@@ -3,7 +3,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -13,7 +13,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.  */
 
 /* To whomever it may concern: I have never seen the code which most
    Unix programs use to perform this function.  I wrote this from scratch
@@ -67,7 +67,7 @@
 #  endif
 #endif /* !HAVE_DIRENT_H */
 
-#if defined (_POSIX_SOURCE)
+#if defined (_POSIX_SOURCE) && !defined (STRUCT_DIRENT_HAS_D_INO)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #  define REAL_DIR_ENTRY(dp) 1

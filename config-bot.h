@@ -44,8 +44,12 @@
 #  define HISTORY
 #endif
 
+#if defined (PROGRAMMABLE_COMPLETION) && !defined (READLINE)
+#  undef PROGRAMMABLE_COMPLETION
+#endif
+
 #if !defined (V9_ECHO)
-#  undef DEFAULT_ECHO_TO_USG
+#  undef DEFAULT_ECHO_TO_XPG
 #endif
 
 #if defined (JOB_CONTROL_MISSING)
@@ -66,6 +70,11 @@
 #  undef HAVE_STRCOLL
 #endif
 
+#if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && defined (HAVE_NETINET_IN_H)
+#  define HAVE_NETWORK
+#endif
+
 #if !defined (PROMPT_STRING_DECODE)
+#  undef PPROMPT
 #  define PPROMPT "$ "
 #endif

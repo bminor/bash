@@ -140,6 +140,14 @@ umask -S u:rwx,g:rwx,o:rx >/dev/null # 002
 # at some point, this may mean `invert', but for now it is an error
 umask -i
 
+# bad assignments shouldn't change the umask
+mask=$(umask)
+umask g=u
+mask2=$(umask)
+if [ "$mask" != "$mask2" ]; then
+	echo "umask errors change process umask"
+fi
+
 # assignment to a readonly variable in environment
 VAR=4
 readonly VAR
@@ -183,7 +191,7 @@ enable sh bash
 # try to set and unset shell options simultaneously
 shopt -s -u checkhash
 
-# someday, this may give `read' a timeout, but for now it is an error
+# this is an error -- bad timeout spec
 read -t var < /dev/null
 
 # try to read into an invalid identifier

@@ -6,7 +6,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -16,9 +16,9 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include "config.h"
+#include <config.h>
 
 #include "bashansi.h"
 
@@ -68,7 +68,7 @@ make_hash_table (buckets)
    for STRING.  TABLE is a pointer to a HASH_TABLE. */
 
 /* A possibly better distribution may be obtained by initializing i to
-   ~0UL and using i = (i * 33) + *string++ as the step */
+   ~0UL and using i = (i * 31) + *string++ as the step */
 
 #define ALL_ONES (~((unsigned long) 0))
 #define BITS(h, n) ((unsigned long)(h) & ~(ALL_ONES << (n)))

@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 /* Stuff in curly braces gets expanded before all other shell expansions. */
 
@@ -117,9 +117,13 @@ brace_expand (text)
       return (result);
     }
 
+#if defined (SHELL)
+  amble = substring (text, start, i);
+#else
   amble = (char *)xmalloc (1 + (i - start));
   strncpy (amble, &text[start], (i - start));
   amble[i - start] = '\0';
+#endif
 
 #if defined (SHELL)
   /* If the amble does not contain an unquoted BRACE_ARG_SEPARATOR, then
@@ -175,9 +179,13 @@ expand_amble (text)
   for (start = 0, i = 0, c = 1; c; start = ++i)
     {
       c = brace_gobbler (text, &i, brace_arg_separator);
+#if defined (SHELL)
+      tem = substring (text, start, i);
+#else
       tem = (char *)xmalloc (1 + (i - start));
       strncpy (tem, &text[start], (i - start));
       tem[i- start] = '\0';
+#endif
 
       partial = brace_expand (tem);
 

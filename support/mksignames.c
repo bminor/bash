@@ -7,7 +7,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -36,10 +36,18 @@ char *signal_names[2 * NSIG];
 
 char *progname;
 
+#if defined (SIGRTMAX) || defined (SIGRTMIN)
+#  define RTLEN 14
+#  define RTLIM 256
+#endif
+
 void
 initialize_signames ()
 {
   register int i;
+#if defined (SIGRTMAX) || defined (SIGRTMIN)
+  int rtmin, rtmax, rtcnt;
+#endif
 
   for (i = 1; i < sizeof(signal_names)/sizeof(signal_names[0]); i++)
     signal_names[i] = (char *)NULL;
@@ -49,6 +57,57 @@ initialize_signames ()
 
   /* Place signal names which can be aliases for more common signal
      names first.  This allows (for example) SIGABRT to overwrite SIGLOST. */
+
+  /* POSIX 1003.1b-1993 real time signals, but take care of incomplete
+     implementations. Acoording to the standard, both, SIGRTMIN and
+     SIGRTMAX must be defined, SIGRTMIN must be stricly less than
+     SIGRTMAX, and the difference must be at least 7, that is, there
+     must be at least eight distinct real time signals. */
+
+  /* The generated signal names are SIGRTMIN, SIGRTMIN+1, ...,
+     SIGRTMIN+x, SIGRTMAX-x, ..., SIGRTMAX-1, SIGRTMAX. If the number
+     of RT signals is odd, there is an extra SIGRTMIN+(x+1).
+     These names are the ones used by ksh and /usr/xpg4/bin/sh on SunOS5. */
+
+#if defined (SIGRTMIN)
+  rtmin = SIGRTMIN;
+  signal_names[rtmin] = "SIGRTMIN";
+#endif
+
+#if defined (SIGRTMAX)
+  rtmax = SIGRTMAX;
+  signal_names[rtmax] = "SIGRTMAX";
+#endif
+
+#if defined (SIGRTMAX) && defined (SIGRTMIN)
+  if (rtmax > rtmin)
+    {
+      rtcnt = (rtmax - rtmin - 1) / 2;
+      /* croak if there are too many RT signals */
+      if (rtcnt >= RTLIM/2)
+	{
+	  rtcnt = RTLIM/2-1;
+	  fprintf(stderr, "%s: error: more than %i real time signals, fix `%s'\n",
+		  progname, RTLIM, progname);
+	}
+
+      for (i = 1; i <= rtcnt; i++)
+	{
+	  signal_names[rtmin+i] = (char *)malloc(RTLEN);
+	  sprintf (signal_names[rtmin+i], "SIGRTMIN+%d", i);
+	  signal_names[rtmax-i] = (char *)malloc(RTLEN);
+	  sprintf (signal_names[rtmax-i], "SIGRTMAX-%d", i);
+	}
+
+      if (rtcnt < RTLIM/2-1 && rtcnt != (rtmax-rtmin)/2)
+	{
+	  /* Need an extra RTMIN signal */
+	  signal_names[rtmin+rtcnt+1] = (char *)malloc(RTLEN);
+	  sprintf (signal_names[rtmin+rtcnt+1], "SIGRTMIN+%d", rtcnt+1);
+	}
+    }
+#endif /* SIGRTMIN && SIGRTMAX */
+
 /* AIX */
 #if defined (SIGLOST)	/* resource lost (eg, record-lock lost) */
   signal_names[SIGLOST] = "SIGLOST";

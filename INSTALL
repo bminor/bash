@@ -3,18 +3,44 @@ Basic Installation
 
 These are installation instructions for Bash.
 
+The simplest way to compile Bash is:
+
+  1. `cd' to the directory containing the source code and type
+     `./configure' to configure Bash for your system.  If you're using
+     `csh' on an old version of System V, you might need to type `sh
+     ./configure' instead to prevent `csh' from trying to execute
+     `configure' itself.
+
+     Running `configure' takes some time.  While running, it prints
+     messages telling which features it is checking for.
+
+  2. Type `make' to compile Bash and build the `bashbug' bug reporting
+     script.
+
+  3. Optionally, type `make tests' to run the Bash test suite.
+
+  4. Type `make install' to install `bash' and `bashbug'.  This will
+     also install the manual pages and Info file.
+
 The `configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
 those values to create a `Makefile' in each directory of the package
-(the top directory, the `builtins' and `doc' directories, and the each
-directory under `lib').  It also creates a `config.h' file containing
-system-dependent definitions.  Finally, it creates a shell script named
-`config.status' that you can run in the future to recreate the current
-configuration, a file `config.cache' that saves the results of its
-tests to speed up reconfiguring, and a file `config.log' containing
-compiler output (useful mainly for debugging `configure').  If at some
-point `config.cache' contains results you don't want to keep, you may
-remove or edit it.
+(the top directory, the `builtins', `doc', and `support' directories,
+each directory under `lib', and several others).  It also creates a
+`config.h' file containing system-dependent definitions.  Finally, it
+creates a shell script named `config.status' that you can run in the
+future to recreate the current configuration, a file `config.cache'
+that saves the results of its tests to speed up reconfiguring, and a
+file `config.log' containing compiler output (useful mainly for
+debugging `configure').  If at some point `config.cache' contains
+results you don't want to keep, you may remove or edit it.
+
+To find out more about the options and arguments that the `configure'
+script understands, type
+
+     bash-2.04$ ./configure --help
+
+at the Bash prompt in your Bash source directory.
 
 If you need to do unusual things to compile Bash, please try to figure
 out how `configure' could check whether or not to do them, and mail
@@ -33,25 +59,6 @@ the Bash distribution, for example `2.01'.  `_patchlevel' should
 contain the patch level of the Bash distribution, `0' for example.  The
 script `support/mkconffiles' has been provided to automate the creation
 of these files.
-
-The simplest way to compile Bash is:
-
-  1. `cd' to the directory containing the source code and type
-     `./configure' to configure Bash for your system.  If you're using
-     `csh' on an old version of System V, you might need to type `sh
-     ./configure' instead to prevent `csh' from trying to execute
-     `configure' itself.
-
-     Running `configure' takes awhile.  While running, it prints some
-     messages telling which features it is checking for.
-
-  2. Type `make' to compile Bash and build the `bashbug' bug reporting
-     script.
-
-  3. Optionally, type `make tests' to run the Bash test suite.
-
-  4. Type `make install' to install `bash' and `bashbug'.  This will
-     also install the manual pages and Info file.
 
 You can remove the program binaries and object files from the source
 code directory by typing `make clean'.  To also remove the files that
@@ -116,7 +123,7 @@ than `/usr/local' by giving `configure' the option `--prefix=PATH'.
 You can specify separate installation prefixes for
 architecture-specific files and architecture-independent files.  If you
 give `configure' the option `--exec-prefix=PATH', `make install' will
-use `PATH' as the prefix for installing programs and libraries.
+use PATH as the prefix for installing programs and libraries.
 Documentation and other data files will still use the regular prefix.
 
 Specifying the System Type
@@ -171,14 +178,14 @@ Operation Controls
      script, and exit.
 
 `configure' also accepts some other, not widely used, boilerplate
-options.
+options.  `configure --help' prints the complete list.
 
 Optional Features
 =================
 
 The Bash `configure' has a number of `--enable-FEATURE' options, where
 FEATURE indicates an optional part of Bash.  There are also several
-`--with-PACKAGE' options, where PACKAGE is something like `gnu-malloc'
+`--with-PACKAGE' options, where PACKAGE is something like `bash-malloc'
 or `purify'.  To turn off the default use of a package, use
 `--without-PACKAGE'.  To configure Bash without a feature that is
 enabled by default, use `--disable-FEATURE'.
@@ -188,6 +195,15 @@ the Bash `configure' recognizes.
 
 `--with-afs'
      Define if you are using the Andrew File System from Transarc.
+
+`--with-bash-malloc'
+     Use the Bash version of `malloc' in `lib/malloc/malloc.c'.  This
+     is not the same `malloc' that appears in GNU libc, but an older
+     version derived from the 4.2 BSD `malloc'.  This `malloc' is very
+     fast, but wastes some space on each allocation.  This option is
+     enabled by default.  The `NOTES' file contains a list of systems
+     for which this should be turned off, and `configure' disables this
+     option automatically for a number of systems.
 
 `--with-curses'
      Use the curses library instead of the termcap library.  This should
@@ -200,25 +216,19 @@ the Bash `configure' recognizes.
      2, but a modified version of the `malloc' from glibc version 1.
      This is somewhat slower than the default `malloc', but wastes less
      space on a per-allocation basis, and will return memory to the
-     operating system under some circumstances.
+     operating system under certain circumstances.
 
 `--with-gnu-malloc'
-     Use the GNU version of `malloc' in `lib/malloc/malloc.c'.  This is
-     not the same `malloc' that appears in GNU libc, but an older
-     version derived from the 4.2 BSD `malloc'.  This `malloc' is very
-     fast, but wastes some space on each allocation.  This option is
-     enabled by default.  The `NOTES' file contains a list of systems
-     for which this should be turned off, and `configure' disables this
-     option automatically for a number of systems.
+     A synonym for `--with-bash-malloc'.
 
 `--with-installed-readline'
-     Define this to make bash link with a locally-installed version of
-     Readline rather than the version in lib/readline.  This works only
-     with readline 4.0 and later versions.
+     Define this to make Bash link with a locally-installed version of
+     Readline rather than the version in `lib/readline'.  This works
+     only with Readline 4.1 and later versions.
 
 `--with-purify'
-     Define this to use the Purify memory allocation checker from Pure
-     Software.
+     Define this to use the Purify memory allocation checker from
+     Rational Software.
 
 `--enable-minimal-config'
      This produces a shell with minimal features, close to the
@@ -240,12 +250,17 @@ options, but it is processed first, so individual options may be
 enabled using `enable-FEATURE'.
 
 All of the following options except for `disabled-builtins' and
-`usg-echo-default' are enabled by default, unless the operating system
+`xpg-echo-default' are enabled by default, unless the operating system
 does not provide the necessary support.
 
 `--enable-alias'
      Allow alias expansion and include the `alias' and `unalias'
      builtins (*note Aliases::.).
+
+`--enable-arith-for-command'
+     Include support for the alternate form of the `for' command that
+     behaves like the C language `for' statement (*note Looping
+     Constructs::.).
 
 `--enable-array-variables'
      Include support for one-dimensional array shell variables (*note
@@ -261,9 +276,9 @@ does not provide the necessary support.
 
 `--enable-command-timing'
      Include support for recognizing `time' as a reserved word and for
-     displaying timing statistics for the pipeline following `time'.
-     This allows pipelines as well as shell builtins and functions to
-     be timed.
+     displaying timing statistics for the pipeline following `time'
+     (*note Pipelines::.).  This allows pipelines as well as shell
+     builtins and functions to be timed.
 
 `--enable-cond-command'
      Include support for the `[[' conditional command (*note
@@ -289,15 +304,20 @@ does not provide the necessary support.
 
 `--enable-help-builtin'
      Include the `help' builtin, which displays help on shell builtins
-     and variables.
+     and variables (*note Bash Builtins::.).
 
 `--enable-history'
      Include command history and the `fc' and `history' builtin
-     commands.
+     commands (*note Bash History Facilities::.).
 
 `--enable-job-control'
      This enables the job control features (*note Job Control::.), if
      the operating system supports them.
+
+`--enable-net-redirections'
+     This enables the special handling of filenames of the form
+     `/dev/tcp/HOST/PORT' and `/dev/udp/HOST/PORT' when used in
+     redirections (*note Redirections::.).
 
 `--enable-process-substitution'
      This enables process substitution (*note Process Substitution::.)
@@ -308,6 +328,11 @@ does not provide the necessary support.
      characters in the `$PS1', `$PS2', `$PS3', and `$PS4' prompt
      strings.  See *Note Printing a Prompt::, for a complete list of
      prompt string escape sequences.
+
+`--enable-progcomp'
+     Enable the programmable completion facilities (*note Programmable
+     Completion::.).  If Readline is not enabled, this option has no
+     effect.
 
 `--enable-readline'
      Include support for command-line editing and history with the Bash
@@ -323,11 +348,17 @@ does not provide the necessary support.
      menus (*note Conditional Constructs::.).
 
 `--enable-usg-echo-default'
-     Make the `echo' builtin expand backslash-escaped characters by
-     default, without requiring the `-e' option.  This makes the Bash
-     `echo' behave more like the System V version.
+     A synonym for `--enable-xpg-echo-default'.
 
-The file `config.h.top' contains C Preprocessor `#define' statements
+`--enable-xpg-echo-default'
+     Make the `echo' builtin expand backslash-escaped characters by
+     default, without requiring the `-e' option.  This sets the default
+     value of the `xpg_echo' shell option to `on', which makes the Bash
+     `echo' behave more like the version specified in the Single Unix
+     Specification, version 2.  *Note Bash Builtins::, for a
+     description of the escape sequences that `echo' recognizes.
+
+The file `config-top.h' contains C Preprocessor `#define' statements
 for options which are not settable from `configure'.  Some of these are
 not meant to be changed; beware of the consequences if you do.  Read
 the comments associated with each definition for more information about

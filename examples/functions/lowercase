@@ -9,6 +9,7 @@
 lowercase()
 {
 	for file; do
+		[ -f "$file" ] || continue
 		filename=${file##*/}
 		case "$filename" in
 		*/*)    dirname=${file%/*} ;;

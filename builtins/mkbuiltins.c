@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <config.h>
 
@@ -33,8 +33,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include <sys/file.h>
 #endif
 
-#include "../posixstat.h"
-#include "../filecntl.h"
+#include "posixstat.h"
+#include "filecntl.h"
 
 #include "../bashansi.h"
 #include <stdio.h>
@@ -1036,7 +1036,7 @@ char *structfile_header[] = {
   "",
   "   Bash is free software; you can redistribute it and/or modify it",
   "   under the terms of the GNU General Public License as published by",
-  "   the Free Software Foundation; either version 1, or (at your option)",
+  "   the Free Software Foundation; either version 2, or (at your option)",
   "   any later version.",
   "",
   "   Bash is distributed in the hope that it will be useful, but WITHOUT",
@@ -1046,7 +1046,7 @@ char *structfile_header[] = {
   "",
   "   You should have received a copy of the GNU General Public License",
   "   along with Bash; see the file COPYING.  If not, write to the Free",
-  "   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */",
+  "   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */",
   "",
   "/* The list of shell builtins.  Each element is name, function, flags,",
   "   long-doc, short-doc.  The long-doc field contains a pointer to an array",

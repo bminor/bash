@@ -1,5 +1,5 @@
 This document details the incompatibilites between this version of bash,
-bash-2.03, and the previous widely-available version, bash-1.14 (which
+bash-2.04, and the previous widely-available version, bash-1.14 (which
 is still the `standard' version for many Linux distributions).  These
 were discovered by users of bash-2.x, so this list is not comprehensive.
 
@@ -124,3 +124,10 @@ were discovered by users of bash-2.x, so this list is not comprehensive.
     when in POSIX mode.  The bash-1.14 behavior may be obtained with
 
 	<>filename 1>&0
+
+12. The `alias' builtin now checks for invalid options and takes a `-p'
+    option to display output in POSIX mode.  If you have old aliases beginning
+    with `-' or `+', you will have to add the `--' to the alias command
+    that declares them:
+
+	alias -x='chmod a-x' --> alias -- -x='chmod a-x'

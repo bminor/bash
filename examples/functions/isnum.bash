@@ -11,12 +11,41 @@
 # BASH NOTE: make sure you have executed `shopt -s extglob' before
 # trying to use this function, or it will not work
 
-function isnum # string
+isnum() # string
 {
     case $1 in
     ?([-+])+([0-9])?(.)*([0-9])?([Ee]?([-+])+([0-9])) )
         return 0;;
     ?([-+])*([0-9])?(.)+([0-9])?([Ee]?([-+])+([0-9])) )
+        return 0;;
+    *) return 1;;
+    esac
+}
+
+isnum2() # string
+{
+    case $1 in
+    ?([-+])+([[:digit:]])?(.)*([[:digit:]])?([Ee]?([-+])+([[:digit:]])) )
+        return 0;;
+    ?([-+])*([[:digit:]])?(.)+([[:digit:]])?([Ee]?([-+])+([[:digit:]])) )
+        return 0;;
+    *) return 1;;
+    esac
+}
+
+isint() # string
+{
+    case $1 in
+    ?([-+])+([0-9]) )
+        return 0;;
+    *) return 1;;
+    esac
+}
+
+isint2() # string
+{
+    case $1 in
+    ?([-+])+([[:digit:]]) )
         return 0;;
     *) return 1;;
     esac

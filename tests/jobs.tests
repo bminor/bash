@@ -4,6 +4,10 @@ ${THIS_SH} ./jobs1.sub
 # test out fg/bg failure in a subshell
 ${THIS_SH} ./jobs2.sub
 
+# test out behavior of waiting for background pids -- bug in versions
+# before 2.03
+${THIS_SH} ./jobs3.sub
+
 jobs
 echo $?
 

@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_SUBST_H_)
 #define _SUBST_H_
@@ -108,6 +108,9 @@ extern int number_of_args __P((void));
    takes care of quote removal. */
 extern WORD_LIST *expand_string_unsplit __P((char *, int));
 
+/* Expand a prompt string. */
+extern WORD_LIST *expand_prompt_string __P((char *, int));
+
 /* Expand STRING just as if you were expanding a word.  This also returns
    a list of words.  Note that filename globbing is *NOT* done for word
    or string expansion, just when the shell is expanding a command.  This
@@ -167,22 +170,31 @@ extern WORD_LIST *expand_words_no_vars __P((WORD_LIST *));
    command substitution, arithmetic expansion, and word splitting. */
 extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 
+extern char *command_substitute __P((char *, int));
 extern char *pat_subst __P((char *, char *, char *, int));
 
 extern void unlink_fifo_list __P((void));
+
+extern WORD_LIST *list_string_with_quotes __P((char *));
 
 #if defined (ARRAY_VARS)
 extern int array_expand_index __P((char *, int));
 extern int valid_array_reference __P((char *));
 extern char *get_array_value __P((char *, int));
 extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
-extern WORD_LIST *list_string_with_quotes __P((char *));
 extern char *extract_array_assignment_list __P((char *, int *));
 #endif
 
 #if defined (COND_COMMAND)
 extern char *remove_backslashes __P((char *));
 extern char *cond_expand_word __P((WORD_DESC *, int));
+#endif
+
+#if defined (READLINE)
+extern int char_is_quoted __P((char *, int));
+extern int unclosed_pair __P((char *, int, char *));
+extern int skip_to_delim __P((char *, int, char *));
+extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int *, int *));
 #endif
 
 /* How to determine the quoted state of the character C. */

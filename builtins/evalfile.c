@@ -4,7 +4,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -14,7 +14,7 @@
    
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <config.h>
 
@@ -23,8 +23,8 @@
 #endif
 
 #include "../bashtypes.h"
-#include "../posixstat.h"
-#include "../filecntl.h"
+#include "posixstat.h"
+#include "filecntl.h"
 
 #include <stdio.h>
 #include <signal.h>

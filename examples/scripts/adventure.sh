@@ -86,7 +86,8 @@ export PATH
 trap 'echo Ouch!' 2 3
 #trap '' 18			# disable Berkeley job control
 
-ash_lk(){ echo " $1 " | fgrep " $2 " >&- 2>&-; }
+#ash_lk(){ echo " $1 " | fgrep " $2 " >&- 2>&-; }
+ash_lk(){ echo " $1 " | fgrep -q " $2 " >/dev/null 2>&1 ; }
 ash_pr(){ echo $* | tr ' ' '\012' | pr -5 -t -w75 -l$[ ( $# + 4 ) / 5 ]; }
 ash_rm(){ echo " $1 " | sed -e "s/ $2 / /" -e 's/^ //' -e 's/ $//'; }
 
@@ -97,10 +98,13 @@ set -o emacs
 
 cd
 LIM=.limbo			# $HOME/$LIM contains "destroyed" objects
-mkdir $LIM >&- 2>&-
+mkdir $LIM || {
+	echo "ash: cannot mkdir $LIM: exiting
+	exit 1
+}
 KNAP=.knapsack			# $HOME/$KNAP contains objects being "carried"
 if [ ! -d $KNAP ]
-then	mkdir $KNAP >&- 2>&-
+then	mkdir $KNAP >/dev/null 2>&1
 	if [ $? = 0 ]
 	then	echo 'You found a discarded empty knapsack.'
 	else	echo 'You have no knapsack to carry things in.'
@@ -185,7 +189,7 @@ do	room=`pwd`
 								set --
 							fi
 							if [ "$2" ]
-							then	if mv $obj $2 >&- 2>&-
+							then	if mv $obj $2 # >&- 2>&-
 								then	echo "The $obj shimmers and turns into $2."
 									obs=`ash_rm "$2 $obs" "$obj"`
 								else	echo "There is a cloud of smoke but the $obj is unchanged."
@@ -214,7 +218,7 @@ do	room=`pwd`
 						as)	if [ "$2" ]
 							then	if [ -f $2 ]
 								then	echo "You must destroy $2 first."
-								else	if cp $obj $2 >&- 2>&-
+								else	if cp $obj $2 # >&- 2>&-
 									then	echo "Poof!  When the smoke clears, you see the new $2."
 										obs="$obs $2"
 									else	echo 'You hear a dull thud but no clone appears.'
@@ -240,7 +244,7 @@ do	room=`pwd`
 				do	if ash_lk "$kn" "$it"
 					then	if [ -w $it ]
 						then	echo "You must destroy $it first."
-						else	if mv $HOME/$KNAP/$it $it >&- 2>&-
+						else	if mv $HOME/$KNAP/$it $it # >&- 2>&-
 							then	echo "$it: dropped."
 								kn=`ash_rm "$kn" "$it"`
 								obs=`echo $it $obs`
@@ -281,7 +285,7 @@ do	room=`pwd`
 				for it in $obj $x
 				do	if ash_lk "$obs $hobs $exs $hexs" "$it"
 					then	echo "Upon close inspection of the $it, you see:"
-						ls -ld $it 2>&-
+						ls -ld $it 2>/dev/null
 						if [ $? != 0 ]
 						then	echo "-- when you look directly at the $it, it vanishes."
 						fi
@@ -300,9 +304,9 @@ do	room=`pwd`
 					case "$1" in
 					to)	if [ "$2" ]
 						then	shift
-							if PATH=$OPATH $* <$obj 2>&-
+							if PATH=$OPATH $* <$obj 2>/dev/null
 							then	echo "The $1 monster devours your $obj."
-								if rm -f $obj >&- 2>&-
+								if rm -f $obj # >&- 2>&-
 								then	obs=`ash_rm "$obs" "$obj"`
 								else	echo 'But he spits it back up.'
 								fi
@@ -331,7 +335,7 @@ do	room=`pwd`
 				do	if ash_lk "$obs $hobs" "$it"
 					then	if ash_lk "$kn" "$it"
 						then	echo 'You already have one.'
-						else	if mv $it $HOME/$KNAP/$it >&- 2>&-
+						else	if mv $it $HOME/$KNAP/$it # >&- 2>&-
 							then	echo "$it: taken."
 								kn="$it $kn"
 								obs=`ash_rm "$obs" "$it"`
@@ -367,7 +371,7 @@ do	room=`pwd`
 				fi
 				for it in $obj $x
 				do	if ash_lk "$obs $hobs" "$it"
-					then	if mv $it $HOME/$LIM <&- >&- 2>&-
+					then	if mv $it $HOME/$LIM # <&- >&- 2>&-
 						then	if [ $verb = kill ]
 							then	echo "The $it cannot defend himself; he dies."
 							else	echo "You have destroyed the $it; it vanishes."
@@ -457,7 +461,7 @@ do	room=`pwd`
 			then	for it in $obj $x
 				do	if ash_lk "$obs $hobs" "$it"
 					then	echo "The $it is already alive and well."
-					else	if mv $HOME/$LIM/$it $it <&- >&- 2>&-
+					else	if mv $HOME/$LIM/$it $it # <&- >&- 2>&-
 						then	echo "The $it staggers to his feet."
 							obs=`echo $it $obs`
 						else	echo "There are sparks but no $it appears."
@@ -474,11 +478,11 @@ do	room=`pwd`
 					case "$1" in
 					from)	if [ "$2" ]
 						then	shift
-							if PATH=$OPATH $* >$obj 2>&-
+							if PATH=$OPATH $* >$obj 2>/dev/null
 							then	echo "The $1 monster drops the $obj."
 								obs=`echo $obj $obs`
 							else	echo "The $1 monster runs away as you approach."
-								rm -f $obj >&- 2>&-
+								rm -f $obj # >&- 2>&-
 							fi
 						else	echo 'From what?'
 						fi

@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_MAKE_CMD_H_)
 #define _MAKE_CMD_H_
@@ -54,6 +54,10 @@ extern COMMAND *make_select_command __P((WORD_DESC *, WORD_LIST *, COMMAND *));
 extern COND_COM *make_cond_node __P((int, WORD_DESC *, COND_COM *, COND_COM *));
 extern COMMAND *make_cond_command __P((COND_COM *));
 #endif
+
+extern COMMAND *make_arith_for_command __P((WORD_LIST *, COMMAND *, int));
+
+extern COMMAND *make_subshell_command __P((COMMAND *));
 
 extern COMMAND *connect_async_list __P((COMMAND *, COMMAND *, int));
 

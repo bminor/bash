@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
@@ -65,10 +65,11 @@
 #  define BRACE_COMPLETION
 #endif /* BRACE_EXPANSION */
 
-/* Define DEFAULT_ECHO_TO_USG if you want the echo builtin to interpret
-   the backslash-escape characters by default, like the System V echo.
+/* Define DEFAULT_ECHO_TO_XPG if you want the echo builtin to interpret
+   the backslash-escape characters by default, like the XPG Single Unix
+   Specification V2 for echo.
    This requires that V9_ECHO be defined. */
-#undef DEFAULT_ECHO_TO_USG
+#undef DEFAULT_ECHO_TO_XPG
 
 /* Define HELP_BUILTIN if you want the `help' shell builtin and the long
    documentation strings compiled into the shell. */
@@ -118,6 +119,19 @@
    command. */
 #undef COND_COMMAND
 
+/* Define ARITH_FOR_COMMAND if you want the ksh93-style
+	for (( init; test; step )) do list; done
+   arithmetic for command. */
+#undef ARITH_FOR_COMMAND
+
+/* Define NETWORK_REDIRECTIONS if you want /dev/(tcp|udp)/host/port to open
+   socket connections when used in redirections */
+#undef NETWORK_REDIRECTIONS
+
+/* Define PROGRAMMABLE_COMPLETION for the programmable completion features
+   and the complete builtin. */
+#undef PROGRAMMABLE_COMPLETION
+
 /* Define AFS if you are using Transarc's AFS. */
 #undef AFS
 
@@ -127,6 +141,9 @@
 #include "config-top.h"
 
 /* Beginning of autoconf additions. */
+
+/* Define if using the bash version of malloc in lib/malloc/malloc.c */
+#undef USING_BASH_MALLOC
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -202,17 +219,29 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
+/* Define to `short' if <sys/types.h> doesn't define.  */
+#undef bits16_t
+
+/* Define to `unsigned short' if <sys/types.h> doesn't define.  */
+#undef u_bits16_t
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#undef int32_t
+#undef bits32_t
 
 /* Define to `unsigned int' if <sys/types.h> doesn't define.  */
-#undef u_int32_t
+#undef u_bits32_t
+
+/* Define to `double' if <sys/types.h> doesn't define. */
+#undef bits64_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef ptrdiff_t
 
-/* Define to `double' if <sys/types.h> doesn't define. */
-#undef bits64_t
+/* Define to `unsigned int' if <sys/types.h> doesn't define. */
+#undef u_int
+
+/* Define to `unsigned long' if <sys/types.h> doesn't define.  */
+#undef u_long
 
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
@@ -261,6 +290,10 @@
 
 #undef DUP2_BROKEN
 
+#undef HAVE_GETHOSTBYNAME
+
+#undef HAVE_INET_ATON
+
 #undef HAVE_GETRLIMIT
 
 #undef HAVE_GETRUSAGE
@@ -286,6 +319,8 @@
 #undef HAVE_DEV_FD
 
 #undef DEV_FD_PREFIX
+
+#undef HAVE_DEV_STDIN
 
 #undef HAVE_GETPW_DECLS
 
@@ -425,6 +460,10 @@
 /* Define if you have the setlocale function.  */
 #undef HAVE_SETLOCALE
 
+/* Define if you have the setvbuf function.  */
+#undef HAVE_SETVBUF
+
+/* Define if you have the siginterrupt function.  */
 #undef HAVE_SIGINTERRUPT
 
 /* Define if you have the strcasecmp function.  */
@@ -435,6 +474,9 @@
 
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
+
+/* Define if you have the strpbrk function. */
+#undef HAVE_STRPBRK
 
 /* Define if you have the strtod function. */
 #undef HAVE_STRTOD
@@ -456,6 +498,8 @@
 
 /* Define if you have the ulimit function. */
 #undef HAVE_ULIMIT
+
+#undef HAVE_TTYNAME
 
 #undef HAVE_WAITPID
 
@@ -548,6 +592,15 @@
 
 /* Define if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
+
+/* Define if you have the <netdh.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
 
 #undef HAVE_LIBDL
 

@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -32,6 +32,11 @@
 #include <ctype.h>
 
 #include "shell.h"
+#include "pathexp.h"
+
+#if defined (EXTENDED_GLOB)
+#  include <glob/fnmatch.h>
+#endif
 
 #ifndef to_upper
 #  define to_upper(c) (islower(c) ? toupper(c) : (c))
@@ -51,11 +56,14 @@
 /* Convert STRING by expanding the escape sequences specified by the
    ANSI C standard.  If SAWC is non-null, recognize `\c' and use that
    as a string terminator.  If we see \c, set *SAWC to 1 before
-   returning.  LEN is the length of STRING. */
+   returning.  LEN is the length of STRING.  FOR_ECHO is a flag that
+   means, if non-zero, that we're translating a string for `echo -e',
+   and therefore should not treat a single quote as a character that
+   may be escaped with a backslash. */
 char *
-ansicstr (string, len, sawc, rlen)
+ansicstr (string, len, for_echo, sawc, rlen)
      char *string;
-     int len, *sawc, *rlen;
+     int len, for_echo, *sawc, *rlen;
 {
   int c, temp;
   char *ret, *r, *s;
@@ -103,7 +111,10 @@ ansicstr (string, len, sawc, rlen)
 		}
 	      break;
 	    case '\\':
+	      break;
 	    case '\'':
+	      if (for_echo)
+		*r++ = '\\';
 	      break;
 	    case 'c':
 	      if (sawc)
@@ -147,6 +158,14 @@ find_name_in_array (name, array)
   return (-1);
 }
 #endif
+
+/* Allocate an array of strings with room for N members. */
+char **
+alloc_array (n)
+     int n;
+{
+  return ((char **)xmalloc ((n) * sizeof (char *)));
+}
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 int
@@ -290,6 +309,32 @@ argv_to_word_list (array, copy, starting_index)
   return (REVERSE_LIST(list, WORD_LIST *));
 }
 
+/* Find STRING in ALIST, a list of string key/int value pairs.  If FLAGS
+   is 1, STRING is treated as a pattern and matched using fnmatch. */
+int
+find_string_in_alist (string, alist, flags)
+     char *string;
+     STRING_INT_ALIST *alist;
+     int flags;
+{
+  register int i;
+  int r;
+
+  for (i = r = 0; alist[i].word; i++)
+    {
+#if defined (EXTENDED_GLOB)
+      if (flags)
+        r = fnmatch (alist[i].word, string, FNM_EXTMATCH) != FNM_NOMATCH;
+      else
+#endif
+        r = STREQ (string, alist[i].word);
+
+      if (r)
+        return (alist[i].token);
+    }
+  return -1;
+}
+
 /* **************************************************************** */
 /*								    */
 /*		    String Management Functions			    */
@@ -329,6 +374,62 @@ strsub (string, pat, rep, global)
     }
   temp[templen] = 0;
   return (temp);
+}
+
+/* Replace all instances of C in STRING with TEXT.  TEXT may be empty or
+   NULL.  If DO_GLOB is non-zero, we quote the replacement text for
+   globbing.  Backslash may be used to quote C. */
+char *
+strcreplace (string, c, text, do_glob)
+     char *string;
+     int c;
+     char *text;
+     int do_glob;
+{
+  char *ret, *p, *r, *t;
+  int len, rlen, ind, tlen;
+
+  len = STRLEN (text);
+  rlen = len + strlen (string) + 2;
+  ret = xmalloc (rlen);
+
+  for (p = string, r = ret; p && *p; )
+    {
+      if (*p == c)
+	{
+	  if (len)
+	    {
+	      ind = r - ret;
+	      if (do_glob && (glob_pattern_p (text) || strchr (text, '\\')))
+		{
+		  t = quote_globbing_chars (text);
+		  tlen = strlen (t);
+		  RESIZE_MALLOCED_BUFFER (ret, ind, tlen, rlen, rlen);
+		  r = ret + ind;	/* in case reallocated */
+		  strcpy (r, t);
+		  r += tlen;
+		  free (t);
+		}
+	      else
+		{
+		  RESIZE_MALLOCED_BUFFER (ret, ind, len, rlen, rlen);
+		  r = ret + ind;	/* in case reallocated */
+		  strcpy (r, text);
+		  r += len;
+		}
+	    }
+	  p++;
+	  continue;
+	}
+
+      if (*p == '\\' && p[1] == '&')
+	p++;
+
+      *r++ = *p++;
+    }
+  *r = '\0';
+
+  return ret;
 }
 
 #ifdef INCLUDE_UNUSED

@@ -7,7 +7,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -29,12 +29,18 @@
 #include "bashansi.h"
 
 #include <stdio.h>
+#include <errno.h>
 
 #include "trap.h"
 
 #include "shell.h"
+#include "input.h"	/* for save_token_state, restore_token_state */
 #include "signames.h"
 #include "builtins/common.h"
+
+#ifndef errno
+extern int errno;
+#endif
 
 /* Flags which describe the current handling state of a signal. */
 #define SIG_INHERITED   0x0	/* Value inherited from parent. */
@@ -135,6 +141,25 @@ initialize_traps ()
     }
 }
 
+#ifdef INCLUDE_UNUSED
+/* Return a printable representation of the trap handler for SIG. */
+static char *
+trap_handler_string (sig)
+     int sig;
+{
+  if (trap_list[sig] == (char *)DEFAULT_SIG)
+    return "DEFAULT_SIG";
+  else if (trap_list[sig] == (char *)IGNORE_SIG)
+    return "IGNORE_SIG";
+  else if (trap_list[sig] == (char *)IMPOSSIBLE_TRAP_HANDLER)
+    return "IMPOSSIBLE_TRAP_HANDLER";
+  else if (trap_list[sig])
+    return trap_list[sig];
+  else
+    return "NULL";
+}
+#endif
+
 /* Return the print name of this signal. */
 char *
 signal_name (sig)
@@ -183,7 +208,7 @@ void
 run_pending_traps ()
 {
   register int sig;
-  int old_exit_value;
+  int old_exit_value, *token_state;
 
   if (catch_flag == 0)		/* simple optimization */
     return;
@@ -218,8 +243,38 @@ run_pending_traps ()
 	      run_interrupt_trap ();
 	      CLRINTERRUPT;
 	    }
+	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
+		   trap_list[sig] == (char *)IGNORE_SIG ||
+		   trap_list[sig] == (char *)IMPOSSIBLE_TRAP_HANDLER)
+	    {
+	      /* This is possible due to a race condition.  Say a bash
+		 process has SIGTERM trapped.  A subshell is spawned
+		 using { list; } & and the parent does something and kills
+		 the subshell with SIGTERM.  It's possible for the subshell
+		 to set pending_traps[SIGTERM] to 1 before the code in
+		 execute_cmd.c eventually calls restore_original_signals
+		 to reset the SIGTERM signal handler in the subshell.  The
+		 next time run_pending_traps is called, pending_traps[SIGTERM]
+		 will be 1, but the trap handler in trap_list[SIGTERM] will
+		 be invalid (probably DEFAULT_SIG, but it could be IGNORE_SIG).
+		 Unless we catch this, the subshell will dump core when
+		 trap_list[SIGTERM] == DEFAULT_SIG, because DEFAULT_SIG is
+		 usually 0x0. */
+	      internal_warning ("run_pending_traps: bad value in trap_list[%d]: 0x%x",
+				sig, (int)trap_list[sig]);
+	      if (trap_list[sig] == (char *)DEFAULT_SIG)
+		{
+		  internal_warning ("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself", sig, signal_name (sig));
+		  kill (getpid (), sig);
+		}
+	    }
 	  else
-	    parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST);
+	    {
+	      token_state = save_token_state ();
+	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST);
+	      restore_token_state (token_state);
+	      free (token_state);
+	    }
 
 	  pending_traps[sig] = 0;
 
@@ -240,12 +295,15 @@ sighandler
 trap_handler (sig)
      int sig;
 {
+  int oerrno;
+
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
     programming_error ("trap_handler: bad signal %d", sig);
   else
     {
+      errno = oerrno;
 #if defined (MUST_REINSTALL_SIGHANDLERS)
       set_signal_handler (sig, trap_handler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
@@ -255,6 +313,8 @@ trap_handler (sig)
 
       if (interrupt_immediately)
 	run_pending_traps ();
+
+      errno = oerrno;
     }
 
   SIGRETURN (0);
@@ -563,7 +623,7 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int old_exit_value, old_line_number;
+  int old_exit_value, old_line_number, *token_state;
 
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
@@ -581,7 +641,12 @@ _run_trap_internal (sig, tag)
       /* Need to copy the value of line_number because parse_and_execute
 	 resets it to 1, and the trap command might want it. */
       trap_line_number = line_number;
+
+      token_state = save_token_state ();
       parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+      restore_token_state (token_state);
+      free (token_state);
+
       last_command_exit_value = old_exit_value;
       running_trap = 0;
 

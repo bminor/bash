@@ -1,5 +1,21 @@
 # Skeleton Makefile for the GNU malloc code
 #
+#
+# Copyright (C) 1996 Free Software Foundation, Inc.     
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 srcdir = @srcdir@
 VPATH = .:@srcdir@
@@ -30,7 +46,9 @@ LDFLAGS = @LDFLAGS@
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
-INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
+BASHINCDIR = ${topdir}/include
+
+INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib
 
 CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
 	  $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
@@ -110,7 +128,7 @@ alloca.o: $(BUILD_DIR)/config.h
 malloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 nmalloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 nmalloc2.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
-xmalloc.o: $(BUILD_DIR)/config.h $(topdir)/ansi_stdlib.h
+xmalloc.o: $(BUILD_DIR)/config.h $(BASHINCDIR)/ansi_stdlib.h
 gmalloc.o: $(BUILD_DIR)/config.h
 
 # Rules for deficient makes, like SunOS and Solaris

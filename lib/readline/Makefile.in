@@ -4,6 +4,22 @@
 #								            #
 #############################################################################
 
+# Copyright (C) 1994 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+
 srcdir = @srcdir@
 VPATH = .:@srcdir@
 topdir = @top_srcdir@
@@ -61,7 +77,7 @@ CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
 	   posixstat.h posixdir.h posixjmp.h tilde.h rlconf.h rltty.h \
-	   ansi_stdlib.h rlstdc.h tcap.h
+	   ansi_stdlib.h rlstdc.h tcap.h rlprivate.h rlshell.h
 
 HISTOBJ = history.o histexpand.o histfile.o histsearch.o shell.o savestring.o
 TILDEOBJ = tilde.o
@@ -179,6 +195,8 @@ macro.o: readline.h keymaps.h chardefs.h tilde.h
 macro.o: history.h rlstdc.h
 nls.o: ansi_stdlib.h
 nls.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+nls.o: readline.h keymaps.h chardefs.h tilde.h
+nls.o: history.h rlstdc.h
 parens.o: rlconf.h
 parens.o: ${BUILD_DIR}/config.h
 parens.o: readline.h keymaps.h chardefs.h tilde.h rlstdc.h
@@ -213,8 +231,55 @@ util.o: readline.h keymaps.h chardefs.h tilde.h rlstdc.h
 vi_mode.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 vi_mode.o: readline.h keymaps.h chardefs.h tilde.h
 vi_mode.o: history.h ansi_stdlib.h rlstdc.h
-xmalloc.o: ${BUILD_DIR}/config.h
-xmalloc.o: ansi_stdlib.h
+xmalloc.o: ${BUILD_DIR}/config.h ansi_stdlib.h
+
+bind.o: rlshell.h
+histfile.o: rlshell.h
+nls.o: rlshell.h
+readline.o: rlshell.h
+shell.o: rlshell.h
+terminal.o: rlshell.h
+histexpand.o: rlshell.h
+
+bind.o: rlprivate.h
+callback.o: rlprivate.h
+complete.o: rlprivate.h
+display.o: rlprivate.h
+input.o: rlprivate.h
+isearch.o: rlprivate.h
+kill.o: rlprivate.h
+macro.o: rlprivate.h
+nls.o: rlprivate.h
+parens.o: rlprivate.h
+readline.o: rlprivate.h
+rltty.o: rlprivate.h
+search.o: rlprivate.h
+signals.o: rlprivate.h
+terminal.o: rlprivate.h
+undo.o: rlprivate.h
+util.o: rlprivate.h
+vi_mode.o: rlprivate.h
+
+bind.o: xmalloc.h
+complete.o: xmalloc.h  
+display.o: xmalloc.h
+funmap.o: xmalloc.h
+histexpand.o: xmalloc.h   
+histfile.o: xmalloc.h
+history.o: xmalloc.h
+input.o: xmalloc.h
+isearch.o: xmalloc.h
+keymaps.o: xmalloc.h
+kill.o: xmalloc.h
+macro.o: xmalloc.h
+readline.o: xmalloc.h   
+savestring.o: xmalloc.h
+search.o: xmalloc.h
+shell.o: xmalloc.h   
+tilde.o: xmalloc.h  
+tilde.o: xmalloc.h 
+util.o: xmalloc.h
+vi_mode.o: xmalloc.h 
 
 # Rules for deficient makes, like SunOS and Solaris
 bind.o: bind.c

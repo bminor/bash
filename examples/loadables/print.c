@@ -1,3 +1,7 @@
+/*
+ * print -- loadable ksh-93 style print builtin
+ */
+
 #include "bashtypes.h"
 
 #include <errno.h>
@@ -18,8 +22,6 @@ int print_builtin ();
 static int printargs ();
 
 static FILE *ofp;
-
-extern char *ansicstr ();
 
 extern char *this_command_name;
 
@@ -150,7 +152,7 @@ printargs (list, ofp)
 
   for (sawc = 0, l = list; l; l = l->next)
     {
-      ostr = ansicstr (l->word->word, strlen (l->word->word), &sawc, (int *)0);
+      ostr = ansicstr (l->word->word, strlen (l->word->word), 0, &sawc, (int *)0);
       fprintf (ofp, "%s", ostr);
       free (ostr);
       if (sawc)
@@ -160,4 +162,3 @@ printargs (list, ofp)
     }
   return (1);
 }
-

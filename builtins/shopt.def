@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 $PRODUCES shopt.c
 
@@ -64,6 +64,7 @@ extern int cdspelling, expand_aliases;
 extern int check_window_size;
 extern int glob_ignore_case;
 extern int hup_on_exit;
+extern int xpg_echo;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -76,7 +77,12 @@ extern int force_append_history;
 
 #if defined (READLINE)
 extern int hist_verify, history_reediting, perform_hostname_completion;
+extern int no_empty_command_completion;
 extern void enable_hostname_completion ();
+#endif
+
+#if defined (PROGRAMMABLE_COMPLETION)
+extern int prog_completion_enabled;
 #endif
 
 #if defined (RESTRICTED_SHELL)
@@ -126,14 +132,21 @@ static struct {
   { "lithist", &literal_history, (Function *)NULL },
 #endif
   { "mailwarn", &mail_warning, (Function *)NULL },
+#if defined (READLINE)
+  { "no_empty_cmd_completion", &no_empty_command_completion, (Function *)NULL },
+#endif
   { "nocaseglob", &glob_ignore_case, (Function *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (Function *)NULL },
+#if defined (PROGRAMMABLE_COMPLETION)
+  { "progcomp", &prog_completion_enabled, (Function *)NULL },
+#endif
   { "promptvars", &promptvars, (Function *)NULL },
 #if defined (RESTRICTED_SHELL)
   { "restricted_shell", &restricted_shell, set_restricted_shell },
 #endif
   { "shift_verbose", &print_shift_error, (Function *)NULL },
   { "sourcepath", &source_uses_path, (Function *)NULL },
+  { "xpg_echo", &xpg_echo, (Function *)NULL },
   { (char *)0, (int *)0, (Function *)NULL }
 };
 
@@ -429,3 +442,17 @@ set_restricted_shell (mode)
   return (0);
 }
 #endif /* RESTRICTED_SHELL */
+
+char **
+get_shopt_options ()
+{
+  char **ret;
+  int n, i;
+
+  n = sizeof (shopt_vars) / sizeof (shopt_vars[0]);
+  ret = alloc_array (n + 1);
+  for (i = 0; shopt_vars[i].name; i++)
+    ret[i] = savestring (shopt_vars[i].name);
+  ret[i] = (char *)NULL;
+  return ret;
+}

@@ -117,3 +117,37 @@ declare -f f1	# should print the definition, too
 # no functions should be exported, right?
 declare -xF
 declare -xf
+
+# FUNCNAME tests
+func2()
+{
+	echo FUNCNAME = $FUNCNAME
+}
+
+func()
+{
+	echo before: FUNCNAME = $FUNCNAME
+	func2
+	echo after: FUNCNAME = $FUNCNAME
+}
+
+echo before: try to assign to FUNCNAME
+FUCNAME=7
+
+echo outside: FUNCNAME = $FUNCNAME
+func
+echo outside2: FUNCNAME = $FUNCNAME
+
+# test exported functions (and cached exportstr)
+zf()
+{
+	echo this is zf
+}
+export -f zf
+
+${THIS_SH} -c 'type -t zf'
+${THIS_SH} -c 'type zf'
+
+${THIS_SH} ./func1.sub
+
+exit 0

@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "config.h"
 
 #if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
@@ -44,19 +44,7 @@
 #  include <limits.h>
 #endif
 
-/* Some systems require this, mostly for the definition of `struct timezone'.
-   For example, Dynix/ptx has that definition in <time.h> rather than
-   sys/time.h */
-#if defined (TIME_WITH_SYS_TIME)
-#  include <sys/time.h>
-#  include <time.h>
-#else
-#  if defined (HAVE_SYS_TIME_H)
-#    include <sys/time.h>
-#  else 
-#    include <time.h>
-#  endif
-#endif
+#include "posixtime.h"
 
 #if defined (HAVE_SYS_RESOURCE_H) && !defined (RLIMTYPE)
 #  include <sys/resource.h>
@@ -145,6 +133,9 @@ static int execute_cond_command ();
 #if defined (COMMAND_TIMING)
 static int time_command ();
 #endif
+#if defined (ARITH_FOR_COMMAND)
+static int execute_arith_for_command ();
+#endif
 static int execute_case_command ();
 static int execute_while_command (), execute_until_command ();
 static int execute_while_or_until ();
@@ -157,6 +148,8 @@ static void execute_subshell_builtin_or_function ();
 static void execute_disk_command ();
 static int execute_connection ();
 static int execute_intern_function ();
+
+static int execute_in_subshell ();
 
 /* The line number that the currently executing function starts on. */
 static int function_line_number;
@@ -195,6 +188,9 @@ REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
 int subshell_environment;
+
+/* Currently-executing shell function. */
+SHELL_VAR *this_shell_function;
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -287,7 +283,10 @@ execute_command (command)
   discard_unwind_frame ("execute-command");
 
 #if defined (PROCESS_SUBSTITUTION)
-  unlink_fifo_list ();
+  /* don't unlink fifos if we're in a shell function; wait until the function
+     returns. */
+  if (variable_context == 0)
+    unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
   return (result);
@@ -301,6 +300,9 @@ shell_control_structure (type)
   switch (type)
     {
     case cm_for:
+#if defined (ARITH_FOR_COMMAND)
+    case cm_arith_for:
+#endif
 #if defined (SELECT_COMMAND)
     case cm_select:
 #endif
@@ -443,8 +445,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   /* If a command was being explicitly run in a subshell, or if it is
      a shell control-structure, and it has a pipe, then we do the command
      in a subshell. */
+  if (command->type == cm_subshell && (command->flags & CMD_NO_FORK))
+    return (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
 
-  if ((command->flags & (CMD_WANT_SUBSHELL|CMD_FORCE_SUBSHELL)) ||
+  if (command->type == cm_subshell ||
+      (command->flags & (CMD_WANT_SUBSHELL|CMD_FORCE_SUBSHELL)) ||
       (shell_control_structure (command->type) &&
        (pipe_out != NO_PIPE || pipe_in != NO_PIPE || asynchronous)))
     {
@@ -455,134 +460,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       paren_pid = make_child (savestring (make_command_string (command)),
 			      asynchronous);
       if (paren_pid == 0)
-	{
-	  int user_subshell, return_code, function_value, should_redir_stdin;
-
-	  should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
-				  pipe_in == NO_PIPE &&
-				  stdin_redirects (command->redirects) == 0);
-
-	  user_subshell = (command->flags & CMD_WANT_SUBSHELL) != 0;
-	  command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
-
-	  /* If a command is asynchronous in a subshell (like ( foo ) & or
-	     the special case of an asynchronous GROUP command where the
-	     the subshell bit is turned on down in case cm_group: below),
-	     turn off `asynchronous', so that two subshells aren't spawned.
-
-	     This seems semantically correct to me.  For example,
-	     ( foo ) & seems to say ``do the command `foo' in a subshell
-	     environment, but don't wait for that subshell to finish'',
-	     and "{ foo ; bar } &" seems to me to be like functions or
-	     builtins in the background, which executed in a subshell
-	     environment.  I just don't see the need to fork two subshells. */
-
-	  /* Don't fork again, we are already in a subshell.  A `doubly
-	     async' shell is not interactive, however. */
-	  if (asynchronous)
-	    {
-#if defined (JOB_CONTROL)
-	      /* If a construct like ( exec xxx yyy ) & is given while job
-		 control is active, we want to prevent exec from putting the
-		 subshell back into the original process group, carefully
-		 undoing all the work we just did in make_child. */
-	      original_pgrp = -1;
-#endif /* JOB_CONTROL */
-	      interactive_shell = 0;
-	      expand_aliases = 0;
-	      asynchronous = 0;
-	    }
-
-	  /* Subshells are neither login nor interactive. */
-	  login_shell = interactive = 0;
-
-	  subshell_environment = user_subshell ? SUBSHELL_PAREN : SUBSHELL_ASYNC;
-
-	  reset_terminating_signals ();		/* in shell.c */
-	  /* Cancel traps, in trap.c. */
-	  restore_original_signals ();
-	  if (asynchronous)
-	    setup_async_signals ();
-
-#if defined (JOB_CONTROL)
-	  set_sigchld_handler ();
-#endif /* JOB_CONTROL */
-
-	  set_sigint_handler ();
-
-#if defined (JOB_CONTROL)
-	  /* Delete all traces that there were any jobs running.  This is
-	     only for subshells. */
-	  without_job_control ();
-#endif /* JOB_CONTROL */
-	  do_piping (pipe_in, pipe_out);
-
-	  /* If this is a user subshell, set a flag if stdin was redirected.
-	     This is used later to decide whether to redirect fd 0 to
-	     /dev/null for async commands in the subshell.  This adds more
-	     sh compatibility, but I'm not sure it's the right thing to do. */
-	  if (user_subshell)
-	    {
-	      stdin_redir = stdin_redirects (command->redirects);
-	      restore_default_signal (0);
-	    }
-
-	  if (fds_to_close)
-	    close_fd_bitmap (fds_to_close);
-
-	  /* If this is an asynchronous command (command &), we want to
-	     redirect the standard input from /dev/null in the absence of
-	     any specific redirection involving stdin. */
-	  if (should_redir_stdin && stdin_redir == 0)
-	    async_redirect_stdin ();
-
-	  /* Do redirections, then dispose of them before recursive call. */
-	  if (command->redirects)
-	    {
-	      if (do_redirections (command->redirects, 1, 0, 0) != 0)
-		exit (EXECUTION_FAILURE);
-
-	      dispose_redirects (command->redirects);
-	      command->redirects = (REDIRECT *)NULL;
-	    }
-
-	  /* If this is a simple command, tell execute_disk_command that it
-	     might be able to get away without forking and simply exec.
-	     This means things like ( sleep 10 ) will only cause one fork.
-	     If we're timing the command, however, we cannot do this
-	     optimization. */
-#if 0
-	  if (user_subshell && command->type == cm_simple)
-#else
-	  if (user_subshell && command->type == cm_simple && (command->flags & CMD_TIME_PIPELINE) == 0)
-#endif
-	    {
-	      command->flags |= CMD_NO_FORK;
-	      command->value.Simple->flags |= CMD_NO_FORK;
-	    }
-
-	  /* If we're inside a function while executing this subshell, we
-	     need to handle a possible `return'. */
-	  function_value = 0;
-	  if (return_catch_flag)
-	    function_value = setjmp (return_catch);
-
-	  if (function_value)
-	    return_code = return_catch_value;
-	  else
-	    return_code = execute_command_internal
-	      (command, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
-
-	  /* If we were explicitly placed in a subshell with (), we need
-	     to do the `shell cleanup' things, such as running traps[0]. */
-	  if (user_subshell && signal_is_trapped (0))
-	    {
-	      last_command_exit_value = return_code;
-	      return_code = run_exit_trap ();
-	    }
-
-	  exit (return_code);
-	}
+        exit (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
+        /* NOTREACHED */
       else
 	{
 	  close_pipes (pipe_in, pipe_out);
@@ -606,11 +485,13 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	      /* If we have to, invert the return value. */
 	      if (invert)
-		return ((last_command_exit_value == EXECUTION_SUCCESS)
-			  ? EXECUTION_FAILURE
-			  : EXECUTION_SUCCESS);
+		exec_result = ((last_command_exit_value == EXECUTION_SUCCESS)
+				? EXECUTION_FAILURE
+				: EXECUTION_SUCCESS);
 	      else
-		return (last_command_exit_value);
+		exec_result = last_command_exit_value;
+
+	      return (last_command_exit_value = exec_result);
 	    }
 	  else
 	    {
@@ -748,7 +629,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       }
 
       if (was_debug_trap)
-	run_debug_trap ();
+	{
+	  last_command_exit_value = exec_result;
+	  run_debug_trap ();
+	}
 
       if (ignore_return == 0 && invert == 0 &&
 	  ((posixly_correct && interactive == 0 && special_builtin_failed) ||
@@ -766,6 +650,14 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	command->value.For->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_for_command (command->value.For);
       break;
+
+#if defined (ARITH_FOR_COMMAND)
+    case cm_arith_for:
+      if (ignore_return)
+	command->value.ArithFor->flags |= CMD_IGNORE_RETURN;
+      exec_result = execute_arith_for_command (command->value.ArithFor);
+      break;
+#endif
 
 #if defined (SELECT_COMMAND)
     case cm_select:
@@ -899,77 +791,12 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 }
 
 #if defined (COMMAND_TIMING)
+
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
-static struct timeval *
-difftimeval (d, t1, t2)
-     struct timeval *d, *t1, *t2;
-{
-  d->tv_sec = t2->tv_sec - t1->tv_sec;
-  d->tv_usec = t2->tv_usec - t1->tv_usec;
-  if (d->tv_usec < 0)
-    {
-      d->tv_usec += 1000000;
-      d->tv_sec -= 1;
-      if (d->tv_sec < 0)		/* ??? -- BSD/OS does this */
-	{
-	  d->tv_sec = 0;
-	  d->tv_usec = 0;
-	}
-    }
-  return d;
-}
-
-static struct timeval *
-addtimeval (d, t1, t2)
-     struct timeval *d, *t1, *t2;
-{
-  d->tv_sec = t1->tv_sec + t2->tv_sec;
-  d->tv_usec = t1->tv_usec + t2->tv_usec;
-  if (d->tv_usec >= 1000000)
-    {
-      d->tv_usec -= 1000000;
-      d->tv_sec += 1;
-    }
-  return d;
-}
-
-/* Do "cpu = ((user + sys) * 10000) / real;" with timevals.
-   Barely-tested code from Deven T. Corzine <deven@ties.org>. */
-static int
-timeval_to_cpu (rt, ut, st)
-     struct timeval *rt, *ut, *st;	/* real, user, sys */
-{
-  struct timeval t1, t2;
-  register int i;
-
-  addtimeval (&t1, ut, st);
-  t2.tv_sec = rt->tv_sec;
-  t2.tv_usec = rt->tv_usec;
-
-  for (i = 0; i < 6; i++)
-    {
-      if ((t1.tv_sec > 99999999) || (t2.tv_sec > 99999999))
-	break;
-      t1.tv_sec *= 10;
-      t1.tv_sec += t1.tv_usec / 100000;
-      t1.tv_usec *= 10;
-      t1.tv_usec %= 1000000;
-      t2.tv_sec *= 10;
-      t2.tv_sec += t2.tv_usec / 100000;
-      t2.tv_usec *= 10;
-      t2.tv_usec %= 1000000;
-    }
-  for (i = 0; i < 4; i++)
-    {
-      if (t1.tv_sec < 100000000)
-	t1.tv_sec *= 10;
-      else
-	t2.tv_sec /= 10;
-    }
-
-  return ((t2.tv_sec == 0) ? 0 : t1.tv_sec / t2.tv_sec);
-}  
-#endif /* HAVE_GETRUSAGE && HAVE_GETTIMEOFDAY */
+extern struct timeval *difftimeval();
+extern struct timeval *addtimeval();
+extern int timeval_to_cpu();
+#endif
 
 #define POSIX_TIMEFORMAT "real %2R\nuser %2U\nsys %2S"
 #define BASH_TIMEFORMAT  "\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS"
@@ -1228,6 +1055,146 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   return rv;
 }
 #endif /* COMMAND_TIMING */
+
+/* Execute a command that's supposed to be in a subshell.  This must be
+   called after make_child and we must be running in the child process. */
+static int
+execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
+     COMMAND *command;
+     int asynchronous;
+     int pipe_in, pipe_out;
+     struct fd_bitmap *fds_to_close;
+{
+  int user_subshell, return_code, function_value, should_redir_stdin;
+  COMMAND *tcom;
+
+  should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
+			  pipe_in == NO_PIPE &&
+			  stdin_redirects (command->redirects) == 0);
+
+  user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
+  command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
+
+  /* If a command is asynchronous in a subshell (like ( foo ) & or
+     the special case of an asynchronous GROUP command where the
+     the subshell bit is turned on down in case cm_group: below),
+     turn off `asynchronous', so that two subshells aren't spawned.
+
+     This seems semantically correct to me.  For example,
+     ( foo ) & seems to say ``do the command `foo' in a subshell
+     environment, but don't wait for that subshell to finish'',
+     and "{ foo ; bar ; } &" seems to me to be like functions or
+     builtins in the background, which executed in a subshell
+     environment.  I just don't see the need to fork two subshells. */
+
+  /* Don't fork again, we are already in a subshell.  A `doubly
+     async' shell is not interactive, however. */
+  if (asynchronous)
+    {
+#if defined (JOB_CONTROL)
+      /* If a construct like ( exec xxx yyy ) & is given while job
+	 control is active, we want to prevent exec from putting the
+	 subshell back into the original process group, carefully
+	 undoing all the work we just did in make_child. */
+      original_pgrp = -1;
+#endif /* JOB_CONTROL */
+      interactive_shell = 0;
+      expand_aliases = 0;
+      asynchronous = 0;
+    }
+
+  /* Subshells are neither login nor interactive. */
+  login_shell = interactive = 0;
+
+  subshell_environment = user_subshell ? SUBSHELL_PAREN : SUBSHELL_ASYNC;
+
+  reset_terminating_signals ();		/* in sig.c */
+  /* Cancel traps, in trap.c. */
+  restore_original_signals ();
+  if (asynchronous)
+    setup_async_signals ();
+
+#if defined (JOB_CONTROL)
+  set_sigchld_handler ();
+#endif /* JOB_CONTROL */
+
+  set_sigint_handler ();
+
+#if defined (JOB_CONTROL)
+  /* Delete all traces that there were any jobs running.  This is
+     only for subshells. */
+  without_job_control ();
+#endif /* JOB_CONTROL */
+
+  if (fds_to_close)
+    close_fd_bitmap (fds_to_close);
+
+  do_piping (pipe_in, pipe_out);
+
+  /* If this is a user subshell, set a flag if stdin was redirected.
+     This is used later to decide whether to redirect fd 0 to
+     /dev/null for async commands in the subshell.  This adds more
+     sh compatibility, but I'm not sure it's the right thing to do. */
+  if (user_subshell)
+    {
+      stdin_redir = stdin_redirects (command->redirects);
+      restore_default_signal (0);
+    }
+
+  /* If this is an asynchronous command (command &), we want to
+     redirect the standard input from /dev/null in the absence of
+     any specific redirection involving stdin. */
+  if (should_redir_stdin && stdin_redir == 0)
+    async_redirect_stdin ();
+
+  /* Do redirections, then dispose of them before recursive call. */
+  if (command->redirects)
+    {
+      if (do_redirections (command->redirects, 1, 0, 0) != 0)
+	exit (EXECUTION_FAILURE);
+
+      dispose_redirects (command->redirects);
+      command->redirects = (REDIRECT *)NULL;
+    }
+
+  tcom = (command->type == cm_subshell) ? command->value.Subshell->command : command;
+
+  /* If this is a simple command, tell execute_disk_command that it
+     might be able to get away without forking and simply exec.
+     This means things like ( sleep 10 ) will only cause one fork.
+     If we're timing the command, however, we cannot do this
+     optimization. */
+  if (user_subshell && (tcom->type == cm_simple || tcom->type == cm_subshell) &&
+      (tcom->flags & CMD_TIME_PIPELINE) == 0)
+    {
+      tcom->flags |= CMD_NO_FORK;
+      if (tcom->type == cm_simple)
+	tcom->value.Simple->flags |= CMD_NO_FORK;
+    }
+
+  /* If we're inside a function while executing this subshell, we
+     need to handle a possible `return'. */
+  function_value = 0;
+  if (return_catch_flag)
+    function_value = setjmp (return_catch);
+
+  if (function_value)
+    return_code = return_catch_value;
+  else
+    return_code = execute_command_internal
+      (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
+
+  /* If we were explicitly placed in a subshell with (), we need
+     to do the `shell cleanup' things, such as running traps[0]. */
+  if (user_subshell && signal_is_trapped (0))
+    {
+      last_command_exit_value = return_code;
+      return_code = run_exit_trap ();
+    }
+
+  return (return_code);
+  /* NOTREACHED */
+}
 
 static int
 execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
@@ -1489,24 +1456,13 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   return exec_result;
 }
 
-#if defined (JOB_CONTROL)
-#  define REAP() \
-	do \
-	  { \
-	    if (!interactive_shell) \
-	      reap_dead_jobs (); \
-	  } \
-	while (0)
-#else /* !JOB_CONTROL */
-#  define REAP() \
-	do \
-	  { \
-	    if (!interactive_shell) \
-	      cleanup_dead_jobs (); \
-	  } \
-	while (0)
-#endif /* !JOB_CONTROL */
-
+#define REAP() \
+  do \
+    { \
+      if (!interactive_shell) \
+	reap_dead_jobs (); \
+    } \
+  while (0)
 
 /* Execute a FOR command.  The syntax is: FOR word_desc IN word_list;
    DO command; DONE */
@@ -1611,6 +1567,107 @@ execute_for_command (for_command)
   discard_unwind_frame ("for");
   return (retval);
 }
+
+#if defined (ARITH_FOR_COMMAND)
+/* Execute an arithmetic for command.  The syntax is
+
+	for (( init ; step ; test ))
+	do
+		body
+	done
+
+   The execution should be exactly equivalent to
+
+	eval \(\( init \)\)
+	while eval \(\( test \)\) ; do
+		body;
+		eval \(\( step \)\)
+	done
+*/
+static long
+eval_arith_for_expr (l, okp)
+     WORD_LIST *l;
+     int *okp;
+{
+  WORD_LIST *new;
+  long expresult;
+
+  new = expand_words_no_vars (l);
+  if (echo_command_at_execute)
+    xtrace_print_arith_cmd (new);
+  expresult = evalexp (new->word->word, okp);
+  dispose_words (new);
+  return (expresult);
+}
+
+static int
+execute_arith_for_command (arith_for_command)
+     ARITH_FOR_COM *arith_for_command;
+{
+  long expresult;
+  int expok, result, body_status;
+
+  body_status = EXECUTION_SUCCESS;
+  loop_level++;
+
+  if (arith_for_command->flags & CMD_IGNORE_RETURN)
+    arith_for_command->action->flags |= CMD_IGNORE_RETURN;
+
+  this_command_name = "((";	/* )) for expression error messages */
+
+  if (variable_context)
+    line_number = arith_for_command->line - function_line_number;
+
+  /* Evaluate the initialization expression. */
+  expresult = eval_arith_for_expr (arith_for_command->init, &expok);
+  if (expok == 0)
+    return (EXECUTION_FAILURE);
+
+  while (1)
+    {
+      /* Evaluate the test expression. */
+      expresult = eval_arith_for_expr (arith_for_command->test, &expok);
+      if (expok == 0)
+	{
+	  body_status = EXECUTION_FAILURE;
+	  break;
+	}
+      REAP ();
+      if (expresult == 0)
+        break;
+
+      /* Execute the body of the arithmetic for command. */
+      QUIT;
+      body_status = execute_command (arith_for_command->action);
+      QUIT;
+
+      /* Handle any `break' or `continue' commands executed by the body. */
+      if (breaking)
+	{
+	  breaking--;
+	  break;
+	}
+
+      if (continuing)
+	{
+	  continuing--;
+	  if (continuing)
+	    break;
+	}
+
+      /* Evaluate the step expression. */
+      expresult = eval_arith_for_expr (arith_for_command->step, &expok);
+      if (expok == 0)
+	{
+	  body_status = EXECUTION_FAILURE;
+	  break;
+	}
+    }
+
+  loop_level--;
+  return (body_status);
+}
+#endif
 
 #if defined (SELECT_COMMAND)
 static int LINES, COLS, tabsize;
@@ -1862,6 +1919,13 @@ execute_select_command (select_command)
 	{
 	  breaking--;
 	  break;
+	}
+
+      if (continuing)
+	{
+	  continuing--;
+	  if (continuing)
+	    break;
 	}
     }
 
@@ -2198,7 +2262,7 @@ bind_lastarg (arg)
   if (arg == 0)
     arg = "";
   var = bind_variable ("_", arg);
-  var->attributes &= ~att_exported;
+  VUNSETATTR (var, att_exported);
 }
 
 /* Execute a null command.  Fork a subshell if the command uses pipes or is
@@ -2207,7 +2271,8 @@ bind_lastarg (arg)
 static int
 execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subst_pid)
      REDIRECT *redirects;
-     int pipe_in, pipe_out, async, old_last_command_subst_pid;
+     int pipe_in, pipe_out, async;
+     pid_t old_last_command_subst_pid;
 {
   if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
@@ -2330,10 +2395,20 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       /* XXX memory leak if expand_words() error causes a jump_to_top_level */
       command_line = savestring (the_printed_command);
 
+      /* Do this now, because execute_disk_command will do it anyway in the
+	 vast majority of cases. */
+      maybe_make_export_env ();
+
       if (make_child (command_line, async) == 0)
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
+
+	  /* We need to do this before piping to handle some really
+	     pathological cases where one of the pipe file descriptors
+	     is < 2. */
+	  if (fds_to_close)
+	    close_fd_bitmap (fds_to_close);
 
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = -1;
@@ -2681,6 +2756,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   int return_val, result;
   COMMAND *tc, *fc;
   char *debug_trap;
+  SHELL_VAR *old_shell_function;
 
   tc = (COMMAND *)copy_command (function_cell (var));
   if (tc && (flags & CMD_IGNORE_RETURN))
@@ -2695,8 +2771,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
       add_unwind_protect (dispose_command, (char *)tc);
+      unwind_protect_pointer (this_shell_function);
       unwind_protect_int (loop_level);
     }
+
+  this_shell_function = var;
+  make_funcname_visible (1);
 
   debug_trap = (signal_is_trapped (DEBUG_TRAP) && signal_is_ignored (DEBUG_TRAP) == 0)
 			? trap_list[DEBUG_TRAP]
@@ -2761,7 +2841,32 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (subshell == 0)
     run_unwind_frame ("function_calling");
 
+  if (variable_context == 0 || this_shell_function == 0)
+    make_funcname_visible (0);
+
   return (result);
+}
+
+/* A convenience routine for use by other parts of the shell to execute
+   a particular shell function. */
+int
+execute_shell_function (var, words)
+     SHELL_VAR *var;
+     WORD_LIST *words;
+{
+  int ret;
+  struct fd_bitmap *bitmap;
+
+  bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
+  begin_unwind_frame ("execute-shell-function");
+  add_unwind_protect (dispose_fd_bitmap, (char *)bitmap);
+      
+  ret = execute_function (var, words, 0, bitmap, 0, 0);
+
+  dispose_fd_bitmap (bitmap);
+  discard_unwind_frame ("execute-shell-function");
+
+  return ret;
 }
 
 /* Execute a shell builtin or function in a subshell environment.  This
@@ -2782,13 +2887,16 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
      struct fd_bitmap *fds_to_close;
      int flags;
 {
-  int result, r, jobs_hack;
-
-  /* A subshell is neither a login shell nor interactive. */
-  login_shell = interactive = 0;
+  int result, r;
+#if defined (JOB_CONTROL)
+  int jobs_hack;
 
   jobs_hack = (builtin == jobs_builtin) &&
 		((subshell_environment & SUBSHELL_ASYNC) == 0 || pipe_out != NO_PIPE);
+#endif
+
+  /* A subshell is neither a login shell nor interactive. */
+  login_shell = interactive = 0;
 
   subshell_environment = SUBSHELL_ASYNC;
 
@@ -2810,10 +2918,10 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 
   set_sigint_handler ();
 
-  do_piping (pipe_in, pipe_out);
-
   if (fds_to_close)
     close_fd_bitmap (fds_to_close);
+
+  do_piping (pipe_in, pipe_out);
 
   if (do_redirections (redirects, 1, 0, 0) != 0)
     exit (EXECUTION_FAILURE);
@@ -2955,7 +3063,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 {
   char *pathname, *command, **args;
   int nofork;
-  int pid;
+  pid_t pid;
 
   nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
@@ -2978,7 +3086,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       put_command_name_into_env (command);
     }
 
-  /* We have to make the child before we check for the non-existance
+  /* We have to make the child before we check for the non-existence
      of COMMAND, since we want the error messages to be redirected. */
   /* If we can get away without forking and there are no pipes to deal with,
      don't bother to fork, just directly exec the command. */
@@ -3014,6 +3122,14 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	  setup_async_signals ();
 	}
 
+      /* This functionality is now provided by close-on-exec of the
+	 file descriptors manipulated by redirection and piping.
+	 Some file descriptors still need to be closed in all children
+	 because of the way bash does pipes; fds_to_close is a
+	 bitmap of all such file descriptors. */
+      if (fds_to_close)
+	close_fd_bitmap (fds_to_close);
+
       do_piping (pipe_in, pipe_out);
 
       if (async)
@@ -3023,14 +3139,6 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	}
 
       subshell_environment = SUBSHELL_FORK;
-
-      /* This functionality is now provided by close-on-exec of the
-	 file descriptors manipulated by redirection and piping.
-	 Some file descriptors still need to be closed in all children
-	 because of the way bash does pipes; fds_to_close is a
-	 bitmap of all such file descriptors. */
-      if (fds_to_close)
-	close_fd_bitmap (fds_to_close);
 
       if (redirects && (do_redirections (redirects, 1, 0, 0) != 0))
 	{
@@ -3098,10 +3206,14 @@ execute_shell_script (sample, sample_len, command, args, env)
        i++)
     ;
 
+#if 1
+  execname = substring ((char *)sample, start, i);
+#else
   larry = i - start;
   execname = xmalloc (1 + larry);
   strncpy (execname, (char *)(sample + start), larry);
   execname[larry] = '\0';
+#endif
   size_increment = 1;
 
   /* Now the argument, if any. */
@@ -3119,10 +3231,14 @@ execute_shell_script (sample, sample_len, command, args, env)
 	   !whitespace (sample[i]) && sample[i] != '\n' && i < sample_len;
 	   i++)
 	;
+#if 1
+      firstarg = substring ((char *)sample, start, i);
+#else
       larry = i - start;
       firstarg = xmalloc (1 + larry);
       strncpy (firstarg, (char *)(sample + start), larry);
       firstarg[larry] = '\0';
+#endif
 
       size_increment = 2;
     }
@@ -3363,9 +3479,6 @@ do_piping (pipe_in, pipe_out)
 	sys_error ("cannot duplicate fd %d to fd 0", pipe_in);
       if (pipe_in > 0)
 	close (pipe_in);
-#ifdef __CYGWIN32__
-      setmode (0, O_TEXT);
-#endif
     }
   if (pipe_out != NO_PIPE)
     {
@@ -3375,18 +3488,11 @@ do_piping (pipe_in, pipe_out)
 	    sys_error ("cannot duplicate fd %d to fd 1", pipe_out);
 	  if (pipe_out == 0 || pipe_out > 1)
 	    close (pipe_out);
-#ifdef __CYGWIN32__
-	  setmode (1, O_TEXT);
-#endif
 	}
       else
 	{
 	  if (dup2 (1, 2) < 0)
 	    sys_error ("cannot duplicate fd 1 to fd 2");
-#ifdef __CYGWIN32__
-	  setmode (1, O_TEXT);
-	  setmode (2, O_TEXT);
-#endif
 	}
     }
 }

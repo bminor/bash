@@ -15,8 +15,8 @@
 
    You should have received a copy of the GNU Library General Public
    License along with the GNU C Library; see the file COPYING.LIB.  If
-   not, write to the Free Software Foundation, Inc., 675 Mass Ave,
-   Cambridge, MA 02139, USA.  */
+   not, write to the Free Software Foundation, Inc.,
+   59 Temple Place, Suite 330, Boston, MA 02111 USA.  */
 
 #include <config.h>
 
@@ -62,6 +62,10 @@ extern int errno;
 
 #if !defined (HAVE_LSTAT)
 #  define lstat stat
+#endif
+
+#if !defined (NULL)
+#  define NULL 0
 #endif
 
 /* Get the pathname of the current working directory,
@@ -138,14 +142,14 @@ getcwd (buf, size)
 	  char *new;
 	  if (dotlist == dots)
 	    {
-	      new = malloc (dotsize * 2 + 1);
+	      new = (char *)malloc (dotsize * 2 + 1);
 	      if (new == NULL)
 		goto lose;
 	      memcpy (new, dots, dotsize);
 	    }
 	  else
 	    {
-	      new = realloc ((PTR) dotlist, dotsize * 2 + 1);
+	      new = (char *)realloc ((PTR) dotlist, dotsize * 2 + 1);
 	      if (new == NULL)
 		goto lose;
 	    }
@@ -222,13 +226,13 @@ getcwd (buf, size)
 
 	      if (pathbuf == path)
 		{
-		  new = malloc (pathsize * 2);
+		  new = (char *)malloc (pathsize * 2);
 		  if (!new)
 		    goto lose;
 		}
 	      else
 		{
-		  new = realloc ((PTR) pathbuf, (pathsize * 2));
+		  new = (char *)realloc ((PTR) pathbuf, (pathsize * 2));
 		  if (!new)
 		    goto lose;
 		  pathp = new + space;

@@ -17,9 +17,11 @@
                          
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <config.h>
+
+#include <stdio.h>	/* for debugging */
                                 
 #include "fnmatch.h"
 #include "collsyms.h"
@@ -66,8 +68,18 @@ static char *patscan ();
 #define STREQN(a, b, n) ((a)[0] == (b)[0] && strncmp(a, b, n) == 0)
 #endif
 
+/* We don't use strcoll(3) for range comparisons in bracket expressions,
+   even if we have it, since it can have unwanted side effects in locales
+   other than POSIX or US.  For instance, in the de locale, [A-Z] matches
+   all characters.  So, for ranges we use ASCII collation, and for
+   collating symbol equivalence we use strcoll().  The casts to int are
+   to handle tests that use unsigned chars. */
+
+#define rangecmp(c1, c2)	((int)(c1) - (int)(c2))
+
 #if defined (HAVE_STRCOLL)
-static int rangecmp (c1, c2)
+/* Helper function for collating symbol equivalence. */
+static int rangecmp2 (c1, c2)
      int c1, c2;
 {
   static char s1[2] = { ' ', '\0' };
@@ -89,14 +101,14 @@ static int rangecmp (c1, c2)
   return (c1 - c2);
 }
 #else /* !HAVE_STRCOLL */
-#  define rangecmp(c1, c2)	((c1) - (c2))
+#  define rangecmp2(c1, c2)	((int)(c1) - (int)(c2))
 #endif /* !HAVE_STRCOLL */
 
 #if defined (HAVE_STRCOLL)
 static int collequiv (c1, c2)
      int c1, c2;
 {
-  return (rangecmp (c1, c2) == 0);
+  return (rangecmp2 (c1, c2) == 0);
 }
 #else
 #  define collequiv(c1, c2)	((c1) == (c2))
@@ -253,7 +265,7 @@ gmatch (string, se, pattern, pe, flags)
 		     that's OK, since we can match 0 or more occurrences.
 		     We need to skip the glob pattern and see if we
 		     match the rest of the string. */
-		  newn = patscan (p, pe, 0);
+		  newn = patscan (p + 1, pe, 0);
 		  p = newn;
 		}
 #endif
@@ -587,6 +599,8 @@ patscan (string, end, delim)
   pnest = bnest = 0;
   for (s = string; c = *s; s++)
     {
+      if (s >= end)
+        return (s);
       switch (c)
 	{
 	case '\0':
@@ -603,10 +617,15 @@ patscan (string, end, delim)
 	    pnest++;
 	  break;
 	case ')':
+#if 0
 	  if (bnest == 0)
 	    pnest--;
 	  if (pnest <= 0)
 	    return ++s;
+#else
+	  if (bnest == 0 && pnest-- <= 0)
+	    return ++s;
+#endif
 	  break;
 	case '|':
 	  if (bnest == 0 && pnest == 0 && delim == '|')
@@ -614,6 +633,7 @@ patscan (string, end, delim)
 	  break;
 	}
     }
+
   return (char *)0;
 }
 
@@ -658,16 +678,22 @@ extmatch (xc, s, se, p, pe, flags)
   char *srest;			/* pointer to rest of string */
   int m1, m2;
 
+#if 0
+fprintf(stderr, "extmatch: xc = %c\n", xc);
+fprintf(stderr, "extmatch: s = %s; se = %s\n", s, se);
+fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
+#endif
+
+  prest = patscan (p + (*p == '('), pe, 0); /* ) */
+  if (prest == 0)
+    /* If PREST is 0, we failed to scan a valid pattern.  In this
+       case, we just want to compare the two as strings. */
+    return (strcompare (p - 1, pe, s, se));
+
   switch (xc)
     {
     case '+':			/* match one or more occurrences */
     case '*':			/* match zero or more occurrences */
-      prest = patscan (p, pe, 0);
-      if (prest == 0)
-	/* If PREST is 0, we failed to scan a valid pattern.  In this
-	   case, we just want to compare the two as strings. */
-	return (strcompare (p - 1, pe, s, se));
-
       /* If we can get away with no matches, don't even bother.  Just
 	 call gmatch on the rest of the pattern and return success if
 	 it succeeds. */
@@ -701,10 +727,6 @@ extmatch (xc, s, se, p, pe, flags)
 
     case '?':		/* match zero or one of the patterns */
     case '@':		/* match exactly one of the patterns */
-      prest = patscan (p, pe, 0);
-      if (prest == 0)
-	return (strcompare (p - 1, pe, s, se));
-      
       /* If we can get away with no matches, don't even bother.  Just
 	 call gmatch on the rest of the pattern and return success if
 	 it succeeds. */
@@ -730,10 +752,6 @@ extmatch (xc, s, se, p, pe, flags)
       return (FNM_NOMATCH);
 
     case '!':		/* match anything *except* one of the patterns */
-      prest = patscan (p, pe, 0);
-      if (prest == 0)
-	return (strcompare (p - 1, pe, s, se));
-
       for (srest = s; srest <= se; srest++)
 	{
 	  m1 = 0;

@@ -5,17 +5,19 @@
 #
 
 PROGNAME=`basename $0`
-
-trap 'rm -f /tmp/rlvers /tmp/rlvers.?' 0 1 2 3 6 15
+TDIR=/tmp/rlvers
 
 # defaults
 CC=cc
 RL_LIBDIR=/usr/local/lib
 
+TERMCAP_LIB="-ltermcap"
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-C)	shift ; CC="$1"; shift ;;
 	-L)	shift ; RL_LIBDIR="$1" ; shift ;;
+	-T)	shift ; TERMCAP_LIB="$1" ; shift ;;
 	-v)	shift ; verbose=y ;;
 	--)	shift ; break ;;
 	*)	echo "${PROGNAME}: usage: $PROGNAME [-C compiler] [-L libdir] [-v]" >&2 ; exit 2;;
@@ -41,7 +43,17 @@ if [ -n "$verbose" ]; then
 	echo "${PROGNAME}: attempting program compilation"
 fi
 
-cat > /tmp/rlvers.c << EOF
+# make $TDIR mode 0700
+mkdir $TDIR || {
+	echo "${PROGNAME}: ${TDIR}: file exists" >&2
+	echo 0
+	exit 1
+}
+chmod 700 $TDIR
+
+trap 'rm -f $TDIR/rlvers $TDIR/rlvers.? ; rmdir $TDIR' 0 1 2 3 6 15
+
+cat > $TDIR/rlvers.c << EOF
 #include <stdio.h>
 extern char *rl_library_version;
 
@@ -52,9 +64,9 @@ main()
 }
 EOF
 
-if eval ${CC} -L${RL_LIBDIR} -o /tmp/rlvers /tmp/rlvers.c -lreadline -ltermcap -lcurses;
+if eval ${CC} -L${RL_LIBDIR} -o $TDIR/rlvers $TDIR/rlvers.c -lreadline ${TERMCAP_LIB};
 then
-	v=`/tmp/rlvers`
+	v=`$TDIR/rlvers`
 else
 	if [ -n "$verbose" ] ; then
 		echo "${PROGNAME}: compilation failed: status $?"

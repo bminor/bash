@@ -6,6 +6,11 @@ set +a
 # The calls to egrep -v are to filter out builtin array variables that are
 # automatically set and possibly contain values that vary.
 
+# this should be an error
+test=(first & second)
+echo $?
+unset test
+
 # make sure declare -a converts an existing variable to an array
 unset a
 a=abcde
@@ -220,3 +225,38 @@ echo "value = ${barray[*]}"
 # make sure the array code behaves correctly with respect to unset variables
 set -u
 ( echo ${#narray[4]} )
+
+# some old bugs and ksh93 compatibility tests
+set +u
+cd /tmp
+
+touch 1=bar
+foo=([10]="bar")
+echo ${foo[0]}
+rm 1=bar
+
+foo=(a b c d e f g)
+echo ${foo[@]}
+
+# quoted reserved words are ok
+foo=(\for \case \if \then \else)
+echo ${foo[@]}
+
+# quoted metacharacters are ok
+foo=( [1]='<>' [2]='<' [3]='>' [4]='!' )
+echo ${foo[@]}
+
+# numbers are just words when not in a redirection context
+foo=( 12 14 16 18 20 )
+echo ${foo[@]}
+
+foo=( 4414758999202 )
+echo ${foo[@]}
+
+# errors
+foo=(a b c for case if then else)
+
+foo=(for case if then else)
+
+metas=( <> < > ! )
+metas=( [1]=<> [2]=< [3]=> [4]=! )

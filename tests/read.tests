@@ -78,3 +78,12 @@ echo " foo" | { IFS=$' \n' ; read line; recho "$line"; }
 echo " foo" | { IFS=$' \t\n' ; read line; recho "$line"; }
 
 echo " foo" | { IFS=$':' ; read line; recho "$line"; }
+
+# test read -d delim behavior
+${THIS_SH} ./read1.sub
+
+# test read -t timeout behavior
+${THIS_SH} ./read2.sub
+
+# test read -n nchars behavior
+${THIS_SH} ./read3.sub

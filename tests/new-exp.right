@@ -148,6 +148,12 @@ argv[4] = <mnop>
 argv[5] = <qrst>
 argv[6] = <uvwyyy>
 
+This
+string
+has
+multiple
+lines.
+This-string-has-multiple-lines.
 this is a test of proc subst
 this is test 2
 ./new-exp2.sub: /tmp/bashtmp.x*: No such file or directory
@@ -226,6 +232,10 @@ argv[1] = <defghi>
 argv[1] = <efghi>
 argv[1] = <e*docrine>
 argv[1] = <e*docri*e>
+argv[1] = <endocrine>
+argv[1] = <endocrine>
+argv[1] = <endocrine>
+argv[1] = <endocrine>
 argv[1] = <endocrine>
 argv[1] = <endocrine>
 argv[1] = </usr/bin>
@@ -390,4 +400,38 @@ argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
 argv[1] = <>
+argv[1] = <_QUANTITY>
+argv[2] = <_QUART>
+argv[3] = <_QUEST>
+argv[4] = <_QUILL>
+argv[5] = <_QUOTA>
+argv[6] = <_QUOTE>
+argv[1] = <_QUANTITY>
+argv[2] = <_QUART>
+argv[3] = <_QUEST>
+argv[4] = <_QUILL>
+argv[5] = <_QUOTA>
+argv[6] = <_QUOTE>
+argv[1] = <_QUANTITY-_QUART-_QUEST-_QUILL-_QUOTA-_QUOTE>
+./new-exp3.sub: ${!_Q* }: bad substitution
+./new-exp3.sub: ${!1*}: bad substitution
+./new-exp3.sub: ${!@*}: bad substitution
+./new-exp.tests: ${$(($#-1))}: bad substitution
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[5] = <e>
+argv[6] = <f>
+argv[7] = <g>
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[5] = <e>
+argv[1] = <a>
+argv[1] = <a>
+argv[2] = <b>
+argv[1] = <>
+./new-exp.tests: $(($# - 2)): substring expression < 0
 ./new-exp.tests: ABXD: parameter unset

@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_JOBS_H_)
 #  define _JOBS_H_
@@ -95,7 +95,7 @@ extern pid_t fork (), getpid (), getpgrp ();
 #endif /* !HAVE_UNISTD_H */
 
 /* Stuff from the jobs.c file. */
-extern pid_t  original_pgrp, shell_pgrp, pipeline_pgrp;
+extern pid_t original_pgrp, shell_pgrp, pipeline_pgrp;
 extern pid_t last_made_pid, last_asynchronous_pid;
 extern int current_job, previous_job;
 extern int asynchronous_notification;
@@ -114,6 +114,8 @@ extern void delete_job __P((int, int));
 extern void nohup_job __P((int));
 extern void delete_all_jobs __P((int));
 extern void nohup_all_jobs __P((int));
+
+extern int count_all_jobs __P((void));
 
 extern void terminate_current_pipeline __P((void));
 extern void terminate_stopped_jobs __P((void));
@@ -134,6 +136,7 @@ extern void list_stopped_jobs __P((int));
 extern void list_running_jobs __P((int));
 
 extern pid_t make_child __P((char *, int));
+
 extern int get_tty_state __P((void));
 extern int set_tty_state __P((void));
 

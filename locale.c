@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -81,6 +81,12 @@ set_default_locale_vars ()
     setlocale (LC_MESSAGES, lc_all);
 #  endif /* LC_MESSAGES */
 
+#  if defined (LC_NUMERIC)
+  val = get_string_value ("LC_NUMERIC");
+  if (val == 0 && lc_all && *lc_all)
+    setlocale (LC_NUMERIC, lc_all);
+#  endif /* LC_NUMERIC */
+
 #endif /* HAVE_SETLOCALE */
 
   val = get_string_value ("TEXTDOMAIN");
@@ -136,7 +142,7 @@ set_locale_var (var, value)
 	  lc_all[0] = '\0';
 	}
 #if defined (HAVE_SETLOCALE)
-      return (setlocale (LC_ALL, value) != 0);
+      return (setlocale (LC_ALL, lc_all) != 0);
 #else
       return (1);
 #endif
@@ -146,21 +152,28 @@ set_locale_var (var, value)
   else if (var[3] == 'C' && var[4] == 'T')	/* LC_CTYPE */
     {
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_CTYPE, value) != 0);
+	return (setlocale (LC_CTYPE, value ? value : "") != 0);
     }
   else if (var[3] == 'C' && var[4] == 'O')	/* LC_COLLATE */
     {
 #  if defined (LC_COLLATE)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_COLLATE, value) != 0);
+	return (setlocale (LC_COLLATE, value ? value : "") != 0);
 #  endif /* LC_COLLATE */
     }
   else if (var[3] == 'M' && var[4] == 'E')	/* LC_MESSAGES */
     {
 #  if defined (LC_MESSAGES)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_MESSAGES, value) != 0);
+	return (setlocale (LC_MESSAGES, value ? value : "") != 0);
 #  endif /* LC_MESSAGES */
+    }
+  else if (var[3] = 'N' && var[4] == 'U')	/* LC_NUMERIC */
+    {
+#  if defined (LC_NUMERIC)
+      if (lc_all == 0 || *lc_all == '\0')
+	return (setlocale (LC_NUMERIC, value ? value : "") != 0);
+#  endif /* LC_NUMERIC */
     }
 #endif /* HAVE_SETLOCALE */
 

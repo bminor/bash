@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_BASHLINE_H_)
 #define _BASHLINE_H_
@@ -29,5 +29,15 @@ extern void posix_readline_initialize __P((int));
 extern void initialize_readline __P((void));
 extern void bashline_reinitialize __P((void));
 extern int bash_re_edit __P((char *));
+
+extern int bind_keyseq_to_unix_command __P((char *));
+
+/* Used by programmable completion code. */
+extern char *command_word_completion_function __P((char *, int));
+
+extern char **get_hostname_list __P((void));
+extern void clear_hostname_list __P((void));
+
+extern char **bash_directory_completion_matches __P((char *));
 
 #endif /* _BASHLINE_H_ */

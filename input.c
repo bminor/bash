@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -47,7 +47,6 @@ extern int errno;
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
 
-#if !defined (HAVE_RESTARTABLE_SYSCALLS)
 static unsigned char localbuf[128];
 static int local_index, local_bufused;
 
@@ -86,13 +85,16 @@ ungetc_with_restart (c, stream)
     return EOF;
   return (localbuf[--local_index] = c);
 }
-#endif /* !HAVE_RESTARTABLE_SYSCALLS */
 
 #if defined (BUFFERED_INPUT)
 
 /* A facility similar to stdio, but input-only. */
 
-#define MAX_INPUT_BUFFER_SIZE	8192
+#if defined (USING_BASH_MALLOC)
+#  define MAX_INPUT_BUFFER_SIZE	8176
+#else
+#  define MAX_INPUT_BUFFER_SIZE	8192
+#endif
 
 #if !defined (SEEK_CUR)
 #  define SEEK_CUR 1
@@ -378,11 +380,7 @@ static int
 b_fill_buffer (bp)
      BUFFERED_STREAM *bp;
 {
-  do
-    {
-      bp->b_used = read (bp->b_fd, bp->b_buffer, bp->b_size);
-    }
-  while (bp->b_used < 0 && errno == EINTR);
+  bp->b_used = zread (bp->b_fd, bp->b_buffer, bp->b_size);
   if (bp->b_used <= 0)
     {
       bp->b_buffer[0] = 0;

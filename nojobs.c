@@ -9,7 +9,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -34,29 +34,12 @@
 #include <signal.h>
 #include <errno.h>
 
-#include "bashjmp.h"
-
-#include "command.h"
-#include "general.h"
-#include "jobs.h"
-#include "externs.h"
-#include "sig.h"
-#include "error.h"
-#include "bashtty.h"
-
 #if defined (BUFFERED_INPUT)
 #  include "input.h"
 #endif
 
-#if defined (TERMIOS_TTY_DRIVER)
-#  include <termios.h>
-#else
-#  if defined (TERMIO_TTY_DRIVER)
-#    include <termio.h>
-#  else
-#    include <sgtty.h>
-#  endif /* !TERMIO_TTY_DRIVER */
-#endif /* TERMIOS_TTY_DRIVER */
+/* Need to include this up here for *_TTY_DRIVER definitions. */
+#include "shtty.h"
 
 #if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
 /* For struct winsize on SCO */
@@ -69,13 +52,22 @@
 #  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
 #endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
+#include "shell.h"
+#include "jobs.h"
+
+#include "builtins/builtext.h"	/* for wait_builtin */
+
+#if !defined (CHILD_MAX)
+#  define CHILD_MAX 32
+#endif
+
 #if defined (_POSIX_VERSION) || !defined (HAVE_KILLPG)
 #  define killpg(pg, sig)		kill(-(pg),(sig))
 #endif /* USG || _POSIX_VERSION */
 
 #if !defined (HAVE_SIGINTERRUPT)
 #  define siginterrupt(sig, code)
-#endif /* USG */
+#endif /* !HAVE_SIGINTERRUPT */
 
 #if defined (HAVE_WAITPID)
 #  define WAITPID(pid, statusp, options) waitpid (pid, statusp, options)
@@ -92,14 +84,17 @@ extern int errno;
 
 #if defined (READLINE)
 extern void _rl_set_screen_size (); 
-#endif    
+#endif
 
 extern int interactive, interactive_shell, login_shell;
 extern int subshell_environment;
 extern int last_command_exit_value;
+extern int interrupt_immediately;
+extern Function *this_shell_builtin;
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
 #endif
+extern procenv_t wait_intr_buf;
 
 pid_t last_made_pid = NO_PID;
 pid_t last_asynchronous_pid = NO_PID;
@@ -118,15 +113,26 @@ int check_window_size;
 static void reap_zombie_children ();
 #endif
 
+static int wait_sigint_received;
+
+/* STATUS and FLAGS are only valid if pid != NO_PID
+   STATUS is only valid if (flags & PROC_RUNNING) == 0 */
 struct proc_status {
   pid_t pid;
   int status;	/* Exit status of PID or 128 + fatal signal number */
+  int flags;
 };
+
+/* Values for proc_status.flags */
+#define PROC_RUNNING	0x01
+#define PROC_NOTIFIED	0x02
+#define PROC_ASYNC	0x04
 
 static struct proc_status *pid_list = (struct proc_status *)NULL;
 static int pid_list_size;
 
-#define PROC_BAD -1
+/* Return values from find_status_by_pid */
+#define PROC_BAD	 -1
 #define PROC_STILL_ALIVE -2
 
 /* Allocate new, or grow existing PID_LIST. */
@@ -188,7 +194,19 @@ find_status_by_pid (pid)
   i = find_index_by_pid (pid);
   if (i == NO_PID)
     return (PROC_BAD);
+  if (pid_list[i].flags & PROC_RUNNING)
+    return (PROC_STILL_ALIVE);
   return (pid_list[i].status);
+}
+
+static int
+process_exit_status (status)
+     WAIT status;
+{
+  if (WIFSIGNALED (status))
+    return (128 + WTERMSIG (status));
+  else
+    return (WEXITSTATUS (status));
 }
 
 /* Give PID the status value STATUS in the PID_LIST array. */
@@ -203,23 +221,96 @@ set_pid_status (pid, status)
   if (slot == NO_PID)
     return;
 
-  if (WIFSIGNALED (status))
-    pid_list[slot].status = 128 + WTERMSIG (status);
-  else
-    pid_list[slot].status = WEXITSTATUS (status);
+  pid_list[slot].status = process_exit_status (status);
+  pid_list[slot].flags &= ~PROC_RUNNING;
+  /* If it's not a background process, mark it as notified so it gets
+     cleaned up. */
+  if ((pid_list[slot].flags & PROC_ASYNC) == 0)
+    pid_list[slot].flags |= PROC_NOTIFIED;
+}
+
+/* Give PID the flags FLAGS in the PID_LIST array. */
+static void
+set_pid_flags (pid, flags)
+     pid_t pid;
+     int flags;
+{
+  int slot;
+
+  slot = find_index_by_pid (pid);
+  if (slot == NO_PID)
+    return;
+
+  pid_list[slot].flags |= flags;
+}
+
+/* Unset FLAGS for PID in the pid list */
+static void
+unset_pid_flags (pid, flags)
+     pid_t pid;
+     int flags;
+{
+  int slot;
+
+  slot = find_index_by_pid (pid);
+  if (slot == NO_PID)
+    return;
+
+  pid_list[slot].flags &= ~flags;
 }
 
 static void
-add_pid (pid)
+add_pid (pid, async)
      pid_t pid;
+     int async;
 {
   int slot;
 
   slot = find_proc_slot ();
+
   pid_list[slot].pid = pid;
-  pid_list[slot].status = PROC_STILL_ALIVE;
+  pid_list[slot].status = -1;
+  pid_list[slot].flags = PROC_RUNNING;
+  if (async)
+    pid_list[slot].flags |= PROC_ASYNC;
 }
 
+static void
+mark_dead_jobs_as_notified (force)
+     int force;
+{
+  register int i, ndead;
+
+  /* first, count the number of non-running async jobs if FORCE == 0 */
+  for (i = ndead = 0; force == 0 && i < pid_list_size; i++)
+    {
+      if (pid_list[i].pid == NO_PID)
+	continue;
+      if (((pid_list[i].flags & PROC_RUNNING) == 0) &&
+	   (pid_list[i].flags & PROC_ASYNC))
+        ndead++;
+    }
+
+  if (force == 0 && ndead <= CHILD_MAX)
+    return;
+
+  /* If FORCE == 0, we just mark as many non-running async jobs as notified
+     to bring us under the CHILD_MAX limit. */
+  for (i = 0; i < pid_list_size; i++)
+    {
+      if (pid_list[i].pid == NO_PID)
+	continue;
+      if (((pid_list[i].flags & PROC_RUNNING) == 0) &&
+	   pid_list[i].pid != last_asynchronous_pid)
+	{
+	  pid_list[i].flags |= PROC_NOTIFIED;
+	  if (force == 0 && (pid_list[i].flags & PROC_ASYNC) && --ndead <= CHILD_MAX)
+	    break;
+	}
+    }
+}
+
+/* Remove all dead, notified jobs from the pid_list. */
 int
 cleanup_dead_jobs ()
 {
@@ -230,8 +321,20 @@ cleanup_dead_jobs ()
 #endif
 
   for (i = 0; i < pid_list_size; i++)
-    if (pid_list[i].status != PROC_STILL_ALIVE)
-      pid_list[i].pid = NO_PID;
+    {
+      if ((pid_list[i].flags & PROC_RUNNING) == 0 &&
+	  (pid_list[i].flags & PROC_NOTIFIED))
+	pid_list[i].pid = NO_PID;
+    }
+
+  return 0;
+}
+
+void
+reap_dead_jobs ()
+{
+  mark_dead_jobs_as_notified (0);
+  cleanup_dead_jobs ();
 }
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
@@ -408,7 +511,7 @@ make_child (command, async_p)
       if (async_p)
 	last_asynchronous_pid = pid;
 
-      add_pid (pid);
+      add_pid (pid, async_p);
     }
   return (pid);
 }
@@ -433,7 +536,8 @@ default_tty_job_signals ()
 #endif
 }
 
-/* Wait for a single pid (PID) and return its exit status. */
+/* Wait for a single pid (PID) and return its exit status.  Called by
+   the wait builtin. */
 wait_for_single_pid (pid)
      pid_t pid;
 {
@@ -469,16 +573,16 @@ wait_for_single_pid (pid)
     }
 
   set_pid_status (got_pid, status);
+  set_pid_flags (got_pid, PROC_NOTIFIED);
+
   siginterrupt (SIGINT, 0);
   QUIT;
 
-  if (WIFSIGNALED (status))
-    return (128 + WTERMSIG (status));
-  else
-    return (WEXITSTATUS (status));
+  return (process_exit_status (status));
 }
 
-/* Wait for all of the shell's children to exit. */
+/* Wait for all of the shell's children to exit.  Called by the `wait'
+   builtin. */
 void
 wait_for_background_pids ()
 {
@@ -504,6 +608,23 @@ wait_for_background_pids ()
 
   siginterrupt (SIGINT, 0);
   QUIT;
+
+  mark_dead_jobs_as_notified (1);
+  cleanup_dead_jobs ();
+}
+
+/* Make OLD_SIGINT_HANDLER the SIGINT signal handler. */
+#define INVALID_SIGNAL_HANDLER (SigHandler *)wait_for_background_pids
+static SigHandler *old_sigint_handler = INVALID_SIGNAL_HANDLER;
+
+static void
+restore_sigint_handler ()
+{
+  if (old_sigint_handler != INVALID_SIGNAL_HANDLER)
+    {
+      set_signal_handler (SIGINT, old_sigint_handler);
+      old_sigint_handler = INVALID_SIGNAL_HANDLER;
+    }
 }
 
 /* Handle SIGINT while we are waiting for children in a script to exit.
@@ -513,10 +634,27 @@ static sighandler
 wait_sigint_handler (sig)
      int sig;
 {
+  SigHandler *sigint_handler;
+
+  /* If we got a SIGINT while in `wait', and SIGINT is trapped, do
+     what POSIX.2 says (see builtins/wait.def for more info). */
+  if (this_shell_builtin && this_shell_builtin == wait_builtin &&
+      signal_is_trapped (SIGINT) &&
+      ((sigint_handler = trap_to_sighandler (SIGINT)) == trap_handler))
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      restore_sigint_handler ();
+      interrupt_immediately = 0;
+      trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
+      longjmp (wait_intr_buf, 1);
+    }
+
 #if 0
   /* Run a trap handler if one has been defined. */
   maybe_call_trap_handler (sig);
 #endif
+
+  wait_sigint_received = 1;
 
   SIGRETURN (0);
 }
@@ -530,7 +668,6 @@ wait_for (pid)
   int return_val, pstatus;
   pid_t got_pid;
   WAIT status;
-  SigHandler *old_sigint_handler;
 
   pstatus = find_status_by_pid (pid);
 
@@ -542,7 +679,8 @@ wait_for (pid)
 
   /* If we are running a script, ignore SIGINT while we're waiting for
      a child to exit.  The loop below does some of this, but not all. */
-  if (!interactive_shell)
+  wait_sigint_received = 0;
+  if (interactive_shell == 0)
     old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
 
   while ((got_pid = WAITPID (-1, &status, 0)) != pid) /* XXX was pid now -1 */
@@ -571,22 +709,29 @@ wait_for (pid)
 
   if (interactive_shell == 0)
     {
-      set_signal_handler (SIGINT, old_sigint_handler);
+      SigHandler *temp_handler;
+
+      temp_handler = old_sigint_handler;
+      restore_sigint_handler ();
+
       /* If the job exited because of SIGINT, make sure the shell acts as if
 	 it had received one also. */
       if (WIFSIGNALED (status) && (WTERMSIG (status) == SIGINT))
 	{
+
 	  if (maybe_call_trap_handler (SIGINT) == 0)
-	    (*old_sigint_handler) (SIGINT);
+	    {
+	      if (temp_handler == SIG_DFL)
+		termination_unwind_protect (SIGINT);
+	      else if (temp_handler != INVALID_SIGNAL_HANDLER && temp_handler != SIG_IGN)
+		(*temp_handler) (SIGINT);
+	    }
 	}
     }
 
   /* Default return value. */
   /* ``a full 8 bits of status is returned'' */
-  if (WIFSIGNALED (status))
-    return_val = 128 + WTERMSIG (status);
-  else
-    return_val = WEXITSTATUS (status);
+  return_val = process_exit_status (status);
 
 #if !defined (DONT_REPORT_SIGPIPE)
   if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
@@ -624,24 +769,11 @@ kill_pid (pid, signal, group)
 {
   int result;
 
-  if (group)
-    result = killpg (pid, signal);
-  else
-    result = kill (pid, signal);
-
+  result = group ? killpg (pid, signal) : kill (pid, signal);
   return (result);
 }
 
-#if defined (TERMIOS_TTY_DRIVER)
-static struct termios shell_tty_info;
-#else /* !TERMIOS_TTY_DRIVER */
-#  if defined (TERMIO_TTY_DRIVER)
-static struct termio shell_tty_info;
-#  else
-static struct sgttyb shell_tty_info;
-#  endif /* !TERMIO_TTY_DRIVER */
-#endif /* !TERMIOS_TTY_DRIVER */
-
+static TTYSTRUCT shell_tty_info;
 static int got_tty_state;
 
 /* Fill the contents of shell_tty_info with the current tty info. */
@@ -652,15 +784,7 @@ get_tty_state ()
   tty = input_tty ();
   if (tty != -1)
     {
-#if defined (TERMIOS_TTY_DRIVER)
-      tcgetattr (tty, &shell_tty_info);
-#else
-#  if defined (TERMIO_TTY_DRIVER)
-      ioctl (tty, TCGETA, &shell_tty_info);
-#  else
-      ioctl (tty, TIOCGETP, &shell_tty_info);
-#  endif
-#endif
+      ttgetattr (tty, &shell_tty_info);
       got_tty_state = 1;
       if (check_window_size)
 	get_new_window_size (0);
@@ -678,16 +802,7 @@ set_tty_state ()
     {
       if (got_tty_state == 0)
 	return 0;
-
-#if defined (TERMIOS_TTY_DRIVER)
-      tcsetattr (tty, TCSADRAIN, &shell_tty_info);
-#else
-#  if defined (TERMIO_TTY_DRIVER)
-      ioctl (tty, TCSETAW, &shell_tty_info);  /* Wait for output, no flush */
-#  else
-      ioctl (tty, TIOCSETN, &shell_tty_info);
-#  endif
-#endif
+      ttsetattr (tty, &shell_tty_info);
     }
   return 0;
 }
@@ -734,4 +849,10 @@ describe_pid (pid)
 void
 unfreeze_jobs_list ()
 {
+}
+
+int
+count_all_jobs ()
+{
+  return 0;
 }

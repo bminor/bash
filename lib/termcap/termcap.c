@@ -12,8 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; see the file COPYING.  If not, write to the
+Free Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.  */
 
 /* Emacs config.h may rename various library functions such as malloc.  */
 #ifdef HAVE_CONFIG_H
@@ -26,6 +26,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <fcntl.h>
+
+#ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+#else
+extern char *getenv ();
+extern char *malloc ();
+extern char *realloc ();
+#endif
 
 #else /* not HAVE_CONFIG_H */
 
@@ -76,6 +84,8 @@ int bufsize = 128;
 #define BUFSIZE 2048
 #endif
 #endif
+
+#include "ltcap.h"
 
 #ifndef TERMCAP_FILE
 #define TERMCAP_FILE "/etc/termcap"
@@ -137,6 +147,7 @@ find_capability (bp, cap)
   return NULL;
 }
 
+__private_extern__
 int
 tgetnum (cap)
      char *cap;
@@ -147,6 +158,7 @@ tgetnum (cap)
   return atoi (ptr);
 }
 
+__private_extern__
 int
 tgetflag (cap)
      char *cap;
@@ -160,6 +172,7 @@ tgetflag (cap)
    to store the string.  That pointer is advanced over the space used.
    If AREA is null, space is allocated with `malloc'.  */
 
+__private_extern__
 char *
 tgetstr (cap, area)
      char *cap;
@@ -264,7 +277,7 @@ tgetst1 (ptr, area)
 short ospeed;
 /* If OSPEED is 0, we use this as the actual baud rate.  */
 int tputs_baud_rate;
-char PC;
+__private_extern__ char PC = '\0';
 
 /* Actual baud rate if positive;
    - baud rate / 100 if negative.  */
@@ -280,6 +293,7 @@ static int speeds[] =
 #endif /* not VMS */
   };
 
+__private_extern__
 void
 tputs (str, nlines, outfun)
      register char *str;
@@ -299,8 +313,10 @@ tputs (str, nlines, outfun)
 #else
   if (ospeed == 0)
     speed = tputs_baud_rate;
-  else
+  else if (ospeed > 0 && ospeed < (sizeof speeds / sizeof speeds[0]))
     speed = speeds[ospeed];
+  else
+    speed = 0;
 #endif
 
   if (!str)
@@ -393,7 +409,8 @@ static int
 valid_filename_p (fn)
      char *fn;
 {
-  return *fn == '/' || fn[1] == ':';
+  return *fn == '\\' || *fn == '/' ||
+    (*fn >= 'A' && *fn <= 'z' && fn[1] == ':');
 }
 #else
 #define valid_filename_p(fn) (*(fn) == '/')
@@ -412,6 +429,7 @@ valid_filename_p (fn)
    0 if the data base is accessible but the type NAME is not defined
    in it, and some other value otherwise.  */
 
+__private_extern__
 int
 tgetent (bp, name)
      char *bp, *name;
@@ -452,11 +470,13 @@ tgetent (bp, name)
   termcap_name = getenv ("TERMCAP");
   if (termcap_name && *termcap_name == '\0')
     termcap_name = NULL;
+#if 0
 #if defined (MSDOS) && !defined (TEST)
   if (termcap_name && (*termcap_name == '\\'
 		       || *termcap_name == '/'
 		       || termcap_name[1] == ':'))
     dostounix_filename(termcap_name);
+#endif
 #endif
 
   filep = termcap_name && valid_filename_p (termcap_name);

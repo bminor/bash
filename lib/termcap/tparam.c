@@ -12,12 +12,21 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; see the file COPYING.  If not, write to the
+Free Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.  */
 
 /* Emacs config.h may rename various library functions such as malloc.  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
+
+#ifdef HAVE_STDLIB_H 
+#  include <stdlib.h>
+#else
+extern char *getenv ();
+extern char *malloc ();
+extern char *realloc ();
+#endif
+
 #else /* not HAVE_CONFIG_H */
 
 #if defined(HAVE_STRING_H) || defined(STDC_HEADERS)
@@ -33,6 +42,8 @@ char *realloc ();
 #endif
 
 #endif /* not HAVE_CONFIG_H */
+
+#include "ltcap.h"
 
 #ifndef NULL
 #define NULL (char *) 0
@@ -101,11 +112,12 @@ tparam (string, outstring, len, arg0, arg1, arg2, arg3)
   return tparam1 (string, outstring, len, NULL, NULL, arg);
 }
 
-char *BC;
-char *UP;
+__private_extern__ char *BC;
+__private_extern__ char *UP;
 
 static char tgoto_buf[50];
 
+__private_extern__
 char *
 tgoto (cm, hpos, vpos)
      char *cm;

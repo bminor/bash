@@ -4,7 +4,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -14,7 +14,7 @@
    
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <config.h>
 
@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include "../bashtypes.h"
-#include "../posixstat.h"
+#include "posixstat.h"
 #include <signal.h>
 
 #include <errno.h>
@@ -43,7 +43,7 @@
 #include "../bashansi.h"
 
 #include "../shell.h"
-#include "../maxpath.h"
+#include "maxpath.h"
 #include "../flags.h"
 #include "../jobs.h"
 #include "../builtins.h"
@@ -62,6 +62,12 @@
 #if !defined (errno)
 extern int errno;   
 #endif /* !errno */
+
+#ifdef __STDC__
+typedef int QSFUNC (const void *, const void *);
+#else
+typedef int QSFUNC ();
+#endif 
 
 extern int no_symbolic_links, interactive, interactive_shell;
 extern int indirection_level, startup_state, subshell_environment;
@@ -462,7 +468,7 @@ get_job_spec (list)
   if (digit (*word) && all_digits (word))
     {
       job = atoi (word);
-      return (job - 1);
+      return (job >= job_slots ? NO_JOB : job - 1);
     }
 
   substring = 0;
@@ -701,13 +707,8 @@ shell_builtin_compare (sbp1, sbp2)
 void
 initialize_shell_builtins ()
 {
-#ifdef _MINIX
   qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
-    (int (*)(const void *, const void *))shell_builtin_compare);
-#else
-  qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
-    shell_builtin_compare);
-#endif
+    (QSFUNC *)shell_builtin_compare);
 }
 
 /* **************************************************************** */
@@ -767,6 +768,7 @@ double_quote (string)
 	case '$':
 	case '`':
 	case '\\':
+	case '\n':		/* XXX */
 	  *r++ = '\\';
 	default:
 	  *r++ = c;
@@ -778,6 +780,37 @@ double_quote (string)
   *r = '\0';
 
   return (result);
+}
+
+/* Remove backslashes that are quoting characters that are special between
+   double quotes.  Return a new string. */
+char *
+un_double_quote (string)
+     char *string;
+{
+  register int c, pass_next;
+  char *result, *r, *s;
+
+  r = result = xmalloc (strlen (string) + 1);
+
+  for (pass_next = 0, s = string; s && (c = *s); s++)
+    {
+      if (pass_next)
+	{
+	  *r++ = c;
+	  pass_next = 0;
+	  continue;
+	}
+      if (c == '\\' && strchr (slashify_in_quotes, s[1]))
+	{
+	  pass_next = 1;
+	  continue;
+	}
+      *r++ = c;
+    }
+
+  *r = '\0';
+  return result;
 }
 
 /* Quote special characters in STRING using backslashes.  Return a new
@@ -826,6 +859,41 @@ backslash_quote (string)
   *r = '\0';
   return (result);
 }
+
+#if defined (PROMPT_STRING_DECODE)
+/* Quote characters that get special treatment when in double quotes in STRING
+   using backslashes.  Return a new string. */
+char *
+backslash_quote_for_double_quotes (string)
+     char *string;
+{
+  int c;
+  char *result, *r, *s;
+
+  result = xmalloc (2 * strlen (string) + 1);
+
+  for (r = result, s = string; s && (c = *s); s++)
+    {
+      switch (c)
+	{
+	case '"':
+	case '$':
+	case '`':
+	case '\\':
+	case '\n':
+	  *r++ = '\\';
+	  *r++ = c;
+	  break;
+	default:
+	  *r++ = c;
+	  break;
+	}
+    }
+
+  *r = '\0';
+  return (result);
+}
+#endif /* PROMPT_STRING_DECODE */
 
 int
 contains_shell_metas (string)

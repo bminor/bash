@@ -18,7 +18,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 /* Define PATTERN_MATCHING to get the csh-like =~ and !~ pattern-matching
    binary operators. */
@@ -200,6 +200,19 @@ test_stat (path, finfo)
       return (stat (pbuf, finfo));
 #endif /* !HAVE_DEV_FD */
     }
+#if !defined (HAVE_DEV_STDIN)
+  else if (STREQN (path, "/dev/std", 8))
+    {
+      if (STREQ (path+8, "in"))
+	return (fstat (0, finfo));
+      else if (STREQ (path+8, "out"))
+	return (fstat (1, finfo));
+      else if (STREQ (path+8, "err"))
+	return (fstat (2, finfo));
+      else
+	return (stat (path, finfo));
+    }
+#endif /* !HAVE_DEV_STDIN */
   return (stat (path, finfo));
 }
 

@@ -1,7 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992
-   Free Software Foundation, Inc.
+/* Copyright (C) 1987-1999 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -17,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -40,18 +39,6 @@
 #include "shell.h"
 #include <tilde/tilde.h>
 
-#if defined (TIME_WITH_SYS_TIME)
-#  include <sys/time.h>
-#  include <time.h>
-#else
-#  if defined (HAVE_SYS_TIME_H)
-#    include <sys/time.h>
-#  else
-#    include <time.h>
-#  endif
-#endif
-
-#include <sys/times.h>
 #include "maxpath.h"
 
 #if !defined (errno)
@@ -132,98 +119,6 @@ print_rlimtype (n, addnl)
   printf ("%s%s", s + len, addnl ? "\n" : "");
 }
 #endif /* RLIMTYPE */
-
-#if defined (HAVE_TIMEVAL)
-/* Convert a pointer to a struct timeval to seconds and thousandths of a
-   second, returning the values in *SP and *SFP, respectively.  This does
-   rounding on the fractional part, not just truncation to three places. */
-void
-timeval_to_secs (tvp, sp, sfp)
-     struct timeval *tvp;
-     long *sp;
-     int *sfp;
-{
-  int rest;
-
-  *sp = tvp->tv_sec;
-
-  *sfp = tvp->tv_usec % 1000000;	/* pretty much a no-op */
-  rest = *sfp % 1000;
-  *sfp = (*sfp * 1000) / 1000000;
-  if (rest >= 500)
-    *sfp += 1;
-
-  /* Sanity check */
-  if (*sfp >= 1000)
-    {
-      *sp += 1;
-      *sfp -= 1000;
-    }
-}
-  
-/* Print the contents of a struct timeval * in a standard way to stdio
-   stream FP.  */
-void
-print_timeval (fp, tvp)
-     FILE *fp;
-     struct timeval *tvp;
-{
-  int minutes, seconds_fraction;
-  long seconds;
-
-  timeval_to_secs (tvp, &seconds, &seconds_fraction);
-
-  minutes = seconds / 60;
-  seconds %= 60;
-
-  fprintf (fp, "%0dm%0ld.%03ds",  minutes, seconds, seconds_fraction);
-}
-#endif /* HAVE_TIMEVAL */
-
-#if defined (HAVE_TIMES)
-void
-clock_t_to_secs (t, sp, sfp)
-     clock_t t;
-     long *sp;
-     int *sfp;
-{
-  static long clk_tck = 0;
-
-  if (clk_tck == 0)
-    clk_tck = get_clk_tck ();
-
-  *sfp = t % clk_tck;
-  *sfp = (*sfp * 1000) / clk_tck;
-
-  *sp = t / clk_tck;
-
-  /* Sanity check */
-  if (*sfp >= 1000)
-    {
-      *sp += 1;
-      *sfp -= 1000;
-    }
-}
-
-/* Print the time defined by a time_t (returned by the `times' and `time'
-   system calls) in a standard way to stdion stream FP.  This is scaled in
-   terms of HZ, which is what is returned by the `times' call. */
-void
-print_time_in_hz (fp, t)
-     FILE *fp;
-     clock_t t;
-{
-  int minutes, seconds_fraction;
-  long seconds;
-
-  clock_t_to_secs (t, &seconds, &seconds_fraction);
-
-  minutes = seconds / 60;
-  seconds %= 60;
-
-  fprintf (fp, "%0dm%0ld.%03ds",  minutes, seconds, seconds_fraction);
-}
-#endif /* HAVE_TIMES */
 
 /* **************************************************************** */
 /*								    */
@@ -338,27 +233,34 @@ check_identifier (word, check_word)
 #endif /* O_NDELAY */
 
 /* Make sure no-delay mode is not set on file descriptor FD. */
-void
+int
 unset_nodelay_mode (fd)
      int fd;
 {
-  int flags, set;
+  int flags, bflags;
 
   if ((flags = fcntl (fd, F_GETFL, 0)) < 0)
-    return;
+    return -1;
 
-  set = 0;
+  bflags = 0;
 
   /* This is defined to O_NDELAY in filecntl.h if O_NONBLOCK is not present
      and O_NDELAY is defined. */
-  if (flags & O_NONBLOCK)
+#ifdef O_NONBLOCK
+  bflags |= O_NONBLOCK;
+#endif
+
+#ifdef O_NDELAY
+  bflags |= O_NDELAY;
+#endif
+
+  if (flags & bflags)
     {
-      flags &= ~O_NONBLOCK;
-      set++;
+      flags &= ~bflags;
+      return (fcntl (fd, F_SETFL, flags));
     }
 
-  if (set)
-    fcntl (fd, F_SETFL, flags);
+  return 0;
 }
 
 /* There is a bug in the NeXT 2.1 rlogind that causes opens
@@ -670,32 +572,11 @@ make_absolute (string, dot_path)
      char *string, *dot_path;
 {
   char *result;
-  int result_len;
 
   if (dot_path == 0 || *string == '/')
     result = savestring (string);
   else
-    {
-      if (dot_path[0])
-	{
-	  result_len = strlen (dot_path);
-	  result = xmalloc (2 + result_len + strlen (string));
-	  strcpy (result, dot_path);
-	  if (result[result_len - 1] != '/')
-	    {
-	      result[result_len++] = '/';
-	      result[result_len] = '\0';
-	    }
-	}
-      else
-	{
-	  result = xmalloc (3 + strlen (string));
-	  result[0] = '.'; result[1] = '/'; result[2] = '\0';
-	  result_len = 2;
-	}
-
-      strcpy (result + result_len, string);
-    }
+    result = sh_makepath (dot_path, string, 0);
 
   return (result);
 }
@@ -753,37 +634,17 @@ char *
 full_pathname (file)
      char *file;
 {
-  char *disposer;
-  char *current_dir;
-  int dlen;
+  char *ret;
 
   file = (*file == '~') ? bash_tilde_expand (file) : savestring (file);
 
   if ((*file == '/') && absolute_pathname (file))
     return (file);
 
-  disposer = file;
+  ret = sh_makepath ((char *)NULL, file, (MP_DOCWD|MP_RMDOT));
+  free (file);
 
-  /* XXX - this should probably be just PATH_MAX or PATH_MAX + 1 */
-  current_dir = xmalloc (2 + PATH_MAX + strlen (file));
-  if (getcwd (current_dir, PATH_MAX) == 0)
-    {
-      sys_error (bash_getcwd_errstr);
-      free (disposer);
-      free (current_dir);
-      return ((char *)NULL);
-    }
-  dlen = strlen (current_dir);
-  if (current_dir[0] == '/' && dlen > 1)
-    current_dir[dlen++] = '/';
-
-  /* Turn /foo/./bar into /foo/bar. */
-  if (file[0] == '.' && file[1] == '/')
-    file += 2;
-
-  strcpy (current_dir + dlen, file);
-  free (disposer);
-  return (current_dir);
+  return (ret);
 }
 
 /* A slightly related function.  Get the prettiest name of this
@@ -854,12 +715,7 @@ extract_colon_unit (string, p_index)
       value[0] = '\0';
     }
   else
-    {
-      len = i - start;
-      value = xmalloc (1 + len);
-      strncpy (value, string + start, len);
-      value [len] = '\0';
-    }
+    value = substring (string, start, i);
 
   return (value);
 }
@@ -915,12 +771,12 @@ tilde_initialize ()
      tilde_initialize () is called from within bashline_reinitialize (). */
   if (times_called++ == 0)
     {
-      tilde_additional_prefixes = (char **)xmalloc (3 * sizeof (char *));
+      tilde_additional_prefixes = alloc_array (3);
       tilde_additional_prefixes[0] = "=~";
       tilde_additional_prefixes[1] = ":~";
       tilde_additional_prefixes[2] = (char *)NULL;
 
-      tilde_additional_suffixes = (char **)xmalloc (3 * sizeof (char *));
+      tilde_additional_suffixes = alloc_array (3);
       tilde_additional_suffixes[0] = ":";
       tilde_additional_suffixes[1] = "=~";
       tilde_additional_suffixes[2] = (char *)NULL;
@@ -1081,7 +937,7 @@ get_group_list (ngp)
       return (char **)NULL;
     }
 
-  group_vector = (char **)xmalloc (ngroups * sizeof (char *));
+  group_vector = alloc_array (ngroups);
   for (i = 0; i < ngroups; i++)
     {
       nbuf = itos ((int)group_array[i]);

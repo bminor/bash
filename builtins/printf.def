@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -54,7 +54,7 @@ $END
 
 #include "../bashansi.h"
 #include "../shell.h"
-#include "../stdc.h"
+#include "stdc.h"
 #include "bashgetopt.h"
 
 #if !defined (errno)
@@ -74,12 +74,13 @@ extern int errno;
   } while (0)
 
 #define PRETURN(value) \
-  do { free (format); fflush (stdout); return (value); } while (0)
+  do { /* free (format); */ fflush (stdout); return (value); } while (0)
 
 #define  SKIP1 "#-+ 0"
 #define  SKIP2 "*0123456789"
 
 static void printstr __P((char *, char *, int, int, int));
+static int tescape __P((char *, int, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *mklong __P((char *, int));
 static int getchr __P((void));
@@ -125,12 +126,12 @@ printf_builtin (list)
   if (list->word->word == 0 || list->word->word[0] == '\0')
     return (EXECUTION_SUCCESS);
 
-  format = ansicstr (list->word->word, strlen (list->word->word), (int *)NULL, &fmtlen);
+  format = list->word->word;
 
   garglist = list->next;
 
   /* If the format string is empty after preprocessing, return immediately. */
-  if ((format == 0 || *format == 0) && fmtlen == 0)
+  if (format == 0 || *format == 0)
     return (EXECUTION_SUCCESS);
 	  
   /* Basic algorithm is to scan the format string for conversion
@@ -139,14 +140,24 @@ printf_builtin (list)
      format strings are reused as necessary to use up the provided
      arguments, arguments of zero/null string are provided to use
      up the format string. */
-#define FMTIND (fmt - format)
 
   do
     {
       /* find next format specification */
-      for (fmt = format; FMTIND < fmtlen; fmt++)
+      for (fmt = format; *fmt; fmt++)
 	{
 	  precision = fieldwidth = foundmod = 0;
+
+	  if (*fmt == '\\')
+	    {
+	      fmt++;
+	      /* A NULL third argument to tescape means to not do special
+		 processing for \c. */
+	      fmt += tescape (fmt, 1, &nextch, (int *)NULL);
+	      putchar (nextch);
+	      fmt--;	/* for loop will increment it for us again */
+	      continue;
+	    }
 
 	  if (*fmt != '%')
 	    {
@@ -301,10 +312,10 @@ printf_builtin (list)
 		break;
 	      }
 
-	    /* We output unrecognized format characters, but we print a
-	       warning message and return a failure exit status. */
+	    /* We don't output unrecognized format characters; we print an
+	       error message and return a failure exit status. */
 	    default:
-	      builtin_error ("`%c': illegal format character", convch);
+	      builtin_error ("`%c': invalid format character", convch);
 	      PRETURN (EXECUTION_FAILURE);
 	    }
 
@@ -430,14 +441,114 @@ printstr (fmt, string, len, fieldwidth, precision)
 
 #define HEXVALUE(c) \
   ((c) >= 'a' && (c) <= 'f' ? (c)-'a'+10 : (c) >= 'A' && (c) <= 'F' ? (c)-'A'+10 : (c)-'0')
-  
+
+/* Translate a single backslash-escape sequence starting at ESTART (the
+   character after the backslash) and return the number of characters
+   consumed by the sequence.  CP is the place to return the translated
+   value.  *SAWC is set to 1 if the escape sequence was \c, since that means
+   to short-circuit the rest of the processing.  If SAWC is null, we don't
+   do the \c short-circuiting, and \c is treated as an unrecognized escape
+   sequence.  */
+static int
+tescape (estart, trans_squote, cp, sawc)
+     char *estart;
+     int trans_squote;
+     char *cp;
+     int *sawc;
+{
+  register char *p;
+  int temp, c, evalue;
+
+  p = estart;
+
+  switch (c = *p++)
+    {
+#if defined (__STDC__)
+      case 'a': *cp = '\a'; break;
+#else
+      case 'a': *cp = '\007'; break;
+#endif
+
+      case 'b': *cp = '\b'; break;
+
+      case 'e': *cp = '\033'; break;	/* ESC -- non-ANSI */
+
+      case 'f': *cp = '\f'; break;
+
+      case 'n': *cp = '\n'; break;
+
+      case 'r': *cp = '\r'; break;
+
+      case 't': *cp = '\t'; break;
+
+      case 'v': *cp = '\v'; break;
+
+      /* %b octal constants are `\0' followed by one, two, or three
+         octal digits... */
+      case '0':
+	for (temp = 3, evalue = 0; isoctal (*p) && temp--; p++)
+	  evalue = (evalue * 8) + OCTVALUE (*p);
+	*cp = evalue;
+	break;
+
+      /* but, as an extension, the other echo-like octal escape
+	 sequences are supported as well. */
+      case '1': case '2': case '3': case '4':
+      case '5': case '6': case '7':
+	for (temp = 2, evalue = c - '0'; isoctal (*p) && temp--; p++)
+	  evalue = (evalue * 8) + OCTVALUE (*p);
+	*cp = evalue;
+	break;
+
+      /* And, as another extension, we allow \xNNN, where each N is a
+	 hex digit. */
+      case 'x':
+	for (temp = 3, evalue = 0; isxdigit (*p) && temp--; p++)
+	  evalue = (evalue * 16) + HEXVALUE (*p);
+	if (temp == 3)
+	  {
+	    builtin_error ("missing hex digit for \\x");
+	    *cp = '\\';
+	    return 0;
+	  }
+	*cp = evalue;
+	break;
+
+      case '\\':	/* \\ -> \ */
+	*cp = c;
+	break;
+
+      case '\'':	/* TRANS_SQUOTE != 0 means \' -> ' */
+	if (trans_squote)
+	  *cp = c;
+	else
+	  {
+	    *cp = '\\';
+	    return 0;
+	  }
+	break;
+
+      case 'c':
+	if (sawc)
+	  {
+	    *sawc = 1;
+	    break;
+	  }
+      /* other backslash escapes are passed through unaltered */
+      default:
+	*cp = '\\';
+	return 0;
+      }
+  return (p - estart);
+}
+
 static char *
 bexpand (string, len, sawc, lenp)
      char *string;
      int len, *sawc, *lenp;
 {
-  int c, temp;
-  char *ret, *r, *s;
+  int temp;
+  char *ret, *r, *s, c;
 
   if (string == 0 || *string == '\0')
     {
@@ -457,74 +568,13 @@ bexpand (string, len, sawc, lenp)
 	  *r++ = c;
 	  continue;
 	}
-
-      switch (c = *s++)
+      temp = 0;
+      s += tescape (s, 0, &c, &temp);
+      if (temp)
 	{
-#if defined (__STDC__)
-	case 'a': c = '\a'; break;
-#else
-	case 'a': c = '\007'; break;
-#endif
-
-	case 'b': c = '\b'; break;
-
-	case 'e': c = '\033'; break;	/* ESC -- non-ANSI */
-
-	case 'f': c = '\f'; break;
-
-	case 'n': c = '\n'; break;
-
-	case 'r': c = '\r'; break;
-
-	case 't': c = '\t'; break;
-
-	case 'v': c = '\v'; break;
-
-	/* %b octal constants are `\0' followed by one, two, or three
-	   octal digits... */
-	case '0':
-	  for (temp = 3, c = 0; isoctal (*s) && temp--; s++)
-	    c = (c * 8) + OCTVALUE (*s);
-	  break;
-
-	/* but, as an extension, the other echo-like octal escape
-	   sequences are supported as well. */
-	case '1': case '2': case '3': case '4':
-	case '5': case '6': case '7':
-	  for (temp = 2, c -= '0'; isoctal (*s) && temp--; s++)
-	    c = (c * 8) + OCTVALUE (*s);
-	  break;
-
-	/* And, as another extension, we allow \xNNN, where each N is a
-	   hex digit. */
-	case 'x':
-	  for (temp = 3, c = 0; isxdigit (*s) && temp--; s++)
-	    c = (c * 16) + HEXVALUE (*s);
-	  if (temp == 3)
-	    {
-	      builtin_error ("missing hex digit for \\x");
-	      *r++ = '\\';
-	      c = 'x';
-	    }
-	  break;
-
-	case '\\':
-#if 0
-	case '\'':		/* XXX */
-	case '"':		/* XXX */
-#endif
-	  break;
-
-	case 'c':
 	  if (sawc)
 	    *sawc = 1;
-	  *r = '\0';
-	  if (lenp)
-	    *lenp = r - ret;
-	  return ret;
-
-	/* other backslash escapes are passed through unaltered */
-	default: *r++ = '\\'; break;
+	  break;
 	}
 
       *r++ = c;
@@ -600,6 +650,7 @@ getlong (lp)
      long *lp;
 {
   long ret;
+  char *ep;
 
   if (garglist == 0)
     {
@@ -614,11 +665,14 @@ getlong (lp)
     }
 
   errno = 0;
-  /* legal_number does not currently detect overflow, but it should.
-     Someday it will. */
-  if (legal_number (garglist->word->word, &ret) == 0)
+  /* If we use 0 as the third argument, we can handle octal and hex, which
+     legal_number does not.  (This was
+	  if (legal_number (garglist->word->word, &ret) == 0)
+     ) */
+  ret = strtol (garglist->word->word, &ep, 0);
+  if (*ep != '\0')
     {
-      builtin_error ("%s: illegal number", garglist->word->word);
+      builtin_error ("%s: invalid number", garglist->word->word);
       return (1);
     }
   else if (errno == ERANGE)
@@ -656,7 +710,7 @@ getulong (ulp)
   
   if (*ep)
     {
-      builtin_error ("%s: illegal number", garglist->word->word);
+      builtin_error ("%s: invalid number", garglist->word->word);
       return (1);
     }
   else if (errno == ERANGE)

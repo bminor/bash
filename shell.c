@@ -1,30 +1,22 @@
-/* shell.c -- GNU's idea of the POSIX shell specification.
+/* shell.c -- GNU's idea of the POSIX shell specification. */
 
-   This file is part of Bash, the Bourne Again SHell.  Bash is free
-   software; no one can prevent you from reading the source code, or
-   giving it to someone else.  This file is copyrighted under the GNU
-   General Public License, which can be found in the file called
-   COPYING.
+/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
 
-   Copyright (C) 1988, 1991 Free Software Foundation, Inc.
+   This file is part of GNU Bash, the Bourne Again SHell.
 
-   This file is part of GNU Bash.
+   Bash is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY.  No author or distributor accepts responsibility to
-   anyone for the consequences of using it or for whether it serves
-   any particular purpose or works at all, unless he says so in
-   writing.  Refer to the GNU Emacs General Public License for full
-   details.
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-   Everyone is granted permission to copy, modify and redistribute
-   Bash, but only under the conditions described in the GNU General
-   Public License.  A copy of this license is supposed to have been
-   given to you along with GNU Emacs so you can know your rights and
-   responsibilities.  It should be in a file named COPYING.
-
-   Among other things, the copyright notice and this notice must be
-   preserved on all copies.
+   You should have received a copy of the GNU General Public License
+   along with Bash; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
   Birthdate:
   Sunday, January 10th, 1988.
@@ -91,6 +83,7 @@ extern char **environ;	/* used if no third argument to main() */
 
 extern char *dist_version, *release_status;
 extern int patch_level, build_version;
+extern int shell_level;
 extern int subshell_environment;
 extern int last_command_exit_value;
 extern int line_number;
@@ -238,8 +231,10 @@ char **subshell_envp;
 int default_buffered_input = -1;
 #endif
 
-static int read_from_stdin;		/* -s flag supplied */
-static int want_pending_command;	/* -c flag supplied */
+/* The following two variables are not static so they can show up in $-. */
+int read_from_stdin;		/* -s flag supplied */
+int want_pending_command;	/* -c flag supplied */
+
 static char *local_pending_command;
 
 static FILE *default_input;
@@ -795,6 +790,15 @@ exit_shell (s)
   exit (s);
 }
 
+/* A wrapper for exit that (optionally) can do other things, like malloc
+   statistics tracing. */
+void
+sh_exit (s)
+     int s;
+{
+  exit (s);
+}
+
 /* Source the bash startup files.  If POSIXLY_CORRECT is non-zero, we obey
    the Posix.2 startup file rules:  $ENV is expanded, and if the file it
    names exists, that file is sourced.  The Posix.2 rules are in effect
@@ -851,27 +855,17 @@ run_startup_files ()
   int old_job_control;
 #endif
   int sourced_login, run_by_ssh;
-  SHELL_VAR *sshvar;
 
   /* get the rshd/sshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && local_pending_command)
     {
-      /* Find out if we were invoked by ssh.  If so, set RUN_BY_SSH to 1. */
-      sshvar = find_variable ("SSH_CLIENT");
-      if (sshvar)
-	{
-	  run_by_ssh = 1;
-	  /* Now that we've tested the variable, we need to unexport it. */
-	  sshvar->attributes &= ~att_exported;
-	  array_needs_making = 1;
-	}
-      else
-	run_by_ssh = 0;
+      run_by_ssh = find_variable ("SSH_CLIENT") != (SHELL_VAR *)0;
+      run_by_ssh |= find_variable ("SSH2_CLIENT") != (SHELL_VAR *)0;
 
       /* If we were run by sshd or we think we were run by rshd, execute
-	 ~/.bashrc. */
-      if (run_by_ssh || isnetconn (fileno (stdin)))
+	 ~/.bashrc if we are a top-level shell. */
+      if ((run_by_ssh || isnetconn (fileno (stdin))) && shell_level < 2)
 	{
 #ifdef SYS_BASHRC
 #  if defined (__OPENNT)
@@ -892,7 +886,15 @@ run_startup_files ()
 
   sourced_login = 0;
 
-  if (login_shell < 0 && posixly_correct == 0)	/* --login flag and not posix */
+  /* A shell begun with the --login flag that is not in posix mode runs
+     the login shell startup files, no matter whether or not it is
+     interactive.  If NON_INTERACTIVE_LOGIN_SHELLS is defined, run the
+     startup files if argv[0][0] == '-' as well. */
+#if defined (NON_INTERACTIVE_LOGIN_SHELLS)
+  if (login_shell && posixly_correct == 0)
+#else
+  if (login_shell < 0 && posixly_correct == 0)
+#endif
     {
       /* We don't execute .bashrc for login shells. */
       no_rc++;
@@ -955,7 +957,7 @@ run_startup_files ()
 	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
 #  else
 	  maybe_execute_file (SYS_BASHRC, 1);
-#  endif`
+#  endif
 #endif
           maybe_execute_file (bashrc_file, 1);
 	}
@@ -1256,6 +1258,11 @@ open_shell_script (script_name)
       lseek (fd, 0L, 0);
     }
 
+  /* Open the script.  But try to move the file descriptor to a randomly
+     large one, in the hopes that any descriptors used by the script will
+     not match with ours. */
+  fd = move_to_high_fd (fd, 0, -1);
+
 #if defined (BUFFERED_INPUT)
   default_buffered_input = fd;
 #  if 0
@@ -1268,11 +1275,6 @@ open_shell_script (script_name)
 #  endif
   SET_CLOSE_ON_EXEC (default_buffered_input);
 #else /* !BUFFERED_INPUT */
-  /* Open the script.  But try to move the file descriptor to a randomly
-     large one, in the hopes that any descriptors used by the script will
-     not match with ours. */
-  fd = move_to_high_fd (fd, 0, -1);
-
   default_input = fdopen (fd, "r");
 
   if (default_input == 0)
@@ -1454,8 +1456,8 @@ shell_initialize ()
   /* Line buffer output for stderr and stdout. */
   if (shell_initialized == 0)
     {
-      setlinebuf (stderr);
-      setlinebuf (stdout);
+      sh_setlinebuf (stderr);
+      sh_setlinebuf (stdout);
     }
 
   /* Sort the array of shell builtins so that the binary search in

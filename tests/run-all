@@ -13,12 +13,14 @@ export THIS_SH
 
 ${THIS_SH} ./version
 
+rm -f /tmp/xx
+
 echo Any output from any test, unless otherwise noted, indicates a possible anomaly
 
 for x in run-*
 do
 	case $x in
-	$0|run-minimal)	;;
+	$0|run-minimal|run-gprof)	;;
 	*.orig|*~) ;;
 	*)	echo $x ; sh $x ;;
 	esac

@@ -26,3 +26,95 @@ f1 ()
     echo $status;
     return $status
 }
+before: try to assign to FUNCNAME
+outside: FUNCNAME =
+before: FUNCNAME = func
+FUNCNAME = func2
+after: FUNCNAME = func
+outside2: FUNCNAME =
+function
+zf is a function
+zf () 
+{ 
+    echo this is zf
+}
+f is a function
+f () 
+{ 
+    echo f-x;
+    echo f-y
+} 1>&2
+subshell
+f is a function
+f () 
+{ 
+    echo f-x;
+    echo f-y
+} 1>&2
+f2 is a function
+f2 () 
+{ 
+    echo f2-a;
+    function f3 () 
+    { 
+        echo f3-a;
+        echo f3-b
+    } 1>&2;
+    f3
+}
+subshell
+f2 is a function
+f2 () 
+{ 
+    echo f2-a;
+    function f3 () 
+    { 
+        echo f3-a;
+        echo f3-b
+    } 1>&2;
+    f3
+}
+f4 is a function
+f4 () 
+{ 
+    echo f4-a;
+    function f5 () 
+    { 
+        echo f5-a;
+        echo f5-b
+    } 1>&2;
+    f5
+} 2>&1
+subshell
+f4 is a function
+f4 () 
+{ 
+    echo f4-a;
+    function f5 () 
+    { 
+        echo f5-a;
+        echo f5-b
+    } 1>&2;
+    f5
+} 2>&1
+testgrp is a function
+testgrp () 
+{ 
+    echo testgrp-a;
+    { 
+        echo tg-x;
+        echo tg-y
+    } 1>&2;
+    echo testgrp-b
+}
+subshell
+testgrp is a function
+testgrp () 
+{ 
+    echo testgrp-a;
+    { 
+        echo tg-x;
+        echo tg-y
+    } 1>&2;
+    echo testgrp-b
+}

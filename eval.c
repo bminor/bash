@@ -1,24 +1,22 @@
-/* eval.c -- reading and evaluating commands.
+/* eval.c -- reading and evaluating commands. */
 
-   Copyright (C) 1996 Free Software Foundation, Inc.
+/* Copyright (C) 1996 Free Software Foundation, Inc.
 
-   This file is part of GNU Bash.
+   This file is part of GNU Bash, the Bourne Again SHell.
+
+   Bash is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY.  No author or distributor accepts responsibility to
-   anyone for the consequences of using it or for whether it serves
-   any particular purpose or works at all, unless he says so in
-   writing.  Refer to the GNU Emacs General Public License for full
-   details.
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-   Everyone is granted permission to copy, modify and redistribute
-   Bash, but only under the conditions described in the GNU General
-   Public License.  A copy of this license is supposed to have been
-   given to you along with GNU Emacs so you can know your rights and
-   responsibilities.  It should be in a file named COPYING.
-
-   Among other things, the copyright notice and this notice must be
-   preserved on all copies. */
+   You should have received a copy of the GNU General Public License
+   along with Bash; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -49,11 +47,11 @@ extern int yyparse ();
 
 extern int EOF_reached;
 extern int indirection_level, interactive, interactive_shell;
+extern int posixly_correct;
 extern int subshell_environment, running_under_emacs;
 extern int last_command_exit_value, stdin_redir;
 extern int need_here_doc;
 extern int current_command_number, current_command_line_count, line_number;
-extern char *ps1_prompt, **prompt_string_pointer;
 extern int expand_aliases;
 
 /* Read and execute commands until EOF is reached.  This assumes that
@@ -89,6 +87,8 @@ reader_loop ()
 	    case FORCE_EOF:
 	    case EXITPROG:
 	      current_command = (COMMAND *)NULL;
+	      if (exit_immediately_on_error)
+		variable_context = 0;	/* not in a function */
 	      EOF_Reached = EOF;
 	      goto exec_done;
 
@@ -228,7 +228,7 @@ read_command ()
   int tmout_len, result;
   SigHandler *old_alrm;
 
-  prompt_string_pointer = &ps1_prompt;
+  set_current_prompt_level (1);
   global_command = (COMMAND *)NULL;
 
   /* Only do timeouts if interactive. */
@@ -263,57 +263,4 @@ read_command ()
     }
 
   return (result);
-}
-
-/* Take a string and run it through the shell parser, returning the
-   resultant word list.  Used by compound array assignment. */
-WORD_LIST *
-parse_string_to_word_list (s, whom)
-     char *s, *whom;
-{
-  WORD_LIST *wl;
-  COMMAND *saved_global;
-#if defined (HISTORY)
-  int old_remember_on_history, old_history_expansion_inhibited;
-#endif
-
-#if defined (HISTORY)
-  old_remember_on_history = remember_on_history;
-#  if defined (BANG_HISTORY)
-  old_history_expansion_inhibited = history_expansion_inhibited;
-#  endif
-  bash_history_disable ();
-#endif
-
-  push_stream (1);
-
-  saved_global = global_command;
-  global_command = (COMMAND *)0;
-
-  with_input_from_string (s, whom);
-  if (parse_command () != 0 || global_command == 0 || global_command->type != cm_simple)
-    {
-      if (global_command)
-	dispose_command (global_command);
-      wl = (WORD_LIST *)NULL;
-    }
-  else
-    {
-      wl = global_command->value.Simple->words;
-      free (global_command->value.Simple);
-      free (global_command);
-    }
-
-  global_command = saved_global;
-
-  pop_stream ();
-
-#if defined (HISTORY)
-  remember_on_history = old_remember_on_history;
-#  if defined (BANG_HISTORY)
-  history_expansion_inhibited = old_history_expansion_inhibited;
-#  endif /* BANG_HISTORY */
-#endif /* HISTORY */
-
-  return (wl);
 }

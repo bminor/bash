@@ -16,8 +16,8 @@ Library General Public License for more details.
 
 You should have received a copy of the GNU Library General Public
 License along with this library; see the file COPYING.LIB.  If
-ot, write to the Free Software Foundation, Inc., 59 Temple Place -
-Suite 330, Boston, MA 02111-1307, USA.
+ot, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
    The author may be reached (Email) at the address mike@ai.mit.edu,
    or (US mail) as Mike Haertel c/o Free Software Foundation.  */
@@ -141,7 +141,7 @@ struct mstats
 struct hdr
   {
     size_t size;		/* Exact size requested by user.  */
-    u_int32_t magic;		/* Magic number to check header integrity.  */
+    u_bits32_t magic;		/* Magic number to check header integrity.  */
   };
 #endif /* RCHECK */
 

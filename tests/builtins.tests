@@ -183,7 +183,7 @@ echo "$@"
 echo "$@"
 
 # test out cd and $CDPATH
-${THIS_SH} ./builtins.sub1
+${THIS_SH} ./builtins1.sub
 
 # test behavior of `.' when given a non-existant file argument
 ${THIS_SH} ./source5.sub
@@ -252,6 +252,9 @@ kill -l 4096
 
 # kill -l NAME should return the signal number
 kill -l ${sigone/SIG/}
+
+# test behavior of shopt xpg_echo
+${THIS_SH} ./builtins2.sub
 
 # this must be last -- it is a fatal error
 exit status

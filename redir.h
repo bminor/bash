@@ -1,4 +1,4 @@
-/* findcmd.h - functions from findcmd.c. */
+/* redir.h - functions from redir.c. */
 
 /* Copyright (C) 1997 Free Software Foundation, Inc.
 
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_REDIR_H_)
 #define _REDIR_H_

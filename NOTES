@@ -26,6 +26,10 @@ Platform-Specific Configuration and Operation Notes
 
 	BSD/OS 2.1, 3.x if you want to use loadable builtins
 
+	Motorola m68k machines running System V.3.  There is a file descriptor
+	leak caused by using the bash malloc because closedir(3) needs to read
+	freed memory to find the file descriptor to close
+
 	If you are using GNU libc, especially on a linux system
 
 (Configuring --without-gnu-malloc will still result in lib/malloc/libmalloc.a
@@ -202,9 +206,13 @@ being built and linked against, but there is only a stub file in the archive.)
 10. If you do not have /usr/ccs/bin in your PATH when building on SunOS 5.x
     (Solaris 2), the configure script will be unable to find `ar' and
     `ranlib' (of course, ranlib is unnecessary).  Make sure your $PATH
-    includes /usr/ccs/bin on SunOS 5.x.
+    includes /usr/ccs/bin on SunOS 5.x.  This generally manifests itself
+    with libraries not being built and make reporting errors like
+    `cr: not found' when library construction is attempted.
 
-11. Building a statically-linked bash on Solaris 2.5.x or 2.6 is complicated.
+11. Building a statically-linked bash on Solaris 2.5.x, 2.6, or 7 is
+    complicated.
+
     It's not possible to build a completely statically-linked binary, since
     part of the C library depends on dynamic linking.  The following recipe
     assumes that you're using gcc and the Solaris ld (/usr/ccs/bin/ld).

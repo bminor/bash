@@ -56,7 +56,7 @@ getenv (name)
     {
       FREE (last_tempenv_value);
 
-      last_tempenv_value = savestring (value_cell (var));
+      last_tempenv_value = value_cell (var) ? savestring (value_cell (var)) : (char *)NULL;
       dispose_variable (var);
       return (last_tempenv_value);
     }

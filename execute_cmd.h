@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_EXECUTE_CMD_H_)
 #define _EXECUTE_CMD_H_
@@ -32,6 +32,8 @@ extern int execute_command_internal __P((COMMAND *, int, int, int, struct fd_bit
 extern int shell_execve __P((char *, char **, char **));
 extern void setup_async_signals __P((void));
 extern void dispose_exec_redirects __P ((void));
+
+extern int execute_shell_function __P((SHELL_VAR *, WORD_LIST *));
 
 #if defined (PROCESS_SUBSTITUTION)
 extern void close_all_files __P((void));

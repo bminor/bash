@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "config.h"
 
 #if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
@@ -64,6 +64,7 @@ static void add_exec_redirect ();
 static int add_undo_redirect ();
 static int do_redirection_internal ();
 static int expandable_redirection_filename ();
+static int stdin_redirection ();
 
 /* Spare redirector used when translating [N]>&WORD or [N]<&WORD to a new
    redirection and when creating the redirection undo list. */
@@ -79,14 +80,18 @@ redirection_error (temp, error)
      int error;
 {
   char *filename;
+  int oflags;
 
   if (expandable_redirection_filename (temp))
     {
-      if (posixly_correct && !interactive_shell)
-        disallow_filename_globbing++;
+      if (posixly_correct && interactive_shell == 0)
+	{
+	  oflags = temp->redirectee.filename->flags;
+	  temp->redirectee.filename->flags |= W_NOGLOB;
+	}
       filename = redirection_expand (temp->redirectee.filename);
-      if (posixly_correct && !interactive_shell)
-        disallow_filename_globbing--;
+      if (posixly_correct && interactive_shell == 0)
+        temp->redirectee.filename->flags = oflags;
       if (filename == 0)
 	filename = savestring (temp->redirectee.filename->word);
       if (filename == 0)
@@ -195,8 +200,13 @@ redirection_expand (word)
 {
   char *result;
   WORD_LIST *tlist1, *tlist2;
+  WORD_DESC *w;
 
-  tlist1 = make_word_list (copy_word (word), (WORD_LIST *)NULL);
+  w = copy_word (word);
+  if (posixly_correct)
+    w->flags |= W_NOSPLIT;
+
+  tlist1 = make_word_list (w, (WORD_LIST *)NULL);
   tlist2 = expand_words_no_vars (tlist1);
   dispose_words (tlist1);
 
@@ -293,7 +303,7 @@ here_document_to_fd (redirectee)
      WORD_DESC *redirectee;
 {
   char filename[24];
-  int r, fd;
+  int r, fd, fd2;
   static int fnum = 0;
 
   do
@@ -315,44 +325,122 @@ here_document_to_fd (redirectee)
   if (redirectee->word)
     r = write_here_document (fd, redirectee);
 
-  close (fd);
   if (r)
     {
+      close (fd);
       unlink (filename);
       errno = r;
       return (-1);
     }
 
-  /* XXX - this is raceable */
+  /* In an attempt to avoid races, we close the first fd only after opening
+     the second. */
   /* Make the document really temporary.  Also make it the input. */
-  fd = open (filename, O_RDONLY, 0600);
+  fd2 = open (filename, O_RDONLY, 0600);
 
-  if (fd < 0)
+  if (fd2 < 0)
     {
       r = errno;
       unlink (filename);
+      close (fd);
       errno = r;
       return -1;
     }
 
+  close (fd);
   if (unlink (filename) < 0)
     {
       r = errno;
-      close (fd);
+      close (fd2);
       errno = r;
       return (-1);
     }
 
-  return (fd);
+  return (fd2);
 }
 
+#define RF_DEVFD	1
+#define RF_DEVSTDERR	2
+#define RF_DEVSTDIN	3
+#define RF_DEVSTDOUT	4
+#define RF_DEVTCP	5
+#define RF_DEVUDP	6
+
+/* A list of pattern/value pairs for filenames that the redirection
+   code handles specially. */
+static STRING_INT_ALIST _redir_special_filenames[] = {
+#if !defined (HAVE_DEV_FD)
+  { "/dev/fd/[0-9]*", RF_DEVFD },
+#endif
+#if !defined (HAVE_DEV_STDIN)
+  { "/dev/stderr", RF_DEVSTDERR },
+  { "/dev/stdin", RF_DEVSTDIN },
+  { "/dev/stdout", RF_DEVSTDOUT },
+#endif
+#if defined (NETWORK_REDIRECTIONS)
+  { "/dev/tcp/*/*", RF_DEVTCP },
+  { "/dev/udp/*/*", RF_DEVUDP },
+#endif
+  { (char *)NULL, -1 }
+};
+
+static int
+redir_special_open (spec, filename, flags, mode, ri)
+     int spec;
+     char *filename;
+     int flags, mode;
+     enum r_instruction ri;
+{
+  int fd;
+  long lfd;
+
+  fd = -1;
+  switch (spec)
+    {
+#if !defined (HAVE_DEV_FD)
+    case RF_DEVFD:
+      if (legal_number, filename+8, &lfd)
+	fd = fcntl ((int)lfd, F_DUPFD, 10);
+      else
+	fd = AMBIGUOUS_REDIRECT;
+      break;
+#endif
+
+#if !defined (HAVE_DEV_STDIN)
+    case RF_DEVSTDIN:
+      fd = fcntl (0, F_DUPFD, 10);
+      break;
+    case RF_DEVSTDOUT:
+      fd = fcntl (1, F_DUPFD, 10);
+      break;
+    case RF_DEVSTDERR:
+      fd = fcntl (2, F_DUPFD, 10);
+      break;
+#endif
+
+#if defined (NETWORK_REDIRECTIONS)
+    case RF_DEVTCP:
+    case RF_DEVUDP:
+#if defined (HAVE_NETWORK)
+      fd = netopen (filename);
+#else
+      internal_warning ("/dev/(tcp|udp)/host/port not supported without networking");
+      fd = open (filename, flags, mode);
+#endif
+      break;
+#endif /* NETWORK_REDIRECTIONS */
+    }
+
+  return fd;
+}
+      
 /* Open FILENAME with FLAGS in noclobber mode, hopefully avoiding most
    race conditions and avoiding the problem where the file is replaced
    between the stat(2) and open(2). */
 static int
-noclobber_open (filename, flags, ri)
+noclobber_open (filename, flags, mode, ri)
      char *filename;
-     int flags;
+     int flags, mode;
      enum r_instruction ri;
 {
   int r, fd;
@@ -372,10 +460,10 @@ noclobber_open (filename, flags, ri)
   flags &= ~O_TRUNC;
   if (r != 0)
     {
-      fd = open (filename, flags|O_EXCL, 0666);
+      fd = open (filename, flags|O_EXCL, mode);
       return ((fd < 0 && errno == EEXIST) ? NOCLOBBER_REDIRECT : fd);
     }
-  fd = open (filename, flags, 0666);
+  fd = open (filename, flags, mode);
 
   /* If the open failed, return the file descriptor right away. */
   if (fd < 0)
@@ -401,6 +489,38 @@ noclobber_open (filename, flags, ri)
   return (NOCLOBBER_REDIRECT);
 }
 
+static int
+redir_open (filename, flags, mode, ri)
+     char *filename;
+     int flags, mode;
+     enum r_instruction ri;
+{
+  int fd, r;
+
+  r = find_string_in_alist (filename, _redir_special_filenames, 1);
+  if (r >= 0)
+    return (redir_special_open (r, filename, flags, mode, ri));
+
+  /* If we are in noclobber mode, you are not allowed to overwrite
+     existing files.  Check before opening. */
+  if (noclobber && OUTPUT_REDIRECT (ri))
+    {
+      fd = noclobber_open (filename, flags, mode, ri);
+      if (fd == NOCLOBBER_REDIRECT)
+	return (NOCLOBBER_REDIRECT);
+    }
+  else
+    {
+      fd = open (filename, flags, mode);
+#if defined (AFS)
+      if ((fd < 0) && (errno == EACCES))
+	fd = open (filename, flags & ~O_CREAT, mode);
+#endif /* AFS */
+    }
+
+  return fd;
+}
+
 /* Do the specific redirection requested.  Returns errno or one of the
    special redirection errors (*_REDIRECT) in case of error, 0 on success.
    If FOR_REAL is zero, then just do whatever is neccessary to produce the
@@ -413,7 +533,7 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
      int for_real, remembering, set_clexec;
 {
   WORD_DESC *redirectee;
-  int redir_fd, fd, redirector, r;
+  int redir_fd, fd, redirector, r, oflags;
   char *redirectee_word;
   enum r_instruction ri;
   REDIRECT *new_redirect;
@@ -506,11 +626,14 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
     case r_err_and_out:		/* command &>filename */
     case r_input_output:
     case r_output_force:
-      if (posixly_correct && !interactive_shell)
-	disallow_filename_globbing++;
+      if (posixly_correct && interactive_shell == 0)
+        {
+          oflags = redirectee->flags;
+          redirectee->flags |= W_NOGLOB;
+        }
       redirectee_word = redirection_expand (redirectee);
-      if (posixly_correct && !interactive_shell)
-	disallow_filename_globbing--;
+      if (posixly_correct && interactive_shell == 0)
+	redirectee->flags = oflags;
 
       if (redirectee_word == 0)
 	return (AMBIGUOUS_REDIRECT);
@@ -523,26 +646,11 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	}
 #endif /* RESTRICTED_SHELL */
 
-      /* If we are in noclobber mode, you are not allowed to overwrite
-	 existing files.  Check before opening. */
-      if (noclobber && OUTPUT_REDIRECT (ri))
-	{
-	  fd = noclobber_open (redirectee_word, redirect->flags, ri);
-	  if (fd == NOCLOBBER_REDIRECT)
-	    {
-	      free (redirectee_word);
-	      return (NOCLOBBER_REDIRECT);
-	    }
-	}
-      else
-	{
-	  fd = open (redirectee_word, redirect->flags, 0666);
-#if defined (AFS)
-	  if ((fd < 0) && (errno == EACCES))
-	    fd = open (redirectee_word, redirect->flags & ~O_CREAT, 0666);
-#endif /* AFS */
-	}
+      fd = redir_open (redirectee_word, redirect->flags, 0666, ri);
       free (redirectee_word);
+
+      if (fd == NOCLOBBER_REDIRECT)
+        return (fd);
 
       if (fd < 0)
 	return (errno);
@@ -650,10 +758,11 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 		SET_CLOSE_ON_EXEC (redirector);
 	    }
 
+	  if (fd != redirector)
 #if defined (BUFFERED_INPUT)
-	  close_buffered_fd (fd);
+	    close_buffered_fd (fd);
 #else
-	  close (fd);
+	    close (fd);
 #endif
 	}
       break;
@@ -672,6 +781,7 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
+
 	  /* This is correct.  2>&1 means dup2 (1, 2); */
 	  if (dup2 (redir_fd, redirector) < 0)
 	    return (errno);
@@ -791,6 +901,36 @@ add_exec_redirect (dummy_redirect)
   exec_redirection_undo_list = dummy_redirect;
 }
 
+/* Return 1 if the redirection specified by RI and REDIRECTOR alters the
+   standard input. */
+static int
+stdin_redirection (ri, redirector)
+     enum r_instruction ri;
+     int redirector;
+{
+  switch (ri)
+    {
+    case r_input_direction:
+    case r_inputa_direction:
+    case r_input_output:
+    case r_reading_until:
+    case r_deblank_reading_until:
+      return (1);
+    case r_duplicating_input:
+    case r_duplicating_input_word:
+    case r_close_this:
+      return (redirector == 0);
+    case r_output_direction:
+    case r_appending_to:
+    case r_duplicating_output:
+    case r_err_and_out:
+    case r_output_force:
+    case r_duplicating_output_word:
+      return (0);
+    }
+  return (0);
+}
+
 /* Return non-zero if any of the redirections in REDIRS alter the standard
    input. */
 int
@@ -801,28 +941,6 @@ stdin_redirects (redirs)
   int n;
 
   for (n = 0, rp = redirs; rp; rp = rp->next)
-    switch (rp->instruction)
-      {
-      case r_input_direction:
-      case r_inputa_direction:
-      case r_input_output:
-      case r_reading_until:
-      case r_deblank_reading_until:
-	n++;
-        break;
-      case r_duplicating_input:
-      case r_duplicating_input_word:
-      case r_close_this:
-	n += (rp->redirector == 0);
-        break;
-      case r_output_direction:
-      case r_appending_to:
-      case r_duplicating_output:
-      case r_err_and_out:
-      case r_output_force:
-      case r_duplicating_output_word:
-	break;
-      }
-
+    n += stdin_redirection (rp->instruction, rp->redirector);
   return n;
 }

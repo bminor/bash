@@ -453,6 +453,10 @@ recho + "$@"
 expect '<+>'
 recho +"$@"
 
+# variants of nested curly braces inside ${...} expressions
+
+# IFS is not the standard one
+
 expect '<G { I>' '<K>' '<}>'
 recho ${gik:-G { I } K }
 
@@ -460,3 +464,21 @@ abc=hi
 
 expect '<hi>' '<K>' '<}>'
 recho ${abc:-G { I } K }
+
+# reset IFS to the default
+IFS=' 	
+'
+
+# nested ${...} inside ${...} are handled specially
+unset XXX FOO BAR
+expect '<xxx>' '<yyy>'
+XXX=xxx
+FOO=${BAR:-${XXX} yyy}
+recho $FOO
+
+# this was a bug in versions of bash prior to bash-2.04-release
+set -- ''
+expect 1
+echo $#
+expect '<>'
+recho "${@:-}"

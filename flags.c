@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 /* Flags hacking. */
 #include "config.h"
@@ -35,6 +35,9 @@ extern int set_job_control ();
 #if defined (RESTRICTED_SHELL)
 extern char *shell_name;
 #endif
+
+/* -c, -s invocation options -- not really flags, but they show up in $- */
+extern int want_pending_command, read_from_stdin;
 
 /* **************************************************************** */
 /*								    */
@@ -219,13 +222,13 @@ change_flag (flag, on_or_off)
 {
   int *value, old_value;
 
-  value = find_flag (flag);
-
 #if defined (RESTRICTED_SHELL)
   /* Don't allow "set +r" in a shell which is `restricted'. */
   if (restricted && flag == 'r' && on_or_off == FLAG_OFF)
     return (FLAG_ERROR);
 #endif /* RESTRICTED_SHELL */
+
+  value = find_flag (flag);
 
   if ((value == (int *)FLAG_UNKNOWN) || (on_or_off != FLAG_ON && on_or_off != FLAG_OFF))
     return (FLAG_ERROR);
@@ -275,10 +278,15 @@ which_set_flags ()
   char *temp;
   int i, string_index;
 
-  temp = xmalloc (1 + NUM_SHELL_FLAGS);
+  temp = xmalloc (1 + NUM_SHELL_FLAGS + read_from_stdin + want_pending_command);
   for (i = string_index = 0; shell_flags[i].name; i++)
     if (*(shell_flags[i].value))
       temp[string_index++] = shell_flags[i].name;
+
+  if (want_pending_command)
+    temp[string_index++] = 'c';
+  if (read_from_stdin)
+    temp[string_index++] = 's';
 
   temp[string_index] = '\0';
   return (temp);

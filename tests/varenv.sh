@@ -125,11 +125,11 @@ export A
 # Make sure expansion doesn't use assignment statements preceding a builtin
 A=ZVAR echo $A
 
-PATH=/bin:/usr/bin:/usr/local/bin:.
+XPATH=/bin:/usr/bin:/usr/local/bin:.
 func2()
 {
 	local z=yy
-	local -a avar=( ${PATH//: } )
+	local -a avar=( ${XPATH//: } )
 	echo ${avar[@]}
 	local
 }
@@ -184,3 +184,13 @@ echo ${SHELLOPTS}
 
 # and make sure it is readonly
 readonly -p | grep SHELLOPTS
+
+# This was an error in bash versions prior to bash-2.04.  The `set -a'
+# should cause the assignment statement that's an argument to typeset
+# to create an exported variable
+unset FOOFOO
+FOOFOO=bar
+set -a
+typeset FOOFOO=abcde
+
+printenv FOOFOO

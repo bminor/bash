@@ -220,3 +220,50 @@ echo $(( 2**(16-1)))
 echo $(( 2**16*2 ))
 echo $(( 2**31-1))
 echo $(( 2**0 ))
+
+# {pre,post}-{inc,dec}rement and associated errors
+
+x=4
+
+echo $x
+echo $(( x++ ))
+echo $x
+echo $(( x-- ))
+echo $x
+
+echo $(( --x ))
+echo $x
+
+echo $(( ++x ))
+echo $x
+
+echo $(( ++7 ))
+echo $(( 7-- ))
+
+echo $(( --x=7 ))
+echo $(( ++x=7 ))
+
+echo $(( x++=7 ))
+echo $(( x--=7 ))
+
+echo $x
+
+echo $(( +7 ))
+echo $(( -7 ))
+
+echo $(( ++7 ))
+echo $(( --7 ))
+
+x=4
+y=7
+
+(( x=8 , y=12 ))
+
+echo $x $y
+
+# should be an error
+(( x=9 y=41 ))
+
+# These are errors
+echo $((a b))
+((a b))

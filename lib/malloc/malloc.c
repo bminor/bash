@@ -4,7 +4,7 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 1, or (at your option)
+    the Free Software Foundation; either version 2, or (at your option)
     any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 In other words, you are welcome to use, share and improve this program.
 You are forbidden to forbid anyone else to use, share and improve
@@ -107,6 +107,15 @@ what you give them.   Help stamp out software-hoarding!  */
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 
+/* Generic pointer type. */
+#ifndef PTR_T
+#  if defined (__STDC__)
+#    define PTR_T void *
+#  else
+#    define PTR_T char *
+#  endif
+#endif
+
 #if !defined (NULL)
 #  define NULL 0
 #endif
@@ -139,9 +148,10 @@ extern char *sbrk ();
  * (whether by morecore() or for alignment); TSBRK is the total number of
  * bytes requested from the kernel with sbrk().  BYTESUSED is the total
  * number of bytes consumed by blocks currently in use; BYTESFREE is the
- * total number of bytes currently on all of the free lists.  NBSPLIT is
+ * total number of bytes currently on all of the free lists.  TBSPLIT is
  * the number of times a larger block was split to satisfy a smaller request.
- * NBCOALESCE is the number of times two adjacent smaller blocks off the free
+ * NSPLIT[i] is the number of times a block of size I was split.
+ * TBCOALESCE is the number of times two adjacent smaller blocks off the free
  * list were combined to satisfy a larger request.
  */
 struct _malstats {
@@ -154,11 +164,12 @@ struct _malstats {
   int nrcopy;
   int nrecurse;
   int nsbrk;
-  int32_t tsbrk;
-  int32_t bytesused;
-  int32_t bytesfree;
-  int nbsplit;
-  int nbcoalesce;
+  bits32_t tsbrk;
+  bits32_t bytesused;
+  bits32_t bytesfree;
+  int tbsplit;
+  int nsplit[NBUCKETS];
+  int tbcoalesce;
 };
 
 static struct _malstats _mstats;
@@ -167,13 +178,16 @@ static struct _malstats _mstats;
    NFREE is the number of free blocks for this allocation size.  NUSED
    is the number of blocks in use.  NMAL is the number of requests for
    blocks of size BLOCKSIZE.  NMORECORE is the number of times we had
-   to call MORECORE to repopulate the free list for this bucket. */
+   to call MORECORE to repopulate the free list for this bucket.  NSPLIT
+   is the number of times a block of this size was split to satisfy a
+   smaller request. */
 struct bucket_stats {
-  u_int32_t blocksize;
+  u_bits32_t blocksize;
   int nfree;
   int nused;
   int nmal;
   int nmorecore;
+  int nsplit;
 };
 #endif /* MALLOC_STATS */
 
@@ -189,8 +203,8 @@ union mhead {
     char     mi_alloc;	/* ISALLOC or ISFREE */		/* 1 */
     char     mi_index;	/* index in nextf[] */		/* 1 */
     /* Remainder are valid only when block is allocated */
-    u_int32_t mi_nbytes;  /* # of bytes allocated */	/* 4 */
-    unsigned short mi_magic2;/* should be == MAGIC2 */	/* 2 */
+    u_bits32_t mi_nbytes;  /* # of bytes allocated */	/* 4 */
+    u_bits16_t mi_magic2;/* should be == MAGIC2 */	/* 2 */
   } minfo;
 };
 #define mh_alloc	minfo.mi_alloc
@@ -243,8 +257,8 @@ botch (s)
 /* Minimum and maximum bucket indices for block splitting (and to bound
    the search for a block to split). */
 #define SPLIT_MIN	3
-#define SPLIT_MID	9
-#define SPLIT_MAX	12
+#define SPLIT_MID	11	/* XXX - was 9 */
+#define SPLIT_MAX	14	/* XXX - was 12 */
 
 /* Minimum and maximum bucket indices for block coalescing. */
 #define COMBINE_MIN	6
@@ -262,6 +276,7 @@ static char busy[NBUCKETS];
 
 static int pagesz;	/* system page size. */
 static int pagebucket;	/* bucket for requests a page in size */
+static int maxbuck;	/* highest bucket receiving allocation request. */
 
 #if 0
 /* Coalesce two adjacent free blocks off the free list for size NU - 1,
@@ -305,7 +320,7 @@ bcoalesce (nu)
     return;	/* not adjacent */
 
 #ifdef MALLOC_STATS
-  _mstats.nbcoalesce++;
+  _mstats.tbcoalesce++;
 #endif
 
   /* Since they are adjacent, remove them from the free list */
@@ -328,12 +343,14 @@ bsplit (nu)
      register int nu;
 {
   register union mhead *mp;
-  int nbuck, nblks;
+  int nbuck, nblks, split_max;
   unsigned long siz;
+
+  split_max = (maxbuck > SPLIT_MAX) ? maxbuck : SPLIT_MAX;
 
   if (nu >= SPLIT_MID)
     {
-      for (nbuck = SPLIT_MAX; nbuck > nu; nbuck--)
+      for (nbuck = split_max; nbuck > nu; nbuck--)
 	{
 	  if (busy[nbuck] || nextf[nbuck] == 0)
 	    continue;
@@ -342,7 +359,7 @@ bsplit (nu)
     }
   else
     {
-      for (nbuck = nu + 1; nbuck <= SPLIT_MAX; nbuck++)
+      for (nbuck = nu + 1; nbuck <= split_max; nbuck++)
 	{
 	  if (busy[nbuck] || nextf[nbuck] == 0)
 	    continue;
@@ -350,14 +367,15 @@ bsplit (nu)
 	}
     }
 
-  if (nbuck > SPLIT_MAX || nbuck <= nu)
+  if (nbuck > split_max || nbuck <= nu)
     return;
 
   /* XXX might want to split only if nextf[nbuck] has >= 2 blocks free
      and nbuck is below some threshold. */
 
 #ifdef MALLOC_STATS
-  _mstats.nbsplit++;
+  _mstats.tbsplit++;
+  _mstats.nsplit[nbuck]++;
 #endif
 
   /* Figure out how many blocks we'll get. */
@@ -406,7 +424,7 @@ morecore (nu)			/* ask system for more memory */
   siz = 1 << (nu + 3);	/* size of desired block for nextf[nu] */
 
   if (siz < 0)
-    return;		/* oops */
+    goto morecore_done;		/* oops */
 
 #ifdef MALLOC_STATS
   _mstats.nmorecore[nu]++;
@@ -414,7 +432,11 @@ morecore (nu)			/* ask system for more memory */
 
   /* Try to split a larger block here, if we're within the range of sizes
      to split. */
+#if 0
   if (nu >= SPLIT_MIN && nu < SPLIT_MAX)
+#else
+  if (nu >= SPLIT_MIN)
+#endif
     {
       bsplit (nu);
       if (nextf[nu] != 0)
@@ -463,7 +485,7 @@ morecore (nu)			/* ask system for more memory */
 
   /* Totally out of memory. */
   if ((long)mp == -1)
-    return;
+    goto morecore_done;
 
   /* shouldn't happen, but just in case -- require 8-byte alignment */
   if ((long)mp & 7)
@@ -515,10 +537,10 @@ zmemset (s, c, n)
 static void
 malloc_debug_dummy ()
 {
-  ;
+  write (1, "malloc_debug_dummy\n", 19);
 }
 
-char *
+PTR_T
 malloc (n)		/* get a block */
      size_t n;
 {
@@ -578,7 +600,7 @@ malloc (n)		/* get a block */
     }
   else
     {
-      register u_int32_t amt;
+      register u_bits32_t amt;
 
       nunits = pagebucket;
       amt = pagesz;
@@ -598,6 +620,9 @@ malloc (n)		/* get a block */
 #endif
   while (busy[nunits]) nunits++;
   busy[nunits] = 1;
+
+  if (nunits > maxbuck)
+    maxbuck = nunits;
 
   /* If there are no blocks of the appropriate size, go get some */
   if (nextf[nunits] == 0)
@@ -636,18 +661,18 @@ malloc (n)		/* get a block */
   _mstats.tmalloc[nunits]++;
   _mstats.nmal++;
 #endif /* MALLOC_STATS */
-  return (char *) (p + 1);
+  return (char *) (p + 1);	/* XXX - should be cast to PTR_T? */
 }
 
 void
 free (mem)
-     char *mem;
+     PTR_T mem;
 {
   register union mhead *p;
   register char *ap;
   register int nunits;
 
-  if ((ap = mem) == 0)
+  if ((ap = (char *)mem) == 0)
     return;
 
   p = (union mhead *) ap - 1;
@@ -680,6 +705,11 @@ free (mem)
   ASSERT (nunits < NBUCKETS);
   p->mh_alloc = ISFREE;
 
+#if 0
+  if (busy[nunits] == 1)
+    botch ("calling free %d while in malloc for %d", nunits, nunits);    
+#endif
+
   /* Protect against signal handlers calling malloc.  */
   busy[nunits] = 1;
   /* Put this block on the free list.  */
@@ -693,13 +723,13 @@ free (mem)
 #endif /* MALLOC_STATS */
 }
 
-char *
+PTR_T
 realloc (mem, n)
-     char *mem;
+     PTR_T mem;
      register size_t n;
 {
   register union mhead *p;
-  register u_int32_t tocopy;
+  register u_bits32_t tocopy;
   register unsigned int nbytes;
   register int nunits;
   register char *m;
@@ -720,7 +750,7 @@ realloc (mem, n)
   ASSERT (p->mh_alloc == ISALLOC);
   ASSERT (p->mh_magic2 == MAGIC2);
 
-  m = mem + (tocopy = p->mh_nbytes);
+  m = (char *)mem + (tocopy = p->mh_nbytes);
   ASSERT (*m++ == MAGIC1); ASSERT (*m++ == MAGIC1);
   ASSERT (*m++ == MAGIC1); ASSERT (*m   == MAGIC1);
 
@@ -730,10 +760,10 @@ realloc (mem, n)
   /* If ok, use the same block, just marking its size as changed.  */
   if (nbytes > (4 << nunits) && nbytes <= (8 << nunits))
     {
-      m = mem + tocopy;
+      m = (char *)mem + tocopy;
       *m++ = 0;  *m++ = 0;  *m++ = 0;  *m++ = 0;
       p->mh_nbytes = n;
-      m = mem + n;
+      m = (char *)mem + n;
       *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;
       return mem;
     }
@@ -752,7 +782,7 @@ realloc (mem, n)
   return m;
 }
 
-char *
+PTR_T
 memalign (alignment, size)
      unsigned int alignment;
      size_t size;
@@ -782,11 +812,7 @@ memalign (alignment, size)
 #if !defined (HPUX)
 /* This runs into trouble with getpagesize on HPUX, and Multimax machines.
    Patching out seems cleaner than the ugly fix needed.  */
-#if defined (__STDC__)
-void *
-#else
-char *
-#endif
+PTR_T
 valloc (size)
      size_t size;
 {
@@ -795,7 +821,7 @@ valloc (size)
 #endif /* !HPUX */
 
 #ifndef NO_CALLOC
-char *
+PTR_T
 calloc (n, s)
      size_t n, s;
 {
@@ -811,7 +837,7 @@ calloc (n, s)
 
 void
 cfree (p)
-     char *p;
+     PTR_T p;
 {
   free (p);
 }
@@ -831,7 +857,7 @@ malloc_bucket_stats (size)
   if (size < 0 || size >= NBUCKETS)
     {
       v.blocksize = 0;
-      v.nused = v.nmal = 0;
+      v.nused = v.nmal = v.nmorecore = v.nsplit = 0;
       return v;
     }
 
@@ -839,6 +865,7 @@ malloc_bucket_stats (size)
   v.nused = _mstats.nmalloc[size];
   v.nmal = _mstats.tmalloc[size];
   v.nmorecore = _mstats.nmorecore[size];
+  v.nsplit = _mstats.nsplit[size];
 
   for (p = nextf[size]; p; p = CHAIN (p))
     v.nfree++;
@@ -868,29 +895,60 @@ malloc_stats ()
   return (result);
 }
 
-void
-print_malloc_stats (s)
+static void
+_print_malloc_stats (s, fp)
      char *s;
+     FILE *fp;
 {
   register int i;
   int totused, totfree;
   struct bucket_stats v;
 
-  fprintf (stderr, "Memory allocation statistics: %s\n\tsize\tfree\tin use\ttotal\tmorecore\n", s ? s : "");
+  fprintf (fp, "Memory allocation statistics: %s\n\tsize\tfree\tin use\ttotal\tmorecore\tsplit\n", s ? s : "");
   for (i = totused = totfree = 0; i < NBUCKETS; i++)
     {
       v = malloc_bucket_stats (i);
-      fprintf (stderr, "%12lu\t%4d\t%6d\t%5d\t%8d\n", v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore);
+      fprintf (fp, "%12lu\t%4d\t%6d\t%5d\t%8d\t%5d\n", v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore, v.nsplit);
       totfree += v.nfree * v.blocksize;
       totused += v.nused * v.blocksize;
     }
-  fprintf (stderr, "\nTotal bytes in use: %d, total bytes free: %d\n",
+  fprintf (fp, "\nTotal bytes in use: %d, total bytes free: %d\n",
 	   totused, totfree);
-  fprintf (stderr, "Total mallocs: %d, total frees: %d, total reallocs: %d (%d copies)\n",
+  fprintf (fp, "Total mallocs: %d, total frees: %d, total reallocs: %d (%d copies)\n",
 	   _mstats.nmal, _mstats.nfre, _mstats.nrealloc, _mstats.nrcopy);
-  fprintf (stderr, "Total sbrks: %d, total bytes via sbrk: %d\n",
+  fprintf (fp, "Total sbrks: %d, total bytes via sbrk: %d\n",
   	   _mstats.nsbrk, _mstats.tsbrk);
-  fprintf (stderr, "Total blocks split: %d, total block coalesces: %d\n",
-  	   _mstats.nbsplit, _mstats.nbcoalesce);
+  fprintf (fp, "Total blocks split: %d, total block coalesces: %d\n",
+  	   _mstats.tbsplit, _mstats.tbcoalesce);
+}
+
+void
+print_malloc_stats (s)
+{
+  _print_malloc_stats (s, stderr);
+}
+
+#define TRACEROOT "/var/tmp/maltrace/trace."
+extern char *inttostr ();
+
+void
+trace_malloc_stats (s)
+{
+  char ibuf[32], *ip;
+  char fname[64];
+  int p;
+  FILE *fp;
+
+  p = (int)getpid();
+  ip = inttostr(p, ibuf, sizeof(ibuf));
+  strcpy (fname, TRACEROOT);
+  strcat (fname, ip);
+  fp = fopen(fname, "w");
+  if (fp)
+    {
+      _print_malloc_stats (s, fp);
+      fflush(fp);
+      fclose(fp);
+    }
 }
 #endif /* MALLOC_STATS */

@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.0, for Bash version 2.03.
+This is the Bash FAQ, version 3.7, for Bash version 2.04.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -14,6 +14,8 @@ chet@po.cwru.edu.
 This document is available for anonymous FTP with the URL
 
 ftp://ftp.cwru.edu/pub/bash/FAQ
+
+The Bash home page is http://cnswww.cns.cwru.edu/~chet/bash/bashtop.html
 
 ----------
 Contents:
@@ -34,8 +36,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 2.03?
-B2) Are there any user-visible incompatibilities between bash-2.03 and
+B1) What's new in version 2.04?
+B2) Are there any user-visible incompatibilities between bash-2.04 and
     bash-1.14.7?
 
 Section C:  Differences from other Unix shells
@@ -56,26 +58,18 @@ D5) How can I pipe standard output and standard error from one command to
 D6) Now that I've converted from ksh to bash, are there equivalents to
     ksh features like autoloaded functions and the `whence' command?
 
-Section E:  How can I get bash to do certain things, and why does bash do
-            things the way it does?
+Section E:  Why does bash do certain things the way it does?
 
 E1) Why is the bash builtin `test' slightly different from /bin/test?
 E2) Why does bash sometimes say `Broken pipe'?
-E3) How can I get bash to read and display eight-bit characters?
-E4) How do I write a function `x' to replace builtin command `x', but
-    still invoke the command from within the function?
-E5) When I have terminal escape sequences in my prompt, why does bash
+E3) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
-E6) How can I find the value of a shell variable whose name is the value
-    of another shell variable?
-E7) If I pipe the output of a command into `read variable', why doesn't
+E4) If I pipe the output of a command into `read variable', why doesn't
     the output show up in $variable when the read command finishes?
-E8) I have a bunch of shell scripts that use backslash-escaped characters
+E5) I have a bunch of shell scripts that use backslash-escaped characters
     in arguments to `echo'.  Bash doesn't interpret these characters.  Why
     not, and how can I make it understand them?
-E9) Why doesn't a while or for loop get suspended when I type ^Z?
-E10) How can I make the bash `time' reserved word print timing output that
-     looks like the output from my system's /usr/bin/time?
+E6) Why doesn't a while or for loop get suspended when I type ^Z?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -87,15 +81,31 @@ F3) Why does bash dump core after I interrupt username completion or
 F4) I'm running SVR4.2.  Why is the line erased every time I type `@'?
 F5) Why does bash report syntax errors when my C News scripts use a
     redirection before a subshell command?
+F6) Why can't I use vi-mode editing on Red Hat Linux 6.1?
 
-Section G:  Where do I go from here?
+Section G:  How can I get bash to do certain common things?
 
-G1) How do I report bugs in bash, and where should I look for fixes and
+G1) How can I get bash to read and display eight-bit characters?
+G2) How do I write a function `x' to replace builtin command `x', but
+    still invoke the command from within the function?
+G3) How can I find the value of a shell variable whose name is the value
+    of another shell variable?
+G4) How can I make the bash `time' reserved word print timing output that
+    looks like the output from my system's /usr/bin/time?
+G5) How do I get the current directory into my prompt?
+G6) How can I rename "*.foo" to "*.bar"?
+G7) How can I translate a filename from uppercase to lowercase?
+G8) How can I write a filename expansion (globbing) pattern that will match
+    all files in the current directory except "." and ".."?
+
+Section H:  Where do I go from here?
+
+H1) How do I report bugs in bash, and where should I look for fixes and
     advice?
-G2) What kind of bash documentation is there?
-G3) What's coming in future versions?
-G4) What's on the bash `wish list'?
-G5) When will the next release appear?
+H2) What kind of bash documentation is there?
+H3) What's coming in future versions?
+H4) What's on the bash `wish list'?
+H5) When will the next release appear?
 
 ----------
 Section A:  The Basics
@@ -120,22 +130,22 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 2.03, first made available on Friday, 19 Feburary 1999.
+The latest version is 2.04, first made available on Friday, 17 March 2000.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 2.03:
+The following URLs tell how to get version 2.04:
 
-ftp://ftp.gnu.org/pub/gnu/bash-2.03.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-2.03.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-2.04.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-2.04.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash-doc-2.03.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-2.03.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.04.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-2.04.tar.gz
 
 A4)  On what machines will bash run?
 
@@ -150,25 +160,25 @@ More information appears in the file `INSTALL' in the distribution.
 A5) Will bash run on operating systems other than Unix?
 
 Configuration specifics for Unix-like systems such as QNX and
-LynxOS are included in the distribution.  Bash-2.03 should 
+LynxOS are included in the distribution.  Bash-2.04 should 
 compile and run on Minix 2.0 (patches were contributed), but I
 don't believe anyone has built bash-2.x on earlier Minix versions
 yet.
 
 Bash has been ported to versions of Windows implementing the Win32
 programming interface.  This includes Windows 95 and Windows NT.
-The port was done by Cygnus Solutions as part of their GNU-Win32
+The port was done by Cygnus Solutions as part of their CYGWIN
 project.  For more information about the project, look at the URL
 
-http://www.cygnus.com/misc/gnu-win32
+http:/sourceware.cygnus.com/cygwin
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
-early GNU-Win32 releases.  Cygnus has also done a port of bash-2.01 to the
-GNU-Win32 environment, and it is available as part of their current
-release.  (They may have upgraded by now.)
+early GNU-Win32 (the original name) releases.  Cygnus has also done a
+port of bash-2.02.1 to the CYGWIN environment, and it is available as
+part of their current release.  (They may have upgraded by now.)
 
-Bash-2.03 should require no local Cygnus changes to build and run under
-GNU-WIN32.
+Bash-2.04 should require no local Cygnus changes to build and run under
+CYGWIN.
 
 The Cygnus port works only on Intel machines.  There is a port of bash
 (I don't know which version) to the alpha/NT environment available from
@@ -185,7 +195,7 @@ but Interix users should fetch
 ftp://ftp.interix.com/pub/tw/unsup/bash.diffs.tar.gz
 
 and read the README.OpenNT file in that archive.  It will detail the
-arguments configure needs to build on Interix.  A configure cache
+arguments `configure' needs to build on Interix.  A configure cache
 file for Interix is in the bash distribution in cross-build/opennt.cache;
 copy that to `config.cache' before starting configure.
 
@@ -203,6 +213,15 @@ The corresponding source is
 
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147s.zip
 
+Mark Elbrecht <snowball3@bigfoot.com> has sent me notice that bash-2.03
+has become available for DJGPP V2.  The files are available as:
+
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203b.zip	binary
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203d.zip	documentation
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203s.zip	source
+
+Mark has begun to work with bash-2.04.
+
 Ports of bash-1.12 and bash-2.0 are available for OS/2 from
 
 ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash_112.zip
@@ -210,6 +229,10 @@ ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash-2.0(253).zip
 
 I haven't looked at either, but the second appears to be a binary-only
 distribution.  Beware.
+
+I have received word that Bash (I'm not sure which version, but I
+believe that it's at least bash-2.02.1) is the standard shell on
+BeOS.
 
 A6) How can I build bash with gcc? 
 
@@ -261,6 +284,33 @@ Next, add a line similar to the above to ~/.profile:
 This will cause login shells to replace themselves with bash running as
 a login shell.  Once you have this working, you can copy your initialization
 code from ~/.profile to ~/.bash_profile.
+
+I have received word that the recipe supplied above is insufficient for
+machines running CDE.  CDE has a maze of twisty little startup files, all
+slightly different.
+
+If you cannot change your login shell in the password file to bash, you
+will have to (apparently) live with CDE using the shell in the password
+file to run its startup scripts.  If you have changed your shell to bash,
+there is code in the CDE startup files (on Solaris, at least) to do the
+right thing. 
+
+`dtterm' claims to use $SHELL as the default program to start, so if you
+can change $SHELL in the CDE startup files, you should be able to use bash
+in your terminal windows.
+
+Setting DTSOURCEPROFILE in ~/.dtprofile will cause the `Xsession' program
+to read your login shell's startup files.  You may be able to use bash for
+the rest of the CDE programs by setting SHELL to bash in ~/.dtprofile as
+well, but I have not tried this.
+
+You can use the above `exec' recipe to start bash when not logging in with
+CDE by testing the value of the DT variable:
+
+	if [ -n "$DT" ]; then
+	        [ -f /usr/gnu/bin/bash ] && exec /usr/gnu/bin/bash --login
+	fi
+
 
 A8) I just changed my login shell to bash, and now I can't FTP into my
    machine.  Why not?
@@ -324,16 +374,59 @@ Reference Manual.
 
 Section B:  The latest version
 
-B1) What's new in version 2.03?
+B1) What's new in version 2.04?
 
-Bash-2.03 has a very few new features, in keeping with the convention
+Bash-2.04 contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-2.04
+distribution):
+
+o Programmable word completion with the new `complete' and `compgen' builtins;
+  examples are provided in examples/complete/complete-examples
+o `history' has a new `-d' option to delete a history entry
+o `bind' has a new `-x' option to bind key sequences to shell commands
+o The prompt expansion code has new `\j' and `\l' escape sequences
+o The `no_empty_command_completion' shell option, if enabled, inhibits
+  command completion when TAB is typed on an empty line
+o `help' has a new `-s' option to print a usage synopsis
+o New arithmetic operators: var++, var--, ++var, --var, expr1,expr2 (comma)
+o New ksh93-style arithmetic for command:
+	for ((expr1 ; expr2; expr3 )); do list; done
+o `read' has new options: `-t', `-n', `-d', `-s'
+o The redirection code handles several filenames specially:  /dev/fd/N,
+  /dev/stdin, /dev/stdout, /dev/stderr
+o The redirection code now recognizes /dev/tcp/HOST/PORT and
+  /dev/udp/HOST/PORT and tries to open a TCP or UDP socket, respectively,
+  to the specified port on the specified host
+o The ${!prefix*} expansion has been implemented
+o A new FUNCNAME variable, which expands to the name of a currently-executing
+  function
+o The GROUPS variable is no longer readonly
+o A new shopt `xpg_echo' variable, to control the behavior of echo with
+  respect to backslash-escape sequences at runtime
+o The NON_INTERACTIVE_LOGIN_SHELLS #define has returned
+
+The version of Readline released with Bash-2.04, Readline-4.1, has several
+new features as well:
+
+o Parentheses matching is always compiled into readline, and controllable
+  with the new `blink-matching-paren' variable
+o The history-search-forward and history-search-backward functions now leave
+  point at the end of the line when the search string is empty, like
+  reverse-search-history, and forward-search-history
+o A new function for applications:  rl_on_new_line_with_prompt()
+o New variables for applications:  rl_already_prompted, and rl_gnu_readline_p
+
+
+A short feature history dating from bash-2.0:
+
+Bash-2.03 had very few new features, in keeping with the convention
 that odd-numbered releases provide mainly bug fixes.  A number of new
 features were added to Readline, mostly at the request of the Cygnus
 folks.
 
-a new shopt option, `restricted_shell', so that startup files can test
+A new shopt option, `restricted_shell', so that startup files can test
 	whether or not the shell was started in restricted mode
-filename generation is now performed on the words between ( and ) in
+Filename generation is now performed on the words between ( and ) in
 	compound array assignments (this is really a bug fix)
 OLDPWD is now auto-exported, as POSIX.2 requires
 ENV and BASH_ENV are read-only variables in a restricted shell
@@ -342,7 +435,7 @@ Bash may now be linked against an already-installed Readline library,
 All shells begun with the `--login' option will source the login shell
 	startup files, even if the shell is not interactive
 
-There are lots of changes to the version of the Readline library released
+There were lots of changes to the version of the Readline library released
 along with Bash-2.03.  For a complete list of the changes, read the file
 CHANGES in the Bash-2.03 distribution.
 
@@ -412,11 +505,11 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-2.03 and
+B2) Are there any user-visible incompatibilities between bash-2.04 and
     bash-1.14.7?
 
-There are a few incompatibilities between version 1.14.7 and version 2.03.
-They are detailed in the file COMPAT in the bash-2.03 distribution.
+There are a few incompatibilities between version 1.14.7 and version 2.04.
+They are detailed in the file COMPAT in the bash-2.04 distribution.
 
 Section C:  Differences from other Unix shells
 
@@ -431,13 +524,15 @@ Things bash has that sh does not:
 	`!' reserved word to invert pipeline return value
 	`time' reserved word to time pipelines and shell builtins
 	the `function' reserved word
-	the select compound command and reserved word
+	the `select' compound command and reserved word
+	arithmetic for command: for ((expr1 ; expr2; expr3 )); do list; done
 	new $'...' and $"..." quoting
 	the $(...) form of command substitution
 	the $(<filename) form of command substitution, equivalent to
 		$(cat filename)
 	the ${#param} parameter value length operator
 	the ${!param} indirect parameter expansion operator
+	the ${!param*} prefix expansion operator
 	the ${param:length[:offset]} parameter substring operator
 	the ${param/pat[/string]} parameter pattern substitution operator
 	expansions to perform substring removal (${p%[%]w}, ${p#[#]w})
@@ -448,16 +543,18 @@ Things bash has that sh does not:
 		   ENV, PS3, PS4, DIRSTACK, PIPESTATUS, HISTSIZE, HISTFILE,
 		   HISTFILESIZE, HISTCONTROL, HISTIGNORE, GLOBIGNORE, GROUPS,
 		   PROMPT_COMMAND, FCEDIT, FIGNORE, IGNOREEOF, INPUTRC,
-		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, histchars, auto_resume
+		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, FUNCNAME, histchars,
+		   auto_resume
 	DEBUG trap
 	variable arrays with new compound assignment syntax
 	redirections: <>, &>, >|
 	prompt string special char translation and variable expansion
-	auto-export of modified values of variables in initial environment
+	auto-export of variables in initial environment
 	command search finds functions before builtins
 	bash return builtin will exit a file sourced with `.'
 	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -p.
-		  export -n/-f/-p/name=value, pwd -L/-P, read -e/-p/-a,
+		  export -n/-f/-p/name=value, pwd -L/-P,
+		  read -e/-p/-a/-t/-n/-d/-s,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
 		  unset -f/-v, ulimit -m/-p/-u,
@@ -473,12 +570,13 @@ Things bash has that sh does not:
 	process substitution
 	aliases and alias/unalias builtins
 	local variables in functions and `local' builtin
-	readline and command-line editing
+	readline and command-line editing with programmable completion
 	command history and history/fc builtins
 	csh-like history expansion
-	other new bash builtins: bind, command, builtin, declare/typeset,
-				 dirs, enable, fc, help, history, logout,
-				 popd, pushd, disown, shopt, printf
+	other new bash builtins: bind, command, compgen, complete, builtin,
+				 declare/typeset, dirs, enable, fc, help,
+				 history, logout, popd, pushd, disown, shopt,
+				 printf
 	exported functions
 	filename generation when using output redirection (command >a*)
 	POSIX.2-style globbing character classes
@@ -489,6 +587,8 @@ Things bash has that sh does not:
 	variable assignments preceding commands affect only that command,
 		even for builtins and functions
 	posix mode
+	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr,
+		/dev/tcp/host/port, /dev/udp/host/port
 
 Things sh has that bash does not:
 	uses variable SHACCT to do shell accounting
@@ -521,11 +621,13 @@ C2)  How does bash differ from the Korn shell, version ksh88?
 Things bash has or uses that ksh88 does not:
 	long invocation options
 	`!' reserved word
+	arithmetic for command: for ((expr1 ; expr2; expr3 )); do list; done
 	posix mode and posix conformance
 	command hashing
 	tilde expansion for assignment statements that look like $PATH
 	process substitution with named pipes if /dev/fd is not available
 	the ${!param} indirect parameter expansion operator
+	the ${!param*} prefix expansion operator
 	the ${param:length[:offset]} parameter substring operator
 	the ${param/pat[/string]} parameter pattern substitution operator
 	variables: BASH, BASH_VERSION, BASH_VERSINFO, UID, EUID, SHLVL,
@@ -533,18 +635,19 @@ Things bash has or uses that ksh88 does not:
 		   HISTFILESIZE, HISTIGNORE, HISTCONTROL, PROMPT_COMMAND,
 		   IGNOREEOF, FIGNORE, INPUTRC, HOSTFILE, DIRSTACK,
 		   PIPESTATUS, HOSTNAME, OPTERR, SHELLOPTS, GLOBIGNORE,
-		   GROUPS, histchars, auto_resume
+		   GROUPS, FUNCNAME, histchars, auto_resume
 	prompt expansion with backslash escapes and command substitution
 	redirection: &> (stdout and stderr)
-	more extensive and extensible editing and completion
+	more extensive and extensible editing and programmable completion
 	builtins: bind, builtin, command, declare, dirs, echo -e/-E, enable,
 		  exec -l/-c/-a, fc -s, export -n/-f/-p, hash, help, history,
 		  jobs -x/-r/-s, kill -s/-n/-l, local, logout, popd, pushd,
-		  read -e/-p/-a, readonly -a/-n/-f/-p, set -o braceexpand/
-		  -o histexpand/-o interactive-comments/-o notify/-o physical/
-		  -o posix/-o hashall/-o onecmd/-h/-B/-C/-b/-H/-P, set +o,
-		  suspend, trap -l, type, typeset -a/-F/-p, ulimit -u,
-		  umask -S, alias -p, shopt, disown, printf
+		  read -e/-p/-a/-t/-n/-d/-s, readonly -a/-n/-f/-p,
+		  set -o braceexpand/-o histexpand/-o interactive-comments/
+		  -o notify/-o physical/-o posix/-o hashall/-o onecmd/
+		  -h/-B/-C/-b/-H/-P, set +o, suspend, trap -l, type,
+		  typeset -a/-F/-p, ulimit -u, umask -S, alias -p, shopt,
+		  disown, printf, complete, compgen
 	`!' csh-style history expansion
 	POSIX.2-style globbing character classes
 	POSIX.2-style globbing equivalence classes
@@ -552,10 +655,11 @@ Things bash has or uses that ksh88 does not:
 	egrep-like extended pattern matching operators
 	case-insensitive pattern matching and globbing
 	`**' arithmetic operator to do exponentiation
+	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases
-	variables: ERRNO, FPATH, COLUMNS, LINES, EDITOR, VISUAL
+	variables: ERRNO, FPATH, EDITOR, VISUAL
 	co-processes (|&, >&p, <&p)
 	weirdly-scoped functions
 	typeset +f to list all function names without definitions
@@ -574,30 +678,29 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-2.03:
+New things in ksh-93 not in bash-2.04:
 	associative arrays
 	floating point arithmetic
-	++, --, comma arithmetic operators
 	math library functions
 	${!name[sub]} name of subscript for associative array
-	${!prefix*} and {!prefix@} variable name prefix expansions
 	`.' is allowed in variable names to create a hierarchical namespace
 	more extensive compound assignment syntax
 	discipline functions
 	`sleep' and `getconf' builtins (bash has loadable versions)
 	typeset -n and `nameref' variables
 	KEYBD trap
-	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, HISTEDIT,
-		   .sh.version, .sh.name, .sh.subscript, .sh.value
+	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, .sh.version,
+		   .sh.name, .sh.subscript, .sh.value, HISTEDIT
 	backreferences in pattern matching
-	print -f (bash has a loadable version of print and the printf builtin)
+	print -f (bash uses printf)
 	`fc' has been renamed to `hist'
-	read -t/-d
 	`.' can execute shell functions
 
-New things in ksh-93 present in bash-2.03:
-	?: arithmetic operator
-	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]}
+New things in ksh-93 present in bash-2.04:
+        for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
+        ?:, ++, --, `expr1 , expr2' arithmetic operators
+	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]},
+		    ${!param*}
 	compound array assignment
 	the `!' reserved word
 	loadable builtins -- but ksh uses `builtin' while bash uses `enable'
@@ -607,6 +710,7 @@ New things in ksh-93 present in bash-2.03:
 	set -o notify/-C
 	changes to kill builtin
 	read -A (bash uses read -a)
+        read -t/-d
 	trap -p
 	exec -c/-a
 	`.' restores the positional parameters when it completes
@@ -638,7 +742,7 @@ the following function definition to your .bashrc:
 
 	which()
 	{
-		builtin type -p "$@"
+		builtin type "$@"
 	}
 
 If you're moving from tcsh and would like to bring `where' along
@@ -771,8 +875,8 @@ descriptor 2.
 D6) Now that I've converted from ksh to bash, are there equivalents to
     ksh features like autoloaded functions and the `whence' command?
 
-There are features in ksh-88 that do not have direct bash equivalents.
-Most, however, can be emulated with very little trouble.
+There are features in ksh-88 and ksh-93 that do not have direct bash
+equivalents.  Most, however, can be emulated with very little trouble.
 
 ksh-88 feature		Bash equivalent
 --------------		---------------
@@ -783,6 +887,14 @@ typeset +f		declare -F
 cd, print, whence	function substitutes in examples/functions/kshenv
 autoloaded functions	examples/functions/autoload is the same as typeset -fu
 read var?prompt		read -p prompt var
+
+ksh-93 feature		Bash equivalent
+--------------		---------------
+sleep, getconf		Bash has loadable versions in examples/loadables
+${.sh.version}		$BASH_VERSION
+print -f		printf
+hist			alias fc=hist
+$HISTEDIT		$FCEDIT
 
 Section E:  How can I get bash to do certain things, and why does bash do
 	    things the way it does?
@@ -835,62 +947,7 @@ You can build a version of bash that will not report SIGPIPE errors
 by uncommenting the definition of DONT_REPORT_SIGPIPE in the file
 config-top.h.
 
-E3) How can I get bash to read and display eight-bit characters?
-
-This is a process requiring several steps.
-
-First, you must ensure that the `physical' data path is a full eight
-bits.  For xterms, for example, the `vt100' resources `eightBitInput'
-and `eightBitOutput' should be set to `true'.
-
-Once you have set up an eight-bit path, you must tell the kernel and
-tty driver to leave the eighth bit of characters alone when processing
-keyboard input.  Use `stty' to do this:
-
-	stty cs8 -istrip -parenb
-
-For old BSD-style systems, you can use
-
-	stty pass8
-
-You may also need
-
-	stty even odd
-
-Finally, you need to tell readline that you will be inputting and
-displaying eight-bit characters.  You use readline variables to do
-this.  These variables can be set in your .inputrc or using the bash
-`bind' builtin.  Here's an example using `bind':
-
-	bash$ bind 'set convert-meta off'
-	bash$ bind 'set meta-flag on'
-	bash$ bind 'set output-meta on'
-
-The `set' commands between the single quotes may also be placed
-in ~/.inputrc.
-
-E4) How do I write a function `x' to replace builtin command `x', but
-    still invoke the command from within the function?
-
-This is why the `command' and `builtin' builtins exist.  The
-`command' builtin executes the command supplied as its first
-argument, skipping over any function defined with that name.  The
-`builtin' builtin executes the builtin command given as its first
-argument directly. 
-
-For example, to write a function to replace `cd' that writes the
-hostname and current directory to an xterm title bar, use
-something like the following:
-
-	cd()
-	{
-		builtin cd "$@" && xtitle "$HOST: $PWD"
-	}
-
-This could also be written using `command' instead of `builtin';
-the version above is marginally more efficient. 
-
-E5) When I have terminal escape sequences in my prompt, why does bash
+E3) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
 
 Readline, the line editing library that bash uses, does not know
@@ -906,38 +963,7 @@ characters in the prompt strings take up no screen space.
 Use the \[ escape to begin a sequence of non-printing characters,
 and the \] escape to signal the end of such a sequence. 
 
-E6) How can I find the value of a shell variable whose name is the value
-    of another shell variable?
-
-Versions of Bash newer than Bash-2.0 support this directly.  You can use 
-
-	${!var}
-
-For example, the following sequence of commands will echo `z':
-
-	var1=var2
-	var2=z
-	echo ${!var1}
-
-For sh compatibility, use the `eval' builtin.  The important
-thing to remember is that `eval' expands the arguments you give
-it again, so you need to quote the parts of the arguments that
-you want `eval' to act on. 
-
-For example, this expression prints the value of the last positional
-parameter:
-
-	eval echo \"\$\{$#\}\"
-
-The expansion of the quoted portions of this expression will be
-deferred until `eval' runs, while the `$#' will be expanded
-before `eval' is executed.  In versions of bash later than bash-2.0,
-
-	echo ${!#}
-
-does the same thing.
-
-E7) If I pipe the output of a command into `read variable', why doesn't
+E4) If I pipe the output of a command into `read variable', why doesn't
     the output show up in $variable when the read command finishes?
 
 This has to do with the parent-child relationship between Unix
@@ -993,13 +1019,13 @@ this.
 This is the general approach -- in most cases you will not need to
 set $IFS to a different value.
 
-E8) I have a bunch of shell scripts that use backslash-escaped characters
+E5) I have a bunch of shell scripts that use backslash-escaped characters
     in arguments to `echo'.  Bash doesn't interpret these characters.  Why
     not, and how can I make it understand them?
 
 This is the behavior of echo on most Unix System V machines.
 
-The bash builtin `echo' is modelled after the 9th Edition
+The bash builtin `echo' is modeled after the 9th Edition
 Research Unix version of `echo'.  It does not interpret
 backslash-escaped characters in its argument strings by default;
 it requires the use of the -e option to enable the
@@ -1013,7 +1039,11 @@ configure with the --enable-usg-echo-default option to turn this
 on.  Be aware that this will cause some of the tests run when you
 type `make tests' to fail.
 
-E9) Why doesn't a while or for loop get suspended when I type ^Z?
+There is a shell option, `xpg_echo', settable with `shopt' that will
+change the behavior of echo at runtime.  Enabling this option turns
+on expansion of backslash-escape sequences.
+
+E6) Why doesn't a while or for loop get suspended when I type ^Z?
 
 This is a consequence of how job control works on Unix.  The only
 thing that can be suspended is the process group.  This is a single
@@ -1027,38 +1057,6 @@ suspended when you type ^Z.
 If you want to be able to stop the entire loop, you need to put it
 within parentheses, which will force the loop into a subshell that
 may be stopped (and subsequently restarted) as a single unit.
-
-E10) How can I make the bash `time' reserved word print timing output that
-     looks like the output from my system's /usr/bin/time?
-
-The bash command timing code looks for a variable `TIMEFORMAT' and
-uses its value as a format string to decide how to display the
-timing statistics.
-
-The value of TIMEFORMAT is a string with `%' escapes expanded in a
-fashion similar in spirit to printf(3).  The manual page explains
-the meanings of the escape sequences in the format string.
-
-If TIMEFORMAT is not set, bash acts as if the following assignment had
-been performed:
-
-	TIMEFORMAT=$'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS'
-
-The POSIX.2 default time format (used by `time -p command') is
-
-	TIMEFORMAT=$'real %2R\nuser %2U\nsys %2S'
-
-The BSD /usr/bin/time format can be emulated with:
-
-	TIMEFORMAT=$'\t%1R real\t%1U user\t%1S sys'
-
-The System V /usr/bin/time format can be emulated with:
-
-	TIMEFORMAT=$'\nreal\t%1R\nuser\t%1U\nsys\t%1S'
-
-The ksh format can be emulated with:
-
-	TIMEFORMAT=$'\nreal\t%2lR\nuser\t%2lU\nsys\t%2lS'
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -1156,16 +1154,211 @@ is, in fact, a syntax error.  Redirections may only precede `simple
 commands'.  A subshell construct such as the above is one of the shell's
 `compound commands'.  A redirection may only follow a compound command.
 
-The file CWRU/sh-redir-hack in the bash-2.03 distribution is an
+This affects the mechanical transformation of commands that use `cat'
+to pipe a file into a command (a favorite Useless-Use-Of-Cat topic on
+comp.unix.shell).  While most commands of the form
+
+	cat file | command
+
+can be converted to `< file command', shell control structures such as
+loops and subshells require `command < file'.
+
+The file CWRU/sh-redir-hack in the bash-2.04 distribution is an
 (unofficial) patch to parse.y that will modify the grammar to
 support this construct.  It will not apply with `patch'; you must
 modify parse.y by hand.  Note that if you apply this, you must
 recompile with -DREDIRECTION_HACK.  This introduces a large
 number of reduce/reduce conflicts into the shell grammar. 
 
-Section G:  Where do I go from here?
+F6) Why can't I use vi-mode editing on Red Hat Linux 6.1?
 
-G1) How do I report bugs in bash, and where should I look for fixes and
+The short answer is that Red Hat screwed up.
+
+The long answer is that they shipped an /etc/inputrc that only works
+for emacs mode editing, and then screwed all the vi users by setting
+INPUTRC to /etc/inputrc in /etc/profile.
+
+The short fix is to do one of the following: remove or rename
+/etc/inputrc, set INPUTRC=~/.inputrc in ~/.bashrc (or .bash_profile,
+but make sure you export it if you do), remove the assignment to
+INPUTRC from /etc/profile, add
+
+        set keymap emacs
+
+to the beginning of /etc/inputrc, or bracket the key bindings in
+/etc/inputrc with these lines
+
+	$if mode=emacs
+		[...]
+	$endif
+
+Section G:  How can I get bash to do certain common things?
+
+G1) How can I get bash to read and display eight-bit characters?
+
+This is a process requiring several steps.
+
+First, you must ensure that the `physical' data path is a full eight
+bits.  For xterms, for example, the `vt100' resources `eightBitInput'
+and `eightBitOutput' should be set to `true'.
+
+Once you have set up an eight-bit path, you must tell the kernel and
+tty driver to leave the eighth bit of characters alone when processing
+keyboard input.  Use `stty' to do this:
+
+	stty cs8 -istrip -parenb
+
+For old BSD-style systems, you can use
+
+	stty pass8
+
+You may also need
+
+	stty even odd
+
+Finally, you need to tell readline that you will be inputting and
+displaying eight-bit characters.  You use readline variables to do
+this.  These variables can be set in your .inputrc or using the bash
+`bind' builtin.  Here's an example using `bind':
+
+	bash$ bind 'set convert-meta off'
+	bash$ bind 'set meta-flag on'
+	bash$ bind 'set output-meta on'
+
+The `set' commands between the single quotes may also be placed
+in ~/.inputrc.
+
+G2) How do I write a function `x' to replace builtin command `x', but
+    still invoke the command from within the function?
+
+This is why the `command' and `builtin' builtins exist.  The
+`command' builtin executes the command supplied as its first
+argument, skipping over any function defined with that name.  The
+`builtin' builtin executes the builtin command given as its first
+argument directly. 
+
+For example, to write a function to replace `cd' that writes the
+hostname and current directory to an xterm title bar, use
+something like the following:
+
+	cd()
+	{
+		builtin cd "$@" && xtitle "$HOST: $PWD"
+	}
+
+This could also be written using `command' instead of `builtin';
+the version above is marginally more efficient. 
+
+G3) How can I find the value of a shell variable whose name is the value
+    of another shell variable?
+
+Versions of Bash newer than Bash-2.0 support this directly.  You can use 
+
+	${!var}
+
+For example, the following sequence of commands will echo `z':
+
+	var1=var2
+	var2=z
+	echo ${!var1}
+
+For sh compatibility, use the `eval' builtin.  The important
+thing to remember is that `eval' expands the arguments you give
+it again, so you need to quote the parts of the arguments that
+you want `eval' to act on. 
+
+For example, this expression prints the value of the last positional
+parameter:
+
+	eval echo \"\$\{$#\}\"
+
+The expansion of the quoted portions of this expression will be
+deferred until `eval' runs, while the `$#' will be expanded
+before `eval' is executed.  In versions of bash later than bash-2.0,
+
+	echo ${!#}
+
+does the same thing.
+
+G4) How can I make the bash `time' reserved word print timing output that
+     looks like the output from my system's /usr/bin/time?
+
+The bash command timing code looks for a variable `TIMEFORMAT' and
+uses its value as a format string to decide how to display the
+timing statistics.
+
+The value of TIMEFORMAT is a string with `%' escapes expanded in a
+fashion similar in spirit to printf(3).  The manual page explains
+the meanings of the escape sequences in the format string.
+
+If TIMEFORMAT is not set, bash acts as if the following assignment had
+been performed:
+
+	TIMEFORMAT=$'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS'
+
+The POSIX.2 default time format (used by `time -p command') is
+
+	TIMEFORMAT=$'real %2R\nuser %2U\nsys %2S'
+
+The BSD /usr/bin/time format can be emulated with:
+
+	TIMEFORMAT=$'\t%1R real\t%1U user\t%1S sys'
+
+The System V /usr/bin/time format can be emulated with:
+
+	TIMEFORMAT=$'\nreal\t%1R\nuser\t%1U\nsys\t%1S'
+
+The ksh format can be emulated with:
+
+	TIMEFORMAT=$'\nreal\t%2lR\nuser\t%2lU\nsys\t%2lS'
+
+G5) How do I get the current directory into my prompt?
+
+Bash provides a number of backslash-escape sequences which are expanded
+when the prompt string (PS1 or PS2) is displayed.  The full list is in
+the manual page.
+
+The \w expansion gives the full pathname of the current directory, with
+a tilde (`~') substituted for the current value of $HOME.  The \W
+expansion gives the basename of the current directory.  To put the full
+pathname of the current directory into the path without any tilde
+subsitution, use $PWD.  Here are some examples:
+
+	PS1='\w$ '	# current directory with tilde
+	PS1='\W$ '	# basename of current directory
+	PS1='$PWD$ '	# full pathname of current directory
+
+The single quotes are important in the final example to prevent $PWD from
+being expanded when the assignment to PS1 is performed.
+
+G6) How can I rename "*.foo" to "*.bar"?
+
+Use the pattern removal functionality described in D3.  The following `for'
+loop will do the trick:
+
+	for f in *.foo; do
+		mv $f ${f%foo}bar
+	done
+
+G7) How can I translate a filename from uppercase to lowercase?
+
+The script examples/functions/lowercase, originally written by John DuBois,
+will do the trick.  The converse is left as an exercise.
+
+G8) How can I write a filename expansion (globbing) pattern that will match
+    all files in the current directory except "." and ".."?
+
+You must have set the `extglob' shell option using `shopt -s extglob' to use
+this:
+
+	echo .!(.|) *
+
+A solution that works without extended globbing is given in the Unix Shell
+FAQ, posted periodically to comp.unix.shell.
+
+Section H:  Where do I go from here?
+
+H1) How do I report bugs in bash, and where should I look for fixes and
     advice?
 
 Use the `bashbug' script to report bugs.  It is built and
@@ -1183,7 +1376,7 @@ and problems also take place there.
 To reach the bash maintainers directly, send mail to
 bash-maintainers@gnu.org.
 
-G2) What kind of bash documentation is there?
+H2) What kind of bash documentation is there?
 
 First, look in the doc directory in the bash distribution.  It should
 contain at least the following files:
@@ -1213,36 +1406,33 @@ A second edition of this book is available, published in January, 1998.
 The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
 or on the web.
 
-G3) What's coming in future versions?
+H3) What's coming in future versions?
 
 These are features I plan to include in a future version of bash.
 
-a bash debugger (a minimally-tested version is included with bash-2.02)
-Programmable completion a la zsh/tcsh
+a bash debugger (a minimally-tested version is included with bash-2.04)
+associative arrays
 
-G4) What's on the bash `wish list' for future versions?
+H4) What's on the bash `wish list' for future versions?
 
 These are features that may or may not appear in a future version of bash.
 
-associative arrays (not really all that hard)
 breaking some of the shell functionality into embeddable libraries
+a module system like zsh's, using dynamic loading like builtins
 better internationalization using GNU `gettext'
 an option to use external files for the long `help' text
-timeouts for the `read' builtin
-the ksh-93 ${!prefix*} and ${!prefix@} operators
-arithmetic ++ and -- prefix and postfix operators
 date-stamped command history
-a way to bind readline editing key sequences to shell commands
-a mechanism to open network connections and assign them to file descriptors
-	using redirection (like ksh /dev/{tcp,udp})
+a bash programmer's guide with a chapter on creating loadable builtins
+a better loadable interface to perl with access to the shell builtins and
+	variables (contributions gratefully accepted)
 
-G5) When will the next release appear?
+H5) When will the next release appear?
 
-The next version will appear sometime in 1999.  Never make
+The next version will appear sometime in 2000 or 2001.  Never make
 predictions. 
 
 
-This document is Copyright 1995-1999 by Chester Ramey.
+This document is Copyright 1995-2000 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

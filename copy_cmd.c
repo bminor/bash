@@ -8,7 +8,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -18,7 +18,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -152,6 +152,24 @@ copy_for_command (com)
   return (new_for);
 }
 
+#if defined (ARITH_FOR_COMMAND)
+static ARITH_FOR_COM *
+copy_arith_for_command (com)
+     ARITH_FOR_COM *com;
+{
+  ARITH_FOR_COM *new_arith_for;
+
+  new_arith_for = (ARITH_FOR_COM *)xmalloc (sizeof (ARITH_FOR_COM));
+  new_arith_for->flags = com->flags;
+  new_arith_for->line = com->line;
+  new_arith_for->init = copy_word_list (com->init);
+  new_arith_for->test = copy_word_list (com->test);
+  new_arith_for->step = copy_word_list (com->step);
+  new_arith_for->action = copy_command (com->action);
+  return (new_arith_for);
+}
+#endif /* ARITH_FOR_COMMAND */
+
 static GROUP_COM *
 copy_group_command (com)
      GROUP_COM *com;
@@ -161,6 +179,18 @@ copy_group_command (com)
   new_group = (GROUP_COM *)xmalloc (sizeof (GROUP_COM));
   new_group->command = copy_command (com->command);
   return (new_group);
+}
+
+static SUBSHELL_COM *
+copy_subshell_command (com)
+     SUBSHELL_COM *com;
+{
+  SUBSHELL_COM *new_subshell;
+
+  new_subshell = (SUBSHELL_COM *)xmalloc (sizeof (SUBSHELL_COM));
+  new_subshell->command = copy_command (com->command);
+  new_subshell->flags = com->flags;
+  return (new_subshell);
 }
 
 static CASE_COM *
@@ -290,6 +320,12 @@ copy_command (command)
 	new_command->value.For = copy_for_command (command->value.For);
 	break;
 
+#if defined (ARITH_FOR_COMMAND)
+      case cm_arith_for:
+	new_command->value.ArithFor = copy_arith_for_command (command->value.ArithFor);
+	break;
+#endif
+
 #if defined (SELECT_COMMAND)
       case cm_select:
 	new_command->value.Select =
@@ -300,6 +336,10 @@ copy_command (command)
       case cm_group:
 	new_command->value.Group = copy_group_command (command->value.Group);
 	break;
+
+      case cm_subshell:
+        new_command->value.Subshell = copy_subshell_command (command->value.Subshell);
+        break;
 
       case cm_case:
 	new_command->value.Case = copy_case_command (command->value.Case);

@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 $PRODUCES type.c
 
@@ -44,7 +44,7 @@ $END
 #include <config.h>
 
 #include "../bashtypes.h"
-#include "../posixstat.h"
+#include "posixstat.h"
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -65,6 +65,8 @@ $END
 #include "bashgetopt.h"
 
 extern int find_reserved_word ();
+
+extern char *this_command_name;
 
 /* For each word in LIST, find out what the shell is going to do with
    it as a simple command. i.e., which file would this shell use to
@@ -210,8 +212,8 @@ describe_command (command, verbose, all)
      char *command;
      int verbose, all;
 {
-  int found, i, found_file;
-  char *full_path;
+  int found, i, found_file, f;
+  char *full_path, *x, *cwd;
   SHELL_VAR *func;
 #if defined (ALIAS)
   alias_t *alias;
@@ -232,7 +234,7 @@ describe_command (command, verbose, all)
 	printf ("%s is aliased to `%s'\n", command, alias->value);
       else if (verbose == 4)
 	{
-	  char *x = single_quote (alias->value);
+	  x = single_quote (alias->value);
 	  printf ("alias %s=%s\n", command, x);
 	  free (x);
 	}
@@ -313,7 +315,7 @@ describe_command (command, verbose, all)
      check to see if it is executable. */
   if (absolute_program (command))
     {
-      int f = file_status (command);
+      f = file_status (command);
       if (f & FS_EXECABLE)
         {
 	  if (verbose == 1)
@@ -360,6 +362,23 @@ describe_command (command, verbose, all)
 
       if (!full_path)
 	break;
+
+      /* If we found the command as itself by looking through $PATH, it
+	 probably doesn't exist.  Check whether or not the command is an
+	 executable file.  If it's not, don't report a match. */
+      if (STREQ (full_path, command))
+	{
+	  f = file_status (full_path);
+	  if ((f & FS_EXECABLE) == 0)
+	    {
+	      free (full_path);
+	      full_path = (char *)NULL;
+	      if (all == 0)
+		break;
+	    }
+	  else if (verbose >= 2)
+	    full_path = sh_makepath ((char *)NULL, full_path, MP_DOCWD);
+	}
 
       found_file++;
       found = 1;

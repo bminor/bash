@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 /* Make sure that this is included *after* config.h! */
 
@@ -60,7 +60,6 @@ extern void get_current_user_info __P((void));
 extern int reader_loop __P((void));
 extern int parse_command __P((void));
 extern int read_command __P((void));
-extern WORD_LIST *parse_string_to_word_list __P((char *, char *));
 
 /* Functions from braces.c. */
 #if defined (BRACE_EXPANSION)
@@ -68,8 +67,12 @@ extern char **brace_expand __P((char *));
 #endif
 
 /* Miscellaneous functions from parse.y */
-extern int yyparse ();
-extern void reset_parser ();
+extern int yyparse __P((void));
+extern void reset_parser __P((void));
+extern WORD_LIST *parse_string_to_word_list __P((char *, char *));
+
+extern int get_current_prompt_level __P((void));
+extern void set_current_prompt_level __P((int));
 
 /* Functions from version.c. */
 extern char *shell_version_string __P((void));
@@ -92,8 +95,9 @@ extern GENERIC_LIST *list_append ();
 extern GENERIC_LIST *delete_element ();
 
 /* Declarations for functions defined in stringlib.c */
-extern char *ansicstr __P((char *, int, int *, int *));
+extern char *ansicstr __P((char *, int, int, int *, int *));
 extern int find_name_in_array __P((char *, char **));
+extern char **alloc_array __P((int));
 extern int array_len __P((char **));
 extern void free_array_members __P((char **));
 extern void free_array __P((char **));
@@ -103,7 +107,10 @@ extern void sort_char_array __P((char **));
 extern char **word_list_to_argv __P((WORD_LIST *, int, int, int *));
 extern WORD_LIST *argv_to_word_list __P((char **, int, int));
 
+extern int find_string_in_alist __P((char *, STRING_INT_ALIST *, int));
+
 extern char *strsub __P((char *, char *, char *, int));
+extern char *strcreplace __P((char *, int, char *, int));
 extern void strip_leading __P((char *));
 extern void strip_trailing __P((char *, int, int));
 extern char *strindex __P((char *, char *));
@@ -160,5 +167,35 @@ extern long strtol __P((const char *, char **, int));
 #if !defined (HAVE_STRTOUL)
 extern unsigned long strtoul __P((const char *, char **, int));
 #endif
+
+/* declarations for functions defined in lib/sh/zread.c */
+extern int zread __P((int, char *, size_t));
+extern int zread1 __P((int, char *, size_t));
+extern int zreadc __P((int, char *));
+extern void zreset __P((void));
+extern void zsyncfd __P((int));
+
+/* declarations for functions defined in lib/sh/zwrite.c */
+extern int zwrite __P((int, unsigned char *, size_t));
+
+/* declarations for functions defined in lib/sh/netopen.c */
+extern int netopen __P((char *));
+
+/* declarations for functions defined in lib/sh/timeval.c.  No prototypes
+   so we don't have to count on having a definition of struct timeval in
+   scope when this file is included. */
+extern void timeval_to_secs ();
+extern void print_timeval ();
+
+/* declarations for functions defined in lib/sh/clock.c */
+extern void clock_t_to_secs ();
+extern void print_clock_t ();
+
+/* declarations for functions defined in lib/sh/makepath.c */
+#define MP_DOTILDE	0x01
+#define MP_DOCWD	0x02
+#define MP_RMDOT	0x04
+
+extern char *sh_makepath __P((char *, char *, int));
 
 #endif /* _EXTERNS_H_ */

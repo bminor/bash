@@ -3,7 +3,7 @@
 # psize.sh -- determine this system's pipe size, and write a define to
 #             pipesize.h so ulimit.c can use it.
 
-TMPDIR=/tmp
+: ${TMPDIR:=/tmp}
 TMPNAME=pipsize.$$
 TMPFILE=$TMPDIR/$TMPNAME
 

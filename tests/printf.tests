@@ -1,4 +1,5 @@
 LC_ALL=C
+LC_NUMERIC=C
 
 # these should output error messages -- the format is required
 printf
@@ -21,6 +22,11 @@ printf "no newline " ; printf "now newline\n"
 
 # %% -> %
 printf "%%\n"
+
+# this was a bug caused by pre-processing the string for backslash escapes
+# before doing the `%' format processing -- all versions before bash-2.04
+printf "\045" ; echo
+printf "\045d\n"
 
 # simple character output
 printf "%c\n" ABCD
@@ -82,6 +88,12 @@ printf -- "--%b--\n"
 # the stuff following the \c should be ignored, as well as the rest
 # of the format string
 printf -- "--%b--\n" '4.2\c5.4\n'; printf "\n"
+
+# unrecognized escape sequences should by displayed unchanged
+printf -- "--%b--\n" '4\.2'
+
+# a bare \ should not be processed as an escape sequence
+printf -- "--%b--\n" '\'
 
 # make sure extra arguments are ignored if the format string doesn't
 # actually use them
@@ -157,6 +169,23 @@ printf -- "--%6.4b--\n" abcdefghijklmnopqrstuvwxyz
 # and these two also
 printf -- "--%12.10s--\n" abcdefghijklmnopqrstuvwxyz
 printf -- "--%12.10b--\n" abcdefghijklmnopqrstuvwxyz
+
+# tests for translating \' to ' and \\ to \
+# printf translates \' to ' in the format string...
+printf "\'abcd\'\n"
+
+# but not when the %b format specification is used
+printf "%b\n" \\\'abcd\\\'
+
+# but both translate \\ to \
+printf '\\abcd\\\n'
+printf "%b\n" '\\abcd\\'
+
+# this was reported as a bug in bash-2.03
+# these three lines should all echo `26'
+printf "%d\n" 0x1a
+printf "%d\n" 032
+printf "%d\n" 26
 
 # error messages
 

@@ -16,8 +16,9 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
+#include "stdc.h"
 #include "hashlib.h"
 
 #define FILENAME_HASH_BUCKETS 107
@@ -34,8 +35,8 @@ typedef struct {
 
 #define pathdata(x) ((PATH_DATA *)(x)->data)
 
-extern void initialize_filename_hashing ();
-extern void flush_hashed_filenames ();
-extern void remove_hashed_filename ();
-extern void remember_filename ();
-extern char *find_hashed_filename ();
+extern void initialize_filename_hashing __P((void));
+extern void flush_hashed_filenames __P((void));
+extern void remove_hashed_filename __P((char *));
+extern void remember_filename __P((char *, char *, int, int));
+extern char *find_hashed_filename __P((char *));

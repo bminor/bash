@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_GENERAL_H_)
 #define _GENERAL_H_
@@ -133,7 +133,8 @@ typedef struct {
 
 /* String comparisons that possibly save a function call each. */
 #define STREQ(a, b) ((a)[0] == (b)[0] && strcmp(a, b) == 0)
-#define STREQN(a, b, n) ((a)[0] == (b)[0] && strncmp(a, b, n) == 0)
+#define STREQN(a, b, n) ((n == 0) ? (1) \
+				  : ((a)[0] == (b)[0] && strncmp(a, b, n) == 0))
 
 /* More convenience definitions that possibly save system or libc calls. */
 #define STRLEN(s) (((s) && (s)[0]) ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
@@ -180,7 +181,7 @@ typedef char **CPPFunction ();
 /* Declarations for functions defined in xmalloc.c */
 extern char *xmalloc __P((size_t));
 extern char *xrealloc __P((void *, size_t));
-extern void xfree __P((char *));
+extern void xfree __P((void *));
 
 /* Declarations for functions defined in general.c */
 extern void posix_initialize __P((int));
@@ -190,17 +191,12 @@ extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
-extern void timeval_to_secs ();
-extern void print_timeval ();
-extern void clock_t_to_secs ();
-extern void print_time_in_hz ();
-
 extern int all_digits __P((char *));
 extern int legal_number __P((char *, long *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
 
-extern void unset_nodelay_mode __P((int));
+extern int unset_nodelay_mode __P((int));
 extern void check_dev_tty __P((void));
 extern int same_file ();	/* too many problems with prototype */
 extern int move_to_high_fd __P((int, int, int));

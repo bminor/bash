@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -243,10 +243,10 @@ get_next_path_element (path_list, path_index_pointer)
 
   path = extract_colon_unit (path_list, path_index_pointer);
 
-  if (!path)
+  if (path == 0)
     return (path);
 
-  if (!*path)
+  if (*path == '\0')
     {
       free (path);
       path = savestring (".");
@@ -338,7 +338,7 @@ user_command_matches (name, flags, state)
       if (match_list == 0)
 	{
 	  match_list_size = 5;
-	  match_list = (char **)xmalloc (match_list_size * sizeof(char *));
+	  match_list = alloc_array (match_list_size);
 	}
 
       /* Clear out the old match list. */
@@ -402,24 +402,6 @@ user_command_matches (name, flags, state)
   return (match);
 }
 
-/* Turn PATH, a directory, and NAME, a filename, into a full pathname.
-   This allocates new memory and returns it. */
-static char *
-make_full_pathname (path, name, name_len)
-     char *path, *name;
-     int name_len;
-{
-  char *full_path;
-  int path_len;
-
-  path_len = strlen (path);
-  full_path = xmalloc (2 + path_len + name_len);
-  strcpy (full_path, path);
-  full_path[path_len] = '/';
-  strcpy (full_path + path_len + 1, name);
-  return (full_path);
-}
-
 static char *
 find_absolute_program (name, flags)
      char *name;
@@ -458,7 +440,7 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
   if (dot_found_in_search == 0 && *xpath == '.')
     dot_found_in_search = same_file (".", xpath, dotinfop, (struct stat *)NULL);
 
-  full_path = make_full_pathname (xpath, name, name_len);
+  full_path = sh_makepath (xpath, name, 0);
 
   status = file_status (full_path);
 

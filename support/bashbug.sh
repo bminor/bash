@@ -22,6 +22,46 @@ PATH=/bin:/usr/bin:/usr/local/bin:$PATH
 export PATH
 
 TEMP=/tmp/bbug.$$
+USAGE="Usage: $0 [--help] [--version] [bug-report-email-address]"
+VERSTR="GNU bashbug, version ${RELEASE}.${PATCHLEVEL}-${RELSTATUS}"
+
+do_help= do_version=
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	--help)		shift ; do_help=y ;;
+	--version)	shift ; do_version=y ;;
+	--)		shift ; break ;;
+	-*)		echo "bashbug: ${1}: invalid option" >&2
+			echo "$USAGE" >& 2
+			exit 2 ;;
+	*)		break ;;
+	esac
+done
+
+if [ -n "$do_version" ]; then
+	echo "${VERSTR}"
+	exit 0
+fi
+
+if [ -n "$do_help" ]; then
+	echo "${VERSTR}"
+	echo "${USAGE}"
+	echo
+	cat << HERE_EOF
+Bashbug is used to send mail to the Bash maintainers
+for when Bash doesn't behave like you'd like, or expect.
+
+Bashbug will start up your editor (as defined by the shell's
+EDITOR environment variable) with a preformatted bug report
+template for you to fill in. The report will be mailed to the
+bash maintainers by default. See the manual for details.
+
+If you invoke bashbug by accident, just quit your editor without
+saving any changes to the template, and no bug report will be sent.
+HERE_EOF
+	exit 0
+fi
 
 # Figure out how to echo a string without a trailing newline
 N=`echo 'hi there\c'`
@@ -33,12 +73,13 @@ esac
 BASHTESTERS="bash-testers@po.cwru.edu"
 
 case "$RELSTATUS" in
-alpha*|beta*)	BUGBASH=chet@po.cwru.edu ;;
-*)		BUGBASH=bug-bash@gnu.org ;;
+alpha*|beta*|devel*)	BUGBASH=chet@po.cwru.edu ;;
+*)			BUGBASH=bug-bash@gnu.org ;;
 esac
 
 case "$RELSTATUS" in
-alpha*|beta*)	echo "$0: This is a testing release.  Would you like your bug report"
+alpha*|beta*|devel*)
+		echo "$0: This is a testing release.  Would you like your bug report"
 		echo "$0: to be sent to the bash-testers mailing list?"
 		echo $n "$0: Send to bash-testers? $c"
 		read ans
@@ -49,7 +90,31 @@ esac
 
 BUGADDR="${1-$BUGBASH}"
 
-: ${EDITOR=emacs}
+if [ -z "$DEFEDITOR" ] && [ -z "$EDITOR" ]; then
+	if [ -x /usr/local/bin/ce ]; then
+		DEFEDITOR=ce
+	elif [ -x /usr/local/bin/emacs ]; then
+		DEFEDITOR=emacs
+	elif [ -x /usr/contrib/bin/emacs ]; then
+		DEFEDITOR=emacs
+	elif [ -x /usr/bin/emacs ]; then
+		DEFEDITOR=emacs
+	elif [ -x /usr/bin/xemacs ]; then
+		DEFEDITOR=xemacs
+	elif [ -x /usr/contrib/bin/jove ]; then
+		DEFEDITOR=jove
+	elif [ -x /usr/local/bin/jove ]; then
+		DEFEDITOR=jove
+	elif [ -x /usr/bin/vi ]; then
+		DEFEDITOR=vi
+	else
+		echo "$0: No default editor found: attempting to use vi" >&2
+		DEFEDITOR=vi
+	fi
+fi
+
+
+: ${EDITOR=$DEFEDITOR}
 
 : ${USER=${LOGNAME-`whoami`}}
 
@@ -63,10 +128,13 @@ fi
 
 if [ -f /usr/lib/sendmail ] ; then
 	RMAIL="/usr/lib/sendmail"
+	SMARGS="-i -t"
 elif [ -f /usr/sbin/sendmail ] ; then
 	RMAIL="/usr/sbin/sendmail"
+	SMARGS="-i -t"
 else
 	RMAIL=rmail
+	SMARGS="$BUGADDR"
 fi
 
 # this is raceable
@@ -135,7 +203,7 @@ case "$ans" in
 [Nn]*)	exit 0 ;;
 esac
 
-${RMAIL} $BUGADDR < $TEMP || {
+${RMAIL} $SMARGS < $TEMP || {
 	cat $TEMP >> $HOME/dead.bashbug
 	echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
 }

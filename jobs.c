@@ -9,7 +9,7 @@
 
    Bash is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 1, or (at your option) any later
+   Software Foundation; either version 2, or (at your option) any later
    version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -51,32 +51,11 @@
 #endif
 
 /* Need to include this up here for *_TTY_DRIVER definitions. */
-#include "bashtty.h"
+#include "shtty.h"
 
 /* Define this if your output is getting swallowed.  It's a no-op on
    machines with the termio or termios tty drivers. */
 /* #define DRAIN_OUTPUT */
-
-/* The _POSIX_SOURCE define is to avoid multiple symbol definitions
-   between sys/ioctl.h and termios.h.  Ditto for the test against SunOS4
-   and the undefining of several symbols. */
-#if defined (TERMIOS_TTY_DRIVER)
-#  if (defined (SunOS4) || defined (SunOS5)) && !defined (_POSIX_SOURCE)
-#    define _POSIX_SOURCE
-#  endif
-#  if defined (SunOS4)
-#    undef ECHO
-#    undef NOFLSH
-#    undef TOSTOP
-#  endif /* SunOS4 */
-#  include <termios.h>
-#else /* !TERMIOS_TTY_DRIVER */
-#  if defined (TERMIO_TTY_DRIVER)
-#    include <termio.h>
-#  else
-#    include <sgtty.h>
-#  endif
-#endif /* !TERMIOS_TTY_DRIVER */
 
 /* For the TIOCGPGRP and TIOCSPGRP ioctl parameters on HP-UX */
 #if defined (hpux) && !defined (TERMIOS_TTY_DRIVER)
@@ -98,7 +77,6 @@
 #include "shell.h"
 #include "jobs.h"
 #include "flags.h"
-#include "error.h"
 
 #include "builtins/builtext.h"
 #include "builtins/common.h"
@@ -165,6 +143,8 @@ extern int loop_level, breaking;
 extern Function *this_shell_builtin;
 extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;
+extern procenv_t wait_intr_buf;
+extern WORD_LIST *subst_assign_varlist;
 
 #if defined (ARRAY_VARS)
 static int *pstatuses;		/* list of pipeline statuses */
@@ -239,6 +219,7 @@ static void notify_of_job_status (), cleanup_dead_jobs (), discard_pipeline ();
 static void add_process (), set_current_job (), reset_current ();
 static void print_pipeline ();
 static void pretty_print_job ();
+static void mark_all_jobs_as_dead ();
 static void mark_dead_jobs_as_notified ();
 #if defined (PGRP_PIPE)
 static void pipe_read (), pipe_close ();
@@ -1455,7 +1436,9 @@ last_pid (job)
 
 /* Wait for a particular child of the shell to finish executing.
    This low-level function prints an error message if PID is not
-   a child of this shell.  It returns -1 if it fails, or 0 if not. */
+   a child of this shell.  It returns -1 if it fails, or 0 if not
+   (whatever wait_for returns).  If the child is not found in the
+   jobs table, it returns 127. */
 int
 wait_for_single_pid (pid)
      pid_t pid;
@@ -1491,11 +1474,11 @@ wait_for_single_pid (pid)
 void
 wait_for_background_pids ()
 {
-  register int i, count;
+  register int i, count, r, waited_for;
   sigset_t set, oset;
   pid_t pid;
 
-  for (;;)
+  for (waited_for = 0;;)
     {
       BLOCK_CHILD (set, oset);
 
@@ -1519,7 +1502,15 @@ wait_for_background_pids ()
 	    pid = last_pid (i);
 	    UNBLOCK_CHILD (oset);
 	    QUIT;
-	    wait_for_single_pid (pid);
+	    errno = 0;		/* XXX */
+	    r = wait_for_single_pid (pid);
+	    if (r == -1)
+	      {
+		if (errno == ECHILD)
+		  mark_all_jobs_as_dead ();
+	      }
+	    else
+	      waited_for++;
 	    break;
 	  }
     }
@@ -1553,11 +1544,24 @@ static sighandler
 wait_sigint_handler (sig)
      int sig;
 {
+  SigHandler *sigint_handler;
+
   if (interrupt_immediately ||
       (this_shell_builtin && this_shell_builtin == wait_builtin))
     {
       last_command_exit_value = EXECUTION_FAILURE;
       restore_sigint_handler ();
+      /* If we got a SIGINT while in `wait', and SIGINT is trapped, do
+         what POSIX.2 says (see builtins/wait.def for more info). */
+      if (this_shell_builtin && this_shell_builtin == wait_builtin &&
+	  signal_is_trapped (SIGINT) &&
+	  ((sigint_handler = trap_to_sighandler (SIGINT)) == trap_handler))
+	{
+	  interrupt_immediately = 0;
+	  trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
+	  longjmp (wait_intr_buf, 1);
+	}
+      
       ADDINTERRUPT;
       QUIT;
     }
@@ -1584,17 +1588,21 @@ process_exit_status (status)
 }
 
 static int
-job_exit_status (job)
-     int job;
+raw_job_exit_status (job)
 {
   register PROCESS *p;
   for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
     ;
-  return (process_exit_status (p->status));
+  return (p->status);
 }
 
-/* Wait for pid (one of our children) to terminate, then
-   return the termination state. */
+static int
+job_exit_status (job)
+     int job;
+{
+  return (process_exit_status (raw_job_exit_status (job)));
+}
+
 #define FIND_CHILD(pid, child) \
   do \
     { \
@@ -1610,15 +1618,19 @@ job_exit_status (job)
     } \
   while (0)
 
+/* Wait for pid (one of our children) to terminate, then
+   return the termination state.  Returns 127 if PID is not found in
+   the jobs table.  Returns -1 if waitchld() returns -1, indicating
+   that there are no unwaited-for child processes. */
 int
 wait_for (pid)
      pid_t pid;
 {
-  int job, termination_state;
+  int job, termination_state, r, s;
   register PROCESS *child;
   sigset_t set, oset;
-#if 0
   register PROCESS *p;
+#if 0
   int job_state, any_stopped;
 #endif
 
@@ -1701,12 +1713,17 @@ wait_for (pid)
 	  sigaction (SIGCHLD, &act, &oact);
 #  endif
 	  waiting_for_job = 1;
-	  waitchld (pid, 1);
+	  r = waitchld (pid, 1);
 #  if defined (MUST_UNBLOCK_CHLD)
 	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
 	  sigprocmask (SIG_SETMASK, &chldset, (sigset_t *)NULL);
 #  endif
 	  waiting_for_job = 0;
+	  if (r == -1 && errno == ECHILD && this_shell_builtin == wait_builtin)
+	    {
+	      termination_state = -1;
+	      goto wait_for_return;
+	    }
 #endif /* WAITPID_BROKEN */
 	}
 
@@ -1722,7 +1739,6 @@ wait_for (pid)
   /* The exit state of the command is either the termination state of the
      child, or the termination state of the job.  If a job, the status
      of the last child in the pipeline is the significant one. */
-
   if (job != NO_JOB)
     termination_state = job_exit_status (job);
   else
@@ -1760,14 +1776,40 @@ if (job == NO_JOB)
     {
       if (interactive_shell && subshell_environment == 0)
 	{
-	  if (WIFSIGNALED (child->status) || WIFSTOPPED (child->status))
+	  /* This used to use `child->status'.  That's wrong, however, for
+	     pipelines.  `child' is the first process in the pipeline.  It's
+	     likely that the process we want to check for abnormal termination
+	     or stopping is the last process in the pipeline, especially if
+	     it's long-lived and the first process is short-lived.  Since we
+	     know we have a job here, we can check all the processes in this
+	     job's pipeline and see if one of them stopped or terminated due
+	     to a signal.  We might want to change this later to just check
+	     the last process in the pipeline.  If no process exits due to a
+	     signal, S is left as the status of the last job in the pipeline. */
+	  p = jobs[job]->pipe;
+	  do
+	    {
+	      s = p->status;
+	      if (WIFSIGNALED(s) || WIFSTOPPED(s))
+		break;
+	      p = p->next;
+	    }
+	  while (p != jobs[job]->pipe);
+
+	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
 	      set_tty_state ();
+#if 0
 	      /* If the foreground job was suspended with ^Z (SIGTSTP), and
-		 the user has requested it, get a new window size. */
-	      if (check_window_size && WIFSTOPPED (child->status) &&
-		    (WSTOPSIG (child->status) == SIGTSTP) &&
+		 the user has requested it, get a possibly new window size. */
+	      if (check_window_size && WIFSTOPPED (s) &&
+		    (WSTOPSIG (s) == SIGTSTP) &&
 		    job == current_job)
+#else
+	      /* If the current job was stopped or killed by a signal, and
+		 the user has requested it, get a possibly new window size */
+	      if (check_window_size && job == current_job)
+#endif
 		get_new_window_size (0);
 	    }
 	  else
@@ -1778,8 +1820,7 @@ if (job == NO_JOB)
 	     by SIGINT, then print a newline to compensate for the kernel
 	     printing the ^C without a trailing newline. */
 	  if (job_control && IS_JOBCONTROL (job) && IS_FOREGROUND (job) &&
-		WIFSIGNALED (child->status) &&
-		WTERMSIG (child->status) == SIGINT)
+		WIFSIGNALED (s) && WTERMSIG (s) == SIGINT)
 	    {
 	      /* If SIGINT is not trapped and the shell is in a for, while,
 		 or until loop, act as if the shell received SIGINT as
@@ -1806,6 +1847,8 @@ if (job == NO_JOB)
 	}
     }
 
+wait_for_return:
+
   UNBLOCK_CHILD (oset);
 
   /* Restore the original SIGINT signal handler before we return. */
@@ -1814,7 +1857,9 @@ if (job == NO_JOB)
   return (termination_state);
 }
 
-/* Wait for the last process in the pipeline for JOB. */
+/* Wait for the last process in the pipeline for JOB.  Returns whatever
+   wait_for returns: the last process's termination state or -1 if there
+   are no unwaited-for child processes or an error occurs. */
 int
 wait_for_job (job)
      int job;
@@ -2216,20 +2261,25 @@ static sighandler
 sigchld_handler (sig)
      int sig;
 {
-  int n;
+  int n, oerrno;
 
+  oerrno = errno;
   REINSTALL_SIGCHLD_HANDLER;
   sigchld++;
   n = 0;
   if (waiting_for_job == 0)
     n = waitchld (-1, 0);
+  errno = oerrno;
   SIGRETURN (n);
 }
 
 /* waitchld() reaps dead or stopped children.  It's called by wait_for and
-   flush_child, and runs until there aren't any children terminating any more.
+   sigchld_handler, and runs until there aren't any children terminating any
+   more.
    If BLOCK is 1, this is to be a blocking wait for a single child, although
-   an arriving SIGCHLD could cause the wait to be non-blocking. */
+   an arriving SIGCHLD could cause the wait to be non-blocking.  It returns
+   the number of children reaped, or -1 if there are no unwaited-for child
+   processes. */
 static int
 waitchld (wpid, block)
      pid_t wpid;
@@ -2258,8 +2308,19 @@ waitchld (wpid, block)
 	 if it was non-zero before we called waitpid. */
       if (sigchld > 0 && (waitpid_flags & WNOHANG))
 	sigchld--;
+  
+      /* If waitpid returns -1 with errno == ECHILD, there are no more
+	 unwaited-for child processes of this shell. */
+      if (pid < 0 && errno == ECHILD)
+	{
+	  if (children_exited == 0)
+	    return -1;
+	  else
+	    break;
+	}
 
-      /* If waitpid returns 0, there are running children. */
+      /* If waitpid returns 0, there are running children.  If it returns -1,
+	 the only other error POSIX says it can return is EINTR. */
       if (pid <= 0)
 	continue;	/* jumps right to the test */
 
@@ -2425,13 +2486,15 @@ waitchld (wpid, block)
   /* If a job was running and became stopped, then set the current
      job.  Otherwise, don't change a thing. */
   if (call_set_current)
-    if (last_stopped_job != NO_JOB)
-      set_current_job (last_stopped_job);
-    else
-      reset_current ();
+    {
+      if (last_stopped_job != NO_JOB)
+	set_current_job (last_stopped_job);
+      else
+	reset_current ();
+    }
 
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
-  if (job_control && signal_is_trapped (SIGCHLD) &&
+  if (job_control && signal_is_trapped (SIGCHLD) && children_exited &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {
       char *trap_command;
@@ -2452,6 +2515,7 @@ waitchld (wpid, block)
       unwind_protect_int (interrupt_immediately);
       unwind_protect_int (jobs_list_frozen);
       unwind_protect_pointer (the_pipeline);
+      unwind_protect_pointer (subst_assign_varlist);
 
       /* We have to add the commands this way because they will be run
 	 in reverse order of adding.  We don't want maybe_set_sigchld_trap ()
@@ -2459,6 +2523,7 @@ waitchld (wpid, block)
       add_unwind_protect ((Function *)xfree, trap_command);
       add_unwind_protect ((Function *)maybe_set_sigchld_trap, trap_command);
 
+      subst_assign_varlist = (WORD_LIST *)NULL;
       the_pipeline = (PROCESS *)NULL;
       restore_default_signal (SIGCHLD);
       jobs_list_frozen = 1;
@@ -2503,7 +2568,11 @@ notify_of_job_status ()
     {
       if (jobs[job] && IS_NOTIFIED (job) == 0)
 	{
+#if 0
 	  s = jobs[job]->pipe->status;
+#else
+	  s = raw_job_exit_status (job);
+#endif
 	  termsig = WTERMSIG (s);
 
 	  /* POSIX.2 says we have to hang onto the statuses of at most the
@@ -2960,6 +3029,38 @@ nohup_all_jobs (running_only)
   UNBLOCK_CHILD (oset);
 }
 
+int
+count_all_jobs ()
+{
+  int i, n;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+  for (i = n = 0; i < job_slots; i++)
+    if (jobs[i] && DEADJOB(i) == 0)
+      n++;
+  UNBLOCK_CHILD (oset);
+  return n;
+}
+
+static void
+mark_all_jobs_as_dead ()
+{
+  register int i;
+  sigset_t set, oset;
+
+  if (job_slots)
+    {
+      BLOCK_CHILD (set, oset);
+
+      for (i = 0; i < job_slots; i++)
+	if (jobs[i])
+	  jobs[i]->state = JDEAD;
+
+      UNBLOCK_CHILD (oset);
+    }
+}
+
 /* Mark all dead jobs as notified, so delete_job () cleans them out
    of the job table properly.  POSIX.2 says we need to save the
    status of the last CHILD_MAX jobs, so we count the number of dead
@@ -3093,7 +3194,7 @@ pipe_read (pp)
   if (pp[0] >= 0)
     {
       while (read (pp[0], &ch, 1) == -1 && errno == EINTR)
-	continue;
+	;
     }
 }
 

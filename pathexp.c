@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -196,7 +196,22 @@ shell_glob_filename (pathname)
   else if (i != 0)		/* other error codes not in POSIX.2 */
     filenames.gl_pathv = (char **)NULL;
 
-  return (filenames.gl_pathv);
+  results = filenames.gl_pathv;
+
+  if (results && ((GLOB_FAILED (results)) == 0))
+    {
+      if (should_ignore_glob_matches ())
+	ignore_glob_matches (results);
+      if (results && results[0])
+	sort_char_array (results);
+      else
+	{
+	  FREE (results);
+	  results = (char **)NULL;
+	}
+    }
+
+  return (results);
 
 #else /* !USE_POSIX_GLOB_LIBRARY */
 
@@ -298,7 +313,7 @@ ignore_globbed_names (names, name_func)
 
   for (i = 0; names[i]; i++)
     ;
-  newnames = (char **)xmalloc ((i + 1) * sizeof (char *));
+  newnames = alloc_array (i + 1);
 
   for (n = i = 0; names[i]; i++)
     {

@@ -46,8 +46,8 @@ fi
 oldpat=$1
 newpat=$2
 
-set $1
-if [ ! -a "$1" ]; then
+set -- $1
+if [ ! -e "$1" ]; then
     echo "$name: no files match $oldpat."
     exit 1
 fi
@@ -79,7 +79,7 @@ while :; do
 done
 
 if [ $i -eq 1 ]; then
-    print -u2 "No globbing chars in pattern."
+    echo "No globbing chars in pattern." 1>&2
     exit 1
 fi
 

@@ -16,12 +16,12 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if  !defined (__COMMON_H)
 #  define __COMMON_H
 
-#include "../stdc.h"
+#include "stdc.h"
 
 #define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
 
@@ -72,7 +72,9 @@ extern void initialize_shell_builtins __P((void));
 
 extern char *single_quote __P((char *));
 extern char *double_quote __P((char *));
+extern char *un_double_quote __P((char *));
 extern char *backslash_quote __P((char *));
+extern char *backslash_quote_for_double_quotes __P((char *));
 extern int contains_shell_metas __P((char *));
 
 /* Functions from set.def */
@@ -81,9 +83,11 @@ extern void list_minus_o_opts __P((int, int));
 extern int set_minus_o_option __P((int, char *));
 extern int minus_o_option_value __P((char *));
 extern void reset_shell_options __P((void));
+extern char **get_minus_o_opts __P((void));
 
 /* Functions from shopt.def */
 extern void reset_shopt_options __P((void));
+extern char **get_shopt_options __P((void));
 
 /* Functions from type.def */
 extern int describe_command __P((char *, int, int));

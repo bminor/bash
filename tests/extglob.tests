@@ -329,6 +329,7 @@ rm -rf $TESTDIR
 mkdir $TESTDIR
 builtin cd $TESTDIR
 
+LC_COLLATE=C # have to set this; it affects the sorting 
 touch a.b a,b a:b a-b a\;b a\ b a_b
 
 echo a[^[:alnum:]]b

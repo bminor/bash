@@ -6,6 +6,11 @@ expect()
 expect '<^J^J^J>'
 recho $'\n\n\n'
 
+expect '<++^J++>'
+f=$'\n'
+recho "++$f++"
+unset f
+
 z1=$''
 expect '<>'
 recho "$z1"
@@ -61,3 +66,15 @@ case "$z" in
 $'\v\f\a\b')	echo ok;;
 *)		echo bad;;
 esac
+
+# Dave Korn says this should be allowed and echo 'abcd'
+echo $'\'abcd\''
+
+# printf translates \' to ' ...
+printf "\'abcd\'\n"
+
+# but echo -e doesn't
+echo -e "\'abcd\'"
+echo -e "\\'abcd\\'"
+
+

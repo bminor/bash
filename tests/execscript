@@ -79,3 +79,6 @@ ${THIS_SH} ./exec4.sub
 
 # try exec'ing a command that cannot be found in $PATH
 ${THIS_SH} ./exec5.sub
+
+# this was a bug in bash versions before bash-2.04
+${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-

@@ -6,7 +6,7 @@
 
    Bash is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    Bash is distributed in the hope that it will be useful, but WITHOUT
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 /*
  All arithmetic is done as long integers with no checking for overflow
@@ -25,6 +25,8 @@
  The following operators are handled, grouped into a set of levels in
  order of decreasing precedence.
 
+	"id++", "id--"		[post-increment and post-decrement]
+	"++id", "--id"		[pre-increment and pre-decrement]
 	"-", "+"		[(unary operators)]
 	"!", "~"
 	"**"			[(exponentiation)]
@@ -75,6 +77,8 @@
 #  include <unistd.h>
 #endif
 
+#include <ctype.h>
+
 #include "shell.h"
 
 /* Because of the $((...)) construct, expressions may include newlines.
@@ -104,6 +108,10 @@
 #define OP_ASSIGN 11	/* op= expassign as in Posix.2 */
 #define COND	12	/* exp1 ? exp2 : exp3 */
 #define POWER	13	/* exp1**exp2 */
+#define PREINC	14	/* ++var */
+#define PREDEC	15	/* --var */
+#define POSTINC	16	/* var++ */
+#define POSTDEC	17	/* var-- */
 #define EQ	'='
 #define GT	'>'
 #define LT	'<'
@@ -121,6 +129,11 @@
 #define BNOT	'~'	/* Bitwise NOT; Two's complement. */
 #define QUES	'?'
 #define COL	':'
+#define COMMA	','
+
+/* This should be the function corresponding to the operator with the
+   highest precedence. */
+#define EXP_HIGHEST	expcomma
 
 static char	*expression;	/* The current expression */
 static char	*tp;		/* token lexical position */
@@ -136,17 +149,24 @@ static procenv_t evalbuf;
 static void	readtok ();	/* lexical analyzer */
 static long	subexpr (), expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
 		exp4 (), exp5 (), expshift (), expland (), explor (),
-		expband (), expbor (), expbxor (), expcond (), exppower ();
+		expband (), expbor (), expbxor (), expcond (), exppower (),
+		expcomma ();
 static long	strlong ();
 static void	evalerror ();
 
 /* A structure defining a single expression context. */
 typedef struct {
   int curtok, lasttok;
-  char *expression, *tp;
+  char *expression, *tp, *lasttp;
   int tokval;
   char *tokstr;
+  int noeval;
 } EXPR_CONTEXT;
+
+typedef struct {
+  char *tokstr;
+  int tokval;
+} LVALUE;
 
 /* Global var which contains the stack of expression contexts. */
 static EXPR_CONTEXT **expr_stack;
@@ -154,6 +174,28 @@ static int expr_depth;		   /* Location in the stack. */
 static int expr_stack_size;	   /* Number of slots already allocated. */
 
 extern char *this_command_name;
+
+#define SAVETOK(X) \
+  do { \
+    (X)->curtok = curtok; \
+    (X)->lasttok = lasttok; \
+    (X)->tp = tp; \
+    (X)->lasttp = lasttp; \
+    (X)->tokval = tokval; \
+    (X)->tokstr = tokstr; \
+    (X)->noeval = noeval; \
+  } while (0)
+
+#define RESTORETOK(X) \
+  do { \
+    curtok = (X)->curtok; \
+    lasttok = (X)->lasttok; \
+    tp = (X)->tp; \
+    lasttp = (X)->lasttp; \
+    tokval = (X)->tokval; \
+    tokstr = (X)->tokstr; \
+    noeval = (X)->noeval; \
+  } while (0)
 
 /* Push and save away the contents of the globals describing the
    current expression context. */
@@ -174,12 +216,9 @@ pushexp ()
 
   context = (EXPR_CONTEXT *)xmalloc (sizeof (EXPR_CONTEXT));
 
-  context->curtok = curtok;
-  context->lasttok = lasttok;
   context->expression = expression;
-  context->tp = tp;
-  context->tokval = tokval;
-  context->tokstr = tokstr;
+  SAVETOK(context);
+
   expr_stack[expr_depth++] = context;
 }
 
@@ -194,12 +233,10 @@ popexp ()
     evalerror ("recursion stack underflow");
 
   context = expr_stack[--expr_depth];
-  curtok = context->curtok;
-  lasttok = context->lasttok;
+
   expression = context->expression;
-  tp = context->tp;
-  tokval = context->tokval;
-  tokstr = context->tokstr;
+  RESTORETOK (context);
+
   free (context);
 }
 
@@ -294,7 +331,7 @@ subexpr (expr)
 
   readtok ();
 
-  val = expassign ();
+  val = EXP_HIGHEST ();
 
   if (curtok != 0)
     evalerror ("syntax error in expression");
@@ -307,35 +344,21 @@ subexpr (expr)
   return val;
 }
 
-/* Bind/create a shell variable with the name LHS to the RHS.
-   This creates or modifies a variable such that it is an integer.
-
-   This should really be in variables.c, but it is here so that all of the
-   expression evaluation stuff is localized.  Since we don't want any
-   recursive evaluation from bind_variable() (possible without this code,
-   since bind_variable() calls the evaluator for variables with the integer
-   attribute set), we temporarily turn off the integer attribute for each
-   variable we set here, then turn it back on after binding as necessary. */
-
-void
-bind_int_variable (lhs, rhs)
-     char *lhs, *rhs;
+static long
+expcomma ()
 {
-  register SHELL_VAR *v;
-  int isint = 0;
+  register long value;
 
-  v = find_variable (lhs);
-  if (v)
+  value = expassign ();
+  while (curtok == COMMA)
     {
-      isint = integer_p (v);
-      v->attributes &= ~att_integer;
+      readtok ();
+      value = expassign ();
     }
 
-  v = bind_variable (lhs, rhs);
-  if (isint)
-    v->attributes |= att_integer;
+  return value;
 }
-
+  
 static long
 expassign ()
 {
@@ -404,7 +427,7 @@ expassign ()
 
       rhs = itos (value);
       if (noeval == 0)
-	bind_int_variable (lhs, rhs);
+	(void)bind_int_variable (lhs, rhs);
       free (rhs);
       free (lhs);
       FREE (tokstr);
@@ -435,7 +458,7 @@ expcond ()
 #if 0
       val1 = explor ();
 #else
-      val1 = expassign ();
+      val1 = EXP_HIGHEST ();
 #endif
       if (set_noeval)
         noeval--;
@@ -706,6 +729,8 @@ exppower ()
       val2 = exp1 ();
       if (val2 == 0)
 	return (1L);
+      if (val2 < 0)
+	evalerror ("exponent less than 0");
       for (c = 1; val2--; c *= val1)
 	;
       val1 = c;
@@ -737,9 +762,31 @@ exp1 ()
 static long
 exp0 ()
 {
-  register long val = 0L;
+  register long val = 0L, v2;
+  char *vincdec;
+  int stok;
 
-  if (curtok == MINUS)
+  /* XXX - might need additional logic here to decide whether or not
+	   pre-increment or pre-decrement is legal at this point. */
+  if (curtok == PREINC || curtok == PREDEC)
+    {
+      stok = lasttok = curtok;
+      readtok ();
+      if (curtok != STR)
+        /* readtok() catches this */
+	evalerror ("identifier expected after pre-increment or pre-decrement");
+
+      v2 = tokval + ((stok == PREINC) ? 1 : -1);
+      vincdec = itos (v2);
+      if (noeval == 0)
+	(void)bind_int_variable (tokstr, vincdec);
+      free (vincdec);
+      val = v2;
+
+      curtok = NUM;	/* make sure --x=7 is flagged as an error */
+      readtok ();
+    }
+  else if (curtok == MINUS)
     {
       readtok ();
       val = - exp0 ();
@@ -752,7 +799,7 @@ exp0 ()
   else if (curtok == LPAR)
     {
       readtok ();
-      val = expassign ();
+      val = EXP_HIGHEST ();
 
       if (curtok != RPAR)
 	evalerror ("missing `)'");
@@ -763,6 +810,19 @@ exp0 ()
   else if ((curtok == NUM) || (curtok == STR))
     {
       val = tokval;
+      if (curtok == STR && (*tp == '+' || *tp == '-') && tp[1] == *tp &&
+		(tp[2] == '\0' || (isalnum (tp[2]) == 0)))
+	{
+	  /* post-increment or post-decrement */
+	  v2 = val + ((*tp == '+') ? 1 : -1);
+	  vincdec = itos (v2);
+	  if (noeval == 0)
+	    (void)bind_int_variable (tokstr, vincdec);
+	  free (vincdec);
+	  tp += 2;
+	  curtok = NUM;	/* make sure x++=7 is flagged as an error */
+	}
+	  
       readtok ();
     }
   else
@@ -802,9 +862,10 @@ readtok ()
 
   if (legal_variable_starter (c))
     {
-      /* Semi-bogus ksh compatibility feature -- variable names
-	 not preceded with a dollar sign are shell variables. */
-      char *value;
+      /* variable names not preceded with a dollar sign are shell variables. */
+      char *value, *savecp;
+      EXPR_CONTEXT ec;
+      int peektok;
 
       while (legal_variable_char (c))
 	c = *cp++;
@@ -827,24 +888,41 @@ readtok ()
 #endif /* ARRAY_VARS */
 
       *cp = '\0';
-
       FREE (tokstr);
       tokstr = savestring (tp);
-
-#if defined (ARRAY_VARS)
-      value = (e == ']') ? get_array_value (tokstr, 0) : get_string_value (tokstr);
-#else
-      value = get_string_value (tokstr);
-#endif
-
-      tokval = (value && *value) ? subexpr (value) : 0;
-
-#if defined (ARRAY_VARS)
-      if (e == ']')
-	FREE (value);	/* get_array_value returns newly-allocated memory */
-#endif
-
       *cp = c;
+
+      SAVETOK (&ec);
+      tokstr = (char *)NULL;	/* keep it from being freed */
+      tp = savecp = cp;
+      noeval = 1;
+      readtok ();
+      peektok = curtok;
+      if (peektok == STR)	/* free new tokstr before old one is restored */
+	FREE (tokstr);
+      RESTORETOK (&ec);
+      cp = savecp;
+
+      /* The tests for PREINC and PREDEC aren't strictly correct, but they
+	 preserve old behavior if a construct like --x=9 is given. */
+      if (lasttok == PREINC || lasttok == PREDEC || peektok != EQ)
+        {
+#if defined (ARRAY_VARS)
+	  value = (e == ']') ? get_array_value (tokstr, 0) : get_string_value (tokstr);
+#else
+	  value = get_string_value (tokstr);
+#endif
+
+	  tokval = (value && *value) ? subexpr (value) : 0;
+
+#if defined (ARRAY_VARS)
+	  if (e == ']')
+	    FREE (value);	/* get_array_value returns newly-allocated memory */
+#endif
+        }
+      else
+        tokval = 0;
+
       lasttok = curtok;
       curtok = STR;
     }
@@ -900,6 +978,10 @@ readtok ()
 	c = LOR;
       else if ((c == '*') && (c1 == '*'))
         c = POWER;
+      else if ((c == '-') && (c1 == '-') && legal_variable_starter (*cp))
+        c = PREDEC;
+      else if ((c == '+') && (c1 == '+') && legal_variable_starter (*cp))
+        c = PREINC;
       else if (c1 == EQ && member(c, "*/%+-&^|"))
 	{
 	  assigntok = c;	/* a OP= b */

@@ -1,13 +1,29 @@
 #
 # Makefile for the Bash library
 #
+#
+# Copyright (C) 1998 Free Software Foundation, Inc.     
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 srcdir = @srcdir@
 VPATH = .:@srcdir@
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 
-POSIX_INC = ${topdir}/lib/posixheaders
+BASHINCDIR = ${topdir}/include
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -33,7 +49,7 @@ PROFILE_FLAGS = @PROFILE_FLAGS@
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
-INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(POSIX_INC) -I$(srcdir)
+INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(BASHINCDIR) -I$(srcdir)
 
 CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
 	  $(CFLAGS) $(CPPFLAGS) 
@@ -45,17 +61,19 @@ CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
 LIBRARY_NAME = libsh.a
 
 # The C code source files for this library.
-CSOURCES = clktck.c getcwd.c getenv.c oslib.c setlinebuf.c \
+CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strcasecmp.c strerror.c strtod.c strtol.c strtoul.c \
-	   vprint.c itos.c rename.c
+	   vprint.c itos.c rename.c zread.c zwrite.c shtty.c \
+	   inet_aton.c netopen.c strpbrk.c timeval.c makepath.c
 
 # The header files for this library.
 HSOURCES = 
 
 # The object files contained in $(LIBRARY_NAME)
-OBJECTS = clktck.o getcwd.o getenv.o oslib.o setlinebuf.o \
+OBJECTS = clktck.o clock.o getcwd.o getenv.o oslib.o setlinebuf.o \
 	  strcasecmp.o strerror.o strtod.o strtol.o strtoul.o \
-	  vprint.o itos.o rename.o
+	  vprint.o itos.o rename.o zread.o zwrite.o shtty.o \
+	  inet_aton.o netopen.o strpbrk.o timeval.o makepath.o
 
 SUPPORT = Makefile
 
@@ -85,87 +103,124 @@ mostlyclean: clean
 
 # rules for losing makes, like SunOS
 clktck.o: clktck.c
+clock.o: clock.c
 getcwd.o: getcwd.c
 getenv.o: getenv.c
+inet_aton.o: inet_aton.c
 itos.o: itos.c
+netopen.o: netopen.c
 oslib.o: oslib.c
 rename.o: rename.c
 setlinebuf.o: setlinebuf.c
+shquote.o: shquote.c
+shtty.o: shtty.c
 strcasecmp.o: strcasecmp.c
 strerror.o: strerror.c
+strpbrk.o: strpbrk.c
 strtod.o: strtod.c
 strtol.o: strtol.c
 strtoul.o: strtoul.c
+times.o: times.c
+timeval.o: timeval.c
 vprint.o: vprint.c
+zread.o: zread.c
+zwrite.o: zwrite.c
 
 # all files in the library depend on config.h
 clktck.o: ${BUILD_DIR}/config.h
+clock.o: ${BUILD_DIR}/config.h
 getcwd.o: ${BUILD_DIR}/config.h
 getenv.o: ${BUILD_DIR}/config.h
+inet_aton.o: ${BUILD_DIR}/config.h
 itos.o: ${BUILD_DIR}/config.h
+netopen.o: ${BUILD_DIR}/config.h
 oslib.o: ${BUILD_DIR}/config.h
 rename.o: ${BUILD_DIR}/config.h
 setlinebuf.o: ${BUILD_DIR}/config.h
+shquote.o: ${BUILD_DIR}/config.h
+shtty.o: ${BUILD_DIR}/config.h
 strcasecmp.o: ${BUILD_DIR}/config.h
 strerror.o: ${BUILD_DIR}/config.h
+strpbrk.o: ${BUILD_DIR}/config.h
 strtod.o: ${BUILD_DIR}/config.h
 strtol.o: ${BUILD_DIR}/config.h
 strtoul.o: ${BUILD_DIR}/config.h
+times.o: ${BUILD_DIR}/config.h
+timeval.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
+zread.o: ${BUILD_DIR}/config.h
+zwrite.o: ${BUILD_DIR}/config.h
 
 clktck.o: ${topdir}/bashtypes.h
 
-getcwd.o: ${topdir}/bashtypes.h ${topdir}/bashansi.h ${topdir}/maxpath.h
-getcwd.o: ${POSIX_INC}/posixstat.h ${POSIX_INC}/posixdir.h
-getcwd.o: ${POSIX_INC}/memalloc.h ${POSIX_INC}/ansi_stdlib.h
+getcwd.o: ${topdir}/bashtypes.h ${topdir}/bashansi.h ${BASHINCDIR}/maxpath.h
+getcwd.o: ${BASHINCDIR}/posixstat.h ${BASHINCDIR}/posixdir.h
+getcwd.o: ${BASHINCDIR}/memalloc.h ${BASHINCDIR}/ansi_stdlib.h
 
-getenv.o: ${topdir}/bashansi.h ${topdir}/ansi_stdlib.h
-getenv.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${topdir}/posixjmp.h
-getenv.o: ${topdir}/command.h ${topdir}/stdc.h ${topdir}/error.h
+getenv.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+getenv.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+getenv.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
 getenv.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h
 getenv.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 getenv.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 getenv.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 getenv.o: ${topdir}/pathnames.h ${topdir}/externs.h
 
-itos.o: ${topdir}/bashansi.h ${topdir}/ansi_stdlib.h
-itos.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${topdir}/posixjmp.h
-itos.o: ${topdir}/command.h ${topdir}/stdc.h ${topdir}/error.h
+inet_aton.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+inet_aton.o: ${BASHINCDIR}/stdc.h
+
+itos.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+itos.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+itos.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
 itos.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h
 itos.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 itos.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 itos.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 itos.o: ${topdir}/pathnames.h ${topdir}/externs.h
 
-oslib.o: ${topdir}/bashtypes.h ${topdir}/bashansi.h ${topdir}/maxpath.h
-oslib.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${topdir}/posixjmp.h
-oslib.o: ${topdir}/command.h ${topdir}/stdc.h ${topdir}/error.h
+netopen.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+
+oslib.o: ${topdir}/bashtypes.h ${topdir}/bashansi.h ${BASHINCDIR}/maxpath.h
+oslib.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+oslib.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
 oslib.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h
 oslib.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 oslib.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 oslib.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 oslib.o: ${topdir}/pathnames.h ${topdir}/externs.h
-oslib.o: ${POSIX_INC}/posixstat.h ${POSIX_INC}/filecntl.h
-oslib.o: ${POSIX_INC}/ansi_stdlib.h
+oslib.o: ${BASHINCDIR}/posixstat.h ${BASHINCDIR}/filecntl.h
+oslib.o: ${BASHINCDIR}/ansi_stdlib.h
 
-rename.o: ${topdir}/bashtypes.h ${topdir}/stdc.h
+rename.o: ${topdir}/bashtypes.h ${BASHINCDIR}/stdc.h
 
-strcasecmp.o: ${topdir}/stdc.h ${topdir}/bashansi.h ${topdir}/ansi_stdlib.h
+shtty.o: ${BASHINCDIR}/shtty.h
+shtty.o: ${BASHINCDIR}/stdc.h
+
+strcasecmp.o: ${BASHINCDIR}/stdc.h ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 
 strerror.o: ${topdir}/bashtypes.h
-strerror.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${topdir}/posixjmp.h
-strerror.o: ${topdir}/command.h ${topdir}/stdc.h ${topdir}/error.h
+strerror.o: ${topdir}/shell.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+strerror.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
 strerror.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h
 strerror.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 strerror.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 strerror.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 strerror.o: ${topdir}/pathnames.h ${topdir}/externs.h
 
+strpbrk.o: ${BASHINCDIR}/stdc.h
+
 strtod.o: ${topdir}/bashansi.h
-strtod.o: ${POSIX_INC}/ansi_stdlib.h
+strtod.o: ${BASHINCDIR}/ansi_stdlib.h
 
 strtol.o: ${topdir}/bashansi.h
-strtol.o: ${POSIX_INC}/ansi_stdlib.h
+strtol.o: ${BASHINCDIR}/ansi_stdlib.h
 
 strtoul.o: ${topdir}/bashansi.h
-strtoul.o: ${POSIX_INC}/ansi_stdlib.h
+strtoul.o: ${BASHINCDIR}/ansi_stdlib.h
+
+times.o: ${BASHINCDIR}/systimes.h
+times.o: ${BASHINCDIR}/posixtime.h
+
+timeval.o: ${BASHINCDIR}/posixtime.h
+
+clock.o: ${BASHINCDIR}/posixtime.h

@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -64,7 +64,7 @@ extern int give_terminal_to ();
 /* The current maintainer of the shell.  You change this in the
    Makefile. */
 #if !defined (MAINTAINER)
-#define MAINTAINER "bash-maintainers@prep.ai.mit.edu"
+#define MAINTAINER "bash-maintainers@gnu.org"
 #endif
 
 char *the_current_maintainer = MAINTAINER;
@@ -121,7 +121,10 @@ programming_error (reason, arg1, arg2, arg3, arg4, arg5)
     }
 #endif
 
+#if 0
   fprintf (stderr, "Report this to %s\n", the_current_maintainer);
+#endif
+
   fprintf (stderr, "Stopping myself...");
   fflush (stderr);
 
@@ -245,7 +248,10 @@ programming_error (format, va_alist)
     }
 #endif
 
+#if 0
   fprintf (stderr, "Report this to %s\n", the_current_maintainer);
+#endif
+
   fprintf (stderr, "Stopping myself...");
   fflush (stderr);
 
@@ -455,7 +461,6 @@ itrace (format, va_alist)
   fflush(stderr);
 }
 
-#if 0
 /* A trace function for silent debugging -- doesn't require a control
    terminal. */
 void
@@ -471,7 +476,7 @@ trace (format, va_alist)
   static FILE *tracefp = (FILE *)NULL;
 
   if (tracefp == NULL)
-    tracefp = fopen("/usr/tmp/bash-trace.log", "a+");
+    tracefp = fopen("/tmp/bash-trace.log", "a+");
 
   if (tracefp == NULL)
     tracefp = stderr;
@@ -493,7 +498,6 @@ trace (format, va_alist)
 
   fflush(tracefp);
 }
-#endif /* 0 */
 
 #endif /* USE_VARARGS */
 

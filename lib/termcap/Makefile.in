@@ -4,6 +4,22 @@
 #								   #
 ####################################################################
 
+# Copyright (C) 1996 Free Software Foundation, Inc.     
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+
 srcdir = @srcdir@
 VPATH = .:@srcdir@
 topdir = @top_srcdir@
@@ -29,7 +45,7 @@ LDFLAGS = @LDFLAGS@
 
 DEFS = @DEFS@
 
-INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
+INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(srcdir)
 
 CCFLAGS = $(CFLAGS) $(DEFS) $(CPPFLAGS) ${INCLUDES}
 
@@ -59,7 +75,10 @@ install:
 clean:
 	$(RM) *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
 
-mostlyclean distclean maintainer-clean: clean
+mostlyclean: clean
+
+distclean maintainer-clean: clean
+	$(RM) Makefile
 
 $(DESTDIR)/libtermcap.a: libtermcap.a
 	${INSTALL_DATA} -c -m 644 libtermcap.a $@

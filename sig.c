@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -172,8 +172,10 @@ static struct termsig terminating_signals[] = {
   SIGVTALRM, NULL_HANDLER,
 #endif
 
+#if 0
 #ifdef SIGPROF
   SIGPROF, NULL_HANDLER,
+#endif
 #endif
 
 #ifdef SIGLOST
@@ -272,7 +274,9 @@ initialize_shell_signals ()
      to child processes.  Children will never block SIGCHLD, though. */
   sigemptyset (&top_level_mask);
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &top_level_mask);
+#  if defined (SIGCHLD)
   sigdelset (&top_level_mask, SIGCHLD);
+#  endif
 #endif /* JOB_CONTROL || HAVE_POSIX_SIGNALS */
 
   /* And, some signals that are specifically ignored by the shell. */

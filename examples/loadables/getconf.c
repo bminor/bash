@@ -222,16 +222,28 @@ static const struct conf_variable conf_table[] =
 #endif
 #if defined (_SC_THREADS)
   { "_POSIX_THREADS",		SYSCONF,	_SC_THREADS		},
+#endif
+#if defined (_SC_THREADS)
   { "_POSIX_THREAD_ATTR_STACKADDR", SYSCONF,	_SC_THREAD_ATTR_STACKADDR },
+#endif
+#if defined (_SC_THREAD_ATTR_STACKSIZE)
   { "_POSIX_THREAD_ATTR_STACKSIZE", SYSCONF,	_SC_THREAD_ATTR_STACKSIZE },
+#endif
+#if defined (_SC_THREAD_PRIORITY_SCHEDULING)
   { "_POSIX_THREAD_PRIORITY_SCHEDULING", SYSCONF, _SC_THREAD_PRIORITY_SCHEDULING },
+#endif
+#if defined (_SC_THREAD_PRIO_INHERIT)
   { "_POSIX_THREAD_PRIO_INHERIT", SYSCONF,	_SC_THREAD_PRIO_INHERIT	},
+#endif
+#if defined (_SC_THREAD_PRIO_PROTECT)
   { "_POSIX_THREAD_PRIO_PROTECT", SYSCONF,	_SC_THREAD_PRIO_PROTECT	},
+#endif
+#if defined (_SC_THREAD_PROCESS_SHARED)
   { "_POSIX_THREAD_PROCESS_SHARED", SYSCONF,	_SC_THREAD_PROCESS_SHARED },
-#  if defined (_SC_THREAD_SAFE_FUNCTIONS)
+#endif
+#if defined (_SC_THREAD_SAFE_FUNCTIONS)
   { "_POSIX_THREAD_SAFE_FUNCTIONS", SYSCONF,	_SC_THREAD_SAFE_FUNCTIONS },
-#  endif
-#endif /* _SC_THREADS */
+#endif
 
   /* XPG 4.2 Configurable System Variables. */
 #if defined (_SC_ATEXIT_MAX)
@@ -249,23 +261,44 @@ static const struct conf_variable conf_table[] =
 
 #if defined (_SC_AIO_LISTIO_MAX)
   { "AIO_LISTIO_MAX",		SYSCONF,	_SC_AIO_LISTIO_MAX	},
+#endif
+#if defined (_SC_AIO_MAX)
   { "AIO_MAX",			SYSCONF,	_SC_AIO_MAX		},
+#endif
+#if defined (_SC_AIO_PRIO_DELTA_MAX)
   { "AIO_PRIO_DELTA_MAX",	SYSCONF,	_SC_AIO_PRIO_DELTA_MAX	},
+#endif
+#if defined (_SC_DELAYTIMER_MAX)
   { "DELAYTIMER_MAX",		SYSCONF,	_SC_DELAYTIMER_MAX	},
+#endif
 #if defined (_SC_GETGR_R_SIZE_MAX)
   { "GETGR_R_SIZE_MAX",		SYSCONF,	_SC_GETGR_R_SIZE_MAX	},
 #endif
 #if defined (_SC_GETPW_R_SIZE_MAX)
   { "GETPW_R_SIZE_MAX",		SYSCONF,	_SC_GETPW_R_SIZE_MAX	},
 #endif
+#if defined (_SC_MQ_OPEN_MAX)
   { "MQ_OPEN_MAX",		SYSCONF,	_SC_MQ_OPEN_MAX		},
+#endif
+#if defined (_SC_MQ_PRIO_MAX)
   { "MQ_PRIO_MAX",		SYSCONF,	_SC_MQ_PRIO_MAX		},
+#endif
+#if defined (_SC_RTSIG_MAX)
   { "RTSIG_MAX",		SYSCONF,	_SC_RTSIG_MAX		},
+#endif
+#if defined (_SC_SEM_NSEMS_MAX)
   { "SEM_NSEMS_MAX",		SYSCONF,	_SC_SEM_NSEMS_MAX	},
+#endif
+#if defined (_SC_SEM_VALUE_MAX)
   { "SEM_VALUE_MAX",		SYSCONF,	_SC_SEM_VALUE_MAX	},
+#endif
+#if defined (_SC_SIGQUEUE_MAX)
   { "SIGQUEUE_MAX",		SYSCONF,	_SC_SIGQUEUE_MAX	},
+#endif
+#if defined (_SC_TIMER_MAX)
   { "TIMER_MAX",		SYSCONF,	_SC_TIMER_MAX		},
-#endif /* _SC_AIO_LISTIO_MAX */
+#endif
+
 #if defined (_SC_LOGIN_NAME_MAX)
   { "LOGIN_NAME_MAX",		SYSCONF,	_SC_LOGIN_NAME_MAX	},
 #endif
@@ -276,12 +309,18 @@ static const struct conf_variable conf_table[] =
   { "TTY_NAME_MAX",		SYSCONF,	_SC_TTY_NAME_MAX	},
 #endif
 
-#if defined (_SC_PTHREAD_DESTRUCTOR_ITERATIONS)
+#if defined (_SC_THREAD_DESTRUCTOR_ITERATIONS)
   { "PTHREAD_DESTRUCTOR_ITERATIONS", SYSCONF,	_SC_THREAD_DESTRUCTOR_ITERATIONS },
+#endif
+#if defined (_SC_THREAD_KEYS_MAX)
   { "PTHREAD_KEYS_MAX",		SYSCONF,	_SC_THREAD_KEYS_MAX },
+#endif
+#if defined (_SC_THREAD_STACK_MIN)
   { "PTHREAD_STACK_MIN",	SYSCONF,	_SC_THREAD_STACK_MIN },
+#endif
+#if defined (_SC_THREAD_THREADS_MAX)
   { "PTHREAD_THREADS_MAX",	SYSCONF,	_SC_THREAD_THREADS_MAX },
-#endif /* _SC_PTHREAD_DESTRUCTOR_ITERATIONS */
+#endif
 
   /* XPG 4.2 Optional Facility Configuration Values */
 #if defined (_SC_XOPEN_UNIX)

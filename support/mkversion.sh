@@ -6,7 +6,7 @@
 # otherwise everything is echoed to the standard output.
 
 PROGNAME=`basename $0`
-USAGE="$PROGNAME [-b] -d version -p patchlevel [-s status]"
+USAGE="$PROGNAME [-b] -d version -p patchlevel [-s status] [-o outfile]"
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -65,8 +65,27 @@ fi
 echo "/* Version control for the shell.  This file gets changed when you say"
 echo "   \`make version.h' to the Makefile.  It is created by mkversion. */"
 
-# Output the distribution version
-float_dist=`echo $dist_version | awk '{printf "%.2f\n", $1}'`
+# Output the distribution version.  Single numbers are converted to x.00.
+# Any characters other than digits and `.' are invalid.
+case "$dist_version" in
+*[!0-9.]*)	echo "mkversion.sh: ${dist_version}: bad distribution version" >&2
+		exit 1 ;;
+*.*)	;;
+*)	dist_version=${dist_version}.00 ;;
+esac
+
+dist_major=`echo $dist_version | sed 's:\..*$::'`
+[ -z "${dist_major}" ] && dist_major=0
+
+dist_minor=`echo $dist_version | sed 's:^.*\.::'`
+case "$dist_minor" in
+"")	dist_minor=00 ;;
+?)	dist_minor=0${dist_minor} ;;
+*)	;;
+esac
+
+#float_dist=`echo $dist_version | awk '{printf "%.2f\n", $1}'`
+float_dist=${dist_major}.${dist_minor}
 
 echo
 echo "/* The distribution version number of this shell. */"

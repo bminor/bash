@@ -7,7 +7,7 @@ This file is part of GNU Bash, the Bourne Again SHell.
 
 Bash is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 1, or (at your option) any later
+Software Foundation; either version 2, or (at your option) any later
 version.
 
 Bash is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -17,7 +17,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
 
@@ -48,6 +48,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 extern int line_number, current_command_line_count;
 extern int disallow_filename_globbing;
+extern int last_command_exit_value;
+
 
 WORD_DESC *
 make_bare_word (string)
@@ -203,7 +205,99 @@ make_select_command (name, map_list, action)
 {
 #if defined (SELECT_COMMAND)
   return (make_for_or_select (cm_select, name, map_list, action));
+#else
+  last_command_exit_value = 2;
+  return ((COMMAND *)NULL);
 #endif
+}
+
+#if defined (ARITH_FOR_COMMAND)
+static WORD_LIST *
+make_arith_for_expr (s)
+     char *s;
+{
+  WORD_LIST *result;
+  WORD_DESC *w;
+
+  if (s == 0 || *s == '\0')
+    return ((WORD_LIST *)NULL);
+  w = make_word (s);
+  result = make_word_list (w, (WORD_LIST *)NULL);
+  return result;
+}
+#endif
+
+COMMAND *
+make_arith_for_command (exprs, action, lineno)
+     WORD_LIST *exprs;
+     COMMAND *action;
+     int lineno;
+{
+#if defined (ARITH_FOR_COMMAND)
+  ARITH_FOR_COM *temp;
+  WORD_LIST *init, *test, *step;
+  char *s, *t, *start;
+  int nsemi, l;
+
+  init = test = step = (WORD_LIST *)NULL;
+  /* Parse the string into the three component sub-expressions. */
+  start = t = s = exprs->word->word;
+  for (nsemi = 0; ;)
+    {
+      /* skip whitespace at the start of each sub-expression. */
+      while (whitespace (*s))
+	s++;
+      start = s;
+      /* skip to the semicolon or EOS */
+      while (*s && *s != ';')
+        s++;
+
+      t = (s > start) ? substring (start, 0, s - start) : (char *)NULL;
+
+      nsemi++;
+      switch (nsemi)
+	{
+	case 1:
+	  init = make_arith_for_expr (t);
+	  break;
+	case 2:
+	  test = make_arith_for_expr (t);
+	  break;
+	case 3:
+	  step = make_arith_for_expr (t);
+	  break;
+	}
+
+      FREE (t);
+      if (*s == '\0')
+        break;
+      s++;	/* skip over semicolon */
+    }
+
+  if (nsemi != 3)
+    {
+      if (nsemi < 3)
+	parser_error (lineno, "syntax error: arithmetic expression required");
+      else
+	parser_error (lineno, "syntax error: `;' unexpected");
+      parser_error (lineno, "syntax error: `((%s))'", exprs->word->word);
+      last_command_exit_value = 2;
+      return ((COMMAND *)NULL);
+    }
+
+  temp = (ARITH_FOR_COM *)xmalloc (sizeof (ARITH_FOR_COM));
+  temp->flags = 0;
+  temp->line = lineno;
+  temp->init = init ? init : make_arith_for_expr ("1");
+  temp->test = test ? test : make_arith_for_expr ("1");
+  temp->step = step ? step : make_arith_for_expr ("1");
+  temp->action = action;
+
+  return (make_command (cm_arith_for, (SIMPLE_COM *)temp));
+#else
+  last_command_exit_value = 2;
+  return ((COMMAND *)NULL);
+#endif /* ARITH_FOR_COMMAND */
 }
 
 COMMAND *
@@ -308,6 +402,7 @@ make_arith_command (exp)
 
   return (command);
 #else
+  last_command_exit_value = 2;
   return ((COMMAND *)NULL);
 #endif
 }
@@ -350,6 +445,7 @@ make_cond_command (cond_node)
 
   return (command);
 #else
+  last_command_exit_value = 2;
   return ((COMMAND *)NULL);
 #endif
 }
@@ -586,6 +682,18 @@ make_function_def (name, command, lineno, lstart)
   temp->flags = 0;
   command->line = lstart;
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
+}
+
+COMMAND *
+make_subshell_command (command)
+     COMMAND *command;
+{
+  SUBSHELL_COM *temp;
+
+  temp = (SUBSHELL_COM *)xmalloc (sizeof (SUBSHELL_COM));
+  temp->command = command;
+  temp->flags = CMD_WANT_SUBSHELL;
+  return (make_command (cm_subshell, (SIMPLE_COM *)temp));
 }
 
 /* Reverse the word list and redirection list in the simple command

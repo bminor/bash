@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #if !defined (_INPUT_H_)
 #define _INPUT_H_
@@ -96,6 +96,9 @@ extern int find_reserved_word __P((char *));
 extern char *decode_prompt_string __P((char *));
 extern void gather_here_documents __P((void));
 extern void execute_prompt_command __P((char *));
+
+extern int *save_token_state __P((void));
+extern void restore_token_state __P((int *));
 
 /* Functions from input.c */
 extern int getc_with_restart ();
