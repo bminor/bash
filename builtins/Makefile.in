@@ -97,8 +97,11 @@ mkbuiltins: $(srcdir)/mkbuiltins.c ../config.h
 common.o: common.c
 bashgetopt.o: bashgetopt.c
 getopt.o: getopt.c
+evalstring.o: evalstring.c
+evalfile.o: evalfile.c
 
-ulimit.o: ulimit.def pipesize.h
+ulimit.o: ulimit.def
+ulimit.o: pipesize.h
 
 pipesize.h:	psize.aux
 	$(SHELL) $(srcdir)/psize.sh > pipesize.h
@@ -149,6 +152,7 @@ return.o: return.def
 set.o: set.def
 setattr.o: setattr.def
 shift.o: shift.def
+shopt.o: shopt.def
 source.o: source.def
 suspend.o: suspend.def
 test.o: test.def

@@ -160,7 +160,9 @@ parse_and_execute (string, from_file, flags)
 		}
 	      else
 		{
-		  dispose_command (command);	/* XXX */
+#if 0
+		  dispose_command (command);	/* pe_dispose does this */
+#endif
 		  continue;
 		}
 
@@ -192,7 +194,8 @@ parse_and_execute (string, from_file, flags)
 #if defined (ONESHOT)
 	      if (startup_state == 2 && *bash_input.location.string == '\0' &&
 		  command->type == cm_simple && !command->redirects &&
-		  !command->value.Simple->redirects)
+		  !command->value.Simple->redirects &&
+		  ((command->flags & CMD_TIME_PIPELINE) == 0))
 		{
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;

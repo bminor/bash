@@ -586,8 +586,14 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	  /* If this is a simple command, tell execute_disk_command that it
 	     might be able to get away without forking and simply exec.
-	     This means things like ( sleep 10 ) will only cause one fork. */
+	     This means things like ( sleep 10 ) will only cause one fork.
+	     If we're timing the command, however, we cannot do this
+	     optimization. */
+#if 0
 	  if (user_subshell && command->type == cm_simple)
+#else
+	  if (user_subshell && command->type == cm_simple && (command->flags & CMD_TIME_PIPELINE) == 0)
+#endif
 	    {
 	      command->flags |= CMD_NO_FORK;
 	      command->value.Simple->flags |= CMD_NO_FORK;
@@ -1068,7 +1074,8 @@ print_formatted_time (fp, format, rs, rsf, us, usf, ss, ssf, cpu)
 {
   int prec, lng, len;
   char *str, *s, ts[32];
-  int sum, sum_frac;
+  long sum;
+  int sum_frac;
   int sindex, ssize;
 
   len = strlen (format);
@@ -1716,15 +1723,16 @@ print_select_list (list, list_len, max_elem_len, indices_len)
 /* Print the elements of LIST, one per line, preceded by an index from 1 to
    LIST_LEN.  Then display PROMPT and wait for the user to enter a number.
    If the number is between 1 and LIST_LEN, return that selection.  If EOF
-   is read, return a null string.  If a blank line is entered, the loop is
-   executed again. */
+   is read, return a null string.  If a blank line is entered, or an invalid
+   number is entered, the loop is executed again. */
 static char *
 select_query (list, list_len, prompt)
      WORD_LIST *list;
      int list_len;
      char *prompt;
 {
-  int max_elem_len, indices_len, len, reply;
+  int max_elem_len, indices_len, len;
+  long reply;
   WORD_LIST *l;
   char *repl_string, *t;
 
@@ -1767,7 +1775,8 @@ select_query (list, list_len, prompt)
       repl_string = get_string_value ("REPLY");
       if (*repl_string == 0)
 	continue;
-      reply = atoi (repl_string);
+      if (legal_number (repl_string, &reply) == 0)
+	continue;
       if (reply < 1 || reply > list_len)
 	return "";
 
@@ -2138,7 +2147,7 @@ fix_assignment_words (words)
   if (words == 0)
     return;
 
-  b = builtin_address_internal (words->word->word);
+  b = builtin_address_internal (words->word->word, 0);
   if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
     return;
 

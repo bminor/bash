@@ -190,6 +190,7 @@ rltty.o: readline.h keymaps.h chardefs.h tilde.h
 search.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 search.o: readline.h keymaps.h chardefs.h tilde.h
 search.o: ansi_stdlib.h history.h
+shell.o: ${BUILD_DIR}/config.h
 signals.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 signals.o: readline.h keymaps.h chardefs.h tilde.h
 signals.o: history.h
@@ -212,3 +213,32 @@ vi_mode.o: readline.h keymaps.h chardefs.h tilde.h
 vi_mode.o: history.h ansi_stdlib.h
 xmalloc.o: ${BUILD_DIR}/config.h
 xmalloc.o: ansi_stdlib.h
+
+# Rules for deficient makes, like SunOS and Solaris
+bind.o: bind.c
+callback.o: callback.c
+complete.o: complete.c
+display.o: display.c
+funmap.o: funmap.c
+histexpand.o: histexpand.c
+histfile.o: histfile.c
+history.o: history.c
+histsearch.o: histsearch.c
+input.o: input.c
+isearch.o: isearch.c
+keymaps.o: keymaps.c emacs_keymap.c vi_keymap.c
+kill.o: kill.c
+macro.o: macro.c
+nls.o: nls.c
+parens.o: parens.c
+readline.o: readline.c
+rltty.o: rltty.c
+search.o: search.c
+shell.o: shell.c
+signals.o: signals.c
+terminal.o: terminal.c
+tilde.o: tilde.c
+undo.o: undo.c
+util.o: util.c
+vi_mode.o: vi_mode.c
+xmalloc.o: xmalloc.c

@@ -75,9 +75,9 @@ initialize_signals ()
 {
   initialize_shell_signals ();
   initialize_job_signals ();
-#if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
+#if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_UNDER_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
   initialize_siglist ();
-#endif
+#endif /* !HAVE_SYS_SIGLIST && !HAVE_UNDER_SYS_SIGLIST && !HAVE_STRSIGNAL */
 }
 
 void
@@ -229,8 +229,10 @@ initialize_terminating_signals ()
 	  sigaction (XSIG (i), &oact, &act);
 	  set_signal_ignored (XSIG (i));
         }
+#if defined (SIGPROF)
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
         sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
+#endif /* SIGPROF */
     }
 
 #else /* !HAVE_POSIX_SIGNALS */

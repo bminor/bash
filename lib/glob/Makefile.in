@@ -107,3 +107,7 @@ glob.o: $(BUILD_DIR)/config.h
 glob.o: $(topdir)/bashtypes.h $(topdir)/ansi_stdlib.h $(topdir)/bashansi.h
 glob.o: $(topdir)/posixstat.h $(topdir)/memalloc.h
 glob.o: fnmatch.h
+
+# Rules for deficient makes, like SunOS and Solaris
+fnmatch.o: fnmatch.c
+glob.o: glob.c

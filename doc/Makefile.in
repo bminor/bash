@@ -142,7 +142,8 @@ maintainer-clean:	clean
 
 installdirs:
 	-test -d $(man1dir) || $(SHELL) ${MKDIRS} $(man1dir)
-	-test -d $(man3dir) || $(SHELL) ${MKDIRS} $(man3dir)
+# uncomment the next line to create the directory for the readline man page
+#	-test -d $(man3dir) || $(SHELL) ${MKDIRS} $(man3dir)
 	-test -d $(infodir) || $(SHELL) ${MKDIRS} $(infodir)
 	
 install: info installdirs

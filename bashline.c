@@ -700,8 +700,8 @@ attempt_shell_completion (text, start, end)
 
   /* Check that we haven't incorrectly flagged a closed command substitution
      as indicating we're in a command position. */
-  if (in_command_position && rl_line_buffer[ti] == '`' && *text != '`' && 
-	unclosed_pair (rl_line_buffer, 0, "`") == 0)
+  if (in_command_position && ti >= 0 && rl_line_buffer[ti] == '`' &&
+	*text != '`' && unclosed_pair (rl_line_buffer, 0, "`") == 0)
     in_command_position = 0;
 
   /* Special handling for command substitution.  If *TEXT is a backquote,
@@ -744,7 +744,16 @@ attempt_shell_completion (text, start, end)
   /* This could be a globbing pattern, so try to expand it using pathname
      expansion. */
   if (!matches && glob_pattern_p (text))
-    matches = completion_matches (text, glob_complete_word);
+    {
+      matches = completion_matches (text, glob_complete_word);
+      /* A glob expression that matches more than one filename is problematic.
+	 If we match more than one filename, punt. */
+      if (matches && matches[1])
+	{
+	  free_array (matches);
+	  matches = (char **)0;
+	}
+    }
 
   return (matches);
 }
@@ -1801,6 +1810,7 @@ glob_complete_word (text, state)
 
   if (state == 0)
     {
+      rl_filename_completion_desired = 1;
       if (matches)
         free (matches);
       matches = shell_glob_filename (text);

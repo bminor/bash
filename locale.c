@@ -126,7 +126,15 @@ set_locale_var (var, value)
   else if (var[3] == 'A')			/* LC_ALL */
     {
       FREE (lc_all);
-      lc_all = value ? savestring (value) : savestring (default_locale);
+      if (value)
+	lc_all = savestring (value);
+      else if (default_locale)
+	lc_all = savestring (default_locale);
+      else
+	{
+	  lc_all = xmalloc (1);
+	  lc_all[0] = '\0';
+	}
 #if defined (HAVE_SETLOCALE)
       return (setlocale (LC_ALL, value) != 0);
 #else

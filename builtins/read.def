@@ -46,6 +46,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+
 #include "../shell.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -53,6 +55,10 @@ $END
 #if defined (READLINE)
 #include "../bashline.h"
 #include <readline/readline.h>
+#endif
+
+#if !defined(errno)
+extern int errno;
 #endif
 
 #define issep(c)	(strchr (ifs_chars, (c)))
@@ -180,8 +186,11 @@ read_builtin (list)
 	  c = rlbuf[rlind++];
 	}
       else
-#endif   
-      if (read (0, &c, 1) != 1)
+#endif
+
+      while (((retval = read (0, &c, 1)) < 0) && errno == EINTR)
+        ;
+      if (retval <= 0)
 	{
 	  eof = 1;
 	  break;

@@ -248,7 +248,7 @@ main (argc, argv, env)
      char **argv, **env;
 {
   register int i;
-  int code;
+  int code, saverst;
   volatile int locally_skip_execution;
   volatile int arg_index, top_level_arg_index;
 
@@ -459,6 +459,13 @@ main (argc, argv, env)
       interactive = 1;
     }
 
+#if defined (RESTRICTED_SHELL)
+  /* If the `-r' option is supplied at invocation, make sure that the shell
+     is not in restricted mode when running the startup files. */
+    saverst = restricted;
+    restricted = 0;
+#endif
+
   if (locally_skip_execution == 0 && running_setuid == 0)
     run_startup_files ();
 
@@ -473,7 +480,10 @@ main (argc, argv, env)
     }
 
 #if defined (RESTRICTED_SHELL)
-  /* Turn on the restrictions after parsing the startup files. */
+  /* Turn on the restrictions after parsing the startup files.  This
+     means that `bash -r' or `set -r' invoked from a startup file will
+     turn on the restrictions after the startup files are executed. */
+  restricted = saverst || restricted;
   maybe_make_restricted (shell_name);
 #endif /* RESTRICTED_SHELL */
 

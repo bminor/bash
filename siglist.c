@@ -20,7 +20,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "config.h"
 
-#if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
+#if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_UNDER_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
 
 #include <stdio.h>
 #include "bashtypes.h"
@@ -225,4 +225,4 @@ initialize_siglist ()
 	}
     }
 }
-#endif /* !HAVE_SYS_SIGLIST && !HAVE_STRSIGNAL */
+#endif /* !HAVE_SYS_SIGLIST && !HAVE_UNDER_SYS_SIGLIST && !HAVE_STRSIGNAL */

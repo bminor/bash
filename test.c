@@ -42,6 +42,11 @@
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
+
 #if !defined (_POSIX_VERSION)
 #  include <sys/file.h>
 #endif /* !_POSIX_VERSION */
@@ -54,11 +59,6 @@
 #if !defined (STRLEN)
 #  define STRLEN(s) ((s)[0] ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
 #endif
-
-#include <errno.h>
-#if !defined (errno)
-extern int errno;
-#endif /* !errno */
 
 #if !defined (STREQ)
 #  define STREQ(a, b) ((a)[0] == (b)[0] && strcmp (a, b) == 0)

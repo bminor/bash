@@ -369,8 +369,10 @@ declare_internal (list, local_var)
 	    assign_array_var_from_string (var, value);
 	  else
 #endif
+	  /* This essentially duplicates the internals of bind_variable() */
 	  if (offset)
 	    {
+	      var->attributes &= ~att_invisible;
 	      t = make_variable_value (var, value);
 	      FREE (var->value);
 	      var->value = t;

@@ -133,8 +133,9 @@ int restricted = 0;
 #endif /* RESTRICTED_SHELL */
 
 /* Non-zero means that this shell is running in `privileged' mode.  This
-   mode is entered on startup if the real and effective uids or gids
-   differ. */
+   is required if the shell is to run setuid.  If the `-p' option is
+   not supplied at startup, and the real and effective uids or gids
+   differ, disable_priv_mode is called to relinquish setuid status. */
 int privileged_mode = 0;
 
 #if defined (BRACE_EXPANSION)

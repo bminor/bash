@@ -150,7 +150,7 @@ add_mail_file (file, msg)
   int i;
 
   filename = full_pathname (file);
-  i = find_mail_file (file);
+  i = find_mail_file (filename);
   if (i >= 0)
     {
       if (stat (filename, &finfo) == 0)

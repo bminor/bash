@@ -276,18 +276,22 @@ xtrace_print_word_list (list)
      WORD_LIST *list;
 {
   WORD_LIST *w;
-  char *t;
+  char *t, *x;
 
   fprintf (stderr, "%s", indirection_level_string ());
   for (w = list; w; w = w->next)
     {
       t = w->word->word;
       if (t == 0 || *t == '\0')
-        fprintf (stderr, "''%s", w->next ? " " : "");
+	fprintf (stderr, "''%s", w->next ? " " : "");
       else if (contains_shell_metas (t))
-        fprintf (stderr, "'%s'%s", t, w->next ? " " : "");
+	{
+	  x = single_quote (t);
+	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
+	  free (x);
+	}
       else
-        fprintf (stderr, "%s%s", t, w->next ? " " : "");
+	fprintf (stderr, "%s%s", t, w->next ? " " : "");
     }
   fprintf (stderr, "\n");
 }

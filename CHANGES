@@ -1,3 +1,106 @@
+This document details the changes between this version, bash-2.01.1-release,
+and the previous version, bash-2.01-release.
+
+1.  Changes to Bash
+
+a.  The select command was fixed to check the validity of the user's
+    input more strenuously.
+
+b.  A bug was fixed that prevented `time' from timing commands correctly
+    when supplied as an argument to `bash -c'.
+
+c.  A fix was made to the mail checking code to keep from adding the same
+    mail file to the list of files to check multiple times when parsing
+    $MAILPATH.
+
+d.  Fixed an off-by-one error in the tilde expansion library.
+
+e.  When using the compound array assignment syntax, the old value of
+    the array is cleared before assigning the new value.
+
+f.  Fixed a bug that could cause a core dump when a trap handler was reset
+    to the default in the trap command associated with that signal.
+
+g.  Fixed a bug in the locale code that occurred when assigning a value
+    to LC_ALL.
+
+h.  A change was made to the parser so that words of the form xxx=(...)
+    are not considered compound assignment statements unless there are
+    characters before the `='.
+
+i.  A fix was made to the command tracing code to correctly quote each
+    word of output.
+
+j.  Some changes were made to the bash-specific autoconf tests to make them
+    more portable.
+
+k.  Completion of words with globbing characters now correctly quotes the
+    result.
+
+l.  The directory /var/spool/mail is now preferred to /usr/spool/mail when
+    configure is deciding on the default mail directory.
+
+m.  The brace completion code was fixed to not quote the `{' and `}'.
+
+n.  Some fixes were made to make $RANDOM more random in subshells.
+
+o.  System-specific changes were made to configure for: SVR4.2
+
+p.  Changes were made so that completion of words containing globbing chars
+    substitutes the result only if a single filename was matched.
+
+q.  The window size is now recomputed after a job is stopped with SIGTSTP if
+    the user has set `checkwinsize' with `shopt'.
+
+r.  When doing substring expansion, out-of-range substring specifiers now
+    cause nothing to be substituted rather than an expansion error.
+
+s.  A fix was made so that you can no longer trap `SIGEXIT' or `SIGDEBUG' --
+    only `EXIT' and `DEBUG' are accepted.
+
+t.  The display of trapped signals now uses the signal number if signals
+    for which bash does not know the name are trapped.
+
+u.  A fix was made so that `bash -r' does not turn on restricted mode until
+    after the startup files are executed.
+
+v.  A bug was fixed that occasionally caused a core dump when a variable
+    found in the temporary environment of export/declare/readonly had a
+    null value.
+
+w.  A bug that occasionally caused unallocated memory to be passed to free()
+    when doing arithmetic substitution was fixed.
+
+x.  A bug that caused a buffer overrun when expanding a prompt string
+    containing `\w' and ${#PWD} exceeded PATH_MAX was fixed.
+
+y.  A problem with the completion code that occasionally caused it to
+    refer to a character before the beginning of the readline line buffer
+    was fixed.
+
+z.  A bug was fixed so that the `read' builtin restarts reads when
+    interrupted by signals other than SIGINT.
+
+aa. Fixed a bug that caused a command to be freed twice when there was
+    an evaluation error in the `eval' command.
+
+2.  Changes to Readline
+
+a.  Added a missing `extern' to a declaration in readline.h that kept
+    readline from compiling cleanly on some systems.
+
+b.  The history file is now opened with mode 0600 when it is written for
+    better security.
+
+c.  Changes were made to the SIGWINCH handling code so that prompt redisplay
+    is done better.
+
+d.  ^G now interrupts incremental searches correctly.
+
+e.  A bug that caused a core dump when the set of characters to be quoted
+    when completing words was empty was fixed.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-2.01-release,
 and the previous version, bash-2.01-beta2.
 

@@ -3506,7 +3506,9 @@ parameter_brace_expand_length (name)
 /* Verify and limit the start and end of the desired substring.  If
    VTYPE == 0, a regular shell variable is being used; if it is 1,
    then the positional paramters are being used; if it is 2, then
-   VALUE is really a pointer to an array variable that should be used. */
+   VALUE is really a pointer to an array variable that should be used.
+   Return value is 1 if both values were OK, 0 if there was a problem
+   with an invalid expression, or -1 if the values were out of range. */
 static int
 verify_substring_values (value, substr, vtype, e1p, e2p)
      char *value, *substr;
@@ -3548,7 +3550,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
     *e1p += len;
 
   if (*e1p >= len || *e1p < 0)
-    return (0);
+    return (-1);
 
   if (t)
     {
@@ -3672,7 +3674,7 @@ parameter_brace_substring (varname, value, substr, quoted)
      char *varname, *value, *substr;
      int quoted;
 {
-  int e1, e2, vtype;
+  int e1, e2, vtype, r;
   char *temp, *val;
   SHELL_VAR *v;
 
@@ -3685,11 +3687,12 @@ parameter_brace_substring (varname, value, substr, quoted)
   if (vtype == -1)
     return ((char *)NULL);
 
-  if (verify_substring_values (val, substr, vtype, &e1, &e2) == 0)
+  r = verify_substring_values (val, substr, vtype, &e1, &e2);
+  if (r <= 0)
     {
       if (val && vtype == VT_ARRAYMEMBER)
 	free (val);
-      return (&expand_param_error);
+      return ((r == 0) ? &expand_param_error : (char *)NULL);
     }
 
   switch (vtype)
@@ -4506,11 +4509,14 @@ expand_word_internal (word, quoted, contains_dollar_at, expanded_something)
 	         extract the expression and pass it to the evaluator. */
 	      if (temp && *temp == '(')
 		{
+		  char *temp2;
 		  temp1 = temp + 1;
-		  t_index = strlen (temp1) - 1;
+		  temp2 = savestring (temp1);
+		  t_index = strlen (temp2) - 1;
 
-		  if (temp1[t_index] != ')')
+		  if (temp2[t_index] != ')')
 		    {
+		      free (temp2);
 #if 0
 		      report_error ("%s: bad arithmetic substitution", temp);
 		      free (temp);
@@ -4523,10 +4529,11 @@ expand_word_internal (word, quoted, contains_dollar_at, expanded_something)
 		    }
 
 		  /* Cut off ending `)' */
-		  temp1[t_index] = '\0';
+		  temp2[t_index] = '\0';
 
 		  /* Expand variables found inside the expression. */
-		  temp1 = maybe_expand_string (temp1, Q_DOUBLE_QUOTES, expand_string);
+		  temp1 = maybe_expand_string (temp2, Q_DOUBLE_QUOTES, expand_string);
+		  free (temp2);
 
 		  /* No error messages. */
 		  this_command_name = (char *)NULL;

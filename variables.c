@@ -907,7 +907,11 @@ static int
 brand ()
 {
   rseed = rseed * 1103515245 + 12345;
+#if 0
   return ((unsigned int)(rseed / 65536) % 32768);
+#else
+  return ((unsigned int)(rseed % 32768));
+#endif
 }
 
 /* Set the random number generator seed to SEED. */
@@ -916,6 +920,7 @@ sbrand (seed)
      int seed;
 {
   rseed = seed;
+  last_random_value = 0;
 }
 
 static SHELL_VAR *
@@ -936,7 +941,7 @@ get_random (var)
 
   /* Reset for command and process substitution. */
   if (subshell_environment)
-    sbrand ((int)(getpid() + NOW));
+    sbrand (rseed + (int)(getpid() + NOW));
 
   do
     rv = brand ();
@@ -1462,6 +1467,10 @@ assign_array_from_string (name, value)
     }
   else if (array_p (var) == 0)
     var = convert_var_to_array (var);
+#if 0
+  else
+    empty_array (array_cell (var));
+#endif
 
   return (assign_array_var_from_string (var, value));
 }
@@ -1508,6 +1517,13 @@ assign_array_var_from_string (var, value)
     }
   else
     nlist = expand_string (value, 0);
+
+#if 1
+  /* Now that we are ready to assign values to the array, kill the existing
+     value. */
+  if (a)
+    empty_array (a);
+#endif
 
   for (last_ind = 0, list = nlist; list; list = list->next)
     {

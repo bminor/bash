@@ -326,7 +326,7 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
   else
     {
-      x = double_quote (value_cell (var));
+      x = double_quote (value_cell (var) ? value_cell (var) : "");
       printf ("%s=%s\n", var->name, x);
       free (x);
     }
@@ -366,7 +366,7 @@ set_var_attribute (name, attribute, undo)
     {
       if (tv = find_tempenv_variable (name))
 	{
-	  var = bind_variable (tv->name, tv->value);
+	  var = bind_variable (tv->name, tv->value ? tv->value : "");
 	  dispose_variable (tv);
 	}
       else

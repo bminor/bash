@@ -112,7 +112,7 @@ strrchr (string, c)
    doesn't matter. */
 int
 strncasecmp (string1, string2, count)
-     char *string1, *string2;
+     const char *string1, *string2;
      int count;
 {
   register char *s1, *s2;
@@ -120,8 +120,8 @@ strncasecmp (string1, string2, count)
 
   if (count > 0)
     {
-      s1 = string1;
-      s2 = string2;
+      s1 = (char *)string1;
+      s2 = (char *)string2;
       do
 	{
 	  if ((r = to_lower (*s1) - to_lower (*s2)) != 0)
@@ -138,13 +138,13 @@ strncasecmp (string1, string2, count)
 /* strcmp (), but caseless. */
 int
 strcasecmp (string1, string2)
-     char *string1, *string2;
+     const char *string1, *string2;
 {
   register char *s1, *s2;
   register int r;
 
-  s1 = string1;
-  s2 = string2;
+  s1 = (char *)string1;
+  s2 = (char *)string2;
 
   while ((r = to_lower (*s1) - to_lower (*s2)) == 0)
     {

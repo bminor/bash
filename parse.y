@@ -2529,7 +2529,7 @@ read_token_word (character)
 
 #if defined (ARRAY_VARS)
       /* Identify possible compound array variable assignment. */
-      else if (character == '=')
+      else if (character == '=' && token_index > 0)
 	{
 	  peek_char = shell_getc (1);
 	  if (peek_char == '(')		/* ) */
@@ -3077,6 +3077,7 @@ decode_prompt_string (string)
 	      {
 		/* Use the value of PWD because it is much more efficient. */
 		char t_string[PATH_MAX];
+		int tlen;
 
 		temp = get_string_value ("PWD");
 
@@ -3085,11 +3086,17 @@ decode_prompt_string (string)
 		    if (getcwd (t_string, sizeof(t_string)) == 0)
 		      {
 		        t_string[0] = '.';
-		        t_string[1] = '\0';
+			tlen = 1;
 		      }
+		    else
+		      tlen = strlen (t_string);
 		  }
 		else
-		  strcpy (t_string, temp);
+		  {
+		    tlen = sizeof (t_string) - 1;
+		    strncpy (t_string, temp, tlen);
+		  }
+		t_string[tlen] = '\0';
 
 		if (c == 'W')
 		  {
@@ -3098,6 +3105,8 @@ decode_prompt_string (string)
 		      strcpy (t_string, t + 1);
 		  }
 		else
+		  /* polite_directory_format is guaranteed to return a string
+		     no longer than PATH_MAX - 1 characters. */
 		  strcpy (t_string, polite_directory_format (t_string));
 
 		/* If we're going to be expanding the prompt string later,

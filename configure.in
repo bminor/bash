@@ -6,7 +6,7 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl checks for version info
 
-AC_REVISION([for Bash 2.01, version 1.26, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 2.01, version 1.28, from autoconf version] AC_ACVERSION)dnl
 
 AC_INIT(shell.h)
 AC_CONFIG_HEADER(config.h)
@@ -38,7 +38,7 @@ alpha-*)	opt_gnu_malloc=no ;;	# alpha running osf/1 or linux
 *-osf1*)	opt_gnu_malloc=no ;;	# other osf/1 machines
 sparc-svr4*)	opt_gnu_malloc=no ;;	# sparc SVR4, SVR4.2
 sparc-netbsd*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
-*-sgi-irix6*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
+sgi-irix6*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
 sparc-linux*)	opt_gnu_malloc=no ;;	# sparc running linux; requires ELF
 *-freebsd*)	opt_gnu_malloc=no ;;	# they claim it's better
 *-aix*)		opt_gnu_malloc=no ;;	# AIX machines
@@ -46,7 +46,7 @@ sparc-linux*)	opt_gnu_malloc=no ;;	# sparc running linux; requires ELF
 *-dgux*)	opt_gnu_malloc=no ;;	# DG/UX machines
 *-qnx*)		opt_gnu_malloc=no ;;	# QNX 4.2
 *-machten4)	opt_gnu_malloc=no ;;	# MachTen 4.x
-*-bsdi2.1)	opt_gnu_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+*-bsdi2.1|*-bsdi3.0)	opt_gnu_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
 esac
 
 dnl arguments to configure
@@ -456,7 +456,7 @@ dnl
 dnl this should really go away someday
 
 case "$host_os" in
-sysv4.2)	AC_DEFINE(SVR4_2)
+sysv4.2*)	AC_DEFINE(SVR4_2)
 		AC_DEFINE(SVR4) ;;
 sysv4*)		AC_DEFINE(SVR4) ;;
 hpux*)		LOCAL_CFLAGS=-DHPUX ;;

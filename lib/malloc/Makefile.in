@@ -91,8 +91,8 @@ stubmalloc: ${STUB_OBJS}
 	${AR} cr libmalloc.a ${STUB_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
-alloca.o:	$(ALLOCA_SOURCE)
-	$(CC) $(CCFLAGS) -c $(ALLOCA_SOURCE)
+alloca.o:	$(srcdir)/$(ALLOCA_SOURCE)
+	$(CC) $(CCFLAGS) -c $(srcdir)/$(ALLOCA_SOURCE)
 	@- if test "$(ALLOCA_OBJECT)" != alloca.o ; then \
 		mv $(ALLOCA_OBJECT) alloca.o >/dev/null 2>&1 ; \
 	fi
@@ -103,12 +103,14 @@ mostlyclean clean:
 distclean realclean maintainer-clean: clean
 	$(RM) Makefile
 
-malloc.o: malloc.c
-gmalloc.o: gmalloc.c
-
 alloca.o: $(BUILD_DIR)/config.h
 malloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 nmalloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 nmalloc2.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 xmalloc.o: $(BUILD_DIR)/config.h $(topdir)/ansi_stdlib.h
 gmalloc.o: $(BUILD_DIR)/config.h
+
+# Rules for deficient makes, like SunOS and Solaris
+stub.o: stub.c
+malloc.o: malloc.c
+gmalloc.o: gmalloc.c

@@ -36,6 +36,8 @@
 #include "shell.h"
 #include <readline/readline.h>
 
+extern char *backslash_quote ();
+
 /* Find greatest common prefix of two strings. */
 static int
 string_gcd (s1, s2)
@@ -61,20 +63,19 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
      int real_start, real_end, gcd_zero;
 {
   int start, end, gcd;
-  char *result, *subterm;
-  int result_size, flag;
+  char *result, *subterm, *x;
+  int result_size, flag, tlen;
 
   flag = 0;
 
   if (real_start == real_end)
     {
-      if (array[real_start])
-        return (savestring (array[real_start] + gcd_zero));
-      else
-        return (savestring (array[0]));
+      x = array[real_start] ? backslash_quote (array[real_start] + gcd_zero)
+ 			    : backslash_quote (array[0]);
+      return x;
     }
 
-  result = xmalloc (result_size = 1);
+  result = xmalloc (result_size = 16);
   *result = '\0';
 
   for (start = real_start; start < real_end; start = end + 1)
@@ -103,15 +104,29 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  flag++;
 	}
 
+      /* Make sure we backslash quote every substring we insert into the
+	 resultant brace expression.  This is so the default filename
+	 quoting function won't inappropriately quote the braces. */
       if (start == end)
-	subterm = savestring (array[start] + gcd_zero);
+	{
+	  x = savestring (array[start] + gcd_zero);
+	  subterm = backslash_quote (x);
+	  free (x);
+	}
       else
 	{
 	  /* If there is more than one element in the subarray,
-	     insert the prefix and an opening brace. */
-	  result_size += gcd - gcd_zero + 1;
+	     insert the (quoted) prefix and an opening brace. */
+	  tlen = gcd - gcd_zero;
+	  x = xmalloc (tlen + 1);
+	  strncpy (x, array[start] + gcd_zero, tlen);
+	  x[tlen] = '\0';
+	  subterm = backslash_quote (x);
+	  free (x);
+	  result_size += strlen (subterm) + 1;
 	  result = xrealloc (result, result_size);
-	  strncat (result, array[start] + gcd_zero, gcd - gcd_zero);
+	  strcat (result, subterm);
+	  free (subterm);
 	  strcat (result, "{");
 	  subterm = really_munge_braces (array, start, end + 1, gcd);
 	  subterm[strlen (subterm) - 1] = '}';
@@ -146,25 +161,35 @@ hack_braces_completion (names)
   names[0] = temp;
 }
 
+/* We handle quoting ourselves within hack_braces_completion, so we turn off
+   rl_filename_quoting_desired and rl_filename_quoting_function. */
 void
 bash_brace_completion ()
 {
   Function *orig_ignore_func;
   Function *orig_entry_func;
+  CPFunction *orig_quoting_func;
   CPPFunction *orig_attempt_func;
+  int orig_quoting_desired;
 
   orig_ignore_func = rl_ignore_some_completions_function;
   orig_attempt_func = rl_attempted_completion_function;
   orig_entry_func = rl_completion_entry_function;
+  orig_quoting_func = rl_filename_quoting_function;
+  orig_quoting_desired = rl_filename_quoting_desired;
 
   rl_completion_entry_function = (Function *) filename_completion_function;
   rl_attempted_completion_function = NULL;
   rl_ignore_some_completions_function = (Function *) hack_braces_completion;
+  rl_filename_quoting_function = NULL;
+  rl_filename_quoting_desired = 0;
 
   rl_complete_internal (TAB);
 
   rl_ignore_some_completions_function = orig_ignore_func;
   rl_attempted_completion_function = orig_attempt_func;
   rl_completion_entry_function = orig_entry_func;
+  rl_filename_quoting_function = orig_quoting_func;
+  rl_filename_quoting_desired = orig_quoting_desired;
 }
 #endif /* BRACE_EXPANSION && READLINE */

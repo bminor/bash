@@ -23,14 +23,14 @@
 
 #include <stdio.h>
 
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "bashtypes.h"
 #include "trap.h"
 
 #include "bashansi.h"
-
-#if defined (HAVE_UNISTD_H)
-#  include <unistd.h>
-#endif
 
 #include "shell.h"
 #include "signames.h"
@@ -151,9 +151,11 @@ decode_signal (string)
   if (legal_number (string, &sig))
     return ((sig >= 0 && sig <= NSIG) ? (int)sig : NO_SIG);
 
+  /* A leading `SIG' may be omitted. */
   for (sig = 0; sig <= NSIG; sig++)
     if (strcasecmp (string, signal_names[sig]) == 0 ||
-	strcasecmp (string, &(signal_names[sig])[3]) == 0)
+	(STREQN (signal_names[sig], "SIG", 3) &&
+	  strcasecmp (string, &(signal_names[sig])[3]) == 0))
       return ((int)sig);
 
   return (NO_SIG);
@@ -298,6 +300,20 @@ set_sigint_handler ()
     return (set_signal_handler (SIGINT, sigint_sighandler));
   else
     return (set_signal_handler (SIGINT, termination_unwind_protect));
+}
+
+/* Return the correct handler for signal SIG according to the values in
+   sigmodes[SIG]. */
+SigHandler *
+trap_to_sighandler (sig)
+     int sig;
+{
+  if (sigmodes[sig] & (SIG_IGNORED|SIG_HARD_IGNORE))
+    return (SIG_IGN);
+  else if (sigmodes[sig] & SIG_TRAPPED)
+    return (trap_handler);
+  else
+    return (SIG_DFL);
 }
 
 /* Set SIG to call STRING as a command. */

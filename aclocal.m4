@@ -197,8 +197,26 @@ fi
 dnl
 dnl Check for sys_siglist[] or _sys_siglist[]
 dnl
+AC_DEFUN(BASH_DECL_UNDER_SYS_SIGLIST,
+[AC_MSG_CHECKING([for _sys_siglist in signal.h or unistd.h])
+AC_CACHE_VAL(bash_cv_decl_under_sys_siglist,
+[AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <signal.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif], [ char *msg = _sys_siglist[2]; ],
+  bash_cv_decl_under_sys_siglist=yes, bash_cv_decl_under_sys_siglist=no,
+AC_MSG_ERROR(cannot check for _sys_siglist[] if cross compiling))])dnl
+AC_MSG_RESULT($bash_cv_decl_under_sys_siglist)
+if test $bash_cv_decl_under_sys_siglist = yes; then
+AC_DEFINE(UNDER_SYS_SIGLIST_DECLARED)
+fi
+])
+
 AC_DEFUN(BASH_UNDER_SYS_SIGLIST,
-[AC_MSG_CHECKING([for _sys_siglist in system C library])
+[AC_REQUIRE([BASH_DECL_UNDER_SYS_SIGLIST])
+AC_MSG_CHECKING([for _sys_siglist in system C library])
 AC_CACHE_VAL(bash_cv_under_sys_siglist,
 [AC_TRY_RUN([
 #include <sys/types.h>
@@ -206,12 +224,12 @@ AC_CACHE_VAL(bash_cv_under_sys_siglist,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifndef _sys_siglist
+#ifndef UNDER_SYS_SIGLIST_DECLARED
 extern char *_sys_siglist[];
 #endif
 main()
 {
-char *msg = _sys_siglist[2];
+char *msg = (char *)_sys_siglist[2];
 exit(msg == 0);
 }],
 bash_cv_under_sys_siglist=yes, bash_cv_under_sys_siglist=no,
@@ -434,7 +452,7 @@ typedef int (*_bashfunc)();
 main()
 {
 _bashfunc pf;
-pf = printf;
+pf = (_bashfunc) printf;
 exit(pf == 0);
 }
 ],bash_cv_printf_declared=yes, bash_cv_printf_declared=no,
@@ -911,7 +929,10 @@ AC_DEFUN(BASH_CHECK_GETPW_FUNCS,
 AC_CACHE_VAL(bash_cv_can_redecl_getpw,
 [AC_TRY_COMPILE([#include <sys/types.h>
 #include <pwd.h>
-extern struct passwd *getpwent();], [struct passwd *z; z = getpwent();],
+extern struct passwd *getpwent();
+extern struct passwd *getpwuid();
+extern struct passwd *getpwnam();],
+[struct passwd *z; z = getpwent(); z = getpwuid(0); z = getpwnam("root");],
   bash_cv_can_redecl_getpw=yes,bash_cv_can_redecl_getpw=no)])
 AC_MSG_RESULT($bash_cv_can_redecl_getpw)
 if test $bash_cv_can_redecl_getpw = no; then
@@ -994,10 +1015,10 @@ AC_CACHE_VAL(bash_cv_mail_dir,
    bash_cv_mail_dir=/var/mail
  elif test -d /usr/mail; then
    bash_cv_mail_dir=/usr/mail
- elif test -d /usr/spool/mail; then
-   bash_cv_mail_dir=/usr/spool/mail
  elif test -d /var/spool/mail; then
    bash_cv_mail_dir=/var/spool/mail
+ elif test -d /usr/spool/mail; then
+   bash_cv_mail_dir=/usr/spool/mail
  else
    bash_cv_mail_dir=unknown
  fi

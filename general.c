@@ -844,8 +844,9 @@ polite_directory_format (name)
   l = home ? strlen (home) : 0;
   if (l > 1 && strncmp (home, name, l) == 0 && (!name[l] || name[l] == '/'))
     {
-      strcpy (tdir + 1, name + l);
+      strncpy (tdir + 1, name + l, sizeof(tdir) - 2);
       tdir[0] = '~';
+      tdir[sizeof(tdir) - 1] = '\0';
       return (tdir);
     }
   else

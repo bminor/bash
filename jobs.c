@@ -1694,7 +1694,15 @@ wait_for (pid)
       if (interactive_shell && subshell_environment == 0)
 	{
 	  if (WIFSIGNALED (child->status) || WIFSTOPPED (child->status))
-	    set_tty_state ();
+	    {
+	      set_tty_state ();
+	      /* If the foreground job was suspended with ^Z (SIGTSTP), and
+		 the user has requested it, get a new window size. */
+	      if (check_window_size && WIFSTOPPED (child->status) &&
+		    (WSTOPSIG (child->status) == SIGTSTP) &&
+		    job == current_job)
+		get_new_window_size (0);
+	    }
 	  else
 	    get_tty_state ();
 
@@ -2318,6 +2326,13 @@ waitchld (wpid, block)
 		     the signal to ourselves. */
 		  SigHandler *temp_handler;
 		  temp_handler = old_sigint_handler;
+		  /* Bogus.  If we've reset the signal handler as the result
+		     of a trap caught on SIGINT, then old_sigint_handler
+		     will point to trap_handler, which now knows nothing about
+		     SIGINT (if we reset the sighandler to the default).
+		     In this case, we have to fix things up.  What a crock. */
+		  if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
+		    temp_handler = trap_to_sighandler (SIGINT);
 		  restore_sigint_handler ();
 		  if (temp_handler == SIG_DFL)
 		    termination_unwind_protect (SIGINT);

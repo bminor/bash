@@ -191,7 +191,7 @@ static void
 showtrap (i)
      int i;
 {
-  char *t, *p;
+  char *t, *p, *sn;
 
   p = trap_list[i];
 
@@ -199,9 +199,15 @@ showtrap (i)
     return;
 
   t = (p == (char *)IGNORE_SIG) ? (char *)NULL : single_quote (p);
-  printf ("trap -- %s %s\n", t ? t : "''", signal_name (i));
-  if (t)
-    free (t);
+  sn = signal_name (i);
+  /* Make sure that signals whose names are unknown (for whatever reason)
+     are printed as signal numbers. */
+  if (STREQN (sn, "SIGJUNK", 7) || STREQN (sn, "unknown", 7))
+    printf ("trap -- %s %d\n", t ? t : "''", i);
+  else
+    printf ("trap -- %s %s\n", t ? t : "''", sn);
+
+  FREE (t);
 }
 
 static int

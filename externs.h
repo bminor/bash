@@ -98,8 +98,8 @@ extern char *strerror __P((int));
 #endif
 
 #if !defined (HAVE_STRCASECMP)
-extern int strncasecmp __P((char *, char *, int));
-extern int strcasecmp __P((char *, char *));
+extern int strncasecmp __P((const char *, const char *, int));
+extern int strcasecmp __P((const char *, const char *));
 #endif /* HAVE_STRCASECMP */
 
 extern int dup2 __P((int, int));

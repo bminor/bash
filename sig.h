@@ -118,5 +118,7 @@ extern void jump_to_top_level __P((int));
 
 /* Functions defined in trap.c. */
 extern SigHandler *set_sigint_handler __P((void));
+extern SigHandler *trap_to_sighandler __P((int));
+extern sighandler trap_handler __P((int));
 
 #endif /* _SIG_H_ */
