@@ -31,12 +31,17 @@
 extern size_t xmbsrtowcs __P((wchar_t *, const char **, size_t, mbstate_t *));
 extern size_t xdupmbstowcs __P((wchar_t **, char ***, const char *));
 
+extern size_t mbstrlen __P((const char *));
+
 extern char *xstrchr __P((const char *, int));
 
 #ifndef MB_INVALIDCH
 #define MB_INVALIDCH(x)		((x) == (size_t)-1 || (x) == (size_t)-2)
 #define MB_NULLWCH(x)		((x) == 0)
 #endif
+
+#define MBSLEN(s)	(((s) && (s)[0]) ? ((s)[1] ? mbstrlen (s) : 1) : 0)
+#define MB_STRLEN(s)	((MB_CUR_MAX > 1) ? MBSLEN (s) : STRLEN (s))
 
 #else /* !HANDLE_MULTIBYTE */
 
@@ -53,6 +58,8 @@ extern char *xstrchr __P((const char *, int));
 #define MB_INVALIDCH(x)		(0)
 #define MB_NULLWCH(x)		(0)
 #endif
+
+#define MB_STRLEN(s)		(STRLEN(s))
 
 #endif /* !HANDLE_MULTIBYTE */
 

@@ -4691,6 +4691,26 @@ valid_length_expression (name)
 	  legal_identifier (name + 1));				/* ${#PS1} */
 }
 
+#if defined (HANDLE_MULTIBYTE)
+size_t
+mbstrlen (s)
+     const char *s;
+{
+  size_t clen, nc;
+  mbstate_t mbs;
+
+  nc = 0;
+  memset (&mbs, 0, sizeof (mbs));
+  while ((clen = mbrlen(s, MB_CUR_MAX, &mbs)) != 0 && (MB_INVALIDCH(clen) == 0))
+    {
+      s += clen;
+      nc++;
+    }
+  return nc;
+}
+#endif
+      
+
 /* Handle the parameter brace expansion that requires us to return the
    length of a parameter. */
 static intmax_t
@@ -4746,14 +4766,14 @@ parameter_brace_expand_length (name)
       if (legal_number (name + 1, &arg_index))		/* ${#1} */
 	{
 	  t = get_dollar_var_value (arg_index);
-	  number = STRLEN (t);
+	  number = MB_STRLEN (t);
 	  FREE (t);
 	}
 #if defined (ARRAY_VARS)
-      else if ((var = find_variable (name + 1)) && array_p (var))
+      else if ((var = find_variable (name + 1)) && (invisible_p (var) == 0) && array_p (var))
 	{
 	  t = array_reference (array_cell (var), 0);
-	  number = STRLEN (t);
+	  number = MB_STRLEN (t);
 	}
 #endif
       else				/* ${#PS1} */
@@ -4766,7 +4786,7 @@ parameter_brace_expand_length (name)
 	  if (list)
 	    dispose_words (list);
 
-	  number = STRLEN (t);
+	  number = MB_STRLEN (t);
 	  FREE (t);
 	}
     }
@@ -4871,7 +4891,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
     {
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
-      len = strlen (value);
+      len = MB_STRLEN (value);
       break;
     case VT_POSPARMS:
       len = number_of_args () + 1;
@@ -4879,8 +4899,9 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       a = (ARRAY *)value;
-      /* For arrays, the first value deals with array indices. */
-      len = array_max_index (a);	/* arrays index from 0 to n - 1 */
+      /* For arrays, the first value deals with array indices.  Negative
+	 offsets count from one past the array's maximum index. */
+      len = array_max_index (a) + (*e1p < 0);	/* arrays index from 0 to n - 1 */
       break;
 #endif
     }
@@ -4891,7 +4912,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   if (*e1p < 0)		/* negative offsets count from end */
     *e1p += len;
 
-  if (*e1p >= len || *e1p < 0)
+  if (*e1p > len || *e1p < 0)
     return (-1);
 
 #if defined (ARRAY_VARS)
@@ -4982,7 +5003,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
       else
 	return -1;
     }
-  else if ((v = find_variable (varname)) && array_p (v))
+  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && array_p (v))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;

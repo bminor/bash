@@ -611,7 +611,7 @@ array_variable_part (s, subp, lenp)
   var = find_variable (t);
 
   free (t);
-  return var;
+  return (var == 0 || invisible_p (var)) ? (SHELL_VAR *)0 : var;
 }
 
 /* Return a string containing the elements in the array and subscript

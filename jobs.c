@@ -1778,8 +1778,13 @@ raw_job_exit_status (job)
   if (pipefail_opt)
     {
       fail = 0;
-      for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
-        if (p->status != EXECUTION_SUCCESS) fail = p->status;
+      p = jobs[job]->pipe;
+      do
+	{
+	  if (p->status != EXECUTION_SUCCESS) fail = p->status;
+	  p = p->next;
+	}
+      while (p != jobs[job]->pipe);
       return fail;
     }
 

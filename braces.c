@@ -340,8 +340,8 @@ expand_seqterm (text, tlen)
   
   if (lhs_t == ST_CHAR)
     {
-      lhs_v = lhs[0];
-      rhs_v = rhs[0];
+      lhs_v = (unsigned char)lhs[0];
+      rhs_v = (unsigned char)rhs[0];
     }
   else
     {
@@ -402,6 +402,8 @@ brace_gobbler (text, tlen, indx, satisfy)
 	{
 	  pass_next = 1;
 	  i++;
+	  if (quoted == 0)
+	    level++;
 	  continue;
 	}
 #endif

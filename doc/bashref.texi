@@ -5953,7 +5953,8 @@ The @code{trap} builtin displays signal names without the leading
 @item
 The @code{trap} builtin doesn't check the first argument for a possible
 signal specification and revert the signal handling to the original
-disposition if it is.  If users want to reset the handler for a given
+disposition if it is, unless that argument consists solely of digits and
+is a valid signal number.  If users want to reset the handler for a given
 signal to the original disposition, they should use @samp{-} as the
 first argument.
 

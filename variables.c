@@ -1419,11 +1419,11 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("GROUPS", get_groupset, null_array_assign, att_noassign);
 
 #  if defined (DEBUGGER)
-  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, (att_invisible|att_noassign));
-  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign);
+  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign);
 #  endif /* DEBUGGER */
-  v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, (att_invisible|att_noassign));
-  v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign);
+  v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign);
 #endif
 
   v = init_funcname_var ();
@@ -1599,7 +1599,10 @@ make_local_variable (name)
   /* local foo; local foo;  is a no-op. */
   old_var = find_variable (name);
   if (old_var && local_p (old_var) && old_var->context == variable_context)
-    return (old_var);
+    {
+      VUNSETATTR (old_var, att_invisible);
+      return (old_var);
+    }
 
   was_tmpvar = old_var && tempvar_p (old_var);
   if (was_tmpvar)

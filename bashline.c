@@ -100,6 +100,7 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
+static int bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
@@ -292,7 +293,7 @@ enable_hostname_completion (on_or_off)
       /* See if we have anything to do. */
       at = strchr (rl_completer_word_break_characters, '@');
       if ((at == 0 && on_or_off == 0) || (at != 0 && on_or_off != 0))
-        return;
+        return old_value;
 
       /* We have something to do.  Do it. */
       nval = (char *)xmalloc (strlen (rl_completer_word_break_characters) + 1 + on_or_off);
@@ -1406,10 +1407,19 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, tl, vl;
+	      int l, tl, vl, dl;
+	      char *rd;
 	      vl = strlen (val);
 	      tl = strlen (hint_text);
+#if 0
 	      l = vl - hint_len;	/* # of chars added */
+#else
+	      rd = savestring (filename_hint);
+	      bash_directory_expansion (&rd);
+	      dl = strlen (rd);
+	      l = vl - dl;		/* # of chars added */
+	      free (rd);
+#endif
 	      temp = (char *)xmalloc (l + 2 + tl);
 	      strcpy (temp, hint_text);
 	      strcpy (temp + tl, val + vl - l);
@@ -2187,6 +2197,27 @@ bash_ignore_everything (names)
   return 0;
 }
 
+/* Simulate the expansions that will be performed by
+   rl_filename_completion_function.  This must be called with the address of
+   a pointer to malloc'd memory. */
+static int
+bash_directory_expansion (dirname)
+     char **dirname;
+{
+  char *d;
+
+  d = savestring (*dirname);
+
+  if (rl_directory_rewrite_hook)
+    (*rl_directory_rewrite_hook) (&d);
+
+  if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
+    {
+      free (*dirname);
+      *dirname = d;
+    }
+}
+  
 /* Handle symbolic link references and other directory name
    expansions while hacking completion. */
 static int
@@ -2513,7 +2544,7 @@ glob_complete_word (text, state)
   static char **matches = (char **)NULL;
   static int ind;
   int glen;
-  char *ret;
+  char *ret, *ttext;
 
   if (state == 0)
     {
@@ -2523,17 +2554,22 @@ glob_complete_word (text, state)
 	FREE (globorig);
       FREE (globtext);
 
+      ttext = bash_tilde_expand (text, 0);
+
       if (rl_explicit_arg)
 	{
-	  globorig = savestring (text);
-	  glen = strlen (text);
+	  globorig = savestring (ttext);
+	  glen = strlen (ttext);
 	  globtext = (char *)xmalloc (glen + 2);
-	  strcpy (globtext, text);
+	  strcpy (globtext, ttext);
 	  globtext[glen] = '*';
 	  globtext[glen+1] = '\0';
 	}
       else
-        globtext = globorig = savestring (text);
+        globtext = globorig = savestring (ttext);
+
+      if (ttext != text)
+	free (ttext);
 
       matches = shell_glob_filename (globtext);
       if (GLOB_FAILED (matches))

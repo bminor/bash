@@ -451,7 +451,7 @@ char	*v;
 			 */
 			array_dispose_element(new);
 			free(element_value(ae));
-			ae->value = savestring(v);
+			ae->value = v ? savestring(v) : (char *)NULL;
 			return(0);
 		} else if (element_index(ae) > i) {
 			ADD_BEFORE(ae, new);
