@@ -33,24 +33,17 @@
 #include "filecntl.h"
 #include "bashansi.h"
 #include <stdio.h>
-#include <ctype.h>
+#include "chartypes.h"
 #include <errno.h>
 
 #include "shell.h"
 #include <tilde/tilde.h>
 
-#include "maxpath.h"
-
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
 
-#ifndef to_upper
-#  define to_upper(c) (islower(c) ? toupper(c) : (c))
-#  define to_lower(c) (isupper(c) ? tolower(c) : (c))
-#endif
-
-extern int interactive_shell, expand_aliases;
+extern int expand_aliases;
 extern int interrupt_immediately;
 extern int interactive_comments;
 extern int check_hashed_filenames;
@@ -102,8 +95,8 @@ string_to_rlimtype (s)
       neg = *s == '-';
       s++;
     }
-  for ( ; s && *s && digit (*s); s++)
-    ret = (ret * 10) + digit_value (*s);
+  for ( ; s && *s && DIGIT (*s); s++)
+    ret = (ret * 10) + TODIGIT (*s);
   return (neg ? -ret : ret);
 }
 
@@ -112,26 +105,27 @@ print_rlimtype (n, addnl)
      RLIMTYPE n;
      int addnl;
 {
-  char s[sizeof (RLIMTYPE) * 3 + 1];
-  int len;
+  char s[INT_STRLEN_BOUND (RLIMTYPE) + 1], *p;
 
-  if (n == 0)
-    {
-      printf ("0%s", addnl ? "\n" : "");
-      return;
-    }
+  p = s + sizeof(s);
+  *--p = '\0';
 
   if (n < 0)
     {
-      putchar ('-');
-      n = -n;
+      do
+	*--p = '0' - n % 10;
+      while ((n /= 10) != 0);
+
+      *--p = '-';
+    }
+  else
+    {
+      do
+	*--p = '0' + n % 10;
+      while ((n /= 10) != 0);
     }
 
-  len = sizeof (RLIMTYPE) * 3 + 1;
-  s[--len] = '\0';
-  for ( ; n != 0; n /= 10)
-    s[--len] = n % 10 + '0';
-  printf ("%s%s", s + len, addnl ? "\n" : "");
+  printf ("%s%s", p, addnl ? "\n" : "");
 }
 #endif /* RLIMTYPE */
 
@@ -149,7 +143,7 @@ all_digits (string)
   register char *s;
 
   for (s = string; *s; s++)
-    if (isdigit (*s) == 0)
+    if (DIGIT (*s) == 0)
       return (0);
 
   return (1);
@@ -157,7 +151,7 @@ all_digits (string)
 
 /* Return non-zero if the characters pointed to by STRING constitute a
    valid number.  Stuff the converted number into RESULT if RESULT is
-   a non-null pointer to a long. */
+   not null. */
 int
 legal_number (string, result)
      char *string;
@@ -169,7 +163,10 @@ legal_number (string, result)
   if (result)
     *result = 0;
 
+  errno = 0;
   value = strtol (string, &ep, 10);
+  if (errno)
+    return 0;	/* errno is set on overflow or underflow */
 
   /* Skip any trailing whitespace, since strtol does not. */
   while (whitespace (*ep))
@@ -198,13 +195,14 @@ legal_identifier (name)
      char *name;
 {
   register char *s;
+  unsigned char c;
 
-  if (!name || !*name || (legal_variable_starter (*name) == 0))
+  if (!name || !(c = *name) || (legal_variable_starter (c) == 0))
     return (0);
 
-  for (s = name + 1; *s; s++)
+  for (s = name + 1; (c = *s) != 0; s++)
     {
-      if (legal_variable_char (*s) == 0)
+      if (legal_variable_char (c) == 0)
 	return (0);
     }
   return (1);
@@ -379,27 +377,21 @@ move_to_high_fd (fd, check_new, maxfd)
    check up to the first newline, or SAMPLE_LEN, whichever comes first.
    All of the characters must be printable or whitespace. */
 
-#if !defined (isspace)
-#define isspace(c) ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) == '\f')
-#endif
-
-#if !defined (isprint)
-#define isprint(c) (isletter(c) || digit(c) || ispunct(c))
-#endif
-
 int
 check_binary_file (sample, sample_len)
-     unsigned char *sample;
+     char *sample;
      int sample_len;
 {
   register int i;
+  unsigned char c;
 
   for (i = 0; i < sample_len; i++)
     {
-      if (sample[i] == '\n')
+      c = sample[i];
+      if (c == '\n')
 	return (0);
 
-      if (isspace (sample[i]) == 0 && isprint (sample[i]) == 0)
+      if (ISSPACE (c) == 0 && ISPRINT (c) == 0)
 	return (1);
     }
 
@@ -434,7 +426,7 @@ make_absolute (string, dot_path)
    to decide whether or not to look up a directory name in $CDPATH. */
 int
 absolute_pathname (string)
-     char *string;
+     const char *string;
 {
   if (string == 0 || *string == '\0')
     return (0);
@@ -456,7 +448,7 @@ absolute_pathname (string)
    up through $PATH. */
 int
 absolute_program (string)
-     char *string;
+     const char *string;
 {
   return ((char *)strchr (string, '/') != (char *)NULL);
 }
@@ -561,7 +553,7 @@ extract_colon_unit (string, p_index)
       if (string[i])
 	(*p_index)++;
       /* Return "" in the case of a trailing `:'. */
-      value = xmalloc (1);
+      value = (char *)xmalloc (1);
       value[0] = '\0';
     }
   else
@@ -579,6 +571,10 @@ extract_colon_unit (string, p_index)
 #if defined (PUSHD_AND_POPD)
 extern char *get_dirstack_from_string __P((char *));
 #endif
+
+/* Reserved for post-bash-2.05a */
+static char **bash_tilde_prefixes;
+static char **bash_tilde_suffixes;
 
 /* If tilde_expand hasn't been able to expand the text, perhaps it
    is a special shell expansion.  This function is installed as the
@@ -598,7 +594,7 @@ bash_special_tilde_expansions (text)
   else if (text[0] == '-' && text[1] == '\0')
     result = get_string_value ("OLDPWD");
 #if defined (PUSHD_AND_POPD)
-  else if (isdigit (*text) || ((*text == '+' || *text == '-') && isdigit (text[1])))
+  else if (DIGIT (*text) || ((*text == '+' || *text == '-') && DIGIT (text[1])))
     result = get_dirstack_from_string (text);
 #endif
 
@@ -614,35 +610,69 @@ tilde_initialize ()
   static int times_called = 0;
 
   /* Tell the tilde expander that we want a crack first. */
-  tilde_expansion_preexpansion_hook = (CPFunction *)bash_special_tilde_expansions;
+  tilde_expansion_preexpansion_hook = bash_special_tilde_expansions;
 
   /* Tell the tilde expander about special strings which start a tilde
      expansion, and the special strings that end one.  Only do this once.
      tilde_initialize () is called from within bashline_reinitialize (). */
   if (times_called++ == 0)
     {
-      tilde_additional_prefixes = alloc_array (3);
-      tilde_additional_prefixes[0] = "=~";
-      tilde_additional_prefixes[1] = ":~";
-      tilde_additional_prefixes[2] = (char *)NULL;
+      bash_tilde_prefixes = alloc_array (3);
+      bash_tilde_prefixes[0] = "=~";
+      bash_tilde_prefixes[1] = ":~";
+      bash_tilde_prefixes[2] = (char *)NULL;
 
-      tilde_additional_suffixes = alloc_array (3);
-      tilde_additional_suffixes[0] = ":";
-      tilde_additional_suffixes[1] = "=~";
-      tilde_additional_suffixes[2] = (char *)NULL;
+      tilde_additional_prefixes = bash_tilde_prefixes;
+
+      bash_tilde_suffixes = alloc_array (3);
+      bash_tilde_suffixes[0] = ":";
+      bash_tilde_suffixes[1] = "=~";	/* XXX - ?? */
+      bash_tilde_suffixes[2] = (char *)NULL;
+
+      tilde_additional_suffixes = bash_tilde_suffixes;
     }
 }
 
+/* POSIX.2, 3.6.1:  A tilde-prefix consists of an unquoted tilde character
+   at the beginning of the word, followed by all of the characters preceding
+   the first unquoted slash in the word, or all the characters in the word
+   if there is no slash...If none of the characters in the tilde-prefix are
+   quoted, the characters in the tilde-prefix following the tilde shell be
+   treated as a possible login name. */
+
+#define TILDE_END(c)	((c) == '\0' || (c) == '/' || (c) == ':')
+
+static int
+unquoted_tilde_word (s)
+     const char *s;
+{
+  const char *r;
+
+  for (r = s; TILDE_END(*r) == 0; r++)
+    {
+      switch (*r)
+	{
+	case '\\':
+	case '\'':
+	case '"':
+	  return 0;
+	}
+    }
+  return 1;
+}
+
+/* Tilde-expand S by running it through the tilde expansion library. */
 char *
 bash_tilde_expand (s)
-     char *s;
+     const char *s;
 {
-  int old_immed;
+  int old_immed, r;
   char *ret;
 
   old_immed = interrupt_immediately;
   interrupt_immediately = 1;
-  ret = tilde_expand (s);
+  r = (*s == '~') ? unquoted_tilde_word (s) : 1;
+  ret = r ? tilde_expand (s) : savestring (s);
   interrupt_immediately = old_immed;
   return (ret);
 }
@@ -790,7 +820,7 @@ get_group_list (ngp)
   group_vector = alloc_array (ngroups);
   for (i = 0; i < ngroups; i++)
     {
-      nbuf = itos ((int)group_array[i]);
+      nbuf = itos (group_array[i]);
       group_vector[i] = nbuf;
     }
 

@@ -54,7 +54,7 @@ extern char *strchr (), *strrchr ();
 #include "readline.h"
 #include "rlprivate.h"
 
-static int find_matching_open __P((char *, int, int));
+static int find_matching_open PARAMS((char *, int, int));
 
 /* Non-zero means try to blink the matching open parenthesis when the
    close parenthesis is inserted. */

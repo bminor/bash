@@ -27,27 +27,7 @@
 /* Shell variables and functions are stored in hash tables. */
 #include "hashlib.h"
 
-/* Placeholder for future modifications if cross-compiling or building a
-   `fat' binary, e.g. on Apple Rhapsody.  These values are used in multiple
-   files, so they appear here. */
-#if !defined (RHAPSODY)
-#  define HOSTTYPE	CONF_HOSTTYPE
-#  define OSTYPE	CONF_OSTYPE
-#  define MACHTYPE	CONF_MACHTYPE
-#else /* RHAPSODY */
-#  if   defined(__powerpc__) || defined(__ppc__)
-#    define HOSTTYPE "powerpc"
-#  elif defined(__i386__)
-#    define HOSTTYPE "i386"
-#  else
-#    define HOSTTYPE CONF_HOSTTYPE
-#  endif
-
-#  define OSTYPE CONF_OSTYPE
-#  define VENDOR CONF_VENDOR
-
-#  define MACHTYPE HOSTTYPE "-" VENDOR "-" OSTYPE
-#endif /* RHAPSODY */
+#include "conftypes.h"
 
 /* What a shell variable looks like. */
 
@@ -105,6 +85,11 @@ typedef struct variable {
 #define VSETATTR(var, attr)	((var)->attributes |= (attr))
 #define VUNSETATTR(var, attr)	((var)->attributes &= ~(attr))
 
+#define VGETFLAGS(var)		((var)->attributes)
+
+#define VSETFLAGS(var, flags)	((var)->attributes = (flags))
+#define VCLRFLAGS(var)		((var)->attributes = 0)
+
 /* Macros to perform various operations on `exportstr' member of a SHELL_VAR. */
 #define CLEAR_EXPORTSTR(var)	(var)->exportstr = (char *)NULL
 #define COPY_EXPORTSTR(var)	((var)->exportstr) ? savestring ((var)->exportstr) : (char *)NULL
@@ -145,6 +130,8 @@ typedef struct variable {
 	} while (0)
 	
 /* Stuff for hacking variables. */
+typedef int sh_var_map_func_t __P((SHELL_VAR *));
+
 extern int variable_context;
 extern HASH_TABLE *shell_variables, *shell_functions;
 extern char *dollar_vars[];
@@ -161,16 +148,18 @@ extern void set_ppid __P((void));
 
 extern void make_funcname_visible __P((int));
 
-extern SHELL_VAR *find_function __P((char *));
-extern SHELL_VAR *find_variable __P((char *));
-extern SHELL_VAR *find_variable_internal __P((char *, int));
-extern SHELL_VAR *find_tempenv_variable __P((char *));
-extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
-extern SHELL_VAR *make_local_variable __P((char *));
-extern SHELL_VAR *bind_variable __P((char *, char *));
-extern SHELL_VAR *bind_function __P((char *, COMMAND *));
+extern SHELL_VAR *var_lookup __P((const char *, HASH_TABLE *));
 
-extern SHELL_VAR **map_over __P((Function *, HASH_TABLE *));
+extern SHELL_VAR *find_function __P((const char *));
+extern SHELL_VAR *find_variable __P((const char *));
+extern SHELL_VAR *find_variable_internal __P((const char *, int));
+extern SHELL_VAR *find_tempenv_variable __P((const char *));
+extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
+extern SHELL_VAR *make_local_variable __P((const char *));
+extern SHELL_VAR *bind_variable __P((const char *, char *));
+extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
+
+extern SHELL_VAR **map_over __P((sh_var_map_func_t *, HASH_TABLE *));
 extern SHELL_VAR **all_shell_variables __P((void));
 extern SHELL_VAR **all_shell_functions __P((void));
 extern SHELL_VAR **all_visible_variables __P((void));
@@ -180,7 +169,7 @@ extern SHELL_VAR **all_exported_variables __P((void));
 extern SHELL_VAR **all_array_variables __P((void));
 #endif
 
-extern char **all_variables_matching_prefix __P((char *));
+extern char **all_variables_matching_prefix __P((const char *));
 
 extern char **make_var_array __P((HASH_TABLE *));
 extern char **add_or_supercede_exported_var __P((char *, int));
@@ -190,13 +179,14 @@ extern char *make_variable_value __P((SHELL_VAR *, char *));
 
 extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *));
 extern SHELL_VAR *bind_int_variable __P((char *, char *));
+extern SHELL_VAR *bind_var_to_int __P((char *, long));
 
-extern int assignment __P((char *));
+extern int assignment __P((const char *));
 extern int variable_in_context __P((SHELL_VAR *));
-extern int assign_in_env __P((char *));
-extern int unbind_variable __P((char *));
-extern int makunbound __P((char *, HASH_TABLE *));
-extern int kill_local_variable __P((char *));
+extern int assign_in_env __P((const char *));
+extern int unbind_variable __P((const char *));
+extern int makunbound __P((const char *, HASH_TABLE *));
+extern int kill_local_variable __P((const char *));
 extern void delete_all_variables __P((HASH_TABLE *));
 
 extern void adjust_shell_level __P((int));
@@ -210,14 +200,14 @@ extern void merge_builtin_env __P((void));
 extern void merge_function_env __P((void));
 extern void kill_all_local_variables __P((void));
 extern void set_var_read_only __P((char *));
-extern void set_func_read_only __P((char *));
+extern void set_func_read_only __P((const char *));
 extern void set_var_auto_export __P((char *));
-extern void set_func_auto_export __P((char *));
+extern void set_func_auto_export __P((const char *));
 extern void sort_variables __P((SHELL_VAR **));
 extern void maybe_make_export_env __P((void));
 extern void update_export_env_inplace __P((char *, int, char *));
 extern void put_command_name_into_env __P((char *));
-extern void put_gnu_argv_flags_into_env __P((int, char *));
+extern void put_gnu_argv_flags_into_env __P((long, char *));
 extern void print_var_list __P((SHELL_VAR **));
 extern void print_func_list __P((SHELL_VAR **));
 extern void print_assignment __P((SHELL_VAR *));
@@ -229,14 +219,6 @@ extern char *indirection_level_string __P((void));
 #if defined (ARRAY_VARS)
 extern SHELL_VAR *make_new_array_variable __P((char *));
 extern SHELL_VAR *make_local_array_variable __P((char *));
-extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
-extern SHELL_VAR *bind_array_variable __P((char *, int, char *));
-extern SHELL_VAR *assign_array_from_string  __P((char *, char *));
-extern SHELL_VAR *assign_array_var_from_word_list __P((SHELL_VAR *, WORD_LIST *));
-extern SHELL_VAR *assign_array_var_from_string __P((SHELL_VAR *, char *));
-extern int unbind_array_element __P((SHELL_VAR *, char *));
-extern int skipsubscript __P((char *, int));
-extern void print_array_assignment __P((SHELL_VAR *, int));
 
 extern void set_pipestatus_array __P((int *));
 #endif
@@ -251,21 +233,30 @@ extern int get_random_number __P((void));
 
 /* The `special variable' functions that get called when a particular
    variable is set. */
-void sv_path (), sv_mail (), sv_ignoreeof (), sv_strict_posix ();
-void sv_optind (), sv_opterr (), sv_globignore (), sv_locale ();
+extern void sv_path __P((char *));
+extern void sv_mail __P((char *));
+extern void sv_globignore __P((char *));
+extern void sv_ignoreeof __P((char *));
+extern void sv_strict_posix __P((char *));
+extern void sv_optind __P((char *));
+extern void sv_opterr __P((char *));
+extern void sv_locale __P((char *));
 
 #if defined (READLINE)
-void sv_terminal (), sv_hostfile ();
+extern void sv_terminal __P((char *));
+extern void sv_hostfile __P((char *));
 #endif
 
 #if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
-void sv_tz ();
+extern void sv_tz __P((char *));
 #endif
 
 #if defined (HISTORY)
-void sv_histsize (), sv_histignore (), sv_history_control ();
+extern void sv_histsize __P((char *));
+extern void sv_histignore __P((char *));
+extern void sv_history_control __P((char *));
 #  if defined (BANG_HISTORY)
-void sv_histchars ();
+extern void sv_histchars __P((char *));
 #  endif
 #endif /* HISTORY */
 

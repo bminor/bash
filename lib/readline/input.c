@@ -84,6 +84,11 @@ rl_getc_func_t *rl_getc_function = rl_getc;
 
 static int _keyboard_input_timeout = 100000;		/* 0.1 seconds; it's in usec */
 
+static int ibuffer_space PARAMS((void));
+static int rl_get_char PARAMS((int *));
+static int rl_unget_char PARAMS((int));
+static void rl_gather_tyi PARAMS((void));
+
 /* **************************************************************** */
 /*								    */
 /*			Character Input Buffering       	    */
@@ -245,7 +250,7 @@ _rl_input_available ()
   fd_set readfds, exceptfds;
   struct timeval timeout;
 #endif
-#if defined(FIONREAD)
+#if !defined (HAVE_SELECT) && defined(FIONREAD)
   int chars_avail;
 #endif
   int tty;
@@ -260,11 +265,13 @@ _rl_input_available ()
   timeout.tv_sec = 0;
   timeout.tv_usec = _keyboard_input_timeout;
   return (select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout) > 0);
-#endif
+#else
 
 #if defined (FIONREAD)
   if (ioctl (tty, FIONREAD, &chars_avail) == 0)
     return (chars_avail);
+#endif
+
 #endif
 
   return 0;
@@ -278,7 +285,7 @@ _rl_insert_typein (c)
   char *string;
 
   i = key = 0;
-  string = xmalloc (ibuffer_len + 1);
+  string = (char *)xmalloc (ibuffer_len + 1);
   string[i++] = (char) c;
 
   while ((t = rl_get_char (&key)) &&

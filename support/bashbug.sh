@@ -3,11 +3,12 @@
 # bashbug - create a bug report and mail it to the bug address
 #
 # The bug address depends on the release status of the shell.  Versions
-# with status `alpha' or `beta' mail bug reports to chet@po.cwru.edu.
+# with status `devel', `alpha', `beta', or `rc' mail bug reports to
+# chet@po.cwru.edu and, optionally, to bash-testers@po.cwru.edu.
 # Other versions send mail to bug-bash@gnu.org.
 #
 # configuration section:
-#	these variables are filled in by the make target in cpp-Makefile
+#	these variables are filled in by the make target in Makefile
 #
 MACHINE="!MACHINE!"
 OS="!OS!"
@@ -23,14 +24,32 @@ export PATH
 
 # If the OS supplies a program to make temp files with semi-random names,
 # use it.
-TEMP=/tmp/bbug.$$
-for d in /bin /usr/bin /usr/local/bin ; do
-	if [ -x $d/mktemp ]; then
-		TEMP=`$d/mktemp -t bbug ` ; break;
-	elif [ -x $d/tempfile ]; then
-		TEMP=` $d/tempfile --prefix bbug --mode 600 `; break
-	fi
-done
+: ${TMPDIR:=/tmp}
+rm_tmp1=false
+rm_tmp2=false
+
+# if we don't have mktemp or tempfile, we don't want to see error messages
+# like `mktemp: not found', so temporarily redirect stderr using {...} while
+# trying to run them.  this may fail using old versions of the bourne shell
+# that run {...} blocks with redirections in subshells; in that case we're
+# no worse off than previous versions
+
+{ TEMPFILE1=`mktemp "$TMPDIR/bbug.XXXXXX" 2>/dev/null` ; } 2>/dev/null
+if [ -z "$TEMPFILE1" ]; then
+	{ TEMPFILE1=`tempfile --prefix bbug --mode 600 2>/dev/null`; } 2>/dev/null
+fi
+if [ -z "$TEMPFILE1" ]; then
+	TEMPFILE1=$TMPDIR/bbug.$$
+	rm_tmp1=true
+fi
+{ TEMPFILE2=`mktemp "$TMPDIR/bbug.XXXXXX" 2>/dev/null`; } 2>/dev/null
+if [ -z "$TEMPFILE2" ]; then
+	{ TEMPFILE2=`tempfile --prefix bbug --mode 600 2>/dev/null`; } 2>/dev/null
+fi
+if [ -z "$TEMPFILE2" ]; then
+	TEMPFILE2="$TMPDIR/bbug.$$.x"
+	rm_tmp2=true
+fi
 
 USAGE="Usage: $0 [--help] [--version] [bug-report-email-address]"
 VERSTR="GNU bashbug, version ${RELEASE}.${PATCHLEVEL}-${RELSTATUS}"
@@ -83,12 +102,12 @@ esac
 BASHTESTERS="bash-testers@po.cwru.edu"
 
 case "$RELSTATUS" in
-alpha*|beta*|devel*)	BUGBASH=chet@po.cwru.edu ;;
-*)			BUGBASH=bug-bash@gnu.org ;;
+alpha*|beta*|devel*|rc*)	BUGBASH=chet@po.cwru.edu ;;
+*)				BUGBASH=bug-bash@gnu.org ;;
 esac
 
 case "$RELSTATUS" in
-alpha*|beta*|devel*)
+alpha*|beta*|devel*|rc*)
 		echo "$0: This is a testing release.  Would you like your bug report"
 		echo "$0: to be sent to the bash-testers mailing list?"
 		echo $n "$0: Send to bash-testers? $c"
@@ -130,8 +149,8 @@ fi
 
 : ${USER=${LOGNAME-`whoami`}}
 
-trap 'rm -f $TEMP $TEMP.x; exit 1' 1 2 3 13 15
-trap 'rm -f $TEMP $TEMP.x' 0
+trap 'rm -f "$TEMPFILE1" "$TEMPFILE2"; exit 1' 1 2 3 13 15
+trap 'rm -f "$TEMPFILE1" "$TEMPFILE2"' 0
 
 UN=
 if (uname) >/dev/null 2>&1; then
@@ -149,13 +168,15 @@ else
 	SMARGS="$BUGADDR"
 fi
 
-# this is raceable
-rm -f $TEMP
+INITIAL_SUBJECT='[50 character or so descriptive subject here (for reference)]'
 
-cat > $TEMP <<EOF
+# this is raceable unless (hopefully) we used mktemp(1) or tempfile(1)
+$rm_tmp1 && rm -f "$TEMPFILE1"
+
+cat > "$TEMPFILE1" <<EOF
 From: ${USER}
 To: ${BUGADDR}
-Subject: [50 character or so descriptive subject here (for reference)]
+Subject: ${INITIAL_SUBJECT}
 
 Configuration Information [Automatically generated, do not change]:
 Machine: $MACHINE
@@ -181,29 +202,62 @@ Fix:
 	fix for the problem, don't include this section.]
 EOF
 
-# this is still raceable
-rm -f $TEMP.x
-cp $TEMP $TEMP.x
-chmod u+w $TEMP
+# this is still raceable unless (hopefully) we used mktemp(1) or tempfile(1)
+$rm_tmp2 && rm -f "$TEMPFILE2"
+
+cp "$TEMPFILE1" "$TEMPFILE2"
+chmod u+w "$TEMPFILE1"
 
 trap '' 2		# ignore interrupts while in editor
 
-until $EDITOR $TEMP; do
-	echo "$0: editor \`$EDITOR' exited with nonzero status."
-	echo "$0: Perhaps it was interrupted."
-	echo "$0: Type \`y' to give up, and lose your bug report;"
-	echo "$0: type \`n' to re-enter the editor."
-	echo $n "$0: Do you want to give up? $c"
+edstat=1
+while [ $edstat -ne 0 ]; do
+	$EDITOR "$TEMPFILE1"
+	edstat=$?
 
-	read ans
-	case "$ans" in
-	[Yy]*) exit 1 ;;
+	if [ $edstat -ne 0 ]; then
+		echo "$0: editor \`$EDITOR' exited with nonzero status."
+		echo "$0: Perhaps it was interrupted."
+		echo "$0: Type \`y' to give up, and lose your bug report;"
+		echo "$0: type \`n' to re-enter the editor."
+		echo $n "$0: Do you want to give up? $c"
+
+		read ans
+		case "$ans" in
+		[Yy]*) exit 1 ;;
+		esac
+
+		continue
+	fi
+
+	# find the subject from the temp file and see if it's been changed
+	CURR_SUB=`grep '^Subject: ' "$TEMPFILE1" | sed 's|^Subject:[ 	]*||' | sed 1q`
+
+	case "$CURR_SUB" in
+	"${INITIAL_SUBJECT}")
+		echo
+		echo "$0: You have not changed the subject from the default."
+		echo "$0: Please use a more descriptive subject header."
+		echo "$0: Type \`y' to give up, and lose your bug report;"
+		echo "$0: type \`n' to re-enter the editor."
+		echo $n "$0: Do you want to give up? $c"
+
+		read ans
+		case "$ans" in
+		[Yy]*) exit 1 ;;
+		esac
+
+		echo "$0:  The editor will be restarted in five seconds."
+		sleep 5
+		edstat=1
+		;;
 	esac
+
 done
 
-trap 'rm -f $TEMP $TEMP.x; exit 1' 2	# restore trap on SIGINT
+trap 'rm -f "$TEMPFILE1" "$TEMPFILE2"; exit 1' 2	# restore trap on SIGINT
 
-if cmp -s $TEMP $TEMP.x
+if cmp -s "$TEMPFILE1" "$TEMPFILE2"
 then
 	echo "File not changed, no bug report submitted."
 	exit
@@ -215,8 +269,8 @@ case "$ans" in
 [Nn]*)	exit 0 ;;
 esac
 
-${RMAIL} $SMARGS < $TEMP || {
-	cat $TEMP >> $HOME/dead.bashbug
+${RMAIL} $SMARGS < "$TEMPFILE1" || {
+	cat "$TEMPFILE1" >> $HOME/dead.bashbug
 	echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
 }
 

@@ -36,7 +36,7 @@ extern int errno;
 int
 zwrite (fd, buf, nb)
      int fd;
-     unsigned char *buf;
+     char *buf;
      size_t nb;
 {
   int n, i, nt;

@@ -121,7 +121,8 @@ readonly -n AA
 AA=(one two three)
 
 # try to assign a readonly array with bad assignment syntax
-readonly -a ZZZ=bbb
+# NOTE: this works in post-bash-2.05 (at least when I write this)
+# readonly -a ZZZ=bbb
 
 # bad counts to `shift'
 shopt -s shift_verbose
@@ -217,8 +218,8 @@ trap -p NOSIG
 # maybe someday trap will take a -s argument like kill, but not now
 trap -p -s NOSIG
 
-# maybe someday we will have a ksh-like ERR trap, but not yet
-trap 'echo [$LINENO] -- error' ERR
+# we have a ksh-like ERR trap, post-bash-2.05
+#trap 'echo [$LINENO] -- error' ERR
 
 # can only return from a function or sourced script
 return 2

@@ -18,25 +18,24 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include "config.h"
+#include <config.h>
 
-#include "bashtypes.h"
+#include <bashtypes.h>
 #ifndef _MINIX
 #  include <sys/param.h>
 #endif
-#include "posixstat.h"
+#include <posixstat.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-#include "filecntl.h"
-#include "bashansi.h"
+#include <filecntl.h>
+#include <bashansi.h>
 #include <stdio.h>
+#include <chartypes.h>
 
 #include "shell.h"
-
-#include "maxpath.h"
 
 /* Return 1 if PATH corresponds to a directory.  A function for debugging. */
 static int
@@ -80,7 +79,7 @@ sh_canonpath (path, flags)
     {
       stub_char = DIRSEP;
 #if defined (__CYGWIN__)
-      base = (isalpha(result[0]) && result[1] == ':') ? result + 3 : result + 1;
+      base = (ISALPHA((unsigned char)result[0]) && result[1] == ':') ? result + 3 : result + 1;
 #else
       base = result + 1;
 #endif
@@ -91,10 +90,11 @@ sh_canonpath (path, flags)
     {
       stub_char = '.';
 #if defined (__CYGWIN__)
-      base = (isalpha(result[0]) && result[1] == ':') ? result + 2 : result;
+      base = (ISALPHA((unsigned char)result[0]) && result[1] == ':') ? result + 2 : result;
 #else
       base = result;
 #endif
+      double_slash_path = 0;
     }
 
   /*

@@ -176,6 +176,16 @@ in any file that uses Readline's features.  Since some of the definitions
 in @code{readline.h} use the @code{stdio} library, the file
 @code{<stdio.h>} should be included before @code{readline.h}.
 
+@code{readline.h} defines a C preprocessor variable that should
+be treated as an integer, @code{RL_READLINE_VERSION}, which may
+be used to conditionally compile application code depending on
+the installed Readline version.  The value is a hexadecimal
+encoding of the major and minor version numbers of the library,
+of the form 0x@var{MMmm}.  @var{MM} is the two-digit major
+version number; @var{mm} is the two-digit minor version number. 
+For Readline 4.2, for example, the value of
+@code{RL_READLINE_VERSION} would be @code{0x0402}. 
+
 @menu
 * Readline Typedefs::	C declarations to make code readable.
 * Function Writing::	Variables and calling conventions.
@@ -346,6 +356,14 @@ never sets it.
 
 @deftypevar {const char *} rl_library_version
 The version number of this revision of the library.
+@end deftypevar
+
+@deftypevar int rl_readline_version
+An integer encoding the current version of the library.  The encoding is
+of the form 0x@var{MMmm}, where @var{MM} is the two-digit major version
+number, and @var{mm} is the two-digit minor version number.
+For example, for Readline-4.2, @code{rl_readline_version} would have the
+value 0x0402.
 @end deftypevar
 
 @deftypevar {int} rl_gnu_readline_p
@@ -1074,6 +1092,15 @@ that it can be made part of an @code{inputrc} file and re-read.
 @deftypefun int rl_set_paren_blink_timeout (int u)
 Set the time interval (in microseconds) that Readline waits when showing
 a balancing character when @code{blink-matching-paren} has been enabled.
+@end deftypefun
+
+@deftypefun {char *} rl_get_termcap (const char *cap)
+Retrieve the string value of the termcap capability @var{cap}.
+Readline fetches the termcap entry for the current terminal name and
+uses those capabilities to move around the screen line and perform other
+terminal-specific operations, like erasing a line.  Readline does not
+use all of a terminal's capabilities, and this function will return
+values for only those capabilities Readline uses.
 @end deftypefun
 
 @node Alternate Interface

@@ -348,6 +348,7 @@ int	flags;
 }
 
 #ifndef NOBUILTIN
+int
 finfo_builtin(list)
      WORD_LIST *list;
 {

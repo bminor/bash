@@ -67,7 +67,7 @@
 #  endif
 #endif /* !HAVE_DIRENT_H */
 
-#if defined (_POSIX_SOURCE) && !defined (STRUCT_DIRENT_HAS_D_INO)
+#if defined (_POSIX_SOURCE) && !defined (STRUCT_DIRENT_HAS_D_INO) || defined (BROKEN_DIRENT_D_INO)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #  define REAL_DIR_ENTRY(dp) 1
@@ -94,7 +94,7 @@
 #  include "memalloc.h"
 #endif
 
-#include "fnmatch.h"
+#include "strmatch.h"
 
 #if !defined (HAVE_STDLIB_H) && !defined (SHELL)
 extern char *malloc (), *realloc ();
@@ -131,9 +131,9 @@ char *glob_error_return;
 /* Return nonzero if PATTERN has any special globbing chars in it.  */
 int
 glob_pattern_p (pattern)
-     char *pattern;
+     const char *pattern;
 {
-  register char *p;
+  register const char *p;
   register char c;
   int bopen;
 
@@ -256,7 +256,7 @@ glob_vector (pat, dir)
   int lose, skip;
   register char **name_vector;
   register unsigned int i;
-  int flags;		/* Flags passed to fnmatch (). */
+  int flags;		/* Flags passed to strmatch (). */
 
   lastlink = 0;
   count = lose = skip = 0;
@@ -342,7 +342,7 @@ glob_vector (pat, dir)
       if (d == NULL)
 	return ((char **) &glob_error_return);
 
-      /* Compute the flags that will be passed to fnmatch().  We don't
+      /* Compute the flags that will be passed to strmatch().  We don't
 	 need to do this every time through the loop. */
       flags = (noglob_dot_filenames ? FNM_PERIOD : 0) | FNM_PATHNAME;
 
@@ -394,7 +394,7 @@ glob_vector (pat, dir)
 		(pat[0] != '\\' || pat[1] != '.'))
 	    continue;
 
-	  if (fnmatch (pat, dp->d_name, flags) != FNM_NOMATCH)
+	  if (strmatch (pat, dp->d_name, flags) != FNM_NOMATCH)
 	    {
 	      nextlink = (struct globval *) alloca (sizeof (struct globval));
 	      nextlink->next = lastlink;

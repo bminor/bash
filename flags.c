@@ -28,8 +28,12 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "shell.h"
 #include "flags.h"
 
+#if defined (BANG_HISTORY)
+#  include "bashhist.h"
+#endif
+
 #if defined (JOB_CONTROL)
-extern int set_job_control ();
+extern int set_job_control __P((int));
 #endif
 
 #if defined (RESTRICTED_SHELL)
@@ -67,7 +71,7 @@ int place_keywords_in_env = 0;
 
 /* Non-zero means read commands, but don't execute them.  This is useful
    for debugging shell scripts that should do something hairy and possibly
-   desctructive. */
+   destructive. */
 int read_but_dont_execute = 0;
 
 /* Non-zero means end of file is after one command. */
@@ -240,11 +244,28 @@ change_flag (flag, on_or_off)
   /* Special cases for a few flags. */
   switch (flag)
     {
+#if defined (BANG_HISTORY)
+    case 'H':
+      if (on_or_off == FLAG_ON)
+	bash_initialize_history ();
+      break;
+#endif
+
 #if defined (JOB_CONTROL)
     case 'm':
       set_job_control (on_or_off == FLAG_ON);
       break;
 #endif /* JOB_CONTROL */
+
+    case 'n':
+      if (interactive_shell)
+	read_but_dont_execute = 0;
+      break;
+
+    case 'p':
+      if (on_or_off == FLAG_OFF)
+	disable_priv_mode ();
+      break;
 
 #if defined (RESTRICTED_SHELL)
     case 'r':
@@ -253,18 +274,6 @@ change_flag (flag, on_or_off)
       break;
 #endif
 
-#if defined (BANG_HISTORY)
-    case 'H':
-      if (on_or_off == FLAG_ON)
-	bash_initialize_history ();
-      break;
-#endif
-
-    case 'p':
-      if (on_or_off == FLAG_OFF)
-	disable_priv_mode ();
-
-      break;
     }
 
   return (old_value);
@@ -278,7 +287,7 @@ which_set_flags ()
   char *temp;
   int i, string_index;
 
-  temp = xmalloc (1 + NUM_SHELL_FLAGS + read_from_stdin + want_pending_command);
+  temp = (char *)xmalloc (1 + NUM_SHELL_FLAGS + read_from_stdin + want_pending_command);
   for (i = string_index = 0; shell_flags[i].name; i++)
     if (*(shell_flags[i].value))
       temp[string_index++] = shell_flags[i].name;

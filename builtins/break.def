@@ -42,7 +42,7 @@ $END
 extern char *this_command_name;
 extern int posixly_correct;
 
-static int check_loop_level ();
+static int check_loop_level __P((void));
 
 /* The depth of while's and until's. */
 int loop_level = 0;
@@ -59,7 +59,7 @@ int
 break_builtin (list)
      WORD_LIST *list;
 {
-  int newbreak;
+  long newbreak;
 
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
@@ -94,7 +94,7 @@ int
 continue_builtin (list)
      WORD_LIST *list;
 {
-  int newcont;
+  long newcont;
 
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);

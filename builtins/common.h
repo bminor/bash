@@ -31,7 +31,7 @@
 #define SEVAL_NOHIST	0x04
 
 /* Functions from common.c */
-extern void builtin_error __P((const char *, ...));
+extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_usage __P((void));
 extern void no_args __P((WORD_LIST *));
 extern void bad_option __P((char *));
@@ -49,7 +49,8 @@ extern int dollar_vars_changed __P((void));
 extern void set_dollar_vars_unchanged __P((void));
 extern void set_dollar_vars_changed __P((void));
 
-extern int get_numeric_arg __P((WORD_LIST *, int));
+extern long get_numeric_arg __P((WORD_LIST *, int));
+extern int get_exitstat __P((WORD_LIST *));
 extern int read_octal __P((char *));
 
 /* Keeps track of the current working directory. */
@@ -65,22 +66,34 @@ extern int display_signal_list __P((WORD_LIST *, int));
 /* It's OK to declare a function as returning a Function * without
    providing a definition of what a `Function' is. */
 extern struct builtin *builtin_address_internal __P((char *, int));
-extern Function *find_shell_builtin __P((char *));
-extern Function *builtin_address __P((char *));
-extern Function *find_special_builtin __P((char *));
+extern sh_builtin_func_t *find_shell_builtin __P((char *));
+extern sh_builtin_func_t *builtin_address __P((char *));
+extern sh_builtin_func_t *find_special_builtin __P((char *));
 extern void initialize_shell_builtins __P((void));
 
+/* Functions from getopts.def */
+extern void getopts_reset __P((int));
+
 /* Functions from set.def */
-extern void initialize_shell_options __P((int));
-extern void list_minus_o_opts __P((int, int));
-extern int set_minus_o_option __P((int, char *));
 extern int minus_o_option_value __P((char *));
-extern void reset_shell_options __P((void));
+extern void list_minus_o_opts __P((int, int));
 extern char **get_minus_o_opts __P((void));
+extern int set_minus_o_option __P((int, char *));
+
+extern void set_shellopts __P((void));
+extern void parse_shellopts __P((char *));
+extern void initialize_shell_options __P((int));
+
+extern void reset_shell_options __P((void));
 
 /* Functions from shopt.def */
 extern void reset_shopt_options __P((void));
 extern char **get_shopt_options __P((void));
+
+extern int shopt_setopt __P((char *, int));
+extern int shopt_listopt __P((char *, int));
+
+extern int set_login_shell __P((int));
 
 /* Functions from type.def */
 extern int describe_command __P((char *, int, int));
@@ -93,17 +106,17 @@ extern void set_var_attribute __P((char *, int, int));
 
 /* Functions from pushd.def */
 extern char *get_dirstack_from_string __P((char *));
-extern char *get_dirstack_element __P((int, int));
-extern void set_dirstack_element __P((int, int, char *));
+extern char *get_dirstack_element __P((long, int));
+extern void set_dirstack_element __P((long, int, char *));
 extern WORD_LIST *get_directory_stack __P((void));
 
 /* Functions from evalstring.c */
-extern int parse_and_execute __P((char *, char *, int));
+extern int parse_and_execute __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
 
 /* Functions from evalfile.c */
-extern int maybe_execute_file __P((char *, int));
-extern int source_file __P((char *));
-extern int fc_execute_file __P((char *));
+extern int maybe_execute_file __P((const char *, int));
+extern int source_file __P((const char *));
+extern int fc_execute_file __P((const char *));
 
 #endif /* !__COMMON_H */

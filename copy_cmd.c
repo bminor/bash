@@ -32,6 +32,26 @@
 
 #include "shell.h"
 
+static PATTERN_LIST *copy_case_clause __P((PATTERN_LIST *));
+static PATTERN_LIST *copy_case_clauses __P((PATTERN_LIST *));
+static FOR_COM *copy_for_command __P((FOR_COM *));
+#if defined (ARITH_FOR_COMMAND)
+static ARITH_FOR_COM *copy_arith_for_command __P((ARITH_FOR_COM *));
+#endif
+static GROUP_COM *copy_group_command __P((GROUP_COM *));
+static SUBSHELL_COM *copy_subshell_command __P((SUBSHELL_COM *));
+static CASE_COM *copy_case_command __P((CASE_COM *));
+static WHILE_COM *copy_while_command __P((WHILE_COM *));
+static IF_COM *copy_if_command __P((IF_COM *));
+#if defined (DPAREN_ARITHMETIC)
+static ARITH_COM *copy_arith_command __P((ARITH_COM *));
+#endif
+#if defined (COND_COMMAND)
+static COND_COM *copy_cond_command __P((COND_COM *));
+#endif
+static SIMPLE_COM *copy_simple_command __P((SIMPLE_COM *));
+static FUNCTION_DEF *copy_function_def __P((FUNCTION_DEF *));
+
 WORD_DESC *
 copy_word (w)
      WORD_DESC *w;

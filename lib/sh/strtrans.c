@@ -26,9 +26,9 @@
 #  include <unistd.h>
 #endif
 
-#include "bashansi.h"
+#include <bashansi.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <chartypes.h>
 
 #include "shell.h"
 
@@ -36,21 +36,6 @@
 #undef ESC
 #endif
 #define ESC '\033'	/* ASCII */
-
-#ifndef ISOCTAL
-#define ISOCTAL(c)	((c) >= '0' && (c) <= '7')
-#endif
-
-#ifndef OCTVALUE
-#define OCTVALUE(c)	((c) - '0')
-#endif
-
-#ifndef isxdigit
-#  define isxdigit(c)	(isdigit((c)) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
-#endif
-
-#define HEXVALUE(c) \
-  ((c) >= 'a' && (c) <= 'f' ? (c)-'a'+10 : (c) >= 'A' && (c) <= 'F' ? (c)-'A'+10 : (c)-'0')
 
 /* Convert STRING by expanding the escape sequences specified by the
    ANSI C standard.  If SAWC is non-null, recognize `\c' and use that
@@ -70,7 +55,7 @@ ansicstr (string, len, for_echo, sawc, rlen)
   if (string == 0 || *string == '\0')
     return ((char *)NULL);
 
-  ret = xmalloc (len + 1);
+  ret = (char *)xmalloc (len + 1);
   for (r = ret, s = string; s && *s; )
     {
       c = *s++;
@@ -98,16 +83,18 @@ ansicstr (string, len, for_echo, sawc, rlen)
 	    case '4': case '5': case '6': case '7':
 	      for (temp = 2, c -= '0'; ISOCTAL (*s) && temp--; s++)
 		c = (c * 8) + OCTVALUE (*s);
+	      c &= 0xFF;
 	      break;
 	    case 'x':			/* Hex digit -- non-ANSI */
-	      for (temp = 3, c = 0; isxdigit (*s) && temp--; s++)
+	      for (temp = 2, c = 0; ISXDIGIT ((unsigned char)*s) && temp--; s++)
 		c = (c * 16) + HEXVALUE (*s);
 	      /* \x followed by non-hex digits is passed through unchanged */
-	      if (temp == 3)
+	      if (temp == 2)
 		{
 		  *r++ = '\\';
 		  c = 'x';
 		}
+	      c &= 0xFF;
 	      break;
 	    case '\\':
 	      break;
@@ -143,21 +130,22 @@ ansic_quote (str, flags, rlen)
      int flags, *rlen;
 {
   char *r, *ret, *s, obuf[8];
-  int l, c, rsize, t;
+  int l, rsize, t;
+  unsigned char c;
 
   if (str == 0 || *str == 0)
     return ((char *)0);
 
   l = strlen (str);
   rsize = 2 * l + 4;
-  r = ret = xmalloc (rsize);
+  r = ret = (char *)xmalloc (rsize);
 
   *r++ = '$';
   *r++ = '\'';
 
   for (s = str, l = 0; *s; s++)
     {
-      c = *(unsigned char *)s;
+      c = *s;
       l = 1;		/* 1 == add backslash; 0 == no backslash */
       switch (c)
 	{
@@ -179,7 +167,7 @@ ansic_quote (str, flags, rlen)
 	case '\'':
 	  break;
 	default:
-	  if (isprint (c) == 0)
+	  if (ISPRINT (c) == 0)
 	    {
 	      sprintf (obuf, "\\%.3o", c);
 	      t = r - ret;
@@ -202,4 +190,21 @@ ansic_quote (str, flags, rlen)
   if (rlen)
     *rlen = r - ret;
   return ret;
+}
+
+/* return 1 if we need to quote with $'...' because of non-printing chars. */
+ansic_shouldquote (string)
+     const char *string;
+{
+  const char *s;
+  unsigned char c;
+
+  if (string == 0)
+    return 0;
+
+  for (s = string; c = *s; s++)
+    if (ISPRINT (c) == 0)
+      return 1;
+
+  return 0;
 }

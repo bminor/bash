@@ -22,49 +22,26 @@
 #define _UNWIND_PROT_H
 
 /* Run a function without interrupts. */
-extern void begin_unwind_frame ();
-extern void discard_unwind_frame ();
-extern void run_unwind_frame ();
-extern void add_unwind_protect ();
-extern void remove_unwind_protect ();
-extern void run_unwind_protects ();
-extern void unwind_protect_var ();
-extern void clear_unwind_protect_list ();
-
-/* Try to force correct alignment on machines where pointers and ints
-   differ in size. */
-typedef union {
-  char *s;
-  int i;
-} UWP;
+extern void begin_unwind_frame __P((char *));
+extern void discard_unwind_frame __P((char *));
+extern void run_unwind_frame __P((char *));
+extern void add_unwind_protect (); /* Not portable to arbitrary C99 hosts.  */
+extern void remove_unwind_protect __P((void));
+extern void run_unwind_protects __P((void));
+extern void clear_unwind_protect_list __P((int));
 
 /* Define for people who like their code to look a certain way. */
 #define end_unwind_frame()
 
-/* How to protect an integer. */
-#define unwind_protect_int(X) \
-	do \
-	  { \
-	    UWP u; \
-	    u.i = (X); \
-	    unwind_protect_var (&(X), u.s, sizeof (int)); \
-	  } \
-	while (0)
+/* How to protect a variable.  */
+#define unwind_protect_var(X) unwind_protect_mem ((char *)&(X), sizeof (X))
+extern void unwind_protect_mem __P((char *, int));
 
-#define unwind_protect_short(X) \
-  unwind_protect_var ((int *)&(X), (char *)&(X), sizeof (short))
-
-/* How to protect a pointer to a string. */
-#define unwind_protect_string(X) \
-  unwind_protect_var ((int *)&(X), \
-		      ((sizeof (char *) == sizeof (int)) ? (char *) (X) : (char *) &(X)), \
-		       sizeof (char *))
-
-/* How to protect any old pointer. */
-#define unwind_protect_pointer(X) unwind_protect_string (X)
-
-/* How to protect the contents of a jmp_buf. */
-#define unwind_protect_jmp_buf(X) \
-  unwind_protect_var ((int *)(X), (char *)(X), sizeof (procenv_t))
+/* Backwards compatibility */
+#define unwind_protect_int	unwind_protect_var
+#define unwind_protect_short	unwind_protect_var
+#define unwind_protect_string	unwind_protect_var
+#define unwind_protect_pointer	unwind_protect_var
+#define unwind_protect_jmp_buf	unwind_protect_var
 
 #endif /* _UNWIND_PROT_H */

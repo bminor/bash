@@ -66,7 +66,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int interactive, interactive_shell, subshell_environment;
+extern int subshell_environment;
 extern REDIRECT *redirection_undo_list;
 
 int no_exit_on_failed_exec;
@@ -79,7 +79,7 @@ mkdashname (name)
 {
   char *ret;
 
-  ret = xmalloc (2 + strlen (name));
+  ret = (char *)xmalloc (2 + strlen (name));
   ret[0] = '-';
   strcpy (ret + 1, name);
   return ret;

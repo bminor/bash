@@ -27,9 +27,12 @@
 #  define _FUNCTION_DEF
 typedef int Function ();
 typedef void VFunction ();
-typedef char *CPFunction ();
-typedef char **CPPFunction ();
+typedef char *CPFunction ();		/* no longer used */
+typedef char **CPPFunction ();		/* no longer used */
 #endif /* _FUNCTION_DEF */
+
+typedef int sh_cget_func_t __P((void));		/* sh_ivoidfunc_t */
+typedef int sh_cunget_func_t __P((int));	/* sh_intfunc_t */
 
 enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
 
@@ -49,12 +52,12 @@ enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
    synchronization.  Look in input.c for the implementation. */
 typedef struct BSTREAM
 {
-  int	b_fd;
+  int	 b_fd;
   char	*b_buffer;		/* The buffer that holds characters read. */
   size_t b_size;		/* How big the buffer is. */
-  int	b_used;			/* How much of the buffer we're using, */
-  int	b_flag;			/* Flag values. */
-  int	b_inputp;		/* The input pointer, index into b_buffer. */
+  size_t b_used;		/* How much of the buffer we're using, */
+  int	 b_flag;		/* Flag values. */
+  size_t b_inputp;		/* The input pointer, index into b_buffer. */
 } BUFFERED_STREAM;
 
 #if 0
@@ -77,18 +80,18 @@ typedef struct {
   enum stream_type type;
   char *name;
   INPUT_STREAM location;
-  Function *getter;
-  Function *ungetter;
+  sh_cget_func_t *getter;
+  sh_cunget_func_t *ungetter;
 } BASH_INPUT;
 
 extern BASH_INPUT bash_input;
 
 /* Functions from parse.y. */
 extern void initialize_bash_input __P((void));
-extern void init_yy_io __P((Function *, Function *, enum stream_type, char *, INPUT_STREAM));
+extern void init_yy_io __P((sh_cget_func_t *, sh_cunget_func_t *, enum stream_type, const char *, INPUT_STREAM));
 extern void with_input_from_stdin __P((void));
-extern void with_input_from_string __P((char *, char *));
-extern void with_input_from_stream __P((FILE *, char *));
+extern void with_input_from_string __P((char *, const char *));
+extern void with_input_from_stream __P((FILE *, const char *));
 extern void push_stream __P((int));
 extern void pop_stream __P((void));
 extern int stream_on_stack __P((enum stream_type));
@@ -102,8 +105,8 @@ extern int *save_token_state __P((void));
 extern void restore_token_state __P((int *));
 
 /* Functions from input.c */
-extern int getc_with_restart ();
-extern int ungetc_with_restart ();
+extern int getc_with_restart __P((FILE *));
+extern int ungetc_with_restart __P((int, FILE *));
 
 #if defined (BUFFERED_INPUT)
 /* Functions from input.c. */

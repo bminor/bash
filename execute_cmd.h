@@ -23,7 +23,7 @@
 
 #include "stdc.h"
 
-extern struct fd_bitmap *new_fd_bitmap __P((long));
+extern struct fd_bitmap *new_fd_bitmap __P((int));
 extern void dispose_fd_bitmap __P((struct fd_bitmap *));
 extern void close_fd_bitmap __P((struct fd_bitmap *));
 extern int executing_line_number __P((void));

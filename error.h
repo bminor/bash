@@ -24,35 +24,38 @@
 #include "stdc.h"
 
 /* Get the name of the shell or shell script for an error message. */
-extern char *get_name_for_error ();
+extern char *get_name_for_error __P((void));
 
 /* Report an error having to do with FILENAME. */
-extern void file_error __P((char *));
+extern void file_error __P((const char *));
 
 /* Report a programmer's error, and abort.  Pass REASON, and ARG1 ... ARG5. */
-extern void programming_error __P((const char *, ...));
+extern void programming_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* General error reporting.  Pass FORMAT and ARG1 ... ARG5. */
-extern void report_error __P((const char *, ...));
+extern void report_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Error messages for parts of the parser that don't call report_syntax_error */
-extern void parser_error __P((int, const char *, ...));
+extern void parser_error __P((int, const char *, ...))  __attribute__((__format__ (printf, 2, 3)));
 
 /* Report an unrecoverable error and exit.  Pass FORMAT and ARG1 ... ARG5. */
-extern void fatal_error __P((const char *, ...));
+extern void fatal_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Report a system error, like BSD warn(3). */
-extern void sys_error __P((const char *, ...));
+extern void sys_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Report an internal error. */
-extern void internal_error __P((const char *, ...));
+extern void internal_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Report an internal warning. */
-extern void internal_warning __P((const char *, ...));
+extern void internal_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Report an error having to do with command parsing or execution. */
 extern void command_error __P((const char *, int, int, int));
 
 extern char *command_errstr __P((int));
+
+/* Debugging function, not enabled in released version. */
+extern void itrace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
 
 #endif /* !_ERROR_H_ */

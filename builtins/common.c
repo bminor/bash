@@ -26,6 +26,7 @@
 #endif
 
 #include <stdio.h>
+#include <chartypes.h>
 #include "../bashtypes.h"
 #include "posixstat.h"
 #include <signal.h>
@@ -63,26 +64,18 @@
 extern int errno;   
 #endif /* !errno */
 
-#ifdef __STDC__
-typedef int QSFUNC (const void *, const void *);
-#else
-typedef int QSFUNC ();
-#endif 
-
-extern int no_symbolic_links, interactive, interactive_shell;
+extern int no_symbolic_links;
 extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
-extern int variable_context;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
-extern COMMAND *global_command;
 extern char *bash_getcwd_errstr;
 
 /* Used by some builtins and the mainline code. */
-Function *last_shell_builtin = (Function *)NULL;
-Function *this_shell_builtin = (Function *)NULL;
+sh_builtin_func_t *last_shell_builtin = (sh_builtin_func_t *)NULL;
+sh_builtin_func_t *this_shell_builtin = (sh_builtin_func_t *)NULL;
 
 /* **************************************************************** */
 /*								    */
@@ -337,7 +330,7 @@ set_dollar_vars_changed ()
    follow.  If FATAL is true, call throw_to_top_level, which exits the
    shell; if not, call jump_to_top_level (DISCARD), which aborts the
    current command. */
-int
+long
 get_numeric_arg (list, fatal)
      WORD_LIST *list;
      int fatal;
@@ -359,7 +352,29 @@ get_numeric_arg (list, fatal)
 	}
       no_args (list->next);
     }
+
   return (count);
+}
+
+/* Get an eight-bit status value from LIST */
+int
+get_exitstat (list)
+     WORD_LIST *list;
+{
+  int status;
+  long sval;
+  char *arg;
+
+  arg = list->word->word;
+  if (arg == 0 || legal_number (arg, &sval) == 0)
+    {
+      builtin_error ("bad non-numeric arg `%s'", list->word->word);
+      return 255;
+    }
+  no_args (list->next);
+
+  status = sval & 255;
+  return status;
 }
 
 /* Return the octal number parsed from STRING, or -1 to indicate
@@ -375,9 +390,11 @@ read_octal (string)
     {
       digits++;
       result = (result * 8) + (*string++ - '0');
+      if (result > 0777)
+	return -1;
     }
 
-  if (!digits || result > 0777 || *string)
+  if (digits == 0 || *string)
     result = -1;
 
   return (result);
@@ -409,7 +426,7 @@ get_working_directory (for_whom)
 
   if (the_current_working_directory == 0)
     {
-      the_current_working_directory = xmalloc (PATH_MAX);
+      the_current_working_directory = (char *)xmalloc (PATH_MAX);
       the_current_working_directory[0] = '\0';
       directory = getcwd (the_current_working_directory, PATH_MAX);
       if (directory == 0)
@@ -449,7 +466,7 @@ get_job_spec (list)
      WORD_LIST *list;
 {
   register char *word;
-  int job, substring;
+  int job, substring_search;
 
   if (list == 0)
     return (current_job);
@@ -462,13 +479,13 @@ get_job_spec (list)
   if (*word == '%')
     word++;
 
-  if (digit (*word) && all_digits (word))
+  if (DIGIT (*word) && all_digits (word))
     {
       job = atoi (word);
       return (job >= job_slots ? NO_JOB : job - 1);
     }
 
-  substring = 0;
+  substring_search = 0;
   switch (*word)
     {
     case 0:
@@ -480,7 +497,7 @@ get_job_spec (list)
       return (previous_job);
 
     case '?':			/* Substring search requested. */
-      substring++;
+      substring_search++;
       word++;
       /* FALLTHROUGH */
 
@@ -498,15 +515,17 @@ get_job_spec (list)
 		p = jobs[i]->pipe;
 		do
 		  {
-		    if ((substring && strindex (p->command, word)) ||
+		    if ((substring_search && strindex (p->command, word)) ||
 			(STREQN (p->command, word, wl)))
-		      if (job != NO_JOB)
-			{
-			  builtin_error ("ambigious job spec: %s", word);
-			  return (DUP_JOB);
-			}
-		      else
-			job = i;
+		      {
+			if (job != NO_JOB)
+			  {
+			    builtin_error ("ambigious job spec: %s", word);
+			    return (DUP_JOB);
+			  }
+			else
+			  job = i;
+		      }
 
 		    p = p->next;
 		  }
@@ -658,33 +677,33 @@ builtin_address_internal (name, disabled_okay)
 }
 
 /* Return the pointer to the function implementing builtin command NAME. */
-Function *
+sh_builtin_func_t *
 find_shell_builtin (name)
      char *name;
 {
   current_builtin = builtin_address_internal (name, 0);
-  return (current_builtin ? current_builtin->function : (Function *)NULL);
+  return (current_builtin ? current_builtin->function : (sh_builtin_func_t *)NULL);
 }
 
 /* Return the address of builtin with NAME, whether it is enabled or not. */
-Function *
+sh_builtin_func_t *
 builtin_address (name)
      char *name;
 {
   current_builtin = builtin_address_internal (name, 1);
-  return (current_builtin ? current_builtin->function : (Function *)NULL);
+  return (current_builtin ? current_builtin->function : (sh_builtin_func_t *)NULL);
 }
 
 /* Return the function implementing the builtin NAME, but only if it is a
    POSIX.2 special builtin. */
-Function *
+sh_builtin_func_t *
 find_special_builtin (name)
      char *name;
 {
   current_builtin = builtin_address_internal (name, 0);
   return ((current_builtin && (current_builtin->flags & SPECIAL_BUILTIN)) ?
   			current_builtin->function :
-  			(Function *)NULL);
+  			(sh_builtin_func_t *)NULL);
 }
   
 static int

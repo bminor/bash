@@ -30,11 +30,14 @@
 #endif
 
 #include <stdio.h>
+#include <stdc.h>
+
+extern long get_clk_tck __P((void));
 
 void
 clock_t_to_secs (t, sp, sfp)
      clock_t t;
-     long *sp;
+     time_t *sp;
      int *sfp;
 {
   static long clk_tck = -1;
@@ -64,15 +67,15 @@ print_clock_t (fp, t)
      FILE *fp;
      clock_t t;
 {
-  int minutes, seconds_fraction;
-  long seconds;
+  time_t timestamp;
+  long minutes;
+  int seconds, seconds_fraction;
 
-  clock_t_to_secs (t, &seconds, &seconds_fraction);
+  clock_t_to_secs (t, &timestamp, &seconds_fraction);
 
-  minutes = seconds / 60;
-  seconds %= 60;
+  minutes = timestamp / 60;
+  seconds = timestamp % 60;
 
-  fprintf (fp, "%0dm%0ld.%03ds",  minutes, seconds, seconds_fraction);
+  fprintf (fp, "%ldm%d.%03ds",  minutes, seconds, seconds_fraction);
 }
 #endif /* HAVE_TIMES */
-

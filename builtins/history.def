@@ -70,10 +70,11 @@ $END
 extern int errno;
 #endif
 
-static void display_history ();
-static void push_history ();
-static int expand_and_print_history ();
-static int delete_histent ();
+static void display_history __P((WORD_LIST *));
+static int delete_histent __P((int));
+static int delete_last_history __P((void));
+static void push_history __P((WORD_LIST *));
+static int expand_and_print_history __P((WORD_LIST *));
 
 #define AFLAG	0x01
 #define RFLAG	0x02
@@ -163,17 +164,14 @@ history_builtin (list)
 #endif
   else if (flags & DFLAG)
     {
-      if (legal_number (delete_arg, &delete_offset) == 0)
+      if ((legal_number (delete_arg, &delete_offset) == 0)
+	  || (delete_offset < history_base)
+	  || (delete_offset > (history_base + history_length)))
 	{
 	  builtin_error ("%s: not a valid history position", delete_arg);
 	  return (EXECUTION_FAILURE);
 	}
       opt = delete_offset;
-      if (opt < history_base || opt < 0 || opt > (history_base + history_length))
-	{
-	  builtin_error ("%d: not a valid history position", opt);
-	  return (EXECUTION_FAILURE);
-	}
       result = delete_histent (opt - history_base);
       /* Since remove_history changes history_length, this can happen if
 	 we delete the last history entry. */
@@ -217,16 +215,17 @@ display_history (list)
      WORD_LIST *list;
 {
   register int i;
-  int limited, limit;
+  long limit;
   HIST_ENTRY **hlist;
 
   if (list)
     {
-      limited = 1;
       limit = get_numeric_arg (list, 0);
+      if (limit < 0)
+	limit = -limit;
     }
   else
-    limited = limit = 0;
+    limit = -1;
 
   hlist = history_list ();
 
@@ -235,10 +234,9 @@ display_history (list)
       for (i = 0;  hlist[i]; i++)
 	;
 
-      if (limit < 0)
-	limit = -limit;
-
-      if ((limited == 0)  || ((i -= limit) < 0))
+      if (0 <= limit && limit < i)
+	i -= limit;
+      else
 	i = 0;
 
       while (hlist[i])

@@ -45,8 +45,6 @@
 #include "array.h"
 #include "builtins/common.h"
 
-extern char *quote_string ();	/* XXX */
-
 #define ADD_BEFORE(ae, new) \
 	do { \
 		ae->prev->next = new; \
@@ -66,7 +64,7 @@ char	*value;
 {
 	ARRAY_ELEMENT *r;
 
-	r = (ARRAY_ELEMENT *) xmalloc(sizeof(ARRAY_ELEMENT));
+	r = (ARRAY_ELEMENT *)xmalloc(sizeof(ARRAY_ELEMENT));
 	r->ind = indx;
 	r->value = value ? savestring(value) : (char *)NULL;
 	r->next = r->prev = (ARRAY_ELEMENT *) NULL;
@@ -87,7 +85,7 @@ new_array()
 	ARRAY	*r;
 	ARRAY_ELEMENT	*head;
 
-	r =(ARRAY *) xmalloc(sizeof(ARRAY));
+	r =(ARRAY *)xmalloc(sizeof(ARRAY));
 	r->type = array_indexed;
 	r->max_index = r->max_size = -1;
 	r->num_elements = 0;
@@ -159,7 +157,7 @@ ARRAY_ELEMENT	*s, *e;
 {
 	ARRAY	*a;
 	ARRAY_ELEMENT *p, *n;
-	int	i;
+	arrayind_t i;
 
 	a = new_array ();
 	a->type = array->type;
@@ -280,7 +278,7 @@ arrayind_t	i;
 void
 array_walk(a, func)
 ARRAY	*a;
-Function *func;
+sh_ae_map_func_t *func;
 {
 	register ARRAY_ELEMENT *ae;
 
@@ -309,9 +307,10 @@ int	quoted;
 		return ((char *)NULL);
 
 	slen = strlen(sep);
+	result = NULL;
 	for (rsize = rlen = 0, ae = start; ae != end; ae = element_forw(ae)) {
 		if (rsize == 0)
-			result = xmalloc (rsize = 64);
+			result = (char *)xmalloc (rsize = 64);
 		if (element_value(ae)) {
 			t = quoted ? quote_string(element_value(ae)) : element_value(ae);
 			reg = strlen(t);
@@ -330,7 +329,8 @@ int	quoted;
 			}
 		}
 	}
-	result[rlen] = '\0';	/* XXX */
+	if (result)
+	  result[rlen] = '\0';	/* XXX */
 	return(result);
 }
 
@@ -358,7 +358,7 @@ ARRAY	*a;
 	if (a == 0 || array_empty (a))
 		return((char *)NULL);
 
-	result = xmalloc (rsize = 128);
+	result = (char *)xmalloc (rsize = 128);
 	result[0] = '(';
 	rlen = 1;
 
@@ -525,10 +525,11 @@ ARRAY	*array;
 char *
 array_subrange (a, start, end, quoted)
 ARRAY	*a;
-int	start, end, quoted;
+arrayind_t	start, end;
+int	quoted;
 {
 	ARRAY_ELEMENT	*h, *p;
-	int	i;
+	arrayind_t	i;
 
 	p = array_head (a);
 	if (p == 0 || array_empty (a) || start > array_num_elements (a))
@@ -577,7 +578,7 @@ int	mflags;
 print_element(ae)
 ARRAY_ELEMENT	*ae;
 {
-	printf("array[%d] = %s\n",(int)element_index(ae), element_value(ae));
+	printf("array[%ld] = %s\n", element_index(ae), element_value(ae));
 }
 
 print_array(a)

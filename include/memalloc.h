@@ -30,7 +30,7 @@
 #  define HAVE_ALLOCA
 #endif
 
-#if defined (HAVE_ALLOCA_H) && !defined (HAVE_ALLOCA)
+#if defined (HAVE_ALLOCA_H) && !defined (HAVE_ALLOCA) && !defined (C_ALLOCA)
 #  define HAVE_ALLOCA
 #endif /* HAVE_ALLOCA_H && !HAVE_ALLOCA */
 
@@ -49,7 +49,11 @@
 extern void *alloca ();
 #    else
 #      if !defined (alloca)
+#        if defined (__STDC__)
+extern void *alloca (size_t);
+#        else
 extern char *alloca ();
+#        endif /* !__STDC__ */
 #      endif /* !alloca */
 #    endif /* !__hpux || !__STDC__ && !alloca */
 #  endif /* !HAVE_ALLOCA_H || C_ALLOCA */

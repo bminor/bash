@@ -39,8 +39,6 @@
 #include "shell.h"
 #include <readline/readline.h>
 
-extern char *sh_backslash_quote ();
-
 /* Find greatest common prefix of two strings. */
 static int
 string_gcd (s1, s2)
@@ -78,7 +76,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
       return x;
     }
 
-  result = xmalloc (result_size = 16);
+  result = (char *)xmalloc (result_size = 16);
   *result = '\0';
 
   for (start = real_start; start < real_end; start = end + 1)
@@ -102,7 +100,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  /* In this case, add in a leading '{', because we are at
 	     top level, and there isn't a consistent prefix. */
 	  result_size += 1;
-	  result = xrealloc (result, result_size);
+	  result = (char *)xrealloc (result, result_size);
 	  result[0] = '{'; result[1] = '\0';
 	  flag++;
 	}
@@ -121,13 +119,13 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  /* If there is more than one element in the subarray,
 	     insert the (quoted) prefix and an opening brace. */
 	  tlen = gcd - gcd_zero;
-	  x = xmalloc (tlen + 1);
+	  x = (char *)xmalloc (tlen + 1);
 	  strncpy (x, array[start] + gcd_zero, tlen);
 	  x[tlen] = '\0';
 	  subterm = sh_backslash_quote (x);
 	  free (x);
 	  result_size += strlen (subterm) + 1;
-	  result = xrealloc (result, result_size);
+	  result = (char *)xrealloc (result, result_size);
 	  strcat (result, subterm);
 	  free (subterm);
 	  strcat (result, "{");
@@ -136,7 +134,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	}
 
       result_size += strlen (subterm) + 1;
-      result = xrealloc (result, result_size);
+      result = (char *)xrealloc (result, result_size);
       strcat (result, subterm);
       strcat (result, ",");
       free (subterm);

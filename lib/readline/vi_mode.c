@@ -57,20 +57,8 @@
 #include "rlprivate.h"
 #include "xmalloc.h"
 
-#ifndef _rl_digit_p
-#define _rl_digit_p(c)  ((c) >= '0' && (c) <= '9')
-#endif
-
-#ifndef _rl_digit_value
-#define _rl_digit_value(c) ((c) - '0')
-#endif
-
 #ifndef member
 #define member(c, s) ((c) ? (char *)strchr ((s), (c)) != (char *)NULL : 0)
-#endif
-
-#ifndef isident
-#define isident(c) ((_rl_pure_alphabetic (c) || _rl_digit_p (c) || c == '_'))
 #endif
 
 #ifndef exchange
@@ -81,7 +69,7 @@
 static int _rl_vi_doing_insert;
 
 /* Command keys which do movement for xxx_to commands. */
-static const char *vi_motion = " hl^$0ftFt;,%wbeWBE|";
+static const char *vi_motion = " hl^$0ftFT;,%wbeWBE|";
 
 /* Keymap used for vi replace characters.  Created dynamically since
    rarely used. */
@@ -112,9 +100,11 @@ static int vi_redoing;
 static const char *vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
 
 /* Arrays for the saved marks. */
-static int vi_mark_chars[27];
+static int vi_mark_chars['z' - 'a' + 1];
 
-static int rl_digit_loop1 __P((void));
+static void _rl_vi_stuff_insert PARAMS((int));
+static void _rl_vi_save_insert PARAMS((UNDO_LIST *));
+static int rl_digit_loop1 PARAMS((void));
 
 void
 _rl_vi_initialize_line ()
@@ -460,14 +450,14 @@ rl_vi_fword (count, ignore)
   while (count-- && rl_point < (rl_end - 1))
     {
       /* Move to white space (really non-identifer). */
-      if (isident (rl_line_buffer[rl_point]))
+      if (_rl_isident (rl_line_buffer[rl_point]))
 	{
-	  while (isident (rl_line_buffer[rl_point]) && rl_point < rl_end)
+	  while (_rl_isident (rl_line_buffer[rl_point]) && rl_point < rl_end)
 	    rl_point++;
 	}
       else /* if (!whitespace (rl_line_buffer[rl_point])) */
 	{
-	  while (!isident (rl_line_buffer[rl_point]) &&
+	  while (!_rl_isident (rl_line_buffer[rl_point]) &&
 		 !whitespace (rl_line_buffer[rl_point]) && rl_point < rl_end)
 	    rl_point++;
 	}
@@ -497,9 +487,9 @@ rl_vi_bword (count, ignore)
 	 back so we don't get messed up by the rl_point++ down there in
 	 the while loop.  Without this code, words like `l;' screw up the
 	 function. */
-      last_is_ident = isident (rl_line_buffer[rl_point - 1]);
-      if ((isident (rl_line_buffer[rl_point]) && !last_is_ident) ||
-	  (!isident (rl_line_buffer[rl_point]) && last_is_ident))
+      last_is_ident = _rl_isident (rl_line_buffer[rl_point - 1]);
+      if ((_rl_isident (rl_line_buffer[rl_point]) && !last_is_ident) ||
+	  (!_rl_isident (rl_line_buffer[rl_point]) && last_is_ident))
 	rl_point--;
 
       while (rl_point > 0 && whitespace (rl_line_buffer[rl_point]))
@@ -507,10 +497,10 @@ rl_vi_bword (count, ignore)
 
       if (rl_point > 0)
 	{
-	  if (isident (rl_line_buffer[rl_point]))
-	    while (--rl_point >= 0 && isident (rl_line_buffer[rl_point]));
+	  if (_rl_isident (rl_line_buffer[rl_point]))
+	    while (--rl_point >= 0 && _rl_isident (rl_line_buffer[rl_point]));
 	  else
-	    while (--rl_point >= 0 && !isident (rl_line_buffer[rl_point]) &&
+	    while (--rl_point >= 0 && !_rl_isident (rl_line_buffer[rl_point]) &&
 		   !whitespace (rl_line_buffer[rl_point]));
 	  rl_point++;
 	}
@@ -532,10 +522,10 @@ rl_vi_eword (count, ignore)
 
       if (rl_point < rl_end)
 	{
-	  if (isident (rl_line_buffer[rl_point]))
-	    while (++rl_point < rl_end && isident (rl_line_buffer[rl_point]));
+	  if (_rl_isident (rl_line_buffer[rl_point]))
+	    while (++rl_point < rl_end && _rl_isident (rl_line_buffer[rl_point]));
 	  else
-	    while (++rl_point < rl_end && !isident (rl_line_buffer[rl_point])
+	    while (++rl_point < rl_end && !_rl_isident (rl_line_buffer[rl_point])
 		   && !whitespace (rl_line_buffer[rl_point]));
 	}
       rl_point--;
@@ -611,7 +601,7 @@ _rl_vi_save_insert (up)
   if (len >= vi_insert_buffer_size)
     {
       vi_insert_buffer_size += (len + 32) - (len % 32);
-      vi_insert_buffer = xrealloc (vi_insert_buffer, vi_insert_buffer_size);
+      vi_insert_buffer = (char *)xrealloc (vi_insert_buffer, vi_insert_buffer_size);
     }
   strncpy (vi_insert_buffer, rl_line_buffer + start, len - 1);
   vi_insert_buffer[len-1] = '\0';
@@ -847,12 +837,12 @@ rl_digit_loop1 ()
 	  RL_UNSETSTATE(RL_STATE_NUMERICARG);
 	  return 1;
 	}
-      rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg, 0);
+      rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg);
       RL_SETSTATE(RL_STATE_MOREINPUT);
       key = c = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
-      if (_rl_keymap[c].type == ISFUNC &&
+      if (c >= 0 && _rl_keymap[c].type == ISFUNC &&
 	  _rl_keymap[c].function == rl_universal_argument)
 	{
 	  rl_numeric_arg *= 4;
@@ -1356,7 +1346,7 @@ rl_vi_set_mark (count, key)
   ch = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
-  if (_rl_lowercase_p (ch) == 0)
+  if (ch < 'a' || ch > 'z')
     {
       rl_ding ();
       return -1;
@@ -1381,7 +1371,7 @@ rl_vi_goto_mark (count, key)
       rl_point = rl_mark;
       return 0;
     }
-  else if (_rl_lowercase_p (ch) == 0)
+  else if (ch < 'a' || ch > 'z')
     {
       rl_ding ();
       return -1;

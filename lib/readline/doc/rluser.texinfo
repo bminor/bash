@@ -10,7 +10,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988-2000 Free Software Foundation, Inc.
+Copyright (C) 1988-2001 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -235,7 +235,7 @@ words, to the end of the next word.
 Word boundaries are the same as those used by @kbd{M-f}.
 
 @item M-@key{DEL}
-Kill from the cursor the start of the previous word, or, if between
+Kill from the cursor the start of the current word, or, if between
 words, to the start of the previous word.
 Word boundaries are the same as those used by @kbd{M-b}.
 
@@ -311,6 +311,10 @@ For instance, a @key{RET} will terminate the search and accept
 the line, thereby executing the command from the history list.
 A movement command will terminate the search, make the last line found
 the current line, and begin editing.
+
+Readline remembers the last incremental search string.  If two
+@kbd{C-r}s are typed without any intervening characters defining a new
+search string, any remembered search string is used.
 
 Non-incremental searches read the entire search string before starting
 to search for matching history lines.  The search string may be
@@ -452,6 +456,11 @@ arrow keys.  The default is @samp{off}.
 If set to @samp{on}, tilde expansion is performed when Readline
 attempts word completion.  The default is @samp{off}.
 
+@vindex history-preserve-point
+If set to @samp{on}, the history code attempts to place point at the
+same location on each history line retrived with @code{previous-history}
+or @code{next-history}.
+
 @item horizontal-scroll-mode
 @vindex horizontal-scroll-mode
 This variable can be set to either @samp{on} or @samp{off}.  Setting it
@@ -502,6 +511,14 @@ appended.  The default is @samp{on}.
 This variable, when set to @samp{on}, causes Readline to display an
 asterisk (@samp{*}) at the start of history lines which have been modified.
 This variable is @samp{off} by default.
+
+@item match-hidden-files
+@vindex match-hidden-files
+This variable, when set to @samp{on}, causes Readline to match files whose
+names begin with a @samp{.} (hidden files) when performing filename
+completion, unless the leading @samp{.} is
+supplied by the user in the filename to be completed.
+This variable is @samp{on} by default.
 
 @item output-meta
 @vindex output-meta
@@ -644,11 +661,11 @@ horizontal tab
 @item \v
 vertical tab
 @item \@var{nnn}
-the character whose @sc{ascii} code is the octal value @var{nnn}
+the eight-bit character whose value is the octal value @var{nnn}
 (one to three digits)
-@item \x@var{nnn}
-the character whose @sc{ascii} code is the hexadecimal value @var{nnn}
-(one to three digits)
+@item \x@var{HH}
+the eight-bit character whose value is the hexadecimal value @var{HH}
+(one or two hex digits)
 @end table
 
 When entering the text of a macro, single or double quotes must
@@ -1021,6 +1038,8 @@ Negative arguments have no effect.
 @item transpose-words (M-t)
 Drag the word before point past the word after point,
 moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
 
 @item upcase-word (M-u)
 Uppercase the current (or following) word.  With a negative argument,
@@ -1534,7 +1553,7 @@ matches were generated.
 @item complete
 @btindex complete
 @example
-@code{complete [-abcdefjkvu] [-o @var{comp-option}] [-A @var{action}] [-G @var{globpat}] [-W @var{wordlist}]
+@code{complete [-abcdefgjkvu] [-o @var{comp-option}] [-A @var{action}] [-G @var{globpat}] [-W @var{wordlist}]
 [-P @var{prefix}] [-S @var{suffix}] [-X @var{filterpat}] [-F @var{function}]
 [-C @var{command}] @var{name} [@var{name} @dots{}]}
 @code{complete -pr [@var{name} @dots{}]}
@@ -1616,6 +1635,9 @@ File names.  May also be specified as @option{-f}.
 
 @item function
 Names of shell functions.
+
+@item group
+Group names.  May also be specified as @option{-g}.
 
 @item helptopic
 Help topics as accepted by the @code{help} builtin (@pxref{Bash Builtins}).

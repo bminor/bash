@@ -48,6 +48,7 @@
 #include "history.h"
 
 #include "rlprivate.h"
+#include "xmalloc.h"
 
 #define SWAP(s, e)  do { int t; t = s; s = e; e = t; } while (0)
 

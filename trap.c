@@ -52,15 +52,25 @@ extern int errno;
 #define SIG_CHANGED	0x20	/* Trap value changed in trap handler. */
 #define SIG_IGNORED	0x40	/* The signal is currently being ignored. */
 
+#define SPECIAL_TRAP(s)	((s) == EXIT_TRAP || (s) == DEBUG_TRAP || (s) == ERROR_TRAP)
+
 /* An array of such flags, one for each signal, describing what the
    shell will do with a signal.  DEBUG_TRAP == NSIG; some code below
    assumes this. */
-static int sigmodes[NSIG+1];
+static int sigmodes[BASH_NSIG];
 
-static void change_signal (), restore_signal ();
+static void free_trap_command __P((int));
+static void change_signal __P((int, char *));
+
+static void get_original_signal __P((int));
+
+static void _run_trap_internal __P((int, char *));
+
+static void reset_signal __P((int));
+static void restore_signal __P((int));
+static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
 
 /* Variables used here but defined in other files. */
-extern int interactive_shell, interactive;
 extern int interrupt_immediately;
 extern int last_command_exit_value;
 extern int line_number;
@@ -73,7 +83,7 @@ SigHandler *original_signals[NSIG];
    DEFAULT_SIG, which means do whatever you were going to do before
    you were so rudely interrupted, or IGNORE_SIG, which says ignore
    this signal. */
-char *trap_list[NSIG+1];
+char *trap_list[BASH_NSIG];
 
 /* A bitmap of signals received for which we have trap handlers. */
 int pending_traps[NSIG];
@@ -97,8 +107,8 @@ initialize_traps ()
 {
   register int i;
 
-  trap_list[EXIT_TRAP] = trap_list[DEBUG_TRAP] = (char *)NULL;
-  sigmodes[EXIT_TRAP] = sigmodes[DEBUG_TRAP] = SIG_INHERITED;
+  trap_list[EXIT_TRAP] = trap_list[DEBUG_TRAP] = trap_list[ERROR_TRAP] = (char *)NULL;
+  sigmodes[EXIT_TRAP] = sigmodes[DEBUG_TRAP] = sigmodes[ERROR_TRAP] = SIG_INHERITED;
   original_signals[EXIT_TRAP] = IMPOSSIBLE_TRAP_HANDLER;
 
   for (i = 1; i < NSIG; i++)
@@ -185,10 +195,10 @@ decode_signal (string)
   long sig;
 
   if (legal_number (string, &sig))
-    return ((sig >= 0 && sig <= NSIG) ? (int)sig : NO_SIG);
+    return ((sig >= 0 && sig < NSIG) ? (int)sig : NO_SIG);
 
   /* A leading `SIG' may be omitted. */
-  for (sig = 0; sig <= NSIG; sig++)
+  for (sig = 0; sig < BASH_NSIG; sig++)
     {
       if (signal_names[sig] == 0 || signal_names[sig][0] == '\0')
 	continue;
@@ -260,8 +270,8 @@ run_pending_traps ()
 		 Unless we catch this, the subshell will dump core when
 		 trap_list[SIGTERM] == DEFAULT_SIG, because DEFAULT_SIG is
 		 usually 0x0. */
-	      internal_warning ("run_pending_traps: bad value in trap_list[%d]: 0x%x",
-				sig, (int)trap_list[sig]);
+	      internal_warning ("run_pending_traps: bad value in trap_list[%d]: %p",
+				sig, trap_list[sig]);
 	      if (trap_list[sig] == (char *)DEFAULT_SIG)
 		{
 		  internal_warning ("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself", sig, signal_name (sig));
@@ -350,6 +360,13 @@ set_debug_trap (command)
   set_signal (DEBUG_TRAP, command);
 }
 
+void
+set_error_trap (command)
+     char *command;
+{
+  set_signal (ERROR_TRAP, command);
+}
+
 #ifdef INCLUDE_UNUSED
 void
 set_sigint_trap (command)
@@ -402,7 +419,7 @@ set_signal (sig, string)
      int sig;
      char *string;
 {
-  if (sig == DEBUG_TRAP || sig == EXIT_TRAP)
+  if (SPECIAL_TRAP (sig))
     {
       change_signal (sig, savestring (string));
       if (sig == EXIT_TRAP && interactive == 0)
@@ -508,9 +525,9 @@ void
 restore_default_signal (sig)
      int sig;
 {
-  if (sig == DEBUG_TRAP || sig == EXIT_TRAP)
+  if (SPECIAL_TRAP (sig))
     {
-      if ((sig != DEBUG_TRAP) || (sigmodes[sig] & SIG_INPROGRESS) == 0)
+      if ((sig != DEBUG_TRAP && sig != ERROR_TRAP) || (sigmodes[sig] & SIG_INPROGRESS) == 0)
 	free_trap_command (sig);
       trap_list[sig] = (char *)NULL;
       sigmodes[sig] &= ~SIG_TRAPPED;
@@ -546,7 +563,7 @@ void
 ignore_signal (sig)
      int sig;
 {
-  if ((sig == EXIT_TRAP || sig == DEBUG_TRAP) && ((sigmodes[sig] & SIG_IGNORED) == 0))
+  if (SPECIAL_TRAP (sig) && ((sigmodes[sig] & SIG_IGNORED) == 0))
     {
       change_signal (sig, (char *)IGNORE_SIG);
       return;
@@ -623,7 +640,7 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int old_exit_value, old_line_number, *token_state;
+  int old_exit_value, *token_state;
 
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
@@ -667,6 +684,13 @@ run_debug_trap ()
     _run_trap_internal (DEBUG_TRAP, "debug trap");
 }
 
+void
+run_error_trap ()
+{
+  if ((sigmodes[ERROR_TRAP] & SIG_TRAPPED) && (sigmodes[ERROR_TRAP] & SIG_INPROGRESS) == 0)
+    _run_trap_internal (ERROR_TRAP, "error trap");
+}
+
 /* Run a trap set on SIGINT.  This is called from throw_to_top_level (), and
    declared here to localize the trap functions. */
 void
@@ -683,13 +707,13 @@ free_trap_strings ()
 {
   register int i;
 
-  for (i = 0; i < NSIG+1; i++)
+  for (i = 0; i < BASH_NSIG; i++)
     {
       free_trap_command (i);
       trap_list[i] = (char *)DEFAULT_SIG;
       sigmodes[i] &= ~SIG_TRAPPED;
     }
-  trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = (char *)NULL;
+  trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = (char *)NULL;
 }
 #endif
 
@@ -714,7 +738,7 @@ restore_signal (sig)
 
 static void
 reset_or_restore_signal_handlers (reset)
-     VFunction *reset;
+     sh_resetsig_func_t *reset;
 {
   register int i;
 
@@ -737,8 +761,15 @@ reset_or_restore_signal_handlers (reset)
       else if (sigmodes[i] & SIG_SPECIAL)
 	(*reset) (i);
     }
+
+  /* Command substitution and other child processes don't inherit the
+     debug or error traps. */
+  sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;  
+  sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
 }
 
+/* Reset trapped signals to their original values, but don't free the
+   trap strings.  Called by the command substitution code. */
 void
 reset_signal_handlers ()
 {
@@ -773,6 +804,9 @@ maybe_call_trap_handler (sig)
 	  break;
 	case DEBUG_TRAP:
 	  run_debug_trap ();
+	  break;
+	case ERROR_TRAP:
+	  run_error_trap ();
 	  break;
 	default:
 	  trap_handler (sig);

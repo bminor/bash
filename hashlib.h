@@ -36,12 +36,14 @@ typedef struct hash_table {
   int nentries;			/* How many entries does this table have. */
 } HASH_TABLE;
 
-extern int hash_string __P((char *, HASH_TABLE *));
+extern int hash_string __P((const char *, HASH_TABLE *));
+extern int hash_table_nentries __P((HASH_TABLE *));
 extern HASH_TABLE *make_hash_table __P((int));
-extern BUCKET_CONTENTS *find_hash_item __P((char *, HASH_TABLE *));
-extern BUCKET_CONTENTS *remove_hash_item __P((char *, HASH_TABLE *));
+extern HASH_TABLE *copy_hash_table __P((HASH_TABLE *, sh_string_func_t *));
+extern BUCKET_CONTENTS *find_hash_item __P((const char *, HASH_TABLE *));
+extern BUCKET_CONTENTS *remove_hash_item __P((const char *, HASH_TABLE *));
 extern BUCKET_CONTENTS *add_hash_item __P((char *, HASH_TABLE *));
-extern void flush_hash_table __P((HASH_TABLE *, VFunction *));
+extern void flush_hash_table __P((HASH_TABLE *, sh_free_func_t *));
 extern void dispose_hash_table __P((HASH_TABLE *));
 
 /* Redefine the function as a macro for speed. */
@@ -53,7 +55,7 @@ extern void dispose_hash_table __P((HASH_TABLE *));
 /* Default number of buckets in the hash table. */
 #define DEFAULT_HASH_BUCKETS 53	/* was 107 */
 
-#define HASH_ENTRIES(ht)	(ht)->nentries
+#define HASH_ENTRIES(ht)	((ht) ? (ht)->nentries : 0)
 
 #if !defined (NULL)
 #  if defined (__STDC__)

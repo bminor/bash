@@ -77,7 +77,7 @@
 #  include <unistd.h>
 #endif
 
-#include <ctype.h>
+#include "chartypes.h"
 
 #include "shell.h"
 
@@ -142,31 +142,52 @@ static int	curtok;		/* the current token */
 static int	lasttok;	/* the previous token */
 static int	assigntok;	/* the OP in OP= */
 static char	*tokstr;	/* current token string */
-static int	tokval;		/* current token value */
+static long	tokval;		/* current token value */
 static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
-static void	readtok ();	/* lexical analyzer */
-static long	subexpr (), expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
-		exp4 (), exp5 (), expshift (), expland (), explor (),
-		expband (), expbor (), expbxor (), expcond (), exppower (),
-		expcomma ();
-static long	strlong ();
-static void	evalerror ();
+static void	readtok __P((void));	/* lexical analyzer */
+static long	strlong __P((char *));
+static void	evalerror __P((char *));
+
+static void	pushexp __P((void));
+static void	popexp __P((void));
+
+static long 	subexpr __P((char *));
+
+static long	expcomma __P((void));
+static long 	expassign __P((void));
+static long	expcond __P((void));
+static long 	explor __P((void));
+static long 	expland __P((void));
+static long	expbor __P((void));
+static long	expbxor __P((void));
+static long	expband __P((void));
+static long 	exp5 __P((void));
+static long 	exp4 __P((void));
+static long 	expshift __P((void));
+static long 	exp3 __P((void));
+static long 	exp2 __P((void));
+static long	exppower __P((void));
+static long 	exp1 __P((void));
+static long 	exp0 __P((void));
 
 /* A structure defining a single expression context. */
 typedef struct {
   int curtok, lasttok;
   char *expression, *tp, *lasttp;
-  int tokval;
+  long tokval;
   char *tokstr;
   int noeval;
 } EXPR_CONTEXT;
 
+#ifdef INCLUDE_UNUSED
+/* Not used yet. */
 typedef struct {
   char *tokstr;
-  int tokval;
+  long tokval;
 } LVALUE;
+#endif
 
 /* Global var which contains the stack of expression contexts. */
 static EXPR_CONTEXT **expr_stack;
@@ -209,9 +230,8 @@ pushexp ()
 
   if (expr_depth >= expr_stack_size)
     {
-      expr_stack = (EXPR_CONTEXT **)
-	xrealloc (expr_stack, (expr_stack_size += EXPR_STACK_GROW_SIZE)
-		  * sizeof (EXPR_CONTEXT *));
+      expr_stack_size += EXPR_STACK_GROW_SIZE;
+      expr_stack = (EXPR_CONTEXT **)xrealloc (expr_stack, expr_stack_size * sizeof (EXPR_CONTEXT *));
     }
 
   context = (EXPR_CONTEXT *)xmalloc (sizeof (EXPR_CONTEXT));
@@ -263,7 +283,7 @@ evalexp (expr, validp)
   procenv_t old_evalbuf;
 #endif
 
-  val = 0L;
+  val = 0;
 
 #if 0
   /* Save the value of evalbuf to protect it around possible recursive
@@ -291,7 +311,7 @@ evalexp (expr, validp)
 
       if (validp)
 	*validp = 0;
-      return (0L);
+      return (0);
     }
 
   val = subexpr (expr);
@@ -319,7 +339,7 @@ subexpr (expr)
     ;
 
   if (p == NULL || *p == '\0')
-    return (0L);
+    return (0);
 
   pushexp ();
   curtok = lasttok = 0;
@@ -327,7 +347,7 @@ subexpr (expr)
   tp = expression;
 
   tokstr = (char *)NULL;
-  tokval = 0L;
+  tokval = 0;
 
   readtok ();
 
@@ -458,11 +478,9 @@ expcond ()
 	  set_noeval = 1;
 	  noeval++;
 	}
-#if 0
-      val1 = explor ();
-#else
+
       val1 = EXP_HIGHEST ();
-#endif
+
       if (set_noeval)
 	noeval--;
       if (curtok != COL)
@@ -731,7 +749,7 @@ exppower ()
       readtok ();
       val2 = exp1 ();
       if (val2 == 0)
-	return (1L);
+	return (1);
       if (val2 < 0)
 	evalerror ("exponent less than 0");
       for (c = 1; val2--; c *= val1)
@@ -765,7 +783,7 @@ exp1 ()
 static long
 exp0 ()
 {
-  register long val = 0L, v2;
+  register long val = 0, v2;
   char *vincdec;
   int stok;
 
@@ -814,7 +832,7 @@ exp0 ()
     {
       val = tokval;
       if (curtok == STR && (*tp == '+' || *tp == '-') && tp[1] == *tp &&
-		(tp[2] == '\0' || (isalnum (tp[2]) == 0)))
+		(tp[2] == '\0' || (ISALNUM ((unsigned char)tp[2]) == 0)))
 	{
 	  /* post-increment or post-decrement */
 	  v2 = val + ((*tp == '+') ? 1 : -1);
@@ -842,7 +860,8 @@ static void
 readtok ()
 {
   register char *cp;
-  register int c, c1, e;
+  register unsigned char c, c1;
+  register int e;
 
   /* Skip leading whitespace. */
   cp = tp;
@@ -929,9 +948,9 @@ readtok ()
       lasttok = curtok;
       curtok = STR;
     }
-  else if (digit(c))
+  else if (DIGIT(c))
     {
-      while (digit (c) || isletter (c) || c == '#' || c == '@' || c == '_')
+      while (ISALNUM (c) || c == '#' || c == '@' || c == '_')
 	c = *cp++;
 
       c = *--cp;
@@ -981,9 +1000,9 @@ readtok ()
 	c = LOR;
       else if ((c == '*') && (c1 == '*'))
 	c = POWER;
-      else if ((c == '-') && (c1 == '-') && legal_variable_starter (*cp))
+      else if ((c == '-') && (c1 == '-') && legal_variable_starter ((unsigned char)*cp))
 	c = PREDEC;
-      else if ((c == '+') && (c1 == '+') && legal_variable_starter (*cp))
+      else if ((c == '+') && (c1 == '+') && legal_variable_starter ((unsigned char)*cp))
 	c = PREINC;
       else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{
@@ -1029,13 +1048,11 @@ strlong (num)
      char *num;
 {
   register char *s;
-  register int c;
+  register unsigned char c;
   int base, foundbase;
-  long val = 0L;
+  long val;
 
   s = num;
-  if (s == NULL || *s == '\0')
-    return 0L;
 
   base = 10;
   foundbase = 0;
@@ -1043,8 +1060,8 @@ strlong (num)
     {
       s++;
 
-      if (s == NULL || *s == '\0')
-	return 0L;
+      if (*s == '\0')
+	return 0;
 
        /* Base 16? */
       if (*s == 'x' || *s == 'X')
@@ -1057,7 +1074,7 @@ strlong (num)
       foundbase++;
     }
 
-  val = 0L;
+  val = 0;
   for (c = *s++; c; c = *s++)
     {
       if (c == '#')
@@ -1065,26 +1082,25 @@ strlong (num)
 	  if (foundbase)
 	    evalerror ("bad number");
 
-	  base = (int)val;
-
 	  /* Illegal base specifications raise an evaluation error. */
-	  if (base < 2 || base > 64)
+	  if (val < 2 || val > 64)
 	    evalerror ("illegal arithmetic base");
 
-	  val = 0L;
+	  base = val;
+	  val = 0;
 	  foundbase++;
 	}
-      else if (isletter(c) || digit(c) || (c == '_') || (c == '@'))
+      else if (ISALNUM(c) || (c == '_') || (c == '@'))
 	{
-	  if (digit(c))
-	    c = digit_value(c);
+	  if (DIGIT(c))
+	    c = TODIGIT(c);
 	  else if (c >= 'a' && c <= 'z')
 	    c -= 'a' - 10;
 	  else if (c >= 'A' && c <= 'Z')
 	    c -= 'A' - ((base <= 36) ? 10 : 36);
-	  else if (c == '_')
-	    c = 62;
 	  else if (c == '@')
+	    c = 62;
+	  else if (c == '_')
 	    c = 63;
 
 	  if (c >= base)
@@ -1099,14 +1115,14 @@ strlong (num)
 }
 
 #if defined (EXPR_TEST)
-char *
+void *
 xmalloc (n)
      int n;
 {
   return (malloc (n));
 }
 
-char *
+void *
 xrealloc (s, n)
      char *s;
      int n;
@@ -1155,7 +1171,7 @@ builtin_error (format, arg1, arg2, arg3, arg4, arg5)
 
 char *
 itos (n)
-     int n;
+     long n;
 {
   return ("42");
 }

@@ -25,7 +25,7 @@
 #endif
 
 #include <stdio.h>
-#include "bashansi.h"
+#include <bashansi.h>
 
 #include "shell.h"
 
@@ -67,6 +67,9 @@ realloc_stringlist (sl, n)
 {
   register int i;
 
+  if (sl == 0)
+    return (sl = alloc_stringlist(n));
+
   if (n > sl->list_size)
     {
       sl->list = (char **)xrealloc (sl->list, (n+1) * sizeof (char *));
@@ -95,6 +98,8 @@ copy_stringlist (sl)
   STRINGLIST *new;
   register int i;
 
+  if (sl == 0)
+    return ((STRINGLIST *)0);
   new = alloc_stringlist (sl->list_size);
   /* I'd like to use copy_array, but that doesn't copy everything. */
   if (sl->list)
@@ -129,6 +134,7 @@ merge_stringlists (m1, m2)
     sl->list[n] = STRDUP (m2->list[i]);
   sl->list_len = n;
   sl->list[n] = (char *)NULL;
+  return (sl);
 }
 
 /* Make STRINGLIST M1 contain everything in M1 and M2. */
@@ -139,10 +145,7 @@ append_stringlist (m1, m2)
   register int i, n, len1, len2;
 
   if (m1 == 0)
-    {
-      m1 = copy_stringlist (m2);
-      return m1;
-    }
+    return (m2 ? copy_stringlist (m2) : (STRINGLIST *)0);
 
   len1 = m1->list_len;
   len2 = m2 ? m2->list_len : 0;
@@ -180,7 +183,7 @@ prefix_suffix_stringlist (sl, prefix, suffix)
     {
       llen = STRLEN (sl->list[i]);
       tlen = plen + llen + slen + 1;
-      t = xmalloc (tlen + 1);
+      t = (char *)xmalloc (tlen + 1);
       if (plen)
 	strcpy (t, prefix);
       strcpy (t + plen, sl->list[i]);
@@ -223,6 +226,12 @@ word_list_to_stringlist (list, copy, starting_index, ip)
   STRINGLIST *ret;
   int slen, len;
 
+  if (list == 0)
+    {
+      if (ip)
+        *ip = 0;
+      return ((STRINGLIST *)0);
+    }
   slen = list_length (list);
   ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
   ret->list = word_list_to_argv (list, copy, starting_index, &len);

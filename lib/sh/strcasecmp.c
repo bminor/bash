@@ -24,11 +24,7 @@
 
 #include <stdc.h>
 #include <bashansi.h>
-#include <ctype.h>
-
-#if !defined (to_lower)
-#  define to_lower(c) (islower(c) ? (c) : tolower(c))
-#endif /* to_lower */
+#include <chartypes.h>
 
 /* Compare at most COUNT characters from string1 to string2.  Case
    doesn't matter. */
@@ -49,7 +45,7 @@ strncasecmp (string1, string2, count)
   s2 = string2;
   do
     {
-      if ((r = to_lower (*s1) - to_lower (*s2)) != 0)
+      if ((r = TOLOWER ((unsigned char) *s1) - TOLOWER ((unsigned char) *s2)) != 0)
 	return r;
       if (*s1++ == '\0')
 	break;
@@ -76,7 +72,7 @@ strcasecmp (string1, string2)
   if (s1 == s2)
     return (0);
 
-  while ((r = to_lower (*s1) - to_lower (*s2)) == 0)
+  while ((r = TOLOWER ((unsigned char)*s1) - TOLOWER ((unsigned char)*s2)) == 0)
     {
       if (*s1++ == '\0')
 	return 0;

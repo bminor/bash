@@ -21,10 +21,15 @@
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include "config.h"
+
 #include <stdio.h>
 #include "bashansi.h"
-#include <ctype.h>
+#include "chartypes.h"
 #include <errno.h>
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #include "syntax.h"
 
@@ -82,6 +87,7 @@ usage()
   exit (2);
 }
 
+#ifdef INCLUDE_UNUSED
 static int
 getcflag (s)
      char *s;
@@ -93,6 +99,7 @@ getcflag (s)
       return wordflags[i].flag;
   return -1;
 }
+#endif
 
 static char *
 cdesc (i)
@@ -102,7 +109,7 @@ cdesc (i)
 
   if (i == ' ')
     return "SPC";
-  else if (isprint (i))
+  else if (ISPRINT (i))
     {
       xbuf[0] = i;
       xbuf[1] = '\0';
@@ -150,18 +157,20 @@ addcstr (str, flag)
      char *str;
      int flag;
 {
-  unsigned char *s;
-  char *fstr;
+  char *s, *fstr;
+  unsigned char uc;
 
-  for (s = (unsigned char *)str; s && *s; s++)
+  for (s = str; s && *s; s++)
     {
+      uc = *s;
+
       if (debug)
 	{
 	  fstr = getcstr (flag);
-	  fprintf(stderr, "added %s for character %s\n", fstr, cdesc(*s));
+	  fprintf(stderr, "added %s for character %s\n", fstr, cdesc(uc));
 	}
 	
-      lsyntax[*s] |= flag;
+      lsyntax[uc] |= flag;
     }
 }
 
@@ -256,8 +265,7 @@ static void
 dump_lsyntax (fp)
      FILE *fp;
 {
-  int i, cflag;
-  char *cstr;
+  int i;
 
   fprintf (fp, "const int sh_syntaxtab[%d] = {\n", SYNSIZE);
 
@@ -273,6 +281,7 @@ dump_lsyntax (fp)
   fprintf (fp, "};\n");
 }
 
+int
 main(argc, argv)
      int argc;
      char **argv;

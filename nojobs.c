@@ -90,7 +90,7 @@ extern int interactive, interactive_shell, login_shell;
 extern int subshell_environment;
 extern int last_command_exit_value;
 extern int interrupt_immediately;
-extern Function *this_shell_builtin;
+extern sh_builtin_func_t *this_shell_builtin;
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
 #endif
@@ -109,12 +109,6 @@ int shell_tty = -1;
    exits from get_tty_state(). */
 int check_window_size;
 
-#if defined (HAVE_WAITPID)
-static void reap_zombie_children ();
-#endif
-
-static int wait_sigint_received;
-
 /* STATUS and FLAGS are only valid if pid != NO_PID
    STATUS is only valid if (flags & PROC_RUNNING) == 0 */
 struct proc_status {
@@ -128,12 +122,34 @@ struct proc_status {
 #define PROC_NOTIFIED	0x02
 #define PROC_ASYNC	0x04
 
-static struct proc_status *pid_list = (struct proc_status *)NULL;
-static int pid_list_size;
-
 /* Return values from find_status_by_pid */
 #define PROC_BAD	 -1
 #define PROC_STILL_ALIVE -2
+
+static struct proc_status *pid_list = (struct proc_status *)NULL;
+static int pid_list_size;
+static int wait_sigint_received;
+
+static void alloc_pid_list __P((void));
+static int find_proc_slot __P((void));
+static int find_index_by_pid __P((pid_t));
+static int find_status_by_pid __P((pid_t));
+static int process_exit_status __P((WAIT));
+static void set_pid_status __P((pid_t, WAIT));
+static void set_pid_flags __P((pid_t, int));
+static void unset_pid_flags __P((pid_t, int));
+static void add_pid __P((pid_t, int));
+static void mark_dead_jobs_as_notified __P((int));
+
+static void get_new_window_size __P((int));
+static sighandler sigwinch_sighandler __P((int));
+static sighandler wait_signal_handler __P((int));
+
+#if defined (HAVE_WAITPID)
+static void reap_zombie_children __P((void));
+#endif
+
+static void restore_sigint_handler __P((void));
 
 /* Allocate new, or grow existing PID_LIST. */
 static void
@@ -143,8 +159,7 @@ alloc_pid_list ()
   int old = pid_list_size;
 
   pid_list_size += 10;
-  pid_list = (struct proc_status *)
-    xrealloc (pid_list, pid_list_size * sizeof (struct proc_status));
+  pid_list = (struct proc_status *)xrealloc (pid_list, pid_list_size * sizeof (struct proc_status));
 
   /* None of the newly allocated slots have process id's yet. */
   for (i = old; i < pid_list_size; i++)
@@ -538,6 +553,7 @@ default_tty_job_signals ()
 
 /* Wait for a single pid (PID) and return its exit status.  Called by
    the wait builtin. */
+int
 wait_for_single_pid (pid)
      pid_t pid;
 {
@@ -549,7 +565,7 @@ wait_for_single_pid (pid)
 
   if (pstatus == PROC_BAD)
     {
-      internal_error ("wait: pid %d is not a child of this shell", pid);
+      internal_error ("wait: pid %ld is not a child of this shell", (long)pid);
       return (127);
     }
 
@@ -698,7 +714,7 @@ wait_for (pid)
 	  break;
 	}
       else if (got_pid < 0 && errno != EINTR)
-	programming_error ("wait_for(%d): %s", pid, strerror(errno));
+	programming_error ("wait_for(%ld): %s", (long)pid, strerror(errno));
       else if (got_pid > 0)
 	set_pid_status (got_pid, status);
     }
@@ -818,17 +834,25 @@ give_terminal_to (pgrp, force)
 }
 
 /* Stop a pipeline. */
+int
 stop_pipeline (async, ignore)
      int async;
      COMMAND *ignore;
 {
   already_making_children = 0;
+  return 0;
 }
 
 void
 start_pipeline ()
 {
   already_making_children = 1;
+}
+
+void
+stop_making_children ()
+{
+  already_making_children = 0;
 }
 
 int
@@ -847,7 +871,7 @@ void
 describe_pid (pid)
      pid_t pid;
 {
-  fprintf (stderr, "%d\n", (int) pid);
+  fprintf (stderr, "%ld\n", (long) pid);
 }
 
 void

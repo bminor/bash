@@ -32,9 +32,9 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #  include "trap.h"
 #endif
 
-char *sys_siglist[NSIG];
+#include "xmalloc.h"
 
-extern char *xmalloc (), *malloc ();
+char *sys_siglist[NSIG];
 
 void
 initialize_siglist ()

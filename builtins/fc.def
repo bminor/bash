@@ -63,6 +63,7 @@ $END
 #endif
 
 #include <stdio.h>
+#include <chartypes.h>
 
 #include "../bashansi.h"
 #include <errno.h>
@@ -84,7 +85,7 @@ extern int echo_input_at_read;
 extern int current_command_line_count;
 extern int literal_history;
 
-extern int unlink ();
+extern int unlink __P((const char *));
 
 extern FILE *sh_mktmpfp __P((char *, int, char **));
 
@@ -117,10 +118,6 @@ extern FILE *sh_mktmpfp __P((char *, int, char **));
    Equivalent to !command:sg/pat/rep execpt there can be multiple PAT=REP's.
 */
 
-static char *fc_dosubs (), *fc_gethist (), *fc_readline ();
-static int fc_gethnum (), fc_number ();
-static void fc_replhist (), fc_addhist ();
-
 /* Data structure describing a list of global replacements to perform. */
 typedef struct repl {
   struct repl *next;
@@ -146,6 +143,16 @@ typedef struct repl {
 		} \
 	} while (0)
 
+static char *fc_dosubs __P((char *, REPL *));
+static char *fc_gethist __P((char *, HIST_ENTRY **));
+static int fc_gethnum __P((char *, HIST_ENTRY **));
+static int fc_number __P((WORD_LIST *));
+static void fc_replhist __P((char *));
+#ifdef INCLUDE_UNUSED
+static char *fc_readline __P((FILE *));
+static void fc_addhist __P((char *));
+#endif
+
 /* String to execute on a file that we want to edit. */
 #define FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-vi}}"
 
@@ -159,7 +166,7 @@ fc_builtin (list)
   int histbeg, histend, last_hist, retval, opt;
   FILE *stream;
   REPL *rlist, *rl;
-  char *ename, *command, *newcom, *line;
+  char *ename, *command, *newcom;
   HIST_ENTRY **hlist;
   char *fn;
 
@@ -445,7 +452,7 @@ fc_gethnum (command, hlist)
       s++;
     }
 
-  if (s && digit(*s))
+  if (s && DIGIT(*s))
     {
       n = atoi (s);
       n *= sign;
@@ -494,6 +501,7 @@ fc_gethist (command, hlist)
     return ((char *)NULL);
 }
 
+#ifdef INCLUDE_UNUSED
 /* Read the edited history lines from STREAM and return them
    one at a time.  This can read unlimited length lines.  The
    caller should free the storage. */
@@ -508,7 +516,7 @@ fc_readline (stream)
   while ((c = getc (stream)) != EOF)
     {
       if ((lindex + 2) >= line_len)
-	line = (char *) xrealloc (line, (line_len += 128));
+	line = (char *)xrealloc (line, (line_len += 128));
 
       if (c == '\n')
 	{
@@ -535,6 +543,7 @@ fc_readline (stream)
   line[lindex++] = '\0';
   return (line);
 }
+#endif
 
 /* Perform the SUBS on COMMAND.
    SUBS is a list of substitutions, and COMMAND is a simple string.
@@ -604,6 +613,7 @@ fc_replhist (command)
     }
 }
 
+#ifdef INCLUDE_UNUSED
 /* Add LINE to the history, after removing a single trailing newline. */
 static void
 fc_addhist (line)
@@ -619,4 +629,6 @@ fc_addhist (line)
   if (line && *line)
     maybe_add_history (line);
 }
+#endif
+
 #endif /* HISTORY */

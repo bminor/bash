@@ -20,8 +20,11 @@
    have a copy of the license, write to the Free Software Foundation,
    59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-extern char *strcpy ();
-extern char *xmalloc ();
+#include <config.h>
+#ifdef HAVE_STRING_H
+#  include <string.h>
+#endif
+#include "xmalloc.h"
 
 /* Backwards compatibility, now that savestring has been removed from
    all `public' readline header files. */
@@ -29,5 +32,5 @@ char *
 savestring (s)
      const char *s;
 {
-  return ((char *)strcpy (xmalloc (1 + (int)strlen (s)), (s)));
+  return ((char *)strcpy ((char *)xmalloc (1 + strlen (s)), (s)));
 }

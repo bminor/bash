@@ -62,11 +62,11 @@ extern char *strchr (), *strrchr ();
 extern char *_rl_term_forward_char;
 #endif
 
-static void update_line __P((char *, char *, int, int, int, int));
-static void space_to_eol __P((int));
-static void delete_chars __P((int));
-static void insert_some_chars __P((char *, int));
-static void cr __P((void));
+static void update_line PARAMS((char *, char *, int, int, int, int));
+static void space_to_eol PARAMS((int));
+static void delete_chars PARAMS((int));
+static void insert_some_chars PARAMS((char *, int));
+static void cr PARAMS((void));
 
 static int *inv_lbreaks, *vis_lbreaks;
 static int inv_lbsize, vis_lbsize;
@@ -202,7 +202,7 @@ expand_prompt (pmt, lp, lip, niflp)
     }
 
   l = strlen (pmt);
-  r = ret = xmalloc (l + 1);
+  r = ret = (char *)xmalloc (l + 1);
 
   invfl = 0;	/* invisible chars in first line of prompt */
 
@@ -335,16 +335,16 @@ init_line_structures (minsize)
     {
       if (line_size < minsize)
 	line_size = minsize;
-      visible_line = xmalloc (line_size);
-      invisible_line = xmalloc (line_size);
+      visible_line = (char *)xmalloc (line_size);
+      invisible_line = (char *)xmalloc (line_size);
     }
   else if (line_size < minsize)	/* ensure it can hold MINSIZE chars */
     {
       line_size *= 2;
       if (line_size < minsize)
 	line_size = minsize;
-      visible_line = xrealloc (visible_line, line_size);
-      invisible_line = xrealloc (invisible_line, line_size);
+      visible_line = (char *)xrealloc (visible_line, line_size);
+      invisible_line = (char *)xrealloc (invisible_line, line_size);
     }
 
   for (n = minsize; n < line_size; n++)
@@ -421,8 +421,8 @@ rl_redisplay ()
 	  if (temp >= line_size)
 	    {
 	      line_size = (temp + 1024) - (temp % 1024);
-	      visible_line = xrealloc (visible_line, line_size);
-	      line = invisible_line = xrealloc (invisible_line, line_size);
+	      visible_line = (char *)xrealloc (visible_line, line_size);
+	      line = invisible_line = (char *)xrealloc (invisible_line, line_size);
 	    }
 	  strncpy (line + out, local_prompt, local_len);
 	  out += local_len;
@@ -455,8 +455,8 @@ rl_redisplay ()
       if (temp >= line_size)
 	{
 	  line_size = (temp + 1024) - (temp % 1024);
-	  visible_line = xrealloc (visible_line, line_size);
-	  line = invisible_line = xrealloc (invisible_line, line_size);
+	  visible_line = (char *)xrealloc (visible_line, line_size);
+	  line = invisible_line = (char *)xrealloc (invisible_line, line_size);
 	}
       strncpy (line + out,  prompt_this_line, pmtlen);
       out += pmtlen;
@@ -530,8 +530,8 @@ rl_redisplay ()
       if (out + 8 >= line_size)		/* XXX - 8 for \t */
 	{
 	  line_size *= 2;
-	  visible_line = xrealloc (visible_line, line_size);
-	  invisible_line = xrealloc (invisible_line, line_size);
+	  visible_line = (char *)xrealloc (visible_line, line_size);
+	  invisible_line = (char *)xrealloc (invisible_line, line_size);
 	  line = invisible_line;
 	}
 
@@ -1330,7 +1330,7 @@ rl_character_len (c, pos)
   if (CTRL_CHAR (c) || c == RUBOUT)
     return (2);
 
-  return ((isprint (uc)) ? 1 : 2);
+  return ((ISPRINT (uc)) ? 1 : 2);
 }
 
 /* How to print things in the "echo-area".  The prompt is treated as a
@@ -1357,7 +1357,12 @@ rl_message (va_alist)
   format = va_arg (args, char *);
 #endif
 
+#if defined (HAVE_VSNPRINTF)
+  vsnprintf (msg_buf, sizeof (msg_buf) - 1, format, args);
+#else
   vsprintf (msg_buf, format, args);
+  msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
+#endif
   va_end (args);
 
   rl_display_prompt = msg_buf;
@@ -1370,6 +1375,7 @@ rl_message (format, arg1, arg2)
      char *format;
 {
   sprintf (msg_buf, format, arg1, arg2);
+  msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
   rl_display_prompt = msg_buf;
   (*rl_redisplay_function) ();
   return 0;
@@ -1436,7 +1442,7 @@ _rl_make_prompt_for_search (pchar)
   if (saved_local_prompt == 0)
     {
       len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
-      pmt = xmalloc (len + 2);
+      pmt = (char *)xmalloc (len + 2);
       if (len)
 	strcpy (pmt, rl_prompt);
       pmt[len] = pchar;
@@ -1445,7 +1451,7 @@ _rl_make_prompt_for_search (pchar)
   else
     {
       len = *saved_local_prompt ? strlen (saved_local_prompt) : 0;
-      pmt = xmalloc (len + 2);
+      pmt = (char *)xmalloc (len + 2);
       if (len)
 	strcpy (pmt, saved_local_prompt);
       pmt[len] = pchar;

@@ -40,7 +40,7 @@ $PRODUCES setattr.c
 extern int posixly_correct;
 extern int array_needs_making;
 extern char *this_command_name;
-extern Function *this_shell_builtin;
+extern sh_builtin_func_t *this_shell_builtin;
 
 #ifdef ARRAY_VARS
 extern int declare_builtin ();
@@ -248,7 +248,11 @@ set_or_show_attributes (list, attribute, nodefs)
 	      if (arrays_only && array_p (var) == 0)
 		continue;
 #endif
+#if 0
 	      if ((var->attributes & attribute) && invisible_p (var) == 0)
+#else
+	      if ((var->attributes & attribute))
+#endif
 		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
 	    }
 	  free (variable_list);
@@ -327,6 +331,8 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else if (function_p (var))
     printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+  else if (invisible_p (var))
+    printf ("%s\n", var->name);
   else
     {
       x = sh_double_quote (value_cell (var) ? value_cell (var) : "");
@@ -342,7 +348,6 @@ show_name_attributes (name, nodefs)
      int nodefs;
 {
   SHELL_VAR *var;
-  int ret;
 
   var = find_tempenv_variable (name);
   if (var == 0)

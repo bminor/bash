@@ -29,17 +29,15 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+#include "posixtime.h"
 #include "bashansi.h"
 
 #include "shell.h"
-#include "maxpath.h"
 #include "execute_cmd.h"
 #include "mailcheck.h"
 #include <tilde/tilde.h>
 
-#ifndef NOW
-#define NOW ((time_t)time ((time_t *)0))
-#endif
+extern int mailstat __P((const char *, struct stat *));
 
 typedef struct {
   char *name;
@@ -56,10 +54,20 @@ static FILEINFO **mailfiles = (FILEINFO **)NULL;
 static int mailfiles_count;
 
 /* The last known time that mail was checked. */
-static int last_time_mail_checked;
+static time_t last_time_mail_checked;
 
 /* Non-zero means warn if a mail file has been read since last checked. */
 int mail_warning;
+
+static int find_mail_file __P((char *));
+static void update_mail_file __P((int));
+static int add_mail_file __P((char *, char *));
+
+static int file_mod_date_changed __P((int));
+static int file_access_date_changed __P((int));
+static int file_has_grown __P((int));
+
+static char *parse_mailpath_spec __P((char *));
 
 /* Returns non-zero if it is time to check mail. */
 int
@@ -70,20 +78,10 @@ time_to_check_mail ()
   long seconds;
 
   temp = get_string_value ("MAILCHECK");
-  seconds = -1L;
-
-  /* Skip leading whitespace in MAILCHECK. */
-  if (temp)
-    {
-      while (whitespace (*temp))
-	temp++;
-
-      seconds = atoi (temp);
-    }
 
   /* Negative number, or non-numbers (such as empty string) cause no
      checking to take place. */
-  if (seconds < 0)
+  if (temp == 0 || legal_number (temp, &seconds) == 0 || seconds < 0)
     return (0);
 
   now = NOW;
@@ -131,7 +129,7 @@ update_mail_file (i)
   struct stat finfo;
 
   file = mailfiles[i]->name;
-  if (stat (file, &finfo) == 0)
+  if (mailstat (file, &finfo) == 0)
     {
       mailfiles[i]->access_time = finfo.st_atime;
       mailfiles[i]->mod_time = finfo.st_mtime;
@@ -155,7 +153,7 @@ add_mail_file (file, msg)
   i = find_mail_file (filename);
   if (i >= 0)
     {
-      if (stat (filename, &finfo) == 0)
+      if (mailstat (filename, &finfo) == 0)
 	{
 	  mailfiles[i]->mod_time = finfo.st_mtime;
 	  mailfiles[i]->access_time = finfo.st_atime;
@@ -221,7 +219,7 @@ file_mod_date_changed (i)
   file = mailfiles[i]->name;
   mtime = mailfiles[i]->mod_time;
 
-  if ((stat (file, &finfo) == 0) && (finfo.st_size > 0))
+  if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
     return (mtime != finfo.st_mtime);
 
   return (0);
@@ -239,7 +237,7 @@ file_access_date_changed (i)
   file = mailfiles[i]->name;
   atime = mailfiles[i]->access_time;
 
-  if ((stat (file, &finfo) == 0) && (finfo.st_size > 0))
+  if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
     return (atime != finfo.st_atime);
 
   return (0);
@@ -257,7 +255,7 @@ file_has_grown (i)
   file = mailfiles[i]->name;
   size = mailfiles[i]->file_size;
 
-  return ((stat (file, &finfo) == 0) && (finfo.st_size > size));
+  return ((mailstat (file, &finfo) == 0) && (finfo.st_size > size));
 }
 
 /* Take an element from $MAILPATH and return the portion from
@@ -294,7 +292,7 @@ make_default_mailpath ()
   char *mp;
 
   get_current_user_info ();
-  mp = xmalloc (2 + sizeof (DEFAULT_MAIL_DIRECTORY) + strlen (current_user.user_name));
+  mp = (char *)xmalloc (2 + sizeof (DEFAULT_MAIL_DIRECTORY) + strlen (current_user.user_name));
   strcpy (mp, DEFAULT_MAIL_DIRECTORY);
   mp[sizeof(DEFAULT_MAIL_DIRECTORY) - 1] = '/';
   strcpy (mp + sizeof (DEFAULT_MAIL_DIRECTORY), current_user.user_name);
@@ -356,7 +354,6 @@ check_mail ()
   char *current_mail_file, *message;
   int i, use_user_notification;
   char *dollar_underscore, *temp;
-  WORD_LIST *tlist;
 
   dollar_underscore = get_string_value ("_");
   if (dollar_underscore)
@@ -403,12 +400,10 @@ check_mail ()
 #undef atime
 #undef mtime
 
-	  if ((tlist = expand_string (message, Q_DOUBLE_QUOTES)))
+	  if (temp = expand_string_to_string (message, Q_DOUBLE_QUOTES))
 	    {
-	      temp = string_list (tlist);
 	      puts (temp);
 	      free (temp);
-	      dispose_words (tlist);
 	    }
 	  else
 	    putchar ('\n');

@@ -58,7 +58,8 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-static int display_traps ();
+static void showtrap __P((int));
+static int display_traps __P((WORD_LIST *));
 
 /* The trap command:
 
@@ -79,7 +80,7 @@ static int display_traps ();
 #define REVERT 1		/* Revert to this signals original value. */
 #define IGNORE 2		/* Ignore this signal. */
 
-extern int interactive, posixly_correct;
+extern int posixly_correct;
 
 int
 trap_builtin (list)
@@ -228,7 +229,7 @@ display_traps (list)
 
   if (list == 0)
     {
-      for (i = 0; i <= NSIG; i++)
+      for (i = 0; i < BASH_NSIG; i++)
 	showtrap (i);
       return (EXECUTION_SUCCESS);
     }

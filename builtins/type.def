@@ -64,7 +64,7 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int find_reserved_word ();
+extern int find_reserved_word __P((char *));
 
 extern char *this_command_name;
 
@@ -213,7 +213,7 @@ describe_command (command, verbose, all)
      int verbose, all;
 {
   int found, i, found_file, f;
-  char *full_path, *x, *cwd;
+  char *full_path, *x;
   SHELL_VAR *func;
 #if defined (ALIAS)
   alias_t *alias;

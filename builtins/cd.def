@@ -53,13 +53,14 @@ $PRODUCES cd.c
 extern int errno;
 #endif /* !errno */
 
-extern int posixly_correct, interactive;
+extern int posixly_correct;
 extern int array_needs_making;
 extern char *bash_getcwd_errstr;
 
-static int change_to_directory ();
+static int bindpwd __P((int));
+static int change_to_directory __P((char *, int));
 
-static char *cdspell ();
+static char *cdspell __P((char *));
 
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;
@@ -87,7 +88,7 @@ bindpwd (no_symlinks)
      int no_symlinks;
 {
   char *dirname, *pwdvar;
-  int old_symlinks, old_anm;
+  int old_anm;
   SHELL_VAR *tvar;
 
 #define tcwd the_current_working_directory
@@ -424,7 +425,7 @@ cdspell (dirname)
   char *guess;
 
   n = (strlen (dirname) * 3 + 1) / 2 + 1;
-  guess = xmalloc (n);
+  guess = (char *)xmalloc (n);
 
   switch (spname (dirname, guess))
     {

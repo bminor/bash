@@ -47,6 +47,7 @@
 #include "pcomplete.h"
 #include "alias.h"
 #include "bashline.h"
+#include "execute_cmd.h"
 #include "pathexp.h"
 
 #if defined (JOB_CONTROL)
@@ -61,7 +62,7 @@
 #include "builtins/common.h"
 
 #include <glob/glob.h>
-#include <glob/fnmatch.h>
+#include <glob/strmatch.h>
 
 #include <readline/rlconf.h>
 #include <readline/readline.h>
@@ -82,23 +83,54 @@ extern int array_needs_making;
 extern STRING_INT_ALIST word_token_alist[];
 extern char *signal_names[];
 
-static int it_init_aliases ();
-static int it_init_arrayvars ();
-static int it_init_bindings ();
-static int it_init_builtins ();
-static int it_init_disabled ();
-static int it_init_enabled ();
-static int it_init_exported ();
-static int it_init_functions ();
-static int it_init_hostnames ();
-static int it_init_jobs ();
-static int it_init_running ();
-static int it_init_stopped ();
-static int it_init_keywords ();
-static int it_init_signals ();
-static int it_init_variables ();
-static int it_init_setopts ();
-static int it_init_shopts ();
+#if defined(PREFER_STDARG)
+static void debug_printf (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+#endif
+
+static int it_init_joblist __P((ITEMLIST *, int));
+
+static int it_init_aliases __P((ITEMLIST *));
+static int it_init_arrayvars __P((ITEMLIST *));
+static int it_init_bindings __P((ITEMLIST *));
+static int it_init_builtins __P((ITEMLIST *));
+static int it_init_disabled __P((ITEMLIST *));
+static int it_init_enabled __P((ITEMLIST *));
+static int it_init_exported __P((ITEMLIST *));
+static int it_init_functions __P((ITEMLIST *));
+static int it_init_hostnames __P((ITEMLIST *));
+static int it_init_jobs __P((ITEMLIST *));
+static int it_init_running __P((ITEMLIST *));
+static int it_init_stopped __P((ITEMLIST *));
+static int it_init_keywords __P((ITEMLIST *));
+static int it_init_signals __P((ITEMLIST *));
+static int it_init_variables __P((ITEMLIST *));
+static int it_init_setopts __P((ITEMLIST *));
+static int it_init_shopts __P((ITEMLIST *));
+
+static int shouldexp_filterpat __P((char *));
+static char *preproc_filterpat __P((char *, char *));
+
+static void init_itemlist_from_varlist __P((ITEMLIST *, SVFUNC *));
+
+static STRINGLIST *gen_matches_from_itemlist __P((ITEMLIST *, const char *));
+static STRINGLIST *gen_action_completions __P((COMPSPEC *, const char *));
+static STRINGLIST *gen_globpat_matches __P((COMPSPEC *, const char *));
+static STRINGLIST *gen_wordlist_matches __P((COMPSPEC *, const char *));
+static STRINGLIST *gen_shell_function_matches __P((COMPSPEC *, const char *,
+						   char *, int, WORD_LIST *,
+						   int, int));
+static STRINGLIST *gen_command_matches __P((COMPSPEC *, const char *, char *,
+					    int, WORD_LIST *, int, int));
+
+static char *pcomp_filename_completion_function __P((const char *, int));
+
+#if defined (ARRAY_VARS)
+static SHELL_VAR *bind_comp_words __P((WORD_LIST *));
+#endif
+static void bind_compfunc_variables __P((char *, int, WORD_LIST *, int, int));
+static void unbind_compfunc_variables __P((int));
+static WORD_LIST *build_arg_list __P((char *, const char *, WORD_LIST *, int));
+static WORD_LIST *command_line_to_word_list __P((char *, int, int, int *, int *));
 
 static int progcomp_debug = 0;
 
@@ -117,7 +149,8 @@ ITEMLIST it_exports  = { LIST_DYNAMIC, it_init_exported, (STRINGLIST *)0 };
 ITEMLIST it_files = { LIST_DYNAMIC };	/* unused */
 ITEMLIST it_functions  = { 0, it_init_functions, (STRINGLIST *)0 };
 ITEMLIST it_hostnames  = { LIST_DYNAMIC, it_init_hostnames, (STRINGLIST *)0 };
-ITEMLIST it_jobs = { LIST_DYNAMIC, it_init_jobs, (STRINGLIST *)0 };;
+ITEMLIST it_groups = { LIST_DYNAMIC };	/* unused */
+ITEMLIST it_jobs = { LIST_DYNAMIC, it_init_jobs, (STRINGLIST *)0 };
 ITEMLIST it_keywords = { 0, it_init_keywords, (STRINGLIST *)0 };
 ITEMLIST it_running = { LIST_DYNAMIC, it_init_running, (STRINGLIST *)0 };
 ITEMLIST it_setopts = { 0, it_init_setopts, (STRINGLIST *)0 };
@@ -264,7 +297,7 @@ filter_stringlist (sl, filterpat, text)
   ret = alloc_stringlist (sl->list_size);
   for (i = 0; i < sl->list_len; i++)
     {
-      m = fnmatch (t, sl->list[i], FNMATCH_EXTFLAG);
+      m = strmatch (t, sl->list[i], FNMATCH_EXTFLAG);
       if ((not && m == FNM_NOMATCH) || (not == 0 && m != FNM_NOMATCH))
 	free (sl->list[i]);
       else
@@ -317,21 +350,21 @@ it_init_aliases (itp)
      ITEMLIST *itp;
 {
 #ifdef ALIAS
-  alias_t **aliases;
+  alias_t **alias_list;
   register int i, n;
   STRINGLIST *sl;
 
-  aliases = all_aliases ();
-  if (aliases == 0)
+  alias_list = all_aliases ();
+  if (alias_list == 0)
     {
       itp->slist = (STRINGLIST *)NULL;
       return 0;
     }
-  for (n = 0; aliases[n]; n++)
+  for (n = 0; alias_list[n]; n++)
     ;
   sl = alloc_stringlist (n+1);
   for (i = 0; i < n; i++)
-    sl->list[i] = STRDUP (aliases[i]->name);
+    sl->list[i] = STRDUP (alias_list[i]->name);
   sl->list[n] = (char *)NULL;
   sl->list_size = sl->list_len = n;
   itp->slist = sl;
@@ -380,7 +413,7 @@ it_init_bindings (itp)
   STRINGLIST *sl;
 
   /* rl_funmap_names allocates blist, but not its members */
-  blist = (char **)rl_funmap_names ();
+  blist = (char **)rl_funmap_names ();	/* XXX fix const later */
   sl = alloc_stringlist (0);
   sl->list = blist;
   sl->list_size = 0;
@@ -396,7 +429,6 @@ it_init_builtins (itp)
      ITEMLIST *itp;
 {
   STRINGLIST *sl;
-  char **list;
   register int i, n;
 
   sl = alloc_stringlist (num_shell_builtins);
@@ -414,7 +446,6 @@ it_init_enabled (itp)
      ITEMLIST *itp;
 {
   STRINGLIST *sl;
-  char **list;
   register int i, n;
 
   sl = alloc_stringlist (num_shell_builtins);
@@ -434,7 +465,6 @@ it_init_disabled (itp)
      ITEMLIST *itp;
 {
   STRINGLIST *sl;
-  char **list;
   register int i, n;
 
   sl = alloc_stringlist (num_shell_builtins);
@@ -487,7 +517,7 @@ it_init_joblist (itp, jstate)
 {
 #if defined (JOB_CONTROL)
   STRINGLIST *sl;
-  register int i, n;
+  register int i;
   register PROCESS *p;
   char *s, *t;
   JOB_STATE js;
@@ -628,6 +658,8 @@ gen_matches_from_itemlist (itp, text)
       if ((itp->flags & LIST_INITIALIZED) == 0)
 	initialize_itemlist (itp);
     }
+  if (itp->slist == 0)
+    return ((STRINGLIST *)NULL);
   ret = alloc_stringlist (itp->slist->list_len+1);
   sl = itp->slist;
   tlen = STRLEN (text);
@@ -671,8 +703,11 @@ pcomp_filename_completion_function (text, state)
     if (bmap & flag) \
       { \
 	tlist = gen_matches_from_itemlist (it, text); \
-	glist = append_stringlist (glist, tlist); \
-	free_stringlist (tlist); \
+	if (tlist) \
+	  { \
+	    glist = append_stringlist (glist, tlist); \
+	    free_stringlist (tlist); \
+	  } \
       } \
   } while (0)
 
@@ -723,6 +758,7 @@ gen_action_completions (cs, text)
   GEN_XCOMPS(flags, CA_COMMAND, text, command_word_completion_function, cmatches, ret, tmatches);
   GEN_XCOMPS(flags, CA_FILE, text, pcomp_filename_completion_function, cmatches, ret, tmatches);
   GEN_XCOMPS(flags, CA_USER, text, rl_username_completion_function, cmatches, ret, tmatches);
+  GEN_XCOMPS(flags, CA_GROUP, text, bash_groupname_completion_function, cmatches, ret, tmatches);
 
   /* And lastly, the special case for directories */
   if (flags & CA_DIRECTORY)
@@ -748,7 +784,6 @@ gen_globpat_matches (cs, text)
       const char *text;
 {
   STRINGLIST *sl;
-  char *t;
 
   sl = alloc_stringlist (0);
   sl->list = glob_filename (cs->globpat);
@@ -825,7 +860,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
      WORD_LIST *lwords;
      int cw, exported;
 {
-  char ibuf[32];
+  char ibuf[INT_STRLEN_BOUND(int) + 1];
   char *value;
   SHELL_VAR *v;
 
@@ -835,7 +870,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
   if (v && exported)
     VSETATTR(v, att_exported);
 
-  value = inttostr (ind, ibuf, 32);
+  value = inttostr (ind, ibuf, sizeof(ibuf));
   v = bind_int_variable ("COMP_POINT", value);
   if (v && exported)
     VSETATTR(v, att_exported);
@@ -846,7 +881,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
     {
 #ifdef ARRAY_VARS
       v = bind_comp_words (lwords);
-      value = inttostr (cw, ibuf, 32);
+      value = inttostr (cw, ibuf, sizeof(ibuf));
       bind_int_variable ("COMP_CWORD", value);
 #endif
     }
@@ -882,7 +917,7 @@ unbind_compfunc_variables (exported)
 static WORD_LIST *
 build_arg_list (cmd, text, lwords, ind)
      char *cmd;
-     char *text;
+     const char *text;
      WORD_LIST *lwords;
      int ind;
 {
@@ -925,7 +960,8 @@ build_arg_list (cmd, text, lwords, ind)
 static STRINGLIST *
 gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
      COMPSPEC *cs;
-     char *text, *line;
+     const char *text;
+     char *line;
      int ind;
      WORD_LIST *lwords;
      int nw, cw;
@@ -1003,7 +1039,8 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
 static STRINGLIST *
 gen_command_matches (cs, text, line, ind, lwords, nw, cw)
      COMPSPEC *cs;
-     char *text, *line;
+     const char *text;
+     char *line;
      int ind;
      WORD_LIST *lwords;
      int nw, cw;
@@ -1024,7 +1061,7 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
   cmdsize += 2;
 
   /* allocate the string for the command and fill it in. */
-  cscmd = xmalloc (cmdsize + 1);
+  cscmd = (char *)xmalloc (cmdsize + 1);
 
   strcpy (cscmd, cs->command);			/* $0 */
   cmdlen = n;
@@ -1103,16 +1140,16 @@ gen_compspec_completions (cs, cmd, word, start, end)
      int start, end;
 {
   STRINGLIST *ret, *tmatches;
-  char *line, *lword;
+  char *line;
   int llen, nw, cw;
   WORD_LIST *lwords;
 
   debug_printf ("programmable_completions (%s, %s, %d, %d)", cmd, word, start, end);
-  debug_printf ("programmable_completions: %s -> 0x%x", cmd, (int)cs);
+  debug_printf ("programmable_completions: %s -> %p", cmd, cs);
   ret = gen_action_completions (cs, word);
   if (ret && progcomp_debug)
     {
-      debug_printf ("gen_action_completions (0x%x, %s) -->", (int)cs, word);
+      debug_printf ("gen_action_completions (%p, %s) -->", cs, word);
       print_stringlist (ret, "\t");
       rl_on_new_line ();
     }
@@ -1125,7 +1162,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
 	{
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_globpat_matches (0x%x, %s) -->", (int)cs, word);
+	      debug_printf ("gen_globpat_matches (%p, %s) -->", cs, word);
 	      print_stringlist (tmatches, "\t");
 	      rl_on_new_line ();
 	    }
@@ -1142,7 +1179,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
 	{
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_wordlist_matches (0x%x, %s) -->", (int)cs, word);
+	      debug_printf ("gen_wordlist_matches (%p, %s) -->", cs, word);
 	      print_stringlist (tmatches, "\t");
 	      rl_on_new_line ();
 	    }
@@ -1161,7 +1198,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
       line = substring (rl_line_buffer, start, end);
       llen = end - start;
 
-      debug_printf ("command_line_to_word_list (%s, %d, %d, 0x%x, 0x%x)",
+      debug_printf ("command_line_to_word_list (%s, %d, %d, %p, %p)",
 		line, llen, rl_point - start, &nw, &cw);
       lwords = command_line_to_word_list (line, llen, rl_point - start, &nw, &cw);
       if (lwords == 0 && llen > 0)
@@ -1184,7 +1221,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
 	{
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_shell_function_matches (0x%x, %s, 0x%x, %d, %d) -->", (int)cs, word, lwords, nw, cw);
+	      debug_printf ("gen_shell_function_matches (%p, %s, %p, %d, %d) -->", cs, word, lwords, nw, cw);
 	      print_stringlist (tmatches, "\t");
 	      rl_on_new_line ();
 	    }
@@ -1200,7 +1237,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
 	{
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_command_matches (0x%x, %s, 0x%x, %d, %d) -->", (int)cs, word, lwords, nw, cw);
+	      debug_printf ("gen_command_matches (%p, %s, %p, %d, %d) -->", cs, word, lwords, nw, cw);
 	      print_stringlist (tmatches, "\t");
 	      rl_on_new_line ();
 	    }
@@ -1221,7 +1258,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
       tmatches = filter_stringlist (ret, cs->filterpat, word);
       if (progcomp_debug)
 	{
-	  debug_printf ("filter_stringlist (0x%x, %s, %s) -->", ret, cs->filterpat, word);
+	  debug_printf ("filter_stringlist (%p, %s, %s) -->", ret, cs->filterpat, word);
 	  print_stringlist (tmatches, "\t");
 	  rl_on_new_line ();
 	}

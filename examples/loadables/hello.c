@@ -31,6 +31,7 @@
 
    A builtin command returns EXECUTION_SUCCESS for success and
    EXECUTION_FAILURE to indicate failure. */
+int
 hello_builtin (list)
      WORD_LIST *list;
 {

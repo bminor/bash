@@ -51,6 +51,8 @@
    string. */
 char *history_search_delimiter_chars = (char *)NULL;
 
+static int history_search_internal PARAMS((const char *, int, int));
+
 /* Search the history for STRING, starting at history_offset.
    If DIRECTION < 0, then the search is through previous entries, else
    through subsequent.  If ANCHORED is non-zero, the string must

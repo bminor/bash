@@ -20,6 +20,8 @@
 #ifndef _SH_GETOPT_H
 #define _SH_GETOPT_H 1
 
+#include "stdc.h"
+
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
    the argument value is returned here.
@@ -54,7 +56,7 @@ extern int sh_optopt;
 /* Set to 1 when an unrecognized option is encountered. */
 extern int sh_badopt;
 
-extern int sh_getopt ();
-extern void sh_getopt_restore_state ();
+extern int sh_getopt __P((int, char *const *, const char *));
+extern void sh_getopt_restore_state __P((char **));
 
 #endif /* _SH_GETOPT_H */

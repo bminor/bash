@@ -77,7 +77,17 @@ sunos5*|solaris2*)
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
 	;;
 
-freebsd2* | netbsd* | openbsd*)
+# All versions of Linux or the semi-mythical GNU Hurd.
+linux*|gnu*)
+	SHOBJ_CFLAGS=-fPIC
+	SHOBJ_LD='${CC}'
+	SHOBJ_LDFLAGS='-shared -Wl,-soname,$@'
+
+	SHLIB_XLDFLAGS='-Wl,-rpath,$(libdir) -Wl,-soname,`basename $@ $(SHLIB_MINOR)`'
+	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
+	;;
+
+freebsd2* | netbsd*)
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD=ld
 	SHOBJ_LDFLAGS='-x -Bshareable'
@@ -85,16 +95,6 @@ freebsd2* | netbsd* | openbsd*)
 	SHLIB_XLDFLAGS='-R$(libdir)'
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
 	;;
-
-# FreeBSD-3.x can have either a.out or ELF object files
-#freebsd3*)
-#	SHOBJ_CFLAGS=-fpic
-#	SHOBJ_LD='${CC}'
-#	SHOBJ_LDFLAGS='-shared'
-#
-#	SHLIB_XLDFLAGS='-R$(libdir)'
-#	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
-#	;;
 
 # FreeBSD-3.x ELF
 freebsd[3-9]*|freebsdelf[3-9]*|freebsdaout[3-9]*)
@@ -113,13 +113,31 @@ freebsd[3-9]*|freebsdelf[3-9]*|freebsdaout[3-9]*)
 		SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
 	fi
 	;;
-# All versions of Linux or the semi-mythical GNU Hurd.
-linux*|gnu*)
+
+# Darwin/MacOS X
+darwin*|macosx*)
+	SHOBJ_STATUS=unsupported
+	SHLIB_STATUS=supported
+
+	SHOBJ_CFLAGS='-dynamic -fno-common'
+
+	SHOBJ_LD=/usr/bin/libtool
+
+	SHLIB_LIBVERSION='$(SHLIB_MAJOR)$(SHLIB_MINOR).$(SHLIB_LIBSUFF)'
+	SHLIB_LIBSUFF='dylib'
+
+	SHOBJ_LDFLAGS='-dynamic'
+	SHLIB_XLDFLAGS='-arch_only `/usr/bin/arch` -install_name $(libdir)/$@ -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
+
+	SHLIB_LIBS='-lSystem'
+	;;
+
+openbsd*)
 	SHOBJ_CFLAGS=-fPIC
 	SHOBJ_LD='${CC}'
-	SHOBJ_LDFLAGS='-shared -Wl,-soname,$@'
+	SHOBJ_LDFLAGS='-shared'
 
-	SHLIB_XLDFLAGS='-Wl,-rpath,$(libdir) -Wl,-soname,`basename $@ $(SHLIB_MINOR)`'
+	SHLIB_XLDFLAGS='-R$(libdir)'
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
 	;;
 
@@ -239,6 +257,20 @@ hpux9*-*gcc*)
 hpux9*)
 	SHOBJ_STATUS=unsupported
 	SHLIB_STATUS=unsupported
+
+	# If you are using the HP ANSI C compiler, you can uncomment and use
+	# this code (I have not tested it)
+#	SHOBJ_STATUS=supported
+#	SHLIB_STATUS=supported
+#
+#	SHOBJ_CFLAGS='+z'
+#	SHOBJ_LD='ld'
+#	SHOBJ_LDFLAGS='-b +s'
+#
+#	SHLIB_XLDFLAGS='+b $(libdir)'
+#	SHLIB_LIBSUFF='sl'
+#	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'	
+
 	;;
 
 hpux10*-*gcc*)
@@ -257,17 +289,18 @@ hpux10*)
 	SHLIB_STATUS=unsupported
 
 	# If you are using the HP ANSI C compiler, you can uncomment and use
-	# this code
-#	SHOBJ_STATUS=unsupported
-#	SHLIB_STATUS=unsupported
+	# this code (I have not tested it)
+#	SHOBJ_STATUS=supported
+#	SHLIB_STATUS=supported
 #
 #	SHOBJ_CFLAGS='+z'
 #	SHOBJ_LD='ld'
-#	SHOBJ_LDFLAGS='-b'
+#	SHOBJ_LDFLAGS='-b +s +h $@'
 #
-#	SHLIB_XLDFLAGS=''
+#	SHLIB_XLDFLAGS='+b $(libdir)'
 #	SHLIB_LIBSUFF='sl'
 #	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'	
+
 	;;
 
 hpux11*-*gcc*)
@@ -287,15 +320,15 @@ hpux11*)
 	SHLIB_STATUS=unsupported
 
 	# If you are using the HP ANSI C compiler, you can uncomment and use
-	# this code
-#	SHOBJ_STATUS=unsupported
-#	SHLIB_STATUS=unsupported
+	# this code (I have not tested it)
+#	SHOBJ_STATUS=supported
+#	SHLIB_STATUS=supported
 #
 #	SHOBJ_CFLAGS='+z'
 #	SHOBJ_LD='ld'
-#	SHOBJ_LDFLAGS='-b'
+#	SHOBJ_LDFLAGS='-b +s +h $@'
 #
-#	SHLIB_XLDFLAGS=''
+#	SHLIB_XLDFLAGS='+b $(libdir)'
 #	SHLIB_LIBSUFF='sl'
 #	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'	
 

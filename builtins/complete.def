@@ -24,7 +24,7 @@ $PRODUCES complete.c
 $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
-$SHORT_DOC complete [-abcdefjkvu] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
+$SHORT_DOC complete [-abcdefgjkvu] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
 For each NAME, specify how arguments are to be completed.
 If the -p option is supplied, or if no options are supplied, existing
 completion specifications are printed in a way that allows them to be
@@ -51,12 +51,20 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
+#include <readline/readline.h>
+
 #define STRDUP(x)       ((x) ? savestring (x) : (char *)NULL)
 
-static int remove_cmd_completions ();
+static int find_compact __P((char *));
+static int find_compopt __P((char *));
 
-static void print_all_completions ();
-static int print_cmd_completions ();
+static int build_actions __P((WORD_LIST *, int *, int *, unsigned long *, unsigned long *));
+
+static int remove_cmd_completions __P((WORD_LIST *));
+
+static void print_one_completion __P((char *, COMPSPEC *));
+static void print_all_completions __P((void));
+static int print_cmd_completions __P((WORD_LIST *));
 
 static char *Aarg, *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 
@@ -78,6 +86,7 @@ static struct _compacts {
   { "function",  CA_FUNCTION,   0 },
   { "helptopic", CA_BUILTIN,  0 },	/* for now */
   { "hostname",  CA_HOSTNAME,   0 },
+  { "group",     CA_GROUP,     'g' },
   { "job",       CA_JOB,       'j' },
   { "keyword",   CA_KEYWORD,   'k' },
   { "running",   CA_RUNNING,    0 },
@@ -144,14 +153,14 @@ build_actions (list, pp, rp, actp, optp)
      int *pp, *rp;
      unsigned long *actp, *optp;
 {
-  int opt, ind, pflag, rflag, opt_given;
+  int opt, ind, opt_given;
   unsigned long acts, copts;
 
   acts = copts = (unsigned long)0L;
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefjko:pruvA:G:W:P:S:X:F:C:")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:pruvA:G:W:P:S:X:F:C:")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -199,6 +208,9 @@ build_actions (list, pp, rp, actp, optp)
 	  break;
 	case 'f':
 	  acts |= CA_FILE;
+	  break;
+	case 'g':
+	  acts |= CA_GROUP;
 	  break;
 	case 'j':
 	  acts |= CA_JOB;
@@ -424,6 +436,7 @@ print_one_completion (cmd, cs)
   PRINTOPT (CA_DIRECTORY, "-d");
   PRINTOPT (CA_EXPORT, "-e");
   PRINTOPT (CA_FILE, "-f");
+  PRINTOPT (CA_GROUP, "-g");
   PRINTOPT (CA_KEYWORD, "-k");
   PRINTOPT (CA_JOB, "-j");
   PRINTOPT (CA_USER, "-u");
@@ -490,7 +503,7 @@ print_cmd_completions (list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefjkvu] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
+$SHORT_DOC compgen [-abcdefgjkvu] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
 Display the possible completions depending on the options.  Intended
 to be used from within a shell function generating possible completions.
 If the optional WORD argument is supplied, matches against WORD are
@@ -547,9 +560,21 @@ compgen_builtin (list)
 
   rval = EXECUTION_FAILURE;
   sl = gen_compspec_completions (cs, "compgen", word, 0, 0);
+
+  /* This isn't perfect, but it's the best we can do, given what readline
+     exports from its set of completion utility functions. */
+  if ((sl == 0 || sl->list_len == 0) && (copts & COPT_DEFAULT))
+    {
+      char **matches;
+
+      matches = rl_completion_matches (word, rl_filename_completion_function);
+      sl = completions_to_stringlist (matches);
+      free_array (matches);
+    }
+
   if (sl)
     {
-      if (sl->list)
+      if (sl->list && sl->list_len)
 	{
 	  rval = EXECUTION_SUCCESS;
 	  print_stringlist (sl, (char *)NULL);

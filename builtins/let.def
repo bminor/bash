@@ -93,7 +93,7 @@ let_builtin (list)
 	return (EXECUTION_FAILURE);
     }
 
-  return ((ret == 0L) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  return ((ret == 0) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 
 #ifdef INCLUDE_UNUSED
@@ -113,6 +113,6 @@ exp_builtin (list)
   exp = string_list (list);
   ret = evalexp (exp, &expok);
   (void)free (exp);
-  return (((ret == 0L) || (expok == 0)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  return (((ret == 0) || (expok == 0)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 #endif

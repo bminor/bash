@@ -54,7 +54,7 @@
 extern HIST_ENTRY *_rl_saved_line_for_history;
 
 /* Functions imported from the rest of the library. */
-extern int _rl_free_history_entry __P((HIST_ENTRY *));
+extern int _rl_free_history_entry PARAMS((HIST_ENTRY *));
 
 static char *noninc_search_string = (char *) NULL;
 static int noninc_history_pos;
@@ -65,6 +65,13 @@ static int rl_history_search_len;
 static int rl_history_search_pos;
 static char *history_search_string;
 static int history_string_size;
+
+static void make_history_line_current PARAMS((HIST_ENTRY *));
+static int noninc_search_from_pos PARAMS((char *, int, int));
+static void noninc_dosearch PARAMS((char *, int));
+static void noninc_search PARAMS((int, int));
+static int rl_history_search_internal PARAMS((int, int));
+static void rl_history_search_reinit PARAMS((void));
 
 /* Make the data from the history entry ENTRY be the contents of the
    current line.  This doesn't do anything with rl_point; the caller
@@ -391,7 +398,7 @@ rl_history_search_reinit ()
       if (rl_history_search_len >= history_string_size - 2)
 	{
 	  history_string_size = rl_history_search_len + 2;
-	  history_search_string = xrealloc (history_search_string, history_string_size);
+	  history_search_string = (char *)xrealloc (history_search_string, history_string_size);
 	}
       history_search_string[0] = '^';
       strncpy (history_search_string + 1, rl_line_buffer, rl_point);

@@ -73,7 +73,7 @@ typedef struct { SigHandler *sa_handler; int sa_mask, sa_flags; } sighandler_cxt
 #  define sigemptyset(m)
 #endif /* !HAVE_POSIX_SIGNALS */
 
-static SigHandler *rl_set_sighandler __P((int, SigHandler *, sighandler_cxt *));
+static SigHandler *rl_set_sighandler PARAMS((int, SigHandler *, sighandler_cxt *));
 
 /* Exported variables for use by applications. */
 

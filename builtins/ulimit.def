@@ -44,7 +44,9 @@ option is given, it is interpreted as follows:
     -u	the maximum number of user processes
     -v	the size of virtual memory 
 
-If LIMIT is given, it is the new value of the specified resource.
+If LIMIT is given, it is the new value of the specified resource;
+the special LIMIT values `soft', `hard', and `unlimited' stand for
+the current soft limit, the current hard limit, and no limit, respectively.
 Otherwise, the current value of the specified resource is printed.
 If no option is given, then -f is assumed.  Values are in 1024-byte
 increments, except for -t, which is in seconds, -p, which is in
@@ -109,8 +111,6 @@ extern int errno;
 #  define print_rlimtype(num, nl) printf ("%ld%s", num, nl ? "\n" : "")
 #endif
 
-#define DESCFMT	"%-28s"
-
 /* Some systems use RLIMIT_NOFILE, others use RLIMIT_OFILE */
 #if defined (HAVE_RESOURCE) && defined (RLIMIT_OFILE) && !defined (RLIMIT_NOFILE)
 #  define RLIMIT_NOFILE RLIMIT_OFILE
@@ -154,58 +154,72 @@ extern int errno;
 #  define RLIM_INFINITY 0x7fffffff
 #endif
 
+#if !defined (RLIM_SAVED_CUR)
+#  define RLIM_SAVED_CUR RLIM_INFINITY
+#endif
+
+#if !defined (RLIM_SAVED_MAX)
+#  define RLIM_SAVED_MAX RLIM_INFINITY
+#endif
+
 #define LIMIT_HARD 0x01
 #define LIMIT_SOFT 0x02
 
+static int _findlim __P((int));
+
 static int ulimit_internal __P((int, char *, int, int));
+
+static int get_limit __P((int, RLIMTYPE *, RLIMTYPE *));
+static int set_limit __P((int, RLIMTYPE, int));
+
 static void printone __P((int, RLIMTYPE, int));
 static void print_all_limits __P((int));
 
-static int get_limit __P((int, int, RLIMTYPE *));
-static int set_limit __P((int, RLIMTYPE, int));
+static int set_all_limits __P((int, RLIMTYPE));
 
 static int filesize __P((RLIMTYPE *));
 static int pipesize __P((RLIMTYPE *));
-static int getmaxuprc __P((int, RLIMTYPE *));
-static int getmaxvm __P((int, RLIMTYPE *));
+static int getmaxuprc __P((RLIMTYPE *));
+static int getmaxvm __P((RLIMTYPE *, RLIMTYPE *));
 
 typedef struct {
   int  option;			/* The ulimit option for this limit. */
   int  parameter;		/* Parameter to pass to get_limit (). */
   int  block_factor;		/* Blocking factor for specific limit. */
   char *description;		/* Descriptive string to output. */
+  char *units;			/* scale */
 } RESOURCE_LIMITS;
 
 static RESOURCE_LIMITS limits[] = {
 #ifdef RLIMIT_CORE
-  { 'c',	RLIMIT_CORE,  1024, "core file size (blocks)" },
+  { 'c',	RLIMIT_CORE,  1024,	"core file size",	"blocks" },
 #endif
 #ifdef RLIMIT_DATA
-  { 'd',	RLIMIT_DATA,  1024, "data seg size (kbytes)" },
+  { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
 #endif
-  { 'f',	RLIMIT_FILESIZE, 1024, "file size (blocks)" },
+  { 'f',	RLIMIT_FILESIZE, 1024,	"file size",		"blocks" },
 #ifdef RLIMIT_MEMLOCK
-  { 'l',	RLIMIT_MEMLOCK, 1024, "max locked memory (kbytes)" },
+  { 'l',	RLIMIT_MEMLOCK, 1024,	"max locked memory",	"kbytes" },
 #endif
 #ifdef RLIMIT_RSS
-  { 'm',	RLIMIT_RSS,   1024, "max memory size (kbytes)" },
+  { 'm',	RLIMIT_RSS,   1024,	"max memory size",	"kbytes" },
 #endif /* RLIMIT_RSS */
-  { 'n',	RLIMIT_OPENFILES, 1, "open files" },
-  { 'p',	RLIMIT_PIPESIZE, 512, "pipe size (512 bytes)" },
+  { 'n',	RLIMIT_OPENFILES, 1,	"open files",		(char *)NULL},
+  { 'p',	RLIMIT_PIPESIZE, 512,	"pipe size", 		"512 bytes" },
 #ifdef RLIMIT_STACK
-  { 's',	RLIMIT_STACK, 1024, "stack size (kbytes)" },
+  { 's',	RLIMIT_STACK, 1024,	"stack size",		"kbytes" },
 #endif
 #ifdef RLIMIT_CPU
-  { 't',	RLIMIT_CPU,      1, "cpu time (seconds)" },
+  { 't',	RLIMIT_CPU,      1,	"cpu time",		"seconds" },
 #endif /* RLIMIT_CPU */
-  { 'u',	RLIMIT_MAXUPROC, 1, "max user processes" },
+  { 'u',	RLIMIT_MAXUPROC, 1,	"max user processes",	(char *)NULL },
 #if defined (HAVE_RESOURCE)
-  { 'v',	RLIMIT_VIRTMEM, RLIMIT_VMBLKSZ, "virtual memory (kbytes)" },
+  { 'v',	RLIMIT_VIRTMEM, RLIMIT_VMBLKSZ, "virtual memory", "kbytes" },
 #endif
 #ifdef RLIMIT_SWAP
-  { 'w',	RLIMIT_SWAP,	1024,	"swap size (kbytes)" },
+  { 'w',	RLIMIT_SWAP,	1024,	"swap size",		"kbytes" },
 #endif
-  { -1, -1, -1, (char *)NULL }
+  { -1, -1, -1, (char *)NULL, (char *)NULL }
 };
 #define NCMDS	(sizeof(limits) / sizeof(limits[0]))
 
@@ -308,6 +322,17 @@ ulimit_builtin (list)
 
   if (all_limits)
     {
+#ifdef NOTYET
+      if (list)		/* setting */
+        {
+          if (STREQ (list->word->word, "unlimited") == 0)
+            {
+              builtin_error ("invalid limit argument: %s", list->word->word);
+              return (EXECUTION_FAILURE);
+            }
+          return (set_all_limits (mode == 0 ? LIMIT_SOFT|LIMIT_HARD : mode, RLIM_INFINITY));
+        }
+#endif
       print_all_limits (mode == 0 ? LIMIT_SOFT : mode);
       return (EXECUTION_SUCCESS);
     }
@@ -347,58 +372,66 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
      int mode, multiple;
 {
   int opt, limind, setting;
-  long block_factor;
-  RLIMTYPE current_limit, real_limit, limit;
+  int block_factor;
+  RLIMTYPE soft_limit, hard_limit, real_limit, limit;
 
   setting = cmdarg != 0;
   limind = _findlim (cmd);
   if (mode == 0)
     mode = setting ? (LIMIT_HARD|LIMIT_SOFT) : LIMIT_SOFT;
-  opt = get_limit (limind, mode, &current_limit);
+  opt = get_limit (limind, &soft_limit, &hard_limit);
   if (opt < 0)
     {
-      builtin_error ("cannot get limit: %s", strerror (errno));
+      builtin_error ("cannot get %s limit: %s", limits[limind].description,
+						strerror (errno));
       return (EXECUTION_FAILURE);
     }
 
   if (setting == 0)	/* print the value of the specified limit */
     {
-      printone (limind, current_limit, multiple);
+      printone (limind, (mode & LIMIT_SOFT) ? soft_limit : hard_limit, multiple);
       return (EXECUTION_SUCCESS);
     }
  
   /* Setting the limit. */
-  if (STREQ (cmdarg, "unlimited"))
-    limit = RLIM_INFINITY;
+  if (STREQ (cmdarg, "hard"))
+    real_limit = hard_limit;
+  else if (STREQ (cmdarg, "soft"))
+    real_limit = soft_limit;
+  else if (STREQ (cmdarg, "unlimited"))
+    real_limit = RLIM_INFINITY;
   else if (all_digits (cmdarg))
-    limit = string_to_rlimtype (cmdarg);
+    {
+      limit = string_to_rlimtype (cmdarg);
+      block_factor = limits[limind].block_factor;
+      real_limit = limit * block_factor;
+
+      if ((real_limit / block_factor) != limit)
+	{
+	  builtin_error ("limit out of range: %s", cmdarg);
+	  return (EXECUTION_FAILURE);
+	}
+    }
   else
     {
       builtin_error ("bad non-numeric arg `%s'", cmdarg);
       return (EXECUTION_FAILURE);
     }
 
-  block_factor = (limit == RLIM_INFINITY) ? 1 : limits[limind].block_factor;
-  real_limit = limit * block_factor;
-
-  if (real_limit < 0 || (real_limit == 0 && limit != 0))
-    {
-      builtin_error ("limit out of range: %d", limit);
-      return (EXECUTION_FAILURE);
-    }
-
   if (set_limit (limind, real_limit, mode) < 0)
     {
-      builtin_error ("cannot modify limit: %s", strerror (errno));
+      builtin_error ("cannot modify %s limit: %s", limits[limind].description,
+						   strerror (errno));
       return (EXECUTION_FAILURE);
     }
+
   return (EXECUTION_SUCCESS);
 }
 
 static int
-get_limit (ind, mode, limptr)
-     int ind, mode;
-     RLIMTYPE *limptr;
+get_limit (ind, softlim, hardlim)
+     int ind;
+     RLIMTYPE *softlim, *hardlim;
 {
   RLIMTYPE value;
 #if defined (HAVE_RESOURCE)
@@ -421,18 +454,16 @@ get_limit (ind, mode, limptr)
 	  value = (RLIMTYPE)getdtablesize ();
 	  break;
 	case RLIMIT_VIRTMEM:
-	  if (getmaxvm (mode, &value) < 0)
-	    return -1;
-	  break;
+	  return (getmaxvm (softlim, hardlim));
 	case RLIMIT_MAXUPROC:
-	  if (getmaxuprc (mode, &value) < 0)
+	  if (getmaxuprc (&value) < 0)
 	    return -1;
 	  break;
 	default:
 	  errno = EINVAL;
 	  return -1;
 	}
-      *limptr = value;
+      *softlim = *hardlim = value;
       return (0);
     }
   else
@@ -440,13 +471,16 @@ get_limit (ind, mode, limptr)
 #if defined (HAVE_RESOURCE)
       if (getrlimit (limits[ind].parameter, &limit) < 0)
 	return -1;
-      value = (mode & LIMIT_SOFT) ? limit.rlim_cur : limit.rlim_max;
+      *softlim = limit.rlim_cur;
+      *hardlim = limit.rlim_max;
 #  if defined (HPUX9)
       if (limits[ind].parameter == RLIMIT_FILESIZE)
-	*limptr = value * 512;			/* Ugh. */
+	{
+	  *softlim *= 512;
+	  *hardlim *= 512;			/* Ugh. */
+	}
       else
 #  endif /* HPUX9 */
-      *limptr = value;
       return 0;
 #else
       errno = EINVAL;
@@ -521,26 +555,21 @@ set_limit (ind, newlim, mode)
 }
 
 static int
-getmaxvm (mode, valuep)
-     int mode;
-     RLIMTYPE *valuep;
+getmaxvm (softlim, hardlim)
+     RLIMTYPE *softlim, *hardlim;
 {
 #if defined (HAVE_RESOURCE)
-  struct rlimit rl;
-  RLIMTYPE maxdata, maxstack;
+  struct rlimit datalim, stacklim;
 
-  if (getrlimit (RLIMIT_DATA, &rl) < 0)
+  if (getrlimit (RLIMIT_DATA, &datalim) < 0)
     return -1;
-  else
-    maxdata = (mode & LIMIT_SOFT) ? rl.rlim_cur : rl.rlim_max;
 
-  if (getrlimit (RLIMIT_STACK, &rl) < 0)
+  if (getrlimit (RLIMIT_STACK, &stacklim) < 0)
     return -1;
-  else
-    maxstack = (mode & LIMIT_SOFT) ? rl.rlim_cur : rl.rlim_max;
 
   /* Protect against overflow. */
-  *valuep = (maxdata / 1024L) + (maxstack / 1024L);
+  *softlim = (datalim.rlim_cur / 1024L) + (stacklim.rlim_cur / 1024L);
+  *hardlim = (datalim.rlim_max / 1024L) + (stacklim.rlim_max / 1024L);
   return 0;
 #else
   errno = EINVAL;
@@ -557,11 +586,7 @@ filesize(valuep)
   if ((result = ulimit (1, 0L)) < 0)
     return -1;
   else
-#  if 0
-    *valuep = (RLIMTYPE) result;
-#  else
-    *valuep = (RLIMTYPE) result * 512L;
-#  endif
+    *valuep = (RLIMTYPE) result * 512;
   return 0;
 #else
   errno = EINVAL;
@@ -590,8 +615,7 @@ pipesize (valuep)
 }
 
 static int
-getmaxuprc (mode, valuep)
-     int mode;
+getmaxuprc (valuep)
      RLIMTYPE *valuep;
 {
 #  if defined (HAVE_SYSCONF) && defined (_SC_CHILD_MAX)
@@ -618,20 +642,17 @@ print_all_limits (mode)
      int mode;
 {
   register int i;
-  RLIMTYPE value;
+  RLIMTYPE softlim, hardlim;
 
   if (mode == 0)
     mode |= LIMIT_SOFT;
 
   for (i = 0; limits[i].option > 0; i++)
     {
-      if (get_limit (i, mode, &value) < 0)
-	{
-	  fprintf (stderr, DESCFMT, limits[i].description);
-	  builtin_error ("cannot get limit: %s", strerror (errno));
-	}
+      if (get_limit (i, &softlim, &hardlim) < 0)
+	builtin_error ("cannot get %s limit: %s", limits[i].description, strerror (errno));
       else
-	printone (i, value, 1);     
+	printone (i, (mode & LIMIT_SOFT) ? softlim : hardlim, 1);
     }
 }
 
@@ -641,11 +662,65 @@ printone (limind, curlim, pdesc)
      RLIMTYPE curlim;
      int pdesc;
 {
+  char unitstr[64];
+
   if (pdesc)
-    printf (DESCFMT, limits[limind].description);
+    {
+      if (limits[limind].units)
+	sprintf (unitstr, "(%s, -%c) ", limits[limind].units, limits[limind].option);
+      else
+        sprintf (unitstr, "(-%c) ", limits[limind].option);
+
+      printf ("%-18s %16s", limits[limind].description, unitstr);
+    }
   if (curlim == RLIM_INFINITY)
     puts ("unlimited");
+  else if (curlim == RLIM_SAVED_MAX)
+    puts ("hard");
+  else if (curlim == RLIM_SAVED_CUR)
+    puts ("soft");
   else
     print_rlimtype ((curlim / limits[limind].block_factor), 1);
 }
+
+/* Set all limits to NEWLIM.  NEWLIM currently must be RLIM_INFINITY, which
+   causes all limits to be set as high as possible depending on mode (like
+   csh `unlimit').  Returns -1 if NEWLIM is invalid, 0 if all limits
+   were set successfully, and 1 if at least one limit could not be set.
+
+   To raise all soft limits to their corresponding hard limits, use
+	ulimit -S -a unlimited
+   To attempt to raise all hard limits to infinity (superuser-only), use
+	ulimit -H -a unlimited
+   To attempt to raise all soft and hard limits to infinity, use
+	ulimit -a unlimited
+*/
+
+static int
+set_all_limits (mode, newlim)
+     int mode;
+     RLIMTYPE newlim;
+{
+  register int i;
+  int retval = 0;
+
+  if (newlim != RLIM_INFINITY)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  
+  if (mode == 0)
+    mode = LIMIT_SOFT|LIMIT_HARD;
+
+  for (retval = i = 0; limits[i].option > 0; i++)
+    if (set_limit (i, newlim, mode) < 0)
+      {
+	builtin_error ("cannot modify %s limit: %s", limits[i].description,
+						     strerror (errno));
+	retval = 1;
+      }
+  return retval;
+}
+
 #endif /* !_MINIX */

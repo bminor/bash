@@ -1,6 +1,10 @@
 export LC_ALL=C
 export LANG=C
 
+if (( $UID == 0 )); then
+        echo "execscript: the test suite should not be run as root" >&2
+fi
+
 set -- one two three
 echo before exec1.sub: "$@"
 echo calling exec1.sub
@@ -40,6 +44,7 @@ echo $?
 . ${THIS_SH} 2>/dev/null
 echo $?
 
+# post-bash-2.05 versions allow sourcing non-regular files
 . /dev/null
 echo $?
 

@@ -40,10 +40,6 @@
 #include "general.h"
 #define brace_whitespace(c) (!(c) || (c) == ' ' || (c) == '\t' || (c) == '\n')
 
-#if defined (SHELL)
-extern char *extract_command_subst ();
-#endif
-
 /* Basic idea:
 
    Segregate the text into 3 sections: preamble (stuff before an open brace),
@@ -56,8 +52,15 @@ extern char *extract_command_subst ();
 /* The character which is used to separate arguments. */
 int brace_arg_separator = ',';
 
+#if defined (__P)
+static int brace_gobbler __P((char *, int *, int));
+static char **expand_amble __P((char *));
+static char **array_concat __P((char **, char **));
+#else
 static int brace_gobbler ();
-static char **expand_amble (), **array_concat ();
+static char **expand_amble ();
+static char **array_concat ();
+#endif
 
 /* Return an array of strings; the brace expansion of TEXT. */
 char **

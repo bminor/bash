@@ -41,6 +41,8 @@
 
 HASH_TABLE *prog_completes = (HASH_TABLE *)NULL;
 
+static void free_progcomp __P((PTR_T));
+
 static int progcomp_initialized = 0;
 
 COMPSPEC *
@@ -127,7 +129,7 @@ num_progcomps ()
 
 static void
 free_progcomp (data)
-     char *data;
+     PTR_T data;
 {
   COMPSPEC *cs;
 
@@ -195,7 +197,7 @@ find_compspec (cmd)
   if (prog_completes == 0)
     return ((COMPSPEC *)NULL);
 
-  item = find_hash_item ((char *)cmd, prog_completes);	/* XXX fix const later */
+  item = find_hash_item (cmd, prog_completes);
 
   if (item == NULL)
     return ((COMPSPEC *)NULL);
@@ -207,7 +209,7 @@ find_compspec (cmd)
 
 void
 print_all_compspecs (pfunc)
-     VFunction *pfunc;
+     sh_csprint_func_t *pfunc;
 {
   BUCKET_CONTENTS *item_list;
   int bucket;

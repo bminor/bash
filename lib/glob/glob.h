@@ -20,7 +20,7 @@
 
 #include "stdc.h"
 
-extern int glob_pattern_p __P((char *));
+extern int glob_pattern_p __P((const char *));
 extern char **glob_vector __P((char *, char *));
 extern char **glob_filename __P((char *));
 

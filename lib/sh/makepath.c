@@ -27,7 +27,7 @@
 #  include <unistd.h>
 #endif
 
-#include "bashansi.h"
+#include <bashansi.h>
 #include "shell.h"
 
 #include <tilde/tilde.h>
@@ -56,7 +56,7 @@ extern char *get_working_directory __P((char *));
 
 #define MAKEDOT() \
   do { \
-    xpath = xmalloc (2); \
+    xpath = (char *)xmalloc (2); \
     xpath[0] = '.'; \
     xpath[1] = '\0'; \
     pathlen = 1; \
@@ -64,11 +64,11 @@ extern char *get_working_directory __P((char *));
 
 char *
 sh_makepath (path, dir, flags)
-     char *path, *dir;
+     const char *path, *dir;
      int flags;
 {
   int dirlen, pathlen;
-  char *ret, *xpath, *r, *s;
+  char *ret, *xpath, *xdir, *r, *s;
 
   if (path == 0 || *path == '\0')
     {
@@ -91,24 +91,25 @@ sh_makepath (path, dir, flags)
     }
   else
     {
-      xpath = ((flags & MP_DOTILDE) && *path == '~') ? bash_tilde_expand (path) : path;
+      xpath = ((flags & MP_DOTILDE) && *path == '~') ? bash_tilde_expand (path) : (char *)path;
       pathlen = strlen (xpath);
     }
 
-  dirlen = strlen (dir);
+  xdir = (char *)dir;
+  dirlen = strlen (xdir);
   if ((flags & MP_RMDOT) && dir[0] == '.' && dir[1] == '/')
     {
-      dir += 2;
+      xdir += 2;
       dirlen -= 2;
     }
 
-  r = ret = xmalloc (2 + dirlen + pathlen);
+  r = ret = (char *)xmalloc (2 + dirlen + pathlen);
   s = xpath;
   while (*s)
     *r++ = *s++;
   if (s[-1] != '/')
     *r++ = '/';      
-  s = dir;
+  s = xdir;
   while (*r++ = *s++)
     ;
   if (xpath != path)

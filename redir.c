@@ -54,17 +54,23 @@ extern int errno;
 #endif
 
 extern int posixly_correct;
-extern int interactive, interactive_shell;
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
 /* Static functions defined and used in this file. */
-static void add_undo_close_redirect ();
-static void add_exec_redirect ();
-static int add_undo_redirect ();
-static int do_redirection_internal ();
-static int expandable_redirection_filename ();
-static int stdin_redirection ();
+static void add_undo_close_redirect __P((int));
+static void add_exec_redirect __P((REDIRECT *));
+static int add_undo_redirect __P((int));
+static int expandable_redirection_filename __P((REDIRECT *));
+static int stdin_redirection __P((enum r_instruction, int));
+static int do_redirection_internal __P((REDIRECT *, int, int, int));
+
+static int write_here_document __P((int, WORD_DESC *));
+static int here_document_to_fd __P((WORD_DESC *));
+
+static int redir_special_open __P((int, char *, int, int, enum r_instruction));
+static int noclobber_open __P((char *, int, int, enum r_instruction));
+static int redir_open __P((char *, int, int, enum r_instruction));
 
 /* Spare redirector used when translating [N]>&WORD or [N]<&WORD to a new
    redirection and when creating the redirection undo list. */
@@ -79,29 +85,35 @@ redirection_error (temp, error)
      REDIRECT *temp;
      int error;
 {
-  char *filename;
+  char *filename, *allocname;
   int oflags;
 
-  if (expandable_redirection_filename (temp))
+  allocname = 0;
+  if (temp->redirector < 0)
+    /* This can happen when read_token_word encounters overflow, like in
+       exec 4294967297>x */
+    filename = "file descriptor out of range";
+#ifdef EBADF
+  else if (temp->redirector >= 0 && errno == EBADF)
+    filename = allocname = itos (temp->redirector);
+#endif
+  else if (expandable_redirection_filename (temp))
     {
       if (posixly_correct && interactive_shell == 0)
 	{
 	  oflags = temp->redirectee.filename->flags;
 	  temp->redirectee.filename->flags |= W_NOGLOB;
 	}
-      filename = redirection_expand (temp->redirectee.filename);
+      filename = allocname = redirection_expand (temp->redirectee.filename);
       if (posixly_correct && interactive_shell == 0)
 	temp->redirectee.filename->flags = oflags;
       if (filename == 0)
-	filename = savestring (temp->redirectee.filename->word);
-      if (filename == 0)
-	{
-	  filename = xmalloc (1);
-	  filename[0] = '\0';
-	}
+	filename = temp->redirectee.filename->word;
     }
+  else if (temp->redirectee.dest < 0)
+    filename = "file descriptor out of range";
   else
-    filename = itos (temp->redirectee.dest);
+    filename = allocname = itos (temp->redirectee.dest);
 
   switch (error)
     {
@@ -128,7 +140,7 @@ redirection_error (temp, error)
       break;
     }
 
-  FREE (filename);
+  FREE (allocname);
 }
 
 /* Perform the redirections on LIST.  If FOR_REAL, then actually make
@@ -289,8 +301,13 @@ write_here_document (fd, redirectee)
 	      return (fd2);
 	    }
 	}
-      fclose (fp);
       dispose_words (tlist);
+      if (fclose (fp) != 0)
+	{
+	  if (errno == 0)
+	    errno = ENOSPC;
+	  return (errno);
+	}
     }
   return 0;
 }
@@ -304,7 +321,6 @@ here_document_to_fd (redirectee)
 {
   char *filename;
   int r, fd, fd2;
-  static int fnum = 0;
 
   fd = sh_mktmpfd ("sh-thd", MT_USERANDOM, &filename);
 
@@ -399,15 +415,20 @@ redir_special_open (spec, filename, flags, mode, ri)
      enum r_instruction ri;
 {
   int fd;
+#if !defined (HAVE_DEV_FD)
   long lfd;
+#endif
 
   fd = -1;
   switch (spec)
     {
 #if !defined (HAVE_DEV_FD)
     case RF_DEVFD:
-      if (legal_number, filename+8, &lfd)
-	fd = fcntl ((int)lfd, F_DUPFD, 10);
+      if (all_digits (filename+8) && legal_number (filename+8, &lfd) && lfd == (int)lfd)
+	{
+	  fd = lfd;
+	  fd = fcntl (fd, F_DUPFD, 10);
+	}
       else
 	fd = AMBIGUOUS_REDIRECT;
       break;
@@ -541,6 +562,7 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 {
   WORD_DESC *redirectee;
   int redir_fd, fd, redirector, r, oflags;
+  long lfd;
   char *redirectee_word;
   enum r_instruction ri;
   REDIRECT *new_redirect;
@@ -560,21 +582,20 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	return (AMBIGUOUS_REDIRECT);
       else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
 	{
-	  rd.dest = 0L;
+	  rd.dest = 0;
 	  new_redirect = make_redirection (redirector, r_close_this, rd);
 	}
       else if (all_digits (redirectee_word))
 	{
-	  if (ri == r_duplicating_input_word)
-	    {
-	      rd.dest = atol (redirectee_word);
-	      new_redirect = make_redirection (redirector, r_duplicating_input, rd);
-	    }
+	  if (legal_number (redirectee_word, &lfd) && (int)lfd == lfd)
+	    rd.dest = lfd;
 	  else
-	    {
-	      rd.dest = atol (redirectee_word);
-	      new_redirect = make_redirection (redirector, r_duplicating_output, rd);
-	    }
+	    rd.dest = -1;	/* XXX */
+	  new_redirect = make_redirection (redirector,
+					   (ri == r_duplicating_input_word
+						? r_duplicating_input
+						: r_duplicating_output),
+					   rd);		
 	}
       else if (ri == r_duplicating_output_word && redirector == 1)
 	{
@@ -660,11 +681,13 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
       if (for_real)
 	{
 	  if (remembering)
-	    /* Only setup to undo it if the thing to undo is active. */
-	    if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-	      add_undo_redirect (redirector);
-	    else
-	      add_undo_close_redirect (redirector);
+	    {
+	      /* Only setup to undo it if the thing to undo is active. */
+	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
+		add_undo_redirect (redirector);
+	      else
+		add_undo_close_redirect (redirector);
+	    }
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -736,11 +759,13 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	  if (for_real)
 	    {
 	      if (remembering)
-		/* Only setup to undo it if the thing to undo is active. */
-		if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		  add_undo_redirect (redirector);
-		else
-		  add_undo_close_redirect (redirector);
+	        {
+		  /* Only setup to undo it if the thing to undo is active. */
+		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
+		    add_undo_redirect (redirector);
+		  else
+		    add_undo_close_redirect (redirector);
+	        }
 
 #if defined (BUFFERED_INPUT)
 	      check_bash_input (redirector);
@@ -774,11 +799,13 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
       if (for_real && (redir_fd != redirector))
 	{
 	  if (remembering)
-	    /* Only setup to undo it if the thing to undo is active. */
-	    if (fcntl (redirector, F_GETFD, 0) != -1)
-	      add_undo_redirect (redirector);
-	    else
-	      add_undo_close_redirect (redirector);
+	    {
+	      /* Only setup to undo it if the thing to undo is active. */
+	      if (fcntl (redirector, F_GETFD, 0) != -1)
+		add_undo_redirect (redirector);
+	      else
+		add_undo_close_redirect (redirector);
+	    }
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -851,11 +878,11 @@ add_undo_redirect (fd)
 
   clexec_flag = fcntl (fd, F_GETFD, 0);
 
-  rd.dest = 0L;
+  rd.dest = 0;
   closer = make_redirection (new_fd, r_close_this, rd);
   dummy_redirect = copy_redirects (closer);
 
-  rd.dest = (long)new_fd;
+  rd.dest = new_fd;
   if (fd == 0)
     new_redirect = make_redirection (fd, r_duplicating_input, rd);
   else
@@ -891,7 +918,7 @@ add_undo_close_redirect (fd)
 {
   REDIRECT *closer;
 
-  rd.dest = 0L;
+  rd.dest = 0;
   closer = make_redirection (fd, r_close_this, rd);
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;

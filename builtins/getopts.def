@@ -79,7 +79,6 @@ $END
 #define G_ARG_MISSING	-3
 
 extern char *this_command_name;
-extern WORD_LIST *rest_of_args;
 
 /* getopts_reset is magic code for when OPTIND is reset.  N is the
    value that has just been assigned to OPTIND. */
@@ -304,14 +303,10 @@ getopts_builtin (list)
     }
 
   reset_internal_getopt ();
-  while ((ret = internal_getopt (list, "")) != -1)
+  if (internal_getopt (list, "") != -1)
     {
-      switch (ret)
-	{
-	default:
-	  builtin_usage ();
-	  return (EX_USAGE);
-	}
+      builtin_usage ();
+      return (EX_USAGE);
     }
   list = loptend;
 

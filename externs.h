@@ -44,7 +44,7 @@ extern void xtrace_print_cond_term __P((int, int, WORD_DESC *, char *, char *));
 #endif
 
 /* Functions from shell.c. */
-extern void exit_shell __P((int));
+extern void exit_shell __P((int)) __attribute__((__noreturn__));
 extern void disable_priv_mode __P((void));
 extern void unbind_args __P((void));
 
@@ -68,15 +68,16 @@ extern char **brace_expand __P((char *));
 
 /* Miscellaneous functions from parse.y */
 extern int yyparse __P((void));
+extern int return_EOF __P((void));
 extern void reset_parser __P((void));
-extern WORD_LIST *parse_string_to_word_list __P((char *, char *));
+extern WORD_LIST *parse_string_to_word_list __P((char *, const char *));
 
 extern int get_current_prompt_level __P((void));
 extern void set_current_prompt_level __P((int));
 
-/* Functions from version.c. */
-extern char *shell_version_string __P((void));
-extern void show_shell_version __P((int));
+#if defined (HISTORY)
+extern char *history_delimiting_chars __P((void));
+#endif
 
 /* Declarations for functions defined in locale.c */
 extern void set_default_locale __P((void));
@@ -87,8 +88,8 @@ extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
 
 /* Declarations for functions defined in list.c. */
-extern void map_over_list __P((GENERIC_LIST *, Function *));
-extern void map_over_words __P((WORD_LIST *, Function *));
+extern void map_over_list __P((GENERIC_LIST *, sh_glist_func_t *));
+extern void map_over_words __P((WORD_LIST *, sh_icpfunc_t *));
 extern GENERIC_LIST *reverse_list ();
 extern int list_length ();
 extern GENERIC_LIST *list_append ();
@@ -116,21 +117,36 @@ extern long get_clk_tck __P((void));
 extern void clock_t_to_secs ();
 extern void print_clock_t ();
 
+/* Declarations for functions defined in lib/sh/fmtulong.c */
+#define FL_PREFIX     0x01    /* add 0x, 0X, or 0 prefix as appropriate */
+#define FL_ADDBASE    0x02    /* add base# prefix to converted value */
+#define FL_HEXUPPER   0x04    /* use uppercase when converting to hex */
+#define FL_UNSIGNED   0x08    /* don't add any sign */
+
+extern char *fmtulong __P((unsigned long int, int, char *, size_t, int));
+
+/* Declarations for functions defined in lib/sh/fmtulong.c */
+#if defined (HAVE_LONG_LONG)
+extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
+#endif
+
 /* Declarations for functions defined in lib/sh/getcwd.c */
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
 #endif
 
 /* Declarations for functions defined in lib/sh/itos.c */
-extern char *inttostr __P((int, char *, int));
-extern char *itos __P((int));
+extern char *inttostr __P((long, char *, size_t));
+extern char *itos __P((long));
+extern char *uinttostr __P((unsigned long, char *, size_t));
+extern char *uitos __P((unsigned long));
 
 /* declarations for functions defined in lib/sh/makepath.c */
 #define MP_DOTILDE	0x01
 #define MP_DOCWD	0x02
 #define MP_RMDOT	0x04
 
-extern char *sh_makepath __P((char *, char *, int));
+extern char *sh_makepath __P((const char *, const char *, int));
 
 /* declarations for functions defined in lib/sh/netopen.c */
 extern int netopen __P((char *));
@@ -160,8 +176,8 @@ extern char *sh_physpath __P((char *, int));
 extern char *sh_realpath __P((const char *, char *));
 
 /* declarations for functions defined in lib/sh/setlinebuf.c */
-#if !defined (HAVE_SETLINEBUF)
-extern int setlinebuf ();
+#ifdef NEED_SH_SETLINEBUF_DECL
+extern int sh_setlinebuf __P((FILE *));
 #endif
 
 /* declarations for functions defined in lib/sh/shquote.c */
@@ -216,7 +232,7 @@ extern int array_len __P((char **));
 extern void free_array_members __P((char **));
 extern void free_array __P((char **));
 extern char **copy_array __P((char **));
-extern int qsort_string_compare ();
+extern int qsort_string_compare __P((char **, char **));
 extern void sort_char_array __P((char **));
 
 /* declarations for functions defined in lib/sh/strtod.c */
@@ -225,18 +241,43 @@ extern double strtod __P((const char *, char **));
 #endif
 
 /* declarations for functions defined in lib/sh/strtol.c */
-#if !defined (HAVE_STRTOL)
+#if !HAVE_DECL_STRTOL
 extern long strtol __P((const char *, char **, int));
 #endif
 
+/* declarations for functions defined in lib/sh/strtoll.c */
+#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOLL
+extern long long strtoll __P((const char *, char **, int));
+#endif
+
 /* declarations for functions defined in lib/sh/strtoul.c */
-#if !defined (HAVE_STRTOUL)
+#if !HAVE_DECL_STRTOUL
 extern unsigned long strtoul __P((const char *, char **, int));
 #endif
+
+/* declarations for functions defined in lib/sh/strtoull.c */
+#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOULL
+extern unsigned long long strtoull __P((const char *, char **, int));
+#endif
+
+/* declarations for functions defined in lib/sh/strimax.c */
+#ifdef NEED_STRTOIMAX_DECL
+
+#if !HAVE_DECL_STRTOIMAX
+extern intmax_t strtoimax __P((const char *, char **, int));
+#endif
+
+/* declarations for functions defined in lib/sh/strumax.c */
+#if !HAVE_DECL_STRTOUMAX
+extern uintmax_t strtoumax __P((const char *, char **, int));
+#endif
+
+#endif /* NEED_STRTOIMAX_DECL */
 
 /* declarations for functions defined in lib/sh/strtrans.c */
 extern char *ansicstr __P((char *, int, int, int *, int *));
 extern char *ansic_quote __P((char *, int, int *));
+extern int ansic_shouldquote __P((const char *));
 
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in
@@ -254,13 +295,13 @@ extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
 /* declarations for functions defined in lib/sh/zread.c */
-extern int zread __P((int, char *, size_t));
-extern int zread1 __P((int, char *, size_t));
-extern int zreadc __P((int, char *));
+extern ssize_t zread __P((int, char *, size_t));
+extern ssize_t zread1 __P((int, char *, size_t));
+extern ssize_t zreadc __P((int, char *));
 extern void zreset __P((void));
 extern void zsyncfd __P((int));
 
 /* declarations for functions defined in lib/sh/zwrite.c */
-extern int zwrite __P((int, unsigned char *, size_t));
+extern int zwrite __P((int, char *, size_t));
 
 #endif /* _EXTERNS_H_ */

@@ -36,13 +36,13 @@ extern int errno;
 
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
-int
+ssize_t
 zread (fd, buf, len)
      int fd;
      char *buf;
      size_t len;
 {
-  int r;
+  ssize_t r;
 
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
     ;
@@ -57,13 +57,14 @@ zread (fd, buf, len)
 #endif
 #define NUM_INTR 3
 
-int
+ssize_t
 zread1 (fd, buf, len)
      int fd;
      char *buf;
      size_t len;
 {
-  int r, nintr;
+  ssize_t r;
+  int nintr;
 
   for (nintr = 0; ; )
     {
@@ -84,25 +85,29 @@ zread1 (fd, buf, len)
    in read(2).  This does some local buffering to avoid many one-character
    calls to read(2), like those the `read' builtin performs. */
 
-static unsigned char lbuf[128];
-static int lind, lused;
+static char lbuf[128];
+static size_t lind, lused;
 
-int
+ssize_t
 zreadc (fd, cp)
      int fd;
      char *cp;
 {
-  int r;
+  ssize_t nr;
 
   if (lind == lused || lused == 0)
     {
-      lused = zread (fd, lbuf, sizeof (lbuf));
+      nr = zread (fd, lbuf, sizeof (lbuf));
       lind = 0;
-      if (lused <= 0)
-	return (lused);
+      if (nr <= 0)
+	{
+	  lused = 0;
+	  return nr;
+	}
+      lused = nr;
     }
   if (cp)
-    *cp = (char)lbuf[lind++];
+    *cp = lbuf[lind++];
   return 1;
 }
 
@@ -118,7 +123,7 @@ void
 zsyncfd (fd)
      int fd;
 {
-  int off;
+  off_t off;
 
   off = lused - lind;
   if (off > 0)

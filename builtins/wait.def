@@ -50,6 +50,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include <chartypes.h>
+
 #include "../bashansi.h"
 
 #include "../shell.h"
@@ -80,6 +82,8 @@ wait_builtin (list)
 {
   int status, code;
   volatile int old_interrupt_immediately;
+
+  USE_VAR(list);
 
   if (no_options (list))
     return (EX_USAGE);
@@ -120,13 +124,14 @@ wait_builtin (list)
     {
       pid_t pid;
       char *w;
+      long pid_value;
 
       w = list->word->word;
-      if (digit (*w))
+      if (DIGIT (*w))
 	{
-	  if (all_digits (w + 1))
+	  if (legal_number (w, &pid_value) && pid_value == (pid_t)pid_value)
 	    {
-	      pid = (pid_t)atoi (w);
+	      pid = (pid_t)pid_value;
 	      status = wait_for_single_pid (pid);
 	    }
 	  else

@@ -31,42 +31,22 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-static void memory_error_and_abort ();
+/* Generic pointer type. */
+#ifndef PTR_T
+
+#if defined (__STDC__)
+#  define PTR_T void *
+#else
+#  define PTR_T char *
+#endif
+
+#endif /* PTR_T */
 
 /* **************************************************************** */
 /*								    */
 /*		   Memory Allocation and Deallocation.		    */
 /*								    */
 /* **************************************************************** */
-
-/* Return a pointer to free()able block of memory large enough
-   to hold BYTES number of bytes.  If the memory cannot be allocated,
-   print an error message and abort. */
-char *
-xmalloc (bytes)
-     int bytes;
-{
-  char *temp;
-
-  temp = (char *)malloc (bytes);
-  if (temp == 0)
-    memory_error_and_abort ("xmalloc");
-  return (temp);
-}
-
-char *
-xrealloc (pointer, bytes)
-     char *pointer;
-     int bytes;
-{
-  char *temp;
-
-  temp = pointer ? (char *)realloc (pointer, bytes) : (char *)malloc (bytes);
-
-  if (temp == 0)
-    memory_error_and_abort ("xrealloc");
-  return (temp);
-}
 
 static void
 memory_error_and_abort (fname)
@@ -76,11 +56,38 @@ memory_error_and_abort (fname)
   exit (2);
 }
 
-/* Use this as the function to call when adding unwind protects so we
-   don't need to know what free() returns. */
+/* Return a pointer to free()able block of memory large enough
+   to hold BYTES number of bytes.  If the memory cannot be allocated,
+   print an error message and abort. */
+PTR_T
+xmalloc (bytes)
+     size_t bytes;
+{
+  PTR_T temp;
+
+  temp = malloc (bytes);
+  if (temp == 0)
+    memory_error_and_abort ("xmalloc");
+  return (temp);
+}
+
+PTR_T
+xrealloc (pointer, bytes)
+     PTR_T pointer;
+     size_t bytes;
+{
+  PTR_T temp;
+
+  temp = pointer ? realloc (pointer, bytes) : malloc (bytes);
+
+  if (temp == 0)
+    memory_error_and_abort ("xrealloc");
+  return (temp);
+}
+
 void
 xfree (string)
-     char *string;
+     PTR_T string;
 {
   if (string)
     free (string);

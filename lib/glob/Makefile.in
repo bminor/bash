@@ -62,12 +62,12 @@ CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS
 LIBRARY_NAME = libglob.a
 
 # The C code source files for this library.
-CSOURCES = $(srcdir)/glob.c $(srcdir)/fnmatch.c
+CSOURCES = $(srcdir)/glob.c $(srcdir)/strmatch.c
 
 # The header files for this library.
-HSOURCES = $(srcdir)/fnmatch.h
+HSOURCES = $(srcdir)/strmatch.h
 
-OBJECTS = glob.o fnmatch.o
+OBJECTS = glob.o strmatch.o
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/glob.texi
@@ -121,14 +121,15 @@ mostlyclean: clean
 #								     #
 ######################################################################
 
-fnmatch.o: fnmatch.h
-fnmatch.o: $(BUILD_DIR)/config.h
+strmatch.o: strmatch.h
+strmatch.o: $(BUILD_DIR)/config.h
+strmatch.o: $(BASHINCDIR)/chartypes.h
 
 glob.o: $(BUILD_DIR)/config.h
 glob.o: $(topdir)/bashtypes.h $(BASHINCDIR)/ansi_stdlib.h $(topdir)/bashansi.h
 glob.o: $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/memalloc.h
-glob.o: fnmatch.h
+glob.o: strmatch.h
 
 # Rules for deficient makes, like SunOS and Solaris
-fnmatch.o: fnmatch.c
+strmatch.o: strmatch.c
 glob.o: glob.c

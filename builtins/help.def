@@ -47,15 +47,13 @@ $END
 #include "../shell.h"
 #include "../builtins.h"
 #include "../pathexp.h"
+#include "common.h"
 #include "bashgetopt.h"
 
-#include <glob/fnmatch.h>
+#include <glob/strmatch.h>
 #include <glob/glob.h>
 
-extern void builtin_error ();
-extern void builtin_usage ();
-
-static  void show_builtin_command_help ();
+static  void show_builtin_command_help __P((void));
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern
@@ -109,7 +107,7 @@ help_builtin (list)
 	{
 	  QUIT;
 	  if ((strncmp (pattern, name, plen) == 0) ||
-	      (fnmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
+	      (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
 	    {
 	      printf ("%s: %s\n", name, shell_builtins[i].short_doc);
 

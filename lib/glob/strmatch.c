@@ -1,4 +1,4 @@
-/* fnmatch.c -- ksh-like extended pattern matching for the shell and filename
+/* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
 /* Copyright (C) 1991, 1997 Free Software Foundation, Inc.
@@ -23,9 +23,9 @@
 
 #include <stdio.h>	/* for debugging */
 				
-#include "fnmatch.h"
+#include "strmatch.h"
 #include "collsyms.h"
-#include <ctype.h>
+#include <chartypes.h>
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -40,27 +40,13 @@ static int extmatch ();
 static char *patscan ();
 #endif
   
-#if !defined (isascii)
+#if !defined (isascii) && !defined (HAVE_ISASCII)
 #  define isascii(c)	((unsigned int)(c) <= 0177)
 #endif
 
-/* Note that these evaluate C many times.  */
-
-#ifndef isblank
-#  define isblank(c)	((c) == ' ' || (c) == '\t')
-#endif
-
-#ifndef isgraph
-#  define isgraph(c)	((c) != ' ' && isprint((c)))
-#endif
-
-#ifndef isxdigit
-#  define isxdigit(c)	(((c) >= '0' && (c) <= '9') || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
-#endif
-
 /* The result of FOLD is an `unsigned char' */
-# define FOLD(c) ((flags & FNM_CASEFOLD) && isupper ((unsigned char)c) \
-	? tolower ((unsigned char)c) \
+# define FOLD(c) ((flags & FNM_CASEFOLD) \
+	? TOLOWER ((unsigned char)c) \
 	: ((unsigned char)c))
 
 #ifndef STREQ
@@ -127,8 +113,23 @@ collsym (s, len)
   return -1;
 }
 
+#ifdef HAVE_LIBC_FNM_EXTMATCH
 int
-fnmatch (pattern, string, flags)
+strmatch (pattern, string, flags)
+     char *pattern;
+     char *string;
+     int flags;
+{
+  char *se, *pe;
+
+  if (string == 0 || pattern == 0)
+    return FNM_NOMATCH;
+
+  return (fnmatch (pattern, string, flags));
+}
+#else /* !HAVE_LIBC_FNM_EXTMATCH */
+int
+strmatch (pattern, string, flags)
      char *pattern;
      char *string;
      int flags;
@@ -143,6 +144,7 @@ fnmatch (pattern, string, flags)
 
   return (gmatch (string, se, pattern, pe, flags));
 }
+#endif /* !HAVE_LIBC_FNM_EXTMATCH */
 
 /* Match STRING against the filename pattern PATTERN, returning zero if
    it matches, FNM_NOMATCH if not.  */
@@ -231,7 +233,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	       we are matching a pathname. */
 	    return FNM_NOMATCH;
 
-	  /* Collapse multiple consecutive, `*' and `?', but make sure that
+	  /* Collapse multiple consecutive `*' and `?', but make sure that
 	     one character of the string is consumed for each `?'. */
 	  for (c = *p++; (c == '?' || c == '*'); c = *p++)
 	    {
@@ -267,7 +269,8 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 		     We need to skip the glob pattern and see if we
 		     match the rest of the string. */
 		  newn = patscan (p + 1, pe, 0);
-		  p = newn;
+		  /* If NEWN is 0, we have an ill-formed pattern. */
+		  p = newn ? newn : pe;
 		}
 #endif
 	      if (p == pe)
@@ -288,7 +291,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	    c1 = FOLD (c1);
 	    for (--p; n < se; ++n)
 	      {
-		/* Only call fnmatch if the first character indicates a
+		/* Only call strmatch if the first character indicates a
 		   possible match.  We can check the first character if
 		   we're not doing an extended glob match. */
 		if ((flags & FNM_EXTMATCH) == 0 && c != '[' && FOLD (*n) != c1) /*]*/
@@ -426,29 +429,29 @@ brackmatch (p, test, flags)
 	{
 	  pc = 0;	/* make sure invalid char classes don't match. */
 	  if (STREQN (p+1, "alnum:]", 7))
-	    { pc = isalnum (test); p += 8; }
+	    { pc = ISALNUM (test); p += 8; }
 	  else if (STREQN (p+1, "alpha:]", 7))
-	    { pc = isalpha (test); p += 8; }
+	    { pc = ISALPHA (test); p += 8; }
 	  else if (STREQN (p+1, "blank:]", 7))
-	    { pc = isblank (test); p += 8; }
+	    { pc = ISBLANK (test); p += 8; }
 	  else if (STREQN (p+1, "cntrl:]", 7))
-	    { pc = iscntrl (test); p += 8; }
+	    { pc = ISCNTRL (test); p += 8; }
 	  else if (STREQN (p+1, "digit:]", 7))
-	    { pc = isdigit (test); p += 8; }
+	    { pc = ISDIGIT (test); p += 8; }
 	  else if (STREQN (p+1, "graph:]", 7))
-	    { pc = isgraph (test); p += 8; }
+	    { pc = ISGRAPH (test); p += 8; }
 	  else if (STREQN (p+1, "lower:]", 7))
-	    { pc = islower (test); p += 8; }
+	    { pc = ISLOWER (test); p += 8; }
 	  else if (STREQN (p+1, "print:]", 7))
-	    { pc = isprint (test); p += 8; }
+	    { pc = ISPRINT (test); p += 8; }
 	  else if (STREQN (p+1, "punct:]", 7))
-	    { pc = ispunct (test); p += 8; }
+	    { pc = ISPUNCT (test); p += 8; }
 	  else if (STREQN (p+1, "space:]", 7))
-	    { pc = isspace (test); p += 8; }
+	    { pc = ISSPACE (test); p += 8; }
 	  else if (STREQN (p+1, "upper:]", 7))
-	    { pc = isupper (test); p += 8; }
+	    { pc = ISUPPER (test); p += 8; }
 	  else if (STREQN (p+1, "xdigit:]", 8))
-	    { pc = isxdigit (test); p += 9; }
+	    { pc = ISXDIGIT (test); p += 9; }
 	  else if (STREQN (p+1, "ascii:]", 7))
 	    { pc = isascii (test); p += 8; }
 	  if (pc)
@@ -828,7 +831,7 @@ main (c, v)
   string = v[1];
   pat = v[2];
 
-  if (fnmatch (pat, string, 0) == 0)
+  if (strmatch (pat, string, 0) == 0)
     {
       printf ("%s matches %s\n", string, pat);
       exit (0);

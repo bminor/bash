@@ -23,13 +23,13 @@
 
 #include "stdc.h"
 
-extern int file_status __P((char *));
-extern int executable_file __P((char *));
-extern int is_directory __P((char *));
-extern int executable_or_directory __P((char *));
-extern char *find_user_command __P((char *));
-extern char *find_path_file __P((char *));
-extern char *search_for_command __P((char *));
-extern char *user_command_matches __P((char *, int, int));
+extern int file_status __P((const char *));
+extern int executable_file __P((const char *));
+extern int is_directory __P((const char *));
+extern int executable_or_directory __P((const char *));
+extern char *find_user_command __P((const char *));
+extern char *find_path_file __P((const char *));
+extern char *search_for_command __P((const char *));
+extern char *user_command_matches __P((const char *, int, int));
 
 #endif /* _FINDCMD_H_ */

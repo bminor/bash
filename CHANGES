@@ -1,3 +1,533 @@
+This document details the changes between this version, bash-2.05a-release,
+and the previous version, bash-2.05a-rc1.
+
+1.  Changes to Bash
+
+a.  Fixed the `printf' builtin so that the variable name supplied as an
+    argument to a %n conversion must be a valid shell identifier.
+
+b.  Improved the random number generator slightly.
+
+c.  Changes to configuration to not put -I/usr/include into $CFLAGS, since
+    it messes up some includes.
+
+d.  Corrected description of POSIXLY_CORRECT in man page and info manual.
+
+e.  Fixed a couple of cases of incorrect function prototypes that sneaked
+    through and caused compilation problems.
+
+f.  A few changes to avoid potential core dumps in the programmable completion
+    code.
+
+g.  Fixed a configure problem that could cause a non-existent file to show
+    up in LIBOBJS.
+
+h.  Fixed a configure problem that could cause siglist.o to not be built when
+    required.
+
+i.  Changes to the strtoimax and strtoumax replacement functions to work
+    around buggy compilers.
+
+j.  Fixed a problem with the snprintf replacement function that could
+    potentially cause a core dump.
+
+2.  Changes to Readline
+
+a.  Fixed a locale-specific problem in the vi-mode `goto mark' command.
+
+b.  Fixed Makefile to not put -I/usr/include into CFLAGS, since it can cause
+    include file problems.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.05a-rc1,
+and the previous version, bash-2.05a-beta1.
+
+1.  Changes to Bash
+
+a.  Fixed the snprintf replacement to correctly implement the `alternate form'
+    of the %g and %G conversions.
+
+b.  Fixed snprintf to correctly handle the optional precision with the %g and
+    %G conversions.
+
+c.  Fixed the arithmetic evaluation code to correct the values of `@' and `_'
+    when translating base-64 constants (they were backwards).
+
+d.  New library functions for formatting long and long long ints.
+
+e.  Fixed a few places where negative array subscripts could have occurred,
+    mostly as the result of systems using signed characters.
+
+f.  Fixed a few places that assumed a pid_t was no wider than an int.
+
+g.  Fixed the `maildir' mail checking code to work on systems where a
+    `struct stat' doesn't include an `st_blocks' member.
+
+h.  Fixed snprintf to make `unsigned long long' conversion formats (%llu)
+    work better.
+
+i.  Fixed snprintf to not print a sign when asked to do an unsigned conversion.
+
+j.  Made configure changes to avoid compiling empty source files in lib/sh.
+
+k.  New replacement functions (if necessary) for strtoull, strtoll, strtoimax,
+    strtoumax.
+
+l.  The `printf' builtin now handles the `ll' and `j' length modifiers
+    directly, since they can affect the type and width of the argument
+    passed to printf(3).
+
+m.  Renamed a number of the bash-specific autoconf macros in aclocal.m4 to
+    have more sytematic naming, with accompanying changes to configure.in.
+
+n.  Fixed snprintf to handle long doubles and the %a/%A conversions by
+    falling back to sprintf, as long as sprintf supports them.
+
+o.  Fixed return value from vsnprintf/snprintf to be the number of characters
+    that would have been printed, even if that number exceeds the buffer
+    size passed as an argument.
+
+p.  Bash no longer attempts to define its own versions of some ctype macros
+    if they are implemented as functions in libc but not as macros in
+    <ctype.h>.
+
+q.  Changed the variable printing code (used by `set', `export', etc.) to
+    not use the $'...' syntax when in posix mode, since that caused
+    interoperability problems with other shells (most notably with autoconf).
+    When not in posix mode, it uses $'...' if the string to be printed
+    contains non-printing characters and regular single quotes otherwise.
+
+r.  snprintf now recognizes the %F conversion.
+
+s.  Fixed a bug that could cause the wrong status to be returned by a shell
+    function when the shell is compiled without job control and a null
+    command containing a command substutition was executed in the function.
+
+t.  When in posix mode, the default value for MAILCHECK is 600.
+
+u.  Bash only initializes FUNCNAME, GROUPS, and DIRSTACK as special variables
+    if they're not in the initial environment.
+
+v.  If SECONDS appears in the initial environment with a valid integer value,
+    bash uses that as the starting value, as if an assignment had been
+    performed.
+
+w.  Bash no longer auto-exports HOME, PATH, SHELL, or TERM, even though it
+    gives them default values if they don't appear in the initial environment.
+
+x.  Bash no longer auto-exports HOSTNAME, HOSTTYPE, MACHTYPE, or OSTYPE,
+    even if it assigns them default values.
+
+y.  Bash no longer removes the export attribute from SSH_CLIENT or SSH2_CLIENT
+    if they appear in the initial environment.
+
+z.  Bash no longer attempts to discover if it's being run by sshd in order to
+    run the startup files.  If the SSH_SOURCE_BASHRC is uncommented in
+    config-top.h it will attempt to do so as previously, but that's commented
+    out in the distributed version.
+
+aa. Fixed a typo in the code that tests for LC_NUMERIC.
+
+bb. The POSIXLY_CORRECT shell variable and its effects are now documented.
+
+cc. Some changes to several of the support shell scripts included in the
+    definitions to try to avoid race conditions and attacks.
+
+dd. Several changes to avoid warnings from `gcc -Wall'.
+
+ee. Fixed a problem with the `unset' builtin that could cause incorrect
+    results if asked to unset a variable and an array subscript in the
+    same command.
+
+ff. A few changes to the shell's temporary file creation code to avoid
+    potential file descriptor leaks and to prefer the system's idea of
+    the temporary directory to use.
+
+gg. Fixes to build with the C alloca in lib/malloc/alloca.c if the system
+    requires it but the shell has been configured --without-bash-malloc.
+
+hh. Updated the documentation to note that only interactive shells resend
+    SIGHUP to all jobs before exiting.
+
+ii. Fixes to only pass unquoted tilde words to tilde_expand, rather than
+    rely on tilde_expand or getpwnam(3) to handle the quotes (MacOS 10.x
+    will remove backslashes in any login name passed to getpwnam(3)).
+
+jj. Small change from Paul Eggert to make LINENO right in commands run with
+    `bash -c'.
+
+2.  New Features in Bash
+
+a.  The `printf' builtin now handles the %a and %A conversions if they're
+    implemented by printf(3).
+
+b.  The `printf' builtin now handles the %F conversion (just about like %f).
+
+c.  The `printf' builtin now handles the %n conversion like printf(3).  The
+    corresponding argument is the name of a shell variable to which the
+    value is assigned.
+
+3.  Changes to Readline
+
+a.  Fixed a few places where negative array subscripts could have occurred.
+
+b.  Fixed the vi-mode code to use a better method to determine the bounds of
+    the array used to hold the marks.
+
+c.  Fixed the defines in chardefs.h to work better when chars are signed.
+
+d.  Fixed configure.in to use the new names for bash autoconf macros.
+
+e.  Readline no longer attempts to define its own versions of some ctype
+    macros if they are implemented as functions in libc but not as macros in
+    <ctype.h>.
+
+f.  Fixed a problem where rl_backward could possibly set point to before
+    the beginning of the line.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.05a-beta1,
+and the previous version, bash-2.05a-alpha1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug in the evalution of arithmetic `for' statements when the
+    expanded expression is NULL.
+
+b.  Fixed an unassigned variable problem in the redirection printing code.
+
+c.  Added more prototypes to extern function declarations in the header
+    files and to static function declarations in C source files.
+
+d.  Make sure called functions have a prototype in scope, to get the arguments
+    and return values right instead of casting.  Removed extern function
+    declarations from C source files that were already included in header
+    files.
+
+e.  Changed some function arguments to use function typedefs in general.h so
+    the prototypes can be checked.  The only use of Function and VFunction
+    now is for unwind-protects.
+
+f.  More const changes to function arguments and appropriate variables.
+
+g.  Changed the mail checking support to handle `maildir'-style mail
+    directories.
+
+h.  Augmented the bash malloc to pass in the file and line number information
+    for each malloc, realloc, and free.  This should result in better error
+    messages.
+
+i.  The `old' gnu malloc is no longer a configuration option.
+
+j.  Augmented the bash malloc with optional tracing and registering allocated
+    and freed memory.
+
+k.  Prompt string decoding now saves and restores the value of $? when it
+    expands the prompt string, so command substitutions don't change $?.
+
+i.  Array indices are now `long', since shell arithmetic is performed as long,
+    and the internal arrayind_t type is used consistently.
+
+j.  Some more `unsigned char *' fixes from Paul Eggert.
+
+k.  Fixed a bad call to builtin_error that could cause core dumps when making
+    local variables.
+
+l.  `return' may no longer be used to terminate a `select' command, for
+    compatibility with ksh.
+
+m.  Changed code that reads octal numbers to do a better job of detecting
+    overflows.
+
+n.  The time formatting code no longer uses absolute indices into a buffer,
+    because the buffer size changes depending on the size of a `time_t'.
+
+o.  `umask' now prints four digits when printing in octal mode, for
+    compatibility with other shells.
+
+p.  Lots of changes to the `printf' builtin from Paul Eggert:  it handles `L'
+    formats and long doubles better, and internal functions have been
+    simpified where appropriate.
+
+q.  Some `time_t' fixes for machines were a time_t is bigger than a long.
+
+r.  Replaced some bash-specific autoconf macros with standard equivalents.
+
+s.  Improvmed the code that constructs temporary filenames to make the
+    generated names a bit more random.
+
+t.  Added code that checks for ascii before calling any of the is* ctype
+    functions.
+
+u.  Changed some places where a `char' was used as an array subscript to use
+    `unsigned char', since a `char' can be negative if it's signed by default.
+
+v.  Lots of changes to the `ulimit' builtin from Paul Eggert to add support
+    for the new POSIX-200x RLIM_SAVED_CUR and RLIM_SAVED_MAX values and
+    simplify the code.
+
+w.  `ulimit' now prints the description of a resource in any error message
+    relating to fetching or setting that resource's limits.
+
+x.  The `snprintf' replacement now computes maximum values at compile
+    time rather than using huge constants for things like long long.
+
+y.  Interactive shells now ignore `set -n'.
+
+z.  Changed the malloc bookkeeping information so that it's now 8 bytes
+    instead of 12 on most 32-bit machines (saving 4 bytes per allocation),
+    restoring 8-byte alignment.
+
+aa. The malloc error reporting code now attempts to print the file and line
+    number of the call that caused the error.
+
+bb. Changed the redirection error reporting code to catch EBADF errors and
+    report the file descriptor number rather than the file being redirected
+    to or from (e.g., things like `exec 4242<x' where 4242 is an out-of-range
+    file descriptor).
+
+cc. `printf', `echo -e', and the $'...' code now process only two hex digits
+    after a `\x' escape sequence for compatibility with other shells, and
+    the documentation was changed to note that the octal and hex escape
+    sequences result in an eight-bit value rather than strict ASCII.
+
+2.  Changes to Readline
+
+a.  The completion code now attempts to do a better job of preserving the
+    case of the word the user typed if ignoring case in completions.
+
+b.  Readline defaults to not echoing the input and lets the terminal
+    initialization code enable echoing if there is a controlling terminal.
+
+c.  The key binding code now processes only two hex digits after a `\x'
+    escape sequence, and the documentation was changed to note that the
+    octal and hex escape sequences result in an eight-bit value rather
+    than strict ASCII.
+
+3.  New Features in Bash
+
+a.  The builtin `ulimit' now takes two new non-numeric arguments:  `hard',
+    meaning the current hard limit, and `soft', meaning the current soft
+    limit, in addition to `unlimited'
+
+b.  `ulimit' now prints the option letter associated with a particular
+    resource when printing more than one limit.
+
+c.  `ulimit' prints `hard' or `soft' when a value is not `unlimited' but is
+    one of RLIM_SAVED_MAX or RLIM_SAVED_CUR, respectively.
+
+4.  New Features in Readline
+
+a.  New bindable variable `history-preserve-point'.  If set, the history
+    code attempts to place the user at the same location on each history
+    line retrived with previous-history or next-history.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.05a-alpha1,
+and the previous version, bash-2.05-release.
+
+1.  Changes to Bash
+
+a.  Better checks in the redirection code for write errors.
+
+b.  bashbug now uses $TMPDIR, defaulting to /tmp, and uses mktemp(1) more
+    portably.
+
+c.  System-specific configuration changes for:  Interix, OpenBSD, FreeBSD,
+    MacOS X.
+
+d.  Some more `const' cleanups through the code.
+
+e.  Fixed a typo in the /dev/fd redirection code, better checks for valid
+    numeric fds in /dev/fd.
+
+f.  Fixed many parts of the shell to handle integer overflow more gracefully
+    and to do more stringent checks for valid numbers.
+
+g.  Fixed mksignames to include config.h.
+
+h.  Fixed an uninitialized variable problem that could cause the shell to core
+    dump when replacing characters in a string.
+
+i.  New mechanism for updating the patch level when official patches are
+    released (patchlevel.h).
+
+j.  configure.in changed to no longer require external files _distribution and
+    _patchlevel.
+
+k.  Fixed non-interactive shell initialization problem when bash started as
+    `bash -i filename'.
+
+l.  Fixed printf builtin conversion error handling to be POSIX.2-conformant.
+
+m.  autoconf-2.52 is now used to build configure; autoconf-2.50 or newer is
+    required.  Some of the bash-specific macros were removed, since they are
+    now standard.
+
+n.  Startup files and files read with source or `.' are no longer required to
+    be regular files.
+
+o.  Fixed core dump in builtin printf when user-supplied precision or field
+    width is 0.
+
+p.  Fixed builtin printf to treat a negative field width as a positive field
+    width with left-justification.
+
+r.  New unwind-protect implementation from Paul Eggert.
+
+s.  Fixed an inadvertently-unclosed comment in the bash completion code that
+    caused programmable completions to not add trailing slashes or spaces to
+    completions.
+
+t.  Fixed the process substitution code to cope better when stdin is closed.
+
+v.  Fixes, mostly from Paul Eggert, for a few possible buffer overflows in
+    the shell.
+
+w.  Fixes from Paul Eggert to avoid most of the type casts in the shell code,
+    and use more appropriate types for a number of variables.
+
+x.  Command substition no longer inherits the DEBUG trap.
+
+y.  Some fixes to the process substition code on machines without /dev/fd so
+    that named pipes are not removed inappropriately.
+
+z.  The loadable `getconf' builtin is now much more complete, and will become
+    part of the shell in the future.
+
+aa. The select command no longer terminates on a `return', so it can be used
+    to return from an enclosing function (as ksh does it).
+
+bb. Fixed the extended pattern matching code to behave better when presented
+    with incorrectly-formed patterns.
+
+cc. Some changes were made with the intent of making cross-compilation easier.
+
+dd. The network code (/dev/tcp and /dev/udp redirections) uses getaddrinfo(3)
+    if it's available, which adds support for IPv6.
+
+ee. Subshells of login shells no longer source ~/.bash_logout when they exit.
+
+ff. Fixes so that subshells don't exit inappropriately if the -e option has
+    been set.
+
+gg. Restricted shells no longer allow functions to be exported.
+
+hh. Changes to the pattern matching code so extended pattern matching works
+    on systems with deficient shared library implementations, like MacOS X.
+
+ii. Better error messages when a script with a leading `#!interp' fails
+    to execute because of problems with `interp'.
+
+jj. Fixed `compgen' to handle the `-o default' option better.
+
+kk. Fixed the job control code to force an asynchronous process's standard
+    input to /dev/null only if job control is not active.
+
+ll. Fixed a possible infinite recursion problem when `fc ""=abc' (a null
+    pattern) is used to re-execute a previous command.
+
+mm. Fixed `declare [-a] var=value' to assign VALUE to element 0 if VAR is an
+    array variable.  Similarly for `declare [-a] var[N]=value'.  This is like
+    ksh93.
+
+nn. Fixed a bug that caused `read -a aname' to work even if ANAME had been
+    declared readonly.
+
+oo. Fixed a possible integer overflow problem when constructing names for
+    temporary files.
+
+2.  New Features in Bash
+
+a.  Added support for DESTDIR installation root prefix, so you can do a
+    `make install DESTDIR=bash-root' and do easier binary packaging.
+
+b.  Added support for builtin printf "'" flag character as per latest POSIX
+    drafts.
+
+c.  Support for POSIX.2 printf(1) length specifiers `j', `t', and `z' (from
+    ISO C99).
+
+d.  New autoconf macro, RL_LIB_READLINE_VERSION, for use by other applications
+    (bash doesn't use very much of what it returns).
+
+e.  `set [-+]o nolog' is recognized as required by the latest POSIX drafts,
+    but ignored.
+
+f.  New read-only `shopt' option:  login_shell.  Set to non-zero value if the
+    shell is a login shell.
+
+g.  New `\A' prompt string escape sequence; expands to time in 24 HH:MM format.
+
+h.  New `-A group/-g' option to complete and compgen; does group name
+    completion.
+
+i.  New `-t' option to `hash' to list hash values for each filename argument.
+
+j.  New [-+]O invocation option to set and unset `shopt' options at startup.
+
+k.  configure's `--with-installed-readline' option now takes an optional
+    `=PATH' suffix to set the root of the tree where readline is installed
+    to PATH.
+
+l.  The ksh-like `ERR' trap has been added.  The `ERR' trap will be run
+    whenever the shell would have exited if the -e option were enabled.
+    It is not inherited by shell functions.
+
+m.  `readonly', `export', and `declare' now print variables which have been
+    given attributes but not set by assigning a value as just a command and
+    a variable name (like `export foo') when listing, as the latest POSIX
+    drafts require.
+
+n.  `bashbug' now requires that the subject be changed from the default.
+
+o.  configure has a new `--enable-largefile' option, like other GNU utilities.
+
+p.  `for' loops now allow empty word lists after `in', like the latest POSIX
+    drafts require.
+
+3.  Changes to Readline
+
+a.  More `const' and type casting fixes.
+
+b.  Changed rl_message() to use vsnprintf(3) (if available) to fix buffer
+    overflow problems.
+
+c.  The completion code no longer appends a `/' or ` ' to a match when
+    completing a symbolic link that resolves to a directory name, unless
+    the match does not add anything to the word being completed.  This
+    means that a tab will complete the word up to the full name, but not
+    add anything, and a subsequent tab will add a slash.
+
+d.  Fixed a trivial typo that made the vi-mode `dT' command not work.
+
+e.  Fixed the tty code so that ^S and ^Q can be inserted with rl_quoted_insert.
+
+f.  Fixed the tty code so that ^V works more than once.
+
+g.  Changed the use of __P((...)) for function prototypes to PARAMS((...))
+    because the use of __P in typedefs conflicted g++ and glibc.
+
+4.  New Features in Readline
+
+a.  Added extern declaration for rl_get_termcap to readline.h, making it a
+    public function (it was always there, just not in readline.h).
+
+b.  New #defines in readline.h:  RL_READLINE_VERSION, currently 0x0402,
+    RL_VERSION_MAJOR, currently 4, and RL_VERSION_MINOR, currently 2.
+
+c.  New readline variable:  rl_readline_version, mirrors RL_READLINE_VERSION.
+
+d.  New bindable boolean readline variable:  match-hidden-files.  Controls
+    completion of files beginning with a `.' (on Unix).  Enabled by default.
+
+e.  The history expansion code now allows any character to terminate a
+    `:first-' modifier, like csh.
+
+f.  The incremental search code remembers the last search string and uses
+    it if ^R^R is typed without a search string.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-2.05-release,
 and the previous version, bash-2.05-beta2.
 

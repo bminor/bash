@@ -73,8 +73,14 @@ extern char *strchr (), *strrchr ();
 #define _rl_stricmp strcasecmp
 #define _rl_strnicmp strncasecmp
 #else
-extern int _rl_stricmp __P((char *, char *);
-extern int _rl_strnicmp __P((char *, char *));
+extern int _rl_stricmp PARAMS((char *, char *));
+extern int _rl_strnicmp PARAMS((char *, char *));
+#endif
+
+#if defined (HAVE_STRPBRK)
+#  define _rl_strpbrk(a,b)	strpbrk((a),(b))
+#else
+extern char *_rl_strpbrk PARAMS((const char *, const char *));
 #endif
 
 #if !defined (emacs_mode)
@@ -97,8 +103,7 @@ extern int _rl_strnicmp __P((char *, char *));
 #endif
 
 #ifndef savestring
-extern char *xmalloc __P((int));
-#define savestring(x) strcpy (xmalloc (1 + strlen (x)), (x))
+#define savestring(x) strcpy ((char *)xmalloc (1 + strlen (x)), (x))
 #endif
 
 /* Possible values for _rl_bell_preference. */

@@ -29,7 +29,12 @@
 #  include <unistd.h>
 #endif
 
+#if defined (HAVE_GRP_H)
+#  include <grp.h>
+#endif
+
 #include <stdio.h>
+#include "chartypes.h"
 #include "bashansi.h"
 #include "shell.h"
 #include "builtins.h"
@@ -59,8 +64,6 @@ extern int bash_brace_completion __P((int, int));
 
 /* Forward declarations */
 
-extern char *command_word_completion_function __P((const char *, int));
-
 /* Functions bound to keys in Readline for Bash users. */
 static int shell_expand_line __P((int, int));
 static int display_shell_version __P((int, int));
@@ -69,10 +72,8 @@ static int operate_and_get_next __P((int, int));
 static int bash_ignore_filenames __P((char **));
 static int bash_ignore_everything __P((char **));
 
-static void cleanup_expansion_error __P((void));
-static void set_up_new_line __P((char *));
-
 #if defined (BANG_HISTORY)
+static char *history_expand_line_internal __P((char *));
 static int history_expand_line __P((int, int));
 static int tcsh_magic_space __P((int, int));
 #endif /* BANG_HISTORY */
@@ -84,37 +85,59 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
-static int bash_directory_completion_hook ();
-static int filename_completion_ignore ();
+static int bash_directory_completion_hook __P((char **));
+static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
 
+static void cleanup_expansion_error __P((void));
+static void maybe_make_readline_line __P((char *));
+static void set_up_new_line __P((char *));
+
+static int check_redir __P((int));
 static char **attempt_shell_completion __P((const char *, int, int));
 static char *variable_completion_function __P((const char *, int));
 static char *hostname_completion_function __P((const char *, int));
 static char *command_subst_completion_function __P((const char *, int));
 
+static void build_history_completion_array __P((void));
+static char *history_completion_generator __P((const char *, int));
 static int dynamic_complete_history __P((int, int));
 
-static char *glob_complete_word __P((const char *, int));
-static int bash_glob_expand_word __P((int, int));
-static int bash_glob_list_expansions __P((int, int));
-
-static void snarf_hosts_from_file __P((char *));
+static void initialize_hostname_list __P((void));
 static void add_host_name __P((char *));
+static void snarf_hosts_from_file __P((char *));
+static char **hostnames_matching __P((char *));
+
+static void _ignore_completion_names __P((char **, sh_ignore_func_t *));
+static int name_is_acceptable __P((const char *));
+static int test_for_directory __P((const char *));
+static int return_zero __P((const char *));
 
 static char *bash_dequote_filename __P((char *, int));
+static char *quote_word_break_chars __P((char *));
 static char *bash_quote_filename __P((char *, int, char *));
+
+static int bash_execute_unix_command __P((int, int));
+static void init_unix_command_map __P((void));
+static int isolate_sequence __P((char *, int, int, int *));
+
+static int set_saved_history __P((void));
 
 #if defined (ALIAS)
 static int posix_edit_macros __P((int, int));
 #endif
 
 #if defined (PROGRAMMABLE_COMPLETION)
+static int find_cmd_start __P((int));
+static int find_cmd_end __P((int));
+static char *find_cmd_name __P((int));
+static char *prog_complete_return __P((const char *, int));
+
 static char **prog_complete_matches;
-static int old_rl_completion_append_character;
 #endif
 
 /* Variables used here but defined in other files. */
+extern int current_command_line_count;
 extern int posixly_correct, no_symbolic_links;
 extern char *current_prompt_string, *ps1_prompt;
 extern STRING_INT_ALIST word_token_alist[];
@@ -144,6 +167,11 @@ static int bash_complete_variable __P((int, int));
 static int bash_possible_variable_completions __P((int, int));
 static int bash_complete_command __P((int, int));
 static int bash_possible_command_completions __P((int, int));
+
+static char *glob_complete_word __P((const char *, int));
+static int bash_glob_completion_internal __P((int));
+static int bash_glob_expand_word __P((int, int));
+static int bash_glob_list_expansions __P((int, int));
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
 #if defined (VI_MODE)
@@ -189,10 +217,14 @@ posix_readline_initialize (on_or_off)
 #endif
 }
 
-void
+int
 enable_hostname_completion (on_or_off)
      int on_or_off;
 {
+  int old_value;
+
+  old_value = perform_hostname_completion;
+
   if (on_or_off)
     {
       perform_hostname_completion = 1;
@@ -205,6 +237,8 @@ enable_hostname_completion (on_or_off)
       rl_special_prefixes = "$";
       rl_completer_word_break_characters = bash_nohostname_word_break_characters;
     }
+
+  return (old_value);
 }
 
 /* Called once from parse.y if we are going to use readline. */
@@ -457,7 +491,7 @@ static void
 add_host_name (name)
      char *name;
 {
-  long size;
+  size_t size;
 
   if (hostname_list_length + 2 > hostname_list_size)
     {
@@ -514,7 +548,7 @@ snarf_hosts_from_file (filename)
 	}
 
       /* Skip internet address if present. */
-      if (digit (buffer[i]))
+      if (DIGIT (buffer[i]))
 	for (; buffer[i] && cr_whitespace (buffer[i]) == 0; i++);
 
       /* Gobble up names.  Each name is separated with whitespace. */
@@ -619,6 +653,7 @@ set_saved_history ()
     rl_get_previous_history (history_length - saved_history_line_to_use, 0);
   saved_history_line_to_use = -1;
   rl_startup_hook = old_rl_startup_hook;
+  return (0);
 }
 
 static int
@@ -657,14 +692,17 @@ vi_edit_and_execute_command (count, c)
      int count, c;
 {
   char *command;
-  int r;
+  int r, cclc, rrs;
+
+  rrs = rl_readline_state;
+  cclc = current_command_line_count;
 
   /* Accept the current line. */
   rl_newline (1, c);
 
   if (rl_explicit_arg)
     {
-      command = xmalloc (strlen (VI_EDIT_COMMAND) + 8);
+      command = (char *)xmalloc (strlen (VI_EDIT_COMMAND) + 8);
       sprintf (command, "%s %d", VI_EDIT_COMMAND, count);
     }
   else
@@ -681,7 +719,18 @@ vi_edit_and_execute_command (count, c)
       command = savestring (VI_EDIT_COMMAND);
     }
   r = parse_and_execute (command, "v", SEVAL_NOHIST);
+
+  current_command_line_count = cclc;
+
+  /* Now erase the contents of the current line and undo the effects of the
+     rl_accept_line() above.  We don't even want to make the text we just
+     executed available for undoing. */
   rl_line_buffer[0] = '\0';	/* XXX */
+  rl_point = rl_end = 0;
+  rl_done = 0;
+  rl_readline_state = rrs;
+
+  rl_forced_update_display ();
 
   return r;
 }
@@ -739,6 +788,11 @@ check_redir (ti)
 }
 
 #if defined (PROGRAMMABLE_COMPLETION)
+/*
+ * XXX - because of the <= start test, and setting os = s+1, this can
+ * potentially return os > start.  This is probably not what we want to
+ * happen, but fix later after 2.05a-release.
+ */
 static int
 find_cmd_start (start)
      int start;
@@ -782,7 +836,7 @@ find_cmd_name (start)
 
 static char *
 prog_complete_return (text, matchnum)
-     char *text;
+     const char *text;
      int matchnum;
 {
   static int ind;
@@ -886,7 +940,10 @@ attempt_shell_completion (text, start, end)
       s = find_cmd_start (start);
       e = find_cmd_end (end);
       n = find_cmd_name (s);
-      prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
+      if (e > s)
+	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
+      else
+	foundcs = 0;
       FREE (n);
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default
@@ -895,7 +952,7 @@ attempt_shell_completion (text, start, end)
       if (foundcs)
 	{
 	  /* If the user specified that the compspec returns filenames, make
-	     sure that readline knows it.
+	     sure that readline knows it. */
 	  if (foundcs & COPT_FILENAMES)
 	    rl_filename_completion_desired = 1;
 	  /* Turn what the programmable completion code returns into what
@@ -953,7 +1010,7 @@ attempt_shell_completion (text, start, end)
 
   /* This could be a globbing pattern, so try to expand it using pathname
      expansion. */
-  if (!matches && glob_pattern_p ((char *)text))	/* XXX fix const later */
+  if (!matches && glob_pattern_p (text))
     {
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
@@ -1002,12 +1059,12 @@ command_word_completion_function (hint_text, state)
 	 aliases, reserved words, functions or builtins.  We must check
 	 whether or not it is unique, and, if so, whether that filename
 	 is executable. */
-      if (absolute_program ((char *)hint_text))
+      if (absolute_program (hint_text))
 	{
 	  /* Perform tilde expansion on what's passed, so we don't end up
 	     passing filenames with tildes directly to stat(). */
 	  if (*hint_text == '~')
-	    hint = bash_tilde_expand ((char *)hint_text);
+	    hint = bash_tilde_expand (hint_text);
 	  else
 	    hint = savestring (hint_text);
 	  hint_len = strlen (hint);
@@ -1146,7 +1203,7 @@ command_word_completion_function (hint_text, state)
       if (filename_hint)
 	free (filename_hint);
 
-      filename_hint = xmalloc (2 + strlen (current_path) + hint_len);
+      filename_hint = (char *)xmalloc (2 + strlen (current_path) + hint_len);
       sprintf (filename_hint, "%s/%s", current_path, hint);
 
       free (current_path);
@@ -1181,7 +1238,7 @@ command_word_completion_function (hint_text, state)
 	      vl = strlen (val);
 	      tl = strlen (hint_text);
 	      l = vl - hint_len;	/* # of chars added */
-	      temp = xmalloc (l + 2 + tl);
+	      temp = (char *)xmalloc (l + 2 + tl);
 	      strcpy (temp, hint_text);
 	      strcpy (temp + tl, val + vl - l);
 	    }
@@ -1258,7 +1315,7 @@ command_subst_completion_function (text, state)
     }
   else
     {
-      value = xmalloc (1 + start_len + strlen (matches[cmd_index]));
+      value = (char *)xmalloc (1 + start_len + strlen (matches[cmd_index]));
 
       if (start_len == 1)
 	value[0] = *orig_start;
@@ -1314,7 +1371,9 @@ variable_completion_function (text, state)
     }
   else
     {
-      char *value = xmalloc (4 + strlen (varlist[varlist_index]));
+      char *value;
+
+      value = (char *)xmalloc (4 + strlen (varlist[varlist_index]));
 
       if (first_char_loc)
 	{
@@ -1355,7 +1414,7 @@ hostname_completion_function (text, state)
       if (first_char == '@')
 	first_char_loc++;
 
-      list = hostnames_matching (&text[first_char_loc]);
+      list = hostnames_matching ((char *)text+first_char_loc);
       list_index = 0;
     }
 
@@ -1363,7 +1422,7 @@ hostname_completion_function (text, state)
     {
       char *t;
 
-      t = xmalloc (2 + strlen (list[list_index]));
+      t = (char *)xmalloc (2 + strlen (list[list_index]));
       *t = first_char;
       strcpy (t + first_char_loc, list[list_index]);
       list_index++;
@@ -1371,6 +1430,45 @@ hostname_completion_function (text, state)
     }
 
   return ((char *)NULL);
+}
+
+char *
+bash_groupname_completion_function (text, state)
+     const char *text;
+     int state;
+{
+#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GRP_H)
+  return ((char *)NULL);
+#else
+  static char *gname = (char *)NULL;
+  static struct group *grent;
+  static int gnamelen;
+  char *value;
+
+  if (state == 0)
+    {
+      FREE (gname);
+      gname = savestring (text);
+      gnamelen = strlen (gname);
+
+      setgrent ();
+    }
+
+  while (grent = getgrent ())
+    {
+      if (gnamelen == 0 || (STREQN (gname, grent->gr_name, gnamelen)))
+        break;
+    }
+
+  if (grent == 0)
+    {
+      endgrent ();
+      return ((char *)NULL);
+    }
+
+  value = savestring (grent->gr_name);
+  return (value);
+#endif
 }
 
 /* Functions to perform history and alias expansions on the current line. */
@@ -1429,8 +1527,10 @@ static void
 set_up_new_line (new_line)
      char *new_line;
 {
-  int old_point = rl_point;
-  int at_end = rl_point == rl_end;
+  int old_point, at_end;
+
+  old_point = rl_point;
+  at_end = rl_point == rl_end;
 
   /* If the line was history and alias expanded, then make that
      be one thing to undo. */
@@ -1594,7 +1694,7 @@ shell_expand_line (count, ignore)
       FREE (new_line);
       if (expanded_string == 0)
 	{
-	  new_line = xmalloc (1);
+	  new_line = (char *)xmalloc (1);
 	  new_line[0] = '\0';
 	}
       else
@@ -1642,13 +1742,13 @@ static struct ignorevar fignore =
   (struct ign *)0,
   0,
   (char *)0,
-  (Function *) 0,
+  (sh_iv_item_func_t *) 0,
 };
 
 static void
 _ignore_completion_names (names, name_func)
      char **names;
-     Function *name_func;
+     sh_ignore_func_t *name_func;
 {
   char **newnames;
   int idx, nidx;
@@ -1737,7 +1837,7 @@ _ignore_completion_names (names, name_func)
 
 static int
 name_is_acceptable (name)
-     char *name;
+     const char *name;
 {
   struct ign *p;
   int nlen;
@@ -1782,7 +1882,7 @@ filename_completion_ignore (names)
 /* Return 1 if NAME is a directory. */
 static int
 test_for_directory (name)
-     char *name;
+     const char *name;
 {
   struct stat finfo;
   char *fn;
@@ -1808,7 +1908,7 @@ bash_ignore_filenames (names)
 
 static int
 return_zero (name)
-     char *name;
+     const char *name;
 {
   return 0;
 }
@@ -1866,7 +1966,7 @@ bash_directory_completion_hook (dirname)
 	{
 	  free (new_dirname);
 	  free (local_dirname);
-	  *dirname = xmalloc (1);
+	  *dirname = (char *)xmalloc (1);
 	  **dirname = '\0';
 	  return 1;
 	}
@@ -1891,7 +1991,7 @@ bash_directory_completion_hook (dirname)
       if (temp1[len1 - 1] == '/')
 	{
 	  len2 = strlen (temp2);
-	  temp2 = xrealloc (temp2, len2 + 2);
+	  temp2 = (char *)xrealloc (temp2, len2 + 2);
 	  temp2[len2] = '/';
 	  temp2[len2 + 1] = '\0';
 	}
@@ -1942,7 +2042,7 @@ build_history_completion_array ()
 	      if (harry_len + 2 > harry_size)
 		{
 		  harry_size += 10;
-		  history_completion_array = (char **) xrealloc
+		  history_completion_array = (char **)xrealloc
 		    (history_completion_array, harry_size * sizeof (char *));
 		}
 
@@ -1953,17 +2053,17 @@ build_history_completion_array ()
 	}
 
       /* Sort the complete list of tokens. */
-      qsort (history_completion_array, harry_len, sizeof (char *), (Function *)qsort_string_compare);
+      qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)qsort_string_compare);
     }
 }
 
 static char *
 history_completion_generator (hint_text, state)
-     char *hint_text;
+     const char *hint_text;
      int state;
 {
   static int local_index, len;
-  static char *text;
+  static const char *text;
 
   /* If this is the first call to the generator, then initialize the
      list of strings to complete over. */
@@ -1987,6 +2087,8 @@ static int
 dynamic_complete_history (count, key)
      int count, key;
 {
+  int r;
+
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
 
@@ -1996,12 +2098,13 @@ dynamic_complete_history (count, key)
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
 
   if (rl_last_func == dynamic_complete_history)
-    rl_complete_internal ('?');
+    r = rl_complete_internal ('?');
   else
-    rl_complete_internal (TAB);
+    r = rl_complete_internal (TAB);
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  return r;
 }
 
 #if defined (SPECIFIC_COMPLETION_FUNCTIONS)
@@ -2215,7 +2318,7 @@ bash_dequote_filename (text, quote_char)
   int l, quoted;
 
   l = strlen (text);
-  ret = xmalloc (l + 1);
+  ret = (char *)xmalloc (l + 1);
   for (quoted = quote_char, p = text, r = ret; p && *p; p++)
     {
       /* Allow backslash-quoted characters to pass through unscathed. */
@@ -2255,7 +2358,7 @@ quote_word_break_chars (text)
   int l;
 
   l = strlen (text);
-  ret = xmalloc ((2 * l) + 1);
+  ret = (char *)xmalloc ((2 * l) + 1);
   for (s = text, r = ret; *s; s++)
     {
       /* Pass backslash-quoted characters through, including the backslash. */
@@ -2358,7 +2461,7 @@ bash_quote_filename (s, rtype, qcp)
   /* Leave the opening quote intact.  The readline completion code takes
      care of avoiding doubled opening quotes. */
   rlen = strlen (rtext);
-  ret = xmalloc (rlen + 1);
+  ret = (char *)xmalloc (rlen + 1);
   strcpy (ret, rtext);
 
   /* If there are multiple matches, cut off the closing quote. */
@@ -2484,7 +2587,7 @@ bind_keyseq_to_unix_command (line)
 {
   Keymap kmap;
   char *kseq, *value;
-  int i, kstart, len, ok;
+  int i, kstart;
 
   if (cmd_xmap == 0)
     init_unix_command_map ();

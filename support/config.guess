@@ -695,12 +695,12 @@ EOF
         echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
         exit 0 ;;
     *:FreeBSD:*:*)
-	if test -x /usr/bin/objformat; then
-	    if test "elf" = "`/usr/bin/objformat`"; then
-		echo ${UNAME_MACHINE}-unknown-freebsdelf`echo ${UNAME_RELEASE}|sed -e 's/[-_].*//'`
-		exit 0
-	    fi
-	fi
+#	if test -x /usr/bin/objformat; then
+#	    if test "elf" = "`/usr/bin/objformat`"; then
+#		echo ${UNAME_MACHINE}-unknown-freebsdelf`echo ${UNAME_RELEASE}|sed -e 's/[-_].*//'`
+#		exit 0
+#	    fi
+#	fi
 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-=(].*//'`
 	exit 0 ;;
     *:NetBSD:*:*)

@@ -44,7 +44,7 @@
 /* The thing that we build the array of builtins out of. */
 struct builtin {
   char *name;			/* The name that the user types. */
-  Function *function;		/* The address of the invoked function. */
+  sh_builtin_func_t *function;		/* The address of the invoked function. */
   int flags;			/* One of the #defines above. */
   char **long_doc;		/* NULL terminated array of strings. */
   char *short_doc;		/* Short version of documenation. */

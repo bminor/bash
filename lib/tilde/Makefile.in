@@ -97,8 +97,8 @@ force:
 # always returns TRUE unless there really was an error installing the
 # include files.
 install:
-	$(INSTALL_DATA) -c -m 644 $(LIBRARY_NAME) $(bindir)/$(LIBRARY_NAME)
-	-test -n "$(RANLIB)" && $(RANLIB) -t $(bindir)/$(LIBRARY_NAME)
+	$(INSTALL_DATA) -c -m 644 $(LIBRARY_NAME) $(libdir)/$(LIBRARY_NAME)
+	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/$(LIBRARY_NAME)
 
 clean:
 	$(RM) -f $(OBJECTS) $(LIBRARY_NAME)

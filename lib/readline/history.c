@@ -71,6 +71,9 @@ static HIST_ENTRY **the_history = (HIST_ENTRY **)NULL;
    history that we save. */
 static int history_stifled;
 
+/* The current number of slots allocated to the input_history. */
+static int history_size;
+
 /* If HISTORY_STIFLED is non-zero, then this is the maximum number of
    entries to remember. */
 int history_max_entries;
@@ -82,9 +85,6 @@ int history_offset;
 
 /* The number of strings currently stored in the history list. */
 int history_length;
-
-/* The current number of slots allocated to the input_history. */
-static int history_size;
 
 /* The logical `base' of the history array.  It defaults to 1. */
 int history_base = 1;

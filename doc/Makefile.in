@@ -32,13 +32,16 @@ infodir = @infodir@
 # set this to a directory name to have the HTML files installed
 htmldir = @htmldir@
 
+# Support an alternate destination root directory for package building
+DESTDIR =
+
 mandir = @mandir@
 manpfx = man
 
-man1ext = 1
-man1dir = $(mandir)/$(manpfx)$(man1ext)
-man3ext = 3
-man3dir = $(mandir)/$(manpfx)$(man3ext) 
+man1ext = .1
+man1dir = $(mandir)/$(manpfx)1
+man3ext = .3
+man3dir = $(mandir)/$(manpfx)3
 
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -167,6 +170,51 @@ article.ps: article.ms
 $(MAN2HTML):	${topdir}/support/man2html.c
 	-( cd ${BUILD_DIR}/support ; ${MAKE} ${MFLAGS} man2html)
 
+clean:
+	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
+		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o
+	${RM} core *.core
+
+distclean mostlyclean: clean
+	$(RM) Makefile
+
+maintainer-clean:	clean
+	${RM} ${PSFILES} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}
+	${RM} ${CREATED_FAQ}
+	$(RM) Makefile
+
+installdirs:
+	-test -d $(man1dir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(man1dir)
+	-test -d $(infodir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(infodir)
+	-if test -n "$(htmldir)" ; then \
+		test -d $(htmldir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(htmldir) ; \
+	fi
+	
+install: info installdirs
+	-$(INSTALL_DATA) $(srcdir)/bash.1 $(DESTDIR)$(man1dir)/bash${man1ext}
+	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(DESTDIR)$(man1dir)/bashbug${man1ext}
+# uncomment the next line to install the builtins man page
+#	-$(INSTALL_DATA) $(srcdir)/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
+	-$(INSTALL_DATA) $(srcdir)/bashref.info $(DESTDIR)$(infodir)/bash.info
+# run install-info if it is present to update the info directory
+	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+		install-info --dir-file=$(DESTDIR)$(infodir)/dir $(DESTDIR)$(infodir)/bash.info; \
+	else true; fi
+# if htmldir is set, install the html files into that directory
+	-if test -n "${htmldir}" ; then \
+		$(INSTALL_DATA) $(srcdir)/bash.html $(DESTDIR)$(htmldir) ; \
+		$(INSTALL_DATA) $(srcdir)/bashref.html $(DESTDIR)$(htmldir) ; \
+	fi
+
+uninstall:
+	-$(RM) $(DESTDIR)$(man1dir)/bash${man1ext} $(DESTDIR)$(man1dir)/bashbug${man1ext}
+	$(RM) $(DESTDIR)$(infodir)/bash.info
+	-if test -n "$(htmldir)" ; then \
+		$(RM) $(DESTDIR)$(htmldir)/bash.html ; \
+		$(RM) $(DESTDIR)$(htmldir)/bashref.html ; \
+	fi
+
+# for use by chet
 CREATED_FAQ = faq.news faq.news2 faq.mail faq.version
 
 faq:	${CREATED_FAQ}
@@ -195,51 +243,6 @@ faq.mail: FAQ faq.headers.mail faq.version
 	$(RM) $@
 	cat faq.headers.mail faq.version FAQ > $@
 
-clean:
-	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
-		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o
-	${RM} core *.core
-
-distclean mostlyclean: clean
-	$(RM) Makefile
-
-maintainer-clean:	clean
-	${RM} ${PSFILES} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}
-	${RM} ${CREATED_FAQ}
-	$(RM) Makefile
-
-installdirs:
-	-test -d $(man1dir) || $(SHELL) ${MKDIRS} $(man1dir)
-	-test -d $(infodir) || $(SHELL) ${MKDIRS} $(infodir)
-	-if [ -n "$(htmldir)" ]; then \
-		test -d $(htmldir) || $(SHELL) ${MKDIRS} $(htmldir) ; \
-	fi
-	
-install: info installdirs
-	-$(INSTALL_DATA) $(srcdir)/bash.1 $(man1dir)/bash.${man1ext}
-	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(man1dir)/bashbug.${man1ext}
-# uncomment the next line to install the builtins man page
-#	$(INSTALL_DATA) $(srcdir)/builtins.1 $(man1dir)/bash_builtins.${man1ext}
-	-$(INSTALL_DATA) $(srcdir)/bashref.info $(infodir)/bash.info
-# run install-info if it is present to update the info directory
-	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
-		install-info --dir-file=$(infodir)/dir $(infodir)/bash.info; \
-	else true; fi
-# if htmldir is set, install the html files into that directory
-	-if [ -n "${htmldir}" ]; then \
-		$(INSTALL_DATA) $(srcdir)/bash.html $(htmldir) ; \
-		$(INSTALL_DATA) $(srcdir)/bashref.html $(htmldir) ; \
-	fi
-
-uninstall:
-	-$(RM) $(man1dir)/bash.${man1ext} $(man1dir)/bashbug.${man1ext}
-	$(RM) $(infodir)/bash.info
-	-if [ -n "$(htmldir)" ]; then \
-		$(RM) $(htmldir)/bash.html ; \
-		$(RM) $(htmldir)/bashref.html ; \
-	fi
-
-# for use by chet
 inst:	bashref.texi
 	$(SHELL) ./mkinstall
 	cmp -s INSTALL ../INSTALL || mv INSTALL ../INSTALL

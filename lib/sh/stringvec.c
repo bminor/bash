@@ -18,17 +18,17 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include "config.h"
+#include <config.h>
 
-#include "bashtypes.h"
+#include <bashtypes.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-#include "bashansi.h"
+#include <bashansi.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <chartypes.h>
 
 #include "shell.h"
 
@@ -100,16 +100,16 @@ copy_array (array)
 {
   register int i;
   int len;
-  char **new_array;
+  char **ret;
 
   len = array_len (array);
 
-  new_array = (char **)xmalloc ((len + 1) * sizeof (char *));
+  ret = (char **)xmalloc ((len + 1) * sizeof (char *));
   for (i = 0; array[i]; i++)
-    new_array[i] = savestring (array[i]);
-  new_array[i] = (char *)NULL;
+    ret[i] = savestring (array[i]);
+  ret[i] = (char *)NULL;
 
-  return (new_array);
+  return (ret);
 }
 
 /* Comparison routine for use with qsort() on arrays of strings.  Uses
@@ -135,7 +135,5 @@ void
 sort_char_array (array)
      char **array;
 {
-  qsort (array, array_len (array), sizeof (char *),
-	 (Function *)qsort_string_compare);
+  qsort (array, array_len (array), sizeof (char *), (QSFUNC *)qsort_string_compare);
 }
-

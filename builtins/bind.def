@@ -76,8 +76,8 @@ extern int errno;
 #include "bashgetopt.h"
 #include "common.h"
 
-static int query_bindings ();
-static int unbind_command ();
+static int query_bindings __P((char *));
+static int unbind_command __P((char *));
 
 extern int no_line_editing;
 
@@ -102,7 +102,6 @@ bind_builtin (list)
      WORD_LIST *list;
 {
   int return_code;
-  FILE *old_rl_outstream;
   Keymap kmap, saved_keymap;
   int flags, opt;
   char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq;
@@ -118,10 +117,9 @@ bind_builtin (list)
   if (!bash_readline_initialized)
     initialize_readline ();
 
-  /* Cannot use unwind_protect_pointer () on "FILE *", it is only
-     guaranteed to work for strings. */
-  /* XXX -- see if we can use unwind_protect here */
-  old_rl_outstream = rl_outstream;
+  begin_unwind_frame ("bind_builtin");
+  unwind_protect_var (rl_outstream);
+
   rl_outstream = stdout;
 
   reset_internal_getopt ();  
@@ -242,7 +240,7 @@ bind_builtin (list)
 
   if ((flags & RFLAG) && remove_seq)
     {
-      if (rl_set_key (remove_seq, (Function *)NULL, rl_get_keymap ()) != 0)
+      if (rl_set_key (remove_seq, (rl_command_func_t *)NULL, rl_get_keymap ()) != 0)
 	{
 	  builtin_error ("cannot unbind %s", remove_seq);
 	  BIND_RETURN (EXECUTION_FAILURE);
@@ -263,7 +261,8 @@ bind_builtin (list)
   if (saved_keymap)
     rl_set_keymap (saved_keymap);
 
-  rl_outstream = old_rl_outstream;
+  run_unwind_frame ("bind_builtin");
+
   return (return_code);
 }
 
@@ -271,7 +270,7 @@ static int
 query_bindings (name)
      char *name;
 {
-  Function *function;
+  rl_command_func_t *function;
   char **keyseqs;
   int j;
 
@@ -303,7 +302,7 @@ static int
 unbind_command (name)
      char *name;
 {
-  Function *function;
+  rl_command_func_t *function;
 
   function = rl_named_function (name);
   if (function == 0)

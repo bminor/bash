@@ -21,6 +21,7 @@ unset a
 a=abcde
 a[2]=bdef
 
+unset b
 declare -a b[256]
 
 unset c[2]
@@ -78,7 +79,7 @@ set +o posix
 declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")'
 d[9]="ninth element"
 
-declare -a e[10]=test
+declare -a e[10]=test	# this works in post-bash-2.05 versions
 declare -a e[10]='(test)'
 
 pass=/etc/passwd

@@ -78,7 +78,7 @@ extern int force_append_history;
 #if defined (READLINE)
 extern int hist_verify, history_reediting, perform_hostname_completion;
 extern int no_empty_command_completion;
-extern void enable_hostname_completion ();
+extern int enable_hostname_completion __P((int));
 #endif
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -90,72 +90,80 @@ extern int restricted_shell;
 extern char *shell_name;
 #endif
 
-extern void set_shellopts ();
-
-static int set_interactive_comments ();
+static int set_interactive_comments __P((int));
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell ();
+static int set_restricted_shell __P((int));
 #endif
+
+static int shopt_login_shell;
+
+typedef int shopt_set_func_t __P((int));
 
 static struct {
   char *name;
   int  *value;
-  Function *set_func;
+  shopt_set_func_t *set_func;
 } shopt_vars[] = {
-  { "cdable_vars", &cdable_vars, (Function *)NULL },
-  { "cdspell", &cdspelling, (Function *)NULL },
-  { "checkhash", &check_hashed_filenames, (Function *)NULL },
-  { "checkwinsize", &check_window_size, (Function *)NULL },
+  { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
+  { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
+  { "checkhash", &check_hashed_filenames, (shopt_set_func_t *)NULL },
+  { "checkwinsize", &check_window_size, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
-  { "cmdhist", &command_oriented_history, (Function *)NULL },
+  { "cmdhist", &command_oriented_history, (shopt_set_func_t *)NULL },
 #endif
-  { "dotglob", &glob_dot_filenames, (Function *)NULL },
-  { "execfail", &no_exit_on_failed_exec, (Function *)NULL },
-  { "expand_aliases", &expand_aliases, (Function *)NULL },
+  { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
+  { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
+  { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
 #if defined (EXTENDED_GLOB)
-  { "extglob", &extended_glob, (Function *)NULL },
+  { "extglob", &extended_glob, (shopt_set_func_t *)NULL },
 #endif
 #if defined (READLINE)
-  { "histreedit", &history_reediting, (Function *)NULL },
+  { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
 #endif
 #if defined (HISTORY)
-  { "histappend", &force_append_history, (Function *)NULL },
+  { "histappend", &force_append_history, (shopt_set_func_t *)NULL },
 #endif
 #if defined (READLINE)
-  { "histverify", &hist_verify, (Function *)NULL },
-  { "hostcomplete", &perform_hostname_completion, (Function *)enable_hostname_completion },
+  { "histverify", &hist_verify, (shopt_set_func_t *)NULL },
+  { "hostcomplete", &perform_hostname_completion, enable_hostname_completion },
 #endif
-  { "huponexit", &hup_on_exit, (Function *)NULL },
+  { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_interactive_comments },
 #if defined (HISTORY)
-  { "lithist", &literal_history, (Function *)NULL },
+  { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif
-  { "mailwarn", &mail_warning, (Function *)NULL },
+  { "login_shell", &shopt_login_shell, set_login_shell },
+  { "mailwarn", &mail_warning, (shopt_set_func_t *)NULL },
 #if defined (READLINE)
-  { "no_empty_cmd_completion", &no_empty_command_completion, (Function *)NULL },
+  { "no_empty_cmd_completion", &no_empty_command_completion, (shopt_set_func_t *)NULL },
 #endif
-  { "nocaseglob", &glob_ignore_case, (Function *)NULL },
-  { "nullglob",	&allow_null_glob_expansion, (Function *)NULL },
+  { "nocaseglob", &glob_ignore_case, (shopt_set_func_t *)NULL },
+  { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
-  { "progcomp", &prog_completion_enabled, (Function *)NULL },
+  { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
 #endif
-  { "promptvars", &promptvars, (Function *)NULL },
+  { "promptvars", &promptvars, (shopt_set_func_t *)NULL },
 #if defined (RESTRICTED_SHELL)
   { "restricted_shell", &restricted_shell, set_restricted_shell },
 #endif
-  { "shift_verbose", &print_shift_error, (Function *)NULL },
-  { "sourcepath", &source_uses_path, (Function *)NULL },
-  { "xpg_echo", &xpg_echo, (Function *)NULL },
-  { (char *)0, (int *)0, (Function *)NULL }
+  { "shift_verbose", &print_shift_error, (shopt_set_func_t *)NULL },
+  { "sourcepath", &source_uses_path, (shopt_set_func_t *)NULL },
+  { "xpg_echo", &xpg_echo, (shopt_set_func_t *)NULL },
+  { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
 
 static char *on = "on";
 static char *off = "off";
 
-static int list_shopt_o_options ();
-static int list_some_o_options (), list_some_shopts ();
-static int toggle_shopts (), list_shopts (), set_shopt_o_options ();
+static int find_shopt __P((char *));
+static int toggle_shopts __P((int, WORD_LIST *, int));
+static void print_shopt __P((char *, int, int));
+static int list_shopts __P((WORD_LIST *, int));
+static int list_some_shopts __P((int, int));
+static int list_shopt_o_options __P((WORD_LIST *, int));
+static int list_some_o_options __P((int, int));
+static int set_shopt_o_options __P((int, WORD_LIST *, int));
 
 #define SFLAG	0x01
 #define UFLAG	0x02
@@ -244,6 +252,8 @@ reset_shopt_options ()
   hist_verify = history_reediting = 0;
   perform_hostname_completion = 1;
 #endif
+
+  shopt_login_shell = login_shell;
 }
 
 static int
@@ -444,6 +454,15 @@ set_restricted_shell (mode)
 }
 #endif /* RESTRICTED_SHELL */
 
+/* Not static so shell.c can call it to initialize shopt_login_shell */
+int
+set_login_shell (mode)
+     int mode;
+{
+  shopt_login_shell = login_shell != 0;
+  return (0);
+}
+
 char **
 get_shopt_options ()
 {
@@ -456,4 +475,44 @@ get_shopt_options ()
     ret[i] = savestring (shopt_vars[i].name);
   ret[i] = (char *)NULL;
   return ret;
+}
+
+/*
+ * External interface for other parts of the shell.  NAME is a string option;
+ * MODE is 0 if we want to unset an option; 1 if we want to set an option.
+ * REUSABLE is 1 if we want to print output in a form that may be reused.
+ */
+int
+shopt_setopt (name, mode)
+     char *name;
+     int mode;
+{
+  WORD_LIST *wl;
+  int r;
+
+  wl = add_string_to_list (name, (WORD_LIST *)NULL);
+  r = toggle_shopts (mode, wl, 0);
+  dispose_words (wl);
+  return r;
+}
+
+int
+shopt_listopt (name, reusable)
+     char *name;
+     int reusable;
+{
+  int i;
+
+  if (name == 0)
+    return (list_shopts ((WORD_LIST *)NULL, reusable ? PFLAG : 0));
+
+  i = find_shopt (name);
+  if (i < 0)
+    {
+      SHOPT_ERROR (name);
+      return (EXECUTION_FAILURE);
+    }
+
+  print_shopt (name, *shopt_vars[i].value, reusable ? PFLAG : 0);
+  return (EXECUTION_SUCCESS);
 }

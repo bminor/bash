@@ -28,8 +28,7 @@
 #include <stdio.h>
 
 #include "syntax.h"
-
-extern char *xmalloc ();
+#include <xmalloc.h>
 
 /* **************************************************************** */
 /*								    */
@@ -46,7 +45,7 @@ sh_single_quote (string)
   register int c;
   char *result, *r, *s;
 
-  result = xmalloc (3 + (4 * strlen (string)));
+  result = (char *)xmalloc (3 + (4 * strlen (string)));
   r = result;
   *r++ = '\'';
 
@@ -73,10 +72,10 @@ char *
 sh_double_quote (string)
      char *string;
 {
-  register int c;
+  register unsigned char c;
   char *result, *r, *s;
 
-  result = xmalloc (3 + (2 * strlen (string)));
+  result = (char *)xmalloc (3 + (2 * strlen (string)));
   r = result;
   *r++ = '"';
 
@@ -103,7 +102,7 @@ sh_un_double_quote (string)
   register int c, pass_next;
   char *result, *r, *s;
 
-  r = result = xmalloc (strlen (string) + 1);
+  r = result = (char *)xmalloc (strlen (string) + 1);
 
   for (pass_next = 0, s = string; s && (c = *s); s++)
     {
@@ -113,7 +112,7 @@ sh_un_double_quote (string)
 	  pass_next = 0;
 	  continue;
 	}
-      if (c == '\\' && (sh_syntaxtab[s[1]] & CBSDQUOTE))
+      if (c == '\\' && (sh_syntaxtab[(unsigned char) s[1]] & CBSDQUOTE))
 	{
 	  pass_next = 1;
 	  continue;
@@ -134,7 +133,7 @@ sh_backslash_quote (string)
   int c;
   char *result, *r, *s;
 
-  result = xmalloc (2 * strlen (string) + 1);
+  result = (char *)xmalloc (2 * strlen (string) + 1);
 
   for (r = result, s = string; s && (c = *s); s++)
     {
@@ -179,10 +178,10 @@ char *
 sh_backslash_quote_for_double_quotes (string)
      char *string;
 {
-  int c;
+  unsigned char c;
   char *result, *r, *s;
 
-  result = xmalloc (2 * strlen (string) + 1);
+  result = (char *)xmalloc (2 * strlen (string) + 1);
 
   for (r = result, s = string; s && (c = *s); s++)
     {
@@ -219,6 +218,7 @@ sh_contains_shell_metas (string)
 	case '~':				/* tilde expansion */
 	  if (s == string || s[-1] == '=' || s[-1] == ':')
 	    return (1);
+	  break;
 	case '#':
 	  if (s == string)			/* comment char */
 	    return (1);

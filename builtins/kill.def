@@ -58,8 +58,6 @@ extern int errno;
 #endif /* !errno */
 
 #if defined (JOB_CONTROL)
-extern int interactive;
-extern int job_control;
 extern int posixly_correct;
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
@@ -78,6 +76,7 @@ kill_builtin (list)
   int signal, any_succeeded, listing, saw_signal;
   char *sigspec, *word;
   pid_t pid;
+  long pid_value;
 
   if (list == 0)
     {
@@ -164,10 +163,10 @@ kill_builtin (list)
       if (*word == '-')
 	word++;
 
-      if (*word && all_digits (word))
+      if (*word && legal_number (word, &pid_value) && (pid_value == (pid_t)pid_value))
 	{
 	  /* Use the entire argument in case of minus sign presence. */
-	  pid = (pid_t) atoi (list->word->word);
+	  pid = (pid_t) pid_value;
 
 	  if (kill_pid (pid, signal, 0) < 0)
 	    goto signal_error;
@@ -207,12 +206,10 @@ kill_builtin (list)
 	  if (kill_pid (pid, signal, 1) < 0)
 	    {
 	    signal_error:
-	      if (errno == EPERM)
-		builtin_error ("(%d) - Not owner", (int)pid);
-	      else if (errno == ESRCH)
-		builtin_error ("(%d) - No such pid", (int)pid);
-	      else
+	      if (errno == EINVAL)
 		builtin_error ("Invalid signal %d", signal);
+	      else
+		builtin_error ("(%ld) - %s", (long)pid, strerror (errno));
 	      CONTINUE_OR_FAIL;
 	    }
 	  else

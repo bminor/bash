@@ -31,6 +31,7 @@
 #endif
 
 #include <stdio.h>
+#include "chartypes.h"
 #include "bashansi.h"
 #include "command.h"
 #include "general.h"
@@ -41,7 +42,18 @@
 #  include "pcomplete.h"
 #endif
 
-static int qsort_alias_compare ();
+typedef int sh_alias_map_func_t __P((alias_t *));
+
+static void free_alias_data __P((PTR_T));
+static alias_t **map_over_aliases __P((sh_alias_map_func_t *));
+static void sort_aliases __P((alias_t **));
+static int qsort_alias_compare __P((alias_t **, alias_t **));
+
+#if defined (READLINE)
+static int skipquotes __P((char *, int));
+static int skipws __P((char *, int));
+static int rd_token __P((char *, int));
+#endif
 
 /* Non-zero means expand all words on the line.  Otherwise, expand
    after first expansion if the expansion ends in a space. */
@@ -134,7 +146,7 @@ add_alias (name, value)
 /* Delete a single alias structure. */
 static void
 free_alias_data (data)
-     char *data;
+     PTR_T data;
 {
   register alias_t *a;
 
@@ -189,7 +201,7 @@ delete_all_aliases ()
    If FUNCTION is NULL, return all aliases. */
 static alias_t **
 map_over_aliases (function)
-     Function *function;
+     sh_alias_map_func_t *function;
 {
   register int i;
   register BUCKET_CONTENTS *tlist;
@@ -208,8 +220,11 @@ map_over_aliases (function)
 	  if (!function || (*function) (alias))
 	    {
 	      if (list_index + 1 >= list_size)
-		list = (alias_t **)
-		  xrealloc ((char *)list, (list_size += 20) * sizeof (alias_t *));
+	        {
+	          list_size += 20;
+		  list = (alias_t **)xrealloc (list,
+					       list_size * sizeof (alias_t *));
+	        }
 
 	      list[list_index++] = alias;
 	      list[list_index] = (alias_t *)NULL;
@@ -224,7 +239,7 @@ static void
 sort_aliases (array)
      alias_t **array;
 {
-  qsort (array, array_len ((char **)array), sizeof (alias_t *), qsort_alias_compare);
+  qsort (array, array_len ((char **)array), sizeof (alias_t *), (QSFUNC *)qsort_alias_compare);
 }
 
 static int
@@ -248,7 +263,7 @@ all_aliases ()
   if (!aliases)
     return ((alias_t **)NULL);
 
-  list = map_over_aliases ((Function *)NULL);
+  list = map_over_aliases ((sh_alias_map_func_t *)NULL);
   if (list)
     sort_aliases (list);
   return (list);
@@ -324,12 +339,13 @@ skipws (string, start)
      char *string;
      int start;
 {
-  register int i = 0;
-  int pass_next, backslash_quoted_word, peekc;
+  register int i;
+  int pass_next, backslash_quoted_word;
+  unsigned char peekc;
 
   /* skip quoted strings, in ' or ", and words in which a character is quoted
      with a `\'. */
-  backslash_quoted_word = pass_next = 0;
+  i = backslash_quoted_word = pass_next = 0;
 
   /* Skip leading whitespace (or separator characters), and quoted words.
      But save it in the output.  */
@@ -351,7 +367,7 @@ skipws (string, start)
       if (string[i] == '\\')
 	{
 	  peekc = string[i+1];
-	  if (isletter (peekc))
+	  if (ISLETTER (peekc))
 	    backslash_quoted_word++;	/* this is a backslash-quoted word */
 	  else
 	    pass_next++;
@@ -372,7 +388,7 @@ skipws (string, start)
 	    break;
 
 	  peekc = string[i + 1];
-	  if (isletter (peekc))
+	  if (ISLETTER (peekc))
 	    backslash_quoted_word++;
 	  continue;
 	}
@@ -452,8 +468,8 @@ alias_expand (string)
   alias_t *alias;
 
   line_len = strlen (string) + 1;
-  line = xmalloc (line_len);
-  token = xmalloc (line_len);
+  line = (char *)xmalloc (line_len);
+  token = (char *)xmalloc (line_len);
 
   line[0] = i = 0;
   expand_next = 0;

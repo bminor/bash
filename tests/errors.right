@@ -31,14 +31,13 @@ exec: usage: exec [-cl] [-a name] file [redirection ...]
 ./errors.tests: logout: not login shell: use `exit'
 ./errors.tests: hash: notthere: not found
 ./errors.tests: hash: illegal option: -v
-hash: usage: hash [-r] [-p pathname] [name ...]
+hash: usage: hash [-r] [-p pathname] [-t] [name ...]
 ./errors.tests: hash: hashing disabled
 ./errors.tests: export: `AA[4]': not a valid identifier
 ./errors.tests: readonly: `AA[4]': not a valid identifier
 ./errors.tests: [-2]: bad array subscript
 ./errors.tests: AA: readonly variable
 ./errors.tests: AA: readonly variable
-./errors.tests: readonly: ZZZ: cannot assign to array variables in this way
 ./errors.tests: shift: shift count must be <= $#
 ./errors.tests: shift: shift count must be >= 0
 ./errors.tests: shopt: no_such_option: unknown shell option name
@@ -86,7 +85,6 @@ command: usage: command [-pVv] command [arg ...]
 ./errors.tests: trap: NOSIG: not a signal specification
 ./errors.tests: trap: illegal option: -s
 trap: usage: trap [arg] [signal_spec ...] or trap -l
-./errors.tests: trap: ERR: not a signal specification
 ./errors.tests: return: can only `return' from a function or sourced script
 ./errors.tests: break: loop count must be > 0
 ./errors.tests: continue: loop count must be > 0

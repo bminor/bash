@@ -46,11 +46,16 @@ $END
 #endif
 
 #include <stdio.h>
+#include <chartypes.h>
 
 #include "../shell.h"
 #include "posixstat.h"
 #include "common.h"
 #include "bashgetopt.h"
+
+#ifdef __LCC__
+#define mode_t int
+#endif
 
 /* **************************************************************** */
 /*                                                                  */
@@ -58,8 +63,8 @@ $END
 /*                                                                  */
 /* **************************************************************** */
 
-static void print_symbolic_umask ();
-static int symbolic_umask ();
+static void print_symbolic_umask __P((mode_t));
+static int symbolic_umask __P((WORD_LIST *));
 
 /* Set or display the mask used by the system when creating files.  Flag
    of -S means display the umask in a symbolic mode. */
@@ -92,7 +97,7 @@ umask_builtin (list)
 
   if (list)
     {
-      if (digit (*list->word->word))
+      if (DIGIT (*list->word->word))
 	{
 	  umask_value = read_octal (list->word->word);
 
@@ -128,7 +133,7 @@ umask_builtin (list)
       if (print_symbolically)
 	print_symbolic_umask (umask_arg);
       else
-	printf ("%03o\n", umask_arg);
+	printf ("%04lo\n", (unsigned long)umask_arg);
     }
 
   fflush (stdout);
@@ -179,12 +184,12 @@ parse_symbolic_mode (mode, initial_bits)
      char *mode;
      int initial_bits;
 {
-  int who, op, perm, mask, bits, c;
+  int who, op, perm, bits, c;
   char *s;
 
   for (s = mode, bits = initial_bits;;)
     {
-      who = op = perm = mask = 0;
+      who = op = perm = 0;
 
       /* Parse the `who' portion of the symbolic mode clause. */
       while (member (*s, "agou"))

@@ -29,7 +29,7 @@
 #include "bashintl.h"
 #include "bashansi.h"
 #include <stdio.h>
-#include <ctype.h>
+#include "chartypes.h"
 
 #include "shell.h"
 
@@ -138,7 +138,7 @@ set_locale_var (var, value)
 	lc_all = savestring (default_locale);
       else
 	{
-	  lc_all = xmalloc (1);
+	  lc_all = (char *)xmalloc (1);
 	  lc_all[0] = '\0';
 	}
 #if defined (HAVE_SETLOCALE)
@@ -168,7 +168,7 @@ set_locale_var (var, value)
 	return (setlocale (LC_MESSAGES, value ? value : "") != 0);
 #  endif /* LC_MESSAGES */
     }
-  else if (var[3] = 'N' && var[4] == 'U')	/* LC_NUMERIC */
+  else if (var[3] == 'N' && var[4] == 'U')	/* LC_NUMERIC */
     {
 #  if defined (LC_NUMERIC)
       if (lc_all == 0 || *lc_all == '\0')
@@ -248,7 +248,7 @@ localetrans (string, len, lenp)
       (locale[0] == 'C' && locale[1] == '\0') || STREQ (locale, "POSIX"))
 #endif
     {
-      t = xmalloc (len + 1);
+      t = (char *)xmalloc (len + 1);
       strcpy (t, string);
       if (lenp)
 	*lenp = len;
@@ -260,7 +260,7 @@ localetrans (string, len, lenp)
   translated = gettext (string);
   if (translated == string)	/* gettext returns its argument if untranslatable */
     {
-      t = xmalloc (len + 1);
+      t = (char *)xmalloc (len + 1);
       strcpy (t, string);
       if (lenp)
 	*lenp = len;
@@ -268,7 +268,7 @@ localetrans (string, len, lenp)
   else
     {
       tlen = strlen (translated);
-      t = xmalloc (tlen + 1);
+      t = (char *)xmalloc (tlen + 1);
       strcpy (t, translated);
       if (lenp)
 	*lenp = tlen;

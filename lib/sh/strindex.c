@@ -22,15 +22,10 @@
 
 #include <config.h>
 
-#include "bashansi.h"
-#include <ctype.h>
+#include <bashansi.h>
+#include <chartypes.h>
 
 #include <stdc.h>
-
-#ifndef to_upper
-#  define to_upper(c) (islower(c) ? toupper(c) : (c))
-#  define to_lower(c) (isupper(c) ? tolower(c) : (c))
-#endif
 
 /* Determine if s2 occurs in s1.  If so, return a pointer to the
    match in s1.  The compare is case insensitive.  This is a
@@ -42,11 +37,11 @@ strindex (s1, s2)
 {
   register int i, l, len, c;
 
-  c = to_upper (s2[0]);
+  c = TOLOWER ((unsigned char)s2[0]);
   len = strlen (s1);
   l = strlen (s2);
   for (i = 0; (len - i) >= l; i++)
-    if ((to_upper (s1[i]) == c) && (strncasecmp (s1 + i, s2, l) == 0))
+    if ((TOLOWER ((unsigned char)s1[i]) == c) && (strncasecmp (s1 + i, s2, l) == 0))
       return ((char *)s1 + i);
   return ((char *)0);
 }

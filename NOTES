@@ -210,7 +210,7 @@ being built and linked against, but there is only a stub file in the archive.)
     with libraries not being built and make reporting errors like
     `cr: not found' when library construction is attempted.
 
-11. Building a statically-linked bash on Solaris 2.5.x, 2.6, or 7 is
+11. Building a statically-linked bash on Solaris 2.5.x, 2.6, 7, or 8 is
     complicated.
 
     It's not possible to build a completely statically-linked binary, since
@@ -252,16 +252,19 @@ being built and linked against, but there is only a stub file in the archive.)
 	thor(2)$ ldd bash
 	        libdl.so.1 =>    /etc/lib/libdl.so.1
 
-    On Solaris 7 (and presumably Solaris 8, though I do not run that), the
-    following recipe appears to work for gcc:
+    On Solaris 7 (Solaris 8, using the version of gcc on the free software
+    CD-ROM), the following recipe appears to work for gcc:
 
 	configure --enable-static-link
-	make STATIC_LD='-Wl,-Bstatic' LOCAL_LIBS='Wl,-Bdynamic -Wl,-R/etc/lib -ldl -Wl,-Bstatic'
+	make STATIC_LD='-Wl,-Bstatic' LOCAL_LIBS='-Wl,-Bdynamic -Wl,-R/etc/lib -ldl -Wl,-Bstatic'
 
 	thor.ins.cwru.edu(2)$ ldd bash
 	        libdl.so.1 =>    /etc/lib/libdl.so.1
 
     Make the analogous changes if you are running Sun's C Compiler.
+
+    I have received word that adding -L/etc/lib (or the equivalent
+    -Wl,-L/etc/lib) might also be necessary, in addition to the -R/etc/lib.
 
 12. Configuring bash to build it in a cross environment.  Currently only
     two native versions can be compiled this way, cygwin32 and x86 BeOS.
@@ -309,4 +312,17 @@ being built and linked against, but there is only a stub file in the archive.)
     with `z' and still allow individual users to change the collation order.
     Users may put the above command into their own profiles as well, of course.
 
+14. Building on Interix (nee OpenNT), which Microsoft bought from Softway
+    Systems and has seemingly abandoned (thanks to Kevin Moore for this item).
 
+	1.  cp cross-build/opennt.cache config.cache
+
+	2.  If desired, edit pathnames.h to set the values of SYS_PROFILE and
+	    DEFAULT_HOSTS_FILE appropriately.
+
+	3.  export CONFIG_SHELL=$INTERIX_ROOT/bin/sh
+
+	4.  ./configure --prefix=$INTERIX_ROOT/usr/local (or wherever you
+	    want it).
+
+	5. make; make install; enjoy

@@ -29,13 +29,15 @@
 
 #include "bashansi.h"
 #include <stdio.h>
-#include <ctype.h>
+#include "chartypes.h"
 
 #include "shell.h"
 #include "pathexp.h"
 
+#include <glob/glob.h>
+
 #if defined (EXTENDED_GLOB)
-#  include <glob/fnmatch.h>
+#  include <glob/strmatch.h>
 #endif
 
 /* **************************************************************** */
@@ -105,7 +107,7 @@ argv_to_word_list (array, copy, starting_index)
 }
 
 /* Find STRING in ALIST, a list of string key/int value pairs.  If FLAGS
-   is 1, STRING is treated as a pattern and matched using fnmatch. */
+   is 1, STRING is treated as a pattern and matched using strmatch. */
 int
 find_string_in_alist (string, alist, flags)
      char *string;
@@ -119,7 +121,7 @@ find_string_in_alist (string, alist, flags)
     {
 #if defined (EXTENDED_GLOB)
       if (flags)
-	r = fnmatch (alist[i].word, string, FNM_EXTMATCH) != FNM_NOMATCH;
+	r = strmatch (alist[i].word, string, FNM_EXTMATCH) != FNM_NOMATCH;
       else
 #endif
 	r = STREQ (string, alist[i].word);
@@ -153,12 +155,13 @@ strsub (string, pat, rep, global)
     {
       if (repl && STREQN (string + i, pat, patlen))
 	{
-	  RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
+	  if (replen)
+	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
 	  for (r = rep; *r; )
 	    temp[templen++] = *r++;
 
-	  i += patlen;
+	  i += patlen ? patlen : 1;	/* avoid infinite recursion */
 	  repl = global != 0;
 	}
       else
@@ -186,7 +189,7 @@ strcreplace (string, c, text, do_glob)
 
   len = STRLEN (text);
   rlen = len + strlen (string) + 2;
-  ret = xmalloc (rlen);
+  ret = (char *)xmalloc (rlen);
 
   for (p = string, r = ret; p && *p; )
     {
@@ -220,6 +223,7 @@ strcreplace (string, c, text, do_glob)
       if (*p == '\\' && p[1] == c)
 	p++;
 
+      ind = r - ret;
       RESIZE_MALLOCED_BUFFER (ret, ind, 2, rlen, rlen);
       r = ret + ind;			/* in case reallocated */
       *r++ = *p++;

@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2001 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,7 +21,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-/* Configuration settings controllable by autoconf. */
+/* Configuration feature settings controllable by autoconf. */
 
 /* Define JOB_CONTROL if your operating system supports
    BSD-like job control. */
@@ -142,7 +142,60 @@
 
 /* Beginning of autoconf additions. */
 
+/* Characteristics of the C compiler */
+#undef const
+
+#undef inline
+
+/* Define if cpp supports the ANSI-C stringizing `#' operator */
+#undef HAVE_STRINGIZE
+
+/* Define if the compiler supports `long double' variables. */
+#undef HAVE_LONG_DOUBLE
+
+#undef PROTOTYPES
+
+#undef __CHAR_UNSIGNED__
+
+/* Define if the compiler supports `long long' variables. */
+#undef HAVE_LONG_LONG
+
+#undef HAVE_UNSIGNED_LONG_LONG
+
+/* The number of bytes in a int.  */
+#undef SIZEOF_INT
+
+/* The number of bytes in a long.  */
+#undef SIZEOF_LONG
+
+/* The number of bytes in a pointer to char.  */
+#undef SIZEOF_CHAR_P
+
+/* The number of bytes in a double (hopefully 8). */
+#undef SIZEOF_DOUBLE
+
+/* The number of bytes in a `long long', if we have one. */
+#undef SIZEOF_LONG_LONG
+
+/* System paths */
+
 #define DEFAULT_MAIL_DIRECTORY "/usr/spool/mail"
+
+/* Characteristics of the system's header files and libraries that affect
+   the compilation environment. */
+
+/* Define if the system does not provide POSIX.1 features except
+   with this defined.  */
+#undef _POSIX_1_SOURCE
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define to use GNU libc extensions */
+#undef _GNU_SOURCE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
 
 /* Memory management functions. */
 
@@ -164,18 +217,6 @@
 
 
 /* SYSTEM TYPES */
-
-/* The number of bytes in a int.  */
-#undef SIZEOF_INT
-
-/* The number of bytes in a long.  */
-#undef SIZEOF_LONG
-
-/* The number of bytes in a pointer to char.  */
-#undef SIZEOF_CHAR_P
-
-/* The number of bytes in a double (hopefully 8). */
-#undef SIZEOF_DOUBLE
 
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
@@ -204,18 +245,27 @@
 /* Define to `double' if <sys/types.h> doesn't define. */
 #undef bits64_t
 
-/* Define to `int' if <sys/types.h> doesn't define. */
-#undef ptrdiff_t
-
 /* Define to `unsigned int' if <sys/types.h> doesn't define. */
 #undef u_int
 
 /* Define to `unsigned long' if <sys/types.h> doesn't define.  */
 #undef u_long
 
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef ptrdiff_t
+
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
 
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef ssize_t
+
+/* Define to `long' if <stdint.h> doesn't define. */
+#undef intmax_t
+
+/* Define to `unsigned long' if <stdint.h> doesn't define. */
+#undef uintmax_t
+ 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
@@ -228,6 +278,9 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t
 
+/* Define to `unsigned int' if <sys/socket.h> doesn't define. */
+#undef socklen_t
+
 /* Define if you have quad_t in <sys/types.h>. */
 #undef HAVE_QUAD_T
 
@@ -236,13 +289,6 @@
 /* Define to the type of elements in the array set by `getgroups'.
    Usually this is either `int' or `gid_t'.  */
 #undef GETGROUPS_T
-
-/* Define if the system does not provide POSIX.1 features except
-   with this defined.  */
-#undef _POSIX_1_SOURCE
-
-/* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
 
 /* Characteristics of the machine archictecture. */
 
@@ -257,9 +303,6 @@
 
 /* Define if the machine architecture is big-endian. */
 #undef WORDS_BIGENDIAN
-
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
 
 /* Check for the presence of certain non-function symbols in the system
    libraries. */
@@ -301,6 +344,7 @@
 
 #undef TERMIO_LDISC
 
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
 
 /* Characteristics of definitions in the system header files. */
 
@@ -308,9 +352,26 @@
 
 #undef HAVE_RESOURCE
 
-#undef SBRK_DECLARED
+#undef HAVE_LIBC_FNM_EXTMATCH
 
-#undef PRINTF_DECLARED
+#undef HAVE_DECL_CONFSTR
+
+#undef HAVE_DECL_STRTOLD
+
+#undef HAVE_DECL_SBRK
+
+#undef HAVE_DECL_PRINTF
+
+#undef HAVE_DECL_STRSIGNAL
+
+/* These are checked with BASH_CHECK_DECL */
+
+#undef HAVE_DECL_STRTOIMAX
+#undef HAVE_DECL_STRTOL
+#undef HAVE_DECL_STRTOLL
+#undef HAVE_DECL_STRTOUL
+#undef HAVE_DECL_STRTOULL
+#undef HAVE_DECL_STRTOUMAX
 
 /* Characteristics of system calls and C library functions. */
 
@@ -334,6 +395,7 @@
 
 #undef CAN_REDEFINE_GETENV
 
+#undef HAVE_PRINTF_A_FORMAT
 
 /* Characteristics of properties exported by the kernel. */
 
@@ -360,10 +422,6 @@
 
 #undef MUST_REINSTALL_SIGHANDLERS
 
-/* Define if system calls automatically restart after interruption
-   by a signal.  */
-#undef HAVE_RESTARTABLE_SYSCALLS
-
 #undef HAVE_BSD_SIGNALS
 
 #undef HAVE_POSIX_SIGNALS
@@ -374,6 +432,9 @@
 
 
 /* Presence of system and C library functions. */
+
+/* Define if you have the asprintf function.  */
+#undef HAVE_ASPRINTF
 
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
@@ -401,6 +462,9 @@
 
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
+
+/* Define if you have the getaddrinfo function. */
+#undef HAVE_GETADDRINFO
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
@@ -443,6 +507,24 @@
 
 /* Define if you have the inet_aton function.  */
 #undef HAVE_INET_ATON
+
+/* Define if you have the isascii function. */
+#undef HAVE_ISASCII
+
+/* Define if you have the isblank function.  */
+#undef HAVE_ISBLANK
+
+/* Define if you have the isgraph function.  */
+#undef HAVE_ISGRAPH
+
+/* Define if you have the isprint function.  */
+#undef HAVE_ISPRINT
+
+/* Define if you have the isspace function.  */
+#undef HAVE_ISSPACE
+
+/* Define if you have the isxdigit function.  */
+#undef HAVE_ISXDIGIT
 
 /* Define if you have the killpg function.  */
 #undef HAVE_KILLPG
@@ -498,6 +580,9 @@
 /* Define if you have the POSIX.1-style sigsetjmp function.  */
 #undef HAVE_POSIX_SIGSETJMP
 
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
 /* Define if you have the strcasecmp function.  */
 #undef HAVE_STRCASECMP
 
@@ -516,11 +601,23 @@
 /* Define if you have the strtod function. */
 #undef HAVE_STRTOD
 
+/* Define if you have the strtoimax function. */
+#undef HAVE_STRTOIMAX
+
 /* Define if you have the strtol function. */
 #undef HAVE_STRTOL
 
+/* Define if you have the strtoll function. */
+#undef HAVE_STRTOLL
+
 /* Define if you have the strtoul function. */
 #undef HAVE_STRTOUL
+
+/* Define if you have the strtoull function. */
+#undef HAVE_STRTOULL
+
+/* Define if you have the strtoumax function. */
+#undef HAVE_STRTOUMAX
 
 /* Define if you have the strsignal function or macro. */
 #undef HAVE_STRSIGNAL
@@ -552,15 +649,20 @@
 /* Define if you have the uname function. */
 #undef HAVE_UNAME
 
+/* Define if you have the vasprintf function.  */
+#undef HAVE_VASPRINTF
+
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF
+
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
 
 /* Define if you have the waitpid function. */
 #undef HAVE_WAITPID
 
 /* Define if you have the wait3 function.  */
 #undef HAVE_WAIT3
-
 
 /* Presence of certain system include files. */
 
@@ -572,6 +674,12 @@
 
 /* Define if you have the <dlfcn.h> header file.  */
 #undef HAVE_DLFCN_H
+
+/* Define if you have the <grp.h> header file.  */
+#undef HAVE_GRP_H
+
+/* Define if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
 
 /* Define if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
@@ -600,11 +708,17 @@
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
+
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
 
 /* Define if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
+
+/* Define if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
@@ -689,6 +803,12 @@
 /* Do we need to define _KERNEL to get the RLIMIT_* defines from
    <sys/resource.h>? */
 #undef RLIMIT_NEEDS_KERNEL
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#undef _FILE_OFFSET_BITS
+
+/* Define for large files on AIX-style hosts. */
+#undef _LARGE_FILES
 
 /* Do strcoll(3) and strcmp(3) give different results in the default locale? */
 #undef STRCOLL_BROKEN

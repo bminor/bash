@@ -70,6 +70,11 @@ static int rl_kill_index;
 /* How many slots we have in the kill ring. */
 static int rl_kill_ring_length;
 
+static int _rl_copy_to_kill_ring PARAMS((char *, int));
+static int region_kill_internal PARAMS((int));
+static int _rl_copy_word_as_kill PARAMS((int, int));
+static int rl_yank_nth_arg_internal PARAMS((int, int, int));
+
 /* How to say that you only want to save a certain amount
    of kill material. */
 int
@@ -129,7 +134,7 @@ _rl_copy_to_kill_ring (text, append)
   if (_rl_last_command_was_kill && rl_editing_mode != vi_mode)
     {
       old = rl_kill_ring[slot];
-      new = xmalloc (1 + strlen (old) + strlen (text));
+      new = (char *)xmalloc (1 + strlen (old) + strlen (text));
 
       if (append)
 	{
@@ -612,7 +617,7 @@ rl_paste_from_clipboard (count, key)
       if (ptr)
 	{
 	  len = ptr - data;
-	  ptr = xmalloc (len + 1);
+	  ptr = (char *)xmalloc (len + 1);
 	  ptr[len] = '\0';
 	  strncpy (ptr, data, len);
 	}

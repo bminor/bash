@@ -61,11 +61,11 @@ printf -- "--%b--\n" '\t\101'
 
 # these should all display `A7'
 echo -e "\1017"
-echo -e "\x0417"
+echo -e "\x417"
 
 printf "%b\n" '\01017'
 printf "%b\n" '\1017'
-printf "%b\n" '\x0417'
+printf "%b\n" '\x417'
 
 printf -- "--%b--\n" '\"abcd\"'
 printf -- "--%b--\n" "\'abcd\'"
@@ -206,5 +206,19 @@ printf "ab%Mcd\n"
 # this caused an infinite loop in older versions of printf
 printf "%y" 0
 
+# these should print a warning and `0', according to POSIX.2
 printf "%d\n" GNU
 printf "%o\n" GNU
+
+# failures in all bash versions through bash-2.05
+printf "%.0s" foo
+printf "%.*s" 0 foo
+
+printf '%.0b-%.0s\n' foo bar
+printf '(%*b)(%*s)\n' -4 foo -4 bar
+
+format='%'`printf '%0100384d' 0`'d\n' 
+printf $format 0
+
+# this doesn't work with printf(3) on all systems
+#printf "%'s\n" foo

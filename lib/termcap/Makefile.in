@@ -25,6 +25,8 @@ VPATH = .:@srcdir@
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 
+libdir = @libdir@
+
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
@@ -80,7 +82,7 @@ mostlyclean: clean
 distclean maintainer-clean: clean
 	$(RM) Makefile
 
-$(DESTDIR)/libtermcap.a: libtermcap.a
+$(DESTDIR)$(libdir)/libtermcap.a: libtermcap.a
 	${INSTALL_DATA} -c -m 644 libtermcap.a $@
 	-test -n "$(RANLIB)" && $(RANLIB) -t $@
 

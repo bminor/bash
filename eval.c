@@ -43,10 +43,8 @@
 #  include "bashhist.h"
 #endif
 
-extern int yyparse ();
-
 extern int EOF_reached;
-extern int indirection_level, interactive, interactive_shell;
+extern int indirection_level;
 extern int posixly_correct;
 extern int subshell_environment, running_under_emacs;
 extern int last_command_exit_value, stdin_redir;
@@ -61,6 +59,8 @@ reader_loop ()
 {
   int our_indirection_level;
   COMMAND *current_command = (COMMAND *)NULL;
+
+  USE_VAR(current_command);
 
   our_indirection_level = ++indirection_level;
 
@@ -234,11 +234,11 @@ read_command ()
   /* Only do timeouts if interactive. */
   tmout_var = (SHELL_VAR *)NULL;
   tmout_len = 0;
+  old_alrm = (SigHandler *)NULL;
 
   if (interactive)
     {
       tmout_var = find_variable ("TMOUT");
-      old_alrm = (SigHandler *)NULL;
 
       if (tmout_var && tmout_var->value)
 	{

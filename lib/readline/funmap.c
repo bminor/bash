@@ -46,7 +46,7 @@ typedef int QSFUNC (const void *, const void *);
 typedef int QSFUNC ();
 #endif
 
-extern int _rl_qsort_string_compare __P((char **, char **));
+extern int _rl_qsort_string_compare PARAMS((char **, char **));
 
 FUNMAP **funmap;
 static int funmap_size;

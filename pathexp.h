@@ -34,7 +34,7 @@ extern char *glob_error_return;
 #define QGLOB_FILENAME	0x02	/* do correct quoting for matching filenames */
 
 #if defined (EXTENDED_GLOB)
-/* Flags to OR with other flag args to fnmatch() to enabled the extended
+/* Flags to OR with other flag args to strmatch() to enabled the extended
    pattern matching. */
 #  define FNMATCH_EXTFLAG	(extended_glob ? FNM_EXTMATCH : 0)
 #else
@@ -63,7 +63,7 @@ extern char *quote_globbing_chars __P((char *));
 /* Call the glob library to do globbing on PATHNAME. */
 extern char **shell_glob_filename __P((const char *));
 
-/* Filename completion ignore.  Used to the "fignore" facility of
+/* Filename completion ignore.  Used to implement the "fignore" facility of
    tcsh and GLOBIGNORE (like ksh-93 FIGNORE).
 
    It is passed a NULL-terminated array of (char *)'s that must be
@@ -77,12 +77,14 @@ struct ign {
   int len, flags;
 };
 
+typedef int sh_iv_item_func_t __P((struct ign *));
+
 struct ignorevar {
   char *varname;	/* FIGNORE or GLOBIGNORE */
   struct ign *ignores;	/* Store the ignore strings here */
   int num_ignores;	/* How many are there? */
   char *last_ignoreval;	/* Last value of variable - cached for speed */
-  Function *item_func;	/* Called when each item is parsed from $`varname' */
+  sh_iv_item_func_t *item_func; /* Called when each item is parsed from $`varname' */
 };
 
 extern void setup_ignore_patterns __P((struct ignorevar *));

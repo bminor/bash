@@ -38,7 +38,7 @@ GENERIC_LIST global_error_list;
 void
 map_over_list (list, function)
      GENERIC_LIST *list;
-     Function *function;
+     sh_glist_func_t *function;
 {
   for ( ; list; list = list->next)
     (*function) (list);
@@ -48,7 +48,7 @@ map_over_list (list, function)
 void
 map_over_words (words, function)
      WORD_LIST *words;
-     Function *function;
+     sh_icpfunc_t *function;
 {
   for ( ; words; words = words->next)
     (*function) (words->word->word);

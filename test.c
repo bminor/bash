@@ -32,9 +32,7 @@
 
 #include "bashtypes.h"
 
-#if defined (HAVE_LIMITS_H)
-#  include <limits.h>
-#else
+#if !defined (HAVE_LIMITS_H)
 #  include <sys/param.h>
 #endif
 
@@ -58,7 +56,7 @@ extern int errno;
 #include "test.h"
 #include "builtins/common.h"
 
-#include <glob/fnmatch.h>
+#include <glob/strmatch.h>
 
 #if !defined (STRLEN)
 #  define STRLEN(s) ((s)[0] ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
@@ -115,25 +113,31 @@ static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-static int unary_operator ();
-static int binary_operator ();
-static int two_arguments ();
-static int three_arguments ();
-static int posixtest ();
+static void test_syntax_error __P((char *, char *)) __attribute__((__noreturn__));
+static void beyond __P((void)) __attribute__((__noreturn__));
+static void integer_expected_error __P((char *)) __attribute__((__noreturn__));
 
-static int expr ();
-static int term ();
-static int and ();
-static int or ();
+static int test_stat __P((char *, struct stat *));
 
-static void beyond ();
+static int unary_operator __P((void));
+static int binary_operator __P((void));
+static int two_arguments __P((void));
+static int three_arguments __P((void));
+static int posixtest __P((void));
+
+static int expr __P((void));
+static int term __P((void));
+static int and __P((void));
+static int or __P((void));
+
+static int filecomp __P((char *, char *, int));
+static int arithcomp __P((char *, char *, int, int));
+static int patcomp __P((char *, char *, int));
 
 static void
 test_syntax_error (format, arg)
      char *format, *arg;
 {
-  extern int interactive_shell;
-  extern char *get_name_for_error ();
   if (interactive_shell == 0)
     fprintf (stderr, "%s: ", get_name_for_error ());
   fprintf (stderr, "%s: ", argv[0]);
@@ -178,13 +182,16 @@ test_stat (path, finfo)
     {
 #if !defined (HAVE_DEV_FD)
       long fd;
-      if (legal_number (path + 8, &fd))
-	return (fstat ((int)fd, finfo));
-      else
-	{
-	  errno = EBADF;
-	  return (-1);
-	}
+      int r;
+
+      if (legal_number (path + 8, &fd) && fd == (int)fd)
+        {
+          r = fstat ((int)fd, finfo);
+          if (r == 0 || errno != EBADF)
+            return (r);
+        }
+      errno = ENOENT;
+      return (-1);
 #else
   /* If HAVE_DEV_FD is defined, DEV_FD_PREFIX is defined also, and has a
      trailing slash.  Make sure /dev/fd/xx really uses DEV_FD_PREFIX/xx.
@@ -279,7 +286,7 @@ or ()
   int value, v2;
 
   value = and ();
-  while (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'o' && !argv[pos][2])
+  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'o' && !argv[pos][2])
     {
       advance (0);
       v2 = or ();
@@ -300,7 +307,7 @@ and ()
   int value, v2;
 
   value = term ();
-  while (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'a' && !argv[pos][2])
+  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'a' && !argv[pos][2])
     {
       advance (0);
       v2 = and ();
@@ -456,7 +463,7 @@ patcomp (string, pat, op)
 {
   int m;
 
-  m = fnmatch (pat, string, FNMATCH_EXTFLAG);
+  m = strmatch (pat, string, FNMATCH_EXTFLAG);
   return ((op == EQ) ? (m == 0) : (m != 0));
 }
 
@@ -550,7 +557,7 @@ binary_operator ()
 static int
 unary_operator ()
 {
-  char *op, *arg;
+  char *op;
   long r;
 
   op = argv[pos];
@@ -680,7 +687,7 @@ unary_test (op, arg)
     case 't':	/* File fd is a terminal? */
       if (legal_number (arg, &r) == 0)
 	return (FALSE);
-      return (isatty ((int)r));
+      return ((r == (int)r) && isatty ((int)r));
 
     case 'n':			/* True if arg has some length. */
       return (arg[0] != '\0');
@@ -691,6 +698,9 @@ unary_test (op, arg)
     case 'o':			/* True if option `arg' is set. */
       return (minus_o_option_value (arg) == 1);
     }
+
+  /* We can't actually get here, but this shuts up gcc. */
+  return (FALSE);
 }
 
 /* Return TRUE if OP is one of the test command's binary operators. */
@@ -788,6 +798,8 @@ two_arguments ()
 
 #define ANDOR(s)  (s[0] == '-' && !s[2] && (s[1] == 'a' || s[1] == 'o'))
 
+/* This could be augmented to handle `-t' as equivalent to `-t 1', but
+   POSIX requires that `-t' be given an argument. */
 #define ONE_ARG_TEST(s)		((s)[0] != '\0')
 
 static int
@@ -878,8 +890,9 @@ test_command (margc, margv)
      char **margv;
 {
   int value;
-
   int code;
+
+  USE_VAR(margc);
 
   code = setjmp (test_exit_buf);
 

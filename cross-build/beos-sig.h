@@ -8,7 +8,7 @@
    Use gcc labelled initializers to set up the array.  Note that
    some entries might wind up being NULL. */
 
-char *signal_names[NSIG + 2] = {
+char *signal_names[NSIG + 3] = {
   [0]         "EXIT",
   [SIGHUP]    "SIGHUP",
   [SIGINT]    "SIGINT",
@@ -32,5 +32,6 @@ char *signal_names[NSIG + 2] = {
   [SIGWINCH]  "SIGWINCH",
   [SIGKILLTHR]        "SIGKILLTHR",
   [NSIG]      "DEBUG",
-  [NSIG + 1]  (char *)0x0,
+  [NSIG + 1]  "ERR",
+  [NSIG + 2]  (char *)0x0,
 };

@@ -26,6 +26,6 @@
 extern void redirection_error __P((REDIRECT *, int));
 extern int do_redirections __P((REDIRECT *, int, int, int));
 extern char *redirection_expand __P((WORD_DESC *));
-extern int stdin_redirs __P((REDIRECT *));
+extern int stdin_redirects __P((REDIRECT *));
 
 #endif /* _REDIR_H_ */

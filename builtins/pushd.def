@@ -136,12 +136,12 @@ static int directory_list_size;
 /* Offset to the end of the list. */
 static int directory_list_offset;
 
-static void pushd_error ();
-static void clear_directory_stack ();
-static int cd_to_string ();
-static int change_to_temp ();
-static int get_dirstack_index ();
-static void add_dirstack_element ();
+static void pushd_error __P((int, char *));
+static void clear_directory_stack __P((void));
+static int cd_to_string __P((char *));
+static int change_to_temp __P((char *));
+static void add_dirstack_element __P((char *));
+static int get_dirstack_index __P((long, int, int *));
 
 #define NOCD		0x01
 #define ROTATE		0x02
@@ -293,7 +293,7 @@ popd_builtin (list)
   char *which_word;
 
   which_word = (char *)NULL;
-  for (flags = 0, which = 0L, direction = '+'; list; list = list->next)
+  for (flags = 0, which = 0, direction = '+'; list; list = list->next)
     {
       if (ISOPTION (list->word->word, 'n'))
 	{
@@ -537,7 +537,8 @@ add_dirstack_element (dir)
 
 static int
 get_dirstack_index (ind, sign, indexp)
-     int ind, sign, *indexp;
+     long ind;
+     int sign, *indexp;
 {
   if (indexp)
     *indexp = sign > 0 ? 1 : 2;
@@ -552,8 +553,10 @@ get_dirstack_index (ind, sign, indexp)
 	*indexp = sign > 0 ? 2 : 1;
       return 0;
     }
-  else
+  else if (ind >= 0 && ind <= directory_list_offset)
     return (sign > 0 ? directory_list_offset - ind : ind);
+  else
+    return -1;
 }
 
 /* Used by the tilde expansion code. */
@@ -586,7 +589,8 @@ get_dirstack_from_string (string)
 #ifdef INCLUDE_UNUSED
 char *
 get_dirstack_element (ind, sign)
-     int ind, sign;
+     long ind;
+     int sign;
 {
   int i;
 
@@ -598,7 +602,8 @@ get_dirstack_element (ind, sign)
 
 void
 set_dirstack_element (ind, sign, value)
-     int ind, sign;
+     long ind;
+     int  sign;
      char *value;
 {
   int i;

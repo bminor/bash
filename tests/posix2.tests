@@ -146,14 +146,14 @@ fi
 newtest
 SQUOTE="'"
 val1=$(set | sed -n 's:^SQUOTE=::p')
-if [ "$val1" != "\$'\\''" ]; then
+if [ "$val1" != "''\\'''" ]; then
         testfail "variable quoting 1"
 fi
 
 newtest
 VTILDE='~'
 val1=$(set | sed -n 's:^VTILDE=::p')
-if [ "$val1" != "\$'~'" ]; then
+if [ "$val1" != "'~'" ]; then
 	testfail "variable quoting 2"
 fi
 
@@ -167,7 +167,7 @@ fi
 newtest
 VHASH2=#abcd
 val1=$(set | sed -n 's:^VHASH2=::p')
-if [ "$val1" != "\$'#abcd'" ]; then
+if [ "$val1" != "'#abcd'" ]; then
 	testfail "variable quoting 4"
 fi
 

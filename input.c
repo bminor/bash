@@ -47,7 +47,7 @@ extern int errno;
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
 
-static unsigned char localbuf[128];
+static char localbuf[128];
 static int local_index, local_bufused;
 
 /* Posix and USG systems do not guarantee to restart read () if it is
@@ -57,6 +57,8 @@ int
 getc_with_restart (stream)
      FILE *stream;
 {
+  unsigned char uc;
+
   /* Try local buffering to reduce the number of read(2) calls. */
   if (local_index == local_bufused || local_bufused == 0)
     {
@@ -73,7 +75,8 @@ getc_with_restart (stream)
 	}
       local_index = 0;
     }
-  return (localbuf[local_index++]);
+  uc = localbuf[local_index++];
+  return uc;
 }
 
 int
@@ -83,7 +86,8 @@ ungetc_with_restart (c, stream)
 {
   if (local_index == 0 || c == EOF)
     return EOF;
-  return (localbuf[--local_index] = c);
+  localbuf[--local_index] = c;
+  return c;
 }
 
 #if defined (BUFFERED_INPUT)
@@ -108,8 +112,6 @@ ungetc_with_restart (c, stream)
 #  undef min
 #endif
 #define min(a, b)	((a) > (b) ? (b) : (a))
-
-extern int return_EOF ();
 
 extern int interactive_shell;
 
@@ -274,8 +276,6 @@ int
 check_bash_input (fd)
      int fd;
 {
-  int nfd;
-
   if (fd > 0 && fd_is_bash_input (fd))
     return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
   return 0;
@@ -402,6 +402,11 @@ int
 close_buffered_fd (fd)
      int fd;
 {
+  if (fd < 0)
+    {
+      errno = EBADF;
+      return -1;
+    }
   if (fd >= nbuffers || !buffers || !buffers[fd])
     return (close (fd));
   return (close_buffered_stream (buffers[fd]));
@@ -426,21 +431,30 @@ static int
 b_fill_buffer (bp)
      BUFFERED_STREAM *bp;
 {
-  bp->b_used = zread (bp->b_fd, bp->b_buffer, bp->b_size);
-#if defined (__CYGWIN__)
-  /* If on cygwin, translate \r\n to \n. */
-  if (bp->b_buffer[bp->b_used - 1] == '\r' && bp->b_buffer[bp->b_used] == '\n')
-    bp->b_buffer[--bp->b_used] = '\n';
-#endif
-  if (bp->b_used <= 0)
+  ssize_t nr;
+
+  nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
+  if (nr <= 0)
     {
+      bp->b_used = 0;
       bp->b_buffer[0] = 0;
-      if (bp->b_used == 0)
+      if (nr == 0)
 	bp->b_flag |= B_EOF;
       else
 	bp->b_flag |= B_ERROR;
       return (EOF);
     }
+
+#if defined (__CYGWIN__)
+  /* If on cygwin, translate \r\n to \n. */
+  if (nr >= 2 && bp->b_buffer[nr - 2] == '\r' && bp->b_buffer[nr - 1] == '\n')
+    {
+      bp->b_buffer[nr - 2] = '\n';
+      nr--;
+    }
+#endif
+
+  bp->b_used = nr;
   bp->b_inputp = 0;
   return (bp->b_buffer[bp->b_inputp++] & 0xFF);
 }
@@ -521,22 +535,22 @@ with_input_from_buffered_stream (bfd, name)
 }
 
 #if defined (TEST)
-char *
+void *
 xmalloc(s)
 int s;
 {
-	return ((char *)malloc (s));
+	return (malloc (s));
 }
 
-char *
+void *
 xrealloc(s, size)
 char	*s;
 int	size;
 {
 	if (!s)
-		return((char *)malloc (size));
+		return(malloc (size));
 	else
-		return((char *)realloc (s, size));
+		return(realloc (s, size));
 }
 
 void

@@ -35,17 +35,25 @@ if [ ! -f "$linkfile" ]; then
 	exit 1
 fi
 
-rm -f /tmp/z
+rm_ltmp=false
+LINKTEMP=`mktemp -t linktmp.XXXXXXXX 2>/dev/null`
+if [ -z "$LINKTEMP" ]; then
+	: ${TMPDIR:=/tmp}
+	LINKTEMP=${TMPDIR}/linktmp.$$
+	rm_ltmp=true
+fi
+
+$rm_ltmp && rm -f ${LINKTEMP}
 # if the user specified hard links, then do that.  otherwise, try to use
 # symlinks if they're present
 if [ -n "$hardlinks" ]; then
 	LN=ln
-elif (ln -s /dev/null /tmp/z) >/dev/null 2>&1; then
+elif (ln -s /dev/null ${LINKTEMP}) >/dev/null 2>&1; then
 	LN="ln -s"
 else
 	LN=ln
 fi
-rm -f /tmp/z
+rm -f ${LINKTEMP}
 
 while read name target
 do

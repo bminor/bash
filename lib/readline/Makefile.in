@@ -121,6 +121,12 @@ documentation: force
 	test -d doc || mkdir doc
 	-( cd doc && $(MAKE) $(MFLAGS) )
 
+# Since tilde.c is shared between readline and bash, make sure we compile
+# it with the right flags when it's built as part of readline
+tilde.o:	tilde.c
+	rm -f $@
+	$(CC) $(CCFLAGS) -DREADLINE_LIBRARY -c $(srcdir)/tilde.c
+
 force:
 
 install:
@@ -152,7 +158,7 @@ bind.o: ansi_stdlib.h posixstat.h
 bind.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 bind.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 bind.o: history.h rlstdc.h
-callback.o: rlconf.h
+callback.o: rlconf.h ansi_stdlib.h
 callback.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 callback.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h rlstdc.h
 compat.o: rlstdc.h
@@ -228,7 +234,7 @@ tilde.o: tilde.h
 undo.o: ansi_stdlib.h
 undo.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 undo.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
-undo.o: history.h rlstdc.h
+undo.o: history.h rlstdc.h xmalloc.h
 util.o: posixjmp.h ansi_stdlib.h
 util.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 util.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h rlstdc.h

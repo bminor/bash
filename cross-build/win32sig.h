@@ -1,5 +1,5 @@
 /* This file is used when cross-compiling for the CYGWIN32 environment on
-   a Unix machine. */
+   a Unix machine.  It gets copied to signames.h in the build directory. */
 #include <sys/types.h>
 #include <signal.h>
 
@@ -11,7 +11,7 @@
    labelled initializers to set up the array.  Note that some entries
    might wind up being NULL.  */
 
-char *signal_names[NSIG + 2] = {
+char *signal_names[NSIG + 3] = {
   [0]		"EXIT",
 
 #ifdef SIGLOST
@@ -250,5 +250,7 @@ char *signal_names[NSIG + 2] = {
 
   [NSIG]	"DEBUG",
 
-  [NSIG + 1]	(char *)0x0
+  [NSIG + 1]	"ERR",
+
+  [NSIG + 2]	(char *)0x0
 };

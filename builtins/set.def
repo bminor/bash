@@ -49,8 +49,10 @@ $PRODUCES set.c
 #  include "../bashhist.h"
 #endif
 
-extern int interactive;
 extern int noclobber, posixly_correct, ignoreeof, eof_encountered_limit;
+#if defined (HISTORY)
+extern int dont_save_function_defs;
+#endif
 #if defined (READLINE)
 extern int no_line_editing;
 #endif /* READLINE */
@@ -92,6 +94,7 @@ $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
             noclobber    same as -C
             noexec       same as -n
             noglob       same as -f
+            nolog        currently accepted but ignored
             notify       same as -b
             nounset      same as -u
             onecmd       same as -t
@@ -132,16 +135,19 @@ parameters and are assigned, in order, to $1, $2, .. $n.  If no
 ARGs are given, all shell variables are printed.
 $END
 
-static int set_ignoreeof ();
-static int set_posix_mode ();
+static void print_minus_o_option __P((char *, int, int));
+static void print_all_shell_variables __P((void));
+
+static int set_ignoreeof __P((int, char *));
+static int set_posix_mode __P((int, char *));
 
 #if defined (READLINE)
-static int set_edit_mode ();
-static int get_edit_mode ();
+static int set_edit_mode __P((int, char *));
+static int get_edit_mode __P((char *));
 #endif
 
 #if defined (HISTORY)
-static int bash_set_history ();
+static int bash_set_history __P((int, char *));
 #endif
 
 static char *on = "on";
@@ -179,23 +185,29 @@ struct {
   {(char *)NULL, 0 },
 };
 
+typedef int setopt_set_func_t __P((int, char *));
+typedef int setopt_get_func_t __P((char *));
+
 struct {
   char *name;
   int *variable;
-  Function *set_func;
-  Function *get_func;
+  setopt_set_func_t *set_func;
+  setopt_get_func_t *get_func;
 } binary_o_options[] = {
 #if defined (HISTORY)
-  { "history", &remember_on_history, bash_set_history, (Function *)NULL },
+  { "history", &remember_on_history, bash_set_history, (setopt_get_func_t *)NULL },
 #endif
-  { "ignoreeof", &ignoreeof, set_ignoreeof, (Function *)NULL },
-  { "interactive-comments", &interactive_comments, (Function *)NULL, (Function *)NULL },
-  { "posix", &posixly_correct, set_posix_mode, (Function *)NULL },
+  { "ignoreeof", &ignoreeof, set_ignoreeof, (setopt_get_func_t *)NULL },
+  { "interactive-comments", &interactive_comments, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL },
+#if defined (HISTORY)
+  { "nolog", &dont_save_function_defs, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL },
+#endif
+  { "posix", &posixly_correct, set_posix_mode, (setopt_get_func_t *)NULL },
 #if defined (READLINE)
   { "emacs", (int *)NULL, set_edit_mode, get_edit_mode },
   { "vi", (int *)NULL, set_edit_mode, get_edit_mode },
 #endif
-  { (char *)NULL, (int *)NULL }
+  { (char *)NULL, (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL }
 };
 
 #define GET_BINARY_O_OPTION_VALUE(i, name) \
@@ -375,7 +387,6 @@ set_minus_o_option (on_or_off, option_name)
      char *option_name;
 {
   int option_char;
-  VFunction *set_func;
   register int i;
 
   for (i = 0; binary_o_options[i].name; i++)
@@ -387,7 +398,7 @@ set_minus_o_option (on_or_off, option_name)
 	}
     }
 
-  for (i = 0, option_char = -1, set_func = 0; o_options[i].name; i++)
+  for (i = 0, option_char = -1; o_options[i].name; i++)
     {
       if (STREQ (option_name, o_options[i].name))
 	{
@@ -450,7 +461,7 @@ set_shellopts ()
     if (GET_BINARY_O_OPTION_VALUE (i, binary_o_options[i].name))
       vsize += strlen (binary_o_options[i].name) + 1;
 
-  value = xmalloc (vsize + 1);
+  value = (char *)xmalloc (vsize + 1);
 
   for (i = vptr = 0; o_options[i].name; i++)
     {
@@ -752,6 +763,7 @@ unset_builtin (list)
       name = list->word->word;
 
 #if defined (ARRAY_VARS)
+      unset_array = 0;
       if (!unset_function && valid_array_reference (name))
 	{
 	  t = strchr (name, '[');

@@ -51,7 +51,7 @@ autoload()
 	# yet defined, but we don't have enough information to do that here.
 	#
 	if [ $# -eq 0 ] ; then
-		echo "usage: autoload function [function...]"
+		echo "usage: autoload function [function...]" >&2
 		return 1
 	fi
 
@@ -60,7 +60,7 @@ autoload()
 	#
 
 	if [ -z "$FPATH" ] ; then
-		echo autoload: FPATH not set
+		echo autoload: FPATH not set or null >&2
 		return 1
 	fi
 
@@ -71,17 +71,25 @@ autoload()
 	# The path splitting command is taken from Kernighan and Pike
 	#
 
-	fp=$(echo $FPATH | sed 's/^:/.:/
-				s/::/:.:/g
-				s/:$/:./
-				s/:/ /g')
+#	fp=$(echo $FPATH | sed 's/^:/.:/
+#				s/::/:.:/g
+#				s/:$/:./
+#				s/:/ /g')
+
+	# replaced with builtin mechanisms 2001 Oct 10
+
+	fp=${FPATH/#:/.:}
+	fp=${fp//::/:.:}
+	fp=${fp/%:/:.}
+	fp=${fp//:/ }
 
 	for FUNC in $args ; do
 		#
 		# We're blowing away the arguments to autoload here...
-		# We have to; there are no arrays.
+		# We have to; there are no arrays (well, there are, but
+		# this doesn't use them yet).
 		#
-		set $fp
+		set -- $fp
 
 		while [ $# -ne 0 ] ; do
 			if [ -f $1/$FUNC ] ; then
@@ -91,7 +99,7 @@ autoload()
 		done
 
 		if [ $# -eq 0 ] ; then
-			echo "$FUNC: autoload function not found"
+			echo "$FUNC: autoload function not found" >&2
 			continue
 		fi
 

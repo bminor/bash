@@ -1,7 +1,9 @@
 This document details the incompatibilites between this version of bash,
-bash-2.05, and the previous widely-available version, bash-1.14 (which
+bash-2.05a, and the previous widely-available version, bash-1.14 (which
 is still the `standard' version for many Linux distributions).  These
 were discovered by users of bash-2.x, so this list is not comprehensive.
+Some of these incompatibilities occur between the current version and
+versions 2.0 and above.
 
 1.  Bash now uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -132,14 +134,7 @@ were discovered by users of bash-2.x, so this list is not comprehensive.
 
 	alias -x='chmod a-x' --> alias -- -x='chmod a-x'
 
-13. There was a bug in bash-1.14 and previous versions that caused it to
-    accept as valid syntax for loops of the form
-
-	for f in ; do ... ; done
-
-    This should be a syntax error, and bash-2.x treats it as such.
-
-14. The behavior of range specificiers within bracket matching expressions
+13. The behavior of range specificiers within bracket matching expressions
     in the pattern matcher (e.g., [A-Z]) depends on the current locale,
     specifically the value of the LC_COLLATE environment variable.  Setting
     this variable to C or POSIX will result in the traditional ASCII behavior
@@ -183,7 +178,7 @@ were discovered by users of bash-2.x, so this list is not comprehensive.
     with `z' and still allow individual users to change the collation order.
     Users may put the above command into their own profiles as well, of course.
 
-15.  Bash versions up to 1.14.7 included an undocumented `-l' operator to
+14.  Bash versions up to 1.14.7 included an undocumented `-l' operator to
      the `test/[' builtin.  It was a unary operator that expanded to the
      length of its string argument.  This let you do things like
 
@@ -198,3 +193,13 @@ were discovered by users of bash-2.x, so this list is not comprehensive.
      This operator is not part of the POSIX standard, because one can (and
      should) use ${#variable} to get the length of a variable's value.
      Bash-2.x does not support it.
+
+15.  Bash no longer auto-exports the HOME, PATH, SHELL, TERM, HOSTNAME,
+     HOSTTYPE, MACHTYPE, or OSTYPE variables.
+
+16.  Bash no longer initializes the FUNCNAME, GROUPS, or DIRSTACK variables
+     to have special behavior if they appear in the initial environment.
+
+17.  Bash no longer removes the export attribute from the SSH_CLIENT or
+     SSH2_CLIENT variables, and no longer attempts to discover whether or
+     not it has been invoked by sshd in order to run the startup files.

@@ -49,10 +49,14 @@ $END
 #include "bashgetopt.h"
 #include "common.h"
 
+#if defined (_CS_PATH) && defined (HAVE_CONFSTR) && !HAVE_DECL_CONFSTR
+extern size_t confstr __P((int, char *, size_t));
+#endif
+
 extern int subshell_environment;
 
-static void restore_path ();
-static char *get_standard_path ();
+static void restore_path __P((char *));
+static char *get_standard_path __P((void));
 
 /* Run the commands mentioned in LIST without paying attention to shell
    functions. */
@@ -131,11 +135,13 @@ command_builtin (list)
       FREE (standard_path);
     }
 
+#define COMMAND_BUILTIN_FLAGS (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION | CMD_COMMAND_BUILTIN)
+
   command = make_bare_simple_command ();
   command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
-  command->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
-  command->value.Simple->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
+  command->flags |= COMMAND_BUILTIN_FLAGS;
+  command->value.Simple->flags |= COMMAND_BUILTIN_FLAGS;
 #if 0
   /* This breaks for things like ( cd /tmp ; command z ababa ; echo next )
      or $(command echo a ; command echo b;) or even
@@ -184,7 +190,7 @@ get_standard_path ()
   len = (size_t)confstr (_CS_PATH, (char *)NULL, (size_t)0);
   if (len > 0)
     {
-      p = xmalloc ((int)len + 2);
+      p = (char *)xmalloc (len + 2);
       *p = '\0';
       confstr (_CS_PATH, p, len);
       return (p);

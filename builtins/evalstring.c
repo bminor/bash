@@ -40,6 +40,7 @@
 #include "../input.h"
 #include "../execute_cmd.h"
 #include "../redir.h"
+#include "../trap.h"
 
 #if defined (HISTORY)
 #  include "../bashhist.h"
@@ -53,20 +54,15 @@ extern int errno;
 
 #define IS_BUILTIN(s)	(builtin_address_internal(s, 0) != (struct builtin *)NULL)
 
-extern void run_trap_cleanup ();
-extern int zwrite ();
-
-extern int interactive, interactive_shell;
 extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
 extern int posixly_correct;
-extern COMMAND *global_command;
 
 int parse_and_execute_level = 0;
 
-static int cat_file ();
+static int cat_file __P((REDIRECT *));
 
 /* How to force parse_and_execute () to clean up after itself. */
 void
@@ -92,7 +88,7 @@ parse_and_execute_cleanup ()
 int
 parse_and_execute (string, from_file, flags)
      char *string;
-     char *from_file;
+     const char *from_file;
      int flags;
 {
   int code, x;
@@ -297,7 +293,8 @@ cat_file (r)
      REDIRECT *r;
 {
   char lbuf[128], *fn;
-  int nr, fd, rval;
+  int fd, rval;
+  ssize_t nr;
 
   if (r->instruction != r_input_direction)
     return -1;
@@ -344,5 +341,5 @@ cat_file (r)
   free (fn);
   close (fd);
 
-  return (0);  
+  return (rval);
 }

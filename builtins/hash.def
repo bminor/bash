@@ -23,12 +23,15 @@ $PRODUCES hash.c
 
 $BUILTIN hash
 $FUNCTION hash_builtin
-$SHORT_DOC hash [-r] [-p pathname] [name ...]
+$SHORT_DOC hash [-r] [-p pathname] [-t] [name ...]
 For each NAME, the full pathname of the command is determined and
 remembered.  If the -p option is supplied, PATHNAME is used as the
 full pathname of NAME, and no path search is performed.  The -r
-option causes the shell to forget all remembered locations.  If no
-arguments are given, information about remembered commands is displayed.
+option causes the shell to forget all remembered locations.
+If the -t option is supplied the full pathname to which each NAME
+corresponds is printed.  If multiple NAME arguments are supplied with
+-t, the NAME is printed before the hashed full pathname.  If no arguments
+are given, information about remembered commands is displayed.
 $END
 
 #include <config.h>
@@ -56,8 +59,9 @@ $END
 extern int dot_found_in_search;
 extern char *this_command_name;
 
-static int add_hashed_command ();
-static int print_hashed_commands ();
+static int add_hashed_command __P((char *, int));
+static int print_hashed_commands __P((void));
+static int list_hashed_filename_targets __P((WORD_LIST *));
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified
@@ -66,7 +70,7 @@ int
 hash_builtin (list)
      WORD_LIST *list;
 {
-  int expunge_hash_table, opt;
+  int expunge_hash_table, list_targets, opt;
   char *w, *pathname;
 
   if (hashing_enabled == 0)
@@ -75,10 +79,10 @@ hash_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  expunge_hash_table = 0;
+  expunge_hash_table = list_targets = 0;
   pathname = (char *)NULL;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "rp:")) != -1)
+  while ((opt = internal_getopt (list, "rp:t")) != -1)
     {
       switch (opt)
 	{
@@ -88,12 +92,22 @@ hash_builtin (list)
 	case 'p':
 	  pathname = list_optarg;
 	  break;
+	case 't':
+	  list_targets = 1;
+	  break;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
 	}
     }
   list = loptend;
+
+  /* hash -t requires at least one argument. */
+  if (list == 0 && list_targets)
+    {
+      builtin_error("-t: argument required");
+      return (EXECUTION_FAILURE);
+    }
 
   /* We want hash -r to be silent, but hash -- to print hashing info.  That
      is the reason for the test of expunge_hash_table. */
@@ -108,6 +122,12 @@ hash_builtin (list)
   if (expunge_hash_table)
     flush_hashed_filenames ();
 
+  /* If someone runs `hash -r -t xyz' he will be disappointed. */
+  if (list_targets)
+    {
+      return (list_hashed_filename_targets (list));
+    }
+      
 #if defined (RESTRICTED_SHELL)
   if (restricted && pathname && strchr (pathname, '/'))
     {
@@ -197,4 +217,32 @@ print_hashed_commands ()
 
     }
   return (any_printed);
+}
+
+static int
+list_hashed_filename_targets (list)
+     WORD_LIST *list;
+{
+  int all_found, multiple;
+  char *target;
+  WORD_LIST *l;
+
+  all_found = 1;
+  multiple = list->next != 0;
+
+  for (l = list; l; l = l->next)
+    {
+      target = find_hashed_filename (l->word->word);
+      if (target == 0)
+	{
+	  all_found = 0;
+	  builtin_error ("%s: not found", l->word->word);
+	  continue;
+	}
+      if (multiple)
+        printf ("%s\t", l->word->word);
+      printf ("%s\n", target);
+    }
+
+  return (all_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }

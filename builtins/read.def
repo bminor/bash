@@ -83,15 +83,18 @@ extern int errno;
 extern int interrupt_immediately;
 
 #if defined (READLINE)
-static char *edit_line ();
-static void set_eol_delim ();
-static void reset_eol_delim ();
+static char *edit_line __P((char *));
+static void set_eol_delim __P((int));
+static void reset_eol_delim __P((char *));
 #endif
-static SHELL_VAR *bind_read_variable ();
+static SHELL_VAR *bind_read_variable __P((char *, char *));
+
+static sighandler sigalrm __P((int));
+static void reset_alarm __P((void));
 
 static procenv_t alrmbuf;
 static SigHandler *old_alrm;
-static int delim;
+static unsigned char delim;
 
 static sighandler
 sigalrm (s)
@@ -120,7 +123,8 @@ read_builtin (list)
   register char *varname;
   int size, i, pass_next, saw_escape, eof, opt, retval, code;
   int input_is_tty, input_is_pipe, unbuffered_read;
-  int raw, edit, tmout, nchars, silent;
+  int raw, edit, nchars, silent, have_timeout;
+  unsigned int tmout;
   long timeoutval, ncharsval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
@@ -135,6 +139,25 @@ read_builtin (list)
   int rlind;
 #endif
 
+  USE_VAR(size);
+  USE_VAR(i);
+  USE_VAR(pass_next);
+  USE_VAR(saw_escape);
+  USE_VAR(input_is_pipe);
+/*  USE_VAR(raw); */
+  USE_VAR(edit);
+  USE_VAR(tmout);
+  USE_VAR(nchars);
+  USE_VAR(silent);
+  USE_VAR(ifs_chars);
+  USE_VAR(prompt);
+  USE_VAR(arrayname);
+#if defined (READLINE)
+  USE_VAR(rlbuf);
+  USE_VAR(rlind);
+#endif
+  USE_VAR(list);
+
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
   silent = 0;
@@ -145,8 +168,8 @@ read_builtin (list)
   rlind = 0;
 #endif
 
-  tmout = -1;		/* no timeout */
-  nchars = input_is_tty = input_is_pipe = unbuffered_read = 0;
+  tmout = 0;		/* no timeout */
+  nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
 
   reset_internal_getopt ();
@@ -175,17 +198,20 @@ read_builtin (list)
 #endif
 	case 't':
 	  code = legal_number (list_optarg, &timeoutval);
-	  if (code == 0 || timeoutval < 0)
+	  if (code == 0 || timeoutval < 0 || timeoutval != (unsigned int)timeoutval)
 	    {
 	      builtin_error ("%s: invalid timeout specification", list_optarg);
 	      return (EXECUTION_FAILURE);
 	    }
 	  else
-	    tmout = timeoutval;
+	    {
+	      have_timeout = 1;
+	      tmout = timeoutval;
+	    }
 	  break;
 	case 'n':
 	  code = legal_number (list_optarg, &ncharsval);
-	  if (code == 0 || ncharsval < 0)
+	  if (code == 0 || ncharsval < 0 || ncharsval != (int)ncharsval)
 	    {
 	      builtin_error ("%s: invalid number specification", list_optarg);
 	      return (EXECUTION_FAILURE);
@@ -204,7 +230,7 @@ read_builtin (list)
   list = loptend;
 
   /* `read -t 0 var' returns failure immediately. */
-  if (tmout == 0)
+  if (have_timeout && tmout == 0)
     return (EXECUTION_FAILURE);
 
   /* IF IFS is unset, we use the default of " \t\n". */
@@ -213,7 +239,7 @@ read_builtin (list)
   if (ifs_chars == 0)		/* XXX */
     ifs_chars = "";		/* XXX */
 
-  input_string = xmalloc (size = 128);
+  input_string = (char *)xmalloc (size = 128);
 
   begin_unwind_frame ("read_builtin");
 #if defined (READLINE)
@@ -250,7 +276,7 @@ read_builtin (list)
       /* Turn off the timeout if stdin is a regular file (e.g. from
 	 input redirection). */
       if ((fstat (0, &tsb) < 0) || S_ISREG (tsb.st_mode))
-	tmout = -1;
+	tmout = 0;
     }
 
   if (tmout > 0)
@@ -358,7 +384,7 @@ read_builtin (list)
 
       if (i + 2 >= size)
 	{
-	  input_string = xrealloc (input_string, size += 128);
+	  input_string = (char *)xrealloc (input_string, size += 128);
 	  remove_unwind_protect ();
 	  add_unwind_protect (xfree, input_string);
 	}
@@ -383,7 +409,7 @@ read_builtin (list)
 	  continue;
 	}
 
-      if (c == delim)
+      if ((unsigned char)c == delim)
 	break;
 
       if (c == CTLESC || c == CTLNUL)
@@ -410,7 +436,7 @@ read_builtin (list)
 	  if (nchars > 0)
 	    rl_num_chars_to_read = 0;
 	  if (delim != '\n')
-	    reset_eol_delim ();
+	    reset_eol_delim ((char *)NULL);
 	}
       else
 #endif
@@ -433,12 +459,9 @@ read_builtin (list)
      an assign them to `arrayname' in turn. */
   if (arrayname)
     {
-      var = find_variable (arrayname);
+      var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
-	var = make_new_array_variable (arrayname);
-      else if (array_p (var) == 0)
-	var = convert_var_to_array (var);
-
+	return EXECUTION_FAILURE;	/* readonly or noassign */
       empty_array (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
@@ -504,7 +527,7 @@ read_builtin (list)
 #endif
 	{
 	  builtin_error ("`%s': not a valid identifier", varname);
-	  free (orig_input_string);
+	  xfree (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -522,7 +545,7 @@ read_builtin (list)
 	    {
 	      t1 = dequote_string (t);
 	      var = bind_read_variable (varname, t1);
-	      free (t1);
+	      xfree (t1);
 	    }
 	  else
 	    var = bind_read_variable (varname, t);
@@ -536,7 +559,7 @@ read_builtin (list)
       FREE (t);
       if (var == 0)
 	{
-	  free (orig_input_string);
+	  xfree (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -552,7 +575,7 @@ read_builtin (list)
 #endif
     {
       builtin_error ("`%s': not a valid identifier", list->word->word);
-      free (orig_input_string);
+      xfree (orig_input_string);
       return (EXECUTION_FAILURE);
     }
 
@@ -565,14 +588,14 @@ read_builtin (list)
     {
       t = dequote_string (input_string);
       var = bind_read_variable (list->word->word, t);
-      free (t);
+      xfree (t);
     }
   else
     var = bind_read_variable (list->word->word, input_string);
   stupidly_hack_special_variables (list->word->word);
   if (var)
     VUNSETATTR (var, att_invisible);
-  free (orig_input_string);
+  xfree (orig_input_string);
 
   return (retval);
 }
@@ -583,21 +606,12 @@ bind_read_variable (name, value)
 {
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    {
-#if 0
-      if (legal_identifier (name) == 0)
-	{
-	  builtin_error ("`%s': not a valid identifier", name);
-	  return ((SHELL_VAR *)NULL);
-	}
-#endif
-      return (bind_variable (name, value));
-    }
+    return (bind_variable (name, value));
   else
-    return (do_array_element_assignment (name, value));
-#else
+    return (assign_array_element (name, value));
+#else /* !ARRAY_VARS */
   return bind_variable (name, value);
-#endif
+#endif /* !ARRAY_VARS */
 }
 
 #if defined (READLINE)
@@ -614,18 +628,18 @@ edit_line (p)
   if (ret == 0)
     return ret;
   len = strlen (ret);
-  ret = xrealloc (ret, len + 2);
+  ret = (char *)xrealloc (ret, len + 2);
   ret[len++] = delim;
   ret[len] = '\0';
   return ret;
 }
 
 static int old_delim_ctype;
-static Function *old_delim_func;
+static rl_command_func_t *old_delim_func;
 static int old_newline_ctype;
-static Function *old_newline_func;
+static rl_command_func_t *old_newline_func;
 
-static int delim_char;
+static unsigned char delim_char;
 
 static void
 set_eol_delim (c)
@@ -653,8 +667,8 @@ set_eol_delim (c)
 }
 
 static void
-reset_eol_delim (c)
-     int c;
+reset_eol_delim (cp)
+     char *cp;
 {
   Keymap cmap;
 

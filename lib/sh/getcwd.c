@@ -40,25 +40,11 @@
 
 #include <bashansi.h>
 
+#include <xmalloc.h>
+
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-#if defined (__STDC__)
-#  define CONST const
-#  define PTR void *
-#else /* !__STDC__ */
-#  define CONST
-#  define PTR char *
-#endif /* !__STDC__ */
-
-#if !defined (PATH_MAX)
-#  if defined (MAXPATHLEN)
-#    define PATH_MAX MAXPATHLEN
-#  else /* !MAXPATHLEN */
-#    define PATH_MAX 1024
-#  endif /* !MAXPATHLEN */
-#endif /* !PATH_MAX */
 
 #if !defined (HAVE_LSTAT)
 #  define lstat stat
@@ -85,11 +71,11 @@ getcwd (buf, size)
      size_t size;
 #endif /* !__STDC__ */
 {
-  static CONST char dots[]
+  static const char dots[]
     = "../../../../../../../../../../../../../../../../../../../../../../../\
 ../../../../../../../../../../../../../../../../../../../../../../../../../../\
 ../../../../../../../../../../../../../../../../../../../../../../../../../..";
-  CONST char *dotp, *dotlist;
+  const char *dotp, *dotlist;
   size_t dotsize;
   dev_t rootdev, thisdev;
   ino_t rootino, thisino;
@@ -149,7 +135,7 @@ getcwd (buf, size)
 	    }
 	  else
 	    {
-	      new = (char *)realloc ((PTR) dotlist, dotsize * 2 + 1);
+	      new = (char *)realloc ((PTR_T) dotlist, dotsize * 2 + 1);
 	      if (new == NULL)
 		goto lose;
 	    }
@@ -232,7 +218,7 @@ getcwd (buf, size)
 		}
 	      else
 		{
-		  new = (char *)realloc ((PTR) pathbuf, (pathsize * 2));
+		  new = (char *)realloc ((PTR_T) pathbuf, (pathsize * 2));
 		  if (!new)
 		    goto lose;
 		  pathp = new + space;
@@ -257,7 +243,7 @@ getcwd (buf, size)
     *--pathp = '/';
 
   if (dotlist != dots)
-    free ((PTR) dotlist);
+    free ((PTR_T) dotlist);
 
   {
     size_t len = pathbuf + pathsize - pathp;
@@ -274,7 +260,7 @@ getcwd (buf, size)
 	errno = ERANGE;
 	goto lose2;
       }
-    (void) memcpy((PTR) buf, (PTR) pathp, len);
+    (void) memcpy((PTR_T) buf, (PTR_T) pathp, len);
   }
 
   if (pathbuf != path)
@@ -286,7 +272,7 @@ getcwd (buf, size)
   if ((dotlist != dots) && dotlist)
     {
       int e = errno;
-      free ((PTR) dotlist);
+      free ((PTR_T) dotlist);
       errno = e;
     }
 
@@ -294,7 +280,7 @@ getcwd (buf, size)
   if ((pathbuf != path) && pathbuf)
     {
       int e = errno;
-      free ((PTR) pathbuf);
+      free ((PTR_T) pathbuf);
       errno = e;
     }
   return ((char *)NULL);

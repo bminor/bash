@@ -95,14 +95,18 @@ typedef struct word_list {
 /*								    */
 /* **************************************************************** */
 
-/* What a redirection descriptor looks like.  If FLAGS is IS_DESCRIPTOR,
-   then we use REDIRECTEE.DEST, else we use the file specified. */
+/* What a redirection descriptor looks like.  If the redirection instruction
+   is ri_duplicating_input or ri_duplicating_output, use DEST, otherwise
+   use the file in FILENAME.  Out-of-range descriptors are identified by a
+   negative DEST. */
 
 typedef union {
-  long dest;			/* Place to redirect REDIRECTOR to, or ... */
+  int dest;			/* Place to redirect REDIRECTOR to, or ... */
   WORD_DESC *filename;		/* filename to redirect to. */
 } REDIRECTEE;
 
+/* Structure describing a redirection.  If REDIRECTOR is negative, the parser
+   (or translator in redir.c) encountered an out-of-range file descriptor. */
 typedef struct redirect {
   struct redirect *next;	/* Next element, or NULL. */
   int redirector;		/* Descriptor to be redirected. */
@@ -131,6 +135,7 @@ typedef struct element {
 #define CMD_TIME_POSIX	   0x100 /* time -p; use POSIX.2 time output spec. */
 #define CMD_AMPERSAND	   0x200 /* command & */
 #define CMD_STDIN_REDIR	   0x400 /* async command needs implicit </dev/null */
+#define CMD_COMMAND_BUILTIN 0x0800 /* command executed by `command' builtin */
 
 /* What a command looks like. */
 typedef struct command {

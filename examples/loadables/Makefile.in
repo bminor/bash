@@ -66,9 +66,9 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 
 
 ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
-	  tty pathchk tee head mkdir rmdir sprintf printenv id whoami \
-	  uname sync push ln unlink cut realpath
-OTHERPROG = necho getconf hello cat
+	  tty pathchk tee head mkdir rmdir printenv id whoami \
+	  uname sync push ln unlink cut realpath getconf
+OTHERPROG = necho hello cat
 
 all:	$(SHOBJ_STATUS)
 
@@ -85,9 +85,6 @@ unsupported:
 	@echo "for inclusion in future bash releases."
 
 everything: supported others
-
-sprintf: sprintf.o
-	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ sprintf.o $(SHOBJ_LIBS)
 
 print:	print.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ print.o $(SHOBJ_LIBS)
@@ -207,7 +204,6 @@ pathchk.o: pathchk.c
 tee.o: tee.c
 head.o: head.c
 rmdir.o: rmdir.c
-sprintf.o: sprintf.c
 necho.o: necho.c
 getconf.o: getconf.c
 hello.o: hello.c

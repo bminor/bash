@@ -41,10 +41,12 @@
 #include "input.h"
 #include "parser.h"	/* for the struct dstack stuff. */
 #include "pathexp.h"	/* for the struct ignorevar stuff */
+#include "bashhist.h"	/* matching prototypes and declarations */
 #include "builtins/common.h"
 
 #include <readline/history.h>
-#include <glob/fnmatch.h>
+#include <glob/glob.h>
+#include <glob/strmatch.h>
 
 #if defined (READLINE)
 #  include "bashline.h"
@@ -54,9 +56,7 @@
 extern int errno;
 #endif
 
-extern int glob_pattern_p ();
-
-static int histignore_item_func ();
+static int histignore_item_func __P((struct ign *));
 
 static struct ignorevar histignore =
 {
@@ -64,7 +64,7 @@ static struct ignorevar histignore =
   (struct ign *)0,
   0,
   (char *)0,
-  (Function *)histignore_item_func,
+  (sh_iv_item_func_t *)histignore_item_func,
 };
 
 #define HIGN_EXPAND 0x01
@@ -148,18 +148,24 @@ int hist_verify;
 
 #endif /* READLINE */
 
+/* Non-zero means to not save function definitions in the history list. */
+int dont_save_function_defs;
+
 /* Variables declared in other files used here. */
-extern int interactive;
 extern int current_command_line_count;
 
 extern struct dstack dstack;
 
-extern char *extract_colon_unit ();
-extern char *history_delimiting_chars ();
-extern void maybe_add_history ();	/* forward declaration */
-extern void bash_add_history ();	/* forward declaration */
-
-static int history_should_ignore ();
+static int bash_history_inhibit_expansion __P((char *, int));
+#if defined (READLINE)
+static void re_edit __P((char *));
+#endif
+static int history_expansion_p __P((char *));
+static int shell_comment __P((char *));
+static int should_expand __P((char *));
+static HIST_ENTRY *last_history_entry __P((void));
+static char *expand_histignore_pattern __P((char *));
+static int history_should_ignore __P((char *));
 
 /* Is the history expansion starting at string[i] one that should not
    be expanded? */
@@ -470,6 +476,7 @@ shell_comment (line)
   return (p && *p == '#');
 }
 
+#ifdef INCLUDE_UNUSED
 /* Remove shell comments from LINE.  A `#' and anything after it is a comment.
    This isn't really useful yet, since it doesn't handle quoting. */
 static char *
@@ -484,6 +491,7 @@ filter_comments (line)
     *p = '\0';
   return (line);
 }
+#endif
 
 /* Add LINE to the history list depending on the value of HISTORY_CONTROL. */
 void
@@ -580,10 +588,10 @@ bash_add_history (line)
 	      chars_to_add = "";
 	    }
 
-	  new_line = (char *) xmalloc (1
-				       + curlen
-				       + strlen (line)
-				       + strlen (chars_to_add));
+	  new_line = (char *)xmalloc (1
+				      + curlen
+				      + strlen (line)
+				      + strlen (chars_to_add));
 	  sprintf (new_line, "%s%s%s", current->line, chars_to_add, line);
 	  offset = where_history ();
 	  old = replace_history_entry (offset, new_line, current->data);
@@ -704,7 +712,7 @@ history_should_ignore (line)
       else
 	npat = histignore.ignores[i].val;
 
-      match = fnmatch (npat, line, FNMATCH_EXTFLAG) != FNM_NOMATCH;
+      match = strmatch (npat, line, FNMATCH_EXTFLAG) != FNM_NOMATCH;
 
       if (histignore.ignores[i].flags & HIGN_EXPAND)
 	free (npat);

@@ -41,15 +41,15 @@
 extern char *xmalloc ();
 
 /* The names of functions that actually do the manipulation. */
-int com_list __P((char *));
-int com_view __P((char *));
-int com_rename __P((char *));
-int com_stat __P((char *));
-int com_pwd __P((char *));
-int com_delete __P((char *));
-int com_help __P((char *));
-int com_cd __P((char *));
-int com_quit __P((char *));
+int com_list PARAMS((char *));
+int com_view PARAMS((char *));
+int com_rename PARAMS((char *));
+int com_stat PARAMS((char *));
+int com_pwd PARAMS((char *));
+int com_delete PARAMS((char *));
+int com_help PARAMS((char *));
+int com_cd PARAMS((char *));
+int com_quit PARAMS((char *));
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -212,8 +212,8 @@ stripwhite (string)
 /*                                                                  */
 /* **************************************************************** */
 
-char *command_generator __P((const char *, int));
-char **fileman_completion __P((const char *, int, int));
+char *command_generator PARAMS((const char *, int));
+char **fileman_completion PARAMS((const char *, int, int));
 
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames

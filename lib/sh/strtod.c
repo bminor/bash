@@ -25,7 +25,7 @@
 extern int errno;
 #endif
 
-#include <ctype.h>
+#include <chartypes.h>
 #include <math.h>
 
 #if HAVE_FLOAT_H
@@ -73,7 +73,7 @@ strtod (nptr, endptr)
   s = nptr;
 
   /* Eat whitespace.  */
-  while (isspace (*s))
+  while (ISSPACE ((unsigned char)*s))
     ++s;
 
   /* Get the sign.  */
@@ -87,7 +87,7 @@ strtod (nptr, endptr)
   exponent = 0;
   for (;; ++s)
     {
-      if (isdigit (*s))
+      if (DIGIT (*s))
 	{
 	  got_digit = 1;
 
@@ -120,7 +120,7 @@ strtod (nptr, endptr)
   if (!got_digit)
     goto noconv;
 
-  if (tolower (*s) == 'e')
+  if (TOLOWER ((unsigned char)*s) == 'e')
     {
       /* Get the exponent specified after the `e' or `E'.  */
       int save = errno;

@@ -64,6 +64,7 @@
 
 #include "rlprivate.h"
 #include "rlshell.h"
+#include "xmalloc.h"
 
 /* **************************************************************** */
 /*								    */
@@ -326,7 +327,11 @@ get_term_capabilities (bp)
   register int i;
 
   for (i = 0; i < NUM_TC_STRINGS; i++)
+#  ifdef __LCC__
+    *(tc_strings[i].tc_value) = tgetstr ((char *)tc_strings[i].tc_var, bp);
+#  else
     *(tc_strings[i].tc_value) = tgetstr (tc_strings[i].tc_var, bp);
+#  endif
 #endif
   tcap_initialized = 1;
 }
@@ -361,10 +366,10 @@ _rl_init_terminal_io (terminal_name)
   else
     {
       if (term_string_buffer == 0)
-	term_string_buffer = xmalloc(2032);
+	term_string_buffer = (char *)xmalloc(2032);
 
       if (term_buffer == 0)
-	term_buffer = xmalloc(4080);
+	term_buffer = (char *)xmalloc(4080);
 
       buffer = term_string_buffer;
 

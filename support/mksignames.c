@@ -19,6 +19,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -32,7 +34,15 @@
 #  define NSIG 64
 #endif
 
-char *signal_names[2 * NSIG];
+/*
+ * Special traps:
+ *	EXIT == 0
+ *	DEBUG == NSIG
+ *	ERR == NSIG+1
+ */
+#define LASTSIG NSIG+1
+
+char *signal_names[2 * NSIG + 3];
 
 #define signal_names_size (sizeof(signal_names)/sizeof(signal_names[0]))
 
@@ -105,16 +115,19 @@ initialize_signames ()
       for (i = 1; i <= rtcnt; i++)
 	{
 	  signal_names[rtmin+i] = (char *)malloc(RTLEN);
-	  sprintf (signal_names[rtmin+i], "SIGRTMIN+%d", i);
+	  if (signal_names[rtmin+i])
+	    sprintf (signal_names[rtmin+i], "SIGRTMIN+%d", i);
 	  signal_names[rtmax-i] = (char *)malloc(RTLEN);
-	  sprintf (signal_names[rtmax-i], "SIGRTMAX-%d", i);
+	  if (signal_names[rtmax-i])
+	    sprintf (signal_names[rtmax-i], "SIGRTMAX-%d", i);
 	}
 
       if (rtcnt < RTLIM/2-1 && rtcnt != (rtmax-rtmin)/2)
 	{
 	  /* Need an extra RTMIN signal */
 	  signal_names[rtmin+rtcnt+1] = (char *)malloc(RTLEN);
-	  sprintf (signal_names[rtmin+rtcnt+1], "SIGRTMIN+%d", rtcnt+1);
+	  if (signal_names[rtmin+rtcnt+1])
+	    sprintf (signal_names[rtmin+rtcnt+1], "SIGRTMIN+%d", rtcnt+1);
 	}
     }
 #endif /* SIGRTMIN && SIGRTMAX */
@@ -350,10 +363,12 @@ initialize_signames ()
     if (signal_names[i] == (char *)NULL)
       {
 	signal_names[i] = (char *)malloc (18);
-	sprintf (signal_names[i], "SIGJUNK(%d)", i);
+	if (signal_names[i])
+	  sprintf (signal_names[i], "SIGJUNK(%d)", i);
       }
 
   signal_names[NSIG] = "DEBUG";
+  signal_names[NSIG+1] = "ERR";
 }
 
 void
@@ -367,12 +382,12 @@ write_signames (stream)
   fprintf (stream, "   Do not edit.  Edit support/mksignames.c instead. */\n\n");
   fprintf (stream,
 	   "/* A translation list so we can be polite to our users. */\n");
-  fprintf (stream, "char *signal_names[NSIG + 2] = {\n");
+  fprintf (stream, "char *signal_names[NSIG + 3] = {\n");
 
-  for (i = 0; i <= NSIG; i++)
+  for (i = 0; i <= LASTSIG; i++)
     fprintf (stream, "    \"%s\",\n", signal_names[i]);
 
-  fprintf (stream, "    (char *)0x0,\n");
+  fprintf (stream, "    (char *)0x0\n");
   fprintf (stream, "};\n");
 }
 

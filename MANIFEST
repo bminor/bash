@@ -55,6 +55,7 @@ config-bot.h	f
 config.h.in	f
 aclocal.m4	f
 array.c		f
+arrayfunc.c	f
 eval.c		f
 print_cmd.c	f
 general.c	f
@@ -100,8 +101,11 @@ alias.h		f
 builtins.h	f
 bashhist.h	f
 bashline.h	f
+conftypes.h	f
+patchlevel.h	f
 variables.h	f
 array.h		f
+arrayfunc.h	f
 jobs.h		f
 findcmd.h	f
 hashlib.h	f
@@ -134,10 +138,10 @@ redir.h		f
 bashtypes.h	f
 mailcheck.h	f
 pathnames.h	f
+xmalloc.h	f
 y.tab.c		f
 y.tab.h		f
 parser-built	f
-builtins/ChangeLog	f
 builtins/Makefile.in	f
 builtins/alias.def	f
 builtins/bind.def	f
@@ -198,6 +202,7 @@ cross-build/x86-beos.cache	f
 cross-build/beos-sig.h	f
 cross-build/opennt.cache	f
 include/ansi_stdlib.h	f
+include/chartypes.h	f
 include/filecntl.h	f
 include/maxpath.h	f
 include/memalloc.h	f
@@ -209,11 +214,11 @@ include/posixwait.h	f
 include/shtty.h		f
 include/stdc.h		f
 include/systimes.h	f
+include/typemax.h	f
 include/unionwait.h	f
-lib/glob/ChangeLog	f
 lib/glob/Makefile.in	f
-lib/glob/fnmatch.c	f
-lib/glob/fnmatch.h	f
+lib/glob/strmatch.c	f
+lib/glob/strmatch.h	f
 lib/glob/glob.c		f
 lib/glob/glob.h		f
 lib/glob/collsyms.h	f
@@ -222,12 +227,17 @@ lib/glob/doc/glob.texi	f
 lib/glob/ndir.h		f
 lib/malloc/Makefile.in	f
 lib/malloc/getpagesize.h	f
+lib/malloc/imalloc.h	f
+lib/malloc/mstats.h	f
+lib/malloc/shmalloc.h	f
+lib/malloc/table.h	f
 lib/malloc/alloca.c	f
 lib/malloc/malloc.c	f
-lib/malloc/gmalloc.c	f
+lib/malloc/stats.c	f
+lib/malloc/table.c	f
+lib/malloc/trace.c	f
 lib/malloc/xmalloc.c	f
-lib/malloc/ogmalloc.c	f
-lib/malloc/omalloc.c	f
+lib/malloc/xleaktrace	f	755
 lib/malloc/stub.c	f
 lib/malloc/i386-alloca.s	f
 lib/malloc/x386-alloca.s	f
@@ -307,10 +317,13 @@ lib/readline/examples/Inputrc	f
 lib/sh/Makefile.in	f
 lib/sh/clktck.c		f
 lib/sh/clock.c		f
+lib/sh/fmtullong.c	f
+lib/sh/fmtulong.c	f
 lib/sh/getcwd.c		f
 lib/sh/getenv.c		f
 lib/sh/inet_aton.c	f
 lib/sh/itos.c		f
+lib/sh/mailstat.c	f
 lib/sh/makepath.c	f
 lib/sh/netopen.c	f
 lib/sh/oslib.c		f
@@ -320,6 +333,7 @@ lib/sh/rename.c		f
 lib/sh/setlinebuf.c	f
 lib/sh/shquote.c	f
 lib/sh/shtty.c		f
+lib/sh/snprintf.c	f
 lib/sh/spell.c		f
 lib/sh/strcasecmp.c	f
 lib/sh/strerror.c	f
@@ -328,8 +342,12 @@ lib/sh/stringlist.c	f
 lib/sh/stringvec.c	f
 lib/sh/strpbrk.c	f
 lib/sh/strtod.c		f
+lib/sh/strtoimax.c	f
 lib/sh/strtol.c		f
+lib/sh/strtoll.c	f
 lib/sh/strtoul.c	f
+lib/sh/strtoull.c	f
+lib/sh/strtoumax.c	f
 lib/sh/strtrans.c	f
 lib/sh/times.c		f
 lib/sh/timeval.c	f
@@ -359,7 +377,6 @@ lib/termcap/grot/configure.in	f
 lib/termcap/grot/COPYING	f
 lib/termcap/grot/README	f
 lib/tilde/README	f
-lib/tilde/ChangeLog	f
 lib/tilde/Makefile.in	f
 lib/tilde/doc/tilde.texi	f
 lib/tilde/doc/Makefile	f
@@ -378,8 +395,6 @@ CWRU/README		f
 CWRU/POSIX.NOTES	f
 CWRU/changelog		f
 CWRU/sh-redir-hack	f
-CWRU/empty-for-wordlist	f
-CWRU/maildir-patch	f
 CWRU/mh-folder-comp	f
 doc/FAQ		f
 doc/Makefile.in	f
@@ -395,6 +410,7 @@ doc/bashref.info	f
 doc/article.ms	f
 doc/htmlpost.sh	f	755
 support/Makefile.in	f
+support/bashversion.c	f
 support/config.guess	f
 support/config.sub	f
 support/printenv.sh	f	755
@@ -427,6 +443,7 @@ examples/complete/complete-examples	f
 examples/complete/complete.ianmac	f
 examples/complete/complete2.ianmac	f
 examples/complete/complete.freebsd	f
+examples/complete/complete.gnu-longopt	f
 examples/loadables/README	f
 examples/loadables/template.c	f
 examples/loadables/Makefile.in	f
@@ -434,9 +451,9 @@ examples/loadables/necho.c	f
 examples/loadables/hello.c	f
 examples/loadables/print.c	f
 examples/loadables/realpath.c	f
-examples/loadables/sprintf.c	f
 examples/loadables/sleep.c	f
 examples/loadables/truefalse.c	f
+examples/loadables/getconf.h	f
 examples/loadables/getconf.c	f
 examples/loadables/finfo.c	f
 examples/loadables/cat.c	f
@@ -469,6 +486,9 @@ examples/functions/autoload.v2	f
 examples/functions/autoload.v3	f
 examples/functions/basename	f
 examples/functions/basename2	f
+examples/functions/coproc.bash	f
+examples/functions/coshell.README	f
+examples/functions/coshell.bash	f
 examples/functions/csh-compat	f
 examples/functions/dirfuncs	f
 examples/functions/dirname	f
@@ -737,6 +757,8 @@ tests/tilde.right	f
 tests/trap.tests	f
 tests/trap.right	f
 tests/trap1.sub		f	755
+tests/trap2.sub		f	755
+tests/trap2a.sub	f	755
 tests/type.tests	f
 tests/type.right	f
 tests/varenv.right	f

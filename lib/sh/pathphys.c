@@ -18,26 +18,25 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include "config.h"
+#include <config.h>
 
-#include "bashtypes.h"
+#include <bashtypes.h>
 #ifndef _MINIX
 #  include <sys/param.h>
 #endif
-#include "posixstat.h"
+#include <posixstat.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-#include "filecntl.h"
-#include "bashansi.h"
+#include <filecntl.h>
+#include <bashansi.h>
 #include <stdio.h>
+#include <chartypes.h>
 #include <errno.h>
 
 #include "shell.h"
-
-#include "maxpath.h"
 
 #if !defined (MAXSYMLINKS)
 #  define MAXSYMLINKS 32
@@ -82,9 +81,9 @@ sh_physpath (path, flags)
   int double_slash_path, linklen, nlink;
 
   nlink = 0;
-  q = result = xmalloc (PATH_MAX + 1);
+  q = result = (char *)xmalloc (PATH_MAX + 1);
 
-  workpath = xmalloc (PATH_MAX + 1);
+  workpath = (char *)xmalloc (PATH_MAX + 1);
   strcpy (workpath, path);
 
   /* This always gets an absolute pathname. */
@@ -92,7 +91,7 @@ sh_physpath (path, flags)
   /* POSIX.2 says to leave a leading `//' alone.  On cygwin, we skip over any
      leading `x:' (dos drive name). */
 #if defined (__CYGWIN__)
-  qbase = (isalpha(workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
+  qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
 #else
   qbase = workpath + 1;
 #endif
@@ -176,7 +175,7 @@ error:
 	      q = result;
 	      /* Duplicating some code here... */
 #if defined (__CYGWIN__)
-	      qbase = (isalpha(workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
+	      qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
 #else
 	      qbase = workpath + 1;
 #endif

@@ -24,7 +24,7 @@
 
 #include "stdc.h"
 
-typedef int	arrayind_t;
+typedef long	arrayind_t;
 
 enum atype {array_indexed, array_assoc};
 
@@ -40,6 +40,8 @@ typedef struct array_element {
 	struct array_element *next, *prev;
 } ARRAY_ELEMENT;
 
+typedef int sh_ae_map_func_t __P((ARRAY_ELEMENT *));
+
 char	*array_reference __P((ARRAY *, arrayind_t));
 
 extern int	array_add_element __P((ARRAY *, arrayind_t, char *));
@@ -53,7 +55,6 @@ extern void	empty_array __P((ARRAY *));
 extern void	dispose_array __P((ARRAY *));
 extern ARRAY	*dup_array __P((ARRAY *));
 extern ARRAY	*dup_array_subrange __P((ARRAY *, ARRAY_ELEMENT *, ARRAY_ELEMENT *));
-extern ARRAY_ELEMENT *new_array_element __P((arrayind_t, char *));
 extern ARRAY_ELEMENT *copy_array_element __P((ARRAY_ELEMENT *));
 
 extern WORD_LIST *array_to_word_list __P((ARRAY *));
@@ -67,7 +68,7 @@ extern char *quoted_array_assignment_string __P((ARRAY *));
 extern char *array_to_string __P((ARRAY *, char *, int));
 extern ARRAY *string_to_array __P((char *, char *));
 
-extern char *array_subrange __P((ARRAY *, int, int, int));
+extern char *array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int));
 extern char *array_pat_subst __P((ARRAY *, char *, char *, int));
 
 extern ARRAY *array_quote __P((ARRAY *));

@@ -26,8 +26,9 @@
 extern WORD_LIST *make_word_list __P((WORD_DESC *, WORD_LIST *));
 extern WORD_LIST *add_string_to_list __P((char *, WORD_LIST *));
 
-extern WORD_DESC *make_bare_word __P((char *));
-extern WORD_DESC *make_word __P((char *));
+extern WORD_DESC *make_bare_word __P((const char *));
+extern WORD_DESC *make_word_flags __P((WORD_DESC *, const char *));
+extern WORD_DESC *make_word __P((const char *));
 extern WORD_DESC *make_word_from_token __P((int));
 
 extern COMMAND *make_command __P((enum command_type, SIMPLE_COM *));

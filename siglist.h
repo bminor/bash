@@ -37,4 +37,8 @@ extern char *sys_siglist[];
 #  define strsignal(sig) (char *)sys_siglist[sig]
 #endif /* !strsignal && !HAVE_STRSIGNAL */
 
+#if !defined (strsignal) && !HAVE_DECL_STRSIGNAL
+extern char *strsignal __P((int));
+#endif
+
 #endif /* _SIGLIST_H */

@@ -103,7 +103,7 @@ timeval_to_cpu (rt, ut, st)
 void
 timeval_to_secs (tvp, sp, sfp)
      struct timeval *tvp;
-     long *sp;
+     time_t *sp;
      int *sfp;
 {
   int rest;
@@ -131,14 +131,15 @@ print_timeval (fp, tvp)
      FILE *fp;
      struct timeval *tvp;
 {
-  int minutes, seconds_fraction;
-  long seconds;
+  time_t timestamp;
+  long minutes;
+  int seconds, seconds_fraction;
 
-  timeval_to_secs (tvp, &seconds, &seconds_fraction);
+  timeval_to_secs (tvp, &timestamp, &seconds_fraction);
 
-  minutes = seconds / 60;
-  seconds %= 60;
+  minutes = timestamp / 60;
+  seconds = timestamp % 60;
 
-  fprintf (fp, "%0dm%0ld.%03ds",  minutes, seconds, seconds_fraction);
+  fprintf (fp, "%ldm%d.%03ds",  minutes, seconds, seconds_fraction);
 }
 #endif /* HAVE_TIMEVAL */

@@ -33,10 +33,11 @@
 #include "pathexp.h"
 #include "flags.h"
 
-#include <glob/fnmatch.h>
+#include <glob/strmatch.h>
 
 #if defined (USE_POSIX_GLOB_LIBRARY)
 #  include <glob.h>
+typedef int posix_glob_errfunc_t __P((const char *, int));
 #else
 #  include <glob/glob.h>
 #endif
@@ -107,7 +108,7 @@ quote_string_for_globbing (pathname, qflags)
   char *temp;
   register int i, j;
 
-  temp = xmalloc (strlen (pathname) + 1);
+  temp = (char *)xmalloc (strlen (pathname) + 1);
 
   if ((qflags & QGLOB_CVTNULL) && QUOTED_NULL (pathname))
     {
@@ -137,7 +138,7 @@ quote_globbing_chars (string)
 {
   char *temp, *s, *t;
 
-  temp = xmalloc (strlen (string) * 2 + 1);
+  temp = (char *)xmalloc (strlen (string) * 2 + 1);
   for (t = temp, s = string; *s; )
     {
       switch (*s)
@@ -185,7 +186,7 @@ shell_glob_filename (pathname)
 
   glob_flags |= (GLOB_ERR | GLOB_DOOFFS);
 
-  i = glob (temp, glob_flags, (Function *)NULL, &filenames);
+  i = glob (temp, glob_flags, (posix_glob_errfunc_t *)NULL, &filenames);
 
   free (temp);
 
@@ -249,7 +250,7 @@ static struct ignorevar globignore =
   (struct ign *)0,
   0,
   (char *)0,
-  (Function *)0,
+  (sh_iv_item_func_t *)0,
 };
 
 /* Set up to ignore some glob matches because the value of GLOBIGNORE
@@ -279,7 +280,7 @@ should_ignore_glob_matches ()
 /* Return 0 if NAME matches a pattern in the globignore.ignores list. */
 static int
 glob_name_is_acceptable (name)
-     char *name;
+     const char *name;
 {
   struct ign *p;
   int flags;
@@ -291,7 +292,7 @@ glob_name_is_acceptable (name)
   flags = FNM_PATHNAME | FNMATCH_EXTFLAG;
   for (p = globignore.ignores; p->val; p++)
     {
-      if (fnmatch (p->val, name, flags) != FNM_NOMATCH)
+      if (strmatch (p->val, (char *)name, flags) != FNM_NOMATCH)
 	return (0);
     }
   return (1);
@@ -306,7 +307,7 @@ glob_name_is_acceptable (name)
 static void
 ignore_globbed_names (names, name_func)
      char **names;
-     Function *name_func;
+     sh_ignore_func_t *name_func;
 {
   char **newnames;
   int n, i;

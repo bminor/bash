@@ -60,8 +60,6 @@ CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
 	$(CC) $(CCFLAGS) -c $<
 
 MALLOC_SOURCE = malloc.c
-GMALLOC_SOURCE = gmalloc.c
-NMALLOC_SOURCE = nmalloc.c
 STUB_SOURCE = stub.c
 
 ALLOCA_SOURCE = alloca.c
@@ -71,14 +69,10 @@ MALLOC_SRC = @MALLOC_SRC@
 MALLOC = @MALLOC@
 ALLOCA = @ALLOCA@
 
-MALLOC_OBJS = malloc.o $(ALLOCA) stub.o
-GMALLOC_OBJS = gmalloc.o $(ALLOCA) stub.o
-NMALLOC_OBJS = nmalloc.o $(ALLOCA) stub.o
-NMALLOC2_OBJS = nmalloc2.o $(ALLOCA) stub.o
-NGMALLOC_OBJS = ngmalloc.o $(ALLOCA) stub.o
+MALLOC_OBJS = malloc.o $(ALLOCA) trace.o stats.o table.o
 STUB_OBJS = $(ALLOCA) stub.o
 
-.PHONY:		malloc gmalloc stubmalloc nmalloc ngmalloc nmalloc2
+.PHONY:		malloc stubmalloc
 
 all:		malloc
 
@@ -87,29 +81,14 @@ malloc: ${MALLOC_OBJS}
 	${AR} ${ARFLAGS} libmalloc.a ${MALLOC_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
-nmalloc: ${NMALLOC_OBJS}
-	${RM} libmalloc.a
-	${AR} ${ARFLAGS} libmalloc.a ${NMALLOC_OBJS}
-	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
-
-nmalloc2: ${NMALLOC2_OBJS}
-	${RM} libmalloc.a
-	${AR} ${ARFLAGS} libmalloc.a ${NMALLOC2_OBJS}
-	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
-
-gmalloc: ${GMALLOC_OBJS}
-	${RM} libmalloc.a
-	${AR} ${ARFLAGS} libmalloc.a ${GMALLOC_OBJS}
-	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
-
-ngmalloc: ${NGMALLOC_OBJS}
-	${RM} libmalloc.a
-	${AR} ${ARFLAGS} libmalloc.a ${NGMALLOC_OBJS}
-	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
-
 stubmalloc: ${STUB_OBJS}
 	${RM} libmalloc.a
 	${AR} ${ARFLAGS} libmalloc.a ${STUB_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+alloca: ${ALLOCA}
+	${RM} libmalloc.a
+	${AR} ${ARFLAGS} libmalloc.a ${ALLOCA}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 alloca.o:	$(srcdir)/$(ALLOCA_SOURCE)
@@ -126,12 +105,18 @@ distclean realclean maintainer-clean: clean
 
 alloca.o: $(BUILD_DIR)/config.h
 malloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
-nmalloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
-nmalloc2.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
 xmalloc.o: $(BUILD_DIR)/config.h $(BASHINCDIR)/ansi_stdlib.h
-gmalloc.o: $(BUILD_DIR)/config.h
+trace.o: ${BUILD_DIR}/config.h
+table.o: ${BUILD_DIR}/config.h
+
+malloc.o: ${srcdir}/imalloc.h ${srcdir}/mstats.h
+stats.o: ${srcdir}/imalloc.h ${srcdir}/mstats.h
+trace.o: ${srcdir}/imalloc.h
+table.o: ${srcdir}/imalloc.h ${srcdir}/table.h
 
 # Rules for deficient makes, like SunOS and Solaris
 stub.o: stub.c
 malloc.o: malloc.c
-gmalloc.o: gmalloc.c
+table.o: table.c
+trace.o: trace.c
+stats.o: stats.c

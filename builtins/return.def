@@ -52,7 +52,7 @@ int
 return_builtin (list)
      WORD_LIST *list;
 {
-  return_catch_value = list ? get_numeric_arg (list, 1) : last_command_exit_value;
+  return_catch_value = list ? get_exitstat (list) : last_command_exit_value;
 
   if (return_catch_flag)
     longjmp (return_catch, 1);

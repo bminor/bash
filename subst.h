@@ -72,6 +72,12 @@ extern char *assignment_name __P((char *));
    each word with a space. */
 extern char *string_list __P((WORD_LIST *));
 
+/* Turn $* into a single string, obeying POSIX rules. */
+extern char *string_list_dollar_star __P((WORD_LIST *));
+
+/* Expand $@ into a single string, obeying POSIX rules. */
+extern char *string_list_dollar_at __P((WORD_LIST *, int));
+
 /* Perform quoted null character removal on each element of LIST.
    This modifies LIST. */
 extern void word_list_remove_quoted_nulls __P((WORD_LIST *));
@@ -88,12 +94,8 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
    perform parameter expansion, command substitution, and arithmetic
    expansion on the right-hand side.  Perform tilde expansion in any
    case.  Do not perform word splitting on the result of expansion. */
-extern int do_assignment __P((char *));
-extern int do_assignment_no_expand __P((char *));
-
-#if defined (ARRAY_VARS)
-extern SHELL_VAR *do_array_element_assignment __P((char *, char *));
-#endif
+extern int do_assignment __P((const char *));
+extern int do_assignment_no_expand __P((const char *));
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
@@ -103,7 +105,7 @@ extern char *sub_append_string __P((char *, char *, int *, int *));
 
 /* Append the textual representation of NUMBER to TARGET.
    INDEX and SIZE are as in SUB_APPEND_STRING. */
-extern char *sub_append_number __P((int, char *, int *, int *));
+extern char *sub_append_number __P((long, char *, int *, int *));
 
 /* Return the word list that corresponds to `$*'. */
 extern WORD_LIST *list_rest_of_args __P((void));
@@ -118,7 +120,7 @@ extern int number_of_args __P((void));
 /* Expand STRING by performing parameter expansion, command substitution,
    and arithmetic expansion.  Dequote the resulting WORD_LIST before
    returning it, but do not perform word splitting.  The call to
-   remove_quoted_nulls () is in here because word splitting normally
+   remove_quoted_nulls () is made here because word splitting normally
    takes care of quote removal. */
 extern WORD_LIST *expand_string_unsplit __P((char *, int));
 
@@ -131,6 +133,12 @@ extern WORD_LIST *expand_prompt_string __P((char *, int));
    does parameter expansion, command substitution, arithmetic expansion,
    and word splitting.  Dequote the resultant WORD_LIST before returning. */
 extern WORD_LIST *expand_string __P((char *, int));
+
+/* Convenience functions that expand strings to strings, taking care of
+   converting the WORD_LIST * returned by the expand_string* functions
+   to a string and deallocating the WORD_LIST *. */
+extern char *expand_string_to_string __P((char *, int));
+extern char *expand_string_unsplit_to_string __P((char *, int));
 
 /* De-quoted quoted characters in STRING. */
 extern char *dequote_string __P((char *));
@@ -147,10 +155,14 @@ extern WORD_LIST *expand_word_unsplit __P((WORD_DESC *, int));
 extern WORD_LIST *expand_word_leave_quoted __P((WORD_DESC *, int));
 
 /* Return the value of a positional parameter.  This handles values > 10. */
-extern char *get_dollar_var_value __P((int));
+extern char *get_dollar_var_value __P((long));
 
 /* Quote a string to protect it from word splitting. */
 extern char *quote_string __P((char *));
+
+/* Quote escape characters (characters special to interals of expansion)
+   in a string. */
+extern char *quote_escapes __P((char *));
 
 /* Perform quote removal on STRING.  If QUOTED > 0, assume we are obeying the
    backslash quoting rules for within double quotes. */
@@ -192,10 +204,6 @@ extern void unlink_fifo_list __P((void));
 extern WORD_LIST *list_string_with_quotes __P((char *));
 
 #if defined (ARRAY_VARS)
-extern int array_expand_index __P((char *, int));
-extern int valid_array_reference __P((char *));
-extern char *get_array_value __P((char *, int));
-extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
 extern char *extract_array_assignment_list __P((char *, int *));
 #endif
 

@@ -52,7 +52,7 @@ initialize_filename_hashing ()
 
 static void
 free_filename_data (data)
-     char *data;
+     PTR_T data;
 {
   free (((PATH_DATA *)data)->path);
   free (data);
@@ -68,7 +68,7 @@ flush_hashed_filenames ()
 /* Remove FILENAME from the table of hashed commands. */
 void
 remove_hashed_filename (filename)
-     char *filename;
+     const char *filename;
 {
   register BUCKET_CONTENTS *item;
 
@@ -85,14 +85,14 @@ remove_hashed_filename (filename)
     }
 }
 
-/* Place FILENAME (key) and FULL_PATHNAME (data->path) into the
+/* Place FILENAME (key) and FULL_PATH (data->path) into the
    hash table.  CHECK_DOT if non-null is for future calls to
    find_hashed_filename (); it means that this file was found
    in a directory in $PATH that is not an absolute pathname.
    FOUND is the initial value for times_found. */
 void
-remember_filename (filename, full_pathname, check_dot, found)
-     char *filename, *full_pathname;
+remember_filename (filename, full_path, check_dot, found)
+     char *filename, *full_path;
      int check_dot, found;
 {
   register BUCKET_CONTENTS *item;
@@ -109,13 +109,13 @@ remember_filename (filename, full_pathname, check_dot, found)
   else
     {
       item->key = savestring (filename);
-      item->data = xmalloc (sizeof (PATH_DATA));
+      item->data = (char *)xmalloc (sizeof (PATH_DATA));
     }
-  pathdata(item)->path = savestring (full_pathname);
+  pathdata(item)->path = savestring (full_path);
   pathdata(item)->flags = 0;
   if (check_dot)
     pathdata(item)->flags |= HASH_CHKDOT;
-  if (*full_pathname != '/')
+  if (*full_path != '/')
     pathdata(item)->flags |= HASH_RELPATH;
   item->times_found = found;
 }
@@ -127,7 +127,7 @@ remember_filename (filename, full_pathname, check_dot, found)
    for freeing it. */
 char *
 find_hashed_filename (filename)
-     char *filename;
+     const char *filename;
 {
   register BUCKET_CONTENTS *item;
   char *path, *dotted_filename, *tail;
@@ -147,11 +147,11 @@ find_hashed_filename (filename)
   path = pathdata(item)->path;
   if (pathdata(item)->flags & (HASH_CHKDOT|HASH_RELPATH))
     {
-      tail = (pathdata(item)->flags & HASH_RELPATH) ? path : filename;
+      tail = (pathdata(item)->flags & HASH_RELPATH) ? path : (char *)filename;	/* XXX - fix const later */
       /* If the pathname does not start with a `./', add a `./' to it. */
       if (tail[0] != '.' || tail[1] != '/')
 	{
-	  dotted_filename = xmalloc (3 + strlen (tail));
+	  dotted_filename = (char *)xmalloc (3 + strlen (tail));
 	  dotted_filename[0] = '.'; dotted_filename[1] = '/';
 	  strcpy (dotted_filename + 2, tail);
 	}

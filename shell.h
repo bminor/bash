@@ -18,7 +18,9 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "bashjmp.h"
 
@@ -27,6 +29,7 @@
 #include "general.h"
 #include "error.h"
 #include "variables.h"
+#include "arrayfunc.h"
 #include "quit.h"
 #include "maxpath.h"
 #include "unwind_prot.h"
@@ -36,12 +39,12 @@
 #include "sig.h"
 #include "pathnames.h"
 #include "externs.h"
+#include "version.h"
 
 extern int EOF_Reached;
 
 #define NO_PIPE -1
 #define REDIRECT_BOTH -2
-#define IS_DESCRIPTOR -1
 
 #define NO_VARIABLE -1
 
@@ -82,11 +85,12 @@ extern WORD_LIST *rest_of_args;
 
 /* Generalized global variables. */
 extern int executing, login_shell;
+extern int interactive, interactive_shell;
 
 /* Structure to pass around that holds a bitmap of file descriptors
    to close, and the size of that structure.  Used in execute_cmd.c. */
 struct fd_bitmap {
-  long size;
+  int size;
   char *bitmap;
 };
 
@@ -105,3 +109,11 @@ struct user_info {
 };
 
 extern struct user_info current_user;
+
+/* Force gcc to not clobber X on a longjmp().  Old versions of gcc mangle
+   this badly. */
+#if __GNUC__ == 2 && __GNUC_MINOR__ > 8
+#  define USE_VAR(x)	((void) &(x))
+#else
+#  define USE_VAR(x)
+#endif

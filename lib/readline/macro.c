@@ -163,9 +163,9 @@ _rl_add_macro_char (c)
   if (current_macro_index + 1 >= current_macro_size)
     {
       if (current_macro == 0)
-	current_macro = xmalloc (current_macro_size = 25);
+	current_macro = (char *)xmalloc (current_macro_size = 25);
       else
-	current_macro = xrealloc (current_macro, current_macro_size += 25);
+	current_macro = (char *)xrealloc (current_macro, current_macro_size += 25);
     }
 
   current_macro[current_macro_index++] = c;

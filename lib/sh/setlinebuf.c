@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 
-extern char *xmalloc();
+#include <xmalloc.h>
 
 #if defined (USING_BASH_MALLOC)
 #  define LBUF_BUFSIZE	1008
@@ -42,7 +42,7 @@ sh_setlinebuf (stream)
 #endif
 
 #if defined (USING_BASH_MALLOC)
-  local_linebuf = xmalloc (LBUF_BUFSIZE);
+  local_linebuf = (char *)xmalloc (LBUF_BUFSIZE);
 #else
   local_linebuf = (char *)NULL;
 #endif
@@ -56,7 +56,7 @@ sh_setlinebuf (stream)
 #  endif /* !SETVBUF_REVERSED */
 # else /* !HAVE_SETVBUF */
 
-  setlinebuf (stream));
+  setlinebuf (stream);
   return (0);
 
 #endif /* !HAVE_SETVBUF */

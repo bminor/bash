@@ -67,22 +67,26 @@
 #include "xmalloc.h"
 
 #ifndef RL_LIBRARY_VERSION
-#  define RL_LIBRARY_VERSION "4.2"
+#  define RL_LIBRARY_VERSION "4.2a"
+#endif
+
+#ifndef RL_READLINE_VERSION
+#  define RL_READLINE_VERSION	0x0402
 #endif
 
 /* Evaluates its arguments multiple times. */
 #define SWAP(s, e)  do { int t; t = s; s = e; e = t; } while (0)
 
 /* Forward declarations used in this file. */
-void _rl_free_history_entry __P((HIST_ENTRY *));
+void _rl_free_history_entry PARAMS((HIST_ENTRY *));
 
-static char *readline_internal __P((void));
-static void readline_initialize_everything __P((void));
-static void start_using_history __P((void));
-static void bind_arrow_keys __P((void));
-static int rl_change_case __P((int, int));
+static char *readline_internal PARAMS((void));
+static void readline_initialize_everything PARAMS((void));
+static void start_using_history PARAMS((void));
+static void bind_arrow_keys PARAMS((void));
+static int rl_change_case PARAMS((int, int));
 
-static void readline_default_bindings __P((void));
+static void readline_default_bindings PARAMS((void));
 
 /* **************************************************************** */
 /*								    */
@@ -91,6 +95,8 @@ static void readline_default_bindings __P((void));
 /* **************************************************************** */
 
 const char *rl_library_version = RL_LIBRARY_VERSION;
+
+int rl_readline_version = RL_READLINE_VERSION;
 
 /* True if this is `real' readline as opposed to some stub substitute. */
 int rl_gnu_readline_p = 1;
@@ -155,8 +161,11 @@ FILE *_rl_in_stream, *_rl_out_stream;
 FILE *rl_instream = (FILE *)NULL;
 FILE *rl_outstream = (FILE *)NULL;
 
-/* Non-zero means echo characters as they are read. */
-int readline_echoing_p = 1;
+/* Non-zero means echo characters as they are read.  Defaults to no echo;
+   set to 1 if there is a controlling terminal, we can get its attributes,
+   and the attributes include `echo'.  Look at rltty.c:prepare_terminal_settings
+   for the code that sets it. */
+int readline_echoing_p = 0;
 
 /* Current prompt. */
 char *rl_prompt = (char *)NULL;
@@ -219,7 +228,7 @@ int rl_num_chars_to_read;
 char *rl_line_buffer = (char *)NULL;
 int rl_line_buffer_len = 0;
 
-/* Forward declarations used by the display and termcap code. */
+/* Forward declarations used by the display, termcap, and history code. */
 
 /* **************************************************************** */
 /*								    */
@@ -240,6 +249,14 @@ int _rl_convert_meta_chars_to_ascii = 1;
    rather than as a meta-prefixed escape sequence. */
 int _rl_output_meta_chars = 0;
 
+/* If non-zero, rl_get_previous_history and rl_get_next_history attempt
+   to preserve the value of rl_point from line to line. */
+int _rl_history_preserve_point = 0;
+
+/* Saved target point for when _rl_history_preserve_point is set.  Special
+   value of -1 means that point is at the end of the line. */
+static int _rl_history_saved_point = -1;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -258,9 +275,7 @@ rl_set_prompt (prompt)
   FREE (rl_prompt);
   rl_prompt = prompt ? savestring (prompt) : (char *)NULL;
 
-  rl_visible_prompt_length = (rl_prompt && *rl_prompt)
-				? rl_expand_prompt (rl_prompt)
-				: 0;
+  rl_visible_prompt_length = rl_expand_prompt (rl_prompt);
   return 0;
 }
   
@@ -583,6 +598,12 @@ _rl_dispatch (key, map)
 	  if (key == ESC)
 	    RL_UNSETSTATE(RL_STATE_METANEXT);
 
+	  if (newkey < 0)
+	    {
+	      _rl_abort_internal ();
+	      return -1;
+	    }
+
 	  r = _rl_dispatch (newkey, FUNCTION_TO_KEYMAP (map, key));
 	}
       else
@@ -714,7 +735,7 @@ readline_initialize_everything ()
 
   /* Allocate data structures. */
   if (rl_line_buffer == 0)
-    rl_line_buffer = xmalloc (rl_line_buffer_len = DEFAULT_BUFFER_SIZE);
+    rl_line_buffer = (char *)xmalloc (rl_line_buffer_len = DEFAULT_BUFFER_SIZE);
 
   /* Initialize the terminal interface. */
   if (rl_terminal_name == 0)
@@ -855,6 +876,12 @@ rl_digit_loop ()
       key = c = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
+      if (c < 0)
+	{
+	  _rl_abort_internal ();
+	  return -1;
+	}
+
       /* If we see a key bound to `universal-argument' after seeing digits,
 	 it ends the argument but is otherwise ignored. */
       if (_rl_keymap[c].type == ISFUNC &&
@@ -901,8 +928,7 @@ rl_digit_loop ()
 	}
     }
 
-  RL_UNSETSTATE(RL_STATE_NUMERICARG);
-  return 0;
+  /*NOTREACHED*/
 }
 
 /* Add the current digit to the argument in progress. */
@@ -1139,6 +1165,10 @@ rl_backward (count, key)
       else
         rl_point -= count;
     }
+
+  if (rl_point < 0)
+    rl_point = 0;
+
   return 0;
 }
 
@@ -1344,7 +1374,7 @@ rl_insert (count, c)
      readline because of extra large arguments. */
   if (count > 1 && count <= 1024)
     {
-      string = xmalloc (1 + count);
+      string = (char *)xmalloc (1 + count);
 
       for (i = 0; i < count; i++)
 	string[i] = c;
@@ -1431,6 +1461,10 @@ rl_newline (count, key)
      int count, key;
 {
   rl_done = 1;
+
+  if (_rl_history_preserve_point)
+    _rl_history_saved_point = (rl_point == rl_end) ? -1 : rl_point;
+
   RL_SETSTATE(RL_STATE_DONE);
 
 #if defined (VI_MODE)
@@ -1487,10 +1521,10 @@ rl_rubout (count, key)
     }
   else
     {
-      int c = the_line[--rl_point];
+      unsigned char c = the_line[--rl_point];
       rl_delete_text (rl_point, rl_point + 1);
 
-      if (rl_point == rl_end && isprint (c) && _rl_last_c_pos)
+      if (rl_point == rl_end && ISPRINT (c) && _rl_last_c_pos)
 	{
 	  int l;
 	  l = rl_character_len (c, rl_point);
@@ -1685,7 +1719,8 @@ rl_change_case (count, op)
 /*								    */
 /* **************************************************************** */
 
-/* Transpose the words at point. */
+/* Transpose the words at point.  If point is at the end of the line,
+   transpose the two words before point. */
 int
 rl_transpose_words (count, key)
      int count, key;
@@ -2000,6 +2035,10 @@ rl_get_next_history (count, key)
 
   rl_maybe_replace_line ();
 
+  /* either not saved by rl_newline or at end of line, so set appropriately. */
+  if (_rl_history_saved_point == -1 && (rl_point || rl_end))
+    _rl_history_saved_point = (rl_point == rl_end) ? -1 : rl_point;
+
   temp = (HIST_ENTRY *)NULL;
   while (count)
     {
@@ -2020,7 +2059,12 @@ rl_get_next_history (count, key)
 
       strcpy (the_line, temp->line);
       rl_undo_list = (UNDO_LIST *)temp->data;
-      rl_end = rl_point = strlen (the_line);
+      rl_end = strlen (the_line);
+      rl_point = (_rl_history_preserve_point && _rl_history_saved_point != -1)
+			? _rl_history_saved_point
+			: rl_end;
+      if (rl_point > rl_end)
+	rl_point = rl_end;
 #if defined (VI_MODE)
       if (rl_editing_mode == vi_mode)
 	rl_point = 0;
@@ -2043,6 +2087,10 @@ rl_get_previous_history (count, key)
 
   if (count == 0)
     return 0;
+
+  /* either not saved by rl_newline or at end of line, so set appropriately. */
+  if (_rl_history_saved_point == -1 && (rl_point || rl_end))
+    _rl_history_saved_point = (rl_point == rl_end) ? -1 : rl_point;
 
   /* If we don't have a line saved, then save this one. */
   rl_maybe_save_line ();
@@ -2077,7 +2125,12 @@ rl_get_previous_history (count, key)
 
       strcpy (the_line, temp->line);
       rl_undo_list = (UNDO_LIST *)temp->data;
-      rl_end = rl_point = line_len;
+      rl_end = line_len;
+      rl_point = (_rl_history_preserve_point && _rl_history_saved_point != -1)
+			? _rl_history_saved_point
+			: rl_end;
+      if (rl_point > rl_end)
+	rl_point = rl_end;
 
 #if defined (VI_MODE)
       if (rl_editing_mode == vi_mode)

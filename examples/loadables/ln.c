@@ -23,10 +23,12 @@
 extern int errno;
 #endif
 
+typedef int unix_link_syscall_t __P((const char *, const char *));
+
 #define LN_SYMLINK 0x01
 #define LN_UNLINK  0x02
 
-static Function *linkfn;
+static unix_link_syscall_t *linkfn;
 static int dolink ();
 
 ln_builtin (list)

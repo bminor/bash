@@ -57,3 +57,7 @@
 /* Define this to make non-interactive shells begun with argv[0][0] == '-'
    run the startup files when not in posix mode. */
 /* #define NON_INTERACTIVE_LOGIN_SHELLS */
+
+/* Define this if you want bash to try to check whether it's being run by
+   sshd and source the .bashrc if so (like the rshd behavior). */
+/* #define SSH_SOURCE_BASHRC */

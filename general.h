@@ -38,12 +38,11 @@
 #  include <strings.h>
 #endif /* !HAVE_STRING_H */
 
-/* Generic pointer type. */
-#if defined (__STDC__)
-#  define PTR_T	void *
-#else
-#  define PTR_T char *
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
 #endif
+
+#include "xmalloc.h"
 
 /* NULL pointer type. */
 #if !defined (NULL)
@@ -56,14 +55,12 @@
 
 #define pointer_to_int(x) (int)((long)(x))
 
-extern char *xmalloc (), *xrealloc ();
-
 #if defined (alpha) && defined (__GNUC__) && !defined (strchr) && !defined (__STDC__)
 extern char *strchr (), *strrchr ();
 #endif
 
 #if !defined (strcpy)
-extern char *strcpy ();
+extern char *strcpy __P((char *, const char *));
 #endif
 
 #if !defined (savestring)
@@ -78,25 +75,34 @@ extern char *strcpy ();
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
-#ifndef digit
-#define digit(c)  (isdigit(c))
+#ifndef CHAR_MAX
+#  ifdef __CHAR_UNSIGNED__
+#    define CHAR_MAX	0xff
+#  else
+#    define CHAR_MAX	0x7f
+#  endif
 #endif
 
-#ifndef isletter
-#define isletter(c) (isalpha(c))
+#ifndef CHAR_BIT
+#  define CHAR_BIT 8
 #endif
 
-#ifndef digit_value
-#define digit_value(c) ((c) - '0')
-#endif
+/* Nonzero if the integer type T is signed.  */
+#define TYPE_SIGNED(t) (! ((t) 0 < (t) -1))
 
-#ifndef ISOCTAL
-#define ISOCTAL(c)  ((c) >= '0' && (c) <= '7')
-#endif
+/* Bound on length of the string representing an integer value of type T.
+   Subtract one for the sign bit if T is signed;
+   302 / 1000 is log10 (2) rounded up;
+   add one for integer division truncation;
+   add one more for a minus sign if t is signed.  */
+#define INT_STRLEN_BOUND(t) \
+  ((sizeof (t) * CHAR_BIT - TYPE_SIGNED (t)) * 302 / 1000 \
+   + 1 + TYPE_SIGNED (t))
+
 
 /* Define exactly what a legal shell identifier consists of. */
-#define legal_variable_starter(c) (isletter(c) || (c == '_'))
-#define legal_variable_char(c)	(isletter (c) || digit (c) || c == '_')
+#define legal_variable_starter(c) (ISALPHA(c) || (c == '_'))
+#define legal_variable_char(c)	(ISALNUM(c) || c == '_')
 
 /* Definitions used in subst.c and by the `read' builtin for field
    splitting. */
@@ -168,9 +174,51 @@ typedef struct {
 #  define _FUNCTION_DEF
 typedef int Function ();
 typedef void VFunction ();
-typedef char *CPFunction ();
-typedef char **CPPFunction ();
+typedef char *CPFunction ();		/* no longer used */
+typedef char **CPPFunction ();		/* no longer used */
 #endif /* _FUNCTION_DEF */
+
+#ifndef SH_FUNCTION_TYPEDEF
+#  define SH_FUNCTION_TYPEDEF
+
+/* Shell function typedefs with prototypes */
+/* `Generic' function pointer typedefs */
+
+typedef int sh_intfunc_t __P((int));
+typedef int sh_ivoidfunc_t __P((void));
+typedef int sh_icpfunc_t __P((char *));
+typedef int sh_icppfunc_t __P((char **));
+typedef int sh_iptrfunc_t __P((PTR_T));
+
+typedef void sh_voidfunc_t __P((void));
+typedef void sh_vintfunc_t __P((int));
+typedef void sh_vcpfunc_t __P((char *));
+typedef void sh_vcppfunc_t __P((char **));
+typedef void sh_vptrfunc_t __P((PTR_T));
+
+typedef int sh_wdesc_func_t __P((WORD_DESC *));
+typedef int sh_wlist_func_t __P((WORD_LIST *));
+
+typedef int sh_glist_func_t __P((GENERIC_LIST *));
+
+typedef char *sh_string_func_t __P((char *));	/* like savestring, et al. */
+
+typedef int sh_msg_func_t __P((const char *, ...));	/* printf(3)-like */
+typedef void sh_vmsg_func_t __P((const char *, ...));	/* printf(3)-like */
+
+/* Specific function pointer typedefs.  Most of these could be done
+   with #defines. */
+typedef void sh_sv_func_t __P((char *));	/* sh_vcpfunc_t */
+typedef void sh_free_func_t __P((PTR_T));	/* sh_vptrfunc_t */
+typedef void sh_resetsig_func_t __P((int));	/* sh_vintfunc_t */
+
+typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
+
+typedef int sh_assign_func_t __P((const char *));	/* sh_icpfunc_t */
+
+typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
+
+#endif /* SH_FUNCTION_TYPEDEF */
 
 #define NOW	((time_t) time ((time_t *) 0))
 
@@ -182,6 +230,13 @@ typedef char **CPPFunction ();
 #define FS_DIRECTORY	  0x10
 #define FS_NODIRS	  0x20
 
+/* The type of function passed as the fourth argument to qsort(3). */
+#ifdef __STDC__
+typedef int QSFUNC (const void *, const void *);
+#else
+typedef int QSFUNC ();
+#endif 
+
 /* Some useful definitions for Unix pathnames.  Argument convention:
    x == string, c == character */
 
@@ -189,7 +244,7 @@ typedef char **CPPFunction ();
 #  define ABSPATH(x)	((x)[0] == '/')
 #  define RELPATH(x)	((x)[0] != '/')
 #else /* __CYGWIN__ */
-#  define ABSPATH(x)	(((x)[0] && isalpha((x)[0]) && (x)[1] == ':' && (x)[2] == '/') || (x)[0] == '/')
+#  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':' && (x)[2] == '/') || (x)[0] == '/')
 #  define RELPATH(x)	(!(x)[0] || ((x)[1] != ':' && (x)[0] != '/'))
 #endif /* __CYGWIN__ */
 
@@ -199,10 +254,12 @@ typedef char **CPPFunction ();
 #define ISDIRSEP(c)	((c) == '/')
 #define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
 
+#if 0
 /* Declarations for functions defined in xmalloc.c */
-extern char *xmalloc __P((size_t));
-extern char *xrealloc __P((void *, size_t));
+extern PTR_T xmalloc __P((size_t));
+extern PTR_T xrealloc __P((void *, size_t));
 extern void xfree __P((void *));
+#endif
 
 /* Declarations for functions defined in general.c */
 extern void posix_initialize __P((int));
@@ -219,13 +276,16 @@ extern int check_identifier __P((WORD_DESC *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
 extern void check_dev_tty __P((void));
-extern int same_file ();	/* too many problems with prototype */
 extern int move_to_high_fd __P((int, int, int));
-extern int check_binary_file __P((unsigned char *, int));
+extern int check_binary_file __P((char *, int));
+
+#ifdef _POSIXSTAT_H_
+extern int same_file __P((char *, char *, struct stat *, struct stat *));
+#endif
 
 extern char *make_absolute __P((char *, char *));
-extern int absolute_pathname __P((char *));
-extern int absolute_program __P((char *));
+extern int absolute_pathname __P((const char *));
+extern int absolute_program __P((const char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
@@ -233,7 +293,7 @@ extern char *polite_directory_format __P((char *));
 extern char *extract_colon_unit __P((char *, int *));
 
 extern void tilde_initialize __P((void));
-extern char *bash_tilde_expand __P((char *));
+extern char *bash_tilde_expand __P((const char *));
 
 extern int group_member __P((gid_t));
 extern char **get_group_list __P((int *));

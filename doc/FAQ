@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.11, for Bash version 2.05.
+This is the Bash FAQ, version 3.17, for Bash version 2.05a.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,8 +36,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 2.05?
-B2) Are there any user-visible incompatibilities between bash-2.05 and
+B1) What's new in version 2.05a?
+B2) Are there any user-visible incompatibilities between bash-2.05a and
     bash-1.14.7?
 
 Section C:  Differences from other Unix shells
@@ -134,22 +134,23 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 2.05, first made available on Monday, 9 April 2001.
+The latest version is 2.05a, first made available on Thursday, 15
+November, 2001.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 2.05:
+The following URLs tell how to get version 2.05a:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-2.05.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-2.05.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-2.05a.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-2.05a.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.05.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-2.05.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.05a.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-2.05a.tar.gz
 
 A4)  On what machines will bash run?
 
@@ -161,13 +162,17 @@ itself accordingly, using a script created by GNU autoconf.
 
 More information appears in the file `INSTALL' in the distribution.
 
+The Bash web page (http://cnswww.cns.cwru.edu/~chet/bash/bashtop.html)
+explains how to obtain binary versions of bash for most of the major
+commercial Unix systems.
+
 A5) Will bash run on operating systems other than Unix?
 
 Configuration specifics for Unix-like systems such as QNX and
-LynxOS are included in the distribution.  Bash-2.05 should 
-compile and run on Minix 2.0 (patches were contributed), but I
-don't believe anyone has built bash-2.x on earlier Minix versions
-yet.
+LynxOS are included in the distribution.  Bash-2.05 and later
+versions should compile and run on Minix 2.0 (patches were
+contributed), but I don't believe anyone has built bash-2.x on
+earlier Minix versions yet. 
 
 Bash has been ported to versions of Windows implementing the Win32
 programming interface.  This includes Windows 95 and Windows NT.
@@ -179,10 +184,10 @@ http://sourceware.cygnus.com/cygwin
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
 early GNU-Win32 (the original name) releases.  Cygnus has also done a
-port of bash-2.04 to the CYGWIN environment, and it is available as
+port of bash-2.05 to the CYGWIN environment, and it is available as
 part of their current release.
 
-Bash-2.05 should require no local Cygnus changes to build and run under
+Bash-2.05a should require no local Cygnus changes to build and run under
 CYGWIN.
 
 The Cygnus port works only on Intel machines.  There is a port of bash
@@ -190,30 +195,21 @@ The Cygnus port works only on Intel machines.  There is a port of bash
 
 ftp://ftp.gnustep.org//pub/win32/bash-alpha-nt-1.01.tar.gz
 
-DJ Delorie has a port of bash-1.14.7 which runs under MS-DOS, as part
+DJ Delorie has a port of bash-2.x which runs under MS-DOS, as part
 of the DJGPP project.  For more information on the project, see
 
 http://www.delorie.com/djgpp/
 
 I have been told that the original DJGPP port was done by Daisuke Aoyama.
 
-I picked up a binary of bash-1.14.7 that is purported to work with
-the DJGPP V2 environment from
+Mark Elbrecht <snowball3@bigfoot.com> has sent me notice that bash-2.04
+is available for DJGPP V2.  The files are available as:
 
-ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147b.zip
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204b.zip	binary
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204d.zip	documentation
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204s.zip	source
 
-The corresponding source is
-
-ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147s.zip
-
-Mark Elbrecht <snowball3@bigfoot.com> has sent me notice that bash-2.03
-has become available for DJGPP V2.  The files are available as:
-
-ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203b.zip	binary
-ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203d.zip	documentation
-ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh203s.zip	source
-
-Mark has begun to work with bash-2.04.
+Mark has begun to work with bash-2.05, but I don't know the status.
 
 Ports of bash-1.12 and bash-2.0 are available for OS/2 from
 
@@ -285,8 +281,9 @@ slightly different.
 If you cannot change your login shell in the password file to bash, you
 will have to (apparently) live with CDE using the shell in the password
 file to run its startup scripts.  If you have changed your shell to bash,
-there is code in the CDE startup files (on Solaris, at least) to do the
-right thing. 
+there is code in the CDE startup files (on Solaris, at least) that attempts
+to do the right thing.  It is, however, often broken, and may require that
+you use the $BASH_ENV trick described below.
 
 `dtterm' claims to use $SHELL as the default program to start, so if you
 can change $SHELL in the CDE startup files, you should be able to use bash
@@ -304,6 +301,16 @@ CDE by testing the value of the DT variable:
 	        [ -f /usr/gnu/bin/bash ] && exec /usr/gnu/bin/bash --login
 	fi
 
+If CDE starts its shells non-interactively during login, the login shell
+startup files (~/.profile, ~/.bash_profile) will not be sourced at login.
+To get around this problem, append a line similar to the following to your
+~/.dtprofile:
+
+	BASH_ENV=${HOME}/.bash_profile ; export BASH_ENV
+
+and add the following line to the beginning of ~/.bash_profile:
+
+	unset BASH_ENV
 
 A8) I just changed my login shell to bash, and now I can't FTP into my
    machine.  Why not?
@@ -350,6 +357,12 @@ line editing.  Only vi-style line editing commands have been
 standardized; emacs editing commands were left out due to
 objections.
 
+The Open Group has made an older version of its Single Unix
+Specification (version 2), which is very similar to POSIX.2,
+available on the web at
+
+http://www.opengroup.org/onlinepubs/007908799/
+
 A10)  What is the bash `posix mode'?
 
 Although bash is an implementation of the POSIX.2 shell
@@ -367,11 +380,47 @@ Reference Manual.
 
 Section B:  The latest version
 
-B1) What's new in version 2.05?
+B1) What's new in version 2.05a?
 
-Bash-2.05 contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-2.05
+The raison d'etre for bash-2.05a is to make an intermediate release
+containing principally bug fixes (some very good work was done and
+contributed after bash-2.05 was released) available before I start to
+work on the major new features to be available in the next release
+(bash-2.06 or bash-3.0 or whatever I tag it).  As such, there are
+only a few relatively minor new features.
+
+Bash-2.05a contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-2.05a
 distribution):
+
+o The `printf' builtin has undergone major work
+
+o There is a new read-only `shopt' option: login_shell, which is set by
+  login shells and unset otherwise
+
+o New `\A' prompt string escape sequence; expanding to time in 24-hour
+  HH:MM format
+
+o New `-A group/-g' option to complete and compgen; goes group name
+  completion
+
+o New [+-]O invocation option to set and unset `shopt' options at startup
+
+o ksh-like `ERR' trap
+
+o `for' loops now allow empty word lists after the `in' reserved word
+
+o new `hard' and `soft' arguments for the `ulimit' builtin
+
+o Readline can be configured to place the user at the same point on the line
+  when retrieving commands from the history list
+
+o Readline can be configured to skip `hidden' files (filenames with a leading
+  `.' on Unix) when performing completion
+
+A short feature history dating from bash-2.0:
+
+Bash-2.05 introduced the following new features:
 
 o This version has once again reverted to using locales and strcoll(3) when
   processing pattern matching bracket expressions, as POSIX requires. 
@@ -395,8 +444,6 @@ o When `set' is called without options, it prints function defintions in a
   way that allows them to be reused as input.  This affects `declare' and 
   `declare -p' as well.  This only happens when the shell is not in POSIX
    mode, since POSIX.2 forbids this behavior.
-
-A short feature history dating from bash-2.0:
 
 Bash-2.04 introduced the following new features:
 
@@ -523,11 +570,13 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-2.05 and
+B2) Are there any user-visible incompatibilities between bash-2.05a and
     bash-1.14.7?
 
-There are a few incompatibilities between version 1.14.7 and version 2.05.
-They are detailed in the file COMPAT in the bash-2.05 distribution.
+There are a few incompatibilities between version 1.14.7 and version 2.05a.
+They are detailed in the file COMPAT in the bash-2.05a distribution.  That
+file is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
+if you find something that's not mentioned there.
 
 Section C:  Differences from other Unix shells
 
@@ -539,6 +588,7 @@ completely.
 
 Things bash has that sh does not:
 	long invocation options
+	[+-]O invocation option
 	`!' reserved word to invert pipeline return value
 	`time' reserved word to time pipelines and shell builtins
 	the `function' reserved word
@@ -564,13 +614,14 @@ Things bash has that sh does not:
 		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, FUNCNAME, histchars,
 		   auto_resume
 	DEBUG trap
+	ERR trap
 	variable arrays with new compound assignment syntax
 	redirections: <>, &>, >|
 	prompt string special char translation and variable expansion
 	auto-export of variables in initial environment
 	command search finds functions before builtins
 	bash return builtin will exit a file sourced with `.'
-	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -p.
+	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -p/-t.
 		  export -n/-f/-p/name=value, pwd -L/-P,
 		  read -e/-p/-a/-t/-n/-d/-s,
 		  readonly -a/-f/name=value, trap -l, set +o,
@@ -638,6 +689,7 @@ C2)  How does bash differ from the Korn shell, version ksh88?
 
 Things bash has or uses that ksh88 does not:
 	long invocation options
+	[-+]O invocation option
 	`!' reserved word
 	arithmetic for command: for ((expr1 ; expr2; expr3 )); do list; done
 	posix mode and posix conformance
@@ -674,11 +726,11 @@ Things bash has or uses that ksh88 does not:
 	case-insensitive pattern matching and globbing
 	`**' arithmetic operator to do exponentiation
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr
+	arrays of unlimited size
 
 Things ksh88 has or uses that bash does not:
-	tracked aliases
+	tracked aliases (alias -t)
 	variables: ERRNO, FPATH, EDITOR, VISUAL
-	trap on ERR
 	co-processes (|&, >&p, <&p)
 	weirdly-scoped functions
 	typeset +f to list all function names without definitions
@@ -686,7 +738,10 @@ Things ksh88 has or uses that bash does not:
 	builtins: alias -x, cd old new, fc -e -, newgrp, print,
 		  read -p/-s/-u/var?prompt, set -A/-o gmacs/
 		  -o bgnice/-o markdirs/-o nolog/-o trackall/-o viraw/-s,
-		  typeset -H/-L/-R/-A/-ft/-fu/-fx/-l/-u/-t, whence
+		  typeset -H/-L/-R/-Z/-A/-ft/-fu/-fx/-l/-u/-t, whence
+	using environment to pass attributes of exported variables
+	arithmetic evaluation done on arguments to some builtins
+	reads .profile from $PWD when invoked as login shell
 
 Implementation differences:
 	ksh runs last command of a pipeline in parent shell context
@@ -694,12 +749,14 @@ Implementation differences:
 	bash has fixed startup file for all interactive shells; ksh reads $ENV
 	bash has exported functions
 	bash command search finds functions before builtins
+	bash waits for all commands in pipeline to exit before returning status
+	emacs-mode editing has some slightly different key bindings
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-2.05:
+New things in ksh-93 not in bash-2.05a:
 	associative arrays
-	floating point arithmetic
+	floating point arithmetic and variables
 	math library functions
 	${!name[sub]} name of subscript for associative array
 	`.' is allowed in variable names to create a hierarchical namespace
@@ -709,13 +766,24 @@ New things in ksh-93 not in bash-2.05:
 	typeset -n and `nameref' variables
 	KEYBD trap
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, .sh.version,
-		   .sh.name, .sh.subscript, .sh.value, HISTEDIT
-	backreferences in pattern matching
+		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT
+	backreferences in pattern matching (\N)
+	`&' operator in pattern lists for matching
 	print -f (bash uses printf)
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
+	exit statuses between 0 and 255
+	set -o pipefail
+	`+=' variable assignment operator
+	TMOUT is default timeout for `read' and `select'
+	<&N- and >&N- redirections (combination dup and close)
+	FPATH and PATH mixing
+	getopts -a
+	-I invocation option
+	DEBUG trap now executed before each simple command, instead of after
+	printf %H, %P, %T, %Z modifiers, output base for %d
 
-New things in ksh-93 present in bash-2.04:
+New things in ksh-93 present in bash-2.05a:
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
         ?:, ++, --, `expr1 , expr2' arithmetic operators
 	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]},
@@ -1041,6 +1109,16 @@ this.
 This is the general approach -- in most cases you will not need to
 set $IFS to a different value.
 
+Some other user-supplied alternatives include:
+
+read A B C D << HERE
+    $(IFS=.; echo $(/usr/local/bin/ipaddr))
+HERE
+
+and, where process substitution is available,
+
+read A B C D < <(IFS=.; echo $(/usr/local/bin/ipaddr))
+
 E5) I have a bunch of shell scripts that use backslash-escaped characters
     in arguments to `echo'.  Bash doesn't interpret these characters.  Why
     not, and how can I make it understand them?
@@ -1057,7 +1135,7 @@ them.
 
 There is a configuration option that will make bash behave like
 the System V echo and interpret things like `\t' by default.  Run
-configure with the --enable-usg-echo-default option to turn this
+configure with the --enable-xpg-echo-default option to turn this
 on.  Be aware that this will cause some of the tests run when you
 type `make tests' to fail.
 
@@ -1101,11 +1179,12 @@ bash:
 		( cd $d && ${MAKE} ${MFLAGS} clean )
 	done
 
-This is a syntax error.  If the reserved word `in' is present, a word must
-follow it before the semicolon or newline.  The language in the manual page
-referring to the list of words being empty refers to the list after it is
-expanded.  There must be at least one word following the `in' when the
-construct is parsed.
+In versions of bash before bash-2.05a, this was a syntax error.  If the
+reserved word `in' was present, a word must follow it before the semicolon
+or newline.  The language in the manual page referring to the list of words
+being empty referred to the list after it is expanded.  These versions of
+bash required that there be at least one word following the `in' when the
+construct was parsed.
 
 The idiomatic Makefile solution is something like:
 
@@ -1116,11 +1195,9 @@ subdirs-clean:
 		( cd $$d && ${MAKE} ${MFLAGS} clean ) \
 	done
 
-
-The POSIX.2 interpretation committee has considered this issue and declared
-that the bash implemenation is correct, according to the standard:
-
-http://www.pasc.org/interps/unofficial/db/p1003.2/pasc-1003.2-169.html
+The latest drafts of the updated POSIX standard have changed this:  the
+word list is no longer required.  Bash versions 2.05a and later accept
+the new syntax.
 
 E8) Why does the arithmetic evaluation code complain about `08'?
 
@@ -1143,11 +1220,12 @@ honoring the current locale setting when processing ranges within pattern
 matching bracket expressions ([A-Z]).  This is what POSIX.2 and SUSv2/XPG5
 specify. 
 
-The behavior of the matcher in bash-2.05 depends on the current LC_COLLATE
-setting.  Setting this variable to `C' or `POSIX' will result in the
-traditional behavior ([A-Z] matches all uppercase ASCII characters).
-Many other locales, including the en_US locale (the default on many US
-versions of Linux) collate the upper and lower case letters like this:
+The behavior of the matcher in bash-2.05 and later versions depends on the
+current LC_COLLATE setting.  Setting this variable to `C' or `POSIX' will
+result in the traditional behavior ([A-Z] matches all uppercase ASCII
+characters).  Many other locales, including the en_US locale (the default
+on many US versions of Linux) collate the upper and lower case letters like
+this:
 
 	AaBb...Zz
 
@@ -1279,7 +1357,7 @@ comp.unix.shell).  While most commands of the form
 can be converted to `< file command', shell control structures such as
 loops and subshells require `command < file'.
 
-The file CWRU/sh-redir-hack in the bash-2.05 distribution is an
+The file CWRU/sh-redir-hack in the bash-2.05a distribution is an
 (unofficial) patch to parse.y that will modify the grammar to
 support this construct.  It will not apply with `patch'; you must
 modify parse.y by hand.  Note that if you apply this, you must
@@ -1395,6 +1473,9 @@ before `eval' is executed.  In versions of bash later than bash-2.0,
 	echo ${!#}
 
 does the same thing.
+
+This is not the same thing as ksh93 `nameref' variables, though the syntax
+is similar.  I may add namerefs in a future bash version.
 
 G4) How can I make the bash `time' reserved word print timing output that
      looks like the output from my system's /usr/bin/time?
@@ -1524,14 +1605,14 @@ or on the web.
 
 H3) What's coming in future versions?
 
-These are features I plan to include in a future version of bash.
+These are features I hope to include in a future version of bash.
 
-a bash debugger (a minimally-tested version is included with bash-2.05)
+a better bash debugger (a minimally-tested version is included with bash-2.05a)
 associative arrays
 changes to the DEBUG trap to be compatible with ksh93 (which runs the
 trap before each simple command, instead of after each one like previous
 versions)
-an implementation of the ksh-like ERR trap
+co-processes, but with a new-style syntax that looks like function declaration
 
 H4) What's on the bash `wish list' for future versions?
 
@@ -1545,11 +1626,15 @@ date-stamped command history
 a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
+ksh93-like `nameref' variables
+ksh93-like `+=' variable assignment operator
+ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
+	associated disipline functions
+Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2001 or 2002.  Never make
-predictions. 
+The next version will appear sometime in 2002.  Never make predictions. 
 
 
 This document is Copyright 1995-2001 by Chester Ramey.

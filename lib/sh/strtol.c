@@ -1,25 +1,27 @@
-/* strtol - Convert string representation of a number into an integer value.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+/* Convert string representation of a number into an integer value.
+   Copyright (C) 1991,92,94,95,96,97,98,99,2000,2001 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
 
-   This program is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 2, or (at your option) any
-   later version.
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   The GNU C Library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Lesser General Public
+   License along with the GNU C Library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307 USA.  */
 
 #include <config.h>
 
 #if !defined (HAVE_STRTOL)
 
-#include <ctype.h>
+#include <chartypes.h>
 #include <errno.h>
 
 #ifndef errno
@@ -34,6 +36,8 @@ extern int errno;
 #  include <limits.h>
 #endif
 
+#include <typemax.h>
+
 #include <stdc.h>
 #include <bashansi.h>
 
@@ -41,61 +45,74 @@ extern int errno;
 #  define NULL 0
 #endif
 
-/* Nonzero if we are defining `strtoul', operating on unsigned integers.  */
+/* Nonzero if we are defining `strtoul' or `strtoull', operating on
+   unsigned integers.  */
 #ifndef UNSIGNED
-# define UNSIGNED 0
-# define RETTYPE long
+#  define UNSIGNED 0
+#  define INT LONG int
 #else
-# define RETTYPE unsigned long
+#  define INT unsigned LONG int
 #endif
 
-/* Determine the name.  */
 #if UNSIGNED
-#  define strtol strtoul
+#  ifdef QUAD
+#    define strtol strtoull
+#  else
+#    define strtol strtoul
+#  endif
+#else
+#  ifdef QUAD
+#    define strtol strtoll
+#  endif
 #endif
 
-#ifndef CHAR_BIT
-#  define CHAR_BIT 8
-#endif
+/* If QUAD is defined, we are defining `strtoll' or `strtoull',
+   operating on `long long ints.  */
 
-#ifndef ULONG_MAX
-#  define ULONG_MAX ((unsigned long) ~(unsigned long) 0)
-#  define ULONG_MIN ((unsigned long) 0 - ULONG_MAX)
-#endif
-
-#ifndef LONG_MAX
-#  define LONG_MAX ((long) (ULONG_MAX >> 1))
-#  define LONG_MIN ((long) (0 - LONG_MAX))
+#ifdef QUAD
+#  define LONG long long
+#  define STRTOL_LONG_MIN LLONG_MIN
+#  define STRTOL_LONG_MAX LLONG_MAX
+#  define STRTOL_ULONG_MAX ULLONG_MAX
+#else	/* !QUAD */
+#  define LONG long
+#  define STRTOL_LONG_MIN LONG_MIN
+#  define STRTOL_LONG_MAX LONG_MAX
+#  define STRTOL_ULONG_MAX ULONG_MAX
 #endif
 
 /* Convert NPTR to an `unsigned long int' or `long int' in base BASE.
    If BASE is 0 the base is determined by the presence of a leading
    zero, indicating octal or a leading "0x" or "0X", indicating hexadecimal.
-   If BASE is < 2 or > 36, it is reset to 10.
+   If BASE is < 2 or > 36, it is no longer reset to 10; EINVAL is returned.
    If ENDPTR is not NULL, a pointer to the character after the last
    one converted is stored in *ENDPTR.  */
 
-RETTYPE
+INT
 strtol (nptr, endptr, base)
      const char *nptr;
      char **endptr;
      int base;
 {
   int negative;
-  register unsigned long cutoff, i;
+  register unsigned LONG int cutoff;
   register unsigned int cutlim;
+  register unsigned LONG int i;
   register const char *s;
   register unsigned char c;
   const char *save, *end;
   int overflow;
 
   if (base < 0 || base == 1 || base > 36)
-    base = 10;
+    {
+      __set_errno (EINVAL);
+      return 0;
+    }
 
   save = s = nptr;
 
   /* Skip white space.  */
-  while (isspace (*s))
+  while (ISSPACE ((unsigned char)*s))
     ++s;
   if (*s == '\0')
     goto noconv;
@@ -109,58 +126,85 @@ strtol (nptr, endptr, base)
   else
     negative = 0;
 
-  if (base == 16 && *s == '0' && toupper (s[1]) == 'X')
-    s += 2;
-
-  /* If BASE is zero, figure it out ourselves.  */
-  if (base == 0)
-    if (*s == '0')
-      {
-	if (toupper (s[1]) == 'X')
-	  {
-	    s += 2;
-	    base = 16;
-	  }
-	else
-	  base = 8;
-      }
-    else
-      base = 10;
+  /* Recognize number prefix and if BASE is zero, figure it out ourselves.  */
+  if (*s == '0')
+    {
+      if ((base == 0 || base == 16) && TOUPPER ((unsigned char) s[1]) == 'X')
+	{
+	  s += 2;
+	  base = 16;
+	}
+      else if (base == 0)
+	base = 8;
+    }
+  else if (base == 0)
+    base = 10;
 
   /* Save the pointer so we can check later if anything happened.  */
   save = s;
 
   end = NULL;
 
-  cutoff = ULONG_MAX / (unsigned long int) base;
-  cutlim = ULONG_MAX % (unsigned long int) base;
+  cutoff = STRTOL_ULONG_MAX / (unsigned LONG int) base;
+  cutlim = STRTOL_ULONG_MAX % (unsigned LONG int) base;
 
   overflow = 0;
   i = 0;
-  for (c = *s; c != '\0'; c = *++s)
+  c = *s;
+  if (sizeof (long int) != sizeof (LONG int))
     {
-      if (s == end)
-	break;
+      unsigned long int j = 0;
+      unsigned long int jmax = ULONG_MAX / base;
 
-      if (c >= '0' && c <= '9')
-	c -= '0';
-      else if (isalpha (c))
-	c = toupper (c) - 'A' + 10;
-      else
-	break;
-
-      if ((int) c >= base)
-	break;
-
-      /* Check for overflow.  */
-      if (i > cutoff || (i == cutoff && c > cutlim))
-	overflow = 1;
-      else
+      for (;c != '\0'; c = *++s)
 	{
-	  i *= (unsigned long int) base;
-	  i += c;
+	  if (s == end)
+	    break;
+	  if (DIGIT (c))
+	    c -= '0';
+	  else if (ISALPHA (c))
+	    c = TOUPPER (c) - 'A' + 10;
+	  else
+	    break;
+
+	  if ((int) c >= base)
+	    break;
+	  /* Note that we never can have an overflow.  */
+	  else if (j >= jmax)
+	    {
+	      /* We have an overflow.  Now use the long representation.  */
+	      i = (unsigned LONG int) j;
+	      goto use_long;
+	    }
+	  else
+	    j = j * (unsigned long int) base + c;
 	}
+
+      i = (unsigned LONG int) j;
     }
+  else
+    for (;c != '\0'; c = *++s)
+      {
+	if (s == end)
+	  break;
+	if (DIGIT (c))
+	  c -= '0';
+	else if (ISALPHA (c))
+	  c = TOUPPER (c) - 'A' + 10;
+	else
+	  break;
+	if ((int) c >= base)
+	  break;
+	/* Check for overflow.  */
+	if (i > cutoff || (i == cutoff && c > cutlim))
+	  overflow = 1;
+	else
+	  {
+	  use_long:
+	    i *= (unsigned LONG int) base;
+	    i += c;
+	  }
+      }
 
   /* Check if anything actually happened.  */
   if (s == save)
@@ -173,11 +217,11 @@ strtol (nptr, endptr, base)
 
 #if !UNSIGNED
   /* Check for a value that is within the range of
-     `unsigned long int', but outside the range of `long int'.  */
+     `unsigned LONG int', but outside the range of `LONG int'.  */
   if (overflow == 0
       && i > (negative
-	      ? -((unsigned long) (LONG_MIN + 1)) + 1
-	      : (unsigned long) LONG_MAX))
+	      ? -((unsigned LONG int) (STRTOL_LONG_MIN + 1)) + 1
+	      : (unsigned LONG int) STRTOL_LONG_MAX))
     overflow = 1;
 #endif
 
@@ -185,23 +229,23 @@ strtol (nptr, endptr, base)
     {
       __set_errno (ERANGE);
 #if UNSIGNED
-      return ULONG_MAX;
+      return STRTOL_ULONG_MAX;
 #else
-      return negative ? LONG_MIN : LONG_MAX;
+      return negative ? STRTOL_LONG_MIN : STRTOL_LONG_MAX;
 #endif
     }
 
-  /* Return the result with the appropriate sign.  */
-  return (negative ? -i : i);
+  /* Return the result of the appropriate sign.  */
+  return negative ? -i : i;
 
 noconv:
   /* We must handle a special case here: the base is 0 or 16 and the
      first two characters are '0' and 'x', but the rest are no
      hexadecimal digits.  This is no error case.  We return 0 and
-     ENDPTR points to the `x'.  */
+     ENDPTR points to the `x`.  */
   if (endptr != NULL)
     {
-      if (save - nptr >= 2 && toupper (save[-1]) == 'X' && save[-2] == '0')
+      if (save - nptr >= 2 && TOUPPER ((unsigned char) save[-1]) == 'X' && save[-2] == '0')
 	*endptr = (char *) &save[-1];
       else
 	/*  There was no number to convert.  */

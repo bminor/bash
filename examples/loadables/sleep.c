@@ -23,6 +23,7 @@
 #endif
 
 #include <stdio.h>
+#include "chartypes.h"
 
 #include "shell.h"
 #include "builtins.h"
@@ -78,7 +79,7 @@ long	*sp, *usp;
 	for (p = s; p && *p; p++) {
 		if (*p == DECIMAL)		/* decimal point */
 			break;
-		if (isdigit(*p) == 0)
+		if (DIGIT(*p) == 0)
 			RETURN(0);
 		sec = (sec * 10) + (*p - '0');
 	}
@@ -91,7 +92,7 @@ long	*sp, *usp;
 
 	/* Look for up to six digits past a decimal point. */
 	for (n = 0; n < 6 && p[n]; n++) {
-		if (isdigit(p[n]) == 0)
+		if (DIGIT(p[n]) == 0)
 			RETURN(0);
 		usec = (usec * 10) + (p[n] - '0');
 	}
@@ -99,7 +100,7 @@ long	*sp, *usp;
 	/* Now convert to millionths */
 	usec *= multiplier[n];
 
-	if (n == 6 && p[6] && isdigit(p[6]) && p[6] >= '5')	
+	if (n == 6 && p[6] >= '5' && p[6] <= '9')
 		usec++;			/* round up 1 */
 
 	RETURN(1);

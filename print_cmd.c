@@ -43,7 +43,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "stdc.h"
 #include "builtins/common.h"
 
-#if !defined (PRINTF_DECLARED)
+#if !HAVE_DECL_PRINTF
 extern int printf __P((const char *, ...));	/* Yuck.  Double yuck. */
 #endif
 
@@ -51,42 +51,50 @@ static int indentation;
 static int indentation_amount = 4;
 
 #if defined (PREFER_STDARG)
-static void cprintf __P((char *, ...));
+typedef void PFUNC __P((const char *, ...));
+
+static void cprintf __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+static void xprintf __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 #else
+#define PFUNC VFunction
 static void cprintf ();
-#endif
-
-static void newline (), indent (), the_printed_command_resize ();
-static void semicolon ();
 static void xprintf ();
-
-static void make_command_string_internal ();
-static void command_print_word_list ();
-static void print_case_clauses ();
-static void print_redirection_list ();
-static void print_redirection ();
-
-static void print_for_command ();
-#if defined (SELECT_COMMAND)
-static void print_select_command ();
 #endif
-static void print_group_command ();
-static void print_case_command ();
-static void print_while_command ();
-static void print_until_command ();
-static void print_until_or_while ();
-static void print_if_command ();
-static void print_function_def ();
+
+static void reset_locals __P((void));
+static void newline __P((char *));
+static void indent __P((int));
+static void semicolon __P((void));
+static void the_printed_command_resize __P((int));
+
+static void make_command_string_internal __P((COMMAND *));
+static void _print_word_list __P((WORD_LIST *, char *, PFUNC *));
+static void command_print_word_list __P((WORD_LIST *, char *));
+static void print_case_clauses __P((PATTERN_LIST *));
+static void print_redirection_list __P((REDIRECT *));
+static void print_redirection __P((REDIRECT *));
+
+static void print_for_command __P((FOR_COM *));
+#if defined (ARITH_FOR_COMMAND)
+static void print_arith_for_command __P((ARITH_FOR_COM *));
+#endif
+#if defined (SELECT_COMMAND)
+static void print_select_command __P((SELECT_COM *));
+#endif
+static void print_group_command __P((GROUP_COM *));
+static void print_case_command __P((CASE_COM *));
+static void print_while_command __P((WHILE_COM *));
+static void print_until_command __P((WHILE_COM *));
+static void print_until_or_while __P((WHILE_COM *, char *));
+static void print_if_command __P((IF_COM *));
 #if defined (DPAREN_ARITHMETIC)
-static void print_arith_command ();
+static void print_arith_command __P((ARITH_COM *));
 #endif
 #if defined (COND_COMMAND)
-static void print_cond_node ();
-static void print_cond_command ();
+static void print_cond_node __P((COND_COM *));
+static void print_cond_command __P((COND_COM *));
 #endif
-#if defined (ARITH_FOR_COMMAND)
-static void print_arith_for_command ();
-#endif
+static void print_function_def __P((FUNCTION_DEF *));
 
 #define PRINTED_COMMAND_INITIAL_SIZE 64
 #define PRINTED_COMMAND_GROW_SIZE 128
@@ -290,7 +298,7 @@ static void
 _print_word_list (list, separator, pfunc)
      WORD_LIST *list;
      char *separator;
-     VFunction *pfunc;
+     PFUNC *pfunc;
 {
   WORD_LIST *w;
 
@@ -807,6 +815,7 @@ print_function_def (func)
   COMMAND *cmdcopy;
   REDIRECT *func_redirects;
 
+  func_redirects = NULL;
   cprintf ("function %s () \n", func->name->word);
   add_unwind_protect (reset_locals, 0);
 
@@ -970,11 +979,12 @@ semicolon ()
 /* How to make the string. */
 static void
 cprintf (format, arg1, arg2)
-     char *format, *arg1, *arg2;
+     const char *format;
+     char *arg1, *arg2;
 {
-  register char *s;
-  char char_arg[2], *argp, *args[2], intbuf[32];
-  int arg_len, c, arg_index;
+  register const char *s;
+  char char_arg[2], *argp, *args[2], intbuf[INT_STRLEN_BOUND(int) + 1];
+  int arg_len, c, arg_index, digit_arg;
 
   args[arg_index = 0] = arg1;
   args[1] = arg2;
@@ -990,7 +1000,8 @@ cprintf (format, arg1, arg2)
       c = *s++;
       if (c != '%' || !*s)
 	{
-	  argp = s;
+	  char_arg[0] = c;
+	  argp = char_arg;
 	  arg_len = 1;
 	}
       else
@@ -1010,7 +1021,18 @@ cprintf (format, arg1, arg2)
 	      break;
 
 	    case 'd':
-	      argp = inttostr (pointer_to_int (args[arg_index]), intbuf, sizeof (intbuf));
+	      /* Represent an out-of-range file descriptor with an out-of-range
+		 integer value.  We can do this because the only use of `%d' in
+		 the calls to cprintf is to output a file descriptor number for
+		 a redirection. */
+	      digit_arg = pointer_to_int (args[arg_index]);
+	      if (digit_arg < 0)
+		{
+		  sprintf (intbuf, "%u", (unsigned)-1);
+		  argp = intbuf;
+		}
+	      else
+	        argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
 	      arg_index++;
 	      arg_len = strlen (argp);
 	      break;
@@ -1044,15 +1066,15 @@ cprintf (format, arg1, arg2)
 /* How to make the string. */
 static void
 #if defined (PREFER_STDARG)
-cprintf (char *control, ...)
+cprintf (const char *control, ...)
 #else
 cprintf (control, va_alist)
-     char *control;
+     const char *control;
      va_dcl
 #endif
 {
-  register char *s;
-  char char_arg[2], *argp, intbuf[32];
+  register const char *s;
+  char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (int) + 1];
   int digit_arg, arg_len, c;
   va_list args;
 
@@ -1075,7 +1097,8 @@ cprintf (control, va_alist)
       argp = (char *)NULL;
       if (c != '%' || !*s)
 	{
-	  argp = s - 1;
+	  char_arg[0] = c;
+	  argp = char_arg;
 	  arg_len = 1;
 	}
       else
@@ -1095,8 +1118,18 @@ cprintf (control, va_alist)
 	      break;
 
 	    case 'd':
+	      /* Represent an out-of-range file descriptor with an out-of-range
+		 integer value.  We can do this because the only use of `%d' in
+		 the calls to cprintf is to output a file descriptor number for
+		 a redirection. */
 	      digit_arg = va_arg (args, int);
-	      argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
+	      if (digit_arg < 0)
+		{
+		  sprintf (intbuf, "%u", (unsigned)-1);
+		  argp = intbuf;
+		}
+	      else
+	        argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
 	      arg_len = strlen (argp);
 	      break;
 
@@ -1135,7 +1168,7 @@ the_printed_command_resize (length)
   if (the_printed_command == 0)
     {
       the_printed_command_size = (length + PRINTED_COMMAND_INITIAL_SIZE - 1) & ~(PRINTED_COMMAND_INITIAL_SIZE - 1);
-      the_printed_command = xmalloc (the_printed_command_size);
+      the_printed_command = (char *)xmalloc (the_printed_command_size);
       command_string_index = 0;
     }
   else if ((command_string_index + length) >= the_printed_command_size)
@@ -1147,11 +1180,13 @@ the_printed_command_resize (length)
       new = (new + PRINTED_COMMAND_GROW_SIZE - 1) & ~(PRINTED_COMMAND_GROW_SIZE - 1);
       the_printed_command_size = new;
 
-      the_printed_command = xrealloc (the_printed_command, the_printed_command_size);
+      the_printed_command = (char *)xrealloc (the_printed_command, the_printed_command_size);
     }
 }
 
-#if defined (HAVE_VFPRINTF)
+#if defined (HAVE_VPRINTF)
+/* ``If vprintf is available, you may assume that vfprintf and vsprintf are
+     also available.'' */
 
 static void
 #if defined (PREFER_STDARG)
@@ -1178,9 +1213,9 @@ xprintf (format, va_alist)
 
 static void
 xprintf (format, arg1, arg2, arg3, arg4, arg5)
-     char *format;
+     const char *format;
 {
   printf (format, arg1, arg2, arg3, arg4, arg5);
 }
 
-#endif /* !HAVE_VFPRINTF */
+#endif /* !HAVE_VPRINTF */

@@ -31,6 +31,7 @@
 #  include <sys/file.h>
 #endif
 #include "posixstat.h"
+#include "posixtime.h"
 #include "bashansi.h"
 #include <stdio.h>
 #include <signal.h>
@@ -41,6 +42,8 @@
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+
+#define NEED_SH_SETLINEBUF_DECL		/* used in externs.h */
 
 #include "shell.h"
 #include "flags.h"
@@ -63,7 +66,7 @@
 #endif
 
 #include <tilde/tilde.h>
-#include <glob/fnmatch.h>
+#include <glob/strmatch.h>
 
 #if defined (__OPENNT)
 #  include <opennt/opennt.h>
@@ -101,7 +104,8 @@ COMMAND *global_command = (COMMAND *)NULL;
 /* Information about the current user. */
 struct user_info current_user =
 {
-  -1, -1, -1, -1, (char *)NULL, (char *)NULL, (char *)NULL
+  (uid_t)-1, (uid_t)-1, (gid_t)-1, (gid_t)-1,
+  (char *)NULL, (char *)NULL, (char *)NULL
 };
 
 /* The current host's name. */
@@ -241,24 +245,34 @@ static char *local_pending_command;
 
 static FILE *default_input;
 
-static int parse_long_options ();
-static int parse_shell_options ();
-static void run_startup_files ();
-static int bind_args ();
-static int open_shell_script ();
-static void set_bash_input ();
-static int run_one_command ();
-static int run_wordexp ();
+static STRING_INT_ALIST *shopt_alist;
+static int shopt_ind = 0, shopt_len = 0;
 
-static int uidget ();
-static int isnetconn ();
+static int parse_long_options __P((char **, int, int));
+static int parse_shell_options __P((char **, int, int));
+static int bind_args __P((char **, int, int, int));
 
-static void init_interactive (), init_noninteractive ();
-static void set_shell_name ();
-static void shell_initialize ();
-static void shell_reinitialize ();
+static void add_shopt_to_alist __P((char *, int));
+static void run_shopt_alist __P((void));
 
-static void show_shell_usage ();
+static void execute_env_file __P((char *));
+static void run_startup_files __P((void));
+static int open_shell_script __P((char *));
+static void set_bash_input __P((void));
+static int run_one_command __P((char *));
+static int run_wordexp __P((char *));
+
+static int uidget __P((void));
+static int isnetconn __P((int));
+
+static void init_interactive __P((void));
+static void init_noninteractive __P((void));
+
+static void set_shell_name __P((char *));
+static void shell_initialize __P((void));
+static void shell_reinitialize __P((void));
+
+static void show_shell_usage __P((FILE *, int));
 
 #ifdef __CYGWIN__
 static void
@@ -290,7 +304,10 @@ main (argc, argv, env)
 #endif /* !NO_MAIN_ENV_ARG */
 {
   register int i;
-  int code, saverst, old_errexit_flag;
+  int code, old_errexit_flag;
+#if defined (RESTRICTED_SHELL)
+  int saverst;
+#endif
   volatile int locally_skip_execution;
   volatile int arg_index, top_level_arg_index;
 #ifdef __OPENNT
@@ -299,10 +316,29 @@ main (argc, argv, env)
   env = environ;
 #endif /* __OPENNT */
 
+  USE_VAR(argc);
+  USE_VAR(argv);
+  USE_VAR(env);
+  USE_VAR(code);
+  USE_VAR(old_errexit_flag);
+#if defined (RESTRICTED_SHELL)
+  USE_VAR(saverst);
+#endif
+
   /* Catch early SIGINTs. */
   code = setjmp (top_level);
   if (code)
     exit (2);
+
+#if defined (USING_BASH_MALLOC) && defined (DEBUG)
+#  if 0		/* memory tracing */
+  malloc_set_trace(1);
+#  endif
+
+#  if 0
+  malloc_set_register (1);
+#  endif
+#endif
 
   check_dev_tty ();
 
@@ -388,6 +424,8 @@ main (argc, argv, env)
       login_shell = -login_shell;
     }
 
+  set_login_shell (login_shell != 0);
+
   /* All done with full word options; do standard shell option parsing.*/
   this_command_name = shell_name;	/* for error reporting */
   arg_index = parse_shell_options (argv, arg_index, argc);
@@ -460,6 +498,10 @@ main (argc, argv, env)
       sv_strict_posix ("POSIXLY_CORRECT");
     }
 
+  /* Now we run the shopt_alist and process the options. */
+  if (shopt_alist)
+    run_shopt_alist ();
+
   /* From here on in, the shell must be a normal functioning shell.
      Variables from the environment are expected to be set, etc. */
   shell_initialize ();
@@ -473,7 +515,7 @@ main (argc, argv, env)
       term = getenv ("TERM");
       no_line_editing |= term && (STREQ (term, "emacs"));
       term = getenv ("EMACS");
-      running_under_emacs = term ? ((fnmatch ("*term*", term, 0) == 0) ? 2 : 1)
+      running_under_emacs = term ? ((strmatch ("*term*", term, 0) == 0) ? 2 : 1)
 				 : 0;
     }
 
@@ -568,6 +610,7 @@ main (argc, argv, env)
       arg_index = bind_args (argv, arg_index, argc, 0);
       startup_state = 2;
 #if defined (ONESHOT)
+      executing = 1;
       run_one_command (local_pending_command);
       exit_shell (last_command_exit_value);
 #else /* ONESHOT */
@@ -732,6 +775,21 @@ parse_shell_options (argv, arg_start, arg_end)
 	      next_arg++;
 	      break;
 
+	    case 'O':
+	      /* Since some of these can be overridden by the normal
+		 interactive/non-interactive shell initialization or
+		 initializing posix mode, we save the options and process
+		 them after initialization. */
+	      o_option = argv[next_arg];
+	      if (o_option == 0)
+		{
+		  shopt_listopt (o_option, (on_or_off == '-') ? 0 : 1);
+		  break;
+		}
+	      add_shopt_to_alist (o_option, on_or_off);
+	      next_arg++;
+	      break;
+
 	    case 'D':
 	      dump_translatable_strings = 1;
 	      break;
@@ -790,6 +848,7 @@ exit_shell (s)
   exit (s);
 }
 
+#ifdef INCLUDE_UNUSED
 /* A wrapper for exit that (optionally) can do other things, like malloc
    statistics tracing. */
 void
@@ -798,6 +857,7 @@ sh_exit (s)
 {
   exit (s);
 }
+#endif
 
 /* Source the bash startup files.  If POSIXLY_CORRECT is non-zero, we obey
    the Posix.2 startup file rules:  $ENV is expanded, and if the file it
@@ -831,20 +891,13 @@ execute_env_file (env_file)
       char *env_file;
 {
   char *fn;
-  WORD_LIST *list;
 
   if (env_file && *env_file)
     {
-      list = expand_string_unsplit (env_file, Q_DOUBLE_QUOTES);
-      if (list)
-	{
-	  fn = string_list (list);
-	  dispose_words (list);
-
-	  if (fn && *fn)
-	    maybe_execute_file (fn, 1);
-	  FREE (fn);
-	}
+      fn = expand_string_unsplit_to_string (env_file, Q_DOUBLE_QUOTES);
+      if (fn && *fn)
+	maybe_execute_file (fn, 1);
+      FREE (fn);
     }
 }
 
@@ -860,8 +913,12 @@ run_startup_files ()
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && local_pending_command)
     {
-      run_by_ssh = find_variable ("SSH_CLIENT") != (SHELL_VAR *)0;
-      run_by_ssh |= find_variable ("SSH2_CLIENT") != (SHELL_VAR *)0;
+#ifdef SSH_SOURCE_BASHRC
+      run_by_ssh = (find_variable ("SSH_CLIENT") != (SHELL_VAR *)0) ||
+		   (find_variable ("SSH2_CLIENT") != (SHELL_VAR *)0);
+#else
+      run_by_ssh = 0;
+#endif
 
       /* If we were run by sshd or we think we were run by rshd, execute
 	 ~/.bashrc if we are a top-level shell. */
@@ -1058,7 +1115,6 @@ run_wordexp (words)
      char *words;
 {
   int code, nw, nb;
-  WORD_DESC *w;
   WORD_LIST *wl, *result;
 
   code = setjmp (top_level);
@@ -1198,7 +1254,7 @@ open_shell_script (script_name)
 {
   int fd, e, fd_is_tty;
   char *filename, *path_filename;
-  unsigned char sample[80];
+  char sample[80];
   int sample_len;
   struct stat sb;
 
@@ -1304,6 +1360,11 @@ open_shell_script (script_name)
       default_input = stdin;
 #endif
     }
+  else if (forced_interactive && fd_is_tty == 0)
+    /* But if a script is called with something like `bash -i scriptname',
+       we need to do a non-interactive setup here, since we didn't do it
+       before. */
+    init_noninteractive ();
 
   free (filename);
   return (fd);
@@ -1582,7 +1643,7 @@ show_shell_usage (fp, extra)
     fprintf (fp, "\t--%s\n", long_args[i].name);
 
   fputs ("Shell options:\n", fp);
-  fputs ("\t-irsD or -c command\t\t(invocation only)\n", fp);
+  fputs ("\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n", fp);
 
   for (i = 0, set_opts = 0; shell_builtins[i].name; i++)
     if (STREQ (shell_builtins[i].name, "set"))
@@ -1609,6 +1670,34 @@ show_shell_usage (fp, extra)
     }
 }
 
+static void
+add_shopt_to_alist (opt, on_or_off)
+     char *opt;
+     int on_or_off;
+{
+  if (shopt_ind >= shopt_len)
+    {
+      shopt_len += 8;
+      shopt_alist = (STRING_INT_ALIST *)xrealloc (shopt_alist, shopt_len * sizeof (shopt_alist[0]));
+    }
+  shopt_alist[shopt_ind].word = opt;
+  shopt_alist[shopt_ind].token = on_or_off;
+  shopt_ind++;
+}
+
+static void
+run_shopt_alist ()
+{
+  register int i;
+
+  for (i = 0; i < shopt_ind; i++)
+    if (shopt_setopt (shopt_alist[i].word, (shopt_alist[i].token == '-')) != EXECUTION_SUCCESS)
+      exit (EX_USAGE);
+  free (shopt_alist);
+  shopt_alist = 0;
+  shopt_ind = shopt_len = 0;
+}
+
 /* The second and subsequent conditions must match those used to decide
    whether or not to call getpeername() in isnetconn(). */
 #if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && !defined (SVR4_2)
@@ -1621,7 +1710,8 @@ isnetconn (fd)
      int fd;
 {
 #if defined (HAVE_GETPEERNAME) && !defined (SVR4_2) && !defined (__BEOS__)
-  int rv, l;
+  int rv;
+  socklen_t l;
   struct sockaddr sa;
 
   l = sizeof(sa);

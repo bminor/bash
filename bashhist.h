@@ -21,6 +21,8 @@
 #if !defined (_BASHHIST_H_)
 #define _BASHHIST_H_
 
+#include "stdc.h"
+
 extern int remember_on_history;
 extern int history_lines_this_session;
 extern int history_lines_in_file;
@@ -33,21 +35,21 @@ extern int hist_last_line_added;
 extern int history_expansion_inhibited;
 #  endif /* BANG_HISTORY */
 
-extern void bash_initialize_history ();
-extern void bash_history_reinit ();
-extern void bash_history_disable ();
-extern void bash_history_enable ();
-extern void load_history ();
-extern void save_history ();
-extern int maybe_append_history ();
-extern int maybe_save_shell_history ();
-extern char *pre_process_line ();
-extern int history_number ();
-extern void maybe_add_history ();
-extern void bash_add_history ();
+extern void bash_initialize_history __P((void));
+extern void bash_history_reinit __P((int));
+extern void bash_history_disable __P((void));
+extern void bash_history_enable __P((void));
+extern void load_history __P((void));
+extern void save_history __P((void));
+extern int maybe_append_history __P((char *));
+extern int maybe_save_shell_history __P((void));
+extern char *pre_process_line __P((char *, int, int));
+extern void maybe_add_history __P((char *));
+extern void bash_add_history __P((char *));
+extern int history_number __P((void));
 
-extern void setup_history_ignore ();
+extern void setup_history_ignore __P((char *));
 
-extern char *last_history_line ();
+extern char *last_history_line __P((void));
 
 #endif /* _BASHHIST_H_ */

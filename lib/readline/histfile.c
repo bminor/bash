@@ -105,7 +105,7 @@ history_filename (filename)
   else
     home_len = strlen (home);
 
-  return_val = xmalloc (2 + home_len + 8); /* strlen(".history") == 8 */
+  return_val = (char *)xmalloc (2 + home_len + 8); /* strlen(".history") == 8 */
   strcpy (return_val, home);
   return_val[home_len] = '/';
 #if defined (__MSDOS__)
@@ -161,7 +161,7 @@ read_history_range (filename, from, to)
       goto error_and_exit;
     }
 
-  buffer = xmalloc (file_size + 1);
+  buffer = (char *)xmalloc (file_size + 1);
 
   chars_read = read (file, buffer, file_size);
   if (chars_read < 0)
@@ -276,7 +276,7 @@ history_truncate_file (fname, lines)
       goto truncate_exit;
     }
 
-  buffer = xmalloc (file_size + 1);
+  buffer = (char *)xmalloc (file_size + 1);
   chars_read = read (file, buffer, file_size);
   close (file);
 
@@ -367,7 +367,7 @@ history_do_write (filename, nelements, overwrite)
       buffer_size += 1 + strlen (the_history[i]->line);
 
     /* Allocate the buffer, and fill it. */
-    buffer = xmalloc (buffer_size);
+    buffer = (char *)xmalloc (buffer_size);
 
     for (j = 0, i = history_length - nelements; i < history_length; i++)
       {

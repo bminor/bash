@@ -34,6 +34,9 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "shell.h"
 #include "hashlib.h"
 
+static void initialize_hash_table __P((HASH_TABLE *));
+static BUCKET_CONTENTS *copy_bucket_array __P((BUCKET_CONTENTS *, sh_string_func_t *));
+
 /* Zero the buckets in TABLE. */
 static void
 initialize_hash_table (table)
@@ -64,18 +67,80 @@ make_hash_table (buckets)
   return (new_table);
 }
 
+int
+hash_table_nentries (table)
+     HASH_TABLE *table;
+{
+  return (HASH_ENTRIES(table));
+}
+
+static BUCKET_CONTENTS *
+copy_bucket_array (ba, cpdata)
+     BUCKET_CONTENTS *ba;
+     sh_string_func_t *cpdata;	/* data copy function */
+{
+  BUCKET_CONTENTS *new_bucket, *n, *e;
+
+  if (ba == 0)
+    return ((BUCKET_CONTENTS *)0);
+
+  for (n = (BUCKET_CONTENTS *)0, e = ba; e; e = e->next)
+    {
+      if (n == 0)
+        {
+          new_bucket = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
+          n = new_bucket;
+        }
+      else
+        {
+          n->next = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
+          n = n->next;
+        }
+
+      n->key = savestring (e->key);
+      n->data = e->data ? (cpdata ? (*cpdata) (e->data) : savestring (e->data))
+			: (char *)NULL;
+      n->times_found = e->times_found;
+      n->next = (BUCKET_CONTENTS *)NULL;
+    }
+
+  return new_bucket;  
+}
+
+HASH_TABLE *
+copy_hash_table (table, cpdata)
+     HASH_TABLE *table;
+     sh_string_func_t *cpdata;
+{
+  HASH_TABLE *new_table;
+  int i;
+
+  if (table == 0)
+    return ((HASH_TABLE *)NULL);
+
+  new_table = make_hash_table (table->nbuckets);
+
+  for (i = 0; i < table->nbuckets; i++)
+    new_table->bucket_array[i] = copy_bucket_array (table->bucket_array[i], cpdata);
+
+  new_table->nentries = table->nentries;
+  return new_table;
+}
+
 /* Return the location of the bucket which should contain the data
    for STRING.  TABLE is a pointer to a HASH_TABLE. */
 
+#if 0
 /* A possibly better distribution may be obtained by initializing i to
    ~0UL and using i = (i * 31) + *string++ as the step */
 
 #define ALL_ONES (~((unsigned long) 0))
 #define BITS(h, n) ((unsigned long)(h) & ~(ALL_ONES << (n)))
+#endif
 
 int
 hash_string (string, table)
-     char *string;
+     const char *string;
      HASH_TABLE *table;
 {
   register unsigned int i = 0;
@@ -83,14 +148,20 @@ hash_string (string, table)
   while (*string)
     i = (i << 2) + *string++;
 
+#if 0
   return (BITS (i, 31) % table->nbuckets);
+#else
+  /* Rely on properties of unsigned division (unsigned/int -> unsigned) and
+     don't discard the upper 32 bits of the value, if present. */
+  return (i % table->nbuckets);
+#endif
 }
 
 /* Return a pointer to the hashed item, or NULL if the item
    can't be found. */
 BUCKET_CONTENTS *
 find_hash_item (string, table)
-     char *string;
+     const char *string;
      HASH_TABLE *table;
 {
   BUCKET_CONTENTS *list;
@@ -117,7 +188,7 @@ find_hash_item (string, table)
    the item isn't in this table NULL is returned. */
 BUCKET_CONTENTS *
 remove_hash_item (string, table)
-     char *string;
+     const char *string;
      HASH_TABLE *table;
 {
   int the_bucket;
@@ -194,7 +265,7 @@ add_hash_item (string, table)
 void
 flush_hash_table (table, free_data)
      HASH_TABLE *table;
-     VFunction *free_data;
+     sh_free_func_t *free_data;
 {
   int i;
   register BUCKET_CONTENTS *bucket, *item;
@@ -282,14 +353,18 @@ print_table_stats (table, name)
 #undef NULL
 #include <stdio.h>
 
-HASH_TABLE *table;
+#ifndef NULL
+#define NULL 0
+#endif
+
+HASH_TABLE *table, *ntable;
 #define NBUCKETS 107
 
-char *
+void *
 xmalloc (bytes)
-     int bytes;
+     size_t bytes;
 {
-  char *result = (char *)malloc (bytes);
+  void *result = malloc (bytes);
   if (!result)
     {
       fprintf (stderr, "hash: out of virtual memory\n");
@@ -327,6 +402,11 @@ main ()
     }
 
   print_table_stats (table, "hash test");
+
+  ntable = copy_hash_table (table, (sh_string_func_t *)NULL);
+  flush_hash_table (table, (sh_free_func_t *)NULL);
+  print_table_stats (ntable, "hash copy test");
+
   exit (0);
 }
 

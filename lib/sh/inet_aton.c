@@ -115,7 +115,7 @@ inet_aton(cp, addr)
 {
 	register u_bits32_t val;
 	register int base, n;
-	register char c;
+	register unsigned char c;
 	u_int parts[4];
 	register u_int *pp = parts;
 
@@ -126,7 +126,12 @@ inet_aton(cp, addr)
 		 * Values are specified as for C:
 		 * 0x=hex, 0=octal, isdigit=decimal.
 		 */
+#if 0
 		if (!isdigit(c))
+#else
+		if (c != '0' && c != '1' && c != '2' && c != '3' && c != '4' &&
+		    c != '5' && c != '6' && c != '7' && c != '8' && c != '9')
+#endif
 			return (0);
 		val = 0; base = 10;
 		if (c == '0') {

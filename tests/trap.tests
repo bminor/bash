@@ -53,6 +53,9 @@ echo $?
 trap '' USR2
 ./trap1.sub
 
+# test ERR trap
+./trap2.sub
+
 #
 # show that setting a trap on SIGCHLD is not disastrous.
 #
@@ -71,3 +74,4 @@ trap -p SIGCHLD
 trap SIGINT QUIT TERM
 
 trap
+

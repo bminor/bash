@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <ctype.h>
+#include "chartypes.h"
 
 #include "builtins.h"
 #include "shell.h"
@@ -37,7 +37,7 @@ munge_list (list)
   for (l = list; l; l = l->next)
     {
       arg = l->word->word;
-      if (arg[0] != '-' || arg[1] == '-' || (isdigit(arg[1]) == 0))
+      if (arg[0] != '-' || arg[1] == '-' || (DIGIT(arg[1]) == 0))
         return;
       /* We have -[0-9]* */
       wd = make_bare_word (arg+1);

@@ -37,6 +37,6 @@ typedef struct {
 
 extern void initialize_filename_hashing __P((void));
 extern void flush_hashed_filenames __P((void));
-extern void remove_hashed_filename __P((char *));
+extern void remove_hashed_filename __P((const char *));
 extern void remember_filename __P((char *, char *, int, int));
-extern char *find_hashed_filename __P((char *));
+extern char *find_hashed_filename __P((const char *));

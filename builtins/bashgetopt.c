@@ -25,6 +25,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 
 #include "../bashansi.h"
+#include <chartypes.h>
 #include <errno.h>
 
 #include "../shell.h"
@@ -124,7 +125,7 @@ char		*opts;
 	} else if (*cp == '#') {
 		/* optional numeric argument */
 		if (lcurrent->word->word[sp+1]) {
-			if (digit(lcurrent->word->word[sp+1])) {
+			if (DIGIT(lcurrent->word->word[sp+1])) {
 				list_optarg = lcurrent->word->word + sp + 1;
 				lcurrent = lcurrent->next;
 			} else

@@ -28,6 +28,8 @@
 /* If compiling with GCC 2, this file's not needed.  */
 #if !defined (__GNUC__) || __GNUC__ < 2
 
+#include <bashtypes.h>		/* for size_t */
+
 /* If alloca is defined somewhere, this file is not needed. */
 #ifndef alloca
 
@@ -155,7 +157,7 @@ static header *last_alloca_header = NULL;	/* -> last alloca header.  */
 
 pointer
 alloca (size)
-     unsigned size;
+     size_t size;
 {
   auto char probe;		/* Probes stack depth: */
   register char *depth = ADDRESS_FUNCTION (probe);

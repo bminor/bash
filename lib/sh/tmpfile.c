@@ -44,7 +44,7 @@ extern int errno;
 #define DEFAULT_TMPDIR		"."	/* bogus default, should be changed */
 #define DEFAULT_NAMEROOT	"shtmp"
 
-extern int dollar_dollar_pid;
+extern pid_t dollar_dollar_pid;
 
 static char *sys_tmpdir = (char *)NULL;
 static int ntmpfiles;
@@ -59,6 +59,12 @@ get_sys_tmpdir ()
   if (sys_tmpdir)
     return sys_tmpdir;
 
+#ifdef P_tmpdir
+  sys_tmpdir = P_tmpdir;
+  if (stat (sys_tmpdir, &sb) == 0)
+    return sys_tmpdir;
+#endif
+
   sys_tmpdir = "/tmp";
   if (stat (sys_tmpdir, &sb) == 0)
     return sys_tmpdir;
@@ -71,11 +77,7 @@ get_sys_tmpdir ()
   if (stat (sys_tmpdir, &sb) == 0)
     return sys_tmpdir;
 
-#ifdef P_tmpdir
-  sys_tmpdir = P_tmpdir;
-#else
   sys_tmpdir = DEFAULT_TMPDIR;
-#endif
 
   return sys_tmpdir;
 }
@@ -105,32 +107,42 @@ sh_mktmpname (nameroot, flags)
      char *nameroot;
      int flags;
 {
-  char *filename, *tdir;
+  char *filename, *tdir, *lroot;
   struct stat sb;
   int r, tdlen;
 
-  filename = xmalloc (PATH_MAX + 1);
+  filename = (char *)xmalloc (PATH_MAX + 1);
   tdir = get_tmpdir (flags);
   tdlen = strlen (tdir);
 
-  if (nameroot == 0)
-    nameroot = DEFAULT_NAMEROOT;
+  lroot = nameroot ? nameroot : DEFAULT_NAMEROOT;
 
+#ifdef USE_MKTEMP
+  sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+  if (mktemp (filename) == 0)
+    {
+      free (filename);
+      filename = NULL;
+    }
+#else  /* !USE_MKTEMP */
   while (1)
     {
-      filenum *= (int)time ((time_t *)0) * dollar_dollar_pid *
-		((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
-      sprintf (filename, "%s/%s-%lu", tdir, nameroot, filenum);
+      filenum = (filenum << 1) ^
+		(unsigned long) time ((time_t *)0) ^
+		(unsigned long) dollar_dollar_pid ^
+		(unsigned long) ((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
+      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';
-#ifdef HAVE_LSTAT
+#  ifdef HAVE_LSTAT
       r = lstat (filename, &sb);
-#else
+#  else
       r = stat (filename, &sb);
-#endif
+#  endif
       if (r < 0 && errno == ENOENT)
 	break;
     }
+#endif /* !USE_MKTEMP */
 
   return filename;
 }
@@ -141,21 +153,34 @@ sh_mktmpfd (nameroot, flags, namep)
      int flags;
      char **namep;
 {
-  char *filename, *tdir;
+  char *filename, *tdir, *lroot;
   int fd, tdlen;
 
-  filename = xmalloc (PATH_MAX + 1);
+  filename = (char *)xmalloc (PATH_MAX + 1);
   tdir = get_tmpdir (flags);
   tdlen = strlen (tdir);
 
-  if (nameroot == 0)
-    nameroot = DEFAULT_NAMEROOT;
+  lroot = nameroot ? nameroot : DEFAULT_NAMEROOT;
 
+#ifdef USE_MKSTEMP
+  sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+  fd = mkstemp (filename);
+  if (fd < 0 || namep == 0)
+    {
+      free (filename);
+      filename = NULL;
+    }
+  if (namep)
+    *namep = filename;
+  return fd;
+#else /* !USE_MKSTEMP */
   do
     {
-      filenum *= (int)time ((time_t *)0) * dollar_dollar_pid *
-		((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
-      sprintf (filename, "%s/%s-%lu", tdir, nameroot, filenum);
+      filenum = (filenum << 1) ^
+		(unsigned long) time ((time_t *)0) ^
+		(unsigned long) dollar_dollar_pid ^
+		(unsigned long) ((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
+      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';
       fd = open (filename, BASEOPENFLAGS | ((flags & MT_READWRITE) ? O_RDWR : O_WRONLY), 0600);
@@ -168,6 +193,7 @@ sh_mktmpfd (nameroot, flags, namep)
     free (filename);
 
   return fd;
+#endif /* !USE_MKSTEMP */
 }
 
 FILE *
@@ -177,7 +203,13 @@ sh_mktmpfp (nameroot, flags, namep)
      char **namep;
 {
   int fd;
+  FILE *fp;
 
   fd = sh_mktmpfd (nameroot, flags, namep);
-  return ((fd >= 0) ? (fdopen (fd, (flags & MT_READWRITE) ? "w+" : "w")) : (FILE *)NULL);
+  if (fd < 0)
+    return ((FILE *)NULL);
+  fp = fdopen (fd, (flags & MT_READWRITE) ? "w+" : "w");
+  if (fp == 0)
+    close (fd);
+  return fp;
 }

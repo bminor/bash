@@ -48,13 +48,17 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 
 extern int line_number, current_command_line_count;
-extern int disallow_filename_globbing;
 extern int last_command_exit_value;
 
+static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *));
+#if defined (ARITH_FOR_COMMAND)
+static WORD_LIST *make_arith_for_expr __P((char *));
+#endif
+static COMMAND *make_until_or_while __P((enum command_type, COMMAND *, COMMAND *));
 
 WORD_DESC *
 make_bare_word (string)
-     char *string;
+     const char *string;
 {
   WORD_DESC *temp;
 
@@ -63,7 +67,7 @@ make_bare_word (string)
     temp->word = savestring (string);
   else
     {
-      temp->word = xmalloc (1);
+      temp->word = (char *)xmalloc (1);
       temp->word[0] = '\0';
     }
 
@@ -74,9 +78,9 @@ make_bare_word (string)
 WORD_DESC *
 make_word_flags (w, string)
      WORD_DESC *w;
-     char *string;
+     const char *string;
 {
-  register char *s;
+  register const char *s;
 
   for (s = string; *s; s++)
     switch (*s)
@@ -97,7 +101,7 @@ make_word_flags (w, string)
 
 WORD_DESC *
 make_word (string)
-     char *string;
+     const char *string;
 {
   WORD_DESC *temp;
 
@@ -118,15 +122,15 @@ make_word_from_token (token)
 }
 
 WORD_LIST *
-make_word_list (word, link)
+make_word_list (word, wlink)
      WORD_DESC *word;
-     WORD_LIST *link;
+     WORD_LIST *wlink;
 {
   WORD_LIST *temp;
 
   temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
   temp->word = word;
-  temp->next = link;
+  temp->next = wlink;
   return (temp);
 }
 
@@ -238,7 +242,7 @@ make_arith_for_command (exprs, action, lineno)
   ARITH_FOR_COM *temp;
   WORD_LIST *init, *test, *step;
   char *s, *t, *start;
-  int nsemi, l;
+  int nsemi;
 
   init = test = step = (WORD_LIST *)NULL;
   /* Parse the string into the three component sub-expressions. */
@@ -542,7 +546,7 @@ make_here_document (temp)
     redir_len = strlen (redir_word);
   else
     {
-      temp->here_doc_eof = xmalloc (1);
+      temp->here_doc_eof = (char *)xmalloc (1);
       temp->here_doc_eof[0] = '\0';
       goto document_done;
     }
@@ -591,7 +595,7 @@ make_here_document (temp)
       if (len + document_index >= document_size)
 	{
 	  document_size = document_size ? 2 * (document_size + len) : len + 2;
-	  document = xrealloc (document, document_size);
+	  document = (char *)xrealloc (document, document_size);
 	}
 
       /* len is guaranteed to be > 0 because of the check for line
@@ -605,7 +609,7 @@ document_done:
     document[document_index] = '\0';
   else
     {
-      document = xmalloc (1);
+      document = (char *)xmalloc (1);
       document[0] = '\0';
     }
   temp->redirectee.filename->word = document;

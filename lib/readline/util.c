@@ -132,7 +132,7 @@ rl_copy_text (from, to)
     SWAP (from, to);
 
   length = to - from;
-  copy = xmalloc (1 + length);
+  copy = (char *)xmalloc (1 + length);
   strncpy (copy, rl_line_buffer + from, length);
   copy[length] = '\0';
   return (copy);
@@ -147,7 +147,7 @@ rl_extend_line_buffer (len)
   while (len >= rl_line_buffer_len)
     {
       rl_line_buffer_len += DEFAULT_BUFFER_SIZE;
-      rl_line_buffer = xrealloc (rl_line_buffer, rl_line_buffer_len);
+      rl_line_buffer = (char *)xrealloc (rl_line_buffer, rl_line_buffer_len);
     }
 
   _rl_set_the_line ();
@@ -193,7 +193,7 @@ rl_tilde_expand (ignore, key)
   if (rl_line_buffer[start] == '~')
     {
       len = end - start + 1;
-      temp = xmalloc (len + 1);
+      temp = (char *)xmalloc (len + 1);
       strncpy (temp, rl_line_buffer + start, len);
       temp[len] = '\0';
       homedir = tilde_expand (temp);
@@ -225,6 +225,7 @@ _rl_strindex (s1, s2)
   return ((char *)NULL);
 }
 
+#ifndef HAVE_STRPBRK
 /* Find the first occurrence in STRING1 of any character from STRING2.
    Return a pointer to the character in STRING1. */
 char *
@@ -243,6 +244,7 @@ _rl_strpbrk (string1, string2)
     }
   return ((char *)NULL);
 }
+#endif
 
 #if !defined (HAVE_STRCASECMP)
 /* Compare at most COUNT characters from string1 to string2.  Case
@@ -302,62 +304,16 @@ _rl_qsort_string_compare (s1, s2)
 #endif
 }
 
-/* Function equivalents for the macros defined in chartypes.h. */
-#undef _rl_uppercase_p
-int
-_rl_uppercase_p (c)
-     int c;
-{
-  return (isupper (c));
-}
+/* Function equivalents for the macros defined in chardefs.h. */
+#define FUNCTION_FOR_MACRO(f)	int (f) (c) int c; { return f (c); }
 
-#undef _rl_lowercase_p
-int
-_rl_lowercase_p (c)
-     int c;
-{
-  return (islower (c));
-}
-
-#undef _rl_pure_alphabetic
-int
-_rl_pure_alphabetic (c)
-     int c;
-{
-  return (isupper (c) || islower (c));
-}
-
-#undef _rl_digit_p
-int
-_rl_digit_p (c)
-     int c;
-{
-  return (isdigit (c));
-}
-
-#undef _rl_to_lower
-int
-_rl_to_lower (c)
-     int c;
-{
-  return (isupper (c) ? tolower (c) : c);
-}
-
-#undef _rl_to_upper
-int
-_rl_to_upper (c)
-     int c;
-{
-  return (islower (c) ? toupper (c) : c);
-}
-
-#undef _rl_digit_value
-int
-_rl_digit_value (c)
-     int c;
-{
-  return (isdigit (c) ? c - '0' : c);
-}
+FUNCTION_FOR_MACRO (_rl_digit_p)
+FUNCTION_FOR_MACRO (_rl_digit_value)
+FUNCTION_FOR_MACRO (_rl_lowercase_p)
+FUNCTION_FOR_MACRO (_rl_pure_alphabetic)
+FUNCTION_FOR_MACRO (_rl_to_lower)
+FUNCTION_FOR_MACRO (_rl_to_upper)
+FUNCTION_FOR_MACRO (_rl_uppercase_p)
 
 /* Backwards compatibility, now that savestring has been removed from
    all `public' readline header files. */
@@ -366,5 +322,5 @@ char *
 _rl_savestring (s)
      const char *s;
 {
-  return (strcpy (xmalloc (1 + (int)strlen (s)), (s)));
+  return (strcpy ((char *)xmalloc (1 + (int)strlen (s)), (s)));
 }

@@ -58,7 +58,7 @@ extern char *dollar_vars[];
 extern char *shell_name;
 #if defined (JOB_CONTROL)
 extern pid_t shell_pgrp;
-extern int give_terminal_to ();
+extern int give_terminal_to __P((pid_t, int));
 #endif /* JOB_CONTROL */
 
 /* The current maintainer of the shell.  You change this in the
@@ -95,7 +95,7 @@ get_name_for_error ()
    format string. */
 void
 file_error (filename)
-     char *filename;
+     const char *filename;
 {
   report_error ("%s: %s", filename, strerror (errno));
 }
@@ -227,7 +227,7 @@ programming_error (format, va_alist)
   char *h;
 
 #if defined (JOB_CONTROL)
-  give_terminal_to (shell_pgrp);
+  give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
 #if defined (PREFER_STDARG)
@@ -446,7 +446,7 @@ itrace (format, va_alist)
 {
   va_list args;
 
-  fprintf(stderr, "TRACE: pid %d: ", (int)getpid());
+  fprintf(stderr, "TRACE: pid %ld: ", (long)getpid());
 
 #if defined (PREFER_STDARG)
   va_start (args, format);
@@ -484,7 +484,7 @@ trace (format, va_alist)
   else
     fcntl (fileno (tracefp), F_SETFD, 1);     /* close-on-exec */
 
-  fprintf(tracefp, "TRACE: pid %d: ", getpid());
+  fprintf(tracefp, "TRACE: pid %ld: ", (long)getpid());
 
 #if defined (PREFER_STDARG)
   va_start (args, format);
