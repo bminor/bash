@@ -1,0 +1,95 @@
+#! /bin/sh
+#
+#
+src=src
+case "$1" in
+-s)	shift; src=$1; shift ;;
+esac
+
+if [ ! -d $1 ]; then
+	mkdir $1
+fi
+
+prog=`basename $0`
+
+echo "${prog}: creating clone of bash source tree (from $src) in $1"
+
+case $src in
+/*)	abs=yes ;;
+esac
+
+d=${PWD-`pwd`}
+
+cd $1 || { echo "$0: cannot cd to $1" ; exit 1; }
+
+d=$d/$1
+
+SUBDIRS="CWRU builtins documentation examples support tests"
+LIBDIRS="malloc termcap glob readline tilde malloclib posixheaders doc-support"
+CWRUDIRS="misc"
+
+mkdir $SUBDIRS
+for i in $SUBDIRS
+do
+	cd $i
+	case "$abs" in
+	yes)	ln -s $src/$i/* . ;;
+	*)	ln -s ../../$src/$i/* . ;;
+	esac
+	echo -n $i..
+	cd ..
+done
+cd $d
+
+cd CWRU
+for i in $CWRUDIRS
+do
+	rm -f $i
+	mkdir $i
+	cd $i
+	case "$abs" in
+	yes)	ln -s $src/CWRU/$i/* . ;;
+	*)	ln -s ../../../$src/CWRU/$i/* . ;;
+	esac
+	echo -n "CWRU/$i.."
+	cd ..
+done
+cd $d
+
+if [ ! -d lib ] ; then
+	mkdir lib
+fi
+
+cd lib
+mkdir $LIBDIRS
+
+for i in $LIBDIRS
+do
+	cd $i
+	case "$abs" in
+	yes)	ln -s $src/lib/$i/* . ;;
+	*)	ln -s ../../../$src/lib/$i/* . ;;
+	esac
+	echo -n "lib/$i.."
+	cd ..
+done
+
+cd $d
+
+case "$abs" in
+yes)	ln -s $src/.[a-z]* . ; ln -s $src/* . 2>&1 | grep -v exists ;;
+*)	ln -s ../$src/.[a-z]* . ; ln -s ../$src/* . 2>&1 | grep -v exists ;;
+esac
+
+echo -n src..
+
+SPECIAL="parser-built y.tab.h y.tab.c"
+for x in $SPECIAL
+do
+	rm -f $x
+	cp ../$src/$x .
+done
+
+echo special
+
+exit 0

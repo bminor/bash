@@ -1,0 +1,118 @@
+# Makefile for GNU termcap library.
+# Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+
+# If you don't have a BSD or GNU install program, use cp.
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+
+MAKEINFO = makeinfo
+
+# Things you might add to DEFS:
+# -DHAVE_STRING_H	If you have memcpy instead of bcopy.
+# -DNO_ARG_ARRAY	If you can't take the address of the first of
+#			a group of arguments and treat it as an array.
+#			We always define this, because it's not a big loss
+#			and can't be detected when cross-autoconfiguring.
+
+DEFS = @DEFS@ -DNO_ARG_ARRAY
+
+CFLAGS = -g
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+
+# Directory in which to install libtermcap.a.
+libdir = $(exec_prefix)/lib
+
+# Directory in which to install termcap.h.
+includedir = $(prefix)/include
+
+# Directory in which to optionally also install termcap.h,
+# so compilers besides gcc can find it by default.
+# If it is empty or not defined, termcap.h will only be installed in
+# includedir. 
+oldincludedir = /usr/include
+
+# Directory in which to install the documentation info files.
+infodir = $(prefix)/info
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+SRCS = termcap.c tparam.c version.c
+OBJS = termcap.o tparam.o version.o
+HDRS = termcap.h
+DISTFILES = $(SRCS) $(HDRS) ChangeLog COPYING README INSTALL NEWS \
+termcap.texi termcap.info* \
+texinfo.tex Makefile.in configure configure.in
+
+all:	libtermcap.a termcap.info
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(DEFS) -I$(srcdir) $(CFLAGS) $<
+
+install: all
+	$(INSTALL_DATA) libtermcap.a $(libdir)/libtermcap.a
+	-ranlib $(libdir)/libtermcap.a
+	test -d $(includedir) || mkdir $(includedir)
+	cd $(srcdir); $(INSTALL_DATA) termcap.h $(includedir)/termcap.h
+	-cd $(srcdir); test -z "$(oldincludedir)" || \
+	  $(INSTALL_DATA) termcap.h $(oldincludedir)/termcap.h
+	cd $(srcdir); for f in termcap.info*; \
+	do $(INSTALL_DATA) $$f $(infodir)/$$f; done
+
+uninstall:
+	rm -f $(libdir)/libtermcap.a $(includedir)/termcap.h
+	test -z "$(oldincludedir)" || rm -f $(oldincludedir)/termcap.h
+	rm -f $(infodir)/termcap.info*
+
+libtermcap.a: $(OBJS)
+	ar rc $@ $(OBJS)
+	-ranlib $@
+
+termcap.info: termcap.texi
+	$(MAKEINFO) $(srcdir)/termcap.texi --output=$(srcdir)/termcap.info
+
+TAGS:	$(SRCS)
+	etags $(SRCS)
+
+clean:
+	rm -f *.a *.o core
+
+mostlyclean: clean
+
+distclean: clean
+	rm -f Makefile config.status
+
+realclean: distclean
+	rm -f TAGS *.info*
+
+dist: $(DISTFILES)
+	echo termcap-`sed -e '/version_string/!d' -e 's/[^0-9]*\([0-9a-z.]*\).*/\1/' -e q version.c` > .fname
+	rm -rf `cat .fname`
+	mkdir `cat .fname`
+	ln $(DISTFILES) `cat .fname`
+	tar chzf `cat .fname`.tar.z `cat .fname`
+	rm -rf `cat .fname` .fname

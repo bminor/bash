@@ -1,0 +1,29 @@
+#! /bin/sh
+#
+# mkdirs - a work-alike for `mkdir -p'
+#
+# Chet Ramey
+# chet@po.cwru.edu
+
+for dir
+do
+
+	[ -d "$dir" ] && continue
+
+	tomake=$dir
+	while [ "$dir" ]; do
+		# dir=${dir%/*}
+		# dir=`expr "$dir" ':' '^\(/.*\)/[^/]*'`
+		dir=`expr "$dir" ':' '^\(.*\)/[^/]*'`
+		tomake="$dir $tomake"
+	done
+
+	for d in $tomake
+	do
+		[ -d $d ] && continue
+		echo mkdir $d
+		mkdir $d
+	done
+done
+
+exit 0

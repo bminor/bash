@@ -1,0 +1,219 @@
+This file is bind.def, from which is created bind.c.
+It implements the builtin "bind" in Bash.
+
+Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+
+This file is part of GNU Bash, the Bourne Again SHell.
+
+Bash is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 1, or (at your option) any later
+version.
+
+Bash is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Bash; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$PRODUCES bind.c
+
+$BUILTIN bind
+$DEPENDS_ON READLINE
+$FUNCTION bind_builtin
+$SHORT_DOC bind [-lvd] [-m keymap] [-f filename] [-q name] [keyseq:readline-function]
+Bind a key sequence to a Readline function, or to a macro.  The
+syntax is equivalent to that found in ~/.inputrc, but must be
+passed as a single argument: bind '"\C-x\C-r": re-read-init-file'.
+Arguments we accept:
+  -m  keymap         Use `keymap' as the keymap for the duration of this
+                     command.  Acceptable keymap names are emacs,
+                     emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,
+                     vi-command, and vi-insert.
+  -l                 List names of functions.
+  -v                 List function names and bindings.
+  -d                 Dump functions and bindings such that they
+                     can be read back in.
+  -f  filename       Read key bindings from FILENAME.
+  -q  function-name  Query about which keys invoke the named function.
+$END
+
+#include <stdio.h>
+#include "../shell.h"
+#if defined (READLINE)
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
+#include <readline/readline.h>
+#include <readline/history.h>
+#include "bashgetopt.h"
+
+static int query_bindings ();
+
+extern int bash_readline_initialized;
+extern int no_line_editing;
+
+#define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
+
+#define USAGE "usage: bind [-lvd] [-m keymap] [-f filename] [-q name] [keyseq:readline_func]"
+
+int
+bind_builtin (list)
+     WORD_LIST *list;
+{
+  int return_code = EXECUTION_SUCCESS;
+  FILE *old_rl_outstream;
+  Keymap kmap, saved_keymap;
+  int lflag, dflag, fflag, vflag, qflag, mflag, opt;
+  char *initfile, *map_name, *fun_name;
+
+  if (no_line_editing)
+    return (EXECUTION_FAILURE);
+
+  kmap = saved_keymap = (Keymap) NULL;
+  lflag = dflag = vflag = fflag = qflag = mflag = 0;
+  initfile = map_name = fun_name = (char *)NULL;
+
+  if (!bash_readline_initialized)
+    initialize_readline ();
+
+  /* Cannot use unwind_protect_pointer () on "FILE *", it is only
+     guaranteed to work for strings. */
+  /* XXX -- see if we can use unwind_protect here */
+  old_rl_outstream = rl_outstream;
+  rl_outstream = stdout;
+
+  reset_internal_getopt ();  
+  while ((opt = internal_getopt (list, "lvdf:q:m:")) != EOF)
+    {
+      switch (opt)
+	{
+	case 'l':
+	  lflag++;
+	  break;
+
+	case 'v':
+	  vflag++;
+	  break;
+
+	case 'd':
+	  dflag++;
+	  break;
+
+	case 'f':
+	  fflag++;
+	  initfile = list_optarg;
+	  break;
+
+	case 'm':
+	  mflag++;
+	  map_name = list_optarg;
+	  break;
+
+	case 'q':
+	  qflag++;
+	  fun_name = list_optarg;
+	  break;
+
+	default:
+	  builtin_error (USAGE);
+	  BIND_RETURN (EX_USAGE);
+	}
+    }
+
+  list = loptend;
+
+  /* First, see if we need to install a special keymap for this
+     command.  Then start on the arguments. */
+
+  if (mflag && map_name)
+    {
+      kmap = rl_get_keymap_by_name (map_name);
+      if (!kmap)
+        {
+          builtin_error ("`%s': illegal keymap name", map_name);
+	  BIND_RETURN (EXECUTION_FAILURE);
+        }
+    }
+
+  if (kmap)
+    {
+      saved_keymap = rl_get_keymap ();
+      rl_set_keymap (kmap);
+    }
+
+  /* XXX - we need to add exclusive use tests here.  It doesn't make sense
+     to use some of these options together. */
+  /* Now hack the option arguments */
+  if (lflag)
+    rl_list_funmap_names (0);
+
+  if (vflag)
+    rl_function_dumper (0);
+
+  if (dflag)
+    rl_function_dumper (1);
+
+  if (fflag && initfile)
+    {
+      if (rl_read_init_file (initfile) != 0)
+	{
+	  builtin_error ("cannot read %s: %s", initfile, strerror (errno));
+	  BIND_RETURN (EXECUTION_FAILURE);
+	}
+    }
+
+  if (qflag && fun_name)
+    return_code = query_bindings (fun_name);
+
+  /* Process the rest of the arguments as binding specifications. */
+  while (list)
+    {
+      rl_parse_and_bind (list->word->word);
+      list = list->next;
+    }
+
+ bind_exit:
+  if (saved_keymap)
+    rl_set_keymap (saved_keymap);
+
+  rl_outstream = old_rl_outstream;
+  return (return_code);
+}
+
+static int
+query_bindings (name)
+     char *name;
+{
+  Function *function;
+  char **keyseqs;
+  int j;
+
+  function = rl_named_function (name);
+  if (!function)
+    {
+      builtin_error ("unknown function name `%s'", name);
+      return EXECUTION_FAILURE;
+    }
+
+  keyseqs = rl_invoking_keyseqs (function);
+
+  if (!keyseqs)
+    {
+      printf ("%s is not bound to any keys.\n", name);
+      return EXECUTION_FAILURE;
+    }
+
+  printf ("%s can be invoked via ", name);
+  for (j = 0; j < 5 && keyseqs[j]; j++)
+    printf ("\"%s\"%s", keyseqs[j], keyseqs[j + 1] ? ", " : ".\n");
+  if (keyseqs[j])
+    printf ("...\n");
+  free_array (keyseqs);
+  return EXECUTION_SUCCESS;
+}
+#endif /* READLINE */

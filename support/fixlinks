@@ -1,0 +1,61 @@
+#! /bin/sh
+#
+# fixlinks - make symlinks in the bash source tree so that there is
+#	     exactly one version of any given source file.
+#
+#
+
+SRCDIR=.
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-s)	shift; SRCDIR=$1 ;;
+	-u)	unfix=yes ;;
+	-*)	echo "$0: $1: bad option" 1>&2
+		echo "$0: usage: $0 [-u] [-s srcdir] [linkmap]" 1>&2
+		exit 1;;
+	*)	break ;;
+	esac
+	shift
+done
+
+if [ ! -d $SRCDIR/builtins ]; then
+	echo "$0: must be run with valid -s argument or from source directory" 1>&2
+	exit 1
+fi
+
+if [ $# -eq 0 ]; then
+	linkfile=$SRCDIR/support/SYMLINKS
+else
+	linkfile=$1	
+fi
+
+if [ ! -f "$linkfile" ]; then
+	echo "$0: symlink map file \`$linkfile' does not exist"
+	exit 1
+fi
+
+rm -f /tmp/z
+if (ln -s /dev/null /tmp/z) >/dev/null 2>&1; then
+	LN="ln -s"
+else
+	LN=ln
+fi
+
+while read name target
+do
+	case "$name" in
+	\#*)	continue;;
+	esac
+
+	rm -f $name
+	case "$unfix" in
+	yes)	dirname=`expr "$name" ':' '^\(.*\)/[^/]*'`
+		[ -z "$dirname" ] && dirname=.
+		cp $dirname/$target $name
+		echo $target copied to $name ;;
+	*)	$LN $target $name ; echo "$name -> $target" ;;
+	esac
+
+done < $linkfile
+
+exit 0

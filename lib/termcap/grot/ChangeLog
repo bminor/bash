@@ -1,0 +1,48 @@
+Thu Apr 15 12:45:10 1993  David J. MacKenzie  (djm@kropotkin.gnu.ai.mit.edu)
+
+	* Version 1.2.
+
+	* tparam.c [!emacs] (xmalloc, xrealloc, memory_out): New functions.
+	(tparam1): Use them.
+
+	* termcap.c, tparam.c: Use NULL or '\0' where appropriate
+	instead of 0.  Rename some vars.
+	* termcap.c (tgetent): If EOF is reached on termcap file,
+	free allocated resources before returning.
+
+	* termcap.c (tgetent): Use /etc/termcap if TERMCAP is an entry
+	for a term type other than TERM.
+	From pjr@jet.UK (Paul J Rippin).
+
+Sat Apr 10 23:55:12 1993  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* tparam.c (tparam1): Don't set the 0200 bit on a non-0 character code.
+	From junio@twinsun.COM (Junio Hamano).
+
+Tue Dec  8 22:02:15 1992  David J. MacKenzie  (djm@kropotkin.gnu.ai.mit.edu)
+
+	* termcap.c, tparam.c: Use HAVE_STRING_H instead of USG.
+
+Thu Dec  3 13:47:56 1992  David J. MacKenzie  (djm@nutrimat.gnu.ai.mit.edu)
+
+	* termcap.c, tparam.c [HAVE_CONFIG_H]: Include config.h.
+
+Fri Oct 23 12:35:29 1992  David J. MacKenzie  (djm@goldman.gnu.ai.mit.edu)
+
+	* termcap.h [__STDC__]: Add consts.  From Franc,ois Pinard.
+
+Tue Oct 13 15:52:21 1992  David J. MacKenzie  (djm@goldman.gnu.ai.mit.edu)
+
+	* Version 1.1.
+
+Tue Sep 29 21:04:39 1992  David J. MacKenzie  (djm@geech.gnu.ai.mit.edu)
+
+	* termcap.[ch], tparam.c: Fix some lint.
+
+	* version.c: New file.
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+version-control: never
+End:

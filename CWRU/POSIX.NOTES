@@ -1,0 +1,63 @@
+Starting bash with the `-posix' command-line option or setting the variable
+POSIXLY_CORRECT while bash is running will cause bash to conform more
+closely to the Posix.2 standard by changing the behavior to match that
+specified by Posix.2 in areas where the bash default differs.
+
+The following list is what's changed when `posixly_correct' is enabled:
+
+1.  When a command in the hash table no longer exists, bash will re-search
+    $PATH to find the new location.
+
+2.  The >& redirection does not redirect stdout and stderr.
+
+3.  The message printed by the job control code and builtins when a job
+    exits with a non-zero status is `Done(status)'.
+
+4.  The <> redirection does not open a file for both stdin and stdout, but
+    rather opens it for read-write on fd 0.
+
+5.  Reserved words may not be aliased.
+
+6.  The Posix.2 PS1 and PS2 expansions of `!' -> history number and `!!' -> `!'
+    are enabled.
+
+7.  Interactive comments are enabled by default.  (Note that this version has
+    them on by default anyway.)
+
+8.  The Posix.2 startup files are executed ($ENV) rather than the normal bash
+    files.
+
+9.  Tilde expansion is only performed on assignments preceding a command name,
+    rather than on all assignment statements on the line.
+
+10. The default history file is ~/.sh_history (default value of $HISTFILE).
+
+11. The output of `kill -l' prints all the signal names on a single line,
+    separated by spaces.
+
+12. Non-interactive shells exit if `file' in `. file' is not found.
+
+13. Redirection operators do not perform pathname expansion on the word
+    in the redirection unless the shell is interactive
+
+14. Function names must be valid shell identifiers.  That is, they may not
+    contain characters other than letters, digits, and underscores, and
+    may not start with a digit
+
+There is other Posix.2 behavior that bash does not implement.  Specifically:
+
+1.  There are no `special builtins' and `regular builtins'.  All builtins
+    are equivalent.  This means that:
+
+	o assignment statements affect the execution environment of all
+	  builtins, not just special ones
+	o temporary assignments do not persist after Posix.2 special
+	  builtins complete
+	o Functions are found before Posix.2 special builtins
+	o The shell does not exit upon errors while executing Posix.2
+	  special builtins
+
+2.  $LINENO does not represent the line number of a command within a function
+
+3.  The arithmetic evaluator does not implement the `e ? e1 : e2' conditional
+    expression

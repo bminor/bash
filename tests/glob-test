@@ -1,0 +1,179 @@
+#
+# test the shell globbing
+#
+expect()
+{
+	echo expect "$@"
+}
+
+TESTDIR=/tmp/glob-test
+rm -rf $TESTDIR
+mkdir $TESTDIR
+builtin cd $TESTDIR
+
+touch a b c d abc abd abe bb bcd ca cb dd de
+mkdir bdir
+
+# see if `regular' globbing works right
+expect '<a> <abc> <abd> <abe> <X*>'
+recho a* X*
+
+expect '<a> <abc> <abd> <abe>'
+recho \a*
+
+# see if null glob expansion works
+allow_null_glob_expansion=
+
+expect '<a> <abc> <abd> <abe>'
+recho a* X*
+
+unset allow_null_glob_expansion
+
+# see if the code that expands directories only works
+expect '<bdir/>'
+recho b*/
+
+# Test quoted and unquoted globbing characters
+expect '<*>'
+recho \*
+
+expect '<a*>'
+recho 'a*'
+
+expect '<a*>'
+recho a\*
+
+expect '<c> <ca> <cb> <a*> <*q*>'
+recho c* a\* *q*
+
+expect '<**>'
+recho "*"*
+
+expect '<**>'
+recho \**
+
+expect '<\.\./*/>'
+recho "\.\./*/"
+
+expect '<s/\..*//>'
+recho 's/\..*//'
+
+# Pattern from Larry Wall's Configure that caused bash to blow up
+expect '</^root:/{s/^[^:]*:[^:]*:\([^:]*\).*$/\1/>'
+recho "/^root:/{s/^[^:]*:[^:]*:\([^:]*\).*"'$'"/\1/"
+
+# Make sure character classes work properly
+
+expect '<abc> <abd> <abe> <bb> <cb>'
+recho [a-c]b*
+
+expect '<abd> <abe> <bb> <bcd> <bdir> <ca> <cb> <dd> <de>'
+recho [a-y]*[^c]
+
+expect '<abd> <abe>'
+recho a*[^c]
+
+touch a-b aXb
+expect '<a-b> <aXb>'
+recho a[X-]b
+
+touch .x .y
+expect '<d> <dd> <de>'
+recho [^a-c]*
+
+# Make sure that filenames with embedded globbing characters are handled
+# properly
+mkdir a\*b
+> a\*b/ooo
+
+expect '<a*b/ooo>'
+recho a\*b/*
+
+expect '<a*b/ooo>'
+recho a\*?/*
+
+expect '<no match>'
+cmd='echo !7'
+case "$cmd" in
+*\\!*) echo match ;;
+*) echo no match ;;
+esac
+
+expect '<not there>'
+file='r.*'
+case $file in
+*.\*) echo not there ;;
+*) echo there ;;
+esac
+
+# examples from the Posix.2 spec (d11.2, p. 243)
+expect '<abc>'
+recho a[b]c
+
+expect '<abc>'
+recho a["b"]c
+
+expect '<abc>'
+recho a[\b]c
+
+expect '<abc>'
+recho a?c
+
+expect '<match>'
+case abc in
+a"b"c)	echo match
+	;;
+*)	echo BAD
+	;;
+esac
+
+expect '<match>'
+case abc in
+a*c)	echo match
+	;;
+*)	echo BAD
+	;;
+esac
+
+expect '<ok>'
+case abc in
+"a?c")	echo bad
+	;;
+*)	echo ok
+	;;
+esac
+
+expect '<ok>'
+case abc in
+a\*c)	echo bad
+	;;
+*)	echo ok
+	;;
+esac
+
+expect '<ok>'
+case abc in
+a\[b]c)	echo bad
+	;;
+*)	echo ok
+	;;
+esac
+
+expect '<ok>'
+case "$nosuchvar" in
+"") 	echo ok ;;
+*)	echo bad ;;
+esac
+
+# This is very odd, but sh and ksh seem to agree
+expect '<ok>'
+case abc in
+a["\b"]c) echo ok
+	;;
+*)	echo bad
+	;;
+esac
+
+builtin cd /
+rm -rf $TESTDIR
+exit 0

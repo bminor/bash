@@ -1,0 +1,4 @@
+PATH=$PATH:`pwd`
+export PATH
+../bash ./glob-test | grep -v '^expect' > xx
+diff xx glob.right && rm -f xx

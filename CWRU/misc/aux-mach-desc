@@ -1,0 +1,20 @@
+/* ************************ */
+/*                        */
+/*    A/UX 3.0 System     */
+/*                        */
+/* ************************ */
+#if defined (mc68k32) && !defined (M_MACHINE)
+#  define M_MACHINE "Macintosh"
+#  define M_OS "AUX"
+#  define SYSDEP_CFLAGS -ZP -DUSG -DHAVE_BCOPY -DHAVE_UID_T -DNSIG=32 \
+			-DHAVE_GETDTABLESIZE
+#  define SYSDEP_LDFLAGS -ZP
+#  define HAVE_DIRENT
+#  define HAVE_POSIX_SIGNALS
+#  define HAVE_VFPRINTF
+#  define VOID_SIGHANDLER
+#  define HAVE_GETGROUPS
+#  undef HAVE_RESOURCE
+#  undef HAVE_ALLOCA
+#  define REQUIRED_LIBRARIES -lc_s
+#endif /* A/UX */

@@ -1,0 +1,22 @@
+if _mkfifo cannot be found, add "-DMKFIFO_MISSING" to SYSDEP_CFLAGS in
+your machine's entry in machines.h.
+
+If bash compiles, but hangs when executing a non-builtin, there is a
+problem with the defines in your /usr/include/sys/wait.h.  If you
+don't have one, there is a problem in our defines.  At any rate,
+perhaps you have a partially POSIX system, instead of a fully
+operational one.  Try defining _POSIX_SOURCE just before the inclusion
+of <sys/wait.h> in jobs.h, and then undefining it immediately after
+the inclusion.
+
+Finding out if your system has something (like setpgid, for example)
+You can always do "nm -o /lib/*.a | grep setpgid".  If an entry for
+the function appears, you have it, and you might have to link with
+that library by adding "#defined REQUIRED_LIBRARIES -lfoo" to the
+entry in machines.h.
+
+If you seem to be going around in circles, and they are related to
+job control and posixness, try #undef HAVE_UNISTD_H in the entry for
+your machine in machines.h.  This can work by keeping unistd.h from
+defining _POSIX_VERSION, which in turn prevents bash from assuming
+full Posix semantics.

@@ -1,0 +1,13 @@
+#
+# show that IFS is only applied to the result of expansions
+#
+../bash ifs-test-1.sh > xx
+diff xx ./ifs.1.right
+
+../bash ifs-test-2.sh > xx
+diff xx ./ifs.2.right
+
+../bash ifs-test-3.sh > xx
+diff xx ./ifs.3.right
+
+rm -f xx

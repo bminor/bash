@@ -1,0 +1,95 @@
+expect()
+{
+        echo expect "$@"
+}
+
+HOME=/usr/homes/chet	# to make the check against new-exp.right work
+expect '<foo bar>'
+recho "${undef-"foo bar"}"	# should be foo bar
+expect '<foo>'
+recho "${und="foo"}"		# should be foo
+
+expect "<$HOME>"
+recho ${HOME-"}"}
+expect "<$HOME>"
+recho "${HOME-'}'}"
+expect "<$HOME>"
+recho "${HOME-"}"}"
+
+expect $0: '${HOME:`echo }`}: bad substitution'
+recho "${HOME:`echo }`}"	# should be an error -- bad substitution
+
+expect $0: '${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}: bad substitution'
+x=${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}	# memory leak
+
+expect "<$HOME>"
+recho ${HOME}
+expect "<$HOME>"
+recho ${HOME:-`echo }`}
+expect "<$HOME>"
+recho ${HOME:-`echo "}"`}
+expect "<$HOME>"
+recho "${HOME:-`echo "}"`}"
+expect "<$HOME>"
+recho "$(echo "${HOME}")"
+expect "<$HOME>"
+recho "$(echo "$(echo ${HOME})")"
+expect "<$HOME>"
+recho "$(echo "$(echo "${HOME}")")"
+
+P=*@*
+expect '<*@>'
+recho "${P%"*"}"         # should be *@
+expect '<@*>'
+recho "${P#\*}"		# should be @*
+
+expect '<)>'
+recho "$(echo ")")"	# should be )
+expect '<")">'
+recho "$(echo "\")\"")"	# should be ")"
+
+foo='abcd   '
+expect '<-abcd> <->'
+recho -${foo}-		# should be -abcd -
+expect '<-abcd> <->'
+recho -${foo% *}-	# should be -abcd -
+expect '<-abcd->'
+recho -${foo%% *}-	# should be -abcd-
+
+set a b c d e
+expect '<a b c d e>'
+IFS=""
+recho "$@"
+IFS=' 	
+'
+
+foo=bar
+expect '<bar foo>'
+echo -n $foo' ' ; echo foo
+
+expect '<bar foo>'
+echo -n $foo" " ; echo foo
+
+expect '<bar foo>'
+echo -n "$foo " ; echo foo
+
+expect '<bar foo>'
+echo -e "$foo\c " ; echo foo
+
+expect '<bar foo>'
+echo -e $foo"\c " ; echo foo
+
+set -u
+expect $0: ABX: unbound variable
+recho ${ABX}
+set +u
+
+expect $0: '$6: cannot assign in this way'
+recho ${6="arg6"}
+
+expect a newline
+echo $abmcde
+
+# this must be last!
+expect $0: 'ABXD: parameter unset'
+recho ${ABXD:?"parameter unset"}

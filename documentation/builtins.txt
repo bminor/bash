@@ -1,0 +1,1188 @@
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+NAME
+     bash, :, ., alias, bg, bind, break, builtin, bye, case,  cd,
+     command,  continue, declare, dirs, echo, enable, eval, exec,
+     exit, export, fc, fg, for, getopts, hash, help, history, if,
+     jobs,  kill,  let,  local,  logout,  popd, pushd, pwd, read,
+     readonly, return, set, shift, source, suspend, test,  times,
+     trap,  type,  typeset, ulimit, umask, unalias, unset, until,
+     wait, while - bash built-in commands, see bash(1)
+
+BASH BUILTIN COMMANDS
+     : [_a_r_g_u_m_e_n_t_s]
+          No effect; the command does  nothing  beyond  expanding
+          _a_r_g_u_m_e_n_t_s and performing any specified redirections.  A
+          zero exit code is returned.
+
+      .  _f_i_l_e_n_a_m_e [_a_r_g_u_m_e_n_t_s]
+     source _f_i_l_e_n_a_m_e [_a_r_g_u_m_e_n_t_s]
+          Read and execute commands from _f_i_l_e_n_a_m_e in the  current
+          shell  environment  and  return  the exit status of the
+          last command executed from _f_i_l_e_n_a_m_e.  If _f_i_l_e_n_a_m_e  does
+          not contain a slash, pathnames in PATH are used to find
+          the directory containing _f_i_l_e_n_a_m_e.  The  file  searched
+          for in PATH need not be executable.  The current direc-
+          tory is searched if no file is found in PATH.   If  any
+          _a_r_g_u_m_e_n_t_s  are  supplied,  they  become  the positional
+          parameters when _f_i_l_e is executed.  Otherwise the  posi-
+          tional  parameters are unchanged.  The return status is
+          the status of the last command exited within the script
+          (0  if no commands are executed), and false if _f_i_l_e_n_a_m_e
+          is not found.
+
+     alias [_n_a_m_e[=_v_a_l_u_e] ...]
+          Alias with no arguments prints the list of  aliases  in
+          the form _n_a_m_e=_v_a_l_u_e on standard output.  When arguments
+          are supplied, an alias is defined for each  _n_a_m_e  whose
+          _v_a_l_u_e  is  given.  A trailing space in _v_a_l_u_e causes the
+          next word to be checked for alias substitution when the
+          alias  is expanded.  For each _n_a_m_e in the argument list
+          for which no _v_a_l_u_e is supplied, the name and  value  of
+          the alias is printed.  Alias returns true unless a _n_a_m_e
+          is given for which no alias has been defined.
+
+     bg [_j_o_b_s_p_e_c]
+          Place _j_o_b_s_p_e_c in the background,  as  if  it  had  been
+          started with &.  If _j_o_b_s_p_e_c is not present, the shell's
+          notion of the _c_u_r_r_e_n_t _j_o_b is used.  bg _j_o_b_s_p_e_c  returns
+          0  unless run when job control is disabled or, when run
+          with job control enabled, if _j_o_b_s_p_e_c was not  found  or
+          started without job control.
+
+     bind [-m _k_e_y_m_a_p] [-lvd] [-q _n_a_m_e]
+     bind [-m _k_e_y_m_a_p] -f _f_i_l_e_n_a_m_e
+
+
+
+GNU              Last change: 1993 September 16                 1
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+     bind [-m _k_e_y_m_a_p] _k_e_y_s_e_q:_f_u_n_c_t_i_o_n-_n_a_m_e
+          Display current readline key and function bindings,  or
+          bind  a  key  sequence to a readline function or macro.
+          The binding syntax accepted is  identical  to  that  of
+          ._i_n_p_u_t_r_c, but each binding must be passed as a separate
+          argument;   e.g.,   '"\C-x\C-r":    re-read-init-file'.
+          Options, if supplied, have the following meanings:
+          -m _k_e_y_m_a_p
+               Use _k_e_y_m_a_p as the keymap to  be  affected  by  the
+               subsequent  bindings.  Acceptable _k_e_y_m_a_p names are
+               _e_m_a_c_s, _e_m_a_c_s-_s_t_a_n_d_a_r_d, _e_m_a_c_s-_m_e_t_a, _e_m_a_c_s-_c_t_l_x, _v_i,
+               _v_i-_m_o_v_e,   _v_i-_c_o_m_m_a_n_d,   and   _v_i-_i_n_s_e_r_t.   _v_i  is
+               equivalent to _v_i-_c_o_m_m_a_n_d; _e_m_a_c_s is  equivalent  to
+               _e_m_a_c_s-_s_t_a_n_d_a_r_d.
+          -l   List the names of all readline functions
+          -v   List current function names and bindings
+          -d   Dump function names and bindings  in  such  a  way
+               that they can be re-read
+          -f _f_i_l_e_n_a_m_e
+               Read key bindings from _f_i_l_e_n_a_m_e
+          -q _f_u_n_c_t_i_o_n
+               Query about which keys invoke the named _f_u_n_c_t_i_o_n
+
+          The return value is 0 unless an unrecognized option  is
+          given or an error occurred.
+
+     break [_n]
+          Exit from within a for, while, or until loop.  If _n  is
+          specified,  break  _n  levels.   _n must be >_ 1.  If _n is
+          greater than the number of enclosing loops, all enclos-
+          ing loops are exited.  The return value is 0 unless the
+          shell is not executing a loop when break is executed.
+
+     builtin _s_h_e_l_l-_b_u_i_l_t_i_n [_a_r_g_u_m_e_n_t_s]
+          Execute the specified shell builtin, passing  it  _a_r_g_u_-
+          _m_e_n_t_s, and return its exit status.  This is useful when
+          you wish to define a function whose name is the same as
+          a  shell  builtin,  but  need  the functionality of the
+          builtin within the function itself.  The cd builtin  is
+          commonly  redefined  this  way.   The  return status is
+          false if _s_h_e_l_l-_b_u_i_l_t_i_n is not a shell builtin command.
+
+     cd [_d_i_r]
+          Change the current directory to _d_i_r.  The variable HOME
+          is  the  default  _d_i_r.  The variable CDPATH defines the
+          search path for the directory containing _d_i_r.  Alterna-
+          tive  directory  names are separated by a colon (:).  A
+          null directory name  in  CDPATH  is  the  same  as  the
+          current  directory,  i.e., ``.''.  If _d_i_r begins with a
+          slash (/), then CDPATH is not used.  An argument  of  -
+          is  equivalent to $OLDPWD.  The return value is true if
+          the   directory   was   successfully   changed;   false
+
+
+
+GNU              Last change: 1993 September 16                 2
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          otherwise.
+
+     command [-pVv] _c_o_m_m_a_n_d [_a_r_g ...]
+          Run _c_o_m_m_a_n_d with  _a_r_g_s  suppressing  the  normal  shell
+          function  lookup.  Only  builtin  commands  or commands
+          found in the PATH are executed.  If the  -p  option  is
+          given,  the  search  for  _c_o_m_m_a_n_d  is performed using a
+          default value for PATH that is guaranteed to  find  all
+          of  the  standard  utilities.   If  either the -V or -v
+          option  is  supplied,  a  description  of  _c_o_m_m_a_n_d   is
+          printed.  The -v option causes a single word indicating
+          the command or pathname used to invoke  _c_o_m_m_a_n_d  to  be
+          printed; the -V option produces a more verbose descrip-
+          tion.  An argument of -- disables option  checking  for
+          the  rest  of the arguments.  If the -V or -v option is
+          supplied, the exit status is 0 if  _c_o_m_m_a_n_d  was  found,
+          and  1  if  not.   If neither option is supplied and an
+          error occurred or _c_o_m_m_a_n_d cannot  be  found,  the  exit
+          status  is 127.  Otherwise, the exit status of the com-
+          mand builtin is the exit status of _c_o_m_m_a_n_d.
+
+     continue [_n]
+          Resume the next iteration of the enclosing for,  while,
+          or  until  loop.   If _n is specified, resume at the _nth
+          enclosing loop.  _n must be >_ 1.  If _n is  greater  than
+          the  number of enclosing loops, the last enclosing loop
+          (the `top-level' loop) is resumed.  The return value is
+          0  unless  the  shell is not executing a loop when con-
+          tinue is executed.
+
+     declare [-frxi] [_n_a_m_e[=_v_a_l_u_e]]
+     typeset [-frxi] [_n_a_m_e[=_v_a_l_u_e]]
+          Declare variables and/or give them attributes.   If  no
+          _n_a_m_es  are  given, then display the values of variables
+          instead.  The options can be used to restrict output to
+          variables with the specified attribute.
+          -f   Use function names only
+          -r   Make _n_a_m_es readonly.  These names cannot  then  be
+               assigned  values  by  subsequent assignment state-
+               ments.
+          -x   Mark _n_a_m_es for export to subsequent  commands  via
+               the environment.
+          -i   The variable is treated as an integer;  arithmetic
+               evaluation  (see  ARITHMETIC  EVALUATION ) is per-
+               formed when the variable is assigned a value.
+
+          Using `+'  instead  of  `-'  turns  off  the  attribute
+          instead.   When  used in a function, makes _n_a_m_es local,
+          as with the local  command.   The  return  value  is  0
+          unless  an illegal option is encountered, an attempt is
+          made to define a function using "-f  foo=bar",  one  of
+          the  _n_a_m_e_s  is  not  a  legal  shell  variable name, an
+
+
+
+GNU              Last change: 1993 September 16                 3
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          attempt is made to  turn  off  readonly  status  for  a
+          readonly  variable,  or an attempt is made to display a
+          non-existant function with -f.
+
+     dirs [-l] [+/-n]
+          Display the list of currently  remembered  directories.
+          Directories  are  added to the list with the pushd com-
+          mand; the popd command moves back up through the list.
+          +n   displays the _nth entry counting from the  left  of
+               the  list  shown  by  dirs  when  invoked  without
+               options, starting with zero.
+          -n   displays the _nth entry counting from the right  of
+               the  list  shown  by  dirs  when  invoked  without
+               options, starting with zero.
+          -l   produces a longer  listing;  the  default  listing
+               format uses a tilde to denote the home directory.
+
+          The return value is 0 unless an illegal option is  sup-
+          plied  or  _n  indexes  beyond  the end of the directory
+          stack.
+
+     echo [-neE] [_a_r_g ...]
+          Output the  _a_r_gs,  separated  by  spaces.   The  return
+          status  is  always 0.  If -n is specified, the trailing
+          newline is suppressed.  If  the  -e  option  is  given,
+          interpretation of the following backslash-escaped char-
+          acters  is  enabled.   The  -E  option   disables   the
+          interpretation of these escape characters, even on sys-
+          tems where they are interpreted by default.
+          \a   alert (bell)
+          \b   backspace
+          \c   suppress trailing newline
+          \f   form feed
+          \n   new line
+          \r   carriage return
+          \t   horizontal tab
+          \v   vertical tab
+          \\   backslash
+          \nnn the character whose ASCII code is _n_n_n (octal)
+
+     enable [-n] [-all] [_n_a_m_e ...]
+          Enable and disable builtin shell commands.  This allows
+          the execution of a disk command which has the same name
+          as a shell builtin without specifying a full  pathname.
+          If  -n is used, each _n_a_m_e is disabled; otherwise, _n_a_m_e_s
+          are enabled.  For example, to use the test binary found
+          via the PATH instead of the shell builtin version, type
+          ``enable -n test''.  If no arguments are given, a  list
+          of  all  enabled shell builtins is printed.  If only -n
+          is  supplied,  a  list  of  all  disabled  builtins  is
+          printed.   If  only  -all is supplied, the list printed
+          includes all builtins, with an indication of whether or
+
+
+
+GNU              Last change: 1993 September 16                 4
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          not  each  is  enabled.  enable accepts -a as a synonym
+          for -all.  The return value is 0 unless a _n_a_m_e is not a
+          shell builtin.
+
+     eval [_a_r_g ...]
+          The _a_r_gs are read and concatenated together into a sin-
+          gle command.  This command is then read and executed by
+          the shell, and its exit status is returned as the value
+          of  the  eval  command.   If there are no _a_r_g_s, or only
+          null arguments, eval returns true.
+
+     exec [[-] _c_o_m_m_a_n_d [_a_r_g_u_m_e_n_t_s]]
+          If _c_o_m_m_a_n_d is specified, it replaces the shell.  No new
+          process is created.  The _a_r_g_u_m_e_n_t_s become the arguments
+          to _c_o_m_m_a_n_d.  If the first  argument  is  -,  the  shell
+          places  a  dash  in  the  zeroth arg passed to _c_o_m_m_a_n_d.
+          This is what login does.  If the file  cannot  be  exe-
+          cuted  for  some reason, a non-interactive shell exits,
+          unless  the   shell   variable   no_exit_on_failed_exec
+          exists,  in which case it returns failure.  An interac-
+          tive shell returns failure if the file cannot  be  exe-
+          cuted.   If  _c_o_m_m_a_n_d is not specified, any redirections
+          take effect in the current shell, and the return status
+          is 0.
+
+     exit [_n]
+          Cause the shell to exit with a status of _n.   If  _n  is
+          omitted,  the  exit  status is that of the last command
+          executed.  A trap on EXIT is executed before the  shell
+          terminates.
+
+     export [-nf] [_n_a_m_e[=_w_o_r_d]] ...
+     export -p
+          The supplied _n_a_m_e_s are marked for automatic  export  to
+          the  environment of subsequently executed commands.  If
+          the -f option is given, the _n_a_m_e_s refer  to  functions.
+          If no _n_a_m_e_s are given, or if the -p option is supplied,
+          a list of all names that are exported in this shell  is
+          printed.   The  -n option causes the export property to
+          be removed from the named variables.  An argument of --
+          disables option checking for the rest of the arguments.
+          export returns an exit status of 0  unless  an  illegal
+          option  is encountered, one of the _n_a_m_e_s is not a legal
+          shell variable name, or -f is supplied with a _n_a_m_e that
+          is not a function.
+
+     fc [-e _e_n_a_m_e] [-nlr] [_f_i_r_s_t] [_l_a_s_t]
+     fc -s [_p_a_t=_r_e_p] [_c_m_d]
+          Fix Command.  In the first form, a  range  of  commands
+          from  _f_i_r_s_t  to _l_a_s_t is selected from the history list.
+          _F_i_r_s_t and _l_a_s_t may be specified as a string (to  locate
+          the  last  command  beginning with that string) or as a
+
+
+
+GNU              Last change: 1993 September 16                 5
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          number (an index into the history list, where  a  nega-
+          tive  number is used as an offset from the current com-
+          mand number).  If _l_a_s_t is not specified it  is  set  to
+          the  current  command  for  listing  (so that fc -l -10
+          prints the last 10 commands) and  to  _f_i_r_s_t  otherwise.
+          If  _f_i_r_s_t  is  not  specified it is set to the previous
+          command for editing and -16 for listing.
+
+          The -n flag suppresses the command numbers  when  list-
+          ing.   The  -r flag reverses the order of the commands.
+          If the -l flag is given, the  commands  are  listed  on
+          standard  output.  Otherwise, the editor given by _e_n_a_m_e
+          is invoked on a file  containing  those  commands.   If
+          _e_n_a_m_e is not given, the value of the FCEDIT variable is
+          used, and the value of EDITOR if FCEDIT is not set.  If
+          neither variable is set, is used.  When editing is com-
+          plete, the edited commands are echoed and executed.
+
+          In the second form, _c_o_m_m_a_n_d is re-executed  after  each
+          instance  of _p_a_t is replaced by _r_e_p.  A useful alias to
+          use with this is ``r=fc -s'', so that typing  ``r  cc''
+          runs  the last command beginning with ``cc'' and typing
+          ``r'' re-executes the last command.
+
+          If the first form is used, the return value is 0 unless
+          an  illegal  option  is  encountered  or  _f_i_r_s_t or _l_a_s_t
+          specify history lines out of range.  If the  -e  option
+          is  supplied, the return value is the value of the last
+          command executed or failure if an error occurs with the
+          temporary  file  of  commands.   If  the second form is
+          used, the return status is  that  of  the  command  re-
+          executed,  unless  _c_m_d does not specify a valid history
+          line, in which case fc returns failure.
+
+     fg [_j_o_b_s_p_e_c]
+          Place _j_o_b_s_p_e_c  in  the  foreground,  and  make  it  the
+          current  job.   If  _j_o_b_s_p_e_c is not present, the shell's
+          notion of the _c_u_r_r_e_n_t _j_o_b is used.  The return value is
+          that  of  the  command  placed  into the foreground, or
+          failure if run when job control is  disabled  or,  when
+          run  with  job  control  enabled,  if  _j_o_b_s_p_e_c does not
+          specify a valid job or _j_o_b_s_p_e_c specifies a job that was
+          started without job control.
+
+     getopts _o_p_t_s_t_r_i_n_g _n_a_m_e [_a_r_g_s]
+          getopts is used by shell procedures to parse positional
+          parameters.   _o_p_t_s_t_r_i_n_g  contains the option letters to
+          be recognized; if a letter is followed by a colon,  the
+          option is expected to have an argument, which should be
+          separated from it by white  space.   Each  time  it  is
+          invoked,  getopts  places  the next option in the shell
+          variable _n_a_m_e, initializing _n_a_m_e if it does not  exist,
+
+
+
+GNU              Last change: 1993 September 16                 6
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          and the index of the next argument to be processed into
+          the variable OPTIND.  OPTIND is initialized to  1  each
+          time  the  shell or a shell script is invoked.  When an
+          option requires an argument, getopts places that  argu-
+          ment  into  the  variable  OPTARG.   The shell does not
+          reset OPTIND automatically; it must be  manually  reset
+          between multiple calls to getopts within the same shell
+          invocation if a new set of parameters is to be used.
+
+          getopts can report errors in two ways.   If  the  first
+          character of _o_p_t_s_t_r_i_n_g is a colon, _s_i_l_e_n_t error report-
+          ing is used.  In normal operation  diagnostic  messages
+          are  printed  when  illegal  options  or missing option
+          arguments are encountered.  If the variable  OPTERR  is
+          set  to  0, no error message will be displayed, even if
+          the first character of _o_p_t_s_t_r_i_n_g is not a colon.
+
+          If an illegal option is seen,  getopts  places  ?  into
+          _n_a_m_e  and,  if  not silent, prints an error message and
+          unsets OPTARG.  If getopts is silent, the option  char-
+          acter  found is placed in OPTARG and no diagnostic mes-
+          sage is printed.
+
+          If a required argument is not found, and getopts is not
+          silent,  a  question mark (?) is placed in _n_a_m_e, OPTARG
+          is unset, and a  diagnostic  message  is  printed.   If
+          getopts  is  silent, then a colon (:) is placed in _n_a_m_e
+          and OPTARG is set to the option character found.
+
+          getopts normally parses the positional parameters,  but
+          if  more  arguments  are  given in _a_r_g_s, getopts parses
+          those instead.  getopts  returns  true  if  an  option,
+          specified  or  unspecified, is found.  It returns false
+          if the end  of  options  is  encountered  or  an  error
+          occurs.
+
+     hash [-r] [_n_a_m_e]
+          For each _n_a_m_e, the full  pathname  of  the  command  is
+          determined  and  remembered.   The -r option causes the
+          shell to forget all remembered locations.  If no  argu-
+          ments  are given, information about remembered commands
+          is printed.  An argument of -- disables option checking
+          for  the  rest  of the arguments.  The return status is
+          true unless a _n_a_m_e is not found or an illegal option is
+          supplied.
+
+     help [_p_a_t_t_e_r_n]
+          Display helpful information about builtin commands.  If
+          _p_a_t_t_e_r_n  is  specified, help gives detailed help on all
+          commands matching _p_a_t_t_e_r_n;  otherwise  a  list  of  the
+          builtins  is printed.  The return status is 0 unless no
+          command matches _p_a_t_t_e_r_n.
+
+
+
+GNU              Last change: 1993 September 16                 7
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+     history [_n]
+     history -rwan [_f_i_l_e_n_a_m_e]
+          With no options, display the command history list  with
+          line  numbers.   Lines  listed with a * have been modi-
+          fied.  An argument of _n lists only the  last  _n  lines.
+          If a non-option argument is supplied, it is used as the
+          name of the history file; if not, the value of HISTFILE
+          is  used.   Options,  if  supplied,  have the following
+          meanings:
+          -a   Append the ``new'' history  lines  (history  lines
+               entered  since  the  beginning of the current bash
+               session) to the history file
+          -n   Read the history lines not already read  from  the
+               history file into the current history list.  These
+               are lines appended to the history file  since  the
+               beginning of the current bash session.
+          -r   Read the contents of the history file and use them
+               as the current history
+          -w   Write the current history  to  the  history  file,
+               overwriting the history file's contents.
+
+          The return value is  0  unless  an  illegal  option  is
+          encountered or an error occurs while reading or writing
+          the history file.
+
+     jobs [-lnp] [ _j_o_b_s_p_e_c ... ]
+     jobs -x _c_o_m_m_a_n_d [ _a_r_g_s ... ]
+          The first form lists the active jobs.   The  -l  option
+          lists  process  IDs  in addition to the normal informa-
+          tion; the -p option lists only the process  ID  of  the
+          job's  process  group  leader.   The -n option displays
+          only jobs that have changed status since last notified.
+          If  _j_o_b_s_p_e_c  is given, output is restricted to informa-
+          tion about that job.  The return status is 0 unless  an
+          illegal  option is encountered or an illegal _j_o_b_s_p_e_c is
+          supplied.
+
+          If the -x option is supplied, jobs replaces any _j_o_b_s_p_e_c
+          found in _c_o_m_m_a_n_d or _a_r_g_s with the corresponding process
+          group ID, and executes _c_o_m_m_a_n_d passing it _a_r_g_s, return-
+          ing its exit status.
+
+     kill [-s sigspec | -sigspec] [_p_i_d | _j_o_b_s_p_e_c] ...
+     kill -l [_s_i_g_n_u_m]
+          Send the signal named by _s_i_g_s_p_e_c to the processes named
+          by  _p_i_d  or  _j_o_b_s_p_e_c.   _s_i_g_s_p_e_c is either a signal name
+          such as SIGKILL or a signal number.  If  _s_i_g_s_p_e_c  is  a
+          signal  name,  the  name is case insensitive and may be
+          given with or without the SIG prefix.   If  _s_i_g_s_p_e_c  is
+          not  present,  then SIGTERM is assumed.  An argument of
+          -l lists the signal names.  If any arguments  are  sup-
+          plied  when  -l  is  given,  the names of the specified
+
+
+
+GNU              Last change: 1993 September 16                 8
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          signals are listed, and the return  status  is  0.   An
+          argument of -- disables option checking for the rest of
+          the arguments.  kill returns true if at least one  sig-
+          nal  was successfully sent, or false if an error occurs
+          or an illegal option is encountered.
+
+     let _a_r_g [_a_r_g ...]
+          Each _a_r_g is an arithmetic expression  to  be  evaluated
+          (see ARITHMETIC EVALUATION).  If the last _a_r_g evaluates
+          to 0, let returns 1; 0 is returned otherwise.
+
+     local [_n_a_m_e[=_v_a_l_u_e] ...]
+          For each argument, create a local variable named  _n_a_m_e,
+          and assign it _v_a_l_u_e.  When local is used within a func-
+          tion, it causes the variable _n_a_m_e  to  have  a  visible
+          scope  restricted  to  that  function and its children.
+          With no operands, local writes a list  of  local  vari-
+          ables  to  the  standard output.  It is an error to use
+          local when not within a function.  The return status is
+          0  unless local is used outside a function, or an ille-
+          gal _n_a_m_e is supplied.
+
+     logout
+          Exit a login shell.
+
+     popd [+/-n]
+          Removes entries from  the  directory  stack.   With  no
+          arguments,  removes  the  top directory from the stack,
+          and performs a cd to the new top directory.
+          +n   removes the _nth entry counting from  the  left  of
+               the  list  shown by dirs, starting with zero.  For
+               example: ``popd +0'' removes the first  directory,
+               ``popd +1'' the second.
+          -n   removes the _nth entry counting from the  right  of
+               the  list  shown by dirs, starting with zero.  For
+               example: ``popd -0'' removes the  last  directory,
+               ``popd -1'' the next to last.
+
+          If the popd command is successful, a dirs is  performed
+          as  well,  and  the  return  status is 0.  popd returns
+          false if an illegal option is encountered,  the  direc-
+          tory  stack  is  empty,  a non-existent directory stack
+          entry is specified, or the directory change fails.
+
+     pushd [_d_i_r]
+     pushd +/-n
+          Adds a directory to the top of the directory stack,  or
+          rotates  the stack, making the new top of the stack the
+          current  working   directory.    With   no   arguments,
+          exchanges the top two directories and returns 0, unless
+          the directory stack is empty.
+          +n   Rotates  the  stack  so  that  the  _nth  directory
+
+
+
+GNU              Last change: 1993 September 16                 9
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+               (counting from the left of the list shown by dirs)
+               is at the top.
+          -n   Rotates  the  stack  so  that  the  _nth  directory
+               (counting from the right) is at the top.
+          dir  adds _d_i_r to the directory stack at the top, making
+               it the new current working directory.
+
+          If the pushd command is successful, a dirs is performed
+          as  well.   If  the first form is used, pushd returns 0
+          unless the cd to _d_i_r  fails.   With  the  second  form,
+          pushd  returns 0 unless the directory stack is empty, a
+          non-existant directory stack element is  specified,  or
+          the  directory  change  to  the  specified  new current
+          directory fails.
+
+     pwd  Print the absolute  pathname  of  the  current  working
+          directory.  The path printed contains no symbolic links
+          if the -P option to the set  builtin  command  is  set.
+          See  also  the description of nolinks under Shell Vari-
+          ables above).  The return status is 0 unless  an  error
+          occurs while reading the pathname of the current direc-
+          tory.
+
+     read [-r] [_n_a_m_e ...]
+          One line is read from the standard input, and the first
+          word  is assigned to the first _n_a_m_e, the second word to
+          the  second  _n_a_m_e,  and  so  on,  with  leftover  words
+          assigned  to the last _n_a_m_e.  Only the characters in IFS
+          are recognized as word delimiters.   If  no  _n_a_m_e_s  are
+          supplied,  the  line  read  is assigned to the variable
+          REPLY.  The return code is zero, unless end-of-file  is
+          encountered.   If  the -r option is given, a backslash-
+          newline pair is not ignored, and the backslash is  con-
+          sidered to be part of the line.
+
+     readonly [-f] [_n_a_m_e ...]
+     readonly -p
+          The given _n_a_m_e_s are marked readonly and the  values  of
+          these  _n_a_m_e_s  may  not be changed by subsequent assign-
+          ment.  If the -f  option  is  supplied,  the  functions
+          corresponding  to the _n_a_m_e_s are so marked.  If no argu-
+          ments are given, or if the -p  option  is  supplied,  a
+          list  of all readonly names is printed.  An argument of
+          -- disables option checking for the rest of  the  argu-
+          ments.  The return status is 0 unless an illegal option
+          is encountered, one of the _n_a_m_e_s is not a  legal  shell
+          variable  name,  or  -f is supplied with a _n_a_m_e that is
+          not a function.
+
+     return [_n]
+          Causes a function to exit with the return value  speci-
+          fied  by _n.  If _n is omitted, the return status is that
+
+
+
+GNU              Last change: 1993 September 16                10
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          of the last command executed in the function body.   If
+          used  outside  a  function,  but  during execution of a
+          script by the . (source) command, it causes  the  shell
+          to  stop  executing  that script and return either _n or
+          the exit status of the last command executed within the
+          script  as the exit status of the script.  If used out-
+          side a function and not during execution of a script by
+          ., the return status is false.
+
+     set [--abefhkmnptuvxldCHP] [-o _o_p_t_i_o_n] [_a_r_g ...]
+          -a      Automatically mark variables which are modified
+                  or  created  for  export  to the environment of
+                  subsequent commands.
+          -b      Cause the status of terminated background  jobs
+                  to  be reported immediately, rather than before
+                  the next  primary  prompt.   (Also  see  notify
+                  under Shell Variables above).
+          -e      Exit immediately if a _s_i_m_p_l_e-_c_o_m_m_a_n_d (see SHELL
+                  GRAMMAR  above)  exits  with a non-zero status.
+                  The shell does not exit  if  the  command  that
+                  fails  is  part of an _u_n_t_i_l or _w_h_i_l_e loop, part
+                  of an _i_f statement, part of a && or || list, or
+                  if the command's return value is being inverted
+                  via !.
+          -f      Disable pathname expansion.
+          -h      Locate and remember function commands as  func-
+                  tions  are defined.  Function commands are nor-
+                  mally looked up when the function is executed.
+          -k      All  keyword  arguments  are  placed   in   the
+                  environment  for a command, not just those that
+                  precede the command name.
+          -m      Monitor mode.  Job control  is  enabled.   This
+                  flag is on by default for interactive shells on
+                  systems  that  support  it  (see  JOB   CONTROL
+                  above).  Background processes run in a separate
+                  process group and a line containing their  exit
+                  status is printed upon their completion.
+          -n      Read commands but do not  execute  them.   This
+                  may  be used to check a shell script for syntax
+                  errors.   This  is  ignored   for   interactive
+                  shells.
+          -o _o_p_t_i_o_n-_n_a_m_e
+                  The _o_p_t_i_o_n-_n_a_m_e can be one of the following:
+                  allexport
+                          Same as -a.
+                  braceexpand
+                          The shell performs brace expansion (see
+                          Brace  Expansion above).  This is on by
+                          default.
+                  emacs   Use an emacs-style command line editing
+                          interface.   This is enabled by default
+                          when the shell is  interactive,  unless
+
+
+
+GNU              Last change: 1993 September 16                11
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+                          the  shell  is  started  with the -nol-
+                          ineediting option.
+                  errexit Same as -e.
+                  histexpand
+                          Same as -H.
+                  ignoreeof
+                          The effect is as if the  shell  command
+                          `IGNOREEOF=10'  had  been executed (see
+                          Shell Variables above).
+                  interactive-comments
+                          Allow a word beginning with # to  cause
+                          that  word and all remaining characters
+                          on  that  line  to  be  ignored  in  an
+                          interactive shell (see COMMENTS above).
+                  monitor Same as -m.
+                  noclobber
+                          Same as -C.
+                  noexec  Same as -n.
+                  noglob  Same as -f.
+                  nohash  Same as -d.
+                  notify  Same as -b.
+                  nounset Same as -u.
+                  physical
+                          Same as -P.
+                  posix   Change the behavior of bash  where  the
+                          default   operation  differs  from  the
+                          Posix  1003.2  standard  to  match  the
+                          standard.
+                  privileged
+                          Same as -p.
+                  verbose Same as -v.
+                  vi      Use a  vi-style  command  line  editing
+                          interface.
+                  xtrace  Same as -x.
+                  If no _o_p_t_i_o_n-_n_a_m_e is supplied,  the  values  of
+                  the current options are printed.
+          -p      Turn on _p_r_i_v_i_l_e_g_e_d mode.   In  this  mode,  the
+                  $ENV file is not processed, and shell functions
+                  are not inherited from the  environment.   This
+                  is  enabled  automatically  on  startup  if the
+                  effective user (group) id is not equal  to  the
+                  real  user (group) id.  Turning this option off
+                  causes the effective user and group ids  to  be
+                  set to the real user and group ids.
+          -t      Exit after reading and executing one command.
+          -u      Treat unset variables as an error when perform-
+                  ing   parameter  expansion.   If  expansion  is
+                  attempted  on  an  unset  variable,  the  shell
+                  prints  an  error message, and, if not interac-
+                  tive, exits with a non-zero status.
+          -v      Print shell input lines as they are read.
+          -x      After  expanding  each   _s_i_m_p_l_e-_c_o_m_m_a_n_d,   bash
+
+
+
+GNU              Last change: 1993 September 16                12
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+                  displays the expanded value of PS4, followed by
+                  the command and its expanded arguments.
+          -l      Save and restore the binding of _n_a_m_e in  a  for
+                  _n_a_m_e  [in  word]  command  (see  SHELL  GRAMMAR
+                  above).
+          -d      Disable the hashing of commands that are looked
+                  up   for  execution.   Normally,  commands  are
+                  remembered in a hash table, and once found,  do
+                  not have to be looked up again.
+          -C      The  effect  is  as  if   the   shell   command
+                  `noclobber=' had been executed (see Shell Vari-
+                  ables above).
+          -H      Enable ! style history substitution.  This flag
+                  is on by default when the shell is interactive.
+          -P      If set, do not follow symbolic links when  per-
+                  forming  commands  such  as cd which change the
+                  current directory.  The physical  directory  is
+                  used instead.
+          --      If no arguments  follow  this  flag,  then  the
+                  positional  parameters  are  unset.  Otherwise,
+                  the positional parameters are set to the  _a_r_gs,
+                  even if some of them begin with a -.
+          -       Signal the end of options, cause all  remaining
+                  _a_r_gs  to  be assigned to the positional parame-
+                  ters.  The -x and -v options  are  turned  off.
+                  If there are no _a_r_gs, the positional parameters
+                  remain unchanged.
+
+          The flags are off by default  unless  otherwise  noted.
+          Using  +  rather than - causes these flags to be turned
+          off.  The flags can also be specified as options to  an
+          invocation  of the shell.  The current set of flags may
+          be found in $-.  After the option  arguments  are  pro-
+          cessed,  the remaining _n _a_r_gs are treated as values for
+          the positional parameters and are assigned,  in  order,
+          to $1, $2, ... $_n.  If no options or _a_r_gs are supplied,
+          all shell variables are printed.  The return status  is
+          always true unless an illegal option is encountered.
+
+     shift [_n]
+          The positional parameters from _n+1 ... are  renamed  to
+          $1  ....  Parameters represented by the numbers $# down
+          to $#-_n+1 are unset.  If _n  is  0,  no  parameters  are
+          changed.   If _n is not given, it is assumed to be 1.  _n
+          must be a non-negative number less than or equal to $#.
+          If  _n is greater than $#, the positional parameters are
+          not changed.  The return status is greater than 0 if  _n
+          is greater than $# or less than 0; otherwise 0.
+
+     suspend [-f]
+          Suspend the execution of this shell until it receives a
+          SIGCONT  signal.  The -f option says not to complain if
+
+
+
+GNU              Last change: 1993 September 16                13
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          this is a login shell; just suspend anyway.  The return
+          status is 0 unless the shell is a login shell and -f is
+          not supplied, or if job control is not enabled.
+
+     test _e_x_p_r
+     [ _e_x_p_r ]
+          Return a status of 0 (true) or 1 (false)  depending  on
+          the  evaluation  of  the  conditional  expression _e_x_p_r.
+          Expressions may be unary or binary.  Unary  expressions
+          are  often used to examine the status of a file.  There
+          are string operators and numeric  comparison  operators
+          as  well.  Each operator and operand must be a separate
+          argument.  If _f_i_l_e is of the form /dev/fd/_n, then  file
+          descriptor _n is checked.
+          -b _f_i_l_e
+               True if _f_i_l_e exists and is block special.
+          -c _f_i_l_e
+               True if _f_i_l_e exists and is character special.
+          -d _f_i_l_e
+               True if _f_i_l_e exists and is a directory.
+          -e _f_i_l_e
+               True if _f_i_l_e exists.
+          -f _f_i_l_e
+               True if _f_i_l_e exists and is a regular file.
+          -g _f_i_l_e
+               True if _f_i_l_e exists and is set-group-id.
+          -k _f_i_l_e
+               True if _f_i_l_e has its ``sticky'' bit set.
+          -L _f_i_l_e
+               True if _f_i_l_e exists and is a symbolic link.
+          -p _f_i_l_e
+               True if _f_i_l_e exists and is a named pipe.
+          -r _f_i_l_e
+               True if _f_i_l_e exists and is readable.
+          -s _f_i_l_e
+               True if _f_i_l_e exists and has a  size  greater  than
+               zero.
+          -S _f_i_l_e
+               True if _f_i_l_e exists and is a socket.
+          -t _f_d
+               True if _f_d is opened on a terminal.
+          -u _f_i_l_e
+               True if _f_i_l_e exists and  its  set-user-id  bit  is
+               set.
+          -w _f_i_l_e
+               True if _f_i_l_e exists and is writable.
+          -x _f_i_l_e
+               True if _f_i_l_e exists and is executable.
+          -O _f_i_l_e
+               True if _f_i_l_e exists and is owned by the  effective
+               user id.
+          -G _f_i_l_e
+
+
+
+GNU              Last change: 1993 September 16                14
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+               True if _f_i_l_e exists and is owned by the  effective
+               group id.
+          _f_i_l_e_1 -nt _f_i_l_e_2
+               True if _f_i_l_e_1 is newer (according to  modification
+               date) than _f_i_l_e_2.
+          _f_i_l_e_1 -ot _f_i_l_e_2
+               True if _f_i_l_e_1 is older than file2.
+          _f_i_l_e_1 -ef _f_i_l_e
+               True if _f_i_l_e_1 and _f_i_l_e_2 have the same  device  and
+               inode numbers.
+          -z _s_t_r_i_n_g
+               True if the length of _s_t_r_i_n_g is zero.
+          -n _s_t_r_i_n_g
+          _s_t_r_i_n_g
+               True if the length of _s_t_r_i_n_g is non-zero.
+          _s_t_r_i_n_g_1 = _s_t_r_i_n_g_2
+               True if the strings are equal.
+          _s_t_r_i_n_g_1 != _s_t_r_i_n_g_2
+               True if the strings are not equal.
+          ! _e_x_p_r
+               True if _e_x_p_r is false.
+          _e_x_p_r_1 -a _e_x_p_r_2
+               True if both _e_x_p_r_1 AND _e_x_p_r_2 are true.
+          _e_x_p_r_1 -o _e_x_p_r_2
+               True if either _e_x_p_r_1 OR _e_x_p_r_2 is true.
+          _a_r_g_1 OP _a_r_g_2
+               OP is one of -eq, -ne,  -lt,  -le,  -gt,  or  -ge.
+               These  arithmetic  binary operators return true if
+               _a_r_g_1 is equal,  not-equal,  less-than,  less-than-
+               or-equal,  greater-than,  or greater-than-or-equal
+               than _a_r_g_2, respectively.  _A_r_g_1  and  _a_r_g_2  may  be
+               positive  integers, negative integers, or the spe-
+               cial expression -l _s_t_r_i_n_g, which evaluates to  the
+               length of _s_t_r_i_n_g.
+
+     times
+          Print the accumulated user and  system  times  for  the
+          shell and for processes run from the shell.  The return
+          status is 0.
+
+     trap [-l] [_a_r_g] [_s_i_g_s_p_e_c]
+          The command _a_r_g is to be read  and  executed  when  the
+          shell  receives signal(s) _s_i_g_s_p_e_c.  If _a_r_g is absent or
+          -, all specified signals are reset  to  their  original
+          values  (the  values  they  had  upon  entrance  to the
+          shell).  If _a_r_g is  the  null  string  this  signal  is
+          ignored  by  the  shell and by the commands it invokes.
+          _s_i_g_s_p_e_c is either a signal name defined in  <_s_i_g_n_a_l._h>,
+          or  a signal number. If _s_i_g_s_p_e_c is EXIT (0) the command
+          _a_r_g is executed on exit from the shell.  With no  argu-
+          ments, trap prints the list of commands associated with
+          each signal number.  The -l option causes the shell  to
+
+
+
+GNU              Last change: 1993 September 16                15
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          print  a  list  of signal names and their corresponding
+          numbers.  An argument of --  disables  option  checking
+          for  the  rest  of the arguments.  Signals ignored upon
+          entry to the shell cannot be trapped or reset.  Trapped
+          signals  are  reset to their original values in a child
+          process when it is created.  The return status is false
+          if either the trap name or number is invalid; otherwise
+          trap returns true.
+
+     type [-all] [-type | -path] _n_a_m_e [_n_a_m_e ...]
+          With no options, indicate how each _n_a_m_e would be inter-
+          preted if used as a command name.  If the -type flag is
+          used, type prints a phrase which is one of _a_l_i_a_s,  _k_e_y_-
+          _w_o_r_d,  _f_u_n_c_t_i_o_n,  _b_u_i_l_t_i_n, or _f_i_l_e if _n_a_m_e is an alias,
+          shell reserved word, function, builtin, or  disk  file,
+          respectively. If the name is not found, then nothing is
+          printed, and an exit status of false is  returned.   If
+          the -path flag is used, type either returns the name of
+          the disk file that  would  be  executed  if  _n_a_m_e  were
+          specified  as a command name, or nothing if -type would
+          not return _f_i_l_e.  If a command is hashed, -path  prints
+          the hashed value, not necessarily the file that appears
+          first in PATH.  If the -all flag is used,  type  prints
+          all  of  the  places  that  contain an executable named
+          _n_a_m_e.  This includes aliases and functions, if and only
+          if  the  -path  flag  is  not  also used.  The table of
+          hashed commands is not consulted when using -all.  type
+          accepts  -a,  -t,  and  -p in place of -all, -type, and
+          -path, respectively.  An argument of -- disables option
+          checking  for  the rest of the arguments.  type returns
+          true if any of the arguments are found, false  if  none
+          are found.
+
+     ulimit [-SHacdfmstpnuv [_l_i_m_i_t]]
+          Ulimit provides control over the resources available to
+          the  shell  and  to processes started by it, on systems
+          that allow such control.  The value of _l_i_m_i_t can  be  a
+          number  in  the unit specified for the resource, or the
+          value unlimited.  The H and S options specify that  the
+          hard  or  soft  limit is set for the given resource.  A
+          hard limit cannot be increased once it is set;  a  soft
+          limit  may  be  increased  up  to the value of the hard
+          limit.  If neither H nor S is  specified,  the  command
+          applies  to  the  soft limit.  If _l_i_m_i_t is omitted, the
+          current value of the soft  limit  of  the  resource  is
+          printed,  unless the H option is given.  When more than
+          one resource is specified, the limit name and  unit  is
+          printed  before  the  value.   Other options are inter-
+          preted as follows:
+          -a   all current limits are reported
+          -c   the maximum size of core files created
+          -d   the maximum size of a process's data segment
+
+
+
+GNU              Last change: 1993 September 16                16
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          -f   the maximum size of files created by the shell
+          -m   the maximum resident set size
+          -s   the maximum stack size
+          -t   the maximum amount of cpu time in seconds
+          -p   the pipe size in 512-byte blocks (this may not  be
+               set)
+          -n   the maximum number of open file descriptors  (most
+               systems  do  not  allow this value to be set, only
+               displayed)
+          -u   the maximum number of  processes  available  to  a
+               single user
+          -v   The maximum amount of virtual memory available  to
+               the shell
+
+          An argument of -- disables option checking for the rest
+          of  the  arguments.   If  _l_i_m_i_t is given, it is the new
+          value of the  specified  resource  (the  -a  option  is
+          display  only).   If  no  option  is  given, then -f is
+          assumed.  Values are in  1024-byte  increments,  except
+          for  -t,  which is in seconds, -p, which is in units of
+          512-byte blocks, and -n  and  -u,  which  are  unscaled
+          values.   The  return  status  is  0  unless an illegal
+          option is encountered,  a  non-numeric  argument  other
+          than unlimited is supplied as _l_i_m_i_t, or an error occurs
+          while setting a new limit.
+
+     umask [-S] [_m_o_d_e]
+          The user file-creation mask is set to  _m_o_d_e.   If  _m_o_d_e
+          begins  with  a  digit,  it  is interpreted as an octal
+          number; otherwise it is interpreted as a symbolic  mode
+          mask  similar to that accepted by _c_h_m_o_d(1).  If _m_o_d_e is
+          omitted, or if the -S option is supplied,  the  current
+          value of the mask is printed.  The -S option causes the
+          mask to be printed in symbolic form; the default output
+          is  an octal number.  An argument of -- disables option
+          checking for the rest of  the  arguments.   The  return
+          status  is 0 if the mode was successfully changed or if
+          no _m_o_d_e argument was supplied, and false otherwise.
+
+     unalias [-a] [_n_a_m_e ...]
+          Remove _n_a_m_es from the list of defined aliases.   If  -a
+          is  supplied,  all  alias definitions are removed.  The
+          return value is true unless a supplied _n_a_m_e  is  not  a
+          defined alias.
+
+     unset [-fv] [_n_a_m_e ...]
+          For each _n_a_m_e, remove the  corresponding  variable  or,
+          given  the -f option, function.  An argument of -- dis-
+          ables option checking for the rest  of  the  arguments.
+          Note that PATH, IFS, PPID, PS1, PS2, UID, and EUID can-
+          not be unset.  If any of RANDOM,  SECONDS,  LINENO,  or
+          HISTCMD  are unset, they lose their special properties,
+
+
+
+GNU              Last change: 1993 September 16                17
+
+
+
+
+
+
+BASH_BUILTINS(1)         USER COMMANDS           BASH_BUILTINS(1)
+
+
+
+          even if they are subsequently reset.  The  exit  status
+          is  true  unless  a  _n_a_m_e  does  not  exist  or is non-
+          unsettable.
+
+     wait [_n]
+          Wait for the specified process and return its  termina-
+          tion status.  _n may be a process ID or a job specifica-
+          tion; if a job spec is given,  all  processes  in  that
+          job's  pipeline are waited for.  If _n is not given, all
+          currently active child processes are  waited  for,  and
+          the  return  status  is  zero.   If  _n specifies a non-
+          existant process or job,  the  return  status  is  127.
+          Otherwise,  the return status is the exit status of the
+          last process or job waited for.
+
+SEE ALSO
+     bash(1), sh(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GNU              Last change: 1993 September 16                18
+
+
+

@@ -1,0 +1,344 @@
+/* getcwd.c -- stolen from the GNU C library and modified to work with bash. */
+
+/* Copyright (C) 1991 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public License as
+   published by the Free Software Foundation; either version 2 of the
+   License, or (at your option) any later version.
+
+   The GNU C Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+
+   You should have received a copy of the GNU Library General Public
+   License along with the GNU C Library; see the file COPYING.LIB.  If
+   not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+   Cambridge, MA 02139, USA.  */
+
+#include "bashtypes.h"
+#include <errno.h>
+
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
+#endif
+
+#if defined (HAVE_DIRENT_H)
+#  include <dirent.h>
+#else
+#  include <sys/dir.h>
+#  if !defined (dirent)
+#    define dirent direct
+#  endif /* !dirent */
+#endif /* !HAVE_DIRENT_H */
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "posixstat.h"
+#include "maxpath.h"
+#include "config.h"
+
+#if defined (HAVE_STDLIB_H)
+#  include <stdlib.h>
+#else
+#  include "ansi_stdlib.h"
+#endif /* !HAVE_STDLIB_H */
+
+#if defined (HAVE_STRING_H)
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif /* !HAVE_STRING_H */
+
+/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
+
+#if defined (__STDC__)
+#  define CONST const
+#  define PTR void *
+#else /* !__STDC__ */
+#  define CONST
+#  define PTR char *
+#endif /* !__STDC__ */
+
+#if !defined (PATH_MAX)
+#  if defined (MAXPATHLEN)
+#    define PATH_MAX MAXPATHLEN
+#  else /* !MAXPATHLEN */
+#    define PATH_MAX 1024
+#  endif /* !MAXPATHLEN */
+#endif /* !PATH_MAX */
+
+#if defined (_POSIX_VERSION) || defined (USGr3) || defined (HAVE_DIRENT_H)
+#  if !defined (HAVE_DIRENT)
+#    define HAVE_DIRENT
+#  endif /* !HAVE_DIRENT */
+#endif /* _POSIX_VERSION || USGr3 || HAVE_DIRENT_H */
+
+#if defined (HAVE_DIRENT)
+#  define D_NAMLEN(d)	(strlen ((d)->d_name))
+#else
+#  define D_NAMLEN(d)	((d)->d_namlen)
+#endif /* ! (_POSIX_VERSION || USGr3) */
+
+#if defined (USG) || defined (USGr3)
+#  define d_fileno d_ino
+#endif
+
+#if !defined (alloca)
+extern char *alloca ();
+#endif /* alloca */
+
+/* Heuristic to tell whether or not the current machine has lstat(2).
+   Can probably be fooled easily. */
+#if !defined (S_ISLNK)
+#  define lstat stat
+#endif
+
+/* Get the pathname of the current working directory,
+   and put it in SIZE bytes of BUF.  Returns NULL if the
+   directory couldn't be determined or SIZE was too small.
+   If successful, returns BUF.  In GNU, if BUF is NULL,
+   an array is allocated with `malloc'; the array is SIZE
+   bytes long, unless SIZE <= 0, in which case it is as
+   big as necessary.  */
+#if defined (__STDC__)
+char *
+getcwd (char *buf, size_t size)
+#else /* !__STDC__ */
+char *
+getcwd (buf, size)
+     char *buf;
+     size_t size;
+#endif /* !__STDC__ */
+{
+  static CONST char dots[]
+    = "../../../../../../../../../../../../../../../../../../../../../../../\
+../../../../../../../../../../../../../../../../../../../../../../../../../../\
+../../../../../../../../../../../../../../../../../../../../../../../../../..";
+  CONST char *dotp, *dotlist;
+  size_t dotsize;
+  dev_t rootdev, thisdev;
+  ino_t rootino, thisino;
+  char path[PATH_MAX + 1];
+  register char *pathp;
+  char *pathbuf;
+  size_t pathsize;
+  struct stat st;
+
+  if (buf != NULL && size == 0)
+    {
+      errno = EINVAL;
+      return ((char *)NULL);
+    }
+
+  pathsize = sizeof (path);
+  pathp = &path[pathsize];
+  *--pathp = '\0';
+  pathbuf = path;
+
+  if (stat (".", &st) < 0)
+    return ((char *)NULL);
+  thisdev = st.st_dev;
+  thisino = st.st_ino;
+
+  if (stat ("/", &st) < 0)
+    return ((char *)NULL);
+  rootdev = st.st_dev;
+  rootino = st.st_ino;
+
+  dotsize = sizeof (dots) - 1;
+  dotp = &dots[sizeof (dots)];
+  dotlist = dots;
+  while (!(thisdev == rootdev && thisino == rootino))
+    {
+      register DIR *dirstream;
+      register struct dirent *d;
+      dev_t dotdev;
+      ino_t dotino;
+      char mount_point;
+      int namlen;
+
+      /* Look at the parent directory.  */
+      if (dotp == dotlist)
+	{
+	  /* My, what a deep directory tree you have, Grandma.  */
+	  char *new;
+	  if (dotlist == dots)
+	    {
+	      new = malloc (dotsize * 2 + 1);
+	      if (new == NULL)
+		goto lose;
+	      memcpy (new, dots, dotsize);
+	    }
+	  else
+	    {
+	      new = realloc ((PTR) dotlist, dotsize * 2 + 1);
+	      if (new == NULL)
+		goto lose;
+	    }
+	  memcpy (&new[dotsize], new, dotsize);
+	  dotp = &new[dotsize];
+	  dotsize *= 2;
+	  new[dotsize] = '\0';
+	  dotlist = new;
+	}
+
+      dotp -= 3;
+
+      /* Figure out if this directory is a mount point.  */
+      if (stat (dotp, &st) < 0)
+	goto lose;
+      dotdev = st.st_dev;
+      dotino = st.st_ino;
+      mount_point = dotdev != thisdev;
+
+      /* Search for the last directory.  */
+      dirstream = opendir (dotp);
+      if (dirstream == NULL)
+	goto lose;
+      while ((d = readdir (dirstream)) != NULL)
+	{
+	  if (d->d_name[0] == '.' &&
+	      (d->d_name[1] == '\0' ||
+		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
+	    continue;
+	  if (mount_point || d->d_fileno == thisino)
+	    {
+	      char *name;
+
+	      namlen = D_NAMLEN(d);
+	      name = (char *)
+		alloca (dotlist + dotsize - dotp + 1 + namlen + 1);
+	      memcpy (name, dotp, dotlist + dotsize - dotp);
+	      name[dotlist + dotsize - dotp] = '/';
+	      memcpy (&name[dotlist + dotsize - dotp + 1],
+		      d->d_name, namlen + 1);
+	      if (lstat (name, &st) < 0)
+		{
+		  int save = errno;
+		  (void) closedir (dirstream);
+		  errno = save;
+		  goto lose;
+		}
+	      if (st.st_dev == thisdev && st.st_ino == thisino)
+		break;
+	    }
+	}
+      if (d == NULL)
+	{
+	  int save = errno;
+	  (void) closedir (dirstream);
+	  errno = save;
+	  goto lose;
+	}
+      else
+	{
+	  size_t space;
+
+	  while ((space = pathp - pathbuf) <= namlen)
+	    {
+	      char *new;
+
+	      if (pathbuf == path)
+		{
+		  new = malloc (pathsize * 2);
+		  if (!new)
+		    goto lose;
+		}
+	      else
+		{
+		  new = realloc ((PTR) pathbuf, (pathsize * 2));
+		  if (!new)
+		    goto lose;
+		  pathp = new + space;
+		}
+	      (void) memcpy (new + pathsize + space, pathp, pathsize - space);
+	      pathp = new + pathsize + space;
+	      pathbuf = new;
+	      pathsize *= 2;
+	    }
+
+	  pathp -= namlen;
+	  (void) memcpy (pathp, d->d_name, namlen);
+	  *--pathp = '/';
+	  (void) closedir (dirstream);
+	}
+
+      thisdev = dotdev;
+      thisino = dotino;
+    }
+
+  if (pathp == &path[sizeof(path) - 1])
+    *--pathp = '/';
+
+  if (dotlist != dots)
+    free ((PTR) dotlist);
+
+  {
+    size_t len = pathbuf + pathsize - pathp;
+    if (buf == NULL)
+      {
+	if (len < (size_t) size)
+	  len = size;
+	buf = (char *) malloc (len);
+	if (buf == NULL)
+	  goto lose2;
+      }
+    else if ((size_t) size < len)
+      {
+	errno = ERANGE;
+	goto lose2;
+      }
+    (void) memcpy((PTR) buf, (PTR) pathp, len);
+  }
+
+  if (pathbuf != path)
+    free (pathbuf);
+
+  return (buf);
+
+ lose:
+  if ((dotlist != dots) && dotlist)
+    {
+      int e = errno;
+      free ((PTR) dotlist);
+      errno = e;
+    }
+
+ lose2:
+  if ((pathbuf != path) && pathbuf)
+    {
+      int e = errno;
+      free ((PTR) pathbuf);
+      errno = e;
+    }
+  return ((char *)NULL);
+}
+
+#if defined (TEST)
+#  include <stdio.h>
+main (argc, argv)
+     int argc;
+     char **argv;
+{
+  char b[PATH_MAX];
+
+  if (getcwd(b, sizeof(b)))
+    {
+      printf ("%s\n", b);
+      exit (0);
+    }
+  else
+    {
+      perror ("cwd: getcwd");
+      exit (1);
+    }
+}
+#endif /* TEST */

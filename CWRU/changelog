@@ -1,0 +1,786 @@
+				    6/2
+				    ---
+lib/readline/readline.c
+	- fixed an off-by-one error in the kill ring reallocation code
+	  in rl_kill_text
+
+Makefile
+	- replaced instances of /bin/sh with $(SHELL)
+
+Makefile, cpp-Makefile, documentation/Makefile
+	- added a working `uninstall' target
+
+[1.14.0 FCS release made available for FTP]
+
+				    6/3
+				    ---
+README
+	- added note about building with gcc, same as in Makefile
+
+documentation/Makefile
+	- some versions of make don't understand `$*' in a regular recipe;
+	  replace with features.dvi in the recipe for features.ps
+
+				    6/4
+				    ---
+subst.c
+	- fix up the calls to string_extract_double_quoted and 
+	  string_extract_single_quoted in char_is_quoted so the initial
+	  value of the index is *after* the opening quote character
+	- make sure we only return 1 from char_is_quoted if the index
+	  into the string after a call to string_extract_double_quoted or
+	  string_extract_single_quoted is *greater than* `eindex'
+
+lib/readline/complete.c
+	- change the order and sense of the quoting tests in
+	  rl_complete_internal so that the expensive char_is_quoted
+	  is only called if `scan' actually is a word break character
+
+shell.c
+	- fixed a typo in the test for a restricted shell
+
+builtins/exec.def
+	- need to include flags.h
+
+				    6/6
+				    ---
+make_cmd.c
+	- make sure that we don't try to walk down a null command tree
+	  in connect_async_list (tickled by `(command &) &')
+	- if a command has the CMD_WANT_SUBSHELL bit set in its flags,
+	  don't even try to walk the command tree and move the `&';
+	  just connect the command with a null command using `&'
+
+execute_cmd.c
+	- make sure we don't try to reference a command struct without
+	  first checking it (case '&')
+
+				    6/7
+				    ---
+machines.h
+	- fix a typo in the NeXT/i386 description; change the NeXT description
+	  to #define HAVE_RESOURCE if not already defined rather than putting
+	  -DHAVE_RESOURCE into the SYSDEP_CFLAGS
+
+				    6/9
+				    ---
+Makefile
+	- make sure all of the rules that reinvoke `make' have the
+	  `-f bash-Makefile' before the assignment statements; some
+	  versions of make like it that way
+
+variables.c
+	- make sure that `interactive' is set to 0 before evaluating the
+	  string containing an exported function obtained from the
+	  environment, so that it does not try to execute PROMPT_COMMAND
+	  (this may not be the best fix)
+
+				   6/13
+				   ----
+documentation/Makefile
+	- make sure all of the directories exist before trying to install
+	  doc files into them
+
+lib/readline/history.c
+	- add a missing O_TRUNC to the open call for writing in
+	  history_truncate_file
+
+trap.c
+	- run_interrupt_trap should only try to run the trap command if
+	  the value is not IMPOSSIBLE_TRAP_HANDLER
+
+Makefile
+	- add `realclean'
+
+lib/readline/complete.c
+	- do the same kind of double-quoting a replacement string if the
+	  user supplies the opening double quote as we would if we were
+	  adding both quotes ourselves
+
+variables.c
+	- fixed the variable initialization so that history_control/HISTCONTROL
+	  can be inherited from a parent shell
+
+INSTALL, README, cpp-Makefile, documentation/bash.1, documentation/readline.3
+	- ai.mit.edu -> prep.ai.mit.edu
+
+shell.c
+	- fixed a problem with setting no_line_editing to the result of the
+	  check for running inside emacs, thereby losing any value
+	  initialized by the `-nolineediting' flag
+
+cpp-Makefile
+	- `make distclean' will now remove the `installed-bash' link
+
+print_cmd.c
+	- fixed a problem with undefined variables when HAVE_VARARGS_H is
+	  not defined
+
+				   6/14
+				   ----
+lib/readline/history.c
+	- fixed an error in the csh history expansion code so that the
+	  `-y' word designator now expands to `0-y' rather than `1-y'
+
+lib/readline/isearch.c
+	- changed an absolute check for a character falling within the
+	  ASCII 32-126 range (printable chars) with checks for CTRL_P
+	  and META_CHAR and a check against the value RUBOUT
+	- changed a `break' to a `continue' so that the first non-matching
+	  character in the search string does not cause the search to
+	  end abruptly
+	- initialize prev_line_found to 0 at the top of rl_search_history
+	  to avoid duplicate history lines being saved across searches
+
+lib/readline/rltty.c
+	- consolidated repeated code for setting special characters into
+	  `SET_SPECIAL' defines
+
+lib/readline/readline.c
+	- include <sys/ioctl.h> if VSTATUS is defined
+	- add bindable command rl_tty_status (unbound by default)
+
+lib/readline/funmap.c
+	- assign bindable command name `tty-status' to rl_tty_status
+
+INSTALL
+	- add note about compiling with gcc, same text as README
+
+lib/readline/display.c
+	- many changes and tweaks to make redisplay work better when the
+	  prompt has invisible characters.  These changes are non-optimal
+	  in that the prompt is redrawn more than it needs to be, but
+	  things are a hell of a lot better than they were
+
+				   6/15
+				   ----
+documentation/Makefile
+	- make a variable NROFF that people can set to `groff -Tascii' if
+	  they don't have real nroff
+	- changed the suffix rules to use $<
+
+support/bashbug.sh
+	- if rmail doesn't exist or fails, save the bug report in
+	  ~/dead.bashbug
+
+execute_cmd.c
+	- in setup_async_signals, only ignore SIGINT and SIGQUIT if job
+	  control is not active.  If it is active and the job is restarted,
+	  SIGINT remains ignored, and the now-foregrounded job is not
+	  interruptible
+
+subst.c
+	- fixed up a problem with char_is_quoted that caused backslash-
+	  escaped characters to cause incorrect results
+
+tests/run-dollars, tests/dollar-at.sh, tests/dollar-star.sh
+	- since the error messages produced by `cat' vary, changed `cat'
+	  to `recho' and updated the correct answers file
+
+machines.h
+	- fixes to CRAY_STACKSEG_END definitions for different versions of
+	  Unicos on the YMP (from Bill Jones)
+	- Motorola SVR4 machines have getcwd() and should not undef
+	  HAVE_GETCWD
+	- on hpux 9.x, don't try to link with -lPW if compiling with gcc
+	  (for alloca)
+
+parse.y
+	- an ugly fix for a compiler problem with structure assignment on
+	  the cray
+
+				   6/16
+				   ----
+builtins/wait.def
+	- replaced a call to sscanf with a validity check using all_digits()
+	  and a call to atoi, since a pid_t is not necessarily an int, and
+	  the sscanf clobbered the stack frame on systems where it is shorter
+	  than an int (e.g., SCO)
+
+lib/readline/display.c
+	- since META_CHAR and the other macros only work with unsigned
+	  chars, make rl_character_len convert its argument to an unsigned
+	  char before testing it
+
+documentation/Makefile
+	- use $(INSTALL_DATA) instead of $(CP) to install the man pages and
+	  info files
+
+cpp-Makefile
+	- use INSTALL_PROGRAM and INSTALL_DATA to install binaries and
+	  documentation; pass both values to installs in subdirectories
+
+				   6/18
+				   ----
+builtins/ulimit.def
+	- compensate for systems which define RLIMIT_OFILE instead of
+	  RLIMIT_NOFILE, or don't provide such a compatibility define
+	  themselves
+
+shell.c
+	- make maybe_execute_file check for directories and print an
+	  appropriate error message, since it's doing an fstat anyway
+
+support/mksysdefs
+	- added support for a `-s srcdir' option so it can find
+	  cpp-Makefile if ansi-Makefile is to be created
+
+Makefile
+	- call mksysdefs with -s $(srcdir)
+
+jobs.c
+	- add the magic #undef lines to avoid redefinition warnings on
+	  SunOS 4 only
+
+				   6/20
+				   ----
+cpp-Makefile
+	- install `bashbug' with `make install'
+
+trap.c
+	- make sure that `interactive' is set to 0 when running trap
+	  commands
+
+builtins/umask.c
+	- fixed typo in usage error message
+
+subst.c
+	- fix process_substitute to set subshell_environment
+
+jobs.c, nojobs.c
+	- only mess with the terminal settings for an interactive shell
+	  that is not in a subshell environment
+
+				   6/21
+				   ----
+lib/readline/history.h
+	- add extern declaration of history_get
+
+builtins/fc.def
+	- make history replacement when using `r' or `fc -s' obey the
+	  setting of HISTCONTROL
+
+general.c
+	- in canonicalize_pathname, preserve a double // at the start
+	  of an absolute pathname, since that means something special
+	  for the network directory system
+
+README, INSTALL
+	- updated information about submitting bug reports
+
+lib/readline/vi_mode.c, lib/readline/isearch.c
+	- make sure unistd.h is included before rldefs.h, if
+	  HAVE_UNISTD_H is defined
+
+				   6/24
+				   ----
+lib/readline/complete.c
+	- add `#' to the list of characters which cause a completed filename
+	  to be quoted
+
+execute_cmd.c
+	- be more careful about closing pipe file descriptors in do_piping;
+	  don't want to have `dup2(i, i); close(i);' problem
+
+lib/readline/{keymaps,readline}.h
+	- include local copies of include files if READLINE_LIBRARY is
+	  defined, otherwise include the `official, installed' versions
+	  using #include <readline/xxx.h>
+
+lib/readline/*.c
+	- define READLINE_LIBRARY before including any files
+	- include only `local' copies of include files using #include "xxx.h"
+	  rather than #include <readline/xxx.h>
+
+				   6/26
+				   ----
+execute_cmd.c
+	- check for clobbering the bash input stream before closing a file
+	  descriptor due to an r_close_this redirection
+
+lib/readline/history.c
+	- made history_expand inhibit history expansion if the history
+	  expansion char is set to 0
+
+lib/readline/chardefs.h
+	- moved savestring() definition to rldefs.h
+	- changed lowercase_p, uppercase_p, to_lower, to_upper defines to
+	  use <ctype.h> macros rather than assume ASCII
+
+lib/readline/bind.c, general.c, general.h
+	- use strcasecmp, strncasecmp instead of str[n]icmp if
+	  HAVE_STRCASECMP is defined
+
+cpp-Makefile
+	- pass -DHAVE_STRCASECMP to builds in the libraries, primarily
+	  readline
+
+machines.h
+	- add HAVE_STRCASECMP to the entries for BSD/386, NetBSD, FreeBSD,
+	  and 4.4 BSD
+
+builtins/hash.def
+	- add a fourth parameter to remember_filename, the initial value
+	  of times_found (0 if we're just looking it up for `hash', 1
+	  for the command execution code)
+
+execute_cmd.c
+	- call remember_filename with an initial value of 1 for times_found
+
+builtins/wait.def
+	- handle a null argument with an error message
+
+builtins/common.c
+	- parse_and_execute now takes a third parameter: the value for
+	  `interactive' while it is executing commands
+
+bashline.c, jobs.c, parse.y, shell.c, subst.c, trap.c, variables.c
+	- set the new third argument to parse_and_execute appropriately
+
+builtins/eval.def, builtins/fc.def, builtins/source.def
+	- set the new third argument to parse_and_execute appropriately
+
+builtins/help.def
+	- changed a call to strnicmp to strncmp when trying to find what
+	  to give help on; it seems more correct
+
+				   6/27
+				   ----
+machines.h
+	- cleaned up the SunOS section so it no longer relies on
+	  HAVE_SHARED_LIBS being defined; it uses SunOS4 and SunOS5
+	  instead
+
+support/mksysdefs
+	- define SYSDEF to be SunOS4 or SunOS5 depending on the output
+	  of uname rather than looking for ld.so
+
+				   6/29
+				   ----
+machines.h
+	- minor change to the ardent titan machine description
+	- move the ardent and stardent descriptions before the
+	  mips riscos description
+
+print_cmd.c
+	- ardent machines also need the extern declaration for printf
+
+make_cmd.c
+	- connect_async_list should do its work only if the lists to be
+	  backgrounded are connected with `;'.  This makes `;' bind tighter
+	  than `&', so only the last job in the list is backgrounded.  All
+	  other lists should have the entire thing put in the background
+
+parse.y
+	- added a function `print_prompt' to take care of displaying the
+	  prompt string if readline is not being used.  This fixes problems
+	  with the prompt being displayed before the status of completed
+	  jobs is printed
+
+				   6/30
+				   ----
+builtins/fg_bg.def
+	- `fg' and `bg' now print error messages if invoked when job control
+	  is disabled
+
+lib/readline/rltty.c
+	- if not compiled into the shell, make get_tty_settings get and set
+	  the window size.  This noop stops the process if it is started in
+	  the background
+
+lib/readline/readline.c
+	- provide a function version of savestring, if not being compiled
+	  into the shell, since the macro has been removed from the
+	  `public' header files
+
+lib/readline/readline.h
+	- provide all extern function declarations without checking whether
+	  VI_MODE or PAREN_MATCHING are defined.  It does not hurt to define
+	  them if they are not used and not in the library, and other
+	  applications using readline can't tell whether or not VI_MODE was
+	  defined when the library was compiled anyway
+
+				    7/1
+				    ---
+machines.h
+	- add #undef HAVE_DIRENT_H to the ardent titan description
+
+				    7/2
+				    ---
+lib/readline/chardefs.h
+	- removed META_P define, renamed CTRL_P to CTRL_CHAR
+
+lib/readline/bind.c, lib/readline/isearch.c
+	- changed instances of CTRL_P to CTRL_CHAR
+
+lib/readline/search.c
+	- include <unistd.h> before rldefs.h, if HAVE_UNISTD_H is defined
+
+lib/readline/readline.c
+	- declare PC, UP, and BC as extern rather than `local' to the
+	  readline library
+
+				    7/5
+				    ---
+bashline.c
+	- implement command word completion inside of command substitution
+	  with a new function: `command_subst_completion_function'
+
+subst.c
+	- new function to help with command subst completion: unclosed_pair
+
+lib/readline/complete.c
+	- new variable rl_filename_quoting_desired, which can be set to 0
+	  to inhibit the quoting of filenames after completion
+
+lib/readline/readline.h
+	- declare rl_filename_completion_desired and
+	  rl_filename_quoting_desired
+
+builtins/bind.def
+	- don't save the old value of rl_outstream before initializing
+	  readline -- it saves garbage values and screws up readline
+
+parse.y
+	- don't have private state telling whether or not readline has
+	  been initialized -- use bash_readline_initialized like other
+	  functions in bashline.c
+
+lib/readline/readline.c
+	- make the default 8-bit behavior be based on whether LC_CTYPE is
+	  defined and its value (accept iso-8859-1 or iso_8859_1)
+
+				    7/6
+				    ---
+variables.c
+	- fix up the declaration of getenv() for convex machines
+
+				    7/7
+				    ---
+lib/readline/readline.c
+	- fixed up typos in the declaration of `savestring'
+
+lib/readline/history.c
+	- fixed an off-by-one error in the ADD_CHAR macro which caused one
+	  extra character to be overwritten, causing the gnu malloc to abort
+	  when that one character was at the end of an allocated block
+	- changed the ADD_STRING macro to avoid some unnecessary xreallocs
+
+lib/readline/display.c
+	- fixed a problem with move_cursor_relative -- function now returns
+	  immediately if it has nothing to do
+	- fixed another problem with displaying prompts with invisible chars
+
+lib/readline/chardefs.h
+	- fixed the CTRL macro to be right (agree with the BSD kernel, for
+	  example)
+
+cpp-Makefile
+	- fixed typo in the `install' recipe
+
+				    7/8
+				    ---
+support/srcdir
+	- fixed to handle srcdir when it begins with ./ or ../ to handle
+	  $(srcdir) being a relative path better
+
+cpp-Makefile
+	- changed some include paths to $(BUILTIN_ABSSRC) when building in
+	  `builtins' to handle $(srcdir) being a relative path
+	- change the `chmod' on bashbug to turn on read and execute for all
+	- added a couple of definitions to make it easier for a later
+	  `configure' program
+
+support/mksysdefs
+	- added a -i option to specify an alternate set of directories to
+	  search for include files
+
+lib/readline/bind.c
+	- in rl_read_init_file, when skipping whitespace at the start of
+	  the line, decrement `i' so that we don't jump past the start
+	  of the next line
+
+machines.h
+	- SCOv4 has a `robust' opendir that checks that you're actually
+	  opening a directory
+
+				   7/11
+				   ----
+lib/readline/complete.c
+	- make sure a word break character is unquoted before using it to
+	  separate out the current word for completing
+
+machines.h
+	- new machine description: NetBSD on motorola m68k machines like
+	  the hp300
+	- undef HAVE_GETWD in the generic svr4 machine description, like
+	  other svr4 descriptions
+
+lib/readline/rltty.c
+	- make sure to fflush (rl_outstream) after toggling the setting
+	  of the keypad and meta key
+
+portbash/libc.sh
+	- add a test for OPENDIR_NOT_ROBUST
+
+support/getcppsyms.c
+	- output __svr4__ if we find __uxps__ (this makes the Fujitsu port of
+	  SVR4 to the sparc build OK)
+
+				   7/12
+				   ----
+lib/readline/display.c
+	- more display-related fixes when the prompt has invisible chars;
+	  this time for screen updates when moving between screen lines
+
+lib/readline/readline.c, lib/readline/display.c
+	- changes to make readline work with terminals that have auto-wrap
+	  from Per Bothner (new function _rl_update_final, term_xn changes,
+	  some efficiency speedups, new function space_to_eol)
+
+				   7/13
+				   ----
+lib/readline/display.c
+	- after moving up screen lines using term_up in _rl_move_vert, if
+	  the new screen line is 0, _rl_last_c_pos needs to be adjusted
+	  to take invisible characters into account.  This was the source
+	  of many bugs
+
+				   
+				   7/14
+				   ----
+documentation/Makefile
+	- change instances of `groff' to `${GROFF}', GROFF is set to
+	  `groff' by default
+
+general.c, variables.c
+	- moved `qsort_string_compare' from variables.c to general.c
+
+general.h, variables.h
+	- moved declaration of `qsort_string_compare' from variables.h
+	  to general.h
+
+alias.c, lib/readline/funmap.c
+	- moved qsort auxiliary functions after their use and added
+	  forward declarations to avoid warnings from ANSI C compilers
+
+memalloc.h
+	- hpux_9 needs alloca declared as `extern void *' if __STDC__
+	  is defined
+
+support/mksysdefs
+	- removed HAVE_SHARED_LIBS entirely
+	- make a call to /bin/uname -X for SCO machines to avoid running
+	  a different uname from the $PATH
+
+machines.h
+	- new descriptions: Intel i860 running SVR4, Tahoe running 4.3 BSD
+	- changed descriptions: Mips/RiscOS, DG AViiON, unknown machine
+
+jobs.c
+	- changes to how the shell handles foreground jobs dying of SIGINT:
+		an interactive shell using job control will no longer
+		act as if it received a SIGINT if the foreground job
+		dies from a SIGINT
+
+		a non-interactive shell or shell without job control tries
+		to differentiate between SIGINTs it has seen (in
+		wait_sigint_handler) and a foreground job dying of a SIGINT
+		not sent from the keyboard, and runs the normal SIGINT code
+		only in the former case
+
+				   7/15
+				   ----
+support/mksysdefs
+	- check for ${UNAME}${RELEASE} expanding to `SunOS4*' or `SunOS5*'
+	  to set SYSDEF to SunOS4 or SunOS5, respectively.  Apparently
+	  this does not work for Solbourne
+
+				   7/18
+				   ----
+
+lib/readline/rltty.c
+	- if output is being flushed on termios systems, loop until the
+	  FLUSHO bit is no longer set in the termios struct
+
+support/mksysdefs
+	- added a -A flag to force creation of ansi-Makefile
+
+machines.h
+	- new entry for Tandem machines running SVR3
+
+				   7/19
+				   ----
+lib/readline/rldefs.h
+	- include <termcap.h> if HAVE_TERMCAP_H is defined
+	- use <termio.h> stuff if HAVE_TERMIO_H is defined and _POSIX_VERSION
+	  is not defined
+
+lib/readline/rldefs.h, lib/readline/history.c
+	- include "config.h" if HAVE_CONFIG_H is defined
+
+lib/readline/{rldefs.h,signals.c,readline.c}
+	- WINSIZE_IN_IOCTL_H -> GWINSZ_IN_SYS_IOCTL for compatibility with
+	  other GNU programs
+
+lib/readline/doc/Makefile
+	- fixed up to create the readline and history manuals in dvi and
+	  ps format
+
+lib/readline/Makefile
+	- changes inspired by the standalone readline-2.0 distribution
+
+				   7/20
+				   ----
+lib/readline/history.c
+	- new function, history_is_stifled (), returns history_stifled
+	- set history_state flags member in the history state functions
+
+lib/readline/history.h
+	- reorganized the function declarations, added missing declarations
+	- history_stifled is no longer exported by the library
+	- added a `flags' member to the HISTORY_STATE structure
+
+bashline.c
+	- use history_is_stifled () instead of history_stifled
+
+lib/readline/readline.c, lib/readline/vi_mode.c
+	- filled in correct argument declarations for functions called via
+	  keymaps (count, key)
+
+lib/readline/complete.c
+	- efficiency improvement for compare_strings
+
+				   7/21
+				   ----
+examples/dirfuncs
+	- new directory functions from ksh book, contributed by
+	  Ken Konecki (kenk@wfg.com)
+
+machines.h
+	- hpux_8 and hpux_9 should both #undef HAVE_ALLOCA unless gcc is
+	  being used
+
+				   7/22
+				   ----
+bashline.c
+	- fixed up command_word_completion_function so that filenames with
+	  leading tildes are completed correctly
+
+				   7/26
+				   ----
+builtins/read.def
+	- if -r not given, make sure CTLESC is removed from input string
+	  when reading \<newline>
+
+lib/readline/readline.c
+	- new function bind_arrow_keys, which binds vt100/ansi arrow key
+	  escape sequences after reading the termcap definition and the
+	  inputrc file
+	- new function rl_yank_last_arg, which does what insert-last-arg
+	  does in bash
+
+lib/readline/emacs_keymap.c
+	- remove default bindings to rl_arrow_keys for M-[ and M-O
+	- rl_yank_last_arg is now bound to `M-.' and `M-_' in
+	  emacs_meta_keymap
+
+subst.c
+	- when performing process substitution on systems with /dev/fd,
+	  make sure the child clears the slot in dev_fd_list it gets
+	  from its parent so the file descriptor does not get closed
+	  inappropriately if reallocated by, e.g., pipe(2)
+
+bashline.c
+	- removed insert_last_arg and the calls to bind in to `M-.' and `M-_'.
+	  `insert-last-argument' is now bound to rl_yank_last_arg for
+	  backwards compatibility
+
+lib/readline/funmap.c
+	- `yank-last-arg' is now a named command for rl_yank_last_arg
+
+
+documentation/bash.1, documentation/readline.3
+	- add description of yank-last-arg as one of the readline user
+	  commands
+
+lib/readline/doc/rluser.texinfo
+	- added description of yank-last-arg
+
+builtins/getopts.def
+	- fixed a typo in the int-to-string code computing the value to set
+	  OPTIND to: had '\0' instead of '0'
+	- made getopts handle the case where there are more than 9 dollar
+	  variables (where rest_of_args is non-null) correctly
+
+				   7/28
+				   ----
+lib/readline/display.c
+	- fixes to the display code for single-line-display in the presence
+	  of prompts containing invisible characters
+
+lib/readline/readline.c
+	- if we are using horizontal scrolling and we have term_xn, decrement
+	  the screenwidth by 1, since we won't be doing any line wrapping
+
+				   7/31
+				   ----
+jobs.c
+	- new variable `freeze_jobs_list' to set when changes to the jobs
+	  list or status of jobs in the list (other than calling something
+	  like `jobs -n') are undesirable.  This is set when execuing traps
+	  on SIGCHLD
+
+				    8/1
+				    ---
+subst.c
+	- check that `~' is unquoted before performing tilde expansion in
+	  an assignment statement
+
+				    8/3
+				    ---
+bracecomp.c
+	- keep brace completion from dumping core if there is only one
+	  match
+
+lib/readline/chardefs.h
+	- add a define for digit_p, which returns the value of isdigit()
+
+lib/readline/readline.c
+	- added function equivalents for uppercase_p, lowercase_p, to_upper,
+	  to_lower, pure_alphabetic, digit_p, and digit_value
+	- replaced calls to numeric () with calls to digit_p, removed
+	  definition of numeric ()
+
+lib/readline/history.c
+	- digit -> digit_p
+
+lib/readline/vi_mode.c
+	- replaced uses of the `isletter' define to use pure_alphabetic
+	  from chartypes.h
+	- replaced uses of `numeric' with calls to digit_p
+	- added do...while(0) to `exchange' define
+
+				    
+				    8/4
+				    ---
+execute_cmd.c
+	- make sure execute_function saves and restores the current loop
+	  count with unwind_protect_int
+
+documentation/features.texi
+	- change the `Shell Command Line Options' section to `Invoking
+	  Bash' to be closer to the GNU coding standards
+
+				    8/5
+				    ---
+builtins/read.def
+	- fixed up a memory leak and made behavior correct when no
+	  variables given and backslash escaped at least one input char
+	- if we added CTLESC anywhere while reading the input string,
+	  make sure we call dequote_string on each word of the input
+	  before calling bind_variable with that string
+
+subst.c
+	- made an efficiency improvement to dequote_string -- don't
+	  do anything when we see CTLESC, just `continue' the loop

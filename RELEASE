@@ -1,0 +1,269 @@
+This file details the changes between the previous release of bash (1.13.5)
+and this release (1.14.0).
+
+1. New Features in Bash
+
+a.  The source has been reorganized:  nearly all extern function
+    declarations have been moved to header files, function prototypes
+    have been added to most header files, function declarations have
+    been moved to file scope, dead code has been removed, the
+    bash history code has been isolated in bashhist.[ch], and several
+    new header files have been created
+
+b.  `set -o posix' puts bash into Posix.2 mode
+
+c.  If $POSIX_PEDANTIC exists in the initial environment or is assigned
+    a value, bash enters Posix.2 mode
+
+d.  Bash sets $OSTYPE to a string describing the UNIX version
+
+e.  The features.info file was completely rewritten and now reflects
+    the current state of things
+
+f.  A manual page for readline is in documentation/readline.{3,ps}
+
+g.  The test builtin emulates /dev/fd/x for systems without /dev/fd
+
+h.  `dirs' has -n and +n options to access members of the directory stack
+
+i.  Prompt string expansion handles invisible characters in the prompt;
+    \[ and \] are used (and required) to start and end sequences of
+    invisible chars
+
+j.  NO_PROMPT_VARS has been removed
+
+k.  New machine descriptions have been added:  IBM AIX/ESA, NEC EWS, NetBSD,
+    FreeBSD, QNX 4.2, concurrent, MIPS SVR4.2, Lynx 2.1
+
+l.  RESTRICTED_SHELL is no longer defined by default in config.h
+
+m.  The version string in $BASH_VERSION has changed to dist.patch(build)
+
+n.  $history_control has been renamed to $HISTCONTROL and now takes the
+    value `ignoreboth' ($history_control is still accepted for backwards
+    compatibility)
+
+o.  There is a new program `bashbug' for reporting bugs.  Eventually I will
+    probably switch to gnats.
+
+p.  auto_resume can take the values `exact' and `substring'
+
+q.  `set -P' (`set -o physical') enables the same physical view of the
+    file system that `nolinks' enables (`nolinks' will remain for one
+    more release)
+
+r.  There is a `mkmachtype' program to generate a GNU-style machine type
+    string (e.g., `sparc-sun-sunos4.1.2') suitable for assigning to
+    $MACHTYPE
+
+s.  The variable $HISTCMD returns the current history number
+
+t.  Variables in directory names are now expanded while doing completion
+
+u.  The test suite has been expanded and is runnable as a regression test
+    with `make tests'
+
+v.  `bye' is no longer a builtin synonym for `exit'
+
+w.  The ksh `select' control construct has been implemented
+
+x.  The `ignoreeof' attribute can be inherited if $IGNOREEOF is exported
+
+y.  The `USG-style' echo is now a configuration option.  Define
+    DEFAULT_ECHO_TO_USG for default \-interpretation without the -e flag
+
+z.  There is a copy of an article I wrote about bash for the Linux
+    Journal in documentation/article.{ms,ps}
+
+aa. The `pwd' builtin now obeys the setting of `set -o physical' (`nolinks')
+
+bb. Process substitution is no longer performed when the shell is in
+    `posix mode'
+
+cc. Users may change the debugging and optimization flags to cc by specifying
+    CFLAGS to make
+
+2. New Features in Readline
+
+a.  Readline now understands sequences of invisible characters in the prompt
+    string, as long as they are escaped (e.g., by the bash \[ and \] escapes)
+
+b.  A `set keymap' variable assignment
+
+c.  A `bell-style' variable that can be set to `visible', `audio', or `none'
+
+d.  A `show-all-if-ambiguous' variable, which causes non-unique completion
+    to immediately list the possible completions
+
+e.  An `output-meta' variable to make readline directly output chars
+    with the eighth bit set
+
+f.  New bindable readline commands: kill-whole-line, tilde-expand,
+    vi-redo, vi-tilde-expand, emacs-editing-mode,
+    non-incremental-forward-search-history-again,
+    non-incremental-reverse-search-history-again
+
+g.  New history-search-forward and history-search-backward to search for
+    the characters between the start of the current line and point
+
+h.  Readline takes the name of the startup file from the INPUTRC variable
+    before defaulting to ~/.inputrc
+
+i.  isearch no longer finds identical lines multiple times in succession
+
+j.  M-C-H bound to backward-kill-word in emacs mode
+
+k.  M-~ bound to tilde-expand in emacs mode
+
+l.  History expansion is now fully csh-compatible: missing modifiers and
+    substitutions have been added, and bugs fixed
+
+m.  When asking whether or not to display the possible completions, readline
+    now accepts space as equivalent to `y' and rubout for `n'
+
+n.  Readline now attempts to find and bind the arrow keys into the vi mode
+    movement keymap
+
+3.  Bugs fixed in Bash
+
+a.  Portability fixes: `index' and `rindex' are gone completely, many
+    OS-specific defines have been replaced with feature-test macros,
+    the use of alloca has been reduced, and other platform-specific fixes
+    (e.g. cray) have been made
+
+b.  The man page has been fixed up and brought up to date
+
+c.  Speed improvements: here documents, variable expansion, history
+    expansion, command substitution
+
+d.  If history is stifled, the history list replaces the history file at
+    exit
+
+e.  Asynchronous jobs re-run with fc -s now print the job number
+
+f.  Output redirections do not perform filename expansion in Posix.2 mode
+    when the shell is not interactive
+
+g.  operate_and_get_next now works on the most recent line even if the
+    history is unstifled
+
+h.  $PROMPT_COMMAND execution no longer causes recursive invocations
+    of yyparse()
+
+i.  An error message is printed if job control initialization fails
+
+j.  A command found in $PATH from the temporary environment is not hashed
+
+k.  Errors display the name of the script if the shell is not interactive
+
+l.  Fixed expression evaluation so blank expressions return 0
+
+m.  Fixed a bug that caused SIGINT and SIGQUIT not to be ignored in some
+    asynchronous children
+
+n.  Pipes used for /dev/fd process substitution are now closed on errors
+
+o.  Fixed /dev/null redirection so that ( list ) subshells inherit the
+    `stdin-has-been-redirected' flag as in sh
+
+p.  Process substitution now works only when unquoted
+
+q.  Fixed a bug where the async flag was added inappropriately in a command
+    like `a;b;c;d &'
+
+r.  Fixed off-by-one bug which caused negative history offsets in `fc' to
+    be wrong
+
+s.  Shell now remembers mail dates at startup on all systems
+
+t.  Posix systems without job control no longer create so many zombies
+
+u.  $ENV is now sourced by shells forked to execute scripts without a
+    leading `#!' line
+
+v.  Non-root users can now use the `unlimited' argument to ulimit and have
+    the resource value set to the hard limit
+
+w.  Made bash more sh-compatible by assigning the first argument after
+    `-c command' to $0
+
+x.  Fixed mail checking bug to note that *new* mail has arrived
+
+y.  Fixed off-by-one error in mailcheck.c:free_mail_files()
+
+z.  Fixed a bug where command strings passed to `bash -c' would be truncated
+    after executing the first disk command in the string
+
+aa. Fixed a bug which caused redirections passed to executable commands with
+    input or output pipes to be closed before the command was executed
+
+bb. Fixed a bug which caused bash to search for files supplied on the command
+    line in the $PATH if the initial open failed, even if the names contained
+    a slash
+
+cc. The initial argument parsing was fixed up so that other options can
+    be supplied with -c (that is, `sh -ec command' now works as make
+    intends), and so `bash -o' lists all the shell options at startup.
+
+dd. Error messages are consistently prefixed with the name of the shell
+    or shell script when non-interactive.
+
+ee. Fixed up a problem with the `read' builtin that occurred when more
+    variables than arguments were supplied.
+
+ff. Unset the variables passed to `read' as arguments when EOF is
+    read from stdin (sh, Posix.2 compatibility).
+
+gg. Fixes to the command printing code to make the output of `type'
+    available as legal shell input.
+
+ii. Fixes so that command completion is attempted after all of the shell
+    command separator characters.
+
+jj. Fixes to the shell completion code so that it handles quoted characters
+    and substrings better.
+
+kk. Bash no longer looks through $PATH for a shell script passed as an
+    argument if the name contains slashes.
+
+ll. Bash now checks that the `name' in a `name[=value]' argument to `declare'
+    (and thus `typeset', `export', and `readonly') is a legal shell variable
+    name.
+
+4.  Bugs fixed in Readline
+
+a.  The ^W and ^U bindings in non-incremental search mode have been changed
+    to be closer to what Posix specifies
+
+b.  Tries to initialize the keypad to enable the arrow keys
+
+c.  Multiple words are now killed and yanked in the right order
+
+d.  rl_read_init_file now reads filenames in a more regular order:  the last
+    one read, $INPUTRC, then ~/.inputrc
+
+e.  yank_nth_arg inserts a space in the right place in vi mode
+
+f.  Fixed a bug in the history library that tried to write to a file opened
+    O_RDONLY
+
+g.  Binding of `0' in vi command mode is now right
+
+h.  The VISIBLE_STATS completion listing code now follows symlinks
+
+i.  Memory allocated with alloca() is no longer passed to other functions
+
+j.  Error messages are now printed for unrecognized history modifiers
+
+k.  Fixed a problem with history library and `!#'; now it is more csh-like.
+
+l.  Fixed a csh incompatibility in the history library: now only an end of
+    line or `?' terminates a ?string history search string.
+
+m.  Fixed a problem with readline completion that sometimes caused possible
+    matches to be listed one per line when `show-all-if-ambiguous' was set.
+
+n.  Fixed a problem in the readline display code that caused divide-by-zero
+    errors.
+
+o.  Fixed an off-by-one error in the kill ring reallocation code.

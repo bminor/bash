@@ -1,0 +1,16 @@
+if : ; then
+	set -e
+	N=95
+	while :; do
+		# expr returns 1 if expression is null or 0
+		set +e
+		N_MOD_100=`expr $N % 100`
+		set -e
+		echo $N_MOD_100
+		N=`expr $N + 1`
+		if [ $N -eq 110 ]; then
+			break
+		fi
+	done
+	set +e
+fi
