@@ -1390,9 +1390,7 @@ shell_initialize ()
   char hostname[256];
 
   /* Line buffer output for stderr and stdout. */
-#if defined (SunOS5)
   if (shell_initialized == 0)
-#endif
     {
       setlinebuf (stderr);
       setlinebuf (stdout);

@@ -3,12 +3,14 @@ Platform-Specific Configuration and Operation Notes
 
 1.  configure --without-gnu-malloc on:
 
-	alpha running OSF/1
-	alpha running Linux
+	alpha running OSF/1, Linux, or NetBSD (malloc needs 8-byte alignment;
+	bash malloc has 8-byte alignment now, but I have no alphas to test on)
 
 	next running NeXT/OS
 
-	all machines running SunOS YP code: SunOS4, SunOS5, HP/UX
+	all machines running SunOS YP code: SunOS4, SunOS5, HP/UX, if you
+	have problems with username completion or tilde expansion for
+	usernames found via YP/NIS
 
 	linux (optional, but don't do it if you're using Doug Lea's malloc)
 
@@ -19,16 +21,18 @@ Platform-Specific Configuration and Operation Notes
 	DG/UX
 	Cray
 
-	NetBSD/sparc (malloc needs 8-byte alignment; GNU malloc has 4-byte)
+	NetBSD/sparc (malloc needs 8-byte alignment; bash malloc has 8-byte
+	alignment now, but I have no NetBSD machines to test on)
 
-	BSD/OS 2.1 if you want to use loadable builtins
+	BSD/OS 2.1, 3.x if you want to use loadable builtins
 
 	If you are using GNU libc, especially on a linux system
 
 (Configuring --without-gnu-malloc will still result in lib/malloc/libmalloc.a
 being built and linked against, but there is only a stub file in the archive.)
 
-2.  configure using shlicc on BSD/OS 2.1 to use loadable builtins
+2.  Configure using shlicc2 on BSD/OS 2.1 and BSD/OS 3.x to use loadable
+    builtins
 
 3.  Bash cannot be built in a directory separate from the source directory
     using configure --srcdir=... unless the version of `make' you're using
@@ -44,8 +48,8 @@ being built and linked against, but there is only a stub file in the archive.)
     fixes the problem.
 
 5.  There is a problem with Red Hat Linux's `makewhatis' script.
-    Running `makewhatis' with bash-2.0 results in error messages
-    like this:
+    Running `makewhatis' with bash-2.0 or later versions results
+    in error messages like this:
 
     /usr/sbin/makewhatis: cd: manpath: No such file or directory
     /usr/sbin/makewhatis: manpath/whatis: No such file or directory

@@ -37,9 +37,6 @@ static int extmatch ();
 
 /* Note that these evaluate C many times.  */
 
-#define ISUPPER(c)	(isascii (c) && isupper (c))
-#define ISLOWER(c)	(isascii (c) && islower (c))
-
 #ifndef isblank
 #  define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
@@ -52,7 +49,10 @@ static int extmatch ();
 #  define isxdigit(c)	(((c) >= '0' && (c) <= '9') || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 #endif
 
-# define FOLD(c) ((flags & FNM_CASEFOLD) && ISUPPER (c) ? tolower (c) : (c))
+/* The result of FOLD is an `unsigned char' */
+# define FOLD(c) ((flags & FNM_CASEFOLD) && isupper ((unsigned char)c) \
+	? tolower ((unsigned char)c) \
+	: ((unsigned char)c))
 
 #ifndef STREQ
 #define STREQ(a, b) ((a)[0] == (b)[0] && strcmp(a, b) == 0)
@@ -190,7 +190,7 @@ gmatch (string, se, pattern, pe, flags)
 		return FNM_NOMATCH;
 	      c = FOLD (c);
 	    }
-	  if (FOLD (sc) != c)
+	  if (FOLD (sc) != (unsigned char)c)
 	    return FNM_NOMATCH;
 	  break;
 
@@ -240,9 +240,9 @@ gmatch (string, se, pattern, pe, flags)
 
 	  /* General case, use recursion. */
 	  {
-	    char c1;
+	    unsigned char c1;
 
-	    c1 = ((flags & FNM_NOESCAPE) == 0 && c == '\\') ? *p : c;
+	    c1 = (unsigned char)((flags & FNM_NOESCAPE) == 0 && c == '\\') ? *p : c;
 	    c1 = FOLD (c1);
 	    for (--p; n < se; ++n)
 	      /* Only call fnmatch if the first character indicates a
@@ -272,7 +272,7 @@ gmatch (string, se, pattern, pe, flags)
 	  break;
 
 	default:
-	  if (c != FOLD (sc))
+	  if ((unsigned char)c != FOLD (sc))
 	    return (FNM_NOMATCH);
 	}
 
@@ -378,7 +378,7 @@ brackmatch (p, test, flags)
 	  else if (STREQN (p+1, "graph:]", 7))
 	    { pc = isgraph (test); p += 8; }
 	  else if (STREQN (p+1, "lower:]", 7))
-	    { pc = ISLOWER (test); p += 8; }
+	    { pc = islower (test); p += 8; }
 	  else if (STREQN (p+1, "print:]", 7))
 	    { pc = isprint (test); p += 8; }
 	  else if (STREQN (p+1, "punct:]", 7))
@@ -386,7 +386,7 @@ brackmatch (p, test, flags)
 	  else if (STREQN (p+1, "space:]", 7))
 	    { pc = isspace (test); p += 8; }
 	  else if (STREQN (p+1, "upper:]", 7))
-	    { pc = ISUPPER (test); p += 8; }
+	    { pc = isupper (test); p += 8; }
 	  else if (STREQN (p+1, "xdigit:]", 8))
 	    { pc = isxdigit (test); p += 9; }
 	  else if (STREQN (p+1, "ascii:]", 7))

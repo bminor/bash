@@ -5033,7 +5033,11 @@ add_string:
 	    {
 	      if (list->next)
 		{
-		  temp = string_list (quote_list (list));
+		  /* Testing quoted_dollar_at makes sure that "$@" is
+		     split correctly when $IFS does not contain a space. */
+		  temp = quoted_dollar_at
+				? string_list_dollar_at (list, Q_DOUBLE_QUOTES)
+				: string_list (quote_list (list));
 		  dispose_words (list);
 		  goto add_string;
 		}

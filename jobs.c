@@ -925,9 +925,9 @@ print_pipeline (p, job_index, format, stream)
 	  else
 	    {
 	      if (WIFSTOPPED (show->status))
-		temp = strsignal (WSTOPSIG (show->status));
+		temp = (char *)strsignal (WSTOPSIG (show->status));
 	      else if (WIFSIGNALED (show->status))
-		temp = strsignal (WTERMSIG (show->status));
+		temp = (char *)strsignal (WTERMSIG (show->status));
 	      else if (WIFEXITED (show->status))
 		{
 		  temp = retcode_name_buffer;
@@ -1191,7 +1191,7 @@ make_child (command, async_p)
 	  if (pipeline_pgrp == mine)
 	    {
 #endif
-	      if (async_p == 0)
+	      if (async_p == 0 && pipeline_pgrp != shell_pgrp)
 		give_terminal_to (pipeline_pgrp);
 
 #if defined (PGRP_PIPE)

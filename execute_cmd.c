@@ -2276,7 +2276,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 {
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
-  int first_word_quoted, result, builtin_is_special, already_forked;
+  int first_word_quoted, result, builtin_is_special, already_forked, dofork;
   pid_t old_last_command_subst_pid;
   Function *builtin;
   SHELL_VAR *func;
@@ -2298,8 +2298,23 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   old_last_command_subst_pid = last_command_subst_pid;
 
-  already_forked = 0;
-  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
+  already_forked = dofork = 0;
+
+  /* If we're in a pipeline or run in the background, set DOFORK so we
+     make the child early, before word expansion.  This keeps assignment
+     statements from affecting the parent shell's environment when they
+     should not. */
+  dofork = pipe_in != NO_PIPE || pipe_out != NO_PIPE || async;
+
+  /* Something like `%2 &' should restart job 2 in the background, not cause
+     the shell to fork here. */
+  if (dofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE &&
+	simple_command->words && simple_command->words->word &&
+	simple_command->words->word->word &&
+	(simple_command->words->word->word[0] == '%'))
+    dofork = 0;
+
+  if (dofork)
     {
       /* XXX memory leak if expand_words() error causes a jump_to_top_level */
       command_line = savestring (the_printed_command);
@@ -2312,7 +2327,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = -1;
 
-	  subshell_environment = SUBSHELL_ASYNC;
+	  subshell_environment = async ? SUBSHELL_ASYNC : SUBSHELL_FORK;
 	}
       else
 	{

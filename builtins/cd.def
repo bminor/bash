@@ -263,7 +263,7 @@ cd_builtin (list)
 		     directory name is echoed to stdout, whether or not
 		     the shell is interactive. */
 		  if (opt)
-		    printf ("%s\n", the_current_working_directory);
+		    printf ("%s\n", no_symlinks ? temp : the_current_working_directory);
 
 		  free (temp);
 		  /* Posix.2 says that after using CDPATH, the resultant
@@ -276,8 +276,10 @@ cd_builtin (list)
 
 	  /* POSIX.2 says that if `.' does not appear in $CDPATH, we don't
 	     try the current directory, so we just punt now with an error
-	     message if POSIXLY_CORRECT is non-zero. */
-	  if (posixly_correct)
+	     message if POSIXLY_CORRECT is non-zero.  The check for cdpath[0]
+	     is so we don't mistakenly treat a CDPATH value of "" as not
+	     specifying the current directory. */
+	  if (posixly_correct && cdpath[0])
 	    {
 	      builtin_error ("%s: %s", dirname, strerror (ENOENT));
 	      return (EXECUTION_FAILURE);

@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 2.11, for Bash version 2.02.
+This is the Bash FAQ, version 2.13, for Bash version 2.02.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -150,9 +150,10 @@ More information appears in the file `INSTALL' in the distribution.
 5) Will bash run on operating systems other than Unix?
 
 Configuration specifics for Unix-like systems such as QNX and
-LynxOS are included in the distribution.  Previous versions of
-bash have been ported to Minix, but I don't believe anyone has
-built bash-2.x on Minix yet.
+LynxOS are included in the distribution.  Bash-2.02 should 
+compile and run on Minix 2.0 (patches were contributed), but I
+don't believe anyone has built bash-2.x on earlier Minix versions
+yet.
 
 Bash has been ported to versions of Windows implementing the Win32
 programming interface.  This includes Windows 95 and Windows NT.
@@ -174,9 +175,9 @@ The Cygnus port works only on Intel machines.  There is a port of bash
 
 ftp://ftp.gnustep.org//pub/win32/bash-alpha-nt-1.01.tar.gz
 
-Softway Systems has ported bash-2.01.1 to their OpenNT system, a
-Unix subsystem for NT that replaces the Microsoft POSIX subsystem.
-Check out http://www.opennt.com for more information.
+Softway Systems has ported bash-2.01.1 to their Interix (nee OpenNT)
+system, a Unix subsystem for NT that replaces the Microsoft POSIX
+subsystem.  Check out http://www.interix.com for more information.
 
 D. J. Delorie has ported bash-1.14.7 to run under MS-DOS, as part of
 the DJGPP project.  For more information on the project, see
@@ -403,6 +404,8 @@ Things bash has that sh does not:
 	the select compound command and reserved word
 	new $'...' and $"..." quoting
 	the $(...) form of command substitution
+	the $(<filename) form of command substitution, equivalent to
+		$(cat filename)
 	the ${#param} parameter value length operator
 	the ${!param} indirect parameter expansion operator
 	the ${param:length[:offset]} parameter substring operator
@@ -413,7 +416,7 @@ Things bash has that sh does not:
 		   TIMEFORMAT, PPID, PWD, OLDPWD, SHLVL, RANDOM, SECONDS,
 		   LINENO, HISTCMD, HOSTTYPE, OSTYPE, MACHTYPE, HOSTNAME,
 		   ENV, PS3, PS4, DIRSTACK, PIPESTATUS, HISTSIZE, HISTFILE,
-		   HISTFILESIZE, HISTCONTROL, HISTIGNORE, GLOBIGNORE,
+		   HISTFILESIZE, HISTCONTROL, HISTIGNORE, GLOBIGNORE, GROUPS,
 		   PROMPT_COMMAND, FCEDIT, FIGNORE, IGNOREEOF, INPUTRC,
 		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, histchars, auto_resume
 	DEBUG trap
@@ -436,6 +439,7 @@ Things bash has that sh does not:
 	brace expansion
 	tilde expansion
 	arithmetic expansion with $((...)) and `let' builtin
+	the `[[...]]' extended conditional command
 	process substitution
 	aliases and alias/unalias builtins
 	local variables in functions and `local' builtin
@@ -444,9 +448,14 @@ Things bash has that sh does not:
 	csh-like history expansion
 	other new bash builtins: bind, command, builtin, declare/typeset,
 				 dirs, enable, fc, help, history, logout,
-				 popd, pushd, disown, shopt
+				 popd, pushd, disown, shopt, printf
 	exported functions
 	filename generation when using output redirection (command >a*)
+	POSIX.2-style globbing character classes
+	POSIX.2-style globbing equivalence classes
+	POSIX.2-style globbing collating symbols
+	egrep-like extended pattern matching operators
+	case-insensitive pattern matching and globbing
 	variable assignments preceding commands affect only that command,
 		even for builtins and functions
 	posix mode
@@ -493,7 +502,7 @@ Things bash has or uses that ksh88 does not:
 		   HISTFILESIZE, HISTIGNORE, HISTCONTROL, PROMPT_COMMAND,
 		   IGNOREEOF, FIGNORE, INPUTRC, HOSTFILE, DIRSTACK,
 		   PIPESTATUS, HOSTNAME, OPTERR, SHELLOPTS, GLOBIGNORE,
-		   histchars, auto_resume
+		   GROUPS, histchars, auto_resume
 	prompt expansion with backslash escapes and command substitution
 	redirection: &> (stdout and stderr)
 	more extensive and extensible editing and completion
@@ -504,15 +513,18 @@ Things bash has or uses that ksh88 does not:
 		  -o histexpand/-o interactive-comments/-o notify/-o physical/
 		  -o posix/-o hashall/-o onecmd/-h/-B/-C/-b/-H/-P, set +o,
 		  suspend, trap -l, type, typeset -a/-F/-p, ulimit -u,
-		  umask -S, alias -p, shopt, disown
+		  umask -S, alias -p, shopt, disown, printf
 	`!' csh-style history expansion
+	POSIX.2-style globbing character classes
+	POSIX.2-style globbing equivalence classes
+	POSIX.2-style globbing collating symbols
+	egrep-like extended pattern matching operators
+	case-insensitive pattern matching and globbing
+	`**' arithmetic operator to do exponentiation
 
 Things ksh88 has or uses that bash does not:
-	new version of test: [[...]]
 	tracked aliases
-	$(<file)	
 	variables: ERRNO, FPATH, COLUMNS, LINES, EDITOR, VISUAL
-	extended pattern matching with egrep-style pattern lists
 	co-processes (|&, >&p, <&p)
 	weirdly-scoped functions
 	typeset +f to list all function names without definitions
@@ -547,7 +559,7 @@ New things in ksh-93 not in bash-2.02:
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, HISTEDIT,
 		   .sh.version, .sh.name, .sh.subscript, .sh.value
 	backreferences in pattern matching
-	print -f (bash has a loadable version)
+	print -f (bash has a loadable version of print and the printf builtin)
 	`fc' has been renamed to `hist'
 	read -t/-d
 	`.' can execute shell functions
@@ -712,12 +724,8 @@ Most, however, can be emulated with very little trouble.
 
 ksh-88 feature		Bash equivalent
 --------------		---------------
-[[...]]			can usually use [...]; minor differences (no
-			pattern matching, for one)
 compiled-in aliases	set up aliases in .bashrc; some ksh aliases are
 			bash builtins (hash, history, type)
-$(<file)		$(cat file)
-extended patterns	no good substitute
 coprocesses		named pipe pairs (one for read, one for write)
 typeset +f		declare -F
 cd, print, whence	function substitutes in examples/functions/kshenv
@@ -1146,7 +1154,7 @@ is 1-56592-147-X.  Look for it in fine bookstores near you.  This book
 covers bash-1.14, but has an appendix describing some of the new features
 in bash-2.0.  
 
-A second edition of this book is available, just published in January, 1998.
+A second edition of this book is available, published in January, 1998.
 The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
 or on the web.
 

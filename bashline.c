@@ -213,7 +213,9 @@ initialize_readline ()
 
 #ifdef ALIAS
   rl_add_defun ("alias-expand-line", (Function *)alias_expand_line, -1);
+#  ifdef BANG_HISTORY
   rl_add_defun ("history-and-alias-expand-line", (Function *)history_and_alias_expand_line, -1);
+#  endif
 #endif
 
   /* Backwards compatibility. */
@@ -538,7 +540,7 @@ hostnames_matching (text)
         continue;
 
       /* OK, it matches.  Add it to the list. */
-      if (nmatch >= rsize)
+      if (nmatch >= (rsize - 1))
 	{
 	  rsize = (rsize + 16) - (rsize % 16);
 	  result = (char **)xrealloc (result, rsize * sizeof (char *));

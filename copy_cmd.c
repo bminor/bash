@@ -229,7 +229,8 @@ copy_cond_command (com)
   new_cond = (COND_COM *)xmalloc (sizeof (COND_COM));
   new_cond->flags = com->flags;
   new_cond->line = com->line;
-  new_cond->op = copy_word (com->op);
+  new_cond->type = com->type;
+  new_cond->op = com->op ? copy_word (com->op) : com->op;
   new_cond->left = com->left ? copy_cond_command (com->left) : (COND_COM *)NULL;
   new_cond->right = com->right ? copy_cond_command (com->right) : (COND_COM *)NULL;
 

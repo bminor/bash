@@ -184,7 +184,7 @@ struct bucket_stats {
    enough room in the block for the new size.  Range checking is always
    done. */
 union mhead {
-  union mhead *mh_align;
+  double mh_align;
   struct {
     char     mi_alloc;	/* ISALLOC or ISFREE */		/* 1 */
     char     mi_index;	/* index in nextf[] */		/* 1 */

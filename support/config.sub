@@ -102,7 +102,7 @@ case $os in
 		os=-hiuxwe2
 		;;
 	-sco5)
-		os=sco3.2v5
+		os=-sco3.2v5
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
 		;;
 	-sco4)
@@ -175,7 +175,8 @@ case $basic_machine in
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* | power-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
 	      | hppa-* | hppa1.0-* | hppa1.1-* | hppa2.0-* \
-	      | alpha-* | we32k-* | cydra-* | ns16k-* \
+	      | alpha-* | alphaev5-* | alphaev56-* | alphapca56-* | alphaev6-* \
+	      | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
 	      | pdp11-* | sh-* | powerpc-* | powerpcle-* | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* | f301-* \
@@ -454,6 +455,14 @@ case $basic_machine in
 	np1)
 		basic_machine=np1-gould
 		;;
+	osr5 | sco5)	# SCO Open Server
+		basic_machine=i386-pc
+		os=-sco3.2v5
+		;;
+	odt | odt3 | odt4)	# SCO Open Desktop
+		basic_machine=i386-pc
+		os=-sco3.2v4
+		;;
 	pa-hitachi)
 		basic_machine=hppa1.1-hitachi
 		os=-hiuxwe2
@@ -584,6 +593,14 @@ case $basic_machine in
 		basic_machine=a29k-nyu
 		os=-sym1
 		;;
+	uw2 | unixware | unixware2)
+		basic_machine=i386-pc
+		os=-sysv4.2uw2.1
+		;;
+	uw7 | unixware7)
+		basic_machine=i386-pc
+		os=-sysv5uw7
+		;;
 	vaxv)
 		basic_machine=vax-dec
 		os=-sysv
@@ -683,8 +700,14 @@ case $os in
 	-solaris)
 		os=-solaris2
 		;;
-	-unixware* | svr4*)
+	svr4*)
 		os=-sysv4
+		;;
+	-unixware | -uw | -unixware2* | -uw2*)
+		os=-sysv4.2uw2.1
+		;;
+	-unixware7* | -uw7*)
+		os=-sysv5uw7
 		;;
 	-gnu/linux*)
 		os=`echo $os | sed -e 's|gnu/linux|linux-gnu|'`
@@ -759,7 +782,10 @@ case $os in
 	-sysvr4)
 		os=-sysv4
 		;;
-	# This must come after -sysvr4.
+	-sysvr5)
+		os=-sysv5
+		;;
+	# This must come after -sysvr[45].
 	-sysv*)
 		;;
 	-xenix)

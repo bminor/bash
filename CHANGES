@@ -1,5 +1,56 @@
-This document details the changes between this version, bash-2.02-beta2,
-and the previous version, bash-2.02-beta1.
+This document details the changes between this version, bash-2.02.1-release,
+and the previous version, bash-2.02-release.
+
+1.  Changes to Bash
+
+a.  A bug that caused the bash readline support to not compile unless aliases
+    and csh-style history were configured into the shell was fixed.
+
+b.  Fixed a bug that could cause a core dump when here documents contained
+    more than 1000 characters.
+
+c.  Fixed a bug that caused a CDPATH entry of "" to not be treated the same
+    as the current directory when in POSIX mode.
+
+d.  Fixed an alignment problem with the memory returned by the bash malloc,
+    so returned memory is now 64-bit aligned.
+
+e.  Fixed a bug that caused command substitutions executed within pipelines
+    to put the terminal in the wrong process group.
+
+f.  Fixes to support/config.sub for: alphas, SCO Open Server and Open Desktop,
+    Unixware 2, and Unixware 7.
+
+g.  Fixes to the pattern matching code to make it work correctly for eight-bit
+    characters.
+
+h.  Fixed a problem that occasionally caused the shell to display the wrong
+    value for the new working directory when changing to a directory found
+    in $CDPATH when in physical mode.
+
+i.  Fixed a bug that caused core dumps when using conditional commands in
+    shell functions.
+
+j.  Fixed a bug that caused the printf builtin to loop forever if the format
+    string did not consume any of the arguments.
+
+k.  Fixed a bug in the parameter expansion code that caused "$@" to be
+    incorrectly split if $IFS did not contain a space character.
+
+l.  Fixed a bug that could cause a core dump when completing hostnames if
+    the number of matching hostnames was an exact multiple of 16.
+
+m.  Fixed a bug that caused the shell to fork too early when a command
+    such as `%2 &' was given.
+
+2.  Changes to Readline
+
+a.  Fixed a problem with redisplay that showed up when the prompt string was
+    longer than the screen width and the prompt contained invisible characters.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.02-release,
+and the previous version, bash-2.02-beta2.
 
 1.  Changes to Bash
 

@@ -129,6 +129,10 @@ printf_builtin (list)
 
   garglist = list->next;
 
+  /* If the format string is empty after preprocessing, return immediately. */
+  if (format == 0 || *format == 0)
+    return (EXECUTION_SUCCESS);
+	  
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
      width or precision is a '*'; if it is, gather up value.  Note,
@@ -305,7 +309,7 @@ printf_builtin (list)
 	  fmt[1] = nextch;
 	}
     }
-  while (garglist);
+  while (garglist && garglist != list->next);
 
   PRETURN (retval);
 }

@@ -492,7 +492,7 @@ make_here_document (temp)
       len = strlen (line);
       if (len + document_index >= document_size)
 	{
-	  document_size = document_size ? 2 * (document_size + len) : 1000;
+	  document_size = document_size ? 2 * (document_size + len) : len + 2;
 	  document = xrealloc (document, document_size);
 	}
 
