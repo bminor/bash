@@ -343,7 +343,7 @@ glob_vector (pat, dir)
 	return ((char **) &glob_error_return);
 
       /* Compute the flags that will be passed to fnmatch().  We don't
-         need to do this every time through the loop. */
+	 need to do this every time through the loop. */
       flags = (noglob_dot_filenames ? FNM_PERIOD : 0) | FNM_PATHNAME;
 
 #ifdef FNM_CASEFOLD
@@ -480,14 +480,11 @@ glob_dir_to_array (dir, array)
 				   + strlen (array[i]) + 1);
       if (result[i] == NULL)
 	return (NULL);
-#if 1
+
       strcpy (result[i], dir);
       if (add_slash)
-        result[i][l] = '/';
+	result[i][l] = '/';
       strcpy (result[i] + l + add_slash, array[i]);
-#else
-      (void)sprintf (result[i], "%s%s%s", dir, add_slash ? "/" : "", array[i]);
-#endif
     }
   result[i] = NULL;
 

@@ -267,3 +267,11 @@ echo $x $y
 # These are errors
 echo $((a b))
 ((a b))
+
+n=42
+printf "%d\n" $n
+printf "%i\n" $n
+echo $(( 8#$(printf "%o\n" $n) ))
+printf "%u\n" $n
+echo $(( 16#$(printf "%x\n" $n) ))
+echo $(( 16#$(printf "%X\n" $n) ))

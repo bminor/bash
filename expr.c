@@ -417,6 +417,9 @@ expassign ()
 	    case BOR:
 	      lvalue |= value;
 	      break;
+	    case BXOR:
+	      lvalue ^= value;
+	      break;
 	    default:
 	      free (lhs);
 	      evalerror ("bug: bad expassign token");
@@ -461,9 +464,9 @@ expcond ()
       val1 = EXP_HIGHEST ();
 #endif
       if (set_noeval)
-        noeval--;
+	noeval--;
       if (curtok != COL)
-        evalerror ("`:' expected for conditional expression");
+	evalerror ("`:' expected for conditional expression");
       readtok ();
       if (curtok == 0)
 	evalerror ("expression expected");
@@ -475,7 +478,7 @@ expcond ()
  	}
       val2 = explor ();
       if (set_noeval)
-        noeval--;
+	noeval--;
       rval = cval ? val1 : val2;
       lasttok = COND;
     }
@@ -695,8 +698,8 @@ exp2 ()
   val1 = exppower ();
 
   while ((curtok == MUL) ||
-         (curtok == DIV) ||
-         (curtok == MOD))
+	 (curtok == DIV) ||
+	 (curtok == MOD))
     {
       int op = curtok;
 
@@ -708,11 +711,11 @@ exp2 ()
 	evalerror ("division by 0");
 
       if (op == MUL)
-        val1 *= val2;
+	val1 *= val2;
       else if (op == DIV)
-        val1 /= val2;
+	val1 /= val2;
       else if (op == MOD)
-        val1 %= val2;
+	val1 %= val2;
     }
   return (val1);
 }
@@ -773,7 +776,7 @@ exp0 ()
       stok = lasttok = curtok;
       readtok ();
       if (curtok != STR)
-        /* readtok() catches this */
+	/* readtok() catches this */
 	evalerror ("identifier expected after pre-increment or pre-decrement");
 
       v2 = tokval + ((stok == PREINC) ? 1 : -1);
@@ -906,7 +909,7 @@ readtok ()
       /* The tests for PREINC and PREDEC aren't strictly correct, but they
 	 preserve old behavior if a construct like --x=9 is given. */
       if (lasttok == PREINC || lasttok == PREDEC || peektok != EQ)
-        {
+	{
 #if defined (ARRAY_VARS)
 	  value = (e == ']') ? get_array_value (tokstr, 0) : get_string_value (tokstr);
 #else
@@ -919,9 +922,9 @@ readtok ()
 	  if (e == ']')
 	    FREE (value);	/* get_array_value returns newly-allocated memory */
 #endif
-        }
+	}
       else
-        tokval = 0;
+	tokval = 0;
 
       lasttok = curtok;
       curtok = STR;
@@ -977,12 +980,12 @@ readtok ()
       else if ((c == BOR) && (c1 == BOR))
 	c = LOR;
       else if ((c == '*') && (c1 == '*'))
-        c = POWER;
+	c = POWER;
       else if ((c == '-') && (c1 == '-') && legal_variable_starter (*cp))
-        c = PREDEC;
+	c = PREDEC;
       else if ((c == '+') && (c1 == '+') && legal_variable_starter (*cp))
-        c = PREINC;
-      else if (c1 == EQ && member(c, "*/%+-&^|"))
+	c = PREINC;
+      else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{
 	  assigntok = c;	/* a OP= b */
 	  c = OP_ASSIGN;
@@ -1133,9 +1136,9 @@ main (argc, argv)
     {
       v = evalexp (argv[i], &expok);
       if (expok == 0)
-        fprintf (stderr, "%s: expression error\n", argv[i]);
+	fprintf (stderr, "%s: expression error\n", argv[i]);
       else
-        printf ("'%s' -> %ld\n", argv[i], v);
+	printf ("'%s' -> %ld\n", argv[i], v);
     }
   exit (0);
 }

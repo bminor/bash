@@ -80,6 +80,7 @@ typedef struct variable {
 #define att_local     0x100	/* variable is local to a function */
 #define att_tempvar   0x200	/* variable came from the temp environment */
 #define att_importstr 0x400	/* exportstr points into initial environment */
+#define att_noassign  0x800	/* assignment not allowed */
 
 #define exported_p(var)		((((var)->attributes) & (att_exported)))
 #define readonly_p(var)		((((var)->attributes) & (att_readonly)))
@@ -88,9 +89,10 @@ typedef struct variable {
 #define non_unsettable_p(var)	((((var)->attributes) & (att_nounset)))
 #define function_p(var)		((((var)->attributes) & (att_function)))
 #define integer_p(var)		((((var)->attributes) & (att_integer)))
-#define imported_p(var)         ((((var)->attributes) & (att_imported)))
+#define imported_p(var)		((((var)->attributes) & (att_imported)))
 #define local_p(var)		((((var)->attributes) & (att_local)))
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
+#define noassign_p(var)		((((var)->attributes) & (att_noassign)))
 
 #define value_cell(var) ((var)->value)
 #define function_cell(var) (COMMAND *)((var)->value)
@@ -114,7 +116,7 @@ typedef struct variable {
 	  if ((var)->exportstr) \
 	    { \
 	      if (((var)->attributes & att_importstr) == 0) \
-	        free ((var)->exportstr); \
+		free ((var)->exportstr); \
 	    } \
 	} while (0)
 
@@ -151,7 +153,9 @@ extern char **non_unsettable_vars;
 
 extern void initialize_shell_variables __P((char **, int));
 extern SHELL_VAR *set_if_not __P((char *, char *));
-extern void set_lines_and_columns __P((int, int));
+extern void sh_set_lines_and_columns __P((int, int));
+
+extern void set_pwd __P((void));
 
 extern void set_ppid __P((void));
 
@@ -181,7 +185,7 @@ extern char **all_variables_matching_prefix __P((char *));
 extern char **make_var_array __P((HASH_TABLE *));
 extern char **add_or_supercede_exported_var __P((char *, int));
 
-extern char *get_string_value __P((char *));
+extern char *get_string_value __P((const char *));
 extern char *make_variable_value __P((SHELL_VAR *, char *));
 
 extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *));
@@ -203,6 +207,7 @@ extern void dispose_function_env __P((void));
 extern void dispose_builtin_env __P((void));
 extern void merge_temporary_env __P((void));
 extern void merge_builtin_env __P((void));
+extern void merge_function_env __P((void));
 extern void kill_all_local_variables __P((void));
 extern void set_var_read_only __P((char *));
 extern void set_func_read_only __P((char *));
@@ -214,6 +219,7 @@ extern void update_export_env_inplace __P((char *, int, char *));
 extern void put_command_name_into_env __P((char *));
 extern void put_gnu_argv_flags_into_env __P((int, char *));
 extern void print_var_list __P((SHELL_VAR **));
+extern void print_func_list __P((SHELL_VAR **));
 extern void print_assignment __P((SHELL_VAR *));
 extern void print_var_value __P((SHELL_VAR *, int));
 extern void print_var_function __P((SHELL_VAR *));
@@ -240,6 +246,8 @@ extern void set_pipestatus_from_exit __P((int));
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
 extern void stupidly_hack_special_variables __P((char *));
+
+extern int get_random_number __P((void));
 
 /* The `special variable' functions that get called when a particular
    variable is set. */

@@ -157,7 +157,7 @@ history_builtin (list)
   else if (flags & PFLAG)
     {
       if (list)
-        return (expand_and_print_history (list));
+	return (expand_and_print_history (list));
       return (EXECUTION_SUCCESS);
     }
 #endif
@@ -326,10 +326,10 @@ expand_and_print_history (list)
 	  result = EXECUTION_FAILURE;
 	}
       else
-        {
+	{
 	  fputs (s, stdout);
 	  putchar ('\n');
-        }
+	}
       FREE (s);
       list = list->next;
     }

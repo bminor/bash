@@ -28,6 +28,7 @@
 typedef struct compspec {
   int refcount;
   unsigned long actions;
+  unsigned long options;
   char *globpat;
   char *words;
   char *prefix;
@@ -62,13 +63,11 @@ typedef struct compspec {
 #define CA_USER		(1<<20)
 #define CA_VARIABLE	(1<<21)
 
-/* This is a general-purpose argv-style array struct that should be used
-   elsewhere. */
-typedef struct _list_of_strings {
-  char **list;
-  int list_size;
-  int list_len;
-} STRINGLIST;
+/* Values for COMPSPEC options field. */
+#define COPT_RESERVED	(1<<0)		/* reserved for other use */
+#define COPT_DEFAULT	(1<<1)
+#define COPT_FILENAMES	(1<<2)
+#define COPT_DIRNAMES	(1<<3)
 
 /* List of items is used by the code that implements the programmable
    completions. */
@@ -133,14 +132,14 @@ extern int add_progcomp __P((char *, COMPSPEC *));
 
 extern int num_progcomps __P((void));
 
-extern COMPSPEC *find_compspec __P((char *));
+extern COMPSPEC *find_compspec __P((const char *));
 
 extern void print_all_compspecs __P((VFunction *));
 
 /* Functions from pcomplete.c */
 extern void set_itemlist_dirty __P((ITEMLIST *));
 
-extern STRINGLIST *gen_compspec_completions __P((COMPSPEC *, char *, char *, int, int));
-extern char **programmable_completions __P((char *, char *, int, int, int *));
+extern STRINGLIST *gen_compspec_completions __P((COMPSPEC *, const char *, const char *, int, int));
+extern char **programmable_completions __P((const char *, const char *, int, int, int *));
 
 #endif /* _PCOMPLETE_H_ */

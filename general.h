@@ -79,15 +79,19 @@ extern char *strcpy ();
 #endif
 
 #ifndef digit
-#define digit(c)  ((c) >= '0' && (c) <= '9')
+#define digit(c)  (isdigit(c))
 #endif
 
 #ifndef isletter
-#define isletter(c) (((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
+#define isletter(c) (isalpha(c))
 #endif
 
 #ifndef digit_value
 #define digit_value(c) ((c) - '0')
+#endif
+
+#ifndef ISOCTAL
+#define ISOCTAL(c)  ((c) >= '0' && (c) <= '7')
 #endif
 
 /* Define exactly what a legal shell identifier consists of. */
@@ -115,7 +119,7 @@ typedef struct {
 /* A macro to avoid making an uneccessary function call. */
 #define REVERSE_LIST(list, type) \
   ((list && list->next) ? (type)reverse_list ((GENERIC_LIST *)list) \
-  			: (type)(list))
+			: (type)(list))
 
 #if __GNUC__ > 1
 #  define FASTCOPY(s, d, n)  __builtin_memcpy (d, s, n)
@@ -178,6 +182,23 @@ typedef char **CPPFunction ();
 #define FS_DIRECTORY	  0x10
 #define FS_NODIRS	  0x20
 
+/* Some useful definitions for Unix pathnames.  Argument convention:
+   x == string, c == character */
+
+#if !defined (__CYGWIN__)
+#  define ABSPATH(x)	((x)[0] == '/')
+#  define RELPATH(x)	((x)[0] != '/')
+#else /* __CYGWIN__ */
+#  define ABSPATH(x)	(((x)[0] && isalpha((x)[0]) && (x)[1] == ':' && (x)[2] == '/') || (x)[0] == '/')
+#  define RELPATH(x)	(!(x)[0] || ((x)[1] != ':' && (x)[0] != '/'))
+#endif /* __CYGWIN__ */
+
+#define ROOTEDPATH(x)	(ABSPATH(x))
+
+#define DIRSEP	'/'
+#define ISDIRSEP(c)	((c) == '/')
+#define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
+
 /* Declarations for functions defined in xmalloc.c */
 extern char *xmalloc __P((size_t));
 extern char *xrealloc __P((void *, size_t));
@@ -196,13 +217,12 @@ extern int legal_number __P((char *, long *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
 
-extern int unset_nodelay_mode __P((int));
+extern int sh_unset_nodelay_mode __P((int));
 extern void check_dev_tty __P((void));
 extern int same_file ();	/* too many problems with prototype */
 extern int move_to_high_fd __P((int, int, int));
 extern int check_binary_file __P((unsigned char *, int));
 
-extern char *canonicalize_pathname __P((char *));
 extern char *make_absolute __P((char *, char *));
 extern int absolute_pathname __P((char *));
 extern int absolute_program __P((char *));

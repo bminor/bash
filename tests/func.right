@@ -118,3 +118,33 @@ testgrp ()
     } 1>&2;
     echo testgrp-b
 }
+funca is a function
+funca () 
+{ 
+    ( echo func-a )
+}
+funcb is a function
+funcb () 
+{ 
+    ( echo func-b )
+}
+funcc is a function
+funcc () 
+{ 
+    ( echo func-c ) 2>&1
+}
+func-a
+func-b
+func-c
+expect 5 10
+5 10
+expect 20
+20
+expect 5 20
+5 20
+expect 5 30
+5 30
+expect 2 40
+2 40
+expect 5 20
+5 20

@@ -327,7 +327,7 @@ set_dollar_vars_changed ()
 
 /* **************************************************************** */
 /*								    */
-/*	        Validating numeric input and arguments		    */
+/*		Validating numeric input and arguments		    */
 /*								    */
 /* **************************************************************** */
 
@@ -371,10 +371,10 @@ read_octal (string)
   int result, digits;
 
   result = digits = 0;
-  while (*string && *string >= '0' && *string < '8')
+  while (*string && ISOCTAL (*string))
     {
       digits++;
-      result = (result * 8) + *string++ - '0';
+      result = (result * 8) + (*string++ - '0');
     }
 
   if (!digits || result > 0777 || *string)
@@ -416,10 +416,7 @@ get_working_directory (for_whom)
 	{
 	  fprintf (stderr, "%s: could not get current directory: %s: %s\n",
 		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
-		   the_current_working_directory[0]
-			? the_current_working_directory
-			: bash_getcwd_errstr,
-		   strerror (errno));
+		   bash_getcwd_errstr, strerror (errno));
 
 	  free (the_current_working_directory);
 	  the_current_working_directory = (char *)NULL;
@@ -709,222 +706,4 @@ initialize_shell_builtins ()
 {
   qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
     (QSFUNC *)shell_builtin_compare);
-}
-
-/* **************************************************************** */
-/*								    */
-/*	 Functions for quoting strings to be re-read as input	    */
-/*								    */
-/* **************************************************************** */
-
-/* Return a new string which is the single-quoted version of STRING.
-   Used by alias and trap, among others. */
-char *
-single_quote (string)
-     char *string;
-{
-  register int c;
-  char *result, *r, *s;
-
-  result = (char *)xmalloc (3 + (4 * strlen (string)));
-  r = result;
-  *r++ = '\'';
-
-  for (s = string; s && (c = *s); s++)
-    {
-      *r++ = c;
-
-      if (c == '\'')
-	{
-	  *r++ = '\\';	/* insert escaped single quote */
-	  *r++ = '\'';
-	  *r++ = '\'';	/* start new quoted string */
-	}
-    }
-
-  *r++ = '\'';
-  *r = '\0';
-
-  return (result);
-}
-
-/* Quote STRING using double quotes.  Return a new string. */
-char *
-double_quote (string)
-     char *string;
-{
-  register int c;
-  char *result, *r, *s;
-
-  result = (char *)xmalloc (3 + (2 * strlen (string)));
-  r = result;
-  *r++ = '"';
-
-  for (s = string; s && (c = *s); s++)
-    {
-      switch (c)
-        {
-	case '"':
-	case '$':
-	case '`':
-	case '\\':
-	case '\n':		/* XXX */
-	  *r++ = '\\';
-	default:
-	  *r++ = c;
-	  break;
-        }
-    }
-
-  *r++ = '"';
-  *r = '\0';
-
-  return (result);
-}
-
-/* Remove backslashes that are quoting characters that are special between
-   double quotes.  Return a new string. */
-char *
-un_double_quote (string)
-     char *string;
-{
-  register int c, pass_next;
-  char *result, *r, *s;
-
-  r = result = xmalloc (strlen (string) + 1);
-
-  for (pass_next = 0, s = string; s && (c = *s); s++)
-    {
-      if (pass_next)
-	{
-	  *r++ = c;
-	  pass_next = 0;
-	  continue;
-	}
-      if (c == '\\' && strchr (slashify_in_quotes, s[1]))
-	{
-	  pass_next = 1;
-	  continue;
-	}
-      *r++ = c;
-    }
-
-  *r = '\0';
-  return result;
-}
-
-/* Quote special characters in STRING using backslashes.  Return a new
-   string. */
-char *
-backslash_quote (string)
-     char *string;
-{
-  int c;
-  char *result, *r, *s;
-
-  result = xmalloc (2 * strlen (string) + 1);
-
-  for (r = result, s = string; s && (c = *s); s++)
-    {
-      switch (c)
-	{
-	case ' ': case '\t': case '\n':		/* IFS white space */
-	case '\'': case '"': case '\\':		/* quoting chars */
-	case '|': case '&': case ';':		/* shell metacharacters */
-	case '(': case ')': case '<': case '>':
-	case '!': case '{': case '}':		/* reserved words */
-	case '*': case '[': case '?': case ']':	/* globbing chars */
-	case '^':
-	case '$': case '`':			/* expansion chars */
-	  *r++ = '\\';
-	  *r++ = c;
-	  break;
-#if 0
-	case '~':				/* tilde expansion */
-	  if (s == string || s[-1] == '=' || s[-1] == ':')
-	    *r++ = '\\';
-	  *r++ = c;
-	  break;
-#endif
-	case '#':				/* comment char */
-	  if (s == string)
-	    *r++ = '\\';
-	  /* FALLTHROUGH */
-	default:
-	  *r++ = c;
-	  break;
-	}
-    }
-
-  *r = '\0';
-  return (result);
-}
-
-#if defined (PROMPT_STRING_DECODE)
-/* Quote characters that get special treatment when in double quotes in STRING
-   using backslashes.  Return a new string. */
-char *
-backslash_quote_for_double_quotes (string)
-     char *string;
-{
-  int c;
-  char *result, *r, *s;
-
-  result = xmalloc (2 * strlen (string) + 1);
-
-  for (r = result, s = string; s && (c = *s); s++)
-    {
-      switch (c)
-	{
-	case '"':
-	case '$':
-	case '`':
-	case '\\':
-	case '\n':
-	  *r++ = '\\';
-	  *r++ = c;
-	  break;
-	default:
-	  *r++ = c;
-	  break;
-	}
-    }
-
-  *r = '\0';
-  return (result);
-}
-#endif /* PROMPT_STRING_DECODE */
-
-int
-contains_shell_metas (string)
-     char *string;
-{
-  char *s;
-
-  for (s = string; s && *s; s++)
-    {
-      switch (*s)
-	{
-	case ' ': case '\t': case '\n':		/* IFS white space */
-	case '\'': case '"': case '\\':		/* quoting chars */
-	case '|': case '&': case ';':		/* shell metacharacters */
-	case '(': case ')': case '<': case '>':
-	case '!': case '{': case '}':		/* reserved words */
-	case '*': case '[': case '?': case ']':	/* globbing chars */
-	case '^':
-	case '$': case '`':			/* expansion chars */
-	  return (1);
-	case '~':				/* tilde expansion */
-	  if (s == string || s[-1] == '=' || s[-1] == ':')
-	    return (1);
-	case '#':
-	  if (s == string)			/* comment char */
-	    return (1);
-	  /* FALLTHROUGH */
-	default:
-	  break;
-	}
-    }
-
-  return (0);
 }

@@ -481,4 +481,21 @@ set -- ''
 expect 1
 echo $#
 expect '<>'
+recho "${@}"
+expect '<>'
+recho "${@-}"
+expect '<>'
+recho "${@:-}"
+
+# this was a bug in bash-2.04, fixed in 2.05
+set -- a b
+expect '<:a:>' '<:b:>'
+for i in "${@-}"; do recho :$i:; done
+
+# I believe that ksh93 does these wrong -- we're using the rhs, so shouldn't
+# it behave the same as ""?
+set --
+expect '<>'
+recho "${@-}"
+expect '<>'
 recho "${@:-}"

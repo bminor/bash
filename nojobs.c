@@ -83,7 +83,7 @@ extern int errno;
 #endif /* !errno */
 
 #if defined (READLINE)
-extern void _rl_set_screen_size (); 
+extern void rl_set_screen_size __P((int, int));
 #endif
 
 extern int interactive, interactive_shell, login_shell;
@@ -288,7 +288,7 @@ mark_dead_jobs_as_notified (force)
 	continue;
       if (((pid_list[i].flags & PROC_RUNNING) == 0) &&
 	   (pid_list[i].flags & PROC_ASYNC))
-        ndead++;
+	ndead++;
     }
 
   if (force == 0 && ndead <= CHILD_MAX)
@@ -364,9 +364,9 @@ get_new_window_size (from_sig)
 #if defined (aixpc)
       shell_tty_info.c_winsize = win;	/* structure copying */
 #endif
-      set_lines_and_columns (win.ws_row, win.ws_col);
+      sh_set_lines_and_columns (win.ws_row, win.ws_col);
 #if defined (READLINE)
-      _rl_set_screen_size (win.ws_row, win.ws_col);
+      rl_set_screen_size (win.ws_row, win.ws_col);
 #endif
     }
 }
@@ -569,7 +569,7 @@ wait_for_single_pid (pid)
 	  break;
 	}
       else if (got_pid > 0)
-        set_pid_status (got_pid, status);
+	set_pid_status (got_pid, status);
     }
 
   set_pid_status (got_pid, status);
@@ -649,10 +649,13 @@ wait_sigint_handler (sig)
       longjmp (wait_intr_buf, 1);
     }
 
-#if 0
-  /* Run a trap handler if one has been defined. */
-  maybe_call_trap_handler (sig);
-#endif
+  if (interrupt_immediately)
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      restore_sigint_handler ();
+      ADDINTERRUPT;
+      QUIT;
+    }
 
   wait_sigint_received = 1;
 
@@ -808,8 +811,9 @@ set_tty_state ()
 }
 
 /* Give the terminal to PGRP.  */
-give_terminal_to (pgrp)
+give_terminal_to (pgrp, force)
      pid_t pgrp;
+     int force;
 {
 }
 

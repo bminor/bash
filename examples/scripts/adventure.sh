@@ -99,7 +99,7 @@ set -o emacs
 cd
 LIM=.limbo			# $HOME/$LIM contains "destroyed" objects
 mkdir $LIM || {
-	echo "ash: cannot mkdir $LIM: exiting
+	echo "ash: cannot mkdir $LIM: exiting"
 	exit 1
 }
 KNAP=.knapsack			# $HOME/$KNAP contains objects being "carried"

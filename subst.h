@@ -23,6 +23,20 @@
 
 #include "stdc.h"
 
+/* Constants which specify how to handle backslashes and quoting in
+   expand_word_internal ().  Q_DOUBLE_QUOTES means to use the function
+   slashify_in_quotes () to decide whether the backslash should be
+   retained.  Q_HERE_DOCUMENT means slashify_in_here_document () to
+   decide whether to retain the backslash.  Q_KEEP_BACKSLASH means
+   to unconditionally retain the backslash. */
+#define Q_DOUBLE_QUOTES  0x1
+#define Q_HERE_DOCUMENT  0x2
+#define Q_KEEP_BACKSLASH 0x4
+#define Q_NOQUOTE	 0x8
+#define Q_QUOTED	 0x10
+#define Q_ADDEDQUOTES	 0x20
+#define Q_QUOTEDNULL	 0x40
+
 /* Cons a new string from STRING starting at START and ending at END,
    not including END. */
 extern char *substring __P((char *, int, int));
@@ -129,7 +143,7 @@ extern WORD_LIST *expand_word __P((WORD_DESC *, int));
 /* Expand WORD, but do not perform word splitting on the result.  This
    does parameter expansion, command substitution, arithmetic expansion,
    and quote removal. */
-extern WORD_LIST *expand_word_no_split __P((WORD_DESC *, int));
+extern WORD_LIST *expand_word_unsplit __P((WORD_DESC *, int));
 extern WORD_LIST *expand_word_leave_quoted __P((WORD_DESC *, int));
 
 /* Return the value of a positional parameter.  This handles values > 10. */

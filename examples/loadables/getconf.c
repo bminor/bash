@@ -55,7 +55,7 @@
 struct conf_variable
 {
   const char *name;
-  enum { SYSCONF, CONFSTR, PATHCONF, CONSTANT } type;
+  enum { SYSCONF, CONFSTR, PATHCONF, CONSTANT, G_UNDEF } type;
   long value;
 };
 
@@ -105,19 +105,55 @@ static const struct conf_variable conf_table[] =
 #endif /* _CS_XBS5_ILP32_OFF32_CFLAGS */
 
   /* POSIX.2 Utility Limit Minimum Values */
+#ifdef _POSIX2_BC_BASE_MAX
   { "POSIX2_BC_BASE_MAX",	CONSTANT,	_POSIX2_BC_BASE_MAX	},
+#else
+  { "POSIX2_BC_BASE_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_DIM_MAX
   { "POSIX2_BC_DIM_MAX",	CONSTANT,	_POSIX2_BC_DIM_MAX	},
+#else
+  { "POSIX2_BC_DIM_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_SCALE_MAX
   { "POSIX2_BC_SCALE_MAX",	CONSTANT,	_POSIX2_BC_SCALE_MAX	},
+#else
+  { "POSIX2_BC_SCALE_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_STRING_MAX
   { "POSIX2_BC_STRING_MAX",	CONSTANT,	_POSIX2_BC_STRING_MAX	},
+#else
+  { "POSIX2_BC_STRING_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_COLL_WEIGHTS_MAX
   { "POSIX2_COLL_WEIGHTS_MAX",	CONSTANT,	_POSIX2_COLL_WEIGHTS_MAX },
+#else
+  { "POSIX2_COLL_WEIGHTS_MAX",	G_UNDEF,	-1			 },
+#endif
 #if defined (_POSIX2_EQUIV_CLASS_MAX)
   { "POSIX2_EQUIV_CLASS_MAX",	CONSTANT,	_POSIX2_EQUIV_CLASS_MAX	},
 #endif
+#ifdef _POSIX2_EXPR_NEST_MAX
   { "POSIX2_EXPR_NEST_MAX",	CONSTANT,	_POSIX2_EXPR_NEST_MAX	},
+#else
+  { "POSIX2_EXPR_NEST_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_LINE_MAX
   { "POSIX2_LINE_MAX",		CONSTANT,	_POSIX2_LINE_MAX	},
+#else
+  { "POSIX2_LINE_MAX",		G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_RE_DUP_MAX
   { "POSIX2_RE_DUP_MAX",	CONSTANT,	_POSIX2_RE_DUP_MAX	},
+#else
+  { "POSIX2_RE_DUP_MAX",	G_UNDEF,	-1			},
+#endif
 #if defined (_POSIX2_VERSION)
   { "POSIX2_VERSION",		CONSTANT,	_POSIX2_VERSION		},
+#else
+#  if !defined (_SC_2_VERSION)
+  { "POSIX2_VERSION",		G_UNDEF,	-1			},
+#  endif
 #endif
 
   /* POSIX.1 Minimum Values */
@@ -146,20 +182,50 @@ static const struct conf_variable conf_table[] =
   { "RE_DUP_MAX",		SYSCONF,	_SC_RE_DUP_MAX		},
 
   /* POSIX.2 Optional Facility Configuration Values */
+#ifdef _SC_2_C_BIND
   { "POSIX2_C_BIND",		SYSCONF,	_SC_2_C_BIND		},
+#else
+  { "POSIX2_C_BIND",		G_UNDEF,	-1			},
+#endif
+#ifdef _SC_2_C_DEV
   { "POSIX2_C_DEV",		SYSCONF,	_SC_2_C_DEV		},
+#else
+  { "POSIX2_C_DEV",		G_UNDEF,	-1			},
+#endif
 #if defined (_SC_2_C_VERSION)
   { "POSIX2_C_VERSION",		SYSCONF,	_SC_2_C_VERSION		},
+#else
+  { "POSIX2_C_VERSION",		G_UNDEF,	-1			},
 #endif
 #if defined (_SC_2_CHAR_TERM)
   { "POSIX2_CHAR_TERM",		SYSCONF,	_SC_2_CHAR_TERM		},
+#else
+  { "POSIX2_CHAR_TERM",		G_UNDEF,	-1			},
 #endif
+#ifdef _SC_2_FORT_DEV
   { "POSIX2_FORT_DEV",		SYSCONF,	_SC_2_FORT_DEV		},
+#else
+  { "POSIX2_FORT_DEV",		G_UNDEF,	-1			},
+#endif
+#ifdef _SC_2_FORT_RUN
   { "POSIX2_FORT_RUN",		SYSCONF,	_SC_2_FORT_RUN		},
+#else
+  { "POSIX2_FORT_RUN",		G_UNDEF,	-1			},
+#endif
+#ifdef _SC_2_LOCALEDEF
   { "POSIX2_LOCALEDEF",		SYSCONF,	_SC_2_LOCALEDEF		},
+#else
+  { "POSIX2_LOCALEDEF",		G_UNDEF,	-1			},
+#endif
+#ifdef _SC_2_SW_DEV
   { "POSIX2_SW_DEV",		SYSCONF,	_SC_2_SW_DEV		},
+#else
+  { "POSIX2_SW_DEV",		G_UNDEF,	-1			},
+#endif
 #if defined (_SC2_UPE)
   { "POSIX2_UPE",		SYSCONF,	_SC_2_UPE		},
+#else
+  { "POSIX2_UPE",		G_UNDEF,	-1			},
 #endif
 #if !defined (_POSIX2_VERSION) && defined (_SC_2_VERSION)
   { "POSIX2_VERSION"		SYSCONF,	_SC_2_VERSION		},
@@ -449,6 +515,10 @@ int all;
 	size_t slen;
 
 	switch (cp->type) {
+	case G_UNDEF:
+		printf("undefined\n");
+		break;
+
 	case CONSTANT:
 		printf("%ld\n", cp->value);
 		break;
@@ -508,7 +578,8 @@ int all;
 		break;
 	}
 
-	return (ferror(stdout) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+	return ((ferror(stdout) || cp->type == G_UNDEF) ? EXECUTION_FAILURE
+							: EXECUTION_SUCCESS);
 }
 
 static int

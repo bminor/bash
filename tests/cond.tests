@@ -20,6 +20,19 @@ echo returns: $?
 [[ ! x || x ]]
 echo returns: $?
 
+# parenthesized terms didn't work right until post-2.04
+[[ a ]]
+echo returns: $?
+
+[[ (a) ]]
+echo returns: $?
+
+[[ -n a ]]
+echo returns: $?
+
+[[ (-n a) ]]
+echo returns: $?
+
 # unset variables don't need to be quoted
 [[ -n $UNSET ]]
 echo returns: $?

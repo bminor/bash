@@ -320,9 +320,9 @@ xtrace_print_word_list (list)
       t = w->word->word;
       if (t == 0 || *t == '\0')
 	fprintf (stderr, "''%s", w->next ? " " : "");
-      else if (contains_shell_metas (t))
+      else if (sh_contains_shell_metas (t))
 	{
-	  x = single_quote (t);
+	  x = sh_single_quote (t);
 	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
@@ -581,6 +581,7 @@ print_cond_command (cond)
   cprintf (" ]]");
 }
 
+#ifdef DEBUG
 void
 debug_print_cond_command (cond)
      COND_COM *cond;
@@ -590,6 +591,7 @@ debug_print_cond_command (cond)
   print_cond_command (cond);
   fprintf (stderr, "%s\n", the_printed_command);
 }
+#endif
 
 void
 xtrace_print_cond_term (type, invert, op, arg1, arg2)
@@ -688,10 +690,10 @@ print_redirection_list (redirects)
     {
       cprintf (" "); 
       for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
-        {
+	{
 	  print_redirection (hdtail);
 	  cprintf ("\n");
-        }
+	}
       dispose_redirects (heredocs);
       was_heredoc = 1;
     }
@@ -741,12 +743,12 @@ print_redirection (redirect)
 	cprintf ("%d", redirector);
       /* If the here document delimiter is quoted, single-quote it. */
       if (redirect->redirectee.filename->flags & W_QUOTED)
-        {
-          char *x;
-          x = single_quote (redirect->here_doc_eof);
+	{
+	  char *x;
+	  x = sh_single_quote (redirect->here_doc_eof);
 	  cprintf ("<<%s%s\n", kill_leading? "-" : "", x);
-          free (x);
-        }
+	  free (x);
+	}
       else
 	cprintf ("<<%s%s\n", kill_leading? "-" : "", redirect->here_doc_eof);
       cprintf ("%s%s",
@@ -814,12 +816,11 @@ print_function_def (func)
   inside_function_def++;
   indentation += indentation_amount;
 
-  func_redirects = (REDIRECT *)NULL;
   cmdcopy = copy_command (func->command);
   if (cmdcopy->type == cm_group)
     {
-      func_redirects = cmdcopy->value.Group->command->redirects;
-      cmdcopy->value.Group->command->redirects = (REDIRECT *)NULL;
+      func_redirects = cmdcopy->redirects;
+      cmdcopy->redirects = (REDIRECT *)NULL;
     }
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
@@ -833,7 +834,7 @@ print_function_def (func)
     { /* { */
       newline ("} ");
       print_redirection_list (func_redirects);
-      cmdcopy->value.Group->command->redirects = func_redirects;
+      cmdcopy->redirects = func_redirects;
     }
   else
     newline ("}");
@@ -887,8 +888,8 @@ named_function_string (name, command, multi_line)
   func_redirects = (REDIRECT *)NULL;
   if (cmdcopy->type == cm_group)
     {
-      func_redirects = cmdcopy->value.Group->command->redirects;
-      cmdcopy->value.Group->command->redirects = (REDIRECT *)NULL;
+      func_redirects = cmdcopy->redirects;
+      cmdcopy->redirects = (REDIRECT *)NULL;
     }
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
@@ -902,7 +903,7 @@ named_function_string (name, command, multi_line)
     { /* { */
       newline ("} ");
       print_redirection_list (func_redirects);
-      cmdcopy->value.Group->command->redirects = func_redirects;
+      cmdcopy->redirects = func_redirects;
     }
   else
     newline ("}");
@@ -921,7 +922,7 @@ named_function_string (name, command, multi_line)
 	  }
 #else
       if (result[2] == '\n')	/* XXX -- experimental */
-        strcpy (result + 2, result + 3);
+	strcpy (result + 2, result + 3);
 #endif
     }
 

@@ -68,10 +68,6 @@ extern int errno;
 #  define STREQ(a, b) ((a)[0] == (b)[0] && strcmp (a, b) == 0)
 #endif /* !STREQ */
 
-#if !defined (member)
-#  define member(c, s) (int)((c) ? (char *)strchr ((s), (c)) : 0)
-#endif /* !member */
-
 #if !defined (R_OK)
 #define R_OK 4
 #define W_OK 2
@@ -241,7 +237,7 @@ test_eaccess (path, mode)
 	return (0);
     }
 
-  if (st.st_uid == current_user.euid)        /* owner */
+  if (st.st_uid == current_user.euid)	/* owner */
     mode <<= 6;
   else if (group_member (st.st_gid))
     mode <<= 3;
@@ -358,7 +354,7 @@ term ()
       advance (1);
       value = expr ();
       if (argv[pos] == 0)
-        test_syntax_error ("`)' expected", (char *)NULL);
+	test_syntax_error ("`)' expected", (char *)NULL);
       else if (argv[pos][0] != ')' || argv[pos][1])
 	test_syntax_error ("`)' expected, found %s", argv[pos]);
       advance (0);
@@ -393,8 +389,19 @@ filecomp (s, t, op)
 {
   struct stat st1, st2;
 
-  if (test_stat (s, &st1) < 0 || test_stat (t, &st2) < 0)
-    return (FALSE);
+  if (test_stat (s, &st1) < 0)
+    {
+      st1.st_mtime = 0;
+      if (op == EF)
+	return (FALSE);
+    }
+  if (test_stat (t, &st2) < 0)
+    {
+      st2.st_mtime = 0;
+      if (op == EF)
+	return (FALSE);
+    }
+  
   switch (op)
     {
     case OT: return (st1.st_mtime < st2.st_mtime);
@@ -475,8 +482,8 @@ binary_test (op, arg1, arg2, flags)
     {
       switch (op[1])
 	{
-        case 'n': return (filecomp (arg1, arg2, NT));		/* -nt */
-        case 'o': return (filecomp (arg1, arg2, OT));		/* -ot */
+	case 'n': return (filecomp (arg1, arg2, NT));		/* -nt */
+	case 'o': return (filecomp (arg1, arg2, OT));		/* -ot */
 	case 'l': return (arithcomp (arg1, arg2, LT, flags));	/* -lt */
 	case 'g': return (arithcomp (arg1, arg2, GT, flags));	/* -gt */
 	}
@@ -554,10 +561,15 @@ unary_operator ()
   if (op[1] == 't')
     {
       advance (0);
-      if (pos < argc && legal_number (argv[pos], &r))
+      if (pos < argc)
 	{
-	  advance (0);
-	  return (unary_test (op, argv[pos - 1]));
+	  if (legal_number (argv[pos], &r))
+	    {
+	      advance (0);
+	      return (unary_test (op, argv[pos - 1]));
+	    }
+	  else
+	    return (FALSE);
 	}
       else
 	return (unary_test (op, "1"));
@@ -731,7 +743,7 @@ test_binop (op)
 	    return (0);
 	  }
       else
-        return (0);
+	return (0);
     }
 }
 
@@ -791,9 +803,9 @@ three_arguments ()
   else if (ANDOR (argv[pos+1]))
     {
       if (argv[pos+1][1] == 'a')
-        value = ONE_ARG_TEST(argv[pos]) && ONE_ARG_TEST(argv[pos+2]);
+	value = ONE_ARG_TEST(argv[pos]) && ONE_ARG_TEST(argv[pos+2]);
       else
-        value = ONE_ARG_TEST(argv[pos]) || ONE_ARG_TEST(argv[pos+2]);
+	value = ONE_ARG_TEST(argv[pos]) || ONE_ARG_TEST(argv[pos+2]);
       pos = argc;
     }
   else if (argv[pos][0] == '!' && argv[pos][1] == '\0')
@@ -880,11 +892,11 @@ test_command (margc, margv)
     {
       --margc;
 
-      if (margc < 2)
-	test_exit (SHELL_BOOLEAN (FALSE));
-
       if (margv[margc] && (margv[margc][0] != ']' || margv[margc][1]))
 	test_syntax_error ("missing `]'", (char *)NULL);
+
+      if (margc < 2)
+	test_exit (SHELL_BOOLEAN (FALSE));
     }
 
   argc = margc;

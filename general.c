@@ -50,8 +50,12 @@ extern int errno;
 #  define to_lower(c) (isupper(c) ? tolower(c) : (c))
 #endif
 
+extern int interactive_shell, expand_aliases;
 extern int interrupt_immediately;
 extern int interactive_comments;
+extern int check_hashed_filenames;
+extern int source_uses_path;
+extern int source_searches_cwd;
 
 /* A standard error message to use when getcwd() returns NULL. */
 char *bash_getcwd_errstr = "getcwd: cannot access parent directories";
@@ -61,7 +65,18 @@ void
 posix_initialize (on)
      int on;
 {
-  interactive_comments = on != 0;
+  /* Things that should be turned on when posix mode is enabled. */
+  if (on != 0)
+    {
+      interactive_comments = source_uses_path = expand_aliases = 1;
+    }
+
+  /* Things that should be turned on when posix mode is disabled. */
+  if (on == 0)
+    {
+      source_searches_cwd = 1;
+      expand_aliases = interactive_shell;
+    }
 }
 
 /* **************************************************************** */
@@ -131,13 +146,12 @@ int
 all_digits (string)
      char *string;
 {
-  while (*string)
-    {
-      if (!digit (*string))
-	return (0);
-      else
-	string++;
-    }
+  register char *s;
+
+  for (s = string; *s; s++)
+    if (isdigit (*s) == 0)
+      return (0);
+
   return (1);
 }
 
@@ -156,6 +170,10 @@ legal_number (string, result)
     *result = 0;
 
   value = strtol (string, &ep, 10);
+
+  /* Skip any trailing whitespace, since strtol does not. */
+  while (whitespace (*ep))
+    ep++;
 
   /* If *string is not '\0' but *ep is '\0' on return, the entire string
      is valid. */
@@ -187,7 +205,7 @@ legal_identifier (name)
   for (s = name + 1; *s; s++)
     {
       if (legal_variable_char (*s) == 0)
-        return (0);
+	return (0);
     }
   return (1);
 }
@@ -234,7 +252,7 @@ check_identifier (word, check_word)
 
 /* Make sure no-delay mode is not set on file descriptor FD. */
 int
-unset_nodelay_mode (fd)
+sh_unset_nodelay_mode (fd)
      int fd;
 {
   int flags, bflags;
@@ -394,175 +412,6 @@ check_binary_file (sample, sample_len)
 /*								    */
 /* **************************************************************** */
 
-/* Return 1 if PATH corresponds to a directory. */
-static int
-canon_stat (path)
-     char *path;
-{
-  int l;
-  char *s;
-  struct stat sb;
-
-  l = strlen (path);
-  s = xmalloc (l + 3);
-  strcpy (s, path);
-  s[l] = '/';
-  s[l+1] = '.';
-  s[l+2] = '\0';
-  l = stat (s, &sb) == 0 && S_ISDIR (sb.st_mode);
-  free (s);
-  return l;
-}
-
-/* Canonicalize PATH, and return a new path.  The new path differs from PATH
-   in that:
-	Multple `/'s are collapsed to a single `/'.
-	Leading `./'s and trailing `/.'s are removed.
-	Trailing `/'s are removed.
-	Non-leading `../'s and trailing `..'s are handled by removing
-	portions of the path. */
-char *
-canonicalize_pathname (path)
-     char *path;
-{
-  register int i, start;
-  char stub_char;
-  char *result;
-
-  /* The result cannot be larger than the input PATH. */
-  result = savestring (path);
-
-  stub_char = (*path == '/') ? '/' : '.';
-
-  /* Walk along RESULT looking for things to compact. */
-  i = 0;
-  while (1)
-    {
-      if (!result[i])
-	break;
-
-      while (result[i] && result[i] != '/')
-	i++;
-
-      start = i++;
-
-      /* If we didn't find any slashes, then there is nothing left to do. */
-      if (!result[start])
-	break;
-
-      /* Handle multiple `/'s in a row. */
-      while (result[i] == '/')
-	i++;
-
-#if 0
-      if ((start + 1) != i)
-#else
-      /* Leave a leading `//' alone, as POSIX requires. */
-      if ((start + 1) != i && (start != 0 || i != 2))
-#endif
-	{
-	  strcpy (result + start + 1, result + i);
-	  i = start + 1;
-	  /* Make sure that what we have so far corresponds to a directory.
-	     If it does not, just punt. */
-	  if (*result)
-	    {
-	      char c;
-	      c = result[start];
-	      result[start] = '\0';
-	      if (canon_stat (result) == 0)
-		{
-		  free (result);
-		  return ((char *)NULL);
-		}
-	      result[start] = c;
-	    }
-	}
-#if 0
-      /* Handle backslash-quoted `/'. */
-      if (start > 0 && result[start - 1] == '\\')
-	continue;
-#endif
-
-      /* Check for trailing `/'. */
-      if (start && !result[i])
-	{
-	zero_last:
-	  result[--i] = '\0';
-	  break;
-	}
-
-      /* Check for `../', `./' or trailing `.' by itself. */
-      if (result[i] == '.')
-	{
-	  /* Handle trailing `.' by itself. */
-	  if (!result[i + 1])
-	    goto zero_last;
-
-	  /* Handle `./'. */
-	  if (result[i + 1] == '/')
-	    {
-	      strcpy (result + i, result + i + 1);
-	      i = (start < 0) ? 0 : start;
-	      continue;
-	    }
-
-	  /* Handle `../' or trailing `..' by itself. */
-	  if (result[i + 1] == '.' &&
-	      (result[i + 2] == '/' || !result[i + 2]))
-	    {
-	      /* Make sure that the last component corresponds to a directory
-		 before blindly chopping it off. */
-	      if (i)
-		{
-		  result[i] = '\0';
-		  if (canon_stat (result) == 0)
-		    {
-		      free (result);
-		      return ((char *)NULL);
-		    }
-		  result[i] = '.';
-		}
-	      while (--start > -1 && result[start] != '/');
-	      strcpy (result + start + 1, result + i + 2);
-#if 0	/* Unnecessary */
-	      if (*result && canon_stat (result) == 0)
-		{
-		  free (result);
-		  return ((char *)NULL);
-		}
-#endif
-	      i = (start < 0) ? 0 : start;
-	      continue;
-	    }
-	}
-    }
-
-  if (!*result)
-    {
-      *result = stub_char;
-      result[1] = '\0';
-    }
-
-  /* If the result starts with `//', but the original path does not, we
-     can turn the // into /. */
-  if ((result[0] == '/' && result[1] == '/' && result[2] != '/') &&
-      (path[0] != '/' || path[1] != '/' || path[2] == '/'))
-    {
-      char *r2;
-      if (result[2] == '\0')	/* short-circuit for bare `//' */
-	result[1] = '\0';
-      else
-	{
-	  r2 = savestring (result + 1);
-	  free (result);
-	  result = r2;
-	}
-    }
-
-  return (result);
-}
-
 /* Turn STRING (a pathname) into an absolute pathname, assuming that
    DOT_PATH contains the symbolic location of `.'.  This always
    returns a new string, even if STRING was an absolute pathname to
@@ -573,7 +422,7 @@ make_absolute (string, dot_path)
 {
   char *result;
 
-  if (dot_path == 0 || *string == '/')
+  if (dot_path == 0 || ABSPATH(string))
     result = savestring (string);
   else
     result = sh_makepath (dot_path, string, 0);
@@ -581,23 +430,24 @@ make_absolute (string, dot_path)
   return (result);
 }
 
-/* Return 1 if STRING contains an absolute pathname, else 0. */
+/* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'
+   to decide whether or not to look up a directory name in $CDPATH. */
 int
 absolute_pathname (string)
      char *string;
 {
-  if (!string || !*string)
+  if (string == 0 || *string == '\0')
     return (0);
 
-  if (*string == '/')
+  if (ABSPATH(string))
     return (1);
 
-  if (*string++ == '.')
-    {
-      if (!*string || *string == '/' ||
-	   (*string == '.' && (string[1] == '\0' || string[1] == '/')))
-	return (1);
-    }
+  if (string[0] == '.' && PATHSEP(string[1]))	/* . and ./ */
+    return (1);
+
+  if (string[0] == '.' && string[1] == '.' && PATHSEP(string[2]))	/* .. and ../ */
+    return (1);
+
   return (0);
 }
 
@@ -619,7 +469,7 @@ base_pathname (string)
 {
   char *p;
 
-  if (!absolute_pathname (string))
+  if (absolute_pathname (string) == 0)
     return (string);
 
   p = (char *)strrchr (string, '/');
@@ -638,7 +488,7 @@ full_pathname (file)
 
   file = (*file == '~') ? bash_tilde_expand (file) : savestring (file);
 
-  if ((*file == '/') && absolute_pathname (file))
+  if (ABSPATH(file))
     return (file);
 
   ret = sh_makepath ((char *)NULL, file, (MP_DOCWD|MP_RMDOT));
@@ -857,7 +707,7 @@ initialize_group_array ()
   if (i == ngroups && ngroups < maxgroups)
     {
       for (i = ngroups; i > 0; i--)
-        group_array[i] = group_array[i - 1];
+	group_array[i] = group_array[i - 1];
       group_array[0] = current_user.gid;
       ngroups++;
     }
@@ -868,8 +718,8 @@ initialize_group_array ()
   if (group_array[0] != current_user.gid)
     {
       for (i = 0; i < ngroups; i++)
-        if (group_array[i] == current_user.gid)
-          break;
+	if (group_array[i] == current_user.gid)
+	  break;
       if (i < ngroups)
 	{
 	  group_array[i] = group_array[0];

@@ -40,9 +40,10 @@ enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
 #undef B_ERROR		/* There are some systems with this define */
 #undef B_UNBUFF
 
-#define B_EOF		0x1
-#define B_ERROR		0x2
-#define B_UNBUFF	0x4
+#define B_EOF		0x01
+#define B_ERROR		0x02
+#define B_UNBUFF	0x04
+#define B_WASBASHINPUT	0x08
 
 /* A buffered stream.  Like a FILE *, but with our own buffering and
    synchronization.  Look in input.c for the implementation. */
@@ -106,6 +107,9 @@ extern int ungetc_with_restart ();
 
 #if defined (BUFFERED_INPUT)
 /* Functions from input.c. */
+extern int fd_is_bash_input __P((int));
+extern int set_bash_input_fd __P((int));
+extern int save_bash_input __P((int, int));
 extern int check_bash_input __P((int));
 extern int duplicate_buffered_stream __P((int, int));
 extern BUFFERED_STREAM *fd_to_buffered_stream __P((int));

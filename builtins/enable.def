@@ -164,7 +164,7 @@ enable_builtin (list)
     {
       filter = (flags & NFLAG) ? DISABLED : ENABLED;
       if (flags & SFLAG)
-        filter |= SPECIAL;
+	filter |= SPECIAL;
 
       result = dyn_load_builtin (list, filter, filename);
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -326,10 +326,10 @@ dyn_load_builtin (list, flags, filename)
       b->handle = handle;
 
       if (old_builtin = builtin_address_internal (name, 1))
-        {
-          replaced++;
+	{
+	  replaced++;
 	  FASTCOPY ((char *)b, (char *)old_builtin, sizeof (struct builtin));
-        }
+	}
       else
 	  new_builtins[new++] = b;
     }

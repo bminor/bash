@@ -9,5 +9,5 @@ fact ()
         echo 1
         return ;
     fi;
-    echo $[ $num * $(fact $[ $num - 1 ])]
+    echo $(( $num * $(fact $(( $num - 1 )) ) ))
 }

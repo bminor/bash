@@ -204,8 +204,8 @@ noconv:
       if (save - nptr >= 2 && toupper (save[-1]) == 'X' && save[-2] == '0')
 	*endptr = (char *) &save[-1];
       else
-        /*  There was no number to convert.  */
-        *endptr = (char *) nptr;
+	/*  There was no number to convert.  */
+	*endptr = (char *) nptr;
     }
 
   return 0L;

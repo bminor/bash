@@ -27,9 +27,7 @@
 
 #include <stdio.h>
 
-#if !defined(slashify_in_quotes)
-#  define slashify_in_quotes "\\`$\"\n"
-#endif
+#include "syntax.h"
 
 extern char *xmalloc ();
 
@@ -42,7 +40,7 @@ extern char *xmalloc ();
 /* Return a new string which is the single-quoted version of STRING.
    Used by alias and trap, among others. */
 char *
-single_quote (string)
+sh_single_quote (string)
      char *string;
 {
   register int c;
@@ -72,7 +70,7 @@ single_quote (string)
 
 /* Quote STRING using double quotes.  Return a new string. */
 char *
-double_quote (string)
+sh_double_quote (string)
      char *string;
 {
   register int c;
@@ -84,18 +82,10 @@ double_quote (string)
 
   for (s = string; s && (c = *s); s++)
     {
-      switch (c)
-        {
-	case '"':
-	case '$':
-	case '`':
-	case '\\':
-	case '\n':		/* XXX */
-	  *r++ = '\\';
-	default:
-	  *r++ = c;
-	  break;
-        }
+      if (sh_syntaxtab[c] & CBSDQUOTE)
+	*r++ = '\\';
+
+      *r++ = c;
     }
 
   *r++ = '"';
@@ -107,7 +97,7 @@ double_quote (string)
 /* Remove backslashes that are quoting characters that are special between
    double quotes.  Return a new string. */
 char *
-un_double_quote (string)
+sh_un_double_quote (string)
      char *string;
 {
   register int c, pass_next;
@@ -123,7 +113,7 @@ un_double_quote (string)
 	  pass_next = 0;
 	  continue;
 	}
-      if (c == '\\' && strchr (slashify_in_quotes, s[1]))
+      if (c == '\\' && (sh_syntaxtab[s[1]] & CBSDQUOTE))
 	{
 	  pass_next = 1;
 	  continue;
@@ -138,7 +128,7 @@ un_double_quote (string)
 /* Quote special characters in STRING using backslashes.  Return a new
    string. */
 char *
-backslash_quote (string)
+sh_backslash_quote (string)
      char *string;
 {
   int c;
@@ -182,8 +172,33 @@ backslash_quote (string)
   return (result);
 }
 
+#if defined (PROMPT_STRING_DECODE)
+/* Quote characters that get special treatment when in double quotes in STRING
+   using backslashes.  Return a new string. */
+char *
+sh_backslash_quote_for_double_quotes (string)
+     char *string;
+{
+  int c;
+  char *result, *r, *s;
+
+  result = xmalloc (2 * strlen (string) + 1);
+
+  for (r = result, s = string; s && (c = *s); s++)
+    {
+      if (sh_syntaxtab[c] & CBSDQUOTE)
+	*r++ = '\\';
+
+      *r++ = c;
+    }
+
+  *r = '\0';
+  return (result);
+}
+#endif /* PROMPT_STRING_DECODE */
+
 int
-contains_shell_metas (string)
+sh_contains_shell_metas (string)
      char *string;
 {
   char *s;

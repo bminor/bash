@@ -194,3 +194,7 @@ set -a
 typeset FOOFOO=abcde
 
 printenv FOOFOO
+
+# test out export behavior of variable assignments preceding builtins and
+# functions
+$THIS_SH ./varenv1.sub

@@ -9,6 +9,7 @@
 #include <grp.h>
 #include <errno.h>
 
+#include "bashansi.h"
 #include "shell.h"
 #include "builtins.h"
 #include "common.h"
@@ -17,7 +18,6 @@
 extern int	errno;
 #endif
 
-extern char	*strrchr();
 extern char	**make_builtin_argv ();
 
 static int	printst();
@@ -137,7 +137,11 @@ char	*f;
 		fd = lfd;
 		r = fstat(fd, &st);
 	} else
+#ifdef HAVE_LSTAT
+		r = lstat(f, &st);
+#else
 		r = stat(f, &st);
+#endif
 	if (r < 0) {
 		builtin_error("%s: cannot stat: %s", f, strerror(errno));
 		return ((struct stat *)0);

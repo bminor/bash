@@ -1,12 +1,12 @@
 dnl
-dnl Configure script for bash-2.04
+dnl Configure script for bash-2.05
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
 dnl checks for version info
-AC_REVISION([for Bash 2.04, version 2.77, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 2.05, version 2.90, from autoconf version] AC_ACVERSION)dnl
 
 AC_INIT(shell.h)
 AC_CONFIG_HEADER(config.h)
@@ -32,12 +32,12 @@ opt_with_installed_readline=no
 
 #htmldir=
 
-dnl some systems should be configured without gnu malloc by default
+dnl some systems should be configured without the bash malloc by default
 dnl and some need a special compiler or loader
 dnl look in the NOTES file for more
 case "${host_cpu}-${host_os}" in
 alpha*-*)	opt_bash_malloc=no ;;	# alpha running osf/1 or linux
-*[Cc]ray*-*)	opt_bash_malloc=no ;;	# Crays
+*[[Cc]]ray*-*)	opt_bash_malloc=no ;;	# Crays
 *-osf1*)	opt_bash_malloc=no ;;	# other osf/1 machines
 sparc-svr4*)	opt_bash_malloc=no ;;	# sparc SVR4, SVR4.2
 sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
@@ -47,13 +47,16 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 #*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
 *-nextstep*)	opt_bash_malloc=no ;;	# NeXT machines running NeXTstep
-*-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody
+*-macos*)	opt_bash_malloc=no ;;	# Apple MacOS X
+*-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
+*-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
 *-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
 *-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2
 *-machten4)	opt_bash_malloc=no ;;	# MachTen 4.x
 *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
-*-cygwin32*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN32 environment
+*-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+*-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
 esac
 
 dnl arguments to configure
@@ -270,7 +273,7 @@ AC_CYGWIN
 AC_MINGW32
 AC_EXEEXT
 
-dnl BEGIN changes for cross-building for cygwin32 and BeOS
+dnl BEGIN changes for cross-building for cygwin and BeOS
 
 SIGNAMES_H=lsignames.h
 
@@ -283,7 +286,7 @@ dnl Set SIGNAMES_H based on whether or not we're cross-compiling.
 
 if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
-    *-cygwin32*)
+    *-cygwin*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
 	;;
@@ -333,6 +336,7 @@ if test "$opt_static_link" = yes; then
 	# if we're using gcc, add `-static' to LDFLAGS
 	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
 		STATIC_LD="-static"
+		LDFLAGS="$LDFLAGS -static"	# XXX experimental
 	fi
 fi
 
@@ -361,11 +365,11 @@ dnl	the correct directory for the readline library
 	test "x$exec_prefix" = xNONE && _rl_exec_prefix=${_rl_prefix} || _rl_exec_prefix=${exec_prefix}
 
 	AC_MSG_CHECKING(version of installed readline library)
-	_rl_version=`exec_prefix=${_rl_exec_prefix} ${CONFIG_SHELL-/bin/sh} ${srcdir}/support/rlvers.sh -C "${CC}" -L ${libdir} -T ${TERMCAP_LIB}`
+	_rl_version=`exec_prefix=${_rl_exec_prefix} ${CONFIG_SHELL-/bin/sh} ${srcdir}/support/rlvers.sh -C "${CC}" -L ${libdir} -I ${includedir} -T ${TERMCAP_LIB}`
 	AC_MSG_RESULT($_rl_version)
 
 	case "$_rl_version" in
-	4.[[1-9]]*|5*|6*|7*|8*|9*)	;;
+	4.[[2-9]]*|5*|6*|7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN(installed readline library is too old to be linked with bash)
 		AC_MSG_WARN(using private bash version)
@@ -466,14 +470,15 @@ AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 select getdtablesize getgroups gethostname \
 		setdtablesize getpagesize killpg lstat getpeername sbrk \
-		getrlimit getrusage gettimeofday waitpid tcgetpgrp rename)
+		getrlimit getrusage gettimeofday waitpid tcgetpgrp \
+		readlink rename)
 
 dnl checks for c library functions
 AC_CHECK_FUNCS(bcopy bzero confstr getcwd strcasecmp setenv putenv \
 		setlinebuf setlocale strchr strerror strtod strtol \
 		strtoul tcgetattr uname sysconf ulimit times tzset \
-		siginterrupt memmove ttyname gethostbyname inet_aton \
-		strpbrk setvbuf)
+		siginterrupt memmove ttyname gethostbyname getservbyname \
+		inet_aton strpbrk setvbuf pathconf)
 
 dnl checks for locale functions
 AC_CHECK_HEADERS(libintl.h)
@@ -630,6 +635,7 @@ BASH_HAVE_FIONREAD
 dnl miscellaneous
 BASH_MISC_SPEED_T
 BASH_CHECK_GETPW_FUNCS
+BASH_CHECK_RTSIGS
 
 dnl special checks
 case "$host_os" in
@@ -692,7 +698,7 @@ lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic ;;	 # allow dynamic loading
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s -lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
-cygwin32*)	LOCAL_LIBS="-luser32" ;;
+cygwin*)	LOCAL_LIBS="-luser32" ;;
 opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG" ;;
 esac
 
@@ -705,9 +711,11 @@ esac
 
 dnl FreeBSD-3.x can have either a.out or ELF
 case "${host_os}" in
-freebsd3*)	if test -x /usr/bin/objformat && test "`/usr/bin/objformat`" = "elf" ; then
+freebsd[[3-9]]*)
+		if test -x /usr/bin/objformat && test "`/usr/bin/objformat`" = "elf" ; then
 			LOCAL_LDFLAGS=-rdynamic # allow dynamic loading
 		fi ;;
+freebsdelf*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 esac
 
 case "$host_cpu" in
@@ -730,7 +738,7 @@ esac
 if test "$ac_cv_func_dlopen" = "yes" && test -f ${srcdir}/support/shobj-conf
 then
 	AC_MSG_CHECKING(shared object configuration for loadable builtins)
-	eval `${CONFIG_SHELL-/bin/sh} ${srcdir}/support/shobj-conf -C "${CC}" -c ${host_cpu} -o ${host_os} -v ${host_vendor}`
+	eval `${CONFIG_SHELL-/bin/sh} ${srcdir}/support/shobj-conf -C "${CC}" -c "${host_cpu}" -o "${host_os}" -v "${host_vendor}"`
 	AC_SUBST(SHOBJ_CC)
 	AC_SUBST(SHOBJ_CFLAGS)
 	AC_SUBST(SHOBJ_LD)

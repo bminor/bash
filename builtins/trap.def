@@ -79,7 +79,7 @@ static int display_traps ();
 #define REVERT 1		/* Revert to this signals original value. */
 #define IGNORE 2		/* Ignore this signal. */
 
-extern int interactive;
+extern int interactive, posixly_correct;
 
 int
 trap_builtin (list)
@@ -201,12 +201,19 @@ showtrap (i)
   if (p == (char *)DEFAULT_SIG)
     return;
 
-  t = (p == (char *)IGNORE_SIG) ? (char *)NULL : single_quote (p);
+  t = (p == (char *)IGNORE_SIG) ? (char *)NULL : sh_single_quote (p);
   sn = signal_name (i);
   /* Make sure that signals whose names are unknown (for whatever reason)
      are printed as signal numbers. */
   if (STREQN (sn, "SIGJUNK", 7) || STREQN (sn, "unknown", 7))
     printf ("trap -- %s %d\n", t ? t : "''", i);
+  else if (posixly_correct)
+    {
+      if (STREQN (sn, "SIG", 3))
+	printf ("trap -- %s %s\n", t ? t : "''", sn+3);
+      else
+	printf ("trap -- %s %s\n", t ? t : "''", sn);
+    }
   else
     printf ("trap -- %s %s\n", t ? t : "''", sn);
 

@@ -66,21 +66,27 @@ procenv_t wait_intr_buf;
    0.  If a list of pids or job specs are given, return the exit status of
    the last one waited for. */
 
-#define WAIT_RETURN(s) do { run_unwind_frame ("wait_builtin"); return (s); } while (0)
+#define WAIT_RETURN(s) \
+  do \
+    { \
+      interrupt_immediately = old_interrupt_immediately;\
+      return (s);\
+    } \
+  while (0)
 
 int
 wait_builtin (list)
      WORD_LIST *list;
 {
   int status, code;
+  volatile int old_interrupt_immediately;
 
   if (no_options (list))
     return (EX_USAGE);
   if (list != loptend)
     list = loptend;
 
-  begin_unwind_frame ("wait_builtin");
-  unwind_protect_int (interrupt_immediately);
+  old_interrupt_immediately = interrupt_immediately;
   interrupt_immediately++;
 
   /* POSIX.2 says:  When the shell is waiting (by means of the wait utility)

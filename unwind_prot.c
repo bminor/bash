@@ -55,10 +55,13 @@ typedef struct {
   int size;
 } SAVED_VAR;
 
-static void unwind_frame_discard_internal (), unwind_frame_run_internal ();
-static void add_unwind_protect_internal (), remove_unwind_protect_internal ();
-static void run_unwind_protects_internal (), without_interrupts ();
-
+static void without_interrupts ();
+static void unwind_frame_discard_internal ();
+static void unwind_frame_run_internal ();
+static void add_unwind_protect_internal ();
+static void remove_unwind_protect_internal ();
+static void run_unwind_protects_internal ();
+static void clear_unwind_protects_internal ();
 static void restore_variable ();
 static void discard_saved_var ();
 
@@ -137,9 +140,19 @@ run_unwind_protects ()
       (run_unwind_protects_internal, (char *)NULL, (char *)NULL);
 }
 
+/* Erase the unwind-protect list.  If flags is 1, free the elements. */
+void
+clear_unwind_protect_list (flags)
+     int flags;
+{
+  if (unwind_protect_list)
+    without_interrupts
+      (clear_unwind_protects_internal, (char *)flags, (char *)NULL);
+}
+
 /* **************************************************************** */
 /*								    */
-/*                        The Actual Functions                 	    */
+/*			The Actual Functions		 	    */
 /*								    */
 /* **************************************************************** */
 
@@ -158,7 +171,8 @@ add_unwind_protect_internal (cleanup, arg)
 }
 
 static void
-remove_unwind_protect_internal ()
+remove_unwind_protect_internal (ignore1, ignore2)
+     char *ignore1, *ignore2;
 {
   UNWIND_ELT *elt;
 
@@ -173,7 +187,8 @@ remove_unwind_protect_internal ()
 }
 
 static void
-run_unwind_protects_internal ()
+run_unwind_protects_internal (ignore1, ignore2)
+     char *ignore1, *ignore2;
 {
   UNWIND_ELT *t, *elt = unwind_protect_list;
 
@@ -194,8 +209,23 @@ run_unwind_protects_internal ()
 }
 
 static void
-unwind_frame_discard_internal (tag)
-     char *tag;
+clear_unwind_protects_internal (flag, ignore)
+     char *flag, *ignore;
+{
+  int free_elts = (int)flag;
+  UNWIND_ELT *elt;
+
+  if (free_elts != 0 && unwind_protect_list)
+    {
+      while (unwind_protect_list)
+	remove_unwind_protect_internal ((char *)NULL, (char *)NULL);
+    }
+  unwind_protect_list = (UNWIND_ELT *)NULL;
+}
+
+static void
+unwind_frame_discard_internal (tag, ignore)
+     char *tag, *ignore;
 {
   UNWIND_ELT *elt;
 
@@ -208,18 +238,18 @@ unwind_frame_discard_internal (tag)
 	  break;
 	}
       else if (elt->cleanup && elt->cleanup == (Function *)restore_variable)
-        {
-          discard_saved_var ((SAVED_VAR *)elt->arg);
-          free (elt);
-        }
+	{
+	  discard_saved_var ((SAVED_VAR *)elt->arg);
+	  free (elt);
+	}
       else
 	free (elt);
     }
 }
 
 static void
-unwind_frame_run_internal (tag)
-     char *tag;
+unwind_frame_run_internal (tag, ignore)
+     char *tag, *ignore;
 {
   UNWIND_ELT *elt;
 
@@ -290,17 +320,8 @@ unwind_protect_var (var, value, size)
   s->variable = var;
   if (size != sizeof (int))
     {
-      /* There is a problem here when VALUE is 0.  This tries to copy the
-	  first SIZE bytes starting at memory location 0 into
-	  s->desired_setting.  There is no guarantee that these bytes are
-	  0, or make a valid null pointer.  We can try to bzero the space,
-	  or just save it as 0 (or (void *)0).  If we do the latter, make
-	  sure restore_variable is changed to understand it. */
       s->desired_setting = (char *)xmalloc (size);
-      if (value == 0)
-	bzero ((char *)s->desired_setting, size);
-      else
-	FASTCOPY (value, (char *)s->desired_setting, size);
+      FASTCOPY (value, (char *)s->desired_setting, size);
     }
   else
     s->desired_setting = value;

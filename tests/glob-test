@@ -296,6 +296,11 @@ case p in
 [a-\z])	echo ok 36 ;;
 esac
 
+# this was a bug in all versions up to bash-2.04-release
+case "/tmp" in
+[/\\]*) echo ok 37 ;;
+esac
+
 # none of these should output anything
 
 case abc in

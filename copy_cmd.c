@@ -39,7 +39,11 @@ copy_word (w)
   WORD_DESC *new_word;
 
   new_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
+#if 1
+  new_word->flags = w->flags;
+#else
   FASTCOPY ((char *)w, (char *)new_word, sizeof (WORD_DESC));
+#endif
   new_word->word = savestring (w->word);
   return (new_word);
 }
@@ -291,6 +295,8 @@ copy_function_def (com)
   new_def = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));
   new_def->name = copy_word (com->name);
   new_def->command = copy_command (com->command);
+  new_def->flags = com->flags;
+  new_def->line = com->line;
   return (new_def);
 }
 
@@ -338,8 +344,8 @@ copy_command (command)
 	break;
 
       case cm_subshell:
-        new_command->value.Subshell = copy_subshell_command (command->value.Subshell);
-        break;
+	new_command->value.Subshell = copy_subshell_command (command->value.Subshell);
+	break;
 
       case cm_case:
 	new_command->value.Case = copy_case_command (command->value.Case);
@@ -356,8 +362,8 @@ copy_command (command)
 
 #if defined (DPAREN_ARITHMETIC)
       case cm_arith:
-        new_command->value.Arith = copy_arith_command (command->value.Arith);
-        break;
+	new_command->value.Arith = copy_arith_command (command->value.Arith);
+	break;
 #endif
 
 #if defined (COND_COMMAND)

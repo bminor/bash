@@ -38,216 +38,11 @@
 #  include <glob/fnmatch.h>
 #endif
 
-#ifndef to_upper
-#  define to_upper(c) (islower(c) ? toupper(c) : (c))
-#  define to_lower(c) (isupper(c) ? tolower(c) : (c))
-#endif
-
-#define ISOCTAL(c)	((c) >= '0' && (c) <= '7')
-#define OCTVALUE(c)	((c) - '0')
-
-#ifndef isxdigit
-#  define isxdigit(c)	(isdigit((c)) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
-#endif
-
-#define HEXVALUE(c) \
-  ((c) >= 'a' && (c) <= 'f' ? (c)-'a'+10 : (c) >= 'A' && (c) <= 'F' ? (c)-'A'+10 : (c)-'0')
-
-/* Convert STRING by expanding the escape sequences specified by the
-   ANSI C standard.  If SAWC is non-null, recognize `\c' and use that
-   as a string terminator.  If we see \c, set *SAWC to 1 before
-   returning.  LEN is the length of STRING.  FOR_ECHO is a flag that
-   means, if non-zero, that we're translating a string for `echo -e',
-   and therefore should not treat a single quote as a character that
-   may be escaped with a backslash. */
-char *
-ansicstr (string, len, for_echo, sawc, rlen)
-     char *string;
-     int len, for_echo, *sawc, *rlen;
-{
-  int c, temp;
-  char *ret, *r, *s;
-
-  if (string == 0 || *string == '\0')
-    return ((char *)NULL);
-
-  ret = xmalloc (len + 1);
-  for (r = ret, s = string; s && *s; )
-    {
-      c = *s++;
-      if (c != '\\' || *s == '\0')
-        *r++ = c;
-      else
-	{
-	  switch (c = *s++)
-	    {
-#if defined (__STDC__)
-	    case 'a': c = '\a'; break;
-	    case 'v': c = '\v'; break;
-#else
-	    case 'a': c = '\007'; break;
-	    case 'v': c = (int) 0x0B; break;
-#endif
-	    case 'b': c = '\b'; break;
-	    case 'e': case 'E':		/* ESC -- non-ANSI */
-	      c = '\033'; break;
-	    case 'f': c = '\f'; break;
-	    case 'n': c = '\n'; break;
-	    case 'r': c = '\r'; break;
-	    case 't': c = '\t'; break;
-	    case '0': case '1': case '2': case '3':
-	    case '4': case '5': case '6': case '7':
-	      for (temp = 2, c -= '0'; ISOCTAL (*s) && temp--; s++)
-	        c = (c * 8) + OCTVALUE (*s);
-	      break;
-	    case 'x':			/* Hex digit -- non-ANSI */
-	      for (temp = 3, c = 0; isxdigit (*s) && temp--; s++)
-	        c = (c * 16) + HEXVALUE (*s);
-	      /* \x followed by non-hex digits is passed through unchanged */
-	      if (temp == 3)
-		{
-		  *r++ = '\\';
-		  c = 'x';
-		}
-	      break;
-	    case '\\':
-	      break;
-	    case '\'':
-	      if (for_echo)
-		*r++ = '\\';
-	      break;
-	    case 'c':
-	      if (sawc)
-		{
-		  *sawc = 1;
-		  *r = '\0';
-		  if (rlen)
-		    *rlen = r - ret;
-		  return ret;
-		}
-	    default:  *r++ = '\\'; break;
-	    }
-	  *r++ = c;
-	}
-    }
-  *r = '\0';
-  if (rlen)
-    *rlen = r - ret;
-  return ret;
-}
-
 /* **************************************************************** */
 /*								    */
 /*		Functions to manage arrays of strings		    */
 /*								    */
 /* **************************************************************** */
-
-#ifdef INCLUDE_UNUSED
-/* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
-   ARRAY should be NULL terminated. */
-int
-find_name_in_array (name, array)
-     char *name, **array;
-{
-  int i;
-
-  for (i = 0; array[i]; i++)
-    if (STREQ (name, array[i]))
-      return (i);
-
-  return (-1);
-}
-#endif
-
-/* Allocate an array of strings with room for N members. */
-char **
-alloc_array (n)
-     int n;
-{
-  return ((char **)xmalloc ((n) * sizeof (char *)));
-}
-
-/* Return the length of ARRAY, a NULL terminated array of char *. */
-int
-array_len (array)
-     char **array;
-{
-  register int i;
-
-  for (i = 0; array[i]; i++);
-  return (i);
-}
-
-/* Free the contents of ARRAY, a NULL terminated array of char *. */
-void
-free_array_members (array)
-     char **array;
-{
-  register int i;
-
-  if (array == 0)
-    return;
-
-  for (i = 0; array[i]; i++)
-    free (array[i]);
-}
-
-void
-free_array (array)
-     char **array;
-{
-  if (array == 0)
-    return;
-
-  free_array_members (array);
-  free (array);
-}
-
-/* Allocate and return a new copy of ARRAY and its contents. */
-char **
-copy_array (array)
-     char **array;
-{
-  register int i;
-  int len;
-  char **new_array;
-
-  len = array_len (array);
-
-  new_array = (char **)xmalloc ((len + 1) * sizeof (char *));
-  for (i = 0; array[i]; i++)
-    new_array[i] = savestring (array[i]);
-  new_array[i] = (char *)NULL;
-
-  return (new_array);
-}
-
-/* Comparison routine for use with qsort() on arrays of strings.  Uses
-   strcoll(3) if available, otherwise it uses strcmp(3). */
-int
-qsort_string_compare (s1, s2)
-     register char **s1, **s2;
-{
-#if defined (HAVE_STRCOLL)
-   return (strcoll (*s1, *s2));
-#else /* !HAVE_STRCOLL */
-  int result;
-
-  if ((result = **s1 - **s2) == 0)
-    result = strcmp (*s1, *s2);
-
-  return (result);
-#endif /* !HAVE_STRCOLL */
-}
-
-/* Sort ARRAY, a null terminated array of pointers to strings. */
-void
-sort_char_array (array)
-     char **array;
-{
-  qsort (array, array_len (array), sizeof (char *),
-	 (Function *)qsort_string_compare);
-}
 
 /* Cons up a new array of words.  The words are taken from LIST,
    which is a WORD_LIST *.  If COPY is true, everything is malloc'ed,
@@ -324,13 +119,13 @@ find_string_in_alist (string, alist, flags)
     {
 #if defined (EXTENDED_GLOB)
       if (flags)
-        r = fnmatch (alist[i].word, string, FNM_EXTMATCH) != FNM_NOMATCH;
+	r = fnmatch (alist[i].word, string, FNM_EXTMATCH) != FNM_NOMATCH;
       else
 #endif
-        r = STREQ (string, alist[i].word);
+	r = STREQ (string, alist[i].word);
 
       if (r)
-        return (alist[i].token);
+	return (alist[i].token);
     }
   return -1;
 }
@@ -357,15 +152,15 @@ strsub (string, pat, rep, global)
   for (temp = (char *)NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
     {
       if (repl && STREQN (string + i, pat, patlen))
-        {
-          RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
+	{
+	  RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
 	  for (r = rep; *r; )
 	    temp[templen++] = *r++;
 
 	  i += patlen;
 	  repl = global != 0;
-        }
+	}
       else
 	{
 	  RESIZE_MALLOCED_BUFFER (temp, templen, 1, tempsize, 16);
@@ -422,9 +217,11 @@ strcreplace (string, c, text, do_glob)
 	  continue;
 	}
 
-      if (*p == '\\' && p[1] == '&')
+      if (*p == '\\' && p[1] == c)
 	p++;
 
+      RESIZE_MALLOCED_BUFFER (ret, ind, 2, rlen, rlen);
+      r = ret + ind;			/* in case reallocated */
       *r++ = *p++;
     }
   *r = '\0';
@@ -465,28 +262,12 @@ strip_trailing (string, len, newlines_only)
   while (len >= 0)
     {
       if ((newlines_only && string[len] == '\n') ||
-          (!newlines_only && whitespace (string[len])))
-        len--;
+	  (!newlines_only && whitespace (string[len])))
+	len--;
       else
-        break;
+	break;
     }
   string[len + 1] = '\0';
-}
-
-/* Determine if s2 occurs in s1.  If so, return a pointer to the
-   match in s1.  The compare is case insensitive.  This is a
-   case-insensitive strstr(3). */
-char *
-strindex (s1, s2)
-     char *s1, *s2;
-{
-  register int i, l, len, c;
-
-  c = to_upper (s2[0]);
-  for (i = 0, len = strlen (s1), l = strlen (s2); (len - i) >= l; i++)
-    if ((to_upper (s1[i]) == c) && (strncasecmp (s1 + i, s2, l) == 0))
-      return (s1 + i);
-  return ((char *)NULL);
 }
 
 /* A wrapper for bcopy that can be prototyped in general.h */

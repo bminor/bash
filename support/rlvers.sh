@@ -5,17 +5,22 @@
 #
 
 PROGNAME=`basename $0`
-TDIR=/tmp/rlvers
+
+: ${TMPDIR:=/tmp}
+TDIR=$TMPDIR/rlvers
 
 # defaults
 CC=cc
 RL_LIBDIR=/usr/local/lib
+RL_INCDIR=/usr/local/include
 
 TERMCAP_LIB="-ltermcap"
 
+# cannot rely on the presence of getopts
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-C)	shift ; CC="$1"; shift ;;
+	-I)	shift ; RL_INCDIR="$1" ; shift ;;
 	-L)	shift ; RL_LIBDIR="$1" ; shift ;;
 	-T)	shift ; TERMCAP_LIB="$1" ; shift ;;
 	-v)	shift ; verbose=y ;;
@@ -64,7 +69,15 @@ main()
 }
 EOF
 
-if eval ${CC} -L${RL_LIBDIR} -o $TDIR/rlvers $TDIR/rlvers.c -lreadline ${TERMCAP_LIB};
+opwd=`pwd`
+
+cd $TDIR || {
+	echo "${PROGNAME}: cannot cd to $TDIR" >&2
+	echo 0
+	exit 1
+}
+	
+if eval ${CC} -L${RL_LIBDIR} -I${RL_INCDIR} -o $TDIR/rlvers $TDIR/rlvers.c -lreadline ${TERMCAP_LIB};
 then
 	v=`$TDIR/rlvers`
 else
@@ -80,4 +93,5 @@ unknown | "")	echo 0 ;;
 *)		echo "$v" ;;
 esac
 
+cd $opwd
 exit 0

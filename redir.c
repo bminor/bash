@@ -91,7 +91,7 @@ redirection_error (temp, error)
 	}
       filename = redirection_expand (temp->redirectee.filename);
       if (posixly_correct && interactive_shell == 0)
-        temp->redirectee.filename->flags = oflags;
+	temp->redirectee.filename->flags = oflags;
       if (filename == 0)
 	filename = savestring (temp->redirectee.filename->word);
       if (filename == 0)
@@ -252,7 +252,7 @@ write_here_document (fd, redirectee)
 	  return (errno);
 	}
       else
-        return 0;
+	return 0;
     }
 
   tlist = expand_string (redirectee->word, Q_HERE_DOCUMENT);
@@ -302,23 +302,18 @@ static int
 here_document_to_fd (redirectee)
      WORD_DESC *redirectee;
 {
-  char filename[24];
+  char *filename;
   int r, fd, fd2;
   static int fnum = 0;
 
-  do
-    {
-      /* Make the filename for the temp file. */
-      sprintf (filename, "/tmp/t%d-%d-sh", (int)getpid (), fnum++);
-
-      /* Make sure we open it exclusively. */
-      fd = open (filename, O_TRUNC | O_WRONLY | O_CREAT | O_EXCL, 0600);
-    }
-  while (fd < 0 && errno == EEXIST);
+  fd = sh_mktmpfd ("sh-thd", MT_USERANDOM, &filename);
 
   /* If we failed for some reason other than the file existing, abort */
   if (fd < 0)
-    return (fd);
+    {
+      FREE (filename);
+      return (fd);
+    }
 
   errno = r = 0;		/* XXX */
   /* write_here_document returns 0 on success, errno on failure. */
@@ -329,6 +324,7 @@ here_document_to_fd (redirectee)
     {
       close (fd);
       unlink (filename);
+      free (filename);
       errno = r;
       return (-1);
     }
@@ -342,6 +338,7 @@ here_document_to_fd (redirectee)
     {
       r = errno;
       unlink (filename);
+      free (filename);
       close (fd);
       errno = r;
       return -1;
@@ -351,11 +348,21 @@ here_document_to_fd (redirectee)
   if (unlink (filename) < 0)
     {
       r = errno;
+#if defined (__CYGWIN__)
+      /* Under CygWin 1.1.0, the unlink will fail if the file is
+	 open. This hack will allow the previous action of silently
+	 ignoring the error, but will still leave the file there. This
+	 needs some kind of magic. */
+      if (r == EACCES)
+	return (fd2);
+#endif /* __CYGWIN__ */
       close (fd2);
+      free (filename);
       errno = r;
       return (-1);
     }
 
+  free (filename);
   return (fd2);
 }
 
@@ -503,7 +510,7 @@ redir_open (filename, flags, mode, ri)
 
   /* If we are in noclobber mode, you are not allowed to overwrite
      existing files.  Check before opening. */
-  if (noclobber && OUTPUT_REDIRECT (ri))
+  if (noclobber && CLOBBERING_REDIRECT (ri))
     {
       fd = noclobber_open (filename, flags, mode, ri);
       if (fd == NOCLOBBER_REDIRECT)
@@ -571,13 +578,8 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	}
       else if (ri == r_duplicating_output_word && redirector == 1)
 	{
-	  if (posixly_correct == 0)
-	    {
-	      rd.filename = make_bare_word (redirectee_word);
-	      new_redirect = make_redirection (1, r_err_and_out, rd);
-	    }
-	  else
-	    new_redirect = copy_redirect (redirect);
+	  rd.filename = make_bare_word (redirectee_word);
+	  new_redirect = make_redirection (1, r_err_and_out, rd);
 	}
       else
 	{
@@ -627,10 +629,10 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
     case r_input_output:
     case r_output_force:
       if (posixly_correct && interactive_shell == 0)
-        {
-          oflags = redirectee->flags;
-          redirectee->flags |= W_NOGLOB;
-        }
+	{
+	  oflags = redirectee->flags;
+	  redirectee->flags |= W_NOGLOB;
+	}
       redirectee_word = redirection_expand (redirectee);
       if (posixly_correct && interactive_shell == 0)
 	redirectee->flags = oflags;
@@ -650,7 +652,7 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
       free (redirectee_word);
 
       if (fd == NOCLOBBER_REDIRECT)
-        return (fd);
+	return (fd);
 
       if (fd < 0)
 	return (errno);
@@ -781,7 +783,6 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
-
 	  /* This is correct.  2>&1 means dup2 (1, 2); */
 	  if (dup2 (redir_fd, redirector) < 0)
 	    return (errno);
@@ -844,7 +845,7 @@ add_undo_redirect (fd)
 
   if (new_fd < 0)
     {
-      sys_error ("redirection error");
+      sys_error ("redirection error: cannot duplicate fd");
       return (-1);
     }
 
@@ -855,7 +856,10 @@ add_undo_redirect (fd)
   dummy_redirect = copy_redirects (closer);
 
   rd.dest = (long)new_fd;
-  new_redirect = make_redirection (fd, r_duplicating_output, rd);
+  if (fd == 0)
+    new_redirect = make_redirection (fd, r_duplicating_input, rd);
+  else
+    new_redirect = make_redirection (fd, r_duplicating_output, rd);
   new_redirect->next = closer;
 
   closer->next = redirection_undo_list;

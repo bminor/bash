@@ -460,8 +460,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       paren_pid = make_child (savestring (make_command_string (command)),
 			      asynchronous);
       if (paren_pid == 0)
-        exit (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
-        /* NOTREACHED */
+	exit (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
+	/* NOTREACHED */
       else
 	{
 	  close_pipes (pipe_in, pipe_out);
@@ -1057,7 +1057,8 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif /* COMMAND_TIMING */
 
 /* Execute a command that's supposed to be in a subshell.  This must be
-   called after make_child and we must be running in the child process. */
+   called after make_child and we must be running in the child process.
+   The caller will return or exit() immediately with the value this returns. */
 static int
 execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      COMMAND *command;
@@ -1065,14 +1066,17 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int user_subshell, return_code, function_value, should_redir_stdin;
+  int user_subshell, return_code, function_value, should_redir_stdin, invert;
+  int ois;
   COMMAND *tcom;
 
   should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
 			  pipe_in == NO_PIPE &&
 			  stdin_redirects (command->redirects) == 0);
 
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
+
   command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
@@ -1098,8 +1102,14 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 undoing all the work we just did in make_child. */
       original_pgrp = -1;
 #endif /* JOB_CONTROL */
+      ois = interactive_shell;
       interactive_shell = 0;
-      expand_aliases = 0;
+      /* This test is to prevent alias expansion by interactive shells that
+	 run `(command) &' but to allow scripts that have enabled alias
+	 expansion with `shopt -s expand_alias' to continue to expand
+	 aliases. */
+      if (ois != interactive_shell)
+	expand_aliases = 0;
       asynchronous = 0;
     }
 
@@ -1151,7 +1161,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (command->redirects)
     {
       if (do_redirections (command->redirects, 1, 0, 0) != 0)
-	exit (EXECUTION_FAILURE);
+	exit (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 
       dispose_redirects (command->redirects);
       command->redirects = (REDIRECT *)NULL;
@@ -1162,15 +1172,19 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* If this is a simple command, tell execute_disk_command that it
      might be able to get away without forking and simply exec.
      This means things like ( sleep 10 ) will only cause one fork.
-     If we're timing the command, however, we cannot do this
-     optimization. */
+     If we're timing the command or inverting its return value, however,
+     we cannot do this optimization. */
   if (user_subshell && (tcom->type == cm_simple || tcom->type == cm_subshell) &&
-      (tcom->flags & CMD_TIME_PIPELINE) == 0)
+      ((tcom->flags & CMD_TIME_PIPELINE) == 0) &&
+      ((tcom->flags & CMD_INVERT_RETURN) == 0))
     {
       tcom->flags |= CMD_NO_FORK;
       if (tcom->type == cm_simple)
 	tcom->value.Simple->flags |= CMD_NO_FORK;
     }
+
+  invert = (tcom->flags & CMD_INVERT_RETURN) != 0;
+  tcom->flags &= ~CMD_INVERT_RETURN;
 
   /* If we're inside a function while executing this subshell, we
      need to handle a possible `return'. */
@@ -1183,6 +1197,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   else
     return_code = execute_command_internal
       (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
+
+  /* If we are asked to, invert the return value. */
+  if (invert)
+    return_code = (return_code == EXECUTION_SUCCESS) ? EXECUTION_FAILURE
+						     : EXECUTION_SUCCESS;
 
   /* If we were explicitly placed in a subshell with (), we need
      to do the `shell cleanup' things, such as running traps[0]. */
@@ -1513,9 +1532,9 @@ execute_for_command (for_command)
       QUIT;
       this_command_name = (char *)NULL;
       v = bind_variable (identifier, list->word->word);
-      if (readonly_p (v))
+      if (readonly_p (v) || noassign_p (v))
 	{
-	  if (interactive_shell == 0 && posixly_correct)
+	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);
@@ -1634,7 +1653,7 @@ execute_arith_for_command (arith_for_command)
 	}
       REAP ();
       if (expresult == 0)
-        break;
+	break;
 
       /* Execute the body of the arithmetic for command. */
       QUIT;
@@ -1888,9 +1907,9 @@ execute_select_command (select_command)
 	break;
 
       v = bind_variable (identifier, selection);
-      if (readonly_p (v))
+      if (readonly_p (v) || noassign_p (v))
 	{
-	  if (interactive_shell == 0 && posixly_correct)
+	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);
@@ -1958,7 +1977,7 @@ execute_case_command (case_command)
       case_command->word->word = word;
     }
 
-  wlist = expand_word_no_split (case_command->word, 0);
+  wlist = expand_word_unsplit (case_command->word, 0);
   word = wlist ? string_list (wlist) : savestring ("");
   dispose_words (wlist);
 
@@ -2404,6 +2423,10 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
 
+	  subshell_environment = (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+					? (SUBSHELL_PIPE|SUBSHELL_FORK)
+	  				: (SUBSHELL_ASYNC|SUBSHELL_FORK);
+
 	  /* We need to do this before piping to handle some really
 	     pathological cases where one of the pipe file descriptors
 	     is < 2. */
@@ -2414,7 +2437,6 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  pipe_in = pipe_out = -1;
 
 	  last_asynchronous_pid = old_last_async_pid;
-	  subshell_environment = async ? SUBSHELL_ASYNC : SUBSHELL_FORK;
 	}
       else
 	{
@@ -2581,7 +2603,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (builtin || func)
     {
-       if (already_forked)
+      if (already_forked)
 	{
 	  /* reset_terminating_signals (); */	/* XXX */
 	  /* Cancel traps, in trap.c. */
@@ -2714,13 +2736,25 @@ execute_builtin (builtin, words, flags, subshell)
 	    add_unwind_protect (dispose_builtin_env, (char *)NULL);
 	  dispose_used_env_vars ();
 	}
-#if 0
-      else
-	builtin_env = (char **)NULL;
-#endif
+      /* Otherwise we inherit builtin_env from our caller. */
+    }
+
+  /* `return' does a longjmp() back to a saved environment in execute_function.
+     If a variable assignment list preceded the command, and the shell is
+     running in POSIX mode, we need to merge that into the shell_variables
+     table, since `return' is a POSIX special builtin. */
+  if (posixly_correct && subshell == 0 && builtin == return_builtin && temporary_env)
+    {
+      begin_unwind_frame ("return_temp_env");
+      add_unwind_protect (merge_temporary_env, (char *)NULL);
     }
 
   result = ((*builtin) (words->next));
+
+  /* This shouldn't happen, but in case `return' comes back instead of
+     longjmp'ing, we need to unwind. */
+  if (posixly_correct && subshell == 0 && builtin == return_builtin && temporary_env)
+    discard_unwind_frame ("return_temp_env");
 
   if (subshell == 0 && (builtin == source_builtin || builtin == eval_builtin))
     {
@@ -2729,12 +2763,8 @@ execute_builtin (builtin, words, flags, subshell)
 	 and `eval' are special builtins. */
       if (posixly_correct && builtin_env)
 	merge_builtin_env ();
-#if 0
-      dispose_builtin_env ();
-      discard_unwind_frame ("builtin_env");
-#else
+
       run_unwind_frame ("builtin_env");
-#endif
     }
 
   if (eval_unwind)
@@ -2801,14 +2831,19 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (temporary_env)
     {
       function_env = copy_array (temporary_env);
+      /* In POSIX mode, variable assignments preceding function names are
+	 supposed to persist in the environment after the function returns,
+	 as if a special builtin command had been executed. */
       if (subshell == 0)
-	add_unwind_protect (dispose_function_env, (char *)NULL);
+	{
+	  if (posixly_correct)
+	    add_unwind_protect (merge_function_env, (char *)NULL);
+	  else
+	    add_unwind_protect (dispose_function_env, (char *)NULL);
+	}
       dispose_used_env_vars ();
     }
-#if 0
-  else
-    function_env = (char **)NULL;
-#endif
+    /* Otherwise, we inherit function_env from our caller. */
 
   remember_args (words->next, 1);
 
@@ -2968,6 +3003,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
 {
   int result;
   REDIRECT *saved_undo_list;
+  Function *saved_this_shell_builtin;
 
   if (do_redirections (redirects, 1, 1, 0) != 0)
     {
@@ -2977,6 +3013,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
       return (EX_REDIRFAIL);	/* was EXECUTION_FAILURE */
     }
 
+  saved_this_shell_builtin = this_shell_builtin;
   saved_undo_list = redirection_undo_list;
 
   /* Calling the "exec" builtin changes redirections forever. */
@@ -3001,6 +3038,21 @@ execute_builtin_or_function (words, builtin, var, redirects,
     result = execute_builtin (builtin, words, flags, 0);
   else
     result = execute_function (var, words, flags, fds_to_close, 0, 0);
+
+  /* If we are executing the `command' builtin, but this_shell_builtin is
+     set to `exec_builtin', we know that we have something like
+     `command exec [redirection]', since otherwise `exec' would have
+     overwritten the shell and we wouldn't get here.  In this case, we
+     want to behave as if the `command' builtin had not been specified
+     and preserve the redirections. */
+  if (builtin == command_builtin && this_shell_builtin == exec_builtin)
+    {
+      if (saved_undo_list)
+	dispose_redirects (saved_undo_list);
+      redirection_undo_list = exec_redirection_undo_list;
+      saved_undo_list = exec_redirection_undo_list = (REDIRECT *)NULL;      
+      discard_unwind_frame ("saved_redirects");
+    }
 
   if (saved_undo_list)
     {
@@ -3186,6 +3238,24 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
    The word immediately following the #! is the interpreter to execute.
    A single argument to the interpreter is allowed. */
+
+/* CPP defines to decide whether a particular index into the #! line
+   corresponds to a valid interpreter name or argument character, or
+   whitespace.  The MSDOS define is to allow \r to be treated the same
+   as \n. */
+
+#if !defined (MSDOS)
+#  define STRINGCHAR(ind) \
+    (!whitespace (sample[ind]) && sample[ind] != '\n' && ind < sample_len)
+#  define WHITECHAR(ind) \
+    (whitespace (sample[ind]) && sample[ind] != '\n' && ind < sample_len)
+#else	/* MSDOS */
+#  define STRINGCHAR(ind) \
+    (!whitespace (sample[ind]) && sample[ind] != '\n' && sample[ind] != '\r' && ind < sample_len)
+#  define WHITECHAR(ind) \
+    (whitespace (sample[ind]) && sample[ind] != '\n' && sample[ind] != '\r' && ind < sample_len)
+#endif	/* MSDOS */
+
 static int
 execute_shell_script (sample, sample_len, command, args, env)
      unsigned char *sample;
@@ -3201,45 +3271,24 @@ execute_shell_script (sample, sample_len, command, args, env)
   for (i = 2; whitespace (sample[i]) && i < sample_len; i++)
     ;
 
-  for (start = i;
-       !whitespace (sample[i]) && sample[i] != '\n' && i < sample_len;
-       i++)
+  for (start = i; STRINGCHAR(i); i++)
     ;
 
-#if 1
   execname = substring ((char *)sample, start, i);
-#else
-  larry = i - start;
-  execname = xmalloc (1 + larry);
-  strncpy (execname, (char *)(sample + start), larry);
-  execname[larry] = '\0';
-#endif
   size_increment = 1;
 
   /* Now the argument, if any. */
-  firstarg = (char *)NULL;
-  for (start = i;
-       whitespace (sample[i]) && sample[i] != '\n' && i < sample_len;
-       i++)
+  for (firstarg = (char *)NULL, start = i; WHITECHAR(i); i++)
     ;
 
   /* If there is more text on the line, then it is an argument for the
      interpreter. */
-  if (i < sample_len && sample[i] != '\n' && !whitespace (sample[i]))
-    {
-      for (start = i;
-	   !whitespace (sample[i]) && sample[i] != '\n' && i < sample_len;
-	   i++)
-	;
-#if 1
-      firstarg = substring ((char *)sample, start, i);
-#else
-      larry = i - start;
-      firstarg = xmalloc (1 + larry);
-      strncpy (firstarg, (char *)(sample + start), larry);
-      firstarg[larry] = '\0';
-#endif
 
+  if (STRINGCHAR(i))  
+    {
+      for (start = i; STRINGCHAR(i); i++)
+	;
+      firstarg = substring ((char *)sample, start, i);
       size_increment = 2;
     }
 
@@ -3263,6 +3312,9 @@ execute_shell_script (sample, sample_len, command, args, env)
 
   return (shell_execve (execname, args, env));
 }
+#undef STRINGCHAR
+#undef WHITECHAR
+
 #endif /* !HAVE_HASH_BANG_EXEC */
 
 static void
@@ -3290,6 +3342,17 @@ initialize_subshell ()
   reset_shell_options ();
   reset_shopt_options ();
 
+  /* Zero out builtin_env, since this could be a shell script run from a
+     sourced file with a temporary environment supplied to the `source/.'
+     builtin.  Such variables are not supposed to be exported (empirical
+     testing with sh and ksh). */
+  builtin_env = 0;
+
+  clear_unwind_protect_list (0);
+
+  /* We're no longer inside a shell function. */
+  variable_context = return_catch_flag = 0;
+
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */
   if (interactive_shell == 0)
@@ -3302,6 +3365,20 @@ initialize_subshell ()
 #  define SETOSTYPE(x)
 #endif
 
+#define READ_SAMPLE_BUF(file, buf, len) \
+  do \
+    { \
+      fd = open(file, O_RDONLY); \
+      if (fd >= 0) \
+	{ \
+	  len = read (fd, (char *)buf, 80); \
+	  close (fd); \
+	} \
+      else \
+	len = -1; \
+    } \
+  while (0)
+      
 /* Call execve (), handling interpreting shell scripts, and handling
    exec failures. */
 int
@@ -3311,20 +3388,31 @@ shell_execve (command, args, env)
 {
   struct stat finfo;
   int larray, i, fd;
+  unsigned char sample[80];
+  int sample_len;
 
   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */
   execve (command, args, env);
+  i = errno;			/* error from execve() */
   SETOSTYPE (1);
 
   /* If we get to this point, then start checking out the file.
      Maybe it is something we can hack ourselves. */
-  if (errno != ENOEXEC)
+  if (i != ENOEXEC)
     {
-      i = errno;
       if ((stat (command, &finfo) == 0) && (S_ISDIR (finfo.st_mode)))
 	internal_error ("%s: is a directory", command);
       else
 	{
+#if defined (HAVE_HASH_BANG_EXEC)
+	  READ_SAMPLE_BUF (command, sample, sample_len);
+	  if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
+	    {
+	      errno = i;
+	      sys_error ("%s: bad interpreter", command);
+	      return (EX_NOEXEC);
+	    }
+#endif
 	  errno = i;
 	  file_error (command);
 	}
@@ -3334,40 +3422,36 @@ shell_execve (command, args, env)
   /* This file is executable.
      If it begins with #!, then help out people with losing operating
      systems.  Otherwise, check to see if it is a binary file by seeing
-     if the first line (or up to 80 characters) are in the ASCII set.
-     Execute the contents as shell commands. */
-  fd = open (command, O_RDONLY);
-  if (fd >= 0)
+     if the contents of the first line (or up to 80 characters) are in the
+     ASCII set.  If it's a text file, execute the contents as shell commands,
+     otherwise return 126 (EX_BINARY_FILE). */
+  READ_SAMPLE_BUF (command, sample, sample_len);
+
+  if (sample_len == 0)
+    return (EXECUTION_SUCCESS);
+
+  /* Is this supposed to be an executable script?
+     If so, the format of the line is "#! interpreter [argument]".
+     A single argument is allowed.  The BSD kernel restricts
+     the length of the entire line to 32 characters (32 bytes
+     being the size of the BSD exec header), but we allow 80
+     characters. */
+  if (sample_len > 0)
     {
-      unsigned char sample[80];
-      int sample_len;
-
-      sample_len = read (fd, (char *)sample, 80);
-      close (fd);
-
-      if (sample_len == 0)
-	return (EXECUTION_SUCCESS);
-
-      /* Is this supposed to be an executable script?
-	 If so, the format of the line is "#! interpreter [argument]".
-	 A single argument is allowed.  The BSD kernel restricts
-	 the length of the entire line to 32 characters (32 bytes
-	 being the size of the BSD exec header), but we allow 80
-	 characters. */
-      if (sample_len > 0)
-	{
 #if !defined (HAVE_HASH_BANG_EXEC)
-	  if (sample[0] == '#' && sample[1] == '!')
-	    return (execute_shell_script (sample, sample_len, command, args, env));
-	  else
+      if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
+	return (execute_shell_script (sample, sample_len, command, args, env));
+      else
 #endif
-	  if (check_binary_file (sample, sample_len))
-	    {
-	      internal_error ("%s: cannot execute binary file", command);
-	      return (EX_BINARY_FILE);
-	    }
+      if (check_binary_file (sample, sample_len))
+	{
+	  internal_error ("%s: cannot execute binary file", command);
+	  return (EX_BINARY_FILE);
 	}
     }
+
+  /* We have committed to attempting to execute the contents of this file
+     as shell commands. */
 
   initialize_subshell ();
 
@@ -3430,9 +3514,10 @@ execute_intern_function (name, function)
     }
 
   var = find_function (name->word);
-  if (var && readonly_p (var))
+  if (var && (readonly_p (var) || noassign_p (var)))
     {
-      internal_error ("%s: readonly function", var->name);
+      if (readonly_p (var))
+	internal_error ("%s: readonly function", var->name);
       return (EXECUTION_FAILURE);
     }
 

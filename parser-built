@@ -1,3 +1,46 @@
+#ifndef YYERRCODE
+#define YYERRCODE 256
+#endif
+
+#define IF 257
+#define THEN 258
+#define ELSE 259
+#define ELIF 260
+#define FI 261
+#define CASE 262
+#define ESAC 263
+#define FOR 264
+#define SELECT 265
+#define WHILE 266
+#define UNTIL 267
+#define DO 268
+#define DONE 269
+#define FUNCTION 270
+#define COND_START 271
+#define COND_END 272
+#define COND_ERROR 273
+#define IN 274
+#define BANG 275
+#define TIME 276
+#define TIMEOPT 277
+#define WORD 278
+#define ASSIGNMENT_WORD 279
+#define NUMBER 280
+#define ARITH_CMD 281
+#define ARITH_FOR_EXPRS 282
+#define COND_CMD 283
+#define AND_AND 284
+#define OR_OR 285
+#define GREATER_GREATER 286
+#define LESS_LESS 287
+#define LESS_AND 288
+#define GREATER_AND 289
+#define SEMI_SEMI 290
+#define LESS_LESS_MINUS 291
+#define AND_GREATER 292
+#define LESS_GREATER 293
+#define GREATER_BAR 294
+#define yacc_EOF 295
 typedef union {
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
@@ -7,45 +50,4 @@ typedef union {
   ELEMENT element;
   PATTERN_LIST *pattern;
 } YYSTYPE;
-#define	IF	258
-#define	THEN	259
-#define	ELSE	260
-#define	ELIF	261
-#define	FI	262
-#define	CASE	263
-#define	ESAC	264
-#define	FOR	265
-#define	SELECT	266
-#define	WHILE	267
-#define	UNTIL	268
-#define	DO	269
-#define	DONE	270
-#define	FUNCTION	271
-#define	COND_START	272
-#define	COND_END	273
-#define	COND_ERROR	274
-#define	IN	275
-#define	BANG	276
-#define	TIME	277
-#define	TIMEOPT	278
-#define	WORD	279
-#define	ASSIGNMENT_WORD	280
-#define	NUMBER	281
-#define	ARITH_CMD	282
-#define	ARITH_FOR_EXPRS	283
-#define	COND_CMD	284
-#define	AND_AND	285
-#define	OR_OR	286
-#define	GREATER_GREATER	287
-#define	LESS_LESS	288
-#define	LESS_AND	289
-#define	GREATER_AND	290
-#define	SEMI_SEMI	291
-#define	LESS_LESS_MINUS	292
-#define	AND_GREATER	293
-#define	LESS_GREATER	294
-#define	GREATER_BAR	295
-#define	yacc_EOF	296
-
-
 extern YYSTYPE yylval;

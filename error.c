@@ -434,6 +434,7 @@ parser_error (lineno, format, va_alist)
     exit (2);
 }
 
+#ifdef DEBUG
 void
 #if defined (PREFER_STDARG)
 itrace (const char *format, ...)
@@ -500,6 +501,7 @@ trace (format, va_alist)
 }
 
 #endif /* USE_VARARGS */
+#endif /* DEBUG */
 
 static char *cmd_error_table[] = {
 	"unknown command error",	/* CMDERR_DEFAULT */

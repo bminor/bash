@@ -40,6 +40,15 @@ trap '' int
 
 trap
 
+# exit 0 in exit trap should set exit status
+(
+set -e
+trap 'exit 0' EXIT
+false   
+echo bad
+)
+echo $?
+
 # hmmm...should this set the handling to SIG_IGN for children, too?
 trap '' USR2
 ./trap1.sub

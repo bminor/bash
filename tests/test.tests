@@ -407,3 +407,17 @@ t 4 -eq 4 -a 3 4
 echo $?
 
 t \( \)
+
+# non-numeric arguments to `test -t' should return failure -- fix in 2.05
+echo 't -t a'
+t -t a
+echo 't -t addsds'
+t -t addsds
+echo 't -t 42'
+t -t 42
+echo 't -t /dev/tty'
+t -t /dev/tty
+echo 't -t /dev/tty4'
+t -t /dev/tty4
+echo 't -t /dev/tty4444444...'
+t -t /dev/tty4444444...

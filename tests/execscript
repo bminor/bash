@@ -35,6 +35,8 @@ echo $?
 . /
 echo $?
 
+# try sourcing a binary file -- post-2.04 versions don't do the binary file
+# check, and will probably fail with `command not found', or status 127
 . ${THIS_SH} 2>/dev/null
 echo $?
 
@@ -82,3 +84,8 @@ ${THIS_SH} ./exec5.sub
 
 # this was a bug in bash versions before bash-2.04
 ${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-
+
+# checks for proper return values in subshell commands with inverted return
+# values
+
+${THIS_SH} ./exec6.sub

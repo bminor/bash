@@ -239,10 +239,10 @@ brace_gobbler (text, indx, satisfy)
       /* A backslash escapes the next character.  This allows backslash to
 	 escape the quote character in a double-quoted string. */
       if (c == '\\' && (quoted == 0 || quoted == '"' || quoted == '`'))
-        {
-          pass_next = 1;
-          continue;
-        }
+	{
+	  pass_next = 1;
+	  continue;
+	}
 
       if (quoted)
 	{

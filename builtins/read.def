@@ -58,6 +58,11 @@ $END
 #include <signal.h>
 #include <errno.h>
 
+#ifdef __CYGWIN__
+#  include <fcntl.h>
+#  include <io.h>
+#endif
+
 #include "../shell.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -148,8 +153,8 @@ read_builtin (list)
   while ((opt = internal_getopt (list, "erp:a:d:t:n:s")) != -1)
     {
       switch (opt)
-        {
-        case 'r':
+	{
+	case 'r':
 	  raw = 1;
 	  break;
 	case 'p':
@@ -211,15 +216,13 @@ read_builtin (list)
   input_string = xmalloc (size = 128);
 
   begin_unwind_frame ("read_builtin");
-  add_unwind_protect (xfree, input_string);
 #if defined (READLINE)
   add_unwind_protect (xfree, rlbuf);
 #endif
-  interrupt_immediately++;
 
   input_is_tty = isatty (0);
   if (input_is_tty == 0)
-#ifndef __CYGWIN32__
+#ifndef __CYGWIN__
     input_is_pipe = (lseek (0, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
 #else
     input_is_pipe = 1;
@@ -247,7 +250,7 @@ read_builtin (list)
       /* Turn off the timeout if stdin is a regular file (e.g. from
 	 input redirection). */
       if ((fstat (0, &tsb) < 0) || S_ISREG (tsb.st_mode))
-        tmout = -1;
+	tmout = -1;
     }
 
   if (tmout > 0)
@@ -285,7 +288,7 @@ read_builtin (list)
       else
 #endif
       if (input_is_tty)
-        {
+	{
 	  ttsave ();
 	  if (silent)
 	    ttcbreak ();
@@ -301,7 +304,16 @@ read_builtin (list)
       add_unwind_protect ((Function *)ttrestore, (char *)NULL);
     }
 
+  /* This *must* be the top unwind-protect on the stack, so the manipulation
+     of the unwind-protect stack after the realloc() works right. */
+  add_unwind_protect (xfree, input_string);
+  interrupt_immediately++;
+
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
+
+#if defined (__CYGWIN__) && defined (O_TEXT)
+  setmode (0, O_TEXT);
+#endif
 
   for (eof = 0;;)
     {
@@ -345,7 +357,11 @@ read_builtin (list)
 #endif
 
       if (i + 2 >= size)
-	input_string = xrealloc (input_string, size += 128);
+	{
+	  input_string = xrealloc (input_string, size += 128);
+	  remove_unwind_protect ();
+	  add_unwind_protect (xfree, input_string);
+	}
 
       /* If the next character is to be accepted verbatim, a backslash
 	 newline pair still disappears from the input. */
@@ -419,9 +435,9 @@ read_builtin (list)
     {
       var = find_variable (arrayname);
       if (var == 0)
-        var = make_new_array_variable (arrayname);
+	var = make_new_array_variable (arrayname);
       else if (array_p (var) == 0)
-        var = convert_var_to_array (var);
+	var = convert_var_to_array (var);
 
       empty_array (array_cell (var));
 
@@ -441,7 +457,8 @@ read_builtin (list)
      so that `read x ; echo "$x"' and `read ; echo "$REPLY"' behave the
      same way, but I believe that the difference in behaviors is useful
      enough to not do it.  Without the bash behavior, there is no way
-     to read a line completely without interpretation or modification.
+     to read a line completely without interpretation or modification
+     unless you mess with $IFS (e.g., setting it to the empty string).
      If you disagree, change the occurrences of `#if 0' to `#if 1' below. */
   if (list == 0)
     {
@@ -462,11 +479,8 @@ read_builtin (list)
       else
 	var = bind_variable ("REPLY", input_string);
       VUNSETATTR (var, att_invisible);
-#if 0
-      free (orig_input_string);
-#else
+
       free (input_string);
-#endif
       return (retval);
     }
 
@@ -572,10 +586,10 @@ bind_read_variable (name, value)
     {
 #if 0
       if (legal_identifier (name) == 0)
-        {
+	{
 	  builtin_error ("`%s': not a valid identifier", name);
 	  return ((SHELL_VAR *)NULL);
-        }
+	}
 #endif
       return (bind_variable (name, value));
     }

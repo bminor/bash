@@ -24,6 +24,8 @@
 #include "bashtypes.h"
 #include "bashansi.h"
 
+#include "filecntl.h"
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -77,9 +79,6 @@
 #define YYDEBUG 0
 
 #if defined (EXTENDED_GLOB)
-#define PATTERN_CHAR(c) \
-	((c) == '@' || (c) == '*' || (c) == '+' || (c) == '?' || (c) == '!')
-
 extern int extended_glob;
 #endif
 
@@ -126,6 +125,10 @@ static void prompt_again ();
 static void reset_readline_prompt ();
 #endif
 static void print_prompt ();
+
+#if defined (HISTORY)
+char *history_delimiting_chars ();
+#endif
 
 extern int yyerror ();
 
@@ -220,7 +223,7 @@ static REDIRECTEE redir;
 %type <command> arith_command
 %type <command> cond_command
 %type <command> arith_for_command
-%type <command> function_def if_command elif_clause subshell
+%type <command> function_def function_body if_command elif_clause subshell
 %type <redirect> redirection redirection_list
 %type <element> simple_command_element
 %type <word_list> word_list pattern
@@ -462,25 +465,6 @@ command:	simple_command
 			  COMMAND *tc;
 
 			  tc = $1;
-			  /* According to Posix.2 3.9.5, redirections
-			     specified after the body of a function should
-			     be attached to the function and performed when
-			     the function is executed, not as part of the
-			     function definition command. */
-			  /* XXX - I don't think it matters, but we might
-			     want to change this in the future to avoid
-			     problems differentiating between a function
-			     definition with a redirection and a function
-			     definition containing a single command with a
-			     redirection.  The two are semantically equivalent,
-			     though -- the only difference is in how the
-			     command printing code displays the redirections. */
-			  if (tc->type == cm_function_def)
-			    {
-			      tc = tc->value.Function_def->command;
-			      if (tc->type == cm_group)
-			        tc = tc->value.Group->command;
-			    }
 			  if (tc->redirects)
 			    {
 			      register REDIRECT *t;
@@ -492,6 +476,8 @@ command:	simple_command
 			    tc->redirects = $2;
 			  $$ = $1;
 			}
+	|	function_def
+			{ $$ = $1; }
 	;
 
 shell_command:	for_command
@@ -516,8 +502,6 @@ shell_command:	for_command
 			{ $$ = $1; }
 	|	arith_for_command
 			{ $$ = $1; }
-	|	function_def
-			{ $$ = $1; }
 	;
 
 for_command:	FOR WORD newline_list DO compound_list DONE
@@ -538,7 +522,12 @@ arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_
 				{ $$ = make_arith_for_command ($2, $6, arith_for_lineno); }
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{ $$ = make_arith_for_command ($2, $6, arith_for_lineno); }
+	|		FOR ARITH_FOR_EXPRS DO compound_list DONE
+				{ $$ = make_arith_for_command ($2, $4, arith_for_lineno); }
+	|		FOR ARITH_FOR_EXPRS '{' compound_list '}'
+				{ $$ = make_arith_for_command ($2, $4, arith_for_lineno); }
 	;
+
 select_command:	SELECT WORD newline_list DO list DONE
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5);
@@ -573,15 +562,48 @@ case_command:	CASE WORD newline_list IN newline_list ESAC
 			{ $$ = make_case_command ($2, $5); }
 	;
 
-function_def:	WORD '(' ')' newline_list group_command
+function_def:	WORD '(' ')' newline_list function_body
 			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); }
 
-
-	|	FUNCTION WORD '(' ')' newline_list group_command
+	|	FUNCTION WORD '(' ')' newline_list function_body
 			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); }
 
-	|	FUNCTION WORD newline_list group_command
+	|	FUNCTION WORD newline_list function_body
 			{ $$ = make_function_def ($2, $4, function_dstart, function_bstart); }
+	;
+
+
+function_body:	shell_command
+			{ $$ = $1; }
+	|	shell_command redirection_list
+			{
+			  COMMAND *tc;
+
+			  tc = $1;
+			  /* According to Posix.2 3.9.5, redirections
+			     specified after the body of a function should
+			     be attached to the function and performed when
+			     the function is executed, not as part of the
+			     function definition command. */
+			  /* XXX - I don't think it matters, but we might
+			     want to change this in the future to avoid
+			     problems differentiating between a function
+			     definition with a redirection and a function
+			     definition containing a single command with a
+			     redirection.  The two are semantically equivalent,
+			     though -- the only difference is in how the
+			     command printing code displays the redirections. */
+			  if (tc->redirects)
+			    {
+			      register REDIRECT *t;
+			      for (t = tc->redirects; t->next; t = t->next)
+				;
+			      t->next = $2;
+			    }
+			  else
+			    tc->redirects = $2;
+			  $$ = $1;
+			}
 	;
 
 subshell:	'(' compound_list ')'
@@ -600,7 +622,7 @@ if_command:	IF compound_list THEN compound_list FI
 	;
 
 
-group_command:	'{' list '}'
+group_command:	'{' compound_list '}'
 			{ $$ = make_group_command ($2); }
 	;
 
@@ -809,15 +831,6 @@ timespec:	TIME
 #define TOKEN_DEFAULT_INITIAL_SIZE 496
 #define TOKEN_DEFAULT_GROW_SIZE 512
 
-/* Shell meta-characters that, when unquoted, separate words. */
-#define shellmeta(c)	(strchr (shell_meta_chars, (c)) != 0)
-#define shellbreak(c)	(strchr (shell_break_chars, (c)) != 0)
-#define shellquote(c)	((c) == '"' || (c) == '`' || (c) == '\'')
-#define shellexp(c)	((c) == '$' || (c) == '<' || (c) == '>')
-
-char *shell_meta_chars = "()<>;&|";
-char *shell_break_chars = "()<>;&| \t\n";
-
 /* The token currently being read. */
 static int current_token;
 
@@ -966,7 +979,7 @@ yy_readline_get ()
 
 #if defined (JOB_CONTROL)
       if (job_control)
-	give_terminal_to (shell_pgrp);
+	give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
       if (signal_is_ignored (SIGINT) == 0)
@@ -1196,18 +1209,20 @@ pop_stream ()
 	 save stack, update the buffered fd to the new file descriptor and
 	 re-establish the buffer <-> bash_input fd correspondence. */
       if (bash_input.type == st_bstream && bash_input.location.buffered_fd >= 0)
-        {
-          if (bash_input_fd_changed)
+	{
+	  if (bash_input_fd_changed)
 	    {
 	      bash_input_fd_changed = 0;
 	      if (default_buffered_input >= 0)
 		{
 		  bash_input.location.buffered_fd = default_buffered_input;
 		  saver->bstream->b_fd = default_buffered_input;
+		  SET_CLOSE_ON_EXEC (default_buffered_input);
 		}
 	    }
+	  /* XXX could free buffered stream returned as result here. */
 	  set_buffered_stream (bash_input.location.buffered_fd, saver->bstream);
-        }
+	}
 #endif /* BUFFERED_INPUT */
 
       line_number = saver->line;
@@ -1412,8 +1427,14 @@ read_a_line (remove_quoted_newline)
       /* Allow immediate exit if interrupted during input. */
       QUIT;
 
+      /* Ignore null bytes in input. */
       if (c == 0)
-	continue;
+	{
+#if 0
+	  internal_warning ("read_a_line: ignored null byte in input");
+#endif
+	  continue;
+	}
 
       /* If there is no more input, then we return NULL. */
       if (c == EOF)
@@ -1435,10 +1456,10 @@ read_a_line (remove_quoted_newline)
 	 need to treat the backslash specially only if a backslash
 	 quoting a backslash-newline pair appears in the line. */
       if (pass_next)
-        {
+	{
 	  line_buffer[indx++] = c;
 	  pass_next = 0;
-        }
+	}
       else if (c == '\\' && remove_quoted_newline)
 	{
 	  peekc = yy_getc ();
@@ -1516,8 +1537,8 @@ STRING_INT_ALIST word_token_alist[] = {
 };
 
 /* XXX - we should also have an alist with strings for other tokens, so we
-         can give more descriptive error messages.  Look at y.tab.h for the
-         other tokens. */
+	 can give more descriptive error messages.  Look at y.tab.h for the
+	 other tokens. */
 
 /* These are used by read_token_word, but appear up here so that shell_getc
    can use them to decide when to add otherwise blank lines to the history. */
@@ -1553,6 +1574,11 @@ static struct dstack temp_dstack = { (char *)NULL, 0, 0 };
    read the next line.  This is called by read_token when the shell is
    processing normal command input. */
 
+/* This implements one-character lookahead/lookbehind across physical input
+   lines, to avoid something being lost because it's pushed back with
+   shell_ungetc when we're at the start of a line. */
+static int eol_ungetc_lookahead = 0;
+
 static int
 shell_getc (remove_quoted_newline)
      int remove_quoted_newline;
@@ -1562,6 +1588,13 @@ shell_getc (remove_quoted_newline)
   static int mustpop = 0;
 
   QUIT;
+
+  if (eol_ungetc_lookahead)
+    {
+      c = eol_ungetc_lookahead;
+      eol_ungetc_lookahead = 0;
+      return (c);
+    }
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If shell_input_line[shell_input_line_index] == 0, but there is
@@ -1604,10 +1637,20 @@ shell_getc (remove_quoted_newline)
       if (bash_input.type == st_stream)
 	clearerr (stdin);
 
-      while (c = yy_getc ())
+      while (1)
 	{
+	  c = yy_getc ();
+
 	  /* Allow immediate exit if interrupted during input. */
 	  QUIT;
+
+	  if (c == '\0')
+	    {
+#if 0
+	      internal_warning ("shell_getc: ignored null byte in input");
+#endif
+	      continue;
+	    }
 
 	  RESIZE_MALLOCED_BUFFER (shell_input_line, i, 2, shell_input_line_size, 256);
 
@@ -1632,6 +1675,7 @@ shell_getc (remove_quoted_newline)
 	      break;
 	    }
 	}
+
       shell_input_line_index = 0;
       shell_input_line_len = i;		/* == strlen (shell_input_line) */
 
@@ -1663,20 +1707,29 @@ shell_getc (remove_quoted_newline)
 		current_command_line_count--;
 
 	      /* We have to force the xrealloc below because we don't know
-	         the true allocated size of shell_input_line anymore. */
+		 the true allocated size of shell_input_line anymore. */
 	      shell_input_line_size = shell_input_line_len;
 	    }
 	}
-      /* XXX - this is grotesque */
+      /* Try to do something intelligent with blank lines encountered while
+	 entering multi-line commands.  XXX - this is grotesque */
       else if (remember_on_history && shell_input_line &&
 	       shell_input_line[0] == '\0' &&
-	       current_command_line_count > 1 && current_delimiter (dstack))
+	       current_command_line_count > 1)
 	{
-	  /* We know shell_input_line[0] == 0 and we're reading some sort of
-	     quoted string.  This means we've got a line consisting of only
-	     a newline in a quoted string.  We want to make sure this line
-	     gets added to the history. */
-	  maybe_add_history (shell_input_line);
+	  if (current_delimiter (dstack))
+	    /* We know shell_input_line[0] == 0 and we're reading some sort of
+	       quoted string.  This means we've got a line consisting of only
+	       a newline in a quoted string.  We want to make sure this line
+	       gets added to the history. */
+	    maybe_add_history (shell_input_line);
+	  else
+	    {
+	      char *hdcs;
+	      hdcs = history_delimiting_chars ();
+	      if (hdcs && hdcs[0] == ';')
+		maybe_add_history (shell_input_line);
+	    }
 	}
 
 #endif /* HISTORY */
@@ -1732,18 +1785,18 @@ shell_getc (remove_quoted_newline)
   if (!c && (pushed_string_list != (STRING_SAVER *)NULL))
     {
       if (mustpop)
-        {
-          pop_string ();
-          c = shell_input_line[shell_input_line_index];
+	{
+	  pop_string ();
+	  c = shell_input_line[shell_input_line_index];
 	  if (c)
 	    shell_input_line_index++;
 	  mustpop--;
-        }
+	}
       else
-        {
-          mustpop++;
-          c = ' ';
-        }
+	{
+	  mustpop++;
+	  c = ' ';
+	}
     }
 #endif /* ALIAS || DPAREN_ARITHMETIC */
 
@@ -1760,6 +1813,8 @@ shell_ungetc (c)
 {
   if (shell_input_line && shell_input_line_index)
     shell_input_line[--shell_input_line_index] = c;
+  else
+    eol_ungetc_lookahead = c;
 }
 
 static void
@@ -1974,8 +2029,8 @@ time_command_acceptable ()
     case DO:
     case THEN:
     case ELSE:
-    case '{':
-    case '(':
+    case '{':		/* } */
+    case '(':		/* ) */
       return 1;
     default:
       return 0;
@@ -1996,9 +2051,10 @@ time_command_acceptable ()
 	to be set
 
 	`{' is recognized if the last token as WORD and the token
-	before that was FUNCTION.
+	before that was FUNCTION, or if we just parsed an arithmetic
+	`for' command.
 
-	`}' is recognized if there is an unclosed `{' prsent.
+	`}' is recognized if there is an unclosed `{' present.
 
 	`-p' is returned as TIMEOPT if the last read token was TIME.
 
@@ -2064,6 +2120,16 @@ special_case_tokens (token)
 	  function_bstart = line_number;
 	  return ('{');					/* } */
 	}
+    }
+
+  /* We allow a `do' after a for ((...)) without an intervening
+     list_terminator */
+  if (last_read_token == ARITH_FOR_EXPRS && token[0] == 'd' && token[1] == 'o' && !token[2])
+    return (DO);
+  if (last_read_token == ARITH_FOR_EXPRS && token[0] == '{' && token[1] == '\0')	/* } */
+    {
+      open_brace_count++;
+      return ('{');			/* } */
     }
 
   if (open_brace_count && reserved_word_acceptable (last_read_token) && token[0] == '}' && !token[1])
@@ -2263,7 +2329,7 @@ read_token (command)
 		  if (cmdtyp == 1)
 		    {
 		      /* parse_arith_cmd adds quotes at the beginning and end
-		         of the string it returns; we need to take those out. */
+			 of the string it returns; we need to take those out. */
 		      len = strlen (wval);
 		      wv2 = xmalloc (len);
 		      strncpy (wv2, wval + 1, len - 2);
@@ -2342,7 +2408,7 @@ read_token (command)
 	parser_state |= PST_SUBSHELL;
       /*(*/
       else if ((parser_state & PST_CASEPAT) && character == ')')
-        parser_state &= ~PST_CASEPAT;
+	parser_state &= ~PST_CASEPAT;
       /*(*/
       else if ((parser_state & PST_SUBSHELL) && character == ')')
 	parser_state &= ~PST_SUBSHELL;
@@ -2386,8 +2452,8 @@ parse_matched_pair (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int count, ch, was_dollar;
-  int pass_next_character, nestlen, start_lineno;
-  char *ret, *nestret;
+  int pass_next_character, nestlen, ttranslen, start_lineno;
+  char *ret, *nestret, *ttrans;
   int retind, retsize;
 
   count = 1;
@@ -2440,7 +2506,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 #if 1
       /* handle nested ${...} specially. */
       else if (open != close && was_dollar && open == '{' && ch == open) /* } */
-        count++;
+	count++;
 #endif
       else if (((flags & P_FIRSTCLOSE) == 0) && ch == open)		/* nested begin */
 	count++;
@@ -2465,12 +2531,39 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    {
 	      /* '', ``, or "" inside $(...) or other grouping construct. */
 	      push_delimiter (dstack, ch);
-	      nestret = parse_matched_pair (ch, ch, ch, &nestlen, 0);
+	      if (was_dollar && ch == '\'')	/* $'...' inside group */
+		nestret = parse_matched_pair (ch, ch, ch, &nestlen, P_ALLOWESC);
+	      else
+		nestret = parse_matched_pair (ch, ch, ch, &nestlen, 0);
 	      pop_delimiter (dstack);
 	      if (nestret == &matched_pair_error)
 		{
 		  free (ret);
 		  return &matched_pair_error;
+		}
+	      if (was_dollar && ch == '\'')
+		{
+		  /* Translate $'...' here. */
+		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
+		  free (nestret);
+		  nestret = sh_single_quote (ttrans);
+		  free (ttrans);
+		  nestlen = strlen (nestret);
+		  retind -= 2;		/* back up before the $' */
+		}
+	      else if (was_dollar && ch == '"')
+		{
+		  /* Locale expand $"..." here. */
+		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
+		  free (nestret);
+		  nestret = xmalloc (ttranslen + 3);
+		  nestret[0] = '"';
+		  strcpy (nestret + 1, ttrans);
+		  nestret[ttranslen + 1] = '"';
+		  nestret[ttranslen += 2] = '\0';
+		  free (ttrans);
+		  nestlen = ttranslen;
+		  retind -= 2;		/* back up before the $" */
 		}
 	      if (nestlen)
 		{
@@ -2696,14 +2789,16 @@ cond_term ()
       /* binop */
       tok = read_token (READ);
       if (tok == WORD && test_binop (yylval.word->word))
-        op = yylval.word;
+	op = yylval.word;
       else if (tok == '<' || tok == '>')
-        op = make_word_from_token (tok);
-      else if (tok == COND_END || tok == AND_AND || tok == OR_OR)
+	op = make_word_from_token (tok);  /* ( */
+      /* There should be a check before blindly accepting the `)' that we have
+	 seen the opening `('. */
+      else if (tok == COND_END || tok == AND_AND || tok == OR_OR || tok == ')')
 	{
 	  /* Special case.  [[ x ]] is equivalent to [[ -n x ]], just like
 	     the test command.  Similarly for [[ x && expr ]] or
-	     [[ x || expr ]] */
+	     [[ x || expr ]] or [[ (x) ]]. */
 	  op = make_word ("-n");
 	  term = make_cond_node (COND_UNARY, op, tleft, (COND_COM *)NULL);
 	  cond_token = tok;
@@ -2789,7 +2884,7 @@ read_token_word (character)
     token = xrealloc (token, token_buffer_size = TOKEN_DEFAULT_INITIAL_SIZE);
 
   token_index = 0;
-  all_digits = digit (character);
+  all_digits = isdigit (character);
   dollar_present = quoted = pass_next_character = 0;
 
   for (;;)
@@ -2824,7 +2919,7 @@ read_token_word (character)
 
 	      /* If the next character is to be quoted, note it now. */
 	      if (cd == 0 || cd == '`' ||
-		  (cd == '"' && member (peek_char, slashify_in_quotes)))
+		  (cd == '"' && (sh_syntaxtab[peek_char] & CBSDQUOTE)))
 		pass_next_character++;
 
 	      quoted = 1;
@@ -2854,7 +2949,7 @@ read_token_word (character)
 
 #ifdef EXTENDED_GLOB
       /* Parse a ksh-style extended pattern matching specification. */
-      if (extended_glob && PATTERN_CHAR(character))
+      if (extended_glob && PATTERN_CHAR (character))
 	{
 	  peek_char = shell_getc (1);
 	  if (peek_char == '(')		/* ) */
@@ -2882,11 +2977,7 @@ read_token_word (character)
 
       /* If the delimiter character is not single quote, parse some of
 	 the shell expansions that must be read as a single word. */
-#if defined (PROCESS_SUBSTITUTION)
-      if (character == '$' || character == '<' || character == '>')
-#else
-      if (character == '$')
-#endif /* !PROCESS_SUBSTITUTION */
+      if (shellexp (character))
 	{
 	  peek_char = shell_getc (1);
 	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
@@ -2894,7 +2985,7 @@ read_token_word (character)
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
-	        ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE);
+		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE);
 	      else if (peek_char == '(')		/* ) */
 		{
 		  /* XXX - push and pop the `(' as a delimiter for use by
@@ -2942,7 +3033,7 @@ read_token_word (character)
 		  /* Insert the single quotes and correctly quote any
 		     embedded single quotes (allowed because P_ALLOWESC was
 		     passed to parse_matched_pair). */
-		  ttok = single_quote (ttrans);
+		  ttok = sh_single_quote (ttrans);
 		  free (ttrans);
 		  ttrans = ttok;
 		  ttranslen = strlen (ttrans);
@@ -3035,7 +3126,7 @@ read_token_word (character)
 
     got_character:
 
-      all_digits &= digit (character);
+      all_digits &= isdigit (character);
       dollar_present |= character == '$';
 
       if (character == CTLESC || character == CTLNUL)
@@ -3181,7 +3272,7 @@ mk_msgstr (string, foundnlp)
       if (*s == '"' || *s == '\\')
 	len++;
       else if (*s == '\n')
-        len += 5;
+	len += 5;
     }
   
   r = result = xmalloc (len + 3);
@@ -3380,9 +3471,9 @@ history_delimiting_chars ()
       /* This does not work for subshells inside case statement
 	 command lists.  It's a suboptimal solution. */
       else if (parser_state & PST_CASESTMT)	/* case statement pattern */
-        return " ";
+	return " ";
       else	
-        return "; ";				/* (...) subshell */
+	return "; ";				/* (...) subshell */
     }
   else if (token_before_that == WORD && two_tokens_ago == FUNCTION)
     return " ";		/* function def using `function name' without `()' */
@@ -3392,7 +3483,7 @@ history_delimiting_chars ()
       /* Tricky.  `for i\nin ...' should not have a semicolon, but
 	 `for i\ndo ...' should.  We do what we can. */
       for (i = shell_input_line_index; whitespace(shell_input_line[i]); i++)
-        ;
+	;
       if (shell_input_line[i] && shell_input_line[i] == 'i' && shell_input_line[i+1] == 'n')
 	return " ";
       return ";";
@@ -3560,7 +3651,6 @@ decode_prompt_string (string)
 
 	      if (n == CTLESC || n == CTLNUL)
 		{
-		  string += 3;
 		  temp[0] = CTLESC;
 		  temp[1] = n;
 		  temp[2] = '\0';
@@ -3572,10 +3662,12 @@ decode_prompt_string (string)
 		}
 	      else
 		{
-		  string += 3;
 		  temp[0] = n;
 		  temp[1] = '\0';
 		}
+
+	      for (c = 0; n != -1 && c < 3 && ISOCTAL (*string); c++)
+		string++;
 
 	      c = 0;
 	      goto add_string;
@@ -3655,7 +3747,7 @@ decode_prompt_string (string)
 		  {
 		    if (getcwd (t_string, sizeof(t_string)) == 0)
 		      {
-		        t_string[0] = '.';
+			t_string[0] = '.';
 			tlen = 1;
 		      }
 		    else
@@ -3668,12 +3760,19 @@ decode_prompt_string (string)
 		  }
 		t_string[tlen] = '\0';
 
+#define ROOT_PATH(x)	((x)[0] == '/' && (x)[1] == 0)
+#define DOUBLE_SLASH_ROOT(x)	((x)[0] == '/' && (x)[1] == '/' && (x)[2] == 0)
 		if (c == 'W')
 		  {
-		    t = strrchr (t_string, '/');
-		    if (t && t != t_string)
-		      strcpy (t_string, t + 1);
+		    if (ROOT_PATH (t_string) == 0 && DOUBLE_SLASH_ROOT (t_string) == 0)
+		      {
+			t = strrchr (t_string, '/');
+			if (t)
+			  strcpy (t_string, t + 1);
+		      }
 		  }
+#undef ROOT_PATH
+#undef DOUBLE_SLASH_ROOT
 		else
 		  /* polite_directory_format is guaranteed to return a string
 		     no longer than PATH_MAX - 1 characters. */
@@ -3682,14 +3781,10 @@ decode_prompt_string (string)
 		/* If we're going to be expanding the prompt string later,
 		   quote the directory name. */
 		if (promptvars || posixly_correct)
-#if 0
-		  temp = backslash_quote (t_string);
-#else
 		  /* Make sure that expand_prompt_string is called with a
 		     second argument of Q_DOUBLE_QUOTE if we use this
 		     function here. */
-		  temp = backslash_quote_for_double_quotes (t_string);
-#endif
+		  temp = sh_backslash_quote_for_double_quotes (t_string);
 		else
 		  temp = savestring (t_string);
 
@@ -3804,11 +3899,7 @@ decode_prompt_string (string)
      the prompt string. */
   if (promptvars || posixly_correct)
     {
-#if 0
-      list = expand_string_unsplit (result, Q_DOUBLE_QUOTES);
-#else
       list = expand_prompt_string (result, Q_DOUBLE_QUOTES);
-#endif
       free (result);
       result = string_list (list);
       dispose_words (list);
@@ -3998,6 +4089,7 @@ parse_string_to_word_list (s, whom)
 {
   WORD_LIST *wl;
   int tok, orig_line_number, orig_input_terminator;
+  int orig_line_count;
 #if defined (HISTORY)
   int old_remember_on_history, old_history_expansion_inhibited;
 #endif
@@ -4011,10 +4103,12 @@ parse_string_to_word_list (s, whom)
 #endif
 
   orig_line_number = line_number;
+  orig_line_count = current_command_line_count;
   orig_input_terminator = shell_input_line_terminator;
 
   push_stream (1);
   last_read_token = '\n';
+  current_command_line_count = 0;
 
   with_input_from_string (s, whom);
   wl = (WORD_LIST *)NULL;
@@ -4022,6 +4116,8 @@ parse_string_to_word_list (s, whom)
     {
       if (tok == '\n' && *bash_input.location.string == '\0')
 	break;
+      if (tok == '\n')		/* Allow newlines in compound assignments */
+	continue;
       if (tok != WORD && tok != ASSIGNMENT_WORD)
 	{
 	  line_number = orig_line_number + line_number - 1;
@@ -4044,6 +4140,7 @@ parse_string_to_word_list (s, whom)
 #  endif /* BANG_HISTORY */
 #endif /* HISTORY */
 
+  current_command_line_count = orig_line_count;
   shell_input_line_terminator = orig_input_terminator;
 
   if (wl == &parse_string_error)

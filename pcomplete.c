@@ -78,7 +78,6 @@ typedef SHELL_VAR **SVFUNC ();
 extern char *strpbrk __P((char *, char *));
 #endif
 
-extern int rl_filename_completion_desired;
 extern int array_needs_making;
 extern STRING_INT_ALIST word_token_alist[];
 extern char *signal_names[];
@@ -209,132 +208,6 @@ clean_itemlist (itp)
   itp->flags &= ~(LIST_DONTFREE|LIST_DONTFREEMEMBERS|LIST_INITIALIZED|LIST_DIRTY);
 }
 
-/* Functions to manage the string lists -- lists of matches.  These should
-   really be moved to a separate file. */
-
-/* Allocate a new STRINGLIST, with room for N strings. */
-STRINGLIST *
-alloc_stringlist (n)
-     int n;
-{
-  STRINGLIST *ret;
-  register int i;
-
-  ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
-  if (n)
-    {
-      ret->list = alloc_array (n+1);
-      ret->list_size = n;
-      for (i = 0; i < n; i++)
-	ret->list[i] = (char *)NULL;
-    }
-  else
-    {
-      ret->list = (char **)NULL;
-      ret->list_size = 0;
-    }
-  ret->list_len = 0;
-  return ret;
-}
-
-STRINGLIST *
-realloc_stringlist (sl, n)
-     STRINGLIST *sl;
-     int n;
-{
-  register int i;
-
-  if (n > sl->list_size)
-    {
-      sl->list = (char **)xrealloc (sl->list, (n+1) * sizeof (char *));
-      for (i = sl->list_size; i <= n; i++)
-	sl->list[i] = (char *)NULL;
-      sl->list_size = n;
-    }
-  return sl;
-}
-  
-void
-free_stringlist (sl)
-     STRINGLIST *sl;
-{
-  if (sl == 0)
-    return;
-  if (sl->list)
-    free_array (sl->list);
-  free (sl);
-}
-
-STRINGLIST *
-copy_stringlist (sl)
-     STRINGLIST *sl;
-{
-  STRINGLIST *new;
-  register int i;
-
-  new = alloc_stringlist (sl->list_size);
-  /* I'd like to use copy_array, but that doesn't copy everything. */
-  if (sl->list)
-    {
-      for (i = 0; i < sl->list_size; i++)
-	new->list[i] = STRDUP (sl->list[i]);
-    }
-  new->list_size = sl->list_size;
-  new->list_len = sl->list_len;
-  /* just being careful */
-  if (new->list)
-    new->list[new->list_len] = (char *)NULL;
-  return new;
-}
-
-/* Return a new STRINGLIST with everything from M1 and M2. */
-
-STRINGLIST *
-merge_stringlists (m1, m2)
-     STRINGLIST *m1, *m2;
-{
-  STRINGLIST *sl;
-  int i, n, l1, l2;
-
-  l1 = m1 ? m1->list_len : 0;
-  l2 = m2 ? m2->list_len : 0;
-
-  sl = alloc_stringlist (l1 + l2 + 1);
-  for (i = n = 0; i < l1; i++, n++)
-    sl->list[n] = STRDUP (m1->list[i]);
-  for (i = 0; i < l2; i++, n++)
-    sl->list[n] = STRDUP (m2->list[i]);
-  sl->list_len = n;
-  sl->list[n] = (char *)NULL;
-}
-
-/* Make STRINGLIST M1 contain everything in M1 and M2. */
-STRINGLIST *
-append_stringlist (m1, m2)
-     STRINGLIST *m1, *m2;
-{
-  register int i, n, len1, len2;
-
-  if (m1 == 0)
-    {
-      m1 = copy_stringlist (m2);
-      return m1;
-    }
-
-  len1 = m1->list_len;
-  len2 = m2 ? m2->list_len : 0;
-
-  if (len2)
-    {
-      m1 = realloc_stringlist (m1, len1 + len2 + 1);
-      for (i = 0, n = len1; i < len2; i++, n++)
-	m1->list[n] = STRDUP (m2->list[i]);
-      m1->list[n] = (char *)NULL;
-      m1->list_len = n;
-    }
-
-  return m1;
-}
 
 static int
 shouldexp_filterpat (s)
@@ -405,55 +278,8 @@ filter_stringlist (sl, filterpat, text)
   return ret;
 }
 
-STRINGLIST *
-prefix_suffix_stringlist (sl, prefix, suffix)
-     STRINGLIST *sl;
-     char *prefix, *suffix;
-{
-  int plen, slen, tlen, llen, i;
-  char *t;
-
-  if (sl == 0 || sl->list == 0 || sl->list_len == 0)
-    return sl;
-
-  plen = STRLEN (prefix);
-  slen = STRLEN (suffix);
-
-  if (plen == 0 && slen == 0)
-    return (sl);
-
-  for (i = 0; i < sl->list_len; i++)
-    {
-      llen = STRLEN (sl->list[i]);
-      tlen = plen + llen + slen + 1;
-      t = xmalloc (tlen + 1);
-      if (plen)
-	strcpy (t, prefix);
-      strcpy (t + plen, sl->list[i]);
-      if (slen)
-	strcpy (t + plen + llen, suffix);
-      free (sl->list[i]);
-      sl->list[i] = t;
-    }
-
-  return (sl);	 
-}
-   
-void
-print_stringlist (sl, prefix)
-     STRINGLIST *sl;
-     char *prefix;
-{
-  register int i;
-
-  if (sl == 0)
-    return;
-  for (i = 0; i < sl->list_len; i++)
-    printf ("%s%s\n", prefix ? prefix : "", sl->list[i]);
-}
-
-/* Turn an array of strings returned by completion_matches into a STRINGLIST.
-   This understands how completion_matches sets matches[0] (the lcd of the
+/* Turn an array of strings returned by rl_completion_matches into a STRINGLIST.
+   This understands how rl_completion_matches sets matches[0] (the lcd of the
    strings in the list, unless it's the only match). */
 STRINGLIST *
 completions_to_stringlist (matches)
@@ -554,7 +380,7 @@ it_init_bindings (itp)
   STRINGLIST *sl;
 
   /* rl_funmap_names allocates blist, but not its members */
-  blist = rl_funmap_names ();
+  blist = (char **)rl_funmap_names ();
   sl = alloc_stringlist (0);
   sl->list = blist;
   sl->list_size = 0;
@@ -683,7 +509,7 @@ it_init_joblist (itp, jstate)
 	  t = strpbrk (s, " \t\n");
 	  if (t)
 	    *t = '\0';
-	sl->list[sl->list_len++] = s;
+	  sl->list[sl->list_len++] = s;
 	}
     }
   itp->slist = sl;
@@ -789,7 +615,7 @@ it_init_shopts (itp)
 static STRINGLIST *
 gen_matches_from_itemlist (itp, text)
      ITEMLIST *itp;
-     char *text;
+     const char *text;
 {
   STRINGLIST *ret, *sl;
   int tlen, i, n;
@@ -814,11 +640,11 @@ gen_matches_from_itemlist (itp, text)
   return ret;
 }
 
-/* A wrapper for filename_completion_function that dequotes the filename
+/* A wrapper for rl_filename_completion_function that dequotes the filename
    before attempting completions. */
 static char *
 pcomp_filename_completion_function (text, state)
-     char *text;
+     const char *text;
      int state;
 {
   static char *dfn;	/* dequoted filename */
@@ -831,13 +657,13 @@ pcomp_filename_completion_function (text, state)
       if (rl_filename_dequoting_function)
 	{
 	  qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
-	  dfn = (*rl_filename_dequoting_function) (text, qc);
+	  dfn = (*rl_filename_dequoting_function) ((char *)text, qc);
 	}
       else
 	dfn = savestring (text);
     }
 
-  return (filename_completion_function (dfn, state));
+  return (rl_filename_completion_function (dfn, state));
 }
 
 #define GEN_COMPS(bmap, flag, it, text, glist, tlist) \
@@ -854,7 +680,7 @@ pcomp_filename_completion_function (text, state)
   do { \
     if (bmap & flag) \
       { \
-	cmatches = completion_matches (text, func); \
+	cmatches = rl_completion_matches (text, func); \
 	tlist = completions_to_stringlist (cmatches); \
 	glist = append_stringlist (glist, tlist); \
 	free_array (cmatches); \
@@ -867,10 +693,10 @@ pcomp_filename_completion_function (text, state)
 static STRINGLIST *
 gen_action_completions (cs, text)
      COMPSPEC *cs;
-     char *text;
+     const char *text;
 {
   STRINGLIST *ret, *tmatches;
-  char **cmatches;	/* from completion_matches ... */
+  char **cmatches;	/* from rl_completion_matches ... */
   unsigned long flags;
 
   ret = tmatches = (STRINGLIST *)NULL;
@@ -896,7 +722,7 @@ gen_action_completions (cs, text)
 
   GEN_XCOMPS(flags, CA_COMMAND, text, command_word_completion_function, cmatches, ret, tmatches);
   GEN_XCOMPS(flags, CA_FILE, text, pcomp_filename_completion_function, cmatches, ret, tmatches);
-  GEN_XCOMPS(flags, CA_USER, text, username_completion_function, cmatches, ret, tmatches);
+  GEN_XCOMPS(flags, CA_USER, text, rl_username_completion_function, cmatches, ret, tmatches);
 
   /* And lastly, the special case for directories */
   if (flags & CA_DIRECTORY)
@@ -919,7 +745,7 @@ gen_action_completions (cs, text)
 static STRINGLIST *
 gen_globpat_matches (cs, text)
       COMPSPEC *cs;
-      char *text;
+      const char *text;
 {
   STRINGLIST *sl;
   char *t;
@@ -938,7 +764,7 @@ gen_globpat_matches (cs, text)
 static STRINGLIST *
 gen_wordlist_matches (cs, text)
      COMPSPEC *cs;
-     char *text;
+     const char *text;
 {
   WORD_LIST *l, *l2;
   STRINGLIST *sl;
@@ -965,7 +791,7 @@ gen_wordlist_matches (cs, text)
   for (nw = 0, l = l2; l; l = l->next)
     {
       if (tlen == 0 || STREQN (l->word->word, text, tlen))
-        sl->list[nw++] = STRDUP (l->word->word);
+	sl->list[nw++] = STRDUP (l->word->word);
     }
   sl->list[sl->list_len = nw] = (char *)NULL;
 
@@ -1117,8 +943,8 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   f = find_function (funcname);
   if (f == 0)
     {
-      fprintf (stderr, "gen_shell_function_matches: function `%s' not found\n", funcname);
-      ding ();
+      internal_error ("completion: function `%s' not found", funcname);
+      rl_ding ();
       rl_on_new_line ();
       return ((STRINGLIST *)NULL);
     }
@@ -1205,7 +1031,7 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
   cscmd[cmdlen++] = ' ';
   for (cl = cmdlist->next; cl; cl = cl->next)   /* $1, $2, $3, ... */
     {
-      t = single_quote (cl->word->word ? cl->word->word : "");
+      t = sh_single_quote (cl->word->word ? cl->word->word : "");
       n = strlen (t);
       RESIZE_MALLOCED_BUFFER (cscmd, cmdlen, n + 2, cmdsize, 64);
       strcpy (cscmd + cmdlen, t);
@@ -1272,8 +1098,8 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
 STRINGLIST *
 gen_compspec_completions (cs, cmd, word, start, end)
      COMPSPEC *cs;
-     char *cmd;
-     char *word;
+     const char *cmd;
+     const char *word;
      int start, end;
 {
   STRINGLIST *ret, *tmatches;
@@ -1410,6 +1236,20 @@ gen_compspec_completions (cs, cmd, word, start, end)
   if (cs->prefix || cs->suffix)
     ret = prefix_suffix_stringlist (ret, cs->prefix, cs->suffix);
 
+  /* If no matches have been generated and the user has specified that
+      directory completion should be done as a default, call
+      gen_action_completions again to generate a list of matching directory
+      names. */
+  if ((ret == 0 || ret->list_len == 0) && (cs->options & COPT_DIRNAMES))
+    {
+      COMPSPEC *dummy;
+
+      dummy = alloc_compspec ();
+      dummy->actions = CA_DIRECTORY;
+      ret = gen_action_completions (dummy, word);
+      free_compspec (dummy);
+    }
+
   return (ret);
 }
 
@@ -1418,7 +1258,8 @@ gen_compspec_completions (cs, cmd, word, start, end)
    bound the command currently being completed in rl_line_buffer. */
 char **
 programmable_completions (cmd, word, start, end, foundp)
-     char *cmd, *word;
+     const char *cmd;
+     const char *word;
      int start, end, *foundp;
 {
   COMPSPEC *cs;
@@ -1441,9 +1282,10 @@ programmable_completions (cmd, word, start, end, foundp)
       return ((char **)NULL);
     }
 
-  /* Signal the caller that we found a COMPSPEC for this command. */
+  /* Signal the caller that we found a COMPSPEC for this command, and pass
+     back any meta-options associated with the compspec. */
   if (foundp)
-    *foundp = 1;
+    *foundp = 1|cs->options;
 
   ret = gen_compspec_completions (cs, cmd, word, start, end);
 

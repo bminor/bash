@@ -364,7 +364,7 @@ ARRAY	*a;
 
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
 		indstr = itos (element_index(ae));
-		valstr = element_value (ae) ? double_quote (element_value(ae))
+		valstr = element_value (ae) ? sh_double_quote (element_value(ae))
 					    : (char *)NULL;
 		elen = STRLEN (indstr) + 8 + STRLEN (valstr);
 		RESIZE_MALLOCED_BUFFER (result, rlen, (elen + 1), rsize, rsize);
@@ -401,7 +401,7 @@ ARRAY	*a;
 	if (sv == 0)
 		return ((char *)NULL);
 
-	vstr = single_quote (sv);
+	vstr = sh_single_quote (sv);
 	free (sv);
 	return (vstr);
 }

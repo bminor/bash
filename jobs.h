@@ -151,7 +151,7 @@ extern int start_job __P((int, int));
 extern int kill_pid __P((pid_t, int, int));
 extern int initialize_job_control __P((int));
 extern void initialize_job_signals __P((void));
-extern int give_terminal_to __P((pid_t));
+extern int give_terminal_to __P((pid_t, int));
 
 extern void set_sigwinch_handler __P((void));
 extern void unset_sigwinch_handler __P((void));

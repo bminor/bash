@@ -490,10 +490,10 @@ void
 maybe_add_history (line)
      char *line;
 {
-  int should_add;
+  static int first_line_saved = 0;
   HIST_ENTRY *temp;
 
-  should_add = hist_last_line_added = 0;
+  hist_last_line_added = 0;
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command (old code did
@@ -504,19 +504,24 @@ maybe_add_history (line)
   if (current_command_line_count > 1)
 #endif
     {
-      if (literal_history || dstack.delimiter_depth != 0 || shell_comment (line) == 0)
+      if (first_line_saved &&
+	  (literal_history || dstack.delimiter_depth != 0 || shell_comment (line) == 0))
 	bash_add_history (line);
       return;
     }
 
+  /* This is the first line of a (possible multi-line) command.  Note whether
+     or not we should save the first line and remember it. */
+  first_line_saved = 0;
+
   switch (history_control)
     {
     case 0:
-      should_add = 1;
+      first_line_saved = 1;
       break;
     case 1:
       if (*line != ' ')
-	should_add = 1;
+	first_line_saved = 1;
       break;
     case 3:
       if (*line == ' ')
@@ -527,14 +532,16 @@ maybe_add_history (line)
       temp = previous_history ();
 
       if (temp == 0 || STREQ (temp->line, line) == 0)
-	should_add = 1;
+	first_line_saved = 1;
 
       using_history ();
       break;
     }
 
-  if (should_add && history_should_ignore (line) == 0)
+  if (first_line_saved && history_should_ignore (line) == 0)
     bash_add_history (line);
+  else
+    first_line_saved = 0;
 }
 
 /* Add a line to the history list.

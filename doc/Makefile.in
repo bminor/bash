@@ -110,10 +110,10 @@ RLUSER      = $(RL_LIBDIR)/doc/rluser.texinfo
 all: ps info dvi text html
 nodvi: ps info text html
 
-PSFILES = bash.ps bashbug.ps readline.ps article.ps builtins.ps rbash.ps
+PSFILES = bash.ps bashbug.ps article.ps builtins.ps rbash.ps
 DVIFILES = bashref.dvi bashref.ps
 INFOFILES = bashref.info
-MAN0FILES = bash.0 bashbug.0 builtins.0 rbash.0 readline.0
+MAN0FILES = bash.0 bashbug.0 builtins.0 rbash.0
 HTMLFILES = bashref.html bash.html
 
 ps: ${PSFILES}
@@ -162,8 +162,6 @@ bash.0: bash.1
 bashbug.0: bashbug.1
 builtins.0: builtins.1 bash.1
 rbash.0: rbash.1 bash.1
-readline.0: readline.3
-readline.ps: readline.3
 article.ps: article.ms
 
 $(MAN2HTML):	${topdir}/support/man2html.c
@@ -212,8 +210,6 @@ maintainer-clean:	clean
 
 installdirs:
 	-test -d $(man1dir) || $(SHELL) ${MKDIRS} $(man1dir)
-# uncomment the next line to create the directory for the readline man page
-#	-test -d $(man3dir) || $(SHELL) ${MKDIRS} $(man3dir)
 	-test -d $(infodir) || $(SHELL) ${MKDIRS} $(infodir)
 	-if [ -n "$(htmldir)" ]; then \
 		test -d $(htmldir) || $(SHELL) ${MKDIRS} $(htmldir) ; \
@@ -222,8 +218,6 @@ installdirs:
 install: info installdirs
 	-$(INSTALL_DATA) $(srcdir)/bash.1 $(man1dir)/bash.${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(man1dir)/bashbug.${man1ext}
-# uncomment the next line to install the readline man page
-#	-$(INSTALL_DATA) $(srcdir)/readline.3 $(man3dir)/readline.${man3ext}
 # uncomment the next line to install the builtins man page
 #	$(INSTALL_DATA) $(srcdir)/builtins.1 $(man1dir)/bash_builtins.${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashref.info $(infodir)/bash.info
@@ -239,7 +233,6 @@ install: info installdirs
 
 uninstall:
 	-$(RM) $(man1dir)/bash.${man1ext} $(man1dir)/bashbug.${man1ext}
-	-$(RM) $(man3dir)/readline.${man3ext}
 	$(RM) $(infodir)/bash.info
 	-if [ -n "$(htmldir)" ]; then \
 		$(RM) $(htmldir)/bash.html ; \
@@ -256,3 +249,5 @@ posix:	bashref.texi
 	$(SHELL) ./mkposix
 	cmp -s POSIX.NOTES ../CWRU/POSIX.NOTES || mv POSIX.NOTES ../CWRU/POSIX.NOTES
 	$(RM) POSIX.NOTES
+
+xdist: inst posix

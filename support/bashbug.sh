@@ -21,7 +21,17 @@ MACHTYPE="!MACHTYPE!"
 PATH=/bin:/usr/bin:/usr/local/bin:$PATH
 export PATH
 
+# If the OS supplies a program to make temp files with semi-random names,
+# use it.
 TEMP=/tmp/bbug.$$
+for d in /bin /usr/bin /usr/local/bin ; do
+	if [ -x $d/mktemp ]; then
+		TEMP=`$d/mktemp -t bbug ` ; break;
+	elif [ -x $d/tempfile ]; then
+		TEMP=` $d/tempfile --prefix bbug --mode 600 `; break
+	fi
+done
+
 USAGE="Usage: $0 [--help] [--version] [bug-report-email-address]"
 VERSTR="GNU bashbug, version ${RELEASE}.${PATCHLEVEL}-${RELSTATUS}"
 
@@ -91,7 +101,9 @@ esac
 BUGADDR="${1-$BUGBASH}"
 
 if [ -z "$DEFEDITOR" ] && [ -z "$EDITOR" ]; then
-	if [ -x /usr/local/bin/ce ]; then
+	if [ -x /usr/bin/editor ]; then
+		DEFEDITOR=editor
+	elif [ -x /usr/local/bin/ce ]; then
 		DEFEDITOR=ce
 	elif [ -x /usr/local/bin/emacs ]; then
 		DEFEDITOR=emacs

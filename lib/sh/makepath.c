@@ -68,7 +68,7 @@ sh_makepath (path, dir, flags)
      int flags;
 {
   int dirlen, pathlen;
-  char *ret, *xpath;
+  char *ret, *xpath, *r, *s;
 
   if (path == 0 || *path == '\0')
     {
@@ -102,14 +102,15 @@ sh_makepath (path, dir, flags)
       dirlen -= 2;
     }
 
-  ret = xmalloc (2 + dirlen + pathlen);
-  strcpy (ret, xpath);
-  if (xpath[pathlen - 1] != '/')
-    {
-      ret[pathlen++] = '/';
-      ret[pathlen] = '\0';
-    }
-  strcpy (ret + pathlen, dir);
+  r = ret = xmalloc (2 + dirlen + pathlen);
+  s = xpath;
+  while (*s)
+    *r++ = *s++;
+  if (s[-1] != '/')
+    *r++ = '/';      
+  s = dir;
+  while (*r++ = *s++)
+    ;
   if (xpath != path)
     free (xpath);
   return (ret);

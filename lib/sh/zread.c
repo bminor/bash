@@ -69,7 +69,7 @@ zread1 (fd, buf, len)
     {
       r = read (fd, buf, len);
       if (r >= 0)
-        return r;
+	return r;
       if (r == -1 && errno == EINTR)
 	{
 	  if (++nintr > NUM_INTR)

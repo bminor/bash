@@ -123,12 +123,12 @@ type_builtin (list)
 	  type_only = 0;
 	}
       else if (STREQ (flag, "all") || STREQ (flag, "-all"))
-        all = 1;
+	all = 1;
       else
 	{
-          prev = this;
-          this = this->next;
-          continue;
+	  prev = this;
+	  this = this->next;
+	  continue;
 	}
 
       /* We found a long option; remove it from the argument list.  Don't
@@ -234,7 +234,7 @@ describe_command (command, verbose, all)
 	printf ("%s is aliased to `%s'\n", command, alias->value);
       else if (verbose == 4)
 	{
-	  x = single_quote (alias->value);
+	  x = sh_single_quote (alias->value);
 	  printf ("alias %s=%s\n", command, x);
 	  free (x);
 	}
@@ -317,7 +317,7 @@ describe_command (command, verbose, all)
     {
       f = file_status (command);
       if (f & FS_EXECABLE)
-        {
+	{
 	  if (verbose == 1)
 	    puts ("file");
 	  else if (verbose == 2)
@@ -329,7 +329,7 @@ describe_command (command, verbose, all)
 	     because they're not consulted when an absolute program
 	     name is supplied. */
 	  return (1);
-        }
+	}
     }
 
   /* If the user isn't doing "-a", then we might care about

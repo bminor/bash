@@ -86,7 +86,7 @@ extern int literal_history;
 
 extern int unlink ();
 
-extern int fc_execute_file ();
+extern FILE *sh_mktmpfp __P((char *, int, char **));
 
 /* **************************************************************** */
 /*								    */
@@ -161,7 +161,7 @@ fc_builtin (list)
   REPL *rlist, *rl;
   char *ename, *command, *newcom, *line;
   HIST_ENTRY **hlist;
-  char fn[64];
+  char *fn;
 
   numbering = 1;
   reverse = listing = execute = 0;
@@ -327,14 +327,11 @@ fc_builtin (list)
   else
     {
       numbering = 0;
-      /* XXX - this is raceable */
-      sprintf (fn, "/tmp/bash%d", (int)time ((time_t *) 0) + (int)getpid ());
-
-      stream = fopen (fn, "w");
-
+      stream = sh_mktmpfp ("bash-fc", MT_USERANDOM|MT_USETMPDIR, &fn);
       if (stream == 0)
 	{
-	  builtin_error ("cannot open temp file %s", fn);
+	  builtin_error ("cannot open temp file %s", fn ? fn : "");
+	  FREE (fn);
 	  return (EXECUTION_FAILURE);
 	}
     }
@@ -369,6 +366,7 @@ fc_builtin (list)
   if (retval != EXECUTION_SUCCESS)
     {
       unlink (fn);
+      free (fn);
       return (EXECUTION_FAILURE);
     }
 
@@ -381,6 +379,7 @@ fc_builtin (list)
   /* Turn on the `v' flag while fc_execute_file runs so the commands
      will be echoed as they are read by the parser. */
   begin_unwind_frame ("fc builtin");
+  add_unwind_protect ((Function *)xfree, fn);
   add_unwind_protect (unlink, fn);
   unwind_protect_int (echo_input_at_read);
   echo_input_at_read = 1;

@@ -1,4 +1,4 @@
-/* config.h.bot */
+/* config-bot.h */
 /* modify settings or make new ones based on what autoconf tells us. */
 
 #if !defined (HAVE_VPRINTF) && defined (HAVE_DOPRNT)

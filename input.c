@@ -100,6 +100,15 @@ ungetc_with_restart (c, stream)
 #  define SEEK_CUR 1
 #endif /* !SEEK_CUR */
 
+#ifdef max
+#  undef max
+#endif
+#define max(a, b)	(((a) > (b)) ? (a) : (b))
+#ifdef min
+#  undef min
+#endif
+#define min(a, b)	((a) > (b) ? (b) : (a))
+
 extern int return_EOF ();
 
 extern int interactive_shell;
@@ -113,8 +122,6 @@ int bash_input_fd_changed;
    correspondence is maintained. */
 static BUFFERED_STREAM **buffers = (BUFFERED_STREAM **)NULL;
 static int nbuffers;
-
-#define max(a, b)  (((a) > (b)) ? (a) : (b))
 
 #define ALLOCATE_BUFFERS(n) \
 	do { if ((n) >= nbuffers) allocate_buffers (n); } while (0)
@@ -173,65 +180,104 @@ copy_buffered_stream (bp)
   return (nbp);
 }
 
+int
+set_bash_input_fd (fd)
+     int fd;
+{
+  if (bash_input.type == st_bstream)
+    bash_input.location.buffered_fd = fd;
+  else if (interactive_shell == 0)
+    default_buffered_input = fd;
+  return 0;
+}
+
+int
+fd_is_bash_input (fd)
+     int fd;
+{
+  if (bash_input.type == st_bstream && bash_input.location.buffered_fd == fd)
+    return 1;
+  else if (interactive_shell == 0 && default_buffered_input == fd)
+    return 1;
+  return 0;
+}
+
+/* Save the buffered stream corresponding to file descriptor FD (which bash
+   is using to read input) to a buffered stream associated with NEW_FD.  If
+   NEW_FD is -1, a new file descriptor is allocated with fcntl.  The new
+   file descriptor is returned on success, -1 on error. */
+int
+save_bash_input (fd, new_fd)
+     int fd, new_fd;
+{
+  int nfd;
+
+  /* Sync the stream so we can re-read from the new file descriptor.  We
+     might be able to avoid this by copying the buffered stream verbatim
+     to the new file descriptor. */
+  if (buffers[fd])
+    sync_buffered_stream (fd);
+
+  /* Now take care of duplicating the file descriptor that bash is
+     using for input, so we can reinitialize it later. */
+  nfd = (new_fd == -1) ? fcntl (fd, F_DUPFD, 10) : new_fd;
+  if (nfd == -1)
+    {
+      if (fcntl (fd, F_GETFD, 0) == 0)
+	sys_error ("cannot allocate new file descriptor for bash input from fd %d", fd);
+      return -1;
+    }
+
+  if (buffers[nfd])
+    {
+      /* What's this?  A stray buffer without an associated open file
+	 descriptor?  Free up the buffer and report the error. */
+      internal_error ("check_bash_input: buffer already exists for new fd %d", nfd);
+      free_buffered_stream (buffers[nfd]);
+    }
+
+  /* Reinitialize bash_input.location. */
+  if (bash_input.type == st_bstream)
+    {
+      bash_input.location.buffered_fd = nfd;
+      fd_to_buffered_stream (nfd);
+      close_buffered_fd (fd);	/* XXX */
+    }
+  else
+    /* If the current input type is not a buffered stream, but the shell
+       is not interactive and therefore using a buffered stream to read
+       input (e.g. with an `eval exec 3>output' inside a script), note
+       that the input fd has been changed.  pop_stream() looks at this
+       value and adjusts the input fd to the new value of
+       default_buffered_input accordingly. */
+    bash_input_fd_changed++;
+
+  if (default_buffered_input == fd)
+    default_buffered_input = nfd;
+
+  SET_CLOSE_ON_EXEC (nfd);
+  return nfd;
+}
+
 /* Check that file descriptor FD is not the one that bash is currently
    using to read input from a script.  FD is about to be duplicated onto,
    which means that the kernel will close it for us.  If FD is the bash
    input file descriptor, we need to seek backwards in the script (if
    possible and necessary -- scripts read from stdin are still unbuffered),
    allocate a new file descriptor to use for bash input, and re-initialize
-   the buffered stream. */
+   the buffered stream.  Make sure the file descriptor used to save bash
+   input is set close-on-exec. Returns 0 on success, -1 on failure.  This
+   works only if fd is > 0 -- if fd == 0 and bash is reading input from
+   fd 0, save_bash_input is used instead, to cooperate with input
+   redirection (look at redir.c:add_undo_redirect()). */
 int
 check_bash_input (fd)
      int fd;
 {
   int nfd;
 
-  if (fd > 0 && ((bash_input.type == st_bstream && bash_input.location.buffered_fd == fd) ||
-  		 (interactive_shell == 0 && default_buffered_input == fd)))
-    {
-      /* Sync the stream so we can re-read from the new file descriptor.  We
-	 might be able to avoid this by copying the buffered stream verbatim
-	 to the new file descriptor. */
-      if (buffers[fd])
-	sync_buffered_stream (fd);
-
-      /* Now take care of duplicating the file descriptor that bash is
-	 using for input, so we can reinitialize it later. */
-      nfd = fcntl (fd, F_DUPFD, 10);
-      if (nfd == -1)
-	{
-	  if (fcntl (fd, F_GETFD, 0) == 0)
-	    sys_error ("cannot allocate new file descriptor for bash input from fd %d", fd);
-	  return -1;
-	}
-
-      if (buffers[nfd])
-	{
-	  /* What's this?  A stray buffer without an associated open file
-	     descriptor?  Free up the buffer and report the error. */
-	  internal_error ("check_bash_input: buffer already exists for new fd %d", nfd);
-	  free_buffered_stream (buffers[nfd]);
-	}
-
-      /* Reinitialize bash_input.location. */
-      if (bash_input.type == st_bstream)
-	{
-	  bash_input.location.buffered_fd = nfd;
-	  fd_to_buffered_stream (nfd);
-	  close_buffered_fd (fd);	/* XXX */
-	}
-      else
-	/* If the current input type is not a buffered stream, but the shell
-	   is not interactive and therefore using a buffered stream to read
-	   input (e.g. with an `eval exec 3>output' inside a script), note
-	   that the input fd has been changed.  pop_stream() looks at this
-	   value and adjusts the input fd to the new value of
-	   default_buffered_input accordingly. */
-	bash_input_fd_changed++;
-
-      if (default_buffered_input == fd)
-	default_buffered_input = nfd;
-    }
+  if (fd > 0 && fd_is_bash_input (fd))
+    return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
   return 0;
 }
       
@@ -264,18 +310,22 @@ duplicate_buffered_stream (fd1, fd2)
   if (buffers[fd2])
     buffers[fd2]->b_fd = fd2;
 
-  if (is_bash_input && !buffers[fd2])
-    fd_to_buffered_stream (fd2);
+  if (is_bash_input)
+    {
+      if (!buffers[fd2])
+	fd_to_buffered_stream (fd2);
+      buffers[fd2]->b_flag |= B_WASBASHINPUT;
+    }
 
   return (fd2);
 }
 
 /* Return 1 if a seek on FD will succeed. */
-#ifndef __CYGWIN32__
+#ifndef __CYGWIN__
 #  define fd_is_seekable(fd) (lseek ((fd), 0L, SEEK_CUR) >= 0)
 #else
 #  define fd_is_seekable(fd) 0
-#endif /* __CYGWIN32__ */
+#endif /* __CYGWIN__ */
 
 /* Take FD, a file descriptor, and create and return a buffered stream
    corresponding to it.  If something is wrong and the file descriptor
@@ -294,13 +344,9 @@ fd_to_buffered_stream (fd)
       return ((BUFFERED_STREAM *)NULL);
     }
 
-  if (fd_is_seekable (fd) == 0)
+  size = (fd_is_seekable (fd)) ? min (sb.st_size, MAX_INPUT_BUFFER_SIZE) : 1;
+  if (size == 0)
     size = 1;
-  else
-    size = (size_t)((sb.st_size > MAX_INPUT_BUFFER_SIZE)
-				? MAX_INPUT_BUFFER_SIZE
-				: sb.st_size);
-      
   buffer = (char *)xmalloc (size);
 
   return (make_buffered_stream (fd, buffer, size));
@@ -381,6 +427,11 @@ b_fill_buffer (bp)
      BUFFERED_STREAM *bp;
 {
   bp->b_used = zread (bp->b_fd, bp->b_buffer, bp->b_size);
+#if defined (__CYGWIN__)
+  /* If on cygwin, translate \r\n to \n. */
+  if (bp->b_buffer[bp->b_used - 1] == '\r' && bp->b_buffer[bp->b_used] == '\n')
+    bp->b_buffer[--bp->b_used] = '\n';
+#endif
   if (bp->b_used <= 0)
     {
       bp->b_buffer[0] = 0;
@@ -422,9 +473,9 @@ sync_buffered_stream (bfd)
   BUFFERED_STREAM *bp;
   off_t chars_left;
 
-  bp = buffers[bfd];
-  if (!bp)
+  if (buffers == 0 || (bp = buffers[bfd]) == 0)
     return (-1);
+
   chars_left = bp->b_used - bp->b_inputp;
   if (chars_left)
     lseek (bp->b_fd, -chars_left, SEEK_CUR);
@@ -435,7 +486,15 @@ sync_buffered_stream (bfd)
 int
 buffered_getchar ()
 {
+#if !defined (DJGPP)
   return (bufstream_getc (buffers[bash_input.location.buffered_fd]));
+#else
+  /* On DJGPP, ignore \r. */
+  int ch;
+  while ((ch = bufstream_getc (buffers[bash_input.location.buffered_fd])) == '\r')
+    ;
+  return ch;
+#endif
 }
 
 int

@@ -56,6 +56,7 @@ extern int errno;
 #define FEVAL_NONINT		0x008
 #define FEVAL_LONGJMP		0x010
 #define FEVAL_HISTORY		0x020
+#define FEVAL_CHECKBINARY	0x040
 
 extern int interactive, interactive_shell, posixly_correct;
 extern int indirection_level, startup_state, subshell_environment;
@@ -87,7 +88,7 @@ file_error_and_exit:
 	file_error (filename);
 
       if (flags & FEVAL_LONGJMP)
-        {
+	{
 	  last_command_exit_value = 1;
 	  jump_to_top_level (EXITPROG);
 	}
@@ -116,6 +117,11 @@ file_error_and_exit:
       (*errfunc) ("%s: file is too large", filename);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }      
+
+#if defined (__CYGWIN__) && defined (O_TEXT)
+  setmode (fd, O_TEXT);
+#endif
+
   string = xmalloc (1 + file_size);
   result = read (fd, string, file_size);
   string[result] = '\0';
@@ -136,7 +142,8 @@ file_error_and_exit:
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_SUCCESS : 1);
     }
       
-  if (check_binary_file ((unsigned char *)string, (result > 80) ? 80 : result))
+  if ((flags & FEVAL_CHECKBINARY) && 
+      check_binary_file ((unsigned char *)string, (result > 80) ? 80 : result))
     {
       free (string);
       (*errfunc) ("%s: cannot execute binary file", filename);

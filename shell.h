@@ -23,6 +23,7 @@
 #include "bashjmp.h"
 
 #include "command.h"
+#include "syntax.h"
 #include "general.h"
 #include "error.h"
 #include "variables.h"
@@ -64,26 +65,6 @@ extern int EOF_Reached;
 #define EX_REDIRFAIL	259	/* redirection failed */
 #define EX_BADASSIGN	260	/* variable assignment error */
 #define EX_EXPFAIL	261	/* word expansion failed */
-
-/* The list of characters that are quoted in double-quotes with a
-   backslash.  Other characters following a backslash cause nothing
-   special to happen. */
-#define slashify_in_quotes "\\`$\"\n"
-#define slashify_in_here_document "\\`$"
-
-/* Constants which specify how to handle backslashes and quoting in
-   expand_word_internal ().  Q_DOUBLE_QUOTES means to use the function
-   slashify_in_quotes () to decide whether the backslash should be
-   retained.  Q_HERE_DOCUMENT means slashify_in_here_document () to
-   decide whether to retain the backslash.  Q_KEEP_BACKSLASH means
-   to unconditionally retain the backslash. */
-#define Q_DOUBLE_QUOTES  0x1
-#define Q_HERE_DOCUMENT  0x2
-#define Q_KEEP_BACKSLASH 0x4
-#define Q_NOQUOTE	 0x8
-#define Q_QUOTED	 0x10
-#define Q_ADDEDQUOTES	 0x20
-#define Q_QUOTEDNULL	 0x40
 
 /* Flag values that control parameter pattern substitution. */
 #define MATCH_ANY	0x0

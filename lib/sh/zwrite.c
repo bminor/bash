@@ -49,6 +49,7 @@ zwrite (fd, buf, nb)
 	  n -= i;
 	  if (n <= 0)
 	    return nb;
+	  buf += i;
 	}
       else if (i == 0)
 	{

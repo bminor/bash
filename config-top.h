@@ -1,4 +1,4 @@
-/* config.h.top */
+/* config-top.h */
 
 /* This contains various user-settable options not under the control of
    autoconf. */

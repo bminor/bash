@@ -52,6 +52,7 @@ alloc_compspec ()
   ret->refcount = 0;
 
   ret->actions = (unsigned long)0;
+  ret->options = (unsigned long)0;
 
   ret->globpat = (char *)NULL;
   ret->words = (char *)NULL;
@@ -93,6 +94,7 @@ copy_compspec (cs)
 
   new->refcount = cs->refcount;
   new->actions = cs->actions;
+  new->options = cs->options;
 
   new->globpat = STRDUP (cs->globpat);
   new->words = STRDUP (cs->words);
@@ -185,7 +187,7 @@ add_progcomp (cmd, cs)
 
 COMPSPEC *
 find_compspec (cmd)
-     char *cmd;
+     const char *cmd;
 {
   register BUCKET_CONTENTS *item;
   COMPSPEC *cs;
@@ -193,7 +195,7 @@ find_compspec (cmd)
   if (prog_completes == 0)
     return ((COMPSPEC *)NULL);
 
-  item = find_hash_item (cmd, prog_completes);
+  item = find_hash_item ((char *)cmd, prog_completes);	/* XXX fix const later */
 
   if (item == NULL)
     return ((COMPSPEC *)NULL);

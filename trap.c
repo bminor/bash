@@ -221,7 +221,7 @@ run_pending_traps ()
   for (sig = 1; sig < NSIG; sig++)
     {
       /* XXX this could be made into a counter by using
-         while (pending_traps[sig]--) instead of the if statement. */
+	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
 #if defined (HAVE_POSIX_SIGNALS)
@@ -303,7 +303,7 @@ trap_handler (sig)
     programming_error ("trap_handler: bad signal %d", sig);
   else
     {
-      errno = oerrno;
+      oerrno = errno;
 #if defined (MUST_REINSTALL_SIGHANDLERS)
       set_signal_handler (sig, trap_handler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
@@ -600,7 +600,7 @@ run_exit_trap ()
 	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
 	}
       else if (code == EXITPROG)
-        return (last_command_exit_value);
+	return (last_command_exit_value);
       else
 	return (old_exit_value);
     }

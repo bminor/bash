@@ -253,6 +253,11 @@ echo ${foo[@]}
 foo=( 4414758999202 )
 echo ${foo[@]}
 
+# this was a bug in all versions of bash 2.x up to and including bash-2.04
+declare -a ddd=(aaa
+bbb)
+echo ${ddd[@]}
+
 # errors
 foo=(a b c for case if then else)
 
@@ -260,3 +265,16 @@ foo=(for case if then else)
 
 metas=( <> < > ! )
 metas=( [1]=<> [2]=< [3]=> [4]=! )
+
+# various expansions that didn't really work right until post-bash-2.04
+foo='abc'
+echo ${foo[0]} ${#foo[0]}
+echo ${foo[1]} ${#foo[1]}
+echo ${foo[@]} ${#foo[@]}
+echo ${foo[*]} ${#foo[*]}
+
+foo=''
+echo ${foo[0]} ${#foo[0]}
+echo ${foo[1]} ${#foo[1]}
+echo ${foo[@]} ${#foo[@]}
+echo ${foo[*]} ${#foo[*]}

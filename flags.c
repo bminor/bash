@@ -249,7 +249,7 @@ change_flag (flag, on_or_off)
 #if defined (RESTRICTED_SHELL)
     case 'r':
       if (on_or_off == FLAG_ON)
-        maybe_make_restricted (shell_name);
+	maybe_make_restricted (shell_name);
       break;
 #endif
 

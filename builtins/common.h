@@ -70,13 +70,6 @@ extern Function *builtin_address __P((char *));
 extern Function *find_special_builtin __P((char *));
 extern void initialize_shell_builtins __P((void));
 
-extern char *single_quote __P((char *));
-extern char *double_quote __P((char *));
-extern char *un_double_quote __P((char *));
-extern char *backslash_quote __P((char *));
-extern char *backslash_quote_for_double_quotes __P((char *));
-extern int contains_shell_metas __P((char *));
-
 /* Functions from set.def */
 extern void initialize_shell_options __P((int));
 extern void list_minus_o_opts __P((int, int));
@@ -111,5 +104,6 @@ extern void parse_and_execute_cleanup __P((void));
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((char *, int));
 extern int source_file __P((char *));
+extern int fc_execute_file __P((char *));
 
 #endif /* !__COMMON_H */

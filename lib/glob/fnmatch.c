@@ -9,12 +9,12 @@
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
-              
+	      
    Bash is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
-                         
+			 
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
@@ -22,7 +22,7 @@
 #include <config.h>
 
 #include <stdio.h>	/* for debugging */
-                                
+				
 #include "fnmatch.h"
 #include "collsyms.h"
 #include <ctype.h>
@@ -68,18 +68,14 @@ static char *patscan ();
 #define STREQN(a, b, n) ((a)[0] == (b)[0] && strncmp(a, b, n) == 0)
 #endif
 
-/* We don't use strcoll(3) for range comparisons in bracket expressions,
-   even if we have it, since it can have unwanted side effects in locales
+/* We use strcoll(3) for range comparisons in bracket expressions,
+   even though it can have unwanted side effects in locales
    other than POSIX or US.  For instance, in the de locale, [A-Z] matches
-   all characters.  So, for ranges we use ASCII collation, and for
-   collating symbol equivalence we use strcoll().  The casts to int are
-   to handle tests that use unsigned chars. */
-
-#define rangecmp(c1, c2)	((int)(c1) - (int)(c2))
+   all characters. */
 
 #if defined (HAVE_STRCOLL)
 /* Helper function for collating symbol equivalence. */
-static int rangecmp2 (c1, c2)
+static int rangecmp (c1, c2)
      int c1, c2;
 {
   static char s1[2] = { ' ', '\0' };
@@ -101,14 +97,14 @@ static int rangecmp2 (c1, c2)
   return (c1 - c2);
 }
 #else /* !HAVE_STRCOLL */
-#  define rangecmp2(c1, c2)	((int)(c1) - (int)(c2))
+#  define rangecmp(c1, c2)	((int)(c1) - (int)(c2))
 #endif /* !HAVE_STRCOLL */
 
 #if defined (HAVE_STRCOLL)
 static int collequiv (c1, c2)
      int c1, c2;
 {
-  return (rangecmp2 (c1, c2) == 0);
+  return (rangecmp (c1, c2) == 0);
 }
 #else
 #  define collequiv(c1, c2)	((c1) == (c2))
@@ -124,7 +120,7 @@ collsym (s, len)
   for (csp = posix_collsyms; csp->name; csp++)
     {
       if (STREQN(csp->name, s, len) && csp->name[len] == '\0')
-        return (csp->code);
+	return (csp->code);
     }
   if (len == 1)
     return s[0];
@@ -165,6 +161,11 @@ gmatch (string, se, pattern, pe, flags)
 
   if (string == 0 || pattern == 0)
     return FNM_NOMATCH;
+
+#if DEBUG_MATCHING
+fprintf(stderr, "gmatch: string = %s; se = %s\n", string, se);
+fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
+#endif
 
   while (p < pe)
     {
@@ -270,7 +271,7 @@ gmatch (string, se, pattern, pe, flags)
 		}
 #endif
 	      if (p == pe)
-	        break;
+		break;
 	    }
 
 	  /* If we've hit the end of the pattern and the last character of
@@ -290,14 +291,14 @@ gmatch (string, se, pattern, pe, flags)
 		/* Only call fnmatch if the first character indicates a
 		   possible match.  We can check the first character if
 		   we're not doing an extended glob match. */
-		if ((flags & FNM_EXTMATCH) == 0 && c != '[' && FOLD (*n) != c1)
+		if ((flags & FNM_EXTMATCH) == 0 && c != '[' && FOLD (*n) != c1) /*]*/
 		  continue;
 
 		/* If we're doing an extended glob match and the pattern is not
 		   one of the extended glob patterns, we can check the first
 		   character. */
 		if ((flags & FNM_EXTMATCH) && p[1] != '(' && /*)*/
-		    strchr ("?*+@!", *p) == 0 && c != '[' && FOLD (*n) != c1)
+		    strchr ("?*+@!", *p) == 0 && c != '[' && FOLD (*n) != c1) /*]*/
 		  continue;
 
 		/* Otherwise, we just recurse. */
@@ -339,7 +340,7 @@ gmatch (string, se, pattern, pe, flags)
   if ((flags & FNM_LEADING_DIR) && *n == '/')
     /* The FNM_LEADING_DIR flag says that "foo*" matches "foobar/frobozz".  */
     return 0;
-          
+	  
   return (FNM_NOMATCH);
 }
 
@@ -355,7 +356,7 @@ parse_collsym (p, vp)
   int val;
 
   p++;				/* move past the `.' */
-          
+	  
   for (pc = 0; p[pc]; pc++)
     if (p[pc] == '.' && p[pc+1] == ']')
       break;
@@ -382,7 +383,7 @@ brackmatch (p, test, flags)
 
   /* POSIX.2 3.13.1 says that an exclamation mark (`!') shall replace the
      circumflex (`^') in its role in a `nonmatching list'.  A bracket
-     expression starging with an unquoted circumflex character produces
+     expression starting with an unquoted circumflex character produces
      unspecified results.  This implementation treats the two identically. */
   if (not = (*p == '!' || *p == '^'))
     ++p;
@@ -404,19 +405,24 @@ brackmatch (p, test, flags)
 	  pc = FOLD (p[1]);
 	  p += 4;
 	  if (collequiv (test, pc))
-	    goto matched;
+	    {
+/*[*/	      /* Move past the closing `]', since the first thing we do at
+		 the `matched:' label is back p up one. */
+	      p++;
+	      goto matched;
+	    }
 	  else
 	    {
 	      c = *p++;
 	      if (c == '\0')
-		return ((test == '[') ? savep : (char *)0);
+		return ((test == '[') ? savep : (char *)0); /*]*/
 	      c = FOLD (c);
 	      continue;
 	    }
-        }
+	}
 
       /* POSIX.2 character class expression.  See POSIX.2 2.8.3.2. */
-      if (c == '[' && *p == ':')
+      if (c == '[' && *p == ':')	/*]*/
 	{
 	  pc = 0;	/* make sure invalid char classes don't match. */
 	  if (STREQN (p+1, "alnum:]", 7))
@@ -446,7 +452,12 @@ brackmatch (p, test, flags)
 	  else if (STREQN (p+1, "ascii:]", 7))
 	    { pc = isascii (test); p += 8; }
 	  if (pc)
+	    {
+/*[*/	      /* Move past the closing `]', since the first thing we do at
+		 the `matched:' label is back p up one. */
+	      p++;
 	      goto matched;
+	    }
 	  else
 	    {
 	      /* continue the loop here, since this expression can't be
@@ -455,7 +466,7 @@ brackmatch (p, test, flags)
 	      if (c == '\0')
 		return ((test == '[') ? savep : (char *)0);
 	      else if (c == ']')
-	        break;
+		break;
 	      c = FOLD (c);
 	      continue;
 	    }
@@ -528,7 +539,7 @@ brackmatch (p, test, flags)
 	  if (rangecmp (cstart, cend) > 0)
 	    {
 	      if (c == ']')
-	        break;
+		break;
 	      c = FOLD (c);
 	      continue;
 	    }
@@ -545,7 +556,12 @@ brackmatch (p, test, flags)
 
 matched:
   /* Skip the rest of the [...] that already matched.  */
+#if 0
   brcnt = (c != ']') + (c == '[' && (*p == '=' || *p == ':' || *p == '.'));
+#else
+  c = *--p;
+  brcnt = 1;
+#endif
   while (brcnt > 0)
     {
       /* A `[' without a matching `]' is just another character to match. */
@@ -554,9 +570,9 @@ matched:
 
       c = *p++;
       if (c == '[' && (*p == '=' || *p == ':' || *p == '.'))
-        brcnt++;
+	brcnt++;
       else if (c == ']')
-        brcnt--;
+	brcnt--;
       else if (!(flags & FNM_NOESCAPE) && c == '\\')
 	{
 	  if (*p == '\0')
@@ -593,29 +609,56 @@ patscan (string, end, delim)
      char *string, *end;
      int delim;
 {
-  int pnest, bnest;
-  char *s, c;
+  int pnest, bnest, cchar;
+  char *s, c, *bfirst;
 
-  pnest = bnest = 0;
+  pnest = bnest = cchar = 0;
+  bfirst = 0;
   for (s = string; c = *s; s++)
     {
       if (s >= end)
-        return (s);
+	return (s);
       switch (c)
 	{
 	case '\0':
 	  return ((char *)0);
+
+	/* `[' is not special inside a bracket expression, but it may
+	   introduce one of the special POSIX bracket expressions
+	   ([.SYM.], [=c=], [: ... :]) that needs special handling. */
 	case '[':
-	  bnest++;
+	  if (bnest == 0)
+	    {
+	      bfirst = s + 1;
+	      if (*bfirst == '!' || *bfirst == '^')
+		bfirst++;
+	      bnest++;
+	    }
+	  else if (s[1] == ':' || s[1] == '.' || s[1] == '=')
+	    cchar = s[1];
 	  break;
+
+	/* `]' is not special if it's the first char (after a leading `!'
+	   or `^') in a bracket expression or if it's part of one of the
+	   special POSIX bracket expressions ([.SYM.], [=c=], [: ... :]) */
 	case ']':
 	  if (bnest)
-	    bnest--;
+	    {
+	      if (cchar && s[-1] == cchar)
+		cchar = 0;
+	      else if (s != bfirst)
+		{
+		  bnest--;
+		  bfirst = 0;
+		}
+	    }
 	  break;
+
 	case '(':
 	  if (bnest == 0)
 	    pnest++;
 	  break;
+
 	case ')':
 #if 0
 	  if (bnest == 0)
@@ -627,6 +670,7 @@ patscan (string, end, delim)
 	    return ++s;
 #endif
 	  break;
+
 	case '|':
 	  if (bnest == 0 && pnest == 0 && delim == '|')
 	    return ++s;
@@ -678,7 +722,7 @@ extmatch (xc, s, se, p, pe, flags)
   char *srest;			/* pointer to rest of string */
   int m1, m2;
 
-#if 0
+#if DEBUG_MATCHING
 fprintf(stderr, "extmatch: xc = %c\n", xc);
 fprintf(stderr, "extmatch: s = %s; se = %s\n", s, se);
 fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
@@ -701,8 +745,8 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 	return 0;
 
       /* OK, we have to do this the hard way.  First, we make sure one of
-         the subpatterns matches, then we try to match the rest of the
-         string. */
+	 the subpatterns matches, then we try to match the rest of the
+	 string. */
       for (psub = p + 1; ; psub = pnext)
 	{
 	  pnext = patscan (psub, pe, '|');
@@ -718,7 +762,7 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 		m2 = (gmatch (srest, se, prest, pe, flags) == 0) ||
 		      (s != srest && gmatch (srest, se, p - 1, pe, flags) == 0);
 	      if (m1 && m2)
-	        return (0);
+		return (0);
 	    }
 	  if (pnext == prest)
 	    break;
@@ -765,7 +809,7 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 		break;
 	    }
 	  if (m1 == 0 && gmatch (srest, se, prest, pe, flags) == 0)
-	    return (0);	
+	    return (0);
 	}
       return (FNM_NOMATCH);
     }

@@ -12,10 +12,12 @@ The following list is what's changed when `POSIX mode' is in effect:
      re-search `$PATH' to find the new location.  This is also
      available with `shopt -s checkhash'.
 
-  2. The `>&' redirection does not redirect stdout and stderr.
+  2. The message printed by the job control code and builtins when a job
+     exits with a non-zero status is `Done(status)'.
 
   3. The message printed by the job control code and builtins when a job
-     exits with a non-zero status is `Done(status)'.
+     is stopped is `Stopped(SIGNAME)', where SIGNAME is, for example,
+     `SIGTSTP'.
 
   4. Reserved words may not be aliased.
 
@@ -69,7 +71,7 @@ The following list is what's changed when `POSIX mode' is in effect:
      `$CDPATH', the value it assigns to the `PWD' variable does not
      contain any symbolic links, as if `cd -P' had been executed.
 
- 19. If `$CDPATH' is set, the `cd' builtin will not implicitly append
+ 19. If `CDPATH' is set, the `cd' builtin will not implicitly append
      the current directory to it.  This means that `cd' will fail if no
      valid directory name can be constructed from any of the entries in
      `$CDPATH', even if the a directory with the same name as the name
@@ -89,8 +91,26 @@ The following list is what's changed when `POSIX mode' is in effect:
  23. Assignment statements preceding POSIX 1003.2 special builtins
      persist in the shell environment after the builtin completes.
 
- 24. The `export' and `readonly' builtin commands display their output
+ 24. Assignment statements preceding shell function calls persist in the
+     shell environment after the function returns, as if a POSIX
+     special builtin command had been executed.
+
+ 25. The `export' and `readonly' builtin commands display their output
      in the format required by POSIX 1003.2.
+
+ 26. The `trap' builtin displays signal names without the leading `SIG'.
+
+ 27. The `.' and `source' builtins do not search the current directory
+     for the filename argument if it is not found by searching `PATH'.
+
+ 28. Subshells spawned to execute command substitutions inherit the
+     value of the `-e' option from the parent shell.  When not in POSIX
+     mode, Bash clears the `-e' option in such subshells.
+
+ 29. Alias expansion is always enabled, even in non-interactive shells.
+
+ 30. When the `set' builtin is invoked without options, it does not
+     display shell function names and definitions.
 
 
 There is other POSIX 1003.2 behavior that Bash does not implement.
@@ -98,4 +118,14 @@ Specifically:
 
   1. Assignment statements affect the execution environment of all
      builtins, not just special ones.
+
+  2. When a subshell is created to execute a shell script with execute
+     permission, but without a leading `#!', Bash sets `$0' to the full
+     pathname of the script as found by searching `$PATH', rather than
+     the command as typed by the user.
+
+  3. When using `.' to source a shell script found in `$PATH', bash
+     checks execute permission bits rather than read permission bits,
+     just as if it were searching for a command.
+
 

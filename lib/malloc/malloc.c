@@ -278,6 +278,11 @@ static int pagesz;	/* system page size. */
 static int pagebucket;	/* bucket for requests a page in size */
 static int maxbuck;	/* highest bucket receiving allocation request. */
 
+#ifdef SHELL
+extern int interrupt_immediately;
+extern int signal_is_trapped ();
+#endif
+
 #if 0
 /* Coalesce two adjacent free blocks off the free list for size NU - 1,
    as long as there are at least MIN_COMBINE_FREE free blocks and we
@@ -400,6 +405,34 @@ bsplit (nu)
 }
 
 static void
+block_signals (setp, osetp)
+     sigset_t *setp, *osetp;
+{
+#ifdef HAVE_POSIX_SIGNALS
+  sigfillset (setp);
+  sigemptyset (osetp);
+  sigprocmask (SIG_BLOCK, setp, osetp);
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  *osetp = sigsetmask (-1);
+#  endif
+#endif
+}
+
+static void
+unblock_signals (setp, osetp)
+     sigset_t *setp, *osetp;
+{
+#ifdef HAVE_POSIX_SIGNALS
+  sigprocmask (SIG_SETMASK, osetp, (sigset_t *)NULL);
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  sigsetmask (*osetp);
+#  endif
+#endif
+}
+  
+static void
 morecore (nu)			/* ask system for more memory */
      register int nu;		/* size index to get more of  */
 {
@@ -407,19 +440,18 @@ morecore (nu)			/* ask system for more memory */
   register int nblks;
   register long siz;
   long sbrk_amt;		/* amount to get via sbrk() */
+  sigset_t set, oset;
+  int blocked_sigs;
 
   /* Block all signals in case we are executed from a signal handler. */
-#if defined (HAVE_BSD_SIGNALS)
-  int oldmask;
-  oldmask = sigsetmask (-1);
-#else
-#  if defined (HAVE_POSIX_SIGNALS)
-  sigset_t set, oset;
-  sigfillset (&set);
-  sigemptyset (&oset);
-  sigprocmask (SIG_BLOCK, &set, &oset);
-#  endif /* HAVE_POSIX_SIGNALS */
-#endif /* HAVE_BSD_SIGNALS */
+  blocked_sigs = 0;
+#ifdef SHELL
+  if (interrupt_immediately || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+#endif
+    {
+      block_signals (&set, &oset);
+      blocked_sigs = 1;
+    }
 
   siz = 1 << (nu + 3);	/* size of desired block for nextf[nu] */
 
@@ -450,7 +482,7 @@ morecore (nu)			/* ask system for more memory */
     {
       bcoalesce (nu);
       if (nextf[nu] != 0)
-        goto morecore_done;
+	goto morecore_done;
     }
 #endif
 
@@ -507,15 +539,8 @@ morecore (nu)			/* ask system for more memory */
   CHAIN (mp) = 0;
 
 morecore_done:
-#if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (oldmask);
-#else
-#  if defined (HAVE_POSIX_SIGNALS)
-  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
-#  else
-  ; /* nothing to do, but need a null statement before the brace */
-#  endif
-#endif /* HAVE_BSD_SIGNALS */
+  if (blocked_sigs)
+    unblock_signals (&set, &oset);
 }
 
 #if defined (MEMSCRAMBLE) || !defined (NO_CALLOC)
@@ -557,30 +582,30 @@ malloc (n)		/* get a block */
 
       pagesz = getpagesize ();
       if (pagesz < 1024)
-        pagesz = 1024;
+	pagesz = 1024;
       /* OK, how much do we need to allocate to make things page-aligned?
-         This partial page is wasted space.  Once we figure out how much
-         to advance the break pointer, go ahead and do it. */
+	 This partial page is wasted space.  Once we figure out how much
+	 to advance the break pointer, go ahead and do it. */
       sbrk_needed = pagesz - ((long)sbrk (0) & (pagesz - 1));	/* sbrk(0) % pagesz */
       if (sbrk_needed < 0)
-        sbrk_needed += pagesz;
+	sbrk_needed += pagesz;
       /* Now allocate the wasted space. */
       if (sbrk_needed)
-        {
+	{
 #ifdef MALLOC_STATS
 	  _mstats.nsbrk++;
 	  _mstats.tsbrk += sbrk_needed;
 #endif
-          if ((long)sbrk (sbrk_needed) == -1)
-            return (NULL);
-        }
+	  if ((long)sbrk (sbrk_needed) == -1)
+	    return (NULL);
+	}
       nunits = 0;
       nbytes = 8;
       while (pagesz > nbytes)
-        {
-          nbytes <<= 1;
-          nunits++;
-        }
+	{
+	  nbytes <<= 1;
+	  nunits++;
+	}
       pagebucket = nunits;
     }
  
@@ -605,10 +630,10 @@ malloc (n)		/* get a block */
       nunits = pagebucket;
       amt = pagesz;
       while (nbytes > amt)
-        {
-          amt <<= 1;
-          nunits++;
-        }
+	{
+	  amt <<= 1;
+	  nunits++;
+	}
     }
 
   /* In case this is reentrant use of malloc from signal handler,
@@ -924,6 +949,7 @@ _print_malloc_stats (s, fp)
 
 void
 print_malloc_stats (s)
+     char *s;
 {
   _print_malloc_stats (s, stderr);
 }
@@ -933,6 +959,7 @@ extern char *inttostr ();
 
 void
 trace_malloc_stats (s)
+     char *s;
 {
   char ibuf[32], *ip;
   char fname[64];

@@ -234,11 +234,9 @@ localetrans (string, len, lenp)
   if (string == 0 || *string == 0)
     {
       if (lenp)
-        *lenp = 0;
+	*lenp = 0;
       return ((char *)NULL);
     }
-
-  t = xmalloc (len + 1);
 
   locale = get_locale_var ("LC_MESSAGES");
 
@@ -250,6 +248,7 @@ localetrans (string, len, lenp)
       (locale[0] == 'C' && locale[1] == '\0') || STREQ (locale, "POSIX"))
 #endif
     {
+      t = xmalloc (len + 1);
       strcpy (t, string);
       if (lenp)
 	*lenp = len;
@@ -261,13 +260,13 @@ localetrans (string, len, lenp)
   translated = gettext (string);
   if (translated == string)	/* gettext returns its argument if untranslatable */
     {
+      t = xmalloc (len + 1);
       strcpy (t, string);
       if (lenp)
 	*lenp = len;
     }
   else
     {
-      free (t);
       tlen = strlen (translated);
       t = xmalloc (tlen + 1);
       strcpy (t, translated);

@@ -97,8 +97,9 @@ _getaddr (host, ap)
 /* Return 1 if SERV is a valid port number and stuff the converted value into
    PP in network byte order. */   
 static int
-_getserv (serv, pp)
+_getserv (serv, proto, pp)
      char *serv;
+     int proto;
      unsigned short *pp;
 {
   long l;
@@ -115,7 +116,20 @@ _getserv (serv, pp)
       return 1;
     }
   else
+#if defined (HAVE_GETSERVBYNAME)
+    {
+      struct servent *se;
+
+      se = getservbyname (serv, (proto == 't') ? "tcp" : "udp");
+      if (se == 0)
+	return 0;
+      if (pp)
+	*pp = se->s_port;	/* ports returned in network byte order */
+      return 1;
+    }
+#else /* !HAVE_GETSERVBYNAME */
     return 0;
+#endif /* !HAVE_GETSERVBYNAME */
 }
 
 static int 
@@ -126,18 +140,20 @@ _netopen(host, serv, typ)
   struct in_addr ina;
   struct sockaddr_in sin;
   unsigned short p;
-  int s;
+  int s, e;
   char **cp;
 
   if (_getaddr(host, &ina) == 0)
     {
       internal_error ("%s: host unknown", host);
+      errno = EINVAL;
       return -1;
     }
 
-  if (_getserv(serv, &p) == 0)
+  if (_getserv(serv, typ, &p) == 0)
     {
       internal_error("%s: invalid service", serv);
+      errno = EINVAL;
       return -1;
     }
 	
@@ -155,8 +171,10 @@ _netopen(host, serv, typ)
 
   if (connect (s, (struct sockaddr *)&sin, sizeof (sin)) < 0)
     {
+      e = errno;
       sys_error("connect");
       close(s);
+      errno = e;
       return (-1);
     }
 

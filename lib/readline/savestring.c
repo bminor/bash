@@ -27,7 +27,7 @@ extern char *xmalloc ();
    all `public' readline header files. */
 char *
 savestring (s)
-     char *s;
+     const char *s;
 {
   return ((char *)strcpy (xmalloc (1 + (int)strlen (s)), (s)));
 }

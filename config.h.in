@@ -142,6 +142,10 @@
 
 /* Beginning of autoconf additions. */
 
+#define DEFAULT_MAIL_DIRECTORY "/usr/spool/mail"
+
+/* Memory management functions. */
+
 /* Define if using the bash version of malloc in lib/malloc/malloc.c */
 #undef USING_BASH_MALLOC
 
@@ -152,48 +156,14 @@
    This function is required for alloca.c support on those systems.  */
 #undef CRAY_STACKSEG_END
 
-/* Define to the type of elements in the array set by `getgroups'.
-   Usually this is either `int' or `gid_t'.  */
-#undef GETGROUPS_T
-
-/* Define if the `getpgrp' function takes no argument.  */
-#undef GETPGRP_VOID
-
-/* Define to `int' if <sys/types.h> doesn't define.  */
-#undef gid_t
-
 /* Define if you have alloca, as a function or macro.  */
 #undef HAVE_ALLOCA
 
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
-/* Define if you don't have vprintf but do have _doprnt.  */
-#undef HAVE_DOPRNT
 
-/* Define if system calls automatically restart after interruption
-   by a signal.  */
-#undef HAVE_RESTARTABLE_SYSCALLS
-
-/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
-#undef HAVE_SYS_WAIT_H
-
-/* Define if you have <sys/time.h> */
-#undef HAVE_SYS_TIME_H
-
-#undef TIME_WITH_SYS_TIME
-
-#undef HAVE_SYS_TIMES_H
-
-/* Define if you have the vprintf function.  */
-#undef HAVE_VPRINTF
-
-#undef HAVE_WAIT3
-
-#undef HAVE_SETOSTYPE
-
-/* Define if on MINIX.  */
-#undef _MINIX
+/* SYSTEM TYPES */
 
 /* The number of bytes in a int.  */
 #undef SIZEOF_INT
@@ -255,6 +225,18 @@
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef time_t
 
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
+
+/* Define if you have quad_t in <sys/types.h>. */
+#undef HAVE_QUAD_T
+
+#undef RLIMTYPE
+
+/* Define to the type of elements in the array set by `getgroups'.
+   Usually this is either `int' or `gid_t'.  */
+#undef GETGROUPS_T
+
 /* Define if the system does not provide POSIX.1 features except
    with this defined.  */
 #undef _POSIX_1_SOURCE
@@ -262,13 +244,7 @@
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
-/* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
-
-/* Define if the setvbuf function takes the buffering type as its second
-   argument and the buffer pointer as the third, as on System V
-   before release 3.  */
-#undef SETVBUF_REVERSED
+/* Characteristics of the machine archictecture. */
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -279,8 +255,14 @@
  */
 #undef STACK_DIRECTION
 
+/* Define if the machine architecture is big-endian. */
+#undef WORDS_BIGENDIAN
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
+
+/* Check for the presence of certain non-function symbols in the system
+   libraries. */
 
 /* Define if `sys_siglist' is declared by <signal.h> or <unistd.h>.  */
 #undef SYS_SIGLIST_DECLARED
@@ -288,89 +270,26 @@
 /* Define if `_sys_siglist' is declared by <signal.h> or <unistd.h>.  */
 #undef UNDER_SYS_SIGLIST_DECLARED
 
-#undef DUP2_BROKEN
+#undef HAVE_SYS_SIGLIST
 
-#undef HAVE_GETHOSTBYNAME
+#undef HAVE_UNDER_SYS_SIGLIST
 
-#undef HAVE_INET_ATON
+#undef HAVE_SYS_ERRLIST
 
-#undef HAVE_GETRLIMIT
+#undef HAVE_TIMEVAL
 
-#undef HAVE_GETRUSAGE
 
-#undef HAVE_GETTIMEOFDAY
+/* Characteristics of some of the system structures. */
 
-#undef GWINSZ_IN_SYS_IOCTL
+#undef STRUCT_DIRENT_HAS_D_INO
+
+#undef STRUCT_DIRENT_HAS_D_FILENO
 
 #undef TIOCSTAT_IN_SYS_IOCTL
 
 #undef FIONREAD_IN_SYS_IOCTL
 
-#undef WORDS_BIGENDIAN
-
-#undef HAVE_HASH_BANG_EXEC
-
-#undef HAVE_BSD_SIGNALS
-
-#undef HAVE_POSIX_SIGNALS
-
-#undef HAVE_USG_SIGHOLD
-
-#undef HAVE_DEV_FD
-
-#undef DEV_FD_PREFIX
-
-#undef HAVE_DEV_STDIN
-
-#undef HAVE_GETPW_DECLS
-
-#undef HAVE_QUAD_T
-
-#undef HAVE_RESOURCE
-
-#undef HAVE_STRSIGNAL
-
-#undef HAVE_SYS_ERRLIST
-
-#undef STAT_MACROS_BROKEN
-
-#undef HAVE_TIMEVAL
-
-#undef HAVE_MEMMOVE
-
-#undef HAVE_MKFIFO
-
-#undef NAMED_PIPES_MISSING
-
-#undef OPENDIR_NOT_ROBUST
-
-#undef PGRP_PIPE
-
-#undef RLIMTYPE
-
-#undef SBRK_DECLARED
-
-#undef PRINTF_DECLARED
-
-#undef HAVE_SYS_SIGLIST
-
-#undef HAVE_TIMES
-
-#undef HAVE_UNDER_SYS_SIGLIST
-
-#undef VOID_SIGHANDLER
-
-#undef TERMIOS_LDISC
-
-#undef TERMIO_LDISC
-
-#undef ULIMIT_MAXFDS
-
-#undef GETCWD_BROKEN
-
-#undef STRUCT_DIRENT_HAS_D_INO
-
-#undef STRUCT_DIRENT_HAS_D_FILENO
+#undef GWINSZ_IN_SYS_IOCTL
 
 #undef STRUCT_WINSIZE_IN_SYS_IOCTL
 
@@ -378,18 +297,89 @@
 
 #undef SPEED_T_IN_SYS_TYPES
 
+#undef TERMIOS_LDISC
+
+#undef TERMIO_LDISC
+
+
+/* Characteristics of definitions in the system header files. */
+
+#undef HAVE_GETPW_DECLS
+
+#undef HAVE_RESOURCE
+
+#undef SBRK_DECLARED
+
+#undef PRINTF_DECLARED
+
+/* Characteristics of system calls and C library functions. */
+
+/* Define if the `getpgrp' function takes no argument.  */
+#undef GETPGRP_VOID
+
+#undef NAMED_PIPES_MISSING
+
+#undef OPENDIR_NOT_ROBUST
+
+#undef PGRP_PIPE
+
+/* Define if the setvbuf function takes the buffering type as its second
+   argument and the buffer pointer as the third, as on System V
+   before release 3.  */
+#undef SETVBUF_REVERSED
+
+#undef STAT_MACROS_BROKEN
+
+#undef ULIMIT_MAXFDS
+
 #undef CAN_REDEFINE_GETENV
+
+
+/* Characteristics of properties exported by the kernel. */
+
+/* Define if the kernel can exec files beginning with #! */
+#undef HAVE_HASH_BANG_EXEC
+
+/* Define if you have the /dev/fd devices to map open files into the file system. */
+#undef HAVE_DEV_FD
+
+/* Defined to /dev/fd or /proc/self/fd (linux). */
+#undef DEV_FD_PREFIX
+
+/* Define if you have the /dev/stdin device. */
+#undef HAVE_DEV_STDIN
+
+
+/* Type and behavior of signal handling functions. */
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if return type of signal handlers is void */
+#undef VOID_SIGHANDLER
 
 #undef MUST_REINSTALL_SIGHANDLERS
 
-#undef JOB_CONTROL_MISSING
+/* Define if system calls automatically restart after interruption
+   by a signal.  */
+#undef HAVE_RESTARTABLE_SYSCALLS
 
-#undef HAVE_POSIX_SIGSETJMP
+#undef HAVE_BSD_SIGNALS
 
-#define DEFAULT_MAIL_DIRECTORY "/usr/spool/mail"
+#undef HAVE_POSIX_SIGNALS
+
+#undef HAVE_USG_SIGHOLD
+
+#undef UNUSABLE_RT_SIGNALS
+
+
+/* Presence of system and C library functions. */
 
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
+
+/* Define if you have the bindtextdomain function.  */
+#undef HAVE_BINDTEXTDOMAIN
 
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
@@ -406,6 +396,9 @@
 /* Define if you have the dlsym function.  */
 #undef HAVE_DLSYM
 
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
 
@@ -418,6 +411,9 @@
 /* Define if you have the getgroups function.  */
 #undef HAVE_GETGROUPS
 
+/* Define if you have the gethostbyname function.  */
+#undef HAVE_GETHOSTBYNAME
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -427,8 +423,26 @@
 /* Define if you have the getpeername function.  */
 #undef HAVE_GETPEERNAME
 
+/* Define if you have the getrlimit function.  */
+#undef HAVE_GETRLIMIT
+
+/* Define if you have the getrusage function.  */
+#undef HAVE_GETRUSAGE
+
+/* Define if you have the getservbyname function.  */
+#undef HAVE_GETSERVBYNAME
+
+/* Define if you have the gettext function. */
+#undef HAVE_GETTEXT
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
 /* Define if you have the getwd function.  */
 #undef HAVE_GETWD
+
+/* Define if you have the inet_aton function.  */
+#undef HAVE_INET_ATON
 
 /* Define if you have the killpg function.  */
 #undef HAVE_KILLPG
@@ -436,8 +450,20 @@
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
+
+/* Define if you have the mkfifo function.  */
+#undef HAVE_MKFIFO
+
+/* Define if you have the pathconf function. */
+#undef HAVE_PATHCONF
+
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
+
+/* Define if you have the readlink function. */
+#undef HAVE_READLINK
 
 /* Define if you have the rename function. */
 #undef HAVE_RENAME
@@ -460,17 +486,26 @@
 /* Define if you have the setlocale function.  */
 #undef HAVE_SETLOCALE
 
+/* Define if you have the setostype function.  */
+#undef HAVE_SETOSTYPE
+
 /* Define if you have the setvbuf function.  */
 #undef HAVE_SETVBUF
 
 /* Define if you have the siginterrupt function.  */
 #undef HAVE_SIGINTERRUPT
 
+/* Define if you have the POSIX.1-style sigsetjmp function.  */
+#undef HAVE_POSIX_SIGSETJMP
+
 /* Define if you have the strcasecmp function.  */
 #undef HAVE_STRCASECMP
 
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
+
+/* Define if you have the strcoll function.  */
+#undef HAVE_STRCOLL
 
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
@@ -487,39 +522,59 @@
 /* Define if you have the strtoul function. */
 #undef HAVE_STRTOUL
 
-/* Define if you have the tcgetattr function.  */
-#undef HAVE_TCGETATTR
+/* Define if you have the strsignal function or macro. */
+#undef HAVE_STRSIGNAL
 
 /* Define if you have the sysconf function. */
 #undef HAVE_SYSCONF
 
-/* Define if you have the uname function. */
-#undef HAVE_UNAME
+/* Define if you have the tcgetattr function.  */
+#undef HAVE_TCGETATTR
+
+/* Define if you have the tcgetpgrp function.  */
+#undef HAVE_TCGETPGRP
+
+/* Define if you have the textdomain function.  */
+#undef HAVE_TEXTDOMAIN
+
+/* Define if you have the times function.  */
+#undef HAVE_TIMES
+
+/* Define if you have the ttyname function.  */
+#undef HAVE_TTYNAME
+
+/* Define if you have the tzset function. */
+#undef HAVE_TZSET
 
 /* Define if you have the ulimit function. */
 #undef HAVE_ULIMIT
 
-#undef HAVE_TTYNAME
+/* Define if you have the uname function. */
+#undef HAVE_UNAME
 
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define if you have the waitpid function. */
 #undef HAVE_WAITPID
 
-#undef HAVE_TCGETPGRP
+/* Define if you have the wait3 function.  */
+#undef HAVE_WAIT3
 
-#undef HAVE_GETTEXT
 
-#undef HAVE_TEXTDOMAIN
+/* Presence of certain system include files. */
 
-#undef HAVE_BINDTEXTDOMAIN
-
-#undef HAVE_STRCOLL
-
-#undef HAVE_TZSET
+/* Define if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
 
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
 /* Define if you have the <dlfcn.h> header file.  */
 #undef HAVE_DLFCN_H
+
+/* Define if you have the <libintl.h> header file. */
+#undef HAVE_LIBINTL_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
@@ -529,6 +584,12 @@
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
+
+/* Define if you have the <netdh.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
 
 /* Define if you have the <stdlib.h> header file.  */
 #undef HAVE_STDLIB_H
@@ -541,6 +602,9 @@
 
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
+
+/* Define if you have the <stddef.h> header file. */
+#undef HAVE_STDDEF_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
@@ -572,6 +636,17 @@
 /* Define if you have the <sys/stream.h> header file.  */
 #undef HAVE_SYS_STREAM_H
 
+/* Define if you have <sys/time.h> */
+#undef HAVE_SYS_TIME_H
+
+#undef TIME_WITH_SYS_TIME
+
+/* Define if you have <sys/times.h> */
+#undef HAVE_SYS_TIMES_H
+
+/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+#undef HAVE_SYS_WAIT_H
+
 /* Define if you have the <termcap.h> header file.  */
 #undef HAVE_TERMCAP_H
 
@@ -587,26 +662,17 @@
 /* Define if you have the <varargs.h> header file.  */
 #undef HAVE_VARARGS_H
 
-/* Define if you have the <libintl.h> header file. */
-#undef HAVE_LIBINTL_H
-
-/* Define if you have the <stddef.h> header file. */
-#undef HAVE_STDDEF_H
-
-/* Define if you have the <netdh.h> header file. */
-#undef HAVE_NETDB_H
-
-/* Define if you have the <netinet/in.h> header file. */
-#undef HAVE_NETINET_IN_H
-
-/* Define if you have the <arpa/inet.h> header file. */
-#undef HAVE_ARPA_INET_H
+/* Presence of certain system libraries. */
 
 #undef HAVE_LIBDL
 
 #undef HAVE_LIBSUN
 
 #undef HAVE_LIBSOCKET
+
+
+/* Define if on MINIX.  */
+#undef _MINIX
 
 /* Are we running SVR5 (UnixWare 7)? */
 #undef SVR5
@@ -617,12 +683,19 @@
 /* Are we running some version of SVR4? */
 #undef SVR4
 
+/* Define if job control is unusable or unsupported. */
+#undef JOB_CONTROL_MISSING
+
 /* Do we need to define _KERNEL to get the RLIMIT_* defines from
    <sys/resource.h>? */
 #undef RLIMIT_NEEDS_KERNEL
 
 /* Do strcoll(3) and strcmp(3) give different results in the default locale? */
 #undef STRCOLL_BROKEN
+
+#undef DUP2_BROKEN
+
+#undef GETCWD_BROKEN
 
 #include "config-bot.h"
 

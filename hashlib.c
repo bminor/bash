@@ -270,7 +270,7 @@ print_table_stats (table, name)
 
       fprintf (stderr, "\tslot %3d: ", slot);
       for (bcount = 0; bc; bc = bc->next)
-        bcount++;
+	bcount++;
 
       fprintf (stderr, "%d\n", bcount);
     }
@@ -310,9 +310,9 @@ main ()
     {
       char *temp_string;
       if (fgets (string, sizeof (string), stdin) == 0)
-        break;
+	break;
       if (!*string)
-        break;
+	break;
       temp_string = savestring (string);
       tt = add_hash_item (temp_string, table);
       if (tt->times_found)

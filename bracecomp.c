@@ -39,7 +39,7 @@
 #include "shell.h"
 #include <readline/readline.h>
 
-extern char *backslash_quote ();
+extern char *sh_backslash_quote ();
 
 /* Find greatest common prefix of two strings. */
 static int
@@ -73,8 +73,8 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 
   if (real_start == real_end)
     {
-      x = array[real_start] ? backslash_quote (array[real_start] + gcd_zero)
- 			    : backslash_quote (array[0]);
+      x = array[real_start] ? sh_backslash_quote (array[real_start] + gcd_zero)
+ 			    : sh_backslash_quote (array[0]);
       return x;
     }
 
@@ -113,7 +113,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
       if (start == end)
 	{
 	  x = savestring (array[start] + gcd_zero);
-	  subterm = backslash_quote (x);
+	  subterm = sh_backslash_quote (x);
 	  free (x);
 	}
       else
@@ -124,7 +124,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  x = xmalloc (tlen + 1);
 	  strncpy (x, array[start] + gcd_zero, tlen);
 	  x[tlen] = '\0';
-	  subterm = backslash_quote (x);
+	  subterm = sh_backslash_quote (x);
 	  free (x);
 	  result_size += strlen (subterm) + 1;
 	  result = xrealloc (result, result_size);
@@ -147,7 +147,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
   return (result);
 }
 
-static void
+static int
 hack_braces_completion (names)
      char **names;
 {
@@ -162,18 +162,20 @@ hack_braces_completion (names)
       names[i] = NULL;
     }
   names[0] = temp;
+  return 0;
 }
 
 /* We handle quoting ourselves within hack_braces_completion, so we turn off
    rl_filename_quoting_desired and rl_filename_quoting_function. */
-void
-bash_brace_completion ()
+int
+bash_brace_completion (count, ignore)
+     int count, ignore;
 {
-  Function *orig_ignore_func;
-  Function *orig_entry_func;
-  CPFunction *orig_quoting_func;
-  CPPFunction *orig_attempt_func;
-  int orig_quoting_desired;
+  rl_compignore_func_t *orig_ignore_func;
+  rl_compentry_func_t *orig_entry_func;
+  rl_quote_func_t *orig_quoting_func;
+  rl_completion_func_t *orig_attempt_func;
+  int orig_quoting_desired, r;
 
   orig_ignore_func = rl_ignore_some_completions_function;
   orig_attempt_func = rl_attempted_completion_function;
@@ -181,18 +183,20 @@ bash_brace_completion ()
   orig_quoting_func = rl_filename_quoting_function;
   orig_quoting_desired = rl_filename_quoting_desired;
 
-  rl_completion_entry_function = (Function *) filename_completion_function;
-  rl_attempted_completion_function = NULL;
-  rl_ignore_some_completions_function = (Function *) hack_braces_completion;
-  rl_filename_quoting_function = NULL;
+  rl_completion_entry_function = rl_filename_completion_function;
+  rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_ignore_some_completions_function = hack_braces_completion;
+  rl_filename_quoting_function = (rl_quote_func_t *)NULL;
   rl_filename_quoting_desired = 0;
 
-  rl_complete_internal (TAB);
+  r = rl_complete_internal (TAB);
 
   rl_ignore_some_completions_function = orig_ignore_func;
   rl_attempted_completion_function = orig_attempt_func;
   rl_completion_entry_function = orig_entry_func;
   rl_filename_quoting_function = orig_quoting_func;
   rl_filename_quoting_desired = orig_quoting_desired;
+
+  return r;
 }
 #endif /* BRACE_EXPANSION && READLINE */

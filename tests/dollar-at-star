@@ -117,3 +117,94 @@ unset IFS
 recho "$@"
 recho $@
 recho "$*"
+
+IFS=:
+
+# special variables
+set -- 1 2 3 4 5 6 7 8 9 10
+
+bar=${*}
+foo=$*
+echo foo = "$foo"
+echo bar = "$bar"
+
+foo1=$@
+bar1=${@}
+
+echo foo1 = "$foo1"
+echo bar1 = "$bar1"
+
+foo2="$*"
+bar2="${*}"
+
+echo foo2 = "$foo2"
+echo bar2 = "$bar2"
+
+eval foo3='$*' bar3='${*}'
+echo foo3 = "$foo3"
+echo bar3 = "$bar3"
+
+case $* in
+*\:*)	echo ok 1;;
+*)	echo bad 1;;
+esac
+
+case $@ in
+*\:*)	echo bad 2;;
+*)	echo ok 2;;
+esac
+
+case "$*" in
+*\:*)	echo ok 3;;
+*)	echo bad 3;;
+esac
+
+case "$@" in
+*\:*)	echo bad 4;;
+*)	echo ok 4;;
+esac
+
+IFS=$' \t\n'
+
+bar=${*}
+foo=$*
+echo foo = "$foo"
+echo bar = "$bar"
+
+foo1=$@
+bar1=${@}
+
+echo foo1 = "$foo1"
+echo bar1 = "$bar1"
+
+foo2="$*"
+bar2="${*}"
+
+echo foo2 = "$foo2"
+echo bar2 = "$bar2"
+
+eval foo3='$*' bar3='${*}'
+echo foo3 = "$foo3"
+echo bar3 = "$bar3"
+
+case $* in
+*\ *)	echo ok 1;;
+*)	echo bad 1;;
+esac
+
+case $@ in
+*\ *)	echo ok 2;;
+*)	echo bad 2;;
+esac
+
+case "$*" in
+*\ *)	echo ok 3;;
+*)	echo bad 3;;
+esac
+
+case "$@" in
+*\ *)	echo ok 4;;
+*)	echo bad 4;;
+esac
+
+exit 0

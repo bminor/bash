@@ -333,10 +333,12 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 
-	  /* Cannot use declare to assign value to readonly variable. */
-	  if (readonly_p (var) && offset)
+	  /* Cannot use declare to assign value to readonly or noassign
+	     variable. */
+	  if ((readonly_p (var) || noassign_p (var)) && offset)
 	    {
-	      builtin_error ("%s: readonly variable", name);
+	      if (readonly_p (var))
+		builtin_error ("%s: readonly variable", name);
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
@@ -347,7 +349,7 @@ declare_internal (list, local_var)
 	  if ((making_array_special || (flags_on & att_array) || array_p (var)) && offset)
 	    {
 	      if (value[0] == '(' && strchr (value, ')'))
-	        assigning_array_special = 1;
+		assigning_array_special = 1;
 	      else
 		{
 		  builtin_error ("%s: cannot assign to array variables in this way", name);

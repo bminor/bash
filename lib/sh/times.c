@@ -60,7 +60,7 @@ times(tms)
 
 	if (gettimeofday(&tv, (struct timezone *) 0) < 0)
 		return ((clock_t)-1);
-        rv = (clock_t)(CONVTCK(tv));
+	rv = (clock_t)(CONVTCK(tv));
 #else /* !HAVE_GETRUSAGE */
 	if (clk_tck == -1)
 		clk_tck = get_clk_tck();

@@ -202,6 +202,9 @@ static RESOURCE_LIMITS limits[] = {
 #if defined (HAVE_RESOURCE)
   { 'v',	RLIMIT_VIRTMEM, RLIMIT_VMBLKSZ, "virtual memory (kbytes)" },
 #endif
+#ifdef RLIMIT_SWAP
+  { 'w',	RLIMIT_SWAP,	1024,	"swap size (kbytes)" },
+#endif
   { -1, -1, -1, (char *)NULL }
 };
 #define NCMDS	(sizeof(limits) / sizeof(limits[0]))
@@ -476,7 +479,13 @@ set_limit (ind, newlim, mode)
 
       case RLIMIT_OPENFILES:
 #if defined (HAVE_SETDTABLESIZE)
+#  if defined (__CYGWIN__)
+	/* Grrr... Cygwin declares setdtablesize as void. */
+	setdtablesize (newlim);
+	return 0;
+#  else
 	return (setdtablesize (newlim));
+#  endif
 #endif
       case RLIMIT_PIPESIZE:
       case RLIMIT_VIRTMEM:
@@ -495,6 +504,7 @@ set_limit (ind, newlim, mode)
 	newlim /= 512;				/* Ugh. */
 #  endif /* HPUX9 */
       val = (current_user.euid != 0 && newlim == RLIM_INFINITY &&
+	       (mode & LIMIT_HARD) == 0 &&		/* XXX -- test */
 	       (limit.rlim_cur <= limit.rlim_max))
 		 ? limit.rlim_max : newlim;
       if (mode & LIMIT_SOFT)

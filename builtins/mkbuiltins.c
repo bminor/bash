@@ -205,7 +205,7 @@ main (argc, argv)
 #if !defined (OLDCODE)
       else if (strcmp (arg, "-nodocument") == 0)
 	no_long_document = 1;
-#endif /* !OLDCODE */        
+#endif /* !OLDCODE */	
       else
 	{
 	  fprintf (stderr, "%s: Unknown flag %s.\n", argv[0], arg);
@@ -614,10 +614,10 @@ free_defs (defs)
   if (defs->builtins)
     {
       for (i = 0; builtin = (BUILTIN_DESC *)defs->builtins->array[i]; i++)
-        {
+	{
 	  free_builtin (builtin);
 	  free (builtin);
-        }
+	}
       array_free (defs->builtins);
     }
   free (defs);
@@ -990,9 +990,9 @@ copy_builtin (builtin)
 
   new = (BUILTIN_DESC *)xmalloc (sizeof (BUILTIN_DESC));
 
-  new->name         = savestring (builtin->name);
-  new->shortdoc     = savestring (builtin->shortdoc);
-  new->longdoc      = copy_string_array (builtin->longdoc);
+  new->name = savestring (builtin->name);
+  new->shortdoc = savestring (builtin->shortdoc);
+  new->longdoc = copy_string_array (builtin->longdoc);
   new->dependencies = copy_string_array (builtin->dependencies);
 
   new->function =
@@ -1151,7 +1151,7 @@ write_builtins (defs, structfile, externfile)
 			     builtin->function);
 
 		  fprintf (externfile, "extern char *%s_doc[];\n",
-			   builtin->docname ?builtin->docname : builtin->name);
+			   builtin->docname ? builtin->docname : builtin->name);
 		}
 
 	      /* Write the structure definition. */

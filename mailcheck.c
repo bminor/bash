@@ -283,7 +283,7 @@ parse_mailpath_spec (str)
 	  continue;
 	}
       if (*s == '?' || *s == '%')
-        return s;
+	return s;
     }
   return ((char *)NULL);
 }

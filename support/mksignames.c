@@ -34,7 +34,18 @@
 
 char *signal_names[2 * NSIG];
 
+#define signal_names_size (sizeof(signal_names)/sizeof(signal_names[0]))
+
 char *progname;
+
+/* AIX 4.3 defines SIGRTMIN and SIGRTMAX as 888 and 999 respectively.
+   I don't want to allocate so much unused space for the intervening signal
+   numbers, so we just punt if SIGRTMAX is past the bounds of the
+   signal_names array (handled in configure). */
+#if defined (SIGRTMAX) && defined (UNUSABLE_RT_SIGNALS)
+#  undef SIGRTMAX
+#  undef SIGRTMIN
+#endif
 
 #if defined (SIGRTMAX) || defined (SIGRTMIN)
 #  define RTLEN 14
@@ -49,7 +60,7 @@ initialize_signames ()
   int rtmin, rtmax, rtcnt;
 #endif
 
-  for (i = 1; i < sizeof(signal_names)/sizeof(signal_names[0]); i++)
+  for (i = 1; i < signal_names_size; i++)
     signal_names[i] = (char *)NULL;
 
   /* `signal' 0 is what we do on exit. */

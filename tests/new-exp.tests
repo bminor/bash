@@ -118,6 +118,32 @@ recho "${@:3:4}"
 expect '<ab cd> <ef> <gh ij> <kl mn> <op>'
 recho "${@:1:$#}"
 
+# code to ad-hoc parse arithmetic expressions in substring expansions was
+# broken until post-2.04
+base=/home/chet/foo//bar
+string1=$base/abcabcabc
+x=1 j=4
+
+expect '</home/chet/foo//bar/abcabcabc>'
+recho ${string1:0}
+
+expect '<home/chet/foo//bar/abcabcabc>'
+recho ${string1:1}
+
+expect '<home>'
+recho ${string1:(j?1:0):j}
+
+expect '<home>'
+recho ${string1:j?1:0:j}
+
+expect '<home>'
+recho ${string1:(j?(x?1:0):0):j}
+
+expect '<home>'
+recho ${string1:j?(x?1:0):0:j}
+
+unset base string1 x j
+
 # indirect variable references
 expect '<abcdefghijklmnop>'
 recho ${!9:-$z}

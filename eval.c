@@ -140,10 +140,10 @@ reader_loop ()
 
 	    exec_done:
 	      if (current_command)
-	        {
+		{
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
-	        }
+		}
 
 	      QUIT;
 	    }

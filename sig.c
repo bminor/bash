@@ -230,13 +230,13 @@ initialize_terminating_signals ()
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
-        {
+	{
 	  sigaction (XSIG (i), &oact, &act);
 	  set_signal_ignored (XSIG (i));
-        }
+	}
 #if defined (SIGPROF) && !defined (_MINIX)
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
-        sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
+	sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
 #endif /* SIGPROF && !_MINIX */
     }
 
@@ -249,12 +249,12 @@ initialize_terminating_signals ()
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
 	{
-          signal (XSIG (i), SIG_IGN);
-          set_signal_ignored (XSIG (i));
+	  signal (XSIG (i), SIG_IGN);
+	  set_signal_ignored (XSIG (i));
 	}
 #ifdef SIGPROF
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
-        signal (XSIG (i), XHANDLER (i));
+	signal (XSIG (i), XHANDLER (i));
 #endif
     }
 
@@ -351,7 +351,7 @@ throw_to_top_level ()
     parse_and_execute_cleanup ();
 
 #if defined (JOB_CONTROL)
-  give_terminal_to (shell_pgrp);
+  give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
 #if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)

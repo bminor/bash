@@ -79,7 +79,7 @@ strcasecmp (string1, string2)
   while ((r = to_lower (*s1) - to_lower (*s2)) == 0)
     {
       if (*s1++ == '\0')
-        return 0;
+	return 0;
       s2++;
     }
 

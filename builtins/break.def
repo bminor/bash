@@ -40,6 +40,7 @@ $END
 #include "common.h"
 
 extern char *this_command_name;
+extern int posixly_correct;
 
 static int check_loop_level ();
 
@@ -61,7 +62,7 @@ break_builtin (list)
   int newbreak;
 
   if (check_loop_level () == 0)
-    return (EXECUTION_FAILURE);
+    return (EXECUTION_SUCCESS);
 
   newbreak = get_numeric_arg (list, 1);
 
@@ -96,7 +97,7 @@ continue_builtin (list)
   int newcont;
 
   if (check_loop_level () == 0)
-    return (EXECUTION_FAILURE);
+    return (EXECUTION_SUCCESS);
 
   newcont = get_numeric_arg (list, 1);
 
@@ -121,7 +122,7 @@ static int
 check_loop_level ()
 {
 #if defined (BREAK_COMPLAINS)
-  if (loop_level == 0)
+  if (loop_level == 0 && posixly_correct == 0)
     builtin_error ("only meaningful in a `for', `while', or `until' loop");
 #endif /* BREAK_COMPLAINS */
 

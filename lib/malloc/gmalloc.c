@@ -651,7 +651,7 @@ imalloc (size)
 		 final free block; if so we don't need to get as much.  */
 	      if (_heaplimit != 0 && block + lastblocks == _heaplimit &&
 		  /* We can't do this if we will have to make the heap info
-                     table bigger to accomodate the new space.  */
+		     table bigger to accomodate the new space.  */
 		  block + wantblocks <= heapsize &&
 		  get_contiguous_space ((wantblocks - lastblocks) * BLOCKSIZE,
 					ADDRESS (block + lastblocks)))
@@ -1165,7 +1165,7 @@ irealloc (ptr, size)
 		 the thing we just freed.  Unfortunately it might
 		 have been coalesced with its neighbors.  */
 	      if (_heapindex == block)
-	        (void) imalloc (blocks * BLOCKSIZE);
+		(void) imalloc (blocks * BLOCKSIZE);
 	      else
 		{
 		  genptr_t previous;

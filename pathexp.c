@@ -101,7 +101,7 @@ unquoted_glob_pattern_p (string)
    to match a filename should be performed. */
 char *
 quote_string_for_globbing (pathname, qflags)
-     char *pathname;
+     const char *pathname;
      int qflags;
 {
   char *temp;
@@ -118,13 +118,13 @@ quote_string_for_globbing (pathname, qflags)
   for (i = j = 0; pathname[i]; i++)
     {
       if (pathname[i] == CTLESC)
-        {
-          if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
-            continue;
+	{
+	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
+	    continue;
 	  temp[j++] = '\\';
-        }
+	}
       else
-        temp[j++] = pathname[i];
+	temp[j++] = pathname[i];
     }
   temp[j] = '\0';
 
@@ -141,21 +141,21 @@ quote_globbing_chars (string)
   for (t = temp, s = string; *s; )
     {
       switch (*s)
-        {
-        case '*':
-        case '[':
-        case ']':
-        case '?':
-        case '\\':
-          *t++ = '\\';
-          break;
-        case '+':
-        case '@':
-        case '!':
+	{
+	case '*':
+	case '[':
+	case ']':
+	case '?':
+	case '\\':
+	  *t++ = '\\';
+	  break;
+	case '+':
+	case '@':
+	case '!':
 	  if (s[1] == '(')	/*(*/
 	    *t++ = '\\';
 	  break;
-        }
+	}
       *t++ = *s++;
     }
   *t = '\0';
@@ -165,11 +165,11 @@ quote_globbing_chars (string)
 /* Call the glob library to do globbing on PATHNAME. */
 char **
 shell_glob_filename (pathname)
-     char *pathname;
+     const char *pathname;
 {
 #if defined (USE_POSIX_GLOB_LIBRARY)
   register int i;
-  char *temp, **return_value;
+  char *temp, **results;
   glob_t filenames;
   int glob_flags;
 
@@ -189,7 +189,7 @@ shell_glob_filename (pathname)
 
   free (temp);
 
-  if (i == GLOB_NOSPACE || i == GLOB_ABEND)
+  if (i == GLOB_NOSPACE || i == GLOB_ABORTED)
     return ((char **)NULL);
   else if (i == GLOB_NOMATCH)
     filenames.gl_pathv = (char **)NULL;
@@ -292,7 +292,7 @@ glob_name_is_acceptable (name)
   for (p = globignore.ignores; p->val; p++)
     {
       if (fnmatch (p->val, name, flags) != FNM_NOMATCH)
-        return (0);
+	return (0);
     }
   return (1);
 }
@@ -318,7 +318,7 @@ ignore_globbed_names (names, name_func)
   for (n = i = 0; names[i]; i++)
     {
       if ((*name_func) (names[i]))
-        newnames[n++] = names[i];
+	newnames[n++] = names[i];
       else
 	free (names[i]);
     }
@@ -400,7 +400,7 @@ setup_ignore_patterns (ivp)
       ivp->ignores[numitems].len = strlen (colon_bit);
       ivp->ignores[numitems].flags = 0;
       if (ivp->item_func)
-        (*ivp->item_func) (&ivp->ignores[numitems]);
+	(*ivp->item_func) (&ivp->ignores[numitems]);
       numitems++;
     }
   ivp->ignores[numitems].val = (char *)NULL;

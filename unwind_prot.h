@@ -29,6 +29,7 @@ extern void add_unwind_protect ();
 extern void remove_unwind_protect ();
 extern void run_unwind_protects ();
 extern void unwind_protect_var ();
+extern void clear_unwind_protect_list ();
 
 /* Try to force correct alignment on machines where pointers and ints
    differ in size. */
@@ -55,7 +56,9 @@ typedef union {
 
 /* How to protect a pointer to a string. */
 #define unwind_protect_string(X) \
-  unwind_protect_var ((int *)&(X), (X), sizeof (char *))
+  unwind_protect_var ((int *)&(X), \
+		      ((sizeof (char *) == sizeof (int)) ? (char *) (X) : (char *) &(X)), \
+		       sizeof (char *))
 
 /* How to protect any old pointer. */
 #define unwind_protect_pointer(X) unwind_protect_string (X)

@@ -196,9 +196,9 @@ dogetopts (argc, argv)
 	;
       v = alloc_array (i + 1);
       for (i = 0; i < 10 && dollar_vars[i]; i++)
-        v[i] = dollar_vars[i];
+	v[i] = dollar_vars[i];
       for (words = rest_of_args; words; words = words->next, i++)
-        v[i] = words->word->word;
+	v[i] = words->word->word;
       v[i] = (char *)NULL;
       sh_getopt_restore_state (v);
       ret = sh_getopt (i, v, optstr);

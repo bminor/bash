@@ -24,7 +24,7 @@ $PRODUCES complete.c
 $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
-$SHORT_DOC complete [-abcdefjkvu] [-pr] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
+$SHORT_DOC complete [-abcdefjkvu] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
 For each NAME, specify how arguments are to be completed.
 If the -p option is supplied, or if no options are supplied, existing
 completion specifications are printed in a way that allows them to be
@@ -90,6 +90,16 @@ static struct _compacts {
   { (char *)NULL, 0, 0 },
 };
 
+static struct _compopt {
+  char *optname;
+  int optflag;
+} compopts[] = {
+  { "default",	COPT_DEFAULT },
+  { "dirnames", COPT_DIRNAMES },
+  { "filenames",COPT_FILENAMES},
+  { (char *)NULL, 0 },
+};
+
 static int
 find_compact (name)
      char *name;
@@ -102,32 +112,46 @@ find_compact (name)
   return -1;
 }
 
-/* Build the actions from the options specified in LIST.  ACTP is a pointer
-   to an unsigned long in which to place the bitmap of actions.  PP, if
-   non-null, gets 1 if -p is supplied; RP, if non-null, gets 1 if -r is
-   supplied.  If either is null, the corresponding option generates an
-   error.  This also sets variables corresponding to options that take
-   arguments as a side effect; the caller should ensure that those variables
-   are set to NULL before calling build_actions.  Return value:
+static int
+find_compopt (name)
+     char *name;
+{
+  register int i;
+
+  for (i = 0; compopts[i].optname; i++)
+    if (STREQ (name, compopts[i].optname))
+      return i;
+  return -1;
+}
+
+/* Build the actions and compspec options from the options specified in LIST.
+   ACTP is a pointer to an unsigned long in which to place the bitmap of
+   actions.  OPTP is a pointer to an unsigned long in which to place the
+   btmap of compspec options (arguments to `-o').  PP, if non-null, gets 1
+   if -p is supplied; RP, if non-null, gets 1 if -r is supplied.
+   If either is null, the corresponding option generates an error.
+   This also sets variables corresponding to options that take arguments as
+   a side effect; the caller should ensure that those variables are set to
+   NULL before calling build_actions.  Return value:
    	EX_USAGE = bad option
    	EXECUTION_SUCCESS = some options supplied
    	EXECUTION_FAILURE = no options supplied
 */
 
 static int
-build_actions (list, pp, rp, actp)
+build_actions (list, pp, rp, actp, optp)
      WORD_LIST *list;
      int *pp, *rp;
-     unsigned long *actp;
+     unsigned long *actp, *optp;
 {
   int opt, ind, pflag, rflag, opt_given;
-  unsigned long acts;
+  unsigned long acts, copts;
 
-  acts = (unsigned long)0L;
+  acts = copts = (unsigned long)0L;
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefjkpruvA:G:W:P:S:X:F:C:")) != -1)
+  while ((opt = internal_getopt (list, "abcdefjko:pruvA:G:W:P:S:X:F:C:")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -188,6 +212,15 @@ build_actions (list, pp, rp, actp)
 	case 'v':
 	  acts |= CA_VARIABLE;
 	  break;
+	case 'o':
+	  ind = find_compopt (list_optarg);
+	  if (ind < 0)
+	    {
+	      builtin_error ("%s: invalid option name", list_optarg);
+	      return (EX_USAGE);
+	    }
+	  copts |= compopts[ind].optflag;
+	  break;
 	case 'A':
 	  ind = find_compact (list_optarg);
 	  if (ind < 0)
@@ -225,6 +258,8 @@ build_actions (list, pp, rp, actp)
     }
 
   *actp = acts;
+  *optp = copts;
+
   return (opt_given ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
@@ -234,7 +269,7 @@ complete_builtin (list)
      WORD_LIST *list;
 {
   int opt_given, pflag, rflag, rval;
-  unsigned long acts;
+  unsigned long acts, copts;
   char *cmd;
   COMPSPEC *cs;
 
@@ -245,13 +280,13 @@ complete_builtin (list)
     }
 
   opt_given = pflag = rflag = 0;
-  acts = (unsigned long)0L;
+  acts = copts = (unsigned long)0L;
   Aarg = Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, &pflag, &rflag, &acts);
+  rval = build_actions (list, &pflag, &rflag, &acts, &copts);
   if (rval == EX_USAGE)
     return (rval);
   opt_given = rval != EXECUTION_FAILURE;
@@ -290,6 +325,7 @@ complete_builtin (list)
      remaining argument. */
   cs = alloc_compspec ();
   cs->actions = acts;
+  cs->options = copts;
 
   cs->globpat = STRDUP (Garg);
   cs->words = STRDUP (Warg);
@@ -304,7 +340,7 @@ complete_builtin (list)
       /* Add CS as the compspec for the specified commands. */
       cmd = list->word->word;
       if (add_progcomp (cmd, cs) == 0)
-        rval = EXECUTION_FAILURE;
+	rval = EXECUTION_FAILURE;
     }
 
   return (rval);
@@ -332,7 +368,7 @@ remove_cmd_completions (list)
   do { \
     if (a) \
       { \
-      	x = single_quote (a); \
+      	x = sh_single_quote (a); \
 	printf ("%s %s ", f, x); \
 	free (x); \
       } \
@@ -356,19 +392,32 @@ remove_cmd_completions (list)
       printf ("-A %s ", f); \
   } while (0)
 
+#define PRINTCOMPOPT(a, f) \
+  do { \
+    if (copts & a) \
+      printf ("-o %s ", f); \
+  } while (0)
+
 static void
 print_one_completion (cmd, cs)
      char *cmd;
      COMPSPEC *cs;
 {
-  unsigned long acts;
+  unsigned long acts, copts;
   char *x;
 
   printf ("complete ");
 
+  copts = cs->options;
+
+  /* First, print the -o options. */
+  PRINTCOMPOPT (COPT_DEFAULT, "default");
+  PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
+  PRINTCOMPOPT (COPT_FILENAMES, "filenames");
+
   acts = cs->actions;
 
-  /* simple flags first */
+  /* simple flags next */
   PRINTOPT (CA_ALIAS, "-a");
   PRINTOPT (CA_BUILTIN, "-b");
   PRINTOPT (CA_COMMAND, "-c");
@@ -428,7 +477,7 @@ print_cmd_completions (list)
     {
       cs = find_compspec (l->word->word);
       if (cs)
-        print_one_completion (l->word->word, cs);
+	print_one_completion (l->word->word, cs);
       else
 	{
 	  builtin_error ("%s: no completion specification", l->word->word);
@@ -441,7 +490,7 @@ print_cmd_completions (list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefjkvu] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
+$SHORT_DOC compgen [-abcdefjkvu] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
 Display the possible completions depending on the options.  Intended
 to be used from within a shell function generating possible completions.
 If the optional WORD argument is supplied, matches against WORD are
@@ -453,7 +502,7 @@ compgen_builtin (list)
      WORD_LIST *list;
 {
   int rval;
-  unsigned long acts;
+  unsigned long acts, copts;
   COMPSPEC *cs;
   STRINGLIST *sl;
   char *word;
@@ -461,13 +510,13 @@ compgen_builtin (list)
   if (list == 0)
     return (EXECUTION_SUCCESS);
 
-  acts = (unsigned long)0L;
+  acts = copts = (unsigned long)0L;
   Aarg = Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, (int *)NULL, (int *)NULL, &acts);
+  rval = build_actions (list, (int *)NULL, (int *)NULL, &acts, &copts);
   if (rval == EX_USAGE)
     return (rval);
   if (rval == EXECUTION_FAILURE)
@@ -485,6 +534,7 @@ compgen_builtin (list)
   /* If we get here, we need to build a compspec and evaluate it. */
   cs = alloc_compspec ();
   cs->actions = acts;
+  cs->options = copts;
   cs->refcount = 1;
 
   cs->globpat = STRDUP (Garg);

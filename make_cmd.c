@@ -32,6 +32,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #  include <unistd.h>
 #endif
 
+#include "syntax.h"
 #include "command.h"
 #include "general.h"
 #include "error.h"
@@ -250,7 +251,7 @@ make_arith_for_command (exprs, action, lineno)
       start = s;
       /* skip to the semicolon or EOS */
       while (*s && *s != ';')
-        s++;
+	s++;
 
       t = (s > start) ? substring (start, 0, s - start) : (char *)NULL;
 
@@ -270,7 +271,7 @@ make_arith_for_command (exprs, action, lineno)
 
       FREE (t);
       if (*s == '\0')
-        break;
+	break;
       s++;	/* skip over semicolon */
     }
 
@@ -569,7 +570,7 @@ make_here_document (temp)
       line_number++;
 
       if (kill_leading && *line)
-        {
+	{
 	  /* Hack:  To be compatible with some Bourne shells, we
 	     check the word before stripping the whitespace.  This
 	     is a hack, though. */
@@ -581,7 +582,7 @@ make_here_document (temp)
 	}
 
       if (*line == 0)
-        continue;
+	continue;
 
       if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
 	goto document_done;

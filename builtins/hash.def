@@ -41,6 +41,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+
 #include "../bashansi.h"
 
 #include "../shell.h"
@@ -119,7 +121,19 @@ hash_builtin (list)
       /* Add or rehash the specified commands. */
       w = list->word->word;
       if (pathname)
-	remember_filename (w, pathname, 0, 0);
+	{
+	  if (is_directory (pathname))
+	    {
+#ifdef EISDIR
+	      builtin_error ("%s: %s", pathname, strerror (EISDIR));
+#else
+	      builtin_error ("%s: is a directory", pathname);
+#endif
+	      opt = EXECUTION_FAILURE;
+	    }
+	  else
+	    remember_filename (w, pathname, 0, 0);
+	}
       else if (absolute_program (w))
 	continue;
       else if (add_hashed_command (w, 0))

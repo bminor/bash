@@ -186,10 +186,10 @@ pushd_builtin (list)
 	  flags |= NOCD;
 	}
       else if (ISOPTION (list->word->word, '-'))
-        {
-          list = list->next;
-          break;
-        }
+	{
+	  list = list->next;
+	  break;
+	}
       else if (list->word->word[0] == '-' && list->word->word[1] == '\0')
 	/* Let `pushd -' work like it used to. */
 	break;
@@ -296,14 +296,14 @@ popd_builtin (list)
   for (flags = 0, which = 0L, direction = '+'; list; list = list->next)
     {
       if (ISOPTION (list->word->word, 'n'))
-        {
-          flags |= NOCD;
-        }
+	{
+	  flags |= NOCD;
+	}
       else if (ISOPTION (list->word->word, '-'))
-        {
-          list = list->next;
-          break;
-        }
+	{
+	  list = list->next;
+	  break;
+	}
       else if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
 	  if (legal_number (list->word->word + 1, &which) == 0)
@@ -335,7 +335,7 @@ popd_builtin (list)
       (direction == '-' && which == directory_list_offset))
     {
       i = ((flags & NOCD) == 0) ? cd_to_string (pushd_directory_list[directory_list_offset - 1])
-      			        : EXECUTION_SUCCESS;
+      				: EXECUTION_SUCCESS;
       if (i != EXECUTION_SUCCESS)
 	return (i);
       free (pushd_directory_list[--directory_list_offset]);
@@ -386,14 +386,14 @@ dirs_builtin (list)
 	  vflag |= 1;
 	}
       else if (ISOPTION (list->word->word, '-'))
-        {
-          list = list->next;
-          break;
-        }
+	{
+	  list = list->next;
+	  break;
+	}
       else if (*list->word->word == '+' || *list->word->word == '-')
-        {
-          int sign;
-          if (legal_number (w = list->word->word + 1, &i) == 0)
+	{
+	  int sign;
+	  if (legal_number (w = list->word->word + 1, &i) == 0)
 	    {
 	      builtin_error (m_badarg, list->word->word);
 	      builtin_usage ();

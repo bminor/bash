@@ -169,7 +169,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	  /* xxx [-np] name[=value] */
 	  assign = assignment (name);
 
-          if (assign)
+	  if (assign)
 	    name[assign] = '\0';
 
 	  if (legal_identifier (name) == 0)
@@ -233,11 +233,11 @@ set_or_show_attributes (list, attribute, nodefs)
 
 #if defined (ARRAY_VARS)
       if (attribute & att_array)
-        {
-          arrays_only++;
-          if (attribute != att_array)
+	{
+	  arrays_only++;
+	  if (attribute != att_array)
 	    attribute &= ~att_array;
-        }
+	}
 #endif
 
       if (variable_list)
@@ -246,7 +246,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	    {
 #if defined (ARRAY_VARS)
 	      if (arrays_only && array_p (var) == 0)
-	        continue;
+		continue;
 #endif
 	      if ((var->attributes & attribute) && invisible_p (var) == 0)
 		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
@@ -285,16 +285,16 @@ show_var_attributes (var, pattr, nodefs)
 #endif
 
       if (function_p (var))
-        flags[i++] = 'f';
+	flags[i++] = 'f';
 
       if (integer_p (var))
-        flags[i++] = 'i';
+	flags[i++] = 'i';
 
       if (readonly_p (var))
-        flags[i++] = 'r';
+	flags[i++] = 'r';
 
       if (exported_p (var))
-        flags[i++] = 'x';
+	flags[i++] = 'x';
     }
   else
     {
@@ -304,7 +304,7 @@ show_var_attributes (var, pattr, nodefs)
 #endif
 
       if (function_p (var))
-        flags[i++] = 'f';
+	flags[i++] = 'f';
     }
 
   flags[i] = '\0';
@@ -329,7 +329,7 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
   else
     {
-      x = double_quote (value_cell (var) ? value_cell (var) : "");
+      x = sh_double_quote (value_cell (var) ? value_cell (var) : "");
       printf ("%s=%s\n", var->name, x);
       free (x);
     }

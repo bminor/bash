@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Tue Mar 14 11:36:43 EST 2000
+.\"	Last Change: Mon Mar  5 10:19:14 EST 2001
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2000 Mar 14" "GNU Bash-2.04"
+.TH BASH 1 "2001 Mar 5" "GNU Bash-2.05"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-1999 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-1999 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2001 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2001 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -110,7 +110,7 @@ A list of all double-quoted strings preceded by \fB$\fP
 is printed on the standard ouput.
 These are the strings that
 are subject to language translation when the current locale
-is not C or POSIX.
+is not \fBC\fP or \fBPOSIX\fP.
 This implies the \fB\-n\fP option; no commands will be executed.
 .TP
 .B \-\-
@@ -140,6 +140,20 @@ Equivalent to \fB\-D\fP.
 .TP
 .B \-\-help
 Display a usage message on standard output and exit successfully.
+.TP
+.PD 0
+\fB\-\-init\-file\fP \fIfile\fP
+.TP
+\fB\-\-rcfile\fP \fIfile\fP
+.PD
+Execute commands from
+.I file
+instead of the standard personal initialization file
+.I ~/.bashrc
+if the shell is interactive (see
+.SM
+.B INVOCATION
+below).
 .TP
 .B \-\-login
 Make
@@ -178,17 +192,7 @@ This option is on by default if the shell is invoked as
 .TP
 .B \-\-posix
 Change the behavior of \fBbash\fP where the default operation differs
-from the POSIX 1003.2 standard to match the standard.
-.TP
-\fB\-\-rcfile\fP \fIfile\fP
-Execute commands from
-.I file
-instead of the standard personal initialization file
-.I ~/.bashrc
-if the shell is interactive (see
-.SM
-.B INVOCATION
-below).
+from the POSIX 1003.2 standard to match the standard (\fIposix mode\fP).
 .TP
 .B \-\-restricted
 The shell becomes restricted (see
@@ -303,7 +307,8 @@ expanded value as the name of a file to read and execute.
 behaves as if the following command were executed:
 .sp .5
 .RS
-\f(CWif [ \-n "$BASH_ENV" ]; then . "$BASH_ENV"; fi\fP
+.if t \f(CWif [ \-n "$BASH_ENV" ]; then . "$BASH_ENV"; fi\fP
+.if n if [ \-n "$BASH_ENV" ]; then . "$BASH_ENV"; fi
 .RE
 .sp .5
 but the value of the
@@ -1119,7 +1124,7 @@ user is a member.
 Assignments to    
 .SM
 .B GROUPS
-have no effect and are silently discarded.
+have no effect and return an error status.
 If
 .SM
 .B GROUPS
@@ -1223,7 +1228,7 @@ This variable exists only when a shell function is executing.
 Assignments to
 .SM
 .B FUNCNAME
-have no effect and are silently discarded.
+have no effect and return an error status.
 If
 .SM
 .B FUNCNAME
@@ -1376,7 +1381,9 @@ the shell looks for commands (see
 below).  The default path is system-dependent,
 and is set by the administrator who installs
 .BR bash .
-A common value is ``/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:.''.
+A common value is
+.if t \f(CW/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:.\fP.
+.if n ``/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:.''.
 .TP
 .B HOME
 The home directory of the current user; the default argument for the
@@ -1421,7 +1428,8 @@ often (in seconds)
 .B bash
 checks for mail.  The default is 60 seconds.  When it is time to check
 for mail, the shell does so before displaying the primary prompt.
-If this variable is unset, the shell disables mail checking.
+If this variable is unset, or set to a value that is not a number
+greater than or equal to zero, the shell disables mail checking.
 .TP
 .B MAILPATH
 A colon-separated list of file names to be checked for mail. 
@@ -1577,6 +1585,14 @@ strings preceded by a \fB$\fP.
 .TP
 .B LC_NUMERIC
 This variable determines the locale category used for number formatting.
+.TP
+.B LINES
+Used by the \fBselect\fP builtin command to determine the column length
+for printing selection lists.  Automatically set upon receipt of a SIGWINCH.
+.TP
+.B COLUMNS
+Used by the \fBselect\fP builtin command to determine the terminal width
+when printing selection lists.  Automatically set upon receipt of a SIGWINCH.
 .TP
 .B PROMPT_COMMAND
 If set, the value is executed as a command prior to issuing each primary
@@ -2502,9 +2518,10 @@ Matches any single character.
 .TP
 .B [...]
 Matches any one of the enclosed characters.  A pair of characters
-separated by a minus sign denotes a
-.IR range ;
-any character lexically between those two characters, inclusive,
+separated by a hyphen denotes a
+\fIrange expression\fP;
+any character that sorts between those two characters, inclusive,
+using the current locale's collating sequence and character set,
 is matched.  If the first character following the
 .B [
 is a
@@ -2512,6 +2529,9 @@ is a
 or a
 .B ^
 then any character not enclosed is matched.
+The sorting order of characters in range expressions is determined by
+the current locale and the value of the \fBLC_COLLATE\fP shell variable,
+if set.
 A 
 .B \-
 may be matched by including it as the first or last character
@@ -3990,6 +4010,7 @@ command or the text of a macro and a key sequence to which
 it should be bound. The name may be specified in one of two ways:
 as a symbolic key name, possibly with \fIMeta\-\fP or \fIControl\-\fP
 prefixes, or as a key sequence.
+.PP
 When using the form \fBkeyname\fP:\^\fIfunction\-name\fP or \fImacro\fP,
 .I keyname
 is the name of a key spelled out in English.  For example:
@@ -4013,7 +4034,8 @@ and
 .I C\-o
 is bound to run the macro
 expressed on the right hand side (that is, to insert the text
-.I "> output"
+.if t \f(CW> output\fP
+.if n ``> output''
 into the line).
 .PP
 In the second form, \fB"keyseq"\fP:\^\fIfunction\-name\fP or \fImacro\fP,
@@ -4023,7 +4045,8 @@ differs from
 above in that strings denoting
 an entire key sequence may be specified by placing the sequence
 within double quotes.  Some GNU Emacs style key escapes can be
-used, as in the following example.
+used, as in the following example, but the symbolic character names
+are not recognized.
 .sp
 .RS
 "\eC\-u": universal\-argument
@@ -4043,7 +4066,9 @@ is bound to the function
 and 
 .I "ESC [ 1 1 ~"
 is bound to insert the text
-.BR "Function Key 1" .
+.if t \f(CWFunction Key 1\fP.
+.if n ``Function Key 1''.
+.PP
 The full set of GNU Emacs style escape sequences is
 .RS
 .PD 0
@@ -4467,8 +4492,8 @@ This is a non-incremental search.
 .TP
 .B yank\-nth\-arg (M\-C\-y)
 Insert the first argument to the previous command (usually
-the second word on the previous line) at point (the current
-cursor position).  With an argument
+the second word on the previous line) at point.
+With an argument
 .IR n ,
 insert the \fIn\fPth word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
@@ -4527,7 +4552,7 @@ argument is ignored.
 .PD 0
 .TP
 .B delete\-char (C\-d)
-Delete the character under the cursor.  If point is at the
+Delete the character at point.  If point is at the
 beginning of the line, there are no characters in the line, and
 the last character typed was not bound to \fBdelete\-char\fP,
 then return
@@ -4554,15 +4579,15 @@ Insert a tab character.
 Insert the character typed.
 .TP
 .B transpose\-chars (C\-t)
-Drag the character before point forward over the character at point.
-Point moves forward as well.
-If point is at the end of the line, then transpose the two characters
-before point.
+Drag the character before point forward over the character at point,
+moving point forward as well.
+If point is at the end of the line, then this transposes
+the two characters before point.
 Negative arguments have no effect.
 .TP
 .B transpose\-words (M\-t)
 Drag the word before point past the word after point,
-moving the point over that word as well.
+moving point over that word as well.
 .TP
 .B upcase\-word (M\-u)
 Uppercase the current (or following) word.  With a negative argument,
@@ -4605,7 +4630,6 @@ Word boundaries are the same as those used by \fBbackward\-word\fP.
 .TP
 .B unix\-word\-rubout (C\-w)
 Kill the word behind point, using white space as a word boundary.
-The word boundaries are different from \fBbackward\-kill\-word\fP.
 The killed text is saved on the kill-ring.
 .TP
 .B delete\-horizontal\-space (M\-\e)
@@ -4626,7 +4650,7 @@ Copy the word following point to the kill buffer.
 The word boundaries are the same as \fBforward\-word\fP.
 .TP
 .B yank (C\-y)
-Yank the top of the kill ring into the buffer at the cursor.
+Yank the top of the kill ring into the buffer at point.
 .TP
 .B yank\-pop (M\-y)
 Rotate the kill ring, and yank the new top.  Only works following
@@ -4682,8 +4706,9 @@ Similar to \fBcomplete\fP, but replaces the word to be completed
 with a single match from the list of possible completions.
 Repeated execution of \fBmenu\-complete\fP steps through the list
 of possible completions, inserting each match in turn.
-At the end of the list of completions, the bell is rung and the
-original text is restored.
+At the end of the list of completions, the bell is rung
+(subject to the setting of \Bbell\-style\fP)
+and the original text is restored.
 An argument of \fIn\fP moves \fIn\fP positions forward in the list
 of matches; a negative argument may be used to move backward
 through the list.
@@ -4802,7 +4827,7 @@ command enough times to return the line to its initial state.
 Perform tilde expansion on the current word.
 .TP
 .B set\-mark (C\-@, M\-<space>)
-Set the mark to the current point.  If a
+Set the mark to the point.  If a
 numeric argument is supplied, the mark is set to that position.
 .TP
 .B exchange\-point\-and\-mark (C\-x C\-x)
@@ -4975,10 +5000,17 @@ options are added to each member of the completion list, and the result is
 returned to the readline completion code as the list of possible
 completions.
 .PP
-If a compspec is found, whatever it generates is returned to the completion
-code as the full set of possible completions.
+If the previously-applied actions do not generate any matches, and the
+\fB\-o dirnames\fP option was supplied to \fBcomplete\fP when the
+compspec was defined, directory name completion is attempted.
+.PP
+By default, if a compspec is found, whatever it generates is returned
+to the completion code as the full set of possible completions.
 The default \fBbash\fP completions are not attempted, and the readline
 default of filename completion is disabled.
+If the \fB-o default\fP option was supplied to \fBcomplete\fP when the
+compspec was defined, readline's default completion will be performed
+if the compspec generates no matches.
 .SH HISTORY
 When the
 .B \-o history
@@ -5377,7 +5409,8 @@ are used to find the directory containing
 The file searched for in
 .SM
 .B PATH
-need not be executable.  The current directory is
+need not be executable.
+When \fBbash\fP is not in \fIposix mode\fP, the current directory is
 searched if no file is found in
 .SM
 .BR PATH .
@@ -5454,7 +5487,7 @@ Acceptable
 .I keymap
 names are
 \fIemacs, emacs\-standard, emacs\-meta, emacs\-ctlx, vi,
-vi\-command\fP, and
+vi\-move, vi\-command\fP, and
 .IR vi\-insert .
 \fIvi\fP is equivalent to \fIvi\-command\fP; \fIemacs\fP is
 equivalent to \fIemacs\-standard\fP.
@@ -5639,7 +5672,7 @@ The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
 .PD 0
-\fBcomplete\fP [\fB\-abcdefjkvu\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
+\fBcomplete\fP [\fB\-abcdefjkvu\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
 .br
 [\fB\-X\fP \fIfilterpat\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] \fIname\fP [\fIname ...\fP]
 .TP
@@ -5664,6 +5697,24 @@ should be quoted to protect them from expansion before the
 builtin is invoked.
 .RS
 .PD 0
+.TP 8
+\fB\-o\fP \fIcomp-option\fP
+The \fIcomp-option\fP controls several aspects of the compspec's behavior
+beyond the simple generation of completions.
+\fIcomp-option\fP may be one of:
+.RS
+.TP 8
+.B default
+Use readline's default completion if the compspec generates no matches.
+.TP 8
+.B dirnames
+Perform directory name completion if the compspec generates no matches.
+.TP 8
+.B filenames
+Tell readline that the compspec generates filenames, so it can perform any
+filename\-specific processing (like adding a slash to directory names or
+suppressing trailing spaces).  Intended to be used with shell functions.
+.RE
 .TP 8
 \fB\-A\fP \fIaction\fP
 The \fIaction\fP may be one of the following to generate a list of possible
@@ -5964,7 +6015,7 @@ the following backslash-escaped characters is enabled.  The
 .B \-E
 option disables the interpretation of these escape characters,
 even on systems where they are interpreted by default.
-The \fBxpg_echo\fP shell option to the may be used to
+The \fBxpg_echo\fP shell option may be used to
 dynamically determine whether or not \fBecho\fP expands these
 escape characters by default.
 .B echo
@@ -6029,7 +6080,8 @@ binary found via the
 .SM
 .B PATH
 instead of the shell builtin version, run
-\f(CWenable -n test\fP.
+.if t \f(CWenable -n test\fP.
+.if n ``enable -n test''.
 The
 .B \-f
 option means to load the new builtin command
@@ -6885,8 +6937,8 @@ Options, if specified, have the following meanings:
 .PD 0
 .TP 8
 .B \-a
-Automatically mark variables which are modified or created for export
-to the environment of subsequent commands.
+Automatically mark variables and functions which are modified or created
+for export to the environment of subsequent commands.
 .TP 8
 .B \-b
 Report the status of terminated background jobs
@@ -6978,7 +7030,10 @@ Enable command history, as described above under
 This option is on by default in interactive shells.
 .TP 8
 .B ignoreeof
-The effect is as if the shell command \f(CWIGNOREEOF=10\fP had been executed
+The effect is as if the shell command
+.if t \f(CWIGNOREEOF=10\fP
+.if n ``IGNOREEOF=10''
+had been executed
 (see
 .B Shell Variables
 above).
@@ -7023,7 +7078,7 @@ Same as
 Change the behavior of
 .B bash
 where the default operation differs
-from the POSIX 1003.2 standard to match the standard.
+from the POSIX 1003.2 standard to match the standard (\fIposix mode\fP).
 .TP 8
 .B privileged
 Same as
@@ -7621,7 +7676,9 @@ either returns the name of the disk file
 that would be executed if
 .I name
 were specified as a command name,
-or nothing if \f(CWtype -t name\fP
+or nothing if
+.if t \f(CWtype -t name\fP
+.if n ``type -t name''
 would not return
 .IR file .
 If a command is hashed,

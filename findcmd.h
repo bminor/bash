@@ -26,6 +26,7 @@
 extern int file_status __P((char *));
 extern int executable_file __P((char *));
 extern int is_directory __P((char *));
+extern int executable_or_directory __P((char *));
 extern char *find_user_command __P((char *));
 extern char *find_path_file __P((char *));
 extern char *search_for_command __P((char *));

@@ -14,6 +14,21 @@ if : ; then
 	done
 	set +e
 fi
+
+(
+set -e
+false
+echo bad
+)
+echo $?
+
+x=$(
+set -e
+false
+echo bad
+)
+echo $? $x
+
 # command subst should not inherit -e
 set -e
 echo $(false; echo ok)

@@ -175,7 +175,7 @@ parse_and_execute (string, from_file, flags)
 
 	    case DISCARD:
 	      run_unwind_frame ("pe_dispose");
-	      last_command_exit_value = 1;	/* XXX */
+	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -238,7 +238,7 @@ parse_and_execute (string, from_file, flags)
 
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
-		  subshell_environment == SUBSHELL_COMSUB &&
+		  (subshell_environment & SUBSHELL_COMSUB) &&
 		  *bash_input.location.string == '\0' &&
 		  command->type == cm_simple && !command->redirects &&
 		  (command->flags & CMD_TIME_PIPELINE) == 0 &&
@@ -277,8 +277,8 @@ parse_and_execute (string, from_file, flags)
   if (interrupt_state && parse_and_execute_level == 0)
     {
       /* An interrupt during non-interactive execution in an
-         interactive shell (e.g. via $PROMPT_COMMAND) should
-         not cause the shell to exit. */
+	 interactive shell (e.g. via $PROMPT_COMMAND) should
+	 not cause the shell to exit. */
       interactive = interactive_shell;
       throw_to_top_level ();
     }
