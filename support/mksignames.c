@@ -48,15 +48,101 @@ initialize_signames ()
   signal_names[0] = "EXIT";
 
   /* Place signal names which can be aliases for more common signal
-     names first.  This allows (for example) SIGEMT to overwrite SIGGRANT. */
+     names first.  This allows (for example) SIGABRT to overwrite SIGLOST. */
+/* AIX */
+#if defined (SIGLOST)	/* resource lost (eg, record-lock lost) */
+  signal_names[SIGLOST] = "SIGLOST";
+#endif
+
+#if defined (SIGMSG)	/* HFT input data pending */
+  signal_names[SIGMSG] = "SIGMSG";
+#endif
+
+#if defined (SIGDANGER)	/* system crash imminent */
+  signal_names[SIGDANGER] = "SIGDANGER";
+#endif
+
+#if defined (SIGMIGRATE) /* migrate process to another CPU */
+  signal_names[SIGMIGRATE] = "SIGMIGRATE";
+#endif
+
+#if defined (SIGPRE)	/* programming error */
+  signal_names[SIGPRE] = "SIGPRE";
+#endif
+
+#if defined (SIGVIRT)	/* AIX virtual time alarm */
+  signal_names[SIGVIRT] = "SIGVIRT";
+#endif
+
+#if defined (SIGALRM1)	/* m:n condition variables */
+  signal_names[SIGALRM1] = "SIGALRM1";
+#endif
+
+#if defined (SIGWAITING)	/* m:n scheduling */
+  signal_names[SIGWAITING] = "SIGWAITING";
+#endif
+
 #if defined (SIGGRANT)	/* HFT monitor mode granted */
   signal_names[SIGGRANT] = "SIGGRANT";
+#endif
+
+#if defined (SIGKAP)	/* keep alive poll from native keyboard */
+  signal_names[SIGKAP] = "SIGKAP";
 #endif
 
 #if defined (SIGRETRACT) /* HFT monitor mode retracted */
   signal_names[SIGRETRACT] = "SIGRETRACT";
 #endif
 
+#if defined (SIGSOUND)	/* HFT sound sequence has completed */
+  signal_names[SIGSOUND] = "SIGSOUND";
+#endif
+
+#if defined (SIGSAK)	/* Secure Attention Key */
+  signal_names[SIGSAK] = "SIGSAK";
+#endif
+
+/* SunOS5 */
+#if defined (SIGLWP)	/* special signal used by thread library */
+  signal_names[SIGLWP] = "SIGLWP";
+#endif
+
+#if defined (SIGFREEZE)	/* special signal used by CPR */
+  signal_names[SIGFREEZE] = "SIGFREEZE";
+#endif
+
+#if defined (SIGTHAW)	/* special signal used by CPR */
+  signal_names[SIGTHAW] = "SIGTHAW";
+#endif
+
+#if defined (SIGCANCEL)	/* thread cancellation signal used by libthread */
+  signal_names[SIGCANCEL] = "SIGCANCEL";
+#endif
+
+/* HP-UX */
+#if defined (SIGDIL)	/* DIL signal (?) */
+  signal_names[SIGDIL] = "SIGDIL";
+#endif
+
+/* System V */
+#if defined (SIGCLD)	/* Like SIGCHLD.  */
+  signal_names[SIGCLD] = "SIGCLD";
+#endif
+
+#if defined (SIGPWR)	/* power state indication */
+  signal_names[SIGPWR] = "SIGPWR";
+#endif
+
+#if defined (SIGPOLL)	/* Pollable event (for streams)  */
+  signal_names[SIGPOLL] = "SIGPOLL";
+#endif
+
+/* Unknown */
+#if defined (SIGWINDOW)
+  signal_names[SIGWINDOW] = "SIGWINDOW";
+#endif
+
+/* Common */
 #if defined (SIGHUP)	/* hangup */
   signal_names[SIGHUP] = "SIGHUP";
 #endif
@@ -77,12 +163,12 @@ initialize_signames ()
   signal_names[SIGTRAP] = "SIGTRAP";
 #endif
 
-#if defined (SIGABRT)	/* Cause current process to dump core. */
-  signal_names[SIGABRT] = "SIGABRT";
-#endif
-
 #if defined (SIGIOT)	/* IOT instruction */
   signal_names[SIGIOT] = "SIGIOT";
+#endif
+
+#if defined (SIGABRT)	/* Cause current process to dump core. */
+  signal_names[SIGABRT] = "SIGABRT";
 #endif
 
 #if defined (SIGEMT)	/* EMT instruction */
@@ -119,18 +205,6 @@ initialize_signames ()
 
 #if defined (SIGTERM)	/* software termination signal from kill */
   signal_names[SIGTERM] = "SIGTERM";
-#endif
-
-#if defined (SIGCLD)	/* Like SIGCHLD.  */
-  signal_names[SIGCLD] = "SIGCLD";
-#endif
-
-#if defined (SIGPWR)	/* Magic thing for some machines. */
-  signal_names[SIGPWR] = "SIGPWR";
-#endif
-
-#if defined (SIGPOLL)	/* For keyboard input?  */
-  signal_names[SIGPOLL] = "SIGPOLL";
 #endif
 
 #if defined (SIGURG)	/* urgent condition on IO channel */
@@ -185,8 +259,9 @@ initialize_signames ()
   signal_names[SIGWINCH] = "SIGWINCH";
 #endif
 
-#if defined (SIGLOST)	/* resource lost (eg, record-lock lost) */
-  signal_names[SIGLOST] = "SIGLOST";
+/* 4.4 BSD */
+#if defined (SIGINFO)	/* information request */
+  signal_names[SIGINFO] = "SIGINFO";
 #endif
 
 #if defined (SIGUSR1)	/* user defined signal 1 */
@@ -195,42 +270,6 @@ initialize_signames ()
 
 #if defined (SIGUSR2)	/* user defined signal 2 */
   signal_names[SIGUSR2] = "SIGUSR2";
-#endif
-
-#if defined (SIGMSG)	/* HFT input data pending */
-  signal_names[SIGMSG] = "SIGMSG";
-#endif
-
-#if defined (SIGPWR)	/* power failure imminent (save your data) */
-  signal_names[SIGPWR] = "SIGPWR";
-#endif
-
-#if defined (SIGDANGER)	/* system crash imminent */
-  signal_names[SIGDANGER] = "SIGDANGER";
-#endif
-
-#if defined (SIGMIGRATE) /* migrate process to another CPU */
-  signal_names[SIGMIGRATE] = "SIGMIGRATE";
-#endif
-
-#if defined (SIGPRE)	/* programming error */
-  signal_names[SIGPRE] = "SIGPRE";
-#endif
-
-#if defined (SIGSOUND)	/* HFT sound sequence has completed */
-  signal_names[SIGSOUND] = "SIGSOUND";
-#endif
-
-#if defined (SIGWINDOW)
-  signal_names[SIGWINDOW] = "SIGWINDOW";
-#endif
-
-#if defined (SIGDIL)
-  signal_names[SIGDIL] = "SIGDIL";
-#endif
-
-#if defined (SIGSAK)	/* Secure Attention Key */
-  signal_names[SIGSAK] = "SIGSAK";
 #endif
 
   for (i = 0; i < NSIG; i++)

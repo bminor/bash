@@ -292,7 +292,10 @@ getopts_builtin (list)
   int ac, ret;
 
   if (list == 0)
-    return EXECUTION_FAILURE;
+    {
+      builtin_usage ();
+      return EX_USAGE;
+    }
 
   reset_internal_getopt ();
   while ((ret = internal_getopt (list, "")) != -1)

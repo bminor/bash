@@ -19,8 +19,7 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <sys/types.h>
+#include "bashtypes.h"
 #include <fcntl.h>
 
 #if defined (HAVE_UNISTD_H)
@@ -34,6 +33,8 @@
 #    include <varargs.h>
 #  endif
 #endif
+
+#include <stdio.h>
 
 #include <errno.h>
 #if !defined (errno)
@@ -234,7 +235,7 @@ programming_error (format, va_alist)
     }
 #endif
 
-  fprintf (stderr, "Tell %s to fix this someday.\n", the_current_maintainer);
+  fprintf (stderr, "Report this to %s\n", the_current_maintainer);
   fprintf (stderr, "Stopping myself...");
   fflush (stderr);
 

@@ -1,25 +1,29 @@
 Introduction
 ============
 
-This is GNU Bash, version 2.0.  Bash is the GNU Project's Bourne
+This is GNU Bash, version 2.01.  Bash is the GNU Project's Bourne
 Again SHell, a complete implementation of the POSIX.2 shell spec,
 but also with interactive command line editing, job control on
 architectures that support it, csh-like features such as history
 substitution and brace expansion, and a slew of other features. 
 For more information on the features of Bash that are new to this
-type of shell, see the file `doc/features.texi'.  There is also a
-large man page.  The manual page is the definitive description of
-the shell's features. 
+type of shell, see the file `doc/bashref.texi'.  There is also a
+large Unix-style man page.  The man page is the definitive description
+of the shell's features. 
 
 See the file CWRU/POSIX.NOTES for a discussion of how Bash differs
 from the POSIX.2 spec and a description of the Bash `posix mode'.
 
 There are some user-visible incompatibilities between this version
-of Bash and the previous version, bash-1.14.  For details, see the
-file COMPAT.
+of Bash and the previous widely-distributed version, bash-1.14.
+For details, see the file COMPAT.  The NEWS file tersely lists
+features that are new in this release. 
 
 Bash is free software, distributed under the terms of the GNU Public
 License, version 2.  For more information, see the file COPYING.
+
+A number of frequently-asked questions are answered in the file
+`doc/FAQ'.
 
 To compile Bash, try typing `./configure', then `make'.  Bash
 auto-configures the build process, so no further intervention
@@ -39,12 +43,13 @@ platform-specific installation and configuration information.
 
 If you are a csh user and wish to convert your csh aliases to Bash
 aliases, you may wish to use the script `examples/misc/alias-conv.sh'
-as a starting point.
+as a starting point.  The script `examples/misc/cshtobash' is a
+more ambitious script that attempts to do a more complete job.
 
 Reporting Bugs
 ==============
 
-Bug reports for 2.0 should be sent to:
+Bug reports for bash-2.01 should be sent to:
 
 	bug-bash@prep.ai.mit.edu
 
@@ -52,15 +57,19 @@ using the `bashbug' program that is built and installed at the same
 time as bash.
 
 The discussion list `bug-bash@prep.ai.mit.edu' often contains
-information about new ports of Bash, or discussions of new
-features or behavior changes that people would like.  This
-mailing list is also available as a usenet newsgroup:
-gnu.bash.bug. 
+information about new ports of Bash, or discussions of new features or
+behavior changes that people would like.  This mailing list is also
+available as a usenet newsgroup: gnu.bash.bug. 
 
-When you send a bug report to bug-bash@prep.ai.mit.edu, please include:
+When you send a bug report, please use the `bashbug' program that is
+built at the same time as bash.  If bash fails to build, try building
+bashbug directly with `make bashbug'.  If you cannot build `bashbug',
+please send mail to bug-bash@prep.ai.mit.edu with the following
+information:
 
-	* the version number of Bash
-	* the machine and OS that it is running on (see .machine or .made)
+	* the version number and release status of Bash (e.g., 2.01-release)
+	* the machine and OS that it is running on (look at the file
+	  `.made' in the bash build directory)
 	* a list of the compilation flags or the contents of `config.h', if
 	  appropriate
 	* a description of the bug
@@ -69,8 +78,8 @@ When you send a bug report to bug-bash@prep.ai.mit.edu, please include:
 
 The `bashbug' program includes much of this automatically.
 
-If you would like to contact the Bash maintainers directly, send mail to
-bash-maintainers@prep.ai.mit.edu.
+If you would like to contact the Bash maintainers directly, send mail
+to bash-maintainers@prep.ai.mit.edu. 
 
 While the Bash maintainers do not promise to fix all bugs, we would
 like this shell to be the best that we can make it.

@@ -17,6 +17,8 @@
 #endif
 
 #include <stdio.h>
+#include "bashansi.h"
+
 #include "shell.h"
 #include "array.h"
 #include "builtins/common.h"
@@ -123,6 +125,7 @@ ARRAY	*a;
 	return(a1);
 }
 
+#ifdef INCLUDE_UNUSED
 /*
  * Make and return a new array composed of the elements in array A from
  * S to E, inclusive.
@@ -146,6 +149,7 @@ ARRAY_ELEMENT	*s, *e;
 	a->num_elements = a->max_index = i;
 	return a;
 }
+#endif
 
 ARRAY_ELEMENT *
 copy_array_element(ae)
@@ -392,6 +396,7 @@ register char *s1, *s2;
 }
 #endif
 
+#if defined (INCLUDE_UNUSED) || defined (TEST_ARRAY)
 /*
  * Return an array consisting of elements in S, separated by SEP
  */
@@ -410,6 +415,7 @@ char	*s, *sep;
 	a = word_list_to_array (w);
 	return (a);
 }
+#endif
 
 /* Convenience routines for the shell to translate to and from the form used
    by the rest of the code. */
@@ -549,7 +555,7 @@ main()
 	array_add_element(a, 12, "twelve");
 	array_add_element(a, 42, "forty-two");
 	print_array(a);
-	s = array_to_string (a, " ");
+	s = array_to_string (a, " ", 0);
 	printf("s = %s\n", s);
 	copy_of_a = string_to_array(s, " ");
 	printf("copy_of_a:");
@@ -563,7 +569,7 @@ main()
 	destroy_array_element(ae);
 	array_add_element(a, 16, "sixteen");
 	print_array(a);
-	s = array_to_string (a, " ");
+	s = array_to_string (a, " ", 0);
 	printf("s = %s\n", s);
 	copy_of_a = string_to_array(s, " ");
 	printf("copy_of_a:");
@@ -576,7 +582,7 @@ main()
 	array_add_element(a, 0, "zero");
 	array_add_element(a, 134, "");
 	print_array(a);
-	s = array_to_string (a, ":");
+	s = array_to_string (a, ":", 0);
 	printf("s = %s\n", s);
 	copy_of_a = string_to_array(s, ":");
 	printf("copy_of_a:");
@@ -586,9 +592,9 @@ main()
 	free(s);
 	new_a = copy_array(a);
 	print_array(new_a);
-	s = array_to_string (new_a, ":");
+	s = array_to_string (new_a, ":", 0);
 	printf("s = %s\n", s);
-	copy_of_a = string_to_array(s, ":");
+	copy_of_a = string_to_array(s, ":", 0);
 	printf("copy_of_a:");
 	print_array(copy_of_a);
 	dispose_array(copy_of_a);

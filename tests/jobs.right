@@ -1,0 +1,71 @@
+0
+wait-for-pid
+wait-errors
+./jobs.tests: wait: `1-1' is not a pid or valid job spec
+./jobs.tests: wait: `-4' is not a pid or valid job spec
+wait-for-background-pids
+async list wait-for-background-pids
+async list wait for child
+forked
+wait-when-no-children
+wait-for-job
+./jobs.tests: wait: %2: no such job
+127
+async list wait-for-job
+forked
+fg-bg 1
+sleep 5
+fg-bg 2
+sleep 5
+fg-bg 3
+sleep 5
+fg-bg 4
+sleep 5
+fg-bg 5
+./jobs.tests: fg: %2: no such job
+./jobs.tests: bg: bg background job?
+fg-bg 6
+./jobs.tests: fg: illegal option: -s
+fg: usage: fg [job_spec]
+./jobs.tests: bg: illegal option: -s
+bg: usage: bg [job_spec]
+./jobs.tests: disown: illegal option: -r
+disown: usage: disown [-h] [jobspec ...]
+./jobs.tests: disown: %1: no such job
+wait-for-non-child
+./jobs.tests: wait: pid 1 is not a child of this shell
+127
+3 -- 1 2 3 -- 1 - 2 - 3
+[1]   Running                 sleep 300 &
+[2]-  Running                 sleep 350 &
+[3]+  Running                 sleep 400 &
+running jobs:
+[1]   Running                 sleep 300 &
+[2]-  Running                 sleep 350 &
+[3]+  Running                 sleep 400 &
+./jobs.tests: kill: %4: no such job
+after kill -STOP
+running jobs:
+[1]   Running                 sleep 300 &
+[3]-  Running                 sleep 400 &
+stopped jobs:
+[2]+  Stopped                 sleep 350
+after disown
+[2]+  Stopped                 sleep 350
+[3]-  Running                 sleep 400 &
+running jobs:
+[3]-  Running                 sleep 400 &
+stopped jobs:
+[2]+  Stopped                 sleep 350
+after kill -s CONT
+running jobs:
+[2]+  Running                 sleep 350 &
+[3]-  Running                 sleep 400 &
+stopped jobs:
+after kill -STOP, backgrounding %3:
+[3]+ sleep 400 &
+killing...
+done
+after KILL -STOP, foregrounding %1
+sleep 10
+done

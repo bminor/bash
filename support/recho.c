@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+void strprint();
+
+int
 main(argc, argv)
 int	argc;
 char	**argv;
@@ -11,13 +14,14 @@ char	**argv;
 		strprint(argv[i]);
 		printf(">\n");
 	}
+	exit(0);
 }
 
+void
 strprint(str)
 char	*str;
 {
 	register char *s;
-	int	c;
 
 	for (s = str; s && *s; s++) {
 		if (*s < ' ') {
@@ -29,5 +33,4 @@ char	*str;
 		} else
 			putchar(*s);
 	}
-	return(0);
 }

@@ -1,6 +1,17 @@
+# this is needed so that the bad assignments (b[]=bcde, for example) do not
+# cause fatal shell errors when in posix mode
+set +o posix
+
 set +a
 # The calls to egrep -v are to filter out builtin array variables that are
 # automatically set and possibly contain values that vary.
+
+# make sure declare -a converts an existing variable to an array
+unset a
+a=abcde
+declare -a a
+echo ${a[0]}
+
 unset a
 a=abcde
 a[2]=bdef
@@ -23,7 +34,7 @@ echo ${a[@]}
 echo ${a[*]}
 
 # this should print out values, too
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
 unset a[7]
 echo ${a[*]}
@@ -51,8 +62,8 @@ echo ${a[@]}
 
 readonly a[5]
 readonly a
-readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
-declare -ar | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+declare -ar | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
 declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")'
 d[9]="ninth element"
@@ -66,7 +77,7 @@ b=([0]=this [1]=is [2]=a [3]=test [4]="$PS1" [5]=$pass)
 
 echo ${b[@]:2:3}
 
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+declare -pa | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
 a[3]="this is a test"
 
@@ -84,7 +95,7 @@ d=([]=abcde [1]="test test" [*]=last [-65]=negative )
 unset d[12]
 unset e[*]
 
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
 ps1='hello'
 unset ps1[2]
@@ -101,7 +112,7 @@ this is a test of read using arrays
 echo ${rv[0]} ${rv[4]}
 echo ${rv[@]}
 
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
 export rv
 #set
@@ -129,3 +140,62 @@ for z in "$@"
 do
 	echo "$z"
 done
+
+# do various pattern removal and length tests
+XPATH=/bin:/usr/bin:/usr/ucb:/usr/local/bin:.:/sbin:/usr/sbin
+
+xpath=( $( IFS=: ; echo $XPATH ) )
+
+echo ${xpath[@]}
+echo ${xpath[@]##*/}
+echo ${xpath[0]##*/}
+echo ${xpath[@]%%[!/]*}
+echo ${xpath[0]%%[!/]*}
+
+# let's try to make it a DOS-style path
+
+zecho "${xpath[@]/\//\\}"
+zecho "${xpath[@]//\//\\}"
+zecho "${xpath[@]//[\/]/\\}"
+
+# length of the first element of the array, since array without subscript
+# is equivalent to referencing first element
+echo ${#xpath} -- ${#xpath[0]}
+
+# number of elements in the array
+nelem=${#xpath[@]}
+echo ${#xpath[@]} -- $nelem
+
+# total length of all elements in the array, including space separators
+xx="${xpath[*]}"
+echo ${#xx}
+
+# total length of all elements in the array
+xx=$( IFS='' ; echo "${xpath[*]}" )
+echo ${#xx}
+
+unset xpath[nelem-1]
+
+nelem=${#xpath[@]}
+echo ${#xpath[@]} -- $nelem
+
+# arrays and things that look like index assignments
+array=(42 [1]=14 [2]=44)
+
+array2=(grep [ 123 ] \*)
+
+echo ${array[@]}
+echo "${array2[@]}"
+
+# arrays and implicit arithmetic evaluation
+declare -i -a iarray
+
+iarray=( 2+4 1+6 7+2 )
+echo ${iarray[@]}
+
+iarray[4]=4+1
+echo ${iarray[@]}
+
+# make sure the array code behaves correctly with respect to unset variables
+set -u
+( echo ${#narray[4]} )

@@ -22,7 +22,7 @@
 #  include <unistd.h>
 #endif
 
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include "../posixstat.h"
 #include "../filecntl.h"
 
@@ -55,6 +55,7 @@ extern int errno;
 #define FEVAL_UNWINDPROT	0x004
 #define FEVAL_NONINT		0x008
 #define FEVAL_LONGJMP		0x010
+#define FEVAL_HISTORY		0x020
 
 extern int interactive, interactive_shell, posixly_correct;
 extern int indirection_level, startup_state, subshell_environment;
@@ -71,7 +72,7 @@ _evalfile (filename, flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
-  int return_val, fd, result;
+  int return_val, fd, result, pflags;
   char *string;
   struct stat finfo;
   VFunction *errfunc;
@@ -151,6 +152,9 @@ file_error_and_exit:
   return_catch_flag++;
   sourcelevel++;
 
+  /* set the flags to be passed to parse_and_execute */
+  pflags = (flags & FEVAL_HISTORY) ? 0 : SEVAL_NOHIST;
+
   if (flags & FEVAL_BUILTIN)
     result = EXECUTION_SUCCESS;
 
@@ -164,7 +168,7 @@ file_error_and_exit:
       result = return_catch_value;
     }
   else
-    result = parse_and_execute (string, filename, -1);
+    result = parse_and_execute (string, filename, pflags);
 
   if (flags & FEVAL_UNWINDPROT)
     run_unwind_frame ("_evalfile");
@@ -196,6 +200,20 @@ maybe_execute_file (fname, force_noninteractive)
   free (filename);
   return result;
 }
+
+#if defined (HISTORY)
+int
+fc_execute_file (filename)
+     char *filename;
+{
+  int flags;
+
+  /* We want these commands to show up in the history list if
+     remember_on_history is set. */
+  flags = FEVAL_ENOENTOK|FEVAL_HISTORY;
+  return (_evalfile (filename, flags));
+}
+#endif /* HISTORY */
 
 int
 source_file (filename)

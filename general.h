@@ -23,6 +23,14 @@
 
 #include "stdc.h"
 
+#include "bashtypes.h"
+
+#if defined (HAVE_STRING_H)
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif /* !HAVE_STRING_H */
+
 /* Generic pointer type. */
 #if defined (__STDC__)
 #  define PTR_T	void *
@@ -38,12 +46,6 @@
 #    define NULL 0x0
 #  endif /* !__STDC__ */
 #endif /* !NULL */
-
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
 
 #define pointer_to_int(x) (int)((long)(x))
 
@@ -197,7 +199,7 @@ extern int check_identifier __P((WORD_DESC *, int));
 extern void unset_nodelay_mode __P((int));
 extern void check_dev_tty __P((void));
 extern int same_file ();	/* too many problems with prototype */
-extern int move_to_high_fd __P((int, int));
+extern int move_to_high_fd __P((int, int, int));
 extern int check_binary_file __P((unsigned char *, int));
 
 extern char *canonicalize_pathname __P((char *));
@@ -212,5 +214,12 @@ extern char *extract_colon_unit __P((char *, int *));
 
 extern void tilde_initialize __P((void));
 extern char *bash_tilde_expand __P((char *));
+
+#if defined (__STDC__) && defined (gid_t)
+extern int group_member __P((int));
+#else
+extern int group_member __P((gid_t));
+#endif
+extern char **get_group_list __P((int *));
 
 #endif	/* _GENERAL_H_ */

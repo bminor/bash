@@ -27,11 +27,11 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-extern long evalexp __P((char *));
+extern long evalexp __P((char *, int *));
 
 /* Functions from getcwd.c */
 #if !defined (HAVE_GETCWD)
-extern char *getcwd ();
+extern char *getcwd __P((char *, size_t));
 #endif
 
 /* Functions from print_cmd.c. */
@@ -45,10 +45,13 @@ extern void xtrace_print_word_list __P((WORD_LIST *));
 /* Functions from shell.c. */
 extern int exit_shell __P((int));
 extern void disable_priv_mode __P((void));
+extern void unbind_args __P((void));
 
 #if defined (RESTRICTED_SHELL)
 extern int maybe_make_restricted __P((char *));
 #endif
+
+extern void get_current_user_info __P((void));
 
 /* Functions from eval.c. */
 extern int reader_loop __P((void));
@@ -56,7 +59,6 @@ extern int parse_command __P((void));
 extern int read_command __P((void));
 
 /* Functions from test.c. */
-extern int group_member ();
 extern int test_command ();
 
 /* Functions from braces.c. */
@@ -115,7 +117,7 @@ extern int setlinebuf ();
 #endif
 
 /* Declarations for functions defined in stringlib.c */
-extern char *ansicstr __P((char *, int, int *));
+extern char *ansicstr __P((char *, int, int *, int *));
 extern int find_name_in_array __P((char *, char **));
 extern int array_len __P((char **));
 extern void free_array_members __P((char **));
@@ -128,7 +130,7 @@ extern WORD_LIST *argv_to_word_list __P((char **, int, int));
 
 extern char *strsub __P((char *, char *, char *, int));
 extern void strip_leading __P((char *));
-extern void strip_trailing __P((char *, int));
+extern void strip_trailing __P((char *, int, int));
 extern char *strindex __P((char *, char *));
 extern void xbcopy __P((char *, char *, int));
 

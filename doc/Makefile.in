@@ -148,14 +148,20 @@ installdirs:
 install: info installdirs
 	-$(INSTALL_DATA) $(srcdir)/bash.1 $(man1dir)/bash.${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(man1dir)/bashbug.${man1ext}
-	-$(INSTALL_DATA) $(srcdir)/readline.3 $(man3dir)/readline.${man3ext}
-	-$(INSTALL_DATA) $(srcdir)/bashref.info $(infodir)/bash.info
+# uncomment the next line to install the readline man page
+#	-$(INSTALL_DATA) $(srcdir)/readline.3 $(man3dir)/readline.${man3ext}
 # uncomment the next line to install the builtins man page
 #	$(INSTALL_DATA) builtins.1 $(man1dir)/bash_builtins.${man1ext}
+	-$(INSTALL_DATA) $(srcdir)/bashref.info $(infodir)/bash.info
+# run install-info if it is present to update the info directory
+	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+		install-info --dir-file=$(infodir)/dir $(infodir)/bash.info; \
+	else true; fi
 
 uninstall:
-	$(RM) $(man1dir)/bash.${man1ext} $(man1dir)/bashbug.${man1ext}
-	$(RM) $(man3dir)/readline.${man3ext} $(infodir)/bash.info
+	-$(RM) $(man1dir)/bash.${man1ext} $(man1dir)/bashbug.${man1ext}
+	-$(RM) $(man3dir)/readline.${man3ext}
+	$(RM) $(infodir)/bash.info
 
 # for use by chet
 inst:	bashref.texi

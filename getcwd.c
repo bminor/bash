@@ -38,17 +38,7 @@
 #include "maxpath.h"
 #include "memalloc.h"
 
-#if defined (HAVE_STDLIB_H)
-#  include <stdlib.h>
-#else
-#  include "ansi_stdlib.h"
-#endif /* !HAVE_STDLIB_H */
-
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "bashansi.h"
 
 #if !defined (errno)
 extern int errno;

@@ -50,8 +50,8 @@ $END
 
 #if defined (HISTORY)
 #include <sys/param.h>
-#include "bashtypes.h"
-#include "posixstat.h"
+#include "../bashtypes.h"
+#include "../posixstat.h"
 #include <sys/file.h>
 
 #if defined (HAVE_UNISTD_H)
@@ -77,8 +77,12 @@ extern int errno;
 #endif /* !errno */
 
 extern int echo_input_at_read;
+extern int current_command_line_count;
+extern int literal_history;
 
 extern int unlink ();
+
+extern int fc_execute_file ();
 
 /* **************************************************************** */
 /*								    */
@@ -252,7 +256,7 @@ fc_builtin (list)
 
       fprintf (stderr, "%s\n", command);
       fc_replhist (command);	/* replace `fc -s' with command */
-      return (parse_and_execute (command, "fc", -1));
+      return (parse_and_execute (command, "fc", SEVAL_NOHIST));
     }
 
   /* This is the second form of the command (the list-or-edit-and-rerun
@@ -266,9 +270,11 @@ fc_builtin (list)
      ("fc blah..." and so on) is already part of the history list by
      the time we get to this point.  This just skips over that command
      and makes the last command that this deals with be the last command
-     the user entered before the fc. */
+     the user entered before the fc.  We need to check whether the
+     line was actually added (HISTIGNORE may have caused it to not be),
+     so we check hist_last_line_added. */
 
-  last_hist = i - 2;
+  last_hist = i - 1 - hist_last_line_added;
 
   if (list)
     {
@@ -317,6 +323,7 @@ fc_builtin (list)
   else
     {
       numbering = 0;
+      /* XXX - this is raceable */
       sprintf (fn, "/tmp/bash%d", (int)time ((time_t *) 0) + (int)getpid ());
 
       stream = fopen (fn, "w");
@@ -354,7 +361,7 @@ fc_builtin (list)
       command = (char *)xmalloc (3 + strlen (FC_EDIT_COMMAND) + strlen (fn));
       sprintf (command, "%s %s", FC_EDIT_COMMAND, fn);
     }
-  retval = parse_and_execute (command, "fc", -1);
+  retval = parse_and_execute (command, "fc", SEVAL_NOHIST);
   if (retval != EXECUTION_SUCCESS)
     {
       unlink (fn);
@@ -375,10 +382,18 @@ fc_builtin (list)
   retval = EXECUTION_SUCCESS;
   first = 1;
 
+#if 1
+  /* Make sure parse_and_execute doesn't turn this off, even though a
+     call to parse_and_execute farther up the function call stack (e.g.,
+     if this is called by vi_edit_and_execute_command) may have already
+     called bash_history_disable. */
+  remember_on_history = 1;
+#else
   /* First, write the commands to the history file.  This will not happen
      when we call parse_and_execute, since parse_and_execute disables
      the command line history while it executes. */
-     
+
+  opt = current_command_line_count;
   while ((line = fc_readline (stream)) != NULL)
     {
       if (line[0] == '\n')
@@ -390,23 +405,36 @@ fc_builtin (list)
       if (first)
 	{
 	  first = 0;
+	  /* If we retrieved only one command from the history file, but we
+	     read multiple lines from the edited file, and literal_history
+	     has been set by `shopt', we assume that it was a compound
+	     command stored with embedded newlines.  In this case, we want
+	     the history code to store it as one command again. */
+	  if (literal_history && histbeg == histend)
+	    current_command_line_count = 1;
 	  fc_replhist (line);
 	}
       else
-	fc_addhist (line);
+	{
+	  if (literal_history && histbeg == histend)
+	    current_command_line_count++;
+	  fc_addhist (line);
+	}
 
       free (line);
     }
   fclose (stream);
+  current_command_line_count = opt;
+#endif
 
-  /* Turn on the `v' flag while maybe_execute_file runs so the commands
+  /* Turn on the `v' flag while fc_execute_file runs so the commands
      will be echoed as they are read by the parser. */
   begin_unwind_frame ("fc builtin");
   add_unwind_protect (unlink, fn);
   unwind_protect_int (echo_input_at_read);
   echo_input_at_read = 1;
     
-  retval = maybe_execute_file (fn, 0);
+  retval = fc_execute_file (fn);
 
   run_unwind_frame ("fc builtin");
 
@@ -447,8 +475,10 @@ fc_gethnum (command, hlist)
      ("fc blah..." and so on) is already part of the history list by
      the time we get to this point.  This just skips over that command
      and makes the last command that this deals with be the last command
-     the user entered before the fc. */
-  i -= 2;
+     the user entered before the fc.  We need to check whether the
+     line was actually added (HISTIGNORE may have caused it to not be),
+     so we check hist_last_line_added. */
+  i -= 1 + hist_last_line_added;
 
   /* No specification defaults to most recent command. */
   if (command == NULL)

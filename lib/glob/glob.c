@@ -103,6 +103,8 @@ extern void free ();
 #endif /* !NULL */
 
 #if defined (SHELL)
+extern void throw_to_top_level ();
+
 extern int interrupt_state;
 #endif /* SHELL */
 
@@ -265,7 +267,8 @@ glob_vector (pat, dir)
 	continue;
 
       /* If a dot must be explicity matched, check to see if they do. */
-      if (noglob_dot_filenames && dp->d_name[0] == '.' && pat[0] != '.')
+      if (noglob_dot_filenames && dp->d_name[0] == '.' && pat[0] != '.' &&
+	    (pat[0] != '\\' || pat[1] != '.'))
 	continue;
 
       flags = (noglob_dot_filenames ? FNM_PERIOD : 0) | FNM_PATHNAME;
@@ -295,7 +298,9 @@ glob_vector (pat, dir)
     }
 
   /* Have we run out of memory?	 */
+#if defined (SHELL)
  lost:
+#endif
   if (lose)
     {
       /* Here free the strings we have got.  */

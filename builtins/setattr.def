@@ -34,8 +34,17 @@ $PRODUCES setattr.c
 #include "common.h"
 #include "bashgetopt.h"
 
+extern int posixly_correct;
 extern int array_needs_making;
 extern char *this_command_name;
+extern Function *this_shell_builtin;
+
+#ifdef ARRAY_VARS
+extern int declare_builtin ();
+#endif
+
+#define READONLY_OR_EXPORT \
+  (this_shell_builtin == readonly_builtin || this_shell_builtin == export_builtin)
 
 $BUILTIN export
 $FUNCTION export_builtin
@@ -94,6 +103,10 @@ set_or_show_attributes (list, attribute, nodefs)
   register SHELL_VAR *var;
   int assign, undo, functions_only, arrays_only, any_failed, assign_error, opt;
   char *name;
+#if defined (ARRAY_VARS)
+  WORD_LIST *nlist, *tlist;
+  WORD_DESC *w;
+#endif
 
   undo = functions_only = arrays_only = any_failed = assign_error = 0;
   /* Read arguments from the front of the list. */
@@ -159,7 +172,10 @@ set_or_show_attributes (list, attribute, nodefs)
 	  if (legal_identifier (name) == 0)
 	    {
 	      builtin_error ("`%s': not a valid identifier", name);
-	      assign_error++;
+	      if (assign)
+		assign_error++;
+	      else
+		any_failed++;
 	      list = list->next;
 	      continue;
 	    }
@@ -167,6 +183,24 @@ set_or_show_attributes (list, attribute, nodefs)
 	  if (assign)	/* xxx [-np] name=value */
 	    {
 	      name[assign] = '=';
+#if defined (ARRAY_VARS)
+	      /* Let's try something here.  Turn readonly -a xxx=yyy into
+		 declare -ra xxx=yyy and see what that gets us. */
+	      if (arrays_only)
+		{
+		  tlist = list->next;
+		  list->next = (WORD_LIST *)NULL;
+		  w = make_word ("-ra");
+		  nlist = make_word_list (w, list);
+		  opt = declare_builtin (nlist);
+		  if (opt != EXECUTION_SUCCESS)
+		    assign_error++;
+		  list->next = tlist;
+		  dispose_word (w);
+		  free (nlist);
+		}
+	      else
+#endif
 	      /* This word has already been expanded once with command
 		 and parameter expansion.  Call do_assignment_no_expand (),
 		 which does not do command or parameter substitution.  If
@@ -212,7 +246,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	        continue;
 #endif
 	      if ((var->attributes & attribute) && invisible_p (var) == 0)
-		show_var_attributes (var, nodefs);
+		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
 	    }
 	  free (variable_list);
 	}
@@ -223,43 +257,70 @@ set_or_show_attributes (list, attribute, nodefs)
   					    : EXECUTION_FAILURE));
 }
 
+/* Show the attributes for shell variable VAR.  If NODEFS is non-zero,
+   don't show function definitions along with the name.  If PATTR is
+   non-zero, it indicates we're being called from `export' or `readonly'.
+   In POSIX mode, this prints the name of the calling builtin (`export'
+   or `readonly') instead of `declare', and doesn't print function defs
+   when called by `export' or `readonly'. */
 int
-show_var_attributes (var, nodefs)
+show_var_attributes (var, pattr, nodefs)
      SHELL_VAR *var;
-     int nodefs;
+     int pattr, nodefs;
 {
   char flags[6], *x;
   int i;
 
   i = 0;
 
+  /* pattr == 0 means we are called from `declare'. */
+  if (pattr == 0 || posixly_correct == 0)
+    {
 #if defined (ARRAY_VARS)
-  if (array_p (var))
-    flags[i++] = 'a';
+      if (array_p (var))
+	flags[i++] = 'a';
 #endif
 
-  if (function_p (var))
-    flags[i++] = 'f';
+      if (function_p (var))
+        flags[i++] = 'f';
 
-  if (integer_p (var))
-    flags[i++] = 'i';
+      if (integer_p (var))
+        flags[i++] = 'i';
 
-  if (readonly_p (var))
-    flags[i++] = 'r';
+      if (readonly_p (var))
+        flags[i++] = 'r';
 
-  if (exported_p (var))
-    flags[i++] = 'x';
+      if (exported_p (var))
+        flags[i++] = 'x';
+    }
+  else
+    {
+#if defined (ARRAY_VARS)
+      if (array_p (var))
+	flags[i++] = 'a';
+#endif
+
+      if (function_p (var))
+        flags[i++] = 'f';
+    }
 
   flags[i] = '\0';
 
-  printf ("declare -%s ", i ? flags : "-");
+  if (pattr == 0 || posixly_correct == 0)
+    printf ("declare -%s ", i ? flags : "-");
+  else if (i)
+    printf ("%s -%s ", this_command_name, flags);
+  else
+    printf ("%s ", this_command_name);
 
 #if defined (ARRAY_VARS)
  if (array_p (var))
     print_array_assignment (var, 1);
   else
 #endif
-  if (nodefs)
+  /* force `readline' and `export' to not print out function definitions
+     when in POSIX mode. */
+  if (nodefs || (function_p (var) && pattr != 0 && posixly_correct))
     printf ("%s\n", var->name);
   else if (function_p (var))
     printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
@@ -285,7 +346,7 @@ show_name_attributes (name, nodefs)
 
   if (var && invisible_p (var) == 0)
     {
-      show_var_attributes (var, nodefs);
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       return (0);
     }
   else

@@ -58,14 +58,16 @@
 #  endif /* !TERMIO_TTY_DRIVER */
 #endif /* TERMIOS_TTY_DRIVER */
 
+#if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
 /* For struct winsize on SCO */
 /*   sys/ptem.h has winsize but needs mblk_t from sys/stream.h */
-#if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
-#  if defined (HAVE_SYS_STREAM_H)
-#    include <sys/stream.h>
-#  endif
-#  include <sys/ptem.h>
-#endif
+#  if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
+#    if defined (HAVE_SYS_STREAM_H)
+#      include <sys/stream.h>
+#    endif
+#    include <sys/ptem.h>
+#  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
+#endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
 #if defined (_POSIX_VERSION) || !defined (HAVE_KILLPG)
 #  define killpg(pg, sig)		kill(-(pg),(sig))
@@ -81,9 +83,16 @@
 #  define WAITPID(pid, statusp, options) wait (statusp)
 #endif /* !HAVE_WAITPID */
 
+/* Return the fd from which we are actually getting input. */
+#define input_tty() (shell_tty != -1) ? shell_tty : fileno (stderr)
+
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
+
+#if defined (READLINE)
+extern void _rl_set_screen_size (); 
+#endif    
 
 extern int interactive, interactive_shell, login_shell;
 extern int subshell_environment;
@@ -97,6 +106,9 @@ pid_t last_asynchronous_pid = NO_PID;
 
 /* Call this when you start making children. */
 int already_making_children = 0;
+
+/* The controlling tty for this shell. */
+int shell_tty = -1;
 
 /* If this is non-zero, $LINES and $COLUMNS are reset after every process
    exits from get_tty_state(). */
@@ -223,9 +235,13 @@ cleanup_dead_jobs ()
 }
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
-initialize_jobs ()
+initialize_job_control (force)
+     int force;
 {
-  get_tty_state ();
+  shell_tty = fileno (stderr);
+
+  if (interactive)
+    get_tty_state ();
 }
 
 #if defined (TIOCGWINSZ) && defined (SIGWINCH)
@@ -238,7 +254,7 @@ get_new_window_size (from_sig)
   struct winsize win;
   int tty;
 
-  tty = open ("/dev/tty", O_RDONLY);
+  tty = input_tty ();
   if (tty >= 0 && (ioctl (tty, TIOCGWINSZ, &win) == 0) &&
       win.ws_row > 0 && win.ws_col > 0)
     {
@@ -250,7 +266,6 @@ get_new_window_size (from_sig)
       _rl_set_screen_size (win.ws_row, win.ws_col);
 #endif
     }
-  close (tty);
 }
 
 static sighandler
@@ -578,8 +593,13 @@ wait_for (pid)
   else
     return_val = WEXITSTATUS (status);
 
-  if (!WIFSTOPPED (status) && WIFSIGNALED (status) &&
-      (WTERMSIG (status) != SIGINT))
+#if !defined (DONT_REPORT_SIGPIPE)
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
+	(WTERMSIG (status) != SIGINT))
+#else
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
+	(WTERMSIG (status) != SIGINT) && (WTERMSIG (status) != SIGPIPE))
+#endif
     {
       fprintf (stderr, "%s", strsignal (WTERMSIG (status)));
       if (WIFCORED (status))
@@ -634,7 +654,7 @@ get_tty_state ()
 {
   int tty;
 
-  tty = open ("/dev/tty", O_RDONLY);
+  tty = input_tty ();
   if (tty != -1)
     {
 #if defined (TERMIOS_TTY_DRIVER)
@@ -646,7 +666,6 @@ get_tty_state ()
       ioctl (tty, TIOCGETP, &shell_tty_info);
 #  endif
 #endif
-      close (tty);
       got_tty_state = 1;
       if (check_window_size)
 	get_new_window_size (0);
@@ -658,14 +677,12 @@ set_tty_state ()
 {
   int tty;
 
-  tty = open ("/dev/tty", O_RDONLY);
+  tty = input_tty ();
   if (tty != -1)
     {
       if (got_tty_state == 0)
-	{
-	  close (tty);
-	  return;
-	}
+	return;
+
 #if defined (TERMIOS_TTY_DRIVER)
       tcsetattr (tty, TCSADRAIN, &shell_tty_info);
 #else
@@ -675,7 +692,6 @@ set_tty_state ()
       ioctl (tty, TIOCSETN, &shell_tty_info);
 #  endif
 #endif
-      close (tty);
     }
 }
 
@@ -697,6 +713,17 @@ void
 start_pipeline ()
 {
   already_making_children = 1;
+}
+
+int
+get_job_by_pid (pid, block)
+     pid_t pid;
+     int block;
+{
+  int i;
+
+  i = find_index_by_pid (pid);
+  return ((i == NO_PID) ? PROC_BAD : i);
 }
 
 /* Print descriptive information about the job with leader pid PID. */

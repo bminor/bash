@@ -27,6 +27,7 @@ extern int history_lines_in_file;
 extern int history_expansion;
 extern int history_control;
 extern int command_oriented_history;
+extern int hist_last_line_added;
 
 #  if defined (BANG_HISTORY)
 extern int history_expansion_inhibited;
@@ -43,6 +44,7 @@ extern int maybe_save_shell_history ();
 extern char *pre_process_line ();
 extern int history_number ();
 extern void maybe_add_history ();
+extern void bash_add_history ();
 
 extern void setup_history_ignore ();
 

@@ -66,6 +66,7 @@ extern int restricted;
 extern int *find_flag __P((int));
 extern int change_flag __P((int, int));
 extern char *which_set_flags __P((void));
+extern void reset_shell_flags __P((void));
 
 /* A macro for efficiency. */
 #define change_flag_char(flag, on_or_off)  change_flag (flag, on_or_off)

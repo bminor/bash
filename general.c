@@ -89,11 +89,9 @@ char *
 itos (i)
      int i;
 {
-  char *buf, *p, *ret;
+  char buf[MAX_INT_LEN], *p, *ret;
   int negative = 0;
   unsigned int ui;
-
-  buf = xmalloc (MAX_INT_LEN);
 
   if (i < 0)
     {
@@ -114,7 +112,6 @@ itos (i)
     *p-- = '-';
 
   ret = savestring (p + 1);
-  free (buf);
   return (ret);
 }
 
@@ -439,14 +436,14 @@ check_dev_tty ()
   int tty_fd;
   char *tty;
 
-  tty_fd = open ("/dev/tty", O_RDWR);
+  tty_fd = open ("/dev/tty", O_RDWR|O_NONBLOCK);
 
   if (tty_fd < 0)
     {
       tty = (char *)ttyname (fileno (stdin));
       if (tty == 0)
 	return;
-      tty_fd = open (tty, O_RDWR);
+      tty_fd = open (tty, O_RDWR|O_NONBLOCK);
     }
   close (tty_fd);
 }
@@ -482,18 +479,25 @@ same_file (path1, path2, stp1, stp2)
    allowed in the shell process, to avoid the user stepping on it with
    redirection and causing us extra work.  If CHECK_NEW is non-zero,
    we check whether or not the file descriptors are in use before
-   duplicating FD onto them. */
+   duplicating FD onto them.  MAXFD says where to start checking the
+   file descriptors.  If it's less than 20, we get the maximum value
+   available from getdtablesize(2). */
 int
-move_to_high_fd (fd, check_new)
-     int fd, check_new;
+move_to_high_fd (fd, check_new, maxfd)
+     int fd, check_new, maxfd;
 {
   int script_fd, nfds, ignore;
 
-  nfds = getdtablesize ();
-  if (nfds <= 0)
-    nfds = 20;
-  if (nfds > 256)
-    nfds = 256;
+  if (maxfd < 20)
+    {
+      nfds = getdtablesize ();
+      if (nfds <= 0)
+	nfds = 20;
+      if (nfds > 256)
+	nfds = 256;
+    }
+  else
+    nfds = maxfd;
 
   for (nfds--; check_new && nfds > 3; nfds--)
     if (fcntl (nfds, F_GETFD, &ignore) == -1)
@@ -607,11 +611,12 @@ canonicalize_pathname (path)
       while (result[i] == '/')
 	i++;
 
-#if !defined (apollo)
+#if 0
       if ((start + 1) != i)
 #else
+      /* Leave a leading `//' alone, as POSIX requires. */
       if ((start + 1) != i && (start != 0 || i != 2))
-#endif /* apollo */
+#endif
 	{
 	  strcpy (result + start + 1, result + i);
 	  i = start + 1;
@@ -709,11 +714,11 @@ make_absolute (string, dot_path)
   char *result;
   int result_len;
 
-  if (!dot_path || *string == '/')
+  if (dot_path == 0 || *string == '/')
     result = savestring (string);
   else
     {
-      if (dot_path && dot_path[0])
+      if (dot_path[0])
 	{
 	  result_len = strlen (dot_path);
 	  result = xmalloc (2 + result_len + strlen (string));
@@ -801,6 +806,7 @@ full_pathname (file)
 
   disposer = file;
 
+  /* XXX - this should probably be just PATH_MAX or PATH_MAX + 1 */
   current_dir = xmalloc (2 + PATH_MAX + strlen (file));
   if (getcwd (current_dir, PATH_MAX) == 0)
     {
@@ -906,9 +912,9 @@ extract_colon_unit (string, p_index)
 
 /* If tilde_expand hasn't been able to expand the text, perhaps it
    is a special shell expansion.  This function is installed as the
-   tilde_expansion_failure_hook.  It knows how to expand ~- and ~+. */
+   tilde_expansion_preexpansion_hook.  It knows how to expand ~- and ~+. */
 static char *
-bash_tilde_expansion_failure_hook (text)
+bash_special_tilde_expansions (text)
      char *text;
 {
   char *result;
@@ -917,9 +923,9 @@ bash_tilde_expansion_failure_hook (text)
   if (text[1] == '\0')
     {
       if (*text == '+')
-        result = get_string_value ("PWD");
+	result = get_string_value ("PWD");
       else if (*text == '-')
-        result = get_string_value ("OLDPWD");
+	result = get_string_value ("OLDPWD");
     }
 
   return (result ? savestring (result) : (char *)NULL);
@@ -933,8 +939,8 @@ tilde_initialize ()
 {
   static int times_called = 0;
 
-  /* Tell the tilde expander that we want a crack if it fails. */
-  tilde_expansion_failure_hook = (CPFunction *)bash_tilde_expansion_failure_hook;
+  /* Tell the tilde expander that we want a crack first. */
+  tilde_expansion_preexpansion_hook = (CPFunction *)bash_special_tilde_expansions;
 
   /* Tell the tilde expander about special strings which start a tilde
      expansion, and the special strings that end one.  Only do this once.
@@ -966,4 +972,136 @@ bash_tilde_expand (s)
   ret = tilde_expand (s);
   interrupt_immediately = old_immed;
   return (ret);
+}
+
+/* **************************************************************** */
+/*								    */
+/*	  Functions to manipulate and search the group list	    */
+/*								    */
+/* **************************************************************** */
+
+static int ngroups, maxgroups;
+
+/* The set of groups that this user is a member of. */
+static GETGROUPS_T *group_array = (GETGROUPS_T *)NULL;
+
+#if !defined (NOGROUP)
+#  define NOGROUP (gid_t) -1
+#endif
+
+#if defined (HAVE_SYSCONF) && defined (_SC_NGROUPS_MAX)
+#  define getmaxgroups() sysconf(_SC_NGROUPS_MAX)
+#else
+#  if defined (NGROUPS_MAX)
+#    define getmaxgroups() NGROUPS_MAX
+#  else /* !NGROUPS_MAX */
+#    if defined (NGROUPS)
+#      define getmaxgroups() NGROUPS
+#    else /* !NGROUPS */
+#      define getmaxgroups() 64
+#    endif /* !NGROUPS */
+#  endif /* !NGROUPS_MAX */
+#endif /* !HAVE_SYSCONF || !SC_NGROUPS_MAX */
+
+static void
+initialize_group_array ()
+{
+  register int i;
+
+  if (maxgroups == 0)
+    maxgroups = getmaxgroups ();
+
+  ngroups = 0;
+  group_array = (GETGROUPS_T *)xrealloc (group_array, maxgroups * sizeof (GETGROUPS_T));
+
+#if defined (HAVE_GETGROUPS)
+  ngroups = getgroups (maxgroups, group_array);
+#endif
+
+  /* If getgroups returns nothing, or the OS does not support getgroups(),
+     make sure the groups array includes at least the current gid. */
+  if (ngroups == 0)
+    {
+      group_array[0] = current_user.gid;
+      ngroups = 1;
+    }
+
+  /* If the primary group is not in the groups array, add it as group_array[0]
+     and shuffle everything else up 1, if there's room. */
+  for (i = 0; i < ngroups; i++)
+    if (current_user.gid == (gid_t)group_array[i])
+      break;
+  if (i == ngroups && ngroups < maxgroups)
+    {
+      for (i = ngroups; i > 0; i--)
+        group_array[i] = group_array[i - 1];
+      group_array[0] = current_user.gid;
+      ngroups++;
+    }
+}
+
+/* Return non-zero if GID is one that we have in our groups list. */
+int
+group_member (gid)
+     gid_t gid;
+{
+#if defined (HAVE_GETGROUPS)
+  register int i;
+#endif
+
+  /* Short-circuit if possible, maybe saving a call to getgroups(). */
+  if (gid == current_user.gid || gid == current_user.egid)
+    return (1);
+
+#if defined (HAVE_GETGROUPS)
+  if (ngroups == 0)
+    initialize_group_array ();
+
+  /* In case of error, the user loses. */
+  if (ngroups <= 0)
+    return (0);
+
+  /* Search through the list looking for GID. */
+  for (i = 0; i < ngroups; i++)
+    if (gid == (gid_t)group_array[i])
+      return (1);
+#endif
+
+  return (0);
+}
+
+char **
+get_group_list (ngp)
+     int *ngp;
+{
+  static char **group_vector = (char **)NULL;
+  register int i;
+  char *nbuf;
+
+  if (group_vector)
+    {
+      if (ngp)
+	*ngp = ngroups;
+      return group_vector;
+    }
+
+  if (ngroups == 0)
+    initialize_group_array ();
+
+  if (ngroups <= 0)
+    {
+      if (ngp)
+	*ngp = 0;
+      return (char **)NULL;
+    }
+
+  group_vector = (char **)xmalloc (ngroups * sizeof (char *));
+  for (i = 0; i < ngroups; i++)
+    {
+      nbuf = itos ((int)group_array[i]);
+      group_vector[i] = nbuf;
+    }
+  if (ngp)
+    *ngp = ngroups;
+  return group_vector;
 }

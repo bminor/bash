@@ -130,7 +130,7 @@ static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
 static void	readtok ();	/* lexical analyzer */
-static long	expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
+static long	subexpr (), expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
 		exp4 (), exp5 (), expshift (), expland (), explor (),
 		expband (), expbor (), expbxor (), expcond ();
 static long	strlong ();
@@ -158,8 +158,6 @@ pushexp ()
 {
   EXPR_CONTEXT *context;
 
-  context = (EXPR_CONTEXT *)xmalloc (sizeof (EXPR_CONTEXT));
-
   if (expr_depth >= MAX_EXPR_RECURSION_LEVEL)
     evalerror ("expression recursion level exceeded");
 
@@ -169,6 +167,8 @@ pushexp ()
 	xrealloc (expr_stack, (expr_stack_size += EXPR_STACK_GROW_SIZE)
 		  * sizeof (EXPR_CONTEXT *));
     }
+
+  context = (EXPR_CONTEXT *)xmalloc (sizeof (EXPR_CONTEXT));
 
   context->curtok = curtok;
   context->lasttok = lasttok;
@@ -199,7 +199,11 @@ popexp ()
   free (context);
 }
 
-/* Evaluate EXPR, and return the arithmetic result.
+/* Evaluate EXPR, and return the arithmetic result.  If VALIDP is
+   non-null, a zero is stored into the location to which it points
+   if the expression is invalid, non-zero otherwise.  If a non-zero
+   value is returned in *VALIDP, the return value of evalexp() may
+   be used.
 
    The `while' loop after the longjmp is caught relies on the above
    implementation of pushexp and popexp leaving in expr_stack[0] the
@@ -209,41 +213,72 @@ popexp ()
    safe to let the loop terminate when expr_depth == 0, without freeing up
    any of the expr_depth[0] stuff. */
 long
-evalexp (expr)
+evalexp (expr, validp)
      char *expr;
+     int *validp;
 {
-  long val = 0L;
+  long val;
+#if 0
   procenv_t old_evalbuf;
-  char *p;
+#endif
 
-  for (p = expr; p && *p && cr_whitespace (*p); p++)
-    ;
+  val = 0L;
 
-  if (p == NULL || *p == '\0')
-    return (0);
-
+#if 0
   /* Save the value of evalbuf to protect it around possible recursive
      calls to evalexp (). */
   COPY_PROCENV (evalbuf, old_evalbuf);
+#endif
 
   if (setjmp (evalbuf))
     {
-      if (tokstr)		/* Clean up local allocation. */
-	free (tokstr);
+      FREE (tokstr);
+      FREE (expression);
+      tokstr = expression = (char *)NULL;
 
-      if (expression)
-	free (expression);
-
-      while (--expr_depth)
+      while (--expr_depth > 0)
 	{
 	  if (expr_stack[expr_depth]->tokstr)
 	    free (expr_stack[expr_depth]->tokstr);
 
 	  if (expr_stack[expr_depth]->expression)
 	    free (expr_stack[expr_depth]->expression);
+
+	  free (expr_stack[expr_depth]);
 	}
-      jump_to_top_level (DISCARD);
+      free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
+
+      if (validp)
+	*validp = 0;
+      return (0L);
     }
+
+  val = subexpr (expr);
+
+#if 0
+  /* Restore the value of evalbuf so that any subsequent longjmp calls
+     will have a valid location to jump to. */
+  COPY_PROCENV (old_evalbuf, evalbuf);
+#endif
+
+  if (validp)
+    *validp = 1;
+
+  return (val);
+}
+
+static long
+subexpr (expr)
+     char *expr;
+{
+  long val;
+  char *p;
+
+  for (p = expr; p && *p && cr_whitespace (*p); p++)
+    ;
+
+  if (p == NULL || *p == '\0')
+    return (0L);
 
   pushexp ();
   curtok = lasttok = 0;
@@ -251,7 +286,7 @@ evalexp (expr)
   tp = expression;
 
   tokstr = (char *)NULL;
-  tokval = 0l;
+  tokval = 0L;
 
   readtok ();
 
@@ -260,18 +295,12 @@ evalexp (expr)
   if (curtok != 0)
     evalerror ("syntax error in expression");
 
-  if (tokstr)
-    free (tokstr);
-  if (expression)
-    free (expression);
+  FREE (tokstr);
+  FREE (expression);
 
   popexp ();
 
-  /* Restore the value of evalbuf so that any subsequent longjmp calls
-     will have a valid location to jump to. */
-  COPY_PROCENV (old_evalbuf, evalbuf);
-
-  return (val);
+  return val;
 }
 
 /* Bind/create a shell variable with the name LHS to the RHS.
@@ -362,6 +391,7 @@ expassign ()
 	      lvalue |= value;
 	      break;
 	    default:
+	      free (lhs);
 	      evalerror ("bug: bad expassign token");
 	      break;
 	    }
@@ -373,7 +403,7 @@ expassign ()
 	bind_int_variable (lhs, rhs);
       free (rhs);
       free (lhs);
-      free (tokstr);
+      FREE (tokstr);
       tokstr = (char *)NULL;		/* For freeing on errors. */
     }
   return (value);
@@ -384,6 +414,9 @@ static long
 expcond ()
 {
   long cval, val1, val2, rval;
+  int set_noeval;
+
+  set_noeval = 0;
   rval = cval = explor ();
   if (curtok == QUES)		/* found conditional expr */
     {
@@ -391,23 +424,30 @@ expcond ()
       if (curtok == 0 || curtok == COL)
 	evalerror ("expression expected");
       if (cval == 0)
-	noeval++;
+	{
+	  set_noeval = 1;
+	  noeval++;
+	}
 #if 0
       val1 = explor ();
 #else
       val1 = expassign ();
 #endif
-      if (cval == 0)
+      if (set_noeval)
         noeval--;
       if (curtok != COL)
         evalerror ("`:' expected for conditional expression");
       readtok ();
       if (curtok == 0)
 	evalerror ("expression expected");
+      set_noeval = 0;
       if (cval)
-        noeval++;
+ 	{
+ 	  set_noeval = 1;
+	  noeval++;
+ 	}
       val2 = explor ();
-      if (cval)
+      if (set_noeval)
         noeval--;
       rval = cval ? val1 : val2;
       lasttok = COND;
@@ -420,18 +460,24 @@ static long
 explor ()
 {
   register long val1, val2;
+  int set_noeval;
 
   val1 = expland ();
 
   while (curtok == LOR)
     {
+      set_noeval = 0;
+      if (val1 != 0)
+	{
+	  noeval++;
+	  set_noeval = 1;
+	}
       readtok ();
-      if (val1 != 0)
-	noeval++;
       val2 = expland ();
-      if (val1 != 0)
+      if (set_noeval)
 	noeval--;
       val1 = val1 || val2;
+      lasttok = LOR;
     }
 
   return (val1);
@@ -442,18 +488,24 @@ static long
 expland ()
 {
   register long val1, val2;
+  int set_noeval;
 
   val1 = expbor ();
 
   while (curtok == LAND)
     {
+      set_noeval = 0;
+      if (val1 == 0)
+	{
+	  set_noeval = 1;
+	  noeval++;
+	}
       readtok ();
-      if (val1 == 0)
-	noeval++;
       val2 = expbor ();
-      if (val1 == 0)
+      if (set_noeval)
 	noeval--;
       val1 = val1 && val2;
+      lasttok = LAND;
     }
 
   return (val1);
@@ -556,7 +608,7 @@ exp4 ()
 	val1 = val1 >= val2;
       else if (op == LT)
 	val1 = val1 < val2;
-      else if (op == GT)
+      else			/* (op == GT) */
 	val1 = val1 > val2;
     }
   return (val1);
@@ -762,7 +814,12 @@ readtok ()
       value = get_string_value (tokstr);
 #endif
 
-      tokval = (value && *value) ? evalexp (value) : 0;
+      tokval = (value && *value) ? subexpr (value) : 0;
+
+#if defined (ARRAY_VARS)
+      if (e == ']')
+	FREE (value);	/* get_array_value returns newly-allocated memory */
+#endif
 
       *cp = c;
       lasttok = curtok;
@@ -960,14 +1017,18 @@ main (argc, argv)
 {
   register int i;
   long v;
+  int expok;
 
   if (setjmp (top_level))
     exit (0);
 
   for (i = 1; i < argc; i++)
     {
-      v = evalexp (argv[i]);
-      printf ("'%s' -> %ld\n", argv[i], v);
+      v = evalexp (argv[i], &expok);
+      if (expok == 0)
+        fprintf (stderr, "%s: expression error\n", argv[i]);
+      else
+        printf ("'%s' -> %ld\n", argv[i], v);
     }
   exit (0);
 }

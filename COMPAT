@@ -1,7 +1,7 @@
 This document details the incompatibilites between this version of bash,
-bash-2.0, and the previous version, bash-1.14.  These were discovered
-by alpha and beta testers, so they will likely be encountered by a
-significant number of users.
+bash-2.01, and the previous widely-available version, bash-1.14.  These
+were discovered by alpha and beta testers, so they will likely be
+encountered by a significant number of users. 
 
 1.  Bash now uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -71,8 +71,33 @@ significant number of users.
     command_oriented_history, glob_dot_filenames, allow_null_glob_expansion,
     nolinks, hostname_completion_file, noclobber, no_exit_on_failed_exec, and
     cdable_vars.  Most of them are now implemented with the new `shopt'
-    builtin; others were already implemented by `set'.
+    builtin; others were already implemented by `set'.  Here is a list of
+    correspondences:
 
-8.  The `ulimit' builtins now sets both hard and soft limits and reports the
-    soft limit by default (when neither -H nor -S is specified).  This is
-    compatible with versions of sh and ksh that implement `ulimit'.
+	MAIL_WARNING			shopt mailwarn
+	notify				set -o notify
+	history_control			HISTCONTROL
+	command_oriented_history	shopt cmdhist
+	glob_dot_filenames		shopt dotglob
+	allow_null_glob_expansion	shopt nullglob
+	nolinks				set -o physical
+	hostname_completion_file	HOSTFILE
+	noclobber			set -o noclobber
+	no_exit_on_failed_exec		shopt execfail
+	cdable_vars			shopt cdable_vars
+
+8. `ulimit' now sets both hard and soft limits and reports the soft limit
+    by default (when neither -H nor -S is specified).  This is compatible
+    with versions of sh and ksh that implement `ulimit'.  The bash-1.14
+    behavior of, for example,
+
+		ulimit -c 0
+
+    can be obtained with
+
+		ulimit -S -c 0
+
+    It may be useful to define an alias:
+
+		alias ulimit="ulimit -S"
+

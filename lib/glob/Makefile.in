@@ -26,10 +26,11 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
 DEFS = @DEFS@
+LOCAL_DEFS = @LOCAL_DEFS@
 
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
 
-CCFLAGS = $(DEFS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
+CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
 
 # Here is a rule for making .o files from .c files that doesn't force
 # the type of the machine (like -sun3) into the flags.
@@ -99,7 +100,10 @@ mostlyclean: clean
 #								     #
 ######################################################################
 
-fnmatch.o: fnmatch.c fnmatch.h
-
+fnmatch.o: fnmatch.h
 fnmatch.o: $(BUILD_DIR)/config.h
+
 glob.o: $(BUILD_DIR)/config.h
+glob.o: $(topdir)/bashtypes.h $(topdir)/ansi_stdlib.h $(topdir)/bashansi.h
+glob.o: $(topdir)/posixstat.h $(topdir)/memalloc.h
+glob.o: fnmatch.h

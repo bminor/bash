@@ -237,14 +237,28 @@ disown_builtin (list)
   list = loptend;
   retval = EXECUTION_SUCCESS;
 
+#if 0
+  /* For the future `disown -a' */
+  if (list == 0)
+    {
+      if (nohup_only)
+	nohup_all_jobs ();
+      else
+	delete_all_jobs ();
+      return (EXECUTION_SUCCESS);
+    }
+#endif
+
   do
     {
       BLOCK_CHILD (set, oset);
-      job = get_job_spec (list);
+      job = (list && all_digits(list->word->word))
+		? get_job_by_pid (atoi(list->word->word), 0)
+		: get_job_spec (list);
 
       if (job == NO_JOB || jobs == 0 || jobs[job] == 0)
 	{
-	  builtin_error ("no such job %s", list->word->word);
+	  builtin_error ("%s: no such job", list ? list->word->word : "current");
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)
@@ -257,6 +271,7 @@ disown_builtin (list)
 	list = list->next;
     }
   while (list);
+
   return (retval);
 }
 #endif /* JOB_CONTROL */

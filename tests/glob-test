@@ -1,3 +1,4 @@
+LC_COLLATE=C
 #
 # test the shell globbing
 #
@@ -5,6 +6,8 @@ expect()
 {
 	echo expect "$@"
 }
+
+MYDIR=$PWD	# save where we are
 
 TESTDIR=/tmp/glob-test
 mkdir $TESTDIR
@@ -119,59 +122,47 @@ recho a[\b]c
 expect '<abc>'
 recho a?c
 
-expect '<match>'
+expect '<match 1>'
 case abc in
-a"b"c)	echo match
-	;;
-*)	echo BAD
-	;;
+a"b"c)	echo 'match 1' ;;
+*)	echo 'BAD match 1' ;;
 esac
 
-expect '<match>'
+expect '<match 2>'
 case abc in
-a*c)	echo match
-	;;
-*)	echo BAD
-	;;
+a*c)	echo 'match 2' ;;
+*)	echo 'BAD match 2' ;;
 esac
 
-expect '<ok>'
+expect '<ok 1>'
 case abc in
-"a?c")	echo bad
-	;;
-*)	echo ok
-	;;
+"a?c")	echo 'bad 1' ;;
+*)	echo 'ok 1' ;;
 esac
 
-expect '<ok>'
+expect '<ok 2>'
 case abc in
-a\*c)	echo bad
-	;;
-*)	echo ok
-	;;
+a\*c)	echo 'bad 2' ;;
+*)	echo 'ok 2' ;;
 esac
 
-expect '<ok>'
+expect '<ok 3>'
 case abc in
-a\[b]c)	echo bad
-	;;
-*)	echo ok
-	;;
+a\[b]c)	echo 'bad 3' ;;
+*)	echo 'ok 3' ;;
 esac
 
-expect '<ok>'
+expect '<ok 4>'
 case "$nosuchvar" in
-"") 	echo ok ;;
-*)	echo bad ;;
+"") 	echo 'ok 4' ;;
+*)	echo 'bad 4' ;;
 esac
 
 # This is very odd, but sh and ksh seem to agree
-expect '<ok>'
+expect '<ok 5>'
 case abc in
-a["\b"]c) echo ok
-	;;
-*)	echo bad
-	;;
+a["\b"]c) echo 'ok 5' ;;
+*)	echo 'bad 5' ;;
 esac
 
 mkdir man
@@ -253,32 +244,115 @@ case abcdecdhjk in
 a****c**?**??*****)	echo ok 25;;
 esac
 
+case '-' in
+[-abc])	echo ok 26 ;;
+esac
+
+case '-' in
+[abc-]) echo ok 27 ;;
+esac
+
+case '\' in
+\\)	echo ok 28 ;;
+esac
+
+case '\' in
+[\\])	echo ok 29 ;;
+esac
+
+case '\' in
+'\')	echo ok 30 ;;
+esac
+
+case '[' in
+[[])	echo ok 31 ;;
+esac
+
+# a `[' without a closing `]' is just another character to match, in the
+# bash implementation
+case '[' in
+[)	echo ok 32 ;;
+esac
+
+case '[abc' in
+[*)	echo 'ok 33';;
+esac
+
+# a right bracket shall lose its special meaning and represent itself in
+# a bracket expression if it occurs first in the list.  -- POSIX.2 2.8.3.2
+case ']' in
+[]])	echo ok 34 ;;
+esac
+
+case '-' in
+[]-])	echo ok 35 ;;
+esac
+
 # none of these should output anything
 
 case abc in
-??**********?****?)	echo bad ;;
+??**********?****?)	echo bad 1;;
 esac
 
 case abc in
-??**********?****c)	echo bad ;;
+??**********?****c)	echo bad 2;;
 esac
 
 case abc in
-?************c****?****)	echo bad;;
+?************c****?****)	echo bad 3;;
 esac
 
 case abc in
-*c*?**)	echo bad;;
+*c*?**)	echo bad 4;;
 esac
 
 case abc in
-a*****c*?**)	echo bad;;
+a*****c*?**)	echo bad 5;;
 esac
 
 case abc in
-a********???*******)	echo bad;;
+a********???*******)	echo bad 6;;
 esac
+
+case 'a' in
+[])	echo bad 7 ;;
+esac
+
+case '[' in
+[abc)	echo bad 8;;
+esac
+
+
+# make sure set -f works right
+set -f
+recho *
+set +f
+
+# test out the GLOBIGNORE code
+GLOBIGNORE='.*:*c:*e:?'
+recho *
+
+GLOBIGNORE='.*:*b:*d:?'
+recho *
+
+# see if GLOBIGNORE can substitute for `set -f'
+GLOBIGNORE='.*:*'
+recho *
+
+unset GLOBIGNORE
+expect '<man/man1/bash.1>'
+recho */man*/bash.*
+
+# make sure null values for GLOBIGNORE have no effect
+GLOBIGNORE=
+expect '<man/man1/bash.1>'
+recho */man*/bash.*
 
 builtin cd /
 rm -rf $TESTDIR
+
+# this is for the benefit of pure coverage, so it writes the pcv file
+# in the right place
+builtin cd $MYDIR
+
 exit 0

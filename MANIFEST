@@ -40,6 +40,7 @@ MANIFEST	f
 NEWS		f
 NOTES		f
 README		f
+AUTHORS		f
 configure.in	f
 configure	f
 Makefile.in	f
@@ -62,6 +63,7 @@ unwind_prot.c	f
 dispose_cmd.c	f
 getcwd.c	f
 bashhist.c	f
+hashcmd.c	f
 hashlib.c	f
 parse.y		f
 pathexp.c	f
@@ -112,10 +114,10 @@ externs.h	f
 siglist.h	f
 subst.h		f
 dispose_cmd.h	f
+hashcmd.h	f
 bashansi.h	f
 bashtty.h	f
 bashjmp.h	f
-bashwait.h	f
 bashintl.h	f
 make_cmd.h	f
 execute_cmd.h	f
@@ -125,7 +127,10 @@ pathnames.h	f
 y.tab.c		f
 y.tab.h		f
 posixdir.h	f
+posixjmp.h	f
 posixstat.h	f
+posixwait.h	f
+unionwait.h	f
 stdc.h		f
 ansi_stdlib.h	f
 memalloc.h	f
@@ -154,7 +159,6 @@ builtins/getopt.c	f
 builtins/getopt.h	f
 builtins/getopts.def	f
 builtins/hash.def	f
-builtins/hashcom.h	f
 builtins/help.def	f
 builtins/let.def	f
 builtins/history.def	f
@@ -203,6 +207,7 @@ lib/malloc/stub.c	f
 lib/malloc/i386-alloca.s	f
 lib/malloc/x386-alloca.s	f
 lib/posixheaders/posixdir.h	f
+lib/posixheaders/posixjmp.h	f
 lib/posixheaders/posixstat.h	f
 lib/posixheaders/ansi_stdlib.h	f
 lib/posixheaders/stdc.h	f
@@ -240,6 +245,7 @@ lib/readline/macro.c	f
 lib/readline/input.c	f
 lib/readline/callback.c	f
 lib/readline/nls.c	f
+lib/readline/shell.c	f
 lib/readline/tilde.c	f
 lib/readline/tilde.h	f
 lib/readline/rldefs.h	f
@@ -252,6 +258,7 @@ lib/readline/history.h	f
 lib/readline/histlib.h	f
 lib/readline/chardefs.h	f
 lib/readline/posixdir.h	f
+lib/readline/posixjmp.h	f
 lib/readline/posixstat.h	f
 lib/readline/ansi_stdlib.h	f
 lib/readline/doc/Makefile	f
@@ -266,6 +273,7 @@ lib/readline/examples/fileman.c	f
 lib/readline/examples/manexamp.c	f
 lib/readline/examples/histexamp.c	f
 lib/readline/examples/rltest.c	f
+lib/readline/examples/rl.c	f
 lib/readline/examples/Inputrc	f
 lib/termcap/Makefile.in	f
 lib/termcap/termcap.c	f
@@ -318,11 +326,13 @@ doc/builtins.1	f
 doc/article.ms	f
 support/config.guess	f
 support/config.sub	f
-support/printenv	f	755
+support/printenv.sh	f	755
+support/printenv.c	f
 support/bash.xbm	f
 support/mkclone		f	755
+support/mkconffiles	f	755
 support/mkdirs		f	755
-support/mkversion.c	f
+support/mkversion.sh	f	755
 support/mksignames.c	f
 support/bashbug.sh	f
 support/recho.c		f
@@ -332,6 +342,7 @@ support/fixlinks	f	755
 support/install.sh	f	755
 support/texi2dvi	f
 support/texi2html	f
+support/xenix-link.sh	f	755
 examples/bashdb/PERMISSION	f
 examples/bashdb/README	f
 examples/bashdb/bashdb	f
@@ -386,6 +397,7 @@ examples/functions/seq		f
 examples/functions/mhfold	f
 examples/functions/repeat2	f
 examples/functions/lowercase	f
+examples/functions/xalias.bash	f
 examples/scripts/shprompt	f
 examples/scripts/adventure.sh	f
 examples/scripts/precedence	f
@@ -393,7 +405,9 @@ examples/scripts/bcsh.sh	f
 examples/scripts/inpath		f
 examples/scripts/nohup.bash	f
 examples/scripts/vtree2		f
+examples/scripts/vtree3		f
 examples/scripts/scrollbar	f
+examples/scripts/spin.bash	f
 examples/scripts/zprintf	f
 examples/startup-files/README	f
 examples/startup-files/Bashrc	f
@@ -412,15 +426,48 @@ tests/array.tests	f
 tests/array.right	f
 tests/braces-tests	f
 tests/braces.right	f
+tests/builtins.tests	f
+tests/builtins.right	f
+tests/builtins.sub1	f
+tests/source.sub1	f
+tests/source.sub2	f
+tests/source.sub3	f
+tests/source.sub4	f
+tests/dirstack.tests	f
+tests/dirstack.right	f
 tests/dollar-at.sh	f
 tests/dollar-star.sh	f
 tests/dollar.right	f
+tests/errors.tests	f
+tests/errors.right	f
+tests/execscript	f
+tests/execscript.right	f
+tests/execscript.sub	f	755
+tests/execscript.sub2	f
+tests/execscript.sub3	f
+tests/execscript.sub4	f
 tests/exp-tests		f
 tests/exp.right		f
+tests/func.tests	f
+tests/func.right	f
+tests/getopts.tests	f
+tests/getopts.right	f
+tests/getopts.sub1	f
+tests/getopts.sub2	f
+tests/getopts.sub3	f
+tests/getopts.sub4	f
+tests/getopts.sub5	f
+tests/getopts.sub6	f
+tests/getopts.sub7	f
 tests/glob-test		f
 tests/glob.right	f
 tests/heredoc.tests	f
 tests/heredoc.right	f
+tests/histexpand.tests	f
+tests/histexpand.right	f
+tests/history.tests	f
+tests/history.right	f
+tests/history.list	f
 tests/ifs-test-1.sh	f
 tests/ifs-test-2.sh	f
 tests/ifs-test-3.sh	f
@@ -430,11 +477,12 @@ tests/ifs.3.right	f
 tests/input-line.sh	f
 tests/input-line.sub	f
 tests/input.right	f
-tests/minus-e		f
-tests/minus-e.right	f
+tests/jobs.tests	f
+tests/jobs.right	f
 tests/more-exp.tests	f
 tests/more-exp.right	f
 tests/new-exp.tests	f
+tests/new-exp.sub1	f
 tests/new-exp.right	f
 tests/nquote.tests	f
 tests/nquote.right	f
@@ -446,19 +494,39 @@ tests/quote.tests	f
 tests/quote.right	f
 tests/read.tests	f
 tests/read.right	f
+tests/redir.tests	f
+tests/redir.right	f
+tests/redir1.sub	f
+tests/redir2.sub	f
+tests/redir3.sub	f
+tests/redir3.in1	f
+tests/redir3.in2	f
+tests/redir4.sub	f
+tests/redir4.in1	f
 tests/rhs-exp.tests	f
 tests/rhs-exp.right	f
+tests/rsh.tests		f
+tests/rsh.right		f
 tests/run-all		f
+tests/run-minimal	f
 tests/run-arith		f
 tests/run-array		f
 tests/run-braces	f
+tests/run-builtins	f
+tests/run-dirstack	f
 tests/run-dollars	f
+tests/run-errors	f
+tests/run-execscript	f
 tests/run-exp-tests	f
+tests/run-func		f
+tests/run-getopts	f
 tests/run-glob-test	f
 tests/run-heredoc	f
+tests/run-histexpand	f
+tests/run-history	f
 tests/run-ifs-tests	f
 tests/run-input-test	f
-tests/run-minus-e	f
+tests/run-jobs		f
 tests/run-more-exp	f
 tests/run-new-exp	f
 tests/run-nquote	f
@@ -466,11 +534,15 @@ tests/run-posix2	f
 tests/run-precedence	f
 tests/run-quote		f
 tests/run-read		f
+tests/run-redir		f
 tests/run-rhs-exp	f
+tests/run-rsh		f
 tests/run-set-e-test	f
 tests/run-strip		f
 tests/run-test		f
 tests/run-tilde		f
+tests/run-trap		f
+tests/run-type		f
 tests/run-varenv	f
 tests/set-e-test	f
 tests/set-e.right	f
@@ -480,21 +552,19 @@ tests/test-tests	f
 tests/test.right	f
 tests/tilde-tests	f
 tests/tilde.right	f
+tests/trap.tests	f
+tests/trap.right	f
+tests/trap.sub1		f	755
+tests/type.tests	f
+tests/type.right	f
 tests/varenv.right	f
 tests/varenv.sh		f
-tests/misc/chld-trap.sh	f
-tests/misc/dot-test-1.sh	f
-tests/misc/dot-test-1.sub	f
-tests/misc/gotest		f
+tests/version		f
+tests/version.mini	f
+tests/misc/haertel.perftest	f
 tests/misc/perf-script		f
-tests/misc/redir.t1.sh		f
 tests/misc/redir.t2.sh		f
-tests/misc/redir.t3.sh		f
-tests/misc/redir.t3.sub		f
-tests/misc/redir.t4.sh		f
-tests/misc/run.r1.sh	f
 tests/misc/run.r2.sh	f
-tests/misc/run.r3.sh	f
 tests/misc/sigint.t1.sh		f
 tests/misc/sigint.t2.sh		f
 tests/misc/sigint.t3.sh		f

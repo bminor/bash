@@ -115,7 +115,7 @@ sh_getopt (argc, argv, optstring)
 
   sh_optarg = 0;
 
-  if (sh_optind > argc || sh_optind < 0)
+  if (sh_optind >= argc || sh_optind < 0)	/* XXX was sh_optind > argc */
     {
       sh_optind = argc;
       return (EOF);
@@ -144,7 +144,7 @@ sh_getopt (argc, argv, optstring)
   if (nextchar == 0 || *nextchar == '\0')
     {
       /* If we have done all the ARGV-elements, stop the scan. */
-      if (sh_optind == argc)
+      if (sh_optind >= argc)
 	return EOF;
 
       temp = argv[sh_optind];

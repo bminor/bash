@@ -23,7 +23,7 @@
 #include <config.h>
 #endif
 
-#include <sys/types.h>
+#include "bashtypes.h"
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)

@@ -25,23 +25,17 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #  include <unistd.h>
 #endif
 
-#include "../bashansi.h"
-#include "../config.h"
-#include <stdio.h>
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "../posixstat.h"
 #include "../filecntl.h"
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "../bashansi.h"
+#include <stdio.h>
 
 #define DOCFILE "builtins.texi"
 
@@ -351,9 +345,9 @@ array_add (element, array)
       (array->array, (array->size += array->growth_rate) * array->width);
 
 #if defined (HAVE_BCOPY)
-  bcopy (&element, &(array->array[array->sindex]), array->width);
+  bcopy (&element, (char *) &(array->array[array->sindex]), array->width);
   array->sindex++;
-  bzero (&(array->array[array->sindex]), array->width);
+  bzero ((char *) &(array->array[array->sindex]), array->width);
 #else
   array->array[array->sindex++] = element;
   array->array[array->sindex] = (char *)NULL;

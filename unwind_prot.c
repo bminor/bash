@@ -27,6 +27,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "config.h"
 
 #include "bashtypes.h"
+#include "bashansi.h"
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -44,10 +46,21 @@ typedef struct _uwp {
   char *arg;
 } UNWIND_ELT;
 
-static void
-  unwind_frame_discard_internal (), unwind_frame_run_internal (),
-  add_unwind_protect_internal (), remove_unwind_protect_internal (),
-  run_unwind_protects_internal (), without_interrupts ();
+/* Structure describing a saved variable and the value to restore it to.
+   If a cleanup function is set to restore_variable, the `arg' pointer
+   points to this. */
+typedef struct {
+  int *variable;
+  char *desired_setting;
+  int size;
+} SAVED_VAR;
+
+static void unwind_frame_discard_internal (), unwind_frame_run_internal ();
+static void add_unwind_protect_internal (), remove_unwind_protect_internal ();
+static void run_unwind_protects_internal (), without_interrupts ();
+
+static void restore_variable ();
+static void discard_saved_var ();
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 
@@ -147,11 +160,14 @@ add_unwind_protect_internal (cleanup, arg)
 static void
 remove_unwind_protect_internal ()
 {
-  UNWIND_ELT *elt = unwind_protect_list;
+  UNWIND_ELT *elt;
 
+  elt = unwind_protect_list;
   if (elt)
     {
       unwind_protect_list = unwind_protect_list->next;
+      if (elt->cleanup && elt->cleanup == (Function *)restore_variable)
+	discard_saved_var ((SAVED_VAR *)elt->arg);
       free (elt);
     }
 }
@@ -164,7 +180,7 @@ run_unwind_protects_internal ()
   while (elt)
    {
       /* This function can be run at strange times, like when unwinding
-	the entire world of unwind protects.  Thus, we may come across
+	 the entire world of unwind protects.  Thus, we may come across
 	 an element which is simply a label for a catch frame.  Don't call
 	 the non-existant function. */
       if (elt->cleanup)
@@ -186,11 +202,16 @@ unwind_frame_discard_internal (tag)
   while (elt = unwind_protect_list)
     {
       unwind_protect_list = unwind_protect_list->next;
-      if (!elt->cleanup && (STREQ (elt->arg, tag)))
+      if (elt->cleanup == 0 && (STREQ (elt->arg, tag)))
 	{
 	  free (elt);
 	  break;
 	}
+      else if (elt->cleanup && elt->cleanup == (Function *)restore_variable)
+        {
+          discard_saved_var ((SAVED_VAR *)elt->arg);
+          free (elt);
+        }
       else
 	free (elt);
     }
@@ -225,12 +246,14 @@ unwind_frame_run_internal (tag)
     }
 }
 
-/* Structure describing a saved variable and the value to restore it to. */
-typedef struct {
-  int *variable;
-  char *desired_setting;
-  int size;
-} SAVED_VAR;
+static void
+discard_saved_var (sv)
+     SAVED_VAR *sv;
+{
+  if (sv->size != sizeof (int))
+    free (sv->desired_setting);
+  free (sv);
+}
 
 /* Restore the value of a variable, based on the contents of SV.  If
    sv->size is greater than sizeof (int), sv->desired_setting points to
@@ -242,7 +265,7 @@ restore_variable (sv)
 {
   if (sv->size != sizeof (int))
     {
-      bcopy ((char *)sv->desired_setting, (char *)sv->variable, sv->size);
+      FASTCOPY ((char *)sv->desired_setting, (char *)sv->variable, sv->size);
       free (sv->desired_setting);
     }
   else
@@ -267,8 +290,17 @@ unwind_protect_var (var, value, size)
   s->variable = var;
   if (size != sizeof (int))
     {
+      /* There is a problem here when VALUE is 0.  This tries to copy the
+	  first SIZE bytes starting at memory location 0 into
+	  s->desired_setting.  There is no guarantee that these bytes are
+	  0, or make a valid null pointer.  We can try to bzero the space,
+	  or just save it as 0 (or (void *)0).  If we do the latter, make
+	  sure restore_variable is changed to understand it. */
       s->desired_setting = (char *)xmalloc (size);
-      bcopy (value, (char *)s->desired_setting, size);
+      if (value == 0)
+	bzero ((char *)s->desired_setting, size);
+      else
+	FASTCOPY (value, (char *)s->desired_setting, size);
     }
   else
     s->desired_setting = value;

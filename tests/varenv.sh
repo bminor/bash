@@ -103,3 +103,67 @@ export a
 a=bcde
 export a
 /bin/true 2>/dev/null
+
+func()
+{
+	local YYZ
+
+	YYZ="song by rush"
+	echo $YYZ
+	echo $A
+}
+
+YYZ="toronto airport"
+A="AVAR"
+echo $YYZ
+echo $A
+A=BVAR func
+echo $YYZ
+echo $A
+
+export A
+# Make sure expansion doesn't use assignment statements preceding a builtin
+A=ZVAR echo $A
+
+PATH=/bin:/usr/bin:/usr/local/bin:.
+func2()
+{
+	local z=yy
+	local -a avar=( ${PATH//: } )
+	echo ${avar[@]}
+	local
+}
+
+avar=42
+echo $avar
+func2
+echo $avar
+
+# try to set an attribute for an unset variable; make sure it persists
+# when the variable is assigned a value
+declare -i ivar
+
+ivar=10
+
+declare -p ivar
+unset ivar
+
+# export an unset variable, make sure it is not suddenly set, but make
+# sure the export attribute persists when the variable is assigned a
+# value
+export ivar
+echo ${ivar-unset}
+
+ivar=42
+declare -p ivar
+
+# make sure that shopt -o is reflected in $SHELLOPTS
+# first, get rid of things that might be set automatically via shell
+# variables
+set +o posix
+set +o ignoreeof
+echo $-
+echo ${SHELLOPTS}
+shopt -so physical
+echo $-
+echo ${SHELLOPTS}

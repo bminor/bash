@@ -285,6 +285,7 @@ ignore_globbed_names (names, name_func)
   for (n = 0; newnames[n]; n++)
     names[n] = newnames[n];
   names[n] = (char *)NULL;
+  free (newnames);
 }
 
 void

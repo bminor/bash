@@ -25,6 +25,11 @@
 
 #define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
 
+/* Flag values for parse_and_execute () */
+#define SEVAL_NONINT	0x01
+#define SEVAL_INTERACT	0x02
+#define SEVAL_NOHIST	0x04
+
 extern void builtin_error __P((const char *, ...));
 extern void builtin_usage ();
 extern void bad_option ();
@@ -69,18 +74,15 @@ extern char *double_quote ();
 extern char *backslash_quote ();
 extern int contains_shell_metas ();
 
-/* Functions from hash.def */
-extern void initialize_filename_hashing ();
-extern void flush_hashed_filenames ();
-extern char *find_hashed_filename ();
-extern void remove_hashed_filename ();
-extern void remember_filename ();
-
 /* Functions from set.def */
 extern void initialize_shell_options ();
 extern void list_minus_o_opts ();
 extern int set_minus_o_option ();
 extern int minus_o_option_value ();
+extern void reset_shell_options ();
+
+/* Functions from shopt.def */
+extern void reset_shopt_options ();
 
 /* Functions from type.def */
 extern int describe_command ();

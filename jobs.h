@@ -26,91 +26,14 @@
 
 #include "stdc.h"
 
+#include "posixwait.h"
+
 /* Defines controlling the fashion in which jobs are listed. */
 #define JLIST_STANDARD       0
 #define JLIST_LONG	     1
 #define JLIST_PID_ONLY	     2
 #define JLIST_CHANGED_ONLY   3
 #define JLIST_NONINTERACTIVE 4
-
-/* If _POSIX_VERSION is not defined, we assume that <sys/wait.h> defines
-   a `union wait' and various macros used to manipulate it.  Look in
-   bashwait.h for the things we expect to find. */
-#if defined (HAVE_SYS_WAIT_H)
-#  include <sys/wait.h>
-#else /* !HAVE_SYS_WAIT_H */
-#  if !defined (_POSIX_VERSION)
-#    include "bashwait.h"
-#  endif
-#endif  /* !HAVE_SYS_WAIT_H */
-
-/* How to get the status of a job.  For Posix, this is just an
-   int, but for other systems we have to crack the union wait. */
-#if !defined (_POSIX_VERSION)
-typedef union wait WAIT;
-#  define WSTATUS(t)  (t.w_status)
-#else /* _POSIX_VERSION */
-typedef int WAIT;
-#  define WSTATUS(t)  (t)
-#endif /* _POSIX_VERSION */
-
-/* Make sure that parameters to wait3 are defined. */
-#if !defined (WNOHANG)
-#  define WNOHANG 1
-#  define WUNTRACED 2
-#endif /* WNOHANG */
-
-/* More Posix P1003.1 definitions.  In the POSIX versions, the parameter is
-   passed as an `int', in the non-POSIX version, as `union wait'. */
-#if defined (_POSIX_VERSION)
-
-#  if !defined (WSTOPSIG)
-#    define WSTOPSIG(s)       ((s) >> 8)
-#  endif /* !WSTOPSIG */
-
-#  if !defined (WTERMSIG)
-#    define WTERMSIG(s)	      ((s) & 0177)
-#  endif /* !WTERMSIG */
-
-#  if !defined (WEXITSTATUS)
-#    define WEXITSTATUS(s)    ((s) >> 8)
-#  endif /* !WEXITSTATUS */
-
-#  if !defined (WIFSTOPPED)
-#    define WIFSTOPPED(s)     (((s) & 0177) == 0177)
-#  endif /* !WIFSTOPPED */
-
-#  if !defined (WIFEXITED)
-#    define WIFEXITED(s)      (((s) & 0377) == 0)
-#  endif /* !WIFEXITED */
-
-#  if !defined (WIFSIGNALED)
-#    define WIFSIGNALED(s)    (!WIFSTOPPED(s) && !WIFEXITED(s))
-#  endif /* !WIFSIGNALED */
-
-#  if !defined (WIFCORED)
-#    define WIFCORED(s)       ((s) & 0200)
-#  endif /* !WIFCORED */
-
-#else /* !_POSIX_VERSION */
-
-#  if !defined (WSTOPSIG)
-#    define WSTOPSIG(s)	      ((s).w_stopsig)
-#  endif /* !WSTOPSIG */
-
-#  if !defined (WTERMSIG)
-#    define WTERMSIG(s)	      ((s).w_termsig)
-#  endif /* !WTERMSIG */
-
-#  if !defined (WEXITSTATUS)
-#    define WEXITSTATUS(s)    ((s).w_retcode)
-#  endif /* !WEXITSTATUS */
-
-#  if !defined (WIFCORED)
-#    define WIFCORED(s)       ((s).w_coredump)
-#  endif /* !WIFCORED */
-
-#endif /* !_POSIX_VERSION */
 
 /* I looked it up.  For pretty_print_job ().  The real answer is 24. */
 #define LONGEST_SIGNAL_DESC 24
@@ -186,8 +109,11 @@ extern void save_pipeline __P((int));
 extern void restore_pipeline __P((int));
 extern void start_pipeline __P((void));
 extern int stop_pipeline __P((int, COMMAND *));
+
 extern void delete_job __P((int));
 extern void nohup_job __P((int));
+extern void delete_all_jobs __P((void));
+extern void nohup_all_jobs __P((void));
 
 extern void terminate_current_pipeline __P((void));
 extern void terminate_stopped_jobs __P((void));
@@ -195,8 +121,10 @@ extern void hangup_all_jobs __P((void));
 extern void kill_current_pipeline __P((void));
 
 #if defined (__STDC__) && defined (pid_t)
+extern int get_job_by_pid __P((int, int));
 extern void describe_pid __P((int));
 #else
+extern int get_job_by_pid __P((pid_t, int));
 extern void describe_pid __P((pid_t));
 #endif
 
@@ -218,7 +146,7 @@ extern void notify_and_cleanup __P((void));
 extern void reap_dead_jobs __P((void));
 extern int start_job __P((int, int));
 extern int kill_pid __P((pid_t, int, int));
-extern int initialize_jobs __P((void));
+extern int initialize_job_control __P((int));
 extern void initialize_job_signals __P((void));
 extern int give_terminal_to __P((pid_t));
 

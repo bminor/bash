@@ -43,9 +43,9 @@
    as a string terminator.  If we see \c, set *SAWC to 1 before
    returning.  LEN is the length of STRING. */
 char *
-ansicstr (string, len, sawc)
+ansicstr (string, len, sawc, rlen)
      char *string;
-     int len, *sawc;
+     int len, *sawc, *rlen;
 {
   int c;
   char *ret, *r, *s;
@@ -93,6 +93,8 @@ ansicstr (string, len, sawc)
 		{
 		  *sawc = 1;
 		  *r = '\0';
+		  if (rlen)
+		    *rlen = r - ret;
 		  return ret;
 		}
 	    default:  *r++ = '\\'; break;
@@ -101,6 +103,8 @@ ansicstr (string, len, sawc)
 	}
     }
   *r = '\0';
+  if (rlen)
+    *rlen = r - ret;
   return ret;
 }
 
@@ -307,6 +311,7 @@ strsub (string, pat, rep, global)
   return (temp);
 }
 
+#ifdef INCLUDE_UNUSED
 /* Remove all leading whitespace from STRING.  This includes
    newlines.  STRING should be terminated with a zero. */
 void
@@ -325,17 +330,17 @@ strip_leading (string)
       start[len] = '\0';
     }
 }
+#endif
 
 /* Remove all trailing whitespace from STRING.  This includes
    newlines.  If NEWLINES_ONLY is non-zero, only trailing newlines
    are removed.  STRING should be terminated with a zero. */
 void
-strip_trailing (string, newlines_only)
+strip_trailing (string, len, newlines_only)
      char *string;
+     int len;
      int newlines_only;
 {
-  int len = strlen (string) - 1;
-
   while (len >= 0)
     {
       if ((newlines_only && string[len] == '\n') ||

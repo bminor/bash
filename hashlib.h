@@ -41,6 +41,7 @@ extern BUCKET_CONTENTS *remove_hash_item ();
 extern BUCKET_CONTENTS *add_hash_item ();
 extern BUCKET_CONTENTS *get_hash_bucket ();
 extern void flush_hash_table ();
+extern void dispose_hash_table ();
 
 /* Redefine the function as a macro for speed. */
 #define get_hash_bucket(bucket, table) \
@@ -49,7 +50,7 @@ extern void flush_hash_table ();
 		(BUCKET_CONTENTS *)NULL)
 
 /* Default number of buckets in the hash table. */
-#define DEFAULT_HASH_BUCKETS 107
+#define DEFAULT_HASH_BUCKETS 53	/* was 107 */
 
 #if !defined (NULL)
 #  if defined (__STDC__)

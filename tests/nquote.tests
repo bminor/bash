@@ -55,3 +55,9 @@ recho \$"hello, $world"
 
 expect '<hello, chet>'
 recho $"hello, $world"
+
+z=$'\v\f\a\b'
+case "$z" in
+$'\v\f\a\b')	echo ok;;
+*)		echo bad;;
+esac

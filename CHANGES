@@ -1,3 +1,401 @@
+This document details the changes between this version, bash-2.01-release,
+and the previous version, bash-2.01-beta2.
+
+1.  Changes to Bash
+
+a.  The `distclean' target should remove the `printenv' executable if it
+    has been created.
+
+b.  The test suite was changed slightly to ensure that the error messages
+    are printed in English.
+
+c.  A bug that caused the shell to dump core when a filename containing a
+    `/' was passed to `hash' was fixed.
+
+d.  Pathname canonicalization now leaves a leading `//' intact, as POSIX.1
+    requires.
+
+e.  A memory leak when completing commands was fixed.
+
+f.  A memory leak that occurred when checking the hash table for commands
+    with relative paths was fixed.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.01-beta2,
+and the previous version, bash-2.01-beta1.
+
+1.  Changes to Bash
+
+a.  The `ulimit' builtin translates RLIM_INFINITY to the hard limit only if
+    the current (soft) limit is less than or equal to the hard limit.
+
+b.  Fixed a bug that caused the bash emulation of strcasecmp to produce
+    incorrect results.
+
+c.  A bug that caused memory to be freed twice when a trap handler resets
+    the trap more than once was fixed.
+
+d.  A bug that caused machines where sizeof (pointer) > sizeof (int) to
+    fail (and possibly dump core) when trying to unwind-protect a null
+    pointer was fixed.
+
+e.  The startup files should not be run with job control enabled.  This fix
+    allows SIGINT to once again interrupt startup file execution.
+
+f.  Bash should not change the SIGPROF handler if it is set to something
+    other than SIG_DFL.
+
+g.  The completion code that provides bash-specific completions for readline
+    now quotes characters that the readline code would treat as word break
+    characters if they appear in a file name.
+
+h.  The completion code now correctly quotes filenames containing a `!',
+    even if the user attempted to use double quotes when attempting
+    completion.
+
+i.  A bug that caused the shell to dump core when `disown' was called without
+    arguments and there was no current job was fixed.
+
+j.  A construct like $((foo);bar) is now processed as a command substitution
+    rather than as a bad arithmetic substitution.
+
+k.  A couple of bugs that caused `fc' to not obey the `cmdhist' and `lithist'
+    shell options when editing and re-executing a series of commands were
+    fixed.
+
+l.  A fix was made to the grammar -- the list of commands between `do' and
+    `done' in the body of a `for' command should be treated the same as a
+    while loop.
+
+2.  Changes to Readline
+
+a.  A couple of bugs that caused the history search functions to attempt to
+    free a NULL pointer were fixed.
+
+b.  If the C library provides setlocale(3), readline does not need to look
+    at various environment variables to decide whether or not to go into
+    eight-bit mode automatically -- just check whether the current locale
+    is not `C' or `POSIX'.
+
+c.  If the filename completion function finds that a directory was not closed
+    by a previous (interrupted) completion, it closes the directory with
+    closedir().
+
+3.  New Features in Bash
+
+a.  New bindable readline commands:  history-and-alias-expand-line and
+    alias-expand-line.  The code was always in there, there was just no
+    way to execute it.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.01-beta1,
+and the previous version, bash-2.01-alpha1.
+
+1.  Changes to Bash
+
+a.  Fixed a problem that could cause file descriptors used for process
+    substitution to conflict with those used explicitly in redirections.
+
+b.  Made it easier to regenerate configure if the user changes configure.in.
+
+c.  ${GROUPS[0]} should always be the primary group, even on systems without
+    multiple groups.
+
+d.  Spelling correction is no longer enabled by default.
+
+e.  Fixes to quoting problems in `bashbug'.
+
+f.  OS-specific configuration changes were made for: Irix 6.
+
+g.  OS-specific code changes were made for: QNX.
+
+h.  A more meaningful message is now printed when the file in /tmp for a
+    here document cannot be created.
+
+i.  Many changes to the shell's variable initialization code to speed
+    non-interactive startup.
+
+j.  Changes to the non-job-control code so that it does not try to open
+    /dev/tty.
+
+k.  The output of `set' and `export' is once again sorted, as POSIX wants.
+
+l.  Fixed a problem caused by a recursive call reparsing the value of
+    $SHELLOPTS.
+
+m.  The tilde code no longer calls getenv() when it's compiled as part of
+    the shell, which should eliminate problems on systems that cannot
+    redefine getenv(), like the NeXT OS.
+
+n.  Fixed a problem that caused `bash -o' or `bash +o' to not list all
+    the shell options.
+
+o.  Fixed `ulimit' to convert RLIM_INFINITY to the appropriate hard limit
+    only if the hard limit is greater than the current (soft) limit.
+
+p.  Fixed a problem that arose when building bash in a different directory
+    than the source and y.tab.[ch] were remade with something other than
+    bison.  This came up most often on NetBSD.
+
+q.  Fixed a problem with completion -- it thought that `pwd`/[TAB] indicated
+    an unfinished command completion (`/), which generated errors.
+
+r.  The bash special tilde expansions (~-, ~+) are now attempted before
+    calling the standard tilde expansion code, which should eliminate the
+    problems people have been seeing with this on Solaris 2.5.1.
+
+s.  Added support for <stdarg.h> to places where it was missing.
+
+t.  Changed the code that reads the output of a command substitution to not
+    go through stdio.  This reduces the memory requirements and is faster.
+
+u.  A number of changes to speed up export environment creation were made.
+
+v.  A number of memory leaks were fixed as the result of running the test
+    scripts through Purify.
+
+w.  Fixed a bug that caused subshells forked to interpret executable
+    scripts without a leading `#!' to not reinitialize the values of
+    the shell options.
+
+2.  Changes to Readline
+
+a.  History library has less `#ifdef SHELL' code -- abstracted stuff out
+    into application-specific function hooks.
+
+b.  Readline no longer calls getenv() if it's compiled as part of the shell,
+    which should eliminate problems on systems that cannot redefine getenv(),
+    like the NeXT OS.
+
+c.  Fixed translation of ESC when `untranslating' macro values.
+
+d.  The region kill operation now fixes the mark if it ends up beyond the
+    boundaries of the line after the region is deleted.
+
+3.  New Features in Bash
+
+a.  New argument for `configure':  `--with-curses'.  This can be used to
+    override the selection of the termcap library on systems where it is
+    deficient.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.01-alpha1,
+and the previous version, bash-2.0-release.
+
+1.  Changes to Bash
+
+a.  System-specific configuration changes for: FreeBSD, SunOS4, Irix,
+    MachTen, QNX 4.2, Harris Night Hawk, SunOS5.
+
+b.  System-specific code changes were made for: Linux, 4.4 BSD, QNX 4.2,
+    HP-UX, AIX 4.2.
+
+c.  A bug that caused the exec builtin to fail because the full pathname of
+    the command could not be found was fixed.
+
+d.  The code that performs output redirections is now more resistant to
+    race conditions and possible security exploits.
+
+e.  A bug that caused the shell to dump core when performing pattern
+    substitutions on variable values was fixed.
+
+f.  More hosts are now recognized by the auto-configuration mechanism
+    (OpenBSD, QNX, others).
+
+g.  Assignments to read-only variables that attempt to convert them to
+    arrays are now errors.
+
+h.  A bug that caused shell scripts using array assignments in POSIX mode
+    to exit after the assignment was performed was fixed.
+
+i.  The substring expansion code is now more careful about running off the
+    ends of the expanded variable value.
+
+j.  A bug that caused completion to fail if a backquoted command substitution
+    appeared anywhere on the line was fixed.
+
+k.  The `source' builtin no longer turns off history if it has been enabled
+    in a non-interactive shell.
+
+l.  A bug that caused the shell to crash when `disown' was given a pid
+    instead of a job number was fixed.
+
+m.  The `cd' spelling correction code will not try to change to `.' if no
+    directory entries match a single-character argument.
+
+n.  A bad variable name supplied to `declare', `export', or `readonly' no
+    longer causes a non-interactive shell in POSIX mode to exit.
+
+o.  Some fixes were made to the test suite to handle peculiarities of
+    various Unix versions.
+
+p.  The bash completion code now quotes characters that readline would
+    treat as word breaks for completion but are not shell metacharacters.
+
+q.  Bad options supplied at invocation now cause a usage message to be
+    displayed.
+
+r.  Fixes were made to the code that handles DEBUG traps so that the trap
+    string is not freed inappropriately.
+
+s.  Some changes were made to the bash debugger in examples/bashdb -- it
+    should be closer to working now.
+
+t.  A problem that caused the default filename used for mail checking to be
+    wrong was fixed.
+
+u.  A fix was made to the `echo' builtin so that NUL characters printed with
+    `echo -e' do not cause the output to be truncated.
+
+v.  A fix was made to the job control code so that the shell behaves better
+    when monitor mode is enabled in a non-interactive shell.
+
+w.  Bash no longer catches all of the terminating signals in a non-
+    interactive shell until a trap is set on EXIT, which should result in
+    quicker startup.
+
+x.  A fix was made to the command timing code so that `time' can be used in
+    a loop.
+
+y.  A fix was made to the parser so that `((cmd); cmd2)' is now parsed as
+    a nested subshell rather than strictly as an (errnoeous) arithmetic
+    command.
+
+z.  A fix was made to the globbing code so that it correctly matches quoted
+    filenames beginning with a `.'.
+
+aa. A bug in `fc' that caused some multi-line commands to not be stored as
+    one command in the history when they were re-executed after editing
+    (with `fc -e') was fixed.
+
+bb. The `ulimit' builtin now attempts to catch some classes of integer
+    overflows.
+
+cc. The command-oriented-history code no longer attempts to add `;'
+    inappropriately when a newline appears while reading a $(...) command
+    substitution.
+
+dd. A bug that caused the shell to dump core when `help --' was executed
+    was fixed.
+
+ee. A bug that caused the shell to crash when an unset variable appeared
+    in the body of a here document after `set -u' had been executed was
+    fixed.
+
+ff. Implicit input redirections from /dev/null for asynchronous commands
+    are now handled better.
+
+gg. A bug that caused the shell to fail to compile when configured with
+    `--disable-readline' was fixed.
+
+hh. The globbing code should now be interruptible.
+
+ii. Bash now notices when the `kill' builtin is used to send SIGCONT to a
+    stopped job and adjusts the data structures accordingly, as if `bg' had
+    been executed instead.
+
+jj. A bug that caused the shell to crash when mixing calls to `getopts'
+    and `shift' on the same set of positional parameters was fixed.
+
+kk. The command printing code now preserves the `-p' flag to `time'.
+
+ll. The command printing code now handles here documents better when there
+    are other redirections associated with the command.
+
+mm. The special glibc environment variable (NNN_GNU_nonoption_argv_flags_)
+    is no longer placed into the environment of executed commands -- users
+    of glibc had too many problems with it.
+
+nn. Reorganized the code that generates signames.h.  The signal_names list
+    is now more complete but may be slightly different (SIGABRT is favored
+    over SIGIOT, for example).  The preferred signal names are those
+    listed in the POSIX.2 standard.
+
+oo. `bashbug' now uses a filename shorter than 14 characters for its
+    temporary file, and asks for confirmation before sending the bug
+    report.
+
+pp. A bug that caused TAB completion in vi editing mode to not be turned
+    off when `set -o posix' was executed or back on when `set +o posix'
+    was executed was fixed.
+
+qq. A bug in the brace expansion code that caused brace expansions appearing
+    in new-style $(...) command substitutions to be inappropriately expanded
+    was fixed.
+
+rr. A bug in the readline hook shell-expand-line that could cause memory to
+    be inappropriately freed was fixed.
+
+ss. A bug that caused some arithmetic expressions containing `&&' and `||'
+    to be parsed with the wrong precedence has been fixed.
+
+tt. References to unbound variables after `set -u' has been executed now
+    cause the shell to exit immediately, as they should.
+
+uu. A bug that caused the shell to exit inappropriately when `set -e' had
+    been executed and a command's return status was being inverted with the
+    `!' reserved word was fixed.
+
+vv. A bug that could occasionally cause the shell to crash with a
+    divide-by-zero error when timing a command was fixed.
+
+ww. A bug that caused parameter pattern substitution to leave stray
+    backslashes in the replacement string when the expression is in
+    double quotes was fixed.
+
+xx. The `break' and `continue' builtins now break out of all loops when an
+    invalid count argument is supplied.
+
+yy. Fixed a bug that caused PATH to be set to the empty string if
+    `command -p' is executed with PATH unset.
+
+zz. Fixed `kill -l signum' to print the signal name without the `SIG' prefix,
+    as POSIX specifies.
+
+aaa. Fixed a bug that caused the shell to crash while setting $SHELLOPTS
+     if there were no shell options set.
+
+bbb. Fixed `export -p' and `readonly -p' so that when the shell is in POSIX
+     mode, their output is as POSIX.2 specifies.
+
+ccc. Fixed a bug in `readonly' so that `readonly -a avar=(...)' actually
+     creates an array variable.
+
+ddd. Fixed a bug that prevented `time' from correctly timing background
+     pipelines.
+
+2.  Changes to Readline
+
+a.  A bug that caused an extra newline to be printed when the cursor was on
+    an otherwise empty line was fixed.
+
+b.  An instance of memory being used after it was freed was corrected.
+
+c.  The redisplay code now works when the prompt is longer than the screen
+    width.
+
+d.  `dump-macros' is now a bindable name, as it should have been all along.
+
+e.  Non-printable characters are now expanded when displaying macros and
+    their values.
+
+f.  The `dump-variables' and `dump-macros' commands now output a leading
+    newline if they're called as the result of a key sequence, rather
+    than directly by an application.
+
+3.  New Features in Bash
+
+a.  There is a new builtin array variable: GROUPS, the set of groups to which
+    the user belongs.  This is used by the test suite.
+
+4.  New Features in Readline
+
+a.  If a key sequence bound to `universal-argument' is read while reading a
+    numeric argument started with `universal-argument', it terminates the
+    argument but is otherwise ignored.  This provides a way to insert multiple
+    instances of a digit string, and is how GNU emacs does it.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-2.0-release,
 and the previous version, bash-2.0-beta3.
 

@@ -68,12 +68,12 @@ sigset_t top_level_mask;
 /* When non-zero, we throw_to_top_level (). */
 int interrupt_immediately = 0;
 
-static void initialize_terminating_signals ();
+static void initialize_shell_signals ();
 
 void
 initialize_signals ()
 {
-  initialize_terminating_signals ();
+  initialize_shell_signals ();
   initialize_job_signals ();
 #if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
   initialize_siglist ();
@@ -83,7 +83,7 @@ initialize_signals ()
 void
 reinitialize_signals ()
 {
-  initialize_terminating_signals ();
+  initialize_shell_signals (1);
   initialize_job_signals ();
 }
 
@@ -191,20 +191,27 @@ static struct termsig terminating_signals[] = {
 #define XSIG(x) (terminating_signals[x].signum)
 #define XHANDLER(x) (terminating_signals[x].orig_handler)
 
+static int termsigs_initialized = 0;
+
 /* Initialize signals that will terminate the shell to do some
-   unwind protection. */
-static void
+   unwind protection.  For non-interactive shells, we only call
+   this when a trap is defined for EXIT (0). */
+void
 initialize_terminating_signals ()
 {
   register int i;
+#if defined (HAVE_POSIX_SIGNALS)
+  struct sigaction act, oact;
+#endif
+
+  if (termsigs_initialized)
+    return;
 
   /* The following code is to avoid an expensive call to
      set_signal_handler () for each terminating_signals.  Fortunately,
      this is possible in Posix.  Unfortunately, we have to call signal ()
      on non-Posix systems for each signal in terminating_signals. */
 #if defined (HAVE_POSIX_SIGNALS)
-  struct sigaction act, oact;
-
   act.sa_handler = termination_unwind_protect;
   act.sa_flags = 0;
   sigemptyset (&act.sa_mask);
@@ -214,32 +221,44 @@ initialize_terminating_signals ()
   for (i = 0; i < TERMSIGS_LENGTH; i++)
     {
       sigaction (XSIG (i), &act, &oact);
-      terminating_signals[i].orig_handler = oact.sa_handler;
+      XHANDLER(i) = oact.sa_handler;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
-      if (!interactive_shell && oact.sa_handler == SIG_IGN)
+      if (!interactive_shell && XHANDLER (i) == SIG_IGN)
         {
 	  sigaction (XSIG (i), &oact, &act);
 	  set_signal_ignored (XSIG (i));
         }
+      if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
+        sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
     }
 
 #else /* !HAVE_POSIX_SIGNALS */
 
   for (i = 0; i < TERMSIGS_LENGTH; i++)
     {
-      terminating_signals[i].orig_handler =
-	signal (XSIG (i), termination_unwind_protect);
+      XHANDLER(i) = signal (XSIG (i), termination_unwind_protect);
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
-      if (!interactive_shell && terminating_signals[i].orig_handler == SIG_IGN)
+      if (!interactive_shell && XHANDLER (i) == SIG_IGN)
 	{
           signal (XSIG (i), SIG_IGN);
           set_signal_ignored (XSIG (i));
 	}
+      if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
+        signal (XSIG (i), XHANDLER (i));
     }
 
 #endif /* !HAVE_POSIX_SIGNALS */
+
+  termsigs_initialized = 1;
+}
+
+static void
+initialize_shell_signals ()
+{
+  if (interactive)
+    initialize_terminating_signals ();
 
 #if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
   /* All shells use the signal mask they inherit, and pass it along
@@ -263,10 +282,14 @@ void
 reset_terminating_signals ()
 {
   register int i;
-
 #if defined (HAVE_POSIX_SIGNALS)
   struct sigaction act;
+#endif
 
+  if (termsigs_initialized == 0)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
   act.sa_flags = 0;
   sigemptyset (&act.sa_mask);
   for (i = 0; i < TERMSIGS_LENGTH; i++)

@@ -17,16 +17,20 @@ RM = rm -f
 CP = cp
 MV = mv
 
+PROFILE_FLAGS = 
+
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 
 DEFS = @DEFS@
+LOCAL_DEFS = @LOCAL_DEFS@
 
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
 
-CCFLAGS = ${INCLUDES} $(DEFS) $(LOCAL_CFLAGS) $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
+CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
+	  $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
 
 .c.o:
 	$(CC) $(CCFLAGS) -c $<
@@ -35,6 +39,9 @@ CCFLAGS = ${INCLUDES} $(DEFS) $(LOCAL_CFLAGS) $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFL
 	$(CC) $(CCFLAGS) -c $<
 
 MALLOC_SOURCE = malloc.c
+GMALLOC_SOURCE = gmalloc.c
+NMALLOC_SOURCE = nmalloc.c
+STUB_SOURCE = stub.c
 
 ALLOCA_SOURCE = alloca.c
 ALLOCA_OBJECT = alloca.o
@@ -43,12 +50,46 @@ MALLOC_SRC = @MALLOC_SRC@
 MALLOC = @MALLOC@
 ALLOCA = @ALLOCA@
 
-libmalloc.a:	$(MALLOC) $(ALLOCA) stub.o
-	$(RM) $@
-	$(AR) cr $@ $(MALLOC) $(ALLOCA) stub.o
-	-test -n "$(RANLIB)" && $(RANLIB) $@
+MALLOC_OBJS = malloc.o $(ALLOCA) stub.o
+GMALLOC_OBJS = gmalloc.o $(ALLOCA) stub.o
+NMALLOC_OBJS = nmalloc.o $(ALLOCA) stub.o
+NMALLOC2_OBJS = nmalloc2.o $(ALLOCA) stub.o
+NGMALLOC_OBJS = ngmalloc.o $(ALLOCA) stub.o
+STUB_OBJS = $(ALLOCA) stub.o
 
-malloc.o: malloc.c getpagesize.h
+.PHONY:		malloc gmalloc stubmalloc nmalloc ngmalloc nmalloc2
+
+all:		malloc
+
+malloc: ${MALLOC_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${MALLOC_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+nmalloc: ${NMALLOC_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${NMALLOC_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+nmalloc2: ${NMALLOC2_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${NMALLOC2_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+gmalloc: ${GMALLOC_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${GMALLOC_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+ngmalloc: ${NGMALLOC_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${NGMALLOC_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
+
+stubmalloc: ${STUB_OBJS}
+	${RM} libmalloc.a
+	${AR} cr libmalloc.a ${STUB_OBJS}
+	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 alloca.o:	$(ALLOCA_SOURCE)
 	$(CC) $(CCFLAGS) -c $(ALLOCA_SOURCE)
@@ -62,7 +103,12 @@ mostlyclean clean:
 distclean realclean maintainer-clean: clean
 	$(RM) Makefile
 
+malloc.o: malloc.c
+gmalloc.o: gmalloc.c
+
 alloca.o: $(BUILD_DIR)/config.h
-malloc.o: $(BUILD_DIR)/config.h
-xmalloc.o: $(BUILD_DIR)/config.h
+malloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
+nmalloc.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
+nmalloc2.o: $(BUILD_DIR)/config.h $(topdir)/bashtypes.h getpagesize.h
+xmalloc.o: $(BUILD_DIR)/config.h $(topdir)/ansi_stdlib.h
 gmalloc.o: $(BUILD_DIR)/config.h

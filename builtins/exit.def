@@ -30,7 +30,7 @@ $END
 
 #include <config.h>
 
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
@@ -45,6 +45,8 @@ $END
 
 extern int interactive, login_shell;
 extern int last_command_exit_value;
+extern Function *this_shell_builtin;
+extern Function *last_shell_builtin;
 
 static int exit_or_logout ();
 static int sourced_logout;
@@ -82,10 +84,6 @@ logout_builtin (list)
     return (exit_or_logout (list));
 }
 
-/* Clean up work for exiting or logging out. */
-Function *last_shell_builtin = (Function *)NULL;
-Function *this_shell_builtin = (Function *)NULL;
-
 static int
 exit_or_logout (list)
      WORD_LIST *list;
@@ -121,7 +119,7 @@ exit_or_logout (list)
 
   /* Get return value if present.  This means that you can type
      `logout 5' to a shell, and it returns 5. */
-  exit_value = list ? get_numeric_arg (list) : last_command_exit_value;
+  exit_value = list ? get_numeric_arg (list, 1) : last_command_exit_value;
 
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0)

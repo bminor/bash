@@ -33,9 +33,6 @@ $END
 
 #include <config.h>
 
-#include <sys/types.h>
-#include "../posixstat.h"
-
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
@@ -46,9 +43,9 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
-#include "../flags.h"
 #include "../execute_cmd.h"
-#include "hashcom.h"
+#include "../flags.h"
+#include "../hashcmd.h"
 #include "common.h"
 #include "bashgetopt.h"
 
@@ -57,54 +54,6 @@ extern char *this_command_name;
 
 static int add_hashed_command ();
 static int print_hashed_commands ();
-
-static int hashing_initialized = 0;
-
-HASH_TABLE *hashed_filenames;
-
-void
-initialize_filename_hashing ()
-{
-  if (hashing_initialized == 0)
-    {
-      hashed_filenames = make_hash_table (FILENAME_HASH_BUCKETS);
-      hashing_initialized = 1;
-    }
-}
-
-static void
-free_filename_data (data)
-     char *data;
-{
-  free (((PATH_DATA *)data)->path);
-  free (data);
-}
-
-void
-flush_hashed_filenames ()
-{
-  flush_hash_table (hashed_filenames, free_filename_data);
-}
-
-/* Remove FILENAME from the table of hashed commands. */
-void
-remove_hashed_filename (filename)
-     char *filename;
-{
-  register BUCKET_CONTENTS *item;
-
-  if (hashing_enabled == 0)
-    return;
-
-  item = remove_hash_item (filename, hashed_filenames);
-  if (item)
-    {
-      if (item->data)
-	free_filename_data (item->data);
-      free (item->key);
-      free (item);
-    }
-}
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified
@@ -161,54 +110,14 @@ hash_builtin (list)
       word = list->word->word;
       if (pathname)
 	remember_filename (word, pathname, 0, 0);
-      else
-	{
-	  if (absolute_program (word))
-	    {
-	      list = list->next;
-	      continue;
-	    }
-
-	  if (add_hashed_command (word))
-	    opt = EXECUTION_FAILURE;
-	}
+      else if (absolute_program (word))
+	continue;
+      else if (add_hashed_command (word, 0))
+	opt = EXECUTION_FAILURE;
     }
 
   fflush (stdout);
-
   return (opt);
-}
-
-/* Place FILENAME (key) and FULL_PATHNAME (data->path) into the
-   hash table.  CHECK_DOT if non-null is for future calls to
-   find_hashed_filename (); it means that this file was found
-   in a directory in $PATH that is not an absolute pathname.
-   FOUND is the initial value for times_found. */
-void
-remember_filename (filename, full_pathname, check_dot, found)
-     char *filename, *full_pathname;
-     int check_dot, found;
-{
-  register BUCKET_CONTENTS *item;
-
-  if (hashing_enabled == 0)
-    return;
-
-  item = add_hash_item (filename, hashed_filenames);
-  if (item->data)
-    free (pathdata(item)->path);
-  else
-    {
-      item->key = savestring (filename);
-      item->data = xmalloc (sizeof (PATH_DATA));
-    }
-  pathdata(item)->path = savestring (full_pathname);
-  pathdata(item)->flags = 0;
-  if (check_dot)
-    pathdata(item)->flags |= HASH_CHKDOT;
-  if (*full_pathname != '/')
-    pathdata(item)->flags |= HASH_RELPATH;
-  item->times_found = found;
 }
 
 static int
@@ -243,6 +152,9 @@ print_hashed_commands ()
 {
   BUCKET_CONTENTS *item_list;
   int bucket, any_printed;
+
+  if (hashed_filenames == 0)
+    return (0);
 
   for (bucket = any_printed = 0; bucket < hashed_filenames->nbuckets; bucket++)
     {

@@ -100,6 +100,7 @@ make_word (string)
   return (make_word_flags (temp, string));
 }
 
+#ifdef INCLUDE_UNUSED
 WORD_DESC *
 make_word_from_token (token)
      int token;
@@ -111,6 +112,7 @@ make_word_from_token (token)
 
   return (make_word (tokenizer));
 }
+#endif
 
 WORD_LIST *
 make_word_list (word, link)
@@ -466,37 +468,32 @@ make_redirection (source, instruction, dest_and_filename)
   switch (instruction)
     {
 
-    case r_output_direction:	/* >foo */
-    case r_output_force:	/* >| foo */
+    case r_output_direction:		/* >foo */
+    case r_output_force:		/* >| foo */
+    case r_err_and_out:			/* command &>filename */
       temp->flags = O_TRUNC | O_WRONLY | O_CREAT;
       break;
 
-    case r_input_direction:	/* <foo */
-    case r_inputa_direction:	/* foo & makes this. */
-      temp->flags = O_RDONLY;
-      break;
-
-    case r_appending_to:	/* >>foo */
+    case r_appending_to:		/* >>foo */
       temp->flags = O_APPEND | O_WRONLY | O_CREAT;
       break;
 
-    case r_deblank_reading_until: /* <<-foo */
-    case r_reading_until:	/* << foo */
+    case r_input_direction:		/* <foo */
+    case r_inputa_direction:		/* foo & makes this. */
+      temp->flags = O_RDONLY;
       break;
 
+    case r_input_output:		/* <>foo */
+      temp->flags = O_RDWR | O_CREAT;
+      break;
+
+    case r_deblank_reading_until: 	/* <<-foo */
+    case r_reading_until:		/* << foo */
     case r_close_this:			/* <&- */
     case r_duplicating_input:		/* 1<&2 */
     case r_duplicating_output:		/* 1>&2 */
     case r_duplicating_input_word:	/* 1<&$foo */
     case r_duplicating_output_word:	/* 1>&$foo */
-      break;
-
-    case r_err_and_out:		/* command &>filename */
-      temp->flags = O_TRUNC | O_WRONLY | O_CREAT;
-      break;
-
-    case r_input_output:
-      temp->flags = O_RDWR | O_CREAT;
       break;
 
     default:

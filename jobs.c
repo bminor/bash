@@ -83,14 +83,16 @@
 #  include <bsdtty.h>
 #endif /* hpux && !TERMIOS_TTY_DRIVER */
 
+#if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
 /* For struct winsize on SCO */
 /*   sys/ptem.h has winsize but needs mblk_t from sys/stream.h */
-#if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
-#  if defined (HAVE_SYS_STREAM_H)
-#    include <sys/stream.h>
-#  endif
-#  include <sys/ptem.h>
-#endif
+#  if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
+#    if defined (HAVE_SYS_STREAM_H)
+#      include <sys/stream.h>
+#    endif
+#    include <sys/ptem.h>
+#  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
+#endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
 #include "bashansi.h"
 #include "shell.h"
@@ -145,6 +147,10 @@ extern int errno;
 
 /* The number of additional slots to allocate when we run out. */
 #define JOB_SLOTS 8
+
+#if defined (READLINE)
+extern void _rl_set_screen_size ();
+#endif
 
 /* Variables used here but defined in other files. */
 extern int interactive, interactive_shell, asynchronous_notification;
@@ -577,8 +583,7 @@ nohup_job (job_index)
 {
   register JOB *temp;
 
-  temp = jobs[job_index];
-  if (temp)
+  if (temp = jobs[job_index])
     temp->flags |= J_NOHUP;
 }
 
@@ -806,6 +811,25 @@ find_job (pid)
     }
 
   return (NO_JOB);
+}
+
+/* Find a job given a PID.  If BLOCK is non-zero, block SIGCHLD as
+   required by find_job. */
+int
+get_job_by_pid (pid, block)
+     pid_t pid;
+     int block;
+{
+  int job;
+  sigset_t set, oset;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+  job = find_job (pid);
+  if (block)
+    UNBLOCK_CHILD (oset);
+
+  return job;
 }
 
 /* Print descriptive information about the job with leader pid PID. */
@@ -1346,8 +1370,9 @@ get_tty_state ()
 int
 set_tty_state ()
 {
-  int tty = input_tty ();
+  int tty;
 
+  tty = input_tty ();
   if (tty != -1)
     {
 #if defined (NEW_TTY_DRIVER)
@@ -1894,6 +1919,29 @@ reset_current ()
     current_job = previous_job = NO_JOB;
 }
 
+/* Set up the job structures so we know the job and its processes are
+   all running. */
+static void
+set_job_running (job)
+     int job;
+{
+  register PROCESS *p;
+
+  /* Each member of the pipeline is now running. */
+  p = jobs[job]->pipe;
+
+  do
+    {
+      if (WIFSTOPPED (p->status))
+	p->running = 1;
+      p = p->next;
+    }
+  while (p != jobs[job]->pipe);
+
+  /* This means that the job is running. */
+  JOBSTATE (job) = JRUNNING;
+}
+
 /* Start a job.  FOREGROUND if non-zero says to do that.  Otherwise,
    start the job in the background.  JOB is a zero-based index into
    JOBS.  Returns -1 if it is unable to start a job, and the return
@@ -1971,21 +2019,7 @@ start_job (job, foreground)
 
   /* Run the job. */
   if (already_running == 0)
-    {
-      /* Each member of the pipeline is now running. */
-      p = jobs[job]->pipe;
-
-      do
-	{
-	  if (WIFSTOPPED (p->status))
-	    p->running = 1;
-	  p = p->next;
-	}
-      while (p != jobs[job]->pipe);
-
-      /* This means that the job is running. */
-      JOBSTATE (job) = JRUNNING;
-    }
+    set_job_running (job);
 
   /* Save the tty settings before we start the job in the foreground. */
   if (foreground)
@@ -2071,6 +2105,14 @@ kill_pid (pid, sig, group)
 	      result = killpg (jobs[job]->pgrp, sig);
 	      if (p && STOPPED (job) && (sig == SIGTERM || sig == SIGHUP))
 		killpg (jobs[job]->pgrp, SIGCONT);
+	      /* If we're continuing a stopped job via kill rather than bg or
+		 fg, emulate the `bg' behavior. */
+	      if (p && STOPPED (job) && (sig == SIGCONT))
+		{
+		  set_job_running (job);
+		  jobs[job]->flags &= ~J_FOREGROUND;
+		  jobs[job]->flags |= J_NOTIFIED;
+		}
 	    }
 	}
       else
@@ -2119,9 +2161,9 @@ waitchld (wpid, block)
 
   do
     {
-      /* We don't want to be notified about jobs stopping if we're not
-         interactive. */
-      waitpid_flags = (interactive_shell && subshell_environment == 0)
+      /* We don't want to be notified about jobs stopping if job control
+         is not active.  XXX - was interactive_shell instead of job_control */
+      waitpid_flags = (job_control && subshell_environment == 0)
 			? WUNTRACED
 			: 0;
       if (sigchld || block == 0)
@@ -2156,6 +2198,7 @@ waitchld (wpid, block)
       child->running = 0;
 
       job = find_job (pid);
+  
       if (job == NO_JOB)
         continue;
 
@@ -2270,11 +2313,15 @@ waitchld (wpid, block)
 		{
 		  /* wait_sigint_handler () has already seen SIGINT and
 		     allowed the wait builtin to jump out.  We need to
-		     call the original SIGINT handler. */
+		     call the original SIGINT handler, if necessary.  If
+		     the original handler is SIG_DFL, we need to resend
+		     the signal to ourselves. */
 		  SigHandler *temp_handler;
 		  temp_handler = old_sigint_handler;
 		  restore_sigint_handler ();
-		  if (temp_handler != SIG_IGN)
+		  if (temp_handler == SIG_DFL)
+		    termination_unwind_protect (SIGINT);
+		  else if (temp_handler != SIG_IGN)
 		    (*temp_handler) (SIGINT);
 		}
 	    }
@@ -2325,7 +2372,7 @@ waitchld (wpid, block)
       for (i = 0; i < children_exited; i++)
 	{
 	  interrupt_immediately = 1;
-	  parse_and_execute (savestring (trap_command), "trap", -1);
+	  parse_and_execute (savestring (trap_command), "trap", SEVAL_NOHIST);
 	}
 
       run_unwind_frame ("SIGCHLD trap");
@@ -2381,7 +2428,7 @@ notify_of_job_status ()
 
 	  /* Print info on jobs that are running in the background,
 	     and on foreground jobs that were killed by anything
-	     except SIGINT. */
+	     except SIGINT (and possibly SIGPIPE). */
 	  switch (JOBSTATE (job))
 	    {
 	    case JDEAD:
@@ -2393,7 +2440,11 @@ notify_of_job_status ()
 		}
 	      else if (IS_FOREGROUND (job))
 		{
+#if !defined (DONT_REPORT_SIGPIPE)
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT)
+#else
+		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT && termsig != SIGPIPE)
+#endif
 		    {
 		      fprintf (stderr, "%s", strsignal (termsig));
 
@@ -2441,13 +2492,14 @@ notify_of_job_status ()
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
 int
-initialize_jobs ()
+initialize_job_control (force)
+     int force;
 {
   shell_pgrp = getpgid (0);
 
   if (shell_pgrp == -1)
     {
-      sys_error ("initialize_jobs: getpgrp failed");
+      sys_error ("initialize_job_control: getpgrp failed");
       exit (1);
     }
 
@@ -2456,6 +2508,7 @@ initialize_jobs ()
     {
       job_control = 0;
       original_pgrp = NO_PID;
+      shell_tty = fileno (stderr);
     }
   else
     {
@@ -2464,7 +2517,7 @@ initialize_jobs ()
 	 matter where fd 2 is directed. */
       shell_tty = dup (fileno (stderr));	/* fd 2 */
 
-      shell_tty = move_to_high_fd (shell_tty, 1);
+      shell_tty = move_to_high_fd (shell_tty, 1, -1);
 
       /* Compensate for a bug in systems that compiled the BSD
 	 rlogind with DEBUG defined, like NeXT and Alliant. */
@@ -2492,7 +2545,7 @@ initialize_jobs ()
       /* Make sure that we are using the new line discipline. */
       if (set_new_line_discipline (shell_tty) < 0)
 	{
-	  sys_error ("initialize_jobs: line discipline");
+	  sys_error ("initialize_job_control: line discipline");
 	  job_control = 0;
 	}
       else
@@ -2502,7 +2555,7 @@ initialize_jobs ()
 
 	  if ((original_pgrp != shell_pgrp) && (setpgid (0, shell_pgrp) < 0))
 	    {
-	      sys_error ("initialize_jobs: setpgid");
+	      sys_error ("initialize_job_control: setpgid");
 	      shell_pgrp = original_pgrp;
 	    }
 
@@ -2633,6 +2686,7 @@ sigwinch_sighandler (sig)
   set_signal_handler (SIGWINCH, sigwinch_sighandler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
   get_new_window_size (1);
+  SIGRETURN (0);
 }
 #else
 static void
@@ -2750,7 +2804,7 @@ give_terminal_to (pgrp)
    children of the shell, who should not have any job structures as baggage
    when they start executing (forking subshells for parenthesized execution
    and functions with pipes are the two that spring to mind). */
-static void
+void
 delete_all_jobs ()
 {
   register int i;
@@ -2768,6 +2822,26 @@ delete_all_jobs ()
 
       free ((char *)jobs);
       job_slots = 0;
+    }
+
+  UNBLOCK_CHILD (oset);
+}
+
+/* Mark all jobs in the job array so that they don't get a SIGHUP when the
+   shell gets one. */
+void
+nohup_all_jobs ()
+{
+  register int i;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+
+  if (job_slots)
+    {
+      for (i = 0; i < job_slots; i++)
+	if (jobs[i])
+	  nohup_job (i);
     }
 
   UNBLOCK_CHILD (oset);
@@ -2850,7 +2924,7 @@ restart_job_control ()
 {
   if (shell_tty != -1)
     close (shell_tty);
-  initialize_jobs ();
+  initialize_job_control (0);
 }
 
 /* Set the handler to run when the shell receives a SIGCHLD signal. */

@@ -45,13 +45,13 @@
 #      include <alloca.h>
 #    endif /* !IBMESA */
 #  else  /* !HAVE_ALLOCA_H */
-#    if defined (hpux_9) && defined (__STDC__) && !defined (alloca)
+#    if defined (__hpux) && defined (__STDC__) && !defined (alloca)
 extern void *alloca ();
 #    else
 #      if !defined (alloca)
 extern char *alloca ();
 #      endif /* !alloca */
-#    endif /* !hpux_9 || !__STDC__ && !alloca */
+#    endif /* !__hpux || !__STDC__ && !alloca */
 #  endif /* !HAVE_ALLOCA_H */
 #endif /* !__GNUC__ */
 

@@ -1,3 +1,7 @@
+# must do this because posix mode causes process substitution to be disabled
+# and flagged as a syntax error, which causes the shell to exit
+set +o posix
+
 expect()
 {
         echo expect "$@"
@@ -83,6 +87,11 @@ echo -e "$foo\c " ; echo foo
 expect '<barfoo>'
 echo -e $foo"\c " ; echo foo
 
+# make sure backslashes are preserved in front of characters that are not
+# valid backslash escapes
+expect '<\x>'
+echo -e '\x'
+
 # substring tests
 z=abcdefghijklmnop
 expect '<abcd>'
@@ -90,6 +99,9 @@ recho ${z:0:4}
 
 expect '<efg> <nop>'
 recho ${z:4:3} ${z:${#z}-3:3}
+
+expect '<efg> <nop>'
+recho ${z:4:3} ${z: -3:3}
 
 expect '<hijklmnop>'
 recho ${z:7:30}
@@ -138,7 +150,7 @@ recho ${!1-$z}
 
 set -u
 expect $0: ABX: unbound variable
-recho ${ABX}
+( recho ${ABX} )
 set +u
 
 expect $0: '$6: cannot assign in this way'
@@ -222,12 +234,10 @@ recho ${@//%x*/yyy}
 expect a newline
 echo $abmcde
 
-expect this is a test of proc subst
-cat <(echo this is a test of proc subst)
-echo this is test 2 > /tmp/x
-expect this is test 2
-cat <(cat /tmp/x)
-rm -f /tmp/x
+# run process substitution tests in a subshell so that syntax errors
+# caused by a shell not implementing process substitution (e.g., one
+# built on a NeXT) will not cause the whole test to exit prematurely
+${THIS_SH} ./new-exp.sub1
 
 expect $0: '${#:-foo}: bad substitution'
 echo ${#:-foo}
@@ -366,6 +376,78 @@ xx=oneonetwo
 recho ${xx/one}
 recho ${xx//one}
 recho ${xx/\/one}
+
+# out-of-range substrings
+var=abc
+c=${var:3}
+expect nothing
+recho $c
+c=${var:4}
+expect nothing
+recho $c
+expect '<./new-exp.tests: -2: substring expression < 0>'
+c=${var:0:-2}
+
+var=abcdefghi
+c=${var:3:12}
+recho $c
+c=${var:4:20}
+recho $c
+
+# make sure null patterns work
+xxx=endocrine
+yyy=n
+unset zzz
+
+recho ${xxx/$yyy/*}
+recho ${xxx//$yyy/*}
+
+recho ${xxx/$zzz/*}
+recho ${xxx//$zzz/*}
+
+# another case that caused a core dump in bash-2.0
+XPATH=/usr/bin:/bin:/usr/local/bin:/usr/gnu/bin::/usr/bin/X11:/sbin:/usr/sbin
+
+recho ${XPATH//:/ }
+
+xx=(ar as at au av aw ax ay az)
+
+recho ${xx[@]/a/}
+recho ${xx[@]//a/}
+
+recho ${xx[*]/a/}
+recho ${xx[*]//a/}
+
+recho ${xx[@]%?}
+recho ${xx[*]%?}
+
+recho ${xx[@]#?}
+recho ${xx[*]#?}
+
+set -- ar as at au av aw ax ay az
+
+recho ${@/a/}
+recho ${@//a/}
+
+recho ${*/a/}
+recho ${*//a/}
+
+recho ${@%?}
+recho ${*%?}
+
+recho ${@#?}
+recho ${*#?}
+
+shift $#
+set -u
+( recho $9 ; echo after 1)
+( recho ${9} ; echo after 2)
+( recho $UNSET ; echo after 3)
+( recho ${UNSET} ; echo after 4)
+( recho "$UNSET" ; echo after 5)
+( recho "${UNSET}" ; echo after 6)
+( recho "${#UNSET}" ; echo after 7)
+set +u
 
 # this must be last!
 expect $0: 'ABXD: parameter unset'

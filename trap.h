@@ -24,7 +24,7 @@
 #include "stdc.h"
 
 #if !defined (SIG_DFL)
-#include <sys/types.h>
+#include "bashtypes.h"
 #include <signal.h>
 #endif /* SIG_DFL */
 

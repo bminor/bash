@@ -1,3 +1,5 @@
+# Makefile for bash-2.01, version 2.32
+#
 # Make sure the first target in the makefile is the right one
 all: .made
 
@@ -39,6 +41,8 @@ INSTALL_DATA = @INSTALL_DATA@
 COMPRESS = gzip
 COMPRESS_EXT = .gz
 
+TESTSCRIPT = @TESTSCRIPT@
+
 #If you have purify, and want to use it, uncomment this definition or
 # run the make as `make PURIFY=purify'
 # or run configure with the --with-purify argument.
@@ -50,13 +54,15 @@ PURIFY = @PURIFY@
 	$(RM) $@
 	$(CC) $(CCFLAGS) -c $<
 
-# The name of this program.
+# The name of this program and some version information.
 Program = bash
+Version = @BASHVERS@
+PatchLevel = @BASHPATCH@
+RELSTATUS = release
+
 Machine = @host_cpu@
 OS = @host_os@
 MACHTYPE = @host@
-
-RELSTATUS = release
 
 THIS_SH = $(BUILD_DIR)/$(Program)
 
@@ -64,17 +70,13 @@ THIS_SH = $(BUILD_DIR)/$(Program)
 # with gprof, or nothing (the default).
 PROFILE_FLAGS=
 
-# set to alloca.o if we are using the C alloca in lib/malloc
-ALLOCA = @ALLOCA@
-ALLOCA_SOURCE = @ALLOCA_SOURCE@
-ALLOCA_OBJECT = @ALLOCA_OBJECT@
-
 # The GNU coding standards don't recognize the possibility that
 # other information besides optimization and debugging might be
 # passed to cc.  A different name should have been used.
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
 DEFS = @DEFS@
+LOCAL_DEFS = @LOCAL_DEFS@
 LOCAL_LIBS = @LOCAL_LIBS@
 LIBS = $(BUILTINS_LIB) $(LIBRARIES) $(LOCAL_LIBS) @LIBS@
 LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(PROFILE_FLAGS) $(CFLAGS)
@@ -82,7 +84,7 @@ LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 
 SYSTEM_FLAGS = -DPROGRAM='"$(Program)"' -DHOSTTYPE='"$(Machine)"' -DOSTYPE='"$(OS)"' -DMACHTYPE='"$(MACHTYPE)"'
 
-CCFLAGS	= $(PROFILE_FLAGS) $(SYSTEM_FLAGS) -DSHELL \
+CCFLAGS	= $(PROFILE_FLAGS) $(SYSTEM_FLAGS) $(LOCAL_DEFS) \
 	  $(DEFS) $(LOCAL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(CFLAGS)
 
 INCLUDES = -I. -I$(srcdir) -I$(LIBSRC)
@@ -132,6 +134,7 @@ READLINE_SOURCE	= $(RL_LIBSRC)/rldefs.h $(RL_LIBSRC)/rlconf.h \
 		  $(RL_LIBSRC)/undo.c $(RL_LIBSRC)/macro.c \
 		  $(RL_LIBSRC)/terminal.c $(RL_LIBSRC)/nls.c \
 		  $(RL_LIBSRC)/input.c $(RL_LIBSRC)/xmalloc.c \
+		  $(RL_LIBSRC)/shell.c \
 		  $(RL_LIBSRC)/histexpand.c $(RL_LIBSRC)/history.c \
 		  $(RL_LIBSRC)/histsearch.c $(RL_LIBSRC)/histfile.c
 
@@ -145,6 +148,7 @@ READLINE_OBJ	= $(RL_LIBDIR)/readline.o $(RL_LIBDIR)/funmap.o \
 		  $(RL_LIBDIR)/kill.o $(RL_LIBDIR)/undo.o $(RL_LIBDIR)/nls.o \
 		  $(RL_LIBDIR)/macro.o $(RL_LIBDIR)/input.o \
 		  $(RL_LIBDIR)/terminal.o $(RL_LIBDIR)/callback.o \
+		  $(RL_LIBDIR)/shell.o \
 		  $(RL_LIBDIR)/history.o $(RL_LIBDIR)/histexpand.o \
 		  $(RL_LIBDIR)/histsearch.o $(RL_LIBDIR)/histfile.o
 
@@ -160,9 +164,11 @@ HISTORY_DEP = @HISTORY_DEP@
 # The source, object and documentation of the history library.
 HISTORY_SOURCE	= $(HIST_LIBSRC)/history.c $(HIST_LIBSRC)/histexpand.c \
 		  $(HIST_LIBSRC)/histsearch.c $(HIST_LIBSRC)/histfile.c \
+		  $(HIST_LIBSRC)/shell.c \
 		  $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/histlib.h
 HISTORY_OBJ	= $(HIST_LIBDIR)/history.o $(HIST_LIBDIR)/histexpand.o \
-		  $(HIST_LIBDIR)/histsearch.o $(HIST_LIBDIR)/histfile.o
+		  $(HIST_LIBDIR)/histsearch.o $(HIST_LIBDIR)/histfile.o \
+		  $(HIST_LIBDIR)/shell.o
 
 # You only need termcap (or curses) if you are linking with GNU Readline.
 TERM_LIBSRC = $(LIBSRC)/termcap
@@ -204,15 +210,18 @@ TILDE_SOURCE	= $(TILDE_LIBSRC)/tilde.c $(TILDE_LIBSRC)/tilde.h
 TILDE_OBJ	= $(TILDE_LIBDIR)/tilde.o
 
 # Our malloc.
+MALLOC_TARGET = @MALLOC_TARGET@
+
+# set to alloca.o if we are using the C alloca in lib/malloc
+ALLOCA = @ALLOCA@
+
 ALLOC_LIBSRC = $(LIBSRC)/malloc
 ALLOC_LIBDIR = $(dot)/$(LIBSUBDIR)/malloc
 ALLOC_ABSSRC = ${topdir}/$(ALLOC_LIBDIR)
 
-ALLOCA_DEP = $(ALLOC_LIBDIR)/@ALLOCA@
-
-MALLOC_OBJ = $(ALLOC_LIBDIR)/@MALLOC@
 MALLOC_SRC = @MALLOC_SRC@
-MALLOC_CFLAGS = -Drcheck -Dbotch=programming_error
+MALLOC_SOURCE = ${ALLOC_LIBSRC}/${MALLOC_SRC}
+MALLOC_CFLAGS = -DRCHECK -Dbotch=programming_error
 
 MALLOC_LIB     = -lmalloc
 MALLOC_LIBRARY = $(ALLOC_LIBDIR)/libmalloc.a
@@ -221,11 +230,10 @@ MALLOC_DEP = $(MALLOC_LIBRARY)
 
 ALLOC_HEADERS = $(ALLOC_LIBSRC)/getpagesize.h
 
-$(MALLOC_LIBRARY): $(MALLOC_SRC)
-		@$(RM) $@
+$(MALLOC_LIBRARY):	${MALLOC_SOURCE}
 		@(cd $(ALLOC_LIBDIR) && \
 		 $(MAKE) $(MFLAGS) \
-		 MALLOC_CFLAGS="$(MALLOC_CFLAGS)" libmalloc.a ) || exit 1
+		 MALLOC_CFLAGS="$(MALLOC_CFLAGS)" ${MALLOC_TARGET} ) || exit 1
 
 BASHPOSIX_LIB     = $(LIBSRC)/posixheaders
 BASHPOSIX_SUPPORT = $(BASHPOSIX_LIB)/posixstat.h $(BASHPOSIX_LIB)/ansi_stdlib.h \
@@ -247,18 +255,20 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(TILDE_LDFLAGS) \
 # The main source code for the Bourne Again SHell.
 CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
 	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
-	   expr.c copy_cmd.c flags.c subst.c hashlib.c mailcheck.c \
-	   test.c trap.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
+	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
+	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
 	   vprint.c input.c bashhist.c array.c sig.c pathexp.c oslib.c \
-	   unwind_prot.c siglist.c getcwd.c $(RL_SUPPORT_SRC) error.c \
+	   unwind_prot.c siglist.c getcwd.c bashline.c bracecomp.c error.c \
 	   list.c stringlib.c locale.c xmalloc.c
 
-HSOURCES = shell.h flags.h trap.h hashlib.h jobs.h builtins.h alias.c y.tab.h \
+HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   general.h variables.h config.h $(ALLOC_HEADERS) alias.h maxpath.h \
-	   quit.h posixstat.h filecntl.h unwind_prot.h \
+	   quit.h posixdir.h posixstat.h filecntl.h unwind_prot.h ansi_stdlib.h \
 	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
-	   array.h sig.h mailcheck.h bashtty.h
+	   array.h sig.h mailcheck.h bashtty.h bashintl.h bashjmp.h ${GRAM_H} \
+	   posixwait.h execute_cmd.h memalloc.h parser.h pathexp.h pathnames.h \
+	   posixjmp.h stdc.h unionwait.h $(BASHPOSIX_SUPPORT)
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
 
@@ -268,8 +278,8 @@ JOBS_O = @JOBS_O@
 # Matching object files.
 OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
-	   expr.o flags.o $(JOBS_O) subst.o hashlib.o mailcheck.o test.o \
-	   trap.o input.o unwind_prot.o pathexp.o sig.o version.o \
+	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
+	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
 	   alias.o array.o braces.o bracecomp.o bashhist.o bashline.o \
 	   getcwd.o siglist.o vprint.o oslib.o list.o stringlib.o \
 	   locale.o xmalloc.o
@@ -296,8 +306,7 @@ BUILTIN_DEFS = $(DEFSRC)/alias.def $(DEFSRC)/bind.def $(DEFSRC)/break.def \
 	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def
 BUILTIN_C_SRC  = $(DEFSRC)/mkbuiltins.c $(DEFSRC)/common.c \
 		 $(DEFSRC)/evalstring.c $(DEFSRC)/evalfile.c \
-		 $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE) \
-		 $(DEFSRC)/hashcom.h 
+		 $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE)
 BUILTIN_C_OBJ  = $(DEFDIR)/common.o $(DEFDIR)/evalstring.o \
 		 $(DEFDIR)/evalfile.o $(DEFDIR)/bashgetopt.o
 BUILTIN_OBJS = $(DEFDIR)/alias.o $(DEFDIR)/bind.o $(DEFDIR)/break.o \
@@ -317,22 +326,23 @@ BUILTIN_OBJS = $(DEFDIR)/alias.o $(DEFDIR)/bind.o $(DEFDIR)/break.o \
 GETOPT_SOURCE   = $(DEFSRC)/getopt.c $(DEFSRC)/getopt.h
 PSIZE_SOURCE	= $(DEFSRC)/psize.sh $(DEFSRC)/psize.c
 
-BUILTINS_LIBRARY = builtins/libbuiltins.a
+BUILTINS_LIBRARY = $(DEFDIR)/libbuiltins.a
 BUILTINS_LIB = -lbuiltins
 BUILTINS_LDFLAGS = -L$(DEFDIR)
 BUILTINS_DEP = $(BUILTINS_LIBRARY)
 
 # Documentation for the shell.
 DOCSRC = $(srcdir)/doc
-DOCDIR = ./doc
+DOCDIR = $(dot)/doc
 
 SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
 
 SUPPORT_SRC = $(srcdir)/support/
-SDIR = ./support/
+SDIR = $(dot)/support/
 
-CREATED_SUPPORT = signames.h recho zecho tests/recho tests/zecho \
-		  tests/printenv mksignames mkversion 
+TESTS_SUPPORT = recho zecho printenv
+CREATED_SUPPORT = signames.h recho zecho printenv tests/recho tests/zecho \
+		  tests/printenv mksignames 
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
 		    stamp-h
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
@@ -344,32 +354,28 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 .NOEXPORT:
 
 .made: $(Program) bashbug
-	cp .machine .made
+	@echo "$(Program) last made for a $(Machine) running $(OS)" >.made
 
-$(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP) $(srcdir)/.distribution
+$(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
 	$(RM) $@
 	$(PURIFY) $(CC) $(LDFLAGS) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
 	ls -l $(Program)
 	size $(Program)
 
-.build:	$(SOURCES) config.h Makefile mkversion version.h .machine
+.build:	$(SOURCES) config.h Makefile version.h
 	@echo
 	@echo "	  ***********************************************************"
 	@echo "	  *                                                         *"
-	@echo "	  * Making Bash-`cat $(srcdir)/.distribution`.`cat $(srcdir)/.patchlevel`-$(RELSTATUS) for a $(Machine) running $(OS)"
+	@echo "	  * Making Bash-$(Version).$(PatchLevel)-$(RELSTATUS) for a $(Machine) running $(OS)"
 	@echo "	  *                                                         *"
 	@echo "	  ***********************************************************"
 	@echo
 
-.machine: $(SOURCES) config.h Makefile mkversion version.h
-	@echo "$(Program) last made for a $(Machine) running $(OS)" >.machine
-
-bashbug: $(SUPPORT_SRC)bashbug.sh mkversion config.h Makefile
-	@sed -e "s:!MACHINE!:$(Machine):" -e "s:!OS!:$(OS):" \
-	     -e "s:!CFLAGS!:$(CCFLAGS):" -e "s:!CC!:$(CC):" \
-	     -e "s:!RELEASE!:`cat $(srcdir)/.distribution`:" \
-	     -e "s:!PATCHLEVEL!:`cat $(srcdir)/.patchlevel`:" \
-	     -e "s:!MACHTYPE!:$(MACHTYPE):" -e "s:!RELSTATUS!:$(RELSTATUS):" \
+bashbug: $(SUPPORT_SRC)bashbug.sh config.h Makefile
+	@sed -e "s%!MACHINE!%$(Machine)%" -e "s%!OS!%$(OS)%" \
+	     -e "s%!CFLAGS!%$(CCFLAGS)%" -e "s%!CC!%$(CC)%" \
+	     -e "s%!RELEASE!%$(Version)%" -e "s%!PATCHLEVEL!%$(PatchLevel)%" \
+	     -e "s%!MACHTYPE!%$(MACHTYPE)%" -e "s%!RELSTATUS!%$(RELSTATUS)%" \
 	     $(SUPPORT_SRC)bashbug.sh > $@
 	@chmod a+rx bashbug
 
@@ -378,19 +384,21 @@ strip:	$(Program) .made
 	ls -l $(Program)
 	size $(Program)
 
-version.h:  $(SOURCES) config.h Makefile mkversion .patchlevel .distribution
-	if ./mkversion -dir $(srcdir) -build -status $(RELSTATUS); then mv -f newversion.h version.h; fi
+version.h:  $(SOURCES) config.h Makefile 
+	if $(SHELL) $(SUPPORT_SRC)mkversion.sh -b -s $(RELSTATUS) -d $(Version) -p $(PatchLevel) -o newversion.h; \
+	then mv newversion.h version.h; fi;
 
 # old rules
-y.tab.o: y.tab.c parser-built
-y.tab.c: parser-built
-y.tab.h: parser-built
-parser-built:	parse.y command.h stdc.h input.h
-	$(RM) $@
-	-if test -f y.tab.h; then mv -f y.tab.h old-y.tab.h; fi
+GRAM_H = parser-built
+y.tab.o: y.tab.c ${GRAM_H} command.h stdc.h input.h
+${GRAM_H}:	y.tab.h
+	@-if test -f y.tab.h ; then \
+		cmp -s $@ y.tab.h 2>/dev/null || cp -p y.tab.h $@; \
+	fi
+y.tab.c y.tab.h: parse.y
+#	-if test -f y.tab.h; then mv -f y.tab.h old-y.tab.h; fi
 	$(YACC) -d $(srcdir)/parse.y
-	-if cmp -s old-y.tab.h y.tab.h; then mv old-y.tab.h y.tab.h; fi
-	touch $@
+#	-if cmp -s old-y.tab.h y.tab.h; then mv old-y.tab.h y.tab.h; else cp -p y.tab.h ${GRAM_H}; fi
 
 # experimental new rules - work with GNU make but not BSD (or OSF) make
 #y.tab.o: y.tab.c y.tab.h
@@ -402,7 +410,7 @@ parser-built:	parse.y command.h stdc.h input.h
 $(READLINE_LIBRARY): config.h $(READLINE_SOURCE)
 	@echo making $@ in ${RL_LIBDIR}
 	@(cd ${RL_LIBDIR} && \
-		$(MAKE) $(MFLAGS) APP_CFLAGS=-DSHELL libreadline.a) || exit 1
+		$(MAKE) $(MFLAGS) libreadline.a) || exit 1
 
 $(HISTORY_LIBRARY): config.h $(HISTORY_SOURCE)
 	@echo making $@ in ${HIST_LIBDIR}
@@ -420,8 +428,8 @@ $(TILDE_LIBRARY): config.h $(TILDE_SOURCE)
 		$(MAKE) $(MFLAGS) libtilde.a) || exit 1
 
 $(TERMCAP_LIBRARY): config.h ${TERMCAP_SOURCE}
-	@echo making $@ in ${TERMCAP_LIBDIR}	
-	@(cd ${TERMCAP_LIBDIR} && \
+	@echo making $@ in ${TERM_LIBDIR}	
+	@(cd ${TERM_LIBDIR} && \
 		$(MAKE) $(MFLAGS) libtermcap.a) || exit 1
 
 mksignames:	$(SUPPORT_SRC)mksignames.c
@@ -435,20 +443,20 @@ $(BUILTINS_LIBRARY): $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h memalloc.h
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) libbuiltins.a ) || exit 1
 
 # these require special rules to circumvent make builtin rules
-builtins/common.o:	$(BUILTIN_SRCDIR)/common.c
+${DEFDIR}/common.o:	$(BUILTIN_SRCDIR)/common.c
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) common.o) || exit 1
 
-builtins/bashgetopt.o:	$(BUILTIN_SRCDIR)/bashgetopt.c
+${DEFDIR}/bashgetopt.o:	$(BUILTIN_SRCDIR)/bashgetopt.c
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) bashgetopt.o) || exit 1
 
-builtins/builtext.h: $(BUILTIN_DEFS)
+${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) builtext.h ) || exit 1
 
 # For the justification of the following Makefile rules, see node
 # `Automatic Remaking' in GNU Autoconf documentation.
 
-Makefile:	config.status $(srcdir)/Makefile.in
-	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+Makefile makefile:	config.status $(srcdir)/Makefile.in
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
 Makefiles makefiles:	config.status $(srcdir)/Makefile.in
 	@for mf in $(CREATED_MAKEFILES); do \
@@ -467,14 +475,11 @@ config.status:	$(srcdir)/configure
 #$(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4
 #	cd $(srcdir) && autoconf
 
-mkversion:	$(SUPPORT_SRC)mkversion.c
-	$(CC) $(CCFLAGS) -I.. -o $@ $(SUPPORT_SRC)mkversion.c
-
-newversion:	mkversion
-	$(RM) .build
-	./mkversion -dir $(srcdir) -dist
-	mv -f newversion.h version.h
-	$(MAKE) -f $(srcdir)/Makefile $(MFLAGS) srcdir=$(srcdir)
+#newversion:	mkversion
+#	$(RM) .build
+#	./mkversion -dir $(srcdir) -dist
+#	mv -f newversion.h version.h
+#	$(MAKE) -f $(srcdir)/Makefile $(MFLAGS) srcdir=$(srcdir)
 
 doc documentation:  force
 	@(cd $(DOCDIR) ; $(MAKE) $(MFLAGS) )
@@ -519,7 +524,7 @@ uninstall:	.made
 .PHONY: basic-clean clean realclean maintainer-clean distclean mostlyclean
 basic-clean:
 	$(RM) $(OBJECTS) $(Program) bashbug
-	$(RM) .build .made .machine version.h
+	$(RM) .build .made version.h
 
 clean:	basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
@@ -557,7 +562,7 @@ distclean:	basic-clean
 maintainer-clean:	basic-clean
 	@echo This command is intended for maintainers to use.
 	@echo It deletes files that may require special tools to rebuild.
-	$(RM) y.tab.c y.tab.h parser-built tags TAGS
+	$(RM) y.tab.c y.tab.h parser-built.h tags TAGS
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
 	( cd builtins && $(MAKE) $(MFLAGS) $@ )
 	-(cd $(RL_LIBDIR) && $(MAKE) $(MFLAGS) $@)
@@ -570,16 +575,19 @@ maintainer-clean:	basic-clean
 	$(RM) $(CREATED_SUPPORT) Makefile
 
 recho:		$(SUPPORT_SRC)recho.c
-	@$(CC) -o $@ $(SUPPORT_SRC)recho.c
+	@$(CC) $(CCFLAGS) -o $@ $(SUPPORT_SRC)recho.c
 
 zecho:		$(SUPPORT_SRC)zecho.c
-	@$(CC) -o $@ $(SUPPORT_SRC)zecho.c
+	@$(CC) $(CCFLAGS) -o $@ $(SUPPORT_SRC)zecho.c
 
-tests check:		force $(Program) recho zecho
+printenv:		$(SUPPORT_SRC)printenv.c
+	@$(CC) $(CCFLAGS) -o $@ $(SUPPORT_SRC)printenv.c
+
+test tests check:		force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
-	@cp recho zecho $(SUPPORT_SRC)printenv tests
+	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \
-		PATH=$$PATH:$(BUILD_DIR)/tests THIS_SH=$(THIS_SH) sh run-all )
+		PATH=$$PATH:$(BUILD_DIR)/tests THIS_SH=$(THIS_SH) sh ${TESTSCRIPT} )
 
 symlinks:
 	$(SHELL) $(SUPPORT_SRC)fixlinks -s $(srcdir)
@@ -587,9 +595,14 @@ symlinks:
 dist:	force
 	@echo Bash distributions are created using $(srcdir)/support/mkdist.
 	@echo Here is a sample of the necessary commands:
-	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${Program} `cat $(srcdir)/.distribution`
-	@echo tar cf $(Program)-`cat $(srcdir)/.distribution`.tar ${Program}-`cat $(srcdir)/.distribution`
-	@echo gzip $(Program)-`cat $(srcdir)/.distribution`.tar
+	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${Program} $(Version)
+	@echo tar cf $(Program)-$(Version).tar ${Program}-$(Version)
+	@echo gzip $(Program)-$(Version).tar
+
+depend:	depends
+
+sdepend: force
+	$(Program) $(SUPPORT_SRC)mkdep -c ${CC} -- ${CCFLAGS} ${CSOURCES}
 
 ############################ DEPENDENCIES ###############################
 
@@ -601,145 +614,237 @@ y.tab.o: config.h.top
 jobs.o: config.h.top
 nojobs.o: config.h.top
 execute_cmd.o: config.h.top
-builtins/break.o: config.h.top
-builtins/common.o: config.h.top
-builtins/echo.o: config.h.top
 variables.o: config.h.top
 builtins/command.o: config.h.top
+builtins/common.o: config.h.top
+builtins/break.o: config.h.top
+builtins/echo.o: config.h.top
+builtins/evalstring.o: config.h.top
+builtins/exit.o: config.h.top
+builtins/kill.o: config.h.top
 
-copy_cmd.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h
-copy_cmd.o: general.h variables.h config.h memalloc.h quit.h
-copy_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
-dispose_cmd.o: shell.h bashjmp.h sig.h command.h stdc.h
-dispose_cmd.o: general.h variables.h config.h memalloc.h quit.h
-dispose_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
-error.o: error.h
-execute_cmd.o: shell.h bashjmp.h sig.h command.h stdc.h y.tab.h posixstat.h
-execute_cmd.o: general.h variables.h config.h memalloc.h quit.h hashlib.h jobs.h
-execute_cmd.o: unwind_prot.h siglist.h builtins/builtext.h config.h flags.h
-execute_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h bashtypes.h
-execute_cmd.o: pathexp.h
-expr.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h
-expr.o: general.h variables.h config.h memalloc.h quit.h
-expr.o: dispose_cmd.h make_cmd.h subst.h externs.h
-flags.o: flags.h stdc.h config.h memalloc.h general.h quit.h
-general.o: shell.h bashjmp.h sig.h command.h stdc.h maxpath.h
-general.o: general.h variables.h config.h memalloc.h quit.h unwind_prot.h
-general.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-getcwd.o: config.h config.h.bot bashtypes.h maxpath.h posixstat.h
-hashlib.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h
-hashlib.o: general.h variables.h config.h memalloc.h quit.h
-hashlib.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-jobs.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h trap.h jobs.h 
-jobs.o: general.h variables.h config.h memalloc.h quit.h bashtty.h siglist.h
-jobs.o: dispose_cmd.h make_cmd.h subst.h externs.h builtins/builtext.h
-jobs.o: unwind_prot.h
-mailcheck.o: posixstat.h maxpath.h variables.h
-mailcheck.o: hashlib.h quit.h mailcheck.h
-make_cmd.o: shell.h bashjmp.h sig.h command.h stdc.h flags.h input.h 
-make_cmd.o: general.h variables.h config.h memalloc.h quit.h bashtypes.h
-make_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
-y.tab.o: shell.h bashjmp.h sig.h command.h stdc.h flags.h maxpath.h alias.h
-y.tab.o: general.h variables.h config.h memalloc.h quit.h mailcheck.h parser.h
-y.tab.o: dispose_cmd.h make_cmd.h subst.h externs.h bashtypes.h bashline.h
-y.tab.o: builtins/builtext.h
-print_cmd.o: shell.h bashjmp.h sig.h command.h stdc.h y.tab.h
-print_cmd.o: general.h variables.h config.h memalloc.h quit.h
-print_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h unwind_prot.h
-shell.o: shell.h bashjmp.h sig.h command.h stdc.h flags.h stdc.h
-shell.o: general.h variables.h config.h memalloc.h quit.h
-shell.o: dispose_cmd.h make_cmd.h subst.h externs.h mailcheck.h
-shell.o: posixstat.h filecntl.h jobs.h input.h
-subst.o: shell.h bashjmp.h sig.h command.h stdc.h flags.h jobs.h siglist.h
-subst.o: general.h variables.h config.h memalloc.h quit.h bashtypes.h
-subst.o: dispose_cmd.h make_cmd.h subst.h externs.h execute_cmd.h
-subst.o: ${DEFSRC}/getopt.h pathexp.h bashline.h
-pathexp.o: config.h shell.h bashjmp.h command.h stdc.h general.h
-pathexp.o: error.h variables.h quit.h maxpath.h unwind_prot.h dispose_cmd.h
-pathexp.o: make_cmd.h subst.h sig.h pathnames.h externs.h
-pathexp.o: $(GLOB_LIBSRC)/glob.h $(GLOB_LIBSRC)/fnmatch.h
-test.o: posixstat.h
-trap.o: trap.h shell.h bashjmp.h sig.h command.h stdc.h hashlib.h unwind_prot.h
-trap.o: general.h variables.h config.h memalloc.h quit.h signames.h
-trap.o: dispose_cmd.h make_cmd.h subst.h externs.h
-unwind_prot.o: config.h memalloc.h general.h unwind_prot.h sig.h
-variables.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h flags.h
-variables.o: config.h memalloc.h general.h variables.h quit.h mailcheck.h
-variables.o: execute_cmd.h dispose_cmd.h make_cmd.h subst.h externs.h
-sig.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h flags.h
-sig.o: config.h memalloc.h general.h variables.h quit.h
-sig.o: bashtypes.h jobs.h bashline.h unwind_prot.h
-version.o: version.h .build
-oslib.o: config.h bashtypes.h posixstat.h filecntl.h bashansi.h maxpath.h
-oslib.o: shell.h bashjmp.h sig.h command.h stdc.h mailcheck.h
-oslib.o: general.h error.h variables.h quit.h unwind_prot.h dispose_cmd.h
-oslib.o: make_cmd.h subst.h pathnames.h externs.h
-xmalloc.o: config.h ansi_stdlib.h general.h error.h
-
-eval.o: config.h bashansi.h shell.h trap.h flags.h builtins/common.h
+# shell basics
+copy_cmd.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+copy_cmd.o: general.h bashtypes.h variables.h array.h hashlib.h
+copy_cmd.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+copy_cmd.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+dispose_cmd.o: bashansi.h ansi_stdlib.h
+dispose_cmd.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h
+dispose_cmd.o: error.h general.h bashtypes.h variables.h array.h hashlib.h
+dispose_cmd.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+dispose_cmd.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+getcwd.o: config.h bashtypes.h bashansi.h
+getcwd.o: maxpath.h posixstat.h posixdir.h memalloc.h
+error.o: config.h bashtypes.h bashansi.h ansi_stdlib.h flags.h stdc.h error.h
+error.o: command.h general.h externs.h input.h bashhist.h
+eval.o: config.h bashansi.h ansi_stdlib.h trap.h flags.h ${DEFSRC}/common.h
+eval.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+eval.o: general.h bashtypes.h variables.h array.h hashlib.h
+eval.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+eval.o: make_cmd.h subst.h sig.h pathnames.h externs.h
 eval.o: input.h execute_cmd.h
-eval.o: bashjmp.h command.h general.h error.h variables.h quit.h
-eval.o: maxpath.h unwind_prot.h dispose_cmd.h make_cmd.h subst.h
-eval.o: sig.h pathnames.h externs.h
+execute_cmd.o: config.h bashtypes.h filecntl.h posixstat.h bashansi.h ansi_stdlib.h
+execute_cmd.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+execute_cmd.o: general.h bashtypes.h variables.h array.h hashlib.h
+execute_cmd.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+execute_cmd.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+execute_cmd.o: memalloc.h ${GRAM_H} flags.h builtins.h jobs.h quit.h siglist.h
+execute_cmd.o: execute_cmd.h trap.h pathexp.h $(DEFSRC)/common.h
+execute_cmd.o: ${DEFDIR}/builtext.h ${GLOB_LIBSRC}/fnmatch.h
+expr.o: config.h bashansi.h ansi_stdlib.h
+expr.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+expr.o: general.h bashtypes.h variables.h array.h hashlib.h
+expr.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+expr.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+flags.o: config.h flags.h
+flags.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+flags.o: general.h bashtypes.h variables.h array.h hashlib.h
+flags.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+flags.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+general.o: config.h bashtypes.h posixstat.h filecntl.h bashansi.h ansi_stdlib.h
+general.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+general.o: general.h bashtypes.h variables.h array.h hashlib.h
+general.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+general.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+general.o: maxpath.h
+hashcmd.o: config.h posixstat.h bashtypes.h bashansi.h ansi_stdlib.h
+hashcmd.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+hashcmd.o: general.h bashtypes.h variables.h array.h hashcmd.h
+hashcmd.o: execute_cmd.h stdc.h
+hashlib.o: config.h bashansi.h ansi_stdlib.h
+hashlib.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+hashlib.o: general.h bashtypes.h variables.h array.h hashlib.h
+hashlib.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+hashlib.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+input.o: config.h bashtypes.h filecntl.h posixstat.h bashansi.h ansi_stdlib.h
+input.o: command.h stdc.h general.h input.h error.h externs.h
+list.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+list.o: general.h bashtypes.h variables.h array.h hashlib.h
+list.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+list.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+locale.o: config.h bashtypes.h bashintl.h bashansi.h ansi_stdlib.h
+locale.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+locale.o: general.h bashtypes.h variables.h array.h hashlib.h
+locale.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+locale.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+mailcheck.o: config.h bashtypes.h posixstat.h bashansi.h ansi_stdlib.h
+mailcheck.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+mailcheck.o: general.h bashtypes.h variables.h array.h hashlib.h
+mailcheck.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+mailcheck.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+mailcheck.o: execute_cmd.h mailcheck.h
+make_cmd.o: config.h bashtypes.h filecntl.h bashansi.h
+make_cmd.o: command.h stdc.h general.h error.h flags.h make_cmd.h
+make_cmd.o: variables.h array.h hashlib.h subst.h input.h externs.h
+make_cmd.o: jobs.h quit.h siglist.h
+oslib.o: config.h bashtypes.h posixstat.h filecntl.h bashansi.h maxpath.h
+oslib.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+oslib.o: general.h bashtypes.h variables.h array.h hashlib.h
+oslib.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+oslib.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+y.tab.o: config.h bashtypes.h bashansi.h ansi_stdlib.h memalloc.h
+y.tab.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+y.tab.o: general.h bashtypes.h variables.h array.h hashlib.h
+y.tab.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+y.tab.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+y.tab.o: trap.h flags.h parser.h input.h mailcheck.h $(DEFSRC)/common.h
+y.tab.o: $(DEFDIR)/builtext.h bashline.h bashhist.h jobs.h siglist.h alias.h
+pathexp.o: config.h bashtypes.h bashansi.h ansi_stdlib.h
+pathexp.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+pathexp.o: general.h bashtypes.h variables.h array.h hashlib.h
+pathexp.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+pathexp.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+pathexp.o: pathexp.h flags.h 
+pathexp.o: $(GLOB_LIBSRC)/glob.h $(GLOB_LIBSRC)/fnmatch.h
+print_cmd.o: config.h bashansi.h ansi_stdlib.h
+print_cmd.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+print_cmd.o: general.h bashtypes.h variables.h array.h hashlib.h
+print_cmd.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+print_cmd.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+print_cmd.o: ${GRAM_H} $(DEFSRC)/common.h
+shell.o: config.h bashtypes.h posixstat.h bashansi.h ansi_stdlib.h filecntl.h
+shell.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+shell.o: general.h bashtypes.h variables.h array.h hashlib.h
+shell.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+shell.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+shell.o: flags.h trap.h mailcheck.h builtins.h $(DEFSRC)/common.h
+shell.o: jobs.h siglist.h input.h execute_cmd.h bashhist.h
+shell.o: ${GLOB_LIBSRC}/fnmatch.h
+sig.o: config.h bashtypes.h
+sig.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+sig.o: general.h bashtypes.h variables.h array.h hashlib.h
+sig.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+sig.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+sig.o: jobs.h siglist.h trap.h $(DEFSRC)/common.h bashline.h bashhist.h
+siglist.o: config.h bashtypes.h siglist.h trap.h
+stringlib.o: bashtypes.h
+stringlib.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+stringlib.o: general.h bashtypes.h variables.h array.h hashlib.h
+stringlib.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+stringlib.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+subst.o: config.h bashtypes.h bashansi.h ansi_stdlib.h posixstat.h
+subst.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+subst.o: general.h bashtypes.h variables.h array.h hashlib.h
+subst.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+subst.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+subst.o: flags.h jobs.h siglist.h execute_cmd.h filecntl.h trap.h pathexp.h
+subst.o: mailcheck.h input.h $(DEFSRC)/getopt.h $(DEFSRC)/common.h
+subst.o: bashline.h bashhist.h ${GLOB_LIBSRC}/fnmatch.h
+test.o: bashtypes.h posixstat.h filecntl.h
+test.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+test.o: general.h bashtypes.h variables.h array.h hashlib.h
+test.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+test.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+test.o: ${DEFSRC}/common.h
+trap.o: config.h bashtypes.h trap.h bashansi.h ansi_stdlib.h
+trap.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+trap.o: general.h bashtypes.h variables.h array.h hashlib.h
+trap.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+trap.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+trap.o: signames.h $(DEFSRC)/common.h
+unwind_prot.o: config.h bashtypes.h bashansi.h ansi_stdlib.h command.h stdc.h
+unwind_prot.o: general.h unwind_prot.h quit.h sig.h
+variables.o: config.h bashtypes.h posixstat.h bashansi.h ansi_stdlib.h
+variables.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+variables.o: general.h bashtypes.h variables.h array.h hashlib.h
+variables.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+variables.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+varibales.o: flags.h execute_cmd.h mailcheck.h input.h $(DEFSRC)/common.h
+variables.o: bashhist.h
+version.o: version.h .build
+vprint.o: config.h
+xmalloc.o: config.h bashtypes.h ansi_stdlib.h error.h
 
-locale.o: bashintl.h bashansi.h config.h bashtypes.h shell.h
-locale.o: bashjmp.h command.h general.h error.h variables.h quit.h
-locale.o: maxpath.h unwind_prot.h dispose_cmd.h make_cmd.h subst.h
-locale.o: sig.h pathnames.h externs.h
+# job control
 
+jobs.o: config.h bashtypes.h trap.h filecntl.h input.h bashtty.h
+jobs.o: bashansi.h ansi_stdlib.h
+jobs.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+jobs.o: general.h bashtypes.h variables.h array.h hashlib.h
+jobs.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+jobs.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+jobs.o: jobs.h flags.h $(DEFSRC)/common.h $(DEFDIR)/builtext.h
+nojobs.o: config.h bashtypes.h filecntl.h bashjmp.h posixjmp.h
+nojobs.o: command.h stdc.h general.h jobs.h quit.h siglist.h externs.h
+nojobs.o: sig.h error.h bashtty.h input.h
 
-alias.o: ansi_stdlib.h
-bashline.o: ansi_stdlib.h
-variables.o: ansi_stdlib.h
-shell.o: ansi_stdlib.h
-error.o: ansi_stdlib.h
-hash.o: ansi_stdlib.h
-signames.o: ansi_stdlib.h
-expr.o: ansi_stdlib.h
-general.o: ansi_stdlib.h
-input.o: ansi_stdlib.h
+# shell features that may be compiled in
 
-jobs.o: jobs.c
-nojobs.o: nojobs.c
+array.o: config.h bashansi.h ansi_stdlib.h
+array.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+array.o: general.h bashtypes.h variables.h array.h hashlib.h
+array.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+array.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+array.o: $(DEFSRC)/common.h
+braces.o: config.h bashansi.h ansi_stdlib.h
+braces.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+braces.o: general.h bashtypes.h variables.h array.h hashlib.h
+braces.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+braces.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+alias.o: config.h bashansi.h ansi_stdlib.h command.h stdc.h
+alias.o: general.h bashtypes.h externs.h alias.h
 
-array.o: general.h shell.h bashjmp.h sig.h variables.h quit.h config.h
-array.o: command.h error.h maxpath.h unwind_prot.h dispose_cmd.h memalloc.h
-array.o: make_cmd.h subst.h externs.h
-array.o: array.h stdc.h $(DEFSRC)/common.h
+# library support files
 
-braces.o: general.h shell.h bashjmp.h sig.h variables.h quit.h config.h
-braces.o: dispose_cmd.h make_cmd.h subst.h externs.h memalloc.h
-braces.o: maxpath.h unwind_prot.h command.h stdc.h
-
-bracecomp.o: bracecomp.c
-bracecomp.o: shell.h bashjmp.h sig.h command.h hashlib.h builtins.h general.h
+bashhist.o: config.h bashtypes.h bashansi.h ansi_stdlib.h posixstat.h
+bashhist.o: filecntl.h
+bashhist.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+bashhist.o: general.h bashtypes.h variables.h array.h hashlib.h
+bashhist.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+bashhist.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+bashhist.o: flags.h input.h parser.h pathexp.h $(DEFSRC)/common.h bashline.h
+bashhist.o: $(GLOB_LIBSRC)/fnmatch.h
+bashline.o: config.h bashtypes.h posixstat.h bashansi.h ansi_stdlib.h
+bashline.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+bashline.o: general.h bashtypes.h variables.h array.h hashlib.h
+bashline.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+bashline.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+bashline.o: builtins.h bashhist.h bashline.h execute_cmd.h pathexp.h
+bashline.o: $(DEFSRC)/common.h $(GLOB_LIBSRC)/glob.h alias.h
+bracecomp.o: config.h bashansi.h ansi_stdlib.h
+bracecomp.o: shell.h config.h bashjmp.h posixjmp.h command.h stdc.h error.h
+bracecomp.o: general.h bashtypes.h variables.h array.h hashlib.h
+bracecomp.o: quit.h maxpath.h unwind_prot.h dispose_cmd.h
+bracecomp.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+bracecomp.o: shell.h bashjmp.h posixjmp.h sig.h command.h hashlib.h builtins.h general.h
 bracecomp.o: quit.h alias.h config.h  variables.h
 bracecomp.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-bracecomp.o: $(RL_LIBSRC)/readline.h
 
-bashline.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h builtins.h
-bashline.o: general.h variables.h config.h memalloc.h quit.h alias.h
-bashline.o: dispose_cmd.h make_cmd.h subst.h externs.h config.h bashline.h
-bashline.o: $(GLOB_LIBSRC)/glob.h pathexp.h execute_cmd.h
+# library dependencies
 
-bashhist.o: config.h bashansi.h posixstat.h filecntl.h parser.h
-bashhist.o: shell.h bashjmp.h sig.h command.h stdc.h hashlib.h builtins.h
-bashhist.o: general.h variables.h memalloc.h quit.h alias.h execute_cmd.h
-bashhist.o: dispose_cmd.h make_cmd.h subst.h externs.h flags.h
-
-bashline.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+bashline.o: $(RL_LIBSRC)/rlconf.h
 bashline.o: $(RL_LIBSRC)/keymaps.h
-y.tab.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/chardefs.h
-y.tab.o: $(RL_LIBSRC)/readline.h
+bashline.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+bracecomp.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/chardefs.h
+bracecomp.o: $(RL_LIBSRC)/readline.h
+y.tab.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+subst.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
 
+shell.o: $(HIST_LIBSRC)/history.h
 subst.o: $(HIST_LIBSRC)/history.h
 bashline.o: $(HIST_LIBSRC)/history.h
 bashhist.o: $(HIST_LIBSRC)/history.h
 y.tab.o: $(HIST_LIBSRC)/history.h
-
-subst.o: $(GLOB_LIBSRC)/fnmatch.h
-execute_cmd.o: $(GLOB_LIBSRC)/fnmatch.h
-bashhist.o: $(GLOB_LIBSRC)/fnmatch.h
 
 execute_cmd.o: $(TILDE_LIBSRC)/tilde.h
 general.o: $(TILDE_LIBSRC)/tilde.h
@@ -748,147 +853,182 @@ shell.o: $(TILDE_LIBSRC)/tilde.h
 subst.o: $(TILDE_LIBSRC)/tilde.h
 variables.o: $(TILDE_LIBSRC)/tilde.h
 
-builtins/common.o: shell.h bashjmp.h sig.h command.h config.h memalloc.h
-builtins/common.o: variables.h input.h $(DEFSRC)/hashcom.h siglist.h
+# XXX - dependencies checked through here
+
+# builtin c sources
+builtins/bashgetopt.o: config.h bashansi.h ansi_stdlib.h
+builtins/bashgetopt.o: shell.h config.h bashjmp.h command.h general.h error.h
+builtins/bashgetopt.o: variables.h quit.h maxpath.h unwind_prot.h dispose_cmd.h
+builtins/bashgetopt.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+builtins/bashgetopt.o: $(DEFSRC)/common.h
+builtins/common.o: bashtypes.h posixstat.h bashansi.h ansi_stdlib.h
+builtins/common.o: shell.h config.h bashjmp.h posixjmp.h sig.h command.h
+builtins/common.o: memalloc.h variables.h input.h siglist.h
 builtins/common.o: quit.h unwind_prot.h maxpath.h jobs.h builtins.h
 builtins/common.o: dispose_cmd.h make_cmd.h subst.h externs.h bashhist.h
-builtins/common.o: execute_cmd.h stdc.h general.h error.h unwind_prot.h
+builtins/common.o: execute_cmd.h stdc.h general.h error.h pathnames.h
+builtins/common.o: ${DEFDIR}/builtext.h
+builtins/evalfile.o: bashtypes.h posixstat.h filecntl.h bashansi.h ansi_stdlib.h
+builtins/evalfile.o: shell.h config.h bashjmp.h command.h general.h error.h
+builtins/evalfile.o: variables.h quit.h maxpath.h unwind_prot.h dispose_cmd.h
+builtins/evalfile.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+builtins/evalfile.o: jobs.h builtins.h flags.h input.h execute_cmd.h
+builtins/evalfile.o: bashhist.h $(DEFSRC)/common.h
+builtins/evalstring.o: config.h bashansi.h ansi_stdlib.h
+builtins/evalstring.o: shell.h bashjmp.h posixjmp.h sig.h command.h siglist.h
+builtins/evalstring.o: memalloc.h variables.h input.h
+builtins/evalstring.o: quit.h unwind_prot.h maxpath.h jobs.h builtins.h
+builtins/evalstring.o: dispose_cmd.h make_cmd.h subst.h externs.h 
+builtins/evalstring.o: jobs.h builtins.h flags.h input.h execute_cmd.h
+builtins/evalstring.o: bashhist.h $(DEFSRC)/common.h
+builtins/getopt.o: config.h memalloc.h
+builtins/getopt.o: shell.h bashjmp.h command.h general.h error.h
+builtins/getopt.o: variables.h quit.h maxpath.h unwind_prot.h dispose_cmd.h
+builtins/getopt.o: make_cmd.h subst.h sig.h pathnames.h externs.h
+builtins/getopt.o: $(DEFSRC)/getopt.h
+builtins/mkbuiltins.o: config.h bashtypes.h posixstat.h filecntl.h
+builtins/mkbuiltins.o: bashansi.h ansi_stdlib.h
+
+# builtin def files
 builtins/alias.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/alias.o: quit.h $(DEFSRC)/common.h
-builtins/alias.o: shell.h bashjmp.h sig.h command.h stdc.h unwind_prot.h
+builtins/alias.o: shell.h bashjmp.h posixjmp.h sig.h command.h stdc.h unwind_prot.h
 builtins/alias.o: dispose_cmd.h make_cmd.h subst.h externs.h variables.h 
 builtins/bind.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/bind.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/bind.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/bind.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/bind.o: $(DEFSRC)/bashgetopt.h
 builtins/break.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/break.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/break.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/break.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/builtin.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/builtin.o: quit.h $(DEFSRC)/common.h
-builtins/builtin.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/builtin.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/builtin.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/cd.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/cd.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h
+builtins/cd.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h
 builtins/cd.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/cd.o: $(DEFSRC)/common.h quit.h 
 builtins/command.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/command.o: quit.h $(DEFSRC)/bashgetopt.h
-builtins/command.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/command.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/command.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/declare.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/declare.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/declare.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/declare.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/echo.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/echo.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/echo.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/echo.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/enable.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/enable.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/enable.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/enable.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/eval.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/eval.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h 
+builtins/eval.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h 
 builtins/eval.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/exec.o: bashtypes.h
 builtins/exec.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/exec.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h
+builtins/exec.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h
 builtins/exec.o: dispose_cmd.h make_cmd.h subst.h externs.h execute_cmd.h
 builtins/exec.o: flags.h quit.h $(DEFSRC)/common.h stdc.h
+builtins/exit.o: bashtypes.h
 builtins/exit.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/exit.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/exit.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/exit.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/fc.o: builtins.h command.h stdc.h 
+builtins/fc.o: bashtypes.h posixstat.h
+builtins/fc.o: bashansi.h ansi_stdlib.h builtins.h command.h stdc.h 
 builtins/fc.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/fc.o: flags.h unwind_prot.h variables.h shell.h bashjmp.h sig.h 
+builtins/fc.o: flags.h unwind_prot.h variables.h shell.h bashjmp.h posixjmp.h sig.h 
 builtins/fc.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h quit.h 
 builtins/fc.o: $(DEFSRC)/bashgetopt.h bashhist.h
+builtins/fg_bg.o: bashtypes.h
 builtins/fg_bg.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/fg_bg.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/fg_bg.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/fg_bg.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/getopts.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/getopts.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h 
+builtins/getopts.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h 
 builtins/getopts.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/hash.o: bashtypes.h
 builtins/hash.o: builtins.h command.h execute_cmd.h stdc.h $(DEFSRC)/common.h
 builtins/hash.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/hash.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h 
+builtins/hash.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h 
 builtins/help.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/help.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/help.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h
+builtins/help.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h
 builtins/help.o: $(GLOB_LIBSRC)/glob.h
+builtins/history.o: bashtypes.h
 builtins/history.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/history.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/history.o: filecntl.h shell.h bashjmp.h sig.h unwind_prot.h
+builtins/history.o: filecntl.h shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h
 builtins/history.o: bashhist.h variables.h 
 builtins/inlib.o: command.h config.h memalloc.h error.h general.h maxpath.h
-builtins/inlib.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h quit.h 
+builtins/inlib.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h quit.h 
 builtins/inlib.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/jobs.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/jobs.o: quit.h $(DEFSRC)/bashgetopt.h
-builtins/jobs.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/jobs.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/jobs.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/kill.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/kill.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/kill.o: shell.h bashjmp.h sig.h trap.h unwind_prot.h variables.h 
+builtins/kill.o: shell.h bashjmp.h posixjmp.h sig.h trap.h unwind_prot.h variables.h 
 builtins/let.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/let.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/let.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/let.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/pushd.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/pushd.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/pushd.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h
+builtins/pushd.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h
 builtins/pushd.o: $(DEFSRC)/common.h
 builtins/read.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/read.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/read.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/read.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/return.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/return.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/return.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/return.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/set.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/set.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/set.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h flags.h
+builtins/set.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h flags.h
 builtins/setattr.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/setattr.o: quit.h $(DEFSRC)/common.h $(DEFSRC)/bashgetopt.h
-builtins/setattr.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/setattr.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/setattr.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/shift.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/shift.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/shift.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/shift.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/shift.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/shopt.o: command.h config.h memalloc.h error.h general.h
+builtins/shopt.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h
+builtins/shopt.o: shell.h bashjmp.h posixjmp.h unwind_prot.h variables.h maxpath.h
+builtins/shopt.o: $(DEFSRC)/common.h $(DEFSRC)/bashgetopt.h
 builtins/source.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/source.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/source.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/source.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/suspend.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/suspend.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/suspend.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/suspend.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/test.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/test.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/test.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/test.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/times.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/times.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/times.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/times.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/trap.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/trap.o: quit.h $(DEFSRC)/common.h
-builtins/trap.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/trap.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/trap.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/type.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/type.o: quit.h $(DEFSRC)/common.h execute_cmd.h
-builtins/type.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h
+builtins/type.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h
 builtins/type.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
 builtins/ulimit.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/ulimit.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/ulimit.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/ulimit.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/umask.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/umask.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/umask.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h 
+builtins/umask.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h 
 builtins/wait.o: command.h config.h memalloc.h error.h general.h maxpath.h
 builtins/wait.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
-builtins/wait.o: shell.h bashjmp.h sig.h unwind_prot.h variables.h
-builtins/shopt.o: command.h config.h memalloc.h error.h general.h
-builtins/shopt.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h
-builtins/shopt.o: shell.h bashjmp.h unwind_prot.h variables.h maxpath.h
-builtins/shopt.o: $(DEFSRC)/common.h $(DEFSRC)/bashgetopt.h
+builtins/wait.o: shell.h bashjmp.h posixjmp.h sig.h unwind_prot.h variables.h
 
-builtins/bashgetopt.o: bashansi.h ansi_stdlib.h
-builtins/mkbuiltins.o: bashansi.h ansi_stdlib.h
-builtins/fc.o: bashansi.h ansi_stdlib.h
-
+# builtin library dependencies
 builtins/bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
 builtins/bind.o: $(RL_LIBSRC)/keymaps.h
 

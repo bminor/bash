@@ -117,13 +117,10 @@ command_builtin (list)
   if (use_standard_path)
     {      
       old_path = get_string_value ("PATH");
+      /* If old_path is NULL, $PATH is unset.  If so, we want to make sure
+	 it's unset after this command completes. */
       if (old_path)
 	old_path = savestring (old_path);
-      else
-	{
-	  old_path = xmalloc (1);
-	  old_path[0] = '\0';
-	}
       add_unwind_protect ((Function *)restore_path, old_path);
 
       standard_path = get_standard_path ();
@@ -162,8 +159,13 @@ static void
 restore_path (var)
      char *var;
 {
-  bind_variable ("PATH", var);
-  free (var);
+  if (var)
+    {
+      bind_variable ("PATH", var);
+      free (var);
+    }
+  else
+    unbind_variable ("PATH");
 }
 
 /* Return a value for PATH that is guaranteed to find all of the standard

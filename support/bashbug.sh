@@ -21,14 +21,33 @@ MACHTYPE="!MACHTYPE!"
 PATH=/bin:/usr/bin:/usr/local/bin:$PATH
 export PATH
 
-TEMP=/tmp/bashbug.$$
+TEMP=/tmp/bbug.$$
+
+# Figure out how to echo a string without a trailing newline
+N=`echo 'hi there\c'`
+case "$N" in
+*c)	n=-n c= ;;
+*)	n= c='\c' ;;
+esac
+
+BASHTESTERS="bash-testers@po.cwru.edu"
 
 case "$RELSTATUS" in
 alpha*|beta*)	BUGBASH=chet@po.cwru.edu ;;
 *)		BUGBASH=bug-bash@prep.ai.mit.edu ;;
 esac
 
-BUGADDR=${1-$BUGBASH}
+case "$RELSTATUS" in
+alpha*|beta*)	echo "$0: This is a testing release.  Would you like your bug report"
+		echo "$0: to be sent to the bash-testers mailing list?"
+		echo $n "$0: Send to bash-testers? $c"
+		read ans
+		case "$ans" in
+		y*|Y*)	BUGBASH="${BUGBASH},${BASHTESTERS}" ;;
+		esac ;;
+esac
+
+BUGADDR="${1-$BUGBASH}"
 
 : ${EDITOR=emacs}
 
@@ -82,25 +101,18 @@ EOF
 chmod u+w $TEMP
 cp $TEMP $TEMP.x
 
-# Figure out how to echo a string without a trailing newline
-N=`echo 'hi there\c'`
-case "$N" in
-*c)	n=-n c= ;;
-*)	n= c='\c' ;;
-esac
-
 trap '' 2		# ignore interrupts while in editor
 
 until $EDITOR $TEMP; do
 	echo "$0: editor \`$EDITOR' exited with nonzero status."
 	echo "$0: Perhaps it was interrupted."
-	echo "$0: Type `y' to give up, and lose your bug report;"
-	echo "$0: type `n' to re-enter the editor."
+	echo "$0: Type \`y' to give up, and lose your bug report;"
+	echo "$0: type \`n' to re-enter the editor."
 	echo $n "$0: Do you want to give up? $c"
 
 	read ans
 	case "$ans" in
-	Yy]*) exit 1 ;;
+	[Yy]*) exit 1 ;;
 	esac
 done
 
@@ -111,6 +123,12 @@ then
 	echo "File not changed, no bug report submitted."
 	exit
 fi
+
+echo $n "Send bug report? [y/n] $c"
+read ans
+case "$ans" in
+[Nn]*)	exit 0 ;;
+esac
 
 ${RMAIL} $BUGADDR < $TEMP || {
 	cat $TEMP >> $HOME/dead.bashbug

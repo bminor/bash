@@ -1,0 +1,60 @@
+set +o posix
+
+hash -r
+unalias -a
+
+# this should echo nothing
+type
+# this should be a usage error
+type -f ${THIS_SH}
+
+# these should behave identically
+type notthere
+command -v notthere
+
+alias m=more
+
+unset -f func 2>/dev/null
+func() { echo this is func; }
+
+type -t func
+type -t while
+type -t m
+type -t builtin
+type -t /bin/sh
+type -t ${THIS_SH}
+
+type func
+# the following two should produce identical output
+type while
+type -a while
+type m
+type builtin
+type /bin/sh
+
+command -v func
+command -V func
+command -v while
+command -V while
+# the following three lines should produce the same output
+command -v m
+alias -p
+alias m
+command -V m
+command -v builtin
+command -V builtin
+command -v /bin/sh
+command -V /bin/sh
+
+unset -f func
+type func
+unalias m
+type m
+
+hash -p /bin/sh sh
+type -p sh
+
+SHBASE=${THIS_SH##*/}
+hash -p /tmp/$SHBASE $SHBASE
+type -p $SHBASE
+type $SHBASE

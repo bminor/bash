@@ -57,6 +57,7 @@ $END
 
 #include "../shell.h"
 #include "../execute_cmd.h"
+#include "../hashcmd.h"
 
 #if defined (ALIAS)
 #include "../alias.h"
@@ -307,6 +308,7 @@ describe_command (command, verbose, all)
 	  else if (verbose == 3 || verbose == 4)
 	    printf ("%s\n", full_path);
 
+	  free (full_path);
 	  return (1);
 	}
     }

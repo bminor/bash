@@ -43,7 +43,7 @@ extern int yyparse ();
 extern int EOF_reached;
 extern int indirection_level, interactive, interactive_shell;
 extern int subshell_environment, running_under_emacs;
-extern int last_command_exit_value;
+extern int last_command_exit_value, stdin_redir;
 extern int need_here_doc;
 extern int current_command_number, current_command_line_count, line_number;
 extern char *ps1_prompt, **prompt_string_pointer;
@@ -128,6 +128,7 @@ reader_loop ()
 	      current_command_number++;
 
 	      executing = 1;
+	      stdin_redir = 0;
 	      execute_command (current_command);
 
 	    exec_done:

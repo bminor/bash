@@ -1,5 +1,5 @@
-Platform-Specific Configuration Notes
-=====================================
+Platform-Specific Configuration and Operation Notes
+===================================================
 
 1.  configure --without-gnu-malloc on:
 
@@ -10,7 +10,7 @@ Platform-Specific Configuration Notes
 
 	all machines running SunOS YP code: SunOS4, SunOS5, HP/UX
 
-	linux (optional)
+	linux (optional, but don't do it if you're using Doug Lea's malloc)
 
 	QNX 4.2
 	other OSF/1 machines (KSR/1, HP, IBM AIX/ESA)
@@ -32,11 +32,108 @@ being built and linked against, but there is only a stub file in the archive.)
 
 3.  Bash cannot be built in a directory separate from the source directory
     using configure --srcdir=... unless the version of `make' you're using
-    does $VPATH handling right.  The SunOS make, for one, does not seem to
-    do it right.  The script support/mkclone can be used to create a
-    `build tree' using symlinks to get around this.
+    does $VPATH handling right.  The script support/mkclone can be used to
+    create a `build tree' using symlinks to get around this.
 
-4.  I've had reports that username completion does not work on IRIX 5.3
-    when linking with -lnsl.  This is only a problem when you're running
-    NIS.  Editing the Makefile after configure runs and removing the
-    `-lnsl' from the assignment to `LIBS' fixes the problem.
+4.  I've had reports that username completion (as well as tilde expansion
+    and \u prompt expansion) does not work on IRIX 5.3 when linking with
+    -lnsl.  This is only a problem when you're running NIS, since
+    apparently -lnsl supports only /etc/passwd and not the NIS functions
+    for retrieving usernames and passwords.  Editing the Makefile after
+    configure runs and removing the `-lnsl' from the assignment to `LIBS'
+    fixes the problem.
+
+5.  There is a problem with Red Hat Linux's `makewhatis' script.
+    Running `makewhatis' with bash-2.0 results in error messages
+    like this:
+
+    /usr/sbin/makewhatis: cd: manpath: No such file or directory
+    /usr/sbin/makewhatis: manpath/whatis: No such file or directory
+    chmod: manpath/whatis: No such file or directory
+    /usr/sbin/makewhatis: cd: catpath: No such file or directory
+    /usr/sbin/makewhatis: catpath/whatis: No such file or directory
+    chmod: catpath/whatis: No such file or directory
+
+    The problem is with `makewhatis'.  Red Hat (and possibly other
+    Linux distributors) uses a construct like this in the code:
+
+        eval path=$"$pages"path
+
+    to do indirect variable expansion.  This `happened to work' in
+    bash-1.14 and previous versions, but that was more an accident
+    of implementation than anything else -- it was never supported
+    and certainly is not portable.
+
+    Bash-2.0 has a new feature that gives a new meaning to $"...".
+    This is explained more completely in item 1 in the COMPAT file.
+
+    The three lines in the `makewhatis' script that need to be changed
+    look like this:
+
+             eval $topath=$"$topath":$name
+    [...]
+       eval path=$"$pages"path
+    [...]
+    eval path=$"$pages"path
+
+    The portable way to write this code is
+
+             eval $topath="\$$topath":$name
+       eval path="\$$pages"path
+    eval path="\$$pages"path
+
+    You could also experiment with another new bash feature: ${!var}.
+    This does indirect variable expansion, making the use of eval
+    unnecessary.
+
+6.  There is a problem with syslogd on many Linux distributions (Red Hat
+    and Slackware are two that I have received reports about).  syslogd
+    sends a SIGINT to its parent process, which is waiting for the daemon
+    to finish its initialization.  The parent process then dies due to
+    the SIGINT, and bash reports it, causing unexpected console output
+    while the system is booting that looks something like
+
+	starting daemons: syslogd/etc/rc.d/rc.M: line 29: 38 Interrupt ${NET}/syslogd
+
+    Bash-2.0 reports events such as processes dying in scripts due to
+    signals when the standard output is a tty.  Bash-1.14.x and previous
+    versions did not report such events.
+
+    This should probably be reported as a bug to whatever Linux distributor
+    people see the problem on.  In my opinion, syslogd should be changed to
+    use some other method of communication, or the wrapper function (which
+    appeared to be `daemon' when I looked at it some time ago) or script
+    (which appeared to be `syslog') should catch SIGINT, since it's an
+    expected event, and exit cleanly.
+
+7.  Several people have reported that `dip' (a program for SLIP/PPP
+    on Linux) does not work with bash-2.0 installed as /bin/sh.
+
+    I don't run any Linux boxes myself, and do not have the dip
+    code handy to look at, but the `problem' with bash-2.0, as
+    it has been related to me, is that bash requires the `-p'
+    option to be supplied at invocation if it is to run setuid
+    or setgid. 
+
+    This means, among other things, that setuid or setgid programs
+    which call system(3) (a horrendously bad practice in any case)
+    relinquish their setuid/setgid status in the child that's forked
+    to execute /bin/sh. 
+
+    The following is an *unofficial* patch to bash-2.0 that causes it
+    to not require `-p' to run setuid or setgid if invoked as `sh'.
+    It has been reported to work on Linux.  It will make your system
+    vulnerable to bogus system(3) calls in setuid executables.
+
+--- ../bash-2.0.orig/shell.c    Wed Dec 18 14:16:30 1996
++++ shell.c     Fri Mar  7 13:12:03 1997
+@@ -347,7 +347,7 @@
+   if (posixly_correct)
+     posix_initialize (posixly_correct);
+
+-  if (running_setuid && privileged_mode == 0)
++  if (running_setuid && privileged_mode == 0 && act_like_sh == 0)
+     disable_priv_mode ();
+
+   /* Need to get the argument to a -c option processed in the
+

@@ -6,6 +6,7 @@
 # usage: vtree [-a] [dir]
 #
 # Original posted to Usenet sometime in February, 1996
+# I believe that the original author is Brian S. Hiles <bsh29256@atc.fhda.edu>
 #
 usage()
 {
@@ -32,10 +33,10 @@ do
 	echo -n "$PWD"
 
 	du $andfiles | sort +1f | sed \
-		's/\([^	]*\)	\(.*\)/\2  (\1)/
-		'"s#^$1##"'
-		s#[^/]*/\([^/]*\)$#|____\1#
-		s#[^/]*/#|    #g'
+		-e 's/\([^	]*\)	\(.*\)/\2  (\1)/' \
+		-e "s#^$1##" \
+		-e 's#[^/]*/\([^/]*\)$#|____\1#' \
+		-e 's#[^/]*/#|    #g'
 	
 	[ $# -gt 1 ] && echo 
 	shift

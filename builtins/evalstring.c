@@ -40,6 +40,8 @@
 
 #include "common.h"
 
+extern void run_trap_cleanup ();
+
 extern int interactive, interactive_shell;
 extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
@@ -62,14 +64,19 @@ parse_and_execute_cleanup ()
 }
 
 /* Parse and execute the commands in STRING.  Returns whatever
-   execute_command () returns.  This frees STRING.  INTERACT is
-   the new value for `interactive' while the commands are being
-   executed.  A value of -1 means don't change it. */
+   execute_command () returns.  This frees STRING.  FLAGS is a
+   flags word; look in common.h for the possible values.  Actions
+   are:
+   	(flags & SEVAL_NONINT) -> interactive = 0;
+   	(flags & SEVAL_INTERACT) -> interactive = 1;
+   	(flags & SEVAL_NOHIST) -> call bash_history_disable ()
+*/
+
 int
-parse_and_execute (string, from_file, interact)
+parse_and_execute (string, from_file, flags)
      char *string;
      char *from_file;
-     int interact;
+     int flags;
 {
   int code;
   volatile int should_jump_to_top_level, last_result;
@@ -83,17 +90,17 @@ parse_and_execute (string, from_file, interact)
   unwind_protect_jmp_buf (top_level);
   unwind_protect_int (indirection_level);
   unwind_protect_int (line_number);
-  if (interact != -1 && interactive != interact)
+  if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 
 #if defined (HISTORY)
+  unwind_protect_int (remember_on_history);	/* can be used in scripts */
+#  if defined (BANG_HISTORY)
   if (interactive_shell)
     {
-      unwind_protect_int (remember_on_history);
-#  if defined (BANG_HISTORY)
       unwind_protect_int (history_expansion_inhibited);
-#  endif /* BANG_HISTORY */
     }
+#  endif /* BANG_HISTORY */
 #endif /* HISTORY */
 
   add_unwind_protect (pop_stream, (char *)NULL);
@@ -104,11 +111,12 @@ parse_and_execute (string, from_file, interact)
   parse_and_execute_level++;
   push_stream (1);	/* reset the line number */
   indirection_level++;
-  if (interact != -1)
-    interactive = interact;
+  if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
+    interactive = (flags & SEVAL_NONINT) ? 0 : 1;
 
 #if defined (HISTORY)
-  bash_history_disable ();
+  if (flags & SEVAL_NOHIST)
+    bash_history_disable ();
 #endif /* HISTORY */
 
   code = should_jump_to_top_level = 0;
@@ -177,6 +185,7 @@ parse_and_execute (string, from_file, interact)
 	      bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
 	      begin_unwind_frame ("pe_dispose");
 	      add_unwind_protect (dispose_fd_bitmap, bitmap);
+	      add_unwind_protect (dispose_command, command);	/* XXX */
 
 	      global_command = (COMMAND *)NULL;
 

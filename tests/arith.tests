@@ -1,3 +1,4 @@
+set +o posix
 declare -i iv jv
 
 iv=$(( 3 + 5 * 32 ))
@@ -156,3 +157,59 @@ let 'rv = 7 + (43 * 6'
 declare -i i
 i=0#4
 i=2#110#11
+
+((echo abc; echo def;); echo ghi)
+
+if (((4+4) + (4 + 7))); then
+	echo ok
+fi
+
+(())	# make sure the null expression works OK
+
+a=(0 2 4 6)
+echo $(( a[1] + a[2] ))
+echo $(( (a[1] + a[2]) == a[3] ))
+(( (a[1] + a[2]) == a[3] )) ; echo $?
+
+# test pushing and popping the expression stack
+unset A
+A="4 + "
+echo $(( ( 4 + A ) + 4 ))
+A="3 + 5"
+echo $(( ( 4 + A ) + 4 ))
+
+# badly-formed conditional expressions
+echo $(( 4 ? : $A ))
+echo $(( 1 ? 20 ))
+echo $(( 4 ? 20 : ))
+
+# precedence and short-circuit evaluation
+B=9
+echo $B
+
+echo $(( 0 && B=42 ))
+echo $B
+
+echo $(( 1 || B=88 ))
+echo $B
+
+echo $(( 0 && (B=42) ))
+echo $B
+
+echo $(( (${$} - $$) && (B=42) ))
+echo $B
+
+echo $(( 1 || (B=88) ))
+echo $B
+
+# until command with (( )) command
+x=7
+
+echo $x
+until (( x == 4 ))
+do
+	echo $x
+	x=4
+done
+
+echo $x

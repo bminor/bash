@@ -36,7 +36,7 @@ $END
 
 #include <config.h>
 
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include "../posixstat.h"
 #include <signal.h>
 #include <errno.h>
@@ -65,7 +65,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int interactive, subshell_environment;
+extern int interactive, interactive_shell, subshell_environment;
 extern REDIRECT *redirection_undo_list;
 
 int no_exit_on_failed_exec;
@@ -90,7 +90,7 @@ exec_builtin (list)
 {
   int exit_value = EXECUTION_FAILURE;
   int cleanenv, login, opt;
-  char *argv0, *command, **args, **env, *newname;
+  char *argv0, *command, **args, **env, *newname, *com2;
 
   cleanenv = login = 0;
   argv0 = (char *)NULL;
@@ -143,7 +143,13 @@ exec_builtin (list)
       goto failed_exec;
     }
 
-  command = full_pathname (command);
+  com2 = full_pathname (command);
+  if (com2)
+    {
+      if (command != args[0])
+	free (command);
+      command = com2;
+    }
 
   if (argv0)
     {
@@ -172,7 +178,8 @@ exec_builtin (list)
     }
 
 #if defined (HISTORY)
-  maybe_save_shell_history ();
+  if (interactive_shell && subshell_environment == 0)
+    maybe_save_shell_history ();
 #endif /* HISTORY */
 
   restore_original_signals ();
@@ -200,6 +207,9 @@ failed_exec:
 
   if (subshell_environment || (interactive == 0 && no_exit_on_failed_exec == 0))
     exit_shell (exit_value);
+
+  if (args)
+    free_array (args);
 
   initialize_traps ();
   reinitialize_signals ();

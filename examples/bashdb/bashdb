@@ -25,5 +25,9 @@ _libdir=.
 _dbgfile=$_tmpdir/bashdb$$		#temp file for script being debugged
 
 cat $_libdir/bashdb.pre $_guineapig > $_dbgfile
-exec bash $_dbgfile $_guineapig $_tmpdir $_libdir "$@"
+if [ -f "$BASH" ]; then
+	exec $BASH $_dbgfile $_guineapig $_tmpdir $_libdir "$@"
+else
+	exec bash $_dbgfile $_guineapig $_tmpdir $_libdir "$@"
+fi
 # end of bashdb

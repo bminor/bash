@@ -151,6 +151,7 @@ remove_alias (name)
     {
       free_alias_data (elt->data);
       free (elt->key);		/* alias name */
+      free (elt);		/* XXX */
       return (aliases->nentries);
     }
   return (-1);
@@ -164,7 +165,7 @@ delete_all_aliases ()
     return;
 
   flush_hash_table (aliases, free_alias_data);
-  free (aliases);
+  dispose_hash_table (aliases);
   aliases = (HASH_TABLE *)NULL;
 }
 
@@ -246,6 +247,10 @@ alias_expand_word (s)
   r = find_alias (s);
   return (r ? savestring (r->value) : (char *)NULL);
 }
+
+/* Readline support functions -- expand all aliases in a line. */
+
+#if defined (READLINE)
 
 /* Return non-zero if CHARACTER is a member of the class of characters
    that are self-delimiting in the shell (this really means that these
@@ -529,4 +534,5 @@ alias_expand (string)
       command_word = 0;
     }
 }
+#endif /* READLINE */
 #endif /* ALIAS */

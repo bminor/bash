@@ -1,7 +1,7 @@
 Basic Installation
 ==================
 
-These are generic installation instructions for Bash.
+These are installation instructions for Bash.
 
 The `configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
@@ -24,7 +24,15 @@ they can be considered for the next release.
 The file `configure.in' is used to create `configure' by a program
 called Autoconf.  You only need `configure.in' if you want to change it
 or regenerate `configure' using a newer version of Autoconf.  If you do
-this, make sure you are using Autoconf version 2.9 or newer.
+this, make sure you are using Autoconf version 2.10 or newer.
+
+If you need to change `configure.in' or regenerate `configure', you
+will need to create two files: `_distribution' and `_patchlevel'.
+`_distribution' should contain the major and minor version numbers of
+the Bash distribution, for example `2.01'.  `_patchlevel' should
+contain the patch level of the Bash distribution, `0' for example.  The
+script `support/mkconffiles' has been provided to automate the creation
+of these files.
 
 The simplest way to compile Bash is:
 
@@ -179,21 +187,27 @@ configure Bash without a feature that is enabled by default, use
 Here is a complete list of the `--enable-' and `--with-' options that
 the Bash `configure' recognizes.
 
-`--with-gnu-malloc'
-     Use the GNU version of `malloc' in `lib/malloc/malloc.c'.  This is
-     not the same `malloc' that appears in GNU libc, but an older
-     version derived from the 4.2 BSD `malloc'.  This `malloc' is very
-     fast, but wastes a lot of space.  This option is enabled by
-     default.  The `NOTES' file contains a list of systems for which
-     this should be turned off.
+`--with-afs'
+     Define if you are using the Andrew File System from Transarc.
+
+`--with-curses'
+     Use the curses library instead of the termcap library.  This should
+     be supplied if your system has an inadequate or incomplete termcap
+     database.
 
 `--with-glibc-malloc'
      Use the GNU libc version of `malloc' in `lib/malloc/gmalloc.c'.
      This is somewhat slower than the default `malloc', but wastes
      considerably less space.
 
-`--with-afs'
-     Define if you are using the Andrew File System from Transarc.
+`--with-gnu-malloc'
+     Use the GNU version of `malloc' in `lib/malloc/malloc.c'.  This is
+     not the same `malloc' that appears in GNU libc, but an older
+     version derived from the 4.2 BSD `malloc'.  This `malloc' is very
+     fast, but wastes a lot of space.  This option is enabled by
+     default.  The `NOTES' file contains a list of systems for which
+     this should be turned off, and `configure' disables this option
+     automatically for a number of systems.
 
 `--with-purify'
      Define this to use the Purify memory allocation checker from Pure
@@ -211,32 +225,48 @@ All of the following options except for `disabled-builtins' and
 `usg-echo-default' are enabled by default, unless the operating system
 does not provide the necessary support.
 
-`--enable-job-control'
-     This enables job control features, if the OS supports them.
-
 `--enable-alias'
      Allow alias expansion and include the `alias' and `unalias'
      builtins.
 
-`--enable-readline'
-     Include support for command-line editing and history with the Bash
-     version of the Readline library.
-
-`--enable-history'
-     Include command history and the `fc' and `history' builtin
-     commands.
+`--enable-array-variables'
+     Include support for one-dimensional array shell variables.
 
 `--enable-bang-history'
      Include support for `csh'-like history substitution.
+
+`--enable-brace-expansion'
+     Include `csh'-like brace expansion ( `b{a,b}c' ==> `bac bbc' ).
+
+`--enable-command-timing'
+     Include support for recognizing `time' as a reserved word and for
+     displaying timing statistics for the pipeline following `time'.
+     This allows pipelines as well as shell builtins and functions to
+     be timed.
 
 `--enable-directory-stack'
      Include support for a `csh'-like directory stack and the `pushd',
      `popd', and `dirs' builtins.
 
-`--enable-restricted'
-     Include support for a "restricted shell".  If this is enabled,
-     Bash, when called as `rbash', enters a restricted mode.  See *Note
-     The Restricted Shell::, for a description of restricted mode.
+`--enable-disabled-builtins'
+     Allow builtin commands to be invoked via `builtin xxx' even after
+     `xxx' has been disabled using `enable -n xxx'.  See *Note Bash
+     Builtins::, for details of the `builtin' and `enable' builtin
+     commands.
+
+`--enable-dparen-arithmetic'
+     Include support for the `ksh' `((...))' command.
+
+`--enable-help-builtin'
+     Include the `help' builtin, which displays help on shell builtins
+     and variables.
+
+`--enable-history'
+     Include command history and the `fc' and `history' builtin
+     commands.
+
+`--enable-job-control'
+     This enables job control features, if the OS supports them.
 
 `--enable-process-substitution'
      This enables process substitution (*note Process Substitution::.)
@@ -247,34 +277,18 @@ does not provide the necessary support.
      characters in the `$PS1', `$PS2', `$PS3', and `$PS4' prompt
      strings.
 
+`--enable-readline'
+     Include support for command-line editing and history with the Bash
+     version of the Readline library.
+
+`--enable-restricted'
+     Include support for a "restricted shell".  If this is enabled,
+     Bash, when called as `rbash', enters a restricted mode.  See *Note
+     The Restricted Shell::, for a description of restricted mode.
+
 `--enable-select'
      Include the `ksh' `select' builtin, which allows the generation of
      simple menus.
-
-`--enable-help-builtin'
-     Include the `help' builtin, which displays help on shell builtins
-     and variables.
-
-`--enable-array-variables'
-     Include support for one-dimensional array shell variables.
-
-`--enable-dparen-arithmetic'
-     Include support for the `ksh' `((...))' command.
-
-`--enable-brace-expansion'
-     Include `csh'-like brace expansion ( `b{a,b}c' ==> `bac bbc' ).
-
-`--enable-disabled-builtins'
-     Allow builtin commands to be invoked via `builtin xxx' even after
-     `xxx' has been disabled using `enable -n xxx'.  See *Note Bash
-     Builtins::, for details of the `builtin' and `enable' builtin
-     commands.
-
-`--enable-command-timing'
-     Include support for recognizing `time' as a reserved word and for
-     displaying timing statistics for the pipeline following `time'.
-     This allows pipelines as well as shell builtins and functions to
-     be timed.
 
 `--enable-usg-echo-default'
      Make the `echo' builtin expand backslash-escaped characters by

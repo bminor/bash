@@ -28,12 +28,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
-
 #include "shell.h"
 
 WORD_DESC *
@@ -118,6 +112,10 @@ copy_redirect (redirect)
     case r_duplicating_input_word:
     case r_duplicating_output_word:
       new_redirect->redirectee.filename = copy_word (redirect->redirectee.filename);
+      break;
+    case r_duplicating_input:
+    case r_duplicating_output:
+    case r_close_this:
       break;
     }
   return (new_redirect);

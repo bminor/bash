@@ -74,7 +74,11 @@ what you give them.   Help stamp out software-hoarding!  */
 #endif
 
 /* Determine which kind of system this is.  */
-#include <sys/types.h>
+#if defined (SHELL)
+#  include "bashtypes.h"
+#else
+#  include <sys/types.h>
+#endif
 #include <signal.h>
 
 /* Define getpagesize () if the system does not.  */
@@ -92,6 +96,20 @@ what you give them.   Help stamp out software-hoarding!  */
 #if !defined (RLIMIT_DATA)
 #  undef HAVE_RESOURCE
 #endif
+
+#if __GNUC__ > 1
+#  define FASTCOPY(s, d, n)  __builtin_memcpy (d, s, n)
+#else /* !__GNUC__ */
+#  if !defined (HAVE_BCOPY)
+#    if !defined (HAVE_MEMMOVE)
+#      define FASTCOPY(s, d, n)  memcpy (d, s, n)
+#    else
+#      define FASTCOPY(s, d, n)  memmove (d, s, n)
+#    endif /* !HAVE_MEMMOVE */
+#  else /* HAVE_BCOPY */
+#    define FASTCOPY(s, d, n)  bcopy (s, d, n)
+#  endif /* HAVE_BCOPY */
+#endif /* !__GNUC__ */
 
 #if !defined (NULL)
 #  define NULL 0
@@ -138,10 +156,10 @@ struct mhead {
 	char     mh_index;	/* index in nextf[] */
 /* Remainder are valid only when block is allocated */
 	unsigned short mh_size;	/* size, if < 0x10000 */
-#ifdef rcheck
+#ifdef RCHECK
 	unsigned int mh_nbytes;	/* number of bytes allocated */
 	int      mh_magic4;	/* should be == MAGIC4 */
-#endif /* rcheck */
+#endif /* RCHECK */
 };
 
 /* Access free-list pointer of a block.
@@ -154,10 +172,12 @@ struct mhead {
 #define CHAIN(a) \
   (*(struct mhead **) (sizeof (char *) + (char *) (a)))
 
-#ifdef rcheck
+#ifdef RCHECK
 #  include <stdio.h>
 #  if !defined (botch)
 #    define botch(x) abort ()
+#  else
+extern void botch();
 #  endif /* botch */
 
 #  if !defined (__STRING)
@@ -178,10 +198,10 @@ struct mhead {
 #  define MAGIC4 0x55555555
 #  define ASSERT(p) if (!(p)) botch(__STRING(p)); else
 #  define EXTRA  4		/* 4 bytes extra for MAGIC1s */
-#else /* !rcheck */
+#else /* !RCHECK */
 #  define ASSERT(p)
 #  define EXTRA  0
-#endif /* rcheck */
+#endif /* RCHECK */
 
 /* nextf[i] is free list of blocks of size 2**(i + 3)  */
 
@@ -441,15 +461,15 @@ malloc (n)		/* get a block */
   /* If not for this check, we would gobble a clobbered free chain ptr */
   /* and bomb out on the NEXT allocate of this size block */
   if (p -> mh_alloc != ISFREE || p -> mh_index != nunits)
-#ifdef rcheck
+#ifdef RCHECK
     botch ("block on free list clobbered");
-#else /* not rcheck */
+#else /* not RCHECK */
     abort ();
-#endif /* not rcheck */
+#endif /* not RCHECK */
 
   /* Fill in the info, and if range checking, set up the magic numbers */
   p -> mh_alloc = ISALLOC;
-#ifdef rcheck
+#ifdef RCHECK
   p -> mh_nbytes = n;
   p -> mh_magic4 = MAGIC4;
   {
@@ -457,9 +477,9 @@ malloc (n)		/* get a block */
 
     *m++ = MAGIC1, *m++ = MAGIC1, *m++ = MAGIC1, *m = MAGIC1;
   }
-#else /* not rcheck */
+#else /* not RCHECK */
   p -> mh_size = n;
-#endif /* not rcheck */
+#endif /* not RCHECK */
 #ifdef MEMSCRAMBLE
   zmemset ((char *)(p + 1), 0xdf, n);	/* scramble previous contents */
 #endif
@@ -485,17 +505,19 @@ free (mem)
 
     if (p -> mh_alloc == ISMEMALIGN)
       {
-#ifdef rcheck
+#ifdef RCHECK
 	ap -= p->mh_nbytes;
+#else
+	ap -= p->mh_size;	/* XXX */
 #endif
 	p = (struct mhead *) ap - 1;
       }
 
-#ifndef rcheck
+#ifndef RCHECK
     if (p -> mh_alloc != ISALLOC)
       abort ();
 
-#else /* rcheck */
+#else /* RCHECK */
     if (p -> mh_alloc != ISALLOC)
       {
 	if (p -> mh_alloc == ISFREE)
@@ -508,17 +530,17 @@ free (mem)
     ap += p -> mh_nbytes;
     ASSERT (*ap++ == MAGIC1); ASSERT (*ap++ == MAGIC1);
     ASSERT (*ap++ == MAGIC1); ASSERT (*ap   == MAGIC1);
-#endif /* rcheck */
+#endif /* RCHECK */
   }
 #ifdef MEMSCRAMBLE
   {
     register int n;
     
-#ifdef rcheck
+#ifdef RCHECK
     n = p->mh_nbytes;
-#else /* not rcheck */
+#else /* not RCHECK */
     n = p->mh_size;
-#endif /* not rcheck */
+#endif /* not RCHECK */
     zmemset (mem, 0xcf, n);
   }
 #endif
@@ -557,19 +579,19 @@ realloc (mem, n)
   p--;
   nunits = p -> mh_index;
   ASSERT (p -> mh_alloc == ISALLOC);
-#ifdef rcheck
+#ifdef RCHECK
   ASSERT (p -> mh_magic4 == MAGIC4);
   {
     register char *m = mem + (tocopy = p -> mh_nbytes);
     ASSERT (*m++ == MAGIC1); ASSERT (*m++ == MAGIC1);
     ASSERT (*m++ == MAGIC1); ASSERT (*m   == MAGIC1);
   }
-#else /* not rcheck */
+#else /* not RCHECK */
   if (p -> mh_index >= 13)
     tocopy = (1 << (p -> mh_index + 3)) - sizeof *p;
   else
     tocopy = p -> mh_size;
-#endif /* not rcheck */
+#endif /* not RCHECK */
 
   /* See if desired size rounds to same power of 2 as actual size. */
   nbytes = (n + sizeof *p + EXTRA + 7) & ~7;
@@ -577,15 +599,15 @@ realloc (mem, n)
   /* If ok, use the same block, just marking its size as changed.  */
   if (nbytes > (4 << nunits) && nbytes <= (8 << nunits))
     {
-#ifdef rcheck
+#ifdef RCHECK
       register char *m = mem + tocopy;
       *m++ = 0;  *m++ = 0;  *m++ = 0;  *m++ = 0;
       p-> mh_nbytes = n;
       m = mem + n;
       *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;
-#else /* not rcheck */
+#else /* not RCHECK */
       p -> mh_size = n;
-#endif /* not rcheck */
+#endif /* not RCHECK */
       return mem;
     }
 
@@ -596,7 +618,7 @@ realloc (mem, n)
 
     if ((new = malloc (n)) == 0)
       return 0;
-    bcopy (mem, new, tocopy);
+    FASTCOPY (mem, new, tocopy);
     free (mem);
     return new;
   }

@@ -20,21 +20,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "config.h"
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
-
-#if defined (HAVE_STDLIB_H)
-#  include <stdlib.h>
-#else
-#  include "ansi_stdlib.h"
-#endif /* HAVE_STDLIB_H */
+#include "bashansi.h"
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+
+#include <stdio.h>
 
 #include "shell.h"
 #include "hashlib.h"
@@ -201,6 +193,9 @@ flush_hash_table (table, free_data)
   int i;
   register BUCKET_CONTENTS *bucket, *item;
 
+  if (table == 0)
+    return;
+
   for (i = 0; i < table->nbuckets; i++)
     {
       bucket = table->bucket_array[i];
@@ -221,6 +216,15 @@ flush_hash_table (table, free_data)
     }
 }
 
+/* Free the hash table pointed to by TABLE. */
+void
+dispose_hash_table (table)
+     HASH_TABLE *table;
+{
+  free (table->bucket_array);
+  free (table);
+}
+
 /* Return the bucket_contents list of bucket BUCKET in TABLE.  If
    TABLE doesn't have BUCKET buckets, return NULL. */
 #undef get_hash_bucket
@@ -234,6 +238,34 @@ get_hash_bucket (bucket, table)
   else
     return (BUCKET_CONTENTS *)NULL;
 }
+
+/* #ifdef DEBUG */
+print_table_stats (table, name)
+     HASH_TABLE *table;
+     char *name;
+{
+  register int slot, bcount;
+  register BUCKET_CONTENTS *bc;
+
+  if (name == 0)
+    name = "unknown hash table";
+
+  fprintf (stderr, "%s: %d buckets; %d items\n", name, table->nbuckets, table->nentries);
+
+  /* Print out a count of how many strings hashed to each bucket, so we can
+     see how even the distribution is. */
+  for (slot = 0; slot < table->nbuckets; slot++)
+    {
+      bc = get_hash_bucket (slot, table);
+
+      fprintf (stderr, "\tslot %3d: ", slot);
+      for (bcount = 0; bc; bc = bc->next)
+        bcount++;
+
+      fprintf (stderr, "%d\n", bcount);
+    }
+}
+/* #endif */
 
 #ifdef TEST_HASHING
 
@@ -284,25 +316,8 @@ main ()
 	}
     }
 
-  printf ("You have entered %d (%d) items.  The distribution is:\n",
-	  table->nentries, count);
-
-  /* Print out a count of how many strings hashed to each bucket, so we can
-     see how even the distribution is. */
-  for (count = 0; count < table->nbuckets; count++)
-    {
-      int bcount;
-      register BUCKET_CONTENTS *list = get_hash_bucket (count, table);
-
-      printf ("slot %3d: ", count);
-      bcount = 0;
-
-      for (bcount = 0; list; list = list->next)
-        bcount++;
-
-      printf ("%d\n", bcount);
-    }
-    exit (0);
+  print_table_stats (table, "hash test");
+  exit (0);
 }
 
 #endif /* TEST_HASHING */

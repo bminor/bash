@@ -61,14 +61,16 @@ extern int cdspelling, expand_aliases;
 extern int check_window_size;
 
 #if defined (HISTORY)
-extern int hist_verify, literal_history, command_oriented_history;
+extern int literal_history, command_oriented_history;
 extern int force_append_history;
 #endif
 
 #if defined (READLINE)
-extern int history_reediting, perform_hostname_completion;
+extern int hist_verify, history_reediting, perform_hostname_completion;
 extern void enable_hostname_completion ();
 #endif
+
+extern void set_shellopts ();
 
 static int set_interactive_comments ();
 
@@ -92,9 +94,9 @@ static struct {
 #endif
 #if defined (HISTORY)
   { "histappend", &force_append_history, (Function *)NULL },
-  { "histverify", &hist_verify, (Function *)NULL },
 #endif
 #if defined (READLINE)
+  { "histverify", &hist_verify, (Function *)NULL },
   { "hostcomplete", &perform_hostname_completion, (Function *)enable_hostname_completion },
 #endif
   { "interactive_comments", &interactive_comments, set_interactive_comments },
@@ -176,6 +178,29 @@ shopt_builtin (list)
   else						/* shopt -su */
     rval = list_some_shopts ((flags & SFLAG) ? SETOPT : UNSETOPT, flags & QFLAG);
   return (rval);
+}
+
+/* Reset the options managed by `shopt' to the values they would have at
+   shell startup. */
+void
+reset_shopt_options ()
+{
+  allow_null_glob_expansion = glob_dot_filenames = 0;
+  cdable_vars = mail_warning = 0;
+  no_exit_on_failed_exec = print_shift_error = 0;
+  check_hashed_filenames = cdspelling = expand_aliases = check_window_size = 0;
+
+  source_uses_path = promptvars = 1;
+
+#if defined (HISTORY)
+  literal_history = force_append_history = 0;
+  command_oriented_history = 1;
+#endif
+
+#if defined (READLINE)
+  hist_verify = history_reediting = 0;
+  perform_hostname_completion = 1;
+#endif
 }
 
 static int

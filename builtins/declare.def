@@ -268,7 +268,8 @@ declare_internal (list, local_var)
 	{
 	  if (offset)	/* declare -f [-rix] foo=bar */
 	    {
-	      builtin_error ("Can't use `-f' to make functions");
+	      builtin_error ("cannot use `-f' to make functions");
+	      free (name);
 	      return (EXECUTION_FAILURE);
 	    }
 	  else		/* declare -f [-rx] name [name...] */

@@ -232,6 +232,19 @@ x=/one/two/three
 expect '<three>'
 recho ${x##*/}
 
+# pattern removal of patterns that don't match
+z=abcdef
+
+expect '<abcdef>'
+recho ${z#xyz}
+expect '<abcdef>'
+recho ${z##xyz}
+
+expect '<abcdef>'
+recho ${z%xyz}
+expect '<abcdef>'
+recho ${z%%xyz}
+
 # Command substitution and the quirky differences between `` and $()
 
 expect '<\$x>'
@@ -318,8 +331,25 @@ esac
 set one two three four five
 expect '<one> <three> <five>'
 recho $1 $3 ${5} $8 ${9}
+
+# length tests on positional parameters and some special parameters
+
 expect '<5> <5>'
 recho $# ${#}
+expect '<3>'
+recho ${#1}
+expect '<1>'
+recho ${##}
+expect '<1>'
+recho ${#?}
+expect '<5>'
+recho ${#@}
+expect '<5>'
+recho ${#*}
+expect '<5>'
+recho "${#@}"
+expect '<5>'
+recho "${#*}"
 
 expect '<42>'
 recho $((28 + 14))
@@ -334,6 +364,8 @@ recho '~'
 
 expect nothing
 recho $!
+expect nothing
+recho ${!}
 
 # test word splitting of assignment statements not preceding a command
 a="a b c d e"

@@ -291,9 +291,10 @@ make_default_mailpath ()
 {
   char *mp;
 
-  mp = xmalloc (1 + sizeof (DEFAULT_MAIL_DIRECTORY) + strlen (current_user.user_name));
+  mp = xmalloc (2 + sizeof (DEFAULT_MAIL_DIRECTORY) + strlen (current_user.user_name));
   strcpy (mp, DEFAULT_MAIL_DIRECTORY);
-  strcpy (mp + sizeof (DEFAULT_MAIL_DIRECTORY) - 1, current_user.user_name);
+  mp[sizeof(DEFAULT_MAIL_DIRECTORY) - 1] = '/';
+  strcpy (mp + sizeof (DEFAULT_MAIL_DIRECTORY), current_user.user_name);
   return (mp);
 }
 

@@ -49,13 +49,16 @@ extern int errno;
 #endif /* !errno */
 
 extern int posixly_correct, interactive;
+extern int array_needs_making;
 extern char *bash_getcwd_errstr;
 
 static int change_to_directory ();
 
 static char *cdspell ();
 static int spname (), mindist (), spdist ();
-int cdspelling = 1;
+
+/* Change this to 1 to get cd spelling correction by default. */
+int cdspelling = 0;
 
 int cdable_vars;
 
@@ -118,8 +121,9 @@ static int
 bindpwd (no_symlinks)
      int no_symlinks;
 {
-  char *dirname;
-  int old_symlinks;
+  char *dirname, *pwdvar;
+  int old_symlinks, old_anm;
+  SHELL_VAR *tvar;
 
   if (no_symlinks)
     {
@@ -132,7 +136,22 @@ bindpwd (no_symlinks)
     dirname = get_working_directory ("cd");
 
   bind_variable ("OLDPWD", get_string_value ("PWD"));
-  bind_variable ("PWD", dirname);
+
+  old_anm = array_needs_making;
+  tvar = bind_variable ("PWD", dirname);
+  /* This is an efficiency hack.  If PWD is exported, we will need to
+     remake the exported environment every time we change directories.
+     If there is no other reason to make the exported environment, just
+     update PWD in place and mark the exported environment as no longer
+     needing a remake. */
+  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+    {
+      pwdvar = xmalloc (strlen (dirname) + 5);	/* 5 = "PWD" + '=' + '\0' */
+      strcpy (pwdvar, "PWD=");
+      strcpy (pwdvar + 4, dirname);
+      add_or_supercede_exported_var (pwdvar, 0);
+      array_needs_making = 0;
+    }
 
   FREE (dirname);
   return (EXECUTION_SUCCESS);
@@ -547,6 +566,9 @@ mindist(dir, guess, best)
     }
   (void)closedir(fd);
 
+  /* Don't return `.' */
+  if (best[0] == '.' && best[1] == '\0')
+    dist = 3;
   return dist;
 }
 

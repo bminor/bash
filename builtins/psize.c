@@ -28,7 +28,7 @@
 #endif
 
 #include <stdio.h>
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include <signal.h>
 #include <errno.h>
 
@@ -47,6 +47,7 @@ sigpipe (sig)
   exit (0);
 }
 
+int
 main (argc, argv)
      int argc;
      char **argv;
@@ -66,4 +67,5 @@ main (argc, argv)
       n = write (1, buf, 128);
       nw += n;
     }
+  return (0);
 }

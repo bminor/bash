@@ -40,8 +40,18 @@
 #  include <limits.h>
 #endif
 
-#if defined (HAVE_SYS_TIME_H)
+/* Some systems require this, mostly for the definition of `struct timezone'.
+   For example, Dynix/ptx has that definition in <time.h> rather than
+   sys/time.h */
+#if defined (TIME_WITH_SYS_TIME)
 #  include <sys/time.h>
+#  include <time.h>
+#else
+#  if defined (HAVE_SYS_TIME_H)
+#    include <sys/time.h>
+#  else 
+#    include <time.h>
+#  endif
 #endif
 
 #if defined (HAVE_SYS_RESOURCE_H)
@@ -62,7 +72,7 @@ extern int errno;
 
 #include "memalloc.h"
 #include "shell.h"
-#include "y.tab.h"
+#include <y.tab.h>	/* use <...> so we pick it up from the build directory */
 #include "flags.h"
 #include "builtins.h"
 #include "hashlib.h"
@@ -70,6 +80,7 @@ extern int errno;
 #include "execute_cmd.h"
 #include "trap.h"
 #include "pathexp.h"
+#include "hashcmd.h"
 
 #include "builtins/common.h"
 #include "builtins/builtext.h"	/* list of builtins */
@@ -92,7 +103,7 @@ extern int errno;
 extern int posixly_correct;
 extern int executing, breaking, continuing, loop_level;
 extern int interactive, interactive_shell, login_shell, expand_aliases;
-extern int parse_and_execute_level, running_trap;
+extern int parse_and_execute_level, running_trap, trap_line_number;
 extern int command_string_index, variable_context, line_number;
 extern int dot_found_in_search;
 extern int already_making_children;
@@ -121,7 +132,9 @@ static int execute_for_command ();
 #if defined (SELECT_COMMAND)
 static int execute_select_command ();
 #endif
+#if defined (COMMAND_TIMING)
 static int time_command ();
+#endif
 static int execute_case_command ();
 static int execute_while_command (), execute_until_command ();
 static int execute_while_or_until ();
@@ -138,8 +151,9 @@ static int execute_intern_function ();
 /* The line number that the currently executing function starts on. */
 static int function_line_number;
 
-/* Set to 1 if fd 0 was the subject of redirection to a subshell. */
-static int stdin_redir;
+/* Set to 1 if fd 0 was the subject of redirection to a subshell.  Global
+   so that reader_loop can set it to zero before executing a command. */
+int stdin_redir;
 
 /* The name of the command that is currently being executed.
    `test' needs this, for example. */
@@ -150,7 +164,14 @@ static COMMAND *currently_executing_command;
 struct stat SB;		/* used for debugging */
 
 static int special_builtin_failed;
+
+/* Spare redirector used when translating [N]>&WORD or [N]<&WORD to a new
+   redirection and when creating the redirection undo list. */
 static REDIRECTEE rd;
+
+/* Set to errno when a here document cannot be created for some reason.
+   Used to print a reasonable error message. */
+static int heredoc_errno;
 
 /* The file name which we would try to execute, except that it isn't
    possible to execute it.  This is the first file that matches the
@@ -186,7 +207,8 @@ int check_hashed_filenames;
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
-#define FD_BITMAP_DEFAULT_SIZE 32
+#define FD_BITMAP_DEFAULT_SIZE 32L
+
 /* Functions to allocate and deallocate the structures used to pass
    information from the shell to its children about file descriptors
    to close. */
@@ -242,7 +264,10 @@ executing_line_number ()
   if (executing && variable_context == 0 && currently_executing_command &&
        currently_executing_command->type == cm_simple)
     return currently_executing_command->value.Simple->line;
-  return line_number;
+  else if (running_trap)
+    return trap_line_number;
+  else
+    return line_number;
 }
 
 /* Execute the command passed in COMMAND.  COMMAND is exactly what
@@ -359,6 +384,56 @@ open_files ()
   fprintf (stderr, "\n");
 }
 
+static int
+stdin_redirects (redirs)
+     REDIRECT *redirs;
+{
+  REDIRECT *rp;
+  int n;
+
+  for (n = 0, rp = redirs; rp; rp = rp->next)
+    switch (rp->instruction)
+      {
+      case r_input_direction:
+      case r_inputa_direction:
+      case r_input_output:
+      case r_reading_until:
+      case r_deblank_reading_until:
+	n++;
+        break;
+      case r_duplicating_input:
+      case r_duplicating_input_word:
+      case r_close_this:
+	n += (rp->redirector == 0);
+        break;
+      case r_output_direction:
+      case r_appending_to:
+      case r_duplicating_output:
+      case r_err_and_out:
+      case r_output_force:
+      case r_duplicating_output_word:
+	break;
+      }
+
+  return n;
+}
+
+
+static void
+async_redirect_stdin ()
+{
+  int fd;
+
+  fd = open ("/dev/null", O_RDONLY);
+  if (fd > 0)
+    {
+      dup2 (fd, 0);
+      close (fd);
+    }
+  else if (fd < 0)
+    internal_error ("cannot redirect standard input from /dev/null: %s", strerror (errno));
+}
+
 #define DESCRIBE_PID(pid) do { if (interactive) describe_pid (pid); } while (0)
 
 /* Execute the command passed in COMMAND, perhaps doing it asynchrounously.
@@ -382,7 +457,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
      struct fd_bitmap *fds_to_close;
 {
   int exec_result, invert, ignore_return, was_debug_trap;
-  REDIRECT *my_undo_list, *exec_undo_list, *rp;
+  REDIRECT *my_undo_list, *exec_undo_list;
   pid_t last_pid;
 
   if (command == 0 || breaking || continuing || read_but_dont_execute)
@@ -393,17 +468,14 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (running_trap == 0)
     currently_executing_command = command;
 
-#if defined (COMMAND_TIMING)
-  if (command->flags & CMD_TIME_PIPELINE)
-    {
-      exec_result = time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close);
-      if (running_trap == 0)
-	currently_executing_command = (COMMAND *)NULL;
-      return (exec_result);
-    }
-#endif /* COMMAND_TIMING */
-
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
+
+  /* If we're inverting the return value and `set -e' has been executed,
+     we don't want a failing command to inadvertently cause the shell
+     to exit. */
+  if (exit_immediately_on_error && invert)	/* XXX */
+    command->flags |= CMD_IGNORE_RETURN;	/* XXX */
+
   exec_result = EXECUTION_SUCCESS;
 
   /* If a command was being explicitly run in a subshell, or if it is
@@ -422,7 +494,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 			      asynchronous);
       if (paren_pid == 0)
 	{
-	  int user_subshell, return_code, function_value;
+	  int user_subshell, return_code, function_value, should_redir_stdin;
+
+	  should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
+				  pipe_in == NO_PIPE &&
+				  stdin_redirects (command->redirects) == 0);
 
 	  user_subshell = (command->flags & CMD_WANT_SUBSHELL) != 0;
 	  command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
@@ -485,28 +561,18 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	     sh compatibility, but I'm not sure it's the right thing to do. */
 	  if (user_subshell)
 	    {
-	      for (rp = command->redirects; rp; rp = rp->next)
-		switch (rp->instruction)
-		  {
-		  case r_input_direction:
-		  case r_inputa_direction:
-		  case r_input_output:
-		  case r_reading_until:
-		  case r_deblank_reading_until:
-		    stdin_redir++;
-		    break;
-		  case r_duplicating_input:
-		  case r_duplicating_input_word:
-		  case r_close_this:
-		    stdin_redir += (rp->redirector == 0);
-		    break;
-		  }
-
+	      stdin_redir = stdin_redirects (command->redirects);
 	      restore_default_signal (0);
 	    }
 
 	  if (fds_to_close)
 	    close_fd_bitmap (fds_to_close);
+
+	  /* If this is an asynchronous command (command &), we want to
+	     redirect the standard input from /dev/null in the absence of
+	     any specific redirection involving stdin. */
+	  if (should_redir_stdin && stdin_redir == 0)
+	    async_redirect_stdin ();
 
 	  /* Do redirections, then dispose of them before recursive call. */
 	  if (command->redirects)
@@ -589,6 +655,27 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	}
     }
 
+#if defined (COMMAND_TIMING)
+  if (command->flags & CMD_TIME_PIPELINE)
+    {
+      if (asynchronous)
+	{
+	  command->flags |= CMD_FORCE_SUBSHELL;
+	  exec_result = execute_command_internal (command, 1, pipe_in, pipe_out, fds_to_close);
+	}
+      else
+	{
+	  exec_result = time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+	  if (running_trap == 0)
+	    currently_executing_command = (COMMAND *)NULL;
+	}
+      return (exec_result);
+    }
+#endif /* COMMAND_TIMING */
+
+  if (shell_control_structure (command->type) && command->redirects)
+    stdin_redir = stdin_redirects (command->redirects);
+
   /* Handle WHILE FOR CASE etc. with redirections.  (Also '&' input
      redirection.)  */
   if (do_redirections (command->redirects, 1, 1, 0) != 0)
@@ -642,6 +729,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	if (ignore_return && command->value.Simple)
 	  command->value.Simple->flags |= CMD_IGNORE_RETURN;
+	if (command->flags & CMD_STDIN_REDIR)
+	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
@@ -885,7 +974,7 @@ timeval_to_cpu (rt, ut, st)
         t2.tv_sec /= 10;
     }
 
-  return (t1.tv_sec / t2.tv_sec);
+  return ((t2.tv_sec == 0) ? 0 : t1.tv_sec / t2.tv_sec);
 }  
 #endif /* HAVE_GETRUSAGE && HAVE_GETTIMEOFDAY */
 
@@ -1058,7 +1147,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rv, posix_time;
+  int rv, posix_time, old_flags;
   long rs, us, ss;
   int rsf, usf, ssf;
   int cpu;
@@ -1088,8 +1177,10 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   posix_time = (command->flags & CMD_TIME_POSIX);
 
+  old_flags = command->flags;
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
   rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+  command->flags = old_flags;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   gettimeofday (&after, &dtz);
@@ -1121,7 +1212,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   sys = (after.tms_stime - before.tms_stime) + (after.tms_cstime - before.tms_cstime);
   clock_t_to_secs (sys, &ss, &ssf);
 
-  cpu = ((user + sys) * 10000) / real;
+  cpu = (real == 0) ? 0 : ((user + sys) * 10000) / real;
 
 #  else
   rs = us = ss = 0L;
@@ -1259,7 +1350,10 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  REDIRECT *tr, *tl, *rp;
+#if 0
+  REDIRECT *tr, *tl;
+#endif
+  REDIRECT *rp;
   COMMAND *tc, *second;
   int ignore_return, exec_result;
 
@@ -1275,8 +1369,9 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
       rp = tc->redirects;
 
-      if (ignore_return && tc)
+      if (ignore_return)
 	tc->flags |= CMD_IGNORE_RETURN;
+      tc->flags |= CMD_AMPERSAND;
 
       /* If this shell was compiled without job control support, if
 	 the shell is not running interactively, if we are currently
@@ -1289,20 +1384,20 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       if (!stdin_redir)
 #endif /* JOB_CONTROL */
 	{
+#if 0
 	  rd.filename = make_bare_word ("/dev/null");
 	  tr = make_redirection (0, r_inputa_direction, rd);
 	  tr->next = tc->redirects;
 	  tc->redirects = tr;
+#endif
+	  tc->flags |= CMD_STDIN_REDIR;
 	}
 
       exec_result = execute_command_internal (tc, 1, pipe_in, pipe_out, fds_to_close);
 
-#if defined (JOB_CONTROL)
-      if ((!interactive_shell || subshell_environment || !job_control) && !stdin_redir)
-#else
-      if (!stdin_redir)
-#endif /* JOB_CONTROL */
+      if (tc->flags & CMD_STDIN_REDIR)
 	{
+#if 0
 	  /* Remove the redirection we added above.  It matters,
 	     especially for loops, which call execute_command ()
 	     multiple times with the same command. */
@@ -1316,6 +1411,8 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
 	  tl->next = (REDIRECT *)NULL;
 	  dispose_redirects (tr);
+#endif
+	  tc->flags &= ~CMD_STDIN_REDIR;
 	}
 
       second = command->value.Connection->second;
@@ -1473,6 +1570,7 @@ execute_for_command (for_command)
 	  else
 	    {
 	      run_unwind_frame ("for");
+	      loop_level--;
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -2076,7 +2174,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_string_index = 0;
   print_simple_command (simple_command);
   command_line = xmalloc (1 + strlen (the_printed_command));
-  strcpy (command_line, the_printed_command);
+  strcpy (command_line, the_printed_command);	/* XXX memory leak on errors */
 
   first_word_quoted =
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
@@ -2239,7 +2337,13 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	      restore_original_signals ();
 
 	      if (async)
-		setup_async_signals ();
+		{
+		  if ((simple_command->flags & CMD_STDIN_REDIR) &&
+			pipe_in == NO_PIPE &&
+			(stdin_redirects (simple_command->redirects) == 0))
+		    async_redirect_stdin ();
+		  setup_async_signals ();
+		}
 
 	      execute_subshell_builtin_or_function
 		(words, simple_command->redirects, builtin, func,
@@ -2289,7 +2393,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
-			(simple_command->flags & CMD_NO_FORK));
+			simple_command->flags);
 
  return_result:
   bind_lastarg (lastarg);
@@ -2330,7 +2434,7 @@ execute_builtin (builtin, words, flags, subshell)
      WORD_LIST *words;
      int flags, subshell;
 {
-  int old_e_flag, result;
+  int old_e_flag, result, eval_unwind;
 
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
@@ -2344,12 +2448,15 @@ execute_builtin (builtin, words, flags, subshell)
       begin_unwind_frame ("eval_builtin");
       unwind_protect_int (exit_immediately_on_error);
       exit_immediately_on_error = 0;
+      eval_unwind = 1;
     }
+  else
+    eval_unwind = 0;
 
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
-     problem only with the `source' builtin. */
-  if (builtin == source_builtin)
+     problem only with the `source' and `eval' builtins. */
+  if (builtin == source_builtin || builtin == eval_builtin)
     {
       if (subshell == 0)
 	begin_unwind_frame ("builtin_env");
@@ -2369,18 +2476,18 @@ execute_builtin (builtin, words, flags, subshell)
 
   result = ((*builtin) (words->next));
 
-  if (subshell == 0 && builtin == source_builtin)
+  if (subshell == 0 && (builtin == source_builtin || builtin == eval_builtin))
     {
-      /* In POSIX mode, if any variable assignments precede the `.' builtin,
-	 they persist after the builtin completes, since `.' is a special
-	 builtin. */
+      /* In POSIX mode, if any variable assignments precede the `.' or
+	 `eval' builtin, they persist after the builtin completes, since `.'
+	 and `eval' are special builtins. */
       if (posixly_correct && builtin_env)
 	merge_builtin_env ();
       dispose_builtin_env ();
       discard_unwind_frame ("builtin_env");
     }
 
-  if (subshell == 0 && builtin == eval_builtin && (flags & CMD_IGNORE_RETURN))
+  if (eval_unwind)
     {
       exit_immediately_on_error += old_e_flag;
       discard_unwind_frame ("eval_builtin");
@@ -2425,6 +2532,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  debug_trap = savestring (debug_trap);
 	  add_unwind_protect (set_debug_trap, debug_trap);
+	  /* XXX - small memory leak here -- hard to fix */
 	}
       restore_default_signal (DEBUG_TRAP);
     }
@@ -2652,17 +2760,19 @@ setup_async_signals ()
    this gnarly hair, for no good reason.  */
 static void
 execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
-		      async, fds_to_close, nofork)
+		      async, fds_to_close, cmdflags)
      WORD_LIST *words;
      REDIRECT *redirects;
      char *command_line;
      int pipe_in, pipe_out, async;
      struct fd_bitmap *fds_to_close;
-     int nofork;	/* Don't fork, just exec, if no pipes */
+     int cmdflags;
 {
   char *pathname, *command, **args;
+  int nofork;
   int pid;
 
+  nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
 
 #if defined (RESTRICTED_SHELL)
@@ -2696,9 +2806,12 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     {
       int old_interactive;
 
+#if 0
+      /* This has been disabled for the time being. */
 #if !defined (ARG_MAX) || ARG_MAX >= 10240
       if (posixly_correct == 0)
 	put_gnu_argv_flags_into_env ((int)getpid (), glob_argv_flags);
+#endif
 #endif
 
       /* Cancel traps, in trap.c. */
@@ -2708,7 +2821,13 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
          by make_child to ensure that SIGINT and SIGQUIT are ignored
          in asynchronous children. */
       if (async)
-	setup_async_signals ();
+	{
+	  if ((cmdflags & CMD_STDIN_REDIR) &&
+		pipe_in == NO_PIPE &&
+		(stdin_redirects (redirects) == 0))
+	    async_redirect_stdin ();
+	  setup_async_signals ();
+	}
 
       do_piping (pipe_in, pipe_out);
 
@@ -2845,6 +2964,48 @@ execute_shell_script (sample, sample_len, command, args, env)
 }
 #endif /* !HAVE_HASH_BANG_EXEC */
 
+static void
+initialize_subshell ()
+{
+#if defined (ALIAS)
+  /* Forget about any aliases that we knew of.  We are in a subshell. */
+  delete_all_aliases ();
+#endif /* ALIAS */
+
+#if defined (HISTORY)
+  /* Forget about the history lines we have read.  This is a non-interactive
+     subshell. */
+  history_lines_this_session = 0;
+#endif
+
+#if defined (JOB_CONTROL)
+  /* Forget about the way job control was working. We are in a subshell. */
+  without_job_control ();
+  set_sigchld_handler ();
+#endif /* JOB_CONTROL */
+
+  /* Reset the values of the shell flags and options. */
+  reset_shell_flags ();
+  reset_shell_options ();
+  reset_shopt_options ();
+
+  /* If we're not interactive, close the file descriptor from which we're
+     reading the current shell script. */
+#if defined (BUFFERED_INPUT)
+  if (interactive_shell == 0 && default_buffered_input >= 0)
+    {
+      close_buffered_fd (default_buffered_input);
+      default_buffered_input = bash_input.location.buffered_fd = -1;
+    }
+#else
+  if (interactive_shell == 0 && default_input)
+    {
+      fclose (default_input);
+      default_input = (FILE *)NULL;
+    }
+#endif
+}
+
 #if defined (HAVE_SETOSTYPE) && defined (_POSIX_SOURCE)
 #  define SETOSTYPE(x)	__setostype(x)
 #else
@@ -2877,7 +3038,7 @@ shell_execve (command, args, env)
 	  errno = i;
 	  file_error (command);
 	}
-      return (EX_NOEXEC);	/* XXX Posix.2 says that exit status is 126 */
+      return ((i == ENOENT) ? EX_NOTFOUND : EX_NOEXEC);	/* XXX Posix.2 says that exit status is 126 */
     }
 
   /* This file is executable.
@@ -2918,44 +3079,12 @@ shell_execve (command, args, env)
 	}
     }
 
-  larray = array_len (args) + 1;
-
-#if defined (ALIAS)
-  /* Forget about any aliases that we knew of.  We are in a subshell. */
-  delete_all_aliases ();
-#endif /* ALIAS */
-
-#if defined (HISTORY)
-  /* Forget about the history lines we have read.  This is a non-interactive
-     subshell. */
-  history_lines_this_session = 0;
-#endif
-
-#if defined (JOB_CONTROL)
-  /* Forget about the way job control was working. We are in a subshell. */
-  without_job_control ();
-  set_sigchld_handler ();
-#endif /* JOB_CONTROL */
-
-  /* If we're not interactive, close the file descriptor from which we're
-     reading the current shell script. */
-#if defined (BUFFERED_INPUT)
-  if (interactive_shell == 0 && default_buffered_input >= 0)
-    {
-      close_buffered_fd (default_buffered_input);
-      default_buffered_input = bash_input.location.buffered_fd = -1;
-    }
-#else
-  if (interactive_shell == 0 && default_input)
-    {
-      fclose (default_input);
-      default_input = (FILE *)NULL;
-    }
-#endif
+  initialize_subshell ();
 
   set_sigint_handler ();
 
   /* Insert the name of this shell into the argument list. */
+  larray = array_len (args) + 1;
   args = (char **)xrealloc ((char *)args, (1 + larray) * sizeof (char *));
 
   for (i = larray - 1; i; i--)
@@ -3021,6 +3150,7 @@ execute_intern_function (name, function)
   return (EXECUTION_SUCCESS);
 }
 
+#if defined (INCLUDE_UNUSED)
 #if defined (PROCESS_SUBSTITUTION)
 void
 close_all_files ()
@@ -3035,6 +3165,7 @@ close_all_files ()
     close (i);
 }
 #endif /* PROCESS_SUBSTITUTION */
+#endif
 
 static void
 close_pipes (in, out)
@@ -3114,6 +3245,10 @@ redirection_error (temp, error)
       internal_error ("%s: restricted: cannot redirect output", filename);
       break;
 #endif /* RESTRICTED_SHELL */
+
+    case HEREDOC_REDIRECT:
+      internal_error ("cannot create temp file for here document: %s", strerror (heredoc_errno));
+      break;
 
     default:
       internal_error ("%s: %s", filename, strerror (error));
@@ -3210,6 +3345,9 @@ redirection_expand (word)
   return (result);
 }
 
+/* Write the text of the here document pointed to by REDIRECTEE to the file
+   descriptor FD, which is already open to a temp file.  Return 0 if the
+   write is successful, otherwise return errno. */
 static int
 write_here_document (fd, redirectee)
      int fd;
@@ -3279,7 +3417,117 @@ write_here_document (fd, redirectee)
   return 0;
 }
 
-/* Do the specific redirection requested.  Returns errno in case of error.
+/* Create a temporary file holding the text of the here document pointed to
+   by REDIRECTEE, and return a file descriptor open for reading to the temp
+   file.  Return -1 on any error, and make sure errno is set appropriately. */
+static int
+here_document_to_fd (redirectee)
+     WORD_DESC *redirectee;
+{
+  char filename[24];
+  int r, fd;
+
+  /* Make the filename for the temp file. */
+  sprintf (filename, "/tmp/t%d-sh", (int)time ((time_t *) 0) + (int)getpid ());
+
+  /* Make sure we open it exclusively. */
+  fd = open (filename, O_TRUNC | O_WRONLY | O_CREAT | O_EXCL, 0600);
+  if (fd < 0)
+    return (fd);
+
+  errno = r = 0;		/* XXX */
+  /* write_here_document returns 0 on success, errno on failure. */
+  if (redirectee->word)
+    r = write_here_document (fd, redirectee);
+
+  close (fd);
+  if (r)
+    {
+      unlink (filename);
+      errno = r;
+      return (-1);
+    }
+
+  /* XXX - this is raceable */
+  /* Make the document really temporary.  Also make it the input. */
+  fd = open (filename, O_RDONLY, 0600);
+
+  if (fd < 0)
+    {
+      r = errno;
+      unlink (filename);
+      errno = r;
+      return -1;
+    }
+
+  if (unlink (filename) < 0)
+    {
+      r = errno;
+      close (fd);
+      errno = r;
+      return (-1);
+    }
+
+  return (fd);
+}
+
+/* Open FILENAME with FLAGS in noclobber mode, hopefully avoiding most
+   race conditions and avoiding the problem where the file is replaced
+   between the stat(2) and open(2). */
+static int
+noclobber_open (filename, flags, ri)
+     char *filename;
+     int flags;
+     enum r_instruction ri;
+{
+  int r, fd;
+  struct stat finfo, finfo2;
+
+  /* If the file exists and is a regular file, return an error
+     immediately. */
+  r = stat (filename, &finfo);
+  if (r == 0 && (S_ISREG (finfo.st_mode)))
+    return (NOCLOBBER_REDIRECT);
+
+  /* If the file was not present (r != 0), make sure we open it
+     exclusively so that if it is created before we open it, our open
+     will fail.  Make sure that we do not truncate an existing file.
+     Note that we don't turn on O_EXCL unless the stat failed -- if
+     the file was not a regular file, we leave O_EXCL off. */
+  flags &= ~O_TRUNC;
+  if (r != 0)
+    {
+      fd = open (filename, flags|O_EXCL, 0666);
+      return ((fd < 0 && errno == EEXIST) ? NOCLOBBER_REDIRECT : fd);
+    }
+  fd = open (filename, flags, 0666);
+
+  /* If the open failed, return the file descriptor right away. */
+  if (fd < 0)
+    return (errno == EEXIST ? NOCLOBBER_REDIRECT : fd);
+
+  /* OK, the open succeeded, but the file may have been changed from a
+     non-regular file to a regular file between the stat and the open.
+     We are assuming that the O_EXCL open handles the case where FILENAME
+     did not exist and is symlinked to an existing file between the stat
+     and open. */
+
+  /* If we can open it and fstat the file descriptor, and neither check
+     revealed that it was a regular file, and the file has not been replaced,
+     return the file descriptor. */
+  if ((fstat (fd, &finfo2) == 0) && (S_ISREG (finfo2.st_mode) == 0) &&
+      r == 0 && (S_ISREG (finfo.st_mode) == 0) &&
+      same_file (filename, filename, &finfo, &finfo2))
+    return fd;
+
+  /* The file has been replaced.  badness. */
+  close (fd);  
+  errno = EEXIST;
+  return (NOCLOBBER_REDIRECT);
+}
+
+/* Do the specific redirection requested.  Returns errno or one of the
+   special redirection errors (*_REDIRECT) in case of error, 0 on success.
    If FOR_REAL is zero, then just do whatever is neccessary to produce the
    appropriate side effects.   REMEMBERING, if non-zero, says to remember
    how to undo each redirection.  If SET_CLEXEC is non-zero, then
@@ -3294,7 +3542,6 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
   char *redirectee_word;
   enum r_instruction ri;
   REDIRECT *new_redirect;
-  struct stat finfo;
 
   redirectee = redirect->redirectee.filename;
   redir_fd = redirect->redirectee.dest;
@@ -3402,25 +3649,11 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 #endif /* RESTRICTED_SHELL */
 
       /* If we are in noclobber mode, you are not allowed to overwrite
-	 existing files.  Check first. */
+	 existing files.  Check before opening. */
       if (noclobber && OUTPUT_REDIRECT (ri))
 	{
-	  r = stat (redirectee_word, &finfo);
-
-	  if (r == 0 && (S_ISREG (finfo.st_mode)))
-	    {
-	      free (redirectee_word);
-	      return (NOCLOBBER_REDIRECT);
-	    }
-
-	  /* If the file was not present, make sure we open it exclusively
-	     so that if it is created before we open it, our open will fail. */
-	  if (r != 0)
-	    redirect->flags |= O_EXCL;
-
-	  fd = open (redirectee_word, redirect->flags, 0666);
-
-	  if (fd < 0 && errno == EEXIST)
+	  fd = noclobber_open (redirectee_word, redirect->flags, ri);
+	  if (fd == NOCLOBBER_REDIRECT)
 	    {
 	      free (redirectee_word);
 	      return (NOCLOBBER_REDIRECT);
@@ -3507,34 +3740,12 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	 the new input.  Place it in a temporary file. */
       if (redirectee)
 	{
-	  char filename[24];
-
-	  /* Make the filename for the temp file. */
-	  sprintf (filename, "/tmp/t%d-sh", (int)getpid ());
-
-	  fd = open (filename, O_TRUNC | O_WRONLY | O_CREAT, 0666);
-	  if (fd < 0)
-	    return (errno);
-
-	  errno = r = 0;		/* XXX */
-	  if (redirectee->word)
-	    r = write_here_document (fd, redirectee);
-
-	  close (fd);
-	  if (r)
-	    return (r);
-
-	  /* Make the document really temporary.  Also make it the input. */
-	  fd = open (filename, O_RDONLY, 0666);
+	  fd = here_document_to_fd (redirectee);
 
 	  if (fd < 0)
-	    return (errno);
-
-	  if (unlink (filename) < 0)
 	    {
-	      r = errno;
-	      close (fd);
-	      return (r);
+	      heredoc_errno = errno;
+	      return (HEREDOC_REDIRECT);
 	    }
 
 	  if (for_real)
@@ -3621,6 +3832,10 @@ do_redirection_internal (redirect, for_real, remembering, set_clexec)
 	  close (redirector);
 #endif /* !BUFFERED_INPUT */
 	}
+      break;
+
+    case r_duplicating_input_word:
+    case r_duplicating_output_word:
       break;
     }
   return (0);
@@ -3715,7 +3930,6 @@ file_status (name)
      char *name;
 {
   struct stat finfo;
-  static int user_id = -1;
 
   /* Determine whether this file exists or not. */
   if (stat (name, &finfo) < 0)
@@ -3739,12 +3953,10 @@ file_status (name)
   /* Find out if the file is actually executable.  By definition, the
      only other criteria is that the file has an execute bit set that
      we can use. */
-  if (user_id == -1)
-    user_id = current_user.euid;
 
   /* Root only requires execute permission for any of owner, group or
      others to be able to exec a file. */
-  if (user_id == 0)
+  if (current_user.euid == (uid_t)0)
     {
       int bits;
 
@@ -3757,7 +3969,7 @@ file_status (name)
     }
 
   /* If we are the owner of the file, the owner execute bit applies. */
-  if (user_id == finfo.st_uid && X_BIT (u_mode_bits (finfo.st_mode)))
+  if (current_user.euid == finfo.st_uid && X_BIT (u_mode_bits (finfo.st_mode)))
     return (FS_EXISTS | FS_EXECABLE);
 
   /* If we are in the owning group, the group permissions apply. */
@@ -3890,6 +4102,9 @@ get_next_path_element (path_list, path_index_pointer)
   return (path);
 }
 
+/* Look for PATHNAME in $PATH.  Returns either the hashed command
+   corresponding to PATHNAME or the first instance of PATHNAME found
+   in $PATH.  Returns a newly-allocated string. */
 char *
 search_for_command (pathname)
      char *pathname;
@@ -3921,12 +4136,13 @@ search_for_command (pathname)
       if ((st ^ (FS_EXISTS | FS_EXECABLE)) != 0)
 	{
 	  remove_hashed_filename (pathname);
+	  free (hashed_file);
 	  hashed_file = (char *)NULL;
 	}
     }
 
   if (hashed_file)
-    command = savestring (hashed_file);
+    command = hashed_file;
   else if (absolute_program (pathname))
     /* A command containing a slash is not looked up in PATH or saved in
        the hash table. */

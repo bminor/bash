@@ -105,7 +105,7 @@ strrchr (string, c)
 #if !defined (HAVE_STRCASECMP)
 
 #if !defined (to_lower)
-#  define to_lower(c) (islower(c) ? (c) : toupper(c))
+#  define to_lower(c) (islower(c) ? (c) : tolower(c))
 #endif /* to_lower */
 
 /* Compare at most COUNT characters from string1 to string2.  Case
@@ -280,9 +280,10 @@ bzero (s, n)
      int n;
 {
   register int i;
+  register char *r;
 
-  for (i = 0; i < n; i++)
-    s[i] = '\0';
+  for (i = 0, r = s; i < n; i++)
+    *r++ = '\0';
 }
 #endif
 

@@ -1,0 +1,203 @@
+# These should all be safe
+LC_ALL=C
+LC_CTYPE=C
+LC_COLLATE=C
+LC_MESSAGES=C
+
+# these tests should all generate errors
+
+# make sure we don't exit prematurely
+set +e
+set +o posix
+
+# the iteration variable must be a valid identifier
+for 1 in a b c; do echo $1; done
+
+# try to rebind a read-only function
+func()
+{
+	echo func
+}
+readonly -f func
+# make sure `readonly' and `declare' play well together
+declare -Fr
+func()
+{
+	echo bar
+}
+
+# cannot unset readonly functions or variables
+unset -f func
+# or make them not readonly
+declare -fr func
+declare -f +r func
+
+XPATH=$PATH
+declare -r XPATH
+unset -v XPATH
+
+# cannot unset invalid identifiers
+unset /bin/sh
+
+# bad option
+declare -z
+# cannot declare invalid identifiers
+declare -- -z 
+declare /bin/sh
+
+# this is the syntax used to export functions in the environment, but
+# it cannot be used with `declare'
+declare -f func='() { echo "this is func"; }'
+
+# try to export -f something that is not a function -- this should be
+# an error, not create an `invisible function'
+export -f XPATH
+
+# this depends on the setting of BREAK_COMPLAINS in config.h.in
+break
+continue
+
+# this should not exit the shell; it did in versions before 2.01
+shift label
+
+# other shells do not complain about the extra arguments; maybe someday
+# we won't either
+set -- a b c
+shift $# label
+# and get rid of the positional parameters
+shift $#
+
+# let without an expression is an error, though maybe it should just return
+# success
+let
+
+# local outside a function is an error
+local
+
+# try to hash a non-existant command
+hash notthere
+
+# turn off hashing, then try to hash something
+set +o hashall
+hash -p ${THIS_SH} ${THIS_SH##*/}
+
+# bad identifiers to declare/readonly/export
+export AA[4]
+readonly AA[4]
+
+declare -a AA
+unset AA[-2]
+
+# try to assign to a readonly array
+declare -r AA
+AA=( one two three )
+
+# bad counts to `shift'
+shopt -s shift_verbose
+shift $(( $# + 5 ))
+shift -2
+
+# bad shell options
+shopt -s no_such_option
+shopt no_such_option
+
+# non-octal digits for umask and other errors
+umask 09
+umask -S u=rwx:g=rwx:o=rx >/dev/null # 002
+umask -S u:rwx,g:rwx,o:rx >/dev/null # 002
+# this may behave identically to umask without arguments in the future,
+# but for now it is an error
+umask -p
+
+# assignment to a readonly variable in environment
+VAR=4
+readonly VAR
+VAR=7 :
+
+# more readonly variable tests
+declare VAR=88
+declare +r VAR
+
+declare -p unset
+
+# iteration variable in a for statement being readonly
+for VAR in 1 2 3 ; do echo $VAR; done
+
+# parser errors
+: $( for z in 1 2 3; do )
+: $( for z in 1 2 3; done )
+
+# various `cd' errors
+( unset HOME ; cd )
+( unset OLDPWD ; cd - )
+
+# various `source/.' errors
+.
+source
+
+# maybe someday this will work like in rc
+. -i /dev/tty
+
+# make sure that this gives an error rather than setting $1
+set -q
+
+# enable non-builtins
+enable sh bash
+
+# try to set and unset shell options simultaneously
+shopt -s -u checkhash
+
+# try to read into an invalid identifier
+read /bin/sh < /dev/null
+
+# try to read into a readonly variable
+read VAR < /dev/null
+
+# someday these may mean something, but for now they're errors
+eval -i "echo $-"
+command -i "echo $-"
+
+# error to list trap for an unknown signal
+trap -p NOSIG
+
+# maybe someday trap will take a -s argument like kill, but not now
+trap -p -s NOSIG
+
+# maybe someday we will have a ksh-like ERR trap, but not yet
+trap 'echo [$LINENO] -- error' ERR
+
+# can only return from a function or sourced script
+return 2
+
+# break and continue with arguments <= 0
+for z in 1 2 3; do
+	break 0
+	echo $x
+done
+for z in 1 2 3; do
+	continue 0
+	echo $x
+done
+
+# builtin with non-builtin
+builtin bash
+
+# maybe someday you will be able to use fg/bg when job control is not really
+# active, but for now they are errors
+bg
+fg
+
+# argument required
+kill -s
+# bad argument
+kill -S
+
+# this must be last!
+# in posix mode, a function name must be a valid identifier
+# this can't go in posix2.tests, since it causes the shell to exit
+# immediately
+set -o posix
+function !! () { fc -s "$@" ; }
+set +o posix
+
+echo end

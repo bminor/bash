@@ -23,7 +23,7 @@
 #endif
 
 #include <stdio.h>
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include "../posixstat.h"
 #include <signal.h>
 
@@ -45,9 +45,9 @@
 #include "../input.h"
 #include "../execute_cmd.h"
 #include "../trap.h"
-#include "hashcom.h"
 #include "bashgetopt.h"
 #include "common.h"
+#include "builtext.h"
 #include <tilde/tilde.h>
 
 #if defined (HISTORY)
@@ -59,13 +59,15 @@ extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
-extern int hashing_enabled;
 extern int variable_context;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
 extern COMMAND *global_command;
-extern HASH_TABLE *hashed_filenames;
 extern char *bash_getcwd_errstr;
+
+/* Used by some builtins and the mainline code. */
+Function *last_shell_builtin = (Function *)NULL;
+Function *this_shell_builtin = (Function *)NULL;
 
 /* **************************************************************** */
 /*								    */
@@ -317,10 +319,13 @@ set_dollar_vars_changed ()
 /* Read a numeric arg for this_command_name, the name of the shell builtin
    that wants it.  LIST is the word list that the arg is to come from.
    Accept only the numeric argument; report an error if other arguments
-   follow. */
+   follow.  If FATAL is true, call throw_to_top_level, which exits the
+   shell; if not, call jump_to_top_level (DISCARD), which aborts the
+   current command. */
 int
-get_numeric_arg (list)
+get_numeric_arg (list, fatal)
      WORD_LIST *list;
+     int fatal;
 {
   long count = 1;
 
@@ -332,7 +337,10 @@ get_numeric_arg (list)
       if (!arg || (legal_number (arg, &count) == 0))
 	{
 	  builtin_error ("bad non-numeric arg `%s'", list->word->word);
-	  throw_to_top_level ();
+	  if (fatal)
+	    throw_to_top_level ();
+	  else
+	    jump_to_top_level (DISCARD);
 	}
       no_args (list->next);
     }
@@ -358,80 +366,6 @@ read_octal (string)
     result = -1;
 
   return (result);
-}
-
-/* **************************************************************** */
-/*								    */
-/*		 	Command name hashing			    */
-/*								    */
-/* **************************************************************** */
-
-/* Return the full pathname that FILENAME hashes to.  If FILENAME
-   is hashed, but (data->flags & HASH_CHKDOT) is non-zero, check
-   ./FILENAME and return that if it is executable. */
-char *
-find_hashed_filename (filename)
-     char *filename;
-{
-  register BUCKET_CONTENTS *item;
-  char *path, *dotted_filename, *tail;
-  int same;
-
-  if (hashing_enabled == 0)
-    return ((char *)NULL);
-
-  item = find_hash_item (filename, hashed_filenames);
-
-  if (item == NULL)
-    return ((char *)NULL);
-
-  /* If this filename is hashed, but `.' comes before it in the path,
-     see if ./filename is executable.  If the hashed value is not an
-     absolute pathname, see if ./`hashed-value' exists. */
-  path = pathdata(item)->path;
-  if (pathdata(item)->flags & (HASH_CHKDOT|HASH_RELPATH))
-    {
-      tail = (pathdata(item)->flags & HASH_RELPATH) ? path : filename;
-      dotted_filename = xmalloc (3 + strlen (tail));
-      dotted_filename[0] = '.'; dotted_filename[1] = '/';
-      strcpy (dotted_filename + 2, tail);
-
-      if (executable_file (dotted_filename))
-	return (dotted_filename);
-
-      free (dotted_filename);
-
-#if 0
-      if (pathdata(item)->flags & HASH_RELPATH)
-	return ((char *)NULL);
-#endif
-
-      /* Watch out.  If this file was hashed to "./filename", and
-	 "./filename" is not executable, then return NULL. */
-
-      /* Since we already know "./filename" is not executable, what
-	 we're really interested in is whether or not the `path'
-	 portion of the hashed filename is equivalent to the current
-	 directory, but only if it starts with a `.'.  (This catches
-	 ./. and so on.)  same_file () tests general Unix file
-	 equivalence -- same device and inode. */
-      if (*path == '.')
-	{
-	  same = 0;
-	  tail = (char *)strrchr (path, '/');
-
-	  if (tail)
-	    {
-	      *tail = '\0';
-	      same = same_file (".", path, (struct stat *)NULL, (struct stat *)NULL);
-	      *tail = '/';
-	    }
-
-	  return same ? (char *)NULL : path;
-	}
-    }
-
-  return (path);
 }
 
 /* **************************************************************** */
@@ -635,7 +569,13 @@ display_signal_list (list, forcecols)
 	      list = list->next;
 	      continue;
 	    }
+#if defined (JOB_CONTROL)
+	  /* POSIX.2 says that `kill -l signum' prints the signal name without
+	     the `SIG' prefix. */
+	  printf ("%s\n", (this_shell_builtin == kill_builtin) ? name + 3 : name);
+#else
 	  printf ("%s\n", name);
+#endif
 	}
       else
 	{
@@ -852,6 +792,9 @@ backslash_quote (string)
 	  *r++ = c;
 	  break;
 	case '#':				/* comment char */
+#if 0
+	case '~':				/* tilde expansion */
+#endif
 	  if (s == string)
 	    *r++ = '\\';
 	  /* FALLTHROUGH */

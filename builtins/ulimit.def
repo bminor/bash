@@ -35,7 +35,7 @@ option is given, it is interpreted as follows:
     -c	the maximum size of core files created
     -d	the maximum size of a process's data segment
     -f	the maximum size of files created by the shell
-    -l  the maximum size a process may lock into memory
+    -l	the maximum size a process may lock into memory
     -m	the maximum resident set size
     -n	the maximum number of open file descriptors
     -p	the pipe buffer size
@@ -215,6 +215,17 @@ static ULCMD *cmdlist;
 static int ncmd;
 static int cmdlistsz;
 
+#if !defined (HAVE_RESOURCE) && !defined (HAVE_ULIMIT)
+long
+ulimit (cmd, newlim)
+     int cmd;
+     long newlim;
+{
+  errno = EINVAL;
+  return -1;
+}
+#endif /* !HAVE_RESOURCE && !HAVE_ULIMIT */
+
 static int
 _findlim (opt)
      int opt;
@@ -368,6 +379,12 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
   block_factor = (limit == RLIM_INFINITY) ? 1 : limits[limind].block_factor;
   real_limit = limit * block_factor;
 
+  if (real_limit < 0 || (real_limit == 0 && limit != 0))
+    {
+      builtin_error ("limit out of range: %d", limit);
+      return (EXECUTION_FAILURE);
+    }
+
   if (set_limit (limind, real_limit, mode) < 0)
     {
       builtin_error ("cannot modify limit: %s", strerror (errno));
@@ -444,6 +461,9 @@ set_limit (ind, newlim, mode)
       case RLIMIT_FILESIZE:
 #if !defined (HAVE_RESOURCE)
 	return (ulimit (2, newlim / 512L));
+#else
+	errno = EINVAL;
+	return -1;
 #endif
 
       case RLIMIT_OPENFILES:
@@ -462,8 +482,9 @@ set_limit (ind, newlim, mode)
 #if defined (HAVE_RESOURCE)
       if (getrlimit (limits[ind].parameter, &limit) < 0)
 	return -1;
-      val = (current_user.euid != 0 && newlim == RLIM_INFINITY)
-		? limit.rlim_max : newlim;
+      val = (current_user.euid != 0 && newlim == RLIM_INFINITY &&
+	       (limit.rlim_cur <= limit.rlim_max))
+		 ? limit.rlim_max : newlim;
       if (mode & LIMIT_SOFT)
 	limit.rlim_cur = val;
       if (mode & LIMIT_HARD)

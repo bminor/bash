@@ -17,3 +17,53 @@ fi
 # command subst should not inherit -e
 set -e
 echo $(false; echo ok)
+
+if set +e
+then
+	false
+fi
+echo hi
+
+set -e
+
+# a failing command in the compound list following a while, until, or
+# if should not cause the shell to exit
+
+while false; do
+	echo hi
+done
+echo while succeeded
+
+x=1
+until (( x == 4 )); do
+	x=4
+done
+echo until succeeded: $x
+
+if false; then
+	echo oops
+fi
+echo if succeeded
+
+# failing commands that are part of an AND or OR list should not
+# cause the shell to exit
+false && echo AND list failed
+echo AND list succeeded
+
+false || echo OR list succeeded
+
+! false
+echo ! succeeded
+
+# make sure eval preserves the state of the -e flag and `!' reserved word
+set -e
+if eval false; then
+	echo oops
+fi
+echo eval succeeded
+
+! eval false
+echo ! eval succeeded -- 1
+
+! eval '(exit 5)'
+echo ! eval succeeded -- 2

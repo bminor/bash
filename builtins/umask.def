@@ -64,6 +64,7 @@ umask_builtin (list)
      WORD_LIST *list;
 {
   int print_symbolically, opt, umask_value;
+  mode_t umask_arg;
 
   print_symbolically = 0;
   reset_internal_getopt ();
@@ -105,19 +106,20 @@ umask_builtin (list)
 	  if (umask_value == -1)
 	    return (EXECUTION_FAILURE);
 	}
-      umask (umask_value);
+      umask_arg = (mode_t)umask_value;
+      umask (umask_arg);
       if (print_symbolically)
-	print_symbolic_umask (umask_value);
+	print_symbolic_umask (umask_arg);
     }
   else				/* Display the UMASK for this user. */
     {
-      umask_value = umask (022);
-      umask (umask_value);
+      umask_arg = umask (022);
+      umask (umask_arg);
 
       if (print_symbolically)
-	print_symbolic_umask (umask_value);
+	print_symbolic_umask (umask_arg);
       else
-	printf ("%03o\n", umask_value);
+	printf ("%03o\n", umask_arg);
     }
 
   fflush (stdout);
@@ -128,7 +130,7 @@ umask_builtin (list)
    printed if the corresponding bit is clear in the umask. */
 static void
 print_symbolic_umask (um)
-     int um;
+     mode_t um;
 {
   char ubits[4], gbits[4], obits[4];		/* u=rwx,g=rwx,o=rwx */
   int i;
@@ -267,9 +269,12 @@ symbolic_umask (list)
 	        umc |= perm;
 	        break;
 
+#if 0
+	      /* No other values are possible. */
 	      default:
 	      	builtin_error ("bad symbolic mode operator: %c", op);
 	      	return (-1);
+#endif
 	    }
 
 	  if (!*s)

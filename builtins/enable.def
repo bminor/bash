@@ -238,7 +238,10 @@ enable_shell_command (name, disable_p)
 }
 
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
-#include <dlfcn.h>
+
+#if defined (HAVE_DLFCN_H)
+#  include <dlfcn.h>
+#endif
 
 static int
 dyn_load_builtin (list, flags, filename)
@@ -359,7 +362,11 @@ delete_builtin (b)
   struct builtin *new_shell_builtins;
 
   /* XXX - funky pointer arithmetic - XXX */
+#ifdef __STDC__
+  ind = b - shell_builtins;
+#else
   ind = ((int)b - (int)shell_builtins) / sizeof (struct builtin);
+#endif
   size = num_shell_builtins * sizeof (struct builtin);
   new_shell_builtins = (struct builtin *)xmalloc (size);
 

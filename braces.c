@@ -28,11 +28,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "bashansi.h"
 
 #if defined (SHELL)
 #  include "shell.h"
@@ -40,6 +36,10 @@
 
 #include "general.h"
 #define brace_whitespace(c) (!(c) || (c) == ' ' || (c) == '\t' || (c) == '\n')
+
+#if defined (SHELL)
+extern char *extract_command_subst ();
+#endif
 
 /* Basic idea:
 
@@ -210,6 +210,10 @@ brace_gobbler (text, indx, satisfy)
      int satisfy;
 {
   register int i, c, quoted, level, pass_next;
+#if defined (SHELL)
+  int si;
+  char *t;
+#endif
 
   level = quoted = pass_next = 0;
 
@@ -241,6 +245,18 @@ brace_gobbler (text, indx, satisfy)
 	  quoted = c;
 	  continue;
 	}
+
+#if defined (SHELL)
+      /* Pass new-style command substitutions through unchanged. */
+      if (c == '$' && text[i+1] == '(')			/* ) */
+	{
+	  si = i + 2;
+	  t = extract_command_subst (text, &si);
+	  i = si;
+	  free (t);
+	  continue;
+	}
+#endif
 
       if (c == satisfy && level == 0 && quoted == 0)
 	{

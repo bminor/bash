@@ -6,11 +6,11 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Mon Nov 25 15:36:20 EST 1996
+.\"	Last Change: Mon May 19 12:45:24 EDT 1997
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
-.TH BASH 1 "1996 Nov 25" GNU
+.TH BASH 1 "1997 May 19" GNU
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -256,8 +256,9 @@ section.
 .PP
 When
 .B bash
-is invoked as a login shell, it first reads and executes commands
-from the file \fI/etc/profile\fP, if that file exists.
+is invoked as an interactive login shell, it first reads and
+executes commands from the file \fI/etc/profile\fP, if that
+file exists.
 After reading that file, it looks for \fI~/.bash_profile\fP,
 \fI~/.bash_login\fP, and \fI~/.profile\fP, in that order, and reads
 and executes commands from the first one that exists and is readable.
@@ -623,7 +624,7 @@ is the exit status of the last command executed in
 .IR list ,
 or zero if no commands were executed.
 .TP
-\fBcase\fP \fIword\fP \fBin\fP [ \fIpattern\fP [ \fB|\fP \fIpattern\fP ] \
+\fBcase\fP \fIword\fP \fBin\fP [ ( \fIpattern\fP [ \fB|\fP \fIpattern\fP ] \
 ... ) \fIlist\fP ;; ] ... \fBesac\fP
 A \fBcase\fP command first expands \fIword\fP, and tries to match
 it against each \fIpattern\fP in turn, using the same matching rules
@@ -902,7 +903,11 @@ is the first character of the value of the
 variable.  If
 .SM
 .B IFS
-is null or unset, the parameters are separated by spaces.
+is unset, the parameters are separated by spaces.
+If
+.SM
+.B IFS
+is null, the parameters are joined without intervening separators.
 .TP
 .B @
 Expands to the positional parameters, starting from one.  When the
@@ -998,6 +1003,10 @@ Expands to the user ID of the current user, initialized at shell startup.
 .B EUID
 Expands to the effective user ID of the current user, initialized at
 shell startup.
+.TP
+.B GROUPS
+An array variable containing the list of groups of which the current
+user is a member.
 .TP
 .B BASH
 Expands to the full file name used to invoke this instance of
@@ -1221,14 +1230,14 @@ specified by the
 command.  A sample value is
 ``.:~:/usr''.
 .TP
-.B ENV
+.B BASH_ENV
 If this parameter is set when \fBbash\fP is executing a shell script,
 its value is interpreted as a filename containing commands to
 initialize the shell, as in
 .IR .bashrc .
 The value of
 .SM
-.B ENV
+.B BASH_ENV
 is subjected to parameter expansion, command substitution, and arithmetic
 expansion before being interpreted as a file name.
 .SM
@@ -3130,7 +3139,7 @@ below).
 .SH READLINE
 This is the library that handles reading input when using an interactive
 shell, unless the
-.B \-noediting
+.B \-\-noediting
 option is given at shell invocation.
 By default, the line editing commands are similar to those of emacs.
 A vi-style line editing interface is also available.
@@ -3668,10 +3677,21 @@ word expansions.  See
 below for a description of history expansion.
 .TP
 .B history\-expand\-line (M\-^)
-Perform history expansion on the current line.  See
+Perform history expansion on the current line.
+See
 .SM
 .B HISTORY EXPANSION
 below for a description of history expansion.
+.TP
+.B alias\-expand\-line
+Perform alias expansion on the current line.
+See
+.SM
+.B ALIASES
+above for a description of alias expansion.
+.TP
+.B history\-and\-alias\-expand\-line
+Perform history and alias expansion on the current line.
 .TP
 .B insert\-last\-argument (M\-.\^, M\-_\^)
 A synonym for \fByank\-last\-arg\fP.
@@ -3794,9 +3814,18 @@ Add this digit to the argument already accumulating, or start a new
 argument.  M\-\- starts a negative argument.
 .TP
 .B universal\-argument
-Each time this is executed, the argument count is multiplied by four.
+This is another way to specify an argument.
+If this command is followed by one or more digits, optionally with a
+leading minus sign, those digits define the argument.
+If the command is followed by digits, executing
+.B universal\-argument
+again ends the numeric argument, but is otherwise ignored.
+As a special case, if this command is immediately followed by a
+character that is neither a digit or minus sign, the argument count
+for the next command is multiplied by four.
 The argument count is initially one, so executing this function the
-first time makes the argument count four.
+first time makes the argument count four, a second time makes the
+argument count sixteen, and so on.
 .PD
 .SS Completing
 .PP
@@ -3980,7 +4009,7 @@ Display version information about the current instance of
 .PD
 .SH HISTORY
 When the
-.B -o history
+.B \-o history
 option to the
 .B set
 builtin is enabled, the shell provides access to the
@@ -5494,12 +5523,15 @@ Arguments, if supplied, have the following meanings:
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
 (counting from the left of the list shown by
-.BR dirs )
+.BR dirs ,
+starting with zero)
 is at the top.
 .TP
 \fB\-\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
-(counting from the right) is at the top.
+(counting from the right of the list shown by
+.BR dirs ,
+starting with zero) is at the top.
 .TP
 .B \-n
 Suppresses the normal change of directory when adding directories
@@ -6006,7 +6038,7 @@ The errors checked for are transposed characters,
 a missing character, and one character too many.
 If a correction is found, the corrected file name is printed,
 and the command proceeds.
-This option is enabled by default, but is only used by interactive shells.
+This option is only used by interactive shells.
 .TP 8
 .B checkhash
 If set, \fBbash\fP checks that a command found in the hash
@@ -6303,7 +6335,7 @@ may be positive or negative integers.
 Print the accumulated user and system times for the shell and
 for processes run from the shell.  The return status is 0.
 .TP
-\fBtrap\fP [\fB\-lp\fP] [\fIarg\fP] [\fIsigspec\fP]
+\fBtrap\fP [\fB\-lp\fP] [\fIarg\fP] [\fIsigspec\fP ...]
 The command
 .I arg
 is to be read and executed when the shell receives
@@ -6315,11 +6347,12 @@ is absent or
 .BR \- ,
 all specified signals are
 reset to their original values (the values they had
-upon entrance to the shell).  If 
+upon entrance to the shell).
+If 
 .I arg
-is the null string this
-signal is ignored by the shell and by the
-commands it invokes.
+is the null string the signal specified by each
+.I sigspec
+is ignored by the shell and by the commands it invokes.
 If
 .I arg
 is
@@ -6333,16 +6366,18 @@ only
 is given,
 .B trap
 prints the list of commands associated with each signal number.
+Each
 .I sigspec
 is either
-a signal name defined in <\fIsignal.h\fP>, or a signal number.  If
+a signal name defined in <\fIsignal.h\fP>, or a signal number.
+If a
 .I sigspec
 is
 .SM
 .B EXIT
 (0) the command
 .I arg
-is executed on exit from the shell.  If
+is executed on exit from the shell.  If a
 .I sigspec
 is
 .SM
@@ -6359,7 +6394,8 @@ option causes the shell to print a list of signal names and
 their corresponding numbers.
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals are reset to their original values in a child
-process when it is created.  The return status is false if any
+process when it is created.
+The return status is false if any
 .I sigspec
 is invalid; otherwise
 .B trap
@@ -6723,8 +6759,7 @@ that you have.
 Once you have determined that a bug actually exists, use the
 .I bashbug
 command to submit a bug report.
-If you have a fix, you are welcome to mail that
-as well!
+If you have a fix, you are encouraged to mail that as well!
 Suggestions and `philosophical' bug reports may be mailed
 to \fPbug-bash\fP@\fIprep.ai.MIT.Edu\fP or posted to the Usenet
 newsgroup

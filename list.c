@@ -96,6 +96,7 @@ list_append (head, tail)
   return (head);
 }
 
+#ifdef INCLUDE_UNUSED
 /* Delete the element of LIST which satisfies the predicate function COMPARER.
    Returns the element that was deleted, so you can dispose of it, or -1 if
    the element wasn't found.  COMPARER is called with the list element and
@@ -126,3 +127,4 @@ delete_element (list, comparer, arg)
     }
   return ((GENERIC_LIST *)&global_error_list);
 }
+#endif

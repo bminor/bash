@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 2.1, for Bash version 2.0.
+This is the Bash FAQ, version 2.5, for Bash version 2.01.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -24,77 +24,78 @@ Section A:  The Basics
 2) What's the latest version?
 3) Where can I get it?
 4) On what machines will bash run?
-5) How can I build bash with gcc?
-6) How can I make bash my login shell?
-7) I just changed my login shell to bash, and now I can't FTP into my
+5) Will bash run on operating systems other than Unix?
+6) How can I build bash with gcc?
+7) How can I make bash my login shell?
+8) I just changed my login shell to bash, and now I can't FTP into my
    machine.  Why not?
-8) What's the `POSIX 1003.2 standard'?
-9) What is the bash `posix mode'?
+9) What's the `POSIX 1003.2 standard'?
+10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-10) What's new in version 2.0?
-11) Are there any user-visible incompatibilities between bash-2.0 and
+11) What's new in version 2.01?
+12) Are there any user-visible incompatibilities between bash-2.01 and
     bash-1.14.7?
 
 Section C:  Differences from other Unix shells
 
-12) How does bash differ from sh, the Bourne shell?
-13) How does bash differ from the Korn shell, version ksh88?
-14) Which new features in ksh-93 are not in bash, and which are?
+13) How does bash differ from sh, the Bourne shell?
+14) How does bash differ from the Korn shell, version ksh88?
+15) Which new features in ksh-93 are not in bash, and which are?
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
-15) Why does bash run a different version of `command' than
+16) Why does bash run a different version of `command' than
     `which command' says it will?
-16) Why doesn't bash treat brace expansions exactly like csh?
-17) Why doesn't bash have csh variable modifiers?
-18) How can I make my csh aliases work when I convert to bash?
-19) How can I pipe standard output and standard error from one command to
+17) Why doesn't bash treat brace expansions exactly like csh?
+18) Why doesn't bash have csh variable modifiers?
+19) How can I make my csh aliases work when I convert to bash?
+20) How can I pipe standard output and standard error from one command to
     another, like csh does with `|&'?
-20) Now that I've converted from ksh to bash, are there equivalents to
+21) Now that I've converted from ksh to bash, are there equivalents to
     ksh features like autoloaded functions and the `whence' command?
 
 Section E:  How can I get bash to do certain things, and why does bash do
             things the way it does?
 
-21) Why is the bash builtin `test' slightly different from /bin/test?
-22) Why does bash sometimes say `Broken pipe'?
-23) How can I get bash to read and display eight-bit characters?
-24) How do I write a function `x' to replace builtin command `x', but
+22) Why is the bash builtin `test' slightly different from /bin/test?
+23) Why does bash sometimes say `Broken pipe'?
+24) How can I get bash to read and display eight-bit characters?
+25) How do I write a function `x' to replace builtin command `x', but
     still invoke the command from within the function?
-25) When I have terminal escape sequences in my prompt, why does bash
+26) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
-26) How can I find the value of a shell variable whose name is the value
+27) How can I find the value of a shell variable whose name is the value
     of another shell variable?
-27) If I pipe the output of a command into `read variable', why doesn't
+28) If I pipe the output of a command into `read variable', why doesn't
     the output show up in $variable when the read command finishes?
-28) I have a bunch of shell scripts that use backslash-escaped characters
+29) I have a bunch of shell scripts that use backslash-escaped characters
     in arguments to `echo'.  Bash doesn't interpret these characters.  Why
     not, and how can I make it understand them?
-29) Why doesn't a while or for loop get suspended when I type ^Z?
-30) How can I make the bash `time' reserved word print timing output that
+30) Why doesn't a while or for loop get suspended when I type ^Z?
+31) How can I make the bash `time' reserved word print timing output that
     looks like the output from my system's /usr/bin/time?
 
 Section F:  Things to watch out for on certain Unix versions
 
-31) Why can't I use command line editing in my `cmdtool'?
-32) I built bash on Solaris 2.  Why do globbing expansions and filename
+32) Why can't I use command line editing in my `cmdtool'?
+33) I built bash on Solaris 2.  Why do globbing expansions and filename
     completion chop off the first few characters of each filename?
-33) Why does bash dump core after I interrupt username completion or
+34) Why does bash dump core after I interrupt username completion or
     `~user' tilde expansion on a machine running NIS?
-34) I'm running SVR4.2.  Why is the line erased every time I type `@'?
-35) Why does bash report syntax errors when my C News scripts use a
+35) I'm running SVR4.2.  Why is the line erased every time I type `@'?
+36) Why does bash report syntax errors when my C News scripts use a
     redirection before a subshell command?
 
 Section G:  Where do I go from here?
 
-36) How do I report bugs in bash, and where should I look for fixes and
+37) How do I report bugs in bash, and where should I look for fixes and
     advice?
-37) What kind of bash documentation is there?
-38) What's coming in future versions?
-39) What's on the bash `wish list'?
-40) When will the next release appear?
+38) What kind of bash documentation is there?
+39) What's coming in future versions?
+40) What's on the bash `wish list'?
+41) When will the next release appear?
 
 ----------
 Section A:  The Basics
@@ -119,7 +120,7 @@ of Case Western Reserve University.
 
 2)  What's the latest version?
 
-The latest version is 2.0, first made available on December 23, 1996.
+The latest version is 2.01, first made available on June 6, 1997.
 
 3)  Where can I get it?
 
@@ -127,15 +128,15 @@ Bash is the GNU project's shell, and so is available from the
 master GNU archive site, prep.ai.mit.edu, and its mirrors.  The
 latest version is also available for FTP from slc2.ins.cwru.edu,
 the maintainer's machine.  The following URLs tell how to get
-version 2.0:
+version 2.01:
 
-ftp://prep.ai.mit.edu/pub/gnu/bash-2.0.tar.gz
-ftp://slc2.ins.cwru.edu/pub/dist/bash-2.0.tar.gz
+ftp://prep.ai.mit.edu/pub/gnu/bash-2.01.tar.gz
+ftp://slc2.ins.cwru.edu/pub/dist/bash-2.01.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://prep.ai.mit.edu/pub/gnu/bash-doc-2.0.tar.gz
-ftp://slc2.ins.cwru.edu/pub/dist/bash-doc-2.0.tar.gz
+ftp://prep.ai.mit.edu/pub/gnu/bash-doc-2.01.tar.gz
+ftp://slc2.ins.cwru.edu/pub/dist/bash-doc-2.01.tar.gz
 
 4)  On what machines will bash run?
 
@@ -147,12 +148,49 @@ itself accordingly, using a script created by GNU autoconf.
 
 More information appears in the file `INSTALL' in the distribution.
 
-5) How can I build bash with gcc? 
+5) Will bash run on operating systems other than Unix?
+
+Configuration specifics for Unix-like systems such as QNX and
+LynxOS are included in the distribution.  Previous versions of
+bash have been ported to Minix, but I don't believe anyone has
+built bash-2.x on Minix yet.
+
+Bash has been ported to versions of Windows implementing the Win32
+programming interface.  This includes Windows 95 and Windows NT.
+The port was done by Cygnus Solutions as part of their GNU-Win32
+project.  For more information about the project, look at the URL
+
+http://www.cygnus.com/misc/gnu-win32
+
+Cygnus has ported bash-1.14.7.  Maybe someday they (or I) will port
+bash-2.01 (or later) to the GNU-Win32 environment.
+
+D. J. Delorie has ported bash-1.14.7 to run under MS-DOS, as part of
+the DJGPP project.  For more information on the project, see
+
+http://www.delorie.com/djgpp/
+
+I picked up a binary of bash-1.14.7 that is purported to work with
+the DJGPP V2 environment from
+
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147b.zip
+
+The corresponding source is
+
+ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147s.zip
+
+A port of bash-1.12 is available for OS/2 from
+
+ftp://hobbes.nmsu.edu/os2/unix/bash_112.zip
+
+I haven't looked at it.
+
+6) How can I build bash with gcc? 
 
 Bash configures to use gcc by default if it is available.  Read the
 file INSTALL in the distribution for more information.
 
-6)  How can I make bash my login shell?
+7)  How can I make bash my login shell?
 
 Some machines let you use `chsh' to change your login shell.  Other
 systems use `passwd -s'.  If one of these works for you, that's all
@@ -182,18 +220,23 @@ like
 
 to ensure that bash is exec'd only when the csh is interactive.
 
-If your login shell is sh or ksh, you have to do two things.  First, add
-a line similar to the above to ~/.profile:
+If your login shell is sh or ksh, you have to do two things.
 
-	[ -f /usr/gnu/bin/bash ] && exec /usr/gnu/bin/bash --login
-
-Next, create an empty file in your home directory named `.bash_profile'.
+First, create an empty file in your home directory named `.bash_profile'.
 The existence of this file will prevent the exec'd bash from trying to
 read ~/.profile, and re-execing itself over and over again.  ~/.bash_profile
-is the file bash tries to read initialization commands from when it is
-invoked as a login shell.
+is the first file bash tries to read initialization commands from when
+it is invoked as a login shell.
 
-7) I just changed my login shell to bash, and now I can't FTP into my
+Next, add a line similar to the above to ~/.profile:
+
+        [ -f /usr/gnu/bin/bash ] && exec /usr/gnu/bin/bash --login
+
+This will cause login shells to replace themselves with bash running as
+a login shell.  Once you have this working, you can copy your initialization
+code from ~/.profile to ~/.bash_profile.
+
+8) I just changed my login shell to bash, and now I can't FTP into my
    machine.  Why not?
 
 You must add the full pathname to bash to the file /etc/shells.  As
@@ -203,7 +246,7 @@ this before you can make bash your login shell.
 Most versions of ftpd use this file to prohibit `special' users
 such as `uucp' and `news' from using FTP. 
 
-8)  What's the `POSIX 1003.2 standard'?
+9)  What's the `POSIX 1003.2 standard'?
 
 POSIX is a name originally coined by Richard Stallman for a
 family of open system standards based on UNIX.  There are a
@@ -238,7 +281,7 @@ line editing.  Only vi-style line editing commands have been
 standardized; emacs editing commands were left out due to
 objections.
 
-9)  What is the bash `posix mode'?
+10)  What is the bash `posix mode'?
 
 Although bash is an implementation of the POSIX.2 shell
 specification, there are areas where the bash default behavior
@@ -255,10 +298,16 @@ Reference Manual.
 
 Section B:  The latest version
 
-10) What's new in version 2.0?
+11) What's new in version 2.01?
 
-This version contains extensive changes and new features.  Here's a
-short list:
+Bash-2.01 contains only a few new features.
+
+new `GROUPS' builtin array variable containing the user's group list
+new bindable readline commands: history-and-alias-expand-line and
+	alias-expand-line
+
+Bash-2.0 contains extensive changes and new features from bash-1.14.7.
+Here's a short list:
 
 new `time' reserved word to time pipelines, shell builtins, and
 	shell functions
@@ -295,15 +344,15 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-11) Are there any user-visible incompatibilities between bash-2.0 and
+12) Are there any user-visible incompatibilities between bash-2.01 and
     bash-1.14.7?
 
-There are a few incompatibilities between version 1.14.7 and version 2.0.
-They are detailed in the file COMPAT in the bash-2.0 distribution.
+There are a few incompatibilities between version 1.14.7 and version 2.01.
+They are detailed in the file COMPAT in the bash-2.01 distribution.
 
 Section C:  Differences from other Unix shells
 
-12) How does bash differ from sh, the Bourne shell?
+13) How does bash differ from sh, the Bourne shell?
 
 This is a non-comprehensive list of features that differentiate bash
 from the SVR4.2 shell.  The bash manual page explains these more
@@ -370,7 +419,6 @@ Things sh has that bash does not:
 	includes `stop' builtin (bash can use alias stop='kill -s STOP')
 	`newgrp' builtin
 	turns on job control if called as `jsh'
-	ulimit attempts to set both soft & hard limits if -S/-H not given
 	$TIMEOUT (like bash $TMOUT)
 	`^' is a synonym for `|'
 	new SVR4.2 sh builtins: mldmode, priv
@@ -386,11 +434,12 @@ Implementation differences:
 	sh does not allow traps on SIGALRM or SIGCHLD
 	bash allows multiple option arguments when invoked (e.g. -x -v);
 		sh allows only a single option argument (`sh -x -v' attempts
-		to open a file named `-v', and, on SunOS 4.1.4, dumps core)
+		to open a file named `-v', and, on SunOS 4.1.4, dumps core.
+		On Solaris 2, sh goes into an infinite loop.)
 	sh exits a script if any builtin fails; bash exits only if one of
 		the POSIX.2 `special' builtins fails
 
-13)  How does bash differ from the Korn shell, version ksh88?
+14)  How does bash differ from the Korn shell, version ksh88?
 
 Things bash has or uses that ksh88 does not:
 	long invocation options
@@ -438,15 +487,14 @@ Things ksh88 has or uses that bash does not:
 
 Implementation differences:
 	ksh runs last command of a pipeline in parent shell context
-	ksh ulimit sets hard and soft limits by default
 	bash has brace expansion by default (ksh88 compile-time option)
 	bash has fixed startup file for all interactive shells; ksh reads $ENV
 	bash has exported functions
 	bash command search finds functions before builtins
 
-14)  Which new features in ksh-93 are not in bash, and which are?
+15)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-2.0:
+New things in ksh-93 not in bash-2.01:
 	associative arrays
 	floating point arithmetic
 	++, --, comma arithmetic operators
@@ -466,11 +514,10 @@ New things in ksh-93 not in bash-2.0:
 	`fc' has been renamed to `hist'
 	read -t/-d
 	`.' can execute shell functions
-	ENV processed only for interactive shells
 
-New things in ksh-93 present in bash-2.0:
+New things in ksh-93 present in bash-2.01:
 	?: arithmetic operator
-	expansions: ${!param}, ${param:len[:offset]}, ${param/pat[/str]}
+	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]}
 	compound array assignment
 	the `!' reserved word
 	loadable builtins -- but ksh uses `builtin' while bash uses `enable'
@@ -488,10 +535,11 @@ New things in ksh-93 present in bash-2.0:
 	unalias -a
 	command and arithmetic substitution performed on PS1, PS4, and ENV
 	command name completion
+	ENV processed only for interactive shells
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
-15) Why does bash run a different version of `command' than
+16) Why does bash run a different version of `command' than
     `which command' says it will?
 
 `which' is actually a csh script that assumes you're running csh. 
@@ -500,7 +548,7 @@ those to determine which `command' will be invoked.  Since bash
 doesn't use any of those startup files, there's a good chance
 that your bash environment differs from your csh environment. 
 
-16) Why doesn't bash treat brace expansions exactly like csh?
+17) Why doesn't bash treat brace expansions exactly like csh?
 
 The only difference between bash and csh brace expansion is that
 bash requires a brace expression to contain at least one unquoted
@@ -511,7 +559,7 @@ compatibility.
 
 Bash, ksh, zsh, and pd-ksh all implement brace expansion this way. 
 
-17) Why doesn't bash have csh variable modifiers?
+18) Why doesn't bash have csh variable modifiers?
 
 Posix has specified a more powerful, albeit somewhat more cryptic,
 mechanism cribbed from ksh, and bash implements it.
@@ -566,7 +614,7 @@ Given
 	$b:e			${b##*.}	   xxx
 
 
-18) How can I make my csh aliases work when I convert to bash?
+19) How can I make my csh aliases work when I convert to bash?
 
 Bash uses a different syntax to support aliases than csh does. 
 The details can be found in the documentation.  We have provided
@@ -609,7 +657,7 @@ simply `cshtobash' to convert your normal interactive
 environment, or as `cshtobash ~/.login' to convert your login
 environment. 
 
-19) How can I pipe standard output and standard error from one command to
+20) How can I pipe standard output and standard error from one command to
     another, like csh does with `|&'?
 
 Use
@@ -619,7 +667,7 @@ The key is to remember that piping is performed before redirection, so
 file descriptor 1 points to the pipe when it is duplicated onto file
 descriptor 2.
 
-20) Now that I've converted from ksh to bash, are there equivalents to
+21) Now that I've converted from ksh to bash, are there equivalents to
     ksh features like autoloaded functions and the `whence' command?
 
 There are features in ksh-88 that do not have direct bash equivalents.
@@ -642,7 +690,7 @@ read var?prompt		read -p prompt var
 Section E:  How can I get bash to do certain things, and why does bash do
 	    things the way it does?
 
-21) Why is the bash builtin `test' slightly different from /bin/test?
+22) Why is the bash builtin `test' slightly different from /bin/test?
 
 The specific example used here is [ ! x -o x ], which is false.
 
@@ -671,7 +719,7 @@ of the 3 Arg case.
    
 As you can see, the test becomes (not (x or x)), which is false.
 
-22) Why does bash sometimes say `Broken pipe'?
+23) Why does bash sometimes say `Broken pipe'?
 
 If a sequence of commands appears in a pipeline, and one of the
 reading commands finishes before the writer has finished, the
@@ -686,7 +734,7 @@ will try to write on a pipe without a reader.  In that case, bash
 will print `Broken pipe' to stderr when ps is killed by a
 SIGPIPE. 
 
-23) How can I get bash to read and display eight-bit characters?
+24) How can I get bash to read and display eight-bit characters?
 
 This is a process requiring several steps.
 
@@ -720,7 +768,7 @@ this.  These variables can be set in your .inputrc or using the bash
 The `set' commands between the single quotes may also be placed
 in ~/.inputrc.
 
-24) How do I write a function `x' to replace builtin command `x', but
+25) How do I write a function `x' to replace builtin command `x', but
     still invoke the command from within the function?
 
 This is why the `command' and `builtin' builtins exist.  The
@@ -741,7 +789,7 @@ something like the following:
 This could also be written using `command' instead of `builtin';
 the version above is marginally more efficient. 
 
-25) When I have terminal escape sequences in my prompt, why does bash
+26) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
 
 Readline, the line editing library that bash uses, does not know
@@ -757,10 +805,10 @@ characters in the prompt strings take up no screen space.
 Use the \[ escape to begin a sequence of non-printing characters,
 and the \] escape to signal the end of such a sequence. 
 
-26) How can I find the value of a shell variable whose name is the value
+27) How can I find the value of a shell variable whose name is the value
     of another shell variable?
 
-Bash-2.0 supports this directly.  You can use 
+Bash-2.01 supports this directly.  You can use 
 
 	${!var}
 
@@ -782,13 +830,13 @@ parameter:
 
 The expansion of the quoted portions of this expression will be
 deferred until `eval' runs, while the `$#' will be expanded
-before `eval' is executed.  In bash-2.0,
+before `eval' is executed.  In bash-2.01,
 
 	echo ${!#}
 
 does the same thing.
 
-27) If I pipe the output of a command into `read variable', why doesn't
+28) If I pipe the output of a command into `read variable', why doesn't
     the output show up in $variable when the read command finishes?
 
 This has to do with the parent-child relationship between Unix
@@ -844,7 +892,7 @@ this.
 This is the general approach -- in most cases you will not need to
 set $IFS to a different value.
 
-28) I have a bunch of shell scripts that use backslash-escaped characters
+29) I have a bunch of shell scripts that use backslash-escaped characters
     in arguments to `echo'.  Bash doesn't interpret these characters.  Why
     not, and how can I make it understand them?
 
@@ -864,7 +912,7 @@ configure with the --enable-usg-echo-default option to turn this
 on.  Be aware that this will cause some of the tests run when you
 type `make tests' to fail.
 
-29) Why doesn't a while or for loop get suspended when I type ^Z?
+30) Why doesn't a while or for loop get suspended when I type ^Z?
 
 This is a consequence of how job control works on Unix.  The only
 thing that can be suspended is the process group.  This is a single
@@ -879,7 +927,7 @@ If you want to be able to stop the entire loop, you need to put it
 within parentheses, which will force the loop into a subshell that
 may be stopped (and subsequently restarted) as a single unit.
 
-30) How can I make the bash `time' reserved word print timing output that
+31) How can I make the bash `time' reserved word print timing output that
     looks like the output from my system's /usr/bin/time?
 
 The bash command timing code looks for a variable `TIMEFORMAT' and
@@ -913,7 +961,7 @@ The ksh format can be emulated with:
 
 Section F:  Things to watch out for on certain Unix versions
 
-31) Why can't I use command line editing in my `cmdtool'?
+32) Why can't I use command line editing in my `cmdtool'?
 
 The problem is `cmdtool' and bash fighting over the input.  When
 scrolling is enabled in a cmdtool window, cmdtool puts the tty in
@@ -941,7 +989,7 @@ The bash command-line editing should behave better in the new
 cmdtool.  If this works, you can put the assignment to TERMCAP
 in your bashrc file.
 
-32) I built bash on Solaris 2.  Why do globbing expansions and filename
+33) I built bash on Solaris 2.  Why do globbing expansions and filename
     completion chop off the first few characters of each filename?
 
 This is the consequence of building bash on SunOS 5 and linking
@@ -961,7 +1009,7 @@ If you have installed the Sun C compiler, you may also need to
 put /usr/ccs/bin and /opt/SUNWspro/bin into your $PATH before
 /usr/ucb.
 
-33) Why does bash dump core after I interrupt username completion or
+34) Why does bash dump core after I interrupt username completion or
     `~user' tilde expansion on a machine running NIS?
 
 This is a famous and long-standing bug in the SunOS YP (sorry, NIS)
@@ -984,7 +1032,7 @@ times; that's probably why this has never been fixed.  You can
 run configure with the `--without-gnu-malloc' option to use
 the C library malloc and avoid the problem.
 
-34) I'm running SVR4.2.  Why is the line erased every time I type `@'?
+35) I'm running SVR4.2.  Why is the line erased every time I type `@'?
 
 The `@' character is the default `line kill' character in most
 versions of System V, including SVR4.2.  You can change this
@@ -995,7 +1043,7 @@ change the line kill character to control-u, type
 
 where the `^' and `U' can be two separate characters.
 
-35) Why does bash report syntax errors when my C News scripts use a
+36) Why does bash report syntax errors when my C News scripts use a
     redirection before a subshell command?
 
 The actual command in question is something like
@@ -1007,7 +1055,7 @@ is, in fact, a syntax error.  Redirections may only precede `simple
 commands'.  A subshell construct such as the above is one of the shell's
 `compound commands'.  A redirection may only follow a compound command.
 
-The file CWRU/sh-redir-hack in the bash-2.0 distribution is an
+The file CWRU/sh-redir-hack in the bash-2.01 distribution is an
 (unofficial) patch to parse.y that will modify the grammar to
 support this construct.  It will not apply with `patch'; you must
 modify parse.y by hand.  Note that if you apply this, you must
@@ -1016,7 +1064,7 @@ number of reduce/reduce conflicts into the shell grammar.
 
 Section G:  Where do I go from here?
 
-36) How do I report bugs in bash, and where should I look for fixes and
+37) How do I report bugs in bash, and where should I look for fixes and
     advice?
 
 Use the `bashbug' script to report bugs.  It is built and
@@ -1034,7 +1082,7 @@ and problems also take place there.
 To reach the bash maintainers directly, send mail to
 bash-maintainers@prep.ai.mit.edu.
 
-37) What kind of bash documentation is there?
+38) What kind of bash documentation is there?
 
 First, look in the doc directory in the bash distribution.  It should
 contain at least the following files:
@@ -1056,19 +1104,23 @@ slc2.ins.cwru.edu in the `pub/bash' directory.
 
 Cameron Newham and Bill Rosenblatt have written a book on bash, published
 by O'Reilly and Associates.  The book is based on Bill Rosenblatt's Korn
-Shell book.  The title is ``Learning the Bash Shell''.  The ISBN number is
-1-56592-147-X.  Look for it in fine bookstores near you.  This book covers
-bash-1.14, but has an appendix describing some of the new features in
-bash-2.0. 
+Shell book.  The title is ``Learning the Bash Shell'', and the ISBN number
+is 1-56592-147-X.  Look for it in fine bookstores near you.  This book
+covers bash-1.14, but has an appendix describing some of the new features
+in bash-2.0.  There are rumors of a second edition of this book, describing
+bash-2.0 (and 2.01).  I do not know what ORA's publication schedule for
+this edition is.
 
-38) What's coming in future versions?
+39) What's coming in future versions?
 
 These are features I plan to include in a future version of bash.
 
 POSIX.2-style globbing character classes ([:alpha:], [:alnum:], etc.)
-a bash debugger (an incomplete, untested version is included with bash-2.0)
+POSIX.2-style globbing equivalence classes
+POSIX.2-style globbing collating symbols
+a bash debugger (a minimally-tested version is included with bash-2.01)
 
-39) What's on the bash `wish list' for future versions?
+40) What's on the bash `wish list' for future versions?
 
 These are features that may or may not appear in a future version of bash.
 
@@ -1084,7 +1136,7 @@ timeouts for the `read' builtin
 the ksh-93 ${!prefix*} and ${!prefix@} operators
 arithmetic ++ and -- prefix and postfix operators
 
-40) When will the next release appear?
+41) When will the next release appear?
 
 The next version will appear sometime in 1997.  Never make predictions.
 

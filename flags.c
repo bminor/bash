@@ -32,6 +32,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 extern int set_job_control ();
 #endif
 
+#if defined (RESTRICTED_SHELL)
+extern char *shell_name;
+#endif
+
 /* **************************************************************** */
 /*								    */
 /*			The Standard Sh Flags.			    */
@@ -238,12 +242,26 @@ change_flag (flag, on_or_off)
     {
 #if defined (JOB_CONTROL)
     case 'm':
-      set_job_control (on_or_off == '-');
+      set_job_control (on_or_off == FLAG_ON);
       break;
 #endif /* JOB_CONTROL */
 
+#if defined (RESTRICTED_SHELL)
+    case 'r':
+      if (on_or_off == FLAG_ON)
+        maybe_make_restricted (shell_name);
+      break;
+#endif
+
+#if defined (BANG_HISTORY)
+    case 'H':
+      if (on_or_off == FLAG_ON)
+	bash_initialize_history ();
+      break;
+#endif
+
     case 'p':
-      if (on_or_off == '+')
+      if (on_or_off == FLAG_OFF)
 	disable_priv_mode ();
 
       break;
@@ -267,4 +285,32 @@ which_set_flags ()
 
   temp[string_index] = '\0';
   return (temp);
+}
+
+void
+reset_shell_flags ()
+{
+  mark_modified_vars = exit_immediately_on_error = disallow_filename_globbing = 0;
+  place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
+  noclobber = unbound_vars_is_error = echo_input_at_read = 0;
+  echo_command_at_execute = jobs_m_flag = forced_interactive = 0;
+  no_symbolic_links = no_invisible_vars = privileged_mode = 0;
+
+  hashing_enabled = interactive_comments = 1;
+
+#if defined (JOB_CONTROL)
+  asynchronous_notification = 0;
+#endif
+
+#if defined (BANG_HISTORY)
+  history_expansion = 1;
+#endif
+
+#if defined (BRACE_EXPANSION)
+  brace_expansion = 1;
+#endif
+
+#if defined (RESTRICTED_SHELL)
+  restricted = 0;
+#endif
 }

@@ -23,17 +23,17 @@ $PRODUCES trap.c
 
 $BUILTIN trap
 $FUNCTION trap_builtin
-$SHORT_DOC trap [arg] [signal_spec] or trap -l
+$SHORT_DOC trap [arg] [signal_spec ...] or trap -l
 The command ARG is to be read and executed when the shell receives
 signal(s) SIGNAL_SPEC.  If ARG is absent all specified signals are
 reset to their original values.  If ARG is the null string each
 SIGNAL_SPEC is ignored by the shell and by the commands it invokes.
-If SIGNAL_SPEC is EXIT (0) the command ARG is executed on exit from
-the shell.  If SIGNAL_SPEC is DEBUG, ARG is executed after every
+If a SIGNAL_SPEC is EXIT (0) the command ARG is executed on exit from
+the shell.  If a SIGNAL_SPEC is DEBUG, ARG is executed after every
 command.  If ARG is `-p' then the trap commands associated with
 each SIGNAL_SPEC are displayed.  If no arguments are supplied or if
 only `-p' is given, trap prints the list of commands associated with
-each signal number.  SIGNAL_SPEC is either a signal name in <signal.h>
+each signal number.  Each SIGNAL_SPEC is either a signal name in <signal.h>
 or a signal number.  `trap -l' prints a list of signal names and their
 corresponding numbers.  Note that a signal can be sent to the shell
 with "kill -signal $$".
@@ -115,7 +115,8 @@ trap_builtin (list)
 
       operation = SET;
       first_arg = list->word->word;
-      if (first_arg && *first_arg && signal_object_p (first_arg))
+      if (first_arg && *first_arg && (*first_arg != '-' || first_arg[1]) &&
+		signal_object_p (first_arg))
 	operation = REVERT;
       else
 	{

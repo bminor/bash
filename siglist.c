@@ -23,7 +23,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
 
 #include <stdio.h>
-#include <sys/types.h>
+#include "bashtypes.h"
 #include <signal.h>
 
 #include "siglist.h"
@@ -208,6 +208,10 @@ initialize_siglist ()
 
 #if defined (SIGSOUND)
   sys_siglist[SIGSOUND] = "HFT sound sequence has completed";
+#endif
+
+#if defined (SIGINFO)
+  sys_siglist[SIGINFO] = "Information request";
 #endif
 
   for (i = 0; i < NSIG; i++)

@@ -50,9 +50,12 @@ $END
 #  include <unistd.h>
 #endif
 
+#include "../bashansi.h"
+
 #include "../shell.h"
 #include "../jobs.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 extern int interrupt_immediately;
 
@@ -71,6 +74,8 @@ wait_builtin (list)
 
   if (no_options (list))
     return (EX_USAGE);
+  if (list != loptend)
+    list = loptend;
 
   begin_unwind_frame ("wait_builtin");
   unwind_protect_int (interrupt_immediately);

@@ -1,8 +1,8 @@
-## -*- text -*- ####################################################
-#								   #
-# Makefile for the GNU Readline and History Libraries.		   #
-#								   #
-####################################################################
+## -*- text -*- #############################################################
+#								            #
+# Makefile for the Bash versions of the GNU Readline and History Libraries. #
+#								            #
+#############################################################################
 
 srcdir = @srcdir@
 VPATH = .:@srcdir@
@@ -20,7 +20,11 @@ RM = rm -f
 CP = cp
 MV = mv
 
-# See the file STANDALONE for the -D defines that readline understands
+SHELL = /bin/sh
+
+# Programs to make tags files.
+ETAGS = etags -tw
+CTAGS = ctags -tw
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
@@ -28,13 +32,12 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 
 DEFS = @DEFS@
+LOCAL_DEFS = @LOCAL_DEFS@
 
 INCLUDES = -I. -I$(BUILD_DIR) -I$(topdir) -I$(topdir)/lib
 
-CCFLAGS = $(DEFS) $(APP_CFLAGS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
+CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(APP_CFLAGS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
 
-# Here is a rule for making .o files from .c files that doesn't force
-# the type of the machine (like -sun3) into the flags.
 .c.o:
 	$(CC) -c $(CCFLAGS) $<
 
@@ -50,20 +53,20 @@ CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 	   $(srcdir)/undo.c $(srcdir)/macro.c $(srcdir)/input.c \
 	   $(srcdir)/callback.c $(srcdir)/terminal.c $(srcdir)/xmalloc.c \
 	   $(srcdir)/history.c $(srcdir)/histsearch.c $(srcdir)/histexpand.c \
-	   $(srcdir)/histfile.c $(srcdir)/nls.c \
-	   $(srcdir)/tilde.c \
+	   $(srcdir)/histfile.c $(srcdir)/nls.c $(srcdir)/search.c \
+	   $(srcdir)/shell.c $(srcdir)/tilde.c
 
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
-	   posixstat.h tilde.h rlconf.h tcap.h
+	   posixstat.h posixdir.h posixjmp.h tilde.h rlconf.h rltty.h \
+	   ansi_stdlib.h tcap.h
 
-HISTOBJ = history.o histexpand.o histfile.o histsearch.o
-TILDEOBJ= tilde.o
+HISTOBJ = history.o histexpand.o histfile.o histsearch.o shell.o
+TILDEOBJ = tilde.o
 OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
 	  rltty.o complete.o bind.o isearch.o display.o signals.o \
 	  util.o kill.o undo.o macro.o input.o callback.o terminal.o \
-	  nls.o xmalloc.o \
-	  $(HISTOBJ) $(TILDEOBJ)
+	  nls.o $(HISTOBJ) $(TILDEOBJ) xmalloc.o
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
@@ -84,12 +87,12 @@ INSTALLED_HEADERS = readline.h chardefs.h keymaps.h history.h tilde.h
 all: libreadline.a libhistory.a
 
 libreadline.a: $(OBJECTS)
-	$(RM) -f $@
+	$(RM) $@
 	$(AR) cr $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 libhistory.a: $(HISTOBJ) xmalloc.o
-	$(RM) -f $@
+	$(RM) $@
 	$(AR) cr $@ $(HISTOBJ) xmalloc.o
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
@@ -99,94 +102,113 @@ documentation: force
 
 force:
 
-# The rule for 'includes' is written funny so that the if statement
-# always returns TRUE unless there really was an error installing the
-# include files.
-install: installdirs libreadline.a
-	for file in $(INSTALLED_HEADERS) ; do \
-		$(INSTALL_DATA) $(srcdir)/$$file $(includedir)/readline ; \
-	done
-	-${MV} $(libdir)/libreadline.a $(libdir)/libreadline.old
-	${INSTALL_DATA} libreadline.a $(libdir)/libreadline.a
-	-test -n "$(RANLIB)" && $(RANLIB) -t $(bindir)/libreadline.a
-
-installdirs:	$(topdir)/support/mkdirs
-	$(SHELL) $(topdir)/support/mkdirs $(includedir) \
-		$(includedir)/readline $(libdir) $(infodir) $(man3dir)
+install:
+	@echo "This version of the readline library should not be installed."
 
 uninstall:
-	cd $(includedir)/readline && ${RM} -f ${INSTALLED_HEADERS}
-	cd $(libdir) && ${RM} -f libreadline.a libreadline.old
-
-tags:	force
-	etags $(CSOURCES) $(HSOURCES)
+	@echo "This version of the readline library should not be installed."
 
 TAGS:	force
-	ctags -x $(CSOURCES) $(HSOURCES) > $@
+	$(ETAGS) $(CSOURCES) $(HSOURCES)
 
-readline: readline.h rldefs.h chardefs.h
-readline: $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
-	  $(LOCAL_INCLUDES) -DTEST -o readline readline.c vi_mode.o funmap.o \
-	  keymaps.o -ltermcap
+tags:	force
+	$(CTAGS) $(CSOURCES) $(HSOURCES)
 
 clean:	force
 	$(RM) $(OBJECTS) *.a
 	-( cd doc && $(MAKE) $(MFLAGS) $@ )
 
-distclean realclean maintainer-clean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
-	$(RM) Makefile
-
 mostlyclean: clean
 	-( cd doc && $(MAKE) $(MFLAGS) $@ )
 
-# Dependencies
-readline.o: readline.c readline.h rldefs.h rlconf.h chardefs.h tcap.h
-readline.o: keymaps.h history.h
-vi_mode.o: rldefs.h rlconf.h readline.h history.h
-funmap.o: funmap.c readline.h rlconf.h
-keymaps.o: keymaps.c emacs_keymap.c vi_keymap.c keymaps.h chardefs.h rlconf.h
-history.o: history.h histlib.h
-histexpand.o: history.h histlib.h
-histsearch.o: history.h histlib.h
-histfile.o: history.h histlib.h
-isearch.o: readline.h history.h
-search.o: readline.h history.h
-display.o: readline.h history.h rldefs.h rlconf.h tcap.h
-complete.o: readline.h rldefs.h rlconf.h posixdir.h posixstat.h
-rltty.o: rldefs.h rlconf.h readline.h rltty.h
-bind.o: rldefs.h rlconf.h readline.h history.h
-signals.o: rldefs.h rlconf.h readline.h history.h
-parens.o: readline.h
-kill.o: rldefs.h rlconf.h readline.h history.h
-macro.o: rldefs.h rlconf.h readline.h history.h
-undo.o: rldefs.h rlconf.h readline.h history.h
-input.o: rldefs.h rlconf.h readline.h history.h
-callback.o: rlconf.h rldefs.h readline.h
-terminal.o: rlconf.h rldefs.h readline.h tcap.h history.h
+distclean maintainer-clean: clean
+	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	$(RM) Makefile
+	$(RM) TAGS tags
 
-bind.o: $(BUILD_DIR)/config.h
-callback.o: $(BUILD_DIR)/config.h
-complete.o: $(BUILD_DIR)/config.h
-display.o: $(BUILD_DIR)/config.h
-funmap.o: $(BUILD_DIR)/config.h
-histexpand.o: $(BUILD_DIR)/config.h
-histfile.o: $(BUILD_DIR)/config.h
-history.o: $(BUILD_DIR)/config.h
-histsearch.o: $(BUILD_DIR)/config.h
-input.o: $(BUILD_DIR)/config.h
-isearch.o: $(BUILD_DIR)/config.h
-keymaps.o: $(BUILD_DIR)/config.h
-kill.o: $(BUILD_DIR)/config.h
-macro.o: $(BUILD_DIR)/config.h
-parens.o: $(BUILD_DIR)/config.h
-readline.o: $(BUILD_DIR)/config.h
-rltty.o: $(BUILD_DIR)/config.h
-search.o: $(BUILD_DIR)/config.h
-signals.o: $(BUILD_DIR)/config.h
-tilde.o: $(BUILD_DIR)/config.h
-undo.o: $(BUILD_DIR)/config.h
-util.o: $(BUILD_DIR)/config.h
-vi_mode.o: $(BUILD_DIR)/config.h
-xmalloc.o: $(BUILD_DIR)/config.h
+# Dependencies
+bind.o: ansi_stdlib.h posixstat.h
+bind.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+bind.o: readline.h keymaps.h chardefs.h tilde.h
+bind.o: history.h
+callback.o: rlconf.h
+callback.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+callback.o: readline.h keymaps.h chardefs.h tilde.h
+complete.o: ansi_stdlib.h posixdir.h posixstat.h
+complete.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+complete.o: readline.h keymaps.h chardefs.h tilde.h
+display.o: ansi_stdlib.h posixstat.h
+display.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+display.o: tcap.h
+display.o: readline.h keymaps.h chardefs.h tilde.h
+display.o: history.h
+funmap.o: readline.h keymaps.h chardefs.h tilde.h
+funmap.o: rlconf.h ansi_stdlib.h
+funmap.o: ${BUILD_DIR}/config.h
+histexpand.o: ansi_stdlib.h
+histexpand.o: history.h histlib.h
+histexpand.o: ${BUILD_DIR}/config.h
+histfile.o: ansi_stdlib.h
+histfile.o: history.h histlib.h
+histfile.o: ${BUILD_DIR}/config.h
+history.o: ansi_stdlib.h
+history.o: history.h histlib.h
+history.o: ${BUILD_DIR}/config.h
+histsearch.o: ansi_stdlib.h
+histsearch.o: history.h histlib.h
+histsearch.o: ${BUILD_DIR}/config.h
+input.o: ansi_stdlib.h
+input.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+input.o: readline.h keymaps.h chardefs.h tilde.h
+isearch.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+isearch.o: readline.h keymaps.h chardefs.h tilde.h
+isearch.o: ansi_stdlib.h history.h
+keymaps.o: emacs_keymap.c vi_keymap.c
+keymaps.o: keymaps.h chardefs.h rlconf.h ansi_stdlib.h
+keymaps.o: readline.h keymaps.h chardefs.h tilde.h
+keymaps.o: ${BUILD_DIR}/config.h
+kill.o: ansi_stdlib.h
+kill.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+kill.o: readline.h keymaps.h chardefs.h tilde.h
+kill.o: history.h
+macro.o: ansi_stdlib.h
+macro.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+macro.o: readline.h keymaps.h chardefs.h tilde.h
+macro.o: history.h
+nls.o: ansi_stdlib.h
+nls.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+parens.o: rlconf.h
+parens.o: ${BUILD_DIR}/config.h
+parens.o: readline.h keymaps.h chardefs.h tilde.h
+readline.o: readline.h keymaps.h chardefs.h tilde.h
+readline.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+readline.o: history.h
+readline.o: posixstat.h ansi_stdlib.h posixjmp.h
+rltty.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+rltty.o: rltty.h
+rltty.o: readline.h keymaps.h chardefs.h tilde.h
+search.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+search.o: readline.h keymaps.h chardefs.h tilde.h
+search.o: ansi_stdlib.h history.h
+signals.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+signals.o: readline.h keymaps.h chardefs.h tilde.h
+signals.o: history.h
+terminal.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+terminal.o: tcap.h
+terminal.o: readline.h keymaps.h chardefs.h tilde.h
+terminal.o: history.h
+tilde.o: ansi_stdlib.h
+tilde.o: ${BUILD_DIR}/config.h
+tilde.o: tilde.h
+undo.o: ansi_stdlib.h
+undo.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+undo.o: readline.h keymaps.h chardefs.h tilde.h
+undo.o: history.h
+util.o: posixjmp.h ansi_stdlib.h
+util.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+util.o: readline.h keymaps.h chardefs.h tilde.h
+vi_mode.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+vi_mode.o: readline.h keymaps.h chardefs.h tilde.h
+vi_mode.o: history.h ansi_stdlib.h
+xmalloc.o: ${BUILD_DIR}/config.h
+xmalloc.o: ansi_stdlib.h

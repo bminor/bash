@@ -102,14 +102,19 @@ static char *localeexpand ();
 static int reserved_word_acceptable ();
 static int read_token ();
 static int yylex ();
+static int parse_arith_cmd ();
 static int read_token_word ();
 static void discard_parser_constructs ();
 
 static void report_syntax_error ();
 static void handle_eof_input_unit ();
 static void prompt_again ();
+#if 0
 static void reset_readline_prompt ();
+#endif
 static void print_prompt ();
+
+extern int yyerror ();
 
 /* Default prompt strings */
 char *primary_prompt = PPROMPT;
@@ -478,17 +483,17 @@ shell_command:	for_command
 			{ $$ = $1; }
 	;
 
-for_command:	FOR WORD newline_list DO list DONE
+for_command:	FOR WORD newline_list DO compound_list DONE
 			{ $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5); }
-	|	FOR WORD newline_list '{' list '}'
+	|	FOR WORD newline_list '{' compound_list '}'
 			{ $$ = make_for_command ($2, add_string_to_list ("$@", (WORD_LIST *)NULL), $5); }
-	|	FOR WORD ';' newline_list DO list DONE
+	|	FOR WORD ';' newline_list DO compound_list DONE
 			{ $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6); }
-	|	FOR WORD ';' newline_list '{' list '}'
+	|	FOR WORD ';' newline_list '{' compound_list '}'
 			{ $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6); }
-	|	FOR WORD newline_list IN word_list list_terminator newline_list DO list DONE
+	|	FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{ $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9); }
-	|	FOR WORD newline_list IN word_list list_terminator newline_list '{' list '}'
+	|	FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{ $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9); }
 	;
 
@@ -745,6 +750,7 @@ timespec:	TIME
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
+#define TOKEN_DEFAULT_INITIAL_SIZE 496
 #define TOKEN_DEFAULT_GROW_SIZE 512
 
 /* Shell meta-characters that, when unquoted, separate words. */
@@ -826,7 +832,7 @@ initialize_bash_input ()
 void
 init_yy_io (get, unget, type, name, location)
      Function *get, *unget;
-     int type;
+     enum stream_type type;
      char *name;
      INPUT_STREAM location;
 {
@@ -1222,7 +1228,8 @@ push_string (s, expand, ap)
   temp->next = pushed_string_list;
   pushed_string_list = temp;
 
-  ap->flags |= AL_BEINGEXPANDED;
+  if (ap)
+    ap->flags |= AL_BEINGEXPANDED;
 
   shell_input_line = s;
   shell_input_line_size = strlen (s);
@@ -1256,7 +1263,8 @@ pop_string ()
   t = pushed_string_list;
   pushed_string_list = pushed_string_list->next;
 
-  t->expander->flags &= ~AL_BEINGEXPANDED;
+  if (t->expander)
+    t->expander->flags &= ~AL_BEINGEXPANDED;
 
   free ((char *)t);
 }
@@ -1539,18 +1547,19 @@ shell_getc (remove_quoted_newline)
 #  if defined (BANG_HISTORY)
 	  history_expansion_inhibited = old_hist;
 #  endif
+	  if (expansions != shell_input_line)
+	    {
+	      free (shell_input_line);
+	      shell_input_line = expansions;
+	      shell_input_line_len = shell_input_line ?
+					strlen (shell_input_line) : 0;
+	      if (!shell_input_line_len)
+		current_command_line_count--;
 
-	  free (shell_input_line);
-	  shell_input_line = expansions;
-	  shell_input_line_len = shell_input_line ?
-				 strlen (shell_input_line) :
-				 0;
-	  if (!shell_input_line_len)
-	    current_command_line_count--;
-
-	  /* We have to force the xrealloc below because we don't know the
-	     true allocated size of shell_input_line anymore. */
-	  shell_input_line_size = shell_input_line_len;
+	      /* We have to force the xrealloc below because we don't know
+	         the true allocated size of shell_input_line anymore. */
+	      shell_input_line_size = shell_input_line_len;
+	    }
 	}
       /* XXX - this is grotesque */
       else if (remember_on_history && shell_input_line &&
@@ -1685,7 +1694,7 @@ execute_prompt_command (command)
   if (last_lastarg)
     last_lastarg = savestring (last_lastarg);
 
-  parse_and_execute (savestring (command), "PROMPT_COMMAND", 0);
+  parse_and_execute (savestring (command), "PROMPT_COMMAND", SEVAL_NONINT|SEVAL_NOHIST);
 
   last_shell_builtin = temp_last;
   this_shell_builtin = temp_this;
@@ -1976,7 +1985,10 @@ read_token (command)
     {
       result = token_to_read;
       if (token_to_read == WORD || token_to_read == ASSIGNMENT_WORD)
-	yylval.word = word_desc_to_read;
+	{
+	  yylval.word = word_desc_to_read;
+	  word_desc_to_read = (WORD_DESC *)NULL;
+	}
       token_to_read = 0;
       return (result);
     }
@@ -2066,9 +2078,29 @@ read_token (command)
 	    case '(':		/* ) */
 	      if (reserved_word_acceptable (last_read_token))
 		{
-		  parser_state |= PST_DBLPAREN;
-		  yylval.word = make_word ("let");
-		  return (WORD);	  
+		  int cmdtyp, sline;
+		  char *wval;
+
+		  sline = line_number;
+		  cmdtyp = parse_arith_cmd (&wval);
+		  if (cmdtyp == 1)	/* arithmetic command */
+		    {
+		      word_desc_to_read = make_word (wval);
+		      word_desc_to_read->flags = W_QUOTED;
+		      token_to_read = WORD;
+		      free (wval);
+		      yylval.word = make_word ("let");
+		      return (WORD);
+		    }
+		  else if (cmdtyp == 0)	/* nested subshell */
+		    {
+		      push_string (wval, 0, (alias_t *)NULL);
+		      if ((parser_state & PST_CASEPAT) == 0)
+			parser_state |= PST_SUBSHELL;
+		      return (character);
+		    }
+		  else			/* ERROR */
+		    return -1;
 		}
 	      break;
 #endif
@@ -2284,6 +2316,52 @@ parse_matched_pair (qc, open, close, lenp, flags)
   return ret;
 }
 
+#if defined (DPAREN_ARITHMETIC)
+/* We've seen a `(('.  Look for the matching `))'.  If we get it, return 1.
+   If not, assume it's a nested subshell for backwards compatibility and
+   return 0.  In any case, put the characters we've consumed into a locally-
+   allocated buffer and make *ep point to that buffer.  Return -1 on an
+   error, for example EOF. */
+static int
+parse_arith_cmd (ep)
+     char **ep;
+{
+  int exp_lineno, rval, c;
+  char *ttok, *token;
+  int ttoklen;
+
+  exp_lineno = line_number;
+  ttok = parse_matched_pair (0, '(', ')', &ttoklen, 0);
+  rval = 1;
+  if (ttok == &matched_pair_error)
+    return -1;
+  /* Check that the next character is the closing right paren.  If
+     not, this is a syntax error. ( */
+  if ((c = shell_getc (0)) != ')')
+    rval = 0;
+
+  token = xmalloc(ttoklen + 4);
+
+  /* (( ... )) -> "..." */
+  token[0] = (rval == 1) ? '"' : '(';
+  strncpy (token + 1, ttok, ttoklen - 1);	/* don't copy the final `)' */
+  if (rval == 1)
+    {
+      token[ttoklen] = '"';
+      token[ttoklen+1] = '\0';
+    }
+  else
+    {
+      token[ttoklen] = ')';
+      token[ttoklen+1] = c;
+      token[ttoklen+2] = '\0';
+    }
+  *ep = token;
+  FREE (ttok);
+  return rval;
+}
+#endif /* DPAREN_ARITHMETIC */
+
 static int
 read_token_word (character)
      int character;
@@ -2313,11 +2391,8 @@ read_token_word (character)
   char *ttok, *ttrans;
   int ttoklen, ttranslen;
 
-  if (token_buffer_size < TOKEN_DEFAULT_GROW_SIZE)
-    {
-      FREE (token);
-      token = xmalloc (token_buffer_size = TOKEN_DEFAULT_GROW_SIZE);
-    }
+  if (token_buffer_size < TOKEN_DEFAULT_INITIAL_SIZE)
+    token = xrealloc (token, token_buffer_size = TOKEN_DEFAULT_INITIAL_SIZE);
 
   token_index = 0;
   all_digits = digit (character);
@@ -2363,45 +2438,6 @@ read_token_word (character)
 	    }
 	}
 
-#if defined (DPAREN_ARITHMETIC)
-      /* Parse a ksh-style ((...)) expression. */
-      if (parser_state & PST_DBLPAREN)
-	{
-	  int exp_lineno;
-
-	  /* If we've already consumed a right paren that should be part of
-	     the expression, push it back so the paren matching code won't
-	     return prematurely. */
-	  if (character == '(')		/* ) */
-	    shell_ungetc (character);
-	  exp_lineno = line_number;
-	  ttok = parse_matched_pair (0, '(', ')', &ttoklen, 0);
-	  parser_state &= ~PST_DBLPAREN;
-	  if (ttok == &matched_pair_error)
-	    return -1;
-	  /* Check that the next character is the closing right paren.  If
-	     not, this is a syntax error. ( */
-	  if (shell_getc (0) != ')')
-	    {
-	      FREE (ttok);	/* ( */
-	      parser_error (exp_lineno, "missing closing `)' for arithmetic expression");
-	      return -1;
-	    }
-	  RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 4,
-				  token_buffer_size, TOKEN_DEFAULT_GROW_SIZE);
-	  token[token_index++] = '"';
-	  if (character != '(')		/* ) */
-	    token[token_index++] = character;
-	  strncpy (token + token_index, ttok, ttoklen - 1);
-	  token_index += ttoklen - 1;
-	  token[token_index++] = '"';
-	  FREE (ttok);
-	  dollar_present = all_digits = 0;
-	  quoted = 1;
-	  goto got_token;
-	}
-#endif /* DPAREN_ARITHMETIC */
-
       /* Parse a matched pair of quote characters. */
       if (shellquote (character))
 	{
@@ -2438,7 +2474,16 @@ read_token_word (character)
 	      if (peek_char == '{')		/* } */
 	        ttok = parse_matched_pair (cd, '{', '}', &ttoklen, 0);
 	      else if (peek_char == '(')		/* ) */
-		ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
+		{
+		  /* XXX - push and pop the `(' as a delimiter for use by
+		     the command-oriented-history code.  This way newlines
+		     appearing in the $(...) string get added to the
+		     history literally rather than causing a possibly-
+		     incorrect `;' to be added. */
+		  push_delimiter (dstack, peek_char);
+		  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
+		  pop_delimiter (dstack);
+		}
 	      else
 		ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
 	      if (ttok == &matched_pair_error)
@@ -2636,10 +2681,8 @@ ansiexpand (string, start, end, lenp)
 
   if (*temp)
     {
-      t = ansicstr (temp, tlen, (int *)NULL);
+      t = ansicstr (temp, tlen, (int *)NULL, lenp);
       free (temp);
-      if (lenp)
-	*lenp = strlen (t);
       return (t);
     }
   else
@@ -2893,7 +2936,7 @@ print_prompt ()
 	\[	begin a sequence of non-printing chars
 	\]	end a sequence of non-printing chars
 */
-#define PROMPT_GROWTH 50
+#define PROMPT_GROWTH 48
 char *
 decode_prompt_string (string)
      char *string;

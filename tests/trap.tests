@@ -1,0 +1,58 @@
+# test the trap code
+
+trap 'echo exiting' 0
+trap 'echo aborting' 1 2 3 6 15
+
+# make sure a user-specified subshell runs the exit trap, but does not
+# inherit the exit trap from a parent shell
+( trap 'echo subshell exit' 0; exit 0 )
+( exit 0 )
+
+trap
+
+func()
+{
+	trap 'echo [$LINENO] funcdebug' DEBUG
+	echo funcdebug line
+}
+
+trap 'echo [$LINENO] debug' DEBUG
+echo debug line
+
+trap
+
+func
+
+trap
+
+trap '' DEBUG
+
+trap
+
+trap - debug
+
+trap
+
+trap - HUP
+trap hup
+trap '' INT
+trap '' int
+
+trap
+
+# hmmm...should this set the handling to SIG_IGN for children, too?
+trap '' USR2
+./trap.sub1
+
+#
+# show that setting a trap on SIGCHLD is not disastrous.
+#
+set -o monitor
+
+trap 'echo caught a child death' SIGCHLD
+
+sleep 7 & sleep 6 & sleep 5 &
+
+wait
+
+trap -p SIGCHLD

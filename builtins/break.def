@@ -57,13 +57,17 @@ break_builtin (list)
 {
   int newbreak;
 
-  if (!check_loop_level ())
+  if (check_loop_level () == 0)
     return (EXECUTION_FAILURE);
 
-  newbreak = get_numeric_arg (list);
+  newbreak = get_numeric_arg (list, 1);
 
   if (newbreak <= 0)
-    return (EXECUTION_FAILURE);
+    {
+      builtin_error ("loop count must be > 0");
+      breaking = loop_level;
+      return (EXECUTION_FAILURE);
+    }
 
   if (newbreak > loop_level)
     newbreak = loop_level;
@@ -88,13 +92,17 @@ continue_builtin (list)
 {
   int newcont;
 
-  if (!check_loop_level ())
+  if (check_loop_level () == 0)
     return (EXECUTION_FAILURE);
 
-  newcont = get_numeric_arg (list);
+  newcont = get_numeric_arg (list, 1);
 
   if (newcont <= 0)
-    return (EXECUTION_FAILURE);
+    {
+      builtin_error ("loop count must be > 0");
+      breaking = loop_level;
+      return (EXECUTION_FAILURE);
+    }
 
   if (newcont > loop_level)
     newcont = loop_level;
@@ -110,7 +118,7 @@ static int
 check_loop_level ()
 {
 #if defined (BREAK_COMPLAINS)
-  if (!loop_level)
+  if (loop_level == 0)
     builtin_error ("only meaningful in a `for', `while', or `until' loop");
 #endif /* BREAK_COMPLAINS */
 

@@ -46,7 +46,10 @@ $END
 #include <glob/fnmatch.h>
 #include <glob/glob.h>
 
-static void show_builtin_command_help ();
+extern void builtin_error ();
+extern void builtin_usage ();
+
+static  void show_builtin_command_help ();
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern
@@ -58,13 +61,6 @@ help_builtin (list)
   register int i, j;
   char *pattern, *name;
   int plen, match_found;
-
-  if (list == 0)
-    {
-      show_shell_version (0);
-      show_builtin_command_help ();
-      return (EXECUTION_SUCCESS);
-    }
 
   /* Placeholder for future options. */
   reset_internal_getopt ();
@@ -78,6 +74,13 @@ help_builtin (list)
 	}
     }
   list = loptend;
+
+  if (list == 0)
+    {
+      show_shell_version (0);
+      show_builtin_command_help ();
+      return (EXECUTION_SUCCESS);
+    }
 
   /* We should consider making `help bash' do something. */
 

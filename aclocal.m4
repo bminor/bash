@@ -3,20 +3,6 @@ dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
 dnl
-dnl check whether cc can create executables
-dnl
-AC_DEFUN(BASH_CC_WORKS,
-[AC_CACHE_CHECK(whether CC works at all, bash_cv_prog_cc_works,	
-	[AC_TRY_RUN([main() { exit(0); }],
-		bash_cv_prog_cc_works=yes, bash_cv_prog_cc_works=no,
-		bash_cv_prog_cc_works=no)
-	]
-)
-if test "$bash_cv_prog_cc_works" = "no"; then
-AC_MSG_ERROR([Installation or configuration problem: C compiler cannot create executables])
-fi
-])
-
 dnl
 dnl Check if dup2() does not clear the close on exec flag
 dnl
@@ -497,7 +483,7 @@ if test $bash_cv_termcap_lib = gnutermcap; then
 LDFLAGS="$LDFLAGS -L./lib/termcap"
 TERMCAP_LIB="./lib/termcap/libtermcap.a"
 TERMCAP_DEP="./lib/termcap/libtermcap.a"
-elif test $bash_cv_termcap_lib = libtermcap; then
+elif test $bash_cv_termcap_lib = libtermcap && test -z "$prefer_curses"; then
 TERMCAP_LIB=-ltermcap
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncurses; then
@@ -601,6 +587,39 @@ struct dirent d; int z; z = d.d_ino;
 AC_MSG_RESULT($bash_cv_dirent_has_dino)
 if test $bash_cv_dirent_has_dino = yes; then
 AC_DEFINE(STRUCT_DIRENT_HAS_D_INO)
+fi
+])
+
+AC_DEFUN(BASH_STRUCT_DIRENT_D_FILENO,
+[AC_REQUIRE([AC_HEADER_DIRENT])
+AC_MSG_CHECKING(if struct dirent has a d_fileno member)
+AC_CACHE_VAL(bash_cv_dirent_has_d_fileno,
+[AC_TRY_COMPILE([
+#include <stdio.h>
+#include <sys/types.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#if defined(HAVE_DIRENT_H)
+# include <dirent.h>
+#else
+# define dirent direct
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif /* SYSNDIR */
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif /* SYSDIR */
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif /* HAVE_DIRENT_H */
+],[
+struct dirent d; int z; z = d.d_fileno;
+], bash_cv_dirent_has_d_fileno=yes, bash_cv_dirent_has_d_fileno=no)])
+AC_MSG_RESULT($bash_cv_dirent_has_d_fileno)
+if test $bash_cv_dirent_has_d_fileno = yes; then
+AC_DEFINE(STRUCT_DIRENT_HAS_D_FILENO)
 fi
 ])
 
@@ -834,6 +853,18 @@ AC_DEFINE(GWINSZ_IN_SYS_IOCTL)
 fi
 ])
 
+AC_DEFUN(BASH_STRUCT_WINSIZE,
+[AC_MSG_CHECKING(for struct winsize in sys/ioctl.h)
+AC_CACHE_VAL(bash_cv_struct_winsize_in_ioctl,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/ioctl.h>], [struct winsize x;],
+  bash_cv_struct_winsize_in_ioctl=yes,bash_cv_struct_winsize_in_ioctl=no)])
+AC_MSG_RESULT($bash_cv_struct_winsize_in_ioctl)
+if test $bash_cv_struct_winsize_in_ioctl = yes; then   
+AC_DEFINE(STRUCT_WINSIZE_IN_SYS_IOCTL)
+fi
+])
+
 AC_DEFUN(BASH_HAVE_TIOCSTAT,
 [AC_MSG_CHECKING(for TIOCSTAT in sys/ioctl.h)
 AC_CACHE_VAL(bash_cv_tiocstat_in_ioctl,
@@ -855,6 +886,23 @@ AC_CACHE_VAL(bash_cv_fionread_in_ioctl,
 AC_MSG_RESULT($bash_cv_fionread_in_ioctl)
 if test $bash_cv_fionread_in_ioctl = yes; then   
 AC_DEFINE(FIONREAD_IN_SYS_IOCTL)
+fi
+])
+
+dnl
+dnl See if speed_t is declared in <sys/types.h>.  Some versions of linux
+dnl require a definition of speed_t each time <termcap.h> is included,
+dnl but you can only get speed_t if you include <termios.h> (on some
+dnl versions) or <sys/types.h> (on others).
+dnl
+AC_DEFUN(BASH_MISC_SPEED_T,
+[AC_MSG_CHECKING(for speed_t in sys/types.h)
+AC_CACHE_VAL(bash_cv_speed_t_in_sys_types,
+[AC_TRY_COMPILE([#include <sys/types.h>], [speed_t x;],
+  bash_cv_speed_t_in_sys_types=yes,bash_cv_speed_t_in_sys_types=no)])
+AC_MSG_RESULT($bash_cv_speed_t_in_sys_types)
+if test $bash_cv_speed_t_in_sys_types = yes; then   
+AC_DEFINE(SPEED_T_IN_SYS_TYPES)
 fi
 ])
 
@@ -892,6 +940,13 @@ elif test $bash_cv_dev_fd = "whacky"; then
 fi
 ])
 
+dnl
+dnl Check for the presence of getpeername (the only networking function
+dnl bash currently requires) in libsocket.  If libsocket is present,
+dnl check for libnsl and add it to LIBS if it's there, since most
+dnl systems with libsocket require linking with libnsl as well.
+dnl This should only be called if getpeername was not found in libc.
+dnl
 AC_DEFUN(BASH_CHECK_SOCKLIB,
 [
 if test "X$bash_cv_have_socklib" = "X"; then
@@ -989,5 +1044,53 @@ AC_CACHE_VAL(bash_cv_kernel_rlimit,
 AC_MSG_RESULT($bash_cv_kernel_rlimit)
 if test $bash_cv_kernel_rlimit = yes; then
 AC_DEFINE(RLIMIT_NEEDS_KERNEL)
+fi
+])
+
+AC_DEFUN(BASH_FUNC_STRCOLL,
+[
+AC_MSG_CHECKING(whether or not strcoll and strcmp differ)
+AC_CACHE_VAL(bash_cv_func_strcoll_broken,
+[AC_TRY_RUN([
+#include <stdio.h>
+#if defined (HAVE_LOCALE_H)
+#include <locale.h>
+#endif
+
+main(c, v)
+int     c;
+char    *v[];
+{
+        int     r1, r2;
+        char    *deflocale, *defcoll;
+
+#ifdef HAVE_SETLOCALE
+        deflocale = setlocale(LC_ALL, "");
+	defcoll = setlocale(LC_COLLATE, "");
+#endif
+
+#ifdef HAVE_STRCOLL
+	/* These two values are taken from tests/glob-test. */
+        r1 = strcoll("abd", "aXd");
+#else
+	r1 = 0;
+#endif
+        r2 = strcmp("abd", "aXd");
+
+	/* These two should both be greater than 0.  It is permissible for
+	   a system to return different values, as long as the sign is the
+	   same. */
+
+        /* Exit with 1 (failure) if these two values are both > 0, since
+	   this tests whether strcoll(3) is broken with respect to strcmp(3)
+	   in the default locale. */
+	exit (r1 > 0 && r2 > 0);
+}
+], bash_cv_func_strcoll_broken=yes, bash_cv_func_strcoll_broken=no,
+   AC_MSG_ERROR(cannot check strcoll if cross compiling))
+])
+AC_MSG_RESULT($bash_cv_func_strcoll_broken)
+if test $bash_cv_func_strcoll_broken = yes; then
+AC_DEFINE(STRCOLL_BROKEN)
 fi
 ])

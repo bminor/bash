@@ -1,0 +1,38 @@
+# getopts tests
+# this should fail
+getopts
+echo $?
+getopts opts
+echo $?
+
+# maybe someday we will have a ksh93-like -a argument to set the name
+# used in error messages, but not yet
+getopts -a opts name
+
+${THIS_SH} ./getopts.sub1 -a -b bval one two three
+# make sure getopts works when there are more than 9 positional parameters
+${THIS_SH} ./getopts.sub1 -a -b bval one two three four five six seven eight nine ten eleven twelve
+${THIS_SH} ./getopts.sub1 -a -b 
+
+${THIS_SH} ./getopts.sub2 -ad -c cval three four five
+
+${THIS_SH} ./getopts.sub3
+
+# make sure that `-b bval' and `-bbval' are equivalent
+${THIS_SH} ./getopts.sub4 -a -b bval one two three
+${THIS_SH} ./getopts.sub4 -a -bbval one two three
+# this tests `silent' error reporting
+${THIS_SH} ./getopts.sub4 -a -b
+${THIS_SH} ./getopts.sub4 -a -c
+
+# make sure that `--' can be used to end the list of options
+${THIS_SH} ./getopts.sub4 -a -- -b bval one two three
+
+${THIS_SH} ./getopts.sub5 -a -c
+
+${THIS_SH} ./getopts.sub6 -a
+${THIS_SH} ./getopts.sub6 -a -c
+${THIS_SH} ./getopts.sub6 -ac
+echo $? # this should be 2
+
+${THIS_SH} ./getopts.sub7 -a

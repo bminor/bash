@@ -56,6 +56,7 @@ extern int errno;
 
 #if defined (JOB_CONTROL)
 extern int interactive;
+extern int job_control;
 extern int posixly_correct;
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
@@ -166,7 +167,7 @@ kill_builtin (list)
 	  builtin_error ("%s: no such pid", list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
-      else if (interactive)
+      else if (interactive || job_control)
 	/* Posix.2 says you can kill without job control active (4.32.4) */
 	{			/* Must be a job spec.  Check it out. */
 	  int job;

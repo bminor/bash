@@ -45,7 +45,7 @@ $END
 #include <config.h>
 
 #if defined (HISTORY)
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include <sys/file.h>
 #include "../posixstat.h"
 #include "../filecntl.h"
@@ -193,7 +193,7 @@ display_history (list)
   if (list)
     {
       limited = 1;
-      limit = get_numeric_arg (list);
+      limit = get_numeric_arg (list, 0);
     }
   else
     limited = limit = 0;
@@ -259,7 +259,7 @@ push_history (list)
 {
   char *s;
 
-  if (delete_last_history () == 0)
+  if (hist_last_line_added && delete_last_history () == 0)
     return;
   s = string_list (list);
   maybe_add_history (s);	/* Obeys HISTCONTROL setting. */
@@ -274,7 +274,7 @@ expand_and_print_history (list)
   char *s;
   int r, result;
 
-  if (delete_last_history () == 0)
+  if (hist_last_line_added && delete_last_history () == 0)
     return EXECUTION_FAILURE;
   result = EXECUTION_SUCCESS;
   while (list)

@@ -13,6 +13,7 @@ _steptrap() {
 	let " $_trace" &&
 		_msg "$PS4, line $_curline: ${_lines[$(($_curline-$_firstline+1))]}"
 
+
 	# if in step mode, decrement counter
 	let " $_steps >= 0" && let _steps="$_steps - 1"
 
@@ -87,7 +88,7 @@ _at_linenumbp() {
 	if [ -z "${_linebp}" ]; then
 		return 1
 	fi
-	echo "${curline}" | egrep -s "(${linebp%\|})" >/dev/null 2>&1
+	echo "${_curline}" | egrep "(${_linebp%\|})" >/dev/null 2>&1
 	return $?
 }
 
@@ -95,11 +96,12 @@ _at_linenumbp() {
 # search string brkpts to see if next line in script matches.
 _at_stringbp() {
 	local l;
+
 	if [ -z "$_stringbp" ]; then
 		return 1;
 	fi
 	l=${_lines[$_curline-$_firstline+1]}
-	echo "${l} | egrep -s "*(${stringbp%\|})*" >/dev/null 2>&1
+	echo "${l}" | egrep "*(${_stringbp%\|})*" >/dev/null 2>&1
 	return $?
 }
 
@@ -132,9 +134,9 @@ _setbp() {
 # list brkpts and break condition.
 _listbp() {
 	_msg "Breakpoints at lines:"
-	_msg "$(echo $_linebp | tr '|' ' ')"
+	_msg "${_linebp//\|/ }"
 	_msg "Breakpoints at strings:"
-	_msg "$(echo $_stringbp | tr '|' ' ')"
+	_msg "${_stringbp//\|/ }"
 	_msg "Break on condition:"
 	_msg "$_brcond"
 }

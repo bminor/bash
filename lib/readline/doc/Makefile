@@ -1,8 +1,12 @@
 # This makefile for Readline library documentation is in -*- text -*- mode.
 # Emacs likes it that way.
-TEXI2DVI = texi2dvi
-
 RM = rm -f
+
+MAKEINFO    = makeinfo
+TEXI2DVI    = texi2dvi
+TEXI2HTML   = texi2html
+QUIETPS     = #set this to -q to shut up dvips
+DVIPS       = dvips -D 300 $(QUIETPS) -o $@     # tricky
 
 INSTALL_DATA = cp
 infodir = /usr/local/info
@@ -15,39 +19,42 @@ INFOOBJ = readline.info history.info
 PSOBJ = readline.ps history.ps
 HTMLOBJ = readline.html history.html
 
-all: info dvi html
+all: info dvi html ps
+nodvi: info html
 
 readline.dvi: $(RLSRC)
 	$(TEXI2DVI) rlman.texinfo
 	mv rlman.dvi readline.dvi
 
 readline.info: $(RLSRC)
-	makeinfo --no-split -o $@ rlman.texinfo
+	$(MAKEINFO) --no-split -o $@ rlman.texinfo
 
 history.dvi: ${HISTSRC}
 	$(TEXI2DVI) hist.texinfo
 	mv hist.dvi history.dvi
 
 history.info: ${HISTSRC}
-	makeinfo --no-split -o $@ hist.texinfo
+	$(MAKEINFO) --no-split -o $@ hist.texinfo
 
 readline.ps:	readline.dvi
-	dvips -D 300 -o $@ readline.dvi
+	$(RM) $@
+	$(DVIPS) readline.dvi
 
 history.ps:	history.dvi
-	dvips -D 300 -o $@ history.dvi
+	$(RM) $@
+	$(DVIPS) history.dvi
 
 readline.html:	${RLSRC}
-	texi2html rlman.texinfo
+	$(TEXI2HTML) rlman.texinfo
 	sed -e 's:rlman.html:readline.html:' -e 's:rlman_toc.html:readline_toc.html:' rlman.html > readline.html
 	sed -e 's:rlman.html:readline.html:' -e 's:rlman_toc.html:readline_toc.html:' rlman_toc.html > readline_toc.html
-	rm -f rlman.html rlman_toc.html
+	$(RM) rlman.html rlman_toc.html
 
 history.html:	${HISTSRC}
-	texi2html hist.texinfo
+	$(TEXI2HTML) hist.texinfo
 	sed -e 's:hist.html:history.html:' -e 's:hist_toc.html:history_toc.html:' hist.html > history.html
 	sed -e 's:hist.html:history.html:' -e 's:hist_toc.html:history_toc.html:' hist_toc.html > history_toc.html
-	rm -f hist.html hist_toc.html
+	$(RM) hist.html hist_toc.html
 
 info:	$(INFOOBJ)
 dvi:	$(DVIOBJ)

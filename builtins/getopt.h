@@ -17,8 +17,8 @@
 
 /* XXX THIS HAS BEEN MODIFIED FOR INCORPORATION INTO BASH XXX */
 
-#ifndef _GETOPT_H
-#define _GETOPT_H 1
+#ifndef _SH_GETOPT_H
+#define _SH_GETOPT_H 1
 
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
@@ -57,4 +57,4 @@ extern int sh_badopt;
 extern int sh_getopt ();
 extern void sh_getopt_restore_state ();
 
-#endif /* _GETOPT_H */
+#endif /* _SH_GETOPT_H */

@@ -83,7 +83,7 @@ extern SHELL_VAR **all_visible_variables __P((void));
 extern SHELL_VAR **all_visible_functions __P((void));
 
 extern char **make_var_array __P((HASH_TABLE *));
-extern char **add_or_supercede __P((char *, char **));
+extern char **add_or_supercede_exported_var __P((char *, int));
 
 extern char *get_string_value __P((char *));
 extern char *make_variable_value __P((SHELL_VAR *, char *));

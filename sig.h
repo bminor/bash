@@ -111,6 +111,7 @@ extern sighandler termination_unwind_protect __P((int));
 extern sighandler sigint_sighandler __P((int));
 extern void initialize_signals __P((void));
 extern void reinitialize_signals __P((void));
+extern void initialize_terminating_signals __P((void));
 extern void reset_terminating_signals __P((void));
 extern void throw_to_top_level __P((void));
 extern void jump_to_top_level __P((int));

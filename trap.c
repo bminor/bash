@@ -26,11 +26,7 @@
 #include "bashtypes.h"
 #include "trap.h"
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "bashansi.h"
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -61,6 +57,7 @@ static void change_signal (), restore_signal ();
 extern int interactive_shell, interactive;
 extern int interrupt_immediately;
 extern int last_command_exit_value;
+extern int line_number;
 
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
@@ -80,6 +77,11 @@ int pending_traps[NSIG];
    parse_and_execute does not return normally after executing the
    trap command (e.g., when `return' is executed in the trap command). */
 int running_trap;
+
+/* The value of line_number when the trap started executing, since
+   parse_and_execute resets it to 1 and the trap command might want
+   it. */
+int trap_line_number;
 
 /* A value which can never be the target of a trap handler. */
 #define IMPOSSIBLE_TRAP_HANDLER (SigHandler *)initialize_traps
@@ -200,7 +202,7 @@ run_pending_traps ()
 	      CLRINTERRUPT;
 	    }
 	  else
-	    parse_and_execute (savestring (trap_list[sig]), "trap", 0);
+	    parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST);
 
 	  pending_traps[sig] = 0;
 
@@ -307,6 +309,8 @@ set_signal (sig, string)
   if (sig == DEBUG_TRAP || sig == EXIT_TRAP)
     {
       change_signal (sig, savestring (string));
+      if (sig == EXIT_TRAP && interactive == 0)
+	initialize_terminating_signals ();
       return;
     }
 
@@ -366,7 +370,8 @@ change_signal (sig, value)
      int sig;
      char *value;
 {
-  free_trap_command (sig);
+  if ((sigmodes[sig] & SIG_INPROGRESS) == 0)
+    free_trap_command (sig);
   trap_list[sig] = value;
 
   sigmodes[sig] |= SIG_TRAPPED;
@@ -409,9 +414,12 @@ restore_default_signal (sig)
 {
   if (sig == DEBUG_TRAP || sig == EXIT_TRAP)
     {
-      free_trap_command (sig);
+      if ((sig != DEBUG_TRAP) || (sigmodes[sig] & SIG_INPROGRESS) == 0)
+	free_trap_command (sig);
       trap_list[sig] = (char *)NULL;
       sigmodes[sig] &= ~SIG_TRAPPED;
+      if (sigmodes[sig] & SIG_INPROGRESS)
+	sigmodes[sig] |= SIG_CHANGED;
       return;
     }
 
@@ -491,7 +499,7 @@ run_exit_trap ()
       code = setjmp (top_level);
 
       if (code == 0)
-	parse_and_execute (trap_command, "exit trap", 0);
+	parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
       else if (code == EXITPROG)
         return (last_command_exit_value);
       else
@@ -516,7 +524,7 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int old_exit_value;
+  int old_exit_value, old_line_number;
 
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
@@ -531,7 +539,10 @@ _run_trap_internal (sig, tag)
 
       running_trap = sig + 1;
       old_exit_value = last_command_exit_value;
-      parse_and_execute (trap_command, tag, 0);
+      /* Need to copy the value of line_number because parse_and_execute
+	 resets it to 1, and the trap command might want it. */
+      trap_line_number = line_number;
+      parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
       last_command_exit_value = old_exit_value;
       running_trap = 0;
 

@@ -1,4 +1,5 @@
 abcde
+abcde
 abcde bdef
 abcde bdef
 declare -a DIRSTACK='()'
@@ -52,12 +53,12 @@ declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element
 this of
 this is a test of read using arrays
 declare -a DIRSTACK='()'
-declare -a rv='([0]="this" [1]="is" [2]="a" [3]="test" [4]="of" [5]="read" [6]="using" [7]="arrays")'
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
 declare -ar c='()'
 declare -a d='([1]="test test" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
+declare -a rv='([0]="this" [1]="is" [2]="a" [3]="test" [4]="of" [5]="read" [6]="using" [7]="arrays")'
 abde
 abde
 bbb
@@ -76,3 +77,21 @@ b c
 d
 e f g
 h
+/bin /usr/bin /usr/ucb /usr/local/bin . /sbin /usr/sbin
+bin bin ucb bin . sbin sbin
+bin
+/ / / / / /
+/
+\bin \usr/bin \usr/ucb \usr/local/bin . \sbin \usr/sbin
+\bin \usr\bin \usr\ucb \usr\local\bin . \sbin \usr\sbin
+\bin \usr\bin \usr\ucb \usr\local\bin . \sbin \usr\sbin
+4 -- 4
+7 -- 7
+55
+49
+6 -- 6
+42 14 44
+grep [ 123 ] *
+6 7 9
+6 7 9 5
+./array.tests: narray: unbound variable

@@ -20,10 +20,6 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-/* Define STANDALONE to get the /bin/test version.  Otherwise, you get
-   the shell builtin version. */
-/* #define STANDALONE */
-
 /* Define PATTERN_MATCHING to get the csh-like =~ and !~ pattern-matching
    binary operators. */
 /* #define PATTERN_MATCHING */
@@ -34,11 +30,7 @@
 
 #include <stdio.h>
 
-#if defined (STANDALONE)
-#  include <sys/types.h>
-#else
-#  include "bashtypes.h"
-#endif
+#include "bashtypes.h"
 
 #if defined (HAVE_LIMITS_H)
 #  include <limits.h>
@@ -56,26 +48,8 @@
 #include "posixstat.h"
 #include "filecntl.h"
 
-#if !defined (STANDALONE)
-#  include "shell.h"
-#  include "builtins/common.h"
-#  define main test_command
-#  define isint legal_number
-#  define getuid() current_user.uid
-#  define geteuid() current_user.euid
-#  define getgid() current_user.gid
-#  define getegid() current_user.egid
-#else /* STANDALONE */
-#  if !defined (S_IXUGO)
-#    define S_IXUGO 0111
-#  endif
-#  if defined (HAVE_UNISTD_H)
-#    include <unistd.h>
-#  endif /* HAVE_UNISTD_H */
-#  define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#  define digit(c)  ((c) >= '0' && (c) <= '9')
-#  define digit_value(c) ((c) - '0')
-#endif /* STANDALONE */
+#include "shell.h"
+#include "builtins/common.h"
 
 #if !defined (STRLEN)
 #  define STRLEN(s) ((s)[0] ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
@@ -93,16 +67,6 @@ extern int errno;
 #if !defined (member)
 #  define member(c, s) (int)((c) ? (char *)strchr ((s), (c)) : 0)
 #endif /* !member */
-
-/* Make gid_t and uid_t mean something for non-posix systems. */
-#if defined (STANDALONE) && !defined (_POSIX_VERSION) && !defined (HAVE_UID_T)
-#  if !defined (gid_t)
-#    define gid_t int
-#  endif
-#  if !defined (uid_t)
-#    define uid_t int
-#  endif
-#endif /* STANDALONE && !_POSIX_VERSION && !HAVE_UID_T */
 
 #if !defined (R_OK)
 #define R_OK 4
@@ -130,14 +94,10 @@ extern int errno;
 #define FALSE 0
 #define SHELL_BOOLEAN(value) (!(value))
 
-#if defined (STANDALONE)
-#  define test_exit(val) exit (val)
-#else
 static procenv_t test_exit_buf;
 static int test_error_return;
-#  define test_exit(val) \
+#define test_exit(val) \
 	do { test_error_return = val; longjmp (test_exit_buf, 1); } while (0)
-#endif /* STANDALONE */
 
 #if defined (AFS)
   /* We have to use access(2) for machines running AFS, because it's
@@ -153,9 +113,6 @@ static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-#if defined (STANDALONE)
-static int isint ();
-#endif
 static int unop ();
 static int binop ();
 static int unary_operator ();
@@ -175,12 +132,10 @@ static void
 test_syntax_error (format, arg)
      char *format, *arg;
 {
-#if !defined (STANDALONE)
   extern int interactive_shell;
   extern char *get_name_for_error ();
   if (interactive_shell == 0)
     fprintf (stderr, "%s: ", get_name_for_error ());
-#endif
   fprintf (stderr, "%s: ", argv[0]);
   fprintf (stderr, format, arg);
   fprintf (stderr, "\n");
@@ -204,7 +159,7 @@ test_stat (path, finfo)
     {
 #if !defined (HAVE_DEV_FD)
       long fd;
-      if (isint (path + 8, &fd))
+      if (legal_number (path + 8, &fd))
 	return (fstat ((int)fd, finfo));
       else
 	{
@@ -234,15 +189,11 @@ test_eaccess (path, mode)
      int mode;
 {
   struct stat st;
-  static int euid = -1;
 
   if (test_stat (path, &st) < 0)
     return (-1);
 
-  if (euid == -1)
-    euid = geteuid ();
-
-  if (euid == 0)
+  if (current_user.euid == 0)
     {
       /* Root can read or write any file. */
       if (mode != X_OK)
@@ -254,7 +205,7 @@ test_eaccess (path, mode)
 	return (0);
     }
 
-  if (st.st_uid == euid)        /* owner */
+  if (st.st_uid == current_user.euid)        /* owner */
     mode <<= 6;
   else if (group_member (st.st_gid))
     mode <<= 3;
@@ -263,74 +214,6 @@ test_eaccess (path, mode)
     return (0);
 
   return (-1);
-}
-
-#if defined (HAVE_GETGROUPS)
-/* The number of groups that this user is a member of. */
-static int ngroups, maxgroups;
-static GETGROUPS_T *group_array = (GETGROUPS_T *)NULL;
-#endif /* HAVE_GETGROUPS */
-
-#if !defined (NOGROUP)
-#  define NOGROUP (gid_t) -1
-#endif
-
-#if defined (HAVE_GETGROUPS)
-
-#  if defined (NGROUPS_MAX)
-#    define getmaxgroups() NGROUPS_MAX
-#  else /* !NGROUPS_MAX */
-#    if defined (NGROUPS)
-#      define getmaxgroups() NGROUPS
-#    else /* !NGROUPS */
-#      define getmaxgroups() 64
-#    endif /* !NGROUPS */
-#  endif /* !NGROUPS_MAX */
-
-#endif /* HAVE_GETGROUPS */
-
-/* Return non-zero if GID is one that we have in our groups list. */
-int
-group_member (gid)
-     gid_t gid;
-{
-  static gid_t pgid = (gid_t)NOGROUP;
-  static gid_t egid = (gid_t)NOGROUP;
-#if defined (HAVE_GETGROUPS)
-  register int i;
-#endif
-
-  if (pgid == (gid_t)NOGROUP)
-    pgid = (gid_t) getgid ();
-
-  if (egid == (gid_t)NOGROUP)
-    egid = (gid_t) getegid ();
-
-  if (gid == pgid || gid == egid)
-    return (1);
-
-#if defined (HAVE_GETGROUPS)
-  /* getgroups () returns the number of elements that it was able to
-     place into the array. */
-  if (ngroups == 0)
-    {
-      if (maxgroups == 0)
-	maxgroups = getmaxgroups ();
-      group_array = (GETGROUPS_T *)xrealloc (group_array, maxgroups * sizeof (GETGROUPS_T));
-      ngroups = getgroups (maxgroups, group_array);
-    }
-
-  /* In case of error, the user loses. */
-  if (ngroups <= 0)
-    return (0);
-
-  /* Search through the list looking for GID. */
-  for (i = 0; i < ngroups; i++)
-    if (gid == (gid_t)group_array[i])
-      return (1);
-#endif /* HAVE_GETGROUPS */
-
-  return (0);
 }
 
 /* Increment our position in the argument list.  Check that we're not
@@ -357,68 +240,6 @@ integer_expected_error (pch)
 {
   test_syntax_error ("%s: integer expression expected", pch);
 }
-
-#if defined (STANDALONE)
-/* Return non-zero if the characters pointed to by STRING constitute a
-   valid number.  Stuff the converted number into RESULT if RESULT is
-   a non-null pointer to a long. */
-static int
-isint (string, result)
-     register char *string;
-     long *result;
-{
-  int sign;
-  long value;
-
-  sign = 1;
-  value = 0;
-
-  if (result)
-    *result = 0;
-
-  /* Skip leading whitespace characters. */
-  while (whitespace (*string))
-    string++;
-
-  if (!*string)
-    return (0);
-
-  /* We allow leading `-' or `+'. */
-  if (*string == '-' || *string == '+')
-    {
-      if (!digit (string[1]))
-	return (0);
-
-      if (*string == '-')
-	sign = -1;
-
-      string++;
-    }
-
-  while (digit (*string))
-    {
-      if (result)
-	value = (value * 10) + digit_value (*string);
-      string++;
-    }
-
-  /* Skip trailing whitespace, if any. */
-  while (whitespace (*string))
-    string++;
-
-  /* Error if not at end of string. */
-  if (*string)
-    return (0);
-
-  if (result)
-    {
-      value *= sign;
-      *result = value;
-    }
-
-  return (1);
-}
-#endif /* STANDALONE */
 
 /*
  * term - parse a term and return 1 or 0 depending on whether the term
@@ -471,9 +292,21 @@ term ()
       return (value);
     }
 
+#if 1
   /* are there enough arguments left that this could be dyadic? */
   if ((pos + 3 <= argc) && binop (argv[pos + 1]))
     value = binary_operator ();
+#else
+  /* If this is supposed to be a binary operator, make sure there are
+     enough arguments and fail if there are not. */
+  if ((pos + 1 < argc) && binop (argv[pos+1]))
+    {
+      if (pos + 3 <= argc)
+        value = binary_operator ();
+      else
+        beyond ();
+    }
+#endif
 
   /* Might be a switch type argument */
   else if (argv[pos][0] == '-' && argv[pos][2] == '\0')
@@ -517,9 +350,9 @@ arithcomp (s, t, op)
 {
   long l, r;
 
-  if (isint (s, &l) == 0)
+  if (legal_number (s, &l) == 0)
     integer_expected_error (s);
-  if (isint (t, &r) == 0)
+  if (legal_number (t, &r) == 0)
     integer_expected_error (t);
   switch (op)
     {
@@ -666,12 +499,12 @@ unary_operator ()
     case 'O':			/* File is owned by you? */
       unary_advance ();
       return (test_stat (argv[pos - 1], &stat_buf) == 0 &&
-	      (uid_t) geteuid () == (uid_t) stat_buf.st_uid);
+	      (uid_t) current_user.euid == (uid_t) stat_buf.st_uid);
 
     case 'G':			/* File is owned by your group? */
       unary_advance ();
       return (test_stat (argv[pos - 1], &stat_buf) == 0 &&
-	      (gid_t) getegid () == (gid_t) stat_buf.st_gid);
+	      (gid_t) current_user.egid == (gid_t) stat_buf.st_gid);
 
     case 'f':			/* File is a file? */
       unary_advance ();
@@ -756,7 +589,7 @@ unary_operator ()
 
     case 't':	/* File fd is a terminal?  fd defaults to stdout. */
       advance (0);
-      if (pos < argc && isint (argv[pos], &r))
+      if (pos < argc && legal_number (argv[pos], &r))
 	{
 	  advance (0);
 	  return (isatty ((int)r));
@@ -771,11 +604,9 @@ unary_operator ()
       unary_advance ();
       return (argv[pos - 1][0] == '\0');
 
-#if !defined (STANDALONE)
     case 'o':
       unary_advance ();
       return (minus_o_option_value (argv[pos - 1]) == 1);
-#endif /* !STANDALONE */
     }
 }
 
@@ -842,9 +673,9 @@ binop (s)
 
   if (s[0] == '=' && s[1] == '\0')
     return (1);		/* '=' */
-  else if (s[1] == '\0' && (s[0] == '<' || s[0] == '>'))  /* string <, > */
+  else if ((s[0] == '<' || s[0] == '>') && s[1] == '\0')  /* string <, > */
     return (1);
-  else if (s[2] == '\0' && s[1] == '=' && (s[0] == '=' || s[0] == '!'))
+  else if ((s[0] == '=' || s[0] == '!') && s[1] == '=' && s[2] == '\0')
     return (1);		/* `==' and `!=' */
 #if defined (PATTERN_MATCHING)
   else if (s[2] == '\0' && s[1] == '~' && (s[0] == '=' || s[0] == '!'))
@@ -902,9 +733,7 @@ unop (op)
     case 'p': case 'r': case 's': case 't': case 'u':
     case 'w': case 'x': case 'z':
     case 'G': case 'L': case 'O': case 'S':
-#if !defined (STANDALONE)
     case 'o':
-#endif
       return (1);
     }
   return (0);
@@ -1015,20 +844,18 @@ posixtest ()
  *	test expr
  */
 int
-main (margc, margv)
+test_command (margc, margv)
      int margc;
      char **margv;
 {
   int value;
 
-#if !defined (STANDALONE)
   int code;
 
   code = setjmp (test_exit_buf);
 
   if (code)
     return (test_error_return);
-#endif /* !STANDALONE */
 
   argv = margv;
 

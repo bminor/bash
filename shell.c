@@ -318,7 +318,7 @@ main (argc, argv, env)
 
   if (want_initial_help)
     {
-      show_shell_usage (stdout);
+      show_shell_usage (stdout, 1);
       exit (EXECUTION_SUCCESS);
     }
 
@@ -341,11 +341,6 @@ main (argc, argv, env)
 
   if (dump_translatable_strings)
     read_but_dont_execute = 1;
-
-  /* If we're in a strict Posix.2 mode, turn on interactive comments and
-     other Posix.2 things. */
-  if (posixly_correct)
-    posix_initialize (posixly_correct);
 
   if (running_setuid && privileged_mode == 0)
     disable_priv_mode ();
@@ -400,6 +395,17 @@ main (argc, argv, env)
     }
 #endif /* CLOSE_FDS_AT_LOGIN */
 
+  /* If we're in a strict Posix.2 mode, turn on interactive comments and
+     other Posix.2 things. */
+  if (posixly_correct)
+    {
+      posix_initialize (posixly_correct);
+#if defined (READLINE)
+      if (interactive_shell)
+	posix_readline_initialize (posixly_correct);
+#endif
+    }
+
   /* From here on in, the shell must be a normal functioning shell.
      Variables from the environment are expected to be set, etc. */
   shell_initialize ();
@@ -428,7 +434,13 @@ main (argc, argv, env)
       if (code == EXITPROG)
 	exit_shell (last_command_exit_value);
       else
-	locally_skip_execution++;
+	{
+#if defined (JOB_CONTROL)
+	  /* Reset job control, since run_startup_files turned it off. */
+	  set_job_control (interactive_shell);
+#endif
+	  locally_skip_execution++;
+	}
     }
 
   arg_index = top_level_arg_index;
@@ -452,7 +464,13 @@ main (argc, argv, env)
 
   /* If we are invoked as `sh', turn on Posix mode. */
   if (act_like_sh)
-    posix_initialize (posixly_correct = 1);
+    {
+      posix_initialize (posixly_correct = 1);
+#if defined (READLINE)
+      if (interactive_shell)
+        posix_readline_initialize (posixly_correct);
+#endif
+    }
 
 #if defined (RESTRICTED_SHELL)
   /* Turn on the restrictions after parsing the startup files. */
@@ -568,6 +586,7 @@ parse_long_options (argv, arg_start, arg_end)
 	  if (longarg)
 	    {
 	      report_error ("%s: unrecognized option", argv[arg_index]);
+	      show_shell_usage (stderr, 0);
 	      exit (EX_USAGE);
 	    }
 	  break;		/* No such argument.  Maybe flag arg. */
@@ -621,7 +640,7 @@ parse_shell_options (argv, arg_start, arg_end)
 	      o_option = argv[next_arg];
 	      if (o_option == 0)
 		{
-		  list_minus_o_opts ();
+		  list_minus_o_opts (-1);
 		  break;
 		}
 	      if (set_minus_o_option (on_or_off, o_option) != EXECUTION_SUCCESS)
@@ -637,6 +656,7 @@ parse_shell_options (argv, arg_start, arg_end)
 	      if (change_flag (arg_character, on_or_off) == FLAG_ERROR)
 		{
 		  report_error ("%c%c: unrecognized option", on_or_off, arg_character);
+		  show_shell_usage (stderr, 0);
 		  exit (EX_USAGE);
 		}
 	    }
@@ -730,6 +750,10 @@ execute_env_file (env_file)
 static void
 run_startup_files ()
 {
+#if defined (JOB_CONTROL)
+  int old_job_control;
+#endif
+
   /* get the rshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && local_pending_command && isnetconn (fileno (stdin)))
@@ -752,6 +776,11 @@ run_startup_files ()
 	execute_env_file (get_string_value ("BASH_ENV"));
       return;
     }
+
+#if defined (JOB_CONTROL)
+  /* Startup files should be run without job control enabled. */
+  old_job_control = set_job_control (0);
+#endif
 
   /* Interactive shell or `-su' shell. */
   if (posixly_correct == 0)		  /* bash, sh */
@@ -791,6 +820,10 @@ run_startup_files ()
       if (interactive_shell && privileged_mode == 0 && sourced_env++ == 0)
         execute_env_file (get_string_value ("ENV"));
     }
+
+#if defined (JOB_CONTROL)
+  set_job_control (old_job_control);
+#endif
 }
 
 #if defined (RESTRICTED_SHELL)
@@ -880,7 +913,7 @@ run_one_command (command)
 	  programming_error ("run_one_command: bad jump: code %d", code);
 	}
     }
-   return (parse_and_execute (savestring (command), "-c", -1));
+   return (parse_and_execute (savestring (command), "-c", SEVAL_NOHIST));
 }
 #endif /* ONESHOT */
 
@@ -902,6 +935,7 @@ bind_args (argv, arg_start, arg_end, start_index)
 	  /* Posix.2 4.56.3 says that the first argument after sh -c command
 	     becomes $0, and the rest of the arguments become $1...$n */
 	  shell_name = savestring (args->word->word);
+	  FREE (dollar_vars[0]);
 	  dollar_vars[0] = savestring (args->word->word);
 	  remember_args (args->next, 1);
 	}
@@ -924,10 +958,11 @@ static int
 open_shell_script (script_name)
      char *script_name;
 {
-  int fd;
+  int fd, e;
   char *filename, *path_filename;
   unsigned char sample[80];
   int sample_len;
+  struct stat sb;
 
   free (dollar_vars[0]);
   dollar_vars[0] = savestring (script_name);
@@ -936,6 +971,7 @@ open_shell_script (script_name)
   fd = open (filename, O_RDONLY);
   if ((fd < 0) && (errno == ENOENT) && (absolute_program (filename) == 0))
     {
+      e = errno;
       /* If it's not in the current directory, try looking through PATH
 	 for it. */
       path_filename = find_path_file (script_name);
@@ -945,11 +981,13 @@ open_shell_script (script_name)
 	  filename = path_filename;
 	  fd = open (filename, O_RDONLY);
 	}
+      else
+	errno = e;
     }
 
   if (fd < 0)
     {
-      int e = errno;
+      e = errno;
       file_error (filename);
       exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
@@ -961,7 +999,19 @@ open_shell_script (script_name)
 	 according to the same tests done by execute_simple_command (),
 	 and report an error and exit if it is. */
       sample_len = read (fd, sample, sizeof (sample));
-      if (sample_len > 0 && (check_binary_file (sample, sample_len)))
+      if (sample_len < 0)
+	{
+	  e = errno;
+	  if ((fstat (fd, &sb) == 0) && S_ISDIR (sb.st_mode))
+	    internal_error ("%s: is a directory", filename);
+          else
+	    {
+	      errno = e;
+	      file_error (filename);
+	    }
+	  exit (EX_NOEXEC);
+	}
+      else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
 	  internal_error ("%s: cannot execute binary file", filename);
 	  exit (EX_BINARY_FILE);
@@ -972,17 +1022,20 @@ open_shell_script (script_name)
 
 #if defined (BUFFERED_INPUT)
   default_buffered_input = fd;
+#  if 0
+  /* This is never executed. */
   if (default_buffered_input == -1)
     {
       file_error (filename);
       exit (EX_NOTFOUND);
     }
+#  endif
   SET_CLOSE_ON_EXEC (default_buffered_input);
 #else /* !BUFFERED_INPUT */
   /* Open the script.  But try to move the file descriptor to a randomly
      large one, in the hopes that any descriptors used by the script will
       not match with ours. */
-  fd = move_to_high_fd (fd, 0);
+  fd = move_to_high_fd (fd, 0, -1);
 
   default_input = fdopen (fd, "r");
 
@@ -998,6 +1051,7 @@ open_shell_script (script_name)
 #endif /* !BUFFERED_INPUT */
 
   if (interactive_shell == 0 || isatty (fd) == 0)
+    /* XXX - does this really need to be called again here? */
     init_noninteractive ();
   else
     {
@@ -1102,38 +1156,10 @@ init_noninteractive ()
 #endif /* JOB_CONTROL */
 }
 
-/* Do whatever is necessary to initialize the shell.
-   Put new initializations in here. */
-static void
-shell_initialize ()
+void
+get_current_user_info ()
 {
   struct passwd *entry;
-  char hostname[256];
-
-  /* Line buffer output for stderr and stdout. */
-  setlinebuf (stderr);
-  setlinebuf (stdout);
-
-  /* Sort the array of shell builtins so that the binary search in
-     find_shell_builtin () works correctly. */
-  initialize_shell_builtins ();
-
-  /* Initialize the trap signal handlers before installing our own
-     signal handlers.  traps.c:restore_original_signals () is responsible
-     for restoring the original default signal handlers.  That function
-     is called when we make a new child. */
-  initialize_traps ();
-  initialize_signals ();
-
-  /* It's highly unlikely that this will change. */
-  if (current_host_name == 0)
-    {
-      /* Initialize current_user.name and current_host_name. */
-      if (gethostname (hostname, 255) < 0)
-	current_host_name = "??host??";
-      else
-	current_host_name = savestring (hostname);
-    }
 
   /* Don't fetch this more than once. */
   if (current_user.user_name == 0)
@@ -1155,6 +1181,45 @@ shell_initialize ()
 	}
       endpwent ();
     }
+}
+
+/* Do whatever is necessary to initialize the shell.
+   Put new initializations in here. */
+static void
+shell_initialize ()
+{
+  char hostname[256];
+
+  /* Line buffer output for stderr and stdout. */
+  setlinebuf (stderr);
+  setlinebuf (stdout);
+
+  /* Sort the array of shell builtins so that the binary search in
+     find_shell_builtin () works correctly. */
+  initialize_shell_builtins ();
+
+  /* Initialize the trap signal handlers before installing our own
+     signal handlers.  traps.c:restore_original_signals () is responsible
+     for restoring the original default signal handlers.  That function
+     is called when we make a new child. */
+  initialize_traps ();
+  initialize_signals ();
+
+  /* It's highly unlikely that this will change. */
+  if (current_host_name == 0)
+    {
+      /* Initialize current_host_name. */
+      if (gethostname (hostname, 255) < 0)
+	current_host_name = "??host??";
+      else
+	current_host_name = savestring (hostname);
+    }
+
+  /* Initialize the stuff in current_user that comes from the password
+     file.  We don't need to do this right away if the shell is not
+     interactive. */
+  if (interactive_shell)
+    get_current_user_info ();
 
   /* Initialize our interface to the tilde expander. */
   tilde_initialize ();
@@ -1168,11 +1233,13 @@ shell_initialize ()
   initialize_shell_variables (shell_environment, privileged_mode||running_setuid);
 #endif
 
+#if 0
   /* Initialize filename hash tables. */
   initialize_filename_hashing ();
+#endif
 
   /* Initialize the data structures for storing and running jobs. */
-  initialize_jobs ();
+  initialize_job_control (0);
 
   /* Initialize input streams to null. */
   initialize_bash_input ();
@@ -1230,13 +1297,15 @@ shell_reinitialize ()
 }
 
 static void
-show_shell_usage (fp)
+show_shell_usage (fp, extra)
      FILE *fp;
+     int extra;
 {
   int i;
   char *set_opts, *s, *t;
 
-  fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
+  if (extra)
+    fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
   fprintf (fp, "Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n",
 	     shell_name, shell_name);
   fputs ("GNU long options:\n", fp);
@@ -1263,9 +1332,12 @@ show_shell_usage (fp)
       free (set_opts);
     }
 
-  fprintf (fp, "Type `%s -c \"help set\"' for more information about shell options.\n", shell_name);
-  fprintf (fp, "Type `%s -c help' for more information about shell builtin commands.\n", shell_name);
-  fprintf (fp, "Use the `bashbug' command to report bugs.\n");
+  if (extra)
+    {
+      fprintf (fp, "Type `%s -c \"help set\"' for more information about shell options.\n", shell_name);
+      fprintf (fp, "Type `%s -c help' for more information about shell builtin commands.\n", shell_name);
+      fprintf (fp, "Use the `bashbug' command to report bugs.\n");
+    }
 }
 
 /* The second and subsequent conditions must match those used to decide

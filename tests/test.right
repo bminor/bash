@@ -14,6 +14,10 @@ t -d run-all
 1
 t -d /etc
 0
+t -d ""
+1
+b -d ""
+1
 t -e noexist
 1
 t -e run-all
@@ -102,6 +106,8 @@ t 200 -eq 200
 0
 t 34 -eq 222
 1
+t -32 -eq 32
+1
 t 200 -ne 200
 1
 t 34 -ne 222
@@ -145,6 +151,8 @@ t -w /dev/fd/1
 t -w /dev/fd/2
 0
 t
+1
+b
 1
 t 12 -eq 34
 1
@@ -191,4 +199,64 @@ t true -a -X
 t ( -E )
 0
 t ( "" )
+1
+t ! -z "$z"
+0
+t ! -n "$z"
+1
+t "$zero"
+1
+t ! "$zero"
+0
+b "$zero"
+1
+b ! "$zero"
+0
+t -G /tmp/test.group
+0
+t -h /tmp/test.symlink
+0
+t 4+3 -eq 7
+./test-tests: test: 4+3: integer expression expected
+1
+b 4-5 -eq 7
+./test-tests: [: 4+3: integer expression expected
+1
+t 9 -eq 4+5
+./test-tests: test: 4+5: integer expression expected
+1
+b 9 -eq 4+5
+./test-tests: [: 4+5: integer expression expected
+1
+t A -eq 7
+./test-tests: test: A: integer expression expected
+1
+b A -eq 7
+./test-tests: [: A: integer expression expected
+1
+t 9 -eq B
+./test-tests: test: B: integer expression expected
+1
+b 9 -eq B
+./test-tests: [: B: integer expression expected
+1
+t ( 1 = 2
+./test-tests: test: `)' expected
+1
+b ( 1 = 2
+./test-tests: [: `)' expected, found ]
+1
+./test-tests: test: a: unary operator expected
+1
+./test-tests: test: b: binary operator expected
+1
+./test-tests: test: -A: unary operator expected
+1
+./test-tests: test: too many arguments
+1
+./test-tests: test: too many arguments
+1
+./test-tests: [: missing `]'
+1
+./test-tests: test: (: unary operator expected
 1

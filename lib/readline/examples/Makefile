@@ -1,6 +1,6 @@
 # This is the Makefile for the examples subdirectory of readline. -*- text -*-
 #
-EXECUTABLES = fileman rltest
+EXECUTABLES = fileman rltest rl
 CFLAGS  = -g -I../.. -I..
 LDFLAGS = -g -L..
 
@@ -8,6 +8,10 @@ LDFLAGS = -g -L..
 	$(CC) $(CFLAGS) -c $<
 
 all: $(EXECUTABLES)
+
+
+rl: rl.o
+	$(CC) $(LDFLAGS) -o $@ rl.o -lreadline -ltermcap
 
 fileman: fileman.o
 	$(CC) $(LDFLAGS) -o $@ fileman.o -lreadline -ltermcap
@@ -17,3 +21,4 @@ rltest: rltest.o
 
 fileman.o: fileman.c
 rltest.o: rltest.c
+rl.o: rl.c

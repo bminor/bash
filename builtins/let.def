@@ -75,6 +75,7 @@ let_builtin (list)
      WORD_LIST *list;
 {
   long ret;
+  int expok;
 
   if (list == 0)
     {
@@ -83,17 +84,22 @@ let_builtin (list)
     }
 
   for (; list; list = list->next)
-    ret = evalexp (list->word->word);
+    {
+      ret = evalexp (list->word->word, &expok);
+      if (expok == 0)
+	return (EXECUTION_FAILURE);
+    }
 
   return ((ret == 0L) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 
+#ifdef INCLUDE_UNUSED
 int
 exp_builtin (list)
      WORD_LIST *list;
 {
   char *exp;
-  int ret;
+  int ret, expok;
 
   if (list == 0)
     {
@@ -102,7 +108,8 @@ exp_builtin (list)
     }
 
   exp = string_list (list);
-  ret = evalexp (exp);
-  free (exp);
-  return ((ret == 0L) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  ret = evalexp (exp, &expok);
+  (void)free (exp);
+  return (((ret == 0L) || (expok == 0)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
+#endif

@@ -1,0 +1,78 @@
+export LC_ALL=C
+export LANG=C
+
+set -- one two three
+echo before execscript.sub: "$@"
+echo calling execscript.sub
+./execscript.sub aa bb cc dd ee
+echo after execscript.sub with args: $?
+./execscript.sub
+echo after execscript.sub without args: $?
+
+# set up a fixed path so we know notthere will not be found
+PATH=/usr/bin:/bin:/usr/local/bin:
+export PATH
+
+notthere
+echo $?
+
+# this is iffy, since the error messages may vary from system to system
+${THIS_SH} notthere
+echo $?
+
+# /bin/sh should be there on all systems
+${THIS_SH} /bin/sh
+echo $?
+
+# try executing a directory
+/
+echo $?
+
+${THIS_SH} /
+echo $?
+
+# try sourcing a directory
+. /
+echo $?
+
+. ${THIS_SH} 2>/dev/null
+echo $?
+
+. /dev/null
+echo $?
+
+# kill two birds with one test -- test out the BASH_ENV code
+echo echo this is bashenv > /tmp/bashenv
+export BASH_ENV=/tmp/bashenv
+${THIS_SH} ./execscript.sub3
+rm -f /tmp/bashenv
+unset BASH_ENV
+
+# we're resetting the $PATH to empty, so this should be last
+PATH=
+
+notthere
+echo $?
+
+command notthere
+echo $?
+
+command -p notthere
+echo $?
+
+# but -p should guarantee that we find all the standard utilities, even
+# with an empty or unset $PATH
+command -p sh -c 'echo this is $0'
+unset PATH
+command -p sh -c 'echo this is $0'
+
+# a bug in bash before bash-2.01 caused PATH to be set to the empty string
+# when command -p was run with PATH unset
+echo ${PATH-unset}
+
+echo "echo ok" | ${THIS_SH} -t
+
+${THIS_SH} ./execscript.sub2
+echo $?
+
+${THIS_SH} ./execscript.sub4

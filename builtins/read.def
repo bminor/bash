@@ -164,7 +164,7 @@ read_builtin (list)
 	{
 	  if (rlbuf && rlbuf[rlind] == '\0')
 	    {
-	      free (rlbuf);
+	      xfree (rlbuf);
 	      rlbuf = (char *)0;
 	    }
 	  if (rlbuf == 0)
@@ -247,13 +247,28 @@ read_builtin (list)
 	  assign_array_var_from_word_list (var, alist);
 	  dispose_words (alist);
 	}
-      free (input_string);
+      xfree (input_string);
       return (retval);
     }
 #endif /* ARRAY_VARS */ 
 
-  if (!list)
+  /* If there are no variables, save the text of the line read to the
+     variable $REPLY.  ksh93 strips leading and trailing IFS whitespace,
+     so that `read x ; echo "$x"' and `read ; echo "$REPLY"' behave the
+     same way, but I believe that the difference in behaviors is useful
+     enough to not do it.  Without the bash behavior, there is no way
+     to read a line completely without interpretation or modification.
+     If you disagree, change the occurrences of `#if 0' to `#if 1' below. */
+  if (list == 0)
     {
+#if 0
+      orig_input_string = input_string;
+      for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && issep(*t); t++)
+	;
+      input_string = t;
+      input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
+#endif
+
       if (saw_escape)
 	{
 	  t = dequote_string (input_string);
@@ -263,7 +278,11 @@ read_builtin (list)
       else
 	var = bind_variable ("REPLY", input_string);
       var->attributes &= ~att_invisible;
+#if 0
+      free (orig_input_string);
+#else
       free (input_string);
+#endif
       return (retval);
     }
 

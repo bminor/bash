@@ -78,6 +78,9 @@ $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
 #if defined (BANG_HISTORY)
             histexpand   same as -H
 #endif /* BANG_HISTORY */
+#if defined (HISTORY)
+            history      enable command history
+#endif
             ignoreeof    the shell will not exit upon reading EOF
             interactive-comments
                          allow comments to appear in interactive commands
@@ -110,12 +113,12 @@ $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
 #if defined (BRACE_EXPANSION)
     -B  the shell will perform brace expansion
 #endif /* BRACE_EXPANSION */
+    -C  If set, disallow existing regular files to be overwritten
+        by redirection of output.
 #if defined (BANG_HISTORY)
     -H  Enable ! style history substitution.  This flag is on
         by default.
 #endif /* BANG_HISTORY */
-    -C  If set, disallow existing regular files to be overwritten
-        by redirection of output.
     -P  If set, do not follow symbolic links when executing commands
         such as cd which change the current directory.
 
@@ -127,6 +130,7 @@ ARGs are given, all shell variables are printed.
 $END
 
 static int set_ignoreeof ();
+static int set_posix_mode ();
 
 #if defined (READLINE)
 static int set_edit_mode ();
@@ -183,7 +187,7 @@ struct {
 #endif
   { "ignoreeof", &ignoreeof, set_ignoreeof, (Function *)NULL },
   { "interactive-comments", &interactive_comments, (Function *)NULL, (Function *)NULL },
-  { "posix", &posixly_correct, (Function *)NULL, (Function *)NULL },
+  { "posix", &posixly_correct, set_posix_mode, (Function *)NULL },
 #if defined (READLINE)
   { "emacs", (int *)NULL, set_edit_mode, get_edit_mode },
   { "vi", (int *)NULL, set_edit_mode, get_edit_mode },
@@ -281,6 +285,20 @@ set_ignoreeof (on_or_off, option_name)
     unbind_variable ("IGNOREEOF");
   sv_ignoreeof ("IGNOREEOF");
   return 0;
+}
+
+static int
+set_posix_mode (on_or_off, option_name)
+     int on_or_off;
+     char *option_name;
+{
+  posixly_correct = on_or_off == FLAG_ON;
+  if (posixly_correct == 0)
+    unbind_variable ("POSIXLY_CORRECT");
+  else
+    bind_variable ("POSIXLY_CORRECT", "y");
+  sv_strict_posix ("POSIXLY_CORRECT");
+  return (0);
 }
 
 #if defined (READLINE)
@@ -435,7 +453,9 @@ set_shellopts ()
 	vptr += strlen (binary_o_options[i].name);
 	value[vptr++] = ':';
       }
-  value[--vptr] = '\0';		/* cut off trailing colon */
+  if (vptr)
+    vptr--;			/* cut off trailing colon */
+  value[vptr] = '\0';
 
   v = find_variable ("SHELLOPTS");
   if (v)
@@ -465,13 +485,32 @@ void
 initialize_shell_options ()
 {
   char *temp;
+  SHELL_VAR *var;
 
+  var = find_variable ("SHELLOPTS");
   /* set up any shell options we may have inherited. */
-  if (temp = get_string_value ("SHELLOPTS"))
-    parse_shellopts (temp);
+  if (var && imported_p (var))
+    {
+      temp = (array_p (var)) ? (char *)NULL : savestring (value_cell (var));
+      if (temp)
+	{
+	  parse_shellopts (temp);
+	  free (temp);
+	}
+    }
 
   /* Set up the $SHELLOPTS variable. */
   set_shellopts ();
+}
+
+/* Reset the values of the -o options that are not also shell flags. */
+void
+reset_shell_options ()
+{
+#if defined (HISTORY)
+  remember_on_history = 1;
+#endif
+  ignoreeof = posixly_correct = 0;
 }
 
 /* Set some flags from the word values in the input list.  If LIST is empty,
@@ -690,6 +729,12 @@ unset_builtin (list)
 	  unset_array++;
 	}
 #endif
+
+      if (legal_identifier (name) == 0)
+        {
+          builtin_error ("`%s': not a valid identifier", name);
+          NEXT_VARIABLE ();
+        }
 
       var = unset_function ? find_function (name) : find_variable (name);
 

@@ -19,6 +19,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #  include <unistd.h>
 #  if defined (_SC_PAGESIZE)
 #    define getpagesize() sysconf(_SC_PAGESIZE)
+#  else
+#    if defined (_SC_PAGE_SIZE)
+#      define getpagesize() sysconf(_SC_PAGE_SIZE)
+#    endif /* _SC_PAGE_SIZE */
 #  endif /* _SC_PAGESIZE */
 #endif
 

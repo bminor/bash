@@ -26,6 +26,8 @@ $PRODUCES echo.c
 #  include <unistd.h>
 #endif
 
+#include "../bashansi.h"
+
 #include <stdio.h>
 #include "../shell.h"
 
@@ -72,8 +74,8 @@ int
 echo_builtin (list)
      WORD_LIST *list;
 {
-  int display_return, do_v9, i;
-  char *temp;
+  int display_return, do_v9, i, len;
+  char *temp, *s;
 
 #if defined (DEFAULT_ECHO_TO_USG)
 /* System V machines already have a /bin/sh with a v9 behaviour.  We
@@ -130,13 +132,21 @@ just_echo:
 
   while (list)
     {
-      i = 0;
-      temp = do_v9 ? ansicstr (list->word->word, STRLEN (list->word->word), &i)
+      i = len = 0;
+      temp = do_v9 ? ansicstr (list->word->word, STRLEN (list->word->word), &i, &len)
 		   : list->word->word;
       if (temp)
 	{
-	  printf ("%s", temp);
+	  if (do_v9)
+	    {
+	      for (s = temp; len > 0; len--)
+		putchar (*s++);
+	    }
+	  else	    
+	    printf ("%s", temp);
+#if defined (SunOS5)
 	  fflush (stdout);	/* Fix for bug in SunOS 5.5 printf(3) */
+#endif
 	}
       if (do_v9 && temp)
 	free (temp);

@@ -20,15 +20,17 @@ RM = rm
 CP = cp
 MV = mv
 
-CFLAGS = @CFLAGS@ @LOCAL_CFLAGS@
+CFLAGS = @CFLAGS@
+LOCAL_CFLAGS = @LOCAL_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
 DEFS = @DEFS@
+LOCAL_DEFS = @LOCAL_DEFS@
 
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
 
-CCFLAGS = $(CFLAGS) $(DEFS) $(CPPFLAGS) ${INCLUDES}
+CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
 
 .c.o:
 	$(CC) -c $(CCFLAGS) $<
@@ -94,5 +96,5 @@ mostlyclean: clean
 #								     #
 ######################################################################
 
-tilde.o: tilde.h tilde.c
+tilde.o: tilde.h $(topdir)/ansi_stdlib.h
 tilde.o: $(BUILD_DIR)/config.h

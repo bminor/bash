@@ -32,12 +32,14 @@
 #include "bashansi.h"
 #include "posixstat.h"
 #include "filecntl.h"
+
 #include "shell.h"
 #include "flags.h"
 #include "input.h"
 #include "parser.h"	/* for the struct dstack stuff. */
 #include "pathexp.h"	/* for the struct ignorevar stuff */
 #include "builtins/common.h"
+
 #include <readline/history.h>
 #include <glob/fnmatch.h>
 
@@ -48,6 +50,8 @@
 #if !defined (errno)
 extern int errno;
 #endif
+
+extern int glob_pattern_p ();
 
 static int histignore_item_func ();
 
@@ -124,6 +128,11 @@ int force_append_history;
    Value of 2 means save all lines that do not match the last line saved. */
 int history_control;
 
+/* Set to 1 if the last command was added to the history list successfully
+   as a separate history entry; set to 0 if the line was ignored or added
+   to a previous entry as part of command-oriented-history processing. */
+int hist_last_line_added;
+
 #if defined (READLINE)
 /* If non-zero, and readline is being used, the user is offered the
    chance to re-edit a failed history expansion. */
@@ -133,7 +142,8 @@ int history_reediting;
    line with history substitution.  Reload it into the editing buffer
    instead and let the user further edit and confirm with a newline. */
 int hist_verify;
-#endif
+
+#endif /* READLINE */
 
 /* Variables declared in other files used here. */
 extern int interactive;
@@ -144,15 +154,36 @@ extern struct dstack dstack;
 extern char *extract_colon_unit ();
 extern char *history_delimiting_chars ();
 extern void maybe_add_history ();	/* forward declaration */
+extern void bash_add_history ();	/* forward declaration */
 
-static void bash_add_history ();
 static int history_should_ignore ();
+
+/* Is the history expansion starting at string[i] one that should not
+   be expanded? */
+static int
+bash_history_inhibit_expansion (string, i)
+     char *string;
+     int i;
+{
+  /* The shell uses ! as a pattern negation character in globbing [...]
+     expressions, so let those pass without expansion. */
+  if (i > 0 && (string[i - 1] == '[') && member (']', string + i + 1))
+    return (1);
+  /* The shell uses ! as the indirect expansion character, so let those
+     expansions pass as well. */
+  else if (i > 1 && string[i - 1] == '{' && string[i - 2] == '$' &&
+	     member ('}', string + i + 1))
+    return (1);
+  else
+    return (0);
+}
 
 void
 bash_initialize_history ()
 {
   history_quotes_inhibit_expansion = 1;
   history_search_delimiter_chars = ";&()|<>";
+  history_inhibit_expansion_function = bash_history_inhibit_expansion;
 }
 
 void
@@ -164,6 +195,7 @@ bash_history_reinit (interact)
   history_expansion_inhibited = 1;
 #endif
   remember_on_history = interact != 0;
+  history_inhibit_expansion_function = bash_history_inhibit_expansion;
 }
 
 void
@@ -182,6 +214,7 @@ bash_history_enable ()
 #if defined (BANG_HISTORY)
   history_expansion_inhibited = 0;
 #endif
+  history_inhibit_expansion_function = bash_history_inhibit_expansion;
   sv_history_control ("HISTCONTROL");
   sv_histignore ("HISTIGNORE");
 }
@@ -211,6 +244,7 @@ load_history ()
     }
 }
 
+#ifdef INCLUDE_UNUSED
 /* Write the existing history out to the history file. */
 void
 save_history ()
@@ -233,6 +267,7 @@ save_history ()
       sv_histsize ("HISTFILESIZE");
     }
 }
+#endif
 
 int
 maybe_append_history (filename)
@@ -365,7 +400,11 @@ pre_process_line (line, print_changes, addit)
 	    {
 	      if (expanded < 0)
 		internal_error (history_value);
+#if defined (READLINE)
 	      else if (hist_verify == 0)
+#else
+	      else
+#endif
 		fprintf (stderr, "%s\n", history_value);
 	    }
 
@@ -403,8 +442,10 @@ pre_process_line (line, print_changes, addit)
   if (addit && remember_on_history && *return_value)
     maybe_add_history (return_value);
 
+#if 0
   if (expanded == 0)
     return_value = savestring (line);
+#endif
 
   return (return_value);
 }
@@ -417,7 +458,7 @@ maybe_add_history (line)
   int should_add;
   HIST_ENTRY *temp;
 
-  should_add = 0;
+  should_add = hist_last_line_added = 0;
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command when
@@ -461,7 +502,7 @@ maybe_add_history (line)
    remembering;  when non-zero, and LINE is not the first line of a
    complete parser construct, append LINE to the last history line instead
    of adding it as a new line. */
-static void
+void
 bash_add_history (line)
      char *line;
 {
@@ -512,6 +553,7 @@ bash_add_history (line)
 
   if (add_it)
     {
+      hist_last_line_added = 1;
       add_history (line);
       history_lines_this_session++;
     }

@@ -31,11 +31,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "bashansi.h"
 
 #include "shell.h"
 #include <readline/readline.h>
@@ -103,7 +99,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	     top level, and there isn't a consistent prefix. */
 	  result_size += 1;
 	  result = xrealloc (result, result_size);
-	  strcpy (result, "{");
+	  result[0] = '{'; result[1] = '\0';
 	  flag++;
 	}
 

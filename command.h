@@ -37,6 +37,7 @@ enum r_instruction {
 #define AMBIGUOUS_REDIRECT  -1
 #define NOCLOBBER_REDIRECT  -2
 #define RESTRICTED_REDIRECT -3	/* can only happen in restricted shells. */
+#define HEREDOC_REDIRECT    -4  /* here-doc temp file can't be created */
 
 #define OUTPUT_REDIRECT(ri) \
   (ri == r_output_direction || ri == r_input_output || ri == r_err_and_out)
@@ -121,6 +122,8 @@ typedef struct element {
 #define CMD_NO_FORK	   0x40	/* Don't fork; just call execve */
 #define CMD_TIME_PIPELINE  0x80 /* Time a pipeline */
 #define CMD_TIME_POSIX	   0x100 /* time -p; use POSIX.2 time output spec. */
+#define CMD_AMPERSAND	   0x200 /* command & */
+#define CMD_STDIN_REDIR	   0x400 /* async command needs implicit </dev/null */
 
 /* What a command looks like. */
 typedef struct command {

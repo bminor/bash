@@ -80,7 +80,7 @@ extern BASH_INPUT bash_input;
 
 /* Functions from parse.y. */
 extern void initialize_bash_input __P((void));
-extern void init_yy_io __P((Function *, Function *, int, char *, INPUT_STREAM));
+extern void init_yy_io __P((Function *, Function *, enum stream_type, char *, INPUT_STREAM));
 extern void with_input_from_stdin __P((void));
 extern void with_input_from_string __P((char *, char *));
 extern void with_input_from_stream __P((FILE *, char *));

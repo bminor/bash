@@ -166,6 +166,8 @@ pushd_builtin (list)
     {
       add_dirstack_element ((flags & NOCD) ? savestring (list->word->word) : current_directory);
       dirs_builtin ((WORD_LIST *)NULL);
+      if (flags & NOCD)
+	free (current_directory);
       return (EXECUTION_SUCCESS);
     }
   else
@@ -186,7 +188,9 @@ popd_builtin (list)
   long which;
   int flags;
   char direction;
+  char *which_word;
 
+  which_word = (char *)NULL;
   for (flags = 0, which = 0L, direction = '+'; list; list = list->next)
     {
       if (ISOPTION (list->word->word, 'n'))
@@ -206,6 +210,7 @@ popd_builtin (list)
 	      builtin_usage ();
 	      return (EXECUTION_FAILURE);
 	    }
+	  which_word = list->word->word;
 	}
       else if (*list->word->word == '-')
 	{
@@ -219,7 +224,7 @@ popd_builtin (list)
 
   if (which > directory_list_offset || (directory_list_offset == 0 && which == 0))
     {
-      pushd_error (directory_list_offset, list ? list->word->word : "");
+      pushd_error (directory_list_offset, which_word ? which_word : "");
       return (EXECUTION_FAILURE);
     }
 
@@ -538,10 +543,12 @@ static char *pushd_doc[] = {
   "directory.  With no arguments, exchanges the top two directories.",
   "",
   "+N   Rotates the stack so that the Nth directory (counting",
-  "     from the left of the list shown by `dirs') is at the top.",
+  "     from the left of the list shown by `dirs', starting with"
+  "     zero) is at the top.",
   "",
   "-N   Rotates the stack so that the Nth directory (counting",
-  "     from the right) is at the top.",
+  "     from the right of the list shown by `dirs', starting with" 
+  "     zero) is at the top.",
   "",
   "-n   suppress the normal change of directory when adding directories",
   "     to the stack, so only the stack is manipulated.",

@@ -36,7 +36,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "bashansi.h"
 
 #include "shell.h"
-#include "y.tab.h"
+#include <y.tab.h>	/* use <...> so we pick it up from the build directory */
 #include "stdc.h"
 #include "builtins/common.h"
 
@@ -47,7 +47,11 @@ extern int printf __P((const char *, ...));	/* Yuck.  Double yuck. */
 static int indentation;
 static int indentation_amount = 4;
 
+#if defined (PREFER_STDARG)
 static void cprintf __P((char *, ...));
+#else
+static void cprintf ();
+#endif
 
 static void newline (), indent (), the_printed_command_resize ();
 static void semicolon ();
@@ -71,7 +75,8 @@ static void print_until_or_while ();
 static void print_if_command ();
 static void print_function_def ();
 
-#define PRINTED_COMMAND_GROW_SIZE 1024
+#define PRINTED_COMMAND_INITIAL_SIZE 64
+#define PRINTED_COMMAND_GROW_SIZE 128
 
 char *the_printed_command = (char *)NULL;
 int the_printed_command_size = 0;
@@ -80,6 +85,7 @@ int command_string_index = 0;
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
 static int skip_this_indent;
+static int was_heredoc;
 
 /* The depth of the group commands that we are currently printing.  This
    includes the group command that is a function body. */
@@ -102,7 +108,7 @@ char *
 make_command_string (command)
      COMMAND *command;
 {
-  command_string_index = 0;
+  command_string_index = was_heredoc = 0;
   make_command_string_internal (command);
   return (the_printed_command);
 }
@@ -125,7 +131,11 @@ make_command_string_internal (command)
 	cprintf ("( ");
 
       if (command->flags & CMD_TIME_PIPELINE)
-	cprintf ("time ");
+	{
+	  cprintf ("time ");
+	  if (command->flags & CMD_TIME_POSIX)
+	    cprintf ("-p ");
+	}
 
       if (command->flags & CMD_INVERT_RETURN)
 	cprintf ("! ");
@@ -195,7 +205,10 @@ make_command_string_internal (command)
 	      break;
 
 	    case ';':
-	      cprintf (";");
+	      if (was_heredoc == 0)
+		cprintf (";");
+	      else
+		was_heredoc = 0;
 
 	      if (inside_function_def)
 		cprintf ("\n");
@@ -458,12 +471,48 @@ static void
 print_redirection_list (redirects)
      REDIRECT *redirects;
 {
+  REDIRECT *heredocs, *hdtail, *newredir;
+
+  heredocs = (REDIRECT *)NULL;
+  hdtail = heredocs;
+
+  was_heredoc = 0;
   while (redirects)
     {
-      print_redirection (redirects);
+      /* Defer printing the here documents until we've printed the
+	 rest of the redirections. */
+      if (redirects->instruction == r_reading_until || redirects->instruction == r_deblank_reading_until)
+	{
+	  newredir = copy_redirect (redirects);
+	  newredir->next = (REDIRECT *)NULL;
+	  if (heredocs)
+	    {
+	      hdtail->next = newredir;
+	      hdtail = newredir;
+	    }
+	  else
+	    hdtail = heredocs = newredir;
+	}
+      else
+	print_redirection (redirects);
+
       redirects = redirects->next;
       if (redirects)
 	cprintf (" ");
+    }
+
+  /* Now that we've printed all the other redirections (on one line),
+     print the here documents. */
+  if (heredocs)
+    {
+      cprintf (" "); 
+      for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
+        {
+	  print_redirection (hdtail);
+	  cprintf ("\n");
+        }
+      dispose_redirects (heredocs);
+      was_heredoc = 1;
     }
 }
 
@@ -471,10 +520,13 @@ static void
 print_redirection (redirect)
      REDIRECT *redirect;
 {
-  int kill_leading = 0;
-  int redirector = redirect->redirector;
-  WORD_DESC *redirectee = redirect->redirectee.filename;
-  int redir_fd = redirect->redirectee.dest;
+  int kill_leading, redirector, redir_fd;
+  WORD_DESC *redirectee;
+
+  kill_leading = 0;
+  redirectee = redirect->redirectee.filename;
+  redirector = redirect->redirector;
+  redir_fd = redirect->redirectee.dest;
 
   switch (redirect->instruction)
     {
@@ -605,7 +657,7 @@ named_function_string (name, command, multi_line)
 
   old_indent = indentation;
   old_amount = indentation_amount;
-  command_string_index = 0;
+  command_string_index = was_heredoc = 0;
 
   if (name && *name)
     cprintf ("%s ", name);
@@ -861,9 +913,9 @@ static void
 the_printed_command_resize (length)
      int length;
 {
-  if (!the_printed_command)
+  if (the_printed_command == 0)
     {
-      the_printed_command_size = length + 1;
+      the_printed_command_size = (length + PRINTED_COMMAND_INITIAL_SIZE - 1) & ~(PRINTED_COMMAND_INITIAL_SIZE - 1);
       the_printed_command = xmalloc (the_printed_command_size);
       command_string_index = 0;
     }
@@ -871,8 +923,13 @@ the_printed_command_resize (length)
     {
       int new;
       new = command_string_index + length + 1;
+#if 1
+      /* Round up to the next multiple of PRINTED_COMMAND_GROW_SIZE. */
+      new = (new + PRINTED_COMMAND_GROW_SIZE - 1) & ~(PRINTED_COMMAND_GROW_SIZE - 1);
+#else
       new = new + 2 * PRINTED_COMMAND_GROW_SIZE - 1;
       new -= new % PRINTED_COMMAND_GROW_SIZE;
+#endif
       the_printed_command_size = new;
       the_printed_command = xrealloc (the_printed_command, the_printed_command_size);
     }
@@ -881,14 +938,22 @@ the_printed_command_resize (length)
 #if defined (HAVE_VFPRINTF)
 
 static void
-xprintf (va_alist)
+#if defined (PREFER_STDARG)
+xprintf (const char *format, ...)
+#else
+xprintf (format, va_alist)
+     const char *format;
      va_dcl
+#endif
 {
   va_list args;
-  char *format;
 
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
   va_start (args);
-  format = va_arg (args, char *);
+#endif
+
   vfprintf (stdout, format, args);
   va_end (args);
 }
