@@ -26,6 +26,7 @@
 extern WORD_LIST *make_word_list __P((WORD_DESC *, WORD_LIST *));
 extern WORD_LIST *add_string_to_list __P((char *, WORD_LIST *));
 
+extern WORD_DESC *make_bare_word __P((char *));
 extern WORD_DESC *make_word __P((char *));
 extern WORD_DESC *make_word_from_token __P((int));
 
@@ -42,13 +43,10 @@ extern COMMAND *make_bare_simple_command __P((void));
 extern COMMAND *make_simple_command __P((ELEMENT, COMMAND *));
 extern void make_here_document __P((REDIRECT *));
 extern REDIRECT *make_redirection __P((int, enum r_instruction, REDIRECTEE));
-extern COMMAND *make_function_def __P((WORD_DESC *, COMMAND *));
+extern COMMAND *make_function_def __P((WORD_DESC *, COMMAND *, int, int));
 extern COMMAND *clean_simple_command __P((COMMAND *));
-extern char **make_word_array __P((WORD_LIST *));
 
-#if defined (SELECT_COMMAND)
 extern COMMAND *make_select_command __P((WORD_DESC *, WORD_LIST *, COMMAND *));
-#endif
 
 extern COMMAND *connect_async_list __P((COMMAND *, COMMAND *, int));
 

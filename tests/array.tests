@@ -1,0 +1,131 @@
+set +a
+# The calls to egrep -v are to filter out builtin array variables that are
+# automatically set and possibly contain values that vary.
+unset a
+a=abcde
+a[2]=bdef
+
+declare -a b[256]
+
+unset c[2]
+unset c[*]
+
+a[1]=
+
+_ENV=/bin/true
+x=${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}
+
+declare -r c[100]
+
+echo ${a[0]} ${a[4]}
+echo ${a[@]}
+
+echo ${a[*]}
+
+# this should print out values, too
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+
+unset a[7]
+echo ${a[*]}
+
+unset a[4]
+echo ${a[*]}
+
+echo ${a}
+echo "${a}"
+echo $a
+
+unset a[0]
+echo ${a}
+
+echo ${a[@]}
+
+a[5]="hello world"
+echo ${a[5]}
+echo ${#a[5]}
+
+echo ${#a[@]}
+
+a[4+5/2]="test expression"
+echo ${a[@]}
+
+readonly a[5]
+readonly a
+readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+declare -ar | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+
+declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")'
+d[9]="ninth element"
+
+declare -a e[10]=test
+declare -a e[10]='(test)'
+
+pass=/etc/passwd
+declare -a f='("${d[@]}")'
+b=([0]=this [1]=is [2]=a [3]=test [4]="$PS1" [5]=$pass)
+
+echo ${b[@]:2:3}
+
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+
+a[3]="this is a test"
+
+b[]=bcde
+b[*]=aaa
+echo ${b[   ]}
+
+c[-2]=4
+echo ${c[-4]}
+
+d[7]=(abdedfegeee)
+
+d=([]=abcde [1]="test test" [*]=last [-65]=negative )
+
+unset d[12]
+unset e[*]
+
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+
+ps1='hello'
+unset ps1[2]
+unset ${ps1[2]}
+
+declare +a ps1
+declare +a c
+
+# the prompt should not print when using a here doc
+read -p "array test: " -a rv <<!
+this is a test of read using arrays
+!
+
+echo ${rv[0]} ${rv[4]}
+echo ${rv[@]}
+
+declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS)'
+
+export rv
+#set
+
+x[4]=bbb
+x=abde
+echo $x
+echo ${x[0]}
+echo ${x[4]}
+echo efgh | ( read x[1] ; echo ${x[1]} )
+echo wxyz | ( declare -a x ; read x ; echo $x ; echo ${x[0]} )
+
+# Make sure that arrays can be used to save the positional paramters verbatim
+set -- a 'b c' d 'e f g' h
+
+ARGV=( [0]=$0 "$@" )
+
+for z in "${ARGV[@]}"
+do
+	echo "$z"
+done
+
+echo "$0"
+for z in "$@"
+do
+	echo "$z"
+done

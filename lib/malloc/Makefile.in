@@ -1,0 +1,68 @@
+# Skeleton Makefile for the GNU malloc code
+#
+
+srcdir = @srcdir@
+VPATH = .:@srcdir@
+topdir = @top_srcdir@
+BUILD_DIR = @BUILD_DIR@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+CC = @CC@
+RANLIB = @RANLIB@
+AR = @AR@
+RM = rm -f
+CP = cp
+MV = mv
+
+CFLAGS = @CFLAGS@
+LOCAL_CFLAGS = @LOCAL_CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+
+DEFS = @DEFS@
+
+INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
+
+CCFLAGS = ${INCLUDES} $(DEFS) $(LOCAL_CFLAGS) $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
+
+.c.o:
+	$(CC) $(CCFLAGS) -c $<
+
+.s.o:
+	$(CC) $(CCFLAGS) -c $<
+
+MALLOC_SOURCE = malloc.c
+
+ALLOCA_SOURCE = alloca.c
+ALLOCA_OBJECT = alloca.o
+
+MALLOC_SRC = @MALLOC_SRC@
+MALLOC = @MALLOC@
+ALLOCA = @ALLOCA@
+
+libmalloc.a:	$(MALLOC) $(ALLOCA) stub.o
+	$(RM) $@
+	$(AR) cr $@ $(MALLOC) $(ALLOCA) stub.o
+	-test -n "$(RANLIB)" && $(RANLIB) $@
+
+malloc.o: malloc.c getpagesize.h
+
+alloca.o:	$(ALLOCA_SOURCE)
+	$(CC) $(CCFLAGS) -c $(ALLOCA_SOURCE)
+	@- if test "$(ALLOCA_OBJECT)" != alloca.o ; then \
+		mv $(ALLOCA_OBJECT) alloca.o >/dev/null 2>&1 ; \
+	fi
+
+mostlyclean clean:
+	$(RM) *.o libmalloc.a
+
+distclean realclean maintainer-clean: clean
+	$(RM) Makefile
+
+alloca.o: $(BUILD_DIR)/config.h
+malloc.o: $(BUILD_DIR)/config.h
+xmalloc.o: $(BUILD_DIR)/config.h
+gmalloc.o: $(BUILD_DIR)/config.h

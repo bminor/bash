@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
 $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
@@ -42,10 +41,18 @@ and the return code is zero.  N is a process ID; if it is not given,
 all child processes of the shell are waited for.
 $END
 
-#include <sys/types.h>
+#include <config.h>
+
+#include "../bashtypes.h"
 #include <signal.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../shell.h"
 #include "../jobs.h"
+#include "common.h"
 
 extern int interrupt_immediately;
 
@@ -53,10 +60,17 @@ extern int interrupt_immediately;
    wait for all of the active background processes of the shell and return
    0.  If a list of pids or job specs are given, return the exit status of
    the last one waited for. */
+
+#define WAIT_RETURN(s) do { run_unwind_frame ("wait_builtin"); return (s); } while (0)
+
+int
 wait_builtin (list)
      WORD_LIST *list;
 {
-  int status = EXECUTION_SUCCESS;
+  int status;
+
+  if (no_options (list))
+    return (EX_USAGE);
 
   begin_unwind_frame ("wait_builtin");
   unwind_protect_int (interrupt_immediately);
@@ -67,13 +81,13 @@ wait_builtin (list)
 
   /* But wait without any arguments means to wait for all of the shell's
      currently active background processes. */
-  if (!list)
+  if (list == 0)
     {
       wait_for_background_pids ();
-      status = EXECUTION_SUCCESS;
-      goto return_status;
+      WAIT_RETURN (EXECUTION_SUCCESS);
     }
 
+  status = EXECUTION_SUCCESS;
   while (list)
     {
       pid_t pid;
@@ -89,9 +103,8 @@ wait_builtin (list)
 	    }
 	  else
 	    {
-	      builtin_error ("`%s' is not a pid or legal job spec", w);
-	      status = EXECUTION_FAILURE;
-	      goto return_status;
+	      builtin_error ("`%s' is not a pid or valid job spec", w);
+	      WAIT_RETURN (EXECUTION_FAILURE);
 	    }
 	}
 #if defined (JOB_CONTROL)
@@ -107,7 +120,7 @@ wait_builtin (list)
 	  if (job < 0 || job >= job_slots || !jobs[job])
 	    {
 	      if (job != DUP_JOB)
-		builtin_error ("No such job %s", list->word->word);
+		builtin_error ("%s: no such job", list->word->word);
 	      UNBLOCK_CHILD (oset);
 	      status = 127;	/* As per Posix.2, section 4.70.2 */
 	      list = list->next;
@@ -121,12 +134,11 @@ wait_builtin (list)
 #endif /* JOB_CONTROL */
       else
 	{
-	  builtin_error ("`%s' is not a pid or legal job spec", w);
+	  builtin_error ("`%s' is not a pid or valid job spec", w);
 	  status = EXECUTION_FAILURE;
 	}
       list = list->next;
     }
- return_status:
-  run_unwind_frame ("wait_builtin");
-  return (status);
+
+  WAIT_RETURN (status);
 }

@@ -1,0 +1,78 @@
+This document details the incompatibilites between this version of bash,
+bash-2.0, and the previous version, bash-1.14.  These were discovered
+by alpha and beta testers, so they will likely be encountered by a
+significant number of users.
+
+1.  Bash now uses a new quoting syntax, $"...", to do locale-specific
+    string translation.  Users who have relied on the (undocumented)
+    behavior of bash-1.14 will have to change their scripts.  For
+    instance, if you are doing something like this to get the value of
+    a variable whose name is the value of a second variable:
+
+	eval var2=$"$var1"
+
+    you will have to change to a different syntax.
+
+    This capability is directly supported by bash-2.0:
+
+	var2=${!var1}
+
+    This alternate syntax will work portably between bash-1.14 and bash-2.0:
+
+	eval var2=\$${var1}
+
+2.  One of the bugs fixed in the YACC grammar tightens up the rules
+    concerning group commands ( {...} ).  The `list' that composes the
+    body of the group command must be terminated by a newline or
+    semicolon.  That's because the braces are reserved words, and are
+    recognized as such only when a reserved word is legal.  This means
+    that while bash-1.14 accepted shell function definitions like this:
+
+	foo() { : }
+
+    bash-2.0 requires this:
+
+	foo() { :; }
+
+    This is also an issue for commands like this:
+
+	mkdir dir || { echo 'could not mkdir' ; exit 1; }
+
+    The syntax required by bash-2.0 is also accepted by bash-1.14.
+
+3.  The options to `bind' have changed to make them more consistent with
+    the rest of the bash builtins.  If you are using `bind -d' to list
+    the readline keybindings in a form that can be re-read, use `bind -p'
+    instead.  If you were using `bind -v' to list the keybindings, use
+    `bind -P' instead.
+
+4.  The `long' invocation options must now be prefixed by `--' instead
+    of `-'.  (The old form is still accepted, for the time being.)
+
+5.  There was a bug in the version of readline distributed with bash-1.14
+    that caused it to write badly-formatted key bindings when using 
+    `bind -d'.  The only key sequences that were affected are C-\ (which
+    should appear as \C-\\ in a key binding) and C-" (which should appear
+    as \C-\").  If these key sequences appear in your inputrc, as, for
+    example,
+
+	"\C-\": self-insert
+
+    they will need to be changed to something like the following:
+
+	"\C-\\": self-insert
+
+6.  A number of people complained above having to use ESC to terminate an
+    incremental search, and asked for an alternate mechanism.  Bash-2.0
+    allows ^J to terminate the search without accepting the line.  Use
+    ^M to terminate the search and accept the line, as in bash-1.14.
+
+7.  Some variables have been removed:  MAIL_WARNING, notify, history_control,
+    command_oriented_history, glob_dot_filenames, allow_null_glob_expansion,
+    nolinks, hostname_completion_file, noclobber, no_exit_on_failed_exec, and
+    cdable_vars.  Most of them are now implemented with the new `shopt'
+    builtin; others were already implemented by `set'.
+
+8.  The `ulimit' builtins now sets both hard and soft limits and reports the
+    soft limit by default (when neither -H nor -S is specified).  This is
+    compatible with versions of sh and ksh that implement `ulimit'.

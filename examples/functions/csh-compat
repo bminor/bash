@@ -1,25 +1,13 @@
 # C-shell compatabilty package.
 # setenv VAR VALUE
-function setenv () {
+function setenv ()
+{
   export $1="$2"
 }
 
-function unsetenv () {
+function unsetenv ()
+{
   unset $1
-}
-
-function alias () {
-  local name=$1
-  shift
-  local value="$*"
-
-  if [ "$name" = "" ]; then
-    builtin alias
-  elif [ "$value" = "" ]; then
-    builtin alias $name
-  else
-    builtin alias $name="$value"
-  fi
 }
 
 # Can't write foreach yet.  Need pattern matching, and a few extras.
@@ -31,6 +19,29 @@ echo 'Can'\''t do `foreach'\'' yet.  Type "help for".'
 #set () {
 #}
 
-chdir () {
-  builtin cd $*
- }
+chdir ()
+{
+  builtin cd "$@"
+}
+
+# alias - convert csh alias commands to bash functions
+# from Mohit Aron <aron@cs.rice.edu>
+# posted to usenet as <4i5p17$bnu@larry.rice.edu>
+function alias ()
+{
+	if [ "x$2" = "x" ] 
+	then
+		declare -f $1
+	else
+		echo $2 | egrep -s '(\!|#)' 2>/dev/null
+		if [ $? -eq 0 ]
+		then
+			comm=$(echo $2 | sed  's/\\!\*/\"$\@\"/g
+					       s/\\!:\([1-9]\)/\"$\1\"/g
+				               s/#/\\#/g')
+		else
+			comm="$2 \"\$@\""
+		fi
+		eval function $1 \(\) "{" command "$comm"  "; }"
+	fi
+}

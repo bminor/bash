@@ -19,8 +19,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (__MEMALLOC_H__)
-#  define __MEMALLOC_H__
+#if !defined (_MEMALLOC_H_)
+#  define _MEMALLOC_H_
 
 #if defined (sparc) && defined (sun) && !defined (HAVE_ALLOCA_H)
 #  define HAVE_ALLOCA_H
@@ -34,8 +34,6 @@
 #  define HAVE_ALLOCA
 #endif /* HAVE_ALLOCA_H && !HAVE_ALLOCA */
 
-#if !defined (BUILDING_MAKEFILE)
-
 #if defined (__GNUC__)
 #  undef alloca
 #  define alloca __builtin_alloca
@@ -46,15 +44,15 @@
 #    else /* !IBMESA */
 #      include <alloca.h>
 #    endif /* !IBMESA */
-#  else
-#    if defined (hpux_9) && defined (__STDC__)
+#  else  /* !HAVE_ALLOCA_H */
+#    if defined (hpux_9) && defined (__STDC__) && !defined (alloca)
 extern void *alloca ();
 #    else
+#      if !defined (alloca)
 extern char *alloca ();
-#    endif
+#      endif /* !alloca */
+#    endif /* !hpux_9 || !__STDC__ && !alloca */
 #  endif /* !HAVE_ALLOCA_H */
 #endif /* !__GNUC__ */
 
-#endif /* !BUILDING_MAKEFILE */
-
-#endif /* __MEMALLOC_H__ */
+#endif /* _MEMALLOC_H_ */

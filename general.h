@@ -18,22 +18,19 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (_GENERAL_H)
-#define _GENERAL_H
+#if !defined (_GENERAL_H_)
+#define _GENERAL_H_
 
 #include "stdc.h"
 
-/* just to make sure */
-#if defined (HAVE_UNISTD_H)
-#  ifdef CRAY
-#    define word __word
-#  endif
-#  include <unistd.h>
-#  ifdef CRAY
-#    undef word
-#  endif
+/* Generic pointer type. */
+#if defined (__STDC__)
+#  define PTR_T	void *
+#else
+#  define PTR_T char *
 #endif
 
+/* NULL pointer type. */
 #if !defined (NULL)
 #  if defined (__STDC__)
 #    define NULL ((void *) 0)
@@ -50,12 +47,22 @@
 
 #define pointer_to_int(x) (int)((long)(x))
 
+extern char *xmalloc (), *xrealloc ();
+
+#if defined (alpha) && defined (__GNUC__) && !defined (strchr) && !defined (__STDC__)
+extern char *strchr (), *strrchr ();
+#endif
+
+#if !defined (strcpy)
+extern char *strcpy ();
+#endif
+
 #if !defined (savestring)
-   extern char *xmalloc ();
-#  if !defined (strcpy)
-   extern char *strcpy ();
-#  endif
 #  define savestring(x) (char *)strcpy (xmalloc (1 + strlen (x)), (x))
+#endif
+
+#ifndef member
+#  define member(c, s) ((c) ? ((char *)strchr ((s), (c)) != (char *)NULL) : 0)
 #endif
 
 #ifndef whitespace
@@ -74,20 +81,13 @@
 #define digit_value(c) ((c) - '0')
 #endif
 
+/* Define exactly what a legal shell identifier consists of. */
+#define legal_variable_starter(c) (isletter(c) || (c == '_'))
+#define legal_variable_char(c)	(isletter (c) || digit (c) || c == '_')
+
 /* Definitions used in subst.c and by the `read' builtin for field
    splitting. */
 #define spctabnl(c)	((c) == ' ' || (c) == '\t' || (c) == '\n')
-
-#if !defined (__STDC__) && !defined (strchr)
-extern char *strchr (), *strrchr ();
-#endif /* !strchr */
-
-#ifndef member
-#  if defined (alpha) && defined (__GNUC__)	/* XXX */
-     extern char *strchr ();
-#  endif
-#  define member(c, s) ((c) ? ((char *)strchr ((s), (c)) != (char *)NULL) : 0)
-#endif
 
 /* All structs which contain a `next' field should have that field
    as the first field in the struct.  This means that functions
@@ -105,20 +105,21 @@ typedef struct {
 
 /* A macro to avoid making an uneccessary function call. */
 #define REVERSE_LIST(list, type) \
-  ((list && list->next) ? (type)reverse_list ((GENERIC_LIST *)list) : (type)(list))
+  ((list && list->next) ? (type)reverse_list ((GENERIC_LIST *)list) \
+  			: (type)(list))
 
 #if __GNUC__ > 1
 #  define FASTCOPY(s, d, n)  __builtin_memcpy (d, s, n)
 #else /* !__GNUC__ */
-#  if defined (USG) && !defined (HAVE_BCOPY)
-#    if defined (MEMMOVE_MISSING)
+#  if !defined (HAVE_BCOPY)
+#    if !defined (HAVE_MEMMOVE)
 #      define FASTCOPY(s, d, n)  memcpy (d, s, n)
 #    else
 #      define FASTCOPY(s, d, n)  memmove (d, s, n)
-#    endif /* !MEMMOVE_MISSING */
-#  else
+#    endif /* !HAVE_MEMMOVE */
+#  else /* HAVE_BCOPY */
 #    define FASTCOPY(s, d, n)  bcopy (s, d, n)
-#  endif /* !USG || HAVE_BCOPY */
+#  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 
 /* String comparisons that possibly save a function call each. */
@@ -130,17 +131,27 @@ typedef struct {
 #define FREE(s)  do { if (s) free (s); } while (0)
 #define MEMBER(c, s) (((c) && !(s)[1] && c == s[0]) || (member(c, s)))
 
-/* What type is a `generic' pointer?  This is used as the first argument
-   to xrealloc. */
-#if defined (__STDC__)
-typedef void *GENPTR;
-#else
-typedef char *GENPTR;
-#endif
+/* A fairly hairy macro to check whether an allocated string has more room,
+   and to resize it using xrealloc if it does not.
+   STR is the string (char *)
+   CIND is the current index into the string (int)
+   ROOM is the amount of additional room we need in the string (int)
+   CSIZE is the currently-allocated size of STR (int)
+   SINCR is how much to increment CSIZE before calling xrealloc (int) */
+
+#define RESIZE_MALLOCED_BUFFER(str, cind, room, csize, sincr) \
+  do { \
+    if ((cind) + (room) >= csize) \
+      { \
+	while ((cind) + (room) >= csize) \
+	  csize += (sincr); \
+	str = xrealloc (str, csize); \
+      } \
+  } while (0)
 
 /* Function pointers can be declared as (Function *)foo. */
-#if !defined (__FUNCTION_DEF)
-#  define __FUNCTION_DEF
+#if !defined (_FUNCTION_DEF)
+#  define _FUNCTION_DEF
 typedef int Function ();
 typedef void VFunction ();
 typedef char *CPFunction ();
@@ -154,94 +165,52 @@ typedef char **CPPFunction ();
 #define FS_EXECABLE	  0x2
 #define FS_EXEC_PREFERRED 0x4
 #define FS_EXEC_ONLY	  0x8
+#define FS_DIRECTORY	  0x10
+#define FS_NODIRS	  0x20
 
-/* Posix and USG systems do not guarantee to restart a read () that is
-   interrupted by a signal. */
-#if defined (USG) || defined (_POSIX_VERSION)
-#  define NO_READ_RESTART_ON_SIGNAL
-#endif /* USG || _POSIX_VERSION */
-
-/* Here is a definition for set_signal_handler () which simply expands to
-   a call to signal () for non-Posix systems.  The code for set_signal_handler
-   in the Posix case resides in general.c. */
-
-#if defined (VOID_SIGHANDLER)
-#  define sighandler void
-#else
-#  define sighandler int
-#endif /* !VOID_SIGHANDLER */
-
-typedef sighandler SigHandler ();
-
-#if !defined (_POSIX_VERSION)
-#  define set_signal_handler(sig, handler) (SigHandler *)signal (sig, handler)
-#else
-extern SigHandler *set_signal_handler ();
-#endif /* _POSIX_VERSION */
-
-/* This function is defined in trap.c. */
-extern SigHandler *set_sigint_handler __P((void));
+/* Declarations for functions defined in xmalloc.c */
+extern char *xmalloc __P((size_t));
+extern char *xrealloc __P((void *, size_t));
+extern void xfree __P((char *));
 
 /* Declarations for functions defined in general.c */
-extern char *xmalloc __P((int));
-extern char *xrealloc __P((void *, int));
-extern void xfree __P((char *));
+extern void posix_initialize __P((int));
+
 extern char *itos __P((int));
-extern int all_digits __P((char *));
 extern long string_to_long __P((char *));
-extern int legal_identifier __P((char *));
-extern int check_identifier __P((WORD_DESC *, int));
-extern void unset_nodelay_mode __P((int));
-extern void map_over_words __P((WORD_LIST *, Function *));
-
-extern void map_over_list __P((GENERIC_LIST *, Function *));
-extern GENERIC_LIST *reverse_list ();
-extern GENERIC_LIST *delete_element ();
-extern GENERIC_LIST *list_append ();
-extern int list_length ();
-extern int qsort_string_compare ();
-
-extern int find_name_in_list __P((char *, char **));
-extern int array_len __P((char **));
-extern void free_array __P((char **));
-extern char **copy_array __P((char **));
-extern void strip_leading __P((char *));
-extern void strip_trailing __P((char *, int));
-extern char *canonicalize_pathname __P((char *));
-extern char *make_absolute __P((char *, char *));
-extern int absolute_pathname __P((char *));
-extern int absolute_program __P((char *));
-extern char *base_pathname __P((char *));
-extern char *full_pathname __P((char *));
-extern char *strindex __P((char *, char *));
-extern void set_lines_and_columns __P((int, int));
-extern void xbcopy __P((char *, char *, int));
-extern char *polite_directory_format __P((char *));
-extern void tilde_initialize __P((void));
-
-#if !defined (strerror)
-extern char *strerror __P((int));
-#endif
 
 #if defined (RLIMTYPE)
 extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
-#if !defined (HAVE_STRCASECMP)
-extern int strnicmp __P((char *, char *, int));
-extern int stricmp __P((char *, char *));
-#else /* HAVE_STRCASECMP */
-#  define stricmp strcasecmp
-#  define strnicmp strncasecmp
-#endif /* HAVE_STRCASECMP */
+extern void timeval_to_secs ();
+extern void print_timeval ();
+extern void clock_t_to_secs ();
+extern void print_time_in_hz ();
 
-extern int dup2 __P((int, int));
-extern char *getwd __P((char *));
-extern int getdtablesize __P((void));
+extern int all_digits __P((char *));
+extern int legal_number __P((char *, long *));
+extern int legal_identifier __P((char *));
+extern int check_identifier __P((WORD_DESC *, int));
 
-#if defined (USG) && !defined (HAVE_GETHOSTNAME)
-extern int gethostname __P((char *, int));
-#endif /* USG && !HAVE_GETHOSTNAME */
+extern void unset_nodelay_mode __P((int));
+extern void check_dev_tty __P((void));
+extern int same_file ();	/* too many problems with prototype */
+extern int move_to_high_fd __P((int, int));
+extern int check_binary_file __P((unsigned char *, int));
 
-#endif	/* _GENERAL_H */
+extern char *canonicalize_pathname __P((char *));
+extern char *make_absolute __P((char *, char *));
+extern int absolute_pathname __P((char *));
+extern int absolute_program __P((char *));
+extern char *base_pathname __P((char *));
+extern char *full_pathname __P((char *));
+extern char *polite_directory_format __P((char *));
+
+extern char *extract_colon_unit __P((char *, int *));
+
+extern void tilde_initialize __P((void));
+extern char *bash_tilde_expand __P((char *));
+
+#endif	/* _GENERAL_H_ */

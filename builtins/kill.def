@@ -24,7 +24,7 @@ $PRODUCES kill.c
 $BUILTIN kill
 $FUNCTION kill_builtin
 $DEPENDS_ON JOB_CONTROL
-$SHORT_DOC kill [-s sigspec | -sigspec] [pid | job]... | -l [signum]
+$SHORT_DOC kill [-s sigspec | -n signum | -sigspec] [pid | job]... or kill -l [sigspec]
 Send the processes named by PID (or JOB) the signal SIGSPEC.  If
 SIGSPEC is not present, then SIGTERM is assumed.  An argument of `-l'
 lists the signal names; if arguments follow `-l' they are assumed to
@@ -34,17 +34,25 @@ process IDs, and, if you have reached the limit on processes that
 you can create, you don't have to start a process to kill another one.
 $END
 
-/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
-#if !defined (errno)
-extern int errno;
-#endif /* !errno */
+#include <config.h>
 
-#include "../bashtypes.h"
+#include <stdio.h>
+#include <errno.h>
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
+
 #include "../shell.h"
 #include "../trap.h"
 #include "../jobs.h"
 #include "common.h"
-#include <errno.h>
+
+/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
 
 #if defined (JOB_CONTROL)
 extern int interactive;
@@ -63,13 +71,16 @@ int
 kill_builtin (list)
      WORD_LIST *list;
 {
-  int signal = SIGTERM;
-  int any_succeeded = 0, listing = 0, saw_signal = 0;
-  char *sigspec = "TERM", *word;
+  int signal, any_succeeded, listing, saw_signal;
+  char *sigspec, *word;
   pid_t pid;
 
-  if (!list)
+  if (list == 0)
     return (EXECUTION_SUCCESS);
+
+  any_succeeded = listing = saw_signal = 0;
+  signal = SIGTERM;
+  sigspec = "TERM";
 
   /* Process options. */
   while (list)
@@ -81,13 +92,13 @@ kill_builtin (list)
 	  listing++;
 	  list = list->next;
 	}
-      else if (ISOPTION (word, 's'))
+      else if (ISOPTION (word, 's') || ISOPTION (word, 'n'))
 	{
 	  list = list->next;
 	  if (list)
 	    {
 	      sigspec = list->word->word;
-	      if (sigspec[0] == '0' && !sigspec[1])
+	      if (sigspec[0] == '0' && sigspec[1] == '\0')
 		signal = 0;
 	      else
 		signal = decode_signal (sigspec);
@@ -95,7 +106,7 @@ kill_builtin (list)
 	    }
 	  else
 	    {
-	      builtin_error ("-s requires an argument");
+	      builtin_error ("%s requires an argument", word);
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -103,6 +114,11 @@ kill_builtin (list)
 	{
 	  list = list->next;
 	  break;
+	}
+      else if (ISOPTION (word, '?'))
+	{
+	  builtin_usage ();
+	  return (EXECUTION_SUCCESS);
 	}
       /* If this is a signal specification then process it.  We only process
 	 the first one seen; other arguments may signify process groups (e.g,
@@ -119,75 +135,7 @@ kill_builtin (list)
     }
 
   if (listing)
-    {
-      if (!list)
-	{
-	  register int i;
-	  register int column = 0;
-	  char *name;
-
-	  for (i = 1; i < NSIG; i++)
-	    {
-	      name = signal_name (i);
-	      if (STREQN (name, "SIGJUNK", 7) || STREQN (name, "Unknown", 7))
-		continue;
-
-	      if (posixly_correct)
-	        printf ("%s%s", name, (i == NSIG - 1) ? "" : " ");
-	      else
-		{
-		  printf ("%2d) %s", i, name);
-
-		  if (++column < 4)
-		    printf ("\t");
-		  else
-		    {
-		      printf ("\n");
-		      column = 0;
-		    }
-		}
-	    }
-
-	  if (posixly_correct || column != 0)
-	    printf ("\n");
-	}
-      else
-	{
-	  /* List individual signal names. */
-	  while (list)
-	    {
-	      int signum;
-	      char *name;
-
-	      if ((sscanf (list->word->word, "%d", &signum) != 1) ||
-		  (signum <= 0))
-		{
-	    list_error:
-		  builtin_error ("bad signal number: %s", list->word->word);
-		  list = list->next;
-		  continue;
-		}
-
-	      /* This is specified by Posix.2 so that exit statuses can be
-		 mapped into signal numbers. */
-	      if (signum > 128)
-		signum -= 128;
-
-	      if (signum >= NSIG)
-		goto list_error;
-
-	      name = signal_name (signum);
-	      if (STREQN (name, "SIGJUNK", 7) || STREQN (name, "Unknown", 7))
-		{
-		  list = list->next;
-		  continue;
-		}
-	      printf ("%s\n", name);
-	      list = list->next;
-	    }
-	}
-      return (EXECUTION_SUCCESS);
-    }
+    return (display_signal_list (list, 0));
 
   /* OK, we are killing processes. */
   if (signal == NO_SIG)
@@ -215,15 +163,11 @@ kill_builtin (list)
 	}
       else if (*list->word->word != '%')
 	{
-	  builtin_error ("No such pid %s", list->word->word);
+	  builtin_error ("%s: no such pid", list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
-#if 1
       else if (interactive)
 	/* Posix.2 says you can kill without job control active (4.32.4) */
-#else
-      else if (job_control)	/* can't kill jobs if not using job control */
-#endif
 	{			/* Must be a job spec.  Check it out. */
 	  int job;
 	  sigset_t set, oset;
@@ -234,7 +178,7 @@ kill_builtin (list)
 	  if (job < 0 || job >= job_slots || !jobs[job])
 	    {
 	      if (job != DUP_JOB)
-		builtin_error ("No such job %s", list->word->word);
+		builtin_error ("%s: no such job", list->word->word);
 	      UNBLOCK_CHILD (oset);
 	      CONTINUE_OR_FAIL;
 	    }
@@ -243,10 +187,7 @@ kill_builtin (list)
 	     without job control, then its pgrp == shell_pgrp, so we have
 	     to be careful.  We take the pid of the first job in the pipeline
 	     in that case. */
-	  if (jobs[job]->flags & J_JOBCONTROL)
-	    pid = jobs[job]->pgrp;
-	  else
-	    pid = jobs[job]->pipe->pid;
+	  pid = IS_JOBCONTROL (job) ? jobs[job]->pgrp : jobs[job]->pipe->pid;
 
 	  UNBLOCK_CHILD (oset);
 
@@ -266,16 +207,13 @@ kill_builtin (list)
 	}
       else
 	{
-	  builtin_error ("bad process specification `%s'", list->word->word);
+	  builtin_error ("`%s' is not a pid or valid job spec", list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
     continue_killing:
       list = list->next;
     }
 
-  if (any_succeeded)
-    return (EXECUTION_SUCCESS);
-  else
-    return (EXECUTION_FAILURE);
+  return (any_succeeded ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 #endif /* JOB_CONTROL */

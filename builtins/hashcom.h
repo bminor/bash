@@ -18,7 +18,7 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#include "../hash.h"
+#include "../hashlib.h"
 
 #define FILENAME_HASH_BUCKETS 631
 
@@ -26,7 +26,10 @@ extern HASH_TABLE *hashed_filenames;
 
 typedef struct {
   char *path;		/* The full pathname of the file. */
-  int check_dot;	/* Whether `.' appeared before this one in $PATH. */
+  int flags;
 } PATH_DATA;
+
+#define HASH_RELPATH	0x01	/* this filename is a relative pathname. */
+#define HASH_CHKDOT	0x02	/* check `.' since it was earlier in $PATH */
 
 #define pathdata(x) ((PATH_DATA *)(x)->data)

@@ -19,6 +19,12 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../bashansi.h"
 #include "../config.h"
 #include <stdio.h>
@@ -50,6 +56,7 @@ extern char *strcpy ();
 
 /* Flag values that builtins can have. */
 #define BUILTIN_FLAG_SPECIAL	0x01
+#define BUILTIN_FLAG_ASSIGNMENT 0x02
 
 /* If this stream descriptor is non-zero, then write
    texinfo documentation to it. */
@@ -115,12 +122,41 @@ char *special_builtins[] =
   "export", "readonly", "return", "set", "shift", "trap", "unset",
   (char *)NULL
 };
-static int is_special_builtin ();
 
+/* The builtin commands that take assignment statements as arguments. */
+char *assignment_builtins[] =
+{
+  "alias", "declare", "export", "local", "readonly", "typeset",
+  (char *)NULL
+};
+
+/* Forward declarations. */
+static int is_special_builtin ();
+static int is_assignment_builtin ();
+
+void extract_info ();
+
+void file_error ();
+void line_error ();
+
+void write_file_headers ();
+void write_file_footers ();
+void write_ifdefs ();
+void write_endifs ();
+void write_documentation ();
+void write_longdocs ();
+void write_builtins ();
+
+void free_defs ();
+void add_documentation ();
+
+void must_be_building ();
+void remove_trailing_whitespace ();
 
 /* For each file mentioned on the command line, process it and
    write the information to STRUCTFILE and EXTERNFILE, while
    creating the production file if neccessary. */
+int
 main (argc, argv)
      int argc;
      char **argv;
@@ -305,6 +341,7 @@ copy_string_array (array)
 }
 
 /* Add ELEMENT to ARRAY, growing the array if neccessary. */
+void
 array_add (element, array)
      char *element;
      ARRAY *array;
@@ -324,6 +361,7 @@ array_add (element, array)
 }
 
 /* Free an allocated array and data pointer. */
+void
 array_free (array)
      ARRAY *array;
 {
@@ -397,6 +435,7 @@ int output_cpp_line_info = 0;
    target.  After the file has been processed, write out the names of
    builtins found in each $BUILTIN.  Plain text found before the $PRODUCES
    is ignored, as is "$$ comment text". */
+void
 extract_info (filename, structfile, externfile)
      char *filename;
      FILE *structfile, *externfile;
@@ -548,6 +587,7 @@ free_builtin (builtin)
 }
 
 /* Free all of the memory allocated to a DEF_FILE. */
+void
 free_defs (defs)
      DEF_FILE *defs;
 {
@@ -592,6 +632,7 @@ strip_whitespace (string)
 }
 
 /* Remove only the trailing whitespace from STRING. */
+void
 remove_trailing_whitespace (string)
      char *string;
 {
@@ -625,6 +666,7 @@ get_arg (for_whom, defs, string)
 }
 
 /* Error if not building a builtin. */
+void
 must_be_building (directive, defs)
      char *directive;
      DEF_FILE *defs;
@@ -645,6 +687,7 @@ current_builtin (directive, defs)
 
 /* Add LINE to the long documentation for the current builtin.
    Ignore blank lines until the first non-blank line has been seen. */
+void
 add_documentation (defs, line)
      DEF_FILE *defs;
      char *line;
@@ -670,38 +713,42 @@ builtin_handler (self, defs, arg)
      char *self, *arg;
      DEF_FILE *defs;
 {
+  BUILTIN_DESC *new;
+  char *name;
+
   /* If we are already building a builtin, we cannot start a new one. */
   if (building_builtin)
-    return (line_error (defs, "%s found before $END", self));
+    {
+      line_error (defs, "%s found before $END", self);
+      return (-1);
+    }
 
   output_cpp_line_info++;
 
   /* Get the name of this builtin, and stick it in the array. */
-  {
-    BUILTIN_DESC *new;
-    char *name;
+  name = get_arg (self, defs, arg);
 
-    name = get_arg (self, defs, arg);
+  /* If this is the first builtin, create the array to hold them. */
+  if (!defs->builtins)
+    defs->builtins = array_create (sizeof (BUILTIN_DESC *));
 
-    /* If this is the first builtin, create the array to hold them. */
-    if (!defs->builtins)
-      defs->builtins = array_create (sizeof (BUILTIN_DESC *));
+  new = (BUILTIN_DESC *)xmalloc (sizeof (BUILTIN_DESC));
+  new->name = name;
+  new->function = (char *)NULL;
+  new->shortdoc = (char *)NULL;
+  new->docname = (char *)NULL;
+  new->longdoc = (ARRAY *)NULL;
+  new->dependencies = (ARRAY *)NULL;
+  new->flags = 0;
 
-    new = (BUILTIN_DESC *)xmalloc (sizeof (BUILTIN_DESC));
-    new->name = name;
-    new->function = (char *)NULL;
-    new->shortdoc = (char *)NULL;
-    new->docname = (char *)NULL;
-    new->longdoc = (ARRAY *)NULL;
-    new->dependencies = (ARRAY *)NULL;
-    new->flags = 0;
+  if (is_special_builtin (name))
+    new->flags |= BUILTIN_FLAG_SPECIAL;
+  if (is_assignment_builtin (name))
+    new->flags |= BUILTIN_FLAG_ASSIGNMENT;
 
-    if (is_special_builtin (name))
-      new->flags |= BUILTIN_FLAG_SPECIAL;
+  array_add ((char *)new, defs->builtins);
+  building_builtin = 1;
 
-    array_add ((char *)new, defs->builtins);
-    building_builtin = 1;
-  }
   return (0);
 }
 
@@ -744,6 +791,7 @@ docname_handler (self, defs, arg)
 }
 
 /* How to handle the $SHORT_DOC directive. */
+int
 short_doc_handler (self, defs, arg)
      char *self, *arg;
      DEF_FILE *defs;
@@ -762,13 +810,16 @@ short_doc_handler (self, defs, arg)
 }
 
 /* How to handle the $COMMENT directive. */
+int
 comment_handler (self, defs)
      char *self;
      DEF_FILE *defs;
 {
+  return (0);
 }
 
 /* How to handle the $DEPENDS_ON directive. */
+int
 depends_on_handler (self, defs, arg)
      char *self, *arg;
      DEF_FILE *defs;
@@ -788,6 +839,7 @@ depends_on_handler (self, defs, arg)
 }
 
 /* How to handle the $PRODUCES directive. */
+int
 produces_handler (self, defs, arg)
      char *self, *arg;
      DEF_FILE *defs;
@@ -820,12 +872,14 @@ produces_handler (self, defs, arg)
 }
 
 /* How to handle the $END directive. */
+int
 end_handler (self, defs, arg)
      char *self, *arg;
      DEF_FILE *defs;
 {
   must_be_building (self, defs);
   building_builtin = 0;
+  return (0);
 }
 
 /* **************************************************************** */
@@ -835,6 +889,7 @@ end_handler (self, defs, arg)
 /* **************************************************************** */
 
 /* Produce an error for DEFS with FORMAT and ARGS. */
+void
 line_error (defs, format, arg1, arg2)
      DEF_FILE *defs;
      char *format, *arg1, *arg2;
@@ -848,6 +903,7 @@ line_error (defs, format, arg1, arg2)
 }
 
 /* Print error message for FILENAME. */
+void
 file_error (filename)
      char *filename;
 {
@@ -895,7 +951,7 @@ xrealloc (pointer, bytes)
 static void
 memory_error_and_abort ()
 {
-  fprintf (stderr, "mkbuiltins: Out of virtual memory!\n");
+  fprintf (stderr, "mkbuiltins: out of virtual memory\n");
   abort ();
 }
 
@@ -929,6 +985,7 @@ copy_builtin (builtin)
 }
 
 /* How to save away a builtin. */
+void
 save_builtin (builtin)
      BUILTIN_DESC *builtin;
 {
@@ -972,7 +1029,7 @@ char *structfile_header[] = {
   "   along with Bash; see the file COPYING.  If not, write to the Free",
   "   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */",
   "",
-  "/* The list of shell builtins.  Each element is name, function, enabled-p,",
+  "/* The list of shell builtins.  Each element is name, function, flags,",
   "   long-doc, short-doc.  The long-doc field contains a pointer to an array",
   "   of help lines.  The function takes a WORD_LIST *; the first word in the",
   "   list is the first arg to the command.  The list has already had word",
@@ -992,13 +1049,17 @@ char *structfile_footer[] = {
   "  { (char *)0x0, (Function *)0x0, 0, (char **)0x0, (char *)0x0 }",
   "};",
   "",
+  "struct builtin *shell_builtins = static_shell_builtins;",
+  "struct builtin *current_builtin;",
+  "",
   "int num_shell_builtins =",
-  "\tsizeof (shell_builtins) / sizeof (struct builtin) - 1;",
+  "\tsizeof (static_shell_builtins) / sizeof (struct builtin) - 1;",
   (char *)NULL
 };
 
 /* Write out any neccessary opening information for
    STRUCTFILE and EXTERNFILE. */
+void
 write_file_headers (structfile, externfile)
      FILE *structfile, *externfile;
 {
@@ -1011,7 +1072,7 @@ write_file_headers (structfile, externfile)
 
       fprintf (structfile, "#include \"%s\"\n",
 	       extern_filename ? extern_filename : "builtext.h");
-      fprintf (structfile, "\nstruct builtin shell_builtins[] = {\n");
+      fprintf (structfile, "\nstruct builtin static_shell_builtins[] = {\n");
     }
 
   if (externfile)
@@ -1022,6 +1083,7 @@ write_file_headers (structfile, externfile)
 
 /* Write out any necessary closing information for
    STRUCTFILE and EXTERNFILE. */
+void
 write_file_footers (structfile, externfile)
      FILE *structfile, *externfile;
 {
@@ -1037,6 +1099,7 @@ write_file_footers (structfile, externfile)
 
 /* Write out the information accumulated in DEFS to
    STRUCTFILE and EXTERNFILE. */
+void
 write_builtins (defs, structfile, externfile)
      DEF_FILE *defs;
      FILE *structfile, *externfile;
@@ -1057,8 +1120,7 @@ write_builtins (defs, structfile, externfile)
 	    {
 	      if (builtin->dependencies)
 		{
-		  if (builtin->function)
-		    write_ifdefs (externfile, builtin->dependencies->array);
+		  write_ifdefs (externfile, builtin->dependencies->array);
 		  write_ifdefs (structfile, builtin->dependencies->array);
 		}
 
@@ -1083,20 +1145,14 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(Function *)0x0, ");
 
-#define SPECIAL_FLAG_STRING "BUILTIN_ENABLED | STATIC_BUILTIN | SPECIAL_BUILTIN"
-#define NORMAL_FLAG_STRING "BUILTIN_ENABLED | STATIC_BUILTIN"
-
-		  fprintf (structfile, "%s, %s_doc,\n",
-		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ?
-			SPECIAL_FLAG_STRING :
-			NORMAL_FLAG_STRING,
+		  fprintf (structfile, "%s%s%s, %s_doc,\n",
+		    "BUILTIN_ENABLED | STATIC_BUILTIN",
+		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
+		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
 		    builtin->docname ? builtin->docname : builtin->name);
 
-#undef SPECIAL_FLAG_STRING
-#undef NORMAL_FLAG_STRING
-
 		  fprintf
-		    (structfile, "     \"%s\" },\n",
+		    (structfile, "     \"%s\", (char *)NULL },\n",
 		     builtin->shortdoc ? builtin->shortdoc : builtin->name);
 
 		  /* Save away this builtin for later writing of the
@@ -1126,6 +1182,7 @@ write_builtins (defs, structfile, externfile)
 }
 
 /* Write out the long documentation strings in BUILTINS to STREAM. */
+void
 write_longdocs (stream, builtins)
      FILE *stream;
      ARRAY *builtins;
@@ -1157,6 +1214,7 @@ write_longdocs (stream, builtins)
    DEFINES is a null terminated array of define names.
    If a define is preceded by an `!', then the sense of the test is
    reversed. */
+void
 write_ifdefs (stream, defines)
      FILE *stream;
      char **defines;
@@ -1187,6 +1245,7 @@ write_ifdefs (stream, defines)
    of the immediately preceding code.
    STREAM is the stream to write the information to.
    DEFINES is a null terminated array of define names. */
+void
 write_endifs (stream, defines)
      FILE *stream;
      char **defines;
@@ -1211,6 +1270,7 @@ write_endifs (stream, defines)
 
 /* Write DOCUMENTAION to STREAM, perhaps surrounding it with double-quotes
    and quoting special characters in the string. */
+void
 write_documentation (stream, documentation, indentation, flags)
      FILE *stream;
      char **documentation;
@@ -1218,14 +1278,14 @@ write_documentation (stream, documentation, indentation, flags)
 {
   register int i, j;
   register char *line;
-  int string_array = (flags & STRING_ARRAY); /* Mutually exclusive. */
-  int texinfo = (flags & TEXINFO);
+  int string_array, texinfo;
 
   if (!stream)
     return;
 
+  string_array = flags & STRING_ARRAY;
   if (string_array)
-    fprintf (stream, " {\n");
+    fprintf (stream, " {\n#if defined (HELP_BUILTIN)\n");
 
 #if !defined (OLDCODE)
   /* XXX -- clean me up; for experiment only */
@@ -1233,7 +1293,7 @@ write_documentation (stream, documentation, indentation, flags)
     goto end_of_document;
 #endif /* !OLDCODE */
 
-  for (i = 0; line = documentation[i]; i++)
+  for (i = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
     {
       /* Allow #ifdef's to be written out verbatim. */
       if (*line == '#')
@@ -1295,17 +1355,31 @@ end_of_document:
 #endif /* !OLDCODE */
 
   if (string_array)
-    fprintf (stream, "  (char *)NULL\n};\n");
+    fprintf (stream, "#endif /* HELP_BUILTIN */\n  (char *)NULL\n};\n");
+}
+
+static int
+_find_in_table (name, name_table)
+     char *name, *name_table[];
+{
+  register int i;
+
+  for (i = 0; name_table[i]; i++)
+    if (strcmp (name, name_table[i]) == 0)
+      return 1;
+  return 0;
 }
 
 static int
 is_special_builtin (name)
      char *name;
 {
-  register int i;
+  return (_find_in_table (name, special_builtins));
+}
 
-  for (i = 0; special_builtins[i]; i++)
-    if (strcmp (name, special_builtins[i]) == 0)
-      return 1;
-  return 0;
+static int
+is_assignment_builtin (name)
+     char *name;
+{
+  return (_find_in_table (name, assignment_builtins));
 }

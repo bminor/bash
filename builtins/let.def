@@ -29,13 +29,23 @@ by 0 is trapped and flagged as an error.  The following list of
 operators is grouped into levels of equal-precedence operators.
 The levels are listed in order of decreasing precedence.
 
-	-		unary minus
-	!		logical NOT
-	* / %		multiplication, division, remainder
-	+ -		addition, subtraction
-	<= >= < >	comparison
-	== !=		equality inequality
-	=		assignment
+	-, +		unary minus, plus
+	!, ~		logical and bitwise negation
+	*, /, %		multiplication, division, remainder
+	+, -		addition, subtraction
+	<<, >>		left and right bitwise shifts
+	<=, >=, <, >	comparison
+	==, !=		equality, inequality
+	&		bitwise AND
+	^		bitwise XOR
+	|		bitwise OR
+	&&		logical AND
+	||		logical OR
+	expr ? expr : expr
+			conditional expression
+	=, *=, /=, %=,
+	+=, -=, <<=, >>=,
+	&=, ^=, |=	assignment
 
 Shell variables are allowed as operands.  The name of the variable
 is replaced by its value (coerced to a long integer) within
@@ -50,28 +60,49 @@ If the last ARG evaluates to 0, let returns 1; 0 is returned
 otherwise.
 $END
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../shell.h"
+#include "common.h"
 
 /* Arithmetic LET function. */
+int
 let_builtin (list)
      WORD_LIST *list;
 {
-  long ret = 0L;
+  long ret;
 
-  if (!list)
+  if (list == 0)
     {
-      builtin_error ("argument (expression) expected");
+      builtin_error ("expression expected");
       return (EXECUTION_FAILURE);
     }
 
-  while (list)
+  for (; list; list = list->next)
+    ret = evalexp (list->word->word);
+
+  return ((ret == 0L) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+}
+
+int
+exp_builtin (list)
+     WORD_LIST *list;
+{
+  char *exp;
+  int ret;
+
+  if (list == 0)
     {
-      ret = evalexp (list->word->word);
-      list = list->next;
+      builtin_error ("expression expected");
+      return (EXECUTION_FAILURE);
     }
 
-  if (ret == 0L)
-    return (EXECUTION_FAILURE);
-  else
-    return (EXECUTION_SUCCESS);
+  exp = string_list (list);
+  ret = evalexp (exp);
+  free (exp);
+  return ((ret == 0L) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }

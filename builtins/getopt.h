@@ -51,6 +51,9 @@ extern int sh_opterr;
 
 extern int sh_optopt;
 
+/* Set to 1 when an unrecognized option is encountered. */
+extern int sh_badopt;
+
 extern int sh_getopt ();
 extern void sh_getopt_restore_state ();
 

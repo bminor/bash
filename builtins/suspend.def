@@ -30,15 +30,23 @@ signal.  The `-f' if specified says not to complain about this
 being a login shell if it is; just suspend anyway.
 $END
 
-#include <sys/types.h>
+#include <config.h>
+
+#if defined (JOB_CONTROL)
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashtypes.h"
 #include <signal.h>
 #include "../shell.h"
 #include "../jobs.h"
+#include "common.h"
+#include "bashgetopt.h"
 
-#if defined (JOB_CONTROL)
 extern int job_control;
 
-static SigHandler *old_cont, *old_tstp;
+static SigHandler *old_cont, *old_stop;
 
 /* Continue handler. */
 sighandler
@@ -46,10 +54,10 @@ suspend_continue (sig)
      int sig;
 {
   set_signal_handler (SIGCONT, old_cont);
-  set_signal_handler (SIGTSTP, old_tstp);
-#if !defined (VOID_SIGHANDLER)
-  return (0);
-#endif /* !VOID_SIGHANDLER */
+#if 0
+  set_signal_handler (SIGSTOP, old_stop);
+#endif
+  SIGRETURN (0);
 }
 
 /* Suspending the shell.  If -f is the arg, then do the suspend
@@ -58,28 +66,45 @@ int
 suspend_builtin (list)
      WORD_LIST *list;
 {
-  if (!job_control)
+  int opt, force;
+
+  reset_internal_getopt ();
+  force = 0;
+  while ((opt = internal_getopt (list, "f")) != -1)
+    switch (opt)
+      {
+      case 'f':
+	force++;
+	break;
+      default:
+	builtin_usage ();
+	return (EX_USAGE);
+      }
+      
+  list = loptend;
+
+  if (job_control == 0)
     {
-      builtin_error ("Cannot suspend a shell without job control");
+      builtin_error ("cannot suspend a shell without job control");
       return (EXECUTION_FAILURE);
     }
 
-  if (list)
-    if (strcmp (list->word->word, "-f") == 0)
-      goto do_suspend;
-
-  no_args (list);
-
-  if (login_shell)
+  if (force == 0)  
     {
-      builtin_error ("Can't suspend a login shell");
-      return (EXECUTION_FAILURE);
+      no_args (list);
+
+      if (login_shell)
+	{
+	  builtin_error ("cannot suspend a login shell");
+	  return (EXECUTION_FAILURE);
+	}
     }
 
-do_suspend:
   old_cont = (SigHandler *)set_signal_handler (SIGCONT, suspend_continue);
-  old_tstp = (SigHandler *)set_signal_handler (SIGTSTP, SIG_DFL);
-  killpg (shell_pgrp, SIGTSTP);
+#if 0
+  old_stop = (SigHandler *)set_signal_handler (SIGSTOP, SIG_DFL);
+#endif
+  killpg (shell_pgrp, SIGSTOP);
   return (EXECUTION_SUCCESS);
 }
 

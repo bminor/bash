@@ -33,7 +33,7 @@
 KEYMAP_ENTRY_ARRAY emacs_standard_keymap = {
 
   /* Control keys. */
-  { ISFUNC, (Function *)0x0 },		/* Control-@ */
+  { ISFUNC, rl_set_mark },		/* Control-@ */
   { ISFUNC, rl_beg_of_line },		/* Control-a */
   { ISFUNC, rl_backward },		/* Control-b */
   { ISFUNC, (Function *)0x0 },		/* Control-c */
@@ -62,7 +62,7 @@ KEYMAP_ENTRY_ARRAY emacs_standard_keymap = {
   { ISFUNC, (Function *)0x0 },		/* Control-z */
   { ISKMAP, (Function *)emacs_meta_keymap }, /* Control-[ */
   { ISFUNC, (Function *)0x0 },		/* Control-\ */
-  { ISFUNC, (Function *)0x0 },		/* Control-] */
+  { ISFUNC, rl_char_search },		/* Control-] */
   { ISFUNC, (Function *)0x0 },		/* Control-^ */
   { ISFUNC, rl_undo_command },		/* Control-_ */
 
@@ -358,22 +358,22 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
 
   { ISFUNC, rl_complete },	/* Meta-Control-[ */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-\ */
-  { ISFUNC, (Function *)0x0 },	/* Meta-Control-] */
+  { ISFUNC, rl_backward_char_search },	/* Meta-Control-] */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-^ */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-_ */
 
   /* The start of printing characters. */
-  { ISFUNC, (Function *)0x0 },	/* Meta-SPACE */
+  { ISFUNC, rl_set_mark },	/* Meta-SPACE */
   { ISFUNC, (Function *)0x0 },	/* Meta-! */
   { ISFUNC, (Function *)0x0 },	/* Meta-" */
-  { ISFUNC, (Function *)0x0 },	/* Meta-# */
+  { ISFUNC, rl_insert_comment },/* Meta-# */
   { ISFUNC, (Function *)0x0 },	/* Meta-$ */
   { ISFUNC, (Function *)0x0 },	/* Meta-% */
   { ISFUNC, rl_tilde_expand },	/* Meta-& */
   { ISFUNC, (Function *)0x0 },	/* Meta-' */
   { ISFUNC, (Function *)0x0 },	/* Meta-( */
   { ISFUNC, (Function *)0x0 },	/* Meta-) */
-  { ISFUNC, (Function *)0x0 },	/* Meta-* */
+  { ISFUNC, rl_insert_completions },	/* Meta-* */
   { ISFUNC, (Function *)0x0 },	/* Meta-+ */
   { ISFUNC, (Function *)0x0 },	/* Meta-, */
   { ISFUNC, rl_digit_argument }, /* Meta-- */
@@ -396,7 +396,7 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
   { ISFUNC, (Function *)0x0 },		/* Meta-: */
   { ISFUNC, (Function *)0x0 },		/* Meta-; */
   { ISFUNC, rl_beginning_of_history },	/* Meta-< */
-  { ISFUNC, (Function *)0x0 },		/* Meta-= */
+  { ISFUNC, rl_possible_completions },	/* Meta-= */
   { ISFUNC, rl_end_of_history },	/* Meta-> */
   { ISFUNC, rl_possible_completions },	/* Meta-? */
   { ISFUNC, (Function *)0x0 },		/* Meta-@ */
@@ -632,7 +632,7 @@ KEYMAP_ENTRY_ARRAY emacs_ctlx_keymap = {
   { ISFUNC, rl_undo_command },		/* Control-u */
   { ISFUNC, (Function *)0x0 },		/* Control-v */
   { ISFUNC, (Function *)0x0 },		/* Control-w */
-  { ISFUNC, (Function *)0x0 },		/* Control-x */
+  { ISFUNC, rl_exchange_point_and_mark },/* Control-x */
   { ISFUNC, (Function *)0x0 },		/* Control-y */
   { ISFUNC, (Function *)0x0 },		/* Control-z */
   { ISFUNC, (Function *)0x0 },		/* Control-[ */

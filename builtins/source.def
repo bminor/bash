@@ -36,34 +36,34 @@ in $PATH are used to find the directory containing FILENAME.
 $END
 /* source.c - Implements the `.' and `source' builtins. */
 
-#include <sys/types.h>
+#include <config.h>
+
+#include "../bashtypes.h"
+#include "../posixstat.h"
+#include "../filecntl.h"
 #include <sys/file.h>
 #include <errno.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
-#include "../posixstat.h"
-#include "../filecntl.h"
 #include "../execute_cmd.h"
+#include "common.h"
 
-/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
 
-/* Variables used here but defined in other files. */
-extern int return_catch_flag, return_catch_value;
-extern jmp_buf return_catch;
-extern int posixly_correct;
-extern int interactive, interactive_shell, last_command_exit_value;
+#if defined (RESTRICTED_SHELL)
+extern int restricted;
+#endif
 
-/* How many `levels' of sourced files we have. */
-int sourcelevel = 0;
+/* If non-zero, `.' uses $PATH to look up the script to be sourced. */
+int source_uses_path = 1;
 
 /* If this . script is supplied arguments, we save the dollar vars and
    replace them with the script arguments for the duration of the script's
@@ -86,101 +86,51 @@ maybe_pop_dollar_vars ()
    This cannot be done in a subshell, since things like variable assignments
    take place in there.  So, I open the file, place it into a large string,
    close the file, and then execute the string. */
+int
 source_builtin (list)
      WORD_LIST *list;
 {
-  int result, return_val;
+  int result;
+  char *filename;
 
-  /* Assume the best. */
-  result = EXECUTION_SUCCESS;
-
-  if (list)
-    {
-      char *string, *filename;
-      struct stat finfo;
-      int fd, tt;
-
-      filename = find_path_file (list->word->word);
-      if (!filename)
-	filename = savestring (list->word->word);
-
-      if (((fd = open (filename, O_RDONLY)) < 0) || (fstat (fd, &finfo) < 0))
-	goto file_error_exit;
-
-      string = (char *)xmalloc (1 + (int)finfo.st_size);
-      tt = read (fd, string, finfo.st_size);
-      string[finfo.st_size] = '\0';
-
-      /* Close the open file, preserving the state of errno. */
-      { int temp = errno; close (fd); errno = temp; }
-
-      if (tt != finfo.st_size)
-	{
-	  free (string);
-
-	file_error_exit:
-	  file_error (filename);
-	  free (filename);
-
-	  /* POSIX shells exit if non-interactive and file error. */
-	  if (posixly_correct && !interactive_shell)
-	    {
-	      last_command_exit_value = 1;
-	      longjmp (top_level, EXITPROG);
-	    }
-
-	  return (EXECUTION_FAILURE);
-	}
-
-      if (tt > 80)
-	tt = 80;
-
-      if (check_binary_file ((unsigned char *)string, tt))
-	{
-	  free (string);
-	  builtin_error ("%s: cannot execute binary file", filename);
-	  free (filename);
-	  return (EX_BINARY_FILE);
-	}
-
-      begin_unwind_frame ("File Sourcing");
-
-      if (list->next)
-	{
-	  push_dollar_vars ();
-	  add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
-	  remember_args (list->next, 1);
-	}
-
-      unwind_protect_int (return_catch_flag);
-      unwind_protect_jmp_buf (return_catch);
-      unwind_protect_int (interactive);
-      unwind_protect_int (sourcelevel);
-      add_unwind_protect ((Function *)xfree, filename);
-      interactive = 0;
-      sourcelevel++;
-
-      set_dollar_vars_unchanged ();
-
-      return_catch_flag++;
-      return_val = setjmp (return_catch);
-
-      if (return_val)
-	parse_and_execute_cleanup ();
-      else
-	result = parse_and_execute (string, filename, -1);
-
-      run_unwind_frame ("File Sourcing");
-
-      /* If RETURN_VAL is non-zero, then we return the value given
-	 to return_builtin (), since that is how we got here. */
-      if (return_val)
-	result = return_catch_value;
-    }
-  else
+  if (list == 0)
     {
       builtin_error ("filename argument required");
-      result = EXECUTION_FAILURE;
+      builtin_usage ();
+      return (EX_USAGE);
     }
+
+  if (no_options (list))
+    return (EX_USAGE);
+
+#if defined (RESTRICTED_SHELL)
+  if (restricted && strchr (list->word->word, '/'))
+    {
+      builtin_error ("%s: restricted", list->word->word);
+      return (EXECUTION_FAILURE);
+    }
+#endif
+
+  filename = (char *)NULL;
+  if (source_uses_path)
+    filename = find_path_file (list->word->word);
+  if (filename == 0)
+    filename = savestring (list->word->word);
+
+  begin_unwind_frame ("source");
+  add_unwind_protect ((Function *)xfree, filename);
+
+  if (list->next)
+    {
+      push_dollar_vars ();
+      add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
+      remember_args (list->next, 1);
+    }
+  set_dollar_vars_unchanged ();
+
+  result = source_file (filename);
+
+  run_unwind_frame ("source");
+
   return (result);
 }

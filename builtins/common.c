@@ -16,27 +16,37 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include "../posixstat.h"
-#if defined (HAVE_VFPRINTF)
-#include <varargs.h>
-#endif /* VFPRINTF */
+#include <signal.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#if defined (PREFER_STDARG)
+#  include <stdarg.h>
+#else
+#  if defined (PREFER_VARARGS)
+#    include <varargs.h>
+#  endif
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
-#include "../unwind_prot.h"
 #include "../maxpath.h"
+#include "../flags.h"
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../input.h"
 #include "../execute_cmd.h"
+#include "../trap.h"
 #include "hashcom.h"
+#include "bashgetopt.h"
 #include "common.h"
 #include <tilde/tilde.h>
 
@@ -45,91 +55,57 @@
 #endif
 
 extern int no_symbolic_links, interactive, interactive_shell;
-extern int indirection_level, startup_state;
+extern int indirection_level, startup_state, subshell_environment;
+extern int line_number;
 extern int last_command_exit_value;
-extern int hashing_disabled;
+extern int running_trap;
+extern int hashing_enabled;
 extern int variable_context;
+extern int posixly_correct;
 extern char *this_command_name, *shell_name;
 extern COMMAND *global_command;
 extern HASH_TABLE *hashed_filenames;
+extern char *bash_getcwd_errstr;
 
-/* Read a numeric arg for this_command_name, the name of the shell builtin
-   that wants it.  LIST is the word list that the arg is to come from. */
-int
-get_numeric_arg (list)
-     WORD_LIST *list;
-{
-  int count = 1;
-
-  if (list)
-    {
-      register char *arg;
-      int sign = 1;
-
-      arg = list->word->word;
-      if (!arg)
-	goto bad_number;
-
-      /* Skip optional leading white space. */
-      while (whitespace (*arg))
-	arg++;
-
-      if (!*arg)
-        goto bad_number;
-
-      /* We allow leading `-' or `+'. */
-      if (*arg == '-' || *arg == '+')
-	{
-	  if (!digit (arg[1]))
-	    goto bad_number;
-
-	  if (*arg == '-')
-	    sign = -1;
-
-	  arg++;
-	}
-
-      for (count = 0; digit (*arg); arg++)
-	count = (count * 10) + digit_value (*arg);
-
-      /* Skip trailing whitespace, if any. */
-      while (whitespace (*arg))
-        arg++;
-
-      if (!*arg)
-        count = count * sign;
-      else
-	{
-  bad_number:
-	  builtin_error ("bad non-numeric arg `%s'", list->word->word);
-	  throw_to_top_level ();
-	}
-      no_args (list->next);
-    }
-  return (count);
-}
+/* **************************************************************** */
+/*								    */
+/*	     Error reporting, usage, and option processing	    */
+/*								    */
+/* **************************************************************** */
 
 /* This is a lot like report_error (), but it is for shell builtins
    instead of shell control structures, and it won't ever exit the
    shell. */
-#if defined (HAVE_VFPRINTF)
+#if defined (USE_VARARGS)
 void
-builtin_error (va_alist)
+#if defined (PREFER_STDARG)
+builtin_error (const char *format, ...)
+#else
+builtin_error (format, va_alist)
+     const char *format;
      va_dcl
+#endif
 {
-  char *format;
   va_list args;
+  char *name;
+
+  name = get_name_for_error ();
+  fprintf (stderr, "%s: ", name);
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
 
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
   va_start (args);
-  format = va_arg (args, char *);
+#endif
+
   vfprintf (stderr, format, args);
   va_end (args);
   fprintf (stderr, "\n");
 }
-#else /* !HAVE_VFPRINTF */
+#else /* !USE_VARARGS */
 void
 builtin_error (format, arg1, arg2, arg3, arg4, arg5)
      char *format, *arg1, *arg2, *arg3, *arg4, *arg5;
@@ -141,7 +117,75 @@ builtin_error (format, arg1, arg2, arg3, arg4, arg5)
   fprintf (stderr, "\n");
   fflush (stderr);
 }
-#endif /* !HAVE_VFPRINTF */
+#endif /* !USE_VARARGS */
+
+/* Print a usage summary for the currently-executing builtin command. */
+void
+builtin_usage ()
+{
+  if (this_command_name && *this_command_name)
+    fprintf (stderr, "%s: usage: ", this_command_name);
+  fprintf (stderr, "%s\n", current_builtin->short_doc);
+  fflush (stderr);
+}
+
+/* Return if LIST is NULL else barf and jump to top_level.  Used by some
+   builtins that do not accept arguments. */
+void
+no_args (list)
+     WORD_LIST *list;
+{
+  if (list)
+    {
+      builtin_error ("too many arguments");
+      jump_to_top_level (DISCARD);
+    }
+}
+
+/* Function called when one of the builtin commands detects a bad
+   option. */
+void
+bad_option (s)
+     char *s;
+{
+  builtin_error ("unknown option: %s", s);
+}
+
+/* Check that no options were given to the currently-executing builtin,
+   and return 0 if there were options. */
+int
+no_options (list)
+     WORD_LIST *list;
+{
+  reset_internal_getopt ();
+  if (internal_getopt (list, "") != -1)
+    {
+      builtin_usage ();
+      return (1);
+    }
+  return (0);
+}
+
+/* **************************************************************** */
+/*								    */
+/*	     Shell positional parameter manipulation		    */
+/*								    */
+/* **************************************************************** */
+
+/* Convert a WORD_LIST into a C-style argv.  Return the number of elements
+   in the list in *IP, if IP is non-null.  A convenience function for
+   loadable builtins; also used by `test'. */
+char **
+make_builtin_argv (list, ip)
+     WORD_LIST *list;
+     int *ip;
+{
+  char **argv;
+
+  argv = word_list_to_argv (list, 0, 1, ip);
+  argv[0] = this_command_name;
+  return argv;
+}
 
 /* Remember LIST in $0 ... $9, and REST_OF_ARGS.  If DESTRUCTIVE is
    non-zero, then discard whatever the existing arguments are, else
@@ -155,7 +199,7 @@ remember_args (list, destructive)
 
   for (i = 1; i < 10; i++)
     {
-      if (destructive && dollar_vars[i])
+      if ((destructive || list) && dollar_vars[i])
 	{
 	  free (dollar_vars[i]);
 	  dollar_vars[i] = (char *)NULL;
@@ -163,9 +207,6 @@ remember_args (list, destructive)
 
       if (list)
 	{
-	  if (!destructive && dollar_vars[i])
-	    free (dollar_vars[i]);
-
 	  dollar_vars[i] = savestring (list->word->word);
 	  list = list->next;
 	}
@@ -184,142 +225,15 @@ remember_args (list, destructive)
     set_dollar_vars_changed ();
 }
 
-/* Return if LIST is NULL else barf and jump to top_level. */
-void
-no_args (list)
-     WORD_LIST *list;
-{
-  if (list)
-    {
-      builtin_error ("extra arguments");
-      longjmp (top_level, DISCARD);
-    }
-}
-
-/* Return the octal number parsed from STRING, or -1 to indicate
-   that the string contained a bad number. */
-int
-read_octal (string)
-     char *string;
-{
-  int result = 0;
-  int digits = 0;
-
-  while (*string && *string >= '0' && *string < '8')
-    {
-      digits++;
-      result = (result * 8) + *string++ - '0';
-    }
-
-  if (!digits || result > 0777 || *string)
-    result = -1;
-
-  return (result);
-}
-
-/* Temporary static. */
-static char *dotted_filename = (char *)NULL;
-
-/* Return the full pathname that FILENAME hashes to.  If FILENAME
-   is hashed, but data->check_dot is non-zero, check ./FILENAME
-   and return that if it is executable. */
-char *
-find_hashed_filename (filename)
-     char *filename;
-{
-  register BUCKET_CONTENTS *item;
-
-  if (hashing_disabled)
-    return ((char *)NULL);
-
-  item = find_hash_item (filename, hashed_filenames);
-
-  if (item)
-    {
-      /* If this filename is hashed, but `.' comes before it in the path,
-	 then see if `./filename' is an executable. */
-      if (pathdata(item)->check_dot)
-	{
-	  if (dotted_filename)
-	    free (dotted_filename);
-
-	  dotted_filename = (char *)xmalloc (3 + strlen (filename));
-	  strcpy (dotted_filename, "./");
-	  strcat (dotted_filename, filename);
-
-	  if (executable_file (dotted_filename))
-	    return (dotted_filename);
-
-	  /* Watch out.  If this file was hashed to "./filename", and
-	     "./filename" is not executable, then return NULL. */
-
-	  /* Since we already know "./filename" is not executable, what
-	     we're really interested in is whether or not the `path'
-	     portion of the hashed filename is equivalent to the current
-	     directory, but only if it starts with a `.'.  (This catches
-	     ./. and so on.)  same_file () is in execute_cmd.c; it tests
-	     general Unix file equivalence -- same device and inode. */
-	  {
-	    char *path = pathdata (item)->path;
-
-	    if (*path == '.')
-	      {
-		int same = 0;
-		char *tail;
-
-		tail = (char *) strrchr (path, '/');
-
-		if (tail)
-		  {
-		    *tail = '\0';
-		    same = same_file
-		      (".", path, (struct stat *)NULL, (struct stat *)NULL);
-		    *tail = '/';
-		  }
-		if (same)
-		  return ((char *)NULL);
-	      }
-	  }
-	}
-      return (pathdata (item)->path);
-    }
-  else
-    return ((char *)NULL);
-}
-
-/* Remove FILENAME from the table of hashed commands. */
-void
-remove_hashed_filename (filename)
-     char *filename;
-{
-  register BUCKET_CONTENTS *item;
-
-  if (hashing_disabled)
-    return;
-
-  item = remove_hash_item (filename, hashed_filenames);
-  if (item)
-    {
-      if (item->data)
-        {
-	  free (pathdata(item)->path);
-	  free (item->data);
-        }
-      if (item->key)
-	free (item->key);
-      free (item);
-    }
-}
-
 /* **************************************************************** */
 /*								    */
-/*		    Pushing and Popping a Context		    */
+/*		 Pushing and Popping variable contexts		    */
 /*								    */
 /* **************************************************************** */
 
 static WORD_LIST **dollar_arg_stack = (WORD_LIST **)NULL;
-static int dollar_arg_stack_slots = 0;
-static int dollar_arg_stack_index = 0;
+static int dollar_arg_stack_slots;
+static int dollar_arg_stack_index;
 
 void
 push_context ()
@@ -346,15 +260,15 @@ push_dollar_vars ()
 	xrealloc (dollar_arg_stack, (dollar_arg_stack_slots += 10)
 		  * sizeof (WORD_LIST **));
     }
-  dollar_arg_stack[dollar_arg_stack_index] = list_rest_of_args ();
-  dollar_arg_stack[++dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  dollar_arg_stack[dollar_arg_stack_index++] = list_rest_of_args ();
+  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
 }
 
 /* Restore the positional parameters from our stack. */
 void
 pop_dollar_vars ()
 {
-  if (!dollar_arg_stack || !dollar_arg_stack_index)
+  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
     return;
 
   remember_args (dollar_arg_stack[--dollar_arg_stack_index], 1);
@@ -365,17 +279,18 @@ pop_dollar_vars ()
 void
 dispose_saved_dollar_vars ()
 {
-  if (!dollar_arg_stack || !dollar_arg_stack_index)
+  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
     return;
 
   dispose_words (dollar_arg_stack[dollar_arg_stack_index]);
   dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
 }
 
-static int changed_dollar_vars = 0;
+static int changed_dollar_vars;
 
 /* Have the dollar variables been reset to new values since we last
    checked? */
+int
 dollar_vars_changed ()
 {
   return (changed_dollar_vars);
@@ -390,17 +305,140 @@ set_dollar_vars_unchanged ()
 void
 set_dollar_vars_changed ()
 {
-  changed_dollar_vars  = 1;
+  changed_dollar_vars = 1;
 }
 
-/* Function called when one of the builtin commands detects a bad
-   option. */
-void
-bad_option (s)
-     char *s;
+/* **************************************************************** */
+/*								    */
+/*	        Validating numeric input and arguments		    */
+/*								    */
+/* **************************************************************** */
+
+/* Read a numeric arg for this_command_name, the name of the shell builtin
+   that wants it.  LIST is the word list that the arg is to come from.
+   Accept only the numeric argument; report an error if other arguments
+   follow. */
+int
+get_numeric_arg (list)
+     WORD_LIST *list;
 {
-  builtin_error ("unknown option: %s", s);
+  long count = 1;
+
+  if (list)
+    {
+      register char *arg;
+
+      arg = list->word->word;
+      if (!arg || (legal_number (arg, &count) == 0))
+	{
+	  builtin_error ("bad non-numeric arg `%s'", list->word->word);
+	  throw_to_top_level ();
+	}
+      no_args (list->next);
+    }
+  return (count);
 }
+
+/* Return the octal number parsed from STRING, or -1 to indicate
+   that the string contained a bad number. */
+int
+read_octal (string)
+     char *string;
+{
+  int result, digits;
+
+  result = digits = 0;
+  while (*string && *string >= '0' && *string < '8')
+    {
+      digits++;
+      result = (result * 8) + *string++ - '0';
+    }
+
+  if (!digits || result > 0777 || *string)
+    result = -1;
+
+  return (result);
+}
+
+/* **************************************************************** */
+/*								    */
+/*		 	Command name hashing			    */
+/*								    */
+/* **************************************************************** */
+
+/* Return the full pathname that FILENAME hashes to.  If FILENAME
+   is hashed, but (data->flags & HASH_CHKDOT) is non-zero, check
+   ./FILENAME and return that if it is executable. */
+char *
+find_hashed_filename (filename)
+     char *filename;
+{
+  register BUCKET_CONTENTS *item;
+  char *path, *dotted_filename, *tail;
+  int same;
+
+  if (hashing_enabled == 0)
+    return ((char *)NULL);
+
+  item = find_hash_item (filename, hashed_filenames);
+
+  if (item == NULL)
+    return ((char *)NULL);
+
+  /* If this filename is hashed, but `.' comes before it in the path,
+     see if ./filename is executable.  If the hashed value is not an
+     absolute pathname, see if ./`hashed-value' exists. */
+  path = pathdata(item)->path;
+  if (pathdata(item)->flags & (HASH_CHKDOT|HASH_RELPATH))
+    {
+      tail = (pathdata(item)->flags & HASH_RELPATH) ? path : filename;
+      dotted_filename = xmalloc (3 + strlen (tail));
+      dotted_filename[0] = '.'; dotted_filename[1] = '/';
+      strcpy (dotted_filename + 2, tail);
+
+      if (executable_file (dotted_filename))
+	return (dotted_filename);
+
+      free (dotted_filename);
+
+#if 0
+      if (pathdata(item)->flags & HASH_RELPATH)
+	return ((char *)NULL);
+#endif
+
+      /* Watch out.  If this file was hashed to "./filename", and
+	 "./filename" is not executable, then return NULL. */
+
+      /* Since we already know "./filename" is not executable, what
+	 we're really interested in is whether or not the `path'
+	 portion of the hashed filename is equivalent to the current
+	 directory, but only if it starts with a `.'.  (This catches
+	 ./. and so on.)  same_file () tests general Unix file
+	 equivalence -- same device and inode. */
+      if (*path == '.')
+	{
+	  same = 0;
+	  tail = (char *)strrchr (path, '/');
+
+	  if (tail)
+	    {
+	      *tail = '\0';
+	      same = same_file (".", path, (struct stat *)NULL, (struct stat *)NULL);
+	      *tail = '/';
+	    }
+
+	  return same ? (char *)NULL : path;
+	}
+    }
+
+  return (path);
+}
+
+/* **************************************************************** */
+/*								    */
+/*	     Manipulating the current working directory		    */
+/*								    */
+/* **************************************************************** */
 
 /* Return a consed string which is the current working directory.
    FOR_WHOM is the name of the caller for error printing.  */
@@ -410,6 +448,8 @@ char *
 get_working_directory (for_whom)
      char *for_whom;
 {
+  char *directory;
+
   if (no_symbolic_links)
     {
       if (the_current_working_directory)
@@ -418,21 +458,18 @@ get_working_directory (for_whom)
       the_current_working_directory = (char *)NULL;
     }
 
-  if (!the_current_working_directory)
+  if (the_current_working_directory == 0)
     {
-      char *directory;
-
-      the_current_working_directory = xmalloc (MAXPATHLEN);
-      directory = getwd (the_current_working_directory);
-      if (!directory)
+      the_current_working_directory = xmalloc (PATH_MAX);
+      the_current_working_directory[0] = '\0';
+      directory = getcwd (the_current_working_directory, PATH_MAX);
+      if (directory == 0)
 	{
-	  if (for_whom && *for_whom)
-	    fprintf (stderr, "%s: ", for_whom);
-	  else
-	    fprintf (stderr, "%s: ", get_name_for_error ());
-
-	  fprintf (stderr, "could not get current directory: %s\n",
-		   the_current_working_directory);
+	  fprintf (stderr, "%s: could not get current directory: %s\n",
+		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+		   the_current_working_directory[0]
+			? the_current_working_directory
+			: bash_getcwd_errstr);
 
 	  free (the_current_working_directory);
 	  the_current_working_directory = (char *)NULL;
@@ -448,35 +485,43 @@ void
 set_working_directory (name)
      char *name;
 {
-  if (the_current_working_directory)
-    free (the_current_working_directory);
-
+  FREE (the_current_working_directory);
   the_current_working_directory = savestring (name);
 }
 
+/* **************************************************************** */
+/*								    */
+/*	     	Job control support functions			    */
+/*								    */
+/* **************************************************************** */
+
 #if defined (JOB_CONTROL)
 /* Return the job spec found in LIST. */
+int
 get_job_spec (list)
      WORD_LIST *list;
 {
   register char *word;
-  int job = NO_JOB;
-  int substring = 0;
+  int job, substring;
 
-  if (!list)
+  if (list == 0)
     return (current_job);
 
   word = list->word->word;
 
-  if (!*word)
+  if (*word == '\0')
     return (current_job);
 
   if (*word == '%')
     word++;
 
-  if (digit (*word) && (sscanf (word, "%d", &job) == 1))
-    return (job - 1);
+  if (digit (*word) && all_digits (word))
+    {
+      job = atoi (word);
+      return (job - 1);
+    }
 
+  substring = 0;
   switch (*word)
     {
     case 0:
@@ -490,21 +535,24 @@ get_job_spec (list)
     case '?':			/* Substring search requested. */
       substring++;
       word++;
-      goto find_string;
+      /* FALLTHROUGH */
 
     default:
-    find_string:
       {
-	register int i, wl = strlen (word);
+	register int i, wl;
+
+	job = NO_JOB;
+	wl = strlen (word);
 	for (i = 0; i < job_slots; i++)
 	  {
 	    if (jobs[i])
 	      {
-		register PROCESS *p = jobs[i]->pipe;
+		register PROCESS *p;
+		p = jobs[i]->pipe;
 		do
 		  {
 		    if ((substring && strindex (p->command, word)) ||
-			(strncmp (p->command, word, wl) == 0))
+			(STREQN (p->command, word, wl)))
 		      if (job != NO_JOB)
 			{
 			  builtin_error ("ambigious job spec: %s", word);
@@ -524,171 +572,100 @@ get_job_spec (list)
 }
 #endif /* JOB_CONTROL */
 
-int parse_and_execute_level = 0;
-
-/* How to force parse_and_execute () to clean up after itself. */
-void
-parse_and_execute_cleanup ()
-{
-  run_unwind_frame ("parse_and_execute_top");
-}
-
-/* Parse and execute the commands in STRING.  Returns whatever
-   execute_command () returns.  This frees STRING.  INTERACT is
-   the new value for `interactive' while the commands are being
-   executed.  A value of -1 means don't change it. */
 int
-parse_and_execute (string, from_file, interact)
-     char *string;
-     char *from_file;
-     int interact;
+display_signal_list (list, forcecols)
+     WORD_LIST *list;
+     int forcecols;
 {
-  int last_result = EXECUTION_SUCCESS;
-  int code = 0, jump_to_top_level = 0;
-  char *orig_string = string;
+  register int i, column;
+  char *name;
+  int result;
+  long signum;
 
-  /* Unwind protect this invocation of parse_and_execute (). */
-  begin_unwind_frame ("parse_and_execute_top");
-  unwind_protect_int (parse_and_execute_level);
-  unwind_protect_jmp_buf (top_level);
-  unwind_protect_int (indirection_level);
-  if (interact != -1 && interactive != interact)
-    unwind_protect_int (interactive);
-
-#if defined (HISTORY)
-  if (interactive_shell)
+  result = EXECUTION_SUCCESS;
+  if (!list)
     {
-      unwind_protect_int (remember_on_history);
-#  if defined (BANG_HISTORY)
-      unwind_protect_int (history_expansion_inhibited);
-#  endif /* BANG_HISTORY */
-    }
-#endif /* HISTORY */
+      for (i = 1, column = 0; i < NSIG; i++)
+	{
+	  name = signal_name (i);
+	  if (STREQN (name, "SIGJUNK", 7) || STREQN (name, "Unknown", 7))
+	    continue;
 
-  add_unwind_protect (pop_stream, (char *)NULL);
-  if (orig_string)
-    add_unwind_protect (xfree, orig_string);
-  end_unwind_frame ();
+	  if (posixly_correct && !forcecols)
+	    printf ("%s%s", name, (i == NSIG - 1) ? "" : " ");
+	  else
+	    {
+	      printf ("%2d) %s", i, name);
 
-  parse_and_execute_level++;
-  push_stream ();
-  indirection_level++;
-  if (interact != -1)
-    interactive = interact;
+	      if (++column < 4)
+		printf ("\t");
+	      else
+		{
+		  printf ("\n");
+		  column = 0;
+		}
+	    }
+	}
 
-#if defined (HISTORY)
-  /* We don't remember text read by the shell this way on
-     the history list, and we don't use !$ in shell scripts. */
-  remember_on_history = 0;
-#  if defined (BANG_HISTORY)
-  history_expansion_inhibited = 1;
-#  endif /* BANG_HISTORY */
-#endif /* HISTORY */
-
-  with_input_from_string (string, from_file);
-  {
-    COMMAND *command;
-
-    while (*(bash_input.location.string))
-      {
-	if (interrupt_state)
-	  {
-	    last_result = EXECUTION_FAILURE;
-	    break;
-	  }
-
-	/* Provide a location for functions which `longjmp (top_level)' to
-	   jump to.  This prevents errors in substitution from restarting
-	   the reader loop directly, for example. */
-	code = setjmp (top_level);
-
-	if (code)
-	  {
-	    jump_to_top_level = 0;
-	    switch (code)
-	      {
-	      case FORCE_EOF:
-	      case EXITPROG:
-		run_unwind_frame ("pe_dispose");
-		/* Remember to call longjmp (top_level) after the old
-		   value for it is restored. */
-		jump_to_top_level = 1;
-		goto out;
-
-	      case DISCARD:
-	        dispose_command (command);
-		run_unwind_frame ("pe_dispose");
-		last_command_exit_value = 1;
-		continue;
-
-	      default:
-		programming_error ("bad jump to top_level: %d", code);
-		break;
-	      }
-	  }
-	  
-	if (parse_command () == 0)
-	  {
-	    if ((command = global_command) != (COMMAND *)NULL)
-	      {
-		struct fd_bitmap *bitmap;
-
-		bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
-		begin_unwind_frame ("pe_dispose");
-		add_unwind_protect (dispose_fd_bitmap, bitmap);
-
-		global_command = (COMMAND *)NULL;
-
-#if defined (ONESHOT)
-	        if (startup_state == 2 && *bash_input.location.string == '\0' &&
-		    command->type == cm_simple && !command->redirects &&
-		    !command->value.Simple->redirects)
-		  {
-		    command->flags |= CMD_NO_FORK;
-		    command->value.Simple->flags |= CMD_NO_FORK;
-		  }
-#endif /* ONESHOT */
-    
-		last_result = execute_command_internal
-		    (command, 0, NO_PIPE, NO_PIPE, bitmap);
-
-		dispose_command (command);
-		run_unwind_frame ("pe_dispose");
-	      }
-	  }
-	else
-	  {
-	    last_result = EXECUTION_FAILURE;
-
-	    /* Since we are shell compatible, syntax errors in a script
-	       abort the execution of the script.  Right? */
-	    break;
-	  }
-      }
-  }
-
- out:
-
-  run_unwind_frame ("parse_and_execute_top");
-
-  if (interrupt_state && parse_and_execute_level == 0)
-    {
-      /* An interrupt during non-interactive execution in an
-         interactive shell (e.g. via $PROMPT_COMMAND) should
-         not cause the shell to exit. */
-      interactive = interactive_shell;
-      throw_to_top_level ();
+      if ((posixly_correct && !forcecols) || column != 0)
+	printf ("\n");
+      return result;
     }
 
-  if (jump_to_top_level)
-    longjmp (top_level, code);
+  /* List individual signal names or numbers. */
+  while (list)
+    {
+      if (legal_number (list->word->word, &signum))
+	{
+	  /* This is specified by Posix.2 so that exit statuses can be
+	     mapped into signal numbers. */
+	  if (signum > 128)
+	    signum -= 128;
+	  if (signum < 0 || signum >= NSIG)
+	    {
+	      builtin_error ("bad signal number: %s", list->word->word);
+	      result = EXECUTION_FAILURE;
+	      list = list->next;
+	      continue;
+	    }
 
-  return (last_result);
+	  name = signal_name (signum);
+	  if (STREQN (name, "SIGJUNK", 7) || STREQN (name, "Unknown", 7))
+	    {
+	      list = list->next;
+	      continue;
+	    }
+	  printf ("%s\n", name);
+	}
+      else
+	{
+	  signum = decode_signal (list->word->word);
+	  if (signum == NO_SIG)
+	    {
+	      builtin_error ("%s: not a signal specification", list->word->word);
+	      result = EXECUTION_FAILURE;
+	      list = list->next;
+	      continue;
+	    }
+	  printf ("%ld\n", signum);
+	}
+      list = list->next;
+    }
+  return (result);
 }
 
-/* Return the address of the builtin named NAME.
+/* **************************************************************** */
+/*								    */
+/*	    Finding builtin commands and their functions	    */
+/*								    */
+/* **************************************************************** */
+
+/* Perform a binary search and return the address of the builtin function
+   whose name is NAME.  If the function couldn't be found, or the builtin
+   is disabled or has no function associated with it, return NULL.
+   Return the address of the builtin.
    DISABLED_OKAY means find it even if the builtin is disabled. */
-static Function *
+struct builtin *
 builtin_address_internal (name, disabled_okay)
      char *name;
      int disabled_okay;
@@ -710,40 +687,53 @@ builtin_address_internal (name, disabled_okay)
       if (j == 0)
 	{
 	  /* It must have a function pointer.  It must be enabled, or we
-	     must have explicitly allowed disabled functions to be found. */
+	     must have explicitly allowed disabled functions to be found,
+	     and it must not have been deleted. */
 	  if (shell_builtins[mid].function &&
+	      ((shell_builtins[mid].flags & BUILTIN_DELETED) == 0) &&
 	      ((shell_builtins[mid].flags & BUILTIN_ENABLED) || disabled_okay))
-	    return (shell_builtins[mid].function);
+	    return (&shell_builtins[mid]);
 	  else
-	    return ((Function *)NULL);
+	    return ((struct builtin *)NULL);
 	}
       if (j > 0)
 	hi = mid - 1;
       else
 	lo = mid + 1;
     }
-  return ((Function *)NULL);
+  return ((struct builtin *)NULL);
 }
 
-/* Perform a binary search and return the address of the builtin function
-   whose name is NAME.  If the function couldn't be found, or the builtin
-   is disabled or has no function associated with it, return NULL. */
+/* Return the pointer to the function implementing builtin command NAME. */
 Function *
 find_shell_builtin (name)
-	char *name;
+     char *name;
 {
-  return (builtin_address_internal (name, 0));
+  current_builtin = builtin_address_internal (name, 0);
+  return (current_builtin ? current_builtin->function : (Function *)NULL);
 }
 
-/* Return the address of builtin with NAME, irregardless of its state of
-   enableness. */
+/* Return the address of builtin with NAME, whether it is enabled or not. */
 Function *
 builtin_address (name)
      char *name;
 {
-  return (builtin_address_internal (name, 1));
+  current_builtin = builtin_address_internal (name, 1);
+  return (current_builtin ? current_builtin->function : (Function *)NULL);
 }
 
+/* Return the function implementing the builtin NAME, but only if it is a
+   POSIX.2 special builtin. */
+Function *
+find_special_builtin (name)
+     char *name;
+{
+  current_builtin = builtin_address_internal (name, 0);
+  return ((current_builtin && (current_builtin->flags & SPECIAL_BUILTIN)) ?
+  			current_builtin->function :
+  			(Function *)NULL);
+}
+  
 static int
 shell_builtin_compare (sbp1, sbp2)
      struct builtin *sbp1, *sbp2;
@@ -765,49 +755,56 @@ initialize_shell_builtins ()
     shell_builtin_compare);
 }
 
-/* Return a new string which is the quoted version of STRING.  This is used
-   by alias and trap. */
+/* **************************************************************** */
+/*								    */
+/*	 Functions for quoting strings to be re-read as input	    */
+/*								    */
+/* **************************************************************** */
+
+/* Return a new string which is the single-quoted version of STRING.
+   Used by alias and trap, among others. */
 char *
 single_quote (string)
      char *string;
 {
-  register int i, j, c;
-  char *result;
+  register int c;
+  char *result, *r, *s;
 
-  result = (char *)xmalloc (3 + (3 * strlen (string)));
+  result = (char *)xmalloc (3 + (4 * strlen (string)));
+  r = result;
+  *r++ = '\'';
 
-  result[0] = '\'';
-
-  for (i = 0, j = 1; string && (c = string[i]); i++)
+  for (s = string; s && (c = *s); s++)
     {
-      result[j++] = c;
+      *r++ = c;
 
       if (c == '\'')
 	{
-	  result[j++] = '\\';	/* insert escaped single quote */
-	  result[j++] = '\'';
-	  result[j++] = '\'';	/* start new quoted string */
+	  *r++ = '\\';	/* insert escaped single quote */
+	  *r++ = '\'';
+	  *r++ = '\'';	/* start new quoted string */
 	}
     }
 
-  result[j++] = '\'';
-  result[j] = '\0';
+  *r++ = '\'';
+  *r = '\0';
 
   return (result);
 }
 
+/* Quote STRING using double quotes.  Return a new string. */
 char *
 double_quote (string)
      char *string;
 {
-  register int i, j, c;
-  char *result;
+  register int c;
+  char *result, *r, *s;
 
-  result = (char *)xmalloc (3 + (3 * strlen (string)));
+  result = (char *)xmalloc (3 + (2 * strlen (string)));
+  r = result;
+  *r++ = '"';
 
-  result[0] = '"';
-
-  for (i = 0, j = 1; string && (c = string[i]); i++)
+  for (s = string; s && (c = *s); s++)
     {
       switch (c)
         {
@@ -815,15 +812,86 @@ double_quote (string)
 	case '$':
 	case '`':
 	case '\\':
-	  result[j++] = '\\';
+	  *r++ = '\\';
 	default:
-	  result[j++] = c;
+	  *r++ = c;
 	  break;
         }
     }
 
-  result[j++] = '"';
-  result[j] = '\0';
+  *r++ = '"';
+  *r = '\0';
 
   return (result);
+}
+
+/* Quote special characters in STRING using backslashes.  Return a new
+   string. */
+char *
+backslash_quote (string)
+     char *string;
+{
+  int c;
+  char *result, *r, *s;
+
+  result = xmalloc (2 * strlen (string) + 1);
+
+  for (r = result, s = string; s && (c = *s); s++)
+    {
+      switch (c)
+	{
+	case ' ': case '\t': case '\n':		/* IFS white space */
+	case '\'': case '"': case '\\':		/* quoting chars */
+	case '|': case '&': case ';':		/* shell metacharacters */
+	case '(': case ')': case '<': case '>':
+	case '!': case '{': case '}':		/* reserved words */
+	case '*': case '[': case '?': case ']':	/* globbing chars */
+	case '^':
+	case '$': case '`':			/* expansion chars */
+	  *r++ = '\\';
+	  *r++ = c;
+	  break;
+	case '#':				/* comment char */
+	  if (s == string)
+	    *r++ = '\\';
+	  /* FALLTHROUGH */
+	default:
+	  *r++ = c;
+	  break;
+	}
+    }
+
+  *r = '\0';
+  return (result);
+}
+
+int
+contains_shell_metas (string)
+     char *string;
+{
+  char *s;
+
+  for (s = string; s && *s; s++)
+    {
+      switch (*s)
+	{
+	case ' ': case '\t': case '\n':		/* IFS white space */
+	case '\'': case '"': case '\\':		/* quoting chars */
+	case '|': case '&': case ';':		/* shell metacharacters */
+	case '(': case ')': case '<': case '>':
+	case '!': case '{': case '}':		/* reserved words */
+	case '*': case '[': case '?': case ']':	/* globbing chars */
+	case '^':
+	case '$': case '`':			/* expansion chars */
+	  return (1);
+	case '#':
+	  if (s == string)			/* comment char */
+	    return (1);
+	  /* FALLTHROUGH */
+	default:
+	  break;
+	}
+    }
+
+  return (0);
 }

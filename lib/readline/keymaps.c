@@ -21,7 +21,7 @@
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#  include <config.h>
 #endif
 
 #if defined (HAVE_STDLIB_H)
@@ -41,11 +41,7 @@
 extern int rl_do_lowercase_version ();
 extern int rl_rubout (), rl_insert ();
 
-#if defined (STATIC_MALLOC)
-static char *xmalloc (), *xrealloc ();
-#else
 extern char *xmalloc (), *xrealloc ();
-#endif /* STATIC_MALLOC */
 
 /* **************************************************************** */
 /*								    */
@@ -109,7 +105,7 @@ rl_make_keymap ()
     newmap[i].function = rl_insert;
 
   newmap[TAB].function = rl_insert;
-  newmap[RUBOUT].function = rl_rubout;
+  newmap[RUBOUT].function = rl_rubout;	/* RUBOUT == 127 */
   newmap[CTRL('H')].function = rl_rubout;
 
 #if KEYMAP_SIZE > 128
@@ -152,49 +148,3 @@ rl_discard_keymap (map)
 	}
     }
 }
-
-#if defined (STATIC_MALLOC)
-
-/* **************************************************************** */
-/*								    */
-/*			xmalloc and xrealloc ()		     	    */
-/*								    */
-/* **************************************************************** */
-
-static void memory_error_and_abort ();
-
-static char *
-xmalloc (bytes)
-     int bytes;
-{
-  char *temp = (char *)malloc (bytes);
-
-  if (!temp)
-    memory_error_and_abort ();
-  return (temp);
-}
-
-static char *
-xrealloc (pointer, bytes)
-     char *pointer;
-     int bytes;
-{
-  char *temp;
-
-  if (!pointer)
-    temp = (char *)malloc (bytes);
-  else
-    temp = (char *)realloc (pointer, bytes);
-
-  if (!temp)
-    memory_error_and_abort ();
-  return (temp);
-}
-
-static void
-memory_error_and_abort ()
-{
-  fprintf (stderr, "readline: Out of virtual memory!\n");
-  abort ();
-}
-#endif /* STATIC_MALLOC */

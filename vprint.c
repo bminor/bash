@@ -18,11 +18,15 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+
+#if defined (USE_VFPRINTF_EMULATION)
+
 #include <stdio.h>
 
 #if !defined (NULL)
 #  if defined (__STDC__)
-#    define NULL ((void *)0) 
+#    define NULL ((void *)0)
 #  else
 #    define NULL 0x0
 #  endif /* __STDC__ */
@@ -78,3 +82,4 @@ vsprintf (str, fmt, ap)
   *f._ptr = 0;
   return (len);
 }
+#endif /* USE_VFPRINTF_EMULATION */

@@ -22,16 +22,36 @@
 #define _UNWIND_PROT_H
 
 /* Run a function without interrupts. */
-void
-  begin_unwind_frame (), discard_unwind_frame (),
-  run_unwind_frame (), add_unwind_protect (), remove_unwind_protect (),
-  run_unwind_protects ();
+extern void begin_unwind_frame ();
+extern void discard_unwind_frame ();
+extern void run_unwind_frame ();
+extern void add_unwind_protect ();
+extern void remove_unwind_protect ();
+extern void run_unwind_protects ();
+extern void unwind_protect_var ();
+
+/* Try to force correct alignment on machines where pointers and ints
+   differ in size. */
+typedef union {
+  char *s;
+  int i;
+} UWP;
 
 /* Define for people who like their code to look a certain way. */
 #define end_unwind_frame()
 
 /* How to protect an integer. */
-#define unwind_protect_int(X) unwind_protect_var (&(X), (char *)(X), sizeof (int))
+#define unwind_protect_int(X) \
+	do \
+	  { \
+	    UWP u; \
+	    u.i = (X); \
+	    unwind_protect_var (&(X), u.s, sizeof (int)); \
+	  } \
+	while (0)
+
+#define unwind_protect_short(X) \
+  unwind_protect_var ((int *)&(X), (char *)&(X), sizeof (short))
 
 /* How to protect a pointer to a string. */
 #define unwind_protect_string(X) \
@@ -42,6 +62,6 @@ void
 
 /* How to protect the contents of a jmp_buf. */
 #define unwind_protect_jmp_buf(X) \
-  unwind_protect_var ((int *)(X), (char *)(X), sizeof (jmp_buf))
+  unwind_protect_var ((int *)(X), (char *)(X), sizeof (procenv_t))
 
 #endif /* _UNWIND_PROT_H */

@@ -24,156 +24,277 @@ $PRODUCES history.c
 $BUILTIN history
 $FUNCTION history_builtin
 $DEPENDS_ON HISTORY
-$SHORT_DOC history [n] [ [-awrn] [filename]]
+$SHORT_DOC history [-c] [n] or history -awrn [filename] or history -ps arg [arg...]
 Display the history list with line numbers.  Lines listed with
 with a `*' have been modified.  Argument of N says to list only
-the last N lines.  Argument `-w' means to write out the current
-history file;  `-r' means to read it instead.  Argument `-a' means
+the last N lines.  The -c option causes the history list to be
+cleared by deleting all of the entries.  The `-w' option writes out the
+current history to the history file;  `-r' means to read the file and
+append the contents to the history list instead.  `-a' means
 to append history lines from this session to the history file.
 Argument `-n' means to read all history lines not already read
-from the history file.  If FILENAME is given, then use that file,
-else if $HISTFILE has a value, use that, else use ~/.bash_history.
+from the history file and append them to the history list.  If
+FILENAME is given, then that is used as the history file else
+if $HISTFILE has a value, that is used, else ~/.bash_history.
+If the -s option is supplied, the non-option ARGs are appended to
+the history list as a single entry.  The -p option means to perform
+history expansion on each ARG and display the result, without storing
+anything in the history list.
 $END
 
-#include "../shell.h"
+#include <config.h>
+
 #if defined (HISTORY)
 #include <sys/types.h>
 #include <sys/file.h>
-#include "../filecntl.h"
 #include "../posixstat.h"
+#include "../filecntl.h"
+#include <errno.h>
+#include <stdio.h>
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
+
+#include "../shell.h"
 #include "../bashhist.h"
 #include <readline/history.h>
+#include "bashgetopt.h"
+#include "common.h"
 
-/* History.  Arg of -w FILENAME means write file, arg of -r FILENAME
-   means read file.  Arg of N means only display that many items. */
+#if !defined (errno)
+extern int errno;
+#endif
 
+static void display_history ();
+static void push_history ();
+static int expand_and_print_history ();
+
+#define AFLAG	0x01
+#define RFLAG	0x02
+#define WFLAG	0x04
+#define NFLAG	0x08
+#define SFLAG	0x10
+#define PFLAG	0x20
+#define CFLAG	0x40
+
+int
 history_builtin (list)
      WORD_LIST *list;
 {
-  register int i;
-  int limited = 0, limit = 0;
-  HIST_ENTRY **hlist;
+  int flags, opt, result;
+  char *filename;
 
-  while (list)
+  flags = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "acnpsrw")) != -1)
     {
-      char *arg = list->word->word;
-
-      if ((arg[0] == '-') &&
-	  (strlen (arg) == 2) &&
-	  (member (arg[1], "rwan")))
+      switch (opt)
 	{
-	  char *file;
-	  int result = EXECUTION_SUCCESS;
-
-	  if (list->next)
-	    file = list->next->word->word;
-	  else
-	    file = get_string_value ("HISTFILE");
-
-	  switch (arg[1])
-	    {
-	    case 'a':		/* Append `new' lines to file. */
-	      {
-		if (history_lines_this_session)
-		  {
-		    void using_history ();
-
-		    if (history_lines_this_session < where_history ())
-		      {
-			/* If the filename was supplied, then create it
-			   if it doesn't already exist. */
-			if (file)
-			  {
-			    struct stat buf;
-
-			    if (stat (file, &buf) == -1)
-			      {
-				int tem;
-
-				tem = open (file, O_CREAT, 0666);
-				close (tem);
-			      }
-			  }
-
-			result =
-			  append_history (history_lines_this_session, file);
-			history_lines_in_file += history_lines_this_session;
-			history_lines_this_session = 0;
-		      }
-		  }
-		break;
-	      }
-
-	    case 'w':		/* Write entire history. */
-	      {
-		result = write_history (file);
-		break;
-	      }
-
-	    case 'r':		/* Read entire file. */
-	      {
-		result = read_history (file);
-		break;
-	      }
-
-	    case 'n':		/* Read `new' history from file. */
-	      {
-		/* Read all of the lines in the file that we haven't
-		   already read. */
-		using_history ();
-		result = read_history_range (file, history_lines_in_file, -1);
-		using_history ();
-		history_lines_in_file = where_history ();
-
-		break;
-	      }
-	    }
-	  return (result ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
-	}
-      else if (strcmp (list->word->word, "--") == 0)
-	{
-	  list = list->next;
+	case 'a':
+	  flags |= AFLAG;
 	  break;
-	}
-      else if (*list->word->word == '-')
-	{
-	  bad_option (list->word->word);
-	  builtin_error ("usage: history [n] [-rwan [filename]]");
+	case 'c':
+	  flags |= CFLAG;
+	  break;
+	case 'n':
+	  flags |= NFLAG;
+	  break;
+	case 'r':
+	  flags |= RFLAG;
+	  break;
+	case 'w':
+	  flags |= WFLAG;
+	  break;
+	case 's':
+	  flags |= SFLAG;
+	  break;
+	case 'p':
+#if defined (BANG_HISTORY)
+	  flags |= PFLAG;
+#endif
+	  break;
+	default:
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
-      else
-	break;
     }
+  list = loptend;
+
+  opt = flags & (AFLAG|RFLAG|WFLAG|NFLAG);
+  if (opt && opt != AFLAG && opt != RFLAG && opt != WFLAG && opt != NFLAG)
+    {
+      builtin_error ("cannot use more than one of -anrw");
+      return (EXECUTION_FAILURE);
+    }
+
+  /* clear the history, but allow other arguments to add to it again. */
+  if (flags & CFLAG)
+    {
+      clear_history ();
+      if (list == 0)
+	return (EXECUTION_SUCCESS);
+    }
+
+  if (flags & SFLAG)
+    {
+      if (list)
+	push_history (list);
+      return (EXECUTION_SUCCESS);
+    }
+#if defined (BANG_HISTORY)
+  else if (flags & PFLAG)
+    {
+      if (list)
+        return (expand_and_print_history (list));
+      return (EXECUTION_SUCCESS);
+    }
+#endif
+  else if ((flags & (AFLAG|RFLAG|NFLAG|WFLAG|CFLAG)) == 0)
+    {
+      display_history (list);
+      return (EXECUTION_SUCCESS);
+    }
+
+  filename = list ? list->word->word : get_string_value ("HISTFILE");
+  result = EXECUTION_SUCCESS;
+
+  if (flags & AFLAG)		/* Append session's history to file. */
+    result = maybe_append_history (filename);
+  else if (flags & WFLAG)	/* Write entire history. */
+    result = write_history (filename);
+  else if (flags & RFLAG)	/* Read entire file. */
+    result = read_history (filename);
+  else if (flags & NFLAG)	/* Read `new' history from file. */
+    {
+      /* Read all of the lines in the file that we haven't already read. */
+      using_history ();
+      result = read_history_range (filename, history_lines_in_file, -1);
+      using_history ();
+      history_lines_in_file = where_history ();
+    }
+
+  return (result ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+}
+
+/* Accessors for HIST_ENTRY lists that are called HLIST. */
+#define histline(i) (hlist[(i)]->line)
+#define histdata(i) (hlist[(i)]->data)
+
+static void
+display_history (list)
+     WORD_LIST *list;
+{
+  register int i;
+  int limited, limit;
+  HIST_ENTRY **hlist;
 
   if (list)
     {
       limited = 1;
       limit = get_numeric_arg (list);
     }
+  else
+    limited = limit = 0;
 
   hlist = history_list ();
 
   if (hlist)
     {
-      for (i = 0;  hlist[i]; i++);
+      for (i = 0;  hlist[i]; i++)
+	;
 
       if (limit < 0)
 	limit = -limit;
 
-      if (!limited)
+      if ((limited == 0)  || ((i -= limit) < 0))
 	i = 0;
-      else
-	if ((i -= limit) < 0)
-	  i = 0;
 
       while (hlist[i])
 	{
 	  QUIT;
 	  printf ("%5d%c %s\n", i + history_base,
-		  hlist[i]->data ? '*' : ' ', hlist[i]->line);
+		  histdata(i) ? '*' : ' ',
+		  histline(i));
 	  i++;
 	}
     }
-  return (EXECUTION_SUCCESS);
 }
+
+static int
+delete_last_history ()
+{
+  register int i;
+  HIST_ENTRY **hlist, *histent, *discard;
+
+  hlist = history_list ();
+  if (hlist == NULL)
+    return 0;
+
+  for (i = 0; hlist[i]; i++)
+    ;
+  i--;
+
+  /* History_get () takes a parameter that must be offset by history_base. */
+  histent = history_get (history_base + i);	/* Don't free this */
+  if (histent == NULL)
+    return 0;
+
+  discard = remove_history (i);
+  if (discard)
+    {
+      if (discard->line)
+	free (discard->line);
+      free ((char *) discard);
+    }
+  return (1);
+}
+
+/* Remove the last entry in the history list and add each argument in
+   LIST to the history. */
+static void
+push_history (list)
+     WORD_LIST *list;
+{
+  char *s;
+
+  if (delete_last_history () == 0)
+    return;
+  s = string_list (list);
+  maybe_add_history (s);	/* Obeys HISTCONTROL setting. */
+  free (s);
+}
+
+#if defined (BANG_HISTORY)
+static int
+expand_and_print_history (list)
+     WORD_LIST *list;
+{
+  char *s;
+  int r, result;
+
+  if (delete_last_history () == 0)
+    return EXECUTION_FAILURE;
+  result = EXECUTION_SUCCESS;
+  while (list)
+    {
+      r = history_expand (list->word->word, &s);
+      if (r < 0)
+	{
+	  builtin_error ("%s: history expansion failed", list->word->word);
+	  result = EXECUTION_FAILURE;
+	}
+      else
+        {
+	  fputs (s, stdout);
+	  putchar ('\n');
+        }
+      FREE (s);
+      list = list->next;
+    }
+  fflush (stdout);
+  return result;
+}
+#endif /* BANG_HISTORY */
 #endif /* HISTORY */

@@ -19,12 +19,19 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+
+#if defined (ALIAS)
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include "bashansi.h"
-#include "config.h"
 #include "command.h"
 #include "general.h"
-#include "hash.h"
+#include "externs.h"
 #include "alias.h"
 
 static int qsort_alias_compare ();
@@ -44,22 +51,18 @@ initialize_aliases ()
 }
 
 /* Scan the list of aliases looking for one with NAME.  Return NULL
-   if the alias doesn't exist, else a pointer to the assoc. */
-ASSOC *
+   if the alias doesn't exist, else a pointer to the alias_t. */
+alias_t *
 find_alias (name)
      char *name;
 {
   BUCKET_CONTENTS *al;
 
-  if (!aliases)
-    return ((ASSOC *)NULL);
-  else
-    al = find_hash_item (name, aliases);
+  if (aliases == 0)
+    return ((alias_t *)NULL);
 
-  if (al)
-    return ((ASSOC *)al->data);
-  else
-    return ((ASSOC *)NULL);
+  al = find_hash_item (name, aliases);
+  return (al ? (alias_t *)al->data : (alias_t *)NULL);
 }
 
 /* Return the value of the alias for NAME, or NULL if there is none. */
@@ -67,11 +70,13 @@ char *
 get_alias_value (name)
      char *name;
 {
-  ASSOC *alias = find_alias (name);
-  if (alias)
-    return (alias->value);
-  else
+  alias_t *alias;
+
+  if (aliases == 0)
     return ((char *)NULL);
+
+  alias = find_alias (name);
+  return (alias ? alias->value : (char *)NULL);
 }
 
 /* Make a new alias from NAME and VALUE.  If NAME can be found,
@@ -80,10 +85,15 @@ void
 add_alias (name, value)
      char *name, *value;
 {
-  ASSOC *temp = (ASSOC *)NULL;
+  BUCKET_CONTENTS *elt;
+  alias_t *temp;
+  int n;
 
   if (!aliases)
-    initialize_aliases ();
+    {
+      initialize_aliases ();
+      temp = (alias_t *)NULL;
+    }
   else
     temp = find_alias (name);
 
@@ -91,18 +101,37 @@ add_alias (name, value)
     {
       free (temp->value);
       temp->value = savestring (value);
+      n = value[strlen (value) - 1];
+      if (n == ' ' || n == '\t')
+	temp->flags |= AL_EXPANDNEXT;
     }
   else
     {
-      BUCKET_CONTENTS *elt;
-
-      temp = (ASSOC *)xmalloc (sizeof (ASSOC));
+      temp = (alias_t *)xmalloc (sizeof (alias_t));
       temp->name = savestring (name);
       temp->value = savestring (value);
+      temp->flags = 0;
+
+      n = value[strlen (value) - 1];
+      if (n == ' ' || n == '\t')
+	temp->flags |= AL_EXPANDNEXT;
 
       elt = add_hash_item (savestring (name), aliases);
       elt->data = (char *)temp;
     }
+}
+
+/* Delete a single alias structure. */
+static void
+free_alias_data (data)
+     char *data;
+{
+  register alias_t *a;
+
+  a = (alias_t *)data;
+  free (a->value);
+  free (a->name);
+  free (data);
 }
 
 /* Remove the alias with name NAME from the alias table.  Returns
@@ -114,93 +143,59 @@ remove_alias (name)
 {
   BUCKET_CONTENTS *elt;
 
-  if (!aliases)
+  if (aliases == 0)
     return (-1);
 
   elt = remove_hash_item (name, aliases);
   if (elt)
     {
-      ASSOC *t;
-
-      t = (ASSOC *)elt->data;
-      free (t->name);
-      free (t->value);
+      free_alias_data (elt->data);
       free (elt->key);		/* alias name */
-      free (t);
-
       return (aliases->nentries);
     }
   return (-1);
-}
-
-/* Delete a hash bucket chain of aliases. */
-static void
-delete_alias_list (alias_list)
-     BUCKET_CONTENTS *alias_list;
-{
-  register BUCKET_CONTENTS *bp, *temp;
-  register ASSOC *a;
-
-  for (bp = alias_list; bp; )
-    {
-      temp = bp->next;
-      a = (ASSOC *)bp->data;
-      free (a->value);
-      free (a->name);
-      free (bp->data);
-      free (bp->key);
-      free (bp);
-      bp = temp;
-    }
 }
 
 /* Delete all aliases. */
 void
 delete_all_aliases ()
 {
-  register int i;
-
-  if (!aliases)
+  if (aliases == 0)
     return;
 
-  for (i = 0; i < aliases->nbuckets; i++)
-    {
-      register BUCKET_CONTENTS *bp;
-
-      bp = get_hash_bucket (i, aliases);
-      delete_alias_list (bp);
-    }
+  flush_hash_table (aliases, free_alias_data);
   free (aliases);
   aliases = (HASH_TABLE *)NULL;
 }
 
 /* Return an array of aliases that satisfy the conditions tested by FUNCTION.
    If FUNCTION is NULL, return all aliases. */
-static ASSOC **
+static alias_t **
 map_over_aliases (function)
      Function *function;
 {
   register int i;
   register BUCKET_CONTENTS *tlist;
-  ASSOC *alias, **list = (ASSOC **)NULL;
-  int list_index = 0, list_size = 0;
+  alias_t *alias, **list;
+  int list_index, list_size;
 
-  for (i = 0; i < aliases->nbuckets; i++)
+  list = (alias_t **)NULL;
+  for (i = list_index = list_size = 0; i < aliases->nbuckets; i++)
     {
       tlist = get_hash_bucket (i, aliases);
 
       while (tlist)
 	{
-	  alias = (ASSOC *)tlist->data;
+	  alias = (alias_t *)tlist->data;
 
 	  if (!function || (*function) (alias))
 	    {
 	      if (list_index + 1 >= list_size)
-		list = (ASSOC **)
-		  xrealloc ((char *)list, (list_size += 20) * sizeof (ASSOC *));
+		list = (alias_t **)
+		  xrealloc ((char *)list, (list_size += 20) * sizeof (alias_t *));
 
 	      list[list_index++] = alias;
-	      list[list_index] = (ASSOC *)NULL;
+	      list[list_index] = (alias_t *)NULL;
 	    }
 	  tlist = tlist->next;
 	}
@@ -210,31 +205,31 @@ map_over_aliases (function)
 
 static void
 sort_aliases (array)
-     ASSOC **array;
+     alias_t **array;
 {
-  qsort (array, array_len ((char **)array), sizeof (ASSOC *), qsort_alias_compare);
+  qsort (array, array_len ((char **)array), sizeof (alias_t *), qsort_alias_compare);
 }
 
 static int
 qsort_alias_compare (as1, as2)
-     ASSOC **as1, **as2;
+     alias_t **as1, **as2;
 {
   int result;
-  
+
   if ((result = (*as1)->name[0] - (*as2)->name[0]) == 0)
     result = strcmp ((*as1)->name, (*as2)->name);
 
   return (result);
 }
-        
-/* Return a sorted list of all defined aliases */     
-ASSOC **
+
+/* Return a sorted list of all defined aliases */
+alias_t **
 all_aliases ()
 {
-  ASSOC **list;
+  alias_t **list;
 
   if (!aliases)
-    return ((ASSOC **)NULL);
+    return ((alias_t **)NULL);
 
   list = map_over_aliases ((Function *)NULL);
   if (list)
@@ -246,12 +241,10 @@ char *
 alias_expand_word (s)
      char *s;
 {
-  ASSOC *r = find_alias (s);
+  alias_t *r;
 
-  if (r)
-    return (savestring (r->value));
-  else
-    return ((char *)NULL);
+  r = find_alias (s);
+  return (r ? savestring (r->value) : (char *)NULL);
 }
 
 /* Return non-zero if CHARACTER is a member of the class of characters
@@ -391,7 +384,7 @@ skipws (string, start)
    so all characters show up (e.g. foo'' and foo""bar) */
 static int
 rd_token (string, start)
-     char *string; 
+     char *string;
      int start;
 {
   register int i;
@@ -408,7 +401,7 @@ rd_token (string, start)
       /* If this character is a quote character, we want to call skipquotes
 	 to get the whole quoted portion as part of this word.  That word
 	 will not generally match an alias, even if te unquoted word would
-	 have.  The presence of the quotes in the token serves then to 
+	 have.  The presence of the quotes in the token serves then to
 	 inhibit expansion. */
       if (quote_char (string[i]))
 	{
@@ -431,7 +424,7 @@ alias_expand (string)
   register int i, j, start;
   char *token = xmalloc (line_len);
   int tl, real_start, expand_next, expand_this_token;
-  ASSOC *alias;
+  alias_t *alias;
 
   line[0] = i = 0;
   expand_next = 0;
@@ -462,8 +455,7 @@ alias_expand (string)
 	 expanding it if there is not enough room. */
       j = strlen (line);
       tl = i - start;	/* number of characters just skipped */
-      if (1 + j + tl >= line_len)
-	line = (char *)xrealloc (line, line_len += (50 + tl));
+      RESIZE_MALLOCED_BUFFER (line, j, (tl + 1), line_len, (tl + 50));
       strncpy (line + j, string + start, tl);
       line[j + tl] = '\0';
 
@@ -506,30 +498,35 @@ alias_expand (string)
 	  (expand_this_token || alias_expand_all) &&
 	  (alias = find_alias (token)))
 	{
-	  char *v = alias->value;
-	  int l = strlen (v);
-      
+	  char *v;
+	  int vlen, llen;
+
+	  v = alias->value;
+	  vlen = strlen (v);
+	  llen = strlen (line);
+
 	  /* +3 because we possibly add one more character below. */
-	  if ((l + 3) > line_len - (int)strlen (line))
-	    line = (char *)xrealloc (line, line_len += (50 + l));
+	  RESIZE_MALLOCED_BUFFER (line, llen, (vlen + 3), line_len, (vlen + 50));
 
-	  strcat (line, v);
+	  strcpy (line + llen, v);
 
-	  if ((expand_this_token && l && whitespace (v[l - 1])) ||
+	  if ((expand_this_token && vlen && whitespace (v[vlen - 1])) ||
 	      alias_expand_all)
 	    expand_next = 1;
 	}
       else
 	{
-	  int ll = strlen (line);
-	  int tlen = i - real_start; /* tlen == strlen(token) */
+	  int llen, tlen;
 
-	  if (ll + tlen + 2 > line_len)
-	    line = (char *)xrealloc (line, line_len += 50 + ll + tlen);
+	  llen = strlen (line);
+	  tlen = i - real_start; /* tlen == strlen(token) */
 
-	  strncpy (line + ll, string + real_start, tlen);
-	  line[ll + tlen] = '\0';
+	  RESIZE_MALLOCED_BUFFER (line, llen, (tlen + 1), line_len, (llen + tlen + 50));
+
+	  strncpy (line + llen, string + real_start, tlen);
+	  line[llen + tlen] = '\0';
 	}
       command_word = 0;
     }
 }
+#endif /* ALIAS */

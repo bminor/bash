@@ -23,112 +23,131 @@ $PRODUCES help.c
 
 $BUILTIN help
 $FUNCTION help_builtin
+$DEPENDS_ON HELP_BUILTIN
 $SHORT_DOC help [pattern ...]
 Display helpful information about builtin commands.  If PATTERN is
 specified, gives detailed help on all commands matching PATTERN,
 otherwise a list of the builtins is printed.
 $END
 
+#include <config.h>
+
+#if defined (HELP_BUILTIN)
 #include <stdio.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../shell.h"
 #include "../builtins.h"
+#include "bashgetopt.h"
 
-#if defined (USE_GLOB_LIBRARY)
-#  include <glob/glob.h>
-#else
-#  define FNM_NOMATCH 1
-#endif /* USE_GLOB_LIBRARY */
+#include <glob/fnmatch.h>
+#include <glob/glob.h>
+
+static void show_builtin_command_help ();
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern
    specified. */
+int
 help_builtin (list)
      WORD_LIST *list;
 {
-  if (!list)
-    {
-      register int i, j;
-      char blurb[256];
+  register int i, j;
+  char *pattern, *name;
+  int plen, match_found;
 
-      show_shell_version ();
-      printf (
-"Shell commands that are defined internally.  Type `help' to see this list.\n\
+  if (list == 0)
+    {
+      show_shell_version (0);
+      show_builtin_command_help ();
+      return (EXECUTION_SUCCESS);
+    }
+
+  /* Placeholder for future options. */
+  reset_internal_getopt ();
+  while ((i = internal_getopt (list, "")) != -1)
+    {
+      switch (i)
+	{
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
+
+  /* We should consider making `help bash' do something. */
+
+  if (glob_pattern_p (list->word->word))
+    {
+      printf ("Shell commands matching keyword%s `", list->next ? "s" : "");
+      print_word_list (list, ", ");
+      printf ("'\n\n");
+    }
+
+  for (match_found = 0, pattern = ""; list; list = list->next)
+    {
+      pattern = list->word->word;
+      plen = strlen (pattern);
+
+      for (i = 0; name = shell_builtins[i].name; i++)
+	{
+	  QUIT;
+	  if ((strncmp (pattern, name, plen) == 0) ||
+	      (fnmatch (pattern, name, 0) != FNM_NOMATCH))
+	    {
+	      printf ("%s: %s\n", name, shell_builtins[i].short_doc);
+
+	      for (j = 0; shell_builtins[i].long_doc[j]; j++)
+		printf ("    %s\n", shell_builtins[i].long_doc[j]);
+
+	      match_found++;
+	    }
+	}
+    }
+
+  if (match_found == 0)
+    {
+      builtin_error ("no help topics match `%s'.  Try `help help'.", pattern);
+      return (EXECUTION_FAILURE);
+    }
+
+  fflush (stdout);
+  return (EXECUTION_SUCCESS);
+}
+
+static void
+show_builtin_command_help ()
+{
+  int i, j;
+  char blurb[36];
+
+  printf (
+"These shell commands are defined internally.  Type `help' to see this list.\n\
 Type `help name' to find out more about the function `name'.\n\
 Use `info bash' to find out more about the shell in general.\n\
 \n\
 A star (*) next to a name means that the command is disabled.\n\
 \n");
 
-      for (i = 0; i < num_shell_builtins; i++)
-	{
-	  QUIT;
-	  sprintf (blurb, "%c%s",
-		   (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*',
-		   shell_builtins[i].short_doc);
+  for (i = 0; i < num_shell_builtins; i++)
+    {
+      QUIT;
+      blurb[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
+      strncpy (blurb + 1, shell_builtins[i].short_doc, 34);
+      blurb[35] = '\0';
+      printf ("%s", blurb);
 
-	  blurb[35] = '\0';
-	  printf ("%s", blurb);
-
-	  if (i % 2)
-	    printf ("\n");
-	  else
-	    for (j = strlen (blurb); j < 35; j++)
-	      putc (' ', stdout);
-
-	}
       if (i % 2)
 	printf ("\n");
+      else
+	for (j = strlen (blurb); j < 35; j++)
+	  putc (' ', stdout);
     }
-  else
-    {
-      int match_found = 0;
-      char *pattern = "";
-
-      if (glob_pattern_p (list->word->word))
-	{
-	  printf ("Shell commands matching keyword%s `",
-		  list->next ? "s" : "");
-	  print_word_list (list, ", ");
-	  printf ("'\n\n");
-	}
-
-      while (list)
-	{
-	  register int i = 0, plen;
-	  char *name;
-
-	  pattern = list->word->word;
-	  plen = strlen (pattern);
-
-	  while (name = shell_builtins[i].name)
-	    {
-	      int doc_index;
-
-	      QUIT;
-	      if ((strncmp (pattern, name, plen) == 0) ||
-		  (fnmatch (pattern, name, 0) != FNM_NOMATCH))
-		{
-		  printf ("%s: %s\n", name, shell_builtins[i].short_doc);
-
-		  for (doc_index = 0;
-		       shell_builtins[i].long_doc[doc_index]; doc_index++)
-		    printf ("    %s\n", shell_builtins[i].long_doc[doc_index]);
-
-		  match_found++;
-		}
-	      i++;
-	    }
-	  list = list->next;
-	}
-
-      if (!match_found)
-	{
-	  fprintf (stderr, "No help topics match `%s'.  Try `help help'.\n",
-		   pattern);
-	  fflush (stderr);
-	  return (EXECUTION_FAILURE);
-	}
-    }
-  fflush (stdout);
-  return (EXECUTION_SUCCESS);
+  if (i % 2)
+    printf ("\n");
 }
+#endif /* HELP_BUILTIN */

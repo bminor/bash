@@ -1,5 +1,5 @@
 /* Work-alike for termcap, plus extra features.
-   Copyright (C) 1985, 1986, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1985, 86, 93, 94, 95 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,12 +17,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Emacs config.h may rename various library functions such as malloc.  */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
-#else /* not HAVE_CONFIG_H */
 
-#if defined(HAVE_STRING_H) || defined(STDC_HEADERS)
-#define bcopy(s, d, n) memcpy ((d), (s), (n))
+#include <config.h>
+
+/* Get the O_* definitions for open et al.  */
+#include <sys/file.h>
+#ifdef USG5
+#include <fcntl.h>
 #endif
+
+#else /* not HAVE_CONFIG_H */
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -31,6 +35,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 char *getenv ();
 char *malloc ();
 char *realloc ();
+#endif
+
+/* Do this after the include, in case string.h prototypes bcopy.  */
+#if (defined(HAVE_STRING_H) || defined(STDC_HEADERS)) && !defined(bcopy)
+#define bcopy(s, d, n) memcpy ((d), (s), (n))
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -44,6 +53,10 @@ char *realloc ();
 
 #ifndef NULL
 #define NULL (char *) 0
+#endif
+
+#ifndef O_RDONLY
+#define O_RDONLY 0
 #endif
 
 /* BUFSIZE is the initial size allocated for the buffer
@@ -61,6 +74,10 @@ int bufsize = 128;
 #else
 #define BUFSIZE 2048
 #endif
+#endif
+
+#ifndef TERMCAP_FILE
+#define TERMCAP_FILE "/etc/termcap"
 #endif
 
 #ifndef emacs
@@ -203,7 +220,13 @@ tgetst1 (ptr, area)
   while ((c = *p++) && c != ':' && c != '\n')
     {
       if (c == '^')
-	c = *p++ & 037;
+	{
+	  c = *p++;
+	  if (c == '?')
+	    c = 0177;
+	  else
+	    c &= 037;
+	}
       else if (c == '\\')
 	{
 	  c = *p++;
@@ -245,14 +268,14 @@ char PC;
 /* Actual baud rate if positive;
    - baud rate / 100 if negative.  */
 
-static short speeds[] =
+static int speeds[] =
   {
 #ifdef VMS
     0, 50, 75, 110, 134, 150, -3, -6, -12, -18,
     -20, -24, -36, -48, -72, -96, -192
 #else /* not VMS */
     0, 50, 75, 110, 135, 150, -2, -3, -6, -12,
-    -18, -24, -48, -96, -192, -384
+    -18, -24, -48, -96, -192, -288, -384, -576, -1152
 #endif /* not VMS */
   };
 
@@ -268,6 +291,10 @@ tputs (str, nlines, outfun)
 #ifdef emacs
   extern baud_rate;
   speed = baud_rate;
+  /* For quite high speeds, convert to the smaller
+     units to avoid overflow.  */
+  if (speed > 10000)
+    speed = - speed / 100;
 #else
   if (ospeed == 0)
     speed = tputs_baud_rate;
@@ -296,11 +323,14 @@ tputs (str, nlines, outfun)
   while (*str)
     (*outfun) (*str++);
 
-  /* padcount is now in units of tenths of msec.  */
-  padcount *= speeds[ospeed];
+  /* PADCOUNT is now in units of tenths of msec.
+     SPEED is measured in characters per 10 seconds
+     or in characters per .1 seconds (if negative).
+     We use the smaller units for larger speeds to avoid overflow.  */
+  padcount *= speed;
   padcount += 500;
   padcount /= 1000;
-  if (speeds[ospeed] < 0)
+  if (speed < 0)
     padcount = -padcount;
   else
     {
@@ -357,7 +387,16 @@ valid_filename_p (fn)
 
 #else /* !VMS */
 
+#ifdef MSDOS /* MW, May 1993 */
+static int
+valid_filename_p (fn)
+     char *fn;
+{
+  return *fn == '/' || fn[1] == ':';
+}
+#else
 #define valid_filename_p(fn) (*(fn) == '/')
+#endif
 
 #endif /* !VMS */
 
@@ -388,9 +427,36 @@ tgetent (bp, name)
   char *indirect = NULL;	/* Terminal type in :tc= in TERMCAP value.  */
   int filep;
 
+#ifdef INTERNAL_TERMINAL
+  /* For the internal terminal we don't want to read any termcap file,
+     so fake it.  */
+  if (!strcmp (name, "internal"))
+    {
+      term = INTERNAL_TERMINAL;
+      if (!bp)
+	{
+	  malloc_size = 1 + strlen (term);
+	  bp = (char *) xmalloc (malloc_size);
+	}
+      strcpy (bp, term);
+      goto ret;
+    }
+#endif /* INTERNAL_TERMINAL */
+
+  /* For compatibility with programs like `less' that want to
+     put data in the termcap buffer themselves as a fallback.  */
+  if (bp)
+    term_entry = bp;
+
   termcap_name = getenv ("TERMCAP");
   if (termcap_name && *termcap_name == '\0')
     termcap_name = NULL;
+#if defined (MSDOS) && !defined (TEST)
+  if (termcap_name && (*termcap_name == '\\'
+		       || *termcap_name == '/'
+		       || termcap_name[1] == ':'))
+    dostounix_filename(termcap_name);
+#endif
 
   filep = termcap_name && valid_filename_p (termcap_name);
 
@@ -419,15 +485,15 @@ tgetent (bp, name)
     }
 
   if (!termcap_name || !filep)
-#ifdef VMS
-    termcap_name = "emacs_library:[etc]termcap.dat";
-#else
-    termcap_name = "/etc/termcap";
-#endif
+    termcap_name = TERMCAP_FILE;
 
   /* Here we know we must search a file and termcap_name has its name.  */
 
-  fd = open (termcap_name, 0, 0);
+#ifdef MSDOS
+  fd = open (termcap_name, O_RDONLY|O_TEXT, 0);
+#else
+  fd = open (termcap_name, O_RDONLY, 0);
+#endif
   if (fd < 0)
     return -1;
 
@@ -501,8 +567,6 @@ tgetent (bp, name)
 
  ret:
   term_entry = bp;
-  if (malloc_size)
-    return (int) bp;
   return 1;
 }
 

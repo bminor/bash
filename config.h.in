@@ -1,0 +1,505 @@
+/* config.h -- Configuration file for bash. */
+
+/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash, the Bourne Again SHell.
+
+   Bash is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
+
+   Bash is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash; see the file COPYING.  If not, write to the Free
+   Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
+/* Configuration settings controllable by autoconf. */
+
+/* Define JOB_CONTROL if your operating system supports
+   BSD-like job control. */
+#undef JOB_CONTROL
+
+/* Define ALIAS if you want the alias features. */
+#undef ALIAS
+
+/* Define PUSHD_AND_POPD if you want those commands to be compiled in.
+   (Also the `dirs' commands.) */
+#undef PUSHD_AND_POPD
+
+/* Define BRACE_EXPANSION if you want curly brace expansion a la Csh:
+   foo{a,b} -> fooa foob.  Even if this is compiled in (the default) you
+   can turn it off at shell startup with `-nobraceexpansion', or during
+   shell execution with `set +o braceexpand'. */
+#undef BRACE_EXPANSION
+
+/* Define READLINE to get the nifty/glitzy editing features.
+   This is on by default.  You can turn it off interactively
+   with the -nolineediting flag. */
+#undef READLINE
+
+/* Define BANG_HISTORY if you want to have Csh style "!" history expansion.
+   This is unrelated to READLINE. */
+#undef BANG_HISTORY
+
+/* Define HISTORY if you want to have access to previously typed commands.
+
+   If both HISTORY and READLINE are defined, you can get at the commands
+   with line editing commands, and you can directly manipulate the history
+   from the command line.
+
+   If only HISTORY is defined, the `fc' and `history' builtins are
+   available. */
+#undef HISTORY
+
+/* Define this if you want completion that puts all alternatives into
+   a brace expansion shell expression. */
+#if defined (BRACE_EXPANSION) && defined (READLINE)
+#  define BRACE_COMPLETION
+#endif /* BRACE_EXPANSION */
+
+/* Define DEFAULT_ECHO_TO_USG if you want the echo builtin to interpret
+   the backslash-escape characters by default, like the System V echo.
+   This requires that V9_ECHO be defined. */
+#undef DEFAULT_ECHO_TO_USG
+
+/* Define HELP_BUILTIN if you want the `help' shell builtin and the long
+   documentation strings compiled into the shell. */
+#undef HELP_BUILTIN
+
+/* Define RESTRICTED_SHELL if you want the generated shell to have the
+   ability to be a restricted one.  The shell thus generated can become
+   restricted by being run with the name "rbash", or by setting the -r
+   flag. */
+#undef RESTRICTED_SHELL
+
+/* Define DISABLED_BUILTINS if you want "builtin foo" to always run the
+   shell builtin "foo", even if it has been disabled with "enable -n foo". */
+#undef DISABLED_BUILTINS
+
+/* Define PROCESS_SUBSTITUTION if you want the K*rn shell-like process
+   substitution features "<(file)". */
+/* Right now, you cannot do this on machines without fully operational
+   FIFO support.  This currently include NeXT and Alliant. */
+#undef PROCESS_SUBSTITUTION
+
+/* Define PROMPT_STRING_DECODE if you want the backslash-escaped special
+   characters in PS1 and PS2 expanded.  Variable expansion will still be
+   performed. */
+#undef PROMPT_STRING_DECODE
+
+/* Define SELECT_COMMAND if you want the Korn-shell style `select' command:
+	select word in word_list; do command_list; done */
+#undef SELECT_COMMAND
+
+/* Define COMMAND_TIMING of you want the ksh-style `time' reserved word and
+   the ability to time pipelines, functions, and builtins. */
+#undef COMMAND_TIMING
+
+/* Define ARRAY_VARS if you want ksh-style one-dimensional array variables. */
+#undef ARRAY_VARS
+
+/* Define DPAREN_ARITHMETIC if you want the ksh-style ((...)) arithmetic
+   evaluation command. */
+#undef DPAREN_ARITHMETIC
+
+/* Define AFS if you are using Transarc's AFS. */
+#undef AFS
+
+/* End of configuration settings controllable by autoconf. */
+/* Other settable options appear in config.h.top. */
+
+#include "config.h.top"
+
+/* Beginning of autoconf additions. */
+
+/* Define if using alloca.c.  */
+#undef C_ALLOCA
+
+/* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
+   This function is required for alloca.c support on those systems.  */
+#undef CRAY_STACKSEG_END
+
+/* Define to the type of elements in the array set by `getgroups'.
+   Usually this is either `int' or `gid_t'.  */
+#undef GETGROUPS_T
+
+/* Define if the `getpgrp' function takes no argument.  */
+#undef GETPGRP_VOID
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
+
+/* Define if you have alloca, as a function or macro.  */
+#undef HAVE_ALLOCA
+
+/* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
+#undef HAVE_ALLOCA_H
+
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
+/* Define if system calls automatically restart after interruption
+   by a signal.  */
+#undef HAVE_RESTARTABLE_SYSCALLS
+
+/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+#undef HAVE_SYS_WAIT_H
+
+/* Define if you have <sys/time.h> */
+#undef HAVE_SYS_TIME_H
+
+#undef TIME_WITH_SYS_TIME
+
+#undef HAVE_SYS_TIMES_H
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+#undef HAVE_WAIT3
+
+#undef HAVE_SETOSTYPE
+
+/* Define if on MINIX.  */
+#undef _MINIX
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef mode_t
+
+/* Define to `int' if <signal.h> doesn't define. */
+#undef sigset_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
+
+/* Define if the system does not provide POSIX.1 features except
+   with this defined.  */
+#undef _POSIX_1_SOURCE
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if the setvbuf function takes the buffering type as its second
+   argument and the buffer pointer as the third, as on System V
+   before release 3.  */
+#undef SETVBUF_REVERSED
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at run-time.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown
+ */
+#undef STACK_DIRECTION
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if `sys_siglist' is declared by <signal.h>.  */
+#undef SYS_SIGLIST_DECLARED
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef clock_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef time_t
+
+#undef DUP2_BROKEN
+
+#undef HAVE_GETRLIMIT
+
+#undef HAVE_GETRUSAGE
+
+#undef HAVE_GETTIMEOFDAY
+
+#undef GWINSZ_IN_SYS_IOCTL
+
+#undef TIOCSTAT_IN_SYS_IOCTL
+
+#undef FIONREAD_IN_SYS_IOCTL
+
+#undef WORDS_BIGENDIAN
+
+#undef HAVE_HASH_BANG_EXEC
+
+#undef HAVE_BSD_SIGNALS
+
+#undef HAVE_POSIX_SIGNALS
+
+#undef HAVE_USG_SIGHOLD
+
+#undef HAVE_DEV_FD
+
+#undef DEV_FD_PREFIX
+
+#undef HAVE_GETPW_DECLS
+
+#undef HAVE_QUAD_T
+
+#undef HAVE_RESOURCE
+
+#undef HAVE_STRSIGNAL
+
+#undef HAVE_SYS_ERRLIST
+
+#undef STAT_MACROS_BROKEN
+
+#undef HAVE_TIMEVAL
+
+#undef HAVE_MEMMOVE
+
+#undef HAVE_MKFIFO
+
+#undef NAMED_PIPES_MISSING
+
+#undef OPENDIR_NOT_ROBUST
+
+#undef PGRP_PIPE
+
+#undef RLIMTYPE
+
+#undef SBRK_DECLARED
+
+#undef PRINTF_DECLARED
+
+#undef HAVE_SYS_SIGLIST
+
+#undef HAVE_TIMES
+
+#undef HAVE_UNDER_SYS_SIGLIST
+
+#undef VOID_SIGHANDLER
+
+#undef TERMIOS_LDISC
+
+#undef TERMIO_LDISC
+
+#undef ULIMIT_MAXFDS
+
+#undef GETCWD_BROKEN
+
+#undef STRUCT_DIRENT_HAS_D_INO
+
+#undef CAN_REDEFINE_GETENV
+
+#undef MUST_REINSTALL_SIGHANDLERS
+
+#undef JOB_CONTROL_MISSING
+
+#undef HAVE_POSIX_SIGSETJMP
+
+#define DEFAULT_MAIL_DIRECTORY "/usr/spool/mail"
+
+/* Define if you have the bcopy function.  */
+#undef HAVE_BCOPY
+
+/* Define if you have the bzero function.  */
+#undef HAVE_BZERO
+
+/* Define if you have the confstr function.  */
+#undef HAVE_CONFSTR
+
+/* Define if you have the dlclose function.  */
+#undef HAVE_DLCLOSE
+
+/* Define if you have the dlopen function.  */
+#undef HAVE_DLOPEN
+
+/* Define if you have the dlsym function.  */
+#undef HAVE_DLSYM
+
+/* Define if you have the dup2 function.  */
+#undef HAVE_DUP2
+
+/* Define if you have the getcwd function.  */
+#undef HAVE_GETCWD
+
+/* Define if you have the getdtablesize function.  */
+#undef HAVE_GETDTABLESIZE
+
+/* Define if you have the getgroups function.  */
+#undef HAVE_GETGROUPS
+
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
+
+/* Define if you have the getpagesize function.  */
+#undef HAVE_GETPAGESIZE
+
+/* Define if you have the getpeername function.  */
+#undef HAVE_GETPEERNAME
+
+/* Define if you have the getwd function.  */
+#undef HAVE_GETWD
+
+/* Define if you have the killpg function.  */
+#undef HAVE_KILLPG
+
+#undef HAVE_LSTAT
+
+/* Define if you have the putenv function.  */
+#undef HAVE_PUTENV
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the setdtablesize function.  */
+#undef HAVE_SETDTABLESIZE
+
+/* Define if you have the setenv function.  */
+#undef HAVE_SETENV
+
+/* Define if you have the setlinebuf function.  */
+#undef HAVE_SETLINEBUF
+
+/* Define if you have the setlocale function.  */
+#undef HAVE_SETLOCALE
+
+#undef HAVE_SIGINTERRUPT
+
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
+
+/* Define if you have the strchr function.  */
+#undef HAVE_STRCHR
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the tcgetattr function.  */
+#undef HAVE_TCGETATTR
+
+/* Define if you have the sysconf function. */
+#undef HAVE_SYSCONF
+
+/* Define if you have the uname function. */
+#undef HAVE_UNAME
+
+/* Define if you have the ulimit function. */
+#undef HAVE_ULIMIT
+
+#undef HAVE_WAITPID
+
+#undef HAVE_TCGETPGRP
+
+#undef HAVE_GETTEXT
+
+#undef HAVE_TEXTDOMAIN
+
+#undef HAVE_BINDTEXTDOMAIN
+
+#undef HAVE_STRCOLL
+
+#undef HAVE_TZSET
+
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
+
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Define if you have the <locale.h> header file.  */
+#undef HAVE_LOCALE_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
+
+/* Define if you have the <memory.h> header file.  */
+#undef HAVE_MEMORY_H
+
+/* Define if you have the <sys/dir.h> header file.  */
+#undef HAVE_SYS_DIR_H
+
+/* Define if you have the <sys/file.h> header file.  */
+#undef HAVE_SYS_FILE_H
+
+/* Define if you have the <sys/ndir.h> header file.  */
+#undef HAVE_SYS_NDIR_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/pte.h> header file.  */
+#undef HAVE_SYS_PTE_H
+
+/* Define if you have the <sys/ptem.h> header file.  */
+#undef HAVE_SYS_PTEM_H
+
+/* Define if you have the <sys/resource.h> header file.  */
+#undef HAVE_SYS_RESOURCE_H
+
+/* Define if you have the <sys/select.h> header file.  */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define if you have the <sys/stream.h> header file.  */
+#undef HAVE_SYS_STREAM_H
+
+/* Define if you have the <termcap.h> header file.  */
+#undef HAVE_TERMCAP_H
+
+/* Define if you have the <termio.h> header file.  */
+#undef HAVE_TERMIO_H
+
+/* Define if you have the <termios.h> header file.  */
+#undef HAVE_TERMIOS_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <varargs.h> header file.  */
+#undef HAVE_VARARGS_H
+
+/* Define if you have the <libintl.h> header file. */
+#undef HAVE_LIBINTL_H
+
+#undef HAVE_LIBDL
+
+#undef HAVE_LIBSUN
+
+#undef HAVE_LIBSOCKET
+
+/* Are we running SVR4.2? */
+#undef SVR4_2
+
+/* Are we running some version of SVR4? */
+#undef SVR4
+
+/* Do we need to define _KERNEL to get the RLIMIT_* defines from
+   <sys/resource.h>? */
+#undef RLIMIT_NEEDS_KERNEL
+
+#include "config.h.bot"
+
+#endif /* _CONFIG_H_ */

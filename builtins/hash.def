@@ -23,182 +23,167 @@ $PRODUCES hash.c
 
 $BUILTIN hash
 $FUNCTION hash_builtin
-$SHORT_DOC hash [-r] [name ...]
+$SHORT_DOC hash [-r] [-p pathname] [name ...]
 For each NAME, the full pathname of the command is determined and
-remembered.  The -r option causes the shell to forget all remembered
-locations.  If no arguments are given, information about remembered
-commands is presented.
+remembered.  If the -p option is supplied, PATHNAME is used as the
+full pathname of NAME, and no path search is performed.  The -r
+option causes the shell to forget all remembered locations.  If no
+arguments are given, information about remembered commands is displayed.
 $END
+
+#include <config.h>
 
 #include <sys/types.h>
 #include "../posixstat.h"
 
 #include <stdio.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
 #include "../builtins.h"
 #include "../flags.h"
+#include "../execute_cmd.h"
 #include "hashcom.h"
 #include "common.h"
-#include "../execute_cmd.h"
+#include "bashgetopt.h"
 
 extern int dot_found_in_search;
+extern char *this_command_name;
+
+static int add_hashed_command ();
+static int print_hashed_commands ();
+
+static int hashing_initialized = 0;
+
+HASH_TABLE *hashed_filenames;
 
 void
 initialize_filename_hashing ()
 {
-  hashed_filenames = make_hash_table (FILENAME_HASH_BUCKETS);
+  if (hashing_initialized == 0)
+    {
+      hashed_filenames = make_hash_table (FILENAME_HASH_BUCKETS);
+      hashing_initialized = 1;
+    }
+}
+
+static void
+free_filename_data (data)
+     char *data;
+{
+  free (((PATH_DATA *)data)->path);
+  free (data);
+}
+
+void
+flush_hashed_filenames ()
+{
+  flush_hash_table (hashed_filenames, free_filename_data);
+}
+
+/* Remove FILENAME from the table of hashed commands. */
+void
+remove_hashed_filename (filename)
+     char *filename;
+{
+  register BUCKET_CONTENTS *item;
+
+  if (hashing_enabled == 0)
+    return;
+
+  item = remove_hash_item (filename, hashed_filenames);
+  if (item)
+    {
+      if (item->data)
+	free_filename_data (item->data);
+      free (item->key);
+      free (item);
+    }
 }
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified
    commands. */
+int
 hash_builtin (list)
      WORD_LIST *list;
 {
-  int expunge_hash_table = 0;
-  int any_failed = 0;
+  int expunge_hash_table, opt;
+  char *word, *pathname;
 
-  if (hashing_disabled)
+  if (hashing_enabled == 0)
     {
       builtin_error ("hashing disabled");
       return (EXECUTION_FAILURE);
     }
 
-  while (list)
+  expunge_hash_table = 0;
+  pathname = (char *)NULL;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "rp:")) != -1)
     {
-      char *arg = list->word->word;
-
-      if (ISOPTION (arg, 'r'))
+      switch (opt)
 	{
+	case 'r':
 	  expunge_hash_table = 1;
-	  list = list->next;
-	}
-      else if (ISOPTION (arg, '-'))
-	{
-	  list = list->next;
 	  break;
-	}
-      else if (*arg == '-')
-	{
-	  bad_option (list->word->word);
-	  builtin_error ("usage: hash [-r] [command ...]");
+	case 'p':
+	  pathname = list_optarg;
+	  break;
+	default:
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
-      else
-	break;
     }
+  list = loptend;
 
   /* We want hash -r to be silent, but hash -- to print hashing info.  That
-     is the reason for the !expunge_hash_table. */
-  if (!list && !expunge_hash_table)
+     is the reason for the test of expunge_hash_table. */
+  if (list == 0 && expunge_hash_table == 0)
     {
-      /* Print information about current hashed info. */
-      int any_printed = 0;
-      int bucket = 0;
-      register BUCKET_CONTENTS *item_list;
-
-      while (bucket < hashed_filenames->nbuckets)
-	{
-	  item_list = get_hash_bucket (bucket, hashed_filenames);
-	  if (item_list)
-	    {
-	      if (!any_printed)
-		{
-		  printf ("hits\tcommand\n");
-		  any_printed++;
-		}
-	      while (item_list)
-		{
-		  printf ("%4d\t%s\n",
-			  item_list->times_found, pathdata(item_list)->path);
-		  item_list = item_list->next;
-		}
-	    }
-	  bucket++;
-	}
-
-      if (!any_printed)
-	printf ("No commands in hash table.\n");
+      if (print_hashed_commands () == 0)
+	printf ("%s: hash table empty\n", this_command_name);
 
       return (EXECUTION_SUCCESS);
     }
 
   if (expunge_hash_table)
-    {
-      int bucket = 0;
-      register BUCKET_CONTENTS *item_list, *prev;
+    flush_hashed_filenames ();
 
-      while (bucket < hashed_filenames->nbuckets)
-	{
-	  item_list = get_hash_bucket (bucket, hashed_filenames);
-	  if (item_list)
-	    {
-	      while (item_list)
-		{
-		  prev = item_list;
-		  free (item_list->key);
-		  free (pathdata(item_list)->path);
-		  free (item_list->data);
-		  item_list = item_list->next;
-		  free (prev);
-		}
-	      hashed_filenames->bucket_array[bucket] = (BUCKET_CONTENTS *)NULL;
-	    }
-	  bucket++;
-	}
-    }
-
-  while (list)
+  for (opt = EXECUTION_SUCCESS; list; list = list->next)
     {
       /* Add or rehash the specified commands. */
-      char *word;
-      char *full_path;
-      SHELL_VAR *var;
-
       word = list->word->word;
-      if (absolute_program (word))
+      if (pathname)
+	remember_filename (word, pathname, 0, 0);
+      else
 	{
-	  list = list->next;
-	  continue;
-	}
-      full_path = find_user_command (word);
-      var = find_function (word);
-
-      if (!find_shell_builtin (word) && (!var))
-	{
-	  if (full_path && executable_file (full_path))
-	    remember_filename (word, full_path, dot_found_in_search, 0);
-	  else
+	  if (absolute_program (word))
 	    {
-	      builtin_error ("%s: not found", word);
-	      any_failed++;
+	      list = list->next;
+	      continue;
 	    }
-	}
-      if (full_path)
-	free (full_path);
 
-      list = list->next;
+	  if (add_hashed_command (word))
+	    opt = EXECUTION_FAILURE;
+	}
     }
 
   fflush (stdout);
 
-  if (any_failed)
-    return (EXECUTION_FAILURE);
-  else
-    return (EXECUTION_SUCCESS);
+  return (opt);
 }
 
 /* Place FILENAME (key) and FULL_PATHNAME (data->path) into the
    hash table.  CHECK_DOT if non-null is for future calls to
-   find_hashed_filename ().  FOUND is the initial value for
-   times_found. */
+   find_hashed_filename (); it means that this file was found
+   in a directory in $PATH that is not an absolute pathname.
+   FOUND is the initial value for times_found. */
 void
 remember_filename (filename, full_pathname, check_dot, found)
      char *filename, *full_pathname;
@@ -206,17 +191,74 @@ remember_filename (filename, full_pathname, check_dot, found)
 {
   register BUCKET_CONTENTS *item;
 
-  if (hashing_disabled)
+  if (hashing_enabled == 0)
     return;
+
   item = add_hash_item (filename, hashed_filenames);
   if (item->data)
     free (pathdata(item)->path);
   else
     {
       item->key = savestring (filename);
-      item->data = (char *)xmalloc (sizeof (PATH_DATA));
+      item->data = xmalloc (sizeof (PATH_DATA));
     }
   pathdata(item)->path = savestring (full_pathname);
-  pathdata(item)->check_dot = check_dot;
+  pathdata(item)->flags = 0;
+  if (check_dot)
+    pathdata(item)->flags |= HASH_CHKDOT;
+  if (*full_pathname != '/')
+    pathdata(item)->flags |= HASH_RELPATH;
   item->times_found = found;
+}
+
+static int
+add_hashed_command (word, quiet)
+     char *word;
+     int quiet;
+{
+  int rv;
+  char *full_path;
+
+  rv = 0;
+  if (find_function (word) == 0 && find_shell_builtin (word) == 0)
+    {
+      full_path = find_user_command (word);
+      if (full_path && executable_file (full_path))
+	remember_filename (word, full_path, dot_found_in_search, 0);
+      else
+	{
+	  if (quiet == 0)
+	    builtin_error ("%s: not found", word);
+	  rv++;
+	}
+      if (full_path)
+	free (full_path);
+    }
+  return (rv);
+}
+
+/* Print information about current hashed info. */
+static int
+print_hashed_commands ()
+{
+  BUCKET_CONTENTS *item_list;
+  int bucket, any_printed;
+
+  for (bucket = any_printed = 0; bucket < hashed_filenames->nbuckets; bucket++)
+    {
+      item_list = get_hash_bucket (bucket, hashed_filenames);
+      if (item_list == 0)
+	continue;
+
+      if (any_printed == 0)
+	{
+	  printf ("hits\tcommand\n");
+	  any_printed++;
+	}
+
+      for ( ; item_list; item_list = item_list->next)
+	printf ("%4d\t%s\n", item_list->times_found, pathdata(item_list)->path);
+
+    }
+  return (any_printed);
 }

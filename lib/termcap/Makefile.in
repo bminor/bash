@@ -1,0 +1,69 @@
+## -*- text -*- ####################################################
+#								   #
+# Makefile for termcap replacement libbrary.			   #
+#								   #
+####################################################################
+
+srcdir = @srcdir@
+VPATH = .:@srcdir@
+topdir = @top_srcdir@
+BUILD_DIR = @BUILD_DIR@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+CC = @CC@
+RANLIB = @RANLIB@
+AR = @AR@
+RM = rm -f
+CP = cp
+MV = mv
+
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+
+DEFS = @DEFS@
+
+INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
+
+CCFLAGS = $(CFLAGS) $(DEFS) $(CPPFLAGS) ${INCLUDES}
+
+# Here is a rule for making .o files from .c files that doesn't force
+# the type of the machine (like -sun3) into the flags.
+.c.o:
+	$(CC) -c $(CCFLAGS) $<
+
+SHELL = /bin/sh
+
+SOURCES = termcap.c tparam.c
+OBJECTS = termcap.o tparam.o
+
+DOCUMENTATION = termcap.texinfo
+
+THINGS_TO_TAR = $(SOURCES) $(DOCUMENTATION)
+
+##########################################################################
+
+all: libtermcap.a
+
+libtermcap.a:	$(OBJECTS)
+	$(RM) -f $@
+	$(AR) cr $@ $(OBJECTS)
+	-test -n "$(RANLIB)" && $(RANLIB) $@
+
+install:	
+
+clean:
+	$(RM) *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+
+mostlyclean distclean maintainer-clean: clean
+
+$(DESTDIR)/libtermcap.a: libtermcap.a
+	${INSTALL_DATA} -c -m 644 libtermcap.a $@
+	-test -n "$(RANLIB)" && $(RANLIB) -t $@
+
+termcap.o: $(BUILD_DIR)/config.h
+tparam.o: $(BUILD_DIR)/config.h
+version.o: $(BUILD_DIR)/config.h

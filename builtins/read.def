@@ -23,101 +23,170 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-r] [name ...]
+$SHORT_DOC read [-r] [-p prompt] [-a array] [-e] [name ...]
 One line is read from the standard input, and the first word is
-assigned to the first NAME, the second word to the second NAME, etc.
-with leftover words assigned to the last NAME.  Only the characters
+assigned to the first NAME, the second word to the second NAME, and so
+on, with leftover words assigned to the last NAME.  Only the characters
 found in $IFS are recognized as word delimiters.  The return code is
-zero, unless end-of-file is encountered.  If the -r option is given,
-this signifies `raw' input, and backslash processing is disabled.
+zero, unless end-of-file is encountered.  If no NAMEs are supplied, the
+line read is stored in the REPLY variable.  If the -r option is given,
+this signifies `raw' input, and backslash escaping is disabled.  If
+the `-p' option is supplied, the string supplied as an argument is
+output without a trailing newline before attempting to read.  If -a is
+supplied, the words read are assigned to sequential indices of ARRAY,
+starting at zero.  If -e is supplied and the shell is interactive,
+readline is used to obtain the line.
 $END
 
+#include <config.h>
+
 #include <stdio.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
-#define issep(c)	(strchr (ifs_chars, (c)) != (char *)0)
+#if defined (READLINE)
+#include "../bashline.h"
+#include <readline/readline.h>
+#endif
 
-static int stream_close ();
+#define issep(c)	(strchr (ifs_chars, (c)))
 
 extern int interrupt_immediately;
+
+#if defined (READLINE)
+static char *edit_line ();
+#endif
+static SHELL_VAR *bind_read_variable ();
 
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever
    that may be.  Successive words of the input line are assigned
    to the variables mentioned in LIST.  The last variable in LIST
    gets the remainder of the words on the line.  If no variables
-   are mentioned in LIST, then the default variable is $REPLY.
-
-   S. R. Bourne's shell complains if you don't name a variable
-   to receive the stuff that is read.  GNU's shell doesn't.  This
-   allows you to let the user type random things. */
+   are mentioned in LIST, then the default variable is $REPLY. */
+int
 read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, c, i, fildes, raw_mode, pass_next, saw_escape, retval;
-  char *input_string, *orig_input_string, *ifs_chars, *t;
-  FILE *input_stream;
+  int size, i, raw, pass_next, saw_escape, eof, opt, retval, edit;
+  char c;
+  char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
+  char *e, *t, *t1;
   SHELL_VAR *var;
+#if defined (ARRAY_VARS)
+  WORD_LIST *alist;
+#endif
+#if defined (READLINE)
+  char *rlbuf;
+  int rlind;
+#endif
 
   i = 0;		/* Index into the string that we are reading. */
-  raw_mode = 0;		/* Not reading raw input be default. */
+  raw = edit = 0;	/* Not reading raw input by default. */
+  arrayname = prompt = (char *)NULL;
 
-  while (list)
+#if defined (READLINE)
+  rlbuf = (char *)0;
+  rlind = 0;
+#endif
+
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "erp:a:")) != -1)
     {
-      if (ISOPTION (list->word->word, 'r'))
-	{
-	  raw_mode = 1;
-	  list = list->next;
-	}
-      else if (ISOPTION (list->word->word, '-'))
-	{
-	  list = list->next;
+      switch (opt)
+        {
+        case 'r':
+	  raw = 1;
 	  break;
-	}
-      else if (*list->word->word == '-')
-	{
-	  bad_option (list->word->word);
-	  builtin_error ("usage: read [-r] [name ...]");
+	case 'p':
+	  prompt = list_optarg;
+	  break;
+	case 'e':
+#if defined (READLINE)
+	  edit = 1;
+#endif
+	  break;
+#if defined (ARRAY_VARS)
+	case 'a':
+	  arrayname = list_optarg;
+	  break;
+#endif
+	default:
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
-      else
-	break;
     }
+  list = loptend;
 
-  /* We need unbuffered input from stdin.  So we make a new stream with
-     the same file descriptor as stdin, then unbuffer it. */
-  fildes = dup (fileno (stdin));
-
-  if (fildes == -1)
-    return (EXECUTION_FAILURE);
-
-  input_stream = fdopen (fildes, "r");
-
-  if (!input_stream)
-    {
-      close (fildes);
-      return (EXECUTION_FAILURE);
-    }
-
+  /* IF IFS is unset, we use the default of " \t\n". */
   var = find_variable ("IFS");
   ifs_chars = var ? value_cell (var) : " \t\n";
-  
-  input_string = xmalloc (size = 128);
+  if (ifs_chars == 0)		/* XXX */
+    ifs_chars = "";		/* XXX */
 
-  setbuf (input_stream, (char *)NULL);
+  input_string = xmalloc (size = 128);
 
   begin_unwind_frame ("read_builtin");
   add_unwind_protect (xfree, input_string);
-  add_unwind_protect (stream_close, input_stream);
+#if defined (READLINE)
+  add_unwind_protect (xfree, rlbuf);
+#endif
   interrupt_immediately++;
+
+  /* If the -p or -e flags were given, but input is not coming from the
+     terminal, turn them off. */
+  if ((prompt || edit) && (isatty (0) == 0))
+    {
+      prompt = (char *)NULL;
+      edit = 0;
+    }
+
+  if (prompt && edit == 0)
+    {
+      fprintf (stderr, "%s", prompt);
+      fflush (stderr);
+    }
 
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
   saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
 
-  while ((c = getc (input_stream)) != EOF)
+  for (eof = 0;;)
     {
+#if defined (READLINE)
+      if (edit)
+	{
+	  if (rlbuf && rlbuf[rlind] == '\0')
+	    {
+	      free (rlbuf);
+	      rlbuf = (char *)0;
+	    }
+	  if (rlbuf == 0)
+	    {
+	      rlbuf = edit_line (prompt ? prompt : "");
+	      rlind = 0;
+	    }
+	  if (rlbuf == 0)
+	    {
+	      eof = 1;
+	      break;
+	    }
+	  c = rlbuf[rlind++];
+	}
+      else
+#endif   
+      if (read (0, &c, 1) != 1)
+	{
+	  eof = 1;
+	  break;
+	}
+
       if (i + 2 >= size)
 	input_string = xrealloc (input_string, size += 128);
 
@@ -133,7 +202,7 @@ read_builtin (list)
 	  continue;
 	}
 
-      if (c == '\\' && !raw_mode)
+      if (c == '\\' && raw == 0)
 	{
 	  pass_next++;
 	  saw_escape++;
@@ -157,15 +226,31 @@ read_builtin (list)
   interrupt_immediately--;
   discard_unwind_frame ("read_builtin");
 
-  fclose (input_stream);
+  retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 
-  if (c == EOF)
+#if defined (ARRAY_VARS)
+  /* If -a was given, take the string read, break it into a list of words,
+     an assign them to `arrayname' in turn. */
+  if (arrayname)
     {
-      retval = EXECUTION_FAILURE;
-      /* input_string[0] = '\0'; */
+      var = find_variable (arrayname);
+      if (var == 0)
+        var = make_new_array_variable (arrayname);
+      else if (array_p (var) == 0)
+        var = convert_var_to_array (var);
+
+      empty_array (array_cell (var));
+
+      alist = list_string (input_string, ifs_chars, 0);
+      if (alist)
+	{
+	  assign_array_var_from_word_list (var, alist);
+	  dispose_words (alist);
+	}
+      free (input_string);
+      return (retval);
     }
-  else
-    retval = EXECUTION_SUCCESS;
+#endif /* ARRAY_VARS */ 
 
   if (!list)
     {
@@ -179,98 +264,140 @@ read_builtin (list)
 	var = bind_variable ("REPLY", input_string);
       var->attributes &= ~att_invisible;
       free (input_string);
+      return (retval);
     }
-  else
+
+  /* This code implements the Posix.2 spec for splitting the words
+     read and assigning them to variables. */
+  orig_input_string = input_string;
+
+  /* Remove IFS white space at the beginning of the input string.  If
+     $IFS is null, no field splitting is performed. */
+  for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && issep(*t); t++)
+    ;
+  input_string = t;
+
+  for (; list->next; list = list->next)
     {
-      /* This code implements the Posix.2 spec for splitting the words
-	 read and assigning them to variables.  If $IFS is unset, we
-	 use the default value of " \t\n". */
-      orig_input_string = input_string;
-
-      /* Remove IFS white space at the beginning of the input string.  If
-	 $IFS is null, no field splitting is performed. */
-      for (t = input_string; *ifs_chars && spctabnl (*t) && issep (*t); t++)
-	;
-      input_string = t;
-
-      for (; list->next; list = list->next)
+      varname = list->word->word;
+#if defined (ARRAY_VARS)
+      if (legal_identifier (varname) == 0 && valid_array_reference (varname) == 0)
+#else
+      if (legal_identifier (varname) == 0)
+#endif
 	{
-	  char *e, *t1;
-
-	  varname = list->word->word;
-	  if (legal_identifier (varname) == 0)
-	    {
-	      builtin_error ("%s: not a legal variable name", varname);
-	      free (orig_input_string);
-	      return (EXECUTION_FAILURE);
-	    }
-
-	  /* If there are more variables than words read from the input,
-	     the remaining variables are set to the empty string. */
-	  if (*input_string)
-	    {
-	      /* This call updates INPUT_STRING. */
-	      t = get_word_from_string (&input_string, ifs_chars, &e);
-	      if (t)
-		*e = '\0';
-	      /* Don't bother to remove the CTLESC unless we added one
-		 somewhere while reading the string. */
-	      if (t && saw_escape)
-		{
-		  t1 = dequote_string (t);
-		  var = bind_variable (varname, t1);
-		  free (t1);
-		}
-	      else
-		var = bind_variable (varname, t);
-	    }
-	  else
-	    {
-	      t = (char *)0;
-	      var = bind_variable (varname, "");
-	    }
-
-	  stupidly_hack_special_variables (varname);
-	  var->attributes &= ~att_invisible;
-
-	  if (t)
-	    free (t);
-	}
-
-      if (legal_identifier (list->word->word) == 0)
-	{
-	  builtin_error ("%s: not a legal variable name", list->word->word);
+	  builtin_error ("`%s': not a valid identifier", varname);
 	  free (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
-      /* This has to be done this way rather than using string_list
-	 and list_string because Posix.2 says that the last variable gets the
-	 remaining words and their intervening separators. */
-      input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars,
-						      saw_escape);
-
-      if (saw_escape)
+      /* If there are more variables than words read from the input,
+	 the remaining variables are set to the empty string. */
+      if (*input_string)
 	{
-	  t = dequote_string (input_string);
-	  var = bind_variable (list->word->word, t);
-	  free (t);
+	  /* This call updates INPUT_STRING. */
+	  t = get_word_from_string (&input_string, ifs_chars, &e);
+	  if (t)
+	    *e = '\0';
+	  /* Don't bother to remove the CTLESC unless we added one
+	     somewhere while reading the string. */
+	  if (t && saw_escape)
+	    {
+	      t1 = dequote_string (t);
+	      var = bind_read_variable (varname, t1);
+	      free (t1);
+	    }
+	  else
+	    var = bind_read_variable (varname, t);
 	}
       else
-	var = bind_variable (list->word->word, input_string);
-      stupidly_hack_special_variables (list->word->word);
+	{
+	  t = (char *)0;
+	  var = bind_read_variable (varname, "");
+	}
+
+      FREE (t);
+      if (var == 0)
+	{
+	  free (orig_input_string);
+	  return (EXECUTION_FAILURE);
+	}
+
+      stupidly_hack_special_variables (varname);
       var->attributes &= ~att_invisible;
-      free (orig_input_string);
     }
+
+  /* Now assign the rest of the line to the last variable argument. */
+#if defined (ARRAY_VARS)
+  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word) == 0)
+#else
+  if (legal_identifier (list->word->word) == 0)
+#endif
+    {
+      builtin_error ("`%s': not a valid identifier", list->word->word);
+      free (orig_input_string);
+      return (EXECUTION_FAILURE);
+    }
+
+  /* This has to be done this way rather than using string_list
+     and list_string because Posix.2 says that the last variable gets the
+     remaining words and their intervening separators. */
+  input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
+
+  if (saw_escape)
+    {
+      t = dequote_string (input_string);
+      var = bind_read_variable (list->word->word, t);
+      free (t);
+    }
+  else
+    var = bind_read_variable (list->word->word, input_string);
+  stupidly_hack_special_variables (list->word->word);
+  if (var)
+    var->attributes &= ~att_invisible;
+  free (orig_input_string);
 
   return (retval);
 }
 
-/* This way I don't have to know whether fclose () is a
-   function or a macro. */
-static int
-stream_close (file)
-     FILE *file;
+static SHELL_VAR *
+bind_read_variable (name, value)
+     char *name, *value;
 {
-  return (fclose (file));
+#if defined (ARRAY_VARS)
+  if (valid_array_reference (name) == 0)
+    {
+      if (legal_identifier (name) == 0)
+        {
+	  builtin_error ("`%s': not a valid identifier", name);
+	  return ((SHELL_VAR *)NULL);
+        }
+      return (bind_variable (name, value));
+    }
+  else
+    return (do_array_element_assignment (name, value));
+#else
+  return bind_variable (name, value);
+#endif
 }
+
+#if defined (READLINE)
+static char *
+edit_line (p)
+     char *p;
+{
+  char *ret;
+  int len;
+
+  if (!bash_readline_initialized)
+    initialize_readline ();
+  ret = readline (p);
+  if (ret == 0)
+    return ret;
+  len = strlen (ret);
+  ret = xrealloc (ret, len + 2);
+  ret[len++] = '\n';
+  ret[len] = '\0';
+  return ret;
+}
+#endif

@@ -1,0 +1,26 @@
+#! /bin/bash
+#
+# original from
+# @(#) lowercase.ksh 1.0 92/10/08
+# 92/10/08 john h. dubois iii (john@armory.com)
+#
+# conversion to bash v2 syntax done by Chet Ramey
+
+lowercase()
+{
+for file; do
+    filename=${file##*/}
+    case "$filename" in
+    */*)    dirname=${file%/*} ;;
+    *) dirname=.;;
+    esac
+    nf=$(echo $filename | tr A-Z a-z)
+    newname="${dirname}/${nf}"
+    if [ "$nf" != "$filename" ]; then
+	mv "$file" "$newname"
+	echo "$0: $file -> $newname"
+    else
+	echo "$0: $file not changed."
+    fi
+done
+}

@@ -46,23 +46,32 @@ runs the last command beginning with `cc' and typing `r' re-executes
 the last command.
 $END
 
-#include <stdio.h>
-#include "../bashansi.h"
-#include "../shell.h"
+#include <config.h>
+
 #if defined (HISTORY)
 #include <sys/param.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "bashtypes.h"
+#include "posixstat.h"
 #include <sys/file.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include <stdio.h>
+
+#include "../bashansi.h"
 #include <errno.h>
+
+#include "../shell.h"
 #include "../builtins.h"
 #include "../flags.h"
 #include "../maxpath.h"
 #include "../bashhist.h"
 #include <readline/history.h>
 #include "bashgetopt.h"
+#include "common.h"
 
-/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
@@ -100,8 +109,8 @@ extern int unlink ();
    Equivalent to !command:sg/pat/rep execpt there can be multiple PAT=REP's.
 */
 
-static char *fc_dosubs (), *fc_replace (), *fc_gethist (), *fc_readline ();
-static int fc_gethnum ();
+static char *fc_dosubs (), *fc_gethist (), *fc_readline ();
+static int fc_gethnum (), fc_number ();
 static void fc_replhist (), fc_addhist ();
 
 /* Data structure describing a list of global replacements to perform. */
@@ -110,8 +119,6 @@ typedef struct repl {
   char *pat;
   char *rep;
 } REPL;
-
-#define USAGE	"usage: fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [command]"
 
 /* Accessors for HIST_ENTRY lists that are called HLIST. */
 #define histline(i) (hlist[(i)]->line)
@@ -143,60 +150,50 @@ fc_builtin (list)
   int numbering, reverse, listing, execute;
   int histbeg, histend, last_hist, retval, first, opt;
   FILE *stream;
-  REPL *rlist = (REPL *) NULL, *rl;
-  char *ename = NULL, *command, *newcom, *line;
+  REPL *rlist, *rl;
+  char *ename, *command, *newcom, *line;
   HIST_ENTRY **hlist;
-  char fn[MAXPATHLEN];
+  char fn[64];
 
   numbering = 1;
   reverse = listing = execute = 0;
+  ename = (char *)NULL;
 
   /* Parse out the options and set which of the two forms we're in. */
-
-  while (list && *list->word->word == '-')
+  reset_internal_getopt ();
+  lcurrent = list;		/* XXX */
+  while (fc_number (loptend = lcurrent) == 0 &&
+	 (opt = internal_getopt (list, ":e:lnrs")) != -1)
     {
-      register char *s = &((list->word->word)[1]);
-
-      if (!isletter (*s))
-	break;
-
-      while (opt = *s++)
+      switch (opt)
 	{
-	  switch (opt)
-	    {
-	    case 'n':
-	      numbering = 0;
-	      break;
+	case 'n':
+	  numbering = 0;
+	  break;
 
-	    case 'l':
-	      listing = 1;
-	      break;
+	case 'l':
+	  listing = 1;
+	  break;
 
-	    case 'r':
-	      reverse = 1;
-	      break;
+	case 'r':
+	  reverse = 1;
+	  break;
 
-	    case 's':
-	      execute = 1;
-	      break;
+	case 's':
+	  execute = 1;
+	  break;
 
-	    case 'e':
-	      list = list->next;
-	      if (list == NULL)
-		{
-	          builtin_error (USAGE);
-	          return (EX_USAGE);
-		}
-	      ename = list->word->word;
-	      break;
+	case 'e':
+	  ename = list_optarg;
+	  break;
 
-	    default:
-	      builtin_error (USAGE);
-	      return (EX_USAGE);
-	    }
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
 	}
-      list = list->next;
     }
+
+  list = loptend;
 
   if (ename && (*ename == '-') && (ename[1] == '\0'))
     execute = 1;
@@ -205,6 +202,7 @@ fc_builtin (list)
      substitutions). */
   if (execute)
     {
+      rlist = (REPL *)NULL;
       while (list && ((sep = (char *)strchr (list->word->word, '=')) != NULL))
 	{
 	  *sep++ = '\0';
@@ -227,16 +225,13 @@ fc_builtin (list)
 	 to get the replacements in the proper order. */
 
       if (rlist && rlist->next)
-	rlist = (REPL *) reverse_list ((GENERIC_LIST *) rlist);
+	rlist = (REPL *)reverse_list ((GENERIC_LIST *) rlist);
 
       hlist = history_list ();
 
       /* If we still have something in list, it is a command spec.
 	 Otherwise, we use the most recent command in time. */
-      if (list)
-	command = fc_gethist (list->word->word, hlist);
-      else
-	command = fc_gethist ((char *) NULL, hlist);
+      command = fc_gethist (list ? list->word->word : (char *)NULL, hlist);
 
       if (command == NULL)
 	{
@@ -255,8 +250,8 @@ fc_builtin (list)
 	  command = newcom;
 	}
 
-      printf ("%s\n", command);
-      fc_replhist (command);	/* replace `fc -e -' with command */
+      fprintf (stderr, "%s\n", command);
+      fc_replhist (command);	/* replace `fc -s' with command */
       return (parse_and_execute (command, "fc", -1));
     }
 
@@ -283,12 +278,7 @@ fc_builtin (list)
       if (list)
 	histend = fc_gethnum (list->word->word, hlist);
       else
-	{
-	  if (listing)
-	    histend = last_hist;
-	  else
-	    histend = histbeg;
-	}
+	histend = listing ? last_hist : histbeg;
     }
   else
     {
@@ -301,10 +291,8 @@ fc_builtin (list)
 	    histbeg = 0;
 	}
       else
-	{
-	  /* For editing, it is the last history command. */
-	  histbeg = histend = last_hist;
-      }
+	/* For editing, it is the last history command. */
+	histbeg = histend = last_hist;
     }
 
   /* We print error messages for line specifications out of range. */
@@ -317,10 +305,10 @@ fc_builtin (list)
 
   if (histend < histbeg)
     {
-      int t = histend;
-
+      i = histend;
       histend = histbeg;
-      histbeg = t;
+      histbeg = i;
+
       reverse = 1;
     }
 
@@ -329,40 +317,25 @@ fc_builtin (list)
   else
     {
       numbering = 0;
-      sprintf (fn, "/tmp/bash%d", (int)time ((long *) 0) + (int)getpid ());
+      sprintf (fn, "/tmp/bash%d", (int)time ((time_t *) 0) + (int)getpid ());
 
       stream = fopen (fn, "w");
 
-      if (!stream)
+      if (stream == 0)
 	{
 	  builtin_error ("cannot open temp file %s", fn);
 	  return (EXECUTION_FAILURE);
 	}
     }
 
-  if (!reverse)
+  for (i = reverse ? histend : histbeg; reverse ? i >= histbeg : i <= histend; reverse ? i-- : i++)
     {
-      for (i = histbeg; i <= histend; i++)
-	{
-	  QUIT;
-	  if (numbering)
-	    fprintf (stream, "%d", i + history_base);
-	  if (listing)
-	    fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
-	  fprintf (stream, "%s\n", histline (i));
-	}
-    }
-  else
-    {
-      for (i = histend; i >= histbeg; i--)
-	{
-	  QUIT;
-	  if (numbering)
-	    fprintf (stream, "%d", i + history_base);
-	  if (listing)
-	    fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
-	  fprintf (stream, "%s\n", histline (i));
-	}
+      QUIT;
+      if (numbering)
+	fprintf (stream, "%d", i + history_base);
+      if (listing)
+	fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
+      fprintf (stream, "%s\n", histline (i));
     }
 
   if (listing)
@@ -381,7 +354,12 @@ fc_builtin (list)
       command = (char *)xmalloc (3 + strlen (FC_EDIT_COMMAND) + strlen (fn));
       sprintf (command, "%s %s", FC_EDIT_COMMAND, fn);
     }
-  parse_and_execute (command, "fc", -1);
+  retval = parse_and_execute (command, "fc", -1);
+  if (retval != EXECUTION_SUCCESS)
+    {
+      unlink (fn);
+      return (EXECUTION_FAILURE);
+    }
 
   /* Now reopen the file and execute the edited commands. */
 
@@ -433,6 +411,21 @@ fc_builtin (list)
   run_unwind_frame ("fc builtin");
 
   return (retval);
+}
+
+/* Return 1 if LIST->word->word is a legal number for fc's use. */
+static int
+fc_number (list)
+     WORD_LIST *list;
+{
+  char *s;
+
+  if (list == 0)
+    return 0;
+  s = list->word->word;
+  if (*s == '-')
+    s++;
+  return (legal_number (s, (long *)NULL));
 }
 
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
@@ -572,56 +565,16 @@ fc_dosubs (command, subs)
      char *command;
      REPL *subs;
 {
-  register char *new = savestring (command);
+  register char *new, *t;
   register REPL *r;
 
-  for (r = subs; r; r = r->next)
+  for (new = savestring (command), r = subs; r; r = r->next)
     {
-      register char *t;
-
-      t = fc_replace (r->pat, r->rep, new);
+      t = strsub (new, r->pat, r->rep, 1);
       free (new);
       new = t;
     }
   return (new);
-}
-
-/* Replace the occurrences of PAT with REP in COMMAND.
-   This returns a new string; the caller should free it. */
-static char *
-fc_replace (pat, rep, command)
-     char *pat, *rep, *command;
-{
-  register int i;
-  int patlen, replen, templen;
-  char *new, *temp;
-
-  patlen = strlen (pat);
-  replen = strlen (rep);
-
-  temp = savestring (command);
-  templen = strlen (temp);
-  i = 0;
-
-  for (; (i + patlen) <= templen; i++)
-    {
-      if (STREQN (temp + i, pat, patlen))
-	{
-	  new = (char *) xmalloc (1 + (replen - patlen) + templen);
-
-	  strncpy (new, temp, i);
-	  strncpy (new + i, rep, replen);
-	  strncpy (new + i + replen,
-		   temp + i + patlen, templen - (i + patlen));
-	  new[templen + (replen - patlen)] = '\0'; /* just in case */
-
-	  free (temp);
-	  temp = new;
-	  i += replen;
-	  templen = strlen (temp);
-	}
-    }
-  return (temp);
 }
 
 /* Use `command' to replace the last entry in the history list, which,
@@ -634,10 +587,9 @@ fc_replhist (command)
 {
   register int i;
   HIST_ENTRY **hlist, *histent, *discard;
-  char *data;
   int n;
 
-  if (!command || !*command)
+  if (command == 0 || *command == '\0')
     return;
 
   hlist = history_list ();
@@ -665,8 +617,7 @@ fc_replhist (command)
       discard = remove_history (i);
       if (discard)
 	{
-	  if (discard->line)
-	    free (discard->line);
+	  FREE (discard->line);
 	  free ((char *) discard);
 	}
       maybe_add_history (command);	/* Obeys HISTCONTROL setting. */

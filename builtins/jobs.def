@@ -1,5 +1,5 @@
 This file is jobs.def, from which is created jobs.c.
-It implements the builtin "jobs" in Bash.
+It implements the builtins "jobs" and "disown" in Bash.
 
 Copyright (C) 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
@@ -24,24 +24,38 @@ $PRODUCES jobs.c
 $BUILTIN jobs
 $FUNCTION jobs_builtin
 $DEPENDS_ON JOB_CONTROL
-$SHORT_DOC jobs [-lnp] [jobspec ...] | jobs -x command [args]
+$SHORT_DOC jobs [-lnprs] [jobspec ...] or jobs -x command [args]
 Lists the active jobs.  The -l option lists process id's in addition
 to the normal information; the -p option lists process id's only.
 If -n is given, only processes that have changed status since the last
-notification are printed.  JOBSPEC restricts output to that job.
-If -x is given, COMMAND is run after all job specifications that appear
-in ARGS have been replaced with the process ID of that job's process group
-leader.
+notification are printed.  JOBSPEC restricts output to that job.  The
+-r and -s options restrict output to running and stopped jobs only,
+respectively.  Without options, the status of all active jobs is
+printed.  If -x is given, COMMAND is run after all job specifications
+that appear in ARGS have been replaced with the process ID of that job's
+process group leader.
 $END
 
-#include "../shell.h"
+#include <config.h>
 
 #if defined (JOB_CONTROL)
-#include <sys/types.h>
+#include "../bashtypes.h"
 #include <signal.h>
-#include "../jobs.h"
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
+#include "../bashansi.h"
+
+#include "../shell.h"
+#include "../jobs.h"
+#include "../execute_cmd.h"
 #include "bashgetopt.h"
+#include "common.h"
+
+#define JSTATE_ANY	0x0
+#define JSTATE_RUNNING	0x1
+#define JSTATE_STOPPED	0x2
 
 extern int job_control, interactive_shell;
 static int execute_list_with_replacements ();
@@ -52,20 +66,24 @@ static int execute_list_with_replacements ();
    pid only.  If `-n' is given, only processes that have changed
    status since the last notification are printed.  If -x is given,
    replace all job specs with the pid of the appropriate process
-   group leader and execute the command. */
+   group leader and execute the command.  The -r and -s options mean
+   to print info about running and stopped jobs only, respectively. */
 int
 jobs_builtin (list)
      WORD_LIST *list;
 {
-  int form = JLIST_STANDARD, execute = 0;
-  int opt;
-  int any_failed = 0;
+  int form, execute, state, opt, any_failed, job;
+  sigset_t set, oset;
 
-  if (!job_control && !interactive_shell)
+  if (job_control == 0 && interactive_shell == 0)
     return (EXECUTION_SUCCESS);
 
+  execute = any_failed = 0;
+  form = JLIST_STANDARD;
+  state = JSTATE_ANY;
+
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "lpnx")) != -1)
+  while ((opt = internal_getopt (list, "lpnxrs")) != -1)
     {
       switch (opt)
 	{
@@ -86,9 +104,15 @@ jobs_builtin (list)
 	    }
 	  execute++;
 	  break;
+	case 'r':
+	  state = JSTATE_RUNNING;
+	  break;
+	case 's':
+	  state = JSTATE_STOPPED;
+	  break;
 
 	default:
-	  builtin_error ("usage: jobs [-lpn [jobspec]] [-x command [args]]");
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
     }
@@ -100,21 +124,29 @@ jobs_builtin (list)
 
   if (!list)
     {
-      list_jobs (form);
+      switch (state)
+	{
+	case JSTATE_ANY:
+	  list_all_jobs (form);
+	  break;
+	case JSTATE_RUNNING:
+	  list_running_jobs (form);
+	  break;
+	case JSTATE_STOPPED:
+	  list_stopped_jobs (form);
+	  break;
+	}
       return (EXECUTION_SUCCESS);
     }
 
   while (list)
     {
-      int job;
-      sigset_t set, oset;
-
       BLOCK_CHILD (set, oset);
       job = get_job_spec (list);
 
       if ((job == NO_JOB) || !jobs || !jobs[job])
 	{
-	  builtin_error ("No such job %s", list->word->word);
+	  builtin_error ("no such job %s", list->word->word);
 	  any_failed++;
 	}
       else if (job != DUP_JOB)
@@ -167,5 +199,64 @@ execute_list_with_replacements (list)
 
   run_unwind_frame ("jobs_builtin");
   return (result);
+}
+#endif /* JOB_CONTROL */
+
+$BUILTIN disown
+$FUNCTION disown_builtin
+$DEPENDS_ON JOB_CONTROL
+$SHORT_DOC disown [-h] [jobspec ...]
+By default, removes each JOBSPEC argument from the table of active jobs.
+If the -h option is given, the job is not removed from the table, but is
+marked so that SIGHUP is not sent to the job if the shell receives a
+SIGHUP.
+$END
+
+#if defined (JOB_CONTROL)
+int
+disown_builtin (list)
+     WORD_LIST *list;
+{
+  int opt, job, retval, nohup_only;
+  sigset_t set, oset;
+
+  nohup_only = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "h")) != -1)
+    {
+      switch (opt)
+	{
+	case 'h':
+	  nohup_only = 1;
+	  break;
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
+  retval = EXECUTION_SUCCESS;
+
+  do
+    {
+      BLOCK_CHILD (set, oset);
+      job = get_job_spec (list);
+
+      if (job == NO_JOB || jobs == 0 || jobs[job] == 0)
+	{
+	  builtin_error ("no such job %s", list->word->word);
+	  retval = EXECUTION_FAILURE;
+	}
+      else if (nohup_only)
+	nohup_job (job);
+      else
+	delete_job (job);
+      UNBLOCK_CHILD (oset);
+
+      if (list)
+	list = list->next;
+    }
+  while (list);
+  return (retval);
 }
 #endif /* JOB_CONTROL */

@@ -1,0 +1,57 @@
+expect()
+{
+        echo expect "$@"
+}
+
+expect '<^J^J^J>'
+recho $'\n\n\n'
+
+z1=$''
+expect '<>'
+recho "$z1"
+
+ZIFS=$'\n'$'\t'$' '
+
+expect '<^J^I >'
+recho "$ZIFS"
+
+expect '<abc>'
+recho $'abc'
+
+expect '<^M^[^Gabc>'
+recho $'\r\e\aabc'
+
+D=$"hello"," "$"world"
+
+expect '<hello,> <world>'
+recho $D
+
+expect '<hello, world>'
+recho "$D"
+
+D=$""
+expect '<>'
+recho "$D"
+
+world=chet
+
+expect '<$hello, world>'
+recho \$"hello, world"
+
+expect '<hello, $world>'
+recho $"hello, \$world"
+
+expect '<hello, "world">'
+recho $"hello, \"world\""
+
+expect '<hello, $"world">'
+recho $"hello"', $"world"'
+
+expect '<hello, $"world">'
+recho $'hello, $"world"'
+
+expect '<$hello, chet>'
+recho \$"hello, $world"
+
+expect '<hello, chet>'
+recho $"hello, $world"

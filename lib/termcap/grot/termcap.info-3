@@ -1,5 +1,5 @@
-This is Info file /home/gd/gnu/termcap/termcap.info, produced by
-Makeinfo-1.52 from the input file /home/gd/gnu/termcap/termcap.texi.
+This is Info file ./termcap.info, produced by Makeinfo-1.55 from the
+input file ./termcap.texi.
 
    This file documents the termcap library of the GNU system.
 
@@ -566,12 +566,12 @@ a `ks' capability and send it, to make the keypad actually transmit.
 Such programs should also send the `ke' string when exiting.
 
 `ks'
-     String of commands to make the function keys transmit.  If this
+     String of commands to make the keypad keys transmit.  If this
      capability is not provided, but the others in this section are,
-     programs may assume that the function keys always transmit.
+     programs may assume that the keypad keys always transmit.
 
 `ke'
-     String of commands to make the function keys work locally.  This
+     String of commands to make the keypad keys work locally.  This
      capability is provided only if `ks' is.
 
 `kl'
@@ -783,6 +783,11 @@ Initialization
 `st'
      String of commands to set tab stop at current cursor column on all
      lines.
+
+`NF'
+     Flag whose presence means that the terminal does not support
+     XON/XOFF flow control.  Programs should not send XON (`C-q') or
+     XOFF (`C-s') characters to the terminal.
 
 
 File: termcap.info,  Node: Pad Specs,  Next: Status Line,  Prev: Initialization,  Up: Capabilities
@@ -1266,6 +1271,9 @@ definitions, see the index of capability names (*note Cap Index::.).
 `lm'
      Number: lines of display memory.
 
+`LP'
+     Flag: writing to last column of last line will not scroll.
+
 `mb'
      String to enter blinking mode.
 
@@ -1304,6 +1312,9 @@ definitions, see the index of capability names (*note Cap Index::.).
 
 `nd'
      String to move the cursor right one column.
+
+`NF'
+     Flag: do not use XON/XOFF flow control.
 
 `nl'
      Obsolete alternative name for the `do' and `sf' capabilities.

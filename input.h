@@ -17,28 +17,23 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (_INPUT_H)
-#define _INPUT_H
+#if !defined (_INPUT_H_)
+#define _INPUT_H_
 
 #include "stdc.h"
 
 /* Function pointers can be declared as (Function *)foo. */
-#if !defined (__FUNCTION_DEF)
-#  define __FUNCTION_DEF
+#if !defined (_FUNCTION_DEF)
+#  define _FUNCTION_DEF
 typedef int Function ();
 typedef void VFunction ();
 typedef char *CPFunction ();
 typedef char **CPPFunction ();
 #endif /* _FUNCTION_DEF */
 
-/* Some stream `types'. */
-#define st_none   0
-#define st_stream 1
-#define st_string 2
-#define st_stdin  3
+enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
 
 #if defined (BUFFERED_INPUT)
-#define st_bstream 4
 
 /* Possible values for b_flag. */
 #define B_EOF		0x1
@@ -74,7 +69,7 @@ typedef union {
 } INPUT_STREAM;
 
 typedef struct {
-  int type;
+  enum stream_type type;
   char *name;
   INPUT_STREAM location;
   Function *getter;
@@ -89,13 +84,18 @@ extern void init_yy_io __P((Function *, Function *, int, char *, INPUT_STREAM));
 extern void with_input_from_stdin __P((void));
 extern void with_input_from_string __P((char *, char *));
 extern void with_input_from_stream __P((FILE *, char *));
-extern int push_stream __P((void));
-extern int pop_stream __P((void));
+extern void push_stream __P((int));
+extern void pop_stream __P((void));
+extern int stream_on_stack __P((enum stream_type));
 extern char *read_secondary_line __P((int));
 extern int find_reserved_word __P((char *));
 extern char *decode_prompt_string __P((char *));
 extern void gather_here_documents __P((void));
 extern void execute_prompt_command __P((char *));
+
+/* Functions from input.c */
+extern int getc_with_restart ();
+extern int ungetc_with_restart ();
 
 #if defined (BUFFERED_INPUT)
 /* Functions from input.c. */
@@ -112,4 +112,4 @@ extern int buffered_ungetchar __P((int));
 extern void with_input_from_buffered_stream __P((int, char *));
 #endif /* BUFFERED_INPUT */
 
-#endif /* _INPUT_H */
+#endif /* _INPUT_H_ */

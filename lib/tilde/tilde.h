@@ -1,11 +1,32 @@
 /* tilde.h: Externally available variables and function in libtilde.a. */
 
-#if !defined (__TILDE_H__)
-#  define __TILDE_H__
+/* Copyright (C) 1992 Free Software Foundation, Inc.
+
+   This file contains the Readline Library (the Library), a set of
+   routines for providing Emacs style line input to programs that ask
+   for it.
+
+   The Library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
+
+   The Library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   The GNU General Public License is often shipped with GNU software, and
+   is generally kept in a file called COPYING or LICENSE.  If you do not
+   have a copy of the license, write to the Free Software Foundation,
+   675 Mass Ave, Cambridge, MA 02139, USA. */
+
+#if !defined (_TILDE_H_)
+#  define _TILDE_H_
 
 /* Function pointers can be declared as (Function *)foo. */
-#if !defined (__FUNCTION_DEF)
-#  define __FUNCTION_DEF
+#if !defined (_FUNCTION_DEF)
+#  define _FUNCTION_DEF
 typedef int Function ();
 typedef void VFunction ();
 typedef char *CPFunction ();
@@ -35,4 +56,4 @@ extern char *tilde_expand ();
    tilde.  If there is no expansion, call tilde_expansion_failure_hook. */
 extern char *tilde_expand_word ();
 
-#endif /* __TILDE_H__ */
+#endif /* _TILDE_H_ */

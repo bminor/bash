@@ -22,7 +22,14 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+#if defined (BRACE_EXPANSION) && defined (READLINE)
+
 #include <stdio.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -71,7 +78,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
         return (savestring (array[0]));
     }
 
-  result = (char *) xmalloc (result_size = 1);
+  result = xmalloc (result_size = 1);
   *result = '\0';
 
   for (start = real_start; start < real_end; start = end + 1)
@@ -95,7 +102,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  /* In this case, add in a leading '{', because we are at
 	     top level, and there isn't a consistent prefix. */
 	  result_size += 1;
-	  result = (char *) xrealloc (result, result_size);
+	  result = xrealloc (result, result_size);
 	  strcpy (result, "{");
 	  flag++;
 	}
@@ -107,7 +114,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  /* If there is more than one element in the subarray,
 	     insert the prefix and an opening brace. */
 	  result_size += gcd - gcd_zero + 1;
-	  result = (char *) xrealloc (result, result_size);
+	  result = xrealloc (result, result_size);
 	  strncat (result, array[start] + gcd_zero, gcd - gcd_zero);
 	  strcat (result, "{");
 	  subterm = really_munge_braces (array, start, end + 1, gcd);
@@ -115,7 +122,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	}
 
       result_size += strlen (subterm) + 1;
-      result = (char *) xrealloc (result, result_size);
+      result = xrealloc (result, result_size);
       strcat (result, subterm);
       strcat (result, ",");
       free (subterm);
@@ -164,3 +171,4 @@ bash_brace_completion ()
   rl_attempted_completion_function = orig_attempt_func;
   rl_completion_entry_function = orig_entry_func;
 }
+#endif /* BRACE_EXPANSION && READLINE */

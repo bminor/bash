@@ -18,9 +18,50 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include <stdio.h>
+
 #include "version.h"
 
+extern char *shell_name;
+
+/* Defines from version.h */
 char *dist_version = DISTVERSION;
 int patch_level = PATCHLEVEL;
 int build_version = BUILDVERSION;
+#ifdef RELSTATUS
+char *release_status = RELSTATUS;
+#else
+char *release_status = (char *)0;
+#endif
 char *sccs_version = SCCSVERSION;
+
+/* Functions for getting, setting, and displaying the shell version. */
+
+/* Give version information about this shell. */
+char *
+shell_version_string ()
+{
+  static char tt[32] = { '\0' };
+
+  if (tt[0] == '\0')
+    {
+      if (release_status)
+	sprintf (tt, "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
+      else
+	sprintf (tt, "%s.%d(%d)", dist_version, patch_level, build_version);
+    }
+  return tt;
+}
+
+#if !defined (MACHTYPE)
+#  define MACHTYPE "unknown"
+#endif
+
+void
+show_shell_version (extended)
+     int extended;
+{
+  printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
+  if (extended)
+    printf ("Copyright 1996 Free Software Foundation, Inc.\n");
+}

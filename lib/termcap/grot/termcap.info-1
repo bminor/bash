@@ -1,5 +1,5 @@
-This is Info file /home/gd/gnu/termcap/termcap.info, produced by
-Makeinfo-1.52 from the input file /home/gd/gnu/termcap/termcap.texi.
+This is Info file ./termcap.info, produced by Makeinfo-1.55 from the
+input file ./termcap.texi.
 
    This file documents the termcap library of the GNU system.
 
@@ -218,10 +218,9 @@ variable `TERM' using `getenv ("TERM")'.
 
    If you are using the GNU version of termcap, you can alternatively
 ask `tgetent' to allocate enough space.  Pass a null pointer for
-BUFFER, and `tgetent' itself allocates the storage using `malloc'.  In
-this case the returned value on success is the address of the storage,
-cast to `int'.  But normally there is no need for you to look at the
-address.  Do not free the storage yourself.
+BUFFER, and `tgetent' itself allocates the storage using `malloc'.
+There is no way to get the address that was allocated, and you
+shouldn't try to free the storage.
 
    With the Unix version of termcap, you must allocate space for the
 description yourself and pass the address of the space as the argument
@@ -881,7 +880,7 @@ preferable for cursor motion.
 File: termcap.info,  Node: tparam,  Next: tgoto,  Up: Using Parameters
 
 `tparam'
---------
+........
 
    The function `tparam' can encode display commands with any number of
 parameters and allows you to specify the buffer space.  It is the
@@ -930,7 +929,7 @@ capability.
 File: termcap.info,  Node: tgoto,  Prev: tparam,  Up: Using Parameters
 
 `tgoto'
--------
+.......
 
    The special case of cursor motion is handled by `tgoto'.  There are
 two reasons why you might choose to use `tgoto':

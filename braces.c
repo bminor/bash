@@ -18,12 +18,15 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-/* Stuff in curly braces gets expanded after variable and command
-   substitution, but before filename globbing.
+/* Stuff in curly braces gets expanded before all other shell expansions. */
 
-   (Actually, this should be true for the sake of efficiency, but it
-   isn't because of quoting hacks.  Once I rebuild quoting it will be
-   true. */
+#include "config.h"
+
+#if defined (BRACE_EXPANSION)
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -32,7 +35,7 @@
 #endif /* !HAVE_STRING_H */
 
 #if defined (SHELL)
-#include "shell.h"
+#  include "shell.h"
 #endif /* SHELL */
 
 #include "general.h"
@@ -61,7 +64,7 @@ brace_expand (text)
   register int start;
   char *preamble, *postamble, *amble;
   char **tack, **result;
-  int i, c;
+  int i, j, c;
 
   /* Find the text of the preamble. */
   i = 0;
@@ -74,7 +77,7 @@ brace_expand (text)
   result = (char **)xmalloc (2 * sizeof (char *));
   result[0] = preamble;
   result[1] = (char *)NULL;
-  
+
   /* Special case.  If we never found an exciting character, then
      the preamble is all of the text, so just return that. */
   if (c != '{')
@@ -85,11 +88,9 @@ brace_expand (text)
   c = brace_gobbler (text, &i, '}');
 
   /* What if there isn't a matching close brace? */
-  if (!c)
+  if (c == 0)
     {
 #if defined (NOTDEF)
-      register int j;
-
       /* Well, if we found an unquoted BRACE_ARG_SEPARATOR between START
 	 and I, then this should be an error.  Otherwise, it isn't. */
       for (j = start; j < i; j++)
@@ -103,7 +104,7 @@ brace_expand (text)
 	  if (text[j] == brace_arg_separator)
 	    {
 	      free_array (result);
-	      report_error ("Missing `}'");
+	      report_error ("missing `}'");
 	      throw_to_top_level ();
 	    }
 	}
@@ -120,28 +121,24 @@ brace_expand (text)
 #if defined (SHELL)
   /* If the amble does not contain an unquoted BRACE_ARG_SEPARATOR, then
      just return without doing any expansion.  */
-  {
-    register int j;
+  for (j = 0; amble[j]; j++)
+    {
+      if (amble[j] == '\\')
+	{
+	  j++;
+	  continue;
+	}
+      if (amble[j] == brace_arg_separator)
+	break;
+    }
 
-    for (j = 0; amble[j]; j++)
-      {
-	if (amble[j] == '\\')
-	  {
-	    j++;
-	    continue;
-	  }
-	if (amble[j] == brace_arg_separator)
-	  break;
-      }
-
-    if (!amble[j])
-      {
-	free (amble);
-	free (preamble);
-	result[0] = savestring (text);
-	return (result);
-      }
-  }
+  if (!amble[j])
+    {
+      free (amble);
+      free (preamble);
+      result[0] = savestring (text);
+      return (result);
+    }
 #endif /* SHELL */
 
   postamble = &text[i + 1];
@@ -244,12 +241,12 @@ brace_gobbler (text, indx, satisfy)
 	  quoted = c;
 	  continue;
 	}
-      
-      if (c == satisfy && !level && !quoted)
+
+      if (c == satisfy && level == 0 && quoted == 0)
 	{
 	  /* We ignore an open brace surrounded by whitespace, and also
-	     an open brace followed immediately by a close brace, that
-	     was preceded with whitespace.  */
+	     an open brace followed immediately by a close brace preceded
+	     by whitespace.  */
 	  if (c == '{' &&
 	      ((!i || brace_whitespace (text[i - 1])) &&
 	       (brace_whitespace (text[i + 1]) || text[i + 1] == '}')))
@@ -257,10 +254,8 @@ brace_gobbler (text, indx, satisfy)
 #if defined (SHELL)
 	  /* If this is being compiled as part of bash, ignore the `{'
 	     in a `${}' construct */
-	  if ((c != '{') || !i || (text[i - 1] != '$'))
-#else /* !SHELL */
-	  if ((c != '{') || !i)
-#endif /* !SHELL */
+	  if ((c != '{') || i == 0 || (text[i - 1] != '$'))
+#endif /* SHELL */
 	    break;
 	}
 
@@ -286,10 +281,10 @@ array_concat (arr1, arr2)
   register int i, j, len, len1, len2;
   register char **result;
 
-  if (!arr1)
+  if (arr1 == 0)
     return (copy_array (arr2));
 
-  if (!arr2)
+  if (arr2 == 0)
     return (copy_array (arr1));
 
   len1 = array_len (arr1);
@@ -369,3 +364,4 @@ main ()
  */
 
 #endif /* TEST */
+#endif /* BRACE_EXPANSION */

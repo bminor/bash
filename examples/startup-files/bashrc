@@ -1,35 +1,35 @@
-if [ "$PS1" != "" ] ; then
-
-if [ -f /unix ] ; then
-	alias ls='/bin/ls -CF'
-	alias ll='/bin/ls -lCF'
-	alias dir='/bin/ls -bCalF'
-else
-	alias ls='/bin/ls -F'
-	alias ll='/bin/ls -lF'
-	alias dir='/bin/ls -balF'
+if [ -z "$PS1" ]; then
+	return
 fi
 
+# bogus
+if [ -f /unix ] ; then	
+	alias ls='/bin/ls -CF'
+else
+	alias ls='/bin/ls -F'
+fi
+alias ll='ls -l'
+alias dir='ls -ba'
+
 alias ss="ps -aux"
-alias mail=/usr/ucb/mail
-alias dot='ls .[a-zA-Z0-9]*'
-alias mroe=more
-alias pwd='echo $PWD'
-alias pdw='echo $PWD'
-alias news="xterm -g 80x45 -e rn -e &"
-alias back='cd $OLDPWD'
-alias manroff="nroff /usr/lib/tmac/tmac.an.4.3"
-alias laser="lpr -Palw2"
-alias lw="lpr -Palw2"
+alias dot='ls .[a-zA-Z0-9_]*'
+alias news="xterm -g 80x45 -e trn -e -S1 -N &"
+
 alias c="clear"
 alias m="more"
 alias j="jobs"
 
+# common misspellings
+alias mroe=more
+alias pdw=pwd
+
+hash -p /usr/bin/mail mail
+
 if [ -z "$HOST" ] ; then
-	export HOST=`hostname`
+	export HOST=${HOSTNAME}
 fi
 
-history_control=ignoredups
+HISTIGNORE="[   ]*:&:bg:fg"
 
 psgrep()
 {
@@ -57,10 +57,14 @@ term()
 	tset
 }
 
+xtitle () 
+{ 
+	echo -n -e "\033]0;$*\007"
+}
+
 cd()
 {
-	builtin cd $*
-	xtitle $HOST: $PWD
+	builtin cd "$@" && xtitle $HOST: $PWD
 }
 
 bold()
@@ -126,14 +130,3 @@ function chmog()
 		chgrp $3 $4
 	fi
 }
-
-#
-# Source kshenv for ksh-compatibility definitions
-#
-
-if [ -f ~/.kshenv ] ; then
-	. ~/.kshenv
-fi
-
-fi
-#end of .bashrc

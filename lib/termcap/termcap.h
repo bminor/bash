@@ -1,5 +1,5 @@
 /* Declarations for termcap library.
-   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1995 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ extern char *tgetstr (const char *name, char **area);
 
 extern char PC;
 extern short ospeed;
-extern void tputs (const char *string, int nlines, int (*outfun) ());
+extern void tputs (const char *string, int nlines, int (*outfun) (int));
 
 extern char *tparam (const char *ctlstring, char *buffer, int size, ...);
 

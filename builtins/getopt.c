@@ -17,6 +17,12 @@
    along with this program; if not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include "../memalloc.h"
 #include "../shell.h"
@@ -66,6 +72,9 @@ int sh_opterr = 1;
 
 int sh_optopt = '?';
 
+/* Set to 1 when we see an illegal option; public so getopts can reset it. */
+int sh_badopt = 0;
+
 /* Scan elements of ARGV (whose length is ARGC) for option characters
    given in OPTSTRING.
 
@@ -102,7 +111,6 @@ sh_getopt (argc, argv, optstring)
      char *const *argv;
      const char *optstring;
 {
-  int option_index;
   char c, *temp;
 
   sh_optarg = 0;
@@ -124,10 +132,18 @@ sh_getopt (argc, argv, optstring)
       nextchar = (char *)NULL;
     }
 
+  /* Do the increment of `sh_optind' we deferred because the last option
+     was illegal.  */
+  if (sh_badopt && (nextchar == 0 || *nextchar == '\0'))
+    {
+      sh_badopt = 0;
+      sh_optind++;
+      nextchar = (char *)NULL;
+    }
+
   if (nextchar == 0 || *nextchar == '\0')
     {
-      /* If we have done all the ARGV-elements, stop the scan
-	 and back over any non-options that we skipped and permuted.  */
+      /* If we have done all the ARGV-elements, stop the scan. */
       if (sh_optind == argc)
 	return EOF;
 
@@ -158,21 +174,23 @@ sh_getopt (argc, argv, optstring)
   c = *nextchar++; sh_charindex++;
   temp = strchr (optstring, c);
 
-  /* Increment `sh_optind' when we start to process its last character.  */
-  if (nextchar == 0 || *nextchar == '\0')
-    {
-      sh_optind++;
-      nextchar = (char *)NULL;
-    }
-
   sh_optopt = c;
 
-  if (temp == NULL || c == ':')
+  /* If the option is illegal, return an error, but defer updating sh_optind
+     until the next call so $OPTIND is correct. */
+  if (sh_badopt = (temp == NULL || c == ':'))
     {
       if (sh_opterr)
 	BADOPT (c);
 
       return '?';
+    }
+
+  /* Increment `sh_optind' when we start to process its last character.  */
+  if (nextchar == 0 || *nextchar == '\0')
+    {
+      sh_optind++;
+      nextchar = (char *)NULL;
     }
 
   if (temp[1] == ':')
@@ -191,6 +209,7 @@ sh_getopt (argc, argv, optstring)
 	    NEEDARG (c);
 
 	  sh_optopt = c;
+	  sh_optarg = "";	/* Needed by getopts. */
 	  c = (optstring[0] == ':') ? ':' : '?';
 	}
       else

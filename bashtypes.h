@@ -18,8 +18,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (__BASHTYPES_H)
-#  define __BASHTYPES_H
+#if !defined (_BASHTYPES_H_)
+#  define _BASHTYPES_H_
 
 #if defined (CRAY)
 #  define word __word
@@ -31,4 +31,4 @@
 #  undef word
 #endif
 
-#endif /* __BASHTYPES_H */
+#endif /* _BASHTYPES_H_ */

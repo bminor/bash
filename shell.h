@@ -19,6 +19,9 @@
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "config.h"
+
+#include "bashjmp.h"
+
 #include "command.h"
 #include "general.h"
 #include "error.h"
@@ -29,6 +32,8 @@
 #include "dispose_cmd.h"
 #include "make_cmd.h"
 #include "subst.h"
+#include "sig.h"
+#include "pathnames.h"
 #include "externs.h"
 
 extern int EOF_Reached;
@@ -39,32 +44,31 @@ extern int EOF_Reached;
 
 #define NO_VARIABLE -1
 
-/* A bunch of stuff for flow of control using setjmp () and longjmp (). */
-#include <setjmp.h>
-extern jmp_buf top_level, catch;
-
-#define NOT_JUMPED 0		/* Not returning from a longjmp. */
-#define FORCE_EOF 1		/* We want to stop parsing. */
-#define DISCARD 2		/* Discard current command. */
-#define EXITPROG 3		/* Unconditionally exit the program now. */
-
 /* Values that can be returned by execute_command (). */
 #define EXECUTION_FAILURE 1
 #define EXECUTION_SUCCESS 0
 
 /* Usage messages by builtins result in a return status of 2. */
-#define EX_USAGE 2
+#define EX_BADUSAGE	2
 
-/* Special exit status used when the shell is asked to execute a
-   binary file as a shell script. */
-#define EX_BINARY_FILE 126
-#define EX_NOEXEC 126
-#define EX_NOTFOUND 127
+/* Special exit statuses used by the shell, internally and externally. */
+#define EX_BINARY_FILE	126
+#define EX_NOEXEC	126
+#define EX_NOINPUT	126
+#define EX_NOTFOUND	127
+
+#define EX_SHERRBASE	256	/* all special error values are > this. */
+
+#define EX_BADSYNTAX	257	/* shell syntax error */
+#define EX_USAGE	258	/* syntax error in usage */
+#define EX_REDIRFAIL	259	/* redirection failed */
+#define EX_BADASSIGN	260	/* variable assignment error */
+#define EX_EXPFAIL	261	/* word expansion failed */
 
 /* The list of characters that are quoted in double-quotes with a
    backslash.  Other characters following a backslash cause nothing
    special to happen. */
-#define slashify_in_quotes "\\`$\""
+#define slashify_in_quotes "\\`$\"\n"
 #define slashify_in_here_document "\\`$"
 
 /* Constants which specify how to handle backslashes and quoting in
@@ -76,7 +80,22 @@ extern jmp_buf top_level, catch;
 #define Q_DOUBLE_QUOTES  0x1
 #define Q_HERE_DOCUMENT  0x2
 #define Q_KEEP_BACKSLASH 0x4
+#define Q_NOQUOTE	 0x8
+#define Q_QUOTED	 0x10
+#define Q_ADDEDQUOTES	 0x20
+#define Q_QUOTEDNULL	 0x40
 
+/* Flag values that control parameter pattern substitution. */
+#define MATCH_ANY	0x0
+#define MATCH_BEG	0x1
+#define MATCH_END	0x2
+
+#define MATCH_TYPEMASK	0x3
+
+#define MATCH_GLOBREP	0x10
+#define MATCH_QUOTED	0x20
+
+/* Some needed external declarations. */
 extern char **shell_environment;
 extern WORD_LIST *rest_of_args;
 

@@ -19,6 +19,11 @@
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "config.h"
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "command.h"
 #include "general.h"
 
@@ -28,8 +33,10 @@
 
 /* Flags describing various things about a builtin. */
 #define BUILTIN_ENABLED 0x1	/* This builtin is enabled. */
-#define STATIC_BUILTIN  0x2	/* This builtin is not dynamically loaded. */
-#define SPECIAL_BUILTIN 0x4	/* This is a Posix `special' builtin. */
+#define BUILTIN_DELETED 0x2	/* This has been deleted with enable -d. */
+#define STATIC_BUILTIN  0x4	/* This builtin is not dynamically loaded. */
+#define SPECIAL_BUILTIN 0x8	/* This is a Posix `special' builtin. */
+#define ASSIGNMENT_BUILTIN 0x10	/* This builtin takes assignment statements. */
 
 /* The thing that we build the array of builtins out of. */
 struct builtin {
@@ -38,8 +45,11 @@ struct builtin {
   int flags;			/* One of the #defines above. */
   char **long_doc;		/* NULL terminated array of strings. */
   char *short_doc;		/* Short version of documenation. */
+  char *handle;			/* for future use */
 };
 
 /* Found in builtins.c, created by builtins/mkbuiltins. */
 extern int num_shell_builtins;	/* Number of shell builtins. */
-extern struct builtin shell_builtins[];
+extern struct builtin static_shell_builtins[];
+extern struct builtin *shell_builtins;
+extern struct builtin *current_builtin;

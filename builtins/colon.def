@@ -28,10 +28,32 @@ $SHORT_DOC :
 No effect; the command does nothing.  A zero exit code is returned.
 $END
 
-/* Do nothing.  This command is a no-op. */
+$BUILTIN true
+$DOCNAME true_builtin
+$FUNCTION colon_builtin
+$SHORT_DOC true
+Return a successful result.
+$END
+
+$BUILTIN false
+$DOCNAME false_builtin
+$FUNCTION false_builtin
+$SHORT_DOC false
+Return an unsuccessful result.
+$END
+
+/* Return a successful result. */
 int
 colon_builtin (ignore)
      char *ignore;
 {
   return (0);
+}
+
+/* Return an unsuccessful result. */
+int
+false_builtin (ignore)
+     char *ignore;
+{
+  return (1);
 }

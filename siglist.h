@@ -21,20 +21,20 @@
 #if !defined (_SIGLIST_H_)
 #define _SIGLIST_H_
 
-#if defined (Solaris) || defined (USGr4_2) || defined (drs6000) || defined (amiga) || defined (Minix)
-#  if !defined (sys_siglist)
-#    define sys_siglist _sys_siglist
-#  endif /* !sys_siglist */
-#endif /* Solaris || USGr4_2 || drs6000 || amiga || Minix */
+#if !defined (SYS_SIGLIST_DECLARED) && !defined (HAVE_STRSIGNAL)
 
-#if !defined (Solaris) && !defined (Linux) && !defined (__BSD_4_4__) && \
-	!defined (Minix) && !defined (NetBSD) && !defined (FreeBSD) && \
-	!defined (BSD_OS)
+#if defined (HAVE_UNDER_SYS_SIGLIST) && !defined (HAVE_SYS_SIGLIST) && !defined (sys_siglist)
+#  define sys_siglist _sys_siglist
+#endif /* HAVE_UNDER_SYS_SIGLIST && !HAVE_SYS_SIGLIST && !sys_siglist */
+
+#if !defined (sys_siglist)
 extern char *sys_siglist[];
-#endif /* !Solaris && !Linux && !__BSD_4_4__ && !Minix && !NetBSD && !FreeBSD && !BSD_OS */
+#endif /* !sys_siglist */
 
-#if !defined (strsignal) && !defined (Solaris) && !defined (NetBSD)
+#endif /* !SYS_SIGLIST_DECLARED && !HAVE_STRSIGNAL */
+
+#if !defined (strsignal) && !defined (HAVE_STRSIGNAL)
 #  define strsignal(sig) (char *)sys_siglist[sig]
-#endif /* !strsignal && !Solaris && !NetBSD */
+#endif /* !strsignal && !HAVE_STRSIGNAL */
 
 #endif /* _SIGLIST_H */

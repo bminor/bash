@@ -18,6 +18,10 @@
    not, write to the Free Software Foundation, Inc., 675 Mass Ave,
    Cambridge, MA 02139, USA.  */
 
+#include "config.h"
+
+#if !defined (HAVE_GETCWD)
+
 #include "bashtypes.h"
 #include <errno.h>
 
@@ -25,22 +29,14 @@
 #  include <limits.h>
 #endif
 
-#if defined (HAVE_DIRENT_H)
-#  include <dirent.h>
-#else
-#  include <sys/dir.h>
-#  if !defined (dirent)
-#    define dirent direct
-#  endif /* !dirent */
-#endif /* !HAVE_DIRENT_H */
-
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
+#include "posixdir.h"
 #include "posixstat.h"
 #include "maxpath.h"
-#include "config.h"
+#include "memalloc.h"
 
 #if defined (HAVE_STDLIB_H)
 #  include <stdlib.h>
@@ -54,7 +50,6 @@
 #  include <strings.h>
 #endif /* !HAVE_STRING_H */
 
-/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
@@ -75,29 +70,7 @@ extern int errno;
 #  endif /* !MAXPATHLEN */
 #endif /* !PATH_MAX */
 
-#if defined (_POSIX_VERSION) || defined (USGr3) || defined (HAVE_DIRENT_H)
-#  if !defined (HAVE_DIRENT)
-#    define HAVE_DIRENT
-#  endif /* !HAVE_DIRENT */
-#endif /* _POSIX_VERSION || USGr3 || HAVE_DIRENT_H */
-
-#if defined (HAVE_DIRENT)
-#  define D_NAMLEN(d)	(strlen ((d)->d_name))
-#else
-#  define D_NAMLEN(d)	((d)->d_namlen)
-#endif /* ! (_POSIX_VERSION || USGr3) */
-
-#if defined (USG) || defined (USGr3)
-#  define d_fileno d_ino
-#endif
-
-#if !defined (alloca)
-extern char *alloca ();
-#endif /* alloca */
-
-/* Heuristic to tell whether or not the current machine has lstat(2).
-   Can probably be fooled easily. */
-#if !defined (S_ISLNK)
+#if !defined (HAVE_LSTAT)
 #  define lstat stat
 #endif
 
@@ -342,3 +315,4 @@ main (argc, argv)
     }
 }
 #endif /* TEST */
+#endif /* !HAVE_GETCWD */

@@ -16,11 +16,13 @@ recho "${HOME-'}'}"
 expect "<$HOME>"
 recho "${HOME-"}"}"
 
-expect $0: '${HOME:`echo }`}: bad substitution'
-recho "${HOME:`echo }`}"	# should be an error -- bad substitution
+expect $0: 'HOME: }: syntax error: operand expected (error token is "}")'
+recho "${HOME:`echo }`}"	# should be a math error -- bad substring substitution
 
-expect $0: '${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}: bad substitution'
+expect unset
+_ENV=oops
 x=${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}	# memory leak
+echo ${x:-unset}
 
 expect "<$HOME>"
 recho ${HOME}
@@ -38,8 +40,10 @@ expect "<$HOME>"
 recho "$(echo "$(echo "${HOME}")")"
 
 P=*@*
-expect '<*@>'
-recho "${P%"*"}"         # should be *@
+expect '<*@*>'
+recho "${P%"*"}"	# 
+expect '<*@*>'
+recho "${P%'*'}"	# 
 expect '<@*>'
 recho "${P#\*}"		# should be @*
 
@@ -73,11 +77,64 @@ echo -n $foo" " ; echo foo
 expect '<bar foo>'
 echo -n "$foo " ; echo foo
 
-expect '<bar foo>'
+expect '<barfoo>'
 echo -e "$foo\c " ; echo foo
 
-expect '<bar foo>'
+expect '<barfoo>'
 echo -e $foo"\c " ; echo foo
+
+# substring tests
+z=abcdefghijklmnop
+expect '<abcd>'
+recho ${z:0:4}
+
+expect '<efg> <nop>'
+recho ${z:4:3} ${z:${#z}-3:3}
+
+expect '<hijklmnop>'
+recho ${z:7:30}
+
+expect '<abcdefghijklmnop>'
+recho ${z:0:100}
+
+expect '<abcdefghijklmnop>'
+recho ${z:0:${#z}}
+
+set 'ab cd' 'ef' 'gh ij' 'kl mn' 'op'
+expect '<ab cd> <ef>'
+recho "${@:1:2}"
+
+expect '<gh ij> <kl mn>'
+recho "${@:3:2}"
+
+expect '<gh ij> <kl mn> <op>'
+recho "${@:3:4}"
+
+expect '<ab cd> <ef> <gh ij> <kl mn> <op>'
+recho "${@:1:$#}"
+
+# indirect variable references
+expect '<abcdefghijklmnop>'
+recho ${!9:-$z}
+
+ef=4
+expect '<4>'
+recho ${!2}
+
+expect '<op>'
+recho ${!#}
+
+set a b c d e
+a=
+expect '<abcdefghijklmnop>'
+recho ${a:-$z}
+expect '<abcdefghijklmnop>'
+recho ${!1:-$z}
+
+expect nothing
+recho ${a-$z}
+expect nothing
+recho ${!1-$z}
 
 set -u
 expect $0: ABX: unbound variable
@@ -87,8 +144,228 @@ set +u
 expect $0: '$6: cannot assign in this way'
 recho ${6="arg6"}
 
+v=abcde
+
+# sed-like variable substitution
+expect '<xxcde>'
+recho ${v/a[a-z]/xx}
+expect '<axxde>'
+recho ${v/a??/axx}
+expect '<abxyz>'
+recho ${v/c??/xyz}
+expect '<abbcde>'
+recho ${v/#a/ab}
+expect '<abcde>'
+recho ${v/#d/ab}
+expect '<abcabe>'
+recho ${v/d/ab}
+expect '<abcdlast>'
+recho ${v/%?/last}
+expect '<abcde>'
+recho ${v/%x/last}
+
+av=(abcd efgh ijkl mnop qrst uvwx)
+
+expect '<xxcd>'
+recho ${av/??/xx}
+expect '<abxx>'
+recho ${av/%??/xx}
+expect '<xxgh>'
+recho ${av[1]/??/xx}
+expect '<efgh>'
+recho ${av[1]/%ab/xx}
+expect '<xxfgh>'
+recho ${av[1]/#?/xx}
+expect '<zagh>'
+recho ${av[1]/??/za}
+expect '<zaza>'
+recho ${av[1]//??/za}
+expect '<zagh>'
+recho ${av[1]//#??/za}
+expect '<efza>'
+recho ${av[1]//%??/za}
+
+expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
+recho ${av[@]/*/yyy}
+expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
+recho ${av[@]/#*/yyy}
+expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
+recho ${av[@]/%*/yyy}
+expect '<yyy> <efgh> <ijkl> <mnop> <qrst> <uvwx>'
+recho ${av[@]/a*/yyy}
+expect '<abxx> <efxx> <ijxx> <mnxx> <qrxx> <uvxx>'
+recho ${av[@]/%??/xx}
+
+set abcd efgh ijkl mnop qrst uvwx
+
+expect '<xxcd>'
+recho ${1/??/xx}
+expect '<xxcd> <xxgh> <xxkl> <xxop> <xxst> <xxwx>'
+recho ${@/??/xx}
+expect '<xxcd> <xxgh> <xxkl> <xxop> <xxst> <xxwx>'
+recho ${@/%??/xx}
+expect '<zaza>'
+recho ${3//??/za}
+expect '<efza>'
+recho ${3//%??/za}
+expect '<zaza> <zaza> <zaza> <zaza> <zaza> <zaza>'
+recho ${@//??/za}
+expect '<zacd> <zagh> <zakl> <zaop> <zast> <zawx>'
+recho ${@//#??/za}
+expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
+recho ${@//*/yyy}
+expect '<yyy> <efgh> <ijkl> <mnop> <qrst> <uvwx>'
+recho ${@//a*/yyy}
+expect '<abcd> <efgh> <ijkl> <mnop> <qrst> <uvwyyy>'
+recho ${@//%x*/yyy}
+
 expect a newline
 echo $abmcde
+
+expect this is a test of proc subst
+cat <(echo this is a test of proc subst)
+echo this is test 2 > /tmp/x
+expect this is test 2
+cat <(cat /tmp/x)
+rm -f /tmp/x
+
+expect $0: '${#:-foo}: bad substitution'
+echo ${#:-foo}
+expect $0: '${#:}: bad substitution'
+echo ${#:}
+
+expect "<'>"
+recho "'"
+expect '<">'
+recho '"'
+expect '<"hello">'
+recho "\"hello\""
+
+shift $#
+unset foo
+z=abcdef
+z1='abc def'
+
+expect '<>'
+recho ${foo:-""}
+expect nothing
+recho ${foo:-"$@"}
+expect '<>'
+recho "${foo:-$@}"
+
+# unset var
+expect '<>'
+recho ${foo:-"$zbcd"}
+expect nothing
+recho ${foo:-$zbcd}
+
+# set var
+expect '<abcdef>'
+recho ${foo:-"$z"}
+expect '<abc def>'
+recho ${foo:-"$z1"}
+
+expect '<abcdef>'
+recho ${foo:-$z}
+expect '<abc> <def>'
+recho ${foo:-$z1}
+
+expect '<abcdef>'
+recho "${foo:-$z}"
+expect '<abc def>'
+recho "${foo:-$z1}"
+
+expect '<abcdef>'
+recho "${foo:-"$z"}"
+# this disagrees with sh and ksh, but I think it is right according
+# to posix.2.
+expect '<abc def>'
+recho "${foo:-"$z1"}"
+
+set ab cd ef gh
+expect '<ab> <cd> <ef> <gh>'
+recho ${foo:-"$@"}
+expect '<ab> <cd> <ef> <gh>'
+recho "${foo:-$@}"
+expect '<ab> <cd> <ef> <gh>'
+recho "${foo:-"$@"}"
+
+shift $#
+expect nothing
+recho $xxx"$@"
+expect nothing
+recho ${foo:-$xxx"$@"}
+expect '<>'
+recho "${foo:-$xxx$@}"
+expect '<>'
+recho "${foo:-$xxx"$@"}"
+
+expect nothing
+recho $xxx"$@"
+expect nothing
+recho "$xxx$@"
+expect nothing
+recho "$@"$xxx
+
+expect '<>'
+recho $xxx""
+expect '<>'
+recho $xxx''
+expect '<>'
+recho ''$xxx
+expect '<>'
+recho ""$xxx
+
+AB='abcdefghijklmnopqrstuvwxyz'
+
+recho ${AB:7:15}
+recho ${AB:15:7}
+
+recho ${AB:20}
+
+recho ${AB:0}
+recho ${AB:0:20}
+
+recho ${AB:10:7}
+recho ${AB:10:3+4}
+recho ${AB:20/2:3+4}
+
+set 1 2 3 4 5 6
+recho \""${*:2:2}"\"
+
+IFS=:
+recho \""${*:2:2}"\"
+
+IFS=$' \t\n'
+
+z=123456
+
+recho \""${z:2:2}"\"
+recho \""${z:2}"\"
+recho \""${z:2:4}"\"
+recho \""${z:2:6}"\"
+
+set $'\1' $'\2' $'\177'
+
+recho $*
+recho $@
+
+recho ${*}
+recho ${@}
+
+xx=one/two/two
+recho ${xx%/*}
+recho ${xx/\/two}
+
+yy=oneonetwo
+recho ${yy//one}
+recho ${yy/\/one}
+
+xx=oneonetwo
+
+recho ${xx/one}
+recho ${xx//one}
+recho ${xx/\/one}
 
 # this must be last!
 expect $0: 'ABXD: parameter unset'

@@ -19,8 +19,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (_COMMAND_H)
-#define _COMMAND_H
+#if !defined (_COMMAND_H_)
+#define _COMMAND_H_
 
 #include "stdc.h"
 
@@ -33,18 +33,45 @@ enum r_instruction {
   r_duplicating_input_word, r_duplicating_output_word
 };
 
+/* Redirection errors. */
+#define AMBIGUOUS_REDIRECT  -1
+#define NOCLOBBER_REDIRECT  -2
+#define RESTRICTED_REDIRECT -3	/* can only happen in restricted shells. */
+
+#define OUTPUT_REDIRECT(ri) \
+  (ri == r_output_direction || ri == r_input_output || ri == r_err_and_out)
+
+#define INPUT_REDIRECT(ri) \
+  (ri == r_input_direction || ri == r_inputa_direction || ri == r_input_output)
+
+#define WRITE_REDIRECT(ri) \
+  (ri == r_output_direction || \
+	ri == r_input_output || \
+	ri == r_err_and_out || \
+	ri == r_appending_to || \
+	ri == r_output_force)
+
 /* Command Types: */
 enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_connection, cm_function_def, cm_until, cm_group };
 
+/* Possible values for the `flags' field of a WORD_DESC. */
+#define W_HASDOLLAR	0x01	/* Dollar sign present. */
+#define W_QUOTED	0x02	/* Some form of quote character is present. */
+#define W_ASSIGNMENT	0x04	/* This word is a variable assignment. */
+#define W_GLOBEXP	0x08	/* This word is the result of a glob expansion. */
+#define W_NOSPLIT	0x10	/* Do not perform word splitting on this word. */
+
+/* Possible values for subshell_environment */
+#define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
+#define SUBSHELL_PAREN	0x02	/* subshell caused by ( ... ) */
+#define SUBSHELL_COMSUB	0x04	/* subshell caused by `command` or $(command) */
+#define SUBSHELL_FORK	0x08	/* subshell caused by executing a disk command */
+
 /* A structure which represents a word. */
 typedef struct word_desc {
   char *word;		/* Zero terminated string. */
-  int dollar_present;	/* Non-zero means dollar sign present. */
-  int quoted;		/* Non-zero means single, double, or back quote
-			   or backslash is present. */
-  int assignment;	/* Non-zero means that this word contains an
-			   assignment. */
+  int flags;		/* Flags associated with this word. */
 } WORD_DESC;
 
 /* A linked list of words. */
@@ -92,6 +119,8 @@ typedef struct element {
 #define CMD_NO_FUNCTIONS   0x10 /* Ignore functions during command lookup. */
 #define CMD_INHIBIT_EXPANSION 0x20 /* Do not expand the command words. */
 #define CMD_NO_FORK	   0x40	/* Don't fork; just call execve */
+#define CMD_TIME_PIPELINE  0x80 /* Time a pipeline */
+#define CMD_TIME_POSIX	   0x100 /* time -p; use POSIX.2 time output spec. */
 
 /* What a command looks like. */
 typedef struct command {
@@ -184,19 +213,16 @@ typedef struct simple_com {
   int line;			/* line number the command starts on */
 } SIMPLE_COM;
 
-/* The "function_def" command.  This isn't really a command, but it is
-   represented as such for now.  If the function def appears within 
-   `(' `)' the parser tries to set the SUBSHELL bit of the command.  That
-   means that FUNCTION_DEF has to be run through the executor.  Maybe this
-   command should be defined in a subshell.  Who knows or cares. */
+/* The "function definition" command. */
 typedef struct function_def {
   int ignore;			/* See description of CMD flags. */
   WORD_DESC *name;		/* The name of the function. */
   COMMAND *command;		/* The parsed execution tree. */
+  int line;			/* Line number the function def starts on. */
 } FUNCTION_DEF;
 
-/* A command that is `grouped' allows pipes to take effect over
-   the entire command structure. */
+/* A command that is `grouped' allows pipes and redirections to affect all
+   commands in the group. */
 typedef struct group_com {
   int ignore;			/* See description of CMD flags. */
   COMMAND *command;
@@ -212,4 +238,4 @@ extern REDIRECT *copy_redirect __P((REDIRECT *));
 extern REDIRECT *copy_redirects __P((REDIRECT *));
 extern COMMAND *copy_command __P((COMMAND *));
 
-#endif /* _COMMAND_H */
+#endif /* _COMMAND_H_ */

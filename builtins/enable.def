@@ -23,20 +23,54 @@ $PRODUCES enable.c
 
 $BUILTIN enable
 $FUNCTION enable_builtin
-$SHORT_DOC enable [-n] [name ...]
+$SHORT_DOC enable [-pnds] [-a] [-f filename] [name ...]
 Enable and disable builtin shell commands.  This allows
 you to use a disk command which has the same name as a shell
-builtin.  If -n is used, the NAMEs become disabled.  Otherwise
+builtin.  If -n is used, the NAMEs become disabled; otherwise
 NAMEs are enabled.  For example, to use the `test' found on your
-path instead of the shell builtin version, you type `enable -n test'.
+path instead of the shell builtin version, type `enable -n test'.
+On systems supporting dynamic loading, the -f option may be used
+to load new builtins from the shared object FILENAME.  The -d
+option will delete a builtin previously loaded with -f.  If no
+non-option names are given, or the -p option is supplied, a list
+of builtins is printed.  The -a option means to print every builtin
+with an indication of whether or not it is enabled.  The -s option
+restricts the output to the Posix.2 `special' builtins.  The -n
+option displays a list of all disabled builtins.
 $END
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include <stdio.h>
+#include "../bashansi.h"
 #include "../shell.h"
 #include "../builtins.h"
+#include "../flags.h"
 #include "common.h"
+#include "bashgetopt.h"
+
+#if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
+static int dyn_load_builtin ();
+#endif
+
+#if defined (HAVE_DLCLOSE)
+static int dyn_unload_builtin ();
+#endif
 
 #define ENABLED  1
 #define DISABLED 2
+#define SPECIAL  4
+
+#define AFLAG	0x01
+#define DFLAG	0x02
+#define FFLAG	0x04
+#define NFLAG	0x08
+#define PFLAG	0x10
+#define SFLAG	0x20
 
 static int enable_shell_command ();
 static void list_some_builtins ();
@@ -44,61 +78,117 @@ static void list_some_builtins ();
 /* Enable/disable shell commands present in LIST.  If list is not specified,
    then print out a list of shell commands showing which are enabled and
    which are disabled. */
+int
 enable_builtin (list)
      WORD_LIST *list;
 {
-  int result = 0, any_failed = 0;
-  int disable_p, all_p;
+  int result, flags;
+  int opt, filter;
+#if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
+  char *filename;
+#endif
 
-  disable_p = all_p = 0;
+  result = EXECUTION_SUCCESS;
+  flags = 0;
 
-  while (list && list->word->word && list->word->word[0] == '-')
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "adnpsf:")) != -1)
     {
-      char *arg = list->word->word;
-
-      list = list->next;
-
-      if (ISOPTION (arg, 'n'))
-	disable_p = 1;
-      else if (arg[1] == 'a' && (arg[2] == 0 || strcmp (arg + 2, "ll") == 0))
-	all_p = 1;
-      else if (ISOPTION (arg, '-'))
-        break;
-      else
+      switch (opt)
 	{
-	  bad_option (arg);
-	  return (EXECUTION_FAILURE);
+	case 'a':
+	  flags |= AFLAG;
+	  break;
+	case 'n':
+	  flags |= NFLAG;
+	  break;
+	case 'p':
+	  flags |= PFLAG;
+	  break;
+	case 's':
+	  flags |= SFLAG;
+	  break;
+	case 'f':
+#if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
+	  flags |= FFLAG;
+	  filename = list_optarg;
+	  break;
+#else
+	  builtin_error ("dynamic loading not available");
+	  return (EX_USAGE);
+#endif
+#if defined (HAVE_DLCLOSE)
+	case 'd':
+	  flags |= DFLAG;
+	  break;
+#else
+	  builtin_error ("dynamic loading not available");
+	  return (EX_USAGE);
+#endif /* HAVE_DLCLOSE */
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
 	}
     }
 
-  if (!list)
-    {
-      int filter;
+  list = loptend;
 
-      if (all_p)
-	filter = ENABLED | DISABLED;
-      else if (disable_p)
-	filter = DISABLED;
-      else
-	filter = ENABLED;
+#if defined (RESTRICTED_SHELL)
+  /* Restricted shells cannot load new builtins. */
+  if (restricted && (flags & (FFLAG|DFLAG)))
+    {
+      builtin_error ("restricted");
+      return (EXECUTION_FAILURE);
+    }
+#endif
+
+  if (list == 0 || (flags & PFLAG))
+    {
+      filter = (flags & AFLAG) ? (ENABLED | DISABLED)
+			       : (flags & NFLAG) ? DISABLED : ENABLED;
+
+      if (flags & SFLAG)
+	filter |= SPECIAL;
 
       list_some_builtins (filter);
     }
+#if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
+  else if (flags & FFLAG)
+    {
+      filter = (flags & NFLAG) ? DISABLED : ENABLED;
+      if (flags & SFLAG)
+        filter |= SPECIAL;
+
+      result = dyn_load_builtin (list, filter, filename);
+    }
+#endif
+#if defined (HAVE_DLCLOSE)
+  else if (flags & DFLAG)
+    {
+      while (list)
+	{
+	  opt = dyn_unload_builtin (list->word->word);
+	  if (opt == EXECUTION_FAILURE)
+	    result = EXECUTION_FAILURE;
+	  list = list->next;
+	}
+    }
+#endif
   else
     {
       while (list)
 	{
-	  result = enable_shell_command (list->word->word, disable_p);
+	  opt = enable_shell_command (list->word->word, flags & NFLAG);
 
-	  if (!result)
+	  if (opt == EXECUTION_FAILURE)
 	    {
 	      builtin_error ("%s: not a shell builtin", list->word->word);
-	      any_failed++;
+	      result = EXECUTION_FAILURE;
 	    }
 	  list = list->next;
 	}
     }
-  return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  return (result);
 }
 
 /* List some builtins.
@@ -111,19 +201,18 @@ list_some_builtins (filter)
 
   for (i = 0; i < num_shell_builtins; i++)
     {
-      if (!shell_builtins[i].function)
+      if (shell_builtins[i].function == 0 || (shell_builtins[i].flags & BUILTIN_DELETED))
 	continue;
 
-      if ((filter & ENABLED) &&
-	  (shell_builtins[i].flags & BUILTIN_ENABLED))
-	{
-	  printf ("enable %s\n", shell_builtins[i].name);
-	}
+      if ((filter & SPECIAL) &&
+	  (shell_builtins[i].flags & SPECIAL_BUILTIN) == 0)
+	continue;
+
+      if ((filter & ENABLED) && (shell_builtins[i].flags & BUILTIN_ENABLED))
+	printf ("enable %s\n", shell_builtins[i].name);
       else if ((filter & DISABLED) &&
 	       ((shell_builtins[i].flags & BUILTIN_ENABLED) == 0))
-	{
-	  printf ("enable -n %s\n", shell_builtins[i].name);
-	}
+	printf ("enable -n %s\n", shell_builtins[i].name);
     }
 }
 
@@ -134,23 +223,202 @@ enable_shell_command (name, disable_p)
      char *name;
      int disable_p;
 {
-  register int i;
-  int found = 0;
+  struct builtin *b;
 
-  for (i = 0; i < num_shell_builtins; i++)
-    {
-      if (!shell_builtins[i].function)
-	continue;
+  b = builtin_address_internal (name, 1);
+  if (b == 0)
+    return (EXECUTION_FAILURE);
 
-      if (STREQ (name, shell_builtins[i].name))
-	{
-	  found++;
+  if (disable_p)
+    b->flags &= ~BUILTIN_ENABLED;
+  else
+    b->flags |= BUILTIN_ENABLED;
 
-	  if (disable_p)
-	    shell_builtins[i].flags &= ~BUILTIN_ENABLED;
-	  else
-	    shell_builtins[i].flags |= BUILTIN_ENABLED;
-	}
-    }
-  return (found);
+  return (EXECUTION_SUCCESS);
 }
+
+#if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
+#include <dlfcn.h>
+
+static int
+dyn_load_builtin (list, flags, filename)
+     WORD_LIST *list;
+     int flags;
+     char *filename;
+{
+  WORD_LIST *l;
+  void *handle;
+  
+  int total, size, new, replaced;
+  char *struct_name, *name;
+  struct builtin **new_builtins, *b, *new_shell_builtins, *old_builtin;
+
+  if (list == 0)
+    return (EXECUTION_FAILURE);
+
+#ifndef RTLD_LAZY
+#define RTLD_LAZY 1
+#endif
+
+#if defined (_AIX)
+  handle = dlopen (filename, RTLD_NOW|RTLD_GLOBAL);
+#else
+  handle = dlopen (filename, RTLD_LAZY);
+#endif /* !_AIX */
+
+  if (handle == 0)
+    {
+      builtin_error ("cannot open shared object %s: %s", filename, dlerror ());
+      return (EXECUTION_FAILURE);
+    }
+
+  for (new = 0, l = list; l; l = l->next, new++)
+    ;
+  new_builtins = (struct builtin **)xmalloc (new * sizeof (struct builtin *));
+
+  /* For each new builtin in the shared object, find it and its describing
+     structure.  If this is overwriting an existing builtin, do so, otherwise
+     save the loaded struct for creating the new list of builtins. */
+  for (replaced = new = 0; list; list = list->next)
+    {
+      name = list->word->word;
+
+      size = strlen (name);
+      struct_name = xmalloc (size + 8);
+      strcpy (struct_name, name);
+      strcpy (struct_name + size, "_struct");
+
+      b = (struct builtin *)dlsym (handle, struct_name);
+      if (b == 0)
+	{
+	  builtin_error ("cannot find %s in shared object %s: %s", struct_name,
+			  filename, dlerror ());
+	  free (struct_name);
+	  continue;
+	}
+
+      free (struct_name);
+
+      b->flags &= ~STATIC_BUILTIN;
+      if (flags & SPECIAL)
+	b->flags |= SPECIAL_BUILTIN;
+      b->handle = handle;
+
+      if (old_builtin = builtin_address_internal (name, 1))
+        {
+          replaced++;
+	  FASTCOPY ((char *)b, (char *)old_builtin, sizeof (struct builtin));
+        }
+      else
+	  new_builtins[new++] = b;
+    }
+
+  if (replaced == 0 && new == 0)
+    {
+      free (new_builtins);
+      dlclose (handle);
+      return (EXECUTION_FAILURE);
+    }
+
+  if (new)
+    {
+      total = num_shell_builtins + new;
+      size = (total + 1) * sizeof (struct builtin);
+
+      new_shell_builtins = (struct builtin *)xmalloc (size);
+      FASTCOPY ((char *)shell_builtins, (char *)new_shell_builtins,
+		num_shell_builtins * sizeof (struct builtin));
+      for (replaced = 0; replaced < new; replaced++)
+	FASTCOPY ((char *)new_builtins[replaced],
+		  (char *)&new_shell_builtins[num_shell_builtins + replaced],
+		  sizeof (struct builtin));
+
+      new_shell_builtins[total].name = (char *)0;
+      new_shell_builtins[total].function = (Function *)0;
+      new_shell_builtins[total].flags = 0;
+
+      if (shell_builtins != static_shell_builtins)
+	free (shell_builtins);
+
+      shell_builtins = new_shell_builtins;
+      num_shell_builtins = total;
+      initialize_shell_builtins ();
+    }
+
+  free (new_builtins);
+  return (EXECUTION_SUCCESS);
+}
+#endif
+
+#if defined (HAVE_DLCLOSE)
+static void
+delete_builtin (b)
+     struct builtin *b;
+{
+  int ind, size;
+  struct builtin *new_shell_builtins;
+
+  /* XXX - funky pointer arithmetic - XXX */
+  ind = ((int)b - (int)shell_builtins) / sizeof (struct builtin);
+  size = num_shell_builtins * sizeof (struct builtin);
+  new_shell_builtins = (struct builtin *)xmalloc (size);
+
+  /* Copy shell_builtins[0]...shell_builtins[ind - 1] to new_shell_builtins */
+  if (ind)
+    FASTCOPY ((char *)shell_builtins, (char *)new_shell_builtins,
+	      ind * sizeof (struct builtin));
+  /* Copy shell_builtins[ind+1]...shell_builtins[num_shell_builtins to
+     new_shell_builtins, starting at ind. */
+  FASTCOPY ((char *)(&shell_builtins[ind+1]),
+  	    (char *)(&new_shell_builtins[ind]),
+  	    (num_shell_builtins - ind) * sizeof (struct builtin));
+
+  if (shell_builtins != static_shell_builtins)
+    free (shell_builtins);
+
+  /* The result is still sorted. */
+  num_shell_builtins--;
+  shell_builtins = new_shell_builtins;
+}
+
+static int
+dyn_unload_builtin (name)
+     char *name;
+{
+  struct builtin *b;
+  void *handle;
+  int ref, i;
+
+  b = builtin_address_internal (name, 1);
+  if (b == 0)
+    {
+      builtin_error ("%s: not a shell builtin", name);
+      return (EXECUTION_FAILURE);
+    }
+  if (b->flags & STATIC_BUILTIN)
+    {
+      builtin_error ("%s: not dynamically loaded", name);
+      return (EXECUTION_FAILURE);
+    }
+
+  handle = (void *)b->handle;
+  for (ref = i = 0; i < num_shell_builtins; i++)
+    {
+      if (shell_builtins[i].handle == b->handle)
+	ref++;
+    }
+
+  /* Don't remove the shared object unless the reference count of builtins
+     using it drops to zero. */
+  if (ref == 1 && dlclose (handle) != 0)
+    {
+      builtin_error ("cannot delete %s: %s", name, dlerror ());
+      return (EXECUTION_FAILURE);
+    }
+
+  /* Now remove this entry from the builtin table and reinitialize. */
+  delete_builtin (b);
+
+  return (EXECUTION_SUCCESS);
+}
+#endif

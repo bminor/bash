@@ -65,13 +65,13 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, (Function *)0x0 },		/* Control-\ */
   { ISFUNC, (Function *)0x0 },		/* Control-] */
   { ISFUNC, (Function *)0x0 },		/* Control-^ */
-  { ISFUNC, rl_undo_command },		/* Control-_ */
+  { ISFUNC, rl_vi_undo },		/* Control-_ */
 
   /* The start of printing characters. */
   { ISFUNC, rl_forward },		/* SPACE */
   { ISFUNC, (Function *)0x0 },		/* ! */
   { ISFUNC, (Function *)0x0 },		/* " */
-  { ISFUNC, rl_vi_comment },		/* # */
+  { ISFUNC, rl_insert_comment },	/* # */
   { ISFUNC, rl_end_of_line },		/* $ */
   { ISFUNC, rl_vi_match },		/* % */
   { ISFUNC, rl_vi_tilde_expand },	/* & */
@@ -140,7 +140,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, (Function *)0x0 },		/* ] */
   { ISFUNC, rl_vi_first_print },	/* ^ */
   { ISFUNC, rl_vi_yank_arg },		/* _ */
-  { ISFUNC, (Function *)0x0 },		/* ` */
+  { ISFUNC, rl_vi_goto_mark },		/* ` */
 
   /* Lowercase alphabet. */
   { ISFUNC, rl_vi_append_mode },	/* a */
@@ -155,7 +155,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, rl_get_next_history },	/* j */
   { ISFUNC, rl_get_previous_history },	/* k */
   { ISFUNC, rl_forward },		/* l */
-  { ISFUNC, (Function *)0x0 },		/* m */
+  { ISFUNC, rl_vi_set_mark },		/* m */
   { ISFUNC, rl_vi_search_again },	/* n */
   { ISFUNC, (Function *)0x0 },		/* o */
   { ISFUNC, rl_vi_put },		/* p */
@@ -163,7 +163,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, rl_vi_change_char },	/* r */
   { ISFUNC, rl_vi_subst },		/* s */
   { ISFUNC, rl_vi_char_search },	/* t */
-  { ISFUNC, rl_undo_command },		/* u */
+  { ISFUNC, rl_vi_undo },		/* u */
   { ISFUNC, (Function *)0x0 },		/* v */
   { ISFUNC, rl_vi_next_word },		/* w */
   { ISFUNC, rl_vi_delete },		/* x */
@@ -345,7 +345,7 @@ KEYMAP_ENTRY_ARRAY vi_insertion_keymap = {
   { ISFUNC, rl_insert },		/* Control-\ */
   { ISFUNC, rl_insert },		/* Control-] */
   { ISFUNC, rl_insert },		/* Control-^ */
-  { ISFUNC, rl_undo_command },		/* Control-_ */
+  { ISFUNC, rl_vi_undo },		/* Control-_ */
 
   /* The start of printing characters. */
   { ISFUNC, rl_insert },		/* SPACE */
@@ -630,7 +630,7 @@ KEYMAP_ENTRY_ARRAY vi_escape_keymap = {
   { ISFUNC, (Function *)0x0 },		/* Control-\ */
   { ISFUNC, (Function *)0x0 },		/* Control-] */
   { ISFUNC, (Function *)0x0 },		/* Control-^ */
-  { ISFUNC, rl_undo_command },		/* Control-_ */
+  { ISFUNC, rl_vi_undo },		/* Control-_ */
 
   /* The start of printing characters. */
   { ISFUNC, (Function *)0x0 },		/* SPACE */

@@ -21,22 +21,22 @@
 #if  !defined (__COMMON_H)
 #  define __COMMON_H
 
+#include "../stdc.h"
+
 #define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
 
-extern void builtin_error ();
+extern void builtin_error __P((const char *, ...));
+extern void builtin_usage ();
 extern void bad_option ();
 
+extern char **make_builtin_argv ();
+
 extern int get_numeric_arg ();
-
 extern void remember_args ();
-
 extern void no_args ();
+extern int no_options ();
 
 extern int read_octal ();
-
-extern char *find_hashed_filename ();
-extern void remove_hashed_filename ();
-extern void remember_filename ();
 
 extern void push_context (), pop_context ();
 extern void push_dollar_vars (), pop_dollar_vars ();
@@ -53,17 +53,55 @@ extern void set_working_directory ();
 extern int get_job_spec ();
 #endif
 
-extern int parse_and_execute ();
-extern void parse_and_execute_cleanup ();
-
-extern void initialize_shell_builtins ();
+extern int display_signal_list ();
 
 /* It's OK to declare a function as returning a Function * without
    providing a definition of what a `Function' is. */
+extern struct builtin *builtin_address_internal ();
 extern Function *find_shell_builtin ();
 extern Function *builtin_address ();
+extern Function *find_special_builtin ();
+
+extern void initialize_shell_builtins ();
 
 extern char *single_quote ();
 extern char *double_quote ();
+extern char *backslash_quote ();
+extern int contains_shell_metas ();
+
+/* Functions from hash.def */
+extern void initialize_filename_hashing ();
+extern void flush_hashed_filenames ();
+extern char *find_hashed_filename ();
+extern void remove_hashed_filename ();
+extern void remember_filename ();
+
+/* Functions from set.def */
+extern void initialize_shell_options ();
+extern void list_minus_o_opts ();
+extern int set_minus_o_option ();
+extern int minus_o_option_value ();
+
+/* Functions from type.def */
+extern int describe_command ();
+
+/* Functions from setattr.def */
+extern int set_or_show_attributes ();
+extern int show_var_attributes ();
+extern int show_name_attributes ();
+extern void set_var_attribute ();
+
+/* Functions from pushd.def */
+extern char *get_dirstack_element ();
+extern void set_dirstack_element ();
+extern WORD_LIST *get_directory_stack ();
+
+/* Functions from evalstring.c */
+extern int parse_and_execute ();
+extern void parse_and_execute_cleanup ();
+
+/* Functions from evalfile.c */
+extern int maybe_execute_file __P((char *, int));
+extern int source_file __P((char *));
 
 #endif /* !__COMMON_H */

@@ -19,14 +19,15 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (__STDC_H__)
-#define __STDC_H__
+#if !defined (_STDC_H_)
+#define _STDC_H_
 
 /* Adapted from BSD /usr/include/sys/cdefs.h. */
 
 /* A function can be defined using prototypes and compile on both ANSI C
    and traditional C compilers with something like this:
 	extern char *func __P((char *, char *, int)); */
+
 #if defined (__STDC__)
 
 #  if !defined (__P)
@@ -75,4 +76,4 @@
 
 #endif /* !__STDC__ */
 
-#endif /* !__STDC_H__ */
+#endif /* !_STDC_H_ */

@@ -19,6 +19,10 @@
    along with Readline; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#if defined (HAVE_CONFIG_H)
+#  include <config.h>
+#endif
+
 #if defined (HAVE_STRING_H)
 #  include <string.h>
 #else /* !HAVE_STRING_H */
@@ -31,13 +35,14 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-#include "tilde.h"
 #include <sys/types.h>
 #include <pwd.h>
 
-#if defined (USG) && !defined (HAVE_GETPW_DECLS)
+#include "tilde.h"
+
+#if !defined (HAVE_GETPW_DECLS)
 extern struct passwd *getpwuid (), *getpwnam ();
-#endif /* USG && !defined (HAVE_GETPW_DECLS) */
+#endif /* !HAVE_GETPW_DECLS */
 
 #if !defined (savestring)
 extern char *xmalloc ();
@@ -171,7 +176,7 @@ tilde_expand (string)
 
       /* Copy the skipped text into the result. */
       if ((result_index + start + 1) > result_size)
-	result = (char *)xrealloc (result, 1 + (result_size += (start + 20)));
+	result = xrealloc (result, 1 + (result_size += (start + 20)));
 
       strncpy (result + result_index, string, start);
       result_index += start;
@@ -188,7 +193,7 @@ tilde_expand (string)
 	break;
 
       /* Expand the entire tilde word, and copy it into RESULT. */
-      tilde_word = (char *)xmalloc (1 + end);
+      tilde_word = xmalloc (1 + end);
       strncpy (tilde_word, string, end);
       tilde_word[end] = '\0';
       string += end;
@@ -198,7 +203,7 @@ tilde_expand (string)
 
       len = strlen (expansion);
       if ((result_index + len + 1) > result_size)
-	result = (char *)xrealloc (result, 1 + (result_size += (len + 20)));
+	result = xrealloc (result, 1 + (result_size += (len + 20)));
 
       strcpy (result + result_index, expansion);
       result_index += len;
@@ -217,85 +222,90 @@ tilde_expand_word (filename)
      char *filename;
 {
   char *dirname;
+  char *temp_name;
 
-  dirname = filename ? savestring (filename) : (char *)NULL;
+  if (filename == (char *)0)
+    return ((char *)NULL);
 
-  if (dirname && *dirname == '~')
+  dirname = savestring (filename);
+
+  if (*dirname != '~')
+    return (dirname);
+
+  if (!dirname[1] || dirname[1] == '/')
     {
-      char *temp_name;
-      if (!dirname[1] || dirname[1] == '/')
+      /* Prepend $HOME to the rest of the string. */
+      char *temp_home = (char *)getenv ("HOME");
+      int home_len;
+
+      /* If there is no HOME variable, look up the directory in
+	 the password database. */
+      if (!temp_home)
 	{
-	  /* Prepend $HOME to the rest of the string. */
-	  char *temp_home = (char *)getenv ("HOME");
+	  struct passwd *entry;
 
-	  /* If there is no HOME variable, look up the directory in
-	     the password database. */
-	  if (!temp_home)
+	  entry = getpwuid (getuid ());
+	  if (entry)
+	    temp_home = entry->pw_dir;
+	}
+
+      home_len = temp_home ? strlen (temp_home) : 0;
+      temp_name = xmalloc (1 + strlen (dirname + 1) + home_len);
+			     
+      if (temp_home)
+	strcpy (temp_name, temp_home);
+      strcpy (temp_name + home_len, dirname + 1);
+      free (dirname);
+      dirname = temp_name;
+    }
+  else
+    {
+      char *username;
+      struct passwd *user_entry;
+      int i, len;
+
+      username = xmalloc (strlen (dirname));
+      for (i = 1; dirname[i] && dirname[i] != '/'; i++)
+	username[i - 1] = dirname[i];
+      username[i - 1] = '\0';
+
+      if ((user_entry = getpwnam (username)) == (struct passwd *)0)
+	{
+	  /* If the calling program has a special syntax for
+	     expanding tildes, and we couldn't find a standard
+	     expansion, then let them try. */
+	  if (tilde_expansion_failure_hook)
 	    {
-	      struct passwd *entry;
+	      char *expansion;
 
-	      entry = getpwuid (getuid ());
-	      if (entry)
-		temp_home = entry->pw_dir;
+	      expansion = (*tilde_expansion_failure_hook) (username);
+
+	      if (expansion)
+		{
+		  len = strlen (expansion);
+		  temp_name = xmalloc (1 + len + strlen (dirname + i));
+		  strcpy (temp_name, expansion);
+		  strcpy (temp_name + len, dirname + i);
+		  free (expansion);
+		  free (dirname);
+		  dirname = temp_name;
+		}
 	    }
-
-	  temp_name = xmalloc (1 + strlen (&dirname[1])
-				 + (temp_home ? strlen (temp_home) : 0));
-	  temp_name[0] = '\0';
-	  if (temp_home)
-	    strcpy (temp_name, temp_home);
-	  strcat (temp_name, dirname + 1);
-	  free (dirname);
-	  dirname = temp_name;
+	  /* We shouldn't report errors. */
 	}
       else
 	{
-	  char *username;
-	  struct passwd *user_entry;
-	  int i;
-
-	  username = xmalloc (strlen (dirname));
-	  for (i = 1; dirname[i] && dirname[i] != '/'; i++)
-	    username[i - 1] = dirname[i];
-	  username[i - 1] = '\0';
-
-	  if ((user_entry = getpwnam (username)) == 0)
-	    {
-	      /* If the calling program has a special syntax for
-		 expanding tildes, and we couldn't find a standard
-		 expansion, then let them try. */
-	      if (tilde_expansion_failure_hook)
-		{
-		  char *expansion;
-
-		  expansion = (*tilde_expansion_failure_hook) (username);
-
-		  if (expansion)
-		    {
-		      temp_name = xmalloc (1 + strlen (expansion)
-						  + strlen (&dirname[i]));
-		      strcpy (temp_name, expansion);
-		      strcat (temp_name, &dirname[i]);
-		      free (expansion);
-		      free (dirname);
-		      dirname = temp_name;
-		    }
-		}
-	      /* We shouldn't report errors. */
-	    }
-	  else
-	    {
-	      temp_name = xmalloc (1 + strlen (user_entry->pw_dir)
-				     + strlen (&dirname[i]));
-	      strcpy (temp_name, user_entry->pw_dir);
-	      strcat (temp_name, &dirname[i]);
-	      free (dirname);
-	      dirname = temp_name;
-	    }
-	  endpwent ();
-	  free (username);
+	  len = strlen (user_entry->pw_dir);
+	  temp_name = xmalloc (1 + len + strlen (dirname + i));
+	  strcpy (temp_name, user_entry->pw_dir);
+	  strcpy (temp_name + len, dirname + i);
+	  free (dirname);
+	  dirname = temp_name;
 	}
+      endpwent ();
+      free (username);
     }
+
   return (dirname);
 }
 
@@ -368,7 +378,7 @@ xrealloc (pointer, bytes)
 static void
 memory_error_and_abort ()
 {
-  fprintf (stderr, "readline: Out of virtual memory!\n");
+  fprintf (stderr, "readline: out of virtual memory\n");
   abort ();
 }
 

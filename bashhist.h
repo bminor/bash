@@ -18,8 +18,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (__BASHHIST_H__)
-#define __BASHHIST_H__
+#if !defined (_BASHHIST_H_)
+#define _BASHHIST_H_
 
 extern int remember_on_history;
 extern int history_lines_this_session;
@@ -32,11 +32,20 @@ extern int command_oriented_history;
 extern int history_expansion_inhibited;
 #  endif /* BANG_HISTORY */
 
+extern void bash_initialize_history ();
+extern void bash_history_reinit ();
+extern void bash_history_disable ();
+extern void bash_history_enable ();
 extern void load_history ();
 extern void save_history ();
+extern int maybe_append_history ();
 extern int maybe_save_shell_history ();
 extern char *pre_process_line ();
 extern int history_number ();
 extern void maybe_add_history ();
 
-#endif /* __BASHHIST_H__ */
+extern void setup_history_ignore ();
+
+extern char *last_history_line ();
+
+#endif /* _BASHHIST_H_ */

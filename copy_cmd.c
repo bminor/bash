@@ -20,7 +20,13 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+
 #include <stdio.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -34,27 +40,28 @@ WORD_DESC *
 copy_word (word)
      WORD_DESC *word;
 {
-  WORD_DESC *new_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
+  WORD_DESC *new_word;
+
+  new_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
   FASTCOPY ((char *)word, (char *)new_word, sizeof (WORD_DESC));
   new_word->word = savestring (word->word);
   return (new_word);
 }
 
-/* Copy the chain of words in LIST.  Return a pointer to 
+/* Copy the chain of words in LIST.  Return a pointer to
    the new chain. */
 WORD_LIST *
 copy_word_list (list)
      WORD_LIST *list;
 {
-  WORD_LIST *new_list = NULL;
+  WORD_LIST *new_list, *temp;
 
-  while (list)
+  for (new_list = (WORD_LIST *)NULL; list; list = list->next)
     {
-      WORD_LIST *temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
+      temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
       temp->next = new_list;
       new_list = temp;
       new_list->word = copy_word (list->word);
-      list = list->next;
     }
   return (REVERSE_LIST (new_list, WORD_LIST *));
 }
@@ -63,7 +70,9 @@ static PATTERN_LIST *
 copy_case_clause (clause)
      PATTERN_LIST *clause;
 {
-  PATTERN_LIST *new_clause = (PATTERN_LIST *)xmalloc (sizeof (PATTERN_LIST));
+  PATTERN_LIST *new_clause;
+
+  new_clause = (PATTERN_LIST *)xmalloc (sizeof (PATTERN_LIST));
   new_clause->patterns = copy_word_list (clause->patterns);
   new_clause->action = copy_command (clause->action);
   return (new_clause);
@@ -73,14 +82,13 @@ static PATTERN_LIST *
 copy_case_clauses (clauses)
      PATTERN_LIST *clauses;
 {
-  PATTERN_LIST *new_list = (PATTERN_LIST *)NULL;
+  PATTERN_LIST *new_list, *new_clause;
 
-  while (clauses)
+  for (new_list = (PATTERN_LIST *)NULL; clauses; clauses = clauses->next)
     {
-      PATTERN_LIST *new_clause = copy_case_clause (clauses);
+      new_clause = copy_case_clause (clauses);
       new_clause->next = new_list;
       new_list = new_clause;
-      clauses = clauses->next;
     }
   return (REVERSE_LIST (new_list, PATTERN_LIST *));
 }
@@ -90,14 +98,16 @@ REDIRECT *
 copy_redirect (redirect)
      REDIRECT *redirect;
 {
-  REDIRECT *new_redirect = (REDIRECT *)xmalloc (sizeof (REDIRECT));
+  REDIRECT *new_redirect;
+
+  new_redirect = (REDIRECT *)xmalloc (sizeof (REDIRECT));
   FASTCOPY ((char *)redirect, (char *)new_redirect, (sizeof (REDIRECT)));
   switch (redirect->instruction)
     {
     case r_reading_until:
     case r_deblank_reading_until:
       new_redirect->here_doc_eof = savestring (redirect->here_doc_eof);
-      /* There is NO BREAK HERE ON PURPOSE!!!! */
+      /*FALLTHROUGH*/
     case r_appending_to:
     case r_output_direction:
     case r_input_direction:
@@ -107,34 +117,34 @@ copy_redirect (redirect)
     case r_output_force:
     case r_duplicating_input_word:
     case r_duplicating_output_word:
-      new_redirect->redirectee.filename =
-	copy_word (redirect->redirectee.filename);
+      new_redirect->redirectee.filename = copy_word (redirect->redirectee.filename);
       break;
     }
   return (new_redirect);
 }
-  
+
 REDIRECT *
 copy_redirects (list)
      REDIRECT *list;
 {
-  REDIRECT *new_list = NULL;
+  REDIRECT *new_list, *temp;
 
-  while (list)
+  for (new_list = (REDIRECT *)NULL; list; list = list->next)
     {
-      REDIRECT *temp = copy_redirect (list);
+      temp = copy_redirect (list);
       temp->next = new_list;
       new_list = temp;
-      list = list->next;
     }
   return (REVERSE_LIST (new_list, REDIRECT *));
 }
-  
+
 static FOR_COM *
 copy_for_command (com)
      FOR_COM *com;
 {
-  FOR_COM *new_for = (FOR_COM *)xmalloc (sizeof (FOR_COM));
+  FOR_COM *new_for;
+
+  new_for = (FOR_COM *)xmalloc (sizeof (FOR_COM));
   new_for->flags = com->flags;
   new_for->name = copy_word (com->name);
   new_for->map_list = copy_word_list (com->map_list);
@@ -142,26 +152,13 @@ copy_for_command (com)
   return (new_for);
 }
 
-#if defined (SELECT_COMMAND)
-static SELECT_COM *
-copy_select_command (com)
-     SELECT_COM *com;
-{
-  SELECT_COM *new_select = (SELECT_COM *)xmalloc (sizeof (SELECT_COM));
-  new_select->flags = com->flags;
-  new_select->name = copy_word (com->name);
-  new_select->map_list = copy_word_list (com->map_list);
-  new_select->action = copy_command (com->action);
-  return (new_select);
-}
-#endif /* SELECT_COMMAND */
-
 static GROUP_COM *
 copy_group_command (com)
      GROUP_COM *com;
 {
-  GROUP_COM *new_group = (GROUP_COM *)xmalloc (sizeof (GROUP_COM));
+  GROUP_COM *new_group;
 
+  new_group = (GROUP_COM *)xmalloc (sizeof (GROUP_COM));
   new_group->command = copy_command (com->command);
   return (new_group);
 }
@@ -170,8 +167,9 @@ static CASE_COM *
 copy_case_command (com)
      CASE_COM *com;
 {
-  CASE_COM *new_case = (CASE_COM *)xmalloc (sizeof (CASE_COM));
+  CASE_COM *new_case;
 
+  new_case = (CASE_COM *)xmalloc (sizeof (CASE_COM));
   new_case->flags = com->flags;
   new_case->word = copy_word (com->word);
   new_case->clauses = copy_case_clauses (com->clauses);
@@ -182,8 +180,9 @@ static WHILE_COM *
 copy_while_command (com)
      WHILE_COM *com;
 {
-  WHILE_COM *new_while = (WHILE_COM *)xmalloc (sizeof (WHILE_COM));
+  WHILE_COM *new_while;
 
+  new_while = (WHILE_COM *)xmalloc (sizeof (WHILE_COM));
   new_while->flags = com->flags;
   new_while->test = copy_command (com->test);
   new_while->action = copy_command (com->action);
@@ -194,8 +193,9 @@ static IF_COM *
 copy_if_command (com)
      IF_COM *com;
 {
-  IF_COM *new_if = (IF_COM *)xmalloc (sizeof (IF_COM));
+  IF_COM *new_if;
 
+  new_if = (IF_COM *)xmalloc (sizeof (IF_COM));
   new_if->flags = com->flags;
   new_if->test = copy_command (com->test);
   new_if->true_case = copy_command (com->true_case);
@@ -220,8 +220,9 @@ static FUNCTION_DEF *
 copy_function_def (com)
      FUNCTION_DEF *com;
 {
-  FUNCTION_DEF *new_def = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));
+  FUNCTION_DEF *new_def;
 
+  new_def = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));
   new_def->name = copy_word (com->name);
   new_def->command = copy_command (com->command);
   return (new_def);
@@ -234,72 +235,68 @@ COMMAND *
 copy_command (command)
      COMMAND *command;
 {
-  COMMAND *new_command = (COMMAND *)NULL;
+  COMMAND *new_command;
 
-  if (command)
+  if (command == NULL)
+    return (command);
+
+  new_command = (COMMAND *)xmalloc (sizeof (COMMAND));
+  FASTCOPY ((char *)command, (char *)new_command, sizeof (COMMAND));
+  new_command->flags = command->flags;
+  new_command->line = command->line;
+
+  if (command->redirects)
+    new_command->redirects = copy_redirects (command->redirects);
+
+  switch (command->type)
     {
-      new_command = (COMMAND *)xmalloc (sizeof (COMMAND));
-      FASTCOPY ((char *)command, (char *)new_command, sizeof (COMMAND));
-      new_command->flags = command->flags;
-      new_command->line = command->line;
-
-      if (command->redirects)
-	new_command->redirects = copy_redirects (command->redirects);
-
-      switch (command->type)
-	{
-	case cm_for:
-	  new_command->value.For = copy_for_command (command->value.For);
-	  break;
+      case cm_for:
+	new_command->value.For = copy_for_command (command->value.For);
+	break;
 
 #if defined (SELECT_COMMAND)
-	case cm_select:
-	  new_command->value.Select = copy_select_command (command->value.Select);
-	  break;
+      case cm_select:
+	new_command->value.Select =
+	  (SELECT_COM *)copy_for_command ((FOR_COM *)command->value.Select);
+	break;
 #endif
 
-	case cm_group:
-	  new_command->value.Group = copy_group_command (command->value.Group);
-	  break;
+      case cm_group:
+	new_command->value.Group = copy_group_command (command->value.Group);
+	break;
 
-	case cm_case:
-	  new_command->value.Case = copy_case_command (command->value.Case);
-	  break;
-      
-	case cm_until:
-	case cm_while:
-	  new_command->value.While = copy_while_command (command->value.While);
-	  break;
-      
-	case cm_if:
-	  new_command->value.If = copy_if_command (command->value.If);
-	  break;
-      
-	case cm_simple:
-	  new_command->value.Simple = copy_simple_command (command->value.Simple);
-	  break;
-      
-	case cm_connection:
-	  {
-	    CONNECTION *new_connection;
+      case cm_case:
+	new_command->value.Case = copy_case_command (command->value.Case);
+	break;
 
-	    new_connection = (CONNECTION *)xmalloc (sizeof (CONNECTION));
-	    new_connection->connector = command->value.Connection->connector;
-	    new_connection->first =
-	      copy_command (command->value.Connection->first);
-	    new_connection->second =
-	      copy_command (command->value.Connection->second);
-	    new_command->value.Connection = new_connection;
-	    break;
-	  }
-      
-	  /* Pathological case.  I'm not even sure that you can have a
-	     function definition as part of a function definition. */
-	case cm_function_def:
-	  new_command->value.Function_def =
-	    copy_function_def (command->value.Function_def);
+      case cm_until:
+      case cm_while:
+	new_command->value.While = copy_while_command (command->value.While);
+	break;
+
+      case cm_if:
+	new_command->value.If = copy_if_command (command->value.If);
+	break;
+
+      case cm_simple:
+	new_command->value.Simple = copy_simple_command (command->value.Simple);
+	break;
+
+      case cm_connection:
+	{
+	  CONNECTION *new_connection;
+
+	  new_connection = (CONNECTION *)xmalloc (sizeof (CONNECTION));
+	  new_connection->connector = command->value.Connection->connector;
+	  new_connection->first = copy_command (command->value.Connection->first);
+	  new_connection->second = copy_command (command->value.Connection->second);
+	  new_command->value.Connection = new_connection;
 	  break;
 	}
+
+      case cm_function_def:
+	new_command->value.Function_def = copy_function_def (command->value.Function_def);
+	break;
     }
   return (new_command);
 }

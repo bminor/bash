@@ -163,13 +163,23 @@ expect '<^A^A^B>'
 recho ''
 
 # More tests of "$@"
+set abc def ghi jkl
 expect '<  abc> <def> <ghi> <jkl  >'
-set abc def ghi jkl
 recho "  $@  "
+expect '<  abc> <def> <ghi> <jkl  >'
+recho "${1+  $@  }"
 
-expect '<--abc> <def> <ghi> <jkl-->'
 set abc def ghi jkl
+expect '<--abc> <def> <ghi> <jkl-->'
 recho "--$@--"
+
+set "a b" cd ef gh
+expect '<a b> <cd> <ef> <gh>'
+recho ${1+"$@"}
+expect '<a b> <cd> <ef> <gh>'
+recho ${foo:-"$@"}
+expect '<a b> <cd> <ef> <gh>'
+recho "${@}"
 
 expect '<  >'
 recho "  "
@@ -324,3 +334,9 @@ recho '~'
 
 expect nothing
 recho $!
+
+# test word splitting of assignment statements not preceding a command
+a="a b c d e"
+declare b=$a
+expect '<a> <b> <c> <d> <e>'
+recho $b

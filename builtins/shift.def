@@ -21,13 +21,16 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $PRODUCES shift.c
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
+#include "common.h"
 
 $BUILTIN shift
 $FUNCTION shift_builtin
@@ -35,6 +38,8 @@ $SHORT_DOC shift [n]
 The positional parameters from $N+1 ... are renamed to $1 ...  If N is
 not given, it is assumed to be 1.
 $END
+
+int print_shift_error;
 
 /* Shift the arguments ``left''.  Shift DOLLAR_VARS down then take one
    off of REST_OF_ARGS and place it into DOLLAR_VARS[9].  If LIST has
@@ -44,34 +49,28 @@ int
 shift_builtin (list)
      WORD_LIST *list;
 {
-  int times, number;
-  WORD_LIST *args;
+  int times;
+  register int count;
+  WORD_LIST *temp;
 
   times = get_numeric_arg (list);
 
-  if (!times)
+  if (times == 0)
     return (EXECUTION_SUCCESS);
-
-  if (times < 0)
+  else if (times < 0)
     {
       builtin_error ("shift count must be >= 0");
       return (EXECUTION_FAILURE);
     }
-
-  args = list_rest_of_args ();
-  number = list_length (args);
-  dispose_words (args);
-
-  if (times > number)
+  else if (times > number_of_args ())
     {
-      builtin_error ("shift count must be <= $#");
+      if (print_shift_error)
+	builtin_error ("shift count must be <= $#");
       return (EXECUTION_FAILURE);
     }
 
   while (times-- > 0)
     {
-      register int count;
-
       if (dollar_vars[1])
 	free (dollar_vars[1]);
 
@@ -80,8 +79,7 @@ shift_builtin (list)
 
       if (rest_of_args)
 	{
-	  WORD_LIST *temp = rest_of_args;
-
+	  temp = rest_of_args;
 	  dollar_vars[9] = savestring (temp->word->word);
 	  rest_of_args = rest_of_args->next;
 	  temp->next = (WORD_LIST *)NULL;
@@ -90,6 +88,5 @@ shift_builtin (list)
       else
 	dollar_vars[9] = (char *)NULL;
     }
-
   return (EXECUTION_SUCCESS);
 }

@@ -7,9 +7,9 @@ expect()
 }
 
 TESTDIR=/tmp/glob-test
-rm -rf $TESTDIR
 mkdir $TESTDIR
-builtin cd $TESTDIR
+builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
+rm -rf *
 
 touch a b c d abc abd abe bb bcd ca cb dd de
 mkdir bdir
@@ -22,12 +22,12 @@ expect '<a> <abc> <abd> <abe>'
 recho \a*
 
 # see if null glob expansion works
-allow_null_glob_expansion=
+shopt -s nullglob
 
 expect '<a> <abc> <abd> <abe>'
 recho a* X*
 
-unset allow_null_glob_expansion
+shopt -u nullglob
 
 # see if the code that expands directories only works
 expect '<bdir/>'
@@ -172,6 +172,111 @@ a["\b"]c) echo ok
 	;;
 *)	echo bad
 	;;
+esac
+
+mkdir man
+mkdir man/man1
+touch man/man1/bash.1
+expect '<man/man1/bash.1>'
+recho */man*/bash.*
+expect '<man/man1/bash.1>'
+recho $(echo */man*/bash.*)
+expect '<man/man1/bash.1>'
+recho "$(echo */man*/bash.*)"
+
+# tests with multiple `*'s
+case abc in
+a***c)	echo ok 1;;
+esac
+
+case abc in
+a*****?c)	echo ok 2;;
+esac
+
+case abc in
+?*****??)	echo ok 3;;
+esac
+
+case abc in
+*****??)	echo ok 4;;
+esac
+
+case abc in
+*****??c)	echo ok 5;;
+esac
+
+case abc in
+?*****?c)	echo ok 6;;
+esac
+
+case abc in
+?***?****c)	echo ok 7;;
+esac
+
+case abc in
+?***?****?)	echo ok 8;;
+esac
+
+case abc in
+?***?****)	echo ok 9;;
+esac
+
+case abc in
+*******c)	echo ok 10;;
+esac
+
+case abc in
+*******?)	echo ok 11;;
+esac
+
+case abcdecdhjk in
+a*cd**?**??k)	echo ok 20;;
+esac
+
+case abcdecdhjk in
+a**?**cd**?**??k)	echo ok 21;;
+esac
+
+case abcdecdhjk in
+a**?**cd**?**??k***)	echo ok 22;;
+esac
+
+case abcdecdhjk in
+a**?**cd**?**??***k)	echo ok 23;;
+esac
+
+case abcdecdhjk in
+a**?**cd**?**??***k**)	echo ok 24;;
+esac
+
+case abcdecdhjk in
+a****c**?**??*****)	echo ok 25;;
+esac
+
+# none of these should output anything
+
+case abc in
+??**********?****?)	echo bad ;;
+esac
+
+case abc in
+??**********?****c)	echo bad ;;
+esac
+
+case abc in
+?************c****?****)	echo bad;;
+esac
+
+case abc in
+*c*?**)	echo bad;;
+esac
+
+case abc in
+a*****c*?**)	echo bad;;
+esac
+
+case abc in
+a********???*******)	echo bad;;
 esac
 
 builtin cd /

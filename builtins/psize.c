@@ -21,6 +21,11 @@
 /*  Write output in 128-byte chunks until we get a sigpipe or write gets an
     EPIPE.  Then report how many bytes we wrote.  We assume that this is the
     pipe size. */
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -29,6 +34,7 @@
 
 #include "../command.h"
 #include "../general.h"
+#include "../sig.h"
 extern int errno;
 
 int nw;

@@ -27,19 +27,24 @@ $SHORT_DOC eval [arg ...]
 Read ARGs as input to the shell and execute the resulting command(s).
 $END
 
+#include <config.h>
+#if defined (HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+
 #include "../shell.h"
+#include "bashgetopt.h"
+
+extern int parse_and_execute ();
 
 /* Parse the string that these words make, and execute the command found. */
 int
 eval_builtin (list)
      WORD_LIST *list;
 {
-  int result;
+  if (no_options (list))
+    return (EX_USAGE);
 
   /* Note that parse_and_execute () frees the string it is passed. */
-  if (list)
-    result = parse_and_execute (string_list (list), "eval", -1);
-  else
-    result = EXECUTION_SUCCESS;
-  return (result);
+  return (list ? parse_and_execute (string_list (list), "eval", -1) : EXECUTION_SUCCESS);
 }

@@ -18,7 +18,7 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-/* similar to stdio, but input-only. */
+#include "config.h"
 
 #include "bashtypes.h"
 #include <sys/file.h>
@@ -27,15 +27,68 @@
 #include <stdio.h>
 #include <errno.h>
 
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "bashansi.h"
-#include "config.h"
 #include "command.h"
 #include "general.h"
 #include "input.h"
+#include "error.h"
+#include "externs.h"
 
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
+
+/* Functions to handle reading input on systems that don't restart read(2)
+   if a signal is received. */
+
+#if !defined (HAVE_RESTARTABLE_SYSCALLS)
+static unsigned char localbuf[128];
+static int local_index, local_bufused;
+
+/* Posix and USG systems do not guarantee to restart read () if it is
+   interrupted by a signal.  We do the read ourselves, and restart it
+   if it returns EINTR. */
+int
+getc_with_restart (stream)
+     FILE *stream;
+{
+  /* Try local buffering to reduce the number of read(2) calls. */
+  if (local_index == local_bufused || local_bufused == 0)
+    {
+      while (1)
+	{
+	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
+	  if (local_bufused > 0)
+	    break;
+	  else if (local_bufused == 0 || errno != EINTR)
+	    {
+	      local_index = 0;
+	      return EOF;
+	    }
+	}
+      local_index = 0;
+    }
+  return (localbuf[local_index++]);
+}
+
+int
+ungetc_with_restart (c, stream)
+     int c;
+     FILE *stream;
+{
+  if (local_index == 0 || c == EOF)
+    return EOF;
+  return (localbuf[--local_index] = c);
+}
+#endif /* !HAVE_RESTARTABLE_SYSCALLS */
+
+#if defined (BUFFERED_INPUT)
+
+/* A facility similar to stdio, but input-only. */
 
 #define MAX_INPUT_BUFFER_SIZE	8192
 
@@ -45,16 +98,19 @@ extern int errno;
 
 void free_buffered_stream ();
 
+extern int return_EOF ();
+
 extern int interactive_shell;
 
 int bash_input_fd_changed;
+
 /* This provides a way to map from a file descriptor to the buffer
    associated with that file descriptor, rather than just the other
    way around.  This is needed so that buffers are managed properly
    in constructs like 3<&4.  buffers[x]->b_fd == x -- that is how the
    correspondence is maintained. */
 BUFFERED_STREAM **buffers = (BUFFERED_STREAM **)NULL;
-static int nbuffers = 0;
+static int nbuffers;
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 
@@ -94,9 +150,7 @@ make_buffered_stream (fd, buffer, bufsize)
   bp->b_fd = fd;
   bp->b_buffer = buffer;
   bp->b_size = bufsize;
-  bp->b_used = 0;
-  bp->b_inputp = 0;
-  bp->b_flag = 0;
+  bp->b_used = bp->b_inputp = bp->b_flag = 0;
   if (bufsize == 1)
     bp->b_flag |= B_UNBUFF;
   return (bp);
@@ -145,9 +199,7 @@ check_bash_input (fd)
       if (nfd == -1)
 	{
 	  if (fcntl (fd, F_GETFD, 0) == 0)
-	    report_error
-	      ("cannot allocate new file descriptor for bash input from fd %d: %s",
-		fd, strerror (errno));
+	    sys_error ("cannot allocate new file descriptor for bash input from fd %d", fd);
 	  return -1;
 	}
 
@@ -155,7 +207,7 @@ check_bash_input (fd)
 	{
 	  /* What's this?  A stray buffer without an associated open file
 	     descriptor?  Free up the buffer and report the error. */
-	  report_error ("check_bash_input: buffer already exists for new fd %d", nfd);
+	  internal_error ("check_bash_input: buffer already exists for new fd %d", nfd);
 	  free_buffered_stream (buffers[nfd]);
 	}
 
@@ -185,6 +237,7 @@ check_bash_input (fd)
    BUFFERED_STREAM corresponding to fd2 is deallocated, if one exists.
    BUFFERS[fd1] is copied to BUFFERS[fd2].  This is called by the
    redirect code for constructs like 4<&0 and 3</etc/rc.local. */
+int
 duplicate_buffered_stream (fd1, fd2)
      int fd1, fd2;
 {
@@ -209,11 +262,9 @@ duplicate_buffered_stream (fd1, fd2)
   if (buffers[fd2])
     buffers[fd2]->b_fd = fd2;
 
-  if (is_bash_input)
-    {
-      if (!buffers[fd2])
-	fd_to_buffered_stream (fd2);
-    }
+  if (is_bash_input && !buffers[fd2])
+    fd_to_buffered_stream (fd2);
+
   return (fd2);
 }
 
@@ -256,9 +307,7 @@ open_buffered_stream (file)
   int fd;
 
   fd = open (file, O_RDONLY);
-  if (fd == -1)
-    return ((BUFFERED_STREAM *)NULL);
-  return (fd_to_buffered_stream (fd));
+  return ((fd >= 0) ? fd_to_buffered_stream (fd) : (BUFFERED_STREAM *)NULL);
 }
 
 /* Deallocate a buffered stream and free up its resources.  Make sure we
@@ -354,7 +403,7 @@ sync_buffered_stream (bfd)
      int bfd;
 {
   BUFFERED_STREAM *bp;
-  int chars_left;
+  off_t chars_left;
 
   bp = buffers[bfd];
   if (!bp)
@@ -386,15 +435,16 @@ with_input_from_buffered_stream (bfd, name)
      char *name;
 {
   INPUT_STREAM location;
+  BUFFERED_STREAM *bp;
 
   location.buffered_fd = bfd;
   /* Make sure the buffered stream exists. */
-  fd_to_buffered_stream (bfd);
-  init_yy_io (buffered_getchar, buffered_ungetchar, st_bstream, name, location);
+  bp = fd_to_buffered_stream (bfd);
+  init_yy_io (bp == 0 ? return_EOF : buffered_getchar,
+	      buffered_ungetchar, st_bstream, name, location);
 }
 
 #if defined (TEST)
-
 char *
 xmalloc(s)
 int s;
@@ -461,4 +511,5 @@ char	**argv;
 	}
 	exit(0);
 }
-#endif
+#endif /* TEST */
+#endif /* BUFFERED_INPUT */

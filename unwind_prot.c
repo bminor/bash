@@ -24,13 +24,18 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 /*		      Unwind Protection Scheme for Bash		    */
 /*								    */
 /* **************************************************************** */
-#include "bashtypes.h"
-#include <signal.h>
 #include "config.h"
+
+#include "bashtypes.h"
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "command.h"
 #include "general.h"
 #include "unwind_prot.h"
 #include "quit.h"
+#include "sig.h"
 
 /* If CLEANUP is null, then ARG contains a tag to throw back to. */
 typedef struct _uwp {
@@ -235,7 +240,7 @@ static void
 restore_variable (sv)
      SAVED_VAR *sv;
 {
-  if (sv->size > sizeof (int))
+  if (sv->size != sizeof (int))
     {
       bcopy ((char *)sv->desired_setting, (char *)sv->variable, sv->size);
       free (sv->desired_setting);
@@ -260,7 +265,7 @@ unwind_protect_var (var, value, size)
   SAVED_VAR *s = (SAVED_VAR *)xmalloc (sizeof (SAVED_VAR));
 
   s->variable = var;
-  if (size > sizeof (int))
+  if (size != sizeof (int))
     {
       s->desired_setting = (char *)xmalloc (size);
       bcopy (value, (char *)s->desired_setting, size);

@@ -43,6 +43,15 @@ in the variable REPLY.  COMMANDS are executed after each selection
 until a break or return command is executed.
 $END
 
+$BUILTIN time
+$SHORT_DOC time [-p] PIPELINE
+Execute PIPELINE and print a summary of the real time, user CPU time,
+and system CPU time spent executing PIPELINE when it terminates.
+The return status is the return status of PIPELINE.  The `-p' option
+prints the timing summary in a slightly different format.  This uses
+the value of the TIMEFORMAT variable as the output format.
+$END
+
 $BUILTIN case
 $SHORT_DOC case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac
 Selectively execute COMMANDS based upon WORD matching PATTERN.  The
@@ -97,10 +106,12 @@ $END
 $BUILTIN variables
 $DOCNAME variable_help
 $SHORT_DOC variables - Some variable names and meanings
-BASH_VERSION    The version numbers of this Bash.
+BASH_VERSION    Version information for this Bash.
 CDPATH          A colon separated list of directories to search
 		when the argument to `cd' is not found in the current
 		directory.
+GLOBIGNORE	A colon-separated list of patterns describing filenames to
+		be ignored by pathname expansion.
 #if defined (HISTORY)
 HISTFILE        The name of the file where your command history is stored.
 HISTFILESIZE    The maximum number of lines this file can contain.
@@ -108,22 +119,29 @@ HISTSIZE        The maximum number of history lines that a running
 		shell can access.
 #endif /* HISTORY */
 HOME            The complete pathname to your login directory.
+HOSTNAME	The name of the current host.
 HOSTTYPE        The type of CPU this version of Bash is running under.
 IGNOREEOF       Controls the action of the shell on receipt of an EOF
 		character as the sole input.  If set, then the value
 		of it is the number of EOF characters that can be seen
 		in a row on an empty line before the shell will exit
 		(default 10).  When unset, EOF signifies the end of input.
+MACHTYPE	A string describing the current system Bash is running on.
 MAILCHECK	How often, in seconds, Bash checks for new mail.
 MAILPATH	A colon-separated list of filenames which Bash checks
 		for new mail.
+OSTYPE		The version of Unix this version of Bash is running on.
 PATH            A colon-separated list of directories to search when
 		looking for commands.
 PROMPT_COMMAND  A command to be executed before the printing of each
 		primary prompt.
 PS1             The primary prompt string.
 PS2             The secondary prompt string.
+PWD		The full pathname of the current directory.
+SHELLOPTS	A colon-separated list of enabled shell options.
 TERM            The name of the current terminal type.
+TIMEFORMAT	The output format for timing statistics displayed by the
+		`time' reserved word.
 auto_resume     Non-null means a command word appearing on a line by
 		itself is first looked for in the list of currently
 		stopped jobs.  If found there, that job is foregrounded.
@@ -133,9 +151,6 @@ auto_resume     Non-null means a command word appearing on a line by
 		match a substring of the job.  Any other value means that
 		the command must be a prefix of a stopped job.
 #if defined (HISTORY)
-command_oriented_history
-                Non-null means to save multiple-line commands together on
-                a single history line.
 #  if defined (BANG_HISTORY)
 histchars       Characters controlling history expansion and quick
 		substitution.  The first character is the history
@@ -143,12 +158,7 @@ histchars       Characters controlling history expansion and quick
 		the `quick substitution' character, usually `^'.  The
 		third is the `history comment' character, usually `#'.
 #  endif /* BANG_HISTORY */
-HISTCONTROL	Set to a value of `ignorespace', it means don't enter
-		lines which begin with a space or tab on the history
-		list.  Set to a value of `ignoredups', it means don't
-		enter lines which match the last entered line.  Set to
-		`ignoreboth' means to combine the two options.  Unset,
-		or set to any other value than those above means to save
-		all lines on the history list.
+HISTIGNORE	A colon-separated list of patterns used to decide which
+		command should be saved on the history list.
 #endif /* HISTORY */
 $END

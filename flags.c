@@ -20,9 +20,17 @@ with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 /* Flags hacking. */
+#include "config.h"
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #include "shell.h"
 #include "flags.h"
+
+#if defined (JOB_CONTROL)
+extern int set_job_control ();
+#endif
 
 /* **************************************************************** */
 /*								    */
@@ -45,17 +53,12 @@ int exit_immediately_on_error = 0;
 /* Non-zero means disable filename globbing. */
 int disallow_filename_globbing = 0;
 
-/* Non-zero means to locate and remember function commands as functions are
-   defined.  Function commands are normally located when the function is
-   executed. */
-int locate_commands_in_functions = 0;
-
 /* Non-zero means that all keyword arguments are placed into the environment
    for a command, not just those that appear on the line before the command
    name. */
 int place_keywords_in_env = 0;
 
-/* Non-zero means read commands, but don't execute tham.  This is useful
+/* Non-zero means read commands, but don't execute them.  This is useful
    for debugging shell scripts that should do something hairy and possibly
    desctructive. */
 int read_but_dont_execute = 0;
@@ -97,15 +100,16 @@ int no_symbolic_links = 0;
 /*								    */
 /* **************************************************************** */
 
-
+#if 0
 /* Non-zero means do lexical scoping in the body of a FOR command. */
 int lexical_scoping = 0;
+#endif
 
 /* Non-zero means no such thing as invisible variables. */
 int no_invisible_vars = 0;
 
-/* Non-zero means don't look up or remember command names in a hash table, */
-int hashing_disabled = 0;
+/* Non-zero means look up and remember command names in a hash table, */
+int hashing_enabled = 1;
 
 #if defined (BANG_HISTORY)
 /* Non-zero means that we are doing history expansion.  The default.
@@ -114,11 +118,7 @@ int history_expansion = 1;
 #endif /* BANG_HISTORY */
 
 /* Non-zero means that we allow comments to appear in interactive commands. */
-#if defined (INTERACTIVE_COMMENTS)
 int interactive_comments = 1;
-#else
-int interactive_comments = 0;
-#endif /* INTERACTIVE_COMMENTS */
 
 #if defined (RESTRICTED_SHELL)
 /* Non-zero means that this shell is `restricted'.  A restricted shell
@@ -132,6 +132,11 @@ int restricted = 0;
    mode is entered on startup if the real and effective uids or gids
    differ. */
 int privileged_mode = 0;
+
+#if defined (BRACE_EXPANSION)
+/* Zero means to disable brace expansion: foo{a,b} -> fooa foob */
+int brace_expansion = 1;
+#endif
 
 /* **************************************************************** */
 /*								    */
@@ -147,7 +152,7 @@ struct flags_alist shell_flags[] = {
 #endif /* JOB_CONTROL */
   { 'e', &exit_immediately_on_error },
   { 'f', &disallow_filename_globbing },
-  { 'h', &locate_commands_in_functions }, /* Oh, yeah, good mnemonic. */
+  { 'h', &hashing_enabled },
   { 'i', &forced_interactive },
   { 'k', &place_keywords_in_env },
 #if defined (JOB_CONTROL)
@@ -165,16 +170,18 @@ struct flags_alist shell_flags[] = {
   { 'C', &noclobber },
 
   /* New flags that control non-standard things. */
+#if 0
   { 'l', &lexical_scoping },
+#endif
   { 'I', &no_invisible_vars },
-
-  /* I want `h', but locate_commands_in_functions has it.  Great. */
-  { 'd', &hashing_disabled },
 
   { 'P', &no_symbolic_links },
 
+#if defined (BRACE_EXPANSION)
+  { 'B', &brace_expansion },
+#endif
+
 #if defined (BANG_HISTORY)
-  /* Once again, we don't have the right mnemonic. */
   { 'H', &history_expansion },
 #endif /* BANG_HISTORY */
 
@@ -187,12 +194,11 @@ int *
 find_flag (name)
      int name;
 {
-  int i = 0;
-  while (shell_flags[i].name)
+  int i;
+  for (i = 0; shell_flags[i].name; i++)
     {
       if (shell_flags[i].name == name)
 	return (shell_flags[i].value);
-      i++;
     }
   return (FLAG_UNKNOWN);
 }
@@ -205,8 +211,9 @@ change_flag (flag, on_or_off)
   int flag;
   int on_or_off;
 {
-  int *value = find_flag (flag);
-  int old_value;
+  int *value, old_value;
+
+  value = find_flag (flag);
 
 #if defined (RESTRICTED_SHELL)
   /* Don't allow "set +r" in a shell which is `restricted'. */
@@ -216,18 +223,15 @@ change_flag (flag, on_or_off)
 
   if (value == (int *)FLAG_UNKNOWN)
     return (FLAG_ERROR);
-  else
-    old_value = *value;
+
+  old_value = *value;
 
   if (on_or_off == FLAG_ON)
     *value = 1;
+  else if (on_or_off == FLAG_OFF)
+    *value = 0;
   else
-    {
-      if (on_or_off == FLAG_OFF)
-	*value = 0;
-      else
-	return (FLAG_ERROR);
-    }
+    return (FLAG_ERROR);
 
   /* Special cases for a few flags. */
   switch (flag)
@@ -240,15 +244,11 @@ change_flag (flag, on_or_off)
 
     case 'p':
       if (on_or_off == '+')
-	{
-	  setuid (current_user.uid);
-	  setgid (current_user.gid);
-	  current_user.euid = current_user.uid;
-	  current_user.egid = current_user.gid;
-	}
+	disable_priv_mode ();
+
       break;
     }
-    
+
   return (old_value);
 }
 
@@ -257,11 +257,11 @@ change_flag (flag, on_or_off)
 char *
 which_set_flags ()
 {
-  char *temp = (char *)xmalloc (1 + NUM_SHELL_FLAGS);
+  char *temp;
+  int i, string_index;
 
-  int i, string_index = 0;
-
-  for (i = 0; shell_flags[i].name; i++)
+  temp = xmalloc (1 + NUM_SHELL_FLAGS);
+  for (i = string_index = 0; shell_flags[i].name; i++)
     if (*(shell_flags[i].value))
       temp[string_index++] = shell_flags[i].name;
 

@@ -68,10 +68,14 @@ fnmatch (pattern, string, flags)
 	      (n == string || ((flags & FNM_PATHNAME) && n[-1] == '/')))
 	    return (FNM_NOMATCH);
 
-	  for (c = *p++; c == '?' || c == '*'; c = *p++, ++n)
-	    if (((flags & FNM_PATHNAME) && *n == '/') ||
-		(c == '?' && *n == '\0'))
-	      return (FNM_NOMATCH);
+	  for (c = *p++; c == '?' || c == '*'; c = *p++)
+	    {
+	      if (((flags & FNM_PATHNAME) && *n == '/') ||
+		  (c == '?' && *n == '\0'))
+		return (FNM_NOMATCH);
+	      if (c == '?')
+		n++;
+	    }
 
 	  if (c == '\0')
 	    return (0);

@@ -18,10 +18,17 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#include <errno.h>
-#include "shell.h"
+#include <config.h>
 
-#include "bashansi.h"
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
+#include <errno.h>
+
+#include "../shell.h"
+#include "common.h"
 
 #define ERR(S, C)	builtin_error("%s%c", (S), (C))
 
@@ -41,14 +48,21 @@ char		*opts;
 {
 	register int c;
 	register char *cp;
+	int	plus;	/* nonzero means to handle +option */
 
-	if (!list) {
+	if (*opts == '+') {
+		plus = 1;
+		opts++;
+	} else
+		plus = 0;
+
+	if (list == 0) {
 		list_optarg = (char *)NULL;
 		loptend = (WORD_LIST *)NULL;	/* No non-option arguments */
 		return -1;
 	}
 
-	if (list != lhead || !lhead) {
+	if (list != lhead || lhead == 0) {
 		/* Hmmm.... called with a different word list.  Reset. */
 		sp = 1;
 		lcurrent = lhead = list;
@@ -56,7 +70,7 @@ char		*opts;
 	}
 
 	if (sp == 1) {
-		if (!lcurrent ||
+		if (lcurrent == 0 ||
 		    (lcurrent->word->word[0] != '-' || lcurrent->word->word[1] == '\0')) {
 		    	lhead = (WORD_LIST *)NULL;
 		    	loptend = lcurrent;
@@ -84,23 +98,46 @@ char		*opts;
 		return('?');
 	}
 
-	if (*++cp == ':') {
-		/* Option requires an argument. */
+	if (*++cp == ':' || *cp == ';') {
+		/* `:': Option requires an argument. */
+		/* `;': option argument may be missing */
 		/* We allow -l2 as equivalent to -l 2 */
-		if (lcurrent->word->word[sp+1] != '\0') {
-			list_optarg = &(lcurrent->word->word[sp+1]);
+		if (lcurrent->word->word[sp+1]) {
+			list_optarg = lcurrent->word->word + sp + 1;
 			lcurrent = lcurrent->next;
-		} else if (lcurrent->next == NULL) {
+		/* If the specifier is `;', don't set optarg if the next
+		   argument looks like another option. */
+		} else if (lcurrent->next && (*cp == ':' || lcurrent->next->word->word[0] != '-')) {
+			lcurrent = lcurrent->next;
+			list_optarg = lcurrent->word->word;
+			lcurrent = lcurrent->next;
+		} else if (*cp == ';') {
+			list_optarg = (char *)NULL;
+			lcurrent = lcurrent->next;
+		} else {	/* lcurrent->next == NULL */
 			ERR("option requires an argument: -", c);
 			sp = 1;
 			list_optarg = (char *)NULL;
 			return('?');
-		} else {
-			lcurrent = lcurrent->next;
-			list_optarg = lcurrent->word->word;
-			lcurrent = lcurrent->next;
 		}
 		sp = 1;
+	} else if (*cp == '#') {
+		/* optional numeric argument */
+		if (lcurrent->word->word[sp+1]) {
+			if (digit(lcurrent->word->word[sp+1])) {
+				list_optarg = lcurrent->word->word + sp + 1;
+				lcurrent = lcurrent->next;
+			} else
+				list_optarg = (char *)NULL;
+		} else {
+			if (lcurrent->next && legal_number(lcurrent->next->word->word, (long *)0)) {
+				lcurrent = lcurrent->next;
+				list_optarg = lcurrent->word->word;
+				lcurrent = lcurrent->next;
+			} else
+				list_optarg = (char *)NULL;
+		}
+
 	} else {
 		/* No argument, just return the option. */
 		if (lcurrent->word->word[++sp] == '\0') {

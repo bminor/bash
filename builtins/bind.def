@@ -21,10 +21,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $PRODUCES bind.c
 
+#include <config.h>
+
 $BUILTIN bind
 $DEPENDS_ON READLINE
 $FUNCTION bind_builtin
-$SHORT_DOC bind [-lvd] [-m keymap] [-f filename] [-q name] [keyseq:readline-function]
+$SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-r keyseq] [keyseq:readline-function]
 Bind a key sequence to a Readline function, or to a macro.  The
 syntax is equivalent to that found in ~/.inputrc, but must be
 passed as a single argument: bind '"\C-x\C-r": re-read-init-file'.
@@ -34,49 +36,75 @@ Arguments we accept:
                      emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,
                      vi-command, and vi-insert.
   -l                 List names of functions.
-  -v                 List function names and bindings.
-  -d                 Dump functions and bindings such that they
-                     can be read back in.
+  -P                 List function names and bindings.
+  -p                 List functions and bindings in a form that can be
+                     reused as input.
+  -r  keyseq         Remove the binding for KEYSEQ.
   -f  filename       Read key bindings from FILENAME.
   -q  function-name  Query about which keys invoke the named function.
+  -V                 List variable names and values
+  -v                 List variable names and values in a form that can
+                     be reused as input.
+  -S                 List key sequences that invoke macros and their values
+  -s                 List key sequences that invoke macros and their values in
+                     a form that can be reused as input.
 $END
 
-#include <stdio.h>
-#include "../shell.h"
 #if defined (READLINE)
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include <stdio.h>
 #include <errno.h>
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
+
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include "../shell.h"
+#include "../bashline.h"
 #include "bashgetopt.h"
+#include "common.h"
 
 static int query_bindings ();
 
-extern int bash_readline_initialized;
 extern int no_line_editing;
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 
-#define USAGE "usage: bind [-lvd] [-m keymap] [-f filename] [-q name] [keyseq:readline_func]"
+#define LFLAG	0x01
+#define PFLAG	0x02
+#define FFLAG	0x04
+#define VFLAG	0x08
+#define QFLAG	0x10
+#define MFLAG	0x20
+#define RFLAG	0x40
+#define PPFLAG	0x80
+#define VVFLAG	0x100
+#define SFLAG   0x200
+#define SSFLAG  0x400
 
 int
 bind_builtin (list)
      WORD_LIST *list;
 {
-  int return_code = EXECUTION_SUCCESS;
+  int return_code;
   FILE *old_rl_outstream;
   Keymap kmap, saved_keymap;
-  int lflag, dflag, fflag, vflag, qflag, mflag, opt;
-  char *initfile, *map_name, *fun_name;
+  int flags, opt;
+  char *initfile, *map_name, *fun_name, *remove_seq;
 
   if (no_line_editing)
     return (EXECUTION_FAILURE);
 
   kmap = saved_keymap = (Keymap) NULL;
-  lflag = dflag = vflag = fflag = qflag = mflag = 0;
-  initfile = map_name = fun_name = (char *)NULL;
+  flags = 0;
+  initfile = map_name = fun_name = remove_seq = (char *)NULL;
+  return_code = EXECUTION_SUCCESS;
 
   if (!bash_readline_initialized)
     initialize_readline ();
@@ -88,39 +116,49 @@ bind_builtin (list)
   rl_outstream = stdout;
 
   reset_internal_getopt ();  
-  while ((opt = internal_getopt (list, "lvdf:q:m:")) != EOF)
+  while ((opt = internal_getopt (list, "lvpVPsSf:q:m:r:")) != EOF)
     {
       switch (opt)
 	{
 	case 'l':
-	  lflag++;
+	  flags |= LFLAG;
 	  break;
-
 	case 'v':
-	  vflag++;
+	  flags |= VFLAG;
 	  break;
-
-	case 'd':
-	  dflag++;
+	case 'p':
+	  flags |= PFLAG;
 	  break;
-
 	case 'f':
-	  fflag++;
+	  flags |= FFLAG;
 	  initfile = list_optarg;
 	  break;
-
 	case 'm':
-	  mflag++;
+	  flags |= MFLAG;
 	  map_name = list_optarg;
 	  break;
-
 	case 'q':
-	  qflag++;
+	  flags |= QFLAG;
 	  fun_name = list_optarg;
 	  break;
-
+	case 'r':
+	  flags |= RFLAG;
+	  remove_seq = list_optarg;
+	  break;
+	case 'V':
+	  flags |= VVFLAG;
+	  break;
+	case 'P':
+	  flags |= PPFLAG;
+	  break;
+	case 's':
+	  flags |= SFLAG;
+	  break;
+	case 'S':
+	  flags |= SSFLAG;
+	  break;
 	default:
-	  builtin_error (USAGE);
+	  builtin_usage ();
 	  BIND_RETURN (EX_USAGE);
 	}
     }
@@ -130,12 +168,12 @@ bind_builtin (list)
   /* First, see if we need to install a special keymap for this
      command.  Then start on the arguments. */
 
-  if (mflag && map_name)
+  if ((flags & MFLAG) && map_name)
     {
       kmap = rl_get_keymap_by_name (map_name);
       if (!kmap)
         {
-          builtin_error ("`%s': illegal keymap name", map_name);
+	  builtin_error ("`%s': invalid keymap name", map_name);
 	  BIND_RETURN (EXECUTION_FAILURE);
         }
     }
@@ -149,16 +187,28 @@ bind_builtin (list)
   /* XXX - we need to add exclusive use tests here.  It doesn't make sense
      to use some of these options together. */
   /* Now hack the option arguments */
-  if (lflag)
-    rl_list_funmap_names (0);
+  if (flags & LFLAG)
+    rl_list_funmap_names ();
 
-  if (vflag)
-    rl_function_dumper (0);
-
-  if (dflag)
+  if (flags & PFLAG)
     rl_function_dumper (1);
 
-  if (fflag && initfile)
+  if (flags & PPFLAG)
+    rl_function_dumper (0);
+
+  if (flags & SFLAG)
+    rl_macro_dumper (1);
+
+  if (flags & SSFLAG)
+    rl_macro_dumper (0);
+
+  if (flags & VFLAG)
+    rl_variable_dumper (1);
+
+  if (flags & VVFLAG)
+    rl_variable_dumper (0);
+
+  if ((flags & FFLAG) && initfile)
     {
       if (rl_read_init_file (initfile) != 0)
 	{
@@ -167,8 +217,17 @@ bind_builtin (list)
 	}
     }
 
-  if (qflag && fun_name)
+  if ((flags & QFLAG) && fun_name)
     return_code = query_bindings (fun_name);
+
+  if ((flags & RFLAG) && remove_seq)
+    {
+      if (rl_set_key (remove_seq, (Function *)NULL, rl_get_keymap ()) != 0)
+	{
+	  builtin_error ("cannot unbind %s", remove_seq);
+	  BIND_RETURN (EXECUTION_FAILURE);
+	}
+    }
 
   /* Process the rest of the arguments as binding specifications. */
   while (list)

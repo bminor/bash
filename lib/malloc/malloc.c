@@ -58,34 +58,27 @@ what you give them.   Help stamp out software-hoarding!  */
 #endif
  */
 
+/* Define this to have free() write 0xcf into memory as it's freed, to
+   uncover callers that refer to freed memory. */
+/* SCO 3.2v4 getcwd and possibly other libc routines fail with MEMSCRAMBLE */
+#if !defined (NO_MEMSCRAMBLE)
+#  define MEMSCRAMBLE
+#endif
+
 #if defined (emacs) || defined (HAVE_CONFIG_H)
-#  include "config.h"
+#  include <config.h>
 #endif /* emacs */
 
-#if !defined (USG)
-#  if defined (HPUX) || defined (UnixPC) || defined (Xenix)
-#    define USG
-#  endif /* HPUX || UnixPC || Xenix */
-#endif /* !USG */
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 /* Determine which kind of system this is.  */
 #include <sys/types.h>
 #include <signal.h>
 
-#if !defined (USG) && !defined (USGr4)
-#  ifndef SIGTSTP
-#    ifndef USG
-#      define USG
-#    endif /* !USG */
-#  else /* SIGTSTP */
-#    ifdef SIGIO
-#      define BSD4_2
-#    endif /* SIGIO */
-#  endif /* SIGTSTP */
-#endif /* !USG && !USGr4 */
-
-#ifndef BSD4_2
-   /* Define getpagesize () if the system does not.  */
+/* Define getpagesize () if the system does not.  */
+#ifndef HAVE_GETPAGESIZE
 #  include "getpagesize.h"
 #endif
 
@@ -100,6 +93,10 @@ what you give them.   Help stamp out software-hoarding!  */
 #  undef HAVE_RESOURCE
 #endif
 
+#if !defined (NULL)
+#  define NULL 0
+#endif
+
 #define start_of_data() &etext
 
 #define ISALLOC ((char) 0xf7)	/* magic byte that implies allocation */
@@ -111,12 +108,11 @@ what you give them.   Help stamp out software-hoarding!  */
 				     beginning of the block.  */
 extern char etext;
 
-#if !defined (NO_SBRK_DECL)
+#if !defined (SBRK_DECLARED)
 extern char *sbrk ();
-#endif /* !NO_SBRK_DECL */
+#endif /* !SBRK_DECLARED */
 
 /* These two are for user programs to look at, when they are interested.  */
-
 unsigned int malloc_sbrk_used;       /* amount of data space used now */
 unsigned int malloc_sbrk_unused;     /* amount more we can have */
 
@@ -143,7 +139,7 @@ struct mhead {
 /* Remainder are valid only when block is allocated */
 	unsigned short mh_size;	/* size, if < 0x10000 */
 #ifdef rcheck
-	unsigned mh_nbytes;	/* number of bytes allocated */
+	unsigned int mh_nbytes;	/* number of bytes allocated */
 	int      mh_magic4;	/* should be == MAGIC4 */
 #endif /* rcheck */
 };
@@ -241,7 +237,7 @@ malloc_usable_size (mem)
 
   return blocksize - sizeof (struct mhead) - EXTRA;
 }
-
+
 static void
 morecore (nu)			/* ask system for more memory */
      register int nu;		/* size index to get more of  */
@@ -249,11 +245,19 @@ morecore (nu)			/* ask system for more memory */
   register char *cp;
   register int nblks;
   register unsigned int siz;
-  int oldmask;
 
-#if defined (BSD4_2)
+  /* Block all signals in case we are executed from a signal handler. */
+#if defined (HAVE_BSD_SIGNALS)
+  int oldmask;
   oldmask = sigsetmask (-1);
-#endif /* BSD4_2 */
+#else
+#  if defined (HAVE_POSIX_SIGNALS)
+  sigset_t set, oset;
+  sigfillset (&set);
+  sigemptyset (&oset);
+  sigprocmask (SIG_BLOCK, &set, &oset);
+#  endif /* HAVE_POSIX_SIGNALS */
+#endif /* HAVE_BSD_SIGNALS */
 
   if (!data_space_start)
     {
@@ -331,9 +335,13 @@ morecore (nu)			/* ask system for more memory */
     }
   CHAIN ((struct mhead *) cp) = 0;
 
-#if defined (BSD4_2)
+#if defined (HAVE_BSD_SIGNALS)
   sigsetmask (oldmask);
-#endif /* BSD4_2 */
+#else
+#  if defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+#  endif
+#endif /* HAVE_BSD_SIGNALS */
 }
 
 static void
@@ -373,10 +381,26 @@ getpool ()
       cp += 8 << nu;
     }
 }
-
+
+#if defined (MEMSCRAMBLE) || !defined (NO_CALLOC)
+static char *
+zmemset (s, c, n)
+     char *s;
+     int c;
+     register int n;
+{
+  register char *sp;
+
+  sp = s;
+  while (--n >= 0)
+    *sp++ = c;
+  return (s);
+}
+#endif /* MEMSCRAMBLE || !NO_CALLOC */
+
 char *
 malloc (n)		/* get a block */
-     unsigned n;
+     unsigned int n;
 {
   register struct mhead *p;
   register unsigned int nbytes;
@@ -436,6 +460,9 @@ malloc (n)		/* get a block */
 #else /* not rcheck */
   p -> mh_size = n;
 #endif /* not rcheck */
+#ifdef MEMSCRAMBLE
+  zmemset ((char *)(p + 1), 0xdf, n);	/* scramble previous contents */
+#endif
 #ifdef MSTATS
   nmalloc[nunits]++;
   nmal++;
@@ -474,7 +501,7 @@ free (mem)
 	if (p -> mh_alloc == ISFREE)
 	  botch ("free: Called with already freed block argument\n");
 	else
-	  botch ("free: Called with bad argument\n");
+	  botch ("free: Called with unallocated block argument\n");
       }
 
     ASSERT (p -> mh_magic4 == MAGIC4);
@@ -483,6 +510,18 @@ free (mem)
     ASSERT (*ap++ == MAGIC1); ASSERT (*ap   == MAGIC1);
 #endif /* rcheck */
   }
+#ifdef MEMSCRAMBLE
+  {
+    register int n;
+    
+#ifdef rcheck
+    n = p->mh_nbytes;
+#else /* not rcheck */
+    n = p->mh_size;
+#endif /* not rcheck */
+    zmemset (mem, 0xcf, n);
+  }
+#endif
   {
     register int nunits = p -> mh_index;
 
@@ -506,7 +545,7 @@ free (mem)
 char *
 realloc (mem, n)
      char *mem;
-     register unsigned n;
+     register unsigned int n;
 {
   register struct mhead *p;
   register unsigned int tocopy;
@@ -565,11 +604,13 @@ realloc (mem, n)
 
 char *
 memalign (alignment, size)
-     unsigned alignment, size;
+     unsigned int alignment, size;
 {
-  register char *ptr = malloc (size + alignment);
+  register char *ptr;
   register char *aligned;
   register struct mhead *p;
+
+  ptr = malloc (size + alignment);
 
   if (ptr == 0)
     return 0;
@@ -587,16 +628,44 @@ memalign (alignment, size)
   return aligned;
 }
 
-#if !defined (HPUX) && !defined (Multimax) && !defined (Multimax32k)
+#if !defined (HPUX)
 /* This runs into trouble with getpagesize on HPUX, and Multimax machines.
    Patching out seems cleaner than the ugly fix needed.  */
+#if defined (__STDC__)
+void *
+#else
 char *
+#endif
 valloc (size)
+     size_t size;
 {
   return memalign (getpagesize (), size);
 }
-#endif /* !HPUX && !Multimax && !Multimax32k */
-
+#endif /* !HPUX */
+
+#ifndef NO_CALLOC
+char *
+calloc (n, s)
+     size_t n, s;
+{
+  size_t total;
+  char *result;
+
+  total = n * s;
+  result = malloc (total);
+  if (result)
+    zmemset (result, 0, total);
+  return result;  
+}
+
+void
+cfree (p)
+     char *p;
+{
+  free (p);
+}
+#endif /* !NO_CALLOC */
+
 #ifdef MSTATS
 /* Return statistics describing allocation of blocks of size 2**n. */
 
@@ -633,7 +702,7 @@ malloc_stats (size)
   return v;
 }
 #endif /* MSTATS */
-
+
 /*
  *	This function returns the total number of bytes that the process
  *	will be allowed to allocate via the sbrk(2) system call.  On

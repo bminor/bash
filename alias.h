@@ -18,33 +18,22 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (_ALIAS_)
-#define _ALIAS_
+#if !defined (_ALIAS_H_)
+#define _ALIAS_H_
 
-#include "hash.h"
+#include "hashlib.h"
 
 extern char *xmalloc ();
 
-#if !defined (whitespace)
-#  define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#endif /* !whitespace */
-
-#if !defined (savestring)
-#  define savestring(x) (char *)strcpy (xmalloc (1 + strlen (x)), (x))
-#endif /* !savestring */
-
-#if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *) 0)
-#  else
-#    define NULL 0x0
-#  endif /* !__STDC__ */
-#endif /* !NULL */
-
-typedef struct {
+typedef struct alias {
   char *name;
   char *value;
-} ASSOC;
+  char flags;
+} alias_t;
+
+/* Values for `flags' member of struct alias. */
+#define AL_EXPANDNEXT		0x1
+#define AL_BEINGEXPANDED	0x2
 
 /* The list of known aliases. */
 extern HASH_TABLE *aliases;
@@ -52,8 +41,8 @@ extern HASH_TABLE *aliases;
 extern void initialize_aliases ();
 
 /* Scan the list of aliases looking for one with NAME.  Return NULL
-   if the alias doesn't exist, else a pointer to the assoc. */
-extern ASSOC *find_alias ();
+   if the alias doesn't exist, else a pointer to the alias. */
+extern alias_t *find_alias ();
 
 /* Return the value of the alias for NAME, or NULL if there is none. */
 extern char *get_alias_value ();
@@ -66,10 +55,16 @@ extern void add_alias ();
    the index of the removed alias, or -1 if the alias didn't exist. */
 extern int remove_alias ();
 
+/* Remove all aliases. */
+extern void delete_all_aliases ();
+
 /* Return a new line, with any aliases expanded. */
 extern char *alias_expand ();
 
 /* Return an array of all defined aliases. */
-extern ASSOC **all_aliases ();
+extern alias_t **all_aliases ();
 
-#endif /* _ALIAS_ */
+/* Expand a single word for aliases. */
+extern char *alias_expand_word ();
+
+#endif /* _ALIAS_H_ */

@@ -1,25 +1,38 @@
 #!/bin/sh -
 #
-# bashbug - create a bug report and mail it to bug-bash@prep.ai.mit.edu
+# bashbug - create a bug report and mail it to the bug address
+#
+# The bug address depends on the release status of the shell.  Versions
+# with status `alpha' or `beta' mail bug reports to chet@po.cwru.edu.
+# Other versions send mail to bug-bash@prep.ai.mit.edu.
 #
 # configuration section:
 #	these variables are filled in by the make target in cpp-Makefile
 #
-MACHINE="@MACHINE@"
-OS="@OS@"
-CC="@CC@"
-CFLAGS="@CFLAGS@"
-RELEASE="@RELEASE@"
-PATCHLEVEL="@PATCHLEVEL@"
+MACHINE="!MACHINE!"
+OS="!OS!"
+CC="!CC!"
+CFLAGS="!CFLAGS!"
+RELEASE="!RELEASE!"
+PATCHLEVEL="!PATCHLEVEL!"
+RELSTATUS="!RELSTATUS!"
+MACHTYPE="!MACHTYPE!"
 
-PATH=/bin:/usr/bin:usr/local/bin:$PATH
+PATH=/bin:/usr/bin:/usr/local/bin:$PATH
 export PATH
 
 TEMP=/tmp/bashbug.$$
 
-BUGADDR=${1-bug-bash@prep.ai.mit.edu}
+case "$RELSTATUS" in
+alpha*|beta*)	BUGBASH=chet@po.cwru.edu ;;
+*)		BUGBASH=bug-bash@prep.ai.mit.edu ;;
+esac
+
+BUGADDR=${1-$BUGBASH}
 
 : ${EDITOR=emacs}
+
+: ${USER=${LOGNAME-`whoami`}}
 
 trap 'rm -f $TEMP $TEMP.x; exit 1' 1 2 3 13 15
 trap 'rm -f $TEMP $TEMP.x' 0
@@ -48,37 +61,60 @@ OS: $OS
 Compiler: $CC
 Compilation CFLAGS: $CFLAGS
 uname output: $UN
+Machine Type: $MACHTYPE
 
 Bash Version: $RELEASE
 Patch Level: $PATCHLEVEL
+Release Status: $RELSTATUS
 
 Description:
-        [Detailed description of the problem, suggestion, or complaint.]
+	[Detailed description of the problem, suggestion, or complaint.]
 
 Repeat-By:
-        [Describe the sequence of events that causes the problem
-        to occur.]
+	[Describe the sequence of events that causes the problem
+	to occur.]
 
 Fix:
-        [Description of how to fix the problem.  If you don't know a
-        fix for the problem, don't include this section.]
+	[Description of how to fix the problem.  If you don't know a
+	fix for the problem, don't include this section.]
 EOF
 
 chmod u+w $TEMP
 cp $TEMP $TEMP.x
 
-if $EDITOR $TEMP
-then
-	if cmp -s $TEMP $TEMP.x
-	then
-		echo "File not changed, no bug report submitted."
-		exit
-	fi
+# Figure out how to echo a string without a trailing newline
+N=`echo 'hi there\c'`
+case "$N" in
+*c)	n=-n c= ;;
+*)	n= c='\c' ;;
+esac
 
-	${RMAIL} $BUGADDR < $TEMP || {
-		cat $TEMP >> $HOME/dead.bashbug
-		echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
-	}
+trap '' 2		# ignore interrupts while in editor
+
+until $EDITOR $TEMP; do
+	echo "$0: editor \`$EDITOR' exited with nonzero status."
+	echo "$0: Perhaps it was interrupted."
+	echo "$0: Type `y' to give up, and lose your bug report;"
+	echo "$0: type `n' to re-enter the editor."
+	echo $n "$0: Do you want to give up? $c"
+
+	read ans
+	case "$ans" in
+	Yy]*) exit 1 ;;
+	esac
+done
+
+trap 'rm -f $TEMP $TEMP.x; exit 1' 2	# restore trap on SIGINT
+
+if cmp -s $TEMP $TEMP.x
+then
+	echo "File not changed, no bug report submitted."
+	exit
 fi
+
+${RMAIL} $BUGADDR < $TEMP || {
+	cat $TEMP >> $HOME/dead.bashbug
+	echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
+}
 
 exit 0

@@ -18,6 +18,13 @@
    along with Bash; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "bashansi.h"
 #include "shell.h"
 
 /* Dispose of the command structure passed. */
@@ -25,7 +32,8 @@ void
 dispose_command (command)
      COMMAND *command;
 {
-  if (!command) return;
+  if (command == 0)
+    return;
 
   if (command->redirects)
     dispose_redirects (command->redirects);
@@ -33,8 +41,17 @@ dispose_command (command)
   switch (command->type)
     {
     case cm_for:
+#if defined (SELECT_COMMAND)
+    case cm_select:
+#endif
       {
-	register FOR_COM *c = command->value.For;
+	register FOR_COM *c;
+#if defined (SELECT_COMMAND)
+	if (command->type == cm_select)
+	  c = (FOR_COM *)command->value.Select;
+	else
+#endif
+	c = command->value.For;
 	dispose_word (c->name);
 	dispose_words (c->map_list);
 	dispose_command (c->action);
@@ -42,18 +59,6 @@ dispose_command (command)
 	break;
       }
 
-#if defined (SELECT_COMMAND)
-    case cm_select:
-      {
-	register SELECT_COM *c = command->value.Select;
-	dispose_word (c->name);
-	dispose_words (c->map_list);
-	dispose_command (c->action);
-	free (c);
-	break;
-      }
-#endif
-    
     case cm_group:
       {
 	dispose_command (command->value.Group->command);
@@ -63,12 +68,13 @@ dispose_command (command)
 
     case cm_case:
       {
-	register CASE_COM *c = command->value.Case;
-	PATTERN_LIST *t, *p = c->clauses;
+	register CASE_COM *c;
+	PATTERN_LIST *t, *p;
 
+	c = command->value.Case;
 	dispose_word (c->word);
 
-	while (p)
+	for (p = c->clauses; p; )
 	  {
 	    dispose_words (p->patterns);
 	    dispose_command (p->action);
@@ -83,8 +89,9 @@ dispose_command (command)
     case cm_until:
     case cm_while:
       {
-	register WHILE_COM *c = command->value.While;
+	register WHILE_COM *c;
 
+	c = command->value.While;
 	dispose_command (c->test);
 	dispose_command (c->action);
 	free (c);
@@ -93,7 +100,9 @@ dispose_command (command)
 
     case cm_if:
       {
-	register IF_COM *c = command->value.If;
+	register IF_COM *c;
+
+	c = command->value.If;
 	dispose_command (c->test);
 	dispose_command (c->true_case);
 	dispose_command (c->false_case);
@@ -103,7 +112,9 @@ dispose_command (command)
 
     case cm_simple:
       {
-	register SIMPLE_COM *c = command->value.Simple;
+	register SIMPLE_COM *c;
+
+	c = command->value.Simple;
 	dispose_words (c->words);
 	dispose_redirects (c->redirects);
 	free (c);
@@ -112,7 +123,9 @@ dispose_command (command)
 
     case cm_connection:
       {
-	register CONNECTION *c = command->value.Connection;
+	register CONNECTION *c;
+
+	c = command->value.Connection;
 	dispose_command (c->first);
 	dispose_command (c->second);
 	free (c);
@@ -121,7 +134,9 @@ dispose_command (command)
 
     case cm_function_def:
       {
-	register FUNCTION_DEF *c = command->value.Function_def;
+	register FUNCTION_DEF *c;
+
+	c = command->value.Function_def;
 	dispose_word (c->name);
 	dispose_command (c->command);
 	free (c);
@@ -129,7 +144,7 @@ dispose_command (command)
       }
 
     default:
-      report_error ("Attempt to free unknown command type `%d'.\n", command->type);
+      programming_error ("dispose_command: bad command type `%d'", command->type);
       break;
     }
   free (command);
@@ -140,8 +155,7 @@ void
 dispose_word (word)
      WORD_DESC *word;
 {
-  if (word->word)
-    free (word->word);
+  FREE (word->word);
   free (word);
 }
 
@@ -151,6 +165,7 @@ dispose_words (list)
      WORD_LIST *list;
 {
   WORD_LIST *t;
+
   while (list)
     {
       t = list;
@@ -189,7 +204,7 @@ dispose_redirects (list)
 	case r_reading_until:
 	case r_deblank_reading_until:
 	  free (t->here_doc_eof);
-	  /* ... */
+	/*FALLTHROUGH*/
 	case r_output_direction:
 	case r_input_direction:
 	case r_inputa_direction:
@@ -200,6 +215,8 @@ dispose_redirects (list)
 	case r_duplicating_input_word:
 	case r_duplicating_output_word:
 	  dispose_word (t->redirectee.filename);
+	  /* FALLTHROUGH */
+	default:
 	  break;
 	}
       free (t);

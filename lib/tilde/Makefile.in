@@ -1,0 +1,98 @@
+## -*- text -*- ####################################################
+#								   #
+# Makefile for the GNU Tilde Library.				   #
+#								   #
+####################################################################
+
+srcdir = @srcdir@
+VPATH = .:@srcdir@
+topdir = @top_srcdir@
+BUILD_DIR = @BUILD_DIR@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+CC = @CC@
+RANLIB = @RANLIB@
+AR = @AR@
+RM = rm
+CP = cp
+MV = mv
+
+CFLAGS = @CFLAGS@ @LOCAL_CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
+
+DEFS = @DEFS@
+
+INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib
+
+CCFLAGS = $(CFLAGS) $(DEFS) $(CPPFLAGS) ${INCLUDES}
+
+.c.o:
+	$(CC) -c $(CCFLAGS) $<
+
+# The name of the library target.
+LIBRARY_NAME = libtilde.a
+
+# The C code source files for this library.
+CSOURCES = $(srcdir)/tilde.c
+
+# The header files for this library.
+HSOURCES = $(srcdir)/tilde.h
+
+OBJECTS = tilde.o
+
+# The texinfo files which document this library.
+DOCSOURCE = doc/tilde.texi
+DOCOBJECT = doc/tilde.dvi
+DOCSUPPORT = doc/Makefile
+DOCUMENTATION = $(DOCSOURCE) $(DOCOBJECT) $(DOCSUPPORT)
+
+SUPPORT = Makefile ChangeLog $(DOCSUPPORT)
+
+SOURCES  = $(CSOURCES) $(HSOURCES) $(DOCSOURCE)
+
+THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
+
+######################################################################
+
+all: $(LIBRARY_NAME)
+
+$(LIBRARY_NAME): $(OBJECTS)
+	$(RM) -f $@
+	$(AR) cr $@ $(OBJECTS)
+	-test -n "$(RANLIB)" && $(RANLIB) $@
+
+documentation: force
+	-(cd doc; $(MAKE) $(MFLAGS))
+
+force:
+
+# The rule for 'includes' is written funny so that the if statement
+# always returns TRUE unless there really was an error installing the
+# include files.
+install:
+	$(INSTALL_DATA) -c -m 644 $(LIBRARY_NAME) $(bindir)/$(LIBRARY_NAME)
+	-test -n "$(RANLIB)" && $(RANLIB) -t $(bindir)/$(LIBRARY_NAME)
+
+clean:
+	$(RM) -f $(OBJECTS) $(LIBRARY_NAME)
+	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+
+realclean distclean maintainer-clean: clean
+	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	$(RM) -f Makefile
+
+mostlyclean: clean
+	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+
+######################################################################
+#								     #
+#  Dependencies for the object files which make up this library.     #
+#								     #
+######################################################################
+
+tilde.o: tilde.h tilde.c
+tilde.o: $(BUILD_DIR)/config.h

@@ -23,19 +23,26 @@ $PRODUCES declare.c
 
 $BUILTIN declare
 $FUNCTION declare_builtin
-$SHORT_DOC declare [-[frxi]] name[=value] ...
+$SHORT_DOC declare [-afFrxi] [-p] name[=value] ...
 Declare variables and/or give them attributes.  If no NAMEs are
-given, then display the values of variables instead.
+given, then display the values of variables instead.  The -p option
+will display the attributes and values of each NAME.
 
 The flags are:
 
-  -f	to select from among function names only,
-  -r	to make NAMEs readonly,
-  -x	to make NAMEs export,
-  -i	to make NAMEs have the `integer' attribute set.
+  -a	to make NAMEs arrays (if supported)
+  -f	to select from among function names only
+  -F	to display function names without definitions
+  -r	to make NAMEs readonly
+  -x	to make NAMEs export
+  -i	to make NAMEs have the `integer' attribute set
 
 Variables with the integer attribute have arithmetic evaluation (see
 `let') done when the variable is assigned to.
+
+When displaying values of variables, -f displays a function's name
+and definition.  The -F option restricts the display to function
+name only.
 
 Using `+' instead of `-' turns off the given attribute instead.  When
 used in a function, makes NAMEs local, as with the `local' command.
@@ -43,19 +50,23 @@ $END
 
 $BUILTIN typeset
 $FUNCTION declare_builtin
-$SHORT_DOC typeset [-[frxi]] name[=value] ...
+$SHORT_DOC typeset [-afFrxi] [-p] name[=value] ...
 Obsolete.  See `declare'.
 $END
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include <stdio.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "../bashansi.h"
 
 #include "../shell.h"
+#include "common.h"
+#include "builtext.h"
 
 extern int variable_context, array_needs_making;
 
@@ -84,7 +95,7 @@ local_builtin (list)
     return (declare_internal (list, 1));
   else
     {
-      builtin_error ("Can only be used in a function");
+      builtin_error ("can only be used in a function");
       return (EXECUTION_FAILURE);
     }
 }
@@ -95,14 +106,14 @@ declare_internal (list, local_var)
      register WORD_LIST *list;
      int local_var;
 {
-  int flags_on = 0, flags_off = 0;
-  int any_failed = 0;
+  int flags_on, flags_off, *flags, any_failed, assign_error, pflag, nodefs;
+  char *t;
+  SHELL_VAR *var;
 
+  flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
   while (list)
     {
-      register char *t = list->word->word;
-      int *flags;
-
+      t = list->word->word;
       if (t[0] == '-' && t[1] == '-' && t[2] == '\0')
 	{
 	  list = list->next;
@@ -112,16 +123,18 @@ declare_internal (list, local_var)
       if (*t != '+' && *t != '-')
 	break;
 
-      if (*t == '+')
-	flags = &flags_off;
-      else
-	flags = &flags_on;
-
-      t++;
+      flags = (*t++ == '+') ? &flags_off : &flags_on;
 
       while (*t)
 	{
-	  if (*t == 'f')
+	  if (*t == 'p' && local_var == 0)
+	    pflag++, t++;
+	  else if (*t == 'F')
+	    {
+	      nodefs++;
+	      *flags |= att_function; t++;
+	    }
+	  else if (*t == 'f')
 	    *flags |= att_function, t++;
 	  else if (*t == 'x')
 	    *flags |= att_exported, t++, array_needs_making = 1;
@@ -129,9 +142,14 @@ declare_internal (list, local_var)
 	    *flags |= att_readonly, t++;
 	  else if (*t == 'i')
 	    *flags |= att_integer, t++;
+#if defined (ARRAY_VARS)
+	  else if (*t == 'a')
+	    *flags |= att_array, t++;
+#endif
 	  else
 	    {
 	      builtin_error ("unknown option: `-%c'", *t);
+	      builtin_usage ();
 	      return (EX_USAGE);
 	    }
 	}
@@ -141,7 +159,7 @@ declare_internal (list, local_var)
 
   /* If there are no more arguments left, then we just want to show
      some variables. */
-  if (!list)
+  if (list == 0)	/* declare -[afFirx] */
     {
       /* Show local variables defined at this context level if this is
 	 the `local' builtin. */
@@ -162,25 +180,45 @@ declare_internal (list, local_var)
 	}
       else
 	{
-	  if (!flags_on)
+	  if (flags_on == 0)
 	    set_builtin ((WORD_LIST *)NULL);
 	  else
-	    set_or_show_attributes ((WORD_LIST *)NULL, flags_on);
+	    set_or_show_attributes ((WORD_LIST *)NULL, flags_on, nodefs);
 	}
 
       fflush (stdout);
       return (EXECUTION_SUCCESS);
     }
 
+  if (pflag)	/* declare -p [-afFirx] name [name...] */
+    {
+      for (any_failed = 0; list; list = list->next)
+	{
+	  pflag = show_name_attributes (list->word->word, nodefs);
+	  if (pflag)
+	    {
+	      builtin_error ("%s: not found", list->word->word);
+	      any_failed++;
+	    }
+	}
+      return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+    }
+
 #define NEXT_VARIABLE() free (name); list = list->next; continue
 
   /* There are arguments left, so we are making variables. */
-  while (list)
+  while (list)		/* declare [-afFirx] name [name ...] */
     {
-      char *value, *name = savestring (list->word->word);
-      int offset = assignment (name);
+      char *value, *name;
+      int offset;
+#if defined (ARRAY_VARS)
+      int making_array_special, assigning_array_special;
+#endif
 
-      if (offset)
+      name = savestring (list->word->word);
+      offset = assignment (name);
+
+      if (offset)	/* declare [-afFirx] name=value */
 	{
 	  name[offset] = '\0';
 	  value = name + offset + 1;
@@ -188,10 +226,21 @@ declare_internal (list, local_var)
       else
 	value = "";
 
+#if defined (ARRAY_VARS)
+      assigning_array_special = 0;
+      if (t = strchr (name, '['))
+	{
+	  *t = '\0';
+	  making_array_special = 1;
+	}
+      else
+	making_array_special = 0;
+#endif
+	
       if (legal_identifier (name) == 0)
 	{
-	  builtin_error ("%s: not a legal variable name", name);
-	  any_failed++;
+	  builtin_error ("`%s': not a valid identifier", name);
+	  assign_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -200,7 +249,14 @@ declare_internal (list, local_var)
 	 not global ones. */
 
       if (variable_context)
-	make_local_variable (name);
+	{
+#if defined (ARRAY_VARS)
+	  if ((flags_on & att_array) || making_array_special)
+	    make_local_array_variable (name);
+	  else
+#endif
+	  make_local_variable (name);
+	}
 
       /* If we are declaring a function, then complain about it in some way.
 	 We don't let people make functions by saying `typeset -f foo=bar'. */
@@ -210,36 +266,35 @@ declare_internal (list, local_var)
 
       if (flags_on & att_function)
 	{
-	  if (offset)
+	  if (offset)	/* declare -f [-rix] foo=bar */
 	    {
 	      builtin_error ("Can't use `-f' to make functions");
 	      return (EXECUTION_FAILURE);
 	    }
-	  else
+	  else		/* declare -f [-rx] name [name...] */
 	    {
-	      SHELL_VAR *find_function (), *funvar;
+	      var = find_function (name);
 
-	      funvar = find_function (name);
-
-	      if (funvar)
+	      if (var)
 		{
-		  if (readonly_p (funvar) && (flags_off & att_readonly))
+		  if (readonly_p (var) && (flags_off & att_readonly))
 		    {
 		      builtin_error ("%s: readonly function", name);
 		      any_failed++;
 		      NEXT_VARIABLE ();
 		    }
 
+		  /* declare -[Ff] name [name...] */
 		  if (flags_on == att_function && flags_off == 0)
 		    {
-		      char *result = named_function_string
-				(name, (COMMAND *)function_cell (funvar), 1);
-		      printf ("%s\n", result);
+		      t = nodefs ? var->name
+				 : named_function_string (name, function_cell (var), 1);
+		      printf ("%s\n", t);
 		    }
-		  else
+		  else		/* declare -[fF] -[rx] name [name...] */
 		    {
-		      funvar->attributes |= flags_on;
-		      funvar->attributes &= ~flags_off;
+		      var->attributes |= flags_on;
+		      var->attributes &= ~flags_off;
 		    }
 		}
 	      else
@@ -247,15 +302,21 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 	}
-      else
+      else		/* declare -[airx] name [name...] */
 	{
-	  SHELL_VAR *var;
-
 	  var = find_variable (name);
 
-	  if (!var)
-	    var = bind_variable (name, "");
+	  if (var == 0)
+	    {
+#if defined (ARRAY_VARS)
+	      if ((flags_on & att_array) || making_array_special)
+		var = make_new_array_variable (name);
+	      else
+#endif
+	      var = bind_variable (name, "");
+	    }
 
+	  /* Cannot use declare +r to turn off readonly attribute. */ 
 	  if (readonly_p (var) && (flags_off & att_readonly))
 	    {
 	      builtin_error ("%s: readonly variable", name);
@@ -263,22 +324,55 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 
+	  /* Cannot use declare to assign value to readonly variable. */
+	  if (readonly_p (var) && offset)
+	    {
+	      builtin_error ("%s: readonly variable", name);
+	      assign_error++;
+	      NEXT_VARIABLE ();
+	    }
+
+#if defined (ARRAY_VARS)
+	  /* declare -a name=value does not work; declare name=value when
+	     name is already an array does not work. */
+	  if ((making_array_special || (flags_on & att_array) || array_p (var)) && offset)
+	    {
+	      if (value[0] == '(' && strchr (value, ')'))
+	        assigning_array_special = 1;
+	      else
+		{
+		  builtin_error ("%s: cannot assign to array variables in this way", name);
+		  assign_error++;
+		  NEXT_VARIABLE ();
+		}
+	    }
+
+	  /* Cannot use declare +a name to remove an array variable. */
+	  if ((flags_off & att_array) && array_p (var))
+	    {
+	      builtin_error ("%s: cannot destroy array variables in this way", name);
+	      any_failed++;
+	      NEXT_VARIABLE ();
+	    }
+
+	  /* declare -a name makes name an array variable. */
+	  if ((making_array_special || (flags_on & att_array)) && array_p (var) == 0)
+	    var = convert_var_to_array (var);
+#endif /* ARRAY_VARS */
+
 	  var->attributes |= flags_on;
 	  var->attributes &= ~flags_off;
 
+#if defined (ARRAY_VARS)
+	  if (offset && assigning_array_special)
+	    assign_array_var_from_string (var, value);
+	  else
+#endif
 	  if (offset)
 	    {
-	      free (var->value);
-	      if (integer_p (var))
-		{
-		  long val, evalexp ();
-		  char *itos ();
-
-		  val = evalexp (value);
-		  var->value = itos ((int)val);
-		}
-	      else
-		var->value = savestring (value);
+	      t = make_variable_value (var, value);
+	      FREE (var->value);
+	      var->value = t;
 	    }
 	}
 
@@ -286,5 +380,8 @@ declare_internal (list, local_var)
 
       NEXT_VARIABLE ();
     }
-  return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+
+  return (assign_error ? EX_BADASSIGN
+		       : ((any_failed == 0) ? EXECUTION_SUCCESS
+  					    : EXECUTION_FAILURE));
 }

@@ -1,14 +1,20 @@
 #! /bin/sh
 
-PATH=.:$PATH			# just to get the right version of printenv
+PATH=.:$PATH	# just to get the right version of printenv
 export PATH
-unset ENV
 
+# unset ENV only if it is set
+[ "${ENV+set}" = "set" ] && unset ENV
+
+: ${THIS_SH:=../bash}
+export THIS_SH
+
+echo Testing ${THIS_SH}
 echo Any output from any test indicates an anomaly worth investigating
 for x in run-*
 do
 	case $x in
-	$0)	;;
+	$0|run-minimal)	;;
 	*.orig|*~) ;;
 	*)	echo $x ; sh $x ;;
 	esac

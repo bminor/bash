@@ -19,8 +19,8 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if !defined (_FLAGS_H)
-#define _FLAGS_H
+#if !defined (_FLAGS_H_)
+#define _FLAGS_H_
 
 #include "stdc.h"
 
@@ -41,11 +41,19 @@ extern struct flags_alist shell_flags[];
 
 extern int
   mark_modified_vars, exit_immediately_on_error, disallow_filename_globbing,
-  locate_commands_in_functions, place_keywords_in_env, read_but_dont_execute,
+  place_keywords_in_env, read_but_dont_execute,
   just_one_command, unbound_vars_is_error, echo_input_at_read,
-  echo_command_at_execute, lexical_scoping, no_invisible_vars, noclobber,
-  hashing_disabled, forced_interactive, privileged_mode,
+  echo_command_at_execute, no_invisible_vars, noclobber,
+  hashing_enabled, forced_interactive, privileged_mode,
   asynchronous_notification, interactive_comments, no_symbolic_links;
+
+#if 0
+extern int lexical_scoping;
+#endif
+
+#if defined (BRACE_EXPANSION)
+extern int brace_expansion;
+#endif
 
 #if defined (BANG_HISTORY)
 extern int history_expansion;
@@ -62,4 +70,4 @@ extern char *which_set_flags __P((void));
 /* A macro for efficiency. */
 #define change_flag_char(flag, on_or_off)  change_flag (flag, on_or_off)
 
-#endif /* _FLAGS_H */
+#endif /* _FLAGS_H_ */

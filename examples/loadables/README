@@ -1,0 +1,27 @@
+Some examples of ready-to-dynamic-load builtins.  Most of the
+examples given are reimplementations of standard commands whose
+execution time is dominated by process startup time.  The
+exceptions are sleep, which allows you to sleep for fractions
+of a second, finfo, which provides access to the rest of the
+elements of the `stat' structure that `test' doesn't let you
+see, and pushd/popd/dirs, which allows you to compile them out
+of the shell.
+
+All of the new builtins in ksh93 that bash didn't already have
+are included here, as is the ksh `print' builtin.
+
+Compile with cc and whatever pic options you need (look in the
+Makefile for a few common settings)
+
+load with ld and whatever shared object options you need (again,
+look in the Makefile)
+
+then enable -f filename builtin-name
+
+enable uses a simple reference-counting scheme to avoid unloading a
+shared object that implements more than one loadable builtin before
+all loadable builtins implemented in the object are removed.
+
+Many of the details needed by builtin writers are found in hello.c,
+the canonical example.  There is no real `builtin writers' programming
+guide'.

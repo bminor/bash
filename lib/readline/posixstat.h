@@ -21,34 +21,27 @@
 
 /* This file should be included instead of <sys/stat.h>.
    It relies on the local sys/stat.h to work though. */
-#if !defined (_POSIXSTAT_H)
-#define _POSIXSTAT_H
+#if !defined (_POSIXSTAT_H_)
+#define _POSIXSTAT_H_
 
 #include <sys/stat.h>
 
-#if defined (isc386)
-#  if !defined (S_IFDIR)
-#    define S_IFDIR 0040000
-#  endif /* !S_IFDIR */
-#  if !defined (S_IFMT)
-#    define S_IFMT  0170000
-#  endif /* !S_IFMT */
-#endif /* isc386 */
-
-/* This text is taken directly from the Cadmus I was trying to
-   compile on:
-    the following MACROs are defined for X/OPEN compatibility
-    however, is the param correct ??
-   #define S_ISBLK(s) ((s.st_mode & S_IFMT) == S_IFBLK)
-
-  Well, the answer is no.  Thus... */
-#if defined (BrainDeath)
+#if defined (STAT_MACROS_BROKEN)
 #  undef S_ISBLK
 #  undef S_ISCHR
 #  undef S_ISDIR
 #  undef S_ISFIFO
 #  undef S_ISREG
-#endif /* BrainDeath */
+#  undef S_ISLNK
+#endif /* STAT_MACROS_BROKEN */
+
+/* These are guaranteed to work only on isc386 */
+#if !defined (S_IFDIR) && !defined (S_ISDIR)
+#  define S_IFDIR 0040000
+#endif /* !S_IFDIR && !S_ISDIR */
+#if !defined (S_IFMT)
+#  define S_IFMT  0170000
+#endif /* !S_IFMT */
 
 /* Posix 1003.1 5.6.1.1 <sys/stat.h> file types */
 
@@ -114,7 +107,7 @@
 /*
  * POSIX 1003.1 5.6.1.2 <sys/stat.h> File Modes
  */
- 
+
 #if !defined (S_IRWXU)
 #  if !defined (S_IREAD)
 #    define S_IREAD	00400
@@ -146,4 +139,4 @@
 #define S_IWUGO		(S_IWUSR | S_IWGRP | S_IWOTH)
 #define S_IXUGO		(S_IXUSR | S_IXGRP | S_IXOTH)
 
-#endif /* _POSIXSTAT_H */
+#endif /* _POSIXSTAT_H_ */

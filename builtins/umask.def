@@ -31,12 +31,22 @@ If MODE begins with a digit, it is interpreted as an octal number,
 otherwise it is a symbolic mode string like that accepted by chmod(1).
 $END
 
-#include <stdio.h>
-#include <sys/types.h>
+#include <config.h>
+
+#include "../bashtypes.h"
+#include "../filecntl.h"
 #include <sys/file.h>
+
+#if defined (HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+
+#include <stdio.h>
+
 #include "../shell.h"
 #include "../posixstat.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 /* **************************************************************** */
 /*                                                                  */
@@ -49,47 +59,40 @@ static int symbolic_umask ();
 
 /* Set or display the mask used by the system when creating files.  Flag
    of -S means display the umask in a symbolic mode. */
+int
 umask_builtin (list)
      WORD_LIST *list;
 {
-  int print_symbolically = 0;
+  int print_symbolically, opt, umask_value;
 
-  while (list)
+  print_symbolically = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "S")) != -1)
     {
-      if (ISOPTION (list->word->word, 'S'))
+      switch (opt)
 	{
-	  list = list->next;
+	case 'S':
 	  print_symbolically++;
-	  continue;
-	}
-      else if (ISOPTION (list->word->word, '-'))
-	{
-	  list = list->next;
 	  break;
-	}
-      else if (*(list->word->word) == '-')
-	{
-	  bad_option (list->word->word);
-	  builtin_error ("usage: umask [-S] [mode]");
+	default:
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
-      else
-	break;
     }
+
+  list = loptend;
 
   if (list)
     {
-      int new_umask;
-
       if (digit (*list->word->word))
 	{
-	  new_umask = read_octal (list->word->word);
+	  umask_value = read_octal (list->word->word);
 
 	  /* Note that other shells just let you set the umask to zero
 	     by specifying a number out of range.  This is a problem
 	     with those shells.  We don't change the umask if the input
 	     is lousy. */
-	  if (new_umask == -1)
+	  if (umask_value == -1)
 	    {
 	      builtin_error ("`%s' is not an octal number from 000 to 777",
 				list->word->word);
@@ -98,26 +101,25 @@ umask_builtin (list)
 	}
       else
 	{
-	  new_umask = symbolic_umask (list);
-	  if (new_umask == -1)
+	  umask_value = symbolic_umask (list);
+	  if (umask_value == -1)
 	    return (EXECUTION_FAILURE);
 	}
-      umask (new_umask);
+      umask (umask_value);
       if (print_symbolically)
-	print_symbolic_umask (new_umask);
+	print_symbolic_umask (umask_value);
     }
   else				/* Display the UMASK for this user. */
     {
-      int old_umask;
-
-      old_umask = umask (022);
-      umask (old_umask);
+      umask_value = umask (022);
+      umask (umask_value);
 
       if (print_symbolically)
-	print_symbolic_umask (old_umask);
+	print_symbolic_umask (umask_value);
       else
-	printf ("%03o\n", old_umask);
+	printf ("%03o\n", umask_value);
     }
+
   fflush (stdout);
   return (EXECUTION_SUCCESS);
 }
@@ -176,7 +178,7 @@ symbolic_umask (list)
   um = umask (022);
   umask (um);
 
-  /* All work below is done with the complement of the umask -- its
+  /* All work below is done with the complement of the umask -- it's
      more intuitive and easier to deal with.  It is complemented
      again before being returned. */
   umc = ~um;
@@ -266,7 +268,7 @@ symbolic_umask (list)
 	        break;
 
 	      default:
-	      	builtin_error ("bad operation character: %c", op);
+	      	builtin_error ("bad symbolic mode operator: %c", op);
 	      	return (-1);
 	    }
 

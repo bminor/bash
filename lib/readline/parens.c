@@ -1,4 +1,4 @@
-/* parens.c -- Implemenation of matching parenthesis feature. */
+/* parens.c -- Implementation of matching parentheses feature. */
 
 /* Copyright (C) 1987, 1989, 1992 Free Software Foundation, Inc.
 
@@ -24,7 +24,9 @@
 #include "rlconf.h"
 
 #if !defined (PAREN_MATCHING)
+extern int rl_insert ();
 
+int
 rl_insert_close (count, invoking_key)
      int count, invoking_key;
 {
@@ -33,25 +35,49 @@ rl_insert_close (count, invoking_key)
 
 #else /* PAREN_MATCHING */
 
+#if defined (HAVE_CONFIG_H)
+#  include <config.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
-#if defined (FD_SET)
+
+#if defined (FD_SET) && !defined (HAVE_SELECT)
+#  define HAVE_SELECT
+#endif
+
+#if defined (HAVE_SELECT)
 #  include <sys/time.h>
-#endif /* FD_SET */
+#endif /* HAVE_SELECT */
+#if defined (HAVE_SYS_SELECT_H)
+#  include <sys/select.h>
+#endif
+
+#if defined (HAVE_STRING_H)
+#  include <string.h>
+#else /* !HAVE_STRING_H */
+#  include <strings.h>
+#endif /* !HAVE_STRING_H */
+
+#if !defined (strchr) && !defined (__STDC__)
+extern char *strchr (), *strrchr ();
+#endif /* !strchr && !__STDC__ */
+
 #include "readline.h"
 
 extern int rl_explicit_arg;
 
 /* Non-zero means try to blink the matching open parenthesis when the
    close parenthesis is inserted. */
-#if defined (FD_SET)
+#if defined (HAVE_SELECT)
 int rl_blink_matching_paren = 1;
-#else /* !FD_SET */
+#else /* !HAVE_SELECT */
 int rl_blink_matching_paren = 0;
-#endif /* !FD_SET */
+#endif /* !HAVE_SELECT */
 
 static int find_matching_open ();
 
+int
 rl_insert_close (count, invoking_key)
      int count, invoking_key;
 {
@@ -59,13 +85,13 @@ rl_insert_close (count, invoking_key)
     rl_insert (count, invoking_key);
   else
     {
-#if defined (FD_SET)
+#if defined (HAVE_SELECT)
       int orig_point, match_point, ready;
       struct timeval timer;
       fd_set readfds;
 
       rl_insert (1, invoking_key);
-      rl_redisplay ();
+      (*rl_redisplay_function) ();
       match_point =
 	find_matching_open (rl_line_buffer, rl_point - 2, invoking_key);
 
@@ -80,12 +106,12 @@ rl_insert_close (count, invoking_key)
 
       orig_point = rl_point;
       rl_point = match_point;
-      rl_redisplay ();
+      (*rl_redisplay_function) ();
       ready = select (1, &readfds, (fd_set *)NULL, (fd_set *)NULL, &timer);
       rl_point = orig_point;
-#else /* !FD_SET */
+#else /* !HAVE_SELECT */
       rl_insert (count, invoking_key);
-#endif /* !FD_SET */
+#endif /* !HAVE_SELECT */
     }
   return 0;
 }
@@ -114,8 +140,8 @@ find_matching_open (string, from, closer)
     {
       if (delimiter && (string[i] == delimiter))
 	delimiter = 0;
-      else if ((string[i] == '\'') || (string[i] == '"'))
-	delimiter = rl_line_buffer[i];
+      else if (rl_basic_quote_characters && strchr (rl_basic_quote_characters, string[i]))
+	delimiter = string[i];
       else if (!delimiter && (string[i] == closer))
 	level++;
       else if (!delimiter && (string[i] == opener))

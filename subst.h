@@ -84,6 +84,10 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
 extern int do_assignment __P((char *));
 extern int do_assignment_no_expand __P((char *));
 
+#if defined (ARRAY_VARS)
+extern SHELL_VAR *do_array_element_assignment __P((char *, char *));
+#endif
+
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
    case nothing happens.  Gets rid of SOURCE by free ()ing it.
@@ -101,6 +105,8 @@ extern WORD_LIST *list_rest_of_args __P((void));
    and the rest_of_args.  If DOLLAR_STAR is 1, then obey the special
    case of "$*" with respect to IFS. */
 extern char *string_rest_of_args __P((int));
+
+extern int number_of_args __P((void));
 
 /* Expand STRING by performing parameter expansion, command substitution,
    and arithmetic expansion.  Dequote the resulting WORD_LIST before
@@ -133,6 +139,9 @@ extern WORD_LIST *expand_word_leave_quoted __P((WORD_DESC *, int));
 /* Return the value of a positional parameter.  This handles values > 10. */
 extern char *get_dollar_var_value __P((int));
 
+/* Quote a string to protect it from word splitting. */
+extern char *quote_string __P((char *));
+
 /* Perform quote removal on STRING.  If QUOTED > 0, assume we are obeying the
    backslash quoting rules for within double quotes. */
 extern char *string_quote_removal __P((char *, int));
@@ -160,22 +169,47 @@ extern WORD_LIST *expand_words __P((WORD_LIST *));
    variables. */
 extern WORD_LIST *expand_words_no_vars __P((WORD_LIST *));
 
-/* PATHNAME can contain characters prefixed by CTLESC;; this indicates
-   that the character is to be quoted.  We quote it here in the style
-   that the glob library recognizes.  If CONVERT_QUOTED_NULLS is non-zero,
-   we change quoted null strings (pathname[0] == CTLNUL) into empty
-   strings (pathname[0] == 0).  If this is called after quote removal
-   is performed, CONVERT_QUOTED_NULLS should be 0; if called when quote
-   removal has not been done (for example, before attempting to match a
-   pattern while executing a case statement), CONVERT_QUOTED_NULLS should
-   be 1. */
-extern char *quote_string_for_globbing __P((char *, int));
-
-/* Call the glob library to do globbing on PATHNAME. */
-extern char **shell_glob_filename __P((char *));
-
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
 extern void stupidly_hack_special_variables __P((char *));
+
+extern char *pat_subst __P((char *, char *, char *, int));
+
+extern void unlink_fifo_list __P((void));
+
+#if defined (ARRAY_VARS)
+extern int array_expand_index __P((char *, int));
+extern int valid_array_reference __P((char *));
+extern char *get_array_value __P((char *, int));
+extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
+extern WORD_LIST *list_string_with_quotes __P((char *));
+extern char *extract_array_assignment_list __P((char *, int *));
+#endif
+
+/* The `special variable' functions that get called when a particular
+   variable is set. */
+void sv_path (), sv_mail (), sv_ignoreeof (), sv_strict_posix ();
+void sv_optind (), sv_opterr (), sv_globignore (), sv_locale ();
+
+#if defined (READLINE)
+void sv_terminal (), sv_hostfile ();
+#endif
+
+#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+void sv_tz ();
+#endif
+
+#if defined (HISTORY)
+void sv_histsize (), sv_histignore (), sv_history_control ();
+#  if defined (BANG_HISTORY)
+void sv_histchars ();
+#  endif
+#endif /* HISTORY */
+
+/* How to determine the quoted state of the character C. */
+#define QUOTED_CHAR(c)  ((c) == CTLESC)
+
+/* Is the first character of STRING a quoted NULL character? */
+#define QUOTED_NULL(string) ((string)[0] == CTLNUL && (string)[1] == '\0')
 
 #endif /* !_SUBST_H_ */

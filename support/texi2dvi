@@ -1,8 +1,10 @@
-#!/bin/sh
-# texi2dvi -- smartly produce DVI files from texinfo sources
-#
-# Copyright (C) 1992, 1993 Free Software Foundation.
-#
+#! /bin/sh
+# texi2dvi --- smartly produce DVI files from texinfo sources
+
+# Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+
+# $Id: texi2dvi,v 0.5 1995/06/20 02:21:36 friedman Exp $
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2, or (at your option)
@@ -15,110 +17,122 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, you can either send email to this
-# program's author (see below) or write to:
-#
-#              Free Software Foundation, Inc.
-#              675 Mass Ave.
-#              Cambridge, MA 02139, USA. 
-#
+# program's maintainer or write to: The Free Software Foundation,
+# Inc.; 59 Temple Place, Suite 330; Boston, MA 02111-1307, USA.
+
+# Commentary:
+
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+
 # Please send bug reports, etc. to bug-texinfo@prep.ai.mit.edu
 # If possible, please send a copy of the output of the script called with
-# the `--debug' option when making a bug report. 
-#
-# Version 0.4
-# Last modified 26-Mar-93
-#
+# the `--debug' option when making a bug report.
 
-# Please note that in the interest of general portability, some common
-# bourne shell constructs were avoided because they weren't guaranteed to
-# be available in some earlier implementations.  I've tried to make this as
-# portable as possible. 
+# In the interest of general portability, some common bourne shell
+# constructs were avoided because they weren't guaranteed to be available
+# in some earlier implementations.  I've tried to make this program as
+# portable as possible.  Welcome to unix, where the lowest common
+# denominator is rapidly diminishing.
 #
 # Among the more interesting lossages I noticed with some bourne shells
 # are:
-#       1) Some don't have an `unset' builtin 
-#       2) In some implementations the `shift' builtin can't take a
-#          numerical argument. 
+#     * No shell functions.
+#     * No `unset' builtin.
+#     * `shift' cannot take a numeric argument, and signals an error if
+#       there are no arguments to shift.
 
-progname=`basename $0`
+# Code:
 
-usage="Usage: ${progname} {-D} {-h} [file1] {file2} {...}
-       {--debug} {--help}
+# Name by which this script was invoked.
+progname=`echo "$0" | sed -e 's/[^\/]*\///g'`
 
-   Options in braces are optional.  Those in brackets are required. 
+# This string is expanded by rcs automatically when this file is checked out.
+rcs_revision='$Revision: 0.5 $'
+version=`set - $rcs_revision; echo $2`
+
+# To prevent hairy quoting and escaping later.
+bq='`'
+eq="'"
+
+usage="Usage: $progname {options} [file1] {file2 {...}}
+(version $version)
+
+Options are:
+-D, --debug          Turn on shell debugging ($bq${bq}set -x$eq$eq).
+-h, --help           You're looking at it.
+-v, --version        Print version number.
+
+Arguments in brackets are required.  Those in braces are optional.
 "
 
-if test $# -eq 0 ; then
-   echo "${usage}" 1>&2;
-   exit 1
-fi
-
-backup_extension=".bak"
-texindex="texindex"
-tex="tex"
-bq="\`"  # To prevent hairy quoting and escaping later.
-eq="'"
+# Initialize variables.
+# Don't use `unset' since old bourne shells don't have this command.
+# Instead, assign them an empty value.
+# Some of these, like TEX and TEXINDEX, may be inherited from the environment
+backup_extension=.bak
+debug=
 orig_pwd="`pwd`"
-
-if test "z${TEXINDEX}" != "z" ; then
-   texindex="${TEXINDEX}"
-fi
-
-if test "z${TEX}" != "z" ; then
-   tex="${TEX}"
-fi
+verbose=
+texindex="${TEXINDEX-texindex}"
+tex="${TEX-tex}"
 
 # Save this so we can construct a new TEXINPUTS path for each file to be
 # processed.
-TEXINPUTS_orig="${TEXINPUTS}"
+TEXINPUTS_orig="$TEXINPUTS"
 export TEXINPUTS
 
-# Parse command line options
-
-# "unset" option variables to make sure they weren't accidentally
-# exported
-debug=""
-
-# If you add new commands be sure to change the wildcards below to make
-# sure they are unambiguous (i.e. only match one possible long option)
-# Be sure to show at least one instance of the full long option name to
-# document what the long option is canonically called. 
-while test $# -gt 0 ; do
-   case z$1 in
-      z-D | z--debug | z--d* )
-         debug="t"
-         shift
-        ;;
-      z-h | z--help | z--h* )
-         echo "${usage}" 1>&2
-         exit 1
-        ;;
-      z-- )
-         shift
-         break 
-        ;;
-      z-* )
-         echo "${progname}: ${bq}${1}${eq} is not a valid option." 1>&2
-         echo "" 1>&2
-         echo "${usage}" 1>&2
-         exit 1
-        ;;
-      * )
-         break 
-        ;;
+# Parse command line arguments.
+# Make sure that all wildcarded options are long enough to be unambiguous.
+# It's a good idea to document the full long option name in each case.
+# Long options which take arguments will need a `*' appended to the
+# canonical name to match the value appended after the `=' character.
+while : ; do
+  case $# in 0) break ;; esac
+  case "$1" in
+    -D | --debug | --d* )
+      debug=t
+      shift
+     ;;
+    -h | --help | --h* )
+      echo "$usage" 1>&2
+      exit 0
+     ;;
+    -v | --version | --v* )
+      echo "texi2dvi version $version" 1>&2
+      exit 0
+     ;;
+    -- )     # Stop option processing
+      shift
+      break
+     ;;
+    -* )
+      case "$1" in
+        --*=* ) arg=`echo "$1" | sed -e 's/=.*//'` ;;
+        * )     arg="$1" ;;
+      esac
+      exec 1>&2
+      echo "$progname: unknown or ambiguous option $bq$arg$eq"
+      echo "$progname: Use $bq--help$eq for a list of options."
+      exit 1
+     ;;
+    * )
+      break
+     ;;
    esac
 done
 
 # See if there are any command line args left (which will be interpreted as
 # filename arguments)
-if test $# -eq 0 ; then
-   echo "${progname}: at least one file name is required as an argument." 1>&2
-   echo "" 1>&2
-   echo "${usage}" 1>&2
-   exit 1
-fi
+case $# in
+  0 )
+    exec 1>&2
+    echo "$progname: at least one file name is required as an argument."
+    echo "$progname: Use $bq--help$eq for a description of command syntax."
+    exit 2
+   ;;
+esac
 
-test "z${debug}" = "zt" && set -x
+case "$debug" in t ) set -x ;; esac
 
 # Texify files
 for command_line_filename in ${1+"$@"} ; do
@@ -137,7 +151,7 @@ for command_line_filename in ${1+"$@"} ; do
    # Source file might @include additional texinfo sources.  Put `.' and
    # directory where source file(s) reside in TEXINPUTS before anything
    # else.  `.' goes first to ensure that any old .aux, .cps, etc. files in
-   # ${directory} don't get used in preference to fresher files in `.'. 
+   # ${directory} don't get used in preference to fresher files in `.'.
    TEXINPUTS=".:${directory}:${TEXINPUTS_orig}"
 
    # "Unset" variables that might have values from previous iterations and
@@ -150,7 +164,7 @@ for command_line_filename in ${1+"$@"} ; do
    # able to find the right index files and so forth.
    if test ! -r "${command_line_filename}" ; then
       echo "${progname}: ${command_line_filename}: No such file or permission denied." 1>&2
-      continue; 
+      continue;
    fi
 
    # Find all files having root filename with a two-letter extension,
@@ -159,7 +173,7 @@ for command_line_filename in ${1+"$@"} ; do
    # that too.
    possible_index_files="`eval echo ${filename_noext}.?? ${filename_noext}.aux`"
    for this_file in ${possible_index_files} ; do
-      # If file is empty, forget it.  
+      # If file is empty, forget it.
       if test ! -s "${this_file}" ; then
          continue;
       fi
@@ -177,7 +191,7 @@ for command_line_filename in ${1+"$@"} ; do
                                        s/^[ ]*//;s/[ ]*$//;'`"
 
    # Now save copies of original index files so we have some means of
-   # comparison later. 
+   # comparison later.
    for index_file_to_save in ${orig_index_files} ; do
        cp "${index_file_to_save}" "${index_file_to_save}${backup_extension}"
    done
@@ -213,20 +227,20 @@ for command_line_filename in ${1+"$@"} ; do
                                          s/^[ ]*//;s/[ ]*$//;'`"
 
       # If old and new list don't at least have the same file list, then one
-      # file or another has definitely changed.  
+      # file or another has definitely changed.
       if test "${orig_index_files}" != "${new_index_files}" ; then
          index_files_changed_p=t
       else
          # File list is the same.  We must compare each file until we find a
-         # difference.  
+         # difference.
          index_files_changed_p=""
          for this_file in ${new_index_files} ; do
-            # cmp -s will return nonzero exit status if files differ. 
+            # cmp -s will return nonzero exit status if files differ.
             cmp -s "${this_file}" "${this_file}${backup_extension}"
             if test $? -ne 0  ; then
                # We only need to keep comparing until we find *one* that
                # differs, because we'll have to run texindex & tex no
-               # matter what. 
+               # matter what.
                index_files_changed_p=t
                break
             fi
@@ -238,7 +252,7 @@ for command_line_filename in ${1+"$@"} ; do
       if test "${index_files_changed_p}"  ; then
          retval=0
          if test "${new_index_files_sans_aux}" ; then
-            ${texindex} ${new_index_files_sans_aux} 
+            ${texindex} ${new_index_files_sans_aux}
             retval=$?
          fi
          if test ${retval} -eq 0 ; then
@@ -248,7 +262,7 @@ for command_line_filename in ${1+"$@"} ; do
    fi
 
    # Generate list of files to delete, then call rm once with the entire
-   # list.  This is significantly faster than multiple executions of rm. 
+   # list.  This is significantly faster than multiple executions of rm.
    file_list=""
    for file in ${orig_index_files} ; do
        file_list="${file_list} ${file}${backup_extension}"
@@ -258,6 +272,4 @@ for command_line_filename in ${1+"$@"} ; do
    fi
 done
 
-#
-# eof
-#
+# texi2dvi ends here

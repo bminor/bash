@@ -28,15 +28,20 @@ Run a shell builtin.  This is useful when you wish to rename a
 shell builtin to be a function, but need the functionality of the
 builtin within the function itself.
 $END
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #include "../shell.h"
-
 #include "common.h"
 
 extern char *this_command_name;
 
 /* Run the command mentioned in list directly, without going through the
    normal alias/function/builtin/filename lookup process. */
+int
 builtin_builtin (list)
      WORD_LIST *list;
 {

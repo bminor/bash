@@ -18,6 +18,10 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#include "config.h"
+
+#if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -176,35 +180,35 @@ initialize_siglist ()
 
 #if defined (SIGMSG)
   sys_siglist[SIGMSG] = "HFT input data pending";
-#endif 
+#endif
 
 #if defined (SIGPWR)
   sys_siglist[SIGPWR] = "power failure imminent";
-#endif 
+#endif
 
 #if defined (SIGDANGER)
   sys_siglist[SIGDANGER] = "system crash imminent";
-#endif 
+#endif
 
 #if defined (SIGMIGRATE)
   sys_siglist[SIGMIGRATE] = "migrate process to another CPU";
-#endif 
+#endif
 
 #if defined (SIGPRE)
   sys_siglist[SIGPRE] = "programming error";
-#endif 
+#endif
 
 #if defined (SIGGRANT)
   sys_siglist[SIGGRANT] = "HFT monitor mode granted";
-#endif 
+#endif
 
 #if defined (SIGRETRACT)
   sys_siglist[SIGRETRACT] = "HFT monitor mode retracted";
-#endif 
+#endif
 
 #if defined (SIGSOUND)
   sys_siglist[SIGSOUND] = "HFT sound sequence has completed";
-#endif 
+#endif
 
   for (i = 0; i < NSIG; i++)
     {
@@ -217,3 +221,4 @@ initialize_siglist ()
 	}
     }
 }
+#endif /* !HAVE_SYS_SIGLIST && !HAVE_STRSIGNAL */

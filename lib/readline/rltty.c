@@ -23,7 +23,7 @@
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#  include <config.h>
 #endif
 
 #include <sys/types.h>
@@ -36,6 +36,12 @@
 #endif /* HAVE_UNISTD_H */
 
 #include "rldefs.h"
+
+#if !defined (SHELL) && defined (GWINSZ_IN_SYS_IOCTL)
+#  include <sys/ioctl.h>
+#endif /* !SHELL && GWINSZ_IN_SYS_IOCTL */
+
+#include "rltty.h"
 #include "readline.h"
 
 #if !defined (errno)
@@ -45,10 +51,18 @@ extern int errno;
 extern int readline_echoing_p;
 extern int _rl_eof_char;
 
+extern int _rl_enable_keypad, _rl_enable_meta;
+
 #if defined (__GO32__)
-#  include <sys/pc.h>
+#  include <pc.h>
 #  undef HANDLE_SIGNALS
 #endif /* __GO32__ */
+
+/* Indirect functions to allow apps control over terminal management. */
+extern void rl_prep_terminal (), rl_deprep_terminal ();
+
+VFunction *rl_prep_term_function = rl_prep_terminal;
+VFunction *rl_deprep_term_function = rl_deprep_terminal;
 
 /* **************************************************************** */
 /*								    */
@@ -64,7 +78,7 @@ static int sigint_oldmask;
 #  endif /* HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
 
-static int sigint_blocked = 0;
+static int sigint_blocked;
 
 /* Cause SIGINT to not be delivered until the corresponding call to
    release_sigint(). */
@@ -115,64 +129,35 @@ release_sigint ()
 
 /* **************************************************************** */
 /*								    */
-/*	 	Controlling the Meta Key and Keypad		    */
-/*								    */
-/* **************************************************************** */
-
-extern int term_has_meta;
-extern char *term_mm;
-extern char *term_mo;
-
-extern char *term_ks;
-extern char *term_ke;
-
-static int
-outchar (c)
-     int c;
-{
-  return putc (c, rl_outstream);
-}
-
-/* Turn on/off the meta key depending on ON. */
-static void
-control_meta_key (on)
-     int on;
-{
-  if (term_has_meta)
-    {
-      if (on && term_mm)
-	tputs (term_mm, 1, outchar);
-      else if (!on && term_mo)
-	tputs (term_mo, 1, outchar);
-    }
-}
-
-#if 0
-static void
-control_keypad (on)
-     int on;
-{
-  if (on && term_ks)
-    tputs (term_ks, 1, outchar);
-  else if (!on && term_ke)
-    tputs (term_ke, 1, outchar);
-}
-#endif
-
-/* **************************************************************** */
-/*								    */
 /*		      Saving and Restoring the TTY	    	    */
 /*								    */
 /* **************************************************************** */
 
 /* Non-zero means that the terminal is in a prepped state. */
-static int terminal_prepped = 0;
+static int terminal_prepped;
 
 /* If non-zero, means that this process has called tcflow(fd, TCOOFF)
    and output is suspended. */
 #if defined (__ksr1__)
-static int ksrflow = 0;
+static int ksrflow;
 #endif
+
+#if !defined (SHELL) && defined (TIOCGWINSZ)
+/* Dummy call to force a backgrounded readline to stop before it tries
+   to get the tty settings. */
+static void
+set_winsize (tty)
+     int tty;
+{
+  struct winsize w;
+
+  if (ioctl (tty, TIOCGWINSZ, &w) == 0)
+      (void) ioctl (tty, TIOCSWINSZ, &w);
+}
+#else /* SHELL || !TIOCGWINSZ */
+#  define set_winsize(tty)
+#endif /* SHELL || !TIOCGWINSZ */
+
 #if defined (NEW_TTY_DRIVER)
 
 /* Values for the `flags' field of a struct bsdtty.  This tells which
@@ -204,12 +189,7 @@ get_tty_settings (tty, tiop)
      int tty;
      TIOTYPE *tiop;
 {
-#if !defined (SHELL) && defined (TIOCGWINSZ)
-  struct winsize w;
-
-  if (ioctl (tty, TIOCGWINSZ, &w) == 0)
-      (void) ioctl (tty, TIOCSWINSZ, &w);
-#endif
+  set_winsize (tty);
 
   tiop->flags = tiop->lflag = 0;
 
@@ -234,6 +214,7 @@ get_tty_settings (tty, tiop)
   return 0;
 }
 
+static int
 set_tty_settings (tty, tiop)
      int tty;
      TIOTYPE *tiop;
@@ -360,7 +341,11 @@ prepare_terminal_settings (meta_flag, otio, tiop)
 #  define TIOTYPE struct termios
 #  define DRAIN_OUTPUT(fd)	tcdrain (fd)
 #  define GETATTR(tty, tiop)	(tcgetattr (tty, tiop))
-#  define SETATTR(tty, tiop)	(tcsetattr (tty, TCSANOW, tiop))
+#  ifdef M_UNIX
+#    define SETATTR(tty, tiop)	(tcsetattr (tty, TCSANOW, tiop))
+#  else
+#    define SETATTR(tty, tiop)	(tcsetattr (tty, TCSADRAIN, tiop))
+#  endif /* !M_UNIX */
 #else
 #  define TIOTYPE struct termio
 #  define DRAIN_OUTPUT(fd)
@@ -376,29 +361,61 @@ static TIOTYPE otio;
 #  define OUTPUT_BEING_FLUSHED(tp)  0
 #endif
 
+static void
+rltty_warning (msg)
+     char *msg;
+{
+  fprintf (stderr, "readline: warning: %s\n", msg);
+}
+
+#if defined (_AIX)
+void
+setopost(tp)
+TIOTYPE *tp;
+{
+  if ((tp->c_oflag & OPOST) == 0)
+    {
+      rltty_warning ("turning on OPOST for terminal\r");
+      tp->c_oflag |= OPOST|ONLCR;
+    }
+}
+#endif
+
 static int
 get_tty_settings (tty, tiop)
      int tty;
      TIOTYPE *tiop;
 {
   int ioctl_ret;
-#if !defined (SHELL) && defined (TIOCGWINSZ)
-  struct winsize w;
+  set_winsize (tty);
 
-  if (ioctl (tty, TIOCGWINSZ, &w) == 0)
-      (void) ioctl (tty, TIOCSWINSZ, &w);
+  while (1)
+    {
+      ioctl_ret = GETATTR (tty, tiop);
+      if (ioctl_ret < 0)
+	{
+	  if (errno != EINTR)
+	    return -1;
+	  else
+	    continue;
+	}
+      if (OUTPUT_BEING_FLUSHED (tiop))
+	{
+#if defined (FLUSHO) && defined (_AIX41)
+	  rltty_warning ("turning off output flushing");
+	  tiop->c_lflag &= ~FLUSHO;
+	  break;
+#else
+	  continue;
+#endif
+	}
+      break;
+    }
+
+#if defined (_AIX)
+  setopost(tiop);
 #endif
 
-  /* Keep looping if output is being flushed after a ^O (or whatever
-     the flush character is). */
-  while ((ioctl_ret = GETATTR (tty, tiop)) < 0 || OUTPUT_BEING_FLUSHED (tiop))
-    {
-      if (ioctl_ret < 0 && errno != EINTR)
-	return -1;
-      if (OUTPUT_BEING_FLUSHED (tiop))
-        continue;
-      errno = 0;
-    }
   return 0;
 }
 
@@ -503,7 +520,7 @@ rl_prep_terminal (meta_flag)
      int meta_flag;
 {
 #if !defined (__GO32__)
-  int tty = fileno (rl_instream);
+  int tty;
   TIOTYPE tio;
 
   if (terminal_prepped)
@@ -511,6 +528,8 @@ rl_prep_terminal (meta_flag)
 
   /* Try to keep this function from being INTerrupted. */
   block_sigint ();
+
+  tty = fileno (rl_instream);
 
   if (get_tty_settings (tty, &tio) < 0)
     {
@@ -528,10 +547,9 @@ rl_prep_terminal (meta_flag)
       return;
     }
 
-  control_meta_key (1);
-#if 0
-  control_keypad (1);
-#endif
+  if (_rl_enable_keypad)
+    _rl_control_keypad (1);
+
   fflush (rl_outstream);
   terminal_prepped = 1;
 
@@ -544,18 +562,19 @@ void
 rl_deprep_terminal ()
 {
 #if !defined (__GO32__)
-  int tty = fileno (rl_instream);
+  int tty;
 
   if (!terminal_prepped)
     return;
 
-  /* Try to keep this function from being INTerrupted. */
+  /* Try to keep this function from being interrupted. */
   block_sigint ();
 
-  control_meta_key (0);
-#if 0
-  control_keypad (0);
-#endif
+  tty = fileno (rl_instream);
+
+  if (_rl_enable_keypad)
+    _rl_control_keypad (0);
+
   fflush (rl_outstream);
 
   if (set_tty_settings (tty, &otio) < 0)
@@ -576,6 +595,7 @@ rl_deprep_terminal ()
 /*								    */
 /* **************************************************************** */
 
+int
 rl_restart_output (count, key)
      int count, key;
 {
@@ -608,6 +628,7 @@ rl_restart_output (count, key)
   return 0;
 }
 
+int
 rl_stop_output (count, key)
      int count, key;
 {
@@ -634,7 +655,7 @@ rl_stop_output (count, key)
 
   return 0;
 }
-
+
 /* **************************************************************** */
 /*								    */
 /*			Default Key Bindings			    */

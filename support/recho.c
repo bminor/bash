@@ -29,4 +29,5 @@ char	*str;
 		} else
 			putchar(*s);
 	}
+	return(0);
 }

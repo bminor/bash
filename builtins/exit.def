@@ -1,5 +1,5 @@
 This file is exit.def, from which is created exit.c.
-It implements the builtins "exit" and "logout" in Bash.
+It implements the builtins "exit", and "logout" in Bash.
 
 Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
 
@@ -28,18 +28,26 @@ Exit the shell with a status of N.  If N is omitted, the exit status
 is that of the last command executed.
 $END
 
-#include <stdio.h>
+#include <config.h>
+
 #include <sys/types.h>
+#include <stdio.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #include "../shell.h"
 #include "../jobs.h"
 
+#include "common.h"
 #include "builtext.h"	/* for jobs_builtin */
 
 extern int interactive, login_shell;
 extern int last_command_exit_value;
 
 static int exit_or_logout ();
-static int sourced_logout = 0;
+static int sourced_logout;
 
 int
 exit_builtin (list)
@@ -65,9 +73,9 @@ int
 logout_builtin (list)
      WORD_LIST *list;
 {
-  if (!login_shell && interactive)
+  if (login_shell == 0 && interactive)
     {
-      builtin_error ("Not login shell: use `exit'");
+      builtin_error ("not login shell: use `exit'");
       return (EXECUTION_FAILURE);
     }
   else
@@ -87,7 +95,7 @@ exit_or_logout (list)
 #if defined (JOB_CONTROL)
   int exit_immediate_okay;
 
-  exit_immediate_okay = (!interactive ||
+  exit_immediate_okay = (interactive  == 0 ||
 			 last_shell_builtin == exit_builtin ||
 			 last_shell_builtin == logout_builtin ||
 			 last_shell_builtin == jobs_builtin);
@@ -97,7 +105,7 @@ exit_or_logout (list)
     {
       register int i;
       for (i = 0; i < job_slots; i++)
-	if (jobs[i] && (jobs[i]->state == JSTOPPED))
+	if (jobs[i] && STOPPED (i))
 	  {
 	    fprintf (stderr, "There are stopped jobs.\n");
 
@@ -113,17 +121,20 @@ exit_or_logout (list)
 
   /* Get return value if present.  This means that you can type
      `logout 5' to a shell, and it returns 5. */
-  if (list)
-    exit_value = get_numeric_arg (list);
-  else
-    exit_value = last_command_exit_value;
+  exit_value = list ? get_numeric_arg (list) : last_command_exit_value;
 
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0)
-    maybe_execute_file ("~/.bash_logout", 1);
+    {
+      maybe_execute_file ("~/.bash_logout", 1);
+#ifdef SYS_BASH_LOGOUT
+      maybe_execute_file (SYS_BASH_LOGOUT, 1);
+#endif
+    }
 
   last_command_exit_value = exit_value;
 
   /* Exit the program. */
-  longjmp (top_level, EXITPROG);
+  jump_to_top_level (EXITPROG);
+  /*NOTREACHED*/
 }

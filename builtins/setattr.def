@@ -21,6 +21,15 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $PRODUCES setattr.c
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include <stdio.h>
+#include "../bashansi.h"
+
 #include "../shell.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -30,7 +39,7 @@ extern char *this_command_name;
 
 $BUILTIN export
 $FUNCTION export_builtin
-$SHORT_DOC export [-n] [-f] [name ...] or export -p
+$SHORT_DOC export [-nf] [name ...] or export -p
 NAMEs are marked for automatic export to the environment of
 subsequently executed commands.  If the -f option is given,
 the NAMEs refer to functions.  If no NAMEs are given, or if `-p'
@@ -45,46 +54,51 @@ $END
    print all such variables.  An argument of `-n' says to remove the
    exported attribute from variables named in LIST.  An argument of
   -f indicates that the names present in LIST refer to functions. */
+int
 export_builtin (list)
      register WORD_LIST *list;
 {
-  return (set_or_show_attributes (list, att_exported));
+  return (set_or_show_attributes (list, att_exported, 0));
 }
 
 $BUILTIN readonly
 $FUNCTION readonly_builtin
-$SHORT_DOC readonly [-n] [-f] [name ...] or readonly -p
+$SHORT_DOC readonly [-anf] [name ...] or readonly -p
 The given NAMEs are marked readonly and the values of these NAMEs may
 not be changed by subsequent assignment.  If the -f option is given,
 then functions corresponding to the NAMEs are so marked.  If no
 arguments are given, or if `-p' is given, a list of all readonly names
 is printed.  An argument of `-n' says to remove the readonly property
-from subsequent NAMEs.  An argument of `--' disables further option
+from subsequent NAMEs.  The `-a' option means to treat each NAME as
+an array variable.  An argument of `--' disables further option
 processing.
 $END
 
 /* For each variable name in LIST, make that variable readonly.  Given an
    empty LIST, print out all existing readonly variables. */
+int
 readonly_builtin (list)
      register WORD_LIST *list;
 {
-  return (set_or_show_attributes (list, att_readonly));
+  return (set_or_show_attributes (list, att_readonly, 0));
 }
 
 /* For each variable name in LIST, make that variable have the specified
    ATTRIBUTE.  An arg of `-n' says to remove the attribute from the the
    remaining names in LIST. */
 int
-set_or_show_attributes (list, attribute)
+set_or_show_attributes (list, attribute, nodefs)
      register WORD_LIST *list;
-     int attribute;
+     int attribute, nodefs;
 {
   register SHELL_VAR *var;
-  int assign, undo = 0, functions_only = 0, any_failed = 0, opt;
+  int assign, undo, functions_only, arrays_only, any_failed, assign_error, opt;
+  char *name;
 
+  undo = functions_only = arrays_only = any_failed = assign_error = 0;
   /* Read arguments from the front of the list. */
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "nfp")) != -1)
+  while ((opt = internal_getopt (list, "anfp")) != -1)
     {
       switch (opt)
 	{
@@ -94,10 +108,15 @@ set_or_show_attributes (list, attribute)
 	  case 'f':
 	    functions_only = 1;
 	    break;
+#if defined (ARRAY_VARS)
+	  case 'a':
+	     arrays_only = 1;
+	     break;
+#endif
 	  case 'p':
 	    break;
 	  default:
-	    builtin_error ("usage: %s [-nfp] [varname]", this_command_name);
+	    builtin_usage ();
 	    return (EX_USAGE);
 	}
     }
@@ -108,85 +127,56 @@ set_or_show_attributes (list, attribute)
       if (attribute & att_exported)
 	array_needs_making = 1;
 
-      /* Cannot undo readonly status. */
+      /* Cannot undo readonly status, silently disallowed. */
       if (undo && (attribute & att_readonly))
 	attribute &= ~att_readonly;
 
       while (list)
 	{
-	  register char *name = list->word->word;
+	  name = list->word->word;
 
-	  if (functions_only)
+	  if (functions_only)		/* xxx -f name */
 	    {
 	      var = find_function (name);
-	      if (!var)
+	      if (var == 0)
 		{
 		  builtin_error ("%s: not a function", name);
 		  any_failed++;
 		}
 	      else
-		{
-		  if (undo)
-		    var->attributes &= ~attribute;
-		  else
-		    var->attributes |= attribute;
-		}
+		SETVARATTR (var, attribute, undo);
+
 	      list = list->next;
-	      if (attribute == att_exported)
-		array_needs_making++;
 	      continue;
 	    }
 
+	  /* xxx [-np] name[=value] */
 	  assign = assignment (name);
 
           if (assign)
 	    name[assign] = '\0';
+
 	  if (legal_identifier (name) == 0)
 	    {
-	      builtin_error ("%s: not a legal variable name", name);
-	      any_failed++;
+	      builtin_error ("`%s': not a valid identifier", name);
+	      assign_error++;
 	      list = list->next;
 	      continue;
 	    }
 
-	  if (assign)
+	  if (assign)	/* xxx [-np] name=value */
 	    {
 	      name[assign] = '=';
 	      /* This word has already been expanded once with command
 		 and parameter expansion.  Call do_assignment_no_expand (),
-		 which does not do command or parameter substitution. */
-	      do_assignment_no_expand (name);
+		 which does not do command or parameter substitution.  If
+		 the assignment is not performed correctly, flag an error. */
+	      if (do_assignment_no_expand (name) == 0)
+		assign_error++;
 	      name[assign] = '\0';
 	    }
 
-	  if (undo)
-	    {
-	      var = find_variable (name);
-	      if (var)
-		var->attributes &= ~attribute;
-	    }
-	  else
-	    {
-	      SHELL_VAR *find_tempenv_variable (), *tv;
-
-	      if (tv = find_tempenv_variable (name))
-		{
-		  var = bind_variable (tv->name, tv->value);
-		  dispose_variable (tv);
-		}
-	      else
-		var = find_variable (name);
-
-	      if (!var)
-		{
-		  var = bind_variable (name, (char *)NULL);
-		  var->attributes |= att_invisible;
-		}
-
-	      var->attributes |= attribute;
-	    }
-
-	  array_needs_making++;	/* XXX */
+	  set_var_attribute (name, attribute, undo);
 	  list = list->next;
 	}
     }
@@ -204,50 +194,133 @@ set_or_show_attributes (list, attribute)
       else
 	variable_list = all_shell_variables ();
 
+#if defined (ARRAY_VARS)
+      if (attribute & att_array)
+        {
+          arrays_only++;
+          if (attribute != att_array)
+	    attribute &= ~att_array;
+        }
+#endif
+
       if (variable_list)
 	{
 	  for (i = 0; var = variable_list[i]; i++)
 	    {
-	      if ((var->attributes & attribute) && !invisible_p (var))
-		{
-		  char flags[6];
-
-		  flags[0] = '\0';
-
-		  if (exported_p (var))
-		    strcat (flags, "x");
-
-		  if (readonly_p (var))
-		    strcat (flags, "r");
-
-		  if (function_p (var))
-		    strcat (flags, "f");
-
-		  if (integer_p (var))
-		    strcat (flags, "i");
-
-		  if (flags[0])
-		    {
-		      printf ("declare -%s ", flags);
-
-		      if (!function_p (var))
-			{
-			  char *x = double_quote (value_cell (var));
-			  printf ("%s=%s\n", var->name, x);
-			  free (x);
-			}
-		      else
-			{
-			  char *named_function_string ();
-
-			  printf ("%s\n", named_function_string
-				  (var->name, function_cell (var), 1));
-			}
-		    }
-		}
+#if defined (ARRAY_VARS)
+	      if (arrays_only && array_p (var) == 0)
+	        continue;
+#endif
+	      if ((var->attributes & attribute) && invisible_p (var) == 0)
+		show_var_attributes (var, nodefs);
 	    }
 	  free (variable_list);
 	}
     }
-  return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+
+  return (assign_error ? EX_BADASSIGN
+		       : ((any_failed == 0) ? EXECUTION_SUCCESS
+  					    : EXECUTION_FAILURE));
+}
+
+int
+show_var_attributes (var, nodefs)
+     SHELL_VAR *var;
+     int nodefs;
+{
+  char flags[6], *x;
+  int i;
+
+  i = 0;
+
+#if defined (ARRAY_VARS)
+  if (array_p (var))
+    flags[i++] = 'a';
+#endif
+
+  if (function_p (var))
+    flags[i++] = 'f';
+
+  if (integer_p (var))
+    flags[i++] = 'i';
+
+  if (readonly_p (var))
+    flags[i++] = 'r';
+
+  if (exported_p (var))
+    flags[i++] = 'x';
+
+  flags[i] = '\0';
+
+  printf ("declare -%s ", i ? flags : "-");
+
+#if defined (ARRAY_VARS)
+ if (array_p (var))
+    print_array_assignment (var, 1);
+  else
+#endif
+  if (nodefs)
+    printf ("%s\n", var->name);
+  else if (function_p (var))
+    printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+  else
+    {
+      x = double_quote (value_cell (var));
+      printf ("%s=%s\n", var->name, x);
+      free (x);
+    }
+  return (0);
+}
+
+int
+show_name_attributes (name, nodefs)
+     char *name;
+     int nodefs;
+{
+  SHELL_VAR *var;
+
+  var = find_tempenv_variable (name);
+  if (var == 0)
+    var = find_variable (name);
+
+  if (var && invisible_p (var) == 0)
+    {
+      show_var_attributes (var, nodefs);
+      return (0);
+    }
+  else
+    return (1);
+}
+
+void
+set_var_attribute (name, attribute, undo)
+     char *name;
+     int attribute, undo;
+{
+  SHELL_VAR *var, *tv;
+
+  if (undo)
+    var = find_variable (name);
+  else
+    {
+      if (tv = find_tempenv_variable (name))
+	{
+	  var = bind_variable (tv->name, tv->value);
+	  dispose_variable (tv);
+	}
+      else
+	var = find_variable (name);
+
+      if (var == 0)
+	{
+	  var = bind_variable (name, (char *)NULL);
+	  var->attributes |= att_invisible;
+	}
+    }
+
+  if (var)
+    SETVARATTR (var, attribute, undo);
+
+  if (var && ((var->attributes & att_exported) || (attribute & att_exported)))
+    array_needs_making++;	/* XXX */
 }

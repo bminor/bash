@@ -37,12 +37,12 @@ File operators:
     -e FILE        True if file exists.
     -f FILE        True if file exists and is a regular file.
     -g FILE        True if file is set-group-id.
-    -h FILE        True if file is a symbolic link.  Use "-L".
+    -h FILE        True if file is a symbolic link.
     -L FILE        True if file is a symbolic link.
-    -k FILE        True if file has its "sticky" bit set.
+    -k FILE        True if file has its `sticky' bit set.
     -p FILE        True if file is a named pipe.
     -r FILE        True if file is readable by you.
-    -s FILE        True if file is not empty.
+    -s FILE        True if file exists and is not empty.
     -S FILE        True if file is a socket.
     -t FD          True if FD is opened on a terminal.
     -u FILE        True if the file is set-user-id.
@@ -63,12 +63,16 @@ String operators:
     -z STRING      True if string is empty.
 
     -n STRING
- or STRING         True if string is not empty.
+    STRING         True if string is not empty.
 
     STRING1 = STRING2
                    True if the strings are equal.
     STRING1 != STRING2
                    True if the strings are not equal.
+    STRING1 < STRING2
+                   True if STRING1 sorts before STRING2 lexicographically
+    STRING1 > STRING2
+                   True if STRING1 sorts after STRING2 lexicographically
 
 Other operators:
 
@@ -88,18 +92,21 @@ $BUILTIN [
 $DOCNAME test_bracket
 $FUNCTION test_builtin
 $SHORT_DOC [ arg... ]
-This is a synonym for the "test" shell builtin, excepting that the
-last argument must be literally `]', to match the `[' which invoked
-the test.
+This is a synonym for the "test" builtin, but the last
+argument must be a literal `]', to match the opening `['.
 $END
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
+#include "common.h"
+
 extern char *this_command_name;
 
 /* TEST/[ builtin. */
@@ -109,12 +116,11 @@ test_builtin (list)
 {
   char **argv;
   int argc, result;
-  WORD_LIST *t = list;
 
   /* We let Matthew Bradburn and Kevin Braunsdorf's code do the
      actual test command.  So turn the list of args into an array
-     of strings, since that is what his code wants. */
-  if (!list)
+     of strings, since that is what their code wants. */
+  if (list == 0)
     {
       if (this_command_name[0] == '[' && !this_command_name[1])
 	builtin_error ("missing `]'");
@@ -122,23 +128,9 @@ test_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  /* Get the length of the argument list. */
-  for (argc = 0; t; t = t->next, argc++);
-
-  /* Account for argv[0] being a command name.  This makes our life easier. */
-  argc++;
-  argv = (char **)xmalloc ((1 + argc) * sizeof (char *));
-  argv[argc] = (char *)NULL;
-
-  /* this_command_name is the name of the command that invoked this
-     function.  So you can't call test_builtin () directly from
-     within this code, there are too many things to worry about. */
-  argv[0] = savestring (this_command_name);
-
-  for (t = list, argc = 1; t; t = t->next, argc++)
-    argv[argc] = savestring (t->word->word);
-
+  argv = make_builtin_argv  (list, &argc);
   result = test_command (argc, argv);
-  free_array (argv);
+  free ((char *)argv);
+
   return (result);
 }

@@ -23,7 +23,7 @@ $PRODUCES command.c
 
 $BUILTIN command
 $FUNCTION command_builtin
-$SHORT_DOC command [-pVv] [command [arg ...]]
+$SHORT_DOC command [-pVv] command [arg ...]
 Runs COMMAND with ARGS ignoring shell functions.  If you have a shell
 function called `ls', and you wish to call the command `ls', you can
 say "command ls".  If the -p option is given, a default value is used
@@ -32,14 +32,19 @@ the -V or -v option is given, a string is printed describing COMMAND.
 The -V option produces a more verbose description.
 $END
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
+#include "../flags.h"
 #include "bashgetopt.h"
+#include "common.h"
 
 extern int subshell_environment;
 
@@ -52,9 +57,11 @@ int
 command_builtin (list)
      WORD_LIST *list;
 {
-  int result, verbose = 0, use_standard_path = 0, opt;
-  char *old_path;
-  
+  int result, verbose, use_standard_path, opt;
+  char *old_path, *standard_path;
+  COMMAND *command;
+
+  verbose = use_standard_path = 0;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "pvV")) != -1)
     {
@@ -69,73 +76,80 @@ command_builtin (list)
 	case 'v':
 	  verbose = 4;
 	  break;
-
 	default:
-	  report_bad_option ();
-	  builtin_error ("usage: command [-pvV] [command [arg...]]");
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
     }
   list = loptend;
 
-  if (!list)
+  if (list == 0)
     return (EXECUTION_SUCCESS);
 
   if (verbose)
     {
-      int found, any_found = 0;
+      int found, any_found;
 
-      while (list)
+      for (any_found = 0; list; list = list->next)
 	{
-
 	  found = describe_command (list->word->word, verbose, 0);
 
-	  if (!found)
+	  if (found == 0)
 	    builtin_error ("%s: not found", list->word->word);
 
 	  any_found += found;
-	  list = list->next;
 	}
       return (any_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
+
+#if defined (RESTRICTED_SHELL)
+  if (use_standard_path && restricted)
+    {
+      builtin_error ("restricted: cannot use -p");
+      return (EXECUTION_FAILURE);
+    }
+#endif
 
   begin_unwind_frame ("command_builtin");
 
   /* We don't want this to be reparsed (consider command echo 'foo &'), so
      just make a simple_command structure and call execute_command with it. */
-  {
-    COMMAND *command;
+  if (use_standard_path)
+    {      
+      old_path = get_string_value ("PATH");
+      if (old_path)
+	old_path = savestring (old_path);
+      else
+	{
+	  old_path = xmalloc (1);
+	  old_path[0] = '\0';
+	}
+      add_unwind_protect ((Function *)restore_path, old_path);
 
-    if (use_standard_path)
-      {
-	char *standard_path;
+      standard_path = get_standard_path ();
+      bind_variable ("PATH", standard_path ? standard_path : "");
+      FREE (standard_path);
+    }
 
-	old_path = get_string_value ("PATH");
-	if (old_path)
-	  old_path = savestring (old_path);
-	else
-	  old_path = savestring ("");
-	add_unwind_protect ((Function *)restore_path, old_path);
-
-	standard_path = get_standard_path ();
-	bind_variable ("PATH", standard_path);
-	free (standard_path);
-      }
-    command = make_bare_simple_command ();
-    command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
-    command->value.Simple->redirects = (REDIRECT *)NULL;
-    command->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
-    command->value.Simple->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
-    /* If we're in a subshell, see if we can get away without forking
-       again, since we've already forked to run this builtin. */
-    if (subshell_environment)
-      {
-	command->flags |= CMD_NO_FORK;
-	command->value.Simple->flags |= CMD_NO_FORK;
-      }
-    add_unwind_protect ((char *)dispose_command, command);
-    result = execute_command (command);
-  }
+  command = make_bare_simple_command ();
+  command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
+  command->value.Simple->redirects = (REDIRECT *)NULL;
+  command->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
+  command->value.Simple->flags |= (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION);
+#if 0
+  /* This breaks for things like ( cd /tmp ; command z ababa ; echo next )
+     or $(command echo a ; command echo b;) or even
+     { command echo a; command echo b; } & */
+  /* If we're in a subshell, see if we can get away without forking
+     again, since we've already forked to run this builtin. */
+  if (subshell_environment)
+    {
+      command->flags |= CMD_NO_FORK;
+      command->value.Simple->flags |= CMD_NO_FORK;
+    }
+#endif
+  add_unwind_protect ((char *)dispose_command, command);
+  result = execute_command (command);
 
   run_unwind_frame ("command_builtin");
 
@@ -158,7 +172,7 @@ restore_path (var)
 static char *
 get_standard_path ()
 {
-#if defined (_CS_PATH) && !defined (hpux_7) && !defined (NetBSD)
+#if defined (_CS_PATH) && defined (HAVE_CONFSTR)
   char *p;
   size_t len;
 
@@ -167,11 +181,11 @@ get_standard_path ()
   *p = '\0';
   confstr (_CS_PATH, p, len);
   return (p);
-#else /* !_CSPATH || hpux_7 || NetBSD */
+#else /* !_CSPATH || !HAVE_CONFSTR  */
 #  if defined (CS_PATH)
   return (savestring (CS_PATH));
 #  else
   return (savestring (STANDARD_UTILS_PATH));
 #  endif /* !CS_PATH */
-#endif /* !_CS_PATH || hpux_7 */
+#endif /* !_CS_PATH || !HAVE_CONFSTR */
 }

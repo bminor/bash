@@ -1,0 +1,303 @@
+expect()
+{
+	echo expect "$@"
+}
+
+tool_var() {
+        eval $1=\"\${$1:-$2}\"
+        export $1
+}
+
+A="aaa bbb ccc"
+
+unset B
+
+tool_var        B       ${B:-"$A"}
+
+expect '<aaa bbb ccc>'
+recho "$A"
+expect '<aaa bbb ccc>'
+recho "$B"
+
+eto_prepend() {
+        eval $1=\'$2\''${'$1':+":"${'$1'}}'; export $1
+}
+
+foo=bar; export foo
+eto_prepend foo baz
+expect '<baz:bar>'
+recho $foo
+expect '<baz:bar>'
+recho ${foo-"bar"}
+
+aa='aaa bbb ccc'
+
+expect '<aaa bbb ccc>'
+recho ${zzz-"$aa"}
+expect '<bar>'
+recho ${zzz:-"bar"}
+expect '<bar>'
+recho "${zzz:-bar}"
+expect '<bar>'
+recho "${zzz:-"bar"}"
+
+var=abcde
+expect '<abcde>'
+recho "${var:-xyz}"
+expect '<abcde>'
+recho "${var:=xyz}"
+expect '<xyz>'
+recho "${var:+xyz}"
+
+set 'a b' c d e f
+expect '<a b> <c> <d> <e> <f>'
+recho ${1+"$@"}
+expect '<a b>'
+recho "${1-"$@"}"
+expect '<a> <b>'
+recho ${1-"$@"}
+expect '<a b> <c> <d> <e> <f>'
+recho "${1+$@}"
+expect '<a b> <c> <d> <e> <f>'
+recho "${1+"$@"}"
+
+HOME=/usr/homes/chet
+somevar=
+expect "<$HOME>"
+recho ${somevar:-~}
+expect "<$HOME>"
+recho "${somevar:-~}"
+expect '<~>'
+recho "${somevar:-"~"}"
+expect '<\~>'
+recho "${somevar:-\~}"
+expect '<\ \~>'
+recho "${somevar:-\ \~}"
+expect '<\ \ \~>'
+recho "${somevar:-\ \ \~}"
+
+expect "<$HOME>"
+recho ${somevar:-$HOME}
+expect "<$HOME>"
+recho "${somevar:-$HOME}"
+expect "<$HOME>"
+recho "${somevar:-"$HOME"}"
+expect '<$HOME>'
+recho "${somevar:-\$HOME}"
+expect '<\ $HOME>'
+recho "${somevar:-\ \$HOME}"
+expect '<\ \ $HOME>'
+recho "${somevar:-\ \ \$HOME}"
+
+foo=bar
+expect "<'bar'>"
+recho "${foo+'$foo'}"
+expect "<'bar'>"
+recho "${fox='$foo'}"
+
+P='*@*'
+expect '<*@*>'
+recho "${P%"*"}"
+expect '<*@*>'
+recho "${P%'*'}"
+
+expect '<*@>'
+recho ${P%"*"}
+expect '<*@>'
+recho ${P%'*'}
+
+expect '<*@*>'
+recho ${P%""}
+expect '<*@*>'
+recho ${P#""}
+
+expect '<*@*>'
+recho ${P#"$foobar"}
+expect '<*@*>'
+recho ${P%"$foobar"}
+
+s1=abcdefghijkl
+s2=efgh
+
+first=${s1/$s2*/}
+expect '<abcd>'
+recho $first
+
+last=${s1##$first}
+expect '<efghijkl>'
+recho $last
+
+shift $#
+UNAME_RELEASE=${1:-4.2MP}
+
+RELEASE=`expr "$UNAME_RELEASE" : '[^0-9]*\([0-9]*\)'` # 4
+case "$RELEASE" in
+"")     RELEASE=0 ;;
+*)      RELEASE=`expr "$RELEASE" + 0` ;;
+esac            
+REL_LEVEL=`expr "$UNAME_RELEASE" : '[^0-9]*[0-9]*.\([0-9]*\)'`    # 1
+REL_SUBLEVEL=`expr "$UNAME_RELEASE" : '[^0-9]*[0-9]*.[0-9]*.\([0-9]*\)'` # 2
+
+expect '<4> <2>'
+recho $RELEASE $REL_LEVEL $REL_SUBLEVEL
+
+b1()
+{
+	b2 ${1+"$@"}
+}
+
+b2()
+{	
+	recho $*
+	recho $#
+}
+
+expect '<1>'
+b1 ''
+
+expect '<bar> <2>'
+b1 bar ''
+
+expect '<bar> <2>'
+b1 '' bar
+
+expect '<4>'
+b1 '' '' '' ''
+
+NL="\\
+"
+
+NNL="+$NL+"
+
+expect '<--\> <-->'
+recho --$NL--
+expect '<--\^J-->'
+recho "--$NL--"
+
+expect '<--+\> <+-->'
+recho --$NNL--
+expect '<--+\^J+-->'
+recho "--$NNL--"
+
+expect '<-+\> <+-\> <->'
+recho -$NNL-$NL-
+
+set ''
+expect '<xy>'
+recho "$*xy"
+expect '<xy>'
+recho "x$*y"
+expect '<xy>'
+recho "xy$*"
+expect '<>'
+recho "$*"
+expect nothing
+recho $*
+
+unset undef ; set ""
+
+recho ${undef-"$zzz"}
+recho x${undef-"$zzz"}
+recho x${undef-"$@"}
+recho ${undef-"$@"}
+recho ${undef-"$zzz"}x
+recho ${undef-"$@"}x
+recho "$@"x
+recho "$zzz"x
+recho ${undef-}
+recho ${undef-""}
+
+yyy=""
+recho "$xxx"x
+recho "$yyy"x
+
+set "" "abd" ""
+recho "$@"x
+recho "$@"$xxx
+
+OIFS="$IFS"
+
+arg=a,b,c,d,e,f
+
+IFS=,
+
+export z=$arg
+
+eval z1=\"$arg\"
+
+IFS="$OIFS"
+
+recho $z
+recho $z1
+
+# should give an error
+abc\=def
+
+zz="a b c d e"
+declare a=$zz
+
+recho "$a"
+recho $a
+
+recho $(echo "foo$(echo ")")")
+
+# test backslash escapes
+
+recho \a
+recho \\a
+
+recho "\a"
+recho "\\a"
+
+recho '\a'
+recho '\\a'
+
+recho $(zecho \a)
+recho $(zecho \\a)
+
+recho $(zecho "\a")
+recho $(zecho "\\a")
+
+recho $(zecho '\a')
+recho $(zecho '\\a')
+
+recho `zecho \a`
+recho `zecho \\a`
+
+recho `zecho "\a"`
+recho `zecho "\\a"`
+
+recho `zecho '\a'`
+recho `zecho '\\a'`
+
+a=foo
+
+recho \$a
+recho \\$a
+
+recho "\$a"
+recho "\\$a"
+
+recho '\$a'
+recho '\\$a'
+
+recho $(zecho `zecho \a`)
+recho $(zecho `zecho \\a`)
+
+recho $(zecho `zecho "\a"`)
+recho $(zecho `zecho "\\a"`)
+
+recho $(zecho `zecho '\a'`)
+recho $(zecho `zecho '\\a'`)
+
+# should echo G { I K }
+recho ${abc:-G { I } K }
+
+abc=hi
+
+# should echo hi K }
+recho ${abc:-G { I } K }
+
+# should echo a*
+unset foo
+recho "${foo:-"a"}*"

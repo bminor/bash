@@ -1,8 +1,7 @@
 HOME=/usr/xyz
-set -v
-echo ~chet
+SHELL=~/bash
 echo ~ch\et
-echo ~chet/"foo"
+echo ~/"foo"
 echo "~chet"/"foo"
 echo \~chet/"foo"
 echo \~chet/bar
@@ -11,6 +10,30 @@ echo ~chet""/bar
 echo ":~chet/"
 echo abcd~chet
 echo "SHELL=~/bash"
-echo SHELL=~/bash
+echo $SHELL
 echo abcd:~chet
-echo PATH=/usr/ucb:/bin:~/bin:~/tmp/bin:/usr/bin
+path=/usr/ucb:/bin:~/bin:~/tmp/bin:/usr/bin
+echo $path
+
+cd /usr
+cd /tmp
+echo ~-
+echo ~+
+
+XPATH=/bin:/usr/bin:.
+
+# yes tilde expansion
+PPATH=$XPATH:~/bin
+echo "$PPATH"
+
+# no tilde expansion
+PPATH="$XPATH:~/bin"
+echo "$PPATH"
+
+# yes tilde expansion
+export PPATH=$XPATH:~/bin
+echo "$PPATH"
+
+# no tilde expansion
+export PPATH="$XPATH:~/bin"
+echo "$PPATH"

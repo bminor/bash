@@ -10,8 +10,9 @@ while [ $# -gt 0 ]; do
 	case "$1" in
 	-s)	shift; SRCDIR=$1 ;;
 	-u)	unfix=yes ;;
+	-h)	hardlinks=yes ;;
 	-*)	echo "$0: $1: bad option" 1>&2
-		echo "$0: usage: $0 [-u] [-s srcdir] [linkmap]" 1>&2
+		echo "$0: usage: $0 [-hu] [-s srcdir] [linkmap]" 1>&2
 		exit 1;;
 	*)	break ;;
 	esac
@@ -35,11 +36,16 @@ if [ ! -f "$linkfile" ]; then
 fi
 
 rm -f /tmp/z
-if (ln -s /dev/null /tmp/z) >/dev/null 2>&1; then
+# if the user specified hard links, then do that.  otherwise, try to use
+# symlinks if they're present
+if [ -n "$hardlinks" ]; then
+	LN=ln
+elif (ln -s /dev/null /tmp/z) >/dev/null 2>&1; then
 	LN="ln -s"
 else
 	LN=ln
 fi
+rm -f /tmp/z
 
 while read name target
 do

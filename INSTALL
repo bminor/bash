@@ -1,212 +1,288 @@
-File: bash.info,  Node: Install,  Next: Invoke,	 Prev: Built-in,  Up: Top
+Basic Installation
+==================
 
-Installing BASH
-***************
+These are generic installation instructions for Bash.
 
-To install BASH you simply type `make'.	 The BASH `Makefile' tries
-to dynamically figure out what kind of machine and operating system
-you are using.	It makes an educated guess based on the information
-it finds.
+The `configure' shell script attempts to guess correct values for
+various system-dependent variables used during compilation.  It uses
+those values to create a `Makefile' in each directory of the package
+(the top directory, the `builtins' and `doc' directories, and the each
+directory under `lib').  It also creates a `config.h' file containing
+system-dependent definitions.  Finally, it creates a shell script named
+`config.status' that you can run in the future to recreate the current
+configuration, a file `config.cache' that saves the results of its
+tests to speed up reconfiguring, and a file `config.log' containing
+compiler output (useful mainly for debugging `configure').  If at some
+point `config.cache' contains results you don't want to keep, you may
+remove or edit it.
 
-During the `make' process, a message is displayed describing what
-machine and operating system has been chosen for you.  This
-information is also saved in the file `.machine' so you can look at
-it later.
+If you need to do unusual things to compile the package, please try to
+figure out how `configure' could check whether or not to do them, and
+mail diffs or instructions to `bash-maintainers@prep.ai.mit.edu' so
+they can be considered for the next release.
 
-Therefore, for most machines, simply follow this simple checklist
-to install BASH:
+The file `configure.in' is used to create `configure' by a program
+called Autoconf.  You only need `configure.in' if you want to change it
+or regenerate `configure' using a newer version of Autoconf.  If you do
+this, make sure you are using Autoconf version 2.9 or newer.
 
-  1. Type `make'.  If you want to use GCC to compile bash, type
-     `make CC=gcc CPPNAME='$(CC) -E''.
+The simplest way to compile Bash is:
 
-  2. Wait for the compilation to finish.
+  1. `cd' to the directory containing the source code and type
+     `./configure' to configure Bash for your system.  If you're using
+     `csh' on an old version of System V, you might need to type `sh
+     ./configure' instead to prevent `csh' from trying to execute
+     `configure' itself.
 
-  3. Type `./bash' to see if the compile worked.
+     Running `configure' takes awhile.  While running, it prints some
+     messages telling which features it is checking for.
 
-  4. Type `make install prefix=/usr/gnu/' (or the appropriate root
-     of your local GNU software installation tree) to copy bash to
-     your binaries directory, assumed to be ${prefix}/bin.  This will
-     also attempt to install the manual pages under ${prefix}/man
-     and the info file under ${prefix}/info.
+  2. Type `make' to compile Bash and build the `bashbug' bug reporting
+     script.
 
-* Menu:
+  3. Optionally, type `make tests' to run the Bash test suite.
 
-* Problems::  What to do if BASH doesn't install quite so easily.
+  4. Type `make install' to install `bash' and `bashbug'.  This will
+     also install the manual pages and Info file.
 
-* Files::     Files used in the `make' process.
+You can remove the program binaries and object files from the source
+code directory by typing `make clean'.  To also remove the files that
+`configure' created (so you can compile Bash for a different kind of
+computer), type `make distclean'.
 
-* Porting::   Porting BASH to a new machine.
+Compilers and Options
+=====================
 
-* Bugs::      What to do if you Discover Bugs in BASH.
+Some systems require unusual options for compilation or linking that
+the `configure' script does not know about.  You can give `configure'
+initial values for variables by setting them in the environment.  Using
+a Bourne-compatible shell, you can do that on the command line like
+this:
 
- 
-File: bash.info,  Node: Problems,  Next: Files,	 Prev: Install,	 Up: Install
+     CC=c89 CFLAGS=-O2 LIBS=-lposix ./configure
 
-What if it Doesn't Install so Easily?
-=====================================
+On systems that have the `env' program, you can do it like this:
 
-Sometimes BASH gets confused and will make the wrong assumptions
-about your machine or operating system.	 If the displayed
-information (also found in `.machine') is incorrect, you will have
-to edit the file `machines.h' and provide the appropriate
-information so that BASH can be installed correctly.  The complete
-instructions for doing this are located in the `machines.h' file.
+     env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
 
-However, if BASH says that your machine type is an
-"UNKNOWN_MACHINE", or BASH thought it knew something about your
-machine but was wrong, then reading the next few sections could
-be of use to you (*note Files::., and *note Porting::., for more
-information). 
+The configuration process uses GCC to build Bash if it is available.
 
-On the MIPSEB with the BSD universe, you must:
+Compiling For Multiple Architectures
+====================================
 
-1) Place /bsd43/bin in your PATH before /bin
-2) Use $(CC) -E instead of /lib/cpp to build cpp-Makefile.
+You can compile Bash for more than one kind of computer at the same
+time, by placing the object files for each architecture in their own
+directory.  To do this, you must use a version of `make' that supports
+the `VPATH' variable, such as GNU `make'.  `cd' to the directory where
+you want the object files and executables to go and run the `configure'
+script from the source directory.  You may need to supply the
+`--srcdir=PATH' argument to tell `configure' where the source files
+are.  `configure' automatically checks for the source code in the
+directory that `configure' is in and in `..'.
 
-On SCO Xenix 386, you must:
+If you have to use a `make' that does not supports the `VPATH'
+variable, you can compile Bash for one architecture at a time in the
+source code directory.  After you have installed Bash for one
+architecture, use `make distclean' before reconfiguring for another
+architecture.
 
-1) Use $(CC) -E instead of /lib/cpp to build cpp-Makefile.
+Alternatively, if your system supports symbolic links, you can use the
+`support/mkclone' script to create a build tree which has symbolic
+links back to each file in the source directory.  Here's an example
+that creates a build directory in the current directory from a source
+directory `/usr/gnu/src/bash-2.0':
 
-On Interactive Unix version 3 or 4, you must:
+     bash /usr/gnu/src/bash-2.0/support/mkclone -s /usr/gnu/src/bash-2.0 .
 
-1) Edit cpp-Makefile to remove either -O or -g from DEBUG_FLAGS
+The `mkclone' script requires Bash, so you must have already built Bash
+for at least one architecture before you can create build directories
+for other architectures.
 
-File: bash.info,  Node: Files,	Next: Porting,	Prev: Problems,	 Up: Install
+Installation Names
+==================
 
-Files Used in the `make' Process.
-=================================
+By default, `make install' will install into `/usr/local/bin',
+`/usr/local/man', etc.  You can specify an installation prefix other
+than `/usr/local' by giving `configure' the option `--prefix=PATH'.
 
-The following files are used during the installation of BASH, in
-the `make' process:
+You can specify separate installation prefixes for
+architecture-specific files and architecture-independent files.  If you
+give `configure' the option `--exec-prefix=PATH', the package will use
+`PATH' as the prefix for installing programs and libraries.
+Documentation and other data files will still use the regular prefix.
 
-`Makefile'
-     This is responsible for making the actual `Makefile' that is
-     used to create Bash.  It runs the C preprocessor (usually
-     located in `/lib/cpp') on the file `cpp-Makefile', producing
-     the output file `bash-Makefile'.
+Specifying the System Type
+==========================
 
-`cpp-Makefile'
-     This is a file of C comments and text.  It contains a
-     reasonable number of `ifdefs' which control what files get
-     compiled and which flags are passed to the various C files
-     comprising BASH.  It includes files named `machines.h',
-     `sysdefs.h', and `config.h'.
+There may be some features `configure' can not figure out
+automatically, but needs to determine by the type of host the package
+will run on.  Usually `configure' can figure that out, but if it prints
+a message saying it can not guess the host type, give it the
+`--host=TYPE' option.  `TYPE' can either be a short name for the system
+type, such as `sun4', or a canonical name with three fields:
+`CPU-COMPANY-SYSTEM' (e.g., `sparc-sun-sunos4.1.2').
 
-`machines.h'
-     This file contains the basic compilation parameters for all of
-     the machines to which BASH has been ported.  This file
-     consists of a series of conditional blocks, one per machine
-     type.
+See the file `support/config.sub' for the possible values of each field.
 
-     These conditional blocks are depend upon the unique identifier
-     that `cpp' has predefined for this machine.  In some cases,
-     additional information can be passed from `Makefile'.  It is
-     possible to pass information such as whether or not a
-     particular file is available on this system, and so on.
+Sharing Defaults
+================
 
-`sysdefs.h'
-     This file is dynamically made at build time by running the shell
-     script `support/mksydefs'.  If there appears to be something wrong
-     in this file, then edit the `mksysdefs' script, and mail the
-     changes that you make to bash-maintainers@prep.ai.mit.edu.
+If you want to set default values for `configure' scripts to share, you
+can create a site shell script called `config.site' that gives default
+values for variables like `CC', `cache_file', and `prefix'.  `configure'
+looks for `PREFIX/share/config.site' if it exists, then
+`PREFIX/etc/config.site' if it exists.  Or, you can set the
+`CONFIG_SITE' environment variable to the location of the site script.
+A warning: the Bash `configure' looks for a site script, but not all
+`configure' scripts do.
 
-`bash-Makefile'
-     This is the output from the initial stage of `make'.  It is a
-     stripped down version of `cpp-Makefile' which is tailor-made
-     for your machine and operating system.  All subsequent `makes'
-     use this file.
+Operation Controls
+==================
 
+`configure' recognizes the following options to control how it operates.
 
-File: bash.info,  Node: Porting,  Next: Bugs,  Prev: Files,  Up: Install
+`--cache-file=FILE'
+     Use and save the results of the tests in FILE instead of
+     `./config.cache'.  Set FILE to `/dev/null' to disable caching, for
+     debugging `configure'.
 
-What if You Have to Port to a New Machine?
-==========================================
+`--help'
+     Print a summary of the options to `configure', and exit.
 
-Sometimes you may want to port BASH to a new, previously
-unsupported machine.  To do so you need to create a block in
-`machines.h' which is conditional based on a unique identifier
-present in your version of the C preprocessor.
+`--quiet'
+`--silent'
+`-q'
+     Do not print messages saying which checks are being made.
 
-If you don't know what that symbol is, you might try the following
-simple test:
+`--srcdir=DIR'
+     Look for the Bash source code in directory DIR.  Usually
+     `configure' can determine that directory automatically.
 
-     echo "main () { }" > foo.c
-     cc -v foo.c
+`--version'
+     Print the version of Autoconf used to generate the `configure'
+     script, and exit.
 
-You are looking for `-DMACHINE', where `MACHINE' is an identifier
-for your machine.  If you are very unlucky and your machine's C
-preprocessor doesn't have a unique identifier, you will have to
-define the identifier in Makefile manually.
+`configure' also accepts some other, not widely used, boilerplate
+options.
 
-Let's say you have a machine from Yoyodyne Industries, called the
-YoYo.  It runs a version of BSD, so it is reasonably compatible. 
-However, the `cpp' on this YoYo machine doesn't define any unique
-identifiers.  You should change the `Makefile' line for `CPPFLAGS'
-to:
+Optional Features
+=================
 
-     CPPFLAGS = -P -DYoYo
+The Bash `configure' has a number of `--enable-FEATURE' options, where
+FEATURE indicates an optional part of the package.  There are also
+several `--with-PACKAGE' options, where PACKAGE is something like
+`gnu-malloc' or `purify' (for the Purify memory allocation checker).  To
+turn off the default use of a package, use `--without-PACKAGE'.  To
+configure Bash without a feature that is enabled by default, use
+`--disable-FEATURE'.
 
-Then, in `machines.h', you copy the block for `UNKNOWN_MACHINE',
-and change the conditional to;
+Here is a complete list of the `--enable-' and `--with-' options that
+the Bash `configure' recognizes.
 
-     #if defined (YoYo)
+`--with-gnu-malloc'
+     Use the GNU version of `malloc' in `lib/malloc/malloc.c'.  This is
+     not the same `malloc' that appears in GNU libc, but an older
+     version derived from the 4.2 BSD `malloc'.  This `malloc' is very
+     fast, but wastes a lot of space.  This option is enabled by
+     default.  The `NOTES' file contains a list of systems for which
+     this should be turned off.
 
-Inside of the YoYo block you define `M_MACHINE="YoYo"', and
-`M_OS=Bsd'.  You also modify the existing defines to match your
-machine's software.
+`--with-glibc-malloc'
+     Use the GNU libc version of `malloc' in `lib/malloc/gmalloc.c'.
+     This is somewhat slower than the default `malloc', but wastes
+     considerably less space.
 
-If BASH still won't compile, perhaps because of missing code that
-is required for your YoYo machine, you will have to write that code
-and place it within a conditional block based on YoYo.
+`--with-afs'
+     Define if you are using the Andrew File System from Transarc.
 
-Most machines aren't that difficult; simply redefining a few of the
-default values is sufficient.  If you do run across a difficult
-machine, please send all fixes and changes to
-bash-maintainers@prep.ai.mit.edu in the form of context diffs:
+`--with-purify'
+     Define this to use the Purify memory allocation checker from Pure
+     Software.
 
-     diff -c orig-machines.h machines.h >machines.diffs
+`--enable-minimal-config'
+     This produces a shell with minimal features, close to the
+     historical Bourne shell.
 
-Please include information about which version of the shell you have.
+The `minimal-config' option can be used to disable all of the following
+options, but it is processed first, so individual options may be
+enabled using `enable-FEATURE'.
 
-For those machines which prove more difficult, or if you are not
-sure about where to start, the scripts in the `portbash' directory
-may prove helpful.
+All of the following options except for `disabled-builtins' and
+`usg-echo-default' are enabled by default, unless the operating system
+does not provide the necessary support.
 
-File: bash.info,  Node: Bugs,  Prev: Porting,  Up: Install
+`--enable-job-control'
+     This enables job control features, if the OS supports them.
 
-Reporting Bugs
-==============
+`--enable-alias'
+     Allow alias expansion and include the `alias' and `unalias'
+     builtins.
 
-If you find a bug in bash, you should report it.  But first you
-should make sure that it really is a bug and that it appears in the
-latest version of BASH that is available.
+`--enable-readline'
+     Include support for command-line editing and history with the Bash
+     version of the Readline library.
 
-Once you have ascertained that a bug really exists, you are welcome
-to mail in a bug report.  If you have a fix, please mail that too!
-The program `bashbug' is used to submit bug reports.
+`--enable-history'
+     Include command history and the `fc' and `history' builtin
+     commands.
 
-Suggestions and "philosophical" bug reports should be mailed to
-bug-bash@ai.mit.edu.  Genuine bug reports should be mailed to the
-same place, or to bash-maintainers@prep.ai.mit.edu.  The `bashbug'
-script sends its messages to bug-bash@prep.ai.mit.edu.
+`--enable-bang-history'
+     Include support for `csh'-like history substitution.
 
-*All* bug reports should include:
+`--enable-directory-stack'
+     Include support for a `csh'-like directory stack and the `pushd',
+     `popd', and `dirs' builtins.
 
-   * The version number of BASH.
+`--enable-restricted'
+     Include support for a "restricted shell".  If this is enabled,
+     Bash, when called as `rbash', enters a restricted mode.  See *Note
+     The Restricted Shell::, for a description of restricted mode.
 
-   * The hardware and operating system used.
+`--enable-process-substitution'
+     This enables process substitution (*note Process Substitution::.)
+     if the OS provides the necessary support.
 
-   * The compiler used to compile BASH.
+`--enable-prompt-string-decoding'
+     Turn on the interpretation of a number of backslash-escaped
+     characters in the `$PS1', `$PS2', `$PS3', and `$PS4' prompt
+     strings.
 
-   * A description of the bug's behavior.
+`--enable-select'
+     Include the `ksh' `select' builtin, which allows the generation of
+     simple menus.
 
-   * A short script or "recipe" which demonstrates the bug.
+`--enable-help-builtin'
+     Include the `help' builtin, which displays help on shell builtins
+     and variables.
 
-The `bashbug' program includes much of this information
-automatically.  Without this information, it is generally not
-possible to successfully debug BASH.  Usually, without this
-information, the bug won't manifest itself! 
+`--enable-array-variables'
+     Include support for one-dimensional array shell variables.
 
-Discussion and questions about BASH in general (including
-questions about this documentation) can be sent to
-bash-maintainers@prep.ai.mit.edu. 
+`--enable-dparen-arithmetic'
+     Include support for the `ksh' `((...))' command.
+
+`--enable-brace-expansion'
+     Include `csh'-like brace expansion ( `b{a,b}c' ==> `bac bbc' ).
+
+`--enable-disabled-builtins'
+     Allow builtin commands to be invoked via `builtin xxx' even after
+     `xxx' has been disabled using `enable -n xxx'.  See *Note Bash
+     Builtins::, for details of the `builtin' and `enable' builtin
+     commands.
+
+`--enable-command-timing'
+     Include support for recognizing `time' as a reserved word and for
+     displaying timing statistics for the pipeline following `time'.
+     This allows pipelines as well as shell builtins and functions to
+     be timed.
+
+`--enable-usg-echo-default'
+     Make the `echo' builtin expand backslash-escaped characters by
+     default, without requiring the `-e' option.  This makes the Bash
+     `echo' behave more like the System V version.
+
+The file `config.h.top' contains C Preprocessor `#define' statements
+for options which are not settable from `configure'.  Some of these are
+not meant to be changed; beware of the consequences if you do.  Read
+the comments associated with each definition for more information about
+its effect.

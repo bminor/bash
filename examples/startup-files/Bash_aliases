@@ -13,7 +13,6 @@ alias j="jobs -l"
 alias l="ls -l "
 alias ll="ls -l"
 alias ls="ls -F"
-alias term='set noglob; eval `tset -Q -s `'
 alias pu="pushd"
 alias po="popd"
 
@@ -53,11 +52,12 @@ seq ()
 { 
     local lower upper output;
     lower=$1 upper=$2;
+
+    if [ $lower -ge $upper ]; then return; fi
     while [ $lower -le $upper ];
     do
-        output="$output $lower";
-        lower=$[ $lower + 1 ];
-    done;
-    echo $output
+	echo -n "$lower "
+        lower=$(($lower + 1))
+    done
+    echo "$lower"
 }
-

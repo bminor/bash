@@ -1,5 +1,5 @@
 \input texinfo  @c -*-texinfo-*-
-@setfilename termcap
+@setfilename termcap.info
 @settitle The Termcap Library
 @smallbook
 
@@ -286,9 +286,8 @@ variable @code{TERM} using @code{getenv ("TERM")}.
 If you are using the GNU version of termcap, you can alternatively ask
 @code{tgetent} to allocate enough space.  Pass a null pointer for
 @var{buffer}, and @code{tgetent} itself allocates the storage using
-@code{malloc}.  In this case the returned value on success is the address
-of the storage, cast to @code{int}.  But normally there is no need for you
-to look at the address.  Do not free the storage yourself.@refill
+@code{malloc}.  There is no way to get the address that was allocated,
+and you shouldn't try to free the storage.@refill
 
 With the Unix version of termcap, you must allocate space for the
 description yourself and pass the address of the space as the argument
@@ -1890,6 +1889,12 @@ flag, output a @samp{cm} absolute positioning command after writing in
 the last column.  Another safe thing to do is to output carriage-return
 newline, which will leave the cursor at the beginning of the following
 line.
+
+@item LP
+@kindex LP
+Flag whose presence means that it is safe to write in the last column of
+the last line without worrying about undesired scrolling.  @samp{LP}
+indicates the DEC flavor of @samp{xn} strangeness.
 @end table
 
 @node Scrolling, Windows, Wrapping, Capabilities
@@ -2830,12 +2835,12 @@ Such programs should also send the @samp{ke} string when exiting.
 @table @asis
 @item @samp{ks}
 @kindex ka@dots{}ku
-String of commands to make the function keys transmit.  If this
+String of commands to make the keypad keys transmit.  If this
 capability is not provided, but the others in this section are,
-programs may assume that the function keys always transmit.
+programs may assume that the keypad keys always transmit.
 
 @item @samp{ke}
-String of commands to make the function keys work locally.  This
+String of commands to make the keypad keys work locally.  This
 capability is provided only if @samp{ks} is.
 
 @item @samp{kl}
@@ -3065,6 +3070,12 @@ String of commands to clear all tab stops.
 @kindex st
 String of commands to set tab stop at current cursor column on all
 lines.
+
+@item NF
+@kindex NF
+Flag whose presence means that the terminal does not support XON/XOFF
+flow control.  Programs should not send XON (@kbd{C-q}) or XOFF
+(@kbd{C-s}) characters to the terminal.
 @end table
 
 @node Pad Specs, Status Line, Initialization, Capabilities
@@ -3460,6 +3471,8 @@ Number: height of the screen.
 String to position cursor at lower left corner.
 @item lm
 Number: lines of display memory.
+@item LP
+Flag: writing to last column of last line will not scroll.
 @item mb
 String to enter blinking mode.
 @item md
@@ -3486,6 +3499,8 @@ Flag: cursor motion in standout mode is safe.
 Obsolete flag: do not use ASCII carriage-return on this terminal.
 @item nd
 String to move the cursor right one column.
+@item NF
+Flag: do not use XON/XOFF flow control.
 @item nl
 Obsolete alternative name for the @samp{do} and @samp{sf} capabilities.
 @item ns

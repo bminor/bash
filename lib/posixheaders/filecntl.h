@@ -33,4 +33,13 @@
 #define SET_CLOSE_ON_EXEC(fd)  (fcntl ((fd), F_SETFD, FD_CLOEXEC))
 #define SET_OPEN_ON_EXEC(fd)   (fcntl ((fd), F_SETFD, FD_NCLOEXEC))
 
+/* How to open a file in non-blocking mode, the Posix.1 way. */
+#if !defined (O_NONBLOCK)
+#  if defined (O_NDELAY)
+#    define O_NONBLOCK O_NDELAY
+#  else
+#    define O_NONBLOCK 0
+#  endif
+#endif
+
 #endif /* ! _FILECNTL_H_ */

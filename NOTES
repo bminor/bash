@@ -1,0 +1,42 @@
+Platform-Specific Configuration Notes
+=====================================
+
+1.  configure --without-gnu-malloc on:
+
+	alpha running OSF/1
+	alpha running Linux
+
+	next running NeXT/OS
+
+	all machines running SunOS YP code: SunOS4, SunOS5, HP/UX
+
+	linux (optional)
+
+	QNX 4.2
+	other OSF/1 machines (KSR/1, HP, IBM AIX/ESA)
+	AIX
+	sparc SVR4, SVR4.2 (ICL reference port)
+	DG/UX
+	Cray
+
+	NetBSD/sparc (malloc needs 8-byte alignment; GNU malloc has 4-byte)
+
+	BSD/OS 2.1 if you want to use loadable builtins
+
+	If you are using GNU libc, especially on a linux system
+
+(Configuring --without-gnu-malloc will still result in lib/malloc/libmalloc.a
+being built and linked against, but there is only a stub file in the archive.)
+
+2.  configure using shlicc on BSD/OS 2.1 to use loadable builtins
+
+3.  Bash cannot be built in a directory separate from the source directory
+    using configure --srcdir=... unless the version of `make' you're using
+    does $VPATH handling right.  The SunOS make, for one, does not seem to
+    do it right.  The script support/mkclone can be used to create a
+    `build tree' using symlinks to get around this.
+
+4.  I've had reports that username completion does not work on IRIX 5.3
+    when linking with -lnsl.  This is only a problem when you're running
+    NIS.  Editing the Makefile after configure runs and removing the
+    `-lnsl' from the assignment to `LIBS' fixes the problem.

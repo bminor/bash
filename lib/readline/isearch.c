@@ -26,18 +26,21 @@
    675 Mass Ave, Cambridge, MA 02139, USA. */
 #define READLINE_LIBRARY
 
+#if defined (HAVE_CONFIG_H)
+#  include <config.h>
+#endif
+
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-#include "memalloc.h"
+#include <sys/types.h>
+
+#include "rldefs.h"
 #include "readline.h"
 #include "history.h"
-
-#define STREQ(a, b)	(((a)[0] == (b)[0]) && (strcmp ((a), (b)) == 0))
-#define STREQN(a, b, n)	(((a)[0] == (b)[0]) && (strncmp ((a), (b), (n)) == 0))
 
 /* Variables imported from other files in the readline library. */
 extern Keymap _rl_keymap;
@@ -45,6 +48,14 @@ extern HIST_ENTRY *saved_line_for_history;
 extern int rl_line_buffer_len;
 extern int rl_point, rl_end;
 extern char *rl_line_buffer;
+
+extern void _rl_save_prompt ();
+extern void _rl_restore_prompt ();
+
+extern int rl_execute_next ();
+extern void rl_extend_line_buffer ();
+
+extern int _rl_input_available ();
 
 extern char *xmalloc (), *xrealloc ();
 
@@ -56,18 +67,18 @@ static char *prev_line_found;
 
 /* Search backwards through the history looking for a string which is typed
    interactively.  Start with the current line. */
+int
 rl_reverse_search_history (sign, key)
-     int sign;
-     int key;
+     int sign, key;
 {
   return (rl_search_history (-sign, key));
 }
 
 /* Search forwards through the history looking for a string which is typed
    interactively.  Start with the current line. */
+int
 rl_forward_search_history (sign, key)
-     int sign;
-     int key;
+     int sign, key;
 {
   return (rl_search_history (sign, key));
 }
@@ -83,29 +94,43 @@ rl_display_search (search_string, reverse_p, where)
      int reverse_p, where;
 {
   char *message;
+  int msglen, searchlen;
 
-  message = xmalloc (1 + (search_string ? strlen (search_string) : 0) + 30);
-  *message = '\0';
+  searchlen = (search_string && *search_string) ? strlen (search_string) : 0;
+
+  message = xmalloc (searchlen + 33);
+  msglen = 0;
 
 #if defined (NOTDEF)
   if (where != -1)
-    sprintf (message, "[%d]", where + history_base);
+    {
+      sprintf (message, "[%d]", where + history_base);
+      msglen = strlen (message);
+    }
 #endif /* NOTDEF */
 
-  strcat (message, "(");
+  message[msglen++] = '(';
 
   if (reverse_p)
-    strcat (message, "reverse-");
+    {
+      strcpy (message + msglen, "reverse-");
+      msglen += 8;
+    }
 
-  strcat (message, "i-search)`");
+  strcpy (message + msglen, "i-search)`");
+  msglen += 10;
 
   if (search_string)
-    strcat (message, search_string);
+    {
+      strcpy (message + msglen, search_string);
+      msglen += searchlen;
+    }
 
-  strcat (message, "': ");
+  strcpy (message + msglen, "': ");
+
   rl_message ("%s", message, 0);
   free (message);
-  rl_redisplay ();
+  (*rl_redisplay_function) ();
 }
 
 /* Search through the history looking for an interactively typed string.
@@ -114,8 +139,7 @@ rl_display_search (search_string, reverse_p, where)
    backwards. */
 static int
 rl_search_history (direction, invoking_key)
-     int direction;
-     int invoking_key;
+     int direction, invoking_key;
 {
   /* The string that the user types in to search for. */
   char *search_string;
@@ -127,19 +151,17 @@ rl_search_history (direction, invoking_key)
   int search_string_size;
 
   /* The list of lines to search through. */
-  char **lines, *allocated_line = (char *)NULL;
+  char **lines, *allocated_line;
 
   /* The length of LINES. */
   int hlen;
 
   /* Where we get LINES from. */
-  HIST_ENTRY **hlist = history_list ();
+  HIST_ENTRY **hlist;
 
-  register int i = 0;
-  int orig_point = rl_point;
-  int orig_line = where_history ();
-  int last_found_line = orig_line;
-  int c, done = 0, found, failed, sline_len;
+  register int i;
+  int orig_point, orig_line, last_found_line;
+  int c, found, failed, sline_len;
 
   /* The line currently being searched. */
   char *sline;
@@ -148,10 +170,17 @@ rl_search_history (direction, invoking_key)
   int line_index;
 
   /* Non-zero if we are doing a reverse search. */
-  int reverse = (direction < 0);
+  int reverse;
+
+  orig_point = rl_point;
+  last_found_line = orig_line = where_history ();
+  reverse = direction < 0;
+  hlist = history_list ();
+  allocated_line = (char *)NULL;
 
   /* Create an arrary of pointers to the lines that we want to search. */
   maybe_replace_line ();
+  i = 0;
   if (hlist)
     for (i = 0; hlist[i]; i++);
 
@@ -176,6 +205,8 @@ rl_search_history (direction, invoking_key)
   /* The line where we start the search. */
   i = orig_line;
 
+  _rl_save_prompt ();
+
   /* Initialize search parameters. */
   search_string = xmalloc (search_string_size = 128);
   *search_string = '\0';
@@ -192,14 +223,13 @@ rl_search_history (direction, invoking_key)
   line_index = rl_point;
 
   found = failed = 0;
-  while (!done)
+  for (;;)
     {
       Function *f = (Function *)NULL;
 
       /* Read a key and decide how to proceed. */
       c = rl_read_key ();
 
-      /* Hack C to Do What I Mean. */
       if (_rl_keymap[c].type == ISFUNC)
 	{
 	  f = _rl_keymap[c].function;
@@ -210,78 +240,81 @@ rl_search_history (direction, invoking_key)
 	    c =  !reverse ? -1 : -2;
 	}
 
+      /* Let NEWLINE (^J) terminate the search for people who don't like
+	 using ESC.  ^M can still be used to terminate the search and
+	 immediately execute the command. */
+      if (c == ESC || c == NEWLINE)
+	{
+	  /* ESC still terminates the search, but if there is pending
+	     input or if input arrives within 0.1 seconds (on systems
+	     with select(2)) it is used as a prefix character
+	     with rl_execute_next.  WATCH OUT FOR THIS!  This is intended
+	     to allow the arrow keys to be used like ^F and ^B are used
+	     to terminate the search and execute the movement command. */
+	  if (c == ESC && _rl_input_available ())	/* XXX */
+	    rl_execute_next (ESC);
+	  break;
+	}
+
+      if (c >= 0 && (CTRL_CHAR (c) || META_CHAR (c) || c == RUBOUT))
+	{
+	  rl_execute_next (c);
+	  break;
+	}
+
       switch (c)
 	{
-	case ESC:
-	  done = 1;
-	  continue;
-
 	case -1:
-	  if (!search_string_index)
+	  if (search_string_index == 0)
 	    continue;
+	  else if (reverse)
+	    --line_index;
+	  else if (line_index != sline_len)
+	    ++line_index;
 	  else
-	    {
-	      if (reverse)
-		--line_index;
-	      else
-		{
-		  if (line_index != sline_len)
-		    ++line_index;
-		  else
-		    ding ();
-		}
-	    }
+	    ding ();
 	  break;
 
 	  /* switch directions */
 	case -2:
 	  direction = -direction;
-	  reverse = (direction < 0);
+	  reverse = direction < 0;
 	  break;
 
 	case CTRL ('G'):
 	  strcpy (rl_line_buffer, lines[orig_line]);
 	  rl_point = orig_point;
 	  rl_end = strlen (rl_line_buffer);
+	  _rl_restore_prompt();
 	  rl_clear_message ();
 	  free (allocated_line);
 	  free (lines);
 	  return 0;
 
 	default:
-	  if (CTRL_CHAR (c) || META_CHAR (c) || c == RUBOUT)
+	  /* Add character to search string and continue search. */
+	  if (search_string_index + 2 >= search_string_size)
 	    {
-	      rl_execute_next (c);
-	      done = 1;
-	      continue;
+	      search_string_size += 128;
+	      search_string = xrealloc (search_string, search_string_size);
 	    }
-	  else
-	    {
-	      /* Add character to search string and continue search. */
-	      if (search_string_index + 2 >= search_string_size)
-		{
-		  search_string_size += 128;
-		  search_string = xrealloc (search_string, search_string_size);
-		}
-	      search_string[search_string_index++] = c;
-	      search_string[search_string_index] = '\0';
-	      break;
-	    }
+	  search_string[search_string_index++] = c;
+	  search_string[search_string_index] = '\0';
+	  break;
 	}
 
-      found = failed = 0;
-      while (1)
+      for (found = failed = 0;;)
 	{
 	  int limit = sline_len - search_string_index + 1;
 
 	  /* Search the current line. */
 	  while (reverse ? (line_index >= 0) : (line_index < limit))
 	    {
-	      if (STREQN(search_string, sline + line_index, search_string_index))
-		  {
-		    found++;
-		    break;
-		  }
+	      if (STREQN (search_string, sline + line_index, search_string_index))
+		{
+		  found++;
+		  break;
+		}
 	      else
 		line_index += direction;
 	    }
@@ -314,10 +347,7 @@ rl_search_history (direction, invoking_key)
 	    break;
 
 	  /* Now set up the line for searching... */
-	  if (reverse)
-	    line_index = sline_len - search_string_index;
-	  else
-	    line_index = 0;
+	  line_index = reverse ? sline_len - search_string_index : 0;
 	}
 
       if (failed)
@@ -356,6 +386,8 @@ rl_search_history (direction, invoking_key)
 
   /* First put back the original state. */
   strcpy (rl_line_buffer, lines[orig_line]);
+
+  _rl_restore_prompt ();
 
   /* Free the search string. */
   free (search_string);

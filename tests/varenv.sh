@@ -92,3 +92,14 @@ echo $c $d
 d=$c c=$d
 expect "1 1"
 echo $c $d
+
+# just for completeness
+unset d c
+expect unset
+echo ${d-unset}
+
+# no output
+export a
+a=bcde
+export a
+/bin/true 2>/dev/null

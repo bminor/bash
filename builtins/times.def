@@ -28,62 +28,79 @@ Print the accumulated user and system times for processes run from
 the shell.
 $END
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include <stdio.h>
+#include "../bashtypes.h"
 #include "../shell.h"
-#include <sys/types.h>
 
-#if defined (hpux) || defined (USGr4) || defined (XD88) || defined (USGr3)
-#  undef HAVE_RESOURCE
-#endif /* hpux || USGr4 || XD88 || USGr3 */
-
-#if defined (_POSIX_VERSION) || !defined (HAVE_RESOURCE)
-#  include <sys/times.h>
-#else /* !_POSIX_VERSION && HAVE_RESOURCE */
+#if TIME_WITH_SYS_TIME
 #  include <sys/time.h>
-#  include <sys/resource.h>
-#endif /* !_POSIX_VERSION && HAVE_RESOURCE */
+#  include <time.h>
+#else
+#  if defined (HAVE_SYS_TIME_H)
+#    include <sys/time.h>
+#  else
+#    include <time.h>
+#  endif
+#endif
 
-/* Print the totals for system and user time used.  The
-   information comes from variables in jobs.c used to keep
-   track of this stuff. */
+#if defined (HAVE_SYS_TIMES_H)
+#  include <sys/times.h>
+#endif /* HAVE_SYS_TIMES_H */
+
+#if defined (HAVE_SYS_RESOURCE_H)
+#  include <sys/resource.h>
+#endif
+
+#include "common.h"
+
+/* Print the totals for system and user time used. */
+int
 times_builtin (list)
      WORD_LIST *list;
 {
-#if !defined (_POSIX_VERSION) && defined (HAVE_RESOURCE) && defined (RUSAGE_SELF)
+#if defined (HAVE_GETRUSAGE) && defined (HAVE_TIMEVAL) && defined (RUSAGE_SELF)
   struct rusage self, kids;
 
   getrusage (RUSAGE_SELF, &self);
   getrusage (RUSAGE_CHILDREN, &kids);	/* terminated child processes */
 
-  print_timeval (&self.ru_utime);
+  print_timeval (stdout, &self.ru_utime);
   putchar (' ');
-  print_timeval (&self.ru_stime);
+  print_timeval (stdout, &self.ru_stime);
   putchar ('\n');
-  print_timeval (&kids.ru_utime);
+  print_timeval (stdout, &kids.ru_utime);
   putchar (' ');
-  print_timeval (&kids.ru_stime);
+  print_timeval (stdout, &kids.ru_stime);
   putchar ('\n');
 
-#else /* _POSIX_VERSION || !HAVE_RESOURCE || !RUSAGE_SELF */
-#  if !defined (BrainDeath)
-  struct tms t;
-
-  times (&t);
-
+#else
+#  if defined (HAVE_TIMES)
   /* As of System V.3, HP-UX 6.5, and other ATT-like systems, this stuff is
      returned in terms of clock ticks (HZ from sys/param.h).  C'mon, guys.
      This kind of stupid clock-dependent stuff is exactly the reason 4.2BSD
      introduced the `timeval' struct. */
+  struct tms t;
 
-  print_time_in_hz (t.tms_utime);
+  times (&t);
+
+  print_time_in_hz (stdout, t.tms_utime);
   putchar (' ');
-  print_time_in_hz (t.tms_stime);
+  print_time_in_hz (stdout, t.tms_stime);
   putchar ('\n');
-  print_time_in_hz (t.tms_cutime);
+  print_time_in_hz (stdout, t.tms_cutime);
   putchar (' ');
-  print_time_in_hz (t.tms_cstime);
+  print_time_in_hz (stdout, t.tms_cstime);
   putchar ('\n');
-#  endif /* BrainDeath */
-#endif /* _POSIX_VERSION || !HAVE_RESOURCE || !RUSAGE_SELF */
+#  else /* !HAVE_TIMES */
+  printf ("0.00 0.00\n0.00 0.00\n");
+#  endif /* HAVE_TIMES */
+#endif /* !HAVE_TIMES */
 
   return (EXECUTION_SUCCESS);
 }

@@ -37,7 +37,10 @@
 	"|"
 	"&&"
 	"||"
-	"="
+	"expr ? expr : expr"
+	"=", "*=", "/=", "%=",
+	"+=", "-=", "<<=", ">>=",
+	"&=", "^=", "|="
 
  (Note that most of these operators have special meaning to bash, and an
  entire expression should be quoted, e.g. "a=$a+1" or "a=a+1" to ensure
@@ -61,55 +64,26 @@
  chet@ins.CWRU.Edu
 */
 
+#include "config.h"
+
 #include <stdio.h>
 #include "bashansi.h"
-#include "shell.h"
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
-#define variable_starter(c) (isletter(c) || (c == '_'))
-#define variable_character(c) (isletter(c) || (c == '_') || digit(c))
+#include "shell.h"
 
 /* Because of the $((...)) construct, expressions may include newlines.
    Here is a macro which accepts newlines, tabs and spaces as whitespace. */
 #define cr_whitespace(c) (whitespace(c) || ((c) == '\n'))
-
-extern char	*this_command_name;
-
-static char	*expression = (char *) NULL;	/* The current expression */
-static char	*tp = (char *) NULL;		/* token lexical position */
-static char	*lasttp;
-static int	curtok = 0;			/* the current token */
-static int	lasttok = 0;			/* the previous token */
-static int	assigntok = 0;			/* the OP in OP= */
-static char	*tokstr = (char *) NULL;	/* current token string */
-static int	tokval = 0;			/* current token value */
-static jmp_buf	evalbuf;
-
-static void	readtok ();			/* lexical analyzer */
-static long	expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
-		exp4 (), exp5 (), expshift (), expland (), explor (),
-		expband (), expbor (), expbxor ();
-static long	strlong ();
-static void	evalerror ();
-
-/* A structure defining a single expression context. */
-typedef struct {
-  int curtok, lasttok;
-  char *expression, *tp;
-  int tokval;
-  char *tokstr;
-} EXPR_CONTEXT;
-
-/* Global var which contains the stack of expression contexts. */
-static EXPR_CONTEXT **expr_stack;
-static int expr_depth = 0;	   /* Location in the stack. */
-static int expr_stack_size = 0;	   /* Number of slots already allocated. */
 
 /* Size be which the expression stack grows when neccessary. */
 #define EXPR_STACK_GROW_SIZE 10
 
 /* Maximum amount of recursion allowed.  This prevents a non-integer
    variable such as "num=num+2" from infinitely adding to itself when
-   "let num=num+2" is given.  I have to talk to Chet about this hack. */
+   "let num=num+2" is given. */
 #define MAX_EXPR_RECURSION_LEVEL 1024
 
 /* The Tokens.  Singing "The Lion Sleeps Tonight". */
@@ -125,6 +99,7 @@ static int expr_stack_size = 0;	   /* Number of slots already allocated. */
 #define LSH	9	/* "<<" Left SHift */
 #define RSH    10	/* ">>" Right SHift */
 #define OP_ASSIGN 11	/* op= expassign as in Posix.2 */
+#define COND	12
 #define EQ	'='
 #define GT	'>'
 #define LT	'<'
@@ -137,9 +112,44 @@ static int expr_stack_size = 0;	   /* Number of slots already allocated. */
 #define LPAR	'('
 #define RPAR	')'
 #define BAND	'&'	/* Bitwise AND */
-#define BOR	'|'	/* Either Bitwise OR, or what Chet is. */
+#define BOR	'|'	/* Bitwise OR. */
 #define BXOR	'^'	/* Bitwise eXclusive OR. */
 #define BNOT	'~'	/* Bitwise NOT; Two's complement. */
+#define QUES	'?'
+#define COL	':'
+
+static char	*expression;	/* The current expression */
+static char	*tp;		/* token lexical position */
+static char	*lasttp;	/* pointer to last token position */
+static int	curtok;		/* the current token */
+static int	lasttok;	/* the previous token */
+static int	assigntok;	/* the OP in OP= */
+static char	*tokstr;	/* current token string */
+static int	tokval;		/* current token value */
+static int	noeval;		/* set to 1 if no assignment to be done */
+static procenv_t evalbuf;
+
+static void	readtok ();	/* lexical analyzer */
+static long	expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
+		exp4 (), exp5 (), expshift (), expland (), explor (),
+		expband (), expbor (), expbxor (), expcond ();
+static long	strlong ();
+static void	evalerror ();
+
+/* A structure defining a single expression context. */
+typedef struct {
+  int curtok, lasttok;
+  char *expression, *tp;
+  int tokval;
+  char *tokstr;
+} EXPR_CONTEXT;
+
+/* Global var which contains the stack of expression contexts. */
+static EXPR_CONTEXT **expr_stack;
+static int expr_depth;		   /* Location in the stack. */
+static int expr_stack_size;	   /* Number of slots already allocated. */
+
+extern char *this_command_name;
 
 /* Push and save away the contents of the globals describing the
    current expression context. */
@@ -177,7 +187,7 @@ popexp ()
   EXPR_CONTEXT *context;
 
   if (expr_depth == 0)
-    evalerror ("Recursion stack underflow");
+    evalerror ("recursion stack underflow");
 
   context = expr_stack[--expr_depth];
   curtok = context->curtok;
@@ -194,7 +204,7 @@ popexp ()
    The `while' loop after the longjmp is caught relies on the above
    implementation of pushexp and popexp leaving in expr_stack[0] the
    values that the variables had when the program started.  That is,
-   the first things saved are the initial values of the variables that 
+   the first things saved are the initial values of the variables that
    were assigned at program startup or by the compiler.  Therefore, it is
    safe to let the loop terminate when expr_depth == 0, without freeing up
    any of the expr_depth[0] stuff. */
@@ -203,7 +213,7 @@ evalexp (expr)
      char *expr;
 {
   long val = 0L;
-  jmp_buf old_evalbuf;
+  procenv_t old_evalbuf;
   char *p;
 
   for (p = expr; p && *p && cr_whitespace (*p); p++)
@@ -214,7 +224,7 @@ evalexp (expr)
 
   /* Save the value of evalbuf to protect it around possible recursive
      calls to evalexp (). */
-  xbcopy ((char *)evalbuf, (char *)old_evalbuf, sizeof (jmp_buf));
+  COPY_PROCENV (evalbuf, old_evalbuf);
 
   if (setjmp (evalbuf))
     {
@@ -232,7 +242,7 @@ evalexp (expr)
 	  if (expr_stack[expr_depth]->expression)
 	    free (expr_stack[expr_depth]->expression);
 	}
-      longjmp (top_level, DISCARD);
+      jump_to_top_level (DISCARD);
     }
 
   pushexp ();
@@ -247,7 +257,7 @@ evalexp (expr)
 
   val = expassign ();
 
-  if (curtok != 0) 
+  if (curtok != 0)
     evalerror ("syntax error in expression");
 
   if (tokstr)
@@ -259,7 +269,7 @@ evalexp (expr)
 
   /* Restore the value of evalbuf so that any subsequent longjmp calls
      will have a valid location to jump to. */
-  xbcopy ((char *)old_evalbuf, (char *)evalbuf, sizeof (jmp_buf));
+  COPY_PROCENV (old_evalbuf, evalbuf);
 
   return (val);
 }
@@ -299,15 +309,16 @@ expassign ()
   register long	value;
   char *lhs, *rhs;
 
-  value = explor ();
+  value = expcond ();
   if (curtok == EQ || curtok == OP_ASSIGN)
     {
-      int special = curtok == OP_ASSIGN;
-      int op;
+      int special, op;
       long lvalue;
 
+      special = curtok == OP_ASSIGN;
+
       if (lasttok != STR)
-	evalerror ("attempted expassign to non-variable");
+	evalerror ("attempted assignment to non-variable");
 
       if (special)
 	{
@@ -351,20 +362,57 @@ expassign ()
 	      lvalue |= value;
 	      break;
 	    default:
-	      evalerror ("bug: bad expassign token %d", assigntok);
+	      evalerror ("bug: bad expassign token");
 	      break;
 	    }
 	  value = lvalue;
 	}
 
       rhs = itos (value);
-      bind_int_variable (lhs, rhs);
+      if (noeval == 0)
+	bind_int_variable (lhs, rhs);
       free (rhs);
       free (lhs);
       free (tokstr);
       tokstr = (char *)NULL;		/* For freeing on errors. */
     }
   return (value);
+}
+
+/* Conditional expression (expr?expr:expr) */
+static long
+expcond ()
+{
+  long cval, val1, val2, rval;
+  rval = cval = explor ();
+  if (curtok == QUES)		/* found conditional expr */
+    {
+      readtok ();
+      if (curtok == 0 || curtok == COL)
+	evalerror ("expression expected");
+      if (cval == 0)
+	noeval++;
+#if 0
+      val1 = explor ();
+#else
+      val1 = expassign ();
+#endif
+      if (cval == 0)
+        noeval--;
+      if (curtok != COL)
+        evalerror ("`:' expected for conditional expression");
+      readtok ();
+      if (curtok == 0)
+	evalerror ("expression expected");
+      if (cval)
+        noeval++;
+      val2 = explor ();
+      if (cval)
+        noeval--;
+      rval = cval ? val1 : val2;
+      lasttok = COND;
+    }
+  return rval;
 }
 
 /* Logical OR. */
@@ -378,7 +426,11 @@ explor ()
   while (curtok == LOR)
     {
       readtok ();
+      if (val1 != 0)
+	noeval++;
       val2 = expland ();
+      if (val1 != 0)
+	noeval--;
       val1 = val1 || val2;
     }
 
@@ -396,7 +448,11 @@ expland ()
   while (curtok == LAND)
     {
       readtok ();
+      if (val1 == 0)
+	noeval++;
       val2 = expbor ();
+      if (val1 == 0)
+	noeval--;
       val1 = val1 && val2;
     }
 
@@ -635,7 +691,7 @@ exp0 ()
       readtok ();
     }
   else
-    evalerror ("syntax error in expression");
+    evalerror ("syntax error: operand expected");
 
   return (val);
 }
@@ -647,17 +703,18 @@ exp0 ()
 static void
 readtok ()
 {
-  register char *cp = tp;
-  register int c, c1;
+  register char *cp;
+  register int c, c1, e;
 
   /* Skip leading whitespace. */
-  c = 0;
+  cp = tp;
+  c = e = 0;
   while (cp && (c = *cp) && (cr_whitespace (c)))
     cp++;
 
   if (c)
     cp++;
-	
+
   lasttp = tp = cp - 1;
 
   if (c == '\0')
@@ -668,27 +725,44 @@ readtok ()
       return;
     }
 
-  if (variable_starter (c))
+  if (legal_variable_starter (c))
     {
-      /* Semi-bogus K*rn shell compatibility feature -- variable
-	 names not preceded with a dollar sign are shell variables. */
+      /* Semi-bogus ksh compatibility feature -- variable names
+	 not preceded with a dollar sign are shell variables. */
       char *value;
 
-      while (variable_character (c))
+      while (legal_variable_char (c))
 	c = *cp++;
 
       c = *--cp;
+
+#if defined (ARRAY_VARS)
+      if (c == '[')
+	{
+	  e = skipsubscript (cp, 0);
+	  if (cp[e] == ']')
+	    {
+	      cp += e + 1;
+	      c = *cp;
+	      e = ']';
+	    }
+	  else
+	    evalerror ("bad array subscript");
+	}
+#endif /* ARRAY_VARS */
+
       *cp = '\0';
 
-      if (tokstr)
-        free (tokstr);
+      FREE (tokstr);
       tokstr = savestring (tp);
-      value = get_string_value (tokstr);
 
-      if (value && *value)
-	tokval = evalexp (value);
-      else
-	tokval = 0;
+#if defined (ARRAY_VARS)
+      value = (e == ']') ? get_array_value (tokstr, 0) : get_string_value (tokstr);
+#else
+      value = get_string_value (tokstr);
+#endif
+
+      tokval = (value && *value) ? evalexp (value) : 0;
 
       *cp = c;
       lasttok = curtok;
@@ -696,7 +770,7 @@ readtok ()
     }
   else if (digit(c))
     {
-      while (digit (c) || isletter (c) || c == '#')
+      while (digit (c) || isletter (c) || c == '#' || c == '@' || c == '_')
 	c = *cp++;
 
       c = *--cp;
@@ -710,7 +784,7 @@ readtok ()
   else
     {
       c1 = *cp++;
-      if ((c == EQ) && (c1 == EQ)) 
+      if ((c == EQ) && (c1 == EQ))
 	c = EQEQ;
       else if ((c == NOT) && (c1 == EQ))
 	c = NEQ;
@@ -764,39 +838,47 @@ evalerror (msg)
   char *name, *t;
 
   name = this_command_name;
-  if (name == 0)
-    name = get_name_for_error ();
   for (t = expression; whitespace (*t); t++)
     ;
-  fprintf (stderr, "%s: %s: %s (remainder of expression is \"%s\")\n",
-  		 name, t,
-		 msg, (lasttp && *lasttp) ? lasttp : "");
+  internal_error ("%s%s%s: %s (error token is \"%s\")",
+		   name ? name : "", name ? ": " : "", t,
+		   msg, (lasttp && *lasttp) ? lasttp : "");
   longjmp (evalbuf, 1);
 }
 
 /* Convert a string to a long integer, with an arbitrary base.
    0nnn -> base 8
    0xnn -> base 16
-   Anything else: [base#]number (this is from the ISO Pascal spec). */
+   Anything else: [base#]number (this is implemented to match ksh93)
+
+   Base may be >=2 and <=64.  If base is <= 36, the numbers are drawn
+   from [0-9][a-zA-Z], and lowercase and uppercase letters may be used
+   interchangably.  If base is > 36 and <= 64, the numbers are drawn
+   from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, _ = 62, @ = 63 --
+   you get the picture). */
+
 static long
 strlong (num)
      char *num;
 {
-  register char *s = num;
+  register char *s;
   register int c;
-  int base = 10;
+  int base, foundbase;
   long val = 0L;
 
+  s = num;
   if (s == NULL || *s == '\0')
     return 0L;
 
+  base = 10;
+  foundbase = 0;
   if (*s == '0')
     {
       s++;
 
       if (s == NULL || *s == '\0')
 	return 0L;
-      
+
        /* Base 16? */
       if (*s == 'x' || *s == 'X')
 	{
@@ -805,38 +887,46 @@ strlong (num)
 	}
       else
 	base = 8;
+      foundbase++;
     }
 
+  val = 0L;
   for (c = *s++; c; c = *s++)
     {
       if (c == '#')
 	{
+	  if (foundbase)
+	    evalerror ("bad number");
+
 	  base = (int)val;
 
-	  /* Illegal base specifications are silently reset to base 10.
-	     I don't think that this is a good idea? */
-	  if (base < 2 || base > 36)
-	    base = 10;
+	  /* Illegal base specifications raise an evaluation error. */
+	  if (base < 2 || base > 64)
+	    evalerror ("illegal arithmetic base");
 
 	  val = 0L;
+	  foundbase++;
+	}
+      else if (isletter(c) || digit(c) || (c == '_') || (c == '@'))
+	{
+	  if (digit(c))
+	    c = digit_value(c);
+	  else if (c >= 'a' && c <= 'z')
+	    c -= 'a' - 10;
+	  else if (c >= 'A' && c <= 'Z')
+	    c -= 'A' - ((base <= 36) ? 10 : 36);
+	  else if (c == '_')
+	    c = 62;
+	  else if (c == '@')
+	    c = 63;
+
+	  if (c >= base)
+	    evalerror ("value too great for base");
+
+	  val = (val * base) + c;
 	}
       else
-	if (isletter(c) || digit(c))
-	  {
-	    if (digit(c))
-	      c = digit_value(c);
-	    else if (c >= 'a' && c <= 'z')
-	      c -= 'a' - 10;
-	    else if (c >= 'A' && c <= 'Z')
-	      c -= 'A' - 10;
-
-	    if (c >= base)
-	      evalerror ("value too great for base");
-
-	    val = (val * base) + c;
-	  }
-	else
-	  break;
+	break;
     }
   return (val);
 }
@@ -862,7 +952,7 @@ SHELL_VAR *bind_variable () { return 0; }
 
 char *get_string_value () { return 0; }
 
-jmp_buf top_level;
+procenv_t top_level;
 
 main (argc, argv)
      int argc;

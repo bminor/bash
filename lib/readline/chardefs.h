@@ -20,16 +20,20 @@
    have a copy of the license, write to the Free Software Foundation,
    675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#ifndef _CHARDEFS_H
-#define _CHARDEFS_H
+#ifndef _CHARDEFS_H_
+#define _CHARDEFS_H_
 
 #include <ctype.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
+#if defined (HAVE_CONFIG_H)
+#  if defined (HAVE_STRING_H)
+#    include <string.h>
+#  else
+#    include <strings.h>
+#  endif /* HAVE_STRING_H */
 #else
-#  include <strings.h>
-#endif /* HAVE_STRING_H */
+#  include <string.h>
+#endif /* !HAVE_CONFIG_H */
 
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
@@ -47,39 +51,40 @@
 #define meta_character_bit 0x080	    /* x0000000, must be on. */
 #define largest_char 255		    /* Largest character value. */
 
-#define CTRL_CHAR(c) ((c) < control_character_threshold)
+#define CTRL_CHAR(c) ((c) < control_character_threshold && (c) >= 0)
 #define META_CHAR(c) ((c) > meta_character_threshold && (c) <= largest_char)
 
 #define CTRL(c) ((c) & control_character_mask)
 #define META(c) ((c) | meta_character_bit)
 
 #define UNMETA(c) ((c) & (~meta_character_bit))
-#define UNCTRL(c) to_upper(((c)|control_character_bit))
+#define UNCTRL(c) _rl_to_upper(((c)|control_character_bit))
 
 /* Old versions
-#define lowercase_p(c) (((c) > ('a' - 1) && (c) < ('z' + 1)))
-#define uppercase_p(c) (((c) > ('A' - 1) && (c) < ('Z' + 1)))
-#define digit_p(c)  ((c) >= '0' && (c) <= '9')
+#define _rl_lowercase_p(c) (((c) > ('a' - 1) && (c) < ('z' + 1)))
+#define _rl_uppercase_p(c) (((c) > ('A' - 1) && (c) < ('Z' + 1)))
+#define _rl_digit_p(c)  ((c) >= '0' && (c) <= '9')
 */
 
-#define lowercase_p(c) (islower(c))
-#define uppercase_p(c) (isupper(c))
-#define digit_p(x)  (isdigit (x))
+#define _rl_lowercase_p(c) (islower(c))
+#define _rl_uppercase_p(c) (isupper(c))
+#define _rl_digit_p(x)  (isdigit (x))
 
-#define pure_alphabetic(c) (lowercase_p(c) || uppercase_p(c))
+#define _rl_pure_alphabetic(c) (_rl_lowercase_p(c) || _rl_uppercase_p(c))
+#define ALPHABETIC(c)	(_rl_lowercase_p(c) || _rl_uppercase_p(c) || _rl_digit_p(c))
 
 /* Old versions
-#  define to_upper(c) (lowercase_p(c) ? ((c) - 32) : (c))
-#  define to_lower(c) (uppercase_p(c) ? ((c) + 32) : (c))
+#  define _rl_to_upper(c) (_rl_lowercase_p(c) ? ((c) - 32) : (c))
+#  define _rl_to_lower(c) (_rl_uppercase_p(c) ? ((c) + 32) : (c))
 */
 
-#ifndef to_upper
-#  define to_upper(c) (islower(c) ? toupper(c) : (c))
-#  define to_lower(c) (isupper(c) ? tolower(c) : (c))
+#ifndef _rl_to_upper
+#  define _rl_to_upper(c) (islower(c) ? toupper(c) : (c))
+#  define _rl_to_lower(c) (isupper(c) ? tolower(c) : (c))
 #endif
 
-#ifndef digit_value
-#define digit_value(x) ((x) - '0')
+#ifndef _rl_digit_value
+#define _rl_digit_value(x) ((x) - '0')
 #endif
 
 #ifndef NEWLINE
@@ -119,4 +124,4 @@
 
 #define ESC CTRL('[')
 
-#endif  /* _CHARDEFS_H */
+#endif  /* _CHARDEFS_H_ */

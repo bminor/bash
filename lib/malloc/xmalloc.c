@@ -19,8 +19,10 @@
    along with Readline; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#if defined (ALREADY_HAVE_XMALLOC)
-#else
+#if defined (HAVE_CONFIG_H)
+#include <config.h>
+#endif
+
 #include <stdio.h>
 
 #if defined (HAVE_STDLIB_H)
@@ -44,9 +46,10 @@ char *
 xmalloc (bytes)
      int bytes;
 {
-  char *temp = (char *)malloc (bytes);
+  char *temp;
 
-  if (!temp)
+  temp = (char *)malloc (bytes);
+  if (temp == 0)
     memory_error_and_abort ("xmalloc");
   return (temp);
 }
@@ -58,12 +61,9 @@ xrealloc (pointer, bytes)
 {
   char *temp;
 
-  if (!pointer)
-    temp = (char *)malloc (bytes);
-  else
-    temp = (char *)realloc (pointer, bytes);
+  temp = pointer ? (char *)realloc (pointer, bytes) : (char *)malloc (bytes);
 
-  if (!temp)
+  if (temp == 0)
     memory_error_and_abort ("xrealloc");
   return (temp);
 }
@@ -72,7 +72,16 @@ static void
 memory_error_and_abort (fname)
      char *fname;
 {
-  fprintf (stderr, "%s: Out of virtual memory!\n", fname);
-  abort ();
+  fprintf (stderr, "%s: out of virtual memory\n", fname);
+  exit (2);
 }
-#endif /* !ALREADY_HAVE_XMALLOC */
+
+/* Use this as the function to call when adding unwind protects so we
+   don't need to know what free() returns. */
+void
+xfree (string)
+     char *string;
+{
+  if (string)
+    free (string);
+}

@@ -1,63 +1,86 @@
-Starting bash with the `-posix' command-line option or setting the variable
-POSIXLY_CORRECT while bash is running will cause bash to conform more
-closely to the Posix.2 standard by changing the behavior to match that
-specified by Posix.2 in areas where the bash default differs.
+Bash POSIX Mode
+===============
 
-The following list is what's changed when `posixly_correct' is enabled:
+Starting Bash with the `--posix' command-line option or executing `set
+-o posix' while Bash is running will cause Bash to conform more closely
+to the POSIX.2 standard by changing the behavior to match that
+specified by POSIX.2 in areas where the Bash default differs.
 
-1.  When a command in the hash table no longer exists, bash will re-search
-    $PATH to find the new location.
+The following list is what's changed when `POSIX mode' is in effect:
 
-2.  The >& redirection does not redirect stdout and stderr.
+  1. When a command in the hash table no longer exists, Bash will
+     re-search `$PATH' to find the new location.  This is also
+     available with `shopt -s checkhash'.
 
-3.  The message printed by the job control code and builtins when a job
-    exits with a non-zero status is `Done(status)'.
+  2. The `>&' redirection does not redirect stdout and stderr.
 
-4.  The <> redirection does not open a file for both stdin and stdout, but
-    rather opens it for read-write on fd 0.
+  3. The message printed by the job control code and builtins when a job
+     exits with a non-zero status is `Done(status)'.
 
-5.  Reserved words may not be aliased.
+  4. Reserved words may not be aliased.
 
-6.  The Posix.2 PS1 and PS2 expansions of `!' -> history number and `!!' -> `!'
-    are enabled.
+  5. The POSIX.2 `PS1' and `PS2' expansions of `!' to the history
+     number and `!!' to `!' are enabled, and parameter expansion is
+     performed on the value regardless of the setting of the
+     `promptvars' option.
 
-7.  Interactive comments are enabled by default.  (Note that this version has
-    them on by default anyway.)
+  6. Interactive comments are enabled by default.  (Note that Bash has
+     them on by default anyway.)
 
-8.  The Posix.2 startup files are executed ($ENV) rather than the normal bash
-    files.
+  7. The POSIX.2 startup files are executed (`$ENV') rather than the
+     normal Bash files.
 
-9.  Tilde expansion is only performed on assignments preceding a command name,
-    rather than on all assignment statements on the line.
+  8. Tilde expansion is only performed on assignments preceding a
+     command name, rather than on all assignment statements on the line.
 
-10. The default history file is ~/.sh_history (default value of $HISTFILE).
+  9. The default history file is `~/.sh_history' (this is the default
+     value of `$HISTFILE').
 
-11. The output of `kill -l' prints all the signal names on a single line,
-    separated by spaces.
+ 10. The output of `kill -l' prints all the signal names on a single
+     line, separated by spaces.
 
-12. Non-interactive shells exit if `file' in `. file' is not found.
+ 11. Non-interactive shells exit if FILENAME in `.' FILENAME is not
+     found.
 
-13. Redirection operators do not perform pathname expansion on the word
-    in the redirection unless the shell is interactive
+ 12. Redirection operators do not perform filename expansion on the word
+     in the redirection unless the shell is interactive.
 
-14. Function names must be valid shell identifiers.  That is, they may not
-    contain characters other than letters, digits, and underscores, and
-    may not start with a digit
+ 13. Function names must be valid shell `name's.  That is, they may not
+     contain characters other than letters, digits, and underscores, and
+     may not start with a digit.  Declaring a function with an illegal
+     name causes a fatal syntax error in non-interactive shells.
 
-There is other Posix.2 behavior that bash does not implement.  Specifically:
+ 14. POSIX.2 `special' builtins are found before shell functions during
+     command lookup.
 
-1.  There are no `special builtins' and `regular builtins'.  All builtins
-    are equivalent.  This means that:
+ 15. If a POSIX.2 special builtin returns an error status, a
+     non-interactive shell exits.  The fatal errors are those listed in
+     the POSIX.2 standard, and include things like passing incorrect
+     options, redirection errors, variable assignment errors for
+     assignments preceding the command name, and so on.
 
-	o assignment statements affect the execution environment of all
-	  builtins, not just special ones
-	o temporary assignments do not persist after Posix.2 special
-	  builtins complete
-	o Functions are found before Posix.2 special builtins
-	o The shell does not exit upon errors while executing Posix.2
-	  special builtins
+ 16. If the `cd' builtin finds a directory to change to using
+     `$CDPATH', the value it assigns to the `PWD' variable does not
+     contain any symbolic links, as if `cd -P' had been executed.
 
-2.  $LINENO does not represent the line number of a command within a function
+ 17. A non-interactive shell exits with an error status if a variable
+     assignment error occurs when no command name follows the assignment
+     statements.  A variable assignment error occurs, for example, when
+     trying to assign a value to a read-only variable.
 
-3.  The arithmetic evaluator does not implement the `e ? e1 : e2' conditional
-    expression
+ 18. A non-interactive shell exits with an error status if the iteration
+     variable in a `for' statement or the selection variable in a
+     `select' statement is a read-only variable.
+
+ 19. Process substitution is not available.
+
+ 20. Assignment statements preceding POSIX.2 `special' builtins persist
+     in the shell environment after the builtin completes.
+
+
+There is other POSIX.2 behavior that Bash does not implement.
+Specifically:
+
+  1. Assignment statements affect the execution environment of all
+     builtins, not just special ones.
+

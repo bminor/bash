@@ -11,7 +11,7 @@ function check_exit_status ()
     if [ ${status} -ne 0 -a ${status} != 128 ]; then
        # If process exited by a signal, determine name of signal.
        if [ ${status} -gt 128 ]; then
-          signal="$(builtin kill -l $[${status} - 128] 2>/dev/null)"
+          signal="$(builtin kill -l $((${status} - 128)) 2>/dev/null)"
 	  if [ "$signal" ]; then signal="($signal)"; fi
        fi
        echo "[Exit ${status} ${signal}]" 1>&2

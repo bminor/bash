@@ -22,7 +22,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 $PRODUCES getopts.c
 
 $BUILTIN getopts
-$DEPENDS_ON GETOPTS_BUILTIN
 $FUNCTION getopts_builtin
 $SHORT_DOC getopts optstring name [arg]
 Getopts is used by shell procedures to parse positional parameters.
@@ -57,22 +56,24 @@ Getopts normally parses the positional parameters ($0 - $9), but if
 more arguments are given, they are parsed instead.
 $END
 
+#include <config.h>
+
 #include <stdio.h>
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
 
 #include "../shell.h"
-
-#if defined (GETOPTS_BUILTIN)
+#include "common.h"
+#include "bashgetopt.h"
 #include "getopt.h"
 
-#define G_EOF		(-1)
-#define G_ILLEGAL_OPT	(-2)
-#define G_ARG_MISSING	(-3)
+#define G_EOF		-1
+#define G_ILLEGAL_OPT	-2
+#define G_ARG_MISSING	-3
 
 extern char *this_command_name;
 extern WORD_LIST *rest_of_args;
@@ -84,6 +85,25 @@ getopts_reset (newind)
      int newind;
 {
   sh_optind = newind;
+  sh_badopt = 0;
+}
+
+static int
+getopts_bind_variable (name, value)
+     char *name, *value;
+{
+  SHELL_VAR *v;
+
+  if (legal_identifier (name))
+    {
+      v = bind_variable (name, value);
+      return (v && (readonly_p (v) == 0)) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+    }
+  else
+    {
+      builtin_error ("`%s': not a valid identifier", name);
+      return (EXECUTION_FAILURE);
+    }
 }
 
 /* Error handling is now performed as specified by Posix.2, draft 11
@@ -118,7 +138,7 @@ dogetopts (argc, argv)
      int argc;
      char **argv;
 {
-  int ret, special_error, old_opterr = 0, i, n;
+  int ret, special_error, old_opterr, i, n;
   char strval[2], numval[16];
   char *optstr;			/* list of options */
   char *name;			/* variable to get flag val */
@@ -126,7 +146,7 @@ dogetopts (argc, argv)
 
   if (argc < 3)
     {
-      builtin_error("usage: getopts optstring name [arg]");
+      builtin_usage ();
       return (EX_USAGE);
     }
 
@@ -156,19 +176,19 @@ dogetopts (argc, argv)
     }
   else if (rest_of_args == (WORD_LIST *)NULL)
     {
-      register int i;
-
-      for (i = 0; i < 10 && dollar_vars[i]; i++);
+      for (i = 0; i < 10 && dollar_vars[i]; i++)
+	;
       ret = sh_getopt (i, dollar_vars, optstr);
     }
   else
     {
-      register int i;
       register WORD_LIST *words;
       char **v;
 
-      for (i = 0; i < 10 && dollar_vars[i]; i++);
-      for (words = rest_of_args; words; words = words->next, i++);
+      for (i = 0; i < 10 && dollar_vars[i]; i++)
+	;
+      for (words = rest_of_args; words; words = words->next, i++)
+	;
       v = (char **)xmalloc ((i + 1) * sizeof (char *));
       for (i = 0; i < 10 && dollar_vars[i]; i++)
         v[i] = dollar_vars[i];
@@ -203,9 +223,9 @@ dogetopts (argc, argv)
 
   /* If an error occurred, decide which one it is and set the return
      code appropriately.  In all cases, the option character in error
-     is in SH_OPTOPT.  If an illegal option was encountered, OPTARG is
+     is in OPTOPT.  If an illegal option was encountered, OPTARG is
      NULL.  If a required option argument was missing, OPTARG points
-     to a NULL string (that is, optarg[0] == 0). */
+     to a NULL string (that is, sh_optarg[0] == 0). */
   if (ret == '?')
     {
       if (sh_optarg == NULL)
@@ -216,26 +236,25 @@ dogetopts (argc, argv)
 	    
   if (ret == G_EOF)
     {
-      bind_variable (name, "?");
+      getopts_bind_variable (name, "?");
       return (EXECUTION_FAILURE);
     }
 
   if (ret == G_ILLEGAL_OPT)
     {
       /* Illegal option encountered. */
-      strval[0] = '?';
-      strval[1] = '\0';
-      bind_variable (name, strval);
+      ret = getopts_bind_variable (name, "?");
 
       if (special_error)
 	{
-	  strval[0] = (char) sh_optopt;
+	  strval[0] = (char)sh_optopt;
 	  strval[1] = '\0';
 	  bind_variable ("OPTARG", strval);
 	}
       else
 	makunbound ("OPTARG", shell_variables);
-      return (EXECUTION_SUCCESS);
+
+      return (ret);
     }
 
   if (ret == G_ARG_MISSING)
@@ -243,31 +262,25 @@ dogetopts (argc, argv)
       /* Required argument missing. */
       if (special_error)
 	{
-	  strval[0] = ':';
-	  strval[1] = '\0';
-	  bind_variable (name, strval);
+	  ret = getopts_bind_variable (name, ":");
 
-	  strval[0] = (char) sh_optopt;
+	  strval[0] = (char)sh_optopt;
 	  strval[1] = '\0';
 	  bind_variable ("OPTARG", strval);
 	}
       else
 	{
-	  strval[0] = '?';
-	  strval[1] = '\0';
-	  bind_variable (name, strval);
+	  ret = getopts_bind_variable (name, "?");
 	  makunbound ("OPTARG", shell_variables);
 	}
-      return (EXECUTION_SUCCESS);
+      return (ret);
     }			
 
   bind_variable ("OPTARG", sh_optarg);
 
   strval[0] = (char) ret;
   strval[1] = '\0';
-  bind_variable (name, strval);
-
-  return (EXECUTION_SUCCESS);
+  return (getopts_bind_variable (name, strval));
 }
 
 /* The getopts builtin.  Build an argv, and call dogetopts with it. */
@@ -275,26 +288,27 @@ int
 getopts_builtin (list)
      WORD_LIST *list;
 {
-  register int	i;
   char **av;
   int ac, ret;
-  WORD_LIST *t;
 
   if (list == 0)
     return EXECUTION_FAILURE;
 
-  for (t = list, ac = 0; t; t = t->next, ac++);
+  reset_internal_getopt ();
+  while ((ret = internal_getopt (list, "")) != -1)
+    {
+      switch (ret)
+	{
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
 
-  ac++;
-  av = (char **)xmalloc ((1 + ac) * sizeof (char *));
-  av[ac] = (char *) NULL;
-  av[0] = this_command_name;
-
-  for (t = list, i = 1; t; t = t->next, i++)
-    av[i] = t->word->word;
-
+  av = make_builtin_argv (list, &ac);
   ret = dogetopts (ac, av);
   free ((char *)av);
+
   return (ret);
 }
-#endif /* GETOPTS_BUILTIN */

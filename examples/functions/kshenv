@@ -39,13 +39,9 @@ whence()
 		return 1
 	fi
 	case "$1" in
-		-v) vflag=1
-		    shift 1
-		    ;;
-		-*) echo "whence: bad option: $1"
-		    return 1
-		    ;;
-		 *) ;;
+	-v) vflag=1 ; shift 1 ;;
+	-*) echo "whence: bad option: $1" ; return 1 ;;
+	 *) ;;
 	esac
 
 	if [ "$#" = "0" ] ; then
@@ -63,15 +59,12 @@ whence()
 				echo $path
 			else
 				case "$cmd" in
-					/*) echo ""
-					    ;;
-					 *) case "$(builtin type -type $cmd)" in
-						"") echo ""
-						    ;;
-						 *) echo "$cmd"
-						    ;;
-					    esac
-					    ;;
+				/*) echo "" ;;
+				 *) case "$(builtin type -type $cmd)" in
+				    "") echo "" ;;
+				    *) echo "$cmd" ;;
+				    esac
+				    ;;
 				esac
 			fi
 		fi
@@ -117,7 +110,7 @@ cd()
 #	-n	do not add trailing newline
 #	-p	no-op (no coprocesses)
 #	-r	no escapes
-#	-s	no-op (print to the history file)
+#	-s	print to the history file
 #	-u n	redirect output to fd n
 #
 
@@ -131,20 +124,20 @@ print()
 	while getopts "Rnprsu:" c
 	do
 		case $c in
-		R)	eflag=
-			;;
-		r)	eflag=
-			;;
-		n)	nflag=-n
-			;;
-		u)	fd=$OPTARG
-			;;
-		p|s)	;;
+		R)	eflag= ;;
+		r)	eflag= ;;
+		n)	nflag=-n ;;
+		s)	sflag=y ;;
+		u)	fd=$OPTARG ;;
+		p)	;;
 		esac
 	done
 	shift $[ $OPTIND - 1 ]
 
-	builtin echo $eflag $nflag "$@" >&$fd
+	case "$sflag" in
+	y)	builtin history -s "$*" ;;
+	*)	builtin echo $eflag $nflag "$@" >&$fd
+	esac
 }
 
 # substring function

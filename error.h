@@ -18,17 +18,33 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#if !defined (_ERROR_H_)
+#define _ERROR_H_
+
+#include "stdc.h"
+
 /* Get the name of the shell or shell script for an error message. */
 extern char *get_name_for_error ();
 
 /* Report an error having to do with FILENAME. */
-extern void file_error ();
+extern void file_error __P((char *));
 
 /* Report a programmer's error, and abort.  Pass REASON, and ARG1 ... ARG5. */
-extern void programming_error ();
+extern void programming_error __P((const char *, ...));
 
 /* General error reporting.  Pass FORMAT and ARG1 ... ARG5. */
-extern void report_error ();
+extern void report_error __P((const char *, ...));
+
+/* Error messages for parts of the parser that don't call report_syntax_error */
+extern void parser_error __P((int, const char *, ...));
 
 /* Report an unrecoverable error and exit.  Pass FORMAT and ARG1 ... ARG5. */
-extern void fatal_error ();
+extern void fatal_error __P((const char *, ...));
+
+/* Report a system error, like BSD warn(3). */
+extern void sys_error __P((const char *, ...));
+
+/* Report an internal error. */
+extern void internal_error __P((const char *, ...));
+
+#endif /* !_ERROR_H_ */

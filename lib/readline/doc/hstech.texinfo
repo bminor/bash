@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1991, 1994, 1996 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -166,6 +166,10 @@ and containing structure.
 Make the history entry at offset @var{which} have @var{line} and @var{data}.
 This returns the old entry so you can dispose of the data.  In the case
 of an invalid @var{which}, a @code{NULL} pointer is returned.
+@end deftypefun
+
+@deftypefun void clear_history ()
+Clear the history list by deleting all the entries.
 @end deftypefun
 
 @deftypefun void stifle_history (int max)
@@ -398,6 +402,17 @@ This is disabled by default.
 The list of characters which inhibit history expansion if found immediately
 following @var{history_expansion_char}.  The default is whitespace and
 @samp{=}.
+@end deftypevar
+
+@deftypevar {char *} history_search_delimiter_chars
+The list of additional characters which can delimit a history search
+string, in addition to whitespace, @samp{:} and @samp{?} in the case of
+a substring search.  The default is empty.
+@end deftypevar
+
+@deftypevar int history_quotes_inhibit_expansion
+If non-zero, single-quoted words are not scanned for the history expansion
+character.  The default value is 0.
 @end deftypevar
 
 @node History Programming Example

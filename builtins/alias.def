@@ -23,85 +23,108 @@ $BUILTIN alias
 $FUNCTION alias_builtin
 $DEPENDS_ON ALIAS
 $PRODUCES alias.c
-$SHORT_DOC alias [ name[=value] ... ]
-`alias' with no arguments prints the list of aliases in the form
-NAME=VALUE on standard output.  An alias is defined for each NAME
-whose VALUE is given.  A trailing space in VALUE causes the next
-word to be checked for alias substitution.  Alias returns true
-unless a NAME is given for which no alias has been defined.
+$SHORT_DOC alias [-p] [name[=value] ... ]
+`alias' with no arguments or with the -p option prints the list
+of aliases in the form alias NAME=VALUE on standard output.
+Otherwise, an alias is defined for each NAME whose VALUE is given.
+A trailing space in VALUE causes the next word to be checked for
+alias substitution when the alias is expanded.  Alias returns
+true unless a NAME is given for which no alias has been defined.
 $END
 
-#include "../config.h"
+#include <config.h>
 
 #if defined (ALIAS)
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
 #  include <stdio.h>
 #  include "../shell.h"
 #  include "../alias.h"
 #  include "common.h"
+#  include "bashgetopt.h"
 
 extern int interactive;
 static void print_alias ();
 
 /* Hack the alias command in a Korn shell way. */
+int
 alias_builtin (list)
      WORD_LIST *list;
 {
-  int any_failed = 0;
+  int any_failed, offset, pflag;
+  alias_t **alias_list, *t;
+  char *name, *value;
 
-  if (!list)
+  pflag = 0;
+  reset_internal_getopt ();
+  while ((offset = internal_getopt (list, "p")) != -1)
     {
-      register int i;
-      ASSOC **alias_list;
+      switch (offset)
+	{
+	case 'p':
+	  pflag = 1;
+	  break;
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
 
-      if (!aliases)
+  list = loptend;
+
+  if (list == 0 || pflag)
+    {
+      if (aliases == 0)
 	return (EXECUTION_FAILURE);
 
       alias_list = all_aliases ();
 
-      if (!alias_list)
+      if (alias_list == 0)
 	return (EXECUTION_FAILURE);
 
-      for (i = 0; alias_list[i]; i++)
-	print_alias (alias_list[i]);
+      for (offset = 0; alias_list[offset]; offset++)
+	print_alias (alias_list[offset]);
 
       free (alias_list);	/* XXX - Do not free the strings. */
+
+      if (list == 0)
+	return (EXECUTION_SUCCESS);
     }
-  else
+
+  any_failed = 0;
+  while (list)
     {
-      while (list)
+      name = list->word->word;
+
+      for (offset = 0; name[offset] && name[offset] != '='; offset++)
+	;
+
+      if (offset && name[offset] == '=')
 	{
-	  register char *value, *name = list->word->word;
-	  register int offset;
+	  name[offset] = '\0';
+	  value = name + offset + 1;
 
-	  for (offset = 0; name[offset] && name[offset] != '='; offset++)
-	    ;
-
-	  if (offset && name[offset] == '=')
-	    {
-	      name[offset] = '\0';
-	      value = name + offset + 1;
-
-	      add_alias (name, value);
-	    }
+	  add_alias (name, value);
+	}
+      else
+	{
+	  t = find_alias (name);
+	  if (t)
+	    print_alias (t);
 	  else
 	    {
-	      ASSOC *t = find_alias (name);
-	      if (t)
-		print_alias (t);
-	      else
-		{
-		  if (interactive)
-		    builtin_error ("`%s' not found", name);
-		  any_failed++;
-		}
+	      if (interactive)
+		builtin_error ("`%s' not found", name);
+	      any_failed++;
 	    }
-	  list = list->next;
 	}
+      list = list->next;
     }
-  if (any_failed)
-    return (EXECUTION_FAILURE);
-  else
-    return (EXECUTION_SUCCESS);
+
+  return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 #endif /* ALIAS */
 
@@ -115,33 +138,37 @@ $END
 
 #if defined (ALIAS)
 /* Remove aliases named in LIST from the aliases database. */
+int
 unalias_builtin (list)
      register WORD_LIST *list;
 {
-  register ASSOC *alias;
-  int any_failed = 0;
+  register alias_t *alias;
+  int opt, aflag;
 
-  while (list && *list->word->word == '-')
+  aflag = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "a")) != -1)
     {
-      register char *word = list->word->word;
-
-      if (ISOPTION (word, 'a'))
+      switch (opt)
 	{
-	  delete_all_aliases ();
-	  list = list->next;
-	}
-      else if (ISOPTION (word, '-'))
-	{
-	  list = list->next;
+	case 'a':
+	  aflag = 1;
 	  break;
-	}
-      else
-	{
-	  bad_option (word);
-	  return (EXECUTION_FAILURE);
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
 	}
     }
 
+  list = loptend;
+
+  if (aflag)
+    {
+      delete_all_aliases ();
+      return (EXECUTION_SUCCESS);
+    }
+
+  aflag = 0;
   while (list)
     {
       alias = find_alias (list->word->word);
@@ -151,27 +178,25 @@ unalias_builtin (list)
       else
 	{
 	  if (interactive)
-	    builtin_error ("`%s' not an alias", list->word->word);
+	    builtin_error ("`%s': not an alias", list->word->word);
 
-	  any_failed++;
+	  aflag++;
 	}
 
       list = list->next;
     }
 
-  if (any_failed)
-    return (EXECUTION_FAILURE);
-  else
-    return (EXECUTION_SUCCESS);
+  return (aflag ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 
 /* Output ALIAS in such a way as to allow it to be read back in. */
 static void
 print_alias (alias)
-     ASSOC *alias;
+     alias_t *alias;
 {
-  char *value = single_quote (alias->value);
+  char *value;
 
+  value = single_quote (alias->value);
   printf ("alias %s=%s\n", alias->name, value);
   free (value);
 

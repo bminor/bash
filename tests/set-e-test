@@ -14,3 +14,6 @@ if : ; then
 	done
 	set +e
 fi
+# command subst should not inherit -e
+set -e
+echo $(false; echo ok)

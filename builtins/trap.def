@@ -23,30 +23,46 @@ $PRODUCES trap.c
 
 $BUILTIN trap
 $FUNCTION trap_builtin
-$SHORT_DOC trap [arg] [signal_spec]
+$SHORT_DOC trap [arg] [signal_spec] or trap -l
 The command ARG is to be read and executed when the shell receives
 signal(s) SIGNAL_SPEC.  If ARG is absent all specified signals are
-reset to their original values.  If ARG is the null string this
-signal is ignored by the shell and by the commands it invokes.  If
-SIGNAL_SPEC is EXIT (0) the command ARG is executed on exit from
-the shell.  The trap command with no arguments prints the list of
-commands associated with each signal number.  SIGNAL_SPEC is either
-a signal name in <signal.h>, or a signal number.  The syntax `trap -l'
-prints a list of signal names and their corresponding numbers.
-Note that a signal can be sent to the shell with "kill -signal $$".
+reset to their original values.  If ARG is the null string each
+SIGNAL_SPEC is ignored by the shell and by the commands it invokes.
+If SIGNAL_SPEC is EXIT (0) the command ARG is executed on exit from
+the shell.  If SIGNAL_SPEC is DEBUG, ARG is executed after every
+command.  If ARG is `-p' then the trap commands associated with
+each SIGNAL_SPEC are displayed.  If no arguments are supplied or if
+only `-p' is given, trap prints the list of commands associated with
+each signal number.  SIGNAL_SPEC is either a signal name in <signal.h>
+or a signal number.  `trap -l' prints a list of signal names and their
+corresponding numbers.  Note that a signal can be sent to the shell
+with "kill -signal $$".
 $END
 
-#include <sys/types.h>
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashtypes.h"
 #include <signal.h>
+#include <stdio.h>
+#include "../bashansi.h"
+
 #include "../shell.h"
 #include "../trap.h"
 #include "common.h"
+#include "bashgetopt.h"
+
+static int display_traps ();
 
 /* The trap command:
 
    trap <arg> <signal ...>
    trap <signal ...>
    trap -l
+   trap -p [sigspec ...]
    trap [--]
 
    Set things up so that ARG is executed when SIGNAL(s) N is recieved.
@@ -62,60 +78,44 @@ $END
 
 extern int interactive;
 
+int
 trap_builtin (list)
      WORD_LIST *list;
 {
-  register int i;
-  int list_signal_names = 0;
+  int list_signal_names, display, result, opt;
 
-  while (list)
+  list_signal_names = display = 0;
+  result = EXECUTION_SUCCESS;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "lp")) != -1)
     {
-      if (ISOPTION (list->word->word, 'l'))
+      switch (opt)
 	{
+	case 'l':
 	  list_signal_names++;
-	  list = list->next;
-	}
-      else if (ISOPTION (list->word->word, '-'))
-	{
-	  list = list->next;
 	  break;
-	}
-      else if ((*list->word->word == '-') && list->word->word[1])
-	{
-	  bad_option (list->word->word);
-	  builtin_error ("usage: trap [-l] [arg] [sigspec]");
+	case 'p':
+	  display++;
+	  break;
+	default:
+	  builtin_usage ();
 	  return (EX_USAGE);
 	}
-      else
-	break;
     }
+  list = loptend;
 
   if (list_signal_names)
+    return (display_signal_list ((WORD_LIST *)NULL, 1));
+  else if (display || list == 0)
+    return (display_traps (list));
+  else
     {
-      int column = 0;
+      char *first_arg;
+      int operation, sig;
 
-      for (i = 0; i < NSIG; i++)
-	{
-	  printf ("%2d) %s", i, signal_name (i));
-	  if (++column < 4)
-	    printf ("\t");
-	  else
-	    {
-	      printf ("\n");
-	      column = 0;
-	    }
-	}
-      if (column != 0)
-	printf ("\n");
-      return (EXECUTION_SUCCESS);
-    }
-
-  if (list)
-    {
-      char *first_arg = list->word->word;
-      int operation = SET, any_failed = 0;
-
-      if (signal_object_p (first_arg))
+      operation = SET;
+      first_arg = list->word->word;
+      if (first_arg && *first_arg && signal_object_p (first_arg))
 	operation = REVERT;
       else
 	{
@@ -128,15 +128,13 @@ trap_builtin (list)
 
       while (list)
 	{
-	  int sig;
-
 	  sig = decode_signal (list->word->word);
 
 	  if (sig == NO_SIG)
 	    {
 	      builtin_error ("%s: not a signal specification",
 			     list->word->word);
-	      any_failed++;
+	      result = EXECUTION_FAILURE;
 	    }
 	  else
 	    {
@@ -183,22 +181,52 @@ trap_builtin (list)
 	    }
 	  list = list->next;
 	}
-      return ((!any_failed) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
 
-  for (i = 0; i < NSIG; i++)
+  return (result);
+}
+
+static void
+showtrap (i)
+     int i;
+{
+  char *t, *p;
+
+  p = trap_list[i];
+
+  if (p == (char *)DEFAULT_SIG)
+    return;
+
+  t = (p == (char *)IGNORE_SIG) ? (char *)NULL : single_quote (p);
+  printf ("trap -- %s %s\n", t ? t : "''", signal_name (i));
+  if (t)
+    free (t);
+}
+
+static int
+display_traps (list)
+     WORD_LIST *list;
+{
+  int result, i;
+
+  if (list == 0)
     {
-      char *t, *p;
-
-      p = trap_list[i];
-
-      if (p == (char *)DEFAULT_SIG)
-	continue;
-
-      t = (p == (char *)IGNORE_SIG) ? (char *)NULL : single_quote (p);
-      printf ("trap -- %s %s\n", t ? t : "''", signal_name (i));
-      if (t)
-	free (t);
+      for (i = 0; i <= NSIG; i++)
+	showtrap (i);
+      return (EXECUTION_SUCCESS);
     }
-  return (EXECUTION_SUCCESS);
+
+  for (result = EXECUTION_SUCCESS; list; list = list->next)
+    {
+      i = decode_signal (list->word->word);
+      if (i == NO_SIG)
+	{
+	  result = EXECUTION_FAILURE;
+	  builtin_error ("%s: not a signal specification", list->word->word);
+	}
+      else
+	showtrap (i);
+    }
+
+  return (result);
 }
