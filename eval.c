@@ -23,6 +23,9 @@
 #include "config.h"
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -256,4 +259,39 @@ read_command ()
     }
 
   return (result);
+}
+
+/* Take a string and run it through the shell parser, returning the
+   resultant word list.  Used by compound array assignment. */
+WORD_LIST *
+parse_string_to_word_list (s, whom)
+     char *s, *whom;
+{
+  WORD_LIST *wl;
+  COMMAND *saved_global;
+
+  push_stream (1);
+
+  saved_global = global_command;
+  global_command = (COMMAND *)0;
+
+  with_input_from_string (s, whom);
+  if (parse_command () != 0 || global_command == 0 || global_command->type != cm_simple)
+    {
+      if (global_command)
+	dispose_command (global_command);
+      wl = (WORD_LIST *)NULL;
+    }
+  else
+    {
+      wl = global_command->value.Simple->words;
+      free (global_command->value.Simple);
+      free (global_command);
+    }
+
+  global_command = saved_global;
+
+  pop_stream ();
+
+  return (wl);
 }

@@ -1,15 +1,26 @@
+./errors.tests: alias: illegal option: -x
+alias: usage: alias [-p] [name[=value] ... ]
+./errors.tests: unalias: illegal option: -x
+unalias: usage: unalias [-a] [name ...]
+./errors.tests: alias: `hoowah' not found
+./errors.tests: unalias: `hoowah': not an alias
 ./errors.tests: `1': not a valid identifier
 declare -fr func
 ./errors.tests: func: readonly function
+./errors.tests: unset: illegal option: -x
+unset: usage: unset [-f] [-v] [name ...]
 ./errors.tests: unset: func: cannot unset: readonly function
 ./errors.tests: declare: func: readonly function
 ./errors.tests: unset: XPATH: cannot unset: readonly variable
 ./errors.tests: unset: `/bin/sh': not a valid identifier
+./errors.tests: unset: cannot simultaneously unset a function and a variable
 ./errors.tests: declare: unknown option: `-z'
 declare: usage: declare [-afFrxi] [-p] name[=value] ...
 ./errors.tests: declare: `-z': not a valid identifier
 ./errors.tests: declare: `/bin/sh': not a valid identifier
 ./errors.tests: declare: cannot use `-f' to make functions
+./errors.tests: exec: illegal option: -i
+exec: usage: exec [-cl] [-a name] file [redirection ...]
 ./errors.tests: export: XPATH: not a function
 ./errors.tests: break: only meaningful in a `for', `while', or `until' loop
 ./errors.tests: continue: only meaningful in a `for', `while', or `until' loop
@@ -17,12 +28,17 @@ declare: usage: declare [-afFrxi] [-p] name[=value] ...
 ./errors.tests: shift: too many arguments
 ./errors.tests: let: expression expected
 ./errors.tests: local: can only be used in a function
+./errors.tests: logout: not login shell: use `exit'
 ./errors.tests: hash: notthere: not found
+./errors.tests: hash: illegal option: -v
+hash: usage: hash [-r] [-p pathname] [name ...]
 ./errors.tests: hash: hashing disabled
 ./errors.tests: export: `AA[4]': not a valid identifier
 ./errors.tests: readonly: `AA[4]': not a valid identifier
 ./errors.tests: [-2]: bad array subscript
 ./errors.tests: AA: readonly variable
+./errors.tests: AA: readonly variable
+./errors.tests: readonly: ZZZ: cannot assign to array variables in this way
 ./errors.tests: shift: shift count must be <= $#
 ./errors.tests: shift: shift count must be >= 0
 ./errors.tests: shopt: no_such_option: unknown shell option name
@@ -30,8 +46,8 @@ declare: usage: declare [-afFrxi] [-p] name[=value] ...
 ./errors.tests: umask: `09' is not an octal number from 000 to 777
 ./errors.tests: umask: bad character in symbolic mode: :
 ./errors.tests: umask: bad symbolic mode operator: :
-./errors.tests: umask: illegal option: -p
-umask: usage: umask [-S] [mode]
+./errors.tests: umask: illegal option: -i
+umask: usage: umask [-p] [-S] [mode]
 ./errors.tests: VAR: readonly variable
 ./errors.tests: declare: VAR: readonly variable
 ./errors.tests: declare: VAR: readonly variable
@@ -41,7 +57,10 @@ umask: usage: umask [-S] [mode]
 ./errors.tests: command substitution: line 1: syntax error near unexpected token `done'
 ./errors.tests: command substitution: line 1: ` for z in 1 2 3; done '
 ./errors.tests: cd: HOME not set
+./errors.tests: cd: /tmp/xyz.bash: No such file or directory
 ./errors.tests: cd: OLDPWD not set
+./errors.tests: cd: /bin/sh: Not a directory
+./errors.tests: cd: /tmp/cd-notthere: No such file or directory
 ./errors.tests: .: filename argument required
 .: usage: . filename
 ./errors.tests: source: filename argument required
@@ -52,12 +71,18 @@ source: usage: source filename
 ./errors.tests: enable: sh: not a shell builtin
 ./errors.tests: enable: bash: not a shell builtin
 ./errors.tests: shopt: cannot set and unset shell options simultaneously
+./errors.tests: read: illegal option: -t
+read: usage: read [-r] [-p prompt] [-a array] [-e] [name ...]
 ./errors.tests: read: `/bin/sh': not a valid identifier
 ./errors.tests: VAR: readonly variable
+./errors.tests: readonly: illegal option: -x
+readonly: usage: readonly [-anf] [name ...] or readonly -p
 ./errors.tests: eval: illegal option: -i
 eval: usage: eval [arg ...]
 ./errors.tests: command: illegal option: -i
 command: usage: command [-pVv] command [arg ...]
+./errors.tests: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
 ./errors.tests: trap: NOSIG: not a signal specification
 ./errors.tests: trap: illegal option: -s
 trap: usage: trap [arg] [signal_spec ...] or trap -l
@@ -70,4 +95,7 @@ trap: usage: trap [arg] [signal_spec ...] or trap -l
 ./errors.tests: fg: no job control
 ./errors.tests: kill: -s requires an argument
 ./errors.tests: kill: bad signal spec `S'
+./errors.tests: kill: `': not a pid or valid job spec
+kill: usage: kill [-s sigspec | -n signum | -sigspec] [pid | job]... or kill -l [sigspec]
+./errors.tests: set: trackall: unknown option name
 ./errors.tests: `!!': not a valid identifier

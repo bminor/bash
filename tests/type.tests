@@ -23,6 +23,7 @@ type -t m
 type -t builtin
 type -t /bin/sh
 type -t ${THIS_SH}
+type -t mv
 
 type func
 # the following two should produce identical output
@@ -51,6 +52,8 @@ type func
 unalias m
 type m
 
+hash -r
+
 hash -p /bin/sh sh
 type -p sh
 
@@ -58,3 +61,8 @@ SHBASE=${THIS_SH##*/}
 hash -p /tmp/$SHBASE $SHBASE
 type -p $SHBASE
 type $SHBASE
+
+type -t $SHBASE
+
+# make sure the hash table looks right
+hash

@@ -62,8 +62,13 @@ echo ${a[@]}
 
 readonly a[5]
 readonly a
+# these two lines should output `declare' commands
 readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 declare -ar | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+# this line should output `readonly' commands, even for arrays
+set -o posix
+readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+set +o posix
 
 declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")'
 d[9]="ninth element"
@@ -111,6 +116,15 @@ this is a test of read using arrays
 
 echo ${rv[0]} ${rv[4]}
 echo ${rv[@]}
+
+# the variable should be converted to an array when `read -a' is done
+vv=1
+read -a vv <<!
+this is a test of arrays
+!
+echo ${vv[0]} ${vv[3]}
+echo ${vv[@]}
+unset vv
 
 declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
 
@@ -195,6 +209,13 @@ echo ${iarray[@]}
 
 iarray[4]=4+1
 echo ${iarray[@]}
+
+# make sure assignment using the compound assignment syntax removes all
+# of the old elements from the array value
+barray=(old1 old2 old3 old4 old5)
+barray=(new1 new2 new3)
+echo "length = ${#barray[@]}"
+echo "value = ${barray[*]}"
 
 # make sure the array code behaves correctly with respect to unset variables
 set -u

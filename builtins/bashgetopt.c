@@ -161,6 +161,7 @@ reset_internal_getopt ()
 	sp = 1;
 }
 
+#ifdef INCLUDE_UNUSED
 void
 report_bad_option ()
 {
@@ -171,3 +172,4 @@ report_bad_option ()
 	s[2] = '\0';
 	bad_option (s);
 }
+#endif

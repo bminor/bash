@@ -39,6 +39,9 @@ $END
 #include <stdio.h>
 #include <errno.h>
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -77,7 +80,10 @@ kill_builtin (list)
   pid_t pid;
 
   if (list == 0)
-    return (EXECUTION_SUCCESS);
+    {
+      builtin_usage ();
+      return (EXECUTION_FAILURE);
+    }
 
   any_succeeded = listing = saw_signal = 0;
   signal = SIGTERM;
@@ -145,6 +151,12 @@ kill_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
+  if (list == 0)
+    {
+      builtin_usage ();
+      return (EXECUTION_FAILURE);
+    }
+
   while (list)
     {
       word = list->word->word;
@@ -152,7 +164,7 @@ kill_builtin (list)
       if (*word == '-')
 	word++;
 
-      if (all_digits (word))
+      if (*word && all_digits (word))
 	{
 	  /* Use the entire argument in case of minus sign presence. */
 	  pid = (pid_t) atoi (list->word->word);
@@ -162,12 +174,12 @@ kill_builtin (list)
 	  else
 	    any_succeeded++;
 	}
-      else if (*list->word->word != '%')
+      else if (*list->word->word && *list->word->word != '%')
 	{
 	  builtin_error ("%s: no such pid", list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
-      else if (interactive || job_control)
+      else if (*word && (interactive || job_control))
 	/* Posix.2 says you can kill without job control active (4.32.4) */
 	{			/* Must be a job spec.  Check it out. */
 	  int job;
@@ -208,7 +220,7 @@ kill_builtin (list)
 	}
       else
 	{
-	  builtin_error ("`%s' is not a pid or valid job spec", list->word->word);
+	  builtin_error ("`%s': not a pid or valid job spec", list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
     continue_killing:

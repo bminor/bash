@@ -26,11 +26,15 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "bashtypes.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 #include "filecntl.h"
 #include "posixstat.h"
 #include <signal.h>
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -54,7 +58,7 @@
 #  endif
 #endif
 
-#if defined (HAVE_SYS_RESOURCE_H)
+#if defined (HAVE_SYS_RESOURCE_H) && !defined (RLIMTYPE)
 #  include <sys/resource.h>
 #endif
 
@@ -78,9 +82,15 @@ extern int errno;
 #include "hashlib.h"
 #include "jobs.h"
 #include "execute_cmd.h"
+#include "findcmd.h"
+#include "redir.h"
 #include "trap.h"
 #include "pathexp.h"
 #include "hashcmd.h"
+
+#if defined (COND_COMMAND)
+#  include "test.h"
+#endif
 
 #include "builtins/common.h"
 #include "builtins/builtext.h"	/* list of builtins */
@@ -121,16 +131,16 @@ extern int close ();
 /* Static functions defined and used in this file. */
 static void close_pipes (), do_piping (), bind_lastarg ();
 static void cleanup_redirects ();
-static void add_undo_close_redirect (), add_exec_redirect ();
-static int add_undo_redirect ();
-static int do_redirection_internal (), do_redirections ();
-static int expandable_redirection_filename ();
-static char *find_user_command_internal (), *find_user_command_in_path ();
-static char *find_in_path_element (), *find_absolute_program ();
 
 static int execute_for_command ();
 #if defined (SELECT_COMMAND)
 static int execute_select_command ();
+#endif
+#if defined (DPAREN_ARITHMETIC)
+static int execute_arith_command ();
+#endif
+#if defined (COND_COMMAND)
+static int execute_cond_command ();
 #endif
 #if defined (COMMAND_TIMING)
 static int time_command ();
@@ -165,21 +175,6 @@ struct stat SB;		/* used for debugging */
 
 static int special_builtin_failed;
 
-/* Spare redirector used when translating [N]>&WORD or [N]<&WORD to a new
-   redirection and when creating the redirection undo list. */
-static REDIRECTEE rd;
-
-/* Set to errno when a here document cannot be created for some reason.
-   Used to print a reasonable error message. */
-static int heredoc_errno;
-
-/* The file name which we would try to execute, except that it isn't
-   possible to execute it.  This is the first file that matches the
-   name that we are looking for while we are searching $PATH for a
-   suitable one to execute.  If we cannot find a suitable executable
-   file, then we use this one. */
-static char *file_to_lose_on;
-
 /* For catching RETURN in a function. */
 int return_catch_flag;
 int return_catch_value;
@@ -200,10 +195,6 @@ REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
 int subshell_environment;
-
-/* Non-zero if we should stat every command found in the hash table to
-   make sure it still exists. */
-int check_hashed_filenames;
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -313,6 +304,12 @@ shell_control_structure (type)
 #if defined (SELECT_COMMAND)
     case cm_select:
 #endif
+#if defined (DPAREN_ARITHMETIC)
+    case cm_arith:
+#endif
+#if defined (COND_COMMAND)
+    case cm_cond:
+#endif
     case cm_case:
     case cm_while:
     case cm_until:
@@ -345,7 +342,7 @@ cleanup_func_redirects (list)
 }
 #endif
 
-static void
+void
 dispose_exec_redirects ()
 {
   if (exec_redirection_undo_list)
@@ -383,41 +380,6 @@ open_files ()
     }
   fprintf (stderr, "\n");
 }
-
-static int
-stdin_redirects (redirs)
-     REDIRECT *redirs;
-{
-  REDIRECT *rp;
-  int n;
-
-  for (n = 0, rp = redirs; rp; rp = rp->next)
-    switch (rp->instruction)
-      {
-      case r_input_direction:
-      case r_inputa_direction:
-      case r_input_output:
-      case r_reading_until:
-      case r_deblank_reading_until:
-	n++;
-        break;
-      case r_duplicating_input:
-      case r_duplicating_input_word:
-      case r_close_this:
-	n += (rp->redirector == 0);
-        break;
-      case r_output_direction:
-      case r_appending_to:
-      case r_duplicating_output:
-      case r_err_and_out:
-      case r_output_force:
-      case r_duplicating_output_word:
-	break;
-      }
-
-  return n;
-}
-
 
 static void
 async_redirect_stdin ()
@@ -458,7 +420,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 {
   int exec_result, invert, ignore_return, was_debug_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
-  pid_t last_pid;
+  volatile pid_t last_pid;
 
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
@@ -782,7 +744,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	run_debug_trap ();
 
       if (ignore_return == 0 && invert == 0 &&
-          ((posixly_correct && interactive == 0 && special_builtin_failed) ||
+	  ((posixly_correct && interactive == 0 && special_builtin_failed) ||
 	   (exit_immediately_on_error && (exec_result != EXECUTION_SUCCESS))))
 	{
 	  last_command_exit_value = exec_result;
@@ -879,6 +841,22 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 					pipe_in, pipe_out, fds_to_close);
       break;
 
+#if defined (DPAREN_ARITHMETIC)
+    case cm_arith:
+      if (ignore_return)
+	command->value.Arith->flags |= CMD_IGNORE_RETURN;
+      exec_result = execute_arith_command (command->value.Arith);
+      break;
+#endif
+
+#if defined (COND_COMMAND)
+    case cm_cond:
+      if (ignore_return)
+	command->value.Cond->flags |= CMD_IGNORE_RETURN;
+      exec_result = execute_cond_command (command->value.Cond);
+      break;
+#endif
+    
     case cm_function_def:
       exec_result = execute_intern_function (command->value.Function_def->name,
 					     command->value.Function_def->command);
@@ -977,7 +955,7 @@ timeval_to_cpu (rt, ut, st)
       if (t1.tv_sec < 100000000)
 	t1.tv_sec *= 10;
       else
-        t2.tv_sec /= 10;
+	t2.tv_sec /= 10;
     }
 
   return ((t2.tv_sec == 0) ? 0 : t1.tv_sec / t2.tv_sec);
@@ -1015,7 +993,7 @@ mkfmt (buf, prec, lng, sec, sec_fraction)
       while (min /= 10);
       aind++;
       while (abuf[aind])
-        buf[ind++] = abuf[aind++];
+	buf[ind++] = abuf[aind++];
       buf[ind++] = 'm';
     }
 
@@ -1086,16 +1064,16 @@ print_formatted_time (fp, format, rs, rsf, us, usf, ss, ssf, cpu)
   for (s = format; *s; s++)
     {
       if (*s != '%' || s[1] == '\0')
-        {
-          RESIZE_MALLOCED_BUFFER (str, sindex, 1, ssize, 64);
-          str[sindex++] = *s;
-        }
+	{
+	  RESIZE_MALLOCED_BUFFER (str, sindex, 1, ssize, 64);
+	  str[sindex++] = *s;
+	}
       else if (s[1] == '%')
-        {
-          s++;
-          RESIZE_MALLOCED_BUFFER (str, sindex, 1, ssize, 64);
-          str[sindex++] = *s;
-        }
+	{
+	  s++;
+	  RESIZE_MALLOCED_BUFFER (str, sindex, 1, ssize, 64);
+	  str[sindex++] = *s;
+	}
       else if (s[1] == 'P')
 	{
 	  s++;
@@ -1188,6 +1166,9 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
   rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   command->flags = old_flags;
+
+  rs = us = ss = 0L;
+  rsf = usf = ssf = cpu = 0;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   gettimeofday (&after, &dtz);
@@ -1304,7 +1285,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       fd_bitmap->bitmap[fildes[0]] = 1;
 
       /* In case there are pipe or out-of-processes errors, we
-         want all these file descriptors to be closed when
+	 want all these file descriptors to be closed when
 	 unwind-protects are run, and the storage used for the
 	 bitmaps freed up. */
       begin_unwind_frame ("pipe-file-descriptors");
@@ -1535,10 +1516,10 @@ execute_for_command (for_command)
   if (check_identifier (for_command->name, 1) == 0)
     {
       if (posixly_correct && interactive_shell == 0)
-        {
-          last_command_exit_value = EX_USAGE;
-          jump_to_top_level (EXITPROG);
-        }
+	{
+	  last_command_exit_value = EX_USAGE;
+	  jump_to_top_level (EXITPROG);
+	}
       return (EXECUTION_FAILURE);
     }
 
@@ -1755,7 +1736,7 @@ select_query (list, list_len, prompt)
     {
       len = STRLEN (l->word->word);
       if (len > max_elem_len)
-        max_elem_len = len;
+	max_elem_len = len;
     }
   indices_len = NUMBER_LEN (list_len);
   max_elem_len += indices_len + RP_SPACE_LEN + 2;
@@ -1776,7 +1757,7 @@ select_query (list, list_len, prompt)
       if (*repl_string == 0)
 	continue;
       if (legal_number (repl_string, &reply) == 0)
-	continue;
+	return "";
       if (reply < 1 || reply > list_len)
 	return "";
 
@@ -1858,12 +1839,12 @@ execute_select_command (select_command)
       return_val = setjmp (return_catch);
 
       if (return_val)
-        {
+	{
 	  retval = return_catch_value;
 	  break;
-        }
+	}
       else
-        retval = execute_command (select_command->action);
+	retval = execute_command (select_command->action);
 
       REAP ();
       QUIT;
@@ -1933,7 +1914,7 @@ execute_case_command (case_command)
 	  es = expand_word_leave_quoted (list->word, 0);
 
 	  if (es && es->word && es->word->word && *(es->word->word))
-	    pattern = quote_string_for_globbing (es->word->word, 1);
+	    pattern = quote_string_for_globbing (es->word->word, QGLOB_CVTNULL);
 	  else
 	    {
 	      pattern = xmalloc (1);
@@ -1943,7 +1924,7 @@ execute_case_command (case_command)
 	  /* Since the pattern does not undergo quote removal (as per
 	     Posix.2, section 3.9.4.3), the fnmatch () call must be able
 	     to recognize backslashes as escape characters. */
-	  match = fnmatch (pattern, word, 0) != FNM_NOMATCH;
+	  match = fnmatch (pattern, word, FNMATCH_EXTFLAG) != FNM_NOMATCH;
 	  free (pattern);
 
 	  dispose_words (es);
@@ -2070,6 +2051,134 @@ execute_if_command (if_command)
     }
 }
 
+#if defined (DPAREN_ARITHMETIC)
+static int
+execute_arith_command (arith_command)
+     ARITH_COM *arith_command;
+{
+  int result, expok, expresult;
+  WORD_LIST *new, *p, *printit;
+  WORD_DESC *w;
+
+  result = 0;
+
+  this_command_name = "((";
+  /* If we're in a function, update the line number information. */
+  if (variable_context)
+    line_number = arith_command->line - function_line_number;
+
+  new = expand_words (arith_command->exp);
+
+  /* If we're tracing, make a new word list with `((' at the front and `))'
+     at the back and print it. */
+  if (echo_command_at_execute)
+    xtrace_print_arith_cmd (new);
+
+  result = evalexp (new->word->word, &expok);
+  dispose_words (new);
+
+  if (expok == 0)
+    return (EXECUTION_FAILURE);
+
+  return (result == 0 ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+}
+#endif /* DPAREN_ARITHMETIC */
+
+#if defined (COND_COMMAND)
+
+static char *nullstr = "";
+
+static int
+execute_cond_node (cond)
+     COND_COM *cond;
+{
+  int result, invert, patmatch;
+  char *arg1, *arg2, *print2;
+
+  invert = (cond->flags & CMD_INVERT_RETURN);
+
+  if (cond->type == COND_EXPR)
+    result = execute_cond_node (cond->left);
+  else if (cond->type == COND_OR)
+    {
+      result = execute_cond_node (cond->left);
+      if (result != EXECUTION_SUCCESS)
+	result = execute_cond_node (cond->right);
+    }
+  else if (cond->type == COND_AND)
+    {
+      result = execute_cond_node (cond->left);
+      if (result == EXECUTION_SUCCESS)
+	result = execute_cond_node (cond->right);
+    }
+  else if (cond->type == COND_UNARY)
+    {
+      arg1 = cond_expand_word (cond->left->op, 0);
+      if (arg1 == 0)
+	arg1 = nullstr;
+      if (echo_command_at_execute)
+	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
+      result = unary_test (cond->op->word, arg1) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      if (arg1 != nullstr)
+	free (arg1);
+    }
+  else if (cond->type == COND_BINARY)
+    {
+      patmatch = (cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
+		  (cond->op->word[0] == '!' || cond->op->word[0] == '=');
+
+      arg1 = cond_expand_word (cond->left->op, 0);
+      if (arg1 == 0)
+	arg1 = nullstr;
+      arg2 = cond_expand_word (cond->right->op, patmatch);
+      if (arg2 == 0)
+	arg2 = nullstr;
+
+      if (echo_command_at_execute)
+	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, arg2);
+
+      result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP)
+				? EXECUTION_SUCCESS
+				: EXECUTION_FAILURE;
+      if (arg1 != nullstr)
+	free (arg1);
+      if (arg2 != nullstr)
+	free (arg2);
+    }
+  else
+    {
+      programming_error ("execute_cond_node: %d: unknown conditional command type", cond->type);
+      jump_to_top_level (DISCARD);
+      result = EXECUTION_FAILURE;
+    }
+
+  if (invert)
+    result = (result == EXECUTION_SUCCESS) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
+
+  return result;
+}
+
+static int
+execute_cond_command (cond_command)
+     COND_COM *cond_command;
+{
+  int result;
+
+  result = EXECUTION_SUCCESS;
+
+  this_command_name = "[[";
+  /* If we're in a function, update the line number information. */
+  if (variable_context)
+    line_number = cond_command->line - function_line_number;
+
+#if 0
+  debug_print_cond_command (cond_command);
+#endif
+  last_command_exit_value = result = execute_cond_node (cond_command);  
+  return (result);
+}
+#endif /* COND_COMMAND */
+
 static void
 bind_lastarg (arg)
      char *arg;
@@ -2167,13 +2276,14 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 {
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
-  int first_word_quoted, result, builtin_is_special;
+  int first_word_quoted, result, builtin_is_special, already_forked;
   pid_t old_last_command_subst_pid;
   Function *builtin;
   SHELL_VAR *func;
 
   result = EXECUTION_SUCCESS;
   special_builtin_failed = builtin_is_special = 0;
+  command_line = (char *)0;
 
   /* If we're in a function, update the line number information. */
   if (variable_context)
@@ -2182,13 +2292,39 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
   print_simple_command (simple_command);
-  command_line = xmalloc (1 + strlen (the_printed_command));
-  strcpy (command_line, the_printed_command);	/* XXX memory leak on errors */
 
   first_word_quoted =
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
 
   old_last_command_subst_pid = last_command_subst_pid;
+
+  already_forked = 0;
+  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
+    {
+      /* XXX memory leak if expand_words() error causes a jump_to_top_level */
+      command_line = savestring (the_printed_command);
+
+      if (make_child (command_line, async) == 0)
+	{
+	  already_forked = 1;
+	  simple_command->flags |= CMD_NO_FORK;
+
+	  do_piping (pipe_in, pipe_out);
+	  pipe_in = pipe_out = -1;
+
+	  subshell_environment = SUBSHELL_ASYNC;
+	}
+      else
+	{
+	  close_pipes (pipe_in, pipe_out);
+#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
+	  unlink_fifo_list ();
+#endif
+	  command_line = (char *)NULL;      /* don't free this. */
+	  bind_lastarg ((char *)NULL);
+	  return (result);
+	}
+    }
 
   /* If we are re-running this as the result of executing the `command'
      builtin, do not expand the command words a second time. */
@@ -2208,11 +2344,17 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   if (words == 0)
     {
       result = execute_null_command (simple_command->redirects,
-				     pipe_in, pipe_out, async,
+				     pipe_in, pipe_out,
+				     already_forked ? 0 : async,
 				     old_last_command_subst_pid);
-      FREE (command_line);
-      bind_lastarg ((char *)NULL);
-      return (result);
+      if (already_forked)
+	exit (result);
+      else
+	{
+	  bind_lastarg ((char *)NULL);
+	  set_pipestatus_from_exit (result);
+	  return (result);
+	}
     }
 
   lastarg = (char *)NULL;
@@ -2252,7 +2394,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
 #if defined (JOB_CONTROL)
   /* Is this command a job control related thing? */
-  if (words->word->word[0] == '%')
+  if (words->word->word[0] == '%' && already_forked == 0)
     {
       this_command_name = async ? "bg" : "fg";
       last_shell_builtin = this_shell_builtin;
@@ -2264,7 +2406,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   /* One other possiblilty.  The user may want to resume an existing job.
      If they do, find out whether this word is a candidate for a running
      job. */
-  if (job_control && async == 0 &&
+  if (job_control && already_forked == 0 && async == 0 &&
 	!first_word_quoted &&
 	!words->next &&
 	words->word->word[0] &&
@@ -2337,37 +2479,25 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (builtin || func)
     {
-      if ((pipe_in != NO_PIPE) || (pipe_out != NO_PIPE) || async)
+       if (already_forked)
 	{
-	  if (make_child (command_line, async) == 0)
-	    {
-	      /* reset_terminating_signals (); */	/* XXX */
-	      /* Cancel traps, in trap.c. */
-	      restore_original_signals ();
+	  /* reset_terminating_signals (); */	/* XXX */
+	  /* Cancel traps, in trap.c. */
+	  restore_original_signals ();
 
-	      if (async)
-		{
-		  if ((simple_command->flags & CMD_STDIN_REDIR) &&
-			pipe_in == NO_PIPE &&
-			(stdin_redirects (simple_command->redirects) == 0))
-		    async_redirect_stdin ();
-		  setup_async_signals ();
-		}
-
-	      execute_subshell_builtin_or_function
-		(words, simple_command->redirects, builtin, func,
-		 pipe_in, pipe_out, async, fds_to_close,
-		 simple_command->flags);
-	    }
-	  else
+	  if (async)
 	    {
-	      close_pipes (pipe_in, pipe_out);
-#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-	      unlink_fifo_list ();
-#endif
-	      command_line = (char *)NULL;	/* don't free this. */
-	      goto return_result;
+	      if ((simple_command->flags & CMD_STDIN_REDIR) &&
+		    pipe_in == NO_PIPE &&
+		    (stdin_redirects (simple_command->redirects) == 0))
+		async_redirect_stdin ();
+	      setup_async_signals ();
 	    }
+
+	  execute_subshell_builtin_or_function
+	    (words, simple_command->redirects, builtin, func,
+	     pipe_in, pipe_out, async, fds_to_close,
+	     simple_command->flags);
 	}
       else
 	{
@@ -2378,9 +2508,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	    {
 	      if (result > EX_SHERRBASE)
 		{
-	          result = builtin_status (result);
-	          if (builtin_is_special)
-	            special_builtin_failed = 1;
+		  result = builtin_status (result);
+		  if (builtin_is_special)
+		    special_builtin_failed = 1;
 		}
 	      /* In POSIX mode, if there are assignment statements preceding
 		 a special builtin, they persist after the builtin
@@ -2393,12 +2523,17 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	      if (result == EX_USAGE)
 		result = EX_BADUSAGE;
 	      else if (result > EX_SHERRBASE)
-	        result = EXECUTION_FAILURE;
+		result = EXECUTION_FAILURE;
 	    }
+
+	  set_pipestatus_from_exit (result);
 
 	  goto return_result;
 	}
     }
+
+  if (command_line == 0)
+    command_line = savestring (the_printed_command);
 
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
@@ -2492,8 +2627,12 @@ execute_builtin (builtin, words, flags, subshell)
 	 and `eval' are special builtins. */
       if (posixly_correct && builtin_env)
 	merge_builtin_env ();
+#if 0
       dispose_builtin_env ();
       discard_unwind_frame ("builtin_env");
+#else
+      run_unwind_frame ("builtin_env");
+#endif
     }
 
   if (eval_unwind)
@@ -2540,8 +2679,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       if (subshell == 0)
 	{
 	  debug_trap = savestring (debug_trap);
+	  /* XXX order is important here!  unwind-protect commands are run
+	     in reverse order of registering.  If this causes problems,
+	     take out the xfree unwind-protect and live with the small
+	     memory leak. */
+	  add_unwind_protect (xfree, debug_trap);
 	  add_unwind_protect (set_debug_trap, debug_trap);
-	  /* XXX - small memory leak here -- hard to fix */
 	}
       restore_default_signal (DEBUG_TRAP);
     }
@@ -2657,12 +2800,12 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
       else if (result)
 	exit (EXECUTION_FAILURE);
       else
-        {
-          r = execute_builtin (builtin, words, flags, 1);
-          if (r == EX_USAGE)
-            r = EX_BADUSAGE;
-          exit (r);
-        }
+	{
+	  r = execute_builtin (builtin, words, flags, 1);
+	  if (r == EX_USAGE)
+	    r = EX_BADUSAGE;
+	  exit (r);
+	}
     }
   else
     exit (execute_function (var, words, flags, fds_to_close, async, 1));
@@ -2827,8 +2970,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       restore_original_signals ();
 
       /* restore_original_signals may have undone the work done
-         by make_child to ensure that SIGINT and SIGQUIT are ignored
-         in asynchronous children. */
+	 by make_child to ensure that SIGINT and SIGQUIT are ignored
+	 in asynchronous children. */
       if (async)
 	{
 	  if ((cmdflags & CMD_STDIN_REDIR) &&
@@ -3000,19 +3143,8 @@ initialize_subshell ()
 
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */
-#if defined (BUFFERED_INPUT)
-  if (interactive_shell == 0 && default_buffered_input >= 0)
-    {
-      close_buffered_fd (default_buffered_input);
-      default_buffered_input = bash_input.location.buffered_fd = -1;
-    }
-#else
-  if (interactive_shell == 0 && default_input)
-    {
-      fclose (default_input);
-      default_input = (FILE *)NULL;
-    }
-#endif
+  if (interactive_shell == 0)
+    unset_bash_input (1);
 }
 
 #if defined (HAVE_SETOSTYPE) && defined (_POSIX_SOURCE)
@@ -3197,7 +3329,10 @@ do_piping (pipe_in, pipe_out)
       if (dup2 (pipe_in, 0) < 0)
 	sys_error ("cannot duplicate fd %d to fd 0", pipe_in);
       if (pipe_in > 0)
-        close (pipe_in);
+	close (pipe_in);
+#ifdef __CYGWIN32__
+      setmode (0, O_TEXT);
+#endif
     }
   if (pipe_out != NO_PIPE)
     {
@@ -3207,1226 +3342,18 @@ do_piping (pipe_in, pipe_out)
 	    sys_error ("cannot duplicate fd %d to fd 1", pipe_out);
 	  if (pipe_out == 0 || pipe_out > 1)
 	    close (pipe_out);
-	}
-      else
-	if (dup2 (1, 2) < 0)
-	  sys_error ("cannot duplicate fd 1 to fd 2");
-    }
-}
-
-static void
-redirection_error (temp, error)
-     REDIRECT *temp;
-     int error;
-{
-  char *filename;
-
-  if (expandable_redirection_filename (temp))
-    {
-      if (posixly_correct && !interactive_shell)
-        disallow_filename_globbing++;
-      filename = redirection_expand (temp->redirectee.filename);
-      if (posixly_correct && !interactive_shell)
-        disallow_filename_globbing--;
-      if (filename == 0)
-	filename = savestring (temp->redirectee.filename->word);
-      if (filename == 0)
-	{
-	  filename = xmalloc (1);
-	  filename[0] = '\0';
-	}
-    }
-  else
-    filename = itos (temp->redirectee.dest);
-
-  switch (error)
-    {
-    case AMBIGUOUS_REDIRECT:
-      internal_error ("%s: ambiguous redirect", filename);
-      break;
-
-    case NOCLOBBER_REDIRECT:
-      internal_error ("%s: cannot overwrite existing file", filename);
-      break;
-
-#if defined (RESTRICTED_SHELL)
-    case RESTRICTED_REDIRECT:
-      internal_error ("%s: restricted: cannot redirect output", filename);
-      break;
-#endif /* RESTRICTED_SHELL */
-
-    case HEREDOC_REDIRECT:
-      internal_error ("cannot create temp file for here document: %s", strerror (heredoc_errno));
-      break;
-
-    default:
-      internal_error ("%s: %s", filename, strerror (error));
-      break;
-    }
-
-  FREE (filename);
-}
-
-/* Perform the redirections on LIST.  If FOR_REAL, then actually make
-   input and output file descriptors, otherwise just do whatever is
-   neccessary for side effecting.  INTERNAL says to remember how to
-   undo the redirections later, if non-zero.  If SET_CLEXEC is non-zero,
-   file descriptors opened in do_redirection () have their close-on-exec
-   flag set. */
-static int
-do_redirections (list, for_real, internal, set_clexec)
-     REDIRECT *list;
-     int for_real, internal, set_clexec;
-{
-  int error;
-  REDIRECT *temp;
-
-  if (internal)
-    {
-      if (redirection_undo_list)
-	{
-	  dispose_redirects (redirection_undo_list);
-	  redirection_undo_list = (REDIRECT *)NULL;
-	}
-      if (exec_redirection_undo_list)
-	dispose_exec_redirects ();
-    }
-
-  for (temp = list; temp; temp = temp->next)
-    {
-      error = do_redirection_internal (temp, for_real, internal, set_clexec);
-      if (error)
-	{
-	  redirection_error (temp, error);
-	  return (error);
-	}
-    }
-  return (0);
-}
-
-/* Return non-zero if the redirection pointed to by REDIRECT has a
-   redirectee.filename that can be expanded. */
-static int
-expandable_redirection_filename (redirect)
-     REDIRECT *redirect;
-{
-  switch (redirect->instruction)
-    {
-    case r_output_direction:
-    case r_appending_to:
-    case r_input_direction:
-    case r_inputa_direction:
-    case r_err_and_out:
-    case r_input_output:
-    case r_output_force:
-    case r_duplicating_input_word:
-    case r_duplicating_output_word:
-      return 1;
-
-    default:
-      return 0;
-    }
-}
-
-/* Expand the word in WORD returning a string.  If WORD expands to
-   multiple words (or no words), then return NULL. */
-char *
-redirection_expand (word)
-     WORD_DESC *word;
-{
-  char *result;
-  WORD_LIST *tlist1, *tlist2;
-
-  tlist1 = make_word_list (copy_word (word), (WORD_LIST *)NULL);
-  tlist2 = expand_words_no_vars (tlist1);
-  dispose_words (tlist1);
-
-  if (!tlist2 || tlist2->next)
-    {
-      /* We expanded to no words, or to more than a single word.
-	 Dispose of the word list and return NULL. */
-      if (tlist2)
-	dispose_words (tlist2);
-      return ((char *)NULL);
-    }
-  result = string_list (tlist2);  /* XXX savestring (tlist2->word->word)? */
-  dispose_words (tlist2);
-  return (result);
-}
-
-/* Write the text of the here document pointed to by REDIRECTEE to the file
-   descriptor FD, which is already open to a temp file.  Return 0 if the
-   write is successful, otherwise return errno. */
-static int
-write_here_document (fd, redirectee)
-     int fd;
-     WORD_DESC *redirectee;
-{
-  char *document;
-  int document_len, fd2;
-  FILE *fp;
-  register WORD_LIST *t, *tlist;
-
-  /* Expand the text if the word that was specified had
-     no quoting.  The text that we expand is treated
-     exactly as if it were surrounded by double quotes. */
-
-  if (redirectee->flags & W_QUOTED)
-    {
-      document = redirectee->word;
-      document_len = strlen (document);
-      /* Set errno to something reasonable if the write fails. */
-      if (write (fd, document, document_len) < document_len)
-	{
-	  if (errno == 0)
-	    errno = ENOSPC;
-	  return (errno);
-	}
-      else
-        return 0;
-    }
-
-  tlist = expand_string (redirectee->word, Q_HERE_DOCUMENT);
-  if (tlist)
-    {
-      /* Try using buffered I/O (stdio) and writing a word
-	 at a time, letting stdio do the work of buffering
-	 for us rather than managing our own strings.  Most
-	 stdios are not particularly fast, however -- this
-	 may need to be reconsidered later. */
-      if ((fd2 = dup (fd)) < 0 || (fp = fdopen (fd2, "w")) == NULL)
-	{
-	  if (fd2 >= 0)
-	    close (fd2);
-	  return (errno);
-	}
-      errno = 0;
-      for (t = tlist; t; t = t->next)
-	{
-	  /* This is essentially the body of
-	     string_list_internal expanded inline. */
-	  document = t->word->word;
-	  document_len = strlen (document);
-	  if (t != tlist)
-	    putc (' ', fp);	/* separator */
-	  fwrite (document, document_len, 1, fp);
-	  if (ferror (fp))
-	    {
-	      if (errno == 0)
-		errno = ENOSPC;
-	      fd2 = errno;
-	      fclose(fp);
-	      dispose_words (tlist);
-	      return (fd2);
-	    }
-	}
-      fclose (fp);
-      dispose_words (tlist);
-    }
-  return 0;
-}
-
-/* Create a temporary file holding the text of the here document pointed to
-   by REDIRECTEE, and return a file descriptor open for reading to the temp
-   file.  Return -1 on any error, and make sure errno is set appropriately. */
-static int
-here_document_to_fd (redirectee)
-     WORD_DESC *redirectee;
-{
-  char filename[24];
-  int r, fd;
-
-  /* Make the filename for the temp file. */
-  sprintf (filename, "/tmp/t%d-sh", (int)time ((time_t *) 0) + (int)getpid ());
-
-  /* Make sure we open it exclusively. */
-  fd = open (filename, O_TRUNC | O_WRONLY | O_CREAT | O_EXCL, 0600);
-  if (fd < 0)
-    return (fd);
-
-  errno = r = 0;		/* XXX */
-  /* write_here_document returns 0 on success, errno on failure. */
-  if (redirectee->word)
-    r = write_here_document (fd, redirectee);
-
-  close (fd);
-  if (r)
-    {
-      unlink (filename);
-      errno = r;
-      return (-1);
-    }
-
-  /* XXX - this is raceable */
-  /* Make the document really temporary.  Also make it the input. */
-  fd = open (filename, O_RDONLY, 0600);
-
-  if (fd < 0)
-    {
-      r = errno;
-      unlink (filename);
-      errno = r;
-      return -1;
-    }
-
-  if (unlink (filename) < 0)
-    {
-      r = errno;
-      close (fd);
-      errno = r;
-      return (-1);
-    }
-
-  return (fd);
-}
-
-/* Open FILENAME with FLAGS in noclobber mode, hopefully avoiding most
-   race conditions and avoiding the problem where the file is replaced
-   between the stat(2) and open(2). */
-static int
-noclobber_open (filename, flags, ri)
-     char *filename;
-     int flags;
-     enum r_instruction ri;
-{
-  int r, fd;
-  struct stat finfo, finfo2;
-
-  /* If the file exists and is a regular file, return an error
-     immediately. */
-  r = stat (filename, &finfo);
-  if (r == 0 && (S_ISREG (finfo.st_mode)))
-    return (NOCLOBBER_REDIRECT);
-
-  /* If the file was not present (r != 0), make sure we open it
-     exclusively so that if it is created before we open it, our open
-     will fail.  Make sure that we do not truncate an existing file.
-     Note that we don't turn on O_EXCL unless the stat failed -- if
-     the file was not a regular file, we leave O_EXCL off. */
-  flags &= ~O_TRUNC;
-  if (r != 0)
-    {
-      fd = open (filename, flags|O_EXCL, 0666);
-      return ((fd < 0 && errno == EEXIST) ? NOCLOBBER_REDIRECT : fd);
-    }
-  fd = open (filename, flags, 0666);
-
-  /* If the open failed, return the file descriptor right away. */
-  if (fd < 0)
-    return (errno == EEXIST ? NOCLOBBER_REDIRECT : fd);
-
-  /* OK, the open succeeded, but the file may have been changed from a
-     non-regular file to a regular file between the stat and the open.
-     We are assuming that the O_EXCL open handles the case where FILENAME
-     did not exist and is symlinked to an existing file between the stat
-     and open. */
-
-  /* If we can open it and fstat the file descriptor, and neither check
-     revealed that it was a regular file, and the file has not been replaced,
-     return the file descriptor. */
-  if ((fstat (fd, &finfo2) == 0) && (S_ISREG (finfo2.st_mode) == 0) &&
-      r == 0 && (S_ISREG (finfo.st_mode) == 0) &&
-      same_file (filename, filename, &finfo, &finfo2))
-    return fd;
-
-  /* The file has been replaced.  badness. */
-  close (fd);  
-  errno = EEXIST;
-  return (NOCLOBBER_REDIRECT);
-}
-
-/* Do the specific redirection requested.  Returns errno or one of the
-   special redirection errors (*_REDIRECT) in case of error, 0 on success.
-   If FOR_REAL is zero, then just do whatever is neccessary to produce the
-   appropriate side effects.   REMEMBERING, if non-zero, says to remember
-   how to undo each redirection.  If SET_CLEXEC is non-zero, then
-   we set all file descriptors > 2 that we open to be close-on-exec.  */
-static int
-do_redirection_internal (redirect, for_real, remembering, set_clexec)
-     REDIRECT *redirect;
-     int for_real, remembering, set_clexec;
-{
-  WORD_DESC *redirectee;
-  int redir_fd, fd, redirector, r;
-  char *redirectee_word;
-  enum r_instruction ri;
-  REDIRECT *new_redirect;
-
-  redirectee = redirect->redirectee.filename;
-  redir_fd = redirect->redirectee.dest;
-  redirector = redirect->redirector;
-  ri = redirect->instruction;
-
-  if (ri == r_duplicating_input_word || ri == r_duplicating_output_word)
-    {
-      /* We have [N]>&WORD or [N]<&WORD.  Expand WORD, then translate
-	 the redirection into a new one and continue. */
-      redirectee_word = redirection_expand (redirectee);
-
-      if (redirectee_word == 0)
-	return (AMBIGUOUS_REDIRECT);
-      else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
-	{
-	  rd.dest = 0L;
-	  new_redirect = make_redirection (redirector, r_close_this, rd);
-	}
-      else if (all_digits (redirectee_word))
-	{
-	  if (ri == r_duplicating_input_word)
-	    {
-	      rd.dest = atol (redirectee_word);
-	      new_redirect = make_redirection (redirector, r_duplicating_input, rd);
-	    }
-	  else
-	    {
-	      rd.dest = atol (redirectee_word);
-	      new_redirect = make_redirection (redirector, r_duplicating_output, rd);
-	    }
-	}
-      else if (ri == r_duplicating_output_word && redirector == 1)
-	{
-	  if (posixly_correct == 0)
-	    {
-	      rd.filename = make_bare_word (redirectee_word);
-	      new_redirect = make_redirection (1, r_err_and_out, rd);
-	    }
-	  else
-	    new_redirect = copy_redirect (redirect);
-	}
-      else
-	{
-	  free (redirectee_word);
-	  return (AMBIGUOUS_REDIRECT);
-	}
-
-      free (redirectee_word);
-
-      /* Set up the variables needed by the rest of the function from the
-	 new redirection. */
-      if (new_redirect->instruction == r_err_and_out)
-	{
-	  char *alloca_hack;
-
-	  /* Copy the word without allocating any memory that must be
-	     explicitly freed. */
-	  redirectee = (WORD_DESC *)alloca (sizeof (WORD_DESC));
-	  xbcopy ((char *)new_redirect->redirectee.filename,
-		 (char *)redirectee, sizeof (WORD_DESC));
-
-	  alloca_hack = (char *)
-	    alloca (1 + strlen (new_redirect->redirectee.filename->word));
-	  redirectee->word = alloca_hack;
-	  strcpy (redirectee->word, new_redirect->redirectee.filename->word);
-	}
-      else
-	/* It's guaranteed to be an integer, and shouldn't be freed. */
-	redirectee = new_redirect->redirectee.filename;
-
-      redir_fd = new_redirect->redirectee.dest;
-      redirector = new_redirect->redirector;
-      ri = new_redirect->instruction;
-
-      /* Overwrite the flags element of the old redirect with the new value. */
-      redirect->flags = new_redirect->flags;
-      dispose_redirects (new_redirect);
-    }
-
-  switch (ri)
-    {
-    case r_output_direction:
-    case r_appending_to:
-    case r_input_direction:
-    case r_inputa_direction:
-    case r_err_and_out:		/* command &>filename */
-    case r_input_output:
-    case r_output_force:
-      if (posixly_correct && !interactive_shell)
-	disallow_filename_globbing++;
-      redirectee_word = redirection_expand (redirectee);
-      if (posixly_correct && !interactive_shell)
-	disallow_filename_globbing--;
-
-      if (redirectee_word == 0)
-	return (AMBIGUOUS_REDIRECT);
-
-#if defined (RESTRICTED_SHELL)
-      if (restricted && (WRITE_REDIRECT (ri)))
-	{
-	  free (redirectee_word);
-	  return (RESTRICTED_REDIRECT);
-	}
-#endif /* RESTRICTED_SHELL */
-
-      /* If we are in noclobber mode, you are not allowed to overwrite
-	 existing files.  Check before opening. */
-      if (noclobber && OUTPUT_REDIRECT (ri))
-	{
-	  fd = noclobber_open (redirectee_word, redirect->flags, ri);
-	  if (fd == NOCLOBBER_REDIRECT)
-	    {
-	      free (redirectee_word);
-	      return (NOCLOBBER_REDIRECT);
-	    }
-	}
-      else
-	{
-	  fd = open (redirectee_word, redirect->flags, 0666);
-#if defined (AFS)
-	  if ((fd < 0) && (errno == EACCES))
-	    fd = open (redirectee_word, redirect->flags & ~O_CREAT, 0666);
-#endif /* AFS */
-	}
-      free (redirectee_word);
-
-      if (fd < 0)
-	return (errno);
-
-      if (for_real)
-	{
-	  if (remembering)
-	    /* Only setup to undo it if the thing to undo is active. */
-	    if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-	      add_undo_redirect (redirector);
-	    else
-	      add_undo_close_redirect (redirector);
-
-#if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
-#endif
-
-	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
-	    return (errno);
-
-#if defined (BUFFERED_INPUT)
-	  /* Do not change the buffered stream for an implicit redirection
-	     of /dev/null to fd 0 for asynchronous commands without job
-	     control (r_inputa_direction). */
-	  if (ri == r_input_direction || ri == r_input_output)
-	    duplicate_buffered_stream (fd, redirector);
-#endif /* BUFFERED_INPUT */
-
-	  /*
-	   * If we're remembering, then this is the result of a while, for
-	   * or until loop with a loop redirection, or a function/builtin
-	   * executing in the parent shell with a redirection.  In the
-	   * function/builtin case, we want to set all file descriptors > 2
-	   * to be close-on-exec to duplicate the effect of the old
-	   * for i = 3 to NOFILE close(i) loop.  In the case of the loops,
-	   * both sh and ksh leave the file descriptors open across execs.
-	   * The Posix standard mentions only the exec builtin.
-	   */
-	  if (set_clexec && (redirector > 2))
-	    SET_CLOSE_ON_EXEC (redirector);
-	}
-
-      if (fd != redirector)
-	{
-#if defined (BUFFERED_INPUT)
-	  if (INPUT_REDIRECT (ri))
-	    close_buffered_fd (fd);
-	  else
-#endif /* !BUFFERED_INPUT */
-	    close (fd);		/* Don't close what we just opened! */
-	}
-
-      /* If we are hacking both stdout and stderr, do the stderr
-	 redirection here. */
-      if (ri == r_err_and_out)
-	{
-	  if (for_real)
-	    {
-	      if (remembering)
-		add_undo_redirect (2);
-	      if (dup2 (1, 2) < 0)
-		return (errno);
-	    }
-	}
-      break;
-
-    case r_reading_until:
-    case r_deblank_reading_until:
-      /* REDIRECTEE is a pointer to a WORD_DESC containing the text of
-	 the new input.  Place it in a temporary file. */
-      if (redirectee)
-	{
-	  fd = here_document_to_fd (redirectee);
-
-	  if (fd < 0)
-	    {
-	      heredoc_errno = errno;
-	      return (HEREDOC_REDIRECT);
-	    }
-
-	  if (for_real)
-	    {
-	      if (remembering)
-		/* Only setup to undo it if the thing to undo is active. */
-		if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		  add_undo_redirect (redirector);
-		else
-		  add_undo_close_redirect (redirector);
-
-#if defined (BUFFERED_INPUT)
-	      check_bash_input (redirector);
-#endif
-	      if (fd != redirector && dup2 (fd, redirector) < 0)
-		{
-		  r = errno;
-		  close (fd);
-		  return (r);
-		}
-
-#if defined (BUFFERED_INPUT)
-	      duplicate_buffered_stream (fd, redirector);
-#endif
-
-	      if (set_clexec && (redirector > 2))
-		SET_CLOSE_ON_EXEC (redirector);
-	    }
-
-#if defined (BUFFERED_INPUT)
-	  close_buffered_fd (fd);
-#else
-	  close (fd);
+#ifdef __CYGWIN32__
+	  setmode (1, O_TEXT);
 #endif
 	}
-      break;
-
-    case r_duplicating_input:
-    case r_duplicating_output:
-      if (for_real && (redir_fd != redirector))
-	{
-	  if (remembering)
-	    /* Only setup to undo it if the thing to undo is active. */
-	    if (fcntl (redirector, F_GETFD, 0) != -1)
-	      add_undo_redirect (redirector);
-	    else
-	      add_undo_close_redirect (redirector);
-
-#if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
-#endif
-	  /* This is correct.  2>&1 means dup2 (1, 2); */
-	  if (dup2 (redir_fd, redirector) < 0)
-	    return (errno);
-
-#if defined (BUFFERED_INPUT)
-	  if (ri == r_duplicating_input)
-	    duplicate_buffered_stream (redir_fd, redirector);
-#endif /* BUFFERED_INPUT */
-
-	  /* First duplicate the close-on-exec state of redirectee.  dup2
-	     leaves the flag unset on the new descriptor, which means it
-	     stays open.  Only set the close-on-exec bit for file descriptors
-	     greater than 2 in any case, since 0-2 should always be open
-	     unless closed by something like `exec 2<&-'. */
-	  /* if ((already_set || set_unconditionally) && (ok_to_set))
-		set_it () */
-	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || set_clexec) &&
-	       (redirector > 2))
-	    SET_CLOSE_ON_EXEC (redirector);
-	}
-      break;
-
-    case r_close_this:
-      if (for_real)
-	{
-	  if (remembering && (fcntl (redirector, F_GETFD, 0) != -1))
-	    add_undo_redirect (redirector);
-
-#if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
-	  close_buffered_fd (redirector);
-#else /* !BUFFERED_INPUT */
-	  close (redirector);
-#endif /* !BUFFERED_INPUT */
-	}
-      break;
-
-    case r_duplicating_input_word:
-    case r_duplicating_output_word:
-      break;
-    }
-  return (0);
-}
-
-#define SHELL_FD_BASE	10
-
-/* Remember the file descriptor associated with the slot FD,
-   on REDIRECTION_UNDO_LIST.  Note that the list will be reversed
-   before it is executed.  Any redirections that need to be undone
-   even if REDIRECTION_UNDO_LIST is discarded by the exec builtin
-   are also saved on EXEC_REDIRECTION_UNDO_LIST. */
-static int
-add_undo_redirect (fd)
-     int fd;
-{
-  int new_fd, clexec_flag;
-  REDIRECT *new_redirect, *closer, *dummy_redirect;
-
-  new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
-
-  if (new_fd < 0)
-    {
-      sys_error ("redirection error");
-      return (-1);
-    }
-
-  clexec_flag = fcntl (fd, F_GETFD, 0);
-
-  rd.dest = 0L;
-  closer = make_redirection (new_fd, r_close_this, rd);
-  dummy_redirect = copy_redirects (closer);
-
-  rd.dest = (long)new_fd;
-  new_redirect = make_redirection (fd, r_duplicating_output, rd);
-  new_redirect->next = closer;
-
-  closer->next = redirection_undo_list;
-  redirection_undo_list = new_redirect;
-
-  /* Save redirections that need to be undone even if the undo list
-     is thrown away by the `exec' builtin. */
-  add_exec_redirect (dummy_redirect);
-
-  /* File descriptors used only for saving others should always be
-     marked close-on-exec.  Unfortunately, we have to preserve the
-     close-on-exec state of the file descriptor we are saving, since
-     fcntl (F_DUPFD) sets the new file descriptor to remain open
-     across execs.  If, however, the file descriptor whose state we
-     are saving is <= 2, we can just set the close-on-exec flag,
-     because file descriptors 0-2 should always be open-on-exec,
-     and the restore above in do_redirection() will take care of it. */
-  if (clexec_flag || fd < 3)
-    SET_CLOSE_ON_EXEC (new_fd);
-
-  return (0);
-}
-
-/* Set up to close FD when we are finished with the current command
-   and its redirections. */
-static void
-add_undo_close_redirect (fd)
-     int fd;
-{
-  REDIRECT *closer;
-
-  rd.dest = 0L;
-  closer = make_redirection (fd, r_close_this, rd);
-  closer->next = redirection_undo_list;
-  redirection_undo_list = closer;
-}
-
-static void
-add_exec_redirect (dummy_redirect)
-     REDIRECT *dummy_redirect;
-{
-  dummy_redirect->next = exec_redirection_undo_list;
-  exec_redirection_undo_list = dummy_redirect;
-}
-
-#define u_mode_bits(x) (((x) & 0000700) >> 6)
-#define g_mode_bits(x) (((x) & 0000070) >> 3)
-#define o_mode_bits(x) (((x) & 0000007) >> 0)
-#define X_BIT(x) ((x) & 1)
-
-/* Return some flags based on information about this file.
-   The EXISTS bit is non-zero if the file is found.
-   The EXECABLE bit is non-zero the file is executble.
-   Zero is returned if the file is not found. */
-int
-file_status (name)
-     char *name;
-{
-  struct stat finfo;
-
-  /* Determine whether this file exists or not. */
-  if (stat (name, &finfo) < 0)
-    return (0);
-
-  /* If the file is a directory, then it is not "executable" in the
-     sense of the shell. */
-  if (S_ISDIR (finfo.st_mode))
-    return (FS_EXISTS|FS_DIRECTORY);
-
-#if defined (AFS)
-  /* We have to use access(2) to determine access because AFS does not
-     support Unix file system semantics.  This may produce wrong
-     answers for non-AFS files when ruid != euid.  I hate AFS. */
-  if (access (name, X_OK) == 0)
-    return (FS_EXISTS | FS_EXECABLE);
-  else
-    return (FS_EXISTS);
-#else /* !AFS */
-
-  /* Find out if the file is actually executable.  By definition, the
-     only other criteria is that the file has an execute bit set that
-     we can use. */
-
-  /* Root only requires execute permission for any of owner, group or
-     others to be able to exec a file. */
-  if (current_user.euid == (uid_t)0)
-    {
-      int bits;
-
-      bits = (u_mode_bits (finfo.st_mode) |
-	      g_mode_bits (finfo.st_mode) |
-	      o_mode_bits (finfo.st_mode));
-
-      if (X_BIT (bits))
-	return (FS_EXISTS | FS_EXECABLE);
-    }
-
-  /* If we are the owner of the file, the owner execute bit applies. */
-  if (current_user.euid == finfo.st_uid && X_BIT (u_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
-
-  /* If we are in the owning group, the group permissions apply. */
-  if (group_member (finfo.st_gid) && X_BIT (g_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
-
-  /* If `others' have execute permission to the file, then so do we,
-     since we are also `others'. */
-  if (X_BIT (o_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
-
-  return (FS_EXISTS);
-#endif /* !AFS */
-}
-
-/* Return non-zero if FILE exists and is executable.
-   Note that this function is the definition of what an
-   executable file is; do not change this unless YOU know
-   what an executable file is. */
-int
-executable_file (file)
-     char *file;
-{
-  int s;
-
-  s = file_status (file);
-  return ((s & FS_EXECABLE) && ((s & FS_DIRECTORY) == 0));
-}
-
-int
-is_directory (file)
-     char *file;
-{
-  return (file_status (file) & FS_DIRECTORY);
-}
-
-/* DOT_FOUND_IN_SEARCH becomes non-zero when find_user_command ()
-   encounters a `.' as the directory pathname while scanning the
-   list of possible pathnames; i.e., if `.' comes before the directory
-   containing the file of interest. */
-int dot_found_in_search = 0;
-
-/* Locate the executable file referenced by NAME, searching along
-   the contents of the shell PATH variable.  Return a new string
-   which is the full pathname to the file, or NULL if the file
-   couldn't be found.  If a file is found that isn't executable,
-   and that is the only match, then return that. */
-char *
-find_user_command (name)
-     char *name;
-{
-  return (find_user_command_internal (name, FS_EXEC_PREFERRED|FS_NODIRS));
-}
-
-/* Locate the file referenced by NAME, searching along the contents
-   of the shell PATH variable.  Return a new string which is the full
-   pathname to the file, or NULL if the file couldn't be found.  This
-   returns the first file found. */
-char *
-find_path_file (name)
-     char *name;
-{
-  return (find_user_command_internal (name, FS_EXISTS));
-}
-
-static char *
-_find_user_command_internal (name, flags)
-     char *name;
-     int flags;
-{
-  char *path_list;
-  SHELL_VAR *var;
-
-  /* Search for the value of PATH in both the temporary environment, and
-     in the regular list of variables. */
-  if (var = find_variable_internal ("PATH", 1))	/* XXX could be array? */
-    path_list = value_cell (var);
-  else
-    path_list = (char *)NULL;
-
-  if (path_list == 0 || *path_list == '\0')
-    return (savestring (name));
-
-  return (find_user_command_in_path (name, path_list, flags));
-}
-
-static char *
-find_user_command_internal (name, flags)
-     char *name;
-     int flags;
-{
-#ifdef __WIN32__
-  char *res, *dotexe;
-
-  dotexe = xmalloc (strlen (name) + 5);
-  strcpy (dotexe, name);
-  strcat (dotexe, ".exe");
-  res = _find_user_command_internal (dotexe, flags);
-  free (dotexe);
-  if (res == 0)
-    res = _find_user_command_internal (name, flags);
-  return res;
-#else
-  return (_find_user_command_internal (name, flags));
-#endif
-}
-
-/* Return the next element from PATH_LIST, a colon separated list of
-   paths.  PATH_INDEX_POINTER is the address of an index into PATH_LIST;
-   the index is modified by this function.
-   Return the next element of PATH_LIST or NULL if there are no more. */
-static char *
-get_next_path_element (path_list, path_index_pointer)
-     char *path_list;
-     int *path_index_pointer;
-{
-  char *path;
-
-  path = extract_colon_unit (path_list, path_index_pointer);
-
-  if (!path)
-    return (path);
-
-  if (!*path)
-    {
-      free (path);
-      path = savestring (".");
-    }
-
-  return (path);
-}
-
-/* Look for PATHNAME in $PATH.  Returns either the hashed command
-   corresponding to PATHNAME or the first instance of PATHNAME found
-   in $PATH.  Returns a newly-allocated string. */
-char *
-search_for_command (pathname)
-     char *pathname;
-{
-  char *hashed_file, *command;
-  int temp_path, st;
-  SHELL_VAR *path;
-
-  hashed_file = command = (char *)NULL;
-
-  /* If PATH is in the temporary environment for this command, don't use the
-     hash table to search for the full pathname. */
-  path = find_tempenv_variable ("PATH");
-  temp_path = path != 0;
-
-  /* Don't waste time trying to find hashed data for a pathname
-     that is already completely specified or if we're using a command-
-     specific value for PATH. */
-  if (path == 0 && absolute_program (pathname) == 0)
-    hashed_file = find_hashed_filename (pathname);
-
-  /* If a command found in the hash table no longer exists, we need to
-     look for it in $PATH.  Thank you Posix.2.  This forces us to stat
-     every command found in the hash table. */
-
-  if (hashed_file && (posixly_correct || check_hashed_filenames))
-    {
-      st = file_status (hashed_file);
-      if ((st ^ (FS_EXISTS | FS_EXECABLE)) != 0)
-	{
-	  remove_hashed_filename (pathname);
-	  free (hashed_file);
-	  hashed_file = (char *)NULL;
-	}
-    }
-
-  if (hashed_file)
-    command = hashed_file;
-  else if (absolute_program (pathname))
-    /* A command containing a slash is not looked up in PATH or saved in
-       the hash table. */
-    command = savestring (pathname);
-  else
-    {
-      /* If $PATH is in the temporary environment, we've already retrieved
-	 it, so don't bother trying again. */
-      if (temp_path)
-	command = find_user_command_in_path (pathname, value_cell (path),
-					     FS_EXEC_PREFERRED|FS_NODIRS);
-      else
-	command = find_user_command (pathname);
-      if (command && hashing_enabled && temp_path == 0)
-	remember_filename (pathname, command, dot_found_in_search, 1);
-    }
-  return (command);
-}
-
-char *
-user_command_matches (name, flags, state)
-     char *name;
-     int flags, state;
-{
-  register int i;
-  int  path_index, name_len;
-  char *path_list, *path_element, *match;
-  struct stat dotinfo;
-  static char **match_list = NULL;
-  static int match_list_size = 0;
-  static int match_index = 0;
-
-  if (state == 0)
-    {
-      /* Create the list of matches. */
-      if (match_list == 0)
-	{
-	  match_list_size = 5;
-	  match_list = (char **)xmalloc (match_list_size * sizeof(char *));
-	}
-
-      /* Clear out the old match list. */
-      for (i = 0; i < match_list_size; i++)
-	match_list[i] = 0;
-
-      /* We haven't found any files yet. */
-      match_index = 0;
-
-      if (absolute_program (name))
-	{
-	  match_list[0] = find_absolute_program (name, flags);
-	  match_list[1] = (char *)NULL;
-	  path_list = (char *)NULL;
-	}
       else
 	{
-	  name_len = strlen (name);
-	  file_to_lose_on = (char *)NULL;
-	  dot_found_in_search = 0;
-      	  stat (".", &dotinfo);
-	  path_list = get_string_value ("PATH");
-      	  path_index = 0;
-	}
-
-      while (path_list && path_list[path_index])
-	{
-	  path_element = get_next_path_element (path_list, &path_index);
-
-	  if (path_element == 0)
-	    break;
-
-	  match = find_in_path_element (name, path_element, flags, name_len, &dotinfo);
-
-	  free (path_element);
-
-	  if (match == 0)
-	    continue;
-
-	  if (match_index + 1 == match_list_size)
-	    {
-	      match_list_size += 10;
-	      match_list = (char **)xrealloc (match_list, (match_list_size + 1) * sizeof (char *));
-	    }
-
-	  match_list[match_index++] = match;
-	  match_list[match_index] = (char *)NULL;
-	  FREE (file_to_lose_on);
-	  file_to_lose_on = (char *)NULL;
-	}
-
-      /* We haven't returned any strings yet. */
-      match_index = 0;
-    }
-
-  match = match_list[match_index];
-
-  if (match)
-    match_index++;
-
-  return (match);
-}
-
-/* Turn PATH, a directory, and NAME, a filename, into a full pathname.
-   This allocates new memory and returns it. */
-static char *
-make_full_pathname (path, name, name_len)
-     char *path, *name;
-     int name_len;
-{
-  char *full_path;
-  int path_len;
-
-  path_len = strlen (path);
-  full_path = xmalloc (2 + path_len + name_len);
-  strcpy (full_path, path);
-  full_path[path_len] = '/';
-  strcpy (full_path + path_len + 1, name);
-  return (full_path);
-}
-
-static char *
-find_absolute_program (name, flags)
-     char *name;
-     int flags;
-{
-  int st;
-
-  st = file_status (name);
-
-  /* If the file doesn't exist, quit now. */
-  if ((st & FS_EXISTS) == 0)
-    return ((char *)NULL);
-
-  /* If we only care about whether the file exists or not, return
-     this filename.  Otherwise, maybe we care about whether this
-     file is executable.  If it is, and that is what we want, return it. */
-  if ((flags & FS_EXISTS) || ((flags & FS_EXEC_ONLY) && (st & FS_EXECABLE)))
-    return (savestring (name));
-
-  return ((char *)NULL);
-}
-
-static char *
-find_in_path_element (name, path, flags, name_len, dotinfop)
-     char *name, *path;
-     int flags, name_len;
-     struct stat *dotinfop;
-{
-  int status;
-  char *full_path, *xpath;
-
-  xpath = (*path == '~') ? bash_tilde_expand (path) : path;
-
-  /* Remember the location of "." in the path, in all its forms
-     (as long as they begin with a `.', e.g. `./.') */
-  if (dot_found_in_search == 0 && *xpath == '.')
-    dot_found_in_search = same_file (".", xpath, dotinfop, (struct stat *)NULL);
-
-  full_path = make_full_pathname (xpath, name, name_len);
-
-  status = file_status (full_path);
-
-  if (xpath != path)
-    free (xpath);
-
-  if ((status & FS_EXISTS) == 0)
-    {
-      free (full_path);
-      return ((char *)NULL);
-    }
-
-  /* The file exists.  If the caller simply wants the first file, here it is. */
-  if (flags & FS_EXISTS)
-    return (full_path);
-
-  /* If the file is executable, then it satisfies the cases of
-      EXEC_ONLY and EXEC_PREFERRED.  Return this file unconditionally. */
-  if ((status & FS_EXECABLE) &&
-      (((flags & FS_NODIRS) == 0) || ((status & FS_DIRECTORY) == 0)))
-    {
-      FREE (file_to_lose_on);
-      file_to_lose_on = (char *)NULL;
-      return (full_path);
-    }
-
-  /* The file is not executable, but it does exist.  If we prefer
-     an executable, then remember this one if it is the first one
-     we have found. */
-  if ((flags & FS_EXEC_PREFERRED) && file_to_lose_on == 0)
-    file_to_lose_on = savestring (full_path);
-
-  /* If we want only executable files, or we don't want directories and
-     this file is a directory, fail. */
-  if ((flags & FS_EXEC_ONLY) || (flags & FS_EXEC_PREFERRED) ||
-      ((flags & FS_NODIRS) && (status & FS_DIRECTORY)))
-    {
-      free (full_path);
-      return ((char *)NULL);
-    }
-  else
-    return (full_path);
-}
-
-/* This does the dirty work for find_user_command_internal () and
-   user_command_matches ().
-   NAME is the name of the file to search for.
-   PATH_LIST is a colon separated list of directories to search.
-   FLAGS contains bit fields which control the files which are eligible.
-   Some values are:
-      FS_EXEC_ONLY:		The file must be an executable to be found.
-      FS_EXEC_PREFERRED:	If we can't find an executable, then the
-				the first file matching NAME will do.
-      FS_EXISTS:		The first file found will do.
-      FS_NODIRS:		Don't find any directories.
-*/
-static char *
-find_user_command_in_path (name, path_list, flags)
-     char *name;
-     char *path_list;
-     int flags;
-{
-  char *full_path, *path;
-  int path_index, name_len;
-  struct stat dotinfo;
-
-  /* We haven't started looking, so we certainly haven't seen
-     a `.' as the directory path yet. */
-  dot_found_in_search = 0;
-
-  if (absolute_program (name))
-    {
-      full_path = find_absolute_program (name, flags);
-      return (full_path);
-    }
-
-  if (path_list == 0 || *path_list == '\0')
-    return (savestring (name));		/* XXX */
-
-  file_to_lose_on = (char *)NULL;
-  name_len = strlen (name);
-  stat (".", &dotinfo);
-  path_index = 0;
-
-  while (path_list[path_index])
-    {
-      /* Allow the user to interrupt out of a lengthy path search. */
-      QUIT;
-
-      path = get_next_path_element (path_list, &path_index);
-      if (path == 0)
-	break;
-
-      /* Side effects: sets dot_found_in_search, possibly sets
-	 file_to_lose_on. */
-      full_path = find_in_path_element (name, path, flags, name_len, &dotinfo);
-      free (path);
-
-      /* This should really be in find_in_path_element, but there isn't the
-	 right combination of flags. */
-      if (full_path && is_directory (full_path))
-	{
-	  free (full_path);
-	  continue;
-	}
-
-      if (full_path)
-	{
-	  FREE (file_to_lose_on);
-	  return (full_path);
+	  if (dup2 (1, 2) < 0)
+	    sys_error ("cannot duplicate fd 1 to fd 2");
+#ifdef __CYGWIN32__
+	  setmode (1, O_TEXT);
+	  setmode (2, O_TEXT);
+#endif
 	}
     }
-
-  /* We didn't find exactly what the user was looking for.  Return
-     the contents of FILE_TO_LOSE_ON which is NULL when the search
-     required an executable, or non-NULL if a file was found and the
-     search would accept a non-executable as a last resort. */
-  return (file_to_lose_on);
 }

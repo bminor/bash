@@ -23,7 +23,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include <stdio.h>
 #include "bashtypes.h"
 #include "posixstat.h"
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -44,7 +46,7 @@ typedef struct {
   char *msg;
   time_t access_time;
   time_t mod_time;
-  long file_size;
+  off_t file_size;
 } FILEINFO;
 
 /* The list of remembered mail files. */
@@ -117,7 +119,7 @@ find_mail_file (file)
   do \
     { \
       mailfiles[i]->access_time = mailfiles[i]->mod_time = 0; \
-      mailfiles[i]->file_size = 0L; \
+      mailfiles[i]->file_size = 0; \
     } \
   while (0)
 
@@ -157,7 +159,7 @@ add_mail_file (file, msg)
 	{
 	  mailfiles[i]->mod_time = finfo.st_mtime;
 	  mailfiles[i]->access_time = finfo.st_atime;
-	  mailfiles[i]->file_size = (long)finfo.st_size;
+	  mailfiles[i]->file_size = finfo.st_size;
 	}
       free (filename);
       return i;
@@ -248,7 +250,7 @@ static int
 file_has_grown (i)
      int i;
 {
-  long size;
+  off_t size;
   struct stat finfo;
   char *file;
 
@@ -291,6 +293,7 @@ make_default_mailpath ()
 {
   char *mp;
 
+  get_current_user_info ();
   mp = xmalloc (2 + sizeof (DEFAULT_MAIL_DIRECTORY) + strlen (current_user.user_name));
   strcpy (mp, DEFAULT_MAIL_DIRECTORY);
   mp[sizeof(DEFAULT_MAIL_DIRECTORY) - 1] = '/';

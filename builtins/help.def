@@ -36,11 +36,15 @@ $END
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
 #include "../shell.h"
 #include "../builtins.h"
+#include "../pathexp.h"
 #include "bashgetopt.h"
 
 #include <glob/fnmatch.h>
@@ -100,7 +104,7 @@ help_builtin (list)
 	{
 	  QUIT;
 	  if ((strncmp (pattern, name, plen) == 0) ||
-	      (fnmatch (pattern, name, 0) != FNM_NOMATCH))
+	      (fnmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
 	    {
 	      printf ("%s: %s\n", name, shell_builtins[i].short_doc);
 

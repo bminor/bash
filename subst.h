@@ -58,13 +58,6 @@ extern char *assignment_name __P((char *));
    each word with a space. */
 extern char *string_list __P((WORD_LIST *));
 
-/* Return a single string of all the words present in LIST, obeying the
-   quoting rules for "$*", to wit: (P1003.2, draft 11, 3.5.2) "If the
-   expansion [of $*] appears within a double quoted string, it expands
-   to a single field with the value of each parameter separated by the
-   first character of the IFS variable, or by a <space> if IFS is unset." */
-extern char *string_list_dollar_star __P((WORD_LIST *));
-
 /* Perform quoted null character removal on each element of LIST.
    This modifies LIST. */
 extern void word_list_remove_quoted_nulls __P((WORD_LIST *));
@@ -169,9 +162,10 @@ extern WORD_LIST *expand_words __P((WORD_LIST *));
    variables. */
 extern WORD_LIST *expand_words_no_vars __P((WORD_LIST *));
 
-/* The variable in NAME has just had its state changed.  Check to see if it
-   is one of the special ones where something special happens. */
-extern void stupidly_hack_special_variables __P((char *));
+/* Perform the `normal shell expansions' on a WORD_LIST.  These are
+   brace expansion, tilde expansion, parameter and variable substitution,
+   command substitution, arithmetic expansion, and word splitting. */
+extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 
 extern char *pat_subst __P((char *, char *, char *, int));
 
@@ -186,25 +180,10 @@ extern WORD_LIST *list_string_with_quotes __P((char *));
 extern char *extract_array_assignment_list __P((char *, int *));
 #endif
 
-/* The `special variable' functions that get called when a particular
-   variable is set. */
-void sv_path (), sv_mail (), sv_ignoreeof (), sv_strict_posix ();
-void sv_optind (), sv_opterr (), sv_globignore (), sv_locale ();
-
-#if defined (READLINE)
-void sv_terminal (), sv_hostfile ();
+#if defined (COND_COMMAND)
+extern char *remove_backslashes __P((char *));
+extern char *cond_expand_word __P((WORD_DESC *, int));
 #endif
-
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
-void sv_tz ();
-#endif
-
-#if defined (HISTORY)
-void sv_histsize (), sv_histignore (), sv_history_control ();
-#  if defined (BANG_HISTORY)
-void sv_histchars ();
-#  endif
-#endif /* HISTORY */
 
 /* How to determine the quoted state of the character C. */
 #define QUOTED_CHAR(c)  ((c) == CTLESC)

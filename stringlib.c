@@ -38,6 +38,16 @@
 #  define to_lower(c) (isupper(c) ? tolower(c) : (c))
 #endif
 
+#define ISOCTAL(c)	((c) >= '0' && (c) <= '7')
+#define OCTVALUE(c)	((c) - '0')
+
+#ifndef isxdigit
+#  define isxdigit(c)	(isdigit((c)) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#endif
+
+#define HEXVALUE(c) \
+  ((c) >= 'a' && (c) <= 'f' ? (c)-'a'+10 : (c) >= 'A' && (c) <= 'F' ? (c)-'A'+10 : (c)-'0')
+
 /* Convert STRING by expanding the escape sequences specified by the
    ANSI C standard.  If SAWC is non-null, recognize `\c' and use that
    as a string terminator.  If we see \c, set *SAWC to 1 before
@@ -47,7 +57,7 @@ ansicstr (string, len, sawc, rlen)
      char *string;
      int len, *sawc, *rlen;
 {
-  int c;
+  int c, temp;
   char *ret, *r, *s;
 
   if (string == 0 || *string == '\0')
@@ -71,19 +81,26 @@ ansicstr (string, len, sawc, rlen)
 	    case 'v': c = (int) 0x0B; break;
 #endif
 	    case 'b': c = '\b'; break;
-	    case 'e': c = '\033'; break;	/* ESC -- non-ANSI */
-	    case 'E': c = '\033'; break;	/* ESC -- non-ANSI */
+	    case 'e': case 'E':		/* ESC -- non-ANSI */
+	      c = '\033'; break;
 	    case 'f': c = '\f'; break;
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-	      c -= '0';
-	      if (*s >= '0' && *s <= '7')
-	        c = c * 8 + (*s++ - '0');
-	      if (*s >= '0' && *s <= '7')
-	        c = c * 8 + (*s++ - '0');
+	      for (temp = 2, c -= '0'; ISOCTAL (*s) && temp--; s++)
+	        c = (c * 8) + OCTVALUE (*s);
+	      break;
+	    case 'x':			/* Hex digit -- non-ANSI */
+	      for (temp = 3, c = 0; isxdigit (*s) && temp--; s++)
+	        c = (c * 16) + HEXVALUE (*s);
+	      /* \x followed by non-hex digits is passed through unchanged */
+	      if (temp == 3)
+		{
+		  *r++ = '\\';
+		  c = 'x';
+		}
 	      break;
 	    case '\\':
 	    case '\'':
@@ -114,6 +131,7 @@ ansicstr (string, len, sawc, rlen)
 /*								    */
 /* **************************************************************** */
 
+#ifdef INCLUDE_UNUSED
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
 int
@@ -128,6 +146,7 @@ find_name_in_array (name, array)
 
   return (-1);
 }
+#endif
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 int
@@ -285,15 +304,16 @@ strsub (string, pat, rep, global)
      char *string, *pat, *rep;
      int global;
 {
-  int patlen, templen, tempsize, repl, i;
+  int patlen, replen, templen, tempsize, repl, i;
   char *temp, *r;
 
   patlen = strlen (pat);
+  replen = strlen (rep);
   for (temp = (char *)NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
     {
       if (repl && STREQN (string + i, pat, patlen))
         {
-          RESIZE_MALLOCED_BUFFER (temp, templen, patlen, tempsize, (patlen * 2));
+          RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
 	  for (r = rep; *r; )
 	    temp[templen++] = *r++;

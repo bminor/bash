@@ -140,6 +140,35 @@ if [ "$OPTIND" != 3 ] || [ "$store" != a ] || [ "$OPTARG" != aoptval ]; then
     testfail "getopts"
 fi
 
+newtest
+SQUOTE="'"
+val1=$(set | sed -n 's:^SQUOTE=::p')
+# if I change the default quoting style for variable values, this must change
+if [ "$val1" != "''\'''" ]; then
+        testfail "variable quoting 1"
+fi
+
+newtest
+VTILDE='~'
+val1=$(set | sed -n 's:^VTILDE=::p')
+if [ "$val1" != "'~'" ]; then
+	testfail "variable quoting 2"
+fi
+
+newtest
+VHASH=ab#cd
+val1=$(set | sed -n 's:^VHASH=::p')
+if [ "$val1" != "ab#cd" ]; then
+	testfail "variable quoting 3"
+fi
+
+newtest
+VHASH2=#abcd
+val1=$(set | sed -n 's:^VHASH2=::p')
+if [ "$val1" != "'#abcd'" ]; then
+	testfail "variable quoting 4"
+fi
+
 if [ $exitval = 0 ]; then
     echo "All tests passed"
 else

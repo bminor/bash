@@ -110,6 +110,14 @@
    evaluation command. */
 #undef DPAREN_ARITHMETIC
 
+/* Define EXTENDED_GLOB if you want the ksh-style [*+@?!](patlist) extended
+   pattern matching. */
+#undef EXTENDED_GLOB
+
+/* Define COND_COMMAND if you want the ksh-style [[...]] conditional
+   command. */
+#undef COND_COMMAND
+
 /* Define AFS if you are using Transarc's AFS. */
 #undef AFS
 
@@ -170,6 +178,15 @@
 /* Define if on MINIX.  */
 #undef _MINIX
 
+/* The number of bytes in a int.  */
+#undef SIZEOF_INT
+
+/* The number of bytes in a long.  */
+#undef SIZEOF_LONG
+
+/* The number of bytes in a pointer to char.  */
+#undef SIZEOF_CHAR_P
+
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
 
@@ -181,6 +198,27 @@
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef int32_t
+
+/* Define to `unsigned int' if <sys/types.h> doesn't define.  */
+#undef u_int32_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef ptrdiff_t
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef clock_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef time_t
 
 /* Define if the system does not provide POSIX.1 features except
    with this defined.  */
@@ -197,9 +235,6 @@
    before release 3.  */
 #undef SETVBUF_REVERSED
 
-/* Define to `unsigned' if <sys/types.h> doesn't define.  */
-#undef size_t
-
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
@@ -212,20 +247,11 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define if `sys_siglist' is declared by <signal.h>.  */
+/* Define if `sys_siglist' is declared by <signal.h> or <unistd.h>.  */
 #undef SYS_SIGLIST_DECLARED
 
 /* Define if `_sys_siglist' is declared by <signal.h> or <unistd.h>.  */
 #undef UNDER_SYS_SIGLIST_DECLARED
-
-/* Define to `int' if <sys/types.h> doesn't define.  */
-#undef uid_t
-
-/* Define to `long' if <sys/types.h> doesn't define.  */
-#undef clock_t
-
-/* Define to `long' if <sys/types.h> doesn't define.  */
-#undef time_t
 
 #undef DUP2_BROKEN
 
@@ -306,6 +332,8 @@
 #undef STRUCT_DIRENT_HAS_D_FILENO
 
 #undef STRUCT_WINSIZE_IN_SYS_IOCTL
+
+#undef STRUCT_WINSIZE_IN_TERMIOS
 
 #undef SPEED_T_IN_SYS_TYPES
 
@@ -394,6 +422,15 @@
 
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
+
+/* Define if you have the strtod function. */
+#undef HAVE_STRTOD
+
+/* Define if you have the strtol function. */
+#undef HAVE_STRTOL
+
+/* Define if you have the strtoul function. */
+#undef HAVE_STRTOUL
 
 /* Define if you have the tcgetattr function.  */
 #undef HAVE_TCGETATTR
@@ -495,6 +532,9 @@
 
 /* Define if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
+
+/* Define if you have the <stddef.h> header file. */
+#undef HAVE_STDDEF_H
 
 #undef HAVE_LIBDL
 

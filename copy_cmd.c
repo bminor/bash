@@ -22,23 +22,25 @@
 
 #include "config.h"
 
-#include <stdio.h>
+#include "bashtypes.h"
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
+#include <stdio.h>
+
 #include "shell.h"
 
 WORD_DESC *
-copy_word (word)
-     WORD_DESC *word;
+copy_word (w)
+     WORD_DESC *w;
 {
   WORD_DESC *new_word;
 
   new_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
-  FASTCOPY ((char *)word, (char *)new_word, sizeof (WORD_DESC));
-  new_word->word = savestring (word->word);
+  FASTCOPY ((char *)w, (char *)new_word, sizeof (WORD_DESC));
+  new_word->word = savestring (w->word);
   return (new_word);
 }
 
@@ -201,12 +203,47 @@ copy_if_command (com)
   return (new_if);
 }
 
+#if defined (DPAREN_ARITHMETIC)
+static ARITH_COM *
+copy_arith_command (com)
+     ARITH_COM *com;
+{
+  ARITH_COM *new_arith;
+
+  new_arith = (ARITH_COM *)xmalloc (sizeof (ARITH_COM));
+  new_arith->flags = com->flags;
+  new_arith->exp = copy_word_list (com->exp);
+  new_arith->line = com->line;
+
+  return (new_arith);
+}
+#endif
+
+#if defined (COND_COMMAND)
+static COND_COM *
+copy_cond_command (com)
+     COND_COM *com;
+{
+  COND_COM *new_cond;
+
+  new_cond = (COND_COM *)xmalloc (sizeof (COND_COM));
+  new_cond->flags = com->flags;
+  new_cond->line = com->line;
+  new_cond->op = copy_word (com->op);
+  new_cond->left = com->left ? copy_cond_command (com->left) : (COND_COM *)NULL;
+  new_cond->right = com->right ? copy_cond_command (com->right) : (COND_COM *)NULL;
+
+  return (new_cond);
+}
+#endif
+
 static SIMPLE_COM *
 copy_simple_command (com)
      SIMPLE_COM *com;
 {
-  SIMPLE_COM *new_simple = (SIMPLE_COM *)xmalloc (sizeof (SIMPLE_COM));
+  SIMPLE_COM *new_simple;
 
+  new_simple = (SIMPLE_COM *)xmalloc (sizeof (SIMPLE_COM));
   new_simple->flags = com->flags;
   new_simple->words = copy_word_list (com->words);
   new_simple->redirects = copy_redirects (com->redirects);
@@ -275,6 +312,18 @@ copy_command (command)
       case cm_if:
 	new_command->value.If = copy_if_command (command->value.If);
 	break;
+
+#if defined (DPAREN_ARITHMETIC)
+      case cm_arith:
+        new_command->value.Arith = copy_arith_command (command->value.Arith);
+        break;
+#endif
+
+#if defined (COND_COMMAND)
+      case cm_cond:
+	new_command->value.Cond = copy_cond_command (command->value.Cond);
+	break;
+#endif
 
       case cm_simple:
 	new_command->value.Simple = copy_simple_command (command->value.Simple);

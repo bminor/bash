@@ -38,6 +38,9 @@ $END
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -59,6 +62,12 @@ extern int no_exit_on_failed_exec, print_shift_error;
 extern int check_hashed_filenames, promptvars, interactive_comments;
 extern int cdspelling, expand_aliases;
 extern int check_window_size;
+extern int glob_ignore_case;
+extern int hup_on_exit;
+
+#if defined (EXTENDED_GLOB)
+extern int extended_glob;
+#endif
 
 #if defined (HISTORY)
 extern int literal_history, command_oriented_history;
@@ -89,6 +98,9 @@ static struct {
   { "dotglob", &glob_dot_filenames, (Function *)NULL },
   { "execfail", &no_exit_on_failed_exec, (Function *)NULL },
   { "expand_aliases", &expand_aliases, (Function *)NULL },
+#if defined (EXTENDED_GLOB)
+  { "extglob", &extended_glob, (Function *)NULL },
+#endif
 #if defined (READLINE)
   { "histreedit", &history_reediting, (Function *)NULL },
 #endif
@@ -99,11 +111,13 @@ static struct {
   { "histverify", &hist_verify, (Function *)NULL },
   { "hostcomplete", &perform_hostname_completion, (Function *)enable_hostname_completion },
 #endif
+  { "huponexit", &hup_on_exit, (Function *)NULL },
   { "interactive_comments", &interactive_comments, set_interactive_comments },
 #if defined (HISTORY)
   { "lithist", &literal_history, (Function *)NULL },
 #endif
   { "mailwarn", &mail_warning, (Function *)NULL },
+  { "nocaseglob", &glob_ignore_case, (Function *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (Function *)NULL },
   { "promptvars", &promptvars, (Function *)NULL },
   { "shift_verbose", &print_shift_error, (Function *)NULL },
@@ -166,17 +180,17 @@ shopt_builtin (list)
 
   rval = EXECUTION_SUCCESS;
   if ((flags & OFLAG) && ((flags & (SFLAG|UFLAG)) == 0))	/* shopt -o */
-    rval = list_shopt_o_options (list, flags & QFLAG);
+    rval = list_shopt_o_options (list, flags);
   else if (list && (flags & OFLAG))		/* shopt -so args */
     rval = set_shopt_o_options ((flags & SFLAG) ? FLAG_ON : FLAG_OFF, list, flags & QFLAG);
   else if (flags & OFLAG)	/* shopt -so */
-    rval = list_some_o_options ((flags & SFLAG) ? FLAG_ON : FLAG_OFF, flags & QFLAG);
+    rval = list_some_o_options ((flags & SFLAG) ? 1 : 0, flags);
   else if (list && (flags & (SFLAG|UFLAG)))	/* shopt -su args */
     rval = toggle_shopts ((flags & SFLAG) ? SETOPT : UNSETOPT, list, flags & QFLAG);
   else if ((flags & (SFLAG|UFLAG)) == 0)	/* shopt [args] */
-    rval = list_shopts (list, flags & QFLAG);
+    rval = list_shopts (list, flags);
   else						/* shopt -su */
-    rval = list_some_shopts ((flags & SFLAG) ? SETOPT : UNSETOPT, flags & QFLAG);
+    rval = list_some_shopts ((flags & SFLAG) ? SETOPT : UNSETOPT, flags);
   return (rval);
 }
 
@@ -191,6 +205,10 @@ reset_shopt_options ()
   check_hashed_filenames = cdspelling = expand_aliases = check_window_size = 0;
 
   source_uses_path = promptvars = 1;
+
+#if defined (EXTENDED_GLOB)
+  extended_glob = 0;
+#endif
 
 #if defined (HISTORY)
   literal_history = force_append_history = 0;
@@ -244,12 +262,23 @@ toggle_shopts (mode, list, quiet)
   return (rval);
 }
 
+static int
+print_shopt (name, val, flags)
+     char *name;
+     int val, flags;
+{
+  if (flags & PFLAG)
+    printf ("shopt %s %s\n", val ? "-s" : "-u", name);
+  else
+    printf (OPTFMT, name, val ? on : off);
+}
+
 /* List the values of all or any of the `shopt' options.  Returns 0 if
    all were listed or all variables queried were on; 1 otherwise. */
 static int
-list_shopts (list, quiet)
+list_shopts (list, flags)
      WORD_LIST *list;
-     int quiet;
+     int flags;
 {
   WORD_LIST *l;
   int i, val, rval;
@@ -259,8 +288,8 @@ list_shopts (list, quiet)
       for (i = 0; shopt_vars[i].name; i++)
 	{
 	  val = *shopt_vars[i].value;
-	  if (quiet == 0)
-	    printf (OPTFMT, shopt_vars[i].name, val ? on : off);
+	  if ((flags & QFLAG) == 0)
+	    print_shopt (shopt_vars[i].name, val, flags);
 	}
       return (EXECUTION_SUCCESS);
     }
@@ -277,39 +306,39 @@ list_shopts (list, quiet)
       val = *shopt_vars[i].value;
       if (val == 0)
 	rval = EXECUTION_FAILURE;
-      if (quiet == 0)
-	printf (OPTFMT, l->word->word, val ? on : off);
+      if ((flags & QFLAG) == 0)
+        print_shopt (l->word->word, val, flags);
     }
   return (rval);
 }
 
 static int
-list_some_shopts (mode, quiet)
-     int mode, quiet;
+list_some_shopts (mode, flags)
+     int mode, flags;
 {
   int val, i;
 
   for (i = 0; shopt_vars[i].name; i++)
     {
       val = *shopt_vars[i].value;
-      if (quiet == 0 && mode == val)
-	printf (OPTFMT, shopt_vars[i].name, val ? on : off);
+      if (((flags & QFLAG) == 0) && mode == val)
+	print_shopt (shopt_vars[i].name, val, flags);
     }
   return (EXECUTION_SUCCESS);
 }
 
 static int
-list_shopt_o_options (list, quiet)
+list_shopt_o_options (list, flags)
      WORD_LIST *list;
-     int quiet;
+     int flags;
 {
   WORD_LIST *l;
   int val, rval;
 
   if (list == 0)
     {
-      if (quiet == 0)
-	list_minus_o_opts (-1);
+      if ((flags & QFLAG) == 0)
+	list_minus_o_opts (-1, (flags & PFLAG));
       return (EXECUTION_SUCCESS);
     }
 
@@ -324,18 +353,23 @@ list_shopt_o_options (list, quiet)
 	}
       if (val == 0)
 	rval = EXECUTION_FAILURE;
-      if (quiet == 0)
-	printf (OPTFMT, l->word->word, val ? "on" : "off");
+      if ((flags & QFLAG) == 0)
+	{
+	  if (flags & PFLAG)
+	    printf ("set %co %s\n", val ? '-' : '+', l->word->word);
+	  else
+	    printf (OPTFMT, l->word->word, val ? on : off);
+	}
     }
   return (rval);
 }
 
 static int
-list_some_o_options (mode, quiet)
-     int mode, quiet;
+list_some_o_options (mode, flags)
+     int mode, flags;
 {
-  if (quiet == 0)
-    list_minus_o_opts (mode);
+  if ((flags & QFLAG) == 0)
+    list_minus_o_opts (mode, (flags & PFLAG));
   return (EXECUTION_SUCCESS);
 }
 

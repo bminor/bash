@@ -157,13 +157,30 @@ echo ${ivar-unset}
 ivar=42
 declare -p ivar
 
+# make sure set [-+]o ignoreeof and $IGNOREEOF are reflected
+unset IGNOREEOF
+set +o ignoreeof
+set -o ignoreeof
+if [ "$IGNOREEOF" -ne 10 ]; then
+	echo "./varenv.sh: set -o ignoreeof is not reflected in IGNOREEOF" >&2
+fi
+unset IGNOREEOF
+set +o ignoreeof
+
+# older versions of bash used to not reset RANDOM in subshells correctly
+[[ $RANDOM -eq $(echo $RANDOM) ]] && echo "RANDOM: problem with subshells"
+
 # make sure that shopt -o is reflected in $SHELLOPTS
 # first, get rid of things that might be set automatically via shell
 # variables
 set +o posix
 set +o ignoreeof
+set +o monitor
 echo $-
 echo ${SHELLOPTS}
 shopt -so physical
 echo $-
 echo ${SHELLOPTS}
+
+# and make sure it is readonly
+readonly -p | grep SHELLOPTS

@@ -22,6 +22,9 @@
 #include "config.h"
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -30,6 +33,7 @@
 /* A global variable which acts as a sentinel for an `error' list return. */
 GENERIC_LIST global_error_list;
 
+#ifdef INCLUDE_UNUSED
 /* Call FUNCTION on every member of LIST, a generic list. */
 void
 map_over_list (list, function)
@@ -49,6 +53,7 @@ map_over_words (words, function)
   for ( ; words; words = words->next)
     (*function) (words->word->word);
 }
+#endif /* INCLUDE_UNUSED */
 
 /* Reverse the chain of structures in LIST.  Output the new head
    of the chain.  You should always assign the output value of this

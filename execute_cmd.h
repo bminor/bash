@@ -30,15 +30,8 @@ extern int executing_line_number __P((void));
 extern int execute_command __P((COMMAND *));
 extern int execute_command_internal __P((COMMAND *, int, int, int, struct fd_bitmap *));
 extern int shell_execve __P((char *, char **, char **));
-extern char *redirection_expand __P((WORD_DESC *));
-extern int file_status __P((char *));
-extern int executable_file __P((char *));
-extern int is_directory __P((char *));
-extern char *search_for_command __P((char *));
-extern char *find_user_command __P((char *));
-extern char *find_path_file __P((char *));
-extern char *user_command_matches __P((char *, int, int));
 extern void setup_async_signals __P((void));
+extern void dispose_exec_redirects __P ((void));
 
 #if defined (PROCESS_SUBSTITUTION)
 extern void close_all_files __P((void));

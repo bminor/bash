@@ -54,7 +54,8 @@ enum r_instruction {
 
 /* Command Types: */
 enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
-		    cm_connection, cm_function_def, cm_until, cm_group };
+		    cm_connection, cm_function_def, cm_until, cm_group,
+		    cm_arith, cm_cond };
 
 /* Possible values for the `flags' field of a WORD_DESC. */
 #define W_HASDOLLAR	0x01	/* Dollar sign present. */
@@ -143,6 +144,12 @@ typedef struct command {
 #if defined (SELECT_COMMAND)
     struct select_com *Select;
 #endif
+#if defined (DPAREN_ARITHMETIC)
+    struct arith_com *Arith;
+#endif
+#if defined (COND_COMMAND)
+    struct cond_com *Cond;
+#endif
   } value;
 } COMMAND;
 
@@ -207,6 +214,34 @@ typedef struct while_com {
   COMMAND *action;		/* Thing to do while test is non-zero. */
 } WHILE_COM;
 
+#if defined (DPAREN_ARITHMETIC)
+/* The arithmetic evaluation command, ((...)).  Just a set of flags and
+   a WORD_LIST, of which the first element is the only one used, for the
+   time being. */
+typedef struct arith_com {
+  int flags;
+  WORD_LIST *exp;
+  int line;
+} ARITH_COM;
+#endif /* DPAREN_ARITHMETIC */
+
+/* The conditional command, [[...]].  This is a binary tree -- we slippped
+   a recursive-descent parser into the YACC grammar to parse it. */
+#define COND_AND	1
+#define COND_OR		2
+#define COND_UNARY	3
+#define COND_BINARY	4
+#define COND_TERM	5
+#define COND_EXPR	6
+
+typedef struct cond_com {
+  int flags;
+  int line;
+  int type;
+  WORD_DESC *op;
+  struct cond_com *left, *right;
+} COND_COM;
+
 /* The "simple" command.  Just a collection of words and redirects. */
 typedef struct simple_com {
   int flags;			/* See description of CMD flags. */
@@ -218,7 +253,7 @@ typedef struct simple_com {
 
 /* The "function definition" command. */
 typedef struct function_def {
-  int ignore;			/* See description of CMD flags. */
+  int flags;			/* See description of CMD flags. */
   WORD_DESC *name;		/* The name of the function. */
   COMMAND *command;		/* The parsed execution tree. */
   int line;			/* Line number the function def starts on. */

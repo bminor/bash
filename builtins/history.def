@@ -46,7 +46,9 @@ $END
 
 #if defined (HISTORY)
 #include "../bashtypes.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 #include "../posixstat.h"
 #include "../filecntl.h"
 #include <errno.h>

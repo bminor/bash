@@ -41,7 +41,9 @@ $END
 #include "../bashtypes.h"
 #include "../posixstat.h"
 #include "../filecntl.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 #include <errno.h>
 
 #if defined (HAVE_UNISTD_H)
@@ -51,7 +53,7 @@ $END
 #include "../bashansi.h"
 
 #include "../shell.h"
-#include "../execute_cmd.h"
+#include "../findcmd.h"
 #include "common.h"
 
 #if !defined (errno)

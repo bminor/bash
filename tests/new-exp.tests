@@ -25,7 +25,7 @@ recho "${HOME:`echo }`}"	# should be a math error -- bad substring substitution
 
 expect unset
 _ENV=oops
-x=${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}	# memory leak
+x=${_ENV[(_$-=0)+(_=1)-_${-%%*i*}]}
 echo ${x:-unset}
 
 expect "<$HOME>"
@@ -63,13 +63,6 @@ expect '<-abcd> <->'
 recho -${foo% *}-	# should be -abcd -
 expect '<-abcd->'
 recho -${foo%% *}-	# should be -abcd-
-
-set a b c d e
-expect '<a b c d e>'
-IFS=""
-recho "$@"
-IFS=' 	
-'
 
 foo=bar
 expect '<bar foo>'
@@ -237,10 +230,14 @@ echo $abmcde
 # run process substitution tests in a subshell so that syntax errors
 # caused by a shell not implementing process substitution (e.g., one
 # built on a NeXT) will not cause the whole test to exit prematurely
-${THIS_SH} ./new-exp.sub1
+${THIS_SH} ./new-exp1.sub
 
-expect $0: '${#:-foo}: bad substitution'
-echo ${#:-foo}
+# run the tests of $(<filename) in a subshell to avoid cluttering up
+# this script
+${THIS_SH} ./new-exp2.sub
+
+expect '<6>'
+recho ${#:-foo}
 expect $0: '${#:}: bad substitution'
 echo ${#:}
 
@@ -448,6 +445,15 @@ set -u
 ( recho "${UNSET}" ; echo after 6)
 ( recho "${#UNSET}" ; echo after 7)
 set +u
+
+RECEIVED="12345"
+recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
+RECEIVED="12345#"
+recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
+RECEIVED="#"
+recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
+RECEIVED=""
+recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
 
 # this must be last!
 expect $0: 'ABXD: parameter unset'

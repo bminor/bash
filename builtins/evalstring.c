@@ -19,12 +19,18 @@
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
 #include <stdio.h>
 #include <signal.h>
 
+#include <errno.h>
+
+#include "../filecntl.h"
 #include "../bashansi.h"
 
 #include "../shell.h"
@@ -33,12 +39,17 @@
 #include "../flags.h"
 #include "../input.h"
 #include "../execute_cmd.h"
+#include "../redir.h"
 
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
 
 #include "common.h"
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 extern void run_trap_cleanup ();
 
@@ -47,9 +58,12 @@ extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
+extern int posixly_correct;
 extern COMMAND *global_command;
 
 int parse_and_execute_level = 0;
+
+static int cat_file ();
 
 /* How to force parse_and_execute () to clean up after itself. */
 void
@@ -202,7 +216,23 @@ parse_and_execute (string, from_file, flags)
 		}
 #endif /* ONESHOT */
 
-	      last_result = execute_command_internal
+	      /* See if this is a candidate for $( <file ). */
+	      if (startup_state == 2 &&
+		  subshell_environment == SUBSHELL_COMSUB &&
+		  *bash_input.location.string == '\0' &&
+		  command->type == cm_simple && !command->redirects &&
+		  (command->flags & CMD_TIME_PIPELINE) == 0 &&
+		  command->value.Simple->words == 0 &&
+		  command->value.Simple->redirects &&
+		  command->value.Simple->redirects->next == 0 &&
+		  command->value.Simple->redirects->instruction == r_input_direction)
+		{
+		  int r;
+		  r = cat_file (command->value.Simple->redirects);
+		  last_result = (r < 0) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
+		}
+	      else
+		last_result = execute_command_internal
 				(command, 0, NO_PIPE, NO_PIPE, bitmap);
 
 	      dispose_command (command);
@@ -237,4 +267,95 @@ parse_and_execute (string, from_file, flags)
     jump_to_top_level (code);
 
   return (last_result);
+}
+
+/* Write NB bytes from BUF to file descriptor FD, retrying the write if
+   it is interrupted.  We retry three times if we get a zero-length
+   write.  Any other signal causes this function to return prematurely. */
+static int
+zwrite (fd, buf, nb)
+     int fd;
+     unsigned char *buf;
+     int nb;
+{
+  int n, i, nt;
+
+  for (n = nb, nt = 0;;)
+    {
+      i = write (fd, buf, n);
+      if (i > 0)
+	{
+	  n -= i;
+	  if (n <= 0)
+	    return nb;
+	}
+      else if (i == 0)
+	{
+	  if (++nt > 3)
+	    return (nb - n);
+	}
+      else if (errno != EINTR)
+	return -1;
+    }
+}
+
+/* Handle a $( < file ) command substitution.  This expands the filename,
+   returning errors as appropriate, then just cats the file to the standard
+   output. */
+static int
+cat_file (r)
+     REDIRECT *r;
+{
+  char lbuf[128], *fn;
+  int nr, fd, rval;
+
+  if (r->instruction != r_input_direction)
+    return -1;
+
+  /* Get the filename. */
+  if (posixly_correct && !interactive_shell)
+    disallow_filename_globbing++;
+  fn = redirection_expand (r->redirectee.filename);
+  if (posixly_correct && !interactive_shell)
+    disallow_filename_globbing--;
+
+  if (fn == 0)
+    {
+      redirection_error (r, AMBIGUOUS_REDIRECT);
+      return -1;
+    }
+
+  fd = open(fn, O_RDONLY);
+  if (fd < 0)
+    {
+      file_error (fn);
+      free (fn);
+      return -1;
+    }
+
+  rval = 0;
+  while (1)
+    {
+      /* Retry the reads on EINTR.  Any other error causes a break from the
+	 loop. */
+      while ((nr = read (fd, lbuf, sizeof(lbuf))) < 0 && errno == EINTR)
+ 	;
+      if (nr == 0)
+	break;
+      else if (nr < 0)
+	{
+	  rval = -1;
+	  break;
+	}
+      if (zwrite (1, lbuf, nr) < 0)
+	{
+	  rval = -1;
+	  break;
+	}
+    }
+
+  free (fn);
+  close (fd);
+
+  return (0);  
 }

@@ -1,5 +1,25 @@
+# test out %+, jobs -p, and $! agreement in a subshell first
+${THIS_SH} ./jobs1.sub
+
+# test out fg/bg failure in a subshell
+${THIS_SH} ./jobs2.sub
+
 jobs
 echo $?
+
+# should be a job-control-not-enabled error
+wait %1
+
+# make sure we can't fg a job started when job control was not active
+sleep 30 &
+pid=$!
+fg %1
+# make sure the killed processes don't cause a message
+exec 5>&2
+exec 2>/dev/null
+kill -n 9 $pid
+wait    # make sure we reap the processes while stderr is still redirected
+exec 2>&5
 
 echo wait-for-pid
 sleep 10 &
@@ -68,12 +88,16 @@ fg -s %1
 bg -s %1
 wait
 
-# someday this may mean to disown all running jobs, but for now it is
+# someday this may mean to disown all stopped jobs, but for now it is
 # an error
-disown -r
+disown -s
 
-# this is an error
+# this is an error -- the job with the pid that is the value of $! is
+# retained only until a `wait' is performed
 disown %1
+
+# this, however, is an error
+disown %2
 
 echo wait-for-non-child
 wait 1
@@ -93,6 +117,12 @@ jobs -r
 
 # should be an error
 kill -n 1 %4
+# should be an error
+jobs %4
+echo current job:
+jobs %+
+echo previous job:
+jobs %-
 
 kill -STOP %2
 sleep 5	# give time for the shell to get the stop notification

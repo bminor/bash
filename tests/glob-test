@@ -7,6 +7,9 @@ expect()
 	echo expect "$@"
 }
 
+# First, a test that bash-2.01.1 fails
+${THIS_SH} ./glob1.sub
+
 MYDIR=$PWD	# save where we are
 
 TESTDIR=/tmp/glob-test
@@ -14,7 +17,7 @@ mkdir $TESTDIR
 builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
 rm -rf *
 
-touch a b c d abc abd abe bb bcd ca cb dd de
+touch a b c d abc abd abe bb bcd ca cb dd de Beware
 mkdir bdir
 
 # see if `regular' globbing works right
@@ -81,7 +84,7 @@ expect '<a-b> <aXb>'
 recho a[X-]b
 
 touch .x .y
-expect '<d> <dd> <de>'
+expect '<Beware> <d> <dd> <de>'
 recho [^a-c]*
 
 # Make sure that filenames with embedded globbing characters are handled
@@ -288,6 +291,11 @@ case '-' in
 []-])	echo ok 35 ;;
 esac
 
+# a backslash should just escape the next character in this context
+case p in
+[a-\z])	echo ok 36 ;;
+esac
+
 # none of these should output anything
 
 case abc in
@@ -322,6 +330,14 @@ case '[' in
 [abc)	echo bad 8;;
 esac
 
+# let's start testing the case-insensitive globbing code
+recho b*
+
+shopt -s nocaseglob
+recho b*
+
+recho [b]*
+shopt -u nocaseglob
 
 # make sure set -f works right
 set -f

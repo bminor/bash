@@ -75,6 +75,7 @@ _evalfile (filename, flags)
   int return_val, fd, result, pflags;
   char *string;
   struct stat finfo;
+  size_t file_size;
   VFunction *errfunc;
 
   fd = open (filename, O_RDONLY);
@@ -108,20 +109,33 @@ file_error_and_exit:
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }
 
-  string = xmalloc (1 + (int)finfo.st_size);
-  result = read (fd, string, finfo.st_size);
+  file_size = (size_t)finfo.st_size;
+  /* Check for overflow with large files. */
+  if (file_size != finfo.st_size || file_size + 1 < file_size)
+    {
+      (*errfunc) ("%s: file is too large", filename);
+      return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
+    }      
+  string = xmalloc (1 + file_size);
+  result = read (fd, string, file_size);
   string[result] = '\0';
 
   return_val = errno;
   close (fd);
   errno = return_val;
 
-  if (result != (int)finfo.st_size)
+  if (result < 0)		/* XXX was != file_size, not < 0 */
     {
       free (string);
       goto file_error_and_exit;
     }
 
+  if (result == 0)
+    {
+      free (string);
+      return ((flags & FEVAL_BUILTIN) ? EXECUTION_SUCCESS : 1);
+    }
+      
   if (check_binary_file ((unsigned char *)string, (result > 80) ? 80 : result))
     {
       free (string);

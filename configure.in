@@ -1,12 +1,12 @@
 dnl
-dnl Configure script for bash-2.01
+dnl Configure script for bash-2.02
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl checks for version info
 
-AC_REVISION([for Bash 2.01, version 1.28, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 2.02, version 2.19, from autoconf version] AC_ACVERSION)dnl
 
 AC_INIT(shell.h)
 AC_CONFIG_HEADER(config.h)
@@ -34,19 +34,20 @@ dnl and some need a special compiler or loader
 dnl look in the NOTES file for more
 case "${host_cpu}-${host_os}" in
 alpha-*)	opt_gnu_malloc=no ;;	# alpha running osf/1 or linux
-*cray*-*)	opt_gnu_malloc=no ;;	# Crays
+*[Cc]ray*-*)	opt_gnu_malloc=no ;;	# Crays
 *-osf1*)	opt_gnu_malloc=no ;;	# other osf/1 machines
 sparc-svr4*)	opt_gnu_malloc=no ;;	# sparc SVR4, SVR4.2
 sparc-netbsd*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
 sgi-irix6*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
 sparc-linux*)	opt_gnu_malloc=no ;;	# sparc running linux; requires ELF
-*-freebsd*)	opt_gnu_malloc=no ;;	# they claim it's better
+#*-freebsd*)	opt_gnu_malloc=no ;;	# they claim it's better
 *-aix*)		opt_gnu_malloc=no ;;	# AIX machines
 *-nextstep*)	opt_gnu_malloc=no ;;	# NeXT machines running NeXTstep
 *-dgux*)	opt_gnu_malloc=no ;;	# DG/UX machines
 *-qnx*)		opt_gnu_malloc=no ;;	# QNX 4.2
 *-machten4)	opt_gnu_malloc=no ;;	# MachTen 4.x
-*-bsdi2.1|*-bsdi3.0)	opt_gnu_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+*-bsdi2.1|*-bsdi3.?)	opt_gnu_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+*-cygwin32*)	opt_gnu_malloc=no ;;	# Cygnus's CYGWIN32 environment
 esac
 
 dnl arguments to configure
@@ -104,10 +105,16 @@ opt_select=yes
 opt_help=yes
 opt_array_variables=yes
 opt_dparen_arith=yes
+opt_extended_glob=yes
 opt_brace_expansion=yes
 opt_disabled_builtins=no
 opt_command_timing=yes
 opt_usg_echo=no
+opt_cond_command=yes
+
+dnl options that affect how bash is compiled and linked
+opt_static_link=no
+opt_profiling=no
 
 dnl argument parsing for optional features
 AC_ARG_ENABLE(minimal-config, --enable-minimal-config	a minimal sh-like configuration, opt_minimal_config=$enableval)
@@ -120,6 +127,7 @@ if test $opt_minimal_config = yes; then
 	opt_restricted=no opt_process_subst=no opt_prompt_decoding=no
 	opt_select=no opt_help=no opt_array_variables=no opt_dparen_arith=no
 	opt_brace_expansion=no opt_disabled_builtins=no opt_command_timing=no
+	opt_extended_glob=no opt_cond_command=no
 fi
 
 AC_ARG_ENABLE(alias, --enable-alias		enable shell aliases, opt_alias=$enableval)
@@ -127,9 +135,11 @@ AC_ARG_ENABLE(array-variables, --enable-array-variables	include shell array vari
 AC_ARG_ENABLE(bang-history, --enable-bang-history	turn on csh-style history substitution, opt_bang_history=$enableval)
 AC_ARG_ENABLE(brace-expansion, --enable-brace-expansion	include brace expansion, opt_brace_expansion=$enableval)
 AC_ARG_ENABLE(command-timing, --enable-command-timing	enable the time reserved word and command timing, opt_command_timing=$enableval)
+AC_ARG_ENABLE(cond-command, --enable-cond-command	enable the conditional command, opt_cond_command=$enableval)
 AC_ARG_ENABLE(directory-stack, --enable-directory-stack	enable builtins pushd/popd/dirs, opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, --enable-disabled-builtins	allow disabled builtins to still be invoked, opt_disabled_builtins=$enableval)
 AC_ARG_ENABLE(dparen-arithmetic, [--enable-dparen-arithmetic	include ((...)) command], opt_dparen_arith=$enableval)
+AC_ARG_ENABLE(extended-glob, --enable-extended-glob	include ksh-style extended pattern matching, opt_extended_glob=$enableval)
 AC_ARG_ENABLE(help-builtin, --enable-help-builtin	include the help builtin, opt_help=$enableval)
 AC_ARG_ENABLE(history, --enable-history	turn on command history, opt_history=$enableval)
 AC_ARG_ENABLE(job-control, --enable-job-control	enable job control features, opt_job_control=$enableval)
@@ -139,6 +149,10 @@ AC_ARG_ENABLE(readline, --enable-readline	turn on command line editing, opt_read
 AC_ARG_ENABLE(restricted, --enable-restricted	enable a restricted shell, opt_restricted=$enableval)
 AC_ARG_ENABLE(select, --enable-select		include select command, opt_select=$enableval)
 AC_ARG_ENABLE(usg-echo-default, --enable-usg-echo-default	make the echo builtin expand escape sequences by default, opt_usg_echo=$enableval)
+
+dnl options that alter how bash is compiled and linked
+AC_ARG_ENABLE(profiling, --enable-profiling		allow profiling with gprof, opt_profiling=$enableval)
+AC_ARG_ENABLE(static-link, --enable-static-link		[link bash statically, for use as a root shell], opt_static_link=$enableval)
 
 dnl opt_job_control is handled later, after BASH_JOB_CONTROL_MISSING runs
 
@@ -202,6 +216,12 @@ fi
 if test $opt_usg_echo = yes ; then
 AC_DEFINE(DEFAULT_ECHO_TO_USG)
 fi
+if test $opt_extended_glob = yes ; then
+AC_DEFINE(EXTENDED_GLOB)
+fi
+if test $opt_cond_command = yes ; then
+AC_DEFINE(COND_COMMAND)
+fi
 
 if test "$opt_minimal_config" = yes; then
 	TESTSCRIPT=run-minimal
@@ -226,18 +246,73 @@ esyscmd(cat _distribution)dnl
 [BASHPATCH=]dnl
 esyscmd(cat _patchlevel)dnl
 
-echo "Beginning configuration for bash-$BASHVERS"
+echo "Beginning configuration for bash-$BASHVERS for ${host_cpu}-${host_vendor}-${host_os}"
 
 dnl compilation checks
+dnl AC_PROG_CC sets $cross_compiling to `yes' if cross-compiling for a
+dnl different environment
 AC_PROG_CC
+BASH_LARGE_FILE_SUPPORT
 AC_ISC_POSIX
 AC_MINIX
+
+dnl BEGIN changes for CYGNUS cross-building for cygwin32
+
+dnl load up the cross-building cache file -- add more cases and cache
+dnl files as necessary
+if test "x$cross_compiling" = "xyes"; then
+    case "${host}" in
+    *-cygwin32*)
+	cross_cache=${srcdir}/cross-build/cygwin32.cache
+	if test -r "${cross_cache}"; then
+	    echo "loading cross-build cache file ${cross_cache}"
+	    . ${cross_cache}
+	fi
+	unset cross_cache
+	;;
+    *)	echo "configure: cross-compiling for a non-cygwin32 target is not supported" >&2
+	;;
+    esac
+fi
+
+if test -z "$CC_FOR_BUILD"; then
+    if test "x$cross_compiling" = "xno"; then
+	CC_FOR_BUILD='$(CC)'
+    else
+	CC_FOR_BUILD=gcc
+    fi
+fi
+AC_SUBST(CC_FOR_BUILD)
+
+dnl Set SIGNAMES_H based on whether or not we're cross-compiling
+if test "x$cross_compiling" = "xno"; then
+	SIGNAMES_H=lsignames.h
+else
+	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
+fi
+AC_SUBST(SIGNAMES_H)
+
+dnl END changes for CYGNUS cross-building for cygwin32
 
 dnl We want these before the checks, so the checks can modify their values.
 test -z "$CFLAGS" && CFLAGS=-g auto_cflags=1
 
 dnl If we're using gcc and the user hasn't specified CFLAGS, add -O2 to CFLAGS.
 test -n "$GCC" && test -n "$auto_cflags" && CFLAGS="$CFLAGS -O2"
+
+dnl handle options that alter how bash is compiled and linked
+dnl these must come after the test for cc/gcc
+if test "$opt_profiling" = "yes"; then
+	PROFILE_FLAGS=-pg
+	opt_static_link=yes
+fi
+
+if test "$opt_static_link" = yes; then
+	# if we're using gcc, add `-static' to LDFLAGS
+	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
+		LDFLAGS="$LDFLAGS -static"
+	fi
+fi
 
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
@@ -287,8 +362,9 @@ AC_CHECK_FUNCS(dup2 select getdtablesize getgroups gethostname \
 
 dnl checks for c library functions
 AC_CHECK_FUNCS(bcopy bzero confstr getcwd strcasecmp setenv putenv \
-		setlinebuf setlocale strchr strerror tcgetattr uname \
-		sysconf ulimit times tzset siginterrupt memmove)
+		setlinebuf setlocale strchr strerror strtod strtol \
+		strtoul tcgetattr uname sysconf ulimit times tzset \
+		siginterrupt memmove)
 
 dnl checks for locale functions
 AC_CHECK_HEADERS(libintl.h)
@@ -304,8 +380,10 @@ if test "$ac_cv_func_bindtextdomain" = "no"; then
 fi
 
 dnl checks for the dynamic loading library functions in libc and libdl
+if test "$opt_static_link" != yes; then
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen dlclose dlsym)
+fi
 
 dnl this defines SYS_SIGLIST_DECLARED
 AC_DECL_SYS_SIGLIST
@@ -315,7 +393,8 @@ AC_HEADER_DIRENT
 AC_HEADER_TIME
 
 AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
-		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h)
+		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
+		 stddef.h)
 AC_CHECK_HEADERS(sys/ptem.h sys/pte.h sys/stream.h sys/select.h sys/file.h \
 		 sys/resource.h sys/param.h sys/socket.h \
 		 sys/time.h sys/times.h sys/wait.h)
@@ -338,6 +417,24 @@ AC_TYPE_SIZE_T
 AC_CHECK_TYPE(time_t, long)
 
 AC_TYPE_SIGNAL
+
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(char *)
+
+AC_CHECK_TYPE(int32_t)
+if test "$ac_cv_type_int32_t" = "no"; then
+        BASH_TYPE_INT32_T
+fi
+AC_CHECK_TYPE(u_int32_t)
+if test "$ac_cv_type_u_int32_t" = "no"; then
+        BASH_TYPE_U_INT32_T
+fi
+
+AC_CHECK_TYPE(ptrdiff_t)
+if test "$ac_cv_type_ptrdiff_t" = "no"; then
+        BASH_TYPE_PTRDIFF_T
+fi
 
 dnl structures
 AC_HEADER_STAT
@@ -369,6 +466,10 @@ dnl behavior of system calls and library functions
 BASH_DUP2_CLOEXEC_CHECK
 BASH_PGRP_SYNC
 BASH_SIGNAL_CHECK
+
+if test "$ac_cv_sys_restartable_syscalls" = "no"; then
+BASH_SYS_RESTARTABLE_SYSCALLS
+fi
 
 dnl checking for the presence of certain library symbols
 BASH_SYS_ERRLIST
@@ -471,6 +572,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic ;;	 # allow dynamic loading
 aix4.2*)	LOCAL_LDFLAGS="-bexpall -brtl" ;;# allow dynamic loading
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s -lunix -lncurses" ;;
 powerux)	LOCAL_LIBS="-lgen" ;;
+cygwin32*)	LOCAL_LIBS="-luser32" ;;
 esac
 
 case "$host_cpu" in
@@ -490,16 +592,19 @@ esac
 # this should be packaged into a script accessible via ${srcdir}/support
 case "$srcdir" in
 .)	;;
-*)	for d in doc tests support lib ; do	# dirs
+*)	for d in doc tests support lib examples; do	# dirs
 		test -d $d || mkdir $d
 	done
-	for ld in readline glob tilde malloc termcap; do	# libdirs
+	for ld in readline glob tilde malloc sh termcap; do	# libdirs
 		test -d lib/$ld || mkdir lib/$ld
 	done
+	test -d examples/loadables || mkdir examples/loadables	# loadable builtins
 	;;
 esac
 
 BUILD_DIR=`pwd`
+
+AC_SUBST(PROFILE_FLAGS)
 
 AC_SUBST(incdir)
 AC_SUBST(BUILD_DIR)
@@ -522,8 +627,9 @@ AC_SUBST(LOCAL_DEFS)
 #AC_SUBST(ALLOCA_OBJECT)
 
 AC_OUTPUT([Makefile builtins/Makefile lib/readline/Makefile lib/glob/Makefile \
-	  lib/malloc/Makefile lib/termcap/Makefile lib/tilde/Makefile \
-	  doc/Makefile],
+	  lib/malloc/Makefile lib/sh/Makefile lib/termcap/Makefile \
+	  lib/tilde/Makefile doc/Makefile support/Makefile \
+	  examples/loadables/Makefile],
 [
 # Makefile uses this timestamp file to record whether config.h is up to date.
 echo timestamp > stamp-h

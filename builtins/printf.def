@@ -1,0 +1,693 @@
+This file is printf.def, from which is created printf.c.
+It implements the builtin "printf" in Bash.
+
+Copyright (C) 1997 Free Software Foundation, Inc.
+
+This file is part of GNU Bash, the Bourne Again SHell.
+
+Bash is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 1, or (at your option) any later
+version.
+
+Bash is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Bash; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA
+
+$PRODUCES printf.c
+
+$BUILTIN printf
+$FUNCTION printf_builtin
+$SHORT_DOC printf format [arguments]
+printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
+is a character string which contains three types of objects: plain
+characters, which are simply copied to standard output, character escape
+sequences which are converted and copied to the standard output, and
+format specifications, each of which causes printing of the next successive
+argument.  In addition to the standard printf(1) formats, %b means to
+expand backslash escape sequences in the corresponding argument, and %q
+means to quote the argument in a way that can be reused as shell input.
+$END
+
+#include <config.h>
+
+#include "../bashtypes.h"
+
+#include <errno.h>
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
+#else
+   /* Assume 32-bit ints and longs. */
+#  define LONG_MAX		2147483647L
+#  define LONG_MIN		(-2147483647L-1)
+#  define INT_MAX		2147483647
+#  define INT_MIN		(-2147483647-1)
+#endif
+
+#include <stdio.h>
+#include <ctype.h>
+
+#include "../bashansi.h"
+#include "../shell.h"
+#include "../stdc.h"
+#include "bashgetopt.h"
+
+#if !defined (errno)
+extern int errno;
+#endif
+
+#define PF(f, func) \
+  do { \
+    if (fieldwidth && precision) \
+      (void)printf(f, fieldwidth, precision, func); \
+    else if (fieldwidth && precision == 0) \
+      (void)printf(f, fieldwidth, func); \
+    else if (precision) \
+      (void)printf(f, precision, func); \
+    else \
+      (void)printf(f, func); \
+  } while (0)
+
+#define PRETURN(value) \
+  do { free (format); fflush (stdout); return (value); } while (0)
+
+#define  SKIP1 "#-+ 0"
+#define  SKIP2 "*0123456789"
+
+static void printstr __P((char *, char *, int, int, int));
+static char *bexpand __P((char *, int, int *, int *));
+static char *mklong __P((char *, int));
+static int getchr __P((void));
+static char *getstr __P((void));
+static int  getint __P((void));
+static int getlong __P((long *));
+static int getulong __P((unsigned long *));
+static double getdouble __P((void));
+static int asciicode __P((void));
+
+static WORD_LIST *garglist;
+static int retval;
+
+extern char *backslash_quote ();
+
+int
+printf_builtin (list)
+     WORD_LIST *list;
+{
+  int ch, end, fieldwidth, precision, foundmod;
+  char convch, nextch, *format, *fmt, *start;
+
+  retval = EXECUTION_SUCCESS;
+  reset_internal_getopt ();
+  while ((ch = internal_getopt (list, "")) != -1)
+    {
+      switch (ch)
+	{
+	case '?':
+	default:
+	  builtin_usage();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
+
+  if (list == 0)
+    {
+      builtin_usage ();
+      return (EX_USAGE);
+    }
+
+  if (list->word->word == 0 || list->word->word[0] == '\0')
+    return (EXECUTION_SUCCESS);
+
+  format = ansicstr (list->word->word, strlen (list->word->word), (int *)NULL, (int *)NULL);
+
+  garglist = list->next;
+
+  /* Basic algorithm is to scan the format string for conversion
+     specifications -- once one is found, find out if the field
+     width or precision is a '*'; if it is, gather up value.  Note,
+     format strings are reused as necessary to use up the provided
+     arguments, arguments of zero/null string are provided to use
+     up the format string. */
+
+  do
+    {
+      /* find next format specification */
+      for (fmt = format; *fmt; fmt++)
+	{
+	  precision = fieldwidth = foundmod = 0;
+
+	  if (*fmt != '%')
+	    {
+	      putchar (*fmt);
+	      continue;
+	    }
+
+	  /* ASSERT(*fmt == '%') */
+	  start = fmt++;
+
+	  if (*fmt == '%')		/* %% prints a % */
+	    {
+	      putchar ('%');
+	      continue;
+	    }
+
+	  /* found format specification, skip to field width */
+	  for (; *fmt && strchr(SKIP1, *fmt); ++fmt)
+	    ;
+	  fieldwidth = (*fmt == '*') ? getint () : 0;
+
+	  /* skip to possible '.', get following precision */
+	  for (; *fmt && strchr(SKIP2, *fmt); ++fmt)
+	    ;
+	  if (*fmt == '.')
+	    {
+	      ++fmt;
+	      precision = (*fmt == '*') ? getint () : 0;
+	    }
+
+	  /* skip to conversion char */
+	  for (; *fmt && strchr(SKIP2, *fmt); ++fmt)
+	    ;
+	  if (*fmt == 0)
+	    {
+	      builtin_error ("`%s': missing format character", start);
+	      PRETURN (EXECUTION_FAILURE);
+	    }
+
+	  /* skip possible format modifiers */
+	  if (*fmt == 'l' || *fmt == 'L' || *fmt == 'h')
+	    {
+	      fmt++;
+	      foundmod = 1;
+	    }
+	    
+	  convch = *fmt;
+	  nextch = fmt[1];
+	  fmt[1] = '\0';
+	  switch(convch)
+	    {
+	    case 'c':
+	      {
+		char p;
+
+		p = getchr ();
+		PF(start, p);
+		break;
+	      }
+
+	    case 's':
+	      {
+		char *p;
+
+		p = getstr ();
+		PF(start, p);
+		break;
+	      }
+
+	    case 'b':		/* expand escapes in argument */
+	      {
+		char *p, *xp;
+		int rlen;
+
+		p = getstr ();
+		ch = rlen = 0;
+		xp = bexpand (p, strlen (p), &ch, &rlen);
+
+		if (xp)
+		  {
+		    /* Have to use printstr because of possible NUL bytes
+		       in XP -- printf does not handle that well. */
+		    printstr (start, xp, rlen, fieldwidth, precision);
+		    free (xp);
+		  }
+
+		if (ch)
+		  PRETURN (retval);
+		break;
+	      }
+
+	    case 'q':		/* print with shell quoting */
+	      {
+		char *p, *xp;
+
+		p = getstr ();
+		xp = backslash_quote (p);
+		if (xp)
+		  {
+		    /* Use printstr to get fieldwidth and precision right. */
+		    printstr (start, xp, strlen (xp), fieldwidth, precision);
+		    free (xp);
+		  }
+		break;
+	      }
+
+	    case 'd':
+	    case 'i':
+	      {
+		long p;
+		char *f;
+
+		if (foundmod == 0 && ((f = mklong (start, convch)) == NULL))
+		  PRETURN (EXECUTION_FAILURE);
+		else
+		  f = start;
+		if (getlong (&p))
+		  PRETURN (EXECUTION_FAILURE);
+		PF(f, p);
+		break;
+	      }
+
+	    case 'o':
+	    case 'u':
+	    case 'x':
+	    case 'X':
+	      {
+		unsigned long p;
+		char *f;
+
+		if (foundmod == 0 && ((f = mklong (start, convch)) == NULL))
+		  PRETURN (EXECUTION_FAILURE);
+		else
+		  f = start;
+		if (getulong (&p))
+		  PRETURN (EXECUTION_FAILURE);
+		PF (f, p);
+		break;
+	      }
+
+	    case 'e':
+	    case 'E':
+	    case 'f':
+	    case 'g':
+	    case 'G':
+	      {
+		double p;
+
+		p = getdouble ();
+		PF(start, p);
+		break;
+	      }
+
+	    /* We output unrecognized format characters, but we print a
+	       warning message and return a failure exit status. */
+	    default:
+	      builtin_error ("`%c': illegal format character", convch);
+	      PRETURN (EXECUTION_FAILURE);
+	    }
+
+	  fmt[1] = nextch;
+	}
+    }
+  while (garglist);
+
+  PRETURN (retval);
+}
+
+/* We duplicate a lot of what printf(3) does here. */
+static void
+printstr (fmt, string, len, fieldwidth, precision)
+     char *fmt;			/* format */
+     char *string;		/* expanded string argument */
+     int len;			/* length of expanded string */
+     int fieldwidth;		/* argument for width of `*' */
+     int precision;		/* argument for precision of `*' */
+{
+#if 0
+  char *s;
+#endif
+  int padlen, nc, ljust, i;
+  int fw, pr;			/* fieldwidth and precision */
+
+  if (string == 0 || *string == '\0')
+    return;
+
+#if 0
+  s = fmt;
+#endif
+  if (*fmt == '%')
+    fmt++;
+
+  ljust = fw = pr = 0;
+
+  /* skip flags */
+  while (*fmt == '#' || *fmt == '-' || *fmt == '+' || *fmt == ' ' || *fmt == '0')
+    {
+      if (*fmt == '-')
+	ljust = 1;
+      fmt++;
+    }
+
+  /* get fieldwidth, if present */
+  if (*fmt == '*')
+    {
+      fmt++;
+      fw = fieldwidth;
+    }
+  else if (isdigit (*fmt))
+    {
+      fw = *fmt++ - '0';
+      while (isdigit (*fmt))
+	fw = (fw * 10) + (*fmt++ - '0');
+    }
+
+  /* get precision, if present */
+  if (*fmt == '.')
+    {
+      fmt++;
+      if (*fmt == '*')
+	{
+	  fmt++;
+	  pr = precision;
+	}
+      else if (isdigit (*fmt))
+	{
+	  pr = *fmt++ - '0';
+	  while (isdigit (*fmt))
+	    pr = (pr * 10) + (*fmt++ - '0');
+	}
+    }
+
+#if 0
+  /* If we remove this, get rid of `s'. */
+  if (*fmt != 'b' && *fmt != 'q')
+    {
+      internal_error ("format parsing problem: %s", s);
+      fw = pr = 0;
+    }
+#endif
+
+  /* chars from string to print */
+  nc = (pr > 0 && pr <= len) ? pr : len;
+
+  padlen = fw - nc;
+  if (padlen < 0)
+    padlen = 0;
+  if (ljust)
+    padlen = -padlen;
+
+  /* leading pad characters */
+  for (; padlen > 0; padlen--)
+    putchar (' ');
+
+  /* output NC characters from STRING */
+  for (i = 0; i < nc; i++)
+    putchar (string[i]);
+
+  /* output any necessary trailing padding */
+  for (; padlen < 0; padlen++)
+    putchar (' ');
+}
+  
+/* Convert STRING by expanding the escape sequences specified by the
+   POSIX standard for printf's `%b' format string.  If SAWC is non-null,
+   recognize `\c' and use that as a string terminator.  If we see \c, set
+   *SAWC to 1 before returning.  LEN is the length of STRING. */
+
+#ifdef isoctal
+#undef isoctal
+#endif
+
+#define isoctal(c)	((c) >= '0' && (c) <= '7')
+
+#define OCTVALUE(c)	((c) - '0')
+
+#ifndef isxdigit
+#  define isxdigit(c)	(isdigit((c)) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#endif
+
+#define HEXVALUE(c) \
+  ((c) >= 'a' && (c) <= 'f' ? (c)-'a'+10 : (c) >= 'A' && (c) <= 'F' ? (c)-'A'+10 : (c)-'0')
+  
+static char *
+bexpand (string, len, sawc, lenp)
+     char *string;
+     int len, *sawc, *lenp;
+{
+  int c, temp;
+  char *ret, *r, *s;
+
+  if (string == 0 || *string == '\0')
+    {
+      if (sawc)
+	*sawc = 0;
+      if (lenp)
+	*lenp = 0;
+      return ((char *)NULL);
+    }
+
+  ret = xmalloc (len + 1);
+  for (r = ret, s = string; s && *s; )
+    {
+      c = *s++;
+      if (c != '\\' || *s == '\0')
+	{
+	  *r++ = c;
+	  continue;
+	}
+
+      switch (c = *s++)
+	{
+#if defined (__STDC__)
+	case 'a': c = '\a'; break;
+#else
+	case 'a': c = '\007'; break;
+#endif
+
+	case 'b': c = '\b'; break;
+
+	case 'e': c = '\033'; break;	/* ESC -- non-ANSI */
+
+	case 'f': c = '\f'; break;
+
+	case 'n': c = '\n'; break;
+
+	case 'r': c = '\r'; break;
+
+	case 't': c = '\t'; break;
+
+	case 'v': c = '\v'; break;
+
+	/* %b octal constants are `\0' followed by one, two, or three
+	   octal digits... */
+	case '0':
+	  for (temp = 3, c = 0; isoctal (*s) && temp--; s++)
+	    c = (c * 8) + OCTVALUE (*s);
+	  break;
+
+	/* but, as an extension, the other echo-like octal escape
+	   sequences are supported as well. */
+	case '1': case '2': case '3': case '4':
+	case '5': case '6': case '7':
+	  for (temp = 2, c -= '0'; isoctal (*s) && temp--; s++)
+	    c = (c * 8) + OCTVALUE (*s);
+	  break;
+
+	/* And, as another extension, we allow \xNNN, where each N is a
+	   hex digit. */
+	case 'x':
+	  for (temp = 3, c = 0; isxdigit (*s) && temp--; s++)
+	    c = (c * 16) + HEXVALUE (*s);
+	  if (temp == 3)
+	    {
+	      builtin_error ("missing hex digit for \\x");
+	      *r++ = '\\';
+	      c = 'x';
+	    }
+	  break;
+
+	case '\\':
+#if 0
+	case '\'':		/* XXX */
+	case '"':		/* XXX */
+#endif
+	  break;
+
+	case 'c':
+	  if (sawc)
+	    *sawc = 1;
+	  *r = '\0';
+	  if (lenp)
+	    *lenp = r - ret;
+	  return ret;
+
+	/* other backslash escapes are passed through unaltered */
+	default: *r++ = '\\'; break;
+	}
+
+      *r++ = c;
+    }
+
+  *r = '\0';
+  if (lenp)
+    *lenp = r - ret;
+  return ret;
+}
+
+static char *
+mklong (str, ch)
+     char *str;
+     int ch;
+{
+  static char copy[64];
+  int len;
+
+  len = strlen (str) + 2;
+  FASTCOPY (str, copy, len - 3);
+  copy[len - 3] = 'l';
+  copy[len - 2] = ch;
+  copy[len - 1] = '\0';
+  return (copy);
+}
+
+static int
+getchr ()
+{
+  int ret;
+
+  if (garglist == 0)
+    return ('\0');
+
+  ret = (int)garglist->word->word[0];
+  garglist = garglist->next;
+  return ret;
+}
+
+static char *
+getstr ()
+{
+  char *ret;
+
+  if (garglist == 0)
+    return ("");
+
+  ret = garglist->word->word;
+  garglist = garglist->next;
+  return ret;
+}
+
+static int
+getint ()
+{
+  long ret;
+
+  if (getlong (&ret))
+    return (0);
+
+  if (ret > INT_MAX)
+    {
+      builtin_error ("%s: %s", garglist->word->word, strerror(ERANGE));
+      return (0);
+    }
+
+  return ((int)ret);
+}
+
+static int
+getlong (lp)
+     long *lp;
+{
+  long ret;
+
+  if (garglist == 0)
+    {
+      *lp = 0L;
+      return (0);
+    }
+
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    {
+      *lp =  (long)asciicode ();
+      return (0);
+    }
+
+  errno = 0;
+  /* legal_number does not currently detect overflow, but it should.
+     Someday it will. */
+  if (legal_number (garglist->word->word, &ret) == 0)
+    {
+      builtin_error ("%s: illegal number", garglist->word->word);
+      return (1);
+    }
+  else if (errno == ERANGE)
+    {
+      builtin_error ("%s: %s", garglist->word->word, strerror(ERANGE));
+      return (1);
+    }
+
+  *lp = ret;
+  garglist = garglist->next;
+  return (0);
+}
+
+static int
+getulong (ulp)
+     unsigned long *ulp;
+{
+  unsigned long ret;
+  char *ep;
+
+  if (garglist == 0)
+    {
+      *ulp = (unsigned long)0;
+      return (0);
+    }
+
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    {
+      *ulp =  (unsigned long)asciicode ();
+      return (0);
+    }
+
+  errno = 0;
+  ret = strtoul (garglist->word->word, &ep, 0);
+  
+  if (*ep)
+    {
+      builtin_error ("%s: illegal number", garglist->word->word);
+      return (1);
+    }
+  else if (errno == ERANGE)
+    {
+      builtin_error ("%s: %s", garglist->word->word, strerror(ERANGE));
+      return (1);
+    }
+
+  *ulp = ret;
+  garglist = garglist->next;
+  return (0);
+}
+
+static double
+getdouble ()
+{
+  double ret;
+
+  if (garglist == 0)
+    return ((double)0);
+
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    return ((double)asciicode ());
+
+  /* This should use strtod if it is available. */
+  ret = atof (garglist->word->word);
+  garglist = garglist->next;
+  return (ret);
+}
+
+/* NO check is needed for garglist here. */
+static int
+asciicode ()
+{
+  register int ch;
+
+  ch = garglist->word->word[1];
+  garglist = garglist->next;
+  return (ch);
+}

@@ -57,6 +57,9 @@ $END
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -376,6 +379,18 @@ declare_internal (list, local_var)
 	      t = make_variable_value (var, value);
 	      FREE (var->value);
 	      var->value = t;
+	    }
+
+	  /* If we found this variable in the temporary environment, as with
+	     `var=value declare -x var', make sure it is treated identically
+	     to `var=value export var'.  Do the same for `declare -r' and
+	     `readonly'.  Preserve the attributes, except for att_tempvar. */
+	  if ((flags_on & (att_exported|att_readonly)) && tempvar_p (var))
+	    {
+	      SHELL_VAR *tv;
+	      tv = bind_variable (var->name, var->value ? var->value : "");
+	      tv->attributes = var->attributes & ~att_tempvar;
+	      dispose_variable (var);
 	    }
 	}
 

@@ -42,7 +42,7 @@ trap
 
 # hmmm...should this set the handling to SIG_IGN for children, too?
 trap '' USR2
-./trap.sub1
+./trap1.sub
 
 #
 # show that setting a trap on SIGCHLD is not disastrous.
@@ -56,3 +56,9 @@ sleep 7 & sleep 6 & sleep 5 &
 wait
 
 trap -p SIGCHLD
+
+# Now reset some of the signals the shell handles specially back to
+# their default values (with or without the SIG prefix)
+trap SIGINT QUIT TERM
+
+trap

@@ -101,3 +101,17 @@ encountered by a significant number of users.
 
 		alias ulimit="ulimit -S"
 
+9.  Bash-2.01 uses a new quoting syntax, $'...' to do ANSI-C string
+    translation.  Backslash-escaped characters in ... are expanded and
+    replaced as specified by the ANSI C standard.
+
+10. The sourcing of startup files has changed somewhat.  This is explained
+    more completely in the INVOCATION section of the manual page.
+
+    A non-interactive shell not named `sh' and not in posix mode reads
+    and executes commands from the file named by $BASH_ENV.  A
+    non-interactive shell started by `su' and not in posix mode will read
+    startup files.  No other non-interactive shells read any startup files.
+
+    An interactive shell started in posix mode reads and executes commands
+    from the file named by $ENV.

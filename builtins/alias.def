@@ -37,6 +37,9 @@ $END
 #if defined (ALIAS)
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -80,12 +83,12 @@ alias_builtin (list)
   if (list == 0 || pflag)
     {
       if (aliases == 0)
-	return (EXECUTION_FAILURE);
+	return (EXECUTION_SUCCESS);
 
       alias_list = all_aliases ();
 
       if (alias_list == 0)
-	return (EXECUTION_FAILURE);
+	return (EXECUTION_SUCCESS);
 
       for (offset = 0; alias_list[offset]; offset++)
 	print_alias (alias_list[offset]);
@@ -118,8 +121,7 @@ alias_builtin (list)
 	    print_alias (t);
 	  else
 	    {
-	      if (interactive)
-		builtin_error ("`%s' not found", name);
+	      builtin_error ("`%s' not found", name);
 	      any_failed++;
 	    }
 	}
@@ -179,9 +181,7 @@ unalias_builtin (list)
 	remove_alias (alias->name);
       else
 	{
-	  if (interactive)
-	    builtin_error ("`%s': not an alias", list->word->word);
-
+	  builtin_error ("`%s': not an alias", list->word->word);
 	  aflag++;
 	}
 

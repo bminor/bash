@@ -24,11 +24,16 @@
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
 #include <stdio.h>
+#ifndef _MINIX
 #include "../bashtypes.h"
+#endif
 #include <signal.h>
 #include <errno.h>
 

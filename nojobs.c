@@ -355,8 +355,7 @@ make_child (command, async_p)
      the command is asynchronous, we have already duplicated /dev/null
      as fd 0, but have not changed the buffered stream corresponding to
      the old fd 0.  We don't want to sync the stream in this case. */
-  if (default_buffered_input != -1 &&
-      (!async_p || default_buffered_input > 0))
+  if (default_buffered_input != -1 && (!async_p || default_buffered_input > 0))
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
@@ -386,11 +385,7 @@ make_child (command, async_p)
   if (pid == 0)
     {
 #if defined (BUFFERED_INPUT)
-      if (default_buffered_input > 0)
-	{
-          close_buffered_fd (default_buffered_input);
-          default_buffered_input = bash_input.location.buffered_fd = -1;
-	}
+      unset_bash_input (0);
 #endif /* BUFFERED_INPUT */
 
 #if defined (HAVE_POSIX_SIGNALS)

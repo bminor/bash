@@ -23,6 +23,9 @@
 #if defined (HISTORY)
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -174,6 +177,10 @@ bash_history_inhibit_expansion (string, i)
   else if (i > 1 && string[i - 1] == '{' && string[i - 2] == '$' &&
 	     member ('}', string + i + 1))
     return (1);
+#if defined (EXTENDED_GLOB)
+  else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
+    return (1);
+#endif
   else
     return (0);
 }
@@ -399,7 +406,7 @@ pre_process_line (line, print_changes, addit)
 	  if (print_changes)
 	    {
 	      if (expanded < 0)
-		internal_error (history_value);
+		internal_error ("%s", history_value);
 #if defined (READLINE)
 	      else if (hist_verify == 0)
 #else
@@ -461,9 +468,13 @@ maybe_add_history (line)
   should_add = hist_last_line_added = 0;
 
   /* Don't use the value of history_control to affect the second
-     and subsequent lines of a multi-line command when
-     command_oriented_history is enabled. */
+     and subsequent lines of a multi-line command (old code did
+     this only when command_oriented_history is enabled). */
+#if 0
   if (command_oriented_history && current_command_line_count > 1)
+#else
+  if (current_command_line_count > 1)
+#endif
     {
       bash_add_history (line);
       return;
@@ -693,7 +704,7 @@ history_should_ignore (line)
       else
 	npat = histignore.ignores[i].val;
 
-      match = fnmatch (npat, line, 0) != FNM_NOMATCH;
+      match = fnmatch (npat, line, FNMATCH_EXTFLAG) != FNM_NOMATCH;
 
       if (histignore.ignores[i].flags & HIGN_EXPAND)
 	free (npat);

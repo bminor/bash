@@ -10,8 +10,8 @@ remaining args: one two three
 -a specified
 -b bval specified
 remaining args: one two three four five six seven eight nine ten eleven twelve
-./getopts.sub1: option requires an argument -- b
-Usage: ./getopts.sub1 [-a] [-b value] args
+./getopts1.sub: option requires an argument -- b
+Usage: ./getopts1.sub [-a] [-b value] args
 -a specified
 -c cval specified
 -d specified
@@ -24,10 +24,10 @@ remaining args: one two three
 -a specified
 -b bval specified
 remaining args: one two three
-./getopts.sub4: error: option `b' requires an argument
-Usage: ./getopts.sub4 [-a] [-b value] args
-./getopts.sub4: error: illegal option character `c'
-Usage: ./getopts.sub4 [-a] [-b value] args
+./getopts4.sub: error: option `b' requires an argument
+Usage: ./getopts4.sub [-a] [-b value] args
+./getopts4.sub: error: illegal option character `c'
+Usage: ./getopts4.sub [-a] [-b value] args
 -a specified
 remaining args: -b bval one two three
 OPTERR=0
@@ -36,11 +36,11 @@ something else here
 OPTIND=3
 getop: OPTERR=1
 a here
-./getopts.sub5: illegal option -- c
+./getopts5.sub: illegal option -- c
 something else here
-./getopts.sub5: illegal option -- d
+./getopts5.sub: illegal option -- d
 something else here
-./getopts.sub5: illegal option -- e
+./getopts5.sub: illegal option -- e
 something else here
 getop: OPTIND=5
 OPTIND=3
@@ -52,5 +52,5 @@ remaining args:
 -a specified
 remaining args: 
 0
-./getopts.sub7: getopts: `opt-var': not a valid identifier
+./getopts7.sub: getopts: `opt-var': not a valid identifier
 remaining args: 

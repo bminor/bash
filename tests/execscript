@@ -2,12 +2,12 @@ export LC_ALL=C
 export LANG=C
 
 set -- one two three
-echo before execscript.sub: "$@"
-echo calling execscript.sub
-./execscript.sub aa bb cc dd ee
-echo after execscript.sub with args: $?
-./execscript.sub
-echo after execscript.sub without args: $?
+echo before exec1.sub: "$@"
+echo calling exec1.sub
+./exec1.sub aa bb cc dd ee
+echo after exec1.sub with args: $?
+./exec1.sub
+echo after exec1.sub without args: $?
 
 # set up a fixed path so we know notthere will not be found
 PATH=/usr/bin:/bin:/usr/local/bin:
@@ -44,7 +44,7 @@ echo $?
 # kill two birds with one test -- test out the BASH_ENV code
 echo echo this is bashenv > /tmp/bashenv
 export BASH_ENV=/tmp/bashenv
-${THIS_SH} ./execscript.sub3
+${THIS_SH} ./exec3.sub
 rm -f /tmp/bashenv
 unset BASH_ENV
 
@@ -72,7 +72,10 @@ echo ${PATH-unset}
 
 echo "echo ok" | ${THIS_SH} -t
 
-${THIS_SH} ./execscript.sub2
+${THIS_SH} ./exec2.sub
 echo $?
 
-${THIS_SH} ./execscript.sub4
+${THIS_SH} ./exec4.sub
+
+# try exec'ing a command that cannot be found in $PATH
+${THIS_SH} ./exec5.sub

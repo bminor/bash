@@ -27,6 +27,7 @@
 
 	"-", "+"		[(unary operators)]
 	"!", "~"
+	"**"			[(exponentiation)]
 	"*", "/", "%"
 	"+", "-"
 	"<<", ">>"
@@ -38,9 +39,7 @@
 	"&&"
 	"||"
 	"expr ? expr : expr"
-	"=", "*=", "/=", "%=",
-	"+=", "-=", "<<=", ">>=",
-	"&=", "^=", "|="
+	"=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
 
  (Note that most of these operators have special meaning to bash, and an
  entire expression should be quoted, e.g. "a=$a+1" or "a=a+1" to ensure
@@ -68,7 +67,11 @@
 
 #include <stdio.h>
 #include "bashansi.h"
+
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -99,7 +102,8 @@
 #define LSH	9	/* "<<" Left SHift */
 #define RSH    10	/* ">>" Right SHift */
 #define OP_ASSIGN 11	/* op= expassign as in Posix.2 */
-#define COND	12
+#define COND	12	/* exp1 ? exp2 : exp3 */
+#define POWER	13	/* exp1**exp2 */
 #define EQ	'='
 #define GT	'>'
 #define LT	'<'
@@ -132,7 +136,7 @@ static procenv_t evalbuf;
 static void	readtok ();	/* lexical analyzer */
 static long	subexpr (), expassign (), exp0 (), exp1 (), exp2 (), exp3 (),
 		exp4 (), exp5 (), expshift (), expland (), explor (),
-		expband (), expbor (), expbxor (), expcond ();
+		expband (), expbor (), expbxor (), expcond (), exppower ();
 static long	strlong ();
 static void	evalerror ();
 
@@ -665,7 +669,7 @@ exp2 ()
 {
   register long val1, val2;
 
-  val1 = exp1 ();
+  val1 = exppower ();
 
   while ((curtok == MUL) ||
          (curtok == DIV) ||
@@ -675,7 +679,7 @@ exp2 ()
 
       readtok ();
 
-      val2 = exp1 ();
+      val2 = exppower ();
 
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
 	evalerror ("division by 0");
@@ -686,6 +690,25 @@ exp2 ()
         val1 /= val2;
       else if (op == MOD)
         val1 %= val2;
+    }
+  return (val1);
+}
+
+static long
+exppower ()
+{
+  register long val1, val2, c;
+
+  val1 = exp1 ();
+  if (curtok == POWER)
+    {
+      readtok ();
+      val2 = exp1 ();
+      if (val2 == 0)
+	return (1L);
+      for (c = 1; val2--; c *= val1)
+	;
+      val1 = c;
     }
   return (val1);
 }
@@ -875,6 +898,8 @@ readtok ()
 	c = LAND;
       else if ((c == BOR) && (c1 == BOR))
 	c = LOR;
+      else if ((c == '*') && (c1 == '*'))
+        c = POWER;
       else if (c1 == EQ && member(c, "*/%+-&^|"))
 	{
 	  assigntok = c;	/* a OP= b */
@@ -905,7 +930,7 @@ evalerror (msg)
 
 /* Convert a string to a long integer, with an arbitrary base.
    0nnn -> base 8
-   0xnn -> base 16
+   0[Xx]nn -> base 16
    Anything else: [base#]number (this is implemented to match ksh93)
 
    Base may be >=2 and <=64.  If base is <= 36, the numbers are drawn

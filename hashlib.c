@@ -23,6 +23,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "bashansi.h"
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -225,6 +228,8 @@ dispose_hash_table (table)
   free (table);
 }
 
+/* No longer necessary; everything uses the macro */
+#if 0
 /* Return the bucket_contents list of bucket BUCKET in TABLE.  If
    TABLE doesn't have BUCKET buckets, return NULL. */
 #undef get_hash_bucket
@@ -238,8 +243,10 @@ get_hash_bucket (bucket, table)
   else
     return (BUCKET_CONTENTS *)NULL;
 }
+#endif
 
-/* #ifdef DEBUG */
+#ifdef DEBUG
+void
 print_table_stats (table, name)
      HASH_TABLE *table;
      char *name;
@@ -265,7 +272,7 @@ print_table_stats (table, name)
       fprintf (stderr, "%d\n", bcount);
     }
 }
-/* #endif */
+#endif
 
 #ifdef TEST_HASHING
 

@@ -95,9 +95,14 @@ $END
 
 #if defined (PUSHD_AND_POPD)
 #include <stdio.h>
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -547,6 +552,34 @@ get_dirstack_index (ind, sign, indexp)
     return (sign > 0 ? directory_list_offset - ind : ind);
 }
 
+/* Used by the tilde expansion code. */
+char *
+get_dirstack_from_string (string)
+     char *string;
+{
+  int ind, sign, index_flag;
+  long i;
+
+  sign = 1;
+  if (*string == '-' || *string == '+')
+    {
+      sign = (*string == '-') ? -1 : 1;
+      string++;
+    }
+  if (legal_number (string, &i) == 0)
+    return ((char *)NULL);
+
+  index_flag = 0;
+  ind = get_dirstack_index (i, sign, &index_flag);
+  if (index_flag && (ind < 0 || ind > directory_list_offset))
+    return ((char *)NULL);
+  if (index_flag == 0 || (index_flag == 1 && ind == 0))
+    return (get_string_value ("PWD"));
+  else
+    return (pushd_directory_list[ind]);
+}
+
+#ifdef INCLUDE_UNUSED
 char *
 get_dirstack_element (ind, sign)
      int ind, sign;
@@ -557,6 +590,7 @@ get_dirstack_element (ind, sign)
   return (i < 0 || i > directory_list_offset) ? (char *)NULL
 					      : pushd_directory_list[i];
 }
+#endif
 
 void
 set_dirstack_element (ind, sign, value)

@@ -19,6 +19,9 @@
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -26,6 +29,8 @@
 #include "../bashtypes.h"
 #include "../posixstat.h"
 #include <signal.h>
+
+#include <errno.h>
 
 #if defined (PREFER_STDARG)
 #  include <stdarg.h>
@@ -53,6 +58,10 @@
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
+
+#if !defined (errno)
+extern int errno;   
+#endif /* !errno */
 
 extern int no_symbolic_links, interactive, interactive_shell;
 extern int indirection_level, startup_state, subshell_environment;
@@ -399,11 +408,12 @@ get_working_directory (for_whom)
       directory = getcwd (the_current_working_directory, PATH_MAX);
       if (directory == 0)
 	{
-	  fprintf (stderr, "%s: could not get current directory: %s\n",
+	  fprintf (stderr, "%s: could not get current directory: %s: %s\n",
 		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
 		   the_current_working_directory[0]
 			? the_current_working_directory
-			: bash_getcwd_errstr);
+			: bash_getcwd_errstr,
+		   strerror (errno));
 
 	  free (the_current_working_directory);
 	  the_current_working_directory = (char *)NULL;
@@ -691,8 +701,13 @@ shell_builtin_compare (sbp1, sbp2)
 void
 initialize_shell_builtins ()
 {
+#ifdef _MINIX
+  qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
+    (int (*)(const void *, const void *))shell_builtin_compare);
+#else
   qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
     shell_builtin_compare);
+#endif
 }
 
 /* **************************************************************** */
@@ -791,10 +806,14 @@ backslash_quote (string)
 	  *r++ = '\\';
 	  *r++ = c;
 	  break;
-	case '#':				/* comment char */
 #if 0
 	case '~':				/* tilde expansion */
+	  if (s == string || s[-1] == '=' || s[-1] == ':')
+	    *r++ = '\\';
+	  *r++ = c;
+	  break;
 #endif
+	case '#':				/* comment char */
 	  if (s == string)
 	    *r++ = '\\';
 	  /* FALLTHROUGH */
@@ -827,6 +846,9 @@ contains_shell_metas (string)
 	case '^':
 	case '$': case '`':			/* expansion chars */
 	  return (1);
+	case '~':				/* tilde expansion */
+	  if (s == string || s[-1] == '=' || s[-1] == ':')
+	    return (1);
 	case '#':
 	  if (s == string)			/* comment char */
 	    return (1);

@@ -27,20 +27,18 @@ $SHORT_DOC type [-apt] name [name ...]
 For each NAME, indicate how it would be interpreted if used as a
 command name.
 
-If the -t option is used, returns a single word which is one of
+If the -t option is used, `type' outputs a single word which is one of
 `alias', `keyword', `function', `builtin', `file' or `', if NAME is an
 alias, shell reserved word, shell function, shell builtin, disk file,
 or unfound, respectively.
 
-If the -p flag is used, either returns the name of the disk file
-that would be executed, or nothing if -t would not return `file'.
+If the -p flag is used, `type' either returns the name of the disk
+file that would be executed, or nothing if `type -t NAME' would not
+return `file'.
 
-If the -a flag is used, displays all of the places that contain an
-executable named `file'.  This includes aliases and functions, if and
-only if the -p flag is not also used.
-
-Type accepts -all, -path, and -type in place of -a, -p, and -t,
-respectively.
+If the -a flag is used, `type' displays all of the places that contain
+an executable named `file'.  This includes aliases and functions, if
+and only if the -p flag is not also used.
 $END
 
 #include <config.h>
@@ -56,7 +54,7 @@ $END
 #include "../bashansi.h"
 
 #include "../shell.h"
-#include "../execute_cmd.h"
+#include "../findcmd.h"
 #include "../hashcmd.h"
 
 #if defined (ALIAS)

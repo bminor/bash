@@ -21,8 +21,8 @@ The following list is what's changed when `POSIX mode' is in effect:
 
   5. The POSIX.2 `PS1' and `PS2' expansions of `!' to the history
      number and `!!' to `!' are enabled, and parameter expansion is
-     performed on the value regardless of the setting of the
-     `promptvars' option.
+     performed on the values of `PS1' and `PS2' regardless of the
+     setting of the `promptvars' option.
 
   6. Interactive comments are enabled by default.  (Note that Bash has
      them on by default anyway.)
@@ -42,42 +42,51 @@ The following list is what's changed when `POSIX mode' is in effect:
  11. Non-interactive shells exit if FILENAME in `.' FILENAME is not
      found.
 
- 12. Redirection operators do not perform filename expansion on the word
+ 12. Non-interactive shells exit if a syntax error in an arithmetic
+     expansion results in an invalid expression.
+
+ 13. Redirection operators do not perform filename expansion on the word
      in the redirection unless the shell is interactive.
 
- 13. Function names must be valid shell `name's.  That is, they may not
+ 14. Function names must be valid shell `name's.  That is, they may not
      contain characters other than letters, digits, and underscores, and
-     may not start with a digit.  Declaring a function with an illegal
+     may not start with a digit.  Declaring a function with an invalid
      name causes a fatal syntax error in non-interactive shells.
 
- 14. POSIX.2 `special' builtins are found before shell functions during
+ 15. POSIX.2 `special' builtins are found before shell functions during
      command lookup.
 
- 15. If a POSIX.2 special builtin returns an error status, a
+ 16. If a POSIX.2 special builtin returns an error status, a
      non-interactive shell exits.  The fatal errors are those listed in
      the POSIX.2 standard, and include things like passing incorrect
      options, redirection errors, variable assignment errors for
      assignments preceding the command name, and so on.
 
- 16. If the `cd' builtin finds a directory to change to using
+ 17. If the `cd' builtin finds a directory to change to using
      `$CDPATH', the value it assigns to the `PWD' variable does not
      contain any symbolic links, as if `cd -P' had been executed.
 
- 17. A non-interactive shell exits with an error status if a variable
+ 18. If `$CDPATH' is set, the `cd' builtin will not implicitly append
+     the current directory to it.  This means that `cd' will fail if no
+     valid directory name can be constructed from any of the entries in
+     `$CDPATH', even if the a directory with the same name as the name
+     given as an argument to `cd' exists in the current directory.
+
+ 19. A non-interactive shell exits with an error status if a variable
      assignment error occurs when no command name follows the assignment
      statements.  A variable assignment error occurs, for example, when
-     trying to assign a value to a read-only variable.
+     trying to assign a value to a readonly variable.
 
- 18. A non-interactive shell exits with an error status if the iteration
+ 20. A non-interactive shell exits with an error status if the iteration
      variable in a `for' statement or the selection variable in a
-     `select' statement is a read-only variable.
+     `select' statement is a readonly variable.
 
- 19. Process substitution is not available.
+ 21. Process substitution is not available.
 
- 20. Assignment statements preceding POSIX.2 `special' builtins persist
+ 22. Assignment statements preceding POSIX.2 special builtins persist
      in the shell environment after the builtin completes.
 
- 21. The `export' and `readonly' builtin commands display their output
+ 23. The `export' and `readonly' builtin commands display their output
      in the format required by POSIX.2.
 
 

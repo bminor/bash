@@ -3,6 +3,7 @@
 SHELL = /bin/sh
 RANLIB = @RANLIB@
 CC = @CC@
+CC_FOR_BUILD = @CC_FOR_BUILD@
 AR = @AR@
 RM = rm -f
 CP = cp
@@ -11,13 +12,16 @@ srcdir = @srcdir@
 VPATH = .:@srcdir@
 topdir = @top_srcdir@
 includedir = @includedir@
+BUILD_DIR = @BUILD_DIR@
 
-PROFILE_FLAGS =
+PROFILE_FLAGS = @PROFILE_FLAGS@
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
+LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
+LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 LIBS = @LIBS@
 
 INCLUDES = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(srcdir)
@@ -62,7 +66,8 @@ DEFSRC =  $(srcdir)/alias.def $(srcdir)/bind.def $(srcdir)/break.def \
 	  $(srcdir)/source.def $(srcdir)/suspend.def $(srcdir)/test.def \
 	  $(srcdir)/times.def $(srcdir)/trap.def $(srcdir)/type.def \
 	  $(srcdir)/ulimit.def $(srcdir)/umask.def $(srcdir)/wait.def \
-	  $(srcdir)/reserved.def $(srcdir)/pushd.def $(srcdir)/shopt.def
+	  $(srcdir)/reserved.def $(srcdir)/pushd.def $(srcdir)/shopt.def \
+	  $(srcdir)/printf.def
 
 STATIC_SOURCE = common.c evalstring.c evalfile.c getopt.c bashgetopt.c \
 		getopt.h 
@@ -74,40 +79,57 @@ OFILES = builtins.o \
 	exit.o fc.o fg_bg.o hash.o help.o history.o jobs.o kill.o let.o \
 	pushd.o read.o return.o set.o setattr.o shift.o source.o \
 	suspend.o test.o times.o trap.o type.o ulimit.o umask.o \
-	wait.o getopts.o shopt.o getopt.o bashgetopt.o 
+	wait.o getopts.o shopt.o printf.o getopt.o bashgetopt.o 
 
 CREATED_FILES = builtext.h builtins.c psize.aux pipesize.h
 
 all: $(MKBUILTINS) libbuiltins.a
 
-libbuiltins.a: $(MKBUILTINS) $(OFILES)
+libbuiltins.a: $(MKBUILTINS) $(OFILES) builtins.o
 	$(RM) $@
 	$(AR) cr $@ $(OFILES)
 	-$(RANLIB) $@
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
-	$(RM) builtext.h builtins.c
+	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
+	@-if test -f builtext.h; then mv -f builtext.h old-builtext.h; fi
 	./$(MKBUILTINS) -externfile builtext.h -structfile builtins.c \
-	-noproduction $(DIRECTDEFINE) $(DEFSRC)
+	    -noproduction $(DIRECTDEFINE) $(DEFSRC)
+	@-if cmp -s old-builtext.h builtext.h; then \
+		mv old-builtext.h builtext.h; \
+	 else \
+		$(RM) old-builtext.h; \
+	 fi
+	@-if cmp -s old-builtins.c builtins.c; then \
+		mv old-builtins.c builtins.c; \
+	 else \
+		$(RM) old-builtins.c; \
+	 fi
 
-mkbuiltins: $(srcdir)/mkbuiltins.c ../config.h
-	$(CC) $(CCFLAGS) -o $(MKBUILTINS) $(srcdir)/mkbuiltins.c $(LIBS)
+mkbuiltins.o: ../config.h
+mkbuiltins.o: mkbuiltins.c
+	$(RM) $@
+	$(CC_FOR_BUILD) -c $(CCFLAGS) $<
+
+mkbuiltins: mkbuiltins.o
+	$(CC_FOR_BUILD) $(LDFLAGS) -o $(MKBUILTINS) mkbuiltins.o $(LIBS)
 
 # rules for deficient makes, like SunOS
+mkbuiltins.o: mkbuiltins.c
+builtins.o: builtins.c
 common.o: common.c
 bashgetopt.o: bashgetopt.c
 getopt.o: getopt.c
-evalstring.o: evalstring.c
-evalfile.o: evalfile.c
+evalstring.o: evalstring.c          
+evalfile.o: evalfile.c  
 
-ulimit.o: ulimit.def
 ulimit.o: pipesize.h
 
 pipesize.h:	psize.aux
 	$(SHELL) $(srcdir)/psize.sh > pipesize.h
 
 psize.aux:	psize.c
-	$(CC) $(CCFLAGS) -o $@ $(srcdir)/psize.c
+	$(CC_FOR_BUILD) $(CCFLAGS) -o $@ $(srcdir)/psize.c
 
 documentation: builtins.texi
 
@@ -146,6 +168,7 @@ history.o: history.def
 jobs.o: jobs.def
 kill.o: kill.def
 let.o: let.def
+printf.o: printf.def
 pushd.o: pushd.def
 read.o: read.def
 return.o: return.def
@@ -159,6 +182,7 @@ test.o: test.def
 times.o: times.def
 trap.o: trap.def
 type.o: type.def
+ulimit.o: ulimit.def
 umask.o: umask.def
 wait.o: wait.def
 getopts.o: getopts.def
@@ -274,6 +298,7 @@ exec.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 exec.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/flags.h
 exec.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
 exec.o: $(srcdir)/common.h $(topdir)/execute_cmd.h $(topdir)/maxpath.h
+exec.o: $(topdir)/findcmd.h
 exit.o: $(topdir)/bashtypes.h
 exit.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
 exit.o: $(topdir)/error.h $(topdir)/general.h
@@ -302,7 +327,7 @@ getopts.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 getopts.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/maxpath.h
 getopts.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
 hash.o: $(topdir)/builtins.h $(topdir)/command.h $(topdir)/quit.h
-hash.o: $(topdir)/execute_cmd.h $(topdir)/hashlib.h
+hash.o: $(topdir)/findcmd.h $(topdir)/hashlib.h
 hash.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
 hash.o: $(topdir)/error.h $(topdir)/general.h
 hash.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
@@ -339,6 +364,12 @@ let.o: $(topdir)/error.h $(topdir)/general.h
 let.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 let.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/maxpath.h
 let.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
+printf.o: ../config.h $(topdir)/memalloc.h $(topdir)/bashjmp.h
+printf.o: $(topdir)/command.h $(topdir)/error.h $(topdir)/general.h
+printf.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
+printf.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/sig.h
+printf.o: $(topdir)/pathnames.h $(topdir)/shell.h $(topdir)/unwind_prot.h
+printf.o: $(topdir)/variables.h $(topdir)/stdc.h $(srcdir)/bashgetopt.h
 pushd.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
 pushd.o: $(topdir)/error.h $(topdir)/general.h
 pushd.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -372,7 +403,7 @@ shift.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 shift.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/maxpath.h
 shift.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
 source.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
-source.o: $(topdir)/error.h $(topdir)/general.h
+source.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/findcmd.h
 source.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 source.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/maxpath.h
 source.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
@@ -386,6 +417,7 @@ test.o: $(topdir)/error.h $(topdir)/general.h
 test.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 test.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/maxpath.h
 test.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
+test.o: $(topdir)/test.h
 times.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
 times.o: $(topdir)/error.h $(topdir)/general.h
 times.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -396,7 +428,7 @@ trap.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/externs.h
 trap.o: $(topdir)/quit.h $(srcdir)/common.h $(topdir)/maxpath.h
 trap.o: $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h $(topdir)/subst.h
 trap.o: $(topdir)/shell.h $(topdir)/unwind_prot.h $(topdir)/variables.h
-trap.o: $(topdir)/execute_cmd.h
+trap.o: $(topdir)/findcmd.h
 type.o: $(topdir)/command.h ../config.h $(topdir)/memalloc.h
 type.o: $(topdir)/error.h $(topdir)/general.h
 type.o: $(topdir)/quit.h $(srcdir)/common.h $(topdir)/maxpath.h

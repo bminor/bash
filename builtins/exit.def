@@ -75,7 +75,7 @@ int
 logout_builtin (list)
      WORD_LIST *list;
 {
-  if (login_shell == 0 && interactive)
+  if (login_shell == 0 /* && interactive */)
     {
       builtin_error ("not login shell: use `exit'");
       return (EXECUTION_FAILURE);

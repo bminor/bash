@@ -31,7 +31,7 @@
 #include "bashansi.h"
 
 #include "shell.h"
-#include "execute_cmd.h"
+#include "findcmd.h"
 #include "hashcmd.h"
 
 extern int hashing_enabled;
@@ -148,9 +148,15 @@ find_hashed_filename (filename)
   if (pathdata(item)->flags & (HASH_CHKDOT|HASH_RELPATH))
     {
       tail = (pathdata(item)->flags & HASH_RELPATH) ? path : filename;
-      dotted_filename = xmalloc (3 + strlen (tail));
-      dotted_filename[0] = '.'; dotted_filename[1] = '/';
-      strcpy (dotted_filename + 2, tail);
+      /* If the pathname does not start with a `./', add a `./' to it. */
+      if (tail[0] != '.' || tail[1] != '/')
+	{
+	  dotted_filename = xmalloc (3 + strlen (tail));
+	  dotted_filename[0] = '.'; dotted_filename[1] = '/';
+	  strcpy (dotted_filename + 2, tail);
+	}
+      else
+	dotted_filename = savestring (tail);
 
       if (executable_file (dotted_filename))
 	return (dotted_filename);

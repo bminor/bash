@@ -22,7 +22,9 @@
 #include "config.h"
 
 #include "bashtypes.h"
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 #include "posixstat.h"
 
 #if defined (HAVE_UNISTD_H)
@@ -63,7 +65,9 @@ extern int errno;
 
 extern int interrupt_immediately;
 extern int interactive_comments;
-extern char *bash_getcwd_errstr;
+
+/* A standard error message to use when getcwd() returns NULL. */
+char *bash_getcwd_errstr = "getcwd: cannot access parent directories";
 
 /* Do whatever is necessary to initialize `Posix mode'. */
 void
@@ -71,68 +75,6 @@ posix_initialize (on)
      int on;
 {
   interactive_comments = on != 0;
-}
-
-/* **************************************************************** */
-/*								    */
-/*		     Integer to String Conversion		    */
-/*								    */
-/* **************************************************************** */
-
-/* Number of characters that can appear in a string representation
-   of an integer.  32 is larger than the string rep of 2^^31 - 1. */
-#define MAX_INT_LEN 32
-
-/* Integer to string conversion.  This conses the string; the
-   caller should free it. */
-char *
-itos (i)
-     int i;
-{
-  char buf[MAX_INT_LEN], *p, *ret;
-  int negative = 0;
-  unsigned int ui;
-
-  if (i < 0)
-    {
-      negative++;
-      i = -i;
-    }
-
-  ui = (unsigned int) i;
-
-  p = buf + MAX_INT_LEN - 2;
-  p[1] = '\0';
-
-  do
-    *p-- = (ui % 10) + '0';
-  while (ui /= 10);
-
-  if (negative)
-    *p-- = '-';
-
-  ret = savestring (p + 1);
-  return (ret);
-}
-
-/* atol(3) is not universal */
-long
-string_to_long (s)
-     char *s;
-{
-  long ret = 0L;
-  int neg = 0;
-
-  while (s && *s && whitespace (*s))
-    s++;
-  if (*s == '-' || *s == '+')
-    {
-      neg = *s == '-';
-      s++;
-    }
-  for ( ; s && *s && digit (*s); s++)
-    ret = (ret * 10) + digit_value (*s);
-  return (neg ? -ret : ret);
 }
 
 /* **************************************************************** */
@@ -146,9 +88,11 @@ RLIMTYPE
 string_to_rlimtype (s)
      char *s;
 {
-  RLIMTYPE ret = 0;
-  int neg = 0;
+  RLIMTYPE ret;
+  int neg;
 
+  ret = 0;
+  neg = 0;
   while (s && *s && whitespace (*s))
     s++;
   if (*s == '-' || *s == '+')
@@ -167,7 +111,7 @@ print_rlimtype (n, addnl)
      int addnl;
 {
   char s[sizeof (RLIMTYPE) * 3 + 1];
-  int len = sizeof (RLIMTYPE) * 3 + 1;
+  int len;
 
   if (n == 0)
     {
@@ -181,6 +125,7 @@ print_rlimtype (n, addnl)
       n = -n;
     }
 
+  len = sizeof (RLIMTYPE) * 3 + 1;
   s[--len] = '\0';
   for ( ; n != 0; n /= 10)
     s[--len] = n % 10 + '0';
@@ -295,53 +240,27 @@ legal_number (string, result)
      char *string;
      long *result;
 {
-  int sign;
   long value;
-
-  sign = 1;
-  value = 0;
+  char *ep;
 
   if (result)
     *result = 0;
 
-  /* Skip leading whitespace characters. */
-  while (whitespace (*string))
-    string++;
+  value = strtol (string, &ep, 10);
 
-  if (!*string)
-    return (0);
-
-  /* We allow leading `-' or `+'. */
-  if (*string == '-' || *string == '+')
-    {
-      if (!digit (string[1]))
-	return (0);
-
-      if (*string == '-')
-	sign = -1;
-
-      string++;
-    }
-
-  while (digit (*string))
+  /* If *string is not '\0' but *ep is '\0' on return, the entire string
+     is valid. */
+  if (string && *string && *ep == '\0')
     {
       if (result)
-	value = (value * 10) + digit_value (*string);
-      string++;
+	*result = value;
+      /* The SunOS4 implementation of strtol() will happily ignore
+	 overflow conditions, so this cannot do overflow correctly
+	 on those systems. */
+      return 1;
     }
-
-  /* Skip trailing whitespace, if any. */
-  while (whitespace (*string))
-    string++;
-
-  /* Error if not at end of string. */
-  if (*string)
-    return (0);
-
-  if (result)
-    *result = value * sign;
-
-  return (1);
+    
+  return (0);
 }
 
 /* Return 1 if this token is a legal shell `identifier'; that is, it consists
@@ -700,6 +619,13 @@ canonicalize_pathname (path)
       *result = stub_char;
       result[1] = '\0';
     }
+
+#if 1
+  /* Turn `//' into `/' -- XXX experimental */
+  if (result[0] == '/' && result[1] == '/' && result[2] == '\0')
+    result[1] = '\0';
+#endif
+
   return (result);
 }
 
@@ -911,9 +837,15 @@ extract_colon_unit (string, p_index)
 /*								    */
 /* **************************************************************** */
 
+#if defined (PUSHD_AND_POPD)
+extern char *get_dirstack_from_string __P((char *));
+#endif
+
 /* If tilde_expand hasn't been able to expand the text, perhaps it
    is a special shell expansion.  This function is installed as the
-   tilde_expansion_preexpansion_hook.  It knows how to expand ~- and ~+. */
+   tilde_expansion_preexpansion_hook.  It knows how to expand ~- and ~+.
+   If PUSHD_AND_POPD is defined, ~[+-]N expands to directories from the
+   directory stack. */
 static char *
 bash_special_tilde_expansions (text)
      char *text;
@@ -921,13 +853,15 @@ bash_special_tilde_expansions (text)
   char *result;
 
   result = (char *)NULL;
-  if (text[1] == '\0')
-    {
-      if (*text == '+')
-	result = get_string_value ("PWD");
-      else if (*text == '-')
-	result = get_string_value ("OLDPWD");
-    }
+
+  if (text[0] == '+' && text[1] == '\0')
+    result = get_string_value ("PWD");
+  else if (text[0] == '-' && text[1] == '\0')
+    result = get_string_value ("OLDPWD");
+#if defined (PUSHD_AND_POPD)
+  else if (isdigit (*text) || ((*text == '+' || *text == '-') && isdigit (text[1])))
+    result = get_dirstack_from_string (text);
+#endif
 
   return (result ? savestring (result) : (char *)NULL);
 }
@@ -946,7 +880,7 @@ tilde_initialize ()
   /* Tell the tilde expander about special strings which start a tilde
      expansion, and the special strings that end one.  Only do this once.
      tilde_initialize () is called from within bashline_reinitialize (). */
-  if (times_called == 0)
+  if (times_called++ == 0)
     {
       tilde_additional_prefixes = (char **)xmalloc (3 * sizeof (char *));
       tilde_additional_prefixes[0] = "=~";
@@ -958,7 +892,6 @@ tilde_initialize ()
       tilde_additional_suffixes[1] = "=~";
       tilde_additional_suffixes[2] = (char *)NULL;
     }
-  times_called++;
 }
 
 char *
@@ -1039,12 +972,31 @@ initialize_group_array ()
       group_array[0] = current_user.gid;
       ngroups++;
     }
+
+  /* If the primary group is not group_array[0], swap group_array[0] and
+     whatever the current group is.  The vast majority of systems should
+     not need this; a notable exception is Linux. */
+  if (group_array[0] != current_user.gid)
+    {
+      for (i = 0; i < ngroups; i++)
+        if (group_array[i] == current_user.gid)
+          break;
+      if (i < ngroups)
+	{
+	  group_array[i] = group_array[0];
+	  group_array[0] = current_user.gid;
+	}
+    }
 }
 
 /* Return non-zero if GID is one that we have in our groups list. */
 int
+#if defined (__STDC__) || defined ( _MINIX)
+group_member (gid_t gid)
+#else
 group_member (gid)
      gid_t gid;
+#endif /* !__STDC__ && !_MINIX */
 {
 #if defined (HAVE_GETGROUPS)
   register int i;

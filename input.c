@@ -21,7 +21,9 @@
 #include "config.h"
 
 #include "bashtypes.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 #include "filecntl.h"
 #include "posixstat.h"
 #include <stdio.h>
@@ -96,8 +98,6 @@ ungetc_with_restart (c, stream)
 #  define SEEK_CUR 1
 #endif /* !SEEK_CUR */
 
-void free_buffered_stream ();
-
 extern int return_EOF ();
 
 extern int interactive_shell;
@@ -109,7 +109,7 @@ int bash_input_fd_changed;
    way around.  This is needed so that buffers are managed properly
    in constructs like 3<&4.  buffers[x]->b_fd == x -- that is how the
    correspondence is maintained. */
-BUFFERED_STREAM **buffers = (BUFFERED_STREAM **)NULL;
+static BUFFERED_STREAM **buffers = (BUFFERED_STREAM **)NULL;
 static int nbuffers;
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
@@ -140,7 +140,7 @@ static BUFFERED_STREAM *
 make_buffered_stream (fd, buffer, bufsize)
      int fd;
      char *buffer;
-     int bufsize;
+     size_t bufsize;
 {
   BUFFERED_STREAM *bp;
 
@@ -269,7 +269,11 @@ duplicate_buffered_stream (fd1, fd2)
 }
 
 /* Return 1 if a seek on FD will succeed. */
-#define fd_is_seekable(fd) (lseek ((fd), 0L, SEEK_CUR) >= 0)
+#ifndef __CYGWIN32__
+#  define fd_is_seekable(fd) (lseek ((fd), 0L, SEEK_CUR) >= 0)
+#else
+#  define fd_is_seekable(fd) 0
+#endif /* __CYGWIN32__ */
 
 /* Take FD, a file descriptor, and create and return a buffered stream
    corresponding to it.  If something is wrong and the file descriptor
@@ -279,7 +283,7 @@ fd_to_buffered_stream (fd)
      int fd;
 {
   char *buffer;
-  int size;
+  size_t size;
   struct stat sb;
 
   if (fstat (fd, &sb) < 0)
@@ -291,8 +295,9 @@ fd_to_buffered_stream (fd)
   if (fd_is_seekable (fd) == 0)
     size = 1;
   else
-    size = (sb.st_size > MAX_INPUT_BUFFER_SIZE) ? MAX_INPUT_BUFFER_SIZE
-						: sb.st_size;
+    size = (size_t)((sb.st_size > MAX_INPUT_BUFFER_SIZE)
+				? MAX_INPUT_BUFFER_SIZE
+				: sb.st_size);
       
   buffer = (char *)xmalloc (size);
 
@@ -352,6 +357,20 @@ close_buffered_fd (fd)
   if (fd >= nbuffers || !buffers || !buffers[fd])
     return (close (fd));
   return (close_buffered_stream (buffers[fd]));
+}
+
+/* Make the BUFFERED_STREAM associcated with buffers[FD] be BP, and return
+   the old BUFFERED_STREAM. */
+BUFFERED_STREAM *
+set_buffered_stream (fd, bp)
+     int fd;
+     BUFFERED_STREAM *bp;
+{
+  BUFFERED_STREAM *ret;
+
+  ret = buffers[fd];
+  buffers[fd] = bp;
+  return ret;
 }
 
 /* Read a buffer full of characters from BP, a buffered stream. */

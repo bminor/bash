@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#include "bashtypes.h"
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -132,6 +134,29 @@ dispose_command (command)
 	break;
       }
 
+#if defined (DPAREN_ARITHMETIC)
+    case cm_arith:
+      {
+	register ARITH_COM *c;
+
+	c = command->value.Arith;
+	dispose_words (c->exp);
+	free (c);
+	break;
+      }
+#endif /* DPAREN_ARITHMETIC */
+
+#if defined (COND_COMMAND)
+    case cm_cond:
+      {
+	register COND_COM *c;
+
+	c = command->value.Cond;
+	dispose_cond_node (c);
+	break;
+      }
+#endif /* COND_COMMAND */
+
     case cm_function_def:
       {
 	register FUNCTION_DEF *c;
@@ -150,13 +175,32 @@ dispose_command (command)
   free (command);
 }
 
+#if defined (COND_COMMAND)
+/* How to free a node in a conditional command. */
+void
+dispose_cond_node (cond)
+     COND_COM *cond;
+{
+  if (cond)
+    {
+      if (cond->left)
+	dispose_cond_node (cond->left);
+      if (cond->right)
+	dispose_cond_node (cond->right);
+      if (cond->op)
+	dispose_word (cond->op);
+      free (cond);
+    }
+}
+#endif /* COND_COMMAND */
+
 /* How to free a WORD_DESC. */
 void
-dispose_word (word)
-     WORD_DESC *word;
+dispose_word (w)
+     WORD_DESC *w;
 {
-  FREE (word->word);
-  free (word);
+  FREE (w->word);
+  free (w);
 }
 
 /* How to get rid of a linked list of words.  A WORD_LIST. */

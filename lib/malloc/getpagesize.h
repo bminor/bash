@@ -16,6 +16,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #  if defined (_SC_PAGESIZE)
 #    define getpagesize() sysconf(_SC_PAGESIZE)
@@ -27,7 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #if !defined (getpagesize)
-#  include <sys/param.h>
+#  ifndef _MINIX
+#    include <sys/param.h>
+#  endif
 #  if defined (PAGESIZE)
 #     define getpagesize() PAGESIZE
 #  else /* !PAGESIZE */

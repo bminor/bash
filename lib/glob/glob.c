@@ -25,19 +25,28 @@
   #pragma alloca
 #endif /* _AIX && RISC6000 && !__GNUC__ */
 
+#if defined (SHELL)
+#  include "bashtypes.h"
+#else
+#  include <sys/types.h>
+#endif
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STDLIB_H)
-#  include <stdlib.h>
+#if defined (SHELL)
+#  include "bashansi.h"
 #else
-#  if defined (SHELL)
-#    include "ansi_stdlib.h"
-#  endif /* SHELL */
+#  if defined (HAVE_STDLIB_H)
+#    include <stdlib.h>
+#  endif
+#  if defined (HAVE_STRING_H)
+#    include <string.h>
+#  else /* !HAVE_STRING_H */
+#    include <strings.h>
+#  endif /* !HAVE_STRING_H */
 #endif
-
-#include <sys/types.h>
 
 #if defined (HAVE_DIRENT_H)
 #  include <dirent.h>
@@ -66,27 +75,25 @@
 #  define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* _POSIX_SOURCE */
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
-
 #if !defined (HAVE_BCOPY)
 #  define bcopy(s, d, n) ((void) memcpy ((d), (s), (n)))
 #endif /* !HAVE_BCOPY */
 
-/* If the opendir () on your system lets you open non-directory files,
-   then we consider that not robust. */
-#if defined (OPENDIR_NOT_ROBUST)
-#  if defined (SHELL)
-#    include "posixstat.h"
-#  else /* !SHELL */
-#    include <sys/stat.h>
-#  endif /* !SHELL */
-#endif /* OPENDIR_NOT_ROBUST */
+#if defined (SHELL)
+#  include "posixstat.h"
+#else /* !SHELL */
+#  include <sys/stat.h>
+#endif /* !SHELL */
 
-#include "memalloc.h"
+#include "filecntl.h"
+#if !defined (F_OK)
+#  define F_OK 0
+#endif
+
+#if defined (SHELL)
+#  include "memalloc.h"
+#endif
+
 #include "fnmatch.h"
 
 #if !defined (HAVE_STDLIB_H) && !defined (SHELL)
@@ -104,13 +111,19 @@ extern void free ();
 
 #if defined (SHELL)
 extern void throw_to_top_level ();
+extern int test_eaccess ();
 
 extern int interrupt_state;
+extern int extended_glob;
 #endif /* SHELL */
 
 /* Global variable which controls whether or not * matches .*.
    Non-zero means don't match .*.  */
 int noglob_dot_filenames = 1;
+
+/* Global variable which controls whether or not filename globbing
+   is done without regard to case. */
+int glob_ignore_case = 0;
 
 /* Global variable to return to signify an error in globbing. */
 char *glob_error_return;
@@ -120,9 +133,12 @@ int
 glob_pattern_p (pattern)
      char *pattern;
 {
-  register char *p = pattern;
+  register char *p;
   register char c;
-  int open = 0;
+  int bopen;
+
+  p = pattern;
+  bopen = 0;
 
   while ((c = *p++) != '\0')
     switch (c)
@@ -132,12 +148,19 @@ glob_pattern_p (pattern)
 	return (1);
 
       case '[':		/* Only accept an open brace if there is a close */
-	open++;		/* brace to match it.  Bracket expressions must be */
+	bopen++;	/* brace to match it.  Bracket expressions must be */
 	continue;	/* complete, according to Posix.2 */
       case ']':
-	if (open)
+	if (bopen)
 	  return (1);
 	continue;      
+
+      case '+':		/* extended matching operators */
+      case '@':
+      case '!':
+	if (*p == '(')	/*) */
+	  return (1);
+	continue;
 
       case '\\':
 	if (*p++ == '\0')
@@ -168,6 +191,35 @@ dequote_pathname (pathname)
 }
 
 
+
+/* Test whether NAME exists. */
+
+#if defined (HAVE_LSTAT)
+#  define GLOB_TESTNAME(name)  (lstat (name, &finfo))
+#else /* !HAVE_LSTAT */
+#  if defined (SHELL) && !defined (AFS)
+#    define GLOB_TESTNAME(name)  (test_eaccess (nextname, F_OK))
+#  else /* !SHELL || AFS */
+#    define GLOB_TESTNAME(name)  (access (nextname, F_OK))
+#  endif /* !SHELL || AFS */
+#endif /* !HAVE_LSTAT */
+
+/* Return 0 if DIR is a directory, -1 otherwise. */
+static int
+glob_testdir (dir)
+     char *dir;
+{
+  struct stat finfo;
+
+  if (stat (dir, &finfo) < 0)
+    return (-1);
+
+  if (S_ISDIR (finfo.st_mode) == 0)
+    return (-1);
+
+  return (0);
+}
+
 /* Return a vector of names of files in directory DIR
    whose names match glob pattern PAT.
    The names are not in any particular order.
@@ -204,103 +256,161 @@ glob_vector (pat, dir)
   int lose, skip;
   register char **name_vector;
   register unsigned int i;
-#if defined (OPENDIR_NOT_ROBUST)
-  struct stat finfo;
-
-  if (stat (dir, &finfo) < 0)
-    return ((char **) &glob_error_return);
-
-  if (!S_ISDIR (finfo.st_mode))
-    return ((char **) &glob_error_return);
-#endif /* OPENDIR_NOT_ROBUST */
-
-  d = opendir (dir);
-  if (d == NULL)
-    return ((char **) &glob_error_return);
+  int flags;		/* Flags passed to fnmatch (). */
 
   lastlink = 0;
-  count = 0;
-  lose = 0;
-  skip = 0;
+  count = lose = skip = 0;
 
   /* If PAT is empty, skip the loop, but return one (empty) filename. */
-  if (!pat || !*pat)
+  if (pat == 0 || *pat == '\0')
     {
+      if (glob_testdir (dir) < 0)
+	return ((char **) &glob_error_return);
+
       nextlink = (struct globval *)alloca (sizeof (struct globval));
-      nextlink->next = lastlink;
+      nextlink->next = (struct globval *)0;
       nextname = (char *) malloc (1);
-      if (!nextname)
+      if (nextname == 0)
 	lose = 1;
       else
 	{
 	  lastlink = nextlink;
 	  nextlink->name = nextname;
 	  nextname[0] = '\0';
-	  count++;
+	  count = 1;
 	}
+
       skip = 1;
     }
 
-  /* Scan the directory, finding all names that match.
-     For each name that matches, allocate a struct globval
-     on the stack and store the name in it.
-     Chain those structs together; lastlink is the front of the chain.  */
-  while (!skip)
+  /* If the filename pattern (PAT) does not contain any globbing characters,
+     we can dispense with reading the directory, and just see if there is
+     a filename `DIR/PAT'.  If there is, and we can access it, just make the
+     vector to return and bail immediately. */
+  if (skip == 0 && glob_pattern_p (pat) == 0)
     {
-      int flags;		/* Flags passed to fnmatch (). */
-#if defined (SHELL)
-      /* Make globbing interruptible in the bash shell. */
-      if (interrupt_state)
+      int dirlen;
+      struct stat finfo;
+
+      if (glob_testdir (dir) < 0)
+	return ((char **) &glob_error_return);
+
+      dirlen = strlen (dir);
+      nextname = (char *)malloc (dirlen + strlen (pat) + 2);
+      if (nextname == 0)
+	lose = 1;
+      else
 	{
-	  closedir (d);
-	  lose = 1;
-	  goto lost;
+	  strcpy (nextname, dir);
+	  nextname[dirlen++] = '/';
+	  strcpy (nextname + dirlen, pat);
+
+	  if (GLOB_TESTNAME (nextname) >= 0)
+	    {
+	      free (nextname);
+	      nextlink = (struct globval *)alloca (sizeof (struct globval));
+	      nextlink->next = (struct globval *)0;
+	      nextname = (char *) malloc (strlen (pat) + 1);
+	      if (nextname == 0)
+		lose = 1;
+	      else
+		{
+		  lastlink = nextlink;
+		  nextlink->name = nextname;
+		  strcpy (nextname, pat);
+		  count = 1;
+		}
+	    }
+	  else
+	    free (nextname);
 	}
-#endif /* SHELL */
-	  
-      dp = readdir (d);
-      if (dp == NULL)
-	break;
 
-      /* If this directory entry is not to be used, try again. */
-      if (!REAL_DIR_ENTRY (dp))
-	continue;
+      skip = 1;
+    }
 
-      /* If a dot must be explicity matched, check to see if they do. */
-      if (noglob_dot_filenames && dp->d_name[0] == '.' && pat[0] != '.' &&
-	    (pat[0] != '\\' || pat[1] != '.'))
-	continue;
+  if (skip == 0)
+    {
+      /* Open the directory, punting immediately if we cannot.  If opendir
+	 is not robust (i.e., it opens non-directories successfully), test
+	 that DIR is a directory and punt if it's not. */
+#if defined (OPENDIR_NOT_ROBUST)
+      if (glob_testdir (dir) < 0)
+	return ((char **) &glob_error_return);
+#endif
 
+      d = opendir (dir);
+      if (d == NULL)
+	return ((char **) &glob_error_return);
+
+      /* Compute the flags that will be passed to fnmatch().  We don't
+         need to do this every time through the loop. */
       flags = (noglob_dot_filenames ? FNM_PERIOD : 0) | FNM_PATHNAME;
 
-      if (fnmatch (pat, dp->d_name, flags) != FNM_NOMATCH)
+#ifdef FNM_CASEFOLD
+      if (glob_ignore_case)
+	flags |= FNM_CASEFOLD;
+#endif
+
+#ifdef SHELL
+      if (extended_glob)
+	flags |= FNM_EXTMATCH;
+#endif
+
+      /* Scan the directory, finding all names that match.
+	 For each name that matches, allocate a struct globval
+	 on the stack and store the name in it.
+	 Chain those structs together; lastlink is the front of the chain.  */
+      while (1)
 	{
-	  nextlink = (struct globval *) alloca (sizeof (struct globval));
-	  nextlink->next = lastlink;
-	  nextname = (char *) malloc (D_NAMLEN (dp) + 1);
-	  if (nextname == NULL)
+#if defined (SHELL)
+	  /* Make globbing interruptible in the shell. */
+	  if (interrupt_state)
 	    {
 	      lose = 1;
 	      break;
 	    }
-	  lastlink = nextlink;
-	  nextlink->name = nextname;
-	  bcopy (dp->d_name, nextname, D_NAMLEN (dp) + 1);
-	  ++count;
-	}
-    }
-  (void) closedir (d);
+#endif /* SHELL */
+	  
+	  dp = readdir (d);
+	  if (dp == NULL)
+	    break;
 
-  if (!lose)
+	  /* If this directory entry is not to be used, try again. */
+	  if (REAL_DIR_ENTRY (dp) == 0)
+	    continue;
+
+	  /* If a dot must be explicity matched, check to see if they do. */
+	  if (noglob_dot_filenames && dp->d_name[0] == '.' && pat[0] != '.' &&
+		(pat[0] != '\\' || pat[1] != '.'))
+	    continue;
+
+	  if (fnmatch (pat, dp->d_name, flags) != FNM_NOMATCH)
+	    {
+	      nextlink = (struct globval *) alloca (sizeof (struct globval));
+	      nextlink->next = lastlink;
+	      nextname = (char *) malloc (D_NAMLEN (dp) + 1);
+	      if (nextname == NULL)
+		{
+		  lose = 1;
+		  break;
+		}
+	      lastlink = nextlink;
+	      nextlink->name = nextname;
+	      bcopy (dp->d_name, nextname, D_NAMLEN (dp) + 1);
+	      ++count;
+	    }
+	}
+
+      (void) closedir (d);
+    }
+
+  if (lose == 0)
     {
       name_vector = (char **) malloc ((count + 1) * sizeof (char *));
       lose |= name_vector == NULL;
     }
 
   /* Have we run out of memory?	 */
-#if defined (SHELL)
- lost:
-#endif
   if (lose)
     {
       /* Here free the strings we have got.  */
@@ -313,7 +423,8 @@ glob_vector (pat, dir)
       if (interrupt_state)
 	throw_to_top_level ();
 #endif /* SHELL */
-      return (NULL);
+
+      return ((char **)NULL);
     }
 
   /* Copy the name pointers from the linked list into the vector.  */

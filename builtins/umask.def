@@ -23,19 +23,23 @@ $PRODUCES umask.c
 
 $BUILTIN umask
 $FUNCTION umask_builtin
-$SHORT_DOC umask [-S] [mode]
+$SHORT_DOC umask [-p] [-S] [mode]
 The user file-creation mask is set to MODE.  If MODE is omitted, or if
 `-S' is supplied, the current value of the mask is printed.  The `-S'
 option makes the output symbolic; otherwise an octal number is output.
-If MODE begins with a digit, it is interpreted as an octal number,
-otherwise it is a symbolic mode string like that accepted by chmod(1).
+If `-p' is supplied, and MODE is omitted, the output is in a form
+that may be used as input.  If MODE begins with a digit, it is
+interpreted as an octal number, otherwise it is a symbolic mode string
+like that accepted by chmod(1).
 $END
 
 #include <config.h>
 
 #include "../bashtypes.h"
 #include "../filecntl.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #include <unistd.h>
@@ -63,17 +67,20 @@ int
 umask_builtin (list)
      WORD_LIST *list;
 {
-  int print_symbolically, opt, umask_value;
+  int print_symbolically, opt, umask_value, pflag;
   mode_t umask_arg;
 
-  print_symbolically = 0;
+  print_symbolically = pflag = 0;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "S")) != -1)
+  while ((opt = internal_getopt (list, "Sp")) != -1)
     {
       switch (opt)
 	{
 	case 'S':
 	  print_symbolically++;
+	  break;
+	case 'p':
+	  pflag++;
 	  break;
 	default:
 	  builtin_usage ();
@@ -116,6 +123,8 @@ umask_builtin (list)
       umask_arg = umask (022);
       umask (umask_arg);
 
+      if (pflag)
+	printf ("umask%s ", (print_symbolically ? " -S" : ""));
       if (print_symbolically)
 	print_symbolic_umask (umask_arg);
       else

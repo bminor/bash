@@ -29,7 +29,10 @@ $END
 
 #include <config.h>
 #if defined (HAVE_UNISTD_H)
-#include <unistd.h>
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
+#  include <unistd.h>
 #endif
 
 #include "../shell.h"

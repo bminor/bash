@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 2.5, for Bash version 2.01.
+This is the Bash FAQ, version 2.11, for Bash version 2.02.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -13,7 +13,7 @@ chet@po.cwru.edu.
 
 This document is available for anonymous FTP with the URL
 
-ftp://slc2.ins.cwru.edu/pub/bash/FAQ
+ftp://ftp.cwru.edu/pub/bash/FAQ
 
 ----------
 Contents:
@@ -34,8 +34,8 @@ Section A:  The Basics
 
 Section B:  The latest version
 
-11) What's new in version 2.01?
-12) Are there any user-visible incompatibilities between bash-2.01 and
+11) What's new in version 2.02?
+12) Are there any user-visible incompatibilities between bash-2.02 and
     bash-1.14.7?
 
 Section C:  Differences from other Unix shells
@@ -120,23 +120,22 @@ of Case Western Reserve University.
 
 2)  What's the latest version?
 
-The latest version is 2.01, first made available on June 6, 1997.
+The latest version is 2.02, first made available on Monday, 20 April, 1998.
 
 3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, prep.ai.mit.edu, and its mirrors.  The
-latest version is also available for FTP from slc2.ins.cwru.edu,
-the maintainer's machine.  The following URLs tell how to get
-version 2.01:
+latest version is also available for FTP from ftp.cwru.edu.
+The following URLs tell how to get version 2.02:
 
-ftp://prep.ai.mit.edu/pub/gnu/bash-2.01.tar.gz
-ftp://slc2.ins.cwru.edu/pub/dist/bash-2.01.tar.gz
+ftp://prep.ai.mit.edu/pub/gnu/bash-2.02.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-2.02.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://prep.ai.mit.edu/pub/gnu/bash-doc-2.01.tar.gz
-ftp://slc2.ins.cwru.edu/pub/dist/bash-doc-2.01.tar.gz
+ftp://prep.ai.mit.edu/pub/gnu/bash-doc-2.02.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-2.02.tar.gz
 
 4)  On what machines will bash run?
 
@@ -162,8 +161,22 @@ project.  For more information about the project, look at the URL
 
 http://www.cygnus.com/misc/gnu-win32
 
-Cygnus has ported bash-1.14.7.  Maybe someday they (or I) will port
-bash-2.01 (or later) to the GNU-Win32 environment.
+Cygnus has ported bash-1.14.7, and their port is part of the current
+gnu-win32 release.  Cygnus has also done a port of bash-2.01 to the
+GNU-Win32 environment, and it should be available as part of their next
+release.
+
+Bash-2.02 should require no local Cygnus changes to build and run under
+GNU-WIN32.
+
+The Cygnus port works only on Intel machines.  There is a port of bash
+(I don't know which version) to the alpha/NT environment available from
+
+ftp://ftp.gnustep.org//pub/win32/bash-alpha-nt-1.01.tar.gz
+
+Softway Systems has ported bash-2.01.1 to their OpenNT system, a
+Unix subsystem for NT that replaces the Microsoft POSIX subsystem.
+Check out http://www.opennt.com for more information.
 
 D. J. Delorie has ported bash-1.14.7 to run under MS-DOS, as part of
 the DJGPP project.  For more information on the project, see
@@ -179,11 +192,13 @@ The corresponding source is
 
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh1147s.zip
 
-A port of bash-1.12 is available for OS/2 from
+Ports of bash-1.12 and bash-2.0 are available for OS/2 from
 
-ftp://hobbes.nmsu.edu/os2/unix/bash_112.zip
+ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash_112.zip
+ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash-2.0(253).zip
 
-I haven't looked at it.
+I haven't looked at either, but the second appears to be a binary-only
+distribution.  Beware.
 
 6) How can I build bash with gcc? 
 
@@ -193,11 +208,11 @@ file INSTALL in the distribution for more information.
 7)  How can I make bash my login shell?
 
 Some machines let you use `chsh' to change your login shell.  Other
-systems use `passwd -s'.  If one of these works for you, that's all
-you need.  Note that many systems require the full pathname to a shell
-to appear in /etc/shells before you can make it your login shell.  For
-this, you may need the assistance of your friendly local system
-administrator. 
+systems use `passwd -s' or `passwd -e'.  If one of these works for
+you, that's all you need.  Note that many systems require the full
+pathname to a shell to appear in /etc/shells before you can make it
+your login shell.  For this, you may need the assistance of your
+friendly local system administrator. 
 
 If you cannot do this, you can still use bash as your login shell, but
 you need to perform some tricks.  The basic idea is to add a command
@@ -298,15 +313,37 @@ Reference Manual.
 
 Section B:  The latest version
 
-11) What's new in version 2.01?
+11) What's new in version 2.02?
 
-Bash-2.01 contains only a few new features.
+Bash-2.02 has a number of new features.  Here's a short list:
+
+a new version of malloc (based on the old GNU malloc code in previous
+	bash versions) that is more page-oriented, more conservative
+	with memory usage, does not `orphan' large blocks when they
+	are freed, is usable on 64-bit machines, and has allocation
+	checking turned on unconditionally
+POSIX.2-style globbing character classes ([:alpha:], [:alnum:], etc.)
+POSIX.2-style globbing equivalence classes
+POSIX.2-style globbing collating symbols
+the ksh [[...]] extended conditional command
+the ksh egrep-style extended pattern matching operators
+a new `printf' builtin
+the ksh-like $(<filename) command substitution, which is equivalent to
+	$(cat filename)
+new tilde prefixes that expand to directories from the directory stack
+new `**' arithmetic operator to do exponentiation
+case-insensitive globbing (filename expansion)
+menu completion a la tcsh
+`magic-space' history expansion function like tcsh
+the readline inputrc `language' has a new file inclusion directive ($include)
+
+Bash-2.01 contained only a few new features:
 
 new `GROUPS' builtin array variable containing the user's group list
 new bindable readline commands: history-and-alias-expand-line and
 	alias-expand-line
 
-Bash-2.0 contains extensive changes and new features from bash-1.14.7.
+Bash-2.0 contained extensive changes and new features from bash-1.14.7.
 Here's a short list:
 
 new `time' reserved word to time pipelines, shell builtins, and
@@ -344,11 +381,11 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-12) Are there any user-visible incompatibilities between bash-2.01 and
+12) Are there any user-visible incompatibilities between bash-2.02 and
     bash-1.14.7?
 
-There are a few incompatibilities between version 1.14.7 and version 2.01.
-They are detailed in the file COMPAT in the bash-2.01 distribution.
+There are a few incompatibilities between version 1.14.7 and version 2.02.
+They are detailed in the file COMPAT in the bash-2.02 distribution.
 
 Section C:  Differences from other Unix shells
 
@@ -494,7 +531,7 @@ Implementation differences:
 
 15)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-2.01:
+New things in ksh-93 not in bash-2.02:
 	associative arrays
 	floating point arithmetic
 	++, --, comma arithmetic operators
@@ -510,12 +547,12 @@ New things in ksh-93 not in bash-2.01:
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, HISTEDIT,
 		   .sh.version, .sh.name, .sh.subscript, .sh.value
 	backreferences in pattern matching
-	print -f and printf (bash has loadable versions)
+	print -f (bash has a loadable version)
 	`fc' has been renamed to `hist'
 	read -t/-d
 	`.' can execute shell functions
 
-New things in ksh-93 present in bash-2.01:
+New things in ksh-93 present in bash-2.02:
 	?: arithmetic operator
 	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]}
 	compound array assignment
@@ -808,7 +845,7 @@ and the \] escape to signal the end of such a sequence.
 27) How can I find the value of a shell variable whose name is the value
     of another shell variable?
 
-Bash-2.01 supports this directly.  You can use 
+Bash-2.02 supports this directly.  You can use 
 
 	${!var}
 
@@ -830,7 +867,7 @@ parameter:
 
 The expansion of the quoted portions of this expression will be
 deferred until `eval' runs, while the `$#' will be expanded
-before `eval' is executed.  In bash-2.01,
+before `eval' is executed.  In bash-2.02,
 
 	echo ${!#}
 
@@ -1055,7 +1092,7 @@ is, in fact, a syntax error.  Redirections may only precede `simple
 commands'.  A subshell construct such as the above is one of the shell's
 `compound commands'.  A redirection may only follow a compound command.
 
-The file CWRU/sh-redir-hack in the bash-2.01 distribution is an
+The file CWRU/sh-redir-hack in the bash-2.02 distribution is an
 (unofficial) patch to parse.y that will modify the grammar to
 support this construct.  It will not apply with `patch'; you must
 modify parse.y by hand.  Note that if you apply this, you must
@@ -1100,34 +1137,30 @@ Postscript files created from the above source are available in
 the documentation distribution.
 
 There is additional documentation available for anonymous FTP from host
-slc2.ins.cwru.edu in the `pub/bash' directory.
+ftp.cwru.edu in the `pub/bash' directory.
 
 Cameron Newham and Bill Rosenblatt have written a book on bash, published
 by O'Reilly and Associates.  The book is based on Bill Rosenblatt's Korn
 Shell book.  The title is ``Learning the Bash Shell'', and the ISBN number
 is 1-56592-147-X.  Look for it in fine bookstores near you.  This book
 covers bash-1.14, but has an appendix describing some of the new features
-in bash-2.0.  There are rumors of a second edition of this book, describing
-bash-2.0 (and 2.01).  I do not know what ORA's publication schedule for
-this edition is.
+in bash-2.0.  
+
+A second edition of this book is available, just published in January, 1998.
+The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
+or on the web.
 
 39) What's coming in future versions?
 
 These are features I plan to include in a future version of bash.
 
-POSIX.2-style globbing character classes ([:alpha:], [:alnum:], etc.)
-POSIX.2-style globbing equivalence classes
-POSIX.2-style globbing collating symbols
-a bash debugger (a minimally-tested version is included with bash-2.01)
+a bash debugger (a minimally-tested version is included with bash-2.02)
+Programmable completion a la zsh
 
 40) What's on the bash `wish list' for future versions?
 
 These are features that may or may not appear in a future version of bash.
 
-Programmable completion a la zsh
-menu completion a la tcsh
-the ksh [[...]] extended test command
-the ksh egrep-style extended pattern matching operators
 associative arrays (not really all that hard)
 breaking some of the shell functionality into embeddable libraries
 better internationalization using GNU `gettext'
@@ -1135,13 +1168,15 @@ an option to use external files for the long `help' text
 timeouts for the `read' builtin
 the ksh-93 ${!prefix*} and ${!prefix@} operators
 arithmetic ++ and -- prefix and postfix operators
+date-stamped command history
 
 41) When will the next release appear?
 
-The next version will appear sometime in 1997.  Never make predictions.
+The next version will appear sometime in 1998.  Never make
+predictions. 
 
 
-This document is Copyright 1995, 1996 by Chester Ramey.
+This document is Copyright 1995, 1996, 1998 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

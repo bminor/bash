@@ -43,6 +43,9 @@ $END
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -395,11 +398,13 @@ bind_read_variable (name, value)
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
     {
+#if 0
       if (legal_identifier (name) == 0)
         {
 	  builtin_error ("`%s': not a valid identifier", name);
 	  return ((SHELL_VAR *)NULL);
         }
+#endif
       return (bind_variable (name, value));
     }
   else

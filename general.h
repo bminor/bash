@@ -25,6 +25,13 @@
 
 #include "bashtypes.h"
 
+#if defined (HAVE_SYS_RESOURCE_H) && defined (RLIMTYPE)
+#  if defined (HAVE_SYS_TIME_H)
+#    include <sys/time.h>
+#  endif
+#  include <sys/resource.h>
+#endif
+
 #if defined (HAVE_STRING_H)
 #  include <string.h>
 #else
@@ -131,7 +138,7 @@ typedef struct {
 /* More convenience definitions that possibly save system or libc calls. */
 #define STRLEN(s) (((s) && (s)[0]) ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
 #define FREE(s)  do { if (s) free (s); } while (0)
-#define MEMBER(c, s) (((c) && !(s)[1] && c == s[0]) || (member(c, s)))
+#define MEMBER(c, s) (((c) && c == (s)[0] && !(s)[1]) || (member(c, s)))
 
 /* A fairly hairy macro to check whether an allocated string has more room,
    and to resize it using xrealloc if it does not.
@@ -178,9 +185,6 @@ extern void xfree __P((char *));
 /* Declarations for functions defined in general.c */
 extern void posix_initialize __P((int));
 
-extern char *itos __P((int));
-extern long string_to_long __P((char *));
-
 #if defined (RLIMTYPE)
 extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));
@@ -215,11 +219,7 @@ extern char *extract_colon_unit __P((char *, int *));
 extern void tilde_initialize __P((void));
 extern char *bash_tilde_expand __P((char *));
 
-#if defined (__STDC__) && defined (gid_t)
-extern int group_member __P((int));
-#else
 extern int group_member __P((gid_t));
-#endif
 extern char **get_group_list __P((int *));
 
 #endif	/* _GENERAL_H_ */

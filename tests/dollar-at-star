@@ -1,0 +1,119 @@
+# first, let's start with the basics
+
+recho "$@"
+recho "$*"
+
+recho $@
+recho $*
+
+set a b
+
+recho "$*"
+
+# If IFS is null, the parameters are joined without separators
+IFS=''
+recho "$*"
+
+# If IFS is unset, the parameters are separated by spaces
+unset IFS
+recho "${*}"
+
+recho "$@"
+recho $@
+
+IFS='/'
+set bob 'tom dick harry' joe
+set $*
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set ${*}
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set $@
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set ${@}
+recho $#
+recho $1
+recho $2
+recho $3
+
+# according to POSIX.2, unquoted $* should expand to multiple words if
+# $IFS is null, just like unquoted $@
+IFS=''
+set bob 'tom dick harry' joe
+set $*
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set $@
+recho $#
+recho $1
+recho $2
+recho $3
+
+# if IFS is unset, the individual positional parameters are split on
+# " \t\n" if $* or $@ are unquoted
+unset IFS
+set bob 'tom dick harry' joe
+set $*
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set $@  
+recho $#                                              
+recho $1
+recho $2
+recho $3
+
+# but not for "$@" or "$*"
+set bob 'tom dick harry' joe
+set "$*"
+recho $#
+recho $1
+recho $2
+recho $3
+
+set bob 'tom dick harry' joe
+set "$@"
+recho $#
+recho $1
+recho $2
+recho $3
+
+# POSIX.2 says these should both expand the positional parameters
+# to multiple words
+set a b c d e
+IFS=""
+recho $@
+recho "$@"
+
+# this example is straight from the POSIX.2 rationale
+set foo bar bam
+
+recho "$@"
+recho "$*"
+
+unset IFS
+
+recho "$@"
+recho $@
+recho "$*"

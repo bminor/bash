@@ -27,17 +27,17 @@ typedef struct variable {
   struct variable *prev_context; /* Value from previous context or NULL. */
 } SHELL_VAR;
 
-/* The various attributes that a given variable can have.
-   We only reserve one byte of the INT. */
-#define att_exported  0x01	/* export to environment */
-#define att_readonly  0x02	/* cannot change */
-#define att_invisible 0x04	/* cannot see */
-#define att_array     0x08	/* value is an array */
-#define att_nounset   0x10	/* cannot unset */
-#define att_function  0x20	/* value is a function */
-#define att_integer   0x40	/* internal representation is int */
-#define att_imported  0x80	/* came from environment */
+/* The various attributes that a given variable can have. */
+#define att_exported  0x001	/* export to environment */
+#define att_readonly  0x002	/* cannot change */
+#define att_invisible 0x004	/* cannot see */
+#define att_array     0x008	/* value is an array */
+#define att_nounset   0x010	/* cannot unset */
+#define att_function  0x020	/* value is a function */
+#define att_integer   0x040	/* internal representation is int */
+#define att_imported  0x080	/* came from environment */
 #define att_local     0x100	/* variable is local to a function */
+#define att_tempvar   0x200	/* variable came from the temp environment */
 
 #define exported_p(var)		((((var)->attributes) & (att_exported)))
 #define readonly_p(var)		((((var)->attributes) & (att_readonly)))
@@ -48,6 +48,7 @@ typedef struct variable {
 #define integer_p(var)		((((var)->attributes) & (att_integer)))
 #define imported_p(var)         ((((var)->attributes) & (att_imported)))
 #define local_p(var)		((((var)->attributes) & (att_local)))
+#define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
 
 #define value_cell(var) ((var)->value)
 #define function_cell(var) (COMMAND *)((var)->value)
@@ -131,6 +132,34 @@ extern SHELL_VAR *assign_array_var_from_string __P((SHELL_VAR *, char *));
 extern int unbind_array_element __P((SHELL_VAR *, char *));
 extern int skipsubscript __P((char *, int));
 extern void print_array_assignment __P((SHELL_VAR *, int));
+
+extern void set_pipestatus_array __P((int *));
 #endif
+
+extern void set_pipestatus_from_exit __P((int));
+
+/* The variable in NAME has just had its state changed.  Check to see if it
+   is one of the special ones where something special happens. */
+extern void stupidly_hack_special_variables __P((char *));
+
+/* The `special variable' functions that get called when a particular
+   variable is set. */
+void sv_path (), sv_mail (), sv_ignoreeof (), sv_strict_posix ();
+void sv_optind (), sv_opterr (), sv_globignore (), sv_locale ();
+
+#if defined (READLINE)
+void sv_terminal (), sv_hostfile ();
+#endif
+
+#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+void sv_tz ();
+#endif
+
+#if defined (HISTORY)
+void sv_histsize (), sv_histignore (), sv_history_control ();
+#  if defined (BANG_HISTORY)
+void sv_histchars ();
+#  endif
+#endif /* HISTORY */
 
 #endif /* !_VARIABLES_H_ */

@@ -21,10 +21,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <config.h>
 
 /* Get the O_* definitions for open et al.  */
+#ifndef _MINIX
 #include <sys/file.h>
-#ifdef USG5
-#include <fcntl.h>
 #endif
+
+#include <fcntl.h>
 
 #else /* not HAVE_CONFIG_H */
 
@@ -777,4 +778,3 @@ tprint (cap)
 }
 
 #endif /* TEST */
-

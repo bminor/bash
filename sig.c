@@ -23,6 +23,9 @@
 #include "bashtypes.h"
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -229,10 +232,10 @@ initialize_terminating_signals ()
 	  sigaction (XSIG (i), &oact, &act);
 	  set_signal_ignored (XSIG (i));
         }
-#if defined (SIGPROF)
+#if defined (SIGPROF) && !defined (_MINIX)
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
         sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
-#endif /* SIGPROF */
+#endif /* SIGPROF && !_MINIX */
     }
 
 #else /* !HAVE_POSIX_SIGNALS */
@@ -247,8 +250,10 @@ initialize_terminating_signals ()
           signal (XSIG (i), SIG_IGN);
           set_signal_ignored (XSIG (i));
 	}
+#ifdef SIGPROF
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
         signal (XSIG (i), XHANDLER (i));
+#endif
     }
 
 #endif /* !HAVE_POSIX_SIGNALS */

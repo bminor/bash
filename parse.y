@@ -64,15 +64,24 @@
 #endif /* ALIAS */
 
 #if defined (PROMPT_STRING_DECODE)
-#include <sys/param.h>
-#include <time.h>
-#include "maxpath.h"
+#  ifndef _MINIX
+#    include <sys/param.h>
+#  endif
+#  include <time.h>
+#  include "maxpath.h"
 #endif /* PROMPT_STRING_DECODE */
 
 #define RE_READ_TOKEN	-99
 #define NO_EXPANSION	-100
 
 #define YYDEBUG 0
+
+#if defined (EXTENDED_GLOB)
+#define PATTERN_CHAR(c) \
+	((c) == '@' || (c) == '*' || (c) == '+' || (c) == '?' || (c) == '!')
+
+extern int extended_glob;
+#endif
 
 extern int eof_encountered;
 extern int no_line_editing, running_under_emacs;
@@ -85,7 +94,7 @@ extern int interrupt_immediately;
 extern char *shell_name, *current_host_name;
 extern char *dist_version;
 extern int patch_level;
-extern int dump_translatable_strings;
+extern int dump_translatable_strings, dump_po_strings;
 extern Function *last_shell_builtin, *this_shell_builtin;
 #if defined (BUFFERED_INPUT)
 extern int bash_input_fd_changed;
@@ -103,6 +112,9 @@ static int reserved_word_acceptable ();
 static int read_token ();
 static int yylex ();
 static int parse_arith_cmd ();
+#if defined (COND_COMMAND)
+static COMMAND *parse_cond_command ();
+#endif
 static int read_token_word ();
 static void discard_parser_constructs ();
 
@@ -180,13 +192,17 @@ static REDIRECTEE redir;
 
 /* Reserved words.  Members of the first group are only recognized
    in the case that they are preceded by a list_terminator.  Members
-   of the second group are recognized only under special circumstances. */
+   of the second group are for [[...]] commands.  Members of the
+   third group are recognized only under special circumstances. */
 %token IF THEN ELSE ELIF FI CASE ESAC FOR SELECT WHILE UNTIL DO DONE FUNCTION
-%token IN BANG TIME TIMEOPT
+%token COND_START COND_END COND_ERROR
+%token IN BANG TIME TIMEOPT 
 
 /* More general tokens. yylex () knows how to make these. */
 %token <word> WORD ASSIGNMENT_WORD
 %token <number> NUMBER
+%token <word_list> ARITH_CMD
+%token <command> COND_CMD
 %token AND_AND OR_OR GREATER_GREATER LESS_LESS LESS_AND
 %token GREATER_AND SEMI_SEMI LESS_LESS_MINUS AND_GREATER LESS_GREATER
 %token GREATER_BAR
@@ -197,6 +213,8 @@ static REDIRECTEE redir;
 %type <command> list list0 list1 compound_list simple_list simple_list1
 %type <command> simple_command shell_command
 %type <command> for_command select_command case_command group_command
+%type <command> arith_command
+%type <command> cond_command
 %type <command> function_def if_command elif_clause subshell
 %type <redirect> redirection redirection_list
 %type <element> simple_command_element
@@ -479,6 +497,10 @@ shell_command:	for_command
 			{ $$ = $1; }
 	|	group_command
 			{ $$ = $1; }
+	|	arith_command
+			{ $$ = $1; }
+	|	cond_command
+			{ $$ = $1; }
 	|	function_def
 			{ $$ = $1; }
 	;
@@ -558,6 +580,14 @@ if_command:	IF compound_list THEN compound_list FI
 group_command:	'{' list '}'
 			{ $$ = make_group_command ($2); }
 	;
+
+arith_command:	ARITH_CMD
+			{ $$ = make_arith_command ($1); }
+	;
+
+cond_command:	COND_START COND_CMD COND_END
+			{ $$ = $2; }
+	; 
 
 elif_clause:	ELIF compound_list THEN compound_list
 			{ $$ = make_if_command ($2, $4, (COMMAND *)NULL); }
@@ -747,6 +777,8 @@ timespec:	TIME
 #define PST_SUBSHELL	0x020		/* ( ... ) subshell */
 #define PST_CMDSUBST	0x040		/* $( ... ) command substitution */
 #define PST_CASESTMT	0x080		/* parsing a case statement */
+#define PST_CONDCMD	0x100		/* parsing a [[...]] command */
+#define PST_CONDEXPR	0x200		/* parsing the guts of [[...]] */
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
@@ -1084,6 +1116,11 @@ typedef struct stream_saver {
 /* The globally known line number. */
 int line_number = 0;
 
+#if defined (COND_COMMAND)
+static int cond_lineno;
+static int cond_token;
+#endif
+
 STREAM_SAVER *stream_list = (STREAM_SAVER *)NULL;
 
 void
@@ -1098,10 +1135,8 @@ push_stream (reset_lineno)
   saver->bstream = (BUFFERED_STREAM *)NULL;
   /* If we have a buffered stream, clear out buffers[fd]. */
   if (bash_input.type == st_bstream && bash_input.location.buffered_fd >= 0)
-    {
-      saver->bstream = buffers[bash_input.location.buffered_fd];
-      buffers[bash_input.location.buffered_fd] = (BUFFERED_STREAM *)NULL;
-    }
+    saver->bstream = set_buffered_stream (bash_input.location.buffered_fd,
+    					  (BUFFERED_STREAM *)NULL);
 #endif /* BUFFERED_INPUT */
 
   saver->line = line_number;
@@ -1147,7 +1182,7 @@ pop_stream ()
 		  saver->bstream->b_fd = default_buffered_input;
 		}
 	    }
-	  buffers[bash_input.location.buffered_fd] = saver->bstream;
+	  set_buffered_stream (bash_input.location.buffered_fd, saver->bstream);
         }
 #endif /* BUFFERED_INPUT */
 
@@ -1180,7 +1215,11 @@ stream_on_stack (type)
  *	everything between a `;;' and the next `)' or `esac'
  */
 
-#if defined (ALIAS)
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+
+#if !defined (ALIAS)
+typedef void *alias_t;
+#endif
 
 #define END_OF_ALIAS 0
 
@@ -1197,7 +1236,9 @@ typedef struct string_saver {
   struct string_saver *next;
   int expand_alias;  /* Value to set expand_alias to when string is popped. */
   char *saved_line;
+#if defined (ALIAS)
   alias_t *expander;   /* alias that caused this line to be pushed. */
+#endif
   int saved_line_size, saved_line_index, saved_line_terminator;
 } STRING_SAVER;
 
@@ -1224,12 +1265,16 @@ push_string (s, expand, ap)
   temp->saved_line_size = shell_input_line_size;
   temp->saved_line_index = shell_input_line_index;
   temp->saved_line_terminator = shell_input_line_terminator;
+#if defined (ALIAS)
   temp->expander = ap;
+#endif
   temp->next = pushed_string_list;
   pushed_string_list = temp;
 
+#if defined (ALIAS)
   if (ap)
     ap->flags |= AL_BEINGEXPANDED;
+#endif
 
   shell_input_line = s;
   shell_input_line_size = strlen (s);
@@ -1263,8 +1308,10 @@ pop_string ()
   t = pushed_string_list;
   pushed_string_list = pushed_string_list->next;
 
+#if defined (ALIAS)
   if (t->expander)
     t->expander->flags &= ~AL_BEINGEXPANDED;
+#endif
 
   free ((char *)t);
 }
@@ -1278,14 +1325,17 @@ free_string_list ()
     {
       t1 = t->next;
       FREE (t->saved_line);
-      t->expander->flags &= ~AL_BEINGEXPANDED;
+#if defined (ALIAS)
+      if (t->expander)
+	t->expander->flags &= ~AL_BEINGEXPANDED;
+#endif
       free ((char *)t);
       t = t1;
     }
   pushed_string_list = (STRING_SAVER *)NULL;
 }
 
-#endif /* ALIAS */
+#endif /* ALIAS || DPAREN_ARITHMETIC */
 
 /* Return a line of text, taken from wherever yylex () reads input.
    If there is no more input, then we return NULL.  If REMOVE_QUOTED_NEWLINE
@@ -1410,6 +1460,10 @@ STRING_INT_ALIST word_token_alist[] = {
   { "{", '{' },
   { "}", '}' },
   { "!", BANG },
+#if defined (COND_COMMAND)
+  { "[[", COND_START },
+  { "]]", COND_END },
+#endif
   { (char *)NULL, 0}
 };
 
@@ -1457,16 +1511,16 @@ shell_getc (remove_quoted_newline)
 
   QUIT;
 
-#if defined (ALIAS)
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If shell_input_line[shell_input_line_index] == 0, but there is
      something on the pushed list of strings, then we don't want to go
      off and get another line.  We let the code down below handle it. */
 
   if (!shell_input_line || ((!shell_input_line[shell_input_line_index]) &&
 			    (pushed_string_list == (STRING_SAVER *)NULL)))
-#else /* !ALIAS */
+#else /* !ALIAS && !DPAREN_ARITHMETIC */
   if (!shell_input_line || !shell_input_line[shell_input_line_index])
-#endif /* !ALIAS */
+#endif /* !ALIAS && !DPAREN_ARITHMETIC */
     {
       line_number++;
 
@@ -1617,7 +1671,7 @@ shell_getc (remove_quoted_newline)
 	goto restart_read;
     }
 
-#if defined (ALIAS)
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If C is NULL, we have reached the end of the current input string.  If
      pushed_string_list is non-empty, it's time to pop to the previous string
      because we have fully consumed the result of the last alias expansion.
@@ -1639,7 +1693,7 @@ shell_getc (remove_quoted_newline)
           c = ' ';
         }
     }
-#endif /* ALIAS */
+#endif /* ALIAS || DPAREN_ARITHMETIC */
 
   if (!c && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);
@@ -1790,10 +1844,16 @@ static int open_brace_count;
 	    { \
 	      if ((parser_state & PST_CASEPAT) && (word_token_alist[i].token != ESAC)) \
 		break; \
+	      if (word_token_alist[i].token == TIME) \
+		break; \
 	      if (word_token_alist[i].token == ESAC) \
 		parser_state &= ~(PST_CASEPAT|PST_CASESTMT); \
 	      else if (word_token_alist[i].token == CASE) \
 		parser_state |= PST_CASESTMT; \
+	      else if (word_token_alist[i].token == COND_END) \
+		parser_state &= ~(PST_CONDCMD|PST_CONDEXPR); \
+	      else if (word_token_alist[i].token == COND_START) \
+		parser_state |= PST_CONDCMD; \
 	      else if (word_token_alist[i].token == '{') \
 		open_brace_count++; \
 	      else if (word_token_alist[i].token == '}' && open_brace_count) \
@@ -1847,6 +1907,27 @@ alias_expand_token (token)
 }
 #endif /* ALIAS */
 
+static int
+time_command_acceptable ()
+{
+#if defined (COMMAND_TIMING)
+  switch (last_read_token)
+    {
+    case 0:
+    case ';':
+    case '\n':
+    case AND_AND:
+    case OR_OR:
+    case '&':
+      return 1;
+    default:
+      return 0;
+    }
+#else
+  return 0;
+#endif /* COMMAND_TIMING */
+}
+
 /* Handle special cases of token recognition:
 	IN is recognized if the last token was WORD and the token
 	before that was FOR or CASE or SELECT.
@@ -1861,6 +1942,14 @@ alias_expand_token (token)
 	before that was FUNCTION.
 
 	`}' is recognized if there is an unclosed `{' prsent.
+
+	`-p' is returned as TIMEOPT if the last read token was TIME.
+
+	']]' is returned as COND_END if the parser is currently parsing
+	a conditional expression ((parser_state & PST_CONDEXPR) != 0)
+
+	`time' is returned as TIME if and only if it is immediately
+	preceded by one of `;', `\n', `||', `&&', or `&'.
 */
 
 static int
@@ -1926,9 +2015,21 @@ special_case_tokens (token)
       return ('}');
     }
 
+#if defined (COMMAND_TIMING)
   /* Handle -p after `time'. */
   if (last_read_token == TIME && token[0] == '-' && token[1] == 'p' && !token[2])
     return (TIMEOPT);
+#endif
+
+#if defined (COMMAND_TIMING)
+  if (STREQ (token, "time") && time_command_acceptable ())
+    return (TIME);
+#endif /* COMMAND_TIMING */
+
+#if defined (COND_COMMAND) /* [[ */
+  if ((parser_state & PST_CONDEXPR) && token[0] == ']' && token[1] == ']' && token[2] == '\0')
+    return (COND_END);
+#endif
 
   return (-1);
 }
@@ -1943,13 +2044,10 @@ reset_parser ()
 
   parser_state = 0;
 
-#if defined (ALIAS)
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   if (pushed_string_list)
-    {
-      free_string_list ();
-      pushed_string_list = (STRING_SAVER *)NULL;
-    }
-#endif /* ALIAS */
+    free_string_list ();
+#endif /* ALIAS || DPAREN_ARITHMETIC */
 
   if (shell_input_line)
     {
@@ -1992,6 +2090,26 @@ read_token (command)
       token_to_read = 0;
       return (result);
     }
+
+#if defined (COND_COMMAND)
+  if ((parser_state & (PST_CONDCMD|PST_CONDEXPR)) == PST_CONDCMD)
+    {
+      cond_lineno = line_number;
+      parser_state |= PST_CONDEXPR;
+      yylval.command = parse_cond_command ();
+      if (cond_token != COND_END)
+	{
+	  if (EOF_Reached && cond_token != COND_ERROR)		/* [[ */
+	    parser_error (cond_lineno, "unexpected EOF while looking for `]]'");
+	  else if (cond_token != COND_ERROR)
+	    parser_error (cond_lineno, "syntax error in conditional expression");
+	  return (-1);
+	}
+      token_to_read = COND_END;
+      parser_state &= ~(PST_CONDEXPR|PST_CONDCMD);
+      return (COND_CMD);
+    }
+#endif
 
 #if defined (ALIAS)
   /* This is a place to jump back to once we have successfully expanded a
@@ -2080,17 +2198,17 @@ read_token (command)
 		{
 		  int cmdtyp, sline;
 		  char *wval;
+		  WORD_DESC *wd;
 
 		  sline = line_number;
 		  cmdtyp = parse_arith_cmd (&wval);
 		  if (cmdtyp == 1)	/* arithmetic command */
 		    {
-		      word_desc_to_read = make_word (wval);
-		      word_desc_to_read->flags = W_QUOTED;
-		      token_to_read = WORD;
-		      free (wval);
-		      yylval.word = make_word ("let");
-		      return (WORD);
+		      wd = make_word (wval);
+		      wd->flags = W_QUOTED;
+		      yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
+		      free (wval);	/* make_word copies it */
+		      return (ARITH_CMD);
 		    }
 		  else if (cmdtyp == 0)	/* nested subshell */
 		    {
@@ -2362,6 +2480,175 @@ parse_arith_cmd (ep)
 }
 #endif /* DPAREN_ARITHMETIC */
 
+#if defined (COND_COMMAND)
+static COND_COM *cond_term ();
+static COND_COM *cond_and ();
+static COND_COM *cond_or ();
+static COND_COM *cond_expr ();
+
+static COND_COM *
+cond_expr ()
+{
+  return (cond_or ());  
+}
+
+static COND_COM *
+cond_or ()
+{
+  COND_COM *l, *r;
+
+  l = cond_and ();
+  if (cond_token == OR_OR)
+    {
+      r = cond_or ();
+      l = make_cond_node (COND_OR, (WORD_DESC *)NULL, l, r);
+    }
+  return l;
+}
+
+static COND_COM *
+cond_and ()
+{
+  COND_COM *l, *r;
+
+  l = cond_term ();
+  if (cond_token == AND_AND)
+    {
+      r = cond_and ();
+      l = make_cond_node (COND_AND, (WORD_DESC *)NULL, l, r);
+    }
+  return l;
+}
+
+static int
+cond_skip_newlines ()
+{
+  while ((cond_token = read_token (READ)) == '\n')
+    {
+      if (interactive && (bash_input.type == st_stdin || bash_input.type == st_stream))
+	prompt_again ();
+    }
+  return (cond_token);
+}
+
+#define COND_RETURN_ERROR() \
+  do { cond_token = COND_ERROR; return ((COND_COM *)NULL); } while (0)
+
+static COND_COM *
+cond_term ()
+{
+  WORD_DESC *op;
+  COND_COM *term, *tleft, *tright;
+  int tok, lineno;
+
+  /* Read a token.  It can be a left paren, a `!', a unary operator, or a
+     word that should be the first argument of a binary operator.  Start by
+     skipping newlines, since this is a compound command. */
+  tok = cond_skip_newlines ();
+  lineno = line_number;
+  if (tok == COND_END)
+    {
+      COND_RETURN_ERROR ();
+    }
+  else if (tok == '(')
+    {
+      term = cond_expr ();
+      if (cond_token != ')')
+	{
+	  if (term)
+	    dispose_cond_node (term);		/* ( */
+	  parser_error (lineno, "expected `)'");
+	  COND_RETURN_ERROR ();
+	}
+      term = make_cond_node (COND_EXPR, (WORD_DESC *)NULL, term, (COND_COM *)NULL);
+      (void)cond_skip_newlines ();
+    }
+  else if (tok == BANG || (tok == WORD && (yylval.word->word[0] == '!' && yylval.word->word[1] == '\0')))
+    {
+      if (tok == WORD)
+	dispose_word (yylval.word);	/* not needed */
+      term = cond_term ();
+      if (term)
+	term->flags |= CMD_INVERT_RETURN;
+    }
+  else if (tok == WORD && test_unop (yylval.word->word))
+    {
+      op = yylval.word;
+      tok = read_token (READ);
+      if (tok == WORD)
+	{
+	  tleft = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
+	  term = make_cond_node (COND_UNARY, op, tleft, (COND_COM *)NULL);
+	}
+      else
+	{
+	  dispose_word (op);
+	  parser_error (line_number, "unexpected argument to conditional unary operator");
+	  COND_RETURN_ERROR ();
+	}
+
+      (void)cond_skip_newlines ();
+    }
+  else		/* left argument to binary operator */
+    {
+      /* lhs */
+      tleft = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
+
+      /* binop */
+      tok = read_token (READ);
+      if (tok == WORD && test_binop (yylval.word->word))
+        op = yylval.word;
+      else if (tok == '<' || tok == '>')
+        op = make_word_from_token (tok);
+      else if (tok == COND_END || tok == AND_AND || tok == OR_OR)
+	{
+	  /* Special case.  [[ x ]] is equivalent to [[ -n x ]], just like
+	     the test command.  Similarly for [[ x && expr ]] or
+	     [[ x || expr ]] */
+	  op = make_word ("-n");
+	  term = make_cond_node (COND_UNARY, op, tleft, (COND_COM *)NULL);
+	  cond_token = tok;
+	  return (term);
+	}
+      else
+	{
+	  parser_error (line_number, "conditional binary operator expected");
+	  dispose_cond_node (tleft);
+	  COND_RETURN_ERROR ();
+	}
+
+      /* rhs */
+      tok = read_token (READ);
+      if (tok == WORD)
+	{
+	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
+	  term = make_cond_node (COND_BINARY, op, tleft, tright);
+	}
+      else
+	{
+	  parser_error (line_number, "unexpected argument to conditional binary operator");
+	  dispose_cond_node (tleft);
+	  dispose_word (op);
+	  COND_RETURN_ERROR ();
+	}
+
+      (void)cond_skip_newlines ();
+    }
+  return (term);
+}      
+
+/* This is kind of bogus -- we slip a mini recursive-descent parser in
+   here to handle the conditional statement syntax. */
+static COMMAND *
+parse_cond_command ()
+{
+  COND_COM *cexp;
+
+  cexp = cond_expr ();
+  return (make_cond_command (cexp));
+}
+#endif
+
 static int
 read_token_word (character)
      int character;
@@ -2458,6 +2745,34 @@ read_token_word (character)
 	  goto next_character;
 	}
 
+#ifdef EXTENDED_GLOB
+      /* Parse a ksh-style extended pattern matching specification. */
+      if (extended_glob && PATTERN_CHAR(character))
+	{
+	  peek_char = shell_getc (1);
+	  if (peek_char == '(')		/* ) */
+	    {
+	      push_delimiter (dstack, peek_char);
+	      ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
+	      pop_delimiter (dstack);
+	      if (ttok == &matched_pair_error)
+		return -1;		/* Bail immediately. */
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+				      token_buffer_size,
+				      TOKEN_DEFAULT_GROW_SIZE);
+	      token[token_index++] = character;
+	      token[token_index++] = peek_char;
+	      strcpy (token + token_index, ttok);
+	      token_index += ttoklen;
+	      FREE (ttok);
+	      dollar_present = all_digits = 0;
+	      goto next_character;
+	    }
+	  else
+	    shell_ungetc (peek_char);
+	}
+#endif /* EXTENDED_GLOB */
+
       /* If the delimiter character is not single quote, parse some of
 	 the shell expansions that must be read as a single word. */
 #if defined (PROCESS_SUBSTITUTION)
@@ -2503,13 +2818,16 @@ read_token_word (character)
 	  /* This handles $'...' and $"..." new-style quoted strings. */
 	  else if (character == '$' && (peek_char == '\'' || peek_char == '"'))
 	    {
+	      int first_line;
+
+	      first_line = line_number;
 	      ttok = parse_matched_pair (peek_char, peek_char, peek_char, &ttoklen, 0);
 	      if (ttok == &matched_pair_error)
 		return -1;
 	      if (peek_char == '\'')
 		ttrans = ansiexpand (ttok, 0, ttoklen - 1, &ttranslen);
 	      else
-		ttrans = localeexpand (ttok, 0, ttoklen - 1, &ttranslen);
+		ttrans = localeexpand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
 	      free (ttok);
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 2,
 				      token_buffer_size,
@@ -2701,9 +3019,9 @@ ansiexpand (string, start, end, lenp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 static char *
-localeexpand (string, start, end, lenp)
+localeexpand (string, start, end, lineno, lenp)
      char *string;
-     int start, end, *lenp;
+     int start, end, lineno, *lenp;
 {
   int len, tlen;
   char *temp, *t;
@@ -2716,7 +3034,11 @@ localeexpand (string, start, end, lenp)
   /* If we're just dumping translatable strings, don't do anything. */
   if (dump_translatable_strings)
     {
-      printf ("\"%s\"\n", temp);
+      if (dump_po_strings)
+	printf ("#: %s:%d\nmsgid \"%s\"\nmsgstr \"\"\n",
+		(bash_input.name ? bash_input.name : "stdin"), lineno, temp);
+      else
+	printf ("\"%s\"\n", temp);
       if (lenp)
 	*lenp = tlen;
       return (temp);
@@ -2849,6 +3171,8 @@ history_delimiting_chars ()
       else	
         return "; ";				/* (...) subshell */
     }
+  else if (token_before_that == WORD && two_tokens_ago == FUNCTION)
+    return " ";		/* function def using `function name' without `()' */
 
   for (i = 0; no_semi_successors[i]; i++)
     {
@@ -3049,6 +3373,12 @@ decode_prompt_string (string)
 		  if (n >= 0 && temp[5] == 'a')
 		    temp[5] = 'p';
 		}
+	      goto add_string;
+
+	    case 'r':
+	      temp = xmalloc (2);
+	      temp[0] = '\r';
+	      temp[1] = '\0';
 	      goto add_string;
 
 	    case 'n':

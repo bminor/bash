@@ -26,7 +26,7 @@ $PRODUCES bind.c
 $BUILTIN bind
 $DEPENDS_ON READLINE
 $FUNCTION bind_builtin
-$SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-r keyseq] [keyseq:readline-function]
+$SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [keyseq:readline-function]
 Bind a key sequence to a Readline function, or to a macro.  The
 syntax is equivalent to that found in ~/.inputrc, but must be
 passed as a single argument: bind '"\C-x\C-r": re-read-init-file'.
@@ -42,6 +42,7 @@ Arguments we accept:
   -r  keyseq         Remove the binding for KEYSEQ.
   -f  filename       Read key bindings from FILENAME.
   -q  function-name  Query about which keys invoke the named function.
+  -u  function-name  Unbind all keys which are bound to the named function.
   -V                 List variable names and values
   -v                 List variable names and values in a form that can
                      be reused as input.
@@ -53,6 +54,9 @@ $END
 #if defined (READLINE)
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -71,22 +75,24 @@ extern int errno;
 #include "common.h"
 
 static int query_bindings ();
+static int unbind_command ();
 
 extern int no_line_editing;
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 
-#define LFLAG	0x01
-#define PFLAG	0x02
-#define FFLAG	0x04
-#define VFLAG	0x08
-#define QFLAG	0x10
-#define MFLAG	0x20
-#define RFLAG	0x40
-#define PPFLAG	0x80
-#define VVFLAG	0x100
-#define SFLAG   0x200
-#define SSFLAG  0x400
+#define LFLAG	0x0001
+#define PFLAG	0x0002
+#define FFLAG	0x0004
+#define VFLAG	0x0008
+#define QFLAG	0x0010
+#define MFLAG	0x0020
+#define RFLAG	0x0040
+#define PPFLAG	0x0080
+#define VVFLAG	0x0100
+#define SFLAG   0x0200
+#define SSFLAG  0x0400
+#define UFLAG	0x0800
 
 int
 bind_builtin (list)
@@ -96,14 +102,14 @@ bind_builtin (list)
   FILE *old_rl_outstream;
   Keymap kmap, saved_keymap;
   int flags, opt;
-  char *initfile, *map_name, *fun_name, *remove_seq;
+  char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq;
 
   if (no_line_editing)
     return (EXECUTION_FAILURE);
 
   kmap = saved_keymap = (Keymap) NULL;
   flags = 0;
-  initfile = map_name = fun_name = remove_seq = (char *)NULL;
+  initfile = map_name = fun_name = unbind_name = remove_seq = (char *)NULL;
   return_code = EXECUTION_SUCCESS;
 
   if (!bash_readline_initialized)
@@ -116,7 +122,7 @@ bind_builtin (list)
   rl_outstream = stdout;
 
   reset_internal_getopt ();  
-  while ((opt = internal_getopt (list, "lvpVPsSf:q:m:r:")) != EOF)
+  while ((opt = internal_getopt (list, "lvpVPsSf:q:u:m:r:")) != EOF)
     {
       switch (opt)
 	{
@@ -140,6 +146,10 @@ bind_builtin (list)
 	case 'q':
 	  flags |= QFLAG;
 	  fun_name = list_optarg;
+	  break;
+	case 'u':
+	  flags |= UFLAG;
+	  unbind_name = list_optarg;
 	  break;
 	case 'r':
 	  flags |= RFLAG;
@@ -220,6 +230,9 @@ bind_builtin (list)
   if ((flags & QFLAG) && fun_name)
     return_code = query_bindings (fun_name);
 
+  if ((flags & UFLAG) && unbind_name)
+    return_code = unbind_command (unbind_name);
+
   if ((flags & RFLAG) && remove_seq)
     {
       if (rl_set_key (remove_seq, (Function *)NULL, rl_get_keymap ()) != 0)
@@ -253,7 +266,7 @@ query_bindings (name)
   int j;
 
   function = rl_named_function (name);
-  if (!function)
+  if (function == 0)
     {
       builtin_error ("unknown function name `%s'", name);
       return EXECUTION_FAILURE;
@@ -273,6 +286,23 @@ query_bindings (name)
   if (keyseqs[j])
     printf ("...\n");
   free_array (keyseqs);
+  return EXECUTION_SUCCESS;
+}
+
+static int
+unbind_command (name)
+     char *name;
+{
+  Function *function;
+
+  function = rl_named_function (name);
+  if (function == 0)
+    {
+      builtin_error ("unknown function name `%s'", name);
+      return EXECUTION_FAILURE;
+    }
+
+  rl_unbind_function_in_map (function, rl_get_keymap ());
   return EXECUTION_SUCCESS;
 }
 #endif /* READLINE */

@@ -39,6 +39,9 @@
 /* Control whether * matches .files in globbing. */
 int glob_dot_filenames;
 
+/* Control whether the extended globbing features are enabled. */
+int extended_glob = 0;
+
 /* Return nonzero if STRING has any unquoted special globbing chars in it.  */
 int
 unquoted_glob_pattern_p (string)
@@ -65,6 +68,13 @@ unquoted_glob_pattern_p (string)
 	    return (1);
 	  continue;
 
+	case '+':
+	case '@':
+	case '!':
+	  if (*string == '(')	/*)*/
+	    return (1);
+	  continue;
+
 	case CTLESC:
 	case '\\':
 	  if (*string++ == '\0')
@@ -76,34 +86,42 @@ unquoted_glob_pattern_p (string)
 
 /* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
-   that the glob library recognizes.  If CONVERT_QUOTED_NULLS is non-zero,
+   that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
    we change quoted null strings (pathname[0] == CTLNUL) into empty
    strings (pathname[0] == 0).  If this is called after quote removal
-   is performed, CONVERT_QUOTED_NULLS should be 0; if called when quote
+   is performed, (flags & QGLOB_CVTNULL) should be 0; if called when quote
    removal has not been done (for example, before attempting to match a
-   pattern while executing a case statement), CONVERT_QUOTED_NULLS should
-   be 1. */
+   pattern while executing a case statement), flags should include
+   QGLOB_CVTNULL.  If flags includes QGLOB_FILENAME, appropriate quoting
+   to match a filename should be performed. */
 char *
-quote_string_for_globbing (pathname, convert_quoted_nulls)
+quote_string_for_globbing (pathname, qflags)
      char *pathname;
-     int convert_quoted_nulls;
+     int qflags;
 {
   char *temp;
-  register int i;
+  register int i, j;
 
-  temp = savestring (pathname);
+  temp = xmalloc (strlen (pathname) + 1);
 
-  if (convert_quoted_nulls && QUOTED_NULL (pathname))
+  if ((qflags & QGLOB_CVTNULL) && QUOTED_NULL (pathname))
     {
       temp[0] = '\0';
       return temp;
     }
 
-  for (i = 0; temp[i]; i++)
+  for (i = j = 0; pathname[i]; i++)
     {
-      if (temp[i] == CTLESC)
-	temp[i++] = '\\';
+      if (pathname[i] == CTLESC)
+        {
+          if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
+            continue;
+	  temp[j++] = '\\';
+        }
+      else
+        temp[j++] = pathname[i];
     }
+  temp[j] = '\0';
 
   return (temp);
 }
@@ -126,6 +144,12 @@ quote_globbing_chars (string)
         case '\\':
           *t++ = '\\';
           break;
+        case '+':
+        case '@':
+        case '!':
+	  if (s[1] == '(')	/*(*/
+	    *t++ = '\\';
+	  break;
         }
       *t++ = *s++;
     }
@@ -144,7 +168,7 @@ shell_glob_filename (pathname)
   glob_t filenames;
   int glob_flags;
 
-  temp = quote_string_for_globbing (pathname, 0);
+  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
 
   filenames.gl_offs = 0;
 
@@ -159,7 +183,7 @@ shell_glob_filename (pathname)
     return ((char **)NULL);
 
   if (i == GLOB_NOMATCH)
-    filenames.gl_pathv[0] = (char *)NULL;
+    filenames.gl_pathv = (char **)NULL;
 
   return (filenames.gl_pathv);
 
@@ -169,7 +193,7 @@ shell_glob_filename (pathname)
 
   noglob_dot_filenames = glob_dot_filenames == 0;
 
-  temp = quote_string_for_globbing (pathname, 0);
+  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
 
   results = glob_filename (temp);
   free (temp);
@@ -232,14 +256,16 @@ glob_name_is_acceptable (name)
      char *name;
 {
   struct ign *p;
+  int flags;
 
   /* . and .. are never matched */
   if (name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')))
     return (0);
 
+  flags = FNM_PATHNAME | FNMATCH_EXTFLAG;
   for (p = globignore.ignores; p->val; p++)
     {
-      if (fnmatch (p->val, name, FNM_PATHNAME) != FNM_NOMATCH)
+      if (fnmatch (p->val, name, flags) != FNM_NOMATCH)
         return (0);
     }
   return (1);

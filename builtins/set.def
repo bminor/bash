@@ -24,6 +24,9 @@ $PRODUCES set.c
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -229,9 +232,20 @@ minus_o_option_value (name)
 
 #define MINUS_O_FORMAT "%-15s\t%s\n"
 
+static void
+print_minus_o_option (name, value, pflag)
+     char *name;
+     int value, pflag;
+{
+  if (pflag == 0)
+    printf (MINUS_O_FORMAT, name, value ? on : off);
+  else
+    printf ("set %co %s\n", value ? '-' : '+', name);
+}
+
 void
-list_minus_o_opts (mode)
-     int mode;
+list_minus_o_opts (mode, reusable)
+     int mode, reusable;
 {
   register int	i;
   int *on_or_off, value;
@@ -242,33 +256,13 @@ list_minus_o_opts (mode)
       if (on_or_off == FLAG_UNKNOWN)
 	on_or_off = &value;
       if (mode == -1 || mode == *on_or_off)
-	printf (MINUS_O_FORMAT, o_options[i].name, *on_or_off ? on : off);
+        print_minus_o_option (o_options[i].name, *on_or_off, reusable);
     }
   for (i = 0; binary_o_options[i].name; i++)
     {
       value = GET_BINARY_O_OPTION_VALUE (i, binary_o_options[i].name);
       if (mode == -1 || mode == value)
-	printf (MINUS_O_FORMAT, binary_o_options[i].name, value ? on : off);
-    }
-}
-
-static void
-minus_o_option_commands ()
-{
-  register int	i;
-  int *on_or_off, value;
-
-  for (value = i = 0; o_options[i].name; i++)
-    {
-      on_or_off = find_flag (o_options[i].letter);
-      if (on_or_off == FLAG_UNKNOWN)
-	on_or_off = &value;
-      printf ("set %co %s\n", *on_or_off ? '-' : '+', o_options[i].name);
-    }
-  for (i = 0; binary_o_options[i].name; i++)
-    {
-      value = GET_BINARY_O_OPTION_VALUE (i, binary_o_options[i].name);
-      printf ("set %co %s\n", value ? '-' : '+', binary_o_options[i].name);
+        print_minus_o_option (binary_o_options[i].name, value, reusable);
     }
 }
 
@@ -421,7 +415,7 @@ void
 set_shellopts ()
 {
   char *value;
-  int vsize, i, vptr, *ip;
+  int vsize, i, vptr, *ip, exported;
   SHELL_VAR *v;
 
   for (vsize = i = 0; o_options[i].name; i++)
@@ -458,10 +452,25 @@ set_shellopts ()
   value[vptr] = '\0';
 
   v = find_variable ("SHELLOPTS");
+
+  /* Turn off the read-only attribute so we can bind the new value, and
+     note whether or not the variable was exported. */
   if (v)
-    v->attributes &= ~att_readonly;
+    {
+      v->attributes &= ~att_readonly;
+      exported = exported_p (v);
+    }
+  else
+    exported = 0;
+
   v = bind_variable ("SHELLOPTS", value);
+
+  /* Turn the read-only attribute back on, and turn off the export attribute
+     if it was set implicitly by mark_modified_vars and SHELLOPTS was not
+     exported before we bound the new value. */
   v->attributes |= att_readonly;
+  if (mark_modified_vars && exported == 0 && exported_p (v))
+    v->attributes &= ~att_exported;
 
   free (value);
 }
@@ -482,20 +491,24 @@ parse_shellopts (value)
 }
 
 void
-initialize_shell_options ()
+initialize_shell_options (no_shellopts)
+     int no_shellopts;
 {
   char *temp;
   SHELL_VAR *var;
 
-  var = find_variable ("SHELLOPTS");
-  /* set up any shell options we may have inherited. */
-  if (var && imported_p (var))
+  if (no_shellopts == 0)
     {
-      temp = (array_p (var)) ? (char *)NULL : savestring (value_cell (var));
-      if (temp)
+      var = find_variable ("SHELLOPTS");
+      /* set up any shell options we may have inherited. */
+      if (var && imported_p (var))
 	{
-	  parse_shellopts (temp);
-	  free (temp);
+	  temp = (array_p (var)) ? (char *)NULL : savestring (value_cell (var));
+	  if (temp)
+	    {
+	      parse_shellopts (temp);
+	      free (temp);
+	    }
 	}
     }
 
@@ -607,10 +620,7 @@ set_builtin (list)
 
 		  if (opt == 0)
 		    {
-		      if (on_or_off == '-')
-			list_minus_o_opts (-1);
-		      else
-			minus_o_option_commands ();
+		      list_minus_o_opts (-1, (on_or_off == '+'));
 		      continue;
 		    }
 
@@ -619,10 +629,7 @@ set_builtin (list)
 		  if (option_name == 0 || *option_name == '\0' ||
 		      *option_name == '-' || *option_name == '+')
 		    {
-		      if (on_or_off == '-')
-			list_minus_o_opts (-1);
-		      else
-			minus_o_option_commands ();
+		      list_minus_o_opts (-1, (on_or_off == '+'));
 		      continue;
 		    }
 		  list = list->next; /* Skip over option name. */
@@ -730,7 +737,10 @@ unset_builtin (list)
 	}
 #endif
 
-      if (legal_identifier (name) == 0)
+      /* Bash allows functions with names which are not valid identifiers
+	 to be created when not in posix mode, so check only when in posix
+	 mode when unsetting a function. */
+      if (((unset_function && posixly_correct) || !unset_function) && legal_identifier (name) == 0)
         {
           builtin_error ("`%s': not a valid identifier", name);
           NEXT_VARIABLE ();

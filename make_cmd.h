@@ -46,7 +46,14 @@ extern REDIRECT *make_redirection __P((int, enum r_instruction, REDIRECTEE));
 extern COMMAND *make_function_def __P((WORD_DESC *, COMMAND *, int, int));
 extern COMMAND *clean_simple_command __P((COMMAND *));
 
+extern COMMAND *make_arith_command __P((WORD_LIST *));
+
 extern COMMAND *make_select_command __P((WORD_DESC *, WORD_LIST *, COMMAND *));
+
+#if defined (COND_COMMAND)
+extern COND_COM *make_cond_node __P((int, WORD_DESC *, COND_COM *, COND_COM *));
+extern COMMAND *make_cond_command __P((COND_COM *));
+#endif
 
 extern COMMAND *connect_async_list __P((COMMAND *, COMMAND *, int));
 

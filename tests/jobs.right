@@ -1,4 +1,8 @@
+./jobs2.sub: fg: job %1 started without job control
+fg: 1
 0
+./jobs.tests: wait: job control not enabled
+./jobs.tests: fg: no job control
 wait-for-pid
 wait-errors
 ./jobs.tests: wait: `1-1' is not a pid or valid job spec
@@ -29,9 +33,10 @@ fg-bg 6
 fg: usage: fg [job_spec]
 ./jobs.tests: bg: illegal option: -s
 bg: usage: bg [job_spec]
-./jobs.tests: disown: illegal option: -r
-disown: usage: disown [-h] [jobspec ...]
+./jobs.tests: disown: illegal option: -s
+disown: usage: disown [-h] [-ar] [jobspec ...]
 ./jobs.tests: disown: %1: no such job
+./jobs.tests: disown: %2: no such job
 wait-for-non-child
 ./jobs.tests: wait: pid 1 is not a child of this shell
 127
@@ -44,6 +49,11 @@ running jobs:
 [2]-  Running                 sleep 350 &
 [3]+  Running                 sleep 400 &
 ./jobs.tests: kill: %4: no such job
+./jobs.tests: jobs: no such job %4
+current job:
+[3]+  Running                 sleep 400 &
+previous job:
+[2]-  Running                 sleep 350 &
 after kill -STOP
 running jobs:
 [1]   Running                 sleep 300 &

@@ -31,6 +31,9 @@ $END
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -53,7 +56,7 @@ $END
 #  include <sys/times.h>
 #endif /* HAVE_SYS_TIMES_H */
 
-#if defined (HAVE_SYS_RESOURCE_H)
+#if defined (HAVE_SYS_RESOURCE_H) && !defined (RLIMTYPE)
 #  include <sys/resource.h>
 #endif
 

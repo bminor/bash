@@ -205,11 +205,12 @@ execute_list_with_replacements (list)
 $BUILTIN disown
 $FUNCTION disown_builtin
 $DEPENDS_ON JOB_CONTROL
-$SHORT_DOC disown [-h] [jobspec ...]
+$SHORT_DOC disown [-h] [-ar] [jobspec ...]
 By default, removes each JOBSPEC argument from the table of active jobs.
 If the -h option is given, the job is not removed from the table, but is
 marked so that SIGHUP is not sent to the job if the shell receives a
-SIGHUP.
+SIGHUP.  The -a option, when JOBSPEC is not supplied, means to remove all
+jobs from the job table; the -r option means to remove only running jobs.
 $END
 
 #if defined (JOB_CONTROL)
@@ -217,17 +218,23 @@ int
 disown_builtin (list)
      WORD_LIST *list;
 {
-  int opt, job, retval, nohup_only;
+  int opt, job, retval, nohup_only, running_jobs, all_jobs;
   sigset_t set, oset;
 
-  nohup_only = 0;
+  nohup_only = running_jobs = all_jobs = 0;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "h")) != -1)
+  while ((opt = internal_getopt (list, "ahr")) != -1)
     {
       switch (opt)
 	{
+	case 'a':
+	  all_jobs = 1;
+	  break;
 	case 'h':
 	  nohup_only = 1;
+	  break;
+	case 'r':
+	  running_jobs = 1;
 	  break;
 	default:
 	  builtin_usage ();
@@ -237,17 +244,15 @@ disown_builtin (list)
   list = loptend;
   retval = EXECUTION_SUCCESS;
 
-#if 0
-  /* For the future `disown -a' */
-  if (list == 0)
+  /* `disown -a' or `disown -r' */
+  if (list == 0 && (all_jobs || running_jobs))
     {
       if (nohup_only)
-	nohup_all_jobs ();
+	nohup_all_jobs (running_jobs);
       else
-	delete_all_jobs ();
+	delete_all_jobs (running_jobs);
       return (EXECUTION_SUCCESS);
     }
-#endif
 
   do
     {
@@ -256,7 +261,7 @@ disown_builtin (list)
 		? get_job_by_pid (atoi(list->word->word), 0)
 		: get_job_spec (list);
 
-      if (job == NO_JOB || jobs == 0 || jobs[job] == 0)
+      if (job == NO_JOB || jobs == 0 || job < 0 || job >= job_slots || jobs[job] == 0)
 	{
 	  builtin_error ("%s: no such job", list ? list->word->word : "current");
 	  retval = EXECUTION_FAILURE;
@@ -264,7 +269,7 @@ disown_builtin (list)
       else if (nohup_only)
 	nohup_job (job);
       else
-	delete_job (job);
+	delete_job (job, 1);
       UNBLOCK_CHILD (oset);
 
       if (list)

@@ -35,6 +35,8 @@ $END
 
 #include <stdio.h>
 
+#include "../bashtypes.h"
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -43,8 +45,8 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
-#include "../execute_cmd.h"
 #include "../flags.h"
+#include "../findcmd.h"
 #include "../hashcmd.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -63,7 +65,7 @@ hash_builtin (list)
      WORD_LIST *list;
 {
   int expunge_hash_table, opt;
-  char *word, *pathname;
+  char *w, *pathname;
 
   if (hashing_enabled == 0)
     {
@@ -107,12 +109,12 @@ hash_builtin (list)
   for (opt = EXECUTION_SUCCESS; list; list = list->next)
     {
       /* Add or rehash the specified commands. */
-      word = list->word->word;
+      w = list->word->word;
       if (pathname)
-	remember_filename (word, pathname, 0, 0);
-      else if (absolute_program (word))
+	remember_filename (w, pathname, 0, 0);
+      else if (absolute_program (w))
 	continue;
-      else if (add_hashed_command (word, 0))
+      else if (add_hashed_command (w, 0))
 	opt = EXECUTION_FAILURE;
     }
 
@@ -121,23 +123,23 @@ hash_builtin (list)
 }
 
 static int
-add_hashed_command (word, quiet)
-     char *word;
+add_hashed_command (w, quiet)
+     char *w;
      int quiet;
 {
   int rv;
   char *full_path;
 
   rv = 0;
-  if (find_function (word) == 0 && find_shell_builtin (word) == 0)
+  if (find_function (w) == 0 && find_shell_builtin (w) == 0)
     {
-      full_path = find_user_command (word);
+      full_path = find_user_command (w);
       if (full_path && executable_file (full_path))
-	remember_filename (word, full_path, dot_found_in_search, 0);
+	remember_filename (w, full_path, dot_found_in_search, 0);
       else
 	{
 	  if (quiet == 0)
-	    builtin_error ("%s: not found", word);
+	    builtin_error ("%s: not found", w);
 	  rv++;
 	}
       if (full_path)

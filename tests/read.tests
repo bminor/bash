@@ -13,6 +13,18 @@ echo "\ a  b\ " | ( read -r x ; echo -"$x"- )
 echo " \ a  b\ " | ( read -r x y ; echo -"$x"-"$y"- )
 echo " \ a  b\ " | ( read -r x ; echo -"$x"- )
 
+# make sure that CTLESC and CTLNUL are passed through correctly
+echo $'\001' | ( read var ; recho "$var" )
+echo $'\001' | ( read ; recho "$REPLY" )
+
+echo $'\177' | ( read var ; recho "$var" )
+echo $'\177' | ( read ; recho "$REPLY" )
+
+# make sure a backslash-quoted \\n still disappears from the input when
+# we're not reading in `raw' mode, and no stray CTLESC chars are left in
+# the input stream
+echo $'ab\\\ncd' | ( read ; recho "$REPLY" )
+
 echo "A B " > /tmp/IN
 unset x y z
 read x y z < /tmp/IN
@@ -66,4 +78,3 @@ echo " foo" | { IFS=$' \n' ; read line; recho "$line"; }
 echo " foo" | { IFS=$' \t\n' ; read line; recho "$line"; }
 
 echo " foo" | { IFS=$':' ; read line; recho "$line"; }
-

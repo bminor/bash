@@ -161,6 +161,16 @@ echo 't -O /tmp/test.owner'
 t -O /tmp/test.owner
 rm -f /tmp/test.owner
 
+touch /tmp/test.socket
+echo 't -S /tmp/test.socket'
+t -S /tmp/test.socket	# false
+rm -f /tmp/test.socket
+
+touch /tmp/test.newer
+echo 't -N /tmp/test.newer'
+t -N /tmp/test.newer
+rm -f /tmp/test.newer
+
 echo 't "hello" = "hello"'
 t "hello" = "hello"
 echo 't "hello" = "goodbye"'

@@ -110,10 +110,10 @@ extern void restore_pipeline __P((int));
 extern void start_pipeline __P((void));
 extern int stop_pipeline __P((int, COMMAND *));
 
-extern void delete_job __P((int));
+extern void delete_job __P((int, int));
 extern void nohup_job __P((int));
-extern void delete_all_jobs __P((void));
-extern void nohup_all_jobs __P((void));
+extern void delete_all_jobs __P((int));
+extern void nohup_all_jobs __P((int));
 
 extern void terminate_current_pipeline __P((void));
 extern void terminate_stopped_jobs __P((void));

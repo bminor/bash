@@ -49,10 +49,14 @@ $END
 #include <config.h>
 
 #if defined (HISTORY)
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 #include "../bashtypes.h"
 #include "../posixstat.h"
-#include <sys/file.h>
+#ifndef _MINIX
+#  include <sys/file.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>

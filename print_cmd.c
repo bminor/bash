@@ -22,6 +22,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include <stdio.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -74,6 +77,13 @@ static void print_until_command ();
 static void print_until_or_while ();
 static void print_if_command ();
 static void print_function_def ();
+#if defined (DPAREN_ARITHMETIC)
+static void print_arith_command ();
+#endif
+#if defined (COND_COMMAND)
+static void print_cond_node ();
+static void print_cond_command ();
+#endif
 
 #define PRINTED_COMMAND_INITIAL_SIZE 64
 #define PRINTED_COMMAND_GROW_SIZE 128
@@ -167,6 +177,18 @@ make_command_string_internal (command)
 	case cm_if:
 	  print_if_command (command->value.If);
 	  break;
+
+#if defined (DPAREN_ARITHMETIC)
+	case cm_arith:
+	  print_arith_command (command->value.Arith);
+	  break;
+#endif
+
+#if defined (COND_COMMAND)
+	case cm_cond:
+	  print_cond_command (command->value.Cond);
+	  break;
+#endif
 
 	case cm_simple:
 	  print_simple_command (command->value.Simple);
@@ -457,6 +479,124 @@ print_if_command (if_command)
   semicolon ();
   newline ("fi");
 }
+
+#if defined (DPAREN_ARITHMETIC)
+static void
+print_arith_command (arith_command)
+     ARITH_COM *arith_command;
+{
+  cprintf ("(( ");
+  command_print_word_list (arith_command->exp, " ");
+  cprintf (" ))");
+}
+
+#if defined (COND_COMMAND)
+static void
+print_cond_node (cond)
+     COND_COM *cond;
+{
+  if (cond->flags & CMD_INVERT_RETURN)
+    cprintf ("! ");
+
+  if (cond->type == COND_EXPR)
+    {
+      cprintf ("( ");
+      print_cond_node (cond->left);
+      cprintf (" )");
+    }
+  else if (cond->type == COND_AND)
+    {
+      print_cond_node (cond->left);
+      cprintf (" && ");
+      print_cond_node (cond->right);
+    }
+  else if (cond->type == COND_OR)
+    {
+      print_cond_node (cond->left);
+      cprintf (" || ");
+      print_cond_node (cond->right);
+    }
+  else if (cond->type == COND_UNARY)
+    {
+      cprintf (cond->op->word);
+      cprintf (" ");
+      print_cond_node (cond->left);
+    }
+  else if (cond->type == COND_BINARY)
+    {
+      print_cond_node (cond->left);
+      cprintf (" ");
+      cprintf (cond->op->word);
+      cprintf (" ");
+      print_cond_node (cond->right);
+    }
+  else if (cond->type == COND_TERM)
+    {
+      cprintf (cond->op->word);		/* need to add quoting here */
+    }
+}
+
+static void
+print_cond_command (cond)
+     COND_COM *cond;
+{
+  cprintf ("[[ ");
+  print_cond_node (cond);
+  cprintf (" ]]");
+}
+
+void
+debug_print_cond_command (cond)
+     COND_COM *cond;
+{
+  fprintf (stderr, "DEBUG: ");
+  command_string_index = 0;
+  print_cond_command (cond);
+  fprintf (stderr, "%s\n", the_printed_command);
+}
+
+void
+xtrace_print_cond_term (type, invert, op, arg1, arg2)
+     int type, invert;
+     WORD_DESC *op;
+     char *arg1, *arg2;
+{
+  command_string_index = 0;
+  fprintf (stderr, "%s", indirection_level_string ());
+  fprintf (stderr, "[[ ");
+  if (invert)
+    fprintf (stderr, "! ");
+
+  if (type == COND_UNARY)
+    {
+      fprintf (stderr, "%s ", op->word);
+      fprintf (stderr, "%s", (arg1 && *arg1) ? arg1 : "''");
+    }
+  else if (type == COND_BINARY)
+    {
+      fprintf (stderr, "%s", (arg1 && *arg1) ? arg1 : "''");
+      fprintf (stderr, " %s ", op->word);
+      fprintf (stderr, "%s", (arg2 && *arg2) ? arg2 : "''");
+    }
+
+  fprintf (stderr, " ]]\n");
+}	  
+#endif /* COND_COMMAND */
+
+/* A function to print the words of an arithmetic command when set -x is on. */
+void
+xtrace_print_arith_cmd (list)
+     WORD_LIST *list;
+{
+  WORD_LIST *w;
+
+  fprintf (stderr, "%s", indirection_level_string ());
+  fprintf (stderr, "(( ");
+  for (w = list; w; w = w->next)
+    fprintf (stderr, "%s%s", w->word->word, w->next ? " " : "");
+  fprintf (stderr, " ))\n");
+}
+#endif
 
 void
 print_simple_command (simple_command)

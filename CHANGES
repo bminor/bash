@@ -1,3 +1,386 @@
+This document details the changes between this version, bash-2.02-beta2,
+and the previous version, bash-2.02-beta1.
+
+1.  Changes to Bash
+
+a.  A bug was fixed that caused the terminal process group to be set
+    incorrectly when performing command substitution of builtins in a
+    pipeline.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.02-beta2,
+and the previous version, bash-2.02-beta1.
+
+1.  Changes to Bash
+
+a.  Attempting to `wait' for stopped jobs now generates a warning message.
+
+b.  Pipelines which exit due to SIGPIPE in non-interactive shells are now
+    not reported if the shell is compiled -DDONT_REPORT_SIGPIPE.
+
+c.  Some changes were made to builtins/psize.sh and support/bashbug.sh to
+    attempt to avoid some /tmp file races and surreptitious file
+    substitutions.
+
+d.  Fixed a bug that caused the shell not to compile if configured with
+    dparen arithmetic but without aliases.
+
+e.  Fixed a bug that caused the input stream to be switched when assigning
+    empty arrays with `bash -c'.
+
+f.  A bug was fixed in the readline expansion glue code that caused bash to
+    dump core when expanding lines with an unclosed single quote.
+
+g.  A fix was made to the `cd' builtin so that using a non-empty directory
+    from $CDPATH results in an absolute pathname of the new current working
+    directory to be displayed after the current directory is changed.
+
+h.  Fixed a bug in the variable assignment code that caused the shell to
+    dump core when referencing an unset variable with `set -u' enabled in
+    an assignment statement preceding a command.
+
+i.  Fixed a bug in the exit trap code that caused reserved words to not be
+    recognized under certain circumstances.
+
+j.  Fixed a bug in the parameter pattern substitution code so that quote
+    removal is performed.
+
+k.  The shell should now configure correctly on Apple Rhapsody systems.
+
+l.  The `kill' builtin now prints a usage message if it is not passed any
+    arguments.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.02-beta1,
+and the previous version, bash-2.02-alpha1.
+
+1.  Changes to Bash
+
+a.  A few compilation bugs were fixed in the new extended globbing code.
+
+b.  Executing arithmetic commands now sets the command name to `((' so
+    error messages look right.
+
+c.  Fixed some build problems with various configuration options.
+
+d.  The `printf' builtin now aborts immediately if an illegal format
+    character is encountered.
+
+e.  The code that creates here-documents now behaves better if the file it's
+    trying to create already exists for some reason.
+
+f.  Fixed a problem with the extended globbing code that made patterns like
+    `x+*' expand incorrectly.
+
+g.  The prompt string expansion code no longer quotes tildes with backslashes.
+
+h.  The bash getcwd() implementation in lib/sh/getcwd.c now behaves better in
+    the presence of lstat(2) failures.
+
+i.  Fixed a bug with strsub() that caused core dumps when executing `fc -s'.
+
+j.  The mail checking code now ensures that it has a valid default mailpath.
+
+k.  A bug was fixed that caused local variables to be unset inappropriately
+    when sourcing a script from within another sourced script.
+
+l.  A bug was fixed in the history saving code so that functions are saved
+    in the history list correctly if `cmdhist' is enabled, but `lithist'
+    is not.
+
+m.  A bug was fixed that caused printf overflows when displaying error
+    messages.
+
+n.  It should be easier to build the loadble builtins in examples/loadables,
+    though some manual editing of the generated Makefile is still required.
+
+o.  The user's primary group is now always ${GROUPS[0]}.
+
+p.  Some updates were made to support/config.guess from the GNU master copy.
+
+q.  Some changes were made to the autoconf support for Solaris 2.6 large
+    files.
+
+r.  The `command' builtins now does the right thing when confstr(3) cannot
+    find a value for _CS_PATH.
+
+s.  Extended globbing expressions like `*.!(c)' are not history expanded if
+    `extglob' is enabled.
+
+t.  Using the `-P' option to `cd' will force the value that is assigned to
+    PWD to not contain any symbolic links.
+
+2.  Changes to Readline
+
+a.  The code that prints completion listings now behaves better if one or
+    more of the filenames contains non-printable characters.
+
+b.  The time delay when showing matching parentheses is now 0.5 seconds.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-2.02-alpha1,
+and the previous version, bash-2.01.1-release.
+
+1.  Changes to Bash
+
+a.  OS-specific configuration changes for:  BSD/OS 3.x, Minix 2.x,
+    Solaris 2.6, SINIX SVR4.
+
+b.  Changes were made to the generated `info' files so that `install-info'
+    works correctly.
+
+c.  PWD is now auto-exported.
+
+d.  A fix was made to the pipeline code to make sure that the shell forks
+    to execute simple commands consisting solely of assignment statements.
+
+e.  Changes to the test suite for systems with 14-character filenames.
+
+f.  The default sizes of some internal hash tables have been made smaller
+    to reduce the shell's memory footprint.
+
+g.  The `((...))' arithmetic command is now executed directly instead of
+    being translated into `let "..."'.
+
+h.  Fixes were made to the expansion code so that "$*", "$@", "${array[@]}",
+    and "${array[@]}" expand correctly when IFS does not contain a space
+    character, is unset, or is set to NULL.
+
+i.  The indirect expansion code (${!var}) was changed so that the only
+    valid values of `var' are variable names, positional parameters, `#',
+    `@', and `*'.
+
+j.  An arithmetic expression error in a $((...)) expansion now causes a
+    non-interactive shell running in posix mode to exit.
+
+k.  Compound array assignment now splits the words within the parentheses
+    on shell metacharacters like the parser would before expansing them
+    and performing the assignment.  This is for compatibility with ksh-93.
+
+l.  The internal shell backslash-quoting code (used in the output of `set'
+    and completion) now quotes tildes if they appear at the start of the
+    string or after a `=' or `:'.
+
+m.  A couple of bugs with `shopt -o' were fixed.
+
+n.  `bash +o' now displays the same output as `set +o' before starting an
+    interactive shell.
+
+o.  A bug that caused command substitution and the `eval' builtin to
+    occasionally free memory twice when an error was encountered was fixed.
+
+p.  The filename globbing code no longer requires read permission for a
+    directory when the filename to be matched does not contain any globbing
+    characters, as POSIX.2 specifies.
+
+q.  A bug was fixed so that the job containing the last asynchronous
+    process is not removed from the job table until a `wait' is executed
+    for that process or another asynchronous process is started.  This
+    satisfies a POSIX.2 requirement.
+
+r.  A `select' bug was fixed so that a non-numeric user response is treated
+    the same as a numeric response that is out of range.
+
+s.  The shell no longer parses the value of SHELLOPTS from the environment
+    if it is restricted, running setuid, or running in `privileged mode'.
+
+t.  Fixes were made to enable large file support on systems such as
+    Solaris 2.6, where the size of a file may be larger than can be held
+    in an `int'.
+
+u.  The filename hashing code was fixed to not add `./' to the beginning of
+    filenames which already begin with `./'.
+
+v.  The configure script was changed so that the GNU termcap library is not
+    compiled in if `prefer-curses' has been specified.
+
+w.  HISTCONTROL and HISTIGNORE are no longer applied to the second and
+    subsequent lines of a multi-line command.
+
+x.  A fix was made to `disown' so that it does a better job of catching
+    out-of-range jobs.
+
+y.  Non-interactive shells no longer report the status of processes terminated
+    due to SIGINT, even if the standard output is a terminal.
+
+z.  A bug that caused the output of `jobs' to have extra carriage returns
+    was fixed.
+
+aa. A bug that caused PIPESTATUS to not be set when builtins or shell
+    functions were executed in the foreground was fixed.
+
+bb. Bash now attempts to detect when it is being run by sshd, and treats
+    that case identically to being run by rshd.
+
+cc. A bug that caused `set -a' to export SHELLOPTS when one of the shell
+    options was changed was fixed.
+
+dd. The `kill' builtin now disallows empty or missing process id arguments
+    instead of treating them as identical to `0', which means the current
+    process.
+
+ee. `var=value declare -x var' now behaves identically to
+    `var=value export var'.  Similarly for `var=value declare -r var' and
+    `var=value readonly var'.
+
+ff. A few memory leaks were fixed.
+
+gg. `alias' and `unalias' now print error messages when passed an argument
+    that is not an alias for printing or deletion, even when the shell is
+    not interactive, as POSIX.2 specifies.
+
+hh. `alias' and `alias -p' now return a status of 0 when no aliases are
+    defined, as POSIX.2 specifes.
+
+ii. `cd -' now prints the pathname of the new working directory if the shell
+    is interactive.
+
+jj. A fix was made so that the code that binds $PWD now copes with getcwd()
+    returning NULL.
+
+kk. `unset' now checks whether or not a function name it's trying to unset
+    is a valid shell identifier only when the shell is running in posix mode.
+
+ll. A change was made to the code that generates filenames for here documents
+    to make them less prone to name collisions.
+
+mm. The parser was changed so that `time' is recognized as a reserved word
+    only at the beginning of a pipeline.
+
+nn. The pathname canonicalization code was changed so that `//' is converted
+    into `/', but all other pathnames beginning with `//' are left alone, as
+    POSIX.2 specifies.
+
+oo. The `logout' builtin will no longer exit a non-interactive non-login
+    shell.
+
+2.  Changes to Readline
+
+a.  Fixed a problem in the readline test program rltest.c that caused a core
+    dump.
+
+b.  The code that handles parser directives in inputrc files now displays
+    more error messages.
+
+c.  The history expansion code was fixed so that the appearance of the
+    history comment character at the beginning of a word inhibits history
+    expansion for that word and the rest of the input line.
+
+3.  New Features in Bash
+
+a.  A new version of malloc, based on the older GNU malloc, that has many
+    changes, is more page-based, is more conservative with memory usage,
+    and does not `orphan' large blocks when they are freed.
+
+b.  A new version of gmalloc, based on the old GLIBC malloc, with many
+    changes and range checking included by default.
+
+c.  A new implementation of fnmatch(3) that includes full POSIX.2 Basic
+    Regular Expression matching, including character classes, collating
+    symbols, equivalence classes, and support for case-insensitive pattern
+    matching.
+
+d.  ksh-88 egrep-style extended pattern matching ([@+*?!](patlist)) has been
+    implemented, controlled by a new `shopt' option, `extglob'.
+
+e.  There is a new ksh-like `[[' compound command, which implements
+    extended `test' functionality.
+
+f.  There is a new `printf' builtin, implemented according to the POSIX.2
+    specification.
+
+g.  There is a new feature for command substitution: $(< filename) now expands
+    to the contents of `filename', with any trailing newlines removed
+    (equivalent to $(cat filename)).
+
+h.  There are new tilde prefixes which expand to directories from the
+    directory stack.
+
+i.  There is a new `**' arithmetic operator to do exponentiation.
+
+j.  There are new configuration options to control how bash is linked:
+    `--enable-profiling', to allow bash to be profiled with gprof, and
+    `--enable-static-link', to allow bash to be linked statically.
+
+k.  There is a new configuration option, `--enable-cond-command', which
+    controls whether or not the `[[' command is included.  It is on by
+    default.
+
+l.  There is a new configuration option, `--enable-extended-glob', which
+    controls whether or not the ksh extended globbing feature is included.
+    It is enabled by default.
+
+m.  There is a new configuration #define in config.h.top that, when enabled,
+    will cause all login shells to source /etc/profile and one of the user-
+    specific login shell startup files, whether or not the shell is
+    interactive.
+
+n.  There is a new invocation option, `--dump-po-strings', to dump
+    a shell script's translatable strings ($"...") in GNU `po' format.
+
+o.  There is a new `shopt' option, `nocaseglob', to enable case-insensitive
+    pattern matching when globbing filenames and using the `case' construct.
+
+p.  There is a new `shopt' option, `huponexit', which, when enabled, causes
+    the shell to send SIGHUP to all jobs when an interactive login shell
+    exits.
+
+q.  `bind' has a new `-u' option, which takes a readline function name as an
+    argument and unbinds all key sequences bound to that function in a
+    specified keymap.
+
+r.  `disown' now has `-a' and `-r' options, to limit operation to all jobs
+    and running jobs, respectively.
+
+s.  The `shopt' `-p' option now causes output to be displayed in a reusable
+    format.
+
+t.  `test' has a new `-N' option, which returns true if the filename argument
+    has been modified since it was last accessed.
+
+u.  `umask' now has a `-p' option to print output in a reusable format.
+
+v.  A new escape sequence, `\xNNN', has been added to the `echo -e' and $'...'
+    translation code.  It expands to the character whose ascii code is NNN
+    in hexadecimal.
+
+w.  The prompt string expansion code has a new `\r' escape sequence.
+
+x.  The shell may now be cross-compiled for the CYGWIN32 environment on
+    a Unix machine.
+
+4.  New Features in Readline
+
+a.  There is now an option for `iterative' yank-last-arg handline, so a user
+    can keep entering `M-.', yanking the last argument of successive history
+    lines.
+
+b.  New variable, `print-completions-horizontally', which causes completion
+    matches to be displayed across the screen (like `ls -x') rather than up
+    and down the screen (like `ls').
+
+c.  New variable, `completion-ignore-case', which causes filename completion
+    and matching to be performed case-insensitively.
+
+d.  There is a new bindable command, `magic-space', which causes history
+    expansion to be performed on the current readline buffer and a space to
+    be inserted into the result.
+
+e.  There is a new bindable command, `menu-complete', which enables tcsh-like
+    menu completion (successive executions of menu-complete insert a single
+    completion match, cycling through the list of possible completions).
+
+f.  There is a new bindable command, `paste-from-clipboard', for use on Win32
+    systems, to insert the text from the Win32 clipboard into the editing
+    buffer.
+
+g.  The key sequence translation code now understands printf-style backslash
+    escape sequences, including \NNN octal escapes.  These escape sequences
+    may be used in key sequence definitions or macro values.
+
+h.  An `$include' inputrc file parser directive has been added.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-2.01.1-release,
 and the previous version, bash-2.01-release.
 

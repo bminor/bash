@@ -23,7 +23,7 @@ $PRODUCES ulimit.c
 
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
-$DEPENDS_ON !MINIX
+$DEPENDS_ON !_MINIX
 $SHORT_DOC ulimit [-SHacdflmnpstuv] [limit]
 Ulimit provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
@@ -52,10 +52,14 @@ increments of 512 bytes, and -u, which is an unscaled number of
 processes.
 $END
 
+#if !defined (_MINIX)
+
 #include <config.h>
 
 #include "../bashtypes.h"
-#include <sys/param.h>
+#ifndef _MINIX
+#  include <sys/param.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -101,7 +105,7 @@ extern int errno;
 
 #if !defined (RLIMTYPE)
 #  define RLIMTYPE long
-#  define string_to_rlimtype string_to_long
+#  define string_to_rlimtype(s) strtol(s, (char **)NULL, 10)
 #  define print_rlimtype(num, nl) printf ("%ld%s", num, nl ? "\n" : "")
 #endif
 
@@ -597,7 +601,8 @@ printone (limind, curlim, pdesc)
   if (curlim == RLIM_INFINITY)
     puts ("unlimited");
   else if (curlim == RLIM_INVALID)
-    printf ("cannot get limit: %s\n", strerror (errno));
+    builtin_error ("cannot get limit: %s\n", strerror (errno));
   else
     print_rlimtype ((curlim / limits[limind].block_factor), 1);
 }
+#endif /* !_MINIX */

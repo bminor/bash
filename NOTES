@@ -137,3 +137,60 @@ being built and linked against, but there is only a stub file in the archive.)
 
    /* Need to get the argument to a -c option processed in the
 
+8.  Some people have asked about binding all of the keys in a PC-keyboard-
+    style numeric keypad to readline functions.  Here's something I
+    received from the gnu-win32 list that may help.  Insert the following
+    lines into ~/.inputrc:
+
+# home key
+"\e[1~":beginning-of-line
+# insert key
+"\e[2~":kill-whole-line
+# del key
+"\e[3~":delete-char
+# end key
+"\e[4~":end-of-line
+# pgup key
+"\e[5~":history-search-forward
+# pgdn key
+"\e[6~":history-search-backward
+
+9.  Hints for building under Minix 2.0 (Contributed by Terry R. McConnell,
+    <tmc@barnyard.syr.edu>)
+
+   The version of /bin/sh distributed with Minix is not up to the job of
+   running the configure script. The easiest solution is to swap /bin/sh
+   with /usr/bin/ash. Then use chmem(1) to increase the memory allocated
+   to /bin/sh. The following settings are known to work:
+
+   text         data     bss   stack  memory
+   63552  9440          3304   65536  141832  /bin/sh
+
+   If you have problems with make or yacc it may be worthwhile first to
+   install the GNU versions of these utilities before attempting to build
+   bash. (As of this writing, all of these utilities are available for the
+   i386 as pre-built binaries via anonymous ftp at math.syr.edu in the
+   pub/mcconnell/minix directory. Note that the GNU version of yacc is called
+   bison.)
+
+   Unless you want to see lots of warnings about old-style declarations,
+   do LOCAL_CFLAGS=-wo; export LOCAL_CFLAGS before running configure.
+   (These warnings are harmless, but annoying.)
+
+   configure will insist that you supply a host type. For example, do
+   ./configure --host=i386-pc-minix.
+
+   Minix does not support the system calls required for a proper 
+   implementation of ulimit().  The `ulimit' builtin will not be available.
+
+   Configure will fail to notice that many things like uid_t are indeed
+   typedef'd in <sys/types.h>, because it uses egrep for this purpose
+   and minix has no egrep. You could try making a link /usr/bin/egrep -->
+   /usr/bin/grep. Better is to install the GNU version of grep in
+   /usr/local/bin and make the link /usr/local/bin/egrep -->/usr/local/bin/grep.
+   (These must be hard links, of course, since Minix does not support
+   symbolic links.)
+
+   You will see many warnings of the form:
+   warning: unknown s_type: 98
+   I have no idea what this means, but it doesn't seem to matter.

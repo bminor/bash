@@ -189,6 +189,12 @@ expect '<xy>'
 recho "x$*y"
 expect '<xy>'
 recho "xy$*"
+expect '<xy>'
+recho x"$*"y
+expect '<xy>'
+recho xy"$*"
+expect '<xy>'
+recho "$*"xy
 expect '<>'
 recho "$*"
 expect nothing
@@ -196,15 +202,44 @@ recho $*
 
 unset undef ; set ""
 
+expect '<>'
+recho ${undef-"$*"}
+expect '<xy>'
+recho ${undef-"x$*y"}
+expect '<xy>'
+recho ${undef-"$*xy"}
+expect '<xy>'
+recho ${undef-"xy$*"}
+expect '<xy>'
+recho ${undef-x"$*"y}
+expect '<xy>'
+recho ${undef-xy"$*"}
+expect '<xy>'
+recho ${undef-"$*"xy}
+expect '<>'
+recho "${undef-$*}"
+expect nothing
+recho ${undef-$*}
+
+expect '<>'
 recho ${undef-"$zzz"}
+expect '<x>'
 recho x${undef-"$zzz"}
+expect '<x>'
 recho x${undef-"$@"}
+expect nothing
 recho ${undef-"$@"}
+expect '<x>'
 recho ${undef-"$zzz"}x
+expect '<x>'
 recho ${undef-"$@"}x
+expect '<x>'
 recho "$@"x
+expect '<x>'
 recho "$zzz"x
+expect '<^?>'
 recho ${undef-}
+expect '<^?>'
 recho ${undef-""}
 
 yyy=""
@@ -301,3 +336,101 @@ recho ${abc:-G { I } K }
 # should echo a*
 unset foo
 recho "${foo:-"a"}*"
+
+f ()
+{
+	echo "Number of args: $#"
+	echo "<\${*-x}>: <${*-x}>"
+	echo "<\${@-x}>: <${@-x}>"
+}
+
+f
+f ''
+f '' ''
+
+set 1 2 3 4 5
+
+expect '<5>'
+recho ${#}
+expect '<5>'
+recho ${#:foo}
+expect '<5>'
+recho ${#:-foo}
+expect '<5>'
+recho ${#-posparams}
+expect '<5>'
+recho ${#:-posparams}
+
+expect '<0>'
+recho ${#!}
+
+expect nothing
+recho $!
+expect nothing
+recho ${!}
+
+expect nothing
+recho $8
+expect nothing
+recho ${8}
+
+shift $#
+
+expect '<0>'
+recho ${#}
+expect '<0>'
+recho ${#:foo}
+expect '<0>'
+recho ${#:-foo}
+expect '<0>'
+recho ${#-posparams}
+expect '<0>'
+recho ${#:-posparams}
+
+expect '<posparams>'
+recho ${!-posparams}
+expect '<posparams>'
+recho ${!:-posparams}
+
+expect '<2>'
+recho ${#-}
+
+expect '<0>'
+recho ${#-posparams}
+
+expect '<0>'
+recho ${#?:-xyz}
+
+expect '<1>'
+recho ${#?}
+
+set a b c d e
+
+expect '<5>'
+recho ${#}
+expect '<5>'
+recho ${#?:-xyz}
+
+shift $#
+
+expect '<0>'
+recho ${#:-foo}
+
+expect a bad substitution error
+recho ${#:}
+expect a bad substitution error
+recho ${#/}
+expect a bad substitution error
+recho ${#%}
+expect a bad substitution error
+recho ${#=}
+expect a bad substitution error
+recho ${#+}
+expect a bad substitution error
+recho ${#1xyz}
+
+expect a math syntax error
+recho ${#:%}
+
+expect '<0>'
+recho ${#:-}

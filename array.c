@@ -13,6 +13,9 @@
 #if defined (ARRAY_VARS)
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -151,6 +154,7 @@ ARRAY_ELEMENT	*s, *e;
 }
 #endif
 
+#ifdef INCLUDE_UNUSED
 ARRAY_ELEMENT *
 copy_array_element(ae)
 ARRAY_ELEMENT	*ae;
@@ -158,6 +162,7 @@ ARRAY_ELEMENT	*ae;
 	return(ae ? new_array_element(element_index(ae), element_value(ae))
 		  : (ARRAY_ELEMENT *) NULL);
 }
+#endif
 
 /*
  * Add a new element with index I and value V to array A (a[i] = v).
@@ -248,6 +253,7 @@ arrayind_t	i;
 	return((char *) NULL);
 }
 
+#ifdef TEST_ARRAY
 /*
  * Walk the array, calling FUNC once for each element, with the array
  * element as the argument.
@@ -264,6 +270,7 @@ Function *func;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
 		(*func)(ae);
 }
+#endif
 
 /*
  * Return a string that is the concatenation of all the elements in A,

@@ -47,4 +47,7 @@ extern void sys_error __P((const char *, ...));
 /* Report an internal error. */
 extern void internal_error __P((const char *, ...));
 
+/* Report an internal warning. */
+extern void internal_warning __P((const char *, ...));
+
 #endif /* !_ERROR_H_ */

@@ -190,6 +190,16 @@ internal_error (format, arg1, arg2, arg3, arg4, arg5)
 }
 
 void
+internal_warning (format, arg1, arg2, arg3, arg4, arg5)
+     char *format;
+{
+  fprintf (stderr, "%s: warning: ", get_name_for_error ());
+
+  fprintf (stderr, format, arg1, arg2, arg3, arg4, arg5);
+  fprintf (stderr, "\n");
+}
+
+void
 sys_error (format, arg1, arg2, arg3, arg4, arg5)
      char *format;
 {
@@ -307,6 +317,31 @@ internal_error (format, va_alist)
   va_list args;
 
   fprintf (stderr, "%s: ", get_name_for_error ());
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+#endif
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+
+  va_end (args);
+}
+
+void
+#if defined (PREFER_STDARG)
+internal_warning (const char *format, ...)
+#else
+internal_warning (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  fprintf (stderr, "%s: warning: ", get_name_for_error ());
 
 #if defined (PREFER_STDARG)
   va_start (args, format);

@@ -36,6 +36,10 @@ enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
 #if defined (BUFFERED_INPUT)
 
 /* Possible values for b_flag. */
+#undef B_EOF
+#undef B_ERROR		/* There are some systems with this define */
+#undef B_UNBUFF
+
 #define B_EOF		0x1
 #define B_ERROR		0x2
 #define B_UNBUFF	0x4
@@ -46,15 +50,15 @@ typedef struct BSTREAM
 {
   int	b_fd;
   char	*b_buffer;		/* The buffer that holds characters read. */
-  int	b_size;			/* How big the buffer is. */
+  size_t b_size;		/* How big the buffer is. */
   int	b_used;			/* How much of the buffer we're using, */
   int	b_flag;			/* Flag values. */
   int	b_inputp;		/* The input pointer, index into b_buffer. */
 } BUFFERED_STREAM;
 
+#if 0
 extern BUFFERED_STREAM **buffers;
-
-extern BUFFERED_STREAM *fd_to_buffered_stream ();
+#endif
 
 extern int default_buffered_input;
 
@@ -102,6 +106,7 @@ extern int ungetc_with_restart ();
 extern int check_bash_input __P((int));
 extern int duplicate_buffered_stream __P((int, int));
 extern BUFFERED_STREAM *fd_to_buffered_stream __P((int));
+extern BUFFERED_STREAM *set_buffered_stream __P((int, BUFFERED_STREAM *));
 extern BUFFERED_STREAM *open_buffered_stream __P((char *));
 extern void free_buffered_stream __P((BUFFERED_STREAM *));
 extern int close_buffered_stream __P((BUFFERED_STREAM *));

@@ -197,17 +197,20 @@ the Bash `configure' recognizes.
 
 `--with-glibc-malloc'
      Use the GNU libc version of `malloc' in `lib/malloc/gmalloc.c'.
-     This is somewhat slower than the default `malloc', but wastes
-     considerably less space.
+     This is not the version of `malloc' that appears in glibc version
+     2, but a modified version of the `malloc' from glibc version 1.
+     This is somewhat slower than the default `malloc', but wastes less
+     space on a per-allocation basis, and will return memory to the
+     operating system under some circumstances.
 
 `--with-gnu-malloc'
      Use the GNU version of `malloc' in `lib/malloc/malloc.c'.  This is
      not the same `malloc' that appears in GNU libc, but an older
      version derived from the 4.2 BSD `malloc'.  This `malloc' is very
-     fast, but wastes a lot of space.  This option is enabled by
-     default.  The `NOTES' file contains a list of systems for which
-     this should be turned off, and `configure' disables this option
-     automatically for a number of systems.
+     fast, but wastes some space on each allocation.  This option is
+     enabled by default.  The `NOTES' file contains a list of systems
+     for which this should be turned off, and `configure' disables this
+     option automatically for a number of systems.
 
 `--with-purify'
      Define this to use the Purify memory allocation checker from Pure
@@ -216,6 +219,17 @@ the Bash `configure' recognizes.
 `--enable-minimal-config'
      This produces a shell with minimal features, close to the
      historical Bourne shell.
+
+There are several `--enable-' options that alter how Bash is compiled
+and linked, rather than changing run-time features.
+
+`--enable-profiling'
+     This builds a Bash binary that produces profiling information to be
+     processed by `gprof' each time it is executed.
+
+`--enable-static-link'
+     This causes Bash to be linked statically, if `gcc' is being used.
+     This could be used to build a version to use as root's shell.
 
 The `minimal-config' option can be used to disable all of the following
 options, but it is processed first, so individual options may be
@@ -244,6 +258,9 @@ does not provide the necessary support.
      This allows pipelines as well as shell builtins and functions to
      be timed.
 
+`--enable-cond-command'
+     Include support for the `[[' conditional command.
+
 `--enable-directory-stack'
      Include support for a `csh'-like directory stack and the `pushd',
      `popd', and `dirs' builtins.
@@ -256,6 +273,10 @@ does not provide the necessary support.
 
 `--enable-dparen-arithmetic'
      Include support for the `ksh' `((...))' command.
+
+`--enable-extended-glob'
+     Include support for the extended pattern matching features
+     described above under *Note Pattern Matching::.
 
 `--enable-help-builtin'
      Include the `help' builtin, which displays help on shell builtins

@@ -50,9 +50,10 @@ File operators:
     -x FILE        True if the file is executable by you.
     -O FILE        True if the file is effectively owned by you.
     -G FILE        True if the file is effectively owned by your group.
+    -N FILE        True if the file has been modified since it was last read.
 
-  FILE1 -nt FILE2  True if file1 is newer than (according to
-                   modification date) file2.
+  FILE1 -nt FILE2  True if file1 is newer than file2 (according to
+                   modification date).
 
   FILE1 -ot FILE2  True if file1 is older than file2.
 
@@ -70,12 +71,13 @@ String operators:
     STRING1 != STRING2
                    True if the strings are not equal.
     STRING1 < STRING2
-                   True if STRING1 sorts before STRING2 lexicographically
+                   True if STRING1 sorts before STRING2 lexicographically.
     STRING1 > STRING2
-                   True if STRING1 sorts after STRING2 lexicographically
+                   True if STRING1 sorts after STRING2 lexicographically.
 
 Other operators:
 
+    -o OPTION      True if the shell option OPTION is enabled.
     ! EXPR         True if expr is false.
     EXPR1 -a EXPR2 True if both expr1 AND expr2 are true.
     EXPR1 -o EXPR2 True if either expr1 OR expr2 is true.
@@ -99,12 +101,16 @@ $END
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
 #include "../bashansi.h"
 
 #include "../shell.h"
+#include "../test.h"
 #include "common.h"
 
 extern char *this_command_name;

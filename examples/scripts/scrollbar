@@ -9,17 +9,17 @@
 # converted from ksh syntax to bash v2 syntax by Chet Ramey
 
 WIDTH=${COLUMNS:-80}
+WMINUS=$(( $WIDTH - 1 ))
 
 [ $# -lt 1 ] && set -- TESTING
 
-# Posix.2 compatible printf command or bash loadable builtin
-# in examples/loadables/printf
+# use the bash-2.02 printf builtin
 Text=$(printf "%-${WIDTH}s" "$*")
-Text=$(echo "$Text" | tr ' ' '_')
+Text=${Text// /_}
 
 while :
 do
 	printf "%-.${WIDTH}s\r" "$Text"
-	LastC=$(expr "$Text" : '.*\(.\)$')
-	Text=$(printf "%-.${WIDTH}s" "$LastC$Text")
+	LastC=${Text:${WMINUS}:1}
+	Text="$LastC""${Text%?}"
 done

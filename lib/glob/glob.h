@@ -26,5 +26,6 @@ extern char **glob_filename __P((char *));
 
 extern char *glob_error_return;
 extern int noglob_dot_filenames;
+extern int glob_ignore_case;
 
 #endif /* _GLOB_H_ */

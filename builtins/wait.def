@@ -136,6 +136,12 @@ wait_builtin (list)
 	  UNBLOCK_CHILD (oset);
 	  status = wait_for_job (job);
 	}
+      else if (job_control == 0 && *w == '%')
+	{
+	  /* can't use jobspecs as arguments if job control is not active. */
+	  builtin_error ("job control not enabled");
+	  status = EXECUTION_FAILURE;
+	}
 #endif /* JOB_CONTROL */
       else
 	{

@@ -24,6 +24,9 @@ $PRODUCES setattr.c
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -339,6 +342,7 @@ show_name_attributes (name, nodefs)
      int nodefs;
 {
   SHELL_VAR *var;
+  int ret;
 
   var = find_tempenv_variable (name);
   if (var == 0)
@@ -347,6 +351,8 @@ show_name_attributes (name, nodefs)
   if (var && invisible_p (var) == 0)
     {
       show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      if (tempvar_p (var))
+	dispose_variable (var);
       return (0);
     }
   else

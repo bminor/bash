@@ -29,19 +29,33 @@ extern int noglob_dot_filenames;
 extern char *glob_error_return;
 #endif /* !USE_POSIX_GLOB_LIBRARY */
 
+/* Flag values for quote_string_for_globbing */
+#define QGLOB_CVTNULL	0x01	/* convert QUOTED_NULL strings to '\0' */
+#define QGLOB_FILENAME	0x02	/* do correct quoting for matching filenames */
+
+#if defined (EXTENDED_GLOB)
+/* Flags to OR with other flag args to fnmatch() to enabled the extended
+   pattern matching. */
+#  define FNMATCH_EXTFLAG	(extended_glob ? FNM_EXTMATCH : 0)
+#else
+#  define FNMATCH_EXTFLAG	0
+#endif /* !EXTENDED_GLOB */
+
 extern int glob_dot_filenames;
+extern int extended_glob;
 
 extern int unquoted_glob_pattern_p __P((char *));
 
-/* PATHNAME can contain characters prefixed by CTLESC;; this indicates
+/* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
-   that the glob library recognizes.  If CONVERT_QUOTED_NULLS is non-zero,
+   that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
    we change quoted null strings (pathname[0] == CTLNUL) into empty
    strings (pathname[0] == 0).  If this is called after quote removal
-   is performed, CONVERT_QUOTED_NULLS should be 0; if called when quote
+   is performed, (flags & QGLOB_CVTNULL) should be 0; if called when quote
    removal has not been done (for example, before attempting to match a
-   pattern while executing a case statement), CONVERT_QUOTED_NULLS should
-   be 1. */
+   pattern while executing a case statement), flags should include
+   QGLOB_CVTNULL.  If flags includes QGLOB_FILENAME, appropriate quoting
+   to match a filename should be performed. */
 extern char *quote_string_for_globbing __P((char *, int));
 
 extern char *quote_globbing_chars __P((char *));

@@ -10,6 +10,15 @@ LC_MESSAGES=C
 set +e
 set +o posix
 
+# various alias/unalias errors
+
+# at some point, this may mean to `export' an alias, like ksh, but
+# for now it is an error
+alias -x foo=barz
+unalias -x fooaha
+alias hoowah
+unalias hoowah
+
 # the iteration variable must be a valid identifier
 for 1 in a b c; do echo $1; done
 
@@ -26,6 +35,9 @@ func()
 	echo bar
 }
 
+# bad option
+unset -x func
+
 # cannot unset readonly functions or variables
 unset -f func
 # or make them not readonly
@@ -39,6 +51,9 @@ unset -v XPATH
 # cannot unset invalid identifiers
 unset /bin/sh
 
+# cannot unset function and variable at the same time
+unset -f -v SHELL
+
 # bad option
 declare -z
 # cannot declare invalid identifiers
@@ -48,6 +63,9 @@ declare /bin/sh
 # this is the syntax used to export functions in the environment, but
 # it cannot be used with `declare'
 declare -f func='() { echo "this is func"; }'
+
+# bad option to exec -- this should not exit the script
+exec -i /bin/sh
 
 # try to export -f something that is not a function -- this should be
 # an error, not create an `invisible function'
@@ -74,8 +92,14 @@ let
 # local outside a function is an error
 local
 
+# logout of a non-login shell is an error
+logout
+
 # try to hash a non-existant command
 hash notthere
+
+# bad option to hash, although it may mean `verbose' at some future point
+hash -v
 
 # turn off hashing, then try to hash something
 set +o hashall
@@ -92,6 +116,13 @@ unset AA[-2]
 declare -r AA
 AA=( one two three )
 
+# make sure `readonly -n' doesn't turn off readonly status
+readonly -n AA
+AA=(one two three)
+
+# try to assign a readonly array with bad assignment syntax
+readonly -a ZZZ=bbb
+
 # bad counts to `shift'
 shopt -s shift_verbose
 shift $(( $# + 5 ))
@@ -105,9 +136,9 @@ shopt no_such_option
 umask 09
 umask -S u=rwx:g=rwx:o=rx >/dev/null # 002
 umask -S u:rwx,g:rwx,o:rx >/dev/null # 002
-# this may behave identically to umask without arguments in the future,
-# but for now it is an error
-umask -p
+
+# at some point, this may mean `invert', but for now it is an error
+umask -i
 
 # assignment to a readonly variable in environment
 VAR=4
@@ -129,7 +160,12 @@ for VAR in 1 2 3 ; do echo $VAR; done
 
 # various `cd' errors
 ( unset HOME ; cd )
-( unset OLDPWD ; cd - )
+( HOME=/tmp/xyz.bash ; cd )
+# errors from cd
+cd -
+cd /bin/sh	# error - not a directory
+OLDPWD=/tmp/cd-notthere
+cd -
 
 # various `source/.' errors
 .
@@ -147,15 +183,25 @@ enable sh bash
 # try to set and unset shell options simultaneously
 shopt -s -u checkhash
 
+# someday, this may give `read' a timeout, but for now it is an error
+read -t var < /dev/null
+
 # try to read into an invalid identifier
 read /bin/sh < /dev/null
 
 # try to read into a readonly variable
 read VAR < /dev/null
 
+# bad option to readonly/export
+readonly -x foo
+
 # someday these may mean something, but for now they're errors
 eval -i "echo $-"
 command -i "echo $-"
+
+# this caused a core dump in bash-2.01 (fixed in bash-2.01.1)
+eval echo \$[/bin/sh + 0]
+eval echo '$((/bin/sh + 0))'
 
 # error to list trap for an unknown signal
 trap -p NOSIG
@@ -191,6 +237,13 @@ fg
 kill -s
 # bad argument
 kill -S
+# null argument
+kill -INT ''
+# argument required
+kill -INT
+
+# bad shell option names
+set -o trackall		# bash is not ksh
 
 # this must be last!
 # in posix mode, a function name must be a valid identifier

@@ -4,7 +4,7 @@
 #
 # The bug address depends on the release status of the shell.  Versions
 # with status `alpha' or `beta' mail bug reports to chet@po.cwru.edu.
-# Other versions send mail to bug-bash@prep.ai.mit.edu.
+# Other versions send mail to bug-bash@gnu.org.
 #
 # configuration section:
 #	these variables are filled in by the make target in cpp-Makefile
@@ -34,7 +34,7 @@ BASHTESTERS="bash-testers@po.cwru.edu"
 
 case "$RELSTATUS" in
 alpha*|beta*)	BUGBASH=chet@po.cwru.edu ;;
-*)		BUGBASH=bug-bash@prep.ai.mit.edu ;;
+*)		BUGBASH=bug-bash@gnu.org ;;
 esac
 
 case "$RELSTATUS" in
@@ -69,6 +69,9 @@ else
 	RMAIL=rmail
 fi
 
+# this is raceable
+rm -f $TEMP
+
 cat > $TEMP <<EOF
 From: ${USER}
 To: ${BUGADDR}
@@ -98,8 +101,10 @@ Fix:
 	fix for the problem, don't include this section.]
 EOF
 
-chmod u+w $TEMP
+# this is still raceable
+rm -f $TEMP.x
 cp $TEMP $TEMP.x
+chmod u+w $TEMP
 
 trap '' 2		# ignore interrupts while in editor
 

@@ -3,6 +3,12 @@
 # psize.sh -- determine this system's pipe size, and write a define to
 #             pipesize.h so ulimit.c can use it.
 
+TMPDIR=/tmp
+TMPNAME=pipsize.$$
+TMPFILE=$TMPDIR/$TMPNAME
+
+trap 'rm -f $TMPFILE' 0 1 2 3 6 15
+
 echo "/*"
 echo " * pipesize.h"
 echo " *"
@@ -11,14 +17,20 @@ echo " * Do not edit!"
 echo " */"
 echo ""
 
-./psize.aux 2>/tmp/pipesize | sleep 3
+#
+# Try to avoid tempfile races.  We can't really check for the file's
+# existance before we run psize.aux, because `test -e' is not portable,
+# `test -h' (test for symlinks) is not portable, and `test -f' only
+# checks for regular files
+#
+rm -f $TMPFILE
 
-if [ -s /tmp/pipesize ]; then
-	echo "#define PIPESIZE `cat /tmp/pipesize`"
+./psize.aux 2>$TMPFILE | sleep 3
+
+if [ -s $TMPFILE ]; then
+	echo "#define PIPESIZE `cat $TMPFILE`"
 else
 	echo "#define PIPESIZE 512"
 fi
-
-rm -f /tmp/pipesize
 
 exit 0

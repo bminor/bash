@@ -29,4 +29,8 @@ extern void dispose_words __P((WORD_LIST *));
 extern void dispose_word_array __P((char **));
 extern void dispose_redirects __P((REDIRECT *));
 
+#if defined (COND_COMMAND)
+extern void dispose_cond_node __P((COND_COM *));
+#endif
+
 #endif /* !_DISPOSE_CMD_H_ */

@@ -37,9 +37,9 @@
 #  include <sys/time.h>
 #endif
 
-#if defined (HAVE_SYS_RESOURCE_H) && defined (HAVE_WAIT3) && !defined (_POSIX_VERSION)
+#if defined (HAVE_SYS_RESOURCE_H) && defined (HAVE_WAIT3) && !defined (_POSIX_VERSION) && !defined (RLIMTYPE)
 #  include <sys/resource.h>
-#endif /* !_POSIX_VERSION && HAVE_SYS_RESOURCE_H && HAVE_WAIT3 */
+#endif /* !_POSIX_VERSION && HAVE_SYS_RESOURCE_H && HAVE_WAIT3 && !RLIMTYPE */
 
 #include <sys/file.h>
 #include "filecntl.h"
@@ -165,7 +165,6 @@ extern sigset_t top_level_mask;
 #if defined (ARRAY_VARS)
 static int *pstatuses;		/* list of pipeline statuses */
 static int statsize;
-static void set_pipestatus_array ();
 #endif
 static void setjstatus ();
 static void get_new_window_size ();
@@ -229,7 +228,7 @@ static int waitchld ();
 static PROCESS *find_pipeline ();
 static char *current_working_directory ();
 static char *job_working_directory ();
-static pid_t last_pid ();
+static pid_t find_last_pid (), last_pid ();
 static int set_new_line_discipline (), map_over_jobs (), last_running_job ();
 static int most_recent_job_in_state (), last_stopped_job (), find_job ();
 static void notify_of_job_status (), cleanup_dead_jobs (), discard_pipeline ();
@@ -544,8 +543,13 @@ cleanup_dead_jobs ()
   BLOCK_CHILD (set, oset);
 
   for (i = 0; i < job_slots; i++)
+#if 0
+    if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) &&
+	  (interactive_shell || (find_last_pid (i) != last_asynchronous_pid)))
+#else
     if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
-      delete_job (i);
+#endif
+      delete_job (i, 0);
 
   UNBLOCK_CHILD (oset);
 }
@@ -553,13 +557,16 @@ cleanup_dead_jobs ()
 /* Delete the job at INDEX from the job list.  Must be called
    with SIGCHLD blocked. */
 void
-delete_job (job_index)
-     int job_index;
+delete_job (job_index, warn_stopped)
+     int job_index, warn_stopped;
 {
   register JOB *temp;
 
-  if (jobs_list_frozen)
+  if (job_slots == 0 || jobs_list_frozen)
     return;
+
+  if (warn_stopped && subshell_environment == 0 && STOPPED (job_index))
+    internal_warning ("deleting stopped job %d with process group %d", job_index+1, jobs[job_index]->pgrp);
 
   temp = jobs[job_index];
   if (job_index == current_job || job_index == previous_job)
@@ -582,6 +589,9 @@ nohup_job (job_index)
      int job_index;
 {
   register JOB *temp;
+
+  if (job_slots == 0)
+    return;
 
   if (temp = jobs[job_index])
     temp->flags |= J_NOHUP;
@@ -981,7 +991,17 @@ print_pipeline (p, job_index, format, stream)
 	}
 
       if (format || (p == last))
-	fprintf (stream, "\r\n");
+	{
+	  /* We need to add a CR only if this is an interactive shell, and
+	     we're reporting the status of a completed job asynchronously.
+	     We can't really check whether this particular job is being
+	     reported asynchronously, so just add the CR if the shell is
+	     currently interactive and asynchronous notification is enabled. */
+	  if (asynchronous_notification && interactive)
+	    fprintf (stream, "\r\n");
+	  else
+	    fprintf (stream, "\n");
+	}
 
       if (p == last)
 	break;
@@ -1028,11 +1048,11 @@ pretty_print_job (job_index, format, stream)
 
   p = jobs[job_index]->pipe;
 
+  print_pipeline (p, job_index, format, stream);
+
   /* We have printed information about this job.  When the job's
      status changes, waitchld () sets the notification flag to 0. */
   jobs[job_index]->flags |= J_NOTIFIED;
-
-  print_pipeline (p, job_index, format, stream);
 
   UNBLOCK_CHILD (oset);
 }
@@ -1137,11 +1157,7 @@ make_child (command, async_p)
       /* Close default_buffered_input if it's > 0.  We don't close it if it's
 	 0 because that's the file descriptor used when redirecting input,
 	 and it's wrong to close the file in that case. */
-      if (default_buffered_input > 0)
-	{
-	  close_buffered_fd (default_buffered_input);
-	  default_buffered_input = bash_input.location.buffered_fd = -1;
-	}
+      unset_bash_input (0);
 #endif /* BUFFERED_INPUT */
 
       /* Restore top-level signal mask. */
@@ -1406,20 +1422,30 @@ set_tty_state ()
    process in that job's pipeline.  This is the one whose exit status
    counts. */
 static pid_t
-last_pid (job)
+find_last_pid (job)
      int job;
 {
   register PROCESS *p;
-  sigset_t set, oset;
-
-  BLOCK_CHILD (set, oset);
 
   p = jobs[job]->pipe;
   while (p->next != jobs[job]->pipe)
     p = p->next;
 
-  UNBLOCK_CHILD (oset);
   return (p->pid);
+}
+
+static pid_t
+last_pid (job)
+     int job;
+{
+  pid_t pid;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+  pid = find_last_pid (job);
+  UNBLOCK_CHILD (oset);
+
+  return (pid);
 }
 
 /* Wait for a particular child of the shell to finish executing.
@@ -1431,6 +1457,7 @@ wait_for_single_pid (pid)
 {
   register PROCESS *child;
   sigset_t set, oset;
+  int r, job;
 
   BLOCK_CHILD (set, oset);
   child = find_pipeline (pid);
@@ -1442,7 +1469,20 @@ wait_for_single_pid (pid)
       return (127);
     }
 
-  return (wait_for (pid));
+  r = wait_for (pid);
+
+  /* POSIX.2: if we just waited for $!, we can remove the job from the
+     jobs table. */
+  if (pid == last_asynchronous_pid)
+    {
+      BLOCK_CHILD (set, oset);
+      job = find_job (pid);
+      if (job != NO_JOB && jobs[job] && DEADJOB (job))
+	jobs[job]->flags |= J_NOTIFIED;
+      UNBLOCK_CHILD (oset);
+    }
+
+  return r;
 }
 
 /* Wait for all of the backgrounds of this shell to finish. */
@@ -1759,9 +1799,28 @@ wait_for_job (job)
      int job;
 {
   pid_t pid;
+  int r;
+  sigset_t set, oset;
+
+  BLOCK_CHILD(set, oset);
+  if (JOBSTATE (job) == JSTOPPED)
+    internal_warning ("wait_for_job: job %d is stopped", job+1);
+  UNBLOCK_CHILD(oset);
 
   pid = last_pid (job);
-  return (wait_for (pid));
+  r = wait_for (pid);
+
+  /* POSIX.2: if we just waited for $!, we can remove the job from the
+     jobs table. */
+  if (pid == last_asynchronous_pid)
+    {
+      BLOCK_CHILD (set, oset);
+      if (job != NO_JOB && jobs[job] && DEADJOB (job))
+	jobs[job]->flags |= J_NOTIFIED;
+      UNBLOCK_CHILD (oset);
+    }
+
+  return r;
 }
 
 /* Print info about dead jobs, and then delete them from the list
@@ -2325,6 +2384,7 @@ waitchld (wpid, block)
 		     the original handler is SIG_DFL, we need to resend
 		     the signal to ourselves. */
 		  SigHandler *temp_handler;
+
 		  temp_handler = old_sigint_handler;
 		  /* Bogus.  If we've reset the signal handler as the result
 		     of a trap caught on SIGINT, then old_sigint_handler
@@ -2436,7 +2496,15 @@ notify_of_job_status ()
 	  if ((job_control == 0 && interactive_shell) || startup_state == 2 ||
 		(startup_state == 0 && WIFSIGNALED (s) == 0))
 	    {
+#if 0
 	      if (DEADJOB (job))
+#else
+	      /* POSIX.2 compatibility:  if the shell is not interactive,
+		 hang onto the job corresponding to the last asynchronous
+		 pid until the user has been notified of its status or does
+		 a `wait'. */
+	      if (DEADJOB (job) && (interactive_shell || (find_last_pid (job) != last_asynchronous_pid)))
+#endif
 		jobs[job]->flags |= J_NOTIFIED;
 	      continue;
 	    }
@@ -2448,6 +2516,12 @@ notify_of_job_status ()
 	    {
 	    case JDEAD:
 	      if (interactive_shell == 0 && termsig && WIFSIGNALED (s) &&
+#if 1
+		  termsig != SIGINT &&
+#endif
+#if defined (DONT_REPORT_SIGPIPE)
+		  termsig != SIGPIPE &&
+#endif
 		  signal_is_trapped (termsig) == 0)
 	        {
 		  fprintf (stderr, "%s: line %d: ", get_name_for_error (), line_number);
@@ -2818,9 +2892,11 @@ give_terminal_to (pgrp)
 /* Clear out any jobs in the job array.  This is intended to be used by
    children of the shell, who should not have any job structures as baggage
    when they start executing (forking subshells for parenthesized execution
-   and functions with pipes are the two that spring to mind). */
+   and functions with pipes are the two that spring to mind).  If RUNNING_ONLY
+   is nonzero, only running jobs are removed from the table. */
 void
-delete_all_jobs ()
+delete_all_jobs (running_only)
+     int running_only;
 {
   register int i;
   sigset_t set, oset;
@@ -2832,20 +2908,24 @@ delete_all_jobs ()
       current_job = previous_job = NO_JOB;
 
       for (i = 0; i < job_slots; i++)
-	if (jobs[i])
-	  delete_job (i);
+	if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
+	  delete_job (i, 1);
 
-      free ((char *)jobs);
-      job_slots = 0;
+      if (running_only == 0)
+	{
+	  free ((char *)jobs);
+	  job_slots = 0;
+	}
     }
 
   UNBLOCK_CHILD (oset);
 }
 
 /* Mark all jobs in the job array so that they don't get a SIGHUP when the
-   shell gets one. */
+   shell gets one.  If RUNNING_ONLY is nonzero, mark only running jobs. */
 void
-nohup_all_jobs ()
+nohup_all_jobs (running_only)
+     int running_only;
 {
   register int i;
   sigset_t set, oset;
@@ -2855,7 +2935,7 @@ nohup_all_jobs ()
   if (job_slots)
     {
       for (i = 0; i < job_slots; i++)
-	if (jobs[i])
+	if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
 	  nohup_job (i);
     }
 
@@ -2875,7 +2955,11 @@ mark_dead_jobs_as_notified ()
       BLOCK_CHILD (set, oset);
 
       for (i = 0; i < job_slots; i++)
+#if 0
 	if (jobs[i] && DEADJOB (i))
+#else
+	if (jobs[i] && DEADJOB (i) && (interactive_shell || (find_last_pid (i) != last_asynchronous_pid)))
+#endif
 	  jobs[i]->flags |= J_NOTIFIED;
 
       UNBLOCK_CHILD (oset);
@@ -2910,7 +2994,7 @@ without_job_control ()
 {
   stop_making_children ();
   start_pipeline ();
-  delete_all_jobs ();
+  delete_all_jobs (0);
   set_job_control (0);
 }
 
@@ -3023,30 +3107,3 @@ setjstatus (j)
   set_pipestatus_array (pstatuses);
 #endif
 }
-
-#if defined (ARRAY_VARS)
-static void
-set_pipestatus_array (ps)
-     int *ps;
-{
-  SHELL_VAR *v;
-  ARRAY *a;
-  register int i;
-  char *t;
-
-  v = find_variable ("PIPESTATUS");
-  if (v == 0)
-    v = make_new_array_variable ("PIPESTATUS");
-  if (array_p (v) == 0)
-    return;		/* Do nothing if not an array variable. */
-  a = array_cell (v);
-  if (a)
-    empty_array (a);
-  for (i = 0; ps[i] != -1; i++)
-    {
-      t = itos (ps[i]);
-      array_add_element (a, i, t);
-      free (t);
-    }
-}
-#endif

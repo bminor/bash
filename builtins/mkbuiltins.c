@@ -22,17 +22,19 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
+#ifndef _MINIX
 #include "../bashtypes.h"
 #include <sys/file.h>
+#endif
+
 #include "../posixstat.h"
 #include "../filecntl.h"
-
-#if defined (HAVE_UNISTD_H)
-#  include <unistd.h>
-#endif /* HAVE_UNISTD_H */
 
 #include "../bashansi.h"
 #include <stdio.h>
@@ -437,8 +439,9 @@ extract_info (filename, structfile, externfile)
   register int i;
   DEF_FILE *defs;
   struct stat finfo;
+  size_t file_size;
   char *buffer, *line;
-  int fd;
+  int fd, nr;
 
   if (stat (filename, &finfo) == -1)
     file_error (filename);
@@ -448,12 +451,19 @@ extract_info (filename, structfile, externfile)
   if (fd == -1)
     file_error (filename);
 
-  buffer = xmalloc (1 + (int)finfo.st_size);
+  file_size = (size_t)finfo.st_size;
+  buffer = xmalloc (1 + file_size);
 
-  if (read (fd, buffer, finfo.st_size) != finfo.st_size)
+  if ((nr = read (fd, buffer, file_size)) < 0)
     file_error (filename);
 
   close (fd);
+
+  if (nr == 0)
+    {
+      fprintf (stderr, "mkbuiltins: %s: skipping zero-length file\n", filename);
+      return;
+    }
 
   /* Create and fill in the initial structure describing this file. */
   defs = (DEF_FILE *)xmalloc (sizeof (DEF_FILE));
@@ -466,11 +476,11 @@ extract_info (filename, structfile, externfile)
 
   /* Build the array of lines. */
   i = 0;
-  while (i < finfo.st_size)
+  while (i < file_size)
     {
       array_add (&buffer[i], defs->lines);
 
-      while (buffer[i] != '\n' && i < finfo.st_size)
+      while (buffer[i] != '\n' && i < file_size)
 	i++;
       buffer[i++] = '\0';
     }
@@ -676,7 +686,10 @@ current_builtin (directive, defs)
      DEF_FILE *defs;
 {
   must_be_building (directive, defs);
-  return ((BUILTIN_DESC *)defs->builtins->array[defs->builtins->sindex - 1]);
+  if (defs->builtins)
+    return ((BUILTIN_DESC *)defs->builtins->array[defs->builtins->sindex - 1]);
+  else
+    return ((BUILTIN_DESC *)NULL);
 }
 
 /* Add LINE to the long documentation for the current builtin.
@@ -756,6 +769,11 @@ function_handler (self, defs, arg)
 
   builtin = current_builtin (self, defs);
 
+  if (builtin == 0)
+    {
+      line_error (defs, "syntax error: no current builtin for $FUNCTION directive");
+      exit (1);
+    }
   if (builtin->function)
     line_error (defs, "%s already has a function (%s)",
 		builtin->name, builtin->function);

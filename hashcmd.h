@@ -20,7 +20,7 @@
 
 #include "hashlib.h"
 
-#define FILENAME_HASH_BUCKETS 631
+#define FILENAME_HASH_BUCKETS 107
 
 extern HASH_TABLE *hashed_filenames;
 

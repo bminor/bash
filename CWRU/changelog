@@ -1717,3 +1717,2018 @@ builtins/type.def
 	- free the value returned by find_hashed_filename
 
 [bash-2.01-release frozen]
+
+				    6/6
+				    ---
+configure.in
+	- force shlicc2 and libc malloc for BSD/OS 3.0
+
+				    6/9
+				    ---
+doc/Makefile.in
+	- don't create ${man3dir}, since we're not installing the readline
+	  manual page
+
+lib/readline/readline.h
+	- rl_dispatching should be declared `extern'
+	  [in bash-2.01.1]
+
+				   6/10
+				   ----
+lib/malloc/Makefile.in
+	- make sure ${ALLOCA_SOURCE} is preceded by ${srcdir} so that things
+	  work when building in a directory other than the source directory
+	  [in bash-2.01.1]
+
+				   6/30
+				   ----
+lib/readline/examples/rltest.c
+	- don't free the value returned by history_list()
+
+lib/readline/histfile.c
+	- open the history file for writing with mode 0600 for better
+	  security
+	  [in bash-2.01.1]
+
+execute_cmd.c
+	- select_query now uses legal_number to decide whether the user's
+	  selection is a valid number, and just executes the loop again if
+	  invalid input is entered
+	  [in bash-2.01.1]
+
+				    7/1
+				    ---
+builtins/evalstring.c
+	- fix to parse_and_execute so `bash -c 'time [-p] zzz'' works right
+	  [in bash-2.01.1]
+
+execute_cmd.c
+	- fix to execute_command_internal so that `bash -c time [-p] (zzz)''
+	  works right
+	  [in bash-2.01.1]
+	- print_formatted_time should pass a long as the fourth parameter
+	  to mkfmt 
+	  [in bash-2.01.1]
+
+externs.h, shell.c
+	- `exit_shell' is now a void function
+
+hashlib.c
+	- print_table_stats is now a void function
+
+mailcheck.c
+	- made add_mail_file check for the filename in the mail file list
+	  using the expanded filename, since that is what it puts into
+	  the list
+	  [in bash-2.01.1]
+
+variables.c
+	- for the time being, PWD will be auto-exported, since some systems
+	  seem to expect it
+
+doc/bashref.texi, lib/readline/doc/{hist,rlman}.texinfo
+	- added necessary `dircategory' and `direntry' commands to make
+	  `install-info' work correctly
+
+Makefile.in
+	- move $(LDFLAGS) after $(BUILTINS_LDFLAGS) and $(LIBRARY_LDFLAGS) on
+	  the line that links bash
+
+doc/texinfo.tex
+	- upgraded to version 2.185 from the texinfo-3.9 distribution
+
+lib/tilde/tilde.c
+	- fixed a bug in tilde_expand so that enough space is allocated for
+	  the string and terminating null byte if a `~' does not appear.
+	  This was masked before by the bash malloc()
+	  [in bash-2.01.1]
+
+				    7/3
+				    ---
+aclocal.m4
+	- new test, BASH_TYPE_INT32_T, to check which builtin C type is
+	  32 bits wide
+	- new test, BASH_TYPE_PTRDIFF_T, to check which builtin C type is
+	  appropriate for pointer arithmetic
+
+configure.in
+	- check sizes of int and long, and for the existence of an int32_t
+	  basic system type.  Call BASH_TYPE_INT32_T if int32_t is not
+	  defined anywhere in the system header files
+	- check size of (char *), and for the existence of a ptrdiff_t
+	  basic system type.  Call BASH_TYPE_PTRDIFF_T if ptrdiff_t is not
+	  defined anywhere in the system header files
+	- added a check for <stddef.h>
+
+config.h.in
+	- add lines for SIZEOF_INT, SIZEOF_LONG, SIZEOF_CHAR_P, int32_t,
+	  u_int32_t, and ptrdiff_t
+	- added line for HAVE_STDDEF_H
+
+lib/malloc/malloc.c
+	- new version, with many changes and much better memory usage; old
+	  (bash-2.01) version is lib/malloc/omalloc.c
+
+lib/malloc/gmalloc.c
+	- new version, with a number of changes and range checking included
+	  by default; old (bash-2.01) version is lib/malloc/ogmalloc.c
+
+execute_cmd.c
+	- applied patch from 5/27 to make execute_simple_command fork early
+	  if it's part of a pipeline.  This keeps assignment statements or
+	  other commands that don't require a builtin, function, or disk
+	  command to be executed from modifying the shell's environment
+
+tests/exec?.sub
+	- renamed from tests/execscript.sub? because those filenames are
+	  too long for System V 14-char filename systems
+
+tests/source?.sub
+	- renamed from tests/source.sub? because those filenames are bad
+	  for DOS/Windows
+
+tests/getopts?.sub
+	- renamed from tests/getopts.sub? because those filenames are bad
+	  for DOS/Windows
+
+tests/histexp.{tests,right}
+	- renamed from histexpand.{tests,right} because those filenames are
+	  too long for System V 14-char filename systems
+
+tests/trap1.sub
+	- renamed from trap.sub1 because that filename was bad for DOS/Windows
+
+tests/ifs-[123].right
+	- renamed from ifs.[123].right because those filenames were bad for
+	  DOS/Windows
+
+tests/ifs-[123].test
+	- renamed from ifs-test-[123].sh because those filenames were bad
+	  for DOS/Windows
+
+examples/startup-files/Bashrc.bfox
+	- renamed from examples/startup-files/Bashrc because that filename
+	  conflicts with examples/startup-files/bashrc on case-insensitive
+	  file systems
+
+tests/exec.right
+	- renamed from execscript.right because that filename is too long
+	  for System V 14-char filename systems
+
+tests/run-set-e
+	- renamed from run-set-e-test
+
+tests/misc/perftest
+	- renamed from tests/misc/haertel.perftest because that filename is
+	  too long for System V 14-char filename systems
+
+lib/glob/fnmatch.c
+	- new version with full POSIX.2 BRE matching (character classes,
+	  collating symbols, equivalence classes), full support for
+	  strcoll(3), and case-insensitive pattern matching
+
+lib/glob/fnmatch.h
+	- new version, with necessary symbols for the new fnmatch.c
+
+tests/posixpat.{tests,right}, tests/run-posixpat
+	- test suite for the POSIX.2 BRE pattern matching code
+
+variables.c
+	- make sure that array assignment using the compound syntax empties
+	  the array before doing the assignment
+	  [in bash-2.01.1]
+
+trap.c
+	- new function, trap_to_sighandler(sig), which returns the correct
+	  trap handler for SIG depending on the information in sigmodes[sig]
+	  [in bash-2.01.1]
+
+sig.h
+	- extern declarations for trap_handler and trap_to_sighandler
+	  [in bash-2.01.1]
+
+jobs.c
+	- if we get an interrupt while waiting for a command to complete,
+	  and there was a trap set on SIGINT that resets the handler to
+	  SIG_DFL, the value that waitchld uses for old_trap_handler will
+	  be wrong (it will be trap_handler, but trap_handler no longer
+	  knows anything about SIGINT).  If old_signal_handler is trap_handler,
+	  but signal_is_trapped(SIGINT) returns 0, we need to call
+	  trap_to_sighandler to decide what to do
+	  [in bash-2.01.1]
+
+				    7/7
+				    ---
+locale.c
+	- fix to set_locale_var to handle an assignment to LC_ALL (e.g., as
+	  the result of `unset LANG') when default_locale is null
+	  [in bash-2.01.1]
+
+				    7/8
+				    ---
+builtins/umask.def, doc/{bash.{1,html},bashref.texi}
+	- added `-p' option for umask to print output in a reusable form
+
+				    7/9
+				    ---
+doc/{bash.{1,html},bashref.texi}
+	- removed descriptions of `-type', `-path', and `-all' options to
+	  the `type' builtin in preparation for removing them in the next
+	  release
+
+builtins/type.def
+	- removed mention of `-type', `-path', and `-all' options from the
+	  long help description
+
+error.c, error.h
+	- new function: internal_warning, for warning messages
+
+variables.c
+	- changed a call to internal_error to use internal_warning
+	- modified change of 7/3 so that arrays are not emptied until
+	  just before the shell is about to assign the new values, so
+	  the old value can be used to generate the rhs of the assignment,
+	  if necessary.  This is how `normal' shell variables work
+	  [in bash-2.01.1]
+
+jobs.c, jobs.h
+	- delete_job now takes a second int argument and prints a warning
+	  message when deleting a stopped job if the second argument is
+	  non-zero
+
+jobs.c, builtins/jobs.def
+	- changed all calls to delete_job to provide a proper second arg
+
+lib/readline/bind.c
+	- broke rl_read_init_file into an `upper' and `lower' half in
+	  preparation for adding file inclusion capability to inputrc
+	  parsing
+	- handle_parser_directive now displays an error message if an
+	  unknown directive is encountered
+	- parser_endif now prints an error message if an $endif without
+	  a matching $if is found
+	- added `$include' parser directive to read bindings and commands
+	  from another file at that point
+
+lib/readline/doc/rluser.texinfo, doc/{bash.{1,html},readline.3}
+	- documented new readline `$include' parser directive
+
+shell.c, parse.y
+	- added a new invocation option, --dump-po-strings, and code to
+	  make it dump translatable strings ($"...") in GNU gettext
+	  `po' format
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new `--dump-po-strings' invocation option
+
+lib/readline/{{kill,funmap}.c,readline.h}
+	- added `rl_paste_from_clipboard()', bound to `paste-from-clipboard'
+	  for CYGWIN32 users
+
+lib/readline/kill.c
+	- incorporated bfox's patches for `iterative' yank-last-arg handling.
+	  This means that one can keep pressing M-. and move backwards in
+	  the history, yanking the last argument of successive history lines
+
+lib/readline/rlwinsize.h
+	- new file, encapsulates various locations of the definition for
+	  `struct winsize'
+
+aclocal.m4
+	- augmented BASH_STRUCT_WINSIZE to look in termios.h as well as
+	  sys/ioctl.h for definition of `struct winsize'
+
+lib/readline/rltty.h
+	- include "rlwinsize.h" after including tty-driver-specific header
+	  file
+
+				   7/10
+				   ----
+support/config.guess
+	- add better support for SunOS on M68K (old Sun3 machines)
+
+parse.y
+	- check for compound array assignment in read_token_word only if
+	  there are characters before the `=' (which would make it a legal
+	  assignment statement).  This fixes the problem with defining a
+	  function named `=' with `=() { echo foo; }'
+	  [in bash-2.01.1]
+
+jobs.c, jobs.h
+	- nohup_all_jobs and delete_all_jobs now take a parameter which
+	  says whether or not to restrict their operation to only running
+	  jobs
+
+jobs.c
+	- changed all calls to delete_all_jobs
+
+builtins/jobs.def
+	- added `-a' (all jobs) and `-r' (running jobs only) options to
+	  `disown'
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new `-a' and `-r' options to `disown'
+
+findcmd.c, findcmd.h
+	- new files with command searching code from execute_cmd.c and
+	  function declarations from execute_cmd.h
+
+Makefile.in, builtins/Makefile.in
+	- updated dependencies to account for new findcmd.[ch]
+	- updated dependencies to account for new redir.[ch]
+
+redir.c, redir.h
+	- new files with code that sets up lists and performs redirections
+	  from execute_cmd.c and execute_cmd.h
+
+execute_cmd.c
+	- include new findcmd.h, redir.h
+
+				   7/11
+				   ----
+Makefile.in, configure.in
+	- PROFILE_FLAGS is now substituted into the Makefile by configure
+
+				   7/14
+				   ----
+print_cmd.c
+	- make sure single_quote is called from xtrace_print_word_list
+	  to correctly quote each word of trace output, especially those
+	  with embedded quotes
+	  [in bash-2.01.1]
+
+aclocal.m4
+	- extended BASH_CHECK_GETPW_FUNCS so that it checks that getpwuid
+	  and getpwnam can also be declared, as well as getpwent
+	  [in bash-2.01.1]
+	- in BASH_FUNC_PRINTF, cast printf to type `_bashfunc' before trying
+	  to assign it to `pf' to avoid any prototype problems in the
+	  declaration
+	  [in bash-2.01.1]
+
+trap.c
+	- include <unistd.h> before any of the bash-specific header files,
+	  but after config.h
+	  [in bash-2.01.1]
+
+test.c
+	- include <errno.h> and declare `extern int errno' before including
+	  any of the bash-specific include files, but after <unistd.h>
+	  [in bash-2.01.1]
+
+builtins/Makefile.in
+	- PROFILE_FLAGS is now substituted into the Makefile by configure
+
+configure.in
+	- new options, --enable-profiling and --enable-static-link, to turn
+	  on profiling with gprof and link bash statically (if using gcc)
+	  for use as a root shell.  The former implies the latter.  If
+	  we're linking statically, dynamic loading of new builtins is not
+	  available
+
+doc/bashref.texi
+	- documented new --enable-profiling and --enable-static-link
+	  options in installation section; regenerated INSTALL
+
+lib/glob/glob.[ch]
+	- new global variable, glob_ignore_case, turns on case-insensitive
+	  filename matching in fnmatch() using the FNM_CASEFOLD flag
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new shopt `nocaseglob' option
+
+				   7/15
+				   ----
+bashline.c
+	- when glob_complete_word is called with state == 0, make sure we
+	  set rl_filename_completion_desired so that proper quoting of
+	  the resultant filenames is performed
+	  [in bash-2.01.1]
+
+				   7/16
+				   ----
+externs.h, oslib.c
+	- strcasecmp and strncasecmp replacements should have `const char *'
+	  as the first two arguments, to match OS definitions
+	  [in bash-2.01.1]
+
+				   7/17
+				   ----
+(many files)
+	- changes for minix-2.0, mostly just adding #ifndef _MINIX around
+	  include files that minix doesn't provide, like <sys/param.h> and
+	  <sys/file.h>
+
+lib/readline/terminal.c
+	- removed `outchar' function; use _rl_output_character_function in
+	  its place
+
+support/config.guess
+	- changes to recognize HP_ARCH of `hppa2.0'
+
+test.c
+	- new `-N' option: `test -N file' returns true if FILE exists and
+	  has been modified since it was last accessed
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new `test -N' option
+
+				   7/22
+				   ----
+aclocal.m4
+	- prefer /var/spool/mail to /usr/spool/mail in BASH_DEFAULT_MAIL_DIR
+	  [in bash-2.01.1]
+
+lib/readline/{complete,bind}.c
+	- new readline variable, print-completions-horizontally, which causes
+	  matches to be printed across the screen (like `ls -x') rather than
+	  up-and-down (like `ls')
+	- new readline variable, completion-ignore-case, which causes filename
+	  completion and matching to be performed case-insensitively
+
+doc/{bash.{1,html},readline.3}, lib/readline/doc/rluser.texinfo
+	- documented new print-completions-horizontally variable
+	- documented new completion-ignore-case variable
+
+_distribution, Makefile.in
+	- bumped the version number up to 2.02-alpha1
+
+bracecomp.c
+	- fixes so that the braces are not quoted by the filename quoting
+	  function when complete-into-braces is executed with M-{.  The
+	  brace completion functions do filename quoting themselves
+	  [in bash-2.01.1]
+
+pathexp.c
+	- changed quote_string_for_globbing so that it takes a flags word
+	  as its second argument
+
+pathexp.h
+	- defines for flags passed to quote_string_for_globbing
+
+subst.c,execute_cmd.c
+	- changed calls to quote_string_for_globbing to pass the correct
+	  flag arguments
+
+expr.c
+	- added a `**' binary operator to do exponentiation (2**16 == 65536).
+	  precedence is lower than arithmetic operators, higher than unary
+	  operators (2**16-1 == 65535)
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new `**' arithmetic binary operator
+
+				   7/24
+				   ----
+shell.c
+	- added new (currently undocumented) `--wordexp' option to do the
+	  job required by POSIX.2 wordexp().  If -n is supplied along with
+	  --wordexp, command substitution is disallowed and the shell
+	  exits with a status of 125 if one is attempted.  If there is an
+	  expansion error, the shell exits with a status of 127.  If there
+	  is a shell parsing error, the shell exits with a status of 126.
+	  Otherwise, the exit status is 0.  The current output is
+
+		number of words\n
+		number of bytes\n
+		expanded words, one per line, separated by newlines
+
+	  This will have to be changed when an interface to glibc is coded
+
+				   7/28
+				   ----
+hashcmd.h
+	- reduced the default size of the filename hash table from 631
+	  to 107
+
+sig.c
+	- don't call initialize_siglist if HAVE_UNDER_SYS_SIGLIST is defined
+	  [in bash-2.01.1]
+
+siglist.c
+	- don't compile this file if HAVE_UNDER_SYS_SIGLIST is defined
+	  [in bash-2.01.1]
+
+variables.c
+	- fix to make $RANDOM work better in subshells
+	  [in bash-2.01.1]
+
+aclocal.m4
+	- new macro, BASH_DECL_UNDER_SYS_SIGLIST, looks for _sys_siglist in
+	  <signal.h> and <unistd.h>, defines UNDER_SYS_SIGLIST_DECLARED if
+	  found
+	  [in bash-2.01.1]
+	- change BASH_UNDER_SYS_SIGLIST to require BASH_DECL_UNDER_SYS_SIGLIST,
+	  like BASH_SYS_SIGLIST requires AC_DECL_SYS_SIGLIST
+	  [in bash-2.01.1]
+
+config.h.in
+	- add a line for UNDER_SYS_SIGLIST_DECLARED
+	  [in bash-2.01.1]
+
+configure.in
+	- make sure that SVR4_2 is defined for machines that have $host_os
+	  sysv4.2* (e.g., sysv4.2MP) as well as $host == sysv4.2
+	  [in bash-2.01.1]
+
+				   7/29
+				   ----
+command.h
+	- new command type, ARITH_COM, used to create and execute a ((...))
+	  command without translating it into let "..."
+
+parse.y
+	- changes to the grammar and lexer so that ((...)) is parsed as a
+	  command of type ARITH_CMD.  An ARITH_CMD is a WORD_LIST, for
+	  future expansion, even though only the first word is used
+
+make_cmd.c, make_cmd.h
+	- definition and declaration of a function to build an arithmetic
+	  command
+
+dispose_cmd.c
+	- added code to dispose of arithmetic commands
+
+print_cmd.c
+	- added code to print arithmetic commands, both `regularly' and
+	  when they're being traced with `set -x'
+
+externs.h
+	- extern declaration for xtrace_print_arith_cmd
+
+copy_cmd.c
+	- added code to copy arithmetic commands
+
+execute_cmd.c
+	- added code to directly execute arithmetic commands -- they are
+	  a shell_control_structure, so just about everything like
+	  redirections and piping is taken care of by the boilerplate code.
+	  All that's needed is to expand the expression (which is within
+	  double quotes -- added by parse.y:parse_arith_cmd()), print it
+	  if tracing is enabled, call the expression evaluator, and return
+	  an appropriate result
+
+				   7/30
+				   ----
+input.c
+	- new function, set_buffered_stream(fd, bp), sets the buffered stream
+	  associated with FD to BP and returns the old buffered stream
+
+input.h
+	- extern declaration for set_buffered_stream
+
+parse.y
+	- call set_buffered_stream rather than manipulating the BUFFERS array
+	  directly
+
+shell.c
+	- unset_bash_input now takes an argument, CHECK_ZERO.  This tells it
+	  whether to check whether default_buffered_input is >= 0 or just > 0
+
+externs.h
+	- changed extern declaration for unset_bash_input
+
+execute_cmd.c, jobs.c, nojobs.c
+	- changed calls to unset_bash_input to add appropriate argument
+
+input.h
+	- #undef B_* before defining them as flag values for b_flags.  Some
+	  systems, like SVR4, have a B_ERROR define in a file included by
+	  jobs.c and nojobs.c, and it causes a warning
+
+				   7/31
+				   ----
+fnmatch.c
+	- rewrote most of fnmatch(), so that it now implements ksh-88 style
+	  pattern matching (`[@+*?!](patlist)') if the FNM_EXTMATCH flag
+	  is set
+
+fnmatch.h
+	- added a define for FNM_EXTMATCH
+
+				    8/4
+				    ---
+lib/readline/display.c
+	- fixed _rl_redisplay_after_sigwinch () so that it really redisplays
+	  only the portion after the final newline of a multi-line prompt
+	  [in bash-2.01.1]
+
+bashline.c
+	- attempt_shell_completion no longer returns matches if a glob pattern
+	  matches more than one filename -- it caused too many problems
+	  [in bash-2.01.1]
+
+				    8/5
+				    ---
+lib/glob/glob.c
+	- updated glob_pattern_p so that the extended matching operators
+	  are recognized
+
+pathexp.c
+	- udpated unquoted_glob_pattern_p so that the extended matching
+	  operators are recognized
+	- udpated quote_globbing_chars so that the extended matching
+	  operators are recognized and quoted appropriately
+
+subst.c
+	- updated match_pattern_char so that the extended matching operators
+	  are recognized
+
+parse.y
+	- updated read_token_word so that it parses an extended matching
+	  pattern as a single word
+
+jobs.c
+	- if a job is suspended with SIGTSTP, and the user has set
+	  checkwinsize with `shopt', update the window size
+	  [in bash-2.01.1]
+
+pathexp.c, pathexp.h
+	- new global variable, extended_glob, controls whether the extended
+	  pattern matching features are enabled
+
+pathexp.h
+	- new define, FNMATCH_EXTFLAG, to be OR'd with other values for
+	  flags argument to fnmatch to enable the extended pattern matching
+	  features if extended_glob is set
+
+{pathexp,execute_cmd,bashhist,subst,test}.c, builtins/help.def
+	- changed calls to fnmatch to add FNMATCH_EXTFLAG to the flags arg if
+	  extended_glob is non-zero
+
+lib/glob/glob.c
+	- changed flags arg passed to fnmatch to include FNM_EXTMATCH if
+	  extended_glob is non-zero (#ifdef SHELL)
+
+				    8/6
+				    ---
+builtins/shopt.def
+	- added a new `extglob' shell option, controls the value of
+	  extended_glob
+
+				    8/7
+				    ---
+doc/{bash.{1,html},bashref.texi}
+	- documented new extended pattern matching operators and the `extglob'
+	  shell option
+
+tests/{extglob.{tests,right},run-extglob}
+	- test suite for the new extended globbing features
+
+				    8/8
+				    ---
+parse.y, pathexp.h, lib/glob/fnmatch.c
+	- made the extended globbing code #ifdef EXTENDED_GLOB
+
+config.h.in
+	- added a line for EXTENDED_GLOB, controlled by configure
+
+configure.in
+	- new option, --enable-extended-glob, controls defining of
+	  EXTENDED_GLOB (on by default)
+
+doc/bashref.texi
+	- documented new `configure' `--enable-extended-glob' option
+
+				   8/11
+				   ----
+builtins/printf.def
+	- new `printf' builtin, implemented according to POSIX.2 spec
+	  for printf(1)
+
+Makefile.in,builtins/Makefile.in
+	- added necessary stuff for new printf builtin
+
+				   8/12
+				   ----
+lib/readline/isearch.c
+	- change to make ^G interrupt the incremental search correctly
+	  [in bash-2.01.1]
+
+configure.in, config.h.in
+	- configure now checks for the availability of strtoul(3)
+
+builtins/printf.def
+	- use strtoul for the `%o', `%u', `%x', and `%X' formats if it
+	  is available
+
+				   8/13
+				   ----
+tests/{printf.{right,tests},run-printf}
+	- extensive test suite for the new `printf' builtin
+
+builtins/Makefile.in
+	- change so that `builtext.h' is not recreated every time the source
+	  file for a builtin is changed if the contents are the same.  This
+	  keeps many files from being recompiled
+
+				   8/14
+				   ----
+subst.c
+	- changed verify_substring_values so that it returns -1 for substring
+	  range errors, 0 for expression errors, and 1 for success
+	  [in bash-2.01.1]
+	- changed parameter_brace_substring to return an error if
+	  verify_substring_values returns 0, and a null string if it returns
+	  -1.  This matches the ksh93 behavior
+	  [in bash-2.01.1]
+
+trap.c
+	- changed decode_signal so that it makes sure the first three
+	  characters of a signal name are `SIG' before allowing the `SIG'
+	  prefix to be omitted.  This is so a signal spec of `T' does not
+	  match `EXIT', for instance
+	  [in bash-2.01.1]
+
+builtins/trap.def
+	- make sure that showtrap() displays traps for signals with unknown
+	  names using the signal number
+	  [in bash-2.01.1]
+shell.c
+	- make sure that `bash -r' doesn't turn on the restricted mode until
+	  after the startup files are executed
+	  [in bash-2.01.1]
+
+doc/{bash.{1,html},bashref.texi}
+	- documented printf builtin
+
+				   8/15
+				   ----
+general.c
+	- added \xNNN escape to ansicstr -- NNN are up to three hex digits.
+	  This affects $'...', `echo -e', and printf
+
+builtins/printf.def
+	- added \xNNN escape to bexpand -- NNN are up to three hex digits.
+	  This affects printf's `%b' conversion specifier
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new \xNNN escape sequence for echo, $'...', and printf
+
+builtins/setattr.def
+	- make sure that a variable found in the temp environment does not
+	  cause a null string to be assigned by bind_variable (e.g.,
+		foo="" export foo
+	  )
+	  [in bash-2.01.1]
+
+				   8/18
+				   ----
+subst.c
+	- fixed a bug that sometimes caused bad memory (pointer into an
+	  allocated block) to be passed to free when doing arithmetic
+	  substitution.  Bug report from stevet@myofb.org
+	  [in bash-2.01.1]
+
+				   8/19
+				   ----
+subst.c
+	- considerable changes:  moved the code that expands a single
+	  $... parameter expansion into a separate function: param_expand()
+	  This function returns a string, which may contain characters
+	  quoted with CTLESC or CTLNUL without doing word splitting
+	- changed expand_word_internal to not remove the expansion of "$*"
+	  if the number of positional parameters is > 0
+	- changed the '"' case of expand_word_internal to remove quoted
+	  nulls from the resultant word if the expansion was not "$@", and
+	  the word is not a quoted null string ([] == CTLNUL, [1] == '\0')
+
+subst.c, variables.c
+	- moved the code that handles special variables from subst.c to
+	  variables.c
+
+				   8/20
+				   ----
+subst.c
+	- rearranged the source a bit to group functions with similar
+	  operation together
+	- fixed parameter_brace_expand so that it no longer allows
+	  indirect expansion of `special' variables
+	- fixed parameter_brace_expand so taking the length of some of
+	  the shell's special parameters works again
+	- moved all of the code that computes the length of a shell
+	  parameter (the ${#xxx} expansion) into parameter_brace_expand_length.
+	  Previously, the code that handled the lengths of the shell's
+	  special parameters was in parameter_brace_expand_word
+	- valid indirect expansions are now only variable names or positional
+	  parameters
+
+				   8/21
+				   ----
+subst.c
+	- fixed param_expand to raise an expansion error if $! is being
+	  expanded and no asynchronous processes have been created
+	- an expression error in a $((...)) arithmetic expansion now causes
+	  a non-interactive shell running in POSIX mode to exit
+	- relaxed change of 8/20 to allow indirect references to $#, $@, $*
+
+builtins/bashref.texi
+	- documented new posix-mode exit on invalid expressions in $((...))
+
+lib/readline/complete.c
+	- don't call rl_strpbrk unless rl_filename_quote_characters is not
+	  NULL -- strpbrk requires non-NULL arguments
+	  [in bash-2.01.1]
+
+				   8/22
+				   ----
+bashline.c
+	- don't make `history-expand-line' a bindable command unless
+	  BANG_HISTORY is defined, and don't compile the code for that
+	  command in unless BANG_HISTORY is defined
+	- make history_expand_line(), tcsh_magic_space(), alias_expand_line(),
+	  and history_and_alias_expand_line() int-returning functions that
+	  return 0 for success and non-zero on error.  This allows
+	  tcsh_magic_space() to just call history_expand_line() and insert
+	  a space if that returns successfully
+	- `magic-space' is now a bindable readline command
+
+doc/bash.{1,html}, lib/readline/doc/rluser.texinfo
+	- documented new `magic-space' bindable readline command
+
+				   8/25
+				   ----
+parse.y
+	- fixed decode_prompt_string so that values of $PWD longer than
+	  PATH_MAX don't cause buffer overruns (char t_string[PATH_MAX])
+	  [in bash-2.01.1]
+
+general.c
+	- fixed polite_directory_format so that values of $HOME longer
+	  than PATH_MAX don't cause buffer overruns (char tdir[PATH_MAX])
+	  [in bash-2.01.1]
+
+subst.c
+	- fix to expansion of $* so that the positional parameters are
+	  separated by the first character of $IFS, even when the expansion
+	  is not within double quotes, so the correct split is still
+	  performed even when IFS does not contain a space.  Works for
+	  ${*}, too
+	- fix to expansion of $@ so that the positional parameters are
+	  separated by the first character of $IFS, even when the expansion
+	  is not within double quotes, so the correct split is still
+	  performed even when IFS does not contain a space.  Works for
+	  ${@}, too
+	- new function, string_list_dollar_at(), which is to $@ as
+	  string_list_dollar_star is to $*
+	- fixed expansion of $@ so that splitting is still done even if
+	  IFS is unset or NULL, as POSIX.2 specifies (section 3.5.2)
+	- fixed expansion of $* so that it expands to multiple words if there
+	  is more than one positional parameter, just like $@, even if
+	  IFS is unset or NULL
+	- new function list_quote_escapes, quotes (with CTLESC) all
+	  CTLESC and CTLNUL characters in each member of the list
+
+tests/dollar-{at,star}.sh
+	- combined into dollar-at-star, changed run-dollars accordingly
+
+				   8/26
+				   ----
+Makefile.in
+	- make the `tests' target use $(SHELL) instead of hardcoding `sh'
+
+				   8/29
+				   ----
+subst.c
+	- expand_word_list_internal now takes a flags word as the second
+	  argument, telling which expansions to perform on the WORD_LIST
+	- broke expand_word_list_internal into several functions: one
+	  each to do brace expansion, glob expansion, and the `normal'
+	  shell expansions
+	- new extern function: expand_words_shellexp() to perform the
+	  `normal' shell expansions on a WORD_LIST
+
+subst.h
+	- extern declaration for expand_words_shellexp
+
+bashline.c
+	- fixed a problem with attempt_shell_completion where it attempted
+	  to refer to rl_line_buffer[-1] (completion at the start of the
+	  line, which means that ti == -1, which means that the test for
+	  rl_line_buffer[ti] at line 715 was an array bounds error
+	  [in bash-2.01.1]
+
+eval.c
+	- new function, parse_string_to_word_list(), which takes a string
+	  and runs it through the parser, returning the resultant word
+	  list
+
+externs.h
+	- new extern declaration for parse_string_to_word_list()
+
+variables.c
+	- change assign_array_var_from_string to first split the string
+	  between the parens on whitespace, then expand the resultant
+	  list of words with all the shell expansions before doing the
+	  assignment
+
+				    9/4
+				    ---
+redir.c, redir.h
+	- redirection_error is no longer a static function
+
+builtins/evalstring.c
+	- changes to handle $( < filename ) (equivalent to $(cat filename))
+	  as in ksh
+
+lib/readline/bind.c
+	- added two new functions: rl_unbind_function_in_map(func, map),
+	  which unbinds all keys that execute FUNC in MAP; and
+	  rl_unbind_command_in_map(command, map), which unbinds all keys
+	  bound to COMMAND in MAP
+
+lib/readline/readline.h
+	- extern declarations for rl_unbind_{function,command}_in_map
+
+lib/readline/doc/rltech.texi
+	- documented rl_unbind_{function,command}_in_map
+
+builtins/bind.def
+	- added a new option, -u FUNCNAME, which unbinds all key sequences
+	  bound to FUNCNAME in the specified (or current) keymap
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new $( < filename ) command substitution
+	- documented new bind -u FUNCNAME option
+
+				    9/5
+				    ---
+shell.c
+	- send SIGHUP to all jobs when an interactive login shell exits if
+	  the variable `hup_on_exit' is non-zero
+	- modified run_startup_files so that if `NON_INTERACTIVE_LOGIN_SHELLS'
+	  is #define'd (perhaps in config.h.top, though there is nothing there
+	  for it), all login shells (interactive and non-interactive) run
+	  /etc/profile and one of the per-user login shell startup files
+
+builtins/shopt.def
+	- new shopt option `huponexit' to control the value of hup_on_exit
+
+doc/{bash.{1,html},bashref.texi}
+	- documented new `huponexit' shell option
+
+				    9/8
+				    ---
+builtins/common.c
+	- changed contains_shell_metas to return 1 if a tilde appears at the
+	  start of a string or after a `=' or `:'
+	- changed backslash_quote to quote a tilde if it appears at the start
+	  of a string or after a `=' or `:'
+
+lib/readline/complete.c
+	- moved rl_tilde_expand to util.c; it doesn't really have anything
+	  to do with completion
+	- moved insert_text to readline.c, renamed it _rl_replace_text (since
+	  that's really what it does), changed callers
+	- moved code that postprocesses the list of completion matches into
+	  a new function: postprocess_matches
+	- new implementation of tcsh-like menu completion in a single new
+	  function: rl_menu_complete
+
+lib/readline/{funmap.c,readline.h}
+	- necessary declarations for binding rl_menu_complete to the
+	  new `menu-complete' command
+
+doc/{bash.{1,html},readline.3}, lib/readline/doc/rluser.texinfo
+	- documented new `menu-complete' bindable readline command
+
+				    9/9
+				    ---
+jobs.c
+	- delete_job should print a warning only if subshell_environment
+	  is 0, so we don't print bogus warnings when shell scripts without
+	  a leading #! are executed
+
+				   9/10
+				   ----
+builtins/read.def
+	- fixed the code so that the `read' is automatically restarted when
+	  it returns -1 with errno == EINTR.  SIGINT is handled by the
+	  interrupt handler, since interrupt_immediately is set to 1, so
+	  this handles things like SIGCHLD
+	  [in bash-2.01.1]
+
+				   9/11
+				   ----
+test.c
+	- reorganized the code slightly to make it easier to add the ksh-like
+	  [[...]] compound command
+
+test.h
+	- new file, with extern declarations for functions available in test.c
+
+externs.h
+	- moved declaration of test_command to test.h
+
+builtins/test.def
+	- include `test.h'
+
+				   9/16
+				   ----
+{command,make_cmd,dispose_cmd,externs,subst}.h
+parse.y, subst.c
+{make,dispose,copy,print,execute}_cmd.c
+	- changes to add the new ksh-93 compatible [[...]] conditional command
+
+configure.in
+	- new enable option, --enable-cond-command, to compile in the [[...]]
+	  command code
+
+config.h.in
+	- new #define, COND_COMMAND, to compile in the [[...]] command code
+
+tests/{run-cond,cond.{tests,right}}
+	- test suite for the new [[...]] command
+
+{builtins,lib/{readline,glob,tilde}}/Makefile.in
+	- explicit dependencies for .o files on .c files for losing makes
+	  like Solaris
+
+doc/{bash.{1,html},bashref.texi}
+	- documented the new `[[' compound command
+	- documented the test/[ builtin behavior based on the number of
+	  arguments in the description of the builtin
+	- made a new section for conditional expressions that just lists
+	  the available primaries -- the connectives and other operators
+	  are listed in the description of the [[ command and the test/[
+	  builtin
+
+				   9/18
+				   ----
+builtins/set.def
+	- minus_o_option_commands is now a global function so the shopt
+	  code can use it
+	- minus_o_option_commands now takes an argument telling it which
+	  options to print, just like list_minus_o_options
+	- new function, print_minus_o_option, which prints the value of
+	  a `set -o' option either in the traditional format or in the
+	  format used by `set +o'
+	- changed list_minus_o_opts and minus_o_option_commands to call
+	  print_minus_o_option
+
+builtins/shopt.def
+	- `shopt -p' now causes output to be printed in a format reusable
+	  as input (the format is a series of shopt commands, like the
+	  output of `set +o')
+	- fixed a bug that made `shopt -so' and `shopt -uo' not work
+	- fixed list_shopt_o_options so that `shopt -op' acts like `set +o'
+	- fixed list_shopt_o_options to that `shopt -op optname' prints the
+	  value of optname in a reusable format
+	- fixed list_some_o_options so that `shopt -ops' and `shopt -opu'
+	  work and display output in a reusable format
+
+				   9/19
+				   ----
+doc/{bash.{1,html},bashref.texi}
+	- documented new `shopt -p' behavior
+
+shell.c
+	- made `bash +o' display the same output as `set +o' and then
+	  start an interactive shell (previously `bash -o' and `bash +o'
+	  displayed the same thing)
+
+builtins/common.h
+	- added prototypes to the extern function declarations
+
+				   9/22
+				   ----
+builtins/evalstring.c
+	- fixed the DISCARD case of the jump_to_top_level so that it
+	  doesn't try to call dispose_command(command) after the
+	  `pe_dispose' unwind frame gets run, since that disposes the
+	  command
+
+				   9/23
+				   ----
+test.[ch]
+	- test_eaccess is now a global function so that globbing code can
+	  use it
+
+lib/glob/glob.c
+	- rewrote glob_vector to be slightly more efficient and to not
+	  read the directory if the filename pattern does not contain
+	  any globbing chars.  This satisfies the POSIX requirement that
+	  read permission is not required for a directory when the
+	  pathname component does not contain a pattern character (bug
+	  reported by jsm28@cam.ac.uk)
+
+subst.c
+	- fixed parameter_brace_expand so that ${array[@]} and ${array[*]}
+	  behave correctly when IFS is unset or set to something that does
+	  not contain a space (they should result in separate words, just
+	  like $@ and $*)
+
+tests/{run-array2,array-at-star,array2.right}
+	- tests for the expansions of ${array[@]} and ${array[*]}, derived
+	  from the tests in dollar-at-star
+
+				   9/24
+				   ----
+jobs.c
+	- fixed cleanup_dead_jobs so that it doesn't remove the job
+	  containing last_asynchronous_pid from the job table.  This
+	  fixes the POSIX.2 `wait' requirement problem
+
+				   9/25
+				   ----
+parse.y
+	- added `\r' escape sequence to the prompt expansion code
+
+lib/readline/chardefs.h
+	- added defines for ISOCTAL, OCTVALUE, isxdigit (if not defined),
+	  and HEXVALUE
+
+lib/readline/bind.c
+	- added `normal' echo/printf-like backslash escapes to the
+	  key sequence translation code, with the addition that \d
+	  expands to RUBOUT.  This means that key sequence definitions
+	  (before the `:') and macro values may contain these special
+	  backslash-escape sequences
+	- now that we can translate octal escape sequences in key bindings,
+	  change _rl_get_keyname so that it turns characters with values
+	  128-159 inclusive into octal escape sequences (\200-\237), since
+	  those characters are not ASCII or ISO Latin 1
+
+doc/{bash.{1,html},readline.3}, lib/readline/doc/rluser.texinfo
+	- documented new backslash escapes for readline key sequence and
+	  macro translation
+
+builtins/pushd.def
+	- new function, get_dirstack_from_string(char *string), returns an
+	  element from the directory stack or null, treating the argument
+	  exactly as `dirs string' would, with the exception that if
+	  the first character of `string' is not `+' or `-', a `+' is
+	  assumed
+
+builtins/common.h
+	- new extern declaration for get_dirstack_from_string
+
+general.c
+	- added code to bash_special_tilde_expansions to get the expansion
+	  using get_dirstack_from_string() if the first character of the
+	  tilde-prefix is a digit or the first character is a `+' or `-'
+	  and the second is a digit
+
+tests/dstack.{tests,right}
+	- renamed from dirstack.{tests,right}
+
+tests/dtack2.{tests,right}
+	- new tests for the directory stack tilde expansion code
+
+tests/run-dirstack
+	- now runs both dstack and dstack2
+
+				   10/3
+				   ----
+trap.c
+	- reordered header file inclusion for irix 4
+
+execute_cmd.c
+	- fixed select_query so that a reply that is not a number is treated
+	  the same as a numeric reply that is out of range
+
+lib/readline/util.c
+	- added a backwards-compatibility definition of _rl_savestring()
+
+builtins/set.def
+	- initialize_shell_options now takes an argument saying whether or
+	  not we should parse $SHELLOPTS from the environment.  The shell
+	  does not parse the value if it's restricted, running setuid, or
+	  running in `privileged mode'
+
+shell.c
+	- change call to initialize_shell_options to add the correct argument
+
+builtins/common.h
+	- changed extern declaration for initialize_shell_options
+
+doc/{bash.{1,html},bashref.texi}
+	- added note that the shell ignores $SHELLOPTS in the environment at
+	  startup if running in privileged mode
+	- added note that the restricted shell does not parse $SHELLOPTS from
+	  the environment at startup
+
+				   10/6
+				   ----
+aclocal.m4
+	- change BASH_RLIMIT_TYPE so that it looks for rlim_t in
+	  <sys/resource.h> as well as <sys/types.h>, for Solaris 2.6
+	- new macro, BASH_LARGE_FILE_SUPPORT, to enable special compilation
+	  options for large files on Solaris 2.6 (from eggert@twinsun.com)
+
+mailcheck.c
+	- the `file_size' member of the FILEINFO struct should be of
+	  type `off_t'
+	- the `size' variable in file_has_grown should be of type `off_t'
+	- the RESET_MAIL_FILE macro should initialize file_size to 0, not 0L
+
+builtins/Makefile.in
+	- LDFLAGS and LOCAL_LDFLAGS are now set by configure
+	- `mkbuiltins' is now created from `mkbuiltins.o' instead of directly
+	  from the source to the executable
+
+builtins/evalfile.c
+	- fixed _evalfile so that it handles large files correctly on
+	  systems where the st_size member of `struct stat' will not fit
+	  into an `int'
+
+builtins/mkbuiltins.c
+	- don't assume that st_size fits into an int
+
+input.[ch]
+	- the `b_size' member of a struct BSTREAM is now of type `size_t'
+	- changed third argument to make_buffered_stream to size_t; changed
+	  caller
+	- changed `size' variable in fd_to_buffered_stream to type `size_t'
+
+general.h
+	- include <sys/resource.h> if HAVE_SYS_RESOURCE_H and RLIMTYPE are
+	  both defined, for possible necessary definition of RLIMTYPE
+	  (e.g., on Solaris 2.6)
+
+{execute_cmd,jobs}.c, builtins/times.def
+	- don't include <sys/resource.h> explicitly if RLIMTYPE is defined,
+	  since general.h will include it in that case
+
+lib/readline/bind.c
+	- new function, char *_rl_read_file(filename, sizep), which reads
+	  FILENAME into a malloced buffer, returning the buffer and the
+	  size of the buffer in *SIZEP
+
+lib/readline/histfile.c
+	- changed read_history_range and history_truncate_file to handle
+	  large files
+
+hashcmd.c
+	- find_hashed_filename should not add `./' to the front of a pathname
+	  that already begins with `./'
+
+				   10/8
+				   ----
+support/config.sub
+	- recognize `hppa2.0' as a valid machine architecture
+
+aclocal.m4
+	- changed BASH_CHECK_LIB_TERMCAP so that `gnutermcap' is not chosen
+	  if `$prefer_curses' is set to something
+
+bashhist.c
+	- don't use HISTCONTROL or HISTIGNORE to remove lines from the
+	  second and subsequent lines of a multi-line command
+	  (current_command_line_count > 1).  Old code did this only when
+	  command-oriented-history was enabled
+
+doc/{bash.{1,html},bashref.texi}
+	- changed descriptions of HISTCONTROL and HISTIGNORE to state that
+	  these variables are not applied to the second and subsequent
+	  lines of a multi-line command
+
+builtins/hash.def, {copy,dispose}_cmd.c
+	- include "bashtypes.h" -- cray machines need it because of their
+	  oddball definition of `word'
+
+configure.in
+	- changed check of ${host_cpu} to check for `*cray*' and `*Cray*'
+	  when deciding whether to include the GNU malloc, since it
+	  seems that ${host_cpu} gets set to `CrayYMP'
+
+				   10/9
+				   ----
+configure.in
+	- look for strtod and strtol in libc
+	- make lib/sh directory in build directory if not there
+	- create lib/sh/Makefile
+
+config.h.in
+	- added HAVE_STRTOD and HAVE_STRTOL
+
+Makefile.in
+	- changes for lib/sh/libsh.a (shell library)
+
+builtins/printf.def
+	- took out the `#ifdef STRTOUL' code, since strtoul is in libsh.a,
+	  and will be resolved from there if it's not in libc
+
+variables.c
+	- call strtol() instead of string_to_long()
+
+general.c, general.h
+	- removed string_to_long
+	- changed legal_number to use strtol so it correctly sets errno
+	  to ERANGE on overflow
+	- moved bash_getcwd_errstr here from lib/sh/oslib.c
+
+externs.h
+	- moved extern declarations for functions defined in libsh to a
+	  separate section of the file, added extern declarations for
+	  other functions in libsh
+
+builtins/ulimit.def
+	- changed macro definition for string_to_rlimtype to call strtol
+	  directly instead of string_to_long
+
+lib/sh/clktck.c
+	- moved get_clock_tck to its own file, since it's compiled in
+	  unconditionally
+
+				   10/10
+				   -----
+lib/sh/getenv.c
+	- moved getenv() and __getenv() here from lib/sh/oslib.c
+
+lib/sh/{setlinebuf,strerror,strcasecmp}.c
+	- moved {setlinebuf,strerror,strcasecmp}() from oslib.c to
+	  individual files
+
+lib/sh/Makefile.in, Makefile.in
+	- changes for new files in lib/sh
+
+aclocal.m4
+	- new macro BASH_SYS_RESTARTABLE_SYSCALLS, which does what
+	  AC_SYS_RESTARTABLE_SYSCALLS does, but using posix sigaction()
+
+configure.in
+	- call BASH_SYS_RESTARTABLE_SYSCALLS if ac_cv_sys_restartable_syscalls
+	  is `no'
+
+				   10/13
+				   -----
+builtins/jobs.def
+	- catch out-of-range jobs better in disown_builtin
+
+configure.in
+	- don't build with GNU malloc on cygwin32
+
+trap.c
+	- change signal_name to handle the case where signal_names[sig] is
+	  NULL, which can happen on cygwin32
+
+execute_cmd.c
+	- changes to do_piping to make pipes text mode (O_TEXT) on cygwin32
+
+cross-build
+	- new directory with cache files and other stuff for cross-compiling
+	  bash (currently only for building for cygwin32 on a Unix machine)
+
+cross-build/cygwin32.cache
+	- new file containing configuration variable assignments for
+	  cygwin32 that would otherwise require a default case for AC_TRY_RUN
+
+configure.in
+	- source ${srcdir}/cross-build/cygwin32.cache on CYGWIN32 systems
+	  if we're cross-compiling on a unix machine
+	- set $CC_FOR_BUILD for cygwin32 cross-compiling environment
+
+Makefile.in
+	- CC_FOR_BUILD is now a variable set by configure
+
+builtins/mkbuiltins.c
+	- only check for read(2) returning <= 0 in extract_info() (error
+	  and exit on < 0, warning and return on == 0)
+
+builtins/evalfile.c
+	- only check for read(2) returning <= 0 in _evalfile() (error and
+	  and failure return on < 0, success on == 0 while short-circuting
+	  rest of operation)
+
+				   10/14
+				   -----
+
+vprint.c
+	- moved to lib/sh/vprint.c
+
+lib/sh/Makefile.in
+	- added entries for vprint.[co] in the appropriate places
+
+cross-build/win32sig.h
+	- a version of signames.h for cross-compiling for the CYGWIN32
+	  environment on a Unix machine (from noer@cygnus.com)
+
+aclocal.m4
+	- made all cases of AC_TRY_RUN and AC_TRY_COMPILE have reasonable
+	  default cases for cross-compiling, and tell the user what they are
+
+Makefile.in
+	- removed vprint.c from shell sources and vprint.o from shell
+	  objects
+	- added a level of indirection for signames.h -- the variable
+	  SIGNAMES_H is set by configure to either `lsignames.h' or
+	  a file for a cross-compilation environment (currently only
+	  the cygwin32 stuff is supported).  Then that file is copied
+	  to `signames.h'.  `lsignames.h' is created by `mksignames' as
+	  was previously used to create signames.h directly
+
+configure.in
+	- set SIGNAMES_H to either `$(srcdir)/cross-build/win32sig.h' or
+	  `lsignames.h' as appropriate, substitute into Makefile
+
+				   10/15
+				   -----
+builtins/Makefile.in
+	- CC_FOR_BUILD is now set by configure and used to build mkbuiltins
+	  and psize.aux
+
+variables.h
+	- new variable attribute `att_tempvar', set if the SHELL_VAR * was
+	  constructed on the fly from the temporary environment
+
+variables.c
+	- find_name_in_env_array now sets the `att_tempvar' attribute on
+	  the SHELL_VAR it creates
+
+findcmd.c
+	- search_for_command now disposes the SHELL_VAR created by searching
+	  the temporary environment for $PATH, if it is found there
+	- _find_user_command_internal also disposes of the SHELL_VAR if it
+	  has the `att_tempvar' attribute set
+
+builtins/setattr.c
+	- show_name_attributes looks in the temporary environemnt, so it needs
+	  to dispose the SHELL_VAR if it has the att_tempvar attribute set
+
+subst.c
+	- parameter_brace_expand_word now disposes of the SHELL_VAR returned
+	  by find_variable if it has the att_tempvar attribute set
+	- ditto for param_expand and word_split
+
+builtins/kill.def
+	- disallow null pid arguments instead of treating them as 0
+	- display a usage message and return failure if no pid or job
+	  arguments are supplied
+
+				   10/16
+				   -----
+builtins/declare.def
+	- make `var=value declare -x var' behave the same as
+	  `var=value export var' and `var=value declare -r var' behave the
+	  same as `var=value readonly var', now that we have the `tempvar'
+	  attribute
+
+				   10/22
+				   -----
+jobs.c
+	- non-interactive shells shouldn't report jobs killed by a SIGINT,
+	  even if the standard output is to a terminal
+	- pretty_print_job should add a CR at the end of its output if the
+	  shell is interactive and asynchronous notification is being
+	  performed.  This fixes the problem with extra CRs in the output
+	  of $(jobs)
+
+general.c
+	- changed canonicalize_pathname to change `//' into `/', but leave
+	  other pathnames starting with two consecutive slashes alone
+
+				   10/27
+				   -----
+
+lib/readline/histexpand.c
+	- fixed history_expand so that the appearance of the history
+	  comment character at the beginning of a word inhibits history
+	  expansion for the rest of the line
+
+				   10/29
+				   -----
+jobs.c,variables.c
+	- moved set_pipestatus_array to variables.c
+
+variables.c
+	- new function, set_pipestatus_from_exit(int), which sets the
+	  PIPESTATUS variable from a command's exit status
+
+variables.h
+	- extern declarations for set_pipestatus_from_exit and
+	  set_pipestatus_array
+
+execute_cmd.c
+	- fixed execute_simple_command to call set_pipestatus_from_exit
+	  if a foreground builtin or function, or a foreground null
+	  command is executed
+
+				   10/31
+				   -----
+shell.c
+	- fixed run_startup_files to detect being run by sshd, and treat
+	  that case as equivalent to being run by rshd
+
+				   11/3
+				   ----
+builtins/set.def
+	- make sure `set -a' doesn't cause SHELLOPTS to be exported when
+	  a change is made to one of the shell options
+
+				   11/4
+				   ----
+pathexp.c
+	- fix to shell_glob_filename in the code that uses a POSIX glob
+	  library
+
+				   11/5
+				   ----
+jobs.c
+	- fix cleanup_dead_jobs to hang onto the job corresponding to
+	  last_asynchronous_pid only if the shell is not interactive
+	  (this still has the problem that until a new async process
+	  is started, the job will stay in the jobs table)
+
+configure.in,aclocal.m4
+	- added a new macro, BASH_TYPE_U_INT32_T, to check for u_int32_t
+	  separately from int32_t, since there are systems (HP-UX 10.20)
+	  that have a define for the latter but not the former
+
+				   11/6
+				   ----
+jobs.c
+	- cleanup_dead_jobs no longer checks whether the job it is deleting
+	  corresponds to last_asynchronous_pid
+	- notify_of_job_status and mark_dead_jobs_as_notified now will not
+	  mark the job corresponding to last_asynchronous_pid as notified
+	  if the shell is not interactive
+	- wait_for_single_pid, if told to wait for last_asynchronous_pid,
+	  or the job of which it is a member, will take care of marking
+	  the job as notified after calling wait_for and collecting the
+	  status.  This means that two successive `wait' calls for $! will
+	  succeed the first time and fail the second, as POSIX.2 specifies
+	  (take this code out if it causes problems)
+
+				   11/7
+				   ----
+jobs.c
+	- wait_for_job, if told to wait for the job corresponding to the
+	  last async pid, will mark the job as notified after waiting for
+	  it and collecting the status
+
+general.h
+	- fixed MEMBER macro to avoid reading past end of S (it used to
+	  test s[1] before s[0], which is an error if s == "")
+
+subst.c
+	- expand_word_internal should free ISTRING before returning if
+	  param_expand returns an error
+	- parameter_brace_expand_word should free the memory it allocates
+	  and passes to param_expand
+
+execute_cmd.c
+	- execute_arith_command should call dispose_words on the list
+	  returned by expand_words
+
+parse.y
+	- after calling parse_arith_command, read_token needs to free the
+	  string value that parse_arith_command fills in, since make_word
+	  makes a copy of the string it's passed
+
+				   11/10
+				   -----
+subst.c
+	- cond_expand_word needs to free the value returned by string_list
+	  after it is run through quote_string_for_globbing
+
+parse.y
+	- make sure cond_term frees yylval.word if it is just a `!' and
+	  it's parsed as a term negation operator
+
+variables.c
+	- assign_array_var_from_string needs to free the word list returned
+	  by parse_string_to_word_list after calling expand_words_shellexp
+	  on it
+
+execute_cmd.c
+	- changed execute_simple_command to avoid saving the_printed_command
+	  into command_line until just before it's needed.  This should save
+	  time and prevent memory leaks on errors, but it must be watched
+	  closely to make sure that the_printed_command doesn't change out
+	  from under execute_simple_command before we copy it
+
+				   11/12
+				   -----
+builtins/alias.def
+	- alias and unalias should print error messages when passed an
+	  argument that is not an alias for printing or deletion,
+	  respectively, even if the shell is not interactive
+
+builtins/exit.def
+	- `logout' will no longer exit a non-login non-interactive shell
+
+				   11/17
+				   -----
+lib/readline/nls.c
+	- add `koi8-r' as a legal LANG value
+
+builtins/alias.def
+	- if `alias' or `alias -p' is executed when no aliases are defined,
+	  the return status should be 0, according to POSIX.2
+
+				   11/18
+				   -----
+subst.c
+	- changed a couple of calls to make_word_list (make_word(z), ...)
+	  to add_string_to_list (z, ...)
+
+execute_cmd.c
+	- execute_cond_command now sets this_command_name to `[['
+
+				   11/21
+				   -----
+variables.c
+	- all_visible_{function,variable}s and the functions they call
+	  should be compiled in only if READLINE is defined
+
+				   11/24
+				   -----
+aclocal.m4
+	- remove some leading whitespace before preprocessor statements in
+	  BASH_KERNEL_RLIMIT_CHECK
+
+general.[ch]
+	- fix declarations for group_member so the extern declaration in
+	  general.h agrees with the definition in general.c (fix from
+	  Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>)
+
+builtins/cd.def
+	- print the new working directory if the shell is interactive
+	  and `cd -' succeeds
+	- don't print the new working directory if it's found in $CDPATH
+	  if the shell is not interactive
+
+				   11/25
+				   -----
+builtins/cd.def
+	- fixes to bindpwd so that it copes with get_working_directory
+	  returning NULL (bug from schwab@issan.informatik.uni-dortmund.de)
+
+				   12/2
+				   ----
+support/config.guess
+	- add support for new OS name for SINIX SVR4 systems
+
+				   12/3
+				   ----
+
+builtins/set.def
+	- `unset' should check that a function it's trying to unset is a
+	  legal identifier only when in POSIX mode
+
+redir.c
+	- changed here_document_to_fd to try and make sure the filename
+	  used for the here document is `more unique', since the old
+	  version would fail if two here documents were created in less
+	  than a second
+
+				   12/4
+				   ----
+builtins/cd.def
+	- POSIX.2 says that if CDPATH is used to find the new directory,
+	  and it's not relative to the current directory, the new directory
+	  name should be displayed on stdout even if the shell is not
+	  interactive
+
+				   12/5
+				   ----
+parse.y
+	- changes so that `time' is recognized as a reserved word only at
+	  the beginning of a pipeline (the last read token is one of 0,
+	  `;', `\n', `&&', `||', or `&'):
+
+		o add clause to special_case_tokens that does the check
+		  and returns TIME if the conditions are met
+		o take check for `TIME' out of CHECK_FOR_RESERVED_WORD, but
+		  leave it in the word_token_alist so that `type' still
+		  reports it as a `keyword'
+		o new function, time_command_acceptable(), encapsulates the
+		  necessary conditions for `time' to be returned as a 
+		  reserved word
+
+[bash-2.02-alpha1 frozen]
+
+				  1/6/98
+				  ------
+lib/glob/fnmatch.c
+	- fix define for isgraph so that it does not return success for space
+	- fix strcompare() so that the call to strcoll is surrounded by
+	  #ifdef HAVE_STRCOLL
+
+				    1/7
+				    ---
+lib/glob/fnmatch.c
+	- the `test' argument to brackmatch() should be of type `unsigned char'
+
+				   1/11
+				   ----
+execute_cmd.c
+	- make sure execute_arith_command sets this_command_name to `(('
+
+				   1/29
+				   ----
+parse.y
+	- make sure the code for pushing and popping strings is compiled in
+	  if either ALIAS or DPAREN_ARITHMETIC is defined, because the ((
+	  code uses push_string in the case of a nested subshell
+	- fix cond_skip_newlines so it resets the prompt to $PS2 while
+	  parsing an unfinished conditional command
+
+dispose_cmd.c, copy_cmd.c, builtins/hash.def
+	- fixes to not use `word' as a variable name or the name of a
+	  function parameter to get around stuff in the Cray Unix include
+	  files
+
+builtins/printf.def
+	- return failure immediately if an illegal format character is
+	  encountered
+
+redir.c
+	- make the code that creates here-documents behave better if the
+	  file it's trying to create already exists for some reason
+
+lib/readline/complete.c
+	- changed print_filename to return the number of characters it
+	  outputs; changed callers to use that value.  This makes columns
+	  line up when printing completion listings with filenames
+	  containing control characters
+
+doc/bash.{1,html}
+	- fixed a typo in the quote removal section
+
+				   1/30
+				   ----
+parse.y
+	- free_string_list() needs to check that t->expander is not NULL
+	  before trying to dereference it
+	- reset_parser() doesn't need to set pushed_string_list to NULL
+	  after calling free_string_list(), since free_string_list does it
+
+configure.in,cross-build/cygwin32.cache
+	- fixes from Geoff Noer for better cygwin32 cross-compilation
+
+tests/printf.{tests,right}
+	- removed test for integer overflow, since error messages differ
+	  across systems
+
+pathexp.c
+	- fixed a problem with unquoted_glob_pattern_p that made things
+	  like `x+*' not expand correctly
+
+lib/glob/glob.c
+	- fixed a problem with glob_pattern_p that made things like `x+*'
+	  not expand correctly
+
+builtins/cd.def
+	- if `cd -P' is executed, or `set -o physical' has been executed,
+	  the value of $PWD after a successful cd will not contain any
+	  symlinks, regardless of whether or not the shell is in posix mode
+
+				    2/3
+				    ---
+lib/readline/shell.c
+	- include <string.h> or <strings.h> as appropriate
+
+				    2/4
+				    ---
+builtins/common.c
+	- take out the code in backslash_quote() that looks for tildes to
+	  quote, for the time being
+	- if getcwd() fails, get_working_directory now prints the error
+	  message corresponding to errno in addition to the rest of the
+	  information -- TENTATIVE CHANGE
+
+lib/sh/getcwd.c
+	- fix from Paul Smith to make getcwd() behave better in the presence
+	  of lstat(2) failures
+
+stringlib.c
+	- when copying the replacement string into the output string being
+	  constructed, strsub() needs to make sure enough space for the
+	  replacement string is allocated, not the length of the pattern
+	  (use REPLEN, not PATLEN)
+
+mailcheck.c
+	- make sure make_default_mailpath() has a valid current_user struct
+	  before trying to construct the default mailpath
+
+				    2/5
+				    ---
+execute_cmd.c
+	- execute_builtin needs to call run_unwind_frame if the builtin is
+	  `source' or `eval' and we're not in a subshell rather than just
+	  calling dispose_builtin_env, because not all invocations copy 
+	  the temporary_env to builtin_env, and nested calls to `.' require
+	  that the temporary env given to the first persist until that first
+	  call to `.' finishes
+
+parse.y
+	- fix to history_delimiting_chars so that function definitions like
+
+		function xyz
+		{
+			echo a
+		}
+
+	  are saved to the history correctly when command_oriented_history
+	  is enabled, but literal_history is not
+
+bashhist.c
+	- when calling internal_error from pre_process_line, use "%s" as
+	  the format with history_value as the argument to avoid the
+	  problem with the failed history event containing printf escape
+	  sequences
+
+				   2/13
+				   ----
+shell.c
+	- if shell_initialized is non-zero, don't line-buffer stderr and
+	  stdout in shell_initialize on SunOS5 -- see if this fixes the
+	  crashing problems for scripts without a leading `#! /bin/sh'
+
+				   2/17
+				   ----
+bashline.c
+	- added diffs to _ignore_completion_names from Andreas Schwab to
+	  complete names that would otherwise be ignored with FIGNORE if
+	  they are the only possible completions.  Define NO_FORCE_FIGNORE
+	  if you want this; it is not defined by default
+
+				   2/19
+				   ----
+support/bashbug.sh
+	- changed the bug-bash address to bug-bash@gnu.org
+
+examples/loadables/Makefile.in
+	- converted from `Makefile' with some boilerplate configure variables
+	  to find the source and build directories -- still requires some
+	  hand-editing to get the right CFLAGS and LDFLAGS for shared object
+	  creation
+
+Makefile.in
+	- create examples/loadables/Makefile with `make makefiles'
+
+configure.in
+	- create examples/loadables directory so `make makefiles' can write a
+	  makefile there
+
+general.c
+	- make sure initialize_groups_array always sets things up so that
+	  ${GROUPS[0]} is the user's primary group (current_user.gid)
+
+				   2/20
+				   ----
+lib/readline/parens.c
+	- change the time delay when showing matching parens from 1.5 sec to
+	  0.5 sec
+
+				   2/23
+				   ----
+shell.c
+	- isnetconn() should call getpeername(fd,...) instead of using 0
+	  (though fileno(stdin) should always be 0)
+
+support/config.guess
+	- updates from master FSF copy
+
+				   2/24
+				   ----
+support/man2html.c
+	- modified version of man2html to convert bash.1 into bash.html
+
+support/Makefile.in
+	- simple Makefile to create man2html
+
+configure.in
+	- make sure support/Makefile is created
+
+Makefile.in
+	- make sure support/Makefile is created and cleaned
+
+doc/Makefile.in
+	- changes to suffix rules to say how to make .html from .1 
+	- `bash.html' is now a makefile target, created by man2html from
+	  bash.1 rather than being hand-modified
+
+lib/sh/itos.c, general.c
+	- new file, itos() from general.c.  This is here because the
+	  implementation of strerror in lib/sh/strerror.c uses itos()
+
+Makefile.in, lib/sh/Makefile.in
+	- changes to add itos.c in libsh.a
+
+externs.h, general.h
+	- moved extern declaration of itos() from general.h to externs.h
+
+aclocal.m4
+	- changes to BASH_LARGE_FILE_SUPPORT for the LFS64_* variables in
+	  Solaris 2.6
+
+Makefile.in
+	- make sure configure sets CPPFLAGS in this file
+
+				   2/27
+				   ----
+
+builtins/command.def
+	- make sure get_standard_path returns the value of
+	  STANDARD_UTILS_PATH if _CS_PATH is defined, but confstr(3)
+	  returns 0, indicating that _CS_PATH does not have a defined
+	  value
+
+bashhist.c
+	- fixed bash_history_inhibit_expansion() so that extended globbing
+	  expressions like *.!(c) are not history expanded if extended_glob
+	  is non-zero (shopt -s extglob has been executed)
+
+				    3/2
+				    ---
+Makefile.in
+	- changed release status to `beta1'
+
+[bash-2.02-beta1 frozen]
+
+				   3/17
+				   ----
+lib/readline/vi_mode.c
+	- make sure _rl_vi_save_insert() gets a non-null UNDO_LIST pointer
+	  before trying to do anything with it
+
+jobs.c
+	- add a call to internal_warning from wait_for_job if the job is
+	  stopped
+	- changed notify_of_job_status to not report pipelines exiting due to
+	  SIGPIPE in non-interactive shells if the shell is compiled with
+	  -DDONT_REPORT_SIGPIPE
+
+builtins/psize.sh
+	- some fixes to try to avoid /tmp file races and surreptitious
+	  substitutions
+
+version.c
+	- changed the extended version info to show 1998 as the copyright year
+
+parse.y
+	- fixes from Andreas Schwab <schwab@LS5.informatik.uni-dortmund.de>
+	  for compilation errors when the shell is configured --disable-alias
+	  but with dparen arithmetic enabled
+
+eval.c
+	- fixes from Andreas Schwab <schwab@LS5.informatik.uni-dortmund.de> to
+	  make sure the input stream is popped correctly when performing an
+	  array assignment in the command argument to `bash -c', e.g.,
+	  `bash -c 'A=()''
+
+builtins/kill.def
+	- make `kill' with no arguments print a usage message and return a
+	  failure status
+
+alias.c
+	- fix so that rd_token doesn't dump core when trying to do alias
+	  expansion on a line containing an unclosed single quote (fix from
+	  Vasco Pedro <vp@di.fct.unl.pt>)
+
+builtins/cd.def
+	- fix so that using a non-empty directory from CDPATH to construct
+	  the name of the directory to change to results in an absolute
+	  pathname of the new current working directory being displayed,
+	  as POSIX.2 specifies
+
+support/bashbug.sh
+	- a couple of small fixes to minimize /tmp file races -- the script
+	  is still raceable, the window is just smaller
+
+				   3/24
+				   ----
+variables.c
+	- make sure assign_in_env passes a malloc'd string to
+	  expand_string_unsplit, because some of the error code assumes that
+	  it is malloc'd and frees it (bug reported by Marko.Makela@HUT.FI)
+
+				   3/25
+				   ----
+doc/bashref.texi
+	- changed the email addresses to use the @email texinfo tag
+
+trap.c
+	- call reset_parser from the exit trap code before calling
+	  parse_and_execute, so reserved words are parsed correctly
+
+subst.c
+	- make sure parameter_brace_patsub expands the pattern string as if
+	  the expression were not in double quotes, even if the entire
+	  expansion is enclosed in double quotes, so that quote removal
+	  on embedded double quotes is performed correctly (bug report from
+	  schwab@issan.informatik.uni-dortmund.de)
+
+				   3/27
+				   ----
+support/config.guess
+	- changes to allow Power PCs running Apple's Rhapsody to configure
+
+				   3/31
+				   ----
+
+Makefile.in
+	- changed release status to `beta2'
+
+[bash-2.02-beta2 frozen]
+
+				    4/6
+				    ---
+subst.c
+	- make sure command_substitute does not try to set the terminal's
+	  process group to a background job
+
+[bash-2.02 frozen]

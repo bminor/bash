@@ -1,5 +1,6 @@
 inpath()
 {
+	local PROG
 	path=$(echo $PATH | sed 's/^:/.:/
 				s/::/:.:/g
 				s/:$/:./
@@ -9,7 +10,5 @@ inpath()
 	do
 		[ -x $x/$1 ] && { PROG=$x/$1; break; }
 	done
-	[ -z "$PROG" ]
-	return
+	[ -n "$PROG" ]
 }
-

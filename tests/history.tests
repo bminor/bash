@@ -1,5 +1,17 @@
 trap 'rm /tmp/newhistory' 0
 
+# bad options
+history -x
+# cannot use -r and -w at the same time
+history -r -w /dev/null
+
+# bad option
+fc -v
+
+# all of these should result in an empty history list
+history -c
+history -r /dev/null
+history -n /dev/null
 history -c
 
 HISTFILE=history.list
@@ -59,6 +71,7 @@ fc -l 4
 fc -l 4 8
 
 fc -l 502
+fc -l one=two three=four 502
 
 history 4
 
@@ -70,6 +83,7 @@ alias r="fc -s"
 echo aa ab ac
 
 r a=x
+r x=4 b=8
 
 # this had better fail with `no command found'
 r cc

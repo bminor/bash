@@ -29,11 +29,6 @@
 /* Functions from expr.c. */
 extern long evalexp __P((char *, int *));
 
-/* Functions from getcwd.c */
-#if !defined (HAVE_GETCWD)
-extern char *getcwd __P((char *, size_t));
-#endif
-
 /* Functions from print_cmd.c. */
 extern char *make_command_string __P((COMMAND *));
 extern void print_command __P((COMMAND *));
@@ -41,9 +36,15 @@ extern void print_simple_command __P((SIMPLE_COM *));
 extern char *named_function_string __P((char *, COMMAND *, int));
 extern void print_word_list __P((WORD_LIST *, char *));
 extern void xtrace_print_word_list __P((WORD_LIST *));
+#if defined (DPAREN_ARITHMETIC)
+extern void xtrace_print_arith_cmd __P((WORD_LIST *));
+#endif
+#if defined (COND_COMMAND)
+extern void xtrace_print_cond_term __P((int, int, WORD_DESC *, char *, char *));
+#endif
 
 /* Functions from shell.c. */
-extern int exit_shell __P((int));
+extern void exit_shell __P((int));
 extern void disable_priv_mode __P((void));
 extern void unbind_args __P((void));
 
@@ -51,15 +52,14 @@ extern void unbind_args __P((void));
 extern int maybe_make_restricted __P((char *));
 #endif
 
+extern void unset_bash_input __P((int));
 extern void get_current_user_info __P((void));
 
 /* Functions from eval.c. */
 extern int reader_loop __P((void));
 extern int parse_command __P((void));
 extern int read_command __P((void));
-
-/* Functions from test.c. */
-extern int test_command ();
+extern WORD_LIST *parse_string_to_word_list __P((char *, char *));
 
 /* Functions from braces.c. */
 #if defined (BRACE_EXPANSION)
@@ -90,7 +90,35 @@ extern int list_length ();
 extern GENERIC_LIST *list_append ();
 extern GENERIC_LIST *delete_element ();
 
-/* Declarations for  functions defined in oslib.c */
+/* Declarations for functions defined in stringlib.c */
+extern char *ansicstr __P((char *, int, int *, int *));
+extern int find_name_in_array __P((char *, char **));
+extern int array_len __P((char **));
+extern void free_array_members __P((char **));
+extern void free_array __P((char **));
+extern char **copy_array __P((char **));
+extern int qsort_string_compare ();
+extern void sort_char_array __P((char **));
+extern char **word_list_to_argv __P((WORD_LIST *, int, int, int *));
+extern WORD_LIST *argv_to_word_list __P((char **, int, int));
+
+extern char *strsub __P((char *, char *, char *, int));
+extern void strip_leading __P((char *));
+extern void strip_trailing __P((char *, int, int));
+extern char *strindex __P((char *, char *));
+extern void xbcopy __P((char *, char *, int));
+
+/* Functions from the bash library, lib/sh/libsh.a.  These should really
+   go into a separate include file. */
+/* Declarations for functions defined in lib/sh/getcwd.c */
+#if !defined (HAVE_GETCWD)
+extern char *getcwd __P((char *, size_t));
+#endif
+
+/* Declarations for functions defined in lib/sh/itos.c */
+extern char *itos __P((int));
+
+/* Declarations for  functions defined in lib/sh/oslib.c */
 extern long get_clk_tck __P((void));
 
 #if !defined (strerror)
@@ -116,22 +144,19 @@ extern int getdtablesize __P((void));
 extern int setlinebuf ();
 #endif
 
-/* Declarations for functions defined in stringlib.c */
-extern char *ansicstr __P((char *, int, int *, int *));
-extern int find_name_in_array __P((char *, char **));
-extern int array_len __P((char **));
-extern void free_array_members __P((char **));
-extern void free_array __P((char **));
-extern char **copy_array __P((char **));
-extern int qsort_string_compare ();
-extern void sort_char_array __P((char **));
-extern char **word_list_to_argv __P((WORD_LIST *, int, int, int *));
-extern WORD_LIST *argv_to_word_list __P((char **, int, int));
+/* declarations for functions defined in lib/sh/strtod.c */
+#if !defined (HAVE_STRTOD)
+extern double strtod __P((const char *, char **));
+#endif
 
-extern char *strsub __P((char *, char *, char *, int));
-extern void strip_leading __P((char *));
-extern void strip_trailing __P((char *, int, int));
-extern char *strindex __P((char *, char *));
-extern void xbcopy __P((char *, char *, int));
+/* declarations for functions defined in lib/sh/strtol.c */
+#if !defined (HAVE_STRTOL)
+extern long strtol __P((const char *, char **, int));
+#endif
+
+/* declarations for functions defined in lib/sh/strtoul.c */
+#if !defined (HAVE_STRTOUL)
+extern unsigned long strtoul __P((const char *, char **, int));
+#endif
 
 #endif /* _EXTERNS_H_ */

@@ -24,6 +24,9 @@
 #if defined (ALIAS)
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -411,6 +414,12 @@ rd_token (string, start)
       if (quote_char (string[i]))
 	{
 	  i = skipquotes (string, i);
+	  /* This could be a line that contains a single quote character,
+	     in which case skipquotes () terminates with string[i] == '\0'
+	     (the end of the string).  Check for that here. */
+	  if (string[i] == '\0')
+	    break;
+
 	  /* Now string[i] is the matching quote character, and the
 	     quoted portion of the token has been scanned. */
 	  continue;

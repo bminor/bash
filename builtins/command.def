@@ -35,6 +35,9 @@ $END
 #include <config.h>
 
 #if defined (HAVE_UNISTD_H)
+#  ifdef _MINIX
+#    include <sys/types.h>
+#  endif
 #  include <unistd.h>
 #endif
 
@@ -179,11 +182,16 @@ get_standard_path ()
   size_t len;
 
   len = (size_t)confstr (_CS_PATH, (char *)NULL, (size_t)0);
-  p = xmalloc ((int)len + 2);
-  *p = '\0';
-  confstr (_CS_PATH, p, len);
-  return (p);
-#else /* !_CSPATH || !HAVE_CONFSTR  */
+  if (len > 0)
+    {
+      p = xmalloc ((int)len + 2);
+      *p = '\0';
+      confstr (_CS_PATH, p, len);
+      return (p);
+    }
+  else
+    return (savestring (STANDARD_UTILS_PATH));
+#else /* !_CS_PATH || !HAVE_CONFSTR  */
 #  if defined (CS_PATH)
   return (savestring (CS_PATH));
 #  else

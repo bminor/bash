@@ -22,6 +22,8 @@ declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -ar c='()'
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -ar c='()'
+readonly -a a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+readonly -a c='()'
 ./array.tests: declare: e: cannot assign to array variables in this way
 a test
 declare -a DIRSTACK='()'
@@ -52,6 +54,8 @@ declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element
 ./array.tests: declare: c: cannot destroy array variables in this way
 this of
 this is a test of read using arrays
+this test
+this is a test of arrays
 declare -a DIRSTACK='()'
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
@@ -94,4 +98,6 @@ bin
 grep [ 123 ] *
 6 7 9
 6 7 9 5
+length = 3
+value = new1 new2 new3
 ./array.tests: narray: unbound variable
