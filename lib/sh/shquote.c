@@ -147,6 +147,7 @@ sh_backslash_quote (string)
 	case '*': case '[': case '?': case ']':	/* globbing chars */
 	case '^':
 	case '$': case '`':			/* expansion chars */
+	case ',':				/* brace expansion */
 	  *r++ = '\\';
 	  *r++ = c;
 	  break;

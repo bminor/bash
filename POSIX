@@ -6,6 +6,9 @@ Starting Bash with the `--posix' command-line option or executing `set
 to the POSIX 1003.2 standard by changing the behavior to match that
 specified by POSIX in areas where the Bash default differs.
 
+When invoked as `sh', Bash enters POSIX mode after reading the startup
+files.
+
 The following list is what's changed when `POSIX mode' is in effect:
 
   1. When a command in the hash table no longer exists, Bash will
@@ -112,6 +115,14 @@ The following list is what's changed when `POSIX mode' is in effect:
  30. When the `set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
+ 31. When the `set' builtin is invoked without options, it displays
+     variable values without quotes, unless they contain shell
+     metacharacters, even if the result contains nonprinting characters.
+
+ 32. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
+     constructed from `$PWD' and the directory name supplied as an
+     argument does not refer to an existing directory, `cd' will fail
+     instead of falling back to PHYSICAL mode.
 
 There is other POSIX 1003.2 behavior that Bash does not implement.
 Specifically:

@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -327,7 +327,7 @@ ulimit_builtin (list)
         {
           if (STREQ (list->word->word, "unlimited") == 0)
             {
-              builtin_error ("invalid limit argument: %s", list->word->word);
+              builtin_error ("%s: invalid limit argument", list->word->word);
               return (EXECUTION_FAILURE);
             }
           return (set_all_limits (mode == 0 ? LIMIT_SOFT|LIMIT_HARD : mode, RLIM_INFINITY));
@@ -353,7 +353,7 @@ ulimit_builtin (list)
       limind = _findlim (cmdlist[c].cmd);
       if (limind == -1)
 	{
-	  builtin_error ("bad command: `%c'", cmdlist[c].cmd);
+	  builtin_error ("`%c': bad command", cmdlist[c].cmd);
 	  return (EX_USAGE);
 	}
     }
@@ -382,8 +382,8 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
   opt = get_limit (limind, &soft_limit, &hard_limit);
   if (opt < 0)
     {
-      builtin_error ("cannot get %s limit: %s", limits[limind].description,
-						strerror (errno));
+      builtin_error ("%s: cannot get limit: %s", limits[limind].description,
+						 strerror (errno));
       return (EXECUTION_FAILURE);
     }
 
@@ -408,20 +408,20 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 
       if ((real_limit / block_factor) != limit)
 	{
-	  builtin_error ("limit out of range: %s", cmdarg);
+	  sh_erange (cmdarg, "limit");
 	  return (EXECUTION_FAILURE);
 	}
     }
   else
     {
-      builtin_error ("bad non-numeric arg `%s'", cmdarg);
+      sh_invalidnum (cmdarg);
       return (EXECUTION_FAILURE);
     }
 
   if (set_limit (limind, real_limit, mode) < 0)
     {
-      builtin_error ("cannot modify %s limit: %s", limits[limind].description,
-						   strerror (errno));
+      builtin_error ("%s: cannot modify limit: %s", limits[limind].description,
+						    strerror (errno));
       return (EXECUTION_FAILURE);
     }
 
@@ -618,23 +618,19 @@ static int
 getmaxuprc (valuep)
      RLIMTYPE *valuep;
 {
-#  if defined (HAVE_SYSCONF) && defined (_SC_CHILD_MAX)
   long maxchild;
-  maxchild = sysconf (_SC_CHILD_MAX);
+
+  maxchild = getmaxchild ();
   if (maxchild < 0)
-    return -1;
+    {
+      errno = EINVAL;
+      return -1;
+    }
   else
-    *valuep = (RLIMTYPE) maxchild;
-  return 0;
-#  else /* !HAVE_SYSCONF || !_SC_CHILD_MAX */
-#    if defined (MAXUPRC)
-  *valuep = (RLIMTYPE) MAXUPRC;
-  return 0;
-#    else /* MAXUPRC */
-  errno = EINVAL;
-  return -1;
-#    endif /* !MAXUPRC */
-#  endif /* !HAVE_SYSCONF || !_SC_CHILD_MAX */
+    {
+      *valuep = (RLIMTYPE) maxchild;
+      return 0;
+    }
 }
 
 static void
@@ -650,7 +646,8 @@ print_all_limits (mode)
   for (i = 0; limits[i].option > 0; i++)
     {
       if (get_limit (i, &softlim, &hardlim) < 0)
-	builtin_error ("cannot get %s limit: %s", limits[i].description, strerror (errno));
+	builtin_error ("%s: cannot get limit: %s", limits[i].description,
+						   strerror (errno));
       else
 	printone (i, (mode & LIMIT_SOFT) ? softlim : hardlim, 1);
     }
@@ -716,8 +713,8 @@ set_all_limits (mode, newlim)
   for (retval = i = 0; limits[i].option > 0; i++)
     if (set_limit (i, newlim, mode) < 0)
       {
-	builtin_error ("cannot modify %s limit: %s", limits[i].description,
-						     strerror (errno));
+	builtin_error ("%s: cannot modify limit: %s", limits[i].description,
+						      strerror (errno));
 	retval = 1;
       }
   return retval;

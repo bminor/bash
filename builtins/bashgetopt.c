@@ -1,6 +1,6 @@
 /* bashgetopt.c -- `getopt' for use by the builtins. */
 
-/* Copyright (C) 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,12 +31,14 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "../shell.h"
 #include "common.h"
 
-#define ERR(S, C)	builtin_error("%s%c", (S), (C))
-
+#define ISOPT(s)	(((*(s) == '-') || (plus && *(s) == '+')) && (s)[1])
+#define NOTOPT(s)	(((*(s) != '-') && (!plus || *(s) != '+')) || (s)[1] == '\0')
+			
 static int	sp;
 
 char    *list_optarg;
 int	list_optopt;
+int	list_opttype;
 
 static WORD_LIST *lhead = (WORD_LIST *)NULL;
 WORD_LIST	*lcurrent = (WORD_LIST *)NULL;
@@ -50,12 +52,11 @@ char		*opts;
 	register int c;
 	register char *cp;
 	int	plus;	/* nonzero means to handle +option */
+	static char errstr[3] = { '-', '\0', '\0' };
 
-	if (*opts == '+') {
-		plus = 1;
+	plus = *opts == '+';
+	if (plus)
 		opts++;
-	} else
-		plus = 0;
 
 	if (list == 0) {
 		list_optarg = (char *)NULL;
@@ -71,8 +72,7 @@ char		*opts;
 	}
 
 	if (sp == 1) {
-		if (lcurrent == 0 ||
-		    (lcurrent->word->word[0] != '-' || lcurrent->word->word[1] == '\0')) {
+		if (lcurrent == 0 || NOTOPT(lcurrent->word->word)) {
 		    	lhead = (WORD_LIST *)NULL;
 		    	loptend = lcurrent;
 			return(-1);
@@ -83,12 +83,14 @@ char		*opts;
 			loptend = lcurrent->next;
 			return(-1);
 		}
+		errstr[0] = list_opttype = lcurrent->word->word[0];
 	}
 
 	list_optopt = c = lcurrent->word->word[sp];
 
 	if (c == ':' || (cp = strchr(opts, c)) == NULL) {
-		ERR("illegal option: -", c);
+		errstr[1] = c;
+		sh_invalidopt (errstr);		
 		if (lcurrent->word->word[++sp] == '\0') {
 			lcurrent = lcurrent->next;
 			sp = 1;
@@ -108,7 +110,11 @@ char		*opts;
 			lcurrent = lcurrent->next;
 		/* If the specifier is `;', don't set optarg if the next
 		   argument looks like another option. */
+#if 0
 		} else if (lcurrent->next && (*cp == ':' || lcurrent->next->word->word[0] != '-')) {
+#else
+		} else if (lcurrent->next && (*cp == ':' || NOTOPT(lcurrent->next->word->word))) {
+#endif
 			lcurrent = lcurrent->next;
 			list_optarg = lcurrent->word->word;
 			lcurrent = lcurrent->next;
@@ -116,14 +122,15 @@ char		*opts;
 			list_optarg = (char *)NULL;
 			lcurrent = lcurrent->next;
 		} else {	/* lcurrent->next == NULL */
-			ERR("option requires an argument: -", c);
+			errstr[1] = c;
+			sh_needarg (errstr);
 			sp = 1;
 			list_optarg = (char *)NULL;
 			return('?');
 		}
 		sp = 1;
 	} else if (*cp == '#') {
-		/* optional numeric argument */
+		/* option requires a numeric argument */
 		if (lcurrent->word->word[sp+1]) {
 			if (DIGIT(lcurrent->word->word[sp+1])) {
 				list_optarg = lcurrent->word->word + sp + 1;
@@ -131,12 +138,17 @@ char		*opts;
 			} else
 				list_optarg = (char *)NULL;
 		} else {
-			if (lcurrent->next && legal_number(lcurrent->next->word->word, (long *)0)) {
+			if (lcurrent->next && legal_number(lcurrent->next->word->word, (intmax_t *)0)) {
 				lcurrent = lcurrent->next;
 				list_optarg = lcurrent->word->word;
 				lcurrent = lcurrent->next;
-			} else
+			} else {
+				errstr[1] = c;
+				sh_neednumarg (errstr);
+				sp = 1;
 				list_optarg = (char *)NULL;
+				return ('?');
+			}
 		}
 
 	} else {
@@ -161,16 +173,3 @@ reset_internal_getopt ()
 	lhead = lcurrent = loptend = (WORD_LIST *)NULL;
 	sp = 1;
 }
-
-#ifdef INCLUDE_UNUSED
-void
-report_bad_option ()
-{
-	char s[3];
-
-	s[0] = '-';
-	s[1] = list_optopt;
-	s[2] = '\0';
-	bad_option (s);
-}
-#endif

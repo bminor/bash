@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -146,7 +146,7 @@ enable_builtin (list)
   /* Restricted shells cannot load new builtins. */
   if (restricted && (flags & (FFLAG|DFLAG)))
     {
-      builtin_error ("restricted");
+      sh_restricted ((char *)NULL);
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -246,6 +246,13 @@ enable_shell_command (name, disable_p)
 
   if (disable_p)
     b->flags &= ~BUILTIN_ENABLED;
+#if defined (RESTRICTED_SHELL)
+  else if (restricted && ((b->flags & BUILTIN_ENABLED) == 0))
+    {
+      sh_restricted ((char *)NULL);
+      return (EXECUTION_FAILURE);
+    }
+#endif
   else
     b->flags |= BUILTIN_ENABLED;
 
@@ -453,7 +460,7 @@ dyn_unload_builtin (name)
      using it drops to zero. */
   if (ref == 1 && local_dlclose (handle) != 0)
     {
-      builtin_error ("cannot delete %s: %s", name, dlerror ());
+      builtin_error ("%s: cannot delete: %s", name, dlerror ());
       return (EXECUTION_FAILURE);
     }
 

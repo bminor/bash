@@ -1,7 +1,7 @@
 /* getenv.c - get environment variable value from the shell's variable
 	      list. */
 
-/* Copyright (C) 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,7 +28,12 @@
 #endif
 
 #include <bashansi.h>
+#include <errno.h>
 #include <shell.h>
+
+#ifndef errno
+extern int errno;
+#endif
 
 extern char **environ;
 
@@ -43,13 +48,12 @@ static char *last_tempenv_value = (char *)NULL;
 
 char *
 getenv (name)
-#if defined (__linux__) || defined (__bsdi__) || defined (convex)
      const char *name;
-#else
-     char const *name;
-#endif /* !__linux__ && !__bsdi__ && !convex */
 {
   SHELL_VAR *var;
+
+  if (name == 0 || *name == '\0')
+    return ((char *)NULL);
 
   var = find_tempenv_variable ((char *)name);
   if (var)
@@ -57,7 +61,6 @@ getenv (name)
       FREE (last_tempenv_value);
 
       last_tempenv_value = value_cell (var) ? savestring (value_cell (var)) : (char *)NULL;
-      dispose_variable (var);
       return (last_tempenv_value);
     }
   else if (shell_variables)
@@ -88,12 +91,143 @@ getenv (name)
 /* Some versions of Unix use _getenv instead. */
 char *
 _getenv (name)
-#if defined (__linux__) || defined (__bsdi__) || defined (convex)
      const char *name;
-#else
-     char const *name;
-#endif /* !__linux__ && !__bsdi__ && !convex */
 {
   return (getenv (name));
+}
+
+/* SUSv3 says argument is a `char *'; BSD implementations disagree */
+int
+putenv (str)
+#ifndef HAVE_STD_PUTENV
+     const char *str;
+#else
+     char *str;
+#endif
+{
+  SHELL_VAR *var;
+  char *name, *value;
+  int offset;
+
+  if (str == 0 || *str == '\0')
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  offset = assignment (str);
+  if (str[offset] != '=')
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  name = savestring (str);
+  name[offset] = 0;
+
+  value = name + offset + 1;
+
+  /* XXX - should we worry about readonly here? */
+  var = bind_variable (name, value);
+  if (var == 0)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  VUNSETATTR (var, att_invisible);
+  VSETATTR (var, att_exported);
+
+  return 0;
+}
+
+#if 0
+int
+_putenv (name)
+#ifndef HAVE_STD_PUTENV
+     const char *name;
+#else
+     char *name;
+#endif
+{
+  return putenv (name);
+}
+#endif
+
+int
+setenv (name, value, rewrite)
+     const char *name;
+     const char *value;
+     int rewrite;
+{
+  SHELL_VAR *var;
+  char *v;
+
+  if (name == 0 || *name == '\0' || strchr (name, '=') != 0)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  var = 0;
+  v = value;
+  /* XXX - should we worry about readonly here? */
+  if (rewrite == 0)
+    var = find_variable (name);
+
+  if (var == 0)
+    var = bind_variable (name, v);
+
+  if (var == 0)
+    return -1;
+
+  VUNSETATTR (var, att_invisible);
+  VSETATTR (var, att_exported);
+
+  return 0;
+}
+
+#if 0
+int
+_setenv (name, value, rewrite)
+     const char *name;
+     const char *value;
+     int rewrite;
+{
+  return setenv (name, value, rewrite);
+}
+#endif
+
+/* SUSv3 says unsetenv returns int; existing implementations (BSD) disagree. */
+
+#ifdef HAVE_STD_UNSETENV
+#define UNSETENV_RETURN(N)	return(N)
+#define UNSETENV_RETTYPE	int
+#else
+#define UNSETENV_RETURN(N)	return
+#define UNSETENV_RETTYPE	void
+#endif
+
+UNSETENV_RETTYPE
+unsetenv (name)
+     const char *name;
+{
+  if (name == 0 || *name == '\0' || strchr (name, '=') != 0)
+    {
+      errno = EINVAL;
+      UNSETENV_RETURN(-1);
+    }
+
+  /* XXX - should we just remove the export attribute here? */
+#if 1
+  unbind_variable (name);
+#else
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (v)
+    VUNSETATTR (v, att_exported);
+#endif
+
+  UNSETENV_RETURN(0);
 }
 #endif /* CAN_REDEFINE_GETENV */

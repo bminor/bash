@@ -1,7 +1,7 @@
 This file is command.def, from which is created command.c.
 It implements the builtin "command" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -78,10 +78,10 @@ command_builtin (list)
 	  use_standard_path = 1;
 	  break;
 	case 'V':
-	  verbose = 2;
+	  verbose = CDESC_SHORTDESC;	/* look in common.h for constants */
 	  break;
 	case 'v':
-	  verbose = 4;
+	  verbose = CDESC_REUSABLE;	/* ditto */
 	  break;
 	default:
 	  builtin_usage ();
@@ -99,10 +99,10 @@ command_builtin (list)
 
       for (any_found = 0; list; list = list->next)
 	{
-	  found = describe_command (list->word->word, verbose, 0);
+	  found = describe_command (list->word->word, verbose);
 
 	  if (found == 0)
-	    builtin_error ("%s: not found", list->word->word);
+	    sh_notfound (list->word->word);
 
 	  any_found += found;
 	}
@@ -112,7 +112,7 @@ command_builtin (list)
 #if defined (RESTRICTED_SHELL)
   if (use_standard_path && restricted)
     {
-      builtin_error ("restricted: cannot use -p");
+      sh_restricted ("-p");
       return (EXECUTION_FAILURE);
     }
 #endif

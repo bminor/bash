@@ -37,11 +37,15 @@ a = abc
 4
 1
 4
-./read2.sub: read: -3: invalid timeout specification
+./read2.sub: line 13: read: -3: invalid timeout specification
 1
 4
 abcde
-./read3.sub: read: -1: invalid number specification
+./read3.sub: line 4: read: -1: invalid number
 abc
 ab
 #
+while read -u 3 var
+do
+echo "$var"
+done 3<$0

@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,17 +38,28 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "error.h"
 #include "flags.h"
 #include "make_cmd.h"
+#include "dispose_cmd.h"
 #include "variables.h"
 #include "subst.h"
 #include "input.h"
+#include "ocache.h"
 #include "externs.h"
 
 #if defined (JOB_CONTROL)
 #include "jobs.h"
 #endif
 
+#include "shmbutil.h"
+
 extern int line_number, current_command_line_count;
 extern int last_command_exit_value;
+
+/* Object caching */
+sh_obj_cache_t wdcache = {0, 0, 0};
+sh_obj_cache_t wlcache = {0, 0, 0};
+
+#define WDCACHESIZE	60
+#define WLCACHESIZE	60
 
 static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *));
 #if defined (ARITH_FOR_COMMAND)
@@ -56,13 +67,24 @@ static WORD_LIST *make_arith_for_expr __P((char *));
 #endif
 static COMMAND *make_until_or_while __P((enum command_type, COMMAND *, COMMAND *));
 
+void
+cmd_init ()
+{
+  ocache_create (wdcache, WORD_DESC, WDCACHESIZE);
+  ocache_create (wlcache, WORD_LIST, WLCACHESIZE);
+}
+
 WORD_DESC *
 make_bare_word (string)
      const char *string;
 {
   WORD_DESC *temp;
-
+#if 0
   temp = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
+#else
+  ocache_alloc (wdcache, WORD_DESC, temp);
+#endif
+
   if (*string)
     temp->word = savestring (string);
   else
@@ -80,11 +102,16 @@ make_word_flags (w, string)
      WORD_DESC *w;
      const char *string;
 {
-  register const char *s;
+  register int i;
+  size_t slen;
+  DECLARE_MBSTATE;
 
-  for (s = string; *s; s++)
-    switch (*s)
-      {
+  i = 0;
+  slen = strlen (string);
+  while (i < slen)
+    {
+      switch (string[i])
+	{
 	case '$':
 	  w->flags |= W_HASDOLLAR;
 	  break;
@@ -95,7 +122,11 @@ make_word_flags (w, string)
 	case '"':
 	  w->flags |= W_QUOTED;
 	  break;
-      }
+	}
+
+      ADVANCE_CHAR (string, slen, i);
+    }
+
   return (w);
 }
 
@@ -128,22 +159,13 @@ make_word_list (word, wlink)
 {
   WORD_LIST *temp;
 
+#if 0
   temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
+#else
+  ocache_alloc (wlcache, WORD_LIST, temp);
+#endif
   temp->word = word;
   temp->next = wlink;
-  return (temp);
-}
-
-WORD_LIST *
-add_string_to_list (string, list)
-     char *string;
-     WORD_LIST *list;
-{
-  WORD_LIST *temp;
-
-  temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
-  temp->word = make_word (string);
-  temp->next = list;
   return (temp);
 }
 
@@ -222,12 +244,10 @@ make_arith_for_expr (s)
      char *s;
 {
   WORD_LIST *result;
-  WORD_DESC *w;
 
   if (s == 0 || *s == '\0')
     return ((WORD_LIST *)NULL);
-  w = make_word (s);
-  result = make_word_list (w, (WORD_LIST *)NULL);
+  result = make_word_list (make_word (s), (WORD_LIST *)NULL);
   return result;
 }
 #endif
@@ -490,12 +510,7 @@ make_simple_command (element, command)
     command = make_bare_simple_command ();
 
   if (element.word)
-    {
-      WORD_LIST *tw = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
-      tw->word = element.word;
-      tw->next = command->value.Simple->words;
-      command->value.Simple->words = tw;
-    }
+    command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
   else
     {
       REDIRECT *r = element.redirect;
@@ -624,7 +639,12 @@ make_redirection (source, instruction, dest_and_filename)
      enum r_instruction instruction;
      REDIRECTEE dest_and_filename;
 {
-  REDIRECT *temp = (REDIRECT *)xmalloc (sizeof (REDIRECT));
+  REDIRECT *temp;
+  WORD_DESC *w;
+  int wlen;
+  intmax_t lfd;
+
+  temp = (REDIRECT *)xmalloc (sizeof (REDIRECT));
 
   /* First do the common cases. */
   temp->redirector = source;
@@ -657,11 +677,37 @@ make_redirection (source, instruction, dest_and_filename)
 
     case r_deblank_reading_until: 	/* <<-foo */
     case r_reading_until:		/* << foo */
+    case r_reading_string:		/* <<< foo */
     case r_close_this:			/* <&- */
     case r_duplicating_input:		/* 1<&2 */
     case r_duplicating_output:		/* 1>&2 */
+      break;
+
+    /* the parser doesn't pass these. */
+    case r_move_input:			/* 1<&2- */
+    case r_move_output:			/* 1>&2- */
+    case r_move_input_word:		/* 1<&$foo- */
+    case r_move_output_word:		/* 1>&$foo- */
+      break;
+
+    /* The way the lexer works we have to do this here. */
     case r_duplicating_input_word:	/* 1<&$foo */
     case r_duplicating_output_word:	/* 1>&$foo */
+      w = dest_and_filename.filename;
+      wlen = strlen (w->word) - 1;
+      if (w->word[wlen] == '-')		/* Yuck */
+        {
+          w->word[wlen] = '\0';
+	  if (all_digits (w->word) && legal_number (w->word, &lfd) && lfd == (int)lfd)
+	    {
+	      dispose_word (w);
+	      temp->instruction = (instruction == r_duplicating_input_word) ? r_move_input : r_move_output;
+	      temp->redirectee.dest = lfd;
+	    }
+	  else
+	    temp->instruction = (instruction == r_duplicating_input_word) ? r_move_input_word : r_move_output_word;
+        }
+          
       break;
 
     default:

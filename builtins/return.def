@@ -1,7 +1,7 @@
 This file is return.def, from which is created return.c.
 It implements the builtin "return" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,7 +52,7 @@ int
 return_builtin (list)
      WORD_LIST *list;
 {
-  return_catch_value = list ? get_exitstat (list) : last_command_exit_value;
+  return_catch_value = get_exitstat (list);
 
   if (return_catch_flag)
     longjmp (return_catch, 1);

@@ -62,6 +62,6 @@ extern int malloc_set_register __P((int));
 /* stats.c */
 extern void print_malloc_stats __P((char *));
 extern void fprint_malloc_stats ();	/* full prototype requires stdio.h */
-extern void trace_malloc_stats __P((char *));
+extern void trace_malloc_stats __P((char *, char *));
 
 #endif

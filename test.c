@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -138,12 +138,7 @@ static void
 test_syntax_error (format, arg)
      char *format, *arg;
 {
-  if (interactive_shell == 0)
-    fprintf (stderr, "%s: ", get_name_for_error ());
-  fprintf (stderr, "%s: ", argv[0]);
-  fprintf (stderr, format, arg);
-  fprintf (stderr, "\n");
-  fflush (stderr);
+  builtin_error (format, arg);
   test_exit (TEST_ERREXIT_STATUS);
 }
 
@@ -181,7 +176,7 @@ test_stat (path, finfo)
   if (path[0] == '/' && path[1] == 'd' && strncmp (path, "/dev/fd/", 8) == 0)
     {
 #if !defined (HAVE_DEV_FD)
-      long fd;
+      intmax_t fd;
       int r;
 
       if (legal_number (path + 8, &fd) && fd == (int)fd)
@@ -395,24 +390,23 @@ filecomp (s, t, op)
      int op;
 {
   struct stat st1, st2;
+  int r1, r2;
 
-  if (test_stat (s, &st1) < 0)
+  if ((r1 = test_stat (s, &st1)) < 0)
     {
-      st1.st_mtime = 0;
       if (op == EF)
 	return (FALSE);
     }
-  if (test_stat (t, &st2) < 0)
+  if ((r2 = test_stat (t, &st2)) < 0)
     {
-      st2.st_mtime = 0;
       if (op == EF)
 	return (FALSE);
     }
   
   switch (op)
     {
-    case OT: return (st1.st_mtime < st2.st_mtime);
-    case NT: return (st1.st_mtime > st2.st_mtime);
+    case OT: return (r1 < r2 || (r2 == 0 && st1.st_mtime < st2.st_mtime));
+    case NT: return (r1 > r2 || (r1 == 0 && st1.st_mtime > st2.st_mtime));
     case EF: return ((st1.st_dev == st2.st_dev) && (st1.st_ino == st2.st_ino));
     }
   return (FALSE);
@@ -423,7 +417,7 @@ arithcomp (s, t, op, flags)
      char *s, *t;
      int op, flags;
 {
-  long l, r;
+  intmax_t l, r;
   int expok;
 
   if (flags & TEST_ARITHEXP)
@@ -558,7 +552,7 @@ static int
 unary_operator ()
 {
   char *op;
-  long r;
+  intmax_t r;
 
   op = argv[pos];
   if (test_unop (op) == 0)
@@ -594,7 +588,7 @@ int
 unary_test (op, arg)
      char *op, *arg;
 {
-  long r;
+  intmax_t r;
   struct stat stat_buf;
      
   switch (op[1])

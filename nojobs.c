@@ -57,9 +57,7 @@
 
 #include "builtins/builtext.h"	/* for wait_builtin */
 
-#if !defined (CHILD_MAX)
-#  define CHILD_MAX 32
-#endif
+#define DEFAULT_CHILD_MAX 32
 
 #if defined (_POSIX_VERSION) || !defined (HAVE_KILLPG)
 #  define killpg(pg, sig)		kill(-(pg),(sig))
@@ -95,6 +93,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sigset_t top_level_mask;
 #endif
 extern procenv_t wait_intr_buf;
+extern int wait_signal_received;
 
 pid_t last_made_pid = NO_PID;
 pid_t last_asynchronous_pid = NO_PID;
@@ -130,6 +129,8 @@ static struct proc_status *pid_list = (struct proc_status *)NULL;
 static int pid_list_size;
 static int wait_sigint_received;
 
+static long child_max = -1L;
+
 static void alloc_pid_list __P((void));
 static int find_proc_slot __P((void));
 static int find_index_by_pid __P((pid_t));
@@ -143,7 +144,7 @@ static void mark_dead_jobs_as_notified __P((int));
 
 static void get_new_window_size __P((int));
 static sighandler sigwinch_sighandler __P((int));
-static sighandler wait_signal_handler __P((int));
+static sighandler wait_sigint_handler __P((int));
 
 #if defined (HAVE_WAITPID)
 static void reap_zombie_children __P((void));
@@ -306,7 +307,12 @@ mark_dead_jobs_as_notified (force)
 	ndead++;
     }
 
-  if (force == 0 && ndead <= CHILD_MAX)
+  if (child_max < 0)
+    child_max = getmaxchild ();
+  if (child_max < 0)
+    child_max = DEFAULT_CHILD_MAX;
+
+  if (force == 0 && ndead <= child_max)
     return;
 
   /* If FORCE == 0, we just mark as many non-running async jobs as notified
@@ -319,7 +325,7 @@ mark_dead_jobs_as_notified (force)
 	   pid_list[i].pid != last_asynchronous_pid)
 	{
 	  pid_list[i].flags |= PROC_NOTIFIED;
-	  if (force == 0 && (pid_list[i].flags & PROC_ASYNC) && --ndead <= CHILD_MAX)
+	  if (force == 0 && (pid_list[i].flags & PROC_ASYNC) && --ndead <= child_max)
 	    break;
 	}
     }
@@ -588,13 +594,16 @@ wait_for_single_pid (pid)
 	set_pid_status (got_pid, status);
     }
 
-  set_pid_status (got_pid, status);
-  set_pid_flags (got_pid, PROC_NOTIFIED);
+  if (got_pid > 0)
+    {
+      set_pid_status (got_pid, status);
+      set_pid_flags (got_pid, PROC_NOTIFIED);
+    }
 
   siginterrupt (SIGINT, 0);
   QUIT;
 
-  return (process_exit_status (status));
+  return (got_pid > 0 ? process_exit_status (status) : -1);
 }
 
 /* Wait for all of the shell's children to exit.  Called by the `wait'
@@ -662,6 +671,7 @@ wait_sigint_handler (sig)
       restore_sigint_handler ();
       interrupt_immediately = 0;
       trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
+      wait_signal_received = SIGINT;
       longjmp (wait_intr_buf, 1);
     }
 
@@ -719,7 +729,8 @@ wait_for (pid)
 	set_pid_status (got_pid, status);
     }
 
-  set_pid_status (got_pid, status);
+  if (got_pid > 0)
+    set_pid_status (got_pid, status);
 
 #if defined (HAVE_WAITPID)
   if (got_pid >= 0)

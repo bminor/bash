@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,10 +33,15 @@
 #  include <grp.h>
 #endif
 
+#if defined (HAVE_NETDB_H)
+#  include <netdb.h>
+#endif
+
 #include <stdio.h>
 #include "chartypes.h"
 #include "bashansi.h"
 #include "shell.h"
+#include "input.h"
 #include "builtins.h"
 #include "bashhist.h"
 #include "bashline.h"
@@ -56,6 +61,14 @@
 
 #if defined (PROGRAMMABLE_COMPLETION)
 #  include "pcomplete.h"
+#endif
+
+/* These should agree with the defines for emacs_mode and vi_mode in
+   rldefs.h, even though that's not a public readline header file. */
+#ifndef EMACS_EDITING_MODE
+#  define NO_EDITING_MODE	-1
+#  define EMACS_EDITING_MODE	 1
+#  define VI_EDITING_MODE	 0
 #endif
 
 #if defined (BRACE_COMPLETION)
@@ -170,13 +183,16 @@ static int bash_possible_command_completions __P((int, int));
 
 static char *glob_complete_word __P((const char *, int));
 static int bash_glob_completion_internal __P((int));
+static int bash_glob_complete_word __P((int, int));
 static int bash_glob_expand_word __P((int, int));
 static int bash_glob_list_expansions __P((int, int));
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
+static int edit_and_execute_command __P((int, int, int, char *));
 #if defined (VI_MODE)
 static int vi_edit_and_execute_command __P((int, int));
 #endif
+static int emacs_edit_and_execute_command __P((int, int));
 
 /* Non-zero once initalize_readline () has been called. */
 int bash_readline_initialized = 0;
@@ -213,7 +229,7 @@ posix_readline_initialize (on_or_off)
   if (on_or_off)
     rl_variable_bind ("comment-begin", "#");
 #if defined (VI_MODE)
-  rl_bind_key_in_map (CTRL('I'), on_or_off ? rl_insert : rl_complete, vi_insertion_keymap);
+  rl_bind_key_in_map (CTRL ('I'), on_or_off ? rl_insert : rl_complete, vi_insertion_keymap);
 #endif
 }
 
@@ -275,6 +291,7 @@ initialize_readline ()
 
   rl_add_defun ("operate-and-get-next", operate_and_get_next, -1);
   rl_add_defun ("display-shell-version", display_shell_version, -1);
+  rl_add_defun ("edit-and-execute-command", emacs_edit_and_execute_command, -1);
 
 #if defined (BRACE_COMPLETION)
   rl_add_defun ("complete-into-braces", bash_brace_completion, -1);
@@ -291,6 +308,7 @@ initialize_readline ()
   rl_add_defun ("possible-variable-completions", bash_possible_variable_completions, -1);
   rl_add_defun ("complete-command", bash_complete_command, -1);
   rl_add_defun ("possible-command-completions", bash_possible_command_completions, -1);
+  rl_add_defun ("glob-complete-word", bash_glob_complete_word, -1);
   rl_add_defun ("glob-expand-word", bash_glob_expand_word, -1);
   rl_add_defun ("glob-list-expansions", bash_glob_list_expansions, -1);
 #endif
@@ -341,6 +359,7 @@ initialize_readline ()
   rl_bind_key_in_map ('!', bash_complete_command, emacs_meta_keymap);
   rl_bind_key_in_map ('!', bash_possible_command_completions, emacs_ctlx_keymap);
 
+  rl_bind_key_in_map ('g', bash_glob_complete_word, emacs_meta_keymap);
   rl_bind_key_in_map ('*', bash_glob_expand_word, emacs_ctlx_keymap);
   rl_bind_key_in_map ('g', bash_glob_list_expansions, emacs_ctlx_keymap);
 
@@ -358,6 +377,8 @@ initialize_readline ()
   /* Tell the filename completer we want a chance to ignore some names. */
   rl_ignore_some_completions_function = filename_completion_ignore;
 
+  /* Bind C-xC-e to invoke emacs and run result as commands. */
+  rl_bind_key_in_map (CTRL ('E'), emacs_edit_and_execute_command, emacs_ctlx_keymap);
 #if defined (VI_MODE)
   rl_bind_key_in_map ('v', vi_edit_and_execute_command, vi_movement_keymap);
 #  if defined (ALIAS)
@@ -378,8 +399,14 @@ initialize_readline ()
   rl_filename_dequoting_function = bash_dequote_filename;
   rl_char_is_quoted_p = char_is_quoted;
 
+#if 0
+  /* This is superfluous and makes it impossible to use tab completion in
+     vi mode even when explicitly binding it in ~/.inputrc.  sv_strict_posix()
+     should already have called posix_readline_initialize() when
+     posixly_correct was set. */
   if (posixly_correct)
     posix_readline_initialize (1);
+#endif
 
   bash_readline_initialized = 1;
 }
@@ -491,13 +518,10 @@ static void
 add_host_name (name)
      char *name;
 {
-  size_t size;
-
   if (hostname_list_length + 2 > hostname_list_size)
     {
       hostname_list_size = (hostname_list_size + 32) - (hostname_list_size % 32);
-      size = hostname_list_size * sizeof (char *);
-      hostname_list = (char **)xrealloc (hostname_list, size);
+      hostname_list = strvec_resize (hostname_list, hostname_list_size);
     }
 
   hostname_list[hostname_list_length++] = savestring (name);
@@ -613,7 +637,7 @@ hostnames_matching (text)
      what is desired. */
   if (*text == '\0')
     {
-      result = alloc_array (1 + hostname_list_length);
+      result = strvec_create (1 + hostname_list_length);
       for (i = 0; i < hostname_list_length; i++)
 	result[i] = hostname_list[i];
       result[i] = (char *)NULL;
@@ -632,7 +656,7 @@ hostnames_matching (text)
       if (nmatch >= (rsize - 1))
 	{
 	  rsize = (rsize + 16) - (rsize % 16);
-	  result = (char **)xrealloc (result, rsize * sizeof (char *));
+	  result = strvec_resize (result, rsize);
 	}
 
       result[nmatch++] = hostname_list[i];
@@ -680,16 +704,17 @@ operate_and_get_next (count, c)
   return 0;
 }
 
-#if defined (VI_MODE)
 /* This vi mode command causes VI_EDIT_COMMAND to be run on the current
    command being entered (if no explicit argument is given), otherwise on
    a command from the history file. */
 
-#define VI_EDIT_COMMAND "fc -e ${VISUAL:-${EDITOR:-vi}}"
+#define VI_EDIT_COMMAND		"fc -e ${VISUAL:-${EDITOR:-vi}}"
+#define EMACS_EDIT_COMMAND	"fc -e ${VISUAL:-${EDITOR:-emacs}}"
 
 static int
-vi_edit_and_execute_command (count, c)
-     int count, c;
+edit_and_execute_command (count, c, editing_mode, edit_command)
+     int count, c, editing_mode;
+     char *edit_command;
 {
   char *command;
   int r, cclc, rrs;
@@ -702,8 +727,8 @@ vi_edit_and_execute_command (count, c)
 
   if (rl_explicit_arg)
     {
-      command = (char *)xmalloc (strlen (VI_EDIT_COMMAND) + 8);
-      sprintf (command, "%s %d", VI_EDIT_COMMAND, count);
+      command = (char *)xmalloc (strlen (edit_command) + 8);
+      sprintf (command, "%s %d", edit_command, count);
     }
   else
     {
@@ -716,9 +741,13 @@ vi_edit_and_execute_command (count, c)
       bash_add_history ("");
       history_lines_this_session++;
       using_history ();
-      command = savestring (VI_EDIT_COMMAND);
+      command = savestring (edit_command);
     }
-  r = parse_and_execute (command, "v", SEVAL_NOHIST);
+
+  /* Now, POSIX.1-2001 and SUSv3 say that the commands executed from the
+     temporary file should be placed into the history.  We don't do that
+     yet. */
+  r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
 
   current_command_line_count = cclc;
 
@@ -734,7 +763,22 @@ vi_edit_and_execute_command (count, c)
 
   return r;
 }
+
+#if defined (VI_MODE)
+static int
+vi_edit_and_execute_command (count, c)
+     int count, c;
+{
+  return (edit_and_execute_command (count, c, VI_EDITING_MODE, VI_EDIT_COMMAND));
+}
 #endif /* VI_MODE */
+
+static int
+emacs_edit_and_execute_command (count, c)
+     int count, c;
+{
+  return (edit_and_execute_command (count, c, EMACS_EDITING_MODE, EMACS_EDIT_COMMAND));
+}
 
 #if defined (ALIAS)
 static int
@@ -927,7 +971,7 @@ attempt_shell_completion (text, start, end)
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
   if (!matches && in_command_position == 0 && prog_completion_enabled &&
-      (num_progcomps () > 0) && current_prompt_string == ps1_prompt)
+      (progcomp_size () > 0) && current_prompt_string == ps1_prompt)
     {
       int s, e, foundcs;
       char *n;
@@ -955,6 +999,9 @@ attempt_shell_completion (text, start, end)
 	     sure that readline knows it. */
 	  if (foundcs & COPT_FILENAMES)
 	    rl_filename_completion_desired = 1;
+	  /* If the user doesn't want a space appended, tell readline. */
+	  if (foundcs & COPT_NOSPACE)
+	    rl_completion_suppress_append = 1;
 	  /* Turn what the programmable completion code returns into what
 	     readline wants.  I should have made compute_lcd_of_matches
 	     external... */
@@ -977,7 +1024,7 @@ attempt_shell_completion (text, start, end)
 
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
-  if (!matches && *text == '~' && !strchr (text, '/'))
+  if (!matches && *text == '~' && !xstrchr (text, '/'))
     matches = rl_completion_matches (text, rl_username_completion_function);
 
   /* Another one.  Why not?  If the word starts in '@', then look through
@@ -1005,6 +1052,25 @@ attempt_shell_completion (text, start, end)
 	     filenames and leave directories in the match list. */
 	  if (matches == (char **)NULL)
 	    rl_ignore_some_completions_function = bash_ignore_filenames;
+	  else if (matches[1] == 0 && *matches[0] != '/')
+	    /* Turn off rl_filename_completion_desired so readline doesn't
+	       append a slash if there is a directory with the same name
+	       in the current directory, or other filename-specific things.
+	       If the name begins with a slash, we're either completing a
+	       full pathname or a directory pathname, and readline won't be
+	       looking in the current directory anyway, so there's no
+	       conflict. */
+	    rl_filename_completion_desired = 0;
+	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) && *matches[0] != '/')
+	    /* There are multiple instances of the same match (duplicate
+	       completions haven't yet been removed).  In this case, all of
+	       the matches will be the same, and the duplicate removal code
+	       will distill them all down to one.  We turn off
+	       rl_filename_completion_desired for the same reason as above.
+	       Remember: we only care if there's eventually a single unique
+	       completion.  If there are multiple completions this won't
+	       make a difference and the problem won't occur. */
+	    rl_filename_completion_desired = 0;
 	}
     }
 
@@ -1015,9 +1081,9 @@ attempt_shell_completion (text, start, end)
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
 	 If we match more than one filename, punt. */
-      if (matches && matches[1])
+      if (matches && matches[1] && rl_completion_type == TAB)
 	{
-	  free_array (matches);
+	  strvec_dispose (matches);
 	  matches = (char **)0;
 	}
     }
@@ -1064,7 +1130,7 @@ command_word_completion_function (hint_text, state)
 	  /* Perform tilde expansion on what's passed, so we don't end up
 	     passing filenames with tildes directly to stat(). */
 	  if (*hint_text == '~')
-	    hint = bash_tilde_expand (hint_text);
+	    hint = bash_tilde_expand (hint_text, 0);
 	  else
 	    hint = savestring (hint_text);
 	  hint_len = strlen (hint);
@@ -1195,7 +1261,7 @@ command_word_completion_function (hint_text, state)
 	{
 	  char *t;
 
-	  t = bash_tilde_expand (current_path);
+	  t = bash_tilde_expand (current_path, 0);
 	  free (current_path);
 	  current_path = t;
 	}
@@ -1203,8 +1269,7 @@ command_word_completion_function (hint_text, state)
       if (filename_hint)
 	free (filename_hint);
 
-      filename_hint = (char *)xmalloc (2 + strlen (current_path) + hint_len);
-      sprintf (filename_hint, "%s/%s", current_path, hint);
+      filename_hint = sh_makepath (current_path, hint, 0);
 
       free (current_path);
     }
@@ -1304,8 +1369,31 @@ command_subst_completion_function (text, state)
       filename_text = savestring (text);
       if (matches)
 	free (matches);
-      matches = rl_completion_matches (filename_text, command_word_completion_function);
-      cmd_index = 0;
+
+      /*
+       * At this point we can entertain the idea of re-parsing
+       * `filename_text' into a (possibly incomplete) command name and
+       * arguments, and doing completion based on that.  This is
+       * currently very rudimentary, but it is a small improvement.
+       */
+      for (value = filename_text + strlen (filename_text) - 1; value > filename_text; value--)
+        if (whitespace (*value) || member (*value, COMMAND_SEPARATORS))
+          break;
+      if (value <= filename_text)
+	matches = rl_completion_matches (filename_text, command_word_completion_function);
+      else
+	{
+	  value++;
+	  start_len += value - filename_text;
+	  if (whitespace (value[-1]))
+	    matches = rl_completion_matches (value, rl_filename_completion_function);
+	  else
+	    matches = rl_completion_matches (value, command_word_completion_function);
+	}
+
+      /* If there is more than one match, rl_completion_matches has already
+	 put the lcd in matches[0].  Skip over it. */
+      cmd_index = matches && matches[0] && matches[1];
     }
 
   if (!matches || !matches[cmd_index])
@@ -1359,7 +1447,7 @@ variable_completion_function (text, state)
 
       namelen = strlen (varname);
       if (varlist)
-	free_array (varlist);
+	strvec_dispose (varlist);
 
       varlist = all_variables_matching_prefix (varname);
       varlist_index = 0;
@@ -1432,6 +1520,67 @@ hostname_completion_function (text, state)
   return ((char *)NULL);
 }
 
+/*
+ * A completion function for service names from /etc/services (or wherever).
+ */
+char *
+bash_servicename_completion_function (text, state)
+     const char *text;
+     int state;
+{
+#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GETSERVENT)
+  return ((char *)NULL);
+#else
+  static char *sname = (char *)NULL;
+  static struct servent *srvent;
+  static int snamelen, firstc;
+  char *value;
+  char **alist, *aentry;
+  int afound;
+
+  if (state == 0)
+    {
+      FREE (sname);
+      firstc = *text;
+
+      sname = savestring (text);
+      snamelen = strlen (sname);
+      setservent (0);
+    }
+
+  while (srvent = getservent ())
+    {
+      afound = 0;
+      if (snamelen == 0 || (STREQN (sname, srvent->s_name, snamelen)))
+	break;
+      /* Not primary, check aliases */
+      for (alist = srvent->s_aliases; aentry = *alist; alist++)
+	{
+	  if (STREQN (sname, aentry, snamelen))
+	    {
+	      afound = 1;
+	      break;
+	    }
+	}
+
+      if (afound)
+	break;
+    }
+
+  if (srvent == 0)
+    {
+      endservent ();
+      return ((char *)NULL);
+    }
+
+  value = afound ? savestring (aentry) : savestring (srvent->s_name);
+  return value;
+#endif
+}
+
+/*
+ * A completion function for group names from /etc/group (or wherever).
+ */
 char *
 bash_groupname_completion_function (text, state)
      const char *text;
@@ -1516,7 +1665,7 @@ maybe_make_readline_line (new_line)
 
       rl_add_undo (UNDO_BEGIN, 0, 0, 0);
       rl_delete_text (0, rl_point);
-      rl_point = rl_end = 0;
+      rl_point = rl_end = rl_mark = 0;
       rl_insert_text (new_line);
       rl_add_undo (UNDO_END, 0, 0, 0);
     }
@@ -1777,9 +1926,9 @@ _ignore_completion_names (names, name_func)
      filenames.  The pointers are copied back to NAMES when done. */
   for (nidx = 1; names[nidx]; nidx++)
     ;
-  newnames = alloc_array (nidx + 1);
+  newnames = strvec_create (nidx + 1);
 #ifdef NO_FORCE_FIGNORE
-  oldnames = alloc_array (nidx - 1);
+  oldnames = strvec_create (nidx - 1);
   oidx = 0;
 #endif
 
@@ -1887,7 +2036,7 @@ test_for_directory (name)
   struct stat finfo;
   char *fn;
 
-  fn = bash_tilde_expand (name);
+  fn = bash_tilde_expand (name, 0);
   if (stat (fn, &finfo) != 0)
     {
       free (fn);
@@ -1935,13 +2084,13 @@ bash_directory_completion_hook (dirname)
   local_dirname = *dirname;
 
 #if 0
-  should_expand_dirname = strchr (local_dirname, '$') || strchr (local_dirname, '`');
+  should_expand_dirname = xstrchr (local_dirname, '$') || xstrchr (local_dirname, '`');
 #else
-  if (strchr (local_dirname, '$'))
+  if (xstrchr (local_dirname, '$'))
     should_expand_dirname = 1;
   else
     {
-      t = strchr (local_dirname, '`');
+      t = xstrchr (local_dirname, '`');
       if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
 	should_expand_dirname = 1;
     }
@@ -1950,7 +2099,7 @@ bash_directory_completion_hook (dirname)
   if (should_expand_dirname)  
     {
       new_dirname = savestring (local_dirname);
-      wl = expand_string (new_dirname, 0);
+      wl = expand_prompt_string (new_dirname, 0);	/* does the right thing */
       if (wl)
 	{
 	  *dirname = string_list (wl);
@@ -2016,11 +2165,7 @@ build_history_completion_array ()
   /* First, clear out the current dynamic history completion list. */
   if (harry_size)
     {
-      for (i = 0; history_completion_array[i]; i++)
-	free (history_completion_array[i]);
-
-      free (history_completion_array);
-
+      strvec_dispose (history_completion_array);
       history_completion_array = (char **)NULL;
       harry_size = 0;
       harry_len = 0;
@@ -2040,11 +2185,7 @@ build_history_completion_array ()
 	  for (j = 0; tokens && tokens[j]; j++)
 	    {
 	      if (harry_len + 2 > harry_size)
-		{
-		  harry_size += 10;
-		  history_completion_array = (char **)xrealloc
-		    (history_completion_array, harry_size * sizeof (char *));
-		}
+	        history_completion_array = strvec_resize (history_completion_array, harry_size += 10);
 
 	      history_completion_array[harry_len++] = tokens[j];
 	      history_completion_array[harry_len] = (char *)NULL;
@@ -2053,7 +2194,7 @@ build_history_completion_array ()
 	}
 
       /* Sort the complete list of tokens. */
-      qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)qsort_string_compare);
+      qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
     }
 }
 
@@ -2097,6 +2238,7 @@ dynamic_complete_history (count, key)
   rl_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
 
+  /* XXX - use rl_completion_mode here? */
   if (rl_last_func == dynamic_complete_history)
     r = rl_complete_internal ('?');
   else
@@ -2112,7 +2254,7 @@ static int
 bash_complete_username (ignore, ignore2)
      int ignore, ignore2;
 {
-  return bash_complete_username_internal (TAB);
+  return bash_complete_username_internal (rl_completion_mode (bash_complete_username));
 }
 
 static int
@@ -2133,7 +2275,7 @@ static int
 bash_complete_filename (ignore, ignore2)
      int ignore, ignore2;
 {
-  return bash_complete_filename_internal (TAB);
+  return bash_complete_filename_internal (rl_completion_mode (bash_complete_filename));
 }
 
 static int
@@ -2176,7 +2318,7 @@ static int
 bash_complete_hostname (ignore, ignore2)
      int ignore, ignore2;
 {
-  return bash_complete_hostname_internal (TAB);
+  return bash_complete_hostname_internal (rl_completion_mode (bash_complete_hostname));
 }
 
 static int
@@ -2190,7 +2332,7 @@ static int
 bash_complete_variable (ignore, ignore2)
      int ignore, ignore2;
 {
-  return bash_complete_variable_internal (TAB);
+  return bash_complete_variable_internal (rl_completion_mode (bash_complete_variable));
 }
 
 static int
@@ -2204,7 +2346,7 @@ static int
 bash_complete_command (ignore, ignore2)
      int ignore, ignore2;
 {
-  return bash_complete_command_internal (TAB);
+  return bash_complete_command_internal (rl_completion_mode (bash_complete_command));
 }
 
 static int
@@ -2235,6 +2377,9 @@ bash_complete_command_internal (what_to_do)
   return bash_specific_completion (what_to_do, command_word_completion_function);
 }
 
+static char *globtext;
+static char *globorig;
+
 static char *
 glob_complete_word (text, state)
      const char *text;
@@ -2242,14 +2387,30 @@ glob_complete_word (text, state)
 {
   static char **matches = (char **)NULL;
   static int ind;
+  int glen;
   char *ret;
 
   if (state == 0)
     {
       rl_filename_completion_desired = 1;
-      if (matches)
-	free (matches);
-      matches = shell_glob_filename (text);
+      FREE (matches);
+      if (globorig != globtext)
+	FREE (globorig);
+      FREE (globtext);
+
+      if (rl_explicit_arg)
+	{
+	  globorig = savestring (text);
+	  glen = strlen (text);
+	  globtext = (char *)xmalloc (glen + 2);
+	  strcpy (globtext, text);
+	  globtext[glen] = '*';
+	  globtext[glen+1] = '\0';
+	}
+      else
+        globtext = globorig = savestring (text);
+
+      matches = shell_glob_filename (globtext);
       if (GLOB_FAILED (matches))
 	matches = (char **)NULL;
       ind = 0;
@@ -2265,6 +2426,37 @@ bash_glob_completion_internal (what_to_do)
      int what_to_do;
 {
   return bash_specific_completion (what_to_do, glob_complete_word);
+}
+
+/* A special quoting function so we don't end up quoting globbing characters
+   in the word if there are no matches or multiple matches. */
+static char *
+bash_glob_quote_filename (s, rtype, qcp)
+     char *s;
+     int rtype;
+     char *qcp;
+{
+  if (globorig && qcp && *qcp == '\0' && STREQ (s, globorig))
+    return (savestring (s));
+  else
+    return (bash_quote_filename (s, rtype, qcp));
+}
+
+static int
+bash_glob_complete_word (count, key)
+     int count, key;
+{
+  int r;
+  rl_quote_func_t *orig_quoting_function;
+
+  rl_explicit_arg = 1;	/* force `*' append */
+  orig_quoting_function = rl_filename_quoting_function;
+  rl_filename_quoting_function = bash_glob_quote_filename;
+  
+  r = bash_glob_completion_internal (rl_completion_mode (bash_glob_complete_word));
+
+  rl_filename_quoting_function = orig_quoting_function;
+  return r;
 }
 
 static int
@@ -2372,7 +2564,7 @@ quote_word_break_chars (text)
 	}
       /* OK, we have an unquoted character.  Check its presence in
 	 rl_completer_word_break_characters. */
-      if (strchr (rl_completer_word_break_characters, *s))
+      if (xstrchr (rl_completer_word_break_characters, *s))
 	*r++ = '\\';
       *r++ = *s;
     }
@@ -2384,7 +2576,8 @@ quote_word_break_chars (text)
    depending on the value of completion_quoting_style.  If we're
    completing using backslashes, we need to quote some additional
    characters (those that readline treats as word breaks), so we call
-   quote_word_break_chars on the result. */
+   quote_word_break_chars on the result.  This returns newly-allocated
+   memory. */
 static char *
 bash_quote_filename (s, rtype, qcp)
      char *s;
@@ -2405,7 +2598,7 @@ bash_quote_filename (s, rtype, qcp)
 
   mtext = s;
   if (mtext[0] == '~' && rtype == SINGLE_MATCH)
-    mtext = bash_tilde_expand (s);
+    mtext = bash_tilde_expand (s, 0);
 
   cs = completion_quoting_style;
   /* Might need to modify the default completion style based on *qcp,
@@ -2414,7 +2607,7 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && strchr (mtext, '\n'))
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (mtext, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -2422,11 +2615,11 @@ bash_quote_filename (s, rtype, qcp)
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
   else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
-	   history_expansion_inhibited == 0 && strchr (mtext, '!'))
+	   history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
     cs = COMPLETE_BSQUOTE;
 
   if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
-	history_expansion_inhibited == 0 && strchr (mtext, '!'))
+	history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
     {
       cs = COMPLETE_BSQUOTE;
       *qcp = '\0';
@@ -2483,6 +2676,8 @@ bash_execute_unix_command (count, key)
   Keymap xkmap;		/* unix command executing keymap */
   register int i;
   char *cmd;
+  int old_line_count;
+  int *ts;
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap. */
@@ -2518,8 +2713,14 @@ bash_execute_unix_command (count, key)
 
   rl_crlf ();	/* move to a new line */
 
+  old_line_count = current_command_line_count;
+  ts = save_token_state ();
+
   cmd = savestring (cmd);
-  parse_and_execute (cmd, "bash_execute_unix_command", 0);
+  parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST);
+
+  current_command_line_count = old_line_count;
+  restore_token_state (ts);
 
   /* and restore the readline buffer and display after command execution. */
   rl_forced_update_display ();

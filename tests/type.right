@@ -1,7 +1,7 @@
-./type.tests: type: illegal option: -f
-type: usage: type [-apt] name [name ...]
-./type.tests: type: notthere: not found
-./type.tests: command: notthere: not found
+./type.tests: line 9: type: -r: invalid option
+type: usage: type [-afptP] name [name ...]
+./type.tests: line 12: type: notthere: not found
+./type.tests: line 13: command: notthere: not found
 function
 keyword
 alias
@@ -35,12 +35,12 @@ builtin
 builtin is a shell builtin
 /bin/sh
 /bin/sh is /bin/sh
-./type.tests: type: func: not found
-./type.tests: type: m: not found
+./type.tests: line 51: type: func: not found
+./type.tests: line 53: type: m: not found
 /bin/sh
 /tmp/bash
 bash is hashed (/tmp/bash)
 file
 hits	command
-   1	/bin/sh
    3	/tmp/bash
+   1	/bin/sh

@@ -198,3 +198,6 @@ printenv FOOFOO
 # test out export behavior of variable assignments preceding builtins and
 # functions
 $THIS_SH ./varenv1.sub
+
+# more tests; bugs in bash up to version 2.05a
+$THIS_SH ./varenv2.sub

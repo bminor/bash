@@ -1,7 +1,7 @@
 This file is shift.def, from which is created shift.c.
 It implements the builtin "shift" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,7 +52,7 @@ int
 shift_builtin (list)
      WORD_LIST *list;
 {
-  long times;
+  intmax_t times;
   register int count;
   WORD_LIST *temp;
 
@@ -62,13 +62,13 @@ shift_builtin (list)
     return (EXECUTION_SUCCESS);
   else if (times < 0)
     {
-      builtin_error ("shift count must be >= 0");
+      sh_erange (list->word->word, "shift count");
       return (EXECUTION_FAILURE);
     }
   else if (times > number_of_args ())
     {
       if (print_shift_error)
-	builtin_error ("shift count must be <= $#");
+	sh_erange (list->word->word, "shift count");
       return (EXECUTION_FAILURE);
     }
 

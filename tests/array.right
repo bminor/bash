@@ -1,5 +1,6 @@
-./array.tests: array assign: line 10: syntax error near unexpected token `&'
-./array.tests: array assign: line 10: `first & second'
+
+./array.tests: line 15: syntax error near unexpected token `&'
+./array.tests: line 15: `test=(first & second)'
 1
 abcde
 abcde
@@ -20,7 +21,7 @@ hello world
 11
 3
 bdef hello world test expression
-./array.tests: readonly: `a[5]': not a valid identifier
+./array.tests: line 74: readonly: `a[5]': not a valid identifier
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -ar c='()'
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
@@ -35,25 +36,25 @@ declare -ar c='()'
 declare -a d='([1]="" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")'
 declare -a e='([0]="test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
-./array.tests: a: readonly variable
-./array.tests: b[]: bad array subscript
-./array.tests: b[*]: bad array subscript
-./array.tests: ${b[   ]}: bad substitution
-./array.tests: c[-2]: bad array subscript
-./array.tests: c: bad array subscript
+./array.tests: line 98: a: readonly variable
+./array.tests: line 100: b[]: bad array subscript
+./array.tests: line 101: b[*]: bad array subscript
+./array.tests: line 102: ${b[   ]}: bad substitution
+./array.tests: line 104: c[-2]: bad array subscript
+./array.tests: line 105: c: bad array subscript
 
-./array.tests: d[7]: cannot assign list to array member
-./array.tests: []=abcde: bad array subscript
-./array.tests: [*]=last: cannot assign to non-numeric index
-./array.tests: [-65]=negative: bad array subscript
+./array.tests: line 107: d[7]: cannot assign list to array member
+./array.tests: line 109: []=abcde: bad array subscript
+./array.tests: line 109: [*]=last: cannot assign to non-numeric index
+./array.tests: line 109: [-65]=negative: bad array subscript
 declare -a DIRSTACK='()'
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
 declare -ar c='()'
 declare -a d='([1]="test test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
-./array.tests: unset: ps1: not an array variable
-./array.tests: declare: c: cannot destroy array variables in this way
+./array.tests: line 117: unset: ps1: not an array variable
+./array.tests: line 121: declare: c: cannot destroy array variables in this way
 this of
 this is a test of read using arrays
 this test
@@ -88,6 +89,10 @@ bin bin ucb bin . sbin sbin
 bin
 / / / / / /
 /
+argv[1] = <bin>
+argv[1] = </>
+argv[1] = <sbin>
+argv[1] = </>
 \bin \usr/bin \usr/ucb \usr/local/bin . \sbin \usr/sbin
 \bin \usr\bin \usr\ucb \usr\local\bin . \sbin \usr\sbin
 \bin \usr\bin \usr\ucb \usr\local\bin . \sbin \usr\sbin
@@ -102,7 +107,7 @@ grep [ 123 ] *
 6 7 9 5
 length = 3
 value = new1 new2 new3
-./array.tests: narray: unbound variable
+./array.tests: line 237: narray: unbound variable
 
 a b c d e f g
 for case if then else
@@ -110,19 +115,15 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: array assign: line 263: syntax error near unexpected token `for'
-./array.tests: array assign: line 263: `a b c for case if then else'
-./array.tests: array assign: line 265: syntax error near unexpected token `for'
-./array.tests: array assign: line 265: `for case if then else'
-./array.tests: array assign: line 267: syntax error near unexpected token `<>'
-./array.tests: array assign: line 267: ` <> < > ! '
-./array.tests: array assign: line 268: syntax error near unexpected token `[1]=<>'
-./array.tests: array assign: line 268: ` [1]=<> [2]=< [3]=> [4]=! '
+./array.tests: line 277: syntax error near unexpected token `<>'
+./array.tests: line 277: `metas=( <> < > ! )'
+./array.tests: line 278: syntax error near unexpected token `<>'
+./array.tests: line 278: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
+case 4
+abc case if then else 5
+abc case if then else 5
 0
-abc 1
-abc 1
-0
-0
-1
-1
+case 4
+case if then else 5
+case if then else 5

@@ -35,6 +35,7 @@
 #include "unwind_prot.h"
 #include "dispose_cmd.h"
 #include "make_cmd.h"
+#include "ocache.h"
 #include "subst.h"
 #include "sig.h"
 #include "pathnames.h"
@@ -86,6 +87,7 @@ extern WORD_LIST *rest_of_args;
 /* Generalized global variables. */
 extern int executing, login_shell;
 extern int interactive, interactive_shell;
+extern int startup_state;
 
 /* Structure to pass around that holds a bitmap of file descriptors
    to close, and the size of that structure.  Used in execute_cmd.c. */
@@ -112,7 +114,7 @@ extern struct user_info current_user;
 
 /* Force gcc to not clobber X on a longjmp().  Old versions of gcc mangle
    this badly. */
-#if __GNUC__ == 2 && __GNUC_MINOR__ > 8
+#if (__GNUC__ > 2) || (__GNUC__ == 2 && __GNUC_MINOR__ > 8)
 #  define USE_VAR(x)	((void) &(x))
 #else
 #  define USE_VAR(x)

@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -98,7 +98,7 @@ jobs_builtin (list)
 	case 'x':
 	  if (form != JLIST_STANDARD)
 	    {
-	      builtin_error ("Other options not allowed with `-x'");
+	      builtin_error ("no other options allowed with `-x'");
 	      return (EXECUTION_FAILURE);
 	    }
 	  execute++;
@@ -145,7 +145,7 @@ jobs_builtin (list)
 
       if ((job == NO_JOB) || !jobs || !jobs[job])
 	{
-	  builtin_error ("no such job %s", list->word->word);
+	  sh_badjob (list->word->word);
 	  any_failed++;
 	}
       else if (job != DUP_JOB)
@@ -219,7 +219,7 @@ disown_builtin (list)
 {
   int opt, job, retval, nohup_only, running_jobs, all_jobs;
   sigset_t set, oset;
-  long pid_value;
+  intmax_t pid_value;
 
   nohup_only = running_jobs = all_jobs = 0;
   reset_internal_getopt ();
@@ -263,7 +263,7 @@ disown_builtin (list)
 
       if (job == NO_JOB || jobs == 0 || job < 0 || job >= job_slots || jobs[job] == 0)
 	{
-	  builtin_error ("%s: no such job", list ? list->word->word : "current");
+	  sh_badjob (list ? list->word->word : "current");
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)

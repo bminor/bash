@@ -32,7 +32,7 @@ do
 	cd "$1" || { shift; [ $# -ge 1 ] && echo >&2; continue; }
 	echo -n "$PWD"
 
-	du $andfiles | sort +1f | sed \
+	du $andfiles | sort -k 2f | sed \
 		-e 's/\([^	]*\)	\(.*\)/\2  (\1)/' \
 		-e "s#^$1##" \
 		-e 's#[^/]*/\([^/]*\)$#|____\1#' \

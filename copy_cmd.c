@@ -58,13 +58,8 @@ copy_word (w)
 {
   WORD_DESC *new_word;
 
-  new_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
-#if 1
+  new_word = make_bare_word (w->word);
   new_word->flags = w->flags;
-#else
-  FASTCOPY ((char *)w, (char *)new_word, sizeof (WORD_DESC));
-#endif
-  new_word->word = savestring (w->word);
   return (new_word);
 }
 
@@ -74,15 +69,11 @@ WORD_LIST *
 copy_word_list (list)
      WORD_LIST *list;
 {
-  WORD_LIST *new_list, *temp;
+  WORD_LIST *new_list;
 
   for (new_list = (WORD_LIST *)NULL; list; list = list->next)
-    {
-      temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
-      temp->next = new_list;
-      new_list = temp;
-      new_list->word = copy_word (list->word);
-    }
+    new_list = make_word_list (copy_word (list->word), new_list);
+
   return (REVERSE_LIST (new_list, WORD_LIST *));
 }
 
@@ -128,6 +119,7 @@ copy_redirect (redirect)
     case r_deblank_reading_until:
       new_redirect->here_doc_eof = savestring (redirect->here_doc_eof);
       /*FALLTHROUGH*/
+    case r_reading_string:
     case r_appending_to:
     case r_output_direction:
     case r_input_direction:
@@ -137,10 +129,14 @@ copy_redirect (redirect)
     case r_output_force:
     case r_duplicating_input_word:
     case r_duplicating_output_word:
+    case r_move_input_word:
+    case r_move_output_word:
       new_redirect->redirectee.filename = copy_word (redirect->redirectee.filename);
       break;
     case r_duplicating_input:
     case r_duplicating_output:
+    case r_move_input:
+    case r_move_output:
     case r_close_this:
       break;
     }
@@ -253,7 +249,7 @@ copy_if_command (com)
   new_if->flags = com->flags;
   new_if->test = copy_command (com->test);
   new_if->true_case = copy_command (com->true_case);
-  new_if->false_case = copy_command (com->false_case);
+  new_if->false_case = com->false_case ? copy_command (com->false_case) : com->false_case;
   return (new_if);
 }
 
@@ -301,7 +297,7 @@ copy_simple_command (com)
   new_simple = (SIMPLE_COM *)xmalloc (sizeof (SIMPLE_COM));
   new_simple->flags = com->flags;
   new_simple->words = copy_word_list (com->words);
-  new_simple->redirects = copy_redirects (com->redirects);
+  new_simple->redirects = com->redirects ? copy_redirects (com->redirects) : (REDIRECT *)NULL;
   new_simple->line = com->line;
   return (new_simple);
 }

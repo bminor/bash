@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994 Free Software Foundation, Inc.
+Copyright (C) 1994-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,7 +22,6 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 $PRODUCES shopt.c
 
 $BUILTIN shopt
-$DOCNAME shopt_builtin
 $FUNCTION shopt_builtin
 $SHORT_DOC shopt [-pqsu] [-o long-option] optname [optname...]
 Toggle the values of variables controlling optional behavior.
@@ -59,7 +58,7 @@ $END
 extern int allow_null_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
 extern int no_exit_on_failed_exec, print_shift_error;
-extern int check_hashed_filenames, promptvars, interactive_comments;
+extern int check_hashed_filenames, promptvars;
 extern int cdspelling, expand_aliases;
 extern int check_window_size;
 extern int glob_ignore_case;
@@ -86,9 +85,10 @@ extern int prog_completion_enabled;
 #endif
 
 #if defined (RESTRICTED_SHELL)
-extern int restricted_shell;
 extern char *shell_name;
 #endif
+
+static void shopt_error __P((char *));
 
 static int set_interactive_comments __P((int));
 
@@ -268,7 +268,12 @@ find_shopt (name)
   return -1;
 }
 
-#define SHOPT_ERROR(str)	builtin_error ("%s: unknown shell option name", str)
+static void
+shopt_error (s)
+     char *s;
+{
+  builtin_error ("%s: invalid shell option name", s);
+}
 
 static int
 toggle_shopts (mode, list, quiet)
@@ -284,7 +289,7 @@ toggle_shopts (mode, list, quiet)
       ind = find_shopt (l->word->word);
       if (ind < 0)
 	{
-	  SHOPT_ERROR (l->word->word);
+	  shopt_error (l->word->word);
 	  rval = EXECUTION_FAILURE;
 	}
       else
@@ -334,7 +339,7 @@ list_shopts (list, flags)
       i = find_shopt (l->word->word);
       if (i < 0)
 	{
-	  SHOPT_ERROR (l->word->word);
+	  shopt_error (l->word->word);
 	  rval = EXECUTION_FAILURE;
 	  continue;
 	}
@@ -383,7 +388,7 @@ list_shopt_o_options (list, flags)
       val = minus_o_option_value (l->word->word);
       if (val == -1)
 	{
-	  builtin_error ("%s: unknown option name", l->word->word);
+	  sh_invalidoptname (l->word->word);
 	  rval = EXECUTION_FAILURE;
 	  continue;
 	}
@@ -470,7 +475,7 @@ get_shopt_options ()
   int n, i;
 
   n = sizeof (shopt_vars) / sizeof (shopt_vars[0]);
-  ret = alloc_array (n + 1);
+  ret = strvec_create (n + 1);
   for (i = 0; shopt_vars[i].name; i++)
     ret[i] = savestring (shopt_vars[i].name);
   ret[i] = (char *)NULL;
@@ -509,7 +514,7 @@ shopt_listopt (name, reusable)
   i = find_shopt (name);
   if (i < 0)
     {
-      SHOPT_ERROR (name);
+      shopt_error (name);
       return (EXECUTION_FAILURE);
     }
 

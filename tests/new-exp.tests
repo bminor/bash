@@ -44,9 +44,9 @@ expect "<$HOME>"
 recho "$(echo "$(echo "${HOME}")")"
 
 P=*@*
-expect '<*@*>'
+expect '<*@>'
 recho "${P%"*"}"	# 
-expect '<*@*>'
+expect '<*@>'
 recho "${P%'*'}"	# 
 expect '<@*>'
 recho "${P#\*}"		# should be @*
@@ -520,6 +520,22 @@ recho "${*:1:0}"
 # this is an error -- negative expression
 set a
 recho ${@:1:$(($# - 2))}
+
+XPATH=/bin:/usr/bin:/usr/ucb:/usr/local/bin:.:/sbin:/usr/sbin
+set $( IFS=: ; echo $XPATH ) 
+
+recho ${@##*/}
+recho ${@%%[!/]*}
+
+recho ${@#/*}
+recho ${@%*/}
+
+set /full/path/to/x16 /another/full/path
+
+recho ${1%/*}
+recho ${1%%[!/]*}
+recho ${1#*/}
+recho ${1##*/}
 
 # this must be last!
 expect $0: 'ABXD: parameter unset'

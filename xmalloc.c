@@ -112,7 +112,7 @@ xrealloc (pointer, bytes)
       allocated = findbrk ();
       fatal_error ("xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)", (unsigned long)bytes, (unsigned long)allocated);
 #else
-      fatal_error ("xmalloc: cannot allocate %lu bytes", (unsigned long)bytes);
+      fatal_error ("xrealloc: cannot allocate %lu bytes", (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
 

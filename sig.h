@@ -30,7 +30,7 @@
 #endif
 
 #define sighandler RETSIGTYPE
-typedef RETSIGTYPE SigHandler ();
+typedef RETSIGTYPE SigHandler __P((int));
 
 #if defined (VOID_SIGHANDLER)
 #  define SIGRETURN(n)	return
@@ -44,7 +44,7 @@ typedef RETSIGTYPE SigHandler ();
 #if !defined (HAVE_POSIX_SIGNALS)
 #  define set_signal_handler(sig, handler) (SigHandler *)signal (sig, handler)
 #else
-extern SigHandler *set_signal_handler ();	/* in sig.c */
+extern SigHandler *set_signal_handler __P((int, SigHandler *));	/* in sig.c */
 #endif /* _POSIX_VERSION */
 
 /* Definitions used by the job control code. */
@@ -89,10 +89,12 @@ extern SigHandler *set_signal_handler ();	/* in sig.c */
 /* These definitions are used both in POSIX and non-POSIX implementations. */
 
 #define BLOCK_SIGNAL(sig, nvar, ovar) \
+do { \
   sigemptyset (&nvar); \
   sigaddset (&nvar, sig); \
   sigemptyset (&ovar); \
-  sigprocmask (SIG_BLOCK, &nvar, &ovar)
+  sigprocmask (SIG_BLOCK, &nvar, &ovar); \
+} while (0)
 
 #if defined (HAVE_POSIX_SIGNALS)
 #  define BLOCK_CHILD(nvar, ovar) \
@@ -109,8 +111,7 @@ extern SigHandler *set_signal_handler ();	/* in sig.c */
 /* Functions from sig.c. */
 extern sighandler termination_unwind_protect __P((int));
 extern sighandler sigint_sighandler __P((int));
-extern void initialize_signals __P((void));
-extern void reinitialize_signals __P((void));
+extern void initialize_signals __P((int));
 extern void initialize_terminating_signals __P((void));
 extern void reset_terminating_signals __P((void));
 extern void throw_to_top_level __P((void));

@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -55,6 +55,7 @@ $END
 #include "../shell.h"
 #include "../findcmd.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 #if !defined (errno)
 extern int errno;
@@ -80,13 +81,11 @@ int source_searches_cwd = 1;
 static void
 maybe_pop_dollar_vars ()
 {
-  if (variable_context == 0 && dollar_vars_changed ())
-    {
-      dispose_saved_dollar_vars ();
-      set_dollar_vars_unchanged ();
-    }
+  if (variable_context == 0 && (dollar_vars_changed () & ARGS_SETBLTIN))
+    dispose_saved_dollar_vars ();
   else
     pop_dollar_vars ();
+  set_dollar_vars_unchanged ();
 }
 
 /* Read and execute commands from the file passed as argument.  Guess what.
@@ -100,6 +99,10 @@ source_builtin (list)
   int result;
   char *filename;
 
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;
+
   if (list == 0)
     {
       builtin_error ("filename argument required");
@@ -107,13 +110,10 @@ source_builtin (list)
       return (EX_USAGE);
     }
 
-  if (no_options (list))
-    return (EX_USAGE);
-
 #if defined (RESTRICTED_SHELL)
   if (restricted && strchr (list->word->word, '/'))
     {
-      builtin_error ("%s: restricted", list->word->word);
+      sh_restricted (list->word->word);
       return (EXECUTION_FAILURE);
     }
 #endif

@@ -2,6 +2,10 @@
  * finfo - print file info
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <sys/types.h>
 #include "posixstat.h"
 #include <stdio.h>
@@ -127,10 +131,10 @@ char	*f;
 {
 	static struct stat st;
 	int	fd, r;
-	long	lfd;
+	intmax_t lfd;
 
 	if (strncmp(f, "/dev/fd/", 8) == 0) {
-		if (legal_number(f + 8, &lfd) == 0) {
+		if ((legal_number(f + 8, &lfd) == 0) || (int)lfd != lfd) {
 			builtin_error("%s: invalid fd", f + 8);
 			return ((struct stat *)0);
 		}

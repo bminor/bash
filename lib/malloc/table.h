@@ -55,12 +55,12 @@ typedef struct mr_table {
 
 #define REG_TABLE_SIZE	8192
 
-extern mr_table_t *mr_table_entry ();
-extern void mregister_alloc ();
-extern void mregister_free ();
+extern mr_table_t *mr_table_entry __P((PTR_T));
+extern void mregister_alloc __P((const char *, PTR_T, size_t, const char *, int));
+extern void mregister_free __P((PTR_T, int, const char *, int));
 extern void mregister_describe_mem ();
-extern void mregister_dump_table ();
-extern void mregister_table_init ();
+extern void mregister_dump_table __P((void));
+extern void mregister_table_init __P((void));
 
 /* NOTE:  HASH_MIX taken from dmalloc (http://dmalloc.com) */
 

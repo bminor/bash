@@ -5,13 +5,13 @@
 @c %**end of header
 
 @ignore
-Last Change: Tue Nov 13 12:48:51 EST 2001
+Last Change: Mon Jul 15 15:21:16 EDT 2002
 @end ignore
 
-@set EDITION 2.5a
-@set VERSION 2.05a
-@set UPDATED 13 November 2001
-@set UPDATE-MONTH November 2001
+@set EDITION 2.5b
+@set VERSION 2.05b
+@set UPDATED 15 July 2002
+@set UPDATE-MONTH July 2002
 
 @iftex
 @finalout
@@ -36,7 +36,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright (C) 1991-2001 Free Software Foundation, Inc.
+Copyright (C) 1991-2002 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -70,7 +70,7 @@ by the Free Software Foundation.
 @author Brian Fox, Free Software Foundation
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-1999 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2002 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -100,7 +100,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright (C) 1991, 1993, 1996 Free Software Foundation, Inc.
+Copyright (C) 1991-2002 Free Software Foundation, Inc.
 
 Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -548,6 +548,8 @@ the eight-bit character whose value is the octal value @var{nnn}
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
+@item \c@var{x}
+a control-@var{x} character
 @end table
 
 @noindent
@@ -687,6 +689,9 @@ and optionally terminated by one of @samp{;}, @samp{&}, or a
 Of these list operators, @samp{&&} and @samp{||}
 have equal precedence, followed by @samp{;} and @samp{&},
 which have equal precedence.
+
+A sequence of one or more newlines may appear in a @code{list}
+to delimit commands, equivalent to a semicolon.
 
 If a command is terminated by the control operator @samp{&},
 the shell executes the command asynchronously in a subshell.
@@ -972,7 +977,7 @@ True if both @var{expression1} and @var{expression2} are true.
 True if either @var{expression1} or @var{expression2} is true.
 @end table
 @noindent
-The @code{&&} and @code{||} commands do not execute @var{expression2} if the
+The @code{&&} and @code{||} operators do not evaluate @var{expression2} if the
 value of @var{expression1} is sufficient to determine the return
 value of the entire conditional expression.
 
@@ -1778,10 +1783,12 @@ using the syntax
 following classes defined in the @sc{posix} 1003.2 standard:
 @example
 alnum   alpha   ascii   blank   cntrl   digit   graph   lower
-print   punct   space   upper   xdigit
+print   punct   space   upper   word    xdigit
 @end example
 @noindent
 A character class matches any character belonging to that class.
+The @code{word} character class matches letters, digits, and the character
+@samp{_}.
 
 Within @samp{[} and @samp{]}, an @var{equivalence class} can be
 specified using the syntax @code{[=}@var{c}@code{=]}, which
@@ -1905,20 +1912,20 @@ is not specified.
 
 The general format for redirecting input is:
 @example
-[n]<@var{word}
+[@var{n}]<@var{word}
 @end example
 
 @subsection Redirecting Output
 Redirection of output causes the file whose name results from
 the expansion of @var{word}
-to be opened for writing on file descriptor @code{n},
-or the standard output (file descriptor 1) if @code{n}
+to be opened for writing on file descriptor @var{n},
+or the standard output (file descriptor 1) if @var{n}
 is not specified.  If the file does not exist it is created;
 if it does exist it is truncated to zero size.
 
 The general format for redirecting output is:
 @example
-[n]>[|]@var{word}
+[@var{n}]>[|]@var{word}
 @end example
 
 If the redirection operator is @samp{>}, and the @code{noclobber}
@@ -1933,13 +1940,13 @@ is attempted even if the file named by @var{word} exists.
 Redirection of output in this fashion
 causes the file whose name results from
 the expansion of @var{word}
-to be opened for appending on file descriptor @code{n},
-or the standard output (file descriptor 1) if @code{n}
+to be opened for appending on file descriptor @var{n},
+or the standard output (file descriptor 1) if @var{n}
 is not specified.  If the file does not exist it is created.
 
 The general format for appending output is:
 @example
-[n]>>@var{word}
+[@var{n}]>>@var{word}
 @end example
 
 @subsection Redirecting Standard Output and Standard Error
@@ -1973,7 +1980,7 @@ current source until a line containing only @var{word}
 the lines read up to that point are then used as the standard
 input for a command.
 
-The format of here-documents is as follows:
+The format of here-documents is:
 @example
 <<[@minus{}]@var{word}
         @var{here-document}
@@ -1998,45 +2005,71 @@ line containing @var{delimiter}.
 This allows here-documents within shell scripts to be indented in a
 natural fashion.
 
+@subsection Here Strings
+A variant of here documents, the format is:
+@example
+<<< @var{word}
+@end example
+
+The @var{word} is expanded and supplied to the command on its standard
+input.
+
 @subsection Duplicating File Descriptors
 The redirection operator
 @example
-[n]<&@var{word}
+[@var{n}]<&@var{word}
 @end example
 @noindent
 is used to duplicate input file descriptors.
 If @var{word}
-expands to one or more digits, the file descriptor denoted by @code{n}
+expands to one or more digits, the file descriptor denoted by @var{n}
 is made to be a copy of that file descriptor.
 If the digits in @var{word} do not specify a file descriptor open for
 input, a redirection error occurs.
 If @var{word}
-evaluates to @samp{-}, file descriptor @code{n} is closed.  If
-@code{n} is not specified, the standard input (file descriptor 0) is used.
+evaluates to @samp{-}, file descriptor @var{n} is closed.  If
+@var{n} is not specified, the standard input (file descriptor 0) is used.
 
 The operator
 @example
-[n]>&@var{word}
+[@var{n}]>&@var{word}
 @end example
 @noindent
 is used similarly to duplicate output file descriptors.  If
-@code{n}
-is not specified, the standard output (file descriptor 1) is used.
+@var{n} is not specified, the standard output (file descriptor 1) is used.
 If the digits in @var{word} do not specify a file descriptor open for
 output, a redirection error occurs.
-As a special case, if @code{n} is omitted, and @var{word} does not
+As a special case, if @var{n} is omitted, and @var{word} does not
 expand to one or more digits, the standard output and standard
 error are redirected as described previously.
+
+@subsection Moving File Descriptors
+The redirection operator
+@example
+[@var{n}]<&@var{digit}-
+@end example
+@noindent
+moves the file descriptor @var{digit} to file descriptor @var{n},
+or the standard input (file descriptor 0) if @var{n} is not specified.
+@var{digit} is closed after being duplicated to @var{n}.
+
+Similarly, the redirection operator
+@example
+[@var{n}]>&@var{digit}-
+@end example
+@noindent
+moves the file descriptor @var{digit} to file descriptor @var{n},
+or the standard output (file descriptor 1) if @var{n} is not specified.
 
 @subsection Opening File Descriptors for Reading and Writing
 The redirection operator
 @example
-[n]<>@var{word}
+[@var{n}]<>@var{word}
 @end example
 @noindent
 causes the file whose name is the expansion of @var{word}
 to be opened for both reading and writing on file descriptor
-@code{n}, or on file descriptor 0 if @code{n}
+@var{n}, or on file descriptor 0 if @var{n}
 is not specified.  If the file does not exist, it is created.
 
 @node Executing Commands
@@ -2501,7 +2534,7 @@ The return status is zero unless @var{n} is not greater than or equal to 1.
 @item cd
 @btindex cd
 @example
-cd [-LP] [@var{directory}]
+cd [-L|-P] [@var{directory}]
 @end example
 Change the current working directory to @var{directory}.  If @var{directory}
 is not given, the value of the @env{HOME} shell variable is used.  If the
@@ -2637,7 +2670,7 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @item hash
 @btindex hash
 @example
-hash [-r] [-p @var{filename}] [-t] [@var{name}]
+hash [-'r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
 Remember the full pathnames of commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
@@ -2646,11 +2679,16 @@ The commands are found by searching through the directories listed in
 The @option{-p} option inhibits the path search, and @var{filename} is
 used as the location of @var{name}.
 The @option{-r} option causes the shell to forget all remembered locations.
+The @option{-d} option causes the shell to forget the remembered location
+of each @var{name}.
 If the @option{-t} option is supplied, the full pathname to which each
 @var{name} corresponds is printed.  If multiple @var{name} arguments are
 supplied with @option{-t} the @var{name} is printed before the hashed
 full pathname.
-If no arguments are given, information about remembered commands is printed.
+The @option{-l} option causes output to be displayed in a format
+that may be reused as input.
+If no arguments are given, or if only @option{-l} is supplied,
+information about remembered commands is printed.
 The return status is zero unless a @var{name} is not found or an invalid
 option is supplied.
 
@@ -2905,14 +2943,16 @@ bind [-m @var{keymap}] [-q @var{function}] [-u @var{function}] [-r @var{keyseq}]
 bind [-m @var{keymap}] -f @var{filename}
 bind [-m @var{keymap}] -x @var{keyseq:shell-command}
 bind [-m @var{keymap}] @var{keyseq:function-name}
+bind @var{readline-command}
 @end example
 
 Display current Readline (@pxref{Command Line Editing})
-key and function bindings, or
-bind a key sequence to a Readline function or macro.  The
-binding syntax accepted is identical to that of
+key and function bindings,
+bind a key sequence to a Readline function or macro,
+or set a Readline variable.
+Each non-option argument is a command as it would appear in a
 a Readline initialization file (@pxref{Readline Init File}),
-but each binding must be passed as a separate argument:  e.g.,
+but each binding or command must be passed as a separate argument;  e.g.,
 @samp{"\C-x\C-r":re-read-init-file}.
 Options, if supplied, have the following meanings:
 
@@ -3019,7 +3059,7 @@ zero if @var{command} is found, and non-zero if not.
 @item declare
 @btindex declare
 @example
-declare [-afFrxi] [-p] [@var{name}[=@var{value}]]
+declare [-afFirtx] [-p] [@var{name}[=@var{value}]]
 @end example
 
 Declare variables and give them attributes.  If no @var{name}s
@@ -3048,6 +3088,11 @@ performed when the variable is assigned a value.
 @item -r
 Make @var{name}s readonly.  These names cannot then be assigned values
 by subsequent assignment statements or unset.
+
+@item -t
+Give each @var{name} the @code{trace} attribute.
+Traced functions inherit the @code{DEBUG} trap from the calling shell.
+The trace attribute has no special meaning for variables.
 
 @item -x
 Mark each @var{name} for export to subsequent commands via
@@ -3106,9 +3151,12 @@ horizontal tab
 vertical tab
 @item \\
 backslash
+@item \0@var{nnn}
+the eight-bit character whose value is the octal value @var{nnn}
+(zero to three octal digits)
 @item \@var{nnn}
 the eight-bit character whose value is the octal value @var{nnn}
-(one to three digits)
+(one to three octal digits)
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
@@ -3218,13 +3266,14 @@ non-zero on failure.
 @item read
 @btindex read
 @example
-read [-ers] [-a @var{aname}] [-p @var{prompt}] [-t @var{timeout}] [-n @var{nchars}] [-d @var{delim}] [@var{name} @dots{}]
+read [-ers] [-a @var{aname}] [-d @var{delim}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
 @end example
-One line is read from the standard input, and the first word
+One line is read from the standard input, or from the file descriptor
+@var{fd} supplied as an argument to the @option{-u} option, and the first word
 is assigned to the first @var{name}, the second word to the second @var{name},
 and so on, with leftover words and their intervening separators assigned
 to the last @var{name}.
-If there are fewer words read from the standard input than names,
+If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
 The characters in the value of the @env{IFS} variable
 are used to split the line into words.
@@ -3232,8 +3281,9 @@ The backslash character @samp{\} may be used to remove any special
 meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
 variable @env{REPLY}.
-The return code is zero, unless end-of-file is encountered or @code{read}
-times out.
+The return code is zero, unless end-of-file is encountered, @code{read}
+times out, or an invalid file descriptor is supplied as the argument to
+@option{-u}.
 Options, if supplied, have the following meanings:
 
 @table @code
@@ -3274,6 +3324,9 @@ Cause @code{read} to time out and return failure if a complete line of
 input is not read within @var{timeout} seconds.
 This option has no effect if @code{read} is not reading input from the
 terminal or a pipe.
+
+@item -u @var{fd}
+Read input from file descriptor @var{fd}.
 
 @end table
 
@@ -3482,7 +3535,7 @@ A synonym for @code{.} (@pxref{Bourne Shell Builtins}).
 @item type
 @btindex type
 @example
-type [-atp] [@var{name} @dots{}]
+type [-afptP] [@var{name} @dots{}]
 @end example
 For each @var{name}, indicate how it would be interpreted if used as a
 command name.
@@ -3499,10 +3552,19 @@ If the @option{-p} option is used, @code{type} either returns the name
 of the disk file that would be executed, or nothing if @option{-t}
 would not return @samp{file}.
 
+The @option{-P} option forces a path search for each @var{name}, even if
+@option{-t} would not return @samp{file}.
+
+If a command is hashed, @option{-p} and @option{-P} print the hashed value,
+not necessarily the file that appears first in @code{$PATH}.
+
 If the @option{-a} option is used, @code{type} returns all of the places
 that contain an executable named @var{file}.
 This includes aliases and functions, if and only if the @option{-p} option
 is not also used.
+
+If the @option{-f} option is used, @code{type} does not attempt to find
+shell functions, as with the @code{command} builtin.
 
 The return status is zero if any of the @var{names} are found, non-zero
 if none are found.
@@ -4329,7 +4391,13 @@ If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 
 @item TMOUT
-If set to a value greater than zero, the value is interpreted as
+If set to a value greater than zero, @code{TMOUT} is treated as the
+default timeout for the @code{read} builtin (@pxref{Bash Builtins}).
+The @code{select} command (@pxref{Conditional Constructs}) terminates
+if input does not arrive after @code{TMOUT} seconds when input is coming
+from a terminal.
+
+In an interative shell, the value is interpreted as
 the number of seconds to wait for input after issuing the primary
 prompt when the shell is interactive.
 Bash terminates after that number of seconds if input does
@@ -4374,8 +4442,7 @@ bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_optio
 In addition to the single-character shell command-line options
 (@pxref{The Set Builtin}), there are several multi-character
 options that you can use.  These options must appear on the command
-line before the single-character options in order for them
-to be recognized. 
+line before the single-character options to be recognized. 
 
 @table @code
 @item --dump-po-strings
@@ -4396,15 +4463,7 @@ Execute commands from @var{filename} (instead of @file{~/.bashrc})
 in an interactive shell.
 
 @item --login
-Make this shell act as if it had been directly invoked by login.
-When the shell is interactive, this is equivalent to starting a
-login shell with @samp{exec -l bash}.
-When the shell is not interactive, the login shell startup files will
-be executed.
-@samp{exec bash --login}
-will replace the current shell with a Bash login shell.
-@xref{Bash Startup Files}, for a description of the special behavior
-of a login shell.
+Equivalent to @option{-l}.
 
 @item --noediting
 Do not use the @sc{gnu} Readline library (@pxref{Command Line Editing})
@@ -4452,6 +4511,17 @@ positional parameters, starting with @code{$0}.
 @item -i
 Force the shell to run interactively.  Interactive shells are
 described in @ref{Interactive Shells}.
+
+@item -l
+Make this shell act as if it had been directly invoked by login.
+When the shell is interactive, this is equivalent to starting a
+login shell with @samp{exec -l bash}.
+When the shell is not interactive, the login shell startup files will
+be executed.
+@samp{exec bash -l} or @samp{exec bash --login}
+will replace the current shell with a Bash login shell.
+@xref{Bash Startup Files}, for a description of the special behavior
+of a login shell.
 
 @item -r
 Make the shell a restricted shell (@pxref{The Restricted Shell}).
@@ -4860,14 +4930,15 @@ True if @var{file} exists and is a socket.
 True if @var{file} exists and has been modified since it was last read.
 
 @item @var{file1} -nt @var{file2}
-True if @var{file1} is newer (according to
-modification date) than @var{file2}.
+True if @var{file1} is newer (according to modification date)
+than @var{file2}, or if @var{file1} exists and @var{file2} does not.
 
 @item @var{file1} -ot @var{file2}
-True if @var{file1} is older than @var{file2}.
+True if @var{file1} is older than @var{file2},
+or if @var{file2} exists and @var{file1} does not.
 
 @item @var{file1} -ef @var{file2}
-True if @var{file1} and @var{file2} have the same device and
+True if @var{file1} and @var{file2} refer to the same device and
 inode numbers.
 
 @item -o @var{optname}
@@ -4884,7 +4955,7 @@ True if the length of @var{string} is non-zero.
 
 @item @var{string1} == @var{string2}
 True if the strings are equal.
-@samp{=} may be used in place of @samp{==}.
+@samp{=} may be used in place of @samp{==} for strict @sc{posix} compliance.
 
 @item @var{string1} != @var{string2}
 True if the strings are not equal.
@@ -4919,7 +4990,7 @@ may be positive or negative integers.
 The shell allows arithmetic expressions to be evaluated, as one of
 the shell expansions or by the @code{let} builtin.
 
-Evaluation is done in long integers with no check for overflow,
+Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
 The operators and their precedence and associativity are the same
 as in the C language.
@@ -5277,6 +5348,10 @@ can appear in the prompt variables:
 A bell character.
 @item \d
 The date, in "Weekday Month Date" format (e.g., "Tue May 26").
+@item \D@{@var{format}@}
+The @var{format} is passed to @code{strftime}(3) and the result is inserted
+into the prompt string; an empty @var{format} results in a locale-specific
+time representation.  The braces are required.
 @item \e
 An escape character.
 @item \h
@@ -5347,11 +5422,14 @@ expansion, and quote removal, subject to the value of the
 
 If Bash is started with the name @code{rbash}, or the
 @option{--restricted}
+or
+@option{-r}
 option is supplied at invocation, the shell becomes restricted.
 A restricted shell is used to
 set up an environment more controlled than the standard shell.
 A restricted shell behaves identically to @code{bash}
-with the exception that the following are disallowed:
+with the exception that the following are disallowed or not performed:
+
 @itemize @bullet
 @item
 Changing directories with the @code{cd} builtin.
@@ -5379,10 +5457,18 @@ Using the @code{exec} builtin to replace the shell with another command.
 Adding or deleting builtin commands with the
 @option{-f} and @option{-d} options to the @code{enable} builtin.
 @item
+Using the @code{enable} builtin command to enable disabled shell builtins.
+@item
 Specifying the @option{-p} option to the @code{command} builtin.
 @item
 Turning off restricted mode with @samp{set +r} or @samp{set +o restricted}.
 @end itemize
+
+These restrictions are enforced after any startup files are read.
+
+When a command that is found to be a shell script is executed
+(@pxref{Shell Scripts}), @code{rbash} turns off any restrictions in
+the shell spawned to execute the script.
 
 @node Bash POSIX Mode
 @section Bash POSIX Mode
@@ -5392,6 +5478,9 @@ Starting Bash with the @option{--posix} command-line option or executing
 @samp{set -o posix} while Bash is running will cause Bash to conform more
 closely to the @sc{posix} 1003.2 standard by changing the behavior to
 match that specified by @sc{posix} in areas where the Bash default differs.
+
+When invoked as @code{sh}, Bash enters @sc{posix} mode after reading the
+startup files.
 
 The following list is what's changed when `@sc{posix} mode' is in effect:
 
@@ -5538,6 +5627,12 @@ shell function names and definitions.
 When the @code{set} builtin is invoked without options, it displays
 variable values without quotes, unless they contain shell metacharacters,
 even if the result contains nonprinting characters.
+
+@item
+When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
+constructed from @code{$PWD} and the directory name supplied as an argument
+does not refer to an existing directory, @code{cd} will fail instead of
+falling back to @var{physical} mode.
 @end enumerate
 
 There is other @sc{posix} 1003.2 behavior that Bash does not implement.
@@ -6129,7 +6224,7 @@ A synonym for @code{--with-bash-malloc}.
 @item --with-installed-readline[=@var{PREFIX}]
 Define this to make Bash link with a locally-installed version of Readline
 rather than the version in @file{lib/readline}.  This works only with
-Readline 4.2 and later versions.  If @var{PREFIX} is @code{yes} or not
+Readline 4.3 and later versions.  If @var{PREFIX} is @code{yes} or not
 supplied, @code{configure} uses the values of the make variables
 @code{includedir} and @code{libdir}, which are subdirectories of @code{prefix}
 by default, to find the installed version of Readline if it is not in
@@ -6158,7 +6253,8 @@ compiled and linked, rather than changing run-time features.
 @item --enable-largefile
 Enable support for @uref{http://www.sas.com/standards/large_file/x_open.20Mar96.html,
 large files} if the operating system requires special compiler options
-to build programs which can access large files.
+to build programs which can access large files.  This is enabled by
+default, if the operating system provides large file support.
 
 @item --enable-profiling
 This builds a Bash binary that produces profiling information to be
@@ -6628,7 +6724,8 @@ The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows a
 @code{DEBUG} pseudo-signal specification, similar to @code{EXIT}.
 Commands specified with a @code{DEBUG} trap are executed after every
 simple command.
-The @code{DEBUG} trap is not inherited by shell functions.
+The @code{DEBUG} trap is not inherited by shell functions unless the
+function has been given the @code{trace} attribute.
 
 The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows an
 @code{ERR} pseudo-signal specification, similar to @code{EXIT} and @code{DEBUG}.

@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -125,8 +125,6 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static char *m_badarg = "%s: bad argument";
-
 /* The list of remembered directories. */
 static char **pushd_directory_list = (char **)NULL;
 
@@ -141,7 +139,7 @@ static void clear_directory_stack __P((void));
 static int cd_to_string __P((char *));
 static int change_to_temp __P((char *));
 static void add_dirstack_element __P((char *));
-static int get_dirstack_index __P((long, int, int *));
+static int get_dirstack_index __P((intmax_t, int, int *));
 
 #define NOCD		0x01
 #define ROTATE		0x02
@@ -154,8 +152,11 @@ pushd_builtin (list)
 {
   char *temp, *current_directory, *top;
   int j, flags;
-  long num;
+  intmax_t num;
   char direction;
+
+  if (list && list->word && ISOPTION (list->word->word, '-'))
+    list = list->next;
 
   /* If there is no argument list then switch current and
      top of list. */
@@ -197,7 +198,7 @@ pushd_builtin (list)
 	{
 	  if (legal_number (list->word->word + 1, &num) == 0)
 	    {
-	      builtin_error (m_badarg, list->word->word);
+	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
 	      return (EXECUTION_FAILURE);
 	    }
@@ -214,7 +215,7 @@ pushd_builtin (list)
 	}
       else if (*list->word->word == '-')
 	{
-	  bad_option (list->word->word);
+	  sh_invalidopt (list->word->word);
 	  builtin_usage ();
 	  return (EXECUTION_FAILURE);
 	}
@@ -287,7 +288,7 @@ popd_builtin (list)
      WORD_LIST *list;
 {
   register int i;
-  long which;
+  intmax_t which;
   int flags;
   char direction;
   char *which_word;
@@ -308,7 +309,7 @@ popd_builtin (list)
 	{
 	  if (legal_number (list->word->word + 1, &which) == 0)
 	    {
-	      builtin_error (m_badarg, list->word->word);
+	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
 	      return (EXECUTION_FAILURE);
 	    }
@@ -316,7 +317,7 @@ popd_builtin (list)
 	}
       else if (*list->word->word == '-')
 	{
-	  bad_option (list->word->word);
+	  sh_invalidopt (list->word->word);
 	  builtin_usage ();
 	  return (EXECUTION_FAILURE);
 	}
@@ -364,7 +365,7 @@ dirs_builtin (list)
      WORD_LIST *list;
 {
   int flags, desired_index, index_flag, vflag;
-  long i;
+  intmax_t i;
   char *temp, *w;
 
   for (flags = vflag = index_flag = 0, desired_index = -1, w = ""; list; list = list->next)
@@ -395,7 +396,7 @@ dirs_builtin (list)
 	  int sign;
 	  if (legal_number (w = list->word->word + 1, &i) == 0)
 	    {
-	      builtin_error (m_badarg, list->word->word);
+	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
 	      return (EXECUTION_FAILURE);
 	    }
@@ -404,7 +405,7 @@ dirs_builtin (list)
 	}
       else
 	{
-	  bad_option (list->word->word);
+	  sh_invalidopt (list->word->word);
 	  builtin_usage ();
 	  return (EXECUTION_FAILURE);
 	}
@@ -475,10 +476,8 @@ pushd_error (offset, arg)
 {
   if (offset == 0)
     builtin_error ("directory stack empty");
-  else if (arg)
-    builtin_error ("%s: bad directory stack index", arg);
   else
-    builtin_error ("bad directory stack index");
+    sh_erange (arg, "directory stack index");
 }
 
 static void
@@ -525,19 +524,14 @@ static void
 add_dirstack_element (dir)
      char *dir;
 {
-  int j;
-
   if (directory_list_offset == directory_list_size)
-    {
-      j = (directory_list_size += 10) * sizeof (char *);
-      pushd_directory_list = (char **)xrealloc (pushd_directory_list, j);
-    }
+    pushd_directory_list = strvec_resize (pushd_directory_list, directory_list_size += 10);
   pushd_directory_list[directory_list_offset++] = dir;
 }
 
 static int
 get_dirstack_index (ind, sign, indexp)
-     long ind;
+     intmax_t ind;
      int sign, *indexp;
 {
   if (indexp)
@@ -565,7 +559,7 @@ get_dirstack_from_string (string)
      char *string;
 {
   int ind, sign, index_flag;
-  long i;
+  intmax_t i;
 
   sign = 1;
   if (*string == '-' || *string == '+')
@@ -589,7 +583,7 @@ get_dirstack_from_string (string)
 #ifdef INCLUDE_UNUSED
 char *
 get_dirstack_element (ind, sign)
-     long ind;
+     intmax_t ind;
      int sign;
 {
   int i;
@@ -602,7 +596,7 @@ get_dirstack_element (ind, sign)
 
 void
 set_dirstack_element (ind, sign, value)
-     long ind;
+     intmax_t ind;
      int  sign;
      char *value;
 {

@@ -20,14 +20,17 @@
 
 /* Must be included *after* config.h */
 
-#ifndef _IMALLOC_H_
+#ifndef _IMALLOC_H
 #define _IMALLOC_H
 
 #ifdef MALLOC_DEBUG
 #define MALLOC_STATS
 #define MALLOC_TRACE
 #define MALLOC_REGISTER
+#define MALLOC_WATCH
 #endif
+
+#define MALLOC_WRAPFUNCS
 
 /* Generic pointer type. */
 #ifndef PTR_T
@@ -64,4 +67,96 @@
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 
+#if !defined (__P)
+#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
+#    define __P(protos) protos
+#  else 
+#    define __P(protos) ()
+#  endif
 #endif
+
+/* Use Duff's device for good zeroing/copying performance.  DO NOT call the
+   Duff's device macros with NBYTES == 0. */
+
+#define MALLOC_BZERO(charp, nbytes)					\
+do {									\
+  if ((nbytes) <= 32) {							\
+    size_t * mzp = (size_t *)(charp);					\
+    unsigned long mctmp = (nbytes)/sizeof(size_t);			\
+    long mcn;								\
+    if (mctmp < 8) mcn = 0; else { mcn = (mctmp-1)/8; mctmp &= 7; }	\
+    switch (mctmp) {							\
+      case 0: for(;;) { *mzp++ = 0;					\
+      case 7:	   *mzp++ = 0;						\
+      case 6:	   *mzp++ = 0;						\
+      case 5:	   *mzp++ = 0;						\
+      case 4:	   *mzp++ = 0;						\
+      case 3:	   *mzp++ = 0;						\
+      case 2:	   *mzp++ = 0;						\
+      case 1:	   *mzp++ = 0; if(mcn <= 0) break; mcn--; }		\
+    }									\
+  else									\
+    memset ((charp), 0, (nbytes));					\
+} while(0)
+
+#define MALLOC_ZERO(charp, nbytes) \
+do { 								\
+  size_t mzsz = (nbytes);					\
+  if (mzsz <= 9 * sizeof(mzsz) {				\
+    size_t *mz = (size_t *)(charp);				\
+    if(mzsz >= 5*sizeof(mzsz)) {	*mz++ = 0;		\
+					*mz++ = 0;		\
+      if(mzsz >= 7*sizeof(mzsz)) {	*mz++ = 0;		\
+					*mz++ = 0;		\
+	if(mzsz >= 9*sizeof(mzsz)) {	*mz++ = 0;		\
+					*mz++ = 0; }}}		\
+					*mz++ = 0;		\
+					*mz++ = 0;		\
+					*mz = 0;		\
+  } else							\
+    memset ((charp), 0, mzsz);					\
+} while (0)
+
+#define MALLOC_MEMSET(charp, xch, nbytes)				\
+do {									\
+  if ((nbytes) <= 32) {							\
+    register char * mzp = (charp);					\
+    unsigned long mctmp = (nbytes);					\
+    register long mcn;							\
+    if (mctmp < 8) mcn = 0; else { mcn = (mctmp-1)/8; mctmp &= 7; }	\
+    switch (mctmp) {							\
+      case 0: for(;;) { *mzp++ = xch;					\
+      case 7:	   *mzp++ = xch;					\
+      case 6:	   *mzp++ = xch;					\
+      case 5:	   *mzp++ = xch;					\
+      case 4:	   *mzp++ = xch;					\
+      case 3:	   *mzp++ = xch;					\
+      case 2:	   *mzp++ = xch;					\
+      case 1:	   *mzp++ = xch; if(mcn <= 0) break; mcn--; }		\
+    }									\
+  } else								\
+    memset ((charp), (xch), (nbytes));					\
+} while(0)
+
+#define MALLOC_MEMCPY(dest,src,nbytes)					\
+do {									\
+  if ((nbytes) <= 32) {							\
+    size_t* mcsrc = (size_t*) src;					\
+    size_t* mcdst = (size_t*) dest;					\
+    unsigned long mctmp = (nbytes)/sizeof(size_t);			\
+    long mcn;								\
+    if (mctmp < 8) mcn = 0; else { mcn = (mctmp-1)/8; mctmp &= 7; }	\
+    switch (mctmp) {							\
+      case 0: for(;;) { *mcdst++ = *mcsrc++;				\
+      case 7:	   *mcdst++ = *mcsrc++;					\
+      case 6:	   *mcdst++ = *mcsrc++;					\
+      case 5:	   *mcdst++ = *mcsrc++;					\
+      case 4:	   *mcdst++ = *mcsrc++;					\
+      case 3:	   *mcdst++ = *mcsrc++;					\
+      case 2:	   *mcdst++ = *mcsrc++;					\
+      case 1:	   *mcdst++ = *mcsrc++; if(mcn <= 0) break; mcn--; }	\
+  } else								\
+    memcpy ((dest), (src), (nbytes))					\
+} while(0)
+
+#endif /* _IMALLOC_H */

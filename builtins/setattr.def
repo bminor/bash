@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,7 +43,7 @@ extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
 
 #ifdef ARRAY_VARS
-extern int declare_builtin ();
+extern int declare_builtin __P((WORD_LIST *));
 #endif
 
 #define READONLY_OR_EXPORT \
@@ -51,7 +51,7 @@ extern int declare_builtin ();
 
 $BUILTIN export
 $FUNCTION export_builtin
-$SHORT_DOC export [-nf] [name ...] or export -p
+$SHORT_DOC export [-nf] [name[=value] ...] or export -p
 NAMEs are marked for automatic export to the environment of
 subsequently executed commands.  If the -f option is given,
 the NAMEs refer to functions.  If no NAMEs are given, or if `-p'
@@ -75,7 +75,7 @@ export_builtin (list)
 
 $BUILTIN readonly
 $FUNCTION readonly_builtin
-$SHORT_DOC readonly [-anf] [name ...] or readonly -p
+$SHORT_DOC readonly [-anf] [name[=value] ...] or readonly -p
 The given NAMEs are marked readonly and the values of these NAMEs may
 not be changed by subsequent assignment.  If the -f option is given,
 then functions corresponding to the NAMEs are so marked.  If no
@@ -94,6 +94,12 @@ readonly_builtin (list)
 {
   return (set_or_show_attributes (list, att_readonly, 0));
 }
+
+#if defined (ARRAY_VARS)
+#  define ATTROPTS	"afnp"
+#else
+#  define ATTROPTS	"fnp"
+#endif
 
 /* For each variable name in LIST, make that variable have the specified
    ATTRIBUTE.  An arg of `-n' says to remove the attribute from the the
@@ -114,7 +120,7 @@ set_or_show_attributes (list, attribute, nodefs)
   undo = functions_only = arrays_only = any_failed = assign_error = 0;
   /* Read arguments from the front of the list. */
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "anfp")) != -1)
+  while ((opt = internal_getopt (list, ATTROPTS)) != -1)
     {
       switch (opt)
 	{
@@ -174,7 +180,7 @@ set_or_show_attributes (list, attribute, nodefs)
 
 	  if (legal_identifier (name) == 0)
 	    {
-	      builtin_error ("`%s': not a valid identifier", name);
+	      sh_invalidid (name);
 	      if (assign)
 		assign_error++;
 	      else
@@ -248,11 +254,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	      if (arrays_only && array_p (var) == 0)
 		continue;
 #endif
-#if 0
-	      if ((var->attributes & attribute) && invisible_p (var) == 0)
-#else
 	      if ((var->attributes & attribute))
-#endif
 		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
 	    }
 	  free (variable_list);
@@ -275,7 +277,7 @@ show_var_attributes (var, pattr, nodefs)
      SHELL_VAR *var;
      int pattr, nodefs;
 {
-  char flags[6], *x;
+  char flags[8], *x;
   int i;
 
   i = 0;
@@ -297,6 +299,9 @@ show_var_attributes (var, pattr, nodefs)
       if (readonly_p (var))
 	flags[i++] = 'r';
 
+      if (trace_p (var))
+	flags[i++] = 't';
+
       if (exported_p (var))
 	flags[i++] = 'x';
     }
@@ -313,6 +318,17 @@ show_var_attributes (var, pattr, nodefs)
 
   flags[i] = '\0';
 
+  /* If we're printing functions with definitions, print the function def
+     first, then the attributes, instead of printing output that can't be
+     reused as input to recreate the current state. */
+  if (function_p (var) && nodefs == 0 && (pattr == 0 || posixly_correct == 0))
+    {
+      printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+      nodefs++;
+      if (pattr == 0 && i == 1 && flags[0] == 'f')
+	return 0;		/* don't print `declare -f name' */
+    }
+
   if (pattr == 0 || posixly_correct == 0)
     printf ("declare -%s ", i ? flags : "-");
   else if (i)
@@ -325,7 +341,7 @@ show_var_attributes (var, pattr, nodefs)
     print_array_assignment (var, 1);
   else
 #endif
-  /* force `readline' and `export' to not print out function definitions
+  /* force `readonly' and `export' to not print out function definitions
      when in POSIX mode. */
   if (nodefs || (function_p (var) && pattr != 0 && posixly_correct))
     printf ("%s\n", var->name);
@@ -335,7 +351,7 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else
     {
-      x = sh_double_quote (value_cell (var) ? value_cell (var) : "");
+      x = sh_double_quote (var_isset (var) ? value_cell (var) : "");
       printf ("%s=%s\n", var->name, x);
       free (x);
     }
@@ -349,15 +365,11 @@ show_name_attributes (name, nodefs)
 {
   SHELL_VAR *var;
 
-  var = find_tempenv_variable (name);
-  if (var == 0)
-    var = find_variable (name);
+  var = find_variable_internal (name, 1);
 
   if (var && invisible_p (var) == 0)
     {
       show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
-      if (tempvar_p (var))
-	dispose_variable (var);
       return (0);
     }
   else
@@ -370,23 +382,39 @@ set_var_attribute (name, attribute, undo)
      int attribute, undo;
 {
   SHELL_VAR *var, *tv;
+  char *tvalue;
 
   if (undo)
     var = find_variable (name);
   else
     {
-      if (tv = find_tempenv_variable (name))
+      tv = find_tempenv_variable (name);
+      /* XXX -- need to handle case where tv is a temp variable in a
+	 function-scope context, since function_env has been merged into
+	 the local variables table. */
+      if (tv && tempvar_p (tv))
 	{
-	  var = bind_variable (tv->name, tv->value ? tv->value : "");
-	  dispose_variable (tv);
+	  tvalue = var_isset (tv) ? savestring (value_cell (tv)) : savestring ("");
+
+	  var = bind_variable (tv->name, tvalue);
+	  var->attributes |= tv->attributes & ~att_tempvar;
+	  VSETATTR (tv, att_propagate);
+	  if (var->context != 0)
+	    VSETATTR (var, att_propagate);
+	  SETVARATTR (tv, attribute, undo);	/* XXX */
+
+	  free (tvalue);
 	}
       else
-	var = find_variable (name);
-
-      if (var == 0)
 	{
-	  var = bind_variable (name, (char *)NULL);
-	  VSETATTR (var, att_invisible);
+	  var = find_variable_internal (name, 0);
+	  if (var == 0)
+	    {
+	      var = bind_variable (name, (char *)NULL);
+	      VSETATTR (var, att_invisible);
+	    }
+	  else if (var->context != 0)
+	    VSETATTR (var, att_propagate);
 	}
     }
 

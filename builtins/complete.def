@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete" and "compgen" in Bash.
 
-Copyright (C) 1999 Free Software Foundation, Inc.
+Copyright (C) 1999-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@ $PRODUCES complete.c
 $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
-$SHORT_DOC complete [-abcdefgjkvu] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
+$SHORT_DOC complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [name ...]
 For each NAME, specify how arguments are to be completed.
 If the -p option is supplied, or if no options are supplied, existing
 completion specifications are printed in a way that allows them to be
@@ -62,11 +62,12 @@ static int build_actions __P((WORD_LIST *, int *, int *, unsigned long *, unsign
 
 static int remove_cmd_completions __P((WORD_LIST *));
 
-static void print_one_completion __P((char *, COMPSPEC *));
+static int print_one_completion __P((char *, COMPSPEC *));
+static int print_compitem __P((BUCKET_CONTENTS *));
 static void print_all_completions __P((void));
 static int print_cmd_completions __P((WORD_LIST *));
 
-static char *Aarg, *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
+static char *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 
 static struct _compacts {
   char *actname;
@@ -90,6 +91,7 @@ static struct _compacts {
   { "job",       CA_JOB,       'j' },
   { "keyword",   CA_KEYWORD,   'k' },
   { "running",   CA_RUNNING,    0 },
+  { "service",   CA_SERVICE,   's' },
   { "setopt",    CA_SETOPT,     0 },
   { "shopt",     CA_SHOPT,      0 },
   { "signal",    CA_SIGNAL,     0 },
@@ -99,6 +101,7 @@ static struct _compacts {
   { (char *)NULL, 0, 0 },
 };
 
+/* This should be a STRING_INT_ALIST */
 static struct _compopt {
   char *optname;
   int optflag;
@@ -106,6 +109,7 @@ static struct _compopt {
   { "default",	COPT_DEFAULT },
   { "dirnames", COPT_DIRNAMES },
   { "filenames",COPT_FILENAMES},
+  { "nospace",	COPT_NOSPACE },
   { (char *)NULL, 0 },
 };
 
@@ -160,7 +164,7 @@ build_actions (list, pp, rp, actp, optp)
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefgjko:pruvA:G:W:P:S:X:F:C:")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -173,7 +177,7 @@ build_actions (list, pp, rp, actp, optp)
 	    }
 	  else
 	    {
-	      builtin_error ("illegal option: -r");
+	      sh_invalidopt ("-r");
 	      builtin_usage ();
 	      return (EX_USAGE);
 	    }
@@ -186,7 +190,7 @@ build_actions (list, pp, rp, actp, optp)
 	    }
 	  else
 	    {
-	      builtin_error ("illegal option: -p");
+	      sh_invalidopt ("-p");
 	      builtin_usage ();
 	      return (EX_USAGE);
 	    }
@@ -218,6 +222,9 @@ build_actions (list, pp, rp, actp, optp)
 	case 'k':
 	  acts |= CA_KEYWORD;
 	  break;
+	case 's':
+	  acts |= CA_SERVICE;
+	  break;
 	case 'u':
 	  acts |= CA_USER;
 	  break;
@@ -228,7 +235,7 @@ build_actions (list, pp, rp, actp, optp)
 	  ind = find_compopt (list_optarg);
 	  if (ind < 0)
 	    {
-	      builtin_error ("%s: invalid option name", list_optarg);
+	      sh_invalidoptname (list_optarg);
 	      return (EX_USAGE);
 	    }
 	  copts |= compopts[ind].optflag;
@@ -282,7 +289,6 @@ complete_builtin (list)
 {
   int opt_given, pflag, rflag, rval;
   unsigned long acts, copts;
-  char *cmd;
   COMPSPEC *cs;
 
   if (list == 0)
@@ -293,7 +299,7 @@ complete_builtin (list)
 
   opt_given = pflag = rflag = 0;
   acts = copts = (unsigned long)0L;
-  Aarg = Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
+  Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
@@ -321,7 +327,7 @@ complete_builtin (list)
     {
       if (list == 0)
 	{
-	  clear_progcomps ();
+	  progcomp_flush ();
 	  return (EXECUTION_SUCCESS);
 	}
       return (remove_cmd_completions (list));
@@ -335,7 +341,7 @@ complete_builtin (list)
 
   /* If we get here, we need to build a compspec and add it for each
      remaining argument. */
-  cs = alloc_compspec ();
+  cs = compspec_create ();
   cs->actions = acts;
   cs->options = copts;
 
@@ -350,8 +356,7 @@ complete_builtin (list)
   for (rval = EXECUTION_SUCCESS ; list; list = list->next)
     {
       /* Add CS as the compspec for the specified commands. */
-      cmd = list->word->word;
-      if (add_progcomp (cmd, cs) == 0)
+      if (progcomp_insert (list->word->word, cs) == 0)
 	rval = EXECUTION_FAILURE;
     }
 
@@ -367,7 +372,7 @@ remove_cmd_completions (list)
 
   for (ret = EXECUTION_SUCCESS, l = list; l; l = l->next)
     {
-      if (remove_progcomp (l->word->word) == 0)
+      if (progcomp_remove (l->word->word) == 0)
 	{
 	  builtin_error ("%s: no completion specification", l->word->word);
 	  ret = EXECUTION_FAILURE;
@@ -410,7 +415,7 @@ remove_cmd_completions (list)
       printf ("-o %s ", f); \
   } while (0)
 
-static void
+static int
 print_one_completion (cmd, cs)
      char *cmd;
      COMPSPEC *cs;
@@ -426,6 +431,7 @@ print_one_completion (cmd, cs)
   PRINTCOMPOPT (COPT_DEFAULT, "default");
   PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
   PRINTCOMPOPT (COPT_FILENAMES, "filenames");
+  PRINTCOMPOPT (COPT_NOSPACE, "nospace");
 
   acts = cs->actions;
 
@@ -437,8 +443,9 @@ print_one_completion (cmd, cs)
   PRINTOPT (CA_EXPORT, "-e");
   PRINTOPT (CA_FILE, "-f");
   PRINTOPT (CA_GROUP, "-g");
-  PRINTOPT (CA_KEYWORD, "-k");
   PRINTOPT (CA_JOB, "-j");
+  PRINTOPT (CA_KEYWORD, "-k");
+  PRINTOPT (CA_SERVICE, "-s");
   PRINTOPT (CA_USER, "-u");
   PRINTOPT (CA_VARIABLE, "-v");
 
@@ -470,12 +477,27 @@ print_one_completion (cmd, cs)
   PRINTARG (cs->command, "-C");
 
   printf ("%s\n", cmd);
+
+  return (0);
+}
+
+static int
+print_compitem (item)
+     BUCKET_CONTENTS *item;
+{
+  COMPSPEC *cs;
+  char *cmd;
+
+  cmd = item->key;
+  cs = (COMPSPEC *)item->data;
+
+  return (print_one_completion (cmd, cs));
 }
 
 static void
 print_all_completions ()
 {
-  print_all_compspecs (print_one_completion);
+  progcomp_walk (print_compitem);
 }
 
 static int
@@ -488,7 +510,7 @@ print_cmd_completions (list)
 
   for (ret = EXECUTION_SUCCESS, l = list; l; l = l->next)
     {
-      cs = find_compspec (l->word->word);
+      cs = progcomp_search (l->word->word);
       if (cs)
 	print_one_completion (l->word->word, cs);
       else
@@ -503,7 +525,7 @@ print_cmd_completions (list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefgjkvu] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
+$SHORT_DOC compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-P prefix] [-S suffix] [-X filterpat] [-F function] [-C command] [word]
 Display the possible completions depending on the options.  Intended
 to be used from within a shell function generating possible completions.
 If the optional WORD argument is supplied, matches against WORD are
@@ -524,7 +546,7 @@ compgen_builtin (list)
     return (EXECUTION_SUCCESS);
 
   acts = copts = (unsigned long)0L;
-  Aarg = Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
+  Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
@@ -545,7 +567,7 @@ compgen_builtin (list)
     internal_warning ("compgen: -C option may not work as you expect");
 
   /* If we get here, we need to build a compspec and evaluate it. */
-  cs = alloc_compspec ();
+  cs = compspec_create ();
   cs->actions = acts;
   cs->options = copts;
   cs->refcount = 1;
@@ -569,7 +591,7 @@ compgen_builtin (list)
 
       matches = rl_completion_matches (word, rl_filename_completion_function);
       sl = completions_to_stringlist (matches);
-      free_array (matches);
+      strvec_dispose (matches);
     }
 
   if (sl)
@@ -577,11 +599,11 @@ compgen_builtin (list)
       if (sl->list && sl->list_len)
 	{
 	  rval = EXECUTION_SUCCESS;
-	  print_stringlist (sl, (char *)NULL);
+	  strlist_print (sl, (char *)NULL);
 	}
-      free_stringlist (sl);
+      strlist_dispose (sl);
     }
 
-  free_compspec (cs);
+  compspec_dispose (cs);
   return (rval);
 }

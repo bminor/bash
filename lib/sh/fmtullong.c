@@ -1,4 +1,6 @@
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* fmtullong.c - convert `long long int' to string */
+
+/* Copyright (C) 2001-2002 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -18,7 +20,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_LONG_LONG
 
-#define QUAD 1
+#define LONG		long long
+#define UNSIGNED_LONG	unsigned long long
+#define fmtulong	fmtullong
+
 #include "fmtulong.c"
 
 #endif

@@ -37,6 +37,34 @@
 
 #include "shell.h"
 
+#if defined (__CYGWIN__)
+#include <sys/cygwin.h>
+
+static int
+_is_cygdrive (path)
+     char *path;
+{
+  static char user[MAXPATHLEN];
+  static char system[MAXPATHLEN];
+  static int first_time = 1;
+
+  /* If the path is the first part of a network path, treat it as
+     existing. */
+  if (path[0] == '/' && path[1] == '/' && !strchr (path + 2, '/'))
+    return 1; 
+  /* Otherwise check for /cygdrive prefix. */
+  if (first_time)
+    {
+      char user_flags[MAXPATHLEN];
+      char system_flags[MAXPATHLEN];
+      /* Get the cygdrive info */
+      cygwin_internal (CW_GET_CYGDRIVE_INFO, user, system, user_flags, system_flags);
+      first_time = 0;
+    }
+  return !strcasecmp (path, user) || !strcasecmp (path, system);
+}
+#endif /* __CYGWIN__ */	
+
 /* Return 1 if PATH corresponds to a directory.  A function for debugging. */
 static int
 _path_isdir (path)
@@ -46,6 +74,10 @@ _path_isdir (path)
   struct stat sb;
 
   l = stat (path, &sb) == 0 && S_ISDIR (sb.st_mode);
+#if defined (__CYGWIN__)
+  if (l == 0)
+    l = _is_cygdrive (path);
+#endif
   return l;
 }
 

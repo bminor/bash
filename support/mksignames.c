@@ -19,7 +19,7 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <sys/types.h>

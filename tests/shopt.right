@@ -1,4 +1,4 @@
-./shopt.tests: shopt: illegal option: -z
+./shopt.tests: line 2: shopt: -z: invalid option
 shopt: usage: shopt [-pqsu] [-o long-option] optname [optname...]
 --
 shopt -u cdable_vars
@@ -84,124 +84,124 @@ xpg_echo       	off
 --
 set +o allexport
 set -o braceexpand
+set -o emacs
 set +o errexit
 set -o hashall
 set -o histexpand
+set -o history
+set +o ignoreeof
+set -o interactive-comments
 set +o keyword
 set -o monitor
 set +o noclobber
 set +o noexec
 set +o noglob
+set +o nolog
 set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
+set +o posix
 set -o privileged
 set +o verbose
-set +o xtrace
-set -o history
-set +o ignoreeof
-set -o interactive-comments
-set +o nolog
-set +o posix
-set -o emacs
 set +o vi
+set +o xtrace
 --
 allexport      	off
 braceexpand    	on
+emacs          	on
 errexit        	off
 hashall        	on
 histexpand     	on
+history        	on
+ignoreeof      	off
+interactive-comments	on
 keyword        	off
 monitor        	on
 noclobber      	off
 noexec         	off
 noglob         	off
+nolog          	off
 notify         	off
 nounset        	off
 onecmd         	off
 physical       	off
+posix          	off
 privileged     	on
 verbose        	off
-xtrace         	off
-history        	on
-ignoreeof      	off
-interactive-comments	on
-nolog          	off
-posix          	off
-emacs          	on
 vi             	off
+xtrace         	off
 --
 set +o allexport
 set -o braceexpand
+set -o emacs
 set +o errexit
 set -o hashall
 set -o histexpand
+set -o history
+set +o ignoreeof
+set -o interactive-comments
 set +o keyword
 set -o monitor
 set +o noclobber
 set +o noexec
 set +o noglob
+set +o nolog
 set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
+set +o posix
 set -o privileged
 set +o verbose
-set +o xtrace
-set -o history
-set +o ignoreeof
-set -o interactive-comments
-set +o nolog
-set +o posix
-set -o emacs
 set +o vi
+set +o xtrace
 --
 set -o history
 set +o verbose
 --
 set -o braceexpand
+set -o emacs
 set -o hashall
 set -o histexpand
-set -o monitor
-set -o privileged
 set -o history
 set -o interactive-comments
-set -o emacs
+set -o monitor
+set -o privileged
 --
 set +o allexport
 set +o errexit
+set +o ignoreeof
 set +o keyword
 set +o noclobber
 set +o noexec
 set +o noglob
+set +o nolog
 set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
-set +o verbose
-set +o xtrace
-set +o ignoreeof
-set +o nolog
 set +o posix
+set +o verbose
 set +o vi
+set +o xtrace
 --
 allexport      	off
 errexit        	off
+ignoreeof      	off
 keyword        	off
 noclobber      	off
 noexec         	off
 noglob         	off
+nolog          	off
 notify         	off
 nounset        	off
 onecmd         	off
 physical       	off
-verbose        	off
-xtrace         	off
-ignoreeof      	off
-nolog          	off
 posix          	off
+verbose        	off
 vi             	off
+xtrace         	off
 --
-./shopt.tests: shopt: xyz1: unknown shell option name
-./shopt.tests: shopt: xyz1: unknown option name
+./shopt.tests: line 93: shopt: xyz1: invalid shell option name
+./shopt.tests: line 94: shopt: xyz1: invalid option name

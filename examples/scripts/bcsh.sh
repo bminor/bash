@@ -335,7 +335,7 @@ if test -s "$histfile"
 	then
 	cmdno="`set - \`wc -l $histfile\`;echo $1`"
 	cmdno="`expr \"$cmdno\" + 1`"
-	lastcmd="`tail -1 $histfile`"
+	lastcmd="`sed -n '$p' $histfile`"
 	copy=false
 	ohist=$histfile
 	while test ! -w "$histfile"
@@ -689,7 +689,7 @@ esac/
 					rest=
 					;;
 				esac
-				i="`grep \"$wanted\" $histfile | tail -1`"
+				i="`grep \"$wanted\" $histfile | sed -n '$p'`"
 				;;
 			*)
 				# find which 'start-of-command' match is wanted
@@ -708,7 +708,7 @@ esac/
 					rest=
 					;;
 				esac
-				i="`grep \"^$wanted\" $histfile | tail -1`"
+				i="`grep \"^$wanted\" $histfile | sed -n '$p'`"
 				;;
 			esac
 

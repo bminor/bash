@@ -29,6 +29,10 @@
 #  include <unistd.h>
 #endif
 
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
+#endif
+
 #include <posixstat.h>
 #include <filecntl.h>
 #include <bashansi.h>
@@ -237,3 +241,56 @@ mkfifo (path, mode)
 #endif /* !S_IFIFO */
 }
 #endif /* !HAVE_MKFIFO && PROCESS_SUBSTITUTION */
+
+#define DEFAULT_MAXGROUPS 64
+
+int
+getmaxgroups ()
+{
+  static int maxgroups = -1;
+
+  if (maxgroups > 0)
+    return maxgroups;
+
+#if defined (HAVE_SYSCONF) && defined (_SC_NGROUPS_MAX)
+  maxgroups = sysconf (_SC_NGROUPS_MAX);
+#else
+#  if defined (NGROUPS_MAX)
+  maxgroups = NGROUPS_MAX;
+#  else /* !NGROUPS_MAX */
+#    if defined (NGROUPS)
+  maxgroups = NGROUPS;
+#    else /* !NGROUPS */
+  maxgroups = DEFAULT_MAXGROUPS;
+#    endif /* !NGROUPS */
+#  endif /* !NGROUPS_MAX */  
+#endif /* !HAVE_SYSCONF || !SC_NGROUPS_MAX */
+
+  if (maxgroups <= 0)
+    maxgroups = DEFAULT_MAXGROUPS;
+
+  return maxgroups;
+}
+
+long
+getmaxchild ()
+{
+  static long maxchild = -1L;
+
+  if (maxchild > 0)
+    return maxchild;
+
+#if defined (HAVE_SYSCONF) && defined (_SC_CHILD_MAX)
+  maxchild = sysconf (_SC_CHILD_MAX);
+#else
+#  if defined (CHILD_MAX)
+  maxchild = CHILD_MAX;
+#  else
+#    if defined (MAXUPRC)
+  maxchild = MAXUPRC;
+#    endif /* MAXUPRC */
+#  endif /* CHILD_MAX */
+#endif /* !HAVE_SYSCONF || !_SC_CHILD_MAX */
+
+  return (maxchild);
+}

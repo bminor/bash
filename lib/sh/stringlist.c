@@ -1,6 +1,6 @@
 /* stringlist.c - functions to handle a generic `list of strings' structure */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@
 /* Allocate a new STRINGLIST, with room for N strings. */
 
 STRINGLIST *
-alloc_stringlist (n)
+strlist_create (n)
      int n;
 {
   STRINGLIST *ret;
@@ -46,7 +46,7 @@ alloc_stringlist (n)
   ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
   if (n)
     {
-      ret->list = alloc_array (n+1);
+      ret->list = strvec_create (n+1);
       ret->list_size = n;
       for (i = 0; i < n; i++)
 	ret->list[i] = (char *)NULL;
@@ -61,38 +61,64 @@ alloc_stringlist (n)
 }
 
 STRINGLIST *
-realloc_stringlist (sl, n)
+strlist_resize (sl, n)
      STRINGLIST *sl;
      int n;
 {
   register int i;
 
   if (sl == 0)
-    return (sl = alloc_stringlist(n));
+    return (sl = strlist_create (n));
 
   if (n > sl->list_size)
     {
-      sl->list = (char **)xrealloc (sl->list, (n+1) * sizeof (char *));
+      sl->list = strvec_resize (sl->list, n + 1);
       for (i = sl->list_size; i <= n; i++)
 	sl->list[i] = (char *)NULL;
       sl->list_size = n;
     }
   return sl;
 }
+
+void
+strlist_flush (sl)
+     STRINGLIST *sl;
+{
+  if (sl == 0 || sl->list == 0)
+    return;
+  strvec_flush (sl->list);
+  sl->list_len = 0;
+}
   
 void
-free_stringlist (sl)
+strlist_dispose (sl)
      STRINGLIST *sl;
 {
   if (sl == 0)
     return;
   if (sl->list)
-    free_array (sl->list);
+    strvec_dispose (sl->list);
   free (sl);
 }
 
+int
+strlist_remove (sl, s)
+     STRINGLIST *sl;
+     char *s;
+{
+  int r;
+
+  if (sl == 0 || sl->list == 0 || sl->list_len == 0)
+    return 0;
+
+  r = strvec_remove (sl->list, s);
+  if (r)
+    sl->list_len--;
+  return r;
+}
+
 STRINGLIST *
-copy_stringlist (sl)
+strlist_copy (sl)
      STRINGLIST *sl;
 {
   STRINGLIST *new;
@@ -100,8 +126,8 @@ copy_stringlist (sl)
 
   if (sl == 0)
     return ((STRINGLIST *)0);
-  new = alloc_stringlist (sl->list_size);
-  /* I'd like to use copy_array, but that doesn't copy everything. */
+  new = strlist_create (sl->list_size);
+  /* I'd like to use strvec_copy, but that doesn't copy everything. */
   if (sl->list)
     {
       for (i = 0; i < sl->list_size; i++)
@@ -118,7 +144,7 @@ copy_stringlist (sl)
 /* Return a new STRINGLIST with everything from M1 and M2. */
 
 STRINGLIST *
-merge_stringlists (m1, m2)
+strlist_merge (m1, m2)
      STRINGLIST *m1, *m2;
 {
   STRINGLIST *sl;
@@ -127,7 +153,7 @@ merge_stringlists (m1, m2)
   l1 = m1 ? m1->list_len : 0;
   l2 = m2 ? m2->list_len : 0;
 
-  sl = alloc_stringlist (l1 + l2 + 1);
+  sl = strlist_create (l1 + l2 + 1);
   for (i = n = 0; i < l1; i++, n++)
     sl->list[n] = STRDUP (m1->list[i]);
   for (i = 0; i < l2; i++, n++)
@@ -139,20 +165,20 @@ merge_stringlists (m1, m2)
 
 /* Make STRINGLIST M1 contain everything in M1 and M2. */
 STRINGLIST *
-append_stringlist (m1, m2)
+strlist_append (m1, m2)
      STRINGLIST *m1, *m2;
 {
   register int i, n, len1, len2;
 
   if (m1 == 0)
-    return (m2 ? copy_stringlist (m2) : (STRINGLIST *)0);
+    return (m2 ? strlist_copy (m2) : (STRINGLIST *)0);
 
   len1 = m1->list_len;
   len2 = m2 ? m2->list_len : 0;
 
   if (len2)
     {
-      m1 = realloc_stringlist (m1, len1 + len2 + 1);
+      m1 = strlist_resize (m1, len1 + len2 + 1);
       for (i = 0, n = len1; i < len2; i++, n++)
 	m1->list[n] = STRDUP (m2->list[i]);
       m1->list[n] = (char *)NULL;
@@ -163,7 +189,7 @@ append_stringlist (m1, m2)
 }
 
 STRINGLIST *
-prefix_suffix_stringlist (sl, prefix, suffix)
+strlist_prefix_suffix (sl, prefix, suffix)
      STRINGLIST *sl;
      char *prefix, *suffix;
 {
@@ -197,7 +223,7 @@ prefix_suffix_stringlist (sl, prefix, suffix)
 }
    
 void
-print_stringlist (sl, prefix)
+strlist_print (sl, prefix)
      STRINGLIST *sl;
      char *prefix;
 {
@@ -210,18 +236,32 @@ print_stringlist (sl, prefix)
 }
 
 void
-sort_stringlist (sl)
+strlist_walk (sl, func)
+     STRINGLIST *sl;
+     sh_strlist_map_func_t *func;
+{
+  register int i;
+
+  if (sl == 0)
+    return;
+  for (i = 0; i < sl->list_len; i++)
+    if ((*func)(sl->list[i]) < 0)
+      break;
+} 
+     
+void
+strlist_sort (sl)
      STRINGLIST *sl;
 {
   if (sl == 0 || sl->list_len == 0 || sl->list == 0)
     return;
-  sort_char_array (sl->list);
+  strvec_sort (sl->list);
 }
 
 STRINGLIST *
-word_list_to_stringlist (list, copy, starting_index, ip)
+strlist_from_word_list (list, alloc, starting_index, ip)
      WORD_LIST *list;
-     int copy, starting_index, *ip;
+     int alloc, starting_index, *ip;
 {
   STRINGLIST *ret;
   int slen, len;
@@ -234,7 +274,7 @@ word_list_to_stringlist (list, copy, starting_index, ip)
     }
   slen = list_length (list);
   ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
-  ret->list = word_list_to_argv (list, copy, starting_index, &len);
+  ret->list = strvec_from_word_list (list, alloc, starting_index, &len);
   ret->list_size = slen + starting_index;
   ret->list_len = len;
   if (ip)
@@ -243,15 +283,15 @@ word_list_to_stringlist (list, copy, starting_index, ip)
 }
 
 WORD_LIST *
-stringlist_to_word_list (sl, copy, starting_index)
+strlist_to_word_list (sl, alloc, starting_index)
      STRINGLIST *sl;
-     int copy, starting_index;
+     int alloc, starting_index;
 {
   WORD_LIST *list;
 
   if (sl == 0 || sl->list == 0)
     return ((WORD_LIST *)NULL);
 
-  list = argv_to_word_list (sl->list, copy, starting_index);
+  list = strvec_to_word_list (sl->list, alloc, starting_index);
   return list;
 }

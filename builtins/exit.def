@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,7 +119,8 @@ exit_or_logout (list)
 
   /* Get return value if present.  This means that you can type
      `logout 5' to a shell, and it returns 5. */
-  exit_value = list ? get_exitstat (list) : last_command_exit_value;
+
+  exit_value = get_exitstat (list);
 
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0 && subshell_environment == 0)

@@ -83,6 +83,7 @@ parse_and_execute_cleanup ()
    	(flags & SEVAL_NONINT) -> interactive = 0;
    	(flags & SEVAL_INTERACT) -> interactive = 1;
    	(flags & SEVAL_NOHIST) -> call bash_history_disable ()
+   	(flags & SEVAL_NOFREE) -> don't free STRING when finished
 */
 
 int
@@ -123,7 +124,7 @@ parse_and_execute (string, from_file, flags)
     }
   
   add_unwind_protect (pop_stream, (char *)NULL);
-  if (orig_string)
+  if (orig_string && ((flags & SEVAL_NOFREE) == 0))
     add_unwind_protect (xfree, orig_string);
   end_unwind_frame ();
 
@@ -320,23 +321,7 @@ cat_file (r)
       return -1;
     }
 
-  rval = 0;
-  while (1)
-    {
-      nr = zread (fd, lbuf, sizeof(lbuf));
-      if (nr == 0)
-	break;
-      else if (nr < 0)
-	{
-	  rval = -1;
-	  break;
-	}
-      if (zwrite (1, lbuf, nr) < 0)
-	{
-	  rval = -1;
-	  break;
-	}
-    }
+  rval = zcatfd (fd, 1, fn);
 
   free (fn);
   close (fd);

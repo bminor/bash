@@ -1,6 +1,6 @@
 /* pcomplib.c - library functions for programmable completion. */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,7 +35,7 @@
 #include "shell.h"
 #include "pcomplete.h"
 
-#define COMPLETE_HASH_BUCKETS	29	/* for testing */
+#define COMPLETE_HASH_BUCKETS	32	/* must be power of two */
 
 #define STRDUP(x)	((x) ? savestring (x) : (char *)NULL)
 
@@ -43,10 +43,8 @@ HASH_TABLE *prog_completes = (HASH_TABLE *)NULL;
 
 static void free_progcomp __P((PTR_T));
 
-static int progcomp_initialized = 0;
-
 COMPSPEC *
-alloc_compspec ()
+compspec_create ()
 {
   COMPSPEC *ret;
 
@@ -68,7 +66,7 @@ alloc_compspec ()
 }
 
 void
-free_compspec (cs)
+compspec_dispose (cs)
      COMPSPEC *cs;
 {
   cs->refcount--;
@@ -87,7 +85,7 @@ free_compspec (cs)
 }
 
 COMPSPEC *
-copy_compspec (cs)
+compspec_copy (cs)
      COMPSPEC *cs;
 {
   COMPSPEC *new;
@@ -110,21 +108,16 @@ copy_compspec (cs)
 }
 
 void
-initialize_progcomp ()
+progcomp_create ()
 {
-  if (progcomp_initialized == 0)
-    {
-      prog_completes = make_hash_table (COMPLETE_HASH_BUCKETS);
-      progcomp_initialized = 1;
-    }
+  if (prog_completes == 0)
+    prog_completes = hash_create (COMPLETE_HASH_BUCKETS);
 }
 
 int
-num_progcomps ()
+progcomp_size ()
 {
-  if (progcomp_initialized == 0 || prog_completes == 0)
-    return (0);
-  return (prog_completes->nentries);
+  return (HASH_ENTRIES (prog_completes));
 }
 
 static void
@@ -134,18 +127,26 @@ free_progcomp (data)
   COMPSPEC *cs;
 
   cs = (COMPSPEC *)data;
-  free_compspec (cs);
+  compspec_dispose (cs);
 }
   
 void
-clear_progcomps ()
+progcomp_flush ()
 {
   if (prog_completes)
-    flush_hash_table (prog_completes, free_progcomp);
+    hash_flush (prog_completes, free_progcomp);
+}
+
+void
+progcomp_dispose ()
+{
+  if (prog_completes)
+    hash_dispose (prog_completes);
+  prog_completes = (HASH_TABLE *)NULL;
 }
 
 int
-remove_progcomp (cmd)
+progcomp_remove (cmd)
      char *cmd;
 {
   register BUCKET_CONTENTS *item;
@@ -153,10 +154,11 @@ remove_progcomp (cmd)
   if (prog_completes == 0)
     return 1;
 
-  item = remove_hash_item (cmd, prog_completes);
+  item = hash_remove (cmd, prog_completes, 0);
   if (item)
     {
-      free_progcomp (item->data);
+      if (item->data)
+	free_progcomp (item->data);
       free (item->key);
       free (item);
       return (1);
@@ -165,30 +167,30 @@ remove_progcomp (cmd)
 }
 
 int
-add_progcomp (cmd, cs)
+progcomp_insert (cmd, cs)
       char *cmd;
       COMPSPEC *cs;
 {
   register BUCKET_CONTENTS *item;
 
-  if (progcomp_initialized == 0 || prog_completes == 0)
-    initialize_progcomp ();
-
   if (cs == NULL)
-    programming_error ("add_progcomp: %s: NULL COMPSPEC", cmd);
+    programming_error ("progcomp_insert: %s: NULL COMPSPEC", cmd);
 
-  item = add_hash_item (cmd, prog_completes);
+  if (prog_completes == 0)
+    progcomp_create ();
+
+  item = hash_insert (cmd, prog_completes, 0);
   if (item->data)
     free_progcomp (item->data);
   else
     item->key = savestring (cmd);
-  item->data = (char *)cs;
+  item->data = cs;
   cs->refcount++;
   return 1;
 }
 
 COMPSPEC *
-find_compspec (cmd)
+progcomp_search (cmd)
      const char *cmd;
 {
   register BUCKET_CONTENTS *item;
@@ -197,7 +199,7 @@ find_compspec (cmd)
   if (prog_completes == 0)
     return ((COMPSPEC *)NULL);
 
-  item = find_hash_item (cmd, prog_completes);
+  item = hash_search (cmd, prog_completes, 0);
 
   if (item == NULL)
     return ((COMPSPEC *)NULL);
@@ -208,28 +210,13 @@ find_compspec (cmd)
 }
 
 void
-print_all_compspecs (pfunc)
-     sh_csprint_func_t *pfunc;
+progcomp_walk (pfunc)
+     hash_wfunc *pfunc;
 {
-  BUCKET_CONTENTS *item_list;
-  int bucket;
-  COMPSPEC *cs;
-
-  if (prog_completes == 0 || pfunc == 0)
+  if (prog_completes == 0 || pfunc == 0 || HASH_ENTRIES (prog_completes) == 0)
     return;
 
-  for (bucket = 0; bucket < prog_completes->nbuckets; bucket++)
-    {
-      item_list = get_hash_bucket (bucket, prog_completes);
-      if (item_list == 0)
-	continue;
-
-      for ( ; item_list; item_list = item_list->next)
-	{
-	  cs = (COMPSPEC *)item_list->data;
-	  (*pfunc) (item_list->key, cs);
-	}
-    }
+  hash_walk (prog_completes, pfunc);
 }
 
 #endif /* PROGRAMMABLE_COMPLETION */

@@ -24,6 +24,7 @@
 
 #include <bashtypes.h>
 #include <posixstat.h>
+#include <posixtime.h>
 #include <filecntl.h>
 
 #if defined (HAVE_UNISTD_H)

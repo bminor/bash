@@ -34,7 +34,9 @@ extern int malloc_register;
 #define FIND_EXIST	0x02	/* find existing entry */
 
 static int table_count = 0;
+static int table_allocated = 0;
 static mr_table_t mem_table[REG_TABLE_SIZE];
+static mr_table_t mem_overflow;
 
 /*
  * NOTE: taken from dmalloc (http://dmalloc.com) and modified.
@@ -43,7 +45,7 @@ static unsigned int
 mt_hash (key)
      const PTR_T key;
 {
-  unsigned int a, b, c, len;
+  unsigned int a, b, c;
   unsigned long x;
 
   /* set up the internal state */
@@ -61,10 +63,10 @@ static unsigned int
 which_bucket (mem)
      PTR_T mem;
 {
-  return (mt_hash ((unsigned char *)mem) % REG_TABLE_SIZE);
+  return (mt_hash ((unsigned char *)mem) & (REG_TABLE_SIZE-1));
 }
 #else
-#define which_bucket(mem) (mt_hash ((unsigned char *)(mem)) % REG_TABLE_SIZE);
+#define which_bucket(mem) (mt_hash ((unsigned char *)(mem)) & (REG_TABLE_SIZE-1));
 #endif
 
 static mr_table_t *
@@ -75,6 +77,9 @@ find_entry (mem, flags)
   unsigned int bucket;
   register mr_table_t *tp;
   mr_table_t *endp, *lastp;
+
+  if (mem_overflow.mem == mem)
+    return (&mem_overflow);
 
   bucket = which_bucket (mem);	/* get initial hash */
   tp = endp = mem_table + bucket;
@@ -105,17 +110,26 @@ find_entry (mem, flags)
   /* oops.  table is full.  replace an existing free entry. */
   do
     {
+      /* If there are no free entries, punt right away without searching. */
+      if (table_allocated == REG_TABLE_SIZE)
+	break;
+
       if (tp->flags & MT_FREE)
 	{
 	  memset(tp, 0, sizeof (mr_table_t));
 	  return (tp);
 	}
       tp++;
+
+      if (tp == lastp)
+	tp = mem_table;
     }
   while (tp != endp);
 
-  /* wow. entirely full.  return NULL. */
-  return ((mr_table_t *)NULL);
+  /* wow. entirely full.  return mem_overflow dummy entry. */
+  tp = &mem_overflow;
+  memset (tp, 0, sizeof (mr_table_t));
+  return tp;
 }
 
 mr_table_t *
@@ -158,7 +172,7 @@ mregister_alloc (tag, mem, size, file, line)
   if (tentry == 0)
     {
       /* oops.  table is full.  punt. */
-      fprintf (stderr, "register_alloc: alloc table is full?\n");
+      fprintf (stderr, "register_alloc: alloc table is full with FIND_ALLOC?\n");
       return;
     }
   
@@ -175,6 +189,9 @@ mregister_alloc (tag, mem, size, file, line)
   tentry->file = file;
   tentry->line = line;
   tentry->nalloc++;
+
+  if (tentry != &mem_overflow)
+    table_allocated++;
 }
 
 void
@@ -190,7 +207,9 @@ mregister_free (mem, size, file, line)
   if (tentry == 0)
     {
       /* oops.  not found. */
+#if 0
       fprintf (stderr, "register_free: %p not in allocation table?\n", mem);
+#endif
       return;
     }
   if (tentry->flags & MT_FREE)
@@ -204,6 +223,9 @@ mregister_free (mem, size, file, line)
   tentry->file = file;
   tentry->line = line;
   tentry->nfree++;
+
+  if (tentry != &mem_overflow)
+    table_allocated--;
 }
 
 /* If we ever add more flags, this will require changes. */
@@ -250,6 +272,7 @@ void
 mregister_table_init ()
 {
   memset (mem_table, 0, sizeof(mr_table_t) * REG_TABLE_SIZE);
+  memset (&mem_overflow, 0, sizeof (mr_table_t));
   table_count = 0;
 }
 

@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,13 +28,16 @@
 #include <stdio.h>
 
 #include "shell.h"
+
+#include "shmbutil.h"
+
 #include "builtins/common.h"
 
 extern char *this_command_name;
 extern int last_command_exit_value;
 
 static void quote_array_assignment_chars __P((WORD_LIST *));
-static char *array_value_internal __P((char *, int, int));
+static char *array_value_internal __P((char *, int, int, int *));
 
 /* **************************************************************** */
 /*								    */
@@ -52,11 +55,15 @@ convert_var_to_array (var)
   ARRAY *array;
 
   oldval = value_cell (var);
-  array = new_array ();
-  array_add_element (array, 0, oldval);
+  array = array_create ();
+  array_insert (array, 0, oldval);
 
   FREE (value_cell (var));
-  var->value = (char *)array;
+  var_setarray (var, array);
+
+  /* these aren't valid anymore */
+  var->dynamic_value = (sh_var_value_func_t *)NULL;
+  var->assign_func = (sh_var_assign_func_t *)NULL;
 
   INVALIDATE_EXPORTSTR (var);
 
@@ -89,7 +96,7 @@ bind_array_variable (name, ind, value)
   else if (readonly_p (entry) || noassign_p (entry))
     {
       if (readonly_p (entry))
-	report_error ("%s: readonly variable", name);
+	err_readonly (name);
       return (entry);
     }
   else if (array_p (entry) == 0)
@@ -98,9 +105,9 @@ bind_array_variable (name, ind, value)
   /* ENTRY is an array variable, and ARRAY points to the value. */
   newval = make_variable_value (entry, value);
   if (entry->assign_func)
-    (*entry->assign_func) (entry, ind, newval);
+    (*entry->assign_func) (entry, newval, ind);
   else
-    array_add_element (array_cell (entry), ind, newval);
+    array_insert (array_cell (entry), ind, newval);
   FREE (newval);
 
   return (entry);
@@ -125,7 +132,7 @@ assign_array_element (name, value)
   if ((ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']') || (sublen <= 1))
     {
       free (vname);
-      report_error ("%s: bad array subscript", name);
+      err_badarraysub (name);
       return ((SHELL_VAR *)NULL);
     }
 
@@ -133,7 +140,7 @@ assign_array_element (name, value)
   if (ind < 0)
     {
       free (vname);
-      report_error ("%s: bad array subscript", name);
+      err_badarraysub (name);
       return ((SHELL_VAR *)NULL);
     }
 
@@ -162,7 +169,7 @@ find_or_make_array_variable (name, check_flags)
   else if (check_flags && (readonly_p (var) || noassign_p (var)))
     {
       if (readonly_p (var))
-	report_error ("%s: readonly variable", name);
+	err_readonly (name);
       return ((SHELL_VAR *)NULL);
     }
   else if (array_p (var) == 0)
@@ -199,9 +206,9 @@ assign_array_var_from_word_list (var, list)
 
   for (a = array_cell (var), l = list, i = 0; l; l = l->next, i++)
     if (var->assign_func)
-      (*var->assign_func) (var, i, l->word->word);
+      (*var->assign_func) (var, l->word->word, i);
     else
-      array_add_element (a, i, l->word->word);
+      array_insert (a, i, l->word->word);
   return var;
 }
 
@@ -222,7 +229,7 @@ assign_array_var_from_string (var, value)
     return var;
 
   /* If this is called from declare_builtin, value[0] == '(' and
-     strchr(value, ')') != 0.  In this case, we need to extract
+     xstrchr(value, ')') != 0.  In this case, we need to extract
      the value from between the parens before going on. */
   if (*value == '(')	/*)*/
     {
@@ -259,7 +266,7 @@ assign_array_var_from_string (var, value)
   /* Now that we are ready to assign values to the array, kill the existing
      value. */
   if (a)
-    empty_array (a);
+    array_flush (a);
 
   for (last_ind = 0, list = nlist; list; list = list->next)
     {
@@ -274,9 +281,9 @@ assign_array_var_from_string (var, value)
 	    {
 	      nval = make_variable_value (var, w);
 	      if (var->assign_func)
-		(*var->assign_func) (var, last_ind, nval);
+		(*var->assign_func) (var, nval, last_ind);
 	      else
-		array_add_element (a, last_ind, nval);
+		array_insert (a, last_ind, nval);
 	      FREE (nval);
 	      last_ind++;
 	      continue;
@@ -284,7 +291,7 @@ assign_array_var_from_string (var, value)
 
 	  if (len == 1)
 	    {
-	      report_error ("%s: bad array subscript", w);
+	      err_badarraysub (w);
 	      continue;
 	    }
 
@@ -297,7 +304,7 @@ assign_array_var_from_string (var, value)
 	  ind = array_expand_index (w + 1, len);
 	  if (ind < 0)
 	    {
-	      report_error ("%s: bad array subscript", w);
+	      err_badarraysub (w);
 	      continue;
 	    }
 	  last_ind = ind;
@@ -313,9 +320,9 @@ assign_array_var_from_string (var, value)
 	this_command_name = (char *)NULL;	/* no command name for errors */
       nval = make_variable_value (var, val);
       if (var->assign_func)
-	(*var->assign_func) (var, ind, nval);
+	(*var->assign_func) (var, nval, ind);
       else
-	array_add_element (a, ind, nval);
+	array_insert (a, ind, nval);
       FREE (nval);
       last_ind++;
     }
@@ -340,7 +347,7 @@ quote_array_assignment_chars (list)
       if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
 	continue;	/* should not happen, but just in case... */
       /* Don't bother if it doesn't look like [ind]=value */
-      if (l->word->word[0] != '[' || strchr (l->word->word, '=') == 0) /* ] */
+      if (l->word->word[0] != '[' || xstrchr (l->word->word, '=') == 0) /* ] */
 	continue;
       s = nword = (char *)xmalloc (strlen (l->word->word) * 2 + 1);
       saw_eq = 0;
@@ -366,14 +373,56 @@ skipsubscript (s, i)
      int i;
 {
   int count, c;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t state, state_bak;
+  size_t slength, mblength;
+  size_t mb_cur_max;
+#endif
 
-  for (count = 1; count && (c = s[++i]); )
+#if defined (HANDLE_MULTIBYTE)
+  memset (&state, '\0', sizeof (mbstate_t));
+  slength = strlen (s + i);
+  mb_cur_max = MB_CUR_MAX;
+#endif
+  
+  count = 1;
+  while (count)
     {
-      if (c == '[')
+      /* Advance one (possibly multibyte) character in S starting at I. */
+#if defined (HANDLE_MULTIBYTE)
+      if (mb_cur_max > 1)
+	{
+	  state_bak = state;
+	  mblength = mbrlen (s + i, slength, &state);
+
+	  if (mblength == (size_t)-2 || mblength == (size_t)-1)
+	    {
+	      state = state_bak;
+	      i++;
+	      slength--;
+	    }
+	  else if (mblength == 0)
+	    return i;
+	  else
+	    {
+	      i += mblength;
+	      slength -= mblength;
+	    }
+	}
+      else
+#endif
+      ++i;
+
+      c = s[i];
+
+      if (c == 0)
+        break;
+      else if (c == '[')
 	count++;
       else if (c == ']')
 	count--;
     }
+
   return i;
 }
 
@@ -399,7 +448,7 @@ unbind_array_element (var, sub)
 
   if (ALL_ELEMENT_SUB (sub[0]) && sub[1] == 0)
     {
-      makunbound (var->name, shell_variables);
+      unbind_variable (var->name);
       return (0);
     }
   ind = array_expand_index (sub, len+1);
@@ -408,9 +457,9 @@ unbind_array_element (var, sub)
       builtin_error ("[%s]: bad array subscript", sub);
       return -1;
     }
-  ae = array_delete_element (array_cell (var), ind);
+  ae = array_remove (array_cell (var), ind);
   if (ae)
-    destroy_array_element (ae);
+    array_dispose_element (ae);
   return 0;
 }
 
@@ -423,10 +472,7 @@ print_array_assignment (var, quoted)
 {
   char *vstr;
 
-  if (quoted)
-    vstr = quoted_array_assignment_string (array_cell (var));
-  else
-    vstr = array_to_assignment_string (array_cell (var));
+  vstr = array_to_assign (array_cell (var), quoted);
 
   if (vstr == 0)
     printf ("%s=%s\n", var->name, quoted ? "'()'" : "()");
@@ -451,7 +497,7 @@ valid_array_reference (name)
   char *t;
   int r, len;
 
-  t = strchr (name, '[');	/* ] */
+  t = xstrchr (name, '[');	/* ] */
   if (t)
     {
       *t = '\0';
@@ -509,14 +555,14 @@ array_variable_name (s, subp, lenp)
   char *t, *ret;
   int ind, ni;
 
-  t = strchr (s, '[');
+  t = xstrchr (s, '[');
   if (t == 0)
     return ((char *)NULL);
   ind = t - s;
   ni = skipsubscript (s, ind);
   if (ni <= ind + 1 || s[ni] != ']')
     {
-      report_error ("%s: bad array subscript", s);
+      err_badarraysub (s);
       return ((char *)NULL);
     }
 
@@ -554,11 +600,13 @@ array_variable_part (s, subp, lenp)
 
 /* Return a string containing the elements in the array and subscript
    described by S.  If the subscript is * or @, obeys quoting rules akin
-   to the expansion of $* and $@ including double quoting. */
+   to the expansion of $* and $@ including double quoting.  If RTYPE
+   is non-null it gets 1 if the array reference is name[@] or name[*]
+   and 0 otherwise. */
 static char *
-array_value_internal (s, quoted, allow_all)
+array_value_internal (s, quoted, allow_all, rtype)
      char *s;
-     int quoted, allow_all;
+     int quoted, allow_all, *rtype;
 {
   int len;
   arrayind_t ind;
@@ -568,22 +616,27 @@ array_value_internal (s, quoted, allow_all)
 
   var = array_variable_part (s, &t, &len);
 
+  /* Expand the index, even if the variable doesn't exist, in case side
+     effects are needed, like ${w[i++]} where w is unset. */
+#if 0
   if (var == 0)
     return (char *)NULL;
+#endif
 
   /* [ */
   if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
+      if (rtype)
+	*rtype = 1;
       if (allow_all == 0)
 	{
-	  report_error ("%s: bad array subscript", s);
+	  err_badarraysub (s);
 	  return ((char *)NULL);
 	}
+      else if (var == 0)
+	return ((char *)NULL);
       else if (array_p (var) == 0)
-	{
-	  l = (WORD_LIST *)NULL;
-	  l = add_string_to_list (value_cell (var), l);
-	}
+	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
       else
 	{
 	  l = array_to_word_list (array_cell (var));
@@ -604,17 +657,26 @@ array_value_internal (s, quoted, allow_all)
     }
   else
     {
+      if (rtype)
+	*rtype = 0;
       ind = array_expand_index (t, len);
       if (ind < 0)
 	{
-	  report_error ("%s: bad array subscript", var->name);
+	  if (var)
+	    err_badarraysub (var->name);
+	  else
+	    {
+	      t[-1] = '\0';
+	      err_badarraysub (s);
+	      t[-1] = '[';	/* ] */
+	    }
 	  return ((char *)NULL);
 	}
+      if (var == 0)
+	return ((char *)NULL);
       if (array_p (var) == 0)
-	return (ind == 0 ? savestring (value_cell (var)) : (char *)NULL);
+	return (ind == 0 ? value_cell (var) : (char *)NULL);
       retval = array_reference (array_cell (var), ind);
-      if (retval)
-	retval = quote_escapes (retval);
     }
 
   return retval;
@@ -623,11 +685,11 @@ array_value_internal (s, quoted, allow_all)
 /* Return a string containing the elements described by the array and
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
-array_value (s, quoted)
+array_value (s, quoted, rtype)
      char *s;
-     int quoted;
+     int quoted, *rtype;
 {
-  return (array_value_internal (s, quoted, 1));
+  return (array_value_internal (s, quoted, 1, rtype));
 }
 
 /* Return the value of the array indexing expression S as a single string.
@@ -635,11 +697,11 @@ array_value (s, quoted)
    by other parts of the shell such as the arithmetic expression evaluator
    in expr.c. */
 char *
-get_array_value (s, allow_all)
+get_array_value (s, allow_all, rtype)
      char *s;
-     int allow_all;
+     int allow_all, *rtype;
 {
-  return (array_value_internal (s, 0, allow_all));
+  return (array_value_internal (s, 0, allow_all, rtype));
 }
 
 #endif /* ARRAY_VARS */

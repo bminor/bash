@@ -55,8 +55,6 @@
 #include "rlprivate.h"
 #include "xmalloc.h"
 
-#define SWAP(s, e)  do { int t; t = s; s = e; e = t; } while (0)
-
 /* **************************************************************** */
 /*								    */
 /*			Utility Functions			    */
@@ -89,7 +87,7 @@ _rl_abort_internal ()
   _rl_init_argument ();
   rl_clear_pending_input ();
 
-  _rl_defining_kbd_macro = 0;
+  RL_UNSETSTATE (RL_STATE_MACRODEF);
   while (rl_executing_macro)
     _rl_pop_executing_macro ();
 
@@ -233,6 +231,12 @@ _rl_strpbrk (string1, string2)
      const char *string1, *string2;
 {
   register const char *scan;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+  register int i, v;
+
+  memset (&ps, 0, sizeof (mbstate_t));
+#endif
 
   for (; *string1; string1++)
     {
@@ -241,6 +245,14 @@ _rl_strpbrk (string1, string2)
 	  if (*string1 == *scan)
 	    return ((char *)string1);
 	}
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	{
+	  v = _rl_get_char_len (string1, &ps);
+	  if (v > 1)
+	    string += v - 1;	/* -1 to account for auto-increment in loop */
+	}
+#endif
     }
   return ((char *)NULL);
 }

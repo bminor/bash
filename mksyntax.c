@@ -60,7 +60,8 @@ struct wordflag {
 	{ CGLOB,	"CGLOB" },
 	{ CXGLOB,	"CXGLOB" },
 	{ CXQUOTE,	"CXQUOTE" },
-	{ CSPECVAR,	"CSPECVAR" }
+	{ CSPECVAR,	"CSPECVAR" },
+	{ CSUBSTOP,	"CSUBSTOP" },
 };
 	
 #define N_WFLAGS	(sizeof (wordflags) / sizeof (wordflags[0]))
@@ -221,6 +222,8 @@ load_lsyntax ()
   addcchar ('\\', CXQUOTE);
 
   addcstr ("@*#?-$!", CSPECVAR);	/* omits $0...$9 and $_ */
+
+  addcstr ("-=?+", CSUBSTOP);		/* OP in ${paramOPword} */
 }
 
 static void

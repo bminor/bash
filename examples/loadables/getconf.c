@@ -49,10 +49,19 @@
 #endif
 
 #include <stdio.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
+#ifdef HAVE_LOCALE_H
 #include <locale.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
+
+#include "typemax.h"
+
 #include "bashansi.h"
 #include "shell.h"
 #include "builtins.h"
@@ -857,7 +866,6 @@ static const struct conf_variable conf_table[] =
 static int num_getconf_variables = sizeof(conf_table) / sizeof(struct conf_variable) - 1;
 
 extern char *this_command_name;
-extern char *xmalloc ();
 extern char **make_builtin_argv ();
 
 static void getconf_help ();

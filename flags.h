@@ -38,6 +38,7 @@ struct flags_alist {
 };
 
 extern struct flags_alist shell_flags[];
+extern char optflags[];
 
 extern int
   mark_modified_vars, exit_immediately_on_error, disallow_filename_globbing,
@@ -68,6 +69,8 @@ extern int *find_flag __P((int));
 extern int change_flag __P((int, int));
 extern char *which_set_flags __P((void));
 extern void reset_shell_flags __P((void));
+
+extern void initialize_flags __P((void));
 
 /* A macro for efficiency. */
 #define change_flag_char(flag, on_or_off)  change_flag (flag, on_or_off)

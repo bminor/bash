@@ -30,11 +30,6 @@ Platform-Specific Configuration and Operation Notes
 	leak caused by using the bash malloc because closedir(3) needs to read
 	freed memory to find the file descriptor to close
 
-	If you are using GNU libc, especially on a linux system
-
-(Configuring --without-gnu-malloc will still result in lib/malloc/libmalloc.a
-being built and linked against, but there is only a stub file in the archive.)
-
 2.  Configure using shlicc2 on BSD/OS 2.1 and BSD/OS 3.x to use loadable
     builtins
 
@@ -234,7 +229,7 @@ being built and linked against, but there is only a stub file in the archive.)
 
     If you want to completely remove any dependence on /usr, perhaps
     to put a copy of bash in /sbin and have it available when /usr is
-    not mounted, force the build process to use the shared ld.so library
+    not mounted, force the build process to use the shared dl.so library
     in /etc/lib.
 
     For gcc, this would be something like
@@ -326,3 +321,6 @@ being built and linked against, but there is only a stub file in the archive.)
 	    want it).
 
 	5. make; make install; enjoy
+
+15.  Configure with `CC=xlc' if you don't have gcc on AIX 4.2 and later
+     versions.  `xlc' running in `cc' mode has trouble compiling error.c.

@@ -29,7 +29,7 @@
 	extern char *func __P((char *, char *, int)); */
 
 #if !defined (__P)
-#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus)
+#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
 #    define __P(protos) protos
 #  else 
 #    define __P(protos) ()
@@ -69,6 +69,20 @@
 #  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8) || __STRICT_ANSI__
 #    define __attribute__(x)
 #  endif
+#endif
+
+/* For those situations when gcc handles inlining a particular function but
+   other compilers complain. */
+#ifdef __GNUC__
+#  define INLINE inline
+#else
+#  define INLINE
+#endif
+
+#if defined (PREFER_STDARG)
+#  define SH_VA_START(va, arg)  va_start(va, arg)
+#else
+#  define SH_VA_START(va, arg)  va_start(va)
 #endif
 
 #endif /* !_STDC_H_ */

@@ -52,6 +52,7 @@ extern int rl_arg_sign;
 extern int rl_visible_prompt_length;
 extern int readline_echoing_p;
 extern int rl_key_sequence_length;
+extern int rl_byte_oriented;
 
 /* display.c */
 extern int rl_display_fixed;
@@ -65,17 +66,8 @@ extern int rl_blink_matching_paren;
  *									 *
  *************************************************************************/
 
-/* bind.c */
-extern char *rl_untranslate_keyseq PARAMS((int));
-
 /* kill.c */
 extern int rl_set_retained_kills PARAMS((int));
-
-/* readline.c */
-extern int rl_discard_argument PARAMS((void));
-
-/* rltty.c */
-extern int rl_stop_output PARAMS((int, int));
 
 /* terminal.c */
 extern void _rl_set_screen_size PARAMS((int, int));
@@ -113,6 +105,10 @@ extern int readline_internal_char PARAMS((void));
 /* bind.c */
 extern void _rl_bind_if_unbound PARAMS((const char *, rl_command_func_t *));
 
+/* complete.c */
+extern char _rl_find_completion_word PARAMS((int *, int *));
+extern void _rl_free_match_list PARAMS((char **));
+
 /* display.c */
 extern char *_rl_strip_prompt PARAMS((char *));
 extern void _rl_move_cursor_relative PARAMS((int, const char *));
@@ -132,7 +128,9 @@ extern int _rl_current_display_line PARAMS((void));
 /* input.c */
 extern int _rl_any_typein PARAMS((void));
 extern int _rl_input_available PARAMS((void));
+extern int _rl_input_queued PARAMS((int));
 extern void _rl_insert_typein PARAMS((int));
+extern int _rl_unget_char PARAMS((int));
 
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
@@ -141,6 +139,12 @@ extern void _rl_push_executing_macro PARAMS((void));
 extern void _rl_pop_executing_macro PARAMS((void));
 extern void _rl_add_macro_char PARAMS((int));
 extern void _rl_kill_kbd_macro PARAMS((void));
+
+/* misc.c */
+extern int _rl_init_argument PARAMS((void));
+extern void _rl_start_using_history PARAMS((void));
+extern int _rl_free_saved_history_line PARAMS((void));
+extern void _rl_set_insert_mode PARAMS((int, int));
 
 /* nls.c */
 extern int _rl_init_eightbit PARAMS((void));
@@ -152,12 +156,7 @@ extern void _rl_enable_paren_matching PARAMS((int));
 extern void _rl_init_line_state PARAMS((void));
 extern void _rl_set_the_line PARAMS((void));
 extern int _rl_dispatch PARAMS((int, Keymap));
-extern int _rl_init_argument PARAMS((void));
-extern void _rl_fix_point PARAMS((int));
-extern void _rl_replace_text PARAMS((const char *, int, int));
-extern int _rl_char_search_internal PARAMS((int, int, int));
-extern int _rl_set_mark_at_pos PARAMS((int));
-extern int _rl_free_saved_history_line PARAMS((void));
+extern int _rl_dispatch_subseq PARAMS((int, Keymap, int));
 
 /* rltty.c */
 extern int _rl_disable_tty_signals PARAMS((void));
@@ -175,9 +174,23 @@ extern void _rl_output_some_chars PARAMS((const char *, int));
 extern int _rl_backspace PARAMS((int));
 extern void _rl_enable_meta_key PARAMS((void));
 extern void _rl_control_keypad PARAMS((int));
+extern void _rl_set_cursor PARAMS((int, int));
+
+/* text.c */
+extern void _rl_fix_point PARAMS((int));
+extern int _rl_replace_text PARAMS((const char *, int, int));
+extern int _rl_insert_char PARAMS((int, int));
+extern int _rl_overwrite_char PARAMS((int, int));
+extern int _rl_overwrite_rubout PARAMS((int, int));
+extern int _rl_rubout_char PARAMS((int, int));
+#if defined (HANDLE_MULTIBYTE)
+extern int _rl_char_search_internal PARAMS((int, int, char *, int));
+#else
+extern int _rl_char_search_internal PARAMS((int, int, int));
+#endif
+extern int _rl_set_mark_at_pos PARAMS((int));
 
 /* util.c */
-extern int rl_alphabetic PARAMS((int));
 extern int _rl_abort_internal PARAMS((void));
 extern char *_rl_strindex PARAMS((const char *, const char *));
 extern int _rl_qsort_string_compare PARAMS((char **, char **));
@@ -207,9 +220,11 @@ extern const char *_rl_possible_meta_prefixes[];
 /* complete.c */
 extern int _rl_complete_show_all;
 extern int _rl_complete_mark_directories;
+extern int _rl_complete_mark_symlink_dirs;
 extern int _rl_print_completions_horizontally;
 extern int _rl_completion_case_fold;
 extern int _rl_match_hidden_files;
+extern int _rl_page_completions;
 
 /* display.c */
 extern int _rl_vis_botlin;
@@ -221,8 +236,11 @@ extern char *rl_display_prompt;
 extern char *_rl_isearch_terminators;
 
 /* macro.c */
-extern int _rl_defining_kbd_macro;
 extern char *_rl_executing_macro;
+
+/* misc.c */
+extern int _rl_history_preserve_point;
+extern int _rl_history_saved_point;
 
 /* readline.c */
 extern int _rl_horizontal_scroll_mode;
@@ -231,7 +249,6 @@ extern int _rl_bell_preference;
 extern int _rl_meta_flag;
 extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_output_meta_chars;
-extern int _rl_history_preserve_point;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

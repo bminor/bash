@@ -44,7 +44,10 @@
 #endif
 
 #ifdef CTRL
-#undef CTRL
+#  undef CTRL
+#endif
+#ifdef UNCTRL
+#  undef UNCTRL
 #endif
 
 /* Some character stuff. */
@@ -75,6 +78,9 @@
 #endif
 
 #define NON_NEGATIVE(c)	((unsigned char)(c) == (c))
+
+/* Some systems define these; we want our definitions. */
+#undef ISPRINT
 
 #define ISALNUM(c)	(IN_CTYPE_DOMAIN (c) && isalnum (c))
 #define ISALPHA(c)	(IN_CTYPE_DOMAIN (c) && isalpha (c))

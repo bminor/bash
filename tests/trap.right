@@ -5,19 +5,9 @@ trap -- 'echo aborting' SIGINT
 trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
-debug line
 [20] debug
-trap -- 'echo exiting' EXIT
-trap -- 'echo aborting' SIGHUP
-trap -- 'echo aborting' SIGINT
-trap -- 'echo aborting' SIGQUIT
-trap -- 'echo aborting' SIGABRT
-trap -- 'echo aborting' SIGTERM
-trap -- 'echo [$LINENO] debug' DEBUG
+debug line
 [22] debug
-funcdebug line
-[2] funcdebug
-[24] debug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT
@@ -25,7 +15,24 @@ trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
 trap -- 'echo [$LINENO] debug' DEBUG
+[24] debug
+func[16] funcdebug
+funcdebug line
 [26] debug
+trap -- 'echo exiting' EXIT
+trap -- 'echo aborting' SIGHUP
+trap -- 'echo aborting' SIGINT
+trap -- 'echo aborting' SIGQUIT
+trap -- 'echo aborting' SIGABRT
+trap -- 'echo aborting' SIGTERM
+trap -- 'echo [$LINENO] debug' DEBUG
+[28] debug
+./trap.tests[33] debug
+./trap.tests[34] debug
+func2[31] debug
+func2debug line
+./trap.tests[36] debug
+./trap.tests[38] debug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT

@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,6 +70,8 @@ $END
 extern int errno;
 #endif
 
+extern int current_command_line_count;
+
 static void display_history __P((WORD_LIST *));
 static int delete_histent __P((int));
 static int delete_last_history __P((void));
@@ -89,9 +91,9 @@ int
 history_builtin (list)
      WORD_LIST *list;
 {
-  int flags, opt, result;
+  int flags, opt, result, old_history_lines;
   char *filename, *delete_arg;
-  long delete_offset;
+  intmax_t delete_offset;
 
   flags = 0;
   reset_internal_getopt ();
@@ -168,7 +170,7 @@ history_builtin (list)
 	  || (delete_offset < history_base)
 	  || (delete_offset > (history_base + history_length)))
 	{
-	  builtin_error ("%s: not a valid history position", delete_arg);
+	  sh_erange (delete_arg, "history position");
 	  return (EXECUTION_FAILURE);
 	}
       opt = delete_offset;
@@ -197,10 +199,12 @@ history_builtin (list)
   else if (flags & NFLAG)	/* Read `new' history from file. */
     {
       /* Read all of the lines in the file that we haven't already read. */
+      old_history_lines = history_lines_in_file;
       using_history ();
       result = read_history_range (filename, history_lines_in_file, -1);
       using_history ();
       history_lines_in_file = where_history ();
+      history_lines_this_session += history_lines_in_file - old_history_lines;
     }
 
   return (result ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
@@ -215,7 +219,7 @@ display_history (list)
      WORD_LIST *list;
 {
   register int i;
-  long limit;
+  intmax_t limit;
   HIST_ENTRY **hlist;
 
   if (list)
@@ -297,10 +301,28 @@ push_history (list)
 {
   char *s;
 
+  /* Delete the last history entry if it was a single entry added to the
+     history list (generally the `history -s' itself), or if `history -s'
+     is being used in a compound command and the compound command was
+     added to the history as a single element (command-oriented history).
+     If you don't want history -s to remove the compound command from the
+     history, change #if 0 to #if 1 below. */
+#if 0
   if (hist_last_line_added && delete_last_history () == 0)
-    return;
+#else
+  if ((hist_last_line_added || (current_command_line_count > 0 && current_command_first_line_saved && command_oriented_history))
+      && delete_last_history () == 0)
+#endif
+      return;
+
   s = string_list (list);
-  maybe_add_history (s);	/* Obeys HISTCONTROL setting. */
+  /* Call check_add_history with FORCE set to 1 to skip the check against
+     current_command_line_count.  If history -s is used in a compound
+     command, the above code will delete the compound command's history
+     entry and this call will add the line to the history as a separate
+     entry.  Without FORCE=1, if current_command_line_count were > 1, the
+     line would be appended to the entry before the just-deleted entry. */
+  check_add_history (s, 1);	/* obeys HISTCONTROL, HISTIGNORE */
   free (s);
 }
 

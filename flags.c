@@ -203,6 +203,8 @@ struct flags_alist shell_flags[] = {
 
 #define NUM_SHELL_FLAGS (sizeof (shell_flags) / sizeof (struct flags_alist))
 
+char optflags[NUM_SHELL_FLAGS+4] = { '+' };
+
 int *
 find_flag (name)
      int name;
@@ -327,4 +329,16 @@ reset_shell_flags ()
 #if defined (RESTRICTED_SHELL)
   restricted = 0;
 #endif
+}
+
+void
+initialize_flags ()
+{
+  register int i;
+
+  for (i = 0; shell_flags[i].name; i++)
+    optflags[i+1] = shell_flags[i].name;
+  optflags[++i] = 'o';
+  optflags[++i] = ';';
+  optflags[i+1] = '\0';
 }

@@ -1,7 +1,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987,1989 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -72,6 +72,9 @@ typedef union uwp {
   } sv;
 } UNWIND_ELT;
 
+
+extern int interrupt_immediately;
+
 static void without_interrupts __P((VFunction *, char *, char *));
 static void unwind_frame_discard_internal __P((char *, char *));
 static void unwind_frame_run_internal __P((char *, char *));
@@ -84,7 +87,8 @@ static void unwind_protect_mem_internal __P((char *, char *));
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 
-extern int interrupt_immediately;
+#define uwpalloc(elt)	(elt) = (UNWIND_ELT *)xmalloc (sizeof (UNWIND_ELT))
+#define uwpfree(elt)	free(elt)
 
 /* Run a function without interrupts.  This relies on the fact that the
    FUNCTION cannot change the value of interrupt_immediately.  (I.e., does
@@ -185,7 +189,7 @@ add_unwind_protect_internal (cleanup, arg)
 {
   UNWIND_ELT *elt;
 
-  elt = (UNWIND_ELT *)xmalloc (sizeof (UNWIND_ELT));
+  uwpalloc (elt);
   elt->head.next = unwind_protect_list;
   elt->head.cleanup = cleanup;
   elt->arg.v = arg;
@@ -202,7 +206,7 @@ remove_unwind_protect_internal (ignore1, ignore2)
   if (elt)
     {
       unwind_protect_list = unwind_protect_list->head.next;
-      free (elt);
+      uwpfree (elt);
     }
 }
 
@@ -236,11 +240,11 @@ unwind_frame_discard_internal (tag, ignore)
       unwind_protect_list = unwind_protect_list->head.next;
       if (elt->head.cleanup == 0 && (STREQ (elt->arg.v, tag)))
 	{
-	  free (elt);
+	  uwpfree (elt);
 	  break;
 	}
       else
-	free (elt);
+	uwpfree (elt);
     }
 }
 
@@ -269,7 +273,7 @@ unwind_frame_run_internal (tag, ignore)
 	{
 	  if (tag && STREQ (elt->arg.v, tag))
 	    {
-	      free (elt);
+	      uwpfree (elt);
 	      break;
 	    }
 	}
@@ -281,7 +285,7 @@ unwind_frame_run_internal (tag, ignore)
 	    (*(elt->head.cleanup)) (elt->arg.v);
 	}
 
-      free (elt);
+      uwpfree (elt);
     }
 }
 

@@ -49,8 +49,9 @@ typedef struct _keymap_entry {
 
 /* This must be large enough to hold bindings for all of the characters
    in a desired character set (e.g, 128 for ASCII, 256 for ISO Latin-x,
-   and so on). */
-#define KEYMAP_SIZE 256
+   and so on) plus one for subsequence matching. */
+#define KEYMAP_SIZE 257
+#define ANYOTHERKEY KEYMAP_SIZE-1
 
 /* I wanted to make the above structure contain a union of:
    union { rl_command_func_t *function; struct _keymap_entry *keymap; } value;

@@ -1,5 +1,5 @@
 This document details the incompatibilites between this version of bash,
-bash-2.05a, and the previous widely-available version, bash-1.14 (which
+bash-2.05b, and the previous widely-available version, bash-1.14 (which
 is still the `standard' version for many Linux distributions).  These
 were discovered by users of bash-2.x, so this list is not comprehensive.
 Some of these incompatibilities occur between the current version and
@@ -44,8 +44,8 @@ versions 2.0 and above.
 
 3.  The options to `bind' have changed to make them more consistent with
     the rest of the bash builtins.  If you are using `bind -d' to list
-    the readline keybindings in a form that can be re-read, use `bind -p'
-    instead.  If you were using `bind -v' to list the keybindings, use
+    the readline key bindings in a form that can be re-read, use `bind -p'
+    instead.  If you were using `bind -v' to list the key bindings, use
     `bind -P' instead.
 
 4.  The `long' invocation options must now be prefixed by `--' instead
@@ -64,7 +64,7 @@ versions 2.0 and above.
 
 	"\C-\\": self-insert
 
-6.  A number of people complained above having to use ESC to terminate an
+6.  A number of people complained about having to use ESC to terminate an
     incremental search, and asked for an alternate mechanism.  Bash-2.03
     uses the value of the settable readline variable `isearch-terminators'
     to decide which characters should terminate an incremental search.  If
@@ -146,6 +146,11 @@ versions 2.0 and above.
 	AaBb...Zz
 
     so a range specification like [A-Z] will match every letter except `z'.
+    Other locales collate like
+
+        aAbBcC...zZ
+
+    which means that [A-Z] matches every letter except `a'.
 
     The portable way to specify upper case letters is [:upper:] instead of
     A-Z; lower case may be specified as [:lower:] instead of a-z.

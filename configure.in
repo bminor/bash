@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2001 Free Software Foundation, Inc.
+# Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 2.05a, version 2.128, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 2.05b, version 2.144, from autoconf version] AC_ACVERSION)dnl
 
-AC_INIT(bash, 2.05a, bug-bash@gnu.org)
+AC_INIT(bash, 2.05b, bug-bash@gnu.org)
 
 dnl make sure we are using a recent autoconf version
 AC_PREREQ(2.50)
@@ -35,7 +35,14 @@ AC_CONFIG_AUX_DIR(./support)
 AC_CONFIG_HEADERS(config.h)
 
 dnl checks for version info
-BASHVERS=2.05a
+BASHVERS=2.05b
+RELSTATUS=release
+
+dnl defaults for debug settings
+case "$RELSTATUS" in
+alp*|bet*|dev*|rc*)	DEBUG='-DDEBUG' MALLOC_DEBUG='-DMALLOC_DEBUG' ;;
+*)	DEBUG= MALLOC_DEBUG= ;;
+esac
 
 dnl canonicalize the host and os so we can do some tricky things before
 dnl parsing options
@@ -63,7 +70,7 @@ sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
 mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
 m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
-#*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better
+#*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better; I disagree
 *-openbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
 *-nextstep*)	opt_bash_malloc=no ;;	# NeXT machines running NeXTstep
@@ -79,15 +86,21 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
 esac
 
+# memory scrambling on free()
+case "${host_os}" in
+sco3.2v5*|sco3.2v4*)	opt_memscramble=no ;;
+*)			opt_memscramble=yes ;;
+esac
+
 dnl arguments to configure
 dnl packages
-AC_ARG_WITH(afs, --with-afs		if you are running AFS, opt_afs=$withval)
-AC_ARG_WITH(bash-malloc, --with-bash-malloc	use the Bash version of malloc,opt_bash_malloc=$withval)
-AC_ARG_WITH(curses, --with-curses		use the curses library instead of the termcap library,opt_curses=$withval)
-AC_ARG_WITH(gnu-malloc, --with-gnu-malloc	synonym for --with-bash-malloc,opt_bash_malloc=$withval)
-AC_ARG_WITH(installed-readline, --with-installed-readline	use a version of the readline library that is already installed, opt_with_installed_readline=$withval)
-AC_ARG_WITH(purecov, --with-purecov		configure to postprocess with pure coverage, opt_purecov=$withval)
-AC_ARG_WITH(purify, --with-purify		configure to postprocess with purify, opt_purify=$withval)
+AC_ARG_WITH(afs, AC_HELP_STRING([--with-afs], [if you are running AFS]), opt_afs=$withval)
+AC_ARG_WITH(bash-malloc, AC_HELP_STRING([--with-bash-malloc], [use the Bash version of malloc]), opt_bash_malloc=$withval)
+AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses], [use the curses library instead of the termcap library]), opt_curses=$withval)
+AC_ARG_WITH(gnu-malloc, AC_HELP_STRING([--with-gnu-malloc], [synonym for --with-bash-malloc]), opt_bash_malloc=$withval)
+AC_ARG_WITH(installed-readline, AC_HELP_STRING([--with-installed-readline], [use a version of the readline library that is already installed]), opt_with_installed_readline=$withval)
+AC_ARG_WITH(purecov, AC_HELP_STRING([--with-purecov], [configure to postprocess with pure coverage]), opt_purecov=$withval)
+AC_ARG_WITH(purify, AC_HELP_STRING([--with-purify], [configure to postprocess with purify]), opt_purify=$withval)
 
 if test "$opt_bash_malloc" = yes; then
 	MALLOC_TARGET=malloc
@@ -108,6 +121,7 @@ fi
 
 if test "$opt_purify" = yes; then
 	PURIFY="purify "
+	AC_DEFINE(DISABLE_MALLOC_WRAPPERS)
 else
 	PURIFY=
 fi
@@ -149,14 +163,14 @@ opt_cond_command=yes
 opt_arith_for_command=yes
 opt_net_redirs=yes
 opt_progcomp=yes
-opt_largefile=yes
+opt_separate_help=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
 opt_profiling=no
 
 dnl argument parsing for optional features
-AC_ARG_ENABLE(minimal-config, --enable-minimal-config	a minimal sh-like configuration, opt_minimal_config=$enableval)
+AC_ARG_ENABLE(minimal-config, AC_HELP_STRING([--enable-minimal-config], [a minimal sh-like configuration]), opt_minimal_config=$enableval)
 
 dnl a minimal configuration turns everything off, but features can be
 dnl added individually
@@ -167,37 +181,38 @@ if test $opt_minimal_config = yes; then
 	opt_select=no opt_help=no opt_array_variables=no opt_dparen_arith=no
 	opt_brace_expansion=no opt_disabled_builtins=no opt_command_timing=no
 	opt_extended_glob=no opt_cond_command=no opt_arith_for_command=no
-	opt_net_redirs=no opt_progcomp=no
+	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 fi
 
-AC_ARG_ENABLE(alias, --enable-alias		enable shell aliases, opt_alias=$enableval)
-AC_ARG_ENABLE(arith-for-command, --enable-arith-for-command	enable arithmetic for command, opt_arith_for_command=$enableval)
-AC_ARG_ENABLE(array-variables, --enable-array-variables	include shell array variables, opt_array_variables=$enableval)
-AC_ARG_ENABLE(bang-history, --enable-bang-history	turn on csh-style history substitution, opt_bang_history=$enableval)
-AC_ARG_ENABLE(brace-expansion, --enable-brace-expansion	include brace expansion, opt_brace_expansion=$enableval)
-AC_ARG_ENABLE(command-timing, --enable-command-timing	enable the time reserved word and command timing, opt_command_timing=$enableval)
-AC_ARG_ENABLE(cond-command, --enable-cond-command	enable the conditional command, opt_cond_command=$enableval)
-AC_ARG_ENABLE(directory-stack, --enable-directory-stack	enable builtins pushd/popd/dirs, opt_dirstack=$enableval)
-AC_ARG_ENABLE(disabled-builtins, --enable-disabled-builtins	allow disabled builtins to still be invoked, opt_disabled_builtins=$enableval)
-AC_ARG_ENABLE(dparen-arithmetic, [--enable-dparen-arithmetic	include ((...)) command], opt_dparen_arith=$enableval)
-AC_ARG_ENABLE(extended-glob, --enable-extended-glob	include ksh-style extended pattern matching, opt_extended_glob=$enableval)
-AC_ARG_ENABLE(help-builtin, --enable-help-builtin	include the help builtin, opt_help=$enableval)
-AC_ARG_ENABLE(history, --enable-history	turn on command history, opt_history=$enableval)
-AC_ARG_ENABLE(job-control, --enable-job-control	enable job control features, opt_job_control=$enableval)
-AC_ARG_ENABLE(largefile, --enable-largefile	enable support for large files, opt_largefile=$enableval)
-AC_ARG_ENABLE(net-redirections, --enable-net-redirections	enable /dev/tcp/host/port redirection, opt_net_redirs=$enableval)
-AC_ARG_ENABLE(process-substitution, --enable-process-substitution	enable process substitution, opt_process_subst=$enableval)
-AC_ARG_ENABLE(progcomp, --enable-progcomp	enable programmable completion and the complete builtin, opt_progcomp=$enableval)
-AC_ARG_ENABLE(prompt-string-decoding, --enable-prompt-string-decoding	turn on escape character decoding in prompts, opt_prompt_decoding=$enableval)
-AC_ARG_ENABLE(readline, --enable-readline	turn on command line editing, opt_readline=$enableval)
-AC_ARG_ENABLE(restricted, --enable-restricted	enable a restricted shell, opt_restricted=$enableval)
-AC_ARG_ENABLE(select, --enable-select		include select command, opt_select=$enableval)
-AC_ARG_ENABLE(usg-echo-default, --enable-usg-echo-default	a synonym for --enable-xpg-echo-default, opt_xpg_echo=$enableval)
-AC_ARG_ENABLE(xpg-echo-default, --enable-xpg-echo-default	make the echo builtin expand escape sequences by default, opt_xpg_echo=$enableval)
+AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
+AC_ARG_ENABLE(arith-for-command, AC_HELP_STRING([--enable-arith-for-command], [enable arithmetic for command]), opt_arith_for_command=$enableval)
+AC_ARG_ENABLE(array-variables, AC_HELP_STRING([--enable-array-variables], [include shell array variables]), opt_array_variables=$enableval)
+AC_ARG_ENABLE(bang-history, AC_HELP_STRING([--enable-bang-history], [turn on csh-style history substitution]), opt_bang_history=$enableval)
+AC_ARG_ENABLE(brace-expansion, AC_HELP_STRING([--enable-brace-expansion], [include brace expansion]), opt_brace_expansion=$enableval)
+AC_ARG_ENABLE(command-timing, AC_HELP_STRING([--enable-command-timing], [enable the time reserved word and command timing]), opt_command_timing=$enableval)
+AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the conditional command]), opt_cond_command=$enableval)
+AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
+AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
+AC_ARG_ENABLE(dparen-arithmetic, AC_HELP_STRING([--enable-dparen-arithmetic], [include ((...)) command]), opt_dparen_arith=$enableval)
+AC_ARG_ENABLE(extended-glob, AC_HELP_STRING([--enable-extended-glob], [include ksh-style extended pattern matching]), opt_extended_glob=$enableval)
+AC_ARG_ENABLE(help-builtin, AC_HELP_STRING([--enable-help-builtin], [include the help builtin]), opt_help=$enableval)
+AC_ARG_ENABLE(history, AC_HELP_STRING([--enable-history], [turn on command history]), opt_history=$enableval)
+AC_ARG_ENABLE(job-control, AC_HELP_STRING([--enable-job-control], [enable job control features]), opt_job_control=$enableval)
+AC_ARG_ENABLE(net-redirections, AC_HELP_STRING([--enable-net-redirections], [enable /dev/tcp/host/port redirection]), opt_net_redirs=$enableval)
+AC_ARG_ENABLE(process-substitution, AC_HELP_STRING([--enable-process-substitution], [enable process substitution]), opt_process_subst=$enableval)
+AC_ARG_ENABLE(progcomp, AC_HELP_STRING([--enable-progcomp], [enable programmable completion and the complete builtin]), opt_progcomp=$enableval)
+AC_ARG_ENABLE(prompt-string-decoding, AC_HELP_STRING([--enable-prompt-string-decoding], [turn on escape character decoding in prompts]), opt_prompt_decoding=$enableval)
+AC_ARG_ENABLE(readline, AC_HELP_STRING([--enable-readline], [turn on command line editing]), opt_readline=$enableval)
+AC_ARG_ENABLE(restricted, AC_HELP_STRING([--enable-restricted], [enable a restricted shell]), opt_restricted=$enableval)
+AC_ARG_ENABLE(select, AC_HELP_STRING([--enable-select], [include select command]), opt_select=$enableval)
+AC_ARG_ENABLE(separate-helpfiles, AC_HELP_STRING([--enable-separate-helpfiles], [use external files for help builtin documentation]), opt_separate_help=$enableval)
+AC_ARG_ENABLE(usg-echo-default, AC_HELP_STRING([--enable-usg-echo-default], [a synonym for --enable-xpg-echo-default]), opt_xpg_echo=$enableval)
+AC_ARG_ENABLE(xpg-echo-default, AC_HELP_STRING([--enable-xpg-echo-default], [make the echo builtin expand escape sequences by default]), opt_xpg_echo=$enableval)
 
 dnl options that alter how bash is compiled and linked
-AC_ARG_ENABLE(profiling, --enable-profiling		allow profiling with gprof, opt_profiling=$enableval)
-AC_ARG_ENABLE(static-link, --enable-static-link		[link bash statically, for use as a root shell], opt_static_link=$enableval)
+AC_ARG_ENABLE(mem-scramble, AC_HELP_STRING([--enable-mem-scramble], [scramble memory on calls to malloc and free]), opt_memscramble=$enableval)
+AC_ARG_ENABLE(profiling, AC_HELP_STRING([--enable-profiling], [allow profiling with gprof]), opt_profiling=$enableval)
+AC_ARG_ENABLE(static-link, AC_HELP_STRING([--enable-static-link], [link bash statically, for use as a root shell]), opt_static_link=$enableval)
 
 dnl opt_job_control is handled later, after BASH_JOB_CONTROL_MISSING runs
 
@@ -260,10 +275,25 @@ if test $opt_progcomp = yes; then
 AC_DEFINE(PROGRAMMABLE_COMPLETION)
 fi
 
+if test $opt_memscramble = yes; then
+AC_DEFINE(MEMSCRAMBLE)
+fi
+
 if test "$opt_minimal_config" = yes; then
 	TESTSCRIPT=run-minimal
 else
 	TESTSCRIPT=run-all
+fi
+
+HELPDIR= HELPDIRDEFINE= HELPINSTALL=
+if test "$opt_separate_help" != no; then
+	if test "$opt_separate_help" = "yes" ; then
+		HELPDIR='${datadir}/bash'
+	else
+		HELPDIR=$opt_separate_help
+	fi
+	HELPDIRDEFINE='-H ${HELPDIR}'
+	HELPINSTALL='install-help'
 fi
 
 dnl now substitute in the values generated by arguments
@@ -279,8 +309,12 @@ AC_SUBST(MALLOC_DEP)
 
 AC_SUBST(htmldir)
 
+AC_SUBST(HELPDIR)
+AC_SUBST(HELPDIRDEFINE)
+AC_SUBST(HELPINSTALL)
+
 echo ""
-echo "Beginning configuration for bash-$BASHVERS for ${host_cpu}-${host_vendor}-${host_os}"
+echo "Beginning configuration for bash-$BASHVERS-$RELSTATUS for ${host_cpu}-${host_vendor}-${host_os}"
 echo ""
 
 dnl compilation checks
@@ -355,6 +389,7 @@ if test "$opt_profiling" = "yes"; then
 	solaris2*)	;;
 	*)		opt_static_link=yes ;;
 	esac
+	DEBUG= MALLOC_DEBUG=
 fi
 
 if test "$opt_static_link" = yes; then
@@ -368,10 +403,17 @@ if test "$opt_static_link" = yes; then
 	fi
 fi
 
+test -z "$CPPFLAGS_FOR_BUILD" && CPPFLAGS_FOR_BUILD="$CPPFLAGS"
+test -z "$CFLAGS_FOR_BUILD" && CFLAGS_FOR_BUILD="-g"
+
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(STATIC_LD)
+
+AC_SUBST(CFLAGS_FOR_BUILD)
+AC_SUBST(CPPFLAGS_FOR_BUILD)
+AC_SUBST(LDFLAGS_FOR_BUILD)
 
 AC_PROG_GCC_TRADITIONAL
 
@@ -381,7 +423,6 @@ dnl prepare to allow bash to be linked against an already-installed readline
 dnl first test that the readline version is new enough to link bash against
 if test "$opt_readline" = yes && test "$opt_with_installed_readline" != "no"
 then
-echo opt_with_installed_readline = $opt_with_installed_readline
 	# If the user specified --with-installed-readline=PREFIX and PREFIX
 	# is not `yes', set ac_cv_rl_prefix to PREFIX
 	test $opt_with_installed_readline != "yes" && ac_cv_rl_prefix=$opt_with_installed_readline
@@ -389,7 +430,7 @@ echo opt_with_installed_readline = $opt_with_installed_readline
 	RL_LIB_READLINE_VERSION
 
 	case "$ac_cv_rl_version" in
-	4.[[2-9]]*|5*|6*|7*|8*|9*)	;;
+	4.[[3-9]]*|5*|6*|7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN(installed readline library is too old to be linked with bash)
 		AC_MSG_WARN(using private bash version)
@@ -530,6 +571,7 @@ AC_TYPE_SIGNAL
 dnl checks for certain version-specific system calls and libc functions
 AC_CHECK_FUNC(__setostype, AC_DEFINE(HAVE_SETOSTYPE))
 AC_CHECK_FUNC(wait3, AC_DEFINE(HAVE_WAIT3))
+AC_CHECK_FUNC(isinf, AC_DEFINE(HAVE_ISINF_IN_LIBC))
 
 dnl checks for missing libc functions
 AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
@@ -542,20 +584,21 @@ AC_CHECK_FUNCS(dup2 select getdtablesize getgroups gethostname \
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
-AC_CHECK_FUNCS(bcopy bzero confstr sysconf pathconf setenv putenv \
+AC_CHECK_FUNCS(bcopy bzero confstr sysconf pathconf setenv putenv unsetenv \
 		setlinebuf setvbuf setlocale strchr tcgetattr uname \
 		ulimit tzset siginterrupt memmove ttyname times \
-		getaddrinfo gethostbyname getservbyname inet_aton \
+		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		vsnprintf snprintf vasprintf asprintf fnmatch)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
-AC_REPLACE_FUNCS(getcwd strcasecmp strerror strpbrk strtod)
-AC_REPLACE_FUNCS(strtol strtoul strtoll strtoull strtoimax strtoumax)
+AC_REPLACE_FUNCS(getcwd strcasecmp strerror strftime strpbrk memset)
+AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
 
-AC_CHECK_DECLS([strtold])
 AC_CHECK_DECLS([confstr])
-AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([printf])
+AC_CHECK_DECLS([sbrk])
+AC_CHECK_DECLS([strcpy])
 AC_CHECK_DECLS([strsignal])
+AC_CHECK_DECLS([strtold])
 
 BASH_CHECK_DECL(strtoimax)
 BASH_CHECK_DECL(strtol)
@@ -563,6 +606,8 @@ BASH_CHECK_DECL(strtoll)
 BASH_CHECK_DECL(strtoul)
 BASH_CHECK_DECL(strtoull)
 BASH_CHECK_DECL(strtoumax)
+
+AC_FUNC_MKTIME
 
 dnl checks for locale functions
 AC_CHECK_HEADERS(libintl.h)
@@ -576,6 +621,8 @@ if test "$ac_cv_func_bindtextdomain" = "no"; then
 	AC_CHECK_FUNCS(gettext textdomain bindtextdomain)
     fi
 fi
+
+BASH_CHECK_MULTIBYTE
 
 dnl checks for the dynamic loading library functions in libc and libdl
 if test "$opt_static_link" != yes; then
@@ -684,17 +731,33 @@ BASH_STRUCT_DIRENT_D_FILENO
 BASH_STRUCT_WINSIZE
 BASH_STRUCT_TIMEVAL
 AC_CHECK_MEMBERS([struct stat.st_blocks])
+AC_STRUCT_TM
+AC_STRUCT_TIMEZONE
 
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL
 BASH_FUNC_OPENDIR_CHECK
 BASH_FUNC_ULIMIT_MAXFDS
 BASH_FUNC_GETENV
-if test "$ac_func_getcwd" = "yes"; then
+if test "$ac_cv_func_getcwd" = "yes"; then
 BASH_FUNC_GETCWD
 fi
 BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
+
+dnl If putenv or unsetenv is not present, set the right define so the
+dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant
+
+if test "$ac_cv_func_putenv" = "yes"; then
+BASH_FUNC_STD_PUTENV
+else
+AC_DEFINE(HAVE_STD_PUTENV)
+fi
+if test "$ac_cv_func_unsetenv" = "yes"; then
+BASH_FUNC_STD_UNSETENV
+else
+AC_DEFINE(HAVE_STD_UNSETENV)
+fi
 
 dnl I have removed this check.  The existing libc FNM_EXTMATCH implementation
 dnl (glibc-2.2.4) disagrees with bash on the matching of incorrectly-formed
@@ -779,14 +842,14 @@ dgux*)		LOCAL_CFLAGS=-D_DGUX_SOURCE; LOCAL_LIBS=-ldgc ;;
 isc*)		LOCAL_CFLAGS=-Disc386 ;;
 rhapsody*)	LOCAL_CFLAGS=-DRHAPSODY ;;
 darwin*)	LOCAL_CFLAGS=-DMACOSX ;;
-sco3.2v5*)	LOCAL_CFLAGS="-b elf -DWAITPID_BROKEN -DNO_MEMSCRAMBLE -DPATH_MAX=1024" ;;
-sco3.2v4*)	LOCAL_CFLAGS="-DMUST_UNBLOCK_CHLD -DNO_MEMSCRAMBLE -DPATH_MAX=1024" ;;
+sco3.2v5*)	LOCAL_CFLAGS="-b elf -DWAITPID_BROKEN -DPATH_MAX=1024" ;;
+sco3.2v4*)	LOCAL_CFLAGS="-DMUST_UNBLOCK_CHLD -DPATH_MAX=1024" ;;
 sco3.2*)	LOCAL_CFLAGS=-DMUST_UNBLOCK_CHLD ;;
 sunos4*)	LOCAL_CFLAGS=-DSunOS4 ;;
 solaris2.5*)	LOCAL_CFLAGS=-DSunOS5 ;;
 lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic ;;	 # allow dynamic loading
-*qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s -lunix -lncurses" ;;
+*qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_LIBS="-luser32" ;;
 opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO" ;;
@@ -866,6 +929,9 @@ AC_SUBST(AR)
 AC_SUBST(ARFLAGS)
 
 AC_SUBST(BASHVERS)
+AC_SUBST(RELSTATUS)
+AC_SUBST(DEBUG)
+AC_SUBST(MALLOC_DEBUG)
 
 AC_SUBST(host_cpu)
 AC_SUBST(host_vendor)

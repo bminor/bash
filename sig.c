@@ -54,7 +54,6 @@ extern int last_command_exit_value;
 extern int return_catch_flag;
 extern int loop_level, continuing, breaking;
 extern int parse_and_execute_level, shell_initialized;
-extern int startup_state;
 
 /* Non-zero after SIGINT. */
 int interrupt_state;
@@ -74,20 +73,15 @@ int interrupt_immediately = 0;
 static void initialize_shell_signals __P((void));
 
 void
-initialize_signals ()
+initialize_signals (reinit)
+     int reinit;
 {
   initialize_shell_signals ();
   initialize_job_signals ();
 #if !defined (HAVE_SYS_SIGLIST) && !defined (HAVE_UNDER_SYS_SIGLIST) && !defined (HAVE_STRSIGNAL)
-  initialize_siglist ();
+  if (reinit == 0)
+    initialize_siglist ();
 #endif /* !HAVE_SYS_SIGLIST && !HAVE_UNDER_SYS_SIGLIST && !HAVE_STRSIGNAL */
-}
-
-void
-reinitialize_signals ()
-{
-  initialize_shell_signals ();
-  initialize_job_signals ();
 }
 
 /* A structure describing a signal that terminates the shell if not
@@ -225,6 +219,10 @@ initialize_terminating_signals ()
     sigaddset (&act.sa_mask, XSIG (i));
   for (i = 0; i < TERMSIGS_LENGTH; i++)
     {
+      /* If we've already trapped it, don't do anything. */
+      if (signal_is_trapped (XSIG (i)))
+	continue;
+
       sigaction (XSIG (i), &act, &oact);
       XHANDLER(i) = oact.sa_handler;
       /* Don't do anything with signals that are ignored at shell entry
@@ -244,6 +242,10 @@ initialize_terminating_signals ()
 
   for (i = 0; i < TERMSIGS_LENGTH; i++)
     {
+      /* If we've already trapped it, don't do anything. */
+      if (signal_is_trapped (XSIG (i)))
+	continue;
+
       XHANDLER(i) = signal (XSIG (i), termination_unwind_protect);
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */

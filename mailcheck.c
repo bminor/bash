@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987,1989 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -75,7 +75,7 @@ time_to_check_mail ()
 {
   char *temp;
   time_t now;
-  long seconds;
+  intmax_t seconds;
 
   temp = get_string_value ("MAILCHECK");
 
@@ -390,7 +390,7 @@ check_mail ()
 	     the access time to be equal to the modification time when
 	     the mail in the file is manipulated, check the size also.  If
 	     the file has not grown, continue. */
-	  if ((atime >= mtime) && !file_is_bigger)
+	  if ((atime >= mtime) || !file_is_bigger)
 	    continue;
 
 	  /* If the mod time is later than the access time and the file

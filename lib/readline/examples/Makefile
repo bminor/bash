@@ -35,6 +35,10 @@ fileman: fileman.o
 rltest: rltest.o
 	$(CC) $(LDFLAGS) -o $@ rltest.o -lreadline -ltermcap
 
+rlcat: rlcat.o
+	$(CC) $(LDFLAGS) -o $@ rlcat.o -lreadline -ltermcap
+
 fileman.o: fileman.c
 rltest.o: rltest.c
 rl.o: rl.c
+rlcat.o: rlcat.c

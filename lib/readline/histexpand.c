@@ -41,11 +41,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
+#include "rlmbutil.h"
 
 #include "history.h"
 #include "histlib.h"
@@ -57,6 +53,8 @@
 #define HISTORY_QUOTE_CHARACTERS	"\"'`"
 
 typedef int _hist_search_func_t PARAMS((const char *, int));
+
+extern int rl_byte_oriented;	/* declared in mbutil.c */
 
 static char error_pointer;
 
@@ -204,12 +202,30 @@ get_history_event (string, caller_index, delimiting_quote)
 
   /* Only a closing `?' or a newline delimit a substring search string. */
   for (local_index = i; c = string[i]; i++)
-    if ((!substring_okay && (whitespace (c) || c == ':' ||
-	(history_search_delimiter_chars && member (c, history_search_delimiter_chars)) ||
-	string[i] == delimiting_quote)) ||
-	string[i] == '\n' ||
-	(substring_okay && string[i] == '?'))
-      break;
+#if defined (HANDLE_MULTIBYTE)
+    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      {
+	int v;
+	mbstate_t ps;
+
+	memset (&ps, 0, sizeof (mbstate_t));
+	/* These produce warnings because we're passing a const string to a
+	   function that takes a non-const string. */
+	_rl_adjust_point (string, i, &ps);
+	if ((v = _rl_get_char_len (string + i, &ps)) > 1)
+	  {
+	    i += v - 1;
+	    continue;
+	  }
+      }
+    else
+#endif /* HANDLE_MULTIBYTE */
+      if ((!substring_okay && (whitespace (c) || c == ':' ||
+	  (history_search_delimiter_chars && member (c, history_search_delimiter_chars)) ||
+	  string[i] == delimiting_quote)) ||
+	  string[i] == '\n' ||
+	  (substring_okay && string[i] == '?'))
+	break;
 
   which = i - local_index;
   temp = (char *)xmalloc (1 + which);
@@ -405,13 +421,33 @@ get_subst_pattern (str, iptr, delimiter, is_rhs, lenptr)
      int *iptr, delimiter, is_rhs, *lenptr;
 {
   register int si, i, j, k;
-  char *s = (char *) NULL;
+  char *s;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+#endif
 
+  s = (char *)NULL;
   i = *iptr;
 
+#if defined (HANDLE_MULTIBYTE)
+  memset (&ps, 0, sizeof (mbstate_t));
+  _rl_adjust_point (str, i, &ps);
+#endif
+
   for (si = i; str[si] && str[si] != delimiter; si++)
-    if (str[si] == '\\' && str[si + 1] == delimiter)
-      si++;
+#if defined (HANDLE_MULTIBYTE)
+    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      {
+	int v;
+	if ((v = _rl_get_char_len (str + si, &ps)) > 1)
+	  si += v - 1;
+	else if (str[si] == '\\' && str[si + 1] == delimiter)
+	  si++;
+      }
+    else
+#endif /* HANDLE_MULTIBYTE */
+      if (str[si] == '\\' && str[si + 1] == delimiter)
+	si++;
 
   if (si > i || is_rhs)
     {
@@ -484,6 +520,11 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
   int substitute_globally, want_quotes, print_only;
   char *event, *temp, *result, *tstr, *t, c, *word_spec;
   int result_len;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+
+  memset (&ps, 0, sizeof (mbstate_t));
+#endif
 
   result = (char *)xmalloc (result_len = 128);
 
@@ -514,8 +555,21 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	 quote, then this expansion takes place inside of the
 	 quoted string.  If we have to search for some text ("!foo"),
 	 allow the delimiter to end the search string. */
-      if (i && (string[i - 1] == '\'' || string[i - 1] == '"'))
-	quoted_search_delimiter = string[i - 1];
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	{
+	  int c, l;
+	  l = _rl_find_prev_mbchar (string, i, MB_FIND_ANY);
+	  c = string[l];
+	  /* XXX - original patch had i - 1 ???  If i == 0 it would fail. */
+	  if (i && (c == '\'' || c == '"'))
+	    quoted_search_delimiter = c;
+	}
+      else
+#endif /* HANDLE_MULTIBYTE */	  
+	if (i && (string[i - 1] == '\'' || string[i - 1] == '"'))
+	  quoted_search_delimiter = string[i - 1];
+
       event = get_history_event (string, &i, quoted_search_delimiter);
     }
 	  
@@ -634,7 +688,20 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	    if (c == 's')
 	      {
 		if (i + 2 < (int)strlen (string))
-		  delimiter = string[i + 2];
+		  {
+#if defined (HANDLE_MULTIBYTE)
+		    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		      {
+			_rl_adjust_point (string, i + 2, &ps);
+			if (_rl_get_char_len (string + i + 2, &ps) > 1)
+			  delimiter = 0;
+			else
+			  delimiter = string[i + 2];
+		      }
+		    else
+#endif /* HANDLE_MULTIBYTE */
+		      delimiter = string[i + 2];
+		  }
 		else
 		  break;	/* no search delimiter */
 
@@ -819,6 +886,11 @@ history_expand (hstring, output)
   int result_len;
   char *result;
 
+#if defined (HANDLE_MULTIBYTE)
+  char mb[MB_LEN_MAX];
+  mbstate_t ps;
+#endif
+
   /* Used when adding the string. */
   char *temp;
 
@@ -861,6 +933,10 @@ history_expand (hstring, output)
     }
   else
     {
+#if defined (HANDLE_MULTIBYTE)
+      memset (&ps, 0, sizeof (mbstate_t));
+#endif
+
       string = hstring;
       /* If not quick substitution, still maybe have to do expansion. */
 
@@ -868,8 +944,21 @@ history_expand (hstring, output)
 	 is NOT an expansion. */
       for (i = 0; string[i]; i++)
 	{
+#if defined (HANDLE_MULTIBYTE)
+	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	    {
+	      int v;
+	      v = _rl_get_char_len (string + i, &ps);
+	      if (v > 1)
+		{
+		  i += v - 1;
+		  continue;
+		}
+	    }
+#endif /* HANDLE_MULTIBYTE */
+
 	  cc = string[i + 1];
-	  /* The history_comment_char, if set, appearing that the beginning
+	  /* The history_comment_char, if set, appearing at the beginning
 	     of a word signifies that the rest of the line should not have
 	     history expansion performed on it.
 	     Skip the rest of the line and break out of the loop. */
@@ -931,6 +1020,30 @@ history_expand (hstring, output)
 	  ADD_CHAR (tchar);
 	  continue;
 	}
+
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	{
+	  int k, c;
+
+	  c = tchar;
+	  memset (mb, 0, sizeof (mb));
+	  for (k = 0; k < MB_LEN_MAX; k++)
+	    {
+	      mb[k] = (char)c;
+	      memset (&ps, 0, sizeof (mbstate_t));
+	      if (_rl_get_char_len (mb, &ps) == -2)
+		c = string[++i];
+	      else
+		break;
+	    }
+	  if (strlen (mb) > 1)
+	    {
+	      ADD_STRING (mb);
+	      break;
+	    }
+	}
+#endif /* HANDLE_MULTIBYTE */
 
       if (tchar == history_expansion_char)
 	tchar = -3;

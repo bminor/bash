@@ -23,13 +23,16 @@
 
 #include "stdc.h"
 
-extern WORD_LIST *make_word_list __P((WORD_DESC *, WORD_LIST *));
-extern WORD_LIST *add_string_to_list __P((char *, WORD_LIST *));
+extern void cmd_init __P((void));
 
 extern WORD_DESC *make_bare_word __P((const char *));
 extern WORD_DESC *make_word_flags __P((WORD_DESC *, const char *));
 extern WORD_DESC *make_word __P((const char *));
 extern WORD_DESC *make_word_from_token __P((int));
+
+extern WORD_LIST *make_word_list __P((WORD_DESC *, WORD_LIST *));
+
+#define add_string_to_list(s, l) make_word_list (make_word(s), (l))
 
 extern COMMAND *make_command __P((enum command_type, SIMPLE_COM *));
 extern COMMAND *command_connect __P((COMMAND *, COMMAND *, int));

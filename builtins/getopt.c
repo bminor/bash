@@ -75,7 +75,7 @@ int sh_opterr = 1;
 
 int sh_optopt = '?';
 
-/* Set to 1 when we see an illegal option; public so getopts can reset it. */
+/* Set to 1 when we see an invalid option; public so getopts can reset it. */
 int sh_badopt = 0;
 
 /* Scan elements of ARGV (whose length is ARGC) for option characters
@@ -135,15 +135,6 @@ sh_getopt (argc, argv, optstring)
       nextchar = (char *)NULL;
     }
 
-  /* Do the increment of `sh_optind' we deferred because the last option
-     was illegal.  */
-  if (sh_badopt && (nextchar == 0 || *nextchar == '\0'))
-    {
-      sh_badopt = 0;
-      sh_optind++;
-      nextchar = (char *)NULL;
-    }
-
   if (nextchar == 0 || *nextchar == '\0')
     {
       /* If we have done all the ARGV-elements, stop the scan. */
@@ -179,21 +170,19 @@ sh_getopt (argc, argv, optstring)
 
   sh_optopt = c;
 
-  /* If the option is illegal, return an error, but defer updating sh_optind
-     until the next call so $OPTIND is correct. */
+  /* Increment `sh_optind' when we start to process its last character.  */
+  if (nextchar == 0 || *nextchar == '\0')
+    {
+      sh_optind++;
+      nextchar = (char *)NULL;
+    }
+
   if (sh_badopt = (temp == NULL || c == ':'))
     {
       if (sh_opterr)
 	BADOPT (c);
 
       return '?';
-    }
-
-  /* Increment `sh_optind' when we start to process its last character.  */
-  if (nextchar == 0 || *nextchar == '\0')
-    {
-      sh_optind++;
-      nextchar = (char *)NULL;
     }
 
   if (temp[1] == ':')

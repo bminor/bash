@@ -1,7 +1,7 @@
 This file is getopts.def, from which is created getopts.c.
 It implements the builtin "getopts" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,11 +39,11 @@ getopts places that argument into the shell variable OPTARG.
 
 getopts reports errors in one of two ways.  If the first character
 of OPTSTRING is a colon, getopts uses silent error reporting.  In
-this mode, no error messages are printed.  If an illegal option is
+this mode, no error messages are printed.  If an invalid option is
 seen, getopts places the option character found into OPTARG.  If a
 required argument is not found, getopts places a ':' into NAME and
 sets OPTARG to the option character found.  If getopts is not in
-silent mode, and an illegal option is seen, getopts places '?' into
+silent mode, and an invalid option is seen, getopts places '?' into
 NAME and unsets OPTARG.  If a required option is not found, a '?'
 is placed in NAME, OPTARG is unset, and a diagnostic message is
 printed.
@@ -75,10 +75,13 @@ $END
 #include "getopt.h"
 
 #define G_EOF		-1
-#define G_ILLEGAL_OPT	-2
+#define G_INVALID_OPT	-2
 #define G_ARG_MISSING	-3
 
 extern char *this_command_name;
+
+static int getopts_bind_variable __P((char *, char *));
+static int dogetopts __P((int, char **));
 
 /* getopts_reset is magic code for when OPTIND is reset.  N is the
    value that has just been assigned to OPTIND. */
@@ -103,7 +106,7 @@ getopts_bind_variable (name, value)
     }
   else
     {
-      builtin_error ("`%s': not a valid identifier", name);
+      sh_invalidid (name);
       return (EXECUTION_FAILURE);
     }
 }
@@ -112,9 +115,9 @@ getopts_bind_variable (name, value)
    (identical to that of ksh-88).  The special handling is enabled if
    the first character of the option string is a colon; this handling
    disables diagnostic messages concerning missing option arguments
-   and illegal option characters.  The handling is as follows.
+   and invalid option characters.  The handling is as follows.
 
-   ILLEGAL OPTIONS:
+   INVALID OPTIONS:
         name -> "?"
         if (special_error) then
                 OPTARG = option character found
@@ -193,7 +196,7 @@ dogetopts (argc, argv)
 	;
       for (words = rest_of_args; words; words = words->next, i++)
 	;
-      v = alloc_array (i + 1);
+      v = strvec_create (i + 1);
       for (i = 0; i < 10 && dollar_vars[i]; i++)
 	v[i] = dollar_vars[i];
       for (words = rest_of_args; words; words = words->next, i++)
@@ -207,7 +210,8 @@ dogetopts (argc, argv)
   if (special_error)
     sh_opterr = old_opterr;
 
-  /* Set the OPTIND variable in any case, to handle "--" skipping. */
+  /* Set the OPTIND variable in any case, to handle "--" skipping.  It's
+     highly unlikely that 14 digits will be too few. */
   if (sh_optind < 10)
     {
       numval[14] = sh_optind + '0';
@@ -228,13 +232,13 @@ dogetopts (argc, argv)
 
   /* If an error occurred, decide which one it is and set the return
      code appropriately.  In all cases, the option character in error
-     is in OPTOPT.  If an illegal option was encountered, OPTARG is
+     is in OPTOPT.  If an invalid option was encountered, OPTARG is
      NULL.  If a required option argument was missing, OPTARG points
      to a NULL string (that is, sh_optarg[0] == 0). */
   if (ret == '?')
     {
       if (sh_optarg == NULL)
-	ret = G_ILLEGAL_OPT;
+	ret = G_INVALID_OPT;
       else if (sh_optarg[0] == '\0')
 	ret = G_ARG_MISSING;
     }
@@ -245,9 +249,9 @@ dogetopts (argc, argv)
       return (EXECUTION_FAILURE);
     }
 
-  if (ret == G_ILLEGAL_OPT)
+  if (ret == G_INVALID_OPT)
     {
-      /* Illegal option encountered. */
+      /* Invalid option encountered. */
       ret = getopts_bind_variable (name, "?");
 
       if (special_error)
@@ -257,7 +261,7 @@ dogetopts (argc, argv)
 	  bind_variable ("OPTARG", strval);
 	}
       else
-	makunbound ("OPTARG", shell_variables);
+	unbind_variable ("OPTARG");
 
       return (ret);
     }
@@ -276,7 +280,7 @@ dogetopts (argc, argv)
       else
 	{
 	  ret = getopts_bind_variable (name, "?");
-	  makunbound ("OPTARG", shell_variables);
+	  unbind_variable ("OPTARG");
 	}
       return (ret);
     }			

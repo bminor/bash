@@ -162,11 +162,11 @@ _declare_func()
 
 	COMPREPLY=()
 	if (( $COMP_CWORD <= 1 )) || [[ $cur == '-' ]]; then
-		COMPREPLY=(-a -f -F -i -r -x -p)
+		COMPREPLY=(-a -f -F -i -p -r -t -x)
 		return 0;
 	fi
 	if [[ $cur == '+' ]]; then
-		COMPREPLY=(+i +x)
+		COMPREPLY=(+i +t +x)
 		return 0;
 	fi
 	if [[ $prev == '-p' ]]; then
@@ -252,7 +252,7 @@ _hash_func()
 	prev=${COMP_WORDS[COMP_CWORD-1]}
 
 	if (( $COMP_CWORD <= 1 )) || [[ $cur == '-' ]]; then
-		COMPREPLY=(-p -r)
+		COMPREPLY=(-p -r -t)
 		return 0;
 	fi
 
@@ -344,8 +344,8 @@ _complete_meta_func()
 
 	if (( $COMP_CWORD <= 1 )) || [[ "$cur" == '-' ]]; then
 		case "$cmd" in
-		complete) COMPREPLY=(-a -b -c -d -e -f -j -k -v -u -r -p -A -G -W -P -S -X -F -C);;
-		compgen)  COMPREPLY=(-a -b -c -d -e -f -j -k -v -u -A -G -W -P -S -X -F -C);;
+		complete) COMPREPLY=(-a -b -c -d -e -f -j -k -s -v -u -r -p -A -G -W -P -S -X -F -C);;
+		compgen)  COMPREPLY=(-a -b -c -d -e -f -j -k -s -v -u -A -G -W -P -S -X -F -C);;
 		esac
 		return 0
 	fi
@@ -353,7 +353,7 @@ _complete_meta_func()
 	if [[ $prev == -A ]]; then
 		COMPREPLY=(alias arrayvar binding builtin command directory \
 disabled enabled export file 'function' helptopic hostname job keyword \
-running setopt shopt signal stopped variable)
+running service setopt shopt signal stopped variable)
 		return 0
 	elif [[ $prev == -F ]]; then
 		COMPREPLY=( $( compgen -A function $cur ) )
@@ -466,7 +466,7 @@ complete -f -X '*.bz2' bzip2
 complete -f -X '*.Z' compress
 complete -f -X '!*.+(gz|tgz|Gz)' gunzip gzcat zcat zmore
 complete -f -X '!*.Z' uncompress zmore zcat
-complete -f -X '!*.bz2' bunzip2
+complete -f -X '!*.bz2' bunzip2 bzcat
 complete -f -X '!*.zip' unzip
 complete -f -X '!*.+(gif|jpg|jpeg|GIF|JPG|JPEG|bmp)' xv
 

@@ -10,6 +10,22 @@
 # Chet Ramey
 # chet@po.cwru.edu
 
+# Copyright (C) 1996-2002 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+
 #
 # defaults
 #
@@ -62,7 +78,10 @@ sunos4*)
 sunos5*-*gcc*|solaris2*-*gcc*)
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD='${CC}'
+	# This line works for the Solaris linker in /usr/ccs/bin/ld
 	SHOBJ_LDFLAGS='-shared -Wl,-i -Wl,-h,$@'
+	# This line works for the GNU ld
+#	SHOBJ_LDFLAGS='-shared -Wl,-h,$@'
 
 #	SHLIB_XLDFLAGS='-R $(libdir)'
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'

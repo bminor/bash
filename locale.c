@@ -32,6 +32,9 @@
 #include "chartypes.h"
 
 #include "shell.h"
+#include "input.h"	/* For bash_input */
+
+extern int dump_translatable_strings, dump_po_strings;
 
 /* The current locale when the program begins */
 static char *default_locale;
@@ -180,22 +183,14 @@ set_locale_var (var, value)
   return (0);
 }
 
-#if 0
-/* Called when LANG is assigned a value.  Sets LC_ALL if that has not
-   already been set. */
-#else
-/* This no longer does anything; we rely on the C library for correct
-   behavior. */
-#endif
+/* Called when LANG is assigned a value.  Sets LC_ALL category with
+   setlocale(3) if that has not already been set.  Doesn't change any
+   shell variables. */
 int
 set_lang (var, value)
      char *var, *value;
 {
-#if 0
-  return ((lc_all == 0) ? set_locale_var ("LC_ALL", value) : 0);
-#else
-  return 0;
-#endif
+  return ((lc_all == 0 || *lc_all == 0) ? setlocale (LC_ALL, value?value:"") != NULL : 0);
 }
 
 /* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE) */
@@ -275,4 +270,111 @@ localetrans (string, len, lenp)
     }
   return (t);
 #endif /* HAVE_GETTEXT */
+}
+
+/* Change a bash string into a string suitable for inclusion in a `po' file.
+   This backslash-escapes `"' and `\' and changes newlines into \\\n"\n". */
+char *
+mk_msgstr (string, foundnlp)
+     char *string;
+     int *foundnlp;
+{
+  register int c, len;
+  char *result, *r, *s;
+
+  for (len = 0, s = string; s && *s; s++)
+    {
+      len++;
+      if (*s == '"' || *s == '\\')
+	len++;
+      else if (*s == '\n')
+	len += 5;
+    }
+  
+  r = result = (char *)xmalloc (len + 3);
+  *r++ = '"';
+
+  for (s = string; s && (c = *s); s++)
+    {
+      if (c == '\n')	/* <NL> -> \n"<NL>" */
+	{
+	  *r++ = '\\';
+	  *r++ = 'n';
+	  *r++ = '"';
+	  *r++ = '\n';
+	  *r++ = '"';
+	  if (foundnlp)
+	    *foundnlp = 1;
+	  continue;
+	}
+      if (c == '"' || c == '\\')
+	*r++ = '\\';
+      *r++ = c;
+    }
+
+  *r++ = '"';
+  *r++ = '\0';
+
+  return result;
+}
+
+/* $"..." -- Translate the portion of STRING between START and END
+   according to current locale using gettext (if available) and return
+   the result.  The caller will take care of leaving the quotes intact.
+   The string will be left without the leading `$' by the caller.
+   If translation is performed, the translated string will be double-quoted
+   by the caller.  The length of the translated string is returned in LENP,
+   if non-null. */
+char *
+localeexpand (string, start, end, lineno, lenp)
+     char *string;
+     int start, end, lineno, *lenp;
+{
+  int len, tlen, foundnl;
+  char *temp, *t, *t2;
+
+  temp = (char *)xmalloc (end - start + 1);
+  for (tlen = 0, len = start; len < end; )
+    temp[tlen++] = string[len++];
+  temp[tlen] = '\0';
+
+  /* If we're just dumping translatable strings, don't do anything with the
+     string itself, but if we're dumping in `po' file format, convert it into a form more palatable to gettext(3)
+     and friends by quoting `"' and `\' with backslashes and converting <NL>
+     into `\n"<NL>"'.  If we find a newline in TEMP, we first output a
+     `msgid ""' line and then the translated string; otherwise we output the
+     `msgid' and translated string all on one line. */
+  if (dump_translatable_strings)
+    {
+      if (dump_po_strings)
+	{
+	  foundnl = 0;
+	  t = mk_msgstr (temp, &foundnl);
+	  t2 = foundnl ? "\"\"\n" : "";
+
+	  printf ("#: %s:%d\nmsgid %s%s\nmsgstr \"\"\n",
+			yy_input_name (), lineno, t2, t);
+	  free (t);
+	}
+      else
+	printf ("\"%s\"\n", temp);
+
+      if (lenp)
+	*lenp = tlen;
+      return (temp);
+    }
+  else if (*temp)
+    {
+      t = localetrans (temp, tlen, &len);
+      free (temp);
+      if (lenp)
+	*lenp = len;
+      return (t);
+    }
+  else
+    {
+      if (lenp)
+	*lenp = 0;
+      return (temp);
+    }
 }

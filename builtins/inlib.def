@@ -1,7 +1,7 @@
 This file is inlib.def, from which is created inlib.c.
 It implements the Apollo-specific builtin "inlib" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -51,7 +51,7 @@ inlib_builtin (list)
 
   if (!list)
     {
-      builtin_error ("usage: inlib pathname [pathname...]");
+      builtin_usage ();
       return (EX_USAGE);
     }
 
@@ -64,7 +64,7 @@ inlib_builtin (list)
 
       if (status.all != status_$ok)
 	{
-	  builtin_error ("inlib failed for %s", list->word->word);
+	  builtin_error ("%s: inlib failed", list->word->word);
 	  return_value = EXECUTION_FAILURE;
 	}
 

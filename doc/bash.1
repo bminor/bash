@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Tue Nov 13 12:55:51 EST 2001
+.\"	Last Change: Mon Jul 15 15:20:56 EDT 2002
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2001 November 13" "GNU Bash-2.05a"
+.TH BASH 1 "2002 July 15" "GNU Bash-2.05b"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2001 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2001 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2002 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2002 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -81,6 +81,20 @@ If there are arguments after the
 they are assigned to the positional parameters, starting with
 .BR $0 .
 .TP
+.B \-i
+If the
+.B \-i
+option is present, the shell is
+.IR interactive .
+.TP
+.B \-l
+Make
+.B bash
+act as if it had been invoked as a login shell (see
+.SM
+.B INVOCATION
+below).
+.TP
 .B \-r
 If the
 .B \-r
@@ -90,12 +104,6 @@ option is present, the shell becomes
 .SM
 .B "RESTRICTED SHELL"
 below).
-.TP
-.B \-i
-If the
-.B \-i
-option is present, the shell is
-.IR interactive .
 .TP
 .B \-s
 If the
@@ -140,7 +148,7 @@ is equivalent to \fB\-\-\fP.
 .B Bash
 also interprets a number of multi-character options.
 These options must appear on the command line before the
-single-character options in order for them to be recognized.
+single-character options to be recognized.
 .PP
 .PD 0
 .TP
@@ -154,8 +162,8 @@ Equivalent to \fB\-D\fP.
 .B \-\-help
 Display a usage message on standard output and exit successfully.
 .TP
-.PD 0
 \fB\-\-init\-file\fP \fIfile\fP
+.PD 0
 .TP
 \fB\-\-rcfile\fP \fIfile\fP
 .PD
@@ -169,12 +177,7 @@ if the shell is interactive (see
 below).
 .TP
 .B \-\-login
-Make
-.B bash
-act as if it had been invoked as a login shell (see
-.SM
-.B INVOCATION
-below).
+Equivalent to \fB\-l\fP.
 .TP
 .B \-\-noediting
 Do not use the GNU
@@ -560,6 +563,9 @@ and
 .BR &,
 which have equal precedence.
 .PP
+A sequence of one or more newlines may appear in a \fIlist\fP instead
+of a semicolon to delimit commands.
+.PP
 If a command is terminated by the control operator
 .BR & ,
 the shell executes the command in the \fIbackground\fP
@@ -685,7 +691,7 @@ is true.
 The \fB&&\fP and
 .if t \fB\(bv\(bv\fP
 .if n \fB||\fP
-operators do not execute \fIexpression2\fP if the value of
+operators do not evaluate \fIexpression2\fP if the value of
 \fIexpression1\fP is sufficient to determine the return value of
 the entire conditional expression.
 .RE
@@ -773,8 +779,8 @@ command completes.  Otherwise, the \fBelse\fP \fIlist\fP is
 executed, if present.  The exit status is the exit status of the
 last command executed, or zero if no condition tested true.
 .TP
-.PD 0
 \fBwhile\fP \fIlist\fP; \fBdo\fP \fIlist\fP; \fBdone\fP
+.PD 0
 .TP
 \fBuntil\fP \fIlist\fP; \fBdo\fP \fIlist\fP; \fBdone\fP
 .PD
@@ -929,6 +935,9 @@ the eight-bit character whose value is the octal value \fInnn\fP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP
 (one or two hex digits)
+.TP
+.B \ec\fIx\fP
+a control-\fIx\fP character
 .PD
 .RE
 .LP
@@ -1417,7 +1426,9 @@ This is a colon-separated list of directories in which the shell looks
 for destination directories specified by the
 .B cd
 command.
-A sample value is ``.:~:/usr''.
+A sample value is
+.if t \f(CW".:~:/usr"\fP.
+.if n ".:~:/usr".
 .TP
 .B COLUMNS
 Used by the \fBselect\fP builtin command to determine the terminal width
@@ -1443,7 +1454,9 @@ A filename whose suffix matches one of the entries in
 .SM
 .B FIGNORE
 is excluded from the list of matched filenames.
-A sample value is ``.o:~''.
+A sample value is
+.if t \f(CW".o:~"\fP.
+.if n ".o:~".
 .TP
 .B GLOBIGNORE
 A colon-separated list of patterns defining the set of filenames to
@@ -1761,7 +1774,11 @@ If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .TP
 .B TMOUT
-If set to a value greater than zero, the value is interpreted as the
+If set to a value greater than zero, \fBTMOUT\fP is treated as the
+default timeout for the \fBread\fP builtin.
+The \fBselect\fP command terminates if input does not arrive
+after \fBTMOUT\fP seconds when input is coming from a terminal.
+In an interactive shell, the value is interpreted as the
 number of seconds to wait for input after issuing the primary prompt.
 .B Bash
 terminates after waiting for that number of seconds if input does
@@ -2150,8 +2167,8 @@ is null or unset, nothing is substituted, otherwise the expansion of
 .I word
 is substituted.
 .TP
-.PD 0
 ${\fIparameter\fP\fB:\fP\fIoffset\fP}
+.PD 0
 .TP
 ${\fIparameter\fP\fB:\fP\fIoffset\fP\fB:\fP\fIlength\fP}
 .PD
@@ -2200,8 +2217,8 @@ or
 .BR @ ,
 the value substituted is the number of elements in the array.
 .TP
-.PD 0
 ${\fIparameter\fP\fB#\fP\fIword\fP}
+.PD 0
 .TP
 ${\fIparameter\fP\fB##\fP\fIword\fP}
 .PD
@@ -2232,8 +2249,8 @@ or
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 .TP
-.PD 0
 ${\fIparameter\fP\fB%\fP\fIword\fP}
+.PD 0
 .TP
 ${\fIparameter\fP\fB%%\fP\fIword\fP}
 .PD
@@ -2262,8 +2279,8 @@ or
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 .TP
-.PD 0
 ${\fIparameter\fP\fB/\fP\fIpattern\fP\fB/\fP\fIstring\fP}
+.PD 0
 .TP
 ${\fIparameter\fP\fB//\fP\fIpattern\fP\fB/\fP\fIstring\fP}
 .PD
@@ -2596,10 +2613,11 @@ following classes defined in the POSIX.2 standard:
 .PP
 .RS
 .B
-.if n alnum alpha ascii blank cntrl digit graph lower print punct space upper xdigit
-.if t alnum   alpha   ascii   blank   cntrl   digit   graph   lower   print   punct   space   upper   xdigit
+.if n alnum alpha ascii blank cntrl digit graph lower print punct space upper word xdigit
+.if t alnum   alpha   ascii   blank   cntrl   digit   graph   lower   print   punct   space   upper   word   xdigit
 .br
 A character class matches any character belonging to that class.
+The \fBword\fP character class matches letters, digits, and the character _.
 .br
 .if t .sp 0.5
 .if n .sp 1
@@ -2849,7 +2867,7 @@ is seen.  All of
 the lines read up to that point are then used as the standard
 input for a command.
 .PP
-The format of here-documents is as follows:
+The format of here-documents is:
 .RS
 .PP
 .nf
@@ -2890,6 +2908,17 @@ line containing
 This allows
 here-documents within shell scripts to be indented in a
 natural fashion.
+.SS "Here Strings"
+A variant of here documents, the format is:
+.RS
+.PP
+.nf
+\fB<<<\fP\fIword\fP
+.fi
+.RE
+.PP
+The \fIword\fP is expanded and supplied to the command on its standard
+input.
 .SS "Duplicating File Descriptors"
 .PP
 The redirection operator
@@ -2932,6 +2961,28 @@ do not specify a file descriptor open for output, a redirection error occurs.
 As a special case, if \fIn\fP is omitted, and \fIword\fP does not
 expand to one or more digits, the standard output and standard
 error are redirected as described previously.
+.SS "Moving File Descriptors"
+.PP
+The redirection operator
+.RS
+.PP
+[\fIn\fP]\fB<&\fP\fIdigit\fP\fB\-\fP
+.RE
+.PP
+moves the file descriptor \fIdigit\fP to file descriptor
+.IR n ,
+or the standard input (file descriptor 0) if \fIn\fP is not specified.
+\fIdigit\fP is closed after being duplicated to \fIn\fP.
+.PP
+Similarly, the redirection operator
+.RS
+.PP
+[\fIn\fP]\fB>&\fP\fIdigit\fP\fB\-\fP
+.RE
+.PP
+moves the file descriptor \fIdigit\fP to file descriptor
+.IR n ,
+or the standard output (file descriptor 1) if \fIn\fP is not specified.
 .SS "Opening File Descriptors for Reading and Writing"
 .PP
 The redirection operator
@@ -3058,7 +3109,11 @@ trap (see the description of the
 builtin under
 .SM
 .B SHELL BUILTIN COMMANDS
-below) is not inherited.
+below) is not inherited unless the function has been given the
+\fBtrace\fP attribute (see the description of the
+.SM
+.B declare
+builtin below).
 .PP
 Variables local to the function may be declared with the
 .B local
@@ -3101,7 +3156,7 @@ of recursive calls.
 The shell allows arithmetic expressions to be evaluated, under
 certain circumstances (see the \fBlet\fP builtin command and
 \fBArithmetic Expansion\fP).
-Evaluation is done in long integers with no check for overflow,
+Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
 The operators and their precedence and associativity are the same
 as in the C language.
@@ -3269,14 +3324,15 @@ True if \fIfile\fP exists and is a socket.
 True if \fIfile\fP exists and has been modified since it was last read.
 .TP
 \fIfile1\fP \-\fBnt\fP \fIfile2\fP
-True if \fIfile1\fP is newer (according to
-modification date) than \fIfile2\fP.
+True if \fIfile1\fP is newer (according to modification date) than \fIfile2\fP,
+or if \fIfile1\fP exists and \fPfile2\fP does not.
 .TP
 \fIfile1\fP \-\fBot\fP \fIfile2\fP
-True if \fIfile1\fP is older than \fIfile2\fP.
+True if \fIfile1\fP is older than \fIfile2\fP, or if \fIfile2\fP exists
+and \fIfile1\fP does not.
 .TP
 \fIfile1\fP \fB\-ef\fP \fIfile2\fP
-True if \fIfile1\fP and \fIfile2\fP have the same device and
+True if \fIfile1\fP and \fIfile2\fP refer to the same device and
 inode numbers.
 .TP
 .B \-o \fIoptname\fP
@@ -3301,7 +3357,7 @@ is non-zero.
 .TP
 \fIstring1\fP \fB==\fP \fIstring2\fP
 True if the strings are equal.  \fB=\fP may be used in place of
-\fB==\fP.
+\fB==\fP for strict POSIX compliance.
 .TP
 \fIstring1\fP \fB!=\fP \fIstring2\fP
 True if the strings are not equal.
@@ -3851,6 +3907,11 @@ an ASCII bell character (07)
 .B \ed
 the date in "Weekday Month Date" format (e.g., "Tue May 26")
 .TP
+.B \eD{\fIformat\fP}
+the \fIformat\fP is passed to \fIstrftime\fP(3) and the result is inserted
+into the prompt string; an empty \fIformat\fP results in a locale-specific
+time representation.  The braces are required
+.TP
 .B \ee
 an ASCII escape character (033)
 .TP
@@ -4328,6 +4389,11 @@ appended.
 If set to \fBOn\fP, history lines that have been modified are displayed
 with a preceding asterisk (\fB*\fP).
 .TP
+.B mark\-symlinked\-directories (Off)
+If set to \fBOn\fP, completed names which are symbolic links to directories
+have a slash appended (subject to the value of
+\fBmark\-directories\fP).
+.TP
 .B match\-hidden\-files (On)
 This variable, when set to \fBOn\fP, causes readline to match files whose
 names begin with a `.' (hidden files) when performing filename 
@@ -4338,6 +4404,10 @@ supplied by the user in the filename to be completed.
 If set to \fBOn\fP, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
+.TP
+.B page\-completions (On)
+If set to \fBOn\fP, readline uses an internal \fImore\fP-like pager
+to display a screenful of possible completions at a time.
 .TP
 .B print\-completions\-horizontally (Off)
 If set to \fBOn\fP, readline will display completions with matches
@@ -4616,6 +4686,16 @@ A synonym for \fByank\-last\-arg\fP.
 Accept the current line for execution and fetch the next line
 relative to the current line from the history for editing.  Any
 argument is ignored.
+.TP
+.B edit\-and\-execute\-command (C\-xC\-e)
+Invoke an editor on the current command line, and execute the result as shell
+commands.
+\fBBash\fP attempts to invoke
+.SM
+.BR $FCEDIT ,
+.SM
+.BR $EDITOR ,
+and \fIemacs\fP as the editor, in that order.
 .PD
 .SS Commands for Changing Text
 .PP
@@ -4672,6 +4752,17 @@ lowercase the previous word, but do not move point.
 .B capitalize\-word (M\-c)
 Capitalize the current (or following) word.  With a negative argument,
 capitalize the previous word, but do not move point.
+.TP
+.B overwrite\-mode
+Toggle overwrite mode.  With an explicit positive numeric argument,
+switches to overwrite mode.  With an explicit non-positive numeric
+argument, switches to insert mode.  This command affects only
+\fBemacs\fP mode; \fBvi\fP mode does overwrite differently.
+Each call to \fIreadline()\fP starts in insert mode.
+In overwrite mode, characters bound to \fBself\-insert\fP replace   
+the text at point rather than pushing the text to the right.
+Characters bound to \fBbackward\-delete\-char\fP replace the character
+before point with a space.  By default, this command is unbound.
 .PD
 .SS Killing and Yanking
 .PP
@@ -4915,21 +5006,38 @@ A character is read and point is moved to the previous occurrence of that
 character.  A negative count searches for subsequent occurrences.
 .TP
 .B insert\-comment (M\-#)
-The value of the readline
+Without a numeric argument, the value of the readline
 .B comment\-begin
-variable is inserted at the beginning of the current line, and the line
-is accepted as if a newline had been typed.  The default value of
+variable is inserted at the beginning of the current line.
+If a numeric argument is supplied, this command acts as a toggle:  if
+the characters at the beginning of the line do not match the value
+of \fBcomment\-begin\fP, the value is inserted, otherwise
+the characters in \fBcomment-begin\fP are deleted from the beginning of 
+the line.
+In either case, the line is accepted as if a newline had been typed.
+The default value of
 \fBcomment\-begin\fP causes this command to make the current line
 a shell comment.
+If a numeric argument causes the comment character to be removed, the line
+will be executed by the shell.
+.TP
+.B glob\-complete\-word (M\-g)
+The word before point is treated as a pattern for pathname expansion,
+with an asterisk implicitly appended.  This pattern is used to
+generate a list of matching file names for possible completions.
 .TP
 .B glob\-expand\-word (C\-x *)
 The word before point is treated as a pattern for pathname expansion,
 and the list of matching file names is inserted, replacing the word.
+If a numeric argument is supplied, an asterisk is appended before
+pathname expansion.
 .TP
 .B glob\-list\-expansions (C\-x g)
 The list of expansions that would have been generated by
 .B glob\-expand\-word
 is displayed, and the line is redrawn.
+If a numeric argument is supplied, an asterisk is appended before
+pathname expansion.
 .TP
 .B dump\-functions
 Print all of the functions and their key bindings to the
@@ -5083,6 +5191,12 @@ default of filename completion is disabled.
 If the \fB-o default\fP option was supplied to \fBcomplete\fP when the
 compspec was defined, readline's default completion will be performed
 if the compspec generates no matches.
+.PP
+When a compspec indicates that directory name completion is desired,
+the programmable completion functions force readline to append a slash
+to completed names which are symbolic links to directories, subject to  
+the value of the \fBmark\-directories\fP readline variable, regardless
+of the setting of the \fBmark-symlinked\-directories\fP readline variable.
 .SH HISTORY
 When the
 .B \-o history
@@ -5460,8 +5574,8 @@ No effect; the command does nothing beyond expanding
 and performing any specified
 redirections.  A zero exit code is returned.
 .TP
-.PD 0
 \fB .\| \fP \fIfilename\fP [\fIarguments\fP]
+.PD 0
 .TP
 \fBsource\fP \fIfilename\fP [\fIarguments\fP]
 .PD
@@ -5528,8 +5642,8 @@ returns 0 unless run when job control is disabled or, when run with
 job control enabled, if \fIjobspec\fP was not found or started without
 job control.
 .TP
-.PD 0
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSV\fP]
+.PD 0
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-q\fP \fIfunction\fP] [\fB\-u\fP \fIfunction\fP] [\fB\-r\fP \fIkeyseq\fP]
 .TP
@@ -5538,16 +5652,21 @@ job control.
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-x\fP \fIkeyseq\fP:\fIshell\-command\fP
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIfunction\-name\fP
+.TP
+\fBbind\fP \fIreadline\-command\fP
 .PD
 Display current
 .B readline
-key and function bindings, or bind a key sequence to a
+key and function bindings, bind a key sequence to a
 .B readline
-function or macro.  The binding syntax accepted is identical to that of
+function or macro, or set a
+.B readline
+variable.
+Each non-option argument is a command as it would appear in
 .IR .inputrc ,
-but each binding must be passed as a separate argument;
-e.g., '"\eC\-x\eC\-r": re\-read\-init\-file'.  Options, if supplied, have the
-following meanings:
+but each binding or command must be passed as a separate argument;
+e.g., '"\eC\-x\eC\-r": re\-read\-init\-file'.
+Options, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
@@ -5639,7 +5758,7 @@ The return status is false if
 .I shell\-builtin
 is not a shell builtin command.
 .TP
-\fBcd\fP [\fB\-LP\fP] [\fIdir\fP]
+\fBcd\fP [\fB\-L|-P\fP] [\fIdir\fP]
 Change the current directory to \fIdir\fP.  The variable
 .SM
 .B HOME
@@ -5743,10 +5862,10 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-.PD 0
-\fBcomplete\fP [\fB\-abcdefgjkvu\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
 .br
 [\fB\-X\fP \fIfilterpat\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] \fIname\fP [\fIname ...\fP]
+.PD 0
 .TP
 \fBcomplete\fP \fB\-pr\fP [\fIname\fP ...]
 .PD
@@ -5777,7 +5896,8 @@ beyond the simple generation of completions.
 .RS
 .TP 8
 .B default
-Use readline's default completion if the compspec generates no matches.
+Use readline's default filename completion if the compspec generates
+no matches.
 .TP 8
 .B dirnames
 Perform directory name completion if the compspec generates no matches.
@@ -5786,6 +5906,10 @@ Perform directory name completion if the compspec generates no matches.
 Tell readline that the compspec generates filenames, so it can perform any
 filename\-specific processing (like adding a slash to directory names or
 suppressing trailing spaces).  Intended to be used with shell functions.
+.TP 8
+.B nospace
+Tell readline not to append a space (the default) to words completed at
+the end of the line.
 .RE
 .TP 8
 \fB\-A\fP \fIaction\fP
@@ -5846,6 +5970,9 @@ Shell reserved words.  May also be specified as \fB\-k\fP.
 .TP 8
 .B running
 Names of running jobs, if job control is active.
+.TP 8
+.B service
+Service names.  May also be specified as \fB\-s\fP.
 .TP 8
 .B setopt
 Valid arguments for the \fB\-o\fP option to the \fBset\fP builtin.
@@ -5935,10 +6062,10 @@ shell is not executing a loop when
 .B continue
 is executed.
 .TP
+\fBdeclare\fP [\fB\-afFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP]]
 .PD 0
-\fBdeclare\fP [\fB\-afFirx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP]]
 .TP
-\fBtypeset\fP [\fB\-afFirx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP]]
+\fBtypeset\fP [\fB\-afFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP]]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -5980,6 +6107,11 @@ is performed when the variable is assigned a value.
 .B \-r
 Make \fIname\fPs readonly.  These names cannot then be assigned values
 by subsequent assignment statements or unset.
+.TP
+.B \-t
+Give each \fIname\fP the \fItrace\fP attribute.
+Traced functions inherit the \fBDEBUG\fP trap from the calling shell.
+The trace attribute has no special meaning for variables.
 .TP
 .B \-x
 Mark \fIname\fPs for export to subsequent commands via the environment.
@@ -6132,9 +6264,13 @@ vertical tab
 .B \e\e
 backslash
 .TP
+.B \e0\fInnn\fP
+the eight-bit character whose value is the octal value \fInnn\fP
+(zero to three octal digits)
+.TP
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
-(one to three digits)
+(one to three octal digits)
 .TP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP
@@ -6239,8 +6375,8 @@ A trap on
 .B EXIT
 is executed before the shell terminates.
 .TP
-.PD 0
 \fBexport\fP [\fB\-fn\fP\^] [\fIname\fP[=\fIword\fP]] ...
+.PD 0
 .TP
 .B export \-p
 .PD
@@ -6272,8 +6408,8 @@ is supplied with a
 .I name
 that is not a function.
 .TP
-.PD 0
 \fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-nlr\fP] [\fIfirst\fP] [\fIlast\fP]
+.PD 0
 .TP
 \fBfc\fP \fB\-s\fP [\fIpat\fP=\fIrep\fP] [\fIcmd\fP]
 .PD
@@ -6484,7 +6620,7 @@ returns true if an option, specified or unspecified, is found.
 It returns false if the end of options is encountered or an
 error occurs.
 .TP
-\fBhash\fP [\fB\-r\fP] [\fB\-p\fP \fIfilename\fP] [\fB\-t\fP] [\fIname\fP]
+\fBhash\fP [\fB\-lr\fP] [\fB\-p\fP \fIfilename\fP] [\fB\-dt\fP] [\fIname\fP]
 For each
 .IR name ,
 the full file name of the command is determined by searching
@@ -6500,12 +6636,19 @@ The
 .B \-r
 option causes the shell to forget all
 remembered locations.
+The
+.B \-d
+option causes the shell to forget the remembered location of each \fIname\fP.
 If the
 .B \-t
 option is supplied, the full pathname to which each \fIname\fP corresponds
 is printed.  If multiple \fIname\fP arguments are supplied with \fB\-t\fP,
 the \fIname\fP is printed before the hashed full pathname.
-If no arguments are given, information about remembered commands is printed.
+The
+.B \-l
+option causes output to be displayed in a format that may be reused as input.
+If no arguments are given, or if only \fB\-l\fP is supplied,
+information about remembered commands is printed.
 The return status is true unless a
 .I name
 is not found or an invalid option is supplied.
@@ -6524,8 +6667,8 @@ usage synopsis.
 The return status is 0 unless no command matches
 .IR pattern .
 .TP
-.PD 0
 \fBhistory [\fIn\fP]
+.PD 0
 .TP
 \fBhistory\fP \fB\-c\fP
 .TP
@@ -6598,8 +6741,8 @@ error occurs while reading or writing the history file, an invalid
 history expansion supplied as an argument to \fB\-p\fP fails.
 .RE
 .TP
-.PD 0
 \fBjobs\fP [\fB\-lnprs\fP] [ \fIjobspec\fP ... ]
+.PD 0
 .TP
 \fBjobs\fP \fB\-x\fP \fIcommand\fP [ \fIargs\fP ... ]
 .PD
@@ -6652,8 +6795,8 @@ passing it
 returning its exit status.
 .RE
 .TP
-.PD 0
 \fBkill\fP [\fB\-s\fP \fIsigspec\fP | \fB\-n\fP \fIsignum\fP | \fB\-\fP\fIsigspec\fP] [\fIpid\fP | \fIjobspec\fP] ...
+.PD 0
 .TP
 \fBkill\fP \fB\-l\fP [\fIsigspec\fP | \fIexit_status\fP]
 .PD
@@ -6805,8 +6948,8 @@ extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
 .TP
-.PD 0
 \fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
+.PD 0
 .TP
 \fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
 .PD
@@ -6875,8 +7018,9 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-a\fP \fIaname\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-n\fP \fInchars\fP] [\fB\-d\fP \fIdelim\fP] [\fIname\fP ...]
-One line is read from the standard input, and the first word
+\fBread\fP [\fB\-ers\fP] [\fB\-u\fP \fIfd\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-a\fP \fIaname\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-n\fP \fInchars\fP] [\fB\-d\fP \fIdelim\fP] [\fIname\fP ...]
+One line is read from the standard input, or from the file descriptor
+\fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
 .IR name ,
 the second word to the second
@@ -6884,7 +7028,7 @@ the second word to the second
 and so on, with leftover words and their intervening separators assigned
 to the last
 .IR name .
-If there are fewer words read from the standard input than names,
+If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
 The characters in 
 .SM
@@ -6942,6 +7086,9 @@ Cause \fBread\fP to time out and return failure if a complete line of
 input is not read within \fItimeout\fP seconds.
 This option has no effect if \fBread\fP is not reading input from the
 terminal or a pipe.
+.TP
+.B \-u \fIfd\FP
+Read input from file descriptor \fIfd\fP.
 .PD
 .PP
 If no
@@ -6949,8 +7096,9 @@ If no
 are supplied, the line read is assigned to the variable
 .SM
 .BR REPLY .
-The return code is zero, unless end-of-file is encountered or \fBread\fP
-times out.
+The return code is zero, unless end-of-file is encountered, \fBread\fP
+times out, or an invalid file descriptor is supplied as the argument to
+\fB\-u\fP.
 .RE
 .TP
 \fBreadonly\fP [\fB\-apf\fP] [\fIname\fP ...]
@@ -7573,8 +7721,8 @@ the shell is a login shell and
 .B \-f
 is not supplied, or if job control is not enabled.
 .TP
-.PD 0
 \fBtest\fP \fIexpr\fP
+.PD 0
 .TP
 \fB[\fP \fIexpr\fP \fB]\fP
 Return a status of 0 or 1 depending on
@@ -7761,7 +7909,7 @@ is invalid; otherwise
 .B trap
 returns true.
 .TP
-\fBtype\fP [\fB\-atp\fP] \fIname\fP [\fIname\fP ...]
+\fBtype\fP [\fB\-aftpP\fP] \fIname\fP [\fIname\fP ...]
 With no options, 
 indicate how each
 .I name
@@ -7798,9 +7946,21 @@ or nothing if
 .if n ``type -t name''
 would not return
 .IR file .
+The
+.B \-P
+option forces a
+.SM
+.B PATH
+search for each \fIname\fP, even if
+.if t \f(CWtype -t name\fP
+.if n ``type -t name''
+would not return
+.IR file .
 If a command is hashed,
 .B \-p
-prints the hashed value, not necessarily the file that appears
+and
+.B \-P
+print the hashed value, not necessarily the file that appears
 first in 
 .SM
 .BR PATH .
@@ -7818,6 +7978,9 @@ option is not also used.
 The table of hashed commands is not consulted
 when using
 .BR \-a .
+The
+.B \-f
+option suppresses shell function lookup, as with the \fBcommand\fP builtin.
 .B type
 returns true if any of the arguments are found, false if
 none are found.
@@ -8056,6 +8219,8 @@ and
 options to the
 .B enable
 builtin command
+.IP \(bu
+Using the \fBenable\fP builtin command to enable disabled shell builtins
 .IP \(bu
 specifying the
 .B \-p

@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES declare.c
 
 $BUILTIN declare
 $FUNCTION declare_builtin
-$SHORT_DOC declare [-afFrxi] [-p] name[=value] ...
+$SHORT_DOC declare [-afFirtx] [-p] name[=value] ...
 Declare variables and/or give them attributes.  If no NAMEs are
 given, then display the values of variables instead.  The -p option
 will display the attributes and values of each NAME.
@@ -33,9 +33,10 @@ The flags are:
   -a	to make NAMEs arrays (if supported)
   -f	to select from among function names only
   -F	to display function names without definitions
+  -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
+  -t	to make NAMEs have the `trace' attribute
   -x	to make NAMEs export
-  -i	to make NAMEs have the `integer' attribute set
 
 Variables with the integer attribute have arithmetic evaluation (see
 `let') done when the variable is assigned to.
@@ -50,7 +51,7 @@ $END
 
 $BUILTIN typeset
 $FUNCTION declare_builtin
-$SHORT_DOC typeset [-afFrxi] [-p] name[=value] ...
+$SHORT_DOC typeset [-afFirtx] [-p] name[=value] ...
 Obsolete.  See `declare'.
 $END
 
@@ -70,6 +71,7 @@ $END
 #include "../shell.h"
 #include "common.h"
 #include "builtext.h"
+#include "bashgetopt.h"
 
 extern int array_needs_making;
 
@@ -103,66 +105,70 @@ local_builtin (list)
     }
 }
 
+#if defined (ARRAY_VARS)
+#  define DECLARE_OPTS	"+afiprtxF"
+#else
+#  define DECLARE_OPTS	"+fiprtxF"
+#endif
+
 /* The workhorse function. */
 static int
 declare_internal (list, local_var)
      register WORD_LIST *list;
      int local_var;
 {
-  int flags_on, flags_off, *flags, any_failed, assign_error, pflag, nodefs;
+  int flags_on, flags_off, *flags, any_failed, assign_error, pflag, nodefs, opt;
   char *t, *subscript_start;
   SHELL_VAR *var;
 
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
-  while (list)
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, DECLARE_OPTS)) != EOF)
     {
-      t = list->word->word;
-      if (t[0] == '-' && t[1] == '-' && t[2] == '\0')
+      flags = list_opttype == '+' ? &flags_off : &flags_on;
+
+      switch (opt)
 	{
-	  list = list->next;
-	  break;
-	}
-
-      if (*t != '+' && *t != '-')
-	break;
-
-      flags = (*t++ == '+') ? &flags_off : &flags_on;
-
-      while (*t)
-	{
-	  if (*t == 'p' && local_var == 0)
-	    pflag++, t++;
-	  else if (*t == 'F')
-	    {
-	      nodefs++;
-	      *flags |= att_function; t++;
-	    }
-	  else if (*t == 'f')
-	    *flags |= att_function, t++;
-	  else if (*t == 'x')
-	    *flags |= att_exported, t++, array_needs_making = 1;
-	  else if (*t == 'r')
-	    *flags |= att_readonly, t++;
-	  else if (*t == 'i')
-	    *flags |= att_integer, t++;
+	case 'a':
 #if defined (ARRAY_VARS)
-	  else if (*t == 'a')
-	    *flags |= att_array, t++;
+	  *flags |= att_array;
 #endif
-	  else
-	    {
-	      builtin_error ("unknown option: `-%c'", *t);
-	      builtin_usage ();
-	      return (EX_USAGE);
-	    }
+	  break;
+	case 'p':
+	  if (local_var == 0)
+	    pflag++;
+	  break;
+        case 'F':
+	  nodefs++;
+	  *flags |= att_function;
+	  break;
+	case 'f':
+	  *flags |= att_function;
+	  break;
+	case 'i':
+	  *flags |= att_integer;
+	  break;
+	case 'r':
+	  *flags |= att_readonly;
+	  break;
+	case 't':
+	  *flags |= att_trace;
+	  break;
+	case 'x':
+	  *flags |= att_exported;
+	  array_needs_making = 1;
+	  break;
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
 	}
-
-      list = list->next;
     }
+
+  list = loptend;
 
   /* If there are no more arguments left, then we just want to show
      some variables. */
-  if (list == 0)	/* declare -[afFirx] */
+  if (list == 0)	/* declare -[afFirtx] */
     {
       /* Show local variables defined at this context level if this is
 	 the `local' builtin. */
@@ -171,7 +177,7 @@ declare_internal (list, local_var)
 	  register SHELL_VAR **vlist;
 	  register int i;
 
-	  vlist = map_over (variable_in_context, shell_variables);
+	  vlist = all_local_variables ();
 
 	  if (vlist)
 	    {
@@ -193,14 +199,14 @@ declare_internal (list, local_var)
       return (EXECUTION_SUCCESS);
     }
 
-  if (pflag)	/* declare -p [-afFirx] name [name...] */
+  if (pflag)	/* declare -p [-afFirtx] name [name...] */
     {
       for (any_failed = 0; list; list = list->next)
 	{
 	  pflag = show_name_attributes (list->word->word, nodefs);
 	  if (pflag)
 	    {
-	      builtin_error ("%s: not found", list->word->word);
+	      sh_notfound (list->word->word);
 	      any_failed++;
 	    }
 	}
@@ -244,7 +250,7 @@ declare_internal (list, local_var)
 	
       if (legal_identifier (name) == 0)
 	{
-	  builtin_error ("`%s': not a valid identifier", name);
+	  sh_invalidid (name);
 	  assign_error++;
 	  NEXT_VARIABLE ();
 	}
@@ -253,7 +259,10 @@ declare_internal (list, local_var)
 	 inside of a function.  This means we should make local variables,
 	 not global ones. */
 
-      if (variable_context)
+      /* XXX - this has consequences when we're making a local copy of a
+	       variable that was in the temporary environment.  Watch out
+	       for this. */
+      if (variable_context && ((flags_on & att_function) == 0))
 	{
 #if defined (ARRAY_VARS)
 	  if ((flags_on & att_array) || making_array_special)
@@ -267,6 +276,8 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 	}
+      else
+	var = (SHELL_VAR *)NULL;
 
       /* If we are declaring a function, then complain about it in some way.
 	 We don't let people make functions by saying `typeset -f foo=bar'. */
@@ -315,7 +326,9 @@ declare_internal (list, local_var)
 	}
       else		/* declare -[airx] name [name...] */
 	{
-	  var = find_variable (name);
+	  /* Non-null if we just created or fetched a local variable. */
+	  if (var == 0)
+	    var = find_variable (name);
 
 	  if (var == 0)
 	    {
@@ -330,7 +343,7 @@ declare_internal (list, local_var)
 	  /* Cannot use declare +r to turn off readonly attribute. */ 
 	  if (readonly_p (var) && (flags_off & att_readonly))
 	    {
-	      builtin_error ("%s: readonly variable", name);
+	      sh_readonly (name);
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
@@ -340,7 +353,7 @@ declare_internal (list, local_var)
 	  if ((readonly_p (var) || noassign_p (var)) && offset)
 	    {
 	      if (readonly_p (var))
-		builtin_error ("%s: readonly variable", name);
+		sh_readonly (name);
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
@@ -394,12 +407,27 @@ declare_internal (list, local_var)
 	     `var=value declare -x var', make sure it is treated identically
 	     to `var=value export var'.  Do the same for `declare -r' and
 	     `readonly'.  Preserve the attributes, except for att_tempvar. */
+	  /* XXX -- should this create a variable in the global scope, or
+	     modify the local variable flags?  ksh93 has it modify the
+	     global scope.
+	     Need to handle case like in set_var_attribute where a temporary
+	     variable is in the same table as the function local vars. */
 	  if ((flags_on & (att_exported|att_readonly)) && tempvar_p (var))
 	    {
 	      SHELL_VAR *tv;
-	      tv = bind_variable (var->name, var->value ? var->value : "");
-	      tv->attributes = var->attributes & ~att_tempvar;
-	      dispose_variable (var);
+	      char *tvalue;
+
+	      tv = find_tempenv_variable (var->name);
+	      if (tv)
+		{
+		  tvalue = var_isset (var) ? savestring (value_cell (var)) : savestring ("");
+	          tv = bind_variable (var->name, tvalue);
+	          tv->attributes |= var->attributes & ~att_tempvar;
+	          if (tv->context > 0)
+		    VSETATTR (tv, att_propagate);
+	          free (tvalue);
+		}
+	      VSETATTR (var, att_propagate);
 	    }
 	}
 

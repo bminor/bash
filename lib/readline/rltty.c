@@ -647,7 +647,6 @@ rl_prep_terminal (meta_flag)
   if (get_tty_settings (tty, &tio) < 0)
     {
       release_sigint ();
-fprintf(stderr, "readline: warning: rl_prep_terminal: cannot get terminal settings");
       return;
     }
 

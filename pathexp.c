@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,8 +33,13 @@
 #include "pathexp.h"
 #include "flags.h"
 
+#include "shmbutil.h"
+
 #include <glob/strmatch.h>
 
+static int glob_name_is_acceptable __P((const char *));
+static void ignore_globbed_names __P((char **, sh_ignore_func_t *));
+               
 #if defined (USE_POSIX_GLOB_LIBRARY)
 #  include <glob.h>
 typedef int posix_glob_errfunc_t __P((const char *, int));
@@ -54,9 +59,14 @@ unquoted_glob_pattern_p (string)
      register char *string;
 {
   register int c;
+  char *send;
   int open;
 
+  DECLARE_MBSTATE;
+
   open = 0;
+  send = string + strlen (string);
+
   while (c = *string++)
     {
       switch (c)
@@ -86,6 +96,16 @@ unquoted_glob_pattern_p (string)
 	  if (*string++ == '\0')
 	    return (0);
 	}
+
+      /* Advance one fewer byte than an entire multibyte character to
+	 account for the auto-increment in the loop above. */
+#ifdef HANDLE_MULTIBYTE
+      string--;
+      ADVANCE_CHAR_P (string, send - string);
+      string++;
+#else
+      ADVANCE_CHAR_P (string, send - string);
+#endif
     }
   return (0);
 }
@@ -123,9 +143,11 @@ quote_string_for_globbing (pathname, qflags)
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
 	  temp[j++] = '\\';
+	  i++;
+	  if (pathname[i] == '\0')
+	    break;
 	}
-      else
-	temp[j++] = pathname[i];
+      temp[j++] = pathname[i];
     }
   temp[j] = '\0';
 
@@ -136,9 +158,14 @@ char *
 quote_globbing_chars (string)
      char *string;
 {
-  char *temp, *s, *t;
+  size_t slen;
+  char *temp, *s, *t, *send;
+  DECLARE_MBSTATE;
 
-  temp = (char *)xmalloc (strlen (string) * 2 + 1);
+  slen = strlen (string);
+  send = string + slen;
+
+  temp = (char *)xmalloc (slen * 2 + 1);
   for (t = temp, s = string; *s; )
     {
       switch (*s)
@@ -157,7 +184,10 @@ quote_globbing_chars (string)
 	    *t++ = '\\';
 	  break;
 	}
-      *t++ = *s++;
+
+      /* Copy a single (possibly multibyte) character from s to t,
+         incrementing both. */
+      COPY_CHAR_P (t, s, send);
     }
   *t = '\0';
   return temp;
@@ -204,7 +234,7 @@ shell_glob_filename (pathname)
       if (should_ignore_glob_matches ())
 	ignore_glob_matches (results);
       if (results && results[0])
-	sort_char_array (results);
+	strvec_sort (results);
       else
 	{
 	  FREE (results);
@@ -221,8 +251,7 @@ shell_glob_filename (pathname)
   noglob_dot_filenames = glob_dot_filenames == 0;
 
   temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
-
-  results = glob_filename (temp);
+  results = glob_filename (temp, 0);
   free (temp);
 
   if (results && ((GLOB_FAILED (results)) == 0))
@@ -230,7 +259,7 @@ shell_glob_filename (pathname)
       if (should_ignore_glob_matches ())
 	ignore_glob_matches (results);
       if (results && results[0])
-	sort_char_array (results);
+	strvec_sort (results);
       else
 	{
 	  FREE (results);
@@ -314,7 +343,7 @@ ignore_globbed_names (names, name_func)
 
   for (i = 0; names[i]; i++)
     ;
-  newnames = alloc_array (i + 1);
+  newnames = strvec_create (i + 1);
 
   for (n = i = 0; names[i]; i++)
     {

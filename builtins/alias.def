@@ -1,7 +1,7 @@
 This file is alias.def, from which is created alias.c
 It implements the builtins "alias" and "unalias" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -120,7 +120,7 @@ alias_builtin (list)
 	    print_alias (t);
 	  else
 	    {
-	      builtin_error ("`%s' not found", name);
+	      sh_notfound (name);
 	      any_failed++;
 	    }
 	}
@@ -180,7 +180,7 @@ unalias_builtin (list)
 	remove_alias (alias->name);
       else
 	{
-	  builtin_error ("`%s': not an alias", list->word->word);
+	  sh_notfound (list->word->word);
 	  aflag++;
 	}
 

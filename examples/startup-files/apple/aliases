@@ -24,7 +24,7 @@ ff        () { find . -name ${1} -print ; }
 ll        () { ls -lag "$@" | more ; }
 word      () { fgrep -i "$*" /usr/dict/web2 ; }
 wordcount () { cat "${1}" | tr -s ' 	.,;:?\!()[]"' '\012' | \
-	       cat -n | tail -1 | awk '{print $1}' ; }
+	       awk 'END {print NR}' ; }
 
 ##
 # Read user's aliases

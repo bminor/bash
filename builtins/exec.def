@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -127,19 +127,19 @@ exec_builtin (list)
 #if defined (RESTRICTED_SHELL)
   if (restricted)
     {
-      builtin_error ("restricted");
+      sh_restricted ((char *)NULL);
       return (EXECUTION_FAILURE);
     }
 #endif /* RESTRICTED_SHELL */
 
-  args = word_list_to_argv (list, 1, 0, (int *)NULL);
+  args = strvec_from_word_list (list, 1, 0, (int *)NULL);
 
   /* A command with a slash anywhere in its name is not looked up in $PATH. */
   command = absolute_program (args[0]) ? args[0] : search_for_command (args[0]);
 
   if (command == 0)
     {
-      builtin_error ("%s: not found", args[0]);
+      sh_notfound (args[0]);
       exit_value = EX_NOTFOUND;	/* As per Posix.2, 3.14.6 */
       goto failed_exec;
     }
@@ -215,10 +215,10 @@ failed_exec:
     exit_shell (exit_value);
 
   if (args)
-    free_array (args);
+    strvec_dispose (args);
 
   initialize_traps ();
-  reinitialize_signals ();
+  initialize_signals (1);
 
 #if defined (JOB_CONTROL)
   restart_job_control ();

@@ -40,14 +40,15 @@
 /* Convert STRING by expanding the escape sequences specified by the
    ANSI C standard.  If SAWC is non-null, recognize `\c' and use that
    as a string terminator.  If we see \c, set *SAWC to 1 before
-   returning.  LEN is the length of STRING.  FOR_ECHO is a flag that
-   means, if non-zero, that we're translating a string for `echo -e',
-   and therefore should not treat a single quote as a character that
-   may be escaped with a backslash. */
+   returning.  LEN is the length of STRING.  If (FLAGS&1) is non-zero,
+   that we're translating a string for `echo -e', and therefore should not
+   treat a single quote as a character that may be escaped with a backslash.
+   If (FLAGS&2) is non-zero, we're expanding for the parser and want to
+   quote CTLESC and CTLNUL with CTLESC */
 char *
-ansicstr (string, len, for_echo, sawc, rlen)
+ansicstr (string, len, flags, sawc, rlen)
      char *string;
-     int len, for_echo, *sawc, *rlen;
+     int len, flags, *sawc, *rlen;
 {
   int c, temp;
   char *ret, *r, *s;
@@ -55,7 +56,7 @@ ansicstr (string, len, for_echo, sawc, rlen)
   if (string == 0 || *string == '\0')
     return ((char *)NULL);
 
-  ret = (char *)xmalloc (len + 1);
+  ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
   for (r = ret, s = string; s && *s; )
     {
       c = *s++;
@@ -81,7 +82,12 @@ ansicstr (string, len, for_echo, sawc, rlen)
 	    case 't': c = '\t'; break;
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-	      for (temp = 2, c -= '0'; ISOCTAL (*s) && temp--; s++)
+	      /* If (FLAGS & 1), we're translating a string for echo -e (or
+		 the equivalent xpg_echo option), so we obey the SUSv3/
+		 POSIX-2001 requirement and accept 0-3 octal digits after
+		 a leading `0'. */
+	      temp = 2 + ((flags & 1) && (c == '0'));
+	      for (c -= '0'; ISOCTAL (*s) && temp--; s++)
 		c = (c * 8) + OCTVALUE (*s);
 	      c &= 0xFF;
 	      break;
@@ -99,7 +105,7 @@ ansicstr (string, len, for_echo, sawc, rlen)
 	    case '\\':
 	      break;
 	    case '\'':
-	      if (for_echo)
+	      if (flags & 1)
 		*r++ = '\\';
 	      break;
 	    case 'c':
@@ -111,8 +117,17 @@ ansicstr (string, len, for_echo, sawc, rlen)
 		    *rlen = r - ret;
 		  return ret;
 		}
+	      else if ((flags & 1) == 0 && (c = *s))
+		{
+		  s++;
+		  c = TOCTRL(c);
+		  break;
+		}
+		/*FALLTHROUGH*/
 	    default:  *r++ = '\\'; break;
 	    }
+	  if ((flags & 2) && (c == CTLESC || c == CTLNUL))
+	    *r++ = CTLESC;
 	  *r++ = c;
 	}
     }
@@ -129,7 +144,7 @@ ansic_quote (str, flags, rlen)
      char *str;
      int flags, *rlen;
 {
-  char *r, *ret, *s, obuf[8];
+  char *r, *ret, *s;
   int l, rsize, t;
   unsigned char c;
 
@@ -137,7 +152,7 @@ ansic_quote (str, flags, rlen)
     return ((char *)0);
 
   l = strlen (str);
-  rsize = 2 * l + 4;
+  rsize = 4 * l + 4;
   r = ret = (char *)xmalloc (rsize);
 
   *r++ = '$';
@@ -169,12 +184,10 @@ ansic_quote (str, flags, rlen)
 	default:
 	  if (ISPRINT (c) == 0)
 	    {
-	      sprintf (obuf, "\\%.3o", c);
-	      t = r - ret;
-	      RESIZE_MALLOCED_BUFFER (ret, t, 5, rsize, 16);
-	      r = ret + t;	/* in case reallocated */
-	      for (t = 0; t < 4; t++)
-		*r++ = obuf[t];
+	      *r++ = '\\';
+	      *r++ = TOCHAR ((c >> 6) & 07);
+	      *r++ = TOCHAR ((c >> 3) & 07);
+	      *r++ = TOCHAR (c & 07);
 	      continue;
 	    }
 	  l = 0;
@@ -193,6 +206,7 @@ ansic_quote (str, flags, rlen)
 }
 
 /* return 1 if we need to quote with $'...' because of non-printing chars. */
+int
 ansic_shouldquote (string)
      const char *string;
 {
@@ -207,4 +221,33 @@ ansic_shouldquote (string)
       return 1;
 
   return 0;
+}
+
+/* $'...' ANSI-C expand the portion of STRING between START and END and
+   return the result.  The result cannot be longer than the input string. */
+char *
+ansiexpand (string, start, end, lenp)
+     char *string;
+     int start, end, *lenp;
+{
+  char *temp, *t;
+  int len, tlen;
+
+  temp = (char *)xmalloc (end - start + 1);
+  for (tlen = 0, len = start; len < end; )
+    temp[tlen++] = string[len++];
+  temp[tlen] = '\0';
+
+  if (*temp)
+    {
+      t = ansicstr (temp, tlen, 2, (int *)NULL, lenp);
+      free (temp);
+      return (t);
+    }
+  else
+    {
+      if (lenp)
+	*lenp = 0;
+      return (temp);
+    }
 }

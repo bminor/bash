@@ -152,7 +152,7 @@ hack_braces_completion (names)
   register int i;
   char *temp;
 
-  temp = really_munge_braces (names, 1, array_len (names), 0);
+  temp = really_munge_braces (names, 1, strvec_len (names), 0);
 
   for (i = 0; names[i]; ++i)
     {

@@ -25,7 +25,7 @@ function manpage ()
     set $file
     file="$1"
     if [ -f "$file" ]; then
-      zot=$(head -1 "$file")
+      zot=$(sed 1q "$file")
       cmd=${MANROFF:-"nroff -man - | col | cat -s"}
       h=${zot##"'"'\"'}
       if [ "$h" != "$zot" ]; then

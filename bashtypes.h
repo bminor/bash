@@ -1,4 +1,4 @@
-/* bashtypes.h -- <sys/types.h> with special handling for crays. */
+/* bashtypes.h -- Bash system types. */
 
 /* Copyright (C) 1993 Free Software Foundation, Inc.
 
@@ -29,6 +29,10 @@
 
 #if defined (CRAY)
 #  undef word
+#endif
+
+#if defined (HAVE_INTTYPES_H)
+#  include <inttypes.h>
 #endif
 
 #endif /* _BASHTYPES_H_ */

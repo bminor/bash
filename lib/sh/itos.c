@@ -1,6 +1,6 @@
 /* itos.c -- Convert integer to string. */
 
-/* Copyright (C) 1998, Free Software Foundation, Inc.
+/* Copyright (C) 1998-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,47 +27,46 @@
 #endif
 
 #include <bashansi.h>
-#include <chartypes.h>
 #include "shell.h"
 
 char *
 inttostr (i, buf, len)
-     long i;
+     intmax_t i;
      char *buf;
      size_t len;
 {
-  return (fmtulong (i, 10, buf, len, 0));
+  return (fmtumax (i, 10, buf, len, 0));
 }
 
 /* Integer to string conversion.  This conses the string; the
    caller should free it. */
 char *
 itos (i)
-     long i;
+     intmax_t i;
 {
-  char *p, lbuf[INT_STRLEN_BOUND(long) + 1];
+  char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
 
-  p = fmtulong (i, 10, lbuf, sizeof(lbuf), 0);
+  p = fmtumax (i, 10, lbuf, sizeof(lbuf), 0);
   return (savestring (p));
 }
 
 char *
 uinttostr (i, buf, len)
-     unsigned long i;
+     uintmax_t i;
      char *buf;
      size_t len;
 {
-  return (fmtulong (i, 10, buf, len, FL_UNSIGNED));
+  return (fmtumax (i, 10, buf, len, FL_UNSIGNED));
 }
 
 /* Integer to string conversion.  This conses the string; the
    caller should free it. */
 char *
 uitos (i)
-     unsigned long i;
+     uintmax_t i;
 {
-  char *p, lbuf[INT_STRLEN_BOUND(long) + 1];
+  char *p, lbuf[INT_STRLEN_BOUND(uintmax_t) + 1];
 
-  p = fmtulong (i, 10, lbuf, sizeof(lbuf), FL_UNSIGNED);
+  p = fmtumax (i, 10, lbuf, sizeof(lbuf), FL_UNSIGNED);
   return (savestring (p));
 }

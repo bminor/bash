@@ -2,6 +2,10 @@
  * print -- loadable ksh-93 style print builtin
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include "bashtypes.h"
 
 #include <errno.h>
@@ -50,6 +54,7 @@ print_builtin (list)
      WORD_LIST *list;
 {
   int c, r, nflag, raw, ofd, sflag;
+  intmax_t lfd;
   char **v, *pfmt, *arg;
   WORD_LIST *l;
 
@@ -83,8 +88,8 @@ print_builtin (list)
 	case 'p':
 	  break;	/* NOP */
 	case 'u':
-	  if (all_digits (list_optarg))
-	    ofd = atoi (list_optarg);
+	  if (all_digits (list_optarg) && legal_number (list_optarg, &lfd) && lfd == (int)lfd)
+	    ofd = lfd;
 	  else
 	    {
 	      for (l = list; l->next && l->next != lcurrent; l = l->next);

@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -53,12 +53,292 @@
 		new->next = ae; \
 	} while(0)
 
+static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
+
+ARRAY *
+array_create()
+{
+	ARRAY	*r;
+	ARRAY_ELEMENT	*head;
+
+	r =(ARRAY *)xmalloc(sizeof(ARRAY));
+	r->type = array_indexed;
+	r->max_index = -1;
+	r->num_elements = 0;
+	head = array_create_element(-1, (char *)NULL);	/* dummy head */
+	head->prev = head->next = head;
+	r->head = head;
+	return(r);
+}
+
+void
+array_flush (a)
+ARRAY	*a;
+{
+	register ARRAY_ELEMENT *r, *r1;
+
+	if (a == 0)
+		return;
+	for (r = element_forw(a->head); r != a->head; ) {
+		r1 = element_forw(r);
+		array_dispose_element(r);
+		r = r1;
+	}
+	a->head->next = a->head->prev = a->head;
+	a->max_index = -1;
+	a->num_elements = 0;
+}
+
+void
+array_dispose(a)
+ARRAY	*a;
+{
+	if (a == 0)
+		return;
+	array_flush (a);
+	array_dispose_element(a->head);
+	free(a);
+}
+
+ARRAY *
+array_copy(a)
+ARRAY	*a;
+{
+	ARRAY	*a1;
+	ARRAY_ELEMENT	*ae, *new;
+
+	if (!a)
+		return((ARRAY *) NULL);
+	a1 = array_create();
+	a1->type = a->type;
+	a1->max_index = a->max_index;
+	a1->num_elements = a->num_elements;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		new = array_create_element(element_index(ae), element_value(ae));
+		ADD_BEFORE(a1->head, new);
+	}
+	return(a1);
+}
+
+#ifdef INCLUDE_UNUSED
+/*
+ * Make and return a new array composed of the elements in array A from
+ * S to E, inclusive.
+ */
+ARRAY *
+array_slice(array, s, e)
+ARRAY		*array;
+ARRAY_ELEMENT	*s, *e;
+{
+	ARRAY	*a;
+	ARRAY_ELEMENT *p, *n;
+	int	i;
+	arrayind_t mi;
+
+	a = array_create ();
+	a->type = array->type;
+
+	for (p = s, i = 0; p != e; p = element_forw(p), i++) {
+		n = array_create_element (element_index(p), element_value(p));
+		ADD_BEFORE(a->head, n);
+		mi = element_index(ae);
+	}
+	a->num_elements = i;
+	a->max_index = mi;
+	return a;
+}
+#endif
+
+/*
+ * Walk the array, calling FUNC once for each element, with the array
+ * element as the argument.
+ */
+void
+array_walk(a, func)
+ARRAY	*a;
+sh_ae_map_func_t *func;
+{
+	register ARRAY_ELEMENT *ae;
+
+	if (a == 0 || array_empty(a))
+		return;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
+		if ((*func)(ae) < 0)
+			return;
+}
+
+/*
+ * Shift the array A N elements to the left.  Delete the first N elements
+ * and subtract N from the indices of the remaining elements.  If FLAGS
+ * does not include AS_DISPOSE, this returns a singly-linked null-terminated
+ * list of elements so the caller can dispose of the chain.  If FLAGS
+ * includes AS_DISPOSE, this function disposes of the shifted-out elements
+ * and returns NULL.
+ */
+ARRAY_ELEMENT *
+array_shift(a, n, flags)
+ARRAY	*a;
+int	n, flags;
+{
+	register ARRAY_ELEMENT *ae, *ret;
+	register int i;
+
+	if (a == 0 || array_empty(a) || n <= 0)
+		return ((ARRAY_ELEMENT *)NULL);
+
+	for (i = 0, ret = ae = element_forw(a->head); ae != a->head && i < n; ae = element_forw(ae), i++)
+		;
+	if (ae == a->head) {
+		/* Easy case; shifting out all of the elements */
+		if (flags & AS_DISPOSE) {
+			array_flush (a);
+			return ((ARRAY_ELEMENT *)NULL);
+		}
+		for (ae = ret; element_forw(ae) != a->head; ae = element_forw(ae))
+			;
+		element_forw(ae) = (ARRAY_ELEMENT *)NULL;
+		a->head->next = a->head->prev = a->head;
+		a->max_index = -1;
+		a->num_elements = 0;
+		return ret;
+	}
+	/*
+	 * ae now points to the list of elements we want to retain.
+	 * ret points to the list we want to either destroy or return.
+	 */
+	ae->prev->next = (ARRAY_ELEMENT *)NULL;		/* null-terminate RET */
+
+	a->head->next = ae;		/* slice RET out of the array */
+	ae->prev = a->head;
+
+	for ( ; ae != a->head; ae = element_forw(ae))
+		element_index(ae) -= n;	/* renumber retained indices */
+
+	a->num_elements -= n;		/* modify bookkeeping information */
+	a->max_index -= n;
+
+	if (flags & AS_DISPOSE) {
+		for (ae = ret; ae; ) {
+			ret = element_forw(ae);
+			array_dispose_element(ae);
+			ae = ret;
+		}
+		return ((ARRAY_ELEMENT *)NULL);
+	}
+
+	return ret;
+}
+
+/*
+ * Shift array A right N indices.  If S is non-null, it becomes the value of
+ * the new element 0.  Returns the number of elements in the array after the
+ * shift.
+ */
+int
+array_rshift (a, n, s)
+ARRAY	*a;
+int	n;
+char	*s;
+{
+	register ARRAY_ELEMENT	*ae, *new;
+
+	if (a == 0)
+		return 0;
+	if (n <= 0)
+		return (a->num_elements);
+
+	ae = element_forw(a->head);
+	if (s) {
+		new = array_create_element(0, s);
+		ADD_BEFORE(ae, new);
+		a->num_elements++;
+	}
+
+	a->max_index += n;
+
+	/*
+	 * Renumber all elements in the array except the one we just added.
+	 */
+	for ( ; ae != a->head; ae = element_forw(ae))
+		element_index(ae) += n;
+
+	return (a->num_elements);
+}
+
+ARRAY	*
+array_quote(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array->head == 0 || array_empty (array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = quote_string (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
+char *
+array_subrange (a, start, end, quoted)
+ARRAY	*a;
+arrayind_t	start, end;
+int	quoted;
+{
+	ARRAY_ELEMENT	*h, *p;
+	arrayind_t	i;
+
+	p = array_head (a);
+	if (p == 0 || array_empty (a) || start > array_num_elements (a))
+		return ((char *)NULL);
+
+	for (i = 0, p = element_forw(p); p != a->head && i < start; i++, p = element_forw(p))
+		;
+	if (p == a->head)
+		return ((char *)NULL);
+	for (h = p; p != a->head && i < end; i++, p = element_forw(p))
+		;
+
+	return (array_to_string_internal (h, p, " ", quoted));
+}
+
+char *
+array_patsub (a, pat, rep, mflags)
+ARRAY	*a;
+char	*pat, *rep;
+int	mflags;
+{
+	ARRAY		*a2;
+	ARRAY_ELEMENT	*e;
+	char	*t;
+
+	if (array_head (a) == 0 || array_empty (a))
+		return ((char *)NULL);
+
+	a2 = array_copy (a);
+	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
+		t = pat_subst(element_value(e), pat, rep, mflags);
+		FREE(element_value(e));
+		e->value = t;
+	}
+
+	if (mflags & MATCH_QUOTED)
+		array_quote (a2);
+	t = array_to_string (a2, " ", 0);
+	array_dispose (a2);
+
+	return t;
+}
+
 /*
  * Allocate and return a new array element with index INDEX and value
  * VALUE.
  */
 ARRAY_ELEMENT *
-new_array_element(indx, value)
+array_create_element(indx, value)
 arrayind_t	indx;
 char	*value;
 {
@@ -71,121 +351,29 @@ char	*value;
 	return(r);
 }
 
+#ifdef INCLUDE_UNUSED
+ARRAY_ELEMENT *
+array_copy_element(ae)
+ARRAY_ELEMENT	*ae;
+{
+	return(ae ? array_create_element(element_index(ae), element_value(ae))
+		  : (ARRAY_ELEMENT *) NULL);
+}
+#endif
+
 void
-destroy_array_element(ae)
+array_dispose_element(ae)
 ARRAY_ELEMENT	*ae;
 {
 	FREE(ae->value);
 	free(ae);
 }
 
-ARRAY *
-new_array()
-{
-	ARRAY	*r;
-	ARRAY_ELEMENT	*head;
-
-	r =(ARRAY *)xmalloc(sizeof(ARRAY));
-	r->type = array_indexed;
-	r->max_index = r->max_size = -1;
-	r->num_elements = 0;
-	head = new_array_element(-1, (char *)NULL);	/* dummy head */
-	head->prev = head->next = head;
-	r->head = head;
-	return(r);
-}
-
-void
-empty_array (a)
-ARRAY	*a;
-{
-	register ARRAY_ELEMENT *r, *r1;
-
-	if (a == 0)
-		return;
-	for (r = element_forw(a->head); r != a->head; ) {
-		r1 = element_forw(r);
-		destroy_array_element(r);
-		r = r1;
-	}
-	a->head->next = a->head->prev = a->head;
-	a->max_index = a->max_size = -1;
-	a->num_elements = a->max_size = 0;
-}
-
-void
-dispose_array(a)
-ARRAY	*a;
-{
-	if (a == 0)
-		return;
-	empty_array (a);
-	destroy_array_element(a->head);
-	free(a);
-}
-
-ARRAY *
-dup_array(a)
-ARRAY	*a;
-{
-	ARRAY	*a1;
-	ARRAY_ELEMENT	*ae, *new;
-
-	if (!a)
-		return((ARRAY *) NULL);
-	a1 = new_array();
-	a1->type = a->type;
-	a1->max_index = a->max_index;
-	a1->num_elements = a->num_elements;
-	a1->max_size = a->max_size;
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
-		new = new_array_element(element_index(ae), element_value(ae));
-		ADD_BEFORE(a1->head, new);
-	}
-	return(a1);
-}
-
-#ifdef INCLUDE_UNUSED
-/*
- * Make and return a new array composed of the elements in array A from
- * S to E, inclusive.
- */
-ARRAY *
-dup_array_subrange(array, s, e)
-ARRAY		*array;
-ARRAY_ELEMENT	*s, *e;
-{
-	ARRAY	*a;
-	ARRAY_ELEMENT *p, *n;
-	arrayind_t i;
-
-	a = new_array ();
-	a->type = array->type;
-
-	for (p = s, i = 0; p != e; p = element_forw(p), i++) {
-		n = new_array_element (i, element_value(p));
-		ADD_BEFORE(a->head, n);
-	}
-	a->num_elements = a->max_index = i;
-	return a;
-}
-#endif
-
-#ifdef INCLUDE_UNUSED
-ARRAY_ELEMENT *
-copy_array_element(ae)
-ARRAY_ELEMENT	*ae;
-{
-	return(ae ? new_array_element(element_index(ae), element_value(ae))
-		  : (ARRAY_ELEMENT *) NULL);
-}
-#endif
-
 /*
  * Add a new element with index I and value V to array A (a[i] = v).
  */
 int
-array_add_element(a, i, v)
+array_insert(a, i, v)
 ARRAY	*a;
 arrayind_t	i;
 char	*v;
@@ -194,7 +382,7 @@ char	*v;
 
 	if (!a)
 		return(-1);
-	new = new_array_element(i, v);
+	new = array_create_element(i, v);
 	if (i > array_max_index(a)) {
 		/*
 		 * Hook onto the end.  This also works for an empty array.
@@ -214,7 +402,7 @@ char	*v;
 			/*
 			 * Replacing an existing element.
 			 */
-			destroy_array_element(new);
+			array_dispose_element(new);
 			free(element_value(ae));
 			ae->value = savestring(v);
 			return(0);
@@ -232,7 +420,7 @@ char	*v;
  * caller can dispose of it.
  */
 ARRAY_ELEMENT *
-array_delete_element(a, i)
+array_remove(a, i)
 ARRAY	*a;
 arrayind_t	i;
 {
@@ -270,25 +458,68 @@ arrayind_t	i;
 	return((char *) NULL);
 }
 
-#ifdef TEST_ARRAY
-/*
- * Walk the array, calling FUNC once for each element, with the array
- * element as the argument.
- */
-void
-array_walk(a, func)
+/* Convenience routines for the shell to translate to and from the form used
+   by the rest of the code. */
+WORD_LIST *
+array_to_word_list(a)
 ARRAY	*a;
-sh_ae_map_func_t *func;
 {
-	register ARRAY_ELEMENT *ae;
+	WORD_LIST	*list;
+	ARRAY_ELEMENT	*ae;
 
 	if (a == 0 || array_empty(a))
-		return;
+		return((WORD_LIST *)NULL);
+	list = (WORD_LIST *)NULL;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
-		(*func)(ae);
+		list = make_word_list (make_bare_word(element_value(ae)), list);
+	return (REVERSE_LIST(list, WORD_LIST *));
 }
-#endif
 
+ARRAY *
+array_from_word_list (list)
+WORD_LIST	*list;
+{
+	ARRAY	*a;
+
+	if (list == 0)
+		return((ARRAY *)NULL);
+	a = array_create();
+	return (array_assign_list (a, list));
+}
+
+ARRAY *
+array_assign_list (array, list)
+ARRAY	*array;
+WORD_LIST	*list;
+{
+	register WORD_LIST *l;
+	register arrayind_t i;
+
+	for (l = list, i = 0; l; l = l->next, i++)
+		array_insert(array, i, l->word->word);
+	return array;
+}
+
+char **
+array_to_argv (a)
+ARRAY	*a;
+{
+	char		**ret, *t;
+	int		i;
+	ARRAY_ELEMENT	*ae;
+
+	if (a == 0 || array_empty(a))
+		return ((char **)NULL);
+	ret = strvec_create (array_num_elements (a) + 1);
+	i = 0;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		t = element_value (ae);
+		ret[i++] = t ? savestring (t) : (char *)NULL;
+	}
+	ret[i] = (char *)NULL;
+	return (ret);
+}
+	
 /*
  * Return a string that is the concatenation of all the elements in A,
  * separated by SEP.
@@ -335,6 +566,57 @@ int	quoted;
 }
 
 char *
+array_to_assign (a, quoted)
+ARRAY	*a;
+int	quoted;
+{
+	char	*result, *valstr, *is;
+	char	indstr[INT_STRLEN_BOUND(intmax_t) + 1];
+	ARRAY_ELEMENT *ae;
+	int	rsize, rlen, elen;
+
+	if (a == 0 || array_empty (a))
+		return((char *)NULL);
+
+	result = (char *)xmalloc (rsize = 128);
+	result[0] = '(';
+	rlen = 1;
+
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		is = inttostr (element_index(ae), indstr, sizeof(indstr));
+		valstr = element_value (ae) ? sh_double_quote (element_value(ae))
+					    : (char *)NULL;
+		elen = STRLEN (indstr) + 8 + STRLEN (valstr);
+		RESIZE_MALLOCED_BUFFER (result, rlen, (elen + 1), rsize, rsize);
+
+		result[rlen++] = '[';
+		strcpy (result + rlen, is);
+		rlen += STRLEN (is);
+		result[rlen++] = ']';
+		result[rlen++] = '=';
+		if (valstr) {
+			strcpy (result + rlen, valstr);
+			rlen += STRLEN (valstr);
+		}
+
+		if (element_forw(ae) != a->head)
+		  result[rlen++] = ' ';
+
+		FREE (valstr);
+	}
+	RESIZE_MALLOCED_BUFFER (result, rlen, 1, rsize, 8);
+	result[rlen++] = ')';
+	result[rlen] = '\0';
+	if (quoted) {
+		/* This is not as efficient as it could be... */
+		valstr = sh_single_quote (result);
+		free (result);
+		result = valstr;
+	}
+	return(result);
+}
+
+char *
 array_to_string (a, sep, quoted)
 ARRAY	*a;
 char	*sep;
@@ -347,87 +629,12 @@ int	quoted;
 	return (array_to_string_internal (element_forw(a->head), a->head, sep, quoted));
 }
 
-char *
-array_to_assignment_string (a)
-ARRAY	*a;
-{
-	char	*result, *indstr, *valstr;
-	ARRAY_ELEMENT *ae;
-	int	rsize, rlen, elen;
-
-	if (a == 0 || array_empty (a))
-		return((char *)NULL);
-
-	result = (char *)xmalloc (rsize = 128);
-	result[0] = '(';
-	rlen = 1;
-
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
-		indstr = itos (element_index(ae));
-		valstr = element_value (ae) ? sh_double_quote (element_value(ae))
-					    : (char *)NULL;
-		elen = STRLEN (indstr) + 8 + STRLEN (valstr);
-		RESIZE_MALLOCED_BUFFER (result, rlen, (elen + 1), rsize, rsize);
-
-		result[rlen++] = '[';
-		strcpy (result + rlen, indstr);
-		rlen += STRLEN (indstr);
-		result[rlen++] = ']';
-		result[rlen++] = '=';
-		if (valstr) {
-			strcpy (result + rlen, valstr);
-			rlen += STRLEN (valstr);
-		}
-
-		if (element_forw(ae) != a->head)
-		  result[rlen++] = ' ';
-
-		FREE (indstr);
-		FREE (valstr);
-	}
-	RESIZE_MALLOCED_BUFFER (result, rlen, 1, rsize, 8);
-	result[rlen++] = ')';
-	result[rlen] = '\0';
-	return(result);
-}
-
-char *
-quoted_array_assignment_string (a)
-ARRAY	*a;
-{
-	char *vstr, *sv;
-
-	sv = array_to_assignment_string (a);
-	if (sv == 0)
-		return ((char *)NULL);
-
-	vstr = sh_single_quote (sv);
-	free (sv);
-	return (vstr);
-}
-
-#if 0
-/* Determine if s2 occurs in s1.  If so, return a pointer to the
-   match in s1.  The compare is case sensitive. */
-static char *
-sindex (s1, s2)
-register char *s1, *s2;
-{
-	register int i, l, len;
-
-	for (i = 0, l = strlen(s2), len = strlen(s1); (len - i) >= l; i++)
-		if (strncmp (s1 + i, s2, l) == 0)
-			return (s1 + i);
-	return ((char *)NULL);
-}
-#endif
-
 #if defined (INCLUDE_UNUSED) || defined (TEST_ARRAY)
 /*
  * Return an array consisting of elements in S, separated by SEP
  */
 ARRAY *
-string_to_array(s, sep)
+array_from_string(s, sep)
 char	*s, *sep;
 {
 	ARRAY	*a;
@@ -438,147 +645,122 @@ char	*s, *sep;
 	w = list_string (s, sep, 0);
 	if (w == 0)
 		return((ARRAY *)NULL);
-	a = word_list_to_array (w);
+	a = array_from_word_list (w);
 	return (a);
 }
 #endif
 
-/* Convenience routines for the shell to translate to and from the form used
-   by the rest of the code. */
-WORD_LIST *
-array_to_word_list(a)
-ARRAY	*a;
-{
-	WORD_LIST	*list;
-	ARRAY_ELEMENT	*ae;
-
-	if (a == 0 || array_empty(a))
-		return((WORD_LIST *)NULL);
-	list = (WORD_LIST *)NULL;
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
-		list = make_word_list (make_bare_word(element_value(ae)), list);
-	return (REVERSE_LIST(list, WORD_LIST *));
-}
-
-char **
-array_to_argv (a)
-ARRAY	*a;
-{
-	char		**ret, *t;
-	int		i;
-	ARRAY_ELEMENT	*ae;
-
-	if (a == 0 || array_empty(a))
-		return ((char **)NULL);
-	ret = alloc_array (array_num_elements (a) + 1);
-	i = 0;
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
-		t = element_value (ae);
-		ret[i++] = t ? savestring (t) : (char *)NULL;
-	}
-	ret[i] = (char *)NULL;
-	return (ret);
-}
-	
-ARRAY *
-assign_word_list (array, list)
-ARRAY	*array;
-WORD_LIST	*list;
-{
-	register WORD_LIST *l;
-	register arrayind_t i;
-
-	for (l = list, i = 0; l; l = l->next, i++)
-		array_add_element(array, i, l->word->word);
-	return array;
-}
-
-ARRAY *
-word_list_to_array (list)
-WORD_LIST	*list;
-{
-	ARRAY	*a;
-
-	if (list == 0)
-		return((ARRAY *)NULL);
-	a = new_array();
-	return (assign_word_list (a, list));
-}
-
-ARRAY	*
-array_quote(array)
-ARRAY	*array;
-{
-	ARRAY_ELEMENT	*a;
-	char	*t;
-
-	if (array == 0 || array->head == 0 || array_empty (array))
-		return (ARRAY *)NULL;
-	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
-		t = quote_string (a->value);
-		FREE(a->value);
-		a->value = t;
-	}
-	return array;
-}
-
-char *
-array_subrange (a, start, end, quoted)
-ARRAY	*a;
-arrayind_t	start, end;
-int	quoted;
-{
-	ARRAY_ELEMENT	*h, *p;
-	arrayind_t	i;
-
-	p = array_head (a);
-	if (p == 0 || array_empty (a) || start > array_num_elements (a))
-		return ((char *)NULL);
-
-	for (i = 0, p = element_forw(p); p != a->head && i < start; i++, p = element_forw(p))
-		;
-	if (p == a->head)
-		return ((char *)NULL);
-	for (h = p; p != a->head && i < end; i++, p = element_forw(p))
-		;
-
-	return (array_to_string_internal (h, p, " ", quoted));
-}
-
-char *
-array_pat_subst (a, pat, rep, mflags)
-ARRAY	*a;
-char	*pat, *rep;
-int	mflags;
-{
-	ARRAY		*a2;
-	ARRAY_ELEMENT	*e;
-	char	*t;
-
-	if (array_head (a) == 0 || array_empty (a))
-		return ((char *)NULL);
-
-	a2 = dup_array (a);
-	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
-		t = pat_subst(element_value(e), pat, rep, mflags);
-		FREE(element_value(e));
-		e->value = t;
-	}
-
-	if (mflags & MATCH_QUOTED)
-		array_quote (a2);
-	t = array_to_string (a2, " ", 0);
-	dispose_array (a2);
-
-	return t;
-}
-
-
 #if defined (TEST_ARRAY)
+/*
+ * To make a running version, compile -DTEST_ARRAY and link with:
+ * 	xmalloc.o syntax.o lib/malloc/libmalloc.a lib/sh/libsh.a
+ */
+int interrupt_immediately = 0;
+
+int
+signal_is_trapped(s)
+int	s;
+{
+	return 0;
+}
+
+void
+fatal_error(const char *s, ...)
+{
+	fprintf(stderr, "array_test: fatal memory error\n");
+	abort();
+}
+
+void
+programming_error(const char *s, ...)
+{
+	fprintf(stderr, "array_test: fatal programming error\n");
+	abort();
+}
+
+WORD_DESC *
+make_bare_word (s)
+const char	*s;
+{
+	WORD_DESC *w;
+
+	w = (WORD_DESC *)xmalloc(sizeof(WORD_DESC));
+	w->word = s ? savestring(s) : savestring ("");
+	w->flags = 0;
+	return w;
+}
+
+WORD_LIST *
+make_word_list(x, l)
+WORD_DESC	*x;
+WORD_LIST	*l;
+{
+	WORD_LIST *w;
+
+	w = (WORD_LIST *)xmalloc(sizeof(WORD_LIST));
+	w->word = x;
+	w->next = l;
+	return w;
+}
+
+WORD_LIST *
+list_string(s, t, i)
+char	*s, *t;
+int	i;
+{
+	char	*r, *a;
+	WORD_LIST	*wl;
+
+	if (s == 0)
+		return (WORD_LIST *)NULL;
+	r = savestring(s);
+	wl = (WORD_LIST *)NULL;
+	a = strtok(r, t);
+	while (a) {
+		wl = make_word_list (make_bare_word(a), wl);
+		a = strtok((char *)NULL, t);
+	}
+	return (REVERSE_LIST (wl, WORD_LIST *));
+}
+
+GENERIC_LIST *
+list_reverse (list)
+GENERIC_LIST	*list;
+{
+	register GENERIC_LIST *next, *prev;
+
+	for (prev = 0; list; ) {
+		next = list->next;
+		list->next = prev;
+		prev = list;
+		list = next;
+	}
+	return prev;
+}
+
+char *
+pat_subst(s, t, u, i)
+char	*s, *t, *u;
+int	i;
+{
+	return ((char *)NULL);
+}
+
+char *
+quote_string(s)
+char	*s;
+{
+	return savestring(s);
+}
+
 print_element(ae)
 ARRAY_ELEMENT	*ae;
 {
-	printf("array[%ld] = %s\n", element_index(ae), element_value(ae));
+	char	lbuf[INT_STRLEN_BOUND (intmax_t) + 1];
+
+	printf("array[%s] = %s\n",
+		inttostr (element_index(ae), lbuf, sizeof (lbuf)),
+		element_value(ae));
 }
 
 print_array(a)
@@ -591,64 +773,90 @@ ARRAY	*a;
 main()
 {
 	ARRAY	*a, *new_a, *copy_of_a;
-	ARRAY_ELEMENT	*ae;
+	ARRAY_ELEMENT	*ae, *aew;
 	char	*s;
 
-	a = new_array();
-	array_add_element(a, 1, "one");
-	array_add_element(a, 7, "seven");
-	array_add_element(a, 4, "four");
-	array_add_element(a, 1029, "one thousand twenty-nine");
-	array_add_element(a, 12, "twelve");
-	array_add_element(a, 42, "forty-two");
+	a = array_create();
+	array_insert(a, 1, "one");
+	array_insert(a, 7, "seven");
+	array_insert(a, 4, "four");
+	array_insert(a, 1029, "one thousand twenty-nine");
+	array_insert(a, 12, "twelve");
+	array_insert(a, 42, "forty-two");
 	print_array(a);
 	s = array_to_string (a, " ", 0);
 	printf("s = %s\n", s);
-	copy_of_a = string_to_array(s, " ");
+	copy_of_a = array_from_string(s, " ");
 	printf("copy_of_a:");
 	print_array(copy_of_a);
-	dispose_array(copy_of_a);
+	array_dispose(copy_of_a);
 	printf("\n");
 	free(s);
-	ae = array_delete_element(a, 4);
-	destroy_array_element(ae);
-	ae = array_delete_element(a, 1029);
-	destroy_array_element(ae);
-	array_add_element(a, 16, "sixteen");
+	ae = array_remove(a, 4);
+	array_dispose_element(ae);
+	ae = array_remove(a, 1029);
+	array_dispose_element(ae);
+	array_insert(a, 16, "sixteen");
 	print_array(a);
 	s = array_to_string (a, " ", 0);
 	printf("s = %s\n", s);
-	copy_of_a = string_to_array(s, " ");
+	copy_of_a = array_from_string(s, " ");
 	printf("copy_of_a:");
 	print_array(copy_of_a);
-	dispose_array(copy_of_a);
+	array_dispose(copy_of_a);
 	printf("\n");
 	free(s);
-	array_add_element(a, 2, "two");
-	array_add_element(a, 1029, "new one thousand twenty-nine");
-	array_add_element(a, 0, "zero");
-	array_add_element(a, 134, "");
+	array_insert(a, 2, "two");
+	array_insert(a, 1029, "new one thousand twenty-nine");
+	array_insert(a, 0, "zero");
+	array_insert(a, 134, "");
 	print_array(a);
 	s = array_to_string (a, ":", 0);
 	printf("s = %s\n", s);
-	copy_of_a = string_to_array(s, ":");
+	copy_of_a = array_from_string(s, ":");
 	printf("copy_of_a:");
 	print_array(copy_of_a);
-	dispose_array(copy_of_a);
+	array_dispose(copy_of_a);
 	printf("\n");
 	free(s);
-	new_a = copy_array(a);
+	new_a = array_copy(a);
 	print_array(new_a);
 	s = array_to_string (new_a, ":", 0);
 	printf("s = %s\n", s);
-	copy_of_a = string_to_array(s, ":", 0);
+	copy_of_a = array_from_string(s, ":");
+	free(s);
 	printf("copy_of_a:");
 	print_array(copy_of_a);
-	dispose_array(copy_of_a);
-	printf("\n");
+	array_shift(copy_of_a, 2, AS_DISPOSE);
+	printf("copy_of_a shifted by two:");
+	print_array(copy_of_a);
+	ae = array_shift(copy_of_a, 2, 0);
+	printf("copy_of_a shifted by two:");
+	print_array(copy_of_a);
+	for ( ; ae; ) {
+		aew = element_forw(ae);
+		array_dispose_element(ae);
+		ae = aew;
+	}
+	array_rshift(copy_of_a, 1, (char *)0);
+	printf("copy_of_a rshift by 1:");
+	print_array(copy_of_a);
+	array_rshift(copy_of_a, 2, "new element zero");
+	printf("copy_of_a rshift again by 2 with new element zero:");
+	print_array(copy_of_a);
+	s = array_to_assign(copy_of_a, 0);
+	printf("copy_of_a=%s\n", s);
 	free(s);
-	dispose_array(a);
-	dispose_array(new_a);
+	ae = array_shift(copy_of_a, array_num_elements(copy_of_a), 0);
+	for ( ; ae; ) {
+		aew = element_forw(ae);
+		array_dispose_element(ae);
+		ae = aew;
+	}
+	array_dispose(copy_of_a);
+	printf("\n");
+	array_dispose(a);
+	array_dispose(new_a);
 }
 
 #endif /* TEST_ARRAY */

@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,10 @@ $END
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+
+#include <filecntl.h>
+
 #include "../shell.h"
 #include "../builtins.h"
 #include "../pathexp.h"
@@ -53,7 +57,12 @@ $END
 #include <glob/strmatch.h>
 #include <glob/glob.h>
 
-static  void show_builtin_command_help __P((void));
+#ifndef errno
+extern int errno;
+#endif
+
+static void show_builtin_command_help __P((void));
+static void show_longdoc __P((int));
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern
@@ -62,7 +71,7 @@ int
 help_builtin (list)
      WORD_LIST *list;
 {
-  register int i, j;
+  register int i;
   char *pattern, *name;
   int plen, match_found, sflag;
 
@@ -112,8 +121,7 @@ help_builtin (list)
 	      printf ("%s: %s\n", name, shell_builtins[i].short_doc);
 
 	      if (sflag == 0)
-		for (j = 0; shell_builtins[i].long_doc[j]; j++)
-		  printf ("    %s\n", shell_builtins[i].long_doc[j]);
+		show_longdoc (i);
 
 	      match_found++;
 	    }
@@ -122,12 +130,41 @@ help_builtin (list)
 
   if (match_found == 0)
     {
-      builtin_error ("no help topics match `%s'.  Try `help help'.", pattern);
+      builtin_error ("no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'.", pattern, pattern, pattern);
       return (EXECUTION_FAILURE);
     }
 
   fflush (stdout);
   return (EXECUTION_SUCCESS);
+}
+
+/* By convention, enforced by mkbuiltins.c, if separate help files are being
+   used, the long_doc array contains one string -- the full pathname of the
+   help file for this builtin.  */
+static void
+show_longdoc (i)
+     int i;
+{
+  register int j;
+  char * const *doc;
+  int fd;
+
+  doc = shell_builtins[i].long_doc;
+
+  if (doc && doc[0] && *doc[0] == '/' && doc[1] == (char *)NULL)
+    {
+      fd = open (doc[0], O_RDONLY);
+      if (fd == -1)
+	{
+	  builtin_error ("%s: cannot open: %s", doc[0], strerror (errno));
+	  return;
+	}
+      zcatfd (fd, 1, doc[0]);
+      close (fd);
+    }
+  else
+    for (j = 0; doc[j]; j++)
+      printf ("    %s\n", doc[j]);
 }
 
 static void
@@ -140,6 +177,7 @@ show_builtin_command_help ()
 "These shell commands are defined internally.  Type `help' to see this list.\n\
 Type `help name' to find out more about the function `name'.\n\
 Use `info bash' to find out more about the shell in general.\n\
+Use `man -k' or `info' to find out more about commands not in this list.\n\
 \n\
 A star (*) next to a name means that the command is disabled.\n\
 \n");

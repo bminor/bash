@@ -6,6 +6,11 @@ set +a
 # The calls to egrep -v are to filter out builtin array variables that are
 # automatically set and possibly contain values that vary.
 
+# first make sure we handle the basics
+x=()
+echo ${x[@]}
+unset x
+
 # this should be an error
 test=(first & second)
 echo $?
@@ -171,6 +176,10 @@ echo ${xpath[@]##*/}
 echo ${xpath[0]##*/}
 echo ${xpath[@]%%[!/]*}
 echo ${xpath[0]%%[!/]*}
+recho ${xpath##*/}
+recho ${xpath%%[!/]*}
+recho ${xpath[5]##*/}
+recho ${xpath[5]%%[!/]*}
 
 # let's try to make it a DOS-style path
 
@@ -259,11 +268,12 @@ declare -a ddd=(aaa
 bbb)
 echo ${ddd[@]}
 
-# errors
+# errors until post-bash-2.05a; now reserved words are OK
 foo=(a b c for case if then else)
 
 foo=(for case if then else)
 
+# errors
 metas=( <> < > ! )
 metas=( [1]=<> [2]=< [3]=> [4]=! )
 

@@ -369,11 +369,10 @@ GLOBIGNORE=
 expect '<man/man1/bash.1>'
 recho */man*/bash.*
 
-builtin cd /
-rm -rf $TESTDIR
-
 # this is for the benefit of pure coverage, so it writes the pcv file
-# in the right place
+# in the right place, and for gprof
 builtin cd $MYDIR
+
+rm -rf $TESTDIR
 
 exit 0

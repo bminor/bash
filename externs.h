@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,7 +27,7 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-extern long evalexp __P((char *, int *));
+extern intmax_t evalexp __P((char *, int *));
 
 /* Functions from print_cmd.c. */
 extern char *make_command_string __P((COMMAND *));
@@ -35,6 +35,7 @@ extern void print_command __P((COMMAND *));
 extern void print_simple_command __P((SIMPLE_COM *));
 extern char *named_function_string __P((char *, COMMAND *, int));
 extern void print_word_list __P((WORD_LIST *, char *));
+extern char *indirection_level_string __P((void));
 extern void xtrace_print_word_list __P((WORD_LIST *));
 #if defined (DPAREN_ARITHMETIC)
 extern void xtrace_print_arith_cmd __P((WORD_LIST *));
@@ -45,6 +46,7 @@ extern void xtrace_print_cond_term __P((int, int, WORD_DESC *, char *, char *));
 
 /* Functions from shell.c. */
 extern void exit_shell __P((int)) __attribute__((__noreturn__));
+extern void sh_exit __P((int)) __attribute__((__noreturn__));
 extern void disable_priv_mode __P((void));
 extern void unbind_args __P((void));
 
@@ -72,6 +74,8 @@ extern int return_EOF __P((void));
 extern void reset_parser __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, const char *));
 
+extern char *decode_prompt_string __P((char *));
+
 extern int get_current_prompt_level __P((void));
 extern void set_current_prompt_level __P((int));
 
@@ -86,21 +90,23 @@ extern int set_locale_var __P((char *, char *));
 extern int set_lang __P((char *, char *));
 extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
+extern char *mk_msgstr __P((char *, int *));
+extern char *localeexpand __P((char *, int, int, int, int *));
 
 /* Declarations for functions defined in list.c. */
-extern void map_over_list __P((GENERIC_LIST *, sh_glist_func_t *));
-extern void map_over_words __P((WORD_LIST *, sh_icpfunc_t *));
-extern GENERIC_LIST *reverse_list ();
+extern void list_walk __P((GENERIC_LIST *, sh_glist_func_t *));
+extern void wlist_walk __P((WORD_LIST *, sh_icpfunc_t *));
+extern GENERIC_LIST *list_reverse ();
 extern int list_length ();
 extern GENERIC_LIST *list_append ();
-extern GENERIC_LIST *delete_element ();
+extern GENERIC_LIST *list_remove ();
 
 /* Declarations for functions defined in stringlib.c */
-extern char **word_list_to_argv __P((WORD_LIST *, int, int, int *));
-extern WORD_LIST *argv_to_word_list __P((char **, int, int));
-
 extern int find_string_in_alist __P((char *, STRING_INT_ALIST *, int));
+extern char *find_token_in_alist __P((int, STRING_INT_ALIST *, int));
+extern int find_index_in_alist __P((char *, STRING_INT_ALIST *, int));
 
+extern char *substring __P((char *, int, int));
 extern char *strsub __P((char *, char *, char *, int));
 extern char *strcreplace __P((char *, int, char *, int));
 extern void strip_leading __P((char *));
@@ -130,16 +136,19 @@ extern char *fmtulong __P((unsigned long int, int, char *, size_t, int));
 extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 #endif
 
+/* Declarations for functions defined in lib/sh/fmtumax.c */
+extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
+
 /* Declarations for functions defined in lib/sh/getcwd.c */
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
 #endif
 
 /* Declarations for functions defined in lib/sh/itos.c */
-extern char *inttostr __P((long, char *, size_t));
-extern char *itos __P((long));
-extern char *uinttostr __P((unsigned long, char *, size_t));
-extern char *uitos __P((unsigned long));
+extern char *inttostr __P((intmax_t, char *, size_t));
+extern char *itos __P((intmax_t));
+extern char *uinttostr __P((uintmax_t, char *, size_t));
+extern char *uitos __P((uintmax_t));
 
 /* declarations for functions defined in lib/sh/makepath.c */
 #define MP_DOTILDE	0x01
@@ -148,12 +157,17 @@ extern char *uitos __P((unsigned long));
 
 extern char *sh_makepath __P((const char *, const char *, int));
 
+/* declarations for functions defined in lib/sh/netconn.c */
+extern int isnetconn __P((int));
+
 /* declarations for functions defined in lib/sh/netopen.c */
 extern int netopen __P((char *));
 
 /* Declarations for  functions defined in lib/sh/oslib.c */
 
+#if !defined (HAVE_DUP2) || defined (DUP2_BROKEN)
 extern int dup2 __P((int, int));
+#endif
 
 #if !defined (HAVE_GETDTABLESIZE)
 extern int getdtablesize __P((void));
@@ -162,6 +176,9 @@ extern int getdtablesize __P((void));
 #if !defined (HAVE_GETHOSTNAME)
 extern int gethostname __P((char *, int));
 #endif /* !HAVE_GETHOSTNAME */
+
+extern int getmaxgroups __P((void));
+extern long getmaxchild __P((void));
 
 /* declarations for functions defined in lib/sh/pathcanon.c */
 #define PATH_CHECKDOTDOT	0x0001
@@ -202,6 +219,11 @@ extern int strcasecmp __P((const char *, const char *));
 extern char *strerror __P((int));
 #endif
 
+/* declarations for functions defined in lib/sh/strftime.c */
+#if !defined (HAVE_STRFTIME) && defined (NEED_STRFTIME_DECL)
+extern size_t strftime __P((char *, size_t, const char *, const struct tm *));
+#endif
+
 /* declarations for functions defined in lib/sh/strindex.c */
 extern char *strindex __P((const char *, const char *));
 
@@ -214,26 +236,36 @@ typedef struct _list_of_strings {
   int list_len;
 } STRINGLIST;
 
-extern STRINGLIST *alloc_stringlist __P((int));
-extern STRINGLIST *realloc_stringlist __P((STRINGLIST *, int));
-extern void free_stringlist __P((STRINGLIST *));
-extern STRINGLIST *copy_stringlist __P((STRINGLIST *));
-extern STRINGLIST *merge_stringlists __P((STRINGLIST *, STRINGLIST *));
-extern STRINGLIST *append_stringlist __P((STRINGLIST *, STRINGLIST *));
-extern STRINGLIST *prefix_suffix_stringlist __P((STRINGLIST *, char *, char *));
-extern void print_stringlist __P((STRINGLIST *, char *));
-extern void sort_stringlist __P((STRINGLIST *));
+typedef int sh_strlist_map_func_t __P((char *));
+
+extern STRINGLIST *strlist_create __P((int));
+extern STRINGLIST *strlist_resize __P((STRINGLIST *, int));
+extern void strlist_flush __P((STRINGLIST *));
+extern void strlist_dispose __P((STRINGLIST *));
+extern int strlist_remove __P((STRINGLIST *, char *));
+extern STRINGLIST *strlist_copy __P((STRINGLIST *));
+extern STRINGLIST *strlist_merge __P((STRINGLIST *, STRINGLIST *));
+extern STRINGLIST *strlist_append __P((STRINGLIST *, STRINGLIST *));
+extern STRINGLIST *strlist_prefix_suffix __P((STRINGLIST *, char *, char *));
+extern void strlist_print __P((STRINGLIST *, char *));
+extern void strlist_walk __P((STRINGLIST *, sh_strlist_map_func_t *));
+extern void strlist_sort __P((STRINGLIST *));
 
 /* declarations for functions defined in lib/sh/stringvec.c */
 
-extern int find_name_in_array __P((char *, char **));
-extern char **alloc_array __P((int));
-extern int array_len __P((char **));
-extern void free_array_members __P((char **));
-extern void free_array __P((char **));
-extern char **copy_array __P((char **));
-extern int qsort_string_compare __P((char **, char **));
-extern void sort_char_array __P((char **));
+extern char **strvec_create __P((int));
+extern char **strvec_resize __P((char **, int));
+extern void strvec_flush __P((char **));
+extern void strvec_dispose __P((char **));
+extern int strvec_remove __P((char **, char *));
+extern int strvec_len __P((char **));
+extern int strvec_search __P((char **, char *));
+extern char **strvec_copy __P((char **));
+extern int strvec_strcmp __P((char **, char **));
+extern void strvec_sort __P((char **));
+
+extern char **strvec_from_word_list __P((WORD_LIST *, int, int, int *));
+extern WORD_LIST *strvec_to_word_list __P((char **, int, int));
 
 /* declarations for functions defined in lib/sh/strtod.c */
 #if !defined (HAVE_STRTOD)
@@ -261,8 +293,6 @@ extern unsigned long long strtoull __P((const char *, char **, int));
 #endif
 
 /* declarations for functions defined in lib/sh/strimax.c */
-#ifdef NEED_STRTOIMAX_DECL
-
 #if !HAVE_DECL_STRTOIMAX
 extern intmax_t strtoimax __P((const char *, char **, int));
 #endif
@@ -272,12 +302,11 @@ extern intmax_t strtoimax __P((const char *, char **, int));
 extern uintmax_t strtoumax __P((const char *, char **, int));
 #endif
 
-#endif /* NEED_STRTOIMAX_DECL */
-
 /* declarations for functions defined in lib/sh/strtrans.c */
 extern char *ansicstr __P((char *, int, int, int *, int *));
 extern char *ansic_quote __P((char *, int, int *));
 extern int ansic_shouldquote __P((const char *));
+extern char *ansiexpand __P((char *, int, int, int *));
 
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in
@@ -294,9 +323,13 @@ extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
+/* declarations for functions defined in lib/sh/xstrchr.c */
+#undef xstrchr
+extern char *xstrchr __P((const char *, int));
+
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));
-extern ssize_t zread1 __P((int, char *, size_t));
+extern ssize_t zreadintr __P((int, char *, size_t));
 extern ssize_t zreadc __P((int, char *));
 extern void zreset __P((void));
 extern void zsyncfd __P((int));

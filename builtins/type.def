@@ -1,7 +1,7 @@
 This file is type.def, from which is created type.c.
 It implements the builtin "type" in Bash.
 
-Copyright (C) 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES type.c
 
 $BUILTIN type
 $FUNCTION type_builtin
-$SHORT_DOC type [-apt] name [name ...]
+$SHORT_DOC type [-afptP] name [name ...]
 For each NAME, indicate how it would be interpreted if used as a
 command name.
 
@@ -37,8 +37,14 @@ file that would be executed, or nothing if `type -t NAME' would not
 return `file'.
 
 If the -a flag is used, `type' displays all of the places that contain
-an executable named `file'.  This includes aliases and functions, if
-and only if the -p flag is not also used.
+an executable named `file'.  This includes aliases, builtins, and
+functions, if and only if the -p flag is not also used.
+
+The -f flag suppresses shell function lookup.
+
+The -P flag forces a PATH search for each NAME, even if it is an alias,
+builtin, or function, and returns the name of the disk file that would
+be executed.
 $END
 
 #include <config.h>
@@ -82,6 +88,12 @@ extern char *this_command_name;
 	-a		Returns all occurrences of words, whether they
 			be a filename in the path, alias, function,
 			or builtin.
+
+	-f		Suppress shell function lookup, like `command'.
+
+	-P		Force a path search even in the presence of other
+			definitions.
+
    Order of evaluation:
 	alias
 	keyword
@@ -94,72 +106,62 @@ int
 type_builtin (list)
      WORD_LIST *list;
 {
-  int path_only, type_only, all, verbose;
-  int successful_finds, opt;
-  WORD_LIST *prev, *this;
+  int dflags, successful_finds, opt;
+  WORD_LIST *this;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
 
-  path_only = type_only = all = 0;
+  dflags = CDESC_SHORTDESC;	/* default */
   successful_finds = 0;
 
   /* Handle the obsolescent `-type', `-path', and `-all' by prescanning
-     the arguments and removing those options from the list before calling
-     internal_getopt.  Recognize `--type', `--path', and `--all' also.
-     THIS SHOULD REALLY GO AWAY. */
-  for (this = list; this && this->word->word[0] == '-'; )
+     the arguments and converting those options to the form that
+     internal_getopt recognizes. Converts `--type', `--path', and `--all'
+     also. THIS SHOULD REALLY GO AWAY. */
+  for (this = list; this && this->word->word[0] == '-'; this = this->next)
     {
       char *flag = &(this->word->word[1]);
 
       if (STREQ (flag, "type") || STREQ (flag, "-type"))
 	{
-	  type_only = 1;
-	  path_only = 0;
+	  this->word->word[1] = 't';
+	  this->word->word[2] = '\0';
 	}
       else if (STREQ (flag, "path") || STREQ (flag, "-path"))
 	{
-	  path_only = 1;
-	  type_only = 0;
+	  this->word->word[1] = 'p';
+	  this->word->word[2] = '\0';
 	}
       else if (STREQ (flag, "all") || STREQ (flag, "-all"))
-	all = 1;
-      else
 	{
-	  prev = this;
-	  this = this->next;
-	  continue;
-	}
-
-      /* We found a long option; remove it from the argument list.  Don't
-	 free it if it's the head of the argument list, though -- the
-	 argument list will be freed by the caller. */
-      if (this == list)
-	this = list = list->next;
-      else
-	{
-	  prev->next = this->next;
-	  this->next = (WORD_LIST *)NULL;
-	  dispose_words (this);
-	  this = prev->next;
+	  this->word->word[1] = 'a';
+	  this->word->word[2] = '\0';
 	}
     }
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "apt")) != -1)
+  while ((opt = internal_getopt (list, "afptP")) != -1)
     {
       switch (opt)
 	{
-	case 't':
-	  type_only = 1;
-	  path_only = 0;
+	case 'a':
+	  dflags |= CDESC_ALL;
+	  break;
+	case 'f':
+	  dflags |= CDESC_NOFUNCS;
 	  break;
 	case 'p':
-	  path_only = 1;
-	  type_only = 0;
+	  dflags |= CDESC_PATH_ONLY;
+	  dflags &= ~(CDESC_TYPE|CDESC_SHORTDESC);
 	  break;
-	case 'a':
-	  all = 1;
+	case 't':
+	  dflags |= CDESC_TYPE;
+	  dflags &= ~(CDESC_PATH_ONLY|CDESC_SHORTDESC);
+	  break;
+	case 'P':	/* shorthand for type -ap */
+	  dflags |= (CDESC_PATH_ONLY|CDESC_FORCE_PATH);
+	  dflags &= ~(CDESC_TYPE|CDESC_SHORTDESC);
 	  break;
 	default:
 	  builtin_usage ();
@@ -168,23 +170,14 @@ type_builtin (list)
     }
   list = loptend;
 
-  if (type_only)
-    verbose = 1;
-  else if (path_only == 0)
-    verbose = 2;
-  else if (path_only)
-    verbose = 3;
-  else
-    verbose = 0;
-
   while (list)
     {
       int found;
 
-      found = describe_command (list->word->word, verbose, all);
+      found = describe_command (list->word->word, dflags);
 
-      if (!found && !path_only && !type_only)
-	builtin_error ("%s: not found", list->word->word);
+      if (!found && (dflags & (CDESC_PATH_ONLY|CDESC_TYPE)) == 0)
+	sh_notfound (list->word->word);
 
       successful_finds += found;
       list = list->next;
@@ -196,43 +189,45 @@ type_builtin (list)
 }
 
 /*
- * Describe COMMAND as required by the type builtin.
+ * Describe COMMAND as required by the type and command builtins.
  *
- * If VERBOSE == 0, don't print anything
- * If VERBOSE == 1, print short description as for `type -t'
- * If VERBOSE == 2, print long description as for `type' and `command -V'
- * If VERBOSE == 3, print path name only for disk files
- * If VERBOSE == 4, print string used to invoke COMMAND, for `command -v'
+ * Behavior is controlled by DFLAGS.  Flag values are
+ *	CDESC_ALL	print all descriptions of a command
+ *	CDESC_SHORTDESC	print the description for type and command -V
+ *	CDESC_REUSABLE	print in a format that may be reused as input
+ *	CDESC_TYPE	print the type for type -t
+ *	CDESC_PATH_ONLY	print the path for type -p
+ *	CDESC_FORCE_PATH	force a path search for type -P
+ *	CDESC_NOFUNCS	skip function lookup for type -f
  *
- * ALL says whether or not to look for all occurrences of COMMAND, or
+ * CDESC_ALL says whether or not to look for all occurrences of COMMAND, or
  * return after finding it once.
  */
 int
-describe_command (command, verbose, all)
+describe_command (command, dflags)
      char *command;
-     int verbose, all;
+     int dflags;
 {
-  int found, i, found_file, f;
+  int found, i, found_file, f, all;
   char *full_path, *x;
   SHELL_VAR *func;
 #if defined (ALIAS)
   alias_t *alias;
 #endif
 
+  all = (dflags & CDESC_ALL) != 0;
   found = found_file = 0;
   full_path = (char *)NULL;
 
 #if defined (ALIAS)
   /* Command is an alias? */
-  alias = find_alias (command);
-
-  if (alias)
+  if (((dflags & CDESC_FORCE_PATH) == 0) && (alias = find_alias (command)))
     {
-      if (verbose == 1)
+      if (dflags & CDESC_TYPE)
 	puts ("alias");
-      else if (verbose == 2)
+      else if (dflags & CDESC_SHORTDESC)
 	printf ("%s is aliased to `%s'\n", command, alias->value);
-      else if (verbose == 4)
+      else if (dflags & CDESC_REUSABLE)
 	{
 	  x = sh_single_quote (alias->value);
 	  printf ("alias %s=%s\n", command, x);
@@ -247,14 +242,13 @@ describe_command (command, verbose, all)
 #endif /* ALIAS */
 
   /* Command is a shell reserved word? */
-  i = find_reserved_word (command);
-  if (i >= 0)
+  if (((dflags & CDESC_FORCE_PATH) == 0) && (i = find_reserved_word (command)) >= 0)
     {
-      if (verbose == 1)
+      if (dflags & CDESC_TYPE)
 	puts ("keyword");
-      else if (verbose == 2)
+      else if (dflags & CDESC_SHORTDESC)
 	printf ("%s is a shell keyword\n", command);
-      else if (verbose == 4)
+      else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 
       found = 1;
@@ -264,13 +258,11 @@ describe_command (command, verbose, all)
     }
 
   /* Command is a function? */
-  func = find_function (command);
-
-  if (func)
+  if (((dflags & (CDESC_FORCE_PATH|CDESC_NOFUNCS)) == 0) && (func = find_function (command)))
     {
-      if (verbose == 1)
+      if (dflags & CDESC_TYPE)
 	puts ("function");
-      else if (verbose == 2)
+      else if (dflags & CDESC_SHORTDESC)
 	{
 #define PRETTY_PRINT_FUNC 1
 	  char *result;
@@ -285,7 +277,7 @@ describe_command (command, verbose, all)
 	  printf ("%s\n", result);
 #undef PRETTY_PRINT_FUNC
 	}
-      else if (verbose == 4)
+      else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 
       found = 1;
@@ -295,13 +287,13 @@ describe_command (command, verbose, all)
     }
 
   /* Command is a builtin? */
-  if (find_shell_builtin (command))
+  if (((dflags & CDESC_FORCE_PATH) == 0) && find_shell_builtin (command))
     {
-      if (verbose == 1)
+      if (dflags & CDESC_TYPE)
 	puts ("builtin");
-      else if (verbose == 2)
+      else if (dflags & CDESC_SHORTDESC)
 	printf ("%s is a shell builtin\n", command);
-      else if (verbose == 4)
+      else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 
       found = 1;
@@ -318,11 +310,11 @@ describe_command (command, verbose, all)
       f = file_status (command);
       if (f & FS_EXECABLE)
 	{
-	  if (verbose == 1)
+	  if (dflags & CDESC_TYPE)
 	    puts ("file");
-	  else if (verbose == 2)
+	  else if (dflags & CDESC_SHORTDESC)
 	    printf ("%s is %s\n", command, command);
-	  else if (verbose == 3 || verbose == 4)
+	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY))
 	    printf ("%s\n", command);
 
 	  /* There's no use looking in the hash table or in $PATH,
@@ -334,15 +326,15 @@ describe_command (command, verbose, all)
 
   /* If the user isn't doing "-a", then we might care about
      whether the file is present in our hash table. */
-  if (all == 0)
+  if (all == 0 || (dflags & CDESC_FORCE_PATH))
     {
-      if ((full_path = find_hashed_filename (command)) != (char *)NULL)
+      if (full_path = phash_search (command))
 	{
-	  if (verbose == 1)
+	  if (dflags & CDESC_TYPE)
 	    puts ("file");
-	  else if (verbose == 2)
+	  else if (dflags & CDESC_SHORTDESC)
 	    printf ("%s is hashed (%s)\n", command, full_path);
-	  else if (verbose == 3 || verbose == 4)
+	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY))
 	    printf ("%s\n", full_path);
 
 	  free (full_path);
@@ -376,18 +368,18 @@ describe_command (command, verbose, all)
 	      if (all == 0)
 		break;
 	    }
-	  else if (verbose >= 2)
+	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY|CDESC_SHORTDESC))
 	    full_path = sh_makepath ((char *)NULL, full_path, MP_DOCWD);
 	}
 
       found_file++;
       found = 1;
 
-      if (verbose == 1)
+      if (dflags & CDESC_TYPE)
 	puts ("file");
-      else if (verbose == 2)
+      else if (dflags & CDESC_SHORTDESC)
 	printf ("%s is %s\n", command, full_path);
-      else if (verbose == 3 || verbose == 4)
+      else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY))
 	printf ("%s\n", full_path);
 
       free (full_path);

@@ -3,7 +3,7 @@ argv[1] = <foo>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
-./new-exp.tests: HOME: }: syntax error: operand expected (error token is "}")
+./new-exp.tests: line 24: HOME: }: syntax error: operand expected (error token is "}")
 unset
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
@@ -12,8 +12,8 @@ argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
-argv[1] = <*@*>
-argv[1] = <*@*>
+argv[1] = <*@>
+argv[1] = <*@>
 argv[1] = <@*>
 argv[1] = <)>
 argv[1] = <")">
@@ -59,8 +59,8 @@ argv[1] = <4>
 argv[1] = <op>
 argv[1] = <abcdefghijklmnop>
 argv[1] = <abcdefghijklmnop>
-./new-exp.tests: ABX: unbound variable
-./new-exp.tests: $6: cannot assign in this way
+./new-exp.tests: line 172: ABX: unbound variable
+./new-exp.tests: line 176: $6: cannot assign in this way
 argv[1] = <xxcde>
 argv[1] = <axxde>
 argv[1] = <abxyz>
@@ -162,11 +162,11 @@ lines.
 This-string-has-multiple-lines.
 this is a test of proc subst
 this is test 2
-./new-exp2.sub: /tmp/bashtmp.x*: No such file or directory
-./new-exp2.sub: /tmp/redir-notthere: No such file or directory
+./new-exp2.sub: line 31: /tmp/bashtmp.x*: No such file or directory
+./new-exp2.sub: line 35: /tmp/redir-notthere: No such file or directory
 1
 argv[1] = <6>
-./new-exp.tests: ${#:}: bad substitution
+./new-exp.tests: line 277: ${#:}: bad substitution
 argv[1] = <'>
 argv[1] = <">
 argv[1] = <"hello">
@@ -233,7 +233,7 @@ argv[1] = <oneonetwo>
 argv[1] = <onetwo>
 argv[1] = <two>
 argv[1] = <oneonetwo>
-./new-exp.tests: -2: substring expression < 0
+./new-exp.tests: line 421: -2: substring expression < 0
 argv[1] = <defghi>
 argv[1] = <efghi>
 argv[1] = <e*docrine>
@@ -395,13 +395,13 @@ argv[6] = <w>
 argv[7] = <x>
 argv[8] = <y>
 argv[9] = <z>
-./new-exp.tests: $9: unbound variable
-./new-exp.tests: 9: unbound variable
-./new-exp.tests: UNSET: unbound variable
-./new-exp.tests: UNSET: unbound variable
-./new-exp.tests: UNSET: unbound variable
-./new-exp.tests: UNSET: unbound variable
-./new-exp.tests: UNSET: unbound variable
+./new-exp.tests: line 480: $9: unbound variable
+./new-exp.tests: line 481: 9: unbound variable
+./new-exp.tests: line 482: UNSET: unbound variable
+./new-exp.tests: line 483: UNSET: unbound variable
+./new-exp.tests: line 484: UNSET: unbound variable
+./new-exp.tests: line 485: UNSET: unbound variable
+./new-exp.tests: line 486: UNSET: unbound variable
 argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
@@ -419,10 +419,10 @@ argv[4] = <_QUILL>
 argv[5] = <_QUOTA>
 argv[6] = <_QUOTE>
 argv[1] = <_QUANTITY-_QUART-_QUEST-_QUILL-_QUOTA-_QUOTE>
-./new-exp3.sub: ${!_Q* }: bad substitution
-./new-exp3.sub: ${!1*}: bad substitution
-./new-exp3.sub: ${!@*}: bad substitution
-./new-exp.tests: ${$(($#-1))}: bad substitution
+./new-exp3.sub: line 19: ${!_Q* }: bad substitution
+./new-exp3.sub: line 24: ${!1*}: bad substitution
+./new-exp3.sub: line 26: ${!@*}: bad substitution
+./new-exp.tests: line 503: ${$(($#-1))}: bad substitution
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -439,5 +439,36 @@ argv[1] = <a>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <>
-./new-exp.tests: $(($# - 2)): substring expression < 0
-./new-exp.tests: ABXD: parameter unset
+./new-exp.tests: line 522: $(($# - 2)): substring expression < 0
+argv[1] = <bin>
+argv[2] = <bin>
+argv[3] = <ucb>
+argv[4] = <bin>
+argv[5] = <.>
+argv[6] = <sbin>
+argv[7] = <sbin>
+argv[1] = </>
+argv[2] = </>
+argv[3] = </>
+argv[4] = </>
+argv[5] = </>
+argv[6] = </>
+argv[1] = <bin>
+argv[2] = <usr/bin>
+argv[3] = <usr/ucb>
+argv[4] = <usr/local/bin>
+argv[5] = <.>
+argv[6] = <sbin>
+argv[7] = <usr/sbin>
+argv[1] = </bin>
+argv[2] = </usr/bin>
+argv[3] = </usr/ucb>
+argv[4] = </usr/local/bin>
+argv[5] = <.>
+argv[6] = </sbin>
+argv[7] = </usr/sbin>
+argv[1] = </full/path/to>
+argv[1] = </>
+argv[1] = <full/path/to/x16>
+argv[1] = <x16>
+./new-exp.tests: line 542: ABXD: parameter unset

@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,7 +36,9 @@
 #include "shell.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
 #include "signames.h"
+#include "builtins.h"
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #ifndef errno
 extern int errno;
@@ -75,6 +77,9 @@ extern int interrupt_immediately;
 extern int last_command_exit_value;
 extern int line_number;
 
+extern sh_builtin_func_t *this_shell_builtin;
+extern procenv_t wait_intr_buf;
+
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
 
@@ -98,6 +103,9 @@ int running_trap;
    parse_and_execute resets it to 1 and the trap command might want
    it. */
 int trap_line_number;
+
+/* The (trapped) signal received while executing in the `wait' builtin */
+int wait_signal_received;
 
 /* A value which can never be the target of a trap handler. */
 #define IMPOSSIBLE_TRAP_HANDLER (SigHandler *)initialize_traps
@@ -178,7 +186,7 @@ signal_name (sig)
   char *ret;
 
   /* on cygwin32, signal_names[sig] could be null */
-  ret = (sig > NSIG || sig < 0) ? "bad signal number" : signal_names[sig];
+  ret = (sig >= BASH_NSIG || sig < 0) ? "bad signal number" : signal_names[sig];
   if (ret == NULL)
     ret = "unrecognized signal number";
   return ret;
@@ -192,7 +200,7 @@ int
 decode_signal (string)
      char *string;
 {
-  long sig;
+  intmax_t sig;
 
   if (legal_number (string, &sig))
     return ((sig >= 0 && sig < NSIG) ? (int)sig : NO_SIG);
@@ -320,6 +328,12 @@ trap_handler (sig)
 
       catch_flag = 1;
       pending_traps[sig]++;
+
+      if (interrupt_immediately && this_shell_builtin && (this_shell_builtin == wait_builtin))
+	{
+	  wait_signal_received = sig;
+	  longjmp (wait_intr_buf, 1);
+	}
 
       if (interrupt_immediately)
 	run_pending_traps ();
@@ -680,7 +694,7 @@ _run_trap_internal (sig, tag)
 void
 run_debug_trap ()
 {
-  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && (sigmodes[DEBUG_TRAP] & SIG_INPROGRESS) == 0)
+  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && ((sigmodes[DEBUG_TRAP] & SIG_INPROGRESS) == 0))
     _run_trap_internal (DEBUG_TRAP, "debug trap");
 }
 
@@ -723,6 +737,7 @@ reset_signal (sig)
      int sig;
 {
   set_signal_handler (sig, original_signals[sig]);
+  sigmodes[sig] &= ~SIG_TRAPPED;
 }
 
 /* Set the handler signal SIG to the original and free any trap

@@ -12,7 +12,7 @@ trap
 
 func()
 {
-	trap 'echo [$LINENO] funcdebug' DEBUG
+	trap 'echo ${FUNCNAME:-$0}[$LINENO] funcdebug' DEBUG
 	echo funcdebug line
 }
 
@@ -24,6 +24,16 @@ trap
 func
 
 trap
+
+trap 'echo ${FUNCNAME:-$0}[$LINENO] debug' DEBUG
+func2()
+{
+	echo func2debug line
+}
+declare -ft func2
+func2
+
+unset -f func2
 
 trap '' DEBUG
 
@@ -74,4 +84,3 @@ trap -p SIGCHLD
 trap SIGINT QUIT TERM
 
 trap
-

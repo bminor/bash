@@ -36,22 +36,24 @@ GENERIC_LIST global_error_list;
 #ifdef INCLUDE_UNUSED
 /* Call FUNCTION on every member of LIST, a generic list. */
 void
-map_over_list (list, function)
+list_walk (list, function)
      GENERIC_LIST *list;
      sh_glist_func_t *function;
 {
   for ( ; list; list = list->next)
-    (*function) (list);
+    if ((*function) (list) < 0)
+      return;
 }
 
 /* Call FUNCTION on every string in WORDS. */
 void
-map_over_words (words, function)
+wlist_walk (words, function)
      WORD_LIST *words;
      sh_icpfunc_t *function;
 {
   for ( ; words; words = words->next)
-    (*function) (words->word->word);
+    if ((*function) (words->word->word) < 0)
+      return;
 }
 #endif /* INCLUDE_UNUSED */
 
@@ -59,7 +61,7 @@ map_over_words (words, function)
    of the chain.  You should always assign the output value of this
    function to something, or you will lose the chain. */
 GENERIC_LIST *
-reverse_list (list)
+list_reverse (list)
      GENERIC_LIST *list;
 {
   register GENERIC_LIST *next, *prev;
@@ -108,11 +110,11 @@ list_append (head, tail)
    then ARG.  Note that LIST contains the address of a variable which points
    to the list.  You might call this function like this:
 
-   SHELL_VAR *elt = delete_element (&variable_list, check_var_has_name, "foo");
+   SHELL_VAR *elt = list_remove (&variable_list, check_var_has_name, "foo");
    dispose_variable (elt);
 */
 GENERIC_LIST *
-delete_element (list, comparer, arg)
+list_remove (list, comparer, arg)
      GENERIC_LIST **list;
      Function *comparer;
      char *arg;

@@ -2,7 +2,7 @@ This file is reserved.def, in which the shell reserved words are defined.
 It has no direct C file production, but defines builtins for the Bash
 builtin help command.
 
-Copyright (C) 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,6 +28,19 @@ assumed.  For each element in WORDS, NAME is set to that element, and
 the COMMANDS are executed.
 $END
 
+$BUILTIN for ((
+$DOCNAME arith_for
+$SHORT_DOC for (( exp1; exp2; exp3 )); do COMMANDS; done
+Equivalent to
+	(( EXP1 ))
+	while (( EXP2 )); do
+		COMMANDS
+		(( EXP3 ))
+	done
+EXP1, EXP2, and EXP3 are arithmetic expressions.  If any expression is
+omitted, it behaves as if it evaluates to 1.
+$END
+
 $BUILTIN select
 $SHORT_DOC select NAME [in WORDS ... ;] do COMMANDS; done
 The WORDS are expanded, generating a list of words.  The
@@ -40,7 +53,7 @@ to that word.  If the line is empty, WORDS and the prompt are
 redisplayed.  If EOF is read, the command completes.  Any other
 value read causes NAME to be set to null.  The line read is saved
 in the variable REPLY.  COMMANDS are executed after each selection
-until a break or return command is executed.
+until a break command is executed.
 $END
 
 $BUILTIN time
@@ -101,6 +114,31 @@ This is similar to the `fg' command.  Resume a stopped or background
 job.  If you specifiy DIGITS, then that job is used.  If you specify
 WORD, then the job whose name begins with WORD is used.  Following the
 job specification with a `&' places the job in the background.
+$END
+
+$BUILTIN (( ... ))
+$DOCNAME arith
+$SHORT_DOC (( expression ))
+The EXPRESSION is evaluated according to the rules for arithmetic
+evaluation.  Equivalent to "let EXPRESSION".
+$END
+
+$BUILTIN [[ ... ]]
+$DOCNAME conditional
+$SHORT_DOC [[ expression ]]
+Returns a status of 0 or 1 depending on the evaluation of the conditional
+expression EXPRESSION.  Expressions are composed of the same primaries used
+by the `test' builtin, and may be combined using the following operators
+
+	( EXPRESSION )	Returns the value of EXPRESSION
+	! EXPRESSION	True if EXPRESSION is false; else false
+	EXPR1 && EXPR2	True if both EXPR1 and EXPR2 are true; else false
+	EXPR1 || EXPR2	True if either EXPR1 or EXPR2 is true; else false
+
+When the `==' and `!=' operators are used, the string to the right of the
+operator is used as a pattern and pattern matching is performed.  The
+&& and || operators do not evaluate EXPR2 if EXPR1 is sufficient to
+determine the expression's value.
 $END
 
 $BUILTIN variables

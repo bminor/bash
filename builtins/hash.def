@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,15 +23,17 @@ $PRODUCES hash.c
 
 $BUILTIN hash
 $FUNCTION hash_builtin
-$SHORT_DOC hash [-r] [-p pathname] [-t] [name ...]
+$SHORT_DOC hash [-lr] [-p pathname] [-dt] [name ...]
 For each NAME, the full pathname of the command is determined and
 remembered.  If the -p option is supplied, PATHNAME is used as the
 full pathname of NAME, and no path search is performed.  The -r
-option causes the shell to forget all remembered locations.
+option causes the shell to forget all remembered locations.  The -d
+option causes the shell to forget the remembered location of each NAME.
 If the -t option is supplied the full pathname to which each NAME
 corresponds is printed.  If multiple NAME arguments are supplied with
--t, the NAME is printed before the hashed full pathname.  If no arguments
-are given, information about remembered commands is displayed.
+-t, the NAME is printed before the hashed full pathname.  The -l option
+causes output to be displayed in a format that may be reused as input.
+If no arguments are given, information about remembered commands is displayed.
 $END
 
 #include <config.h>
@@ -60,8 +62,10 @@ extern int dot_found_in_search;
 extern char *this_command_name;
 
 static int add_hashed_command __P((char *, int));
-static int print_hashed_commands __P((void));
-static int list_hashed_filename_targets __P((WORD_LIST *));
+static int print_hash_info __P((BUCKET_CONTENTS *));
+static int print_portable_hash_info __P((BUCKET_CONTENTS *));
+static int print_hashed_commands __P((int));
+static int list_hashed_filename_targets __P((WORD_LIST *, int));
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified
@@ -70,7 +74,7 @@ int
 hash_builtin (list)
      WORD_LIST *list;
 {
-  int expunge_hash_table, list_targets, opt;
+  int expunge_hash_table, list_targets, list_portably, delete, opt;
   char *w, *pathname;
 
   if (hashing_enabled == 0)
@@ -79,18 +83,24 @@ hash_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  expunge_hash_table = list_targets = 0;
+  expunge_hash_table = list_targets = list_portably = delete = 0;
   pathname = (char *)NULL;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "rp:t")) != -1)
+  while ((opt = internal_getopt (list, "dlp:rt")) != -1)
     {
       switch (opt)
 	{
-	case 'r':
-	  expunge_hash_table = 1;
+	case 'd':
+	  delete = 1;
+	  break;
+	case 'l':
+	  list_portably = 1;
 	  break;
 	case 'p':
 	  pathname = list_optarg;
+	  break;
+	case 'r':
+	  expunge_hash_table = 1;
 	  break;
 	case 't':
 	  list_targets = 1;
@@ -105,40 +115,38 @@ hash_builtin (list)
   /* hash -t requires at least one argument. */
   if (list == 0 && list_targets)
     {
-      builtin_error("-t: argument required");
+      sh_needarg ("-t");
       return (EXECUTION_FAILURE);
     }
 
-  /* We want hash -r to be silent, but hash -- to print hashing info.  That
-     is the reason for the test of expunge_hash_table. */
+  /* We want hash -r to be silent, but hash -- to print hashing info, so
+     we test expunge_hash_table. */
   if (list == 0 && expunge_hash_table == 0)
     {
-      if (print_hashed_commands () == 0)
+      if (print_hashed_commands (list_portably) == 0)
 	printf ("%s: hash table empty\n", this_command_name);
 
       return (EXECUTION_SUCCESS);
     }
 
   if (expunge_hash_table)
-    flush_hashed_filenames ();
+    phash_flush ();
 
   /* If someone runs `hash -r -t xyz' he will be disappointed. */
   if (list_targets)
-    {
-      return (list_hashed_filename_targets (list));
-    }
+    return (list_hashed_filename_targets (list, list_portably));
       
 #if defined (RESTRICTED_SHELL)
   if (restricted && pathname && strchr (pathname, '/'))
     {
-      builtin_error ("%s: restricted", pathname);
+      sh_restricted (pathname);
       return (EXECUTION_FAILURE);
     }
 #endif
 
   for (opt = EXECUTION_SUCCESS; list; list = list->next)
     {
-      /* Add or rehash the specified commands. */
+      /* Add, remove or rehash the specified commands. */
       w = list->word->word;
       if (pathname)
 	{
@@ -152,10 +160,15 @@ hash_builtin (list)
 	      opt = EXECUTION_FAILURE;
 	    }
 	  else
-	    remember_filename (w, pathname, 0, 0);
+	    phash_insert (w, pathname, 0, 0);
 	}
       else if (absolute_program (w))
 	continue;
+      else if (delete && phash_remove (w))
+	{
+	  sh_notfound (w);
+	  opt = EXECUTION_FAILURE;
+	}
       else if (add_hashed_command (w, 0))
 	opt = EXECUTION_FAILURE;
     }
@@ -177,51 +190,52 @@ add_hashed_command (w, quiet)
     {
       full_path = find_user_command (w);
       if (full_path && executable_file (full_path))
-	remember_filename (w, full_path, dot_found_in_search, 0);
+	phash_insert (w, full_path, dot_found_in_search, 0);
       else
 	{
 	  if (quiet == 0)
-	    builtin_error ("%s: not found", w);
+	    sh_notfound (w);
 	  rv++;
 	}
-      if (full_path)
-	free (full_path);
+      FREE (full_path);
     }
   return (rv);
 }
 
 /* Print information about current hashed info. */
 static int
-print_hashed_commands ()
+print_hash_info (item)
+     BUCKET_CONTENTS *item;
 {
-  BUCKET_CONTENTS *item_list;
-  int bucket, any_printed;
-
-  if (hashed_filenames == 0)
-    return (0);
-
-  for (bucket = any_printed = 0; bucket < hashed_filenames->nbuckets; bucket++)
-    {
-      item_list = get_hash_bucket (bucket, hashed_filenames);
-      if (item_list == 0)
-	continue;
-
-      if (any_printed == 0)
-	{
-	  printf ("hits\tcommand\n");
-	  any_printed++;
-	}
-
-      for ( ; item_list; item_list = item_list->next)
-	printf ("%4d\t%s\n", item_list->times_found, pathdata(item_list)->path);
-
-    }
-  return (any_printed);
+  printf ("%4d\t%s\n", item->times_found, pathdata(item)->path);
+  return 0;
 }
 
 static int
-list_hashed_filename_targets (list)
+print_portable_hash_info (item)
+     BUCKET_CONTENTS *item;
+{
+  printf ("builtin hash -p %s %s\n", pathdata(item)->path, item->key);
+  return 0;
+}
+
+static int
+print_hashed_commands (fmt)
+     int fmt;
+{
+  if (hashed_filenames == 0 || HASH_ENTRIES (hashed_filenames) == 0)
+    return (0);
+
+  if (fmt == 0)
+    printf ("hits\tcommand\n");
+  hash_walk (hashed_filenames, fmt ? print_portable_hash_info : print_hash_info);
+  return (1);
+}
+
+static int
+list_hashed_filename_targets (list, fmt)
      WORD_LIST *list;
+     int fmt;
 {
   int all_found, multiple;
   char *target;
@@ -232,16 +246,21 @@ list_hashed_filename_targets (list)
 
   for (l = list; l; l = l->next)
     {
-      target = find_hashed_filename (l->word->word);
+      target = phash_search (l->word->word);
       if (target == 0)
 	{
 	  all_found = 0;
-	  builtin_error ("%s: not found", l->word->word);
+	  sh_notfound (l->word->word);
 	  continue;
 	}
-      if (multiple)
-        printf ("%s\t", l->word->word);
-      printf ("%s\n", target);
+      if (fmt)
+	printf ("builtin hash -p %s %s\n", target, l->word->word);
+      else
+	{
+	  if (multiple)
+	    printf ("%s\t", l->word->word);
+	  printf ("%s\n", target);
+	}
     }
 
   return (all_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);

@@ -32,6 +32,7 @@ static int _mtrace_verbose = 0;
 #ifdef MALLOC_TRACE
 
 FILE *_mtrace_fp = NULL;
+extern char _malloc_trace_buckets[];
 
 void
 mtrace_alloc (tag, mem, size, file, line)
@@ -72,7 +73,7 @@ mtrace_free (mem, size, file, line)
 #endif /* MALLOC_TRACE */
 
 int
-malloc_set_trace(n)
+malloc_set_trace (n)
      int n;
 {
   int old;
@@ -84,10 +85,19 @@ malloc_set_trace(n)
 }
 
 void
-malloc_set_tracefp(fp)
+malloc_set_tracefp (fp)
      FILE *fp;
 {
 #ifdef MALLOC_TRACE
   _mtrace_fp = fp ? fp : stderr;
+#endif
+}
+
+void
+malloc_trace_bin (n)
+     int n;
+{
+#ifdef MALLOC_TRACE
+  _malloc_trace_buckets[n] = 1;
 #endif
 }

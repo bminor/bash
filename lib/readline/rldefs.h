@@ -74,7 +74,7 @@ extern char *strchr (), *strrchr ();
 #define _rl_strnicmp strncasecmp
 #else
 extern int _rl_stricmp PARAMS((char *, char *));
-extern int _rl_strnicmp PARAMS((char *, char *));
+extern int _rl_strnicmp PARAMS((char *, char *, int));
 #endif
 
 #if defined (HAVE_STRPBRK)
@@ -87,6 +87,13 @@ extern char *_rl_strpbrk PARAMS((const char *, const char *));
 #  define no_mode -1
 #  define vi_mode 0
 #  define emacs_mode 1
+#endif
+
+#if !defined (RL_IM_INSERT)
+#  define RL_IM_INSERT		1
+#  define RL_IM_OVERWRITE	0
+#
+#  define RL_IM_DEFAULT		RL_IM_INSERT
 #endif
 
 /* If you cast map[key].function to type (Keymap) on a Cray,
@@ -121,9 +128,10 @@ extern char *_rl_strpbrk PARAMS((const char *, const char *));
 /* Possible values for the found_quote flags word used by the completion
    functions.  It says what kind of (shell-like) quoting we found anywhere
    in the line. */
-#define RL_QF_SINGLE_QUOTE	0x1
-#define RL_QF_DOUBLE_QUOTE	0x2
-#define RL_QF_BACKSLASH		0x4
+#define RL_QF_SINGLE_QUOTE	0x01
+#define RL_QF_DOUBLE_QUOTE	0x02
+#define RL_QF_BACKSLASH		0x04
+#define RL_QF_OTHER_QUOTE	0x08
 
 /* Default readline line buffer length. */
 #define DEFAULT_BUFFER_SIZE 256
@@ -136,6 +144,10 @@ extern char *_rl_strpbrk PARAMS((const char *, const char *));
 
 #if !defined (FREE)
 #  define FREE(x)	if (x) free (x)
+#endif
+
+#if !defined (SWAP)
+#  define SWAP(s, e)  do { int t; t = s; s = e; e = t; } while (0)
 #endif
 
 /* CONFIGURATION SECTION */

@@ -27,10 +27,11 @@
 /* Instructions describing what kind of thing to do for a redirection. */
 enum r_instruction {
   r_output_direction, r_input_direction, r_inputa_direction,
-  r_appending_to, r_reading_until, r_duplicating_input,
-  r_duplicating_output, r_deblank_reading_until, r_close_this,
-  r_err_and_out, r_input_output, r_output_force,
-  r_duplicating_input_word, r_duplicating_output_word
+  r_appending_to, r_reading_until, r_reading_string,
+  r_duplicating_input, r_duplicating_output, r_deblank_reading_until,
+  r_close_this, r_err_and_out, r_input_output, r_output_force,
+  r_duplicating_input_word, r_duplicating_output_word,
+  r_move_input, r_move_output, r_move_input_word, r_move_output_word
 };
 
 /* Redirection errors. */
@@ -55,6 +56,11 @@ enum r_instruction {
 	ri == r_appending_to || \
 	ri == r_output_force)
 
+/* redirection needs translation */
+#define TRANSLATE_REDIRECT(ri) \
+  (ri == r_duplicating_input_word || ri == r_duplicating_output_word || \
+   ri == r_move_input_word || ri == r_move_output_word)
+
 /* Command Types: */
 enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_connection, cm_function_def, cm_until, cm_group,
@@ -68,6 +74,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOSPLIT	0x10	/* Do not perform word splitting on this word. */
 #define W_NOGLOB	0x20	/* Do not perform globbing on this word. */
 #define W_NOSPLIT2	0x40	/* Don't split word except for $@ expansion. */
+#define W_TILDEEXP	0x80	/* Tilde expand this assignment word */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */

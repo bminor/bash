@@ -50,12 +50,19 @@ extern void internal_error __P((const char *, ...))  __attribute__((__format__ (
 /* Report an internal warning. */
 extern void internal_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
+/* Debugging function, not enabled in released version. */
+extern void itrace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
+
 /* Report an error having to do with command parsing or execution. */
 extern void command_error __P((const char *, int, int, int));
 
 extern char *command_errstr __P((int));
 
-/* Debugging function, not enabled in released version. */
-extern void itrace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
+/* Specific errror message functions that eventually call report_error or
+   internal_error. */
+
+extern void err_badarraysub __P((const char *));
+extern void err_unboundvar __P((const char *));
+extern void err_readonly __P((const char *));
 
 #endif /* !_ERROR_H_ */

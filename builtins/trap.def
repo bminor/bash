@@ -1,7 +1,7 @@
 This file is trap.def, from which is created trap.c.
 It implements the builtin "trap" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -137,8 +137,7 @@ trap_builtin (list)
 
 	  if (sig == NO_SIG)
 	    {
-	      builtin_error ("%s: not a signal specification",
-			     list->word->word);
+	      sh_invalidsig (list->word->word);
 	      result = EXECUTION_FAILURE;
 	    }
 	  else
@@ -239,8 +238,8 @@ display_traps (list)
       i = decode_signal (list->word->word);
       if (i == NO_SIG)
 	{
+	  sh_invalidsig (list->word->word);
 	  result = EXECUTION_FAILURE;
-	  builtin_error ("%s: not a signal specification", list->word->word);
 	}
       else
 	showtrap (i);

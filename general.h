@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -53,13 +53,14 @@
 #  endif /* !__STDC__ */
 #endif /* !NULL */
 
-#define pointer_to_int(x) (int)((long)(x))
+/* Hardly used anymore */
+#define pointer_to_int(x)	(int)((char *)x - (char *)0)
 
 #if defined (alpha) && defined (__GNUC__) && !defined (strchr) && !defined (__STDC__)
 extern char *strchr (), *strrchr ();
 #endif
 
-#if !defined (strcpy)
+#if !defined (strcpy) && (defined (HAVE_DECL_STRCPY) && !HAVE_DECL_STRCPY)
 extern char *strcpy __P((char *, const char *));
 #endif
 
@@ -68,7 +69,7 @@ extern char *strcpy __P((char *, const char *));
 #endif
 
 #ifndef member
-#  define member(c, s) ((c) ? ((char *)strchr ((s), (c)) != (char *)NULL) : 0)
+#  define member(c, s) ((c) ? ((char *)xstrchr ((s), (c)) != (char *)NULL) : 0)
 #endif
 
 #ifndef whitespace
@@ -124,7 +125,7 @@ typedef struct {
 
 /* A macro to avoid making an uneccessary function call. */
 #define REVERSE_LIST(list, type) \
-  ((list && list->next) ? (type)reverse_list ((GENERIC_LIST *)list) \
+  ((list && list->next) ? (type)list_reverse ((GENERIC_LIST *)list) \
 			: (type)(list))
 
 #if __GNUC__ > 1
@@ -230,6 +231,9 @@ typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 #define FS_DIRECTORY	  0x10
 #define FS_NODIRS	  0x20
 
+/* Default maximum for move_to_high_fd */
+#define HIGH_FD_MAX	256
+
 /* The type of function passed as the fourth argument to qsort(3). */
 #ifdef __STDC__
 typedef int QSFUNC (const void *, const void *);
@@ -270,11 +274,13 @@ extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
 extern int all_digits __P((char *));
-extern int legal_number __P((char *, long *));
+extern int legal_number __P((char *, intmax_t *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
+extern int assignment __P((const char *));
 
 extern int sh_unset_nodelay_mode __P((int));
+extern int sh_validfd __P((int));
 extern void check_dev_tty __P((void));
 extern int move_to_high_fd __P((int, int, int));
 extern int check_binary_file __P((char *, int));
@@ -293,7 +299,7 @@ extern char *polite_directory_format __P((char *));
 extern char *extract_colon_unit __P((char *, int *));
 
 extern void tilde_initialize __P((void));
-extern char *bash_tilde_expand __P((const char *));
+extern char *bash_tilde_expand __P((const char *, int));
 
 extern int group_member __P((gid_t));
 extern char **get_group_list __P((int *));

@@ -1,6 +1,6 @@
-/* stringvec.c - function for managing arrays of strings. */
+/* stringvec.c - functions for managing arrays of strings. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,34 +32,25 @@
 
 #include "shell.h"
 
-#ifdef INCLUDE_UNUSED
-/* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
-   ARRAY should be NULL terminated. */
-int
-find_name_in_array (name, array)
-     char *name, **array;
-{
-  int i;
-
-  for (i = 0; array[i]; i++)
-    if (STREQ (name, array[i]))
-      return (i);
-
-  return (-1);
-}
-#endif
-
 /* Allocate an array of strings with room for N members. */
 char **
-alloc_array (n)
+strvec_create (n)
      int n;
 {
   return ((char **)xmalloc ((n) * sizeof (char *)));
 }
 
+char **
+strvec_resize (array, nsize)
+     char **array;
+     int nsize;
+{
+  return ((char **)xrealloc (array, nsize * sizeof (char *)));
+}
+
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 int
-array_len (array)
+strvec_len (array)
      char **array;
 {
   register int i;
@@ -70,7 +61,7 @@ array_len (array)
 
 /* Free the contents of ARRAY, a NULL terminated array of char *. */
 void
-free_array_members (array)
+strvec_flush (array)
      char **array;
 {
   register int i;
@@ -83,26 +74,65 @@ free_array_members (array)
 }
 
 void
-free_array (array)
+strvec_dispose (array)
      char **array;
 {
   if (array == 0)
     return;
 
-  free_array_members (array);
+  strvec_flush (array);
   free (array);
 }
 
+int
+strvec_remove (array, name)
+     char **array, *name;
+{
+  register int i, j;
+  char *x;
+
+  if (array == 0)
+    return 0;
+
+  for (i = 0; array[i]; i++)
+    if (STREQ (name, array[i]))
+      {
+	x = array[i];
+	for (j = i; array[j]; j++)
+	  array[j] = array[j + 1];
+	free (x);
+	return 1;
+      }
+  return 0;
+}
+
+#ifdef INCLUDE_UNUSED
+/* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
+   ARRAY should be NULL terminated. */
+int
+strvec_search (array, name)
+     char **array, *name;
+{
+  int i;
+
+  for (i = 0; array[i]; i++)
+    if (STREQ (name, array[i]))
+      return (i);
+
+  return (-1);
+}
+#endif
+
 /* Allocate and return a new copy of ARRAY and its contents. */
 char **
-copy_array (array)
+strvec_copy (array)
      char **array;
 {
   register int i;
   int len;
   char **ret;
 
-  len = array_len (array);
+  len = strvec_len (array);
 
   ret = (char **)xmalloc ((len + 1) * sizeof (char *));
   for (i = 0; array[i]; i++)
@@ -115,7 +145,7 @@ copy_array (array)
 /* Comparison routine for use with qsort() on arrays of strings.  Uses
    strcoll(3) if available, otherwise it uses strcmp(3). */
 int
-qsort_string_compare (s1, s2)
+strvec_strcmp (s1, s2)
      register char **s1, **s2;
 {
 #if defined (HAVE_STRCOLL)
@@ -132,8 +162,71 @@ qsort_string_compare (s1, s2)
 
 /* Sort ARRAY, a null terminated array of pointers to strings. */
 void
-sort_char_array (array)
+strvec_sort (array)
      char **array;
 {
-  qsort (array, array_len (array), sizeof (char *), (QSFUNC *)qsort_string_compare);
+  qsort (array, strvec_len (array), sizeof (char *), (QSFUNC *)strvec_strcmp);
+}
+
+/* Cons up a new array of words.  The words are taken from LIST,
+   which is a WORD_LIST *.  If ALLOC is true, everything is malloc'ed,
+   so you should free everything in this array when you are done.
+   The array is NULL terminated.  If IP is non-null, it gets the
+   number of words in the returned array.  STARTING_INDEX says where
+   to start filling in the returned array; it can be used to reserve
+   space at the beginning of the array. */
+
+char **
+strvec_from_word_list (list, alloc, starting_index, ip)
+     WORD_LIST *list;
+     int alloc, starting_index, *ip;
+{
+  int count;
+  char **array;
+
+  count = list_length (list);
+  array = (char **)xmalloc ((1 + count + starting_index) * sizeof (char *));
+
+  for (count = 0; count < starting_index; count++)
+    array[count] = (char *)NULL;
+  for (count = starting_index; list; count++, list = list->next)
+    array[count] = alloc ? savestring (list->word->word) : list->word->word;
+  array[count] = (char *)NULL;
+
+  if (ip)
+    *ip = count;
+  return (array);
+}
+
+/* Convert an array of strings into the form used internally by the shell.
+   ALLOC means to allocate new storage for each WORD_DESC in the returned
+   list rather than copy the values in ARRAY.  STARTING_INDEX says where
+   in ARRAY to begin. */
+
+WORD_LIST *
+strvec_to_word_list (array, alloc, starting_index)
+     char **array;
+     int alloc, starting_index;
+{
+  WORD_LIST *list;
+  WORD_DESC *w;
+  int i, count;
+
+  if (array == 0 || array[0] == 0)
+    return (WORD_LIST *)NULL;
+
+  for (count = 0; array[count]; count++)
+    ;
+
+  for (i = starting_index, list = (WORD_LIST *)NULL; i < count; i++)
+    {
+      w = make_bare_word (alloc ? array[i] : "");
+      if (alloc == 0)
+	{
+	  free (w->word);
+	  w->word = array[i];
+	}
+      list = make_word_list (w, list);
+    }
+  return (REVERSE_LIST (list, WORD_LIST *));
 }

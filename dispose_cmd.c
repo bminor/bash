@@ -29,6 +29,8 @@
 #include "bashansi.h"
 #include "shell.h"
 
+extern sh_obj_cache_t wdcache, wlcache;
+
 /* Dispose of the command structure passed. */
 void
 dispose_command (command)
@@ -222,7 +224,11 @@ dispose_word (w)
      WORD_DESC *w;
 {
   FREE (w->word);
+#if 0
   free (w);
+#else
+  ocache_free (wdcache, WORD_DESC, w);
+#endif
 }
 
 /* How to get rid of a linked list of words.  A WORD_LIST. */
@@ -237,7 +243,11 @@ dispose_words (list)
       t = list;
       list = list->next;
       dispose_word (t->word);
+#if 0
       free (t);
+#else
+      ocache_free (wlcache, WORD_LIST, t);
+#endif
     }
 }
 
@@ -277,6 +287,7 @@ dispose_redirects (list)
 	case r_deblank_reading_until:
 	  free (t->here_doc_eof);
 	/*FALLTHROUGH*/
+	case r_reading_string:
 	case r_output_direction:
 	case r_input_direction:
 	case r_inputa_direction:
@@ -286,6 +297,8 @@ dispose_redirects (list)
 	case r_output_force:
 	case r_duplicating_input_word:
 	case r_duplicating_output_word:
+	case r_move_input_word:
+	case r_move_output_word:
 	  dispose_word (t->redirectee.filename);
 	  /* FALLTHROUGH */
 	default:

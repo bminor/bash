@@ -216,7 +216,7 @@ maybe_execute_file (fname, force_noninteractive)
   char *filename;
   int result, flags;
 
-  filename = bash_tilde_expand (fname);
+  filename = bash_tilde_expand (fname, 0);
   flags = FEVAL_ENOENTOK;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;

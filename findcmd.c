@@ -203,7 +203,7 @@ _find_user_command_internal (name, flags)
   char *path_list, *cmd;
   SHELL_VAR *var;
 
-  /* Search for the value of PATH in both the temporary environment, and
+  /* Search for the value of PATH in both the temporary environments and
      in the regular list of variables. */
   if (var = find_variable_internal ("PATH", 1))	/* XXX could be array? */
     path_list = value_cell (var);
@@ -214,9 +214,6 @@ _find_user_command_internal (name, flags)
     return (savestring (name));
 
   cmd = find_user_command_in_path (name, path_list, flags);
-
-  if (var && tempvar_p (var))
-    dispose_variable (var);
 
   return (cmd);
 }
@@ -282,14 +279,16 @@ search_for_command (pathname)
 
   /* If PATH is in the temporary environment for this command, don't use the
      hash table to search for the full pathname. */
-  path = find_tempenv_variable ("PATH");
-  temp_path = path != 0;
+  path = find_variable_internal ("PATH", 1);
+  temp_path = path && tempvar_p (path);
+  if (temp_path == 0 && path)
+    path = (SHELL_VAR *)NULL;
 
   /* Don't waste time trying to find hashed data for a pathname
      that is already completely specified or if we're using a command-
      specific value for PATH. */
   if (path == 0 && absolute_program (pathname) == 0)
-    hashed_file = find_hashed_filename (pathname);
+    hashed_file = phash_search (pathname);
 
   /* If a command found in the hash table no longer exists, we need to
      look for it in $PATH.  Thank you Posix.2.  This forces us to stat
@@ -300,7 +299,7 @@ search_for_command (pathname)
       st = file_status (hashed_file);
       if ((st ^ (FS_EXISTS | FS_EXECABLE)) != 0)
 	{
-	  remove_hashed_filename (pathname);
+	  phash_remove (pathname);
 	  free (hashed_file);
 	  hashed_file = (char *)NULL;
 	}
@@ -320,13 +319,11 @@ search_for_command (pathname)
 	{
 	  command = find_user_command_in_path (pathname, value_cell (path),
 					       FS_EXEC_PREFERRED|FS_NODIRS);
-	  if (tempvar_p (path))
-	    dispose_variable (path);
 	}
       else
 	command = find_user_command (pathname);
       if (command && hashing_enabled && temp_path == 0)
-	remember_filename ((char *)pathname, command, dot_found_in_search, 1);	/* XXX fix const later */
+	phash_insert ((char *)pathname, command, dot_found_in_search, 1);	/* XXX fix const later */
     }
   return (command);
 }
@@ -350,7 +347,7 @@ user_command_matches (name, flags, state)
       if (match_list == 0)
 	{
 	  match_list_size = 5;
-	  match_list = alloc_array (match_list_size);
+	  match_list = strvec_create (match_list_size);
 	}
 
       /* Clear out the old match list. */
@@ -393,7 +390,7 @@ user_command_matches (name, flags, state)
 	  if (match_index + 1 == match_list_size)
 	    {
 	      match_list_size += 10;
-	      match_list = (char **)xrealloc (match_list, (match_list_size + 1) * sizeof (char *));
+	      match_list = strvec_resize (match_list, (match_list_size + 1));
 	    }
 
 	  match_list[match_index++] = match;
@@ -446,7 +443,7 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
   int status;
   char *full_path, *xpath;
 
-  xpath = (*path == '~') ? bash_tilde_expand (path) : path;
+  xpath = (*path == '~') ? bash_tilde_expand (path, 0) : path;
 
   /* Remember the location of "." in the path, in all its forms
      (as long as they begin with a `.', e.g. `./.') */

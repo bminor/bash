@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,10 +73,10 @@ int
 kill_builtin (list)
      WORD_LIST *list;
 {
-  int signal, any_succeeded, listing, saw_signal;
+  int sig, any_succeeded, listing, saw_signal;
   char *sigspec, *word;
   pid_t pid;
-  long pid_value;
+  intmax_t pid_value;
 
   if (list == 0)
     {
@@ -85,7 +85,7 @@ kill_builtin (list)
     }
 
   any_succeeded = listing = saw_signal = 0;
-  signal = SIGTERM;
+  sig = SIGTERM;
   sigspec = "TERM";
 
   /* Process options. */
@@ -105,14 +105,14 @@ kill_builtin (list)
 	    {
 	      sigspec = list->word->word;
 	      if (sigspec[0] == '0' && sigspec[1] == '\0')
-		signal = 0;
+		sig = 0;
 	      else
-		signal = decode_signal (sigspec);
+		sig = decode_signal (sigspec);
 	      list = list->next;
 	    }
 	  else
 	    {
-	      builtin_error ("%s requires an argument", word);
+	      sh_needarg (word);
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -132,7 +132,7 @@ kill_builtin (list)
       else if ((*word == '-') && !saw_signal)
 	{
 	  sigspec = word + 1;
-	  signal = decode_signal (sigspec);
+	  sig = decode_signal (sigspec);
 	  saw_signal++;
 	  list = list->next;
 	}
@@ -144,9 +144,9 @@ kill_builtin (list)
     return (display_signal_list (list, 0));
 
   /* OK, we are killing processes. */
-  if (signal == NO_SIG)
+  if (sig == NO_SIG)
     {
-      builtin_error ("bad signal spec `%s'", sigspec);
+      sh_invalidsig (sigspec);
       return (EXECUTION_FAILURE);
     }
 
@@ -163,12 +163,12 @@ kill_builtin (list)
       if (*word == '-')
 	word++;
 
-      if (*word && legal_number (word, &pid_value) && (pid_value == (pid_t)pid_value))
+      /* Use the entire argument in case of minus sign presence. */
+      if (*word && legal_number (list->word->word, &pid_value) && (pid_value == (pid_t)pid_value))
 	{
-	  /* Use the entire argument in case of minus sign presence. */
 	  pid = (pid_t) pid_value;
 
-	  if (kill_pid (pid, signal, 0) < 0)
+	  if ((pid < -1 ? kill_pid (-pid, sig, 1) : kill_pid (pid, sig, 0)) < 0)
 	    goto signal_error;
 	  else
 	    any_succeeded++;
@@ -190,7 +190,7 @@ kill_builtin (list)
 	  if (job < 0 || job >= job_slots || !jobs[job])
 	    {
 	      if (job != DUP_JOB)
-		builtin_error ("%s: no such job", list->word->word);
+		sh_badjob (list->word->word);
 	      UNBLOCK_CHILD (oset);
 	      CONTINUE_OR_FAIL;
 	    }
@@ -203,11 +203,11 @@ kill_builtin (list)
 
 	  UNBLOCK_CHILD (oset);
 
-	  if (kill_pid (pid, signal, 1) < 0)
+	  if (kill_pid (pid, sig, 1) < 0)
 	    {
 	    signal_error:
 	      if (errno == EINVAL)
-		builtin_error ("Invalid signal %d", signal);
+		sh_invalidsig (sigspec);
 	      else
 		builtin_error ("(%ld) - %s", (long)pid, strerror (errno));
 	      CONTINUE_OR_FAIL;
@@ -217,7 +217,7 @@ kill_builtin (list)
 	}
       else
 	{
-	  builtin_error ("`%s': not a pid or valid job spec", list->word->word);
+	  sh_badpid (list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
     continue_killing:

@@ -32,17 +32,13 @@
 #else
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
+
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
 #    include <sys/types.h>
 #  endif
 #  include <unistd.h>
 #endif
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
 
 #include "history.h"
 #include "histlib.h"

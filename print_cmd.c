@@ -31,21 +31,21 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #if defined (PREFER_STDARG)
 #  include <stdarg.h>
 #else
-#  if defined (PREFER_VARARGS)
-#    include <varargs.h>
-#  endif
+#  include <varargs.h>
 #endif
 
 #include "bashansi.h"
 
 #include "shell.h"
+#include "flags.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */
-#include "stdc.h"
 #include "builtins/common.h"
 
 #if !HAVE_DECL_PRINTF
 extern int printf __P((const char *, ...));	/* Yuck.  Double yuck. */
 #endif
+
+extern int indirection_level;
 
 static int indentation;
 static int indentation_amount = 4;
@@ -111,6 +111,9 @@ static int was_heredoc;
 /* The depth of the group commands that we are currently printing.  This
    includes the group command that is a function body. */
 static int group_command_nesting;
+
+/* A buffer to indicate the indirection level (PS4) when set -x is enabled. */
+static char indirection_string[100];
 
 /* Print COMMAND (a command tree) on standard output. */
 void
@@ -314,6 +317,35 @@ print_word_list (list, separator)
   _print_word_list (list, separator, xprintf);
 }
 
+/* Return a string denoting what our indirection level is. */
+
+char *
+indirection_level_string ()
+{
+  register int i, j;
+  char *ps4;
+
+  indirection_string[0] = '\0';
+  ps4 = get_string_value ("PS4");
+
+  if (ps4 == 0 || *ps4 == '\0')
+    return (indirection_string);
+
+  change_flag ('x', FLAG_OFF);
+  ps4 = decode_prompt_string (ps4);
+  change_flag ('x', FLAG_ON);
+
+  for (i = 0; *ps4 && i < indirection_level && i < 99; i++)
+    indirection_string[i] = *ps4;
+
+  for (j = 1; *ps4 && ps4[j] && i < 99; i++, j++)
+    indirection_string[i] = ps4[j];
+
+  indirection_string[i] = '\0';
+  free (ps4);
+  return (indirection_string);
+}
+
 /* A function to print the words of a simple command when set -x is on. */
 void
 xtrace_print_word_list (list)
@@ -331,6 +363,12 @@ xtrace_print_word_list (list)
       else if (sh_contains_shell_metas (t))
 	{
 	  x = sh_single_quote (t);
+	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
+	  free (x);
+	}
+      else if (ansic_shouldquote (t))
+	{
+	  x = ansic_quote (t, 0, (int *)0);
 	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
@@ -763,6 +801,20 @@ print_redirection (redirect)
 	       redirect->redirectee.filename->word, redirect->here_doc_eof);
       break;
 
+    case r_reading_string:
+      if (redirector != 0)
+	cprintf ("%d", redirector);
+      if (ansic_shouldquote (redirect->redirectee.filename->word))
+	{
+	  char *x;
+	  x = ansic_quote (redirect->redirectee.filename->word, 0, (int *)0);
+	  cprintf ("<<< %s", x);
+	  free (x);
+	}
+      else
+	cprintf ("<<< %s", redirect->redirectee.filename->word);
+      break;
+
     case r_duplicating_input:
       cprintf ("%d<&%d", redirector, redir_fd);
       break;
@@ -777,6 +829,22 @@ print_redirection (redirect)
 
     case r_duplicating_output_word:
       cprintf ("%d>&%s", redirector, redirectee->word);
+      break;
+
+    case r_move_input:
+      cprintf ("%d<&%d-", redirector, redir_fd);
+      break;
+
+    case r_move_output:
+      cprintf ("%d>&%d-", redirector, redir_fd);
+      break;
+
+    case r_move_input_word:
+      cprintf ("%d<&%s-", redirector, redirectee->word);
+      break;
+
+    case r_move_output_word:
+      cprintf ("%d>&%s-", redirector, redirectee->word);
       break;
 
     case r_close_this:
@@ -970,98 +1038,12 @@ indent (amount)
 static void
 semicolon ()
 {
-  if (command_string_index > 0 && the_printed_command[command_string_index - 1] == '&')
+  if (command_string_index > 0 &&
+       (the_printed_command[command_string_index - 1] == '&' ||
+        the_printed_command[command_string_index - 1] == '\n'))
     return;
   cprintf (";");
 }
-
-#if !defined (USE_VARARGS)
-/* How to make the string. */
-static void
-cprintf (format, arg1, arg2)
-     const char *format;
-     char *arg1, *arg2;
-{
-  register const char *s;
-  char char_arg[2], *argp, *args[2], intbuf[INT_STRLEN_BOUND(int) + 1];
-  int arg_len, c, arg_index, digit_arg;
-
-  args[arg_index = 0] = arg1;
-  args[1] = arg2;
-
-  arg_len = strlen (format);
-  the_printed_command_resize (arg_len + 1);
-
-  char_arg[1] = '\0';
-  s = format;
-  while (s && *s)
-    {
-      int free_argp = 0;
-      c = *s++;
-      if (c != '%' || !*s)
-	{
-	  char_arg[0] = c;
-	  argp = char_arg;
-	  arg_len = 1;
-	}
-      else
-	{
-	  c = *s++;
-	  switch (c)
-	    {
-	    case '%':
-	      char_arg[0] = c;
-	      argp = char_arg;
-	      arg_len = 1;
-	      break;
-
-	    case 's':
-	      argp = (char *)args[arg_index++];
-	      arg_len = strlen (argp);
-	      break;
-
-	    case 'd':
-	      /* Represent an out-of-range file descriptor with an out-of-range
-		 integer value.  We can do this because the only use of `%d' in
-		 the calls to cprintf is to output a file descriptor number for
-		 a redirection. */
-	      digit_arg = pointer_to_int (args[arg_index]);
-	      if (digit_arg < 0)
-		{
-		  sprintf (intbuf, "%u", (unsigned)-1);
-		  argp = intbuf;
-		}
-	      else
-	        argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
-	      arg_index++;
-	      arg_len = strlen (argp);
-	      break;
-
-	    case 'c':
-	      char_arg[0] = pointer_to_int (args[arg_index]);
-	      arg_index++;
-	      argp = char_arg;
-	      arg_len = 1;
-	      break;
-
-	    default:
-	      programming_error ("cprintf: bad `%%' argument (%c)", c);
-	    }
-	}
-      if (argp)
-	{
-	  the_printed_command_resize (arg_len + 1);
-	  FASTCOPY (argp, the_printed_command + command_string_index, arg_len);
-	  command_string_index += arg_len;
-	  if (free_argp)
-	    free (argp);
-	}
-    }
-
-  the_printed_command[command_string_index] = '\0';
-}
-
-#else /* We have support for varargs. */
 
 /* How to make the string. */
 static void
@@ -1078,11 +1060,7 @@ cprintf (control, va_alist)
   int digit_arg, arg_len, c;
   va_list args;
 
-#if defined (PREFER_STDARG)
-  va_start (args, control);
-#else
-  va_start (args);
-#endif
+  SH_VA_START (args, control);
 
   arg_len = strlen (control);
   the_printed_command_resize (arg_len + 1);
@@ -1091,8 +1069,6 @@ cprintf (control, va_alist)
   s = control;
   while (s && *s)
     {
-      int free_argp;
-      free_argp = 0;
       c = *s++;
       argp = (char *)NULL;
       if (c != '%' || !*s)
@@ -1150,14 +1126,11 @@ cprintf (control, va_alist)
 	  the_printed_command_resize (arg_len + 1);
 	  FASTCOPY (argp, the_printed_command + command_string_index, arg_len);
 	  command_string_index += arg_len;
-	  if (free_argp)
-	    free (argp);
 	}
     }
 
   the_printed_command[command_string_index] = '\0';
 }
-#endif /* HAVE_VARARGS_H */
 
 /* Ensure that there is enough space to stuff LENGTH characters into
    THE_PRINTED_COMMAND. */
@@ -1199,11 +1172,7 @@ xprintf (format, va_alist)
 {
   va_list args;
 
-#if defined (PREFER_STDARG)
-  va_start (args, format);
-#else
-  va_start (args);
-#endif
+  SH_VA_START (args, format);
 
   vfprintf (stdout, format, args);
   va_end (args);

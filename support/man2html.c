@@ -102,13 +102,12 @@
 
 static char location_base[NULL_TERMINATED(MED_STR_MAX)] = "";
 
-char   *signature = "<HR>\n"
-"This document was created by man2html\n"
-"using the manual pages.<BR>\n"
-"Time: %s\n";
+char   *signature = "<HR>\nThis document was created by man2html from %s.<BR>\nTime: %s\n";
 
 /* timeformat for signature */
-#define TIMEFORMAT "%T GMT, %B %d, %Y"
+#define TIMEFORMAT "%d %B %Y %T %Z"
+
+char *manpage;
 
 /* BSD mandoc Bl/El lists to HTML list types */
 #define BL_DESC_LIST   1
@@ -437,9 +436,9 @@ print_sig(void)
 
 	datbuf[0] = '\0';
 	clock = time(NULL);
-	timetm = gmtime(&clock);
+	timetm = localtime(&clock);
 	strftime(datbuf, MED_STR_MAX, TIMEFORMAT, timetm);
-	printf(signature, datbuf);
+	printf(signature, manpage, datbuf);
 }
 
 static char *
@@ -1964,6 +1963,28 @@ trans_char(char *c, char s, char t)
 	}
 }
 
+/* Remove \a from C in place.  Return modified C. */
+static char *
+unescape (char *c)
+{
+	int	i, l;
+
+	l = strlen (c);
+	i = 0;
+	while (i < l && c[i]) {
+		if (c[i] == '\a') {
+			if (c[i+1])
+				strcpy(c + i, c + i + 1);	/* should be memmove */
+			else {
+				c[i] = '\0';
+				break;
+			}
+		}
+		i++;
+	}
+	return c;
+}
+	
 static char *
 fill_words(char *c, char *words[], int *n)
 {
@@ -1977,6 +1998,9 @@ fill_words(char *c, char *words[], int *n)
 		if (!slash) {
 			if (*sl == '"') {
 				*sl = '\a';
+				skipspace = !skipspace;
+			} else if (*sl == '\a') {
+				/* handle already-translated " */
 				skipspace = !skipspace;
 			} else if (*sl == escapesym)
 				slash = 1;
@@ -2154,7 +2178,7 @@ scan_request(char *c)
 		j++;
 	if (c[0] == escapesym) {
 		/* some pages use .\" .\$1 .\} */
-		/* .\$1 is too difficult/stuppid */
+		/* .\$1 is too difficult/stupid */
 		if (c[1] == '$')
 			c = skip_till_newline(c);
 		else
@@ -2847,7 +2871,7 @@ scan_request(char *c)
 					out_html("<TH ALIGN=LEFT>");
 					out_html(page_and_sec);
 					out_html("<TH ALIGN=CENTER>");
-					out_html(wordlist[2]);
+					out_html(unescape(wordlist[2]));
 					out_html("<TH ALIGN=RIGHT>");
 					out_html(page_and_sec);
 					out_html("\n</TABLE>\n");
@@ -3940,7 +3964,7 @@ main(int argc, char **argv)
 		usage();
 		exit(EXIT_USAGE);
 	}
-	h = t = argv[1];
+	manpage = h = t = argv[1];
 	i = 0;
 
 	buf = read_man_page(h);

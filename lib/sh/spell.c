@@ -38,8 +38,10 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <bashansi.h>
 #include <maxpath.h>
+#include <stdc.h>
 
-static int mindist (), spdist ();
+static int mindist __P((char *, char *, char *));
+static int spdist __P((char *, char *));
 
 /*
  * `spname' and its helpers are inspired by the code in "The UNIX

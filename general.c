@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-1999 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,6 +49,10 @@ extern int interactive_comments;
 extern int check_hashed_filenames;
 extern int source_uses_path;
 extern int source_searches_cwd;
+
+static char *bash_special_tilde_expansions __P((char *));
+static int unquoted_tilde_word __P((const char *));
+static void initialize_group_array __P((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
 char *bash_getcwd_errstr = "getcwd: cannot access parent directories";
@@ -155,20 +159,20 @@ all_digits (string)
 int
 legal_number (string, result)
      char *string;
-     long *result;
+     intmax_t *result;
 {
-  long value;
+  intmax_t value;
   char *ep;
 
   if (result)
     *result = 0;
 
   errno = 0;
-  value = strtol (string, &ep, 10);
+  value = strtoimax (string, &ep, 10);
   if (errno)
     return 0;	/* errno is set on overflow or underflow */
 
-  /* Skip any trailing whitespace, since strtol does not. */
+  /* Skip any trailing whitespace, since strtoimax does not. */
   while (whitespace (*ep))
     ep++;
 
@@ -232,6 +236,47 @@ check_identifier (word, check_word)
     return (1);
 }
 
+/* Returns non-zero if STRING is an assignment statement.  The returned value
+   is the index of the `=' sign. */
+int
+assignment (string)
+     const char *string;
+{
+  register unsigned char c;
+  register int newi, indx;
+
+  c = string[indx = 0];
+
+  if (legal_variable_starter (c) == 0)
+    return (0);
+
+  while (c = string[indx])
+    {
+      /* The following is safe.  Note that '=' at the start of a word
+	 is not an assignment statement. */
+      if (c == '=')
+	return (indx);
+
+#if defined (ARRAY_VARS)
+      if (c == '[')
+	{
+	  newi = skipsubscript (string, indx);
+	  if (string[newi++] != ']')
+	    return (0);
+	  return ((string[newi] == '=') ? newi : 0);
+	}
+#endif /* ARRAY_VARS */
+
+      /* Variable names in assignment statements may contain only letters,
+	 digits, and `_'. */
+      if (legal_variable_char (c) == 0)
+	return (0);
+
+      indx++;
+    }
+  return (0);
+}
+
 /* **************************************************************** */
 /*								    */
 /*	     Functions to manage files and file descriptors	    */
@@ -277,6 +322,14 @@ sh_unset_nodelay_mode (fd)
     }
 
   return 0;
+}
+
+/* Return 1 if file descriptor FD is valid; 0 otherwise. */
+int
+sh_validfd (fd)
+     int fd;
+{
+  return (fcntl (fd, F_GETFD, 0) >= 0);
 }
 
 /* There is a bug in the NeXT 2.1 rlogind that causes opens
@@ -352,8 +405,8 @@ move_to_high_fd (fd, check_new, maxfd)
       nfds = getdtablesize ();
       if (nfds <= 0)
 	nfds = 20;
-      if (nfds > 256)
-	nfds = 256;
+      if (nfds > HIGH_FD_MAX)
+	nfds = HIGH_FD_MAX;		/* reasonable maximum */
     }
   else
     nfds = maxfd;
@@ -362,13 +415,15 @@ move_to_high_fd (fd, check_new, maxfd)
     if (fcntl (nfds, F_GETFD, &ignore) == -1)
       break;
 
-  if (nfds && fd != nfds && (script_fd = dup2 (fd, nfds)) != -1)
+  if (nfds > 3 && fd != nfds && (script_fd = dup2 (fd, nfds)) != -1)
     {
       if (check_new == 0 || fd != fileno (stderr))	/* don't close stderr */
 	close (fd);
       return (script_fd);
     }
 
+  /* OK, we didn't find one less than our artificial maximum; return the
+     original file descriptor. */
   return (fd);
 }
  
@@ -450,7 +505,7 @@ int
 absolute_program (string)
      const char *string;
 {
-  return ((char *)strchr (string, '/') != (char *)NULL);
+  return ((char *)xstrchr (string, '/') != (char *)NULL);
 }
 
 /* Return the `basename' of the pathname in STRING (the stuff after the
@@ -478,7 +533,7 @@ full_pathname (file)
 {
   char *ret;
 
-  file = (*file == '~') ? bash_tilde_expand (file) : savestring (file);
+  file = (*file == '~') ? bash_tilde_expand (file, 0) : savestring (file);
 
   if (ABSPATH(file))
     return (file);
@@ -572,7 +627,6 @@ extract_colon_unit (string, p_index)
 extern char *get_dirstack_from_string __P((char *));
 #endif
 
-/* Reserved for post-bash-2.05a */
 static char **bash_tilde_prefixes;
 static char **bash_tilde_suffixes;
 
@@ -617,14 +671,14 @@ tilde_initialize ()
      tilde_initialize () is called from within bashline_reinitialize (). */
   if (times_called++ == 0)
     {
-      bash_tilde_prefixes = alloc_array (3);
+      bash_tilde_prefixes = strvec_create (3);
       bash_tilde_prefixes[0] = "=~";
       bash_tilde_prefixes[1] = ":~";
       bash_tilde_prefixes[2] = (char *)NULL;
 
       tilde_additional_prefixes = bash_tilde_prefixes;
 
-      bash_tilde_suffixes = alloc_array (3);
+      bash_tilde_suffixes = strvec_create (3);
       bash_tilde_suffixes[0] = ":";
       bash_tilde_suffixes[1] = "=~";	/* XXX - ?? */
       bash_tilde_suffixes[2] = (char *)NULL;
@@ -661,16 +715,20 @@ unquoted_tilde_word (s)
   return 1;
 }
 
-/* Tilde-expand S by running it through the tilde expansion library. */
+/* Tilde-expand S by running it through the tilde expansion library.
+   ASSIGN_P is 1 if this is a variable assignment, so the alternate
+   tilde prefixes should be enabled (`=~' and `:~', see above). */
 char *
-bash_tilde_expand (s)
+bash_tilde_expand (s, assign_p)
      const char *s;
+     int assign_p;
 {
   int old_immed, r;
   char *ret;
 
   old_immed = interrupt_immediately;
   interrupt_immediately = 1;
+  tilde_additional_prefixes = assign_p ? bash_tilde_prefixes : (char **)0;
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
   interrupt_immediately = old_immed;
@@ -691,20 +749,6 @@ static GETGROUPS_T *group_array = (GETGROUPS_T *)NULL;
 #if !defined (NOGROUP)
 #  define NOGROUP (gid_t) -1
 #endif
-
-#if defined (HAVE_SYSCONF) && defined (_SC_NGROUPS_MAX)
-#  define getmaxgroups() sysconf(_SC_NGROUPS_MAX)
-#else
-#  if defined (NGROUPS_MAX)
-#    define getmaxgroups() NGROUPS_MAX
-#  else /* !NGROUPS_MAX */
-#    if defined (NGROUPS)
-#      define getmaxgroups() NGROUPS
-#    else /* !NGROUPS */
-#      define getmaxgroups() 64
-#    endif /* !NGROUPS */
-#  endif /* !NGROUPS_MAX */
-#endif /* !HAVE_SYSCONF || !SC_NGROUPS_MAX */
 
 static void
 initialize_group_array ()
@@ -798,7 +842,6 @@ get_group_list (ngp)
 {
   static char **group_vector = (char **)NULL;
   register int i;
-  char *nbuf;
 
   if (group_vector)
     {
@@ -817,12 +860,9 @@ get_group_list (ngp)
       return (char **)NULL;
     }
 
-  group_vector = alloc_array (ngroups);
+  group_vector = strvec_create (ngroups);
   for (i = 0; i < ngroups; i++)
-    {
-      nbuf = itos (group_array[i]);
-      group_vector[i] = nbuf;
-    }
+    group_vector[i] = itos (group_array[i]);
 
   if (ngp)
     *ngp = ngroups;

@@ -73,20 +73,22 @@ CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 	   $(srcdir)/history.c $(srcdir)/histsearch.c $(srcdir)/histexpand.c \
 	   $(srcdir)/histfile.c $(srcdir)/nls.c $(srcdir)/search.c \
 	   $(srcdir)/shell.c $(srcdir)/tilde.c $(srcdir)/savestring.c \
-	   $(srcdir)/compat.c
+	   $(srcdir)/text.c $(srcdir)/misc.c $(srcdir)/compat.c \
+	   $(srcdir)/mbutil.c
 
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
 	   posixstat.h posixdir.h posixjmp.h tilde.h rlconf.h rltty.h \
 	   ansi_stdlib.h rlstdc.h tcap.h xmalloc.h rlprivate.h rlshell.h \
-	   rltypedefs.h
+	   rltypedefs.h rlmbutil.h
 
-HISTOBJ = history.o histexpand.o histfile.o histsearch.o shell.o savestring.o
+HISTOBJ = history.o histexpand.o histfile.o histsearch.o shell.o savestring.o \
+	  mbutil.o
 TILDEOBJ = tilde.o
 OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
 	  rltty.o complete.o bind.o isearch.o display.o signals.o \
 	  util.o kill.o undo.o macro.o input.o callback.o terminal.o \
-	  nls.o $(HISTOBJ) $(TILDEOBJ) xmalloc.o compat.o
+	  text.o nls.o misc.o $(HISTOBJ) $(TILDEOBJ) xmalloc.o compat.o
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
@@ -203,6 +205,11 @@ macro.o: ansi_stdlib.h
 macro.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 macro.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 macro.o: history.h rlstdc.h
+mbutil.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h rlmbutil.h
+mbutil.o: readline.h keymaps.h rltypedefs.h chardefs.h rlstdc.h
+misc.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
+misc.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+misc.o: history.h rlstdc.h ansi_stdlib.h
 nls.o: ansi_stdlib.h
 nls.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 nls.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
@@ -228,6 +235,10 @@ terminal.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 terminal.o: tcap.h
 terminal.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 terminal.o: history.h rlstdc.h
+text.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
+text.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
+text.o: history.h rlstdc.h ansi_stdlib.h
+rltty.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 tilde.o: ansi_stdlib.h
 tilde.o: ${BUILD_DIR}/config.h
 tilde.o: tilde.h
@@ -259,6 +270,8 @@ input.o: rlprivate.h
 isearch.o: rlprivate.h
 kill.o: rlprivate.h
 macro.o: rlprivate.h
+mbutil.o: rlprivate.h
+misc.o: rlprivate.h
 nls.o: rlprivate.h
 parens.o: rlprivate.h
 readline.o: rlprivate.h
@@ -266,6 +279,7 @@ rltty.o: rlprivate.h
 search.o: rlprivate.h
 signals.o: rlprivate.h
 terminal.o: rlprivate.h
+text.o: rlprivate.h
 undo.o: rlprivate.h
 util.o: rlprivate.h
 vi_mode.o: rlprivate.h
@@ -282,14 +296,31 @@ isearch.o: xmalloc.h
 keymaps.o: xmalloc.h
 kill.o: xmalloc.h
 macro.o: xmalloc.h
+mbutil.o: xmalloc.h
+misc.o: xmalloc.h  
 readline.o: xmalloc.h   
 savestring.o: xmalloc.h
 search.o: xmalloc.h
 shell.o: xmalloc.h   
-tilde.o: xmalloc.h  
+terminal.o: xmalloc.h  
+text.o: xmalloc.h
 tilde.o: xmalloc.h 
+undo.o: xmalloc.h
 util.o: xmalloc.h
 vi_mode.o: xmalloc.h 
+xmalloc.o: xmalloc.h
+
+complete.o: rlmbutil.h
+display.o: rlmbutil.h
+histexpand.o: rlmbutil.h
+input.o: rlmbutil.h
+isearch.o: rlmbutil.h
+mbutil.o: rlmbutil.h
+misc.o: rlmbutil.h
+readline.o: rlmbutil.h
+search.o: rlmbutil.h
+text.o: rlmbutil.h
+vi_mode.o: rlmbutil.h
 
 # Rules for deficient makes, like SunOS and Solaris
 bind.o: bind.c
@@ -298,15 +329,13 @@ compat.o: compat.c
 complete.o: complete.c
 display.o: display.c
 funmap.o: funmap.c
-histexpand.o: histexpand.c
-histfile.o: histfile.c
-history.o: history.c
-histsearch.o: histsearch.c
 input.o: input.c
 isearch.o: isearch.c
 keymaps.o: keymaps.c emacs_keymap.c vi_keymap.c
 kill.o: kill.c
 macro.o: macro.c
+mbutil.o: mbutil.c
+misc.o: misc.c
 nls.o: nls.c
 parens.o: parens.c
 readline.o: readline.c
@@ -316,8 +345,14 @@ search.o: search.c
 shell.o: shell.c
 signals.o: signals.c
 terminal.o: terminal.c
+text.o: terminal.c
 tilde.o: tilde.c
 undo.o: undo.c
 util.o: util.c
 vi_mode.o: vi_mode.c
 xmalloc.o: xmalloc.c
+
+histexpand.o: histexpand.c
+histfile.o: histfile.c
+history.o: history.c
+histsearch.o: histsearch.c

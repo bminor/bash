@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,8 @@
 #endif /* SHELL */
 
 #include "general.h"
+#include "shmbutil.h"
+
 #define brace_whitespace(c) (!(c) || (c) == ' ' || (c) == '\t' || (c) == '\n')
 
 /* Basic idea:
@@ -53,8 +55,8 @@
 int brace_arg_separator = ',';
 
 #if defined (__P)
-static int brace_gobbler __P((char *, int *, int));
-static char **expand_amble __P((char *));
+static int brace_gobbler __P((char *, size_t, int *, int));
+static char **expand_amble __P((char *, size_t));
 static char **array_concat __P((char **, char **));
 #else
 static int brace_gobbler ();
@@ -68,13 +70,18 @@ brace_expand (text)
      char *text;
 {
   register int start;
+  size_t tlen;
   char *preamble, *postamble, *amble;
+  size_t alen;
   char **tack, **result;
   int i, j, c;
 
+  DECLARE_MBSTATE;
+
   /* Find the text of the preamble. */
+  tlen = strlen (text);
   i = 0;
-  c = brace_gobbler (text, &i, '{');
+  c = brace_gobbler (text, tlen, &i, '{');
 
   preamble = (char *)xmalloc (i + 1);
   strncpy (preamble, text, i);
@@ -91,7 +98,7 @@ brace_expand (text)
 
   /* Find the amble.  This is the stuff inside this set of braces. */
   start = ++i;
-  c = brace_gobbler (text, &i, '}');
+  c = brace_gobbler (text, tlen, &i, '}');
 
   /* What if there isn't a matching close brace? */
   if (c == 0)
@@ -99,20 +106,23 @@ brace_expand (text)
 #if defined (NOTDEF)
       /* Well, if we found an unquoted BRACE_ARG_SEPARATOR between START
 	 and I, then this should be an error.  Otherwise, it isn't. */
-      for (j = start; j < i; j++)
+      j = start;
+      while (j < i)
 	{
 	  if (text[j] == '\\')
 	    {
 	      j++;
+	      ADVANCE_CHAR (text, tlen, j);
 	      continue;
 	    }
 
 	  if (text[j] == brace_arg_separator)
 	    {
-	      free_array (result);
+	      strvec_dispose (result);
 	      report_error ("missing `}'");
 	      throw_to_top_level ();
 	    }
+	  ADVANCE_CHAR (text, tlen, j);
 	}
 #endif
       free (preamble);		/* Same as result[0]; see initialization. */
@@ -122,24 +132,33 @@ brace_expand (text)
 
 #if defined (SHELL)
   amble = substring (text, start, i);
+  alen = i - start;
 #else
   amble = (char *)xmalloc (1 + (i - start));
   strncpy (amble, &text[start], (i - start));
-  amble[i - start] = '\0';
+  alen = i - start;
+  amble[alen] = '\0';
 #endif
 
 #if defined (SHELL)
+  INITIALIZE_MBSTATE;
+
   /* If the amble does not contain an unquoted BRACE_ARG_SEPARATOR, then
      just return without doing any expansion.  */
-  for (j = 0; amble[j]; j++)
+  j = 0;
+  while (amble[j])
     {
       if (amble[j] == '\\')
 	{
 	  j++;
+	  ADVANCE_CHAR (amble, alen, j);
 	  continue;
 	}
+
       if (amble[j] == brace_arg_separator)
 	break;
+
+      ADVANCE_CHAR (amble, alen, j);
     }
 
   if (!amble[j])
@@ -153,14 +172,14 @@ brace_expand (text)
 
   postamble = &text[i + 1];
 
-  tack = expand_amble (amble);
+  tack = expand_amble (amble, alen);
   result = array_concat (result, tack);
   free (amble);
-  free_array (tack);
+  strvec_dispose (tack);
 
   tack = brace_expand (postamble);
   result = array_concat (result, tack);
-  free_array (tack);
+  strvec_dispose (tack);
 
   return (result);
 }
@@ -170,18 +189,23 @@ brace_expand (text)
    expand each slot which needs it, until there are no more slots which
    need it. */
 static char **
-expand_amble (text)
+expand_amble (text, tlen)
      char *text;
+     size_t tlen;
 {
   char **result, **partial;
   char *tem;
   int start, i, c;
 
+  DECLARE_MBSTATE;
+
   result = (char **)NULL;
 
-  for (start = 0, i = 0, c = 1; c; start = ++i)
+  start = i = 0;
+  c = 1;
+  while (c)
     {
-      c = brace_gobbler (text, &i, brace_arg_separator);
+      c = brace_gobbler (text, tlen, &i, brace_arg_separator);
 #if defined (SHELL)
       tem = substring (text, start, i);
 #else
@@ -196,11 +220,11 @@ expand_amble (text)
 	result = partial;
       else
 	{
-	  register int lr = array_len (result);
-	  register int lp = array_len (partial);
+	  register int lr = strvec_len (result);
+	  register int lp = strvec_len (partial);
 	  register int j;
 
-	  result = (char **)xrealloc (result, (1 + lp + lr) * sizeof (char *));
+	  result = strvec_resize (result, lp + lr + 1);
 
 	  for (j = 0; j < lp; j++)
 	    result[lr + j] = partial[j];
@@ -209,6 +233,8 @@ expand_amble (text)
 	  free (partial);
 	}
       free (tem);
+      ADVANCE_CHAR (text, tlen, i);
+      start = i;
     }
   return (result);
 }
@@ -218,8 +244,9 @@ expand_amble (text)
    quoting.  Return the character that caused us to stop searching;
    this is either the same as SATISFY, or 0. */
 static int
-brace_gobbler (text, indx, satisfy)
+brace_gobbler (text, tlen, indx, satisfy)
      char *text;
+     size_t tlen;
      int *indx;
      int satisfy;
 {
@@ -228,14 +255,17 @@ brace_gobbler (text, indx, satisfy)
   int si;
   char *t;
 #endif
+  DECLARE_MBSTATE;
 
   level = quoted = pass_next = 0;
 
-  for (i = *indx; c = text[i]; i++)
+  i = *indx;
+  while (c = text[i])
     {
       if (pass_next)
 	{
 	  pass_next = 0;
+	  ADVANCE_CHAR (text, tlen, i);
 	  continue;
 	}
 
@@ -244,6 +274,7 @@ brace_gobbler (text, indx, satisfy)
       if (c == '\\' && (quoted == 0 || quoted == '"' || quoted == '`'))
 	{
 	  pass_next = 1;
+	  i++;
 	  continue;
 	}
 
@@ -251,12 +282,14 @@ brace_gobbler (text, indx, satisfy)
 	{
 	  if (c == quoted)
 	    quoted = 0;
+	  ADVANCE_CHAR (text, tlen, i);
 	  continue;
 	}
 
       if (c == '"' || c == '\'' || c == '`')
 	{
 	  quoted = c;
+	  i++;
 	  continue;
 	}
 
@@ -268,6 +301,7 @@ brace_gobbler (text, indx, satisfy)
 	  t = extract_command_subst (text, &si);
 	  i = si;
 	  free (t);
+	  i++;
 	  continue;
 	}
 #endif
@@ -280,7 +314,10 @@ brace_gobbler (text, indx, satisfy)
 	  if (c == '{' &&
 	      ((!i || brace_whitespace (text[i - 1])) &&
 	       (brace_whitespace (text[i + 1]) || text[i + 1] == '}')))
-	    continue;
+	    {
+	      i++;
+	      continue;
+	    }
 #if defined (SHELL)
 	  /* If this is being compiled as part of bash, ignore the `{'
 	     in a `${}' construct */
@@ -293,6 +330,8 @@ brace_gobbler (text, indx, satisfy)
 	level++;
       else if (c == '}' && level)
 	level--;
+
+      ADVANCE_CHAR (text, tlen, i);
     }
 
   *indx = i;
@@ -312,13 +351,13 @@ array_concat (arr1, arr2)
   register char **result;
 
   if (arr1 == 0)
-    return (copy_array (arr2));
+    return (strvec_copy (arr2));
 
   if (arr2 == 0)
-    return (copy_array (arr1));
+    return (strvec_copy (arr1));
 
-  len1 = array_len (arr1);
-  len2 = array_len (arr2);
+  len1 = strvec_len (arr1);
+  len2 = strvec_len (arr2);
 
   result = (char **)xmalloc ((1 + (len1 * len2)) * sizeof (char *));
 

@@ -57,6 +57,11 @@ typedef struct process {
   char *command;	/* The particular program that is running. */
 } PROCESS;
 
+/* PRUNNING really means `not exited' */
+#define PRUNNING(p)	((p)->running || WIFSTOPPED((p)->status))
+#define PSTOPPED(p)	(WIFSTOPPED((p)->status))
+#define PDEADPROC(p)	((p)->running == PS_DONE)
+
 /* A description of a pipeline's state. */
 typedef enum { JRUNNING, JSTOPPED, JDEAD, JMIXED } JOB_STATE;
 #define JOBSTATE(job) (jobs[(job)]->state)

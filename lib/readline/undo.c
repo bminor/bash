@@ -50,8 +50,6 @@
 #include "rlprivate.h"
 #include "xmalloc.h"
 
-#define SWAP(s, e)  do { int t; t = s; s = e; e = t; } while (0)
-
 /* Non-zero tells rl_delete_text and rl_insert_text to not add to
    the undo list. */
 int _rl_doing_an_undo = 0;

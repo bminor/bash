@@ -5,7 +5,7 @@
  * chet@ins.CWRU.Edu
  */
 
-/* Copyright (C) 1987,1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -107,7 +107,7 @@ _getserv (serv, proto, pp)
      int proto;
      unsigned short *pp;
 {
-  long l;
+  intmax_t l;
   unsigned short s;
 
   if (legal_number (serv, &l))
@@ -165,7 +165,7 @@ _netopen4(host, serv, typ)
       return -1;
     }
 	
-  bzero ((char *)&sin, sizeof(sin));
+  memset ((char *)&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
   sin.sin_port = p;
   sin.sin_addr = ina;
@@ -205,7 +205,7 @@ _netopen6 (host, serv, typ)
   struct addrinfo hints, *res, *res0;
   int gerr;
 
-  bzero ((char *)&hints, sizeof (hints));
+  memset ((char *)&hints, 0, sizeof (hints));
   /* XXX -- if problems with IPv6, set to PF_INET for IPv4 only */
 #ifdef DEBUG	/* PF_INET is the one that works for me */
   hints.ai_family = PF_INET;

@@ -36,7 +36,7 @@ MV = mv
 
 SHELL = @MAKE_SHELL@
 
-PROFILE_FLAGS = 
+PROFILE_FLAGS = @PROFILE_FLAGS@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
@@ -69,7 +69,7 @@ MALLOC_SRC = @MALLOC_SRC@
 MALLOC = @MALLOC@
 ALLOCA = @ALLOCA@
 
-MALLOC_OBJS = malloc.o $(ALLOCA) trace.o stats.o table.o
+MALLOC_OBJS = malloc.o $(ALLOCA) trace.o stats.o table.o watch.o
 STUB_OBJS = $(ALLOCA) stub.o
 
 .PHONY:		malloc stubmalloc
@@ -110,9 +110,11 @@ trace.o: ${BUILD_DIR}/config.h
 table.o: ${BUILD_DIR}/config.h
 
 malloc.o: ${srcdir}/imalloc.h ${srcdir}/mstats.h
+malloc.o: ${srcdir}/table.h ${srcdir}/watch.h
 stats.o: ${srcdir}/imalloc.h ${srcdir}/mstats.h
 trace.o: ${srcdir}/imalloc.h
 table.o: ${srcdir}/imalloc.h ${srcdir}/table.h
+watch.o: ${srcdir}/imalloc.h ${srcdir}/watch.h
 
 # Rules for deficient makes, like SunOS and Solaris
 stub.o: stub.c
@@ -120,3 +122,4 @@ malloc.o: malloc.c
 table.o: table.c
 trace.o: trace.c
 stats.o: stats.c
+watch.o: watch.c

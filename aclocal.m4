@@ -605,6 +605,66 @@ AC_DEFINE(CAN_REDEFINE_GETENV)
 fi
 ])
 
+# We should check for putenv before calling this
+AC_DEFUN(BASH_FUNC_STD_PUTENV,
+[
+AC_REQUIRE([AC_HEADER_STDC])
+AC_REQUIRE([AC_C_PROTOTYPES])
+AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
+[AC_TRY_LINK([
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifndef __STDC__
+#  ifndef const
+#    define const
+#  endif
+#endif
+#ifdef PROTOTYPES
+extern int putenv (char *);
+#else
+extern int putenv ();
+#endif
+],
+[return (putenv == 0);],
+bash_cv_std_putenv=yes, bash_cv_std_putenv=no
+)])
+if test $bash_cv_std_putenv = yes; then
+AC_DEFINE(HAVE_STD_PUTENV)
+fi
+])
+
+# We should check for unsetenv before calling this
+AC_DEFUN(BASH_FUNC_STD_UNSETENV,
+[
+AC_REQUIRE([AC_HEADER_STDC])
+AC_REQUIRE([AC_C_PROTOTYPES])
+AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unsetenv,
+[AC_TRY_LINK([
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifndef __STDC__
+#  ifndef const
+#    define const
+#  endif
+#endif
+#ifdef PROTOTYPES
+extern int unsetenv (const char *);
+#else
+extern int unsetenv ();
+#endif
+],
+[return (unsetenv == 0);],
+bash_cv_std_unsetenv=yes, bash_cv_std_unsetenv=no
+)])
+if test $bash_cv_std_unsetenv = yes; then
+AC_DEFINE(HAVE_STD_UNSETENV)
+fi
+])
+
 AC_DEFUN(BASH_FUNC_ULIMIT_MAXFDS,
 [AC_MSG_CHECKING(whether ulimit can substitute for getdtablesize)
 AC_CACHE_VAL(bash_cv_ulimit_maxfds,
@@ -922,7 +982,7 @@ _bash_needmsg=
 fi
 AC_CACHE_VAL(bash_cv_termcap_lib,
 [AC_CHECK_LIB(termcap, tgetent, bash_cv_termcap_lib=libtermcap,
-    [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcal_lib=libtinfo,
+    [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
         [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
 	    [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
 	        bash_cv_termcap_lib=gnutermcap)])])])])
@@ -1378,10 +1438,10 @@ AC_DEFUN(BASH_SYS_DEFAULT_MAIL_DIR,
 AC_CACHE_VAL(bash_cv_mail_dir,
 [if test -d /var/mail; then
    bash_cv_mail_dir=/var/mail
- elif test -d /usr/mail; then
-   bash_cv_mail_dir=/usr/mail
  elif test -d /var/spool/mail; then
    bash_cv_mail_dir=/var/spool/mail
+ elif test -d /usr/mail; then
+   bash_cv_mail_dir=/usr/mail
  elif test -d /usr/spool/mail; then
    bash_cv_mail_dir=/usr/spool/mail
  else
@@ -1389,17 +1449,7 @@ AC_CACHE_VAL(bash_cv_mail_dir,
  fi
 ])
 AC_MSG_RESULT($bash_cv_mail_dir)
-if test $bash_cv_mail_dir = "/var/mail"; then
-   AC_DEFINE(DEFAULT_MAIL_DIRECTORY, "/var/mail")
-elif test $bash_cv_mail_dir = "/usr/mail"; then
-   AC_DEFINE(DEFAULT_MAIL_DIRECTORY, "/usr/mail")
-elif test $bash_cv_mail_dir = "/var/spool/mail"; then
-   AC_DEFINE(DEFAULT_MAIL_DIRECTORY, "/var/spool/mail")
-elif test $bash_cv_mail_dir = "/usr/spool/mail"; then
-   AC_DEFINE(DEFAULT_MAIL_DIRECTORY, "/usr/spool/mail")
-else
-   AC_DEFINE(DEFAULT_MAIL_DIRECTORY, "unknown")
-fi
+AC_DEFINE_UNQUOTED(DEFAULT_MAIL_DIRECTORY, "$bash_cv_mail_dir")
 ])
 
 AC_DEFUN(BASH_HAVE_TIOCGWINSZ,
@@ -1593,6 +1643,42 @@ AC_DEFINE(UNUSABLE_RT_SIGNALS)
 fi
 ])
 
+dnl
+dnl check for availability of multibyte characters and functions
+dnl
+AC_DEFUN(BASH_CHECK_MULTIBYTE,
+[
+AC_CHECK_HEADERS(wctype.h)
+AC_CHECK_HEADERS(wchar.h)
+AC_CHECK_HEADERS(langinfo.h)
+
+AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
+AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
+
+AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
+[AC_TRY_RUN([
+#include <wchar.h>
+int
+main ()
+{
+  mbstate_t ps;
+  return 0;
+}], bash_cv_have_mbstate_t=yes,  bash_cv_have_mbstate_t=no)])
+if test $bash_cv_have_mbstate_t = yes; then
+	AC_DEFINE(HAVE_MBSTATE_T)
+fi
+
+AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
+[AC_TRY_LINK(
+[#include <langinfo.h>],
+[char* cs = nl_langinfo(CODESET);],
+bash_cv_langinfo_codeset=yes, bash_cv_langinfo_codeset=no)])
+if test $bash_cv_langinfo_codeset = yes; then
+  AC_DEFINE(HAVE_LANGINFO_CODESET)
+fi
+
+])
+
 dnl need: prefix exec_prefix libdir includedir CC TERMCAP_LIB
 dnl require:
 dnl	AC_PROG_CC
@@ -1655,7 +1741,7 @@ RL_MINOR=0
 case "$ac_cv_rl_version" in
 2*|3*|4*|5*|6*|7*|8*|9*)
 	RL_MAJOR=`echo $ac_cv_rl_version | sed 's:\..*$::'`
-	RL_MINOR=`echo $ac_cv_rl_version | sed -e 's:^.*\.::' -e 's:[a-zA-Z]*$::'`
+	RL_MINOR=`echo $ac_cv_rl_version | sed -e 's:^.*\.::' -e 's:[[a-zA-Z]]*$::'`
 	;;
 esac
 

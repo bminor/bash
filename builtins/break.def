@@ -1,7 +1,7 @@
 This file is break.def, from which is created break.c.
 It implements the builtins "break" and "continue" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,7 +59,7 @@ int
 break_builtin (list)
      WORD_LIST *list;
 {
-  long newbreak;
+  intmax_t newbreak;
 
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
@@ -68,7 +68,7 @@ break_builtin (list)
 
   if (newbreak <= 0)
     {
-      builtin_error ("loop count must be > 0");
+      sh_erange (list->word->word, "loop count");
       breaking = loop_level;
       return (EXECUTION_FAILURE);
     }
@@ -94,7 +94,7 @@ int
 continue_builtin (list)
      WORD_LIST *list;
 {
-  long newcont;
+  intmax_t newcont;
 
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
@@ -103,7 +103,7 @@ continue_builtin (list)
 
   if (newcont <= 0)
     {
-      builtin_error ("loop count must be > 0");
+      sh_erange (list->word->word, "loop count");
       breaking = loop_level;
       return (EXECUTION_FAILURE);
     }

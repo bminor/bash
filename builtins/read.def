@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,25 +23,28 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-t timeout] [-p prompt] [-a array] [-n nchars] [-d delim] [name ...]
-One line is read from the standard input, and the first word is
-assigned to the first NAME, the second word to the second NAME, and so
-on, with leftover words assigned to the last NAME.  Only the characters
-found in $IFS are recognized as word delimiters.  If no NAMEs are supplied,
-the line read is stored in the REPLY variable.  If the -r option is given,
-this signifies `raw' input, and backslash escaping is disabled.  The
--d option causes read to continue until the first character of DELIM is
-read, rather than newline.  If the `-p' option is supplied, the string
-PROMPT is output without a trailing newline before attempting to read.
-If -a is supplied, the words read are assigned to sequential indices of
-ARRAY, starting at zero.  If -e is supplied and the shell is interactive,
-readline is used to obtain the line.  If -n is supplied with a non-zero
-NCHARS argument, read returns after NCHARS characters have been read.
-The -s option causes input coming from a terminal to not be echoed.
+$SHORT_DOC read [-ers] [-u fd] [-t timeout] [-p prompt] [-a array] [-n nchars] [-d delim] [name ...]
+One line is read from the standard input, or from file descriptor FD if the
+-u option is supplied, and the first word is assigned to the first NAME,
+the second word to the second NAME, and so on, with leftover words assigned
+to the last NAME.  Only the characters found in $IFS are recognized as word
+delimiters.  If no NAMEs are supplied, the line read is stored in the REPLY
+variable.  If the -r option is given, this signifies `raw' input, and
+backslash escaping is disabled.  The -d option causes read to continue
+until the first character of DELIM is read, rather than newline.  If the -p
+option is supplied, the string PROMPT is output without a trailing newline
+before attempting to read.  If -a is supplied, the words read are assigned
+to sequential indices of ARRAY, starting at zero.  If -e is supplied and
+the shell is interactive, readline is used to obtain the line.  If -n is
+supplied with a non-zero NCHARS argument, read returns after NCHARS
+characters have been read.  The -s option causes input coming from a
+terminal to not be echoed.
 
 The -t option causes read to time out and return failure if a complete line
-of input is not read within TIMEOUT seconds.  The return code is zero,
-unless end-of-file is encountered or read times out.
+of input is not read within TIMEOUT seconds.  If the TMOUT variable is set,
+its value is the default timeout.  The return code is zero, unless end-of-file
+is encountered, read times out, or an invalid file descriptor is supplied as
+the argument to -u.
 $END
 
 #include <config.h>
@@ -77,8 +80,6 @@ $END
 #if !defined(errno)
 extern int errno;
 #endif
-
-#define issep(c)	(strchr (ifs_chars, (c)))
 
 extern int interrupt_immediately;
 
@@ -123,9 +124,9 @@ read_builtin (list)
   register char *varname;
   int size, i, pass_next, saw_escape, eof, opt, retval, code;
   int input_is_tty, input_is_pipe, unbuffered_read;
-  int raw, edit, nchars, silent, have_timeout;
+  int raw, edit, nchars, silent, have_timeout, fd;
   unsigned int tmout;
-  long timeoutval, ncharsval;
+  intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
   char *e, *t, *t1;
@@ -162,6 +163,7 @@ read_builtin (list)
   raw = edit = 0;	/* Not reading raw input by default. */
   silent = 0;
   arrayname = prompt = (char *)NULL;
+  fd = 0;		/* file descriptor to read from */
 
 #if defined (READLINE)
   rlbuf = (char *)0;
@@ -173,7 +175,7 @@ read_builtin (list)
   delim = '\n';		/* read until newline */
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "erp:a:d:t:n:s")) != -1)
+  while ((opt = internal_getopt (list, "ersa:d:n:p:t:u:")) != -1)
     {
       switch (opt)
 	{
@@ -197,8 +199,8 @@ read_builtin (list)
 	  break;
 #endif
 	case 't':
-	  code = legal_number (list_optarg, &timeoutval);
-	  if (code == 0 || timeoutval < 0 || timeoutval != (unsigned int)timeoutval)
+	  code = legal_number (list_optarg, &intval);
+	  if (code == 0 || intval < 0 || intval != (unsigned int)intval)
 	    {
 	      builtin_error ("%s: invalid timeout specification", list_optarg);
 	      return (EXECUTION_FAILURE);
@@ -206,18 +208,33 @@ read_builtin (list)
 	  else
 	    {
 	      have_timeout = 1;
-	      tmout = timeoutval;
+	      tmout = intval;
 	    }
 	  break;
 	case 'n':
-	  code = legal_number (list_optarg, &ncharsval);
-	  if (code == 0 || ncharsval < 0 || ncharsval != (int)ncharsval)
+	  code = legal_number (list_optarg, &intval);
+	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
-	      builtin_error ("%s: invalid number specification", list_optarg);
+	      sh_invalidnum (list_optarg);
 	      return (EXECUTION_FAILURE);
 	    }
 	  else
-	    nchars = ncharsval;
+	    nchars = intval;
+	  break;
+	case 'u':
+	  code = legal_number (list_optarg, &intval);
+	  if (code == 0 || intval < 0 || intval != (int)intval)
+	    {
+	      builtin_error ("%s: invalid file descriptor specification", list_optarg);
+	      return (EXECUTION_FAILURE);
+	    }
+	  else
+	    fd = intval;
+	  if (sh_validfd (fd) == 0)
+	    {
+	      builtin_error ("%d: invalid file descriptor: %s", fd, strerror (errno));
+	      return (EXECUTION_FAILURE);
+	    }
 	  break;
 	case 'd':
 	  delim = *list_optarg;
@@ -229,24 +246,32 @@ read_builtin (list)
     }
   list = loptend;
 
-  /* `read -t 0 var' returns failure immediately. */
+  /* `read -t 0 var' returns failure immediately.  XXX - should it test
+     whether input is available with select/FIONREAD, and fail if those
+     are unavailable? */
   if (have_timeout && tmout == 0)
     return (EXECUTION_FAILURE);
 
   /* IF IFS is unset, we use the default of " \t\n". */
-  var = find_variable ("IFS");
-  ifs_chars = var ? value_cell (var) : " \t\n";
-  if (ifs_chars == 0)		/* XXX */
-    ifs_chars = "";		/* XXX */
+  ifs_chars = getifs ();
+  if (ifs_chars == 0)		/* XXX - shouldn't happen */
+    ifs_chars = "";
 
-  input_string = (char *)xmalloc (size = 128);
+  input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
+
+  /* $TMOUT, if set, is the default timeout for read. */
+  if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
+    {
+      code = legal_number (e, &intval);
+      if (code == 0 || intval < 0 || intval != (unsigned int)intval)
+	tmout = 0;
+      else
+	tmout = intval;
+    }
 
   begin_unwind_frame ("read_builtin");
-#if defined (READLINE)
-  add_unwind_protect (xfree, rlbuf);
-#endif
 
-  input_is_tty = isatty (0);
+  input_is_tty = isatty (fd);
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
     input_is_pipe = (lseek (0, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
@@ -262,6 +287,11 @@ read_builtin (list)
       edit = silent = 0;
     }
 
+#if defined (READLINE)
+  if (edit)
+    add_unwind_protect (xfree, rlbuf);
+#endif
+
   if (prompt && edit == 0)
     {
       fprintf (stderr, "%s", prompt);
@@ -275,7 +305,7 @@ read_builtin (list)
     {
       /* Turn off the timeout if stdin is a regular file (e.g. from
 	 input redirection). */
-      if ((fstat (0, &tsb) < 0) || S_ISREG (tsb.st_mode))
+      if ((fstat (fd, &tsb) < 0) || S_ISREG (tsb.st_mode))
 	tmout = 0;
     }
 
@@ -341,7 +371,7 @@ read_builtin (list)
   setmode (0, O_TEXT);
 #endif
 
-  for (eof = 0;;)
+  for (eof = retval = 0;;)
     {
 #if defined (READLINE)
       if (edit)
@@ -368,9 +398,9 @@ read_builtin (list)
 #endif
 
       if (unbuffered_read)
-	retval = zread (0, &c, 1);
+	retval = zread (fd, &c, 1);
       else
-	retval = zreadc (0, &c);
+	retval = zreadc (fd, &c);
 
       if (retval <= 0)
 	{
@@ -425,6 +455,14 @@ read_builtin (list)
     }
   input_string[i] = '\0';
 
+#if 1
+  if (retval < 0)
+    {
+      builtin_error ("read error: %d: %s", fd, strerror (errno));
+      return (EXECUTION_FAILURE);
+    }
+#endif
+
   if (tmout > 0)
     reset_alarm ();
 
@@ -447,7 +485,7 @@ read_builtin (list)
     ttrestore ();
 
   if (unbuffered_read == 0)
-    zsyncfd (0);
+    zsyncfd (fd);
 
   interrupt_immediately--;
   discard_unwind_frame ("read_builtin");
@@ -462,7 +500,7 @@ read_builtin (list)
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
 	return EXECUTION_FAILURE;	/* readonly or noassign */
-      empty_array (array_cell (var));
+      array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
@@ -487,7 +525,7 @@ read_builtin (list)
     {
 #if 0
       orig_input_string = input_string;
-      for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && issep(*t); t++)
+      for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && isifs(*t); t++)
 	;
       input_string = t;
       input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
@@ -513,7 +551,7 @@ read_builtin (list)
 
   /* Remove IFS white space at the beginning of the input string.  If
      $IFS is null, no field splitting is performed. */
-  for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && issep(*t); t++)
+  for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && isifs(*t); t++)
     ;
   input_string = t;
 
@@ -526,7 +564,7 @@ read_builtin (list)
       if (legal_identifier (varname) == 0)
 #endif
 	{
-	  builtin_error ("`%s': not a valid identifier", varname);
+	  sh_invalidid (varname);
 	  xfree (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
@@ -574,7 +612,7 @@ read_builtin (list)
   if (legal_identifier (list->word->word) == 0)
 #endif
     {
-      builtin_error ("`%s': not a valid identifier", list->word->word);
+      sh_invalidid (list->word->word);
       xfree (orig_input_string);
       return (EXECUTION_FAILURE);
     }
@@ -615,6 +653,8 @@ bind_read_variable (name, value)
 }
 
 #if defined (READLINE)
+static rl_completion_func_t *old_attempted_completion_function;
+
 static char *
 edit_line (p)
      char *p;
@@ -624,7 +664,10 @@ edit_line (p)
 
   if (!bash_readline_initialized)
     initialize_readline ();
+  old_attempted_completion_function = rl_attempted_completion_function;
+  rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   ret = readline (p);
+  rl_attempted_completion_function = old_attempted_completion_function;
   if (ret == 0)
     return ret;
   len = strlen (ret);

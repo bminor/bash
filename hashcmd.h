@@ -21,7 +21,7 @@
 #include "stdc.h"
 #include "hashlib.h"
 
-#define FILENAME_HASH_BUCKETS 107
+#define FILENAME_HASH_BUCKETS 64	/* must be power of two */
 
 extern HASH_TABLE *hashed_filenames;
 
@@ -35,8 +35,9 @@ typedef struct {
 
 #define pathdata(x) ((PATH_DATA *)(x)->data)
 
-extern void initialize_filename_hashing __P((void));
-extern void flush_hashed_filenames __P((void));
-extern void remove_hashed_filename __P((const char *));
-extern void remember_filename __P((char *, char *, int, int));
-extern char *find_hashed_filename __P((const char *));
+extern void phash_create __P((void));
+extern void phash_flush __P((void));
+
+extern void phash_insert __P((char *, char *, int, int));
+extern int phash_remove __P((const char *));
+extern char *phash_search __P((const char *));

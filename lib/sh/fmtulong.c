@@ -1,6 +1,6 @@
 /* fmtulong.c -- Convert unsigned long int to string. */
 
-/* Copyright (C) 1998, Free Software Foundation, Inc.
+/* Copyright (C) 1998-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,20 +67,9 @@ extern int errno;
 #  define FL_UNSIGNED	0x08	/* don't add any sign */
 #endif
 
-#ifdef QUAD
-   /* fmtullong */
-#  define LONG	long long
-#  define FMTUL_LONG_MAX	LLONG_MAX
-#  define FMTUL_ULONG_MAX	ULLONG_MAX
-#else
+#ifndef LONG
 #  define LONG	long
-#  define FMTUL_LONG_MAX	LONG_MAX
-#  define FMTUL_ULONG_MAX	ULONG_MAX
-#endif
-
-/* Set the name */
-#ifdef QUAD
-#  define fmtulong	fmtullong
+#  define UNSIGNED_LONG unsigned long
 #endif
 
 /* `unsigned long' (or unsigned long long) to string conversion for a given
@@ -88,7 +77,7 @@ extern int errno;
    check for buffer underflow, but currently does not. */
 char *
 fmtulong (ui, base, buf, len, flags)
-     unsigned LONG ui;
+     UNSIGNED_LONG ui;
      int base;
      char *buf;
      size_t len;
@@ -134,7 +123,7 @@ fmtulong (ui, base, buf, len, flags)
 	}
       /* Favor signed arithmetic over unsigned arithmetic; it is faster on
 	 many machines. */
-      if (ui > FMTUL_LONG_MAX)
+      if ((LONG)ui < 0)
 	{
 	  *p-- = TOCHAR (ui % 10);
 	  si = ui / 10;

@@ -29,18 +29,20 @@ extern "C" {
 
 #if defined (READLINE_LIBRARY)
 #  include "rlstdc.h"
+#  include "rltypedefs.h"
 #  include "keymaps.h"
 #  include "tilde.h"
 #else
 #  include <readline/rlstdc.h>
+#  include <readline/rltypedefs.h>
 #  include <readline/keymaps.h>
 #  include <readline/tilde.h>
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0402		/* Readline 4.2 */
+#define RL_READLINE_VERSION	0x0403		/* Readline 4.3 */
 #define RL_VERSION_MAJOR	4
-#define RL_VERSION_MINOR	2
+#define RL_VERSION_MINOR	3
 
 /* Readline data structures. */
 
@@ -82,7 +84,11 @@ extern int rl_digit_argument PARAMS((int, int));
 extern int rl_universal_argument PARAMS((int, int));
 
 /* Bindable commands for moving the cursor. */
+extern int rl_forward_byte PARAMS((int, int));
+extern int rl_forward_char PARAMS((int, int));
 extern int rl_forward PARAMS((int, int));
+extern int rl_backward_byte PARAMS((int, int));
+extern int rl_backward_char PARAMS((int, int));
 extern int rl_backward PARAMS((int, int));
 extern int rl_beg_of_line PARAMS((int, int));
 extern int rl_end_of_line PARAMS((int, int));
@@ -131,6 +137,9 @@ extern int rl_exchange_point_and_mark PARAMS((int, int));
 /* Bindable commands to set the editing mode (emacs or vi). */
 extern int rl_vi_editing_mode PARAMS((int, int));
 extern int rl_emacs_editing_mode PARAMS((int, int));
+
+/* Bindable commands to change the insert mode (insert or overwrite) */
+extern int rl_overwrite_mode PARAMS((int, int));
 
 /* Bindable commands for managing key bindings. */
 extern int rl_re_read_init_file PARAMS((int, int));
@@ -365,6 +374,7 @@ extern void rl_save_prompt PARAMS((void));
 extern void rl_restore_prompt PARAMS((void));
 
 /* Modifying text. */
+extern void rl_replace_line PARAMS((const char *, int));
 extern int rl_insert_text PARAMS((const char *));
 extern int rl_delete_text PARAMS((int, int));
 extern int rl_kill_text PARAMS((int, int));
@@ -417,6 +427,8 @@ extern char **rl_completion_matches PARAMS((const char *, rl_compentry_func_t *)
 extern char *rl_username_completion_function PARAMS((const char *, int));
 extern char *rl_filename_completion_function PARAMS((const char *, int));
 
+extern int rl_completion_mode PARAMS((rl_command_func_t *));
+
 #if 0
 /* Backwards compatibility (compat.c).  These will go away sometime. */
 extern void free_undo_list PARAMS((void));
@@ -452,6 +464,10 @@ extern int rl_readline_state;
 /* Says which editing mode readline is currently using.  1 means emacs mode;
    0 means vi mode. */
 extern int rl_editing_mode;
+
+/* Insert or overwrite mode for emacs mode.  1 means insert mode; 0 means
+   overwrite mode.  Reset to insert mode on each input line. */
+extern int rl_insert_mode;
 
 /* The name of the calling program.  You should initialize this to
    whatever was in argv[0].  It is used when parsing conditionals. */
@@ -675,10 +691,25 @@ extern int rl_completion_type;
    default is a space.  Nothing is added if this is '\0'. */
 extern int rl_completion_append_character;
 
+/* If set to non-zero by an application completion function,
+   rl_completion_append_character will not be appended. */
+extern int rl_completion_suppress_append;
+
 /* Up to this many items will be displayed in response to a
    possible-completions call.  After that, we ask the user if she
    is sure she wants to see them all.  The default value is 100. */
 extern int rl_completion_query_items;
+
+/* If non-zero, a slash will be appended to completed filenames that are
+   symbolic links to directory names, subject to the value of the
+   mark-directories variable (which is user-settable).  This exists so
+   that application completion functions can override the user's preference
+   (set via the mark-symlinked-directories variable) if appropriate.
+   It's set to the value of _rl_complete_mark_symlink_dirs in
+   rl_complete_internal before any application-specific completion
+   function is called, so without that function doing anything, the user's
+   preferences are honored. */
+extern int rl_completion_mark_symlink_dirs;
 
 /* If non-zero, then disallow duplicates in the matches. */
 extern int rl_ignore_completion_duplicates;
@@ -686,7 +717,7 @@ extern int rl_ignore_completion_duplicates;
 /* If this is non-zero, completion is (temporarily) inhibited, and the
    completion character will be inserted as any other. */
 extern int rl_inhibit_completion;
-   
+
 /* Definitions available for use by readline clients. */
 #define RL_PROMPT_START_IGNORE	'\001'
 #define RL_PROMPT_END_IGNORE	'\002'
@@ -724,6 +755,42 @@ extern int rl_inhibit_completion;
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
 #define RL_ISSTATE(x)		(rl_readline_state & (x))
+
+struct readline_state {
+  /* line state */
+  int point;
+  int end;
+  int mark;
+  char *buffer;
+  int buflen;
+  UNDO_LIST *ul;
+  char *prompt;
+
+  /* global state */
+  int rlstate;
+  int done;
+  Keymap kmap;
+
+  /* input state */
+  rl_command_func_t *lastfunc;
+  int insmode;
+  int edmode;
+  int kseqlen;
+  FILE *inf;
+  FILE *outf;
+  int pendingin;
+  char *macro;
+
+  /* signal state */
+  int catchsigs;
+  int catchsigwinch;
+
+  /* reserved for future expansion, so the struct size doesn't change */
+  char reserved[64];
+};
+
+extern int rl_save_state PARAMS((struct readline_state *));
+extern int rl_restore_state PARAMS((struct readline_state *));
 
 #ifdef __cplusplus
 }

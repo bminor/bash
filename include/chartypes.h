@@ -82,6 +82,8 @@
 
 #define DIGIT(c)	((c) >= '0' && (c) <= '9')
 
+#define ISWORD(c)	(ISLETTER(c) || DIGIT(c) || ((c) == '_'))
+
 #define HEXVALUE(c) \
   (((c) >= 'a' && (c) <= 'f') \
 	? (c)-'a'+10 \
@@ -98,22 +100,14 @@
 #define TOLOWER(c)	(ISUPPER(c) ? tolower(c) : (c))
 #define TOUPPER(c)	(ISLOWER(c) ? toupper(c) : (c))
 
-#ifdef toascii
-#  define TOASCII(c)	(toascii(c))
-#else
-#  define TOASCII(c)	((c) & 0x7F)
+#ifndef TOCTRL
+   /* letter to control char -- ASCII.  The TOUPPER is in there so \ce and
+      \cE will map to the same character in $'...' expansions. */
+#  define TOCTRL(x)	(TOUPPER(x) & 037)
 #endif
-
-/* We remove any previous definition of `SIGN_EXTEND_CHAR',
-   since ours (we hope) works properly with all combinations of
-   machines, compilers, `char' and `unsigned char' argument types.
-   (Per Bothner suggested the basic approach.)  */
-#undef SIGN_EXTEND_CHAR
-#if __STDC__
-#  define SIGN_EXTEND_CHAR(c) ((signed char) (c))
-#else  /* not __STDC__ */
-   /* As in Harbison and Steele.  */
-#  define SIGN_EXTEND_CHAR(c) ((((unsigned char) (c)) ^ 128) - 128)
+#ifndef UNCTRL
+   /* control char to letter -- ASCII */
+#  define UNCTRL(x)	(TOUPPER((x) | 0x40))
 #endif
 
 #endif /* _SH_CHARTYPES_H */

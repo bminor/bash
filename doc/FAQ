@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.17, for Bash version 2.05a.
+This is the Bash FAQ, version 3.20, for Bash version 2.05b.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,8 +36,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 2.05a?
-B2) Are there any user-visible incompatibilities between bash-2.05a and
+B1) What's new in version 2.05b?
+B2) Are there any user-visible incompatibilities between bash-2.05b and
     bash-1.14.7?
 
 Section C:  Differences from other Unix shells
@@ -74,6 +74,7 @@ E7) What about empty for loops in Makefiles?
 E8) Why does the arithmetic evaluation code complain about `08'?
 E9) Why does the pattern matching expression [A-Z]* match files beginning
     with every letter except `z'?
+E10) Why does `cd //' leave $PWD as `//'?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -86,6 +87,8 @@ F4) I'm running SVR4.2.  Why is the line erased every time I type `@'?
 F5) Why does bash report syntax errors when my C News scripts use a
     redirection before a subshell command?
 F6) Why can't I use vi-mode editing on Red Hat Linux 6.1?
+F7) Why do bash-2.05a and  bash-2.05b fail to compile `printf.def' on
+    HP/UX 11.x?
 
 Section G:  How can I get bash to do certain common things?
 
@@ -134,23 +137,23 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 2.05a, first made available on Thursday, 15
-November, 2001.
+The latest version is 2.05b, first made available on Wednesday, 17
+July, 2002.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 2.05a:
+The following URLs tell how to get version 2.05b:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-2.05a.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-2.05a.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-2.05b.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-2.05b.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.05a.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-2.05a.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.05b.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-2.05b.tar.gz
 
 A4)  On what machines will bash run?
 
@@ -187,7 +190,7 @@ early GNU-Win32 (the original name) releases.  Cygnus has also done a
 port of bash-2.05 to the CYGWIN environment, and it is available as
 part of their current release.
 
-Bash-2.05a should require no local Cygnus changes to build and run under
+Bash-2.05b should require no local Cygnus changes to build and run under
 CYGWIN.
 
 The Cygnus port works only on Intel machines.  There is a port of bash
@@ -363,6 +366,10 @@ available on the web at
 
 http://www.opengroup.org/onlinepubs/007908799/
 
+The Single Unix Specification, version 3, is available on the web at
+
+http://www.opengroup.org/onlinepubs/007904975/
+
 A10)  What is the bash `posix mode'?
 
 Although bash is an implementation of the POSIX.2 shell
@@ -370,28 +377,60 @@ specification, there are areas where the bash default behavior
 differs from that spec.  The bash `posix mode' changes the bash
 behavior in these areas so that it obeys the spec more closely. 
 
-Posix mode is entered by starting bash with the --posix option or
-executing `set -o posix' after bash is running.
+Posix mode is entered by starting bash with the --posix or
+'-o posix' option or executing `set -o posix' after bash is running.
 
 The specific aspects of bash which change when posix mode is
-active are listed in the file CWRU/POSIX.NOTES in the bash
-distribution.  They are also listed in a section in the Bash
-Reference Manual.
+active are listed in the file POSIX in the bash distribution.
+They are also listed in a section in the Bash Reference Manual
+(from which that file is generated).
 
 Section B:  The latest version
 
-B1) What's new in version 2.05a?
+B1) What's new in version 2.05b?
 
-The raison d'etre for bash-2.05a is to make an intermediate release
-containing principally bug fixes (some very good work was done and
-contributed after bash-2.05 was released) available before I start to
-work on the major new features to be available in the next release
-(bash-2.06 or bash-3.0 or whatever I tag it).  As such, there are
-only a few relatively minor new features.
+The raison d'etre for bash-2.05b is to make a second intermediate
+release containing the first of the new features to be available
+in bash-3.0 and get feedback on those features before proceeding.
+The major new feature is multibyte character support in both Bash
+and Readline.
 
-Bash-2.05a contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-2.05a
+Bash-2.05b contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-2.05b
 distribution):
+
+o support for multibyte characters has been added to both bash and readline
+
+o the DEBUG trap is now run *before* simple commands, ((...)) commands,
+  [[...]] conditional commands, and for ((...)) loops
+
+o the shell now performs arithmetic in the largest integer size the machine
+  supports (intmax_t)
+
+o there is a new \D{...} prompt expansion; passes the `...' to strftime(3)
+  and inserts the result into the expanded prompt
+
+o there is a new `here-string' redirection operator:  <<< word
+
+o when displaying variables, function attributes and definitions are shown
+  separately, allowing them to be re-used as input (attempting to re-use
+  the old output would result in syntax errors).
+
+o `read' has a new `-u fd' option to read from a specified file descriptor
+
+o the bash debugger in examples/bashdb has been modified to work with the
+  new DEBUG trap semantics, the command set has been made more gdb-like,
+  and the changes to $LINENO make debugging functions work better
+
+o the expansion of $LINENO inside a shell function is only relative to the
+  function start if the shell is interactive -- if the shell is running a
+  script, $LINENO expands to the line number in the script.  This is as
+  POSIX-2001 requires
+
+
+A short feature history dating from Bash-2.0:
+
+Bash-2.05a introduced the following new features:
 
 o The `printf' builtin has undergone major work
 
@@ -417,8 +456,6 @@ o Readline can be configured to place the user at the same point on the line
 
 o Readline can be configured to skip `hidden' files (filenames with a leading
   `.' on Unix) when performing completion
-
-A short feature history dating from bash-2.0:
 
 Bash-2.05 introduced the following new features:
 
@@ -570,13 +607,13 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-2.05a and
+B2) Are there any user-visible incompatibilities between bash-2.05b and
     bash-1.14.7?
 
-There are a few incompatibilities between version 1.14.7 and version 2.05a.
-They are detailed in the file COMPAT in the bash-2.05a distribution.  That
-file is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
-if you find something that's not mentioned there.
+There are a few incompatibilities between version 1.14.7 and version 2.05b.
+They are detailed in the file COMPAT in the bash distribution.  That file
+is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
+if if you find something that's not mentioned there.
 
 Section C:  Differences from other Unix shells
 
@@ -589,6 +626,7 @@ completely.
 Things bash has that sh does not:
 	long invocation options
 	[+-]O invocation option
+	-l invocation option
 	`!' reserved word to invert pipeline return value
 	`time' reserved word to time pipelines and shell builtins
 	the `function' reserved word
@@ -601,7 +639,7 @@ Things bash has that sh does not:
 	the ${#param} parameter value length operator
 	the ${!param} indirect parameter expansion operator
 	the ${!param*} prefix expansion operator
-	the ${param:length[:offset]} parameter substring operator
+	the ${param:offset[:length]} parameter substring operator
 	the ${param/pat[/string]} parameter pattern substitution operator
 	expansions to perform substring removal (${p%[%]w}, ${p#[#]w})
 	expansion of positional parameters beyond $9 with ${num}
@@ -616,18 +654,18 @@ Things bash has that sh does not:
 	DEBUG trap
 	ERR trap
 	variable arrays with new compound assignment syntax
-	redirections: <>, &>, >|
+	redirections: <>, &>, >|, <<<, [n]<&word-, [n]>&word-
 	prompt string special char translation and variable expansion
 	auto-export of variables in initial environment
 	command search finds functions before builtins
 	bash return builtin will exit a file sourced with `.'
-	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -p/-t.
+	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -d/-l/-p/-t.
 		  export -n/-f/-p/name=value, pwd -L/-P,
-		  read -e/-p/-a/-t/-n/-d/-s,
+		  read -e/-p/-a/-t/-n/-d/-s/-u,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
 		  unset -f/-v, ulimit -m/-p/-u,
-		  type -a/-p/-t, suspend -f, kill -n,
+		  type -a/-p/-t/-f/-P, suspend -f, kill -n,
 		  test -o optname/s1 == s2/s1 < s2/s1 > s2/-nt/-ot/-ef/-O/-G/-S
 	bash reads ~/.bashrc for interactive shells, $ENV for non-interactive
 	bash restricted shell mode is more extensive
@@ -690,15 +728,17 @@ C2)  How does bash differ from the Korn shell, version ksh88?
 Things bash has or uses that ksh88 does not:
 	long invocation options
 	[-+]O invocation option
+	-l invocation option
 	`!' reserved word
 	arithmetic for command: for ((expr1 ; expr2; expr3 )); do list; done
+	arithmetic in largest machine-supported size (intmax_t)
 	posix mode and posix conformance
 	command hashing
 	tilde expansion for assignment statements that look like $PATH
 	process substitution with named pipes if /dev/fd is not available
 	the ${!param} indirect parameter expansion operator
 	the ${!param*} prefix expansion operator
-	the ${param:length[:offset]} parameter substring operator
+	the ${param:offset[:length]} parameter substring operator
 	the ${param/pat[/string]} parameter pattern substitution operator
 	variables: BASH, BASH_VERSION, BASH_VERSINFO, UID, EUID, SHLVL,
 		   TIMEFORMAT, HISTCMD, HOSTTYPE, OSTYPE, MACHTYPE,
@@ -707,7 +747,7 @@ Things bash has or uses that ksh88 does not:
 		   PIPESTATUS, HOSTNAME, OPTERR, SHELLOPTS, GLOBIGNORE,
 		   GROUPS, FUNCNAME, histchars, auto_resume
 	prompt expansion with backslash escapes and command substitution
-	redirection: &> (stdout and stderr)
+	redirection: &> (stdout and stderr), <<<, [n]<&word-, [n]>&word-
 	more extensive and extensible editing and programmable completion
 	builtins: bind, builtin, command, declare, dirs, echo -e/-E, enable,
 		  exec -l/-c/-a, fc -s, export -n/-f/-p, hash, help, history,
@@ -727,6 +767,7 @@ Things bash has or uses that ksh88 does not:
 	`**' arithmetic operator to do exponentiation
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr
 	arrays of unlimited size
+	TMOUT is default timeout for `read' and `select'
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases (alias -t)
@@ -736,7 +777,7 @@ Things ksh88 has or uses that bash does not:
 	typeset +f to list all function names without definitions
 	text of command history kept in a file, not memory
 	builtins: alias -x, cd old new, fc -e -, newgrp, print,
-		  read -p/-s/-u/var?prompt, set -A/-o gmacs/
+		  read -p/-s/var?prompt, set -A/-o gmacs/
 		  -o bgnice/-o markdirs/-o nolog/-o trackall/-o viraw/-s,
 		  typeset -H/-L/-R/-Z/-A/-ft/-fu/-fx/-l/-u/-t, whence
 	using environment to pass attributes of exported variables
@@ -754,7 +795,7 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-2.05a:
+New things in ksh-93 not in bash-2.05b:
 	associative arrays
 	floating point arithmetic and variables
 	math library functions
@@ -775,15 +816,14 @@ New things in ksh-93 not in bash-2.05a:
 	exit statuses between 0 and 255
 	set -o pipefail
 	`+=' variable assignment operator
-	TMOUT is default timeout for `read' and `select'
-	<&N- and >&N- redirections (combination dup and close)
 	FPATH and PATH mixing
 	getopts -a
 	-I invocation option
 	DEBUG trap now executed before each simple command, instead of after
 	printf %H, %P, %T, %Z modifiers, output base for %d
 
-New things in ksh-93 present in bash-2.05a:
+New things in ksh-93 present in bash-2.05b:
+	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
         ?:, ++, --, `expr1 , expr2' arithmetic operators
 	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]},
@@ -980,7 +1020,7 @@ ksh-93 feature		Bash equivalent
 sleep, getconf		Bash has loadable versions in examples/loadables
 ${.sh.version}		$BASH_VERSION
 print -f		printf
-hist			alias fc=hist
+hist			alias hist=fc
 $HISTEDIT		$FCEDIT
 
 Section E:  How can I get bash to do certain things, and why does bash do
@@ -1139,7 +1179,7 @@ configure with the --enable-xpg-echo-default option to turn this
 on.  Be aware that this will cause some of the tests run when you
 type `make tests' to fail.
 
-There is a shell option, `xpg_echo', settable with `shopt' that will
+There is a shell option, `xpg_echo', settable with `shopt', that will
 change the behavior of echo at runtime.  Enabling this option turns
 on expansion of backslash-escape sequences.
 
@@ -1215,10 +1255,9 @@ http://www.pasc.org/interps/unofficial/db/p1003.2/pasc-1003.2-173.html
 E9) Why does the pattern matching expression [A-Z]* match files beginning
     with every letter except `z'?
 
-Bash-2.05 and later versions have reverted to the bash-2.03 behavior of
-honoring the current locale setting when processing ranges within pattern
-matching bracket expressions ([A-Z]).  This is what POSIX.2 and SUSv2/XPG5
-specify. 
+Bash-2.03, Bash-2.05 and later versions honor the current locale setting
+when processing ranges within pattern matching bracket expressions ([A-Z]). 
+This is what POSIX.2 and SUSv3/XPG6 specify. 
 
 The behavior of the matcher in bash-2.05 and later versions depends on the
 current LC_COLLATE setting.  Setting this variable to `C' or `POSIX' will
@@ -1229,7 +1268,11 @@ this:
 
 	AaBb...Zz
 
-which means that [A-Z] matches every letter except `z'.
+which means that [A-Z] matches every letter except `z'.  Others collate like
+
+	aAbBcC...zZ
+
+which means that [A-Z] matches every letter except `a'.
 
 The portable way to specify upper case letters is [:upper:] instead of
 A-Z; lower case may be specified as [:lower:] instead of a-z.
@@ -1251,6 +1294,16 @@ constructs like [A-Z].  This will prevent things like
 from removing every file in the current directory except those beginning
 with `z' and still allow individual users to change the collation order.
 Users may put the above command into their own profiles as well, of course.
+
+E10) Why does `cd //' leave $PWD as `//'?
+
+POSIX.2, in its description of `cd', says that *three* or more leading
+slashes may be replaced with a single slash when canonicalizing the
+current working directory.
+
+This is, I presume, for historical compatibility.  Certain versions of
+Unix, and early network file systems, used paths of the form
+//hostname/path to access `path' on server `hostname'.
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -1385,6 +1438,21 @@ to the beginning of /etc/inputrc, or bracket the key bindings in
 	$if mode=emacs
 		[...]
 	$endif
+
+F7) Why do bash-2.05a and bash-2.05b fail to compile `printf.def' on
+    HP/UX 11.x?
+
+HP/UX's support for long double is imperfect at best.
+
+GCC will support it without problems, but the HP C library functions
+like strtold(3) and printf(3) don't actually work with long doubles.
+HP implemented a `long_double' type as a 4-element array of 32-bit
+ints, and that is what the library functions use.  The ANSI C
+`long double' type is a 128-bit floating point scalar.
+
+The easiest fix, until HP fixes things up, is to edit the generated
+config.h and #undef the HAVE_LONG_DOUBLE line.  After doing that,
+the compilation should complete successfully.
 
 Section G:  How can I get bash to do certain common things?
 
@@ -1607,11 +1675,8 @@ H3) What's coming in future versions?
 
 These are features I hope to include in a future version of bash.
 
-a better bash debugger (a minimally-tested version is included with bash-2.05a)
+a better bash debugger (a minimally-tested version is included with bash-2.05b)
 associative arrays
-changes to the DEBUG trap to be compatible with ksh93 (which runs the
-trap before each simple command, instead of after each one like previous
-versions)
 co-processes, but with a new-style syntax that looks like function declaration
 
 H4) What's on the bash `wish list' for future versions?
@@ -1621,7 +1686,6 @@ These are features that may or may not appear in a future version of bash.
 breaking some of the shell functionality into embeddable libraries
 a module system like zsh's, using dynamic loading like builtins
 better internationalization using GNU `gettext'
-an option to use external files for the long `help' text
 date-stamped command history
 a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
@@ -1637,7 +1701,7 @@ H5) When will the next release appear?
 The next version will appear sometime in 2002.  Never make predictions. 
 
 
-This document is Copyright 1995-2001 by Chester Ramey.
+This document is Copyright 1995-2002 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

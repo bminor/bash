@@ -3,6 +3,24 @@
 /* This contains various user-settable options not under the control of
    autoconf. */
 
+/* Copyright (C) 2002 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash, the Bourne Again SHell.
+
+   Bash is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2, or (at your option) any later
+   version.
+
+   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with Bash; see the file COPYING.  If not, write to the Free Software
+   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+
 /* Define CONTINUE_AFTER_KILL_ERROR if you want the kill command to
    continue processing arguments after one of them fails.  This is
    what POSIX.2 specifies. */
@@ -47,6 +65,12 @@
 /* Default primary and secondary prompt strings. */
 #define PPROMPT "\\s-\\v\\$ "
 #define SPROMPT "> "
+
+/* Undefine this if you don't want the ksh-compatible behavior of reprinting
+   the select menu after a valid choice is made only if REPLY is set to NULL
+   in the body of the select command.  The menu is always reprinted if the
+   reply to the select query is an empty line. */
+#define KSH_COMPATIBLE_SELECT
 
 /* System-wide .bashrc file for interactive shells. */
 /* #define SYS_BASHRC "/etc/bash.bashrc" */

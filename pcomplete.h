@@ -1,7 +1,7 @@
 /* pcomplete.h - structure definitions and other stuff for programmable
 		 completion. */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,18 +57,20 @@ typedef struct compspec {
 #define CA_JOB		(1<<14)
 #define CA_KEYWORD	(1<<15)
 #define CA_RUNNING	(1<<16)
-#define CA_SETOPT	(1<<17)
-#define CA_SHOPT	(1<<18)
-#define CA_SIGNAL	(1<<19)
-#define CA_STOPPED	(1<<20)
-#define CA_USER		(1<<21)
-#define CA_VARIABLE	(1<<22)
+#define CA_SERVICE	(1<<17)
+#define CA_SETOPT	(1<<18)
+#define CA_SHOPT	(1<<19)
+#define CA_SIGNAL	(1<<20)
+#define CA_STOPPED	(1<<21)
+#define CA_USER		(1<<22)
+#define CA_VARIABLE	(1<<23)
 
 /* Values for COMPSPEC options field. */
 #define COPT_RESERVED	(1<<0)		/* reserved for other use */
 #define COPT_DEFAULT	(1<<1)
 #define COPT_FILENAMES	(1<<2)
 #define COPT_DIRNAMES	(1<<3)
+#define COPT_NOSPACE	(1<<4)
 
 /* List of items is used by the code that implements the programmable
    completions. */
@@ -112,6 +114,7 @@ extern ITEMLIST it_hostnames;
 extern ITEMLIST it_jobs;
 extern ITEMLIST it_keywords;
 extern ITEMLIST it_running;
+extern ITEMLIST it_services;
 extern ITEMLIST it_setopts;
 extern ITEMLIST it_shopts;
 extern ITEMLIST it_signals;
@@ -120,24 +123,22 @@ extern ITEMLIST it_users;
 extern ITEMLIST it_variables;
 
 /* Functions from pcomplib.c */
-typedef void sh_csprint_func_t __P((char *, COMPSPEC *));
+extern COMPSPEC *compspec_create __P((void));
+extern void compspec_dispose __P((COMPSPEC *));
+extern COMPSPEC *compspec_copy __P((COMPSPEC *));
 
-extern COMPSPEC *alloc_compspec __P((void));
-extern void free_compspec __P((COMPSPEC *));
+extern void progcomp_create __P((void));
+extern void progcomp_flush __P((void));
+extern void progcomp_dispose __P((void));
 
-extern COMPSPEC *copy_compspec __P((COMPSPEC *));
+extern int progcomp_size __P((void));
 
-extern void initialize_progcomp __P((void));
-extern void clear_progcomps __P((void));
+extern int progcomp_insert __P((char *, COMPSPEC *));
+extern int progcomp_remove __P((char *));
 
-extern int remove_progcomp __P((char *));
-extern int add_progcomp __P((char *, COMPSPEC *));
+extern COMPSPEC *progcomp_search __P((const char *));
 
-extern int num_progcomps __P((void));
-
-extern COMPSPEC *find_compspec __P((const char *));
-
-extern void print_all_compspecs __P((sh_csprint_func_t *));
+extern void progcomp_walk __P((hash_wfunc *));
 
 /* Functions from pcomplete.c */
 extern void set_itemlist_dirty __P((ITEMLIST *));

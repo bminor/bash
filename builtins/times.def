@@ -1,7 +1,7 @@
 This file is times.def, from which is created times.c.
 It implements the builtin "times" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,6 +61,11 @@ times_builtin (list)
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_TIMEVAL) && defined (RUSAGE_SELF)
   struct rusage self, kids;
 
+  USE_VAR(list);
+
+  if (no_options (list))
+    return (EX_USAGE);
+
   getrusage (RUSAGE_SELF, &self);
   getrusage (RUSAGE_CHILDREN, &kids);	/* terminated child processes */
 
@@ -79,6 +84,11 @@ times_builtin (list)
      `struct tms' with values of type clock_t. */
   struct tms t;
 
+  USE_VAR(list);
+
+  if (no_options (list))
+    return (EX_USAGE);
+
   times (&t);
 
   print_clock_t (stdout, t.tms_utime);
@@ -89,8 +99,15 @@ times_builtin (list)
   putchar (' ');
   print_clock_t (stdout, t.tms_cstime);
   putchar ('\n');
+
 #  else /* !HAVE_TIMES */
+
+  USE_VAR(list);
+
+  if (no_options (list))
+    return (EX_USAGE);
   printf ("0.00 0.00\n0.00 0.00\n");
+
 #  endif /* HAVE_TIMES */
 #endif /* !HAVE_TIMES */
 

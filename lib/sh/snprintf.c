@@ -47,9 +47,7 @@
  * Currently doesn't handle (and bash/readline doesn't use):
  *	*M$ width, precision specifications
  *	%N$ numbered argument conversions
- *	inf, nan floating values (could use isinf(), isnan())
- *	`,', `'' flags 
- *	`C', `S' conversions
+ *	inf, nan floating values imperfect (if isinf(), isnan() not in libc)
  *	support for `F' is imperfect, since underlying printf may not handle it
  */
 
@@ -65,10 +63,12 @@
 #ifdef __linux__
 #define HAVE_PRINTF_A_FORMAT
 #endif
+#define HAVE_ISINF_IN_LIBC
 #define PREFER_STDARG
 #define HAVE_STRINGIZE
 #define HAVE_LIMITS_H
 #define HAVE_STDDEF_H
+#define HAVE_LOCALE_H
 #define intmax_t long
 #endif
 
@@ -96,12 +96,18 @@
 #endif
 
 #ifdef FLOATING_POINT
+#  include <float.h>	/* for manifest constants */
 #  include <stdio.h>	/* for sprintf */
 #endif
 
 #include <typemax.h>
 
+#ifdef HAVE_LOCALE_H
+#  include <locale.h>
+#endif
+
 #include "stdc.h"
+#include <shmbutil.h>
 
 #ifndef DRIVER
 #  include "shell.h"
@@ -112,6 +118,10 @@
 #  define FL_UNSIGNED   0x08    /* don't add any sign */
 extern char *fmtulong __P((unsigned long int, int, char *, size_t, int));
 extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
+#endif
+
+#ifndef FREE
+#  define FREE(x)	if (x) free (x)
 #endif
 
 /* Bound on length of the string representing an integer value of type T.
@@ -130,7 +140,7 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 #define PF_ZEROPAD	0x00008		/* 0 */
 #define PF_PLUS		0x00010		/* + */
 #define PF_SPACE	0x00020		/* ' ' */
-#define PF_COMMA	0x00040		/* , */
+#define PF_THOUSANDS	0x00040		/* ' */
 
 #define PF_DOT		0x00080		/* `.precision' */
 #define PF_STAR_P	0x00100		/* `*' after precision */
@@ -157,6 +167,10 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 #define X_digs	"0123456789ABCDEF"
 
 static char intbuf[INT_STRLEN_BOUND(unsigned long) + 1];
+
+static int decpoint;
+static int thoussep;
+static char *grouping;
 
 /* 
  * For the FLOATING POINT FORMAT :
@@ -196,25 +210,27 @@ static char intbuf[INT_STRLEN_BOUND(unsigned long) + 1];
 
 #define SWAP_INT(a,b) {int t; t = (a); (a) = (b); (b) = t;}
 
+#define GETARG(type)	(va_arg(args, type))
+
 /* Macros that do proper sign extension and handle length modifiers.  Used
    for the integer conversion specifiers. */
 #define GETSIGNED(p) \
   (((p)->flags & PF_LONGINT) \
-	? va_arg(args, long) \
-  	: (((p)->flags & PF_SHORTINT) ? (long)(short)va_arg(args, int) \
-				      : (long)va_arg(args, int)))
+	? GETARG (long) \
+  	: (((p)->flags & PF_SHORTINT) ? (long)(short)GETARG (int) \
+				      : (long)GETARG (int)))
 
 #define GETUNSIGNED(p) \
   (((p)->flags & PF_LONGINT) \
-	? va_arg(args, unsigned long) \
-	: (((p)->flags & PF_SHORTINT) ? (unsigned long)(unsigned short)va_arg(args, int) \
-				      : (unsigned long)va_arg(args, unsigned int)))
+	? GETARG (unsigned long) \
+	: (((p)->flags & PF_SHORTINT) ? (unsigned long)(unsigned short)GETARG (int) \
+				      : (unsigned long)GETARG (unsigned int)))
 
 
 #ifdef HAVE_LONG_DOUBLE
-#define GETLDOUBLE(p) va_arg(args, long double)
+#define GETLDOUBLE(p) GETARG (long double)
 #endif
-#define GETDOUBLE(p) va_arg(args, double)
+#define GETDOUBLE(p) GETARG (double)
 
 #define SET_SIZE_FLAGS(p, type) \
   if (sizeof (type) > sizeof (int)) \
@@ -271,6 +287,8 @@ static void ldfallback __P((struct DATA *, const char *, const char *, long doub
 static void dfallback __P((struct DATA *, const char *, const char *, double));
 #endif
 
+static char *groupnum __P((char *));
+
 #ifdef DRIVER
 static void memory_error_and_abort ();
 static void *xmalloc __P((size_t));
@@ -317,6 +335,20 @@ static void xfree __P((void *));
 	  } \
 	while (0)
 
+/* Output a string.  P->WIDTH has already been adjusted for padding. */
+#define PUT_STRING(string, len, p) \
+	do \
+	  { \
+	    PAD_RIGHT (p); \
+	    while ((len)-- > 0) \
+	      { \
+		PUT_CHAR (*(string), (p)); \
+		(string)++; \
+	      } \
+	    PAD_LEFT (p); \
+	  } \
+	while (0)
+
 #define PUT_PLUS(d, p, zero) \
 	    if ((d) > zero && (p)->justify == RIGHT) \
 	      PUT_CHAR('+', p)
@@ -340,9 +372,34 @@ static void xfree __P((void *));
 /* if width and prec. in the args */
 #define STAR_ARGS(p) \
 	    if ((p)->flags & PF_STAR_W) \
-	      (p)->width = va_arg(args, int); \
+	      (p)->width = GETARG (int); \
 	    if ((p)->flags & PF_STAR_P) \
-	      (p)->precision = va_arg(args, int)
+	      (p)->precision = GETARG (int)
+
+#if defined (HAVE_LOCALE_H)
+#  define GETLOCALEDATA(d, t, g) \
+      do \
+	{ \
+	  struct lconv *lv; \
+	  if ((d) == 0) { \
+	  (d) = '.'; (t) = -1; (g) = 0; /* defaults */ \
+	  lv = localeconv(); \
+	  if (lv) \
+	    { \
+	      if (lv->decimal_point && lv->decimal_point[0]) \
+	        (d) = lv->decimal_point[0]; \
+	      if (lv->thousands_sep && lv->thousands_sep[0]) \
+	        (t) = lv->thousands_sep[0]; \
+	      (g) = lv->grouping ? lv->grouping : ""; \
+	      if (*(g) == '\0' || *(g) == CHAR_MAX || (t) == -1) (g) = 0; \
+	    } \
+	  } \
+	} \
+      while (0);
+#else
+#  define GETLOCALEDATA(d, t, g) \
+      ( (d) = '.', (t) = ',', g = "\003" )
+#endif
 
 #ifdef FLOATING_POINT
 /*
@@ -496,6 +553,8 @@ numtoa(number, base, precision, fract)
       integral_part[1] = '\0';
       fraction_part[0] = '0';
       fraction_part[1] = '\0';
+      if (fract)
+	*fract = fraction_part;
       return integral_part;
     }
 
@@ -570,7 +629,7 @@ number(p, d, base)
      unsigned long d;
      int base;
 {
-  char *tmp;
+  char *tmp, *t;
   long sd;
   int flags;
 
@@ -580,6 +639,14 @@ number(p, d, base)
     flags |= FL_HEXUPPER;
 
   tmp = fmtulong (d, base, intbuf, sizeof(intbuf), flags);
+  t = 0;
+  if ((p->flags & PF_THOUSANDS))
+    {
+      GETLOCALEDATA(decpoint, thoussep, grouping);
+      if (grouping && (t = groupnum (tmp)))
+        tmp = t;
+    }
+
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
 
@@ -609,6 +676,7 @@ number(p, d, base)
     }
 
   PAD_LEFT(p);
+  FREE (t);
 }
 
 #ifdef HAVE_LONG_LONG
@@ -621,7 +689,7 @@ lnumber(p, d, base)
      unsigned long long d;
      int base;
 {
-  char *tmp;
+  char *tmp, *t;
   long long sd;
   int flags;
 
@@ -631,6 +699,14 @@ lnumber(p, d, base)
     flags |= FL_HEXUPPER;
 
   tmp = fmtullong (d, base, intbuf, sizeof(intbuf), flags);
+  t = 0;
+  if ((p->flags & PF_THOUSANDS))
+    {
+      GETLOCALEDATA(decpoint, thoussep, grouping);
+      if (grouping && (t = groupnum (tmp)))
+        tmp = t;
+    }
+
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
 
@@ -660,6 +736,7 @@ lnumber(p, d, base)
     }
 
   PAD_LEFT(p);
+  FREE (t);
 }
 #endif
 
@@ -692,34 +769,162 @@ strings(p, tmp)
      struct DATA *p;
      char *tmp;
 {
-  int i;
+  size_t len;
 
-  i = strlen(tmp);
+  len = strlen(tmp);
   if (p->precision != NOT_FOUND) /* the smallest number */
-    i = (i < p->precision ? i : p->precision);
-  p->width -= i;
-  PAD_RIGHT(p);
-  while (i-- > 0)
-    { /* put the sting */
-      PUT_CHAR(*tmp, p);
-      tmp++;
-    }
-  PAD_LEFT(p);
+    len = (len < p->precision ? len : p->precision);
+  p->width -= len;
+
+  PUT_STRING (tmp, len, p);
 }
 
+#if HANDLE_MULTIBYTE
+/* %ls wide-character strings */
+static void
+wstrings(p, tmp)
+     struct DATA *p;
+     wchar_t *tmp;
+{
+  size_t len;
+  mbstate_t mbs;
+  char *os;
+  const wchar_t *ws;
+
+  memset (&mbs, '\0', sizeof (mbstate_t));
+  ws = (const wchar_t *)tmp;
+
+  os = (char *)NULL;
+  if (p->precision != NOT_FOUND)
+    {
+      os = (char *)xmalloc (p->precision + 1);
+      len = wcsrtombs (os, &ws, p->precision, &mbs);
+    }
+  else
+    {
+      len = wcsrtombs (NULL, &ws, 0, &mbs);
+      if (len != (size_t)-1)
+        {
+	  memset (&mbs, '\0', sizeof (mbstate_t));
+	  os = (char *)xmalloc (len + 1);
+	  (void)wcsrtombs (os, &ws, len + 1, &mbs);
+        }
+    }
+  if (len == (size_t)-1)
+    {
+      /* invalid multibyte sequence; bail now. */
+      FREE (os);      
+      return;
+    }
+
+  p->width -= len;
+  PUT_STRING (os, len, p);
+  free (os);
+}
+
+static void
+wchars (p, wc)
+     struct DATA *p;
+     wint_t wc;
+{
+  char *lbuf, *l;
+  mbstate_t mbs;
+  size_t len;
+
+  lbuf = (char *)malloc (MB_CUR_MAX+1);
+  if (lbuf == 0)
+    return;
+  memset (&mbs, '\0', sizeof (mbstate_t));
+  len = wcrtomb (lbuf, wc, &mbs);
+  if (len == (size_t)-1)
+    /* conversion failed; bail now. */
+    return;
+  p->width -= len;
+  l = lbuf;
+  PUT_STRING (l, len, p);
+  free (lbuf);
+}
+#endif /* HANDLE_MULTIBYTE */
+
 #ifdef FLOATING_POINT
+
+#ifndef HAVE_ISINF_IN_LIBC
+/* Half-assed versions, since we don't want to link with libm. */
+static int
+isinf(d)
+     double d;
+{
+#ifdef DBL_MAX
+  if (d < DBL_MIN)
+    return -1;
+  else if (d > DBL_MAX)
+    return 1;
+  else
+#endif
+    return 0;
+}
+
+static int
+isnan(d)
+     double d;
+{
+  return 0;
+}
+#endif
+
+/* Check for [+-]infinity and NaN.  If MODE == 1, we check for Infinity, else
+   (mode == 2) we check for NaN.  This does the necessary printing.  Returns
+   1 if Inf or Nan, 0 if not. */
+static int
+chkinfnan(p, d, mode)
+     struct DATA *p;
+     double d;
+     int mode;		/* == 1 for inf, == 2 for nan */
+{
+  int i;
+  char *tmp;
+  char *big, *small;
+
+  i = (mode == 1) ? isinf(d) : isnan(d);
+  if (i == 0)
+    return 0;
+  big = (mode == 1) ? "INF" : "NAN";
+  small = (mode == 1) ? "inf" : "nan";
+
+  tmp = (*p->pf == 'F' || *p->pf == 'G' || *p->pf == 'E') ? big : small;
+
+  if (i < 0)
+    PUT_CHAR('-', p);
+
+  while (*tmp)
+    {
+      PUT_CHAR (*tmp, p);
+      tmp++;
+    }
+
+  return 1;
+}
+
 /* %f %F %g %G floating point representation */
 static void
 floating(p, d)
      struct DATA *p;
      double d;
 {
-  char *tmp, *tmp2;
+  char *tmp, *tmp2, *t;
   int i;
 
+  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+    return;	/* already printed nan or inf */
+
+  GETLOCALEDATA(decpoint, thoussep, grouping);
   DEF_PREC(p);
   d = ROUND(d, p);
   tmp = dtoa(d, p->precision, &tmp2);
+  t = 0;
+  if ((p->flags & PF_THOUSANDS) && grouping && (t = groupnum (tmp)))
+    tmp = t;
+
   /* calculate the padding. 1 for the dot */
   p->width = p->width -
 	    ((d > 0. && p->justify == RIGHT) ? 1:0) -
@@ -728,17 +933,22 @@ floating(p, d)
   PAD_RIGHT(p);  
   PUT_PLUS(d, p, 0.);
   PUT_SPACE(d, p, 0.);
+
   while (*tmp)
     { /* the integral */
       PUT_CHAR(*tmp, p);
       tmp++;
     }
+  FREE (t);
+
   if (p->precision != 0 || (p->flags & PF_ALTFORM))
-    PUT_CHAR('.', p);  /* put the '.' */
+    PUT_CHAR(decpoint, p);  /* put the '.' */
+
   if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
     /* smash the trailing zeros unless altform */
     for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
-       tmp2[i] = '\0'; 
+      tmp2[i] = '\0'; 
+
   for (; *tmp2; tmp2++)
     PUT_CHAR(*tmp2, p); /* the fraction */
   
@@ -752,69 +962,55 @@ exponent(p, d)
      double d;
 {
   char *tmp, *tmp2;
-  int j, i, nsig, ndig;
+  int j, i;
 
+  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+    return;	/* already printed nan or inf */
+
+  GETLOCALEDATA(decpoint, thoussep, grouping);
   DEF_PREC(p);
   j = log_10(d);
   d = d / pow_10(j);  /* get the Mantissa */
   d = ROUND(d, p);		  
   tmp = dtoa(d, p->precision, &tmp2);
+
   /* 1 for unit, 1 for the '.', 1 for 'e|E',
    * 1 for '+|-', 2 for 'exp' */
   /* calculate how much padding need */
   p->width = p->width - 
 	     ((d > 0. && p->justify == RIGHT) ? 1:0) -
 	     ((p->flags & PF_SPACE) ? 1:0) - p->precision - 6;
+
   PAD_RIGHT(p);
   PUT_PLUS(d, p, 0.);
   PUT_SPACE(d, p, 0.);
-  /*
-   * When supplied %g or %G, an optional precision is the number of
-   * significant digits to print.
-   *
-   * nsig = number of significant digits we've printed (leading zeros are
-   *	    never significant)
-   * ndig = if non-zero, max number of significant digits to print (only
-   *	    applicable to %g/%G)
-   */
-  nsig = ndig = 0;
-  if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_DOT))
-    ndig = (p->precision == 0) ? 1 : p->precision;
 
   while (*tmp)
     {
       PUT_CHAR(*tmp, p);
       tmp++;
-      if (ndig && (++nsig >= ndig))
-	break;
     }
 
-  if ((p->precision != 0 || (p->flags & PF_ALTFORM)) && (ndig == 0 || nsig < ndig))
-      PUT_CHAR('.', p);  /* the '.' */
+  if (p->precision != 0 || (p->flags & PF_ALTFORM))
+      PUT_CHAR(decpoint, p);  /* the '.' */
+
   if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
     /* smash the trailing zeros unless altform */
     for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
-       tmp2[i] = '\0'; 
+      tmp2[i] = '\0'; 
+
   for (; *tmp2; tmp2++)
-    {
-      if (ndig && (nsig++ >= ndig))
-	break;
-      PUT_CHAR(*tmp2, p); /* the fraction */
-    }
+    PUT_CHAR(*tmp2, p); /* the fraction */
 
   /* the exponent put the 'e|E' */
   if (*p->pf == 'g' || *p->pf == 'e')
-    {
-      PUT_CHAR('e', p);
-    }
+    PUT_CHAR('e', p);
   else
-     PUT_CHAR('E', p);
+    PUT_CHAR('E', p);
 
   /* the sign of the exp */
   if (j > 0)
-    {
-      PUT_CHAR('+', p);
-    }
+    PUT_CHAR('+', p);
   else
     {
       PUT_CHAR('-', p);
@@ -825,9 +1021,7 @@ exponent(p, d)
    /* pad out to at least two spaces.  pad with `0' if the exponent is a
       single digit. */
    if (j <= 9)
-     {
-       PUT_CHAR('0', p);
-     }
+     PUT_CHAR('0', p);
 
    /* the exponent */
    while (*tmp)
@@ -838,6 +1032,69 @@ exponent(p, d)
    PAD_LEFT(p);
 }
 #endif
+
+/* Return a new string with the digits in S grouped according to the locale's
+   grouping info and thousands separator.  If no grouping should be performed,
+   this returns NULL; the caller needs to check for it. */
+static char *
+groupnum (s)
+     char *s;
+{
+  char *se, *ret, *re, *g;
+  int len, slen;
+
+  if (grouping == 0 || *grouping <= 0 || *grouping == CHAR_MAX)
+    return ((char *)NULL);
+
+  /* find min grouping to size returned string */
+  for (len = *grouping, g = grouping; *g; g++)
+      if (*g > 0 && *g < len)
+	len = *g;
+
+  slen = strlen (s);
+  len = slen / len + 1;
+  ret = (char *)xmalloc (slen + len + 1);
+  re = ret + slen + len;
+  *re = '\0';
+
+  g = grouping;
+  se = s + slen;
+  len = *g;
+
+  while (se > s)
+    {
+      *--re = *--se;
+
+      /* handle `-' inserted by numtoa() and the fmtu* family here. */
+      if (se > s && se[-1] == '-')
+	continue;
+
+      /* begin new group. */
+      if (--len == 0 && se > s)
+	{
+	  *--re = thoussep;
+	  len = *++g;		/* was g++, but that uses first char twice (glibc bug, too) */
+	  if (*g == '\0')
+	    len = *--g;		/* use previous grouping */
+	  else if (*g == CHAR_MAX)
+	    {
+	      do
+	        *--re = *--se;
+	      while (se > s);
+	      break;
+	    }
+	}
+    }
+
+  if (re > ret)
+#ifdef HAVE_MEMMOVE
+    memmove (ret, re, strlen (re) + 1);
+#else
+    strcpy (ret, re);
+#endif
+   
+  return ret;
+}
 
 /* initialize the conversion specifiers */
 static void
@@ -887,17 +1144,25 @@ vsnprintf_internal(data, string, length, format, args)
 #endif
   int state, i, c, n;
   char *s;
+#if HANDLE_MULTIBYTE
+  wchar_t *ws;
+  wint_t wc;
+#endif
   const char *convstart;
 
-  /* Sanity check, the string must be > 1.  C99 actually says that LENGTH
-     can be zero here, in the case of snprintf/vsnprintf (it's never 0 in
-     the case of asprintf/vasprintf), and the return value is the number
+  /* Sanity check, the string length must be >= 0.  C99 actually says that
+     LENGTH can be zero here, in the case of snprintf/vsnprintf (it's never
+     0 in the case of asprintf/vasprintf), and the return value is the number
      of characters that would have been written. */
-  if (length < 1)
+  if (length < 0)
     return -1;
 
   if (format == 0)
     return 0;
+
+  /* Reset these for each call because the locale might have changed. */
+  decpoint = thoussep = 0;
+  grouping = 0;
 
   for (; c = *(data->pf); data->pf++)
     {
@@ -966,8 +1231,8 @@ vsnprintf_internal(data, string, length, format, args)
 		data->flags |= PF_PLUS;
 		data->justify = RIGHT;
 		continue;
-	      case ',':
-		data->flags |= PF_COMMA;		/* not implemented yet */
+	      case '\'':
+		data->flags |= PF_THOUSANDS;
 		continue;
 
 	      case '1': case '2': case '3':
@@ -1043,9 +1308,18 @@ conv_break:
 		 * else use %e|%E
 		 */
 		if (-4 < i && i < data->precision)
-		  floating(data, d);
+		  {
+		    /* reset precision */
+		    data->precision -= i + 1;
+		    floating(data, d);
+		  }
 		else
-		  exponent(data, d);
+		  {
+		    /* reduce precision by 1 because of leading digit before
+		       decimal point in e format. */
+		    data->precision--;
+		    exponent(data, d);
+		  }
 		state = 0;
 		break;
 	      case 'e':
@@ -1073,7 +1347,7 @@ conv_break:
 #ifdef HAVE_LONG_LONG
 		if (data->flags & PF_LONGLONG)
 		  {
-		    ull = va_arg(args, unsigned long long);
+		    ull = GETARG (unsigned long long);
 		    lnumber(data, ull, 10);
 		  }
 		else
@@ -1093,7 +1367,7 @@ conv_break:
 #ifdef HAVE_LONG_LONG
 		if (data->flags & PF_LONGLONG)
 		  {
-		    ull = va_arg(args, long long);
+		    ull = GETARG (long long);
 		    lnumber(data, ull, 10);
 		  }
 		else
@@ -1109,7 +1383,7 @@ conv_break:
 #ifdef HAVE_LONG_LONG
 		if (data->flags & PF_LONGLONG)
 		  {
-		    ull = va_arg(args, unsigned long long);
+		    ull = GETARG (unsigned long long);
 		    lnumber(data, ull, 8);
 		  }
 		else
@@ -1126,7 +1400,7 @@ conv_break:
 #ifdef HAVE_LONG_LONG
 		if (data->flags & PF_LONGLONG)
 		  {
-		    ull = va_arg(args, unsigned long long);
+		    ull = GETARG (unsigned long long);
 		    lnumber(data, ull, 16);
 		  }
 		else
@@ -1139,33 +1413,64 @@ conv_break:
 		break;
 	      case 'p':
 		STAR_ARGS(data);
-		ul = (unsigned long)va_arg(args, void *);
+		ul = (unsigned long)GETARG (void *);
 		pointer(data, ul);
 		state = 0;
 		break;
+#if HANDLE_MULTIBYTE
+	      case 'C':
+		data->flags |= PF_LONGINT;
+		/* FALLTHROUGH */
+#endif
 	      case 'c': /* character */
-		ul = va_arg(args, int);
-		PUT_CHAR(ul, data);
+		STAR_ARGS(data);
+#if HANDLE_MULTIBYTE
+		if (data->flags & PF_LONGINT)
+		  {
+		    wc = GETARG (wint_t);
+		    wchars (data, wc);
+		  }
+		else
+#endif
+		  {		
+		    ul = GETARG (int);
+		    PUT_CHAR(ul, data);
+		  }
 		state = 0;
 		break;
+#if HANDLE_MULTIBYTE
+	      case 'S':
+		data->flags |= PF_LONGINT;
+		/* FALLTHROUGH */
+#endif
 	      case 's':  /* string */
 		STAR_ARGS(data);
-		s = va_arg(args, char *);
-		strings(data, s);
+#if HANDLE_MULTIBYTE
+		if (data->flags & PF_LONGINT)
+		  {
+		    ws = GETARG (wchar_t *);
+		    wstrings (data, ws);
+		  }
+		else
+#endif
+		  {
+		    s = GETARG (char *);
+		    strings(data, s);
+		  }
 		state = 0;
 		break;
 	      case 'n':
 #ifdef HAVE_LONG_LONG
 		if (data->flags & PF_LONGLONG)
-		  *(va_arg(args, long long *)) = data->counter;
+		  *(GETARG (long long *)) = data->counter;
 		else
 #endif
 		if (data->flags & PF_LONGINT)
-		  *(va_arg(args, long *)) = data->counter;
+		  *(GETARG (long *)) = data->counter;
 		else if (data->flags & PF_SHORTINT)
-		  *(va_arg(args, short *)) = data->counter;
+		  *(GETARG (short *)) = data->counter;
 		else
-		  *(va_arg(args, int *)) = data->counter;
+		  *(GETARG (int *)) = data->counter;
 		state = 0;
 		break;
 	      case '%':  /* nothing just % */
@@ -1201,7 +1506,7 @@ ldfallback (data, fs, fe, ld)
   char fmtbuf[FALLBACK_FMTSIZE], *obuf;
   int fl;
 
-  obuf = xmalloc(LFALLBACK_BASE + (data->precision < 6 ? 6 : data->precision) + 2);
+  obuf = (char *)xmalloc(LFALLBACK_BASE + (data->precision < 6 ? 6 : data->precision) + 2);
   fl = fe - fs + 1;
   strncpy (fmtbuf, fs, fl);
   fmtbuf[fl] = '\0';
@@ -1248,6 +1553,8 @@ vsnprintf(string, length, format, args)
 {
   struct DATA data;
 
+  if (string == 0 && length != 0)
+    return 0;
   init_data (&data, string, length, format, PFM_SN);
   return (vsnprintf_internal(&data, string, length, format, args));
 }
@@ -1267,12 +1574,10 @@ snprintf(string, length, format, va_alist)
   int rval;
   va_list args;
 
-#if defined(PREFER_STDARG)
-  va_start(args, format);
-#else
-  va_start(args);
-#endif
+  SH_VA_START(args, format);
 
+  if (string == 0 && length != 0)
+    return 0;
   init_data (&data, string, length, format, PFM_SN);
   rval = vsnprintf_internal (&data, string, length, format, args);
 
@@ -1319,11 +1624,7 @@ asprintf(stringp, format, va_alist)
   int rval;
   va_list args;
 
-#if defined(PREFER_STDARG)
-  va_start(args, format);
-#else
-  va_start(args);
-#endif
+  SH_VA_START(args, format);
 
   rval = vasprintf (stringp, format, args);
 
@@ -1378,10 +1679,6 @@ xfree(x)
     free (x);
 }
 
-#ifdef FLOATING_POINT
-#  include <float.h>
-#endif
-
 /* set of small tests for snprintf() */
 main()
 {
@@ -1389,6 +1686,18 @@ main()
   char *h;
   int i, si, ai;
 
+#ifdef HAVE_LOCALE_H
+  setlocale(LC_ALL, "");
+#endif
+
+#if 1
+  si = snprintf((char *)NULL, 0, "abcde\n");
+  printf("snprintf returns %d with NULL first argument and size of 0\n", si);
+  si = snprintf(holder, 0, "abcde\n");
+  printf("snprintf returns %d with non-NULL first argument and size of 0\n", si);
+  si = snprintf((char *)NULL, 16, "abcde\n");
+  printf("snprintf returns %d with NULL first argument and non-zero size\n", si);
+  
 /*
   printf("Suite of test for snprintf:\n");
   printf("a_format\n");
@@ -1659,6 +1968,92 @@ main()
   printf ("<%.10240Lf>\n", (long double)LDBL_MAX);
   printf ("<%d> <%s>\n", si, holder);
   printf ("<%d> <%s>\n\n", ai, h);
+
+  /* huh? */
+  printf("/%%g/, 421.2345\n");
+  snprintf(holder, sizeof holder, "/%g/\n", 421.2345);
+  asprintf(&h, "/%g/\n", 421.2345);
+  printf("/%g/\n", 421.2345);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%g/, 4214.2345\n");
+  snprintf(holder, sizeof holder, "/%g/\n", 4214.2345);
+  asprintf(&h, "/%g/\n", 4214.2345);
+  printf("/%g/\n", 4214.2345);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%.5g/, 4214.2345\n");
+  snprintf(holder, sizeof holder, "/%.5g/\n", 4214.2345);
+  asprintf(&h, "/%.5g/\n", 4214.2345);
+  printf("/%.5g/\n", 4214.2345);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%.4g/, 4214.2345\n");
+  snprintf(holder, sizeof holder, "/%.4g/\n", 4214.2345);
+  asprintf(&h, "/%.4g/\n", 4214.2345);
+  printf("/%.4g/\n", 4214.2345);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'ld %%'ld/, 12345, 1234567\n");
+  snprintf(holder, sizeof holder, "/%'ld %'ld/\n", 12345, 1234567);
+  asprintf(&h, "/%'ld %'ld/\n", 12345, 1234567);
+  printf("/%'ld %'ld/\n", 12345, 1234567);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'ld %%'ld/, 336, 3336\n");
+  snprintf(holder, sizeof holder, "/%'ld %'ld/\n", 336, 3336);
+  asprintf(&h, "/%'ld %'ld/\n", 336, 3336);
+  printf("/%'ld %'ld/\n", 336, 3336);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'ld %%'ld/, -42786, -142786\n");
+  snprintf(holder, sizeof holder, "/%'ld %'ld/\n", -42786, -142786);
+  asprintf(&h, "/%'ld %'ld/\n", -42786, -142786);
+  printf("/%'ld %'ld/\n", -42786, -142786);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'f %%'f/, 421.2345, 421234.56789\n");
+  snprintf(holder, sizeof holder, "/%'f %'f/\n", 421.2345, 421234.56789);
+  asprintf(&h, "/%'f %'f/\n", 421.2345, 421234.56789);
+  printf("/%'f %'f/\n", 421.2345, 421234.56789);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'f %%'f/, -421.2345, -421234.56789\n");
+  snprintf(holder, sizeof holder, "/%'f %'f/\n", -421.2345, -421234.56789);
+  asprintf(&h, "/%'f %'f/\n", -421.2345, -421234.56789);
+  printf("/%'f %'f/\n", -421.2345, -421234.56789);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'g %%'g/, 421.2345, 421234.56789\n");
+  snprintf(holder, sizeof holder, "/%'g %'g/\n", 421.2345, 421234.56789);
+  asprintf(&h, "/%'g %'g/\n", 421.2345, 421234.56789);
+  printf("/%'g %'g/\n", 421.2345, 421234.56789);
+  printf("%s", holder);
+  printf("%s\n", h);
+
+  printf("/%%'g %%'g/, -421.2345, -421234.56789\n");
+  snprintf(holder, sizeof holder, "/%'g %'g/\n", -421.2345, -421234.56789);
+  asprintf(&h, "/%'g %'g/\n", -421.2345, -421234.56789);
+  printf("/%'g %'g/\n", -421.2345, -421234.56789);
+  printf("%s", holder);
+  printf("%s\n", h);
+#endif
+
+  printf("/%%'g/, 4213455.8392\n");
+  snprintf(holder, sizeof holder, "/%'g/\n", 4213455.8392);
+  asprintf(&h, "/%'g/\n", 4213455.8392);
+  printf("/%'g/\n", 4213455.8392);
+  printf("%s", holder);
+  printf("%s\n", h);
 
   exit (0);
 }

@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2001 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -132,6 +132,10 @@
    and the complete builtin. */
 #undef PROGRAMMABLE_COMPLETION
 
+/* Define MEMSCRAMBLE if you want the bash malloc and free to scramble
+   memory contents on malloc() and free(). */
+#undef MEMSCRAMBLE
+
 /* Define AFS if you are using Transarc's AFS. */
 #undef AFS
 
@@ -201,6 +205,8 @@
 
 /* Define if using the bash version of malloc in lib/malloc/malloc.c */
 #undef USING_BASH_MALLOC
+
+#undef DISABLE_MALLOC_WRAPPERS
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -321,6 +327,8 @@
 
 #undef HAVE_TIMEVAL
 
+#undef HAVE_TZNAME
+
 
 /* Characteristics of some of the system structures. */
 
@@ -336,6 +344,8 @@
 
 #undef STRUCT_WINSIZE_IN_SYS_IOCTL
 
+#undef TM_IN_SYS_TIME
+
 #undef STRUCT_WINSIZE_IN_TERMIOS
 
 #undef SPEED_T_IN_SYS_TYPES
@@ -346,6 +356,9 @@
 
 #undef HAVE_STRUCT_STAT_ST_BLOCKS
 
+#undef HAVE_STRUCT_TM_TM_ZONE
+#undef HAVE_TM_ZONE
+
 /* Characteristics of definitions in the system header files. */
 
 #undef HAVE_GETPW_DECLS
@@ -354,15 +367,21 @@
 
 #undef HAVE_LIBC_FNM_EXTMATCH
 
+
 #undef HAVE_DECL_CONFSTR
-
-#undef HAVE_DECL_STRTOLD
-
-#undef HAVE_DECL_SBRK
 
 #undef HAVE_DECL_PRINTF
 
+#undef HAVE_DECL_SBRK
+
+#undef HAVE_DECL_STRCPY
+
 #undef HAVE_DECL_STRSIGNAL
+
+#undef HAVE_DECL_STRTOLD
+
+
+#undef HAVE_MBSTATE_T
 
 /* These are checked with BASH_CHECK_DECL */
 
@@ -395,7 +414,14 @@
 
 #undef CAN_REDEFINE_GETENV
 
+#undef HAVE_STD_PUTENV
+
+#undef HAVE_STD_UNSETENV
+
 #undef HAVE_PRINTF_A_FORMAT
+
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
 
 /* Characteristics of properties exported by the kernel. */
 
@@ -496,6 +522,9 @@
 /* Define if you have the getservbyname function.  */
 #undef HAVE_GETSERVBYNAME
 
+/* Define if you have the getservent function.  */
+#undef HAVE_GETSERVENT
+
 /* Define if you have the gettext function. */
 #undef HAVE_GETTEXT
 
@@ -517,6 +546,9 @@
 /* Define if you have the isgraph function.  */
 #undef HAVE_ISGRAPH
 
+/* Define if you have the isint function in libc */
+#undef HAVE_ISINF_IN_LIBC
+
 /* Define if you have the isprint function.  */
 #undef HAVE_ISPRINT
 
@@ -532,8 +564,14 @@
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
+/* Define if you have the mbsrtowcs function. */
+#undef HAVE_MBSRTOWCS
+
 /* Define if you have the memmove function.  */
 #undef HAVE_MEMMOVE
+
+/* Define if you have the memset function.  */
+#undef HAVE_MEMSET
 
 /* Define if you have the mkfifo function.  */
 #undef HAVE_MKFIFO
@@ -595,6 +633,9 @@
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
 
+/* Define if you have the strftime function. */
+#undef HAVE_STRFTIME
+
 /* Define if you have the strpbrk function. */
 #undef HAVE_STRPBRK
 
@@ -649,6 +690,9 @@
 /* Define if you have the uname function. */
 #undef HAVE_UNAME
 
+/* Define if you have the unsetenv function.  */
+#undef HAVE_UNSETENV
+
 /* Define if you have the vasprintf function.  */
 #undef HAVE_VASPRINTF
 
@@ -663,6 +707,9 @@
 
 /* Define if you have the wait3 function.  */
 #undef HAVE_WAIT3
+
+/* Define if you have the wcwidth function.  */
+#undef HAVE_WCWIDTH
 
 /* Presence of certain system include files. */
 
@@ -680,6 +727,9 @@
 
 /* Define if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define if you have the <langinfo.h> header file.  */
+#undef HAVE_LANGINFO_H
 
 /* Define if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
@@ -775,6 +825,12 @@
 
 /* Define if you have the <varargs.h> header file.  */
 #undef HAVE_VARARGS_H
+
+/* Define if you have the <wchar.h> header file.  */
+#undef HAVE_WCHAR_H
+
+/* Define if you have the <varargs.h> header file.  */
+#undef HAVE_WCTYPE_H
 
 /* Presence of certain system libraries. */
 

@@ -34,26 +34,20 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "shell.h"
 #include "hashlib.h"
 
-static void initialize_hash_table __P((HASH_TABLE *));
-static BUCKET_CONTENTS *copy_bucket_array __P((BUCKET_CONTENTS *, sh_string_func_t *));
+/* Rely on properties of unsigned division (unsigned/int -> unsigned) and
+   don't discard the upper 32 bits of the value, if present. */
+#define HASH_BUCKET(s, t, h) (((h) = hash_string (s)) & ((t)->nbuckets - 1))
 
-/* Zero the buckets in TABLE. */
-static void
-initialize_hash_table (table)
-     HASH_TABLE *table;
-{
-  register int i;
-  for (i = 0; i < table->nbuckets; i++)
-    table->bucket_array[i] = (BUCKET_CONTENTS *)NULL;
-}
+static BUCKET_CONTENTS *copy_bucket_array __P((BUCKET_CONTENTS *, sh_string_func_t *));
 
 /* Make a new hash table with BUCKETS number of buckets.  Initialize
    each slot in the table to NULL. */
 HASH_TABLE *
-make_hash_table (buckets)
+hash_create (buckets)
      int buckets;
 {
   HASH_TABLE *new_table;
+  register int i;
 
   new_table = (HASH_TABLE *)xmalloc (sizeof (HASH_TABLE));
   if (buckets == 0)
@@ -63,12 +57,15 @@ make_hash_table (buckets)
     (BUCKET_CONTENTS **)xmalloc (buckets * sizeof (BUCKET_CONTENTS *));
   new_table->nbuckets = buckets;
   new_table->nentries = 0;
-  initialize_hash_table (new_table);
+
+  for (i = 0; i < buckets; i++)
+    new_table->bucket_array[i] = (BUCKET_CONTENTS *)NULL;
+
   return (new_table);
 }
 
 int
-hash_table_nentries (table)
+hash_size (table)
      HASH_TABLE *table;
 {
   return (HASH_ENTRIES(table));
@@ -99,7 +96,8 @@ copy_bucket_array (ba, cpdata)
 
       n->key = savestring (e->key);
       n->data = e->data ? (cpdata ? (*cpdata) (e->data) : savestring (e->data))
-			: (char *)NULL;
+			: NULL;
+      n->khash = e->khash;
       n->times_found = e->times_found;
       n->next = (BUCKET_CONTENTS *)NULL;
     }
@@ -108,7 +106,7 @@ copy_bucket_array (ba, cpdata)
 }
 
 HASH_TABLE *
-copy_hash_table (table, cpdata)
+hash_copy (table, cpdata)
      HASH_TABLE *table;
      sh_string_func_t *cpdata;
 {
@@ -118,7 +116,7 @@ copy_hash_table (table, cpdata)
   if (table == 0)
     return ((HASH_TABLE *)NULL);
 
-  new_table = make_hash_table (table->nbuckets);
+  new_table = hash_create (table->nbuckets);
 
   for (i = 0; i < table->nbuckets; i++)
     new_table->bucket_array[i] = copy_bucket_array (table->bucket_array[i], cpdata);
@@ -127,59 +125,82 @@ copy_hash_table (table, cpdata)
   return new_table;
 }
 
+/* The `khash' check below requires that strings that compare equally with
+   strcmp hash to the same value. */
+unsigned int
+hash_string (s)
+     const char *s;
+{
+  register unsigned int i;
+
+  /* This is the best string hash function I found.
+
+     The magic is in the interesting relationship between the special prime
+     16777619 (2^24 + 403) and 2^32 and 2^8. */
+ 
+  for (i = 0; *s; s++)
+    {
+      i *= 16777619;
+      i ^= *s;
+    }
+
+  return i;
+}
+
 /* Return the location of the bucket which should contain the data
    for STRING.  TABLE is a pointer to a HASH_TABLE. */
 
-#if 0
-/* A possibly better distribution may be obtained by initializing i to
-   ~0UL and using i = (i * 31) + *string++ as the step */
-
-#define ALL_ONES (~((unsigned long) 0))
-#define BITS(h, n) ((unsigned long)(h) & ~(ALL_ONES << (n)))
-#endif
-
 int
-hash_string (string, table)
+hash_bucket (string, table)
      const char *string;
      HASH_TABLE *table;
 {
-  register unsigned int i = 0;
+  unsigned int h;
 
-  while (*string)
-    i = (i << 2) + *string++;
-
-#if 0
-  return (BITS (i, 31) % table->nbuckets);
-#else
-  /* Rely on properties of unsigned division (unsigned/int -> unsigned) and
-     don't discard the upper 32 bits of the value, if present. */
-  return (i % table->nbuckets);
-#endif
+  return (HASH_BUCKET (string, table, h));
 }
 
-/* Return a pointer to the hashed item, or NULL if the item
-   can't be found. */
+/* Return a pointer to the hashed item.  If the HASH_CREATE flag is passed,
+   create a new hash table entry for STRING, otherwise return NULL. */
 BUCKET_CONTENTS *
-find_hash_item (string, table)
+hash_search (string, table, flags)
      const char *string;
      HASH_TABLE *table;
+     int flags;
 {
   BUCKET_CONTENTS *list;
-  int which_bucket;
+  int bucket;
+  unsigned int hv;
 
-  if (table == 0)
+  if (table == 0 || ((flags & HASH_CREATE) == 0 && HASH_ENTRIES (table) == 0))
     return (BUCKET_CONTENTS *)NULL;
 
-  which_bucket = hash_string (string, table);
+  bucket = HASH_BUCKET (string, table, hv);
 
-  for (list = table->bucket_array[which_bucket]; list; list = list->next)
+  for (list = table->bucket_array[bucket]; list; list = list->next)
     {
-      if (STREQ (list->key, string))
+      if (hv == list->khash && STREQ (list->key, string))
 	{
 	  list->times_found++;
 	  return (list);
 	}
     }
+
+  if (flags & HASH_CREATE)
+    {
+      list = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
+      list->next = table->bucket_array[bucket];
+      table->bucket_array[bucket] = list;
+
+      list->data = NULL;
+      list->key = (char *)string;	/* XXX fix later */
+      list->khash = hv;
+      list->times_found = 0;
+
+      table->nentries++;
+      return (list);
+    }
+      
   return (BUCKET_CONTENTS *)NULL;
 }
 
@@ -187,26 +208,28 @@ find_hash_item (string, table)
    The item removed is returned, so you can free its contents.  If
    the item isn't in this table NULL is returned. */
 BUCKET_CONTENTS *
-remove_hash_item (string, table)
+hash_remove (string, table, flags)
      const char *string;
      HASH_TABLE *table;
+     int flags;
 {
-  int the_bucket;
+  int bucket;
   BUCKET_CONTENTS *prev, *temp;
+  unsigned int hv;
 
-  if (table == 0)
+  if (table == 0 || HASH_ENTRIES (table) == 0)
     return (BUCKET_CONTENTS *)NULL;
 
-  the_bucket = hash_string (string, table);
+  bucket = HASH_BUCKET (string, table, hv);
   prev = (BUCKET_CONTENTS *)NULL;
-  for (temp = table->bucket_array[the_bucket]; temp; temp = temp->next)
+  for (temp = table->bucket_array[bucket]; temp; temp = temp->next)
     {
-      if (STREQ (temp->key, string))
+      if (hv == temp->khash && STREQ (temp->key, string))
 	{
 	  if (prev)
 	    prev->next = temp->next;
 	  else
-	    table->bucket_array[the_bucket] = temp->next;
+	    table->bucket_array[bucket] = temp->next;
 
 	  table->nentries--;
 	  return (temp);
@@ -217,43 +240,37 @@ remove_hash_item (string, table)
 }
 
 /* Create an entry for STRING, in TABLE.  If the entry already
-   exists, then return it. */
+   exists, then return it (unless the HASH_NOSRCH flag is set). */
 BUCKET_CONTENTS *
-add_hash_item (string, table)
+hash_insert (string, table, flags)
      char *string;
      HASH_TABLE *table;
+     int flags;
 {
   BUCKET_CONTENTS *item;
   int bucket;
+  unsigned int hv;
 
   if (table == 0)
-    table = make_hash_table (0);
+    table = hash_create (0);
 
-  if ((item = find_hash_item (string, table)) == 0)
+  item = (flags & HASH_NOSRCH) ? (BUCKET_CONTENTS *)NULL
+  			       : hash_search (string, table, 0);
+
+  if (item == 0)
     {
-      bucket = hash_string (string, table);
-      item = table->bucket_array[bucket];
+      bucket = HASH_BUCKET (string, table, hv);
 
-      while (item && item->next)
-	item = item->next;
+      item = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
+      item->next = table->bucket_array[bucket];
+      table->bucket_array[bucket] = item;
 
-      if (item)
-	{
-	  item->next = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
-	  item = item->next;
-	}
-      else
-	{
-	  table->bucket_array[bucket] =
-	    (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
-	  item = table->bucket_array[bucket];
-	}
-
-      item->data = (char *)NULL;
-      item->next = (BUCKET_CONTENTS *)NULL;
+      item->data = NULL;
       item->key = string;
-      table->nentries++;
+      item->khash = hv;
       item->times_found = 0;
+
+      table->nentries++;
     }
 
   return (item);
@@ -263,14 +280,14 @@ add_hash_item (string, table)
    is a function to call to dispose of a hash item's data.  Otherwise,
    free() is called. */
 void
-flush_hash_table (table, free_data)
+hash_flush (table, free_data)
      HASH_TABLE *table;
      sh_free_func_t *free_data;
 {
   int i;
   register BUCKET_CONTENTS *bucket, *item;
 
-  if (table == 0)
+  if (table == 0 || HASH_ENTRIES (table) == 0)
     return;
 
   for (i = 0; i < table->nbuckets; i++)
@@ -291,37 +308,41 @@ flush_hash_table (table, free_data)
 	}
       table->bucket_array[i] = (BUCKET_CONTENTS *)NULL;
     }
+
+  table->nentries = 0;
 }
 
 /* Free the hash table pointed to by TABLE. */
 void
-dispose_hash_table (table)
+hash_dispose (table)
      HASH_TABLE *table;
 {
   free (table->bucket_array);
   free (table);
 }
 
-/* No longer necessary; everything uses the macro */
-#if 0
-/* Return the bucket_contents list of bucket BUCKET in TABLE.  If
-   TABLE doesn't have BUCKET buckets, return NULL. */
-#undef get_hash_bucket
-BUCKET_CONTENTS *
-get_hash_bucket (bucket, table)
-     int bucket;
-     HASH_TABLE *table;
-{
-  if (table && bucket < table->nbuckets)
-    return (table->bucket_array[bucket]);
-  else
-    return (BUCKET_CONTENTS *)NULL;
-}
-#endif
-
-#ifdef DEBUG
 void
-print_table_stats (table, name)
+hash_walk (table, func)
+     HASH_TABLE *table;
+     hash_wfunc *func;
+{
+  register int i;
+  BUCKET_CONTENTS *item;
+
+  if (table == 0 || HASH_ENTRIES (table) == 0)
+    return;
+
+  for (i = 0; i < table->nbuckets; i++)
+    {
+      for (item = hash_items (i, table); item; item = item->next)
+	if ((*func) (item) < 0)
+	  return;
+    }
+}
+
+#if defined (DEBUG) || defined (TEST_HASHING)
+void
+hash_pstats (table, name)
      HASH_TABLE *table;
      char *name;
 {
@@ -337,7 +358,7 @@ print_table_stats (table, name)
      see how even the distribution is. */
   for (slot = 0; slot < table->nbuckets; slot++)
     {
-      bc = get_hash_bucket (slot, table);
+      bc = hash_items (slot, table);
 
       fprintf (stderr, "\tslot %3d: ", slot);
       for (bcount = 0; bc; bc = bc->next)
@@ -350,6 +371,7 @@ print_table_stats (table, name)
 
 #ifdef TEST_HASHING
 
+/* link with xmalloc.o and lib/malloc/libmalloc.a */
 #undef NULL
 #include <stdio.h>
 
@@ -358,19 +380,26 @@ print_table_stats (table, name)
 #endif
 
 HASH_TABLE *table, *ntable;
-#define NBUCKETS 107
 
-void *
-xmalloc (bytes)
-     size_t bytes;
+int interrupt_immediately = 0;
+
+int
+signal_is_trapped (s)
+     int s;
 {
-  void *result = malloc (bytes);
-  if (!result)
-    {
-      fprintf (stderr, "hash: out of virtual memory\n");
-      abort ();
-    }
-  return (result);
+  return (0);
+}
+
+void
+programming_error (const char *format, ...)
+{
+  abort();
+}
+
+void
+fatal_error (const char *format, ...)
+{
+  abort();
 }
 
 main ()
@@ -379,7 +408,7 @@ main ()
   int count = 0;
   BUCKET_CONTENTS *tt;
 
-  table = make_hash_table (NBUCKETS);
+  table = hash_create (0);
 
   for (;;)
     {
@@ -389,7 +418,7 @@ main ()
       if (!*string)
 	break;
       temp_string = savestring (string);
-      tt = add_hash_item (temp_string, table);
+      tt = hash_insert (temp_string, table, 0);
       if (tt->times_found)
 	{
 	  fprintf (stderr, "You have already added item `%s'\n", string);
@@ -401,11 +430,11 @@ main ()
 	}
     }
 
-  print_table_stats (table, "hash test");
+  hash_pstats (table, "hash test");
 
-  ntable = copy_hash_table (table, (sh_string_func_t *)NULL);
-  flush_hash_table (table, (sh_free_func_t *)NULL);
-  print_table_stats (ntable, "hash copy test");
+  ntable = hash_copy (table, (sh_string_func_t *)NULL);
+  hash_flush (table, (sh_free_func_t *)NULL);
+  hash_pstats (ntable, "hash copy test");
 
   exit (0);
 }

@@ -61,13 +61,17 @@
 #define CXGLOB		0x0200	/* extended globbing characters */
 #define CXQUOTE		0x0400	/* cquote + backslash */
 #define CSPECVAR	0x0800	/* single-character shell variable name */
+#define CSUBSTOP	0x1000	/* values of OP for ${word[:]OPstuff} */
 
 /* Defines for use by the rest of the shell. */
 extern const int sh_syntaxtab[];
 
-#define shellmeta(c)	(sh_syntaxtab[(c)] & CSHMETA)
-#define shellbreak(c)	(sh_syntaxtab[(c)] & CSHBRK)
-#define shellquote(c)	(sh_syntaxtab[(c)] & CQUOTE)
+#define shellmeta(c)	(sh_syntaxtab[(unsigned char)(c)] & CSHMETA)
+#define shellbreak(c)	(sh_syntaxtab[(unsigned char)(c)] & CSHBRK)
+#define shellquote(c)	(sh_syntaxtab[(unsigned char)(c)] & CQUOTE)
+
+#define issyntype(c, t)	((sh_syntaxtab[(unsigned char)(c)] & (t)) != 0)
+#define notsyntype(c,t) ((sh_syntaxtab[(unsigned char)(c)] & (t)) == 0)
 
 #if defined (PROCESS_SUBSTITUTION)
 #  define shellexp(c)	((c) == '$' || (c) == '<' || (c) == '>')

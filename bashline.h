@@ -36,6 +36,7 @@ extern int bind_keyseq_to_unix_command __P((char *));
 /* Used by programmable completion code. */
 extern char *command_word_completion_function __P((const char *, int));
 extern char *bash_groupname_completion_function __P((const char *, int));
+extern char *bash_servicename_completion_function __P((const char *, int));
 
 extern char **get_hostname_list __P((void));
 extern void clear_hostname_list __P((void));

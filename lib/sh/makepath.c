@@ -91,7 +91,7 @@ sh_makepath (path, dir, flags)
     }
   else
     {
-      xpath = ((flags & MP_DOTILDE) && *path == '~') ? bash_tilde_expand (path) : (char *)path;
+      xpath = ((flags & MP_DOTILDE) && *path == '~') ? bash_tilde_expand (path, 0) : (char *)path;
       pathlen = strlen (xpath);
     }
 

@@ -86,9 +86,11 @@ typedef struct {
 
 extern BASH_INPUT bash_input;
 
-/* Functions from parse.y. */
+/* Functions from parse.y whose use directly or indirectly depends on the
+   definitions in this file. */
 extern void initialize_bash_input __P((void));
 extern void init_yy_io __P((sh_cget_func_t *, sh_cunget_func_t *, enum stream_type, const char *, INPUT_STREAM));
+extern char *yy_input_name __P((void));
 extern void with_input_from_stdin __P((void));
 extern void with_input_from_string __P((char *, const char *));
 extern void with_input_from_stream __P((FILE *, const char *));
@@ -97,7 +99,6 @@ extern void pop_stream __P((void));
 extern int stream_on_stack __P((enum stream_type));
 extern char *read_secondary_line __P((int));
 extern int find_reserved_word __P((char *));
-extern char *decode_prompt_string __P((char *));
 extern void gather_here_documents __P((void));
 extern void execute_prompt_command __P((char *));
 

@@ -25,9 +25,15 @@
 #ifdef MALLOC_STATS
 
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
 #include "mstats.h"
 
-struct _malstats _mstats;
+extern int malloc_free_blocks __P((int));
+
+extern struct _malstats _mstats;
 
 struct bucket_stats
 malloc_bucket_stats (size)
@@ -40,7 +46,7 @@ malloc_bucket_stats (size)
   if (size < 0 || size >= NBUCKETS)
     {
       v.blocksize = 0;
-      v.nused = v.nmal = v.nmorecore = v.nsplit = 0;
+      v.nused = v.nmal = v.nmorecore = v.nlesscore = v.nsplit = 0;
       return v;
     }
 
@@ -48,7 +54,9 @@ malloc_bucket_stats (size)
   v.nused = _mstats.nmalloc[size];
   v.nmal = _mstats.tmalloc[size];
   v.nmorecore = _mstats.nmorecore[size];
+  v.nlesscore = _mstats.nlesscore[size];
   v.nsplit = _mstats.nsplit[size];
+  v.ncoalesce = _mstats.ncoalesce[size];
 
   v.nfree = malloc_free_blocks (size);	/* call back to malloc.c */
 
@@ -86,16 +94,18 @@ _print_malloc_stats (s, fp)
   unsigned long totused, totfree;
   struct bucket_stats v;
 
-  fprintf (fp, "Memory allocation statistics: %s\n\tsize\tfree\tin use\ttotal\tmorecore\tsplit\n", s ? s : "");
+  fprintf (fp, "Memory allocation statistics: %s\n    size\tfree\tin use\ttotal\tmorecore lesscore split\tcoalesce\n", s ? s : "");
   for (i = totused = totfree = 0; i < NBUCKETS; i++)
     {
       v = malloc_bucket_stats (i);
-      fprintf (fp, "%12lu\t%4d\t%6d\t%5d\t%8d\t%5d\n", (unsigned long)v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore, v.nsplit);
+      if (v.nmal > 0)
+	fprintf (fp, "%8lu\t%4d\t%6d\t%5d\t%8d\t%d %5d %8d\n", (unsigned long)v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore, v.nlesscore, v.nsplit, v.ncoalesce);
       totfree += v.nfree * v.blocksize;
       totused += v.nused * v.blocksize;
     }
   fprintf (fp, "\nTotal bytes in use: %lu, total bytes free: %lu\n",
 	   totused, totfree);
+  fprintf (fp, "\nTotal bytes requested by application: %lu\n", _mstats.bytesreq);
   fprintf (fp, "Total mallocs: %d, total frees: %d, total reallocs: %d (%d copies)\n",
 	   _mstats.nmal, _mstats.nfre, _mstats.nrealloc, _mstats.nrcopy);
   fprintf (fp, "Total sbrks: %d, total bytes via sbrk: %d\n",
@@ -120,24 +130,51 @@ fprint_malloc_stats (s, fp)
 }
 
 #define TRACEROOT "/var/tmp/maltrace/trace."
-extern char *inttostr ();
+static char mallbuf[1024];
 
 void
-trace_malloc_stats (s)
-     char *s;
+trace_malloc_stats (s, fn)
+     char *s, *fn;
 {
-  char ibuf[32], *ip;
-  char fname[64];
-  long p;
+  char defname[sizeof (TRACEROOT) + 64];
+  char fname[1024];
+  long l;
   FILE *fp;
 
-  p = getpid();
-  ip = inttostr(p, ibuf, sizeof(ibuf));
-  strcpy (fname, TRACEROOT);
-  strcat (fname, ip);
-  fp = fopen(fname, "w");
+  l = (long)getpid ();
+  if (fn == 0)
+    {
+      sprintf (defname, "%s%ld", TRACEROOT, l);  
+      fp = fopen(defname, "w");
+    }
+  else
+    {
+      char *p, *q, *r;
+      char pidbuf[32];
+      int sp;
+
+      sprintf (pidbuf, "%ld", l);
+      if ((strlen (pidbuf) + strlen (fn) + 2) >= sizeof (fname))
+	return;
+      for (sp = 0, p = fname, q = fn; *q; )
+	{
+	  if (sp == 0 && *q == '%' && q[1] == 'p')
+	    {
+	      sp = 1;
+	      for (r = pidbuf; *r; )
+		*p++ = *r++;
+	      q += 2;
+	    }
+	  else
+	    *p++ = *q++;
+	}
+      *p = '\0';
+      fp = fopen (fname, "w");
+    }
+        
   if (fp)
     {
+      setvbuf (fp, mallbuf, _IOFBF, sizeof (mallbuf));
       _print_malloc_stats (s, fp);
       fflush(fp);
       fclose(fp);

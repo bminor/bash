@@ -59,9 +59,6 @@ extern struct passwd *getpwnam PARAMS((const char *));
 #endif /* !HAVE_GETPW_DECLS */
 
 #if !defined (savestring)
-#  ifndef strcpy
-extern char *strcpy ();
-#  endif
 #define savestring(x) strcpy ((char *)xmalloc (1 + strlen (x)), (x))
 #endif /* !savestring */
 

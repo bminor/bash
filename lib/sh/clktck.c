@@ -27,6 +27,10 @@
 #  include <unistd.h>
 #endif
 
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
+#endif
+
 #if !defined (HAVE_SYSCONF) || !defined (_SC_CLK_TCK)
 #  if !defined (CLK_TCK)
 #    if defined (HZ)

@@ -24,13 +24,13 @@
 
 #include "stdc.h"
 
-typedef long	arrayind_t;
+typedef intmax_t	arrayind_t;
 
 enum atype {array_indexed, array_assoc};
 
 typedef struct array {
 	enum atype	type;
-	arrayind_t	max_index, num_elements, max_size;
+	arrayind_t	max_index, num_elements;
 	struct array_element *head;
 } ARRAY;
 
@@ -42,36 +42,43 @@ typedef struct array_element {
 
 typedef int sh_ae_map_func_t __P((ARRAY_ELEMENT *));
 
-char	*array_reference __P((ARRAY *, arrayind_t));
+/* Basic operations on entire arrays */
+extern ARRAY	*array_create __P((void));
+extern void	array_flush __P((ARRAY *));
+extern void	array_dispose __P((ARRAY *));
+extern ARRAY	*array_copy __P((ARRAY *));
+extern ARRAY	*array_slice __P((ARRAY *, ARRAY_ELEMENT *, ARRAY_ELEMENT *));
+extern void	array_walk __P((ARRAY   *, sh_ae_map_func_t *));
 
-extern int	array_add_element __P((ARRAY *, arrayind_t, char *));
-extern ARRAY_ELEMENT *array_delete_element __P((ARRAY *, arrayind_t));
+extern ARRAY_ELEMENT *array_shift __P((ARRAY *, int, int));
+extern int	array_rshift __P((ARRAY *, int, char *));
+extern ARRAY	*array_quote __P((ARRAY *));
 
-extern ARRAY_ELEMENT *new_array_element __P((arrayind_t, char *));
-extern void	destroy_array_element __P((ARRAY_ELEMENT *));
+extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int));
+extern char	*array_patsub __P((ARRAY *, char *, char *, int));
 
-extern ARRAY	*new_array __P((void));
-extern void	empty_array __P((ARRAY *));
-extern void	dispose_array __P((ARRAY *));
-extern ARRAY	*dup_array __P((ARRAY *));
-extern ARRAY	*dup_array_subrange __P((ARRAY *, ARRAY_ELEMENT *, ARRAY_ELEMENT *));
-extern ARRAY_ELEMENT *copy_array_element __P((ARRAY_ELEMENT *));
+/* Basic operations on array elements. */
+extern ARRAY_ELEMENT *array_create_element __P((arrayind_t, char *));
+extern ARRAY_ELEMENT *array_copy_element __P((ARRAY_ELEMENT *));
+extern void	array_dispose_element __P((ARRAY_ELEMENT *));
 
+extern int	array_insert __P((ARRAY *, arrayind_t, char *));
+extern ARRAY_ELEMENT *array_remove __P((ARRAY *, arrayind_t));
+extern char	*array_reference __P((ARRAY *, arrayind_t));
+
+/* Converting to and from arrays */
 extern WORD_LIST *array_to_word_list __P((ARRAY *));
-extern ARRAY *word_list_to_array __P((WORD_LIST *));
-extern ARRAY *assign_word_list __P((ARRAY *, WORD_LIST *));
+extern ARRAY *array_from_word_list __P((WORD_LIST *));
+extern ARRAY *array_assign_list __P((ARRAY *, WORD_LIST *));
 
 extern char **array_to_argv __P((ARRAY *));
 
-extern char *array_to_assignment_string __P((ARRAY *));
-extern char *quoted_array_assignment_string __P((ARRAY *));
+extern char *array_to_assign __P((ARRAY *, int));
 extern char *array_to_string __P((ARRAY *, char *, int));
-extern ARRAY *string_to_array __P((char *, char *));
+extern ARRAY *array_from_string __P((char *, char *));
 
-extern char *array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int));
-extern char *array_pat_subst __P((ARRAY *, char *, char *, int));
-
-extern ARRAY *array_quote __P((ARRAY *));
+/* Flags for array_shift */
+#define AS_DISPOSE	0x01
 
 #define array_num_elements(a)	((a)->num_elements)
 #define array_max_index(a)	((a)->max_index)

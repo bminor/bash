@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2002 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -239,8 +239,7 @@ fc_builtin (list)
       /* If we have a list of substitutions to do, then reverse it
 	 to get the replacements in the proper order. */
 
-      if (rlist && rlist->next)
-	rlist = (REPL *)reverse_list ((GENERIC_LIST *) rlist);
+      rlist = REVERSE_LIST (rlist, REPL *);
 
       hlist = history_list ();
 
@@ -313,10 +312,9 @@ fc_builtin (list)
     }
 
   /* We print error messages for line specifications out of range. */
-  if ((histbeg < 0) || (histend < 0) ||
-      (histbeg > last_hist) || (histend > last_hist))
+  if ((histbeg < 0) || (histend < 0))
     {
-      builtin_error ("history specification out of range");
+      sh_erange ((char *)NULL, "history specification");
       return (EXECUTION_FAILURE);
     }
 
@@ -410,7 +408,7 @@ fc_number (list)
   s = list->word->word;
   if (*s == '-')
     s++;
-  return (legal_number (s, (long *)NULL));
+  return (legal_number (s, (intmax_t *)NULL));
 }
 
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
@@ -457,19 +455,20 @@ fc_gethnum (command, hlist)
       n = atoi (s);
       n *= sign;
 
-      /* Anything specified greater than the last history element that we
-	 deal with is an error. */
-      if (n > i + history_base)
-	return (-1);
-
       /* If the value is negative or zero, then it is an offset from
 	 the current history item. */
       if (n < 0)
-	return (i + n + 1);
+	{
+	  n += i + 1;
+	  return (n < 0 ? 0 : n);
+	}
       else if (n == 0)
 	return (i);
       else
-	return (n - history_base);
+	{
+	  n -= history_base;
+	  return (i < n ? i : n);
+	}
     }
 
   clen = strlen (command);

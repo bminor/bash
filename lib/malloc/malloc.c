@@ -53,12 +53,12 @@ what you give them.   Help stamp out software-hoarding!  */
  * to the second.
  */
 
-/* Define this to have free() write 0xcf into memory as it's freed, to
-   uncover callers that refer to freed memory. */
-/* SCO 3.2v4 getcwd and possibly other libc routines fail with MEMSCRAMBLE */
-#if !defined (NO_MEMSCRAMBLE)
-#  define MEMSCRAMBLE
-#endif
+/* Define MEMSCRAMBLE to have free() write 0xcf into memory as it's freed, to
+   uncover callers that refer to freed memory, and to have malloc() write 0xdf
+   into memory as it's allocated to avoid referring to previous contents. */
+
+/* SCO 3.2v4 getcwd and possibly other libc routines fail with MEMSCRAMBLE;
+   handled by configure. */
 
 #if defined (HAVE_CONFIG_H)
 #  include <config.h>
@@ -69,15 +69,6 @@ what you give them.   Help stamp out software-hoarding!  */
 #  include "stdc.h"
 #else
 #  include <sys/types.h>
-
-#  ifndef __P
-#    if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus)
-#      define __P(protos) protos
-#    else
-#      define __P(protos) ()
-#    endif
-#  endif
-
 #endif
 
 #if defined (HAVE_UNISTD_H)
@@ -106,6 +97,9 @@ what you give them.   Help stamp out software-hoarding!  */
 #endif
 #ifdef MALLOC_REGISTER
 #  include "table.h"
+#endif
+#ifdef MALLOC_WATCH
+#  include "watch.h"
 #endif
 
 /* System-specific omissions. */
@@ -145,6 +139,14 @@ union mhead {
 #define mh_nbytes	minfo.mi_nbytes
 #define mh_magic2	minfo.mi_magic2
 
+#define MOVERHEAD	sizeof(union mhead)
+#define MALIGN_MASK	7	/* one less than desired alignment */
+
+typedef union _malloc_guard {
+  char s[4];
+  u_bits32_t i;
+} mguard_t;
+
 /* Access free-list pointer of a block.
    It is stored at block + sizeof (char *).
    This is not a field in the minfo structure member of union mhead
@@ -159,16 +161,15 @@ union mhead {
    and end of each allocated block, and make sure they are undisturbed
    whenever a free or a realloc occurs. */
 
-/* Written in each of the 4 bytes following the block's real space */
-#define MAGIC1 0x55
 /* Written in the 2 bytes before the block's real space (-4 bytes) */
 #define MAGIC2 0x5555
-#define MSLOP  4		/* 4 bytes extra for MAGIC1s */
+#define MSLOP  4		/* 4 bytes extra for u_bits32_t size */
 
 /* How many bytes are actually allocated for a request of size N --
    rounded up to nearest multiple of 8 after accounting for malloc
    overhead. */
-#define ALLOCATED_BYTES(n)  (((n) + sizeof (union mhead) + MSLOP + 7) & ~7)
+#define ALLOCATED_BYTES(n) \
+	(((n) + MOVERHEAD + MSLOP + MALIGN_MASK) & ~MALIGN_MASK)
 
 #define ASSERT(p) \
   do \
@@ -179,15 +180,18 @@ union mhead {
 
 /* Minimum and maximum bucket indices for block splitting (and to bound
    the search for a block to split). */
-#define SPLIT_MIN	3
-#define SPLIT_MID	11	/* XXX - was 9 */
-#define SPLIT_MAX	14	/* XXX - was 12 */
+#define SPLIT_MIN	2	/* XXX - was 3 */
+#define SPLIT_MID	11
+#define SPLIT_MAX	14
 
 /* Minimum and maximum bucket indices for block coalescing. */
-#define COMBINE_MIN	6
-#define COMBINE_MAX	(pagebucket - 1)
+#define COMBINE_MIN	2
+#define COMBINE_MAX	(pagebucket - 1)	/* XXX */
 
-#define MIN_COMBINE_FREE	4
+#define LESSCORE_MIN	10
+#define LESSCORE_FRC	13
+
+#define STARTBUCK	1
 
 /* Flags for the internal functions. */
 #define MALLOC_WRAPPER	0x01	/* wrapper function */
@@ -202,9 +206,16 @@ union mhead {
 #define ERR_ASSERT_FAILED	0x08
 
 /* Evaluates to true if NB is appropriate for bucket NU.  NB is adjusted
-   appropriately by the caller to account for malloc overhead. */
-#define IN_BUCKET(nb, nu) \
-  ((nb) > (4 << (nu)) && ((nb) <= (8 << (nu))))
+   appropriately by the caller to account for malloc overhead.  This only
+   checks that the recorded size is not too big for the bucket.  We
+   can't check whether or not it's in between NU and NU-1 because we
+   might have encountered a busy bucket when allocating and moved up to
+   the next size. */
+#define IN_BUCKET(nb, nu)	((nb) <= binsizes[(nu)])
+
+/* Use this when we want to be sure that NB is in bucket NU. */
+#define RIGHT_BUCKET(nb, nu) \
+	(((nb) > binsizes[(nu)-1]) && ((nb) <= binsizes[(nu)]))
 
 /* nextf[i] is free list of blocks of size 2**(i + 3)  */
 
@@ -217,6 +228,19 @@ static char busy[NBUCKETS];
 static int pagesz;	/* system page size. */
 static int pagebucket;	/* bucket for requests a page in size */
 static int maxbuck;	/* highest bucket receiving allocation request. */
+
+static char *memtop;	/* top of heap */
+
+static unsigned long binsizes[NBUCKETS] = {
+	8UL, 16UL, 32UL, 64UL, 128UL, 256UL, 512UL, 1024UL, 2048UL, 4096UL,
+	8192UL, 16384UL, 32768UL, 65536UL, 131072UL, 262144UL, 524288UL,
+	1048576UL, 2097152UL, 4194304UL, 8388608UL, 16777216UL, 33554432UL,
+	67108864UL, 134217728UL, 268435456UL, 536870912UL, 1073741824UL,
+	2147483648UL, 4294967296UL-1
+};
+
+/* binsizes[x] == (1 << ((x) + 3)) */
+#define binsize(x)	binsizes[(x)]
 
 /* Declarations for internal functions */
 static PTR_T internal_malloc __P((size_t, const char *, int, int));
@@ -238,10 +262,6 @@ static void botch __P((const char *, const char *, int));
 #endif
 static void xbotch __P((PTR_T, int, const char *, const char *, int));
 
-#ifdef MALLOC_STATS
-extern struct _malstats _mstats;
-#endif /* MALLOC_STATS */
-
 #if !HAVE_DECL_SBRK
 extern char *sbrk ();
 #endif /* !HAVE_DECL_SBRK */
@@ -251,10 +271,22 @@ extern int interrupt_immediately;
 extern int signal_is_trapped __P((int));
 #endif
 
+#ifdef MALLOC_STATS
+struct _malstats _mstats;
+#endif /* MALLOC_STATS */
+
 /* Debugging variables available to applications. */
 int malloc_flags = 0;	/* future use */
 int malloc_trace = 0;	/* trace allocations and frees to stderr */
 int malloc_register = 0;	/* future use */
+
+#ifdef MALLOC_TRACE
+char _malloc_trace_buckets[NBUCKETS];
+
+/* These should really go into a header file. */
+extern void mtrace_alloc __P((const char *, PTR_T, size_t, const char *, int));
+extern void mtrace_free __P((PTR_T, int, const char *, int));
+#endif
 
 #if !defined (botch)
 static void
@@ -286,53 +318,54 @@ xbotch (mem, e, s, file, line)
   botch(s, file, line);
 }
 
-#if 0
 /* Coalesce two adjacent free blocks off the free list for size NU - 1,
-   as long as there are at least MIN_COMBINE_FREE free blocks and we
-   can find two adjacent free blocks.  nextf[NU -1] is assumed to not
-   be busy; the caller (morecore()) checks for this. */
+   as long as we can find two adjacent free blocks.  nextf[NU -1] is
+   assumed to not be busy; the caller (morecore()) checks for this. */
 static void
 bcoalesce (nu)
      register int nu;
 {
   register union mhead *mp, *mp1, *mp2;
-  register int nfree, nbuck;
+  register int nbuck;
   unsigned long siz;
 
   nbuck = nu - 1;
   if (nextf[nbuck] == 0)
     return;
 
-  nfree = 1;
-  mp1 = nextf[nbuck];
+  siz = binsize (nbuck);
+
+  mp2 = mp1 = nextf[nbuck];
   mp = CHAIN (mp1);
-  mp2 = (union mhead *)0;
-  while (CHAIN (mp))
+  while (mp && mp != (union mhead *)((char *)mp1 + siz))
     {
       mp2 = mp1;
       mp1 = mp;
       mp = CHAIN (mp);
-      nfree++;
-      /* We may not want to run all the way through the free list here;
-	 if we do not, we need to check a threshold value here and break
-	 if nfree exceeds it. */
     }
-  if (nfree < MIN_COMBINE_FREE)
+  if (mp == 0)
     return;
+
   /* OK, now we have mp1 pointing to the block we want to add to nextf[NU].
      CHAIN(mp2) must equal mp1.  Check that mp1 and mp are adjacent. */
-  if (CHAIN(mp2) != mp1)
+  if (mp2 != mp1 && CHAIN(mp2) != mp1)
     xbotch ((PTR_T)0, 0, "bcoalesce: CHAIN(mp2) != mp1", (char *)NULL, 0);
-  siz = 1 << (nbuck + 3);
+
+#ifdef MALLOC_DEBUG
   if (CHAIN (mp1) != (union mhead *)((char *)mp1 + siz))
     return;	/* not adjacent */
+#endif
 
 #ifdef MALLOC_STATS
   _mstats.tbcoalesce++;
+  _mstats.ncoalesce[nbuck]++;
 #endif
 
   /* Since they are adjacent, remove them from the free list */
-  CHAIN (mp2) = CHAIN (mp);
+  if (mp1 == nextf[nbuck])
+    nextf[nbuck] = CHAIN (mp);
+  else
+    CHAIN (mp2) = CHAIN (mp);
 
   /* And add the combined two blocks to nextf[NU]. */
   mp1->mh_alloc = ISFREE;
@@ -340,7 +373,6 @@ bcoalesce (nu)
   CHAIN (mp1) = nextf[nu];
   nextf[nu] = mp1;
 }
-#endif
 
 /* Split a block at index > NU (but less than SPLIT_MAX) into a set of
    blocks of the correct size, and attach them to nextf[NU].  nextf[NU]
@@ -387,8 +419,8 @@ bsplit (nu)
 #endif
 
   /* Figure out how many blocks we'll get. */
-  siz = (1 << (nu + 3));
-  nblks = (1 << (nbuck + 3)) / siz;
+  siz = binsize (nu);
+  nblks = binsize (nbuck) / siz;
 
   /* Remove the block from the chain of larger blocks. */
   mp = nextf[nbuck];
@@ -434,6 +466,27 @@ unblock_signals (setp, osetp)
 #  endif
 #endif
 }
+
+/* Return some memory to the system by reducing the break.  This is only
+   called with NU > pagebucket, so we're always assured of giving back
+   more than one page of memory. */  
+static void
+lesscore (nu)			/* give system back some memory */
+     register int nu;		/* size index we're discarding  */
+{
+  long siz;
+
+  siz = binsize (nu);
+  /* Should check for errors here, I guess. */
+  sbrk (-siz);
+  memtop -= siz;
+
+#ifdef MALLOC_STATS
+  _mstats.nsbrk++;
+  _mstats.tsbrk -= siz;
+  _mstats.nlesscore[nu]++;
+#endif
+}
   
 static void
 morecore (nu)			/* ask system for more memory */
@@ -456,7 +509,7 @@ morecore (nu)			/* ask system for more memory */
       blocked_sigs = 1;
     }
 
-  siz = 1 << (nu + 3);	/* size of desired block for nextf[nu] */
+  siz = binsize (nu);	/* size of desired block for nextf[nu] */
 
   if (siz < 0)
     goto morecore_done;		/* oops */
@@ -474,7 +527,6 @@ morecore (nu)			/* ask system for more memory */
 	goto morecore_done;
     }
 
-#if 0
   /* Try to coalesce two adjacent blocks from the free list on nextf[nu - 1],
      if we can, and we're withing the range of the block coalescing limits. */
   if (nu >= COMBINE_MIN && nu < COMBINE_MAX && busy[nu - 1] == 0 && nextf[nu - 1])
@@ -483,7 +535,6 @@ morecore (nu)			/* ask system for more memory */
       if (nextf[nu] != 0)
 	goto morecore_done;
     }
-#endif
 
   /* Take at least a page, and figure out how many blocks of the requested
      size we're getting. */
@@ -499,7 +550,7 @@ morecore (nu)			/* ask system for more memory */
 	 an amount.  If it is, we can just request it.  If not, we want
 	 the smallest integral multiple of pagesize that is larger than
 	 `siz' and will satisfy the request. */
-      sbrk_amt = siz % pagesz;
+      sbrk_amt = siz & (pagesz - 1);
       if (sbrk_amt == 0)
 	sbrk_amt = siz;
       else
@@ -518,10 +569,12 @@ morecore (nu)			/* ask system for more memory */
   if ((long)mp == -1)
     goto morecore_done;
 
+  memtop += sbrk_amt;
+
   /* shouldn't happen, but just in case -- require 8-byte alignment */
-  if ((long)mp & 7)
+  if ((long)mp & MALIGN_MASK)
     {
-      mp = (union mhead *) (((long)mp + 7) & ~7);
+      mp = (union mhead *) (((long)mp + MALIGN_MASK) & ~MALIGN_MASK);
       nblks--;
     }
 
@@ -542,28 +595,82 @@ morecore_done:
     unblock_signals (&set, &oset);
 }
 
-#if defined (MEMSCRAMBLE) || !defined (NO_CALLOC)
-static char *
-zmemset (s, c, n)
-     char *s;
-     int c;
-     register int n;
-{
-  register char *sp;
-
-  sp = s;
-  while (--n >= 0)
-    *sp++ = c;
-  return (s);
-}
-#endif /* MEMSCRAMBLE || !NO_CALLOC */
-
 static void
 malloc_debug_dummy ()
 {
   write (1, "malloc_debug_dummy\n", 19);
 }
 
+#define PREPOP_BIN	2
+#define PREPOP_SIZE	32
+
+static int
+pagealign ()
+{
+  register int nunits;
+  register union mhead *mp;
+  long sbrk_needed;
+  char *curbrk;
+
+  pagesz = getpagesize ();
+  if (pagesz < 1024)
+    pagesz = 1024;
+
+  /* OK, how much do we need to allocate to make things page-aligned?
+     Some of this partial page will be wasted space, but we'll use as
+     much as we can.  Once we figure out how much to advance the break
+     pointer, go ahead and do it. */
+  memtop = curbrk = sbrk (0);
+  sbrk_needed = pagesz - ((long)curbrk & (pagesz - 1));	/* sbrk(0) % pagesz */
+  if (sbrk_needed < 0)
+    sbrk_needed += pagesz;
+
+  /* Now allocate the wasted space. */
+  if (sbrk_needed)
+    {
+#ifdef MALLOC_STATS
+      _mstats.nsbrk++;
+      _mstats.tsbrk += sbrk_needed;
+#endif
+      curbrk = sbrk (sbrk_needed);
+      if ((long)curbrk == -1)
+	return -1;
+      memtop += sbrk_needed;
+
+      /* Take the memory which would otherwise be wasted and populate the most
+	 popular bin (2 == 32 bytes) with it.  Add whatever we need to curbrk
+	 to make things 32-byte aligned, compute how many 32-byte chunks we're
+	 going to get, and set up the bin. */
+      curbrk += sbrk_needed & (PREPOP_SIZE - 1);
+      sbrk_needed -= sbrk_needed & (PREPOP_SIZE - 1);
+      nunits = sbrk_needed / PREPOP_SIZE;
+
+      if (nunits > 0)
+	{
+	  mp = (union mhead *)curbrk;
+
+	  nextf[PREPOP_BIN] = mp;
+	  while (1)
+	    {
+	      mp->mh_alloc = ISFREE;
+	      mp->mh_index = PREPOP_BIN;
+	      if (--nunits <= 0) break;
+	      CHAIN(mp) = (union mhead *)((char *)mp + PREPOP_SIZE);
+	      mp = (union mhead *)((char *)mp + PREPOP_SIZE);
+	    }
+	  CHAIN(mp) = 0;
+	}
+    }
+
+  /* compute which bin corresponds to the page size. */
+  for (nunits = 7; nunits < NBUCKETS; nunits++)
+    if (pagesz <= binsize(nunits))
+      break;
+  pagebucket = nunits;
+
+  return 0;
+}
+    
 static PTR_T
 internal_malloc (n, file, line, flags)		/* get a block */
      size_t n;
@@ -571,71 +678,27 @@ internal_malloc (n, file, line, flags)		/* get a block */
      int line, flags;
 {
   register union mhead *p;
-  register long nbytes;
   register int nunits;
+  register char *m, *z;
+  long nbytes;
+  mguard_t mg;
 
-  /* Get the system page size and align break pointer so everything will
+  /* Get the system page size and align break pointer so future sbrks will
      be page-aligned.  The page size must be at least 1K -- anything
      smaller is increased. */
   if (pagesz == 0)
-    {
-      register long sbrk_needed;
-
-      pagesz = getpagesize ();
-      if (pagesz < 1024)
-	pagesz = 1024;
-      /* OK, how much do we need to allocate to make things page-aligned?
-	 This partial page is wasted space.  Once we figure out how much
-	 to advance the break pointer, go ahead and do it. */
-      sbrk_needed = pagesz - ((long)sbrk (0) & (pagesz - 1));	/* sbrk(0) % pagesz */
-      if (sbrk_needed < 0)
-	sbrk_needed += pagesz;
-      /* Now allocate the wasted space. */
-      if (sbrk_needed)
-	{
-#ifdef MALLOC_STATS
-	  _mstats.nsbrk++;
-	  _mstats.tsbrk += sbrk_needed;
-#endif
-	  if ((long)sbrk (sbrk_needed) == -1)
-	    return (NULL);
-	}
-      nunits = 0;
-      nbytes = 8;
-      while (pagesz > nbytes)
-	{
-	  nbytes <<= 1;
-	  nunits++;
-	}
-      pagebucket = nunits;
-    }
+    if (pagealign () < 0)
+      return ((PTR_T)NULL);
  
   /* Figure out how many bytes are required, rounding up to the nearest
      multiple of 8, then figure out which nextf[] area to use.  Try to
      be smart about where to start searching -- if the number of bytes
      needed is greater than the page size, we can start at pagebucket. */
   nbytes = ALLOCATED_BYTES(n);
-  nunits = 0;
-  if (nbytes <= (pagesz >> 1))
-    {
-      register unsigned int shiftr;
-
-      shiftr = (nbytes - 1) >> 2;	/* == (nbytes - 1) / 4 */
-      while (shiftr >>= 1)		/* == (nbytes - 1) / {8,16,32,...} */
-	nunits++;
-    }
-  else
-    {
-      register u_bits32_t amt;
-
-      nunits = pagebucket;
-      amt = pagesz;
-      while (nbytes > amt)
-	{
-	  amt <<= 1;
-	  nunits++;
-	}
-    }
+  nunits = (nbytes <= (pagesz >> 1)) ? STARTBUCK : pagebucket;
+  for ( ; nunits < NBUCKETS; nunits++)
+    if (nbytes <= binsize(nunits))
+      break;
 
   /* Silently reject too-large requests. */
   if (nunits >= NBUCKETS)
@@ -671,29 +734,34 @@ internal_malloc (n, file, line, flags)		/* get a block */
   /* If not for this check, we would gobble a clobbered free chain ptr
      and bomb out on the NEXT allocate of this size block */
   if (p->mh_alloc != ISFREE || p->mh_index != nunits)
-    xbotch ((PTR_T)0, 0, "malloc: block on free list clobbered", file, line);
+    xbotch ((PTR_T)(p+1), 0, "malloc: block on free list clobbered", file, line);
 
   /* Fill in the info, and set up the magic numbers for range checking. */
   p->mh_alloc = ISALLOC;
   p->mh_magic2 = MAGIC2;
   p->mh_nbytes = n;
-  {
-    register char  *m = (char *) (p + 1) + n;
 
-    *m++ = MAGIC1, *m++ = MAGIC1, *m++ = MAGIC1, *m = MAGIC1;
-  }
+  /* End guard */
+  mg.i = n;
+  z = mg.s;
+  m = (char *) (p + 1) + n;
+  *m++ = *z++, *m++ = *z++, *m++ = *z++, *m++ = *z++;
 
 #ifdef MEMSCRAMBLE
-  zmemset ((char *)(p + 1), 0xdf, n);	/* scramble previous contents */
+  if (n)
+    MALLOC_MEMSET ((char *)(p + 1), 0xdf, n);	/* scramble previous contents */
 #endif
 #ifdef MALLOC_STATS
   _mstats.nmalloc[nunits]++;
   _mstats.tmalloc[nunits]++;
   _mstats.nmal++;
+  _mstats.bytesreq += n;
 #endif /* MALLOC_STATS */
 
 #ifdef MALLOC_TRACE
   if (malloc_trace && (flags & MALLOC_NOTRACE) == 0)
+    mtrace_alloc ("malloc", p + 1, n, file, line);
+  else if (_malloc_trace_buckets[nunits])
     mtrace_alloc ("malloc", p + 1, n, file, line);
 #endif
 
@@ -702,7 +770,12 @@ internal_malloc (n, file, line, flags)		/* get a block */
     mregister_alloc ("malloc", p + 1, n, file, line);
 #endif
 
-  return (char *) (p + 1);	/* XXX - should be cast to PTR_T? */
+#ifdef MALLOC_WATCH
+  if (_malloc_nwatch > 0)
+    _malloc_ckwatch (p + 1, file, line, W_ALLOC, n);
+#endif
+
+  return (PTR_T) (p + 1);
 }
 
 static void
@@ -712,10 +785,11 @@ internal_free (mem, file, line, flags)
      int line, flags;
 {
   register union mhead *p;
-  register char *ap;
+  register char *ap, *z;
   register int nunits;
   register unsigned int nbytes;
   int ubytes;		/* caller-requested size */
+  mguard_t mg;
 
   if ((ap = (char *)mem) == 0)
     return;
@@ -753,18 +827,42 @@ internal_free (mem, file, line, flags)
      We sanity-check the value of mh_nbytes against the size of the blocks
      in the appropriate bucket before we use it.  This can still cause problems
      and obscure errors if mh_nbytes is wrong but still within range; the
-     checks against MAGIC1 will probably fail then.  Using MALLOC_REGISTER
-     will help here, since it saves the original number of bytes requested. */
+     checks against the size recorded at the end of the chunk will probably
+     fail then.  Using MALLOC_REGISTER will help here, since it saves the
+     original number of bytes requested. */
+
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
 	    "free: underflow detected; mh_nbytes out of range", file, line);
 
   ap += p->mh_nbytes;
-  ASSERT (*ap++ == MAGIC1); ASSERT (*ap++ == MAGIC1);
-  ASSERT (*ap++ == MAGIC1); ASSERT (*ap   == MAGIC1);
+  z = mg.s;
+  *z++ = *ap++, *z++ = *ap++, *z++ = *ap++, *z++ = *ap++;  
+  if (mg.i != p->mh_nbytes)
+    xbotch (mem, ERR_ASSERT_FAILED, "free: start and end chunk sizes differ", file, line);
+
+#if 1
+  if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == memtop))
+#else
+  if (((char *)p + binsize(nunits) == memtop) && nunits >= LESSCORE_MIN)
+#endif
+    {
+      /* If above LESSCORE_FRC, give back unconditionally.  This should be set
+	 high enough to be infrequently encountered.  If between LESSCORE_MIN
+	 and LESSCORE_FRC, call lesscore if the bucket is marked as busy (in
+	 which case we would punt below and leak memory) or if there's already
+	 a block on the free list. */
+      if ((nunits >= LESSCORE_FRC) || busy[nunits] || nextf[nunits] != 0)
+	{
+	  lesscore (nunits);
+	  /* keeps the tracing and registering code in one place */
+	  goto free_return;
+	}
+    }
 
 #ifdef MEMSCRAMBLE
-  zmemset (mem, 0xcf, p->mh_nbytes);
+  if (p->mh_nbytes)
+    MALLOC_MEMSET (mem, 0xcf, p->mh_nbytes);
 #endif
 
   ASSERT (nunits < NBUCKETS);
@@ -780,6 +878,8 @@ internal_free (mem, file, line, flags)
   nextf[nunits] = p;
   busy[nunits] = 0;
 
+free_return:
+
 #ifdef MALLOC_STATS
   _mstats.nmalloc[nunits]--;
   _mstats.nfre++;
@@ -788,11 +888,18 @@ internal_free (mem, file, line, flags)
 #ifdef MALLOC_TRACE
   if (malloc_trace && (flags & MALLOC_NOTRACE) == 0)
     mtrace_free (mem, ubytes, file, line);
+  else if (_malloc_trace_buckets[nunits])
+    mtrace_free (mem, ubytes, file, line);
 #endif
 
 #ifdef MALLOC_REGISTER
   if (malloc_register && (flags & MALLOC_NOREG) == 0)
     mregister_free (mem, ubytes, file, line);
+#endif
+
+#ifdef MALLOC_WATCH
+  if (_malloc_nwatch > 0)
+    _malloc_ckwatch (mem, file, line, W_FREE, ubytes);
 #endif
 }
 
@@ -807,7 +914,8 @@ internal_realloc (mem, n, file, line, flags)
   register u_bits32_t tocopy;
   register unsigned int nbytes;
   register int nunits;
-  register char *m;
+  register char *m, *z;
+  mguard_t mg;
 
 #ifdef MALLOC_STATS
   _mstats.nrealloc++;
@@ -837,36 +945,55 @@ internal_realloc (mem, n, file, line, flags)
      We sanity-check the value of mh_nbytes against the size of the blocks
      in the appropriate bucket before we use it.  This can still cause problems
      and obscure errors if mh_nbytes is wrong but still within range; the
-     checks against MAGIC1 will probably fail then.  Using MALLOC_REGISTER
-     will help here, since it saves the original number of bytes requested. */
+     checks against the size recorded at the end of the chunk will probably
+     fail then.  Using MALLOC_REGISTER will help here, since it saves the
+     original number of bytes requested. */
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
 	    "realloc: underflow detected; mh_nbytes out of range", file, line);
 
   m = (char *)mem + (tocopy = p->mh_nbytes);
-  ASSERT (*m++ == MAGIC1); ASSERT (*m++ == MAGIC1);
-  ASSERT (*m++ == MAGIC1); ASSERT (*m   == MAGIC1);
+  z = mg.s;
+  *z++ = *m++, *z++ = *m++, *z++ = *m++, *z++ = *m++;
+  if (mg.i != p->mh_nbytes)
+    xbotch (mem, ERR_ASSERT_FAILED, "realloc: start and end chunk sizes differ", file, line);
+
+#ifdef MALLOC_WATCH
+  if (_malloc_nwatch > 0)
+    _malloc_ckwatch (p + 1, file, line, W_REALLOC, n);
+#endif
+#ifdef MALLOC_STATS
+  _mstats.bytesreq += (n < tocopy) ? 0 : n - tocopy;
+#endif
 
   /* See if desired size rounds to same power of 2 as actual size. */
   nbytes = ALLOCATED_BYTES(n);
 
   /* If ok, use the same block, just marking its size as changed.  */
-  if (IN_BUCKET(nbytes, nunits))
+  if (RIGHT_BUCKET(nbytes, nunits))
     {
-      m = (char *)mem + tocopy;
+#if 0
+      m = (char *)mem + p->mh_nbytes;
+#else
+      /* Compensate for increment above. */
+      m -= 4;
+#endif
       *m++ = 0;  *m++ = 0;  *m++ = 0;  *m++ = 0;
-      p->mh_nbytes = n;
-      m = (char *)mem + n;
-      *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;  *m++ = MAGIC1;
+      m = (char *)mem + (p->mh_nbytes = n);
+
+      mg.i = n;
+      z = mg.s;
+      *m++ = *z++, *m++ = *z++, *m++ = *z++, *m++ = *z++;      
+
       return mem;
     }
+
+  if (n < tocopy)
+    tocopy = n;
 
 #ifdef MALLOC_STATS
   _mstats.nrcopy++;
 #endif
-
-  if (n < tocopy)
-    tocopy = n;
 
   if ((m = internal_malloc (n, file, line, MALLOC_INTERNAL|MALLOC_NOTRACE|MALLOC_NOREG)) == 0)
     return 0;
@@ -876,11 +1003,18 @@ internal_realloc (mem, n, file, line, flags)
 #ifdef MALLOC_TRACE
   if (malloc_trace && (flags & MALLOC_NOTRACE) == 0)
     mtrace_alloc ("realloc", m, n, file, line);
+  else if (_malloc_trace_buckets[nunits])
+    mtrace_alloc ("realloc", m, n, file, line);
 #endif
 
 #ifdef MALLOC_REGISTER
   if (malloc_register && (flags & MALLOC_NOREG) == 0)
     mregister_alloc ("realloc", m, n, file, line);
+#endif
+
+#ifdef MALLOC_WATCH
+  if (_malloc_nwatch > 0)
+    _malloc_ckwatch (m, file, line, W_RESIZED, n);
 #endif
 
   return m;
@@ -946,7 +1080,7 @@ internal_calloc (n, s, file, line, flags)
   total = n * s;
   result = internal_malloc (total, file, line, flags|MALLOC_INTERNAL);
   if (result)
-    zmemset (result, 0, total);
+    memset (result, 0, total);
   return result;  
 }
 
@@ -961,7 +1095,6 @@ internal_cfree (p, file, line, flags)
 #endif /* !NO_CALLOC */
 
 #ifdef MALLOC_STATS
-
 int
 malloc_free_blocks (size)
      int size;
@@ -977,7 +1110,7 @@ malloc_free_blocks (size)
 }
 #endif
 
-#if defined (SHELL)
+#if defined (MALLOC_WRAPFUNCS)
 PTR_T
 sh_malloc (bytes, file, line)
      size_t bytes;
@@ -1045,9 +1178,9 @@ sh_valloc (size, file, line)
 {
   return internal_valloc (size, file, line, MALLOC_WRAPPER);
 }
-#endif
+#endif /* !NO_VALLOC */
 
-#endif
+#endif /* MALLOC_WRAPFUNCS */
 
 /* Externally-available functions that call their internal counterparts. */
 

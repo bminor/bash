@@ -44,12 +44,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
-
 #include "history.h"
 #include "histlib.h"
 
@@ -349,19 +343,19 @@ stifle_history (max)
   max_input_history = history_max_entries = max;
 }
 
-/* Stop stifling the history.  This returns the previous amount the 
-   history was stifled by.  The value is positive if the history was
-   stifled,  negative if it wasn't. */
+/* Stop stifling the history.  This returns the previous maximum
+   number of history entries.  The value is positive if the history
+   was stifled,  negative if it wasn't. */
 int
 unstifle_history ()
 {
   if (history_stifled)
     {
       history_stifled = 0;
-      return (-history_max_entries);
+      return (history_max_entries);
     }
-
-  return (history_max_entries);
+  else
+    return (-history_max_entries);
 }
 
 int

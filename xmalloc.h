@@ -40,7 +40,7 @@ extern PTR_T xmalloc __P((size_t));
 extern PTR_T xrealloc __P((void *, size_t));
 extern void xfree __P((void *));
 
-#ifdef USING_BASH_MALLOC
+#if defined(USING_BASH_MALLOC) && !defined (DISABLE_MALLOC_WRAPPERS)
 extern PTR_T sh_xmalloc __P((size_t, const char *, int));
 extern PTR_T sh_xrealloc __P((void *, size_t, const char *, int));
 extern void sh_xfree __P((void *, const char *, int));
