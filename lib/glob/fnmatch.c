@@ -25,10 +25,17 @@
 #include "collsyms.h"
 #include <ctype.h>
 
+#if defined (HAVE_STRING_H)
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif /* HAVE_STRING_H */
+
 static int gmatch ();
 static char *brackmatch ();
 #ifdef EXTENDED_GLOB
 static int extmatch ();
+static char *patscan ();
 #endif
   
 #if !defined (isascii)
@@ -155,11 +162,17 @@ gmatch (string, se, pattern, pe, flags)
       sc = n < se ? *n : '\0';
 
 #ifdef EXTENDED_GLOB
+      /* extmatch () will handle recursively calling gmatch, so we can
+	 just return what extmatch() returns. */
       if ((flags & FNM_EXTMATCH) && *p == '(' &&
 	  (c == '+' || c == '*' || c == '?' || c == '@' || c == '!')) /* ) */
-	/* extmatch () will handle recursively calling gmatch, so we can
-	   just return what extmatch() returns. */
-	return (extmatch (c, n, se, p, pe, flags));
+	{
+	  int lflags;
+	  /* If we're not matching the start of the string, we're not
+	     concerned about the special cases for matching `.' */
+	  lflags = (n == string) ? flags : (flags & ~FNM_PERIOD);
+	  return (extmatch (c, n, se, p, pe, lflags));
+	}
 #endif
 
       switch (c)
@@ -226,7 +239,23 @@ gmatch (string, se, pattern, pe, flags)
 #ifdef EXTENDED_GLOB
 	      /* Handle ******(patlist) */
 	      if ((flags & FNM_EXTMATCH) && c == '*' && *p == '(')  /*)*/
-		return (extmatch (c, n, se, p, pe, flags));
+		{
+		  char *newn;
+		  /* We need to check whether or not the extended glob
+		     pattern matches the remainder of the string.
+		     If it does, we match the entire pattern. */
+		  for (newn = n; newn < se; ++newn)
+		    {
+		      if (extmatch (c, newn, se, p, pe, flags) == 0)
+			return (0);
+		    }
+		  /* We didn't match the extended glob pattern, but
+		     that's OK, since we can match 0 or more occurrences.
+		     We need to skip the glob pattern and see if we
+		     match the rest of the string. */
+		  newn = patscan (p, pe, 0);
+		  p = newn;
+		}
 #endif
 	      if (p == pe)
 	        break;
@@ -245,11 +274,24 @@ gmatch (string, se, pattern, pe, flags)
 	    c1 = (unsigned char)((flags & FNM_NOESCAPE) == 0 && c == '\\') ? *p : c;
 	    c1 = FOLD (c1);
 	    for (--p; n < se; ++n)
-	      /* Only call fnmatch if the first character indicates a
-		 possible match. */
-	      if ((c == '[' || FOLD (*n) == c1) &&
-		  gmatch (n, se, p, pe, flags & ~FNM_PERIOD) == 0)
-		return (0);
+	      {
+		/* Only call fnmatch if the first character indicates a
+		   possible match.  We can check the first character if
+		   we're not doing an extended glob match. */
+		if ((flags & FNM_EXTMATCH) == 0 && c != '[' && FOLD (*n) != c1)
+		  continue;
+
+		/* If we're doing an extended glob match and the pattern is not
+		   one of the extended glob patterns, we can check the first
+		   character. */
+		if ((flags & FNM_EXTMATCH) && p[1] != '(' && /*)*/
+		    strchr ("?*+@!", *p) == 0 && c != '[' && FOLD (*n) != c1)
+		  continue;
+
+		/* Otherwise, we just recurse. */
+		if (gmatch (n, se, p, pe, flags & ~FNM_PERIOD) == 0)
+		  return (0);
+	      }
 	    return FNM_NOMATCH;
 	  }
 

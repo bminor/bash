@@ -19,6 +19,8 @@ Cambridge, MA 02139, USA.  */
 #ifndef	_FNMATCH_H
 #define	_FNMATCH_H	1
 
+#include "stdc.h"
+
 /* We #undef these before defining them because some losing systems
    (HP-UX A.08.07 for example) define these in <unistd.h>.  */
 #undef  FNM_PATHNAME
@@ -41,6 +43,6 @@ Cambridge, MA 02139, USA.  */
 
 /* Match STRING against the filename pattern PATTERN,
    returning zero if it matches, FNM_NOMATCH if not.  */
-extern int fnmatch();
+extern int fnmatch __P((char *, char *, int));
 
 #endif /* _FNMATCH_H */

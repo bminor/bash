@@ -31,13 +31,16 @@
    of an integer.  32 is larger than the string rep of 2^^31 - 1. */
 #define MAX_INT_LEN 32
 
-/* Integer to string conversion.  This conses the string; the
-   caller should free it. */
+/* Integer to string conversion.  The caller passes the buffer and
+   the size.  This should check for buffer underflow, but currently
+   does not. */
 char *
-itos (i)
+inttostr (i, buf, len)
      int i;
+     char *buf;
+     int len;
 {
-  char buf[MAX_INT_LEN], *p, *ret;
+  char *p;
   int negative = 0;
   unsigned int ui;
 
@@ -49,7 +52,7 @@ itos (i)
 
   ui = (unsigned int) i;
 
-  p = buf + MAX_INT_LEN - 2;
+  p = buf + len - 2;
   p[1] = '\0';
 
   do
@@ -59,6 +62,17 @@ itos (i)
   if (negative)
     *p-- = '-';
 
-  ret = savestring (p + 1);
-  return (ret);
+  return (p + 1);
+}
+
+/* Integer to string conversion.  This conses the string; the
+   caller should free it. */
+char *
+itos (i)
+     int i;
+{
+  char *p, lbuf[MAX_INT_LEN];
+
+  p = inttostr (i, lbuf, sizeof(lbuf));
+  return (savestring (p));
 }

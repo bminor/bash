@@ -129,7 +129,8 @@ int interactive_comments = 1;
    disallows: changing directories, command or path names containing `/',
    unsetting or resetting the values of $PATH and $SHELL, and any type of
    output redirection. */
-int restricted = 0;
+int restricted = 0;		/* currently restricted */
+int restricted_shell = 0;	/* shell was started in restricted mode. */
 #endif /* RESTRICTED_SHELL */
 
 /* Non-zero means that this shell is running in `privileged' mode.  This

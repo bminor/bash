@@ -260,7 +260,7 @@ make_command_string_internal (command)
 	  break;
 
 	default:
-	  programming_error ("print_command: bad command type `%d'", command->type);
+	  command_error ("print_command", CMDERR_BADTYPE, command->type, 0);
 	  break;
 	}
 
@@ -268,7 +268,10 @@ make_command_string_internal (command)
 	cprintf (" )");
 
       if (command->redirects)
-	print_redirection_list (command->redirects);
+	{
+	  cprintf (" ");
+	  print_redirection_list (command->redirects);
+	}
     }
 }
 
@@ -518,7 +521,7 @@ print_cond_node (cond)
     }
   else if (cond->type == COND_UNARY)
     {
-      cprintf (cond->op->word);
+      cprintf ("%s", cond->op->word);
       cprintf (" ");
       print_cond_node (cond->left);
     }
@@ -526,13 +529,13 @@ print_cond_node (cond)
     {
       print_cond_node (cond->left);
       cprintf (" ");
-      cprintf (cond->op->word);
+      cprintf ("%s", cond->op->word);
       cprintf (" ");
       print_cond_node (cond->right);
     }
   else if (cond->type == COND_TERM)
     {
-      cprintf (cond->op->word);		/* need to add quoting here */
+      cprintf ("%s", cond->op->word);		/* need to add quoting here */
     }
 }
 
@@ -896,7 +899,7 @@ cprintf (format, arg1, arg2)
      char *format, *arg1, *arg2;
 {
   register char *s;
-  char char_arg[2], *argp, *args[2];
+  char char_arg[2], *argp, *args[2], intbuf[32];
   int arg_len, c, arg_index;
 
   args[arg_index = 0] = arg1;
@@ -933,10 +936,9 @@ cprintf (format, arg1, arg2)
 	      break;
 
 	    case 'd':
-	      argp = itos (pointer_to_int (args[arg_index]));
+	      argp = inttostr (pointer_to_int (args[arg_index]), intbuf, sizeof (intbuf));
 	      arg_index++;
 	      arg_len = strlen (argp);
-	      free_argp = 1;
 	      break;
 
 	    case 'c':
@@ -976,7 +978,7 @@ cprintf (control, va_alist)
 #endif
 {
   register char *s;
-  char char_arg[2], *argp;
+  char char_arg[2], *argp, intbuf[32];
   int digit_arg, arg_len, c;
   va_list args;
 
@@ -1020,9 +1022,8 @@ cprintf (control, va_alist)
 
 	    case 'd':
 	      digit_arg = va_arg (args, int);
-	      argp = itos (digit_arg);
+	      argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
 	      arg_len = strlen (argp);
-	      free_argp = 1;
 	      break;
 
 	    case 'c':

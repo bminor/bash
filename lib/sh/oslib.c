@@ -154,6 +154,9 @@ getdtablesize ()
 #endif /* !HAVE_GETDTABLESIZE */
 
 #if !defined (HAVE_BCOPY)
+#  if defined (bcopy)
+#    undef bcopy
+#  endif
 void
 bcopy (s,d,n)
      char *d, *s;
@@ -164,6 +167,9 @@ bcopy (s,d,n)
 #endif /* !HAVE_BCOPY */
 
 #if !defined (HAVE_BZERO)
+#  if defined (bzero)
+#    undef bzero
+#  endif
 void
 bzero (s, n)
      char *s;

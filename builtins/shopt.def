@@ -79,9 +79,18 @@ extern int hist_verify, history_reediting, perform_hostname_completion;
 extern void enable_hostname_completion ();
 #endif
 
+#if defined (RESTRICTED_SHELL)
+extern int restricted_shell;
+extern char *shell_name;
+#endif
+
 extern void set_shellopts ();
 
 static int set_interactive_comments ();
+
+#if defined (RESTRICTED_SHELL)
+static int set_restricted_shell ();
+#endif
 
 static struct {
   char *name;
@@ -120,6 +129,9 @@ static struct {
   { "nocaseglob", &glob_ignore_case, (Function *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (Function *)NULL },
   { "promptvars", &promptvars, (Function *)NULL },
+#if defined (RESTRICTED_SHELL)
+  { "restricted_shell", &restricted_shell, set_restricted_shell },
+#endif
   { "shift_verbose", &print_shift_error, (Function *)NULL },
   { "sourcepath", &source_uses_path, (Function *)NULL },
   { (char *)0, (int *)0, (Function *)NULL }
@@ -262,7 +274,7 @@ toggle_shopts (mode, list, quiet)
   return (rval);
 }
 
-static int
+static void
 print_shopt (name, val, flags)
      char *name;
      int val, flags;
@@ -400,3 +412,20 @@ set_interactive_comments (mode)
   set_shellopts ();
   return (0);
 }
+
+#if defined (RESTRICTED_SHELL)
+/* Don't allow the value of restricted_shell to be modified. */
+
+static int
+set_restricted_shell (mode)
+     int mode;
+{
+  static int save_restricted = -1;
+
+  if (save_restricted == -1)
+    save_restricted = shell_is_restricted (shell_name);
+
+  restricted_shell = save_restricted;
+  return (0);
+}
+#endif /* RESTRICTED_SHELL */

@@ -189,6 +189,7 @@ read_builtin (list)
 	  c = rlbuf[rlind++];
 	}
       else
+	{
 #endif
 
       while (((retval = read (0, &c, 1)) < 0) && errno == EINTR)
@@ -198,6 +199,10 @@ read_builtin (list)
 	  eof = 1;
 	  break;
 	}
+
+#if defined (READLINE)
+	}
+#endif
 
       if (i + 2 >= size)
 	input_string = xrealloc (input_string, size += 128);

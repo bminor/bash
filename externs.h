@@ -49,6 +49,7 @@ extern void disable_priv_mode __P((void));
 extern void unbind_args __P((void));
 
 #if defined (RESTRICTED_SHELL)
+extern int shell_is_restricted __P((char *));
 extern int maybe_make_restricted __P((char *));
 #endif
 
@@ -116,6 +117,7 @@ extern char *getcwd __P((char *, size_t));
 #endif
 
 /* Declarations for functions defined in lib/sh/itos.c */
+extern char *inttostr __P((int, char *, int));
 extern char *itos __P((int));
 
 /* Declarations for  functions defined in lib/sh/oslib.c */

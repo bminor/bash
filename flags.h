@@ -61,6 +61,7 @@ extern int history_expansion;
 
 #if defined (RESTRICTED_SHELL)
 extern int restricted;
+extern int restricted_shell;
 #endif /* RESTRICTED_SHELL */
 
 extern int *find_flag __P((int));

@@ -167,13 +167,22 @@ set_locale_var (var, value)
   return (0);
 }
 
+#if 0
 /* Called when LANG is assigned a value.  Sets LC_ALL if that has not
    already been set. */
+#else
+/* This no longer does anything; we rely on the C library for correct
+   behavior. */
+#endif
 int
 set_lang (var, value)
      char *var, *value;
 {
+#if 0
   return ((lc_all == 0) ? set_locale_var ("LC_ALL", value) : 0);
+#else
+  return 0;
+#endif
 }
 
 /* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE) */

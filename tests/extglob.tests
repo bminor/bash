@@ -274,7 +274,74 @@ echo 6: "${x#*(a|b)cd}"
 expect '7: abcdef'
 echo 7: ${x#"*(a|b)cd"}
 
-# clean up and exit
+# More tests derived from a bug report concerning extended glob patterns
+# following a *
+builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
+rm -rf *
+
+touch ab abcdef abef abcfef
+
+expect 'ab abef'
+echo ab*(e|f)
+
+expect 'abcfef abef'
+echo ab?*(e|f)
+
+expect abcdef
+echo ab*d+(e|f)
+
+expect 'ab abcdef abcfef abef'
+echo ab**(e|f)
+
+expect 'abcdef abcfef abef'
+echo ab*+(e|f)
+
+case 'abcfefg' in
+ab**(e|f))	echo ok 37;;
+*)		echo bad 37;;
+esac
+
+case 'abcfefg' in
+ab**(e|f)g)	echo ok 38;;
+*a)		echo bad 38;;
+esac
+
+case ab in
+ab*+(e|f))	echo bad 39;;
+*)		echo ok 39;;
+esac
+
+case abef in
+ab***ef)	echo ok 40;;
+*)		echo bad 40;;
+esac
+
+case abef in
+ab**)		echo ok 41;;
+*)		echo bad 41;;
+esac
+
+# clean up and do the next one
+
+builtin cd /
+rm -rf $TESTDIR
+
+mkdir $TESTDIR
+builtin cd $TESTDIR
+
+touch a.b a,b a:b a-b a\;b a\ b a_b
+
+echo a[^[:alnum:]]b
+echo a[-.,:\;\ _]b
+
+echo a@([^[:alnum:]])b
+echo a@([-.,:; _])b
+echo a@([.])b
+echo a@([^.])b
+echo a@([^x])b
+echo a+([^[:alnum:]])b
+
+echo a@(.|[^[:alnum:]])b
 
 builtin cd /
 rm -rf $TESTDIR

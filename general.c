@@ -152,6 +152,13 @@ timeval_to_secs (tvp, sp, sfp)
   *sfp = (*sfp * 1000) / 1000000;
   if (rest >= 500)
     *sfp += 1;
+
+  /* Sanity check */
+  if (*sfp >= 1000)
+    {
+      *sp += 1;
+      *sfp -= 1000;
+    }
 }
   
 /* Print the contents of a struct timeval * in a standard way to stdio
@@ -189,6 +196,13 @@ clock_t_to_secs (t, sp, sfp)
   *sfp = (*sfp * 1000) / clk_tck;
 
   *sp = t / clk_tck;
+
+  /* Sanity check */
+  if (*sfp >= 1000)
+    {
+      *sp += 1;
+      *sfp -= 1000;
+    }
 }
 
 /* Print the time defined by a time_t (returned by the `times' and `time'
@@ -347,8 +361,16 @@ unset_nodelay_mode (fd)
     fcntl (fd, F_SETFL, flags);
 }
 
-  /* There is a bug in the NeXT 2.1 rlogind that causes opens
-     of /dev/tty to fail. */
+/* There is a bug in the NeXT 2.1 rlogind that causes opens
+   of /dev/tty to fail. */
+
+#if defined (__BEOS__)
+/* On BeOS, opening in non-blocking mode exposes a bug in BeOS, so turn it
+   into a no-op.  This should probably go away in the future. */
+#  undef O_NONBLOCK
+#  define O_NONBLOCK 0
+#endif /* __BEOS__ */
+
 void
 check_dev_tty ()
 {
@@ -620,11 +642,21 @@ canonicalize_pathname (path)
       result[1] = '\0';
     }
 
-#if 1
-  /* Turn `//' into `/' -- XXX experimental */
-  if (result[0] == '/' && result[1] == '/' && result[2] == '\0')
-    result[1] = '\0';
-#endif
+  /* If the result starts with `//', but the original path does not, we
+     can turn the // into /. */
+  if ((result[0] == '/' && result[1] == '/' && result[2] != '/') &&
+      (path[0] != '/' || path[1] != '/' || path[2] == '/'))
+    {
+      char *r2;
+      if (result[2] == '\0')	/* short-circuit for bare `//' */
+	result[1] = '\0';
+      else
+	{
+	  r2 = savestring (result + 1);
+	  free (result);
+	  result = r2;
+	}
+    }
 
   return (result);
 }
@@ -742,7 +774,8 @@ full_pathname (file)
       return ((char *)NULL);
     }
   dlen = strlen (current_dir);
-  current_dir[dlen++] = '/';
+  if (current_dir[0] == '/' && dlen > 1)
+    current_dir[dlen++] = '/';
 
   /* Turn /foo/./bar into /foo/bar. */
   if (file[0] == '.' && file[1] == '/')
@@ -1054,7 +1087,41 @@ get_group_list (ngp)
       nbuf = itos ((int)group_array[i]);
       group_vector[i] = nbuf;
     }
+
   if (ngp)
     *ngp = ngroups;
   return group_vector;
+}
+
+int *
+get_group_array (ngp)
+     int *ngp;
+{
+  int i;
+  static int *group_iarray = (int *)NULL;
+
+  if (group_iarray)
+    {
+      if (ngp)
+	*ngp = ngroups;
+      return (group_iarray);
+    }
+
+  if (ngroups == 0)
+    initialize_group_array ();    
+
+  if (ngroups <= 0)
+    {
+      if (ngp)
+	*ngp = 0;
+      return (int *)NULL;
+    }
+
+  group_iarray = (int *)xmalloc (ngroups * sizeof (int));
+  for (i = 0; i < ngroups; i++)
+    group_iarray[i] = (int)group_array[i];
+
+  if (ngp)
+    *ngp = ngroups;
+  return group_iarray;
 }

@@ -16,10 +16,10 @@ compiler output (useful mainly for debugging `configure').  If at some
 point `config.cache' contains results you don't want to keep, you may
 remove or edit it.
 
-If you need to do unusual things to compile the package, please try to
-figure out how `configure' could check whether or not to do them, and
-mail diffs or instructions to `bash-maintainers@prep.ai.mit.edu' so
-they can be considered for the next release.
+If you need to do unusual things to compile Bash, please try to figure
+out how `configure' could check whether or not to do them, and mail
+diffs or instructions to <bash-maintainers@gnu.org> so they can be
+considered for the next release.
 
 The file `configure.in' is used to create `configure' by a program
 called Autoconf.  You only need `configure.in' if you want to change it
@@ -29,8 +29,8 @@ this, make sure you are using Autoconf version 2.10 or newer.
 If you need to change `configure.in' or regenerate `configure', you
 will need to create two files: `_distribution' and `_patchlevel'.
 `_distribution' should contain the major and minor version numbers of
-the Bash distribution, for example `2.02'.  `_patchlevel' should
-contain the patch level of the Bash distribution, `1' for example.  The
+the Bash distribution, for example `2.01'.  `_patchlevel' should
+contain the patch level of the Bash distribution, `0' for example.  The
 script `support/mkconffiles' has been provided to automate the creation
 of these files.
 
@@ -115,17 +115,17 @@ than `/usr/local' by giving `configure' the option `--prefix=PATH'.
 
 You can specify separate installation prefixes for
 architecture-specific files and architecture-independent files.  If you
-give `configure' the option `--exec-prefix=PATH', the package will use
-`PATH' as the prefix for installing programs and libraries.
+give `configure' the option `--exec-prefix=PATH', `make install' will
+use `PATH' as the prefix for installing programs and libraries.
 Documentation and other data files will still use the regular prefix.
 
 Specifying the System Type
 ==========================
 
 There may be some features `configure' can not figure out
-automatically, but needs to determine by the type of host the package
-will run on.  Usually `configure' can figure that out, but if it prints
-a message saying it can not guess the host type, give it the
+automatically, but needs to determine by the type of host Bash will run
+on.  Usually `configure' can figure that out, but if it prints a
+message saying it can not guess the host type, give it the
 `--host=TYPE' option.  `TYPE' can either be a short name for the system
 type, such as `sun4', or a canonical name with three fields:
 `CPU-COMPANY-SYSTEM' (e.g., `sparc-sun-sunos4.1.2').
@@ -177,12 +177,11 @@ Optional Features
 =================
 
 The Bash `configure' has a number of `--enable-FEATURE' options, where
-FEATURE indicates an optional part of the package.  There are also
-several `--with-PACKAGE' options, where PACKAGE is something like
-`gnu-malloc' or `purify' (for the Purify memory allocation checker).  To
-turn off the default use of a package, use `--without-PACKAGE'.  To
-configure Bash without a feature that is enabled by default, use
-`--disable-FEATURE'.
+FEATURE indicates an optional part of Bash.  There are also several
+`--with-PACKAGE' options, where PACKAGE is something like `gnu-malloc'
+or `purify'.  To turn off the default use of a package, use
+`--without-PACKAGE'.  To configure Bash without a feature that is
+enabled by default, use `--disable-FEATURE'.
 
 Here is a complete list of the `--enable-' and `--with-' options that
 the Bash `configure' recognizes.
@@ -211,6 +210,11 @@ the Bash `configure' recognizes.
      enabled by default.  The `NOTES' file contains a list of systems
      for which this should be turned off, and `configure' disables this
      option automatically for a number of systems.
+
+`--with-installed-readline'
+     Define this to make bash link with a locally-installed version of
+     Readline rather than the version in lib/readline.  This works only
+     with readline 4.0 and later versions.
 
 `--with-purify'
      Define this to use the Purify memory allocation checker from Pure
@@ -241,16 +245,19 @@ does not provide the necessary support.
 
 `--enable-alias'
      Allow alias expansion and include the `alias' and `unalias'
-     builtins.
+     builtins (*note Aliases::.).
 
 `--enable-array-variables'
-     Include support for one-dimensional array shell variables.
+     Include support for one-dimensional array shell variables (*note
+     Arrays::.).
 
 `--enable-bang-history'
-     Include support for `csh'-like history substitution.
+     Include support for `csh'-like history substitution (*note History
+     Interaction::.).
 
 `--enable-brace-expansion'
      Include `csh'-like brace expansion ( `b{a,b}c' ==> `bac bbc' ).
+     See *Note Brace Expansion::, for a complete description.
 
 `--enable-command-timing'
      Include support for recognizing `time' as a reserved word and for
@@ -259,11 +266,12 @@ does not provide the necessary support.
      be timed.
 
 `--enable-cond-command'
-     Include support for the `[[' conditional command.
+     Include support for the `[[' conditional command (*note
+     Conditional Constructs::.).
 
 `--enable-directory-stack'
      Include support for a `csh'-like directory stack and the `pushd',
-     `popd', and `dirs' builtins.
+     `popd', and `dirs' builtins (*note The Directory Stack::.).
 
 `--enable-disabled-builtins'
      Allow builtin commands to be invoked via `builtin xxx' even after
@@ -272,7 +280,8 @@ does not provide the necessary support.
      commands.
 
 `--enable-dparen-arithmetic'
-     Include support for the `ksh' `((...))' command.
+     Include support for the `((...))' command (*note Conditional
+     Constructs::.).
 
 `--enable-extended-glob'
      Include support for the extended pattern matching features
@@ -287,20 +296,22 @@ does not provide the necessary support.
      commands.
 
 `--enable-job-control'
-     This enables job control features, if the OS supports them.
+     This enables the job control features (*note Job Control::.), if
+     the operating system supports them.
 
 `--enable-process-substitution'
      This enables process substitution (*note Process Substitution::.)
-     if the OS provides the necessary support.
+     if the operating system provides the necessary support.
 
 `--enable-prompt-string-decoding'
      Turn on the interpretation of a number of backslash-escaped
      characters in the `$PS1', `$PS2', `$PS3', and `$PS4' prompt
-     strings.
+     strings.  See *Note Printing a Prompt::, for a complete list of
+     prompt string escape sequences.
 
 `--enable-readline'
      Include support for command-line editing and history with the Bash
-     version of the Readline library.
+     version of the Readline library (*note Command Line Editing::.).
 
 `--enable-restricted'
      Include support for a "restricted shell".  If this is enabled,
@@ -308,8 +319,8 @@ does not provide the necessary support.
      The Restricted Shell::, for a description of restricted mode.
 
 `--enable-select'
-     Include the `ksh' `select' builtin, which allows the generation of
-     simple menus.
+     Include the `select' builtin, which allows the generation of simple
+     menus (*note Conditional Constructs::.).
 
 `--enable-usg-echo-default'
      Make the `echo' builtin expand backslash-escaped characters by

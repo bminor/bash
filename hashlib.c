@@ -67,6 +67,9 @@ make_hash_table (buckets)
 /* Return the location of the bucket which should contain the data
    for STRING.  TABLE is a pointer to a HASH_TABLE. */
 
+/* A possibly better distribution may be obtained by initializing i to
+   ~0UL and using i = (i * 33) + *string++ as the step */
+
 #define ALL_ONES (~((unsigned long) 0))
 #define BITS(h, n) ((unsigned long)(h) & ~(ALL_ONES << (n)))
 

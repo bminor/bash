@@ -90,6 +90,11 @@ ash_lk(){ echo " $1 " | fgrep " $2 " >&- 2>&-; }
 ash_pr(){ echo $* | tr ' ' '\012' | pr -5 -t -w75 -l$[ ( $# + 4 ) / 5 ]; }
 ash_rm(){ echo " $1 " | sed -e "s/ $2 / /" -e 's/^ //' -e 's/ $//'; }
 
+# enable history, bang history expansion, and emacs editing
+set -o history
+set -o histexpand
+set -o emacs
+
 cd
 LIM=.limbo			# $HOME/$LIM contains "destroyed" objects
 mkdir $LIM >&- 2>&-
@@ -164,8 +169,7 @@ do	room=`pwd`
 		prev=$room
 	fi
 
-	echo -n '-advsh> '			# prompt
-	read verb obj x
+	read -e -p '-advsh> ' verb obj x	# prompt is '-advsh> '
 	if [ $? != 0 ]
 	then	verb=quit		# EOF
 	fi

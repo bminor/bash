@@ -65,3 +65,7 @@
 #if defined (STRCOLL_BROKEN)
 #  undef HAVE_STRCOLL
 #endif
+
+#if !defined (PROMPT_STRING_DECODE)
+#  define PPROMPT "$ "
+#endif

@@ -51,6 +51,8 @@
 extern int errno;
 #endif
 
+#define IS_BUILTIN(s)	(builtin_address_internal(s, 0) != (struct builtin *)NULL)
+
 extern void run_trap_cleanup ();
 
 extern int interactive, interactive_shell;
@@ -181,7 +183,7 @@ parse_and_execute (string, from_file, flags)
 		}
 
 	    default:
-	      programming_error ("parse_and_execute: bad jump: code %d", code);
+	      command_error ("parse_and_execute", CMDERR_BADJUMP, code, 0);
 	      break;
 	    }
 	}
@@ -206,9 +208,20 @@ parse_and_execute (string, from_file, flags)
 	      global_command = (COMMAND *)NULL;
 
 #if defined (ONESHOT)
-	      if (startup_state == 2 && *bash_input.location.string == '\0' &&
-		  command->type == cm_simple && !command->redirects &&
-		  !command->value.Simple->redirects &&
+	      /*
+	       * IF
+	       *   we were invoked as `bash -c' (startup_state == 2) AND
+	       *   parse_and_execute has not been called recursively AND
+	       *   we have parsed the full command (string == '\0') AND
+	       *   we have a simple command without redirections AND
+	       *   the command is not being timed
+	       * THEN
+	       *   tell the execution code that we don't need to fork
+	       */
+	      if (startup_state == 2 && parse_and_execute_level == 1 &&
+		  *bash_input.location.string == '\0' &&
+		  command->type == cm_simple &&
+		  !command->redirects && !command->value.Simple->redirects &&
 		  ((command->flags & CMD_TIME_PIPELINE) == 0))
 		{
 		  command->flags |= CMD_NO_FORK;

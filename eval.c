@@ -41,6 +41,10 @@
 #include "input.h"
 #include "execute_cmd.h"
 
+#if defined (HISTORY)
+#  include "bashhist.h"
+#endif
+
 extern int yyparse ();
 
 extern int EOF_reached;
@@ -105,7 +109,7 @@ reader_loop ()
 	      break;
 
 	    default:
-	      programming_error ("reader_loop: bad jump: code %d", code);
+	      command_error ("reader_loop", CMDERR_BADJUMP, code, 0);
 	    }
 	}
 
@@ -161,7 +165,7 @@ static sighandler
 alrm_catcher(i)
      int i;
 {
-  printf ("%ctimed out waiting for input: auto-logout\n", '\07');
+  printf ("\007timed out waiting for input: auto-logout\n");
   jump_to_top_level (EXITPROG);
   SIGRETURN (0);
 }
@@ -269,6 +273,17 @@ parse_string_to_word_list (s, whom)
 {
   WORD_LIST *wl;
   COMMAND *saved_global;
+#if defined (HISTORY)
+  int old_remember_on_history, old_history_expansion_inhibited;
+#endif
+
+#if defined (HISTORY)
+  old_remember_on_history = remember_on_history;
+#  if defined (BANG_HISTORY)
+  old_history_expansion_inhibited = history_expansion_inhibited;
+#  endif
+  bash_history_disable ();
+#endif
 
   push_stream (1);
 
@@ -292,6 +307,13 @@ parse_string_to_word_list (s, whom)
   global_command = saved_global;
 
   pop_stream ();
+
+#if defined (HISTORY)
+  remember_on_history = old_remember_on_history;
+#  if defined (BANG_HISTORY)
+  history_expansion_inhibited = old_history_expansion_inhibited;
+#  endif /* BANG_HISTORY */
+#endif /* HISTORY */
 
   return (wl);
 }

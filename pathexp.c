@@ -34,7 +34,12 @@
 #include "flags.h"
 
 #include <glob/fnmatch.h>
-#include <glob/glob.h>
+
+#if defined (USE_POSIX_GLOB_LIBRARY)
+#  include <glob.h>
+#else
+#  include <glob/glob.h>
+#endif
 
 /* Control whether * matches .files in globbing. */
 int glob_dot_filenames;
@@ -172,7 +177,12 @@ shell_glob_filename (pathname)
 
   filenames.gl_offs = 0;
 
+#  if defined (GLOB_PERIOD)
   glob_flags = glob_dot_filenames ? GLOB_PERIOD : 0;
+#  else
+  glob_flags = 0;
+#  endif /* !GLOB_PERIOD */
+
   glob_flags |= (GLOB_ERR | GLOB_DOOFFS);
 
   i = glob (temp, glob_flags, (Function *)NULL, &filenames);
@@ -181,8 +191,9 @@ shell_glob_filename (pathname)
 
   if (i == GLOB_NOSPACE || i == GLOB_ABEND)
     return ((char **)NULL);
-
-  if (i == GLOB_NOMATCH)
+  else if (i == GLOB_NOMATCH)
+    filenames.gl_pathv = (char **)NULL;
+  else if (i != 0)		/* other error codes not in POSIX.2 */
     filenames.gl_pathv = (char **)NULL;
 
   return (filenames.gl_pathv);

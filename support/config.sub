@@ -94,7 +94,7 @@ case $os in
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-apple)
+	-apple )
 		os=
 		basic_machine=$1
 		;;
@@ -184,7 +184,7 @@ case $basic_machine in
 	      | cadmus-* | ews*-nec | ibmrt-ibm* | masscomp-masscomp \
 	      | tandem-* | symmetric-* | drs6000-icl | *-*ardent | gould-gould \
 	      | concurrent-* | ksr1-* | esa-ibm | fxc-alliant | *370-amdahl \
-	      | *-convex)
+	      | *-convex | sx4*-nec)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -209,7 +209,12 @@ case $basic_machine in
 		os=-sysv
 		;;
 	amiga | amiga-*)
-		basic_machine=m68k-cbm
+#		basic_machine=m68k-cbm
+		basic_machine=m68k-unknown
+		;;
+	amigaos)
+		basic_machine=m68k-unknown
+		os=-amigaos
 		;;
 	amigados)
 		basic_machine=m68k-cbm
@@ -404,6 +409,14 @@ case $basic_machine in
 		;;
 	miniframe)
 		basic_machine=m68000-convergent
+		;;
+	mipsel*-linux*)
+		basic_machine=mipsel-unknown
+		os=-linux
+		;;
+	mips*-linux*)
+		basic_machine=mips-unknown
+		os=-linux
 		;;
 	mips3*-*)
 		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`
@@ -639,7 +652,11 @@ case $basic_machine in
 # Here we handle the default manufacturer of certain CPU types.  It is in
 # some cases the only manufacturer, in others, it is the most popular.
 	mips)
-		basic_machine=mips-mips
+		if test "x$os" = "x-linux" ; then
+			basic_machine=mips-unknown
+		else
+			basic_machine=mips-mips
+		fi
 		;;
 	romp)
 		basic_machine=romp-ibm
@@ -719,7 +736,7 @@ case $os in
 	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]*\
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
-	      | -amigados* | -msdos* | -newsos* | -unicos* | -aof* | -aos* \
+	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* | -aos* \
 	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
@@ -727,7 +744,8 @@ case $os in
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin32* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
-	      | -linux-gnu* | -uxpv* | -qnx* | -powerux)
+	      | -linux-gnu* | -uxpv* | -qnx* | -powerux* | -beos* | -rhapsody* \
+	      | -superux* )
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	-linux*)
@@ -843,6 +861,9 @@ case $basic_machine in
 	sparc-* | *-sun)
 		os=-sunos4.1.1
 		;;
+	*-be)
+		os=-beos
+		;;
 	*-ibm)
 		os=-aix
 		;;
@@ -856,7 +877,7 @@ case $basic_machine in
 		os=-sysv
 		;;
 	*-cbm)
-		os=-amigados
+		os=-amigaos
 		;;
 	*-dg)
 		os=-dgux

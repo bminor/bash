@@ -3,19 +3,21 @@
 
 /* See Makefile for compilation details. */
 
-#include "config.h"
+#include <config.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
 #include <stdio.h>
+
 #include "builtins.h"
 #include "shell.h"
+#include "bashgetopt.h"
 
 /* A builtin `xxx' is normally implemented with an `xxx_builtin' function.
    If you're converting a command that uses the normal Unix argc/argv
-   calling convention, use argv = word_list_to_argv (list, &argc) and call
+   calling convention, use argv = make_builtin_argv (list, &argc) and call
    the original `main' something like `xxx_main'.  Look at cat.c for an
    example.
 
@@ -41,7 +43,6 @@ hello_builtin (list)
    which is printed by `help xxx'.  It must end with a NULL. */
 char *hello_doc[] = {
 	"this is the long doc for the sample hello builtin",
-	"which is a bare-bones echo",
 	(char *)NULL
 };
 
@@ -53,7 +54,7 @@ struct builtin hello_struct = {
 	hello_builtin,		/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	hello_doc,		/* array of long documentation strings. */
-	"hello [args]",		/* usage synopsis; becomes short_doc */
+	"hello",		/* usage synopsis; becomes short_doc */
 	0			/* reserved for internal use */
 };
 	

@@ -54,7 +54,11 @@ shell_version_string ()
 }
 
 #if !defined (MACHTYPE)
-#  define MACHTYPE "unknown"
+#  if defined (CONF_MACHTYPE)
+#    define MACHTYPE CONF_MACHTYPE
+#  else
+#    define MACHTYPE "unknown"
+#  endif
 #endif
 
 void

@@ -1,5 +1,6 @@
 # This Makefile is for the Bash/documentation directory -*- text -*-.
 #
+SHELL = @MAKE_SHELL@
 RM	    = rm -f
 
 topdir = @top_srcdir@
@@ -84,11 +85,17 @@ RLUSER      = $(RL_LIBDIR)/doc/rluser.texinfo
 all: ps info dvi text html
 nodvi: ps info text html
 
-ps: bash.ps bashbug.ps readline.ps article.ps builtins.ps
-dvi: bashref.dvi bashref.ps 
-info: bashref.info
-text: bash.0 bashbug.0 builtins.0 readline.0
-html: bashref.html bash.html
+PSFILES = bash.ps bashbug.ps readline.ps article.ps builtins.ps
+DVIFILES = bashref.dvi bashref.ps
+INFOFILES = bashref.info
+MAN0FILES = bash.0 bashbug.0 builtins.0 readline.0
+HTMLFILES = bashref.html bash.html
+
+ps: ${PSFILES}
+dvi: ${DVIFILES}
+info: ${INFOFILES}
+text: ${MAN0FILES}
+html: ${HTMLFILES}
 
 bashref.dvi: $(srcdir)/bashref.texi $(HSUSER) $(RLUSER)
 	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/bashref.texi
@@ -101,7 +108,7 @@ bashref.info: $(srcdir)/bashref.texi $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bashref.html: bashref.texi $(HSUSER) $(RLUSER)
-	$(TEXI2HTML) -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
+	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bash.dvi: bash.texinfo $(HSUSER) $(RLUSER)
 	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) bash.texinfo
@@ -125,7 +132,9 @@ article.ps: article.ms
 $(MAN2HTML):	${topdir}/support/man2html.c
 	-( cd ${BUILD_DIR}/support ; ${MAKE} ${MFLAGS} man2html)
 
-faq:	faq.news faq.news2 faq.mail faq.version
+CREATED_FAQ = faq.news faq.news2 faq.mail faq.version
+
+faq:	${CREATED_FAQ}
 
 faq.version:	FAQ.version FAQ
 	sh mkfaqvers FAQ.version > $@
@@ -143,15 +152,16 @@ faq.mail: FAQ FAQ.headers.mail faq.version
 	cat FAQ.headers.mail faq.version FAQ > $@
 
 clean:
-	$(RM) *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
-		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o \
-		core rluser.texinfo hsuser.texinfo
+	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
+		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o
+	${RM} core *.core
 
 distclean mostlyclean: clean
 	$(RM) Makefile
 
 maintainer-clean:	clean
-	$(RM) *.0 *.ps *.dvi *.info *.txt
+	${RM} ${PSFILES} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}
+	${RM} ${CREATED_FAQ}
 	$(RM) Makefile
 
 installdirs:
@@ -166,7 +176,7 @@ install: info installdirs
 # uncomment the next line to install the readline man page
 #	-$(INSTALL_DATA) $(srcdir)/readline.3 $(man3dir)/readline.${man3ext}
 # uncomment the next line to install the builtins man page
-#	$(INSTALL_DATA) builtins.1 $(man1dir)/bash_builtins.${man1ext}
+#	$(INSTALL_DATA) $(srcdir)/builtins.1 $(man1dir)/bash_builtins.${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashref.info $(infodir)/bash.info
 # run install-info if it is present to update the info directory
 	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \

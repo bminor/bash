@@ -1,10 +1,11 @@
 # This Makefile for building libbuiltins.a is in -*- text -*- for Emacs.
 #
-SHELL = /bin/sh
+SHELL = @MAKE_SHELL@
 RANLIB = @RANLIB@
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 AR = @AR@
+ARFLAGS = @ARFLAGS@
 RM = rm -f
 CP = cp
 
@@ -24,7 +25,7 @@ LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
 LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 LIBS = @LIBS@
 
-INCLUDES = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(srcdir)
+INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(topdir)/lib -I$(srcdir)
 
 CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) $(SYSTEM_FLAGS) $(CPPFLAGS) \
 	  ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
@@ -87,7 +88,7 @@ all: $(MKBUILTINS) libbuiltins.a
 
 libbuiltins.a: $(MKBUILTINS) $(OFILES) builtins.o
 	$(RM) $@
-	$(AR) cr $@ $(OFILES)
+	$(AR) $(ARFLAGS) $@ $(OFILES)
 	-$(RANLIB) $@
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
@@ -95,12 +96,12 @@ builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 	@-if test -f builtext.h; then mv -f builtext.h old-builtext.h; fi
 	./$(MKBUILTINS) -externfile builtext.h -structfile builtins.c \
 	    -noproduction $(DIRECTDEFINE) $(DEFSRC)
-	@-if cmp -s old-builtext.h builtext.h; then \
+	@-if cmp -s old-builtext.h builtext.h 2>/dev/null; then \
 		mv old-builtext.h builtext.h; \
 	 else \
 		$(RM) old-builtext.h; \
 	 fi
-	@-if cmp -s old-builtins.c builtins.c; then \
+	@-if cmp -s old-builtins.c builtins.c 2>/dev/null; then \
 		mv old-builtins.c builtins.c; \
 	 else \
 		$(RM) old-builtins.c; \
@@ -112,7 +113,7 @@ mkbuiltins.o: mkbuiltins.c
 	$(CC_FOR_BUILD) -c $(CCFLAGS) $<
 
 mkbuiltins: mkbuiltins.o
-	$(CC_FOR_BUILD) $(LDFLAGS) -o $(MKBUILTINS) mkbuiltins.o $(LIBS)
+	$(CC_FOR_BUILD) $(PROFILE_FLAGS) $(LDFLAGS) -o $(MKBUILTINS) mkbuiltins.o $(LIBS)
 
 # rules for deficient makes, like SunOS
 mkbuiltins.o: mkbuiltins.c
@@ -126,7 +127,7 @@ evalfile.o: evalfile.c
 ulimit.o: pipesize.h
 
 pipesize.h:	psize.aux
-	$(SHELL) $(srcdir)/psize.sh > pipesize.h
+	$(SHELL) $(srcdir)/psize.sh > $@
 
 psize.aux:	psize.c
 	$(CC_FOR_BUILD) $(CCFLAGS) -o $@ $(srcdir)/psize.c
@@ -139,7 +140,7 @@ builtins.texi: $(MKBUILTINS)
 	./$(MKBUILTINS) -documentonly $(DEFSRC)
 
 clean:
-	$(RM) $(OFILES) $(CREATED_FILES) $(MKBUILTINS) libbuiltins.a
+	$(RM) $(OFILES) $(CREATED_FILES) $(MKBUILTINS) mkbuiltins.o libbuiltins.a
 
 mostlyclean: 
 	$(RM) $(OFILES) libbuiltins.a

@@ -6,11 +6,11 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Wed Apr  1 12:16:09 EST 1998
+.\"	Last Change: Wed Jan 20 16:47:14 EST 1999
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
-.TH BASH 1 "1998 Apr 1" GNU
+.TH BASH 1 "1999 Jan 20" GNU
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989, 1991, 1993, 1995, 1996 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989, 1991, 1993, 1995, 1996 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-1999 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-1999 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -260,7 +260,8 @@ section.
 .PP
 When
 .B bash
-is invoked as an interactive login shell, it first reads and
+is invoked as an interactive login shell, or as a non-interactive shell
+with the \fB\-\-login\fP option, it first reads and
 executes commands from the file \fI/etc/profile\fP, if that
 file exists.
 After reading that file, it looks for \fI~/.bash_profile\fP,
@@ -313,7 +314,8 @@ it tries to mimic the startup behavior of historical versions of
 .B sh
 as closely as possible,
 while conforming to the POSIX standard as well.
-When invoked as an interactive login shell, it first attempts to
+When invoked as an interactive login shell, or a non-interactive
+shell with the \fB\-\-login\fP option, it first attempts to
 read and execute commands from
 .I /etc/profile
 and
@@ -338,7 +340,7 @@ files, the
 option has no effect.
 A non-interactive shell invoked with the name
 .B sh
-does not attempt to read any startup files. 
+does not attempt to read any other startup files. 
 When invoked as
 .BR sh ,
 .B bash
@@ -375,6 +377,14 @@ option may be used to inhibit this behavior, and the
 option may be used to force another file to be read, but
 \fIrshd\fP does not generally invoke the shell with those options
 or allow them to be specified.
+.PP
+If the shell is started with the effective user (group) id not equal to the
+real user (group) id, and the \fB\-p\fP option is not supplied, no startup
+files are read, shell functions are not inherited from the environment,
+the \fBSHELLOPTS\fP variable, if it appears in the environment, is ignored,
+and the effective user id is set to the real user id.
+If the \fB\-p\fP option is supplied at invocation, the startup behavior is
+the same, but the effective user id is not reset.
 .SH DEFINITIONS
 .PP
 The following definitions are used throughout the rest of this
@@ -646,7 +656,7 @@ operators do not execute \fIexpression2\fP if the value of
 \fIexpression1\fP is sufficient to determine the return value of
 the entire conditional expression.
 .TP
-\fBfor\fP \fIname\fP [ \fBin\fP \fIword\fP; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
+\fBfor\fP \fIname\fP [ \fBin\fP \fIword\fP ] ; \fBdo\fP \fIlist\fP ; \fBdone\fP
 The list of words following \fBin\fP is expanded, generating a list
 of items.  The variable \fIname\fP is set to each element of this list
 in turn, and \fIlist\fP is executed each time.  If the \fBin\fP
@@ -659,7 +669,7 @@ The return status is the exit status of the last command that executes.
 If the expansion of the items following \fBin\fP results in an empty
 list, no commands are executed, and the return status is 0.
 .TP
-\fBselect\fP \fIname\fP [ \fBin\fP \fIword\fP; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
+\fBselect\fP \fIname\fP [ \fBin\fP \fIword\fP ] ; \fBdo\fP \fIlist\fP ; \fBdone\fP
 The list of words following \fBin\fP is expanded, generating a list
 of items.  The set of expanded words is printed on the standard
 error, each preceded by a number.  If the \fBin\fP
@@ -2095,9 +2105,9 @@ In the first form, only the first match is replaced.
 The second form causes all matches of \fIpattern\fP to be
 replaced with \fIstring\fP.
 If \fIpattern\fP begins with \fB#\fP, it must match at the beginning
-of \fIstring\fP.
+of the expanded value of \fIparameter\fP.
 If \fIpattern\fP begins with \fB%\fP, it must match at the end
-of \fIstring\fP.
+of the expanded value of \fIparameter\fP.
 If \fIstring\fP is null, matches of \fIpattern\fP are deleted
 and the \fB/\fP following \fIpattern\fP may be omitted.
 If
@@ -2984,6 +2994,9 @@ True if \fIfile\fP exists and is a regular file.
 .TP
 .B \-g \fIfile\fP
 True if \fIfile\fP exists and is set-group-id.
+.TP
+.B \-h \fIfile\fP
+True if \fIfile\fP exists and is a symbolic link.
 .TP
 .B \-k \fIfile\fP
 True if \fIfile\fP exists and its ``sticky'' bit is set.
@@ -4032,6 +4045,12 @@ regardless of what the terminal claims it can support.  The name
 .B meta\-flag
 is a synonym for this variable.
 .TP
+.B isearch\-terminators (``C\-[C\-J'')
+The string of characters that should terminate an incremental
+search without subsequently executing the character as a command.
+If this variable has not been given a value, the characters
+\fIESC\fP and \fIC\-J\fP will terminate an incremental search.
+.TP
 .B keymap (emacs)
 Set the current readline keymap.  The set of valid keymap names is
 \fIemacs, emacs\-standard, emacs\-meta, emacs\-ctlx, vi,
@@ -4159,8 +4178,10 @@ As each character of the search string is typed, readline displays
 the next entry from the history matching the string typed so far.
 An incremental search requires only as many characters as needed to
 find the desired history entry.
-The Escape character is used to terminate an incremental search.
-Control-J will also terminate the search.
+The characters present in the value of the \fIisearch-terminators\fP
+variable are used to terminate an incremental search.
+If that variable has not been assigned a value the Escape and
+Control-J characters will terminate an incremental search.
 Control-G will abort an incremental search and restore the original
 line.
 When the search is terminated, the history entry containing the
@@ -4341,6 +4362,11 @@ then return
 Delete the character behind the cursor.  When given a numeric argument,
 save the deleted text on the kill ring.
 .TP
+.B forward\-backward\-delete\-char
+Delete the character under the cursor, unless the cursor is at the
+end of the line, in which case the character behind the cursor is
+deleted.  By default, this is not bound to a key.
+.TP
 .B quoted\-insert (C\-q, C\-v)
 Add the next character typed to the line verbatim.  This is
 how to insert characters like \fBC\-q\fP, for example.
@@ -4487,6 +4513,13 @@ through the list.
 This command is intended to be bound to \fBTAB\fP, but is unbound
 by default.
 .TP
+.B delete\-char\-or\-list
+Deletes the character under the cursor if not at the beginning or
+end of the line (like \fBdelete-char\fP).
+If at the end of the line, behaves identically to
+\fBpossible-completions\fP.
+This command is unbound by default.
+.TP
 .B complete\-filename (M\-/)
 Attempt filename completion on the text before point.
 .TP
@@ -4588,7 +4621,7 @@ Undo all changes made to this line.  This is like executing the
 .B undo
 command enough times to return the line to its initial state.
 .TP
-.B tilde\-expand (M\-~)
+.B tilde\-expand (M\-&)
 Perform tilde expansion on the current word.
 .TP
 .B set\-mark (C\-@, M\-<space>)
@@ -6210,13 +6243,17 @@ The characters in
 .SM
 .B IFS
 are used to split the line into words.
+The backslash character (\fB\e\fP) may be used to remove any special
+meaning for the next character read and for line continuation.
 Options, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
 .B \-r
-A backslash-newline pair is not ignored, and
-the backslash is considered to be part of the line.
+Backslash does not act as an escape character.
+The backslash is considered to be part of the line.
+In particular, a backslash-newline pair may not be used as a line
+continuation.
 .TP
 .B \-p
 Display \fIprompt\fP, without a
@@ -6487,11 +6524,16 @@ Turn on
 .I privileged
 mode.  In this mode, the
 .B $ENV
-file is not processed, shell functions are not inherited from the
-environment, and the variable
-The \fBSHELLOPTS\fP variable, if it appears in the environment, is ignored.
-This is enabled automatically on startup if the effective user (group)
-id is not equal to the real user (group) id.
+and
+.B $BASH_ENV
+files are not processed, shell functions are not inherited from the
+environment, and the \fBSHELLOPTS\fP variable, if it appears in the
+environment, is ignored.
+If the shell is started with the effective user (group) id not equal to the
+real user (group) id, and the \fB\-p\fP option is not supplied, these actions
+are taken and the effective user id is set to the real user id.
+If the \fB\-p\fP option is supplied at startup, the effective user id is
+not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
 .TP 8
@@ -6793,6 +6835,15 @@ being expanded as described in
 .SM
 .B PROMPTING
 above.  This option is enabled by default.
+.TP 8
+.B restricted_shell
+The shell sets this option if it is started in restricted mode (see
+.SM
+.B "RESTRICTED SHELL"
+below).
+The value may not be changed.
+This is not reset when the startup files are executed, allowing
+the startup files to discover whether or not a shell is restricted.
 .TP 8
 .B shift_verbose
 If set, the
@@ -7232,9 +7283,11 @@ with the exception that the following are disallowed or not performed:
 changing directories with \fBcd\fP
 .IP \(bu
 setting or unsetting the values of
-.B SHELL
+.BR SHELL ,
+.BR PATH ,
+.BR ENV ,
 or
-.B PATH
+.B BASH_ENV
 .IP \(bu
 specifying command names containing
 .B /
@@ -7312,6 +7365,9 @@ The personal initialization file, executed for login shells
 .TP
 .FN ~/.bashrc
 The individual per-interactive-shell startup file
+.TP
+.FN ~/.bash_logout
+The individual login shell cleanup file, executed when a login shell exits
 .TP
 .FN ~/.inputrc
 Individual \fIreadline\fP initialization file

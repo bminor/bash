@@ -99,7 +99,7 @@ int
 printf_builtin (list)
      WORD_LIST *list;
 {
-  int ch, end, fieldwidth, precision, foundmod;
+  int ch, end, fieldwidth, precision, foundmod, fmtlen;
   char convch, nextch, *format, *fmt, *start;
 
   retval = EXECUTION_SUCCESS;
@@ -125,12 +125,12 @@ printf_builtin (list)
   if (list->word->word == 0 || list->word->word[0] == '\0')
     return (EXECUTION_SUCCESS);
 
-  format = ansicstr (list->word->word, strlen (list->word->word), (int *)NULL, (int *)NULL);
+  format = ansicstr (list->word->word, strlen (list->word->word), (int *)NULL, &fmtlen);
 
   garglist = list->next;
 
   /* If the format string is empty after preprocessing, return immediately. */
-  if (format == 0 || *format == 0)
+  if ((format == 0 || *format == 0) && fmtlen == 0)
     return (EXECUTION_SUCCESS);
 	  
   /* Basic algorithm is to scan the format string for conversion
@@ -139,11 +139,12 @@ printf_builtin (list)
      format strings are reused as necessary to use up the provided
      arguments, arguments of zero/null string are provided to use
      up the format string. */
+#define FMTIND (fmt - format)
 
   do
     {
       /* find next format specification */
-      for (fmt = format; *fmt; fmt++)
+      for (fmt = format; FMTIND < fmtlen; fmt++)
 	{
 	  precision = fieldwidth = foundmod = 0;
 
@@ -179,11 +180,6 @@ printf_builtin (list)
 	  /* skip to conversion char */
 	  for (; *fmt && strchr(SKIP2, *fmt); ++fmt)
 	    ;
-	  if (*fmt == 0)
-	    {
-	      builtin_error ("`%s': missing format character", start);
-	      PRETURN (EXECUTION_FAILURE);
-	    }
 
 	  /* skip possible format modifiers */
 	  if (*fmt == 'l' || *fmt == 'L' || *fmt == 'h')
@@ -192,6 +188,12 @@ printf_builtin (list)
 	      foundmod = 1;
 	    }
 	    
+	  if (*fmt == 0)
+	    {
+	      builtin_error ("`%s': missing format character", start);
+	      PRETURN (EXECUTION_FAILURE);
+	    }
+
 	  convch = *fmt;
 	  nextch = fmt[1];
 	  fmt[1] = '\0';

@@ -184,7 +184,7 @@ struct bucket_stats {
    enough room in the block for the new size.  Range checking is always
    done. */
 union mhead {
-  double mh_align;
+  bits64_t mh_align;					/* 8 */
   struct {
     char     mi_alloc;	/* ISALLOC or ISFREE */		/* 1 */
     char     mi_index;	/* index in nextf[] */		/* 1 */
@@ -200,8 +200,8 @@ union mhead {
 
 /* Access free-list pointer of a block.
    It is stored at block + sizeof (char *).
-   This is not a field in the mhead structure
-   because we want sizeof (struct mhead)
+   This is not a field in the minfo structure member of union mhead
+   because we want sizeof (union mhead)
    to describe the overhead for when the block is in use,
    and we do not want the free-list pointer to count in that.  */
 
@@ -490,6 +490,8 @@ morecore_done:
 #else
 #  if defined (HAVE_POSIX_SIGNALS)
   sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+#  else
+  ; /* nothing to do, but need a null statement before the brace */
 #  endif
 #endif /* HAVE_BSD_SIGNALS */
 }

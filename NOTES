@@ -198,3 +198,58 @@ being built and linked against, but there is only a stub file in the archive.)
    You will see many warnings of the form:
    warning: unknown s_type: 98
    I have no idea what this means, but it doesn't seem to matter.
+
+10. If you do not have /usr/ccs/bin in your PATH when building on SunOS 5.x
+    (Solaris 2), the configure script will be unable to find `ar' and
+    `ranlib' (of course, ranlib is unnecessary).  Make sure your $PATH
+    includes /usr/ccs/bin on SunOS 5.x.
+
+11. Building a statically-linked bash on Solaris 2.5.x or 2.6 is complicated.
+    It's not possible to build a completely statically-linked binary, since
+    part of the C library depends on dynamic linking.  The following recipe
+    assumes that you're using gcc and the Solaris ld (/usr/ccs/bin/ld).
+
+	configure --enable-static-link
+	make STATIC_LD= LOCAL_LIBS='-Wl,-B,dynamic -ldl -Wl,-B,static'
+
+    This should result in a bash binary that depends only on libdl.so:
+
+	thor(2)$ ldd bash
+	        libdl.so.1 =>    /usr/lib/libdl.so.1
+
+    If you're using the Sun C Compiler (Sun WorkShop C Compiler version
+    4.2 was what I used), you should be able to get away with using
+
+	configure --enable-static-link
+	make STATIC_LD=  LOCAL_LIBS='-B dynamic -ldl -B static'
+
+    If you want to completely remove any dependence on /usr, perhaps
+    to put a copy of bash in /sbin and have it available when /usr is
+    not mounted, force the build process to use the shared ld.so library
+    in /etc/lib.
+
+    For gcc, this would be something like
+
+	configure --enable-static-link
+	make STATIC_LD= LOCAL_LIBS='-Wl,-B,dynamic -Wl,-R/etc/lib -ldl -Wl,-B,static'
+
+    For Sun's WS4.2 cc
+
+	configure --enable-static-link
+	make STATIC_LD=  LOCAL_LIBS='-B dynamic -R/etc/lib -ldl -B static'
+
+    seems to work, at least on Solaris 2.5.1:
+
+	thor(2)$ ldd bash
+	        libdl.so.1 =>    /etc/lib/libdl.so.1
+
+12. Configuring bash to build it in a cross environment.  Currently only
+    two native versions can be compiled this way, cygwin32 and x86 BeOS.
+    For BeOS, you would configure it like this:
+
+	export RANLIB=i586-beos-ranlib
+	export AR=i586-beos-ar
+	export CC=i586-beos-gcc
+	configure i586-beos
+
+    Similarly for cygwin32.

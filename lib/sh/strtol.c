@@ -34,6 +34,7 @@ extern int errno;
 #  include <limits.h>
 #endif
 
+#include <stdc.h>
 #include <bashansi.h>
 
 #ifndef NULL

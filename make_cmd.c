@@ -346,6 +346,7 @@ make_cond_command (cond_node)
   command->type = cm_cond;
   command->redirects = (REDIRECT *)NULL;
   command->flags = 0;
+  command->line = cond_node ? cond_node->line : 0;
 
   return (command);
 #else
@@ -595,7 +596,7 @@ clean_simple_command (command)
      COMMAND *command;
 {
   if (command->type != cm_simple)
-    programming_error ("clean_simple_command: bad command type `%d'", command->type);
+    command_error ("clean_simple_command", CMDERR_BADTYPE, command->type, 0);
   else
     {
       command->value.Simple->words =

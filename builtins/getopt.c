@@ -232,6 +232,19 @@ sh_getopt_restore_state (argv)
     nextchar = argv[sh_curopt] + sh_charindex;
 }
 
+#if 0
+void
+sh_getopt_debug_restore_state (argv)
+     char **argv;
+{
+  if (nextchar && nextchar != argv[sh_curopt] + sh_charindex)
+    {
+      itrace("sh_getopt_debug_restore_state: resetting nextchar");
+      nextchar = argv[sh_curopt] + sh_charindex;
+    }
+}
+#endif
+ 
 #ifdef TEST
 
 /* Compile with -DTEST to make an executable for use in testing

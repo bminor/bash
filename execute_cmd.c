@@ -737,6 +737,13 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	       commands, this causes the last simple command in
 	       the function to be waited for twice. */
 	      exec_result = wait_for (last_made_pid);
+#if defined (RECYCLES_PIDS)
+	      /* LynxOS, for one, recycles pids very quickly -- so quickly
+		 that a new process may have the same pid as the last one
+		 created.  This has been reported to fix the problem. */
+	      if (exec_result == 0)
+		last_made_pid = NO_PID;
+#endif
 	  }
       }
 
@@ -863,8 +870,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       break;
 
     default:
-      programming_error
-	("execute_command: bad command type `%d'", command->type);
+      command_error ("execute_command", CMDERR_BADTYPE, command->type, 0);
     }
 
   if (my_undo_list)
@@ -905,7 +911,10 @@ difftimeval (d, t1, t2)
       d->tv_usec += 1000000;
       d->tv_sec -= 1;
       if (d->tv_sec < 0)		/* ??? -- BSD/OS does this */
-	d->tv_sec = 0;
+	{
+	  d->tv_sec = 0;
+	  d->tv_usec = 0;
+	}
     }
   return d;
 }
@@ -916,7 +925,7 @@ addtimeval (d, t1, t2)
 {
   d->tv_sec = t1->tv_sec + t2->tv_sec;
   d->tv_usec = t1->tv_usec + t2->tv_usec;
-  if (d->tv_usec > 1000000)
+  if (d->tv_usec >= 1000000)
     {
       d->tv_usec -= 1000000;
       d->tv_sec += 1;
@@ -1472,7 +1481,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       break;
 
     default:
-      programming_error ("execute_connection: bad connector `%d'", command->value.Connection->connector);
+      command_error ("execute_connection", CMDERR_BADCONN, command->value.Connection->connector, 0);
       jump_to_top_level (DISCARD);
       exec_result = EXECUTION_FAILURE;
     }
@@ -2062,7 +2071,7 @@ execute_arith_command (arith_command)
 
   result = 0;
 
-  this_command_name = "((";
+  this_command_name = "((";	/* )) */
   /* If we're in a function, update the line number information. */
   if (variable_context)
     line_number = arith_command->line - function_line_number;
@@ -2092,7 +2101,7 @@ static int
 execute_cond_node (cond)
      COND_COM *cond;
 {
-  int result, invert, patmatch;
+  int result, invert, patmatch, flags;
   char *arg1, *arg2, *print2;
 
   invert = (cond->flags & CMD_INVERT_RETURN);
@@ -2124,8 +2133,9 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_BINARY)
     {
-      patmatch = (cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
-		  (cond->op->word[0] == '!' || cond->op->word[0] == '=');
+      patmatch = ((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
+		  (cond->op->word[0] == '!' || cond->op->word[0] == '=') ||
+		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
 
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
@@ -2147,7 +2157,7 @@ execute_cond_node (cond)
     }
   else
     {
-      programming_error ("execute_cond_node: %d: unknown conditional command type", cond->type);
+      command_error ("execute_cond_node", CMDERR_BADTYPE, cond->type, 0);
       jump_to_top_level (DISCARD);
       result = EXECUTION_FAILURE;
     }
@@ -2262,7 +2272,7 @@ fix_assignment_words (words)
 
   for (w = words; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
-      w->word->flags |= W_NOSPLIT;
+      w->word->flags |= (W_NOSPLIT|W_NOGLOB);
 }
 
 /* The meaty part of all the executions.  We have to start hacking the
@@ -2277,7 +2287,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
   int first_word_quoted, result, builtin_is_special, already_forked, dofork;
-  pid_t old_last_command_subst_pid;
+  pid_t old_last_command_subst_pid, old_last_async_pid;
   Function *builtin;
   SHELL_VAR *func;
 
@@ -2297,6 +2307,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
 
   old_last_command_subst_pid = last_command_subst_pid;
+  old_last_async_pid = last_asynchronous_pid;
 
   already_forked = dofork = 0;
 
@@ -2327,6 +2338,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = -1;
 
+	  last_asynchronous_pid = old_last_async_pid;
 	  subshell_environment = async ? SUBSHELL_ASYNC : SUBSHELL_FORK;
 	}
       else
@@ -2770,10 +2782,13 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
      struct fd_bitmap *fds_to_close;
      int flags;
 {
-  int result, r;
+  int result, r, jobs_hack;
 
   /* A subshell is neither a login shell nor interactive. */
   login_shell = interactive = 0;
+
+  jobs_hack = (builtin == jobs_builtin) &&
+		((subshell_environment & SUBSHELL_ASYNC) == 0 || pipe_out != NO_PIPE);
 
   subshell_environment = SUBSHELL_ASYNC;
 
@@ -2785,8 +2800,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
      the shell itself. */
 
   /* Allow the output of `jobs' to be piped. */
-  if (builtin == jobs_builtin && !async &&
-      (pipe_out != NO_PIPE || pipe_in != NO_PIPE))
+  if (jobs_hack)
     kill_current_pipeline ();
   else
     without_job_control ();
@@ -2898,6 +2912,10 @@ execute_builtin_or_function (words, builtin, var, redirects,
 void
 setup_async_signals ()
 {
+#if defined (__BEOS__)
+  set_signal_handler (SIGHUP, SIG_IGN);	/* they want csh-like behavior */
+#endif
+
 #if defined (JOB_CONTROL)
   if (job_control == 0)
 #endif

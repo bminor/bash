@@ -23,6 +23,17 @@ inet2hex ()
 hex2inet ()
 {
 	local x1 x2 x3 x4
+	local rev
+
+	OPTIND=1
+	while getopts "r" o
+	do
+		case "$o" in
+		r)	rev=true;;
+		*)	echo "hex2inet: usage: hex2inet [0x]XXXXXXXX" >&2 ; exit 2;;
+		esac
+	done
+	shift $(( $OPTIND - 1 ))
 
 	case "$1" in
 	0x*)	h=${1#??} ;;
@@ -40,5 +51,10 @@ hex2inet ()
 	x3=$(( 0x${h:4:2} ))
 	x4=$(( 0x${h:6:2} ))
 
-	printf "%d.%d.%d.%d\n" $x1 $x2 $x3 $x4 
+	if [ -z "$rev" ] ; then
+		printf "%d.%d.%d.%d\n" $x1 $x2 $x3 $x4 
+	else
+		printf "%d.%d.%d.%d\n" $x4 $x3 $x2 $x1 
+	fi
+	return 0
 }

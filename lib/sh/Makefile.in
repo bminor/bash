@@ -16,9 +16,12 @@ INSTALL_DATA = @INSTALL_DATA@
 CC = @CC@
 RANLIB = @RANLIB@
 AR = @AR@
+ARFLAGS = @ARFLAGS@
 RM = rm -f
 CP = cp
 MV = mv
+
+SHELL = @MAKE_SHELL@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
@@ -44,7 +47,7 @@ LIBRARY_NAME = libsh.a
 # The C code source files for this library.
 CSOURCES = clktck.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strcasecmp.c strerror.c strtod.c strtol.c strtoul.c \
-	   vprint.c itos.c
+	   vprint.c itos.c rename.c
 
 # The header files for this library.
 HSOURCES = 
@@ -52,7 +55,7 @@ HSOURCES =
 # The object files contained in $(LIBRARY_NAME)
 OBJECTS = clktck.o getcwd.o getenv.o oslib.o setlinebuf.o \
 	  strcasecmp.o strerror.o strtod.o strtol.o strtoul.o \
-	  vprint.o itos.o
+	  vprint.o itos.o rename.o
 
 SUPPORT = Makefile
 
@@ -60,7 +63,7 @@ all: $(LIBRARY_NAME)
 
 $(LIBRARY_NAME): $(OBJECTS)
 	$(RM) $@
-	$(AR) cr $@ $(OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 force:
@@ -86,6 +89,7 @@ getcwd.o: getcwd.c
 getenv.o: getenv.c
 itos.o: itos.c
 oslib.o: oslib.c
+rename.o: rename.c
 setlinebuf.o: setlinebuf.c
 strcasecmp.o: strcasecmp.c
 strerror.o: strerror.c
@@ -100,6 +104,7 @@ getcwd.o: ${BUILD_DIR}/config.h
 getenv.o: ${BUILD_DIR}/config.h
 itos.o: ${BUILD_DIR}/config.h
 oslib.o: ${BUILD_DIR}/config.h
+rename.o: ${BUILD_DIR}/config.h
 setlinebuf.o: ${BUILD_DIR}/config.h
 strcasecmp.o: ${BUILD_DIR}/config.h
 strerror.o: ${BUILD_DIR}/config.h
@@ -142,6 +147,8 @@ oslib.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 oslib.o: ${topdir}/pathnames.h ${topdir}/externs.h
 oslib.o: ${POSIX_INC}/posixstat.h ${POSIX_INC}/filecntl.h
 oslib.o: ${POSIX_INC}/ansi_stdlib.h
+
+rename.o: ${topdir}/bashtypes.h ${topdir}/stdc.h
 
 strcasecmp.o: ${topdir}/stdc.h ${topdir}/bashansi.h ${topdir}/ansi_stdlib.h
 

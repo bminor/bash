@@ -75,9 +75,9 @@
 #  define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* _POSIX_SOURCE */
 
-#if !defined (HAVE_BCOPY)
+#if !defined (HAVE_BCOPY) && !defined (bcopy)
 #  define bcopy(s, d, n) ((void) memcpy ((d), (s), (n)))
-#endif /* !HAVE_BCOPY */
+#endif /* !HAVE_BCOPY && !bcopy */
 
 #if defined (SHELL)
 #  include "posixstat.h"
@@ -251,7 +251,7 @@ glob_vector (pat, dir)
   register struct dirent *dp;
   struct globval *lastlink;
   register struct globval *nextlink;
-  register char *nextname;
+  register char *nextname, *npat;
   unsigned int count;
   int lose, skip;
   register char **name_vector;
@@ -297,32 +297,32 @@ glob_vector (pat, dir)
 
       dirlen = strlen (dir);
       nextname = (char *)malloc (dirlen + strlen (pat) + 2);
-      if (nextname == 0)
+      npat = (char *)malloc (strlen (pat) + 1);
+      if (nextname == 0 || npat == 0)
 	lose = 1;
       else
 	{
+	  strcpy (npat, pat);
+	  dequote_pathname (npat);
+
 	  strcpy (nextname, dir);
 	  nextname[dirlen++] = '/';
-	  strcpy (nextname + dirlen, pat);
+	  strcpy (nextname + dirlen, npat);
 
 	  if (GLOB_TESTNAME (nextname) >= 0)
 	    {
 	      free (nextname);
 	      nextlink = (struct globval *)alloca (sizeof (struct globval));
 	      nextlink->next = (struct globval *)0;
-	      nextname = (char *) malloc (strlen (pat) + 1);
-	      if (nextname == 0)
-		lose = 1;
-	      else
-		{
-		  lastlink = nextlink;
-		  nextlink->name = nextname;
-		  strcpy (nextname, pat);
-		  count = 1;
-		}
+	      lastlink = nextlink;
+	      nextlink->name = npat;
+	      count = 1;
 	    }
 	  else
-	    free (nextname);
+	    {
+	      free (nextname);
+	      free (npat);
+	    }
 	}
 
       skip = 1;
@@ -377,6 +377,16 @@ glob_vector (pat, dir)
 
 	  /* If this directory entry is not to be used, try again. */
 	  if (REAL_DIR_ENTRY (dp) == 0)
+	    continue;
+
+	  /* If a leading dot need not be explicitly matched, and the pattern
+	     doesn't start with a `.', don't match `.' or `..' */
+#define dname dp->d_name
+	  if (noglob_dot_filenames == 0 && pat[0] != '.' &&
+		(pat[0] != '\\' || pat[1] != '.') &&
+		(dname[0] == '.' &&
+		  (dname[1] == '\0' || (dname[1] == '.' && dname[2] == '\0'))))
+#undef dname
 	    continue;
 
 	  /* If a dot must be explicity matched, check to see if they do. */

@@ -16,9 +16,12 @@ INSTALL_DATA = @INSTALL_DATA@
 CC = @CC@
 RANLIB = @RANLIB@
 AR = @AR@
+ARFLAGS = @ARFLAGS@
 RM = rm -f
 CP = cp
 MV = mv
+
+SHELL = @MAKE_SHELL@
 
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
@@ -35,8 +38,6 @@ CCFLAGS = $(CFLAGS) $(DEFS) $(CPPFLAGS) ${INCLUDES}
 .c.o:
 	$(CC) -c $(CCFLAGS) $<
 
-SHELL = /bin/sh
-
 SOURCES = termcap.c tparam.c
 OBJECTS = termcap.o tparam.o
 
@@ -50,7 +51,7 @@ all: libtermcap.a
 
 libtermcap.a:	$(OBJECTS)
 	$(RM) -f $@
-	$(AR) cr $@ $(OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 install:	

@@ -122,9 +122,9 @@
 #undef AFS
 
 /* End of configuration settings controllable by autoconf. */
-/* Other settable options appear in config.h.top. */
+/* Other settable options appear in config-top.h. */
 
-#include "config.h.top"
+#include "config-top.h"
 
 /* Beginning of autoconf additions. */
 
@@ -187,6 +187,9 @@
 /* The number of bytes in a pointer to char.  */
 #undef SIZEOF_CHAR_P
 
+/* The number of bytes in a double (hopefully 8). */
+#undef SIZEOF_DOUBLE
+
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
 
@@ -207,6 +210,9 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef ptrdiff_t
+
+/* Define to `double' if <sys/types.h> doesn't define. */
+#undef bits64_t
 
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
@@ -392,10 +398,17 @@
 /* Define if you have the killpg function.  */
 #undef HAVE_KILLPG
 
+/* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
+
+/* Define if you have the rename function. */
+#undef HAVE_RENAME
+
+/* Define if you have the sbrk function. */
+#undef HAVE_SBRK
 
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
@@ -542,6 +555,9 @@
 
 #undef HAVE_LIBSOCKET
 
+/* Are we running SVR5 (UnixWare 7)? */
+#undef SVR5
+
 /* Are we running SVR4.2? */
 #undef SVR4_2
 
@@ -555,6 +571,6 @@
 /* Do strcoll(3) and strcmp(3) give different results in the default locale? */
 #undef STRCOLL_BROKEN
 
-#include "config.h.bot"
+#include "config-bot.h"
 
 #endif /* _CONFIG_H_ */

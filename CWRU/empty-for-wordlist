@@ -1,0 +1,25 @@
+This patch is from Brian Fox, in reply to an email message from
+"Marcin 'Qrczak' Kowalczyk" <qrczak@knm.org.pl>, who wrote:
+
+   I think that bash should accept such a syntax:
+
+   for var in ; do command; done
+
+   Of course it should do nothing. It would simplify some scripts.
+
+Here is a patch for those who wish it:
+
+*** parse.y.~1~ Wed Mar  4 09:39:46 1998
+--- parse.y     Mon Jul 13 14:40:23 1998
+***************
+*** 495,500 ****
+--- 495,504 ----
+                        { $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9); }
+        |       FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
+                        { $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9); }
++       |       FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
++                       { $$ = make_for_command ($2, (WORD_LIST *)NULL, $8); }
++       |       FOR WORD newline_list IN  list_terminator newline_list '{' compound_list '}'
++                       { $$ = make_for_command ($2, (WORD_LIST *)NULL, $8); }
+        ;
+  

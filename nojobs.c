@@ -668,6 +668,7 @@ get_tty_state ()
 }
 
 /* Make the current tty use the state in shell_tty_info. */
+int
 set_tty_state ()
 {
   int tty;
@@ -676,7 +677,7 @@ set_tty_state ()
   if (tty != -1)
     {
       if (got_tty_state == 0)
-	return;
+	return 0;
 
 #if defined (TERMIOS_TTY_DRIVER)
       tcsetattr (tty, TCSADRAIN, &shell_tty_info);
@@ -688,6 +689,7 @@ set_tty_state ()
 #  endif
 #endif
     }
+  return 0;
 }
 
 /* Give the terminal to PGRP.  */

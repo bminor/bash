@@ -9,6 +9,13 @@
 /* Shell variables and functions are stored in hash tables. */
 #include "hashlib.h"
 
+/* Placeholder for future modifications if cross-compiling or building a
+   `fat' binary, e.g. on Apple Rhapsody.  These values are used in multiple
+   files, so they appear here. */
+#define HOSTTYPE	CONF_HOSTTYPE
+#define OSTYPE		CONF_OSTYPE
+#define MACHTYPE	CONF_MACHTYPE
+
 /* What a shell variable looks like. */
 
 typedef struct variable *DYNAMIC_FUNC ();
@@ -69,6 +76,8 @@ extern void initialize_shell_variables __P((char **, int));
 extern SHELL_VAR *set_if_not __P((char *, char *));
 extern void set_lines_and_columns __P((int, int));
 
+extern void set_ppid __P((void));
+
 extern SHELL_VAR *find_function __P((char *));
 extern SHELL_VAR *find_variable __P((char *));
 extern SHELL_VAR *find_variable_internal __P((char *, int));
@@ -112,6 +121,7 @@ extern void set_var_auto_export __P((char *));
 extern void set_func_auto_export __P((char *));
 extern void sort_variables __P((SHELL_VAR **));
 extern void maybe_make_export_env __P((void));
+extern void update_export_env_inplace __P((char *, int, char *));
 extern void put_command_name_into_env __P((char *));
 extern void put_gnu_argv_flags_into_env __P((int, char *));
 extern void print_var_list __P((SHELL_VAR **));

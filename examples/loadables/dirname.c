@@ -58,7 +58,7 @@ dirname_builtin (list)
     if (string[slen] == '/')
       break;
 
-  if (slen >= 0)
+  if (slen < 0)
     {
       fputs (".\n", stdout);
       return (EXECUTION_SUCCESS);

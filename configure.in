@@ -1,12 +1,12 @@
 dnl
-dnl Configure script for bash-2.02
+dnl Configure script for bash-2.03
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl checks for version info
 
-AC_REVISION([for Bash 2.02, version 2.19, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 2.03, version 2.49, from autoconf version] AC_ACVERSION)dnl
 
 AC_INIT(shell.h)
 AC_CONFIG_HEADER(config.h)
@@ -28,25 +28,28 @@ opt_purify=no
 opt_purecov=no
 opt_afs=no
 opt_curses=no
+opt_with_installed_readline=no
 
 dnl some systems should be configured without gnu malloc by default
 dnl and some need a special compiler or loader
 dnl look in the NOTES file for more
 case "${host_cpu}-${host_os}" in
-alpha-*)	opt_gnu_malloc=no ;;	# alpha running osf/1 or linux
+alpha*-*)	opt_gnu_malloc=no ;;	# alpha running osf/1 or linux
 *[Cc]ray*-*)	opt_gnu_malloc=no ;;	# Crays
 *-osf1*)	opt_gnu_malloc=no ;;	# other osf/1 machines
 sparc-svr4*)	opt_gnu_malloc=no ;;	# sparc SVR4, SVR4.2
 sparc-netbsd*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
-#mips-irix6*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
+mips-irix6*)	opt_gnu_malloc=no ;;	# needs 8-byte alignment
 sparc-linux*)	opt_gnu_malloc=no ;;	# sparc running linux; requires ELF
 #*-freebsd*)	opt_gnu_malloc=no ;;	# they claim it's better
 *-aix*)		opt_gnu_malloc=no ;;	# AIX machines
 *-nextstep*)	opt_gnu_malloc=no ;;	# NeXT machines running NeXTstep
+*-rhapsody*)	opt_gnu_malloc=no ;;	# Apple Rhapsody
 *-dgux*)	opt_gnu_malloc=no ;;	# DG/UX machines
 *-qnx*)		opt_gnu_malloc=no ;;	# QNX 4.2
 *-machten4)	opt_gnu_malloc=no ;;	# MachTen 4.x
 *-bsdi2.1|*-bsdi3.?)	opt_gnu_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+*-beos*)	opt_gnu_malloc=no ;;	# they say it's suitable
 *-cygwin32*)	opt_gnu_malloc=no ;;	# Cygnus's CYGWIN32 environment
 esac
 
@@ -56,6 +59,7 @@ AC_ARG_WITH(afs, --with-afs		if you are running AFS, opt_afs=$withval)
 AC_ARG_WITH(curses, --with-curses		use the curses library instead of the termcap library,opt_curses=$withval)
 AC_ARG_WITH(glibc-malloc, --with-glibc-malloc	use the GNU C library version of malloc,opt_glibc_malloc=$withval)
 AC_ARG_WITH(gnu-malloc, --with-gnu-malloc	use the GNU version of malloc,opt_gnu_malloc=$withval)
+AC_ARG_WITH(installed-readline, --with-installed-readline	use a version of the readline library that is already installed, opt_with_installed_readline=$withval)
 AC_ARG_WITH(purecov, --with-purecov		configure to postprocess with pure coverage, opt_purecov=$withval)
 AC_ARG_WITH(purify, --with-purify		configure to postprocess with purify, opt_purify=$withval)
 
@@ -156,29 +160,12 @@ AC_ARG_ENABLE(static-link, --enable-static-link		[link bash statically, for use 
 
 dnl opt_job_control is handled later, after BASH_JOB_CONTROL_MISSING runs
 
+dnl opt_readline and opt_history are handled later, because AC_PROG_CC needs
+dnl to be run before we can check the version of an already-installed readline
+dnl library
+
 if test $opt_alias = yes; then
 AC_DEFINE(ALIAS)
-fi
-if test $opt_readline = yes; then
-AC_DEFINE(READLINE)
-READLINE_LIB=-lreadline
-READLINE_DEP='$(READLINE_LIBRARY)'
-else
-READLINE_LIB= READLINE_DEP=
-fi
-if test $opt_history = yes; then
-AC_DEFINE(HISTORY)
-HISTORY_LIB=-lhistory
-HISTORY_DEP='$(HISTORY_LIBRARY)'
-else
-HISTORY_LIB= HISTORY_DEP=
-fi
-if test $opt_bang_history = yes; then
-AC_DEFINE(BANG_HISTORY)
-HISTORY_LIB=-lhistory
-HISTORY_DEP='$(HISTORY_LIBRARY)'
-else
-HISTORY_LIB= HISTORY_DEP=
 fi
 if test $opt_dirstack = yes; then
 AC_DEFINE(PUSHD_AND_POPD)
@@ -234,10 +221,6 @@ AC_SUBST(TESTSCRIPT)
 AC_SUBST(PURIFY)
 AC_SUBST(MALLOC_TARGET)
 AC_SUBST(MALLOC_SRC)
-AC_SUBST(READLINE_LIB)
-AC_SUBST(READLINE_DEP)
-AC_SUBST(HISTORY_LIB)
-AC_SUBST(HISTORY_DEP)
 
 dnl Use GNU m4 macros to get the distribution and patchlevel information
 dnl into configure without requiring the files to be distributed
@@ -256,24 +239,37 @@ BASH_LARGE_FILE_SUPPORT
 AC_ISC_POSIX
 AC_MINIX
 
-dnl BEGIN changes for CYGNUS cross-building for cygwin32
+dnl BEGIN changes for cross-building for cygwin32 and BeOS
+
+SIGNAMES_H=lsignames.h
 
 dnl load up the cross-building cache file -- add more cases and cache
 dnl files as necessary
+
+dnl Note that host and target machine are the same, and different than the
+dnl build machine.
+dnl Set SIGNAMES_H based on whether or not we're cross-compiling.
+
 if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
     *-cygwin32*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	if test -r "${cross_cache}"; then
-	    echo "loading cross-build cache file ${cross_cache}"
-	    . ${cross_cache}
-	fi
-	unset cross_cache
+	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
 	;;
-    *)	echo "configure: cross-compiling for a non-cygwin32 target is not supported" >&2
+    i[[3456]]86-*-beos*)
+	cross_cache=${srcdir}/cross-build/x86-beos.cache
+	SIGNAMES_H='${srcdir}/cross-build/beos-sig.h'
+	;;
+    *)	echo "configure: cross-compiling for $host is not supported" >&2
 	;;
     esac
+    if test -n "${cross_cache}" && test -r "${cross_cache}"; then
+	echo "loading cross-build cache file ${cross_cache}"
+	. ${cross_cache}
+    fi
+    unset cross_cache
 fi
+AC_SUBST(SIGNAMES_H)
 
 if test -z "$CC_FOR_BUILD"; then
     if test "x$cross_compiling" = "xno"; then
@@ -284,15 +280,7 @@ if test -z "$CC_FOR_BUILD"; then
 fi
 AC_SUBST(CC_FOR_BUILD)
 
-dnl Set SIGNAMES_H based on whether or not we're cross-compiling
-if test "x$cross_compiling" = "xno"; then
-	SIGNAMES_H=lsignames.h
-else
-	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
-fi
-AC_SUBST(SIGNAMES_H)
-
-dnl END changes for CYGNUS cross-building for cygwin32
+dnl END changes for cross-building
 
 dnl We want these before the checks, so the checks can modify their values.
 test -z "$CFLAGS" && CFLAGS=-g auto_cflags=1
@@ -304,28 +292,113 @@ dnl handle options that alter how bash is compiled and linked
 dnl these must come after the test for cc/gcc
 if test "$opt_profiling" = "yes"; then
 	PROFILE_FLAGS=-pg
-	opt_static_link=yes
+	case "$host_os" in
+	solaris2*)	;;
+	*)		opt_static_link=yes ;;
+	esac
 fi
 
 if test "$opt_static_link" = yes; then
 	# if we're using gcc, add `-static' to LDFLAGS
 	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
-		LDFLAGS="$LDFLAGS -static"
+		STATIC_LD="-static"
 	fi
 fi
 
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
+AC_SUBST(STATIC_LD)
 
 AC_PROG_GCC_TRADITIONAL
+
+dnl BEGIN READLINE and HISTORY LIBRARY SECTION
+dnl prepare to allow bash to be linked against an already-installed readline
+
+dnl first test that the readline version is new enough to link bash against
+if test "$opt_readline" = yes && test "$opt_with_installed_readline" = "yes"
+then
+
+dnl	we duplicate some work that's done later here so we can look in
+dnl	the correct directory for the readline library
+
+	test "x$prefix" = xNONE && _rl_prefix=$ac_default_prefix || _rl_prefix=${prefix}
+	test "x$exec_prefix" = xNONE && _rl_exec_prefix=${_rl_prefix} || _rl_exec_prefix=${exec_prefix}
+
+	AC_MSG_CHECKING(version of installed readline library)
+	_rl_version=`exec_prefix=${_rl_exec_prefix} ${CONFIG_SHELL-/bin/sh} ${srcdir}/support/rlvers.sh -C "${CC}" -L ${libdir}`
+	AC_MSG_RESULT($_rl_version)
+
+	case "$_rl_version" in
+	3*|4*|5*|6*|7*|8*|9*)	;;
+	*)	opt_with_installed_readline=no 
+		AC_MSG_WARN(installed readline library is too old to be linked with bash)
+		AC_MSG_WARN(using private bash version)
+		;;
+	esac
+	unset _rl_version _rl_prefix _rl_exec_prefix
+fi
+
+if test $opt_readline = yes; then
+	AC_DEFINE(READLINE)
+	READLINE_LIB=-lreadline
+	if test "$opt_with_installed_readline" = "yes" ; then
+		RL_LIBDIR='$(libdir)'
+		READLINE_DEP=
+		RL_INCLUDE='-I$(includedir)'
+	else
+		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
+		READLINE_DEP='$(READLINE_LIBRARY)'
+	fi
+else
+	RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
+	READLINE_LIB= READLINE_DEP=
+fi
+if test $opt_history = yes || test $opt_bang_history = yes; then
+	if test $opt_history = yes; then
+		AC_DEFINE(HISTORY)
+	fi
+	if test $opt_bang_history = yes; then
+		AC_DEFINE(BANG_HISTORY)
+	fi
+	HISTORY_LIB=-lhistory
+ 	if test "$opt_with_installed_readline" = "yes"; then
+		HIST_LIBDIR='$(libdir)'
+		HISTORY_DEP=
+		RL_INCLUDE='-I$(includedir)'
+	else
+		HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
+		HISTORY_DEP='$(HISTORY_LIBRARY)'
+	fi
+else
+	HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
+	HISTORY_LIB= HISTORY_DEP=
+fi
+AC_SUBST(READLINE_LIB)
+AC_SUBST(READLINE_DEP)
+AC_SUBST(RL_LIBDIR)
+AC_SUBST(RL_INCLUDE)
+AC_SUBST(HISTORY_LIB)
+AC_SUBST(HISTORY_DEP)
+AC_SUBST(HIST_LIBDIR)
+
+dnl END READLINE and HISTORY LIBRARY SECTION
 
 dnl programs needed by the build and install process
 AC_PROG_INSTALL
 AC_CHECK_PROG(AR, ar, ar)
+dnl Set default for ARFLAGS, since autoconf does not have a macro for it.
+dnl This allows people to set it when running configure or make
+test -n "$ARFLAGS" || ARFLAGS="cr"
 AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_MAKE_SET
+
+case "$host_os" in
+opennt*|interix*)	MAKE_SHELL="$OPENNT_ROOT/bin/sh" ;;
+*)			MAKE_SHELL=/bin/sh ;;
+esac
+AC_SUBST(MAKE_SHELL)
 
 dnl special checks for libc functions
 AC_FUNC_ALLOCA
@@ -357,8 +430,8 @@ AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 select getdtablesize getgroups gethostname \
-		setdtablesize getpagesize killpg lstat getpeername \
-		getrlimit getrusage gettimeofday waitpid tcgetpgrp)
+		setdtablesize getpagesize killpg lstat getpeername sbrk \
+		getrlimit getrusage gettimeofday waitpid tcgetpgrp rename)
 
 dnl checks for c library functions
 AC_CHECK_FUNCS(bcopy bzero confstr getcwd strcasecmp setenv putenv \
@@ -418,23 +491,15 @@ AC_CHECK_TYPE(time_t, long)
 
 AC_TYPE_SIGNAL
 
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(char *)
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
+AC_CHECK_SIZEOF(char *, 4)
+AC_CHECK_SIZEOF(double, 8)
 
-AC_CHECK_TYPE(int32_t)
-if test "$ac_cv_type_int32_t" = "no"; then
-        BASH_TYPE_INT32_T
-fi
-AC_CHECK_TYPE(u_int32_t)
-if test "$ac_cv_type_u_int32_t" = "no"; then
-        BASH_TYPE_U_INT32_T
-fi
-
-AC_CHECK_TYPE(ptrdiff_t)
-if test "$ac_cv_type_ptrdiff_t" = "no"; then
-        BASH_TYPE_PTRDIFF_T
-fi
+BASH_TYPE_INT32_T
+BASH_TYPE_U_INT32_T
+BASH_TYPE_PTRDIFF_T
+BASH_TYPE_BITS64_T
 
 dnl structures
 AC_HEADER_STAT
@@ -556,23 +621,33 @@ dnl libraries, and specify any additional local cc flags
 dnl
 dnl this should really go away someday
 
-case "$host_os" in
+case "${host_os}" in
 sysv4.2*)	AC_DEFINE(SVR4_2)
 		AC_DEFINE(SVR4) ;;
 sysv4*)		AC_DEFINE(SVR4) ;;
+sysv5*)		AC_DEFINE(SVR5) ;;
+hpux9*)		LOCAL_CFLAGS="-DHPUX9 -DHPUX" ;;
 hpux*)		LOCAL_CFLAGS=-DHPUX ;;
 dgux*)		LOCAL_CFLAGS=-D_DGUX_SOURCE; LOCAL_LIBS=-ldgc ;;
 isc*)		LOCAL_CFLAGS=-Disc386;;
-sco3.2v5*)	LOCAL_CFLAGS="-DWAITPID_BROKEN -DNO_MEMSCRAMBLE -DPATH_MAX=1024" ;;
+sco3.2v5*)	LOCAL_CFLAGS="-b elf -DWAITPID_BROKEN -DNO_MEMSCRAMBLE -DPATH_MAX=1024" ;;
 sco3.2v4*)	LOCAL_CFLAGS="-DMUST_UNBLOCK_CHLD -DNO_MEMSCRAMBLE -DPATH_MAX=1024" ;;
 sco3.2*)	LOCAL_CFLAGS=-DMUST_UNBLOCK_CHLD ;;
 sunos4*)	LOCAL_CFLAGS=-DSunOS4 ;;
 solaris2.5*)	LOCAL_CFLAGS=-DSunOS5 ;;
+lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic ;;	 # allow dynamic loading
-aix4.2*)	LOCAL_LDFLAGS="-bexpall -brtl" ;;# allow dynamic loading
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s -lunix -lncurses" ;;
-powerux)	LOCAL_LIBS="-lgen" ;;
+powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin32*)	LOCAL_LIBS="-luser32" ;;
+opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG" ;;
+esac
+
+dnl Stanza for OS/compiler pair-specific flags
+case "${host_os}-${CC}" in
+aix4.2*-*gcc*)	LOCAL_LDFLAGS="-Xlinker -bexpall -Xlinker -brtl" ;;
+aix4.2*)	LOCAL_LDFLAGS="-bexpall -brtl" ;;
+bsdi4*-*gcc*)	LOCAL_LDFLAGS="-rdynamic" ;;	# allow dynamic loading, like Linux
 esac
 
 case "$host_cpu" in
@@ -587,6 +662,24 @@ case "$host_cpu-$host_vendor-$host_os" in
 m88k-motorola-sysv3)	LOCAL_CFLAGS=-DWAITPID_BROKEN ;;
 mips-pyramid-sysv4)	LOCAL_CFLAGS=-Xa ;;
 esac
+
+#
+# Shared object configuration section.  These values are generated by
+# ${srcdir}/support/shobj-conf
+#
+if test "$ac_cv_func_dlopen" = "yes" && test -f ${srcdir}/support/shobj-conf
+then
+	AC_MSG_CHECKING(shared object configuration for loadable builtins)
+	eval `${CONFIG_SHELL-/bin/sh} ${srcdir}/support/shobj-conf -C ${CC} -c ${host_cpu} -o ${host_os} -v ${host_vendor}`
+	AC_SUBST(SHOBJ_CC)
+	AC_SUBST(SHOBJ_CFLAGS)
+	AC_SUBST(SHOBJ_LD)
+	AC_SUBST(SHOBJ_LDFLAGS)
+	AC_SUBST(SHOBJ_XLDFLAGS)
+	AC_SUBST(SHOBJ_LIBS)
+	AC_SUBST(SHOBJ_STATUS)
+	AC_MSG_RESULT($SHOBJ_STATUS)
+fi
 
 # try to create a directory tree if the source is elsewhere
 # this should be packaged into a script accessible via ${srcdir}/support
@@ -611,11 +704,13 @@ AC_SUBST(BUILD_DIR)
 
 AC_SUBST(YACC)
 AC_SUBST(AR)
+AC_SUBST(ARFLAGS)
 
 AC_SUBST(BASHVERS)
 AC_SUBST(BASHPATCH)
 
 AC_SUBST(host_cpu)
+AC_SUBST(host_vendor)
 AC_SUBST(host_os)
 
 AC_SUBST(LOCAL_LIBS)

@@ -26,13 +26,13 @@ $FUNCTION fc_builtin
 $DEPENDS_ON HISTORY
 $SHORT_DOC fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [cmd]
 
+fc is used to list or edit and re-execute commands from the history list.
 FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
 string.
 
    -e ENAME selects which editor to use.  Default is FCEDIT, then EDITOR,
-      then the editor which corresponds to the current readline editing
-      mode, then vi.
+      then vi.
 
    -l means list lines instead of editing.
    -n means no line numbers listed.
@@ -156,7 +156,7 @@ fc_builtin (list)
   register int i;
   register char *sep;
   int numbering, reverse, listing, execute;
-  int histbeg, histend, last_hist, retval, first, opt;
+  int histbeg, histend, last_hist, retval, opt;
   FILE *stream;
   REPL *rlist, *rl;
   char *ename, *command, *newcom, *line;
@@ -372,64 +372,11 @@ fc_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  /* Now reopen the file and execute the edited commands. */
-
-  stream = fopen (fn, "r");
-
-  if (stream == NULL)
-    {
-      builtin_error ("cannot reopen temp file %s", fn);
-      unlink (fn);
-      return (EXECUTION_FAILURE);
-    }
-
-  retval = EXECUTION_SUCCESS;
-  first = 1;
-
-#if 1
   /* Make sure parse_and_execute doesn't turn this off, even though a
      call to parse_and_execute farther up the function call stack (e.g.,
      if this is called by vi_edit_and_execute_command) may have already
      called bash_history_disable. */
   remember_on_history = 1;
-#else
-  /* First, write the commands to the history file.  This will not happen
-     when we call parse_and_execute, since parse_and_execute disables
-     the command line history while it executes. */
-
-  opt = current_command_line_count;
-  while ((line = fc_readline (stream)) != NULL)
-    {
-      if (line[0] == '\n')
-	{
-	  free (line);
-	  continue;		/* Skip blank lines. */
-	}
-
-      if (first)
-	{
-	  first = 0;
-	  /* If we retrieved only one command from the history file, but we
-	     read multiple lines from the edited file, and literal_history
-	     has been set by `shopt', we assume that it was a compound
-	     command stored with embedded newlines.  In this case, we want
-	     the history code to store it as one command again. */
-	  if (literal_history && histbeg == histend)
-	    current_command_line_count = 1;
-	  fc_replhist (line);
-	}
-      else
-	{
-	  if (literal_history && histbeg == histend)
-	    current_command_line_count++;
-	  fc_addhist (line);
-	}
-
-      free (line);
-    }
-  fclose (stream);
-  current_command_line_count = opt;
-#endif
 
   /* Turn on the `v' flag while fc_execute_file runs so the commands
      will be echoed as they are read by the parser. */

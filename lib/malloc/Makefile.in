@@ -13,9 +13,12 @@ INSTALL_DATA = @INSTALL_DATA@
 CC = @CC@
 RANLIB = @RANLIB@
 AR = @AR@
+ARFLAGS = @ARFLAGS@
 RM = rm -f
 CP = cp
 MV = mv
+
+SHELL = @MAKE_SHELL@
 
 PROFILE_FLAGS = 
 
@@ -63,32 +66,32 @@ all:		malloc
 
 malloc: ${MALLOC_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${MALLOC_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${MALLOC_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 nmalloc: ${NMALLOC_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${NMALLOC_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${NMALLOC_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 nmalloc2: ${NMALLOC2_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${NMALLOC2_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${NMALLOC2_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 gmalloc: ${GMALLOC_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${GMALLOC_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${GMALLOC_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 ngmalloc: ${NGMALLOC_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${NGMALLOC_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${NGMALLOC_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 stubmalloc: ${STUB_OBJS}
 	${RM} libmalloc.a
-	${AR} cr libmalloc.a ${STUB_OBJS}
+	${AR} ${ARFLAGS} libmalloc.a ${STUB_OBJS}
 	-test -n "$(RANLIB)" && $(RANLIB) libmalloc.a
 
 alloca.o:	$(srcdir)/$(ALLOCA_SOURCE)

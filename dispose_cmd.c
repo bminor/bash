@@ -169,7 +169,7 @@ dispose_command (command)
       }
 
     default:
-      programming_error ("dispose_command: bad command type `%d'", command->type);
+      command_error ("dispose_command", CMDERR_BADTYPE, command->type, 0);
       break;
     }
   free (command);

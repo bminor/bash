@@ -116,6 +116,11 @@ initialize_traps ()
   set_signal_handler (SIGINT, original_signals[SIGINT]);
   sigmodes[SIGINT] |= SIG_SPECIAL;
 
+#if defined (__BEOS__)
+  /* BeOS sets SIGINT to SIG_IGN! */
+  original_signals[SIGINT] = SIG_DFL;
+#endif
+
   original_signals[SIGQUIT] =
     (SigHandler *) set_signal_handler (SIGQUIT, SIG_DFL);
   set_signal_handler (SIGQUIT, original_signals[SIGQUIT]);
@@ -159,10 +164,14 @@ decode_signal (string)
 
   /* A leading `SIG' may be omitted. */
   for (sig = 0; sig <= NSIG; sig++)
-    if (strcasecmp (string, signal_names[sig]) == 0 ||
-	(STREQN (signal_names[sig], "SIG", 3) &&
-	  strcasecmp (string, &(signal_names[sig])[3]) == 0))
-      return ((int)sig);
+    {
+      if (signal_names[sig] == 0 || signal_names[sig][0] == '\0')
+	continue;
+      if (strcasecmp (string, signal_names[sig]) == 0 ||
+	  (STREQN (signal_names[sig], "SIG", 3) &&
+	    strcasecmp (string, &(signal_names[sig])[3]) == 0))
+	return ((int)sig);
+    }
 
   return (NO_SIG);
 }

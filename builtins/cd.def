@@ -140,22 +140,20 @@ bindpwd (no_symlinks)
   else
     dirname = get_working_directory ("cd");
 
-  bind_variable ("OLDPWD", get_string_value ("PWD"));
-
   old_anm = array_needs_making;
-  tvar = bind_variable ("PWD", dirname);
-  /* This is an efficiency hack.  If PWD is exported, we will need to
-     remake the exported environment every time we change directories.
-     If there is no other reason to make the exported environment, just
-     update PWD in place and mark the exported environment as no longer
-     needing a remake. */
+  pwdvar = get_string_value ("PWD");
+
+  tvar = bind_variable ("OLDPWD", pwdvar);
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
-      pwdvar = xmalloc (STRLEN (dirname) + 5);	/* 5 = "PWD" + '=' + '\0' */
-      strcpy (pwdvar, "PWD=");
-      if (dirname)
-	strcpy (pwdvar + 4, dirname);
-      add_or_supercede_exported_var (pwdvar, 0);
+      update_export_env_inplace ("OLDPWD=", 7, pwdvar);
+      array_needs_making = 0;
+    }
+
+  tvar = bind_variable ("PWD", dirname);
+  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+    {
+      update_export_env_inplace ("PWD=", 4, dirname);
       array_needs_making = 0;
     }
 
@@ -243,7 +241,7 @@ cd_builtin (list)
 	{
 	  /* Find directory in $CDPATH. */
 	  path_index = 0;
-	  while ((path = extract_colon_unit (cdpath, &path_index)))
+	  while (path = extract_colon_unit (cdpath, &path_index))
 	    {
 	      /* OPT is 1 if the path element is non-empty */
 	      opt = path[0] != '\0';

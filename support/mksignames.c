@@ -260,7 +260,7 @@ initialize_signames ()
 #endif
 
 /* 4.4 BSD */
-#if defined (SIGINFO)	/* information request */
+#if defined (SIGINFO) && !defined (_SEQUENT_)	/* information request */
   signal_names[SIGINFO] = "SIGINFO";
 #endif
 
@@ -270,6 +270,10 @@ initialize_signames ()
 
 #if defined (SIGUSR2)	/* user defined signal 2 */
   signal_names[SIGUSR2] = "SIGUSR2";
+#endif
+
+#if defined (SIGKILLTHR)	/* BeOS: Kill Thread */
+  signal_names[SIGKILLTHR] = "SIGKILLTHR";
 #endif
 
   for (i = 0; i < NSIG; i++)

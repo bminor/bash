@@ -5,13 +5,13 @@
 @c %**end of header
 
 @ignore
-last change: Wed Mar 25 11:36:48 EST 1998
+Last Change: Wed Jan 20 16:46:26 EST 1999
 @end ignore
 
-@set EDITION 2.2
-@set VERSION 2.02
-@set UPDATED 1 April 1998
-@set UPDATE-MONTH April 1998
+@set EDITION 2.3
+@set VERSION 2.03
+@set UPDATED 20 January 1999
+@set UPDATE-MONTH January 1999
 
 @iftex
 @finalout
@@ -36,7 +36,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright (C) 1991, 1993, 1996, 1997 Free Software Foundation, Inc.
+Copyright (C) 1991-1999 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -64,13 +64,13 @@ by the Free Software Foundation.
 @titlepage
 @title Bash Reference Manual
 @subtitle Reference Documentation for Bash
-@subtitle Edition @value{EDITION}, for @code{bash} Version @value{VERSION}.
-@subtitle @value{UPDATED}
+@subtitle Edition @value{EDITION}, for @code{Bash} Version @value{VERSION}.
+@subtitle @value{UPDATE-MONTH}
 @author Chet Ramey, Case Western Reserve University
 @author Brian Fox, Free Software Foundation
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1993, 1996 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-1999 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1428,9 +1428,9 @@ In the first form, only the first match is replaced.
 The second form causes all matches of @var{pattern} to be
 replaced with @var{string}.
 If @var{pattern} begins with @samp{#}, it must match at the beginning
-of @var{string}.
+of the expanded value of @var{parameter}.
 If @var{pattern} begins with @samp{%}, it must match at the end
-of @var{string}.
+of the expanded value of @var{parameter}.
 If @var{string} is null, matches of @var{pattern} are deleted
 and the @code{/} following @var{pattern} may be omitted.
 If @var{parameter} is @samp{@@} or @samp{*},
@@ -2285,13 +2285,16 @@ The return status is zero.
 @item .
 @btindex .
 @example
-. @var{filename}
+. @var{filename} [@var{arguments}]
 @end example
 Read and execute commands from the @var{filename} argument in the
 current shell context.  If @var{filename} does not contain a slash,
 the @code{$PATH} variable is used to find
 @var{filename}.  The current directory is searched if @var{filename}
 is not found in @code{$PATH}.
+If any @var{arguments} are supplied, they become the positional
+parameters when @var{filename} is executed.  Otherwise the positional
+parameters are unchanged.
 The return status is the exit status of the last command executed, or
 zero if no commands are executed.  If @var{filename} is not found, or
 cannot be read, the return status is non-zero.
@@ -3245,7 +3248,8 @@ If any of the files exist but cannot be read, Bash reports an error.
 Tildes are expanded in file names as described above under
 Tilde Expansion (@pxref{Tilde Expansion}).
 
-When Bash is invoked as an interactive login shell, it first reads and
+When Bash is invoked as an interactive login shell, or as a
+non-interactive shell with the @samp{--login} option, it first reads and
 executes commands from the file @file{/etc/profile}, if that file exists.
 After reading that file, it looks for @file{~/.bash_profile},
 @file{~/.bash_login}, and @file{~/.profile}, in that order, and reads
@@ -3285,7 +3289,8 @@ If Bash is invoked with the name @code{sh}, it tries to mimic the
 startup behavior of historical versions of @code{sh} as closely as
 possible, while conforming to the @sc{POSIX} standard as well.
 
-When invoked as an interactive login shell, it first attempts to read
+When invoked as an interactive login shell, or as a non-interactive
+shell with the @samp{--login} option, it first attempts to read
 and execute commands from @file{/etc/profile} and @file{~/.profile}, in
 that order.
 The @samp{--noprofile} option may be used to inhibit this behavior.
@@ -3296,7 +3301,7 @@ Since a shell invoked as @code{sh} does not attempt to read and execute
 commands from any other startup files, the @samp{--rcfile} option has
 no effect.
 A non-interactive shell invoked with the name @code{sh} does not attempt
-to read any startup files.
+to read any other startup files.
 
 When invoked as @code{sh}, Bash enters @sc{POSIX} mode after
 the startup files are read.
@@ -3318,6 +3323,14 @@ The @samp{--norc} option may be used to inhibit this behavior, and the
 @samp{--rcfile} option may be used to force another file to be read, but
 @code{rshd} does not generally invoke the shell with those options or
 allow them to be specified.
+
+If Bash is started with the effective user (group) id not equal to the
+real user (group) id, and the @code{-p} option is not supplied, no startup
+files are read, shell functions are not inherited from the environment,
+the @code{SHELLOPTS} variable, if it appears in the environment, is ignored,
+and the effective user id is set to the real user id.
+If the @code{-p} option is supplied at invocation, the startup behavior is
+the same, but the effective user id is not reset.
 
 @node Is This Shell Interactive?
 @section Is This Shell Interactive?
@@ -3676,6 +3689,8 @@ If there are fewer words read from the standard input than names,
 the remaining names are assigned empty values.
 The characters in the value of the @code{IFS} variable
 are used to split the line into words.
+The backslash character @samp{\} may be used to remove any special
+meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
 variable @code{REPLY}.
 The return code is zero, unless end-of-file is encountered.
@@ -3683,8 +3698,10 @@ Options, if supplied, have the following meanings:
 
 @table @code
 @item -r
-If this option is given, a backslash-newline pair is not ignored, and
-the backslash is considered to be part of the line.
+If this option is given, backslash does not act as an escape
+character.  The backslash is considered to be part of the line.
+In particular, a backslash-newline pair may not be used as a line
+continuation.
 
 @item -p @var{prompt}
 Display @var{prompt}, without a
@@ -3852,6 +3869,13 @@ files to expand to a null string, rather than themselves.
 If set, prompt strings undergo variable and parameter expansion after
 being expanded (@pxref{Printing a Prompt}).
 This option is enabled by default.
+
+@item restricted_shell
+The shell sets this option if it is started in restricted mode
+(@pxref{The Restricted Shell}).
+The value may not be changed.
+This is not reset when the startup files are executed, allowing
+the startup files to discover whether or not a shell is restricted.
 
 @item shift_verbose
 If this is set, the @code{shift}
@@ -4120,9 +4144,12 @@ In this mode, the @code{$BASH_ENV} and @code{$ENV} files are not
 processed, shell functions are not inherited from the environment,
 and the @code{SHELLOPTS} variable, if it appears in the environment,
 is ignored.
-This is enabled automatically
-on startup if the effective user (group) id is not equal to the real
-user (group) id.  Turning this option off causes the effective user
+If the shell is started with the effective user (group) id not equal to the
+real user (group) id, and the @code{-p} option is not supplied, these actions
+are taken and the effective user id is set to the real user id.
+If the @code{-p} option is supplied at startup, the effective user id is
+not reset.
+Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
 
 @item -t
@@ -4234,6 +4261,9 @@ True if @var{file} exists and is a regular file.
 
 @item -g @var{file}
 True if @var{file} exists and its set-group-id bit is set.
+
+@item -h @var{file}
+True if @var{file} exists and is a symbolic link.
 
 @item -k @var{file}
 True if @var{file} exists and its "sticky" bit is set.
@@ -5101,8 +5131,8 @@ with the exception that the following are disallowed:
 @item
 Changing directories with the @code{cd} builtin.
 @item
-Setting or unsetting the values of the @code{SHELL} or @code{PATH}
-variables.
+Setting or unsetting the values of the @code{SHELL}, @code{PATH},
+@code{ENV}, or @code{BASH_ENV} variables.
 @item
 Specifying command names containing slashes.
 @item
@@ -5814,6 +5844,11 @@ This option is enabled by default.
 The @file{NOTES} file contains a list of systems for
 which this should be turned off, and @code{configure} disables this
 option automatically for a number of systems.
+
+@item --with-installed-readline
+Define this to make bash link with a locally-installed version of Readline
+rather than the version in lib/readline.  This works only with readline 4.0
+and later versions.
 
 @item --with-purify
 Define this to use the Purify memory allocation checker from Pure

@@ -289,7 +289,7 @@ maybe_append_history (filename)
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)
 	{
-	  fd = open (filename, O_WRONLY|O_CREAT, 0666);
+	  fd = open (filename, O_WRONLY|O_CREAT, 0600);
 	  if (fd < 0)
 	    {
 	      builtin_error ("%s: cannot create: %s", filename, strerror (errno));
@@ -324,7 +324,7 @@ maybe_save_shell_history ()
 	  if (stat (hf, &buf) == -1)
 	    {
 	      int file;
-	      file = open (hf, O_CREAT | O_TRUNC | O_WRONLY, 0666);
+	      file = open (hf, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 	      if (file != -1)
 		close (file);
 	    }

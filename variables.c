@@ -249,6 +249,12 @@ initialize_shell_variables (env, privmode)
 	}
     }
 
+  /* According to the Single Unix Specification, v2, $OLDPWD is an
+     `environment variable' and therefore should be auto-exported.
+     Make a dummy invisible variable for OLDPWD, and mark it as exported. */
+  temp_var = bind_variable ("OLDPWD", (char *)NULL);
+  temp_var->attributes |= (att_exported | att_invisible);
+
   /* Set up initial value of $_ */
   temp_var = bind_variable ("_", dollar_vars[0]);
 
@@ -276,7 +282,13 @@ initialize_shell_variables (env, privmode)
   /* set up the prompts. */
   if (interactive_shell)
     {
+#if defined (PROMPT_STRING_DECODE)
       set_if_not ("PS1", primary_prompt);
+#else
+      if (current_user.uid == -1)
+	get_current_user_info ();
+      set_if_not ("PS1", current_user.euid == 0 ? "# " : primary_prompt);
+#endif
       set_if_not ("PS2", secondary_prompt);
     }
   set_if_not ("PS4", "+ ");
@@ -304,14 +316,7 @@ initialize_shell_variables (env, privmode)
   /* Do some things with shell level. */
   initialize_shell_level ();
 
-  /* Make a variable $PPID, which holds the pid of the shell's parent.  */
-  name = itos ((int) getppid ());
-  temp_var = find_variable ("PPID");
-  if (temp_var)
-    temp_var->attributes &= ~(att_readonly | att_exported);
-  temp_var = bind_variable ("PPID", name);
-  temp_var->attributes |= (att_readonly | att_integer);
-  free (name);
+  set_ppid ();
 
   /* Initialize the `getopts' stuff. */
   bind_variable ("OPTIND", "1");
@@ -395,6 +400,17 @@ initialize_shell_variables (env, privmode)
 
 /* Set $HOME to the information in the password file if we didn't get
    it from the environment. */
+
+/* This function is not static so the tilde and readline libraries can
+   use it. */
+char *
+get_home_dir ()
+{
+  if (current_user.home_dir == 0)
+    get_current_user_info ();
+  return current_user.home_dir;
+}
+
 static void
 set_home_var ()
 {
@@ -402,11 +418,7 @@ set_home_var ()
 
   temp_var = find_variable ("HOME");
   if (temp_var == 0)
-    {
-      if (current_user.home_dir == 0)
-	get_current_user_info ();
-      temp_var = bind_variable ("HOME", current_user.home_dir);
-    }
+    temp_var = bind_variable ("HOME", get_home_dir ());
   temp_var->attributes |= att_exported;
 }
 
@@ -552,33 +564,44 @@ initialize_shell_level ()
   adjust_shell_level (1);
 }
 
+/* Make a variable $PPID, which holds the pid of the shell's parent.  */
+void
+set_ppid ()
+{
+  char namebuf[32], *name;
+  SHELL_VAR *temp_var;
+
+  name = inttostr ((int) getppid (), namebuf, sizeof(namebuf));
+  temp_var = find_variable ("PPID");
+  if (temp_var)
+    temp_var->attributes &= ~(att_readonly | att_exported);
+  temp_var = bind_variable ("PPID", name);
+  temp_var->attributes |= (att_readonly | att_integer);
+}
+
 static void
 uidset ()
 {
-  char *buff;
+  char buff[32], *b;
   register SHELL_VAR *v;
 
-  buff = itos (current_user.uid);
+  b = inttostr (current_user.uid, buff, sizeof (buff));
   v = find_variable ("UID");
   if (v)
     v->attributes &= ~att_readonly;
 
-  v = bind_variable ("UID", buff);
+  v = bind_variable ("UID", b);
   v->attributes |= (att_readonly | att_integer);
 
   if (current_user.euid != current_user.uid)
-    {
-      free (buff);
-      buff = itos (current_user.euid);
-    }
+    b = inttostr (current_user.euid, buff, sizeof (buff));
 
   v = find_variable ("EUID");
   if (v)
     v->attributes &= ~att_readonly;
 
-  v = bind_variable ("EUID", buff);
+  v = bind_variable ("EUID", b);
   v->attributes |= (att_readonly | att_integer);
-  free (buff);
 }
 
 #if defined (ARRAY_VARS)
@@ -587,7 +610,7 @@ make_vers_array ()
 {
   SHELL_VAR *vv;
   ARRAY *av;
-  char *s, d[16];
+  char *s, d[32];
 
   makunbound ("BASH_VERSINFO", shell_variables);
 
@@ -599,12 +622,10 @@ make_vers_array ()
     *s++ = '\0';
   array_add_element (av, 0, d);
   array_add_element (av, 1, s);
-  s = itos (patch_level);
+  s = inttostr (patch_level, d, sizeof (d));
   array_add_element (av, 2, s);
-  free (s);
-  s = itos (build_version);
+  s = inttostr (build_version, d, sizeof (d));
   array_add_element (av, 3, s);
-  free (s);
   array_add_element (av, 4, release_status);
   array_add_element (av, 5, MACHTYPE);
 
@@ -618,15 +639,13 @@ void
 set_lines_and_columns (lines, cols)
      int lines, cols;
 {
-  char *val;
+  char val[32], *v;
 
-  val = itos (lines);
-  bind_variable ("LINES", val);
-  free (val);
+  v = inttostr (lines, val, sizeof (val));
+  bind_variable ("LINES", v);
 
-  val = itos (cols);
-  bind_variable ("COLUMNS", val);
-  free (val);
+  v = inttostr (cols, val, sizeof (val));
+  bind_variable ("COLUMNS", v);
 }
 
 /* Set NAME to VALUE if NAME has no value. */
@@ -1171,6 +1190,14 @@ get_string_value (var_name)
     return (var->value);
 }
 
+/* This is present for use by the tilde and readline libraries. */
+char *
+get_env_value (v)
+     char *v;
+{
+  return get_string_value (v);
+}
+
 /* Create a local variable referenced by NAME. */
 SHELL_VAR *
 make_local_variable (name)
@@ -1528,18 +1555,19 @@ assign_array_var_from_string (var, value)
     val = value;
 
   /* Expand the value string into a list of words, performing all the
-     shell expansions including word splitting. */
-#if 1
+     shell expansions including pathname generation and word splitting. */
   /* First we split the string on whitespace, using the shell parser
      (ksh93 seems to do this). */
   list = parse_string_to_word_list (val, "array assign");
   /* Now that we've split it, perform the shell expansions on each
      word in the list. */
+#if 0
   nlist = list ? expand_words_shellexp (list) : (WORD_LIST *)NULL;
-  dispose_words (list);
 #else
-  nlist = expand_string (val, 0);
+  nlist = list ? expand_words_no_vars (list) : (WORD_LIST *)NULL;
 #endif
+
+  dispose_words (list);
 
   if (val != value)
     free (val);
@@ -2509,20 +2537,36 @@ maybe_make_export_env ()
     }
 }
 
+/* This is an efficiency hack.  PWD and OLDPWD are auto-exported, so
+   we will need to remake the exported environment every time we
+   change directories.  `_' is always put into the environment for
+   every external command, so without special treatment it will always
+   cause the environment to be remade.
+
+   If there is no other reason to make the exported environment, we can
+   just update the variables in place and mark the exported environment
+   as no longer needing a remake. */
+void
+update_export_env_inplace (env_prefix, preflen, value)
+     char *env_prefix;
+     int preflen;
+     char *value;
+{
+  char *evar;
+
+  evar = xmalloc (STRLEN (value) + preflen + 1);
+  strcpy (evar, env_prefix);
+  if (value)
+    strcpy (evar + preflen, value);
+  export_env = add_or_supercede_exported_var (evar, 0);
+}
+
 /* We always put _ in the environment as the name of this command. */
 void
 put_command_name_into_env (command_name)
      char *command_name;
 {
-  char *dummy;
-
-  dummy = xmalloc (4 + strlen (command_name));
-
-  /* These three statements replace a call to sprintf */
-  dummy[0] = '_';
-  dummy[1] = '=';
-  strcpy (dummy + 2, command_name);
-  export_env = add_or_supercede_exported_var (dummy, 0);
+  update_export_env_inplace ("_=", 2, command_name);
 }
 
 #if 0	/* UNUSED -- it caused too many problems */
@@ -2920,7 +2964,7 @@ set_pipestatus_array (ps)
   SHELL_VAR *v;
   ARRAY *a;
   register int i;
-  char *t;
+  char *t, tbuf[16];
 
   v = find_variable ("PIPESTATUS");
   if (v == 0)
@@ -2932,9 +2976,8 @@ set_pipestatus_array (ps)
     empty_array (a);
   for (i = 0; ps[i] != -1; i++)
     {
-      t = itos (ps[i]);
+      t = inttostr (ps[i], tbuf, sizeof (tbuf));
       array_add_element (a, i, t);
-      free (t);
     }
 }
 #endif

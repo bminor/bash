@@ -73,12 +73,20 @@
 #include <tilde/tilde.h>
 #include <glob/fnmatch.h>
 
+#if defined (__OPENNT)
+#  include <opennt/opennt.h>
+#endif
+
 #if !defined (HAVE_GETPW_DECLS)
 extern struct passwd *getpwuid ();
 #endif /* !HAVE_GETPW_DECLS */
 
 #if !defined (errno)
 extern int errno;
+#endif
+
+#if defined (NO_MAIN_ENV_ARG)
+extern char **environ;	/* used if no third argument to main() */
 #endif
 
 extern char *dist_version, *release_status;
@@ -110,7 +118,7 @@ char *current_host_name = (char *)NULL;
    Specifically:
    0 = not login shell.
    1 = login shell from getty (or equivalent fake out)
-  -1 = login shell from "-login" flag.
+  -1 = login shell from "--login" flag.
   -2 = both from getty, and from flag.
  */
 int login_shell = 0;
@@ -271,15 +279,28 @@ _cygwin32_check_tmp ()
 }
 #endif /* __CYGWIN32__ */
 
+#if defined (NO_MAIN_ENV_ARG)
+/* systems without third argument to main() */
+int
+main (argc, argv)
+     int argc;
+     char **argv;
+#else /* !NO_MAIN_ENV_ARG */
 int
 main (argc, argv, env)
      int argc;
      char **argv, **env;
+#endif /* !NO_MAIN_ENV_ARG */
 {
   register int i;
-  int code, saverst;
+  int code, saverst, old_errexit_flag;
   volatile int locally_skip_execution;
   volatile int arg_index, top_level_arg_index;
+#ifdef __OPENNT
+  char **env;
+
+  env = environ;
+#endif /* __OPENNT */
 
   /* Catch early SIGINTs. */
   code = setjmp (top_level);
@@ -461,6 +482,7 @@ main (argc, argv, env)
     }
 
   top_level_arg_index = arg_index;
+  old_errexit_flag = exit_immediately_on_error;
 
   /* Give this shell a place to longjmp to before executing the
      startup files.  This allows users to press C-c to abort the
@@ -476,6 +498,9 @@ main (argc, argv, env)
 	  /* Reset job control, since run_startup_files turned it off. */
 	  set_job_control (interactive_shell);
 #endif
+	  /* Reset value of `set -e', since it's turned off before running
+	     the startup files. */
+	  exit_immediately_on_error += old_errexit_flag;
 	  locally_skip_execution++;
 	}
     }
@@ -497,14 +522,27 @@ main (argc, argv, env)
     }
 
 #if defined (RESTRICTED_SHELL)
+  /* Set restricted_shell based on whether the basename of $0 indicates that
+     the shell should be restricted or if the `-r' option was supplied at
+     startup. */
+  restricted_shell = shell_is_restricted (shell_name);
+
   /* If the `-r' option is supplied at invocation, make sure that the shell
      is not in restricted mode when running the startup files. */
-    saverst = restricted;
-    restricted = 0;
+  saverst = restricted;
+  restricted = 0;
 #endif
 
+  /* The startup files are run with `set -e' temporarily disabled. */
   if (locally_skip_execution == 0 && running_setuid == 0)
-    run_startup_files ();
+    {
+      old_errexit_flag = exit_immediately_on_error;
+      exit_immediately_on_error = 0;
+
+      run_startup_files ();
+
+      exit_immediately_on_error += old_errexit_flag;
+    }
 
   /* If we are invoked as `sh', turn on Posix mode. */
   if (act_like_sh)
@@ -836,7 +874,11 @@ run_startup_files ()
       if (run_by_ssh || isnetconn (fileno (stdin)))
 	{
 #ifdef SYS_BASHRC
+#  if defined (__OPENNT)
+	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
+#  else
 	  maybe_execute_file (SYS_BASHRC, 1);
+#  endif
 #endif
 	  maybe_execute_file (bashrc_file, 1);
 	  return;
@@ -850,8 +892,7 @@ run_startup_files ()
 
   sourced_login = 0;
 
-#if defined (NON_INTERACTIVE_LOGIN_SHELLS)
-  if (login_shell)
+  if (login_shell < 0 && posixly_correct == 0)	/* --login flag and not posix */
     {
       /* We don't execute .bashrc for login shells. */
       no_rc++;
@@ -871,7 +912,6 @@ run_startup_files ()
 
       sourced_login = 1;
     }
-#endif /* NON_INTERACTIVE_LOGIN_SHELLS */
 
   /* A non-interactive shell not named `sh' and not in posix mode reads and
      executes commands from $BASH_ENV.  If `su' starts a shell with `-c cmd'
@@ -911,7 +951,11 @@ run_startup_files ()
       if (act_like_sh == 0 && no_rc == 0)
 	{
 #ifdef SYS_BASHRC
+#  if defined (__OPENNT)
+	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
+#  else
 	  maybe_execute_file (SYS_BASHRC, 1);
+#  endif`
 #endif
           maybe_execute_file (bashrc_file, 1);
 	}
@@ -932,10 +976,26 @@ run_startup_files ()
 }
 
 #if defined (RESTRICTED_SHELL)
+/* Return 1 if the shell should be a restricted one based on NAME or the
+   value of `restricted'.  Don't actually do anything, just return a
+   boolean value. */
+int
+shell_is_restricted (name)
+     char *name;
+{
+  char *temp;
+
+  if (restricted)
+    return 1;
+  temp = base_pathname (name);
+  return (STREQ (temp, RESTRICTED_SHELL_NAME));
+}
+
 /* Perhaps make this shell a `restricted' one, based on NAME.  If the
    basename of NAME is "rbash", then this shell is restricted.  The
    name of the restricted shell is a configurable option, see config.h.
-   In a restricted shell, PATH and SHELL are read-only and non-unsettable.
+   In a restricted shell, PATH, SHELL, ENV, and BASH_ENV are read-only
+   and non-unsettable.
    Do this also if `restricted' is already set to 1; maybe the shell was
    started with -r. */
 int
@@ -949,6 +1009,8 @@ maybe_make_restricted (name)
     {
       set_var_read_only ("PATH");
       set_var_read_only ("SHELL");
+      set_var_read_only ("ENV");
+      set_var_read_only ("BASH_ENV");
       restricted++;
     }
   return (restricted);
@@ -1011,7 +1073,7 @@ run_wordexp (words)
 	case DISCARD:
 	  return last_command_exit_value = 1;
 	default:
-	  programming_error ("run_wordexp: bad jump: code %d", code);
+	  command_error ("run_wordexp", CMDERR_BADJUMP, code, 0);
 	}
     }
 
@@ -1084,7 +1146,7 @@ run_one_command (command)
 	case DISCARD:
 	  return last_command_exit_value = 1;
 	default:
-	  programming_error ("run_one_command: bad jump: code %d", code);
+	  command_error ("run_one_command", CMDERR_BADJUMP, code, 0);
 	}
     }
    return (parse_and_execute (savestring (command), "-c", SEVAL_NOHIST));
@@ -1208,7 +1270,7 @@ open_shell_script (script_name)
 #else /* !BUFFERED_INPUT */
   /* Open the script.  But try to move the file descriptor to a randomly
      large one, in the hopes that any descriptors used by the script will
-      not match with ours. */
+     not match with ours. */
   fd = move_to_high_fd (fd, 0, -1);
 
   default_input = fdopen (fd, "r");
@@ -1559,7 +1621,7 @@ static int
 isnetconn (fd)
      int fd;
 {
-#if defined (HAVE_GETPEERNAME) && !defined (SVR4_2)
+#if defined (HAVE_GETPEERNAME) && !defined (SVR4_2) && !defined (__BEOS__)
   int rv, l;
   struct sockaddr sa;
 
@@ -1567,7 +1629,7 @@ isnetconn (fd)
   rv = getpeername(fd, &sa, &l);
   /* Solaris 2.5 getpeername() returns EINVAL if the fd is not a socket. */
   return ((rv < 0 && (errno == ENOTSOCK || errno == EINVAL)) ? 0 : 1);
-#else /* !HAVE_GETPEERNAME || SVR4_2 */
+#else /* !HAVE_GETPEERNAME || SVR4_2 || __BEOS__ */
 #  if defined (SVR4) || defined (SVR4_2)
   /* Sockets on SVR4 and SVR4.2 are character special (streams) devices. */
   struct stat sb;
@@ -1582,15 +1644,15 @@ isnetconn (fd)
 #    endif /* S_ISFIFO */
   return (S_ISCHR (sb.st_mode));
 #  else /* !SVR4 && !SVR4_2 */
-#    if defined (S_ISSOCK)
+#    if defined (S_ISSOCK) && !defined (__BEOS__)
   struct stat sb;
 
   if (fstat (fd, &sb) < 0)
     return (0);
   return (S_ISSOCK (sb.st_mode));
-#    else /* !S_ISSOCK */
+#    else /* !S_ISSOCK || __BEOS__ */
   return (0);
-#    endif /* !S_ISSOCK */
+#    endif /* !S_ISSOCK || __BEOS__ */
 #  endif /* !SVR4 && !SVR4_2 */
-#endif /* !HAVE_GETPEERNAME || SVR4_2 */
+#endif /* !HAVE_GETPEERNAME || SVR4_2 || __BEOS__ */
 }

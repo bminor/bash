@@ -1999,10 +1999,13 @@ yyerrhandle:
 #define TOKEN_DEFAULT_GROW_SIZE 512
 
 /* Shell meta-characters that, when unquoted, separate words. */
-#define shellmeta(c)	(strchr ("()<>;&|", (c)) != 0)
-#define shellbreak(c)	(strchr ("()<>;&| \t\n", (c)) != 0)
+#define shellmeta(c)	(strchr (shell_meta_chars, (c)) != 0)
+#define shellbreak(c)	(strchr (shell_break_chars, (c)) != 0)
 #define shellquote(c)	((c) == '"' || (c) == '`' || (c) == '\'')
 #define shellexp(c)	((c) == '$' || (c) == '<' || (c) == '>')
+
+char *shell_meta_chars = "()<>;&|";
+char *shell_break_chars = "()<>;&| \t\n";
 
 /* The token currently being read. */
 static int current_token;
@@ -2680,6 +2683,10 @@ STRING_INT_ALIST word_token_alist[] = {
   { (char *)NULL, 0}
 };
 
+/* XXX - we should also have an alist with strings for other tokens, so we
+         can give more descriptive error messages.  Look at y.tab.h for the
+         other tokens. */
+
 /* These are used by read_token_word, but appear up here so that shell_getc
    can use them to decide when to add otherwise blank lines to the history. */
 
@@ -3132,6 +3139,11 @@ time_command_acceptable ()
     case AND_AND:
     case OR_OR:
     case '&':
+    case DO:
+    case THEN:
+    case ELSE:
+    case '{':
+    case '(':
       return 1;
     default:
       return 0;
@@ -3235,7 +3247,7 @@ special_case_tokens (token)
 #endif
 
 #if defined (COMMAND_TIMING)
-  if (STREQ (token, "time") && time_command_acceptable ())
+  if (STREQ (token, "time") && ((parser_state & PST_CASEPAT) == 0) && time_command_acceptable ())
     return (TIME);
 #endif /* COMMAND_TIMING */
 
@@ -3501,6 +3513,9 @@ read_token (command)
    quoted strings ('', ``, "") and nested constructs.  It also must handle
    reprompting the user, if necessary, after reading a newline, and returning
    correct error values if it reads EOF. */
+
+#define P_FIRSTCLOSE	0x01
+
 static char matched_pair_error;
 static char *
 parse_matched_pair (qc, open, close, lenp, flags)
@@ -3560,7 +3575,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	}
       else if (ch == close)		/* ending delimiter */
 	count--;
-      else if (ch == open)		/* nested begin */
+      else if (((flags & P_FIRSTCLOSE) == 0) && ch == open)		/* nested begin */
 	count++;
 
       /* Add this character. */
@@ -3622,7 +3637,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  if (ch == '(')		/* ) */
 	    nestret = parse_matched_pair (0, '(', ')', &nestlen, 0);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, 0);
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, 0);
 	  if (nestret == &matched_pair_error)
@@ -4000,7 +4015,7 @@ read_token_word (character)
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
-	        ttok = parse_matched_pair (cd, '{', '}', &ttoklen, 0);
+	        ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE);
 	      else if (peek_char == '(')		/* ) */
 		{
 		  /* XXX - push and pop the `(' as a delimiter for use by
@@ -4054,6 +4069,23 @@ read_token_word (character)
 	      all_digits = 0;
 	      goto next_character;
 	    }
+	  /* This could eventually be extended to recognize all of the
+	     shell's single-character parameter expansions, and set flags.*/
+	  else if (character == '$' && peek_char == '$')
+	    {
+	      ttok = xmalloc (3);
+	      ttok[0] = ttok[1] = '$';
+	      ttok[2] = '\0';
+	      RESIZE_MALLOCED_BUFFER (token, token_index, 3,
+				      token_buffer_size,
+				      TOKEN_DEFAULT_GROW_SIZE);
+	      strcpy (token + token_index, ttok);
+	      token_index += 2;
+	      dollar_present = 1;
+	      all_digits = 0;
+	      FREE (ttok);
+	      goto next_character;
+	    }
 	  else
 	    shell_ungetc (peek_char);
 	}
@@ -4068,6 +4100,11 @@ read_token_word (character)
 	      ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
+	      if (ttok[0] == '(')	/* ) */
+		{
+		  FREE (ttok);
+		  return -1;
+		}
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
@@ -4686,9 +4723,11 @@ decode_prompt_string (string)
 	      goto add_string;
 
 	    case '$':
-	      temp = xmalloc (2);
-	      temp[0] = current_user.euid == 0 ? '#' : '$';
-	      temp[1] = '\0';
+	      t = temp = xmalloc (3);
+	      if ((promptvars || posixly_correct) && (current_user.euid != 0))
+		*t++ = '\\';
+	      *t++ = current_user.euid == 0 ? '#' : '$';
+	      *t = '\0';
 	      goto add_string;
 
 #if defined (READLINE)

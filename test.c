@@ -98,6 +98,8 @@ extern int errno;
 #define FALSE 0
 #define SHELL_BOOLEAN(value) (!(value))
 
+#define TEST_ERREXIT_STATUS	2
+
 static procenv_t test_exit_buf;
 static int test_error_return;
 #define test_exit(val) \
@@ -142,7 +144,7 @@ test_syntax_error (format, arg)
   fprintf (stderr, format, arg);
   fprintf (stderr, "\n");
   fflush (stderr);
-  test_exit (SHELL_BOOLEAN (FALSE));
+  test_exit (TEST_ERREXIT_STATUS);
 }
 
 /*

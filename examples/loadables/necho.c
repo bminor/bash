@@ -22,7 +22,7 @@ char *necho_doc[] = {
 	(char *)NULL
 };
 	
-struct builtin echo_struct = {
+struct builtin necho_struct = {
 	"echo",
 	necho_builtin,
 	BUILTIN_ENABLED,

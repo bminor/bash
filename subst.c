@@ -79,6 +79,7 @@ extern int errno;
 
 /* Process ID of the last command executed within command substitution. */
 pid_t last_command_subst_pid = NO_PID;
+pid_t current_command_subst_pid = NO_PID;
 
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, interactive, interactive_shell;
@@ -104,6 +105,8 @@ static int glob_argv_flags_size;
 static WORD_LIST expand_word_error, expand_word_fatal;
 static char expand_param_error, expand_param_fatal;
 
+static int doing_completion = 0;
+
 static char *make_quoted_char ();
 static void remove_quoted_nulls ();
 static char *param_expand ();
@@ -113,6 +116,7 @@ static WORD_LIST *expand_string_internal ();
 static WORD_LIST *expand_word_internal (), *expand_word_list_internal ();
 static WORD_LIST *expand_string_leave_quoted ();
 static WORD_LIST *expand_string_for_rhs ();
+static char *getifs ();
 static WORD_LIST *word_list_split ();
 static WORD_LIST *quote_list (), *dequote_list ();
 static char *quote_escapes ();
@@ -929,7 +933,7 @@ extract_dollar_brace_string (string, sindex, quoted)
 	}
     }
 
-  if (c == 0 && nesting_level)
+  if (c == 0 && nesting_level && doing_completion == 0)
     {
       report_error ("bad substitution: no ending `}' in %s", string);
       jump_to_top_level (DISCARD);
@@ -987,7 +991,12 @@ unquote_bang (string)
 #if defined (READLINE)
 /* Return 1 if the portion of STRING ending at EINDEX is quoted (there is
    an unclosed quoted string), or if the character at EINDEX is quoted
-   by a backslash. */
+   by a backslash. DOING_COMPLETION is used to flag that the various
+   single and double-quoted string parsing functions should not return an
+   error if there are unclosed quotes or braces. */
+
+#define CQ_RETURN(x) do { doing_completion = 0; return (x); } while (0)
+
 int
 char_is_quoted (string, eindex)
      char *string;
@@ -995,13 +1004,14 @@ char_is_quoted (string, eindex)
 {
   int i, pass_next, quoted;
 
+  doing_completion = 1;
   for (i = pass_next = quoted = 0; i <= eindex; i++)
     {
       if (pass_next)
 	{
 	  pass_next = 0;
 	  if (i >= eindex)	/* XXX was if (i >= eindex - 1) */
-	    return 1;
+	    CQ_RETURN(1);
 	  continue;
 	}
       else if (string[i] == '\'' || string[i] == '"')
@@ -1009,7 +1019,7 @@ char_is_quoted (string, eindex)
 	  i = (string[i] == '\'') ? skip_single_quoted (string, ++i)
 				  : skip_double_quoted (string, ++i);
 	  if (i > eindex)
-	    return 1;
+	    CQ_RETURN(1);
 	  i--;	/* the skip functions increment past the closing quote. */
 	}
       else if (string[i] == '\\')
@@ -1018,7 +1028,7 @@ char_is_quoted (string, eindex)
 	  continue;
 	}
     }
-  return (0);
+  CQ_RETURN(0);
 }
 
 int
@@ -1829,7 +1839,7 @@ cond_expand_word (w, special)
   if (w->word == 0 || w->word[0] == '\0')
     return ((char *)NULL);
 
-  l = call_expand_word_internal (w, 0, (int *)0, (int *)0);
+  l = call_expand_word_internal (w, 0, 0, (int *)0, (int *)0);
   if (l)
     {
       if (special == 0)
@@ -1856,13 +1866,13 @@ cond_expand_word (w, special)
    A convenience function for functions that don't want to handle
    any errors or free any memory before aborting. */
 static WORD_LIST *
-call_expand_word_internal (w, q, c, e)
+call_expand_word_internal (w, q, i, c, e)
      WORD_DESC *w;
-     int q, *c, *e;
+     int q, i, *c, *e;
 {
   WORD_LIST *result;
 
-  result = expand_word_internal (w, q, c, e);
+  result = expand_word_internal (w, q, i, c, e);
   if (result == &expand_word_error)
     {
       /* By convention, each time this error is returned, w->word has
@@ -1893,7 +1903,7 @@ expand_string_internal (string, quoted)
 
   bzero ((char *)&td, sizeof (td));
   td.word = string;
-  tresult = call_expand_word_internal (&td, quoted, (int *)NULL, (int *)NULL);
+  tresult = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
   return (tresult);
 }
 
@@ -1926,7 +1936,7 @@ expand_string_unsplit (string, quoted)
    the resultant WORD_LIST.  This is called only from within this file,
    and is used to correctly preserve quoted characters when expanding
    things like ${1+"$@"}.  This does parameter expansion, command
-   subsitution, arithmetic expansion, and word splitting. */
+   substitution, arithmetic expansion, and word splitting. */
 static WORD_LIST *
 expand_string_leave_quoted (string, quoted)
      char *string;
@@ -1964,7 +1974,7 @@ expand_string_for_rhs (string, quoted, dollar_at_p, has_dollar_at)
 
   bzero ((char *)&td, sizeof (td));
   td.word = string;
-  tresult = call_expand_word_internal (&td, quoted, dollar_at_p, has_dollar_at);
+  tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, has_dollar_at);
   return (tresult);
 }
 
@@ -2665,7 +2675,7 @@ expand_word (word, quoted)
 {
   WORD_LIST *result, *tresult;
 
-  tresult = call_expand_word_internal (word, quoted, (int *)NULL, (int *)NULL);
+  tresult = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   result = word_list_split (tresult);
   dispose_words (tresult);
   return (result ? dequote_list (result) : result);
@@ -2681,7 +2691,7 @@ expand_word_no_split (word, quoted)
 {
   WORD_LIST *result;
 
-  result = call_expand_word_internal (word, quoted, (int *)NULL, (int *)NULL);
+  result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   return (result ? dequote_list (result) : result);
 }
 
@@ -2692,7 +2702,7 @@ expand_word_leave_quoted (word, quoted)
      WORD_DESC *word;
      int quoted;
 {
-  return (call_expand_word_internal (word, quoted, (int *)NULL, (int *)NULL));
+  return (call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL));
 }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -3212,6 +3222,7 @@ command_substitute (string, quoted)
 
       close (fildes[0]);
 
+      current_command_subst_pid = pid;
       last_command_exit_value = wait_for (pid);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;
@@ -3954,10 +3965,34 @@ pat_subst (string, pat, rep, mflags)
   char *ret, *s, *e, *str;
   int rsize, rptr, l, replen, mtype;
 
+  mtype = mflags & MATCH_TYPEMASK;
+
+  /* Special cases:
+   * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING
+   *	    with REP and return the result.
+   *	2.  A null pattern with mtype == MATCH_END means to append REP to
+   *	    STRING and return the result.
+   */
+  if ((pat == 0 || *pat == 0) && (mtype == MATCH_BEG || mtype == MATCH_END))
+    {
+      replen = STRLEN (rep);
+      l = strlen (string);
+      ret = xmalloc (replen + l + 2);
+      if (mtype == MATCH_BEG)
+	{
+	  strcpy (ret, rep);
+	  strcpy (ret + replen, string);
+	}
+      else
+	{
+	  strcpy (ret, string);
+	  strcpy (ret + l, rep);
+	}
+      return (ret);
+    }
+
   ret = xmalloc (rsize = 64);
   ret[0] = '\0';
-
-  mtype = mflags & MATCH_TYPEMASK;
 
   for (replen = STRLEN (rep), rptr = 0, str = string;;)
     {
@@ -4754,6 +4789,10 @@ return0:
 
    QUOTED contains flag values defined in shell.h.
 
+   ISEXP is used to tell expand_word_internal that the word should be
+   treated as the result of an expansion.  This has implications for
+   how IFS characters in the word are treated.
+
    CONTAINS_DOLLAR_AT and EXPANDED_SOMETHING are return values; when non-null
    they point to an integer value which receives information about expansion.
    CONTAINS_DOLLAR_AT gets non-zero if WORD contained "$@", else zero.
@@ -4769,9 +4808,9 @@ return0:
 #define WHOLLY_QUOTED    2
 
 static WORD_LIST *
-expand_word_internal (word, quoted, contains_dollar_at, expanded_something)
+expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_something)
      WORD_DESC *word;
-     int quoted;
+     int quoted, isexp;
      int *contains_dollar_at;
      int *expanded_something;
 {
@@ -4808,11 +4847,11 @@ expand_word_internal (word, quoted, contains_dollar_at, expanded_something)
   int had_quoted_null;
   int has_dollar_at;
 
-  int expok;
-
   register int c;		/* Current character. */
   int number;			/* Temporary number value. */
   int t_index;			/* For calls to string_extract_xxx. */
+
+  char ifscmap[256];
 
   istring = xmalloc (istring_size = DEFAULT_INITIAL_ARRAY_SIZE);
   istring[istring_index = 0] = '\0';
@@ -4825,6 +4864,20 @@ expand_word_internal (word, quoted, contains_dollar_at, expanded_something)
 
   if (contains_dollar_at)
     *contains_dollar_at = 0;
+
+  /* Cache a bitmap of characters in IFS for quoting IFS characters that are
+     not part of an expansion.  POSIX.2 says this is a must. */
+  temp = getifs ();
+  bzero (ifscmap, sizeof (ifscmap));
+  for (temp1 = temp; temp1 && *temp1; temp1++)
+#if 0
+    /* This check compensates for what I think is a parsing problem -- the
+       end brace matching algorithms for ${...} expressions differ between
+       parse.y and subst.c.  For instance, the parser passes
+       ${abc:-G { I } K } as one word when it should be three. */
+    if (*temp1 != ' ' && *temp1 != '\t' && *temp1 != '\n')
+#endif
+      ifscmap[*temp1] = 1;
 
   /* Begin the expansion. */
 
@@ -4970,7 +5023,7 @@ add_string:
 	      temp = (char *)NULL;
 
 	      has_dollar_at = 0;
-	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, &has_dollar_at, (int *)NULL);
+	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &has_dollar_at, (int *)NULL);
 
 	      if (list == &expand_word_error || list == &expand_word_fatal)
 		{
@@ -5117,7 +5170,7 @@ add_string:
 
 	default:
 	  /* This is the fix for " $@ " */
-	  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && ifscmap[c]))
 	    {
 	      temp = make_quoted_char (c);
 	      goto dollar_add_string;
@@ -5193,6 +5246,8 @@ finished_with_string:
       list = make_word_list (tword, (WORD_LIST *)NULL);
       if (word->flags & W_ASSIGNMENT)
 	tword->flags |= W_ASSIGNMENT;	/* XXX */
+      if (word->flags & W_NOGLOB)
+	tword->flags |= W_NOGLOB;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
         tword->flags |= W_QUOTED;
     }
@@ -5200,13 +5255,7 @@ finished_with_string:
     {
       char *ifs_chars;
 
-      if (quoted_dollar_at || has_dollar_at)
-	{
-	  var = find_variable ("IFS");
-	  ifs_chars = var ? value_cell (var) : " \t\n";
-	}
-      else
-	ifs_chars = (char *)NULL;
+      ifs_chars = (quoted_dollar_at || has_dollar_at) ? getifs () : (char *)NULL;
 
       /* If we have $@, we need to split the results no matter what.  If
 	 IFS is unset or NULL, string_list_dollar_at has separated the
@@ -5224,6 +5273,8 @@ finished_with_string:
 	    tword->flags |= W_QUOTED;
 	  if (word->flags & W_ASSIGNMENT)
 	    tword->flags |= W_ASSIGNMENT;
+	  if (word->flags & W_NOGLOB)
+	    tword->flags |= W_NOGLOB;
 	}
     }
 
@@ -5338,6 +5389,16 @@ word_list_quote_removal (list, quoted)
  *					   *
  *******************************************/
 
+static char *
+getifs ()
+{
+  SHELL_VAR *ifs;
+
+  ifs = find_variable ("IFS");
+  /* If IFS is unset, it defaults to " \t\n". */
+  return (ifs ? value_cell (ifs) : " \t\n");
+}
+
 /* This splits a single word into a WORD LIST on $IFS, but only if the word
    is not quoted.  list_string () performs quote removal for us, even if we
    don't do any splitting. */
@@ -5410,6 +5471,9 @@ separate_out_assignments (tlist)
 
   if (!tlist)
     return ((WORD_LIST *)NULL);
+
+  if (varlist)
+    dispose_words (varlist);	/* Clean up after previous error */
 
   varlist = (WORD_LIST *)NULL;
   vp = lp = tlist;
@@ -5562,7 +5626,11 @@ glob_expand_word_list (tlist, eflags)
 
       /* If the word isn't an assignment and contains an unquoted
          pattern matching character, then glob it. */
+#if 0
       if ((tlist->word->flags & W_ASSIGNMENT) == 0 &&
+#else
+      if ((tlist->word->flags & W_NOGLOB) == 0 &&
+#endif
 	  unquoted_glob_pattern_p (tlist->word->word))
 	{
 	  glob_array = shell_glob_filename (tlist->word->word);
@@ -5727,7 +5795,7 @@ shell_expand_word_list (tlist, eflags)
 
       expanded_something = 0;
       expanded = expand_word_internal
-	(tlist->word, 0, &has_dollar_at, &expanded_something);
+	(tlist->word, 0, 0, &has_dollar_at, &expanded_something);
 
       if (expanded == &expand_word_error || expanded == &expand_word_fatal)
 	{
@@ -5777,15 +5845,15 @@ shell_expand_word_list (tlist, eflags)
 
 /* The workhorse for expand_words () and expand_words_no_vars ().
    First arg is LIST, a WORD_LIST of words.
-   Second arg DO_VARS is non-zero if you want to do environment and
-   variable assignments, else zero.
+   Second arg EFLAGS is a flags word controlling which expansions are
+   performed.
 
    This does all of the substitutions: brace expansion, tilde expansion,
    parameter expansion, command substitution, arithmetic expansion,
    process substitution, word splitting, and pathname expansion, according
    to the bits set in EFLAGS.  Words with the W_QUOTED or W_NOSPLIT bits
    set, or for which no expansion is done, do not undergo word splitting.
-   Words with the W_ASSIGNMENT bit set do not undergo pathname expansion. */
+   Words with the W_NOGLOB bit set do not undergo pathname expansion. */
 static WORD_LIST *
 expand_word_list_internal (list, eflags)
      WORD_LIST *list;

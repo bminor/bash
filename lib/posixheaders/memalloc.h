@@ -34,17 +34,17 @@
 #  define HAVE_ALLOCA
 #endif /* HAVE_ALLOCA_H && !HAVE_ALLOCA */
 
-#if defined (__GNUC__)
+#if defined (__GNUC__) && !defined (C_ALLOCA)
 #  undef alloca
 #  define alloca __builtin_alloca
-#else /* !__GNUC__ */
-#  if defined (HAVE_ALLOCA_H)
+#else /* !__GNUC__ || C_ALLOCA */
+#  if defined (HAVE_ALLOCA_H) && !defined (C_ALLOCA)
 #    if defined (IBMESA)
 #      include <malloc.h>
 #    else /* !IBMESA */
 #      include <alloca.h>
 #    endif /* !IBMESA */
-#  else  /* !HAVE_ALLOCA_H */
+#  else  /* !HAVE_ALLOCA_H || C_ALLOCA */
 #    if defined (__hpux) && defined (__STDC__) && !defined (alloca)
 extern void *alloca ();
 #    else
@@ -52,7 +52,7 @@ extern void *alloca ();
 extern char *alloca ();
 #      endif /* !alloca */
 #    endif /* !__hpux || !__STDC__ && !alloca */
-#  endif /* !HAVE_ALLOCA_H */
-#endif /* !__GNUC__ */
+#  endif /* !HAVE_ALLOCA_H || C_ALLOCA */
+#endif /* !__GNUC__ || C_ALLOCA */
 
 #endif /* _MEMALLOC_H_ */

@@ -26,17 +26,17 @@ $FUNCTION enable_builtin
 $SHORT_DOC enable [-pnds] [-a] [-f filename] [name ...]
 Enable and disable builtin shell commands.  This allows
 you to use a disk command which has the same name as a shell
-builtin.  If -n is used, the NAMEs become disabled; otherwise
-NAMEs are enabled.  For example, to use the `test' found on your
-path instead of the shell builtin version, type `enable -n test'.
-On systems supporting dynamic loading, the -f option may be used
-to load new builtins from the shared object FILENAME.  The -d
-option will delete a builtin previously loaded with -f.  If no
-non-option names are given, or the -p option is supplied, a list
-of builtins is printed.  The -a option means to print every builtin
-with an indication of whether or not it is enabled.  The -s option
-restricts the output to the Posix.2 `special' builtins.  The -n
-option displays a list of all disabled builtins.
+builtin without specifying a full pathname.  If -n is used, the
+NAMEs become disabled; otherwise NAMEs are enabled.  For example,
+to use the `test' found in $PATH instead of the shell builtin
+version, type `enable -n test'.  On systems supporting dynamic
+loading, the -f option may be used to load new builtins from the
+shared object FILENAME.  The -d option will delete a builtin
+previously loaded with -f.  If no non-option names are given, or
+the -p option is supplied, a list of builtins is printed.  The
+-a option means to print every builtin with an indication of whether
+or not it is enabled.  The -s option restricts the output to the POSIX.2
+`special' builtins.  The -n option displays a list of all disabled builtins.
 $END
 
 #include <config.h>
@@ -391,6 +391,20 @@ delete_builtin (b)
   shell_builtins = new_shell_builtins;
 }
 
+/* Tenon's MachTen has a dlclose that doesn't return a value, so we
+   finesse it with a local wrapper. */
+static int
+local_dlclose (handle)
+     void *handle;
+{
+#if !defined (__MACHTEN__)
+  return (dlclose (handle));
+#else /* __MACHTEN__ */
+  dlclose (handle);
+  return ((dlerror () != NULL) ? -1 : 0);    
+#endif /* __MACHTEN__ */
+}
+
 static int
 dyn_unload_builtin (name)
      char *name;
@@ -398,6 +412,7 @@ dyn_unload_builtin (name)
   struct builtin *b;
   void *handle;
   int ref, i;
+  char *uerror;
 
   b = builtin_address_internal (name, 1);
   if (b == 0)
@@ -420,7 +435,7 @@ dyn_unload_builtin (name)
 
   /* Don't remove the shared object unless the reference count of builtins
      using it drops to zero. */
-  if (ref == 1 && dlclose (handle) != 0)
+  if (ref == 1 && local_dlclose (handle) != 0)
     {
       builtin_error ("cannot delete %s: %s", name, dlerror ());
       return (EXECUTION_FAILURE);

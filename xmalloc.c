@@ -46,7 +46,7 @@
 #  endif /* !__STDC__ */
 #endif /* !PTR_T */
 
-#if !defined (SBRK_DECLARED)
+#if defined (HAVE_SBRK) && !defined (SBRK_DECLARED)
 extern char *sbrk();
 #endif
 
@@ -59,6 +59,19 @@ static size_t allocated;
 /*		   Memory Allocation and Deallocation.		    */
 /*								    */
 /* **************************************************************** */
+
+#if defined (HAVE_SBRK)
+static size_t
+findbrk ()
+{
+  if (brkfound == 0)
+    {
+      lbreak = (PTR_T)sbrk (0);
+      brkfound++;
+    }
+  return (char *)sbrk (0) - (char *)lbreak;
+}
+#endif
 
 /* Return a pointer to free()able block of memory large enough
    to hold BYTES number of bytes.  If the memory cannot be allocated,
@@ -73,13 +86,12 @@ xmalloc (bytes)
 
   if (temp == 0)
     {
-      if (brkfound == 0)
-	{
-	  lbreak = (PTR_T)sbrk (0);
-	  brkfound++;
-	}
-      allocated = (char *)sbrk (0) - (char *)lbreak;
+#if defined (HAVE_SBRK)
+      allocated = findbrk ();
       fatal_error ("xmalloc: cannot allocate %lu bytes (%lu bytes allocated)", (unsigned long)bytes, (unsigned long)allocated);
+#else
+      fatal_error ("xmalloc: cannot allocate %lu bytes", (unsigned long)bytes);
+#endif /* !HAVE_SBRK */
     }
 
   return (temp);
@@ -96,13 +108,12 @@ xrealloc (pointer, bytes)
 
   if (temp == 0)
     {
-      if (brkfound == 0)
-	{
-	  lbreak = (PTR_T)sbrk (0);
-	  brkfound++;
-	}
-      allocated = (char *)sbrk (0) - (char *)lbreak;
+#if defined (HAVE_SBRK)
+      allocated = findbrk ();
       fatal_error ("xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)", (unsigned long)bytes, (unsigned long)allocated);
+#else
+      fatal_error ("xmalloc: cannot allocate %lu bytes", (unsigned long)bytes);
+#endif /* !HAVE_SBRK */
     }
 
   return (temp);

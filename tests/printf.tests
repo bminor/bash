@@ -83,6 +83,11 @@ printf -- "--%b--\n"
 # of the format string
 printf -- "--%b--\n" '4.2\c5.4\n'; printf "\n"
 
+# make sure extra arguments are ignored if the format string doesn't
+# actually use them
+printf "\n" 4.4 BSD
+printf " " 4.4 BSD ; printf "\n"
+
 # make sure that a fieldwidth and precision of `*' are handled right
 printf "%10.8s\n" 4.4BSD
 printf "%*.*s\n" 10 8 4.4BSD

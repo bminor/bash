@@ -496,3 +496,32 @@ trace (format, va_alist)
 #endif /* 0 */
 
 #endif /* USE_VARARGS */
+
+static char *cmd_error_table[] = {
+	"unknown command error",	/* CMDERR_DEFAULT */
+	"bad command type",		/* CMDERR_BADTYPE */
+	"bad connector",		/* CMDERR_BADCONN */
+	"bad jump",			/* CMDERR_BADJUMP */
+	0
+};
+
+void
+command_error (func, code, e, flags)
+     const char *func;
+     int code, e, flags;	/* flags currently unused */
+{
+  if (code > CMDERR_LAST)
+    code = CMDERR_DEFAULT;
+
+  programming_error ("%s: %s: %d", func, cmd_error_table[code], e);
+}
+
+char *
+command_errstr (code)
+     int code;
+{
+  if (code > CMDERR_LAST)
+    code = CMDERR_DEFAULT;
+
+  return (cmd_error_table[code]);
+}

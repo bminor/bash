@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 'di ';
 'ig 00 ';
 #+##############################################################################
@@ -9,7 +9,7 @@
 #                                                                              #
 #-##############################################################################
 
-# @(#)texi2html	1.51 09/10/96	Written (mainly) by Lionel Cons, Lionel.Cons@cern.ch
+# @(#)texi2html	1.52 01/05/98	Written (mainly) by Lionel Cons, Lionel.Cons@cern.ch
 
 # The man page for this program is included at the end of this file and can be
 # viewed using the command 'nroff -man texi2html'.
@@ -29,7 +29,7 @@ $DEBUG_DEF   = 16;
 $DEBUG_HTML  = 32;
 $DEBUG_USER  = 64;
 
-$BIBRE = '\[[\w\/]+\]';			# RE for a bibliography reference
+$BIBRE = '\[[\w\/-]+\]';		# RE for a bibliography reference
 $FILERE = '[\/\w.+-]+';			# RE for a file name
 $VARRE = '[^\s\{\}]+';			# RE for a variable name
 $NODERE = '[^@{}:\'`",]+';		# RE for a node name
@@ -37,8 +37,8 @@ $NODESRE = '[^@{}:\'`"]+';		# RE for a list of node names
 $XREFRE = '[^@{}]+';			# RE for a xref (should use NODERE)
 
 $ERROR = "***";			        # prefix for errors and warnings
-$THISPROG = "texi2html 1.51";			# program name and version
-$HOMEPAGE = "http://wwwcn.cern.ch/dci/texi2html/"; # program home page
+$THISPROG = "texi2html 1.52";			# program name and version
+$HOMEPAGE = "http://wwwinfo.cern.ch/dis/texi2html/"; # program home page
 $TODAY = &pretty_date;			# like "20 September 1993"
 $SPLITTAG = "<!-- SPLIT HERE -->\n";	# tag to know where to split
 $PROTECTTAG = "_ThisIsProtected_";	# tag to recognize protected sections
@@ -129,6 +129,7 @@ $html2_doctype = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 2//E
 	       "!", "!",
 	       "?", "?",
 	       ".", ".",
+	       "-", "",
 	       );
 
 #
@@ -159,19 +160,23 @@ $html2_doctype = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 2//E
 	      'cite', 'CITE',
 	      'code', 'CODE',
 	      'ctrl', '&do_ctrl',	# special case
-	      'dfn', 'STRONG',		# DFN tag is illegal in the standard
+	      'dfn', 'EM',		# DFN tag is illegal in the standard
 	      'dmn', '',		# useless
+	      'email', '&do_email',     # insert a clickable email address
 	      'emph', 'EM',
 	      'file', '"TT',		# will put quotes, cf. &apply_style
 	      'i', 'I',
 	      'kbd', 'KBD',
 	      'key', 'KBD',
+	      'math', 'EM',
 	      'r', '',			# unsupported
 	      'samp', '"SAMP',		# will put quotes, cf. &apply_style
 	      'sc', '&do_sc',		# special case
 	      'strong', 'STRONG',
 	      't', 'TT',
 	      'titlefont', '',		# useless
+	      'uref', '&do_uref',       # insert a clickable URL
+	      'url', '&do_url',         # insert a clickable URL
 	      'var', 'VAR',
 	      'w', '',			# unsupported
 	      );
@@ -270,6 +275,7 @@ $html2_doctype = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 2//E
 	    'smallbook', 1,
 	    'vskip', 1,
 	    'filbreak', 1,
+	    'paragraphindent', 1,
 	    # unsupported formats
 	    'cartouche', 1,
 	    'end cartouche', 1,
@@ -282,6 +288,8 @@ $html2_doctype = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 2//E
 # Argument parsing, initialisation                                             #
 #                                                                              #
 #---############################################################################
+
+%value = ();				# hold texinfo variables, see also -D
 
 $use_bibliography = 1;
 $use_acc = 0;
@@ -306,6 +314,7 @@ To convert a Texinfo file to HMTL: $0 [options] file
     -expandinfo    : use \@ifinfo sections, not \@iftex
     -glossary      : handle a glossary
     -invisible name: use 'name' as an invisible anchor
+    -Dname         : define name like with \@set
     -I dir         : search also for files in 'dir'
     -menu          : handle menus
     -monolithic    : output only one file including ToC
@@ -317,7 +326,7 @@ To convert a Texinfo file to HMTL: $0 [options] file
 To check converted files: $0 -check [-verbose] files
 EOT
 
-while ($#ARGV >= 0 && $ARGV[0] =~ /^-/) {
+while (@ARGV && $ARGV[0] =~ /^-/) {
     $_ = shift(@ARGV);
     if (/^-acc$/)            { $use_acc = 1; next; }
     if (/^-d(ebug)?(\d+)?$/) { $debug = $2 || shift(@ARGV); next; }
@@ -327,6 +336,7 @@ while ($#ARGV >= 0 && $ARGV[0] =~ /^-/) {
     if (/^-g(lossary)?$/)    { $use_glossary = 1; next; }
     if (/^-i(nvisible)?$/)   { $invisible_mark = shift(@ARGV); next; }
     if (/^-iso$/)            { $use_iso = 1; next; }
+    if (/^-D(.+)?$/)         { $value{$1 || shift(@ARGV)} = 1; next; }
     if (/^-I(.+)?$/)         { push(@include_dirs, $1 || shift(@ARGV)); next; }
     if (/^-m(enu)?$/)        { $show_menu = 1; next; }
     if (/^-mono(lithic)?$/)  { $monolithic = 1; next; }
@@ -383,9 +393,8 @@ if ($monolithic) {
 #
 # variables
 #
-%value = ();				# hold texinfo variables
 $value{'html'} = 1;			# predefine html (the output format)
-$value{'texi2html'} = '1.51';		# predefine texi2html (the translator)
+$value{'texi2html'} = '1.52';		# predefine texi2html (the translator)
 # _foo: internal to track @foo
 foreach ('_author', '_title', '_subtitle',
 	 '_settitle', '_setfilename') {
@@ -453,7 +462,7 @@ $toplevel = 0;			        # top level seen in hierarchy
 $curlevel = 0;				# current level in TOC
 $node = '';				# current node name
 $in_table = 0;				# am I inside a table
-$table_type = '';			# type of table ('', 'f', 'v')
+$table_type = '';			# type of table ('', 'f', 'v', 'multi')
 @tables = ();			        # nested table support
 $in_bibliography = 0;			# am I inside a bibliography
 $in_glossary = 0;			# am I inside a glossary
@@ -554,9 +563,11 @@ while ($_ = &next_line) {
     #
     s/((^|[^\@])(\@\@)*)\@c(omment)? .*/$1/;
     # non-@ substitutions cf. texinfmt.el
-    s/``/\"/g;
-    s/''/\"/g;
-    s/([\w ])---([\w ])/$1--$2/g;
+    unless ($in_pre) {
+	s/``/\"/g;
+	s/''/\"/g;
+	s/([\w ])---([\w ])/$1--$2/g;
+    }
     #
     # analyze the tag
     #
@@ -570,14 +581,9 @@ while ($_ = &next_line) {
 	}
 	&skip_until($tag), next if $tag eq 'tex';
 	# handle special tables
-	if ($tag eq 'table') {
-	    $table_type = '';
-	} elsif ($tag eq 'ftable') {
+	if ($tag =~ /^(|f|v|multi)table$/) {
+	    $table_type = $1;
 	    $tag = 'table';
-	    $table_type = 'f';
-	} elsif ($tag eq 'vtable') {
-	    $tag = 'table';
-	    $table_type = 'v';
 	}
 	# special cases
 	if ($tag eq 'top' || ($tag eq 'node' && /^\@node\s+top\s*,/i)) {
@@ -647,11 +653,16 @@ while ($_ = &next_line) {
 	    push(@lines, &debug("<$format_map{$tag}>\n", __LINE__));
 	    next;
 	} elsif ($tag eq 'table') {
-	    if (/^\@[fv]?table\s+\@(\w+)\s*$/) {
-		$in_table = $1;
+	    if (/^\@(|f|v|multi)table\s+\@(\w+)/) {
+		$in_table = $2;
 		unshift(@tables, join($;, $table_type, $in_table));
-		push(@lines, &debug("<DL COMPACT>\n", __LINE__));
-		&html_push_if('DL');
+		if ($table_type eq "multi") {
+		    push(@lines, &debug("<TABLE BORDER>\n", __LINE__));
+		    &html_push_if('TABLE');
+		} else {
+		    push(@lines, &debug("<DL COMPACT>\n", __LINE__));
+		    &html_push_if('DL');
+		}
 		push(@lines, &html_debug("\n", __LINE__));
 	    } else {
 		warn "$ERROR Bad table line: $_";
@@ -776,18 +787,29 @@ while ($_ = &next_line) {
 	    &html_pop_if();
 	    push(@lines, &debug("</$format_map{$end_tag}>\n", __LINE__));
 	    push(@lines, &html_debug("\n", __LINE__));
-	} elsif ($end_tag eq 'table' ||
-		 $end_tag eq 'ftable' ||
-		 $end_tag eq 'vtable') {
-	    shift(@tables);
+	} elsif ($end_tag =~ /^(|f|v|multi)table$/) {
+	    unless (@tables) {
+		warn "$ERROR \@end $end_tag without \@*table\n";
+		next;
+	    }
+	    ($table_type, $in_table) = split($;, shift(@tables));
+	    unless ($1 eq $table_type) {
+		warn "$ERROR \@end $end_tag without matching \@$end_tag\n";
+		next;
+	    }
+	    if ($table_type eq "multi") {
+		push(@lines, "</TR></TABLE>\n");
+		&html_pop_if('TR');
+	    } else {
+		push(@lines, "</DL>\n");
+		&html_pop_if('DD');
+	    }
+	    &html_pop_if();
 	    if (@tables) {
 		($table_type, $in_table) = split($;, $tables[0]);
 	    } else {
 		$in_table = 0;
 	    }
-	    push(@lines, "</DL>\n");
-	    &html_pop_if('DD');
-	    &html_pop_if();
 	} elsif (defined($def_map{$end_tag})) {
  	    push(@lines, &debug("</DL>\n", __LINE__));
 	} elsif ($end_tag eq 'menu') {
@@ -986,6 +1008,12 @@ EOC
 		    if ($table_type) { # add also an index
 			unshift(@input_spool, "\@${table_type}index $what\n");
 		    }
+		} elsif ($html_element eq 'TABLE') {
+		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
+		    &html_push('TR');
+		} elsif ($html_element eq 'TR') {
+		    push(@lines, &debug("</TR>\n", __LINE__));
+		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
 		} else {
 		    push(@lines, &debug("<LI>$what\n", __LINE__));
 		    &html_push('LI') unless $html_element eq 'LI';
@@ -995,6 +1023,9 @@ EOC
 		    push(@lines, &debug("$deferred_ref\n", __LINE__));
 		    $deferred_ref = '';
 		}
+		next;
+	    } elsif (/^\@tab\s+(.*)$/) {
+		push(@lines, "<TD>$1</TD>\n");
 		next;
 	    }
 	}
@@ -1088,13 +1119,25 @@ while (@lines) {
 	    print "# index $key sorted as $_\n"
 		if $key ne $_ && $debug & $DEBUG_INDEX;
 	}
+	push(@lines2, "Jump to:\n");
+	$last_letter = undef;
+	foreach $key (sort byalpha @keys) {
+	    $letter = substr($key2alpha{$key}, 0, 1);
+	    $letter = substr($key2alpha{$key}, 0, 2) if $letter eq $;;
+	    if (!defined($last_letter) || $letter ne $last_letter) {
+		push(@lines2, "-\n") if defined($last_letter);
+		push(@lines2, "<A HREF=\"#$index\_$letter\">" . &protect_html($letter) . "</A>\n");
+		$last_letter = $letter;
+	    }
+	}
+	push(@lines2, "<P>\n");
 	$last_letter = undef;
 	foreach $key (sort byalpha @keys) {
 	    $letter = substr($key2alpha{$key}, 0, 1);
 	    $letter = substr($key2alpha{$key}, 0, 2) if $letter eq $;;
 	    if (!defined($last_letter) || $letter ne $last_letter) {
 		push(@lines2, "</DIR>\n") if defined($last_letter);
-		push(@lines2, "<H2>" . &protect_html($letter) . "</H2>\n");
+		push(@lines2, "<H2><A NAME=\"$index\_$letter\">" . &protect_html($letter) . "</A></H2>\n");
 		push(@lines2, "<DIR>\n");
 		$last_letter = $letter;
 	    }
@@ -1657,7 +1700,23 @@ sub menu_entry {
 
 sub do_ctrl { "^$_[0]" }
 
+sub do_email {
+    local($addr, $text) = split(/,\s*/, $_[0]);
+
+    $text = $addr unless $text;
+    &anchor('', "mailto:$addr", $text);
+}
+
 sub do_sc { "\U$_[0]\E" }
+
+sub do_uref {
+    local($url, $text) = split(/,\s*/, $_[0]);
+
+    $text = $url unless $text;
+    &anchor('', $url, $text);
+}
+
+sub do_url { &anchor('', $_[0], $_[0]) }
 
 sub apply_style {
     local($texi_style, $text) = @_;
@@ -1822,7 +1881,7 @@ sub print_toplevel_footer {
     print FILE <<EOT;
 This document was generated on $TODAY using the
 <A HREF=\"$HOMEPAGE\">texi2html</A>
-translator version 1.51.</P>
+translator version 1.52.</P>
 EOT
     &print_footer;
 }
@@ -1879,7 +1938,7 @@ sub byalpha {
 .nr nl 0-1		\" fake up transition to first page again
 .nr % 0			\" start at page 1
 '; __END__ ############# From here on it's a standard manual page ############
-.TH TEXI2HTML 1 "09/10/96"
+.TH TEXI2HTML 1 "01/05/98"
 .AT 3
 .SH NAME
 texi2html \- a Texinfo to HTML converter
@@ -1924,8 +1983,9 @@ Use the section named 'Glossary' to build a list of terms and put links in the H
 document from each term toward its definition.
 .TP
 .B \-invisible \fIname\fP
-Use \fIname\fP to create invisible destination anchors for index links. This is a workaround
-for a known bug of many WWW browsers, including xmosaic.
+Use \fIname\fP to create invisible destination anchors for index links
+(you can for instance use the invisible.xbm file shipped with this program).
+This is a workaround for a known bug of many WWW browsers, including netscape.
 .TP
 .B \-I \fIdir\fP
 Look also in \fIdir\fP to find included files.
@@ -1985,21 +2045,21 @@ option, it creates only one file:
 predefines the following variables: \fBhtml\fP, \fBtexi2html\fP.
 .SH ADDITIONAL COMMANDS
 .I texi2html
-implements the following non-Texinfo commands:
+implements the following non-Texinfo commands (maybe they are in Texinfo now...):
 .TP 16
 .B @ifhtml
 This indicates the start of an HTML section, this section will passed through
-without any modofication.
+without any modification.
 .TP
 .B @end ifhtml
-This indcates the end of an HTML section.
+This indicates the end of an HTML section.
 .SH VERSION
-This is \fItexi2html\fP version 1.51, 09/10/96.
+This is \fItexi2html\fP version 1.52, 01/05/98.
 .PP
 The latest version of \fItexi2html\fP can be found in WWW, cf. URL
-http://wwwcn.cern.ch/dci/texi2html/
+http://wwwinfo.cern.ch/dis/texi2html/
 .SH AUTHOR
-The main author is Lionel Cons, CERN CN/DCI/UWS, Lionel.Cons@cern.ch.
+The main author is Lionel Cons, CERN IT/DIS/OSE, Lionel.Cons@cern.ch.
 Many other people around the net contributed to this program.
 .SH COPYRIGHT
 This program is the intellectual property of the European

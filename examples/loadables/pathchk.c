@@ -170,8 +170,7 @@ portable_chars_only (path)
   for (p = path; *p; ++p)
     if (portable_chars[(const unsigned char) *p] == 0)
       {
-	error (0, 0, "path `%s' contains nonportable character `%c'",
-	       path, *p);
+	builtin_error ("path `%s' contains nonportable character `%c'", path, *p);
 	return 0;
       }
   return 1;
@@ -212,7 +211,7 @@ dir_ok (path)
 
   if (!S_ISDIR (stats.st_mode))
     {
-      error (0, 0, "`%s' is not a directory", path);
+      builtin_error ("`%s' is not a directory", path);
       return 0;
     }
 
@@ -324,7 +323,7 @@ validate_path (path, portability)
 	name_max = _POSIX_NAME_MAX;
       if (length > name_max)
 	{
-	  error (0, 0, "name `%s' has length %d; exceeds limit of %d",
+	  builtin_error ("name `%s' has length %d; exceeds limit of %d",
 		 start, length, name_max);
 	  free (parent);
 	  return 1;
@@ -350,7 +349,7 @@ validate_path (path, portability)
   free (parent);
   if (strlen (path) > path_max)
     {
-      error (0, 0, "path `%s' has length %d; exceeds limit of %d",
+      builtin_error ("path `%s' has length %d; exceeds limit of %d",
 	     path, strlen (path), path_max);
       return 1;
     }

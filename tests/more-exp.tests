@@ -434,3 +434,29 @@ recho ${#:%}
 
 expect '<0>'
 recho ${#:-}
+
+set --
+unset a b
+
+x=a
+y=b
+
+IFS=+
+
+expect '<a+b>'
+recho $x+$y
+expect '<+>'
+recho $a+$b
+
+expect '<+>'
+recho + "$@"
+expect '<+>'
+recho +"$@"
+
+expect '<G { I>' '<K>' '<}>'
+recho ${gik:-G { I } K }
+
+abc=hi
+
+expect '<hi>' '<K>' '<}>'
+recho ${abc:-G { I } K }

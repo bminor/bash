@@ -10,13 +10,18 @@ of the shell.
 All of the new builtins in ksh93 that bash didn't already have
 are included here, as is the ksh `print' builtin.
 
-Compile with cc and whatever pic options you need (look in the
-Makefile for a few common settings)
+The configure script in the top-level source directory uses the
+support/shobj-conf script to set the right values in the Makefile,
+so you should not need to change the Makefile.  If your system
+is not supported by support/shobj-conf, and it has the necessary
+facilities for building shared objects and support for the
+dlopen/dlsyn/dlclose/dlerror family of functions, please make
+the necessary changes to support/shobj-conf and send the changes
+to bash-maintainers@gnu.org.
 
-load with ld and whatever shared object options you need (again,
-look in the Makefile)
+Loadable builtins are loaded into a running shell with
 
-then enable -f filename builtin-name
+	enable -f filename builtin-name
 
 enable uses a simple reference-counting scheme to avoid unloading a
 shared object that implements more than one loadable builtin before
@@ -24,4 +29,5 @@ all loadable builtins implemented in the object are removed.
 
 Many of the details needed by builtin writers are found in hello.c,
 the canonical example.  There is no real `builtin writers' programming
-guide'.
+guide'.  The file template.c provides a template to use for creating
+new loadable builtins.

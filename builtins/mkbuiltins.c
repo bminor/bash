@@ -130,6 +130,10 @@ char *assignment_builtins[] =
 static int is_special_builtin ();
 static int is_assignment_builtin ();
 
+#if !defined (HAVE_RENAME)
+static int rename ();
+#endif
+
 void extract_info ();
 
 void file_error ();
@@ -265,8 +269,7 @@ main (argc, argv)
 	{
 	  write_longdocs (structfile, saved_builtins);
 	  fclose (structfile);
-	  link (temp_struct_filename, struct_filename);
-	  unlink (temp_struct_filename);
+	  rename (temp_struct_filename, struct_filename);
 	}
 
       if (externfile)
@@ -456,6 +459,10 @@ extract_info (filename, structfile, externfile)
 
   if ((nr = read (fd, buffer, file_size)) < 0)
     file_error (filename);
+
+  /* This is needed on WIN32, and does not hurt on Unix. */
+  if (nr < file_size)
+    file_size = nr;
 
   close (fd);
 
@@ -1395,3 +1402,16 @@ is_assignment_builtin (name)
 {
   return (_find_in_table (name, assignment_builtins));
 }
+
+#if !defined (HAVE_RENAME)
+static int
+rename (from, to)
+     char *from, *to;
+{
+  unlink (to);
+  if (link (from, to) < 0)
+    return (-1);
+  unlink (from);
+  return (0);
+}
+#endif /* !HAVE_RENAME */

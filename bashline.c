@@ -239,50 +239,50 @@ initialize_readline ()
 #endif
 
 #if defined (BRACE_COMPLETION)
-  rl_add_defun ("complete-into-braces", bash_brace_completion, -1);
-  rl_bind_key_in_map ('{', bash_brace_completion, emacs_meta_keymap);
+  rl_add_defun ("complete-into-braces", (Function *)bash_brace_completion, -1);
+  rl_bind_key_in_map ('{', (Function *)bash_brace_completion, emacs_meta_keymap);
 #endif /* BRACE_COMPLETION */
 
 #if defined (SPECIFIC_COMPLETION_FUNCTIONS)
-  rl_add_defun ("complete-filename", bash_complete_filename, -1);
-  rl_bind_key_in_map ('/', bash_complete_filename, emacs_meta_keymap);
+  rl_add_defun ("complete-filename", (Function *)bash_complete_filename, -1);
+  rl_bind_key_in_map ('/', (Function *)bash_complete_filename, emacs_meta_keymap);
   rl_add_defun ("possible-filename-completions",
-		bash_possible_filename_completions, -1);
-  rl_bind_key_in_map ('/', bash_possible_filename_completions, emacs_ctlx_keymap);
+		(Function *)bash_possible_filename_completions, -1);
+  rl_bind_key_in_map ('/', (Function *)bash_possible_filename_completions, emacs_ctlx_keymap);
 
-  rl_add_defun ("complete-username", bash_complete_username, -1);
-  rl_bind_key_in_map ('~', bash_complete_username, emacs_meta_keymap);
+  rl_add_defun ("complete-username", (Function *)bash_complete_username, -1);
+  rl_bind_key_in_map ('~', (Function *)bash_complete_username, emacs_meta_keymap);
   rl_add_defun ("possible-username-completions",
-		bash_possible_username_completions, -1);
-  rl_bind_key_in_map ('~', bash_possible_username_completions, emacs_ctlx_keymap);
+		(Function *)bash_possible_username_completions, -1);
+  rl_bind_key_in_map ('~', (Function *)bash_possible_username_completions, emacs_ctlx_keymap);
 
-  rl_add_defun ("complete-hostname", bash_complete_hostname, -1);
-  rl_bind_key_in_map ('@', bash_complete_hostname, emacs_meta_keymap);
+  rl_add_defun ("complete-hostname", (Function *)bash_complete_hostname, -1);
+  rl_bind_key_in_map ('@', (Function *)bash_complete_hostname, emacs_meta_keymap);
   rl_add_defun ("possible-hostname-completions",
-		bash_possible_hostname_completions, -1);
-  rl_bind_key_in_map ('@', bash_possible_hostname_completions, emacs_ctlx_keymap);
+		(Function *)bash_possible_hostname_completions, -1);
+  rl_bind_key_in_map ('@', (Function *)bash_possible_hostname_completions, emacs_ctlx_keymap);
 
-  rl_add_defun ("complete-variable", bash_complete_variable, -1);
-  rl_bind_key_in_map ('$', bash_complete_variable, emacs_meta_keymap);
+  rl_add_defun ("complete-variable", (Function *)bash_complete_variable, -1);
+  rl_bind_key_in_map ('$', (Function *)bash_complete_variable, emacs_meta_keymap);
   rl_add_defun ("possible-variable-completions",
-		bash_possible_variable_completions, -1);
-  rl_bind_key_in_map ('$', bash_possible_variable_completions, emacs_ctlx_keymap);
+		(Function *)bash_possible_variable_completions, -1);
+  rl_bind_key_in_map ('$', (Function *)bash_possible_variable_completions, emacs_ctlx_keymap);
 
-  rl_add_defun ("complete-command", bash_complete_command, -1);
-  rl_bind_key_in_map ('!', bash_complete_command, emacs_meta_keymap);
+  rl_add_defun ("complete-command", (Function *)bash_complete_command, -1);
+  rl_bind_key_in_map ('!', (Function *)bash_complete_command, emacs_meta_keymap);
   rl_add_defun ("possible-command-completions",
-		bash_possible_command_completions, -1);
-  rl_bind_key_in_map ('!', bash_possible_command_completions, emacs_ctlx_keymap);
+		(Function *)bash_possible_command_completions, -1);
+  rl_bind_key_in_map ('!', (Function *)bash_possible_command_completions, emacs_ctlx_keymap);
 
-  rl_add_defun ("glob-expand-word", bash_glob_expand_word, -1);
-  rl_add_defun ("glob-list-expansions", bash_glob_list_expansions, -1);
-  rl_bind_key_in_map ('*', bash_glob_expand_word, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('g', bash_glob_list_expansions, emacs_ctlx_keymap);
+  rl_add_defun ("glob-expand-word", (Function *)bash_glob_expand_word, -1);
+  rl_add_defun ("glob-list-expansions", (Function *)bash_glob_list_expansions, -1);
+  rl_bind_key_in_map ('*', (Function *)bash_glob_expand_word, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('g', (Function *)bash_glob_list_expansions, emacs_ctlx_keymap);
 
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
-  rl_add_defun ("dynamic-complete-history", dynamic_complete_history, -1);
-  rl_bind_key_in_map (TAB, dynamic_complete_history, emacs_meta_keymap);
+  rl_add_defun ("dynamic-complete-history", (Function *)dynamic_complete_history, -1);
+  rl_bind_key_in_map (TAB, (Function *)dynamic_complete_history, emacs_meta_keymap);
 
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = (CPPFunction *)attempt_shell_completion;
@@ -295,9 +295,9 @@ initialize_readline ()
   rl_ignore_some_completions_function = (Function *)filename_completion_ignore;
 
 #if defined (VI_MODE)
-  rl_bind_key_in_map ('v', vi_edit_and_execute_command, vi_movement_keymap);
+  rl_bind_key_in_map ('v', (Function *)vi_edit_and_execute_command, vi_movement_keymap);
 #  if defined (ALIAS)
-  rl_bind_key_in_map ('@', posix_edit_macros, vi_movement_keymap);
+  rl_bind_key_in_map ('@', (Function *)posix_edit_macros, vi_movement_keymap);
 #  endif
 #endif
 
@@ -561,7 +561,7 @@ static void
 set_saved_history ()
 {
   if (saved_history_line_to_use >= 0)
-    rl_get_previous_history (history_length - saved_history_line_to_use);
+    rl_get_previous_history (history_length - saved_history_line_to_use, 0);
   saved_history_line_to_use = -1;
   rl_startup_hook = old_rl_startup_hook;
 }
@@ -573,7 +573,7 @@ operate_and_get_next (count, c)
   int where;
 
   /* Accept the current line. */
-  rl_newline ();
+  rl_newline (1, c);
 
   /* Find the current line, and find the next line to use. */
   where = where_history ();
@@ -602,7 +602,7 @@ vi_edit_and_execute_command (count, c)
   char *command;
 
   /* Accept the current line. */
-  rl_newline ();
+  rl_newline (1, c);
 
   if (rl_explicit_arg)
     {
@@ -1258,7 +1258,7 @@ set_up_new_line (new_line)
     {
       rl_point = old_point;
       if (!whitespace (rl_line_buffer[rl_point]))
-	rl_forward_word (1);
+	rl_forward_word (1, 0);
     }
 }
 
@@ -1419,7 +1419,7 @@ shell_expand_line (ignore)
 	{
 	  rl_point = old_point;
 	  if (!whitespace (rl_line_buffer[rl_point]))
-	    rl_forward_word (1);
+	    rl_forward_word (1, 0);
 	}
     }
   else
@@ -1553,10 +1553,24 @@ name_is_acceptable (name)
   return (1);
 }
 
+#if 0
+static int
+ignore_dot_names (name)
+     char *name;
+{
+  return (name[0] != '.');
+}
+#endif
+
 static void
 filename_completion_ignore (names)
      char **names;
 {
+#if 0
+  if (glob_dot_filenames == 0)
+    _ignore_completion_names (names, ignore_dot_names);
+#endif
+
   setup_ignore_patterns (&fignore);
 
   if (fignore.num_ignores == 0)
@@ -1597,14 +1611,15 @@ static int
 bash_directory_completion_hook (dirname)
      char **dirname;
 {
-  char *local_dirname, *t;
+  char *local_dirname, *new_dirname, *t;
   int return_value = 0;
   WORD_LIST *wl;
 
   local_dirname = *dirname;
+  new_dirname = savestring (local_dirname);
   if (strchr (local_dirname, '$') || strchr (local_dirname, '`'))
     {
-      wl = expand_string (local_dirname, 0);
+      wl = expand_string (new_dirname, 0);
       if (wl)
 	{
 	  *dirname = string_list (wl);
@@ -1612,11 +1627,13 @@ bash_directory_completion_hook (dirname)
 	     actually expanded something. */
 	  return_value = STREQ (local_dirname, *dirname) == 0;
 	  free (local_dirname);
+	  free (new_dirname);
 	  dispose_words (wl);
 	  local_dirname = *dirname;
 	}
       else
 	{
+	  free (new_dirname);
 	  free (local_dirname);
 	  *dirname = xmalloc (1);
 	  **dirname = '\0';

@@ -16,9 +16,12 @@ INSTALL_DATA = @INSTALL_DATA@
 CC = @CC@
 RANLIB = @RANLIB@
 AR = @AR@
+ARFLAGS = @ARFLAGS@
 RM = rm
 CP = cp
 MV = mv
+
+SHELL = @MAKE_SHELL@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
@@ -64,7 +67,7 @@ all: $(LIBRARY_NAME)
 
 $(LIBRARY_NAME): $(OBJECTS)
 	$(RM) -f $@
-	$(AR) cr $@ $(OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 documentation: force

@@ -196,6 +196,13 @@ int	m;
 		obits[i++] = 'x';
 	obits[i] = '\0';
 
+	if (m & S_ISUID)
+		ubits[2] = (m & S_IXUSR) ? 's' : 'S';
+	if (m & S_ISGID)
+		gbits[2] = (m & S_IXGRP) ? 's' : 'S';
+	if (m & S_ISVTX)
+		obits[2] = (m & S_IXOTH) ? 't' : 'T';
+
 	printf ("u=%s,g=%s,o=%s", ubits, gbits, obits);
 }
 
@@ -217,6 +224,10 @@ int	mode;
 		printf("S_IFLNK ");
 	if (S_ISSOCK(mode))
 		printf("S_IFSOCK ");
+#ifdef S_ISWHT
+	if (S_ISWHT(mode))
+		printf("S_ISWHT ");
+#endif
 	perms(getperm(mode));
 	printf("\n");
 }

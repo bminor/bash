@@ -12,7 +12,7 @@
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
-#include <config.h>
+#  include <config.h>
 #endif
 
 #include <stdio.h>
@@ -24,7 +24,9 @@
 extern int optind;
 extern char *optarg;
 
+#if !defined (strchr) && !defined (__STDC__)
 extern char *strrchr();
+#endif
 
 static char *progname;
 static char *deftext;
@@ -40,6 +42,7 @@ set_deftext ()
     }
 }
 
+static void
 usage()
 {
   fprintf (stderr, "%s: usage: %s [-p prompt] [-u unit] [-d default]\n",
@@ -52,7 +55,7 @@ main (argc, argv)
 {
   char *temp, *prompt;
   struct stat sb;
-  int done, opt, fd;
+  int opt, fd;
   FILE *ifp;
 
   progname = strrchr(argv[0], '/');

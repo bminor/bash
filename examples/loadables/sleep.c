@@ -60,6 +60,8 @@ long	sec, usec;
 /*
  * An incredibly simplistic floating point converter.
  */
+static int multiplier[7] = { 1, 100000, 10000, 1000, 100, 10, 1 };
+
 static int
 convert(s, sp, usp)
 char	*s;
@@ -95,18 +97,11 @@ long	*sp, *usp;
 	}
 
 	/* Now convert to millionths */
-	if (n == 1)
-		usec *= 100000;
-	else if (n == 2)
-		usec *= 10000;
-	else if (n == 3)
-		usec *= 1000;
-	else if (n == 4)
-		usec *= 100;
-	else if (n == 5)
-		usec *= 10;
-	else if (n == 6 && p[6] && isdigit(p[6]) && p[6] >= '5')	
+	usec *= multiplier[n];
+
+	if (n == 6 && p[6] && isdigit(p[6]) && p[6] >= '5')	
 		usec++;			/* round up 1 */
+
 	RETURN(1);
 }
 

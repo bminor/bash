@@ -221,5 +221,6 @@ extern char *bash_tilde_expand __P((char *));
 
 extern int group_member __P((gid_t));
 extern char **get_group_list __P((int *));
+extern int *get_group_array __P((int *));
 
 #endif	/* _GENERAL_H_ */

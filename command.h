@@ -63,6 +63,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_ASSIGNMENT	0x04	/* This word is a variable assignment. */
 #define W_GLOBEXP	0x08	/* This word is the result of a glob expansion. */
 #define W_NOSPLIT	0x10	/* Do not perform word splitting on this word. */
+#define W_NOGLOB	0x20	/* Do not perform globbing on this word. */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -267,6 +268,14 @@ typedef struct group_com {
 } GROUP_COM;
 
 extern COMMAND *global_command;
+
+/* Possible command errors */
+#define CMDERR_DEFAULT	0
+#define CMDERR_BADTYPE	1
+#define CMDERR_BADCONN	2
+#define CMDERR_BADJUMP	3
+
+#define CMDERR_LAST	3
 
 /* Forward declarations of functions declared in copy_cmd.c. */
 

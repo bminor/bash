@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# alias-conv.sh - convert csh aliases to bash aliases and functions
+# aliasconv.bash - convert csh aliases to bash aliases and functions
 #
-# usage: alias-conv.sh
+# usage: aliasconv.bash
 #
 # Chet Ramey
 # chet@po.cwru.edu
@@ -27,7 +27,11 @@ mkalias ()
 }
 EOF
 
-sed "s/^\([a-zA-Z0-9_-]*\)$T\(.*\)$/mkalias \1 '\2'/" >>/tmp/cb$$.1
+# the first thing we want to do is to protect single quotes in the alias,
+# since they whole thing is going to be surrounded by single quotes when
+# passed to mkalias
+
+sed -e "s:':\\'\\\'\\':" -e "s/^\([a-zA-Z0-9_-]*\)$T\(.*\)$/mkalias \1 '\2'/" >>/tmp/cb$$.1
 
 $BASH /tmp/cb$$.1 | sed -e 's/\$cwd/\$PWD/g' \
 		     -e 's/\$term/\$TERM/g' \

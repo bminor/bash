@@ -1,7 +1,7 @@
 This document details the incompatibilites between this version of bash,
-bash-2.01, and the previous widely-available version, bash-1.14.  These
-were discovered by alpha and beta testers, so they will likely be
-encountered by a significant number of users. 
+bash-2.03, and the previous widely-available version, bash-1.14 (which
+is still the `standard' version for many Linux distributions).  These
+were discovered by users of bash-2.x, so this list is not comprehensive.
 
 1.  Bash now uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -63,9 +63,11 @@ encountered by a significant number of users.
 	"\C-\\": self-insert
 
 6.  A number of people complained above having to use ESC to terminate an
-    incremental search, and asked for an alternate mechanism.  Bash-2.0
-    allows ^J to terminate the search without accepting the line.  Use
-    ^M to terminate the search and accept the line, as in bash-1.14.
+    incremental search, and asked for an alternate mechanism.  Bash-2.03
+    uses the value of the settable readline variable `isearch-terminators'
+    to decide which characters should terminate an incremental search.  If
+    that variable has not been set, ESC and Control-J will terminate a
+    search.
 
 7.  Some variables have been removed:  MAIL_WARNING, notify, history_control,
     command_oriented_history, glob_dot_filenames, allow_null_glob_expansion,
@@ -115,3 +117,10 @@ encountered by a significant number of users.
 
     An interactive shell started in posix mode reads and executes commands
     from the file named by $ENV.
+
+11. The <> redirection operator was changed to conform to the POSIX.2 spec.
+    In the absence of any file descriptor specification preceding the `<>',
+    file descriptor 0 is used.  In bash-1.14, this was the behavior only
+    when in POSIX mode.  The bash-1.14 behavior may be obtained with
+
+	<>filename 1>&0

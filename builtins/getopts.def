@@ -181,6 +181,8 @@ dogetopts (argc, argv)
     {
       for (i = 0; i < 10 && dollar_vars[i]; i++)
 	;
+
+      sh_getopt_restore_state (dollar_vars);
       ret = sh_getopt (i, dollar_vars, optstr);
     }
   else
@@ -198,6 +200,7 @@ dogetopts (argc, argv)
       for (words = rest_of_args; words; words = words->next, i++)
         v[i] = words->word->word;
       v[i] = (char *)NULL;
+      sh_getopt_restore_state (v);
       ret = sh_getopt (i, v, optstr);
       free (v);
     }

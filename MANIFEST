@@ -43,11 +43,12 @@ NEWS		f
 NOTES		f
 README		f
 AUTHORS		f
+Y2K		f
 configure.in	f
 configure	f
 Makefile.in	f
-config.h.top	f
-config.h.bot	f
+config-top.h	f
+config-bot.h	f
 config.h.in	f
 aclocal.m4	f
 array.c		f
@@ -195,6 +196,9 @@ builtins/common.h	f
 builtins/bashgetopt.h	f
 cross-build/cygwin32.cache	f
 cross-build/win32sig.h	f
+cross-build/x86-beos.cache	f
+cross-build/beos-sig.h	f
+cross-build/opennt.cache	f
 lib/glob/ChangeLog	f
 lib/glob/Makefile.in	f
 lib/glob/fnmatch.c	f
@@ -256,6 +260,7 @@ lib/readline/input.c	f
 lib/readline/callback.c	f
 lib/readline/nls.c	f
 lib/readline/shell.c	f
+lib/readline/savestring.c	f
 lib/readline/tilde.c	f
 lib/readline/tilde.h	f
 lib/readline/rldefs.h	f
@@ -272,7 +277,9 @@ lib/readline/posixdir.h	f
 lib/readline/posixjmp.h	f
 lib/readline/posixstat.h	f
 lib/readline/ansi_stdlib.h	f
+lib/readline/rlstdc.h	f
 lib/readline/doc/Makefile	f
+lib/readline/doc/manvers.texinfo	f
 lib/readline/doc/rlman.texinfo	f
 lib/readline/doc/rltech.texinfo	f
 lib/readline/doc/rluser.texinfo	f
@@ -292,6 +299,7 @@ lib/sh/getcwd.c		f
 lib/sh/getenv.c		f
 lib/sh/itos.c		f
 lib/sh/oslib.c		f
+lib/sh/rename.c		f
 lib/sh/setlinebuf.c	f
 lib/sh/strcasecmp.c	f
 lib/sh/strerror.c	f
@@ -319,22 +327,27 @@ lib/termcap/grot/configure	f
 lib/termcap/grot/configure.in	f
 lib/termcap/grot/COPYING	f
 lib/termcap/grot/README	f
+lib/tilde/README	f
 lib/tilde/ChangeLog	f
 lib/tilde/Makefile.in	f
 lib/tilde/doc/tilde.texi	f
 lib/tilde/doc/Makefile	f
 lib/tilde/tilde.c	f
 lib/tilde/tilde.h	f
+lib/tilde/shell.c	f
 CWRU/misc/open-files.c	f
 CWRU/misc/sigs.c	f
 CWRU/misc/pid.c		f
 CWRU/misc/sigstat.c	f
 CWRU/misc/bison		f
+CWRU/misc/errlist.c	f
+CWRU/misc/hpux10-dlfcn.h	f
 CWRU/PLATFORMS		f
 CWRU/README		f
 CWRU/POSIX.NOTES	f
 CWRU/changelog		f
 CWRU/sh-redir-hack	f
+CWRU/empty-for-wordlist	f
 CWRU/mh-folder-comp	f
 doc/FAQ		f
 doc/Makefile.in	f
@@ -355,6 +368,7 @@ support/config.sub	f
 support/printenv.sh	f	755
 support/printenv.c	f
 support/bash.xbm	f
+support/missing		f	755
 support/mkclone		f	755
 support/mkconffiles	f	755
 support/mkdirs		f	755
@@ -368,14 +382,17 @@ support/SYMLINKS	f
 support/fixlinks	f	755
 support/install.sh	f	755
 support/texi2dvi	f
-support/texi2html	f
+support/texi2html	f	755
 support/xenix-link.sh	f	755
+support/shobj-conf	f	755
+support/rlvers.sh	f	755
 examples/bashdb/PERMISSION	f
 examples/bashdb/README	f
 examples/bashdb/bashdb	f
 examples/bashdb/bashdb.fns	f
 examples/bashdb/bashdb.pre	f
 examples/loadables/README	f
+examples/loadables/template.c	f
 examples/loadables/Makefile.in	f
 examples/loadables/necho.c	f
 examples/loadables/hello.c	f
@@ -384,7 +401,6 @@ examples/loadables/sprintf.c	f
 examples/loadables/sleep.c	f
 examples/loadables/truefalse.c	f
 examples/loadables/getconf.c	f
-examples/loadables/pushd.c	f
 examples/loadables/finfo.c	f
 examples/loadables/cat.c	f
 examples/loadables/logname.c	f
@@ -395,8 +411,17 @@ examples/loadables/pathchk.c	f
 examples/loadables/tee.c	f
 examples/loadables/rmdir.c	f
 examples/loadables/head.c	f
+examples/loadables/printenv.c	f
+examples/loadables/id.c		f
+examples/loadables/whoami.c	f
+examples/loadables/uname.c	f
+examples/loadables/sync.c	f
+examples/loadables/mkdir.c	f
+examples/loadables/ln.c		f
+examples/loadables/unlink.c	f
 examples/functions/autoload	f
 examples/functions/autoload.v2	f
+examples/functions/autoload.v3	f
 examples/functions/basename	f
 examples/functions/basename2	f
 examples/functions/csh-compat	f
@@ -423,7 +448,9 @@ examples/functions/mhfold	f
 examples/functions/notify.bash	f
 examples/functions/pathfuncs	f
 examples/functions/repeat2	f
+examples/functions/repeat3	f
 examples/functions/seq		f
+examples/functions/seq2		f
 examples/functions/shcat	f
 examples/functions/shcat2	f
 examples/functions/substr	f
@@ -431,6 +458,7 @@ examples/functions/substr2	f
 examples/functions/term		f
 examples/functions/whatis	f
 examples/functions/whence	f
+examples/functions/which	f
 examples/functions/xalias.bash	f
 examples/scripts/adventure.sh	f
 examples/scripts/bcsh.sh	f
@@ -479,6 +507,8 @@ tests/source4.sub	f
 tests/source5.sub	f
 tests/cond.tests	f
 tests/cond.right	f
+tests/cprint.tests	f
+tests/cprint.right	f
 tests/dollar-at-star	f
 tests/dollar.right	f
 tests/dstack.tests	f
@@ -573,6 +603,7 @@ tests/run-array2	f
 tests/run-braces	f
 tests/run-builtins	f
 tests/run-cond		f
+tests/run-cprint	f
 tests/run-dirstack	f
 tests/run-dollars	f
 tests/run-errors	f

@@ -154,24 +154,20 @@ extern int errno;
 #  define RLIM_INFINITY 0x7fffffff
 #endif
 
-#if !defined (RLIM_INVALID)
-#  define RLIM_INVALID	(RLIMTYPE)-1
-#endif
-
 #define LIMIT_HARD 0x01
 #define LIMIT_SOFT 0x02
 
-static int ulimit_internal ();
-static void printone ();
-static void print_all_limits ();
+static int ulimit_internal __P((int, char *, int, int));
+static void printone __P((int, RLIMTYPE, int));
+static void print_all_limits __P((int));
 
-static int get_limit ();
-static int set_limit ();
+static int get_limit __P((int, int, RLIMTYPE *));
+static int set_limit __P((int, RLIMTYPE, int));
 
-static RLIMTYPE filesize ();
-static RLIMTYPE pipesize ();
-static RLIMTYPE getmaxuprc ();
-static RLIMTYPE getmaxvm ();
+static int filesize __P((RLIMTYPE *));
+static int pipesize __P((RLIMTYPE *));
+static int getmaxuprc __P((int, RLIMTYPE *));
+static int getmaxvm __P((int, RLIMTYPE *));
 
 typedef struct {
   int  option;			/* The ulimit option for this limit. */
@@ -351,7 +347,6 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
   long block_factor;
   RLIMTYPE current_limit, real_limit, limit;
 
-  limit = RLIM_INVALID;
   setting = cmdarg != 0;
   limind = _findlim (cmd);
   if (mode == 0)
@@ -412,26 +407,30 @@ get_limit (ind, mode, limptr)
       switch (limits[ind].parameter)
 	{
 	case RLIMIT_FILESIZE:
-	  value = filesize ();
+	  if (filesize (&value) < 0)
+	    return -1;
 	  break;
 	case RLIMIT_PIPESIZE:
-	  value = pipesize ();
+	  if (pipesize (&value) < 0)
+	    return -1;
 	  break;
 	case RLIMIT_OPENFILES:
 	  value = (RLIMTYPE)getdtablesize ();
 	  break;
 	case RLIMIT_VIRTMEM:
-	  value = getmaxvm (mode);
+	  if (getmaxvm (mode, &value) < 0)
+	    return -1;
 	  break;
 	case RLIMIT_MAXUPROC:
-	  value = getmaxuprc (mode);
+	  if (getmaxuprc (mode, &value) < 0)
+	    return -1;
 	  break;
 	default:
 	  errno = EINVAL;
 	  return -1;
 	}
       *limptr = value;
-      return ((value == RLIM_INVALID) ? -1 : 0);
+      return (0);
     }
   else
     {
@@ -439,6 +438,11 @@ get_limit (ind, mode, limptr)
       if (getrlimit (limits[ind].parameter, &limit) < 0)
 	return -1;
       value = (mode & LIMIT_SOFT) ? limit.rlim_cur : limit.rlim_max;
+#  if defined (HPUX9)
+      if (limits[ind].parameter == RLIMIT_FILESIZE)
+	*limptr = value * 512;			/* Ugh. */
+      else
+#  endif /* HPUX9 */
       *limptr = value;
       return 0;
 #else
@@ -486,6 +490,10 @@ set_limit (ind, newlim, mode)
 #if defined (HAVE_RESOURCE)
       if (getrlimit (limits[ind].parameter, &limit) < 0)
 	return -1;
+#  if defined (HPUX9)
+      if (limits[ind].parameter == RLIMIT_FILESIZE)
+	newlim /= 512;				/* Ugh. */
+#  endif /* HPUX9 */
       val = (current_user.euid != 0 && newlim == RLIM_INFINITY &&
 	       (limit.rlim_cur <= limit.rlim_max))
 		 ? limit.rlim_max : newlim;
@@ -502,72 +510,91 @@ set_limit (ind, newlim, mode)
     }
 }
 
-static RLIMTYPE
-getmaxvm (mode)
+static int
+getmaxvm (mode, valuep)
      int mode;
+     RLIMTYPE *valuep;
 {
 #if defined (HAVE_RESOURCE)
   struct rlimit rl;
   RLIMTYPE maxdata, maxstack;
 
   if (getrlimit (RLIMIT_DATA, &rl) < 0)
-    return (RLIM_INVALID);
+    return -1;
   else
     maxdata = (mode & LIMIT_SOFT) ? rl.rlim_cur : rl.rlim_max;
 
   if (getrlimit (RLIMIT_STACK, &rl) < 0)
-    return (RLIM_INVALID);
+    return -1;
   else
     maxstack = (mode & LIMIT_SOFT) ? rl.rlim_cur : rl.rlim_max;
 
   /* Protect against overflow. */
-  return ((maxdata / 1024L) + (maxstack / 1024L));
+  *valuep = (maxdata / 1024L) + (maxstack / 1024L);
+  return 0;
 #else
   errno = EINVAL;
-  return RLIM_INVALID;
+  return -1;
 #endif /* HAVE_RESOURCE */
 }
 
-static RLIMTYPE
-filesize()
+static int
+filesize(valuep)
+     RLIMTYPE *valuep;
 {
 #if !defined (HAVE_RESOURCE)
-  return ((RLIMTYPE)ulimit (1, 0L));
+  long result;
+  if ((result = ulimit (1, 0L)) < 0)
+    return -1;
+  else
+    *valuep = (RLIMTYPE) result;
+  return 0;
 #else
   errno = EINVAL;
-  return RLIM_INVALID;
+  return -1;
 #endif
 }
 
-static RLIMTYPE
-pipesize ()
+static int
+pipesize (valuep)
+     RLIMTYPE *valuep;
 {
 #if defined (PIPE_BUF)
   /* This is defined on Posix systems. */
-  return ((RLIMTYPE) PIPE_BUF);
+  *valuep = (RLIMTYPE) PIPE_BUF;
+  return 0;
 #else
 #  if defined (PIPESIZE)
   /* This is defined by running a program from the Makefile. */
-  return ((RLIMTYPE) PIPESIZE);
+  *valuep = (RLIMTYPE) PIPESIZE;
+  return 0;
 #  else
   errno = EINVAL;
-  return RLIM_INVALID;  
+  return -1;  
 #  endif /* PIPESIZE */
 #endif /* PIPE_BUF */
 }
 
-static RLIMTYPE
-getmaxuprc (mode)
+static int
+getmaxuprc (mode, valuep)
      int mode;
+     RLIMTYPE *valuep;
 {
 #  if defined (HAVE_SYSCONF) && defined (_SC_CHILD_MAX)
-  return ((RLIMTYPE)sysconf (_SC_CHILD_MAX));
+  long maxchild;
+  maxchild = sysconf (_SC_CHILD_MAX);
+  if (maxchild < 0)
+    return -1;
+  else
+    *valuep = (RLIMTYPE) maxchild;
+  return 0;
 #  else /* !HAVE_SYSCONF || !_SC_CHILD_MAX */
 #    if defined (MAXUPRC)
-  return ((RLIMTYPE)MAXUPRC);
+  *valuep = (RLIMTYPE) MAXUPRC;
+  return 0;
 #    else /* MAXUPRC */
   errno = EINVAL;
-  return RLIM_INVALID;
+  return -1;
 #    endif /* !MAXUPRC */
 #  endif /* !HAVE_SYSCONF || !_SC_CHILD_MAX */
 }
@@ -585,8 +612,12 @@ print_all_limits (mode)
   for (i = 0; limits[i].option > 0; i++)
     {
       if (get_limit (i, mode, &value) < 0)
-	value = RLIM_INVALID;
-      printone (i, value, 1);     
+	{
+	  fprintf (stderr, DESCFMT, limits[i].description);
+	  builtin_error ("cannot get limit: %s", strerror (errno));
+	}
+      else
+	printone (i, value, 1);     
     }
 }
 
@@ -600,8 +631,6 @@ printone (limind, curlim, pdesc)
     printf (DESCFMT, limits[limind].description);
   if (curlim == RLIM_INFINITY)
     puts ("unlimited");
-  else if (curlim == RLIM_INVALID)
-    builtin_error ("cannot get limit: %s\n", strerror (errno));
   else
     print_rlimtype ((curlim / limits[limind].block_factor), 1);
 }
