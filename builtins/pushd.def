@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -107,6 +107,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include <errno.h>
 
@@ -164,7 +165,7 @@ pushd_builtin (list)
     {
       if (directory_list_offset == 0)
 	{
-	  builtin_error ("no other directory");
+	  builtin_error (_("no other directory"));
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -431,7 +432,7 @@ dirs_builtin (list)
     {
       temp = get_working_directory ("dirs");
       if (temp == 0)
-	temp = savestring ("<no current directory>");
+	temp = savestring (_("<no current directory>"));
       if (vflag & 2)
 	printf ("%2d  %s", 0, DIRSTACK_FORMAT (temp));
       else
@@ -648,66 +649,66 @@ get_directory_stack ()
 
 #ifdef LOADABLE_BUILTIN
 static char *dirs_doc[] = {
-  "Display the list of currently remembered directories.  Directories",
-  "find their way onto the list with the `pushd' command; you can get",
-  "back up through the list with the `popd' command.",
-  "",
-  "The -l flag specifies that `dirs' should not print shorthand versions",
-  "of directories which are relative to your home directory.  This means",
-  "that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag",
-  "causes `dirs' to print the directory stack with one entry per line,",
-  "prepending the directory name with its position in the stack.  The -p",
-  "flag does the same thing, but the stack position is not prepended.",
-  "The -c flag clears the directory stack by deleting all of the elements.",
-  "",
-  "+N   displays the Nth entry counting from the left of the list shown by",
-  "     dirs when invoked without options, starting with zero.",
-  "",
-  "-N   displays the Nth entry counting from the right of the list shown by",
-  "     dirs when invoked without options, starting with zero.",
+  N_("Display the list of currently remembered directories.  Directories"),
+  N_("find their way onto the list with the `pushd' command; you can get"),
+  N_("back up through the list with the `popd' command."),
+  N_(""),
+  N_("The -l flag specifies that `dirs' should not print shorthand versions"),
+  N_("of directories which are relative to your home directory.  This means"),
+  N_("that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag"),
+  N_("causes `dirs' to print the directory stack with one entry per line,"),
+  N_("prepending the directory name with its position in the stack.  The -p"),
+  N_("flag does the same thing, but the stack position is not prepended."),
+  N_("The -c flag clears the directory stack by deleting all of the elements."),
+  N_(""),
+  N_("+N   displays the Nth entry counting from the left of the list shown by"),
+  N_("     dirs when invoked without options, starting with zero."),
+  N_(""),
+  N_("-N   displays the Nth entry counting from the right of the list shown by"),
+  N_("     dirs when invoked without options, starting with zero."),
   (char *)NULL
 };
 
 static char *pushd_doc[] = {
-  "Adds a directory to the top of the directory stack, or rotates",
-  "the stack, making the new top of the stack the current working",
-  "directory.  With no arguments, exchanges the top two directories.",
-  "",
-  "+N   Rotates the stack so that the Nth directory (counting",
-  "     from the left of the list shown by `dirs', starting with",
-  "     zero) is at the top.",
-  "",
-  "-N   Rotates the stack so that the Nth directory (counting",
-  "     from the right of the list shown by `dirs', starting with",
-  "     zero) is at the top.",
-  "",
-  "-n   suppress the normal change of directory when adding directories",
-  "     to the stack, so only the stack is manipulated.",
-  "",
-  "dir  adds DIR to the directory stack at the top, making it the",
-  "     new current working directory.",
-  "",
-  "You can see the directory stack with the `dirs' command.",
+  N_("Adds a directory to the top of the directory stack, or rotates"),
+  N_("the stack, making the new top of the stack the current working"),
+  N_("directory.  With no arguments, exchanges the top two directories."),
+  N_(""),
+  N_("+N   Rotates the stack so that the Nth directory (counting"),
+  N_("     from the left of the list shown by `dirs', starting with"),
+  N_("     zero) is at the top."),
+  N_(""),
+  N_("-N   Rotates the stack so that the Nth directory (counting"),
+  N_("     from the right of the list shown by `dirs', starting with"),
+  N_("     zero) is at the top."),
+  N_(""),
+  N_("-n   suppress the normal change of directory when adding directories"),
+  N_("     to the stack, so only the stack is manipulated."),
+  N_(""),
+  N_("dir  adds DIR to the directory stack at the top, making it the"),
+  N_("     new current working directory."),
+  N_(""),
+  N_("You can see the directory stack with the `dirs' command."),
   (char *)NULL
 };
 
 static char *popd_doc[] = {
-  "Removes entries from the directory stack.  With no arguments,",
-  "removes the top directory from the stack, and cd's to the new",
-  "top directory.",
-  "",
-  "+N   removes the Nth entry counting from the left of the list",
-  "     shown by `dirs', starting with zero.  For example: `popd +0'",
-  "     removes the first directory, `popd +1' the second.",
-  "",
-  "-N   removes the Nth entry counting from the right of the list",
-  "     shown by `dirs', starting with zero.  For example: `popd -0'",
-  "     removes the last directory, `popd -1' the next to last.",
-  "",
-  "-n   suppress the normal change of directory when removing directories",
-  "     from the stack, so only the stack is manipulated.",
-  "",
-  "You can see the directory stack with the `dirs' command.",
+  N_("Removes entries from the directory stack.  With no arguments,"),
+  N_("removes the top directory from the stack, and cd's to the new"),
+  N_("top directory."),
+  N_(""),
+  N_("+N   removes the Nth entry counting from the left of the list"),
+  N_("     shown by `dirs', starting with zero.  For example: `popd +0'"),
+  N_("     removes the first directory, `popd +1' the second."),
+  N_(""),
+  N_("-N   removes the Nth entry counting from the right of the list"),
+  N_("     shown by `dirs', starting with zero.  For example: `popd -0'"),
+  N_("     removes the last directory, `popd -1' the next to last."),
+  N_(""),
+  N_("-n   suppress the normal change of directory when removing directories"),
+  N_("     from the stack, so only the stack is manipulated."),
+  N_(""),
+  N_("You can see the directory stack with the `dirs' command."),
   (char *)NULL
 };
 

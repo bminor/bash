@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,6 +39,7 @@ $PRODUCES cd.c
 #include <stdio.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include <errno.h>
 #include <tilde/tilde.h>
@@ -106,28 +107,30 @@ bindpwd (no_symlinks)
       array_needs_making = 0;
     }
 
-  tvar = bind_variable ("PWD", dirname);
+  tvar = bind_variable ("PWD", dirname ? dirname : "");
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
-      update_export_env_inplace ("PWD=", 4, dirname);
+      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
       array_needs_making = 0;
     }
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
+
   return (EXECUTION_SUCCESS);
 }
 
 /* Call get_working_directory to reset the value of
    the_current_working_directory () */
 static char *
-resetpwd ()
+resetpwd (caller)
+     char *caller;
 {
   char *tdir;
       
   FREE (the_current_working_directory);
   the_current_working_directory = (char *)NULL;
-  tdir = get_working_directory ("cd");
+  tdir = get_working_directory (caller);
   return (tdir);
 }
 
@@ -184,7 +187,7 @@ cd_builtin (list)
 
       if (dirname == 0)
 	{
-	  builtin_error ("HOME not set");
+	  builtin_error (_("HOME not set"));
 	  return (EXECUTION_FAILURE);
 	}
       lflag = 0;
@@ -196,10 +199,14 @@ cd_builtin (list)
 
       if (dirname == 0)
 	{
-	  builtin_error ("OLDPWD not set");
+	  builtin_error (_("OLDPWD not set"));
 	  return (EXECUTION_FAILURE);
 	}
+#if 0
       lflag = interactive ? LCD_PRINTPATH : 0;
+#else
+      lflag = LCD_PRINTPATH;		/* According to SUSv3 */
+#endif
     }
   else if (absolute_pathname (list->word->word))
     dirname = list->word->word;
@@ -222,8 +229,8 @@ cd_builtin (list)
 		 is used to find the directory to change to, the new
 		 directory name is echoed to stdout, whether or not
 		 the shell is interactive. */
-	      if (opt)
-		printf ("%s\n", no_symlinks ? temp : the_current_working_directory);
+	      if (opt && (path = no_symlinks ? temp : the_current_working_directory))
+		printf ("%s\n", path);
 
 	      free (temp);
 	      /* Posix.2 says that after using CDPATH, the resultant
@@ -332,6 +339,12 @@ pwd_builtin (list)
 
   directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
 		   : get_working_directory ("pwd");
+
+  /* Try again using getcwd() if canonicalization fails (for instance, if
+     the file system has changed state underneath bash). */
+  if (tcwd && directory == 0)
+    directory = resetpwd ("pwd");
+
 #undef tcwd
 
   if (directory)
@@ -342,9 +355,11 @@ pwd_builtin (list)
       fflush (stdout);
       if (ferror (stdout))
 	{
-	  builtin_error ("write error: %s", strerror (errno));
+	  builtin_error (_("write error: %s"), strerror (errno));
+	  clearerr (stdout);
 	  return (EXECUTION_FAILURE);
 	}
+
       return (EXECUTION_SUCCESS);
     }
   else
@@ -363,7 +378,7 @@ change_to_directory (newdir, nolinks)
      int nolinks;
 {
   char *t, *tdir;
-  int err, canon_failed;
+  int err, canon_failed, r;
 
   tdir = (char *)NULL;
 
@@ -398,7 +413,12 @@ change_to_directory (newdir, nolinks)
      resolved path doesn't exist), fail immediately. */
   if (posixly_correct && nolinks == 0 && canon_failed)
     {
-      errno = ENOENT;
+#if defined ENAMETOOLONG
+      if (errno != ENOENT && errno != ENAMETOOLONG)
+#else
+      if (errno != ENOENT)
+#endif
+	errno = ENOTDIR;
       return (0);
     }
 
@@ -408,12 +428,13 @@ change_to_directory (newdir, nolinks)
       /* If canonicalization failed, but the chdir succeeded, reset the
 	 shell's idea of the_current_working_directory. */
       if (canon_failed)
-	resetpwd ();
-      else
 	{
-	  FREE (the_current_working_directory);
-	  the_current_working_directory = tdir;
+	  t = resetpwd ("cd");
+	  if (t == 0)
+	    set_working_directory (tdir);
 	}
+      else
+	set_working_directory (tdir);
 
       return (1);
     }
@@ -424,23 +445,28 @@ change_to_directory (newdir, nolinks)
     return (0);
 
   err = errno;
-  free (tdir);
 
   /* We're not in physical mode (nolinks == 0), but we failed to change to
      the canonicalized directory name (TDIR).  Try what the user passed
      verbatim. If we succeed, reinitialize the_current_working_directory. */
   if (chdir (newdir) == 0)
     {
-      tdir = resetpwd ();
-      FREE (tdir);
+      t = resetpwd ("cd");
+      if (t == 0)
+	set_working_directory (tdir);
+      else
+	free (t);
 
-      return (1);
+      r = 1;
     }
   else
     {
       errno = err;
-      return (0);
+      r = 0;
     }
+
+  free (tdir);
+  return r;
 }
 
 /* Code for cd spelling correction.  Original patch submitted by

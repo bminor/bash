@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -16,14 +16,15 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-static int FCT __P((CHAR *, CHAR *, int));
+int FCT __P((CHAR *, CHAR *, int));
+
 static int GMATCH __P((CHAR *, CHAR *, CHAR *, CHAR *, int));
 static CHAR *PARSE_COLLSYM __P((CHAR *, INT *));
 static CHAR *BRACKMATCH __P((CHAR *, U_CHAR, int));
 static int EXTMATCH __P((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
 static CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
 
-static int
+int
 FCT (pattern, string, flags)
      CHAR *pattern;
      CHAR *string;
@@ -134,6 +135,19 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	      if ((flags & FNM_PATHNAME) && sc == L('/'))
 		/* A slash does not match a wildcard under FNM_PATHNAME. */
 		return FNM_NOMATCH;
+#ifdef EXTENDED_GLOB
+	      else if ((flags & FNM_EXTMATCH) && c == L('?') && *p == L('(')) /* ) */
+		{
+		  CHAR *newn;
+		  for (newn = n; newn < se; ++newn)
+		    {
+		      if (EXTMATCH (c, newn, se, p, pe, flags) == 0)
+			return (0);
+		    }
+		  /* We didn't match.  If we have a `?(...)', that's failure. */
+		  return FNM_NOMATCH;
+		}
+#endif
 	      else if (c == L('?'))
 		{
 		  if (sc == L('\0'))

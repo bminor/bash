@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,8 +39,11 @@
 
 #include "general.h"
 #include "shmbutil.h"
+#include "chartypes.h"
 
 #define brace_whitespace(c) (!(c) || (c) == ' ' || (c) == '\t' || (c) == '\n')
+
+#define BRACE_SEQ_SPECIFIER	".."
 
 /* Basic idea:
 
@@ -56,11 +59,15 @@ int brace_arg_separator = ',';
 
 #if defined (__P)
 static int brace_gobbler __P((char *, size_t, int *, int));
-static char **expand_amble __P((char *, size_t));
+static char **expand_amble __P((char *, size_t, int));
+static char **expand_seqterm __P((char *, size_t));
+static char **mkseq __P((int, int, int));
 static char **array_concat __P((char **, char **));
 #else
 static int brace_gobbler ();
 static char **expand_amble ();
+static char **expand_seqterm ();
+static char **mkseq();
 static char **array_concat ();
 #endif
 
@@ -117,9 +124,9 @@ brace_expand (text)
 	    }
 
 	  if (text[j] == brace_arg_separator)
-	    {
+	    {	/* { */
 	      strvec_dispose (result);
-	      report_error ("missing `}'");
+	      report_error ("no closing `%c' in %s", '}', text);
 	      throw_to_top_level ();
 	    }
 	  ADVANCE_CHAR (text, tlen, j);
@@ -161,21 +168,28 @@ brace_expand (text)
       ADVANCE_CHAR (amble, alen, j);
     }
 
-  if (!amble[j])
+  if (amble[j] == 0)
     {
-      free (amble);
-      free (preamble);
-      result[0] = savestring (text);
-      return (result);
+      tack = expand_seqterm (amble, alen);
+      if (tack)
+	goto add_tack;
+      else
+	{
+	  free (amble);
+	  free (preamble);
+	  result[0] = savestring (text);
+	  return (result);
+	}
     }
 #endif /* SHELL */
 
-  postamble = &text[i + 1];
-
-  tack = expand_amble (amble, alen);
+  tack = expand_amble (amble, alen, 0);
+add_tack:
   result = array_concat (result, tack);
   free (amble);
   strvec_dispose (tack);
+
+  postamble = text + i + 1;
 
   tack = brace_expand (postamble);
   result = array_concat (result, tack);
@@ -189,9 +203,10 @@ brace_expand (text)
    expand each slot which needs it, until there are no more slots which
    need it. */
 static char **
-expand_amble (text, tlen)
+expand_amble (text, tlen, flags)
      char *text;
      size_t tlen;
+     int flags;
 {
   char **result, **partial;
   char *tem;
@@ -220,9 +235,10 @@ expand_amble (text, tlen)
 	result = partial;
       else
 	{
-	  register int lr = strvec_len (result);
-	  register int lp = strvec_len (partial);
-	  register int j;
+	  register int lr, lp, j;
+
+	  lr = strvec_len (result);
+	  lp = strvec_len (partial);
 
 	  result = strvec_resize (result, lp + lr + 1);
 
@@ -236,6 +252,108 @@ expand_amble (text, tlen)
       ADVANCE_CHAR (text, tlen, i);
       start = i;
     }
+  return (result);
+}
+
+#define ST_BAD	0
+#define ST_INT	1
+#define ST_CHAR	2
+
+static char **
+mkseq (start, end, type)
+     int start, end, type;
+{
+  int n, incr, i;
+  char **result, *t;
+
+  n = abs (end - start) + 1;
+  result = strvec_create (n + 1);
+
+  incr = (start < end) ? 1 : -1;
+
+  /* Make sure we go through the loop at least once, so {3..3} prints `3' */
+  i = 0;
+  n = start;
+  do
+    {
+      if (type == ST_INT)
+	result[i++] = itos (n);
+      else
+	{
+	  t = (char *)xmalloc (2);
+	  t[0] = n;
+	  t[1] = '\0';
+	  result[i++] = t;
+	}
+      if (n == end)
+        break;
+      n += incr;
+    }
+  while (1);
+
+  result[i] = (char *)0;
+  return (result);
+}
+
+static char **
+expand_seqterm (text, tlen)
+     char *text;
+     size_t tlen;
+{
+  char *t, *lhs, *rhs;
+  int i, lhs_t, rhs_t, lhs_v, rhs_v;
+  intmax_t tl, tr;
+  char **result;
+
+  t = strstr (text, BRACE_SEQ_SPECIFIER);
+  if (t == 0)
+    return ((char **)NULL);
+
+  i = t - text;		/* index of start of BRACE_SEQ_SPECIFIER */
+  lhs = substring (text, 0, i);
+  rhs = substring (text, i + sizeof(BRACE_SEQ_SPECIFIER) - 1, tlen);
+
+  if (lhs[0] == 0 || rhs[0] == 0)
+    {
+      free (lhs);
+      free (rhs);
+      return ((char **)NULL);
+    }
+
+  /* Now figure out whether LHS and RHS are integers or letters.  Both
+     sides have to match. */
+  lhs_t = (legal_number (lhs, &tl)) ? ST_INT :
+  		((ISALPHA (lhs[0]) && lhs[1] == 0) ?  ST_CHAR : ST_BAD);
+  rhs_t = (legal_number (rhs, &tr)) ? ST_INT :
+  		((ISALPHA (rhs[0]) && rhs[1] == 0) ?  ST_CHAR : ST_BAD);
+
+  if (lhs_t != rhs_t || lhs_t == ST_BAD || rhs_t == ST_BAD)
+    {
+      free (lhs);
+      free (rhs);
+      return ((char **)NULL);
+    }
+
+  /* OK, we have something.  It's either a sequence of integers, ascending
+     or descending, or a sequence or letters, ditto.  Generate the sequence,
+     put it into a string vector, and return it. */
+  
+  if (lhs_t == ST_CHAR)
+    {
+      lhs_v = lhs[0];
+      rhs_v = rhs[0];
+    }
+  else
+    {
+      lhs_v = tl;		/* integer truncation */
+      rhs_v = tr;
+    }
+
+  result = mkseq (lhs_v, rhs_v, lhs_t);
+
+  free (lhs);
+  free (rhs);
+
   return (result);
 }
 
@@ -278,6 +396,16 @@ brace_gobbler (text, tlen, indx, satisfy)
 	  continue;
 	}
 
+#if defined (SHELL)
+      /* If compiling for the shell, treat ${...} like \{...} */
+      if (c == '$' && text[i+1] == '{' && quoted != '\'')		/* } */
+	{
+	  pass_next = 1;
+	  i++;
+	  continue;
+	}
+#endif
+
       if (quoted)
 	{
 	  if (c == quoted)
@@ -318,11 +446,7 @@ brace_gobbler (text, tlen, indx, satisfy)
 	      i++;
 	      continue;
 	    }
-#if defined (SHELL)
-	  /* If this is being compiled as part of bash, ignore the `{'
-	     in a `${}' construct */
-	  if ((c != '{') || i == 0 || (text[i - 1] != '$'))
-#endif /* SHELL */
+
 	    break;
 	}
 
@@ -368,8 +492,7 @@ array_concat (arr1, arr2)
 
       for (j = 0; j < len2; j++)
 	{
-	  result[len] =
-	    (char *)xmalloc (1 + strlen_1 + strlen (arr2[j]));
+	  result[len] = (char *)xmalloc (1 + strlen_1 + strlen (arr2[j]));
 	  strcpy (result[len], arr1[i]);
 	  strcpy (result[len] + strlen_1, arr2[j]);
 	  len++;

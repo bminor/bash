@@ -63,7 +63,7 @@ function coprocess ()
 	shift
 	local old_trap=$(trap -p SIGPIPE)
 	trap 'coprocess close -SIGPIPE' SIGPIPE
-	if [ $# -eq 1 -a "$1" = "--stdin" ] ; then
+	if [ $# -eq 1 ] && [ "$1" = "--stdin" ] ; then
 	  cat >&61
 	else
 	  echo "$@" >&61
@@ -106,4 +106,3 @@ function coprocess ()
   coprocess status
   return $?
 }
-

@@ -125,11 +125,11 @@ function getline
 			unset linesave			# forget temp var
 			;;
 		 )
-			while [ "${line% }" != "$line" -a ${#line} != 0 ] ; do
+			while [ "${line% }" != "$line" ] && [ ${#line} != 0 ] ; do
 				echo -n " "
 				line="${line%?}"
 			done
-			while [ "${line% }" = "$line" -a ${#line} != 0 ] ; do
+			while [ "${line% }" = "$line" ] && [ ${#line} != 0 ] ; do
 				echo -n " "
 				line="${line%?}"
 			done
@@ -151,7 +151,7 @@ function getline
 				# If length is restricted, and the line is too
 				# long, then beep...
 
-			if [ "$2" != 0 -a $(( ${#line} >= $2 )) = 1 ] ; then
+			if [ "$2" != 0 ] && [ $(( ${#line} >= $2 )) = 1 ] ; then
 				echo -n 
 			else				# Otherwise add
 				line="$line$key"	# the character.
@@ -182,4 +182,3 @@ getline LINE 50
 restore
 
 echo "<$LINE>"
-

@@ -8,10 +8,14 @@ ${THIS_SH} ./jobs2.sub
 # before 2.03
 ${THIS_SH} ./jobs3.sub
 
+# test out behavior of using job control notation when job control is not
+# active
+${THIS_SH} ./jobs4.sub
+
 jobs
 echo $?
 
-# should be a job-control-not-enabled error
+# a no-such-job error, since we can use job control notation without job control
 wait %1
 
 # make sure we can't fg a job started when job control was not active

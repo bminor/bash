@@ -1,7 +1,7 @@
 This file is umask.def, from which is created umask.c.
 It implements the builtin "umask" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@ $END
 
 #include "../bashtypes.h"
 #include "filecntl.h"
-#ifndef _MINIX
+#if ! defined(_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 
@@ -47,6 +47,8 @@ $END
 
 #include <stdio.h>
 #include <chartypes.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "posixstat.h"
@@ -107,7 +109,7 @@ umask_builtin (list)
 	     is lousy. */
 	  if (umask_value == -1)
 	    {
-	      sh_erange (list->word->word, "octal number");
+	      sh_erange (list->word->word, _("octal number"));
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -221,7 +223,7 @@ parse_symbolic_mode (mode, initial_bits)
 	case '=':
 	  break;
 	default:
-	  builtin_error ("`%c': invalid symbolic mode operator", op);
+	  builtin_error (_("`%c': invalid symbolic mode operator"), op);
 	  return (-1);
 	}
 
@@ -260,6 +262,8 @@ parse_symbolic_mode (mode, initial_bits)
 	      bits &= ~perm;
 	      break;
 	    case '=':
+	      if (who == 0)
+		who = S_IRWXU | S_IRWXG | S_IRWXO;
 	      bits &= ~who;
 	      bits |= perm;
 	      break;
@@ -274,7 +278,7 @@ parse_symbolic_mode (mode, initial_bits)
 	}
       else
 	{
-	  builtin_error ("`%c': invalid symbolic mode character", *s);
+	  builtin_error (_("`%c': invalid symbolic mode character"), *s);
 	  return (-1);
 	}
     }
@@ -298,7 +302,7 @@ symbolic_umask (list)
   /* All work is done with the complement of the umask -- it's
      more intuitive and easier to deal with.  It is complemented
      again before being returned. */
-  bits = parse_symbolic_mode (list->word->word, ~um);
+  bits = parse_symbolic_mode (list->word->word, ~um & 0777);
   if (bits == -1)
     return (-1);
 

@@ -33,6 +33,8 @@ extern int bash_re_edit __P((char *));
 
 extern int bind_keyseq_to_unix_command __P((char *));
 
+extern char **bash_default_completion __P((const char *, int, int, int, int));
+
 /* Used by programmable completion code. */
 extern char *command_word_completion_function __P((const char *, int));
 extern char *bash_groupname_completion_function __P((const char *, int));
@@ -42,5 +44,6 @@ extern char **get_hostname_list __P((void));
 extern void clear_hostname_list __P((void));
 
 extern char **bash_directory_completion_matches __P((const char *));
+extern char *bash_dequote_text __P((const char *));
 
 #endif /* _BASHLINE_H_ */

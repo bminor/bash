@@ -45,6 +45,8 @@ extern int valid_array_reference __P((char *));
 extern char *array_value __P((char *, int, int *));
 extern char *get_array_value __P((char *, int, int *));
 
+extern char *array_keys __P((char *, int));
+
 extern char *array_variable_name __P((char *, char **, int *));
 extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
 

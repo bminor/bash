@@ -36,9 +36,9 @@ extern WORD_LIST *make_word_list __P((WORD_DESC *, WORD_LIST *));
 
 extern COMMAND *make_command __P((enum command_type, SIMPLE_COM *));
 extern COMMAND *command_connect __P((COMMAND *, COMMAND *, int));
-extern COMMAND *make_for_command __P((WORD_DESC *, WORD_LIST *, COMMAND *));
+extern COMMAND *make_for_command __P((WORD_DESC *, WORD_LIST *, COMMAND *, int));
 extern COMMAND *make_group_command __P((COMMAND *));
-extern COMMAND *make_case_command __P((WORD_DESC *, PATTERN_LIST *));
+extern COMMAND *make_case_command __P((WORD_DESC *, PATTERN_LIST *, int));
 extern PATTERN_LIST *make_pattern_list __P((WORD_LIST *, COMMAND *));
 extern COMMAND *make_if_command __P((COMMAND *, COMMAND *, COMMAND *));
 extern COMMAND *make_while_command __P((COMMAND *, COMMAND *));
@@ -52,7 +52,7 @@ extern COMMAND *clean_simple_command __P((COMMAND *));
 
 extern COMMAND *make_arith_command __P((WORD_LIST *));
 
-extern COMMAND *make_select_command __P((WORD_DESC *, WORD_LIST *, COMMAND *));
+extern COMMAND *make_select_command __P((WORD_DESC *, WORD_LIST *, COMMAND *, int));
 
 #if defined (COND_COMMAND)
 extern COND_COM *make_cond_node __P((int, WORD_DESC *, COND_COM *, COND_COM *));

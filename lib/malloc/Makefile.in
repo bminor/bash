@@ -46,9 +46,16 @@ LDFLAGS = @LDFLAGS@
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
+LIBBUILD = ${BUILD_DIR}/lib
+
 BASHINCDIR = ${topdir}/include
 
-INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib
+INTL_LIBSRC = ${topdir}/lib/intl
+INTL_BUILDDIR = ${LIBBUILD}/intl
+INTL_INC = @INTL_INC@
+LIBINTL_H = @LIBINTL_H@
+
+INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib $(INTL_INC)
 
 CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
 	  $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
@@ -115,6 +122,12 @@ stats.o: ${srcdir}/imalloc.h ${srcdir}/mstats.h
 trace.o: ${srcdir}/imalloc.h
 table.o: ${srcdir}/imalloc.h ${srcdir}/table.h
 watch.o: ${srcdir}/imalloc.h ${srcdir}/watch.h
+
+malloc.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+stats.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+trace.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+table.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+watch.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
 # Rules for deficient makes, like SunOS and Solaris
 stub.o: stub.c

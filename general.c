@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,8 @@
 #include "chartypes.h"
 #include <errno.h>
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include <tilde/tilde.h>
 
@@ -55,7 +57,7 @@ static int unquoted_tilde_word __P((const char *));
 static void initialize_group_array __P((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
-char *bash_getcwd_errstr = "getcwd: cannot access parent directories";
+char *bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
 
 /* Do whatever is necessary to initialize `Posix mode'. */
 void
@@ -224,30 +226,51 @@ check_identifier (word, check_word)
 {
   if ((word->flags & (W_HASDOLLAR|W_QUOTED)) || all_digits (word->word))
     {
-      internal_error ("`%s': not a valid identifier", word->word);
+      internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
   else if (check_word && legal_identifier (word->word) == 0)
     {
-      internal_error ("`%s': not a valid identifier", word->word);
+      internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
   else
     return (1);
 }
 
+/* Return 1 if STRING comprises a valid alias name.  The shell accepts
+   essentially all characters except those which must be quoted to the
+   parser (which disqualifies them from alias expansion anyway) and `/'. */
+int
+legal_alias_name (string, flags)
+     char *string;
+     int flags;
+{
+  register char *s;
+
+  for (s = string; *s; s++)
+    if (shellbreak (*s) || shellxquote (*s) || shellexp (*s) || (*s == '/'))
+      return 0;
+  return 1;
+}
+
 /* Returns non-zero if STRING is an assignment statement.  The returned value
    is the index of the `=' sign. */
 int
-assignment (string)
+assignment (string, flags)
      const char *string;
+     int flags;
 {
   register unsigned char c;
   register int newi, indx;
 
   c = string[indx = 0];
 
+#if defined (ARRAY_VARS)
+  if ((legal_variable_starter (c) == 0) && (flags && c != '[')) /* ] */
+#else
   if (legal_variable_starter (c) == 0)
+#endif
     return (0);
 
   while (c = string[indx])
@@ -455,6 +478,29 @@ check_binary_file (sample, sample_len)
 
 /* **************************************************************** */
 /*								    */
+/*		    Functions to inspect pathnames		    */
+/*								    */
+/* **************************************************************** */
+
+int
+file_isdir (fn)
+     char *fn;
+{
+  struct stat sb;
+
+  return ((stat (fn, &sb) == 0) && S_ISDIR (sb.st_mode));
+}
+
+int
+file_iswdir (fn)
+     char *fn;
+{
+  return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
+}
+
+
+/* **************************************************************** */
+/*								    */
 /*		    Functions to manipulate pathnames		    */
 /*								    */
 /* **************************************************************** */
@@ -470,7 +516,16 @@ make_absolute (string, dot_path)
   char *result;
 
   if (dot_path == 0 || ABSPATH(string))
+#ifdef __CYGWIN__
+    {
+      char pathbuf[PATH_MAX + 1];
+
+      cygwin_conv_to_full_posix_path (string, pathbuf);
+      result = savestring (pathbuf);
+    }
+#else
     result = savestring (string);
+#endif
   else
     result = sh_makepath (dot_path, string, 0);
 

@@ -28,6 +28,8 @@
 #include "patchlevel.h"
 #include "conftypes.h"
 
+#include "bashintl.h"
+
 extern char *shell_name;
 
 /* Defines from version.h */
@@ -43,6 +45,10 @@ const char *sccs_version = SCCSVERSION;
 
 /* Functions for getting, setting, and displaying the shell version. */
 
+/* Forward declarations so we don't have to include externs.h */
+extern char *shell_version_string __P((void));
+extern void show_shell_version __P((int));
+
 /* Give version information about this shell. */
 char *
 shell_version_string ()
@@ -52,9 +58,17 @@ shell_version_string ()
   if (tt[0] == '\0')
     {
       if (release_status)
+#if defined (HAVE_SNPRINTF)
+	snprintf (tt, sizeof (tt), "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
+#else
 	sprintf (tt, "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
+#endif
       else
+#if defined (HAVE_SNPRINTF)
+	snprintf (tt, sizeof (tt), "%s.%d(%d)", dist_version, patch_level, build_version);
+#else
 	sprintf (tt, "%s.%d(%d)", dist_version, patch_level, build_version);
+#endif
     }
   return tt;
 }
@@ -65,5 +79,5 @@ show_shell_version (extended)
 {
   printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
   if (extended)
-    printf ("Copyright (C) 2002 Free Software Foundation, Inc.\n");
+    printf (_("Copyright (C) 2004 Free Software Foundation, Inc.\n"));
 }

@@ -1,6 +1,6 @@
 /* bashintl.h -- Internationalization stuff
 
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,14 +21,21 @@
 #if !defined (_BASHINTL_H_)
 #define _BASHINTL_H_
 
-/* Include this *after* config.h */
-#if defined (HAVE_LIBINTL_H)
-#  include <libintl.h>
+#if defined (BUILDTOOL)
+#  undef ENABLE_NLS
+#  define ENABLE_NLS 0
 #endif
+
+/* Include this *after* config.h */
+#include "gettext.h"
 
 #if defined (HAVE_LOCALE_H)
 #  include <locale.h>
 #endif
+
+#define _(msgid)	gettext(msgid)
+#define N_(msgid)	msgid
+#define D_(d, msgid)	dgettext(d, msgid)
 
 #if defined (HAVE_SETLOCALE) && !defined (LC_ALL)
 #  undef HAVE_SETLOCALE
@@ -36,14 +43,6 @@
 
 #if !defined (HAVE_SETLOCALE)
 #  define setlocale(cat, loc)
-#endif
-
-#if !defined (HAVE_TEXTDOMAIN)
-#  define textdomain(dom)
-#endif
-
-#if !defined (HAVE_BINDTEXTDOMAIN)
-#  define bindtextdomain(dom, dir)
 #endif
 
 #endif /* !_BASHINTL_H_ */

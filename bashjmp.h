@@ -33,9 +33,10 @@ extern procenv_t	return_catch;	/* used by `return' builtin */
 	xbcopy ((char *)old, (char *)save, sizeof (procenv_t));
 
 /* Values for the second argument to longjmp/siglongjmp. */
-#define NOT_JUMPED 0		/* Not returning from a longjmp. */
-#define FORCE_EOF 1		/* We want to stop parsing. */
-#define DISCARD 2		/* Discard current command. */
-#define EXITPROG 3		/* Unconditionally exit the program now. */
+#define NOT_JUMPED	0	/* Not returning from a longjmp. */
+#define FORCE_EOF	1	/* We want to stop parsing. */
+#define DISCARD		2	/* Discard current command. */
+#define EXITPROG	3	/* Unconditionally exit the program now. */
+#define ERREXIT		4	/* Exit due to error condition */	
 
 #endif /* _BASHJMP_H_ */

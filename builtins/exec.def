@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,6 +46,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../execute_cmd.h"
@@ -201,15 +202,14 @@ exec_builtin (list)
 
   if (executable_file (command) == 0)
     {
-      builtin_error ("%s: cannot execute: %s", command, strerror (errno));
+      builtin_error (_("%s: cannot execute: %s"), command, strerror (errno));
       exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
     }
   else
     file_error (command);
 
 failed_exec:
-  if (command)
-    free (command);
+  FREE (command);
 
   if (subshell_environment || (interactive == 0 && no_exit_on_failed_exec == 0))
     exit_shell (exit_value);

@@ -289,3 +289,46 @@ echo ${foo[0]} ${#foo[0]}
 echo ${foo[1]} ${#foo[1]}
 echo ${foo[@]} ${#foo[@]}
 echo ${foo[*]} ${#foo[*]}
+
+# new expansions added after bash-2.05b
+x[0]=zero
+x[1]=one
+x[4]=four
+x[10]=ten
+
+recho ${!x[@]}
+recho "${!x[@]}"
+recho ${!x[*]}
+recho "${!x[*]}"
+
+# sparse array tests for code fixed in bash-3.0
+unset av
+av[1]='one'
+av[2]=''
+
+av[3]=three
+av[5]=five
+av[7]=seven
+
+echo include null element -- expect one
+echo ${av[@]:1:2}	# what happens when we include a null element?
+echo include unset element -- expect three five
+echo ${av[@]:3:2}	# what happens when we include an unset element?
+echo start at unset element -- expect five seven
+echo ${av[@]:4:2}	# what happens when we start at an unset element?
+
+echo too many elements -- expect three five seven
+echo ${av[@]:3:5}	# how about too many elements?
+
+echo positive offset - expect five seven
+echo ${av[@]:5:2}
+echo negative offset - expect five seven
+echo ${av[@]: -2:2}
+
+echo positive offset 2 - expect seven
+echo ${av[@]: 6:2}
+echo negative offset 2 - expect seven
+echo ${av[@]: -1:2}
+
+echo out-of-range offset
+echo ${av[@]:12}

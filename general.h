@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -277,7 +277,8 @@ extern int all_digits __P((char *));
 extern int legal_number __P((char *, intmax_t *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
-extern int assignment __P((const char *));
+extern int legal_alias_name __P((char *, int));
+extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
 extern int sh_validfd __P((int));
@@ -288,6 +289,9 @@ extern int check_binary_file __P((char *, int));
 #ifdef _POSIXSTAT_H_
 extern int same_file __P((char *, char *, struct stat *, struct stat *));
 #endif
+
+extern int file_isdir __P((char  *));
+extern int file_iswdir __P((char  *));
 
 extern char *make_absolute __P((char *, char *));
 extern int absolute_pathname __P((const char *));

@@ -95,7 +95,7 @@ static int iso8601wknum(const struct tm *timeptr);
 #if !defined(OS2) && !defined(MSDOS) && defined(HAVE_TZNAME)
 extern char *tzname[2];
 extern int daylight;
-#if defined(SOLARIS) || defined(mips)
+#if defined(SOLARIS) || defined(mips) || defined (M_UNIX)
 extern long int timezone, altzone;
 #else
 extern int timezone, altzone;

@@ -24,13 +24,9 @@
 #include "stdc.h"
 #include "strmatch.h"
 
-/* Structured this way so that if HAVE_LIBC_FNM_EXTMATCH is defined, the
-   matching portion of the library (smatch.c) is not linked into the shell. */
-
-#ifndef HAVE_LIBC_FNM_EXTMATCH
 extern int xstrmatch __P((char *, char *, int));
-#else
-#  define xstrmatch fnmatch
+#if defined (HAVE_MULTIBYTE)
+extern int internal_wstrmatch __P((wchar_t *, wchar_t *, int));
 #endif
 
 int
@@ -44,6 +40,20 @@ strmatch (pattern, string, flags)
 
   return (xstrmatch (pattern, string, flags));
 }
+
+#if defined (HANDLE_MULTIBYTE)
+int
+wcsmatch (wpattern, wstring, flags)
+     wchar_t *wpattern;
+     wchar_t *wstring;
+     int flags;
+{
+  if (wstring == 0 || wpattern == 0)
+    return (FNM_NOMATCH);
+
+  return (internal_wstrmatch (wpattern, wstring, flags));
+}
+#endif
 
 #ifdef TEST
 main (c, v)

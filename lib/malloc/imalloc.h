@@ -1,6 +1,6 @@
 /* imalloc.h -- internal malloc definitions shared by source files. */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -158,5 +158,11 @@ do {									\
   } else								\
     memcpy ((dest), (src), (nbytes))					\
 } while(0)
+
+#if defined (SHELL)
+#  include "bashintl.h"
+#else
+#  define _(x)	x
+#endif
 
 #endif /* _IMALLOC_H */

@@ -52,14 +52,14 @@
 /* The default value of the PATH variable. */
 #ifndef DEFAULT_PATH_VALUE
 #define DEFAULT_PATH_VALUE \
-  "/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:."
+  "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:."
 #endif
 
 /* The value for PATH when invoking `command -p'.  This is only used when
    the Posix.2 confstr () function, or CS_PATH define are not present. */
 #ifndef STANDARD_UTILS_PATH
 #define STANDARD_UTILS_PATH \
-  "/bin:/usr/bin:/usr/ucb:/sbin:/usr/sbin:/etc:/usr/etc"
+  "/bin:/usr/bin:/sbin:/usr/sbin:/etc:/usr/etc"
 #endif
 
 /* Default primary and secondary prompt strings. */

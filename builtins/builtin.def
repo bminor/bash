@@ -68,7 +68,7 @@ builtin_builtin (list)
 
   if (!function)
     {
-      builtin_error ("%s: not a shell builtin", command);
+      sh_notbuiltin (command);
       return (EXECUTION_FAILURE);
     }
   else

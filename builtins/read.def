@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -65,6 +65,8 @@ $END
 #  include <fcntl.h>
 #  include <io.h>
 #endif
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -202,7 +204,7 @@ read_builtin (list)
 	  code = legal_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned int)intval)
 	    {
-	      builtin_error ("%s: invalid timeout specification", list_optarg);
+	      builtin_error (_("%s: invalid timeout specification"), list_optarg);
 	      return (EXECUTION_FAILURE);
 	    }
 	  else
@@ -225,14 +227,14 @@ read_builtin (list)
 	  code = legal_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
-	      builtin_error ("%s: invalid file descriptor specification", list_optarg);
+	      builtin_error (_("%s: invalid file descriptor specification"), list_optarg);
 	      return (EXECUTION_FAILURE);
 	    }
 	  else
 	    fd = intval;
 	  if (sh_validfd (fd) == 0)
 	    {
-	      builtin_error ("%d: invalid file descriptor: %s", fd, strerror (errno));
+	      builtin_error (_("%d: invalid file descriptor: %s"), fd, strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  break;
@@ -458,7 +460,7 @@ read_builtin (list)
 #if 1
   if (retval < 0)
     {
-      builtin_error ("read error: %d: %s", fd, strerror (errno));
+      builtin_error (_("read error: %d: %s"), fd, strerror (errno));
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -497,6 +499,13 @@ read_builtin (list)
      an assign them to `arrayname' in turn. */
   if (arrayname)
     {
+      if (legal_identifier (arrayname) == 0)
+	{
+	  sh_invalidid (arrayname);
+	  xfree (input_string);
+	  return (EXECUTION_FAILURE);
+	}
+
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
 	return EXECUTION_FAILURE;	/* readonly or noassign */
@@ -505,6 +514,7 @@ read_builtin (list)
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
 	{
+	  word_list_remove_quoted_nulls (alist);
 	  assign_array_var_from_word_list (var, alist);
 	  dispose_words (alist);
 	}

@@ -1,5 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
-/* Copyright (C) 1989 Free Software Foundation, Inc.
+
+/* Copyright (C) 1989-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,6 +36,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "flags.h"
@@ -87,12 +89,8 @@ static void print_while_command __P((WHILE_COM *));
 static void print_until_command __P((WHILE_COM *));
 static void print_until_or_while __P((WHILE_COM *, char *));
 static void print_if_command __P((IF_COM *));
-#if defined (DPAREN_ARITHMETIC)
-static void print_arith_command __P((ARITH_COM *));
-#endif
 #if defined (COND_COMMAND)
 static void print_cond_node __P((COND_COM *));
-static void print_cond_command __P((COND_COM *));
 #endif
 static void print_function_def __P((FUNCTION_DEF *));
 
@@ -197,7 +195,7 @@ make_command_string_internal (command)
 
 #if defined (DPAREN_ARITHMETIC)
 	case cm_arith:
-	  print_arith_command (command->value.Arith);
+	  print_arith_command (command->value.Arith->exp);
 	  break;
 #endif
 
@@ -260,7 +258,7 @@ make_command_string_internal (command)
 	      break;
 
 	    default:
-	      cprintf ("print_command: bad connector `%d'",
+	      cprintf (_("print_command: bad connector `%d'"),
 		       command->value.Connection->connector);
 	      break;
 	    }
@@ -335,6 +333,9 @@ indirection_level_string ()
   ps4 = decode_prompt_string (ps4);
   change_flag ('x', FLAG_ON);
 
+  if (ps4 == 0 || *ps4 == '\0')
+    return (indirection_string);
+
   for (i = 0; *ps4 && i < indirection_level && i < 99; i++)
     indirection_string[i] = *ps4;
 
@@ -346,15 +347,49 @@ indirection_level_string ()
   return (indirection_string);
 }
 
+void
+xtrace_print_assignment (name, value, assign_list, xflags)
+     char *name, *value;
+     int assign_list, xflags;
+{
+  char *nval;
+
+  if (xflags)
+    fprintf (stderr, "%s", indirection_level_string ());
+
+  /* VALUE should not be NULL when this is called. */
+  if (*value == '\0' || assign_list)
+    nval = value;
+  else if (sh_contains_shell_metas (value))
+    nval = sh_single_quote (value);
+  else if (ansic_shouldquote (value))
+    nval = ansic_quote (value, 0, (int *)0);
+  else
+    nval = value;
+
+  if (assign_list)
+    fprintf (stderr, "%s=(%s)\n", name, nval);
+  else
+    fprintf (stderr, "%s=%s\n", name, nval);
+
+  if (nval != value)
+    FREE (nval);
+
+  fflush (stderr);
+}
+
 /* A function to print the words of a simple command when set -x is on. */
 void
-xtrace_print_word_list (list)
+xtrace_print_word_list (list, xtflags)
      WORD_LIST *list;
+     int xtflags;
 {
   WORD_LIST *w;
   char *t, *x;
 
-  fprintf (stderr, "%s", indirection_level_string ());
+  if (xtflags)
+    fprintf (stderr, "%s", indirection_level_string ());
+
   for (w = list; w; w = w->next)
     {
       t = w->word->word;
@@ -386,12 +421,29 @@ command_print_word_list (list, separator)
   _print_word_list (list, separator, cprintf);
 }
 
-static void
-print_for_command (for_command)
+void
+print_for_command_head (for_command)
      FOR_COM *for_command;
 {
   cprintf ("for %s in ", for_command->name->word);
   command_print_word_list (for_command->map_list, " ");
+}
+
+void
+xtrace_print_for_command_head (for_command)
+     FOR_COM *for_command;
+{
+  fprintf (stderr, "%s", indirection_level_string ());
+  fprintf (stderr, "for %s in ", for_command->name->word);
+  xtrace_print_word_list (for_command->map_list, 0);
+}
+
+static void
+print_for_command (for_command)
+     FOR_COM *for_command;
+{
+  print_for_command_head (for_command);
+
   cprintf (";");
   newline ("do\n");
   indentation += indentation_amount;
@@ -406,13 +458,13 @@ static void
 print_arith_for_command (arith_for_command)
      ARITH_FOR_COM *arith_for_command;
 {
-  cprintf ("for (( ");
+  cprintf ("for ((");
   command_print_word_list (arith_for_command->init, " ");
   cprintf (" ; ");
   command_print_word_list (arith_for_command->test, " ");
   cprintf (" ; ");
   command_print_word_list (arith_for_command->step, " ");
-  cprintf (" ))");
+  cprintf ("))");
   newline ("do\n");
   indentation += indentation_amount;
   make_command_string_internal (arith_for_command->action);
@@ -423,12 +475,29 @@ print_arith_for_command (arith_for_command)
 #endif /* ARITH_FOR_COMMAND */
 
 #if defined (SELECT_COMMAND)
-static void
-print_select_command (select_command)
+void
+print_select_command_head (select_command)
      SELECT_COM *select_command;
 {
   cprintf ("select %s in ", select_command->name->word);
   command_print_word_list (select_command->map_list, " ");
+}
+
+void
+xtrace_print_select_command_head (select_command)
+     SELECT_COM *select_command;
+{
+  fprintf (stderr, "%s", indirection_level_string ());
+  fprintf (stderr, "select %s in ", select_command->name->word);
+  xtrace_print_word_list (select_command->map_list, 0);
+}
+
+static void
+print_select_command (select_command)
+     SELECT_COM *select_command;
+{
+  print_select_command_head (select_command);
+
   cprintf (";");
   newline ("do\n");
   indentation += indentation_amount;
@@ -476,11 +545,27 @@ print_group_command (group_command)
   group_command_nesting--;
 }
 
+void
+print_case_command_head (case_command)
+     CASE_COM *case_command;
+{
+  cprintf ("case %s in ", case_command->word->word);
+}
+
+void
+xtrace_print_case_command_head (case_command)
+     CASE_COM *case_command;
+{
+  fprintf (stderr, "%s", indirection_level_string ());
+  fprintf (stderr, "case %s in\n", case_command->word->word);
+}
+
 static void
 print_case_command (case_command)
      CASE_COM *case_command;
 {
-  cprintf ("case %s in ", case_command->word->word);
+  print_case_command_head (case_command);
+
   if (case_command->clauses)
     print_case_clauses (case_command->clauses);
   newline ("esac");
@@ -562,13 +647,13 @@ print_if_command (if_command)
 }
 
 #if defined (DPAREN_ARITHMETIC)
-static void
-print_arith_command (arith_command)
-     ARITH_COM *arith_command;
+void
+print_arith_command (arith_cmd_list)
+     WORD_LIST *arith_cmd_list;
 {
-  cprintf ("(( ");
-  command_print_word_list (arith_command->exp, " ");
-  cprintf (" ))");
+  cprintf ("((");
+  command_print_word_list (arith_cmd_list, " ");
+  cprintf ("))");
 }
 #endif
 
@@ -618,7 +703,7 @@ print_cond_node (cond)
     }
 }
 
-static void
+void
 print_cond_command (cond)
      COND_COM *cond;
 {
@@ -721,6 +806,13 @@ print_redirection_list (redirects)
 	    }
 	  else
 	    hdtail = heredocs = newredir;
+	}
+      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector == 1)
+	{
+	  /* Temporarily translate it as the execution code does. */
+	  redirects->instruction = r_err_and_out;
+	  print_redirection (redirects);
+	  redirects->instruction = r_duplicating_output_word;
 	}
       else
 	print_redirection (redirects);
@@ -1116,7 +1208,7 @@ cprintf (control, va_alist)
 	      break;
 
 	    default:
-	      programming_error ("cprintf: bad `%%' argument (%c)", c);
+	      programming_error (_("cprintf: `%c': invalid format character"), c);
 	      /*NOTREACHED*/
 	    }
 	}

@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,6 +46,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../jobs.h"
@@ -74,9 +75,6 @@ jobs_builtin (list)
   int form, execute, state, opt, any_failed, job;
   sigset_t set, oset;
 
-  if (job_control == 0 && interactive_shell == 0)
-    return (EXECUTION_SUCCESS);
-
   execute = any_failed = 0;
   form = JLIST_STANDARD;
   state = JSTATE_ANY;
@@ -98,7 +96,7 @@ jobs_builtin (list)
 	case 'x':
 	  if (form != JLIST_STANDARD)
 	    {
-	      builtin_error ("no other options allowed with `-x'");
+	      builtin_error (_("no other options allowed with `-x'"));
 	      return (EXECUTION_FAILURE);
 	    }
 	  execute++;
@@ -163,6 +161,7 @@ execute_list_with_replacements (list)
 {
   register WORD_LIST *l;
   int job, result;
+  COMMAND *command;
 
   /* First do the replacement of job specifications with pids. */
   for (l = list; l; l = l->next)
@@ -182,21 +181,18 @@ execute_list_with_replacements (list)
 
   /* Next make a new simple command and execute it. */
   begin_unwind_frame ("jobs_builtin");
-  {
-    COMMAND *command = (COMMAND *)NULL;
 
-    add_unwind_protect (dispose_command, command);
+  command = make_bare_simple_command ();
+  command->value.Simple->words = copy_word_list (list);
+  command->value.Simple->redirects = (REDIRECT *)NULL;
+  command->flags |= CMD_INHIBIT_EXPANSION;
+  command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
 
-    command = make_bare_simple_command ();
-    command->value.Simple->words = copy_word_list (list);
-    command->value.Simple->redirects = (REDIRECT *)NULL;
-    command->flags |= CMD_INHIBIT_EXPANSION;
-    command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
+  add_unwind_protect (dispose_command, command);
+  result = execute_command (command);
+  dispose_command (command);
 
-    result = execute_command (command);
-  }
-
-  run_unwind_frame ("jobs_builtin");
+  discard_unwind_frame ("jobs_builtin");
   return (result);
 }
 #endif /* JOB_CONTROL */

@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,6 +37,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include "../bashintl.h"
+
 #include "../shell.h"
 #include "../jobs.h"
 
@@ -44,6 +46,7 @@ $END
 #include "builtext.h"	/* for jobs_builtin */
 
 extern int last_command_exit_value;
+extern int running_trap, trap_saved_exit_value;
 extern int subshell_environment;
 extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
@@ -77,7 +80,7 @@ logout_builtin (list)
 {
   if (login_shell == 0 /* && interactive */)
     {
-      builtin_error ("not login shell: use `exit'");
+      builtin_error (_("not login shell: use `exit'"));
       return (EXECUTION_FAILURE);
     }
   else
@@ -105,7 +108,7 @@ exit_or_logout (list)
       for (i = 0; i < job_slots; i++)
 	if (jobs[i] && STOPPED (i))
 	  {
-	    fprintf (stderr, "There are stopped jobs.\n");
+	    fprintf (stderr, _("There are stopped jobs.\n"));
 
 	    /* This is NOT superfluous because EOF can get here without
 	       going through the command parser.  Set both last and this
@@ -120,8 +123,24 @@ exit_or_logout (list)
   /* Get return value if present.  This means that you can type
      `logout 5' to a shell, and it returns 5. */
 
-  exit_value = get_exitstat (list);
+  /* If we're running the exit trap (running_trap == 1, since running_trap
+     gets set to SIG+1), and we don't have a argument given to `exit'
+     (list == 0), use the exit status we saved before running the trap
+     commands (trap_saved_exit_value). */
+  exit_value = (running_trap == 1 && list == 0) ? trap_saved_exit_value : get_exitstat (list);
 
+  bash_logout ();
+
+  last_command_exit_value = exit_value;
+
+  /* Exit the program. */
+  jump_to_top_level (EXITPROG);
+  /*NOTREACHED*/
+}
+
+void
+bash_logout ()
+{
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0 && subshell_environment == 0)
     {
@@ -130,10 +149,4 @@ exit_or_logout (list)
       maybe_execute_file (SYS_BASH_LOGOUT, 1);
 #endif
     }
-
-  last_command_exit_value = exit_value;
-
-  /* Exit the program. */
-  jump_to_top_level (EXITPROG);
-  /*NOTREACHED*/
 }

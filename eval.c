@@ -30,6 +30,8 @@
 #include "bashansi.h"
 #include <stdio.h>
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include "flags.h"
 #include "trap.h"
@@ -88,6 +90,7 @@ reader_loop ()
 	    {
 	      /* Some kind of throw to top_level has occured. */
 	    case FORCE_EOF:
+	    case ERREXIT:
 	    case EXITPROG:
 	      current_command = (COMMAND *)NULL;
 	      if (exit_immediately_on_error)
@@ -169,7 +172,8 @@ static sighandler
 alrm_catcher(i)
      int i;
 {
-  printf ("\007timed out waiting for input: auto-logout\n");
+  printf (_("\007timed out waiting for input: auto-logout\n"));
+  bash_logout ();	/* run ~/.bash_logout if this is a login shell */
   jump_to_top_level (EXITPROG);
   SIGRETURN (0);
 }

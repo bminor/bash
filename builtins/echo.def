@@ -133,6 +133,8 @@ echo_builtin (list)
 
 just_echo:
 
+  clearerr (stdout);	/* clear error before writing and testing success */
+
   while (list)
     {
       i = len = 0;

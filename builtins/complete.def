@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete" and "compgen" in Bash.
 
-Copyright (C) 1999-2002 Free Software Foundation, Inc.
+Copyright (C) 1999-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,10 +43,12 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../builtins.h"
 #include "../pcomplete.h"
+#include "../bashline.h"
 
 #include "common.h"
 #include "bashgetopt.h"
@@ -106,10 +108,12 @@ static struct _compopt {
   char *optname;
   int optflag;
 } compopts[] = {
+  { "bashdefault", COPT_BASHDEFAULT },
   { "default",	COPT_DEFAULT },
   { "dirnames", COPT_DIRNAMES },
   { "filenames",COPT_FILENAMES},
   { "nospace",	COPT_NOSPACE },
+  { "plusdirs", COPT_PLUSDIRS },
   { (char *)NULL, 0 },
 };
 
@@ -244,7 +248,7 @@ build_actions (list, pp, rp, actp, optp)
 	  ind = find_compact (list_optarg);
 	  if (ind < 0)
 	    {
-	      builtin_error ("%s: invalid action name", list_optarg);
+	      builtin_error (_("%s: invalid action name"), list_optarg);
 	      return (EX_USAGE);
 	    }
 	  acts |= compacts[ind].actflag;
@@ -374,7 +378,7 @@ remove_cmd_completions (list)
     {
       if (progcomp_remove (l->word->word) == 0)
 	{
-	  builtin_error ("%s: no completion specification", l->word->word);
+	  builtin_error (_("%s: no completion specification"), l->word->word);
 	  ret = EXECUTION_FAILURE;
 	}
     }
@@ -428,10 +432,12 @@ print_one_completion (cmd, cs)
   copts = cs->options;
 
   /* First, print the -o options. */
+  PRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
   PRINTCOMPOPT (COPT_DEFAULT, "default");
   PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
   PRINTCOMPOPT (COPT_FILENAMES, "filenames");
   PRINTCOMPOPT (COPT_NOSPACE, "nospace");
+  PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
 
   acts = cs->actions;
 
@@ -515,7 +521,7 @@ print_cmd_completions (list)
 	print_one_completion (l->word->word, cs);
       else
 	{
-	  builtin_error ("%s: no completion specification", l->word->word);
+	  builtin_error (_("%s: no completion specification"), l->word->word);
 	  ret = EXECUTION_FAILURE;
 	}
     }
@@ -540,7 +546,7 @@ compgen_builtin (list)
   unsigned long acts, copts;
   COMPSPEC *cs;
   STRINGLIST *sl;
-  char *word;
+  char *word, **matches;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -562,9 +568,9 @@ compgen_builtin (list)
   word = (list && list->word) ? list->word->word : "";
 
   if (Farg)
-    internal_warning ("compgen: -F option may not work as you expect");
+    builtin_error (_("warning: -F option may not work as you expect"));
   if (Carg)
-    internal_warning ("compgen: -C option may not work as you expect");
+    builtin_error (_("warning: -C option may not work as you expect"));
 
   /* If we get here, we need to build a compspec and evaluate it. */
   cs = compspec_create ();
@@ -583,12 +589,19 @@ compgen_builtin (list)
   rval = EXECUTION_FAILURE;
   sl = gen_compspec_completions (cs, "compgen", word, 0, 0);
 
+  /* If the compspec wants the bash default completions, temporarily
+     turn off programmable completion and call the bash completion code. */
+  if ((sl == 0 || sl->list_len == 0) && (copts & COPT_BASHDEFAULT))
+    {
+      matches = bash_default_completion (word, 0, 0, 0, 0);
+      sl = completions_to_stringlist (matches);
+      strvec_dispose (matches);
+    }
+
   /* This isn't perfect, but it's the best we can do, given what readline
      exports from its set of completion utility functions. */
   if ((sl == 0 || sl->list_len == 0) && (copts & COPT_DEFAULT))
     {
-      char **matches;
-
       matches = rl_completion_matches (word, rl_filename_completion_function);
       sl = completions_to_stringlist (matches);
       strvec_dispose (matches);

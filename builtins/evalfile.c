@@ -1,4 +1,4 @@
-/* Copyright (C) 1996 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../jobs.h"
@@ -58,6 +59,7 @@ extern int errno;
 #define FEVAL_HISTORY		0x020
 #define FEVAL_CHECKBINARY	0x040
 #define FEVAL_REGFILE		0x080
+#define FEVAL_NOPUSHARGS	0x100
 
 extern int posixly_correct;
 extern int indirection_level, startup_state, subshell_environment;
@@ -79,9 +81,28 @@ _evalfile (filename, flags)
   struct stat finfo;
   size_t file_size;
   sh_vmsg_func_t *errfunc;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
+  ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
+#  if defined (DEBUGGER)
+  SHELL_VAR *bash_argv_v, *bash_argc_v;
+  ARRAY *bash_argv_a, *bash_argc_a;
+#  endif
+  char *t, tt[2];
+#endif
 
   USE_VAR(pflags);
 
+#if defined (ARRAY_VARS)
+  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
+#  if defined (DEBUGGER)
+  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
+  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
+#  endif
+#endif
+  
   fd = open (filename, O_RDONLY);
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
@@ -104,12 +125,12 @@ file_error_and_exit:
 
   if (S_ISDIR (finfo.st_mode))
     {
-      (*errfunc) ("%s: is a directory", filename);
+      (*errfunc) (_("%s: is a directory"), filename);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }
   else if ((flags & FEVAL_REGFILE) && S_ISREG (finfo.st_mode) == 0)
     {
-      (*errfunc) ("%s: not a regular file", filename);
+      (*errfunc) (_("%s: not a regular file"), filename);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }
 
@@ -117,7 +138,7 @@ file_error_and_exit:
   /* Check for overflow with large files. */
   if (file_size != finfo.st_size || file_size + 1 < file_size)
     {
-      (*errfunc) ("%s: file is too large", filename);
+      (*errfunc) (_("%s: file is too large"), filename);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }      
 
@@ -176,8 +197,27 @@ file_error_and_exit:
   return_catch_flag++;
   sourcelevel++;
 
+#if defined (ARRAY_VARS)
+  array_push (bash_source_a, (char *)filename);
+  t = itos (executing_line_number ());
+  array_push (bash_lineno_a, t);
+  free (t);
+  array_push (funcname_a, "source");	/* not exactly right */
+#  if defined (DEBUGGER)
+  /* Have to figure out a better way to do this when `source' is supplied
+     arguments */
+  if ((flags & FEVAL_NOPUSHARGS) == 0)
+    {
+      array_push (bash_argv_a, (char *)filename);
+      tt[0] = '1'; tt[1] = '\0';
+      array_push (bash_argc_a, tt);
+    }
+#  endif
+#endif
+
   /* set the flags to be passed to parse_and_execute */
-  pflags = (flags & FEVAL_HISTORY) ? 0 : SEVAL_NOHIST;
+  pflags = SEVAL_RESETLINE;
+  pflags |= (flags & FEVAL_HISTORY) ? 0 : SEVAL_NOHIST;
 
   if (flags & FEVAL_BUILTIN)
     result = EXECUTION_SUCCESS;
@@ -204,6 +244,19 @@ file_error_and_exit:
       sourcelevel--;
       COPY_PROCENV (old_return_catch, return_catch);
     }
+
+#if defined (ARRAY_VARS)
+  array_pop (bash_source_a);
+  array_pop (bash_lineno_a);
+  array_pop (funcname_a);
+#  if defined (DEBUGGER)
+  if ((flags & FEVAL_NOPUSHARGS) == 0)
+    {
+      array_pop (bash_argc_a);
+      array_pop (bash_argv_a);
+    }
+#  endif
+#endif
 
   return ((flags & FEVAL_BUILTIN) ? result : 1);
 }
@@ -240,14 +293,20 @@ fc_execute_file (filename)
 #endif /* HISTORY */
 
 int
-source_file (filename)
+source_file (filename, sflags)
      const char *filename;
+     int sflags;
 {
-  int flags;
+  int flags, rval;
 
   flags = FEVAL_BUILTIN|FEVAL_UNWINDPROT|FEVAL_NONINT;
+  if (sflags)
+    flags |= FEVAL_NOPUSHARGS;
   /* POSIX shells exit if non-interactive and file error. */
   if (posixly_correct && !interactive_shell)
     flags |= FEVAL_LONGJMP;
-  return (_evalfile (filename, flags));
+  rval = _evalfile (filename, flags);
+
+  run_return_trap ();
+  return rval;
 }

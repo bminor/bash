@@ -1,6 +1,6 @@
 /* jobs.h -- structures and stuff used by the jobs.c file. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -95,6 +95,7 @@ typedef struct job {
 
 #define NO_JOB  -1	/* An impossible job array index. */
 #define DUP_JOB -2	/* A possible return value for get_job_spec (). */
+#define BAD_JOBSPEC -3	/* Bad syntax for job spec. */
 
 /* A value which cannot be a process ID. */
 #define NO_PID (pid_t)-1

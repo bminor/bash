@@ -1,7 +1,7 @@
 This file is fg_bg.def, from which is created fg_bg.c.
 It implements the builtins "bg" and "fg" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,8 @@ $END
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../jobs.h"
@@ -128,7 +130,7 @@ fg_bg (list, foreground)
   /* Or if jobs[job]->pgrp == shell_pgrp. */
   if (IS_JOBCONTROL (job) == 0)
     {
-      builtin_error ("job %%%d started without job control", job + 1);
+      builtin_error (_("job %d started without job control"), job + 1);
       goto failure;
     }
 

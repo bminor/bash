@@ -186,9 +186,7 @@ dispose_command (command)
 	register FUNCTION_DEF *c;
 
 	c = command->value.Function_def;
-	dispose_word (c->name);
-	dispose_command (c->command);
-	free (c);
+	dispose_function_def (c);
 	break;
       }
 
@@ -217,6 +215,23 @@ dispose_cond_node (cond)
     }
 }
 #endif /* COND_COMMAND */
+
+void
+dispose_function_def_contents (c)
+     FUNCTION_DEF *c;
+{
+  dispose_word (c->name);
+  dispose_command (c->command);
+  FREE (c->source_file);
+}
+
+void
+dispose_function_def (c)
+     FUNCTION_DEF *c;
+{
+  dispose_function_def_contents (c);
+  free (c);
+}
 
 /* How to free a WORD_DESC. */
 void

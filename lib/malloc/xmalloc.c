@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Readline, a library for reading lines
    of text with interactive input and history editing.

@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -141,7 +141,7 @@ wait_builtin (list)
 	    }
 	}
 #if defined (JOB_CONTROL)
-      else if (job_control && *w)
+      else if (*w && *w == '%')
 	/* Must be a job spec.  Check it out. */
 	{
 	  int job;
@@ -163,12 +163,6 @@ wait_builtin (list)
 	  /* Job spec used.  Wait for the last pid in the pipeline. */
 	  UNBLOCK_CHILD (oset);
 	  status = wait_for_job (job);
-	}
-      else if (job_control == 0 && *w == '%')
-	{
-	  /* can't use jobspecs as arguments if job control is not active. */
-	  sh_nojobs ((char *)NULL);
-	  status = EXECUTION_FAILURE;
 	}
 #endif /* JOB_CONTROL */
       else

@@ -389,7 +389,7 @@ esac
 
 trap ':' 2
 trap exit 3
-trap "tail -$savehist $histfile>/tmp/hist$$;uniq /tmp/hist$$ > $histfile;\
+trap "tail -n $savehist $histfile>/tmp/hist$$;uniq /tmp/hist$$ > $histfile;\
 rm -f /tmp/*$$;exit 0" 15
 
 getcmd=yes
@@ -517,7 +517,7 @@ do
 		esac
 
 		cmd="${cmd};$line"
-		while test "$line" != "done" -a "$line" != "end"
+		while test "$line" != "done"  && test "$line" != "end"
 		do
 			echo $n "$PS2$c"
 			read line
@@ -531,7 +531,7 @@ do
 		echo "$cmd" > /tmp/bcsh$$
 		;;
 	if[\ \	]*)
-		while test "$line" != "fi" -a "$line" != "endif"
+		while test "$line" != "fi" && test "$line" != "endif"
 		do
 			echo $n "$PS2$c"
 			read line
@@ -659,7 +659,7 @@ esac/
 				-[0-9]*)
 					wanted="`expr \"$i\" : '-\([0-9][0-9]*\).*'`"
 					rest="`expr \"$i\" : '-[0-9][0-9]*\(.*\)'`"
-					i="`tail -$wanted $histfile | sed -e "1q"`"
+					i="`tail -n $wanted $histfile | sed -e "1q"`"
 					;;
 				esac
 				;;
@@ -917,14 +917,14 @@ esac/
 		continue
 		;;
 	exec[\ \	]*)
-		tail -$savehist $histfile>/tmp/hist$$
+		tail -n $savehist $histfile>/tmp/hist$$
 		uniq /tmp/hist$$ > $histfile
 		rm -f /tmp/*$$
 		echo $cmd > /tmp/cmd$$
 		. /tmp/cmd$$
 		;;
 	login[\ \	]*|newgrp[\ \	]*)
-		tail -$savehist $histfile>/tmp/hist$$
+		tail -n $savehist $histfile>/tmp/hist$$
 		uniq /tmp/hist$$ > $histfile
 		rm -f /tmp/*$$
 		echo $cmd > /tmp/cmd$$
@@ -936,22 +936,22 @@ esac/
 			# sh $logoutfile
 			$SHELL $logoutfile
 		fi
-		tail -$savehist $histfile > /tmp/hist$$
+		tail -n $savehist $histfile > /tmp/hist$$
 		uniq /tmp/hist$$ > $histfile
 		rm -f /tmp/*$$
 		exit 0
 		;;
 	h|history)
-		grep -n . $histfile | tail -$history | sed -e 's@:@	@' | $PAGER
+		grep -n . $histfile | tail -n $history | sed -e 's@:@	@' | $PAGER
 		continue
 		;;
 	h[\ \	]\|*|h[\ \	]\>*|h\|*|h\>*)
-		cmd="`echo \"$cmd\" | sed -e \"s@h@grep -n . $histfile | tail -$history | sed -e 's@:@	@'@\"`"
+		cmd="`echo \"$cmd\" | sed -e \"s@h@grep -n . $histfile | tail -n $history | sed -e 's@:@	@'@\"`"
 		getcmd=no
 		continue
 		;;
 	history[\ \	]*\|*|history[\ \	]*\>*)
-		cmd="`echo \"$cmd\" | sed -e \"s@history@grep -n . $histfile | tail -$history | sed -e 's@:@ @'@\"`"
+		cmd="`echo \"$cmd\" | sed -e \"s@history@grep -n . $histfile | tail -n $history | sed -e 's@:@ @'@\"`"
 		getcmd=no
 		continue
 		;;

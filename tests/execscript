@@ -1,7 +1,7 @@
 export LC_ALL=C
 export LANG=C
 
-if (( $UID == 0 )); then
+if [ $UID -eq 0 ]; then
         echo "execscript: the test suite should not be run as root" >&2
 fi
 
@@ -21,8 +21,15 @@ notthere
 echo $?
 
 # this is iffy, since the error messages may vary from system to system
-${THIS_SH} notthere
+# and /tmp might not exist
+ln -s ${THIS_SH} /tmp/bash 2>/dev/null
+if [ -f /tmp/bash ]; then
+	/tmp/bash notthere
+else
+	${THIS_SH} notthere
+fi
 echo $?
+rm -f /tmp/bash
 
 # /bin/sh should be there on all systems
 ${THIS_SH} /bin/sh
@@ -94,3 +101,6 @@ ${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-
 # values
 
 ${THIS_SH} ./exec6.sub
+
+# checks for properly deciding what constitutes an executable file
+${THIS_SH} ./exec7.sub

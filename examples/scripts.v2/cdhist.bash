@@ -39,7 +39,7 @@ cd()
 		set -- $HOME
 	fi
 	
-	if [ "$CDHISTFILE" -a -r "$CDHISTFILE" ] # if directory history exists
+	if [ "$CDHISTFILE" ] && [ -r "$CDHISTFILE" ] # if directory history exists
 	then
 		typeset CDHIST
 		i=-1
@@ -49,7 +49,7 @@ cd()
 		done <$CDHISTFILE
 	fi
 	
-	if [ "${CDHIST[0]}" != "$PWD" -a "$PWD" != "" ]
+	if [ "${CDHIST[0]}" != "$PWD" ] && [ -n "$PWD" ]
 	then
 		_cdins				# insert $PWD into cd history
 	fi

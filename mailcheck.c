@@ -31,6 +31,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 #include "posixtime.h"
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "execute_cmd.h"
@@ -289,6 +290,7 @@ parse_mailpath_spec (str)
 char *
 make_default_mailpath ()
 {
+#if defined (DEFAULT_MAIL_DIRECTORY)
   char *mp;
 
   get_current_user_info ();
@@ -297,6 +299,9 @@ make_default_mailpath ()
   mp[sizeof(DEFAULT_MAIL_DIRECTORY) - 1] = '/';
   strcpy (mp + sizeof (DEFAULT_MAIL_DIRECTORY), current_user.user_name);
   return (mp);
+#else
+  return ((char *)NULL);
+#endif
 }
 
 /* Remember the dates of the files specified by MAILPATH, or if there is
@@ -321,8 +326,11 @@ remember_mail_dates ()
   if (mailpaths == 0)
     {
       mailpaths = make_default_mailpath ();
-      add_mail_file (mailpaths, (char *)NULL);
-      free (mailpaths);
+      if (mailpaths)
+	{
+	  add_mail_file (mailpaths, (char *)NULL);
+	  free (mailpaths);
+	}
       return;
     }
 
@@ -371,7 +379,7 @@ check_mail ()
 	  int file_is_bigger;
 
 	  use_user_notification = mailfiles[i]->msg != (char *)NULL;
-	  message = mailfiles[i]->msg ? mailfiles[i]->msg : "You have mail in $_";
+	  message = mailfiles[i]->msg ? mailfiles[i]->msg : _("You have mail in $_");
 
 	  bind_variable ("_", current_mail_file);
 
@@ -390,13 +398,13 @@ check_mail ()
 	     the access time to be equal to the modification time when
 	     the mail in the file is manipulated, check the size also.  If
 	     the file has not grown, continue. */
-	  if ((atime >= mtime) || !file_is_bigger)
+	  if ((atime >= mtime) && !file_is_bigger)
 	    continue;
 
 	  /* If the mod time is later than the access time and the file
 	     has grown, note the fact that this is *new* mail. */
 	  if (use_user_notification == 0 && (atime < mtime) && file_is_bigger)
-	    message = "You have new mail in $_";
+	    message = _("You have new mail in $_");
 #undef atime
 #undef mtime
 
@@ -412,7 +420,7 @@ check_mail ()
       if (mail_warning && file_access_date_changed (i))
 	{
 	  update_mail_file (i);
-	  printf ("The mail in %s has been read\n", current_mail_file);
+	  printf (_("The mail in %s has been read\n"), current_mail_file);
 	}
     }
 

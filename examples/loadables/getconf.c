@@ -78,7 +78,7 @@ extern int errno;
 struct conf_variable
 {
   const char *name;
-  enum { SYSCONF, CONFSTR, PATHCONF, CONSTANT, G_UNDEF } type;
+  enum { SYSCONF, CONFSTR, PATHCONF, CONSTANT, LLCONST, G_UNDEF } type;
   long value;
 };
 
@@ -93,6 +93,11 @@ static long sysconf __P((int));
 #ifndef HAVE_PATHCONF
 static long pathconf __P((const char *, int));
 #endif
+
+/* Hack to `encode' values wider than long into a conf_variable */
+#define VAL_LLONG_MIN		-1000
+#define VAL_LLONG_MAX		-1001
+#define VAL_ULLONG_MAX		-1002
 
 static const struct conf_variable conf_table[] =
 {
@@ -169,6 +174,8 @@ static const struct conf_variable conf_table[] =
   { "POSIX_V6_ILP32_OFF32_CFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFF32_CFLAGS },
   { "POSIX_V6_ILP32_OFF32_LDFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFF32_LDFLAGS },
   { "POSIX_V6_ILP32_OFF32_LIBS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFF32_LIBS },
+#endif
+#if defined (_CS_POSIX_V6_ILP32_OFF32_LINTFLAGS)
   { "POSIX_V6_ILP32_OFF32_LINTFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFF32_LINTFLAGS },
 #endif
 #if defined (_SC_POSIX_V6_ILP32_OFFBIG)
@@ -178,6 +185,8 @@ static const struct conf_variable conf_table[] =
   { "POSIX_V6_ILP32_OFFBIG_CFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFFBIG_CFLAGS },
   { "POSIX_V6_ILP32_OFFBIG_LDFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS },
   { "POSIX_V6_ILP32_OFFBIG_LIBS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFFBIG_LIBS },
+#endif
+#if defined (_CS_POSIX_V6_ILP32_OFFBIG_LINTFLAGS)
   { "POSIX_V6_ILP32_OFFBIG_LINTFLAGS",	CONFSTR,	_CS_POSIX_V6_ILP32_OFFBIG_LINTFLAGS },
 #endif
 #if defined (_SC_POSIX_V6_LP64_OFF64)
@@ -187,6 +196,8 @@ static const struct conf_variable conf_table[] =
   { "POSIX_V6_LP64_OFF64_CFLAGS",	CONFSTR,	_CS_POSIX_V6_LP64_OFF64_CFLAGS },
   { "POSIX_V6_LP64_OFF64_LDFLAGS",	CONFSTR,	_CS_POSIX_V6_LP64_OFF64_LDFLAGS },
   { "POSIX_V6_LP64_OFF64_LIBS",		CONFSTR,	_CS_POSIX_V6_LP64_OFF64_LIBS },
+#endif
+#if defined (CS_POSIX_V6_LP64_OFF64_LINTFLAGS)
   { "POSIX_V6_LP64_OFF64_LINTFLAGS",	CONFSTR,	_CS_POSIX_V6_LP64_OFF64_LINTFLAGS },
 #endif
 #if defined (_SC_POSIX_V6_LPBIG_OFFBIG)
@@ -196,7 +207,13 @@ static const struct conf_variable conf_table[] =
   { "POSIX_V6_LPBIG_OFFBIG_CFLAGS",	CONFSTR,	_CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS },
   { "POSIX_V6_LPBIG_OFFBIG_LDFLAGS",	CONFSTR,	_CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS },
   { "POSIX_V6_LPBIG_OFFBIG_LIBS",	CONFSTR,	_CS_POSIX_V6_LPBIG_OFFBIG_LIBS },
+#endif
+#if defined (_CS_POSIX_V6_LPBIG_OFFBIG_LINTFLAGS)
   { "POSIX_V6_LPBIG_OFFBIG_LINTFLAGS",	CONFSTR,	_CS_POSIX_V6_LPBIG_OFFBIG_LINTFLAGS },
+#endif
+
+#if defined (_CS_POSIX_V6_WIDTH_RESTRICTED_ENVS)
+  { "POSIX_6_WIDTH_RESTRICTED_ENVS",	CONFSTR,	_CS_POSIX_V6_WIDTH_RESTRICTED_ENVS },
 #endif
 
   /* POSIX.2 Utility Limit Minimum Values */
@@ -219,6 +236,11 @@ static const struct conf_variable conf_table[] =
   { "POSIX2_BC_STRING_MAX",	CONSTANT,	_POSIX2_BC_STRING_MAX	},
 #else
   { "POSIX2_BC_STRING_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_CHARCLASS_NAME_MAX
+  { "POSIX2_CHARCLASS_NAME_MAX",	CONSTANT,	_POSIX2_CHARCLASS_NAME_MAX },
+#else
+  { "POSIX2_CHARCLASS_NAME_MAX",	G_UNDEF,	-1			 },
 #endif
 #ifdef _POSIX2_COLL_WEIGHTS_MAX
   { "POSIX2_COLL_WEIGHTS_MAX",	CONSTANT,	_POSIX2_COLL_WEIGHTS_MAX },
@@ -251,7 +273,83 @@ static const struct conf_variable conf_table[] =
 #  endif
 #endif
 
+#ifdef _POSIX2_BC_BASE_MAX
+  { "_POSIX2_BC_BASE_MAX",	CONSTANT,	_POSIX2_BC_BASE_MAX	},
+#else
+  { "_POSIX2_BC_BASE_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_DIM_MAX
+  { "_POSIX2_BC_DIM_MAX",	CONSTANT,	_POSIX2_BC_DIM_MAX	},
+#else
+  { "_POSIX2_BC_DIM_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_SCALE_MAX
+  { "_POSIX2_BC_SCALE_MAX",	CONSTANT,	_POSIX2_BC_SCALE_MAX	},
+#else
+  { "_POSIX2_BC_SCALE_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_BC_STRING_MAX
+  { "_POSIX2_BC_STRING_MAX",	CONSTANT,	_POSIX2_BC_STRING_MAX	},
+#else
+  { "_POSIX2_BC_STRING_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_CHARCLASS_NAME_MAX
+  { "_POSIX2_CHARCLASS_NAME_MAX",	CONSTANT,	_POSIX2_CHARCLASS_NAME_MAX },
+#else
+  { "_POSIX2_CHARCLASS_NAME_MAX",	G_UNDEF,	-1			 },
+#endif
+#ifdef _POSIX2_COLL_WEIGHTS_MAX
+  { "_POSIX2_COLL_WEIGHTS_MAX",	CONSTANT,	_POSIX2_COLL_WEIGHTS_MAX },
+#else
+  { "_POSIX2_COLL_WEIGHTS_MAX",	G_UNDEF,	-1			 },
+#endif
+#if defined (_POSIX2_EQUIV_CLASS_MAX)
+  { "POSIX2_EQUIV_CLASS_MAX",	CONSTANT,	_POSIX2_EQUIV_CLASS_MAX	},
+#endif
+#ifdef _POSIX2_EXPR_NEST_MAX
+  { "_POSIX2_EXPR_NEST_MAX",	CONSTANT,	_POSIX2_EXPR_NEST_MAX	},
+#else
+  { "_POSIX2_EXPR_NEST_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_LINE_MAX
+  { "_POSIX2_LINE_MAX",		CONSTANT,	_POSIX2_LINE_MAX	},
+#else
+  { "_POSIX2_LINE_MAX",		G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX2_RE_DUP_MAX
+  { "_POSIX2_RE_DUP_MAX",	CONSTANT,	_POSIX2_RE_DUP_MAX	},
+#else
+  { "_POSIX2_RE_DUP_MAX",	G_UNDEF,	-1			},
+#endif
+
+  /* X/OPEN Maxmimum Values */
+#ifdef _XOPEN_IOV_MAX
+  { "_XOPEN_IOV_MAX",		CONSTANT,	_XOPEN_IOV_MAX		},
+#else
+  { "_XOPEN_IOV_MAX",		G_UNDEF,	-1			},
+#endif
+#ifdef _XOPEN_NAME_MAX
+  { "_XOPEN_NAME_MAX",		CONSTANT,	_XOPEN_NAME_MAX		},
+#else
+  { "_XOPEN_NAME_MAX",		G_UNDEF,	-1			},
+#endif
+#ifdef _XOPEN_PATH_MAX
+  { "_XOPEN_PATH_MAX",		CONSTANT,	_XOPEN_PATH_MAX		},
+#else
+  { "_XOPEN_PATH_MAX",		G_UNDEF,	-1			},
+#endif
+
   /* POSIX.1 Minimum Values */
+#ifdef _POSIX_AIO_LISTIO_MAX
+  { "_POSIX_AIO_LISTIO_MAX",	CONSTANT,	_POSIX_AIO_LISTIO_MAX	},
+#else
+  { "_POSIX_AIO_LISTIO_MAX",	G_UNDEF,	-1			},
+#endif
+#ifdef _POSIX_AIO_MAX
+  { "_POSIX_AIO_MAX",		CONSTANT,	_POSIX_AIO_MAX		},
+#else
+  { "_POSIX_AIO_MAX",		G_UNDEF,	-1			},
+#endif
 #ifdef _POSIX_ARG_MAX
   { "_POSIX_ARG_MAX",		CONSTANT,	_POSIX_ARG_MAX		},
 #else
@@ -260,12 +358,27 @@ static const struct conf_variable conf_table[] =
 #ifdef _POSIX_CHILD_MAX
   { "_POSIX_CHILD_MAX",		CONSTANT,	_POSIX_CHILD_MAX	},
 #else
-  { "_POSIX_CHILD_MAX",		G_UNDEF,	-1		},
+  { "_POSIX_CHILD_MAX",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_DELAYTIMER_MAX
+  { "_POSIX_DELAYTIMER_MAX",	CONSTANT,	_POSIX_DELAYTIMER_MAX	},
+#else
+  { "_POSIX_DELAYTIMER_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_HOST_NAME_MAX
+  { "_POSIX_HOST_NAME_MAX",	CONSTANT,	_POSIX_HOST_NAME_MAX	},
+#else
+  { "_POSIX_HOST_NAME_MAX",	G_UNDEF,	-1			},
 #endif  
 #ifdef _POSIX_LINK_MAX
   { "_POSIX_LINK_MAX",		CONSTANT,	_POSIX_LINK_MAX		},
 #else
   { "_POSIX_LINK_MAX",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_LOGIN_NAME_MAX
+  { "_POSIX_LOGIN_NAME_MAX",	CONSTANT,	_POSIX_LOGIN_NAME_MAX	},
+#else
+  { "_POSIX_LOGIN_NAME_MAX",	G_UNDEF,	-1			},
 #endif  
 #ifdef _POSIX_MAX_CANON
   { "_POSIX_MAX_CANON",		CONSTANT,	_POSIX_MAX_CANON	},
@@ -276,6 +389,16 @@ static const struct conf_variable conf_table[] =
   { "_POSIX_MAX_INPUT",		CONSTANT,	_POSIX_MAX_INPUT	},
 #else
   { "_POSIX_MAX_INPUT",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_MQ_OPEN_MAX
+  { "_POSIX_MQ_OPEN_MAX",	CONSTANT,	_POSIX_MQ_OPEN_MAX	},
+#else
+  { "_POSIX_MQ_OPEN_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_MQ_PRIO_MAX
+  { "_POSIX_MQ_PRIO_MAX",	CONSTANT,	_POSIX_MQ_PRIO_MAX	},
+#else
+  { "_POSIX_MQ_PRIO_MAX",	G_UNDEF,	-1			},
 #endif  
 #ifdef _POSIX_NAME_MAX
   { "_POSIX_NAME_MAX",		CONSTANT,	_POSIX_NAME_MAX		},
@@ -302,20 +425,129 @@ static const struct conf_variable conf_table[] =
 #else
   { "_POSIX_PIPE_BUF",		G_UNDEF,	-1			},
 #endif  
+#ifdef _POSIX_RE_DUP_MAX
+  { "_POSIX_RE_DUP_MAX",	CONSTANT,	_POSIX_RE_DUP_MAX	},
+#else
+  { "_POSIX_RE_DUP_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_RTSIG_MAX
+  { "_POSIX_RTSIG_MAX",		CONSTANT,	_POSIX_RTSIG_MAX	},
+#else
+  { "_POSIX_RTSIG_MAX",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_SEM_NSEMS_MAX
+  { "_POSIX_SEM_NSEMS_MAX",	CONSTANT,	_POSIX_SEM_NSEMS_MAX	},
+#else
+  { "_POSIX_SEM_NSEMS_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_SEM_VALUE_MAX
+  { "_POSIX_SEM_VALUE_MAX",	CONSTANT,	_POSIX_SEM_VALUE_MAX	},
+#else
+  { "_POSIX_SEM_VALUE_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_SIGQUEUE_MAX
+  { "_POSIX_SIGQUEUE_MAX",	CONSTANT,	_POSIX_SIGQUEUE_MAX	},
+#else
+  { "_POSIX_SIGQUEUE_MAX",	G_UNDEF,	-1			},
+#endif  
 #ifdef _POSIX_SSIZE_MAX
   { "_POSIX_SSIZE_MAX",		CONSTANT,	_POSIX_SSIZE_MAX	},
 #else
   { "_POSIX_SSIZE_MAX",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_SS_REPL_MAX
+  { "_POSIX_SS_REPL_MAX",	CONSTANT,	_POSIX_SS_REPL_MAX	},
+#else
+  { "_POSIX_SS_REPL_MAX",	G_UNDEF,	-1			},
 #endif  
 #ifdef _POSIX_STREAM_MAX
   { "_POSIX_STREAM_MAX",	CONSTANT,	_POSIX_STREAM_MAX	},
 #else
   { "_POSIX_STREAM_MAX",	G_UNDEF,	-1			},
 #endif  
+#ifdef _POSIX_SYMLINK_MAX
+  { "_POSIX_SYMLINK_MAX",	CONSTANT,	_POSIX_SYMLINK_MAX	},
+#else
+  { "_POSIX_SYMLINK_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_SYMLOOP_MAX
+  { "_POSIX_SYMLOOP_MAX",	CONSTANT,	_POSIX_SYMLOOP_MAX	},
+#else
+  { "_POSIX_SYMLOOP_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_THREAD_DESTRUCTOR_ITERATIONS
+  { "_POSIX_THREAD_DESTRUCTOR_ITERATIONS",	CONSTANT,	_POSIX_THREAD_DESTRUCTOR_ITERATIONS	},
+#else
+  { "_POSIX_THREAD_DESTRUCTOR_ITERATIONS",	G_UNDEF,	-1	},
+#endif  
+#ifdef _POSIX_THREAD_KEYS_MAX
+  { "_POSIX_THREAD_KEYS_MAX",	CONSTANT,	_POSIX_THREAD_KEYS_MAX	},
+#else
+  { "_POSIX_THREAD_KEYS_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_THREAD_THREADS_MAX
+  { "_POSIX_THREAD_THREADS_MAX",CONSTANT,	_POSIX_THREAD_THREADS_MAX },
+#else
+  { "_POSIX_THREAD_THREADS_MAX",G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_TIMER_MAX
+  { "_POSIX_TIMER_MAX",		CONSTANT,	_POSIX_TIMER_MAX	},
+#else
+  { "_POSIX_TIMER_MAX",		G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_TRACE_EVENT_NAME_MAX
+  { "_POSIX_TRACE_EVENT_NAME_MAX",	CONSTANT,	_POSIX_TRACE_EVENT_NAME_MAX	},
+#else
+  { "_POSIX_TRACE_EVENT_NAME_MAX",	G_UNDEF,	-1		},
+#endif  
+#ifdef _POSIX_TRACE_NAME_MAX
+  { "_POSIX_TRACE_NAME_MAX",	CONSTANT,	_POSIX_TRACE_NAME_MAX	},
+#else
+  { "_POSIX_TRACE_NAME_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_TRACE_SYS_MAX
+  { "_POSIX_TRACE_SYS_MAX",	CONSTANT,	_POSIX_TRACE_SYS_MAX	},
+#else
+  { "_POSIX_TRACE_SYS_MAX",	G_UNDEF,	-1			},
+#endif  
+#ifdef _POSIX_TRACE_USER_EVENT_MAX
+  { "_POSIX_TRACE_USER_EVENT_MAX",	CONSTANT,	_POSIX_TRACE_USER_EVENT_MAX	},
+#else
+  { "_POSIX_TRACE_USER_EVENT_MAX",	G_UNDEF,	-1		},
+#endif  
+#ifdef _POSIX_TTY_NAME_MAX
+  { "_POSIX_TTY_NAME_MAX",	CONSTANT,	_POSIX_TTY_NAME_MAX	},
+#else
+  { "_POSIX_TTY_NAME_MAX",	G_UNDEF,	-1			},
+#endif  
 #ifdef _POSIX_TZNAME_MAX
   { "_POSIX_TZNAME_MAX",	CONSTANT,	_POSIX_TZNAME_MAX	},
 #else
-  { "_POSIX_TZNAME_MAX",	G_UNDEF,	-1	},
+  { "_POSIX_TZNAME_MAX",	G_UNDEF,	-1			},
+#endif  
+
+  /* POSIX.1 Maximum Values */
+#ifdef _POSIX_CLOCKRES_MIN
+  { "_POSIX_CLOCKRES_MIN",	CONSTANT,	_POSIX_CLOCKRES_MIN	},
+#else
+  { "_POSIX_CLOCKRES_MIN",	G_UNDEF,	-1			},
+#endif
+
+  /* POSIX.1-2001/XPG6 (and later) Runtime Invariants from <limits.h> */
+#ifdef _SC_SS_REPL_MAX
+  { "SS_REPL_MAX",		SYSCONF,	_SC_SS_REPL_MAX	},
+#endif  
+#ifdef _SC_TRACE_EVENT_NAME_MAX
+  { "TRACE_EVENT_NAME_MAX",	SYSCONF,	_SC_TRACE_EVENT_NAME_MAX	},
+#endif  
+#ifdef _SC_TRACE_NAME_MAX
+  { "TRACE_NAME_MAX",		SYSCONF,	_SC_TRACE_NAME_MAX	},
+#endif  
+#ifdef _SC_TRACE_SYS_MAX
+  { "TRACE_SYS_MAX",		SYSCONF,	_SC_TRACE_SYS_MAX	},
+#endif  
+#ifdef _SC_TRACE_USER_EVENT_MAX
+  { "TRACE_USER_EVENT_MAX",	SYSCONF,	_SC_TRACE_USER_EVENT_MAX	},
 #endif  
 
   /* POSIX.2/XPG 4.2 (and later) Symbolic Utility Limits */
@@ -361,55 +593,58 @@ static const struct conf_variable conf_table[] =
 #ifdef NL_TEXTMAX
   { "NL_TEXTMAX",		CONSTANT,	NL_TEXTMAX		},
 #endif
+#ifdef _SC_RAW_SOCKET
+  { "RAW_SOCKET",		SYSCONF,	_SC_RAW_SOCKET		},
+#endif
 #ifdef _SC_RE_DUP_MAX
   { "RE_DUP_MAX",		SYSCONF,	_SC_RE_DUP_MAX		},
 #endif
 
   /* POSIX.2 Optional Facility Configuration Values */
 #ifdef _SC_2_C_BIND
-  { "_POSIX2_C_BIND",		SYSCONF,	_SC_2_C_BIND		},
+  { "POSIX2_C_BIND",		SYSCONF,	_SC_2_C_BIND		},
 #else
-  { "_POSIX2_C_BIND",		G_UNDEF,	-1			},
+  { "POSIX2_C_BIND",		G_UNDEF,	-1			},
 #endif
 #ifdef _SC_2_C_DEV
-  { "_POSIX2_C_DEV",		SYSCONF,	_SC_2_C_DEV		},
+  { "POSIX2_C_DEV",		SYSCONF,	_SC_2_C_DEV		},
 #else
-  { "_POSIX2_C_DEV",		G_UNDEF,	-1			},
+  { "POSIX2_C_DEV",		G_UNDEF,	-1			},
 #endif
 #if defined (_SC_2_C_VERSION)
-  { "_POSIX2_C_VERSION",		SYSCONF,	_SC_2_C_VERSION		},
+  { "POSIX2_C_VERSION",		SYSCONF,	_SC_2_C_VERSION		},
 #else
-  { "_POSIX2_C_VERSION",		G_UNDEF,	-1			},
+  { "POSIX2_C_VERSION",		G_UNDEF,	-1			},
 #endif
 #if defined (_SC_2_CHAR_TERM)
-  { "_POSIX2_CHAR_TERM",		SYSCONF,	_SC_2_CHAR_TERM		},
+  { "POSIX2_CHAR_TERM",		SYSCONF,	_SC_2_CHAR_TERM		},
 #else
-  { "_POSIX2_CHAR_TERM",		G_UNDEF,	-1			},
+  { "POSIX2_CHAR_TERM",		G_UNDEF,	-1			},
 #endif
 #ifdef _SC_2_FORT_DEV
-  { "_POSIX2_FORT_DEV",		SYSCONF,	_SC_2_FORT_DEV		},
+  { "POSIX2_FORT_DEV",		SYSCONF,	_SC_2_FORT_DEV		},
 #else
-  { "_POSIX2_FORT_DEV",		G_UNDEF,	-1			},
+  { "POSIX2_FORT_DEV",		G_UNDEF,	-1			},
 #endif
 #ifdef _SC_2_FORT_RUN
-  { "_POSIX2_FORT_RUN",		SYSCONF,	_SC_2_FORT_RUN		},
+  { "POSIX2_FORT_RUN",		SYSCONF,	_SC_2_FORT_RUN		},
 #else
-  { "_POSIX2_FORT_RUN",		G_UNDEF,	-1			},
+  { "POSIX2_FORT_RUN",		G_UNDEF,	-1			},
 #endif
 #ifdef _SC_2_LOCALEDEF
-  { "_POSIX2_LOCALEDEF",	SYSCONF,	_SC_2_LOCALEDEF		},
+  { "POSIX2_LOCALEDEF",	SYSCONF,	_SC_2_LOCALEDEF		},
 #else
-  { "_POSIX2_LOCALEDEF",	G_UNDEF,	-1			},
+  { "POSIX2_LOCALEDEF",	G_UNDEF,	-1			},
 #endif
 #ifdef _SC_2_SW_DEV
-  { "_POSIX2_SW_DEV",		SYSCONF,	_SC_2_SW_DEV		},
+  { "POSIX2_SW_DEV",		SYSCONF,	_SC_2_SW_DEV		},
 #else
-  { "_POSIX2_SW_DEV",		G_UNDEF,	-1			},
+  { "POSIX2_SW_DEV",		G_UNDEF,	-1			},
 #endif
 #if defined (_SC2_UPE)
-  { "_POSIX2_UPE",		SYSCONF,	_SC_2_UPE		},
+  { "POSIX2_UPE",		SYSCONF,	_SC_2_UPE		},
 #else
-  { "_POSIX2_UPE",		G_UNDEF,	-1			},
+  { "POSIX2_UPE",		G_UNDEF,	-1			},
 #endif
 #if !defined (_POSIX2_VERSION) && defined (_SC_2_VERSION)
   { "_POSIX2_VERSION",		SYSCONF,	_SC_2_VERSION		},
@@ -418,13 +653,18 @@ static const struct conf_variable conf_table[] =
 #endif
 #if defined (_SC_REGEX_VERSION)
   { "REGEX_VERSION",		SYSCONF,	_SC_REGEX_VERSION	},
+  { "_REGEX_VERSION",		SYSCONF,	_SC_REGEX_VERSION	},
 #else
   { "REGEX_VERSION",		G_UNDEF,	-1			},
+  { "_REGEX_VERSION",		G_UNDEF,	-1			},
 #endif
 
 #if defined (_SC_2_PBS)
   { "_POSIX2_PBS",		SYSCONF,	_SC_2_PBS		},
   { "_POSIX2_PBS_ACCOUNTING",	SYSCONF,	_SC_2_PBS_ACCOUNTING	},
+#  if defined (_SC_2_PBS_CHECKPOINT)
+  { "_POSIX2_PBS_CHECKPOINT",	SYSCONF,	_SC_2_PBS_CHECKPOINT	},
+#  endif
   { "_POSIX2_PBS_LOCATE",	SYSCONF,	_SC_2_PBS_LOCATE	},
   { "_POSIX2_PBS_MESSAGE",	SYSCONF,	_SC_2_PBS_MESSAGE	},
   { "_POSIX2_PBS_TRACK",	SYSCONF,	_SC_2_PBS_TRACK		},
@@ -517,6 +757,9 @@ static const struct conf_variable conf_table[] =
 #if defined (_SC_FSYNC)
   { "_POSIX_FSYNC",		SYSCONF,	_SC_FSYNC		},
 #endif
+#if defined (_SC_IPV6)
+  { "_POSIX_IPV6",		SYSCONF,	_SC_IPV6 		},
+#endif
 #if defined (_SC_JOB_CONTROL)
   { "_POSIX_JOB_CONTROL",	SYSCONF,	_SC_JOB_CONTROL 	},
 #endif
@@ -556,6 +799,9 @@ static const struct conf_variable conf_table[] =
 #if defined (_SC_READER_WRITER_LOCKS)
   { "_POSIX_READER_WRITER_LOCKS", SYSCONF,	_SC_READER_WRITER_LOCKS	},
 #endif
+#if defined (_SC_RAW_SOCKETS)
+  { "_POSIX_RAW_SOCKETS",	SYSCONF,	_SC_RAW_SOCKETS	},
+#endif
 #if defined (_SC_REALTIME_SIGNALS)
   { "_POSIX_REALTIME_SIGNALS",	SYSCONF,	_SC_REALTIME_SIGNALS	},
 #endif
@@ -586,6 +832,9 @@ static const struct conf_variable conf_table[] =
 #endif
 #if defined (_SC_SPORADIC_SERVER)
   { "_POSIX_SPORADIC_SERVER",	SYSCONF,	_SC_SPORADIC_SERVER	},
+#endif
+#if defined (_SC_SYMLOOP_MAX)
+  { "_POSIX_SYMLOOP_MAX",	SYSCONF,	_SC_SYMLOOP_MAX		},
 #endif
 #if defined (_SC_SYNCHRONIZED_IO)
   { "_POSIX_SYNCHRONIZED_IO",	SYSCONF,	_SC_SYNCHRONIZED_IO	},
@@ -701,9 +950,6 @@ static const struct conf_variable conf_table[] =
 #if defined (_SC_AIO_PRIO_DELTA_MAX)
   { "AIO_PRIO_DELTA_MAX",	SYSCONF,	_SC_AIO_PRIO_DELTA_MAX	},
 #endif
-#if defined (_SC_DELAYTIMER_MAX)
-  { "DELAYTIMER_MAX",		SYSCONF,	_SC_DELAYTIMER_MAX	},
-#endif
 #if defined (_SC_MQ_OPEN_MAX)
   { "MQ_OPEN_MAX",		SYSCONF,	_SC_MQ_OPEN_MAX		},
 #endif
@@ -757,6 +1003,9 @@ static const struct conf_variable conf_table[] =
 #endif
 #if defined (_SC_XOPEN_SHM)
   { "_XOPEN_SHM",		SYSCONF,	_SC_XOPEN_SHM		},
+#endif
+#if defined (_SC_XOPEN_STREAMS)
+  { "_XOPEN_STREAMS",		SYSCONF,	_SC_XOPEN_STREAMS	},
 #endif
 #if defined (_SC_XOPEN_UNIX)
   { "_XOPEN_UNIX",		SYSCONF,	_SC_XOPEN_UNIX		},
@@ -842,6 +1091,10 @@ static const struct conf_variable conf_table[] =
   { "INT_BIT",			CONSTANT,	INT_BIT		},
   { "INT_MAX",			CONSTANT,	INT_MAX		},
   { "INT_MIN",			CONSTANT,	INT_MIN		},
+#ifdef LLONG_MAX
+  { "LLONG_MAX",		LLCONST,	VAL_LLONG_MAX	},
+  { "LLONG_MIN",		LLCONST,	VAL_LLONG_MIN	},
+#endif
   { "LONG_BIT",			CONSTANT,	LONG_BIT	},
   { "LONG_MAX",			CONSTANT,	LONG_MAX	},
   { "LONG_MIN",			CONSTANT,	LONG_MIN	},
@@ -856,6 +1109,9 @@ static const struct conf_variable conf_table[] =
   { "SSIZE_MAX",		CONSTANT,	SSIZE_MAX	},
   { "UCHAR_MAX",		CONSTANT,	UCHAR_MAX	},
   { "UINT_MAX",			CONSTANT,	UINT_MAX	},
+#ifdef ULLONG_MAX
+  { "ULLONG_MAX",		LLCONST,	VAL_ULLONG_MAX	},
+#endif
   { "ULONG_MAX",		CONSTANT,	ULONG_MAX	},
   { "USHRT_MAX",		CONSTANT,	USHRT_MAX	},
   { "WORD_BIT",			CONSTANT,	WORD_BIT	},
@@ -940,6 +1196,24 @@ int all;
 		printf("undefined\n");
 		break;
 
+#ifdef LLONG_MAX
+	case LLCONST:
+		switch (cp->value) {
+			default:
+			case VAL_LLONG_MIN:
+				printf ("%lld\n", LLONG_MIN);
+				break;
+			case VAL_LLONG_MAX:
+				printf ("%lld\n", LLONG_MAX);
+				break;
+#  if (ULLONG_MAX != LLONG_MAX)
+			case VAL_ULLONG_MAX:
+				printf ("%llu\n", ULLONG_MAX);
+				break;
+#  endif
+		}
+		break;
+#endif
 	case CONSTANT:
 		switch (cp->value) {
 			case UCHAR_MAX:

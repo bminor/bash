@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,9 +31,12 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "bashintl.h"
+
 #include "trap.h"
 
 #include "shell.h"
+#include "flags.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
 #include "signames.h"
 #include "builtins.h"
@@ -54,7 +57,7 @@ extern int errno;
 #define SIG_CHANGED	0x20	/* Trap value changed in trap handler. */
 #define SIG_IGNORED	0x40	/* The signal is currently being ignored. */
 
-#define SPECIAL_TRAP(s)	((s) == EXIT_TRAP || (s) == DEBUG_TRAP || (s) == ERROR_TRAP)
+#define SPECIAL_TRAP(s)	((s) == EXIT_TRAP || (s) == DEBUG_TRAP || (s) == ERROR_TRAP || (s) == RETURN_TRAP)
 
 /* An array of such flags, one for each signal, describing what the
    shell will do with a signal.  DEBUG_TRAP == NSIG; some code below
@@ -66,7 +69,7 @@ static void change_signal __P((int, char *));
 
 static void get_original_signal __P((int));
 
-static void _run_trap_internal __P((int, char *));
+static int _run_trap_internal __P((int, char *));
 
 static void reset_signal __P((int));
 static void restore_signal __P((int));
@@ -77,8 +80,11 @@ extern int interrupt_immediately;
 extern int last_command_exit_value;
 extern int line_number;
 
+extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
 extern procenv_t wait_intr_buf;
+extern int return_catch_flag, return_catch_value;
+extern int subshell_level;
 
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
@@ -99,10 +105,8 @@ int pending_traps[NSIG];
    trap command (e.g., when `return' is executed in the trap command). */
 int running_trap;
 
-/* The value of line_number when the trap started executing, since
-   parse_and_execute resets it to 1 and the trap command might want
-   it. */
-int trap_line_number;
+/* Set to last_command_exit_value before running a trap. */
+int trap_saved_exit_value;
 
 /* The (trapped) signal received while executing in the `wait' builtin */
 int wait_signal_received;
@@ -115,8 +119,8 @@ initialize_traps ()
 {
   register int i;
 
-  trap_list[EXIT_TRAP] = trap_list[DEBUG_TRAP] = trap_list[ERROR_TRAP] = (char *)NULL;
-  sigmodes[EXIT_TRAP] = sigmodes[DEBUG_TRAP] = sigmodes[ERROR_TRAP] = SIG_INHERITED;
+  trap_list[EXIT_TRAP] = trap_list[DEBUG_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
+  sigmodes[EXIT_TRAP] = sigmodes[DEBUG_TRAP] = sigmodes[ERROR_TRAP] = sigmodes[RETURN_TRAP] = SIG_INHERITED;
   original_signals[EXIT_TRAP] = IMPOSSIBLE_TRAP_HANDLER;
 
   for (i = 1; i < NSIG; i++)
@@ -186,9 +190,10 @@ signal_name (sig)
   char *ret;
 
   /* on cygwin32, signal_names[sig] could be null */
-  ret = (sig >= BASH_NSIG || sig < 0) ? "bad signal number" : signal_names[sig];
-  if (ret == NULL)
-    ret = "unrecognized signal number";
+  ret = (sig >= BASH_NSIG || sig < 0 || signal_names[sig] == NULL)
+	? _("invalid signal number")
+	: signal_names[sig];
+
   return ret;
 }
 
@@ -197,10 +202,12 @@ signal_name (sig)
    then (int)2 is returned.  Return NO_SIG if STRING doesn't
    contain a valid signal descriptor. */
 int
-decode_signal (string)
+decode_signal (string, flags)
      char *string;
+     int flags;
 {
   intmax_t sig;
+  char *name;
 
   if (legal_number (string, &sig))
     return ((sig >= 0 && sig < NSIG) ? (int)sig : NO_SIG);
@@ -208,11 +215,32 @@ decode_signal (string)
   /* A leading `SIG' may be omitted. */
   for (sig = 0; sig < BASH_NSIG; sig++)
     {
-      if (signal_names[sig] == 0 || signal_names[sig][0] == '\0')
+      name = signal_names[sig];
+      if (name == 0 || name[0] == '\0')
 	continue;
-      if (strcasecmp (string, signal_names[sig]) == 0 ||
-	  (STREQN (signal_names[sig], "SIG", 3) &&
-	    strcasecmp (string, &(signal_names[sig])[3]) == 0))
+
+      /* Check name without the SIG prefix first case sensitivly or
+	 insensitively depending on whether flags includes DSIG_NOCASE */
+      if (STREQN (name, "SIG", 3))
+	{
+	  name += 3;
+
+	  if ((flags & DSIG_NOCASE) && strcasecmp (string, name) == 0)
+	    return ((int)sig);
+	  else if ((flags & DSIG_NOCASE) == 0 && strcmp (string, name) == 0)
+	    return ((int)sig);
+	  /* If we can't use the `SIG' prefix to match, punt on this
+	     name now. */
+	  else if ((flags & DSIG_SIGPREFIX) == 0)
+	    continue;
+	}
+
+      /* Check name with SIG prefix case sensitively or insensitively
+	 depending on whether flags includes DSIG_NOCASE */
+      name = signal_names[sig];
+      if ((flags & DSIG_NOCASE) && strcasecmp (string, name) == 0)
+	return ((int)sig);
+      else if ((flags & DSIG_NOCASE) == 0 && strcmp (string, name) == 0)
 	return ((int)sig);
     }
 
@@ -278,11 +306,11 @@ run_pending_traps ()
 		 Unless we catch this, the subshell will dump core when
 		 trap_list[SIGTERM] == DEFAULT_SIG, because DEFAULT_SIG is
 		 usually 0x0. */
-	      internal_warning ("run_pending_traps: bad value in trap_list[%d]: %p",
+	      internal_warning (_("run_pending_traps: bad value in trap_list[%d]: %p"),
 				sig, trap_list[sig]);
 	      if (trap_list[sig] == (char *)DEFAULT_SIG)
 		{
-		  internal_warning ("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself", sig, signal_name (sig));
+		  internal_warning (_("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"), sig, signal_name (sig));
 		  kill (getpid (), sig);
 		}
 	    }
@@ -318,7 +346,7 @@ trap_handler (sig)
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
-    programming_error ("trap_handler: bad signal %d", sig);
+    programming_error (_("trap_handler: bad signal %d"), sig);
   else
     {
       oerrno = errno;
@@ -379,6 +407,13 @@ set_error_trap (command)
      char *command;
 {
   set_signal (ERROR_TRAP, command);
+}
+
+void
+set_return_trap (command)
+     char *command;
+{
+  set_signal (RETURN_TRAP, command);
 }
 
 #ifdef INCLUDE_UNUSED
@@ -541,7 +576,8 @@ restore_default_signal (sig)
 {
   if (SPECIAL_TRAP (sig))
     {
-      if ((sig != DEBUG_TRAP && sig != ERROR_TRAP) || (sigmodes[sig] & SIG_INPROGRESS) == 0)
+      if ((sig != DEBUG_TRAP && sig != ERROR_TRAP && sig != RETURN_TRAP) ||
+	  (sigmodes[sig] & SIG_INPROGRESS) == 0)
 	free_trap_command (sig);
       trap_list[sig] = (char *)NULL;
       sigmodes[sig] &= ~SIG_TRAPPED;
@@ -609,9 +645,10 @@ int
 run_exit_trap ()
 {
   char *trap_command;
-  int code, old_exit_value;
+  int code, function_code, retval;
 
-  old_exit_value = last_command_exit_value;
+  trap_saved_exit_value = last_command_exit_value;
+  function_code = 0;
 
   /* Run the trap only if signal 0 is trapped and not ignored, and we are not
      currently running in the trap handler (call to exit in the list of
@@ -623,20 +660,34 @@ run_exit_trap ()
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
       sigmodes[EXIT_TRAP] |= SIG_INPROGRESS;
 
+      retval = trap_saved_exit_value;
+      running_trap = 1;
+
       code = setjmp (top_level);
 
-      if (code == 0)
+      /* If we're in a function, make sure return longjmps come here, too. */
+      if (return_catch_flag)
+	function_code = setjmp (return_catch);
+
+      if (code == 0 && function_code == 0)
 	{
 	  reset_parser ();
 	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
 	}
+      else if (code == ERREXIT)
+	retval = last_command_exit_value;
       else if (code == EXITPROG)
-	return (last_command_exit_value);
+	retval = last_command_exit_value;
+      else if (function_code != 0)
+        retval = return_catch_value;
       else
-	return (old_exit_value);
+	retval = trap_saved_exit_value;
+
+      running_trap = 0;
+      return retval;
     }
 
-  return (old_exit_value);
+  return (trap_saved_exit_value);
 }
 
 void
@@ -647,15 +698,18 @@ run_trap_cleanup (sig)
 }
 
 /* Run a trap command for SIG.  SIG is one of the signals the shell treats
-   specially. */
-static void
+   specially.  Returns the exit status of the executed trap command list. */
+static int
 _run_trap_internal (sig, tag)
      int sig;
      char *tag;
 {
   char *trap_command, *old_trap;
-  int old_exit_value, *token_state;
+  int trap_exit_value, *token_state;
+  int save_return_catch_flag, function_code;
+  procenv_t save_return_catch;
 
+  trap_exit_value = function_code = 0;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&
@@ -668,41 +722,97 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-      old_exit_value = last_command_exit_value;
-      /* Need to copy the value of line_number because parse_and_execute
-	 resets it to 1, and the trap command might want it. */
-      trap_line_number = line_number;
+      trap_saved_exit_value = last_command_exit_value;
 
       token_state = save_token_state ();
-      parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+
+      /* If we're in a function, make sure return longjmps come here, too. */
+      save_return_catch_flag = return_catch_flag;
+      if (return_catch_flag)
+	{
+	  COPY_PROCENV (return_catch, save_return_catch);
+	  function_code = setjmp (return_catch);
+	}
+
+      if (function_code == 0)
+	parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+
       restore_token_state (token_state);
       free (token_state);
 
-      last_command_exit_value = old_exit_value;
+      trap_exit_value = last_command_exit_value;
+      last_command_exit_value = trap_saved_exit_value;
       running_trap = 0;
 
       sigmodes[sig] &= ~SIG_INPROGRESS;
 
       if (sigmodes[sig] & SIG_CHANGED)
 	{
-	  free (old_trap);
+#if 0
+	  /* Special traps like EXIT, DEBUG, RETURN are handled explicitly in
+	     the places where they can be changed using unwind-protects.  For
+	     example, look at execute_cmd.c:execute_function(). */
+	  if (SPECIAL_TRAP (sig) == 0)
+#endif
+	    free (old_trap);
 	  sigmodes[sig] &= ~SIG_CHANGED;
 	}
+
+      if (save_return_catch_flag)
+	{
+	  return_catch_flag = save_return_catch_flag;
+	  return_catch_value = trap_exit_value;
+	  COPY_PROCENV (save_return_catch, return_catch);
+	  if (function_code)
+	    longjmp (return_catch, 1);
+	}
     }
+
+  return trap_exit_value;
 }
 
-void
+int
 run_debug_trap ()
 {
-  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && ((sigmodes[DEBUG_TRAP] & SIG_INPROGRESS) == 0))
-    _run_trap_internal (DEBUG_TRAP, "debug trap");
+  int trap_exit_value;
+
+  /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
+  trap_exit_value = 0;
+  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && ((sigmodes[DEBUG_TRAP] & SIG_IGNORED) == 0) && ((sigmodes[DEBUG_TRAP] & SIG_INPROGRESS) == 0))
+    {
+      trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+      
+#if defined (DEBUGGER)
+      /* If we're in the debugger and the DEBUG trap returns 2 while we're in
+	 a function or sourced script, we force a `return'. */
+      if (debugging_mode && trap_exit_value == 2 && return_catch_flag)
+	{
+	  return_catch_value = trap_exit_value;
+	  longjmp (return_catch, 1);
+	}
+#endif
+    }
+  return trap_exit_value;
 }
 
 void
 run_error_trap ()
 {
-  if ((sigmodes[ERROR_TRAP] & SIG_TRAPPED) && (sigmodes[ERROR_TRAP] & SIG_INPROGRESS) == 0)
+  if ((sigmodes[ERROR_TRAP] & SIG_TRAPPED) && ((sigmodes[ERROR_TRAP] & SIG_IGNORED) == 0) && (sigmodes[ERROR_TRAP] & SIG_INPROGRESS) == 0)
     _run_trap_internal (ERROR_TRAP, "error trap");
+}
+
+void
+run_return_trap ()
+{
+  int old_exit_value;
+
+  if ((sigmodes[RETURN_TRAP] & SIG_TRAPPED) && ((sigmodes[RETURN_TRAP] & SIG_IGNORED) == 0) && (sigmodes[RETURN_TRAP] & SIG_INPROGRESS) == 0)
+    {
+      old_exit_value = last_command_exit_value;
+      _run_trap_internal (RETURN_TRAP, "return trap");
+      last_command_exit_value = old_exit_value;
+    }
 }
 
 /* Run a trap set on SIGINT.  This is called from throw_to_top_level (), and
@@ -727,7 +837,7 @@ free_trap_strings ()
       trap_list[i] = (char *)DEFAULT_SIG;
       sigmodes[i] &= ~SIG_TRAPPED;
     }
-  trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = (char *)NULL;
+  trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
 }
 #endif
 
@@ -764,6 +874,7 @@ reset_or_restore_signal_handlers (reset)
       trap_list[EXIT_TRAP] = (char *)NULL;
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
     }
+
   for (i = 1; i < NSIG; i++)
     {
       if (sigmodes[i] & SIG_TRAPPED)
@@ -778,9 +889,22 @@ reset_or_restore_signal_handlers (reset)
     }
 
   /* Command substitution and other child processes don't inherit the
-     debug or error traps. */
-  sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;  
-  sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
+     debug, error, or return traps.  If we're in the debugger, and the
+     `functrace' or `errtrace' options have been set, then let command
+     substitutions inherit them.  Let command substitution inherit the
+     RETURN trap if we're in the debugger and tracing functions. */
+#if defined (DEBUGGER)
+  if (debugging_mode == 0 || function_trace_mode == 0)
+#endif
+    sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
+#if defined (DEBUGGER)
+  if (debugging_mode == 0 || error_trace_mode == 0)
+#endif
+    sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
+#if defined (DEBUGGER)
+  if (debugging_mode == 0 || function_trace_mode == 0)
+    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
+#endif
 }
 
 /* Reset trapped signals to their original values, but don't free the

@@ -99,7 +99,7 @@ t -s run-all
 echo 't -t 20'
 t -t 20
 echo 't -t 0'
-t -t 0
+t -t 0 < /dev/tty
 
 echo 't -u noexist'
 t -u noexist
@@ -355,7 +355,7 @@ case "${THIS_SH}" in
 esac
 
 if ln -s ${SHNAME} /tmp/test.symlink 2>/dev/null; then
-	chgrp ${GROUPS[0]} /tmp/test.symlink
+	chgrp ${GROUPS[0]} /tmp/test.symlink 2>/dev/null
 	echo 't -h /tmp/test.symlink'
 	t -h /tmp/test.symlink
 	# some systems don't let you remove this

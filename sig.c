@@ -32,6 +32,8 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include "bashintl.h"
+
 #include "shell.h"
 #if defined (JOB_CONTROL)
 #include "jobs.h"
@@ -51,6 +53,7 @@
 #endif
 
 extern int last_command_exit_value;
+extern int last_command_exit_signal;
 extern int return_catch_flag;
 extern int loop_level, continuing, breaking;
 extern int parse_and_execute_level, shell_initialized;
@@ -343,6 +346,8 @@ throw_to_top_level ()
   if (interrupt_state)
     return;
 
+  last_command_exit_signal = (last_command_exit_value > 128) ?
+				(last_command_exit_value - 128) : 0;
   last_command_exit_value |= 128;
 
   /* Run any traps set on SIGINT. */
@@ -477,7 +482,7 @@ sigprocmask (operation, newset, oldset)
       break;
 
     default:
-      internal_error ("Bad code in sig.c: sigprocmask");
+      internal_error (_("sigprocmask: %d: invalid operation"), operation);
     }
 
   if (oldset)

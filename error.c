@@ -1,5 +1,5 @@
 /* error.c -- Functions for handling errors. */
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,11 +40,10 @@ extern int errno;
 #endif /* !errno */
 
 #include "bashansi.h"
+#include "bashintl.h"
+
+#include "shell.h"
 #include "flags.h"
-#include "error.h"
-#include "command.h"
-#include "general.h"
-#include "externs.h"
 #include "input.h"
 
 #if defined (HISTORY)
@@ -61,6 +60,10 @@ extern pid_t shell_pgrp;
 extern int give_terminal_to __P((pid_t, int));
 #endif /* JOB_CONTROL */
 
+#if defined (ARRAY_VARS)
+extern char *bash_badsub_errmsg;
+#endif
+
 static void error_prolog __P((int));
 
 /* The current maintainer of the shell.  You change this in the
@@ -71,20 +74,22 @@ static void error_prolog __P((int));
 
 char *the_current_maintainer = MAINTAINER;
 
+int gnu_error_format = 0;
+
 static void
 error_prolog (print_lineno)
      int print_lineno;
 {
+  char *ename;
   int line;
 
-  fprintf (stderr, "%s: ", get_name_for_error ());
+  ename = get_name_for_error ();
+  line = (print_lineno && interactive_shell == 0) ? executing_line_number () : -1;
 
-  if (print_lineno && interactive_shell == 0)
-    {
-      line = executing_line_number ();
-      if (line > 0)
-	fprintf (stderr, "line %d: ", line);
-    }
+  if (line > 0)
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", line);
+  else
+    fprintf (stderr, "%s: ", ename);
 }
 
 /* Return the name of the shell or the shell script for error reporting. */
@@ -92,10 +97,23 @@ char *
 get_name_for_error ()
 {
   char *name;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *bash_source_v;
+  ARRAY *bash_source_a;
+#endif
 
   name = (char *)NULL;
   if (interactive_shell == 0)
-    name = dollar_vars[0];
+    {
+#if defined (ARRAY_VARS)
+      bash_source_v = find_variable ("BASH_SOURCE");
+      if (bash_source_v && array_p (bash_source_v) &&
+	  (bash_source_a = array_cell (bash_source_v)))
+	name = array_reference (bash_source_a, 0);
+      if (name == 0)
+#endif
+	name = dollar_vars[0];
+    }
   if (name == 0 && shell_name && *shell_name)
     name = base_pathname (shell_name);
   if (name == 0)
@@ -144,7 +162,7 @@ programming_error (format, va_alist)
   if (remember_on_history)
     {
       h = last_history_line ();
-      fprintf (stderr, "last command: %s\n", h ? h : "(null)");
+      fprintf (stderr, _("last command: %s\n"), h ? h : "(null)");
     }
 #endif
 
@@ -152,7 +170,7 @@ programming_error (format, va_alist)
   fprintf (stderr, "Report this to %s\n", the_current_maintainer);
 #endif
 
-  fprintf (stderr, "Stopping myself...");
+  fprintf (stderr, _("Aborting..."));
   fflush (stderr);
 
   abort ();
@@ -182,7 +200,7 @@ report_error (format, va_alist)
 
   va_end (args);
   if (exit_immediately_on_error)
-    sh_exit (1);
+    exit_shell (1);
 }
 
 void
@@ -239,7 +257,7 @@ internal_warning (format, va_alist)
 {
   va_list args;
 
-  fprintf (stderr, "%s: warning: ", get_name_for_error ());
+  fprintf (stderr, _("%s: warning: "), get_name_for_error ());
 
   SH_VA_START (args, format);
 
@@ -299,11 +317,11 @@ parser_error (lineno, format, va_alist)
   if (interactive)
     fprintf (stderr, "%s: ", ename);
   else if (interactive_shell)
-    fprintf (stderr, "%s: %s: line %d: ", ename, iname, lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
   else if (STREQ (ename, iname))
-    fprintf (stderr, "%s: line %d: ", ename, lineno);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", lineno);
   else
-    fprintf (stderr, "%s: %s: line %d: ", ename, iname, lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
 
   SH_VA_START (args, format);
 
@@ -313,7 +331,7 @@ parser_error (lineno, format, va_alist)
   va_end (args);
 
   if (exit_immediately_on_error)
-    sh_exit (2);
+    exit_shell (2);
 }
 
 #ifdef DEBUG
@@ -384,10 +402,10 @@ trace (format, va_alist)
 
 
 static char *cmd_error_table[] = {
-	"unknown command error",	/* CMDERR_DEFAULT */
-	"bad command type",		/* CMDERR_BADTYPE */
-	"bad connector",		/* CMDERR_BADCONN */
-	"bad jump",			/* CMDERR_BADJUMP */
+	N_("unknown command error"),	/* CMDERR_DEFAULT */
+	N_("bad command type"),		/* CMDERR_BADTYPE */
+	N_("bad connector"),		/* CMDERR_BADCONN */
+	N_("bad jump"),			/* CMDERR_BADJUMP */
 	0
 };
 
@@ -399,7 +417,7 @@ command_error (func, code, e, flags)
   if (code > CMDERR_LAST)
     code = CMDERR_DEFAULT;
 
-  programming_error ("%s: %s: %d", func, cmd_error_table[code], e);
+  programming_error ("%s: %s: %d", func, _(cmd_error_table[code]), e);
 }
 
 char *
@@ -409,7 +427,7 @@ command_errstr (code)
   if (code > CMDERR_LAST)
     code = CMDERR_DEFAULT;
 
-  return (cmd_error_table[code]);
+  return (_(cmd_error_table[code]));
 }
 
 #ifdef ARRAY_VARS
@@ -417,7 +435,7 @@ void
 err_badarraysub (s)
      const char *s;
 {
-  report_error ("%s: bad array subscript", s);
+  report_error ("%s: %s", s, _(bash_badsub_errmsg));
 }
 #endif
 
@@ -425,12 +443,12 @@ void
 err_unboundvar (s)
      const char *s;
 {
-  report_error ("%s: unbound variable", s);
+  report_error (_("%s: unbound variable"), s);
 }
 
 void
 err_readonly (s)
      const char *s;
 {
-  report_error ("%s: readonly variable", s);
+  report_error (_("%s: readonly variable"), s);
 }

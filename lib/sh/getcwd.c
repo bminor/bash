@@ -22,6 +22,10 @@
 
 #if !defined (HAVE_GETCWD)
 
+#if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
+  #pragma alloca
+#endif /* _AIX && RISC6000 && !__GNUC__ */
+
 #include <bashtypes.h>
 #include <errno.h>
 

@@ -103,7 +103,7 @@ esac
 
 shift
 
-[ -z "$end" -o $count -le "$end" ] && increment=1 || increment=-1
+[ -z "$end" ] && [ $count -le "$end" ] && increment=1 || increment=-1
 
 istrue $verbose && echo "start=$count end=$end" 1>&2
 

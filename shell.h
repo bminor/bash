@@ -1,6 +1,6 @@
 /* shell.h -- The data structures used by the shell */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,7 +40,6 @@
 #include "sig.h"
 #include "pathnames.h"
 #include "externs.h"
-#include "version.h"
 
 extern int EOF_Reached;
 
@@ -71,20 +70,22 @@ extern int EOF_Reached;
 #define EX_EXPFAIL	261	/* word expansion failed */
 
 /* Flag values that control parameter pattern substitution. */
-#define MATCH_ANY	0x0
-#define MATCH_BEG	0x1
-#define MATCH_END	0x2
+#define MATCH_ANY	0x000
+#define MATCH_BEG	0x001
+#define MATCH_END	0x002
 
-#define MATCH_TYPEMASK	0x3
+#define MATCH_TYPEMASK	0x003
 
-#define MATCH_GLOBREP	0x10
-#define MATCH_QUOTED	0x20
+#define MATCH_GLOBREP	0x010
+#define MATCH_QUOTED	0x020
+#define MATCH_STARSUB	0x040
 
 /* Some needed external declarations. */
 extern char **shell_environment;
 extern WORD_LIST *rest_of_args;
 
 /* Generalized global variables. */
+extern int debugging_mode;
 extern int executing, login_shell;
 extern int interactive, interactive_shell;
 extern int startup_state;
@@ -119,3 +120,44 @@ extern struct user_info current_user;
 #else
 #  define USE_VAR(x)
 #endif
+
+/* Structure in which to save partial parsing state when doing things like
+   PROMPT_COMMAND and bash_execute_unix_command execution. */
+
+typedef struct _sh_parser_state_t {
+
+  /* parsing state */
+  int parser_state;
+  int *token_state;
+
+  /* input line state -- line number saved elsewhere */
+  int input_line_terminator;
+  int eof_encountered;
+
+#if defined (HANDLE_MULTIBYTE)
+  /* Nothing right now for multibyte state, but might want something later. */
+#endif
+
+  /* history state affecting or modified by the parser */
+  int current_command_line_count;
+#if defined (HISTORY)
+  int remember_on_history;
+  int history_expansion_inhibited;
+#endif
+
+  /* execution state possibly modified by the parser */
+  int last_command_exit_value;
+#if defined (ARRAY_VARS)
+  ARRAY *pipestatus;
+#endif
+  sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
+
+  /* flags state affecting the parser */
+  int expand_aliases;
+  int echo_input_at_read;
+  
+} sh_parser_state_t;
+
+/* Let's try declaring these here. */
+extern sh_parser_state_t *save_parser_state __P((sh_parser_state_t *));
+extern void restore_parser_state __P((sh_parser_state_t *));

@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2004 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -92,12 +92,12 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   /* if this is true, means that seed was not pointed character
      started byte.  So correct the point and consume count */
   if (seed < point)
-    count --;
+    count--;
 
   while (count > 0)  
     {
       tmp = mbrtowc (&wc, string+point, strlen(string + point), &ps);
-      if ((size_t)(tmp) == (size_t)-1 || (size_t)(tmp) == (size_t)-2)
+      if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* invalid bytes. asume a byte represents a character */
 	  point++;
@@ -105,9 +105,8 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
 	  /* reset states. */
 	  memset(&ps, 0, sizeof(mbstate_t));
 	}
-      else if (tmp == (size_t)0)
-	/* found '\0' char */
-	break;
+      else if (MB_NULLWCH (tmp))
+	break;			/* found wide '\0' */
       else
 	{
 	  /* valid bytes */
@@ -160,7 +159,7 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
   while (point < seed)
     {
       tmp = mbrtowc (&wc, string + point, length - point, &ps);
-      if ((size_t)(tmp) == (size_t)-1 || (size_t)(tmp) == (size_t)-2)
+      if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* in this case, bytes are invalid or shorted to compose
 	     multibyte char, so assume that the first byte represents
@@ -169,8 +168,12 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
 	  /* clear the state of the byte sequence, because
 	     in this case effect of mbstate is undefined  */
 	  memset(&ps, 0, sizeof (mbstate_t));
+
+	  /* Since we're assuming that this byte represents a single
+	     non-zero-width character, don't forget about it. */
+	  prev = point;
 	}
-      else if (tmp == 0)
+      else if (MB_NULLWCH (tmp))
 	break;			/* Found '\0' char.  Can this happen? */
       else
 	{
@@ -205,14 +208,16 @@ _rl_get_char_len (src, ps)
   if (tmp == (size_t)(-2))
     {
       /* shorted to compose multibyte char */
-      memset (ps, 0, sizeof(mbstate_t));
+      if (ps)
+	memset (ps, 0, sizeof(mbstate_t));
       return -2;
     }
   else if (tmp == (size_t)(-1))
     {
       /* invalid to compose multibyte char */
       /* initialize the conversion state */
-      memset (ps, 0, sizeof(mbstate_t));
+      if (ps)
+	memset (ps, 0, sizeof(mbstate_t));
       return -1;
     }
   else if (tmp == (size_t)0)
@@ -225,9 +230,12 @@ _rl_get_char_len (src, ps)
    return 1. Otherwise return 0. */
 int
 _rl_compare_chars (buf1, pos1, ps1, buf2, pos2, ps2)
-     char *buf1, *buf2;
-     mbstate_t *ps1, *ps2;
-     int pos1, pos2;
+     char *buf1;
+     int pos1;
+     mbstate_t *ps1;
+     char *buf2;
+     int pos2;
+     mbstate_t *ps2;
 {
   int i, w1, w2;
 
@@ -268,7 +276,7 @@ _rl_adjust_point(string, point, ps)
   while (pos < point)
     {
       tmp = mbrlen (string + pos, length - pos, ps);
-      if((size_t)(tmp) == (size_t)-1 || (size_t)(tmp) == (size_t)-2)
+      if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* in this case, bytes are invalid or shorted to compose
 	     multibyte char, so assume that the first byte represents
@@ -276,8 +284,11 @@ _rl_adjust_point(string, point, ps)
 	  pos++;
 	  /* clear the state of the byte sequence, because
 	     in this case effect of mbstate is undefined  */
-	  memset (ps, 0, sizeof (mbstate_t));
+	  if (ps)
+	    memset (ps, 0, sizeof (mbstate_t));
 	}
+      else if (MB_NULLWCH (tmp))
+	pos++;
       else
 	pos += tmp;
     }

@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include "bashtypes.h"
-#ifndef _MINIX
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "filecntl.h"
@@ -34,6 +34,8 @@
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
+
 #include "command.h"
 #include "general.h"
 #include "input.h"
@@ -226,7 +228,7 @@ save_bash_input (fd, new_fd)
   if (nfd == -1)
     {
       if (fcntl (fd, F_GETFD, 0) == 0)
-	sys_error ("cannot allocate new file descriptor for bash input from fd %d", fd);
+	sys_error (_("cannot allocate new file descriptor for bash input from fd %d"), fd);
       return -1;
     }
 
@@ -234,7 +236,7 @@ save_bash_input (fd, new_fd)
     {
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */
-      internal_error ("check_bash_input: buffer already exists for new fd %d", nfd);
+      internal_error (_("save_bash_input: buffer already exists for new fd %d"), nfd);
       free_buffered_stream (buffers[nfd]);
     }
 
@@ -276,8 +278,13 @@ int
 check_bash_input (fd)
      int fd;
 {
-  if (fd > 0 && fd_is_bash_input (fd))
-    return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
+  if (fd_is_bash_input (fd))
+    {
+      if (fd > 0)
+	return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
+      else if (fd == 0)
+        return ((sync_buffered_stream (fd) == -1) ? -1 : 0);
+    }
   return 0;
 }
       

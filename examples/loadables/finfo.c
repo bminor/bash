@@ -247,10 +247,17 @@ struct stat *st;
 	struct passwd	*pw;
 	struct group	*gr;
 	char	*owner;
+	int	ma, mi, d;
 
-	printf("Device (major/minor): %d (%d/%d)\n", (int) (st->st_dev & 0xFF),
-						     (int) major (st->st_dev),
-						     (int) minor (st->st_dev));
+	ma = major (st->st_rdev);
+	mi = minor (st->st_rdev);
+#if defined (makedev)
+	d = makedev (ma, mi);
+#else
+	d = st->st_rdev & 0xFF;
+#endif
+	printf("Device (major/minor): %d (%d/%d)\n", d, ma, mi);
+
 	printf("Inode: %d\n", (int) st->st_ino);
 	printf("Mode: (%o) ", (int) st->st_mode);
 	printmode((int) st->st_mode);

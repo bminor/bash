@@ -8,7 +8,7 @@ function check_exit_status ()
  local status="$?"
  local signal=""
 
-    if [ ${status} -ne 0 -a ${status} != 128 ]; then
+    if [ ${status} -ne 0 ] && [ ${status} != 128 ]; then
        # If process exited by a signal, determine name of signal.
        if [ ${status} -gt 128 ]; then
           signal="$(builtin kill -l $((${status} - 128)) 2>/dev/null)"

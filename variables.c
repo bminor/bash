@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,7 @@
 #include "chartypes.h"
 #include <pwd.h>
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "flags.h"
@@ -72,16 +73,23 @@
 /* Variables used here and defined in other files. */
 extern int posixly_correct;
 extern int line_number;
-extern int subshell_environment, indirection_level;
+extern int subshell_environment, indirection_level, subshell_level;
 extern int build_version, patch_level;
+extern int expanding_redir;
 extern char *dist_version, *release_status;
 extern char *shell_name;
 extern char *primary_prompt, *secondary_prompt;
 extern char *current_host_name;
 extern sh_builtin_func_t *this_shell_builtin;
 extern SHELL_VAR *this_shell_function;
+extern char *the_printed_command_except_trap;
 extern char *this_command_name;
+extern char *command_execution_string;
 extern time_t shell_start_time;
+
+#if defined (READLINE)
+extern int perform_hostname_completion;
+#endif
 
 /* The list of shell variables that the user has created at the global
    scope, or that came from the environment. */
@@ -94,6 +102,12 @@ VAR_CONTEXT *shell_variables = (VAR_CONTEXT *)NULL;
    the environment. */
 HASH_TABLE *shell_functions = (HASH_TABLE *)NULL;
 
+#if defined (DEBUGGER)
+/* The table of shell function definitions that the user defined or that
+   came from the environment. */
+HASH_TABLE *shell_function_defs = (HASH_TABLE *)NULL;
+#endif
+
 /* The current variable context.  This is really a count of how deep into
    executing functions we are. */
 int variable_context = 0;
@@ -101,6 +115,10 @@ int variable_context = 0;
 /* The set of shell assignments which are made only in the environment
    for a single command. */
 HASH_TABLE *temporary_env = (HASH_TABLE *)NULL;
+
+/* Set to non-zero if an assignment error occurs while putting variables
+   into the temporary environment. */
+int tempenv_assign_error;
 
 /* Some funky variables which are known about specially.  Here is where
    "$*", "$1", and all the cruft is kept. */
@@ -139,6 +157,11 @@ static SHELL_VAR *null_assign __P((SHELL_VAR *, char *, arrayind_t));
 #if defined (ARRAY_VARS)
 static SHELL_VAR *null_array_assign __P((SHELL_VAR *, char *, arrayind_t));
 #endif
+static SHELL_VAR *get_self __P((SHELL_VAR *));
+
+#if defined (ARRAY_VARS)
+static SHELL_VAR *init_dynamic_array_var __P((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
+#endif
 
 static SHELL_VAR *assign_seconds __P((SHELL_VAR *, char *, arrayind_t));
 static SHELL_VAR *get_seconds __P((SHELL_VAR *));
@@ -152,6 +175,9 @@ static SHELL_VAR *get_random __P((SHELL_VAR *));
 static SHELL_VAR *assign_lineno __P((SHELL_VAR *, char *, arrayind_t));
 static SHELL_VAR *get_lineno __P((SHELL_VAR *));
 
+static SHELL_VAR *assign_subshell __P((SHELL_VAR *, char *, arrayind_t));
+static SHELL_VAR *get_subshell __P((SHELL_VAR *));
+
 #if defined (HISTORY)
 static SHELL_VAR *get_histcmd __P((SHELL_VAR *));
 #endif
@@ -159,12 +185,10 @@ static SHELL_VAR *get_histcmd __P((SHELL_VAR *));
 #if defined (PUSHD_AND_POPD) && defined (ARRAY_VARS)
 static SHELL_VAR *assign_dirstack __P((SHELL_VAR *, char *, arrayind_t));
 static SHELL_VAR *get_dirstack __P((SHELL_VAR *));
-static SHELL_VAR *init_dirstack_var __P((void));
 #endif
 
 #if defined (ARRAY_VARS)
 static SHELL_VAR *get_groupset __P((SHELL_VAR *));
-static SHELL_VAR *init_groups_var __P((void));
 #endif
 
 static SHELL_VAR *get_funcname __P((SHELL_VAR *));
@@ -239,6 +263,11 @@ initialize_shell_variables (env, privmode)
   if (shell_functions == 0)
     shell_functions = hash_create (0);
 
+#if defined (DEBUGGER)
+  if (shell_function_defs == 0)
+    shell_function_defs = hash_create (0);
+#endif
+
   for (string_index = 0; string = env[string_index++]; )
     {
       char_index = 0;
@@ -282,7 +311,7 @@ initialize_shell_variables (env, privmode)
 	      array_needs_making = 1;
 	    }
 	  else
-	    report_error ("error importing function definition for `%s'", name);
+	    report_error (_("error importing function definition for `%s'"), name);
 
 	  /* ( */
 	  if (name[char_index - 1] == ')' && name[char_index - 2] == '\0')
@@ -407,6 +436,9 @@ initialize_shell_variables (env, privmode)
 #if defined (ARRAY_VARS)
   make_vers_array ();
 #endif
+
+  if (command_execution_string)
+    bind_variable ("BASH_EXECUTION_STRING", command_execution_string);
 
   /* Find out if we're supposed to be in Posix.2 mode via an
      environment variable. */
@@ -639,7 +671,7 @@ adjust_shell_level (change)
     shell_level = 0;
   else if (shell_level > 1000)
     {
-      internal_warning ("shell level (%d) too high, resetting to 1", shell_level);
+      internal_warning (_("shell level (%d) too high, resetting to 1"), shell_level);
       shell_level = 1;
     }
 
@@ -986,6 +1018,38 @@ null_array_assign (self, value, ind)
 }
 #endif
 
+/* Degenerate `dynamic_value' function; just returns what's passed without
+   manipulation. */
+static SHELL_VAR *
+get_self (self)
+     SHELL_VAR *self;
+{
+  return (self);
+}
+
+#if defined (ARRAY_VARS)
+/* A generic dynamic array variable initializer.  Intialize array variable
+   NAME with dynamic value function GETFUNC and assignment function SETFUNC. */
+static SHELL_VAR *
+init_dynamic_array_var (name, getfunc, setfunc, attrs)
+     char *name;
+     sh_var_value_func_t *getfunc;
+     sh_var_assign_func_t *setfunc;
+     int attrs;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (v)
+    return (v);
+  INIT_DYNAMIC_ARRAY_VAR (name, getfunc, setfunc);
+  if (attrs)
+    VSETATTR (v, attrs);
+  return v;
+}
+#endif
+
+
 /* The value of $SECONDS.  This is the number of seconds since shell
    invocation, or, the number of seconds since the last assignment + the
    value of the last assignment. */
@@ -1132,6 +1196,44 @@ get_lineno (var)
   return (var);
 }
 
+static SHELL_VAR *
+assign_subshell (var, value, unused)
+     SHELL_VAR *var;
+     char *value;
+     arrayind_t unused;
+{
+  intmax_t new_value;
+
+  if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
+    new_value = 0;
+  subshell_level = new_value;
+  return var;
+}
+
+static SHELL_VAR *
+get_subshell (var)
+     SHELL_VAR *var;
+{
+  char *p;
+
+  p = itos (subshell_level);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
+static SHELL_VAR *
+get_bash_command (var)
+     SHELL_VAR *var;
+{
+  char *p;
+
+  p = savestring (the_printed_command_except_trap);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
 #if defined (HISTORY)
 static SHELL_VAR *
 get_histcmd (var)
@@ -1146,8 +1248,49 @@ get_histcmd (var)
 }
 #endif
 
+#if defined (READLINE)
+/* When this function returns, VAR->value points to malloced memory. */
+static SHELL_VAR *
+get_comp_wordbreaks (var)
+     SHELL_VAR *var;
+{
+  char *p;
+
+  /* If we don't have anything yet, assign a default value. */
+  if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
+    enable_hostname_completion (perform_hostname_completion);
+
+#if 0
+  FREE (value_cell (var));
+  p = savestring (rl_completer_word_break_characters);
+  
+  var_setvalue (var, p);
+#else
+  var_setvalue (var, rl_completer_word_break_characters);
+#endif
+
+  return (var);
+}
+
+/* When this function returns, rl_completer_word_break_characters points to
+   malloced memory. */
+static SHELL_VAR *
+assign_comp_wordbreaks (self, value, unused)
+     SHELL_VAR *self;
+     char *value;
+     arrayind_t unused;
+{
+  if (rl_completer_word_break_characters &&
+      rl_completer_word_break_characters != rl_basic_word_break_characters)
+    free (rl_completer_word_break_characters);
+
+  rl_completer_word_break_characters = savestring (value);
+  return self;
+}
+#endif /* READLINE */
+
 #if defined (PUSHD_AND_POPD) && defined (ARRAY_VARS)
-static  SHELL_VAR *
+static SHELL_VAR *
 assign_dirstack (self, value, ind)
      SHELL_VAR *self;
      char *value;
@@ -1170,18 +1313,6 @@ get_dirstack (self)
   dispose_words (l);
   var_setarray (self, a);
   return self;
-}
-
-static SHELL_VAR *
-init_dirstack_var ()
-{
-  SHELL_VAR *v;
-
-  v = find_variable ("DIRSTACK");
-  if (v)
-    return v;
-  INIT_DYNAMIC_ARRAY_VAR ("DIRSTACK", get_dirstack, assign_dirstack);
-  return v;
 }
 #endif /* PUSHD AND POPD && ARRAY_VARS */
 
@@ -1206,25 +1337,15 @@ get_groupset (self)
     }
   return (self);
 }
-
-static SHELL_VAR *
-init_groups_var ()
-{
-  SHELL_VAR *v;
-
-  v = find_variable ("GROUPS");
-  if (v)
-    return (v);
-  INIT_DYNAMIC_ARRAY_VAR ("GROUPS", get_groupset, null_array_assign);
-  VSETATTR (v, att_noassign);
-  return v;
-}
 #endif /* ARRAY_VARS */
 
+/* If ARRAY_VARS is not defined, this just returns the name of any
+   currently-executing function.  If we have arrays, it's a call stack. */
 static SHELL_VAR *
 get_funcname (self)
      SHELL_VAR *self;
 {
+#if ! defined (ARRAY_VARS)
   char *t;
   if (variable_context && this_shell_function)
     {
@@ -1232,6 +1353,7 @@ get_funcname (self)
       t = savestring (this_shell_function->name);
       var_setvalue (self, t);
     }
+#endif
   return (self);
 }
 
@@ -1259,7 +1381,11 @@ init_funcname_var ()
   v = find_variable ("FUNCNAME");
   if (v)
     return v;
+#if defined (ARRAY_VARS)
+  INIT_DYNAMIC_ARRAY_VAR ("FUNCNAME", get_funcname, null_array_assign);
+#else
   INIT_DYNAMIC_VAR ("FUNCNAME", (char *)NULL, get_funcname, null_assign);
+#endif
   VSETATTR (v, att_invisible|att_noassign);
   return v;
 }
@@ -1271,6 +1397,9 @@ initialize_dynamic_variables ()
 
   v = init_seconds_var ();
 
+  INIT_DYNAMIC_VAR ("BASH_COMMAND", (char *)NULL, get_bash_command, (sh_var_assign_func_t *)NULL);
+  INIT_DYNAMIC_VAR ("BASH_SUBSHELL", (char *)NULL, get_subshell, assign_subshell);
+
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
 
@@ -1278,12 +1407,23 @@ initialize_dynamic_variables ()
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);
 #endif
 
+#if defined (READLINE)
+  INIT_DYNAMIC_VAR ("COMP_WORDBREAKS", (char *)NULL, get_comp_wordbreaks, assign_comp_wordbreaks);
+#endif
+
 #if defined (PUSHD_AND_POPD) && defined (ARRAY_VARS)
-  v = init_dirstack_var ();
+  v = init_dynamic_array_var ("DIRSTACK", get_dirstack, assign_dirstack, 0);
 #endif /* PUSHD_AND_POPD && ARRAY_VARS */
 
 #if defined (ARRAY_VARS)
-  v = init_groups_var ();
+  v = init_dynamic_array_var ("GROUPS", get_groupset, null_array_assign, att_noassign);
+
+#  if defined (DEBUGGER)
+  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, (att_invisible|att_noassign));
+#  endif /* DEBUGGER */
+  v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, (att_invisible|att_noassign));
 #endif
 
   v = init_funcname_var ();
@@ -1334,11 +1474,12 @@ var_lookup (name, vcontext)
 */
 
 SHELL_VAR *
-find_variable_internal (name, search_tempenv)
+find_variable_internal (name, force_tempenv)
      const char *name;
-     int search_tempenv;
+     int force_tempenv;
 {
   SHELL_VAR *var;
+  int search_tempenv;
 
   var = (SHELL_VAR *)NULL;
 
@@ -1347,7 +1488,9 @@ find_variable_internal (name, search_tempenv)
      to get the `exported' value of $foo.  This happens if we are executing
      a function or builtin, or if we are looking up a variable in a
      "subshell environment". */
-  if ((search_tempenv || subshell_environment) && temporary_env)
+  search_tempenv = force_tempenv || (expanding_redir == 0 && subshell_environment);
+
+  if (search_tempenv && temporary_env)		
     var = hash_lookup (name, temporary_env);
 
   if (var == 0)
@@ -1364,7 +1507,7 @@ SHELL_VAR *
 find_variable (name)
      const char *name;
 {
-  return (find_variable_internal (name, this_shell_builtin != 0));
+  return (find_variable_internal (name, (expanding_redir == 0 && this_shell_builtin != 0)));
 }
 
 /* Look up the function entry whose name matches STRING.
@@ -1374,6 +1517,15 @@ find_function (name)
      const char *name;
 {
   return (hash_lookup (name, shell_functions));
+}
+
+/* Find the function definition for the shell function named NAME.  Returns
+   the entry or NULL. */
+FUNCTION_DEF *
+find_function_def (name)
+     const char *name;
+{
+  return ((FUNCTION_DEF *)hash_lookup (name, shell_function_defs));
 }
 
 /* Return the value of VAR.  VAR is assumed to have been the result of a
@@ -1459,7 +1611,7 @@ make_local_variable (name)
 
   if (vc == 0)
     {
-      internal_error ("make_local_variable: no function context at current scope found");
+      internal_error (_("make_local_variable: no function context at current scope"));
       return ((SHELL_VAR *)NULL);
     }
   else if (vc->table == 0)
@@ -1515,8 +1667,9 @@ make_local_array_variable (name)
   ARRAY *array;
 
   var = make_local_variable (name);
-  if (var == 0)
+  if (var == 0 || array_p (var))
     return var;
+
   array = array_create ();
 
   FREE (value_cell(var));
@@ -1788,7 +1941,11 @@ bind_int_variable (lhs, rhs)
 
   isint = isarr = 0;
 #if defined (ARRAY_VARS)
+#  if 0
   if (t = xstrchr (lhs, '['))	/*]*/
+#  else
+  if (valid_array_reference (lhs))
+#  endif
     {
       isarr = 1;
       v = array_variable_part (lhs, (char **)0, (int *)0);
@@ -1873,6 +2030,35 @@ bind_function (name, value)
   return (entry);
 }
 
+/* Bind a function definition, which includes source file and line number
+   information in addition to the command, into the FUNCTION_DEF hash table.*/
+void
+bind_function_def (name, value)
+     const char *name;
+     FUNCTION_DEF *value;
+{
+  FUNCTION_DEF *entry;
+  BUCKET_CONTENTS *elt;
+  COMMAND *cmd;
+
+  entry = find_function_def (name);
+  if (entry)
+    {
+      dispose_function_def_contents (entry);
+      entry = copy_function_def_contents (value, entry);
+    }
+  else
+    {
+      cmd = value->command;
+      value->command = 0;
+      entry = copy_function_def (value);
+      value->command = cmd;
+
+      elt = hash_insert (savestring (name), shell_function_defs, HASH_NOSRCH);
+      elt->data = (PTR_T *)entry;
+    }
+}
+
 /* Add STRING, which is of the form foo=bar, to the temporary environment
    HASH_TABLE (temporary_env).  The functions in execute_cmd.c are
    responsible for moving the main temporary env to one of the other
@@ -1885,7 +2071,7 @@ assign_in_env (string)
   char *name, *temp, *value;
   SHELL_VAR *var;
 
-  offset = assignment (string);
+  offset = assignment (string, 0);
   name = savestring (string);
   value = (char *)NULL;
 
@@ -1937,13 +2123,11 @@ assign_in_env (string)
     setifs (var);
 
   if (echo_command_at_execute)
-    {
-      /* The Korn shell prints the `+ ' in front of assignment statements,
-	 so we do too. */
-      fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
-      fflush (stderr);
-    }
+    /* The Korn shell prints the `+ ' in front of assignment statements,
+	so we do too. */
+    xtrace_print_assignment (name, value, 0, 1);
 
+  free (name);
   return 1;
 }
 
@@ -2062,6 +2246,28 @@ unbind_func (name)
   return 0;  
 }
 
+int
+unbind_function_def (name)
+     const char *name;
+{
+  BUCKET_CONTENTS *elt;
+  FUNCTION_DEF *funcdef;
+
+  elt = hash_remove (name, shell_function_defs, 0);
+
+  if (elt == 0)
+    return -1;
+
+  funcdef = (FUNCTION_DEF *)elt->data;
+  if (funcdef)
+    dispose_function_def (funcdef);
+
+  free (elt->key);
+  free (elt);
+
+  return 0;  
+}
+
 /* Make the variable associated with NAME go away.  HASH_LIST is the
    hash table from which this variable should be deleted (either
    shell_variables or shell_functions).
@@ -2096,6 +2302,11 @@ makunbound (name, vc)
      We also need to add it back into the correct hash table. */
   if (old_var && local_p (old_var) && variable_context == old_var->context)
     {
+      /* Reset the attributes.  Preserve the export attribute if the variable
+         came from a temporary environment.  Make sure it stays local, and
+         make it invisible. */ 
+      old_var->attributes = (exported_p (old_var) && tempvar_p (old_var)) ? att_exported : 0;
+      VSETATTR (old_var, att_local);
       VSETATTR (old_var, att_invisible);
       FREE (value_cell (old_var));
       var_setvalue (old_var, (char *)NULL);
@@ -2502,7 +2713,7 @@ all_local_variables ()
 
   if (vc == 0)
     {
-      internal_error ("all_local_variables: no function context at current scope found");
+      internal_error (_("all_local_variables: no function context at current scope"));
       return (SHELL_VAR **)NULL;
     }
   if (vc->table == 0 || HASH_ENTRIES (vc->table) == 0 || vc_haslocals (vc) == 0)
@@ -2716,7 +2927,7 @@ valid_exportstr (v)
   s = v->exportstr;
   if (legal_variable_starter ((unsigned char)*s) == 0)
     {
-      internal_error ("invalid character %d in exportstr for %s", *s, v->name);
+      internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);
       return (0);
     }
   for (s = v->exportstr + 1; s && *s; s++)
@@ -2725,13 +2936,13 @@ valid_exportstr (v)
 	break;
       if (legal_variable_char ((unsigned char)*s) == 0)
 	{
-	  internal_error ("invalid character %d in exportstr for %s", *s, v->name);
+	  internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);
 	  return (0);
 	}
     }
   if (*s != '=')
     {
-      internal_error ("no `=' in exportstr for %s", v->name);
+      internal_error (_("no `=' in exportstr for %s"), v->name);
       return (0);
     }
   return (1);
@@ -2857,7 +3068,7 @@ add_or_supercede_exported_var (assign, do_alloc)
   register int i;
   int equal_offset;
 
-  equal_offset = assignment (assign);
+  equal_offset = assignment (assign, 0);
   if (equal_offset == 0)
     return (export_env);
 
@@ -3156,7 +3367,7 @@ pop_var_context ()
   vcxt = shell_variables;
   if (vc_isfuncenv (vcxt) == 0)
     {
-      internal_error ("pop_var_context: head of shell_variables not a function context");
+      internal_error (_("pop_var_context: head of shell_variables not a function context"));
       return;
     }
 
@@ -3169,7 +3380,7 @@ pop_var_context ()
       dispose_var_context (vcxt);
     }
   else
-    internal_error ("pop_var_context: no global_variables context");
+    internal_error (_("pop_var_context: no global_variables context"));
 }
 
 /* Delete the HASH_TABLEs for all variable contexts beginning at VCXT, and
@@ -3235,7 +3446,7 @@ pop_scope (is_special)
   vcxt = shell_variables;
   if (vc_istempscope (vcxt) == 0)
     {
-      internal_error ("pop_scope: head of shell_variables not a temporary environment scope");
+      internal_error (_("pop_scope: head of shell_variables not a temporary environment scope"));
       return;
     }
 
@@ -3334,6 +3545,56 @@ dispose_saved_dollar_vars ()
   dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
 }
 
+/* Manipulate the special BASH_ARGV and BASH_ARGC variables. */
+
+void
+push_args (list)
+     WORD_LIST *list;
+{
+#if defined (ARRAY_VARS) && defined (DEBUGGER)
+  SHELL_VAR *bash_argv_v, *bash_argc_v;
+  ARRAY *bash_argv_a, *bash_argc_a;
+  WORD_LIST *l;
+  arrayind_t i;
+  char *t;
+
+  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
+  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
+
+  for (l = list, i = 0; l; l = l->next, i++)
+    array_push (bash_argv_a, l->word->word);
+
+  t = itos (i);
+  array_push (bash_argc_a, t);
+  free (t);
+#endif /* ARRAY_VARS && DEBUGGER */
+}
+
+/* Remove arguments from BASH_ARGV array.  Pop top element off BASH_ARGC
+   array and use that value as the count of elements to remove from
+   BASH_ARGV. */
+void
+pop_args ()
+{
+#if defined (ARRAY_VARS) && defined (DEBUGGER)
+  SHELL_VAR *bash_argv_v, *bash_argc_v;
+  ARRAY *bash_argv_a, *bash_argc_a;
+  ARRAY_ELEMENT *ce;
+  intmax_t i;
+
+  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
+  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
+
+  ce = array_shift (bash_argc_a, 1, 0);
+  if (ce == 0 || legal_number (element_value (ce), &i) == 0)
+    i = 0;
+
+  for ( ; i > 0; i--)
+    array_pop (bash_argv_a);
+  array_dispose_element (ce);
+#endif /* ARRAY_VARS && DEBUGGER */
+}
+
 /*************************************************
  *						 *
  *	Functions to manage special variables	 *
@@ -3369,6 +3630,7 @@ static struct name_and_function special_vars[] = {
   { "HISTFILESIZE", sv_histsize },
   { "HISTIGNORE", sv_histignore },
   { "HISTSIZE", sv_histsize },
+  { "HISTTIMEFORMAT", sv_histtimefmt },
 #endif
 
 #if defined (READLINE)
@@ -3598,18 +3860,28 @@ sv_history_control (name)
      char *name;
 {
   char *temp;
+  char *val;
+  int tptr;
 
   history_control = 0;
   temp = get_string_value (name);
 
-  if (temp && *temp && STREQN (temp, "ignore", 6))
+  if (temp == 0 || *temp == 0)
+    return;
+
+  tptr = 0;
+  while (val = extract_colon_unit (temp, &tptr))
     {
-      if (temp[6] == 's')	/* ignorespace */
-	history_control = 1;
-      else if (temp[6] == 'd')	/* ignoredups */
-	history_control = 2;
-      else if (temp[6] == 'b')	/* ignoreboth */
-	history_control = 3;
+      if (STREQ (val, "ignorespace"))
+	history_control |= HC_IGNSPACE;
+      else if (STREQ (val, "ignoredups"))
+	history_control |= HC_IGNDUPS;
+      else if (STREQ (val, "ignoreboth"))
+	history_control |= HC_IGNBOTH;
+      else if (STREQ (val, "erasedups"))
+	history_control |= HC_ERASEDUPS;
+
+      free (val);
     }
 }
 
@@ -3640,6 +3912,16 @@ sv_histchars (name)
     }
 }
 #endif /* BANG_HISTORY */
+
+void
+sv_histtimefmt (name)
+     char *name;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  history_write_timestamps = (v != 0);
+}
 #endif /* HISTORY */
 
 #if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)

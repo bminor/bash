@@ -92,10 +92,27 @@ ansicstr (string, len, flags, sawc, rlen)
 	      c &= 0xFF;
 	      break;
 	    case 'x':			/* Hex digit -- non-ANSI */
+	      if ((flags & 2) && *s == '{')
+		{
+		  flags |= 16;		/* internal flag value */
+		  s++;
+		}
+	      /* Consume at least two hex characters */
 	      for (temp = 2, c = 0; ISXDIGIT ((unsigned char)*s) && temp--; s++)
 		c = (c * 16) + HEXVALUE (*s);
+	      /* DGK says that after a `\x{' ksh93 consumes ISXDIGIT chars
+		 until a non-xdigit or `}', so potentially more than two
+		 chars are consumed. */
+	      if (flags & 16)
+		{
+		  for ( ; ISXDIGIT ((unsigned char)*s); s++)
+		    c = (c * 16) + HEXVALUE (*s);
+		  flags &= ~16;
+		  if (*s == '}')
+		    s++;
+	        }
 	      /* \x followed by non-hex digits is passed through unchanged */
-	      if (temp == 2)
+	      else if (temp == 2)
 		{
 		  *r++ = '\\';
 		  c = 'x';
@@ -104,7 +121,7 @@ ansicstr (string, len, flags, sawc, rlen)
 	      break;
 	    case '\\':
 	      break;
-	    case '\'':
+	    case '\'': case '"': case '?':
 	      if (flags & 1)
 		*r++ = '\\';
 	      break;

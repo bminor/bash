@@ -39,7 +39,7 @@ xfind()
 	# and directories that start with a period.
 
 	for x in * ; do
-		if [ -d "$x" -a ! -L "$x" ] ; then 
+		if [ -d "$x" ] && [ ! -L "$x" ] ; then 
 			$FUNCNAME "$x" "$2" "$action"
 		fi
 	done

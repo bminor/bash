@@ -14,7 +14,7 @@ tf ()
         echo a
     };
     i=0;
-    while (( " i < 3 " )); do
+    while (( i < 3 )); do
         test -r /dev/fd/$i;
         i=$(( i + 1 ));
     done;
@@ -26,7 +26,7 @@ tf ()
     if [[ -r /dev/fd/0 && -w /dev/fd/1 ]]; then
         echo ok >/dev/null;
     else
-        if (( " 7 > 40 " )); then
+        if (( 7 > 40 )); then
             echo oops;
         else
             echo done;

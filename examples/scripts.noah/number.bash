@@ -108,7 +108,7 @@ function number ()
            ;;
          0 ) : ;;
          * )
-            if test ".${val2}" != '.' -a ".${d1}" != '.0' ; then
+            if test ".${val2}" != '.' && test ".${d1}" != '.0' ; then
                val2="${val2}-"
             fi
             case "${d1}" in

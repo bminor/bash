@@ -66,7 +66,7 @@
 #endif /* !__STDC__ */
 
 #ifndef __attribute__
-#  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8) || __STRICT_ANSI__
+#  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
 #    define __attribute__(x)
 #  endif
 #endif

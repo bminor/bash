@@ -254,6 +254,9 @@ echo $(( -7 ))
 echo $(( ++7 ))
 echo $(( --7 ))
 
+${THIS_SH} ./arith1.sub
+${THIS_SH} ./arith2.sub
+
 x=4
 y=7
 
@@ -276,3 +279,6 @@ echo $(( 8#$(printf "%o\n" $n) ))
 printf "%u\n" $n
 echo $(( 16#$(printf "%x\n" $n) ))
 echo $(( 16#$(printf "%X\n" $n) ))
+
+# causes longjmp botches through bash-2.05b
+a[b[c]d]=e

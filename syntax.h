@@ -64,11 +64,14 @@
 #define CSUBSTOP	0x1000	/* values of OP for ${word[:]OPstuff} */
 
 /* Defines for use by the rest of the shell. */
-extern const int sh_syntaxtab[];
+extern int sh_syntaxtab[];
+extern int sh_syntabsiz;
 
 #define shellmeta(c)	(sh_syntaxtab[(unsigned char)(c)] & CSHMETA)
 #define shellbreak(c)	(sh_syntaxtab[(unsigned char)(c)] & CSHBRK)
 #define shellquote(c)	(sh_syntaxtab[(unsigned char)(c)] & CQUOTE)
+
+#define shellxquote(c)	(sh_syntaxtab[(unsigned char)(c)] & CXQUOTE)
 
 #define issyntype(c, t)	((sh_syntaxtab[(unsigned char)(c)] & (t)) != 0)
 #define notsyntype(c,t) ((sh_syntaxtab[(unsigned char)(c)] & (t)) == 0)
@@ -91,5 +94,9 @@ extern const int sh_syntaxtab[];
 
 #define CTLESC '\001'
 #define CTLNUL '\177'
+
+#if !defined (HAVE_ISBLANK) && !defined (isblank)
+#  define isblank(x)	((x) == ' ' || (x) == '\t')
+#endif
 
 #endif /* _SYNTAX_H_ */

@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,6 +50,8 @@ $END
 
 #include <stdio.h>
 #include "../bashansi.h"
+#include "../bashintl.h"
+
 #include "../shell.h"
 #include "../builtins.h"
 #include "../flags.h"
@@ -123,7 +125,7 @@ enable_builtin (list)
 	  filename = list_optarg;
 	  break;
 #else
-	  builtin_error ("dynamic loading not available");
+	  builtin_error (_("dynamic loading not available"));
 	  return (EX_USAGE);
 #endif
 #if defined (HAVE_DLCLOSE)
@@ -131,7 +133,7 @@ enable_builtin (list)
 	  flags |= DFLAG;
 	  break;
 #else
-	  builtin_error ("dynamic loading not available");
+	  builtin_error (_("dynamic loading not available"));
 	  return (EX_USAGE);
 #endif /* HAVE_DLCLOSE */
 	default:
@@ -197,7 +199,7 @@ enable_builtin (list)
 
 	  if (opt == EXECUTION_FAILURE)
 	    {
-	      builtin_error ("%s: not a shell builtin", list->word->word);
+	      sh_notbuiltin (list->word->word);
 	      result = EXECUTION_FAILURE;
 	    }
 	  list = list->next;
@@ -298,7 +300,7 @@ dyn_load_builtin (list, flags, filename)
 
   if (handle == 0)
     {
-      builtin_error ("cannot open shared object %s: %s", filename, dlerror ());
+      builtin_error (_("cannot open shared object %s: %s"), filename, dlerror ());
       return (EXECUTION_FAILURE);
     }
 
@@ -321,8 +323,8 @@ dyn_load_builtin (list, flags, filename)
       b = (struct builtin *)dlsym (handle, struct_name);
       if (b == 0)
 	{
-	  builtin_error ("cannot find %s in shared object %s: %s", struct_name,
-			  filename, dlerror ());
+	  builtin_error (_("cannot find %s in shared object %s: %s"),
+			  struct_name, filename, dlerror ());
 	  free (struct_name);
 	  continue;
 	}
@@ -440,12 +442,12 @@ dyn_unload_builtin (name)
   b = builtin_address_internal (name, 1);
   if (b == 0)
     {
-      builtin_error ("%s: not a shell builtin", name);
+      sh_notbuiltin (name);
       return (EXECUTION_FAILURE);
     }
   if (b->flags & STATIC_BUILTIN)
     {
-      builtin_error ("%s: not dynamically loaded", name);
+      builtin_error (_("%s: not dynamically loaded"), name);
       return (EXECUTION_FAILURE);
     }
 
@@ -460,7 +462,7 @@ dyn_unload_builtin (name)
      using it drops to zero. */
   if (ref == 1 && local_dlclose (handle) != 0)
     {
-      builtin_error ("%s: cannot delete: %s", name, dlerror ());
+      builtin_error (_("%s: cannot delete: %s"), name, dlerror ());
       return (EXECUTION_FAILURE);
     }
 

@@ -1,11 +1,12 @@
 This document details the incompatibilites between this version of bash,
-bash-2.05b, and the previous widely-available version, bash-1.14 (which
-is still the `standard' version for many Linux distributions).  These
-were discovered by users of bash-2.x, so this list is not comprehensive.
-Some of these incompatibilities occur between the current version and
-versions 2.0 and above.
+bash-3.0, and a previous widely-available version, bash-1.14 (which
+is still the `standard' version for a few Linux distributions).  These
+were discovered by users of bash-2.x and 3.x, so this list is not
+comprehensive. Some of these incompatibilities occur between the current
+version and versions 2.0 and above.  (The differences between bash-1.14
+and bash-2.0 were significant.)
 
-1.  Bash now uses a new quoting syntax, $"...", to do locale-specific
+1.  Bash uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
     behavior of bash-1.14 will have to change their scripts.  For
     instance, if you are doing something like this to get the value of
@@ -208,3 +209,6 @@ versions 2.0 and above.
 17.  Bash no longer removes the export attribute from the SSH_CLIENT or
      SSH2_CLIENT variables, and no longer attempts to discover whether or
      not it has been invoked by sshd in order to run the startup files.
+
+18.  Bash no longer requires that the body of a function be a group command;
+     any compound command is accepted.

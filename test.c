@@ -45,11 +45,13 @@
 extern int errno;
 #endif /* !errno */
 
-#if !defined (_POSIX_VERSION)
+#if !defined (_POSIX_VERSION) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif /* !_POSIX_VERSION */
 #include "posixstat.h"
 #include "filecntl.h"
+
+#include "bashintl.h"
 
 #include "shell.h"
 #include "pathexp.h"
@@ -149,7 +151,7 @@ test_syntax_error (format, arg)
 static void
 beyond ()
 {
-  test_syntax_error ("argument expected", (char *)NULL);
+  test_syntax_error (_("argument expected"), (char *)NULL);
 }
 
 /* Syntax error for when an integer argument was expected, but
@@ -158,7 +160,7 @@ static void
 integer_expected_error (pch)
      char *pch;
 {
-  test_syntax_error ("%s: integer expression expected", pch);
+  test_syntax_error (_("%s: integer expression expected"), pch);
 }
 
 /* A wrapper for stat () which disallows pathnames that are empty strings
@@ -351,14 +353,14 @@ term ()
     }
 
   /* A paren-bracketed argument. */
-  if (argv[pos][0] == '(' && argv[pos][1] == '\0')
+  if (argv[pos][0] == '(' && argv[pos][1] == '\0') /* ) */
     {
       advance (1);
       value = expr ();
-      if (argv[pos] == 0)
-	test_syntax_error ("`)' expected", (char *)NULL);
-      else if (argv[pos][0] != ')' || argv[pos][1])
-	test_syntax_error ("`)' expected, found %s", argv[pos]);
+      if (argv[pos] == 0) /* ( */
+	test_syntax_error (_("`)' expected"), (char *)NULL);
+      else if (argv[pos][0] != ')' || argv[pos][1]) /* ( */
+	test_syntax_error (_("`)' expected, found %s"), argv[pos]);
       advance (0);
       return (value);
     }
@@ -373,7 +375,7 @@ term ()
       if (test_unop (argv[pos]))
 	value = unary_operator ();
       else
-	test_syntax_error ("%s: unary operator expected", argv[pos]);
+	test_syntax_error (_("%s: unary operator expected"), argv[pos]);
     }
   else
     {
@@ -538,7 +540,7 @@ binary_operator ()
 
   if ((w[0] != '-' || w[3] != '\0') || test_binop (w) == 0)
     {
-      test_syntax_error ("%s: binary operator expected", w);
+      test_syntax_error (_("%s: binary operator expected"), w);
       /* NOTREACHED */
       return (FALSE);
     }
@@ -782,10 +784,10 @@ two_arguments ()
       if (test_unop (argv[pos]))
 	return (unary_operator ());
       else
-	test_syntax_error ("%s: unary operator expected", argv[pos]);
+	test_syntax_error (_("%s: unary operator expected"), argv[pos]);
     }
   else
-    test_syntax_error ("%s: unary operator expected", argv[pos]);
+    test_syntax_error (_("%s: unary operator expected"), argv[pos]);
 
   return (0);
 }
@@ -825,7 +827,7 @@ three_arguments ()
       pos = argc;
     }
   else
-    test_syntax_error ("%s: binary operator expected", argv[pos+1]);
+    test_syntax_error (_("%s: binary operator expected"), argv[pos+1]);
 
   return (value);
 }
@@ -900,7 +902,7 @@ test_command (margc, margv)
       --margc;
 
       if (margv[margc] && (margv[margc][0] != ']' || margv[margc][1]))
-	test_syntax_error ("missing `]'", (char *)NULL);
+	test_syntax_error (_("missing `]'"), (char *)NULL);
 
       if (margc < 2)
 	test_exit (SHELL_BOOLEAN (FALSE));
@@ -916,7 +918,7 @@ test_command (margc, margv)
   value = posixtest ();
 
   if (pos != argc)
-    test_syntax_error ("too many arguments", (char *)NULL);
+    test_syntax_error (_("too many arguments"), (char *)NULL);
 
   test_exit (SHELL_BOOLEAN (value));
 }

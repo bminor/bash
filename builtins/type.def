@@ -58,6 +58,7 @@ $END
 
 #include <stdio.h>
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../findcmd.h"
@@ -73,6 +74,7 @@ $END
 extern int find_reserved_word __P((char *));
 
 extern char *this_command_name;
+extern int expand_aliases;
 
 /* For each word in LIST, find out what the shell is going to do with
    it as a simple command. i.e., which file would this shell use to
@@ -221,12 +223,12 @@ describe_command (command, dflags)
 
 #if defined (ALIAS)
   /* Command is an alias? */
-  if (((dflags & CDESC_FORCE_PATH) == 0) && (alias = find_alias (command)))
+  if (((dflags & CDESC_FORCE_PATH) == 0) && expand_aliases && (alias = find_alias (command)))
     {
       if (dflags & CDESC_TYPE)
 	puts ("alias");
       else if (dflags & CDESC_SHORTDESC)
-	printf ("%s is aliased to `%s'\n", command, alias->value);
+	printf (_("%s is aliased to `%s'\n"), command, alias->value);
       else if (dflags & CDESC_REUSABLE)
 	{
 	  x = sh_single_quote (alias->value);
@@ -247,7 +249,7 @@ describe_command (command, dflags)
       if (dflags & CDESC_TYPE)
 	puts ("keyword");
       else if (dflags & CDESC_SHORTDESC)
-	printf ("%s is a shell keyword\n", command);
+	printf (_("%s is a shell keyword\n"), command);
       else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 
@@ -267,7 +269,7 @@ describe_command (command, dflags)
 #define PRETTY_PRINT_FUNC 1
 	  char *result;
 
-	  printf ("%s is a function\n", command);
+	  printf (_("%s is a function\n"), command);
 
 	  /* We're blowing away THE_PRINTED_COMMAND here... */
 
@@ -292,7 +294,7 @@ describe_command (command, dflags)
       if (dflags & CDESC_TYPE)
 	puts ("builtin");
       else if (dflags & CDESC_SHORTDESC)
-	printf ("%s is a shell builtin\n", command);
+	printf (_("%s is a shell builtin\n"), command);
       else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 
@@ -313,7 +315,7 @@ describe_command (command, dflags)
 	  if (dflags & CDESC_TYPE)
 	    puts ("file");
 	  else if (dflags & CDESC_SHORTDESC)
-	    printf ("%s is %s\n", command, command);
+	    printf (_("%s is %s\n"), command, command);
 	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY))
 	    printf ("%s\n", command);
 
@@ -333,7 +335,7 @@ describe_command (command, dflags)
 	  if (dflags & CDESC_TYPE)
 	    puts ("file");
 	  else if (dflags & CDESC_SHORTDESC)
-	    printf ("%s is hashed (%s)\n", command, full_path);
+	    printf (_("%s is hashed (%s)\n"), command, full_path);
 	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY))
 	    printf ("%s\n", full_path);
 

@@ -110,7 +110,7 @@ function CopyFiles {
     */)	;;	# don't add / if trailing / already present
     *)  if [ $# -gt 2 ] || # if more than two args given, last must be a dir
 	    # If dest in on local machine, check whether it is a directory
-    	   [ $DestMach = $LocalMach -a -d $DestPath ] || 
+    	   [ $DestMach = $LocalMach ] && [ -d "$DestPath" ] || 
 	    # If dest ends with . or .., it is a directory
 	   lastisdot "$DestPath"
 	then

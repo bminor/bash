@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,6 @@ $PRODUCES kill.c
 
 $BUILTIN kill
 $FUNCTION kill_builtin
-$DEPENDS_ON JOB_CONTROL
 $SHORT_DOC kill [-s sigspec | -n signum | -sigspec] [pid | job]... or kill -l [sigspec]
 Send the processes named by PID (or JOB) the signal SIGSPEC.  If
 SIGSPEC is not present, then SIGTERM is assumed.  An argument of `-l'
@@ -46,6 +45,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../trap.h"
@@ -57,8 +57,9 @@ $END
 extern int errno;
 #endif /* !errno */
 
-#if defined (JOB_CONTROL)
 extern int posixly_correct;
+
+static void kill_error __P((pid_t, int));
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
 #  define CONTINUE_OR_FAIL return (EXECUTION_FAILURE)
@@ -73,7 +74,7 @@ int
 kill_builtin (list)
      WORD_LIST *list;
 {
-  int sig, any_succeeded, listing, saw_signal;
+  int sig, any_succeeded, listing, saw_signal, dflags;
   char *sigspec, *word;
   pid_t pid;
   intmax_t pid_value;
@@ -88,6 +89,7 @@ kill_builtin (list)
   sig = SIGTERM;
   sigspec = "TERM";
 
+  dflags = DSIG_NOCASE | ((posixly_correct == 0) ? DSIG_SIGPREFIX : 0);
   /* Process options. */
   while (list)
     {
@@ -107,7 +109,7 @@ kill_builtin (list)
 	      if (sigspec[0] == '0' && sigspec[1] == '\0')
 		sig = 0;
 	      else
-		sig = decode_signal (sigspec);
+		sig = decode_signal (sigspec, dflags);
 	      list = list->next;
 	    }
 	  else
@@ -132,7 +134,7 @@ kill_builtin (list)
       else if ((*word == '-') && !saw_signal)
 	{
 	  sigspec = word + 1;
-	  sig = decode_signal (sigspec);
+	  sig = decode_signal (sigspec, dflags);
 	  saw_signal++;
 	  list = list->next;
 	}
@@ -169,16 +171,23 @@ kill_builtin (list)
 	  pid = (pid_t) pid_value;
 
 	  if ((pid < -1 ? kill_pid (-pid, sig, 1) : kill_pid (pid, sig, 0)) < 0)
-	    goto signal_error;
+	    {
+	      if (errno == EINVAL)
+		sh_invalidsig (sigspec);
+	      else
+		kill_error (pid, errno);
+	      CONTINUE_OR_FAIL;
+	    }
 	  else
 	    any_succeeded++;
 	}
+#if defined (JOB_CONTROL)
       else if (*list->word->word && *list->word->word != '%')
 	{
-	  builtin_error ("%s: no such pid", list->word->word);
+	  builtin_error (_("%s: arguments must be process or job IDs"), list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
-      else if (*word && (interactive || job_control))
+      else if (*word)
 	/* Posix.2 says you can kill without job control active (4.32.4) */
 	{			/* Must be a job spec.  Check it out. */
 	  int job;
@@ -205,16 +214,16 @@ kill_builtin (list)
 
 	  if (kill_pid (pid, sig, 1) < 0)
 	    {
-	    signal_error:
 	      if (errno == EINVAL)
 		sh_invalidsig (sigspec);
 	      else
-		builtin_error ("(%ld) - %s", (long)pid, strerror (errno));
+		kill_error (pid, errno);
 	      CONTINUE_OR_FAIL;
 	    }
 	  else
 	    any_succeeded++;
 	}
+#endif /* !JOB_CONTROL */
       else
 	{
 	  sh_badpid (list->word->word);
@@ -226,4 +235,16 @@ kill_builtin (list)
 
   return (any_succeeded ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
-#endif /* JOB_CONTROL */
+
+static void
+kill_error (pid, e)
+     pid_t pid;
+     int e;
+{
+  char *x;
+
+  x = strerror (e);
+  if (x == 0)
+    x = _("Unknown error");
+  builtin_error ("(%ld) - %s", (long)pid, x);
+}

@@ -7,15 +7,16 @@ function xalias ()
 	then
 		declare -f $1
 	else
-		echo $2 | egrep -q '(\!|#)'
-		if [ $? -eq 0 ]
-		then
+		case $2 in
+		*[#\!]*)
 			comm=$(echo $2 | sed  's/\\!\*/\"$\@\"/g
 					       s/\\!:\([1-9]\)/\"$\1\"/g
 				               s/#/\\#/g')
-		else
-			comm="$2 \"\$@\""
-		fi
+			;;
+		*)
+			comm="$2 \"\$@\"" ;;
+		esac
+
 		eval function $1 \(\) "{" command "$comm"  "; }"
 	fi
 }

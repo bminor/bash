@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,6 +32,7 @@ $PRODUCES setattr.c
 
 #include <stdio.h>
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -75,13 +76,12 @@ export_builtin (list)
 
 $BUILTIN readonly
 $FUNCTION readonly_builtin
-$SHORT_DOC readonly [-anf] [name[=value] ...] or readonly -p
+$SHORT_DOC readonly [-af] [name[=value] ...] or readonly -p
 The given NAMEs are marked readonly and the values of these NAMEs may
 not be changed by subsequent assignment.  If the -f option is given,
 then functions corresponding to the NAMEs are so marked.  If no
 arguments are given, or if `-p' is given, a list of all readonly names
-is printed.  An argument of `-n' says to remove the readonly property
-from subsequent NAMEs.  The `-a' option means to treat each NAME as
+is printed.  The `-a' option means to treat each NAME as
 an array variable.  An argument of `--' disables further option
 processing.
 $END
@@ -103,7 +103,7 @@ readonly_builtin (list)
 
 /* For each variable name in LIST, make that variable have the specified
    ATTRIBUTE.  An arg of `-n' says to remove the attribute from the the
-   remaining names in LIST. */
+   remaining names in LIST (doesn't work for readonly). */
 int
 set_or_show_attributes (list, attribute, nodefs)
      register WORD_LIST *list;
@@ -162,7 +162,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	      var = find_function (name);
 	      if (var == 0)
 		{
-		  builtin_error ("%s: not a function", name);
+		  builtin_error (_("%s: not a function"), name);
 		  any_failed++;
 		}
 	      else
@@ -173,7 +173,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	    }
 
 	  /* xxx [-np] name[=value] */
-	  assign = assignment (name);
+	  assign = assignment (name, 0);
 
 	  if (assign)
 	    name[assign] = '\0';

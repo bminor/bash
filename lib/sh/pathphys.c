@@ -68,7 +68,7 @@ _path_readlink (path, buf, bufsiz)
 
 /*
  * Return PATH with all symlinks expanded in newly-allocated memory.
- * This always gets a full pathname.
+ * This always gets an absolute pathname.
  */
 
 char *
@@ -80,11 +80,26 @@ sh_physpath (path, flags)
   char *result, *p, *q, *qsave, *qbase, *workpath;
   int double_slash_path, linklen, nlink;
 
+  linklen = strlen (path);
+
+#if 0
+  /* First sanity check -- punt immediately if the name is too long. */
+  if (linklen >= PATH_MAX)
+    return (savestring (path));
+#endif
+
   nlink = 0;
   q = result = (char *)xmalloc (PATH_MAX + 1);
 
-  workpath = (char *)xmalloc (PATH_MAX + 1);
-  strcpy (workpath, path);
+  /* Even if we get something longer than PATH_MAX, we might be able to
+     shorten it, so we try. */
+  if (linklen >= PATH_MAX)
+    workpath = savestring (path);
+  else
+    {
+      workpath = (char *)xmalloc (PATH_MAX + 1);
+      strcpy (workpath, path);
+    }
 
   /* This always gets an absolute pathname. */
 
@@ -133,7 +148,19 @@ sh_physpath (path, flags)
 	  if (q != qbase)
 	    *q++ = DIRSEP;
 	  while (*p && (ISDIRSEP(*p) == 0))
-	    *q++ = *p++;
+	    {
+	      if (q - result >= PATH_MAX)
+		{
+#ifdef ENAMETOOLONG
+		  errno = ENAMETOOLONG;
+#else
+		  errno = EINVAL;
+#endif
+		  goto error;
+		}
+		
+	      *q++ = *p++;
+	    }
 
 	  *q = '\0';
 
@@ -151,6 +178,8 @@ sh_physpath (path, flags)
 	    {
 #ifdef ELOOP
 	      errno = ELOOP;
+#else
+	      errno = EINVAL;
 #endif
 error:
 	      free (result);
@@ -159,6 +188,17 @@ error:
 	    }
 
 	  linkbuf[linklen] = '\0';
+
+	  /* If the new path length would overrun PATH_MAX, punt now. */
+	  if ((strlen (p) + linklen + 2) >= PATH_MAX)
+	    {
+#ifdef ENAMETOOLONG
+	      errno = ENAMETOOLONG;
+#else
+	      errno = EINVAL;
+#endif
+	      goto error;
+	    }
 
 	  /* Form the new pathname by copying the link value to a temporary
 	     buffer and appending the rest of `workpath'.  Reset p to point

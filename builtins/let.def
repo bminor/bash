@@ -45,7 +45,7 @@ The levels are listed in order of decreasing precedence.
 	&&		logical AND
 	||		logical OR
 	expr ? expr : expr
-			conditional expression
+			conditional operator
 	=, *=, /=, %=,
 	+=, -=, <<=, >>=,
 	&=, ^=, |=	assignment
@@ -72,6 +72,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include "../bashintl.h"
+
 #include "../shell.h"
 #include "common.h"
 
@@ -89,7 +91,7 @@ let_builtin (list)
 
   if (list == 0)
     {
-      builtin_error ("expression expected");
+      builtin_error (_("expression expected"));
       return (EXECUTION_FAILURE);
     }
 
@@ -114,7 +116,7 @@ exp_builtin (list)
 
   if (list == 0)
     {
-      builtin_error ("expression expected");
+      builtin_error (_("expression expected"));
       return (EXECUTION_FAILURE);
     }
 

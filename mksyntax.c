@@ -2,7 +2,7 @@
  * mksyntax.c - construct shell syntax table for fast char attribute lookup.
  */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -78,6 +78,7 @@ char	preamble[] = "\
 \n";
 
 char	includes[] = "\
+#include \"config.h\"\n\
 #include \"stdc.h\"\n\
 #include \"syntax.h\"\n\n";
 
@@ -128,8 +129,13 @@ cdesc (i)
     
   switch (i)
     {
+#ifdef __STDC__
     case '\a': xbuf[1] = 'a'; break;
     case '\v': xbuf[1] = 'v'; break;
+#else
+    case '\007': xbuf[1] = 'a'; break;
+    case 0x0B: xbuf[1] = 'v'; break;
+#endif
     case '\b': xbuf[1] = 'b'; break;
     case '\f': xbuf[1] = 'f'; break;
     case '\n': xbuf[1] = 'n'; break;
@@ -270,7 +276,8 @@ dump_lsyntax (fp)
 {
   int i;
 
-  fprintf (fp, "const int sh_syntaxtab[%d] = {\n", SYNSIZE);
+  fprintf (fp, "int sh_syntabsiz = %d;\n", SYNSIZE);
+  fprintf (fp, "int sh_syntaxtab[%d] = {\n", SYNSIZE);
 
   for (i = 0; i < SYNSIZE; i++)
     {

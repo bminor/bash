@@ -321,6 +321,12 @@ ab**)		echo ok 41;;
 *)		echo bad 41;;
 esac
 
+# bug in all versions up to and including bash-2.05b
+case "123abc" in
+*?(a)bc)	echo ok 42;;
+*)		echo bad 42;;
+esac
+
 # clean up and do the next one
 
 builtin cd /

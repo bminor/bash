@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES declare.c
 
 $BUILTIN declare
 $FUNCTION declare_builtin
-$SHORT_DOC declare [-afFirtx] [-p] name[=value] ...
+$SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
 Declare variables and/or give them attributes.  If no NAMEs are
 given, then display the values of variables instead.  The -p option
 will display the attributes and values of each NAME.
@@ -32,7 +32,8 @@ The flags are:
 
   -a	to make NAMEs arrays (if supported)
   -f	to select from among function names only
-  -F	to display function names without definitions
+  -F	to display function names (and line number and source file name if
+	debugging) without definitions 
   -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
@@ -67,6 +68,7 @@ $END
 #include <stdio.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -100,7 +102,7 @@ local_builtin (list)
     return (declare_internal (list, 1));
   else
     {
-      builtin_error ("can only be used in a function");
+      builtin_error (_("can only be used in a function"));
       return (EXECUTION_FAILURE);
     }
 }
@@ -120,6 +122,7 @@ declare_internal (list, local_var)
   int flags_on, flags_off, *flags, any_failed, assign_error, pflag, nodefs, opt;
   char *t, *subscript_start;
   SHELL_VAR *var;
+  FUNCTION_DEF *shell_fn;
 
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
   reset_internal_getopt ();
@@ -225,7 +228,7 @@ declare_internal (list, local_var)
 #endif
 
       name = savestring (list->word->word);
-      offset = assignment (name);
+      offset = assignment (name, 0);
 
       if (offset)	/* declare [-afFirx] name=value */
 	{
@@ -289,7 +292,7 @@ declare_internal (list, local_var)
 	{
 	  if (offset)	/* declare -f [-rix] foo=bar */
 	    {
-	      builtin_error ("cannot use `-f' to make functions");
+	      builtin_error (_("cannot use `-f' to make functions"));
 	      free (name);
 	      return (EXECUTION_FAILURE);
 	    }
@@ -301,7 +304,7 @@ declare_internal (list, local_var)
 		{
 		  if (readonly_p (var) && (flags_off & att_readonly))
 		    {
-		      builtin_error ("%s: readonly function", name);
+		      builtin_error (_("%s: readonly function"), name);
 		      any_failed++;
 		      NEXT_VARIABLE ();
 		    }
@@ -309,9 +312,22 @@ declare_internal (list, local_var)
 		  /* declare -[Ff] name [name...] */
 		  if (flags_on == att_function && flags_off == 0)
 		    {
-		      t = nodefs ? var->name
-				 : named_function_string (name, function_cell (var), 1);
-		      printf ("%s\n", t);
+#if defined (DEBUGGER)
+		      if (nodefs && debugging_mode)
+			{
+			  shell_fn = find_function_def (var->name);
+			  if (shell_fn)
+			    printf ("%s %d %s\n", var->name, shell_fn->line, shell_fn->source_file);
+			  else
+			    printf ("%s\n", var->name);
+			}
+		      else
+#endif /* DEBUGGER */
+			{	
+			  t = nodefs ? var->name
+				     : named_function_string (name, function_cell (var), 1);
+			  printf ("%s\n", t);
+			}
 		    }
 		  else		/* declare -[fF] -[rx] name [name...] */
 		    {
@@ -370,7 +386,7 @@ declare_internal (list, local_var)
 	  /* Cannot use declare +a name to remove an array variable. */
 	  if ((flags_off & att_array) && array_p (var))
 	    {
-	      builtin_error ("%s: cannot destroy array variables in this way", name);
+	      builtin_error (_("%s: cannot destroy array variables in this way"), name);
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }

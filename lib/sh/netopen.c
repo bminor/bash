@@ -51,6 +51,8 @@
 #endif
 
 #include <bashansi.h>
+#include <bashintl.h>
+
 #include <errno.h>
 
 #include <shell.h>
@@ -153,14 +155,14 @@ _netopen4(host, serv, typ)
 
   if (_getaddr(host, &ina) == 0)
     {
-      internal_error ("%s: host unknown", host);
+      internal_error (_("%s: host unknown"), host);
       errno = EINVAL;
       return -1;
     }
 
   if (_getserv(serv, typ, &p) == 0)
     {
-      internal_error("%s: invalid service", serv);
+      internal_error(_("%s: invalid service"), serv);
       errno = EINVAL;
       return -1;
     }
@@ -291,7 +293,7 @@ netopen (path)
   t = strchr (s, '/');
   if (t == 0)
     {
-      internal_error ("%s: bad network path specification", path);
+      internal_error (_("%s: bad network path specification"), path);
       return -1;
     }
   *t++ = '\0';
@@ -331,7 +333,7 @@ int
 netopen (path)
      char *path;
 {
-  internal_error ("network operations not supported");
+  internal_error (_("network operations not supported"));
   return -1;
 }
 

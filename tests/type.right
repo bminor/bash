@@ -4,7 +4,6 @@ type: usage: type [-afptP] name [name ...]
 ./type.tests: line 13: command: notthere: not found
 function
 keyword
-alias
 builtin
 file
 file
@@ -16,7 +15,6 @@ func ()
 }
 while is a shell keyword
 while is a shell keyword
-m is aliased to `more'
 builtin is a shell builtin
 /bin/sh is /bin/sh
 func
@@ -27,6 +25,12 @@ func ()
 }
 while
 while is a shell keyword
+./type.tests: line 42: type: m: not found
+./type.tests: line 43: command: m: not found
+alias m='more'
+alias m='more'
+m is aliased to `more'
+alias
 alias m='more'
 alias m='more'
 alias m='more'
@@ -35,8 +39,8 @@ builtin
 builtin is a shell builtin
 /bin/sh
 /bin/sh is /bin/sh
-./type.tests: line 51: type: func: not found
-./type.tests: line 53: type: m: not found
+./type.tests: line 64: type: func: not found
+./type.tests: line 66: type: m: not found
 /bin/sh
 /tmp/bash
 bash is hashed (/tmp/bash)

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2004 Free Software Foundation, Inc.
 This file is part of the GNU C Library.
 
 The GNU C Library is free software; you can redistribute it and/or
@@ -19,11 +19,7 @@ not, write to the Free Software Foundation, Inc.,
 #ifndef	_STRMATCH_H
 #define	_STRMATCH_H	1
 
-#ifdef HAVE_LIBC_FNM_EXTMATCH
-
-#include <fnmatch.h>
-
-#else /* !HAVE_LIBC_FNM_EXTMATCH */
+#include <config.h>
 
 #include "stdc.h"
 
@@ -59,6 +55,8 @@ not, write to the Free Software Foundation, Inc.,
    returning zero if it matches, FNM_NOMATCH if not.  */
 extern int strmatch __P((char *, char *, int));
 
-#endif /* !HAVE_LIBC_FNM_EXTMATCH */
+#if HANDLE_MULTIBYTE
+extern int wcsmatch __P((wchar_t *, wchar_t *, int));
+#endif
 
 #endif /* _STRMATCH_H */

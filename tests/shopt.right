@@ -9,7 +9,12 @@ shopt -s cmdhist
 shopt -u dotglob
 shopt -u execfail
 shopt -s expand_aliases
+shopt -u extdebug
 shopt -u extglob
+shopt -s extquote
+shopt -u failglob
+shopt -s force_fignore
+shopt -u gnu_errfmt
 shopt -u histreedit
 shopt -u histappend
 shopt -u histverify
@@ -36,6 +41,8 @@ shopt -s sourcepath
 shopt -s cdspell
 shopt -s cmdhist
 shopt -s expand_aliases
+shopt -s extquote
+shopt -s force_fignore
 shopt -s hostcomplete
 shopt -s interactive_comments
 shopt -s progcomp
@@ -47,7 +54,10 @@ shopt -u checkhash
 shopt -u checkwinsize
 shopt -u dotglob
 shopt -u execfail
+shopt -u extdebug
 shopt -u extglob
+shopt -u failglob
+shopt -u gnu_errfmt
 shopt -u histreedit
 shopt -u histappend
 shopt -u histverify
@@ -67,7 +77,10 @@ checkhash      	off
 checkwinsize   	off
 dotglob        	off
 execfail       	off
+extdebug       	off
 extglob        	off
+failglob       	off
+gnu_errfmt     	off
 histreedit     	off
 histappend     	off
 histverify     	off
@@ -86,6 +99,8 @@ set +o allexport
 set -o braceexpand
 set -o emacs
 set +o errexit
+set +o errtrace
+set +o functrace
 set -o hashall
 set -o histexpand
 set -o history
@@ -101,6 +116,7 @@ set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
+set +o pipefail
 set +o posix
 set -o privileged
 set +o verbose
@@ -111,6 +127,8 @@ allexport      	off
 braceexpand    	on
 emacs          	on
 errexit        	off
+errtrace       	off
+functrace      	off
 hashall        	on
 histexpand     	on
 history        	on
@@ -126,6 +144,7 @@ notify         	off
 nounset        	off
 onecmd         	off
 physical       	off
+pipefail       	off
 posix          	off
 privileged     	on
 verbose        	off
@@ -136,6 +155,8 @@ set +o allexport
 set -o braceexpand
 set -o emacs
 set +o errexit
+set +o errtrace
+set +o functrace
 set -o hashall
 set -o histexpand
 set -o history
@@ -151,6 +172,7 @@ set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
+set +o pipefail
 set +o posix
 set -o privileged
 set +o verbose
@@ -171,6 +193,8 @@ set -o privileged
 --
 set +o allexport
 set +o errexit
+set +o errtrace
+set +o functrace
 set +o ignoreeof
 set +o keyword
 set +o noclobber
@@ -181,6 +205,7 @@ set +o notify
 set +o nounset
 set +o onecmd
 set +o physical
+set +o pipefail
 set +o posix
 set +o verbose
 set +o vi
@@ -188,6 +213,8 @@ set +o xtrace
 --
 allexport      	off
 errexit        	off
+errtrace       	off
+functrace      	off
 ignoreeof      	off
 keyword        	off
 noclobber      	off
@@ -198,6 +225,7 @@ notify         	off
 nounset        	off
 onecmd         	off
 physical       	off
+pipefail       	off
 posix          	off
 verbose        	off
 vi             	off

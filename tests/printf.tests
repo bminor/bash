@@ -222,3 +222,19 @@ printf $format 0
 
 # this doesn't work with printf(3) on all systems
 #printf "%'s\n" foo
+
+# test cases from an austin-group list discussion
+# prints ^G as an extension
+printf '%b\n' '\7'
+
+# prints ^G
+printf '%b\n' '\0007'
+
+# prints NUL then 7
+printf '\0007\n'
+
+# prints no more than two hex digits
+printf '\x07e\n'
+
+# additional backslash escapes
+printf '\"\?\n'

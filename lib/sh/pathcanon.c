@@ -34,8 +34,13 @@
 #include <bashansi.h>
 #include <stdio.h>
 #include <chartypes.h>
+#include <errno.h>
 
 #include "shell.h"
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 #if defined (__CYGWIN__)
 #include <sys/cygwin.h>
@@ -70,9 +75,10 @@ static int
 _path_isdir (path)
      char *path;
 {
-  int l;
+  int l, x;
   struct stat sb;
 
+  /* This should leave errno set to the correct value. */
   l = stat (path, &sb) == 0 && S_ISDIR (sb.st_mode);
 #if defined (__CYGWIN__)
   if (l == 0)
