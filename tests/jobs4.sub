@@ -18,5 +18,7 @@ echo $?
 
 wait
 
-cat &
+# the sleep is intended to give the kill time to execute before the job
+# exits
+(sleep 1 ; cat ) &
 kill -1 %% && echo i killed it || echo could not kill it

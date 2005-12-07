@@ -1,7 +1,7 @@
 This file is getopts.def, from which is created getopts.c.
 It implements the builtin "getopts" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -101,7 +101,7 @@ getopts_bind_variable (name, value)
 
   if (legal_identifier (name))
     {
-      v = bind_variable (name, value);
+      v = bind_variable (name, value, 0);
       return (v && (readonly_p (v) == 0)) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
     }
   else
@@ -228,7 +228,7 @@ dogetopts (argc, argv)
 	}
       while (n /= 10);
     }
-  bind_variable ("OPTIND", numval + i);
+  bind_variable ("OPTIND", numval + i, 0);
 
   /* If an error occurred, decide which one it is and set the return
      code appropriately.  In all cases, the option character in error
@@ -259,7 +259,7 @@ dogetopts (argc, argv)
 	{
 	  strval[0] = (char)sh_optopt;
 	  strval[1] = '\0';
-	  bind_variable ("OPTARG", strval);
+	  bind_variable ("OPTARG", strval, 0);
 	}
       else
 	unbind_variable ("OPTARG");
@@ -276,7 +276,7 @@ dogetopts (argc, argv)
 
 	  strval[0] = (char)sh_optopt;
 	  strval[1] = '\0';
-	  bind_variable ("OPTARG", strval);
+	  bind_variable ("OPTARG", strval, 0);
 	}
       else
 	{
@@ -286,7 +286,7 @@ dogetopts (argc, argv)
       return (ret);
     }			
 
-  bind_variable ("OPTARG", sh_optarg);
+  bind_variable ("OPTARG", sh_optarg, 0);
 
   strval[0] = (char) ret;
   strval[1] = '\0';

@@ -43,7 +43,7 @@ extern PTR_T sh_malloc __P((size_t, const char *, int));
 extern PTR_T sh_realloc __P((PTR_T, size_t, const char *, int));
 extern void sh_free __P((PTR_T, const char *, int));
 
-extern PTR_T sh_memalign __P((unsigned int, size_t, const char *, int));
+extern PTR_T sh_memalign __P((size_t, size_t, const char *, int));
 
 extern PTR_T sh_calloc __P((size_t, size_t, const char *, int));
 extern void sh_cfree __P((PTR_T, const char *, int));

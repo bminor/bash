@@ -63,8 +63,9 @@ int
 reader_loop ()
 {
   int our_indirection_level;
-  COMMAND *current_command = (COMMAND *)NULL;
+  COMMAND * volatile current_command;
 
+  current_command = (COMMAND *)NULL;
   USE_VAR(current_command);
 
   our_indirection_level = ++indirection_level;
@@ -146,13 +147,13 @@ reader_loop ()
 	      execute_command (current_command);
 
 	    exec_done:
+	      QUIT;
+
 	      if (current_command)
 		{
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
-
-	      QUIT;
 	    }
 	}
       else

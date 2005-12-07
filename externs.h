@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -235,6 +235,7 @@ extern int sh_regmatch __P((const char *, const char *, int));
 /* declarations for functions defined in lib/sh/shquote.c */
 extern char *sh_single_quote __P((char *));
 extern char *sh_double_quote __P((char *));
+extern char *sh_mkdoublequoted __P((const char *, int, int));
 extern char *sh_un_double_quote __P((char *));
 extern char *sh_backslash_quote __P((char *));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));
@@ -302,6 +303,16 @@ extern void strvec_sort __P((char **));
 extern char **strvec_from_word_list __P((WORD_LIST *, int, int, int *));
 extern WORD_LIST *strvec_to_word_list __P((char **, int, int));
 
+/* declarations for functions defined in lib/sh/strnlen.c */
+#if !defined (HAVE_STRNLEN)
+extern size_t strnlen __P((const char *, size_t));
+#endif
+
+/* declarations for functions defined in lib/sh/strpbrk.c */
+#if !defined (HAVE_STRPBRK)
+extern char *strpbrk __P((const char *, const char *));
+#endif
+
 /* declarations for functions defined in lib/sh/strtod.c */
 #if !defined (HAVE_STRTOD)
 extern double strtod __P((const char *, char **));
@@ -358,9 +369,15 @@ extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
+/* declarations for functions defined in lib/sh/winsize.c */
+extern void get_new_window_size __P((int, int *, int *));
+
 /* declarations for functions defined in lib/sh/xstrchr.c */
 #undef xstrchr
 extern char *xstrchr __P((const char *, int));
+
+/* declarations for functions defined in lib/sh/zcatfd.c */
+extern int zcatfd __P((int, int, char *));
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));

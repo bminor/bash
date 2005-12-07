@@ -39,6 +39,8 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "test.h"
+
 #include <tilde/tilde.h>
 
 #if !defined (errno)
@@ -286,9 +288,15 @@ assignment (string, flags)
 	  newi = skipsubscript (string, indx);
 	  if (string[newi++] != ']')
 	    return (0);
+	  if (string[newi] == '+' && string[newi+1] == '=')
+	    return (newi + 1);
 	  return ((string[newi] == '=') ? newi : 0);
 	}
 #endif /* ARRAY_VARS */
+
+      /* Check for `+=' */
+      if (c == '+' && string[indx+1] == '=')
+	return (indx + 1);
 
       /* Variable names in assignment statements may contain only letters,
 	 digits, and `_'. */
@@ -498,6 +506,36 @@ file_iswdir (fn)
   return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
 }
 
+/* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'
+   to decide whether or not to look up a directory name in $CDPATH. */
+int
+absolute_pathname (string)
+     const char *string;
+{
+  if (string == 0 || *string == '\0')
+    return (0);
+
+  if (ABSPATH(string))
+    return (1);
+
+  if (string[0] == '.' && PATHSEP(string[1]))	/* . and ./ */
+    return (1);
+
+  if (string[0] == '.' && string[1] == '.' && PATHSEP(string[2]))	/* .. and ../ */
+    return (1);
+
+  return (0);
+}
+
+/* Return 1 if STRING is an absolute program name; it is absolute if it
+   contains any slashes.  This is used to decide whether or not to look
+   up through $PATH. */
+int
+absolute_program (string)
+     const char *string;
+{
+  return ((char *)xstrchr (string, '/') != (char *)NULL);
+}
 
 /* **************************************************************** */
 /*								    */
@@ -532,46 +570,20 @@ make_absolute (string, dot_path)
   return (result);
 }
 
-/* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'
-   to decide whether or not to look up a directory name in $CDPATH. */
-int
-absolute_pathname (string)
-     const char *string;
-{
-  if (string == 0 || *string == '\0')
-    return (0);
-
-  if (ABSPATH(string))
-    return (1);
-
-  if (string[0] == '.' && PATHSEP(string[1]))	/* . and ./ */
-    return (1);
-
-  if (string[0] == '.' && string[1] == '.' && PATHSEP(string[2]))	/* .. and ../ */
-    return (1);
-
-  return (0);
-}
-
-/* Return 1 if STRING is an absolute program name; it is absolute if it
-   contains any slashes.  This is used to decide whether or not to look
-   up through $PATH. */
-int
-absolute_program (string)
-     const char *string;
-{
-  return ((char *)xstrchr (string, '/') != (char *)NULL);
-}
-
 /* Return the `basename' of the pathname in STRING (the stuff after the
-   last '/').  If STRING is not a full pathname, simply return it. */
+   last '/').  If STRING is `/', just return it. */
 char *
 base_pathname (string)
      char *string;
 {
   char *p;
 
+#if 0
   if (absolute_pathname (string) == 0)
+    return (string);
+#endif
+
+  if (string[0] == '/' && string[1] == 0)
     return (string);
 
   p = (char *)strrchr (string, '/');
@@ -683,7 +695,9 @@ extern char *get_dirstack_from_string __P((char *));
 #endif
 
 static char **bash_tilde_prefixes;
+static char **bash_tilde_prefixes2;
 static char **bash_tilde_suffixes;
+static char **bash_tilde_suffixes2;
 
 /* If tilde_expand hasn't been able to expand the text, perhaps it
    is a special shell expansion.  This function is installed as the
@@ -731,6 +745,10 @@ tilde_initialize ()
       bash_tilde_prefixes[1] = ":~";
       bash_tilde_prefixes[2] = (char *)NULL;
 
+      bash_tilde_prefixes2 = strvec_create (2);
+      bash_tilde_prefixes2[0] = ":~";
+      bash_tilde_prefixes2[1] = (char *)NULL;
+
       tilde_additional_prefixes = bash_tilde_prefixes;
 
       bash_tilde_suffixes = strvec_create (3);
@@ -739,6 +757,10 @@ tilde_initialize ()
       bash_tilde_suffixes[2] = (char *)NULL;
 
       tilde_additional_suffixes = bash_tilde_suffixes;
+
+      bash_tilde_suffixes2 = strvec_create (2);
+      bash_tilde_suffixes2[0] = ":";
+      bash_tilde_suffixes2[1] = (char *)NULL;
     }
 }
 
@@ -770,9 +792,49 @@ unquoted_tilde_word (s)
   return 1;
 }
 
+/* Find the end of the tilde-prefix starting at S, and return the tilde
+   prefix in newly-allocated memory.  Return the length of the string in
+   *LENP.  FLAGS tells whether or not we're in an assignment context --
+   if so, `:' delimits the end of the tilde prefix as well. */
+char *
+bash_tilde_find_word (s, flags, lenp)
+     const char *s;
+     int flags, *lenp;
+{
+  const char *r;
+  char *ret;
+  int l;
+
+  for (r = s; *r && *r != '/'; r++)
+    {
+      /* Short-circuit immediately if we see a quote character.  Even though
+	 POSIX says that `the first unquoted slash' (or `:') terminates the
+	 tilde-prefix, in practice, any quoted portion of the tilde prefix
+	 will cause it to not be expanded. */
+      if (*r == '\\' || *r == '\'' || *r == '"')  
+	{
+	  ret = savestring (s);
+	  if (lenp)
+	    *lenp = 0;
+	  return ret;
+	}
+      else if (flags && *r == ':')
+	break;
+    }
+  l = r - s;
+  ret = xmalloc (l + 1);
+  strncpy (ret, s, l);
+  ret[l] = '\0';
+  if (lenp)
+    *lenp = l;
+  return ret;
+}
+    
 /* Tilde-expand S by running it through the tilde expansion library.
    ASSIGN_P is 1 if this is a variable assignment, so the alternate
-   tilde prefixes should be enabled (`=~' and `:~', see above). */
+   tilde prefixes should be enabled (`=~' and `:~', see above).  If
+   ASSIGN_P is 2, we are expanding the rhs of an assignment statement,
+   so `=~' is not valid. */
 char *
 bash_tilde_expand (s, assign_p)
      const char *s;
@@ -783,7 +845,12 @@ bash_tilde_expand (s, assign_p)
 
   old_immed = interrupt_immediately;
   interrupt_immediately = 1;
-  tilde_additional_prefixes = assign_p ? bash_tilde_prefixes : (char **)0;
+
+  tilde_additional_prefixes = assign_p == 0 ? (char **)0
+  					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
+  if (assign_p == 2)
+    tilde_additional_suffixes = bash_tilde_suffixes2;
+
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
   interrupt_immediately = old_immed;

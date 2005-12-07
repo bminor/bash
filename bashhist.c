@@ -156,6 +156,10 @@ int history_control;
    to a previous entry as part of command-oriented-history processing. */
 int hist_last_line_added;
 
+/* Set to 1 if builtins/history.def:push_history added the last history
+   entry. */
+int hist_last_line_pushed;
+
 #if defined (READLINE)
 /* If non-zero, and readline is being used, the user is offered the
    chance to re-edit a failed history expansion. */
@@ -217,7 +221,9 @@ bash_initialize_history ()
   history_quotes_inhibit_expansion = 1;
   history_search_delimiter_chars = ";&()|<>";
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+#if defined (BANG_HISTORY)
   sv_histchars ("histchars");
+#endif
 }
 
 void
@@ -698,6 +704,7 @@ really_add_history (line)
      char *line;
 {
   hist_last_line_added = 1;
+  hist_last_line_pushed = 0;
   add_history (line);
   history_lines_this_session++;
 }
@@ -706,7 +713,7 @@ int
 history_number ()
 {
   using_history ();
-  return (get_string_value ("HISTSIZE") ? history_base + where_history () : 1);
+  return (remember_on_history ? history_base + where_history () : 1);
 }
 
 static int

@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,8 +23,8 @@ $PRODUCES kill.c
 
 $BUILTIN kill
 $FUNCTION kill_builtin
-$SHORT_DOC kill [-s sigspec | -n signum | -sigspec] [pid | job]... or kill -l [sigspec]
-Send the processes named by PID (or JOB) the signal SIGSPEC.  If
+$SHORT_DOC kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
+Send the processes named by PID (or JOBSPEC) the signal SIGSPEC.  If
 SIGSPEC is not present, then SIGTERM is assumed.  An argument of `-l'
 lists the signal names; if arguments follow `-l' they are assumed to
 be signal numbers for which names should be listed.  Kill is a shell
@@ -170,7 +170,7 @@ kill_builtin (list)
 	{
 	  pid = (pid_t) pid_value;
 
-	  if ((pid < -1 ? kill_pid (-pid, sig, 1) : kill_pid (pid, sig, 0)) < 0)
+	  if (kill_pid (pid, sig, pid < -1) < 0)
 	    {
 	      if (errno == EINVAL)
 		sh_invalidsig (sigspec);
@@ -192,11 +192,12 @@ kill_builtin (list)
 	{			/* Must be a job spec.  Check it out. */
 	  int job;
 	  sigset_t set, oset;
+	  JOB *j;
 
 	  BLOCK_CHILD (set, oset);
 	  job = get_job_spec (list);
 
-	  if (job < 0 || job >= job_slots || !jobs[job])
+	  if (INVALID_JOB (job))
 	    {
 	      if (job != DUP_JOB)
 		sh_badjob (list->word->word);
@@ -204,11 +205,12 @@ kill_builtin (list)
 	      CONTINUE_OR_FAIL;
 	    }
 
+	  j = get_job_by_jid (job);
 	  /* Job spec used.  Kill the process group. If the job was started
 	     without job control, then its pgrp == shell_pgrp, so we have
 	     to be careful.  We take the pid of the first job in the pipeline
 	     in that case. */
-	  pid = IS_JOBCONTROL (job) ? jobs[job]->pgrp : jobs[job]->pipe->pid;
+	  pid = IS_JOBCONTROL (job) ? j->pgrp : j->pipe->pid;
 
 	  UNBLOCK_CHILD (oset);
 

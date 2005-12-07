@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -384,8 +384,8 @@ set_sigchld_trap (command_string)
 }
 #endif
 
-/* Make COMMAND_STRING be executed when SIGCHLD is caught iff the current
-   SIGCHLD trap handler is DEFAULT_SIG. */
+/* Make COMMAND_STRING be executed when SIGCHLD is caught iff SIGCHLD
+   is not already trapped. */
 void
 maybe_set_sigchld_trap (command_string)
      char *command_string;
@@ -807,6 +807,11 @@ run_return_trap ()
 {
   int old_exit_value;
 
+#if 0
+  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && (sigmodes[DEBUG_TRAP] & SIG_INPROGRESS))
+    return;
+#endif
+
   if ((sigmodes[RETURN_TRAP] & SIG_TRAPPED) && ((sigmodes[RETURN_TRAP] & SIG_IGNORED) == 0) && (sigmodes[RETURN_TRAP] & SIG_INPROGRESS) == 0)
     {
       old_exit_value = last_command_exit_value;
@@ -870,9 +875,12 @@ reset_or_restore_signal_handlers (reset)
   /* Take care of the exit trap first */
   if (sigmodes[EXIT_TRAP] & SIG_TRAPPED)
     {
-      free_trap_command (EXIT_TRAP);
-      trap_list[EXIT_TRAP] = (char *)NULL;
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
+      if (reset != reset_signal)
+	{
+	  free_trap_command (EXIT_TRAP);
+	  trap_list[EXIT_TRAP] = (char *)NULL;
+	}
     }
 
   for (i = 1; i < NSIG; i++)
@@ -903,8 +911,8 @@ reset_or_restore_signal_handlers (reset)
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
 #if defined (DEBUGGER)
   if (debugging_mode == 0 || function_trace_mode == 0)
-    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 #endif
+    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 }
 
 /* Reset trapped signals to their original values, but don't free the
@@ -984,4 +992,11 @@ set_signal_ignored (sig)
 {
   sigmodes[sig] |= SIG_HARD_IGNORE;
   original_signals[sig] = SIG_IGN;
+}
+
+int
+signal_in_progress (sig)
+     int sig;
+{
+  return (sigmodes[sig] & SIG_INPROGRESS);
 }

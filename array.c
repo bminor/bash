@@ -107,7 +107,7 @@ ARRAY	*a;
 	ARRAY	*a1;
 	ARRAY_ELEMENT	*ae, *new;
 
-	if (!a)
+	if (a == 0)
 		return((ARRAY *) NULL);
 	a1 = array_create();
 	a1->type = a->type;
@@ -243,9 +243,9 @@ char	*s;
 {
 	register ARRAY_ELEMENT	*ae, *new;
 
-	if (a == 0)
+	if (a == 0 || (array_empty(a) && s == 0))
 		return 0;
-	if (n <= 0)
+	else if (n <= 0)
 		return (a->num_elements);
 
 	ae = element_forw(a->head);
@@ -253,15 +253,17 @@ char	*s;
 		new = array_create_element(0, s);
 		ADD_BEFORE(ae, new);
 		a->num_elements++;
+		if (array_num_elements(a) == 1)		/* array was empty */
+			return 1;
 	}
-
-	a->max_index += n;
 
 	/*
 	 * Renumber all elements in the array except the one we just added.
 	 */
 	for ( ; ae != a->head; ae = element_forw(ae))
 		element_index(ae) += n;
+
+	a->max_index = element_index(a->head->prev);
 
 	return (a->num_elements);
 }
@@ -288,7 +290,7 @@ ARRAY	*array;
 	ARRAY_ELEMENT	*a;
 	char	*t;
 
-	if (array == 0 || array->head == 0 || array_empty (array))
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
 		return (ARRAY *)NULL;
 	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
 		t = quote_string (a->value);
@@ -313,7 +315,7 @@ int	starsub, quoted;
 	arrayind_t	i;
 	char		*ifs, sep[2];
 
-	p = array_head (a);
+	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
 		return ((char *)NULL);
 
@@ -354,10 +356,10 @@ int	mflags;
 	ARRAY_ELEMENT	*e;
 	char	*t, *ifs, sifs[2];
 
-	if (array_head (a) == 0 || array_empty (a))
+	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
 
-	a2 = array_copy (a);
+	a2 = array_copy(a);
 	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
 		t = pat_subst(element_value(e), pat, rep, mflags);
 		FREE(element_value(e));
@@ -427,7 +429,7 @@ char	*v;
 {
 	register ARRAY_ELEMENT *new, *ae;
 
-	if (!a)
+	if (a == 0)
 		return(-1);
 	new = array_create_element(i, v);
 	if (i > array_max_index(a)) {
@@ -473,7 +475,7 @@ arrayind_t	i;
 {
 	register ARRAY_ELEMENT *ae;
 
-	if (!a || array_empty(a))
+	if (a == 0 || array_empty(a))
 		return((ARRAY_ELEMENT *) NULL);
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
 		if (element_index(ae) == i) {

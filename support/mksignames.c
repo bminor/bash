@@ -133,11 +133,11 @@ initialize_signames ()
     }
 #endif /* SIGRTMIN && SIGRTMAX */
 
-/* AIX */
 #if defined (SIGLOST)	/* resource lost (eg, record-lock lost) */
   signal_names[SIGLOST] = "SIGLOST";
 #endif
 
+/* AIX */
 #if defined (SIGMSG)	/* HFT input data pending */
   signal_names[SIGMSG] = "SIGMSG";
 #endif
@@ -203,6 +203,10 @@ initialize_signames ()
   signal_names[SIGCANCEL] = "SIGCANCEL";
 #endif
 
+#if defined (SIGXRES)	/* resource control exceeded */
+  signal_names[SIGXRES] = "SIGXRES";
+#endif
+
 /* HP-UX */
 #if defined (SIGDIL)	/* DIL signal (?) */
   signal_names[SIGDIL] = "SIGDIL";
@@ -224,6 +228,16 @@ initialize_signames ()
 /* Unknown */
 #if defined (SIGWINDOW)
   signal_names[SIGWINDOW] = "SIGWINDOW";
+#endif
+
+/* Linux */
+#if defined (SIGSTKFLT)
+  signal_names[SIGSTKFLT] = "SIGSTKFLT";
+#endif
+
+/* FreeBSD */
+#if defined (SIGTHR)	/* thread interrupt */
+  signal_names[SIGTHR] = "SIGTHR";
 #endif
 
 /* Common */

@@ -41,6 +41,8 @@
 #define SPECIAL_BUILTIN 0x8	/* This is a Posix `special' builtin. */
 #define ASSIGNMENT_BUILTIN 0x10	/* This builtin takes assignment statements. */
 
+#define BASE_INDENT	4
+
 /* The thing that we build the array of builtins out of. */
 struct builtin {
   char *name;			/* The name that the user types. */

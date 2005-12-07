@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,13 +31,17 @@
    to unconditionally retain the backslash.  Q_PATQUOTE means that we're
    expanding a pattern ${var%#[#%]pattern} in an expansion surrounded
    by double quotes. */
-#define Q_DOUBLE_QUOTES  0x1
-#define Q_HERE_DOCUMENT  0x2
-#define Q_KEEP_BACKSLASH 0x4
-#define Q_PATQUOTE	 0x8
+#define Q_DOUBLE_QUOTES  0x01
+#define Q_HERE_DOCUMENT  0x02
+#define Q_KEEP_BACKSLASH 0x04
+#define Q_PATQUOTE	 0x08
 #define Q_QUOTED	 0x10
 #define Q_ADDEDQUOTES	 0x20
 #define Q_QUOTEDNULL	 0x40
+
+/* Flag values controlling how assignment statements are treated. */
+#define ASS_APPEND	0x01
+#define ASS_MKLOCAL	0x02
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
@@ -93,11 +97,12 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
 
 /* Given STRING, an assignment string, get the value of the right side
    of the `=', and bind it to the left side.  If EXPAND is true, then
-   perform parameter expansion, command substitution, and arithmetic
-   expansion on the right-hand side.  Perform tilde expansion in any
-   case.  Do not perform word splitting on the result of expansion. */
-extern int do_assignment __P((const char *));
-extern int do_assignment_no_expand __P((const char *));
+   perform tilde expansion, parameter expansion, command substitution,
+   and arithmetic expansion on the right-hand side.  Do not perform word
+   splitting on the result of expansion. */
+extern int do_assignment __P((char *));
+extern int do_assignment_no_expand __P((char *));
+extern int do_word_assignment __P((WORD_DESC *));
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
@@ -126,6 +131,9 @@ extern int number_of_args __P((void));
    takes care of quote removal. */
 extern WORD_LIST *expand_string_unsplit __P((char *, int));
 
+/* Expand the rhs of an assignment statement. */
+extern WORD_LIST *expand_string_assignment __P((char *, int));
+
 /* Expand a prompt string. */
 extern WORD_LIST *expand_prompt_string __P((char *, int));
 
@@ -141,6 +149,7 @@ extern WORD_LIST *expand_string __P((char *, int));
    to a string and deallocating the WORD_LIST *. */
 extern char *expand_string_to_string __P((char *, int));
 extern char *expand_string_unsplit_to_string __P((char *, int));
+extern char *expand_assignment_string_to_string __P((char *, int));
 
 /* De-quoted quoted characters in STRING. */
 extern char *dequote_string __P((char *));
@@ -231,7 +240,13 @@ extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int *, int *));
 extern SHELL_VAR *ifs_var;
 extern char *ifs_value;
 extern unsigned char ifs_cmap[];
+
+#if defined (HANDLE_MULTIBYTE)
+extern unsigned char ifs_firstc[];
+extern size_t ifs_firstc_len;
+#else
 extern unsigned char ifs_firstc;
+#endif
 
 /* Evaluates to 1 if C is a character in $IFS. */
 #define isifs(c)	(ifs_cmap[(unsigned char)(c)] != 0)

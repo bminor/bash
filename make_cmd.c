@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -77,15 +77,23 @@ cmd_init ()
 }
 
 WORD_DESC *
+alloc_word_desc ()
+{
+  WORD_DESC *temp;
+
+  ocache_alloc (wdcache, WORD_DESC, temp);
+  temp->flags = 0;
+  temp->word = 0;
+  return temp;
+}
+
+WORD_DESC *
 make_bare_word (string)
      const char *string;
 {
   WORD_DESC *temp;
-#if 0
-  temp = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
-#else
-  ocache_alloc (wdcache, WORD_DESC, temp);
-#endif
+
+  temp = alloc_word_desc ();
 
   if (*string)
     temp->word = savestring (string);
@@ -95,7 +103,6 @@ make_bare_word (string)
       temp->word[0] = '\0';
     }
 
-  temp->flags = 0;
   return (temp);
 }
 
@@ -161,11 +168,8 @@ make_word_list (word, wlink)
 {
   WORD_LIST *temp;
 
-#if 0
-  temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
-#else
   ocache_alloc (wlcache, WORD_LIST, temp);
-#endif
+
   temp->word = word;
   temp->next = wlink;
   return (temp);
@@ -255,7 +259,7 @@ make_arith_for_expr (s)
   if (s == 0 || *s == '\0')
     return ((WORD_LIST *)NULL);
   wd = make_word (s);
-  wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED;	/* no word splitting or globbing */
+  wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED|W_DQUOTE;	/* no word splitting or globbing */
   result = make_word_list (wd, (WORD_LIST *)NULL);
   return result;
 }
@@ -355,6 +359,7 @@ COMMAND *
 make_case_command (word, clauses, lineno)
      WORD_DESC *word;
      PATTERN_LIST *clauses;
+     int lineno;
 {
   CASE_COM *temp;
 
@@ -377,6 +382,7 @@ make_pattern_list (patterns, action)
   temp->patterns = REVERSE_LIST (patterns, WORD_LIST *);
   temp->action = action;
   temp->next = NULL;
+  temp->flags = 0;
   return (temp);
 }
 

@@ -72,11 +72,6 @@ int check_hashed_filenames;
    containing the file of interest. */
 int dot_found_in_search = 0;
 
-#define u_mode_bits(x) (((x) & 0000700) >> 6)
-#define g_mode_bits(x) (((x) & 0000070) >> 3)
-#define o_mode_bits(x) (((x) & 0000007) >> 0)
-#define X_BIT(x) ((x) & 1)
-
 /* Return some flags based on information about this file.
    The EXISTS bit is non-zero if the file is found.
    The EXECABLE bit is non-zero the file is executble.
@@ -86,6 +81,7 @@ file_status (name)
      const char *name;
 {
   struct stat finfo;
+  int r;
 
   /* Determine whether this file exists or not. */
   if (stat (name, &finfo) < 0)
@@ -96,41 +92,62 @@ file_status (name)
   if (S_ISDIR (finfo.st_mode))
     return (FS_EXISTS|FS_DIRECTORY);
 
+  r = FS_EXISTS;
+
 #if defined (AFS)
   /* We have to use access(2) to determine access because AFS does not
      support Unix file system semantics.  This may produce wrong
      answers for non-AFS files when ruid != euid.  I hate AFS. */
-  return ((access (name, X_OK) == 0) ? (FS_EXISTS|FS_EXECABLE) : FS_EXISTS);
+  if (access (name, X_OK) == 0)
+    r |= FS_EXECABLE;
+  if (access (name, R_OK) == 0)
+    r |= FS_READABLE;
+
+  return r;
 #else /* !AFS */
 
   /* Find out if the file is actually executable.  By definition, the
      only other criteria is that the file has an execute bit set that
-     we can use. */
+     we can use.  The same with whether or not a file is readable. */
 
   /* Root only requires execute permission for any of owner, group or
-     others to be able to exec a file. */
+     others to be able to exec a file, and can read any file. */
   if (current_user.euid == (uid_t)0)
     {
-      int bits;
-
-      bits = (u_mode_bits (finfo.st_mode) |
-	      g_mode_bits (finfo.st_mode) |
-	      o_mode_bits (finfo.st_mode));
-
-      return ((X_BIT (bits)) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
+      r |= FS_READABLE;
+      if (finfo.st_mode & S_IXUGO)
+	r |= FS_EXECABLE;
+      return r;
     }
 
-  /* If we are the owner of the file, the owner execute bit applies. */
+  /* If we are the owner of the file, the owner bits apply. */
   if (current_user.euid == finfo.st_uid)
-    return ((X_BIT (u_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
+    {
+      if (finfo.st_mode & S_IXUSR)
+	r |= FS_EXECABLE;
+      if (finfo.st_mode & S_IRUSR)
+	r |= FS_READABLE;
+    }
 
   /* If we are in the owning group, the group permissions apply. */
   else if (group_member (finfo.st_gid))
-    return ((X_BIT (g_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
+    {
+      if (finfo.st_mode & S_IXGRP)
+	r |= FS_EXECABLE;
+      if (finfo.st_mode & S_IRGRP)
+	r |= FS_READABLE;
+    }
 
   /* Else we check whether `others' have permission to execute the file */
   else
-    return ((X_BIT (o_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
+    {
+      if (finfo.st_mode & S_IXOTH)
+	r |= FS_EXECABLE;
+      if (finfo.st_mode & S_IROTH)
+	r |= FS_READABLE;
+    }
+
+  return r;
 #endif /* !AFS */
 }
 
@@ -180,12 +197,13 @@ find_user_command (name)
 /* Locate the file referenced by NAME, searching along the contents
    of the shell PATH variable.  Return a new string which is the full
    pathname to the file, or NULL if the file couldn't be found.  This
-   returns the first file found. */
+   returns the first readable file found; designed to be used to look
+   for shell scripts or files to source. */
 char *
 find_path_file (name)
      const char *name;
 {
-  return (find_user_command_internal (name, FS_EXISTS));
+  return (find_user_command_internal (name, FS_READABLE));
 }
 
 static char *
@@ -460,9 +478,14 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
   if (flags & FS_EXISTS)
     return (full_path);
 
+  /* If we have a readable file, and the caller wants a readable file, this
+     is it. */
+  if ((flags & FS_READABLE) && (status & FS_READABLE))
+    return (full_path);
+
   /* If the file is executable, then it satisfies the cases of
       EXEC_ONLY and EXEC_PREFERRED.  Return this file unconditionally. */
-  if ((status & FS_EXECABLE) &&
+  if ((status & FS_EXECABLE) && (flags & (FS_EXEC_ONLY|FS_EXEC_PREFERRED)) &&
       (((flags & FS_NODIRS) == 0) || ((status & FS_DIRECTORY) == 0)))
     {
       FREE (file_to_lose_on);
@@ -477,9 +500,11 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
     file_to_lose_on = savestring (full_path);
 
   /* If we want only executable files, or we don't want directories and
-     this file is a directory, fail. */
-  if ((flags & FS_EXEC_ONLY) || (flags & FS_EXEC_PREFERRED) ||
-      ((flags & FS_NODIRS) && (status & FS_DIRECTORY)))
+     this file is a directory, or we want a readable file and this file
+     isn't readable, fail. */
+  if ((flags & (FS_EXEC_ONLY|FS_EXEC_PREFERRED)) ||
+      ((flags & FS_NODIRS) && (status & FS_DIRECTORY)) ||
+      ((flags & FS_READABLE) && (status & FS_READABLE) == 0))
     {
       free (full_path);
       return ((char *)NULL);

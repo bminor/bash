@@ -1,7 +1,7 @@
 /* pcomplete.c - functions to generate lists of matches for programmable
 		 completion. */
 
-/* Copyright (C) 1999-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -513,20 +513,22 @@ it_init_joblist (itp, jstate)
   register int i;
   register PROCESS *p;
   char *s, *t;
-  JOB_STATE js;
+  JOB *j;
+  JOB_STATE ws;		/* wanted state */
 
   if (jstate == 0)
-    js = JRUNNING;
+    ws = JRUNNING;
   else if (jstate == 1)
-    js = JSTOPPED;
+    ws = JSTOPPED;
 
-  sl = strlist_create (job_slots);
-  for (i = job_slots - 1; i >= 0; i--)
+  sl = strlist_create (js.j_jobslots);
+  for (i = js.j_jobslots - 1; i >= 0; i--)
     {
-      if (jobs[i] == 0)
+      j = get_job_by_jid (i);
+      if (j == 0)
 	continue;
-      p = jobs[i]->pipe;
-      if (jstate == -1 || JOBSTATE(i) == js)
+      p = j->pipe;
+      if (jstate == -1 || JOBSTATE(i) == ws)
 	{
 	  s = savestring (p->command);
 	  t = strpbrk (s, " \t\n");
@@ -843,6 +845,7 @@ gen_wordlist_matches (cs, text)
     }
   sl->list[sl->list_len = nw] = (char *)NULL;
 
+  dispose_words (l2);
   FREE (ntxt);
   return sl;
 }
@@ -862,7 +865,7 @@ bind_comp_words (lwords)
     VUNSETATTR (v, att_readonly);
   if (array_p (v) == 0)
     v = convert_var_to_array (v);
-  v = assign_array_var_from_word_list (v, lwords);
+  v = assign_array_var_from_word_list (v, lwords, 0);
 
   VUNSETATTR (v, att_invisible);
   return v;
@@ -882,7 +885,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
 
   /* Set the variables that the function expects while it executes.  Maybe
      these should be in the function environment (temporary_env). */
-  v = bind_variable ("COMP_LINE", line);
+  v = bind_variable ("COMP_LINE", line, 0);
   if (v && exported)
     VSETATTR(v, att_exported);
 
@@ -987,6 +990,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   SHELL_VAR *f, *v;
   WORD_LIST *cmdlist;
   int fval;
+  sh_parser_state_t ps;
 #if defined (ARRAY_VARS)
   ARRAY *a;
 #endif
@@ -1010,8 +1014,10 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   bind_compfunc_variables (line, ind, lwords, cw - 1, 0);
 
   cmdlist = build_arg_list (funcname, text, lwords, cw);
-  
+
+  save_parser_state (&ps);  
   fval = execute_shell_function (f, cmdlist);  
+  restore_parser_state (&ps);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);

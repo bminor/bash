@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -128,11 +128,13 @@ $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
     -E  If set, the ERR trap is inherited by shell functions.
 #if defined (BANG_HISTORY)
     -H  Enable ! style history substitution.  This flag is on
-        by default.
+        by default when the shell is interactive.
 #endif /* BANG_HISTORY */
     -P  If set, do not follow symbolic links when executing commands
         such as cd which change the current directory.
     -T  If set, the DEBUG trap is inherited by shell functions.
+    -   Assign any remaining arguments to the positional parameters.
+        The -x and -v options are turned off.
 
 Using + rather than - causes these flags to be turned off.  The
 flags can also be used upon invocation of the shell.  The current
@@ -311,7 +313,7 @@ set_ignoreeof (on_or_off, option_name)
   ignoreeof = on_or_off == FLAG_ON;
   unbind_variable ("ignoreeof");
   if (ignoreeof)
-    bind_variable ("IGNOREEOF", "10"); 
+    bind_variable ("IGNOREEOF", "10", 0); 
   else
     unbind_variable ("IGNOREEOF");
   sv_ignoreeof ("IGNOREEOF");
@@ -327,7 +329,7 @@ set_posix_mode (on_or_off, option_name)
   if (posixly_correct == 0)
     unbind_variable ("POSIXLY_CORRECT");
   else
-    bind_variable ("POSIXLY_CORRECT", "y");
+    bind_variable ("POSIXLY_CORRECT", "y", 0);
   sv_strict_posix ("POSIXLY_CORRECT");
   return (0);
 }
@@ -503,7 +505,7 @@ set_shellopts ()
   else
     exported = 0;
 
-  v = bind_variable ("SHELLOPTS", value);
+  v = bind_variable ("SHELLOPTS", value, 0);
 
   /* Turn the read-only attribute back on, and turn off the export attribute
      if it was set implicitly by mark_modified_vars and SHELLOPTS was not

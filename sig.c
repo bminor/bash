@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,6 +61,9 @@ extern int parse_and_execute_level, shell_initialized;
 /* Non-zero after SIGINT. */
 int interrupt_state;
 
+/* Non-zero after SIGWINCH */
+volatile int sigwinch_received = 0;
+
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
 procenv_t top_level;
@@ -72,6 +75,10 @@ sigset_t top_level_mask;
 
 /* When non-zero, we throw_to_top_level (). */
 int interrupt_immediately = 0;
+
+#if defined (SIGWINCH)
+static SigHandler *old_winch = (SigHandler *)SIG_DFL;
+#endif
 
 static void initialize_shell_signals __P((void));
 
@@ -93,6 +100,7 @@ initialize_signals (reinit)
 struct termsig {
      int signum;
      SigHandler *orig_handler;
+     int orig_flags;
 };
 
 #define NULL_HANDLER (SigHandler *)SIG_DFL
@@ -102,89 +110,89 @@ struct termsig {
    and so forth. */
 static struct termsig terminating_signals[] = {
 #ifdef SIGHUP
-{  SIGHUP, NULL_HANDLER },
+{  SIGHUP, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGINT
-{  SIGINT, NULL_HANDLER },
+{  SIGINT, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGILL
-{  SIGILL, NULL_HANDLER },
+{  SIGILL, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGTRAP
-{  SIGTRAP, NULL_HANDLER },
+{  SIGTRAP, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGIOT
-{  SIGIOT, NULL_HANDLER },
+{  SIGIOT, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGDANGER
-{  SIGDANGER, NULL_HANDLER },
+{  SIGDANGER, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGEMT
-{  SIGEMT, NULL_HANDLER },
+{  SIGEMT, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGFPE
-{  SIGFPE, NULL_HANDLER },
+{  SIGFPE, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGBUS
-{  SIGBUS, NULL_HANDLER },
+{  SIGBUS, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGSEGV
-{  SIGSEGV, NULL_HANDLER },
+{  SIGSEGV, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGSYS
-{  SIGSYS, NULL_HANDLER },
+{  SIGSYS, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGPIPE
-{  SIGPIPE, NULL_HANDLER },
+{  SIGPIPE, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGALRM
-{  SIGALRM, NULL_HANDLER },
+{  SIGALRM, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGTERM
-{  SIGTERM, NULL_HANDLER },
+{  SIGTERM, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGXCPU
-{  SIGXCPU, NULL_HANDLER },
+{  SIGXCPU, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGXFSZ
-{  SIGXFSZ, NULL_HANDLER },
+{  SIGXFSZ, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGVTALRM
-{  SIGVTALRM, NULL_HANDLER },
+{  SIGVTALRM, NULL_HANDLER, 0 },
 #endif
 
 #if 0
 #ifdef SIGPROF
-{  SIGPROF, NULL_HANDLER },
+{  SIGPROF, NULL_HANDLER, 0 },
 #endif
 #endif
 
 #ifdef SIGLOST
-{  SIGLOST, NULL_HANDLER },
+{  SIGLOST, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGUSR1
-{  SIGUSR1, NULL_HANDLER },
+{  SIGUSR1, NULL_HANDLER, 0 },
 #endif
 
 #ifdef SIGUSR2
-{  SIGUSR2, NULL_HANDLER },
+{  SIGUSR2, NULL_HANDLER, 0 },
 #endif
 };
 
@@ -192,6 +200,7 @@ static struct termsig terminating_signals[] = {
 
 #define XSIG(x) (terminating_signals[x].signum)
 #define XHANDLER(x) (terminating_signals[x].orig_handler)
+#define XSAFLAGS(x) (terminating_signals[x].orig_flags)
 
 static int termsigs_initialized = 0;
 
@@ -228,6 +237,7 @@ initialize_terminating_signals ()
 
       sigaction (XSIG (i), &act, &oact);
       XHANDLER(i) = oact.sa_handler;
+      XSAFLAGS(i) = oact.sa_flags;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
@@ -250,6 +260,7 @@ initialize_terminating_signals ()
 	continue;
 
       XHANDLER(i) = signal (XSIG (i), termination_unwind_protect);
+      XSAFLAGS(i) = 0;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
@@ -291,6 +302,7 @@ initialize_shell_signals ()
     {
       set_signal_handler (SIGINT, sigint_sighandler);
       set_signal_handler (SIGTERM, SIG_IGN);
+      set_sigwinch_handler ();
     }
 }
 
@@ -316,6 +328,7 @@ reset_terminating_signals ()
 	continue;
 
       act.sa_handler = XHANDLER (i);
+      act.sa_flags = XSAFLAGS (i);
       sigaction (XSIG (i), &act, (struct sigaction *) NULL);
     }
 #else /* !HAVE_POSIX_SIGNALS */
@@ -408,10 +421,14 @@ sighandler
 termination_unwind_protect (sig)
      int sig;
 {
+  /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
     run_interrupt_trap ();
 
 #if defined (HISTORY)
+  /* This might be unsafe, since it eventually calls functions POSIX says
+     not to call from signal handlers.  If it's a problem, take this code
+     out. */
   if (interactive_shell && sig != SIGABRT)
     maybe_save_shell_history ();
 #endif /* HISTORY */
@@ -454,6 +471,35 @@ sigint_sighandler (sig)
     }
 
   SIGRETURN (0);
+}
+
+#if defined (SIGWINCH)
+sighandler
+sigwinch_sighandler (sig)
+     int sig;
+{
+#if defined (MUST_REINSTALL_SIGHANDLERS)
+  set_signal_handler (SIGWINCH, sigwinch_sighandler);
+#endif /* MUST_REINSTALL_SIGHANDLERS */
+  sigwinch_received = 1;
+  SIGRETURN (0);
+}
+#endif /* SIGWINCH */
+
+void
+set_sigwinch_handler ()
+{
+#if defined (SIGWINCH)
+ old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
+#endif
+}
+
+void
+unset_sigwinch_handler ()
+{
+#if defined (SIGWINCH)
+  set_signal_handler (SIGWINCH, old_winch);
+#endif
 }
 
 /* Signal functions used by the rest of the code. */

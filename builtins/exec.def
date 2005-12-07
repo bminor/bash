@@ -221,7 +221,8 @@ failed_exec:
   initialize_signals (1);
 
 #if defined (JOB_CONTROL)
-  restart_job_control ();
+  if (interactive_shell || job_control)
+    restart_job_control ();
 #endif /* JOB_CONTROL */
 
   return (exit_value);

@@ -39,6 +39,7 @@
 #include "../flags.h"
 #include "../input.h"
 #include "../execute_cmd.h"
+#include "../trap.h"
 
 #if defined (HISTORY)
 #  include "../bashhist.h"
@@ -82,7 +83,7 @@ _evalfile (filename, flags)
   size_t file_size;
   sh_vmsg_func_t *errfunc;
 #if defined (ARRAY_VARS)
-  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
+  SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
 #  if defined (DEBUGGER)
   SHELL_VAR *bash_argv_v, *bash_argc_v;
@@ -246,9 +247,16 @@ file_error_and_exit:
     }
 
 #if defined (ARRAY_VARS)
+  /* These two variables cannot be unset, and cannot be affected by the
+     sourced file. */
   array_pop (bash_source_a);
   array_pop (bash_lineno_a);
-  array_pop (funcname_a);
+
+  /* FUNCNAME can be unset, and so can potentially be changed by the
+     sourced file. */
+  GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
+  if (nfv == funcname_v)
+    array_pop (funcname_a);
 #  if defined (DEBUGGER)
   if ((flags & FEVAL_NOPUSHARGS) == 0)
     {

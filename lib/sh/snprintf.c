@@ -372,10 +372,27 @@ static void xfree __P((void *));
 
 /* if width and prec. in the args */
 #define STAR_ARGS(p) \
+	do { \
 	    if ((p)->flags & PF_STAR_W) \
-	      (p)->width = GETARG (int); \
+	      { \
+		(p)->width = GETARG (int); \
+		if ((p)->width < 0) \
+		  { \
+		    (p)->flags |= PF_LADJUST; \
+		    (p)->justify = LEFT; \
+		    (p)->width = -(p)->width; \
+		  } \
+	      } \
 	    if ((p)->flags & PF_STAR_P) \
-	      (p)->precision = GETARG (int)
+	      { \
+		(p)->precision = GETARG (int); \
+		if ((p)->precision < 0) \
+		  { \
+		    (p)->flags &= ~PF_STAR_P; \
+		    (p)->precision = NOT_FOUND; \
+		  } \
+	      } \
+	} while (0)
 
 #if defined (HAVE_LOCALE_H)
 #  define GETLOCALEDATA(d, t, g) \
@@ -915,7 +932,7 @@ floating(p, d)
   char *tmp, *tmp2, *t;
   int i;
 
-  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+  if (d != 0 && (chkinfnan(p, d, 1) || chkinfnan(p, d, 2)))
     return;	/* already printed nan or inf */
 
   GETLOCALEDATA(decpoint, thoussep, grouping);
@@ -936,8 +953,8 @@ floating(p, d)
   PUT_SPACE(d, p, 0.);
 
   while (*tmp)
-    { /* the integral */
-      PUT_CHAR(*tmp, p);
+    {
+      PUT_CHAR(*tmp, p);	/* the integral */
       tmp++;
     }
   FREE (t);
@@ -1010,7 +1027,7 @@ exponent(p, d)
     PUT_CHAR('E', p);
 
   /* the sign of the exp */
-  if (j > 0)
+  if (j >= 0)
     PUT_CHAR('+', p);
   else
     {
@@ -1150,6 +1167,7 @@ vsnprintf_internal(data, string, length, format, args)
   wint_t wc;
 #endif
   const char *convstart;
+  int negprec;
 
   /* Sanity check, the string length must be >= 0.  C99 actually says that
      LENGTH can be zero here, in the case of snprintf/vsnprintf (it's never
@@ -1165,6 +1183,7 @@ vsnprintf_internal(data, string, length, format, args)
   decpoint = thoussep = 0;
   grouping = 0;
 
+  negprec = 0;
   for (; c = *(data->pf); data->pf++)
     {
       if (c != '%')
@@ -1221,16 +1240,24 @@ vsnprintf_internal(data, string, length, format, args)
 		  data->flags |= PF_STAR_W;
 		continue;
 	      case '-':
-		data->flags |= PF_LADJUST;
-		data->justify = LEFT;
+		if ((data->flags & PF_DOT) == 0)
+		  {
+		    data->flags |= PF_LADJUST;
+		    data->justify = LEFT;
+		  }
+		else
+		  negprec = 1;
 		continue;
 	      case ' ':
 		if ((data->flags & PF_PLUS) == 0)
 		  data->flags |= PF_SPACE;
 		continue;
 	      case '+':
-		data->flags |= PF_PLUS;
-		data->justify = RIGHT;
+		if ((data->flags & PF_DOT) == 0)
+		  {
+		    data->flags |= PF_PLUS;
+		    data->justify = RIGHT;
+		  }
 		continue;
 	      case '\'':
 		data->flags |= PF_THOUSANDS;
@@ -1250,7 +1277,7 @@ vsnprintf_internal(data, string, length, format, args)
 		if (n < 0)
 		  n = 0;
 		if (data->flags & PF_DOT)
-		  data->precision = n;
+		  data->precision = negprec ? NOT_FOUND : n;
 		else
 		  data->width = n;
 		continue;
@@ -1507,11 +1534,21 @@ ldfallback (data, fs, fe, ld)
   char fmtbuf[FALLBACK_FMTSIZE], *obuf;
   int fl;
 
-  obuf = (char *)xmalloc(LFALLBACK_BASE + (data->precision < 6 ? 6 : data->precision) + 2);
+  fl = LFALLBACK_BASE + (data->precision < 6 ? 6 : data->precision) + 2;
+  obuf = (char *)xmalloc (fl);
   fl = fe - fs + 1;
   strncpy (fmtbuf, fs, fl);
   fmtbuf[fl] = '\0';
-  sprintf (obuf, fmtbuf, ld);
+
+  if ((data->flags & PF_STAR_W) && (data->flags & PF_STAR_P))
+    sprintf (obuf, fmtbuf, data->width, data->precision, ld);
+  else if (data->flags & PF_STAR_W)
+    sprintf (obuf, fmtbuf, data->width, ld);
+  else if (data->flags & PF_STAR_P)
+    sprintf (obuf, fmtbuf, data->precision, ld);
+  else
+    sprintf (obuf, fmtbuf, ld);
+
   for (x = obuf; *x; x++)
     PUT_CHAR (*x, data);    
   xfree (obuf);
@@ -1533,7 +1570,16 @@ dfallback (data, fs, fe, d)
   fl = fe - fs + 1;
   strncpy (fmtbuf, fs, fl);
   fmtbuf[fl] = '\0';
-  sprintf (obuf, fmtbuf, d);
+
+  if ((data->flags & PF_STAR_W) && (data->flags & PF_STAR_P))
+    sprintf (obuf, fmtbuf, data->width, data->precision, d);
+  else if (data->flags & PF_STAR_W)
+    sprintf (obuf, fmtbuf, data->width, d);
+  else if (data->flags & PF_STAR_P)
+    sprintf (obuf, fmtbuf, data->precision, d);
+  else
+    sprintf (obuf, fmtbuf, d);
+
   for (x = obuf; *x; x++)
     PUT_CHAR (*x, data);    
 }

@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,17 +67,26 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_arith, cm_cond, cm_arith_for, cm_subshell };
 
 /* Possible values for the `flags' field of a WORD_DESC. */
-#define W_HASDOLLAR	0x0001	/* Dollar sign present. */
-#define W_QUOTED	0x0002	/* Some form of quote character is present. */
-#define W_ASSIGNMENT	0x0004	/* This word is a variable assignment. */
-#define W_GLOBEXP	0x0008	/* This word is the result of a glob expansion. */
-#define W_NOSPLIT	0x0010	/* Do not perform word splitting on this word. */
-#define W_NOGLOB	0x0020	/* Do not perform globbing on this word. */
-#define W_NOSPLIT2	0x0040	/* Don't split word except for $@ expansion. */
-#define W_TILDEEXP	0x0080	/* Tilde expand this assignment word */
-#define W_DOLLARAT	0x0100	/* $@ and its special handling */
-#define W_DOLLARSTAR	0x0200	/* $* and its special handling */
-#define W_NOCOMSUB	0x0400	/* Don't perform command substitution on this word */
+#define W_HASDOLLAR	0x00001	/* Dollar sign present. */
+#define W_QUOTED	0x00002	/* Some form of quote character is present. */
+#define W_ASSIGNMENT	0x00004	/* This word is a variable assignment. */
+#define W_GLOBEXP	0x00008	/* This word is the result of a glob expansion. */
+#define W_NOSPLIT	0x00010	/* Do not perform word splitting on this word. */
+#define W_NOGLOB	0x00020	/* Do not perform globbing on this word. */
+#define W_NOSPLIT2	0x00040	/* Don't split word except for $@ expansion. */
+#define W_TILDEEXP	0x00080	/* Tilde expand this assignment word */
+#define W_DOLLARAT	0x00100	/* $@ and its special handling */
+#define W_DOLLARSTAR	0x00200	/* $* and its special handling */
+#define W_NOCOMSUB	0x00400	/* Don't perform command substitution on this word */
+#define W_ASSIGNRHS	0x00800	/* Word is rhs of an assignment statement */
+#define W_NOTILDE	0x01000	/* Don't perform tilde expansion on this word */
+#define W_ITILDE	0x02000	/* Internal flag for word expansion */
+#define W_NOEXPAND	0x04000	/* Don't expand at all -- do quote removal */
+#define W_COMPASSIGN	0x08000	/* Compound assignment */
+#define W_ASSNBLTIN	0x10000 /* word is a builtin command that takes assignments */
+#define W_ASSIGNARG	0x20000 /* word is assignment argument to command */
+#define W_HASQUOTEDNULL	0x40000	/* word contains a quoted null character */
+#define W_DQUOTE	0x80000	/* word should be treated as if double-quoted */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -193,6 +202,7 @@ typedef struct pattern_list {
   struct pattern_list *next;	/* Clause to try in case this one failed. */
   WORD_LIST *patterns;		/* Linked list of patterns to test. */
   COMMAND *action;		/* Thing to execute if a pattern matches. */
+  int flags;
 } PATTERN_LIST;
 
 /* The CASE command. */

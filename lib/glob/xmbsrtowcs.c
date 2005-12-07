@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,7 +54,7 @@ xmbsrtowcs (dest, src, len, pstate)
       ps = &local_state;
     }
 
-  n = strlen(*src);
+  n = strlen (*src);
 
   if (dest == NULL)
     {
@@ -62,19 +62,22 @@ xmbsrtowcs (dest, src, len, pstate)
       const char *mbs;
       mbstate_t psbuf;
 
+      /* It doesn't matter if malloc fails here, since mbsrtowcs should do
+	 the right thing with a NULL first argument. */
       wsbuf = (wchar_t *) malloc ((n + 1) * sizeof(wchar_t));
       mbs = *src;
       psbuf = *ps;
 
       wclength = mbsrtowcs (wsbuf, &mbs, n, &psbuf);
 
-      free (wsbuf);
+      if (wsbuf)
+	free (wsbuf);
       return wclength;
     }
       
   for (wclength = 0; wclength < len; wclength++, dest++)
     {
-      if(mbsinit(ps))
+      if (mbsinit(ps))
 	{
 	  if (**src == '\0')
 	    {
@@ -166,10 +169,11 @@ xdupmbstowcs (destp, indicesp, src)
 
   p = src;
   wcnum = 0;
-  do {
+  do
+    {
       size_t mblength;	/* Byte length of one multibyte character. */
 
-      if(mbsinit (&state))
+      if (mbsinit (&state))
 	{
 	  if (*p == '\0')
 	    {
@@ -230,7 +234,8 @@ xdupmbstowcs (destp, indicesp, src)
       wsbuf[wcnum - 1] = wc;
       indices[wcnum - 1] = (char *)p;
       p += mblength;
-  } while (MB_NULLWCH (wc) == 0);
+    }
+  while (MB_NULLWCH (wc) == 0);
 
   /* Return the length of the wide character string, not including `\0'. */
   *destp = wsbuf;

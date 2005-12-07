@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2003 Free Software Foundation, Inc.
+Copyright (C) 1997-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES printf.c
 
 $BUILTIN printf
 $FUNCTION printf_builtin
-$SHORT_DOC printf format [arguments]
+$SHORT_DOC printf [-v var] format [arguments]
 printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
 is a character string which contains three types of objects: plain
 characters, which are simply copied to standard output, character escape
@@ -32,6 +32,8 @@ format specifications, each of which causes printing of the next successive
 argument.  In addition to the standard printf(1) formats, %b means to
 expand backslash escape sequences in the corresponding argument, and %q
 means to quote the argument in a way that can be reused as shell input.
+If the -v option is supplied, the output is placed into the value of the
+shell variable VAR rather than being sent to the standard output.
 $END
 
 #include <config.h>
@@ -74,27 +76,60 @@ $END
 extern int errno;
 #endif
 
+#define PC(c) \
+  do { \
+    char b[2]; \
+    tw++; \
+    b[0] = c; b[1] = '\0'; \
+    if (vflag) \
+      vbadd (b, 1); \
+    else \
+      putchar (c); \
+  } while (0)
+
 #define PF(f, func) \
   do { \
+    char *b = 0; \
+    int nw; \
     if (have_fieldwidth && have_precision) \
-      tw += printf(f, fieldwidth, precision, func); \
+      nw = asprintf(&b, f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
-      tw += printf(f, fieldwidth, func); \
+      nw = asprintf(&b, f, fieldwidth, func); \
     else if (have_precision) \
-      tw += printf(f, precision, func); \
+      nw = asprintf(&b, f, precision, func); \
     else \
-      tw += printf(f, func); \
+      nw = asprintf(&b, f, func); \
+    tw += nw; \
+    if (b) \
+      { \
+	if (vflag) \
+	  (void)vbadd (b, nw); \
+	else \
+	  (void)fputs (b, stdout); \
+	free (b); \
+      } \
   } while (0)
 
 /* We free the buffer used by mklong() if it's `too big'. */
 #define PRETURN(value) \
   do \
     { \
+      if (vflag) \
+	{ \
+	  bind_variable  (vname, vbuf, 0); \
+	  stupidly_hack_special_variables (vname); \
+	} \
       if (conv_bufsize > 4096 ) \
 	{ \
-	  free(conv_buf); \
+	  free (conv_buf); \
 	  conv_bufsize = 0; \
 	  conv_buf = 0; \
+	} \
+      if (vbsize > 4096) \
+	{ \
+	  free (vbuf); \
+	  vbsize = 0; \
+	  vbuf = 0; \
 	} \
       fflush (stdout); \
       return (value); \
@@ -105,9 +140,10 @@ extern int errno;
 #define LENMODS "hjlLtz"
 
 static void printf_erange __P((char *));
-static void printstr __P((char *, char *, int, int, int));
+static int printstr __P((char *, char *, int, int, int));
 static int tescape __P((char *, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
+static char *vbadd __P((char *, int));
 static char *mklong __P((char *, char *, size_t));
 static int getchr __P((void));
 static char *getstr __P((void));
@@ -132,6 +168,14 @@ static WORD_LIST *garglist;
 static int retval;
 static int conversion_error;
 
+/* printf -v var support */
+static int vflag = 0;
+static char *vbuf, *vname;
+static size_t vbsize;
+static int vblen;
+
+static intmax_t tw;
+
 static char *conv_buf;
 static size_t conv_bufsize;
 
@@ -141,14 +185,35 @@ printf_builtin (list)
 {
   int ch, fieldwidth, precision;
   int have_fieldwidth, have_precision;
-  intmax_t tw;
   char convch, thisch, nextch, *format, *modstart, *fmt, *start;
 
   conversion_error = 0;
   retval = EXECUTION_SUCCESS;
 
-  if (no_options (list))
-    return (EX_USAGE);
+  vflag = 0;
+
+  reset_internal_getopt ();
+  while ((ch = internal_getopt (list, "v:")) != -1)
+    {
+      switch (ch)
+	{
+	case 'v':
+	  if (legal_identifier (vname = list_optarg))
+	    {
+	      vflag = 1;
+	      vblen = 0;
+	    }
+	  else
+	    {
+	      sh_invalidid (vname);
+	      return (EX_USAGE);
+	    }
+	  break;
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
   list = loptend;	/* skip over possible `--' */
 
   if (list == 0)
@@ -161,6 +226,7 @@ printf_builtin (list)
     return (EXECUTION_SUCCESS);
 
   format = list->word->word;
+  tw = 0;
 
   garglist = list->next;
 
@@ -189,14 +255,14 @@ printf_builtin (list)
 	      /* A NULL third argument to tescape means to bypass the
 		 special processing for arguments to %b. */
 	      fmt += tescape (fmt, &nextch, (int *)NULL);
-	      putchar (nextch);
+	      PC (nextch);
 	      fmt--;	/* for loop will increment it for us again */
 	      continue;
 	    }
 
 	  if (*fmt != '%')
 	    {
-	      putchar (*fmt);
+	      PC (*fmt);
 	      continue;
 	    }
 
@@ -205,7 +271,7 @@ printf_builtin (list)
 
 	  if (*fmt == '%')		/* %% prints a % */
 	    {
-	      putchar ('%');
+	      PC ('%');
 	      continue;
 	    }
 
@@ -235,8 +301,20 @@ printf_builtin (list)
 		  precision = getint ();
 		}
 	      else
-		while (DIGIT (*fmt))
-		  fmt++;
+		{
+		  /* Negative precisions are allowed but treated as if the
+		     precision were missing; I would like to allow a leading
+		     `+' in the precision number as an extension, but lots
+		     of asprintf/fprintf implementations get this wrong. */
+#if 0
+		  if (*fmt == '-' || *fmt == '+')
+#else
+		  if (*fmt == '-')
+#endif
+		    fmt++;
+		  while (DIGIT (*fmt))
+		    fmt++;
+		}
 	    }
 
 	  /* skip possible format modifiers */
@@ -297,21 +375,27 @@ printf_builtin (list)
 	    case 'b':		/* expand escapes in argument */
 	      {
 		char *p, *xp;
-		int rlen;
+		int rlen, r;
 
 		p = getstr ();
-		ch = rlen = 0;
+		ch = rlen = r = 0;
 		xp = bexpand (p, strlen (p), &ch, &rlen);
 
 		if (xp)
 		  {
 		    /* Have to use printstr because of possible NUL bytes
 		       in XP -- printf does not handle that well. */
-		    printstr (start, xp, rlen, fieldwidth, precision);
+		    r = printstr (start, xp, rlen, fieldwidth, precision);
+		    if (r < 0)
+		      {
+		        sh_wrerror ();
+			clearerr (stdout);
+		        retval = EXECUTION_FAILURE;
+		      }
 		    free (xp);
 		  }
 
-		if (ch)
+		if (ch || r < 0)
 		  PRETURN (retval);
 		break;
 	      }
@@ -319,7 +403,9 @@ printf_builtin (list)
 	    case 'q':		/* print with shell quoting */
 	      {
 		char *p, *xp;
+		int r;
 
+		r = 0;
 		p = getstr ();
 		if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
@@ -328,9 +414,17 @@ printf_builtin (list)
 		if (xp)
 		  {
 		    /* Use printstr to get fieldwidth and precision right. */
-		    printstr (start, xp, strlen (xp), fieldwidth, precision);
+		    r = printstr (start, xp, strlen (xp), fieldwidth, precision);
+		    if (r < 0)
+		      {
+			sh_wrerror ();
+			clearerr (stdout);
+		      }
 		    free (xp);
 		  }
+
+		if (r < 0)
+		  PRETURN (EXECUTION_FAILURE);
 		break;
 	      }
 
@@ -412,6 +506,13 @@ printf_builtin (list)
 	  modstart[0] = thisch;
 	  modstart[1] = nextch;
 	}
+
+      if (ferror (stdout))
+	{
+	  sh_wrerror ();
+	  clearerr (stdout);
+	  PRETURN (EXECUTION_FAILURE);
+	}
     }
   while (garglist && garglist != list->next);
 
@@ -429,7 +530,7 @@ printf_erange (s)
 }
 
 /* We duplicate a lot of what printf(3) does here. */
-static void
+static int
 printstr (fmt, string, len, fieldwidth, precision)
      char *fmt;			/* format */
      char *string;		/* expanded string argument */
@@ -443,7 +544,11 @@ printstr (fmt, string, len, fieldwidth, precision)
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
 
+#if 0
   if (string == 0 || *string == '\0')
+#else
+  if (string == 0 || len == 0)
+#endif
     return;
 
 #if 0
@@ -518,15 +623,17 @@ printstr (fmt, string, len, fieldwidth, precision)
 
   /* leading pad characters */
   for (; padlen > 0; padlen--)
-    putchar (' ');
+    PC (' ');
 
   /* output NC characters from STRING */
   for (i = 0; i < nc; i++)
-    putchar (string[i]);
+    PC (string[i]);
 
   /* output any necessary trailing padding */
   for (; padlen < 0; padlen++)
-    putchar (' ');
+    PC (' ');
+
+  return (ferror (stdout) ? -1 : 0);
 }
   
 /* Convert STRING by expanding the escape sequences specified by the
@@ -644,7 +751,11 @@ bexpand (string, len, sawc, lenp)
   int temp;
   char *ret, *r, *s, c;
 
+#if 0
   if (string == 0 || *string == '\0')
+#else
+  if (string == 0 || len == 0)
+#endif
     {
       if (sawc)
 	*sawc = 0;
@@ -678,6 +789,37 @@ bexpand (string, len, sawc, lenp)
   if (lenp)
     *lenp = r - ret;
   return ret;
+}
+
+static char *
+vbadd (buf, blen)
+     char *buf;
+     int blen;
+{
+  size_t nlen;
+
+  nlen = vblen + blen + 1;
+  if (nlen >= vbsize)
+    {
+      vbsize = ((nlen + 63) >> 6) << 6;
+      vbuf = (char *)xrealloc (vbuf, vbsize);
+    }
+
+  if (blen == 1)
+    vbuf[vblen++] = buf[0];
+  else
+    {
+      FASTCOPY (buf, vbuf  + vblen, blen);
+      vblen += blen;
+    }
+  vbuf[vblen] = '\0';
+
+#ifdef DEBUG
+  if  (strlen (vbuf) != vblen)
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, strlen (vbuf));
+#endif
+
+  return vbuf;
 }
 
 static char *

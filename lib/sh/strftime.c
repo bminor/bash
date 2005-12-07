@@ -80,14 +80,20 @@
 
 #undef strchr	/* avoid AIX weirdness */
 
+#if defined (SHELL)
+extern char *get_string_value (const char *);
+#endif
+
 extern void tzset(void);
 static int weeknumber(const struct tm *timeptr, int firstweekday);
 static int iso8601wknum(const struct tm *timeptr);
 
+#ifndef inline
 #ifdef __GNUC__
 #define inline	__inline__
 #else
 #define inline	/**/
+#endif
 #endif
 
 #define range(low, item, hi)	max(low, min(item, hi))
@@ -98,8 +104,12 @@ extern int daylight;
 #if defined(SOLARIS) || defined(mips) || defined (M_UNIX)
 extern long int timezone, altzone;
 #else
+#  if defined (HPUX)
+extern long int timezone;
+#  else
 extern int timezone, altzone;
-#endif
+#  endif /* !HPUX */
+#endif /* !SOLARIS && !mips && !M_UNIX */
 #endif
 
 #undef min	/* just in case */
@@ -480,8 +490,13 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			 * Systems with tzname[] probably have timezone as
 			 * secs west of GMT.  Convert to mins east of GMT.
 			 */
+#  ifdef HPUX
+			off = -timezone / 60;
+#  else
 			off = -(daylight ? timezone : altzone) / 60;
+#  endif /* !HPUX */
 #else /* !HAVE_TZNAME */
+			gettimeofday(& tv, & zone);
 			off = -zone.tz_minuteswest;
 #endif /* !HAVE_TZNAME */
 #endif /* !HAVE_TM_ZONE */

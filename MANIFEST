@@ -35,7 +35,6 @@ lib/sh		d
 lib/termcap	d
 lib/termcap/grot d
 lib/tilde	d
-lib/tilde/doc	d
 po		d
 support		d
 tests		d
@@ -409,6 +408,7 @@ lib/sh/strftime.c	f
 lib/sh/strindex.c	f
 lib/sh/stringlist.c	f
 lib/sh/stringvec.c	f
+lib/sh/strnlen.c	f
 lib/sh/strpbrk.c	f
 lib/sh/strstr.c		f
 lib/sh/strtod.c		f
@@ -423,6 +423,7 @@ lib/sh/times.c		f
 lib/sh/timeval.c	f
 lib/sh/tmpfile.c	f
 lib/sh/vprint.c		f
+lib/sh/winsize.c	f
 lib/sh/xstrchr.c	f
 lib/sh/zcatfd.c		f
 lib/sh/zread.c		f
@@ -450,8 +451,6 @@ lib/termcap/grot/COPYING	f
 lib/termcap/grot/README	f
 lib/tilde/README	f
 lib/tilde/Makefile.in	f
-lib/tilde/doc/tilde.texi	f
-lib/tilde/doc/Makefile	f
 lib/tilde/tilde.c	f
 lib/tilde/tilde.h	f
 lib/tilde/shell.c	f
@@ -463,7 +462,6 @@ po/Rules-builtins	f
 po/Rules-quot		f
 po/bash.pot		f
 po/boldquot.sed		f
-po/builtins.pot		f
 po/en@quot.header	f
 po/en@boldquot.header	f
 po/en@quot.po		f
@@ -529,6 +527,7 @@ support/xenix-link.sh	f	755
 support/shobj-conf	f	755
 support/rlvers.sh	f	755
 examples/bashdb/PERMISSION	f
+examples/bashdb/README	f
 examples/bashdb/bashdb		f
 examples/bashdb/bashdb.el	f
 examples/obashdb/PERMISSION	f
@@ -678,6 +677,8 @@ examples/misc/cshtobash	f
 tests/README		f
 tests/alias.tests	f
 tests/alias.right	f
+tests/appendop.tests	f
+tests/appendop.right	f
 tests/arith-for.tests	f
 tests/arith-for.right	f
 tests/arith.tests	f
@@ -686,6 +687,9 @@ tests/arith1.sub	f
 tests/arith2.sub	f
 tests/array.tests	f
 tests/array.right	f
+tests/array1.sub	f
+tests/array2.sub	f
+tests/array3.sub	f
 tests/array-at-star	f
 tests/array2.right	f
 tests/braces.tests	f
@@ -712,6 +716,7 @@ tests/dollar-at-star	f
 tests/dollar-at1.sub	f
 tests/dollar-at2.sub	f
 tests/dollar-star1.sub	f
+tests/dollar-star2.sub	f
 tests/dollar.right	f
 tests/dstack.tests	f
 tests/dstack.right	f
@@ -734,6 +739,8 @@ tests/extglob.tests	f
 tests/extglob.right	f
 tests/extglob2.tests	f
 tests/extglob2.right	f
+tests/extglob3.tests	f
+tests/extglob3.right	f
 tests/func.tests	f
 tests/func.right	f
 tests/func1.sub		f
@@ -759,12 +766,18 @@ tests/histexp.tests	f
 tests/histexp.right	f
 tests/history.tests	f
 tests/history.right	f
-tests/history.list	f
+tests/history.list	f	444
 tests/ifs.tests		f
 tests/ifs.right		f
+tests/ifs-posix.tests	f
+tests/ifs-posix.right	f
 tests/input-line.sh	f
 tests/input-line.sub	f
 tests/input.right	f
+tests/intl.tests	f
+tests/intl.right	f
+tests/iquote.tests	f
+tests/iquote.right	f
 tests/invert.tests	f
 tests/invert.right	f
 tests/jobs.tests	f
@@ -780,6 +793,7 @@ tests/new-exp1.sub	f
 tests/new-exp2.sub	f
 tests/new-exp3.sub	f
 tests/new-exp4.sub	f
+tests/new-exp5.sub	f
 tests/new-exp.right	f
 tests/nquote.tests	f
 tests/nquote.right	f
@@ -819,6 +833,7 @@ tests/redir4.sub	f
 tests/redir4.in1	f
 tests/redir5.sub	f
 tests/redir6.sub	f
+tests/redir7.sub	f
 tests/rhs-exp.tests	f
 tests/rhs-exp.right	f
 tests/rsh.tests		f
@@ -826,6 +841,7 @@ tests/rsh.right		f
 tests/run-all		f
 tests/run-minimal	f
 tests/run-alias		f
+tests/run-appendop	f
 tests/run-arith-for	f
 tests/run-arith		f
 tests/run-array		f
@@ -843,6 +859,7 @@ tests/run-execscript	f
 tests/run-exp-tests	f
 tests/run-extglob	f
 tests/run-extglob2	f
+tests/run-extglob3	f
 tests/run-func		f
 tests/run-getopts	f
 tests/run-glob-test	f
@@ -851,7 +868,10 @@ tests/run-herestr	f
 tests/run-histexpand	f
 tests/run-history	f
 tests/run-ifs		f
+tests/run-ifs-posix	f
 tests/run-input-test	f
+tests/run-intl		f
+tests/run-iquote	f
 tests/run-invert	f
 tests/run-jobs		f
 tests/run-more-exp	f
@@ -876,6 +896,7 @@ tests/run-shopt		f
 tests/run-strip		f
 tests/run-test		f
 tests/run-tilde		f
+tests/run-tilde2	f
 tests/run-trap		f
 tests/run-type		f
 tests/run-varenv	f
@@ -889,8 +910,10 @@ tests/strip.tests	f
 tests/strip.right	f
 tests/test.tests	f
 tests/test.right	f
-tests/tilde-tests	f
+tests/tilde.tests	f
 tests/tilde.right	f
+tests/tilde2.tests	f
+tests/tilde2.right	f
 tests/trap.tests	f
 tests/trap.right	f
 tests/trap1.sub		f	755

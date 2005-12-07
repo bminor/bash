@@ -769,7 +769,7 @@ exppower ()
   while (curtok == POWER)
     {
       readtok ();
-      val2 = exp1 ();
+      val2 = exppower ();	/* exponentiation is right-associative */
       if (val2 == 0)
 	return (1);
       if (val2 < 0)
@@ -1135,7 +1135,7 @@ evalerror (msg)
    Base may be >=2 and <=64.  If base is <= 36, the numbers are drawn
    from [0-9][a-zA-Z], and lowercase and uppercase letters may be used
    interchangably.  If base is > 36 and <= 64, the numbers are drawn
-   from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, _ = 62, @ = 63 --
+   from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, @ = 62, _ = 63 --
    you get the picture). */
 
 static intmax_t
@@ -1206,6 +1206,7 @@ strlong (num)
       else
 	break;
     }
+
   return (val);
 }
 

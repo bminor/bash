@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -459,7 +459,7 @@ patcomp (string, pat, op)
 {
   int m;
 
-  m = strmatch (pat, string, FNMATCH_EXTFLAG);
+  m = strmatch (pat, string, FNMATCH_EXTFLAG|FNMATCH_IGNCASE);
   return ((op == EQ) ? (m == 0) : (m != 0));
 }
 

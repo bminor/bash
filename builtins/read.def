@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -79,6 +79,10 @@ $END
 #include <readline/readline.h>
 #endif
 
+#if defined (BUFFERED_INPUT)
+#  include "input.h"
+#endif
+
 #if !defined(errno)
 extern int errno;
 #endif
@@ -124,7 +128,7 @@ read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, i, pass_next, saw_escape, eof, opt, retval, code;
+  int size, i, nr, pass_next, saw_escape, eof, opt, retval, code;
   int input_is_tty, input_is_pipe, unbuffered_read;
   int raw, edit, nchars, silent, have_timeout, fd;
   unsigned int tmout;
@@ -173,7 +177,7 @@ read_builtin (list)
 #endif
 
   tmout = 0;		/* no timeout */
-  nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
+  nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
 
   reset_internal_getopt ();
@@ -273,10 +277,15 @@ read_builtin (list)
 
   begin_unwind_frame ("read_builtin");
 
+#if defined (BUFFERED_INPUT)
+  if (interactive == 0 && default_buffered_input >= 0 && fd_is_bash_input (fd))
+    sync_buffered_stream (default_buffered_input);
+#endif
+
   input_is_tty = isatty (fd);
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
-    input_is_pipe = (lseek (0, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+    input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
 #else
     input_is_pipe = 1;
 #endif
@@ -425,11 +434,11 @@ read_builtin (list)
 	 newline pair still disappears from the input. */
       if (pass_next)
 	{
+	  pass_next = 0;
 	  if (c == '\n')
 	    i--;		/* back up over the CTLESC */
 	  else
-	    input_string[i++] = c;
-	  pass_next = 0;
+	    goto add_char;
 	  continue;
 	}
 
@@ -450,9 +459,11 @@ read_builtin (list)
 	  input_string[i++] = CTLESC;
 	}
 
+add_char:
       input_string[i++] = c;
+      nr++;
 
-      if (nchars > 0 && i >= nchars)
+      if (nchars > 0 && nr >= nchars)
 	break;
     }
   input_string[i] = '\0';
@@ -515,7 +526,7 @@ read_builtin (list)
       if (alist)
 	{
 	  word_list_remove_quoted_nulls (alist);
-	  assign_array_var_from_word_list (var, alist);
+	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}
       xfree (input_string);
@@ -544,11 +555,11 @@ read_builtin (list)
       if (saw_escape)
 	{
 	  t = dequote_string (input_string);
-	  var = bind_variable ("REPLY", t);
+	  var = bind_variable ("REPLY", t, 0);
 	  free (t);
 	}
       else
-	var = bind_variable ("REPLY", input_string);
+	var = bind_variable ("REPLY", input_string, 0);
       VUNSETATTR (var, att_invisible);
 
       free (input_string);
@@ -627,10 +638,24 @@ read_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
+#if 0
   /* This has to be done this way rather than using string_list
      and list_string because Posix.2 says that the last variable gets the
      remaining words and their intervening separators. */
   input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
+#else
+  /* Check whether or not the number of fields is exactly the same as the
+     number of variables. */
+  if (*input_string)
+    {
+      t1 = input_string;
+      t = get_word_from_string (&input_string, ifs_chars, &e);
+      if (*input_string == 0)
+	input_string = t;
+      else
+	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
+    }
+#endif
 
   if (saw_escape)
     {
@@ -654,11 +679,11 @@ bind_read_variable (name, value)
 {
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value));
+    return (bind_variable (name, value, 0));
   else
-    return (assign_array_element (name, value));
+    return (assign_array_element (name, value, 0));
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value);
+  return bind_variable (name, value, 0);
 #endif /* !ARRAY_VARS */
 }
 
@@ -672,7 +697,7 @@ edit_line (p)
   char *ret;
   int len;
 
-  if (!bash_readline_initialized)
+  if (bash_readline_initialized == 0)
     initialize_readline ();
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;

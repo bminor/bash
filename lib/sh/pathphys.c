@@ -285,6 +285,7 @@ sh_realpath (pathname, resolved)
     {
       strncpy (resolved, wd, PATH_MAX - 1);
       resolved[PATH_MAX - 1] = '\0';
+      free (wd);
       return resolved;
     }
   else

@@ -509,11 +509,11 @@ function _showline
   fi
 
   if (( $line < 100 )); then
-    _msg "$_guineapig:$line   $bp $cl${_lines[$line]}"
+    _msg "${_guineapig/*\//}:$line   $bp $cl${_lines[$line]}"
   elif (( $line < 10 )); then
-    _msg "$_guineapig:$line  $bp $cl${_lines[$line]}"
+    _msg "${_guineapig/*\//}:$line  $bp $cl${_lines[$line]}"
   elif (( $line > 0 )); then
-    _msg "$_guineapig:$line $bp $cl${_lines[$line]}"
+    _msg "${_guineapig/*\//}:$line $bp $cl${_lines[$line]}"
   fi
 }
 
@@ -564,7 +564,7 @@ let _trace=0
 let _i=1
 
 # Be careful about quoted newlines
-_potbelliedpig=${TMPDIR-/tmp}/$_guineapig.$$
+_potbelliedpig=${TMPDIR-/tmp}/${_guineapig/*\//}.$$
 sed 's,\\$,\\\\,' $_guineapig > $_potbelliedpig
 
 _msg "Reading source from file: $_guineapig"

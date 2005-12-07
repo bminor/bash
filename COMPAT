@@ -1,5 +1,5 @@
 This document details the incompatibilites between this version of bash,
-bash-3.0, and a previous widely-available version, bash-1.14 (which
+bash-3.1, and a previous widely-available version, bash-1.14 (which
 is still the `standard' version for a few Linux distributions).  These
 were discovered by users of bash-2.x and 3.x, so this list is not
 comprehensive. Some of these incompatibilities occur between the current
@@ -212,3 +212,14 @@ and bash-2.0 were significant.)
 
 18.  Bash no longer requires that the body of a function be a group command;
      any compound command is accepted.
+
+19.  As of bash-3.0, the pattern substitution operators no longer perform
+     quote removal on the pattern before attempting the match.  This is the
+     way the pattern removal functions behave, and is more consistent.
+
+20.  After bash-3.0 was released, I reimplemented tilde expansion, incorporating
+     it into the mainline word expansion code.  This fixes the bug that caused
+     the results of tilde expansion to be re-expanded.  There is one
+     incompatibility:  a ${paramOPword} expansion within double quotes will not
+     perform tilde expansion on WORD.  This is consistent with the other
+     expansions, and what POSIX specifies.

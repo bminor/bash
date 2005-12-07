@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -111,6 +111,7 @@ set_or_show_attributes (list, attribute, nodefs)
 {
   register SHELL_VAR *var;
   int assign, undo, functions_only, arrays_only, any_failed, assign_error, opt;
+  int aflags;
   char *name;
 #if defined (ARRAY_VARS)
   WORD_LIST *nlist, *tlist;
@@ -175,8 +176,16 @@ set_or_show_attributes (list, attribute, nodefs)
 	  /* xxx [-np] name[=value] */
 	  assign = assignment (name, 0);
 
+	  aflags = 0;
 	  if (assign)
-	    name[assign] = '\0';
+	    {
+	      name[assign] = '\0';
+	      if (name[assign - 1] == '+')
+		{
+		  aflags |= ASS_APPEND;
+		  name[assign - 1] = '\0';
+		}
+	    }
 
 	  if (legal_identifier (name) == 0)
 	    {
@@ -192,6 +201,8 @@ set_or_show_attributes (list, attribute, nodefs)
 	  if (assign)	/* xxx [-np] name=value */
 	    {
 	      name[assign] = '=';
+	      if (aflags & ASS_APPEND)
+		name[assign - 1] = '+';
 #if defined (ARRAY_VARS)
 	      /* Let's try something here.  Turn readonly -a xxx=yyy into
 		 declare -ra xxx=yyy and see what that gets us. */
@@ -217,6 +228,8 @@ set_or_show_attributes (list, attribute, nodefs)
 	      if (do_assignment_no_expand (name) == 0)
 		assign_error++;
 	      name[assign] = '\0';
+	      if (aflags & ASS_APPEND)
+		name[assign - 1] = '\0';
 	    }
 
 	  set_var_attribute (name, attribute, undo);
@@ -396,12 +409,14 @@ set_var_attribute (name, attribute, undo)
 	{
 	  tvalue = var_isset (tv) ? savestring (value_cell (tv)) : savestring ("");
 
-	  var = bind_variable (tv->name, tvalue);
+	  var = bind_variable (tv->name, tvalue, 0);
 	  var->attributes |= tv->attributes & ~att_tempvar;
 	  VSETATTR (tv, att_propagate);
 	  if (var->context != 0)
 	    VSETATTR (var, att_propagate);
 	  SETVARATTR (tv, attribute, undo);	/* XXX */
+
+	  stupidly_hack_special_variables (tv->name);
 
 	  free (tvalue);
 	}
@@ -410,7 +425,7 @@ set_var_attribute (name, attribute, undo)
 	  var = find_variable_internal (name, 0);
 	  if (var == 0)
 	    {
-	      var = bind_variable (name, (char *)NULL);
+	      var = bind_variable (name, (char *)NULL, 0);
 	      VSETATTR (var, att_invisible);
 	    }
 	  else if (var->context != 0)

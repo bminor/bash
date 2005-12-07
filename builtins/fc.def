@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,10 +84,12 @@ extern int errno;
 extern int echo_input_at_read;
 extern int current_command_line_count;
 extern int literal_history;
+extern int posixly_correct;
 
 extern int unlink __P((const char *));
 
 extern FILE *sh_mktmpfp __P((char *, int, char **));
+extern int delete_last_history __P((void));
 
 /* **************************************************************** */
 /*								    */
@@ -155,6 +157,11 @@ static void fc_addhist __P((char *));
 
 /* String to execute on a file that we want to edit. */
 #define FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-vi}}"
+#if defined (STRICT_POSIX)
+#  define POSIX_FC_EDIT_COMMAND "${FCEDIT:-ed}"
+#else
+#  define POSIX_FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-ed}}"
+#endif
 
 int
 fc_builtin (list)
@@ -166,7 +173,7 @@ fc_builtin (list)
   int histbeg, histend, last_hist, retval, opt;
   FILE *stream;
   REPL *rlist, *rl;
-  char *ename, *command, *newcom;
+  char *ename, *command, *newcom, *fcedit;
   HIST_ENTRY **hlist;
   char *fn;
 
@@ -284,6 +291,11 @@ fc_builtin (list)
      line was actually added (HISTIGNORE may have caused it to not be),
      so we check hist_last_line_added. */
 
+  /* "When not  listing, he fc command that caused the editing shall not be
+     entered into the history list." */
+  if (listing == 0 && hist_last_line_added)
+    delete_last_history ();
+
   last_hist = i - 1 - hist_last_line_added;
 
   if (list)
@@ -302,7 +314,7 @@ fc_builtin (list)
       if (listing)
 	{
 	  histend = last_hist;
-	  histbeg = histend - 16;
+	  histbeg = histend - 16 + 1;	/* +1 because loop below uses >= */
 	  if (histbeg < 0)
 	    histbeg = 0;
 	}
@@ -347,7 +359,12 @@ fc_builtin (list)
       if (numbering)
 	fprintf (stream, "%d", i + history_base);
       if (listing)
-	fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
+	{
+	  if (posixly_correct)
+	    fputs ("\t", stream);
+	  else
+	    fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
+	}
       fprintf (stream, "%s\n", histline (i));
     }
 
@@ -364,8 +381,9 @@ fc_builtin (list)
     }
   else
     {
-      command = (char *)xmalloc (3 + strlen (FC_EDIT_COMMAND) + strlen (fn));
-      sprintf (command, "%s %s", FC_EDIT_COMMAND, fn);
+      fcedit = posixly_correct ? POSIX_FC_EDIT_COMMAND : FC_EDIT_COMMAND;
+      command = (char *)xmalloc (3 + strlen (fcedit) + strlen (fn));
+      sprintf (command, "%s %s", fcedit, fn);
     }
   retval = parse_and_execute (command, "fc", SEVAL_NOHIST);
   if (retval != EXECUTION_SUCCESS)
@@ -489,7 +507,7 @@ fc_gethist (command, hlist)
 {
   int i;
 
-  if (!hlist)
+  if (hlist == 0)
     return ((char *)NULL);
 
   i = fc_gethnum (command, hlist);
@@ -573,41 +591,18 @@ static void
 fc_replhist (command)
      char *command;
 {
-  register int i;
-  HIST_ENTRY **hlist, *histent, *discard;
   int n;
 
   if (command == 0 || *command == '\0')
     return;
 
-  hlist = history_list ();
-
-  if (hlist == NULL)
-    return;
-
-  for (i = 0; hlist[i]; i++);
-  i--;
-
-  /* History_get () takes a parameter that should be
-     offset by history_base. */
-
-  histent = history_get (history_base + i);	/* Don't free this */
-  if (histent == NULL)
-    return;
-
   n = strlen (command);
-
   if (command[n - 1] == '\n')
     command[n - 1] = '\0';
 
   if (command && *command)
     {
-      discard = remove_history (i);
-      if (discard)
-	{
-	  FREE (discard->line);
-	  free ((char *) discard);
-	}
+      delete_last_history ();
       maybe_add_history (command);	/* Obeys HISTCONTROL setting. */
     }
 }
@@ -620,13 +615,16 @@ fc_addhist (line)
 {
   register int n;
 
+  if (line == 0 || *line == 0)
+    return;
+
   n = strlen (line);
 
   if (line[n - 1] == '\n')
     line[n - 1] = '\0';
 
   if (line && *line)
-    maybe_add_history (line);
+    maybe_add_history (line);		/* Obeys HISTCONTROL setting. */
 }
 #endif
 

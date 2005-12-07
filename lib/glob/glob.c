@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2002 Free Software Foundation, Inc.
+   Copyright (C) 1985-2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -66,6 +66,12 @@
 #  define FREE(x)	if (x) free (x)
 #endif
 
+/* Don't try to alloca() more than this much memory for `struct globval'
+   in glob_vector() */
+#ifndef ALLOCA_MAX
+#  define ALLOCA_MAX	100000
+#endif
+
 extern void throw_to_top_level __P((void));
 extern int test_eaccess __P((char *, int));
 
@@ -127,13 +133,13 @@ glob_pattern_p (pattern)
   int r;
 
   if (MB_CUR_MAX == 1)
-    return (internal_glob_pattern_p (pattern));
+    return (internal_glob_pattern_p ((unsigned char *)pattern));
 
   /* Convert strings to wide chars, and call the multibyte version. */
   n = xdupmbstowcs (&wpattern, NULL, pattern);
   if (n == (size_t)-1)
     /* Oops.  Invalid multibyte sequence.  Try it as single-byte sequence. */
-    return (internal_glob_pattern_p (pattern));
+    return (internal_glob_pattern_p ((unsigned char *)pattern));
 
   r = internal_glob_wpattern_p (wpattern);
   free (wpattern);
@@ -347,9 +353,13 @@ glob_vector (pat, dir, flags)
   register char **name_vector;
   register unsigned int i;
   int mflags;		/* Flags passed to strmatch (). */
+  int nalloca;
+  struct globval *firstmalloc, *tmplink;
 
   lastlink = 0;
   count = lose = skip = 0;
+
+  firstmalloc = 0;
 
   /* If PAT is empty, skip the loop, but return one (empty) filename. */
   if (pat == 0 || *pat == '\0')
@@ -488,8 +498,18 @@ glob_vector (pat, dir, flags)
 
 	  if (strmatch (pat, dp->d_name, mflags) != FNM_NOMATCH)
 	    {
+	      if (nalloca < ALLOCA_MAX)
+		{
+		  nextlink = (struct globval *) alloca (sizeof (struct globval));
+		  nalloca += sizeof (struct globval);
+		}
+	      else
+		{
+		  nextlink = (struct globval *) malloc (sizeof (struct globval));
+		  if (firstmalloc == 0)
+		    firstmalloc = nextlink;
+		}
 	      nextname = (char *) malloc (D_NAMLEN (dp) + 1);
-	      nextlink = (struct globval *) alloca (sizeof (struct globval));
 	      if (nextlink == 0 || nextname == 0)
 		{
 		  lose = 1;
@@ -515,11 +535,20 @@ glob_vector (pat, dir, flags)
   /* Have we run out of memory?	 */
   if (lose)
     {
+      tmplink = 0;
+
       /* Here free the strings we have got.  */
       while (lastlink)
 	{
+	  if (firstmalloc)
+	    {
+	      if (lastlink == firstmalloc)
+		firstmalloc = 0;
+	      tmplink = lastlink;
+	    }
 	  free (lastlink->name);
 	  lastlink = lastlink->next;
+	  FREE (tmplink);
 	}
 
       QUIT;
@@ -528,13 +557,29 @@ glob_vector (pat, dir, flags)
     }
 
   /* Copy the name pointers from the linked list into the vector.  */
-  for (i = 0; i < count; ++i)
+  for (tmplink = lastlink, i = 0; i < count; ++i)
     {
-      name_vector[i] = lastlink->name;
-      lastlink = lastlink->next;
+      name_vector[i] = tmplink->name;
+      tmplink = tmplink->next;
     }
 
   name_vector[count] = NULL;
+
+  /* If we allocated some of the struct globvals, free them now. */
+  if (firstmalloc)
+    {
+      tmplink = 0;
+      while (lastlink)
+	{
+	  tmplink = lastlink;
+	  if (lastlink == firstmalloc)
+	    lastlink = firstmalloc = 0;
+	  else
+	    lastlink = lastlink->next;
+	  free (tmplink);
+	}
+    }
+	
   return (name_vector);
 }
 

@@ -1,5 +1,5 @@
 /* Convert string representation of a number into an intmax_t value.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1999-2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,6 +46,10 @@ extern long strtol __P((const char *, char **, int));
 #endif
 #if !HAVE_DECL_STRTOLL && HAVE_LONG_LONG
 extern long long strtoll __P((const char *, char **, int));
+#endif
+
+#ifdef strtoimax
+#undef strtoimax
 #endif
 
 intmax_t

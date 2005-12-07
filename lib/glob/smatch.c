@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -93,14 +93,16 @@ collequiv (c1, c2)
 
 static int
 collsym (s, len)
-     char *s;
+     CHAR *s;
      int len;
 {
   register struct _collsym *csp;
+  char *x;
 
+  x = (char *)s;
   for (csp = posix_collsyms; csp->name; csp++)
     {
-      if (STREQN(csp->name, s, len) && csp->name[len] == '\0')
+      if (STREQN(csp->name, x, len) && csp->name[len] == '\0')
 	return (csp->code);
     }
   if (len == 1)
@@ -366,7 +368,7 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
 
   if (MB_CUR_MAX == 1)
-    return (internal_strmatch (pattern, string, flags));
+    return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   n = xdupmbstowcs (&wpattern, NULL, pattern);
   if (n == (size_t)-1 || n == (size_t)-2)

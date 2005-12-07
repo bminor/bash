@@ -1039,7 +1039,7 @@ static const struct conf_variable conf_table[] =
 #ifdef _PC_MAX_INPUT
   { "MAX_INPUT",		PATHCONF,	_PC_MAX_INPUT		},
 #endif
-#ifdef _PC_NAMW_MAX
+#ifdef _PC_NAME_MAX
   { "NAME_MAX",			PATHCONF,	_PC_NAME_MAX		},
 #endif
 #ifdef _PC_PATH_MAX

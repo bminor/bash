@@ -36,3 +36,14 @@ recho TDEFAULTS = ${selvecs:+-DSELECT_VECS="\\"}
 recho TDEFAULTS = ${selvecs:+-DSELECT_VECS=\\}
 recho TDEFAULTS = ${selvecs:+-DSELECT_VECS=\'}
 recho TDEFAULTS = ${selvecs:+-DSELECT_VECS="\'"}
+
+# more tests for bash-3.0 behavior
+
+var="a*b" ; echo "${var//\\*/}"
+var="a*b" ; echo "${var//\*/}"
+
+var="a?b" ; echo "${var//\\?/}"
+var="a?b" ; echo "${var//\?/}"
+
+var="a/b" ; echo "${var//\\//}"
+var="a/b" ; echo "${var//\//}"

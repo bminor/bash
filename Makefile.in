@@ -1,6 +1,6 @@
-# Makefile for bash-3.0, version 2.152
+# Makefile for bash-3.1, version 2.157
 #
-# Copyright (C) 1996-2004 Free Software Foundation, Inc.
+# Copyright (C) 1996-2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,6 +67,7 @@ RM = rm -f
 AR = @AR@
 ARFLAGS = @ARFLAGS@
 RANLIB = @RANLIB@
+SIZE = @SIZE@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -116,10 +117,10 @@ THIS_SH = $(BUILD_DIR)/$(Program)
 PROFILE_FLAGS= @PROFILE_FLAGS@
 
 CFLAGS = @CFLAGS@
-CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
+CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@ @CROSS_COMPILE@
 CPPFLAGS = @CPPFLAGS@
 CPPFLAGS_FOR_BUILD = @CPPFLAGS_FOR_BUILD@
-LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
+LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG} ${MALLOC_DEBUG}
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
@@ -196,7 +197,8 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/fmtumax.c ${SH_LIBSRC}/netconn.c \
 		${SH_LIBSRC}/mktime.c ${SH_LIBSRC}/strftime.c \
 		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
-		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c
+		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
+		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -309,7 +311,7 @@ TILDE_LIBSRC = $(LIBSRC)/tilde
 TILDE_LIBDIR = $(dot)/$(LIBSUBDIR)/tilde
 TILDE_ABSSRC = ${topdir}/$(TILDE_LIBDIR)
 
-TILDE_LIB = -ltilde
+TILDE_LIB = @TILDE_LIB@
 TILDE_LIBRARY = $(TILDE_LIBDIR)/libtilde.a
 TILDE_LDFLAGS = -L$(TILDE_LIBDIR)
 TILDE_DEP = $(TILDE_LIBRARY)
@@ -513,7 +515,7 @@ $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
 	$(RM) $@
 	$(PURIFY) $(CC) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
 	ls -l $(Program)
-	size $(Program)
+	-$(SIZE) $(Program)
 
 .build:	$(SOURCES) config.h Makefile version.h $(VERSPROG)
 	@echo
@@ -535,7 +537,7 @@ bashbug: $(SUPPORT_SRC)bashbug.sh config.h Makefile $(VERSPROG)
 strip:	$(Program) .made
 	strip $(Program)
 	ls -l $(Program)
-	size $(Program)
+	-$(SIZE) $(Program)
 
 lint:
 	${MAKE} ${MFLAGS} CFLAGS='${GCC_LINT_FLAGS}' .made
@@ -617,7 +619,7 @@ mksyntax$(EXEEXT):	${srcdir}/mksyntax.c config.h syntax.h ${BASHINCDIR}/chartype
 # *not* cross-compiling
 lsignames.h:   mksignames$(EXEEXT)
 	$(RM) $@
-	./mksignames $@
+	./mksignames$(EXEEXT) $@
 
 # copy the correct signames header file to signames.h
 signames.h: $(SIGNAMES_H)
@@ -625,7 +627,7 @@ signames.h: $(SIGNAMES_H)
 
 syntax.c:	mksyntax${EXEEXT} $(srcdir)/syntax.h 
 	$(RM) $@
-	./mksyntax -o $@
+	./mksyntax$(EXEEXT) -o $@
 
 $(BUILTINS_LIBRARY): $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h version.h
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) DEBUG=${DEBUG} libbuiltins.a ) || exit 1
@@ -668,7 +670,7 @@ $(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/confi
 
 # for chet
 reconfig: force
-	sh $(srcdir)/configure
+	sh $(srcdir)/configure -C
 
 #newversion:	mkversion
 #	$(RM) .build
@@ -728,7 +730,7 @@ LIB_SUBDIRS = ${RL_LIBDIR}  ${HIST_LIBDIR} ${TERM_LIBDIR} ${GLOB_LIBDIR} \
 
 basic-clean:
 	$(RM) $(OBJECTS) $(Program) bashbug
-	$(RM) .build .made version.h pathnames.h
+	$(RM) .build .made version.h 
 
 clean:	basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
@@ -758,7 +760,7 @@ distclean:	basic-clean maybe-clean
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) tags TAGS 
-	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES)
+	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES) pathnames.h
 
 maintainer-clean:	basic-clean
 	@echo This command is intended for maintainers to use.
@@ -772,7 +774,7 @@ maintainer-clean:	basic-clean
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) $(CREATED_MAKEFILES)
-	$(RM) $(CREATED_SUPPORT) Makefile
+	$(RM) $(CREATED_SUPPORT) Makefile pathnames.h
 
 maybe-clean:
 	-if test "X$(topdir)" != "X$(BUILD_DIR)" ; then \
@@ -792,7 +794,7 @@ test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
 	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \
-		PATH=$$PATH:$(BUILD_DIR)/tests THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+		PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
 
 symlinks:
 	$(SHELL) $(SUPPORT_SRC)fixlinks -s $(srcdir)

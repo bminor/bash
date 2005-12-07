@@ -2,7 +2,7 @@
 # Makefile for the Bash library
 #
 #
-# Copyright (C) 1998-2002 Free Software Foundation, Inc.
+# Copyright (C) 1998-2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,21 +86,21 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   inet_aton.c netconn.c netopen.c strpbrk.c timeval.c makepath.c \
 	   pathcanon.c pathphys.c tmpfile.c stringlist.c stringvec.c spell.c \
 	   shquote.c strtrans.c strindex.c snprintf.c mailstat.c \
-	   fmtulong.c fmtullong.c fmtumax.c shmatch.c \
+	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
-	   mktime.c strftime.c xstrchr.c zcatfd.c 
+	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c
 
 # The header files for this library.
 HSOURCES = 
 
 # The object files contained in $(LIBRARY_NAME)
 LIBOBJS = @LIBOBJS@
-OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o \
+OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  itos.o zread.o zwrite.o shtty.o shmatch.o \
 	  netconn.o netopen.o timeval.o makepath.o pathcanon.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
-	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o ${LIBOBJS}
+	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o winsize.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -162,6 +162,7 @@ strftime.o: strftime.c
 strindex.o: strindex.c
 stringlist.o: stringlist.c
 stringvec.o: stringvec.c
+strnlen.o: strnlen.c
 strpbrk.o: strpbrk.c
 strtod.o: strtod.c
 strtoimax.o: strtoimax.c
@@ -218,6 +219,7 @@ strftime.o: ${BUILD_DIR}/config.h
 strindex.o: ${BUILD_DIR}/config.h
 stringlist.o: ${BUILD_DIR}/config.h
 stringvec.o: ${BUILD_DIR}/config.h
+strnlen.o: ${BUILD_DIR}/config.h
 strpbrk.o: ${BUILD_DIR}/config.h
 strtod.o: ${BUILD_DIR}/config.h
 strtoimax.o: ${BUILD_DIR}/config.h
@@ -371,6 +373,8 @@ stringvec.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 stringvec.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 stringvec.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 stringvec.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h ${BUILD_DIR}/version.h
+
+strnlen.o: ${BASHINCDIR}/stdc.h
 
 strpbrk.o: ${BASHINCDIR}/stdc.h
 

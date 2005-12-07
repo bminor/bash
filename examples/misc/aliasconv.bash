@@ -22,7 +22,7 @@ mkalias ()
 			              s/#/\#/g')
 		echo $1 \(\) "{" command "$comm"  "; }"
 		;;
-	*)	echo alias ${1}=\'$(echo "${2}" | sed "s:':'\\\\'':")\' ;;
+	*)	echo alias ${1}=\'$(echo "${2}" | sed "s:':'\\\\'':g")\' ;;
 	esac
 }
 EOF

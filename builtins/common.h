@@ -40,6 +40,7 @@
 #define CDESC_PATH_ONLY		0x010	/* type -p */
 #define CDESC_FORCE_PATH	0x020	/* type -ap or type -P */
 #define CDESC_NOFUNCS		0x040	/* type -f */
+#define CDESC_ABSPATH		0x080	/* convert to absolute path, no ./ */
 
 /* Flags for get_job_by_name */
 #define JM_PREFIX		0x01	/* prefix of job name */
@@ -76,6 +77,7 @@ extern void sh_readonly __P((const char *));
 extern void sh_nojobs __P((char *));
 extern void sh_restricted __P((char *));
 extern void sh_notbuiltin __P((char *));
+extern void sh_wrerror __P((void));
 
 extern char **make_builtin_argv __P((WORD_LIST *, int *));
 extern void remember_args __P((WORD_LIST *, int));

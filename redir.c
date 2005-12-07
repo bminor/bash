@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -596,7 +596,10 @@ redir_open (filename, flags, mode, ri)
       fd = open (filename, flags, mode);
 #if defined (AFS)
       if ((fd < 0) && (errno == EACCES))
-	fd = open (filename, flags & ~O_CREAT, mode);
+	{
+	  fd = open (filename, flags & ~O_CREAT, mode);
+	  errno = EACCES;	/* restore errno */
+	}
 #endif /* AFS */
     }
 
@@ -626,6 +629,9 @@ do_redirection_internal (redirect, flags)
   redir_fd = redirect->redirectee.dest;
   redirector = redirect->redirector;
   ri = redirect->instruction;
+
+if (redirect->flags & RX_INTERNAL)
+  flags |= RX_INTERNAL;
 
   if (TRANSLATE_REDIRECT (ri))
     {
@@ -893,11 +899,20 @@ do_redirection_internal (redirect, flags)
 	     leaves the flag unset on the new descriptor, which means it
 	     stays open.  Only set the close-on-exec bit for file descriptors
 	     greater than 2 in any case, since 0-2 should always be open
-	     unless closed by something like `exec 2<&-'. */
+	     unless closed by something like `exec 2<&-'.  It should always
+	     be safe to set fds > 2 to close-on-exec if they're being used to
+	     save file descriptors < 2, since we don't need to preserve the
+	     state of the close-on-exec flag for those fds -- they should
+	     always be open. */
 	  /* if ((already_set || set_unconditionally) && (ok_to_set))
 		set_it () */
-	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (flags & RX_CLEXEC)) &&
+#if 0
+	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || redir_fd < 2 || (flags & RX_CLEXEC)) &&
 	       (redirector > 2))
+#else
+	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (redir_fd < 2 && (flags & RX_INTERNAL)) || (flags & RX_CLEXEC)) &&
+	       (redirector > 2))
+#endif
 	    SET_CLOSE_ON_EXEC (redirector);
 
 	  /* dup-and-close redirection */
@@ -954,6 +969,7 @@ add_undo_redirect (fd)
 
   rd.dest = 0;
   closer = make_redirection (new_fd, r_close_this, rd);
+  closer->flags |= RX_INTERNAL;
   dummy_redirect = copy_redirects (closer);
 
   rd.dest = new_fd;
@@ -961,6 +977,7 @@ add_undo_redirect (fd)
     new_redirect = make_redirection (fd, r_duplicating_input, rd);
   else
     new_redirect = make_redirection (fd, r_duplicating_output, rd);
+  new_redirect->flags |= RX_INTERNAL;
   new_redirect->next = closer;
 
   closer->next = redirection_undo_list;
@@ -969,6 +986,21 @@ add_undo_redirect (fd)
   /* Save redirections that need to be undone even if the undo list
      is thrown away by the `exec' builtin. */
   add_exec_redirect (dummy_redirect);
+
+  /* experimental:  if we're saving a redirection to undo for a file descriptor
+     above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
+     causes redirections to be discarded. */
+  if (fd >= SHELL_FD_BASE)
+    {
+      rd.dest = new_fd;
+      new_redirect = make_redirection (fd, r_duplicating_output, rd);
+#if 0
+      closer = copy_redirects (new_redirect);
+      add_exec_redirect (closer);
+#else
+      add_exec_redirect (new_redirect);
+#endif     
+    }
 
   /* File descriptors used only for saving others should always be
      marked close-on-exec.  Unfortunately, we have to preserve the
@@ -994,6 +1026,7 @@ add_undo_close_redirect (fd)
 
   rd.dest = 0;
   closer = make_redirection (fd, r_close_this, rd);
+  closer->flags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
 }

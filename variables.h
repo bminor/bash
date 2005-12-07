@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -224,7 +224,7 @@ extern SHELL_VAR *find_variable_internal __P((const char *, int));
 extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
 extern SHELL_VAR *make_local_variable __P((const char *));
-extern SHELL_VAR *bind_variable __P((const char *, char *));
+extern SHELL_VAR *bind_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
 
 extern void bind_function_def __P((const char *, FUNCTION_DEF *));
@@ -250,13 +250,14 @@ extern char **add_or_supercede_exported_var __P((char *, int));
 extern char *get_variable_value __P((SHELL_VAR *));
 extern char *get_string_value __P((const char *));
 extern char *sh_get_env_value __P((const char *));
-extern char *make_variable_value __P((SHELL_VAR *, char *));
+extern char *make_variable_value __P((SHELL_VAR *, char *, int));
 
-extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *));
+extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *, int));
 extern SHELL_VAR *bind_int_variable __P((char *, char *));
 extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 
-extern int assign_in_env __P((const char *));
+extern int assign_in_env __P((WORD_DESC *));
+
 extern int unbind_variable __P((const char *));
 extern int unbind_func __P((const char *));
 extern int unbind_function_def __P((const char *));
@@ -329,6 +330,7 @@ extern int get_random_number __P((void));
 extern void sv_ifs __P((char *));
 extern void sv_path __P((char *));
 extern void sv_mail __P((char *));
+extern void sv_comp_wordbreaks __P((char *));
 extern void sv_globignore __P((char *));
 extern void sv_ignoreeof __P((char *));
 extern void sv_strict_posix __P((char *));
@@ -340,10 +342,11 @@ extern void sv_locale __P((char *));
 extern void sv_comp_wordbreaks __P((char *));
 extern void sv_terminal __P((char *));
 extern void sv_hostfile __P((char *));
+extern void sv_winsize __P((char *));
 #endif
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
-extern void sv_tz __P((char *));
+#if defined (__CYGWIN__)
+extern void sv_home __P((char *));
 #endif
 
 #if defined (HISTORY)
@@ -355,5 +358,9 @@ extern void sv_histchars __P((char *));
 #  endif
 extern void sv_histtimefmt __P((char *));
 #endif /* HISTORY */
+
+#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+extern void sv_tz __P((char *));
+#endif
 
 #endif /* !_VARIABLES_H_ */

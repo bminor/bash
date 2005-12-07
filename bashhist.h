@@ -38,6 +38,7 @@ extern int history_control;
 extern int command_oriented_history;
 extern int current_command_first_line_saved;
 extern int hist_last_line_added;
+extern int hist_last_line_pushed;
 
 #  if defined (BANG_HISTORY)
 extern int history_expansion_inhibited;

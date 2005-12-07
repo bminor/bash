@@ -540,6 +540,19 @@ recho ${1%%[!/]*}
 recho ${1#*/}
 recho ${1##*/}
 
+${THIS_SH} ./new-exp5.sub
+
+unset var
+var=blah
+
+# these had better agree
+echo ${var[@]:3}
+echo ${var:3}
+echo ${var[@]//#/--}
+echo ${var//#/--}
+echo ${var[@]##?}
+echo ${var##?}
+
 # this must be last!
 expect $0: 'ABXD: parameter unset'
 recho ${ABXD:?"parameter unset"}

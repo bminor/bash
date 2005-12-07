@@ -372,3 +372,9 @@ a="a b c d e"
 declare b=$a
 expect '<a> <b> <c> <d> <e>'
 recho $b
+
+a="a?b?c"
+
+echo ${a//\\?/ }
+
+echo ${a//\?/ }

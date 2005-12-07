@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -150,7 +150,7 @@ wait_builtin (list)
 	  BLOCK_CHILD (set, oset);
 	  job = get_job_spec (list);
 
-	  if (job < 0 || job >= job_slots || !jobs[job])
+	  if (INVALID_JOB (job))
 	    {
 	      if (job != DUP_JOB)
 		sh_badjob (list->word->word);

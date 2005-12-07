@@ -47,7 +47,7 @@
 
 /* Define DONT_REPORT_SIGPIPE if you don't want to see `Broken pipe' messages
    when a job like `cat jobs.c | exit 1' is executed. */
-/* #define DONT_REPORT_SIGPIPE */
+#define DONT_REPORT_SIGPIPE
 
 /* The default value of the PATH variable. */
 #ifndef DEFAULT_PATH_VALUE

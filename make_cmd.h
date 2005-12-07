@@ -1,6 +1,6 @@
 /* make_cmd.h -- Declarations of functions found in make_cmd.c */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,6 +25,7 @@
 
 extern void cmd_init __P((void));
 
+extern WORD_DESC *alloc_word_desc __P((void));
 extern WORD_DESC *make_bare_word __P((const char *));
 extern WORD_DESC *make_word_flags __P((WORD_DESC *, const char *));
 extern WORD_DESC *make_word __P((const char *));

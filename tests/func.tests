@@ -157,4 +157,12 @@ ${THIS_SH} ./func2.sub
 # test for some posix-specific function behavior
 ${THIS_SH} ./func3.sub
 
+unset -f myfunction
+myfunction() {
+    echo "bad shell function redirection"
+} >> /dev/null
+
+myfunction
+myfunction | cat
+
 exit 0

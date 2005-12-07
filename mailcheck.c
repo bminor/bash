@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -122,6 +122,15 @@ find_mail_file (file)
     } \
   while (0)
 
+#define UPDATE_MAIL_FILE(i, finfo) \
+  do \
+    { \
+      mailfiles[i]->access_time = finfo.st_atime; \
+      mailfiles[i]->mod_time = finfo.st_mtime; \
+      mailfiles[i]->file_size = finfo.st_size; \
+    } \
+  while (0)
+
 static void
 update_mail_file (i)
      int i;
@@ -131,11 +140,7 @@ update_mail_file (i)
 
   file = mailfiles[i]->name;
   if (mailstat (file, &finfo) == 0)
-    {
-      mailfiles[i]->access_time = finfo.st_atime;
-      mailfiles[i]->mod_time = finfo.st_mtime;
-      mailfiles[i]->file_size = finfo.st_size;
-    }
+    UPDATE_MAIL_FILE (i, finfo);
   else
     RESET_MAIL_FILE (i);
 }
@@ -155,11 +160,8 @@ add_mail_file (file, msg)
   if (i >= 0)
     {
       if (mailstat (filename, &finfo) == 0)
-	{
-	  mailfiles[i]->mod_time = finfo.st_mtime;
-	  mailfiles[i]->access_time = finfo.st_atime;
-	  mailfiles[i]->file_size = finfo.st_size;
-	}
+	UPDATE_MAIL_FILE (i, finfo);
+
       free (filename);
       return i;
     }
@@ -182,9 +184,7 @@ reset_mail_files ()
   register int i;
 
   for (i = 0; i < mailfiles_count; i++)
-    {
-      RESET_MAIL_FILE (i);
-    }
+    RESET_MAIL_FILE (i);
 }
 
 /* Free the information that we have about the remembered mail files. */
@@ -208,7 +208,8 @@ free_mail_files ()
 }
 
 /* Return non-zero if FILE's mod date has changed and it has not been
-   accessed since modified. */
+   accessed since modified.  If the size has dropped to zero, reset
+   the cached mail file info. */
 static int
 file_mod_date_changed (i)
      int i;
@@ -222,6 +223,9 @@ file_mod_date_changed (i)
 
   if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
     return (mtime != finfo.st_mtime);
+
+  if (finfo.st_size == 0 && mailfiles[i]->file_size > 0)
+    UPDATE_MAIL_FILE (i, finfo);
 
   return (0);
 }
@@ -381,7 +385,7 @@ check_mail ()
 	  use_user_notification = mailfiles[i]->msg != (char *)NULL;
 	  message = mailfiles[i]->msg ? mailfiles[i]->msg : _("You have mail in $_");
 
-	  bind_variable ("_", current_mail_file);
+	  bind_variable ("_", current_mail_file, 0);
 
 #define atime mailfiles[i]->access_time
 #define mtime mailfiles[i]->mod_time
@@ -426,7 +430,7 @@ check_mail ()
 
   if (dollar_underscore)
     {
-      bind_variable ("_", dollar_underscore);
+      bind_variable ("_", dollar_underscore, 0);
       free (dollar_underscore);
     }
   else

@@ -156,3 +156,19 @@ ${THIS_SH} ./redir5.sub
 
 # test behavior after a write error with a builtin command
 ${THIS_SH} ./redir6.sub
+
+# problem with redirections using fds bash uses internally
+: ${TMPDIR:=/tmp}
+
+trap 'rm -f $TMPDIR/bash-redir-$$' 0 1 2 3 6 15
+
+echo before block
+{
+	echo before redir
+	exec 10>&1
+	echo after redir
+} > $TMPDIR/bash-redir-$$
+
+echo after block
+
+${THIS_SH} ./redir7.sub

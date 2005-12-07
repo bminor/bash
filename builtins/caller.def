@@ -55,6 +55,7 @@ $END
 #include "../shell.h"
 #include "common.h"
 #include "builtext.h"
+#include "bashgetopt.h"
 
 #ifdef LOADABLE_BUILTIN
 #  include "builtins.h"
@@ -87,6 +88,10 @@ caller_builtin (list)
 
   if (bash_source_a == 0 || array_empty (bash_source_a))
     return (EXECUTION_FAILURE);
+
+ if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;       /* skip over possible `--' */
 
   /* If there is no argument list, then give short form: line filename. */
   if (list == 0)
@@ -125,11 +130,11 @@ caller_builtin (list)
 #ifdef LOADABLE_BUILTIN
 static char *caller_doc[] = {
   N_("Returns the context of the current subroutine call."),
-  N_(""),
+  N_(" "),
   N_("Without EXPR, returns returns \"$line $filename\".  With EXPR,"),
   N_("returns \"$line $subroutine $filename\"; this extra information"),
   N_("can be used used to provide a stack trace."),
-  N_(""),
+  N_(" "),
   N_("The value of EXPR indicates how many call frames to go back before the"),
   N_("current one; the top frame is frame 0."),
   (char *)NULL

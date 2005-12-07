@@ -75,10 +75,11 @@ static int
 _path_isdir (path)
      char *path;
 {
-  int l, x;
+  int l;
   struct stat sb;
 
   /* This should leave errno set to the correct value. */
+  errno = 0;
   l = stat (path, &sb) == 0 && S_ISDIR (sb.st_mode);
 #if defined (__CYGWIN__)
   if (l == 0)

@@ -63,6 +63,8 @@ extern char *strcpy ();
 #define BUILTIN_FLAG_SPECIAL	0x01
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
 
+#define BASE_INDENT	4
+
 /* If this stream descriptor is non-zero, then write
    texinfo documentation to it. */
 FILE *documentation_file = (FILE *)NULL;
@@ -76,6 +78,10 @@ int inhibit_production = 0;
 /* Non-zero means to produce separate help files for each builtin, named by
    the builtin name, in `./helpfiles'. */
 int separate_helpfiles = 0;
+
+/* Non-zero means to create single C strings for each `longdoc', with
+   embedded newlines, for ease of translation. */
+int single_longdoc_strings = 1;
 
 /* The name of a directory into which the separate external help files will
    eventually be installed. */
@@ -128,7 +134,7 @@ ARRAY *saved_builtins = (ARRAY *)NULL;
 char *special_builtins[] =
 {
   ":", ".", "source", "break", "continue", "eval", "exec", "exit",
-  "export", "readonly", "return", "set", "shift", "trap", "unset",
+  "export", "readonly", "return", "set", "shift", "times", "trap", "unset",
   (char *)NULL
 };
 
@@ -225,6 +231,8 @@ main (argc, argv)
 	  separate_helpfiles = 1;
 	  helpfile_directory = argv[arg_index++];
         }
+      else if (strcmp (arg, "-S") == 0)
+	single_longdoc_strings = 0;
       else
 	{
 	  fprintf (stderr, "%s: Unknown flag %s.\n", argv[0], arg);
@@ -373,14 +381,8 @@ array_add (element, array)
     array->array = (char **)xrealloc
       (array->array, (array->size += array->growth_rate) * array->width);
 
-#if defined (HAVE_BCOPY)
-  bcopy (&element, (char *) &(array->array[array->sindex]), array->width);
-  array->sindex++;
-  bzero ((char *) &(array->array[array->sindex]), array->width);
-#else
   array->array[array->sindex++] = element;
   array->array[array->sindex] = (char *)NULL;
-#endif /* !HAVE_BCOPY */
 }
 
 /* Free an allocated array and data pointer. */
@@ -1058,9 +1060,10 @@ save_builtin (builtin)
 }
 
 /* Flags that mean something to write_documentation (). */
-#define STRING_ARRAY	1
-#define TEXINFO		2
-#define PLAINTEXT	4
+#define STRING_ARRAY	0x01
+#define TEXINFO		0x02
+#define PLAINTEXT	0x04
+#define HELPFILE	0x08
 
 char *structfile_header[] = {
   "/* builtins.c -- the built in shell commands. */",
@@ -1271,7 +1274,7 @@ write_longdocs (stream, builtins)
 	  sarray[0] = (char *)xmalloc (l + 1);
 	  sprintf (sarray[0], "%s/%s", helpfile_directory, dname);
 	  sarray[1] = (char *)NULL;
-	  write_documentation (stream, sarray, 0, STRING_ARRAY);
+	  write_documentation (stream, sarray, 0, STRING_ARRAY|HELPFILE);
 	  free (sarray[0]);
 	}
       else
@@ -1343,8 +1346,10 @@ write_endifs (stream, defines)
   fprintf (stream, " */\n");
 }
 
-/* Write DOCUMENTAION to STREAM, perhaps surrounding it with double-quotes
-   and quoting special characters in the string. */
+/* Write DOCUMENTATION to STREAM, perhaps surrounding it with double-quotes
+   and quoting special characters in the string.  Handle special things for
+   internationalization (gettext) and the single-string vs. multiple-strings
+   issues. */
 void
 write_documentation (stream, documentation, indentation, flags)
      FILE *stream;
@@ -1353,32 +1358,58 @@ write_documentation (stream, documentation, indentation, flags)
 {
   register int i, j;
   register char *line;
-  int string_array, texinfo;
+  int string_array, texinfo, base_indent, last_cpp, filename_p;
 
   if (!stream)
     return;
 
   string_array = flags & STRING_ARRAY;
-  if (string_array)
-    fprintf (stream, " {\n#if defined (HELP_BUILTIN)\n");
+  filename_p = flags & HELPFILE;
 
-  for (i = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
+  if (string_array)
     {
-      /* Allow #ifdef's to be written out verbatim. */
+      fprintf (stream, " {\n#if defined (HELP_BUILTIN)\n");	/* } */
+      if (single_longdoc_strings)
+	{
+	  if (filename_p == 0)
+	    fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
+	  else
+	    fprintf (stream, "\"");
+	}
+    }
+
+  base_indent = (string_array && single_longdoc_strings && filename_p == 0) ? BASE_INDENT : 0;
+
+  for (i = last_cpp = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
+    {
+      /* Allow #ifdef's to be written out verbatim, but don't put them into
+	 separate help files. */
       if (*line == '#')
 	{
-	  if (string_array)
+	  if (string_array && filename_p == 0 && single_longdoc_strings == 0)
 	    fprintf (stream, "%s\n", line);
+	  last_cpp = 1;
 	  continue;
 	}
+      else
+	last_cpp = 0;
 
       /* prefix with N_( for gettext */
-      if (string_array)
-	fprintf (stream, "  N_(\"");
+      if (string_array && single_longdoc_strings == 0)
+	{
+	  if (filename_p == 0)
+	    fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
+	  else
+	    fprintf (stream, "  \"");
+	}
 
       if (indentation)
 	for (j = 0; j < indentation; j++)
 	  fprintf (stream, " ");
+
+      /* Don't indent the first line, because of how the help builtin works. */
+      if (i == 0)
+	indentation += base_indent;
 
       if (string_array)
 	{
@@ -1397,7 +1428,16 @@ write_documentation (stream, documentation, indentation, flags)
 	    }
 
 	  /* closing right paren for gettext */
-	  fprintf (stream, "\"),\n");
+	  if (single_longdoc_strings == 0)
+	    {
+	      if (filename_p == 0)
+		fprintf (stream, "\"),\n");
+	      else
+		fprintf (stream, "\",\n");
+	    }
+	  else if (documentation[i+1])
+	    /* don't add extra newline after last line */
+	    fprintf (stream, "\\n\\\n");
 	}
       else if (texinfo)
 	{
@@ -1419,6 +1459,15 @@ write_documentation (stream, documentation, indentation, flags)
 	}
       else
 	fprintf (stream, "%s\n", line);
+    }
+
+  /* closing right paren for gettext */
+  if (string_array && single_longdoc_strings)
+    {
+      if (filename_p == 0)
+	fprintf (stream, "\"),\n");
+      else
+	fprintf (stream, "\",\n");
     }
 
   if (string_array)

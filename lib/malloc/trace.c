@@ -22,6 +22,9 @@
 #endif
 
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #include "imalloc.h"
 
@@ -29,9 +32,9 @@ extern int malloc_trace;
 
 static int _mtrace_verbose = 0;
 
-extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
-
 #ifdef MALLOC_TRACE
+
+extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
 
 FILE *_mtrace_fp = NULL;
 extern char _malloc_trace_buckets[];

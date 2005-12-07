@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -270,6 +270,12 @@ sh_notbuiltin (s)
   builtin_error (_("%s: not a shell builtin"), s);
 }
 
+void
+sh_wrerror ()
+{
+  builtin_error (_("write error: %s"), strerror (errno));
+}
+
 /* **************************************************************** */
 /*								    */
 /*	     Shell positional parameter manipulation		    */
@@ -508,15 +514,17 @@ get_job_by_name (name, flags)
 {
   register int i, wl, cl, match, job;
   register PROCESS *p;
+  register JOB *j;
 
   job = NO_JOB;
   wl = strlen (name);
-  for (i = job_slots - 1; i >= 0; i--)
+  for (i = js.j_jobslots - 1; i >= 0; i--)
     {
-      if (jobs[i] == 0 || ((flags & JM_STOPPED) && JOBSTATE(i) != JSTOPPED))
+      j = get_job_by_jid (i);
+      if (j == 0 || ((flags & JM_STOPPED) && J_JOBSTATE(j) != JSTOPPED))
         continue;
 
-      p = jobs[i]->pipe;
+      p = j->pipe;
       do
         {
 	  if (flags & JM_EXACT)
@@ -547,7 +555,7 @@ get_job_by_name (name, flags)
 	  else
 	    job = i;
         }
-      while (p != jobs[i]->pipe);
+      while (p != j->pipe);
     }
 
   return (job);
@@ -562,7 +570,7 @@ get_job_spec (list)
   int job, jflags;
 
   if (list == 0)
-    return (current_job);
+    return (js.j_current);
 
   word = list->word->word;
 
@@ -575,20 +583,19 @@ get_job_spec (list)
   if (DIGIT (*word) && all_digits (word))
     {
       job = atoi (word);
-      return (job > job_slots ? NO_JOB : job - 1);
+      return (job > js.j_jobslots ? NO_JOB : job - 1);
     }
 
   jflags = 0;
   switch (*word)
     {
     case 0:
-	return NO_JOB;
     case '%':
     case '+':
-      return (current_job);
+      return (js.j_current);
 
     case '-':
-      return (previous_job);
+      return (js.j_previous);
 
     case '?':			/* Substring search requested. */
       jflags |= JM_SUBSTRING;

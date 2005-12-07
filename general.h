@@ -24,6 +24,7 @@
 #include "stdc.h"
 
 #include "bashtypes.h"
+#include "chartypes.h"
 
 #if defined (HAVE_SYS_RESOURCE_H) && defined (RLIMTYPE)
 #  if defined (HAVE_SYS_TIME_H)
@@ -129,16 +130,16 @@ typedef struct {
 			: (type)(list))
 
 #if __GNUC__ > 1
-#  define FASTCOPY(s, d, n)  __builtin_memcpy (d, s, n)
+#  define FASTCOPY(s, d, n)  __builtin_memcpy ((d), (s), (n))
 #else /* !__GNUC__ */
 #  if !defined (HAVE_BCOPY)
 #    if !defined (HAVE_MEMMOVE)
-#      define FASTCOPY(s, d, n)  memcpy (d, s, n)
+#      define FASTCOPY(s, d, n)  memcpy ((d), (s), (n))
 #    else
-#      define FASTCOPY(s, d, n)  memmove (d, s, n)
+#      define FASTCOPY(s, d, n)  memmove ((d), (s), (n))
 #    endif /* !HAVE_MEMMOVE */
 #  else /* HAVE_BCOPY */
-#    define FASTCOPY(s, d, n)  bcopy (s, d, n)
+#    define FASTCOPY(s, d, n)  bcopy ((s), (d), (n))
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 
@@ -216,6 +217,7 @@ typedef void sh_resetsig_func_t __P((int));	/* sh_vintfunc_t */
 typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 
 typedef int sh_assign_func_t __P((const char *));	/* sh_icpfunc_t */
+typedef int sh_wassign_func_t __P((WORD_DESC *));
 
 typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 
@@ -230,6 +232,7 @@ typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 #define FS_EXEC_ONLY	  0x8
 #define FS_DIRECTORY	  0x10
 #define FS_NODIRS	  0x20
+#define FS_READABLE	  0x40
 
 /* Default maximum for move_to_high_fd */
 #define HIGH_FD_MAX	256
@@ -248,14 +251,18 @@ typedef int QSFUNC ();
 #  define ABSPATH(x)	((x)[0] == '/')
 #  define RELPATH(x)	((x)[0] != '/')
 #else /* __CYGWIN__ */
-#  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':' && (x)[2] == '/') || (x)[0] == '/')
-#  define RELPATH(x)	(!(x)[0] || ((x)[1] != ':' && (x)[0] != '/'))
+#  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':') || ISDIRSEP((x)[0]))
+#  define RELPATH(x)	(ABSPATH(x) == 0)
 #endif /* __CYGWIN__ */
 
 #define ROOTEDPATH(x)	(ABSPATH(x))
 
 #define DIRSEP	'/'
-#define ISDIRSEP(c)	((c) == '/')
+#if !defined (__CYGWIN__)
+#  define ISDIRSEP(c)	((c) == '/')
+#else
+#  define ISDIRSEP(c)	((c) == '/' || (c) == '\\')
+#endif /* __CYGWIN__ */
 #define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
 
 #if 0
@@ -292,10 +299,10 @@ extern int same_file __P((char *, char *, struct stat *, struct stat *));
 
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
-
-extern char *make_absolute __P((char *, char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));
+
+extern char *make_absolute __P((char *, char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
@@ -303,6 +310,7 @@ extern char *polite_directory_format __P((char *));
 extern char *extract_colon_unit __P((char *, int *));
 
 extern void tilde_initialize __P((void));
+extern char *bash_tilde_find_word __P((const char *, int, int *));
 extern char *bash_tilde_expand __P((const char *, int));
 
 extern int group_member __P((gid_t));

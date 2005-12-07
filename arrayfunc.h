@@ -1,6 +1,6 @@
 /* arrayfunc.h -- declarations for miscellaneous array functions in arrayfunc.c */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,14 +27,14 @@
 
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 
-extern SHELL_VAR *bind_array_variable __P((char *, arrayind_t, char *));
-extern SHELL_VAR *assign_array_element __P((char *, char *));
+extern SHELL_VAR *bind_array_variable __P((char *, arrayind_t, char *, int));
+extern SHELL_VAR *assign_array_element __P((char *, char *, int));
 
 extern SHELL_VAR *find_or_make_array_variable __P((char *, int));
 
-extern SHELL_VAR *assign_array_from_string  __P((char *, char *));
-extern SHELL_VAR *assign_array_var_from_word_list __P((SHELL_VAR *, WORD_LIST *));
-extern SHELL_VAR *assign_array_var_from_string __P((SHELL_VAR *, char *));
+extern SHELL_VAR *assign_array_from_string  __P((char *, char *, int));
+extern SHELL_VAR *assign_array_var_from_word_list __P((SHELL_VAR *, WORD_LIST *, int));
+extern SHELL_VAR *assign_array_var_from_string __P((SHELL_VAR *, char *, int));
 
 extern int unbind_array_element __P((SHELL_VAR *, char *));
 extern int skipsubscript __P((const char *, int));

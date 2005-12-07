@@ -72,11 +72,13 @@ $END
    existing system shells won't barf.  Regrettably, the SUS v2 has
    standardized the Sys V echo behavior.  This variable is external
    so that we can have a `shopt' variable to control it at runtime. */
-#if defined (DEFAULT_ECHO_TO_XPG)
+#if defined (DEFAULT_ECHO_TO_XPG) || defined (STRICT_POSIX)
 int xpg_echo = 1;
 #else
 int xpg_echo = 0;
 #endif /* DEFAULT_ECHO_TO_XPG */
+
+extern int posixly_correct;
 
 /* Print the words in LIST to standard output.  If the first word is
    `-n', then don't print a trailing newline.  We also support the
@@ -90,6 +92,9 @@ echo_builtin (list)
 
   do_v9 = xpg_echo;
   display_return = 1;
+
+  if (posixly_correct && xpg_echo)
+    goto just_echo;
 
   for (; list && (temp = list->word->word) && *temp == '-'; list = list->next)
     {
@@ -170,6 +175,7 @@ just_echo:
   fflush (stdout);
   if (ferror (stdout))
     {
+      sh_wrerror ();
       clearerr (stdout);
       return (EXECUTION_FAILURE);
     }
