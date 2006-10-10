@@ -56,7 +56,7 @@ extern int errno;
 
 #define IS_BUILTIN(s)	(builtin_address_internal(s, 0) != (struct builtin *)NULL)
 
-extern int indirection_level, startup_state, subshell_environment;
+extern int indirection_level, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
@@ -316,9 +316,8 @@ static int
 cat_file (r)
      REDIRECT *r;
 {
-  char lbuf[128], *fn;
+  char *fn;
   int fd, rval;
-  ssize_t nr;
 
   if (r->instruction != r_input_direction)
     return -1;

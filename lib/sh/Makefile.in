@@ -88,7 +88,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   shquote.c strtrans.c strindex.c snprintf.c mailstat.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
-	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c
+	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c eaccess.c \
+	   wcsdup.c
 
 # The header files for this library.
 HSOURCES = 
@@ -96,11 +97,12 @@ HSOURCES =
 # The object files contained in $(LIBRARY_NAME)
 LIBOBJS = @LIBOBJS@
 OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
-	  itos.o zread.o zwrite.o shtty.o shmatch.o \
+	  itos.o zread.o zwrite.o shtty.o shmatch.o eaccess.o \
 	  netconn.o netopen.o timeval.o makepath.o pathcanon.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
-	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o winsize.o ${LIBOBJS}
+	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o winsize.o wcsdup.o \
+	  ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -134,6 +136,7 @@ ${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
 # rules for losing makes, like SunOS
 clktck.o: clktck.c
 clock.o: clock.c
+eaccess.o: eaccess.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
@@ -176,6 +179,7 @@ times.o: times.c
 timeval.o: timeval.c
 tmpfile.o: tmpfile.c
 vprint.o: vprint.c
+wcsdup.o: wcsdup.c
 xstrchr.o: xstrchr.c
 zcatfd.o: zcatfd.c
 zread.o: zread.c
@@ -191,6 +195,7 @@ strtoull.o: strtol.c
 # all files in the library depend on config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
+eaccess.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
@@ -233,6 +238,7 @@ times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
 tmpfile.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
+wcsdup.o: ${BUILD_DIR}/config.h
 xstrchr.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
 zread.o: ${BUILD_DIR}/config.h
@@ -326,6 +332,19 @@ rename.o: ${BASHINCDIR}/posixstat.h
 
 setlinebuf.o: ${topdir}/xmalloc.h ${topdir}/bashansi.h
 setlinebuf.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/stdc.h
+
+eaccess.o: ${topdir}/bashtypes.h
+eaccess.o: ${BASHINCDIR}/posixstat.h
+eaccess.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+eaccess.o: ${BASHINCDIR}/filecntl.h
+eaccess.o: ${BASHINCDIR}/stdc.h
+eaccess.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+eaccess.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+eaccess.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+eaccess.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+eaccess.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+eaccess.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+eaccess.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h ${BUILD_DIR}/version.h
 
 shquote.o: ${BASHINCDIR}/stdc.h ${topdir}/bashansi.h
 shquote.o: ${BASHINCDIR}/ansi_stdlib.h ${topdir}/xmalloc.h
@@ -449,6 +468,10 @@ fmtumax.o: ${BASHINCDIR}/chartypes.h
 fmtumax.o: ${BASHINCDIR}/stdc.h
 fmtumax.o: ${BASHINCDIR}/typemax.h
 fmtumax.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+
+wcsdup.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+wcsdup.o: ${BASHINCDIR}/stdc.h
+wcsdup.o: ${topdir}/xmalloc.h
 
 xstrchr.o: ${topdir}/bashansi.h
 xstrchr.o: ${BASHINCDIR}/ansi_stdlib.h

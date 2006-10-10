@@ -155,6 +155,8 @@ int array_needs_making = 1;
 int shell_level = 0;
 
 /* Some forward declarations. */
+static void create_variable_tables __P((void));
+
 static void set_machine_vars __P((void));
 static void set_home_var __P((void));
 static void set_shell_var __P((void));
@@ -252,19 +254,10 @@ static void push_func_var __P((PTR_T));
 static void push_exported_var __P((PTR_T));
 
 static inline int find_special_var __P((const char *));
-	       
-/* Initialize the shell variables from the current environment.
-   If PRIVMODE is nonzero, don't import functions from ENV or
-   parse $SHELLOPTS. */
-void
-initialize_shell_variables (env, privmode)
-     char **env;
-     int privmode;
-{
-  char *name, *string, *temp_string;
-  int c, char_index, string_index, string_length;
-  SHELL_VAR *temp_var;
 
+static void
+create_variable_tables ()
+{
   if (shell_variables == 0)
     {
       shell_variables = global_variables = new_var_context ((char *)NULL, 0);
@@ -279,6 +272,21 @@ initialize_shell_variables (env, privmode)
   if (shell_function_defs == 0)
     shell_function_defs = hash_create (0);
 #endif
+}
+
+/* Initialize the shell variables from the current environment.
+   If PRIVMODE is nonzero, don't import functions from ENV or
+   parse $SHELLOPTS. */
+void
+initialize_shell_variables (env, privmode)
+     char **env;
+     int privmode;
+{
+  char *name, *string, *temp_string;
+  int c, char_index, string_index, string_length;
+  SHELL_VAR *temp_var;
+
+  create_variable_tables ();
 
   for (string_index = 0; string = env[string_index++]; )
     {
@@ -362,11 +370,7 @@ initialize_shell_variables (env, privmode)
   set_pwd ();
 
   /* Set up initial value of $_ */
-#if 0
-  temp_var = bind_variable ("_", dollar_vars[0], 0);
-#else
   temp_var = set_if_not ("_", dollar_vars[0]);
-#endif
 
   /* Remember this pid. */
   dollar_dollar_pid = getpid ();
@@ -440,7 +444,7 @@ initialize_shell_variables (env, privmode)
   bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
 
-  if (login_shell == 1)
+  if (login_shell == 1 && posixly_correct == 0)
     set_home_var ();
 
   /* Get the full pathname to THIS shell, and set the BASH variable
@@ -483,8 +487,10 @@ initialize_shell_variables (env, privmode)
       set_if_not ("HISTFILE", name);
       free (name);
 
+#if 0
       set_if_not ("HISTSIZE", "500");
       sv_histsize ("HISTSIZE");
+#endif
     }
 #endif /* HISTORY */
 
@@ -860,9 +866,11 @@ sh_set_lines_and_columns (lines, cols)
 {
   char val[INT_STRLEN_BOUND(int) + 1], *v;
 
+#if defined (READLINE)
   /* If we are currently assigning to LINES or COLUMNS, don't do anything. */
   if (winsize_assignment)
     return;
+#endif
 
   v = inttostr (lines, val, sizeof (val));
   bind_variable ("LINES", v, 0);
@@ -1302,20 +1310,11 @@ static SHELL_VAR *
 get_comp_wordbreaks (var)
      SHELL_VAR *var;
 {
-  char *p;
-
   /* If we don't have anything yet, assign a default value. */
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
-#if 0
-  FREE (value_cell (var));
-  p = savestring (rl_completer_word_break_characters);
-  
-  var_setvalue (var, p);
-#else
   var_setvalue (var, rl_completer_word_break_characters);
-#endif
 
   return (var);
 }
@@ -1355,7 +1354,7 @@ get_dirstack (self)
   ARRAY *a;
   WORD_LIST *l;
 
-  l = get_directory_stack ();
+  l = get_directory_stack (0);
   a = array_from_word_list (l);
   array_dispose (array_cell (self));
   dispose_words (l);
@@ -1631,6 +1630,9 @@ set_if_not (name, value)
 {
   SHELL_VAR *v;
 
+  if (shell_variables == 0)
+    create_variable_tables ();
+
   v = find_variable (name);
   if (v == 0)
     v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH, 0);
@@ -1773,11 +1775,7 @@ make_new_variable (name, table)
 
   /* Make sure we have a shell_variables hash table to add to. */
   if (shell_variables == 0)
-    {
-      shell_variables = global_variables = new_var_context ((char *)NULL, 0);
-      shell_variables->scope = 0;
-      shell_variables->table = hash_create (0);
-    }
+    create_variable_tables ();
 
   elt = hash_insert (savestring (name), table, HASH_NOSRCH);
   elt->data = (PTR_T)entry;
@@ -1945,11 +1943,7 @@ bind_variable (name, value, flags)
   VAR_CONTEXT *vc;
 
   if (shell_variables == 0)
-    {
-      shell_variables = global_variables = new_var_context ((char *)NULL, 0);
-      shell_variables->scope = 0;
-      shell_variables->table = hash_create (0);
-    }
+    create_variable_tables ();
 
   /* If we have a temporary environment, look there first for the variable,
      and, if found, modify the value there before modifying it in the
@@ -2029,16 +2023,11 @@ bind_int_variable (lhs, rhs)
      char *lhs, *rhs;
 {
   register SHELL_VAR *v;
-  char *t;
   int isint, isarr;
 
   isint = isarr = 0;
 #if defined (ARRAY_VARS)
-#  if 0
-  if (t = xstrchr (lhs, '['))	/*]*/
-#  else
   if (valid_array_reference (lhs))
-#  endif
     {
       isarr = 1;
       v = array_variable_part (lhs, (char **)0, (int *)0);
@@ -2987,7 +2976,10 @@ void
 dispose_used_env_vars ()
 {
   if (temporary_env)
-    dispose_temporary_env (propagate_temp_var);
+    {
+      dispose_temporary_env (propagate_temp_var);
+      maybe_make_export_env ();
+    }
 }
 
 /* Take all of the shell variables in the temporary environment HASH_TABLE
@@ -4014,19 +4006,19 @@ sv_histsize (name)
     {
       if (legal_number (temp, &num))
 	{
+	  hmax = num;
 	  if (name[4] == 'S')
 	    {
-	      hmax = num;
 	      stifle_history (hmax);
-	      num = where_history ();
-	      if (history_lines_this_session > num)
-		history_lines_this_session = num;
+	      hmax = where_history ();
+	      if (history_lines_this_session > hmax)
+		history_lines_this_session = hmax;
 	    }
 	  else
 	    {
-	      history_truncate_file (get_string_value ("HISTFILE"), (int)num);
-	      if (num <= history_lines_in_file)
-		history_lines_in_file = num;
+	      history_truncate_file (get_string_value ("HISTFILE"), hmax);
+	      if (hmax <= history_lines_in_file)
+		history_lines_in_file = hmax;
 	    }
 	}
     }

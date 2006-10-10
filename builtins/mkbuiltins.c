@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -19,7 +19,16 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-#include <config.h>
+#if !defined (CROSS_COMPILING) 
+#  include <config.h>
+#else	/* CROSS_COMPILING */
+/* A conservative set of defines based on POSIX/SUS3/XPG6 */
+#  define HAVE_UNISTD_H
+#  define HAVE_STRING_H
+#  define HAVE_STDLIB_H
+
+#  define HAVE_RENAME
+#endif /* CROSS_COMPILING */
 
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
@@ -1360,7 +1369,7 @@ write_documentation (stream, documentation, indentation, flags)
   register char *line;
   int string_array, texinfo, base_indent, last_cpp, filename_p;
 
-  if (!stream)
+  if (stream == 0)
     return;
 
   string_array = flags & STRING_ARRAY;
@@ -1372,7 +1381,12 @@ write_documentation (stream, documentation, indentation, flags)
       if (single_longdoc_strings)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
+	    {
+	      if (documentation && documentation[0] && documentation[0][0])
+		fprintf (stream,  "N_(\"");
+	      else
+		fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
+	    }
 	  else
 	    fprintf (stream, "\"");
 	}
@@ -1398,7 +1412,12 @@ write_documentation (stream, documentation, indentation, flags)
       if (string_array && single_longdoc_strings == 0)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
+	    {
+	      if (line[0])	      
+		fprintf (stream, "  N_(\"");
+	      else
+		fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
+	    }
 	  else
 	    fprintf (stream, "  \"");
 	}

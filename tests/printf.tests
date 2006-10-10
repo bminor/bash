@@ -67,7 +67,7 @@ printf -- "--%b--\n" '\t\0101'
 printf -- "--%b--\n" '\t\101'
 
 # these should all display `A7'
-echo -e "\1017"
+echo -e "\01017"
 echo -e "\x417"
 
 printf "%b\n" '\01017'
@@ -246,3 +246,10 @@ printf '\x07e\n'
 
 # additional backslash escapes
 printf '\"\?\n'
+
+# failures with decimal precisions until after bash-3.1
+printf '%0.5d\n' 1
+
+printf '%05d\n' 1
+printf '%5d\n' 1
+printf '%0d\n' 1

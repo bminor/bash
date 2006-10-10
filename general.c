@@ -48,7 +48,6 @@ extern int errno;
 #endif /* !errno */
 
 extern int expand_aliases;
-extern int interrupt_immediately;
 extern int interactive_comments;
 extern int check_hashed_filenames;
 extern int source_uses_path;
@@ -477,8 +476,13 @@ check_binary_file (sample, sample_len)
       if (c == '\n')
 	return (0);
 
+#if 0
       if (ISSPACE (c) == 0 && ISPRINT (c) == 0)
+#else
+      if (c == '\0')
+#endif
 	return (1);
+      
     }
 
   return (0);
@@ -503,7 +507,7 @@ int
 file_iswdir (fn)
      char *fn;
 {
-  return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
+  return (file_isdir (fn) && sh_eaccess (fn, W_OK) == 0);
 }
 
 /* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'

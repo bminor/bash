@@ -78,7 +78,6 @@ void
 set_default_locale_vars ()
 {
   char *val;
-  int r;
 
 #if defined (HAVE_SETLOCALE)
 
@@ -251,6 +250,20 @@ set_lang (var, value)
   return ((lc_all == 0 || *lc_all == 0) ? reset_locale_vars () : 0);
 }
 
+/* Set default values for LANG and LC_ALL.  Default values for all other
+   locale-related variables depend on these. */
+void
+set_default_lang ()
+{
+  char *v;
+
+  v = get_string_value ("LC_ALL");
+  set_locale_var ("LC_ALL", v);
+
+  v = get_string_value ("LANG");
+  set_lang ("LANG", v);
+}
+
 /* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE).
    The precedence is as POSIX.2 specifies:  LC_ALL has precedence over
    the specific locale variables, and LANG, if set, is used as the default. */
@@ -267,7 +280,7 @@ get_locale_var (var)
   if (locale == 0 || *locale == 0)
     locale = lang;
   if (locale == 0 || *locale == 0)
-    locale = default_locale;	/* system-dependent; not really portable */
+    locale = default_locale;	/* system-dependent; not really portable.  should it be "C"? */
 
   return (locale);
 }
@@ -279,12 +292,9 @@ static int
 reset_locale_vars ()
 {
 #if defined (HAVE_SETLOCALE)
-  char *locale;
-
-  locale = lang;
-  if (locale == 0 || *locale == '\0')
-    locale = default_locale;
-  if (setlocale (LC_ALL, locale) == 0)
+  if (lang == 0 || *lang == '\0')
+    maybe_make_export_env ();		/* trust that this will change environment for setlocale */
+  if (setlocale (LC_ALL, lang ? lang : "") == 0)
     return 0;
 
 #  if defined (LC_CTYPE)
@@ -487,10 +497,13 @@ locale_setblanks ()
   for (x = 0; x < sh_syntabsiz; x++)
     {
       if (isblank (x))
-	sh_syntaxtab[x] |= CSHBRK;
+	sh_syntaxtab[x] |= CSHBRK|CBLANK;
       else if (member (x, shell_break_chars))
-	sh_syntaxtab[x] |= CSHBRK;
+	{
+	  sh_syntaxtab[x] |= CSHBRK;
+	  sh_syntaxtab[x] &= ~CBLANK;
+	}
       else
-	sh_syntaxtab[x] &= ~CSHBRK;
+	sh_syntaxtab[x] &= ~(CSHBRK|CBLANK);
     }
 }

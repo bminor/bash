@@ -151,8 +151,14 @@ extern char *expand_string_to_string __P((char *, int));
 extern char *expand_string_unsplit_to_string __P((char *, int));
 extern char *expand_assignment_string_to_string __P((char *, int));
 
-/* De-quoted quoted characters in STRING. */
+/* Expand an arithmetic expression string */
+extern char *expand_arith_string __P((char *, int));
+
+/* De-quote quoted characters in STRING. */
 extern char *dequote_string __P((char *));
+
+/* De-quote quoted characters in each word in LIST. */
+extern WORD_LIST *dequote_list __P((WORD_LIST *));
 
 /* Expand WORD, performing word splitting on the result.  This does
    parameter expansion, command substitution, arithmetic expansion,

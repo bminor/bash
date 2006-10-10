@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -76,7 +76,6 @@ static void restore_signal __P((int));
 static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
 
 /* Variables used here but defined in other files. */
-extern int interrupt_immediately;
 extern int last_command_exit_value;
 extern int line_number;
 
@@ -114,10 +113,24 @@ int wait_signal_received;
 /* A value which can never be the target of a trap handler. */
 #define IMPOSSIBLE_TRAP_HANDLER (SigHandler *)initialize_traps
 
+#define GETORIGSIG(sig) \
+  do { \
+    original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL); \
+    set_signal_handler (sig, original_signals[sig]); \
+    if (original_signals[sig] == SIG_IGN) \
+      sigmodes[sig] |= SIG_HARD_IGNORE; \
+  } while (0)
+
+#define GET_ORIGINAL_SIGNAL(sig) \
+  if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
+    GETORIGSIG(sig)
+
 void
 initialize_traps ()
 {
   register int i;
+
+  initialize_signames();
 
   trap_list[EXIT_TRAP] = trap_list[DEBUG_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
   sigmodes[EXIT_TRAP] = sigmodes[DEBUG_TRAP] = sigmodes[ERROR_TRAP] = sigmodes[RETURN_TRAP] = SIG_INHERITED;
@@ -133,32 +146,25 @@ initialize_traps ()
 
   /* Show which signals are treated specially by the shell. */
 #if defined (SIGCHLD)
-  original_signals[SIGCHLD] =
-    (SigHandler *) set_signal_handler (SIGCHLD, SIG_DFL);
-  set_signal_handler (SIGCHLD, original_signals[SIGCHLD]);
+  GETORIGSIG (SIGCHLD);
   sigmodes[SIGCHLD] |= (SIG_SPECIAL | SIG_NO_TRAP);
 #endif /* SIGCHLD */
 
-  original_signals[SIGINT] =
-    (SigHandler *) set_signal_handler (SIGINT, SIG_DFL);
-  set_signal_handler (SIGINT, original_signals[SIGINT]);
+  GETORIGSIG (SIGINT);
   sigmodes[SIGINT] |= SIG_SPECIAL;
 
 #if defined (__BEOS__)
   /* BeOS sets SIGINT to SIG_IGN! */
   original_signals[SIGINT] = SIG_DFL;
+  sigmodes[SIGINT] &= ~SIG_HARD_IGNORE;
 #endif
 
-  original_signals[SIGQUIT] =
-    (SigHandler *) set_signal_handler (SIGQUIT, SIG_DFL);
-  set_signal_handler (SIGQUIT, original_signals[SIGQUIT]);
+  GETORIGSIG (SIGQUIT);
   sigmodes[SIGQUIT] |= SIG_SPECIAL;
 
   if (interactive)
     {
-      original_signals[SIGTERM] =
-	(SigHandler *)set_signal_handler (SIGTERM, SIG_DFL);
-      set_signal_handler (SIGTERM, original_signals[SIGTERM]);
+      GETORIGSIG (SIGTERM);
       sigmodes[SIGTERM] |= SIG_SPECIAL;
     }
 }
@@ -445,7 +451,7 @@ set_sigint_handler ()
   else if (interactive)	/* XXX - was interactive_shell */
     return (set_signal_handler (SIGINT, sigint_sighandler));
   else
-    return (set_signal_handler (SIGINT, termination_unwind_protect));
+    return (set_signal_handler (SIGINT, termsig_sighandler));
 }
 
 /* Return the correct handler for signal SIG according to the values in
@@ -487,17 +493,9 @@ set_signal (sig, string)
     {
       /* If we aren't sure of the original value, check it. */
       if (original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER)
-	{
-	  original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL);
-	  set_signal_handler (sig, original_signals[sig]);
-	}
-
-      /* Signals ignored on entry to the shell cannot be trapped or reset. */
+        GETORIGSIG (sig);
       if (original_signals[sig] == SIG_IGN)
-	{
-	  sigmodes[sig] |= SIG_HARD_IGNORE;
-	  return;
-	}
+	return;
     }
 
   /* Only change the system signal handler if SIG_NO_TRAP is not set.
@@ -545,25 +543,13 @@ change_signal (sig, value)
     sigmodes[sig] |= SIG_CHANGED;
 }
 
-#define GET_ORIGINAL_SIGNAL(sig) \
-  if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
-    get_original_signal (sig)
-
 static void
 get_original_signal (sig)
      int sig;
 {
   /* If we aren't sure the of the original value, then get it. */
   if (original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
-    {
-      original_signals[sig] =
-	(SigHandler *) set_signal_handler (sig, SIG_DFL);
-      set_signal_handler (sig, original_signals[sig]);
-
-      /* Signals ignored on entry to the shell cannot be trapped. */
-      if (original_signals[sig] == SIG_IGN)
-	sigmodes[sig] |= SIG_HARD_IGNORE;
-    }
+    GETORIGSIG (sig);
 }
 
 /* Restore the default action for SIG; i.e., the action the shell
@@ -901,18 +887,13 @@ reset_or_restore_signal_handlers (reset)
      `functrace' or `errtrace' options have been set, then let command
      substitutions inherit them.  Let command substitution inherit the
      RETURN trap if we're in the debugger and tracing functions. */
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
-#endif
-    sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || error_trace_mode == 0)
-#endif
+  if (function_trace_mode == 0)
+    {
+      sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
+      sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
+    }
+  if (error_trace_mode == 0)
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
-#endif
-    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 }
 
 /* Reset trapped signals to their original values, but don't free the

@@ -620,7 +620,8 @@ set_dirstack_element (ind, sign, value)
 }
 
 WORD_LIST *
-get_directory_stack ()
+get_directory_stack (flags)
+     int flags;
 {
   register int i;
   WORD_LIST *ret;
@@ -628,7 +629,8 @@ get_directory_stack ()
 
   for (ret = (WORD_LIST *)NULL, i = 0; i < directory_list_offset; i++)
     {
-      d = polite_directory_format (pushd_directory_list[i]);
+      d = (flags&1) ? polite_directory_format (pushd_directory_list[i])
+		    : pushd_directory_list[i];
       ret = make_word_list (make_word (d), ret);
     }
   /* Now the current directory. */
@@ -657,7 +659,7 @@ get_directory_stack ()
 }
 
 #ifdef LOADABLE_BUILTIN
-static char * const dirs_doc[] = {
+char * const dirs_doc[] = {
   N_("Display the list of currently remembered directories.  Directories"),
   N_("find their way onto the list with the `pushd' command; you can get"),
   N_("back up through the list with the `popd' command."),
@@ -678,7 +680,7 @@ static char * const dirs_doc[] = {
   (char *)NULL
 };
 
-static char * const pushd_doc[] = {
+char * const pushd_doc[] = {
   N_("Adds a directory to the top of the directory stack, or rotates"),
   N_("the stack, making the new top of the stack the current working"),
   N_("directory.  With no arguments, exchanges the top two directories."),
@@ -701,7 +703,7 @@ static char * const pushd_doc[] = {
   (char *)NULL
 };
 
-static char * const popd_doc[] = {
+char * const popd_doc[] = {
   N_("Removes entries from the directory stack.  With no arguments,"),
   N_("removes the top directory from the stack, and cd's to the new"),
   N_("top directory."),

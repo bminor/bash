@@ -148,6 +148,7 @@ static intmax_t	tokval;		/* current token value */
 static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
+static int	_is_arithop __P((int));
 static void	readtok __P((void));	/* lexical analyzer */
 
 static intmax_t	expr_streval __P((char *, int));
@@ -949,6 +950,64 @@ expr_streval (tok, e)
   return (tval);
 }
 
+static int
+_is_multiop (c)
+     int c;
+{
+  switch (c)
+    {
+    case EQEQ:
+    case NEQ:
+    case LEQ:
+    case GEQ:
+    case LAND:
+    case LOR:
+    case LSH:
+    case RSH:
+    case OP_ASSIGN:
+    case COND:
+    case POWER:
+    case PREINC:
+    case PREDEC:
+    case POSTINC:
+    case POSTDEC:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+static int
+_is_arithop (c)
+     int c;
+{
+  switch (c)
+    {
+    case EQ:
+    case GT:
+    case LT:
+    case PLUS:
+    case MINUS:
+    case MUL:
+    case DIV:
+    case MOD:
+    case NOT:
+    case LPAR:
+    case RPAR:
+    case BAND:
+    case BOR:
+    case BXOR:
+    case BNOT:
+      return 1;		/* operator tokens */
+    case QUES:
+    case COL:
+    case COMMA:
+      return 1;		/* questionable */
+    default:
+      return 0;		/* anything else is invalid */
+    }
+}
+
 /* Lexical analyzer/token reader for the expression evaluator.  Reads the
    next token and puts its value into curtok, while advancing past it.
    Updates value of tp.  May also set tokval (for number) or tokstr (for
@@ -1104,8 +1163,22 @@ readtok ()
 	  assigntok = c;	/* a OP= b */
 	  c = OP_ASSIGN;
 	}
+      else if (_is_arithop (c) == 0)
+	{
+	  cp--;
+	  /* use curtok, since it hasn't been copied to lasttok yet */
+	  if (curtok == 0 || _is_arithop (curtok) || _is_multiop (curtok))
+	    evalerror (_("syntax error: operand expected"));
+	  else
+	    evalerror (_("syntax error: invalid arithmetic operator"));
+	}
       else
 	cp--;			/* `unget' the character */
+
+      /* Should check here to make sure that the current character is one
+	 of the recognized operators and flag an error if not.  Could create
+	 a character map the first time through and check it on subsequent
+	 calls. */
       lasttok = curtok;
       curtok = c;
     }

@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -305,8 +305,19 @@
 /* Define to `unsigned int' if <sys/socket.h> doesn't define. */
 #undef socklen_t
 
+#undef HAVE_MBSTATE_T
+
 /* Define if you have quad_t in <sys/types.h>. */
 #undef HAVE_QUAD_T
+
+/* Define if you have wchar_t in <wctype.h>. */
+#undef HAVE_WCHAR_T
+
+/* Define if you have wctype_t in <wctype.h>. */
+#undef HAVE_WCTYPE_T
+
+/* Define if you have wint_t in <wctype.h>. */
+#undef HAVE_WINT_T
 
 #undef RLIMTYPE
 
@@ -403,8 +414,6 @@
 #undef HAVE_DECL_STRTOLD
 
 #undef STRTOLD_BROKEN
-
-#undef HAVE_MBSTATE_T
 
 /* Define if WCONTINUED is defined in system headers, but rejected by waitpid */
 #undef WCONTINUED_BROKEN
@@ -514,6 +523,9 @@
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
 
+/* Define if you have the eaccess function.  */
+#undef HAVE_EACCESS
+
 /* Define if you have the fcntl function.  */
 #undef HAVE_FCNTL
 
@@ -580,14 +592,26 @@
 /* Define if you have the isgraph function.  */
 #undef HAVE_ISGRAPH
 
-/* Define if you have the isint function in libc */
+/* Define if you have the isinf function in libc */
 #undef HAVE_ISINF_IN_LIBC
+
+/* Define if you have the isnan function in libc */
+#undef HAVE_ISNAN_IN_LIBC
 
 /* Define if you have the isprint function.  */
 #undef HAVE_ISPRINT
 
 /* Define if you have the isspace function.  */
 #undef HAVE_ISSPACE
+
+/* Define if you have the iswctype function.  */
+#undef HAVE_ISWCTYPE
+
+/* Define if you have the iswlower function.  */
+#undef HAVE_ISWLOWER
+
+/* Define if you have the iswupper function.  */
+#undef HAVE_ISWUPPER
 
 /* Define if you have the isxdigit function.  */
 #undef HAVE_ISXDIGIT
@@ -661,6 +685,10 @@
 /* Define if you have the setostype function.  */
 #undef HAVE_SETOSTYPE
 
+/* Define if you have the setregid function.  */
+#undef HAVE_SETREGID
+#undef HAVE_DECL_SETREGID
+
 /* Define if you have the setvbuf function.  */
 #undef HAVE_SETVBUF
 
@@ -733,6 +761,12 @@
 /* Define if you have the times function.  */
 #undef HAVE_TIMES
 
+/* Define if you have the towlower function.  */
+#undef HAVE_TOWLOWER
+
+/* Define if you have the towupper function.  */
+#undef HAVE_TOWUPPER
+
 /* Define if you have the ttyname function.  */
 #undef HAVE_TTYNAME
 
@@ -763,11 +797,17 @@
 /* Define if you have the wait3 function.  */
 #undef HAVE_WAIT3
 
+/* Define if you have the wcrtomb function.  */
+#undef HAVE_WCRTOMB
+
+/* Define if you have the wcscoll function.  */
+#undef HAVE_WCSCOLL
+
 /* Define if you have the wcsdup function.  */
 #undef HAVE_WCSDUP
 
-/* Define if you have the wctomb function.  */
-#undef HAVE_WCTOMB
+/* Define if you have the wctype function.  */
+#undef HAVE_WCTYPE
 
 /* Define if you have the wcwidth function.  */
 #undef HAVE_WCWIDTH

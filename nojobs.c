@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -429,9 +429,11 @@ reap_zombie_children ()
   pid_t pid;
   WAIT status;
 
+  CHECK_TERMSIG;
   while ((pid = waitpid (-1, (int *)&status, WNOHANG)) > 0)
     set_pid_status (pid, status);
 #  endif /* WNOHANG */
+  CHECK_TERMSIG;
 }
 #endif /* WAITPID */
 
@@ -584,6 +586,7 @@ wait_for_single_pid (pid)
   siginterrupt (SIGINT, 1);
   while ((got_pid = WAITPID (pid, &status, 0)) != pid)
     {
+      CHECK_TERMSIG;
       if (got_pid < 0)
 	{
 	  if (errno != EINTR && errno != ECHILD)
@@ -737,6 +740,7 @@ wait_for (pid)
 
   while ((got_pid = WAITPID (-1, &status, 0)) != pid) /* XXX was pid now -1 */
     {
+      CHECK_TERMSIG;
       if (got_pid < 0 && errno == ECHILD)
 	{
 #if !defined (_POSIX_VERSION)
@@ -775,7 +779,7 @@ wait_for (pid)
 	  if (maybe_call_trap_handler (SIGINT) == 0)
 	    {
 	      if (temp_handler == SIG_DFL)
-		termination_unwind_protect (SIGINT);
+		termsig_handler (SIGINT);
 	      else if (temp_handler != INVALID_SIGNAL_HANDLER && temp_handler != SIG_IGN)
 		(*temp_handler) (SIGINT);
 	    }

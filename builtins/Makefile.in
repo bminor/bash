@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
-PACKAGE = @PACKAGE@
+PACKAGE = @PACKAGE_NAME@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
@@ -178,7 +178,7 @@ helpdoc:	$(MKBUILTINS) $(DEFSRC)
 
 install-help:
 	@-if test -n "${HELPDIR}" && test -d helpfiles ; then \
-		test -d ${HELPDIR} || ${SHELL} ${MKDIRS} $(DESTDIR)$(HELPDIR) ;\
+		test -d $(DESTDIR)${HELPDIR} || ${SHELL} ${MKDIRS} $(DESTDIR)$(HELPDIR) ;\
 		( for f in helpfiles/*; do \
 			echo installing $$f; \
 			${INSTALL_DATA} $$f $(DESTDIR)$(HELPDIR); \

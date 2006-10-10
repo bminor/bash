@@ -41,10 +41,13 @@
 #include "input.h"
 #include "error.h"
 #include "externs.h"
+#include "quit.h"
 
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
+
+extern void termsig_handler __P((int));
 
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
@@ -61,11 +64,14 @@ getc_with_restart (stream)
 {
   unsigned char uc;
 
+  CHECK_TERMSIG;
+
   /* Try local buffering to reduce the number of read(2) calls. */
   if (local_index == local_bufused || local_bufused == 0)
     {
       while (1)
 	{
+	  CHECK_TERMSIG;
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
 	  if (local_bufused > 0)
 	    break;
@@ -446,6 +452,7 @@ b_fill_buffer (bp)
 {
   ssize_t nr;
 
+  CHECK_TERMSIG;
   nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
   if (nr <= 0)
     {
@@ -513,6 +520,8 @@ sync_buffered_stream (bfd)
 int
 buffered_getchar ()
 {
+  CHECK_TERMSIG;
+
 #if !defined (DJGPP)
   return (bufstream_getc (buffers[bash_input.location.buffered_fd]));
 #else

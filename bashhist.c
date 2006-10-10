@@ -270,6 +270,9 @@ load_history ()
      Note that the history file is automatically truncated to the
      size of HISTSIZE if the user does not explicitly set the size
      differently. */
+  set_if_not ("HISTSIZE", "500");
+  sv_histsize ("HISTSIZE");
+
   set_if_not ("HISTFILESIZE", get_string_value ("HISTSIZE"));
   sv_histsize ("HISTFILESIZE");
 

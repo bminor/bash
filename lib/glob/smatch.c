@@ -247,7 +247,6 @@ rangecmp_wc (c1, c2)
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
-  int ret;
 
   if (c1 == c2)
     return 0;

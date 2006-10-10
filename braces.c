@@ -61,7 +61,7 @@ int brace_arg_separator = ',';
 static int brace_gobbler __P((char *, size_t, int *, int));
 static char **expand_amble __P((char *, size_t, int));
 static char **expand_seqterm __P((char *, size_t));
-static char **mkseq __P((int, int, int));
+static char **mkseq __P((int, int, int, int));
 static char **array_concat __P((char **, char **));
 #else
 static int brace_gobbler ();
@@ -69,6 +69,18 @@ static char **expand_amble ();
 static char **expand_seqterm ();
 static char **mkseq();
 static char **array_concat ();
+#endif
+
+#if 0
+static void
+dump_result (a)
+     char **a;
+{
+  int i;
+
+  for (i = 0; a[i]; i++)
+    printf ("dump_result: a[%d] = -%s-\n", i, a[i]);
+}
 #endif
 
 /* Return an array of strings; the brace expansion of TEXT. */
@@ -81,14 +93,45 @@ brace_expand (text)
   char *preamble, *postamble, *amble;
   size_t alen;
   char **tack, **result;
-  int i, j, c;
+  int i, j, c, c1;
 
   DECLARE_MBSTATE;
 
   /* Find the text of the preamble. */
   tlen = strlen (text);
   i = 0;
-  c = brace_gobbler (text, tlen, &i, '{');
+#if defined (CSH_BRACE_COMPAT)
+  c = brace_gobbler (text, tlen, &i, '{');	/* } */
+#else
+  /* Make sure that when we exit this loop, c == 0 or text[i] begins a
+     valid brace expansion sequence. */
+  do
+    {
+      c = brace_gobbler (text, tlen, &i, '{');	/* } */
+      c1 = c;
+      /* Verify that c begins a valid brace expansion word.  If it doesn't, we
+	 go on.  Loop stops when there are no more open braces in the word. */
+      if (c)
+	{
+	  start = j = i + 1;	/* { */
+	  c = brace_gobbler (text, tlen, &j, '}');
+	  if (c == 0)		/* it's not */
+	    {
+	      i++;
+	      c = c1;
+	      continue;
+	    }
+	  else			/* it is */
+	    {
+	      c = c1;
+	      break;
+	    }
+	}
+      else
+	break;
+    }
+  while (c);
+#endif /* !CSH_BRACE_COMPAT */
 
   preamble = (char *)xmalloc (i + 1);
   strncpy (preamble, text, i);
@@ -260,22 +303,31 @@ expand_amble (text, tlen, flags)
 #define ST_CHAR	2
 
 static char **
-mkseq (start, end, type)
-     int start, end, type;
+mkseq (start, end, incr, type)
+     int start, end, incr, type;
 {
-  int n, incr, i;
+  int n, i;
   char **result, *t;
 
   n = abs (end - start) + 1;
   result = strvec_create (n + 1);
 
-  incr = (start < end) ? 1 : -1;
+  if (incr == 0)
+    incr = 1;
+  
+  if (start > end && incr > 0)
+    incr = -incr;
+  else if (start < end && incr < 0)
+    incr = -incr;
 
   /* Make sure we go through the loop at least once, so {3..3} prints `3' */
   i = 0;
   n = start;
   do
     {
+#if defined (SHELL)
+      QUIT;		/* XXX - memory leak here */
+#endif
       if (type == ST_INT)
 	result[i++] = itos (n);
       else
@@ -349,7 +401,7 @@ expand_seqterm (text, tlen)
       rhs_v = tr;
     }
 
-  result = mkseq (lhs_v, rhs_v, lhs_t);
+  result = mkseq (lhs_v, rhs_v, 1, lhs_t);
 
   free (lhs);
   free (rhs);
@@ -361,6 +413,11 @@ expand_seqterm (text, tlen)
    index of the character matching SATISFY.  This understands about
    quoting.  Return the character that caused us to stop searching;
    this is either the same as SATISFY, or 0. */
+/* If SATISFY is `}', we are looking for a brace expression, so we
+   should enforce the rules that govern valid brace expansions:
+	1) to count as an arg separator, a comma or `..' has to be outside
+	   an inner set of braces.	 
+*/
 static int
 brace_gobbler (text, tlen, indx, satisfy)
      char *text;
@@ -368,7 +425,7 @@ brace_gobbler (text, tlen, indx, satisfy)
      int *indx;
      int satisfy;
 {
-  register int i, c, quoted, level, pass_next;
+  register int i, c, quoted, level, commas, pass_next;
 #if defined (SHELL)
   int si;
   char *t;
@@ -376,6 +433,11 @@ brace_gobbler (text, tlen, indx, satisfy)
   DECLARE_MBSTATE;
 
   level = quoted = pass_next = 0;
+#if defined (CSH_BRACE_COMPAT)
+  commas = 1;
+#else
+  commas = (satisfy == '}') ? 0 : 1;
+#endif
 
   i = *indx;
   while (c = text[i])
@@ -436,7 +498,7 @@ brace_gobbler (text, tlen, indx, satisfy)
 	}
 #endif
 
-      if (c == satisfy && level == 0 && quoted == 0)
+      if (c == satisfy && level == 0 && quoted == 0 && commas > 0)
 	{
 	  /* We ignore an open brace surrounded by whitespace, and also
 	     an open brace followed immediately by a close brace preceded
@@ -456,6 +518,13 @@ brace_gobbler (text, tlen, indx, satisfy)
 	level++;
       else if (c == '}' && level)
 	level--;
+#if !defined (CSH_BRACE_COMPAT)
+      else if (satisfy == '}' && c == brace_arg_separator && level == 0)
+	commas++;
+      else if (satisfy == '}' && STREQN (text+i, BRACE_SEQ_SPECIFIER, 2) &&
+      		text[i+2] != satisfy && level == 0)
+	commas++;
+#endif
 
       ADVANCE_CHAR (text, tlen, i);
     }

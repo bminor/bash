@@ -81,8 +81,18 @@ ansicstr (string, len, flags, sawc, rlen)
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
-	    case '0': case '1': case '2': case '3':
-	    case '4': case '5': case '6': case '7':
+	    case '1': case '2': case '3':
+	    case '4': case '5': case '6':
+	    case '7':
+#if 1
+	      if (flags & 1)
+		{
+		  *r++ = '\\';
+		  break;
+		}
+	    /*FALLTHROUGH*/
+#endif
+	    case '0':
 	      /* If (FLAGS & 1), we're translating a string for echo -e (or
 		 the equivalent xpg_echo option), so we obey the SUSv3/
 		 POSIX-2001 requirement and accept 0-3 octal digits after
@@ -166,7 +176,7 @@ ansic_quote (str, flags, rlen)
      int flags, *rlen;
 {
   char *r, *ret, *s;
-  int l, rsize, t;
+  int l, rsize;
   unsigned char c;
 
   if (str == 0 || *str == 0)

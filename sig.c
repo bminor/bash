@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,10 +59,13 @@ extern int loop_level, continuing, breaking;
 extern int parse_and_execute_level, shell_initialized;
 
 /* Non-zero after SIGINT. */
-int interrupt_state;
+volatile int interrupt_state = 0;
 
 /* Non-zero after SIGWINCH */
 volatile int sigwinch_received = 0;
+
+/* Set to the value of any terminating signal received. */
+volatile int terminating_signal = 0;
 
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
@@ -75,6 +78,9 @@ sigset_t top_level_mask;
 
 /* When non-zero, we throw_to_top_level (). */
 int interrupt_immediately = 0;
+
+/* When non-zero, we call the terminating signal handler immediately. */
+int terminate_immediately = 0;
 
 #if defined (SIGWINCH)
 static SigHandler *old_winch = (SigHandler *)SIG_DFL;
@@ -223,7 +229,7 @@ initialize_terminating_signals ()
      this is possible in Posix.  Unfortunately, we have to call signal ()
      on non-Posix systems for each signal in terminating_signals. */
 #if defined (HAVE_POSIX_SIGNALS)
-  act.sa_handler = termination_unwind_protect;
+  act.sa_handler = termsig_sighandler;
   act.sa_flags = 0;
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);
@@ -259,7 +265,7 @@ initialize_terminating_signals ()
       if (signal_is_trapped (XSIG (i)))
 	continue;
 
-      XHANDLER(i) = signal (XSIG (i), termination_unwind_protect);
+      XHANDLER(i) = signal (XSIG (i), termsig_sighandler);
       XSAFLAGS(i) = 0;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
@@ -418,17 +424,39 @@ jump_to_top_level (value)
 }
 
 sighandler
-termination_unwind_protect (sig)
+termsig_sighandler (sig)
      int sig;
 {
+  terminating_signal = sig;
+
+  if (terminate_immediately)
+    {
+      terminate_immediately = 0;
+      termsig_handler (sig);
+    }
+
+  SIGRETURN (0);
+}
+
+void
+termsig_handler (sig)
+     int sig;
+{
+  static int handling_termsig = 0;
+
+  /* Simple semaphore to keep this function from being executed multiple
+     times.  Since we no longer are running as a signal handler, we don't
+     block multiple occurrences of the terminating signals while running. */
+  if (handling_termsig)
+    return;
+  handling_termsig = 1;
+  terminating_signal = 0;	/* keep macro from re-testing true. */
+
   /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
     run_interrupt_trap ();
 
 #if defined (HISTORY)
-  /* This might be unsafe, since it eventually calls functions POSIX says
-     not to call from signal handlers.  If it's a problem, take this code
-     out. */
   if (interactive_shell && sig != SIGABRT)
     maybe_save_shell_history ();
 #endif /* HISTORY */
@@ -446,8 +474,6 @@ termination_unwind_protect (sig)
   run_exit_trap ();
   set_signal_handler (sig, SIG_DFL);
   kill (getpid (), sig);
-
-  SIGRETURN (0);
 }
 
 /* What we really do when SIGINT occurs. */

@@ -1,4 +1,4 @@
-/* execute_command.c -- Execute a COMMAND structure. */
+/* execute_cmd.c -- Execute a COMMAND structure. */
 
 /* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
@@ -214,6 +214,8 @@ static int special_builtin_failed;
    report the correct line number.  Kind of a hack. */
 static int showing_function_line;
 
+static int line_number_for_err_trap;
+
 /* For catching RETURN in a function. */
 int return_catch_flag;
 int return_catch_value;
@@ -359,6 +361,7 @@ execute_command (command)
     unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
+  QUIT;
   return (result);
 }
 
@@ -501,6 +504,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
 
+  QUIT;
   run_pending_traps ();
 
 #if 0
@@ -663,7 +667,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
-	line_number = command->value.Simple->line;
+	line_number_for_err_trap = line_number = command->value.Simple->line;
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
@@ -864,6 +868,24 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     exec_result = (exec_result == EXECUTION_SUCCESS)
 		    ? EXECUTION_FAILURE
 		    : EXECUTION_SUCCESS;
+
+#if defined (DPAREN_ARITHMETIC) || defined (COND_COMMAND)
+  /* This is where we set PIPESTATUS from the exit status of the appropriate
+     compound commands (the ones that look enough like simple commands to
+     cause confusion).  We might be able to optimize by not doing this if
+     subshell_environment != 0. */
+  switch (command->type)
+    {
+#  if defined (DPAREN_ARITHMETIC)
+    case cm_arith:
+#  endif
+#  if defined (COND_COMMAND)
+    case cm_cond:
+#  endif
+      set_pipestatus_from_exit (exec_result);
+      break;
+    }
+#endif
 
   last_command_exit_value = exec_result;
   run_pending_traps ();
@@ -1187,6 +1209,10 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      the special case of an asynchronous GROUP command where the
      the subshell bit is turned on down in case cm_group: below),
      turn off `asynchronous', so that two subshells aren't spawned.
+     XXX - asynchronous used to be set to 0 in this block, but that
+     means that setup_async_signals was never run.  Now it's set to
+     0 after subshell_environment is set appropriately and setup_async_signals
+     is run.
 
      This seems semantically correct to me.  For example,
      ( foo ) & seems to say ``do the command `foo' in a subshell
@@ -1214,19 +1240,35 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 aliases. */
       if (ois != interactive_shell)
 	expand_aliases = 0;
-      asynchronous = 0;
     }
 
   /* Subshells are neither login nor interactive. */
   login_shell = interactive = 0;
 
-  subshell_environment = user_subshell ? SUBSHELL_PAREN : SUBSHELL_ASYNC;
+  if (user_subshell)
+    subshell_environment = SUBSHELL_PAREN;
+  else
+    {
+      subshell_environment = 0;			/* XXX */
+      if (asynchronous)
+	subshell_environment |= SUBSHELL_ASYNC;
+      if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+	subshell_environment |= SUBSHELL_PIPE;
+    }
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
   restore_original_signals ();
+
+  /* Make sure restore_original_signals doesn't undo the work done by
+     make_child to ensure that asynchronous children are immune to SIGINT
+     and SIGQUIT.  Turn off asynchronous to make sure more subshells are
+     not spawned. */
   if (asynchronous)
-    setup_async_signals ();
+    {
+      setup_async_signals ();
+      asynchronous = 0;
+    }
 
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();
@@ -1308,8 +1350,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (function_value)
     return_code = return_catch_value;
   else
-    return_code = execute_command_internal
-      (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
+    return_code = execute_command_internal (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
 
   /* If we are asked to, invert the return value. */
   if (invert)
@@ -1629,7 +1670,11 @@ execute_for_command (for_command)
 
       /* Save this command unless it's a trap command and we're not running
 	 a debug trap. */
+#if 0
       if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+      if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
 	{
 	  FREE (the_printed_command_except_trap);
 	  the_printed_command_except_trap = savestring (the_printed_command);
@@ -2048,7 +2093,11 @@ execute_select_command (select_command)
   if (echo_command_at_execute)
     xtrace_print_select_command_head (select_command);
 
+#if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -2180,7 +2229,11 @@ execute_case_command (case_command)
   if (echo_command_at_execute)
     xtrace_print_case_command_head (case_command);
 
-  if (signal_in_progress (DEBUG_TRAP == 0) && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#if 0
+  if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -2378,6 +2431,7 @@ execute_arith_command (arith_command)
   int expok, save_line_number, retval;
   intmax_t expresult;
   WORD_LIST *new;
+  char *exp;
 
   expresult = 0;
 
@@ -2420,8 +2474,11 @@ execute_arith_command (arith_command)
 
   if (new)
     {
-      expresult = evalexp (new->word->word, &expok);
+      exp = new->next ? string_list (new) : new->word->word;
+      expresult = evalexp (exp, &expok);
       line_number = save_line_number;
+      if (exp != new->word->word)
+	free (exp);
       dispose_words (new);
     }
   else
@@ -2477,6 +2534,7 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_BINARY)
     {
+      rmatch = 0;
       patmatch = ((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
 		  (cond->op->word[0] == '!' || cond->op->word[0] == '=') ||
 		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
@@ -2488,7 +2546,7 @@ execute_cond_node (cond)
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
 	arg1 = nullstr;
-      arg2 = cond_expand_word (cond->right->op, patmatch);
+      arg2 = cond_expand_word (cond->right->op, patmatch||rmatch);
       if (arg2 == 0)
 	arg2 = nullstr;
 
@@ -2614,7 +2672,10 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 
 	  do_piping (pipe_in, pipe_out);
 
-	  subshell_environment = SUBSHELL_ASYNC;
+	  if (async)
+	    subshell_environment |= SUBSHELL_ASYNC;
+	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+	    subshell_environment |= SUBSHELL_PIPE;
 
 	  if (do_redirections (redirects, RX_ACTIVE) == 0)
 	    exit (EXECUTION_SUCCESS);
@@ -2709,7 +2770,11 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_string_index = 0;
   print_simple_command (simple_command);
 
+#if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = the_printed_command ? savestring (the_printed_command) : (char *)0;
@@ -2983,7 +3048,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     }
 
   if (command_line == 0)
-    command_line = savestring (the_printed_command);
+    command_line = savestring (the_printed_command_except_trap);
 
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
@@ -3342,7 +3407,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
      struct fd_bitmap *fds_to_close;
      int flags;
 {
-  int result, r;
+  int result, r, funcvalue;
 #if defined (JOB_CONTROL)
   int jobs_hack;
 
@@ -3353,7 +3418,10 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
   /* A subshell is neither a login shell nor interactive. */
   login_shell = interactive = 0;
 
-  subshell_environment = SUBSHELL_ASYNC;
+  if (async)
+    subshell_environment |= SUBSHELL_ASYNC;
+  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+    subshell_environment |= SUBSHELL_PIPE;
 
   maybe_make_export_env ();	/* XXX - is this needed? */
 
@@ -3387,10 +3455,18 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 	 so we don't go back up to main(). */
       result = setjmp (top_level);
 
+      /* Give the return builtin a place to jump to when executed in a subshell
+         or pipeline */
+      funcvalue = 0;
+      if (return_catch_flag && builtin == return_builtin)
+        funcvalue = setjmp (return_catch);
+
       if (result == EXITPROG)
 	exit (last_command_exit_value);
       else if (result)
 	exit (EXECUTION_FAILURE);
+      else if (funcvalue)
+	exit (return_catch_value);
       else
 	{
 	  r = execute_builtin (builtin, words, flags, 1);

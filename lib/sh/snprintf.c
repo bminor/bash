@@ -65,6 +65,7 @@
 #define HAVE_PRINTF_A_FORMAT
 #endif
 #define HAVE_ISINF_IN_LIBC
+#define HAVE_ISNAN_IN_LIBC
 #define PREFER_STDARG
 #define HAVE_STRINGIZE
 #define HAVE_LIMITS_H
@@ -370,6 +371,12 @@ static void xfree __P((void *));
 	      for (; (p)->width > 0; (p)->width--) \
 		 PUT_CHAR((p)->pad, p)
 
+/* pad with zeros from decimal precision */
+#define PAD_ZERO(p) \
+	if ((p)->precision > 0) \
+	  for (; (p)->precision > 0; (p)->precision--) \
+	    PUT_CHAR('0', p)
+
 /* if width and prec. in the args */
 #define STAR_ARGS(p) \
 	do { \
@@ -651,6 +658,10 @@ number(p, d, base)
   long sd;
   int flags;
 
+  /* An explicit precision turns off the zero-padding flag. */
+  if ((p->flags & PF_ZEROPAD) && p->precision >= 0 && (p->flags & PF_DOT))
+    p->flags &= ~PF_ZEROPAD;
+
   sd = d;	/* signed for ' ' padding in base 10 */
   flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
@@ -667,6 +678,12 @@ number(p, d, base)
 
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
+
+  if ((p->flags & PF_DOT) && p->precision > 0)
+    {
+      p->precision -= strlen(tmp);
+      PAD_ZERO(p);
+    }
 
   switch (base)
     {
@@ -711,6 +728,10 @@ lnumber(p, d, base)
   long long sd;
   int flags;
 
+  /* An explicit precision turns off the zero-padding flag. */
+  if ((p->flags & PF_ZEROPAD) && p->precision >= 0 && (p->flags & PF_DOT))
+    p->flags &= ~PF_ZEROPAD;
+
   sd = d;	/* signed for ' ' padding in base 10 */
   flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
@@ -727,6 +748,12 @@ lnumber(p, d, base)
 
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
+
+  if ((p->flags & PF_DOT) && p->precision > 0)
+    {
+      p->precision -= strlen(tmp);
+      PAD_ZERO(p);
+    }
 
   switch (base)
     {
@@ -881,7 +908,9 @@ isinf(d)
 #endif
     return 0;
 }
+#endif
 
+#ifndef HAVE_ISNAN_IN_LIBC
 static int
 isnan(d)
      double d;

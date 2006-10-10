@@ -149,7 +149,7 @@ extern void set_var_attribute __P((char *, int, int));
 extern char *get_dirstack_from_string __P((char *));
 extern char *get_dirstack_element __P((intmax_t, int));
 extern void set_dirstack_element __P((intmax_t, int, char *));
-extern WORD_LIST *get_directory_stack __P((void));
+extern WORD_LIST *get_directory_stack __P((int));
 
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));

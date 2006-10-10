@@ -22,6 +22,7 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>
 
 #include "imalloc.h"
 #include "table.h"

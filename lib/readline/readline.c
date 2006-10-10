@@ -49,6 +49,11 @@
 
 #include <stdio.h>
 #include "posixjmp.h"
+#include <errno.h>
+
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
 
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
@@ -282,6 +287,7 @@ rl_set_prompt (prompt)
 {
   FREE (rl_prompt);
   rl_prompt = prompt ? savestring (prompt) : (char *)NULL;
+  rl_display_prompt = rl_prompt ? rl_prompt : "";
 
   rl_visible_prompt_length = rl_expand_prompt (rl_prompt);
   return 0;
@@ -477,6 +483,20 @@ readline_internal_charloop ()
       RL_SETSTATE(RL_STATE_READCMD);
       c = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_READCMD);
+
+      /* look at input.c:rl_getc() for the circumstances under which this will
+	 be returned; punt immediately on read error without converting it to
+	 a newline. */
+      if (c == READERR)
+	{
+#if defined (READLINE_CALLBACKS)
+	  RL_SETSTATE(RL_STATE_DONE);
+	  return (rl_done = 1);
+#else
+	  eof_found = 1;
+	  break;
+#endif
+	}
 
       /* EOF typed to a non-blank line is a <NL>. */
       if (c == EOF && rl_end)
@@ -714,7 +734,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 
 	  rl_dispatching = 1;
 	  RL_SETSTATE(RL_STATE_DISPATCHING);
-	  r = (*map[key].function)(rl_numeric_arg * rl_arg_sign, key);
+	  (*map[key].function)(rl_numeric_arg * rl_arg_sign, key);
 	  RL_UNSETSTATE(RL_STATE_DISPATCHING);
 	  rl_dispatching = 0;
 

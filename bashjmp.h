@@ -38,5 +38,6 @@ extern procenv_t	return_catch;	/* used by `return' builtin */
 #define DISCARD		2	/* Discard current command. */
 #define EXITPROG	3	/* Unconditionally exit the program now. */
 #define ERREXIT		4	/* Exit due to error condition */	
+#define SIGEXIT		5	/* Exit due to fatal terminating signal */
 
 #endif /* _BASHJMP_H_ */

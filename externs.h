@@ -112,6 +112,7 @@ extern void set_default_locale __P((void));
 extern void set_default_locale_vars __P((void));
 extern int set_locale_var __P((char *, char *));
 extern int set_lang __P((char *, char *));
+extern void set_default_lang __P((void));
 extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
 extern char *mk_msgstr __P((char *, int *));
@@ -225,6 +226,9 @@ extern char *sh_realpath __P((const char *, char *));
 extern int sh_setlinebuf __P((FILE *));
 #endif
 
+/* declarations for functions defined in lib/sh/shaccess.c */
+extern int sh_eaccess __P((char *, int));
+
 /* declarations for functions defined in lib/sh/shmatch.c */
 extern int sh_regmatch __P((const char *, const char *, int));
 
@@ -251,7 +255,7 @@ extern int strcasecmp __P((const char *, const char *));
 #endif /* HAVE_STRCASECMP */
 
 /* declarations for functions defined in lib/sh/strerror.c */
-#if !defined (strerror)
+#if !defined (HAVE_STRERROR) && !defined (strerror)
 extern char *strerror __P((int));
 #endif
 

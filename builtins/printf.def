@@ -91,6 +91,7 @@ extern int errno;
   do { \
     char *b = 0; \
     int nw; \
+    clearerr (stdout); \
     if (have_fieldwidth && have_precision) \
       nw = asprintf(&b, f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
@@ -106,6 +107,12 @@ extern int errno;
 	  (void)vbadd (b, nw); \
 	else \
 	  (void)fputs (b, stdout); \
+	if (ferror (stdout)) \
+	  { \
+	    sh_wrerror (); \
+	    clearerr (stdout); \
+	    return (EXECUTION_FAILURE); \
+	  } \
 	free (b); \
       } \
   } while (0)
@@ -132,6 +139,11 @@ extern int errno;
 	  vbuf = 0; \
 	} \
       fflush (stdout); \
+      if (ferror (stdout)) \
+	{ \
+	  clearerr (stdout); \
+	  return (EXECUTION_FAILURE); \
+	} \
       return (value); \
     } \
   while (0)
@@ -407,7 +419,9 @@ printf_builtin (list)
 
 		r = 0;
 		p = getstr ();
-		if (ansic_shouldquote (p))
+		if (p && *p == 0)	/* XXX - getstr never returns null */
+		  xp = savestring ("''");
+		else if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
 		else
 		  xp = sh_backslash_quote (p);
@@ -816,7 +830,7 @@ vbadd (buf, blen)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, strlen (vbuf));
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
 #endif
 
   return vbuf;

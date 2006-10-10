@@ -78,7 +78,7 @@ read line
 echo $line
 f () 
 { 
-    exec 5<$0;
+    exec 5< $0;
     exec 0<&5-;
     while read line; do
         echo "$line";

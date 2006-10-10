@@ -87,9 +87,8 @@ $END
 extern int errno;
 #endif
 
-extern int interrupt_immediately;
-
 #if defined (READLINE)
+static void reset_attempted_completion_function __P((char *));
 static char *edit_line __P((char *));
 static void set_eol_delim __P((int));
 static void reset_eol_delim __P((char *));
@@ -330,6 +329,10 @@ read_builtin (list)
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
+#if defined (READLINE)
+      if (edit)
+	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
+#endif
       alarm (tmout);
     }
 
@@ -375,6 +378,7 @@ read_builtin (list)
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
   interrupt_immediately++;
+  terminate_immediately = 1;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
 
@@ -472,6 +476,7 @@ add_char:
   if (retval < 0)
     {
       builtin_error (_("read error: %d: %s"), fd, strerror (errno));
+      run_unwind_frame ("read_builtin");
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -501,6 +506,7 @@ add_char:
     zsyncfd (fd);
 
   interrupt_immediately--;
+  terminate_immediately = 0;
   discard_unwind_frame ("read_builtin");
 
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
@@ -519,13 +525,19 @@ add_char:
 
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
-	return EXECUTION_FAILURE;	/* readonly or noassign */
+	{
+	  xfree (input_string);
+	  return EXECUTION_FAILURE;	/* readonly or noassign */
+	}
       array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
 	{
-	  word_list_remove_quoted_nulls (alist);
+	  if (saw_escape)
+	    dequote_list (alist);
+	  else
+	    word_list_remove_quoted_nulls (alist);
 	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}
@@ -688,7 +700,15 @@ bind_read_variable (name, value)
 }
 
 #if defined (READLINE)
-static rl_completion_func_t *old_attempted_completion_function;
+static rl_completion_func_t *old_attempted_completion_function = 0;
+
+static void
+reset_attempted_completion_function (cp)
+     char *cp;
+{
+  if (rl_attempted_completion_function == 0 && old_attempted_completion_function)
+    rl_attempted_completion_function = old_attempted_completion_function;
+}
 
 static char *
 edit_line (p)
@@ -699,10 +719,13 @@ edit_line (p)
 
   if (bash_readline_initialized == 0)
     initialize_readline ();
+
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   ret = readline (p);
   rl_attempted_completion_function = old_attempted_completion_function;
+  old_attempted_completion_function = (rl_completion_func_t *)NULL;
+
   if (ret == 0)
     return ret;
   len = strlen (ret);

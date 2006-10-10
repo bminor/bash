@@ -34,18 +34,20 @@ option is given, it is interpreted as follows:
     -a	all current limits are reported
     -c	the maximum size of core files created
     -d	the maximum size of a process's data segment
-    -f	the maximum size of files created by the shell
-    -i  the maximum number of pending signals
+    -e	the maximum scheduling priority (`nice')
+    -f	the maximum size of files written by the shell and its children
+    -i	the maximum number of pending signals
     -l	the maximum size a process may lock into memory
     -m	the maximum resident set size
     -n	the maximum number of open file descriptors
     -p	the pipe buffer size
-    -q  the maximum number of bytes in POSIX message queues
+    -q	the maximum number of bytes in POSIX message queues
+    -r	the maximum real-time scheduling priority
     -s	the maximum stack size
     -t	the maximum amount of cpu time in seconds
     -u	the maximum number of user processes
     -v	the size of virtual memory
-    -x  the maximum number of file locks
+    -x	the maximum number of file locks
 
 If LIMIT is given, it is the new value of the specified resource;
 the special LIMIT values `soft', `hard', and `unlimited' stand for
@@ -202,6 +204,9 @@ static RESOURCE_LIMITS limits[] = {
 #ifdef RLIMIT_DATA
   { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
 #endif
+#ifdef RLIMIT_NICE
+  { 'e',	RLIMIT_NICE,  1,	"scheduling priority",	(char *)NULL },
+#endif
   { 'f',	RLIMIT_FILESIZE, 1024,	"file size",		"blocks" },
 #ifdef RLIMIT_SIGPENDING
   { 'i',	RLIMIT_SIGPENDING, 1,	"pending signals",	(char *)NULL },
@@ -216,6 +221,9 @@ static RESOURCE_LIMITS limits[] = {
   { 'p',	RLIMIT_PIPESIZE, 512,	"pipe size", 		"512 bytes" },
 #ifdef RLIMIT_MSGQUEUE
   { 'q',	RLIMIT_MSGQUEUE, 1,	"POSIX message queues",	"bytes" },
+#endif
+#ifdef RLIMIT_RTPRIO
+  { 'r',	RLIMIT_RTPRIO,  1,	"real-time priority",	(char *)NULL },
 #endif
 #ifdef RLIMIT_STACK
   { 's',	RLIMIT_STACK, 1024,	"stack size",		"kbytes" },

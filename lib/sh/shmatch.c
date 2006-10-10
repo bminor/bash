@@ -57,8 +57,7 @@ sh_regmatch (string, pattern, flags)
   char *subexp_str;
   int subexp_len;
 #endif
-  int result;  
-
+  int result;
 
 #if defined (ARRAY_VARS)
   rematch = (SHELL_VAR *)NULL;

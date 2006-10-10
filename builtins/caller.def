@@ -28,9 +28,9 @@ $SHORT_DOC caller [EXPR]
 
 Returns the context of the current subroutine call.  
 
-Without EXPR, returns returns "$line $filename".  With EXPR,
+Without EXPR, returns "$line $filename".  With EXPR,
 returns "$line $subroutine $filename"; this extra information
-can be used used to provide a stack trace.
+can be used to provide a stack trace.
 
 The value of EXPR indicates how many call frames to go back before the
 current one; the top frame is frame 0.
@@ -76,7 +76,6 @@ caller_builtin (list)
   SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
   char *funcname_s, *source_s, *lineno_s;
-  ARRAY_ELEMENT *ae;
   intmax_t num;
 
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);

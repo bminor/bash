@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -15,7 +15,6 @@
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
-
 int FCT __P((CHAR *, CHAR *, int));
 
 static int GMATCH __P((CHAR *, CHAR *, CHAR *, CHAR *, int));
@@ -638,12 +637,13 @@ EXTMATCH (xc, s, se, p, pe, flags)
   CHAR *psub;			/* pointer to sub-pattern */
   CHAR *pnext;			/* pointer to next sub-pattern */
   CHAR *srest;			/* pointer to rest of string */
-  int m1, m2;
+  int m1, m2, xflags;		/* xflags = flags passed to recursive matches */
 
 #if DEBUG_MATCHING
 fprintf(stderr, "extmatch: xc = %c\n", xc);
 fprintf(stderr, "extmatch: s = %s; se = %s\n", s, se);
 fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
+fprintf(stderr, "extmatch: flags = %d\n", flags);
 #endif
 
   prest = PATSCAN (p + (*p == L('(')), pe, 0); /* ) */
@@ -677,8 +677,12 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 		 string matches the rest of the pattern.  Also handle
 		 multiple matches of the pattern. */
 	      if (m1)
-		m2 = (GMATCH (srest, se, prest, pe, flags) == 0) ||
-		      (s != srest && GMATCH (srest, se, p - 1, pe, flags) == 0);
+		{
+		  /* if srest > s, we are not at start of string */
+		  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
+		  m2 = (GMATCH (srest, se, prest, pe, xflags) == 0) ||
+			(s != srest && GMATCH (srest, se, p - 1, pe, xflags) == 0);
+		}
 	      if (m1 && m2)
 		return (0);
 	    }
@@ -688,7 +692,7 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
       return (FNM_NOMATCH);
 
     case L('?'):		/* match zero or one of the patterns */
-    case L('@'):		/* match exactly one of the patterns */
+    case L('@'):		/* match one (or more) of the patterns */
       /* If we can get away with no matches, don't even bother.  Just
 	 call gmatch on the rest of the pattern and return success if
 	 it succeeds. */
@@ -704,8 +708,10 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 	  srest = (prest == pe) ? se : s;
 	  for ( ; srest <= se; srest++)
 	    {
+	      /* if srest > s, we are not at start of string */
+	      xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
 	      if (GMATCH (s, srest, psub, pnext - 1, flags) == 0 &&
-		  GMATCH (srest, se, prest, pe, flags) == 0)
+		  GMATCH (srest, se, prest, pe, xflags) == 0)
 		return (0);
 	    }
 	  if (pnext == prest)
@@ -726,7 +732,9 @@ fprintf(stderr, "extmatch: p = %s; pe = %s\n", p, pe);
 	      if (pnext == prest)
 		break;
 	    }
-	  if (m1 == 0 && GMATCH (srest, se, prest, pe, flags) == 0)
+	  /* if srest > s, we are not at start of string */
+	  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
+	  if (m1 == 0 && GMATCH (srest, se, prest, pe, xflags) == 0)
 	    return (0);
 	}
       return (FNM_NOMATCH);

@@ -63,7 +63,7 @@ extern int errno;
 #define FEVAL_NOPUSHARGS	0x100
 
 extern int posixly_correct;
-extern int indirection_level, startup_state, subshell_environment;
+extern int indirection_level, subshell_environment;
 extern int return_catch_flag, return_catch_value;
 extern int last_command_exit_value;
 

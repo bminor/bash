@@ -76,6 +76,7 @@ $END
 #include "bashgetopt.h"
 
 extern int array_needs_making;
+extern int posixly_correct;
 
 static int declare_internal __P((register WORD_LIST *, int));
 
@@ -256,8 +257,12 @@ declare_internal (list, local_var)
       else
 	making_array_special = 0;
 #endif
-	
-      if (legal_identifier (name) == 0)
+
+      /* If we're in posix mode or not looking for a shell function (since
+	 shell function names don't have to be valid identifiers when the
+	 shell's not in posix mode), check whether or not the argument is a
+	 valid, well-formed shell identifier. */
+      if ((posixly_correct || (flags_on & att_function) == 0) && legal_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
 	  assign_error++;
