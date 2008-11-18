@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2005 Free Software Foundation, Inc.
+Copyright (C) 1997-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,6 +49,12 @@ $END
 #  define INT_MIN		(-2147483647-1)
 #endif
 
+#if defined (PREFER_STDARG)
+#  include <stdarg.h>
+#else
+#  include <varargs.h>
+#endif
+
 #include <stdio.h>
 #include <chartypes.h>
 
@@ -63,6 +69,10 @@ $END
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "common.h"
+
+#if defined (PRI_MACROS_BROKEN)
+#  undef PRIdMAX
+#endif
 
 #if !defined (PRIdMAX)
 #  if HAVE_LONG_LONG
@@ -150,6 +160,10 @@ extern int errno;
 
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
+
+#ifndef HAVE_ASPRINTF
+extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+#endif
 
 static void printf_erange __P((char *));
 static int printstr __P((char *, char *, int, int, int));

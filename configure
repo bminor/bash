@@ -4871,7 +4871,7 @@ _ACEOF
 		# static version specified as -llibname to override the
 		# dynamic version
 		case "${host_os}" in
-		darwin8*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
+		darwin[89]*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
 		*)		READLINE_LIB=-lreadline ;;
 		esac
 	fi
@@ -27316,7 +27316,8 @@ sco3.2v5*)	LOCAL_CFLAGS="-b elf -DWAITPID_BROKEN -DPATH_MAX=1024" ;;
 sco3.2v4*)	LOCAL_CFLAGS="-DMUST_UNBLOCK_CHLD -DPATH_MAX=1024" ;;
 sco3.2*)	LOCAL_CFLAGS=-DMUST_UNBLOCK_CHLD ;;
 sunos4*)	LOCAL_CFLAGS=-DSunOS4 ;;
-solaris2.5*)	LOCAL_CFLAGS=-DSunOS5 ;;
+solaris2.5*)	LOCAL_CFLAGS="-DSunOS5 -DSOLARIS" ;;
+solaris2*)	LOCAL_CFLAGS=-DSOLARIS ;;
 lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		case "`uname -r`" in

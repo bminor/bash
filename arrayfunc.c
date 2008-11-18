@@ -618,6 +618,8 @@ array_expand_index (s, len)
   if (expok == 0)
     {
       last_command_exit_value = EXECUTION_FAILURE;
+
+      top_level_cleanup ();      
       jump_to_top_level (DISCARD);
     }
   return val;
@@ -720,7 +722,7 @@ array_value_internal (s, quoted, allow_all, rtype)
   if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
       if (rtype)
-	*rtype = 1;
+	*rtype = (t[0] == '*') ? 1 : 2;
       if (allow_all == 0)
 	{
 	  err_badarraysub (s);

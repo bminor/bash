@@ -67,6 +67,14 @@ int parse_and_execute_level = 0;
 
 static int cat_file __P((REDIRECT *));
 
+#if defined (HISTORY)
+static void
+set_history_remembering ()
+{
+  remember_on_history = enable_history_list;
+}
+#endif
+
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup ()
@@ -115,7 +123,10 @@ parse_and_execute (string, from_file, flags)
   lreset = flags & SEVAL_RESETLINE;
 
 #if defined (HISTORY)
-  unwind_protect_int (remember_on_history);	/* can be used in scripts */
+  if (parse_and_execute_level == 0)
+    add_unwind_protect (set_history_remembering, (char *)NULL);
+  else
+    unwind_protect_int (remember_on_history);	/* can be used in scripts */
 #  if defined (BANG_HISTORY)
   if (interactive_shell)
     {
@@ -237,6 +248,7 @@ parse_and_execute (string, from_file, flags)
 	       *   parse_and_execute has not been called recursively AND
 	       *   we're not running a trap AND
 	       *   we have parsed the full command (string == '\0') AND
+	       *   we're not going to run the exit trap AND
 	       *   we have a simple command without redirections AND
 	       *   the command is not being timed AND
 	       *   the command's return status is not being inverted
@@ -247,7 +259,8 @@ parse_and_execute (string, from_file, flags)
 		  running_trap == 0 &&
 		  *bash_input.location.string == '\0' &&
 		  command->type == cm_simple &&
-		  !command->redirects && !command->value.Simple->redirects &&
+		  signal_is_trapped (EXIT_TRAP) == 0 &&
+		  command->redirects == 0 && command->value.Simple->redirects == 0 &&
 		  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 		  ((command->flags & CMD_INVERT_RETURN) == 0))
 		{

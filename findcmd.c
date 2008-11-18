@@ -308,7 +308,7 @@ search_for_command (pathname)
   if (hashed_file && (posixly_correct || check_hashed_filenames))
     {
       st = file_status (hashed_file);
-      if ((st ^ (FS_EXISTS | FS_EXECABLE)) != 0)
+      if ((st & (FS_EXISTS|FS_EXECABLE)) != (FS_EXISTS|FS_EXECABLE))
 	{
 	  phash_remove (pathname);
 	  free (hashed_file);

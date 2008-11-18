@@ -1,6 +1,6 @@
 /* pathexp.h -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,6 +32,7 @@ extern char *glob_error_return;
 /* Flag values for quote_string_for_globbing */
 #define QGLOB_CVTNULL	0x01	/* convert QUOTED_NULL strings to '\0' */
 #define QGLOB_FILENAME	0x02	/* do correct quoting for matching filenames */
+#define QGLOB_REGEXP	0x04	/* quote an ERE for regcomp/regexec */
 
 #if defined (EXTENDED_GLOB)
 /* Flags to OR with other flag args to strmatch() to enabled the extended

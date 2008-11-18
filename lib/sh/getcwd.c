@@ -251,19 +251,21 @@ getcwd (buf, size)
 
   {
     size_t len = pathbuf + pathsize - pathp;
-    if (buf == NULL)
-      {
-	if (len < (size_t) size)
-	  len = size;
-	buf = (char *) malloc (len);
-	if (buf == NULL)
-	  goto lose2;
-      }
-    else if ((size_t) size < len)
+    if (buf == NULL && size <= 0)
+      size = len;
+
+    if ((size_t) size < len)
       {
 	errno = ERANGE;
 	goto lose2;
       }
+    if (buf == NULL)
+      {
+	buf = (char *) malloc (size);
+	if (buf == NULL)
+	  goto lose2;
+      }
+
     (void) memcpy((PTR_T) buf, (PTR_T) pathp, len);
   }
 

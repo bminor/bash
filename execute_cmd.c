@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -501,8 +501,15 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   volatile int last_pid;
   volatile int save_line_number;
 
+#if 0
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
+#else
+  if (breaking || continuing)
+    return (last_command_exit_value);
+  if (command == 0 || read_but_dont_execute)
+    return (EXECUTION_SUCCESS);
+#endif
 
   QUIT;
   run_pending_traps ();
@@ -614,7 +621,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
       dispose_exec_redirects ();
-      return (EXECUTION_FAILURE);
+      return (last_command_exit_value = EXECUTION_FAILURE);
     }
 
   if (redirection_undo_list)
@@ -2546,7 +2553,8 @@ execute_cond_node (cond)
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
 	arg1 = nullstr;
-      arg2 = cond_expand_word (cond->right->op, patmatch||rmatch);
+      arg2 = cond_expand_word (cond->right->op,
+			       (rmatch && shell_compatibility_level > 31) ? 2 : (patmatch ? 1 : 0));
       if (arg2 == 0)
 	arg2 = nullstr;
 
@@ -3049,6 +3057,11 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (command_line == 0)
     command_line = savestring (the_printed_command_except_trap);
+
+#if defined (PROCESS_SUBSTITUTION)
+  if ((subshell_environment & SUBSHELL_COMSUB) && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
+    simple_command->flags &= ~CMD_NO_FORK;
+#endif
 
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
@@ -3875,6 +3888,8 @@ initialize_subshell ()
     shell_variables = shell_variables->down;
 
   clear_unwind_protect_list (0);
+  /* XXX -- are there other things we should be resetting here? */
+  parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
   variable_context = return_catch_flag = 0;

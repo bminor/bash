@@ -1029,6 +1029,7 @@ timespec:	TIME
 #define PST_CMDTOKEN	0x1000		/* command token OK - unused */
 #define PST_COMPASSIGN	0x2000		/* parsing x=(...) compound assignment */
 #define PST_ASSIGNOK	0x4000		/* assignment statement ok in this context */
+#define PST_REGEXP	0x8000		/* parsing an ERE/BRE as a single word */
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
@@ -2591,6 +2592,9 @@ read_token (command)
       return (character);
     }
 
+  if (parser_state & PST_REGEXP)
+    goto tokword;
+
   /* Shell meta-characters. */
   if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
     {
@@ -2698,6 +2702,7 @@ read_token (command)
   if MBTEST(character == '-' && (last_read_token == LESS_AND || last_read_token == GREATER_AND))
     return (character);
 
+tokword:
   /* Okay, if we got this far, we have to read a word.  Read one,
      and then check it against the known ones. */
   result = read_token_word (character);
@@ -2735,7 +2740,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 /* itrace("parse_matched_pair: open = %c close = %c", open, close); */
   count = 1;
   pass_next_character = backq_backslash = was_dollar = in_comment = 0;
-  check_comment = (flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
+  check_comment = (flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
 
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
   rflags = (qc == '"') ? P_DQUOTE : (flags & P_DQUOTE);
@@ -3202,8 +3207,11 @@ cond_term ()
       if (tok == WORD && test_binop (yylval.word->word))
 	op = yylval.word;
 #if defined (COND_REGEXP)
-      else if (tok == WORD && STREQ (yylval.word->word,"=~"))
-	op = yylval.word;
+      else if (tok == WORD && STREQ (yylval.word->word, "=~"))
+	{
+	  op = yylval.word;
+	  parser_state |= PST_REGEXP;
+	}
 #endif
       else if (tok == '<' || tok == '>')
 	op = make_word_from_token (tok);  /* ( */
@@ -3234,6 +3242,7 @@ cond_term ()
 
       /* rhs */
       tok = read_token (READ);
+      parser_state &= ~PST_REGEXP;
       if (tok == WORD)
 	{
 	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
@@ -3367,7 +3376,7 @@ read_token_word (character)
       if (pass_next_character)
 	{
 	  pass_next_character = 0;
-	  goto got_character;
+	  goto got_escaped_character;
 	}
 
       cd = current_delimiter (dstack);
@@ -3419,9 +3428,34 @@ read_token_word (character)
 	  goto next_character;
 	}
 
+#ifdef COND_REGEXP
+      /* When parsing a regexp as a single word inside a conditional command,
+	 we need to special-case characters special to both the shell and
+	 regular expressions.  Right now, that is only '(' and '|'. */ /*)*/
+      if MBTEST((parser_state & PST_REGEXP) && (character == '(' || character == '|'))		/*)*/
+        {
+          if (character == '|')
+            goto got_character;
+
+	  push_delimiter (dstack, character);
+	  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
+	  pop_delimiter (dstack);
+	  if (ttok == &matched_pair_error)
+	    return -1;		/* Bail immediately. */
+	  RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+				  token_buffer_size, TOKEN_DEFAULT_GROW_SIZE);
+	  token[token_index++] = character;
+	  strcpy (token + token_index, ttok);
+	  token_index += ttoklen;
+	  FREE (ttok);
+	  dollar_present = all_digit_token = 0;
+	  goto next_character;
+        }
+#endif /* COND_REGEXP */
+
 #ifdef EXTENDED_GLOB
       /* Parse a ksh-style extended pattern matching specification. */
-      if (extended_glob && PATTERN_CHAR (character))
+      if MBTEST(extended_glob && PATTERN_CHAR (character))
 	{
 	  peek_char = shell_getc (1);
 	  if MBTEST(peek_char == '(')		/* ) */
@@ -3616,11 +3650,13 @@ read_token_word (character)
 
     got_character:
 
-      all_digit_token &= DIGIT (character);
-      dollar_present |= character == '$';
-
       if (character == CTLESC || character == CTLNUL)
 	token[token_index++] = CTLESC;
+
+    got_escaped_character:
+
+      all_digit_token &= DIGIT (character);
+      dollar_present |= character == '$';
 
       token[token_index++] = character;
 
@@ -4330,7 +4366,7 @@ not_escape:
   if (promptvars || posixly_correct)
     {
       last_exit_value = last_command_exit_value;
-      list = expand_prompt_string (result, Q_DOUBLE_QUOTES);
+      list = expand_prompt_string (result, Q_DOUBLE_QUOTES, 0);
       free (result);
       result = string_list (list);
       dispose_words (list);

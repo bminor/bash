@@ -127,14 +127,14 @@ read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, i, nr, pass_next, saw_escape, eof, opt, retval, code;
-  int input_is_tty, input_is_pipe, unbuffered_read;
+  int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
+  int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, fd;
   unsigned int tmout;
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-  char *e, *t, *t1;
+  char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
   SHELL_VAR *var;
 #if defined (ARRAY_VARS)
@@ -148,6 +148,7 @@ read_builtin (list)
   USE_VAR(size);
   USE_VAR(i);
   USE_VAR(pass_next);
+  USE_VAR(print_ps2);
   USE_VAR(saw_escape);
   USE_VAR(input_is_pipe);
 /*  USE_VAR(raw); */
@@ -163,6 +164,7 @@ read_builtin (list)
   USE_VAR(rlind);
 #endif
   USE_VAR(list);
+  USE_VAR(ps2);
 
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
@@ -386,7 +388,8 @@ read_builtin (list)
   setmode (0, O_TEXT);
 #endif
 
-  for (eof = retval = 0;;)
+  ps2 = 0;
+  for (print_ps2 = eof = retval = 0;;)
     {
 #if defined (READLINE)
       if (edit)
@@ -411,6 +414,15 @@ read_builtin (list)
       else
 	{
 #endif
+
+      if (print_ps2)
+	{
+	  if (ps2 == 0)
+	    ps2 = get_string_value ("PS2");
+	  fprintf (stderr, "%s", ps2 ? ps2 : "");
+	  fflush (stderr);
+	  print_ps2 = 0;
+	}
 
       if (unbuffered_read)
 	retval = zread (fd, &c, 1);
@@ -440,7 +452,11 @@ read_builtin (list)
 	{
 	  pass_next = 0;
 	  if (c == '\n')
-	    i--;		/* back up over the CTLESC */
+	    {
+	      i--;		/* back up over the CTLESC */
+	      if (interactive && input_is_tty && raw == 0)
+		print_ps2 = 1;
+	    }
 	  else
 	    goto add_char;
 	  continue;
@@ -658,12 +674,13 @@ add_char:
 #else
   /* Check whether or not the number of fields is exactly the same as the
      number of variables. */
+  tofree = NULL;
   if (*input_string)
     {
       t1 = input_string;
       t = get_word_from_string (&input_string, ifs_chars, &e);
       if (*input_string == 0)
-	input_string = t;
+	tofree = input_string = t;
       else
 	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
     }
@@ -678,6 +695,8 @@ add_char:
   else
     var = bind_read_variable (list->word->word, input_string);
   stupidly_hack_special_variables (list->word->word);
+  FREE (tofree);
+
   if (var)
     VUNSETATTR (var, att_invisible);
   xfree (orig_input_string);

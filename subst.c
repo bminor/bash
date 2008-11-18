@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -137,7 +137,7 @@ unsigned char ifs_firstc;
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment;
-extern int subshell_level;
+extern int subshell_level, parse_and_execute_level;
 extern int eof_encountered;
 extern int return_catch_flag, return_catch_value;
 extern pid_t dollar_dollar_pid;
@@ -1278,7 +1278,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{			/* { */
-	  report_error ("bad substitution: no closing `%s' in %s", "}", string);
+	  report_error (_("bad substitution: no closing `%s' in %s"), "}", string);
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  exp_jump_to_top_level (DISCARD);
 	}
@@ -1887,7 +1887,13 @@ string_list_dollar_at (list, quoted)
   sep[1] = '\0';
 #endif
 
+  /* XXX -- why call quote_list if ifs == 0?  we can get away without doing
+     it now that quote_escapes quotes spaces */
+#if 0
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
+#else
+  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+#endif
 		? quote_list (list)
 		: list_quote_escapes (list);
 
@@ -2646,11 +2652,12 @@ remove_backslashes (string)
 
 /* This needs better error handling. */
 /* Expand W for use as an argument to a unary or binary operator in a
-   [[...]] expression.  If SPECIAL is nonzero, this is the rhs argument
+   [[...]] expression.  If SPECIAL is 1, this is the rhs argument
    to the != or == operator, and should be treated as a pattern.  In
-   this case, we quote the string specially for the globbing code.  The
-   caller is responsible for removing the backslashes if the unquoted
-   words is needed later. */   
+   this case, we quote the string specially for the globbing code.  If
+   SPECIAL is 2, this is an rhs argument for the =~ operator, and should
+   be quoted appropriately for regcomp/regexec.  The caller is responsible
+   for removing the backslashes if the unquoted word is needed later. */   
 char *
 cond_expand_word (w, special)
      WORD_DESC *w;
@@ -2658,6 +2665,7 @@ cond_expand_word (w, special)
 {
   char *r, *p;
   WORD_LIST *l;
+  int qflags;
 
   if (w->word == 0 || w->word[0] == '\0')
     return ((char *)NULL);
@@ -2672,8 +2680,11 @@ cond_expand_word (w, special)
 	}
       else
 	{
+	  qflags = QGLOB_CVTNULL;
+	  if (special == 2)
+	    qflags |= QGLOB_REGEXP;
 	  p = string_list (l);
-	  r = quote_string_for_globbing (p, QGLOB_CVTNULL);
+	  r = quote_string_for_globbing (p, qflags);
 	  free (p);
 	}
       dispose_words (l);
@@ -2803,9 +2814,10 @@ expand_string_assignment (string, quoted)
    passed string when an error occurs.  Might want to trap other calls
    to jump_to_top_level here so we don't endlessly loop. */
 WORD_LIST *
-expand_prompt_string (string, quoted)
+expand_prompt_string (string, quoted, wflags)
      char *string;
      int quoted;
+     int wflags;
 {
   WORD_LIST *value;
   WORD_DESC td;
@@ -2813,7 +2825,7 @@ expand_prompt_string (string, quoted)
   if (string == 0 || *string == 0)
     return ((WORD_LIST *)NULL);
 
-  td.flags = 0;
+  td.flags = wflags;
   td.word = savestring (string);
 
   no_longjmp_on_fatal_error = 1;
@@ -2916,7 +2928,12 @@ expand_string (string, quoted)
 
 /* Quote escape characters in string s, but no other characters.  This is
    used to protect CTLESC and CTLNUL in variable values from the rest of
-   the word expansion process after the variable is expanded. */
+   the word expansion process after the variable is expanded.  If IFS is
+   null, we quote spaces as well, just in case we split on spaces later
+   (in the case of unquoted $@, we will eventually attempt to split the
+   entire word on spaces).  Corresponding code exists in dequote_escapes.
+   Even if we don't end up splitting on spaces, quoting spaces is not a
+   problem. */
 char *
 quote_escapes (string)
      char *string;
@@ -2924,17 +2941,19 @@ quote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
+  int quote_spaces;
   DECLARE_MBSTATE; 
 
   slen = strlen (string);
   send = string + slen;
 
+  quote_spaces = (ifs_value && *ifs_value == 0);
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
 
   while (*s)
     {
-      if (*s == CTLESC || *s == CTLNUL)
+      if (*s == CTLESC || *s == CTLNUL || (quote_spaces && *s == ' '))
 	*t++ = CTLESC;
       COPY_CHAR_P (t, s, send);
     }
@@ -2976,6 +2995,7 @@ dequote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
+  int quote_spaces;
   DECLARE_MBSTATE;
 
   if (string == 0)
@@ -2990,9 +3010,10 @@ dequote_escapes (string)
   if (strchr (string, CTLESC) == 0)
     return (strcpy (result, s));
 
+  quote_spaces = (ifs_value && *ifs_value == 0);
   while (*s)
     {
-      if (*s == CTLESC && (s[1] == CTLESC || s[1] == CTLNUL))
+      if (*s == CTLESC && (s[1] == CTLESC || s[1] == CTLNUL || (quote_spaces && s[1] == ' ')))
 	{
 	  s++;
 	  if (*s == '\0')
@@ -3954,7 +3975,11 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
   if (patspec == RP_LONG_LEFT || patspec == RP_LONG_RIGHT)
     patstr++;
 
-  pattern = getpattern (patstr, quoted, 1);
+  /* Need to pass getpattern newly-allocated memory in case of expansion --
+     the expansion code will free the passed string on an error. */
+  temp1 = savestring (patstr);
+  pattern = getpattern (temp1, quoted, 1);
+  free (temp1);
 
   temp1 = (char *)NULL;		/* shut up gcc */
   switch (vtype)
@@ -4123,6 +4148,12 @@ unlink_fifo_list ()
     nfifo = 0;
 }
 
+int
+fifos_pending ()
+{
+  return nfifo;
+}
+
 static char *
 make_named_pipe ()
 {
@@ -4170,6 +4201,12 @@ add_fifo_list (fd)
 
   dev_fd_list[fd] = 1;
   nfds++;
+}
+
+int
+fifos_pending ()
+{
+  return 0;	/* used for cleanup; not needed with /dev/fd */
 }
 
 void
@@ -4456,7 +4493,15 @@ read_comsub (fd, quoted)
       /* Add the character to ISTRING, possibly after resizing it. */
       RESIZE_MALLOCED_BUFFER (istring, istring_index, 2, istring_size, DEFAULT_ARRAY_SIZE);
 
-      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || c == CTLESC || c == CTLNUL)
+      /* This is essentially quote_string inline */
+      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
+	istring[istring_index++] = CTLESC;
+      /* Escape CTLESC and CTLNUL in the output to protect those characters
+	 from the rest of the word expansions (word splitting and globbing.)
+	 This is essentially quote_escapes inline. */
+      else if (c == CTLESC)
+	istring[istring_index++] = CTLESC;
+      else if (c == CTLNUL || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
 
       istring[istring_index++] = c;
@@ -4578,7 +4623,8 @@ command_substitute (string, quoted)
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();
   stop_making_children ();
-  pipeline_pgrp = old_pipeline_pgrp;
+  if (pid != 0)
+    pipeline_pgrp = old_pipeline_pgrp;
 #else
   stop_making_children ();
 #endif /* JOB_CONTROL */
@@ -4665,6 +4711,9 @@ command_substitute (string, quoted)
 
       last_command_exit_value = rc;
       rc = run_exit_trap ();
+#if defined (PROCESS_SUBSTITUTION)
+      unlink_fifo_list ();
+#endif
       exit (rc);
     }
   else
@@ -4763,7 +4812,7 @@ array_length_reference (s)
   else
     t = (ind == 0) ? value_cell (var) : (char *)NULL;
 
-  len = STRLEN (t);
+  len = MB_STRLEN (t);
   return (len);
 }
 #endif /* ARRAY_VARS */
@@ -4860,10 +4909,11 @@ parameter_brace_expand_word (name, var_is_special, quoted)
   char *temp, *tt;
   intmax_t arg_index;
   SHELL_VAR *var;
-  int atype;
+  int atype, rflags;
 
   ret = 0;
   temp = 0;
+  rflags = 0;
 
   /* Handle multiple digit arguments, as in ${11}. */  
   if (legal_number (name, &arg_index))
@@ -4896,6 +4946,8 @@ parameter_brace_expand_word (name, var_is_special, quoted)
  	temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
  		  ? quote_string (temp)
  		  : quote_escapes (temp);
+      else if (atype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	rflags |= W_HASQUOTEDNULL;
     }
 #endif
   else if (var = find_variable (name))
@@ -4923,6 +4975,7 @@ parameter_brace_expand_word (name, var_is_special, quoted)
     {
       ret = alloc_word_desc ();
       ret->word = temp;
+      ret->flags |= rflags;
     }
   return ret;
 }
@@ -5546,12 +5599,16 @@ parameter_brace_substring (varname, value, substr, quoted)
 	 so verify_substring_values just returns the numbers specified and we
 	 rely on array_subrange to understand how to deal with them). */
       tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+#if 0
+      /* array_subrange now calls array_quote_escapes as appropriate, so the
+	 caller no longer needs to. */
       if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 	{
 	  temp = tt ? quote_escapes (tt) : (char *)NULL;
 	  FREE (tt);
 	}
       else
+#endif
 	temp = tt;
       break;
 #endif
@@ -5707,6 +5764,11 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   vtype &= ~VT_STARSUB;
 
   mflags = 0;
+  if (patsub && *patsub == '/')
+    {
+      mflags |= MATCH_GLOBREP;
+      patsub++;
+    }
 
   /* Malloc this because expand_string_if_necessary or one of the expansion
      functions in its call chain may free it on a substitution error. */
@@ -5741,13 +5803,12 @@ parameter_brace_patsub (varname, value, patsub, quoted)
     }
 
   /* ksh93 doesn't allow the match specifier to be a part of the expanded
-     pattern.  This is an extension. */
+     pattern.  This is an extension.  Make sure we don't anchor the pattern
+     at the beginning or end of the string if we're doing global replacement,
+     though. */
   p = pat;
-  if (pat && pat[0] == '/')
-    {
-      mflags |= MATCH_GLOBREP|MATCH_ANY;
-      p++;
-    }
+  if (mflags & MATCH_GLOBREP)
+    mflags |= MATCH_ANY;
   else if (pat && pat[0] == '#')
     {
       mflags |= MATCH_BEG;
@@ -5798,12 +5859,16 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       temp = array_patsub (array_cell (v), p, rep, mflags);
+#if 0
+      /* Don't need to do this anymore; array_patsub calls array_quote_escapes
+	 as appropriate before adding the space separators. */
       if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
 	  temp = tt;
 	}
+#endif
       break;
 #endif
     }
@@ -7607,6 +7672,10 @@ exp_jump_to_top_level (v)
   expand_no_split_dollar_star = 0;	/* XXX */
   expanding_redir = 0;
 
+  if (parse_and_execute_level == 0)
+    top_level_cleanup ();			/* from sig.c */
+
+
   jump_to_top_level (v);
 }
 
@@ -7824,7 +7893,7 @@ glob_expand_word_list (tlist, eflags)
 	  else if (fail_glob_expansion != 0)
 	    {
 	      report_error (_("no match: %s"), tlist->word->word);
-	      jump_to_top_level (DISCARD);
+	      exp_jump_to_top_level (DISCARD);
 	    }
 	  else if (allow_null_glob_expansion == 0)
 	    {

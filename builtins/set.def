@@ -189,7 +189,7 @@ struct {
   { "histexpand", 'H', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
 #endif /* BANG_HISTORY */
 #if defined (HISTORY)
-  { "history",   '\0', &remember_on_history, bash_set_history, (setopt_get_func_t *)NULL },
+  { "history",   '\0', &enable_history_list, bash_set_history, (setopt_get_func_t *)NULL },
 #endif
   { "ignoreeof", '\0', &ignoreeof, set_ignoreeof, (setopt_get_func_t *)NULL },
   { "interactive-comments", '\0', &interactive_comments, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL },
@@ -381,13 +381,17 @@ bash_set_history (on_or_off, option_name)
 {
   if (on_or_off == FLAG_ON)
     {
+      enable_history_list = 1;
       bash_history_enable ();
       if (history_lines_this_session == 0)
 	load_history ();
     }
   else
-    bash_history_disable ();
-  return (1 - remember_on_history);
+    {
+      enable_history_list = 0;
+      bash_history_disable ();
+    }
+  return (1 - enable_history_list);
 }
 #endif
 
@@ -565,7 +569,7 @@ void
 reset_shell_options ()
 {
 #if defined (HISTORY)
-  remember_on_history = 1;
+  remember_on_history = enable_history_list = 1;
 #endif
   ignoreeof = 0;
 }

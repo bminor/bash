@@ -1,7 +1,7 @@
 /* config-bot.h */
 /* modify settings or make new ones based on what autoconf tells us. */
 
-/* Copyright (C) 1989-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,9 +70,11 @@
 #  define TERMIOS_MISSING
 #endif
 
-/* If we have a getcwd(3), but it calls popen(), #undef HAVE_GETCWD so
-   the replacement in getcwd.c will be built. */
-#if defined (HAVE_GETCWD) && defined (GETCWD_BROKEN)
+/* If we have a getcwd(3), but one that does not dynamically allocate memory,
+   #undef HAVE_GETCWD so the replacement in getcwd.c will be built.  We do
+   not do this on Solaris, because their implementation of loopback mounts
+   breaks the traditional file system assumptions that getcwd uses. */
+#if defined (HAVE_GETCWD) && defined (GETCWD_BROKEN) && !defined (SOLARIS)
 #  undef HAVE_GETCWD
 #endif
 

@@ -31,6 +31,9 @@
 #define HC_IGNBOTH	(HC_IGNSPACE|HC_IGNDUPS)
 
 extern int remember_on_history;
+extern int enable_history_list;		/* value for `set -o history' */
+extern int literal_history;		/* controlled by `shopt lithist' */
+extern int force_append_history;
 extern int history_lines_this_session;
 extern int history_lines_in_file;
 extern int history_expansion;

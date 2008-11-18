@@ -101,11 +101,14 @@ static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((int));
 
+static int set_compatibility_level __P((int));
+
 #if defined (RESTRICTED_SHELL)
 static int set_restricted_shell __P((int));
 #endif
 
 static int shopt_login_shell;
+static int shopt_compat31;
 
 typedef int shopt_set_func_t __P((int));
 
@@ -121,6 +124,7 @@ static struct {
 #if defined (HISTORY)
   { "cmdhist", &command_oriented_history, (shopt_set_func_t *)NULL },
 #endif
+  { "compat31", &shopt_compat31, set_compatibility_level },
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
   { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
@@ -457,6 +461,18 @@ set_shellopts_after_change (mode)
 {
   set_shellopts ();
   return (0);
+}
+
+static int
+set_compatibility_level (mode)
+     int mode;
+{
+  /* Need to change logic here as we add more compatibility levels */
+  if (shopt_compat31)
+    shell_compatibility_level = 31;
+  else
+    shell_compatibility_level = 32;
+  return 0;
 }
 
 #if defined (RESTRICTED_SHELL)

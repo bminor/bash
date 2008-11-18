@@ -471,6 +471,8 @@ pow_10(n)
 	  10^x ~= r
  * log_10(200) = 2;
  * log_10(250) = 2;
+ *
+ * NOTE: do not call this with r == 0 -- an infinite loop results.
  */
 static int
 log_10(r)
@@ -576,8 +578,11 @@ numtoa(number, base, precision, fract)
     { 
       integral_part[0] = '0';
       integral_part[1] = '\0';
-      fraction_part[0] = '0';
-      fraction_part[1] = '\0';
+      /* The fractional part has to take the precision into account */
+      for (ch = 0; ch < precision-1; ch++)
+ 	fraction_part[ch] = '0';
+      fraction_part[ch] = '0';
+      fraction_part[ch+1] = '\0';
       if (fract)
 	*fract = fraction_part;
       return integral_part;
@@ -663,7 +668,8 @@ number(p, d, base)
     p->flags &= ~PF_ZEROPAD;
 
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  flags = 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
@@ -733,7 +739,7 @@ lnumber(p, d, base)
     p->flags &= ~PF_ZEROPAD;
 
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
@@ -805,6 +811,7 @@ pointer(p, d)
       PUT_CHAR(*tmp, p);
       tmp++;
     }
+
   PAD_LEFT(p);
 }
 
@@ -972,11 +979,21 @@ floating(p, d)
   if ((p->flags & PF_THOUSANDS) && grouping && (t = groupnum (tmp)))
     tmp = t;
 
+  if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
+    {
+      /* smash the trailing zeros unless altform */
+      for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
+        tmp2[i] = '\0'; 
+      if (tmp2[0] == '\0')
+	p->precision = 0;
+    }
+
   /* calculate the padding. 1 for the dot */
   p->width = p->width -
 	    ((d > 0. && p->justify == RIGHT) ? 1:0) -
 	    ((p->flags & PF_SPACE) ? 1:0) -
-	    strlen(tmp) - p->precision - 1;
+	    strlen(tmp) - p->precision -
+	    ((p->precision != 0 || (p->flags & PF_ALTFORM)) ? 1 : 0);	/* radix char */
   PAD_RIGHT(p);  
   PUT_PLUS(d, p, 0.);
   PUT_SPACE(d, p, 0.);
@@ -990,11 +1007,6 @@ floating(p, d)
 
   if (p->precision != 0 || (p->flags & PF_ALTFORM))
     PUT_CHAR(decpoint, p);  /* put the '.' */
-
-  if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
-    /* smash the trailing zeros unless altform */
-    for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
-      tmp2[i] = '\0'; 
 
   for (; *tmp2; tmp2++)
     PUT_CHAR(*tmp2, p); /* the fraction */
@@ -1011,14 +1023,19 @@ exponent(p, d)
   char *tmp, *tmp2;
   int j, i;
 
-  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+  if (d != 0 && (chkinfnan(p, d, 1) || chkinfnan(p, d, 2)))
     return;	/* already printed nan or inf */
 
   GETLOCALEDATA(decpoint, thoussep, grouping);
   DEF_PREC(p);
-  j = log_10(d);
-  d = d / pow_10(j);  /* get the Mantissa */
-  d = ROUND(d, p);		  
+  if (d == 0.)
+    j = 0;
+  else
+    {
+      j = log_10(d);
+      d = d / pow_10(j);  /* get the Mantissa */
+      d = ROUND(d, p);		  
+    }
   tmp = dtoa(d, p->precision, &tmp2);
 
   /* 1 for unit, 1 for the '.', 1 for 'e|E',
@@ -1076,6 +1093,7 @@ exponent(p, d)
        PUT_CHAR(*tmp, p);
        tmp++;
      }
+
    PAD_LEFT(p);
 }
 #endif
@@ -1358,7 +1376,7 @@ conv_break:
 		STAR_ARGS(data);
 		DEF_PREC(data);
 		d = GETDOUBLE(data);
-		i = log_10(d);
+		i = (d != 0.) ? log_10(d) : -1;
 		/*
 		 * for '%g|%G' ANSI: use f if exponent
 		 * is in the range or [-4,p] exclusively

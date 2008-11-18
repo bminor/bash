@@ -80,6 +80,7 @@ static struct ignorevar histignore =
    list.  This is different than the user-controlled behaviour; this
    becomes zero when we read lines from a file, for example. */
 int remember_on_history = 1;
+int enable_history_list = 1;	/* value for `set -o history' */
 
 /* The number of lines that Bash has added to this history session.  The
    difference between the number of the top element in the history list
@@ -234,7 +235,7 @@ bash_history_reinit (interact)
   history_expansion = interact != 0;
   history_expansion_inhibited = 1;
 #endif
-  remember_on_history = interact != 0;
+  remember_on_history = enable_history_list = interact != 0;
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
 }
 

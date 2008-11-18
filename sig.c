@@ -350,6 +350,25 @@ reset_terminating_signals ()
 #undef XSIG
 #undef XHANDLER
 
+/* Run some of the cleanups that should be performed when we run
+   jump_to_top_level from a builtin command context.  XXX - might want to
+   also call reset_parser here. */
+void
+top_level_cleanup ()
+{
+  /* Clean up string parser environment. */
+  while (parse_and_execute_level)
+    parse_and_execute_cleanup ();
+
+#if defined (PROCESS_SUBSTITUTION)
+  unlink_fifo_list ();
+#endif /* PROCESS_SUBSTITUTION */
+
+  run_unwind_protects ();
+  loop_level = continuing = breaking = 0;
+  return_catch_flag = 0;
+}
+
 /* What to do when we've been interrupted, and it is safe to handle it. */
 void
 throw_to_top_level ()

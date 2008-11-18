@@ -2357,7 +2357,7 @@ bash_directory_completion_hook (dirname)
   if (should_expand_dirname)  
     {
       new_dirname = savestring (local_dirname);
-      wl = expand_prompt_string (new_dirname, 0);	/* does the right thing */
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB);	/* does the right thing */
       if (wl)
 	{
 	  *dirname = string_list (wl);

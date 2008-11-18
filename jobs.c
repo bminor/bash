@@ -250,6 +250,7 @@ static int job_exit_status __P((int));
 static int job_exit_signal __P((int));
 static int set_job_status_and_cleanup __P((int));
 
+static WAIT job_signal_status __P((int));
 static WAIT raw_job_exit_status __P((int));
 
 static void notify_of_job_status __P((void));
@@ -783,11 +784,13 @@ reset_job_indices ()
   if (jobs[js.j_firstj] == 0)
     {
       old = js.j_firstj++;
+      if (old >= js.j_jobslots)
+	old = js.j_jobslots - 1;
       while (js.j_firstj != old)
 	{
 	  if (js.j_firstj >= js.j_jobslots)
 	    js.j_firstj = 0;
-	  if (jobs[js.j_firstj])
+	  if (jobs[js.j_firstj] || js.j_firstj == old)	/* needed if old == 0 */
 	    break;
 	  js.j_firstj++;
 	}
@@ -797,11 +800,13 @@ reset_job_indices ()
   if (jobs[js.j_lastj] == 0)
     {
       old = js.j_lastj--;
+      if (old < 0)
+	old = 0;
       while (js.j_lastj != old)
 	{
 	  if (js.j_lastj < 0)
 	    js.j_lastj = js.j_jobslots - 1;
-	  if (jobs[js.j_lastj])
+	  if (jobs[js.j_lastj] || js.j_lastj == old)	/* needed if old == js.j_jobslots */
 	    break;
 	  js.j_lastj--;
 	}
@@ -963,7 +968,11 @@ compact_jobs_list (flags)
   reap_dead_jobs ();
   realloc_jobs_list ();
 
-  return (js.j_lastj);
+#ifdef DEBUG
+  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+#endif
+
+  return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
 }
 
 /* Delete the job at INDEX from the job list.  Must be called
@@ -984,8 +993,6 @@ delete_job (job_index, dflags)
   temp = jobs[job_index];
   if (temp == 0)
     return;
-  if (job_index == js.j_current || job_index == js.j_previous)
-    reset_current ();
 
   if ((dflags & DEL_NOBGPID) == 0)
     {
@@ -1028,6 +1035,9 @@ delete_job (job_index, dflags)
     js.j_firstj = js.j_lastj = 0;
   else if (jobs[js.j_firstj] == 0 || jobs[js.j_lastj] == 0)
     reset_job_indices ();
+
+  if (job_index == js.j_current || job_index == js.j_previous)
+    reset_current ();
 }
 
 /* Must be called with SIGCHLD blocked. */
@@ -2210,6 +2220,26 @@ process_exit_status (status)
     return (EXECUTION_SUCCESS);
 }
 
+static WAIT
+job_signal_status (job)
+     int job;
+{
+  register PROCESS *p;
+  WAIT s;
+
+  p = jobs[job]->pipe;
+  do
+    {
+      s = p->status;
+      if (WIFSIGNALED(s) || WIFSTOPPED(s))
+	break;
+      p = p->next;
+    }
+  while (p != jobs[job]->pipe);
+
+  return s;
+}
+  
 /* Return the exit status of the last process in the pipeline for job JOB.
    This is the exit status of the entire job. */
 static WAIT
@@ -2292,11 +2322,14 @@ wait_for (pid)
      to finish.  We don't want the shell to exit if an interrupt is
      received, only if one of the jobs run is killed via SIGINT.  If
      job control is not set, the job will be run in the same pgrp as
-     the shell, and the shell will see any signals the job gets. */
+     the shell, and the shell will see any signals the job gets.  In
+     fact, we want this set every time the waiting shell and the waited-
+     for process are in the same process group, including command
+     substitution. */
 
   /* This is possibly a race condition -- should it go in stop_pipeline? */
   wait_sigint_received = 0;
-  if (job_control == 0)
+  if (job_control == 0 || (subshell_environment&SUBSHELL_COMSUB))
     {
       old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
       if (old_sigint_handler == SIG_IGN)
@@ -2442,15 +2475,7 @@ if (job == NO_JOB)
 	     to a signal.  We might want to change this later to just check
 	     the last process in the pipeline.  If no process exits due to a
 	     signal, S is left as the status of the last job in the pipeline. */
-	  p = jobs[job]->pipe;
-	  do
-	    {
-	      s = p->status;
-	      if (WIFSIGNALED(s) || WIFSTOPPED(s))
-		break;
-	      p = p->next;
-	    }
-	  while (p != jobs[job]->pipe);
+	  s = job_signal_status (job);
 
 	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
@@ -2482,6 +2507,24 @@ if (job == NO_JOB)
 		  putchar ('\n');
 		  fflush (stdout);
 		}
+	    }
+	}
+      else if ((subshell_environment & SUBSHELL_COMSUB) && wait_sigint_received)
+	{
+	  /* If waiting for a job in a subshell started to do command
+	     substitution, simulate getting and being killed by the SIGINT to
+	     pass the status back to our parent. */
+	  s = job_signal_status (job);
+	
+	  if (WIFSIGNALED (s) && WTERMSIG (s) == SIGINT && signal_is_trapped (SIGINT) == 0)
+	    {
+	      UNBLOCK_CHILD (oset);
+	      restore_sigint_handler ();
+	      old_sigint_handler = set_signal_handler (SIGINT, SIG_DFL);
+	      if (old_sigint_handler == SIG_IGN)
+		restore_sigint_handler ();
+	      else
+		kill (getpid (), SIGINT);
 	    }
 	}
 
