@@ -1,22 +1,22 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
-This file is part of GNU Bash, the Bourne Again SHell.
+   This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -78,6 +78,10 @@ static void command_print_word_list __P((WORD_LIST *, char *));
 static void print_case_clauses __P((PATTERN_LIST *));
 static void print_redirection_list __P((REDIRECT *));
 static void print_redirection __P((REDIRECT *));
+static void print_heredoc_header __P((REDIRECT *));
+static void print_heredoc_body __P((REDIRECT *));
+static void print_heredocs __P((REDIRECT *));
+static void print_deferred_heredocs __P((const char *));
 
 static void print_for_command __P((FOR_COM *));
 #if defined (ARITH_FOR_COMMAND)
@@ -108,6 +112,8 @@ int command_string_index = 0;
 static int inside_function_def;
 static int skip_this_indent;
 static int was_heredoc;
+static int printing_connection;
+static REDIRECT *deferred_heredocs;
 
 /* The depth of the group commands that we are currently printing.  This
    includes the group command that is a function body. */
@@ -134,6 +140,7 @@ make_command_string (command)
      COMMAND *command;
 {
   command_string_index = was_heredoc = 0;
+  deferred_heredocs = 0;
   make_command_string_internal (command);
   return (the_printed_command);
 }
@@ -143,6 +150,8 @@ static void
 make_command_string_internal (command)
      COMMAND *command;
 {
+  char s[3];
+
   if (command == 0)
     cprintf ("");
   else
@@ -215,6 +224,7 @@ make_command_string_internal (command)
 	case cm_connection:
 
 	  skip_this_indent++;
+	  printing_connection++;
 	  make_command_string_internal (command->value.Connection->first);
 
 	  switch (command->value.Connection->connector)
@@ -223,7 +233,13 @@ make_command_string_internal (command)
 	    case '|':
 	      {
 		char c = command->value.Connection->connector;
-		cprintf (" %c", c);
+
+		s[0] = ' ';
+		s[1] = c;
+		s[2] = '\0';
+		
+		print_deferred_heredocs (s);
+
 		if (c != '&' || command->value.Connection->second)
 		  {
 		    cprintf (" ");
@@ -233,22 +249,29 @@ make_command_string_internal (command)
 	      break;
 
 	    case AND_AND:
-	      cprintf (" && ");
+	      print_deferred_heredocs (" && ");
 	      if (command->value.Connection->second)
 		skip_this_indent++;
 	      break;
 
 	    case OR_OR:
-	      cprintf (" || ");
+	      print_deferred_heredocs (" || ");
 	      if (command->value.Connection->second)
 		skip_this_indent++;
 	      break;
 
 	    case ';':
+#if 0
 	      if (was_heredoc == 0)
 		cprintf (";");
 	      else
 		was_heredoc = 0;
+#else
+	      if (deferred_heredocs == 0)
+		cprintf (";");
+	      else
+		print_deferred_heredocs (";");
+#endif
 
 	      if (inside_function_def)
 		cprintf ("\n");
@@ -267,6 +290,7 @@ make_command_string_internal (command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
+	  printing_connection--;	  	  
 	  break;
 
 	case cm_function_def:
@@ -282,6 +306,12 @@ make_command_string_internal (command)
 	  skip_this_indent++;
 	  make_command_string_internal (command->value.Subshell->command);
 	  cprintf (" )");
+	  break;
+
+	case cm_coproc:
+	  cprintf ("coproc %s ", command->value.Coproc->name);
+	  skip_this_indent++;
+	  make_command_string_internal (command->value.Coproc->command);
 	  break;
 
 	default:
@@ -609,7 +639,12 @@ print_case_clauses (clauses)
       indentation += indentation_amount;
       make_command_string_internal (clauses->action);
       indentation -= indentation_amount;
-      newline (";;");
+      if (clauses->flags & CASEPAT_FALLTHROUGH)
+	newline (";&");
+      else if (clauses->flags & CASEPAT_TESTNEXT)
+	newline (";;&");
+      else
+	newline (";;");
       clauses = clauses->next;
     }
   indentation -= indentation_amount;
@@ -807,6 +842,56 @@ print_simple_command (simple_command)
 }
 
 static void
+print_heredocs (heredocs)
+     REDIRECT *heredocs;
+{
+  REDIRECT *hdtail;
+
+  cprintf (" "); 
+  for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
+    {
+      print_redirection (hdtail);
+      cprintf ("\n");
+    }
+  was_heredoc = 1;
+}
+
+/* Print heredocs that are attached to the command before the connector
+   represented by CSTRING.  The parsing semantics require us to print the
+   here-doc delimiters, then the connector (CSTRING), then the here-doc
+   bodies.  We don't print the connector if it's a `;', but we use it to
+   note not to print an extra space after the last heredoc body and
+   newline. */
+static void
+print_deferred_heredocs (cstring)
+     const char *cstring;
+{
+  REDIRECT *hdtail;	
+
+  for (hdtail = deferred_heredocs; hdtail; hdtail = hdtail->next)
+    {
+      cprintf (" ");
+      print_heredoc_header (hdtail);
+    }
+  if (cstring[0] != ';' || cstring[1])
+    cprintf ("%s", cstring); 
+  if (deferred_heredocs)
+    cprintf ("\n");
+  for (hdtail = deferred_heredocs; hdtail; hdtail = hdtail->next)
+    {
+      print_heredoc_body (hdtail);
+      cprintf ("\n");
+    }
+  if (deferred_heredocs)
+    {
+      if (cstring[0] != ';' || cstring[1])
+	cprintf (" ");	/* make sure there's at least one space */
+      dispose_redirects (deferred_heredocs);
+    }
+  deferred_heredocs = (REDIRECT *)NULL;
+}
+      
+static void
 print_redirection_list (redirects)
      REDIRECT *redirects;
 {
@@ -849,17 +934,45 @@ print_redirection_list (redirects)
 
   /* Now that we've printed all the other redirections (on one line),
      print the here documents. */
-  if (heredocs)
+  if (heredocs && printing_connection)
+    deferred_heredocs = heredocs;
+  else if (heredocs)
     {
-      cprintf (" "); 
-      for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
-	{
-	  print_redirection (hdtail);
-	  cprintf ("\n");
-	}
+      print_heredocs (heredocs);
       dispose_redirects (heredocs);
-      was_heredoc = 1;
     }
+}
+
+static void
+print_heredoc_header (redirect)
+     REDIRECT *redirect;
+{
+  int kill_leading;
+  char *x;
+
+  kill_leading = redirect->instruction == r_deblank_reading_until;
+
+  /* Here doc header */
+  if (redirect->redirector != 0)
+    cprintf ("%d", redirect->redirector);
+
+  /* If the here document delimiter is quoted, single-quote it. */
+  if (redirect->redirectee.filename->flags & W_QUOTED)
+    {
+      x = sh_single_quote (redirect->here_doc_eof);
+      cprintf ("<<%s%s", kill_leading ? "-" : "", x);
+      free (x);
+    }
+  else
+    cprintf ("<<%s%s", kill_leading ? "-" : "", redirect->here_doc_eof);
+}
+
+static void
+print_heredoc_body (redirect)
+     REDIRECT *redirect;
+{
+  /* Here doc body */
+  cprintf ("%s%s", redirect->redirectee.filename->word, redirect->here_doc_eof);
 }
 
 static void
@@ -899,23 +1012,10 @@ print_redirection (redirect)
       break;
 
     case r_deblank_reading_until:
-      kill_leading++;
-      /* ... */
     case r_reading_until:
-      if (redirector != 0)
-	cprintf ("%d", redirector);
-      /* If the here document delimiter is quoted, single-quote it. */
-      if (redirect->redirectee.filename->flags & W_QUOTED)
-	{
-	  char *x;
-	  x = sh_single_quote (redirect->here_doc_eof);
-	  cprintf ("<<%s%s\n", kill_leading? "-" : "", x);
-	  free (x);
-	}
-      else
-	cprintf ("<<%s%s\n", kill_leading? "-" : "", redirect->here_doc_eof);
-      cprintf ("%s%s",
-	       redirect->redirectee.filename->word, redirect->here_doc_eof);
+      print_heredoc_header (redirect);
+      cprintf ("\n");
+      print_heredoc_body (redirect);
       break;
 
     case r_reading_string:
@@ -969,7 +1069,11 @@ print_redirection (redirect)
       break;
 
     case r_err_and_out:
-      cprintf (">&%s", redirectee->word);
+      cprintf ("&>%s", redirectee->word);
+      break;
+
+    case r_append_err_and_out:
+      cprintf ("&>>%s", redirectee->word);
       break;
 
     case r_input_output:
@@ -991,6 +1095,8 @@ reset_locals ()
 {
   inside_function_def = 0;
   indentation = 0;
+  printing_connection = 0;
+  deferred_heredocs = 0;
 }
 
 static void
@@ -1039,13 +1145,14 @@ print_function_def (func)
 /* Return the string representation of the named function.
    NAME is the name of the function.
    COMMAND is the function body.  It should be a GROUP_COM.
-   MULTI_LINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_MULTILINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_EXTERNAL means convert from internal to external form
   */
 char *
-named_function_string (name, command, multi_line)
+named_function_string (name, command, flags)
      char *name;
      COMMAND *command;
-     int multi_line;
+     int flags;
 {
   char *result;
   int old_indent, old_amount;
@@ -1055,13 +1162,14 @@ named_function_string (name, command, multi_line)
   old_indent = indentation;
   old_amount = indentation_amount;
   command_string_index = was_heredoc = 0;
+  deferred_heredocs = 0;
 
   if (name && *name)
     cprintf ("%s ", name);
 
   cprintf ("() ");
 
-  if (multi_line == 0)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
       indentation = 1;
       indentation_amount = 0;
@@ -1074,7 +1182,7 @@ named_function_string (name, command, multi_line)
 
   inside_function_def++;
 
-  cprintf (multi_line ? "{ \n" : "{ ");
+  cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");
 
   cmdcopy = copy_command (command);
   /* Take any redirections specified in the function definition (which should
@@ -1104,7 +1212,7 @@ named_function_string (name, command, multi_line)
 
   result = the_printed_command;
 
-  if (!multi_line)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
 #if 0
       register int i;
@@ -1121,6 +1229,9 @@ named_function_string (name, command, multi_line)
     }
 
   dispose_command (cmdcopy);
+
+  if (flags & FUNC_EXTERNAL)
+    result = remove_quoted_escapes (result);
 
   return (result);
 }

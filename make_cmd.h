@@ -1,22 +1,22 @@
 /* make_cmd.h -- Declarations of functions found in make_cmd.c */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (_MAKE_CMD_H_)
 #define _MAKE_CMD_H_
@@ -46,7 +46,7 @@ extern COMMAND *make_while_command __P((COMMAND *, COMMAND *));
 extern COMMAND *make_until_command __P((COMMAND *, COMMAND *));
 extern COMMAND *make_bare_simple_command __P((void));
 extern COMMAND *make_simple_command __P((ELEMENT, COMMAND *));
-extern void make_here_document __P((REDIRECT *));
+extern void make_here_document __P((REDIRECT *, int));
 extern REDIRECT *make_redirection __P((int, enum r_instruction, REDIRECTEE));
 extern COMMAND *make_function_def __P((WORD_DESC *, COMMAND *, int, int));
 extern COMMAND *clean_simple_command __P((COMMAND *));
@@ -63,6 +63,7 @@ extern COMMAND *make_cond_command __P((COND_COM *));
 extern COMMAND *make_arith_for_command __P((WORD_LIST *, COMMAND *, int));
 
 extern COMMAND *make_subshell_command __P((COMMAND *));
+extern COMMAND *make_coproc_command __P((char *, COMMAND *));
 
 extern COMMAND *connect_async_list __P((COMMAND *, COMMAND *, int));
 

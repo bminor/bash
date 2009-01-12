@@ -1,24 +1,23 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (_READLINE_H_)
 #define _READLINE_H_
@@ -40,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0502		/* Readline 5.2 */
-#define RL_VERSION_MAJOR	5
-#define RL_VERSION_MINOR	2
+#define RL_READLINE_VERSION	0x0600		/* Readline 6.0 */
+#define RL_VERSION_MAJOR	6
+#define RL_VERSION_MINOR	0
 
 /* Readline data structures. */
 
@@ -233,6 +232,7 @@ extern int rl_vi_append_mode PARAMS((int, int));
 extern int rl_vi_append_eol PARAMS((int, int));
 extern int rl_vi_eof_maybe PARAMS((int, int));
 extern int rl_vi_insertion_mode PARAMS((int, int));
+extern int rl_vi_insert_mode PARAMS((int, int));
 extern int rl_vi_movement_mode PARAMS((int, int));
 extern int rl_vi_arg_digit PARAMS((int, int));
 extern int rl_vi_change_case PARAMS((int, int));
@@ -420,6 +420,7 @@ extern int rl_set_keyboard_input_timeout PARAMS((int));
 extern void rl_extend_line_buffer PARAMS((int));
 extern int rl_ding PARAMS((void));
 extern int rl_alphabetic PARAMS((int));
+extern void rl_free PARAMS((void *));
 
 /* Readline signal handling, from signals.c */
 extern int rl_set_signals PARAMS((void));
@@ -427,7 +428,9 @@ extern int rl_clear_signals PARAMS((void));
 extern void rl_cleanup_after_signal PARAMS((void));
 extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
- 
+
+extern void rl_echo_signal_char PARAMS((int)); 
+
 extern int rl_set_paren_blink_timeout PARAMS((int));
 
 /* Undocumented. */
@@ -492,6 +495,10 @@ extern const char *rl_readline_name;
 /* The prompt readline uses.  This is set from the argument to
    readline (), and should not be assigned to directly. */
 extern char *rl_prompt;
+
+/* The prompt string that is actually displayed by rl_redisplay.  Public so
+   applications can more easily supply their own redisplay functions. */
+extern char *rl_display_prompt;
 
 /* The line buffer that is in use. */
 extern char *rl_line_buffer;
@@ -598,6 +605,10 @@ extern int rl_catch_sigwinch;
    NULL means to use rl_filename_completion_function (), the default
    filename completer. */
 extern rl_compentry_func_t *rl_completion_entry_function;
+
+/* Optional generator for menu completion.  Default is
+   rl_completion_entry_function (rl_filename_completion_function). */
+ extern rl_compentry_func_t *rl_menu_completion_entry_function;
 
 /* If rl_ignore_some_completions_function is non-NULL it is the address
    of a function to call after all of the possible matches have been
@@ -713,6 +724,9 @@ extern int rl_attempted_completion_over;
    functions. */
 extern int rl_completion_type;
 
+/* Set to the last key used to invoke one of the completion functions */
+extern int rl_completion_invoking_key;
+
 /* Up to this many items will be displayed in response to a
    possible-completions call.  After that, we ask the user if she
    is sure she wants to see them all.  The default value is 100. */
@@ -738,6 +752,9 @@ extern int rl_completion_found_quote;
    This is set to 0 by rl_complete_internal and may be changed by an
    application-specific completion function. */
 extern int rl_completion_suppress_quote;
+
+/* If non-zero, readline will sort the completion matches.  On by default. */
+extern int rl_sort_completion_matches;
 
 /* If non-zero, a slash will be appended to completed filenames that are
    symbolic links to directory names, subject to the value of the

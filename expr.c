@@ -1,22 +1,22 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /*
  All arithmetic is done as intmax_t integers with no checking for overflow
@@ -153,7 +153,7 @@ static void	readtok __P((void));	/* lexical analyzer */
 
 static intmax_t	expr_streval __P((char *, int));
 static intmax_t	strlong __P((char *));
-static void	evalerror __P((char *));
+static void	evalerror __P((const char *));
 
 static void	pushexp __P((void));
 static void	popexp __P((void));
@@ -205,7 +205,7 @@ extern char *this_command_name;
 extern int unbound_vars_is_error;
 
 #if defined (ARRAY_VARS)
-extern char *bash_badsub_errmsg;
+extern const char * const bash_badsub_errmsg;
 #endif
 
 #define SAVETOK(X) \
@@ -1033,8 +1033,6 @@ readtok ()
   if (c)
     cp++;
 
-  lasttp = tp = cp - 1;
-
   if (c == '\0')
     {
       lasttok = curtok;
@@ -1042,6 +1040,7 @@ readtok ()
       tp = cp;
       return;
     }
+  lasttp = tp = cp - 1;
 
   if (legal_variable_starter (c))
     {
@@ -1192,14 +1191,14 @@ readtok ()
 
 static void
 evalerror (msg)
-     char *msg;
+     const char *msg;
 {
   char *name, *t;
 
   name = this_command_name;
   for (t = expression; whitespace (*t); t++)
     ;
-  internal_error ("%s%s%s: %s (error token is \"%s\")",
+  internal_error (_("%s%s%s: %s (error token is \"%s\")"),
 		   name ? name : "", name ? ": " : "", t,
 		   msg, (lasttp && *lasttp) ? lasttp : "");
   longjmp (evalbuf, 1);
@@ -1326,7 +1325,7 @@ main (argc, argv)
     {
       v = evalexp (argv[i], &expok);
       if (expok == 0)
-	fprintf (stderr, "%s: expression error\n", argv[i]);
+	fprintf (stderr, _("%s: expression error\n"), argv[i]);
       else
 	printf ("'%s' -> %ld\n", argv[i], v);
     }

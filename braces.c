@@ -1,22 +1,22 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /* Stuff in curly braces gets expanded before all other shell expansions. */
 
@@ -45,6 +45,8 @@
 
 #define BRACE_SEQ_SPECIFIER	".."
 
+extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+
 /* Basic idea:
 
    Segregate the text into 3 sections: preamble (stuff before an open brace),
@@ -55,13 +57,13 @@
  */
 
 /* The character which is used to separate arguments. */
-int brace_arg_separator = ',';
+static const int brace_arg_separator = ',';
 
 #if defined (__P)
 static int brace_gobbler __P((char *, size_t, int *, int));
 static char **expand_amble __P((char *, size_t, int));
 static char **expand_seqterm __P((char *, size_t));
-static char **mkseq __P((int, int, int, int));
+static char **mkseq __P((int, int, int, int, int));
 static char **array_concat __P((char **, char **));
 #else
 static int brace_gobbler ();
@@ -301,10 +303,11 @@ expand_amble (text, tlen, flags)
 #define ST_BAD	0
 #define ST_INT	1
 #define ST_CHAR	2
+#define ST_ZINT	3
 
 static char **
-mkseq (start, end, incr, type)
-     int start, end, incr, type;
+mkseq (start, end, incr, type, width)
+     int start, end, incr, type, width;
 {
   int n, i;
   char **result, *t;
@@ -330,6 +333,12 @@ mkseq (start, end, incr, type)
 #endif
       if (type == ST_INT)
 	result[i++] = itos (n);
+      else if (type == ST_ZINT)
+	{
+	  int len;
+	  len = asprintf (&t, "%0*d", width, n);
+	  result[i++] = t;
+	}
       else
 	{
 	  t = (char *)xmalloc (2);
@@ -337,9 +346,9 @@ mkseq (start, end, incr, type)
 	  t[1] = '\0';
 	  result[i++] = t;
 	}
-      if (n == end)
-        break;
       n += incr;
+      if ((incr < 0 && n < end) || (incr > 0 && n > end))
+	break;
     }
   while (1);
 
@@ -353,17 +362,17 @@ expand_seqterm (text, tlen)
      size_t tlen;
 {
   char *t, *lhs, *rhs;
-  int i, lhs_t, rhs_t, lhs_v, rhs_v;
+  int i, lhs_t, rhs_t, lhs_v, rhs_v, incr, lhs_l, rhs_l, width;
   intmax_t tl, tr;
-  char **result;
+  char **result, *ep;
 
   t = strstr (text, BRACE_SEQ_SPECIFIER);
   if (t == 0)
     return ((char **)NULL);
 
-  i = t - text;		/* index of start of BRACE_SEQ_SPECIFIER */
-  lhs = substring (text, 0, i);
-  rhs = substring (text, i + sizeof(BRACE_SEQ_SPECIFIER) - 1, tlen);
+  lhs_l = t - text;		/* index of start of BRACE_SEQ_SPECIFIER */
+  lhs = substring (text, 0, lhs_l);
+  rhs = substring (text, lhs_l + sizeof(BRACE_SEQ_SPECIFIER) - 1, tlen);
 
   if (lhs[0] == 0 || rhs[0] == 0)
     {
@@ -376,8 +385,36 @@ expand_seqterm (text, tlen)
      sides have to match. */
   lhs_t = (legal_number (lhs, &tl)) ? ST_INT :
   		((ISALPHA (lhs[0]) && lhs[1] == 0) ?  ST_CHAR : ST_BAD);
-  rhs_t = (legal_number (rhs, &tr)) ? ST_INT :
-  		((ISALPHA (rhs[0]) && rhs[1] == 0) ?  ST_CHAR : ST_BAD);
+
+  /* Decide on rhs and whether or not it looks like the user specified
+     an increment */
+  ep = 0;
+  if (ISDIGIT (rhs[0]) || ((rhs[0] == '+' || rhs[0] == '-') && ISDIGIT (rhs[1])))
+    {
+      rhs_t = ST_INT;
+      tr = strtoimax (rhs, &ep, 10);
+      if (ep && *ep != 0 && *ep != '.')
+	rhs_t = ST_BAD;			/* invalid */
+    }
+  else if (ISALPHA (rhs[0]) && (rhs[1] == 0 || rhs[1] == '.'))
+    {
+      rhs_t = ST_CHAR;
+      ep = rhs + 1;
+    }
+  else
+    {
+      rhs_t = ST_BAD;
+      ep = 0;
+    }
+
+  incr = 1;
+  if (rhs_t != ST_BAD)
+    {
+      if (ep && *ep == '.' && ep[1] == '.' && ep[2])
+	incr = strtoimax (ep + 2, &ep, 10);
+      if (*ep != 0)
+	rhs_t = ST_BAD;			/* invalid incr */
+    }
 
   if (lhs_t != rhs_t || lhs_t == ST_BAD || rhs_t == ST_BAD)
     {
@@ -394,14 +431,27 @@ expand_seqterm (text, tlen)
     {
       lhs_v = (unsigned char)lhs[0];
       rhs_v = (unsigned char)rhs[0];
+      width = 1;
     }
   else
     {
       lhs_v = tl;		/* integer truncation */
       rhs_v = tr;
+
+      /* Decide whether or not the terms need zero-padding */
+      rhs_l = tlen - lhs_l - sizeof (BRACE_SEQ_SPECIFIER) + 1;
+      width = 0;
+      if (lhs_l > 1 && lhs[0] == '0')
+	width = lhs_l, lhs_t = ST_ZINT;
+      if (lhs_l > 2 && lhs[0] == '-' && lhs[1] == '0')
+	width = lhs_l, lhs_t = ST_ZINT;
+      if (rhs_l > 1 && rhs[0] == '0' && width < rhs_l)
+	width = rhs_l, lhs_t = ST_ZINT;
+      if (rhs_l > 2 && rhs[0] == '-' && rhs[1] == '0' && width < rhs_l)
+	width = rhs_l, lhs_t = ST_ZINT;
     }
 
-  result = mkseq (lhs_v, rhs_v, 1, lhs_t);
+  result = mkseq (lhs_v, rhs_v, incr, lhs_t, width);
 
   free (lhs);
   free (rhs);
@@ -486,11 +536,11 @@ brace_gobbler (text, tlen, indx, satisfy)
 	}
 
 #if defined (SHELL)
-      /* Pass new-style command substitutions through unchanged. */
-      if (c == '$' && text[i+1] == '(')			/* ) */
+      /* Pass new-style command and process substitutions through unchanged. */
+      if ((c == '$' || c == '<' || c == '>') && text[i+1] == '(')			/* ) */
 	{
 	  si = i + 2;
-	  t = extract_command_subst (text, &si);
+	  t = extract_command_subst (text, &si, 0);
 	  i = si;
 	  free (t);
 	  i++;

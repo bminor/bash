@@ -1,20 +1,22 @@
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* common.c - utility functions for all builtins */
+
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
-   
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <config.h>
 
@@ -41,6 +43,8 @@
 
 #include "../bashansi.h"
 #include "../bashintl.h"
+
+#define NEED_FPURGE_DECL
 
 #include "../shell.h"
 #include "maxpath.h"
@@ -69,7 +73,7 @@ extern int last_command_exit_value;
 extern int running_trap;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
-extern char *bash_getcwd_errstr;
+extern const char * const bash_getcwd_errstr;
 
 /* Used by some builtins and the mainline code. */
 sh_builtin_func_t *last_shell_builtin = (sh_builtin_func_t *)NULL;
@@ -84,6 +88,22 @@ sh_builtin_func_t *this_shell_builtin = (sh_builtin_func_t *)NULL;
 /* This is a lot like report_error (), but it is for shell builtins
    instead of shell control structures, and it won't ever exit the
    shell. */
+
+static void
+builtin_error_prolog ()
+{
+  char *name;
+
+  name = get_name_for_error ();
+  fprintf (stderr, "%s: ", name);
+
+  if (interactive_shell == 0)
+    fprintf (stderr, _("line %d: "), executing_line_number ());
+
+  if (this_command_name && *this_command_name)
+    fprintf (stderr, "%s: ", this_command_name);
+}
+
 void
 #if defined (PREFER_STDARG)
 builtin_error (const char *format, ...)
@@ -94,16 +114,29 @@ builtin_error (format, va_alist)
 #endif
 {
   va_list args;
-  char *name;
 
-  name = get_name_for_error ();
-  fprintf (stderr, "%s: ", name);
+  builtin_error_prolog ();
 
-  if (interactive_shell == 0)
-    fprintf (stderr, "line %d: ", executing_line_number ());
+  SH_VA_START (args, format);
 
-  if (this_command_name && *this_command_name)
-    fprintf (stderr, "%s: ", this_command_name);
+  vfprintf (stderr, format, args);
+  va_end (args);
+  fprintf (stderr, "\n");
+}
+
+void
+#if defined (PREFER_STDARG)
+builtin_warning (const char *format, ...)
+#else
+builtin_warning (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  builtin_error_prolog ();
+  fprintf (stderr, _("warning: "));
 
   SH_VA_START (args, format);
 
@@ -117,7 +150,7 @@ void
 builtin_usage ()
 {
   if (this_command_name && *this_command_name)
-    fprintf (stderr, "%s: usage: ", this_command_name);
+    fprintf (stderr, _("%s: usage: "), this_command_name);
   fprintf (stderr, "%s\n", current_builtin->short_doc);
   fflush (stderr);
 }
@@ -199,7 +232,15 @@ void
 sh_invalidnum (s)
      char *s;
 {
-  builtin_error (_("%s: invalid number"), s);
+  char *msg;
+
+  if (*s == '0' && isdigit (s[1]))
+    msg = _("invalid octal number");
+  else if (*s == '0' && s[1] == 'x')
+    msg = _("invalid hex number");
+  else
+    msg = _("invalid number");
+  builtin_error ("%s: %s", s, msg);
 }
 
 void
@@ -274,7 +315,25 @@ sh_notbuiltin (s)
 void
 sh_wrerror ()
 {
+#if defined (DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS) && defined (EPIPE)
+  if (errno != EPIPE)
+#endif /* DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS && EPIPE */
   builtin_error (_("write error: %s"), strerror (errno));
+}
+
+int
+sh_chkwrite (s)
+     int s;
+{
+  fflush (stdout);
+  if (ferror (stdout))
+    {
+      sh_wrerror ();
+      fpurge (stdout);
+      clearerr (stdout);
+      return (EXECUTION_FAILURE);
+    }
+  return (s);
 }
 
 /* **************************************************************** */
@@ -372,30 +431,35 @@ set_dollar_vars_changed ()
 /* Read a numeric arg for this_command_name, the name of the shell builtin
    that wants it.  LIST is the word list that the arg is to come from.
    Accept only the numeric argument; report an error if other arguments
-   follow.  If FATAL is true, call throw_to_top_level, which exits the
-   shell; if not, call jump_to_top_level (DISCARD), which aborts the
-   current command. */
-intmax_t
-get_numeric_arg (list, fatal)
+   follow.  If FATAL is 1, call throw_to_top_level, which exits the
+   shell; if it's 2, call jump_to_top_level (DISCARD), which aborts the
+   current command; if FATAL is 0, return an indication of an invalid
+   number by setting *NUMOK == 0 and return -1. */
+int
+get_numeric_arg (list, fatal, count)
      WORD_LIST *list;
      int fatal;
+     intmax_t *count;
 {
-  intmax_t count = 1;
+  char *arg;
+
+  if (count)
+    *count = 1;
 
   if (list && list->word && ISOPTION (list->word->word, '-'))
     list = list->next;
 
   if (list)
     {
-      register char *arg;
-
       arg = list->word->word;
-      if (arg == 0 || (legal_number (arg, &count) == 0))
+      if (arg == 0 || (legal_number (arg, count) == 0))
 	{
-	  sh_neednumarg (list->word->word);
-	  if (fatal)
+	  sh_neednumarg (list->word->word ? list->word->word : "`'");
+	  if (fatal == 0)
+	    return 0;
+	  else if (fatal == 1)		/* fatal == 1; abort */
 	    throw_to_top_level ();
-	  else
+	  else				/* fatal == 2; discard current command */
 	    {
 	      top_level_cleanup ();
 	      jump_to_top_level (DISCARD);
@@ -404,7 +468,7 @@ get_numeric_arg (list, fatal)
       no_args (list->next);
     }
 
-  return (count);
+  return (1);
 }
 
 /* Get an eight-bit status value from LIST */
@@ -647,7 +711,7 @@ display_signal_list (list, forcecols)
 	    {
 	      printf ("%2d) %s", i, name);
 
-	      if (++column < 4)
+	      if (++column < 5)
 		printf ("\t");
 	      else
 		{

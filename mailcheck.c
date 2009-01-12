@@ -1,22 +1,22 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-This file is part of GNU Bash, the Bourne Again SHell.
+   This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -38,14 +38,20 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "mailcheck.h"
 #include <tilde/tilde.h>
 
+/* Values for flags word in struct _fileinfo */
+#define MBOX_INITIALIZED	0x01
+
+extern time_t shell_start_time;
+
 extern int mailstat __P((const char *, struct stat *));
 
-typedef struct {
+typedef struct _fileinfo {
   char *name;
   char *msg;
   time_t access_time;
   time_t mod_time;
   off_t file_size;
+  int flags;
 } FILEINFO;
 
 /* The list of remembered mail files. */
@@ -55,14 +61,18 @@ static FILEINFO **mailfiles = (FILEINFO **)NULL;
 static int mailfiles_count;
 
 /* The last known time that mail was checked. */
-static time_t last_time_mail_checked;
+static time_t last_time_mail_checked = 0;
 
 /* Non-zero means warn if a mail file has been read since last checked. */
 int mail_warning;
 
 static int find_mail_file __P((char *));
+static void init_mail_file __P((int));
 static void update_mail_file __P((int));
 static int add_mail_file __P((char *, char *));
+
+static FILEINFO *alloc_mail_file __P((char *, char *));
+static void dispose_mail_file __P((FILEINFO *));
 
 static int file_mod_date_changed __P((int));
 static int file_access_date_changed __P((int));
@@ -119,6 +129,7 @@ find_mail_file (file)
     { \
       mailfiles[i]->access_time = mailfiles[i]->mod_time = 0; \
       mailfiles[i]->file_size = 0; \
+      mailfiles[i]->flags = 0; \
     } \
   while (0)
 
@@ -128,8 +139,18 @@ find_mail_file (file)
       mailfiles[i]->access_time = finfo.st_atime; \
       mailfiles[i]->mod_time = finfo.st_mtime; \
       mailfiles[i]->file_size = finfo.st_size; \
+      mailfiles[i]->flags |= MBOX_INITIALIZED; \
     } \
   while (0)
+
+static void
+init_mail_file (i)
+     int i;
+{
+  mailfiles[i]->access_time = mailfiles[i]->mod_time = last_time_mail_checked ? last_time_mail_checked : shell_start_time;
+  mailfiles[i]->file_size = 0;
+  mailfiles[i]->flags = 0;
+}
 
 static void
 update_mail_file (i)
@@ -170,10 +191,9 @@ add_mail_file (file, msg)
   mailfiles = (FILEINFO **)xrealloc
 		(mailfiles, mailfiles_count * sizeof (FILEINFO *));
 
-  mailfiles[i] = (FILEINFO *)xmalloc (sizeof (FILEINFO));
-  mailfiles[i]->name = filename;
-  mailfiles[i]->msg = msg ? savestring (msg) : (char *)NULL;
-  update_mail_file (i);
+  mailfiles[i] = alloc_mail_file (filename, msg);
+  init_mail_file (i);
+
   return i;
 }
 
@@ -187,6 +207,29 @@ reset_mail_files ()
     RESET_MAIL_FILE (i);
 }
 
+static FILEINFO *
+alloc_mail_file (filename, msg)
+     char *filename, *msg;
+{
+  FILEINFO *mf;
+
+  mf = (FILEINFO *)xmalloc (sizeof (FILEINFO));
+  mf->name = filename;
+  mf->msg = msg ? savestring (msg) : (char *)NULL;
+  mf->flags = 0;
+
+  return mf;
+}
+
+static void
+dispose_mail_file (mf)
+     FILEINFO *mf;
+{
+  free (mf->name);
+  FREE (mf->msg);
+  free (mf);
+}
+
 /* Free the information that we have about the remembered mail files. */
 void
 free_mail_files ()
@@ -194,17 +237,20 @@ free_mail_files ()
   register int i;
 
   for (i = 0; i < mailfiles_count; i++)
-    {
-      free (mailfiles[i]->name);
-      FREE (mailfiles[i]->msg);
-      free (mailfiles[i]);
-    }
+    dispose_mail_file (mailfiles[i]);
 
   if (mailfiles)
     free (mailfiles);
 
   mailfiles_count = 0;
   mailfiles = (FILEINFO **)NULL;
+}
+
+void
+init_mail_dates ()
+{
+  if (mailfiles == 0)
+    remember_mail_dates ();
 }
 
 /* Return non-zero if FILE's mod date has changed and it has not been
@@ -311,6 +357,7 @@ make_default_mailpath ()
 /* Remember the dates of the files specified by MAILPATH, or if there is
    no MAILPATH, by the file specified in MAIL.  If neither exists, use a
    default value, which we randomly concoct from using Unix. */
+
 void
 remember_mail_dates ()
 {

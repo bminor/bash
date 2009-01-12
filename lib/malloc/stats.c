@@ -2,19 +2,21 @@
 
 /*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2, or (at your option)
-    any later version.
+    This file is part of GNU Bash, the Bourne-Again SHell.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
@@ -181,7 +183,7 @@ _imalloc_fopen (s, fn, def, defbuf, defsiz)
 
       sprintf (pidbuf, "%ld", l);
       if ((strlen (pidbuf) + strlen (fn) + 2) >= sizeof (fname))
-	return;
+	return ((FILE *)0);
       for (sp = 0, p = fname, q = fn; *q; )
 	{
 	  if (sp == 0 && *q == '%' && q[1] == 'p')

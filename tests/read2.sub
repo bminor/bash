@@ -1,12 +1,22 @@
 a=4
 
 read -t 2 a < /dev/tty
-echo $?
+estat=$?
+if [ $estat -gt 128 ]; then
+	echo timeout 1: ok
+else
+	echo $estat
+fi
 
 echo $a
 
 sleep 5 | read -t 1 a
-echo $?
+estat=$?
+if [ $estat -gt 128 ]; then
+	echo timeout 2: ok
+else
+	echo $estat
+fi
 
 echo $a
 

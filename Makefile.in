@@ -1,20 +1,19 @@
-# Makefile for bash-3.1, version 2.159
+# Makefile for bash-4.0, version 3.4
 #
-# Copyright (C) 1996-2005 Free Software Foundation, Inc.
+# Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make sure the first target in the makefile is the right one
 all: .made
@@ -31,12 +30,15 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 prefix = @prefix@
 
 exec_prefix = @exec_prefix@
+
+datarootdir = @datarootdir@
+
 bindir = @bindir@
 libdir = @libdir@
 infodir = @infodir@
 includedir = @includedir@
 datadir = @datadir@
-localedir = $(datadir)/locale
+localedir = @localedir@
 
 mandir = @mandir@
 manpfx = man
@@ -77,6 +79,8 @@ INSTALLMODE= -m 0755
 INSTALLMODE2 = -m 0555
 
 TESTSCRIPT = @TESTSCRIPT@
+
+DEBUGGER_START_FILE = @DEBUGGER_START_FILE@
 
 #If you have purify, and want to use it, uncomment this definition or
 # run the make as `make PURIFY=purify'
@@ -204,7 +208,12 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
 		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
 		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c \
-		${SH_LIBSRC}/eaccess.c ${SH_LIBSRC}/wcsdup.c
+		${SH_LIBSRC}/eaccess.c ${SH_LIBSRC}/wcsdup.c \
+		${SH_LIBSRC}/zmapfd.c ${SH_LIBSRC}/fpurge.c \
+		${SH_LIBSRC}/zgetline.c ${SH_LIBSRC}/mbscmp.c \
+		${SH_LIBSRC}/casemod.c ${SH_LIBSRC}/uconvert.c \
+		${SH_LIBSRC}/ufuncs.c ${SH_LIBSRC}/fdprintf.c \
+		${SH_LIBSRC}/input_avail.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -402,7 +411,7 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
 	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
 	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
 	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
-	   input.c bashhist.c array.c arrayfunc.c sig.c pathexp.c \
+	   input.c bashhist.c array.c arrayfunc.c assoc.c sig.c pathexp.c \
 	   unwind_prot.c siglist.c bashline.c bracecomp.c error.c \
 	   list.c stringlib.c locale.c findcmd.c redir.c \
 	   pcomplete.c pcomplib.c syntax.c xmalloc.c
@@ -413,7 +422,7 @@ HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
 	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
-	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h \
+	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h assoc.h \
 	   $(BASHINCFILES)
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
@@ -431,7 +440,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
-	   alias.o array.o arrayfunc.o braces.o bracecomp.o bashhist.o \
+	   alias.o array.o arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
 	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
@@ -456,7 +465,8 @@ BUILTIN_DEFS = $(DEFSRC)/alias.def $(DEFSRC)/bind.def $(DEFSRC)/break.def \
 	       $(DEFSRC)/times.def $(DEFSRC)/trap.def $(DEFSRC)/type.def \
 	       $(DEFSRC)/ulimit.def $(DEFSRC)/umask.def $(DEFSRC)/wait.def \
 	       $(DEFSRC)/getopts.def $(DEFSRC)/reserved.def \
-	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def $(DEFSRC)/printf.def
+	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def $(DEFSRC)/printf.def \
+	       $(DEFSRC)/mapfile.def
 BUILTIN_C_SRC  = $(DEFSRC)/mkbuiltins.c $(DEFSRC)/common.c \
 		 $(DEFSRC)/evalstring.c $(DEFSRC)/evalfile.c \
 		 $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE)
@@ -475,7 +485,7 @@ BUILTIN_OBJS = $(DEFDIR)/alias.o $(DEFDIR)/bind.o $(DEFDIR)/break.o \
 	       $(DEFDIR)/source.o $(DEFDIR)/suspend.o $(DEFDIR)/test.o \
 	       $(DEFDIR)/times.o $(DEFDIR)/trap.o $(DEFDIR)/type.o \
 	       $(DEFDIR)/ulimit.o $(DEFDIR)/umask.o $(DEFDIR)/wait.o \
-	       $(DEFDIR)/getopts.o $(BUILTIN_C_OBJ)
+	       $(DEFDIR)/getopts.o $(DEFDIR)/mapfile.o $(BUILTIN_C_OBJ)
 GETOPT_SOURCE   = $(DEFSRC)/getopt.c $(DEFSRC)/getopt.h
 PSIZE_SOURCE	= $(DEFSRC)/psize.sh $(DEFSRC)/psize.c
 
@@ -497,10 +507,11 @@ SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
 SUPPORT_SRC = $(srcdir)/support/
 SDIR = $(dot)/support/
 
-TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT)
+TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) xcase$(EXEEXT)
 CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  tests/recho$(EXEEXT) tests/zecho$(EXEEXT) \
-		  tests/printenv$(EXEEXT) mksignames$(EXEEXT) lsignames.h \
+		  tests/printenv$(EXEEXT) xcase$(EXEEXT) tests/xcase$(EXEEXT) \
+		  mksignames$(EXEEXT) lsignames.h \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
 		  buildversion.o mksignames.o signames.o buildsignames.o
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
@@ -614,7 +625,7 @@ ${INTL_LIBRARY}: config.h ${INTL_LIBDIR}/Makefile
 	@(cd ${INTL_LIBDIR} && \
 		$(MAKE) $(MFLAGS) all) || exit 1
 
-${LIBINTL_H}:	${INTL_LIBRARY}
+${LIBINTL_H}:	${INTL_DEP}
 
 signames.o: $(SUPPORT_SRC)signames.c
 	$(RM) $@
@@ -669,9 +680,6 @@ ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 Makefile makefile:	config.status $(srcdir)/Makefile.in
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
-pathnames.h:		config.status $(srcdir)/Makefile.in
-	CONFIG_HEADERS= $(SHELL) ./config.status
-
 Makefiles makefiles:	config.status $(srcdir)/Makefile.in
 	@for mf in $(CREATED_MAKEFILES); do \
 		CONFIG_FILES=$$mf CONFIG_HEADERS= $(SHELL) ./config.status ; \
@@ -684,6 +692,15 @@ stamp-h:	config.status $(srcdir)/config.h.in $(srcdir)/config-top.h $(srcdir)/co
 
 config.status:	$(srcdir)/configure
 	$(SHELL) ./config.status --recheck
+
+pathnames.h:		Makefile $(srcdir)/pathnames.h.in
+	@sed -e 's|@DEBUGGER_START_FILE\@|${DEBUGGER_START_FILE}|g' $(srcdir)/pathnames.h.in > pathnames.tmp
+	@if test -f $@; then \
+		cmp -s pathnames.tmp $@ || mv pathnames.tmp $@; \
+	else \
+		mv pathnames.tmp $@; \
+	fi
+	@${RM} pathnames.tmp
 
 # comment out for distribution
 $(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/config.h.in
@@ -810,6 +827,9 @@ zecho$(EXEEXT):		$(SUPPORT_SRC)zecho.c
 
 printenv$(EXEEXT):	$(SUPPORT_SRC)printenv.c
 	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)printenv.c ${LIBS_FOR_BUILD}
+
+xcase$(EXEEXT):	$(SUPPORT_SRC)xcase.c
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)xcase.c ${LIBS_FOR_BUILD}
 
 test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
@@ -977,7 +997,7 @@ shell.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h arr
 shell.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 shell.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 shell.o: flags.h trap.h mailcheck.h builtins.h $(DEFSRC)/common.h
-shell.o: jobs.h siglist.h input.h execute_cmd.h findcmd.h bashhist.h
+shell.o: jobs.h siglist.h input.h execute_cmd.h findcmd.h bashhist.h bashline.h
 shell.o: ${GLOB_LIBSRC}/strmatch.h ${BASHINCDIR}/posixtime.h
 sig.o: config.h bashtypes.h
 sig.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
@@ -1043,6 +1063,7 @@ jobs.o: ${BASHINCDIR}/posixtime.h
 nojobs.o: config.h bashtypes.h ${BASHINCDIR}/filecntl.h bashjmp.h ${BASHINCDIR}/posixjmp.h
 nojobs.o: command.h ${BASHINCDIR}/stdc.h general.h xmalloc.h jobs.h quit.h siglist.h externs.h
 nojobs.o: sig.h error.h ${BASHINCDIR}/shtty.h input.h
+nojobs.o: $(DEFDIR)/builtext.h
 
 # shell features that may be compiled in
 
@@ -1059,6 +1080,14 @@ arrayfunc.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 arrayfunc.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 arrayfunc.o: $(DEFSRC)/common.h
 arrayfunc.o: ${BASHINCDIR}/shmbutil.h
+assoc.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+assoc.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h
+assoc.o: command.h ${BASHINCDIR}/stdc.h error.h
+assoc.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h
+assoc.o: assoc.h hashlib.h
+assoc.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
+assoc.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
+assoc.o: $(DEFSRC)/common.h
 braces.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 braces.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 braces.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
@@ -1367,6 +1396,9 @@ builtins/complete.o: bashtypes.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 builtins/complete.o: builtins.h 
 builtins/complete.o: pcomplete.h
 builtins/complete.o: ${DEFSRC}/common.h ${DEFSRC}/bashgetopt.h
+builtins/mapfile.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
+builtins/mapfile.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h
+builtins/mapfile.o: shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h unwind_prot.h variables.h arrayfunc.h conftypes.h 
 
 # libintl dependencies
 builtins/bind.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
@@ -1390,7 +1422,8 @@ builtins/inlib.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/jobs.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/kill.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/let.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
-builtins/mkbuiltins.c: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+builtins/mapfile.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+builtins/mkbuiltins.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/printf.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/pushd.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/read.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
@@ -1441,6 +1474,7 @@ builtins/inlib.o: $(DEFSRC)/inlib.def
 builtins/jobs.o: $(DEFSRC)/jobs.def
 builtins/kill.o: $(DEFSRC)/kill.def
 builtins/let.o: $(DEFSRC)/let.def
+builtins/mapfile.o: $(DEFSRC)/mapfile.def
 builtins/pushd.o: $(DEFSRC)/pushd.def
 builtins/read.o: $(DEFSRC)/read.def
 builtins/reserved.o: $(DEFSRC)/reserved.def

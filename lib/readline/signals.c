@@ -1,24 +1,24 @@
 /* signals.c -- signal handling support for readline. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
@@ -40,12 +40,13 @@
 #  include <sys/ioctl.h>
 #endif /* GWINSZ_IN_SYS_IOCTL */
 
-#if defined (HANDLE_SIGNALS)
 /* Some standard library routines. */
 #include "readline.h"
 #include "history.h"
 
 #include "rlprivate.h"
+
+#if defined (HANDLE_SIGNALS)
 
 #if !defined (RETSIGTYPE)
 #  if defined (VOID_SIGHANDLER)
@@ -92,6 +93,14 @@ int rl_catch_sigwinch = 1;
 #else
 int rl_catch_sigwinch = 0;	/* for the readline state struct in readline.c */
 #endif
+
+/* Private variables. */
+/* If non-zero, print characters corresponding to received signals. */
+int _rl_echoctl = 0;
+
+int _rl_intr_char = 0;
+int _rl_quit_char = 0;
+int _rl_susp_char = 0;
 
 static int signals_set_flag;
 static int sigwinch_set_flag;
@@ -142,6 +151,7 @@ rl_signal_handler (sig)
   switch (sig)
     {
     case SIGINT:
+      _rl_reset_completion_state ();
       rl_free_line_state ();
       /* FALLTHROUGH */
 
@@ -157,6 +167,7 @@ rl_signal_handler (sig)
 #if defined (SIGQUIT)
     case SIGQUIT:
 #endif
+      rl_echo_signal_char (sig);
       rl_cleanup_after_signal ();
 
 #if defined (HAVE_POSIX_SIGNALS)
@@ -252,7 +263,11 @@ rl_set_sighandler (sig, handler, ohandler)
   struct sigaction act;
 
   act.sa_handler = handler;
+#  if defined (SIGWINCH)
   act.sa_flags = (sig == SIGWINCH) ? SA_RESTART : 0;
+#  else
+  act.sa_flags = 0;
+#  endif /* SIGWINCH */
   sigemptyset (&act.sa_mask);
   sigemptyset (&ohandler->sa_mask);
   sigaction (sig, &act, &old_handler);
@@ -300,7 +315,7 @@ rl_set_signals ()
       sigemptyset (&bset);
 
       sigaddset (&bset, SIGINT);
-      sigaddset (&bset, SIGINT);
+      sigaddset (&bset, SIGTERM);
 #if defined (SIGQUIT)
       sigaddset (&bset, SIGQUIT);
 #endif
@@ -464,3 +479,105 @@ rl_free_line_state ()
 }
 
 #endif  /* HANDLE_SIGNALS */
+
+/* **************************************************************** */
+/*								    */
+/*			   SIGINT Management			    */
+/*								    */
+/* **************************************************************** */
+
+#if defined (HAVE_POSIX_SIGNALS)
+static sigset_t sigint_set, sigint_oset;
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+static int sigint_oldmask;
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+static int sigint_blocked;
+
+/* Cause SIGINT to not be delivered until the corresponding call to
+   release_sigint(). */
+void
+_rl_block_sigint ()
+{
+  if (sigint_blocked)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigemptyset (&sigint_set);
+  sigemptyset (&sigint_oset);
+  sigaddset (&sigint_set, SIGINT);
+  sigprocmask (SIG_BLOCK, &sigint_set, &sigint_oset);
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  sigint_oldmask = sigblock (sigmask (SIGINT));
+#  else /* !HAVE_BSD_SIGNALS */
+#    if defined (HAVE_USG_SIGHOLD)
+  sighold (SIGINT);
+#    endif /* HAVE_USG_SIGHOLD */
+#  endif /* !HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  sigint_blocked = 1;
+}
+
+/* Allow SIGINT to be delivered. */
+void
+_rl_release_sigint ()
+{
+  if (sigint_blocked == 0)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &sigint_oset, (sigset_t *)NULL);
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  sigsetmask (sigint_oldmask);
+#  else /* !HAVE_BSD_SIGNALS */
+#    if defined (HAVE_USG_SIGHOLD)
+  sigrelse (SIGINT);
+#    endif /* HAVE_USG_SIGHOLD */
+#  endif /* !HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  sigint_blocked = 0;
+}
+
+/* **************************************************************** */
+/*								    */
+/*		Echoing special control characters		    */
+/*								    */
+/* **************************************************************** */
+void
+rl_echo_signal_char (sig)
+     int sig;
+{
+  char cstr[3];
+  int cslen, c;
+
+  if (_rl_echoctl == 0)
+    return;
+
+  switch (sig)
+    {
+    case SIGINT:  c = _rl_intr_char; break;
+    case SIGQUIT: c = _rl_quit_char; break;
+    case SIGTSTP: c = _rl_susp_char; break;
+    default: return;
+    }
+
+  if (CTRL_CHAR (c) || c == RUBOUT)
+    {
+      cstr[0] = '^';
+      cstr[1] = CTRL_CHAR (c) ? UNCTRL (c) : '?';
+      cstr[cslen = 2] = '\0';
+    }
+  else
+    {
+      cstr[0] = c;
+      cstr[cslen = 1] = '\0';
+    }
+
+  _rl_output_some_chars (cstr, cslen);
+}

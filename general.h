@@ -1,22 +1,22 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (_GENERAL_H_)
 #define _GENERAL_H_
@@ -281,7 +281,7 @@ extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
 extern int all_digits __P((char *));
-extern int legal_number __P((char *, intmax_t *));
+extern int legal_number __P((const char *, intmax_t *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
 extern int legal_alias_name __P((char *, int));
@@ -297,6 +297,10 @@ extern int check_binary_file __P((char *, int));
 extern int same_file __P((char *, char *, struct stat *, struct stat *));
 #endif
 
+extern int sh_openpipe __P((int *));
+extern int sh_closepipe __P((int *));
+
+extern int file_exists __P((char *));
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
 extern int absolute_pathname __P((const char *));
@@ -306,6 +310,7 @@ extern char *make_absolute __P((char *, char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
+extern char *trim_pathname __P((char *, int));
 
 extern char *extract_colon_unit __P((char *, int *));
 

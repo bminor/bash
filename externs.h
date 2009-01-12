@@ -1,23 +1,23 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /* Make sure that this is included *after* config.h! */
 
@@ -30,6 +30,9 @@
 extern intmax_t evalexp __P((char *, int *));
 
 /* Functions from print_cmd.c. */
+#define FUNC_MULTILINE	0x01
+#define FUNC_EXTERNAL	0x02
+
 extern char *make_command_string __P((COMMAND *));
 extern char *named_function_string __P((char *, COMMAND *, int));
 
@@ -93,6 +96,7 @@ extern char **brace_expand __P((char *));
 /* Miscellaneous functions from parse.y */
 extern int yyparse __P((void));
 extern int return_EOF __P((void));
+extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
@@ -145,12 +149,27 @@ extern void show_shell_version __P((int));
 /* Functions from the bash library, lib/sh/libsh.a.  These should really
    go into a separate include file. */
 
+/* declarations for functions defined in lib/sh/casemod.c */
+extern char *sh_modcase __P((const char *, char *, int));
+
+/* Defines for flags argument to sh_modcase.  These need to agree with what's
+   in lib/sh/casemode.c */
+#define CASE_LOWER	0x01
+#define CASE_UPPER	0x02
+#define CASE_CAPITALIZE	0x04
+#define CASE_UNCAP	0x08
+#define CASE_TOGGLE	0x10
+#define CASE_TOGGLEALL	0x20
+
 /* declarations for functions defined in lib/sh/clktck.c */
 extern long get_clk_tck __P((void));
 
 /* declarations for functions defined in lib/sh/clock.c */
 extern void clock_t_to_secs ();
 extern void print_clock_t ();
+
+/* Declarations for functions defined in lib/sh/fdprintf.c */
+extern void fdprintf __P((int, const char *, ...))  __attribute__((__format__ (printf, 2, 3)));
 
 /* Declarations for functions defined in lib/sh/fmtulong.c */
 #define FL_PREFIX     0x01    /* add 0x, 0X, or 0 prefix as appropriate */
@@ -168,10 +187,24 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 /* Declarations for functions defined in lib/sh/fmtumax.c */
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
 
+/* Declarations for functions defined in lib/sh/fpurge.c */
+#if !HAVE_DECL_FPURGE
+
+#if HAVE_FPURGE
+#  define fpurge _bash_fpurge
+#endif
+extern int fpurge __P((FILE *stream));
+
+#endif /* HAVE_DECL_FPURGE */
+
+
 /* Declarations for functions defined in lib/sh/getcwd.c */
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
 #endif
+
+/* Declarations for functions defined in lib/sh/input_avail.c */
+extern int input_avail __P((int));
 
 /* Declarations for functions defined in lib/sh/itos.c */
 extern char *inttostr __P((intmax_t, char *, size_t));
@@ -183,6 +216,7 @@ extern char *uitos __P((uintmax_t));
 #define MP_DOTILDE	0x01
 #define MP_DOCWD	0x02
 #define MP_RMDOT	0x04
+#define MP_IGNDOT	0x08
 
 extern char *sh_makepath __P((const char *, const char *, int));
 
@@ -247,6 +281,7 @@ extern int sh_contains_shell_metas __P((char *));
 
 /* declarations for functions defined in lib/sh/spell.c */
 extern int spname __P((char *, char *));
+extern char *dirspell __P((char *));
 
 /* declarations for functions defined in lib/sh/strcasecmp.c */
 #if !defined (HAVE_STRCASECMP)
@@ -373,6 +408,13 @@ extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
+/* declarations for functions defined in lib/sh/uconvert.c */
+extern int uconvert __P((char *, long *, long *));
+
+/* declarations for functions defined in lib/sh/ufuncs.c */
+extern unsigned int falarm __P((unsigned int, unsigned int));
+extern unsigned int fsleep __P((unsigned int, unsigned int));
+
 /* declarations for functions defined in lib/sh/winsize.c */
 extern void get_new_window_size __P((int, int *, int *));
 
@@ -382,6 +424,12 @@ extern char *xstrchr __P((const char *, int));
 
 /* declarations for functions defined in lib/sh/zcatfd.c */
 extern int zcatfd __P((int, int, char *));
+
+/* declarations for functions defined in lib/sh/zgetline.c */
+extern ssize_t zgetline __P((int, char **, size_t *, int));
+
+/* declarations for functions defined in lib/sh/zmapfd.c */
+extern int zmapfd __P((int, char **, char *));
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));

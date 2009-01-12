@@ -1,25 +1,25 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
@@ -163,7 +163,7 @@ int rl_done;
 rl_command_func_t *rl_last_func = (rl_command_func_t *)NULL;
 
 /* Top level environment for readline_internal (). */
-procenv_t readline_top_level;
+procenv_t _rl_top_level;
 
 /* The streams we interact with. */
 FILE *_rl_in_stream, *_rl_out_stream;
@@ -176,7 +176,7 @@ FILE *rl_outstream = (FILE *)NULL;
    set to 1 if there is a controlling terminal, we can get its attributes,
    and the attributes include `echo'.  Look at rltty.c:prepare_terminal_settings
    for the code that sets it. */
-int readline_echoing_p = 0;
+int _rl_echoing_p = 0;
 
 /* Current prompt. */
 char *rl_prompt = (char *)NULL;
@@ -270,6 +270,11 @@ int _rl_output_meta_chars = 0;
    them to equivalent readline functions at startup. */
 int _rl_bind_stty_chars = 1;
 
+/* Non-zero means to go through the history list at every newline (or
+   whenever rl_done is set and readline returns) and revert each line to
+   its initial state. */
+int _rl_revert_all_at_newline = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -300,6 +305,9 @@ readline (prompt)
      const char *prompt;
 {
   char *value;
+#if 0
+  int in_callback;
+#endif
 
   /* If we are at EOF return a NULL string. */
   if (rl_pending_input == EOF)
@@ -307,6 +315,15 @@ readline (prompt)
       rl_clear_pending_input ();
       return ((char *)NULL);
     }
+
+#if 0
+  /* If readline() is called after installing a callback handler, temporarily
+     turn off the callback state to avoid ensuing messiness.  Patch supplied
+     by the gdb folks.  XXX -- disabled.  This can be fooled and readline
+     left in a strange state by a poorly-timed longjmp. */
+  if (in_callback = RL_ISSTATE (RL_STATE_CALLBACK))
+    RL_UNSETSTATE (RL_STATE_CALLBACK);
+#endif
 
   rl_set_prompt (prompt);
 
@@ -324,6 +341,11 @@ readline (prompt)
 
 #if defined (HANDLE_SIGNALS)
   rl_clear_signals ();
+#endif
+
+#if 0
+  if (in_callback)
+    RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
   return (value);
@@ -349,7 +371,7 @@ readline_internal_setup ()
   /* If we're not echoing, we still want to at least print a prompt, because
      rl_redisplay will not do it for us.  If the calling application has a
      custom redisplay function, though, let that function handle it. */
-  if (readline_echoing_p == 0 && rl_redisplay_function == rl_redisplay)
+  if (_rl_echoing_p == 0 && rl_redisplay_function == rl_redisplay)
     {
       if (rl_prompt && rl_already_prompted == 0)
 	{
@@ -370,7 +392,7 @@ readline_internal_setup ()
 
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
-    rl_vi_insertion_mode (1, 'i');
+    rl_vi_insert_mode (1, 'i');
 #endif /* VI_MODE */
 
   if (rl_pre_input_hook)
@@ -398,6 +420,9 @@ readline_internal_teardown (eof)
       strcpy (the_line, temp);
       free (temp);
     }
+
+  if (_rl_revert_all_at_newline)
+    _rl_revert_all_lines ();
 
   /* At any rate, it is highly likely that this line has an undo list.  Get
      rid of it now. */
@@ -459,7 +484,7 @@ readline_internal_charloop ()
 #endif
       lk = _rl_last_command_was_kill;
 
-      code = setjmp (readline_top_level);
+      code = setjmp (_rl_top_level);
 
       if (code)
 	{
@@ -467,7 +492,7 @@ readline_internal_charloop ()
 	  _rl_want_redisplay = 0;
 	  /* If we get here, we're not being called from something dispatched
 	     from _rl_callback_read_char(), which sets up its own value of
-	     readline_top_level (saving and restoring the old, of course), so
+	     _rl_top_level (saving and restoring the old, of course), so
 	     we can just return here. */
 	  if (RL_ISSTATE (RL_STATE_CALLBACK))
 	    return (0);

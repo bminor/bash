@@ -1,23 +1,22 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+Bash is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+Bash is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+You should have received a copy of the GNU General Public License
+along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 
 $PRODUCES cd.c
 #include <config.h>
@@ -56,14 +55,12 @@ extern int errno;
 
 extern int posixly_correct;
 extern int array_needs_making;
-extern char *bash_getcwd_errstr;
+extern const char * const bash_getcwd_errstr;
 
 static int bindpwd __P((int));
 static void setpwd __P((char *));
 static char *resetpwd __P((char *));
 static int change_to_directory __P((char *, int));
-
-static char *cdspell __P((char *));
 
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;
@@ -73,17 +70,29 @@ int cdable_vars;
 $BUILTIN cd
 $FUNCTION cd_builtin
 $SHORT_DOC cd [-L|-P] [dir]
-Change the current directory to DIR.  The variable $HOME is the
-default DIR.  The variable CDPATH defines the search path for
-the directory containing DIR.  Alternative directory names in CDPATH
-are separated by a colon (:).  A null directory name is the same as
-the current directory, i.e. `.'.  If DIR begins with a slash (/),
-then CDPATH is not used.  If the directory is not found, and the
-shell option `cdable_vars' is set, then try the word as a variable
-name.  If that variable has a value, then cd to the value of that
-variable.  The -P option says to use the physical directory structure
-instead of following symbolic links; the -L option forces symbolic links
-to be followed.
+Change the shell working directory.
+
+Change the current directory to DIR.  The default DIR is the value of the
+HOME shell variable.
+
+The variable CDPATH defines the search path for the directory containing
+DIR.  Alternative directory names in CDPATH are separated by a colon (:).
+A null directory name is the same as the current directory.  If DIR begins
+with a slash (/), then CDPATH is not used.
+
+If the directory is not found, and the shell option `cdable_vars' is set,
+the word is assumed to be  a variable name.  If that variable has a value,
+its value is used for DIR.
+
+Options:
+    -L	force symbolic links to be followed
+    -P	use the physical directory structure without following symbolic
+	links
+
+The default is to follow symbolic links, as if `-L' were specified.
+
+Exit Status:
+Returns 0 if the directory is changed; non-zero otherwise.
 $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
@@ -108,8 +117,10 @@ bindpwd (no_symlinks)
      int no_symlinks;
 {
   char *dirname, *pwdvar;
-  int old_anm;
+  int old_anm, r;
   SHELL_VAR *tvar;
+
+  r = sh_chkwrite (EXECUTION_SUCCESS);
 
 #define tcwd the_current_working_directory
   dirname = tcwd ? (no_symlinks ? sh_physpath (tcwd, 0) : tcwd)
@@ -131,7 +142,7 @@ bindpwd (no_symlinks)
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
 
-  return (EXECUTION_SUCCESS);
+  return (r);
 }
 
 /* Call get_working_directory to reset the value of
@@ -224,7 +235,7 @@ cd_builtin (list)
     }
   else if (absolute_pathname (list->word->word))
     dirname = list->word->word;
-  else if (cdpath = get_string_value ("CDPATH"))
+  else if (privileged_mode == 0 && (cdpath = get_string_value ("CDPATH")))
     {
       dirname = list->word->word;
 
@@ -300,7 +311,7 @@ cd_builtin (list)
      typo.  This is similar to the UNIX 8th and 9th Edition shells. */
   if (lflag & LCD_DOSPELL)
     {
-      temp = cdspell (dirname);
+      temp = dirspell (dirname);
       if (temp && change_to_directory (temp, no_symlinks))
 	{
 	  printf ("%s\n", temp);
@@ -317,9 +328,18 @@ cd_builtin (list)
 $BUILTIN pwd
 $FUNCTION pwd_builtin
 $SHORT_DOC pwd [-LP]
-Print the current working directory.  With the -P option, pwd prints
-the physical directory, without any symbolic links; the -L option
-makes pwd follow symbolic links.
+Print the name of the current working directory.
+
+Options:
+  -L	print the value of $PWD if it names the current working
+	directory
+  -P	print the physical directory, without any symbolic links
+
+By default, `pwd' behaves as if `-L' were specified.
+
+Exit Status:
+Returns 0 unless an invalid option is given or the current directory
+cannot be read.
 $END
 
 /* Non-zero means that pwd always prints the physical directory, without
@@ -375,15 +395,7 @@ pwd_builtin (list)
 	setpwd (directory);
       if (directory != the_current_working_directory)
 	free (directory);
-      fflush (stdout);
-      if (ferror (stdout))
-	{
-	  sh_wrerror ();
-	  clearerr (stdout);
-	  return (EXECUTION_FAILURE);
-	}
-
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
   else
     return (EXECUTION_FAILURE);
@@ -498,29 +510,4 @@ change_to_directory (newdir, nolinks)
 
   free (tdir);
   return r;
-}
-
-/* Code for cd spelling correction.  Original patch submitted by
-   Neil Russel (caret@c-side.com). */
-
-static char *
-cdspell (dirname)
-     char *dirname;
-{
-  int n;
-  char *guess;
-
-  n = (strlen (dirname) * 3 + 1) / 2 + 1;
-  guess = (char *)xmalloc (n);
-
-  switch (spname (dirname, guess))
-    {
-    case -1:
-    default:
-      free (guess);
-      return (char *)NULL;
-    case 0:
-    case 1:
-      return guess;
-    }
 }

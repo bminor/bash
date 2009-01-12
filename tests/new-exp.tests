@@ -555,6 +555,14 @@ echo ${var##?}
 
 ${THIS_SH} ./new-exp6.sub
 
+${THIS_SH} ./new-exp7.sub
+
+# problems with stray CTLNUL in bash-4.0-alpha
+unset a
+a=/a
+recho "/${a%/*}"
+recho "/${a///a/}"
+
 # this must be last!
 expect $0: 'ABXD: parameter unset'
 recho ${ABXD:?"parameter unset"}

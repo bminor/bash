@@ -1,25 +1,25 @@
-/* The thing that makes children, remembers them, and contains wait loops. */
+/* nojobs.c - functions that make children, remember them, and handle their termination. */
 
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -232,7 +232,7 @@ find_termsig_by_pid (pid)
     return (0);
   if (pid_list[i].flags & PROC_RUNNING)
     return (0);
-  return (get_termsig (pid_list[i].status));
+  return (get_termsig ((WAIT)pid_list[i].status));
 }
 
 /* Set LAST_COMMAND_EXIT_SIGNAL depending on STATUS.  If STATUS is -1, look
@@ -465,9 +465,7 @@ make_child (command, async_p)
      int async_p;
 {
   pid_t pid;
-#if defined (HAVE_WAITPID)
-  int retry = 1;
-#endif /* HAVE_WAITPID */
+  int forksleep;
 
   /* Discard saved memory. */
   if (command)
@@ -484,26 +482,27 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  /* Create the child, handle severe errors. */
-#if defined (HAVE_WAITPID)
-  retry_fork:
-#endif /* HAVE_WAITPID */
-
-  if ((pid = fork ()) < 0)
+  /* Create the child, handle severe errors.  Retry on EAGAIN. */
+  forksleep = 1;
+  while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
+      sys_error ("fork: retry");
 #if defined (HAVE_WAITPID)
       /* Posix systems with a non-blocking waitpid () system call available
 	 get another chance after zombies are reaped. */
-      if (errno == EAGAIN && retry)
-	{
-	  reap_zombie_children ();
-	  retry = 0;
-	  goto retry_fork;
-	}
+      reap_zombie_children ();
+      if (forksleep > 1 && sleep (forksleep) != 0)
+        break;
+#else
+      if (sleep (forksleep) != 0)
+	break;
 #endif /* HAVE_WAITPID */
+      forksleep <<= 1;
+    }
 
+  if (pid < 0)
+    {
       sys_error ("fork");
-
       throw_to_top_level ();
     }
 
@@ -518,9 +517,11 @@ make_child (command, async_p)
       sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
 #endif
 
+#if 0
       /* Ignore INT and QUIT in asynchronous children. */
       if (async_p)
 	last_asynchronous_pid = getpid ();
+#endif
 
       default_tty_job_signals ();
     }
@@ -801,7 +802,7 @@ wait_for (pid)
     {
       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
       if (WIFCORED (status))
-	fprintf (stderr, " (core dumped)");
+	fprintf (stderr, _(" (core dumped)"));
       fprintf (stderr, "\n");
     }
 

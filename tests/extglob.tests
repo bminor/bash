@@ -356,9 +356,14 @@ rm -rf $TESTDIR
 x=abcdef
 recho "${x#*(a|b)cd}"
 
+TEST='a , b'
+shopt -s globstar
+echo ${TEST//*([[:space:]]),*([[:space:]])/,}
+shopt -u globstar
+
 # this is for the benefit of pure coverage, so it writes the pcv file
 # in the right place
-builtin cd $MYDIR
+builtin cd "$MYDIR"
 
 ${THIS_SH} ./extglob1.sub
 

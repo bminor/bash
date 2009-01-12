@@ -1,23 +1,24 @@
 /* array.h -- definitions for the interface exported by array.c that allows
    the rest of the shell to manipulate array variables. */
 
-/* Copyright (C) 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #ifndef _ARRAY_H_
 #define _ARRAY_H_
@@ -54,11 +55,16 @@ extern ARRAY_ELEMENT *array_shift __P((ARRAY *, int, int));
 extern int	array_rshift __P((ARRAY *, int, char *));
 extern ARRAY_ELEMENT *array_unshift_element __P((ARRAY *));
 extern int	array_shift_element __P((ARRAY *, char *));
+
 extern ARRAY	*array_quote __P((ARRAY *));
 extern ARRAY	*array_quote_escapes __P((ARRAY *));
+extern ARRAY	*array_dequote __P((ARRAY *));
+extern ARRAY	*array_dequote_escapes __P((ARRAY *));
+extern ARRAY	*array_remove_quoted_nulls __P((ARRAY *));
 
 extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int));
 extern char	*array_patsub __P((ARRAY *, char *, char *, int));
+extern char	*array_modcase __P((ARRAY *, char *, int, int));
 
 /* Basic operations on array elements. */
 extern ARRAY_ELEMENT *array_create_element __P((arrayind_t, char *));

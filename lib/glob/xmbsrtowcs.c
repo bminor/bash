@@ -4,19 +4,20 @@
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <config.h>
 
 #include <bashansi.h>
@@ -27,6 +28,10 @@
 #include <shmbutil.h>
 
 #if HANDLE_MULTIBYTE
+
+#ifndef FREE
+#  define FREE(x)	do { if (x) free (x); } while (0)
+#endif
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.
    So, this function is made for converting 0x5c to U<0x5c>. */
 
@@ -160,12 +165,16 @@ xdupmbstowcs (destp, indicesp, src)
       return (size_t)-1;
     }
 
-  indices = (char **) malloc (wsbuf_size * sizeof(char *));
-  if (indices == NULL)
+  indices = NULL;
+  if (indicesp)
     {
-      free (wsbuf);
-      *destp = NULL;
-      return (size_t)-1;
+      indices = (char **) malloc (wsbuf_size * sizeof(char *));
+      if (indices == NULL)
+	{
+	  free (wsbuf);
+	  *destp = NULL;
+	  return (size_t)-1;
+	}
     }
 
   p = src;
@@ -196,7 +205,7 @@ xdupmbstowcs (destp, indicesp, src)
       if (MB_INVALIDCH (mblength))
 	{
 	  free (wsbuf);
-	  free (indices);
+	  FREE (indices);
 	  *destp = NULL;
 	  return (size_t)-1;
 	}
@@ -215,25 +224,29 @@ xdupmbstowcs (destp, indicesp, src)
 	  if (wstmp == NULL)
 	    {
 	      free (wsbuf);
-	      free (indices);
+	      FREE (indices);
 	      *destp = NULL;
 	      return (size_t)-1;
 	    }
 	  wsbuf = wstmp;
 
-	  idxtmp = (char **) realloc (indices, wsbuf_size * sizeof (char **));
-	  if (idxtmp == NULL)
+	  if (indicesp)
 	    {
-	      free (wsbuf);
-	      free (indices);
-	      *destp = NULL;
-	      return (size_t)-1;
+	      idxtmp = (char **) realloc (indices, wsbuf_size * sizeof (char **));
+	      if (idxtmp == NULL)
+		{
+		  free (wsbuf);
+		  free (indices);
+		  *destp = NULL;
+		  return (size_t)-1;
+		}
+	      indices = idxtmp;
 	    }
-	  indices = idxtmp;
 	}
 
       wsbuf[wcnum - 1] = wc;
-      indices[wcnum - 1] = (char *)p;
+      if (indices)
+        indices[wcnum - 1] = (char *)p;
       p += mblength;
     }
   while (MB_NULLWCH (wc) == 0);
@@ -242,8 +255,6 @@ xdupmbstowcs (destp, indicesp, src)
   *destp = wsbuf;
   if (indicesp != NULL)
     *indicesp = indices;
-  else
-    free (indices);
 
   return (wcnum - 1);
 }

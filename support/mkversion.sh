@@ -7,19 +7,19 @@
 
 # Copyright (C) 1996-2002 Free Software Foundation, Inc.
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 PROGNAME=`basename $0`
 USAGE="$PROGNAME [-b] [-S srcdir] -d version -p patchlevel [-s status] [-o outfile]"
@@ -139,6 +139,10 @@ echo "#define BUILDVERSION ${build_ver}"
 echo
 echo "/* The release status of this shell. */"
 echo "#define RELSTATUS \"${rel_status}\""
+
+echo
+echo "/* The default shell compatibility-level (the current version) */"
+echo "#define DEFAULT_COMPAT_LEVEL ${dist_major}${dist_minor}"
 
 # Output the SCCS version string
 sccs_string="${float_dist}.${patch_level}(${build_ver}) ${rel_status} GNU"

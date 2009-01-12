@@ -1,22 +1,22 @@
-/* jobs.h -- structures and stuff used by the jobs.c file. */
+/* jobs.h -- structures and definitions used by the jobs.c file. */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (_JOBS_H_)
 #  define _JOBS_H_
@@ -37,6 +37,9 @@
 
 /* I looked it up.  For pretty_print_job ().  The real answer is 24. */
 #define LONGEST_SIGNAL_DESC 24
+
+/* The max time to sleep while retrying fork() on EAGAIN failure */
+#define FORKSLEEP_MAX	16
 
 /* We keep an array of jobs.  Each entry in the array is a linked list
    of processes that are piped together.  The first process encountered is
@@ -74,7 +77,7 @@ typedef struct process {
 #define get_job_by_jid(ind)	(jobs[(ind)])
 
 /* A description of a pipeline's state. */
-typedef enum { JRUNNING, JSTOPPED, JDEAD, JMIXED } JOB_STATE;
+typedef enum { JNONE = -1, JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } JOB_STATE;
 #define JOBSTATE(job)	(jobs[(job)]->state)
 #define J_JOBSTATE(j)	((j)->state)
 
@@ -218,6 +221,8 @@ extern int initialize_job_control __P((int));
 extern void initialize_job_signals __P((void));
 extern int give_terminal_to __P((pid_t, int));
 
+extern void run_sigchld_trap __P((int));
+
 extern void unfreeze_jobs_list __P((void));
 extern int set_job_control __P((int));
 extern void without_job_control __P((void));
@@ -228,6 +233,8 @@ extern void ignore_tty_job_signals __P((void));
 extern void default_tty_job_signals __P((void));
 
 extern void init_job_stats __P((void));
+
+extern void close_pgrp_pipe __P((void));
 
 #if defined (JOB_CONTROL)
 extern int job_control;

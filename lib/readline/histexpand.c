@@ -1,24 +1,23 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
-   This file contains the GNU History Library (the Library), a set of
+   This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
 
-   The Library is free software; you can redistribute it and/or modify
+   History is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   The Library is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   History is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with History.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #define READLINE_LIBRARY
 
@@ -64,9 +63,11 @@ static int subst_lhs_len;
 static int subst_rhs_len;
 
 static char *get_history_word_specifier PARAMS((char *, char *, int *));
-static char *history_find_word PARAMS((char *, int));
 static int history_tokenize_word PARAMS((const char *, int));
+static char **history_tokenize_internal PARAMS((const char *, int, int *));
 static char *history_substring PARAMS((const char *, int, int));
+static void freewords PARAMS((char **, int));
+static char *history_find_word PARAMS((char *, int));
 
 static char *quote_breaks PARAMS((char *));
 
@@ -1569,6 +1570,18 @@ history_tokenize (string)
   return (history_tokenize_internal (string, -1, (int *)NULL));
 }
 
+/* Free members of WORDS from START to an empty string */
+static void
+freewords (words, start)
+     char **words;
+     int start;
+{
+  register int i;
+
+  for (i = start; words[i]; i++)
+    free (words[i]);
+}
+
 /* Find and return the word which contains the character at index IND
    in the history line LINE.  Used to save the word matched by the
    last history !?string? search. */
@@ -1582,12 +1595,16 @@ history_find_word (line, ind)
 
   words = history_tokenize_internal (line, ind, &wind);
   if (wind == -1 || words == 0)
-    return ((char *)NULL);
+    {
+      if (words)
+	freewords (words, 0);
+      FREE (words);
+      return ((char *)NULL);
+    }
   s = words[wind];
   for (i = 0; i < wind; i++)
     free (words[i]);
-  for (i = wind + 1; words[i]; i++)
-    free (words[i]);
+  freewords (words, wind + 1);
   free (words);
   return s;
 }

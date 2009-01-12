@@ -154,12 +154,15 @@ The following list is what's changed when `POSIX mode' is in effect:
      `$PATH'.
 
  40. The `vi' editing mode will invoke the `vi' editor directly when
-     the `v' command is run, instead of checking `$FCEDIT' and
+     the `v' command is run, instead of checking `$VISUAL' and
      `$EDITOR'.
 
  41. When the `xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to `echo' as options.  Each argument is
      displayed, after escape characters are converted.
+
+ 42. The `ulimit' builtin uses a block size of 512 bytes for the `-c'
+     and `-f' options.
 
 
 There is other POSIX behavior that Bash does not implement by default

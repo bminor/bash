@@ -1,12 +1,16 @@
 ./shopt.tests: line 2: shopt: -z: invalid option
-shopt: usage: shopt [-pqsu] [-o long-option] optname [optname...]
+shopt: usage: shopt [-pqsu] [-o] [optname ...]
 --
+shopt -u autocd
 shopt -u cdable_vars
 shopt -s cdspell
 shopt -u checkhash
+shopt -u checkjobs
 shopt -u checkwinsize
 shopt -s cmdhist
 shopt -u compat31
+shopt -u compat32
+shopt -u dirspell
 shopt -u dotglob
 shopt -u execfail
 shopt -s expand_aliases
@@ -15,6 +19,7 @@ shopt -u extglob
 shopt -s extquote
 shopt -u failglob
 shopt -s force_fignore
+shopt -u globstar
 shopt -u gnu_errfmt
 shopt -u histappend
 shopt -u histreedit
@@ -51,15 +56,20 @@ shopt -s progcomp
 shopt -s promptvars
 shopt -s sourcepath
 --
+shopt -u autocd
 shopt -u cdable_vars
 shopt -u checkhash
+shopt -u checkjobs
 shopt -u checkwinsize
 shopt -u compat31
+shopt -u compat32
+shopt -u dirspell
 shopt -u dotglob
 shopt -u execfail
 shopt -u extdebug
 shopt -u extglob
 shopt -u failglob
+shopt -u globstar
 shopt -u gnu_errfmt
 shopt -u histappend
 shopt -u histreedit
@@ -76,15 +86,20 @@ shopt -u restricted_shell
 shopt -u shift_verbose
 shopt -u xpg_echo
 --
+autocd         	off
 cdable_vars    	off
 checkhash      	off
+checkjobs      	off
 checkwinsize   	off
 compat31       	off
+compat32       	off
+dirspell       	off
 dotglob        	off
 execfail       	off
 extdebug       	off
 extglob        	off
 failglob       	off
+globstar       	off
 gnu_errfmt     	off
 histappend     	off
 histreedit     	off

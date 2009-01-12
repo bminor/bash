@@ -1,23 +1,24 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
+/*
   Birthdate:
   Sunday, January 10th, 1988.
   Initial author: Brian Fox
@@ -69,6 +70,10 @@
 #if defined (HISTORY)
 #  include "bashhist.h"
 #  include <readline/history.h>
+#endif
+
+#if defined (READLINE)
+#  include "bashline.h"
 #endif
 
 #include <tilde/tilde.h>
@@ -139,6 +144,12 @@ int interactive_shell = 0;
    shell exits. */
 int hup_on_exit = 0;
 
+/* Non-zero means to list status of running and stopped jobs at shell exit */
+int check_jobs_at_exit = 0;
+
+/* Non-zero means to change to a directory name supplied as a command name */
+int autocd = 0;
+
 /* Tells what state the shell was in when it started:
 	0 = non-interactive shell script
 	1 = interactive
@@ -171,6 +182,13 @@ time_t shell_start_time;
 
 /* Are we running in an emacs shell window? */
 int running_under_emacs;
+
+/* Do we have /dev/fd? */
+#ifdef HAVE_DEV_FD
+int have_devfd = HAVE_DEV_FD;
+#else
+int have_devfd = 0;
+#endif
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -212,8 +230,8 @@ int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
 #define Charp 2
-struct {
-  char *name;
+static const struct {
+  const char *name;
   int type;
   int *int_value;
   char **char_value;
@@ -292,6 +310,7 @@ static int uidget __P((void));
 
 static void init_interactive __P((void));
 static void init_noninteractive __P((void));
+static void init_interactive_script __P((void));
 
 static void set_shell_name __P((char *));
 static void shell_initialize __P((void));
@@ -535,19 +554,26 @@ main (argc, argv, env)
   set_default_lang ();
   set_default_locale_vars ();
 
+  /*
+   * M-x term -> TERM=eterm EMACS=22.1 (term:0.96)	(eterm)
+   * M-x shell -> TERM=dumb EMACS=t			(no line editing)
+   * M-x terminal -> TERM=emacs-em7955 EMACS=		(line editing)
+   */
   if (interactive_shell)
     {
       char *term, *emacs;
 
       term = get_string_value ("TERM");
-      no_line_editing |= term && (STREQ (term, "emacs"));
       emacs = get_string_value ("EMACS");
-      running_under_emacs = emacs ? ((strstr (emacs, "term") != 0) ? 2 : 1) : 0;
-#if 0
-      no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0';
-#else
+
+      /* Not sure any emacs terminal emulator sets TERM=emacs any more */
+      no_line_editing |= term && (STREQ (term, "emacs"));
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
-#endif
+
+      /* running_under_emacs == 2 for `eterm' */
+      running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
+      running_under_emacs += term && STREQN (term, "eterm", 5) && strstr (emacs, "term");
+
       if (running_under_emacs)
 	gnu_error_format = 1;
     }
@@ -687,8 +713,8 @@ main (argc, argv, env)
   if (interactive_shell)
     {
       /* Set up for checking for presence of mail. */
-      remember_mail_dates ();
       reset_mail_timer ();
+      init_mail_dates ();
 
 #if defined (HISTORY)
       /* Initialize the interactive history stuff. */
@@ -879,6 +905,10 @@ exit_shell (s)
   if (interactive_shell)
     maybe_save_shell_history ();
 #endif /* HISTORY */
+
+#if defined (COPROCESS_SUPPORT)
+  coproc_flush ();
+#endif
 
 #if defined (JOB_CONTROL)
   /* If the user has run `shopt -s huponexit', hangup all jobs when we exit
@@ -1416,7 +1446,7 @@ open_shell_script (script_name)
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
-	  internal_error ("%s: cannot execute binary file", filename);
+	  internal_error (_("%s: cannot execute binary file"), filename);
 	  exit (EX_BINARY_FILE);
 	}
       /* Now rewind the file back to the beginning. */
@@ -1426,7 +1456,7 @@ open_shell_script (script_name)
   /* Open the script.  But try to move the file descriptor to a randomly
      large one, in the hopes that any descriptors used by the script will
      not match with ours. */
-  fd = move_to_high_fd (fd, 0, -1);
+  fd = move_to_high_fd (fd, 1, -1);
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (fd, O_TEXT);
@@ -1467,7 +1497,7 @@ open_shell_script (script_name)
     /* But if a script is called with something like `bash -i scriptname',
        we need to do a non-interactive setup here, since we didn't do it
        before. */
-    init_noninteractive ();
+    init_interactive_script ();
 
   free (filename);
   return (fd);
@@ -1511,6 +1541,7 @@ unset_bash_input (check_zero)
     {
       close_buffered_fd (default_buffered_input);
       default_buffered_input = bash_input.location.buffered_fd = -1;
+      bash_input.type = st_none;		/* XXX */
     }
 #else /* !BUFFERED_INPUT */
   if (default_input)
@@ -1560,8 +1591,8 @@ set_shell_name (argv0)
 static void
 init_interactive ()
 {
-  interactive_shell = startup_state = interactive = 1;
-  expand_aliases = 1;
+  expand_aliases = interactive_shell = startup_state = 1;
+  interactive = 1;
 }
 
 static void
@@ -1576,6 +1607,13 @@ init_noninteractive ()
 #if defined (JOB_CONTROL)
   set_job_control (0);
 #endif /* JOB_CONTROL */
+}
+
+static void
+init_interactive_script ()
+{
+  init_noninteractive ();
+  expand_aliases = interactive_shell = startup_state = 1;
 }
 
 void
@@ -1719,6 +1757,12 @@ shell_reinitialize ()
   delete_all_contexts (shell_variables);
   delete_all_variables (shell_functions);
 
+  reinit_special_variables ();
+
+#if defined (READLINE)
+  bashline_reinitialize ();
+#endif
+
   shell_reinitialized = 1;
 }
 
@@ -1731,7 +1775,7 @@ show_shell_usage (fp, extra)
   char *set_opts, *s, *t;
 
   if (extra)
-    fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
+    fprintf (fp, _("GNU bash, version %s-(%s)\n"), shell_version_string (), MACHTYPE);
   fprintf (fp, _("Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n"),
 	     shell_name, shell_name);
   fputs (_("GNU long options:\n"), fp);

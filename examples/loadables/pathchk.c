@@ -22,6 +22,24 @@
 
 /* See Makefile for compilation details. */
 
+/*
+   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -45,6 +63,7 @@
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "maxpath.h"
+#include "common.h"
 
 #if !defined (errno)
 extern int errno;
@@ -112,6 +131,8 @@ pathchk_builtin (list)
 }
 
 char *pathchk_doc[] = {
+	"Check pathnames for validity.",
+	"",
 	"Check each pathname argument for validity (i.e., it may be used to",
 	"create or access a file without casuing syntax errors) and portability",
 	"(i.e., no filename truncation will result).  If the `-p' option is",

@@ -15,12 +15,12 @@ unset: usage: unset [-f] [-v] [name ...]
 ./errors.tests: line 52: unset: `/bin/sh': not a valid identifier
 ./errors.tests: line 55: unset: cannot simultaneously unset a function and a variable
 ./errors.tests: line 58: declare: -z: invalid option
-declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+declare: usage: declare [-aAfFilrtux] [-p] [name[=value] ...]
 ./errors.tests: line 60: declare: `-z': not a valid identifier
 ./errors.tests: line 61: declare: `/bin/sh': not a valid identifier
 ./errors.tests: line 65: declare: cannot use `-f' to make functions
 ./errors.tests: line 68: exec: -i: invalid option
-exec: usage: exec [-cl] [-a name] file [redirection ...]
+exec: usage: exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
 ./errors.tests: line 72: export: XPATH: not a function
 ./errors.tests: line 75: break: only meaningful in a `for', `while', or `until' loop
 ./errors.tests: line 76: continue: only meaningful in a `for', `while', or `until' loop
@@ -53,9 +53,10 @@ umask: usage: umask [-p] [-S] [mode]
 ./errors.tests: line 159: declare: VAR: readonly variable
 ./errors.tests: line 161: declare: unset: not found
 ./errors.tests: line 164: VAR: readonly variable
-./errors.tests: command substitution: line 168: syntax error: unexpected end of file
-./errors.tests: command substitution: line 168: syntax error near unexpected token `done'
-./errors.tests: command substitution: line 168: ` for z in 1 2 3; done '
+./errors.tests: command substitution: line 168: syntax error near unexpected token `)'
+./errors.tests: command substitution: line 168: ` for z in 1 2 3; do )'
+./errors.tests: command substitution: line 169: syntax error near unexpected token `done'
+./errors.tests: command substitution: line 169: ` for z in 1 2 3; done )'
 ./errors.tests: line 171: cd: HOME not set
 ./errors.tests: line 172: cd: /tmp/xyz.bash: No such file or directory
 ./errors.tests: line 174: cd: OLDPWD not set
@@ -68,7 +69,7 @@ source: usage: source filename [arguments]
 ./errors.tests: line 184: .: -i: invalid option
 .: usage: . filename [arguments]
 ./errors.tests: line 187: set: -q: invalid option
-set: usage: set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
+set: usage: set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
 ./errors.tests: line 190: enable: sh: not a shell builtin
 ./errors.tests: line 190: enable: bash: not a shell builtin
 ./errors.tests: line 193: shopt: cannot set and unset shell options simultaneously
@@ -85,7 +86,7 @@ command: usage: command [-pVv] command [arg ...]
 ./errors.tests: line 213: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
 ./errors.tests: line 216: trap: NOSIG: invalid signal specification
 ./errors.tests: line 219: trap: -s: invalid option
-trap: usage: trap [-lp] [arg signal_spec ...]
+trap: usage: trap [-lp] [[arg] signal_spec ...]
 ./errors.tests: line 225: return: can only `return' from a function or sourced script
 ./errors.tests: line 229: break: 0: loop count out of range
 ./errors.tests: line 233: continue: 0: loop count out of range

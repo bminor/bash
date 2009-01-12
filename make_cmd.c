@@ -1,23 +1,23 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
-This file is part of GNU Bash, the Bourne Again SHell.
+   This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -553,8 +553,9 @@ make_simple_command (element, command)
    the redirectee.word with the new input text.  If <<- is on,
    then remove leading TABS from each line. */
 void
-make_here_document (temp)
+make_here_document (temp, lineno)
      REDIRECT *temp;
+     int lineno;
 {
   int kill_leading, redir_len;
   char *redir_word, *document, *full_line;
@@ -646,6 +647,9 @@ make_here_document (temp)
       document_index += len;
     }
 
+  if (full_line == 0)
+    internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
+
 document_done:
   if (document)
     document[document_index] = '\0';
@@ -685,11 +689,12 @@ make_redirection (source, instruction, dest_and_filename)
 
     case r_output_direction:		/* >foo */
     case r_output_force:		/* >| foo */
-    case r_err_and_out:			/* command &>filename */
+    case r_err_and_out:			/* &>filename */
       temp->flags = O_TRUNC | O_WRONLY | O_CREAT;
       break;
 
     case r_appending_to:		/* >>foo */
+    case r_append_err_and_out:		/* &>> filename */
       temp->flags = O_APPEND | O_WRONLY | O_CREAT;
       break;
 
@@ -771,7 +776,9 @@ make_function_def (name, command, lineno, lstart)
   if (bash_source_a && array_num_elements (bash_source_a) > 0)
     temp->source_file = array_reference (bash_source_a, 0);
 #endif
+#if defined (DEBUGGER)
   bind_function_def (name->word, temp);
+#endif
 
   temp->source_file = 0;
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
@@ -787,6 +794,20 @@ make_subshell_command (command)
   temp->command = command;
   temp->flags = CMD_WANT_SUBSHELL;
   return (make_command (cm_subshell, (SIMPLE_COM *)temp));
+}
+
+COMMAND *
+make_coproc_command (name, command)
+     char *name;
+     COMMAND *command;
+{
+  COPROC_COM *temp;
+
+  temp = (COPROC_COM *)xmalloc (sizeof (COPROC_COM));
+  temp->name = savestring (name);
+  temp->command = command;
+  temp->flags = CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+  return (make_command (cm_coproc, (SIMPLE_COM *)temp));
 }
 
 /* Reverse the word list and redirection list in the simple command

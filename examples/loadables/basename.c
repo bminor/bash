@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "builtins.h"
 #include "shell.h"
+#include "common.h"
 
 basename_builtin (list)
      WORD_LIST *list;
@@ -90,6 +91,8 @@ basename_builtin (list)
 }
 
 char *basename_doc[] = {
+	"Return non-directory portion of pathname.",
+	"",
 	"The STRING is converted to a filename corresponding to the last",
 	"pathname component in STRING.  If the suffix string SUFFIX is",
 	"supplied, it is removed.",

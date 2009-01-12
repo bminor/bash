@@ -1,21 +1,21 @@
 #
 # Simple makefile for the sample loadable builtins
 #
-# Copyright (C) 1996 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2009 Free Software Foundation, Inc.     
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # Include some boilerplate Gnu makefile definitions.
 prefix = @prefix@
@@ -25,6 +25,8 @@ bindir = @bindir@
 libdir = @libdir@
 infodir = @infodir@
 includedir = @includedir@
+
+datarootdir = @datarootdir@
 
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
@@ -68,7 +70,7 @@ CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CFLAGS)
 SHOBJ_CC = @SHOBJ_CC@
 SHOBJ_CFLAGS = @SHOBJ_CFLAGS@
 SHOBJ_LD = @SHOBJ_LD@
-SHOBJ_LDFLAGS = @SHOBJ_LDFLAGS@
+SHOBJ_LDFLAGS = @SHOBJ_LDFLAGS@ @LDFLAGS@
 SHOBJ_XLDFLAGS = @SHOBJ_XLDFLAGS@
 SHOBJ_LIBS = @SHOBJ_LIBS@
 SHOBJ_STATUS = @SHOBJ_STATUS@
@@ -83,7 +85,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 
 ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink cut realpath getconf strftime
+	  uname sync push ln unlink cut realpath getconf strftime mypid
 OTHERPROG = necho hello cat
 
 all:	$(SHOBJ_STATUS)
@@ -186,6 +188,9 @@ realpath:	realpath.o
 strftime:	strftime.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strftime.o $(SHOBJ_LIBS)
 
+mypid:	mypid.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mypid.o $(SHOBJ_LIBS)
+
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
 #
@@ -236,3 +241,4 @@ push.o: push.c
 mkdir.o: mkdir.c
 realpath.o: realpath.c
 strftime.o: strftime.c
+mypid.o: mypid.c

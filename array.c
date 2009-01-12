@@ -9,23 +9,23 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -137,7 +137,7 @@ ARRAY_ELEMENT	*s, *e;
 	a = array_create ();
 	a->type = array->type;
 
-	for (p = s, i = 0; p != e; p = element_forw(p), i++) {
+	for (mi = 0, p = s, i = 0; p != e; p = element_forw(p), i++) {
 		n = array_create_element (element_index(p), element_value(p));
 		ADD_BEFORE(a->head, n);
 		mi = element_index(n);
@@ -281,7 +281,7 @@ char	*v;
 	return (array_rshift (a, 1, v));
 }
 
-ARRAY	*
+ARRAY *
 array_quote(array)
 ARRAY	*array;
 {
@@ -298,7 +298,7 @@ ARRAY	*array;
 	return array;
 }
 
-ARRAY	*
+ARRAY *
 array_quote_escapes(array)
 ARRAY	*array;
 {
@@ -312,6 +312,54 @@ ARRAY	*array;
 		FREE(a->value);
 		a->value = t;
 	}
+	return array;
+}
+
+ARRAY *
+array_dequote(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = dequote_string (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
+ARRAY *
+array_dequote_escapes(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = dequote_escapes (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
+ARRAY *
+array_remove_quoted_nulls(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a))
+		a->value = remove_quoted_nulls (a->value);
 	return array;
 }
 
@@ -329,7 +377,8 @@ int	starsub, quoted;
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, sep[2], *t;
+	char		*ifs, *sifs, *t;
+	int		slen;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -360,13 +409,25 @@ int	starsub, quoted;
 		array_quote_escapes(a2);
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
-		ifs = getifs();
-		sep[0] = ifs ? *ifs : '\0';
+		/* ${array[*]} */
+		array_remove_quoted_nulls (a2);
+		sifs = ifs_firstchar ((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free (sifs);
+	} else if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) {
+		/* ${array[@]} */
+		sifs = ifs_firstchar (&slen);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			if (slen < 2)
+				sifs = xrealloc(sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
+		}
+		t = array_to_string (a2, sifs, 0);
+		free (sifs);
 	} else
-		sep[0] = ' ';
-	sep[1] = '\0';
-
-	t = array_to_string (a2, sep, 0);
+		t = array_to_string (a2, " ", 0);
 	array_dispose(a2);
 
 	return t;
@@ -380,7 +441,8 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t, *ifs, sifs[2];
+	char	*t, *sifs, *ifs;
+	int	slen;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
@@ -396,11 +458,24 @@ int	mflags;
 		array_quote(a2);
 	else
 		array_quote_escapes(a2);
+
 	if (mflags & MATCH_STARSUB) {
-		ifs = getifs();
-		sifs[0] = ifs ? *ifs : '\0';
-		sifs[1] = '\0';
+		array_remove_quoted_nulls (a2);
+		sifs = ifs_firstchar((int *)NULL);
 		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else if (mflags & MATCH_QUOTED) {
+		/* ${array[@]} */
+		sifs = ifs_firstchar (&slen);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			if (slen < 2)
+				sifs = xrealloc (sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
+		}
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
 	} else
 		t = array_to_string (a2, " ", 0);
 	array_dispose (a2);
@@ -408,6 +483,56 @@ int	mflags;
 	return t;
 }
 
+char *
+array_modcase (a, pat, modop, mflags)
+ARRAY	*a;
+char	*pat;
+int	modop;
+int	mflags;
+{
+	ARRAY		*a2;
+	ARRAY_ELEMENT	*e;
+	char	*t, *sifs, *ifs;
+	int	slen;
+
+	if (a == 0 || array_head(a) == 0 || array_empty(a))
+		return ((char *)NULL);
+
+	a2 = array_copy(a);
+	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
+		t = sh_modcase(element_value(e), pat, modop);
+		FREE(element_value(e));
+		e->value = t;
+	}
+
+	if (mflags & MATCH_QUOTED)
+		array_quote(a2);
+	else
+		array_quote_escapes(a2);
+
+	if (mflags & MATCH_STARSUB) {
+		array_remove_quoted_nulls (a2);
+		sifs = ifs_firstchar((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else if (mflags & MATCH_QUOTED) {
+		/* ${array[@]} */
+		sifs = ifs_firstchar (&slen);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			if (slen < 2)
+				sifs = xrealloc (sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
+		}
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else
+		t = array_to_string (a2, " ", 0);
+	array_dispose (a2);
+
+	return t;
+}
 /*
  * Allocate and return a new array element with index INDEX and value
  * VALUE.
@@ -618,8 +743,8 @@ ARRAY	*a;
 }
 	
 /*
- * Return a string that is the concatenation of all the elements in A,
- * separated by SEP.
+ * Return a string that is the concatenation of the elements in A from START
+ * to END, separated by SEP.
  */
 static char *
 array_to_string_internal (start, end, sep, quoted)

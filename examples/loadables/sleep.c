@@ -3,6 +3,25 @@
  *
  * usage: sleep seconds[.fraction]
  */
+
+/*
+   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "config.h"
 
 #include "bashtypes.h"
@@ -27,6 +46,7 @@
 
 #include "shell.h"
 #include "builtins.h"
+#include "common.h"
 
 #define RETURN(x) \
 	do { \
@@ -34,77 +54,6 @@
 		if (usp) *usp = usec; \
 		return (x); \
 	} while (0)
-
-#if defined (HAVE_TIMEVAL) && defined (HAVE_SELECT)
-static int
-fsleep(sec, usec)
-long	sec, usec;
-{
-	struct timeval tv;
-
-	tv.tv_sec = sec;
-	tv.tv_usec = usec;
-
-	return select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &tv);
-}
-#else /* !HAVE_TIMEVAL || !HAVE_SELECT */
-static int
-fsleep(sec, usec)
-long	sec, usec;
-{
-	if (usec >= 500000)	/* round */
-		sec++;
-	return (sleep(sec));
-}
-#endif /* !HAVE_TIMEVAL || !HAVE_SELECT */
-
-/*
- * An incredibly simplistic floating point converter.
- */
-static int multiplier[7] = { 1, 100000, 10000, 1000, 100, 10, 1 };
-
-static int
-convert(s, sp, usp)
-char	*s;
-long	*sp, *usp;
-{
-	int n;
-	long sec, usec;
-	char	*p;
-
-	sec = usec = 0;
-
-#define DECIMAL	'.'
-
-	for (p = s; p && *p; p++) {
-		if (*p == DECIMAL)		/* decimal point */
-			break;
-		if (DIGIT(*p) == 0)
-			RETURN(0);
-		sec = (sec * 10) + (*p - '0');
-	}
-
-	if (*p == 0)
-		RETURN(1);
-
-	if (*p == DECIMAL)
-		p++;
-
-	/* Look for up to six digits past a decimal point. */
-	for (n = 0; n < 6 && p[n]; n++) {
-		if (DIGIT(p[n]) == 0)
-			RETURN(0);
-		usec = (usec * 10) + (p[n] - '0');
-	}
-
-	/* Now convert to millionths */
-	usec *= multiplier[n];
-
-	if (n == 6 && p[6] >= '5' && p[6] <= '9')
-		usec++;			/* round up 1 */
-
-	RETURN(1);
-}
 
 int
 sleep_builtin (list)
@@ -122,7 +71,7 @@ WORD_LIST	*list;
 		return (EX_USAGE);
 	}
 
-    	if (convert(list->word->word, &sec, &usec)) {
+    	if (uconvert(list->word->word, &sec, &usec)) {
 		fsleep(sec, usec);
 		return(EXECUTION_SUCCESS);
     	}
@@ -132,6 +81,8 @@ WORD_LIST	*list;
 }
 
 static char *sleep_doc[] = {
+	"Suspend execution for specified period.",
+	""
 	"sleep suspends execution for a minimum of SECONDS[.FRACTION] seconds.",
 	(char *)NULL
 };

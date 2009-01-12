@@ -1,24 +1,24 @@
 /* text.c -- text handling commands for readline. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
@@ -260,7 +260,7 @@ rl_forward_byte (count, key)
     {
       int end = rl_point + count;
 #if defined (VI_MODE)
-      int lend = rl_end > 0 ? rl_end - (rl_editing_mode == vi_mode) : rl_end;
+      int lend = rl_end > 0 ? rl_end - (VI_COMMAND_MODE()) : rl_end;
 #else
       int lend = rl_end;
 #endif
@@ -296,10 +296,16 @@ rl_forward_char (count, key)
 
   if (count > 0)
     {
+      if (rl_point == rl_end && EMACS_MODE())
+	{
+	  rl_ding ();
+	  return 0;
+	}
+
       point = _rl_find_next_mbchar (rl_line_buffer, rl_point, count, MB_FIND_NONZERO);
 
 #if defined (VI_MODE)
-      if (rl_end <= point && rl_editing_mode == vi_mode)
+      if (point >= rl_end && VI_COMMAND_MODE())
 	point = _rl_find_prev_mbchar (rl_line_buffer, rl_end, MB_FIND_NONZERO);
 #endif
 
@@ -943,7 +949,7 @@ rl_newline (count, key)
   if (rl_erase_empty_line && rl_point == 0 && rl_end == 0)
     return 0;
 
-  if (readline_echoing_p)
+  if (_rl_echoing_p)
     _rl_update_final ();
   return 0;
 }

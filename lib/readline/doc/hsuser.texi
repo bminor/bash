@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988-2006 Free Software Foundation, Inc.
+Copyright (C) 1988-2007 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -97,7 +97,11 @@ to contain no more than @env{$HISTFILESIZE}
 lines.  If @env{HISTFILESIZE} is not set, no truncation is performed.
 
 If the @env{HISTTIMEFORMAT} is set, the time stamp information
-associated with each history entry is written to the history file.
+associated with each history entry is written to the history file,
+marked with the history comment character.
+When the history file is read, lines beginning with the history
+comment character followed immediately by a digit are interpreted
+as timestamps for the previous history line.
 
 The builtin command @code{fc} may be used to list or edit and re-execute
 a portion of the history list.
@@ -133,7 +137,7 @@ history list and history file.
 @item fc
 @btindex fc
 @example
-@code{fc [-e @var{ename}] [-nlr] [@var{first}] [@var{last}]}
+@code{fc [-e @var{ename}] [-lnr] [@var{first}] [@var{last}]}
 @code{fc -s [@var{pat}=@var{rep}] [@var{command}]}
 @end example
 
@@ -277,7 +281,10 @@ them, so that they are available for subsequent recall.
 This is most useful in conjunction with Readline.
 
 The shell allows control of the various characters used by the
-history expansion mechanism with the @code{histchars} variable.
+history expansion mechanism with the @code{histchars} variable,
+as explained above (@pxref{Bash Variables}).  The shell uses
+the history comment character to mark history timestamps when
+writing the history file.
 @end ifset
 
 @menu
@@ -412,7 +419,7 @@ of the following modifiers, each preceded by a @samp{:}.
 Remove a trailing pathname component, leaving only the head.
 
 @item t
-Remove all leading  pathname  components, leaving the tail.
+Remove all leading pathname components, leaving the tail.
 
 @item r
 Remove a trailing suffix of the form @samp{.@var{suffix}}, leaving

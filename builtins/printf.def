@@ -1,39 +1,49 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2007 Free Software Foundation, Inc.
+Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+Bash is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+Bash is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA
+You should have received a copy of the GNU General Public License
+along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 
 $PRODUCES printf.c
 
 $BUILTIN printf
 $FUNCTION printf_builtin
 $SHORT_DOC printf [-v var] format [arguments]
-printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
-is a character string which contains three types of objects: plain
-characters, which are simply copied to standard output, character escape
-sequences which are converted and copied to the standard output, and
+Formats and prints ARGUMENTS under control of the FORMAT.
+
+Options:
+  -v var	assign the output to shell variable VAR rather than
+		display it on the standard output
+
+FORMAT is a character string which contains three types of objects: plain
+characters, which are simply copied to standard output; character escape
+sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
-argument.  In addition to the standard printf(1) formats, %b means to
-expand backslash escape sequences in the corresponding argument, and %q
-means to quote the argument in a way that can be reused as shell input.
-If the -v option is supplied, the output is placed into the value of the
-shell variable VAR rather than being sent to the standard output.
+argument.
+
+In addition to the standard format specifications described in printf(1)
+and printf(3), printf interprets:
+
+  %b	expand backslash escape sequences in the corresponding argument
+  %q	quote the argument in a way that can be reused as shell input
+
+Exit Status:
+Returns success unless an invalid option is given or a write or assignment
+error occurs.
 $END
 
 #include <config.h>
@@ -66,6 +76,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "shmbutil.h"
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "common.h"
@@ -99,31 +110,22 @@ extern int errno;
 
 #define PF(f, func) \
   do { \
-    char *b = 0; \
     int nw; \
     clearerr (stdout); \
     if (have_fieldwidth && have_precision) \
-      nw = asprintf(&b, f, fieldwidth, precision, func); \
+      nw = vflag ? vbprintf (f, fieldwidth, precision, func) : printf (f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
-      nw = asprintf(&b, f, fieldwidth, func); \
+      nw = vflag ? vbprintf (f, fieldwidth, func) : printf (f, fieldwidth, func); \
     else if (have_precision) \
-      nw = asprintf(&b, f, precision, func); \
+      nw = vflag ? vbprintf (f, precision, func) : printf (f, fieldwidth, func); \
     else \
-      nw = asprintf(&b, f, func); \
+      nw = vflag ? vbprintf (f, func) : printf (f, func); \
     tw += nw; \
-    if (b) \
+    if (ferror (stdout)) \
       { \
-	if (vflag) \
-	  (void)vbadd (b, nw); \
-	else \
-	  (void)fputs (b, stdout); \
-	if (ferror (stdout)) \
-	  { \
-	    sh_wrerror (); \
-	    clearerr (stdout); \
-	    return (EXECUTION_FAILURE); \
-	  } \
-	free (b); \
+	sh_wrerror (); \
+	clearerr (stdout); \
+	return (EXECUTION_FAILURE); \
       } \
   } while (0)
 
@@ -148,6 +150,9 @@ extern int errno;
 	  vbsize = 0; \
 	  vbuf = 0; \
 	} \
+      else if (vbuf) \
+	vbuf[0] = 0; \
+      terminate_immediately--; \
       fflush (stdout); \
       if (ferror (stdout)) \
 	{ \
@@ -165,11 +170,16 @@ extern int errno;
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
+#ifndef HAVE_VSNPRINTF
+extern int vsnprintf __P((char *, size_t, const char *, ...)) __attribute__((__format__ (printf, 3, 4)));
+#endif
+
 static void printf_erange __P((char *));
 static int printstr __P((char *, char *, int, int, int));
 static int tescape __P((char *, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *vbadd __P((char *, int));
+static int vbprintf __P((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
 static char *mklong __P((char *, char *, size_t));
 static int getchr __P((void));
 static char *getstr __P((void));
@@ -188,7 +198,7 @@ typedef double floatmax_t;
 #endif
 static floatmax_t getfloatmax __P((void));
 
-static int asciicode __P((void));
+static intmax_t asciicode __P((void));
 
 static WORD_LIST *garglist;
 static int retval;
@@ -228,6 +238,8 @@ printf_builtin (list)
 	    {
 	      vflag = 1;
 	      vblen = 0;
+	      if (vbuf)
+		vbuf[0] = 0;
 	    }
 	  else
 	    {
@@ -259,6 +271,8 @@ printf_builtin (list)
   /* If the format string is empty after preprocessing, return immediately. */
   if (format == 0 || *format == 0)
     return (EXECUTION_SUCCESS);
+
+  terminate_immediately++;
 	  
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
@@ -554,7 +568,7 @@ static void
 printf_erange (s)
      char *s;
 {
-  builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
 }
 
 /* We duplicate a lot of what printf(3) does here. */
@@ -577,7 +591,7 @@ printstr (fmt, string, len, fieldwidth, precision)
 #else
   if (string == 0 || len == 0)
 #endif
-    return;
+    return 0;
 
 #if 0
   s = fmt;
@@ -835,7 +849,7 @@ vbadd (buf, blen)
 
   if (blen == 1)
     vbuf[vblen++] = buf[0];
-  else
+  else if (blen > 1)
     {
       FASTCOPY (buf, vbuf  + vblen, blen);
       vblen += blen;
@@ -848,6 +862,42 @@ vbadd (buf, blen)
 #endif
 
   return vbuf;
+}
+
+static int
+#if defined (PREFER_STDARG)
+vbprintf (const char *format, ...)
+#else
+vbprintf (format, va_alist)
+  const char *format;
+  va_dcl
+#endif
+{
+  va_list args;
+  size_t nlen;
+  int blen;
+
+  SH_VA_START (args, format);
+  blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+
+  nlen = vblen + blen + 1;
+  if (nlen >= vbsize)
+    {
+      vbsize = ((nlen + 63) >> 6) << 6;
+      vbuf = (char *)xrealloc (vbuf, vbsize);
+      blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+    }
+
+  va_end (args);
+  vblen += blen;
+  vbuf[vblen] = '\0';
+
+#ifdef DEBUG
+  if  (strlen (vbuf) != vblen)
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+#endif
+  
+  return (blen);
 }
 
 static char *
@@ -1014,12 +1064,28 @@ getfloatmax ()
 }
 
 /* NO check is needed for garglist here. */
-static int
+static intmax_t
 asciicode ()
 {
-  register int ch;
+  register intmax_t ch;
+#if defined (HANDLE_MULTIBYTE)
+  wchar_t wc;
+  size_t mblength, slen;
+#endif
+  DECLARE_MBSTATE;
 
-  ch = garglist->word->word[1];
+#if defined (HANDLE_MULTIBYTE)
+  slen = strlen (garglist->word->word+1);
+  mblength = MBLEN (garglist->word->word+1, slen);
+  if (mblength > 1)
+    {
+      mblength = mbtowc (&wc, garglist->word->word+1, slen);
+      ch = wc;		/* XXX */
+    }
+  else
+#endif
+    ch = (unsigned char)garglist->word->word[1];
+
   garglist = garglist->next;
   return (ch);
 }

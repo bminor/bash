@@ -1,23 +1,23 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-This file is part of GNU Bash, the Bourne Again SHell.
+   This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (CROSS_COMPILING) 
 #  include <config.h>
@@ -71,6 +71,7 @@ extern char *strcpy ();
 /* Flag values that builtins can have. */
 #define BUILTIN_FLAG_SPECIAL	0x01
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
+#define BUILTIN_FLAG_POSIX_BUILTIN 0x04
 
 #define BASE_INDENT	4
 
@@ -154,9 +155,18 @@ char *assignment_builtins[] =
   (char *)NULL
 };
 
+/* The builtin commands that are special to the POSIX search order. */
+char *posix_builtins[] =
+{
+  "alias", "bg", "cd", "command", "false", "fc", "fg", "getopts", "jobs",
+  "kill", "newgrp", "pwd", "read", "true", "umask", "unalias", "wait",
+  (char *)NULL
+};
+
 /* Forward declarations. */
 static int is_special_builtin ();
 static int is_assignment_builtin ();
+static int is_posix_builtin ();
 
 #if !defined (HAVE_RENAME)
 static int rename ();
@@ -800,6 +810,8 @@ builtin_handler (self, defs, arg)
     new->flags |= BUILTIN_FLAG_SPECIAL;
   if (is_assignment_builtin (name))
     new->flags |= BUILTIN_FLAG_ASSIGNMENT;
+  if (is_posix_builtin (name))
+    new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
 
   array_add ((char *)new, defs->builtins);
   building_builtin = 1;
@@ -1080,23 +1092,23 @@ char *structfile_header[] = {
   "/* This file is manufactured by ./mkbuiltins, and should not be",
   "   edited by hand.  See the source to mkbuiltins for details. */",
   "",
-  "/* Copyright (C) 1987-2002 Free Software Foundation, Inc.",
+  "/* Copyright (C) 1987-2009 Free Software Foundation, Inc.",
   "",
   "   This file is part of GNU Bash, the Bourne Again SHell.",
   "",
-  "   Bash is free software; you can redistribute it and/or modify it",
-  "   under the terms of the GNU General Public License as published by",
-  "   the Free Software Foundation; either version 2, or (at your option)",
-  "   any later version.",
+  "   Bash is free software: you can redistribute it and/or modify",
+  "   it under the terms of the GNU General Public License as published by",
+  "   the Free Software Foundation, either version 3 of the License, or",
+  "   (at your option) any later version.",
   "",
-  "   Bash is distributed in the hope that it will be useful, but WITHOUT",
-  "   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY",
-  "   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public",
-  "   License for more details.",
+  "   Bash is distributed in the hope that it will be useful,",
+  "   but WITHOUT ANY WARRANTY; without even the implied warranty of",
+  "   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+  "   GNU General Public License for more details.",
   "",
   "   You should have received a copy of the GNU General Public License",
-  "   along with Bash; see the file COPYING.  If not, write to the Free",
-  "   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */",
+  "   along with Bash.  If not, see <http://www.gnu.org/licenses/>.",
+  "*/",
   "",
   "/* The list of shell builtins.  Each element is name, function, flags,",
   "   long-doc, short-doc.  The long-doc field contains a pointer to an array",
@@ -1217,14 +1229,15 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
 
-		  fprintf (structfile, "%s%s%s, %s_doc,\n",
+		  fprintf (structfile, "%s%s%s%s, %s_doc,\n",
 		    "BUILTIN_ENABLED | STATIC_BUILTIN",
 		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
+		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
 		    document_name (builtin));
 
 		  fprintf
-		    (structfile, "     \"%s\", (char *)NULL },\n",
+		    (structfile, "     N_(\"%s\"), (char *)NULL },\n",
 		     builtin->shortdoc ? builtin->shortdoc : builtin->name);
 
 		}
@@ -1559,6 +1572,13 @@ is_assignment_builtin (name)
      char *name;
 {
   return (_find_in_table (name, assignment_builtins));
+}
+
+static int
+is_posix_builtin (name)
+     char *name;
+{
+  return (_find_in_table (name, posix_builtins));
 }
 
 #if !defined (HAVE_RENAME)

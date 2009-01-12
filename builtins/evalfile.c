@@ -1,20 +1,22 @@
-/* Copyright (C) 1996-2003 Free Software Foundation, Inc.
+/* evalfile.c - read and evaluate commands from a file or file descriptor */
+
+/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
-   
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <config.h>
 
@@ -44,6 +46,8 @@
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
+
+#include <typemax.h>
 
 #include "common.h"
 
@@ -78,6 +82,7 @@ _evalfile (filename, flags)
   volatile int old_interactive;
   procenv_t old_return_catch;
   int return_val, fd, result, pflags;
+  ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
   size_t file_size;
@@ -147,31 +152,37 @@ file_error_and_exit:
   setmode (fd, O_TEXT);
 #endif
 
-  string = (char *)xmalloc (1 + file_size);
-  result = read (fd, string, file_size);
-  string[result] = '\0';
+  if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
+    {
+      string = (char *)xmalloc (1 + file_size);
+      nr = read (fd, string, file_size);
+      if (nr >= 0)
+	string[nr] = '\0';
+    }
+  else
+    nr = zmapfd (fd, &string, 0);
 
   return_val = errno;
   close (fd);
   errno = return_val;
 
-  if (result < 0)		/* XXX was != file_size, not < 0 */
+  if (nr < 0)		/* XXX was != file_size, not < 0 */
     {
       free (string);
       goto file_error_and_exit;
     }
 
-  if (result == 0)
+  if (nr == 0)
     {
       free (string);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_SUCCESS : 1);
     }
       
   if ((flags & FEVAL_CHECKBINARY) && 
-      check_binary_file (string, (result > 80) ? 80 : result))
+      check_binary_file (string, (nr > 80) ? 80 : nr))
     {
       free (string);
-      (*errfunc) ("%s: cannot execute binary file", filename);
+      (*errfunc) (_("%s: cannot execute binary file"), filename);
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 

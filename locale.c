@@ -1,22 +1,22 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -30,9 +30,14 @@
 #include "bashansi.h"
 #include <stdio.h>
 #include "chartypes.h"
+#include <errno.h>
 
 #include "shell.h"
 #include "input.h"	/* For bash_input */
+
+#ifndef errno
+extern int errno;
+#endif
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -144,7 +149,10 @@ set_locale_var (var, value)
      char *var, *value;
 {
   int r;
+  char *x;
 
+  x = "";
+  errno = 0;
   if (var[0] == 'T' && var[10] == 0)		/* TEXTDOMAIN */
     {
       FREE (default_domain);
@@ -177,7 +185,9 @@ set_locale_var (var, value)
 	  lc_all[0] = '\0';
 	}
 #if defined (HAVE_SETLOCALE)
-      r = *lc_all ? (setlocale (LC_ALL, lc_all) != 0) : reset_locale_vars ();
+      r = *lc_all ? ((x = setlocale (LC_ALL, lc_all)) != 0) : reset_locale_vars ();
+      if (x == 0)
+	internal_warning("setlocale: LC_ALL: cannot change locale (%s): %s", lc_all, strerror(errno));
       locale_setblanks ();
       return r;
 #else
@@ -191,9 +201,8 @@ set_locale_var (var, value)
 #  if defined (LC_CTYPE)
       if (lc_all == 0 || *lc_all == '\0')
 	{
-	  r = (setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE")) != 0);
+	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
-	  return r;
 	}
 #  endif
     }
@@ -201,34 +210,36 @@ set_locale_var (var, value)
     {
 #  if defined (LC_COLLATE)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE")) != 0);
+	x = setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
 #  endif /* LC_COLLATE */
     }
   else if (var[3] == 'M' && var[4] == 'E')	/* LC_MESSAGES */
     {
 #  if defined (LC_MESSAGES)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES")) != 0);
+	x = setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
 #  endif /* LC_MESSAGES */
     }
   else if (var[3] == 'N' && var[4] == 'U')	/* LC_NUMERIC */
     {
 #  if defined (LC_NUMERIC)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC")) != 0);
+	x = setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
 #  endif /* LC_NUMERIC */
     }
   else if (var[3] == 'T' && var[4] == 'I')	/* LC_TIME */
     {
 #  if defined (LC_TIME)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_TIME, get_locale_var ("LC_TIME")) != 0);
+	x = setlocale (LC_TIME, get_locale_var ("LC_TIME"));
 #  endif /* LC_TIME */
     }
 #endif /* HAVE_SETLOCALE */
   
+  if (x == 0)
+    internal_warning("setlocale: %s: cannot change locale (%s): %s", var, get_locale_var (var), strerror(errno));
 
-  return (0);
+  return (x != 0);
 }
 
 /* Called when LANG is assigned a value.  Tracks value in `lang'.  Calls
@@ -280,8 +291,11 @@ get_locale_var (var)
   if (locale == 0 || *locale == 0)
     locale = lang;
   if (locale == 0 || *locale == 0)
+#if 0
     locale = default_locale;	/* system-dependent; not really portable.  should it be "C"? */
-
+#else
+    locale = "";
+#endif
   return (locale);
 }
 
@@ -291,6 +305,7 @@ get_locale_var (var)
 static int
 reset_locale_vars ()
 {
+  char *t;
 #if defined (HAVE_SETLOCALE)
   if (lang == 0 || *lang == '\0')
     maybe_make_export_env ();		/* trust that this will change environment for setlocale */
@@ -298,19 +313,19 @@ reset_locale_vars ()
     return 0;
 
 #  if defined (LC_CTYPE)
-  setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
+  t = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 #  endif
 #  if defined (LC_COLLATE)
-  setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
+  t = setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
 #  endif
 #  if defined (LC_MESSAGES)
-  setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
+  t = setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
 #  endif
 #  if defined (LC_NUMERIC)
-  setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
+  t = setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
 #  endif
 #  if defined (LC_TIME)
-  setlocale (LC_TIME, get_locale_var ("LC_TIME"));
+  t = setlocale (LC_TIME, get_locale_var ("LC_TIME"));
 #  endif
 
   locale_setblanks ();  

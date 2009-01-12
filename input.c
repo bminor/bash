@@ -1,22 +1,22 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -47,6 +47,18 @@
 extern int errno;
 #endif /* !errno */
 
+#if defined (EAGAIN)
+#  define X_EAGAIN EAGAIN
+#else
+#  define X_EAGAIN -99
+#endif
+
+#if defined (EWOULDBLOCK)
+#  define X_EWOULDBLOCK EWOULDBLOCK
+#else
+#  define X_EWOULDBLOCK -99
+#endif
+
 extern void termsig_handler __P((int));
 
 /* Functions to handle reading input on systems that don't restart read(2)
@@ -75,6 +87,15 @@ getc_with_restart (stream)
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
 	  if (local_bufused > 0)
 	    break;
+	  else if (errno == X_EAGAIN || errno == X_EWOULDBLOCK)
+	    {
+	      if (sh_unset_nodelay_mode (fileno (stream)) < 0)
+		{
+		  sys_error (_("cannot reset nodelay mode for fd %d"), fileno (stream));
+		  return EOF;
+		}
+	      continue;
+	    }
 	  else if (local_bufused == 0 || errno != EINTR)
 	    {
 	      local_index = 0;

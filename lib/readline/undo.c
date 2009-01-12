@@ -1,25 +1,25 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987, 1989, 1992, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #define READLINE_LIBRARY
 
 #if defined (HAVE_CONFIG_H)
@@ -116,7 +116,7 @@ rl_free_undo_list ()
       if (release->what == UNDO_DELETE)
 	free (release->text);
 
-      free (release);
+      xfree (release);
     }
   rl_undo_list = (UNDO_LIST *)NULL;
   replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
@@ -171,7 +171,7 @@ rl_do_undo ()
   start = end = waiting_for_begin = 0;
   do
     {
-      if (!rl_undo_list)
+      if (rl_undo_list == 0)
 	return (0);
 
       _rl_doing_an_undo = 1;
@@ -221,7 +221,7 @@ rl_do_undo ()
       rl_undo_list = rl_undo_list->next;
       replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
 
-      free (release);
+      xfree (release);
     }
   while (waiting_for_begin);
 
@@ -291,7 +291,7 @@ int
 rl_revert_line (count, key)
      int count, key;
 {
-  if (!rl_undo_list)
+  if (rl_undo_list == 0)
     rl_ding ();
   else
     {

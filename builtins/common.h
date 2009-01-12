@@ -4,19 +4,19 @@
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if  !defined (__COMMON_H)
 #  define __COMMON_H
@@ -31,6 +31,8 @@
 #define SEVAL_NOHIST	0x004
 #define SEVAL_NOFREE	0x008
 #define SEVAL_RESETLINE	0x010
+#define SEVAL_PARSEONLY	0x020
+#define SEVAL_NOLONGJMP 0x040
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */
@@ -57,6 +59,7 @@
 
 /* Functions from common.c */
 extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+extern void builtin_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_usage __P((void));
 extern void no_args __P((WORD_LIST *));
 extern int no_options __P((WORD_LIST *));
@@ -78,6 +81,7 @@ extern void sh_nojobs __P((char *));
 extern void sh_restricted __P((char *));
 extern void sh_notbuiltin __P((char *));
 extern void sh_wrerror __P((void));
+extern int sh_chkwrite __P((int));
 
 extern char **make_builtin_argv __P((WORD_LIST *, int *));
 extern void remember_args __P((WORD_LIST *, int));
@@ -86,7 +90,7 @@ extern int dollar_vars_changed __P((void));
 extern void set_dollar_vars_unchanged __P((void));
 extern void set_dollar_vars_changed __P((void));
 
-extern intmax_t get_numeric_arg __P((WORD_LIST *, int));
+extern int get_numeric_arg __P((WORD_LIST *, int, intmax_t *));
 extern int get_exitstat __P((WORD_LIST *));
 extern int read_octal __P((char *));
 
@@ -141,6 +145,7 @@ extern int describe_command __P((char *, int));
 
 /* Functions from setattr.def */
 extern int set_or_show_attributes __P((WORD_LIST *, int, int));
+extern int show_all_var_attributes __P((int, int));
 extern int show_var_attributes __P((SHELL_VAR *, int, int));
 extern int show_name_attributes __P((char *, int));
 extern void set_var_attribute __P((char *, int, int));
@@ -154,6 +159,7 @@ extern WORD_LIST *get_directory_stack __P((int));
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
+extern int parse_string __P((char *, const char *, int, char **));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));

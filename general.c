@@ -1,22 +1,22 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -58,7 +58,7 @@ static int unquoted_tilde_word __P((const char *));
 static void initialize_group_array __P((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
-char *bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
+const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
 
 /* Do whatever is necessary to initialize `Posix mode'. */
 void
@@ -69,6 +69,7 @@ posix_initialize (on)
   if (on != 0)
     {
       interactive_comments = source_uses_path = expand_aliases = 1;
+      source_searches_cwd = 0;
     }
 
   /* Things that should be turned on when posix mode is disabled. */
@@ -161,7 +162,7 @@ all_digits (string)
    not null. */
 int
 legal_number (string, result)
-     char *string;
+     const char *string;
      intmax_t *result;
 {
   intmax_t value;
@@ -172,7 +173,7 @@ legal_number (string, result)
 
   errno = 0;
   value = strtoimax (string, &ep, 10);
-  if (errno)
+  if (errno || ep == string)
     return 0;	/* errno is set on overflow or underflow */
 
   /* Skip any trailing whitespace, since strtoimax does not. */
@@ -475,14 +476,8 @@ check_binary_file (sample, sample_len)
       c = sample[i];
       if (c == '\n')
 	return (0);
-
-#if 0
-      if (ISSPACE (c) == 0 && ISPRINT (c) == 0)
-#else
       if (c == '\0')
-#endif
 	return (1);
-      
     }
 
   return (0);
@@ -490,9 +485,53 @@ check_binary_file (sample, sample_len)
 
 /* **************************************************************** */
 /*								    */
+/*		    Functions to manipulate pipes		    */
+/*								    */
+/* **************************************************************** */
+
+int
+sh_openpipe (pv)
+     int *pv;
+{
+  int r;
+
+  if ((r = pipe (pv)) < 0)
+    return r;
+
+  pv[0] = move_to_high_fd (pv[0], 1, 64);
+  pv[1] = move_to_high_fd (pv[1], 1, 64);
+
+  return 0;  
+}
+
+int
+sh_closepipe (pv)
+     int *pv;
+{
+  if (pv[0] >= 0)
+    close (pv[0]);
+
+  if (pv[1] >= 0)
+    close (pv[1]);
+
+  pv[0] = pv[1] = -1;
+  return 0;
+}
+
+/* **************************************************************** */
+/*								    */
 /*		    Functions to inspect pathnames		    */
 /*								    */
 /* **************************************************************** */
+
+int
+file_exists (fn)
+     char *fn;
+{
+  struct stat sb;
+
+  return (stat (fn, &sb) == 0);
+}
 
 int
 file_isdir (fn)
@@ -639,6 +678,72 @@ polite_directory_format (name)
     }
   else
     return (name);
+}
+
+/* Trim NAME.  If NAME begins with `~/', skip over tilde prefix.  Trim to
+   keep any tilde prefix and PROMPT_DIRTRIM trailing directory components
+   and replace the intervening characters with `...' */
+char *
+trim_pathname (name, maxlen)
+     char *name;
+     int maxlen;
+{
+  int nlen, ndirs;
+  intmax_t nskip;
+  char *nbeg, *nend, *ntail, *v;
+
+  if (name == 0 || (nlen = strlen (name)) == 0)
+    return name;
+  nend = name + nlen;
+
+  v = get_string_value ("PROMPT_DIRTRIM");
+  if (v == 0 || *v == 0)
+    return name;
+  if (legal_number (v, &nskip) == 0 || nskip <= 0)
+    return name;
+
+  /* Skip over tilde prefix */
+  nbeg = name;
+  if (name[0] == '~')
+    for (nbeg = name; *nbeg; nbeg++)
+      if (*nbeg == '/')
+	{
+	  nbeg++;
+	  break;
+	}
+  if (*nbeg == 0)
+    return name;
+
+  for (ndirs = 0, ntail = nbeg; *ntail; ntail++)
+    if (*ntail == '/')
+      ndirs++;
+  if (ndirs <= nskip)
+    return name;
+
+  for (ntail = (*nend == '/') ? nend : nend - 1; ntail > nbeg; ntail--)
+    {
+      if (*ntail == '/')
+	nskip--;
+      if (nskip == 0)
+	break;
+    }
+  if (ntail == nbeg)
+    return name;
+
+  /* Now we want to return name[0..nbeg]+"..."+ntail, modifying name in place */
+  nlen = ntail - nbeg;
+  if (nlen <= 3)
+    return name;
+
+  *nbeg++ = '.';
+  *nbeg++ = '.';
+  *nbeg++ = '.';
+
+  nlen = nend - ntail;
+  memcpy (nbeg, ntail, nlen);
+  nbeg[nlen] = '\0';
+
+  return name;
 }
 
 /* Given a string containing units of information separated by colons,
@@ -844,11 +949,12 @@ bash_tilde_expand (s, assign_p)
      const char *s;
      int assign_p;
 {
-  int old_immed, r;
+  int old_immed, old_term, r;
   char *ret;
 
   old_immed = interrupt_immediately;
-  interrupt_immediately = 1;
+  old_term = terminate_immediately;
+  interrupt_immediately = terminate_immediately = 1;
 
   tilde_additional_prefixes = assign_p == 0 ? (char **)0
   					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
@@ -858,6 +964,7 @@ bash_tilde_expand (s, assign_p)
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
   interrupt_immediately = old_immed;
+  terminate_immediately = old_term;
   return (ret);
 }
 

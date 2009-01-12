@@ -1,5 +1,8 @@
 /*
  * finfo - print file info
+ *
+ * Chet Ramey
+ * chet@po.cwru.edu
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,6 +15,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
+#include "posixtime.h"
 
 #include "bashansi.h"
 #include "shell.h"
@@ -375,6 +379,8 @@ finfo_builtin(list)
 }
 
 static char *finfo_doc[] = {
+  "Display information about file attributes.",
+  "",
   "Display information about each FILE.  Only single operators should",
   "be supplied.  If no options are supplied, a summary of the info",
   "available about each FILE is printed.  If FILE is of the form",

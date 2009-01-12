@@ -1,22 +1,23 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Bash; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "config.h"
 
 #if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
@@ -43,8 +44,10 @@ extern int errno;
 
 #include "bashansi.h"
 #include "bashintl.h"
-
 #include "memalloc.h"
+
+#define NEED_FPURGE_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include "execute_cmd.h"
@@ -53,6 +56,8 @@ extern int errno;
 #if defined (BUFFERED_INPUT)
 #  include "input.h"
 #endif
+
+#define SHELL_FD_BASE	10
 
 int expanding_redir;
 
@@ -63,9 +68,10 @@ extern REDIRECT *exec_redirection_undo_list;
 /* Static functions defined and used in this file. */
 static void add_undo_close_redirect __P((int));
 static void add_exec_redirect __P((REDIRECT *));
-static int add_undo_redirect __P((int, enum r_instruction));
+static int add_undo_redirect __P((int, enum r_instruction, int));
 static int expandable_redirection_filename __P((REDIRECT *));
 static int stdin_redirection __P((enum r_instruction, int));
+static int undoablefd __P((int));
 static int do_redirection_internal __P((REDIRECT *, int));
 
 static int write_here_document __P((int, WORD_DESC *));
@@ -98,7 +104,8 @@ redirection_error (temp, error)
        exec 4294967297>x */
     filename = _("file descriptor out of range");
 #ifdef EBADF
-  else if (temp->redirector >= 0 && errno == EBADF)
+  /* This error can never involve NOCLOBBER */
+  else if (error != NOCLOBBER_REDIRECT && temp->redirector >= 0 && error == EBADF)
     {
       /* If we're dealing with two file descriptors, we have to guess about
          which one is invalid; in the cases of r_{duplicating,move}_input and
@@ -152,7 +159,7 @@ redirection_error (temp, error)
 #endif /* RESTRICTED_SHELL */
 
     case HEREDOC_REDIRECT:
-      internal_error (_("cannot create temp file for here document: %s"), strerror (heredoc_errno));
+      internal_error (_("cannot create temp file for here-document: %s"), strerror (heredoc_errno));
       break;
 
     default:
@@ -213,6 +220,7 @@ expandable_redirection_filename (redirect)
     case r_input_direction:
     case r_inputa_direction:
     case r_err_and_out:
+    case r_append_err_and_out:
     case r_input_output:
     case r_output_force:
     case r_duplicating_input_word:
@@ -375,7 +383,7 @@ here_document_to_fd (redirectee, ri)
   char *filename;
   int r, fd, fd2;
 
-  fd = sh_mktmpfd ("sh-thd", MT_USERANDOM, &filename);
+  fd = sh_mktmpfd ("sh-thd", MT_USERANDOM|MT_USETMPDIR, &filename);
 
   /* If we failed for some reason other than the file existing, abort */
   if (fd < 0)
@@ -481,7 +489,7 @@ redir_special_open (spec, filename, flags, mode, ri)
       if (all_digits (filename+8) && legal_number (filename+8, &lfd) && lfd == (int)lfd)
 	{
 	  fd = lfd;
-	  fd = fcntl (fd, F_DUPFD, 10);
+	  fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
 	}
       else
 	fd = AMBIGUOUS_REDIRECT;
@@ -490,13 +498,13 @@ redir_special_open (spec, filename, flags, mode, ri)
 
 #if !defined (HAVE_DEV_STDIN)
     case RF_DEVSTDIN:
-      fd = fcntl (0, F_DUPFD, 10);
+      fd = fcntl (0, F_DUPFD, SHELL_FD_BASE);
       break;
     case RF_DEVSTDOUT:
-      fd = fcntl (1, F_DUPFD, 10);
+      fd = fcntl (1, F_DUPFD, SHELL_FD_BASE);
       break;
     case RF_DEVSTDERR:
-      fd = fcntl (2, F_DUPFD, 10);
+      fd = fcntl (2, F_DUPFD, SHELL_FD_BASE);
       break;
 #endif
 
@@ -604,6 +612,18 @@ redir_open (filename, flags, mode, ri)
     }
 
   return fd;
+}
+
+static int
+undoablefd (fd)
+     int fd;
+{
+  int clexec;
+
+  clexec = fcntl (fd, F_GETFD, 0);
+  if (clexec == -1 || (fd >= SHELL_FD_BASE && clexec == 1))
+    return 0;
+  return 1;
 }
 
 /* Do the specific redirection requested.  Returns errno or one of the
@@ -720,6 +740,7 @@ do_redirection_internal (redirect, flags)
     case r_input_direction:
     case r_inputa_direction:
     case r_err_and_out:		/* command &>filename */
+    case r_append_err_and_out:	/* command &>> filename */
     case r_input_output:
     case r_output_force:
       if (posixly_correct && interactive_shell == 0)
@@ -757,7 +778,7 @@ do_redirection_internal (redirect, flags)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		add_undo_redirect (redirector, ri);
+		add_undo_redirect (redirector, ri, -1);
 	      else
 		add_undo_close_redirect (redirector);
 	    }
@@ -765,6 +786,20 @@ do_redirection_internal (redirect, flags)
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
+
+	  /* Make sure there is no pending output before we change the state
+	     of the underlying file descriptor, since the builtins use stdio
+	     for output. */
+	  if (redirector == 1 && fileno (stdout) == redirector)
+	    {
+	      fflush (stdout);
+	      fpurge (stdout);
+	    }
+	  else if (redirector == 2 && fileno (stderr) == redirector)
+	    {
+	      fflush (stderr);
+	      fpurge (stderr);
+	    }
 
 	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
 	    return (errno);
@@ -803,12 +838,12 @@ do_redirection_internal (redirect, flags)
 
       /* If we are hacking both stdout and stderr, do the stderr
 	 redirection here. */
-      if (ri == r_err_and_out)
+      if (ri == r_err_and_out || ri == r_append_err_and_out)
 	{
 	  if (flags & RX_ACTIVE)
 	    {
 	      if (flags & RX_UNDOABLE)
-		add_undo_redirect (2, ri);
+		add_undo_redirect (2, ri, -1);
 	      if (dup2 (1, 2) < 0)
 		return (errno);
 	    }
@@ -836,7 +871,7 @@ do_redirection_internal (redirect, flags)
 	        {
 		  /* Only setup to undo it if the thing to undo is active. */
 		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		    add_undo_redirect (redirector, ri);
+		    add_undo_redirect (redirector, ri, -1);
 		  else
 		    add_undo_close_redirect (redirector);
 	        }
@@ -878,11 +913,10 @@ do_redirection_internal (redirect, flags)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if (fcntl (redirector, F_GETFD, 0) != -1)
-		add_undo_redirect (redirector, ri);
+		add_undo_redirect (redirector, ri, redir_fd);
 	      else
 		add_undo_close_redirect (redirector);
 	    }
-
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
@@ -915,9 +949,21 @@ do_redirection_internal (redirect, flags)
 #endif
 	    SET_CLOSE_ON_EXEC (redirector);
 
+	  /* When undoing saving of non-standard file descriptors (>=3) using
+	     file descriptors >= SHELL_FD_BASE, we set the saving fd to be
+	     close-on-exec and use a flag to decide how to set close-on-exec
+	     when the fd is restored. */
+	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && redir_fd >= SHELL_FD_BASE)
+	    SET_OPEN_ON_EXEC (redirector);
+	    
 	  /* dup-and-close redirection */
 	  if (ri == r_move_input || ri == r_move_output)
-	    close (redir_fd);
+	    {
+	      close (redir_fd);
+#if defined (COPROCESS_SUPPORT)
+	      coproc_fdchk (redir_fd);	/* XXX - loses coproc fds */
+#endif
+	    }
 	}
       break;
 
@@ -925,7 +971,11 @@ do_redirection_internal (redirect, flags)
       if (flags & RX_ACTIVE)
 	{
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
-	    add_undo_redirect (redirector, ri);
+	    add_undo_redirect (redirector, ri, -1);
+
+#if defined (COPROCESS_SUPPORT)
+	  coproc_fdchk (redirector);
+#endif
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -943,22 +993,30 @@ do_redirection_internal (redirect, flags)
   return (0);
 }
 
-#define SHELL_FD_BASE	10
-
 /* Remember the file descriptor associated with the slot FD,
    on REDIRECTION_UNDO_LIST.  Note that the list will be reversed
    before it is executed.  Any redirections that need to be undone
    even if REDIRECTION_UNDO_LIST is discarded by the exec builtin
-   are also saved on EXEC_REDIRECTION_UNDO_LIST. */
+   are also saved on EXEC_REDIRECTION_UNDO_LIST.  FDBASE says where to
+   start the duplicating.  If it's less than SHELL_FD_BASE, we're ok,
+   and can use SHELL_FD_BASE (-1 == don't care).  If it's >= SHELL_FD_BASE,
+   we have to make sure we don't use fdbase to save a file descriptor,
+   since we're going to use it later (e.g., make sure we don't save fd 0
+   to fd 10 if we have a redirection like 0<&10).  If the value of fdbase
+   puts the process over its fd limit, causing fcntl to fail, we try
+   again with SHELL_FD_BASE. */
 static int
-add_undo_redirect (fd, ri)
+add_undo_redirect (fd, ri, fdbase)
      int fd;
      enum r_instruction ri;
+     int fdbase;
 {
   int new_fd, clexec_flag;
   REDIRECT *new_redirect, *closer, *dummy_redirect;
 
-  new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
+  new_fd = fcntl (fd, F_DUPFD, (fdbase < SHELL_FD_BASE) ? SHELL_FD_BASE : fdbase+1);
+  if (new_fd < 0)
+    new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
 
   if (new_fd < 0)
     {
@@ -979,6 +1037,8 @@ add_undo_redirect (fd, ri)
   else
     new_redirect = make_redirection (fd, r_duplicating_output, rd);
   new_redirect->flags |= RX_INTERNAL;
+  if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
+    new_redirect->flags |= RX_SAVCLEXEC;
   new_redirect->next = closer;
 
   closer->next = redirection_undo_list;
@@ -990,17 +1050,19 @@ add_undo_redirect (fd, ri)
 
   /* experimental:  if we're saving a redirection to undo for a file descriptor
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
-     causes redirections to be discarded. */
-  if (fd >= SHELL_FD_BASE && ri != r_close_this)
+     causes redirections to be discarded.  There needs to be a difference
+     between fds that are used to save other fds and then are the target of
+     user redirctions and fds that are just the target of user redirections.
+     We use the close-on-exec flag to tell the difference; fds > SHELL_FD_BASE
+     that have the close-on-exec flag set are assumed to be fds used internally
+     to save others. */
+  if (fd >= SHELL_FD_BASE && ri != r_close_this && clexec_flag)
     {
       rd.dest = new_fd;
       new_redirect = make_redirection (fd, r_duplicating_output, rd);
-#if 0
-      closer = copy_redirects (new_redirect);
-      add_exec_redirect (closer);
-#else
+      new_redirect->flags |= RX_INTERNAL;
+
       add_exec_redirect (new_redirect);
-#endif     
     }
 
   /* File descriptors used only for saving others should always be
@@ -1012,6 +1074,8 @@ add_undo_redirect (fd, ri)
      because file descriptors 0-2 should always be open-on-exec,
      and the restore above in do_redirection() will take care of it. */
   if (clexec_flag || fd < 3)
+    SET_CLOSE_ON_EXEC (new_fd);
+  else if (redirection_undo_list->flags & RX_SAVCLEXEC)
     SET_CLOSE_ON_EXEC (new_fd);
 
   return (0);
@@ -1064,6 +1128,7 @@ stdin_redirection (ri, redirector)
     case r_appending_to:
     case r_duplicating_output:
     case r_err_and_out:
+    case r_append_err_and_out:
     case r_output_force:
     case r_duplicating_output_word:
       return (0);

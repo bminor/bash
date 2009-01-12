@@ -215,7 +215,7 @@ AC_CACHE_VAL(bash_cv_sys_siglist,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifndef SYS_SIGLIST_DECLARED
+#if !HAVE_DECL_SYS_SIGLIST
 extern char *sys_siglist[];
 #endif
 main()
@@ -336,18 +336,18 @@ main()
 {
 DIR *dir;
 int fd, err;
-err = mkdir("/tmp/bash-aclocal", 0700);
+err = mkdir("bash-aclocal", 0700);
 if (err < 0) {
   perror("mkdir");
   exit(1);
 }
-unlink("/tmp/bash-aclocal/not_a_directory");
-fd = open("/tmp/bash-aclocal/not_a_directory", O_WRONLY|O_CREAT|O_EXCL, 0666);
+unlink("bash-aclocal/not_a_directory");
+fd = open("bash-aclocal/not_a_directory", O_WRONLY|O_CREAT|O_EXCL, 0666);
 write(fd, "\n", 1);
 close(fd);
-dir = opendir("/tmp/bash-aclocal/not_a_directory");
-unlink("/tmp/bash-aclocal/not_a_directory");
-rmdir("/tmp/bash-aclocal");
+dir = opendir("bash-aclocal/not_a_directory");
+unlink("bash-aclocal/not_a_directory");
+rmdir("bash-aclocal");
 exit (dir == 0);
 }], bash_cv_opendir_not_robust=yes,bash_cv_opendir_not_robust=no,
     [AC_MSG_WARN(cannot check opendir if cross compiling -- defaulting to no)
@@ -685,7 +685,7 @@ fi
 ])
 
 AC_DEFUN(BASH_FUNC_GETCWD,
-[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory])
+[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory with 0 size])
 AC_CACHE_VAL(bash_cv_getcwd_malloc,
 [AC_TRY_RUN([
 #include <stdio.h>
@@ -1423,19 +1423,19 @@ exit (1);
 #if defined (NeXT)
 exit (1);
 #endif
-err = mkdir("/tmp/bash-aclocal", 0700);
+err = mkdir("bash-aclocal", 0700);
 if (err < 0) {
   perror ("mkdir");
   exit(1);
 }
-fd = mknod ("/tmp/bash-aclocal/sh-np-autoconf", 0666 | S_IFIFO, 0);
+fd = mknod ("bash-aclocal/sh-np-autoconf", 0666 | S_IFIFO, 0);
 if (fd == -1) {
-  rmdir ("/tmp/bash-aclocal");
+  rmdir ("bash-aclocal");
   exit (1);
 }
 close(fd);
-unlink ("/tmp/bash-aclocal/sh-np-autoconf");
-rmdir ("/tmp/bash-aclocal");
+unlink ("bash-aclocal/sh-np-autoconf");
+rmdir ("bash-aclocal");
 exit(0);
 }], bash_cv_sys_named_pipes=present, bash_cv_sys_named_pipes=missing,
     [AC_MSG_WARN(cannot check for named pipes if cross-compiling -- defaulting to missing)
@@ -1541,18 +1541,16 @@ AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
 [bash_cv_dev_fd=""
-if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
+if test -d /dev/fd  && (exec test -r /dev/fd/0 < /dev/null) ; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
-   exec 3</dev/null
-   if test -r /dev/fd/3; then
+   if (exec test -r /dev/fd/3 3</dev/null) ; then
      bash_cv_dev_fd=standard
    else
      bash_cv_dev_fd=absent
    fi
-   exec 3<&-
 fi
 if test -z "$bash_cv_dev_fd" ; then 
-  if test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
+  if test -d /proc/self/fd && (exec test -r /proc/self/fd/0 < /dev/null) ; then
     bash_cv_dev_fd=whacky
   else
     bash_cv_dev_fd=absent
@@ -1572,9 +1570,9 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && test -r /dev/stdin < /dev/null; then
+[if test -d /dev/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && test -r /dev/stdin < /dev/null; then
+ elif test -d /proc/self/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent
@@ -1679,8 +1677,9 @@ AC_CHECK_HEADERS(wctype.h)
 AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
-AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
+AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
+AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
 
 AC_CHECK_FUNC(wcrtomb, AC_DEFINE(HAVE_WCRTOMB))
 AC_CHECK_FUNC(wcscoll, AC_DEFINE(HAVE_WCSCOLL))
@@ -2366,7 +2365,7 @@ AC_DEFUN([AM_INTL_SUBDIR],
   AC_CHECK_HEADERS([argz.h limits.h locale.h nl_types.h malloc.h stddef.h \
 stdlib.h string.h unistd.h sys/param.h])
   AC_CHECK_FUNCS([feof_unlocked fgets_unlocked getc_unlocked getcwd getegid \
-geteuid getgid getuid mempcpy munmap putenv setenv setlocale stpcpy \
+geteuid getgid getuid mempcpy munmap putenv setenv setlocale localeconv stpcpy \
 strcasecmp strdup strtoul tsearch __argz_count __argz_stringify __argz_next \
 __fsetlocking])
 
@@ -3998,4 +3997,12 @@ AC_DEFUN([jm_AC_TYPE_UNSIGNED_LONG_LONG],
     AC_DEFINE(HAVE_UNSIGNED_LONG_LONG, 1,
       [Define if you have the unsigned long long type.])
   fi
+])
+
+dnl From gnulib
+AC_DEFUN([BASH_FUNC_FPURGE],
+[
+  AC_CHECK_FUNCS_ONCE([fpurge])
+  AC_CHECK_FUNCS_ONCE([__fpurge])
+  AC_CHECK_DECLS([fpurge], , , [#include <stdio.h>])
 ])

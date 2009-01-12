@@ -1,23 +1,23 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -38,6 +38,7 @@
 #include "shell.h"
 #include "flags.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
+#include "jobs.h"
 #include "signames.h"
 #include "builtins.h"
 #include "builtins/common.h"
@@ -295,6 +296,14 @@ run_pending_traps ()
 	      run_interrupt_trap ();
 	      CLRINTERRUPT;
 	    }
+#if defined (JOB_CONTROL) && defined (SIGCHLD)
+	  else if (sig == SIGCHLD &&
+		   trap_list[SIGCHLD] != (char *)IMPOSSIBLE_TRAP_HANDLER &&
+		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
+	    {
+	      run_sigchld_trap (pending_traps[sig]);	/* use as counter */
+	    }
+#endif
 	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
 		   trap_list[sig] == (char *)IGNORE_SIG ||
 		   trap_list[sig] == (char *)IMPOSSIBLE_TRAP_HANDLER)
@@ -349,6 +358,14 @@ trap_handler (sig)
 {
   int oerrno;
 
+  if ((sigmodes[sig] & SIG_TRAPPED) == 0)
+    {
+#if defined (DEBUG)
+      internal_warning ("trap_handler: signal %d: signal not trapped", sig);
+#endif
+      SIGRETURN (0);
+    }
+
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
@@ -357,6 +374,9 @@ trap_handler (sig)
     {
       oerrno = errno;
 #if defined (MUST_REINSTALL_SIGHANDLERS)
+#  if defined (JOB_CONTROL) && defined (SIGCHLD)
+      if (sig != SIGCHLD)
+#  endif /* JOB_CONTROL && SIGCHLD */
       set_signal_handler (sig, trap_handler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
 
@@ -391,13 +411,27 @@ set_sigchld_trap (command_string)
 #endif
 
 /* Make COMMAND_STRING be executed when SIGCHLD is caught iff SIGCHLD
-   is not already trapped. */
+   is not already trapped.  IMPOSSIBLE_TRAP_HANDLER is used as a sentinel
+   to make sure that a SIGCHLD trap handler run via run_sigchld_trap can
+   reset the disposition to the default and not have the original signal
+   accidentally restored, undoing the user's command. */
 void
 maybe_set_sigchld_trap (command_string)
      char *command_string;
 {
-  if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0)
+  if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0 && trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER)
     set_signal (SIGCHLD, command_string);
+}
+
+/* Temporarily set the SIGCHLD trap string to IMPOSSIBLE_TRAP_HANDLER.  Used
+   as a sentinel in run_sigchld_trap and maybe_set_sigchld_trap to see whether
+   or not a SIGCHLD trap handler reset SIGCHLD disposition to the default. */
+void
+set_impossible_sigchld_trap ()
+{
+  restore_default_signal (SIGCHLD);
+  change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
+  sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 
