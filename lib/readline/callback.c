@@ -87,6 +87,7 @@ _rl_callback_newline ()
     }
 
   readline_internal_setup ();
+  RL_CHECK_SIGNALS ();
 }
 
 /* Install a readline handler, set up the terminal, and issue the prompt. */
@@ -127,6 +128,7 @@ rl_callback_read_char ()
 
   do
     {
+      RL_CHECK_SIGNALS ();
       if  (RL_ISSTATE (RL_STATE_ISEARCH))
 	{
 	  eof = _rl_isearch_callback (_rl_iscxt);
@@ -186,6 +188,7 @@ rl_callback_read_char ()
       else
 	eof = readline_internal_char ();
 
+      RL_CHECK_SIGNALS ();
       if (rl_done == 0 && _rl_want_redisplay)
 	{
 	  (*rl_redisplay_function) ();
@@ -223,6 +226,7 @@ rl_callback_handler_remove ()
 {
   rl_linefunc = NULL;
   RL_UNSETSTATE (RL_STATE_CALLBACK);
+  RL_CHECK_SIGNALS ();
   if (in_handler)
     {
       in_handler = 0;

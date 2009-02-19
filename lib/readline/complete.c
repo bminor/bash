@@ -1019,7 +1019,9 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      variable rl_attempted_completion_function. */
   if (rl_attempted_completion_function)
     {
+      _rl_interrupt_immediately++;
       matches = (*rl_attempted_completion_function) (text, start, end);
+      _rl_interrupt_immediately--;
 
       if (matches || rl_attempted_completion_over)
 	{
@@ -1881,6 +1883,7 @@ rl_completion_matches (text, entry_function)
   match_list = (char **)xmalloc ((match_list_size + 1) * sizeof (char *));
   match_list[1] = (char *)NULL;
 
+  _rl_interrupt_immediately++;
   while (string = (*entry_function) (text, matches))
     {
       if (matches + 1 == match_list_size)
@@ -1890,6 +1893,7 @@ rl_completion_matches (text, entry_function)
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;
     }
+  _rl_interrupt_immediately--;
 
   /* If there were any matches, then look through them finding out the
      lowest common denominator.  That then becomes match_list[0]. */

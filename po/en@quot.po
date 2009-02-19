@@ -27,10 +27,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU bash 4.0-rc1\n"
+"Project-Id-Version: GNU bash 4.0-release\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-06 11:56-0500\n"
-"PO-Revision-Date: 2009-01-06 11:56-0500\n"
+"POT-Creation-Date: 2009-02-19 14:53-0500\n"
+"PO-Revision-Date: 2009-02-19 14:53-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -62,7 +62,7 @@ msgstr "%s: cannot assign to non-numeric index"
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: must use subscript when assigning associative array"
 
-#: bashhist.c:380
+#: bashhist.c:379
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: cannot create: %s"
@@ -269,12 +269,22 @@ msgstr "%s: not a shell builtin"
 msgid "write error: %s"
 msgstr "write error: %s"
 
-#: builtins/common.c:553
+#: builtins/common.c:329
+#, c-format
+msgid "error setting terminal attributes: %s"
+msgstr "error setting terminal attributes: %s"
+
+#: builtins/common.c:331
+#, c-format
+msgid "error getting terminal attributes: %s"
+msgstr "error getting terminal attributes: %s"
+
+#: builtins/common.c:563
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: error retrieving current directory: %s: %s\n"
 
-#: builtins/common.c:619 builtins/common.c:621
+#: builtins/common.c:629 builtins/common.c:631
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: ambiguous job spec"
@@ -310,7 +320,7 @@ msgstr "can only be used in a function"
 msgid "cannot use `-f' to make functions"
 msgstr "cannot use ‘-f’ to make functions"
 
-#: builtins/declare.def:365 execute_cmd.c:4731
+#: builtins/declare.def:365 execute_cmd.c:4818
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: readonly function"
@@ -349,7 +359,7 @@ msgstr "%s: not dynamically loaded"
 msgid "%s: cannot delete: %s"
 msgstr "%s: cannot delete: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4588
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4675
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -365,7 +375,7 @@ msgstr "%s: not a regular file"
 msgid "%s: file is too large"
 msgstr "%s: file is too large"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4658 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4745 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: cannot execute binary file"
@@ -513,36 +523,36 @@ msgstr "Unknown error"
 msgid "expression expected"
 msgstr "expression expected"
 
-#: builtins/mapfile.def:215 builtins/read.def:272
+#: builtins/mapfile.def:241 builtins/read.def:272
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: invalid file descriptor specification"
 
-#: builtins/mapfile.def:223 builtins/read.def:279
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: invalid file descriptor: %s"
 
-#: builtins/mapfile.def:232 builtins/mapfile.def:270
+#: builtins/mapfile.def:258 builtins/mapfile.def:296
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: invalid line count"
 
-#: builtins/mapfile.def:243
+#: builtins/mapfile.def:269
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: invalid array origin"
 
-#: builtins/mapfile.def:260
+#: builtins/mapfile.def:286
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: invalid callback quantum"
 
-#: builtins/mapfile.def:292
+#: builtins/mapfile.def:318
 msgid "empty array variable name"
 msgstr "empty array variable name"
 
-#: builtins/mapfile.def:313
+#: builtins/mapfile.def:339
 msgid "array variable support required"
 msgstr "array variable support required"
 
@@ -890,31 +900,31 @@ msgstr "\atimed out waiting for input: auto-logout\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "cannot redirect standard input from /dev/null: %s"
 
-#: execute_cmd.c:1091
+#: execute_cmd.c:1112
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: ‘%c’: invalid format character"
 
-#: execute_cmd.c:1942
+#: execute_cmd.c:2011
 msgid "pipe error"
 msgstr "pipe error"
 
-#: execute_cmd.c:4276
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: restricted: cannot specify ‘/’ in command names"
 
-#: execute_cmd.c:4367
+#: execute_cmd.c:4454
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: command not found"
 
-#: execute_cmd.c:4621
+#: execute_cmd.c:4708
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: bad interpreter"
 
-#: execute_cmd.c:4770
+#: execute_cmd.c:4857
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "cannot duplicate fd %d to fd %d"
@@ -1008,140 +1018,140 @@ msgstr "save_bash_input: buffer already exists for new fd %d"
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:882
+#: jobs.c:887
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "forked pid %d appears in running job %d"
 
-#: jobs.c:1000
+#: jobs.c:1005
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "deleting stopped job %d with process group %ld"
 
-#: jobs.c:1105
+#: jobs.c:1110
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: process %5ld (%s) in the_pipeline"
 
-#: jobs.c:1108
+#: jobs.c:1113
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) marked as still alive"
 
-#: jobs.c:1396
+#: jobs.c:1401
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: no such pid"
 
-#: jobs.c:1411
+#: jobs.c:1416
 #, c-format
 msgid "Signal %d"
 msgstr "Signal %d"
 
-#: jobs.c:1425 jobs.c:1450
+#: jobs.c:1430 jobs.c:1455
 msgid "Done"
 msgstr "Done"
 
-#: jobs.c:1430 siglist.c:122
+#: jobs.c:1435 siglist.c:122
 msgid "Stopped"
 msgstr "Stopped"
 
-#: jobs.c:1434
+#: jobs.c:1439
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Stopped(%s)"
 
-#: jobs.c:1438
+#: jobs.c:1443
 msgid "Running"
 msgstr "Running"
 
-#: jobs.c:1452
+#: jobs.c:1457
 #, c-format
 msgid "Done(%d)"
 msgstr "Done(%d)"
 
-#: jobs.c:1454
+#: jobs.c:1459
 #, c-format
 msgid "Exit %d"
 msgstr "Exit %d"
 
-#: jobs.c:1457
+#: jobs.c:1462
 msgid "Unknown status"
 msgstr "Unknown status"
 
-#: jobs.c:1544
+#: jobs.c:1549
 #, c-format
 msgid "(core dumped) "
 msgstr "(core dumped) "
 
-#: jobs.c:1563
+#: jobs.c:1568
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:1766
+#: jobs.c:1771
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "child setpgid (%ld to %ld)"
 
-#: jobs.c:2094 nojobs.c:576
+#: jobs.c:2099 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld is not a child of this shell"
 
-#: jobs.c:2321
+#: jobs.c:2326
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: No record of process %ld"
 
-#: jobs.c:2593
+#: jobs.c:2598
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: job %d is stopped"
 
-#: jobs.c:2815
+#: jobs.c:2820
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: job has terminated"
 
-#: jobs.c:2824
+#: jobs.c:2829
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: job %d already in background"
 
-#: jobs.c:3487
+#: jobs.c:3492
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: line %d: "
 
-#: jobs.c:3501 nojobs.c:805
+#: jobs.c:3506 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
 msgstr " (core dumped)"
 
-#: jobs.c:3513 jobs.c:3526
+#: jobs.c:3518 jobs.c:3531
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd now: %s)\n"
 
-#: jobs.c:3558
+#: jobs.c:3563
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp failed"
 
-#: jobs.c:3618
+#: jobs.c:3623
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:3628
+#: jobs.c:3633
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3656
+#: jobs.c:3661
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "cannot set terminal process group (%d)"
 
-#: jobs.c:3661
+#: jobs.c:3666
 msgid "no job control in this shell"
 msgstr "no job control in this shell"
 
@@ -1370,7 +1380,7 @@ msgstr "Use “%s” to leave the shell.\n"
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "unexpected EOF while looking for matching ‘)’"
 
-#: pcomplete.c:1016
+#: pcomplete.c:1018
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "completion: function ‘%s’ not found"
@@ -1380,12 +1390,12 @@ msgstr "completion: function ‘%s’ not found"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:287
+#: print_cmd.c:285
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: bad connector ‘%d’"
 
-#: print_cmd.c:1347
+#: print_cmd.c:1348
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: ‘%c’: invalid format character"
@@ -1724,12 +1734,12 @@ msgstr "%s: bad substitution"
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: cannot assign in this way"
 
-#: subst.c:7479
+#: subst.c:7499
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "bad substitution: no closing “`” in %s"
 
-#: subst.c:8354
+#: subst.c:8375
 #, c-format
 msgid "no match: %s"
 msgstr "no match: %s"
@@ -2159,50 +2169,54 @@ msgid "until COMMANDS; do COMMANDS; done"
 msgstr "until COMMANDS; do COMMANDS; done"
 
 #: builtins.c:198
+msgid "coproc [NAME] command [redirections]"
+msgstr "coproc [NAME] command [redirections]"
+
+#: builtins.c:200
 msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
 msgstr "function name { COMMANDS ; } or name () { COMMANDS ; }"
 
-#: builtins.c:200
+#: builtins.c:202
 msgid "{ COMMANDS ; }"
 msgstr "{ COMMANDS ; }"
 
-#: builtins.c:202
+#: builtins.c:204
 msgid "job_spec [&]"
 msgstr "job_spec [&]"
 
-#: builtins.c:204
+#: builtins.c:206
 msgid "(( expression ))"
 msgstr "(( expression ))"
 
-#: builtins.c:206
+#: builtins.c:208
 msgid "[[ expression ]]"
 msgstr "[[ expression ]]"
 
-#: builtins.c:208
+#: builtins.c:210
 msgid "variables - Names and meanings of some shell variables"
 msgstr "variables - Names and meanings of some shell variables"
 
-#: builtins.c:211
+#: builtins.c:213
 msgid "pushd [-n] [+N | -N | dir]"
 msgstr "pushd [-n] [+N | -N | dir]"
 
-#: builtins.c:215
+#: builtins.c:217
 msgid "popd [-n] [+N | -N]"
 msgstr "popd [-n] [+N | -N]"
 
-#: builtins.c:219
+#: builtins.c:221
 msgid "dirs [-clpv] [+N] [-N]"
 msgstr "dirs [-clpv] [+N] [-N]"
 
-#: builtins.c:222
+#: builtins.c:224
 msgid "shopt [-pqsu] [-o] [optname ...]"
 msgstr "shopt [-pqsu] [-o] [optname ...]"
 
-#: builtins.c:224
+#: builtins.c:226
 msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v var] format [arguments]"
 
-#: builtins.c:227
+#: builtins.c:229
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W "
 "wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] "
@@ -2212,7 +2226,7 @@ msgstr ""
 "wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] "
 "[name ...]"
 
-#: builtins.c:231
+#: builtins.c:233
 msgid ""
 "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
@@ -2220,11 +2234,11 @@ msgstr ""
 "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 
-#: builtins.c:235
+#: builtins.c:237
 msgid "compopt [-o|+o option] [name ...]"
 msgstr "compopt [-o|+o option] [name ...]"
 
-#: builtins.c:238
+#: builtins.c:240
 msgid ""
 "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
@@ -2232,7 +2246,15 @@ msgstr ""
 "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
 
-#: builtins.c:250
+#: builtins.c:242
+msgid ""
+"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+msgstr ""
+"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+
+#: builtins.c:254
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2268,7 +2290,7 @@ msgstr ""
 "been\n"
 "    defined."
 
-#: builtins.c:272
+#: builtins.c:276
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2284,7 +2306,7 @@ msgstr ""
 "    \n"
 "    Return success unless a NAME is not an existing alias."
 
-#: builtins.c:285
+#: builtins.c:289
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2358,7 +2380,7 @@ msgstr ""
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
 
-#: builtins.c:322
+#: builtins.c:326
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2376,7 +2398,7 @@ msgstr ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 
-#: builtins.c:334
+#: builtins.c:338
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2394,7 +2416,7 @@ msgstr ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 
-#: builtins.c:346
+#: builtins.c:350
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2418,7 +2440,7 @@ msgstr ""
 "    Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is\n"
 "    not a shell builtin.."
 
-#: builtins.c:361
+#: builtins.c:365
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2446,7 +2468,7 @@ msgstr ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 
-#: builtins.c:379
+#: builtins.c:383
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2508,7 +2530,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns 0 if the directory is changed; non-zero otherwise."
 
-#: builtins.c:407
+#: builtins.c:411
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2536,7 +2558,7 @@ msgstr ""
 "    Returns 0 unless an invalid option is given or the current directory\n"
 "    cannot be read."
 
-#: builtins.c:424
+#: builtins.c:428
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2552,7 +2574,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Always succeeds."
 
-#: builtins.c:435
+#: builtins.c:439
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2564,7 +2586,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Always succeeds."
 
-#: builtins.c:444
+#: builtins.c:448
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
@@ -2576,7 +2598,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Always fails."
 
-#: builtins.c:453
+#: builtins.c:457
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2610,7 +2632,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns exit status of COMMAND, or failure if COMMAND is not found."
 
-#: builtins.c:472
+#: builtins.c:476
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2678,7 +2700,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 
-#: builtins.c:508
+#: builtins.c:512
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2688,7 +2710,7 @@ msgstr ""
 "    \n"
 "    Obsolete.  See ‘help declare’."
 
-#: builtins.c:516
+#: builtins.c:520
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2714,7 +2736,7 @@ msgstr ""
 "    Returns success unless an invalid option is supplied, an error occurs,\n"
 "    or the shell is not executing a function."
 
-#: builtins.c:533
+#: builtins.c:537
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2772,7 +2794,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 
-#: builtins.c:567
+#: builtins.c:571
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2794,7 +2816,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 
-#: builtins.c:582
+#: builtins.c:586
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2844,7 +2866,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 
-#: builtins.c:610
+#: builtins.c:614
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2864,7 +2886,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns exit status of command or success if command is null."
 
-#: builtins.c:622
+#: builtins.c:626
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -2942,7 +2964,7 @@ msgstr ""
 "    Returns success if an option is found; fails if the end of options is\n"
 "    encountered or an error occurs."
 
-#: builtins.c:664
+#: builtins.c:668
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2984,7 +3006,7 @@ msgstr ""
 "    Returns success unless COMMAND is not found or a redirection error "
 "occurs."
 
-#: builtins.c:685
+#: builtins.c:689
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -2996,7 +3018,7 @@ msgstr ""
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 
-#: builtins.c:694
+#: builtins.c:698
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3010,7 +3032,7 @@ msgstr ""
 "executed\n"
 "    in a login shell."
 
-#: builtins.c:704
+#: builtins.c:708
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3066,7 +3088,7 @@ msgstr ""
 "    Returns success or status of executed command; non-zero if an error "
 "occurs."
 
-#: builtins.c:734
+#: builtins.c:738
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3086,7 +3108,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Status of command placed in foreground, or failure if an error occurs."
 
-#: builtins.c:749
+#: builtins.c:753
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3110,7 +3132,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 
-#: builtins.c:763
+#: builtins.c:767
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3154,7 +3176,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless NAME is not found or an invalid option is given."
 
-#: builtins.c:788
+#: builtins.c:792
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3194,7 +3216,7 @@ msgstr ""
 "    Returns success unless PATTERN is not found or an invalid option is "
 "given."
 
-#: builtins.c:812
+#: builtins.c:816
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3258,7 +3280,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 
-#: builtins.c:848
+#: builtins.c:852
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3302,7 +3324,7 @@ msgstr ""
 "    Returns success unless an invalid option is given or an error occurs.\n"
 "    If -x is used, returns the exit status of COMMAND."
 
-#: builtins.c:875
+#: builtins.c:879
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3332,7 +3354,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option or JOBSPEC is given."
 
-#: builtins.c:894
+#: builtins.c:898
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3372,7 +3394,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 
-#: builtins.c:917
+#: builtins.c:921
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3458,7 +3480,7 @@ msgstr ""
 "    Exit Status:\n"
 "    If the last ARG evaluates to 0, let returns 1; let returns 0 otherwise.."
 
-#: builtins.c:962
+#: builtins.c:966
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -3542,7 +3564,7 @@ msgstr ""
 "out,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 
-#: builtins.c:1002
+#: builtins.c:1006
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3562,7 +3584,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns N, or failure if the shell is not executing a function or script."
 
-#: builtins.c:1015
+#: builtins.c:1019
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3722,7 +3744,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given."
 
-#: builtins.c:1097
+#: builtins.c:1101
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3758,7 +3780,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or a NAME is read-only."
 
-#: builtins.c:1117
+#: builtins.c:1121
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3792,7 +3814,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 
-#: builtins.c:1136
+#: builtins.c:1140
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3828,7 +3850,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 
-#: builtins.c:1157
+#: builtins.c:1161
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3846,7 +3868,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless N is negative or greater than $#."
 
-#: builtins.c:1169 builtins.c:1184
+#: builtins.c:1173 builtins.c:1188
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -3870,7 +3892,7 @@ msgstr ""
 "    Returns the status of the last command executed in FILENAME; fails if\n"
 "    FILENAME cannot be read."
 
-#: builtins.c:1200
+#: builtins.c:1204
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3894,7 +3916,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 
-#: builtins.c:1216
+#: builtins.c:1220
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4044,7 +4066,7 @@ msgstr ""
 "    Returns success if EXPR evaluates to true; fails if EXPR evaluates to\n"
 "    false or an invalid argument is given."
 
-#: builtins.c:1292
+#: builtins.c:1296
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4056,7 +4078,7 @@ msgstr ""
 "    This is a synonym for the “test” builtin, but the last argument must\n"
 "    be a literal ‘]’, to match the opening ‘[’."
 
-#: builtins.c:1301
+#: builtins.c:1305
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4076,7 +4098,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Always succeeds."
 
-#: builtins.c:1313
+#: builtins.c:1317
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4144,7 +4166,7 @@ msgstr ""
 "    Returns success unless a SIGSPEC is invalid or an invalid option is "
 "given."
 
-#: builtins.c:1345
+#: builtins.c:1349
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4200,7 +4222,7 @@ msgstr ""
 "    Returns success if all of the NAMEs are found; fails if any are not "
 "found."
 
-#: builtins.c:1376
+#: builtins.c:1380
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4284,7 +4306,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 
-#: builtins.c:1421
+#: builtins.c:1425
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4316,7 +4338,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless MODE is invalid or an invalid option is given."
 
-#: builtins.c:1441
+#: builtins.c:1445
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -4346,7 +4368,7 @@ msgstr ""
 "is\n"
 "    given."
 
-#: builtins.c:1459
+#: builtins.c:1463
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4370,7 +4392,7 @@ msgstr ""
 "is\n"
 "    given."
 
-#: builtins.c:1474
+#: builtins.c:1478
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4392,7 +4414,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1488
+#: builtins.c:1492
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4422,7 +4444,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1506
+#: builtins.c:1510
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4458,7 +4480,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1527
+#: builtins.c:1531
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4486,7 +4508,7 @@ msgstr ""
 "    Exit Status:\n"
 "    The return status is the return status of PIPELINE."
 
-#: builtins.c:1544
+#: builtins.c:1548
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4504,7 +4526,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1556
+#: builtins.c:1560
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4542,7 +4564,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1573
+#: builtins.c:1577
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4560,7 +4582,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1585
+#: builtins.c:1589
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4578,7 +4600,29 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1597
+#: builtins.c:1601
+msgid ""
+"Create a coprocess named NAME.\n"
+"    \n"
+"    Execute COMMAND asynchronously, with the standard output and standard\n"
+"    input of the command connected via a pipe to file descriptors assigned\n"
+"    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
+"    The default NAME is \"COPROC\".\n"
+"    \n"
+"    Exit Status:\n"
+"    Returns the exit status of COMMAND."
+msgstr ""
+"Create a coprocess named NAME.\n"
+"    \n"
+"    Execute COMMAND asynchronously, with the standard output and standard\n"
+"    input of the command connected via a pipe to file descriptors assigned\n"
+"    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
+"    The default NAME is “COPROC”.\n"
+"    \n"
+"    Exit Status:\n"
+"    Returns the exit status of COMMAND."
+
+#: builtins.c:1615
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4602,7 +4646,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless NAME is readonly."
 
-#: builtins.c:1611
+#: builtins.c:1629
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4620,7 +4664,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 
-#: builtins.c:1623
+#: builtins.c:1641
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4644,7 +4688,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns the status of the resumed job."
 
-#: builtins.c:1638
+#: builtins.c:1656
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4662,7 +4706,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise."
 
-#: builtins.c:1650
+#: builtins.c:1668
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -4714,7 +4758,7 @@ msgstr ""
 "    Exit Status:\n"
 "    0 or 1 depending on value of EXPRESSION."
 
-#: builtins.c:1676
+#: builtins.c:1694
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -4818,7 +4862,7 @@ msgstr ""
 "    HISTIGNORE\tA colon-separated list of patterns used to decide which\n"
 "    \t\tcommands should be saved on the history list.\n"
 
-#: builtins.c:1733
+#: builtins.c:1751
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -4876,7 +4920,7 @@ msgstr ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 
-#: builtins.c:1767
+#: builtins.c:1785
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -4926,7 +4970,7 @@ msgstr ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 
-#: builtins.c:1797
+#: builtins.c:1815
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -4980,7 +5024,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 
-#: builtins.c:1826
+#: builtins.c:1844
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5018,7 +5062,7 @@ msgstr ""
 "    Returns success if OPTNAME is enabled; fails if an invalid option is\n"
 "    given or OPTNAME is disabled."
 
-#: builtins.c:1847
+#: builtins.c:1865
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5074,7 +5118,7 @@ msgstr ""
 "assignment\n"
 "    error occurs."
 
-#: builtins.c:1874
+#: builtins.c:1892
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -5114,7 +5158,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 
-#: builtins.c:1897
+#: builtins.c:1915
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5136,7 +5180,7 @@ msgstr ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 
-#: builtins.c:1912
+#: builtins.c:1930
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5190,9 +5234,9 @@ msgstr ""
 "    Returns success unless an invalid option is supplied or NAME does not\n"
 "    have a completion specification defined."
 
-#: builtins.c:1940
+#: builtins.c:1958
 msgid ""
-"Read lines from a file into an array variable.\n"
+"Read lines from the standard input into an array variable.\n"
 "    \n"
 "    Read lines from the standard input into the array variable ARRAY, or "
 "from\n"
@@ -5216,7 +5260,9 @@ msgid ""
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
 "    \n"
-"    If -C is supplied without -c, the default quantum is 5000.\n"
+"    If -C is supplied without -c, the default quantum is 5000.  When\n"
+"    CALLBACK is evaluated, it is supplied the index of the next array\n"
+"    element to be assigned as an additional argument.\n"
 "    \n"
 "    If not supplied with an explicit origin, mapfile will clear ARRAY "
 "before\n"
@@ -5225,7 +5271,7 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or ARRAY is readonly."
 msgstr ""
-"Read lines from a file into an array variable.\n"
+"Read lines from the standard input into an array variable.\n"
 "    \n"
 "    Read lines from the standard input into the array variable ARRAY, or "
 "from\n"
@@ -5249,7 +5295,9 @@ msgstr ""
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
 "    \n"
-"    If -C is supplied without -c, the default quantum is 5000.\n"
+"    If -C is supplied without -c, the default quantum is 5000.  When\n"
+"    CALLBACK is evaluated, it is supplied the index of the next array\n"
+"    element to be assigned as an additional argument.\n"
 "    \n"
 "    If not supplied with an explicit origin, mapfile will clear ARRAY "
 "before\n"
@@ -5257,3 +5305,13 @@ msgstr ""
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or ARRAY is readonly."
+
+#: builtins.c:1990
+msgid ""
+"Read lines from a file into an array variable.\n"
+"    \n"
+"    A synonym for `mapfile'."
+msgstr ""
+"Read lines from a file into an array variable.\n"
+"    \n"
+"    A synonym for ‘mapfile’."

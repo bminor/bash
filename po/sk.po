@@ -1,14 +1,14 @@
-# Translation of the bash package to Slovak 
+# Slovak translation for bash.
 # Copyright (C) 2006 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
-# Ivan Masár <helix84@centrum.sk>, 2007, 2008.
+# Ivan Masár <helix84@centrum.sk>, 2007, 2008, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.0-pre1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-06 11:56-0500\n"
-"PO-Revision-Date: 2008-10-25 20:42+0100\n"
+"POT-Creation-Date: 2009-02-19 14:53-0500\n"
+"PO-Revision-Date: 2009-02-07 15:11+0100\n"
 "Last-Translator: Ivan Masár <helix84@centrum.sk>\n"
 "Language-Team: Slovak <sk-i18n@lists.linux.sk>\n"
 "MIME-Version: 1.0\n"
@@ -40,14 +40,15 @@ msgstr "%s: nie je možné priradiť nenumerickému indexu"
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: pri priraďovaní asociatívnemu poľu je potrebné použiť index"
 
-#: bashhist.c:380
+#: bashhist.c:379
 #, c-format
 msgid "%s: cannot create: %s"
-msgstr "%s: nedá sa vytvoriť: %s"
+msgstr "%s: nie je možné vytvoriť: %s"
 
 #: bashline.c:3413
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr "bash_execute_unix_command: nedá sa nájsť klávesová mapa pre príkaz"
+msgstr ""
+"bash_execute_unix_command: nie je možné nájsť klávesovú mapu pre príkaz"
 
 #: bashline.c:3491
 #, c-format
@@ -76,12 +77,12 @@ msgstr "„%s“: neplatný názov klávesovej mapy"
 #: builtins/bind.def:245
 #, c-format
 msgid "%s: cannot read: %s"
-msgstr "%s: nedá sa čítať: %s"
+msgstr "%s: nie je možné prečítať: %s"
 
 #: builtins/bind.def:260
 #, c-format
 msgid "`%s': cannot unbind"
-msgstr "„%s“: nedá sa zrušiť väzba (unbind)"
+msgstr "„%s“: nie je možné zrušiť väzbu (unbind)"
 
 #: builtins/bind.def:295 builtins/bind.def:325
 #, c-format
@@ -245,12 +246,22 @@ msgstr "%s: nie je vstavaný príkaz (builtin) shellu"
 msgid "write error: %s"
 msgstr "chyba zapisovania: %s"
 
-#: builtins/common.c:553
+#: builtins/common.c:329
+#, c-format
+msgid "error setting terminal attributes: %s"
+msgstr ""
+
+#: builtins/common.c:331
+#, c-format
+msgid "error getting terminal attributes: %s"
+msgstr ""
+
+#: builtins/common.c:563
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: chyba pri zisťovaní aktuálneho adresára: %s: %s\n"
 
-#: builtins/common.c:619 builtins/common.c:621
+#: builtins/common.c:629 builtins/common.c:631
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: nejednoznačné určenie úlohy"
@@ -286,7 +297,7 @@ msgstr "je možné použiť iba vo funkcii"
 msgid "cannot use `-f' to make functions"
 msgstr "nie je možné použiť „-f“ pre tvorbu funkcií"
 
-#: builtins/declare.def:365 execute_cmd.c:4731
+#: builtins/declare.def:365 execute_cmd.c:4818
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funkcia iba na čítanie"
@@ -308,7 +319,7 @@ msgstr "dynamické načítavanie nie je dostupné"
 #: builtins/enable.def:312
 #, c-format
 msgid "cannot open shared object %s: %s"
-msgstr "nedá sa otvoriť zdieľaný objekt %s: %s"
+msgstr "nie je možné otvoriť zdieľaný objekt %s: %s"
 
 #: builtins/enable.def:335
 #, c-format
@@ -323,9 +334,9 @@ msgstr "%s: nie je dynamicky načítané"
 #: builtins/enable.def:474
 #, c-format
 msgid "%s: cannot delete: %s"
-msgstr "%s: nedá sa zmazať: %s"
+msgstr "%s: nie je možné zmazať: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4588
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4675
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -341,7 +352,7 @@ msgstr "%s: nie je obyčajný súbor"
 msgid "%s: file is too large"
 msgstr "%s: súbor je príliš veľký"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4658 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4745 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: nie je možné vykonať binárny súbor"
@@ -349,7 +360,7 @@ msgstr "%s: nie je možné vykonať binárny súbor"
 #: builtins/exec.def:212
 #, c-format
 msgid "%s: cannot execute: %s"
-msgstr "%s: nedá sa spustiť: %s"
+msgstr "%s: nie je možné spustiť: %s"
 
 #: builtins/exit.def:65
 #, c-format
@@ -381,7 +392,7 @@ msgstr "špecifikácia histórie"
 #: builtins/fc.def:362
 #, c-format
 msgid "%s: cannot open temp file: %s"
-msgstr "%s: nedá sa otvoriť odkladací súbor: %s"
+msgstr "%s: nie je možné otvoriť odkladací súbor: %s"
 
 #: builtins/fg_bg.def:149 builtins/jobs.def:282
 msgid "current"
@@ -414,7 +425,7 @@ msgstr "%s: hašovacia tabuľka je prázdna\n"
 #: builtins/hash.def:244
 #, c-format
 msgid "hits\tcommand\n"
-msgstr ""
+msgstr "použití\tpríkaz\n"
 
 #: builtins/help.def:130
 #, c-format
@@ -429,13 +440,13 @@ msgstr[2] "Príkazy shellu zodpovedajúce kľúčovým slovám „"
 msgid ""
 "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
 msgstr ""
-"pre „%s“ neboli nájdené zodpovedajúce témy pomocníka.  Skúste „help help“ "
-"alebo „man -k %s“ alebo „info %s“."
+"pre „%s“ neboli nájdené zodpovedajúce témy pomocníka.\n"
+"Skúste „help help“ alebo „man -k %s“ alebo „info %s“."
 
 #: builtins/help.def:185
 #, c-format
 msgid "%s: cannot open: %s"
-msgstr "%s: nedá sa otvoriť: %s"
+msgstr "%s: nie je možné otvoriť: %s"
 
 #: builtins/help.def:337
 #, c-format
@@ -493,36 +504,36 @@ msgstr "Neznáma chyba"
 msgid "expression expected"
 msgstr "očakával sa výraz"
 
-#: builtins/mapfile.def:215 builtins/read.def:272
+#: builtins/mapfile.def:241 builtins/read.def:272
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: neplatná špecifikácia popisovača súboru"
 
-#: builtins/mapfile.def:223 builtins/read.def:279
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: neplatný popisovač súboru: %s"
 
-#: builtins/mapfile.def:232 builtins/mapfile.def:270
+#: builtins/mapfile.def:258 builtins/mapfile.def:296
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: neplatný počet riadkov"
 
-#: builtins/mapfile.def:243
+#: builtins/mapfile.def:269
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: neplatný začiatok poľa"
 
-#: builtins/mapfile.def:260
+#: builtins/mapfile.def:286
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: neplatné kvantum spätného volania"
 
-#: builtins/mapfile.def:292
+#: builtins/mapfile.def:318
 msgid "empty array variable name"
 msgstr "názov prázdnej premennej poľa"
 
-#: builtins/mapfile.def:313
+#: builtins/mapfile.def:339
 msgid "array variable support required"
 msgstr "vyžaduje sa podpora premennej poľa"
 
@@ -562,7 +573,6 @@ msgid "directory stack index"
 msgstr "index zásobníka adresárov"
 
 #: builtins/pushd.def:683
-#, fuzzy
 msgid ""
 "Display the list of currently remembered directories.  Directories\n"
 "    find their way onto the list with the `pushd' command; you can get\n"
@@ -589,14 +599,15 @@ msgstr ""
 "    sa do zoznamu dostávajú príkazom „pushd“; zo zoznamu ich môžete\n"
 "    vyberať postupne príkazom „popd“.\n"
 "    \n"
-"    Voľba -l určuje, že „dirs“ nemá vypisovať skrátené verzie adresárov\n"
-"    relatívne vzhľadom na váš domovský adresár. To znamená, že\n"
-"    „~/bin“ sa môže zobraziť ako „/homes/bfox/bin“.  Voľba -v spôsobí,\n"
-"    že „dirs“ vypíše zásobník adresárov vo formáte jedna položka na,\n"
-"    riadok a pred adresár vypíše jej pozíciu v zásobníku. Voľba -p robí\n"
-"    to sité, ale nepripája pozíciu v zásobníku.\n"
-"    Voľba -c vyprázdni zásobník adresárov zmazaním všetkých položiek.\n"
+"    Voľby:\n"
+"      -c\tvyprázdni zásobník adresárov zmazaním všetkých položiek\n"
+"      -l\tnevypisovať skrátené verzie adresárov relatívne vzhľadom\n"
+"    \tna váš domovský adresár\n"
+"      -p\tvypíše zásobník adresárov vo formáte jedna položka na riadok\n"
+"      -v\tvypíše zásobník adresárov vo formáte jedna položka na riadok\n"
+"    \ta pred ňu vypíše jej pozíciu na zásobníku\n"
 "    \n"
+"    Argumenty:\n"
 "    +N\tzobrazuje N-tú položku počítajúc zľava zoznamu, ktorý zobrazuje\n"
 "    \tdirs vyvolaný bez volieb, počínajúc nulou.\n"
 "    \n"
@@ -604,7 +615,6 @@ msgstr ""
 "    \tdirs vyvolaný bez volieb, počínajúc nulou."
 
 #: builtins/pushd.def:705
-#, fuzzy
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
 "    the stack, making the new top of the stack the current working\n"
@@ -632,22 +642,23 @@ msgstr ""
 "    nový vrchol zásobníka sa stane aktuálnym pracovným adresárom.\n"
 "    Bez argumentov vymení vrchné dva adresáre.\n"
 "    \n"
+"    Voľby:\n"
+"    -n\tPotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
+"    \tzo zásobníka, takže sa zmení iba zásobník.\n"
+"    \n"
+"    Argumenty:\n"
 "    +N\tOtočí zásobník tak, že N-tý adresár (počítajúc zľava zoznamu,\n"
 "    \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
 "    \n"
 "    -N\tOtočí zásobník tak, že N-tý adresár (počítajúc sprava zoznamu,\n"
 "    \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
 "    \n"
-"    -n\tpotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
-"    \tzo zásobníka, takže sa zmení iba zásobník.\n"
-"    \n"
-"    adr\tpridá ADR na vrchol zásobníka adresárov, čím sa tento stane\n"
+"    adr\tPridá ADR na vrchol zásobníka adresárov, čím sa tento stane\n"
 "    \tnovým aktuálnym pracovným adresárom.\n"
 "    \n"
-"    Zásobník adresárov môžete zobraziť príkazom „dirs“."
+"    Zásobník adresárov môžete zobraziť vstavaným príkazom „dirs“."
 
 #: builtins/pushd.def:730
-#, fuzzy
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
 "    the top directory from the stack, and changes to the new top directory.\n"
@@ -671,6 +682,11 @@ msgstr ""
 "    vrchnú položku zo zásobníka a zmení adresár na adresár, ktorý\n"
 "    sa následne nachádza na vrchu zásobníka.\n"
 "    \n"
+"    Voľby:\n"
+"    -n\tpotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
+"    \tzo zásobníka, takže sa zmení iba zásobník.\n"
+"    \n"
+"    Argumenty:\n"
 "    +N\todstráni N-tú položku položku počítajúc zľava zoznamu,\n"
 "    \tktorý zobrazuje „dirs“, počínajúc nulou. Napríklad: „popd +0“\n"
 "    \todstráni prvý adresár, „popd +1“ druhý.\n"
@@ -679,10 +695,7 @@ msgstr ""
 "    \tktorý zobrazuje „dirs“, počínajúc nulou. Napríklad: „popd -0“\n"
 "    \todstráni posledný adresár, „popd -1“ predposledný.\n"
 "    \n"
-"    -n\tpotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
-"    \tzo zásobníka, takže sa zmení iba zásobník.\n"
-"    \n"
-"    Zásobník adresárov môžete zobraziť príkazom „dirs“."
+"    Zásobník adresárov môžete zobraziť vstavaným príkazom „dirs“."
 
 #: builtins/read.def:248
 #, c-format
@@ -797,7 +810,7 @@ msgstr "„%c“: chybný príkaz"
 #: builtins/ulimit.def:427
 #, c-format
 msgid "%s: cannot get limit: %s"
-msgstr "%s: nedá sa zistiť limit: %s"
+msgstr "%s: nie je možné zistiť limit: %s"
 
 #: builtins/ulimit.def:453
 msgid "limit"
@@ -806,7 +819,7 @@ msgstr "obmedzenie"
 #: builtins/ulimit.def:465 builtins/ulimit.def:765
 #, c-format
 msgid "%s: cannot modify limit: %s"
-msgstr "%s: nedá sa zmeniť limit: %s"
+msgstr "%s: nie je možné zmeniť limit: %s"
 
 #: builtins/umask.def:118
 msgid "octal number"
@@ -867,34 +880,34 @@ msgstr "\ačas vypršal pri čakaní na vstup: automatické odhlásenie\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "nie je možné presmerovať štandardný vstup z /dev/null: %s"
 
-#: execute_cmd.c:1091
+#: execute_cmd.c:1112
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: „%c“: neplatný formátovácí znak"
 
-#: execute_cmd.c:1942
+#: execute_cmd.c:2011
 msgid "pipe error"
 msgstr "chyba rúry"
 
-#: execute_cmd.c:4276
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: obmedzené: nie jemožné uviesť „/“ v názvoch príkazov"
 
-#: execute_cmd.c:4367
+#: execute_cmd.c:4454
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: príkaz nenájdený"
 
-#: execute_cmd.c:4621
+#: execute_cmd.c:4708
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: chybný interpreter"
 
-#: execute_cmd.c:4770
+#: execute_cmd.c:4857
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
-msgstr "nie je možné duplokovať fd %d na fd %d"
+msgstr "nie je možné duplikovať fd %d na fd %d"
 
 #: expr.c:241
 msgid "expression recursion level exceeded"
@@ -974,7 +987,7 @@ msgstr "nie j emožné resetovať nodelay režim fd %d"
 #: input.c:258
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
-msgstr "nedá sa alokovať nový popisovač súboru pre vstup bashu z fd %d"
+msgstr "nie je možné alokovať nový popisovač súboru pre vstup bashu z fd %d"
 
 #: input.c:266
 #, c-format
@@ -985,140 +998,140 @@ msgstr "save_bash_input: bufer už existuje pre nový fd %d"
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp rúra"
 
-#: jobs.c:882
+#: jobs.c:887
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "pid %d získaný pomocou fork sa vyskytuje v bežiacej úlohe %d"
 
-#: jobs.c:1000
+#: jobs.c:1005
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "mažem zastavenú úlohu %d so skupinou procesu %ld"
 
-#: jobs.c:1105
+#: jobs.c:1110
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) v the_pipeline"
 
-#: jobs.c:1108
+#: jobs.c:1113
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) je stále označený ako živý"
 
-#: jobs.c:1396
+#: jobs.c:1401
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: taký pid neexistuje"
 
-#: jobs.c:1411
+#: jobs.c:1416
 #, c-format
 msgid "Signal %d"
 msgstr "Signál %d"
 
-#: jobs.c:1425 jobs.c:1450
+#: jobs.c:1430 jobs.c:1455
 msgid "Done"
 msgstr "Hotovo"
 
-#: jobs.c:1430 siglist.c:122
+#: jobs.c:1435 siglist.c:122
 msgid "Stopped"
 msgstr "Zastavené"
 
-#: jobs.c:1434
+#: jobs.c:1439
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Zastavené(%s)"
 
-#: jobs.c:1438
+#: jobs.c:1443
 msgid "Running"
 msgstr "Beží"
 
-#: jobs.c:1452
+#: jobs.c:1457
 #, c-format
 msgid "Done(%d)"
 msgstr "Hotovo(%d)"
 
-#: jobs.c:1454
+#: jobs.c:1459
 #, c-format
 msgid "Exit %d"
 msgstr "Ukončenie %d"
 
-#: jobs.c:1457
+#: jobs.c:1462
 msgid "Unknown status"
 msgstr "Neznámy stav"
 
-#: jobs.c:1544
+#: jobs.c:1549
 #, c-format
 msgid "(core dumped) "
-msgstr ""
+msgstr "(bol uložený výpis pamäte) "
 
-#: jobs.c:1563
+#: jobs.c:1568
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:1766
+#: jobs.c:1771
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid detského procesu (%ld to %ld)"
 
-#: jobs.c:2094 nojobs.c:576
+#: jobs.c:2099 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld nie je dieťa tohto shellu"
 
-#: jobs.c:2321
+#: jobs.c:2326
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Neexistuje záznam o procese %ld"
 
-#: jobs.c:2593
+#: jobs.c:2598
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: úloha %d je zastavená"
 
-#: jobs.c:2815
+#: jobs.c:2820
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: úloha skončila"
 
-#: jobs.c:2824
+#: jobs.c:2829
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: úloha %d už je v pozadí"
 
-#: jobs.c:3487
+#: jobs.c:3492
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: riadok %d: "
 
-#: jobs.c:3501 nojobs.c:805
+#: jobs.c:3506 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
-msgstr ""
+msgstr " (bol uložený výpis pamäte)"
 
-#: jobs.c:3513 jobs.c:3526
+#: jobs.c:3518 jobs.c:3531
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd teraz: %s)\n"
 
-#: jobs.c:3558
+#: jobs.c:3563
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: funkcia getpgrp zlyhala"
 
-#: jobs.c:3618
+#: jobs.c:3623
 msgid "initialize_job_control: line discipline"
-msgstr ""
+msgstr "initialize_job_control: riadkový systém"
 
-#: jobs.c:3628
+#: jobs.c:3633
 msgid "initialize_job_control: setpgid"
-msgstr ""
+msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3656
+#: jobs.c:3661
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nie je možné nastaviť skupinu procesu terminálu (%d)"
 
-#: jobs.c:3661
+#: jobs.c:3666
 msgid "no job control in this shell"
 msgstr "v tomto shelli nie je riadenie úloh"
 
@@ -1204,7 +1217,7 @@ msgstr "%s: neplatná služba"
 #: lib/sh/netopen.c:306
 #, c-format
 msgid "%s: bad network path specification"
-msgstr "%s: zlá špecifikácia sieťovej cesty"
+msgstr "%s: chybná špecifikácia sieťovej cesty"
 
 #: lib/sh/netopen.c:346
 msgid "network operations not supported"
@@ -1212,16 +1225,16 @@ msgstr "sieťové operácie nie sú podporované"
 
 #: mailcheck.c:433
 msgid "You have mail in $_"
-msgstr "Máte poštu v $_"
+msgstr "Máte poštu v súbore $_"
 
 #: mailcheck.c:458
 msgid "You have new mail in $_"
-msgstr "Máte novú poštu v $_"
+msgstr "Máte novú poštu v súbore $_"
 
 #: mailcheck.c:474
 #, c-format
 msgid "The mail in %s has been read\n"
-msgstr "Pošta v %s bola prečítaná\n"
+msgstr "Pošta v súbore %s bola prečítaná\n"
 
 #: make_cmd.c:322
 msgid "syntax error: arithmetic expression required"
@@ -1229,7 +1242,7 @@ msgstr "chyba syntaxe: vyžaduje sa aritmetický výraz"
 
 #: make_cmd.c:324
 msgid "syntax error: `;' unexpected"
-msgstr "chyba syntaxe: neočakávaný „;“ unexpected"
+msgstr "chyba syntaxe: neočakávaná „;“"
 
 #: make_cmd.c:325
 #, c-format
@@ -1348,7 +1361,7 @@ msgstr "Na opustenie shellu použite „%s“.\n"
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "neočakávaný koniec súboru počas hľadania zodpovedajúceho „)“"
 
-#: pcomplete.c:1016
+#: pcomplete.c:1018
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "dokončovanie: funkcia „%s“ nebola nájdená"
@@ -1358,12 +1371,12 @@ msgstr "dokončovanie: funkcia „%s“ nebola nájdená"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:287
+#: print_cmd.c:285
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: chybný konektor `%d'"
 
-#: print_cmd.c:1347
+#: print_cmd.c:1348
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c“: neplatný formátovací znak"
@@ -1380,7 +1393,7 @@ msgstr "%s: nejednoznačné presmerovanie"
 #: redir.c:152
 #, c-format
 msgid "%s: cannot overwrite existing file"
-msgstr "%s: nedá sa prepísať existujúci súbor"
+msgstr "%s: nie je možné prepísať existujúci súbor"
 
 #: redir.c:157
 #, c-format
@@ -1390,7 +1403,7 @@ msgstr "%s: ombedzené: nie je možné presmerovať výstup"
 #: redir.c:162
 #, c-format
 msgid "cannot create temp file for here-document: %s"
-msgstr "nedá sa vytvoriť odkladací súbor pre here-document: %s"
+msgstr "nie je možné vytvoriť odkladací súbor pre here-document: %s"
 
 #: redir.c:517
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
@@ -1398,7 +1411,7 @@ msgstr "/dev/(tcp|udp)/host/port nie je podporovaný bez podpory sietí"
 
 #: redir.c:1023
 msgid "redirection error: cannot duplicate fd"
-msgstr "chyba presmerovania: nedá sa duplikovať fd"
+msgstr "chyba presmerovania: nie je možné duplikovať fd"
 
 #: shell.c:328
 msgid "could not find /tmp, please create!"
@@ -1652,38 +1665,38 @@ msgstr "%s: nie je možné priradiť zoznam položke poľa"
 
 #: subst.c:4456 subst.c:4472
 msgid "cannot make pipe for process substitution"
-msgstr "nedá sa vytvoriť rúra pre substitúciu procesov"
+msgstr "nie je možné vytvoriť rúru pre substitúciu procesov"
 
 #: subst.c:4504
 msgid "cannot make child for process substitution"
-msgstr "nedá sa vytvoriť dieťa pre substitúciu procesov"
+msgstr "nie je možné vytvoriť potomka pre substitúciu procesov"
 
 #: subst.c:4549
 #, c-format
 msgid "cannot open named pipe %s for reading"
-msgstr "nedá sa otvoriť pomenovaná rúra %s na čítanie"
+msgstr "nie je možné otvoriť pomenovanú rúru %s na čítanie"
 
 #: subst.c:4551
 #, c-format
 msgid "cannot open named pipe %s for writing"
-msgstr "nedá sa otvoriť pomenovaná rúra %s na zápis"
+msgstr "nie je možné otvoriť pomenovanú rúru %s na zápis"
 
 #: subst.c:4569
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
-msgstr "nedá sa duplikovať pomenovaná rúra %s ako fd %d"
+msgstr "nie je možné duplikovať pomenovanú rúru %s ako fd %d"
 
 #: subst.c:4765
 msgid "cannot make pipe for command substitution"
-msgstr "nedá sa vytvoriť rúra pre substitúciu príkazov"
+msgstr "nie je možné vytvoriť rúru pre substitúciu príkazov"
 
 #: subst.c:4799
 msgid "cannot make child for command substitution"
-msgstr "nedá sa vytvoriť dieťa pre substitúciu príkazov"
+msgstr "nie je možné vytvoriť potomka pre substitúciu príkazov"
 
 #: subst.c:4816
 msgid "command_substitute: cannot duplicate pipe as fd 1"
-msgstr "command_substitute: nedá sa duplikovať rúra ako fd 1"
+msgstr "command_substitute: nie je možné duplikovať rúru ako fd 1"
 
 #: subst.c:5318
 #, c-format
@@ -1705,12 +1718,12 @@ msgstr "%s: chybná substitúcia"
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: nie je možné vykonať priradenie takýmto spôsobom"
 
-#: subst.c:7479
+#: subst.c:7499
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "chybná substitúcia: : v reťazci %s chýba uzatvárajúci „`”"
 
-#: subst.c:8354
+#: subst.c:8375
 #, c-format
 msgid "no match: %s"
 msgstr "bez zhody: %s"
@@ -1818,8 +1831,8 @@ msgid ""
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
 "html>\n"
 msgstr ""
-"Licencia GPLv3+: GNU GPL verzie 3 alebo novšia <http://gnu.org/licenses/gpl."
-"html>\n"
+"Licencia GPLv3+: GNU GPL verzie 3 alebo novšia http://gnu.org/licenses/gpl."
+"html\n"
 
 #: version.c:86
 #, c-format
@@ -1829,53 +1842,56 @@ msgstr "GNU bash, verzia %s (%s)\n"
 #: version.c:91
 #, c-format
 msgid "This is free software; you are free to change and redistribute it.\n"
-msgstr ""
+msgstr "Toto je slobodný softvér; môžete ho slobodne meniť a šíriť.\n"
 
 #: version.c:92
 #, c-format
 msgid "There is NO WARRANTY, to the extent permitted by law.\n"
 msgstr ""
+"Nie sú poskytované ŽIADNE ZÁRUKY v rozsahu aký povoľuje\n"
+"aplikovateľné právo.\n"
 
 #: xmalloc.c:92
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr "xmalloc: nedá sa alokovať %lu bajtov (%lu bajtov alokovaných)"
+msgstr "xmalloc: nie je možné alokovať %lu bajtov (%lu bajtov alokovaných)"
 
 #: xmalloc.c:94
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes"
-msgstr "xmalloc: nedá sa alokovať %lu bajtov"
+msgstr "xmalloc: nie je možné alokovať %lu bajtov"
 
 #: xmalloc.c:114
 #, c-format
 msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
-msgstr "xrealloc: nedá sa realokovať %lu bajtov (%lu bajtov alokovaných)"
+msgstr "xrealloc: nie je možné realokovať %lu bajtov (%lu bajtov alokovaných)"
 
 #: xmalloc.c:116
 #, c-format
 msgid "xrealloc: cannot allocate %lu bytes"
-msgstr "xrealloc: nedá sa alokovať %lu bajtov"
+msgstr "xrealloc: nie je možné alokovať %lu bajtov"
 
 #: xmalloc.c:150
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr "xmalloc: %s:%d: nedá sa alokovať %lu bajtov (%lu bajtov alokovaných)"
+msgstr ""
+"xmalloc: %s:%d: nie je možné alokovať %lu bajtov (%lu bajtov alokovaných)"
 
 #: xmalloc.c:152
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes"
-msgstr "xmalloc: %s:%d: nedá sa alokovať %lu bajtov"
+msgstr "xmalloc: %s:%d: nie je možné alokovať %lu bajtov"
 
 #: xmalloc.c:174
 #, c-format
 msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
 msgstr ""
-"xrealloc: %s:%d: nedá sa realokovať %lu bajtov (%lu bajtov alokovaných)"
+"xrealloc: %s:%d: nie je možné realokovať %lu bajtov (%lu bajtov alokovaných)"
 
 #: xmalloc.c:176
 #, c-format
 msgid "xrealloc: %s:%d: cannot allocate %lu bytes"
-msgstr "xrealloc: %s:%d: nedá sa alokovať %lu bajtov"
+msgstr "xrealloc: %s:%d: nie je možné alokovať %lu bajtov"
 
 #: builtins.c:43
 msgid "alias [-p] [name[=value] ... ]"
@@ -2144,51 +2160,55 @@ msgid "until COMMANDS; do COMMANDS; done"
 msgstr "until PRÍKAZY; do PRÍKAZY; done"
 
 #: builtins.c:198
+msgid "coproc [NAME] command [redirections]"
+msgstr ""
+
+#: builtins.c:200
 msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
 msgstr ""
 "function názov_funkcie { PRÍKAZY ; } alebo názov_funkcie () { PRÍKAZY ; }"
 
-#: builtins.c:200
+#: builtins.c:202
 msgid "{ COMMANDS ; }"
 msgstr "{ PRÍKAZY ; }"
 
-#: builtins.c:202
+#: builtins.c:204
 msgid "job_spec [&]"
 msgstr "špec_úlohy [&]"
 
-#: builtins.c:204
+#: builtins.c:206
 msgid "(( expression ))"
 msgstr "(( výraz ))"
 
-#: builtins.c:206
+#: builtins.c:208
 msgid "[[ expression ]]"
 msgstr "[[ výraz ]]"
 
-#: builtins.c:208
+#: builtins.c:210
 msgid "variables - Names and meanings of some shell variables"
 msgstr "premenné - Názvy a významy niektorých premenných shellu"
 
-#: builtins.c:211
+#: builtins.c:213
 msgid "pushd [-n] [+N | -N | dir]"
 msgstr "pushd [-n] [+N | -N | adr]"
 
-#: builtins.c:215
+#: builtins.c:217
 msgid "popd [-n] [+N | -N]"
 msgstr "popd [-n] [+N | -N]"
 
-#: builtins.c:219
+#: builtins.c:221
 msgid "dirs [-clpv] [+N] [-N]"
 msgstr "dirs [-clpv] [+N] [-N]"
 
-#: builtins.c:222
+#: builtins.c:224
 msgid "shopt [-pqsu] [-o] [optname ...]"
 msgstr "shopt [-pqsu] [-o] [názov_voľby ...]"
 
-#: builtins.c:224
+#: builtins.c:226
 msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v var] formát [argumenty]"
 
-#: builtins.c:227
+#: builtins.c:229
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W "
 "wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] "
@@ -2198,7 +2218,7 @@ msgstr ""
 "zoznam_slov]  [-F funkcia] [-C príkaz] [-X vzor_filtra] [-P predpona] [-S "
 "prípona] [názov ...]"
 
-#: builtins.c:231
+#: builtins.c:233
 msgid ""
 "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
@@ -2207,11 +2227,11 @@ msgstr ""
 "zoznam_slov]  [-F funkcia] [-C príkaz] [-X vzor_filtra] [-P predpona] [-S "
 "prípona] [slovo]"
 
-#: builtins.c:235
+#: builtins.c:237
 msgid "compopt [-o|+o option] [name ...]"
 msgstr "compopt [-o|+o voľba] [názov ...]"
 
-#: builtins.c:238
+#: builtins.c:240
 msgid ""
 "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
@@ -2219,8 +2239,16 @@ msgstr ""
 "mapfile [-n počet] [-O začiatok] [-s počet] [-t] [-u fd] [-C spätné_volanie] "
 "[-c kvantum] [pole]"
 
-#: builtins.c:250
+#: builtins.c:242
 #, fuzzy
+msgid ""
+"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+msgstr ""
+"mapfile [-n počet] [-O začiatok] [-s počet] [-t] [-u fd] [-C spätné_volanie] "
+"[-c kvantum] [pole]"
+
+#: builtins.c:254
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2239,15 +2267,24 @@ msgid ""
 "been\n"
 "    defined."
 msgstr ""
-"„alias“ bez argumentov alebo s voľbou -p vypíše na štandardný\n"
-"    výstup zoznam aliasov v tvare NÁZOV=HODNOTA.\n"
-"    Inak je alias definovaný pre každý NÁZOV, ktorého HODNOTA je zadaná.\n"
+"Definovať alebo zobraziť aliasy.\n"
+"    \n"
+"    Bez argumentov vypíše všetky definované aliasy vo formáte, ktorý je\n"
+"    možné znova použiť v tvare NÁZOV=HODNOTA na štandardný výstup.\n"
+"    \n"
+"    Inak definuje alias pre každý NÁZOV, ktorého HODNOTA je zadaná.\n"
 "    Medzera na konci HODNOTY spôsobí, že sa v ďalšom slove\n"
-"    skontroluje substitúcia aliasu pri expanzii aliasu. Alias vracia\n"
-"    true ak nie je zadaný NÁZOV, pre ktorý nebol definovaný žiadny alias."
+"    skontroluje substitúcia aliasu pri expanzii aliasu.\n"
+"    \n"
+"    Voľby:\n"
+"      -p\tVypíše všetky definované aliasy vo formáte, ktorý je možné\n"
+"        \tznova použiť\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti vždy pravdu ak nebol zadaný NÁZOV, pre ktorý nie je definovaný "
+"alias."
 
-#: builtins.c:272
-#, fuzzy
+#: builtins.c:276
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2256,11 +2293,15 @@ msgid ""
 "    \n"
 "    Return success unless a NAME is not an existing alias."
 msgstr ""
-"Odstráni NÁZVY zo zoznamu definovaných aliasov. Ak je uvedená voľba -a,\n"
-"    odstráni všetky definície aliasov."
+"Odstrániť NÁZVY zo zoznamu definovaných aliasov.\n"
+"    \n"
+"    Voľby:\n"
+"      -a\todstráni všetky definície aliasov.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebol zadaný NÁZOV, pre ktorý nie je definovaný alias."
 
-#: builtins.c:285
-#, fuzzy
+#: builtins.c:289
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2298,11 +2339,14 @@ msgid ""
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
 msgstr ""
-"Naviaže sekvenciu klávesov na funkciu alebo makro Readline alebo\n"
+"Nastaviť klávesové väzby a premenné Readline.\n"
+"    \n"
+"    Naviaže sekvenciu klávesov na funkciu alebo makro Readline alebo\n"
 "    nastaviť premennú Readline. Syntax argumentu je rovnaká ako tá\n"
 "    v ~/.inputrc, ale musí sa podať ako jediný argument:\n"
 "    bind '\"\\C-x\\C-r\": re-read-init-file'.\n"
-"    bind akceptuje nasledovné voľby:\n"
+"    \n"
+"    Voľby:\n"
 "      -m  klávmap        Použije „klávmap“ ako mapu klávesov počas trvania\n"
 "                         tohto príkazu. Prijateľné názvy klávesových máp sú\n"
 "                         emacs emacs-standard, emacs-meta, emacs-ctlx, vi,\n"
@@ -2311,24 +2355,29 @@ msgstr ""
 "      -P                 Vypíše názvy funkcií a väzby.\n"
 "      -p                 Vypíše názvy funkcií a väzby v tvare, ktorý je\n"
 "                         možné znova použiť ako vstup.\n"
-"      -r  kláv_sek         Odstráni väzbu pre kláv_sek.\n"
-"      -x  kláv_sek:príkaz_shellu\tSpôsobí vykonanie PRÍKAZU_SHELLU po\n"
-"    \t\t\t\tzadaní KLÁV_SEK.\n"
-"      -f  súboru         Načíta klávesové väzby z SÚBORU.\n"
-"      -q  názov-funkcie  Zistí, ktoré klávesy vyvolávajú túto funkciu.\n"
-"      -u  názov-funkcie  Zruší väzby všetkých kláves naviazaných na túto "
-"funkciu.\n"
+"      -S                 Vypíše klávesové sekvencie, ktoré vyvolávajú makrá "
+"a\n"
+"                         ich hodnoty\n"
+"      -s                 Vypíše klávesové sekvencie, ktoré vyvolávajú makrá "
+"a\n"
+"                         ich hodnoty\n"
+"                         v tvare, ktorý je možné znova použiť ako vstup.\n"
 "      -V                 Vypíše názvy premenných a hodnoty\n"
 "      -v                 Vypíše názvy premenných a hodnoty v tvare, ktorý "
 "je\n"
+"      -q  názov-funkcie  Zistí, ktoré klávesy vyvolávajú túto funkciu.\n"
+"      -u  názov-funkcie  Zruší väzby všetkých kláves naviazaných na túto "
+"funkciu\n"
 "                         možné znova použiť ako vstup.\n"
-"      -S                 Vypíše klávesové sekvencie, ktoré vyvolávajú makrá "
-"a ich hodnoty\n"
-"      -s                 Vypíše klávesové sekvencie, ktoré vyvolávajú makrá "
-"a ich hodnoty\n"
-"                         v tvare, ktorý je možné znova použiť ako vstup."
+"      -r  kláv_sek       Odstráni väzbu pre kláv_sek.\n"
+"      -f  súboru         Načíta klávesové väzby z SÚBORU.\n"
+"      -x  kláv_sek:príkaz_shellu\tSpôsobí vykonanie PRÍKAZU_SHELLU po\n"
+"    \t\t\t\tzadaní KLÁV_SEK.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:322
+#: builtins.c:326
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2343,11 +2392,10 @@ msgstr ""
 "    Ukončiť cyklus FOR, WHILE alebo UNTIL. Ak je zadané N, ukončiť N\n"
 "    nadradených vnorených cyklov.\n"
 "    \n"
-"    Návratový kód:\n"
-"    Návratový kód je 0 ak N nie je väčšie alebo rovné 1."
+"    Návratová hodnota:\n"
+"    Návratová hodnota je 0 ak N nie je väčšie alebo rovné 1."
 
-#: builtins.c:334
-#, fuzzy
+#: builtins.c:338
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2357,10 +2405,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
-"Pokračuje v nasledujúcej iterácii cyklu FOR, WHILE alebo UNTIL.\n"
-"Ak je uvedené N, pokračovať v ďalšej iterácii cyklu o N úrovní vyššej."
+"Pokračovať v cykle for, while alebo until\n"
+"    \n"
+"    Pokračuje v nasledujúcej iterácii cyklu FOR, WHILE alebo UNTIL.\n"
+"    Ak je uvedené N, pokračovať v ďalšej iterácii cyklu o N úrovní vyššej.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak N nie je väčšie alebo rovné 1."
 
-#: builtins.c:346
+#: builtins.c:350
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2381,13 +2434,12 @@ msgstr ""
 "volať\n"
 "    v rámci vašej funkcie.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vracia návratový kód vstavanej funkcie shellu alebo 0 ak argument nie "
 "je\n"
 "    vstavaná funkcia shellu."
 
-#: builtins.c:361
-#, fuzzy
+#: builtins.c:365
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2402,16 +2454,19 @@ msgid ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 msgstr ""
-"Vracia kontext aktuálneho volania podprocedúry.\n"
-"\n"
+"Vrátiť kontext aktuálneho volania podprocedúry.\n"
+"    \n"
 "    Bez VÝR, vráti „$line $filename“.  S VÝR,\n"
 "    vráti „$line $subroutine $filename“; túto informáciu\n"
-"    je možné využiť pre trasovanie zásobníka.    \n"
+"    je možné využiť pre trasovanie zásobníka.\n"
+"    \n"
 "    Hodnota VÝR určuje o koľko rámcov volania sa vrátiť\n"
-"    pred aktuálny; najvyšší rámec má číslo 0."
+"    pred aktuálny; najvyšší rámec má číslo 0.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak shell nevykonáva funkciu shellu a EXPR nie je neplatný."
 
-#: builtins.c:379
-#, fuzzy
+#: builtins.c:383
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2443,19 +2498,32 @@ msgid ""
 "    Exit Status:\n"
 "    Returns 0 if the directory is changed; non-zero otherwise."
 msgstr ""
-"Zmení aktuálny adresár na ADR. Premenná $HOME je štandardný\n"
-"    ADR. Premenná CDPATH definuje cesty, v ktorých sa hľadá adresár\n"
-"    obsahujúci ADR. Alternatívne názvy adresárov vCDPATH sú\n"
-"    oddelené dvojbodkou (:). Prázdny (null) názov adresára zodpovedá\n"
-"    aktuálnemu adresáru, t.j. „.“. Ak ADR začína lomkou (/), CDPATH\n"
-"    sa nepoužije. Ak adresár nebol nájdený a je nastavená voľba shellu\n"
-"    „cdable_vars“ skúste toto slovo ako názov premennej. Ak táto\n"
-"    premenná má hodnotu, vykoná cd na hodnotu premennej.\n"
-"    Voľba -P vraví, že sa má použiť fyzická štruktúra adresárov a nie\n"
-"    nasledovať symbolické odkazy; voľba -L vynúti nasledovanie\n"
-"    symbolických odkazov."
+"Zmeniť aktuálny adresár.\n"
+"    \n"
+"    Zmení aktuálny adresár na ADR. Premenná $HOME je štandardný ADR.\n"
+"    \n"
+"    Premenná CDPATH definuje cesty, v ktorých sa hľadá adresár obsahujúci "
+"ADR.\n"
+"    Alternatívne názvy adresárov v CDPATH sú oddelené dvojbodkou (:).\n"
+"    Prázdny (null) názov adresára zodpovedá aktuálnemu adresáru, t.j. „.“.\n"
+"    Ak ADR začína lomkou (/), CDPATH sa nepoužije.\n"
+"    \n"
+"    Ak adresár nebol nájdený a je nastavená voľba shellu „cdable_vars“,\n"
+"    predpokladá sa, že toto slovo je názov premennej.\n"
+"    Ak táto premenná má hodnotu, vykoná cd na hodnotu premennej.\n"
+"    \n"
+"    Voľby:\n"
+"        -L\tvynúti nasledovanie symbolických odkazov\n"
+"        -P\tpoužije sa fyzická štruktúra adresárov a nie nasledovať\n"
+"    \t\tsymbolické odkazy.\n"
+"    \n"
+"    Štandardne sa budú nasledovať symbolické odkazy ako keby bola\n"
+"    zadaná voľba „-L“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak bol aktuálny adresár zmenený, inak nenulovú hodnotu."
 
-#: builtins.c:407
+#: builtins.c:411
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2479,12 +2547,11 @@ msgstr ""
 "    \n"
 "    Štandardne sa „pwd“ správa ako keby bolo uvedené „-L“.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vracia 0 ak nie je zadaná neplatná voľba alebo nie je možné\n"
 "    prečítať aktuálny adresár."
 
-#: builtins.c:424
-#, fuzzy
+#: builtins.c:428
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2492,9 +2559,15 @@ msgid ""
 "    \n"
 "    Exit Status:\n"
 "    Always succeeds."
-msgstr "Bez účinku; príkaz nič nerobí. Vráti návratový kód nula."
+msgstr ""
+"Prázdny príkaz.\n"
+"    \n"
+"    Bez účinku; príkaz nič nerobí.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vždy vráti pravda."
 
-#: builtins.c:435
+#: builtins.c:439
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2503,19 +2576,24 @@ msgid ""
 msgstr ""
 "Vráti úspešný výsledok\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vždy vráti 0."
 
-#: builtins.c:444
-#, fuzzy
+#: builtins.c:448
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
 "    Exit Status:\n"
 "    Always fails."
-msgstr "Vráti neúspešný výsledok."
+msgstr ""
+"Prázdny príkaz.\n"
+"    \n"
+"    Vráti neúspešný výsledok.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vždy vráti nepravda."
 
-#: builtins.c:453
+#: builtins.c:457
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2533,8 +2611,22 @@ msgid ""
 "    Exit Status:\n"
 "    Returns exit status of COMMAND, or failure if COMMAND is not found."
 msgstr ""
+"Vykonať jednoduchý príkaz alebo zobraziť informácie o príkazoch.\n"
+"    \n"
+"    Spustí PRÍKAZ s ARG potlačiac vyhľadanie funkcie shellu alebo\n"
+"    zobrazí informácie o uvedených PRÍKAZoch. Možno použiť na\n"
+"    vyvolanie externých príkazov ak existuje funkcia s rovnakým názvom.\n"
+"    \n"
+"    Voľby:\n"
+"      -p\tpoužiť štandardnú hodnotu PATH, ktorá zaručene nájde všetky\n"
+"    \t\tštandardné nástroje\n"
+"      -v\tvypísať popis PRÍKAZu podobný zabudovanému príkazu „type“\n"
+"      -v\tvypísať podrobnejší popis každého PRÍKAZu\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu PRÍKAZu alebo zlyhá ak nenájde PRÍKAZ."
 
-#: builtins.c:472
+#: builtins.c:476
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2569,15 +2661,49 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"Nastaviť hodnoty a atribúty premennných.\n"
+"    \n"
+"    Deklaruje premenné a ich atribúty. Ak nie sú zadané NÁZVY,\n"
+"    zobrazí atribúty a hodnoty všetkých premenných.\n"
+"    \n"
+"    Voľby:\n"
+"      -f\tobmedzí operáciu alebo výpis na názvy funkcií a definície\n"
+"      -F\tobmedzí výpis iba na názvy funkcií (plus číslo riadka a\n"
+"    \t\tzdrojový súbor pri ladení)\n"
+"      -p\tzobrazí atribúty a hodnotu každého NÁZVU\n"
+"    \n"
+"    Voľby, ktoré nastavujú atribúty:\n"
+"      -a\turobí z NÁZVU indexované polia (ak sú podporované)\n"
+"      -A\turobí z NÁZVOV asociatívne polia (ak sú podporované)\n"
+"      -i\tdá NÁZVU atribút „celé číslo“\n"
+"      -l\tprevedie NÁZVY pri priradení na malé písmená\n"
+"      -r\tnastaví NÁZVY iba na čítanie\n"
+"      -t\tdá NÁZVU atribút „trace“\n"
+"      -u\tprevedie NÁZVY pri priradení na veľké písmená\n"
+"      -x\tprevedie NÁZVY na export\n"
+"    \n"
+"    Pomocou „+“ namiesto „-“ vypnete uvedený atribút.\n"
+"    \n"
+"    Premenné s atribútom „celé číslo“ vykonávajú aritmetické vyhodnocovanie\n"
+"    (pozri príkaz „let“), keď je im  priradená hodnota.\n"
+"    \n"
+"    Keď sa „declare“ použije vo funkcii, NÁZVY budú lokálne ako pri príkaze\n"
+"    „local“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:508
+#: builtins.c:512
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
+"Nastaviť hodnoty a atribúty premenných.\n"
+"    \n"
+"    Zastaralé. Pozri „help declare“."
 
-#: builtins.c:516
+#: builtins.c:520
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2591,9 +2717,19 @@ msgid ""
 "    Returns success unless an invalid option is supplied, an error occurs,\n"
 "    or the shell is not executing a function."
 msgstr ""
+"Definovať lokálne premenné.\n"
+"    \n"
+"    Vytvorí lokálnu premennú s názvom NÁZOV a priradí jej HODNOTU.\n"
+"    VOĽBA je ľubovoľná voľba, ktorú prijme „declare“\n"
+"    \n"
+"    Lokálne premenné možno použiť iba v rámci funkcie; sú viditeľné\n"
+"    iba v rámci funkcie, kde sú definované a v jej potomkoch.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba, nevyskytla sa chyba a\n"
+"    shell práve nevykonáva funkciu."
 
-#: builtins.c:533
-#, fuzzy
+#: builtins.c:537
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2623,13 +2759,20 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
-"Vypíše ARGumenty. S voľbou -n bude posledný znak nového\n"
-"    riadka potlačený. S voľbou -e sa zapne interpretácia\n"
-"    nasledovných znakov začínajúcich spätnou lomkou:\n"
+"Vypísať argumenty na štandardný výstup.\n"
+"    \n"
+"    Vypíše ARGumenty na štandardný výstup ukončené znakom\n"
+"    nového riadka.\n"
+"    Voľby:\n"
+"      -n\tpotlačí znak nového riadka na konci.\n"
+"      -e\tzapne interpretáciu nasledovných únikových klauzúl\n"
+"      -E\tvypne interpretáciu nasledovných únikových klauzúl\n"
+"    \n"
+"    „echo“ interpretuje nasledovné únikové klauzuly:\n"
 "    \t\\a\tvýstraha (zvonček)\n"
 "    \t\\b\tbackspace\n"
 "    \t\\c\tptlačiť posledný znak nového riadka\n"
-"    \t\\E\tvykonať escape znaku\n"
+"    \t\\e\tescape znaku\n"
 "    \t\\f\tform feed\n"
 "    \t\\n\tnový riadok\n"
 "    \t\\r\tnávrat vozíka\n"
@@ -2638,11 +2781,13 @@ msgstr ""
 "    \t\\\\\tspätná lomka\n"
 "    \t\\0nnn\tznak s ASCII kódom NNN (osmičkový). NNN môže mať\n"
 "    \t\t0 až 3 osmičkové číslice\n"
+"      \\xHH\tosembitový znak, ktorého hodnota je HH (hexadecimálne).\n"
+"    \tHH môže mať jednu alebo dve hexadecimálne číslice.\n"
 "    \n"
-"    Voľbou -E môžete explicitne vypnuť interpretáciu vyššie \n"
-"    uvedených znakov."
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nevyskytla sa chyba pri zápise."
 
-#: builtins.c:567
+#: builtins.c:571
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2654,8 +2799,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
+"Vypísať argumenty na štandardný výstup.\n"
+"    \n"
+"    Vypíše ARGumenty na štandardný výstup ukončené znakom\n"
+"    nového riadka.\n"
+"    Voľby:\n"
+"      -n\tpotlačí znak nového riadka na konci.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nevyskytla sa chyba pri zápise."
 
-#: builtins.c:582
+#: builtins.c:586
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2681,8 +2835,35 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 msgstr ""
+"Zapnúť a vypnúť vstavané funkcie shellu.\n"
+"    \n"
+"    Zapína a vypína vstavané funkcie shellu. Vypnutie vám umožní\n"
+"    vykonať externý príkaz s rovnakým názvom ako vstavaná funkcia\n"
+"    shellu bez toho, aby ste museli použiť úplnú cestu k nemu.\n"
+"    \n"
+"    Voľby:\n"
+"      -a\tvypíše zoznam vstavaných funkcií a zobrazí pi každej\n"
+"         \tči je zapnutá\n"
+"      -n\tvypne každý NÁZOV alebo zobrazí zoznam vypnutých\n"
+"         \tvstavaných funkcií\n"
+"      -p\tvypíše zoznam vstavaných funkcií v tvare, ktorý je\n"
+"         \tmožné znova použiť ako vstup\n"
+"      -s\tvypísať iba názvy Posixových „špeciálnych“\n"
+"         \tvstavaných funkcií\n"
+"    \n"
+"    Voľby riadiace dynamické načítanie:\n"
+"      -f\tNačítať vstavanú funkciu NÁZOV zo zdieľaného objektu SÚBOR\n"
+"      -d\todstrániť vstavanú funkciu načítanú voľbou -f\n"
+"    \n"
+"    Bez volieb zapne každý NÁZOV.\n"
+"    \n"
+"    Ak chcete použiť „test“, ktorý sa nachádza v ceste $PATH namiesto\n"
+"    vstavanej funkcie shellu, napíšte „enable -n test“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak NÁZOV nie je vstavaná funkcia shellu a nevyskytla sa chyba."
 
-#: builtins.c:610
+#: builtins.c:614
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2693,9 +2874,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns exit status of command or success if command is null."
 msgstr ""
+"Vykonať argumenty ako príkaz shellu.\n"
+"    \n"
+"    Skombinovať ARGumenty do jediného reťazca a použiť výsledok\n"
+"    ako vstup shellu a vykonať tieto príkazy.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu príkazu alebo 0 ak je príkaz prázdny."
 
-#: builtins.c:622
-#, fuzzy
+#: builtins.c:626
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -2735,7 +2922,9 @@ msgid ""
 "    Returns success if an option is found; fails if the end of options is\n"
 "    encountered or an error occurs."
 msgstr ""
-"Getopts používajú procedúry shellu na analýzu pozičných parametrov.\n"
+"Syntaktická analýza volieb.\n"
+"    \n"
+"    Getopts používajú procedúry shellu na analýzu pozičných parametrov.\n"
 "    \n"
 "    OPTSTRING obsahuje písmená volieb, ktoré pozná; ak po písmene\n"
 "    nasleduje dvojbodka, po voľbe sa očakáva argument, ktorý by mal\n"
@@ -2763,9 +2952,13 @@ msgstr ""
 "    OPTERR má štandardne hodnotu 1.\n"
 "    \n"
 "    Getopts normálne spracúva pozičné parametre ($0 - $9), ale ak je\n"
-"    zadaných viac argumentov, spracuje tieto."
+"    zadaných viac argumentov, spracuje tieto.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak je voľba nájdená; zlyhá po dosiahnutí konca reťazca volieb\n"
+"    alebo ak sa vyskytne chyba."
 
-#: builtins.c:664
+#: builtins.c:668
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2787,19 +2980,37 @@ msgid ""
 "    Returns success unless COMMAND is not found or a redirection error "
 "occurs."
 msgstr ""
+"Nahradiť shell zadaným príkazom.\n"
+"    \n"
+"    Vykonať PRÍKAZ, pričom sa nahradí tento shell určeným programom.\n"
+"    ARGUMENTy dostane PRÍKAZ ako argumenty.  Ak nie je zadaný PRÍKAZ,\n"
+"    všetky presmerovania sa uskutočnia v aktuálnom shelli.\n"
+"    \n"
+"    Voľby:\n"
+"      -a názov\tpošle NÁZOV ako nultý argument PRÍKAZU\n"
+"      -c\tvykoná PRÍKAZ s prázdnym prostredím\n"
+"      -l\tdá pomlčku na nultý argument PRÍKAZu\n"
+"    \n"
+"    Ak príkaz nemožno vykonať, neinteraktívny shell sa ukončí ak nie je\n"
+"    nastavená voľba shellu „execfail“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestane, že PRÍKAZ nebol nájdený a nevyskytne sa chyba\n"
+"    presmerovania."
 
-#: builtins.c:685
-#, fuzzy
+#: builtins.c:689
 msgid ""
 "Exit the shell.\n"
 "    \n"
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
-"Ukončiť shell so stavom N. Ak sa N vynechá, stav sa nastaví\n"
-"    podľa stavu posledného vykonaného príkazu."
+"Ukončiť shell\n"
+"    \n"
+"    Ukončí shell s návratovou hodnotou N. Ak sa N vynechá, návratová\n"
+"    hodnota  sa nastaví podľa stavu posledného vykonaného príkazu."
 
-#: builtins.c:694
+#: builtins.c:698
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2807,9 +3018,12 @@ msgid ""
 "executed\n"
 "    in a login shell."
 msgstr ""
+"Ukončiť login shell.\n"
+"    \n"
+"    Ukončí login shell s návratovou hodnotou N. Vráti chybu ak nie je\n"
+"    spustený v login shelli."
 
-#: builtins.c:704
-#, fuzzy
+#: builtins.c:708
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -2838,18 +3052,19 @@ msgid ""
 "    Returns success or status of executed command; non-zero if an error "
 "occurs."
 msgstr ""
-"fc sa používa na vypísanie alebo úpravu a opätovné vykonanie príkazov.\n"
-"    z histórie\n"
+"Zobraziť alebo vykonať príkazy z histórie.\n"
+"    \n"
+"    fc sa používa na vypísanie alebo úpravu a opätovné vykonanie príkazov.\n"
+"    z histórie.\n"
 "    PRVÝ a POSLEDNÝ môžu byť čísla udávajúce rozsah alebo PRVÝ môže byť\n"
 "    reťazec, ktorý znamená najnedávnejší príkaz začínajúci týmto reťazcom.\n"
 "    \n"
-"       -e ENAME zvolí editor, ktorý sa má použiť. Štandardne je to FCEDIT, "
-"potom EDITOR,\n"
-"          potom vi.\n"
+"       -e ENAME zvolí editor, ktorý sa má použiť. Štandardne je to FCEDIT,\n"
+"    \t\tpotom EDITOR, potom vi.\n"
 "    \n"
 "       -l znamená vypísať riadky namiesto úpravy.\n"
 "       -n znamená nevypisovať čísla riadkov.\n"
-"       -r  znamená  obrátiť poradie riadkov (najnovšie budú vypísané prvé).\n"
+"       -r znamená obrátiť poradie riadkov (najnovšie budú vypísané prvé).\n"
 "    \n"
 "    S formátom „fc -s [pat=rep ...] [príkaz]“ sa znova vykoná uvedený\n"
 "    príkaz po vykonaní náhrady OLD=NEW.\n"
@@ -2858,10 +3073,13 @@ msgstr ""
 "napísaním\n"
 "    „r cc“ spustíte posledný príkaz začínajúci „cc“ a napísaním „r“ "
 "opätovne\n"
-"    vykonáte posledný príkaz."
+"    vykonáte posledný príkaz.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 alebo stav vykonaného príkazu; nenulovú hodnotu ak sa vyskytne\n"
+"    chyba."
 
-#: builtins.c:734
-#, fuzzy
+#: builtins.c:738
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -2872,11 +3090,16 @@ msgid ""
 "    Exit Status:\n"
 "    Status of command placed in foreground, or failure if an error occurs."
 msgstr ""
-"Dá JOB_SPEC do popredia a urobí ju aktuálnou úlohou. Ak JOB_SPEC\n"
-"    nie je prítomná, použije sa aktuálna úloha shellu."
+"Presunúť úlohu do popredia.\n"
+"    \n"
+"    Umiestni JOB_SPEC do popredia a urobí ju aktuálnou úlohou. Ak JOB_SPEC\n"
+"    nie je prítomná, použije sa aktuálna úloha shellu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Stav príkazu umiestneného do popredia; nenulovú hodnotu ak sa vyskytne\n"
+"    chyba."
 
-#: builtins.c:749
-#, fuzzy
+#: builtins.c:753
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -2889,10 +3112,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
-"Dá každú JOB_SPEC do pozadia, ako keby bola spustená s „&“. Ak\n"
-"    JOB_SPEC nie je prítomná, použije sa aktuálna úloha shellu."
+"Presunúť úlohu do popredia.\n"
+"    \n"
+"    Umiestni každú JOB_SPEC do pozadia, ako keby bola spustená s „&“. Ak\n"
+"    JOB_SPEC nie je prítomná, použije sa aktuálna úloha shellu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nie je riadenie úloh vypnuté a nevyskytne sa chyba."
 
-#: builtins.c:763
+#: builtins.c:767
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -2915,8 +3143,31 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless NAME is not found or an invalid option is given."
 msgstr ""
+"Vyvolať alebo zobraziť umiestnenia programu.\n"
+"    \n"
+"    Určiť a zapamätať si úplnú cestu ku každému PRÍKAZu. Ak nie sú\n"
+"    uvedené žiadne argumenty, zobrazia sa informácie o zapamätaných\n"
+"    príkazoch.\n"
+"    \n"
+"    Voľby:\n"
+"      -d\tzabudnúť zapamätanné umiestnenia každého NÁZVU\n"
+"      -l\tzobraziť vo formáte, ktoré je možné znova použiť ako      \t"
+"\tvstup\n"
+"      -p cesta\tpoužiť CESTU ako plnú cestu k NÁZVU\n"
+"      -r\tzabudnúť všetky zapamätané umiestnenia\n"
+"      -t\tvypísať zapamätané umiestnenia každého NÁZVU, pred\n"
+"        \tne vypísať zodpovedajúci NÁZOV ak sú zadané viaceré\n"
+"        \tNÁZVY\n"
+"    \n"
+"    Argumenty:\n"
+"      NÁZOV\tKaždý NÁZOV sa vyhľadá v $PATH a pridá\n"
+"    \t\tsa do zoznnamu zapamätaných príkazov.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že NÁZOV nebol nájdený a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:788
+#: builtins.c:792
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -2937,9 +3188,26 @@ msgid ""
 "    Returns success unless PATTERN is not found or an invalid option is "
 "given."
 msgstr ""
+"Zobraziť informácie o vstavaných príkazoch.\n"
+"    \n"
+"    Zobrazí stručné zhrnutia vstavaných príkazov. Ak je zadaný VZOR,\n"
+"    uvedie podrobnosti o všetkých príkazoch zodpovedajúcich VZORu,\n"
+"    inak vypíše zoznam tém pomocníka.\n"
+"    \n"
+"    Voľby:\n"
+"      -d\tvypíše krátky popis každej z tém\n"
+"      -m\tvypíše použitie vo formáte podobnom manuálovej stránke\n"
+"      -s\tvypíše iba krátku syntax použitia každej z tém zodpovedajúcich\n"
+"        \tVZORu\n"
+"    \n"
+"    Argumenty:\n"
+"      VZOR\tVzor určujúci tému pomocníka\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že VZOR nebol nájdený a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:812
-#, fuzzy
+#: builtins.c:816
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -2972,29 +3240,37 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
-"Zobrazí históriu s číslami riadkov. Riadky s „*“ boli zmenené.\n"
-"    Argument N znamená zobraziť iba posledných N riadkov. Voľba\n"
-"    „-c“ spôsobí vyčistenie histórie vymazaním všetkých jej položiek.\n"
-"    Voľba „-d“ zmaže položku histórie na ofsete OFSET. Voľba „-w“\n"
-"    vypíše aktuálnu históriu do súbora histórie; „-r“ znamená prečítať\n"
-"    súbor a pridať jeho obsah do zoznamu histórie. „-a“ znamená\n"
-"    pridať riadky histórie z aktuálnej relácie do súbory s históriou.\n"
-"    Argument „-n“ znamená prečítať všetky zatiaľ neprečítané riadky\n"
-"    zo súboru histórie a pridať ich do zoznamu histórie.\n"
+"Zobraziť alebo zmeniť históriu.\n"
 "    \n"
-"    If FILENAME is given, then that is used as the history file else\n"
-"    if $HISTFILE has a value, that is used, else ~/.bash_history.\n"
-"    If the -s option is supplied, the non-option ARGs are appended to\n"
-"    the history list as a single entry.  The -p option means to perform\n"
-"    history expansion on each ARG and display the result, without storing\n"
-"    anything in the history list.\n"
+"    Zobrazí históriu s číslami riadkov. Riadky s „*“ boli zmenené.\n"
+"    Argument N znamená zobraziť iba posledných N riadkov.\n"
 "    \n"
-"    If the $HISTTIMEFORMAT variable is set and not null, its value is used\n"
-"    as a format string for strftime(3) to print the time stamp associated\n"
-"    with each displayed history entry.  No time stamps are printed otherwise."
+"    Voľby:\n"
+"     -c\tvyčistenie histórie vymazaním všetkých jej položiek.\n"
+"     -d\tzmaže položku histórie na pozícii OFSET\n"
+"    \n"
+"     -a\tpridať riadky histórie z aktuálnej relácie do súbory s históriou.\n"
+"     -n\tprečítať všetky zatiaľ neprečítané riadky\n"
+"     -r\tprečítať súbor a pridať jeho obsah do zoznamu histórie\n"
+"       \tzo súboru histórie a pridať ich do zoznamu histórie.\n"
+"     -w\tvypíše aktuálnu históriu do súboru histórie.\n"
+"    \n"
+"     -p\tvykoná expanziu histórie každého ARG a zobrazí výsledok\n"
+"       \tbez toho aby ukladal čokoľvek do histórie.\n"
+"     -s\tpridá ARG, ktoré nie sú voľbami do histórie ako jednu položku.\n"
+"    \n"
+"    Ak je uvedený SÚBOR, použije sa ako súbor histórie, inak sa použije\n"
+"    $HISTFILE ak má nastavenú hodnotu, inak ~/.bash_history.\n"
+"    \n"
+"    Ak je premenná $HISTTIMEFORMAT nastavená a neprázdna, jej hodnota\n"
+"    sa použije ako formátovací reťazec strftime(3) na tlač príslušných\n"
+"    časových známok zobrazených pri každej položke histórie.\n"
+"    V opačnom prípade sa nebudú tlačiť časové známky.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:848
-#, fuzzy
+#: builtins.c:852
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3017,16 +3293,27 @@ msgid ""
 "    Returns success unless an invalid option is given or an error occurs.\n"
 "    If -x is used, returns the exit status of COMMAND."
 msgstr ""
-"Vypíše aktívne úlohy. Voľba „-l“ vypíše naviac aj ID procesov.\n"
-"    Voľba „-p“ vypíše iba ID procesov. Ak je uvedená voľba „-n“,\n"
-"    vypíšu sa iba procesy, ktorých stav sa zmenil od poslednej kontroly.\n"
-"    JOBSPEC vypíše iba úlohu s daným JOBSPEC. Voľby „-r“ a „-s“\n"
-"    obmedzia výstup iba na bežiace a zastavené úlohy. Bez volieb sa\n"
-"    vypíše stav všetkých aktívnych úloh. S voľbou „-x“ sa spustí PRÍKAZ\n"
-"    po tom, ako každá zo špecifikácií úloh, ktoré sú uvedené v ARGS,\n"
-"    boli nahradené ID procesu lídra skupiny procesov danej úlohy."
+"Zobraziť stav úloh.\n"
+"    \n"
+"    Vypíše aktívne úlohy. JOBSPEC vypíše iba úlohu s daným JOBSPEC.\n"
+"    Bez volieb sa vypíše stav všetkých aktívnych úloh.\n"
+"    \n"
+"    Voľby:\n"
+"     -l\tvypíše okrem bežných informácií aj ID procesov\n"
+"     -n\tvypíše iba procesy, ktorých stav sa zmenil od poslednej kontroly.\n"
+"     -p\tvypíše iba ID procesov\n"
+"     -r\tobmedzí výstup iba na bežiace úlohy\n"
+"     -s\tobmedzí výstup iba na zastavené úlohy\n"
+"    \n"
+"    Ak je zadaná voľba „-x“ PRÍKAZ sa spustí po tom, ako každá\n"
+"    zo špecifikácií úloh, ktoré sú uvedené v ARGS, boli nahradené\n"
+"    ID procesu lídra skupiny procesov danej úlohy.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba.\n"
+"    Ak je použitá voľba -x, vráti sa návratová hodnota PRÍKAZu."
 
-#: builtins.c:875
+#: builtins.c:879
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3042,9 +3329,21 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option or JOBSPEC is given."
 msgstr ""
+"Odstrániť úlohy z aktuálneho shellu.\n"
+"    \n"
+"    Odstráni každý argument JOBSPEC z tabuľky aktívnych úloh. Bez uvedenia\n"
+"    akýchkoľvek JOBSPEC, shell použije svoj pojem aktuálnej úlohy.\n"
+"    \n"
+"    Voľby:\n"
+"      -a\todstráni všetky úlohy ak nie sú uvedené JOBSPEC\n"
+"      -h\toznačí každú JOBSPEC tak, že sa jej nepošle SIGHUP ak shell\n"
+"    \t\tdostane SIGHUP\n"
+"      -r\todstráni iba bežiace úlohy\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná JOBSPEC."
 
-#: builtins.c:894
-#, fuzzy
+#: builtins.c:898
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3065,16 +3364,26 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
-"Pošle procesom s uvedeným PID (alebo JOBSPEC) signál SIGSPEC.  Ak\n"
-"    nie je SIGSPEC uvedená, predpokladá sa SIGTERM. Argument „-l“\n"
-"    vypíše názvy signálov; ak sú argumenty uvedené po „-l“, predpokladá\n"
-"    sa, že sú to čísla signálov ktorých názvy sa majú zobraziť. Kill je\n"
-"    vstavaný (builtin) príkaz shellu z dvoch dôvodov: umožňuje použitie\n"
-"    ID úlohy okrem ID procesu a ak dosiahnete limi tprocesov, ktoré\n"
-"    môžete vytvoriť, nemusíte spúšťať proces na ukončenie iného."
+"Poslať úlohe signál.\n"
+"    \n"
+"    Pošle procesom s uvedeným PID (alebo JOBSPEC) signál SIGSPEC.  Ak\n"
+"    nie je SIGSPEC uvedená, predpokladá sa SIGTERM.\n"
+"    \n"
+"    Voľby:\n"
+"      -s sig\tSIG je názov signálu\n"
+"      -n sig\tSIG je číslo signálu\n"
+"      -l\tvypíše názvy signálov; ak sú argumenty uvedené po „-l“,\n"
+"        \tpredpokladá sa, že sú to čísla signálov ktorých názvy sa majú\n"
+"        \tzobraziť.\n"
+"    \n"
+"    Kill je vstavaný (builtin) príkaz shellu z dvoch dôvodov: umožňuje\n"
+"    použitie ID úlohy okrem ID procesu a ak dosiahnete limit procesov, \n"
+"    ktoré môžete vytvoriť, nemusíte spúšťať proces na ukončenie iného.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:917
-#, fuzzy
+#: builtins.c:921
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3118,7 +3427,9 @@ msgid ""
 "    Exit Status:\n"
 "    If the last ARG evaluates to 0, let returns 1; let returns 0 otherwise.."
 msgstr ""
-"Každý ARG je aritmetický výraz, ktorý sa má vyhodnotiť. Vyhodnocuje\n"
+"Vyhodnotiť aritmetické výrazy.\n"
+"    \n"
+"    Každý ARG je aritmetický výraz, ktorý sa má vyhodnotiť. Vyhodnocuje\n"
 "    sa v celých číslach bez kontroly pretečenia, hoci delenie nulou sa\n"
 "    detekuje a označí ako chyba. Nasledujúci zoznam operátorov je\n"
 "    zoskupený do úrovní s rovnakou precedenciou operátorov.\n"
@@ -3154,9 +3465,10 @@ msgstr ""
 "    v zátvorkách sa vyhodnocujú ako prvé a majú prednosť pred\n"
 "    hore uvedenými pravidlami precedencie.\n"
 "    \n"
-"    Ak sa posledný ARG vuhodnotí na 0, let vráti 1; 0 inak sa vráti 0."
+"    Návratová hodnota:\n"
+"    Ak sa posledný ARG vyhodnotí na 0, let vráti 1; 0 inak sa vráti 0."
 
-#: builtins.c:962
+#: builtins.c:966
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3200,37 +3512,42 @@ msgid ""
 "out,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
-"Zo štandardného vstupu alebo, ak je daná voľba -u, z popisovača FD\n"
-"    sa načíta jeden riadok a prvé slovo sa priradí prvému NÁZVU, druhé\n"
+"Načítať riadok zo štandardného vstupu a rozdeliť ho do polí.\n"
+"    \n"
+"    Zo štandardného vstupu sa načíta jeden riadok. Riadok sa rozdelí do\n"
+"    polí ako pri delení na slová a prvé slovo sa priradí prvému NÁZVU, "
+"druhé\n"
 "    slovo druhému NÁZVU atď. až zvyšné slová sa priradia poslednému\n"
 "    NÁZVU. Iba znaky, ktoré sa nachádzajú v $IFS sa považujú za\n"
-"    oddeľovače slov. Ak nie sú uvedené žiadne NÁZVY, načítaný riadok sa\n"
-"    uloží do premennej REPLY. Ak je zadaná voľba -r, značí to "
-"„nespracovaný“\n"
-"    vstup a zápis únikových klauzúl pomocou spätnej lomky je vypnutý. Voľba\n"
-"    -d spôsobí pokračovanie čítania až kým sa nevyskytne prvý znak znak "
-"DELIM\n"
-"    namiesto znaku nového riadka. Ak je zadaná voľba -p, pred pokusom o\n"
-"    čítanie sa vypíše reťazec PROMPT bez koncového znaku nového riadka.\n"
-"    Ak je zadaná voľba -a a shell je interaktívny, všetky načítané slová sa\n"
-"    priradia postupne indexom poľa ARRAY, počínajúc nulou. Ak je zadaná\n"
-"    voľba -e a shell je interaktívny, na načítanie riadka sa použije "
-"readline.\n"
-"    Ak je zadaná voľba -n s nenulovým argumentom NCHARS, čítanie vstupu\n"
-"    skončí po načítaní NCHARS znakov. Voľba -s spôsobí, že sa vstup "
-"načítaný\n"
-"    z terminálu nebude vypisovať.\n"
+"    oddeľovače slov.\n"
 "    \n"
-"    Voľba -t spôsobí ukončenie čítania po vypršaní časového intervalu a ak "
-"sa do\n"
-"    intervalu nenačíta úplný riadok vstupu, vráti chybu. Ak je nastavená "
-"premenná\n"
-"    TMOUT, jej hodnota je štandardný interval expirácie. Návratová hodnota "
-"je\n"
-"    nula ak sa nenarazí na znak konca súboru, čítanie nevyprší alebo sa "
-"ako    argument voľby -u nezadá neplatný popisovač súboru."
+"    Ak nie sú uvedené žiadne NÁZVY, načítaný riadok sa uloží do premennej\n"
+"    REPLY.\n"
+"    \n"
+"    Voľby:\n"
+"     -a pole\tvšetky načítané slová sa priradia postupne indexom poľa POLE, "
+"počínajúc nulou.\n"
+"     -d\tpokračovanie čítania až kým sa nevyskytne prvý znak znak DELIM\n"
+"    namiesto znaku nového riadka.\n"
+"     -e a shell je interaktívny, na načítanie riadka sa použije readline.\n"
+"     -n znakov\tčítanie vstupu skončí po načítaní ZNAKOV znakov.\n"
+"     -p\tvýzva\tpred pokusom o čítanie vypíše reťazec VÝZVA bez koncového\n"
+"       \tznaku nového riadka.\n"
+"     -r\tzápis únikových klauzúl pomocou spätnej lomky je vypnutý.\n"
+"     -s\tvstup načítaný z terminálu nebude vypisovať (echo).\n"
+"    \n"
+"     -t interval\tukončenie čítania po vypršaní časového INTERVALu a ak\n"
+"    \tsa do intervalu nenačíta úplný riadok vstupu, vráti chybu. Ak je\n"
+"    \tnastavená premenná TMOUT, jej hodnota je štandardný interval\n"
+"    \texpirácie. TMOUT môže byť zlomok. Návratová hodnota je\n"
+"    \tväčšia ako 128 aj sa prekročí INTERVAL.\n"
+"     -u fd\tnamiesto štandardného vstupu čítať z popisovača súboru FD.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nenarazí pri čítaní nakoniec súboru, nevyprší čas na\n"
+"    čítanie a ako argument -u nebol je zadaný neplatný popisovač."
 
-#: builtins.c:1002
+#: builtins.c:1006
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3241,9 +3558,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns N, or failure if the shell is not executing a function or script."
 msgstr ""
+"Návrat z funkcie shellu.\n"
+"    \n"
+"    Spôsobí ukončenie funkcie alebo skriptu vyvolaného pomocou source\n"
+"    s návratovou hodnotou N. Ak sa N vynechá, návratovou hodnotu je\n"
+"    návratová hodnota posledného vykonaného príkazu v tejto funkcii či\n"
+"    skripte.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti N alebo zlyhá ak shell nevykonáva funkciu či skript."
 
-#: builtins.c:1015
-#, fuzzy
+#: builtins.c:1019
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3324,22 +3649,28 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given."
 msgstr ""
-"    -a  Označí premenné, ktoré sú zmenené alebo vytvorené na export.\n"
-"        -b  Okamžite oznámi ukončenie úlohy.\n"
-"        -e  Okamžite sa ukončí, keď sa príkaz ukončí s nenulovou návratovou "
-"hodnotou.\n"
-"        -f  Vypnúť tvorbu názvov súborov (globbing).\n"
-"        -h  Pamätať si, kde sú umiestnené príkazy po ich vyhľadaní.\n"
-"        -k  Všetky argumenty priradenia sa odovzdávajú do prostredia\n"
-"            príkazu, nie len tie, ktoré predchádzajú názvy príkazu.\n"
-"        -m  Riadenie úloh je zapnuté.\n"
-"        -n  Načítať príkazy, ale nevykonávať ich.\n"
-"        -o názov-voľby\n"
+"Nastaviť alebo zrušiť nastavenie volieb shellu a pozičných parametrov.\n"
+"    \n"
+"    Zmení hodnotu atribútov shellu a  pozičných parametrov alebo zobrazí\n"
+"    názvy a hodnoty premenných shellu.\n"
+"    \n"
+"    Voľby:\n"
+"      -a  Označí premenné, ktoré sú zmenené alebo vytvorené na export.\n"
+"      -b  Okamžite oznámi ukončenie úlohy.\n"
+"      -e  Okamžite sa ukončí, keď sa príkaz ukončí s nenulovou návratovou\n"
+"          hodnotou.\n"
+"      -f  Vypnúť tvorbu názvov súborov (globbing).\n"
+"      -h  Pamätať si, kde sú umiestnené príkazy po ich vyhľadaní.\n"
+"      -k  Všetky argumenty priradenia sa odovzdávajú do prostredia\n"
+"          príkazu, nie len tie, ktoré predchádzajú názvy príkazu.\n"
+"      -m  Riadenie úloh je zapnuté.\n"
+"      -n  Načítať príkazy, ale nevykonávať ich.\n"
+"      -o názov-voľby\n"
 "            Nastaví premennú zodpovedajúcu názvu-voľby:\n"
 "                allexport    rovnaké ako -a\n"
 "                braceexpand  rovnaké ako -B\n"
-"                emacs        použiť rozhranie na úpravu príkazového riadka v "
-"štýle emacs\n"
+"                emacs        použiť rozhranie na úpravu príkazového riadka\n"
+"                             v štýle emacs\n"
 "                errexit      rovnaké ako -e\n"
 "                errtrace     rovnaké ako -E\n"
 "                functrace    rovnaké ako -T\n"
@@ -3361,47 +3692,49 @@ msgstr ""
 "                onecmd       rovnaké ako -t\n"
 "                physical     rovnaké ako -P\n"
 "                pipefail     návratová hodnota postupnosti rúr je hodnota\n"
-"                             posledného príkazu, ktorý skončil s nenulovou "
-"hodnotou,\n"
-"                             alebo nula ak žiadny príkaz nevrátil nenulovú "
-"hodnotu\n"
+"                             posledného príkazu, ktorý skončil s nenulovou\n"
+"                             hodnotou, alebo nula ak žiadny príkaz nevrátil\n"
+"                             nenulovú hodnotu\n"
 "                posix        zmeniť správanie bash, kde sa štandardné "
 "správanie\n"
 "                             líši od štandardu 1003.2 tak, aby mu "
 "zodpovedalo\n"
 "                privileged   rovnaké ako -p\n"
 "                verbose      rovnaké ako -v\n"
-"                vi           použiť rozhranie na úpravu príkazového riadka v "
-"štýle vi\n"
+"                vi           použiť rozhranie na úpravu príkazového riadka\n"
+"                           v štýle vi\n"
 "                xtrace       rovnaké ako -x\n"
-"        -p  Zapnuté vždy, keď sa skutočné a účinné ID používateľa "
-"nezhoduje.\n"
-"            Vypína spracúvanie súboru $ENV a importovanie funkcií shellu.\n"
-"            Vypnutie tejto voľby spôsobí, že účinný UID a GID sa nastavia\n"
-"            na skutočný UID a GID.\n"
-"        -t  Ukončiť po načítaní a vykonaní jedného príkazu.\n"
-"        -u  Považovať nenastavené premenné za chybu pri substitúcii.\n"
-"        -v  Vypisovať vstupné riadky shellu postupne ako sa načítavajú.\n"
-"        -x  Vypisovať príkazy a ich argumenty postupne ako sa načítavajú.\n"
-"        -B  shell bude vykonávať expanziu zložených zátvoriek\n"
-"        -C  Ak je voľba nastavená, zamedzí prepísaniu existujúcich súborov\n"
-"            persmerovaním výstupu.\n"
-"        -E  Ak je voľba nastavená, zachytenie ERR zdedia funkcie shellu.\n"
-"        -H  Zapne substitúciu príkazov z histórie pomocou znaku !. Tento\n"
-"            prepínač je štandardne zapnutý, keď je shell interaktívny.\n"
-"        -P  Ak je voľba nastavená, nenasledovať symbolické odkazy pri\n"
-"            vykonávaní príkazov ako cd, ktoré menia aktuálny adresár.\n"
-"        -T  Ak je voľba nastavená, zachytenie DEBUG zdedia funkcie shellu.\n"
-"        -   Odovzdať všetky zostávajúce argumenty pozičným parametrom.\n"
-"            Voľby -x a -v sú vypnuté.\n"
+"    \n"
+"      -p  Zapnuté vždy, keď sa skutočné a účinné ID používateľa nezhoduje.\n"
+"          Vypína spracúvanie súboru $ENV a importovanie funkcií shellu.\n"
+"          Vypnutie tejto voľby spôsobí, že účinný UID a GID sa nastavia\n"
+"          na skutočný UID a GID.\n"
+"      -t  Ukončiť po načítaní a vykonaní jedného príkazu.\n"
+"      -u  Považovať nenastavené premenné za chybu pri substitúcii.\n"
+"      -v  Vypisovať vstupné riadky shellu postupne ako sa načítavajú.\n"
+"      -x  Vypisovať príkazy a ich argumenty postupne ako sa načítavajú.\n"
+"      -B  Shell bude vykonávať expanziu zložených zátvoriek\n"
+"      -C  Ak je voľba nastavená, zamedzí prepísaniu existujúcich súborov\n"
+"          persmerovaním výstupu.\n"
+"      -E  Ak je voľba nastavená, zachytenie ERR zdedia funkcie shellu.\n"
+"      -H  Zapne substitúciu príkazov z histórie pomocou znaku !. Tento\n"
+"          prepínač je štandardne zapnutý, keď je shell interaktívny.\n"
+"      -P  Ak je voľba nastavená, nenasledovať symbolické odkazy pri\n"
+"          vykonávaní príkazov ako cd, ktoré menia aktuálny adresár.\n"
+"      -T  Ak je voľba nastavená, zachytenie DEBUG zdedia funkcie shellu.\n"
+"      -   Odovzdať všetky zostávajúce argumenty pozičným parametrom.\n"
+"          Voľby -x a -v sú vypnuté.\n"
 "    \n"
 "    Použitie + namiesto - spôsobí vypnutie voľby. Voľby je tiež možné\n"
 "    použiť pri vyvolaní shellu. Momentálne nastavené voľby možno nájsť v\n"
 "    $-. Zostávajúcich n ARGumentov je pozičných a priradia sa postupne\n"
 "    premenným $1, $2, .. $n. Ak nie sú zadané žiadne ARGumenty, všetky\n"
-"    premenné shellu sa vypíšu."
+"    premenné shellu sa vypíšu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba."
 
-#: builtins.c:1097
+#: builtins.c:1101
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3420,8 +3753,25 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
+"Zrušiť nastavenie hodnôt a atribútov premenných shellu a funkcií.\n"
+"    \n"
+"    Pre každý NÁZOV odstráni zodpovedajúcu premennú alebo funkciu.\n"
+"    \n"
+"    Voľby:\n"
+"      -f\tpovažovať každý NÁZOV za funkciu shellu\n"
+"      -v\tpovažovať každý NÁZOV za premennú shellu\n"
+"    \n"
+"    Bez uvedenia volieb sa unset najskôr pokúša zrušiť nastavenie\n"
+"    premennej a ak sa mu to nepodarí, pokúsi sa zrušiť nastavenie\n"
+"    funkcie.\n"
+"    \n"
+"    Nastavenie niektorých premenných nemožno zrušiť; pozri aj „readonly“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je NÁZOV iba na čítanie a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1117
+#: builtins.c:1121
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3439,8 +3789,24 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
+"Nastaviť atribút export premenným shellu.\n"
+"    \n"
+"    Označí každý NÁZOV na automatický export do prostredia ďalších\n"
+"    spúšťaných príkazov. Ak je zadaná HODNOTA, pred exportovaním priradí\n"
+"    premenej HODNOTU.\n"
+"    \n"
+"    Voľby:\n"
+"      -f\toznačuje funkcie shellu\n"
+"      -n\todoberie z NÁZVU atribút export\n"
+"      -p\tzobrazí zoznam exportovaných premenných a funkcií\n"
+"    \n"
+"    Argument „--“ vypína spracovanie ďalších volieb.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je NÁZOV neplatný a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1136
+#: builtins.c:1140
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3459,8 +3825,26 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
+"Označiť premenné shellu ako nemeniteľné.\n"
+"    \n"
+"    Označí každý NÁZOV ako len na čítanie (atribút readonly); hodnoty "
+"týchto\n"
+"    NÁZVOV nie je možné ďalej meniť priradením. Ak je zadaná HODNOTA,\n"
+"    pred označením ako readonly priradiť premenej HODNOTU.\n"
+"    \n"
+"    Voľby:\n"
+"      -a\todkazuje na premenné indexovaných polí\n"
+"      -A\todkazuje na premenné asociatívnych polí\n"
+"      -f\todkazuje na funkcie shellu\n"
+"      -p\tzobrazí zoznam premenných a funkcií len na čítanie\n"
+"    \n"
+"    Argument „--“ vypína spracovanie ďalších volieb.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je NÁZOV neplatný a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1157
+#: builtins.c:1161
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3470,9 +3854,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless N is negative or greater than $#."
 msgstr ""
+"Posunúť pozičné parametre.\n"
+"    \n"
+"    Premenovať pozičné parametre $N+1,$N+2 ... to $1,$2 ...  Ak N nie je\n"
+"    zadané, predpokladá sa N=1.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je N záporné alebo väčšie ako $#."
 
-#: builtins.c:1169 builtins.c:1184
-#, fuzzy
+#: builtins.c:1173 builtins.c:1188
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -3485,11 +3875,18 @@ msgid ""
 "    Returns the status of the last command executed in FILENAME; fails if\n"
 "    FILENAME cannot be read."
 msgstr ""
-"Načítať a vykonať prákazy zo SÚBORu a vrátiť sa. Na nájdenie adresára\n"
-"    obsahujúceho SÚBOR sa použijú cesty z $PATH. Ak sú zadané nejaké\n"
-"    ARGUMENTY, použijú sa ako pozičné argumenty pri vykonaní SÚBORu."
+"Vykonať príkazy zo súboru v aktuálnom shelli.\n"
+"    \n"
+"    Načítať a vykonať príkazy zo SÚBORu v aktuálnom shelli.\n"
+"    Na nájdenie adresára obsahujúceho SÚBOR sa použijú cesty z $PATH.\n"
+"    Ak sú zadané nejaké ARGUMENTY, použijú sa ako pozičné argumenty\n"
+"    pri vykonaní SÚBORu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného príkazu v SÚBORe; zlyhá ak nie je\n"
+"    možné SÚBOR načítať."
 
-#: builtins.c:1200
+#: builtins.c:1204
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3502,9 +3899,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
+"Pozastaviť vykonávanie shellu.\n"
+"    \n"
+"    Pozastaviť vykonávanie shellu pokým nedostane signál SIGCONT.\n"
+"    Ak to nie je vynútené, login shell nie je možné pozastaviť.\n"
+"    \n"
+"    Voľby:\n"
+"      -f\tvynútiť pozastavenie aj v prípade, že shell je login shell\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je vypnuté riadenie úloh a nevyskytla sa chyba."
 
-#: builtins.c:1216
-#, fuzzy
+#: builtins.c:1220
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -3580,7 +3986,9 @@ msgid ""
 "    Returns success if EXPR evaluates to true; fails if EXPR evaluates to\n"
 "    false or an invalid argument is given."
 msgstr ""
-"Ukončiť s návratovou hodnotou 0 (pravda) alebo 1 (nepravda)\n"
+"Vyhodnotiť podmienený výraz.\n"
+"    \n"
+"    Skončí s návratovou hodnotou 0 (pravda) alebo 1 (nepravda)\n"
 "    v závislosti na vyhodnotení VÝR.  Výrazy môžu byť unárne alebo\n"
 "    binárne. Unárne výrazy sa často používajú na vyhodnotenie stavu\n"
 "    súboru. Existujú aj operátory pracujúce s reťazcami a na\n"
@@ -3648,20 +4056,25 @@ msgstr ""
 "    \n"
 "    Aritmetické binárne operátory vracajú pravdu, keď sa ARG1 rovná,\n"
 "    nerovná, je menší, menší alebo rovný, väčší, väčší alebo rovný ako\n"
-"    ARG2."
+"    ARG2.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak VÝR vyhodnotí ako pravdivý; zlyhá ako sa VÝR vyhodnotí\n"
+"    ako nepravdivý alebo je zadaný neplatný argument."
 
-#: builtins.c:1292
-#, fuzzy
+#: builtins.c:1296
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
 "    This is a synonym for the \"test\" builtin, but the last argument must\n"
 "    be a literal `]', to match the opening `['."
 msgstr ""
-"Toto je synonymum vsatavanej funkcie „test“, ale posledný\n"
+"Vyhodnotiť podmienený výraz.\n"
+"    \n"
+"    Toto je synonymum vsatavanej funkcie „test“, ale posledný\n"
 "    argument musí byť literál „]“, ktorý uzatvára otvárajúcu „[“."
 
-#: builtins.c:1301
+#: builtins.c:1305
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3672,9 +4085,15 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"Zobraziť časy procesov\n"
+"    \n"
+"    Vypíše súhrnné používateľské a systmové časy shellu a všetkých jeho\n"
+"    potomkov.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vždy vráti 0."
 
-#: builtins.c:1313
-#, fuzzy
+#: builtins.c:1317
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -3709,22 +4128,38 @@ msgid ""
 "    Returns success unless a SIGSPEC is invalid or an invalid option is "
 "given."
 msgstr ""
-"Príkaz ARG sa načíta a vykoná, keď shell dostane signál(y) SIGNAL_SPEC.\n"
+"Zachytiť signály a iné udalosti.\n"
+"    \n"
+"    Definuje a aktivuje spustenie obsluhy udalosti, keď shell dostane "
+"signál    SIGNAL_SPEC alebo iných podmienok.\n"
+"    \n"
+"    Príkaz ARG sa načíta a vykoná, keď shell dostane signál(y) SIGNAL_SPEC.\n"
 "    Ak ARG chýba (a je uvedený jediný SIGNAL_SPEC) alebo je „-“,\n"
 "    každý uvedený signál sa obnoví na pôvodnú hodnotu. Ak je ARG\n"
 "    prázdny režazec, každý SIGNAL_SPEC shell a príkaz, ktorý vyvolá,\n"
-"    ignoruje. Ak SIGNAL_SPEC je EXIT (0), príkaz ARG sa vykoná pri\n"
+"    ignoruje.\n"
+"    \n"
+"    Ak SIGNAL_SPEC je EXIT (0), príkaz ARG sa vykoná pri\n"
 "    ukončení shellu.  Ak je SIGNAL_SPEC DEBUG, ARG sa vykoná po každom\n"
-"    jednom príkaze. Ak je uvedená voľba „-p“, potom sa zobrazia príkazy\n"
-"    trap asociované s každým SIGNAL_SPEC. Ak nie sú uvedené žiadne\n"
-"    argumenty alebo iba voľba „-p“.  Trap vypíše zoznam príkazov\n"
-"    asociovaných s každým signálom. SIGNAL_SPEC je buď názov signálu\n"
-"    ako v <signal.h> alebo číslo signálu. V názvoch signálov sa nerozlišuje\n"
-"    veľkosť písmen a predpona SIG je nepovinná. „trap -l“ vypíše zoznam\n"
-"    názvov signálov a ich zodpovedajúce čísla. Majte na pamäti, že signál\n"
-"    je možné shellu poslať príkazom „kill -signal $$“."
+"    jednom príkaze.\n"
+"    \n"
+"    Ak nie sú uvedené žiadne argumenty, trap vypíše zoznam príkazov\n"
+"    asociovaných s každým signálom.\n"
+"    \n"
+"    Voľby:\n"
+"      -l\tvypíše zoznam názvov signálov a ich zodpovedajúce čísla\n"
+"      -p\tzobrazia sa príkazy trap asociované s každým SIGNAL_SPEC\n"
+"    \n"
+"    Každý SIGNAL_SPEC je buď názov signálu ako v <signal.h> alebo číslo\n"
+"    signálu. V názvoch signálov sa nerozlišuje veľkosť písmen a predpona\n"
+"    SIG je nepovinná. Signál je možné shellu poslať príkazom „kill -signal $"
+"$“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je SIGSPEC neplatný a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1345
+#: builtins.c:1349
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -3753,9 +4188,33 @@ msgid ""
 "    Returns success if all of the NAMEs are found; fails if any are not "
 "found."
 msgstr ""
+"Zobraziť informácie o type príkazu.\n"
+"    \n"
+"    Pre každý NÁZOV vypíše ako by sa interpretoval keby bol použitý\n"
+"    ako názov príkazu.\n"
+"    \n"
+"    Voľby:\n"
+"      -a\tzobrazí všetky umiestnenia, ktoré obsahujú spustiteľný súbor\n"
+"        \ts názvom NÁZOV; vrátane aliasov, vstavaných funkcií a funkcií\n"
+"        \tak a iba ak nebola použitá voľba „-p“\n"
+"      -f\tpotlačiť hľadanie vo funkciách shellu\n"
+"      -P\tvynútiť pri každom NÁZVE vyhľadanie v CESTE, aj ak je to alias,\n"
+"        \tvstavaná funkcia alebo funkcia a vráti názov súboru na disku,\n"
+"        \tktorý by sa spustil\n"
+"      -p\tvráti buď názov súboru na disku, ktorý by sa spustil, alebo nič\n"
+"        \tak by „type -t NAME“ nevrátilo „file“.\n"
+"      -t\tvypísať jediné slovo, jedno zo slov „alias“, „keyword“,\n"
+"        \t„function“, „builtin“, „file“ alebo „“, ak je názov alias,\n"
+"        \tvyhradené slovo shellu, funkcia shellu, vstavaná funkcia shellu,\n"
+"        \tsúbor na disku alebo NÁZOV nebol nájdený\n"
+"    \n"
+"    Argumenty:\n"
+"      NÁZOV\tNázov príkazu,  ktorý sa má interpretovať.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak boli nájdené všetky NÁZVY; zlyhá ak nie."
 
-#: builtins.c:1376
-#, fuzzy
+#: builtins.c:1380
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -3798,7 +4257,9 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
-"Ulimit poskytuje kontrolu nad prostriedkami dostupnými procesu,\n"
+"Zmeniť obmedzenia prostriedkov shellu.\n"
+"    \n"
+"    Poskytuje kontrolu nad prostriedkami dostupnými procesu,\n"
 "    ktorý spustil shell na systémoch, ktoré takúto kontrolu umožňujú.\n"
 "    Ak sú zadané voľby, vyhodnocujú sa nasledovne:\n"
 "    \n"
@@ -3827,11 +4288,17 @@ msgstr ""
 "    znamenajú aktuálny mäkký limit, aktuálny tvrdý limit resp. žiadny "
 "limit.\n"
 "    Inak sa vypíše aktuálna hodnota zadaného prostriedku.\n"
-"    Ak nie je zadaná žiada voľba, predpokladá sa -f. Hodnoty sú v\n"
-"    násobkoch 1024 bajtov okrem -t, ktorý je v sekundách, -p, ktorý je v\n"
-"    násobkoch 512 bajtov a -u, čo znamená neobmedzený počet procesov."
+"    Ak nie je zadaná žiada voľba, predpokladá sa -f.\n"
+"    \n"
+"    Hodnoty sú v násobkoch 1024 bajtov okrem -t, ktorý je v sekundách,\n"
+"    -p, ktorý je v násobkoch 512 bajtov a -u, čo znamená neobmedzený\n"
+"    počet procesov.\n"
+"    \n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:1421
+#: builtins.c:1425
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -3848,8 +4315,24 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
+"Zobraziť alebo nastaviť masku režimu súboru.\n"
+"    \n"
+"    Nastaví masku súborov vytvorených používateľom na REŽIM. Ak sa\n"
+"    REŽIM vynechá, vypíše aktuálnu hodnotu masky.\n"
+"    \n"
+"    Ak REŽIM začína bodkou, interpretuje sa ako osmičkové číslo;\n"
+"    inak je to symbolické označenie režimu aké prijíma chmod(1).\n"
+"    \n"
+"    Voľby:\n"
+"      -p\tak sa REŽIM vynechá, vypíše výstup v tvare, ktorý je možné\n"
+"        \tpoužiť ako vstup\n"
+"      -S\tvýpis v symbolickom tvare; inak osmičkové číslo\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je REŽIM neplatný a nebola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1441
+#: builtins.c:1445
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -3865,9 +4348,19 @@ msgid ""
 "is\n"
 "    given."
 msgstr ""
+"Čakať na dokončenie úlohy a vrátiť návratovú hodnotu.\n"
+"    \n"
+"    Počká na proces s identifikátorom ID, čo môže byť PID alebo "
+"špecifikácia\n"
+"    úlohy a oznámi stav jeho ukončenia. Ak nie je ID zadaný, počká na "
+"všetky\n"
+"    momentálne aktívne detské procesy vo fronte úloh.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti stav ID; zlyhá ak je ID neplatný alebo bola zadaná\n"
+"    neplatná voľba."
 
-#: builtins.c:1459
-#, fuzzy
+#: builtins.c:1463
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -3880,14 +4373,18 @@ msgid ""
 "is\n"
 "    given."
 msgstr ""
-"Čakať na ukončenie zadaného procesu a vypísať jeho návratovú\n"
-"    hodnotu. Ak nie je N zadané, čaká sa na všetky momentálne\n"
-"    aktívne procesy potomkov a návratová hodnota je nula. N môže\n"
-"    byť ID procesu alebo určenie úlohy; ak je určená úloha, čaká sa\n"
-"    na ukončenie všetkých procesov v rúre úlohy."
+"Čakať na ukončenie zadaného procesu a vypísať jeho návratovú hodnotu.\n"
+"    \n"
+"    Čaká na ukončenie zadaného procesu a oznámi jeho návratovú\n"
+"    hodnotu. Ak nie je PID zadané, čaká sa na všetky momentálne\n"
+"    aktívne procesy potomkov a návratová hodnota je nula.\n"
+"    PID musí byť ID procesu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti stav ID; zlyhá ak je ID neplatný alebo bola zadaná neplatná\n"
+"    voľba."
 
-#: builtins.c:1474
-#, fuzzy
+#: builtins.c:1478
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -3899,13 +4396,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Cyklus „for“ vykonáva postupnosť príkazov pre každú položku v zozname.\n"
+"Vykoná množinu príkazov pre každú položku zoznamu.\n"
+"    \n"
+"    Cyklus „for“ vykonáva postupnosť príkazov pre každú položku v zozname.\n"
 "    Ak nie je prítomné „in SLOVÁ ...;“, potom sa predpokladá „in \"$@\"“.\n"
 "    Pre každý prvok v SLOVÁch sa NÁZOV nastaví na hodnotu položky a\n"
-"    vykonajú sa PRÍKAZY."
+"    vykonajú sa PRÍKAZY.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1488
-#, fuzzy
+#: builtins.c:1492
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -3921,17 +4422,21 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Ekvivalent\n"
+"Aritmetický cyklus for.\n"
+"    \n"
+"    Ekvivalent\n"
 "    \t(( VÝR1 ))\n"
 "    \twhile (( VÝR2 )); do\n"
 "    \t\tPRÍKAZY\n"
 "    \t\t(( VÝR3 ))\n"
 "    \tdone\n"
 "    VÝR1, VÝR2 a VÝR3 sú aritmetické výrazy. Ak sa vykoná ktorýkoľvek\n"
-"    výraz, chovanie je ako by sa vyhodnotil na 1."
+"    výraz, chovanie je ako by sa vyhodnotil na 1.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1506
-#, fuzzy
+#: builtins.c:1510
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -3950,7 +4455,9 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"SLOVÁ sa rozbalia, čím sa vytvorí zoznam slov. Zoznam slov sa\n"
+"Vybrať slová zo zoznamu a vykonať príkazy.\n"
+"    \n"
+"    SLOVÁ sa rozbalia, čím sa vytvorí zoznam slov. Zoznam slov sa\n"
 "    vypíše na štandardný chybový výstup, pred každým z nich číslo.\n"
 "    Ak nie je prítomné „in SLOVÁ“, použije sa „in \"$@\"“. Zobrazí sa\n"
 "    výzva PS3 a načíta sa riadok zo štandardného vstupu. Ak riadok\n"
@@ -3959,10 +4466,12 @@ msgstr ""
 "    výzva sa znova zobrazia. Po načítaní znaku konca súboru príkaz\n"
 "    končí. Načítanie akejkoľvek inej hodnoty spôsobí nastavenie NÁZVU\n"
 "    na NULL. Načítaný riadok sa uloží do premennej ODPOVEĎ. PRÍKAZY\n"
-"    sa vykonajú po každom výbere až kým sa nevykoná príkaz break."
+"    sa vykonajú po každom výbere až kým sa nevykoná príkaz break.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1527
-#, fuzzy
+#: builtins.c:1531
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -3977,14 +4486,20 @@ msgid ""
 "    Exit Status:\n"
 "    The return status is the return status of PIPELINE."
 msgstr ""
-"Vykonať RÚRU a po jej skončení vypísať zhrnutie skutočného času,\n"
+"Oznámiť čas využitý vykonávaním rúry.\n"
+"    \n"
+"    Vykonať RÚRU a po jej skončení vypísať zhrnutie skutočného času,\n"
 "    času CPU a systémového času CPU stráveného vykonaním RÚRY.\n"
-"    Návratová hodnota je návratová hodnota RÚRY. Voľba „-p“ vypíše\n"
-"    zhrnutie časov v mierne odlišnom formáte. Ten použuje pre\n"
-"    formátovanie výstupu premennú TIMEFORMAT."
+"    \n"
+"    Voľby:\n"
+"      -p\tvypíše zhrnutie časov v prenosnom formáte Posix.\n"
+"    \n"
+"    Na formátovanie výstupu sa použije hodnota premennej TIMEFORMAT.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Návratová hodnota je návratová hodnota RÚRY."
 
-#: builtins.c:1544
-#, fuzzy
+#: builtins.c:1548
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -3994,11 +4509,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Selektívne vykonávať PRÍKAZY na základe toho, či SLOVO zodpovedá VZORu.\n"
-"    „|“ sa použije na oddelenie viacerých vzorov."
+"Vykonať príkazy na základe porovnávania vzorov\n"
+"    \n"
+"    Selektívne vykonávať PRÍKAZY na základe toho, či SLOVO zodpovedá\n"
+"    VZORu.. „|“ sa použije na oddelenie viacerých vzorov.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1556
-#, fuzzy
+#: builtins.c:1560
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4018,7 +4537,10 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Vykoná sa zoznam „if PRÍKAZY“. Ak je jeho návratová hodnota nula, vykoná\n"
+"Vykonať príkazy na základe podmienky.\n"
+"    \n"
+"    Vykoná sa zoznam „if PRÍKAZY“. Ak je jeho návratová hodnota nula, "
+"vykoná\n"
 "    sa zoznam „then PRÍKAZY“. Inak sa postupne vykoná každý zoznam\n"
 "    „elif PRÍKAZY“ a ak je jeho návratová hodnota nula, vykoná sa "
 "zodpovedajúci\n"
@@ -4027,10 +4549,12 @@ msgstr ""
 "    ak je prítomný. Návratová hodnota celej konštrukcie je návratová "
 "hodnota\n"
 "    posledného vykonaného príkazu alebo nula ak sa žiadna podmienka\n"
-"    nevyhodnotila na pravdu."
+"    nevyhodnotila na pravdu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1573
-#, fuzzy
+#: builtins.c:1577
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4040,11 +4564,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Rozbaliť a vykonávať PRÍKAZY pokým posledný príkaz medzi PRÍKAZMI\n"
-"    „while“ nemá návratovú hodnotu nula."
+"Vykonávať príkazy kým podmienka platí.\n"
+"    \n"
+"    Rozbaliť a vykonávať PRÍKAZY pokým posledný príkaz medzi PRÍKAZMI\n"
+"    „while“ nemá návratovú hodnotu nula.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1585
-#, fuzzy
+#: builtins.c:1589
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4054,10 +4582,28 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Rozbaliť a vykonávať PRÍKAZY pokým posledný príkaz medzi PRÍKAZMI\n"
-"    „until“ nemá nenulovú návratovú hodnotu."
+"Vykonávať príkazy kým podmienka neplatí.\n"
+"    \n"
+"    Rozbaliť a vykonávať PRÍKAZY pokým posledný príkaz medzi PRÍKAZMI\n"
+"    „until“ nemá nenulovú návratovú hodnotu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1597
+#: builtins.c:1601
+msgid ""
+"Create a coprocess named NAME.\n"
+"    \n"
+"    Execute COMMAND asynchronously, with the standard output and standard\n"
+"    input of the command connected via a pipe to file descriptors assigned\n"
+"    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
+"    The default NAME is \"COPROC\".\n"
+"    \n"
+"    Exit Status:\n"
+"    Returns the exit status of COMMAND."
+msgstr ""
+
+#: builtins.c:1615
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4070,9 +4616,19 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless NAME is readonly."
 msgstr ""
+"Definovať funkciu shellu.\n"
+"    \n"
+"    Vytvorí funkciu shellu NÁZOV. Keď sa spustí ako jednoduchý príkaz, "
+"NÁZOV\n"
+"    spustí PRÍKAZy v kontexte vulajúceho shellu. Keď sa spustí v tvare "
+"NÁZOV,\n"
+"    argumenty sa odovzdajú funkcii ako $1...$n a názov funkcie je "
+"$FUNCNAME.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak sa nestalo, že je NÁZOV iba na čítanie."
 
-#: builtins.c:1611
-#, fuzzy
+#: builtins.c:1629
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4082,11 +4638,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Spustiť množinu príkazov v skupine. Toto je jeden zo spôsobov ako\n"
-"    presmerovať celú možinu príkazov."
+"Zoskupiť príkazy do jednotky.\n"
+"    \n"
+"    Spustiť množinu príkazov v skupine. Toto je jeden zo spôsobov ako\n"
+"    presmerovať celú možinu príkazov.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu posledného vykonaného príkazu."
 
-#: builtins.c:1623
-#, fuzzy
+#: builtins.c:1641
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4099,14 +4659,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the resumed job."
 msgstr ""
-"Ekvivalentné argumentu JOB_SPEC príkazu „fg“ Obnoví beh\n"
+"Vyhodnotiť podmienený výraz.\n"
+"    \n"
+"    Ekvivalentné argumentu JOB_SPEC príkazu „fg“ Obnoví beh\n"
 "    zastavenej úlohy alebo úlohyu bežiacej v pozadí. JOB_SPEC môže\n"
 "    určiť buď názov alebo číslo úlohy. Ak po JOB_SPEC nasleduje „&“, úloha\n"
 "    sa umiestni do pozadia, ako keby bola špecifikácia úlohy zadaná ako\n"
-"    argument príkazu „bg“."
+"    argument príkazu „bg“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti návratovú hodnotu obnovenej úlohy."
 
-#: builtins.c:1638
-#, fuzzy
+#: builtins.c:1656
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4116,11 +4680,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise."
 msgstr ""
-"VÝRAZ sa vyhodnotí podľa pravidiel aritmetického vyhodnocovania.\n"
-"    Ekvivalentné s „let VÝRAZ“."
+"Vyhodnotiť aritmetický výraz.\n"
+"    \n"
+"    VÝRAZ sa vyhodnotí podľa pravidiel aritmetického vyhodnocovania.\n"
+"    Ekvivalentné s „let VÝRAZ“.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 1 ak sa VÝRAZ vyhodnotí na 0; inak vráti 0."
 
-#: builtins.c:1650
-#, fuzzy
+#: builtins.c:1668
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -4147,7 +4715,9 @@ msgid ""
 "    Exit Status:\n"
 "    0 or 1 depending on value of EXPRESSION."
 msgstr ""
-"Vráti 0 alebo 1 v závislosti na vyhodnotení výrazu podmienky VÝRAZ.\n"
+"Vykonať podmienený výraz.\n"
+"    \n"
+"    Vráti 0 alebo 1 v závislosti na vyhodnotení výrazu podmienky VÝRAZ.\n"
 "    Výrazy sa skladajú z rovnakých zložiek ako pri vstavanom príkaze\n"
 "    „test“ a je možné ich kombinovať pomocou nasledovných operátorov\n"
 "    \n"
@@ -4161,10 +4731,12 @@ msgstr ""
 "    Ak sú použité operátory „==“ a „!=“, reťazec napravo od operátora\n"
 "    sa použije ako vzor a vykoná sa hľadanie zhody reťazcov. Operátory\n"
 "    && a || nevyhodnocujú VÝR2 ak hodnota VÝR1 postačuje na určenie\n"
-"    hodnoty výrazu."
+"    hodnoty výrazu.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 alebo 1 v závislosti na hodnote VÝRAZu."
 
-#: builtins.c:1676
-#, fuzzy
+#: builtins.c:1694
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -4217,7 +4789,9 @@ msgid ""
 "    HISTIGNORE\tA colon-separated list of patterns used to decide which\n"
 "    \t\tcommands should be saved on the history list.\n"
 msgstr ""
-"BASH_VERSION\tInformácie o verzii tohto Bash.\n"
+"Bežné názvy premenných shellu a ich použitie\n"
+"    \n"
+"    BASH_VERSION\tInformácie o verzii tohto Bash.\n"
 "    CDPATH\tBodkočiarkami oddelený zoznam adresárov, v ktorých sa budú\n"
 "    \t\thľadať adresáre dané ako argument príkazu „cd“.\n"
 "    GLOBIGNORE\tBodkočiarkami oddelený zoznam vzorov popisujúcich názvy\n"
@@ -4232,7 +4806,7 @@ msgstr ""
 "    IGNOREEOF\tRiadi činnosť shellu po prijatí znaku EOF ako\n"
 "    \t\tjediného na vstupe. Ak je voľba nastavená, jej hodnota je\n"
 "    \t\tpočet znakov EOF, ktoré budú za sebou prijaté na prázdnom\n"
-"    \t\triadku predtým, než sa shell ukončí (štadnardne 10). Ak voľba\n"
+"    \t\triadku predtým, než sa shell ukončí (štandardne 10). Ak voľba\n"
 "    \t\tNie je nastavená, EOF značí koniec vstupu.\n"
 "    MACHTYPE\tReťazec popisujúci systém, na ktorom Bash práve beží.\n"
 "    MAILCHECK\tAko často v sekundách Bash kontroluje novú poštu.\n"
@@ -4249,14 +4823,13 @@ msgstr ""
 "    SHELLOPTS\tBodkočiarkami oddelený zoznam zapnutých volieb shellu.\n"
 "    TERM\tNázov aktuálneho typu terminálu.\n"
 "    TIMEFORMAT\tFormát výstupu štatistiky doby behu, ktorú zobrazuje\n"
-"    \t\trezervované slovo „time“.\n"
-"    auto_resume\tNenulová hodnota značí príkaz, ktorý keď sa vyskytuje na "
-"samostatnom\n"
-"    \t\triadku, vyhľadá sa v zozname momentálne zastavených\n"
-"    \t\túloh. Ak sa je tam nachádza, úloha sa prenesie do popredia.\n"
-"    \t\tHodnota „exact“ znamená, že slovo príkazu sa musí presne\n"
-"    \t\tzhodovať s príkazom v zozname zastavených úloh. Hodnota\n"
-"    \t\t„substring“ znamená, že slovo príkazu sa musí zhodovať s\n"
+"    \t\tvyhradené slovo „time“.\n"
+"    auto_resume\tNenulová hodnota značí príkaz, ktorý keď sa vyskytuje na\n"
+"    \t\tsamostatnom riadku, vyhľadá sa v zozname momentálne\n"
+"    \t\tzastavených úloh. Ak sa je tam nachádza, úloha sa prenesie do\n"
+"    \t\tpopredia. Hodnota „exact“ znamená, že slovo príkazu sa musí\n"
+"    \t\tpresne zhodovať s príkazom v zozname zastavených úloh.\n"
+"    \t\tHodnota „substring“ znamená, že slovo príkazu sa musí zhodovať s\n"
 "    \t\tpodreťazcom úlohy. Akákoľvek iná hodnota znamená, že\n"
 "    \t\tpríkaz musí byť predponou zastavenej úlohy.\n"
 "    histchars\tZnaky riadiace dopĺňanie histórie a rýchle\n"
@@ -4267,8 +4840,7 @@ msgstr ""
 "    HISTIGNORE\tBodkočiarkami oddelený zoznam vzoriek, ktoré\n"
 "    \t\tsa používajú na rozhodovanie, či sa príkaz uloží do histórie.\n"
 
-#: builtins.c:1733
-#, fuzzy
+#: builtins.c:1751
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -4298,28 +4870,33 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
-"Pridá adresár na vrchol zásobníka adresárov alebo ho otočí tak, že\n"
+"Pridať adresár na zásobník.\n"
+"    \n"
+"    Pridá adresár na vrchol zásobníka adresárov alebo ho otočí tak, že\n"
 "    nový vrchol zásobníka sa stane aktuálnym pracovným adresárom.\n"
 "    Bez argumentov vymení vrchné dva adresáre.\n"
 "    \n"
-"    +N\tOtočí zásobník tak, že N-tý adresár (počítajúc zľava zoznamu,\n"
-"    \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
+"    Voľby:\n"
+"      -n\tpotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
+"        \tzo zásobníka, takže sa zmení iba zásobník.\n"
 "    \n"
-"    -N\tOtočí zásobník tak, že N-tý adresár (počítajúc sprava zoznamu,\n"
-"    \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
+"    Argumenty:\n"
+"      +N\tOtočí zásobník tak, že N-tý adresár (počítajúc zľava zoznamu,\n"
+"        \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
 "    \n"
-"    -n\tpotlačí normálnu zmenu adresára pri odstraňovaní položiek\n"
-"    \tzo zásobníka, takže sa zmení iba zásobník.\n"
+"      -N\tOtočí zásobník tak, že N-tý adresár (počítajúc sprava zoznamu,\n"
+"        \tktorý zobrazuje „dirs“, počínajúc nulou) je na vrchu.\n"
 "    \n"
-"    adr\tpridá ADR na vrchol zásobníka adresárov, čím sa tento stane\n"
-"    \tnovým aktuálnym pracovným adresárom.\n"
+"      adr\tpridá ADR na vrchol zásobníka adresárov, čím sa tento stane\n"
+"        \tnovým aktuálnym pracovným adresárom.\n"
 "    \n"
-"    Zásobník adresárov môžete zobraziť príkazom „dirs“.    \n"
-"    Návratový kód:\n"
+"    Zásobník adresárov môžete zobraziť vstavaným príkazom „dirs“.\n"
+"    \n"
+"    Návratová hodnota:\n"
 "    Vráti 0 ak nebol zadaný neplatný argument a nevyskytla sa\n"
 "    chyba pri zmene adresára."
 
-#: builtins.c:1767
+#: builtins.c:1785
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -4345,7 +4922,7 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
-"Odstráni položky zo zásobníka adresárov.\n"
+"Odstrániť položky zo zásobníka adresárov.\n"
 "    \n"
 "    Odstráni položky zo zásobníka adresárov. Bez argumentov odstráni\n"
 "    vrchnú položku zo zásobníka a zmení adresár na adresár, ktorý\n"
@@ -4365,11 +4942,11 @@ msgstr ""
 "    \n"
 "    Zásobník adresárov môžete zobraziť príkazom „dirs“.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vráti 0 ak nebol zadaný neplatný argument a nevyskytla sa\n"
 "    chyba pri zmene adresára."
 
-#: builtins.c:1797
+#: builtins.c:1815
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -4397,7 +4974,7 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
-"Zobrazí zoznam momentálne zapamätaných adresárov.\n"
+"Zobraziť zoznam momentálne zapamätaných adresárov.\n"
 "    \n"
 "    Zobrazí zoznam momentálne zapamätaných adresárov. Adresáre\n"
 "    sa do zoznamu dostávajú príkazom „pushd“; zo zoznamu ich môžete\n"
@@ -4406,21 +4983,21 @@ msgstr ""
 "    Voľby:\n"
 "      -c\tvyprázdniť zásobník adresárov zmazaním všetkých položiek.\n"
 "      -l\tnevypisovať skrátené verzie adresárov vzhľadom na domovský\n"
-"    \trelatívne k vášmu domovskému adresáru\n"
+"    \t\trelatívne k vášmu domovskému adresáru\n"
 "      -p\tvypisovať zásobník adresárov vo formáte jedna položka na riadok\n"
 "      -v\tvypisovať zásobník adresárov vo formáte jedna položka na\n"
-"    \triadok a pred adresár vypísať jeho pozíciu v zásobníku.\n"
+"    \t\triadok a pred adresár vypísať jeho pozíciu v zásobníku.\n"
 "    \n"
 "      +N\tzobrazuje N-tú položku počítajúc zľava zoznamu, ktorý zobrazuje\n"
-"    \tdirs vyvolaný bez volieb, počínajúc nulou.\n"
+"    \t\tdirs vyvolaný bez volieb, počínajúc nulou.\n"
 "    \n"
 "      -N\tzobrazuje N-tú položku počítajúc sprava zoznamu, ktorý zobrazuje\n"
-"    \tdirs vyvolaný bez volieb, počínajúc nulou.\n"
+"    \t\tdirs vyvolaný bez volieb, počínajúc nulou.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vráti 0 ak nebol zadaný neplatný argument a nevyskytla sa chyba."
 
-#: builtins.c:1826
+#: builtins.c:1844
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -4440,8 +5017,25 @@ msgid ""
 "    Returns success if OPTNAME is enabled; fails if an invalid option is\n"
 "    given or OPTNAME is disabled."
 msgstr ""
+"Nastaviť a zrušiť nastavenie volieb shellu.\n"
+"    \n"
+"    Zmení nastavenie každej z volieb shellu OPTNAME. Bez akýchkoľvek\n"
+"    argumentov volieb vypíše všetky voľby shellu s označením, či je každá\n"
+"    z nich nastavená alebo nie.\n"
+"    \n"
+"    Voľby:\n"
+"      -o\tobmedzí OPTNAME na tie, ktoré sú definované na použitie\n"
+"      \tso „set -o“\n"
+"      -p\tvypíše každú voľbu shellu s označením jej stavu\n"
+"      -q\tpotlačí výstup\n"
+"      -s\tzapnúť (nastaviť) každú OPTNAME\n"
+"      -u\tvypnúť (zrušiť nastavenie) každú OPTNAME\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak je OPTNAME zapnuté; zlyhá ak bola zadaná\n"
+"    neplatná voľba alebo OPTNAME je vypnuté."
 
-#: builtins.c:1847
+#: builtins.c:1865
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -4473,8 +5067,8 @@ msgstr ""
 "printf formátuje a vypisuje ARGUMENTY podľa FORMÁTu.\n"
 "    \n"
 "    FORMÁT je reťazec znakov, ktorý obsahuje tri typy objektov: čisté "
-"znaky,    ktoré sa jednoducho skopírujú na štandardný výstup, únikové "
-"klauzuly,\n"
+"znaky,\n"
+"    ktoré sa jednoducho skopírujú na štandardný výstup, únikové klauzuly,\n"
 "    ktoré sa nahradia zodpovedajúcim výstupom a skopírujú na štandardný\n"
 "    výstup a špecifikácie formátu, z ktorých každá spôsobí vypísanie\n"
 "    nasledovného argumentu.\n"
@@ -4484,13 +5078,13 @@ msgstr ""
 "    \n"
 "      %b\trozšíriť únikové klauzuly backspace v zodpovedajúcom argumente\n"
 "      %q\tdať argument do zátvoriek tak, aby ho bolo možné použiť ako\n"
-"    \tvstup shellu.\n"
+"        \tvstup shellu.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba pri\n"
 "    zápise či priradení."
 
-#: builtins.c:1874
+#: builtins.c:1892
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -4511,8 +5105,25 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"Definuje ako má Readline dopĺňať argumenty.\n"
+"    \n"
+"    Pre každý NÁZOV uviesť ako sa majú dopĺňať argumenty. Ak nie sú zadané\n"
+"    žiadne argumenty, vypíšu sa existujúce dopĺňania v takom tvare, ktorý\n"
+"    je možné znova použiť ako vstup.\n"
+"    \n"
+"    Voľby:\n"
+"      -p\tvypísať existujúce špecifikácie dopĺňania v znovapoužiteľnom\n"
+"        \ttvare\n"
+"      -r\todstrániť špecifikáciu dopĺňania každého NÁZVU alebo ak nie je\n"
+"        \tzadaný žiadny NÁZOV, všetky špecifikácie dopĺňania\n"
+"    \n"
+"    Pri pokuse o doplnenie sa operácie použijú v poradí hore uvedených\n"
+"    volieb veľkými písmenami.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:1897
+#: builtins.c:1915
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -4524,15 +5135,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
-"Zobrazí možné dokončenie v závislosti na voľbách.\n"
+"Zobraziť možné dokončenie v závislosti na voľbách.\n"
 "    \n"
 "    Slúži na použitie z shell funkcií tvoriacich možné dokončenia\n"
 "    Ak je daný voliteľný parameter SLOVO, tvoria sa zhody so SLOVOm.\n"
 "    \n"
-"    Návratový kód:\n"
+"    Návratová hodnota:\n"
 "    Vráti 0 ak nebola zadaná neplatná voľba a nevyskytla sa chyba."
 
-#: builtins.c:1912
+#: builtins.c:1930
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4560,10 +5171,34 @@ msgid ""
 "    Returns success unless an invalid option is supplied or NAME does not\n"
 "    have a completion specification defined."
 msgstr ""
+"Zmeniť alebo zobraziť voľby dopĺňania.\n"
+"    \n"
+"    Zmení voľby dopĺňania pre každý NÁZOV alebo ak nie je zadaný žiadny\n"
+"    NÁZOV pre momentálne vykonávané dopĺňanie. Ak nie sú zadané žiadne\n"
+"    voľby, vypíše špecifikácie dopĺňania pre každý NÁZOV alebo pre\n"
+"    momentálne vykonávané dopĺňanie.\n"
+"    \n"
+"    Voľby:\n"
+"    \t-o voľba\tNastaví voľbu dopĺňania VOĽBA pre každý NÁZOV\n"
+"    \n"
+"    Použitím „+o“ namiesto „-o“ vypnete určenú voľbu.\n"
+"    \n"
+"    Argumenty:\n"
+"    \n"
+"    Každý NÁZOV odkazuje na príkaz, pre ktorý musela byť vopred definovaná\n"
+"    špecifikácia dopĺňania pomocou vstavaného príkazu „complete“. Ak nie sú\n"
+"    zadané žiadne NÁZVY, compopt musí byť volaný priamo funkciou, ktorá\n"
+"    práve tvorí dopĺňanie a voľby generátora momentálne vykonávaného\n"
+"    dopĺňania sa zmenia.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a NÁZOV nemá definovanú\n"
+"    špecifikáciu dopĺňania."
 
-#: builtins.c:1940
+#: builtins.c:1958
+#, fuzzy
 msgid ""
-"Read lines from a file into an array variable.\n"
+"Read lines from the standard input into an array variable.\n"
 "    \n"
 "    Read lines from the standard input into the array variable ARRAY, or "
 "from\n"
@@ -4587,7 +5222,9 @@ msgid ""
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
 "    \n"
-"    If -C is supplied without -c, the default quantum is 5000.\n"
+"    If -C is supplied without -c, the default quantum is 5000.  When\n"
+"    CALLBACK is evaluated, it is supplied the index of the next array\n"
+"    element to be assigned as an additional argument.\n"
 "    \n"
 "    If not supplied with an explicit origin, mapfile will clear ARRAY "
 "before\n"
@@ -4595,6 +5232,42 @@ msgid ""
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or ARRAY is readonly."
+msgstr ""
+"Načítať riadky zo súboru do premennej poľa.\n"
+"    \n"
+"    Načíta riadky zo štandardného vstupu do premennej poľa POLE alebo z\n"
+"    popisovača súboru FD ak je zadaná voľba -u. Štandardné pole je premenná\n"
+"    MAPFILE\n"
+"    \n"
+"    Voľby:\n"
+"      -n počet\tSkopírovať najviac POČET riadkov. Ak je POČER 0, všetky "
+"riadky.\n"
+"      -O začiatok\tZačať priraďovanie položiek POĽA na indexe ZAČIATOK.\n"
+"      \t\tPredvolený index je 0.\n"
+"      -s počet\tIgnorovať prvých prečítaných POČET riadkov.\n"
+"      -t\t\tOdstrániť znak nového riadka z konca každého načítaného riadka.\n"
+"      -u fd\t\tNačítať riadky z popisovača FD namiest štandardného vstupu.\n"
+"      -C callback\tVyhodnotiť CALLBACK po prečítaní každých QUANTUM "
+"riadkov.\n"
+"      -c quantum\tUrčuje počet riadkov, ktoré sa majú prečítať pred každým\n"
+"      \t\tvolaním CALLBACK.\n"
+"    \n"
+"    Argumenty:\n"
+"      ARRAY\t\tNázov premennej poľa, kam sa majú uložiť údaje.\n"
+"    \n"
+"    Ak uvediete -C bez -c, predvolená hodnota quantum je 5000.\n"
+"    \n"
+"    Ak nie je zadaný ZAČIATOK explicitne, mapfile POLE vyčistí predtým,\n"
+"    než ho začne plniť.\n"
+"    \n"
+"    Návratová hodnota:\n"
+"    Vráti 0 ak nebola zadaná neplatná voľba a POLE nie je len na čítanie."
+
+#: builtins.c:1990
+msgid ""
+"Read lines from a file into an array variable.\n"
+"    \n"
+"    A synonym for `mapfile'."
 msgstr ""
 
 #~ msgid " "

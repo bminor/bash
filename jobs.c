@@ -840,6 +840,11 @@ cleanup_dead_jobs ()
       if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
 	delete_job (i, 0);
     }
+
+#if defined (COPROCESS_SUPPORT)
+  coproc_reap ();
+#endif
+
   UNQUEUE_SIGCHLD(os);
 }
 
@@ -3081,7 +3086,7 @@ waitchld (wpid, block)
       child = find_process (pid, 1, &job);	/* want living procs only */
 
 #if defined (COPROCESS_SUPPORT)
-      coproc_pidchk (pid);
+      coproc_pidchk (pid, status);
 #endif
 
       /* It is not an error to have a child terminate that we did

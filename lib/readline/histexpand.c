@@ -1016,7 +1016,7 @@ history_expand (hstring, output)
 	    }
 	  else if (string[i] == history_expansion_char)
 	    {
-	      if (!cc || member (cc, history_no_expand_chars))
+	      if (cc == 0 || member (cc, history_no_expand_chars))
 		continue;
 	      /* If the calling application has set
 		 history_inhibit_expansion_function to a function that checks
@@ -1164,7 +1164,8 @@ history_expand (hstring, output)
 	  /* If the history_expansion_char is followed by one of the
 	     characters in history_no_expand_chars, then it is not a
 	     candidate for expansion of any kind. */
-	  if (member (cc, history_no_expand_chars))
+	  if (cc == 0 || member (cc, history_no_expand_chars) ||
+	  		 (history_inhibit_expansion_function && (*history_inhibit_expansion_function) (string, i)))
 	    {
 	      ADD_CHAR (string[i]);
 	      break;

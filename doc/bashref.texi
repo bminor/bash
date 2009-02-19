@@ -1095,6 +1095,9 @@ The format for a coprocess is:
 @noindent
 This creates a coprocess named @var{NAME}.
 If @var{NAME} is not supplied, the default name is @var{COPROC}.
+@var{NAME} must not be supplied if @var{command} is a simple
+command (@pxref{Simple Commands}); otherwise, it is interpreted as
+the first word of the simple command.
 
 When the coproc is executed, the shell creates an array variable
 (@pxref{Arrays})
@@ -1614,11 +1617,12 @@ introduce indirection.
 In each of the cases below, @var{word} is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 
-When not performing substring expansion, Bash tests for a parameter
-that is unset or null; omitting the colon results in a test only for a
-parameter that is unset.  Put another way, if the colon is included,
-the operator tests for both existence and that the value is not null;
-if the colon is omitted, the operator tests only for existence.
+When not performing substring expansion, using the form described
+below, Bash tests for a parameter that is unset or null.
+Omitting the colon results in a test only for a parameter that is unset.
+Put another way, if the colon is included,
+the operator tests for both @var{parameter}'s existence and that its value
+is not null; if the colon is omitted, the operator tests only for existence.
 
 @table @code
 
@@ -1769,7 +1773,7 @@ to uppercase; the @samp{,} operator converts matching uppercase letters
 to lowercase.
 The @samp{^^} and @samp{,,} expansions convert each matched character in the
 expanded value; the @samp{^} and @samp{,} expansions match and convert only
-the first character.
+the first character in the expanded value.
 If @var{pattern} is omitted, it is treated like a @samp{?}, which matches
 every character.
 If @var{parameter} is @samp{@@} or @samp{*},
@@ -2106,7 +2110,7 @@ ls 2>&1 > @var{dirlist}
 @end example
 @noindent
 directs only the standard output to file @var{dirlist},
-because the standard error was duplicated as standard output
+because the standard error was made a copy of the standard output
 before the standard output was redirected to @var{dirlist}.
 
 Bash handles several filenames specially when they are used in
@@ -3169,7 +3173,7 @@ is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
-part of the test in an @code{if} statement,
+part of the test following the @code{if} or @code{elif} reserved words,
 part of a command executed in a @code{&&} or @code{||} list,
 or if the command's return
 status is being inverted using @code{!}.
@@ -3648,6 +3652,10 @@ Specify the number of lines read between each call to @var{callback}.
 
 If @option{-C} is specified without @option{-c}, 
 the default quantum is 5000.
+When @var{callback}  is evaluated, it is supplied the index of the next
+array element to be assigned as an additional argument.
+@var{callback} is evaluated after the line is read but before the 
+array element is assigned.
 
 If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
 before assigning to it.
@@ -3765,6 +3773,18 @@ Read input from file descriptor @var{fd}.
 
 @end table
 
+@item readarray
+@btindex readarray
+@example
+readarray [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
+-C @var{callback}] [-c @var{quantum}] [@var{array}]
+@end example
+Read lines from the standard input into array variable @var{array},
+or from file descriptor @var{fd}
+if the @option{-u} option is supplied.
+
+A synonym for @code{mapfile}.
+
 @item source
 @btindex source
 @example
@@ -3858,10 +3878,11 @@ The maximum number of pending signals.
 The maximum size that may be locked into memory.
 
 @item -m
-The maximum resident set size.
+The maximum resident set size (many systems do not honor this limit).
 
 @item -n
-The maximum number of open file descriptors.
+The maximum number of open file descriptors (most systems do not
+allow this value to be set).
 
 @item -p
 The pipe buffer size.
@@ -3966,17 +3987,24 @@ Cause the status of terminated background jobs to be reported
 immediately, rather than before printing the next primary prompt.
 
 @item -e
-Exit immediately if a simple command (@pxref{Simple Commands}) exits
-with a non-zero status, unless the command that fails is part of the
+Exit immediately if a pipeline (@pxref{Pipelines}), which may consist
+of a single simple command (@pxref{Simple Commands}),
+a subshell command enclosed in parentheses (@pxref{Command Grouping}),
+or one of the commands executed as part of a command list enclosed
+by braces (@pxref{Command Grouping})
+returns a non-zero status.
+The shell does not exit if the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
 part of the test in an @code{if} statement,
-part of a command executed in a @code{&&} or @code{||b} list,
+part of any command executed in a @code{&&} or @code{||} list except
+the command following the final @code{&&} or @code{||},
 any command in a pipeline but the last,
-or if the command's return status is being inverted using @code{!}.
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
+or if the command's return status is being inverted with @code{!}.
 A trap on @code{ERR}, if set, is executed before the shell exits.
+
+This option applies to the shell environment and each subshell environment
+separately (@pxref{Command Execution Environment}), and may cause
+subshells to exit before executing all the commands in the subshell.
 
 @item -f
 Disable file name generation (globbing).
@@ -4773,8 +4801,8 @@ even if it is subsequently reset.
 @item COMP_WORDS
 An array variable consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as Readline would split it, using
+@code{COMP_WORDBREAKS} as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
 
@@ -7318,7 +7346,7 @@ to reproduce it.
 the template it provides for filing a bug report.
 
 Please send all reports concerning this manual to
-@email{chet@@po.CWRU.Edu}.
+@email{chet.ramey@@case.edu}.
 
 @node Major Differences From The Bourne Shell
 @appendix Major Differences From The Bourne Shell

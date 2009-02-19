@@ -150,7 +150,7 @@ static void
 make_command_string_internal (command)
      COMMAND *command;
 {
-  char s[3];
+  char s[3], *op;
 
   if (command == 0)
     cprintf ("");
@@ -261,17 +261,15 @@ make_command_string_internal (command)
 	      break;
 
 	    case ';':
-#if 0
-	      if (was_heredoc == 0)
-		cprintf (";");
-	      else
-		was_heredoc = 0;
-#else
 	      if (deferred_heredocs == 0)
-		cprintf (";");
+		{
+		  if (was_heredoc == 0)
+		    cprintf (";");
+		  else
+		    was_heredoc = 0;
+		}
 	      else
-		print_deferred_heredocs (";");
-#endif
+		print_deferred_heredocs (inside_function_def ? "" : ";");
 
 	      if (inside_function_def)
 		cprintf ("\n");
@@ -290,6 +288,8 @@ make_command_string_internal (command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
+	  if (deferred_heredocs)
+	    print_deferred_heredocs ("");
 	  printing_connection--;	  	  
 	  break;
 
@@ -884,9 +884,10 @@ print_deferred_heredocs (cstring)
     }
   if (deferred_heredocs)
     {
-      if (cstring[0] != ';' || cstring[1])
+      if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
 	cprintf (" ");	/* make sure there's at least one space */
       dispose_redirects (deferred_heredocs);
+      was_heredoc = 1;
     }
   deferred_heredocs = (REDIRECT *)NULL;
 }

@@ -290,9 +290,8 @@ read_builtin (list)
     }
   list = loptend;
 
-  /* `read -t 0 var' returns failure immediately.  XXX - should it test
-     whether input is available with select/FIONREAD, and fail if those
-     are unavailable? */
+  /* `read -t 0 var' tests whether input is available with select/FIONREAD,
+     and fails if those are unavailable */
   if (have_timeout && tmsec == 0 && tmusec == 0)
 #if 0
     return (EXECUTION_FAILURE);
@@ -417,10 +416,9 @@ read_builtin (list)
 	  termsave.attrs = &ttattrs;
 
 	  ttset = ttattrs;	  
-	  if (silent)
-	    ttfd_cbreak (fd, &ttset);		/* ttcbreak () */
-	  else
-	    ttfd_onechar (fd, &ttset);		/* ttonechar () */
+	  i = silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset);
+	  if (i < 0)
+	    sh_ttyerror (1);
 	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
 	}
     }
@@ -432,7 +430,9 @@ read_builtin (list)
       termsave.attrs = &ttattrs;
 
       ttset = ttattrs;
-      ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
+      i = ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
+      if (i < 0)
+	sh_ttyerror (1);
 
       add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
     }

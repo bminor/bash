@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bash 3.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-06 11:56-0500\n"
+"POT-Creation-Date: 2009-02-19 14:53-0500\n"
 "PO-Revision-Date: 2006-11-24 09:19+0600\n"
 "Last-Translator: Sergio Pokrovskij <sergio.pokrovskij@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
@@ -38,7 +38,7 @@ msgstr "%s: Valorizato havu nombran indicon"
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr ""
 
-#: bashhist.c:380
+#: bashhist.c:379
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: Ne prosperis krei: %s"
@@ -246,12 +246,22 @@ msgstr "„%s‟ ne estas primitiva komando ŝela"
 msgid "write error: %s"
 msgstr "Eraro ĉe skribo: %s"
 
-#: builtins/common.c:553
+#: builtins/common.c:329
+#, c-format
+msgid "error setting terminal attributes: %s"
+msgstr ""
+
+#: builtins/common.c:331
+#, c-format
+msgid "error getting terminal attributes: %s"
+msgstr ""
+
+#: builtins/common.c:563
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: Eraro ĉe provo determini la kurantan dosierujon: %s: %s\n"
 
-#: builtins/common.c:619 builtins/common.c:621
+#: builtins/common.c:629 builtins/common.c:631
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: Ambigua laborindiko"
@@ -287,7 +297,7 @@ msgstr "Uzeblas nur ene de funkcio"
 msgid "cannot use `-f' to make functions"
 msgstr "„-f‟ ne estas uzebla por fari funkciojn"
 
-#: builtins/declare.def:365 execute_cmd.c:4731
+#: builtins/declare.def:365 execute_cmd.c:4818
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: Nurlega funkcio"
@@ -326,7 +336,7 @@ msgstr "%s: Ne ŝargita dinamike"
 msgid "%s: cannot delete: %s"
 msgstr "%s: Ne eblas forigi: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4588
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4675
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -342,7 +352,7 @@ msgstr "%s: Ne ordinara dosiero"
 msgid "%s: file is too large"
 msgstr "%s: Tro granda dosiero"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4658 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4745 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: Neplenumebla duuma dosiero"
@@ -492,37 +502,37 @@ msgstr "Nekonata eraro"
 msgid "expression expected"
 msgstr "Mankas esprimo"
 
-#: builtins/mapfile.def:215 builtins/read.def:272
+#: builtins/mapfile.def:241 builtins/read.def:272
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: Misa indiko de dosiernumero"
 
-#: builtins/mapfile.def:223 builtins/read.def:279
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "„%d‟: Misa dosiernumero: %s"
 
-#: builtins/mapfile.def:232 builtins/mapfile.def:270
+#: builtins/mapfile.def:258 builtins/mapfile.def:296
 #, fuzzy, c-format
 msgid "%s: invalid line count"
 msgstr "%s: Misa opcio"
 
-#: builtins/mapfile.def:243
+#: builtins/mapfile.def:269
 #, fuzzy, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: Misa opcio"
 
-#: builtins/mapfile.def:260
+#: builtins/mapfile.def:286
 #, fuzzy, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: Misa nomo de ago"
 
-#: builtins/mapfile.def:292
+#: builtins/mapfile.def:318
 #, fuzzy
 msgid "empty array variable name"
 msgstr "%s: Ne tabela variablo"
 
-#: builtins/mapfile.def:313
+#: builtins/mapfile.def:339
 msgid "array variable support required"
 msgstr ""
 
@@ -875,32 +885,32 @@ msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "Fiaskis provo nomumi la disponaĵon «/dev/null» ĉefenigujo: %s"
 
 # XXX: internal error:
-#: execute_cmd.c:1091
+#: execute_cmd.c:1112
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: „%c‟: Misa formatsigno"
 
-#: execute_cmd.c:1942
+#: execute_cmd.c:2011
 #, fuzzy
 msgid "pipe error"
 msgstr "Eraro ĉe skribo: %s"
 
-#: execute_cmd.c:4276
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: Malpermesitas uzi „/‟ en komandonomoj"
 
-#: execute_cmd.c:4367
+#: execute_cmd.c:4454
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: Komando ne trovita"
 
-#: execute_cmd.c:4621
+#: execute_cmd.c:4708
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: Misa interpretilo"
 
-#: execute_cmd.c:4770
+#: execute_cmd.c:4857
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "Ne eblas kunnomumi al dosiernumero %d la dosiernumeron %d"
@@ -994,140 +1004,140 @@ msgstr "save_bash_input: La nova dosiernumero (fd %d) jam havas bufron"
 msgid "start_pipeline: pgrp pipe"
 msgstr ""
 
-#: jobs.c:882
+#: jobs.c:887
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "Forke farita proceznumero %d aperas en rulata laboro %d"
 
-#: jobs.c:1000
+#: jobs.c:1005
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "Haltigita laboro %d kun procezgrupo %ld estas forigata"
 
-#: jobs.c:1105
+#: jobs.c:1110
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr ""
 
-#: jobs.c:1108
+#: jobs.c:1113
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr ""
 
-#: jobs.c:1396
+#: jobs.c:1401
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: Ne estas tia proceznumero (%ld)!"
 
-#: jobs.c:1411
+#: jobs.c:1416
 #, c-format
 msgid "Signal %d"
 msgstr ""
 
-#: jobs.c:1425 jobs.c:1450
+#: jobs.c:1430 jobs.c:1455
 msgid "Done"
 msgstr ""
 
-#: jobs.c:1430 siglist.c:122
+#: jobs.c:1435 siglist.c:122
 msgid "Stopped"
 msgstr ""
 
-#: jobs.c:1434
+#: jobs.c:1439
 #, c-format
 msgid "Stopped(%s)"
 msgstr ""
 
-#: jobs.c:1438
+#: jobs.c:1443
 msgid "Running"
 msgstr ""
 
-#: jobs.c:1452
+#: jobs.c:1457
 #, c-format
 msgid "Done(%d)"
 msgstr ""
 
-#: jobs.c:1454
+#: jobs.c:1459
 #, c-format
 msgid "Exit %d"
 msgstr ""
 
-#: jobs.c:1457
+#: jobs.c:1462
 msgid "Unknown status"
 msgstr ""
 
-#: jobs.c:1544
+#: jobs.c:1549
 #, c-format
 msgid "(core dumped) "
 msgstr ""
 
-#: jobs.c:1563
+#: jobs.c:1568
 #, c-format
 msgid "  (wd: %s)"
 msgstr ""
 
-#: jobs.c:1766
+#: jobs.c:1771
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr ""
 
-#: jobs.c:2094 nojobs.c:576
+#: jobs.c:2099 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: La procezo %ld ne estas ido de ĉi tiu ŝelo"
 
-#: jobs.c:2321
+#: jobs.c:2326
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Malestas informoj pri procezo %ld"
 
-#: jobs.c:2593
+#: jobs.c:2598
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: La laboro %d estas haltigita"
 
-#: jobs.c:2815
+#: jobs.c:2820
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: La laboro finiĝis"
 
-#: jobs.c:2824
+#: jobs.c:2829
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: La laboro %d jam estas fona"
 
-#: jobs.c:3487
+#: jobs.c:3492
 #, fuzzy, c-format
 msgid "%s: line %d: "
 msgstr "%s: Averto: "
 
-#: jobs.c:3501 nojobs.c:805
+#: jobs.c:3506 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
 msgstr ""
 
-#: jobs.c:3513 jobs.c:3526
+#: jobs.c:3518 jobs.c:3531
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr ""
 
-#: jobs.c:3558
+#: jobs.c:3563
 msgid "initialize_job_control: getpgrp failed"
 msgstr ""
 
-#: jobs.c:3618
+#: jobs.c:3623
 msgid "initialize_job_control: line discipline"
 msgstr ""
 
-#: jobs.c:3628
+#: jobs.c:3633
 msgid "initialize_job_control: setpgid"
 msgstr ""
 
-#: jobs.c:3656
+#: jobs.c:3661
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr ""
 
-#: jobs.c:3661
+#: jobs.c:3666
 msgid "no job control in this shell"
 msgstr "Ĉi tiu ŝelo ne disponigas laborregadon"
 
@@ -1376,7 +1386,7 @@ msgid "unexpected EOF while looking for matching `)'"
 msgstr "Neatendita dosierfino dum serĉo de responda „)‟"
 
 # XXX: internal_error
-#: pcomplete.c:1016
+#: pcomplete.c:1018
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "Kompletigo: Funkcio „%s‟ ne trovita"
@@ -1387,13 +1397,13 @@ msgstr "Kompletigo: Funkcio „%s‟ ne trovita"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:287
+#: print_cmd.c:285
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: Misa stir-operacio „%d‟"
 
 # XXX: programming_error
-#: print_cmd.c:1347
+#: print_cmd.c:1348
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c‟: Misa formatsigno"
@@ -1741,12 +1751,12 @@ msgstr "%s: Misa anstataŭigo"
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: ĉi tiel ne valorizebla"
 
-#: subst.c:7479
+#: subst.c:7499
 #, fuzzy, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "Misa anstataŭigo: Mankas ferma „%s‟ en %s"
 
-#: subst.c:8354
+#: subst.c:8375
 #, c-format
 msgid "no match: %s"
 msgstr "Nenio kongrua: %s"
@@ -2183,75 +2193,85 @@ msgid "until COMMANDS; do COMMANDS; done"
 msgstr ""
 
 #: builtins.c:198
-msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
+msgid "coproc [NAME] command [redirections]"
 msgstr ""
 
 #: builtins.c:200
-msgid "{ COMMANDS ; }"
+msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
 msgstr ""
 
 #: builtins.c:202
-msgid "job_spec [&]"
+msgid "{ COMMANDS ; }"
 msgstr ""
 
 #: builtins.c:204
+msgid "job_spec [&]"
+msgstr ""
+
+#: builtins.c:206
 #, fuzzy
 msgid "(( expression ))"
 msgstr "Mankas esprimo"
 
-#: builtins.c:206
+#: builtins.c:208
 #, fuzzy
 msgid "[[ expression ]]"
 msgstr "Mankas esprimo"
 
-#: builtins.c:208
+#: builtins.c:210
 msgid "variables - Names and meanings of some shell variables"
 msgstr ""
 
-#: builtins.c:211
+#: builtins.c:213
 msgid "pushd [-n] [+N | -N | dir]"
 msgstr ""
 
-#: builtins.c:215
+#: builtins.c:217
 msgid "popd [-n] [+N | -N]"
 msgstr ""
 
-#: builtins.c:219
+#: builtins.c:221
 msgid "dirs [-clpv] [+N] [-N]"
 msgstr ""
 
-#: builtins.c:222
+#: builtins.c:224
 msgid "shopt [-pqsu] [-o] [optname ...]"
 msgstr ""
 
-#: builtins.c:224
+#: builtins.c:226
 msgid "printf [-v var] format [arguments]"
 msgstr ""
 
-#: builtins.c:227
+#: builtins.c:229
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W "
 "wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] "
 "[name ...]"
 msgstr ""
 
-#: builtins.c:231
+#: builtins.c:233
 msgid ""
 "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
 
-#: builtins.c:235
+#: builtins.c:237
 msgid "compopt [-o|+o option] [name ...]"
 msgstr ""
 
-#: builtins.c:238
+#: builtins.c:240
 msgid ""
 "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
 msgstr ""
 
-#: builtins.c:250
+#: builtins.c:242
+msgid ""
+"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+msgstr ""
+
+#: builtins.c:254
 #, fuzzy
 msgid ""
 "Define or display aliases.\n"
@@ -2279,7 +2299,7 @@ msgstr ""
 "    „alias‟ liveras „true‟ krom se aperas NOMO ne difinita alinome."
 
 # unalias [-a] name [name ...]
-#: builtins.c:272
+#: builtins.c:276
 #, fuzzy
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
@@ -2292,7 +2312,7 @@ msgstr ""
 "Forigu la nomojn name ... el la listo de difinitaj alinomoj.\n"
 "    Se enestas la opcio „-a‟, ĉiujn alinomojn forigu."
 
-#: builtins.c:285
+#: builtins.c:289
 #, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
@@ -2357,7 +2377,7 @@ msgstr ""
 "    -s                Listigu makroajn klavsekvencojn kaj ilian valoron\n"
 "                      en formo reuzebla por enigo."
 
-#: builtins.c:322
+#: builtins.c:326
 #, fuzzy
 msgid ""
 "Exit for, while, or until loops.\n"
@@ -2371,7 +2391,7 @@ msgstr ""
 "Pasu al la sekva iteraciero de  FOR, WHILE aŭ UNTIL. Se N estas\n"
 "donita, pasu je la nivelo de la Na inganta iteraciordono."
 
-#: builtins.c:334
+#: builtins.c:338
 #, fuzzy
 msgid ""
 "Resume for, while, or until loops.\n"
@@ -2385,7 +2405,7 @@ msgstr ""
 "Pasu al la sekva iteraciero de  FOR, WHILE aŭ UNTIL. Se N estas\n"
 "donita, pasu je la nivelo de la Na inganta iteraciordono."
 
-#: builtins.c:346
+#: builtins.c:350
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2399,7 +2419,7 @@ msgid ""
 "    not a shell builtin.."
 msgstr ""
 
-#: builtins.c:361
+#: builtins.c:365
 #, fuzzy
 msgid ""
 "Return the context of the current subroutine call.\n"
@@ -2424,7 +2444,7 @@ msgstr ""
 "    La valoro de EXPR indikas, kiom da vokkadroj retroiri disde la\n"
 "    kuranta; la pinta kadro havas la numeron 0."
 
-#: builtins.c:379
+#: builtins.c:383
 #, fuzzy
 msgid ""
 "Change the shell working directory.\n"
@@ -2470,7 +2490,7 @@ msgstr ""
 "    anstataŭ iri laŭ simbolaj ligiloj; la opcio  -L  igas sekvi\n"
 "    simbolajn ligilojn."
 
-#: builtins.c:407
+#: builtins.c:411
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2486,7 +2506,7 @@ msgid ""
 "    cannot be read."
 msgstr ""
 
-#: builtins.c:424
+#: builtins.c:428
 #, fuzzy
 msgid ""
 "Null command.\n"
@@ -2497,7 +2517,7 @@ msgid ""
 "    Always succeeds."
 msgstr "Senefika: La komando nenion faras. Elirstato 0 estas liverata."
 
-#: builtins.c:435
+#: builtins.c:439
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2505,7 +2525,7 @@ msgid ""
 "    Always succeeds."
 msgstr ""
 
-#: builtins.c:444
+#: builtins.c:448
 #, fuzzy
 msgid ""
 "Return an unsuccessful result.\n"
@@ -2514,7 +2534,7 @@ msgid ""
 "    Always fails."
 msgstr "Liveru malsukcesan rezulton."
 
-#: builtins.c:453
+#: builtins.c:457
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2534,7 +2554,7 @@ msgid ""
 msgstr ""
 
 # declare [-afFirtx] [-p] [name[=value] ...]
-#: builtins.c:472
+#: builtins.c:476
 #, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
@@ -2595,14 +2615,14 @@ msgstr ""
 "    Uzite en funkcio, „declare‟ faras la nomojn name lokaj, samkiel la\n"
 "    komando „local‟."
 
-#: builtins.c:508
+#: builtins.c:512
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
 
-#: builtins.c:516
+#: builtins.c:520
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2617,7 +2637,7 @@ msgid ""
 "    or the shell is not executing a function."
 msgstr ""
 
-#: builtins.c:533
+#: builtins.c:537
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -2666,7 +2686,7 @@ msgstr ""
 "    La opcio  -E  abolas la supre indikitan signifon de ĉi tiuj specialaj\n"
 "    signoj."
 
-#: builtins.c:567
+#: builtins.c:571
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2679,7 +2699,7 @@ msgid ""
 "    Returns success unless a write error occurs."
 msgstr ""
 
-#: builtins.c:582
+#: builtins.c:586
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2706,7 +2726,7 @@ msgid ""
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 msgstr ""
 
-#: builtins.c:610
+#: builtins.c:614
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2719,7 +2739,7 @@ msgid ""
 msgstr ""
 
 # getopts optstring name [arg]
-#: builtins.c:622
+#: builtins.c:626
 #, fuzzy
 msgid ""
 "Parse option arguments.\n"
@@ -2792,7 +2812,7 @@ msgstr ""
 "    Normale „getopts‟ analizas la poziciajn parametrojn ($0 - $9), sed\n"
 "    se estas pli da argumentoj, „getopts‟ anstataŭe analizas ilin."
 
-#: builtins.c:664
+#: builtins.c:668
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2815,7 +2835,7 @@ msgid ""
 "occurs."
 msgstr ""
 
-#: builtins.c:685
+#: builtins.c:689
 #, fuzzy
 msgid ""
 "Exit the shell.\n"
@@ -2826,7 +2846,7 @@ msgstr ""
 "Forlasu la ŝelon kun elirstato N.  Se  N  mankas, la elirstato estas\n"
 "    tiu de la plej ĵuse plenumita komando."
 
-#: builtins.c:694
+#: builtins.c:698
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2837,7 +2857,7 @@ msgstr ""
 
 # ZZZ: fc [-e ename] [-nlr] [first] [last] or
 #      fc -s [pat=rep] [cmd]
-#: builtins.c:704
+#: builtins.c:708
 #, fuzzy
 msgid ""
 "Display or execute commands from the history list.\n"
@@ -2886,7 +2906,7 @@ msgstr ""
 "    «r» replenumigas la ĵusan komandon."
 
 # fg [job_spec]
-#: builtins.c:734
+#: builtins.c:738
 #, fuzzy
 msgid ""
 "Move job to the foreground.\n"
@@ -2902,7 +2922,7 @@ msgstr ""
 "    malestas, apliku la ŝelan koncepton pri la kuranta laboro."
 
 # bg [job_spec]
-#: builtins.c:749
+#: builtins.c:753
 #, fuzzy
 msgid ""
 "Move jobs to the background.\n"
@@ -2920,7 +2940,7 @@ msgstr ""
 "    kun „&‟.  Se nenia laboro estas indikita, apliku la ŝelan koncepton\n"
 "    pri la kuranta laboro."
 
-#: builtins.c:763
+#: builtins.c:767
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -2944,7 +2964,7 @@ msgid ""
 "    Returns success unless NAME is not found or an invalid option is given."
 msgstr ""
 
-#: builtins.c:788
+#: builtins.c:792
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -2969,7 +2989,7 @@ msgstr ""
 # ZZZ history [-c] [-d offset] [n] or
 #     history -awrn [filename] or
 #     history -ps arg [arg...]
-#: builtins.c:812
+#: builtins.c:816
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3032,7 +3052,7 @@ msgstr ""
 
 # ZZZ jobs [-lnprs] [jobspec ...] or
 #     jobs -x command [args]
-#: builtins.c:848
+#: builtins.c:852
 #, fuzzy
 msgid ""
 "Display status of jobs.\n"
@@ -3070,7 +3090,7 @@ msgstr ""
 "    laborindikojn aperantajn en la argumentoj  args  je la proceznumero\n"
 "    de la ĉefprocezo de la grupo."
 
-#: builtins.c:875
+#: builtins.c:879
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3089,7 +3109,7 @@ msgstr ""
 
 # ZZZ: kill [-s sigspec | -n signum | -sigspec] [pid | job]... or
 #      kill -l [sigspec]
-#: builtins.c:894
+#: builtins.c:898
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3125,7 +3145,7 @@ msgstr ""
 "    kroman procezon por ĉesigi iun alian."
 
 # let arg [arg ...]
-#: builtins.c:917
+#: builtins.c:921
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expressions.\n"
@@ -3209,7 +3229,7 @@ msgstr ""
 
 # read [-ers] [-u fd] [-t timeout] [-p prompt] [-a array] [-n nchars]
 #      [-d delim] [name ...]
-#: builtins.c:962
+#: builtins.c:966
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3282,7 +3302,7 @@ msgstr ""
 "    renkontiĝas dosierfino, atendolimo estas atingita, aŭ nevalida\n"
 "    dosiernumero estas indikita ĉe -u."
 
-#: builtins.c:1002
+#: builtins.c:1006
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3295,7 +3315,7 @@ msgid ""
 msgstr ""
 
 # set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
-#: builtins.c:1015
+#: builtins.c:1019
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3449,7 +3469,7 @@ msgstr ""
 "    poziciaj, kaj per ili estas valorizataj, respektive, $1, $2 ... $n.\n"
 "    Se nenia  arg  estas donita, ĉiuj ŝelvariabloj estas eligataj."
 
-#: builtins.c:1097
+#: builtins.c:1101
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3469,7 +3489,7 @@ msgid ""
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
 
-#: builtins.c:1117
+#: builtins.c:1121
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3488,7 +3508,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1136
+#: builtins.c:1140
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3508,7 +3528,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1157
+#: builtins.c:1161
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3520,7 +3540,7 @@ msgid ""
 msgstr ""
 
 # source filename [arguments]
-#: builtins.c:1169 builtins.c:1184
+#: builtins.c:1173 builtins.c:1188
 #, fuzzy
 msgid ""
 "Execute commands from a file in the current shell.\n"
@@ -3539,7 +3559,7 @@ msgstr ""
 "    la dosierujon de  filename.  La eventualaj argumentoj\n"
 "    arguments iĝas la poziciaj parametroj por plenumo de filename."
 
-#: builtins.c:1200
+#: builtins.c:1204
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3554,7 +3574,7 @@ msgid ""
 msgstr ""
 
 # test [expr]
-#: builtins.c:1216
+#: builtins.c:1220
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3692,7 +3712,7 @@ msgstr ""
 "    plia aŭ egala al arg2."
 
 # [ arg... ]
-#: builtins.c:1292
+#: builtins.c:1296
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3703,7 +3723,7 @@ msgstr ""
 "Ĉi tiu estas sinonimo de la primitivo „test‟; tamen la lasta\n"
 "    argumento devas esti „]‟ fermanta la esprimon komencitan per „[‟."
 
-#: builtins.c:1301
+#: builtins.c:1305
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3717,7 +3737,7 @@ msgstr ""
 
 # ZZZ: trap [arg] [signal_spec ...] or
 #      trap -l
-#: builtins.c:1313
+#: builtins.c:1317
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -3772,7 +3792,7 @@ msgstr ""
 "    Signalon  signalindiko  eblas sendi al la ŝelo per la komando\n"
 "    «kill -signalindiko $$»."
 
-#: builtins.c:1345
+#: builtins.c:1349
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -3803,7 +3823,7 @@ msgid ""
 msgstr ""
 
 # ulimit [-SHacdflmnpstuv] [limit]
-#: builtins.c:1376
+#: builtins.c:1380
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -3880,7 +3900,7 @@ msgstr ""
 "    por -p kiu estas en obloj de 512 bajtoj; kaj por -u, kiu estas\n"
 "    sendimensia nombro de procezoj."
 
-#: builtins.c:1421
+#: builtins.c:1425
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -3898,7 +3918,7 @@ msgid ""
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
 
-#: builtins.c:1441
+#: builtins.c:1445
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -3916,7 +3936,7 @@ msgid ""
 msgstr ""
 
 # wait [n]
-#: builtins.c:1459
+#: builtins.c:1463
 #, fuzzy
 msgid ""
 "Wait for process completion and return exit status.\n"
@@ -3937,7 +3957,7 @@ msgstr ""
 "    dukto de la laboro."
 
 # for NAME [in WORDS ... ;] do COMMANDS; done
-#: builtins.c:1474
+#: builtins.c:1478
 #, fuzzy
 msgid ""
 "Execute commands for each member in a list.\n"
@@ -3957,7 +3977,7 @@ msgstr ""
 "    estas plenumataj."
 
 # for ((: for (( exp1; exp2; exp3 )); do COMMANDS; done
-#: builtins.c:1488
+#: builtins.c:1492
 #, fuzzy
 msgid ""
 "Arithmetic for loop.\n"
@@ -3984,7 +4004,7 @@ msgstr ""
 "    ili malestas, 1 estas uzata anstataŭe."
 
 # select NAME [in WORDS ... ;] do COMMANDS; done
-#: builtins.c:1506
+#: builtins.c:1510
 #, fuzzy
 msgid ""
 "Select words from a list and execute commands.\n"
@@ -4018,7 +4038,7 @@ msgstr ""
 "    eliro (break)."
 
 # time [-p] PIPELINE
-#: builtins.c:1527
+#: builtins.c:1531
 #, fuzzy
 msgid ""
 "Report time consumed by pipeline's execution.\n"
@@ -4041,7 +4061,7 @@ msgstr ""
 "    La variablo TIMEFORMAT difinas la formaton de la eligaĵo."
 
 # case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac
-#: builtins.c:1544
+#: builtins.c:1548
 #, fuzzy
 msgid ""
 "Execute commands based on pattern matching.\n"
@@ -4057,7 +4077,7 @@ msgstr ""
 
 # if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]...
 # [ else COMMANDS; ] fi
-#: builtins.c:1556
+#: builtins.c:1560
 #, fuzzy
 msgid ""
 "Execute commands based on conditional.\n"
@@ -4087,7 +4107,7 @@ msgstr ""
 "    komando plenumita, aŭ 0 se neniu el la kondiĉoj estis vera."
 
 # while COMMANDS; do COMMANDS; done
-#: builtins.c:1573
+#: builtins.c:1577
 #, fuzzy
 msgid ""
 "Execute commands as long as a test succeeds.\n"
@@ -4102,7 +4122,7 @@ msgstr ""
 "    COMMANDS de la „while‟-parto liveras elirstaton 0."
 
 # until COMMANDS; do COMMANDS; done
-#: builtins.c:1585
+#: builtins.c:1589
 #, fuzzy
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
@@ -4116,7 +4136,20 @@ msgstr ""
 "Ripete malvolvu kaj plenumu la komandojn dum la lasta el la komandoj\n"
 "    COMMANDS de la „until‟-parto liveras elirstaton alian ol 0."
 
-#: builtins.c:1597
+#: builtins.c:1601
+msgid ""
+"Create a coprocess named NAME.\n"
+"    \n"
+"    Execute COMMAND asynchronously, with the standard output and standard\n"
+"    input of the command connected via a pipe to file descriptors assigned\n"
+"    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
+"    The default NAME is \"COPROC\".\n"
+"    \n"
+"    Exit Status:\n"
+"    Returns the exit status of COMMAND."
+msgstr ""
+
+#: builtins.c:1615
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4131,7 +4164,7 @@ msgid ""
 msgstr ""
 
 # grouping_braces: { COMMANDS ; }
-#: builtins.c:1611
+#: builtins.c:1629
 #, fuzzy
 msgid ""
 "Group commands as a unit.\n"
@@ -4145,7 +4178,7 @@ msgstr ""
 "Plenumu la komandojn grupe.  Tiel eblas apliki alidirektadon al\n"
 "    tuta grupo da komandoj."
 
-#: builtins.c:1623
+#: builtins.c:1641
 #, fuzzy
 msgid ""
 "Resume job in foreground.\n"
@@ -4164,7 +4197,7 @@ msgstr ""
 "    labornumero.  Postmetita „&‟ sendas la laboron en la fonon,\n"
 "    samkiel se la komando „bg‟ estus aplikita al laborindiko."
 
-#: builtins.c:1638
+#: builtins.c:1656
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
@@ -4179,7 +4212,7 @@ msgstr ""
 "    Ekvivalenta al «let EXPRESSION»."
 
 # [[ expression ]]
-#: builtins.c:1650
+#: builtins.c:1668
 #, fuzzy
 msgid ""
 "Execute conditional command.\n"
@@ -4222,7 +4255,7 @@ msgstr ""
 "    sufiĉas por determini la rezulton."
 
 # help var
-#: builtins.c:1676
+#: builtins.c:1694
 #, fuzzy
 msgid ""
 "Common shell variable names and usage.\n"
@@ -4327,7 +4360,7 @@ msgstr ""
 "\t\tkiujn komandojn konservi en la historilisto.\n"
 
 # pushd [dir | +N | -N] [-n]
-#: builtins.c:1733
+#: builtins.c:1751
 #, fuzzy
 msgid ""
 "Add directories to stack.\n"
@@ -4379,7 +4412,7 @@ msgstr ""
 "    Vi povas vidigi la stakon da dosierujoj per la komando „dirs‟."
 
 # popd [+N | -N] [-n]
-#: builtins.c:1767
+#: builtins.c:1785
 #, fuzzy
 msgid ""
 "Remove directories from stack.\n"
@@ -4423,7 +4456,7 @@ msgstr ""
 "    Vi povas vidigi la stakon da dosierujoj per la komando „dirs‟."
 
 # dirs [-clpv] [+N] [-N]
-#: builtins.c:1797
+#: builtins.c:1815
 #, fuzzy
 msgid ""
 "Display directory stack.\n"
@@ -4470,7 +4503,7 @@ msgstr ""
 "    -N\teligu la Nan eron nombrante de dekstre en la listo eligebla\n"
 "\tper „dirs‟ sen opcioj, numerante ekde 0."
 
-#: builtins.c:1826
+#: builtins.c:1844
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -4492,7 +4525,7 @@ msgid ""
 msgstr ""
 
 # printf [-v var] format [arguments]
-#: builtins.c:1847
+#: builtins.c:1865
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -4533,7 +4566,7 @@ msgstr ""
 "    Se ĉeestas la opcio „-v‟, la eligo trafas en ties variablon var kaj\n"
 "    ne en la ĉefeligujon."
 
-#: builtins.c:1874
+#: builtins.c:1892
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -4558,7 +4591,7 @@ msgstr ""
 # compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat]
 # 	[-W wordlist] [-P prefix] [-S suffix] [-X filterpat]
 # 	[-F function] [-C command] [word]
-#: builtins.c:1897
+#: builtins.c:1915
 #, fuzzy
 msgid ""
 "Display possible completions depending on the options.\n"
@@ -4575,7 +4608,7 @@ msgstr ""
 "    por uzo en ŝelfunkcio generanta eblajn kompletigojn.\n"
 "    Se eventuala argumento word estas donita, generu ĝiajn kongruaĵojn."
 
-#: builtins.c:1912
+#: builtins.c:1930
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4604,9 +4637,9 @@ msgid ""
 "    have a completion specification defined."
 msgstr ""
 
-#: builtins.c:1940
+#: builtins.c:1958
 msgid ""
-"Read lines from a file into an array variable.\n"
+"Read lines from the standard input into an array variable.\n"
 "    \n"
 "    Read lines from the standard input into the array variable ARRAY, or "
 "from\n"
@@ -4630,7 +4663,9 @@ msgid ""
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
 "    \n"
-"    If -C is supplied without -c, the default quantum is 5000.\n"
+"    If -C is supplied without -c, the default quantum is 5000.  When\n"
+"    CALLBACK is evaluated, it is supplied the index of the next array\n"
+"    element to be assigned as an additional argument.\n"
 "    \n"
 "    If not supplied with an explicit origin, mapfile will clear ARRAY "
 "before\n"
@@ -4638,6 +4673,13 @@ msgid ""
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or ARRAY is readonly."
+msgstr ""
+
+#: builtins.c:1990
+msgid ""
+"Read lines from a file into an array variable.\n"
+"    \n"
+"    A synonym for `mapfile'."
 msgstr ""
 
 #~ msgid " "

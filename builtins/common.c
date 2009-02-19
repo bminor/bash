@@ -321,6 +321,16 @@ sh_wrerror ()
   builtin_error (_("write error: %s"), strerror (errno));
 }
 
+void
+sh_ttyerror (set)
+     int set;
+{
+  if (set)
+    builtin_error (_("error setting terminal attributes: %s"), strerror (errno));
+  else
+    builtin_error (_("error getting terminal attributes: %s"), strerror (errno));
+}
+
 int
 sh_chkwrite (s)
      int s;

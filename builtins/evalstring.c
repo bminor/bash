@@ -266,10 +266,7 @@ parse_and_execute (string, from_file, flags)
 	      global_command = (COMMAND *)NULL;
 
 	      if ((subshell_environment & SUBSHELL_COMSUB) && comsub_ignore_return)
-{
 		command->flags |= CMD_IGNORE_RETURN;
-itrace("parse_and_execute: turned on CMD_IGNORE_RETURN from comsub_ignore_return");
-}
 
 #if defined (ONESHOT)
 	      /*

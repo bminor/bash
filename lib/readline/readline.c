@@ -397,6 +397,8 @@ readline_internal_setup ()
 
   if (rl_pre_input_hook)
     (*rl_pre_input_hook) ();
+
+  RL_CHECK_SIGNALS ();
 }
 
 STATIC_CALLBACK char *
@@ -405,6 +407,8 @@ readline_internal_teardown (eof)
 {
   char *temp;
   HIST_ENTRY *entry;
+
+  RL_CHECK_SIGNALS ();
 
   /* Restore the original of this history line, iff the line that we
      are editing was originally in the history, AND the line has changed. */
@@ -542,6 +546,7 @@ readline_internal_charloop ()
 
       lastc = c;
       _rl_dispatch ((unsigned char)c, _rl_keymap);
+      RL_CHECK_SIGNALS ();
 
       /* If there was no change in _rl_last_command_was_kill, then no kill
 	 has taken place.  Note that if input is pending we are reading
@@ -662,7 +667,6 @@ _rl_dispatch_callback (cxt)
   int nkey, r;
 
   /* For now */
-#if 1
   /* The first time this context is used, we want to read input and dispatch
      on it.  When traversing the chain of contexts back `up', we want to use
      the value from the next context down.  We're simulating recursion using
@@ -680,13 +684,11 @@ _rl_dispatch_callback (cxt)
     }
   else
     r = cxt->childval;
-#else
-  r = _rl_dispatch_subseq (nkey, cxt->dmap, cxt->subseq_arg);
-#endif
 
   /* For now */
   r = _rl_subseq_result (r, cxt->oldmap, cxt->okey, (cxt->flags & KSEQ_SUBSEQ));
 
+  RL_CHECK_SIGNALS ();
   if (r == 0)			/* success! */
     {
       _rl_keyseq_chain_dispose ();
@@ -773,6 +775,8 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	     remember the last command executed in this variable. */
 	  if (rl_pending_input == 0 && map[key].function != rl_digit_argument)
 	    rl_last_func = map[key].function;
+
+	  RL_CHECK_SIGNALS ();
 	}
       else if (map[ANYOTHERKEY].function)
 	{

@@ -1,3 +1,59 @@
+This document details the changes between this version, bash-4.0-release,
+and the previous version, bash-4.0-rc1.
+
+1.  Changes to Bash
+
+a.  Changed the message printed when setlocale(3) fails to only include the
+    strerror error text if the call changes errno.
+
+b.  Changed trap command execution to reset the line number before running a
+    trap (except DEBUG and RETURN traps).
+
+c.  Fixed behavior of case-modifiying word expansions to not work on
+    individual words within a variable's value.
+
+d.  Fixed a bug that caused mapfile to not be interruptible when run in an
+    interactive shell.
+
+e.  Fixed a bug that caused mapfile to not run callbacks for the first line
+    read.
+
+f.  Fixed a bug that caused mapfile to not honor EOF typed in an interactive
+    shell.
+
+g.  Fixed the coprocess reaping code to not run straight from a signal handler.
+
+h.  Fixed a bug that caused printf -b to ignore the first % conversion specifier
+    in the format string on 64-bit systems.
+
+i.  Fixed a bug that caused incorrect word splitting when `:', `=', or `~'
+    appeared in $IFS.
+
+j.  Fixed a bug that caused data corruption in the programmable completion code
+    when a shell function called from a completion aborted execution.
+
+k.  Fixed a bug that caused the CPU usage reported by the `time' builtin to be
+    capped at 100%.
+
+l.  Changed behavior of shell when -e option is in effect to reflect consensus
+    of Posix shell standardization working group.
+
+m.  Fixed a bug introduced in bash-4.0-alpha that caused redirections to not
+    be displayed by `type' or `declare' when appearing in functions under
+    certain circumstances.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused !(...) extended glob patterns to inhibit later
+    history expansion.
+
+b.  Reworked the signal handling to avoid calling disallowed functions from a
+    signal handler.
+
+3.  New Features in Bash
+
+a.  `readarray' is now a synonym for `mapfile'.
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.0-rc1,
 and the previous version, bash-4.0-beta2.
 
@@ -43,7 +99,7 @@ b.  Fixed a bug that caused redisplay errors when using prompts with invisible
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.0-beta,
-and the previous version, bash-4.0-beta.
+and the previous version, bash-4.0-alpha.
 
 1.  Changes to Bash
 

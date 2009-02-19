@@ -941,11 +941,12 @@ unbind_compfunc_variables (exported)
 
 	$0 == function or command being invoked
    	$1 == command name
-   	$2 = word to be completed (possibly null)
-   	$3 = previous word
+   	$2 == word to be completed (possibly null)
+   	$3 == previous word
 
    Functions can access all of the words in the current command line
-   with the COMP_WORDS array.  External commands cannot. */
+   with the COMP_WORDS array.  External commands cannot; they have to
+   make do  with the COMP_LINE and COMP_POINT variables. */
 
 static WORD_LIST *
 build_arg_list (cmd, text, lwords, ind)
@@ -1005,6 +1006,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   WORD_LIST *cmdlist;
   int fval;
   sh_parser_state_t ps;
+  sh_parser_state_t * restrict pps;
 #if defined (ARRAY_VARS)
   ARRAY *a;
 #endif
@@ -1029,9 +1031,16 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
 
   cmdlist = build_arg_list (funcname, text, lwords, cw);
 
-  save_parser_state (&ps);  
+  pps = &ps;
+  begin_unwind_frame ("gen-shell-function-matches");
+  add_unwind_protect (restore_parser_state, (char *)pps);
+  add_unwind_protect (dispose_words, (char *)cmdlist);
+  add_unwind_protect (unbind_compfunc_variables, (char *)0);
+
   fval = execute_shell_function (f, cmdlist);  
-  restore_parser_state (&ps);
+
+  discard_unwind_frame ("gen-shell-function-matches");
+  restore_parser_state (pps);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);

@@ -355,7 +355,6 @@ save_history ()
 	append_history (history_lines_this_session, hf);
       else
 	write_history (hf);
-
       sv_histsize ("HISTFILESIZE");
     }
 }

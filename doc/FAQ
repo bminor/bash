@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.36, for Bash version 3.2.
+This is the Bash FAQ, version 4.01, for Bash version 4.0.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,9 +36,9 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 3.2?
-B2) Are there any user-visible incompatibilities between bash-3.2 and
-    bash-2.05b?
+B1) What's new in version 4.0?
+B2) Are there any user-visible incompatibilities between bash-4.0,
+    bash-3.2, and bash-2.05b?
 
 Section C:  Differences from other Unix shells
 
@@ -143,26 +143,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 3.2, first made available on 12 October, 2006.
+The latest version is 4.0, first made available on 20 February, 2009.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 3.2:
+The following URLs tell how to get version 4.0:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-3.2.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-3.2.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-4.0.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-4.0.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.2.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-3.2.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.0.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-4.0.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-3.2-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-4.0-patches/
 
 A4)  On what machines will bash run?
 
@@ -194,9 +194,8 @@ http://www.cygwin.com/.
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
 early GNU-Win32 (the original name) releases.  Cygnus has also done
-ports of bash-2.05b and bash-3.0 to the CYGWIN environment, and both
-are available as part of their current release.  Bash-3.2 is currently
-being tested and should be available soon.
+ports of bash-2.05b and bash-3.2 to the CYGWIN environment, and both
+are available as part of their current release.
 
 Bash-2.05b and later versions should require no local Cygnus changes to
 build and run under CYGWIN.
@@ -219,7 +218,7 @@ Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-3.1 or bash-3.2.
+with building bash-4.0, but will gladly accept any patches that are needed.
 
 A6) How can I build bash with gcc? 
 
@@ -388,20 +387,164 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 3.2?
+B1) What's new in version 4.0?
 
-Bash-3.2 is the second maintenance release of the third major release of
-bash.  It contains the following significant new features (see the manual
-page for complete descriptions and the CHANGES and NEWS files in the
-bash-3.2 distribution).
+Bash-4.0 is the fourth major release of bash.  There are numerous new features,
+some experimental.  Depending on community reception, the experimental
+features will evolve.
+
+Bash-4.0 contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-4.0
+distribution):
+
+o   When using substring expansion on the positional parameters, a starting
+    index of 0 now causes $0 to be prefixed to the list.
+
+o   There is a new variable, $BASHPID, which always returns the process id of
+    the current shell.
+
+o   There is a new `autocd' option that, when enabled, causes bash to attempt
+    to `cd' to a directory name that is supplied as the first word of a
+    simple command.
+
+o   There is a new `checkjobs' option that causes the shell to check for and
+    report any running or stopped jobs at exit.
+
+o   The programmable completion code exports a new COMP_TYPE variable, set to
+    a character describing the type of completion being attempted.
+
+o   The programmable completion code exports a new COMP_KEY variable, set to
+    the character that caused the completion to be invoked (e.g., TAB).
+
+o   The programmable completion code now uses the same set of characters as
+    readline when breaking the command line into a list of words.
+
+o   The block multiplier for the ulimit -c and -f options is now 512 when in
+    Posix mode, as Posix specifies.
+
+o   Changed the behavior of the read builtin to save any partial input received
+    in the specified variable when the read builtin times out.  This also
+    results in variables specified as arguments to read to be set to the empty
+    string when there is no input available.  When the read builtin times out,
+    it returns an exit status greater than 128.
+
+o   The shell now has the notion of a `compatibility level', controlled by
+    new variables settable by `shopt'.  Setting this variable currently
+    restores the bash-3.1 behavior when processing quoted strings on the rhs
+    of the `=~' operator to the `[[' command.
+
+o   The `ulimit' builtin now has new -b (socket buffer size) and -T (number
+    of threads) options.
+
+o   There is a new `compopt' builtin that allows completion functions to modify
+    completion options for existing completions or the completion currently
+    being executed.
+
+o   The `read' builtin has a new -i option which inserts text into the reply
+    buffer when using readline.
+
+o   A new `-E' option to the complete builtin allows control of the default
+    behavior for completion on an empty line.
+
+o   There is now limited support for completing command name words containing
+    globbing characters.
+
+o   The `help' builtin now has a new -d option, to display a short description,
+    and a -m option, to print help information in a man page-like format.
+
+o   There is a new `mapfile' builtin to populate an array with lines from a
+    given file.
+
+o   If a command is not found, the shell attempts to execute a shell function
+    named `command_not_found_handle', supplying the command words as the
+    function arguments.
+
+o   There is a new shell option: `globstar'.  When enabled, the globbing code
+    treats `**' specially -- it matches all directories (and files within
+    them, when appropriate) recursively.
+
+o   There is a new shell option: `dirspell'.  When enabled, the filename
+    completion code performs spelling correction on directory names during
+    completion.
+
+o   The `-t' option to the `read' builtin now supports fractional timeout
+    values.
+
+o   Brace expansion now allows zero-padding of expanded numeric values and
+    will add the proper number of zeroes to make sure all values contain the
+    same number of digits.
+
+o   There is a new bash-specific bindable readline function: `dabbrev-expand'.
+    It uses menu completion on a set of words taken from the history list.
+
+o   The command assigned to a key sequence with `bind -x' now sets two new
+    variables in the environment of the executed command:  READLINE_LINE_BUFFER
+    and READLINE_POINT.  The command can change the current readline line
+    and cursor position by modifying READLINE_LINE_BUFFER and READLINE_POINT,
+    respectively.
+
+o   There is a new >>& redirection operator, which appends the standard output
+    and standard error to the named file.
+
+o   The parser now understands `|&' as a synonym for `2>&1 |', which redirects
+    the standard error for a command through a pipe.
+
+o   The new `;&' case statement action list terminator causes execution to
+    continue with the action associated with the next pattern in the
+    statement rather than terminating the command.
+
+o   The new `;;&' case statement action list terminator causes the shell to
+    test the next set of patterns after completing execution of the current
+    action, rather than terminating the command.
+
+o   The shell understands a new variable: PROMPT_DIRTRIM.  When set to an
+    integer value greater than zero, prompt expansion of \w and \W  will
+    retain only that number of trailing pathname components and replace
+    the intervening characters with `...'.
+
+o   There are new case-modifying word expansions: uppercase (^[^]) and
+    lowercase (,[,]).  They can work on either the first character or
+    array element, or globally.  They accept an optional shell pattern
+    that determines which characters to modify.  There is an optionally-
+    configured feature to include capitalization operators.
+
+o   The shell provides associative array variables, with the appropriate
+    support to create, delete, assign values to, and expand them.
+
+o   The `declare' builtin now has new -l (convert value to lowercase upon
+    assignment) and -u (convert value to uppercase upon assignment) options.
+    There is an optionally-configurable -c option to capitalize a value at
+    assignment.
+
+o   There is a new `coproc' reserved word that specifies a coprocess: an
+    asynchronous command run with two pipes connected to the creating shell.
+    Coprocs can be named.  The input and output file descriptors and the
+    PID of the coprocess are available to the calling shell in variables
+    with coproc-specific names.
+
+o   A value of 0 for the -t option to `read' now returns success if there is
+    input available to be read from the specified file descriptor.
+
+o   CDPATH and GLOBIGNORE are ignored when the shell is running in privileged
+    mode.
+
+o   New bindable readline functions shell-forward-word and shell-backward-word,
+    which move forward and backward words delimited by shell metacharacters
+    and honor shell quoting.
+
+o   New bindable readline functions shell-backward-kill-word and shell-kill-word
+    which kill words backward and forward, but use the same word boundaries
+    as shell-forward-word and shell-backward-word.
+
+A short feature history dating from Bash-2.0:
+
+Bash-3.2 contained the following new features:
 
 o Bash-3.2 now checks shell scripts for NUL characters rather than non-printing
   characters when deciding whether or not a script is a binary file.
 
 o Quoting the string argument to the [[ command's  =~ (regexp) operator now
   forces string matching, as with the other pattern-matching operators.
-
-A short feature history dating from Bash-2.0:
 
 Bash-3.1 contained the following new features:
 
@@ -651,10 +794,10 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-3.2 and
-    bash-2.05b?
+B2) Are there any user-visible incompatibilities between bash-4.0, bash-3.2,
+    and bash-2.05b?
 
-There are a few incompatibilities between version 2.05b and version 3.2.
+There are a few incompatibilities between version 4.0 and version 3.2.
 They are detailed in the file COMPAT in the bash distribution.  That file
 is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
 if if you find something that's not mentioned there.
@@ -687,25 +830,25 @@ Things bash has that sh does not:
 	the ${param/pat[/string]} parameter pattern substitution operator
 	expansions to perform substring removal (${p%[%]w}, ${p#[#]w})
 	expansion of positional parameters beyond $9 with ${num}
-	variables: BASH, BASH_VERSION, BASH_VERSINFO, UID, EUID, REPLY,
+	variables: BASH, BASHPID, BASH_VERSION, BASH_VERSINFO, UID, EUID, REPLY,
 		   TIMEFORMAT, PPID, PWD, OLDPWD, SHLVL, RANDOM, SECONDS,
 		   LINENO, HISTCMD, HOSTTYPE, OSTYPE, MACHTYPE, HOSTNAME,
 		   ENV, PS3, PS4, DIRSTACK, PIPESTATUS, HISTSIZE, HISTFILE,
 		   HISTFILESIZE, HISTCONTROL, HISTIGNORE, GLOBIGNORE, GROUPS,
 		   PROMPT_COMMAND, FCEDIT, FIGNORE, IGNOREEOF, INPUTRC,
 		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, FUNCNAME, histchars,
-		   auto_resume
+		   auto_resume, PROMPT_DIRTRIM
 	DEBUG trap
 	ERR trap
 	variable arrays with new compound assignment syntax
-	redirections: <>, &>, >|, <<<, [n]<&word-, [n]>&word-
+	redirections: <>, &>, >|, <<<, [n]<&word-, [n]>&word-, >>&
 	prompt string special char translation and variable expansion
 	auto-export of variables in initial environment
 	command search finds functions before builtins
 	bash return builtin will exit a file sourced with `.'
 	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -d/-l/-p/-t.
 		  export -n/-f/-p/name=value, pwd -L/-P,
-		  read -e/-p/-a/-t/-n/-d/-s/-u,
+		  read -e/-p/-a/-t/-n/-d/-s/-u/-i,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
 		  unset -f/-v, ulimit -i/-m/-p/-q/-u/-x,
@@ -727,7 +870,7 @@ Things bash has that sh does not:
 	other new bash builtins: bind, command, compgen, complete, builtin,
 				 declare/typeset, dirs, enable, fc, help,
 				 history, logout, popd, pushd, disown, shopt,
-				 printf
+				 printf, compopt, mapfile
 	exported functions
 	filename generation when using output redirection (command >a*)
 	POSIX.2-style globbing character classes
@@ -743,7 +886,14 @@ Things bash has that sh does not:
 	debugger support, including `caller' builtin and new variables
 	RETURN trap
 	the `+=' assignment operator
-
+	autocd shell option and behavior
+	command-not-found hook with command_not_found_handle shell function
+	globstar shell option and `**' globbing behavior
+	|& synonym for `2>&1 |'
+	;& and ;;& case action list terminators
+	case-modifying word expansions and variable attributes
+	associative arrays
+	coprocesses using the `coproc' reserved word and variables
 
 Things sh has that bash does not:
 	uses variable SHACCT to do shell accounting
@@ -788,14 +938,14 @@ Things bash has or uses that ksh88 does not:
 	the ${!param*} prefix expansion operator
 	the ${param:offset[:length]} parameter substring operator
 	the ${param/pat[/string]} parameter pattern substitution operator
-	variables: BASH, BASH_VERSION, BASH_VERSINFO, UID, EUID, SHLVL,
+	variables: BASH, BASH_VERSION, BASH_VERSINFO, BASHPID, UID, EUID, SHLVL,
 		   TIMEFORMAT, HISTCMD, HOSTTYPE, OSTYPE, MACHTYPE,
 		   HISTFILESIZE, HISTIGNORE, HISTCONTROL, PROMPT_COMMAND,
 		   IGNOREEOF, FIGNORE, INPUTRC, HOSTFILE, DIRSTACK,
 		   PIPESTATUS, HOSTNAME, OPTERR, SHELLOPTS, GLOBIGNORE,
-		   GROUPS, FUNCNAME, histchars, auto_resume
+		   GROUPS, FUNCNAME, histchars, auto_resume, PROMPT_DIRTRIM
 	prompt expansion with backslash escapes and command substitution
-	redirection: &> (stdout and stderr), <<<, [n]<&word-, [n]>&word-
+	redirection: &> (stdout and stderr), <<<, [n]<&word-, [n]>&word-, >>&
 	more extensive and extensible editing and programmable completion
 	builtins: bind, builtin, command, declare, dirs, echo -e/-E, enable,
 		  exec -l/-c/-a, fc -s, export -n/-f/-p, hash, help, history,
@@ -805,7 +955,7 @@ Things bash has or uses that ksh88 does not:
 		  -o notify/-o physical/-o posix/-o hashall/-o onecmd/
 		  -h/-B/-C/-b/-H/-P, set +o, suspend, trap -l, type,
 		  typeset -a/-F/-p, ulimit -i/-q/-u/-x, umask -S, alias -p,
-		  shopt, disown, printf, complete, compgen
+		  shopt, disown, printf, complete, compgen, compopt, mapfile
 	`!' csh-style history expansion
 	POSIX.2-style globbing character classes
 	POSIX.2-style globbing equivalence classes
@@ -821,18 +971,26 @@ Things bash has or uses that ksh88 does not:
 	Timestamps in history entries
 	{x..y} brace expansion
 	The `+=' assignment operator
+	autocd shell option and behavior
+	command-not-found hook with command_not_found_handle shell function
+	globstar shell option and `**' globbing behavior
+	|& synonym for `2>&1 |'
+	;& and ;;& case action list terminators
+	case-modifying word expansions and variable attributes
+	associative arrays
+	coprocesses using the `coproc' reserved word and variables
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases (alias -t)
 	variables: ERRNO, FPATH, EDITOR, VISUAL
-	co-processes (|&, >&p, <&p)
+	co-processes (bash uses different syntax)
 	weirdly-scoped functions
 	typeset +f to list all function names without definitions
 	text of command history kept in a file, not memory
 	builtins: alias -x, cd old new, newgrp, print,
 		  read -p/-s/var?prompt, set -A/-o gmacs/
 		  -o bgnice/-o markdirs/-o trackall/-o viraw/-s,
-		  typeset -H/-L/-R/-Z/-A/-ft/-fu/-fx/-l/-u/-t, whence
+		  typeset -H/-L/-R/-Z/-A/-ft/-fu/-fx/-t, whence
 	using environment to pass attributes of exported variables
 	arithmetic evaluation done on arguments to some builtins
 	reads .profile from $PWD when invoked as login shell
@@ -848,33 +1006,48 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-3.2:
-	associative arrays
+This list is current through ksh93t (11/04/2008)
+
+New things in ksh-93 not in bash-4.0:
 	floating point arithmetic and variables
 	math library functions
 	${!name[sub]} name of subscript for associative array
 	`.' is allowed in variable names to create a hierarchical namespace
 	more extensive compound assignment syntax
 	discipline functions
-	`sleep' and `getconf' builtins (bash has loadable versions)
-	typeset -n and `nameref' variables
 	KEYBD trap
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, .sh.version,
 		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT
 	backreferences in pattern matching (\N)
-	`&' operator in pattern lists for matching
+	`&' operator in pattern lists for matching (match all instead of any)
+	exit statuses between 0 and 255
+	FPATH and PATH mixing
+	lexical scoping for local variables in `ksh' functions
+	no scoping for local variables in `POSIX' functions
+	$''  \C[.collating-element.] escape sequence
+	-C/-I invocation options
 	print -f (bash uses printf)
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
-	exit statuses between 0 and 255
-	FPATH and PATH mixing
 	getopts -a
-	-I invocation option
-	printf %H, %P, %T, %Z modifiers, output base for %d
-	lexical scoping for local variables in `ksh' functions
-	no scoping for local variables in `POSIX' functions
+	printf %B, %H, %P, %R, %T, %Z modifiers, output base for %d, `=' flag
+	read -N (read -n differs, too)/-v
+	set -o showme/-o multiline (bash default)
+	`sleep' and `getconf' builtins (bash has loadable versions)
+	typeset -n and `nameref' variables
+	typeset -C/-S/-T/-X/-h/-s
+	experimental `type' definitions (a la typedef) using typeset
+	negative subscripts for indexed array variables
+	array expansions ${array[sub1..sub2]} and ${!array[sub1..sub2]}
+	associative array assignments using `;' as element separator
+	command substitution $(n<#) expands to current byte offset for fd N
+	new '${ ' form of command substitution, executed in current shell
+	new >;/<#pat/<##pat/<#/># redirections
+	redirection operators preceded with {varname} to store fd number in varname
+	brace expansion printf-like formats 
 
-New things in ksh-93 present in bash-3.2:
+New things in ksh-93 present in bash-4.0:
+	associative arrays
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
         ?:, ++, --, `expr1 , expr2' arithmetic operators
@@ -883,24 +1056,30 @@ New things in ksh-93 present in bash-3.2:
 	compound array assignment
 	the `!' reserved word
 	loadable builtins -- but ksh uses `builtin' while bash uses `enable'
-	`command', `builtin', `disown' builtins
 	new $'...' and $"..." quoting
 	FIGNORE (but bash uses GLOBIGNORE), HISTCMD
-	set -o notify/-C
+	brace expansion and set -B
 	changes to kill builtin
+	`command', `builtin', `disown' builtins
+	echo -e
+	exec -c/-a
 	read -A (bash uses read -a)
         read -t/-d
 	trap -p
-	exec -c/-a
 	`.' restores the positional parameters when it completes
+	set -o notify/-C
+	set -o pipefail
+	set -G (-o globstar) and **
 	POSIX.2 `test'
 	umask -S
 	unalias -a
 	command and arithmetic substitution performed on PS1, PS4, and ENV
-	command name completion
+	command name completion, TAB displaying possible completions
 	ENV processed only for interactive shells
-	set -o pipefail
 	The `+=' assignment operator
+	the `;&' case statement "fallthrough" pattern list terminator
+	csh-style history expansion and set -H
+	negative offsets in ${param:offset:length}
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1457,6 +1636,11 @@ when assigning the variable, then expand the values to a single string that
 may contain whitespace.  The first problem may be solved by using backslashes
 or any other quoting mechanism to escape the white space in the patterns.
 
+Bash-4.0 introduces the concept of a `compatibility level', controlled by
+several options to the `shopt' builtin.  If the `compat31' option is enabled,
+bash reverts to the bash-3.1 behavior with respect to quoting the rhs of
+the =~ operator.
+
 Section F:  Things to watch out for on certain Unix versions
 
 F1) Why can't I use command line editing in my `cmdtool'?
@@ -1847,9 +2031,7 @@ H3) What's coming in future versions?
 
 These are features I hope to include in a future version of bash.
 
-Rocky Bernstein's bash debugger (support is included with bash-3.0)
-associative arrays
-co-processes, but with a new-style syntax that looks like function declaration
+Rocky Bernstein's bash debugger (support is included with bash-4.0)
 
 H4) What's on the bash `wish list' for future versions?
 
@@ -1867,9 +2049,9 @@ Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2007.  Never make predictions. 
+The next version will appear sometime in 2009.  Never make predictions. 
 
-This document is Copyright 1995-2006 by Chester Ramey.
+This document is Copyright 1995-2009 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

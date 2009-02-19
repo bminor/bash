@@ -53,13 +53,17 @@
 #endif
 
 /* These must agree with the defines in externs.h */
-#define CASE_NOOP	0x0
-#define CASE_LOWER	0x01
-#define CASE_UPPER	0x02
-#define CASE_CAPITALIZE	0x04
-#define CASE_UNCAP	0x08
-#define CASE_TOGGLE	0x10
-#define CASE_TOGGLEALL	0x20
+#define CASE_NOOP	0x0000
+#define CASE_LOWER	0x0001
+#define CASE_UPPER	0x0002
+#define CASE_CAPITALIZE	0x0004
+#define CASE_UNCAP	0x0008
+#define CASE_TOGGLE	0x0010
+#define CASE_TOGGLEALL	0x0020
+#define CASE_UPFIRST	0x0040
+#define CASE_LOWFIRST	0x0080
+
+#define CASE_USEWORDS	0x1000		/* modify behavior to act on words in passed string */
 
 extern char *substring __P((char *, int, int));
 
@@ -96,7 +100,7 @@ sh_modcase (string, pat, flags)
      int flags;
 {
   int start, next, end;
-  int inword, c, nc, nop, match;
+  int inword, c, nc, nop, match, usewords;
   char *ret, *s;
   wchar_t wc;
 #if defined (HANDLE_MULTIBYTE)
@@ -115,6 +119,10 @@ sh_modcase (string, pat, flags)
 
   ret = (char *)xmalloc (end + 1);
   strcpy (ret, string);
+
+  /* See if we are supposed to split on alphanumerics and operate on each word */
+  usewords = (flags & CASE_USEWORDS);
+  flags &= ~CASE_USEWORDS;
 
   inword = 0;
   while (start < end)
@@ -143,16 +151,41 @@ sh_modcase (string, pat, flags)
             }
 	}
 
+      /* XXX - for now, the toggling operators work on the individual
+	 words in the string, breaking on alphanumerics.  Should I
+	 leave the capitalization operators to do that also? */
       if (flags == CASE_CAPITALIZE)
 	{
-	  nop = inword ? CASE_LOWER : CASE_UPPER;
+	  if (usewords)
+	    nop = inword ? CASE_LOWER : CASE_UPPER;
+	  else
+	    nop = (start > 0) ? CASE_LOWER : CASE_UPPER;
 	  inword = 1;
 	}
       else if (flags == CASE_UNCAP)
 	{
-	  nop = inword ? CASE_UPPER : CASE_LOWER;
+	  if (usewords)
+	    nop = inword ? CASE_UPPER : CASE_LOWER;
+	  else
+	    nop = (start > 0) ? CASE_UPPER : CASE_LOWER;
 	  inword = 1;
 	}
+      else if (flags == CASE_UPFIRST)
+ 	{
+ 	  if (usewords)
+	    nop = inword ? CASE_NOOP : CASE_UPPER;
+	  else
+	    nop = (start > 0) ? CASE_NOOP : CASE_UPPER;
+ 	  inword = 1;
+ 	}
+      else if (flags == CASE_LOWFIRST)
+ 	{
+ 	  if (usewords)
+	    nop = inword ? CASE_NOOP : CASE_LOWER;
+	  else
+	    nop = (start > 0) ? CASE_NOOP : CASE_LOWER;
+ 	  inword = 1;
+ 	}
       else if (flags == CASE_TOGGLE)
 	{
 	  nop = inword ? CASE_NOOP : CASE_TOGGLE;

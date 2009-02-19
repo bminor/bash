@@ -36,6 +36,11 @@ extern int errno;
 
 extern ssize_t zread __P((int, char *, size_t));
 extern ssize_t zreadc __P((int, char *));
+extern ssize_t zreadintr __P((int, char *, size_t));
+extern ssize_t zreadcintr __P((int, char *));
+
+typedef ssize_t breadfunc_t __P((int, char *, size_t));
+typedef ssize_t creadfunc_t __P((int, char *));
 
 /* Initial memory allocation for automatic growing buffer in zreadlinec */
 #define GET_LINE_INITIAL_ALLOCATION 16
@@ -74,31 +79,32 @@ zgetline (fd, lineptr, n, unbuffered_read)
 
       if (retval <= 0)
 	{
-	  line[nr] = '\0';
+	  if (line && nr > 0)
+	    line[nr] = '\0';
 	  break;
 	}
 
       if (nr + 2 >= *n)
 	{
-	 size_t new_size;
+	  size_t new_size;
 
-	 new_size = (*n == 0) ? GET_LINE_INITIAL_ALLOCATION : *n * 2;
-	 line = xrealloc (*lineptr, new_size);
+	  new_size = (*n == 0) ? GET_LINE_INITIAL_ALLOCATION : *n * 2;
+	  line = (*n >= new_size) ? NULL : xrealloc (*lineptr, new_size);
 
-	 if (line)
-	   {
-	     *lineptr = line;
-	     *n = new_size;
-	   }
-	 else
-	   {
-	     if (*n > 0)
-	       {
-		 (*lineptr)[*n - 1] = '\0';
-		 nr = *n - 2;
-	       }
-	     break;
-	   }
+	  if (line)
+	    {
+	      *lineptr = line;
+	      *n = new_size;
+	    }
+	  else
+	    {
+	      if (*n > 0)
+		{
+		  (*lineptr)[*n - 1] = '\0';
+		  nr = *n - 2;
+		}
+	      break;
+	    }
 	}
 
       line[nr] = c;

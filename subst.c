@@ -4405,7 +4405,7 @@ make_dev_fd_filename (fd)
 {
   char *ret, intbuf[INT_STRLEN_BOUND (int) + 1], *p;
 
-  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 4);
+  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 8);
 
   strcpy (ret, DEV_FD_PREFIX);
   p = inttostr (fd, intbuf, sizeof (intbuf));
@@ -6191,13 +6191,13 @@ parameter_brace_casemod (varname, value, modspec, patspec, quoted)
   if (modspec == '^')
     {
       x = p && p[0] == modspec;
-      modop = x ? CASE_UPPER : CASE_CAPITALIZE;
+      modop = x ? CASE_UPPER : CASE_UPFIRST;
       p += x;
     }
   else if (modspec == ',')
     {
       x = p && p[0] == modspec;
-      modop = x ? CASE_LOWER : CASE_UNCAP;
+      modop = x ? CASE_LOWER : CASE_LOWFIRST;
       p += x;
     }
   else if (modspec == '~')
@@ -7363,7 +7363,12 @@ add_string:
 	     assignment statements.  We now do tilde expansion on such words
 	     even in POSIX mode. */	
 	  if (word->flags & (W_ASSIGNRHS|W_NOTILDE))
-	    goto add_character;
+	    {
+	      if (isexp == 0 && isifs (c))
+		goto add_ifs_character;
+	      else
+		goto add_character;
+	    }
 	  /* If we're not in posix mode or forcing assignment-statement tilde
 	     expansion, note where the `=' appears in the word and prepare to
 	     do tilde expansion following the first `='. */
@@ -7379,16 +7384,28 @@ add_string:
 		   string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 #endif
-	  goto add_character;
+	  if (isexp == 0 && isifs (c))
+	    goto add_ifs_character;
+	  else
+	    goto add_character;
 
 	case ':':
 	  if (word->flags & W_NOTILDE)
-	    goto add_character;
+	    {
+	      if (isexp == 0 && isifs (c))
+		goto add_ifs_character;
+	      else
+		goto add_character;
+	    }
 
 	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS|W_TILDEEXP)) &&
 	      string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
-	  goto add_character;
+
+	  if (isexp == 0 && isifs (c))
+	    goto add_ifs_character;
+	  else
+	    goto add_character;
 
 	case '~':
 	  /* If the word isn't supposed to be tilde expanded, or we're not
@@ -7399,7 +7416,10 @@ add_string:
 	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	    {
 	      word->flags &= ~W_ITILDE;
-	      goto add_character;
+	      if (isexp == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
+		goto add_ifs_character;
+	      else
+		goto add_character;
 	    }
 
 	  if (word->flags & W_ASSIGNRHS)
@@ -7739,6 +7759,7 @@ add_twochars:
 
 	default:
 	  /* This is the fix for " $@ " */
+	add_ifs_character:
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && isifs (c)))
 	    {
 	      if (string[sindex])	/* from old goto dollar_add_string */

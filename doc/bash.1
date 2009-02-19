@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Dec 29 16:49:01 EST 2008
+.\"	Last Change: Sat Feb  7 20:50:40 EST 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 December 29" "GNU Bash-4.0"
+.TH BASH 1 "2009 February 7" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -887,6 +887,9 @@ The format for a coprocess is:
 .PP
 This creates a coprocess named \fINAME\fP.
 If \fINAME\fP is not supplied, the default name is \fICOPROC\fP.
+\fINAME\fP must not be supplied if \fIcommand\fP is a \fIsimple
+command\fP (see above); otherwise, it is interpreted as the first word
+of the simple command.
 When the coproc is executed, the shell creates an array variable (see
 .B Arrays
 below) named \fINAME\fP in the context of the executing shell.
@@ -1361,7 +1364,7 @@ corresponding to each member of \fBFUNCNAME\fP.
 file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
 (or \fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP if referenced within another
 shell function).
-The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
+The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fP.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
 .B BASH_REMATCH
@@ -1457,7 +1460,7 @@ programmable completion facilities (see \fBProgrammable Completion\fP
 below).
 .TP
 .B COMP_WORDBREAKS
-The set of characters that the Readline library treats as word
+The set of characters that the \fBreadline\fP library treats as word
 separators when performing word completion.
 If
 .SM
@@ -1468,8 +1471,8 @@ subsequently reset.
 .B COMP_WORDS
 An array variable (see \fBArrays\fP below) consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as \fBreadline\fP would split it, using
+\fBCOMP_WORDBREAKS\fP as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
@@ -2484,9 +2487,10 @@ introduce indirection.
 .PP
 In each of the cases below, \fIword\fP is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
-When not performing substring expansion, \fBbash\fP tests for a parameter
-that is unset or null; omitting the colon results in a test only for a
-parameter that is unset.
+.PP
+When not performing substring expansion, using the forms documented below,
+\fBbash\fP tests for a parameter that is unset or null.  Omitting the colon
+results in a test only for a parameter that is unset.
 .PP
 .PD 0
 .TP
@@ -2723,7 +2727,7 @@ to uppercase; the \fB,\fP operator converts matching uppercase letters
 to lowercase.
 The \fB^^\fP and \fB,,\fP expansions convert each matched character in the
 expanded value; the \fB^\fP and \fB,\fP expansions match and convert only
-the first character.
+the first character in the expanded value..
 If \fIpattern\fP is omitted, it is treated like a \fB?\fP, which matches
 every character.
 If
@@ -3173,7 +3177,7 @@ ls 2\fB>&\fP1 \fB>\fP dirlist
 .PP
 directs only the standard output to file
 .IR dirlist ,
-because the standard error was duplicated as standard output
+because the standard error was duplicated from the standard output
 before the standard output was redirected to
 .IR dirlist .
 .PP
@@ -5619,7 +5623,7 @@ variable is inserted at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle:  if
 the characters at the beginning of the line do not match the value
 of \fBcomment\-begin\fP, the value is inserted, otherwise
-the characters in \fBcomment-begin\fP are deleted from the beginning of 
+the characters in \fBcomment\-begin\fP are deleted from the beginning of 
 the line.
 In either case, the line is accepted as if a newline had been typed.
 The default value of
@@ -7636,6 +7640,10 @@ is supplied, or
 Exit a login shell.
 .TP
 \fBmapfile\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
+.PD 0
+.TP
+\fBreadarray\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
+.PD
 Read lines from the standard input into array variable
 .IR array ,
 or from file descriptor 
@@ -7685,6 +7693,10 @@ If
 is specified without 
 .BR \-c ,
 the default quantum is 5000.
+When \fIcallback\fP is evaluated, it is supplied the index of the next
+array element to be assigned as an additional argument.
+\fIcallback\fP is evaluated after the line is read but before the 
+array element is assigned.
 .PP
 If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
 before assigning to it.
@@ -7837,7 +7849,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -8021,7 +8033,10 @@ immediately, rather than before the next primary prompt.  This is
 effective only when job control is enabled.
 .TP 8
 .B \-e
-Exit immediately if a \fIsimple command\fP (see
+Exit immediately if a \fIpipeline\fP (which may consist of a single
+\fIsimple command\fP),  a \fIsubshell\fP command enclosed in parentheses,
+or one of the commands executed as part of a command list enclosed
+by braces (see
 .SM
 .B SHELL GRAMMAR
 above) exits with a non-zero status.
@@ -8031,21 +8046,25 @@ command that fails is part of the command list immediately following a
 or
 .B until
 keyword, 
-part of the test in an
+part of the test following the
 .B if
-statement, part of a command executed in a
+or
+.B elif
+reserved words, part of any command executed in a
 .B &&
 or
 .B \(bv\(bv
-list,
+list except the command following the final \fB&&\fP or \fB\(bv\(bv\fP,
 any command in a pipeline but the last,
 or if the command's return value is
-being inverted via
+being inverted with
 .BR ! .
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
 A trap on \fBERR\fP, if set, is executed before the shell exits.
+This option applies to the shell environment and each subshell environment
+separately (see
+.B "COMMAND EXECUTION ENVIRONMENT"
+above), and may cause
+subshells to exit before executing all the commands in the subshell.
 .TP 8
 .B \-f
 Disable pathname expansion.
@@ -9037,7 +9056,7 @@ The maximum number of pending signals
 The maximum size that may be locked into memory
 .TP
 .B \-m
-The maximum resident set size
+The maximum resident set size (many systems do not honor this limit)
 .TP
 .B \-n
 The maximum number of open file descriptors (most systems do not
@@ -9312,7 +9331,7 @@ bfox@gnu.org
 .PP
 Chet Ramey, Case Western Reserve University
 .br
-chet@po.cwru.edu
+chet.ramey@case.edu
 .SH BUG REPORTS
 If you find a bug in
 .B bash,

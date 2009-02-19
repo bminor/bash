@@ -531,6 +531,18 @@ AC_DEFINE(RLIMTYPE, rlim_t)
 fi
 ])
 
+AC_DEFUN(BASH_TYPE_SIG_ATOMIC_T,
+[AC_CACHE_CHECK([for sig_atomic_t in signal.h], ac_cv_have_sig_atomic_t,
+[AC_TRY_LINK([
+#include <signal.h>
+],[ sig_atomic_t x; ],
+ac_cv_have_sig_atomic_t=yes, ac_cv_have_sig_atomic_t=no)])
+if test "$ac_cv_have_sig_atomic_t" = "no"
+then
+    AC_CHECK_TYPE(sig_atomic_t,int)
+fi
+])
+
 AC_DEFUN(BASH_FUNC_LSTAT,
 [dnl Cannot use AC_CHECK_FUNCS(lstat) because Linux defines lstat() as an
 dnl inline function in <sys/stat.h>.

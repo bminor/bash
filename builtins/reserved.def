@@ -135,6 +135,19 @@ Exit Status:
 Returns the status of the last command executed.
 $END
 
+$BUILTIN coproc
+$SHORT_DOC coproc [NAME] command [redirections]
+Create a coprocess named NAME.
+
+Execute COMMAND asynchronously, with the standard output and standard
+input of the command connected via a pipe to file descriptors assigned
+to indices 0 and 1 of an array variable NAME in the executing shell.
+The default NAME is "COPROC".
+
+Exit Status:
+Returns the exit status of COMMAND.
+$END
+
 $BUILTIN function
 $SHORT_DOC function name { COMMANDS ; } or name () { COMMANDS ; }
 Define shell function.

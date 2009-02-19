@@ -312,3 +312,9 @@ bash-2.0 were significant.)
 41. Beginning with bash-4.0, when one of the commands in a pipeline is killed
     by a SIGINT while executing a command list, the shell acts as if it
     received the interrupt.
+
+42. Bash-4.0 changes the handling of the set -e option so that the shell exits
+    if a pipeline fails (and not just if the last command in the failing
+    pipeline is a simple command).  This is not as Posix specifies.  There is
+    work underway to update this portion of the standard; the bash-4.0
+    behavior attempts to capture the consensus at the time of release.

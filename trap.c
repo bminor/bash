@@ -332,7 +332,7 @@ run_pending_traps ()
 	  else
 	    {
 	      token_state = save_token_state ();
-	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST);
+	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      restore_token_state (token_state);
 	      free (token_state);
 	    }
@@ -692,7 +692,7 @@ run_exit_trap ()
       if (code == 0 && function_code == 0)
 	{
 	  reset_parser ();
-	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
+	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	}
       else if (code == ERREXIT)
 	retval = last_command_exit_value;
@@ -726,7 +726,7 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value, *token_state;
-  int save_return_catch_flag, function_code;
+  int save_return_catch_flag, function_code, flags;
   procenv_t save_return_catch;
 
   trap_exit_value = function_code = 0;
@@ -754,8 +754,11 @@ _run_trap_internal (sig, tag)
 	  function_code = setjmp (return_catch);
 	}
 
+      flags = SEVAL_NONINT|SEVAL_NOHIST;
+      if (sig != DEBUG_TRAP && sig != RETURN_TRAP)
+	flags |= SEVAL_RESETLINE;
       if (function_code == 0)
-	parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+	parse_and_execute (trap_command, tag, flags);
 
       restore_token_state (token_state);
       free (token_state);
