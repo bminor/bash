@@ -98,7 +98,7 @@ string_to_rlimtype (s)
   neg = 0;
   while (s && *s && whitespace (*s))
     s++;
-  if (*s == '-' || *s == '+')
+  if (s && (*s == '-' || *s == '+'))
     {
       neg = *s == '-';
       s++;
@@ -285,7 +285,7 @@ assignment (string, flags)
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  newi = skipsubscript (string, indx);
+	  newi = skipsubscript (string, indx, 0);
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')
@@ -577,7 +577,7 @@ int
 absolute_program (string)
      const char *string;
 {
-  return ((char *)xstrchr (string, '/') != (char *)NULL);
+  return ((char *)mbschr (string, '/') != (char *)NULL);
 }
 
 /* **************************************************************** */
@@ -717,7 +717,7 @@ trim_pathname (name, maxlen)
   for (ndirs = 0, ntail = nbeg; *ntail; ntail++)
     if (*ntail == '/')
       ndirs++;
-  if (ndirs <= nskip)
+  if (ndirs < nskip)
     return name;
 
   for (ntail = (*nend == '/') ? nend : nend - 1; ntail > nbeg; ntail--)

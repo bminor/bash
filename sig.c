@@ -526,7 +526,7 @@ termsig_handler (sig)
 #endif /* HISTORY */
 
 #if defined (JOB_CONTROL)
-  if (interactive && sig == SIGHUP)
+  if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
     hangup_all_jobs ();
   end_job_control ();
 #endif /* JOB_CONTROL */
@@ -561,6 +561,7 @@ sigint_sighandler (sig)
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
+      last_command_exit_value = 128 + sig;
       throw_to_top_level ();
     }
 

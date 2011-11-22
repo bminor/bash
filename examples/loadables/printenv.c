@@ -72,6 +72,7 @@ printenv_builtin (list)
   else
     print_var_value (var, 0);
 
+  printf("\n");
   return (EXECUTION_SUCCESS);
 }
 

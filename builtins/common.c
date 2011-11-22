@@ -612,7 +612,7 @@ get_job_by_name (name, flags)
 	      match = STREQN (p->command, name, cl);
 	    }
 	  else if (flags & JM_SUBSTRING)
-	    match = strindex (p->command, name) != (char *)0;
+	    match = strcasestr (p->command, name) != (char *)0;
 	  else
 	    match = STREQN (p->command, name, wl);
 

@@ -65,8 +65,9 @@ extern int errno;
 #endif
 
 #if !defined (STREQ)
-#  define STREQ(a, b) ((a)[0] == (b)[0] && strcmp (a, b) == 0)
+#  define STREQ(a, b) ((a)[0] == (b)[0] && strcmp ((a), (b)) == 0)
 #endif /* !STREQ */
+#define STRCOLLEQ(a, b) ((a)[0] == (b)[0] && strcoll ((a), (b)) == 0)
 
 #if !defined (R_OK)
 #define R_OK 4
@@ -375,12 +376,16 @@ binary_test (op, arg1, arg2, flags)
 
   if (op[0] == '=' && (op[1] == '\0' || (op[1] == '=' && op[2] == '\0')))
     return (patmatch ? patcomp (arg1, arg2, EQ) : STREQ (arg1, arg2));
-
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
-    return ((op[0] == '>') ? (strcmp (arg1, arg2) > 0) : (strcmp (arg1, arg2) < 0));
-
+    {
+      if (shell_compatibility_level > 40 && flags & TEST_LOCALE)
+	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
+      else
+	return ((op[0] == '>') ? (strcmp (arg1, arg2) > 0) : (strcmp (arg1, arg2) < 0));
+    }
   else if (op[0] == '!' && op[1] == '=' && op[2] == '\0')
     return (patmatch ? patcomp (arg1, arg2, NE) : (STREQ (arg1, arg2) == 0));
+    
 
   else if (op[2] == 't')
     {

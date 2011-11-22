@@ -125,6 +125,10 @@
 #  define PPROMPT "$ "
 #endif
 
+#if !defined (HAVE_SYSLOG) || !defined (HAVE_SYSLOG_H)
+#  undef SYSLOG_HISTORY
+#endif
+
 /************************************************/
 /* check multibyte capability for I18N code	*/
 /************************************************/

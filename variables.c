@@ -44,6 +44,8 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
+#define NEED_XTRACE_SET_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include "execute_cmd.h"
@@ -221,9 +223,11 @@ static SHELL_VAR *get_groupset __P((SHELL_VAR *));
 static SHELL_VAR *build_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
+#  if defined (ALIAS)
 static SHELL_VAR *build_aliasvar __P((SHELL_VAR *));
 static SHELL_VAR *get_aliasvar __P((SHELL_VAR *));
 static SHELL_VAR *assign_aliasvar __P((SHELL_VAR *,  char *, arrayind_t, char *));
+#  endif
 #endif
 
 static SHELL_VAR *get_funcname __P((SHELL_VAR *));
@@ -875,7 +879,7 @@ make_vers_array ()
   vv = make_new_array_variable ("BASH_VERSINFO");
   av = array_cell (vv);
   strcpy (d, dist_version);
-  s = xstrchr (d, '.');
+  s = strchr (d, '.');
   if (s)
     *s++ = '\0';
   array_insert (av, 0, d);
@@ -1556,6 +1560,7 @@ assign_hashcmd (self, value, ind, key)
   return (build_hashcmd (self));
 }
 
+#if defined (ALIAS)
 static SHELL_VAR *
 build_aliasvar (self)
      SHELL_VAR *self;
@@ -1608,6 +1613,8 @@ assign_aliasvar (self, value, ind, key)
   add_alias (key, value);
   return (build_aliasvar (self));
 }
+#endif /* ALIAS */
+
 #endif /* ARRAY_VARS */
 
 /* If ARRAY_VARS is not defined, this just returns the name of any
@@ -1703,7 +1710,9 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign|att_nounset);
 
   v = init_dynamic_assoc_var ("BASH_CMDS", get_hashcmd, assign_hashcmd, att_nofree);
+#  if defined (ALIAS)
   v = init_dynamic_assoc_var ("BASH_ALIASES", get_aliasvar, assign_aliasvar, att_nofree);
+#  endif
 #endif
 
   v = init_funcname_var ();
@@ -2183,7 +2192,12 @@ bind_variable_internal (name, value, table, hflags, aflags)
     {
       INVALIDATE_EXPORTSTR (entry);
       newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
-      entry = (*(entry->assign_func)) (entry, newval, -1, 0);
+      if (assoc_p (entry))
+	entry = (*(entry->assign_func)) (entry, newval, -1, savestring ("0"));
+      else if (array_p (entry))
+	entry = (*(entry->assign_func)) (entry, newval, 0, 0);
+      else
+	entry = (*(entry->assign_func)) (entry, newval, -1, 0);
       if (newval != value)
 	free (newval);
       return (entry);
@@ -3357,6 +3371,11 @@ valid_exportstr (v)
   char *s;
 
   s = v->exportstr;
+  if (s == 0)
+    {
+      internal_error (_("%s has null exportstr"), v->name);
+      return (0);
+    }
   if (legal_variable_starter ((unsigned char)*s) == 0)
     {
       internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);
@@ -3609,7 +3628,7 @@ maybe_make_export_env ()
 	}
       export_env[export_env_index = 0] = (char *)NULL;
 
-      /* Make a dummy variable context from the  temporary_env, stick it on
+      /* Make a dummy variable context from the temporary_env, stick it on
 	 the front of shell_variables, call make_var_export_array on the
 	 whole thing to flatten it, and convert the list of SHELL_VAR *s
 	 to the form needed by the environment. */
@@ -4076,6 +4095,8 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+  { "BASH_XTRACEFD", sv_xtracefd },
+
 #if defined (READLINE)
 #  if defined (STRICT_POSIX)
   { "COLUMNS", sv_winsize },
@@ -4626,4 +4647,39 @@ set_pipestatus_from_exit (s)
   v[0] = s;
   set_pipestatus_array (v, 1);
 #endif
+}
+
+void
+sv_xtracefd (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  char *t, *e;
+  int fd;
+  FILE *fp;
+
+  v = find_variable (name);
+  if (v == 0)
+    {
+      xtrace_reset ();
+      return;
+    }
+
+  t = value_cell (v);
+  if (t == 0 || *t == 0)
+    xtrace_reset ();
+  else
+    {
+      fd = (int)strtol (t, &e, 10);
+      if (e != t && *e == '\0' && sh_validfd (fd))
+	{
+	  fp = fdopen (fd, "w");
+	  if (fp == 0)
+	    internal_error (_("%s: %s: cannot open as FILE"), name, value_cell (v));
+	  else
+	    xtrace_set (fd, fp);
+	}
+      else
+	internal_error (_("%s: %s: invalid value for trace file descriptor"), name, value_cell (v));
+    }
 }

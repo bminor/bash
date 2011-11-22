@@ -407,6 +407,7 @@ expand_compound_array_assignment (var, value, flags)
   return nlist;
 }
 
+/* Callers ensure that VAR is not NULL */
 void
 assign_compound_array_list (var, nlist, flags)
      SHELL_VAR *var;
@@ -431,9 +432,9 @@ assign_compound_array_list (var, nlist, flags)
      value. */
   if ((flags & ASS_APPEND) == 0)
     {
-      if (array_p (var) && a)
+      if (a && array_p (var))
 	array_flush (a);
-      else if (assoc_p (var) && h)
+      else if (h && assoc_p (var))
 	assoc_flush (h);
     }
 
@@ -447,7 +448,7 @@ assign_compound_array_list (var, nlist, flags)
       /* We have a word of the form [ind]=value */
       if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')
 	{
-	  len = skipsubscript (w, 0);
+	  len = skipsubscript (w, 0, (var && assoc_p (var) != 0));
 
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
@@ -560,8 +561,9 @@ quote_assign (string)
 {
   size_t slen;
   int saw_eq;
-  char *temp, *t;
+  char *temp, *t, *subs;
   const char *s, *send;
+  int ss, se;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
@@ -573,6 +575,20 @@ quote_assign (string)
     {
       if (*s == '=')
 	saw_eq = 1;
+      if (saw_eq == 0 && *s == '[')		/* looks like a subscript */
+	{
+	  ss = s - string;
+	  se = skipsubscript (string, ss, 0);
+	  subs = substring (s, ss, se);
+	  *t++ = '\\';
+	  strcpy (t, subs);
+	  t += se - ss;
+	  *t++ = '\\';
+	  *t++ = ']';
+	  s += se + 1;
+	  free (subs);
+	  continue;
+	}
       if (saw_eq == 0 && (glob_char_p (s) || isifs (*s)))
 	*t++ = '\\';
 
@@ -596,7 +612,7 @@ quote_array_assignment_chars (list)
       if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
 	continue;	/* should not happen, but just in case... */
       /* Don't bother if it doesn't look like [ind]=value */
-      if (l->word->word[0] != '[' || xstrchr (l->word->word, '=') == 0) /* ] */
+      if (l->word->word[0] != '[' || mbschr (l->word->word, '=') == 0) /* ] */
 	continue;
       nword = quote_assign (l->word->word);
       free (l->word->word);
@@ -619,7 +635,7 @@ unbind_array_element (var, sub)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0);
+  len = skipsubscript (sub, 0, 0);
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -713,7 +729,7 @@ valid_array_reference (name)
   char *t;
   int r, len;
 
-  t = xstrchr (name, '[');	/* ] */
+  t = mbschr (name, '[');	/* ] */
   if (t)
     {
       *t = '\0';
@@ -722,7 +738,7 @@ valid_array_reference (name)
       if (r == 0)
 	return 0;
       /* Check for a properly-terminated non-blank subscript. */
-      len = skipsubscript (t, 0);
+      len = skipsubscript (t, 0, 0);
       if (t[len] != ']' || len == 1)
 	return 0;
       for (r = 1; r < len; r++)
@@ -773,7 +789,7 @@ array_variable_name (s, subp, lenp)
   char *t, *ret;
   int ind, ni;
 
-  t = xstrchr (s, '[');
+  t = mbschr (s, '[');
   if (t == 0)
     {
       if (subp)
@@ -783,7 +799,7 @@ array_variable_name (s, subp, lenp)
       return ((char *)NULL);
     }
   ind = t - s;
-  ni = skipsubscript (s, ind);
+  ni = skipsubscript (s, ind, 0);
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);

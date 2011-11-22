@@ -115,6 +115,10 @@
    pattern matching. */
 #undef EXTENDED_GLOB
 
+/* Define EXTGLOB_DEFAULT to the value you'd like the extglob shell option
+   to have by default */
+#undef EXTGLOB_DEFAULT
+
 /* Define COND_COMMAND if you want the ksh-style [[...]] conditional
    command. */
 #undef COND_COMMAND
@@ -494,6 +498,8 @@
 /* Define if you have the /dev/stdin device. */
 #undef HAVE_DEV_STDIN
 
+/* The type of iconv's `inbuf' argument */
+#undef ICONV_CONST
 
 /* Type and behavior of signal handling functions. */
 
@@ -608,6 +614,9 @@
 /* Define if you have the getwd function.  */
 #undef HAVE_GETWD
 
+/* Define if you have the iconv function.  */
+#undef HAVE_ICONV
+
 /* Define if you have the inet_aton function.  */
 #undef HAVE_INET_ATON
 
@@ -653,11 +662,20 @@
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
+/* Define if you have the locale_charset function. */
+#undef HAVE_LOCALE_CHARSET
+
 /* Define if you have the mbrlen function. */
 #undef HAVE_MBRLEN
 
 /* Define if you have the mbrtowc function. */
 #undef HAVE_MBRTOWC
+
+/* Define if you have the mbscasecmp function. */
+#undef HAVE_MBSCASECMP
+
+/* Define if you have the mbschr function. */
+#undef HAVE_MBSCHR
 
 /* Define if you have the mbscmp function. */
 #undef HAVE_MBSCMP
@@ -738,6 +756,9 @@
 /* Define if you have the strcasecmp function.  */
 #undef HAVE_STRCASECMP
 
+/* Define if you have the strcasestr function.  */
+#undef HAVE_STRCASESTR
+
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
 
@@ -785,6 +806,9 @@
 
 /* Define if you have the sysconf function. */
 #undef HAVE_SYSCONF
+
+/* Define if you have the syslog function. */
+#undef HAVE_SYSLOG
 
 /* Define if you have the tcgetattr function.  */
 #undef HAVE_TCGETATTR
@@ -910,6 +934,9 @@
 
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define if you have the <syslog.h> header file. */
+#undef HAVE_SYSLOG_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H

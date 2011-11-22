@@ -56,6 +56,8 @@ extern int EOF_Reached;
 #define EX_BADUSAGE	2
 
 /* Special exit statuses used by the shell, internally and externally. */
+#define EX_RETRYFAIL	124
+#define EX_WEXPCOMSUB	125
 #define EX_BINARY_FILE	126
 #define EX_NOEXEC	126
 #define EX_NOINPUT	126
@@ -89,6 +91,7 @@ extern int debugging_mode;
 extern int executing, login_shell;
 extern int interactive, interactive_shell;
 extern int startup_state;
+extern int subshell_environment;
 extern int shell_compatibility_level;
 
 /* Structure to pass around that holds a bitmap of file descriptors

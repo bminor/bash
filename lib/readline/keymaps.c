@@ -57,8 +57,9 @@ Keymap
 rl_make_bare_keymap ()
 {
   register int i;
-  Keymap keymap = (Keymap)xmalloc (KEYMAP_SIZE * sizeof (KEYMAP_ENTRY));
+  Keymap keymap;
 
+  keymap = (Keymap)xmalloc (KEYMAP_SIZE * sizeof (KEYMAP_ENTRY));
   for (i = 0; i < KEYMAP_SIZE; i++)
     {
       keymap[i].type = ISFUNC;
@@ -76,7 +77,8 @@ rl_make_bare_keymap ()
   return (keymap);
 }
 
-/* Return a new keymap which is a copy of MAP. */
+/* Return a new keymap which is a copy of MAP.  Just copies pointers, does
+   not copy text of macros or descend into child keymaps. */
 Keymap
 rl_copy_keymap (map)
      Keymap map;
@@ -128,7 +130,7 @@ rl_discard_keymap (map)
 {
   int i;
 
-  if (!map)
+  if (map == 0)
     return;
 
   for (i = 0; i < KEYMAP_SIZE; i++)
@@ -140,6 +142,7 @@ rl_discard_keymap (map)
 
 	case ISKMAP:
 	  rl_discard_keymap ((Keymap)map[i].function);
+	  free ((char *)map[i].function);
 	  break;
 
 	case ISMACR:
@@ -147,4 +150,13 @@ rl_discard_keymap (map)
 	  break;
 	}
     }
+}
+
+/* Convenience function that discards, then frees, MAP. */
+void
+rl_free_keymap (map)
+     Keymap map;
+{
+  rl_discard_keymap (map);
+  free ((char *)map);
 }

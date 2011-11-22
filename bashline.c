@@ -82,6 +82,9 @@
 extern int bash_brace_completion __P((int, int));
 #endif /* BRACE_COMPLETION */
 
+/* To avoid including curses.h/term.h/termcap.h and that whole mess. */
+extern int tputs __P((const char *string, int nlines, int (*outx)(int)));
+
 /* Forward declarations */
 
 /* Functions bound to keys in Readline for Bash users. */
@@ -112,6 +115,7 @@ static int bash_backward_kill_shellword __P((int, int));
 /* Helper functions for Readline. */
 static char *restore_tilde __P((char *, char *));
 
+static char *bash_filename_rewrite_hook __P((char *, int));
 static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
@@ -146,6 +150,7 @@ static char *bash_dequote_filename __P((char *, int));
 static char *quote_word_break_chars __P((char *));
 static char *bash_quote_filename __P((char *, int, char *));
 
+static int putx __P((int));
 static int bash_execute_unix_command __P((int, int));
 static void init_unix_command_map __P((void));
 static int isolate_sequence __P((char *, int, int, int *));
@@ -244,6 +249,9 @@ static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
 static rl_hook_func_t *old_rl_startup_hook = (rl_hook_func_t *)NULL;
 
 static int dot_in_path = 0;
+
+/* Set to non-zero when dabbrev-expand is running */
+static int dabbrev_expand_active = 0;
 
 /* What kind of quoting is performed by bash_quote_filename:
 	COMPLETE_DQUOTE = double-quoting the filename
@@ -493,6 +501,8 @@ initialize_readline ()
   /* Tell the completer that we might want to follow symbolic links or
      do other expansion on directory names. */
   rl_directory_completion_hook = bash_directory_completion_hook;
+
+  rl_filename_rewrite_hook = bash_filename_rewrite_hook;
 
   /* Tell the filename completer we want a chance to ignore some names. */
   rl_ignore_some_completions_function = filename_completion_ignore;
@@ -748,7 +758,7 @@ clear_hostname_list ()
     return;
   for (i = 0; i < hostname_list_length; i++)
     free (hostname_list[i]);
-  hostname_list_length = 0;
+  hostname_list_length = hostname_list_initialized = 0;
 }
 
 /* Return a NULL terminated list of hostnames which begin with TEXT.
@@ -1187,7 +1197,7 @@ find_cmd_start (start)
   register int s, os;
 
   os = 0;
-  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP)) <= start) &&
+  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP|SD_NOSKIPCMD)) <= start) &&
 	 rl_line_buffer[s])
     os = s+1;
   return os;
@@ -1305,8 +1315,9 @@ attempt_shell_completion (text, start, end)
   /* Special handling for command substitution.  If *TEXT is a backquote,
      it can be the start or end of an old-style command substitution, or
      unmatched.  If it's unmatched, both calls to unclosed_pair will
-     succeed.  */
-  if (*text == '`' && 
+     succeed.  Don't bother if readline found a single quote and we are
+     completing on the substring.  */
+  if (*text == '`' && rl_completion_quote_character != '\'' &&
 	(in_command_position || (unclosed_pair (rl_line_buffer, start, "`") &&
 				 unclosed_pair (rl_line_buffer, end, "`"))))
     matches = rl_completion_matches (text, command_subst_completion_function);
@@ -1386,7 +1397,7 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
-  if (!matches && *text == '~' && !xstrchr (text, '/'))
+  if (matches ==0 && *text == '~' && mbschr (text, '/') == 0)
     matches = rl_completion_matches (text, rl_username_completion_function);
 
   /* Another one.  Why not?  If the word starts in '@', then look through
@@ -2652,6 +2663,20 @@ bash_directory_expansion (dirname)
     }
 }
 
+/* If necessary, rewrite directory entry */
+static char *
+bash_filename_rewrite_hook (fname, fnlen)
+     char *fname;
+     int fnlen;
+{
+  char *conv;
+
+  conv = fnx_fromfs (fname, fnlen);
+  if (conv != fname)
+    conv = savestring (conv);
+  return conv;
+}
+
 /* Handle symbolic link references and other directory name
    expansions while hacking completion. */
 static int
@@ -2666,11 +2691,11 @@ bash_directory_completion_hook (dirname)
   return_value = should_expand_dirname = 0;
   local_dirname = *dirname;
 
-  if (xstrchr (local_dirname, '$'))
+  if (mbschr (local_dirname, '$'))
     should_expand_dirname = 1;
   else
     {
-      t = xstrchr (local_dirname, '`');
+      t = mbschr (local_dirname, '`');
       if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
 	should_expand_dirname = 1;
     }
@@ -2787,6 +2812,8 @@ build_history_completion_array ()
   if (hlist)
     {
       for (i = 0; hlist[i]; i++)
+	;
+      for ( --i; i >= 0; i--)
 	{
 	  /* Separate each token, and place into an array. */
 	  tokens = history_tokenize (hlist[i]->line);
@@ -2803,7 +2830,8 @@ build_history_completion_array ()
 	}
 
       /* Sort the complete list of tokens. */
-      qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
+      if (dabbrev_expand_active == 0)
+        qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
     }
 }
 
@@ -2819,6 +2847,8 @@ history_completion_generator (hint_text, state)
      list of strings to complete over. */
   if (state == 0)
     {
+      if (dabbrev_expand_active)	/* This is kind of messy */
+	rl_completion_suppress_append = 1;
       local_index = 0;
       build_history_completion_array ();
       text = hint_text;
@@ -2862,25 +2892,33 @@ static int
 bash_dabbrev_expand (count, key)
      int count, key;
 {
-  int r;
+  int r, orig_suppress, orig_sort;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
 
   orig_func = rl_menu_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_suppress = rl_completion_suppress_append;
+  orig_sort = rl_sort_completion_matches;
 
   rl_menu_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   rl_filename_completion_desired = 0;
+  rl_completion_suppress_append = 1;
+  rl_sort_completion_matches = 0;
 
   /* XXX - use rl_completion_mode here? */
+  dabbrev_expand_active = 1;
   if (rl_last_func == bash_dabbrev_expand)
     rl_last_func = rl_menu_complete;
   r = rl_menu_complete (count, key);
+  dabbrev_expand_active = 0;
 
   rl_last_func = bash_dabbrev_expand;
   rl_menu_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_completion_suppress_append = orig_suppress;
+  rl_sort_completion_matches = orig_sort;
 
   return r;
 }
@@ -3225,7 +3263,7 @@ bash_dequote_filename (text, quote_char)
 
 	  *r++ = *++p;
 	  if (*p == '\0')
-	    break;
+	    return ret;		/* XXX - was break; */
 	  continue;
 	}
       /* Close quote. */
@@ -3271,7 +3309,7 @@ quote_word_break_chars (text)
 	}
       /* OK, we have an unquoted character.  Check its presence in
 	 rl_completer_word_break_characters. */
-      if (xstrchr (rl_completer_word_break_characters, *s))
+      if (mbschr (rl_completer_word_break_characters, *s))
 	*r++ = '\\';
       /* XXX -- check for standalone tildes here and backslash-quote them */
       if (s == text && *s == '~' && file_exists (text))
@@ -3313,7 +3351,7 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (s, '\n'))
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -3321,11 +3359,11 @@ bash_quote_filename (s, rtype, qcp)
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
   else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
-	   history_expansion_inhibited == 0 && xstrchr (s, '!'))
+	   history_expansion_inhibited == 0 && mbschr (s, '!'))
     cs = COMPLETE_BSQUOTE;
 
   if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
-	history_expansion_inhibited == 0 && xstrchr (s, '!'))
+	history_expansion_inhibited == 0 && mbschr (s, '!'))
     {
       cs = COMPLETE_BSQUOTE;
       *qcp = '\0';
@@ -3380,16 +3418,23 @@ bash_quote_filename (s, rtype, qcp)
 static Keymap cmd_xmap;
 
 static int
+putx(c)
+     int c;
+{
+  putc (c, rl_outstream);
+}
+  
+static int
 bash_execute_unix_command (count, key)
      int count;	/* ignored */
      int key;
 {
   Keymap ckmap;		/* current keymap */
   Keymap xkmap;		/* unix command executing keymap */
-  register int i;
+  register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *l;
+  char *cmd, *value, *l, *l1, *ce;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
@@ -3425,12 +3470,20 @@ bash_execute_unix_command (count, key)
       return 1;
     }
 
-  rl_crlf ();	/* move to a new line */
+  ce = rl_get_termcap ("ce");
+  if (ce)	/* clear current line */
+    {
+      fprintf (rl_outstream, "\r");
+      tputs (ce, 1, putx);
+      fflush (rl_outstream);
+    }
+  else
+    rl_crlf ();	/* move to a new line */
 
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  l = value_cell (v);
+  l = v ? value_cell (v) : 0;
   value = inttostr (rl_point, ibuf, sizeof (ibuf));
   v = bind_int_variable ("READLINE_POINT", value);
   if (v)
@@ -3438,11 +3491,12 @@ bash_execute_unix_command (count, key)
   array_needs_making = 1;
 
   save_parser_state (&ps);
-  parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  r = parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");
-  if (value_cell (v) != l)
+  l1 = v ? value_cell (v) : 0;
+  if (l1 != l)
     maybe_make_readline_line (value_cell (v));
   v = find_variable ("READLINE_POINT");
   if (v && legal_number (value_cell (v), &mi))

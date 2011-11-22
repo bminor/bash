@@ -38,16 +38,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (FD_SET) && !defined (HAVE_SELECT)
-#  define HAVE_SELECT
-#endif
-
-#if defined (HAVE_SELECT)
-#  include <sys/time.h>
-#endif /* HAVE_SELECT */
-#if defined (HAVE_SYS_SELECT_H)
-#  include <sys/select.h>
-#endif
+#include "posixselect.h"
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -130,8 +121,7 @@ rl_insert_close (count, invoking_key)
 
       FD_ZERO (&readfds);
       FD_SET (fileno (rl_instream), &readfds);
-      timer.tv_sec = 0;
-      timer.tv_usec = _paren_blink_usec;
+      USEC_TO_TIMEVAL (_paren_blink_usec, timer);
 
       orig_point = rl_point;
       rl_point = match_point;

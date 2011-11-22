@@ -52,7 +52,7 @@ write_signames (stream)
 
   fprintf (stream, "/* This file was automatically created by %s.\n",
 	   progname);
-  fprintf (stream, "   Do not edit.  Edit support/signames.c instead. */\n\n");
+  fprintf (stream, "   Do not edit.  Edit support/mksignames.c instead. */\n\n");
   fprintf (stream,
 	   "/* A translation list so we can be polite to our users. */\n");
 #if defined (CROSS_COMPILING)

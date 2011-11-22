@@ -256,7 +256,9 @@ static const struct {
 #endif
   { "verbose", Int, &echo_input_at_read, (char **)0x0 },
   { "version", Int, &do_version, (char **)0x0 },
+#if defined (WORDEXP_OPTION)
   { "wordexp", Int, &wordexp_only, (char **)0x0 },
+#endif
   { (char *)0x0, Int, (int *)0x0, (char **)0x0 }
 };
 
@@ -304,7 +306,9 @@ static void run_startup_files __P((void));
 static int open_shell_script __P((char *));
 static void set_bash_input __P((void));
 static int run_one_command __P((char *));
+#if defined (WORDEXP_OPTION)
 static int run_wordexp __P((char *));
+#endif
 
 static int uidget __P((void));
 
@@ -373,6 +377,8 @@ main (argc, argv, env)
   code = setjmp (top_level);
   if (code)
     exit (2);
+
+  xtrace_init ();
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
 #  if 1
@@ -471,7 +477,7 @@ main (argc, argv, env)
       login_shell = -login_shell;
     }
 
-  set_login_shell (login_shell != 0);
+  set_login_shell ("login_shell", login_shell != 0);
 
   if (dump_po_strings)
     dump_translatable_strings = 1;
@@ -572,7 +578,7 @@ main (argc, argv, env)
 
       /* running_under_emacs == 2 for `eterm' */
       running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
-      running_under_emacs += term && STREQN (term, "eterm", 5) && strstr (emacs, "term");
+      running_under_emacs += term && STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
 
       if (running_under_emacs)
 	gnu_error_format = 1;
@@ -660,12 +666,14 @@ main (argc, argv, env)
     maybe_make_restricted (shell_name);
 #endif /* RESTRICTED_SHELL */
 
+#if defined (WORDEXP_OPTION)
   if (wordexp_only)
     {
       startup_state = 3;
       last_command_exit_value = run_wordexp (argv[arg_index]);
       exit_shell (last_command_exit_value);
     }
+#endif
 
   if (command_execution_string)
     {
@@ -892,6 +900,9 @@ void
 exit_shell (s)
      int s;
 {
+  fflush (stdout);		/* XXX */
+  fflush (stderr);
+
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
   if (signal_is_trapped (0))
@@ -1197,6 +1208,7 @@ disable_priv_mode ()
   current_user.egid = current_user.gid;
 }
 
+#if defined (WORDEXP_OPTION)
 static int
 run_wordexp (words)
      char *words;
@@ -1268,6 +1280,7 @@ run_wordexp (words)
 
   return (0);
 }
+#endif
 
 #if defined (ONESHOT)
 /* Run one command, given as the argument to the -c option.  Tell
@@ -1710,8 +1723,10 @@ shell_initialize ()
      privileged or restricted mode or if the shell is running setuid. */
 #if defined (RESTRICTED_SHELL)
   initialize_shell_options (privileged_mode||restricted||running_setuid);
+  initialize_bashopts (privileged_mode||restricted||running_setuid);
 #else
   initialize_shell_options (privileged_mode||running_setuid);
+  initialize_bashopts (privileged_mode||running_setuid);
 #endif
 }
 
@@ -1790,12 +1805,12 @@ show_shell_usage (fp, extra)
       set_opts = savestring (shell_builtins[i].short_doc);
   if (set_opts)
     {
-      s = xstrchr (set_opts, '[');
+      s = strchr (set_opts, '[');
       if (s == 0)
 	s = set_opts;
       while (*++s == '-')
 	;
-      t = xstrchr (s, ']');
+      t = strchr (s, ']');
       if (t)
 	*t = '\0';
       fprintf (fp, _("\t-%s or -o option\n"), s);

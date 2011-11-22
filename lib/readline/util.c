@@ -81,8 +81,7 @@ rl_alphabetic (c)
 
 #if defined (HANDLE_MULTIBYTE)
 int
-_rl_walphabetic (wc)
-     wchar_t wc;
+_rl_walphabetic (wchar_t wc)
 {
   int c;
 
@@ -118,6 +117,13 @@ rl_abort (count, key)
      int count, key;
 {
   return (_rl_abort_internal ());
+}
+
+int
+_rl_null_function (count, key)
+     int count, key;
+{
+  return 0;
 }
 
 int

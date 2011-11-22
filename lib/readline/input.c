@@ -45,14 +45,7 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-#if defined (HAVE_SELECT)
-#  if !defined (HAVE_SYS_SELECT_H) || !defined (M_UNIX)
-#    include <sys/time.h>
-#  endif
-#endif /* HAVE_SELECT */
-#if defined (HAVE_SYS_SELECT_H)
-#  include <sys/select.h>
-#endif
+#include "posixselect.h"
 
 #if defined (FIONREAD_IN_SYS_IOCTL)
 #  include <sys/ioctl.h>
@@ -190,8 +183,7 @@ rl_gather_tyi ()
   FD_ZERO (&exceptfds);
   FD_SET (tty, &readfds);
   FD_SET (tty, &exceptfds);
-  timeout.tv_sec = 0;
-  timeout.tv_usec = _keyboard_input_timeout;
+  USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
   result = select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
   if (result <= 0)
     return 0;	/* Nothing to read. */

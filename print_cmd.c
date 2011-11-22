@@ -108,6 +108,11 @@ char *the_printed_command = (char *)NULL;
 int the_printed_command_size = 0;
 int command_string_index = 0;
 
+int xtrace_fd = -1;
+FILE *xtrace_fp = 0;
+
+#define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
+
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
 static int skip_this_indent;
@@ -348,6 +353,57 @@ print_word_list (list, separator)
   _print_word_list (list, separator, xprintf);
 }
 
+void
+xtrace_set (fd, fp)
+     int fd;
+     FILE *fp;
+{
+  if (fd >= 0 && sh_validfd (fd) == 0)
+    {
+      internal_error (_("xtrace_set: %d: invalid file descriptor"), fd);
+      return;
+    }
+  if (fp == 0)
+    {
+      internal_error (_("xtrace_set: NULL file pointer"));
+      return;
+    }
+  if (fd >= 0 && fileno (fp) != fd)
+    internal_warning (_("xtrace fd (%d) != fileno xtrace fp (%d)"), fd, fileno (fp));
+  
+  xtrace_fd = fd;
+  xtrace_fp = fp;
+}
+
+void
+xtrace_init ()
+{
+  xtrace_set (-1, stderr);
+}
+
+void
+xtrace_reset ()
+{
+  if (xtrace_fd >= 0 && xtrace_fp)
+    {
+      fflush (xtrace_fp);
+      fclose (xtrace_fp);
+    }
+  else if (xtrace_fd >= 0)
+    close (xtrace_fd);
+
+  xtrace_fd = -1;
+  xtrace_fp = stderr;
+}
+
+void
+xtrace_fdchk (fd)
+     int fd;
+{
+  if (fd == xtrace_fd)
+    xtrace_reset ();
+}
+
 /* Return a string denoting what our indirection level is. */
 
 char *
@@ -409,8 +465,10 @@ xtrace_print_assignment (name, value, assign_list, xflags)
 {
   char *nval;
 
+  CHECK_XTRACE_FP;
+
   if (xflags)
-    fprintf (stderr, "%s", indirection_level_string ());
+    fprintf (xtrace_fp, "%s", indirection_level_string ());
 
   /* VALUE should not be NULL when this is called. */
   if (*value == '\0' || assign_list)
@@ -423,14 +481,14 @@ xtrace_print_assignment (name, value, assign_list, xflags)
     nval = value;
 
   if (assign_list)
-    fprintf (stderr, "%s=(%s)\n", name, nval);
+    fprintf (xtrace_fp, "%s=(%s)\n", name, nval);
   else
-    fprintf (stderr, "%s=%s\n", name, nval);
+    fprintf (xtrace_fp, "%s=%s\n", name, nval);
 
   if (nval != value)
     FREE (nval);
 
-  fflush (stderr);
+  fflush (xtrace_fp);
 }
 
 /* A function to print the words of a simple command when set -x is on. */
@@ -442,30 +500,33 @@ xtrace_print_word_list (list, xtflags)
   WORD_LIST *w;
   char *t, *x;
 
+  CHECK_XTRACE_FP;
+
   if (xtflags)
-    fprintf (stderr, "%s", indirection_level_string ());
+    fprintf (xtrace_fp, "%s", indirection_level_string ());
 
   for (w = list; w; w = w->next)
     {
       t = w->word->word;
       if (t == 0 || *t == '\0')
-	fprintf (stderr, "''%s", w->next ? " " : "");
+	fprintf (xtrace_fp, "''%s", w->next ? " " : "");
       else if (sh_contains_shell_metas (t))
 	{
 	  x = sh_single_quote (t);
-	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
+	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
       else if (ansic_shouldquote (t))
 	{
 	  x = ansic_quote (t, 0, (int *)0);
-	  fprintf (stderr, "%s%s", x, w->next ? " " : "");
+	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
       else
-	fprintf (stderr, "%s%s", t, w->next ? " " : "");
+	fprintf (xtrace_fp, "%s%s", t, w->next ? " " : "");
     }
-  fprintf (stderr, "\n");
+  fprintf (xtrace_fp, "\n");
+  fflush (xtrace_fp);
 }
 
 static void
@@ -488,8 +549,9 @@ void
 xtrace_print_for_command_head (for_command)
      FOR_COM *for_command;
 {
-  fprintf (stderr, "%s", indirection_level_string ());
-  fprintf (stderr, "for %s in ", for_command->name->word);
+  CHECK_XTRACE_FP;
+  fprintf (xtrace_fp, "%s", indirection_level_string ());
+  fprintf (xtrace_fp, "for %s in ", for_command->name->word);
   xtrace_print_word_list (for_command->map_list, 0);
 }
 
@@ -542,8 +604,9 @@ void
 xtrace_print_select_command_head (select_command)
      SELECT_COM *select_command;
 {
-  fprintf (stderr, "%s", indirection_level_string ());
-  fprintf (stderr, "select %s in ", select_command->name->word);
+  CHECK_XTRACE_FP;
+  fprintf (xtrace_fp, "%s", indirection_level_string ());
+  fprintf (xtrace_fp, "select %s in ", select_command->name->word);
   xtrace_print_word_list (select_command->map_list, 0);
 }
 
@@ -611,8 +674,9 @@ void
 xtrace_print_case_command_head (case_command)
      CASE_COM *case_command;
 {
-  fprintf (stderr, "%s", indirection_level_string ());
-  fprintf (stderr, "case %s in\n", case_command->word->word);
+  CHECK_XTRACE_FP;
+  fprintf (xtrace_fp, "%s", indirection_level_string ());
+  fprintf (xtrace_fp, "case %s in\n", case_command->word->word);
 }
 
 static void
@@ -790,25 +854,28 @@ xtrace_print_cond_term (type, invert, op, arg1, arg2)
      WORD_DESC *op;
      char *arg1, *arg2;
 {
+  CHECK_XTRACE_FP;
   command_string_index = 0;
-  fprintf (stderr, "%s", indirection_level_string ());
-  fprintf (stderr, "[[ ");
+  fprintf (xtrace_fp, "%s", indirection_level_string ());
+  fprintf (xtrace_fp, "[[ ");
   if (invert)
-    fprintf (stderr, "! ");
+    fprintf (xtrace_fp, "! ");
 
   if (type == COND_UNARY)
     {
-      fprintf (stderr, "%s ", op->word);
-      fprintf (stderr, "%s", (arg1 && *arg1) ? arg1 : "''");
+      fprintf (xtrace_fp, "%s ", op->word);
+      fprintf (xtrace_fp, "%s", (arg1 && *arg1) ? arg1 : "''");
     }
   else if (type == COND_BINARY)
     {
-      fprintf (stderr, "%s", (arg1 && *arg1) ? arg1 : "''");
-      fprintf (stderr, " %s ", op->word);
-      fprintf (stderr, "%s", (arg2 && *arg2) ? arg2 : "''");
+      fprintf (xtrace_fp, "%s", (arg1 && *arg1) ? arg1 : "''");
+      fprintf (xtrace_fp, " %s ", op->word);
+      fprintf (xtrace_fp, "%s", (arg2 && *arg2) ? arg2 : "''");
     }
 
-  fprintf (stderr, " ]]\n");
+  fprintf (xtrace_fp, " ]]\n");
+
+  fflush (xtrace_fp);
 }	  
 #endif /* COND_COMMAND */
 
@@ -820,11 +887,14 @@ xtrace_print_arith_cmd (list)
 {
   WORD_LIST *w;
 
-  fprintf (stderr, "%s", indirection_level_string ());
-  fprintf (stderr, "(( ");
+  CHECK_XTRACE_FP;
+  fprintf (xtrace_fp, "%s", indirection_level_string ());
+  fprintf (xtrace_fp, "(( ");
   for (w = list; w; w = w->next)
-    fprintf (stderr, "%s%s", w->word->word, w->next ? " " : "");
-  fprintf (stderr, " ))\n");
+    fprintf (xtrace_fp, "%s%s", w->word->word, w->next ? " " : "");
+  fprintf (xtrace_fp, " ))\n");
+
+  fflush (xtrace_fp);
 }
 #endif
 
@@ -918,7 +988,7 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector == 1)
+      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector.dest == 1)
 	{
 	  /* Temporarily translate it as the execution code does. */
 	  redirects->instruction = r_err_and_out;
@@ -954,8 +1024,10 @@ print_heredoc_header (redirect)
   kill_leading = redirect->instruction == r_deblank_reading_until;
 
   /* Here doc header */
-  if (redirect->redirector != 0)
-    cprintf ("%d", redirect->redirector);
+  if (redirect->rflags & REDIR_VARASSIGN)
+    cprintf ("{%s}", redirect->redirector.filename->word);
+  else if (redirect->redirector.dest != 0)
+    cprintf ("%d", redirect->redirector.dest);
 
   /* If the here document delimiter is quoted, single-quote it. */
   if (redirect->redirectee.filename->flags & W_QUOTED)
@@ -981,35 +1053,59 @@ print_redirection (redirect)
      REDIRECT *redirect;
 {
   int kill_leading, redirector, redir_fd;
-  WORD_DESC *redirectee;
+  WORD_DESC *redirectee, *redir_word;
 
   kill_leading = 0;
   redirectee = redirect->redirectee.filename;
-  redirector = redirect->redirector;
   redir_fd = redirect->redirectee.dest;
+
+  redir_word = redirect->redirector.filename;
+  redirector = redirect->redirector.dest;
 
   switch (redirect->instruction)
     {
-    case r_output_direction:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf ("> %s", redirectee->word);
-      break;
-
     case r_input_direction:
-      if (redirector != 0)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 0)
 	cprintf ("%d", redirector);
       cprintf ("< %s", redirectee->word);
+      break;
+
+    case r_output_direction:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf ("> %s", redirectee->word);
       break;
 
     case r_inputa_direction:	/* Redirection created by the shell. */
       cprintf ("&");
       break;
 
+    case r_output_force:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf (">|%s", redirectee->word);
+      break;
+
     case r_appending_to:
-      if (redirector != 1)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
 	cprintf ("%d", redirector);
       cprintf (">> %s", redirectee->word);
+      break;
+
+    case r_input_output:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf ("<> %s", redirectee->word);
       break;
 
     case r_deblank_reading_until:
@@ -1020,7 +1116,9 @@ print_redirection (redirect)
       break;
 
     case r_reading_string:
-      if (redirector != 0)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 0)
 	cprintf ("%d", redirector);
       if (ansic_shouldquote (redirect->redirectee.filename->word))
 	{
@@ -1034,39 +1132,66 @@ print_redirection (redirect)
       break;
 
     case r_duplicating_input:
-      cprintf ("%d<&%d", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%d", redir_word->word, redir_fd);
+      else
+	cprintf ("%d<&%d", redirector, redir_fd);
       break;
 
     case r_duplicating_output:
-      cprintf ("%d>&%d", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%d", redir_word->word, redir_fd);
+      else
+	cprintf ("%d>&%d", redirector, redir_fd);
       break;
 
     case r_duplicating_input_word:
-      cprintf ("%d<&%s", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%s", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d<&%s", redirector, redirectee->word);
       break;
 
     case r_duplicating_output_word:
-      cprintf ("%d>&%s", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%s", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d>&%s", redirector, redirectee->word);
       break;
 
     case r_move_input:
-      cprintf ("%d<&%d-", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%d-", redir_word->word, redir_fd);
+      else
+	cprintf ("%d<&%d-", redirector, redir_fd);
       break;
 
     case r_move_output:
-      cprintf ("%d>&%d-", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%d-", redir_word->word, redir_fd);
+      else
+	cprintf ("%d>&%d-", redirector, redir_fd);
       break;
 
     case r_move_input_word:
-      cprintf ("%d<&%s-", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%s-", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d<&%s-", redirector, redirectee->word);
       break;
 
     case r_move_output_word:
-      cprintf ("%d>&%s-", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%s-", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d>&%s-", redirector, redirectee->word);
       break;
 
     case r_close_this:
-      cprintf ("%d>&-", redirector);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&-", redir_word->word);
+      else
+	cprintf ("%d>&-", redirector);
       break;
 
     case r_err_and_out:
@@ -1075,18 +1200,6 @@ print_redirection (redirect)
 
     case r_append_err_and_out:
       cprintf ("&>>%s", redirectee->word);
-      break;
-
-    case r_input_output:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf ("<> %s", redirectee->word);
-      break;
-
-    case r_output_force:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf (">|%s", redirectee->word);
       break;
     }
 }
@@ -1269,7 +1382,7 @@ semicolon ()
 {
   if (command_string_index > 0 &&
        (the_printed_command[command_string_index - 1] == '&' ||
-        the_printed_command[command_string_index - 1] == '\n'))
+	the_printed_command[command_string_index - 1] == '\n'))
     return;
   cprintf (";");
 }
@@ -1334,7 +1447,7 @@ cprintf (control, va_alist)
 		  argp = intbuf;
 		}
 	      else
-	        argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
+		argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
 	      arg_len = strlen (argp);
 	      break;
 

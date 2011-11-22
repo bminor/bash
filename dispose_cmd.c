@@ -309,6 +309,10 @@ dispose_redirects (list)
     {
       t = list;
       list = list->next;
+
+      if (t->rflags & REDIR_VARASSIGN)
+	dispose_word (t->redirector.filename);
+
       switch (t->instruction)
 	{
 	case r_reading_until:

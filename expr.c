@@ -202,7 +202,7 @@ static int expr_depth;		   /* Location in the stack. */
 static int expr_stack_size;	   /* Number of slots already allocated. */
 
 extern char *this_command_name;
-extern int unbound_vars_is_error;
+extern int unbound_vars_is_error, last_command_exit_value;
 
 #if defined (ARRAY_VARS)
 extern const char * const bash_badsub_errmsg;
@@ -923,6 +923,7 @@ expr_streval (tok, e)
       value = tok;
 #endif
 
+      last_command_exit_value = EXECUTION_FAILURE;
       err_unboundvar (value);
 
 #if defined (ARRAY_VARS)
@@ -1057,7 +1058,7 @@ readtok ()
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  e = skipsubscript (cp, 0);
+	  e = skipsubscript (cp, 0, 0);
 	  if (cp[e] == ']')
 	    {
 	      cp += e + 1;

@@ -62,17 +62,37 @@ static size_t allocated;
 /* **************************************************************** */
 
 #if defined (HAVE_SBRK)
+#define FINDBRK() \
+do { \
+  if (brkfound == 0) \
+    { \
+      lbreak = (PTR_T)sbrk (0); \
+      brkfound++; \
+    } \
+} while (0)
+
 static size_t
 findbrk ()
 {
-  if (brkfound == 0)
-    {
-      lbreak = (PTR_T)sbrk (0);
-      brkfound++;
-    }
+  FINDBRK();
   return (char *)sbrk (0) - (char *)lbreak;
 }
+#else
+#define FINDBRK()
 #endif
+
+static void
+allocerr (func, bytes)
+     const char *func;
+     size_t bytes;
+{
+#if defined (HAVE_SBRK)
+      allocated = findbrk ();
+      fatal_error (_("%s: cannot allocate %lu bytes (%lu bytes allocated)"), func, (unsigned long)bytes, (unsigned long)allocated);
+#else
+      fatal_error (_("%s: cannot allocate %lu bytes"), func, (unsigned long)bytes);
+#endif /* !HAVE_SBRK */
+}
 
 /* Return a pointer to free()able block of memory large enough
    to hold BYTES number of bytes.  If the memory cannot be allocated,
@@ -83,17 +103,16 @@ xmalloc (bytes)
 {
   PTR_T temp;
 
+#if defined (DEBUG)
+  if (bytes == 0)
+    internal_warning("xmalloc: size argument is 0");
+#endif
+
+  FINDBRK();
   temp = malloc (bytes);
 
   if (temp == 0)
-    {
-#if defined (HAVE_SBRK)
-      allocated = findbrk ();
-      fatal_error (_("xmalloc: cannot allocate %lu bytes (%lu bytes allocated)"), (unsigned long)bytes, (unsigned long)allocated);
-#else
-      fatal_error (_("xmalloc: cannot allocate %lu bytes"), (unsigned long)bytes);
-#endif /* !HAVE_SBRK */
-    }
+    allocerr ("xmalloc", bytes);
 
   return (temp);
 }
@@ -105,17 +124,16 @@ xrealloc (pointer, bytes)
 {
   PTR_T temp;
 
+#if defined (DEBUG)
+  if (bytes == 0)
+    internal_warning("xrealloc: size argument is 0");
+#endif
+
+  FINDBRK();
   temp = pointer ? realloc (pointer, bytes) : malloc (bytes);
 
   if (temp == 0)
-    {
-#if defined (HAVE_SBRK)
-      allocated = findbrk ();
-      fatal_error (_("xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"), (unsigned long)bytes, (unsigned long)allocated);
-#else
-      fatal_error (_("xrealloc: cannot allocate %lu bytes"), (unsigned long)bytes);
-#endif /* !HAVE_SBRK */
-    }
+    allocerr ("xrealloc", bytes);
 
   return (temp);
 }
@@ -133,6 +151,21 @@ xfree (string)
 #ifdef USING_BASH_MALLOC
 #include <malloc/shmalloc.h>
 
+static void
+sh_allocerr (func, bytes, file, line)
+     const char *func;
+     size_t bytes;
+     char *file;
+     int line;
+{
+#if defined (HAVE_SBRK)
+      allocated = findbrk ();
+      fatal_error (_("%s: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"), func, file, line, (unsigned long)bytes, (unsigned long)allocated);
+#else
+      fatal_error (_("%s: %s:%d: cannot allocate %lu bytes"), func, file, line, (unsigned long)bytes);
+#endif /* !HAVE_SBRK */
+}
+
 PTR_T
 sh_xmalloc (bytes, file, line)
      size_t bytes;
@@ -141,17 +174,16 @@ sh_xmalloc (bytes, file, line)
 {
   PTR_T temp;
 
+#if defined (DEBUG)
+  if (bytes == 0)
+    internal_warning("xmalloc: %s:%d: size argument is 0", file, line);
+#endif
+
+  FINDBRK();
   temp = sh_malloc (bytes, file, line);
 
   if (temp == 0)
-    {
-#if defined (HAVE_SBRK)
-      allocated = findbrk ();
-      fatal_error (_("xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"), file, line, (unsigned long)bytes, (unsigned long)allocated);
-#else
-      fatal_error (_("xmalloc: %s:%d: cannot allocate %lu bytes"), file, line, (unsigned long)bytes);
-#endif /* !HAVE_SBRK */
-    }
+    sh_allocerr ("xmalloc", bytes, file, line);
 
   return (temp);
 }
@@ -165,17 +197,16 @@ sh_xrealloc (pointer, bytes, file, line)
 {
   PTR_T temp;
 
+#if defined (DEBUG)
+  if (bytes == 0)
+    internal_warning("xrealloc: %s:%d: size argument is 0", file, line);
+#endif
+
+  FINDBRK();
   temp = pointer ? sh_realloc (pointer, bytes, file, line) : sh_malloc (bytes, file, line);
 
   if (temp == 0)
-    {
-#if defined (HAVE_SBRK)
-      allocated = findbrk ();
-      fatal_error (_("xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"), file, line, (unsigned long)bytes, (unsigned long)allocated);
-#else
-      fatal_error (_("xrealloc: %s:%d: cannot allocate %lu bytes"), file, line, (unsigned long)bytes);
-#endif /* !HAVE_SBRK */
-    }
+    sh_allocerr ("xrealloc", bytes, file, line);
 
   return (temp);
 }

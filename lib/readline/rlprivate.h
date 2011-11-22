@@ -300,6 +300,8 @@ extern void _rl_signal_handler PARAMS((int));
 
 extern void _rl_block_sigint PARAMS((void));
 extern void _rl_release_sigint PARAMS((void));
+extern void _rl_block_sigwinch PARAMS((void));
+extern void _rl_release_sigwinch PARAMS((void));
 
 /* terminal.c */
 extern void _rl_get_screen_size PARAMS((int, int));
@@ -347,6 +349,7 @@ extern void _rl_trace ();
 extern int _rl_tropen PARAMS((void));
 
 extern int _rl_abort_internal PARAMS((void));
+extern int _rl_null_function PARAMS((int, int));
 extern char *_rl_strindex PARAMS((const char *, const char *));
 extern int _rl_qsort_string_compare PARAMS((char **, char **));
 extern int (_rl_uppercase_p) PARAMS((int));
@@ -386,6 +389,7 @@ extern int _rl_print_completions_horizontally;
 extern int _rl_completion_case_fold;
 extern int _rl_match_hidden_files;
 extern int _rl_page_completions;
+extern int _rl_skip_completed_text;
 
 /* display.c */
 extern int _rl_vis_botlin;
@@ -417,6 +421,7 @@ extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_output_meta_chars;
 extern int _rl_bind_stty_chars;
 extern int _rl_revert_all_at_newline;
+extern int _rl_echo_control_chars;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

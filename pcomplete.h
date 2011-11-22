@@ -1,5 +1,5 @@
 /* pcomplete.h - structure definitions and other stuff for programmable
-n		 completion. */
+		 completion. */
 
 /* Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
@@ -96,6 +96,9 @@ typedef struct _list_of_items {
 #define LIST_DONTFREE		0x010
 #define LIST_DONTFREEMEMBERS	0x020
 
+#define EMPTYCMD	"_EmptycmD_"
+#define DEFAULTCMD	"_DefaultCmD_"
+
 extern HASH_TABLE *prog_completes;
 extern int prog_completion_enabled;
 
@@ -150,7 +153,7 @@ extern void set_itemlist_dirty __P((ITEMLIST *));
 
 extern STRINGLIST *completions_to_stringlist __P((char **));
 
-extern STRINGLIST *gen_compspec_completions __P((COMPSPEC *, const char *, const char *, int, int));
+extern STRINGLIST *gen_compspec_completions __P((COMPSPEC *, const char *, const char *, int, int, int *));
 extern char **programmable_completions __P((const char *, const char *, int, int, int *));
 
 extern void pcomp_set_readline_variables __P((int, int));

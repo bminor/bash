@@ -35,11 +35,15 @@ enum r_instruction {
   r_append_err_and_out
 };
 
+/* Redirection flags; values for rflags */
+#define REDIR_VARASSIGN		0x01
+
 /* Redirection errors. */
 #define AMBIGUOUS_REDIRECT  -1
 #define NOCLOBBER_REDIRECT  -2
 #define RESTRICTED_REDIRECT -3	/* can only happen in restricted shells. */
 #define HEREDOC_REDIRECT    -4  /* here-doc temp file can't be created */
+#define BADVAR_REDIRECT	    -5  /* something wrong with {varname}redir */
 
 #define CLOBBERING_REDIRECT(ri) \
   (ri == r_output_direction || ri == r_err_and_out)
@@ -73,9 +77,9 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_QUOTED	0x000002	/* Some form of quote character is present. */
 #define W_ASSIGNMENT	0x000004	/* This word is a variable assignment. */
 #define W_GLOBEXP	0x000008	/* This word is the result of a glob expansion. */
-#define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word. */
+#define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word because ifs is empty string. */
 #define W_NOGLOB	0x000020	/* Do not perform globbing on this word. */
-#define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion. */
+#define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
 #define W_TILDEEXP	0x000080	/* Tilde expand this assignment word */
 #define W_DOLLARAT	0x000100	/* $@ and its special handling */
 #define W_DOLLARSTAR	0x000200	/* $* and its special handling */
@@ -135,7 +139,8 @@ typedef union {
    (or translator in redir.c) encountered an out-of-range file descriptor. */
 typedef struct redirect {
   struct redirect *next;	/* Next element, or NULL. */
-  int redirector;		/* Descriptor to be redirected. */
+  REDIRECTEE redirector;	/* Descriptor or varname to be redirected. */
+  int rflags;			/* Private flags for this redirection */
   int flags;			/* Flag value for `open'. */
   enum r_instruction  instruction; /* What to do with the information. */
   REDIRECTEE redirectee;	/* File descriptor or filename */

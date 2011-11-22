@@ -305,16 +305,20 @@ get_history_event (string, caller_index, delimiting_quote)
 /* Extract the contents of STRING as if it is enclosed in single quotes.
    SINDEX, when passed in, is the offset of the character immediately
    following the opening single quote; on exit, SINDEX is left pointing
-   to the closing single quote. */
+   to the closing single quote.  FLAGS currently used to allow backslash
+   to escape a single quote (e.g., for bash $'...'). */
 static void
-hist_string_extract_single_quoted (string, sindex)
+hist_string_extract_single_quoted (string, sindex, flags)
      char *string;
-     int *sindex;
+     int *sindex, flags;
 {
   register int i;
 
   for (i = *sindex; string[i] && string[i] != '\''; i++)
-    ;
+    {
+      if ((flags & 1) && string[i] == '\\' && string[i+1])
+        i++;
+    }
 
   *sindex = i;
 }
@@ -924,7 +928,7 @@ history_expand (hstring, output)
      char **output;
 {
   register int j;
-  int i, r, l, passc, cc, modified, eindex, only_printing, dquote;
+  int i, r, l, passc, cc, modified, eindex, only_printing, dquote, flag;
   char *string;
 
   /* The output string, and its length. */
@@ -1044,8 +1048,9 @@ history_expand (hstring, output)
 	  else if (dquote == 0 && history_quotes_inhibit_expansion && string[i] == '\'')
 	    {
 	      /* If this is bash, single quotes inhibit history expansion. */
+	      flag = (i > 0 && string[i - 1] == '$');
 	      i++;
-	      hist_string_extract_single_quoted (string, &i);
+	      hist_string_extract_single_quoted (string, &i, flag);
 	    }
 	  else if (history_quotes_inhibit_expansion && string[i] == '\\')
 	    {
@@ -1096,7 +1101,7 @@ history_expand (hstring, output)
 	  if (strlen (mb) > 1)
 	    {
 	      ADD_STRING (mb);
-	      break;
+	      continue;
 	    }
 	}
 #endif /* HANDLE_MULTIBYTE */
@@ -1130,8 +1135,9 @@ history_expand (hstring, output)
 	      {
 		int quote, slen;
 
+		flag = (i > 0 && string[i - 1] == '$');
 		quote = i++;
-		hist_string_extract_single_quoted (string, &i);
+		hist_string_extract_single_quoted (string, &i, flag);
 
 		slen = i - quote + 2;
 		temp = (char *)xmalloc (slen);
@@ -1435,17 +1441,21 @@ history_tokenize_word (string, ind)
 	  i += 2;
 	  return i;
 	}
-      else
+      else if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
+		(peek == '>' && string[i] == '&') ||
+		(peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
+		(peek == '(' && string[i] == '$')) /* ) */
 	{
-	  if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
-	      (peek == '>' && string[i] == '&') ||
-	      (peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
-	      (peek == '(' && string[i] == '$')) /* ) */
-	    {
-	      i += 2;
-	      return i;
-	    }
+	  i += 2;
+	  return i;
 	}
+#if 0
+      else if (peek == '\'' && string[i] == '$')
+        {
+	  i += 2;	/* XXX */
+	  return i;
+        }
+#endif
 
       if (string[i] != '$')
 	{

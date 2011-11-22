@@ -622,7 +622,7 @@ Readline which keymap to use.
 @deftypefun Keymap rl_make_bare_keymap (void)
 Returns a new, empty keymap.  The space for the keymap is allocated with
 @code{malloc()}; the caller should free it by calling
-@code{rl_discard_keymap()} when done.
+@code{rl_free_keymap()} when done.
 @end deftypefun
 
 @deftypefun Keymap rl_copy_keymap (Keymap map)
@@ -636,7 +636,13 @@ the Meta digits bound to produce numeric arguments.
 @end deftypefun
 
 @deftypefun void rl_discard_keymap (Keymap keymap)
-Free the storage associated with @var{keymap}.
+Free the storage associated with the data in @var{keymap}.
+The caller should free @var{keymap}.
+@end deftypefun
+
+@deftypefun void rl_free_keymap (Keymap keymap)
+Free all storage associated with @var{keymap}.  This calls
+@code{rl_discard_keymap} to free subordindate keymaps and macros.
 @end deftypefun
 
 Readline has several internal keymaps.  These functions allow you to
@@ -1720,6 +1726,35 @@ It could be used to expand symbolic links or shell variables in pathnames.
 At the least, even if no other expansion is performed, this function should
 remove any quote characters from the directory name, because its result will
 be passed directly to @code{opendir()}.
+@end deftypevar
+
+@ignore
+@deftypevar extern rl_icppfunc_t *rl_directory_rewrite_hook;
+If non-zero, this is the address of a function to call when completing
+a directory name.  This function takes the address of the directory name
+to be modified as an argument.  Unlike @code{rl_directory_completion_hook},
+it only modifies the directory name used in @code{opendir}, not what is
+displayed when the possible completions are printed or inserted.  It is
+called before rl_directory_completion_hook.
+
+I'm not happy with how this worksyet, so it's undocumented.
+@end deftypevar
+@end ignore
+
+@deftypevar {rl_dequote_func_t *} rl_filename_rewrite_hook
+If non-zero, this is the address of a function called when reading
+directory entries from the filesystem for completion and comparing
+them to the partial word to be completed.  The function should
+perform any necesary application or system-specific conversion on
+the filename, such as converting between character sets or converting
+from a filesystem format to a character input format.
+The function takes two arguments: @var{fname}, the filename to be converted,
+and @var{fnlen}, its length in bytes.
+It must either return its first argument (if no conversion takes place)
+or the converted filename in newly-allocated memory.  The converted
+form is used to compare against the word to be completed, and, if it
+matches, is added to the list of matches.  Readline will free the
+allocated string.
 @end deftypevar
 
 @deftypevar {rl_compdisp_func_t *} rl_completion_display_matches_hook

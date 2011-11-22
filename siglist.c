@@ -32,6 +32,7 @@
 #  include "trap.h"
 #endif
 
+#include "bashintl.h"
 #include "xmalloc.h"
 
 char *sys_siglist[NSIG];

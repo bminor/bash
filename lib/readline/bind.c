@@ -418,6 +418,13 @@ rl_generic_bind (type, keyseq, data, map)
 	    {
 	      map = FUNCTION_TO_KEYMAP (map, ic);
 	      ic = ANYOTHERKEY;
+	      /* If we're trying to override a keymap with a null function
+		 (e.g., trying to unbind it), we can't use a null pointer
+		 here because that's indistinguishable from having not been
+		 overridden.  We use a special bindable function that does
+		 nothing. */
+	      if (type == ISFUNC && data == 0)
+		data = (char *)_rl_null_function;
 	    }
 
 	  map[ic].function = KEYMAP_TO_FUNCTION (data);
@@ -1419,7 +1426,9 @@ static const struct {
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },
   { "disable-completion",	&rl_inhibit_completion,		0 },
+  { "echo-control-characters",	&_rl_echo_control_chars,	0 },
   { "enable-keypad",		&_rl_enable_keypad,		0 },
+  { "enable-meta-key",		&_rl_enable_meta,		0 },
   { "expand-tilde",		&rl_complete_with_tilde_expansion, 0 },
   { "history-preserve-point",	&_rl_history_preserve_point,	0 },
   { "horizontal-scroll-mode",	&_rl_horizontal_scroll_mode,	0 },
@@ -1436,6 +1445,7 @@ static const struct {
   { "revert-all-at-newline",	&_rl_revert_all_at_newline,	0 },
   { "show-all-if-ambiguous",	&_rl_complete_show_all,		0 },
   { "show-all-if-unmodified",	&_rl_complete_show_unmodified,	0 },
+  { "skip-completed-text",	&_rl_skip_completed_text,	0 },
 #if defined (VISIBLE_STATS)
   { "visible-stats",		&rl_visible_stats,		0 },
 #endif /* VISIBLE_STATS */

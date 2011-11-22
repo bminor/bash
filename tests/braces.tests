@@ -94,6 +94,11 @@ echo {a..z}
 echo {a..z..2}
 echo {z..a..-2}
 
+# unwanted zero-padding -- fixed post-bash-4.0
+echo {10..0..2}
+echo {10..0..-2}
+echo {-50..-0..5}
+
 # bad
 echo {1..10.f}
 echo {1..ff}

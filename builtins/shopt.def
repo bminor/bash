@@ -112,19 +112,20 @@ extern int debugging_mode;
 
 static void shopt_error __P((char *));
 
-static int set_shellopts_after_change __P((int));
-
-static int set_compatibility_level __P((int));
+static int set_shellopts_after_change __P((char *, int));
+static int shopt_enable_hostname_completion __P((char *, int));
+static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell __P((int));
+static int set_restricted_shell __P((char *, int));
 #endif
 
 static int shopt_login_shell;
 static int shopt_compat31;
 static int shopt_compat32;
+static int shopt_compat40;
 
-typedef int shopt_set_func_t __P((int));
+typedef int shopt_set_func_t __P((char *, int));
 
 static struct {
   char *name;
@@ -144,6 +145,7 @@ static struct {
 #endif
   { "compat31", &shopt_compat31, set_compatibility_level },
   { "compat32", &shopt_compat32, set_compatibility_level },
+  { "compat40", &shopt_compat40, set_compatibility_level },
 #if defined (READLINE)
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
 #endif
@@ -169,7 +171,7 @@ static struct {
 #if defined (READLINE)
   { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
   { "histverify", &hist_verify, (shopt_set_func_t *)NULL },
-  { "hostcomplete", &perform_hostname_completion, enable_hostname_completion },
+  { "hostcomplete", &perform_hostname_completion, shopt_enable_hostname_completion },
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_shellopts_after_change },
@@ -196,6 +198,10 @@ static struct {
   { "xpg_echo", &xpg_echo, (shopt_set_func_t *)NULL },
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
+
+#define N_SHOPT_OPTIONS		(sizeof (shopt_vars) / sizeof (shopt_vars[0]))
+
+#define GET_SHOPT_OPTION_VALUE(i)	(*shopt_vars[i].value)
 
 static const char * const on = "on";
 static const char * const off = "off";
@@ -340,9 +346,11 @@ toggle_shopts (mode, list, quiet)
 	{
 	  *shopt_vars[ind].value = mode;	/* 1 for set, 0 for unset */
 	  if (shopt_vars[ind].set_func)
-	    (*shopt_vars[ind].set_func) (mode);
+	    (*shopt_vars[ind].set_func) (shopt_vars[ind].name, mode);
 	}
     }
+
+  set_bashopts ();
   return (rval);
 }
 
@@ -479,7 +487,8 @@ set_shopt_o_options (mode, list, quiet)
 /* If we set or unset interactive_comments with shopt, make sure the
    change is reflected in $SHELLOPTS. */
 static int
-set_shellopts_after_change (mode)
+set_shellopts_after_change (option_name, mode)
+     char *option_name;
      int mode;
 {
   set_shellopts ();
@@ -487,14 +496,36 @@ set_shellopts_after_change (mode)
 }
 
 static int
-set_compatibility_level (mode)
+shopt_enable_hostname_completion (option_name, mode)
+     char *option_name;
+     int mode;
+{
+  return (enable_hostname_completion (mode));
+}
+
+static int
+set_compatibility_level (option_name, mode)
+     char *option_name;
      int mode;
 {
   /* Need to change logic here as we add more compatibility levels */
+
+  /* First, check option_name so we can turn off other compat options when
+     one is set. */
+  if (mode && option_name[6] == '3' && option_name[7] == '1')
+    shopt_compat32 = shopt_compat40 = 0;
+  else if (mode && option_name[6] == '3' && option_name[7] == '2')
+    shopt_compat31 = shopt_compat40 = 0;
+  else if (mode && option_name[6] == '4' && option_name[7] == '0')
+    shopt_compat31 = shopt_compat32 = 0;
+
+  /* Then set shell_compatibility_level based on what remains */
   if (shopt_compat31)
     shell_compatibility_level = 31;
   else if (shopt_compat32)
     shell_compatibility_level = 32;
+  else if (shopt_compat40)
+    shell_compatibility_level = 40;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
   return 0;
@@ -504,7 +535,8 @@ set_compatibility_level (mode)
 /* Don't allow the value of restricted_shell to be modified. */
 
 static int
-set_restricted_shell (mode)
+set_restricted_shell (option_name, mode)
+     char *option_name;
      int mode;
 {
   static int save_restricted = -1;
@@ -519,7 +551,8 @@ set_restricted_shell (mode)
 
 /* Not static so shell.c can call it to initialize shopt_login_shell */
 int
-set_login_shell (mode)
+set_login_shell (option_name, mode)
+     char *option_name;
      int mode;
 {
   shopt_login_shell = login_shell != 0;
@@ -578,4 +611,105 @@ shopt_listopt (name, reusable)
 
   print_shopt (name, *shopt_vars[i].value, reusable ? PFLAG : 0);
   return (sh_chkwrite (EXECUTION_SUCCESS));
+}
+
+void
+set_bashopts ()
+{
+  char *value;
+  char tflag[N_SHOPT_OPTIONS];
+  int vsize, i, vptr, *ip, exported;
+  SHELL_VAR *v;
+
+  for (vsize = i = 0; shopt_vars[i].name; i++)
+    {
+      tflag[i] = 0;
+      if (GET_SHOPT_OPTION_VALUE (i))
+	{
+	  vsize += strlen (shopt_vars[i].name) + 1;
+	  tflag[i] = 1;
+	}
+    }
+
+  value = (char *)xmalloc (vsize + 1);
+
+  for (i = vptr = 0; shopt_vars[i].name; i++)
+    {
+      if (tflag[i])
+	{
+	  strcpy (value + vptr, shopt_vars[i].name);
+	  vptr += strlen (shopt_vars[i].name);
+	  value[vptr++] = ':';
+	}
+    }
+
+  if (vptr)
+    vptr--;			/* cut off trailing colon */
+  value[vptr] = '\0';
+
+  v = find_variable ("BASHOPTS");
+
+  /* Turn off the read-only attribute so we can bind the new value, and
+     note whether or not the variable was exported. */
+  if (v)
+    {
+      VUNSETATTR (v, att_readonly);
+      exported = exported_p (v);
+    }
+  else
+    exported = 0;
+
+  v = bind_variable ("BASHOPTS", value, 0);
+
+  /* Turn the read-only attribute back on, and turn off the export attribute
+     if it was set implicitly by mark_modified_vars and SHELLOPTS was not
+     exported before we bound the new value. */
+  VSETATTR (v, att_readonly);
+  if (mark_modified_vars && exported == 0 && exported_p (v))
+    VUNSETATTR (v, att_exported);
+
+  free (value);
+}
+
+void
+parse_bashopts (value)
+     char *value;
+{
+  char *vname;
+  int vptr, ind;
+
+  vptr = 0;
+  while (vname = extract_colon_unit (value, &vptr))
+    {
+      ind = find_shopt (vname);
+      if (ind >= 0)
+        *shopt_vars[ind].value = 1;
+      free (vname);
+    }
+}
+
+void
+initialize_bashopts (no_bashopts)
+     int no_bashopts;
+{
+  char *temp;
+  SHELL_VAR *var;
+
+  if (no_bashopts == 0)
+    {
+      var = find_variable ("BASHOPTS");
+      /* set up any shell options we may have inherited. */
+      if (var && imported_p (var))
+	{
+	  temp = (array_p (var) || assoc_p (var)) ? (char *)NULL : savestring (value_cell (var));
+	  if (temp)
+	    {
+	      parse_bashopts (temp);
+	      free (temp);
+	    }
+	}
+    }
+
+  /* Set up the $BASHOPTS variable. */
+  set_bashopts ();
 }

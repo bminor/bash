@@ -31,7 +31,7 @@
 #endif
 extern int fpurge __P((FILE *stream));
 
-#if HAVE___FPURGE                   /* glibc >= 2.2, Solaris >= 7 */
+#if HAVE___FPURGE                   /* glibc >= 2.2, Haiku, Solaris >= 7 */
 # include <stdio_ext.h>
 #endif
 #include <stdlib.h>
@@ -39,13 +39,13 @@ extern int fpurge __P((FILE *stream));
 int
 fpurge (FILE *fp)
 {
-#if HAVE___FPURGE                   /* glibc >= 2.2, Solaris >= 7 */
+#if HAVE___FPURGE                   /* glibc >= 2.2, Haiku, Solaris >= 7 */
 
   __fpurge (fp);
   /* The __fpurge function does not have a return value.  */
   return 0;
 
-#elif HAVE_FPURGE                   /* FreeBSD, NetBSD, OpenBSD, MacOS X */
+#elif HAVE_FPURGE                   /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X */
 
   /* Call the system's fpurge function.  */
 # undef fpurge
@@ -53,7 +53,7 @@ fpurge (FILE *fp)
   extern int fpurge (FILE *);
 # endif
   int result = fpurge (fp);
-# if defined __sferror              /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
+# if defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
   if (result == 0)
     /* Correct the invariants that fpurge broke.
        <stdio.h> on BSD systems says:
@@ -71,7 +71,7 @@ fpurge (FILE *fp)
   /* Most systems provide FILE as a struct and the necessary bitmask in
      <stdio.h>, because they need it for implementing getc() and putc() as
      fast macros.  */
-# if defined _IO_ferror_unlocked    /* GNU libc, BeOS */
+# if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
   fp->_IO_read_end = fp->_IO_read_ptr;
   fp->_IO_write_ptr = fp->_IO_write_base;
   /* Avoid memory leak when there is an active ungetc buffer.  */
@@ -81,28 +81,27 @@ fpurge (FILE *fp)
       fp->_IO_save_base = NULL;
     }
   return 0;
-# elif defined __sferror            /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
-  fp->_p = fp->_bf._base;
-  fp->_r = 0;
-  fp->_w = ((fp->_flags & (__SLBF | __SNBF | __SRD)) == 0 /* fully buffered and not currently reading? */
-	    ? fp->_bf._size
-	    : 0);
+# elif defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+  fp_->_p = fp_->_bf._base;
+  fp_->_r = 0;
+  fp_->_w = ((fp_->_flags & (__SLBF | __SNBF | __SRD)) == 0 /* fully buffered and not currently reading? */
+	     ? fp_->_bf._size
+	     : 0);
   /* Avoid memory leak when there is an active ungetc buffer.  */
-#  if defined __NetBSD__ || defined __OpenBSD__ /* NetBSD, OpenBSD */
-   /* See <http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libc/stdio/fileext.h?rev=HEAD&content-type=text/x-cvsweb-markup>
-      and <http://www.openbsd.org/cgi-bin/cvsweb/src/lib/libc/stdio/fileext.h?rev=HEAD&content-type=text/x-cvsweb-markup> */
-#   define fp_ub ((struct { struct __sbuf _ub; } *) fp->_ext._base)->_ub
-#  else                                         /* FreeBSD, MacOS X, Cygwin */
-#   define fp_ub fp->_ub
-#  endif
   if (fp_ub._base != NULL)
     {
-      if (fp_ub._base != fp->_ubuf)
+      if (fp_ub._base != fp_->_ubuf)
 	free (fp_ub._base);
       fp_ub._base = NULL;
     }
   return 0;
-# elif defined _IOERR               /* AIX, HP-UX, IRIX, OSF/1, Solaris, mingw */
+# elif defined __EMX__              /* emx+gcc */
+  fp->_ptr = fp->_buffer;
+  fp->_rcount = 0;
+  fp->_wcount = 0;
+  fp->_ungetc_count = 0;
+  return 0;
+# elif defined _IOERR               /* AIX, HP-UX, IRIX, OSF/1, Solaris, OpenServer, mingw */
   fp->_ptr = fp->_base;
   if (fp->_ptr != NULL)
     fp->_cnt = 0;
@@ -115,8 +114,34 @@ fpurge (FILE *fp)
     fp->__bufpos = fp->__bufread;
 #  endif
   return 0;
+# elif defined __QNX__              /* QNX */
+  fp->_Rback = fp->_Back + sizeof (fp->_Back);
+  fp->_Rsave = NULL;
+  if (fp->_Mode & 0x2000 /* _MWRITE */)
+    /* fp->_Buf <= fp->_Next <= fp->_Wend */
+    fp->_Next = fp->_Buf;
+  else
+    /* fp->_Buf <= fp->_Next <= fp->_Rend */
+    fp->_Rend = fp->_Next;
+  return 0;
+# elif defined __MINT__             /* Atari FreeMiNT */
+  if (fp->__pushed_back)
+    {
+      fp->__bufp = fp->__pushback_bufp;
+      fp->__pushed_back = 0;
+    }
+  /* Preserve the current file position.  */
+  if (fp->__target != -1)
+    fp->__target += fp->__bufp - fp->__buffer;
+  fp->__bufp = fp->__buffer;
+  /* Nothing in the buffer, next getc is nontrivial.  */
+  fp->__get_limit = fp->__bufp;
+  /* Nothing in the buffer, next putc is nontrivial.  */
+  fp->__put_limit = fp->__buffer;
+  return 0;
 # else
- #error "Please port gnulib fpurge.c to your platform! Look at the definitions of fflush, setvbuf and ungetc on your system, then report this to bug-gnulib."
+# warning "Please port gnulib fpurge.c to your platform! Look at the definitions of fflush, setvbuf and ungetc on your system, then report this to bug-gnulib."
+  return 0;
 # endif
 
 #endif

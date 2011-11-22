@@ -326,9 +326,9 @@ KEYMAP_ENTRY_ARRAY vi_insertion_keymap = {
   { ISFUNC, rl_insert },			/* Control-k */
   { ISFUNC, rl_insert },			/* Control-l */
   { ISFUNC, rl_newline },			/* Control-m */
-  { ISFUNC, rl_insert },			/* Control-n */
+  { ISFUNC, rl_menu_complete},			/* Control-n */
   { ISFUNC, rl_insert },			/* Control-o */
-  { ISFUNC, rl_insert },			/* Control-p */
+  { ISFUNC, rl_backward_menu_complete },	/* Control-p */
   { ISFUNC, rl_insert },			/* Control-q */
   { ISFUNC, rl_reverse_search_history },	/* Control-r */
   { ISFUNC, rl_forward_search_history },	/* Control-s */

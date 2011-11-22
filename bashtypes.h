@@ -35,4 +35,8 @@
 #  include <inttypes.h>
 #endif
 
+#if HAVE_STDINT_H
+#  include <stdint.h>
+#endif
+
 #endif /* _BASHTYPES_H_ */

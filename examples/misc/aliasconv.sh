@@ -7,11 +7,11 @@
 # Chet Ramey
 # chet@po.cwru.edu
 #
-trap 'rm -f /tmp/cb$$.?' 0 1 2 3 6 15
-
+trap 'rm -f $TMPFILE' 0 1 2 3 6 15
+TMPFILE=$(mktemp -t cb.XXXXXX) || exit 1
 T='	'
 
-cat << \EOF >/tmp/cb$$.1
+cat << \EOF >$TMPFILE
 mkalias ()
 {
 	case $2 in
@@ -31,9 +31,9 @@ EOF
 # since they whole thing is going to be surrounded by single quotes when
 # passed to mkalias
 
-sed -e "s:':\\'\\\'\\':" -e "s/^\([a-zA-Z0-9_-]*\)$T\(.*\)$/mkalias \1 '\2'/" >>/tmp/cb$$.1
+sed -e "s:':\\'\\\'\\':" -e "s/^\([a-zA-Z0-9_-]*\)$T\(.*\)$/mkalias \1 '\2'/" >>$TMPFILE
 
-sh /tmp/cb$$.1 | sed -e 's/\$cwd/\$PWD/g' \
+sh $TMPFILE | sed -e 's/\$cwd/\$PWD/g' \
 		     -e 's/\$term/\$TERM/g' \
 		     -e 's/\$home/\$HOME/g' \
 		     -e 's/\$user/\$USER/g' \

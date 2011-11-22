@@ -53,6 +53,7 @@ extern int errno;
 
 extern int executing_line_number __P((void));
 
+extern int last_command_exit_value;
 extern char *shell_name;
 #if defined (JOB_CONTROL)
 extern pid_t shell_pgrp;
@@ -331,7 +332,7 @@ parser_error (lineno, format, va_alist)
   va_end (args);
 
   if (exit_immediately_on_error)
-    exit_shell (2);
+    exit_shell (last_command_exit_value = 2);
 }
 
 #ifdef DEBUG

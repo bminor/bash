@@ -57,6 +57,8 @@
 extern int errno;
 #endif
 
+#define NEED_FPURGE_DECL
+
 #include "bashansi.h"
 #include "bashintl.h"
 
@@ -100,7 +102,7 @@ extern int posixly_correct;
 extern int expand_aliases;
 extern int autocd;
 extern int breaking, continuing, loop_level;
-extern int parse_and_execute_level, running_trap;
+extern int parse_and_execute_level, running_trap, sourcelevel;
 extern int command_string_index, line_number;
 extern int dot_found_in_search;
 extern int already_making_children;
@@ -266,6 +268,10 @@ static int function_line_number;
 static int showing_function_line;
 
 static int line_number_for_err_trap;
+
+/* A sort of function nesting level counter */
+static int funcnest = 0;
+int funcnest_max = 0;		/* XXX - for bash-4.2 */
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -607,7 +613,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	      else
 		exec_result = last_command_exit_value;
 
-
 	      if (user_subshell && was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
 		{
 		  last_command_exit_value = exec_result;
@@ -883,19 +888,58 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 #if defined (DPAREN_ARITHMETIC)
     case cm_arith:
+      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
       if (ignore_return)
 	command->value.Arith->flags |= CMD_IGNORE_RETURN;
+      line_number_for_err_trap = save_line_number = line_number;
       exec_result = execute_arith_command (command->value.Arith);
+      line_number = save_line_number;
+
+      if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  save_line_number = line_number;
+	  line_number = line_number_for_err_trap;
+	  run_error_trap ();
+	  line_number = save_line_number;
+	}
+
+      if (ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  run_pending_traps ();
+	  jump_to_top_level (ERREXIT);
+	}
+
       break;
 #endif
 
 #if defined (COND_COMMAND)
     case cm_cond:
+      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
       if (ignore_return)
 	command->value.Cond->flags |= CMD_IGNORE_RETURN;
-      save_line_number = line_number;
+
+      line_number_for_err_trap = save_line_number = line_number;
       exec_result = execute_cond_command (command->value.Cond);
       line_number = save_line_number;
+
+      if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  save_line_number = line_number;
+	  line_number = line_number_for_err_trap;
+	  run_error_trap ();
+	  line_number = save_line_number;
+	}
+
+      if (ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  run_pending_traps ();
+	  jump_to_top_level (ERREXIT);
+	}
+
       break;
 #endif
     
@@ -1248,6 +1292,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 {
   int user_subshell, return_code, function_value, should_redir_stdin, invert;
   int ois, user_coproc;
+  int result;
   COMMAND *tcom;
 
   USE_VAR(user_subshell);
@@ -1414,13 +1459,21 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   invert = (tcom->flags & CMD_INVERT_RETURN) != 0;
   tcom->flags &= ~CMD_INVERT_RETURN;
 
+  result = setjmp (top_level);
+
   /* If we're inside a function while executing this subshell, we
      need to handle a possible `return'. */
   function_value = 0;
   if (return_catch_flag)
     function_value = setjmp (return_catch);
 
-  if (function_value)
+  /* If we're going to exit the shell, we don't want to invert the return
+     status. */
+  if (result == EXITPROG)
+    invert = 0, return_code = last_command_exit_value;
+  else if (result)
+    return_code = EXECUTION_FAILURE;
+  else if (function_value)
     return_code = return_catch_value;
   else
     return_code = execute_command_internal (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
@@ -1928,7 +1981,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rpipe[2], wpipe[2];
+  int rpipe[2], wpipe[2], estat;
   pid_t coproc_pid;
   Coproc *cp;
   char *tcmd;
@@ -1957,7 +2010,12 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
       close (rpipe[0]);
       close (wpipe[1]);
 
-      exit (execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close));
+      estat = execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close);
+
+      fflush (stdout);
+      fflush (stderr);
+
+      exit (estat);
     }
 
   close (rpipe[1]);
@@ -3156,11 +3214,19 @@ static int
 execute_cond_node (cond)
      COND_COM *cond;
 {
-  int result, invert, patmatch, rmatch, mflags;
+  int result, invert, patmatch, rmatch, mflags, ignore;
   char *arg1, *arg2;
 
   invert = (cond->flags & CMD_INVERT_RETURN);
-
+  ignore = (cond->flags & CMD_IGNORE_RETURN);
+  if (ignore)
+    {
+      if (cond->left)
+	cond->left->flags |= CMD_IGNORE_RETURN;
+      if (cond->right)
+	cond->right->flags |= CMD_IGNORE_RETURN;
+    }
+      
   if (cond->type == COND_EXPR)
     result = execute_cond_node (cond->left);
   else if (cond->type == COND_OR)
@@ -3177,7 +3243,11 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_UNARY)
     {
+      if (ignore)
+	comsub_ignore_return++;
       arg1 = cond_expand_word (cond->left->op, 0);
+      if (ignore)
+	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
       if (echo_command_at_execute)
@@ -3197,11 +3267,19 @@ execute_cond_node (cond)
 		cond->op->word[2] == '\0');
 #endif
 
+      if (ignore)
+	comsub_ignore_return++;
       arg1 = cond_expand_word (cond->left->op, 0);
+      if (ignore)
+	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
+      if (ignore)
+	comsub_ignore_return++;
       arg2 = cond_expand_word (cond->right->op,
 			       (rmatch && shell_compatibility_level > 31) ? 2 : (patmatch ? 1 : 0));
+      if (ignore)
+	comsub_ignore_return--;
       if (arg2 == 0)
 	arg2 = nullstr;
 
@@ -3224,7 +3302,7 @@ execute_cond_node (cond)
 	  int oe;
 	  oe = extended_glob;
 	  extended_glob = 1;
-	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP)
+	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP|TEST_LOCALE)
 				  ? EXECUTION_SUCCESS
 				  : EXECUTION_FAILURE;
 	  extended_glob = oe;
@@ -3261,7 +3339,6 @@ execute_cond_command (cond_command)
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
     line_number -= function_line_number;
-
   command_string_index = 0;
   print_cond_command (cond_command);
 
@@ -3315,8 +3392,13 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
      int pipe_in, pipe_out, async;
 {
   int r;
+  int forcefork;
+  REDIRECT *rd;
 
-  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
+  for (forcefork = 0, rd = redirects; rd; rd = rd->next)
+    forcefork += rd->rflags & REDIR_VARASSIGN;
+
+  if (forcefork || pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
       /* We have a null command, but we really want a subshell to take
 	 care of it.  Just fork, do piping and redirections, and exit. */
@@ -3457,7 +3539,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_line = (char *)0;
 
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell)
+  if (variable_context && interactive_shell && sourcelevel == 0)
     line_number -= function_line_number;
 
   /* Remember what this command line looks like at invocation. */
@@ -3814,25 +3896,35 @@ execute_builtin (builtin, words, flags, subshell)
 {
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
+  char *error_trap;
 
 #if 0
   /* XXX -- added 12/11 */
   terminate_immediately++;
 #endif
 
+  error_trap = 0;
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
      flags that will exit the shell on an error if -e is set.  If the
      eval builtin is being called, and we're supposed to ignore the exit
-     value of the command, we turn the -e flag off ourselves, then
-     restore it when the command completes.  This is also a problem (as
-     below) for the command and source/. builtins. */
+     value of the command, we turn the -e flag off ourselves and disable
+     the ERR trap, then restore them when the command completes.  This is
+     also a problem (as below) for the command and source/. builtins. */
   if (subshell == 0 && (flags & CMD_IGNORE_RETURN) &&
 	(builtin == eval_builtin || builtin == command_builtin || builtin == source_builtin))
     {
       begin_unwind_frame ("eval_builtin");
       unwind_protect_int (exit_immediately_on_error);
+      error_trap = TRAP_STRING (ERROR_TRAP);
+      if (error_trap)
+	{
+	  error_trap = savestring (error_trap);
+	  add_unwind_protect (xfree, error_trap);
+	  add_unwind_protect (set_error_trap, error_trap);
+	  restore_default_signal (ERROR_TRAP);
+	}
       exit_immediately_on_error = 0;
       eval_unwind = 1;
     }
@@ -3883,6 +3975,11 @@ execute_builtin (builtin, words, flags, subshell)
   if (eval_unwind)
     {
       exit_immediately_on_error += old_e_flag;
+      if (error_trap)
+	{
+	  set_error_trap (error_trap);
+	  xfree (error_trap);
+	}
       discard_unwind_frame ("eval_builtin");
     }
 
@@ -3911,9 +4008,16 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 #endif
   FUNCTION_DEF *shell_fn;
   char *sfile, *t;
-  static int funcnest = 0;
 
   USE_VAR(fc);
+
+#if 0	/* for bash-4.2 */
+  if (funcnest_max > 0 && funcnest >= funcnest_max)
+    {
+      internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);
+      jump_to_top_level (DISCARD);
+    }
+#endif
 
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
@@ -3936,6 +4040,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       add_unwind_protect (dispose_command, (char *)tc);
       unwind_protect_pointer (this_shell_function);
       unwind_protect_int (loop_level);
+      unwind_protect_int (funcnest);
     }
   else
     push_context (var->name, subshell, temporary_env);	/* don't unwind-protect for subshells */
@@ -4077,7 +4182,6 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (subshell == 0)
     run_unwind_frame ("function_calling");
 
-  funcnest--;
 #if defined (ARRAY_VARS)
   /* These two variables cannot be unset, and cannot be affected by the
      function. */
@@ -4092,8 +4196,13 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 #endif
   
   if (variable_context == 0 || this_shell_function == 0)
-    make_funcname_visible (0);
-
+    {
+      make_funcname_visible (0);
+#if defined (PROCESS_SUBSTITUTION)
+      unlink_fifo_list ();
+#endif
+    }
+  
   return (result);
 }
 
@@ -4369,7 +4478,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
 #if defined (RESTRICTED_SHELL)
   command = (char *)NULL;
-  if (restricted && xstrchr (pathname, '/'))
+  if (restricted && mbschr (pathname, '/'))
     {
       internal_error (_("%s: restricted: cannot specify `/' in command names"),
 		    pathname);
@@ -4482,7 +4591,8 @@ parent_return:
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-      unlink_fifo_list ();
+      if (variable_context == 0)
+        unlink_fifo_list ();
 #endif
       FREE (command);
     }
@@ -4631,7 +4741,7 @@ initialize_subshell ()
   parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
-  variable_context = return_catch_flag = 0;
+  variable_context = return_catch_flag = funcnest = 0;
 
   executing_list = 0;		/* XXX */
 

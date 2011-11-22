@@ -1,6 +1,6 @@
 /* strtoimax - convert string representation of a number into an intmax_t value. */
 
-/* Copyright 1999-2005 Free Software Foundation, Inc.
+/* Copyright 1999-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -26,6 +26,10 @@
 
 #if HAVE_INTTYPES_H
 #  include <inttypes.h>
+#endif
+
+#if HAVE_STDINT_H
+#  include <stdint.h>
 #endif
 
 #if HAVE_STDLIB_H

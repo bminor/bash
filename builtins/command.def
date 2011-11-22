@@ -100,6 +100,31 @@ command_builtin (list)
   if (list == 0)
     return (EXECUTION_SUCCESS);
 
+#if defined (RESTRICTED_SHELL)
+  if (use_standard_path && restricted)
+    {
+      sh_restricted ("-p");
+      return (EXECUTION_FAILURE);
+    }
+#endif
+
+  begin_unwind_frame ("command_builtin");
+
+  if (use_standard_path)
+    {      
+      old_path = get_string_value ("PATH");
+      /* If old_path is NULL, $PATH is unset.  If so, we want to make sure
+	 it's unset after this command completes. */
+      if (old_path)
+	old_path = savestring (old_path);
+      add_unwind_protect ((Function *)restore_path, old_path);
+
+      standard_path = get_standard_path ();
+      bind_variable ("PATH", standard_path ? standard_path : "", 0);
+      stupidly_hack_special_variables ("PATH");
+      FREE (standard_path);
+    }
+
   if (verbose)
     {
       int found, any_found;
@@ -113,37 +138,15 @@ command_builtin (list)
 
 	  any_found += found;
 	}
+
+      run_unwind_frame ("command_builtin");
       return (any_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
-    }
-
-#if defined (RESTRICTED_SHELL)
-  if (use_standard_path && restricted)
-    {
-      sh_restricted ("-p");
-      return (EXECUTION_FAILURE);
-    }
-#endif
-
-  begin_unwind_frame ("command_builtin");
-
-  /* We don't want this to be reparsed (consider command echo 'foo &'), so
-     just make a simple_command structure and call execute_command with it. */
-  if (use_standard_path)
-    {      
-      old_path = get_string_value ("PATH");
-      /* If old_path is NULL, $PATH is unset.  If so, we want to make sure
-	 it's unset after this command completes. */
-      if (old_path)
-	old_path = savestring (old_path);
-      add_unwind_protect ((Function *)restore_path, old_path);
-
-      standard_path = get_standard_path ();
-      bind_variable ("PATH", standard_path ? standard_path : "", 0);
-      FREE (standard_path);
     }
 
 #define COMMAND_BUILTIN_FLAGS (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION | CMD_COMMAND_BUILTIN)
 
+  /* We don't want this to be reparsed (consider command echo 'foo &'), so
+     just make a simple_command structure and call execute_command with it. */
   command = make_bare_simple_command ();
   command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
@@ -182,6 +185,8 @@ restore_path (var)
     }
   else
     unbind_variable ("PATH");
+
+  stupidly_hack_special_variables ("PATH");
 }
 
 /* Return a value for PATH that is guaranteed to find all of the standard

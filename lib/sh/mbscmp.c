@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 /* Compare MBS1 and MBS2.  */
 int
@@ -40,16 +41,25 @@ mbscmp (mbs1, mbs2)
 
   do
     {
-      len1 = mbtowc ((wchar_t *) &c1, mbs1, MB_CUR_MAX);
-      len2 = mbtowc ((wchar_t *) &c2, mbs2, MB_CUR_MAX);
+      len1 = mbtowc (&c1, mbs1, MB_CUR_MAX);
+      len2 = mbtowc (&c2, mbs2, MB_CUR_MAX);
 
       if (len1 == 0)
 	return len2 == 0 ? 0 : -1;
-      if (len2 == 0)
+      else if (len2 == 0)
 	return 1;
-      if (len1 < 0 || len2 < 0)
-	/* FIXME: an illegal character appears.	 What to do?  */
-	return c1 - c2;
+      else if (len1 > 0 && len2 < 0)
+        return -1;
+      else if (len1 < 0 && len2 > 0)
+        return 1;
+      else if (len1 < 0 && len2 < 0)
+	{
+	  len1 = strlen (mbs1);
+	  len2 = strlen (mbs2);
+	  return (len1 == len2 ? memcmp (mbs1, mbs2, len1)
+			       : ((len1 < len2) ? (memcmp (mbs1, mbs2, len1) > 0 ? 1 : -1)
+						: (memcmp (mbs1, mbs2, len2) >= 0 ? 1 : -1)));
+	}
 
       mbs1 += len1;
       mbs2 += len2;

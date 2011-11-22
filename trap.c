@@ -72,6 +72,7 @@ static void get_original_signal __P((int));
 
 static int _run_trap_internal __P((int, char *));
 
+static void free_trap_string __P((int));
 static void reset_signal __P((int));
 static void restore_signal __P((int));
 static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
@@ -85,6 +86,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern procenv_t wait_intr_buf;
 extern int return_catch_flag, return_catch_value;
 extern int subshell_level;
+extern WORD_LIST *subst_assign_varlist;
 
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
@@ -262,6 +264,7 @@ run_pending_traps ()
 {
   register int sig;
   int old_exit_value, *token_state;
+  WORD_LIST *save_subst_varlist;
 
   if (catch_flag == 0)		/* simple optimization */
     return;
@@ -332,9 +335,14 @@ run_pending_traps ()
 	  else
 	    {
 	      token_state = save_token_state ();
+	      save_subst_varlist = subst_assign_varlist;
+	      subst_assign_varlist = 0;
+
 	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      restore_token_state (token_state);
 	      free (token_state);
+
+	      subst_assign_varlist = save_subst_varlist;
 	    }
 
 	  pending_traps[sig] = 0;
@@ -582,7 +590,7 @@ get_original_signal (sig)
      int sig;
 {
   /* If we aren't sure the of the original value, then get it. */
-  if (original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
+  if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
     GETORIGSIG (sig);
 }
 
@@ -728,6 +736,7 @@ _run_trap_internal (sig, tag)
   int trap_exit_value, *token_state;
   int save_return_catch_flag, function_code, flags;
   procenv_t save_return_catch;
+  WORD_LIST *save_subst_varlist;
 
   trap_exit_value = function_code = 0;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
@@ -745,6 +754,8 @@ _run_trap_internal (sig, tag)
       trap_saved_exit_value = last_command_exit_value;
 
       token_state = save_token_state ();
+      save_subst_varlist = subst_assign_varlist;
+      subst_assign_varlist = 0;
 
       /* If we're in a function, make sure return longjmps come here, too. */
       save_return_catch_flag = return_catch_flag;
@@ -762,6 +773,8 @@ _run_trap_internal (sig, tag)
 
       restore_token_state (token_state);
       free (token_state);
+
+      subst_assign_varlist = save_subst_varlist;
 
       trap_exit_value = last_command_exit_value;
       last_command_exit_value = trap_saved_exit_value;
@@ -877,19 +890,27 @@ run_interrupt_trap ()
 
 #ifdef INCLUDE_UNUSED
 /* Free all the allocated strings in the list of traps and reset the trap
-   values to the default. */
+   values to the default.  Intended to be called from subshells that want
+   to complete work done by reset_signal_handlers upon execution of a
+   subsequent `trap' command that changes a signal's disposition. */
 void
 free_trap_strings ()
 {
   register int i;
 
   for (i = 0; i < BASH_NSIG; i++)
-    {
-      free_trap_command (i);
-      trap_list[i] = (char *)DEFAULT_SIG;
-      sigmodes[i] &= ~SIG_TRAPPED;
-    }
+    free_trap_string (i);
   trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
+}
+
+/* Free a trap command string associated with SIG without changing signal
+   disposition.  Intended to be called from free_trap_strings()  */
+static void
+free_trap_string (sig)
+     int sig;
+{
+  change_signal (sig, (char *)DEFAULT_SIG);
+  sigmodes[sig] &= ~SIG_TRAPPED;
 }
 #endif
 

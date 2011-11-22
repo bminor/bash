@@ -1,6 +1,6 @@
 /* strtoumax - convert string representation of a number into an uintmax_t value. */
 
-/* Copyright 1999-2005 Free Software Foundation, Inc.
+/* Copyright 1999-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 /* Written by Paul Eggert.  Modified by Chet Ramey for Bash. */
 
 #if HAVE_CONFIG_H
@@ -25,6 +26,10 @@
 
 #if HAVE_INTTYPES_H
 #  include <inttypes.h>
+#endif
+
+#if HAVE_STDINT_H
+#  include <stdint.h>
 #endif
 
 #if HAVE_STDLIB_H

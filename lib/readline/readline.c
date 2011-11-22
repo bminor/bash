@@ -275,6 +275,10 @@ int _rl_bind_stty_chars = 1;
    its initial state. */
 int _rl_revert_all_at_newline = 0;
 
+/* Non-zero means to honor the termios ECHOCTL bit and echo control
+   characters corresponding to keyboard-generated signals. */
+int _rl_echo_control_chars = 1;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -686,7 +690,8 @@ _rl_dispatch_callback (cxt)
     r = cxt->childval;
 
   /* For now */
-  r = _rl_subseq_result (r, cxt->oldmap, cxt->okey, (cxt->flags & KSEQ_SUBSEQ));
+  if (r != -3)	/* don't do this if we indicate there will be other matches */
+    r = _rl_subseq_result (r, cxt->oldmap, cxt->okey, (cxt->flags & KSEQ_SUBSEQ));
 
   RL_CHECK_SIGNALS ();
   if (r == 0)			/* success! */
@@ -831,7 +836,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	    {
 	      /* Return 0 only the first time, to indicate success to
 		 _rl_callback_read_char.  The rest of the time, we're called
-		 from _rl_dispatch_callback, so we return 3 to indicate
+		 from _rl_dispatch_callback, so we return -3 to indicate
 		 special handling is necessary. */
 	      r = RL_ISSTATE (RL_STATE_MULTIKEY) ? -3 : 0;
 	      cxt = _rl_keyseq_cxt_alloc ();
@@ -895,7 +900,7 @@ _rl_subseq_result (r, map, key, got_subseq)
   Keymap m;
   int type, nt;
   rl_command_func_t *func, *nf;
-  
+
   if (r == -2)
     /* We didn't match anything, and the keymap we're indexed into
        shadowed a function previously bound to that prefix.  Call
@@ -1169,6 +1174,10 @@ bind_arrow_keys ()
 
 #if defined (VI_MODE)
   bind_arrow_keys_internal (vi_movement_keymap);
+  /* Unbind vi_movement_keymap[ESC] to allow users to repeatedly hit ESC
+     in vi command mode while still allowing the arrow keys to work. */
+  if (vi_movement_keymap[ESC].type == ISKMAP)
+    rl_bind_keyseq_in_map ("\033", (rl_command_func_t *)NULL, vi_movement_keymap);
   bind_arrow_keys_internal (vi_insertion_keymap);
 #endif
 }

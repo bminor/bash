@@ -405,7 +405,14 @@ assoc_to_assign (hash, quoted)
   for (i = 0; i < hash->nbuckets; i++)
     for (tlist = hash_items (i, hash); tlist; tlist = tlist->next)
       {
+#if 1
+	if (sh_contains_shell_metas (tlist->key))
+	  istr = sh_double_quote (tlist->key);
+	else
+	  istr = tlist->key;	
+#else
 	istr = tlist->key;
+#endif
 	vstr = tlist->data ? sh_double_quote ((char *)tlist->data) : (char *)0;
 
 	elen = STRLEN (istr) + 8 + STRLEN (vstr);
@@ -422,6 +429,10 @@ assoc_to_assign (hash, quoted)
 	    rlen += STRLEN (vstr);
 	  }
 	ret[rlen++] = ' ';
+
+
+	if (istr != tlist->key)
+	  FREE (istr);
 
 	FREE (vstr);
     }

@@ -23,7 +23,7 @@ $PRODUCES complete.c
 $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
-$SHORT_DOC complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
+$SHORT_DOC complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
 Specify how arguments are to be completed by Readline.
 
 For each NAME, specify how arguments are to be completed.  If no options
@@ -34,9 +34,14 @@ Options:
   -p	print existing completion specifications in a reusable format
   -r	remove a completion specification for each NAME, or, if no
 	NAMEs are supplied, all completion specifications
+  -D	apply the completions and actions as the default for commands
+	without any specific completion defined
+  -E	apply the completions and actions to "empty" commands --
+	completion attempted on a blank line
 
 When completion is attempted, the actions are applied in the order the
-uppercase-letter options are listed above.
+uppercase-letter options are listed above.  The -D option takes
+precedence over -E.
 
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
@@ -72,6 +77,7 @@ $END
 struct _optflags {
   int pflag;
   int rflag;
+  int Dflag;
   int Eflag;
 };
 
@@ -187,7 +193,7 @@ build_actions (list, flagp, actp, optp)
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:E")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:DE")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -275,6 +281,18 @@ build_actions (list, flagp, actp, optp)
 	case 'C':
 	  Carg = list_optarg;
 	  break;
+	case 'D':
+	  if (flagp)
+	    {
+	      flagp->Dflag = 1;
+	      break;
+	    }
+	  else
+	    {
+	      sh_invalidopt ("-D");
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
 	case 'E':
 	  if (flagp)
 	    {
@@ -334,7 +352,7 @@ complete_builtin (list)
       return (EXECUTION_SUCCESS);
     }
 
-  opt_given = oflags.pflag = oflags.rflag = oflags.Eflag = 0;
+  opt_given = oflags.pflag = oflags.rflag = oflags.Dflag = oflags.Eflag = 0;
 
   acts = copts = (unsigned long)0L;
   Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
@@ -349,7 +367,8 @@ complete_builtin (list)
 
   list = loptend;
 
-  wl = oflags.Eflag ? make_word_list (make_bare_word ("_EmptycmD_"), (WORD_LIST *)NULL) : 0;
+  wl = oflags.Dflag ? make_word_list (make_bare_word (DEFAULTCMD), (WORD_LIST *)NULL)
+  		    : (oflags.Eflag ? make_word_list (make_bare_word (EMPTYCMD), (WORD_LIST *)NULL) : 0);
 
   /* -p overrides everything else */
   if (oflags.pflag || (list == 0 && opt_given == 0))
@@ -540,7 +559,12 @@ print_one_completion (cmd, cs)
   /* simple arguments that don't require quoting */
   PRINTARG (cs->funcname, "-F");
 
-  printf ("%s\n", cmd);
+  if (STREQ (cmd, EMPTYCMD))
+    printf ("-E\n");
+  else if (STREQ (cmd, DEFAULTCMD))
+    printf ("-D\n");
+  else
+    printf ("%s\n", cmd);
 
   return (0);
 }
@@ -575,7 +599,12 @@ print_compopts (cmd, cs, full)
       PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
     }
 
-  printf ("%s\n", cmd);
+  if (STREQ (cmd, EMPTYCMD))
+    printf ("-E\n");
+  else if (STREQ (cmd, DEFAULTCMD))
+    printf ("-D\n");
+  else
+    printf ("%s\n", cmd);
 }
 
 static int
@@ -683,7 +712,7 @@ compgen_builtin (list)
   cs->filterpat = STRDUP (Xarg);
 
   rval = EXECUTION_FAILURE;
-  sl = gen_compspec_completions (cs, "compgen", word, 0, 0);
+  sl = gen_compspec_completions (cs, "compgen", word, 0, 0, 0);
 
   /* If the compspec wants the bash default completions, temporarily
      turn off programmable completion and call the bash completion code. */
@@ -720,7 +749,7 @@ compgen_builtin (list)
 $BUILTIN compopt
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compopt_builtin
-$SHORT_DOC compopt [-o|+o option] [name ...]
+$SHORT_DOC compopt [-o|+o option] [-DE] [name ...]
 Modify or display completion options.
 
 Modify the completion options for each NAME, or, if no NAMEs are supplied,
@@ -729,6 +758,8 @@ the completion options for each NAME or the current completion specification.
 
 Options:
 	-o option	Set completion option OPTION for each NAME
+	-D		Change options for the "default" command completion
+	-E		Change options for the "empty" command completion
 
 Using `+o' instead of `-o' turns off the specified option.
 
@@ -749,15 +780,15 @@ int
 compopt_builtin (list)
      WORD_LIST *list;
 {
-  int opts_on, opts_off, *opts, opt, oind, ret, Eflag;
-  WORD_LIST *l;
+  int opts_on, opts_off, *opts, opt, oind, ret, Dflag, Eflag;
+  WORD_LIST *l, *wl;
   COMPSPEC *cs;
 
-  opts_on = opts_off = 0;
+  opts_on = opts_off = Eflag = Dflag = 0;
   ret = EXECUTION_SUCCESS;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "+o:")) != EOF)
+  while ((opt = internal_getopt (list, "+o:DE")) != EOF)
     {
       opts = (list_opttype == '-') ? &opts_on : &opts_off;
 
@@ -772,6 +803,12 @@ compopt_builtin (list)
 	    }
 	  *opts |= compopts[oind].optflag;
 	  break;
+	case 'D':
+	  Dflag = 1;
+	  break;
+	case 'E':
+	  Eflag = 1;
+	  break;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -779,7 +816,10 @@ compopt_builtin (list)
     }
   list = loptend;
 
-  if (list == 0)
+  wl = Dflag ? make_word_list (make_bare_word (DEFAULTCMD), (WORD_LIST *)NULL)
+	     : (Eflag ? make_word_list (make_bare_word (EMPTYCMD), (WORD_LIST *)NULL) : 0);
+
+  if (list == 0 && wl == 0)
     {
       if (RL_ISSTATE (RL_STATE_COMPLETING) == 0 || pcomp_curcs == 0)
 	{
@@ -805,7 +845,7 @@ compopt_builtin (list)
       return (ret);
     }
 
-  for (l = list; l; l = l->next)
+  for (l = wl ? wl : list; l; l = l->next)
     {
       cs = progcomp_search (l->word->word);
       if (cs == 0)

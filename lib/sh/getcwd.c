@@ -48,6 +48,12 @@
 
 #include <bashansi.h>
 
+#if defined (BROKEN_DIRENT_D_INO)
+#  include "command.h"
+#  include "general.h"
+#  include "externs.h"
+#endif
+
 #include <xmalloc.h>
 
 #if !defined (errno)

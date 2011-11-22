@@ -107,6 +107,7 @@ sh_modcase (string, pat, flags)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
   int mlen;
+  size_t m;
   mbstate_t state;
 #endif
 
@@ -210,7 +211,11 @@ sh_modcase (string, pat, flags)
 #if defined (HANDLE_MULTIBYTE)
       else
 	{
-	  mbrtowc (&wc, string + start, end - start, &state);
+	  m = mbrtowc (&wc, string + start, end - start, &state);
+	  if (MB_INVALIDCH (m))
+	    wc = (wchar_t)string[start];
+	  else if (MB_NULLWCH (m))
+	    wc = L'\0';
 	  switch (nop)
 	  {
 	  default:

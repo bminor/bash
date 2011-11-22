@@ -32,6 +32,8 @@ extern SHELL_VAR *bind_array_variable __P((char *, arrayind_t, char *, int));
 extern SHELL_VAR *bind_array_element __P((SHELL_VAR *, arrayind_t, char *, int));
 extern SHELL_VAR *assign_array_element __P((char *, char *, int));
 
+extern SHELL_VAR *bind_assoc_variable __P((SHELL_VAR *, char *, char *, char *, int));
+
 extern SHELL_VAR *find_or_make_array_variable __P((char *, int));
 
 extern SHELL_VAR *assign_array_from_string  __P((char *, char *, int));
@@ -42,7 +44,7 @@ extern void assign_compound_array_list __P((SHELL_VAR *, WORD_LIST *, int));
 extern SHELL_VAR *assign_array_var_from_string __P((SHELL_VAR *, char *, int));
 
 extern int unbind_array_element __P((SHELL_VAR *, char *));
-extern int skipsubscript __P((const char *, int));
+extern int skipsubscript __P((const char *, int, int));
 
 extern void print_array_assignment __P((SHELL_VAR *, int));
 extern void print_assoc_assignment __P((SHELL_VAR *, int));

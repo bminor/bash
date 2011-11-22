@@ -701,8 +701,8 @@ bgp_delete (pid)
   for (prev = p = bgpids.list; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
-        prev->next = p->next;	/* remove from list */
-        break;
+	prev->next = p->next;	/* remove from list */
+	break;
       }
 
   if (p == 0)
@@ -1708,6 +1708,10 @@ make_child (command, async_p)
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
+#if 0		/* for bash-4.2 */
+      /* If we can't create any children, try to reap some dead ones. */
+      waitchld (-1, 0);
+#endif
       sys_error ("fork: retry");
       if (sleep (forksleep) != 0)
 	break;
@@ -1725,6 +1729,7 @@ make_child (command, async_p)
       if (the_pipeline)
 	kill_current_pipeline ();
 
+      last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();	/* Reset signals, etc. */
     }
 
@@ -2371,6 +2376,8 @@ wait_for (pid)
 
   if (interactive && job_control == 0)
     QUIT;
+  /* Check for terminating signals and exit the shell if we receive one */
+  CHECK_TERMSIG;
 
   /* If we say wait_for (), then we have a record of this child somewhere.
      If it and none of its peers are running, don't call waitchld(). */
@@ -2449,6 +2456,8 @@ wait_for (pid)
 	 old SIGINT signal handler. */
       if (interactive && job_control == 0)
 	QUIT;
+      /* Check for terminating signals and exit the shell if we receive one */
+      CHECK_TERMSIG;
     }
   while (PRUNNING (child) || (job != NO_JOB && RUNNING (job)));
 
@@ -3042,7 +3051,14 @@ waitchld (wpid, block)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
+      /* Check for terminating signals and exit the shell if we receive one */
       CHECK_TERMSIG;
+
+      if (block == 1 && queue_sigchld == 0 && (waitpid_flags & WNOHANG) == 0)
+	{
+	  internal_warning (_("waitchld: turning on WNOHANG to avoid indefinite block"));
+	  waitpid_flags |= WNOHANG;
+	}
 
       pid = WAITPID (-1, &status, waitpid_flags);
 
@@ -3137,7 +3153,7 @@ waitchld (wpid, block)
   if (job_control && signal_is_trapped (SIGCHLD) && children_exited &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {
-      if (this_shell_builtin && this_shell_builtin == wait_builtin)
+      if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
 	{
 	  interrupt_immediately = 0;
 	  trap_handler (SIGCHLD);	/* set pending_traps[SIGCHLD] */

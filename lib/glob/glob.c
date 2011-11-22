@@ -246,7 +246,8 @@ udequote_pathname (pathname)
       if (pathname[i - 1] == 0)
 	break;
     }
-  pathname[j] = '\0';
+  if (pathname)
+    pathname[j] = '\0';
 }
 
 #if HANDLE_MULTIBYTE
@@ -279,7 +280,8 @@ wdequote_pathname (pathname)
       if (wpathname[i - 1] == L'\0')
 	break;
     }
-  wpathname[j] = L'\0';
+  if (wpathname)
+    wpathname[j] = L'\0';
 
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
@@ -307,9 +309,9 @@ dequote_pathname (pathname)
 #  define GLOB_TESTNAME(name)  (lstat (name, &finfo))
 #else /* !HAVE_LSTAT */
 #  if !defined (AFS)
-#    define GLOB_TESTNAME(name)  (sh_eaccess (nextname, F_OK))
+#    define GLOB_TESTNAME(name)  (sh_eaccess (name, F_OK))
 #  else /* AFS */
-#    define GLOB_TESTNAME(name)  (access (nextname, F_OK))
+#    define GLOB_TESTNAME(name)  (access (name, F_OK))
 #  endif /* AFS */
 #endif /* !HAVE_LSTAT */
 
@@ -320,6 +322,7 @@ glob_testdir (dir)
 {
   struct stat finfo;
 
+/*itrace("glob_testdir: testing %s", dir);*/
   if (stat (dir, &finfo) < 0)
     return (-1);
 
@@ -426,13 +429,14 @@ glob_vector (pat, dir, flags)
   register struct globval *nextlink;
   register char *nextname, *npat, *subdir;
   unsigned int count;
-  int lose, skip, ndirs, isdir, sdlen, add_current;
+  int lose, skip, ndirs, isdir, sdlen, add_current, patlen;
   register char **name_vector;
   register unsigned int i;
   int mflags;		/* Flags passed to strmatch (). */
   int pflags;		/* flags passed to sh_makepath () */
   int nalloca;
   struct globval *firstmalloc, *tmplink;
+  char *convfn;
 
   lastlink = 0;
   count = lose = skip = add_current = 0;
@@ -466,6 +470,8 @@ glob_vector (pat, dir, flags)
       skip = 1;
     }
 
+  patlen = strlen (pat);
+
   /* If the filename pattern (PAT) does not contain any globbing characters,
      we can dispense with reading the directory, and just see if there is
      a filename `DIR/PAT'.  If there is, and we can access it, just make the
@@ -479,8 +485,8 @@ glob_vector (pat, dir, flags)
 	return ((char **) &glob_error_return);
 
       dirlen = strlen (dir);
-      nextname = (char *)malloc (dirlen + strlen (pat) + 2);
-      npat = (char *)malloc (strlen (pat) + 1);
+      nextname = (char *)malloc (dirlen + patlen + 2);
+      npat = (char *)malloc (patlen + 1);
       if (nextname == 0 || npat == 0)
 	lose = 1;
       else
@@ -633,8 +639,9 @@ glob_vector (pat, dir, flags)
 	      ++count;
 	      continue;
 	    }
-	      
-	  if (strmatch (pat, dp->d_name, mflags) != FNM_NOMATCH)
+
+	  convfn = fnx_fromfs (dp->d_name, D_NAMLEN (dp));
+	  if (strmatch (pat, convfn, mflags) != FNM_NOMATCH)
 	    {
 	      if (nalloca < ALLOCA_MAX)
 		{
@@ -1023,7 +1030,7 @@ glob_filename (pathname, flags)
 	  dflags |= GX_ALLDIRS|GX_ADDCURDIR;
 #if 0
 	  /* If we want all directories (dflags & GX_ALLDIRS) and we're not
-	     being called recursively as something like `echo **/*.o'
+	     being called recursively as something like `echo [star][star]/[star].o'
 	     ((flags & GX_ALLDIRS) == 0), we want to prevent glob_vector from
 	     adding a null directory name to the front of the temp_results
 	     array.  We turn off ADDCURDIR if not called recursively and

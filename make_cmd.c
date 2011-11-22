@@ -34,6 +34,7 @@
 
 #include "bashintl.h"
 
+#include "parser.h"
 #include "syntax.h"
 #include "command.h"
 #include "general.h"
@@ -53,7 +54,7 @@
 
 #include "shmbutil.h"
 
-extern int line_number, current_command_line_count;
+extern int line_number, current_command_line_count, parser_state;
 extern int last_command_exit_value;
 
 /* Object caching */
@@ -528,11 +529,17 @@ make_simple_command (element, command)
   /* If we are starting from scratch, then make the initial command
      structure.  Also note that we have to fill in all the slots, since
      malloc doesn't return zeroed space. */
-  if (!command)
-    command = make_bare_simple_command ();
+  if (command == 0)
+    {
+      command = make_bare_simple_command ();
+      parser_state |= PST_REDIRLIST;
+    }
 
   if (element.word)
-    command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
+    {
+      command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
+      parser_state &= ~PST_REDIRLIST;
+    }
   else if (element.redirect)
     {
       REDIRECT *r = element.redirect;
@@ -544,6 +551,7 @@ make_simple_command (element, command)
       r->next = command->value.Simple->redirects;
       command->value.Simple->redirects = element.redirect;
     }
+
   return (command);
 }
 
@@ -665,10 +673,11 @@ document_done:
    INSTRUCTION is the instruction type, SOURCE is a file descriptor,
    and DEST is a file descriptor or a WORD_DESC *. */
 REDIRECT *
-make_redirection (source, instruction, dest_and_filename)
-     int source;
+make_redirection (source, instruction, dest_and_filename, flags)
+     REDIRECTEE source;
      enum r_instruction instruction;
      REDIRECTEE dest_and_filename;
+     int flags;
 {
   REDIRECT *temp;
   WORD_DESC *w;
@@ -682,6 +691,7 @@ make_redirection (source, instruction, dest_and_filename)
   temp->redirectee = dest_and_filename;
   temp->instruction = instruction;
   temp->flags = 0;
+  temp->rflags = flags;
   temp->next = (REDIRECT *)NULL;
 
   switch (instruction)
@@ -827,6 +837,7 @@ clean_simple_command (command)
 	REVERSE_LIST (command->value.Simple->redirects, REDIRECT *);
     }
 
+  parser_state &= ~PST_REDIRLIST;
   return (command);
 }
 

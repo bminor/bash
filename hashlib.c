@@ -177,7 +177,7 @@ hash_search (string, table, flags)
 
   bucket = HASH_BUCKET (string, table, hv);
 
-  for (list = table->bucket_array[bucket]; list; list = list->next)
+  for (list = table->bucket_array ? table->bucket_array[bucket] : 0; list; list = list->next)
     {
       if (hv == list->khash && STREQ (list->key, string))
 	{

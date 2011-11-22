@@ -517,7 +517,9 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
      TIOTYPE oldtio, *tiop;
 {
   _rl_echoing_p = (oldtio.c_lflag & ECHO);
+#if defined (ECHOCTL)
   _rl_echoctl = (oldtio.c_lflag & ECHOCTL);
+#endif
 
   tiop->c_lflag &= ~(ICANON | ECHO);
 

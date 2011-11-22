@@ -92,7 +92,7 @@ uconvert(s, ip, up)
       ipart = (ipart * 10) + (*p - '0');
     }
 
-  if (*p == 0)
+  if (p == 0 || *p == 0)	/* callers ensure p can never be 0; this is to shut up clang */
     RETURN(1);
 
   if (*p == DECIMAL)

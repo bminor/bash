@@ -63,6 +63,19 @@ after while
 before false in trap2a.sub
 after false in trap2a.sub
 command substitution
++[6] echo 1
+1
++[7] echo 2
+2
++[8] echo 3
++[8] cat
++[8] false
+++[8] echo trap: 8
+trap: 8
++[9] echo 4
+4
+caught a child death
+caught a child death
 caught a child death
 trap -- 'echo caught a child death' SIGCHLD
 trap -- 'echo exiting' EXIT

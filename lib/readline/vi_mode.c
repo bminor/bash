@@ -131,9 +131,10 @@ static int _rl_vi_callback_char_search PARAMS((_rl_callback_generic_arg *));
 void
 _rl_vi_initialize_line ()
 {
-  register int i;
+  register int i, n;
 
-  for (i = 0; i < sizeof (vi_mark_chars) / sizeof (int); i++)
+  n = sizeof (vi_mark_chars) / sizeof (vi_mark_chars[0]);
+  for (i = 0; i < n; i++)
     vi_mark_chars[i] = -1;
 
   RL_UNSETSTATE(RL_STATE_VICMDONCE);
@@ -768,6 +769,7 @@ _rl_vi_change_mbchar_case (count)
   wchar_t wc;
   char mb[MB_LEN_MAX+1];
   int mlen, p;
+  size_t m;
   mbstate_t ps;
 
   memset (&ps, 0, sizeof (mbstate_t));
@@ -775,7 +777,11 @@ _rl_vi_change_mbchar_case (count)
     count--;
   while (count-- && rl_point < rl_end)
     {
-      mbrtowc (&wc, rl_line_buffer + rl_point, rl_end - rl_point, &ps);
+      m = mbrtowc (&wc, rl_line_buffer + rl_point, rl_end - rl_point, &ps);
+      if (MB_INVALIDCH (m))
+	wc = (wchar_t)rl_line_buffer[rl_point];
+      else if (MB_NULLWCH (m))
+        wc = L'\0';
       if (iswupper (wc))
 	wc = towlower (wc);
       else if (iswlower (wc))

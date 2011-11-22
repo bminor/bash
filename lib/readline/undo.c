@@ -139,6 +139,9 @@ _rl_copy_undo_list (head)
 {
   UNDO_LIST *list, *new, *roving, *c;
 
+  if (head == 0)
+    return head;
+
   list = head;
   new = 0;
   while (list)

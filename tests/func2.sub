@@ -15,3 +15,13 @@ type funcc
 funca
 funcb
 funcc
+
+# when not in posix mode, bash allows non-identifiers as function names
+set +o posix
+foo-bar()
+{
+	:;
+}
+
+declare -F foo-bar
+declare -f foo-bar

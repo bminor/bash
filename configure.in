@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-4.0
+dnl Configure script for bash-4.1
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -21,9 +21,9 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.0, version 4.013])dnl
+AC_REVISION([for Bash 4.1, version 4.019])dnl
 
-define(bashvers, 4.0)
+define(bashvers, 4.1)
 define(relstatus, release)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
@@ -185,6 +185,7 @@ opt_debugger=yes
 opt_single_longdoc_strings=yes
 opt_casemod_attrs=yes
 opt_casemod_expansions=yes
+opt_extglob_default=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -204,7 +205,7 @@ if test $opt_minimal_config = yes; then
 	opt_extended_glob=no opt_cond_command=no opt_arith_for_command=no
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
-	opt_casemod_attrs=no opt_casemod_expansions=no
+	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
 fi
 
 AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -223,6 +224,7 @@ AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enabl
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
 AC_ARG_ENABLE(dparen-arithmetic, AC_HELP_STRING([--enable-dparen-arithmetic], [include ((...)) command]), opt_dparen_arith=$enableval)
 AC_ARG_ENABLE(extended-glob, AC_HELP_STRING([--enable-extended-glob], [include ksh-style extended pattern matching]), opt_extended_glob=$enableval)
+AC_ARG_ENABLE(extended-glob-default, AC_HELP_STRING([--enable-extended-glob-default], [force extended pattern matching to be enabled by default]), opt_extglob_default=$enableval)
 AC_ARG_ENABLE(help-builtin, AC_HELP_STRING([--enable-help-builtin], [include the help builtin]), opt_help=$enableval)
 AC_ARG_ENABLE(history, AC_HELP_STRING([--enable-history], [turn on command history]), opt_history=$enableval)
 AC_ARG_ENABLE(job-control, AC_HELP_STRING([--enable-job-control], [enable job control features]), opt_job_control=$enableval)
@@ -295,6 +297,11 @@ AC_DEFINE(STRICT_POSIX)
 fi
 if test $opt_extended_glob = yes ; then
 AC_DEFINE(EXTENDED_GLOB)
+fi
+if test $opt_extglob_default = yes; then
+AC_DEFINE(EXTGLOB_DEFAULT, 1)
+else
+AC_DEFINE(EXTGLOB_DEFAULT, 0)
 fi
 if test $opt_cond_command = yes ; then
 AC_DEFINE(COND_COMMAND)
@@ -500,8 +507,8 @@ then
 	case "$ac_cv_rl_version" in
 	5*|6*|7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
-		AC_MSG_WARN(installed readline library is too old to be linked with bash)
-		AC_MSG_WARN(using private bash version)
+		AC_MSG_WARN([installed readline library is too old to be linked with bash])
+		AC_MSG_WARN([using private bash version])
 		;;
 	esac
 fi
@@ -651,7 +658,8 @@ BASH_HEADER_INTTYPES
 
 AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
-		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h regex.h)
+		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h regex.h \
+		 syslog.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h \
 		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
@@ -723,12 +731,13 @@ AC_CHECK_FUNCS(bcopy bzero confstr fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		memmove pathconf putenv raise regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
-		sysconf tcgetattr times ttyname tzset unsetenv)
+		sysconf syslog tcgetattr times ttyname tzset unsetenv)
 
-AC_CHECK_FUNCS(vsnprintf snprintf vasprintf asprintf)
+AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
-AC_REPLACE_FUNCS(getcwd memset strcasecmp strerror strftime strnlen strpbrk strstr)
+AC_REPLACE_FUNCS(getcwd memset)
+AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
 AC_REPLACE_FUNCS(fdprintf)
 
@@ -919,6 +928,8 @@ BASH_FUNC_GETCWD
 fi
 BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
+BASH_FUNC_SNPRINTF
+BASH_FUNC_VSNPRINTF
 
 dnl If putenv or unsetenv is not present, set the right define so the
 dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant
@@ -1025,7 +1036,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
-opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE" ;;
+opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE" ;;
 esac
 
 dnl Stanza for OS/compiler pair-specific flags

@@ -61,9 +61,13 @@
 #  include <config.h>
 #endif
 
-#if defined(DEBUG)
+/* GCC 4.2 on Snow Leopard doesn't like the snprintf prototype */
+#if defined(DEBUG) && !defined (MACOSX)
 #  undef HAVE_SNPRINTF
 #  undef HAVE_ASPRINTF
+
+#  define HAVE_SNPRINTF 0
+#  define HAVE_ASPRINTF 0
 #endif
 
 #if defined(DRIVER) && !defined(HAVE_CONFIG_H)
@@ -82,7 +86,7 @@
 #define intmax_t long
 #endif
 
-#if !defined (HAVE_SNPRINTF) || !defined (HAVE_ASPRINTF)
+#if !HAVE_SNPRINTF || !HAVE_ASPRINTF
 
 #include <bashtypes.h>
 
@@ -298,6 +302,13 @@ static void dfallback __P((struct DATA *, const char *, const char *, double));
 #endif
 
 static char *groupnum __P((char *));
+
+#ifndef HAVE_ISINF_IN_LIBC
+static int isinf __P((double));
+#endif
+#ifndef HAVE_ISNAN_IN_LIBC
+static int isnan __P((double));
+#endif
 
 #ifdef DRIVER
 static void memory_error_and_abort ();
@@ -1640,7 +1651,7 @@ dfallback (data, fs, fe, d)
 }
 #endif /* FLOATING_POINT */
 
-#ifndef HAVE_SNPRINTF
+#if !HAVE_SNPRINTF
 
 int
 #if defined (__STDC__)
@@ -1690,7 +1701,7 @@ snprintf(string, length, format, va_alist)
 
 #endif /* HAVE_SNPRINTF */
 
-#ifndef HAVE_ASPRINTF
+#if !HAVE_ASPRINTF
 
 int
 #if defined (__STDC__)
@@ -1735,9 +1746,9 @@ asprintf(stringp, format, va_alist)
   return rval;
 }
 
-#endif
+#endif /* !HAVE_ASPRINTF */
 
-#endif
+#endif /* !HAVE_SNPRINTF || !HAVE_ASPRINTF */
 
 #ifdef DRIVER
 

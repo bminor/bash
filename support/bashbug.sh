@@ -84,7 +84,7 @@ for when Bash doesn't behave like you'd like, or expect.
 Bashbug will start up your editor (as defined by the shell's
 EDITOR environment variable) with a preformatted bug report
 template for you to fill in. The report will be mailed to the
-bash maintainers by default. See the manual for details.
+bug-bash mailing list by default. See the manual for details.
 
 If you invoke bashbug by accident, just quit your editor without
 saving any changes to the template, and no bug report will be sent.
@@ -257,7 +257,7 @@ then
 	exit
 fi
 
-echo $n "Send bug report? [y/n] $c"
+echo $n "Send bug report to ${BUGADDR}? [y/n] $c"
 read ans
 case "$ans" in
 [Nn]*)	exit 0 ;;

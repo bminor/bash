@@ -38,6 +38,10 @@
 
 #include "bashintl.h"
 
+#if defined (SYSLOG_HISTORY)
+#  include <syslog.h>
+#endif
+
 #include "shell.h"
 #include "flags.h"
 #include "input.h"
@@ -691,6 +695,26 @@ check_add_history (line, force)
   return 0;
 }
 
+#if defined (SYSLOG_HISTORY)
+#define SYSLOG_MAXLEN 600
+
+void
+bash_syslog_history (line)
+     const char *line;
+{
+  char trunc[SYSLOG_MAXLEN];
+
+  if (strlen(line) < SYSLOG_MAXLEN)
+    syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);
+  else
+    {
+      strncpy (trunc, line, SYSLOG_MAXLEN);
+      trunc[SYSLOG_MAXLEN - 1] = '\0';
+      syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY (TRUNCATED): PID=%d UID=%d %s", getpid(), current_user.uid, trunc);
+    }
+}
+#endif
+     	
 /* Add a line to the history list.
    The variable COMMAND_ORIENTED_HISTORY controls the style of history
    remembering;  when non-zero, and LINE is not the first line of a
@@ -745,6 +769,10 @@ bash_add_history (line)
 
   if (add_it)
     really_add_history (line);
+
+#if defined (SYSLOG_HISTORY)
+  bash_syslog_history (line);
+#endif
 
   using_history ();
 }

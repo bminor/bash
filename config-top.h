@@ -98,3 +98,14 @@
    name is not found.  If you want to name it something other than the
    default ("command_not_found_handle"), change it here. */
 /* #define NOTFOUND_HOOK "command_not_found_handle" */
+
+/* Define if you want each line saved to the history list in bashhist.c:
+   bash_add_history() to be sent to syslog(). */
+/* #define SYSLOG_HISTORY */
+#if defined (SYSLOG_HISTORY)
+#  define SYSLOG_FACILITY LOG_USER
+#  define SYSLOG_LEVEL LOG_INFO
+#endif
+
+/* Define if you want to include code in shell.c to support wordexp(3) */
+/* #define WORDEXP_OPTION */

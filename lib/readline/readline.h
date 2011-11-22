@@ -95,6 +95,7 @@ extern int rl_forward_word PARAMS((int, int));
 extern int rl_backward_word PARAMS((int, int));
 extern int rl_refresh_line PARAMS((int, int));
 extern int rl_clear_screen PARAMS((int, int));
+extern int rl_skip_csi_sequence PARAMS((int, int));
 extern int rl_arrow_keys PARAMS((int, int));
 
 /* Bindable commands for inserting and deleting text. */
@@ -150,7 +151,9 @@ extern int rl_dump_variables PARAMS((int, int));
 extern int rl_complete PARAMS((int, int));
 extern int rl_possible_completions PARAMS((int, int));
 extern int rl_insert_completions PARAMS((int, int));
+extern int rl_old_menu_complete PARAMS((int, int));
 extern int rl_menu_complete PARAMS((int, int));
+extern int rl_backward_menu_complete PARAMS((int, int));
 
 /* Bindable commands for killing and yanking text, and managing the kill ring. */
 extern int rl_kill_word PARAMS((int, int));
@@ -674,6 +677,17 @@ extern rl_icppfunc_t *rl_directory_completion_hook;
    before rl_directory_completion_hook.  I'm not happy with how this works
    yet, so it's undocumented. */
 extern rl_icppfunc_t *rl_directory_rewrite_hook;
+
+/* If non-zero, this is the address of a function to call when reading
+   directory entries from the filesystem for completion and comparing
+   them to the partial word to be completed.  The function should
+   either return its first argument (if no conversion takes place) or
+   newly-allocated memory.  This can, for instance, convert filenames
+   between character sets for comparison against what's typed at the
+   keyboard.  The returned value is what is added to the list of
+   matches.  The second argument is the length of the filename to be
+   converted. */
+extern rl_dequote_func_t *rl_filename_rewrite_hook;
 
 /* Backwards compatibility with previous versions of readline. */
 #define rl_symbolic_link_hook rl_directory_completion_hook
