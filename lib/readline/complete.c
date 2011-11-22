@@ -2208,7 +2208,7 @@ rl_old_menu_complete (count, invoking_key)
 
   /* The first time through, we generate the list of matches and set things
      up to insert them. */
-  if (rl_last_func != rl_menu_complete)
+  if (rl_last_func != rl_old_menu_complete)
     {
       /* Clean up from previous call, if any. */
       FREE (orig_text);
@@ -2219,6 +2219,8 @@ rl_old_menu_complete (count, invoking_key)
       matches = (char **)NULL;
 
       rl_completion_invoking_key = invoking_key;
+
+      RL_SETSTATE(RL_STATE_COMPLETING);
 
       /* Only the completion entry function can change these. */
       set_completion_defaults ('%');
@@ -2259,8 +2261,11 @@ rl_old_menu_complete (count, invoking_key)
 	  FREE (orig_text);
 	  orig_text = (char *)0;
     	  completion_changed_buffer = 0;
+ 	  RL_UNSETSTATE(RL_STATE_COMPLETING);
           return (0);
 	}
+
+      RL_UNSETSTATE(RL_STATE_COMPLETING);
 
       for (match_list_size = 0; matches[match_list_size]; match_list_size++)
         ;
@@ -2337,6 +2342,8 @@ rl_menu_complete (count, ignore)
 
       full_completion = 0;
 
+      RL_SETSTATE(RL_STATE_COMPLETING);
+
       /* Only the completion entry function can change these. */
       set_completion_defaults ('%');
 
@@ -2378,8 +2385,11 @@ rl_menu_complete (count, ignore)
 	  FREE (orig_text);
 	  orig_text = (char *)0;
     	  completion_changed_buffer = 0;
+ 	  RL_UNSETSTATE(RL_STATE_COMPLETING);
           return (0);
 	}
+
+      RL_UNSETSTATE(RL_STATE_COMPLETING);
 
       for (match_list_size = 0; matches[match_list_size]; match_list_size++)
         ;
