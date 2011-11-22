@@ -7481,7 +7481,7 @@ decode_prompt_string (string)
 		      {
 			t = strrchr (t_string, '/');
 			if (t)
-			  strcpy (t_string, t + 1);
+			  memmove (t_string, t + 1, strlen (t));
 		      }
 		  }
 #undef ROOT_PATH
@@ -8243,4 +8243,3 @@ set_line_mbstate ()
     }
 }
 #endif /* HANDLE_MULTIBYTE */
-

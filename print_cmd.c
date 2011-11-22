@@ -113,6 +113,12 @@ FILE *xtrace_fp = 0;
 
 #define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
 
+#define PRINT_DEFERRED_HEREDOCS(x) \
+  do { \
+    if (deferred_heredocs) \
+      print_deferred_heredocs (x); \
+  } while (0)
+
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
 static int skip_this_indent;
@@ -560,13 +566,15 @@ print_for_command (for_command)
      FOR_COM *for_command;
 {
   print_for_command_head (for_command);
-
   cprintf (";");
   newline ("do\n");
+
   indentation += indentation_amount;
   make_command_string_internal (for_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   indentation -= indentation_amount;
+
   newline ("done");
 }
 

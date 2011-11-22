@@ -1680,7 +1680,7 @@ globword:
      a single match (multiple matches that end up reducing the number of
      characters in the common prefix are bad) will ever be returned on
      regular completion. */
-  if (glob_pattern_p (hint))
+  if (globpat)
     {
       if (state == 0)
 	{

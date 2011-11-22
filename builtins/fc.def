@@ -303,6 +303,16 @@ fc_builtin (list)
   rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
   last_hist = i - rh - hist_last_line_added;
 
+  /* XXX */
+  if (i == last_hist && hlist[last_hist] == 0)
+    while (last_hist >= 0 && hlist[last_hist] == 0)
+      last_hist--;
+  if (last_hist < 0)
+    {
+      sh_erange ((char *)NULL, _("history specification"));
+      return (EXECUTION_FAILURE);
+    }
+
   if (list)
     {
       histbeg = fc_gethnum (list->word->word, hlist);
@@ -465,7 +475,7 @@ fc_gethnum (command, hlist)
      HIST_ENTRY **hlist;
 {
   int sign, n, clen, rh;
-  register int i, j;
+  register int i, j, last_hist;
   register char *s;
 
   sign = 1;
@@ -485,7 +495,15 @@ fc_gethnum (command, hlist)
      has been enabled (interactive or not) should use it in the last_hist
      calculation as if it were on. */
   rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
-  i -= rh + hist_last_line_added;
+  last_hist = i - rh - hist_last_line_added;
+
+  if (i == last_hist && hlist[last_hist] == 0)
+    while (last_hist >= 0 && hlist[last_hist] == 0)
+      last_hist--;
+  if (last_hist < 0)
+    return (-1);
+
+  i = last_hist;
 
   /* No specification defaults to most recent command. */
   if (command == NULL)

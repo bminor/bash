@@ -655,6 +655,9 @@ set_signal_handler (sig, handler)
     act.sa_flags |= SA_INTERRUPT;	/* XXX */
   else
     act.sa_flags |= SA_RESTART;		/* XXX */
+#else
+  if (sig == SIGCHLD)
+    act.sa_flags |= SA_RESTART;
 #endif
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);

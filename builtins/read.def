@@ -615,13 +615,14 @@ add_char:
   if (unbuffered_read == 0)
     zsyncfd (fd);
 
-  interrupt_immediately--;
-  terminate_immediately--;
   discard_unwind_frame ("read_builtin");
 
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 
 assign_vars:
+
+  interrupt_immediately--;
+  terminate_immediately--;
 
 #if defined (ARRAY_VARS)
   /* If -a was given, take the string read, break it into a list of words,
