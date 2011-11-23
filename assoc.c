@@ -77,6 +77,11 @@ assoc_insert (hash, key, value)
   b = hash_search (key, hash, HASH_CREATE);
   if (b == 0)
     return -1;
+  /* If we are overwriting an existing element's value, we're not going to
+     use the key.  Nothing in the array assignment code path frees the key
+     string, so we can free it here to avoid a memory leak. */
+  if (b->key != key)
+    free (key);
   FREE (b->data);
   b->data = value ? savestring (value) : (char *)0;
   return (0);
