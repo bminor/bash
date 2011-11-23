@@ -2499,7 +2499,7 @@ yylex ()
 	 We do this only if it is time to do so. Notice that only here
 	 is the mail alarm reset; nothing takes place in check_mail ()
 	 except the checking of mail.  Please don't change this. */
-      if (prompt_is_ps1 && time_to_check_mail ())
+      if (prompt_is_ps1 && parse_and_execute_level == 0 && time_to_check_mail ())
 	{
 	  check_mail ();
 	  reset_mail_timer ();
