@@ -33,9 +33,14 @@ extern void bashline_reset __P((void));
 extern void bashline_reinitialize __P((void));
 extern int bash_re_edit __P((char *));
 
+extern void bashline_set_event_hook __P((void));
+extern void bashline_reset_event_hook __P((void));
+
 extern int bind_keyseq_to_unix_command __P((char *));
 
 extern char **bash_default_completion __P((const char *, int, int, int, int));
+
+void set_directory_hook __P((void));
 
 /* Used by programmable completion code. */
 extern char *command_word_completion_function __P((const char *, int));

@@ -61,6 +61,10 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
+#if defined (READLINE)
+#  include "../bashline.h"
+#endif
+
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
@@ -94,7 +98,7 @@ extern int extended_glob;
 extern int hist_verify, history_reediting, perform_hostname_completion;
 extern int no_empty_command_completion;
 extern int force_fignore;
-extern int dircomplete_spelling;
+extern int dircomplete_spelling, dircomplete_expand;
 
 extern int enable_hostname_completion __P((int));
 #endif
@@ -119,6 +123,10 @@ static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
 static int set_restricted_shell __P((char *, int));
+#endif
+
+#if defined (READLINE)
+static int shopt_set_complete_direxpand __P((char *, int));
 #endif
 
 static int shopt_login_shell;
@@ -150,6 +158,7 @@ static struct {
   { "compat40", &shopt_compat40, set_compatibility_level },
   { "compat41", &shopt_compat41, set_compatibility_level },
 #if defined (READLINE)
+  { "direxpand", &dircomplete_expand, shopt_set_complete_direxpand },
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
 #endif
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
@@ -534,6 +543,17 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
   return 0;
 }
+
+#if defined (READLINE)
+static int
+shopt_set_complete_direxpand (option_name, mode)
+     char *option_name;
+     int mode;
+{
+  set_directory_hook ();
+  return 0;
+}
+#endif
 
 #if defined (RESTRICTED_SHELL)
 /* Don't allow the value of restricted_shell to be modified. */
