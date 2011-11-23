@@ -465,6 +465,9 @@ printf_builtin (list)
 		  secs = shell_start_time;	/* roughly $SECONDS */
 		else
 		  secs = arg;
+#if defined (HAVE_TZSET)
+		sv_tz ("TZ");		/* XXX -- just make sure */
+#endif
 		tm = localtime (&secs);
 		n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
 		free (timefmt);

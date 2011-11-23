@@ -3653,6 +3653,22 @@ n_shell_variables ()
   return n;
 }
 
+int
+chkexport (name)
+     char *name;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (exported_p (v))
+    {
+      array_needs_making = 1;
+      maybe_make_export_env ();
+      return 1;
+    }
+  return 0;
+}
+
 void
 maybe_make_export_env ()
 {
@@ -4214,7 +4230,7 @@ static struct name_and_function special_vars[] = {
   { "TEXTDOMAIN", sv_locale },
   { "TEXTDOMAINDIR", sv_locale },
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+#if defined (HAVE_TZSET)
   { "TZ", sv_tz },
 #endif
 
@@ -4558,12 +4574,13 @@ sv_histtimefmt (name)
 }
 #endif /* HISTORY */
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+#if defined (HAVE_TZSET)
 void
 sv_tz (name)
      char *name;
 {
-  tzset ();
+  if (chkexport (name))
+    tzset ();
 }
 #endif
 

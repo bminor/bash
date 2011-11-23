@@ -313,6 +313,7 @@ extern void set_func_auto_export __P((const char *));
 
 extern void sort_variables __P((SHELL_VAR **));
 
+extern int chkexport __P((char *));
 extern void maybe_make_export_env __P((void));
 extern void update_export_env_inplace __P((char *, int, char *));
 extern void put_command_name_into_env __P((char *));

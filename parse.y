@@ -5135,6 +5135,9 @@ decode_prompt_string (string)
 	    case 'A':
 	      /* Make the current time/date into a string. */
 	      (void) time (&the_time);
+#if defined (HAVE_TZSET)
+	      sv_tz ("TZ");		/* XXX -- just make sure */
+#endif
 	      tm = localtime (&the_time);
 
 	      if (c == 'd')
