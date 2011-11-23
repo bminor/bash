@@ -4609,6 +4609,7 @@ expand_word_unsplit (word, quoted)
   if (ifs_firstc == 0)
 #endif
     word->flags |= W_NOSPLIT;
+  word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
