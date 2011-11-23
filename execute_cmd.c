@@ -2196,6 +2196,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (ignore_return && cmd)
     cmd->flags |= CMD_IGNORE_RETURN;
 
+#if defined (JOB_CONTROL)
   lastpipe_flag = 0;
   begin_unwind_frame ("lastpipe-exec");
   lstdin = -1;
@@ -2215,15 +2216,19 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
 	}
-      cmd->flags |= CMD_LASTPIPE;
+      if (cmd)
+	cmd->flags |= CMD_LASTPIPE;
     }	  
   if (prev >= 0)
     add_unwind_protect (close, prev);
+#endif
 
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
+#if defined (JOB_CONTROL)
   if (lstdin > 0)
     restore_stdin (lstdin);
+#endif
 
   if (prev >= 0)
     close (prev);
