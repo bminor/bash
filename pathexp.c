@@ -196,7 +196,7 @@ quote_string_for_globbing (pathname, qflags)
 	{
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
-	  if ((qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
+	  if (pathname[i+1] != CTLESC && (qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
 	    continue;
 	  temp[j++] = '\\';
 	  i++;
