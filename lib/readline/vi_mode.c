@@ -1114,7 +1114,7 @@ rl_domove_read_callback (m)
       rl_beg_of_line (1, c);
       _rl_vi_last_motion = c;
       RL_UNSETSTATE (RL_STATE_VIMOTION);
-      return (0);
+      return (vidomove_dispatch (m));
     }
 #if defined (READLINE_CALLBACKS)
   /* XXX - these need to handle rl_universal_argument bindings */
