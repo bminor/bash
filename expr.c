@@ -476,19 +476,23 @@ expassign ()
 
       if (special)
 	{
+	  if ((op == DIV || op == MOD) && value == 0)
+	    {
+	      if (noeval == 0)
+		evalerror (_("division by 0"));
+	      else
+	        value = 1;
+	    }
+
 	  switch (op)
 	    {
 	    case MUL:
 	      lvalue *= value;
 	      break;
 	    case DIV:
-	      if (value == 0)
-		evalerror (_("division by 0"));
 	      lvalue /= value;
 	      break;
 	    case MOD:
-	      if (value == 0)
-		evalerror (_("division by 0"));
 	      lvalue %= value;
 	      break;
 	    case PLUS:
@@ -804,7 +808,12 @@ exp2 ()
       val2 = exppower ();
 
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
-	evalerror (_("division by 0"));
+	{
+	  if (noeval == 0)
+	    evalerror (_("division by 0"));
+	  else
+	    val2 = 1;
+	}
 
       if (op == MUL)
 	val1 *= val2;
