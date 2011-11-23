@@ -136,6 +136,9 @@ typedef struct _sh_parser_state_t {
   int parser_state;
   int *token_state;
 
+  char *token;
+  int token_buffer_size;
+
   /* input line state -- line number saved elsewhere */
   int input_line_terminator;
   int eof_encountered;
@@ -166,6 +169,16 @@ typedef struct _sh_parser_state_t {
   
 } sh_parser_state_t;
 
+typedef struct _sh_input_line_state_t {
+  char *input_line;
+  int input_line_index;
+  int input_line_size;
+  int input_line_len;
+} sh_input_line_state_t;
+
 /* Let's try declaring these here. */
 extern sh_parser_state_t *save_parser_state __P((sh_parser_state_t *));
 extern void restore_parser_state __P((sh_parser_state_t *));
+
+extern sh_input_line_state_t *save_input_line_state __P((sh_input_line_state_t *));
+extern void restore_input_line_state __P((sh_input_line_state_t *));
