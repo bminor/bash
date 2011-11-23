@@ -42,4 +42,12 @@
 #  endif
 #endif
 
+/* Make sure O_BINARY and O_TEXT are defined to avoid Windows-specific code. */
+#if !defined (O_BINARY)
+#  define O_BINARY 0
+#endif
+#if !defined (O_TEXT)
+#  define O_TEXT 0
+#endif
+
 #endif /* ! _FILECNTL_H_ */

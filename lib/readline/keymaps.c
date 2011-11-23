@@ -142,11 +142,11 @@ rl_discard_keymap (map)
 
 	case ISKMAP:
 	  rl_discard_keymap ((Keymap)map[i].function);
-	  free ((char *)map[i].function);
+	  xfree ((char *)map[i].function);
 	  break;
 
 	case ISMACR:
-	  free ((char *)map[i].function);
+	  xfree ((char *)map[i].function);
 	  break;
 	}
     }
@@ -158,5 +158,5 @@ rl_free_keymap (map)
      Keymap map;
 {
   rl_discard_keymap (map);
-  free ((char *)map);
+  xfree ((char *)map);
 }

@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -83,7 +83,7 @@ extern char **environ;
 
 /* Variables used here and defined in other files. */
 extern int posixly_correct;
-extern int line_number;
+extern int line_number, line_number_base;
 extern int subshell_environment, indirection_level, subshell_level;
 extern int build_version, patch_level;
 extern int expanding_redir;
@@ -99,6 +99,7 @@ extern char *command_execution_string;
 extern time_t shell_start_time;
 extern int assigning_in_environment;
 extern int executing_builtin;
+extern int funcnest_max;
 
 #if defined (READLINE)
 extern int no_line_editing;
@@ -158,7 +159,6 @@ static int export_env_size;
 
 #if defined (READLINE)
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
-static int winsize_assigned;		/* assigned to LINES or COLUMNS */
 #endif
 
 /* Some forward declarations. */
@@ -387,11 +387,14 @@ initialize_shell_variables (env, privmode)
 #endif
 	{
 	  temp_var = bind_variable (name, string, 0);
-	  if (legal_identifier (name))
-	    VSETATTR (temp_var, (att_exported | att_imported));
-	  else
-	    VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
-	  array_needs_making = 1;
+	  if (temp_var)
+	    {
+	      if (legal_identifier (name))
+		VSETATTR (temp_var, (att_exported | att_imported));
+	      else
+		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
+	      array_needs_making = 1;
+	    }
 	}
 
       name[char_index] = '=';
@@ -587,6 +590,10 @@ initialize_shell_variables (env, privmode)
 
   /* Get the user's real and effective user ids. */
   uidset ();
+
+  temp_var = find_variable ("BASH_XTRACEFD");
+  if (temp_var && imported_p (temp_var))
+    sv_xtracefd (temp_var->name);
 
   /* Initialize the dynamic variables, and seed their values. */
   initialize_dynamic_variables ();
@@ -1228,17 +1235,14 @@ static int seeded_subshell = 0;
 static int
 brand ()
 {
-#if 0
-  rseed = rseed * 1103515245 + 12345;
-  return ((unsigned int)((rseed >> 16) & 32767));	/* was % 32768 */
-#else
   /* From "Random number generators: good ones are hard to find",
      Park and Miller, Communications of the ACM, vol. 31, no. 10,
      October 1988, p. 1195. filtered through FreeBSD */
   long h, l;
 
+  /* Can't seed with 0. */
   if (rseed == 0)
-    seedrand ();
+    rseed = 123459876;
   h = rseed / 127773;
   l = rseed % 127773;
   rseed = 16807 * l - 2836 * h;
@@ -1247,7 +1251,6 @@ brand ()
     rseed += 0x7fffffff;
 #endif
   return ((unsigned int)(rseed & 32767));	/* was % 32768 */
-#endif
 }
 
 /* Set the random number generator seed to SEED. */
@@ -1329,7 +1332,7 @@ assign_lineno (var, value, unused, key)
 
   if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
     new_value = 0;
-  line_number = new_value;
+  line_number = line_number_base = new_value;
   return var;
 }
 
@@ -1784,6 +1787,20 @@ find_variable_internal (name, force_tempenv)
 
   if (var == 0)
     var = var_lookup (name, shell_variables);
+
+  if (var == 0)
+    return ((SHELL_VAR *)NULL);
+
+  return (var->dynamic_value ? (*(var->dynamic_value)) (var) : var);
+}
+
+SHELL_VAR *
+find_global_variable (name)
+     const char *name;
+{
+  SHELL_VAR *var;
+
+  var = var_lookup (name, global_variables);
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -2371,7 +2388,7 @@ bind_int_variable (lhs, rhs)
 #endif
     v = bind_variable (lhs, rhs, 0);
 
-  if (isint)
+  if (v && isint)
     VSETATTR (v, att_integer);
 
   return (v);
@@ -2470,8 +2487,9 @@ bind_function_def (name, value)
    responsible for moving the main temporary env to one of the other
    temporary environments.  The expansion code in subst.c calls this. */
 int
-assign_in_env (word)
+assign_in_env (word, flags)
      WORD_DESC *word;
+     int flags;
 {
   int offset;
   char *name, *temp, *value;
@@ -2529,8 +2547,13 @@ assign_in_env (word)
 
   array_needs_making = 1;
 
+#if 0
   if (ifsname (name))
     setifs (var);
+else
+#endif
+  if (flags)
+    stupidly_hack_special_variables (name);
 
   if (echo_command_at_execute)
     /* The Korn shell prints the `+ ' in front of assignment statements,
@@ -2820,7 +2843,7 @@ delete_all_variables (hashed_vars)
       if (!entry) \
 	{ \
 	  entry = bind_variable (name, "", 0); \
-	  if (!no_invisible_vars) entry->attributes |= att_invisible; \
+	  if (!no_invisible_vars && entry) entry->attributes |= att_invisible; \
 	} \
     } \
   while (0)
@@ -3250,6 +3273,9 @@ find_tempenv_variable (name)
   return (temporary_env ? hash_lookup (name, temporary_env) : (SHELL_VAR *)NULL);
 }
 
+char **tempvar_list;
+int tvlist_ind;
+
 /* Push the variable described by (SHELL_VAR *)DATA down to the next
    variable context from the temporary environment. */
 static void
@@ -3285,6 +3311,9 @@ push_temp_var (data)
     }
   v->attributes |= var->attributes;
 
+  if (find_special_var (var->name) >= 0)
+    tempvar_list[tvlist_ind++] = savestring (var->name);
+
   dispose_variable (var);
 }
 
@@ -3298,24 +3327,46 @@ propagate_temp_var (data)
   if (tempvar_p (var) && (var->attributes & att_propagate))
     push_temp_var (data);
   else
-    dispose_variable (var);
+    {
+      if (find_special_var (var->name) >= 0)
+	tempvar_list[tvlist_ind++] = savestring (var->name);
+      dispose_variable (var);
+    }
 }
 
 /* Free the storage used in the hash table for temporary
    environment variables.  PUSHF is a function to be called
    to free each hash table entry.  It takes care of pushing variables
-   to previous scopes if appropriate. */
+   to previous scopes if appropriate.  PUSHF stores names of variables
+   that require special handling (e.g., IFS) on tempvar_list, so this
+   function can call stupidly_hack_special_variables on all the
+   variables in the list when the temporary hash table is destroyed. */
 static void
 dispose_temporary_env (pushf)
      sh_free_func_t *pushf;
 {
+  int i;
+
+  tempvar_list = strvec_create (HASH_ENTRIES (temporary_env) + 1);
+  tempvar_list[tvlist_ind = 0] = 0;
+    
   hash_flush (temporary_env, pushf);
   hash_dispose (temporary_env);
   temporary_env = (HASH_TABLE *)NULL;
 
+  tempvar_list[tvlist_ind] = 0;
+
   array_needs_making = 1;
 
-  sv_ifs ("IFS");		/* XXX here for now */
+#if 0
+  sv_ifs ("IFS");		/* XXX here for now -- check setifs in assign_in_env */  
+#endif
+  for (i = 0; i < tvlist_ind; i++)
+    stupidly_hack_special_variables (tempvar_list[i]);
+
+  strvec_dispose (tempvar_list);
+  tempvar_list = 0;
+  tvlist_ind = 0;
 }
 
 void
@@ -4109,6 +4160,8 @@ static struct name_and_function special_vars[] = {
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
+  { "FUNCNEST", sv_funcnest },
+
   { "GLOBIGNORE", sv_globignore },
 
 #if defined (HISTORY)
@@ -4280,6 +4333,22 @@ sv_mail (name)
     }
 }
 
+void
+sv_funcnest (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  intmax_t num;
+
+  v = find_variable (name);
+  if (v == 0)
+    funcnest_max = 0;
+  else if (legal_number (value_cell (v), &num) == 0)
+    funcnest_max = 0;
+  else
+    funcnest_max = num;
+}
+
 /* What to do when GLOBIGNORE changes. */
 void
 sv_globignore (name)
@@ -4347,7 +4416,7 @@ sv_winsize (name)
     {
       if (legal_number (value_cell (v), &xd) == 0)
 	return;
-      winsize_assignment = winsize_assigned = 1;
+      winsize_assignment = 1;
       d = xd;			/* truncate */
       if (name[0] == 'L')	/* LINES */
 	rl_set_screen_size (d, -1);
@@ -4639,6 +4708,40 @@ set_pipestatus_array (ps, nproc)
 	  array_insert (a, i, t);
 	}
     }
+}
+
+ARRAY *
+save_pipestatus_array ()
+{
+  SHELL_VAR *v;
+  ARRAY *a, *a2;
+
+  v = find_variable ("PIPESTATUS");
+  if (v == 0 || array_p (v) == 0 || array_cell (v) == 0)
+    return ((ARRAY *)NULL);
+    
+  a = array_cell (v);
+  a2 = array_copy (array_cell (v));
+
+  return a2;
+}
+
+void
+restore_pipestatus_array (a)
+     ARRAY *a;
+{
+  SHELL_VAR *v;
+  ARRAY *a2;
+
+  v = find_variable ("PIPESTATUS");
+  /* XXX - should we still assign even if existing value is NULL? */
+  if (v == 0 || array_p (v) == 0 || array_cell (v) == 0)
+    return;
+
+  a2 = array_cell (v);
+  var_setarray (v, a); 
+
+  array_dispose (a2);
 }
 #endif
 

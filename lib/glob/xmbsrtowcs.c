@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2004 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -18,6 +18,12 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* Ask for GNU extensions to get extern declaration for mbsnrtowcs if
+   available via glibc. */
+#ifndef _GNU_SOURCE
+#  define _GNU_SOURCE 1
+#endif
+
 #include <config.h>
 
 #include <bashansi.h>
@@ -32,6 +38,11 @@
 #ifndef FREE
 #  define FREE(x)	do { if (x) free (x); } while (0)
 #endif
+
+#if ! HAVE_STRCHRNUL
+extern char *strchrnul __P((const char *, int));
+#endif
+
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.
    So, this function is made for converting 0x5c to U<0x5c>. */
 
@@ -120,6 +131,94 @@ xmbsrtowcs (dest, src, len, pstate)
     return (wclength);
 }
 
+#if HAVE_MBSNRTOWCS
+/* Convert a multibyte string to a wide character string. Memory for the
+   new wide character string is obtained with malloc.
+
+   Fast multiple-character version of xdupmbstowcs used when the indices are
+   not required and mbsnrtowcs is available. */
+
+static size_t
+xdupmbstowcs2 (destp, src)
+    wchar_t **destp;	/* Store the pointer to the wide character string */
+    const char *src;	/* Multibyte character string */
+{
+  const char *p;	/* Conversion start position of src */
+  wchar_t *wsbuf;	/* Buffer for wide characters. */
+  size_t wsbuf_size;	/* Size of WSBUF */
+  size_t wcnum;		/* Number of wide characters in WSBUF */
+  mbstate_t state;	/* Conversion State */
+  size_t wcslength;	/* Number of wide characters produced by the conversion. */
+  const char *end_or_backslash;
+  size_t nms;	/* Number of multibyte characters to convert at one time. */
+  mbstate_t tmp_state;
+  const char *tmp_p;
+
+  memset (&state, '\0', sizeof(mbstate_t));
+
+  wsbuf_size = 0;
+  wsbuf = NULL;
+
+  p = src;
+  wcnum = 0;
+  do
+    {
+      end_or_backslash = strchrnul(p, '\\');
+      nms = (end_or_backslash - p);
+      if (*end_or_backslash == '\0')
+	nms++;
+
+      /* Compute the number of produced wide-characters. */
+      tmp_p = p;
+      tmp_state = state;
+      wcslength = mbsnrtowcs(NULL, &tmp_p, nms, 0, &tmp_state);
+
+      /* Conversion failed. */
+      if (wcslength == (size_t)-1)
+	{
+	  free (wsbuf);
+	  *destp = NULL;
+	  return (size_t)-1;
+	}
+
+      /* Resize the buffer if it is not large enough. */
+      if (wsbuf_size < wcnum+wcslength+1)	/* 1 for the L'\0' or the potential L'\\' */
+	{
+	  wchar_t *wstmp;
+
+	  wsbuf_size = wcnum+wcslength+1;	/* 1 for the L'\0' or the potential L'\\' */
+
+	  wstmp = (wchar_t *) realloc (wsbuf, wsbuf_size * sizeof (wchar_t));
+	  if (wstmp == NULL)
+	    {
+	      free (wsbuf);
+	      *destp = NULL;
+	      return (size_t)-1;
+	    }
+	  wsbuf = wstmp;
+	}
+
+      /* Perform the conversion. This is assumed to return 'wcslength'.
+       * It may set 'p' to NULL. */
+      mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
+
+      wcnum += wcslength;
+
+      if (mbsinit (&state) && (p != NULL) && (*p == '\\'))
+	{
+	  wsbuf[wcnum++] = L'\\';
+	  p++;
+	}
+    }
+  while (p != NULL);
+
+  *destp = wsbuf;
+
+  /* Return the length of the wide character string, not including `\0'. */
+  return wcnum;
+}
+#endif /* HAVE_MBSNRTOWCS */
+
 /* Convert a multibyte string to a wide character string. Memory for the
    new wide character string is obtained with malloc.
 
@@ -154,6 +253,11 @@ xdupmbstowcs (destp, indicesp, src)
 	*destp = NULL;
       return (size_t)-1;
     }
+
+#if HAVE_MBSNRTOWCS
+  if (indicesp == NULL)
+    return (xdupmbstowcs2 (destp, src));
+#endif
 
   memset (&state, '\0', sizeof(mbstate_t));
   wsbuf_size = WSBUF_INC;

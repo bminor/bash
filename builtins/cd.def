@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,7 +58,7 @@ extern int array_needs_making;
 extern const char * const bash_getcwd_errstr;
 
 static int bindpwd __P((int));
-static void setpwd __P((char *));
+static int setpwd __P((char *));
 static char *resetpwd __P((char *));
 static int change_to_directory __P((char *, int));
 
@@ -67,9 +67,11 @@ int cdspelling = 0;
 
 int cdable_vars;
 
+static int eflag;	/* file scope so bindpwd() can see it */
+
 $BUILTIN cd
 $FUNCTION cd_builtin
-$SHORT_DOC cd [-L|-P] [dir]
+$SHORT_DOC cd [-L|[-P [-e]]] [dir]
 Change the shell working directory.
 
 Change the current directory to DIR.  The default DIR is the value of the
@@ -88,15 +90,18 @@ Options:
     -L	force symbolic links to be followed
     -P	use the physical directory structure without following symbolic
 	links
+    -e	if the -P option is supplied, and the current working directory
+	cannot be determined successfully, exit with a non-zero status
 
 The default is to follow symbolic links, as if `-L' were specified.
 
 Exit Status:
-Returns 0 if the directory is changed; non-zero otherwise.
+Returns 0 if the directory is changed, and if $PWD is set successfully when
+-P is used; non-zero otherwise.
 $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
-static void
+static int
 setpwd (dirname)
      char *dirname;
 {
@@ -105,11 +110,14 @@ setpwd (dirname)
 
   old_anm = array_needs_making;
   tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
-  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+  if (tvar && readonly_p (tvar))
+    return EXECUTION_FAILURE;
+  if (tvar && old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
       array_needs_making = 0;
     }
+  return EXECUTION_SUCCESS;
 }
 
 static int
@@ -131,13 +139,19 @@ bindpwd (no_symlinks)
   pwdvar = get_string_value ("PWD");
 
   tvar = bind_variable ("OLDPWD", pwdvar, 0);
+  if (tvar && readonly_p (tvar))
+    r = EXECUTION_FAILURE;
+
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("OLDPWD=", 7, pwdvar);
       array_needs_making = 0;
     }
 
-  setpwd (dirname);
+  if (setpwd (dirname) == EXECUTION_FAILURE)
+    r = EXECUTION_FAILURE;
+  if (dirname == 0 && eflag)
+    r = EXECUTION_FAILURE;
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
@@ -162,7 +176,7 @@ resetpwd (caller)
 #define LCD_DOVARS	0x001
 #define LCD_DOSPELL	0x002
 #define LCD_PRINTPATH	0x004
-#define LCD_FREEDIRNAME	0x010
+#define LCD_FREEDIRNAME	0x008
 
 /* This builtin is ultimately the way that all user-visible commands should
    change the current working directory.  It is called by cd_to_string (),
@@ -183,6 +197,7 @@ cd_builtin (list)
     }
 #endif /* RESTRICTED_SHELL */
 
+  eflag = 0;
   no_symlinks = no_symbolic_links;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "LP")) != -1)
@@ -195,6 +210,9 @@ cd_builtin (list)
 	case 'L':
 	  no_symlinks = 0;
 	  break;
+	case 'e':
+	  eflag = 1;
+	  break;
 	default:
 	  builtin_usage ();
 	  return (EXECUTION_FAILURE);
@@ -204,6 +222,8 @@ cd_builtin (list)
 
   lflag = (cdable_vars ? LCD_DOVARS : 0) |
 	  ((interactive && cdspelling) ? LCD_DOSPELL : 0);
+  if (eflag && no_symlinks == 0)
+    eflag = 0;
 
   if (list == 0)
     {
@@ -270,6 +290,7 @@ cd_builtin (list)
 	    free (temp);
 	}
 
+#if 0	/* changed for bash-4.2 Posix cd description steps 5-6 */
       /* POSIX.2 says that if `.' does not appear in $CDPATH, we don't
 	 try the current directory, so we just punt now with an error
 	 message if POSIXLY_CORRECT is non-zero.  The check for cdpath[0]
@@ -280,6 +301,7 @@ cd_builtin (list)
 	  builtin_error ("%s: %s", dirname, strerror (ENOENT));
 	  return (EXECUTION_FAILURE);
 	}
+#endif
     }
   else
     dirname = list->word->word;
@@ -389,13 +411,14 @@ pwd_builtin (list)
 
   if (directory)
     {
+      opt = EXECUTION_SUCCESS;
       printf ("%s\n", directory);
       /* This is dumb but posix-mandated. */
       if (posixly_correct && pflag)
-	setpwd (directory);
+	opt = setpwd (directory);
       if (directory != the_current_working_directory)
 	free (directory);
-      return (sh_chkwrite (EXECUTION_SUCCESS));
+      return (sh_chkwrite (opt));
     }
   else
     return (EXECUTION_FAILURE);

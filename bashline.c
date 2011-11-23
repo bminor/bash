@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -175,7 +175,8 @@ static char **prog_complete_matches;
 extern int hist_verify;
 #endif
 
-extern int current_command_line_count, last_command_exit_value;
+extern int current_command_line_count, saved_command_line_count;
+extern int last_command_exit_value;
 extern int array_needs_making;
 extern int posixly_correct, no_symbolic_links;
 extern char *current_prompt_string, *ps1_prompt;
@@ -500,7 +501,7 @@ initialize_readline ()
 
   /* Tell the completer that we might want to follow symbolic links or
      do other expansion on directory names. */
-  rl_directory_completion_hook = bash_directory_completion_hook;
+  rl_directory_rewrite_hook = bash_directory_completion_hook;
 
   rl_filename_rewrite_hook = bash_filename_rewrite_hook;
 
@@ -528,11 +529,8 @@ initialize_readline ()
   enable_hostname_completion (perform_hostname_completion);
 
   /* characters that need to be quoted when appearing in filenames. */
-#if 0
-  rl_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{";	/*}*/
-#else
   rl_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{~";	/*}*/
-#endif
+
   rl_filename_quoting_function = bash_quote_filename;
   rl_filename_dequoting_function = bash_dequote_filename;
   rl_char_is_quoted_p = char_is_quoted;
@@ -566,7 +564,7 @@ bashline_reset ()
   tilde_initialize ();
   rl_attempted_completion_function = attempt_shell_completion;
   rl_completion_entry_function = NULL;
-  rl_directory_completion_hook = bash_directory_completion_hook;
+  rl_directory_rewrite_hook = bash_directory_completion_hook;
   rl_ignore_some_completions_function = filename_completion_ignore;
 }
 
@@ -862,10 +860,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      char *edit_command;
 {
   char *command, *metaval;
-  int r, cclc, rrs, metaflag;
+  int r, rrs, metaflag;
+  sh_parser_state_t ps;
 
   rrs = rl_readline_state;
-  cclc = current_command_line_count;
+  saved_command_line_count = current_command_line_count;
 
   /* Accept the current line. */
   rl_newline (1, c);
@@ -881,6 +880,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 	 then call fc to operate on it.  We have to add a dummy command to
 	 the end of the history because fc ignores the last command (assumes
 	 it's supposed to deal with the command before the `fc'). */
+      /* This breaks down when using command-oriented history and are not
+	 finished with the command, so we should not ignore the last command */
       using_history ();
       bash_add_history (rl_line_buffer);
       bash_add_history ("");
@@ -897,11 +898,13 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      yet. */
   if (rl_deprep_term_function)
     (*rl_deprep_term_function) ();
+  save_parser_state (&ps);
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
+  restore_parser_state (&ps);
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
 
-  current_command_line_count = cclc;
+  current_command_line_count = saved_command_line_count;
 
   /* Now erase the contents of the current line and undo the effects of the
      rl_accept_line() above.  We don't even want to make the text we just
@@ -990,6 +993,20 @@ bash_forward_shellword (count, key)
 	  return 0;
 	}
 
+      /* Are we in a quoted string?  If we are, move to the end of the quoted
+         string and continue the outer loop. We only want quoted strings, not
+         backslash-escaped characters, but char_is_quoted doesn't
+         differentiate. */
+      if (char_is_quoted (rl_line_buffer, p) && p > 0 && rl_line_buffer[p-1] != '\\')
+	{
+	  do
+	    ADVANCE_CHAR (rl_line_buffer, slen, p);
+	  while (p < rl_end && char_is_quoted (rl_line_buffer, p));
+	  count--;
+	  continue;
+	}
+
+      /* Rest of code assumes we are not in a quoted string. */
       /* Move forward until we hit a non-metacharacter. */
       while (p < rl_end && (c = rl_line_buffer[p]) && WORDDELIM (c))
 	{
@@ -1397,12 +1414,12 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
-  if (matches ==0 && *text == '~' && mbschr (text, '/') == 0)
+  if (matches == 0 && *text == '~' && mbschr (text, '/') == 0)
     matches = rl_completion_matches (text, rl_username_completion_function);
 
   /* Another one.  Why not?  If the word starts in '@', then look through
      the world of known hostnames for completion first. */
-  if (!matches && perform_hostname_completion && *text == '@')
+  if (matches == 0 && perform_hostname_completion && *text == '@')
     matches = rl_completion_matches (text, hostname_completion_function);
 
   /* And last, (but not least) if this word is in a command position, then
@@ -2648,8 +2665,7 @@ bash_directory_expansion (dirname)
 
   if (rl_directory_rewrite_hook)
     (*rl_directory_rewrite_hook) (&d);
-
-  if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
+  else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
     {
       free (*dirname);
       *dirname = d;
@@ -2678,7 +2694,9 @@ bash_filename_rewrite_hook (fname, fnlen)
 }
 
 /* Handle symbolic link references and other directory name
-   expansions while hacking completion. */
+   expansions while hacking completion.  This should return 1 if it modifies
+   the DIRNAME argument, 0 otherwise.  It should make sure not to modify
+   DIRNAME if it returns 0. */
 static int
 bash_directory_completion_hook (dirname)
      char **dirname;
@@ -2735,6 +2753,7 @@ bash_directory_completion_hook (dirname)
     {
       /* Dequote the filename even if we don't expand it. */
       new_dirname = bash_dequote_filename (local_dirname, rl_completion_quote_character);
+      return_value = STREQ (local_dirname, new_dirname) == 0;
       free (local_dirname);
       local_dirname = *dirname = new_dirname;
     }
@@ -2758,14 +2777,14 @@ bash_directory_completion_hook (dirname)
 	      free (temp1);
 	      temp1 = temp2;
 	      temp2 = sh_canonpath (temp1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
-	      return_value = temp2 != 0;
+	      return_value |= temp2 != 0;
 	    }
 	}
       /* If we can't canonicalize, bail. */
       if (temp2 == 0)
 	{
 	  free (temp1);
-	  return 1;
+	  return return_value;
 	}
       len1 = strlen (temp1);
       if (temp1[len1 - 1] == '/')
@@ -2778,10 +2797,12 @@ bash_directory_completion_hook (dirname)
 	      temp2[len2 + 1] = '\0';
 	    }
 	}
+      return_value |= STREQ (local_dirname, temp2) == 0;
       free (local_dirname);
       *dirname = temp2;
       free (temp1);
     }
+
   return (return_value);
 }
 
@@ -2870,12 +2891,15 @@ dynamic_complete_history (count, key)
   int r;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
 
   rl_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
 
   /* XXX - use rl_completion_mode here? */
   if (rl_last_func == dynamic_complete_history)
@@ -2885,6 +2909,8 @@ dynamic_complete_history (count, key)
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
+
   return r;
 }
 
@@ -2895,14 +2921,17 @@ bash_dabbrev_expand (count, key)
   int r, orig_suppress, orig_sort;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
 
   orig_func = rl_menu_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
   orig_suppress = rl_completion_suppress_append;
   orig_sort = rl_sort_completion_matches;
 
   rl_menu_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
   rl_filename_completion_desired = 0;
   rl_completion_suppress_append = 1;
   rl_sort_completion_matches = 0;
@@ -2917,6 +2946,7 @@ bash_dabbrev_expand (count, key)
   rl_last_func = bash_dabbrev_expand;
   rl_menu_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
   rl_completion_suppress_append = orig_suppress;
   rl_sort_completion_matches = orig_sort;
 
@@ -2966,23 +2996,27 @@ bash_complete_filename_internal (what_to_do)
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
   rl_icppfunc_t *orig_dir_func;
+  rl_compignore_func_t *orig_ignore_func;
   /*const*/ char *orig_rl_completer_word_break_characters;
   int r;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
-  orig_dir_func = rl_directory_completion_hook;
+  orig_dir_func = rl_directory_rewrite_hook;
+  orig_ignore_func = rl_ignore_some_completions_function;
   orig_rl_completer_word_break_characters = rl_completer_word_break_characters;
   rl_completion_entry_function = rl_filename_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
-  rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
+  rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
   rl_completer_word_break_characters = " \t\n\"\'";
 
   r = rl_complete_internal (what_to_do);
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
-  rl_directory_completion_hook = orig_dir_func;
+  rl_directory_rewrite_hook = orig_dir_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
   rl_completer_word_break_characters = orig_rl_completer_word_break_characters;
 
   return r;
@@ -3160,17 +3194,21 @@ bash_specific_completion (what_to_do, generator)
 {
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
   int r;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
   rl_completion_entry_function = generator;
   rl_attempted_completion_function = NULL;
+  rl_ignore_some_completions_function = orig_ignore_func;
 
   r = rl_complete_internal (what_to_do);
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
 
   return r;
 }
@@ -3421,7 +3459,10 @@ static int
 putx(c)
      int c;
 {
-  putc (c, rl_outstream);
+  int x;
+
+  x = putc (c, rl_outstream);
+  return (x);
 }
   
 static int

@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -137,6 +137,28 @@
    highest precedence. */
 #define EXP_HIGHEST	expcomma
 
+#ifndef MAX_INT_LEN
+#  define MAX_INT_LEN 32
+#endif
+
+struct lvalue
+{
+  char *tokstr;		/* possibly-rewritten lvalue if not NULL */
+  intmax_t tokval;	/* expression evaluated value */
+  SHELL_VAR *tokvar;	/* variable described by array or var reference */
+  intmax_t ind;		/* array index if not -1 */
+};
+
+/* A structure defining a single expression context. */
+typedef struct {
+  int curtok, lasttok;
+  char *expression, *tp, *lasttp;
+  intmax_t tokval;
+  char *tokstr;
+  int noeval;
+  struct lvalue lval;
+} EXPR_CONTEXT;
+
 static char	*expression;	/* The current expression */
 static char	*tp;		/* token lexical position */
 static char	*lasttp;	/* pointer to last token position */
@@ -148,10 +170,17 @@ static intmax_t	tokval;		/* current token value */
 static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
+static struct lvalue curlval = {0, 0, 0, -1};
+static struct lvalue lastlval = {0, 0, 0, -1};
+
 static int	_is_arithop __P((int));
 static void	readtok __P((void));	/* lexical analyzer */
 
-static intmax_t	expr_streval __P((char *, int));
+static void	init_lvalue __P((struct lvalue *));
+static struct lvalue *alloc_lvalue __P((void));
+static void	free_lvalue __P((struct lvalue *));
+
+static intmax_t	expr_streval __P((char *, int, struct lvalue *));
 static intmax_t	strlong __P((char *));
 static void	evalerror __P((const char *));
 
@@ -159,6 +188,7 @@ static void	pushexp __P((void));
 static void	popexp __P((void));
 static void	expr_unwind __P((void));
 static void	expr_bind_variable __P((char *, char *));
+static void	expr_bind_array_element __P((char *, arrayind_t, char *));
 
 static intmax_t subexpr __P((char *));
 
@@ -178,23 +208,6 @@ static intmax_t exp2 __P((void));
 static intmax_t	exppower __P((void));
 static intmax_t exp1 __P((void));
 static intmax_t exp0 __P((void));
-
-/* A structure defining a single expression context. */
-typedef struct {
-  int curtok, lasttok;
-  char *expression, *tp, *lasttp;
-  intmax_t tokval;
-  char *tokstr;
-  int noeval;
-} EXPR_CONTEXT;
-
-#ifdef INCLUDE_UNUSED
-/* Not used yet. */
-typedef struct {
-  char *tokstr;
-  intmax_t tokval;
-} LVALUE;
-#endif
 
 /* Global var which contains the stack of expression contexts. */
 static EXPR_CONTEXT **expr_stack;
@@ -217,6 +230,7 @@ extern const char * const bash_badsub_errmsg;
     (X)->tokval = tokval; \
     (X)->tokstr = tokstr; \
     (X)->noeval = noeval; \
+    (X)->lval = curlval; \
   } while (0)
 
 #define RESTORETOK(X) \
@@ -228,6 +242,7 @@ extern const char * const bash_badsub_errmsg;
     tokval = (X)->tokval; \
     tokstr = (X)->tokstr; \
     noeval = (X)->noeval; \
+    curlval = (X)->lval; \
   } while (0)
 
 /* Push and save away the contents of the globals describing the
@@ -298,6 +313,32 @@ expr_bind_variable (lhs, rhs)
   stupidly_hack_special_variables (lhs);
 }
 
+/* Rewrite tok, which is of the form vname[expression], to vname[ind], where
+   IND is the already-calculated value of expression. */
+static void
+expr_bind_array_element (tok, ind, rhs)
+     char *tok;
+     arrayind_t ind;
+     char *rhs;
+{
+  char *lhs, *vname;
+  size_t llen;
+  char ibuf[INT_STRLEN_BOUND (arrayind_t) + 1], *istr;
+
+  istr = fmtumax (ind, 10, ibuf, sizeof (ibuf), 0);
+  vname = array_variable_name (tok, (char **)NULL, (int *)NULL);
+
+  llen = strlen (vname) + sizeof (ibuf) + 3;
+  lhs = xmalloc (llen);
+
+  sprintf (lhs, "%s[%s]", vname, istr);		/* XXX */
+  
+  expr_bind_variable (lhs, rhs);
+/*itrace("expr_bind_array_element: %s=%s", lhs, rhs);*/
+  free (vname);
+  free (lhs);
+}
+
 /* Evaluate EXPR, and return the arithmetic result.  If VALIDP is
    non-null, a zero is stored into the location to which it points
    if the expression is invalid, non-zero otherwise.  If a non-zero
@@ -364,12 +405,14 @@ subexpr (expr)
     return (0);
 
   pushexp ();
-  curtok = lasttok = 0;
   expression = savestring (expr);
   tp = expression;
 
+  curtok = lasttok = 0;
   tokstr = (char *)NULL;
   tokval = 0;
+  init_lvalue (&curlval);
+  lastlval = curlval;
 
   readtok ();
 
@@ -406,6 +449,7 @@ expassign ()
 {
   register intmax_t value;
   char *lhs, *rhs;
+  arrayind_t lind;
 
   value = expcond ();
   if (curtok == EQ || curtok == OP_ASSIGN)
@@ -425,6 +469,8 @@ expassign ()
 	}
 
       lhs = savestring (tokstr);
+      /* save ind in case rhs is string var and evaluation overwrites it */
+      lind = curlval.ind;
       readtok ();
       value = expassign ();
 
@@ -476,7 +522,12 @@ expassign ()
 
       rhs = itos (value);
       if (noeval == 0)
-	expr_bind_variable (lhs, rhs);
+	{
+	  if (lind != -1)
+	    expr_bind_array_element (lhs, lind, rhs);
+	  else
+	    expr_bind_variable (lhs, rhs);
+	}
       free (rhs);
       free (lhs);
       FREE (tokstr);
@@ -801,6 +852,16 @@ exp1 ()
       readtok ();
       val = ~exp1 ();
     }
+  else if (curtok == MINUS)
+    {
+      readtok ();
+      val = - exp1 ();
+    }
+  else if (curtok == PLUS)
+    {
+      readtok ();
+      val = exp1 ();
+    }
   else
     val = exp0 ();
 
@@ -828,22 +889,17 @@ exp0 ()
       v2 = tokval + ((stok == PREINC) ? 1 : -1);
       vincdec = itos (v2);
       if (noeval == 0)
-	expr_bind_variable (tokstr, vincdec);
+	{
+	  if (curlval.ind != -1)
+	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
+	  else
+	    expr_bind_variable (tokstr, vincdec);
+	}
       free (vincdec);
       val = v2;
 
       curtok = NUM;	/* make sure --x=7 is flagged as an error */
       readtok ();
-    }
-  else if (curtok == MINUS)
-    {
-      readtok ();
-      val = - exp0 ();
-    }
-  else if (curtok == PLUS)
-    {
-      readtok ();
-      val = exp0 ();
     }
   else if (curtok == LPAR)
     {
@@ -873,12 +929,18 @@ exp0 ()
  	      /* restore certain portions of EC */
  	      tokstr = ec.tokstr;
  	      noeval = ec.noeval;
+ 	      curlval = ec.lval;
  	      lasttok = STR;	/* ec.curtok */
 
 	      v2 = val + ((stok == POSTINC) ? 1 : -1);
 	      vincdec = itos (v2);
 	      if (noeval == 0)
-		expr_bind_variable (tokstr, vincdec);
+		{
+		  if (curlval.ind != -1)
+		    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
+		  else
+		    expr_bind_variable (tokstr, vincdec);
+		}
 	      free (vincdec);
 	      curtok = NUM;	/* make sure x++=7 is flagged as an error */
  	    }
@@ -899,14 +961,44 @@ exp0 ()
   return (val);
 }
 
+static void
+init_lvalue (lv)
+     struct lvalue *lv;
+{
+  lv->tokstr = 0;
+  lv->tokvar = 0;
+  lv->tokval = lv->ind = -1;
+}
+
+static struct lvalue *
+alloc_lvalue ()
+{
+  struct lvalue *lv;
+
+  lv = xmalloc (sizeof (struct lvalue));
+  init_lvalue (lv);
+  return (lv);
+}
+
+static void
+free_lvalue (lv)
+     struct lvalue *lv;
+{
+  free (lv);		/* should be inlined */
+}
+
 static intmax_t
-expr_streval (tok, e)
+expr_streval (tok, e, lvalue)
      char *tok;
      int e;
+     struct lvalue *lvalue;
 {
   SHELL_VAR *v;
   char *value;
   intmax_t tval;
+#if defined (ARRAY_VARS)
+  arrayind_t ind;
+#endif
 
   /* [[[[[ */
 #if defined (ARRAY_VARS)
@@ -941,18 +1033,27 @@ expr_streval (tok, e)
 	jump_to_top_level (FORCE_EOF);
     }
 
+  ind = -1;
 #if defined (ARRAY_VARS)
   /* Second argument of 0 to get_array_value means that we don't allow
      references like array[@].  In this case, get_array_value is just
      like get_variable_value in that it does not return newly-allocated
      memory or quote the results. */
-  value = (e == ']') ? get_array_value (tok, 0, (int *)NULL) : get_variable_value (v);
+  value = (e == ']') ? get_array_value (tok, 0, (int *)NULL, &ind) : get_variable_value (v);
 #else
   value = get_variable_value (v);
 #endif
 
   tval = (value && *value) ? subexpr (value) : 0;
 
+  if (lvalue)
+    {
+      lvalue->tokstr = tok;	/* XXX */
+      lvalue->tokval = tval;
+      lvalue->tokvar = v;	/* XXX */
+      lvalue->ind = ind;
+    }
+	  
   return (tval);
 }
 
@@ -1024,6 +1125,7 @@ readtok ()
   register char *cp, *xp;
   register unsigned char c, c1;
   register int e;
+  struct lvalue lval;
 
   /* Skip leading whitespace. */
   cp = tp;
@@ -1075,6 +1177,7 @@ readtok ()
       tokstr = savestring (tp);
       *cp = c;
 
+      /* XXX - make peektok part of saved token state? */
       SAVETOK (&ec);
       tokstr = (char *)NULL;	/* keep it from being freed */
       tp = savecp = cp;
@@ -1090,7 +1193,10 @@ readtok ()
       /* The tests for PREINC and PREDEC aren't strictly correct, but they
 	 preserve old behavior if a construct like --x=9 is given. */
       if (lasttok == PREINC || lasttok == PREDEC || peektok != EQ)
-	tokval = expr_streval (tokstr, e);
+        {
+          lastlval = curlval;
+	  tokval = expr_streval (tokstr, e, &curlval);
+        }
       else
 	tokval = 0;
 

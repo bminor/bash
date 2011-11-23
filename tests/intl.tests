@@ -35,7 +35,11 @@ esac
 set a b
 
 printf '%s\n' "$*"
-printf '%s' "$*" | od -b
+# squeeze out blanks to avoid white space differences in od implementations
+printf '%s' "$*" | od -b | ( IFS=$' \t\n' ;  while read line; do echo $line; done; )
 
 # display differences make this problematic
 ${THIS_SH} ./intl1.sub
+
+# this tests both international handling in printf and temporary environments
+${THIS_SH} ./intl2.sub

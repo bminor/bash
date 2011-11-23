@@ -198,9 +198,21 @@ eof
 
 ${THIS_SH} ./comsub-posix1.sub
 
+${THIS_SH} ./comsub-posix2.sub
+
+${THIS_SH} ./comsub-posix3.sub
+
 # produced a parse error through bash-4.0-beta2
 : $(echo foo)"
 "
+# produced a parse error through bash-4.1
+unset x
+x=$(
+echo yes
+# a comment with " ' \
+)
+echo $x
+unset x
 
 # fixed after bash-4.0 released
 : $(case a in a) echo ;; # comment

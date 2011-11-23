@@ -59,7 +59,7 @@ extern int no_line_editing;
 
 $BUILTIN set
 $FUNCTION set_builtin
-$SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
+$SHORT_DOC set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
 Set or unset values of shell options and positional parameters.
 
 Change the value of shell attributes and positional parameters, or
@@ -138,6 +138,9 @@ Options:
   -P  If set, do not follow symbolic links when executing commands
       such as cd which change the current directory.
   -T  If set, the DEBUG trap is inherited by shell functions.
+  --  Assign any remaining arguments to the positional parameters.
+      If there are no remaining arguments, the positional parameters
+      are unset.
   -   Assign any remaining arguments to the positional parameters.
       The -x and -v options are turned off.
 

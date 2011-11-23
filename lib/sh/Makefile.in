@@ -2,7 +2,7 @@
 # Makefile for the Bash library
 #
 #
-# Copyright (C) 1998-2009 Free Software Foundation, Inc.
+# Copyright (C) 1998-2010 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -91,7 +91,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c fdprintf.c input_avail.c mbscasecmp.c fnxform.c
+	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
+	   strchrnul.c unicode.c wcswidth.c shmbchar.c
 
 # The header files for this library.
 HSOURCES = 
@@ -105,7 +106,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
-	  fdprintf.o input_avail.o mbscasecmp.o fnxform.o ${LIBOBJS}
+	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -144,7 +145,7 @@ casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
 eaccess.o: eaccess.c
-fdprintf.o: fdprintf.c
+dprintf.o: dprintf.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
@@ -168,6 +169,7 @@ pathcanon.o: pathcanon.c
 pathphys.o: pathphys.c
 rename.o: rename.c
 setlinebuf.o: setlinebuf.c
+shmbchar.o: shmbchar.c
 shquote.o: shquote.c
 shtty.o: shtty.c
 snprintf.o: snprintf.c
@@ -195,6 +197,7 @@ uconvert.o: uconvert.c
 ufuncs.o: ufuncs.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
+wcswidth.o: wcswidth.c
 mbschr.o: mbschr.c
 zcatfd.o: zcatfd.c
 zmapfd.o: zmapfd.c
@@ -214,7 +217,7 @@ casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
-fdprintf.o: ${BUILD_DIR}/config.h
+dprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
@@ -238,6 +241,7 @@ pathcanon.o: ${BUILD_DIR}/config.h
 pathphys.o: ${BUILD_DIR}/config.h
 rename.o: ${BUILD_DIR}/config.h
 setlinebuf.o: ${BUILD_DIR}/config.h
+shmbchare.o: ${BUILD_DIR}/config.h
 shquote.o: ${BUILD_DIR}/config.h
 shtty.o: ${BUILD_DIR}/config.h
 snprintf.o: ${BUILD_DIR}/config.h
@@ -265,6 +269,7 @@ uconvert.o: ${BUILD_DIR}/config.h
 ufuncs.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
+wcswidth.o: ${BUILD_DIR}/config.h
 mbschr.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
 zgetline.o: ${BUILD_DIR}/config.h
@@ -505,9 +510,12 @@ wcsdup.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 wcsdup.o: ${BASHINCDIR}/stdc.h
 wcsdup.o: ${topdir}/xmalloc.h
 
+wcswidth.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+wcswidth.o: ${BASHINCDIR}/stdc.h
+
 mbschr.o: ${topdir}/bashansi.h
 mbschr.o: ${BASHINCDIR}/ansi_stdlib.h
-mbschr.o: ${BASHINCDIR}/shmbutil.h
+mbschr.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 
 zgetline.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 zgetline.o: ${BASHINCDIR}/stdc.h
@@ -526,10 +534,10 @@ casemod.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 casemod.o: ${BASHINCDIR}/stdc.h
 casemod.o: ${topdir}/xmalloc.h
 casemod.o: ${topdir}/bashtypes.h
-casemod.o: ${BASHINCDIR}/shmbutil.h
+casemod.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 casemod.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
-fdprintf.o: ${BASHINCDIR}/stdc.h
+dprintf.o: ${BASHINCDIR}/stdc.h
 
 input_avail.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 input_avail.o: ${BASHINCDIR}/stdc.h
@@ -542,3 +550,5 @@ fnxform.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 fnxform.o: ${BASHINCDIR}/stdc.h
 fnxform.o: ${topdir}/bashtypes.h
 fnxform.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+
+shmbchar.o: ${BASHINCDIR}/shmbchar.h

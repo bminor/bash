@@ -382,7 +382,7 @@ readline_internal_setup ()
 	  nprompt = _rl_strip_prompt (rl_prompt);
 	  fprintf (_rl_out_stream, "%s", nprompt);
 	  fflush (_rl_out_stream);
-	  free (nprompt);
+	  xfree (nprompt);
 	}
     }
   else
@@ -426,7 +426,7 @@ readline_internal_teardown (eof)
       _rl_free_history_entry (entry);
 
       strcpy (the_line, temp);
-      free (temp);
+      xfree (temp);
     }
 
   if (_rl_revert_all_at_newline)
@@ -629,7 +629,7 @@ void
 _rl_keyseq_cxt_dispose (cxt)
     _rl_keyseq_cxt *cxt;
 {
-  free (cxt);
+  xfree (cxt);
 }
 
 void

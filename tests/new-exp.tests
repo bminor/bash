@@ -417,8 +417,10 @@ recho $c
 c=${var:4}
 expect nothing
 recho $c
-expect '<./new-exp.tests: -2: substring expression < 0>'
+# as of bash-4.2, negative LENGTH means offset from the end
 c=${var:0:-2}
+expect '<a>'
+recho $c
 
 var=abcdefghi
 c=${var:3:12}
@@ -564,6 +566,8 @@ unset var
 ${THIS_SH} ./new-exp6.sub
 
 ${THIS_SH} ./new-exp7.sub
+
+${THIS_SH} ./new-exp8.sub
 
 # problems with stray CTLNUL in bash-4.0-alpha
 unset a

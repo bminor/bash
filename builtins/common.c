@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,7 +151,7 @@ builtin_usage ()
 {
   if (this_command_name && *this_command_name)
     fprintf (stderr, _("%s: usage: "), this_command_name);
-  fprintf (stderr, "%s\n", current_builtin->short_doc);
+  fprintf (stderr, "%s\n", _(current_builtin->short_doc));
   fflush (stderr);
 }
 
@@ -367,7 +367,7 @@ make_builtin_argv (list, ip)
   return argv;
 }
 
-/* Remember LIST in $0 ... $9, and REST_OF_ARGS.  If DESTRUCTIVE is
+/* Remember LIST in $1 ... $9, and REST_OF_ARGS.  If DESTRUCTIVE is
    non-zero, then discard whatever the existing arguments are, else
    only discard the ones that are to be replaced. */
 void

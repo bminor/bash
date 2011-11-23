@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -82,7 +82,7 @@ export_builtin (list)
 
 $BUILTIN readonly
 $FUNCTION readonly_builtin
-$SHORT_DOC readonly [-af] [name[=value] ...] or readonly -p
+$SHORT_DOC readonly [-aAf] [name[=value] ...] or readonly -p
 Mark shell variables as unchangeable.
 
 Mark each NAME as read-only; the values of these NAMEs may not be
@@ -433,11 +433,11 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else if (function_p (var))
     printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL));
-  else if (invisible_p (var))
+  else if (invisible_p (var) || var_isset (var) == 0)
     printf ("%s\n", var->name);
   else
     {
-      x = sh_double_quote (var_isset (var) ? value_cell (var) : "");
+      x = sh_double_quote (value_cell (var));
       printf ("%s=%s\n", var->name, x);
       free (x);
     }

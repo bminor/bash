@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2009 Free Software Foundation, Inc.
+Copyright (C) 1997-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,6 +40,8 @@ and printf(3), printf interprets:
 
   %b	expand backslash escape sequences in the corresponding argument
   %q	quote the argument in a way that can be reused as shell input
+  %(fmt)T output the date-time string resulting from using FMT as a format
+        string for strftime(3)
 
 Exit Status:
 Returns success unless an invalid option is given or a write or assignment
@@ -72,8 +74,11 @@ $END
 #  include <inttypes.h>
 #endif
 
+#include "posixtime.h"
 #include "../bashansi.h"
 #include "../bashintl.h"
+
+#define NEED_STRFTIME_DECL
 
 #include "../shell.h"
 #include "shmbutil.h"
@@ -167,6 +172,8 @@ extern int errno;
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
 
+extern time_t shell_start_time;
+
 #if !HAVE_ASPRINTF
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
@@ -177,7 +184,7 @@ extern int vsnprintf __P((char *, size_t, const char *, va_list)) __attribute__(
 
 static void printf_erange __P((char *));
 static int printstr __P((char *, char *, int, int, int));
-static int tescape __P((char *, char *, int *));
+static int tescape __P((char *, char *, int *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *vbadd __P((char *, int));
 static int vbprintf __P((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
@@ -224,6 +231,10 @@ printf_builtin (list)
   int ch, fieldwidth, precision;
   int have_fieldwidth, have_precision;
   char convch, thisch, nextch, *format, *modstart, *fmt, *start;
+#if defined (HANDLE_MULTIBYTE)
+  char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
+  int mbind, mblen;
+#endif
 
   conversion_error = 0;
   retval = EXECUTION_SUCCESS;
@@ -301,8 +312,17 @@ printf_builtin (list)
 	      fmt++;
 	      /* A NULL third argument to tescape means to bypass the
 		 special processing for arguments to %b. */
-	      fmt += tescape (fmt, &nextch, (int *)NULL);
+#if defined (HANDLE_MULTIBYTE)
+	      /* Accommodate possible use of \u or \U, which can result in
+		 multibyte characters */
+	      memset (mbch, '\0', sizeof (mbch));
+	      fmt += tescape (fmt, mbch, &mblen, (int *)NULL);
+	      for (mbind = 0; mbind < mblen; mbind++)
+	        PC (mbch[mbind]);
+#else
+	      fmt += tescape (fmt, &nextch, (int *)NULL, (int *)NULL);
 	      PC (nextch);
+#endif
 	      fmt--;	/* for loop will increment it for us again */
 	      continue;
 	    }
@@ -398,6 +418,70 @@ printf_builtin (list)
 
 		p = getstr ();
 		PF(start, p);
+		break;
+	      }
+
+	    case '(':
+	      {
+		char *timefmt, timebuf[128], *t;
+		int n;
+		intmax_t arg;
+		time_t secs;
+		struct tm *tm;
+
+		modstart[1] = nextch;	/* restore char after left paren */
+		timefmt = xmalloc (strlen (fmt) + 3);
+		fmt++;	/* skip over left paren */
+		for (t = timefmt, n = 1; *fmt; )
+		  {
+		    if (*fmt == '(')
+		      n++;
+		    else if (*fmt == ')')
+		      n--;
+		    if (n == 0)
+		      break;
+		    *t++ = *fmt++;
+		  }
+		*t = '\0';
+		if (*++fmt != 'T')
+		  {
+		    builtin_warning (_("`%c': invalid time format specification"), *fmt);
+		    fmt = start;
+		    free (timefmt);
+		    PC (*fmt);
+		    continue;
+		  }
+		if (timefmt[0] == '\0')
+		  {
+		    timefmt[0] = '%';
+		    timefmt[1] = 'X';	/* locale-specific current time - should we use `+'? */
+		    timefmt[2] = '\0';
+		  }
+		/* argument is seconds since the epoch with special -1 and -2 */
+		arg = getintmax ();
+		if (arg == -1)
+		  secs = NOW;		/* roughly date +%s */
+		else if (arg == -2)
+		  secs = shell_start_time;	/* roughly $SECONDS */
+		else
+		  secs = arg;
+		tm = localtime (&secs);
+		n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
+		free (timefmt);
+		if (n == 0)
+		  timebuf[0] = '\0';
+		else
+		  timebuf[sizeof(timebuf) - 1] = '\0';
+		/* convert to %s format that preserves fieldwidth and precision */
+		modstart[0] = 's';
+		modstart[1] = '\0';
+		n = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
+		if (n < 0)
+		  {
+		    sh_wrerror ();
+		    clearerr (stdout);
+		    PRETURN (EXECUTION_FAILURE);
+		  }
 		break;
 	      }
 
@@ -699,15 +783,18 @@ printstr (fmt, string, len, fieldwidth, precision)
    do the \c short-circuiting, and \c is treated as an unrecognized escape
    sequence; we also bypass the other processing specific to %b arguments.  */
 static int
-tescape (estart, cp, sawc)
+tescape (estart, cp, lenp, sawc)
      char *estart;
      char *cp;
-     int *sawc;
+     int *lenp, *sawc;
 {
   register char *p;
   int temp, c, evalue;
+  unsigned long uvalue;
 
   p = estart;
+  if (lenp)
+    *lenp = 1;
 
   switch (c = *p++)
     {
@@ -743,14 +830,10 @@ tescape (estart, cp, sawc)
 	*cp = evalue & 0xFF;
 	break;
 
-      /* And, as another extension, we allow \xNNN, where each N is a
+      /* And, as another extension, we allow \xNN, where each N is a
 	 hex digit. */
       case 'x':
-#if 0
-	for (evalue = 0; ISXDIGIT ((unsigned char)*p); p++)
-#else
 	for (temp = 2, evalue = 0; ISXDIGIT ((unsigned char)*p) && temp--; p++)
-#endif
 	  evalue = (evalue * 16) + HEXVALUE (*p);
 	if (p == estart + 1)
 	  {
@@ -761,6 +844,30 @@ tescape (estart, cp, sawc)
 	*cp = evalue & 0xFF;
 	break;
 
+#if defined (HANDLE_MULTIBYTE)
+      case 'u':
+      case 'U':
+	temp = (c == 'u') ? 4 : 8;	/* \uNNNN \UNNNNNNNN */
+	for (uvalue = 0; ISXDIGIT ((unsigned char)*p) && temp--; p++)
+	  uvalue = (uvalue * 16) + HEXVALUE (*p);
+	if (p == estart + 1)
+	  {
+	    builtin_error (_("missing unicode digit for \\%c"), c);
+	    *cp = '\\';
+	    return 0;
+	  }
+	if (uvalue <= UCHAR_MAX)
+	  *cp = uvalue;
+	else
+	  {
+	    temp = u32cconv (uvalue, cp);
+	    cp[temp] = '\0';
+	    if (lenp)
+	      *lenp = temp;
+	  }
+	break;
+#endif
+	
       case '\\':	/* \\ -> \ */
 	*cp = c;
 	break;
@@ -799,12 +906,12 @@ bexpand (string, len, sawc, lenp)
 {
   int temp;
   char *ret, *r, *s, c;
-
-#if 0
-  if (string == 0 || *string == '\0')
-#else
-  if (string == 0 || len == 0)
+#if defined (HANDLE_MULTIBYTE)
+  char mbch[25];
+  int mbind, mblen;
 #endif
+
+  if (string == 0 || len == 0)
     {
       if (sawc)
 	*sawc = 0;
@@ -823,7 +930,12 @@ bexpand (string, len, sawc, lenp)
 	  continue;
 	}
       temp = 0;
-      s += tescape (s, &c, &temp);
+#if defined (HANDLE_MULTIBYTE)
+      memset (mbch, '\0', sizeof (mbch));
+      s += tescape (s, mbch, &mblen, &temp);
+#else
+      s += tescape (s, &c, (int *)NULL, &temp);
+#endif
       if (temp)
 	{
 	  if (sawc)
@@ -831,7 +943,12 @@ bexpand (string, len, sawc, lenp)
 	  break;
 	}
 
+#if defined (HANDLE_MULTIBYTE)
+      for (mbind = 0; mbind < mblen; mbind++)
+	*r++ = mbch[mbind];
+#else
       *r++ = c;
+#endif      
     }
 
   *r = '\0';

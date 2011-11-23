@@ -177,6 +177,7 @@ extern void save_pipeline __P((int));
 extern void restore_pipeline __P((int));
 extern void start_pipeline __P((void));
 extern int stop_pipeline __P((int, COMMAND *));
+extern void append_process __P((char *, pid_t, int, int));
 
 extern void delete_job __P((int, int));
 extern void nohup_job __P((int));
@@ -208,6 +209,9 @@ extern pid_t make_child __P((char *, int));
 extern int get_tty_state __P((void));
 extern int set_tty_state __P((void));
 
+extern int job_exit_status __P((int));
+extern int job_exit_signal __P((int));
+
 extern int wait_for_single_pid __P((pid_t));
 extern void wait_for_background_pids __P((void));
 extern int wait_for __P((pid_t));
@@ -223,6 +227,7 @@ extern int give_terminal_to __P((pid_t, int));
 
 extern void run_sigchld_trap __P((int));
 
+extern void freeze_jobs_list __P((void));
 extern void unfreeze_jobs_list __P((void));
 extern int set_job_control __P((int));
 extern void without_job_control __P((void));

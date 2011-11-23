@@ -378,7 +378,7 @@ tilde_expand_word (filename)
 	{
 	  dirname = glue_prefix_and_suffix (expansion, filename, user_len);
 	  xfree (username);
-	  free (expansion);
+	  xfree (expansion);
 	  return (dirname);
 	}
     }
@@ -401,7 +401,7 @@ tilde_expand_word (filename)
 	  if (expansion)
 	    {
 	      dirname = glue_prefix_and_suffix (expansion, filename, user_len);
-	      free (expansion);
+	      xfree (expansion);
 	    }
 	}
       /* If we don't have a failure hook, or if the failure hook did not

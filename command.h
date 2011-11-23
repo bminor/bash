@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -96,6 +96,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOPROCSUB	0x100000	/* don't perform process substitution */
 #define W_HASCTLESC	0x200000	/* word contains literal CTLESC characters */
 #define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
+#define W_ARRAYIND	0x800000	/* word is an array index being expanded */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -105,6 +106,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define SUBSHELL_PIPE	0x10	/* subshell from a pipeline element */
 #define SUBSHELL_PROCSUB 0x20	/* subshell caused by <(command) or >(command) */
 #define SUBSHELL_COPROC	0x40	/* subshell from a coproc pipeline */
+#define SUBSHELL_RESETTRAP 0x80	/* subshell needs to reset trap strings on first call to trap */
 
 /* A structure which represents a word. */
 typedef struct word_desc {
@@ -168,6 +170,7 @@ typedef struct element {
 #define CMD_STDIN_REDIR	   0x400 /* async command needs implicit </dev/null */
 #define CMD_COMMAND_BUILTIN 0x0800 /* command executed by `command' builtin */
 #define CMD_COPROC_SUBSHELL 0x1000
+#define CMD_LASTPIPE	    0x2000
 
 /* What a command looks like. */
 typedef struct command {

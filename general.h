@@ -216,8 +216,8 @@ typedef void sh_resetsig_func_t __P((int));	/* sh_vintfunc_t */
 
 typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 
-typedef int sh_assign_func_t __P((const char *));	/* sh_icpfunc_t */
-typedef int sh_wassign_func_t __P((WORD_DESC *));
+typedef int sh_assign_func_t __P((const char *));
+typedef int sh_wassign_func_t __P((WORD_DESC *, int));
 
 typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 
@@ -289,6 +289,7 @@ extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
 extern int sh_validfd __P((int));
+extern int fd_ispipe __P((int));
 extern void check_dev_tty __P((void));
 extern int move_to_high_fd __P((int, int, int));
 extern int check_binary_file __P((char *, int));
@@ -303,6 +304,7 @@ extern int sh_closepipe __P((int *));
 extern int file_exists __P((char *));
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
+extern int dot_or_dotdot __P((const char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));
 

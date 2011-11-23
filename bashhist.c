@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -184,6 +184,7 @@ int dont_save_function_defs;
 extern int current_command_line_count;
 
 extern struct dstack dstack;
+extern int parser_state;
 
 static int bash_history_inhibit_expansion __P((char *, int));
 #if defined (READLINE)
@@ -211,6 +212,9 @@ bash_history_inhibit_expansion (string, i)
      expansions pass as well. */
   else if (i > 1 && string[i - 1] == '{' && string[i - 2] == '$' &&
 	     member ('}', string + i + 1))
+    return (1);
+  /* The shell uses $! as a defined parameter expansion. */
+  else if (i > 1 && string[i - 1] == '$' && string[i] == '!')
     return (1);
 #if defined (EXTENDED_GLOB)
   else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
@@ -355,7 +359,7 @@ save_history ()
 	 the history file. */
       using_history ();
 
-      if (history_lines_this_session < where_history () || force_append_history)
+      if (history_lines_this_session <= where_history () || force_append_history)
 	append_history (history_lines_this_session, hf);
       else
 	write_history (hf);
@@ -372,7 +376,7 @@ maybe_append_history (filename)
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session && (history_lines_this_session < where_history ()))
+  if (history_lines_this_session && (history_lines_this_session <= where_history ()))
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)
@@ -731,7 +735,7 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      chars_to_add = literal_history ? "\n" : history_delimiting_chars ();
+      chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
 
       using_history ();
       current = previous_history ();
@@ -750,6 +754,13 @@ bash_add_history (line)
 	      curlen--;
 	      chars_to_add = "";
 	    }
+
+	  /* If we're not in some kind of quoted construct, the current history
+	     entry ends with a newline, and we're going to add a semicolon,
+	     don't.  In some cases, it results in a syntax error (e.g., before
+	     a close brace), and it should not be needed. */
+	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
+	    chars_to_add++;
 
 	  new_line = (char *)xmalloc (1
 				      + curlen

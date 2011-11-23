@@ -155,7 +155,7 @@ help_builtin (list)
 		  continue;
 		}
 
-	      printf ("%s: %s\n", name, shell_builtins[i].short_doc);
+	      printf ("%s: %s\n", name, _(shell_builtins[i].short_doc));
 
 	      if (sflag == 0)
 		show_longdoc (i);
@@ -288,7 +288,7 @@ show_manpage (name, i)
 
   /* SYNOPSIS */
   printf ("SYNOPSIS\n");
-  printf ("%*s%s\n\n", BASE_INDENT, " ", shell_builtins[i].short_doc);
+  printf ("%*s%s\n\n", BASE_INDENT, " ", _(shell_builtins[i].short_doc));
 
   /* DESCRIPTION */
   printf ("DESCRIPTION\n");
@@ -360,7 +360,7 @@ A star (*) next to a name means that the command is disabled.\n\
 
       /* first column */
       blurb[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
-      strncpy (blurb + 1, shell_builtins[i].short_doc, width - 2);
+      strncpy (blurb + 1, _(shell_builtins[i].short_doc), width - 2);
       blurb[width - 2] = '>';		/* indicate truncation */
       blurb[width - 1] = '\0';
       printf ("%s", blurb);
@@ -376,7 +376,7 @@ A star (*) next to a name means that the command is disabled.\n\
 
       /* second column */
       blurb[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*';
-      strncpy (blurb + 1, shell_builtins[i+height].short_doc, width - 3);
+      strncpy (blurb + 1, _(shell_builtins[i+height].short_doc), width - 3);
       blurb[width - 3] = '>';		/* indicate truncation */
       blurb[width - 2] = '\0';
       printf ("%s\n", blurb);

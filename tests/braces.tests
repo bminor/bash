@@ -94,6 +94,9 @@ echo {a..z}
 echo {a..z..2}
 echo {z..a..-2}
 
+# make sure brace expansion handles ints > 2**31 - 1 using intmax_t
+echo {2147483645..2147483649}
+
 # unwanted zero-padding -- fixed post-bash-4.0
 echo {10..0..2}
 echo {10..0..-2}

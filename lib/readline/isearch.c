@@ -104,6 +104,9 @@ _rl_scxt_alloc (type, flags)
 
   cxt->save_undo_list = 0;
 
+  cxt->keymap = _rl_keymap;
+  cxt->okeymap = _rl_keymap;
+
   cxt->history_pos = 0;
   cxt->direction = 0;
 
@@ -336,10 +339,22 @@ _rl_isearch_dispatch (cxt, c)
       return -1;
     }
 
-  /* Translate the keys we do something with to opcodes. */
-  if (c >= 0 && _rl_keymap[c].type == ISFUNC)
+  /* If we are moving into a new keymap, modify cxt->keymap and go on.
+     This can be a problem if c == ESC and we want to terminate the
+     incremental search, so we check */
+  if (c >= 0 && cxt->keymap[c].type == ISKMAP && strchr (cxt->search_terminators, cxt->lastc) == 0)
     {
-      f = _rl_keymap[c].function;
+      cxt->keymap = FUNCTION_TO_KEYMAP (cxt->keymap, c);
+      cxt->sflags |= SF_CHGKMAP;
+      /* XXX - we should probably save this sequence, so we can do
+	 something useful if this doesn't end up mapping to a command. */
+      return 1;
+    }
+
+  /* Translate the keys we do something with to opcodes. */
+  if (c >= 0 && cxt->keymap[c].type == ISFUNC)
+    {
+      f = cxt->keymap[c].function;
 
       if (f == rl_reverse_search_history)
 	cxt->lastc = (cxt->sflags & SF_REVERSE) ? -1 : -2;
@@ -347,19 +362,27 @@ _rl_isearch_dispatch (cxt, c)
 	cxt->lastc = (cxt->sflags & SF_REVERSE) ? -2 : -1;
       else if (f == rl_rubout)
 	cxt->lastc = -3;
-      else if (c == CTRL ('G'))
+      else if (c == CTRL ('G') || f == rl_abort)
 	cxt->lastc = -4;
-      else if (c == CTRL ('W'))	/* XXX */
+      else if (c == CTRL ('W') || f == rl_unix_word_rubout)	/* XXX */
 	cxt->lastc = -5;
-      else if (c == CTRL ('Y'))	/* XXX */
+      else if (c == CTRL ('Y') || f == rl_yank)	/* XXX */
 	cxt->lastc = -6;
+    }
+
+  /* If we changed the keymap earlier while translating a key sequence into
+     a command, restore it now that we've succeeded. */
+  if (cxt->sflags & SF_CHGKMAP)
+    {
+      cxt->keymap = cxt->okeymap;
+      cxt->sflags &= ~SF_CHGKMAP;
     }
 
   /* The characters in isearch_terminators (set from the user-settable
      variable isearch-terminators) are used to terminate the search but
      not subsequently execute the character as a command.  The default
      value is "\033\012" (ESC and C-J). */
-  if (strchr (cxt->search_terminators, cxt->lastc))
+  if (cxt->lastc > 0 && strchr (cxt->search_terminators, cxt->lastc))
     {
       /* ESC still terminates the search, but if there is pending
 	 input or if input arrives within 0.1 seconds (on systems

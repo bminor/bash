@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2009 Free Software Foundation, Inc.
+Copyright (C) 1994-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,6 +84,7 @@ extern int gnu_error_format;
 extern int check_jobs_at_exit;
 extern int autocd;
 extern int glob_star;
+extern int lastpipe_opt;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -124,6 +125,7 @@ static int shopt_login_shell;
 static int shopt_compat31;
 static int shopt_compat32;
 static int shopt_compat40;
+static int shopt_compat41;
 
 typedef int shopt_set_func_t __P((char *, int));
 
@@ -146,6 +148,7 @@ static struct {
   { "compat31", &shopt_compat31, set_compatibility_level },
   { "compat32", &shopt_compat32, set_compatibility_level },
   { "compat40", &shopt_compat40, set_compatibility_level },
+  { "compat41", &shopt_compat41, set_compatibility_level },
 #if defined (READLINE)
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
 #endif
@@ -175,6 +178,7 @@ static struct {
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_shellopts_after_change },
+  { "lastpipe", &lastpipe_opt, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif

@@ -130,12 +130,12 @@ sh_set_lines_and_columns (lines, cols)
   b = (char *)xmalloc (INT_STRLEN_BOUND (int) + 1);
   sprintf (b, "%d", lines);
   setenv ("LINES", b, 1);
-  free (b);
+  xfree (b);
 
   b = (char *)xmalloc (INT_STRLEN_BOUND (int) + 1);
   sprintf (b, "%d", cols);
   setenv ("COLUMNS", b, 1);
-  free (b);
+  xfree (b);
 #else /* !HAVE_SETENV */
 #  if defined (HAVE_PUTENV)
   b = (char *)xmalloc (INT_STRLEN_BOUND (int) + sizeof ("LINES=") + 1);

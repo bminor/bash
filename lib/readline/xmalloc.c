@@ -77,13 +77,3 @@ xrealloc (pointer, bytes)
     memory_error_and_abort ("xrealloc");
   return (temp);
 }
-
-/* Use this as the function to call when adding unwind protects so we
-   don't need to know what free() returns. */
-void
-xfree (string)
-     PTR_T string;
-{
-  if (string)
-    free (string);
-}

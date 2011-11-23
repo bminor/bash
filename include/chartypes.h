@@ -107,7 +107,7 @@
 #endif
 #ifndef UNCTRL
    /* control char to letter -- ASCII */
-#  define UNCTRL(x)	(TOUPPER((x) | 0x40))
+#  define UNCTRL(x)	(TOUPPER(x) ^ 0x40)
 #endif
 
 #endif /* _SH_CHARTYPES_H */

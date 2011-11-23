@@ -70,6 +70,7 @@ extern int posixly_correct;
 extern int indirection_level, subshell_environment;
 extern int return_catch_flag, return_catch_value;
 extern int last_command_exit_value;
+extern int executing_command_builtin;
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
@@ -147,10 +148,6 @@ file_error_and_exit:
       (*errfunc) (_("%s: file is too large"), filename);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }      
-
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (fd, O_TEXT);
-#endif
 
   if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
     {
@@ -342,7 +339,7 @@ source_file (filename, sflags)
   if (sflags)
     flags |= FEVAL_NOPUSHARGS;
   /* POSIX shells exit if non-interactive and file error. */
-  if (posixly_correct && !interactive_shell)
+  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
     flags |= FEVAL_LONGJMP;
   rval = _evalfile (filename, flags);
 

@@ -215,6 +215,9 @@
 /* The number of bytes in a double (hopefully 8). */
 #undef SIZEOF_DOUBLE
 
+/* The number of bytes in an `intmax_t'. */
+#undef SIZEOF_INTMAX_T
+
 /* The number of bytes in a `long long', if we have one. */
 #undef SIZEOF_LONG_LONG
 
@@ -415,6 +418,8 @@
 
 #undef HAVE_STRUCT_TIMEZONE
 
+#undef WEXITSTATUS_OFFSET
+
 /* Characteristics of definitions in the system header files. */
 
 #undef HAVE_GETPW_DECLS
@@ -546,17 +551,20 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
 
+/* Define if you have the dprintf function.  */
+#undef HAVE_DPRINTF
+
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
 
 /* Define if you have the eaccess function.  */
 #undef HAVE_EACCESS
 
+/* Define if you have the faccessat function.  */
+#undef HAVE_FACCESSAT
+
 /* Define if you have the fcntl function.  */
 #undef HAVE_FCNTL
-
-/* Define if you have the fdprintf function. */
-#undef HAVE_FDPRINTF
 
 /* Define if you have the fpurge/__fpurge function.  */
 #undef HAVE_FPURGE
@@ -680,6 +688,9 @@
 /* Define if you have the mbscmp function. */
 #undef HAVE_MBSCMP
 
+/* Define if you have the mbsnrtowcs function. */
+#undef HAVE_MBSNRTOWCS
+
 /* Define if you have the mbsrtowcs function. */
 #undef HAVE_MBSRTOWCS
 
@@ -761,6 +772,9 @@
 
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
+
+/* Define if you have the strchrnul function.  */
+#undef HAVE_STRCHRNUL
 
 /* Define if you have the strcoll function.  */
 #undef HAVE_STRCOLL
@@ -866,6 +880,9 @@
 
 /* Define if you have the wctype function.  */
 #undef HAVE_WCTYPE
+
+/* Define if you have the wcswidth function.  */
+#undef HAVE_WCSWIDTH
 
 /* Define if you have the wcwidth function.  */
 #undef HAVE_WCWIDTH
@@ -993,6 +1010,9 @@
 
 /* Define if you have the <termios.h> header file.  */
 #undef HAVE_TERMIOS_H
+
+/* Define if you have the <ulimit.h> header file.  */
+#undef HAVE_ULIMIT_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H

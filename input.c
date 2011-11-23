@@ -193,6 +193,8 @@ make_buffered_stream (fd, buffer, bufsize)
   bp->b_used = bp->b_inputp = bp->b_flag = 0;
   if (bufsize == 1)
     bp->b_flag |= B_UNBUFF;
+  if (O_TEXT && (fcntl (fd, F_GETFL) & O_TEXT) != 0)
+    bp->b_flag |= O_TEXT;
   return (bp);
 }
 
@@ -361,11 +363,7 @@ duplicate_buffered_stream (fd1, fd2)
 }
 
 /* Return 1 if a seek on FD will succeed. */
-#ifndef __CYGWIN__
-#  define fd_is_seekable(fd) (lseek ((fd), 0L, SEEK_CUR) >= 0)
-#else
-#  define fd_is_seekable(fd) 0
-#endif /* __CYGWIN__ */
+#define fd_is_seekable(fd) (lseek ((fd), 0L, SEEK_CUR) >= 0)
 
 /* Take FD, a file descriptor, and create and return a buffered stream
    corresponding to it.  If something is wrong and the file descriptor
@@ -472,9 +470,27 @@ b_fill_buffer (bp)
      BUFFERED_STREAM *bp;
 {
   ssize_t nr;
+  off_t o;
 
   CHECK_TERMSIG;
-  nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
+  /* In an environment where text and binary files are treated differently,
+     compensate for lseek() on text files returning an offset different from
+     the count of characters read() returns.  Text-mode streams have to be
+     treated as unbuffered. */
+  if ((bp->b_flag & (B_TEXT | B_UNBUFF)) == B_TEXT)
+    {
+      o = lseek (bp->b_fd, 0, SEEK_CUR);
+      nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
+      if (nr > 0 && nr < lseek (bp->b_fd, 0, SEEK_CUR) - o)
+	{
+	  lseek (bp->b_fd, o, SEEK_SET);
+	  bp->b_flag |= B_UNBUFF;
+	  bp->b_size = 1;
+	  nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
+	}
+    }
+  else
+    nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
   if (nr <= 0)
     {
       bp->b_used = 0;
@@ -485,15 +501,6 @@ b_fill_buffer (bp)
 	bp->b_flag |= B_ERROR;
       return (EOF);
     }
-
-#if defined (__CYGWIN__)
-  /* If on cygwin, translate \r\n to \n. */
-  if (nr >= 2 && bp->b_buffer[nr - 2] == '\r' && bp->b_buffer[nr - 1] == '\n')
-    {
-      bp->b_buffer[nr - 2] = '\n';
-      nr--;
-    }
-#endif
 
   bp->b_used = nr;
   bp->b_inputp = 0;

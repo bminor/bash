@@ -328,7 +328,7 @@ _rl_free_history_entry (entry)
   FREE (entry->line);
   FREE (entry->timestamp);
 
-  free (entry);
+  xfree (entry);
 }
 
 /* Perhaps put back the current line if it has changed. */
@@ -342,9 +342,9 @@ rl_maybe_replace_line ()
   if (temp && ((UNDO_LIST *)(temp->data) != rl_undo_list))
     {
       temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list);
-      free (temp->line);
+      xfree (temp->line);
       FREE (temp->timestamp);
-      free (temp);
+      xfree (temp);
     }
   return 0;
 }
@@ -480,7 +480,7 @@ _rl_revert_all_lines ()
   _rl_set_the_line ();
 
   /* and clean up */
-  free (lbuf);
+  xfree (lbuf);
 }  
 
 /* **************************************************************** */

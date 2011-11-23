@@ -62,13 +62,14 @@ extern int errno;
 int expanding_redir;
 
 extern int posixly_correct;
+extern int last_command_exit_value;
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
 /* Static functions defined and used in this file. */
-static void add_undo_close_redirect __P((int));
 static void add_exec_redirect __P((REDIRECT *));
 static int add_undo_redirect __P((int, enum r_instruction, int));
+static int add_undo_close_redirect __P((int));
 static int expandable_redirection_filename __P((REDIRECT *));
 static int stdin_redirection __P((enum r_instruction, int));
 static int undoablefd __P((int));
@@ -92,6 +93,17 @@ static REDIRECTEE rd;
 /* Set to errno when a here document cannot be created for some reason.
    Used to print a reasonable error message. */
 static int heredoc_errno;
+
+#define REDIRECTION_ERROR(r, e, fd) \
+do { \
+  if ((r) < 0) \
+    { \
+      if (fd >= 0) \
+	close (fd); \
+      last_command_exit_value = EXECUTION_FAILURE;\
+      return ((e) == 0 ? EINVAL : (e));\
+    } \
+} while (0)
 
 void
 redirection_error (temp, error)
@@ -437,7 +449,7 @@ here_document_to_fd (redirectee, ri)
   /* In an attempt to avoid races, we close the first fd only after opening
      the second. */
   /* Make the document really temporary.  Also make it the input. */
-  fd2 = open (filename, O_RDONLY, 0600);
+  fd2 = open (filename, O_RDONLY|O_BINARY, 0600);
 
   if (fd2 < 0)
     {
@@ -453,14 +465,6 @@ here_document_to_fd (redirectee, ri)
   if (unlink (filename) < 0)
     {
       r = errno;
-#if defined (__CYGWIN__)
-      /* Under CygWin 1.1.0, the unlink will fail if the file is
-	 open. This hack will allow the previous action of silently
-	 ignoring the error, but will still leave the file there. This
-	 needs some kind of magic. */
-      if (r == EACCES)
-	return (fd2);
-#endif /* __CYGWIN__ */
       close (fd2);
       free (filename);
       errno = r;
@@ -807,15 +811,24 @@ do_redirection_internal (redirect, flags)
       if (flags & RX_ACTIVE)
 	{
 	  if (redirect->rflags & REDIR_VARASSIGN)
-	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	    {
+	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
+	    }
 
 	  if (flags & RX_UNDOABLE)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		add_undo_redirect (redirector, ri, -1);
+		r = add_undo_redirect (redirector, ri, -1);
 	      else
-		add_undo_close_redirect (redirector);
+		r = add_undo_close_redirect (redirector);
+	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		close (redirector);
+	      REDIRECTION_ERROR (r, errno, fd);
 	    }
 
 #if defined (BUFFERED_INPUT)
@@ -910,7 +923,13 @@ do_redirection_internal (redirect, flags)
 	    }
 
 	  if (redirect->rflags & REDIR_VARASSIGN)
-	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	    {
+	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
+	    }
 
 	  if (flags & RX_ACTIVE)
 	    {
@@ -918,9 +937,12 @@ do_redirection_internal (redirect, flags)
 	        {
 		  /* Only setup to undo it if the thing to undo is active. */
 		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		    add_undo_redirect (redirector, ri, -1);
+		    r = add_undo_redirect (redirector, ri, -1);
 		  else
-		    add_undo_close_redirect (redirector);
+		    r = add_undo_close_redirect (redirector);
+		  if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		    close (redirector);
+		  REDIRECTION_ERROR (r, errno, fd);
 	        }
 
 #if defined (BUFFERED_INPUT)
@@ -964,7 +986,13 @@ do_redirection_internal (redirect, flags)
     case r_move_input:
     case r_move_output:
       if ((flags & RX_ACTIVE) && (redirect->rflags & REDIR_VARASSIGN))
-	redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+        {
+	  redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	  r = errno;
+	  if (redirector < 0)
+	    sys_error (_("redirection error: cannot duplicate fd"));
+	  REDIRECTION_ERROR (redirector, r, -1);
+        }
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
 	{
@@ -972,9 +1000,12 @@ do_redirection_internal (redirect, flags)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if (fcntl (redirector, F_GETFD, 0) != -1)
-		add_undo_redirect (redirector, ri, redir_fd);
+		r = add_undo_redirect (redirector, ri, redir_fd);
 	      else
-		add_undo_close_redirect (redirector);
+		r = add_undo_close_redirect (redirector);
+	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		close (redirector);
+	      REDIRECTION_ERROR (r, errno, -1);
 	    }
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -1046,8 +1077,12 @@ do_redirection_internal (redirect, flags)
 		return AMBIGUOUS_REDIRECT;
 	    }
 
+	  r = 0;
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
-	    add_undo_redirect (redirector, ri, -1);
+	    {
+	      r = add_undo_redirect (redirector, ri, -1);
+	      REDIRECTION_ERROR (r, errno, redirector);
+	    }
 
 #if defined (COPROCESS_SUPPORT)
 	  coproc_fdchk (redirector);
@@ -1081,7 +1116,7 @@ do_redirection_internal (redirect, flags)
    since we're going to use it later (e.g., make sure we don't save fd 0
    to fd 10 if we have a redirection like 0<&10).  If the value of fdbase
    puts the process over its fd limit, causing fcntl to fail, we try
-   again with SHELL_FD_BASE. */
+   again with SHELL_FD_BASE.  Return 0 on success, -1 on error. */
 static int
 add_undo_redirect (fd, ri, fdbase)
      int fd;
@@ -1132,7 +1167,7 @@ add_undo_redirect (fd, ri, fdbase)
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
      causes redirections to be discarded.  There needs to be a difference
      between fds that are used to save other fds and then are the target of
-     user redirctions and fds that are just the target of user redirections.
+     user redirections and fds that are just the target of user redirections.
      We use the close-on-exec flag to tell the difference; fds > SHELL_FD_BASE
      that have the close-on-exec flag set are assumed to be fds used internally
      to save others. */
@@ -1163,8 +1198,8 @@ add_undo_redirect (fd, ri, fdbase)
 }
 
 /* Set up to close FD when we are finished with the current command
-   and its redirections. */
-static void
+   and its redirections.  Return 0 on success, -1 on error. */
+static int
 add_undo_close_redirect (fd)
      int fd;
 {
@@ -1177,6 +1212,8 @@ add_undo_close_redirect (fd)
   closer->flags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
+
+  return 0;
 }
 
 static void

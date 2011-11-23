@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988-2007 Free Software Foundation, Inc.
+Copyright (C) 1988--2011 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -299,6 +299,8 @@ writing the history file.
 
 An event designator is a reference to a command line entry in the
 history list.
+Unless the reference is absolute, events are relative to the current
+position in the history list.
 @cindex history events
 
 @table @asis
@@ -324,10 +326,15 @@ Refer to the command @var{n} lines back.
 Refer to the previous command.  This is a synonym for @samp{!-1}.
 
 @item @code{!@var{string}}
-Refer to the most recent command starting with @var{string}.
+Refer to the most recent command
+preceding the current position in the history list
+starting with @var{string}.
 
 @item @code{!?@var{string}[?]}
-Refer to the most recent command containing @var{string}.  The trailing
+Refer to the most recent command
+preceding the current position in the history list
+containing @var{string}.
+The trailing
 @samp{?} may be omitted if the @var{string} is followed immediately by
 a newline.
 

@@ -192,24 +192,32 @@ initialize_signames ()
 #endif
 
 /* SunOS5 */
-#if defined (SIGLWP)	/* special signal used by thread library */
+#if defined (SIGLWP)	/* Solaris: special signal used by thread library */
   signal_names[SIGLWP] = "SIGLWP";
 #endif
 
-#if defined (SIGFREEZE)	/* special signal used by CPR */
+#if defined (SIGFREEZE)	/* Solaris: special signal used by CPR */
   signal_names[SIGFREEZE] = "SIGFREEZE";
 #endif
 
-#if defined (SIGTHAW)	/* special signal used by CPR */
+#if defined (SIGTHAW)	/* Solaris: special signal used by CPR */
   signal_names[SIGTHAW] = "SIGTHAW";
 #endif
 
-#if defined (SIGCANCEL)	/* thread cancellation signal used by libthread */
+#if defined (SIGCANCEL)	/* Solaris: thread cancellation signal used by libthread */
   signal_names[SIGCANCEL] = "SIGCANCEL";
 #endif
 
-#if defined (SIGXRES)	/* resource control exceeded */
+#if defined (SIGXRES)	/* Solaris: resource control exceeded */
   signal_names[SIGXRES] = "SIGXRES";
+#endif
+
+#if defined (SIGJVM1)	/* Solaris: Java Virtual Machine 1 */
+  signal_names[SIGJVM1] = "SIGJVM1";
+#endif
+
+#if defined (SIGJVM2)	/* Solaris: Java Virtual Machine 2 */
+  signal_names[SIGJVM2] = "SIGJVM2";
 #endif
 
 /* HP-UX */

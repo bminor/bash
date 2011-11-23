@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2009 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2010 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -67,8 +67,10 @@ can be configured to be POSIX-conformant by default.
 <A NAME="lbAF">&nbsp;</A>
 <H3>OPTIONS</H3>
 
-In addition to the single-character shell options documented in the
-description of the <B>set</B> builtin command, <B>bash</B>
+All of the  single-character shell options documented in the
+description of the <B>set</B> builtin command can be used as options
+when the shell is invoked.
+In addition, <B>bash</B>
 interprets the following options when it is invoked:
 <P>
 
@@ -194,11 +196,6 @@ Turns on extended debugging mode (see the description of the
 
 option to the
 <B>shopt</B>
-
-builtin below)
-and shell function tracing (see the description of the
-<B>-o functrace</B> option to the
-<B>set</B>
 
 builtin below).
 <DT><B>--dump-po-strings</B>
@@ -533,7 +530,7 @@ No other startup files are read.
 <B>Bash</B>
 
 attempts to determine when it is being run with its standard input
-connected to a a network connection, as if by the remote shell
+connected to a network connection, as when executed by the remote shell
 daemon, usually <I>rshd</I>, or the secure shell daemon <I>sshd</I>.
 If
 <B>bash</B>
@@ -739,6 +736,8 @@ reserved word precedes a pipeline, the elapsed as well as user and
 system time consumed by its execution are reported when the pipeline
 terminates.
 The <B>-p</B> option changes the output format to that specified by POSIX.
+When the shell is in <I>posix mode</I>, it does not recognize
+<B>time</B> as a reserved word if the next token begins with a `-'.
 The
 <FONT SIZE=-1><B>TIMEFORMAT</B>
 
@@ -752,6 +751,17 @@ under
 <B>Shell Variables</B>
 
 below.
+<P>
+
+When the shell is in <I>posix mode</I>, <B>time</B>
+may be followed by a newline.  In this case, the shell displays the
+total user and system time consumed by the shell and its children.
+The
+<FONT SIZE=-1><B>TIMEFORMAT</B>
+
+</FONT>
+variable may be used to specify the format of
+the time information.
 <P>
 
 Each command in a pipeline is executed as a separate process (i.e., in a
@@ -905,7 +915,7 @@ as primaries.
 <P>
 
 
-When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+When used with <B>[[</B>, the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
 <P>
 
@@ -988,9 +998,7 @@ and
 <I>expression2</I>
 
 are true.
-<DT><I>expression1</I> <B>||</B> <I>expression2</I>
-<DD>
-
+<DT><I>expression1</I> <B>||</B> <I>expression2</I><DD>
 True if either
 <I>expression1</I>
 
@@ -1002,9 +1010,7 @@ is true.
 </DL>
 <P>
 
-The <B>&amp;&amp;</B> and
-<B>||</B>
-
+The <B>&amp;&amp;</B> and <B>||</B>
 operators do not evaluate <I>expression2</I> if the value of
 <I>expression1</I> is sufficient to determine the return value of
 the entire conditional expression.
@@ -1120,26 +1126,23 @@ the corresponding <B>then</B> <I>list</I> is executed and the
 command completes.  Otherwise, the <B>else</B> <I>list</I> is
 executed, if present.  The exit status is the exit status of the
 last command executed, or zero if no condition tested true.
-<DT><B>while</B> <I>list</I>; <B>do</B> <I>list</I>; <B>done</B><DD>
+<DT><B>while</B> <I>list-1</I>; <B>do</B> <I>list-2</I>; <B>done</B><DD>
 
-<DT><B>until</B> <I>list</I>; <B>do</B> <I>list</I>; <B>done</B><DD>
+<DT><B>until</B> <I>list-1</I>; <B>do</B> <I>list-2</I>; <B>done</B><DD>
 
-The <B>while</B> command continuously executes the <B>do</B>
-<I>list</I> as long as the last command in <I>list</I> returns
+The <B>while</B> command continuously executes the list
+<I>list-2</I> as long as the last command in the list <I>list-1</I> returns
 an exit status of zero.  The <B>until</B> command is identical
 to the <B>while</B> command, except that the test is negated;
-the
-<B>do</B>
-
-<I>list</I>
+<I>list-2</I>
 
 is executed as long as the last command in
-<I>list</I>
+<I>list-1</I>
 
 returns a non-zero exit status.
 The exit status of the <B>while</B> and <B>until</B> commands
 is the exit status
-of the last <B>do</B> <I>list</I> command executed, or zero if
+of the last command executed in <I>list-2</I>, or zero if
 none was executed.
 </DL>
 <A NAME="lbAP">&nbsp;</A>
@@ -1190,7 +1193,7 @@ command (see
 below).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
-The process id of the shell spawned to execute the coprocess is
+The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable <I>NAME</I>_PID.
 The <B>wait</B>
 builtin command may be used to wait for the coprocess to terminate.
@@ -1206,7 +1209,10 @@ A shell function is an object that is called like a simple command and
 executes a compound command with a new set of positional parameters.
 Shell functions are declared as follows:
 <DL COMPACT>
-<DT>[ <B>function</B> ] <I>name</I> () <I>compound-command</I> [<I>redirection</I>]<DD>
+<DT><I>name</I> () <I>compound-command</I> [<I>redirection</I>]<DD>
+
+<DT><B>function</B> <I>name</I> [()] <I>compound-command</I> [<I>redirection</I>]<DD>
+
 This defines a function named <I>name</I>.
 The reserved word <B>function</B> is optional.
 If the <B>function</B> reserved word is supplied, the parentheses are optional.
@@ -1426,6 +1432,16 @@ the eight-bit character whose value is the octal value <I>nnn</I>
 <DD>
 the eight-bit character whose value is the hexadecimal value <I>HH</I>
 (one or two hex digits)
+<DT><B>\u</B><I>HHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits)
+<DT><B>\U</B><I>HHHHHHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits)
 <DT><B>\c</B><I>x</I>
 
 <DD>
@@ -1549,7 +1565,7 @@ builtin commands.
 In the context where an assignment statement is assigning a value
 to a shell variable or array index, the += operator can be used to
 append to or add to the variable's previous value.
-When += is applied to a variable for which the integer attribute has been
+When += is applied to a variable for which the <I>integer</I> attribute has been
 set, <I>value</I> is evaluated as an arithmetic expression and added to the
 variable's current value, which is also evaluated.
 When += is applied to an array variable using compound assignment (see
@@ -1761,14 +1777,14 @@ This variable is read-only.
 <DT><B>BASHPID</B>
 
 <DD>
-Expands to the process id of the current <B>bash</B> process.
+Expands to the process ID of the current <B>bash</B> process.
 This differs from <B>$$</B> under certain circumstances, such as subshells
 that do not require <B>bash</B> to be re-initialized.
 <DT><B>BASH_ALIASES</B>
 
 <DD>
 An associative array variable whose members correspond to the internal
-list of aliases as maintained by the <B>alias</B> builtin
+list of aliases as maintained by the <B>alias</B> builtin.
 Elements added to this array appear in the alias list; unsetting array
 elements cause aliases to be removed from the alias list.
 <DT><B>BASH_ARGC</B>
@@ -1838,15 +1854,16 @@ The command argument to the <B>-c</B> invocation option.
 
 <DD>
 An array variable whose members are the line numbers in source files
-corresponding to each member of
-<FONT SIZE=-1><B>FUNCNAME</B>.
+where each corresponding member of
+<FONT SIZE=-1><B>FUNCNAME</B>
 
 </FONT>
+was invoked.
 <B>${BASH_LINENO[</B><I>$i</I><B>]}</B> is the line number in the source
-file where <B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called
+file (<B>${BASH_SOURCE[</B><I>$i+1</I><B>]}</B>) where
+<B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called
 (or <B>${BASH_LINENO[</B><I>$i-1</I><B>]}</B> if referenced within another
 shell function).
-The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}</B>.
 Use
 <FONT SIZE=-1><B>LINENO</B>
 
@@ -1865,12 +1882,16 @@ This variable is read-only.
 <DT><B>BASH_SOURCE</B>
 
 <DD>
-An array variable whose members are the source filenames corresponding
-to the elements in the
+An array variable whose members are the source filenames
+where the corresponding shell function names in the
 <FONT SIZE=-1><B>FUNCNAME</B>
 
 </FONT>
-array variable.
+array variable are defined.
+The shell function
+<B>${FUNCNAME[</B><I>$i</I><B>]}</B> is defined in the file
+<B>${BASH_SOURCE[</B><I>$i</I><B>]}</B> and called from
+<B>${BASH_SOURCE[</B><I>$i+1</I><B>]}</B>.
 <DT><B>BASH_SUBSHELL</B>
 
 <DD>
@@ -1995,6 +2016,12 @@ as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
+<DT><B>COPROC</B>
+
+<DD>
+An array variable (see <B>Arrays</B> below) created to hold the file descriptors
+for output from and input to an unnamed coprocess (see <B>Coprocesses</B>
+above).
 <DT><B>DIRSTACK</B>
 
 <DD>
@@ -2033,7 +2060,7 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is
+The bottom-most element (the one with the highest index) is
 <TT>&quot;main&quot;</TT>.
 
 This variable exists only when a shell function is executing.
@@ -2048,6 +2075,17 @@ If
 </FONT>
 is unset, it loses its special properties, even if it is
 subsequently reset.
+<P>
+
+
+This variable can be used with <B>BASH_LINENO</B> and <B>BASH_SOURCE</B>.
+Each element of <B>FUNCNAME</B> has corresponding elements in
+<B>BASH_LINENO</B> and <B>BASH_SOURCE</B> to describe the call stack.
+For instance, <B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called from the file
+<B>${BASH_SOURCE[</B><I>$i+1</I><B>]}</B> at line number
+<B>${BASH_LINENO[</B><I>$i</I><B>]}</B>.
+The <B>caller</B> builtin displays the current call stack using this
+information.
 <DT><B>GROUPS</B>
 
 <DD>
@@ -2111,6 +2149,11 @@ type on which
 
 is executing, in the standard GNU <I>cpu-company-system</I> format.
 The default is system-dependent.
+<DT><B>MAPFILE</B>
+
+<DD>
+An array variable (see <B>Arrays</B> below) created to hold the text
+read by the <B>mapfile</B> builtin when no variable name is supplied.
 <DT><B>OLDPWD</B>
 
 <DD>
@@ -2185,6 +2228,34 @@ If
 </FONT>
 is unset, it loses its special properties, even if it is
 subsequently reset.
+<DT><B>READLINE_LINE</B>
+
+<DD>
+The contents of the
+<B>readline</B>
+
+line buffer, for use with
+<TT>bind -x</TT>
+
+(see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
+<DT><B>READLINE_POINT</B>
+
+<DD>
+The position of the insertion point in the
+<B>readline</B>
+
+line buffer, for use with
+<TT>bind -x</TT>
+
+(see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
 <DT><B>REPLY</B>
 
 <DD>
@@ -2281,21 +2352,6 @@ expansion before being interpreted as a file name.
 
 </FONT>
 is not used to search for the resultant file name.
-<DT><B>CDPATH</B>
-
-<DD>
-The search path for the
-<B>cd</B>
-
-command.
-This is a colon-separated list of directories in which the shell looks
-for destination directories specified by the
-<B>cd</B>
-
-command.
-A sample value is
-<TT>&quot;.:~:/usr&quot;</TT>.
-
 <DT><B>BASH_XTRACEFD</B>
 
 <DD>
@@ -2322,11 +2378,29 @@ Note that setting
 to 2 (the standard error file
 descriptor) and then unsetting it will result in the standard error
 being closed.
+<DT><B>CDPATH</B>
+
+<DD>
+The search path for the
+<B>cd</B>
+
+command.
+This is a colon-separated list of directories in which the shell looks
+for destination directories specified by the
+<B>cd</B>
+
+command.
+A sample value is
+<TT>&quot;.:~:/usr&quot;</TT>.
+
 <DT><B>COLUMNS</B>
 
 <DD>
-Used by the <B>select</B> builtin command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a SIGWINCH.
+Used by the <B>select</B> compound command to determine the terminal width
+when printing selection lists.  Automatically set upon receipt of a
+<FONT SIZE=-1><B>SIGWINCH</B>.
+
+</FONT>
 <DT><B>COMPREPLY</B>
 
 <DD>
@@ -2340,8 +2414,16 @@ If <B>bash</B> finds this variable in the environment when the shell starts
 with value
 <TT>t</TT>,
 
-it assumes that the shell is running in an emacs shell buffer and disables
+it assumes that the shell is running in an Emacs shell buffer and disables
 line editing.
+<DT><B>ENV</B>
+
+<DD>
+Similar to
+<FONT SIZE=-1><B>BASH_ENV</B>;
+
+</FONT>
+used when the shell is invoked in POSIX mode.
 <DT><B>FCEDIT</B>
 
 <DD>
@@ -2366,6 +2448,12 @@ is excluded from the list of matched filenames.
 A sample value is
 <TT>&quot;.o:~&quot;</TT>.
 
+<DT><B>FUNCNEST</B>
+
+<DD>
+If set to a numeric value greater than 0, defines a maximum function
+nesting level.  Function invocations that exceed this nesting level
+will cause the current command to abort.
 <DT><B>GLOBIGNORE</B>
 
 <DD>
@@ -2601,7 +2689,7 @@ This variable determines the locale category used for number formatting.
 <DT><B>LINES</B>
 
 <DD>
-Used by the <B>select</B> builtin command to determine the column length
+Used by the <B>select</B> compound command to determine the column length
 for printing selection lists.  Automatically set upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
@@ -2609,14 +2697,15 @@ for printing selection lists.  Automatically set upon receipt of a
 <DT><B>MAIL</B>
 
 <DD>
-If this parameter is set to a file name and the
+If this parameter is set to a file or directory name and the
 <FONT SIZE=-1><B>MAILPATH</B>
 
 </FONT>
 variable is not set,
 <B>bash</B>
 
-informs the user of the arrival of mail in the specified file.
+informs the user of the arrival of mail in the specified file or
+Maildir-format directory.
 <DT><B>MAILCHECK</B>
 
 <DD>
@@ -2852,8 +2941,8 @@ not arrive.
 <DT><B>TMPDIR</B>
 
 <DD>
-If set, <B>Bash</B> uses its value as the name of a directory in which
-<B>Bash</B> creates temporary files for the shell's use.
+If set, <B>bash</B> uses its value as the name of a directory in which
+<B>bash</B> creates temporary files for the shell's use.
 <DT><B>auto_resume</B>
 
 <DD>
@@ -2933,9 +3022,14 @@ An indexed array is created automatically if any variable is assigned to
 using the syntax <I>name</I>[<I>subscript</I>]=<I>value</I>.  The
 <I>subscript</I>
 
-is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an indexed array,
-use
+is treated as an arithmetic expression that must evaluate to a number.
+If
+<I>subscript</I>
+
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
+To explicitly declare an indexed array, use
 <B>declare -a </B><I>name</I>
 
 (see
@@ -3338,7 +3432,7 @@ a level of variable indirection is introduced.
 expanded and that value is used in the rest of the substitution, rather
 than the value of <I>parameter</I> itself.
 This is known as <I>indirect expansion</I>.
-The exceptions to this are the expansions of ${!<I>prefix</I>*} and
+The exceptions to this are the expansions of ${<B>!\fPfIprefix</B><B>*</B>} and
 ${<B>!</B><I>name</I>[<I>@</I>]} described below.
 The exclamation point must immediately follow the left brace in order to
 introduce indirection.
@@ -3407,7 +3501,7 @@ is substituted.
 
 <DT>${<I>parameter</I><B>:</B><I>offset</I><B>:</B><I>length</I>}<DD>
 
-<B>Substring Expansion.</B>
+<B>Substring Expansion</B>.
 Expands to up to <I>length</I> characters of <I>parameter</I>
 starting at the character specified by <I>offset</I>.
 If <I>length</I> is omitted, expands to the substring of
@@ -3417,9 +3511,13 @@ If <I>length</I> is omitted, expands to the substring of
 
 </FONT>
 below).
-<I>length</I> must evaluate to a number greater than or equal to zero.
 If <I>offset</I> evaluates to a number less than zero, the value
 is used as an offset from the end of the value of <I>parameter</I>.
+If <I>length</I> evaluates to a number less than zero, and <I>parameter</I>
+is not <B>@</B> and not an indexed or associative array, it is interpreted
+as an offset from the end of the value of <I>parameter</I> rather than
+a number of characters, and the expansion is the characters between the
+two offsets.
 If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
 parameters beginning at <I>offset</I>.
 If <I>parameter</I> is an indexed array name subscripted by @ or *,
@@ -3439,7 +3537,7 @@ prefixed to the list.
 
 <DT>${<B>!</B><I>prefix</I><B>@</B>}<DD>
 
-<B>Names matching prefix.</B>
+<B>Names matching prefix</B>.
 Expands to the names of variables whose names begin with <I>prefix</I>,
 separated by the first character of the
 <FONT SIZE=-1><B>IFS</B>
@@ -3452,7 +3550,7 @@ variable name expands to a separate word.
 
 <DT>${<B>!</B><I>name</I>[<I>*</I>]}<DD>
 
-<B>List of array keys.</B>
+<B>List of array keys</B>.
 If <I>name</I> is an array variable, expands to the list of array indices
 (keys) assigned in <I>name</I>.
 If <I>name</I> is not an array, expands to 0 if <I>name</I> is set and null
@@ -3460,7 +3558,7 @@ otherwise.
 When <I>@</I> is used and the expansion appears within double quotes, each
 key expands to a separate word.
 <DT>${<B>#</B><I>parameter</I>}<DD>
-<B>Parameter length.</B>
+<B>Parameter length</B>.
 The length in characters of the value of <I>parameter</I> is substituted.
 If
 <I>parameter</I>
@@ -3486,7 +3584,7 @@ the value substituted is the number of elements in the array.
 
 <DT>${<I>parameter</I><B>##</B><I>word</I>}<DD>
 
-<B>Remove matching prefix pattern.</B>
+<B>Remove matching prefix pattern</B>.
 The 
 <I>word</I>
 
@@ -3526,7 +3624,7 @@ array in turn, and the expansion is the resultant list.
 
 <DT>${<I>parameter</I><B>%%</B><I>word</I>}<DD>
 
-<B>Remove matching suffix pattern.</B>
+<B>Remove matching suffix pattern</B>.
 The <I>word</I> is expanded to produce a pattern just as in
 pathname expansion.
 If the pattern matches a trailing portion of the expanded value of
@@ -3560,7 +3658,7 @@ or
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}<DD>
-<B>Pattern substitution.</B>
+<B>Pattern substitution</B>.
 The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
 <I>Parameter</I> is expanded and the longest match of <I>pattern</I>
@@ -3601,7 +3699,7 @@ array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>,</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,,</B><I>pattern</I>}<DD>
 
-<B>Case modification.</B>
+<B>Case modification</B>.
 This expansion modifies the case of alphabetic characters in <I>parameter</I>.
 The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
@@ -3610,7 +3708,7 @@ to uppercase; the <B>,</B> operator converts matching uppercase letters
 to lowercase.
 The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
 expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
-the first character in the expanded value..
+the first character in the expanded value.
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
 If
@@ -4003,6 +4101,7 @@ The special pattern characters have the following meanings:
 <P>
 
 
+<DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT><B>*</B>
 
@@ -4107,6 +4206,8 @@ and
 
 the syntax <B>[.</B><I>symbol</I><B>.]</B> matches the collating symbol
 <I>symbol</I>.
+</DL>
+
 </DL>
 
 
@@ -4781,7 +4882,7 @@ during its execution.
 The special parameter
 <B>#</B>
 
-is updated to reflect the change.  Special parameter 0
+is updated to reflect the change.  Special parameter <B>0</B>
 is unchanged.
 The first element of the
 <FONT SIZE=-1><B>FUNCNAME</B>
@@ -4829,6 +4930,12 @@ Variables local to the function may be declared with the
 
 builtin command.  Ordinarily, variables and their values
 are shared between the function and its caller.
+<P>
+
+The <B>FUNCNEST</B> variable, if set to a numeric value greater
+than 0, defines a maximum function nesting level.  Function
+invocations that exceed the limit cause the entire command to
+abort.
 <P>
 
 If the builtin command
@@ -4887,8 +4994,10 @@ shell's children.
 Care should be taken in cases where this may cause a problem.
 <P>
 
-Functions may be recursive.  No limit is imposed on the number
-of recursive calls.
+Functions may be recursive.
+The <B>FUNCNEST</B> variable may be used to limit the depth of the
+function call stack and restrict the number of function invocations.
+By default, no limit is imposed on the number of recursive calls.
 <A NAME="lbBV">&nbsp;</A>
 <H3>ARITHMETIC EVALUATION</H3>
 
@@ -4992,13 +5101,13 @@ The value of a variable is evaluated as an arithmetic expression
 when it is referenced, or when a variable which has been given the
 <I>integer</I> attribute using <B>declare -i</B> is assigned a value.
 A null value evaluates to 0.
-A shell variable need not have its integer attribute
+A shell variable need not have its <I>integer</I> attribute
 turned on to be used in an expression.
 <P>
 
 Constants with a leading 0 are interpreted as octal numbers.
 A leading 0x or 0X denotes hexadecimal.
-Otherwise, numbers take the form [<I>base#</I>]n, where <I>base</I>
+Otherwise, numbers take the form [<I>base#</I>]n, where the optional <I>base</I>
 is a decimal number between 2 and 64 representing the arithmetic
 base, and <I>n</I> is a number in that base.
 If <I>base#</I> is omitted, then base 10 is used.
@@ -5031,8 +5140,9 @@ links and operate on the target of the link, rather than the link itself.
 <P>
 
 
-When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+When used with <B>[[</B>, the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
+The <B>test</B> command sorts using ASCII ordering.
 <P>
 
 <DL COMPACT>
@@ -5103,10 +5213,6 @@ True if <I>file</I> exists and is writable.
 
 <DD>
 True if <I>file</I> exists and is executable.
-<DT><B>-O </B><I>file</I>
-
-<DD>
-True if <I>file</I> exists and is owned by the effective user id.
 <DT><B>-G </B><I>file</I>
 
 <DD>
@@ -5115,27 +5221,31 @@ True if <I>file</I> exists and is owned by the effective group id.
 
 <DD>
 True if <I>file</I> exists and is a symbolic link.
-<DT><B>-S </B><I>file</I>
-
-<DD>
-True if <I>file</I> exists and is a socket.
 <DT><B>-N </B><I>file</I>
 
 <DD>
 True if <I>file</I> exists and has been modified since it was last read.
+<DT><B>-O </B><I>file</I>
+
+<DD>
+True if <I>file</I> exists and is owned by the effective user id.
+<DT><B>-S </B><I>file</I>
+
+<DD>
+True if <I>file</I> exists and is a socket.
+<DT><I>file1</I> <B>-ef</B> <I>file2</I><DD>
+True if <I>file1</I> and <I>file2</I> refer to the same device and
+inode numbers.
 <DT><I>file1</I> -<B>nt</B> <I>file2</I><DD>
 True if <I>file1</I> is newer (according to modification date) than <I>file2</I>,
 or if <I>file1</I> exists and file2 does not.
 <DT><I>file1</I> -<B>ot</B> <I>file2</I><DD>
 True if <I>file1</I> is older than <I>file2</I>, or if <I>file2</I> exists
 and <I>file1</I> does not.
-<DT><I>file1</I> <B>-ef</B> <I>file2</I><DD>
-True if <I>file1</I> and <I>file2</I> refer to the same device and
-inode numbers.
 <DT><B>-o </B><I>optname</I>
 
 <DD>
-True if shell option
+True if the shell option
 <I>optname</I>
 
 is enabled.
@@ -5146,6 +5256,13 @@ option to the
 <B>set</B>
 
 builtin below.
+<DT><B>-v </B><I>varname</I>
+
+<DD>
+True if the shell variable
+<I>varname</I>
+
+is set (has been assigned a value).
 <DT><B>-z </B><I>string</I>
 
 <DD>
@@ -5411,8 +5528,8 @@ cannot affect the shell's execution environment.
 <P>
 
 Subshells spawned to execute command substitutions inherit the value of
-the <B>-e</B> option from the parent shell.  When not in posix mode,
-Bash clears the <B>-e</B> option in such subshells.
+the <B>-e</B> option from the parent shell.  When not in <I>posix</I> mode,
+<B>bash</B> clears the <B>-e</B> option in such subshells.
 <P>
 
 If a command is followed by a <B>&amp;</B> and job control is not active, the
@@ -6077,7 +6194,7 @@ shell, unless the
 option is given at shell invocation.
 Line editing is also used when using the <B>-e</B> option to the
 <B>read</B> builtin.
-By default, the line editing commands are similar to those of emacs.
+By default, the line editing commands are similar to those of Emacs.
 A vi-style line editing interface is also available.
 Line editing can be enabled at any time using the
 <B>-o emacs</B>
@@ -6108,7 +6225,7 @@ builtin.
 
 <P>
 
-In this section, the emacs-style notation is used to denote
+In this section, the Emacs-style notation is used to denote
 keystrokes.  Control keys are denoted by C-<I>key</I>, e.g., C-n
 means Control-N.  Similarly, 
 <I>meta</I>
@@ -6536,7 +6653,7 @@ mapped to <B>self-insert</B>.
 
 <DD>
 Controls whether readline begins with a set of key bindings similar
-to <I>emacs</I> or <I>vi</I>.
+to <I>Emacs</I> or <I>vi</I>.
 <B>editing-mode</B>
 
 can be set to either
@@ -6566,12 +6683,12 @@ the meta key is used to send eight-bit characters.
 <DT><B>expand-tilde (Off)</B>
 
 <DD>
-If set to <B>on</B>, tilde expansion is performed when readline
+If set to <B>On</B>, tilde expansion is performed when readline
 attempts word completion.
 <DT><B>history-preserve-point (Off)</B>
 
 <DD>
-If set to <B>on</B>, the history code attempts to place point at the
+If set to <B>On</B>, the history code attempts to place point at the
 same location on each history line retrieved with <B>previous-history</B>
 or <B>next-history</B>.
 <DT><B>history-size (0)</B>
@@ -6638,8 +6755,15 @@ have a slash appended (subject to the value of
 <DD>
 This variable, when set to <B>On</B>, causes readline to match files whose
 names begin with a `.' (hidden files) when performing filename 
-completion, unless the leading `.' is
+completion.
+If set to <B>Off</B>, the leading `.' must be
 supplied by the user in the filename to be completed.
+<DT><B>menu-complete-display-prefix (Off)</B>
+
+<DD>
+If set to <B>On</B>, menu completion displays the common prefix of the
+list of possible completions (which may be empty) before cycling through
+the list.
 <DT><B>output-meta (Off)</B>
 
 <DD>
@@ -6659,7 +6783,7 @@ sorted horizontally in alphabetical order, rather than down the screen.
 <DT><B>revert-all-at-newline (Off)</B>
 
 <DD>
-If set to <B>on</B>, readline will undo all changes to history lines 
+If set to <B>On</B>, readline will undo all changes to history lines 
 before returning when <B>accept-line</B> is executed.  By default,
 history lines may be modified and retain individual undo lists across
 calls to <B>readline</B>.
@@ -6668,7 +6792,7 @@ calls to <B>readline</B>.
 <DD>
 This alters the default behavior of the completion functions.  If
 set to
-<B>on</B>,
+<B>On</B>,
 
 words which have more than one possible completion cause the
 matches to be listed immediately instead of ringing the bell.
@@ -6678,7 +6802,7 @@ matches to be listed immediately instead of ringing the bell.
 This alters the default behavior of the completion functions in
 a fashion similar to <B>show-all-if-ambiguous</B>.
 If set to
-<B>on</B>,
+<B>On</B>,
 
 words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
@@ -6752,7 +6876,7 @@ library sets the <I>application name</I>, and an initialization
 file can test for a particular value.
 This could be used to bind key sequences to functions useful for
 a specific program.  For instance, the following command adds a
-key sequence that quotes the current or previous word in Bash:
+key sequence that quotes the current or previous word in <B>bash</B>:
 <P>
 <DL COMPACT><DT><DD>
 <PRE>
@@ -6990,10 +7114,14 @@ as if the &quot;!<I>n</I>&quot; history expansion had been specified.
 
 <DD>
 Insert the last argument to the previous command (the last word of
-the previous history entry).  With an argument,
-behave exactly like <B>yank-nth-arg</B>.
+the previous history entry).
+With a numeric argument, behave exactly like <B>yank-nth-arg</B>.
 Successive calls to <B>yank-last-arg</B> move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the &quot;!$&quot; history expansion had been specified.
 <DT><B>shell-expand-line (M-C-e)</B>
@@ -7315,7 +7443,7 @@ of matches; a negative argument may be used to move backward
 through the list.
 This command is intended to be bound to <B>TAB</B>, but is unbound
 by default.
-<DT><B>menu-complete-rd</B>
+<DT><B>menu-complete-backward</B>
 
 <DD>
 Identical to <B>menu-complete</B>, but moves backward through the list
@@ -7497,7 +7625,7 @@ character.  A negative count searches for previous occurrences.
 <DD>
 A character is read and point is moved to the previous occurrence of that
 character.  A negative count searches for subsequent occurrences.
-<DT><B>skip-csi-sequence ()</B>
+<DT><B>skip-csi-sequence</B>
 
 <DD>
 Read enough characters to consume a multi-key sequence such as those
@@ -7600,7 +7728,7 @@ If the command word is a full pathname, a compspec for the full
 pathname is searched for first.
 If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
-If those searches to not result in a compspec, any compspec defined with
+If those searches do not result in a compspec, any compspec defined with
 the <B>-D</B> option to <B>complete</B> is used as the default.
 <P>
 
@@ -7772,7 +7900,7 @@ exit status of 124.  If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
 attempted (supplied as the first argument when the function is executed),
 programmable completion restarts from the beginning, with an
-attempt to find a compspec for that command.  This allows a set of
+attempt to find a new compspec for that command.  This allows a set of
 completions to be built dynamically as completion is attempted, rather than
 being loaded all at once.
 <P>
@@ -8079,6 +8207,8 @@ writing the history file.
 
 An event designator is a reference to a command line entry in the
 history list.
+Unless the reference is absolute, events are relative to the current
+position in the history list.
 <P>
 
 
@@ -8101,7 +8231,7 @@ Refer to command line
 <DT><B>!-</B><I>n</I>
 
 <DD>
-Refer to the current command line minus
+Refer to the current command minus
 <I>n</I>.
 
 <DT><B>!!</B>
@@ -8111,13 +8241,15 @@ Refer to the previous command.  This is a synonym for `!-1'.
 <DT><B>!</B><I>string</I>
 
 <DD>
-Refer to the most recent command starting with 
+Refer to the most recent command preceding the current position in the
+history list starting with
 <I>string</I>.
 
 <DT><B>!?</B><I>string</I><B>[?]</B>
 
 <DD>
-Refer to the most recent command containing
+Refer to the most recent command preceding the current postition in the
+history list containing
 <I>string</I>.
 
 The trailing <B>?</B> may be omitted if
@@ -8127,7 +8259,7 @@ is followed immediately by a newline.
 <DT><B></B><FONT SIZE=+2><B>^</B></FONT><B></B><I>string1</I><FONT SIZE=+2>^</FONT><I>string2</I><FONT SIZE=+2>^</FONT>
 
 <DD>
-Quick substitution.  Repeat the last command, replacing
+Quick substitution.  Repeat the previous command, replacing
 <I>string1</I>
 
 with
@@ -8596,7 +8728,7 @@ The return status is false if
 is not a shell builtin command.
 <DT><B>caller</B> [<I>expr</I>]<DD>
 Returns the context of any active subroutine call (a shell function or
-a script executed with the <B>.</B> or <B>source</B> builtins.
+a script executed with the <B>.</B> or <B>source</B> builtins).
 Without <I>expr</I>, <B>caller</B> displays the line number and source
 filename of the current subroutine call.
 If a non-negative integer is supplied as <I>expr</I>, <B>caller</B> 
@@ -8607,7 +8739,7 @@ current frame is frame 0.
 The return value is 0 unless the shell is not executing a subroutine
 call or <I>expr</I> does not correspond to a valid position in the
 call stack.
-<DT><B>cd</B> [<B>-L|-P</B>] [<I>dir</I>]<DD>
+<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]]] [<I>dir</I>]<DD>
 Change the current directory to <I>dir</I>.  The variable
 <FONT SIZE=-1><B>HOME</B>
 
@@ -8652,7 +8784,17 @@ option to the
 builtin command); the
 <B>-L</B>
 
-option forces symbolic links to be followed.  An argument of
+option forces symbolic links to be followed.
+If the
+<B>-e</B>
+
+option is supplied with
+<B>-P</B>,
+
+and the current working directory cannot be successfully determined
+after a successful directory change, <B>cd</B> will return an unsuccessful
+status.
+An argument of
 <B>-</B>
 
 is equivalent to
@@ -8931,17 +9073,6 @@ User names.  May also be specified as <B>-u</B>.
 Names of all shell variables.  May also be specified as <B>-v</B>.
 </DL></DL>
 
-<DT><B>-G</B> <I>globpat</I><DD>
-The pathname expansion pattern <I>globpat</I> is expanded to generate
-the possible completions.
-<DT><B>-W</B> <I>wordlist</I><DD>
-The <I>wordlist</I> is split using the characters in the
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-special variable as delimiters, and each resultant word is expanded.
-The possible completions are the members of the resultant list which
-match the word being completed.
 <DT><B>-C</B> <I>command</I><DD>
 <I>command</I> is executed in a subshell environment, and its output is
 used as the possible completions.
@@ -8954,6 +9085,23 @@ of the
 
 </FONT>
 array variable.
+<DT><B>-G</B> <I>globpat</I><DD>
+The pathname expansion pattern <I>globpat</I> is expanded to generate
+the possible completions.
+<DT><B>-P</B> <I>prefix</I><DD>
+<I>prefix</I> is added at the beginning of each possible completion
+after all other options have been applied.
+<DT><B>-S</B> <I>suffix</I><DD>
+<I>suffix</I> is appended to each possible completion
+after all other options have been applied.
+<DT><B>-W</B> <I>wordlist</I><DD>
+The <I>wordlist</I> is split using the characters in the
+<FONT SIZE=-1><B>IFS</B>
+
+</FONT>
+special variable as delimiters, and each resultant word is expanded.
+The possible completions are the members of the resultant list which
+match the word being completed.
 <DT><B>-X</B> <I>filterpat</I><DD>
 <I>filterpat</I> is a pattern as used for pathname expansion.
 It is applied to the list of possible completions generated by the
@@ -8961,12 +9109,6 @@ preceding options and arguments, and each completion matching
 <I>filterpat</I> is removed from the list.
 A leading <B>!</B> in <I>filterpat</I> negates the pattern; in this
 case, any completion not matching <I>filterpat</I> is removed.
-<DT><B>-P</B> <I>prefix</I><DD>
-<I>prefix</I> is added at the beginning of each possible completion
-after all other options have been applied.
-<DT><B>-S</B> <I>suffix</I><DD>
-<I>suffix</I> is appended to each possible completion
-after all other options have been applied.
 
 </DL>
 <P>
@@ -8981,7 +9123,7 @@ an error occurs adding a completion specification.
 <DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>-DE</B>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
 Modify completion options for each <I>name</I> according to the
 <I>option</I>s, or for the
-currently-execution completion if no <I>name</I>s are supplied.
+currently-executing completion if no <I>name</I>s are supplied.
 If no <I>option</I>s are given, display the completion options for each
 <I>name</I> or the current completion.
 The possible values of <I>option</I> are those valid for the <B>complete</B>
@@ -8992,13 +9134,10 @@ on a command for which no completion has previously been defined.
 The <B>-E</B> option indicates that the remaining options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-</DL>
 <P>
-
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a <I>name</I> for which no completion
 specification exists, or an output error occurs.
-<DL COMPACT>
 <DT><B>continue</B> [<I>n</I>]<DD>
 Resume the next iteration of the enclosing
 <B>for</B>,
@@ -9023,9 +9162,9 @@ must be >= 1.  If
 is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless <I>n</I> is not greater than or equal to 1.
-<DT><B>declare</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>declare</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
-<DT><B>typeset</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>typeset</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
 Declare variables and/or give them attributes.
 If no <I>name</I>s are given then display the values of variables.
@@ -9061,6 +9200,12 @@ are displayed as well.  The
 option implies
 <B>-f</B>.
 
+The
+<B>-g</B>
+
+option forces variables to be created or modified at the global scope,
+even when <B>declare</B> is executed in a shell function.
+It is ignored in all other cases.
 The following options can
 be used to restrict output to variables with the specified attribute or
 to give variables attributes:
@@ -9130,13 +9275,13 @@ turns off the attribute instead,
 with the exceptions that <B>+a</B>
 may not be used to destroy an array variable and <B>+r</B> will not
 remove the readonly attribute.
-When used in a function,
-makes each
+When used in a function, makes each
 <I>name</I> local, as with the 
 <B>local</B>
 
-command.
-If a variable name is followed by =<I>value</I>, the value of
+command,
+unless the <B>-gP option is supplied,
+If a variable name is followed by =</B><I>value</I>, the value of
 the variable is set to <I>value</I>.
 The return value is 0 unless an invalid option is encountered,
 an attempt is made to define a function using
@@ -9153,7 +9298,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
 </DL>
 
-<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-cplv</B>]
+<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-clpv</B>]
 
 <DD>
 Without options, displays the list of currently remembered directories.
@@ -9293,6 +9438,9 @@ suppress further output
 <DT><B>\e</B>
 
 <DD>
+<DT><B>\E</B>
+
+<DD>
 an escape character
 <DT><B>\f</B>
 
@@ -9328,6 +9476,16 @@ the eight-bit character whose value is the octal value <I>nnn</I>
 <DD>
 the eight-bit character whose value is the hexadecimal value <I>HH</I>
 (one or two hex digits)
+<DT><B>\u</B><I>HHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits)
+<DT><B>\U</B><I>HHHHHHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits)
 
 </DL></DL>
 
@@ -9680,7 +9838,7 @@ return value greater than zero.
 
 </FONT>
 is set to the index of the first non-option argument,
-and <B>name</B> is set to ?.
+and <I>name</I> is set to ?.
 <P>
 <B>getopts</B>
 
@@ -9763,14 +9921,15 @@ returns true if an option, specified or unspecified, is found.
 It returns false if the end of options is encountered or an
 error occurs.
 <DT><B>hash</B> [<B>-lr</B>] [<B>-p</B> <I>filename</I>] [<B>-dt</B>] [<I>name</I>]<DD>
-For each
-<I>name</I>,
+Each time <B>hash</B> is invoked,
+the full pathname of the command 
+<I>name</I>
 
-the full file name of the command is determined by searching
+is determined by searching
 the directories in
 <B>$PATH</B>
 
-and remembered.
+and remembered.  Any previously-remembered pathname is discarded.
 If the
 <B>-p</B>
 
@@ -9954,16 +10113,16 @@ meanings:
 <DD>
 List process IDs
 in addition to the normal information.
-<DT><B>-p</B>
-
-<DD>
-List only the process ID of the job's process group
-leader.
 <DT><B>-n</B>
 
 <DD>
 Display information only about jobs that have changed status since
 the user was last notified of their status.
+<DT><B>-p</B>
+
+<DD>
+List only the process ID of the job's process group
+leader.
 <DT><B>-r</B>
 
 <DD>
@@ -10196,7 +10355,8 @@ is specified without
 
 the default quantum is 5000.
 When <I>callback</I> is evaluated, it is supplied the index of the next
-array element to be assigned as an additional argument.
+array element to be assigned and the line to be assigned to that element
+as additional arguments.
 <I>callback</I> is evaluated after the line is read but before the 
 array element is assigned.
 <P>
@@ -10270,27 +10430,57 @@ directory change fails.
 <DT><B>printf</B> [<B>-v</B> <I>var</I>] <I>format</I> [<I>arguments</I>]<DD>
 Write the formatted <I>arguments</I> to the standard output under the
 control of the <I>format</I>.
+The <B>-v</B> option causes the output to be assigned to the variable
+<I>var</I> rather than being printed to the standard output.
+<P>
 The <I>format</I> is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 <I>argument</I>.
-In addition to the standard <I>printf</I>(1) formats, <B>%b</B> causes
+In addition to the standard <I>printf</I>(1) format specifications,
+<B>printf</B> interprets the following extensions:
+<DL COMPACT><DT><DD>
+
+<DL COMPACT>
+<DT><B>%b</B>
+
+<DD>
+causes
 <B>printf</B> to expand backslash escape sequences in the corresponding
 <I>argument</I> (except that <B>\c</B> terminates output, backslashes in
 <B>\aq</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
-beginning with <B>\0</B> may contain up to four digits),
-and <B>%q</B> causes <B>printf</B> to output the corresponding
+beginning with <B>\0</B> may contain up to four digits).
+<DT><B>%q</B>
+
+<DD>
+causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
+<DT><B>%(</B><I>datefmt</I>)T
+
+<DD>
+causes <B>printf</B> to output the date-time string resulting from using
+<I>datefmt</I> as a format string for <I>strftime</I>(3).  The corresponding
+<I>argument</I> is an integer representing the number of seconds since the
+epoch.  Two special argument values may be used: -1 represents the current
+time, and -2 represents the time the shell was invoked.
+
+</DL>
 <P>
-The <B>-v</B> option causes the output to be assigned to the variable
-<I>var</I> rather than being printed to the standard output.
+
+Arguments to non-string format specifiers are treated as C constants,
+except that a leading plus or minus sign is allowed, and if the leading
+character is a single or double quote, the value is the ASCII value of
+the following character.
 <P>
+
 The <I>format</I> is reused as necessary to consume all of the <I>arguments</I>.
 If the <I>format</I> requires more <I>arguments</I> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
-appropriate, had been supplied.  The return value is zero on success,
-non-zero on failure.
+appropriate, had been supplied.
+The return value is zero on success, non-zero on failure.
+</DL>
+
 <DT><B>pushd</B> [<B>-n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
 
 <DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
@@ -10572,9 +10762,9 @@ function and not during execution of a script by <B>.</B>,
 the return status is false.
 Any command associated with the <B>RETURN</B> trap is executed
 before execution resumes after the function or script.
-<DT><B>set</B> [<B>--abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+<DT><B>set</B> [<B>--abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option-name</I>] [<I>arg</I> ...]<DD>
 
-<DT><B>set</B> [<B>+abefhkmnptuvxBCEHPT</B>] [<B>+o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+<DT><B>set</B> [<B>+abefhkmnptuvxBCEHPT</B>] [<B>+o</B> <I>option-name</I>] [<I>arg</I> ...]<DD>
 
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
@@ -11212,7 +11402,7 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's =~ operator.
+arguments to the <B>[[</B> conditional command's <B>=~</B> operator.
 <DT><B>compat32</B>
 
 <DD>
@@ -11220,7 +11410,15 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the conditional command's &lt; and &gt; operators.
+string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators.
+Bash versions prior to bash-4.1 use ASCII collation and
+<I>strcmp</I>(3);
+
+bash-4.1 and later
+use the current locale's collation sequence and
+<I>strcoll</I>(3).
+
 <DT><B>compat40</B>
 
 <DD>
@@ -11228,8 +11426,21 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the conditional command's &lt; and &gt; operators
+string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item)
 and the effect of interrupting a command list.
+<DT><B>compat41</B>
+
+<DD>
+@item compat41
+If set,
+<B>bash</B>,
+
+when in posix mode, treats a single quote in a double-quoted
+parameter expansion as a special character.  The single quotes must match
+(an even number) and the characters between the single quotes are considered
+quoted.  This is the behavior of posix mode through version 4.1.
+The default bash behavior remains as in previous versions.
 <DT><B>dirspell</B>
 
 <DD>
@@ -11311,7 +11522,7 @@ subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
 <DD>
 Error tracing is enabled:  command substitution, shell functions, and
 subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
-<B>ERROR</B> trap.
+<B>ERR</B> trap.
 </DL></DL>
 
 <DT><B>extglob</B>
@@ -11421,6 +11632,11 @@ line to be ignored in an interactive shell (see
 
 </FONT>
 above).  This option is enabled by default.
+<DT><B>lastpipe</B>
+
+<DD>
+If set, and job control is not active, the shell runs the last command of
+a pipeline not executed in the background in the current shell environment.
 <DT><B>lithist</B>
 
 <DD>
@@ -11575,6 +11791,7 @@ an argument of <B>--</B> as signifying the end of options.
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence.
 The evaluation depends on the number of arguments; see below.
+Operator precedence is used when there are five or more arguments.
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
@@ -11633,6 +11850,7 @@ the expression is true if the unary test is true.
 If the first argument is not a valid unary conditional operator, the expression
 is false.
 <DT>3 arguments<DD>
+The following conditions are applied in the order listed.
 If the second argument is one of the binary conditional operators listed above
 under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>,
@@ -11656,7 +11874,15 @@ precedence using the rules listed above.
 <DT>5 or more arguments<DD>
 The expression is parsed and evaluated according to precedence
 using the rules listed above.
-</DL></DL>
+<P>
+
+
+</DL>
+<P>
+
+When used with <B>test</B> or <B>[</B>, the <B>&lt;</B> and <B>&gt;</B> operators
+sort lexicographically using ASCII ordering.
+</DL>
 
 
 <DT><B>times</B>
@@ -11715,7 +11941,11 @@ Each
 
 is either
 a signal name defined in &lt;<I>signal.h</I>&gt;, or a signal number.
-Signal names are case insensitive and the SIG prefix is optional.
+Signal names are case insensitive and the
+<FONT SIZE=-1><B>SIG</B>
+
+</FONT>
+prefix is optional.
 <P>
 
 
@@ -11759,8 +11989,8 @@ is
 the command
 <I>arg</I>
 
-is executed each time a shell function or a script executed with the
-<B>.</B> or <B>source</B> builtins finishes executing.
+is executed each time a shell function or a script executed with
+the <B>.</B> or <B>source</B> builtins finishes executing.
 <P>
 
 
@@ -12018,7 +12248,8 @@ The maximum number of processes available to a single user
 <DT><B>-v</B>
 
 <DD>
-The maximum amount of virtual memory available to the shell
+The maximum amount of virtual memory available to the shell and, on
+some systems, to its children
 <DT><B>-x</B>
 
 <DD>
@@ -12232,7 +12463,7 @@ as an argument to the
 
 builtin command
 <DT>*<DD>
-Specifying a filename containing a slash as an argument to the
+specifying a filename containing a slash as an argument to the
 <B>-p</B>
 
 option to the
@@ -12266,7 +12497,7 @@ options to the
 
 builtin command
 <DT>*<DD>
-Using the <B>enable</B> builtin command to enable disabled shell builtins
+using the <B>enable</B> builtin command to enable disabled shell builtins
 <DT>*<DD>
 specifying the
 <B>-p</B>
@@ -12375,7 +12606,7 @@ version of
 <B>bash</B>.
 
 The latest version is always available from
-<I><A HREF="ftp://ftp.gnu.org/pub/bash/">ftp://ftp.gnu.org/pub/bash/</A></I>.
+<I><A HREF="ftp://ftp.gnu.org/pub/gnu/bash/">ftp://ftp.gnu.org/pub/gnu/bash/</A></I>.
 <P>
 
 Once you have determined that a bug actually exists, use the
@@ -12460,7 +12691,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12566,6 +12797,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 30 December 2009 13:07:38 EST
+Time: 28 December 2010 14:30:29 EST
 </BODY>
 </HTML>

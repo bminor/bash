@@ -220,6 +220,7 @@ include/posixselect.h	f
 include/posixstat.h	f
 include/posixtime.h	f
 include/posixwait.h	f
+include/shmbchar.h	f
 include/shmbutil.h	f
 include/shtty.h		f
 include/stdc.h		f
@@ -234,6 +235,7 @@ lib/glob/strmatch.h	f
 lib/glob/glob.c		f
 lib/glob/glob.h		f
 lib/glob/glob_loop.c	f
+lib/glob/gmisc.c	f
 lib/glob/xmbsrtowcs.c	f
 lib/glob/collsyms.h	f
 lib/glob/doc/Makefile	f
@@ -315,6 +317,7 @@ lib/readline/funmap.c	f
 lib/readline/keymaps.c	f
 lib/readline/util.c	f
 lib/readline/terminal.c	f
+lib/readline/xfree.c	f
 lib/readline/xmalloc.c	f
 lib/readline/search.c	f
 lib/readline/isearch.c	f
@@ -382,8 +385,8 @@ lib/sh/Makefile.in	f
 lib/sh/casemod.c	f
 lib/sh/clktck.c		f
 lib/sh/clock.c		f
+lib/sh/dprintf.c	f
 lib/sh/eaccess.c	f
-lib/sh/fdprintf.c	f
 lib/sh/fmtullong.c	f
 lib/sh/fmtulong.c	f
 lib/sh/fmtumax.c	f
@@ -409,12 +412,14 @@ lib/sh/pathphys.c	f
 lib/sh/rename.c		f
 lib/sh/setlinebuf.c	f
 lib/sh/shmatch.c	f
+lib/sh/shmbchar.c	f
 lib/sh/shquote.c	f
 lib/sh/shtty.c		f
 lib/sh/snprintf.c	f
 lib/sh/spell.c		f
 lib/sh/strcasecmp.c	f
 lib/sh/strcasestr.c	f
+lib/sh/strchrnul.c	f
 lib/sh/strerror.c	f
 lib/sh/strftime.c	f
 lib/sh/stringlist.c	f
@@ -435,8 +440,10 @@ lib/sh/timeval.c	f
 lib/sh/tmpfile.c	f
 lib/sh/uconvert.c	f
 lib/sh/ufuncs.c		f
+lib/sh/unicode.c	f
 lib/sh/vprint.c		f
 lib/sh/wcsdup.c		f
+lib/sh/wcswidth.c	f
 lib/sh/winsize.c	f
 lib/sh/zcatfd.c		f
 lib/sh/zgetline.c	f
@@ -515,8 +522,12 @@ po/sv.gmo		f
 po/sv.po		f
 po/tr.gmo		f
 po/tr.po		f
+po/uk.gmo		f
+po/uk.po		f
 po/vi.gmo		f
 po/vi.po		f
+po/zh_CN.gmo		f
+po/zh_CN.po		f
 po/zh_TW.gmo		f
 po/zh_TW.po		f
 po/insert-header.sin	f
@@ -685,6 +696,7 @@ examples/functions/which	f
 examples/functions/xalias.bash	f
 examples/functions/xfind.bash	f
 examples/scripts/adventure.sh	f
+examples/scripts/bash-hexdump.sh	f
 examples/scripts/bcsh.sh	f
 examples/scripts/cat.sh		f
 examples/scripts/center		f
@@ -742,6 +754,8 @@ tests/arith.tests	f
 tests/arith.right	f
 tests/arith1.sub	f
 tests/arith2.sub	f
+tests/arith3.sub	f
+tests/arith4.sub	f
 tests/array.tests	f
 tests/array.right	f
 tests/array1.sub	f
@@ -753,6 +767,7 @@ tests/array6.sub	f
 tests/array7.sub	f
 tests/array8.sub	f
 tests/array9.sub	f
+tests/array10.sub	f
 tests/array-at-star	f
 tests/array2.right	f
 tests/assoc.tests	f
@@ -769,6 +784,7 @@ tests/builtins.tests	f
 tests/builtins.right	f
 tests/builtins1.sub	f
 tests/builtins2.sub	f
+tests/builtins3.sub	f
 tests/source1.sub	f
 tests/source2.sub	f
 tests/source3.sub	f
@@ -793,6 +809,8 @@ tests/comsub-eof.right	f
 tests/comsub-posix.tests	f
 tests/comsub-posix.right	f
 tests/comsub-posix1.sub	f
+tests/comsub-posix2.sub	f
+tests/comsub-posix3.sub	f
 tests/cond.tests	f
 tests/cond.right	f
 tests/cond-regexp.sub	f
@@ -832,11 +850,13 @@ tests/exec5.sub		f
 tests/exec6.sub		f
 tests/exec7.sub		f
 tests/exec8.sub		f
+tests/exec9.sub		f
 tests/exp.tests		f
 tests/exp.right		f
 tests/exp1.sub		f
 tests/exp2.sub		f
 tests/exp3.sub		f
+tests/exp4.sub		f
 tests/extglob.tests	f
 tests/extglob.right	f
 tests/extglob1.sub	f
@@ -849,6 +869,7 @@ tests/func.right	f
 tests/func1.sub		f
 tests/func2.sub		f
 tests/func3.sub		f
+tests/func4.sub		f
 tests/getopts.tests	f
 tests/getopts.right	f
 tests/getopts1.sub	f
@@ -885,6 +906,7 @@ tests/input-line.sub	f
 tests/input.right	f
 tests/intl.tests	f
 tests/intl1.sub		f
+tests/intl2.sub		f
 tests/intl.right	f
 tests/iquote.tests	f
 tests/iquote.right	f
@@ -896,6 +918,9 @@ tests/jobs2.sub		f
 tests/jobs3.sub		f
 tests/jobs4.sub		f
 tests/jobs.right	f
+tests/lastpipe.right	f
+tests/lastpipe.tests	f
+tests/lastpipe1.sub	f
 tests/mapfile.data	f
 tests/mapfile.right	f
 tests/mapfile.tests	f
@@ -910,6 +935,7 @@ tests/new-exp4.sub	f
 tests/new-exp5.sub	f
 tests/new-exp6.sub	f
 tests/new-exp7.sub	f
+tests/new-exp8.sub	f
 tests/new-exp.right	f
 tests/nquote.tests	f
 tests/nquote.right	f
@@ -926,13 +952,23 @@ tests/nquote5.tests	f
 tests/nquote5.right	f
 tests/posix2.tests	f
 tests/posix2.right	f
+tests/posixexp.tests	f
+tests/posixexp.right	f
+tests/posixexp1.sub	f
+tests/posixexp2.sub	f
+tests/posixexp2.tests	f
+tests/posixexp2.right	f
 tests/posixpat.tests	f
 tests/posixpat.right	f
+tests/posixpipe.tests	f
+tests/posixpipe.right	f
 tests/prec.right	f
 tests/precedence	f
 tests/printf.tests	f
 tests/printf.right	f
+tests/printf1.sub	f
 tests/printf2.sub	f
+tests/printf3.sub	f
 tests/quote.tests	f
 tests/quote.right	f
 tests/read.tests	f
@@ -1005,6 +1041,7 @@ tests/run-intl		f
 tests/run-iquote	f
 tests/run-invert	f
 tests/run-jobs		f
+tests/run-lastpipe	f
 tests/run-mapfile	f
 tests/run-more-exp	f
 tests/run-new-exp	f
@@ -1015,7 +1052,10 @@ tests/run-nquote3	f
 tests/run-nquote4	f
 tests/run-nquote5	f
 tests/run-posix2	f
+tests/run-posixexp	f
+tests/run-posixexp2	f
 tests/run-posixpat	f
+tests/run-posixpipe	f
 tests/run-precedence	f
 tests/run-printf	f
 tests/run-quote		f
@@ -1061,6 +1101,7 @@ tests/type.tests	f
 tests/type.right	f
 tests/type1.sub		f
 tests/type2.sub		f
+tests/type3.sub		f
 tests/varenv.right	f
 tests/varenv.sh		f
 tests/varenv1.sub	f
@@ -1074,6 +1115,7 @@ tests/vredir2.sub	f
 tests/vredir3.sub	f
 tests/vredir4.sub	f
 tests/vredir5.sub	f
+tests/vredir6.sub	f
 tests/misc/dev-tcp.tests	f
 tests/misc/perf-script	f
 tests/misc/perftest	f

@@ -262,6 +262,11 @@ echo $(( --7 ))
 
 ${THIS_SH} ./arith1.sub
 ${THIS_SH} ./arith2.sub
+${THIS_SH} ./arith3.sub
+${THIS_SH} ./arith4.sub
+
+# make sure arithmetic expansion handles ints > 2**31 - 1 using intmax_t
+echo $(( 2147483645 + 4 ))
 
 x=4
 y=7

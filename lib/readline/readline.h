@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0600		/* Readline 6.0 */
+#define RL_READLINE_VERSION	0x0602		/* Readline 6.2 */
 #define RL_VERSION_MAJOR	6
-#define RL_VERSION_MINOR	0
+#define RL_VERSION_MINOR	2
 
 /* Readline data structures. */
 
@@ -666,16 +666,24 @@ extern const char *rl_special_prefixes;
    completing on a directory name.  The function is called with
    the address of a string (the current directory name) as an arg.  It
    changes what is displayed when the possible completions are printed
-   or inserted. */
+   or inserted.  The directory completion hook should perform
+   any necessary dequoting.  This function should return 1 if it modifies
+   the directory name pointer passed as an argument.  If the directory
+   completion hook returns 0, it should not modify the directory name
+   pointer passed as an argument. */
 extern rl_icppfunc_t *rl_directory_completion_hook;
 
 /* If non-zero, this is the address of a function to call when completing
    a directory name.  This function takes the address of the directory name
    to be modified as an argument.  Unlike rl_directory_completion_hook, it
    only modifies the directory name used in opendir(2), not what is displayed
-   when the possible completions are printed or inserted.  It is called
-   before rl_directory_completion_hook.  I'm not happy with how this works
-   yet, so it's undocumented. */
+   when the possible completions are printed or inserted.  If set, it takes
+   precedence over rl_directory_completion_hook.  The directory rewrite
+   hook should perform any necessary dequoting.  This function has the same
+   return value properties as the directory_completion_hook.
+
+   I'm not happy with how this works yet, so it's undocumented.  I'm trying
+   it in bash to see how well it goes. */
 extern rl_icppfunc_t *rl_directory_rewrite_hook;
 
 /* If non-zero, this is the address of a function to call when reading
@@ -805,30 +813,30 @@ extern int rl_inhibit_completion;
 /* Possible state values for rl_readline_state */
 #define RL_STATE_NONE		0x000000		/* no state; before first call */
 
-#define RL_STATE_INITIALIZING	0x000001	/* initializing */
-#define RL_STATE_INITIALIZED	0x000002	/* initialization done */
-#define RL_STATE_TERMPREPPED	0x000004	/* terminal is prepped */
-#define RL_STATE_READCMD	0x000008	/* reading a command key */
-#define RL_STATE_METANEXT	0x000010	/* reading input after ESC */
-#define RL_STATE_DISPATCHING	0x000020	/* dispatching to a command */
-#define RL_STATE_MOREINPUT	0x000040	/* reading more input in a command function */
-#define RL_STATE_ISEARCH	0x000080	/* doing incremental search */
-#define RL_STATE_NSEARCH	0x000100	/* doing non-inc search */
-#define RL_STATE_SEARCH		0x000200	/* doing a history search */
-#define RL_STATE_NUMERICARG	0x000400	/* reading numeric argument */
-#define RL_STATE_MACROINPUT	0x000800	/* getting input from a macro */
-#define RL_STATE_MACRODEF	0x001000	/* defining keyboard macro */
-#define RL_STATE_OVERWRITE	0x002000	/* overwrite mode */
-#define RL_STATE_COMPLETING	0x004000	/* doing completion */
-#define RL_STATE_SIGHANDLER	0x008000	/* in readline sighandler */
-#define RL_STATE_UNDOING	0x010000	/* doing an undo */
-#define RL_STATE_INPUTPENDING	0x020000	/* rl_execute_next called */
-#define RL_STATE_TTYCSAVED	0x040000	/* tty special chars saved */
-#define RL_STATE_CALLBACK	0x080000	/* using the callback interface */
-#define RL_STATE_VIMOTION	0x100000	/* reading vi motion arg */
-#define RL_STATE_MULTIKEY	0x200000	/* reading multiple-key command */
-#define RL_STATE_VICMDONCE	0x400000	/* entered vi command mode at least once */
-#define RL_STATE_REDISPLAYING	0x800000	/* updating terminal display */
+#define RL_STATE_INITIALIZING	0x0000001	/* initializing */
+#define RL_STATE_INITIALIZED	0x0000002	/* initialization done */
+#define RL_STATE_TERMPREPPED	0x0000004	/* terminal is prepped */
+#define RL_STATE_READCMD	0x0000008	/* reading a command key */
+#define RL_STATE_METANEXT	0x0000010	/* reading input after ESC */
+#define RL_STATE_DISPATCHING	0x0000020	/* dispatching to a command */
+#define RL_STATE_MOREINPUT	0x0000040	/* reading more input in a command function */
+#define RL_STATE_ISEARCH	0x0000080	/* doing incremental search */
+#define RL_STATE_NSEARCH	0x0000100	/* doing non-inc search */
+#define RL_STATE_SEARCH		0x0000200	/* doing a history search */
+#define RL_STATE_NUMERICARG	0x0000400	/* reading numeric argument */
+#define RL_STATE_MACROINPUT	0x0000800	/* getting input from a macro */
+#define RL_STATE_MACRODEF	0x0001000	/* defining keyboard macro */
+#define RL_STATE_OVERWRITE	0x0002000	/* overwrite mode */
+#define RL_STATE_COMPLETING	0x0004000	/* doing completion */
+#define RL_STATE_SIGHANDLER	0x0008000	/* in readline sighandler */
+#define RL_STATE_UNDOING	0x0010000	/* doing an undo */
+#define RL_STATE_INPUTPENDING	0x0020000	/* rl_execute_next called */
+#define RL_STATE_TTYCSAVED	0x0040000	/* tty special chars saved */
+#define RL_STATE_CALLBACK	0x0080000	/* using the callback interface */
+#define RL_STATE_VIMOTION	0x0100000	/* reading vi motion arg */
+#define RL_STATE_MULTIKEY	0x0200000	/* reading multiple-key command */
+#define RL_STATE_VICMDONCE	0x0400000	/* entered vi command mode at least once */
+#define RL_STATE_REDISPLAYING	0x0800000	/* updating terminal display */
 
 #define RL_STATE_DONE		0x1000000	/* done; accepted line */
 

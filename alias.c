@@ -319,6 +319,8 @@ skipquotes (string, start)
       if (string[i] == '\\')
 	{
 	  i++;		/* skip backslash-quoted quote characters, too */
+	  if (string[i] == 0)
+	    break;
 	  continue;
 	}
 
@@ -364,6 +366,8 @@ skipws (string, start)
       if (string[i] == '\\')
 	{
 	  peekc = string[i+1];
+	  if (peekc == 0)
+	    break;
 	  if (ISLETTER (peekc))
 	    backslash_quoted_word++;	/* this is a backslash-quoted word */
 	  else
@@ -429,6 +433,8 @@ rd_token (string, start)
       if (string[i] == '\\')
 	{
 	  i++;	/* skip backslash-escaped character */
+	  if (string[i] == 0)
+	    break;
 	  continue;
 	}
 

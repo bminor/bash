@@ -147,7 +147,7 @@ _rl_copy_to_kill_ring (text, append)
 	  strcat (new, old);
 	}
       xfree (old);
-      free (text);
+      xfree (text);
       rl_kill_ring[slot] = new;
     }
   else
@@ -601,7 +601,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
 #endif /* VI_MODE */
 
   rl_insert_text (arg);
-  free (arg);
+  xfree (arg);
 
   rl_end_undo_group ();
   return 0;
@@ -640,7 +640,7 @@ rl_yank_last_arg (count, key)
     {
       if (undo_needed)
 	rl_do_undo ();
-      if (count < 1)
+      if (count < 0)		/* XXX - was < 1 */
         direction = -direction;
       history_skip += direction;
       if (history_skip < 0)

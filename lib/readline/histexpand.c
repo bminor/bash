@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -245,7 +245,7 @@ get_history_event (string, caller_index, delimiting_quote)
 
 #define FAIL_SEARCH() \
   do { \
-    history_offset = history_length; free (temp) ; return (char *)NULL; \
+    history_offset = history_length; xfree (temp) ; return (char *)NULL; \
   } while (0)
 
   /* If there is no search string, try to use the previous search string,
@@ -254,7 +254,7 @@ get_history_event (string, caller_index, delimiting_quote)
     {
       if (search_string)
         {
-          free (temp);
+          xfree (temp);
           temp = savestring (search_string);
         }
       else
@@ -285,7 +285,7 @@ get_history_event (string, caller_index, delimiting_quote)
 	      search_match = history_find_word (entry->line, local_index);
 	    }
 	  else
-	    free (temp);
+	    xfree (temp);
 
 	  return (entry->line);
 	}
@@ -508,7 +508,7 @@ postproc_subst_rhs ()
 	}
     }
   new[j] = '\0';
-  free (subst_rhs);
+  xfree (subst_rhs);
   subst_rhs = new;
   subst_rhs_len = j;
 }
@@ -585,7 +585,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
   if (event == 0)
     {
       *ret_string = hist_error (string, start, i, EVENT_NOT_FOUND);
-      free (result);
+      xfree (result);
       return (-1);
     }
 
@@ -599,7 +599,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
   if (word_spec == (char *)&error_pointer)
     {
       *ret_string = hist_error (string, starting_index, i, BAD_WORD_SPEC);
-      free (result);
+      xfree (result);
       return (-1);
     }
 
@@ -632,8 +632,8 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	{
 	default:
 	  *ret_string = hist_error (string, i+1, i+2, BAD_MODIFIER);
-	  free (result);
-	  free (temp);
+	  xfree (result);
+	  xfree (temp);
 	  return -1;
 
 	case 'q':
@@ -658,7 +658,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	    {
 	      tstr++;
 	      t = savestring (tstr);
-	      free (temp);
+	      xfree (temp);
 	      temp = t;
 	    }
 	  break;
@@ -683,7 +683,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	  if (tstr)
 	    {
 	      t = savestring (tstr);
-	      free (temp);
+	      xfree (temp);
 	      temp = t;
 	    }
 	  break;
@@ -759,8 +759,8 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	    if (subst_lhs_len == 0)
 	      {
 		*ret_string = hist_error (string, starting_index, i, NO_PREV_SUBST);
-		free (result);
-		free (temp);
+		xfree (result);
+		xfree (temp);
 		return -1;
 	      }
 
@@ -769,8 +769,8 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	    if (subst_lhs_len > l_temp)
 	      {
 		*ret_string = hist_error (string, starting_index, i, SUBST_FAILED);
-		free (result);
-		free (temp);
+		xfree (result);
+		xfree (temp);
 		return (-1);
 	      }
 
@@ -811,7 +811,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 			     temp + si + subst_lhs_len,
 			     l_temp - (si + subst_lhs_len));
 		    new_event[len] = '\0';
-		    free (temp);
+		    xfree (temp);
 		    temp = new_event;
 
 		    failed = 0;
@@ -847,8 +847,8 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
 	      continue;		/* don't want to increment i */
 
 	    *ret_string = hist_error (string, starting_index, i, SUBST_FAILED);
-	    free (result);
-	    free (temp);
+	    xfree (result);
+	    xfree (temp);
 	    return (-1);
 	  }
 	}
@@ -869,7 +869,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
       else
 	x = savestring (temp);
 
-      free (temp);
+      xfree (temp);
       temp = x;
     }
 
@@ -877,7 +877,7 @@ history_expand_internal (string, start, end_index_ptr, ret_string, current_line)
   if (n >= result_len)
     result = (char *)xrealloc (result, n + 2);
   strcpy (result, temp);
-  free (temp);
+  xfree (temp);
 
   *end_index_ptr = i;
   *ret_string = result;
@@ -1064,7 +1064,7 @@ history_expand (hstring, output)
 	  
       if (string[i] != history_expansion_char)
 	{
-	  free (result);
+	  xfree (result);
 	  *output = savestring (string);
 	  return (0);
 	}
@@ -1144,7 +1144,7 @@ history_expand (hstring, output)
 		strncpy (temp, string + quote, slen);
 		temp[slen - 1] = '\0';
 		ADD_STRING (temp);
-		free (temp);
+		xfree (temp);
 	      }
 	    else
 	      ADD_CHAR (string[i]);
@@ -1157,7 +1157,7 @@ history_expand (hstring, output)
 	      temp = (char *)xmalloc (l - i + 1);
 	      strcpy (temp, string + i);
 	      ADD_STRING (temp);
-	      free (temp);
+	      xfree (temp);
 	      i = l;
 	    }
 	  else
@@ -1190,7 +1190,7 @@ history_expand (hstring, output)
 		  temp = (char *)xmalloc (1 + strlen (result));
 		  strcpy (temp, result);
 		  ADD_STRING (temp);
-		  free (temp);
+		  xfree (temp);
 		}
 	      i++;
 	      break;
@@ -1201,9 +1201,9 @@ history_expand (hstring, output)
 	  if (r < 0)
 	    {
 	      *output = temp;
-	      free (result);
+	      xfree (result);
 	      if (string != hstring)
-		free (string);
+		xfree (string);
 	      return -1;
 	    }
 	  else
@@ -1213,7 +1213,7 @@ history_expand (hstring, output)
 		  modified++;
 		  if (*temp)
 		    ADD_STRING (temp);
-		  free (temp);
+		  xfree (temp);
 		}
 	      only_printing = r == 1;
 	      i = eindex;
@@ -1224,7 +1224,7 @@ history_expand (hstring, output)
 
   *output = result;
   if (string != hstring)
-    free (string);
+    xfree (string);
 
   if (only_printing)
     {
@@ -1405,8 +1405,8 @@ history_arg_extract (first, last, string)
     }
 
   for (i = 0; i < len; i++)
-    free (list[i]);
-  free (list);
+    xfree (list[i]);
+  xfree (list);
 
   return (result);
 }
@@ -1417,10 +1417,10 @@ history_tokenize_word (string, ind)
      int ind;
 {
   register int i;
-  int delimiter;
+  int delimiter, nestdelim, delimopen;
 
   i = ind;
-  delimiter = 0;
+  delimiter = nestdelim = 0;
 
   if (member (string[i], "()\n"))
     {
@@ -1442,12 +1442,20 @@ history_tokenize_word (string, ind)
 	  return i;
 	}
       else if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
-		(peek == '>' && string[i] == '&') ||
-		(peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
-		(peek == '(' && string[i] == '$')) /* ) */
+		(peek == '>' && string[i] == '&'))
 	{
 	  i += 2;
 	  return i;
+	}
+      /* XXX - separated out for later -- bash-4.2 */
+      else if ((peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
+	       (peek == '(' && string[i] == '$')) /*)*/
+	{
+	  i += 2;
+	  delimopen = '(';
+	  delimiter = ')';
+	  nestdelim = 1;
+	  goto get_word;
 	}
 #if 0
       else if (peek == '\'' && string[i] == '$')
@@ -1464,9 +1472,25 @@ history_tokenize_word (string, ind)
 	}
     }
 
+  /* same code also used for $(...)/<(...)/>(...) above */
+  if (member (string[i], "!@?+*"))
+    {
+      int peek = string[i + 1];
+
+      if (peek == '(')		/*)*/
+	{
+	  /* Shell extended globbing patterns */
+	  i += 2;
+	  delimopen = '(';
+	  delimiter = ')';	/* XXX - not perfect */
+	  nestdelim = 1;
+	}
+    }
+
+get_word:
   /* Get word from string + i; */
 
-  if (member (string[i], HISTORY_QUOTE_CHARACTERS))
+  if (delimiter == 0 && member (string[i], HISTORY_QUOTE_CHARACTERS))
     delimiter = string[i++];
 
   for (; string[i]; i++)
@@ -1484,16 +1508,31 @@ history_tokenize_word (string, ind)
 	  continue;
 	}
 
+      /* delimiter must be set and set to something other than a quote if
+	 nestdelim is set, so these tests are safe. */
+      if (nestdelim && string[i] == delimopen)
+	{
+	  nestdelim++;
+	  continue;
+	}
+      if (nestdelim && string[i] == delimiter)
+	{
+	  nestdelim--;
+	  if (nestdelim == 0)
+	    delimiter = 0;
+	  continue;
+	}
+      
       if (delimiter && string[i] == delimiter)
 	{
 	  delimiter = 0;
 	  continue;
 	}
 
-      if (!delimiter && (member (string[i], history_word_delimiters)))
+      if (delimiter == 0 && (member (string[i], history_word_delimiters)))
 	break;
 
-      if (!delimiter && member (string[i], HISTORY_QUOTE_CHARACTERS))
+      if (delimiter == 0 && member (string[i], HISTORY_QUOTE_CHARACTERS))
 	delimiter = string[i];
     }
 
@@ -1590,7 +1629,7 @@ freewords (words, start)
   register int i;
 
   for (i = start; words[i]; i++)
-    free (words[i]);
+    xfree (words[i]);
 }
 
 /* Find and return the word which contains the character at index IND
@@ -1614,8 +1653,8 @@ history_find_word (line, ind)
     }
   s = words[wind];
   for (i = 0; i < wind; i++)
-    free (words[i]);
+    xfree (words[i]);
   freewords (words, wind + 1);
-  free (words);
+  xfree (words);
   return s;
 }

@@ -7,7 +7,7 @@ This document describes the GNU Readline Library, a utility for aiding
 in the consistency of user interface across discrete programs that need
 to provide a command line interface.
 
-Copyright (C) 1988-2007 Free Software Foundation, Inc.
+Copyright (C) 1988--2011 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1157,6 +1157,9 @@ of strings, in argv format, such as a list of completion matches.
 is the length of the longest string in @code{matches}.  This function uses
 the setting of @code{print-completions-horizontally} to select how the
 matches are displayed (@pxref{Readline Init File Syntax}).
+When displaying completions, this function sets the number of columns used
+for display to the value of @code{completion-display-width}, the value of
+the environment variable @env{COLUMNS}, or the screen width, in that order.
 @end deftypefun
 
 The following are implemented as macros, defined in @code{chardefs.h}.
@@ -1714,18 +1717,20 @@ from the array must be freed.
 
 @deftypevar {rl_icppfunc_t *} rl_directory_completion_hook
 This function, if defined, is allowed to modify the directory portion
-of filenames Readline completes.  It is called with the address of a
-string (the current directory name) as an argument, and may modify that string.
+of filenames Readline completes.
+It could be used to expand symbolic links or shell variables in pathnames.
+It is called with the address of a string (the current directory name) as an
+argument, and may modify that string.
 If the string is replaced with a new string, the old value should be freed.
 Any modified directory name should have a trailing slash.
-The modified value will be displayed as part of the completion, replacing
+The modified value will be used as part of the completion, replacing
 the directory portion of the pathname the user typed.
-It returns an integer that should be non-zero if the function modifies
-its directory argument.
-It could be used to expand symbolic links or shell variables in pathnames.
 At the least, even if no other expansion is performed, this function should
 remove any quote characters from the directory name, because its result will
 be passed directly to @code{opendir()}.
+The directory completion hook returns an integer that should be non-zero if
+the function modifies its directory argument.
+The function should not modify the directory argument if it returns 0.
 @end deftypevar
 
 @ignore
@@ -1737,7 +1742,7 @@ it only modifies the directory name used in @code{opendir}, not what is
 displayed when the possible completions are printed or inserted.  It is
 called before rl_directory_completion_hook.
 
-I'm not happy with how this worksyet, so it's undocumented.
+I'm not happy with how this works yet, so it's undocumented.
 @end deftypevar
 @end ignore
 

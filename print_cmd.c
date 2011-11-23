@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -161,7 +161,7 @@ static void
 make_command_string_internal (command)
      COMMAND *command;
 {
-  char s[3], *op;
+  char s[3];
 
   if (command == 0)
     cprintf ("");
@@ -299,8 +299,7 @@ make_command_string_internal (command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
-	  if (deferred_heredocs)
-	    print_deferred_heredocs ("");
+	  PRINT_DEFERRED_HEREDOCS ("");
 	  printing_connection--;	  	  
 	  break;
 
@@ -628,6 +627,7 @@ print_select_command (select_command)
   newline ("do\n");
   indentation += indentation_amount;
   make_command_string_internal (select_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   indentation -= indentation_amount;
   newline ("done");
@@ -711,6 +711,7 @@ print_case_clauses (clauses)
       indentation += indentation_amount;
       make_command_string_internal (clauses->action);
       indentation -= indentation_amount;
+      PRINT_DEFERRED_HEREDOCS ("");
       if (clauses->flags & CASEPAT_FALLTHROUGH)
 	newline (";&");
       else if (clauses->flags & CASEPAT_TESTNEXT)
@@ -744,10 +745,12 @@ print_until_or_while (while_command, which)
   cprintf ("%s ", which);
   skip_this_indent++;
   make_command_string_internal (while_command->test);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   cprintf (" do\n");	/* was newline ("do\n"); */
   indentation += indentation_amount;
   make_command_string_internal (while_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   indentation -= indentation_amount;
   semicolon ();
   newline ("done");
@@ -764,6 +767,7 @@ print_if_command (if_command)
   cprintf (" then\n");
   indentation += indentation_amount;
   make_command_string_internal (if_command->true_case);
+  PRINT_DEFERRED_HEREDOCS ("");
   indentation -= indentation_amount;
 
   if (if_command->false_case)
@@ -772,6 +776,7 @@ print_if_command (if_command)
       newline ("else\n");
       indentation += indentation_amount;
       make_command_string_internal (if_command->false_case);
+      PRINT_DEFERRED_HEREDOCS ("");
       indentation -= indentation_amount;
     }
   semicolon ();
@@ -951,7 +956,7 @@ print_deferred_heredocs (cstring)
       cprintf (" ");
       print_heredoc_header (hdtail);
     }
-  if (cstring[0] != ';' || cstring[1])
+  if (cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 
   if (deferred_heredocs)
     cprintf ("\n");
@@ -1060,10 +1065,9 @@ static void
 print_redirection (redirect)
      REDIRECT *redirect;
 {
-  int kill_leading, redirector, redir_fd;
+  int redirector, redir_fd;
   WORD_DESC *redirectee, *redir_word;
 
-  kill_leading = 0;
   redirectee = redirect->redirectee.filename;
   redir_fd = redirect->redirectee.dest;
 
@@ -1128,6 +1132,10 @@ print_redirection (redirect)
 	cprintf ("{%s}", redir_word->word);
       else if (redirector != 0)
 	cprintf ("%d", redirector);
+#if 0
+      /* Don't need to check whether or not to requote, since original quotes
+         are still intact.  The only thing that has happened is that $'...'
+         has been replaced with 'expanded ...'. */
       if (ansic_shouldquote (redirect->redirectee.filename->word))
 	{
 	  char *x;
@@ -1136,6 +1144,7 @@ print_redirection (redirect)
 	  free (x);
 	}
       else
+#endif
 	cprintf ("<<< %s", redirect->redirectee.filename->word);
       break;
 

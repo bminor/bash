@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1127,7 +1127,7 @@ char *structfile_header[] = {
   };
 
 char *structfile_footer[] = {
-  "  { (char *)0x0, (sh_builtin_func_t *)0x0, 0, (char **)0x0, (char *)0x0 }",
+  "  { (char *)0x0, (sh_builtin_func_t *)0x0, 0, (char **)0x0, (char *)0x0, (char *)0x0 }",
   "};",
   "",
   "struct builtin *shell_builtins = static_shell_builtins;",
@@ -1380,7 +1380,7 @@ write_documentation (stream, documentation, indentation, flags)
 {
   register int i, j;
   register char *line;
-  int string_array, texinfo, base_indent, last_cpp, filename_p;
+  int string_array, texinfo, base_indent, filename_p;
 
   if (stream == 0)
     return;
@@ -1407,7 +1407,7 @@ write_documentation (stream, documentation, indentation, flags)
 
   base_indent = (string_array && single_longdoc_strings && filename_p == 0) ? BASE_INDENT : 0;
 
-  for (i = last_cpp = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
+  for (i = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
     {
       /* Allow #ifdef's to be written out verbatim, but don't put them into
 	 separate help files. */
@@ -1415,11 +1415,8 @@ write_documentation (stream, documentation, indentation, flags)
 	{
 	  if (string_array && filename_p == 0 && single_longdoc_strings == 0)
 	    fprintf (stream, "%s\n", line);
-	  last_cpp = 1;
 	  continue;
 	}
-      else
-	last_cpp = 0;
 
       /* prefix with N_( for gettext */
       if (string_array && single_longdoc_strings == 0)

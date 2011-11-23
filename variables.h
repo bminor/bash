@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -235,6 +235,7 @@ extern FUNCTION_DEF *find_function_def __P((const char *));
 extern SHELL_VAR *find_variable __P((const char *));
 extern SHELL_VAR *find_variable_internal __P((const char *, int));
 extern SHELL_VAR *find_tempenv_variable __P((const char *));
+extern SHELL_VAR *find_global_variable __P((const char *));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
 extern SHELL_VAR *make_local_variable __P((const char *));
 extern SHELL_VAR *bind_variable __P((const char *, char *, int));
@@ -269,7 +270,7 @@ extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *, int));
 extern SHELL_VAR *bind_int_variable __P((char *, char *));
 extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 
-extern int assign_in_env __P((WORD_DESC *));
+extern int assign_in_env __P((WORD_DESC *, int));
 
 extern int unbind_variable __P((const char *));
 extern int unbind_func __P((const char *));
@@ -331,6 +332,8 @@ extern SHELL_VAR *make_new_assoc_variable __P((char *));
 extern SHELL_VAR *make_local_assoc_variable __P((char *));
 
 extern void set_pipestatus_array __P((int *, int));
+extern ARRAY *save_pipestatus_array __P((void));
+extern void restore_pipestatus_array __P((ARRAY *));
 #endif
 
 extern void set_pipestatus_from_exit __P((int));
@@ -350,6 +353,7 @@ extern int get_random_number __P((void));
 extern void sv_ifs __P((char *));
 extern void sv_path __P((char *));
 extern void sv_mail __P((char *));
+extern void sv_funcnest __P((char *));
 extern void sv_globignore __P((char *));
 extern void sv_ignoreeof __P((char *));
 extern void sv_strict_posix __P((char *));

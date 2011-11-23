@@ -927,6 +927,11 @@ describe_pid (pid)
 }
 
 void
+freeze_jobs_list ()
+{
+}
+
+void
 unfreeze_jobs_list ()
 {
 }

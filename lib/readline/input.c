@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -427,17 +427,19 @@ rl_read_key ()
       /* If the user has an event function, then call it periodically. */
       if (rl_event_hook)
 	{
-	  while (rl_event_hook && rl_get_char (&c) == 0)
+	  while (rl_event_hook)
 	    {
-	      (*rl_event_hook) ();
-	      RL_CHECK_SIGNALS ();
-	      if (rl_done)		/* XXX - experimental */
-		return ('\n');
 	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
 		  return ('\n');
 		}
+	      RL_CHECK_SIGNALS ();
+	      if (rl_get_char (&c) != 0)
+		break;
+	      if (rl_done)		/* XXX - experimental */
+		return ('\n');
+	      (*rl_event_hook) ();
 	    }
 	}
       else

@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -793,11 +793,16 @@ assign_vars:
     }
   else
     var = bind_read_variable (list->word->word, input_string);
-  stupidly_hack_special_variables (list->word->word);
-  FREE (tofree);
 
   if (var)
-    VUNSETATTR (var, att_invisible);
+    {
+      stupidly_hack_special_variables (list->word->word);
+      VUNSETATTR (var, att_invisible);
+    }
+  else
+    retval = EXECUTION_FAILURE;
+
+  FREE (tofree);
   xfree (orig_input_string);
 
   return (retval);
@@ -807,14 +812,17 @@ static SHELL_VAR *
 bind_read_variable (name, value)
      char *name, *value;
 {
+  SHELL_VAR *v;
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value, 0));
+    v = bind_variable (name, value, 0);
   else
-    return (assign_array_element (name, value, 0));
+    v = assign_array_element (name, value, 0);
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value, 0);
+  v = bind_variable (name, value, 0);
 #endif /* !ARRAY_VARS */
+  return (v == 0 ? v
+		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
 }
 
 #if defined (HANDLE_MULTIBYTE)

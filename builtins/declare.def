@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,7 +22,7 @@ $PRODUCES declare.c
 
 $BUILTIN declare
 $FUNCTION declare_builtin
-$SHORT_DOC declare [-aAfFilrtux] [-p] [name[=value] ...]
+$SHORT_DOC declare [-aAfFgilrtux] [-p] [name[=value] ...]
 Set variable values and attributes.
 
 Declare variables and give them attributes.  If no NAMEs are given,
@@ -32,6 +32,8 @@ Options:
   -f	restrict action or display to function names and definitions
   -F	restrict display to function names only (plus line number and
 	source file when debugging)
+  -g	create global variables when used in a shell function; otherwise
+	ignored
   -p	display the attributes and value of each NAME
 
 Options which set attributes:
@@ -50,7 +52,7 @@ Variables with the integer attribute have arithmetic evaluation (see
 the `let' command) performed when the variable is assigned a value.
 
 When used in a function, `declare' makes NAMEs local, as with the `local'
-command.
+command.  The `-g' option suppresses this behavior.
 
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
@@ -58,7 +60,7 @@ $END
 
 $BUILTIN typeset
 $FUNCTION declare_builtin
-$SHORT_DOC typeset [-aAfFilrtux] [-p] name[=value] ...
+$SHORT_DOC typeset [-aAfFgilrtux] [-p] name[=value] ...
 Set variable values and attributes.
 
 Obsolete.  See `help declare'.
@@ -125,9 +127,9 @@ local_builtin (list)
 }
 
 #if defined (ARRAY_VARS)
-#  define DECLARE_OPTS	"+acfilprtuxAF"
+#  define DECLARE_OPTS	"+acfgilprtuxAF"
 #else
-#  define DECLARE_OPTS	"+cfilprtuxF"
+#  define DECLARE_OPTS	"+cfgilprtuxF"
 #endif
 
 /* The workhorse function. */
@@ -137,12 +139,12 @@ declare_internal (list, local_var)
      int local_var;
 {
   int flags_on, flags_off, *flags;
-  int any_failed, assign_error, pflag, nodefs, opt;
+  int any_failed, assign_error, pflag, nodefs, opt, mkglobal;
   char *t, *subscript_start;
   SHELL_VAR *var;
   FUNCTION_DEF *shell_fn;
 
-  flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
+  flags_on = flags_off = any_failed = assign_error = pflag = nodefs = mkglobal = 0;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, DECLARE_OPTS)) != EOF)
     {
@@ -176,6 +178,10 @@ declare_internal (list, local_var)
 	  break;
 	case 'f':
 	  *flags |= att_function;
+	  break;
+	case 'g':
+	  if (flags == &flags_on)
+	    mkglobal = 1;
 	  break;
 	case 'i':
 	  *flags |= att_integer;
@@ -328,7 +334,7 @@ declare_internal (list, local_var)
       /* XXX - this has consequences when we're making a local copy of a
 	       variable that was in the temporary environment.  Watch out
 	       for this. */
-      if (variable_context && ((flags_on & att_function) == 0))
+      if (variable_context && mkglobal == 0 && ((flags_on & att_function) == 0))
 	{
 #if defined (ARRAY_VARS)
 	  if (flags_on & att_assoc)
@@ -410,7 +416,7 @@ declare_internal (list, local_var)
 	{
 	  /* Non-null if we just created or fetched a local variable. */
 	  if (var == 0)
-	    var = find_variable (name);
+	    var = mkglobal ? find_global_variable (name) : find_variable (name);
 
 	  if (var == 0)
 	    {

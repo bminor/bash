@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -250,6 +250,9 @@ int extended_quote = 1;
 /* The number of lines read from input while creating the current command. */
 int current_command_line_count;
 
+/* The number of lines in a command saved while we run parse_and_execute */
+int saved_command_line_count;
+
 /* The token that currently denotes the end of parse. */
 int shell_eof_token;
 
@@ -333,7 +336,7 @@ static REDIRECTEE redir;
    third group are recognized only under special circumstances. */
 %token IF THEN ELSE ELIF FI CASE ESAC FOR SELECT WHILE UNTIL DO DONE FUNCTION COPROC
 %token COND_START COND_END COND_ERROR
-%token IN BANG TIME TIMEOPT
+%token IN BANG TIME TIMEOPT TIMEIGN
 
 /* More general tokens. yylex () knows how to make these. */
 %token <word> WORD ASSIGNMENT_WORD REDIR_WORD
@@ -1186,30 +1189,18 @@ simple_list1:	simple_list1 AND_AND newline_list simple_list1
 	;
 
 pipeline_command: pipeline
-			{ $$ = $1; }
-	|	BANG pipeline
+			{ $$ = $1; }			
+	|	BANG pipeline_command
 			{
 			  if ($2)
-			    $2->flags |= CMD_INVERT_RETURN;
+			    $2->flags ^= CMD_INVERT_RETURN;	/* toggle */
 			  $$ = $2;
 			}
-	|	timespec pipeline
+	|	timespec pipeline_command
 			{
 			  if ($2)
 			    $2->flags |= $1;
 			  $$ = $2;
-			}
-	|	timespec BANG pipeline
-			{
-			  if ($3)
-			    $3->flags |= $1|CMD_INVERT_RETURN;
-			  $$ = $3;
-			}
-	|	BANG timespec pipeline
-			{
-			  if ($3)
-			    $3->flags |= $2|CMD_INVERT_RETURN;
-			  $$ = $3;
 			}
 	|	timespec list_terminator
 			{
@@ -1228,7 +1219,24 @@ pipeline_command: pipeline
 			  if ($2 == '\n')
 			    token_to_read = '\n';
 			}
-			
+	|	BANG list_terminator
+			{
+			  ELEMENT x;
+
+			  /* This is just as unclean.  Posix says that `!'
+			     by itself should be equivalent to `false'.
+			     We cheat and push a
+			     newline back if the list_terminator was a newline
+			     to avoid the double-newline problem (one to
+			     terminate this, one to terminate the command) */
+			  x.word = 0;
+			  x.redirect = 0;
+			  $$ = make_simple_command (x, (COMMAND *)NULL);
+			  $$->flags |= CMD_INVERT_RETURN;
+			  /* XXX - let's cheat and push a newline back */
+			  if ($2 == '\n')
+			    token_to_read = '\n';
+			}
 	;
 
 pipeline:	pipeline '|' newline_list pipeline
@@ -1263,6 +1271,8 @@ pipeline:	pipeline '|' newline_list pipeline
 timespec:	TIME
 			{ $$ = CMD_TIME_PIPELINE; }
 	|	TIME TIMEOPT
+			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
+	|	TIME TIMEOPT TIMEIGN
 			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
 	;
 %%
@@ -1422,11 +1432,11 @@ yy_readline_get ()
 	give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-      old_sigint = (SigHandler *)NULL;
+      old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	  interrupt_immediately++;
+	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
       terminate_immediately = 1;
 
@@ -1434,10 +1444,11 @@ yy_readline_get ()
       					  current_readline_prompt : "");
 
       terminate_immediately = 0;
-      if (signal_is_ignored (SIGINT) == 0 && old_sigint)
+      if (signal_is_ignored (SIGINT) == 0)
 	{
 	  interrupt_immediately--;
-	  set_signal_handler (SIGINT, old_sigint);
+	  if (old_sigint != IMPOSSIBLE_TRAP_HANDLER)
+	    set_signal_handler (SIGINT, old_sigint);
 	}
 
 #if 0
@@ -1635,6 +1646,9 @@ typedef struct stream_saver {
 
 /* The globally known line number. */
 int line_number = 0;
+
+/* The line number offset set by assigning to LINENO.  Not currently used. */
+int line_number_base = 0;
 
 #if defined (COND_COMMAND)
 static int cond_lineno;
@@ -1957,6 +1971,7 @@ read_a_line (remove_quoted_newline)
 	}
       else if (c == '\\' && remove_quoted_newline)
 	{
+	  QUIT;
 	  peekc = yy_getc ();
 	  if (peekc == '\n')
 	    {
@@ -2058,6 +2073,7 @@ STRING_INT_ALIST word_token_alist[] = {
 /* other tokens that can be returned by read_token() */
 STRING_INT_ALIST other_token_alist[] = {
   /* Multiple-character tokens with special values */
+  { "--", TIMEIGN },
   { "-p", TIMEOPT },
   { "&&", AND_AND },
   { "||", OR_OR },
@@ -2278,7 +2294,7 @@ shell_getc (remove_quoted_newline)
 	      shell_input_line = expansions;
 	      shell_input_line_len = shell_input_line ?
 					strlen (shell_input_line) : 0;
-	      if (!shell_input_line_len)
+	      if (shell_input_line_len == 0)
 		current_command_line_count--;
 
 	      /* We have to force the xrealloc below because we don't know
@@ -2303,7 +2319,7 @@ shell_getc (remove_quoted_newline)
 	  else
 	    {
 	      char *hdcs;
-	      hdcs = history_delimiting_chars ();
+	      hdcs = history_delimiting_chars (shell_input_line);
 	      if (hdcs && hdcs[0] == ';')
 		maybe_add_history (shell_input_line);
 	    }
@@ -2343,6 +2359,7 @@ shell_getc (remove_quoted_newline)
 	}
     }
 
+next_alias_char:
   uc = shell_input_line[shell_input_line_index];
 
   if (uc)
@@ -2355,7 +2372,7 @@ shell_getc (remove_quoted_newline)
      Do it transparently; just return the next character of the string popped
      to. */
 pop_alias:
-  if (!uc && (pushed_string_list != (STRING_SAVER *)NULL))
+  if (uc == 0 && (pushed_string_list != (STRING_SAVER *)NULL))
     {
       pop_string ();
       uc = shell_input_line[shell_input_line_index];
@@ -2369,21 +2386,28 @@ pop_alias:
 	if (SHOULD_PROMPT ())
 	  prompt_again ();
 	line_number++;
-	/* XXX - what do we do here if we're expanding an alias whose definition
-	   ends with a newline?  Recall that we inhibit the appending of a
-	   space in mk_alexpansion() if newline is the last character. */
-#if 0	/* XXX - bash-4.2 (jonathan@claggett.org) */
+	/* What do we do here if we're expanding an alias whose definition
+	   includes an escaped newline?  If that's the last character in the
+	   alias expansion, we just pop the pushed string list (recall that
+	   we inhibit the appending of a space in mk_alexpansion() if newline
+	   is the last character).  If it's not the last character, we need
+	   to consume the quoted newline and move to the next character in
+	   the expansion. */
 	if (expanding_alias () && shell_input_line[shell_input_line_index+1] == '\0')
 	  {
 	    uc = 0;
 	    goto pop_alias;
 	  }
-#endif
-	  
-	goto restart_read;
+	else if (expanding_alias () && shell_input_line[shell_input_line_index+1] != '\0')
+	  {
+	    shell_input_line_index++;	/* skip newline */
+	    goto next_alias_char;	/* and get next character */
+	  }
+	else	    
+	  goto restart_read;
     }
 
-  if (!uc && shell_input_line_terminator == EOF)
+  if (uc == 0 && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);
 
   return (uc);
@@ -2590,11 +2614,9 @@ mk_alexpansion (s)
   l = strlen (s);
   r = xmalloc (l + 2);
   strcpy (r, s);
-#if 0		/* XXX - bash-4.2 */
-  if (r[l -1] != ' ' && r[l -1] != '\n')
-#else
-  if (r[l -1] != ' ')
-#endif
+  /* If the last character in the alias is a newline, don't add a trailing
+     space to the expansion.  Works with shell_getc above. */
+  if (r[l - 1] != ' ' && r[l - 1] != '\n')
     r[l++] = ' ';
   r[l] = '\0';
   return r;
@@ -2639,6 +2661,20 @@ static int
 time_command_acceptable ()
 {
 #if defined (COMMAND_TIMING)
+  int i;
+
+  if (posixly_correct && shell_compatibility_level > 41)
+    {
+      /* Quick check of the rest of the line to find the next token.  If it
+	 begins with a `-', Posix says to not return `time' as the token.
+	 This was interp 267. */
+      i = shell_input_line_index;
+      while (i < shell_input_line_len && (shell_input_line[i] == ' ' || shell_input_line[i] == '\t'))
+        i++;
+      if (shell_input_line[i] == '-')
+	return 0;
+    }
+
   switch (last_read_token)
     {
     case 0:
@@ -2652,6 +2688,10 @@ time_command_acceptable ()
     case ELSE:
     case '{':		/* } */
     case '(':		/* ) */
+    case BANG:		/* ! time pipeline */
+    case TIME:		/* time time pipeline */
+    case TIMEOPT:	/* time -p time pipeline */
+    case TIMEIGN:	/* time -p -- ... */
       return 1;
     default:
       return 0;
@@ -2678,6 +2718,7 @@ time_command_acceptable ()
 	`}' is recognized if there is an unclosed `{' present.
 
 	`-p' is returned as TIMEOPT if the last read token was TIME.
+	`--' is returned as TIMEIGN if the last read token was TIMEOPT.
 
 	']]' is returned as COND_END if the parser is currently parsing
 	a conditional expression ((parser_state & PST_CONDEXPR) != 0)
@@ -2763,13 +2804,9 @@ special_case_tokens (tokstr)
   /* Handle -p after `time'. */
   if (last_read_token == TIME && tokstr[0] == '-' && tokstr[1] == 'p' && !tokstr[2])
     return (TIMEOPT);
-#endif
-
-#if 0
-#if defined (COMMAND_TIMING)
-  if (STREQ (token, "time") && ((parser_state & PST_CASEPAT) == 0) && time_command_acceptable ())
-    return (TIME);
-#endif /* COMMAND_TIMING */
+  /* Handle -- after `time -p'. */
+  if (last_read_token == TIMEOPT && tokstr[0] == '-' && tokstr[1] == '-' && !tokstr[2])
+    return (TIMEIGN);
 #endif
 
 #if defined (COND_COMMAND) /* [[ */
@@ -3054,12 +3091,13 @@ tokword:
  * reprompting the user, if necessary, after reading a newline, and returning
  * correct error values if it reads EOF.
  */
-#define P_FIRSTCLOSE	0x01
-#define P_ALLOWESC	0x02
-#define P_DQUOTE	0x04
-#define P_COMMAND	0x08	/* parsing a command, so look for comments */
-#define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
-#define P_ARRAYSUB	0x20	/* parsing a [...] array subscript for assignment */
+#define P_FIRSTCLOSE	0x0001
+#define P_ALLOWESC	0x0002
+#define P_DQUOTE	0x0004
+#define P_COMMAND	0x0008	/* parsing a command, so look for comments */
+#define P_BACKQUOTE	0x0010	/* parsing a backquoted command substitution */
+#define P_ARRAYSUB	0x0020	/* parsing a [...] array subscript for assignment */
+#define P_DOLBRACE	0x0040	/* parsing a ${...} construct */
 
 /* Lexical state while parsing a grouping construct or $(...). */
 #define LEX_WASDOL	0x001
@@ -3107,6 +3145,9 @@ parse_matched_pair (qc, open, close, lenp, flags)
   int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
+  int dolbrace_state;
+
+  dolbrace_state = (flags & P_DOLBRACE) ? DOLBRACE_PARAM : 0;
 
 /*itrace("parse_matched_pair[%d]: open = %c close = %c flags = %d", line_number, open, close, flags);*/
   count = 1;
@@ -3124,7 +3165,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -3217,14 +3258,42 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if MBTEST(ch == '\\')			/* backslashes */
 	tflags |= LEX_PASSNEXT;
 
-#if 0
+      /* Based on which dolstate is currently in (param, op, or word),
+	 decide what the op is.  We're really only concerned if it's % or
+	 #, so we can turn on a flag that says whether or not we should
+	 treat single quotes as special when inside a double-quoted
+	 ${...}. This logic must agree with subst.c:extract_dollar_brace_string
+	 since they share the same defines. */
+      if (flags & P_DOLBRACE)
+        {
+          /* ${param%[%]word} */
+	  if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '%' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param#[#]word} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '#' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param/[/]pat/rep} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '/' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param^[^]pat} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '^' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param,[,]pat} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == ',' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", ch) != 0)
+	    dolbrace_state = DOLBRACE_OP;
+	  else if MBTEST(dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", ch) == 0)
+	    dolbrace_state = DOLBRACE_WORD;
+        }
+
       /* The big hammer.  Single quotes aren't special in double quotes.  The
-         problem is that Posix says the single quotes are semi-special:
+         problem is that Posix used to say the single quotes are semi-special:
          within a double-quoted ${...} construct "an even number of
          unescaped double-quotes or single-quotes, if any, shall occur." */
-      if MBTEST(open == '{' && (flags & P_DQUOTE) && ch == '\'')	/* } */
+      /* This was changed in Austin Group Interp 221 */
+      if MBTEST(posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
 	continue;
-#endif
 
       /* Could also check open == '`' if we want to parse grouping constructs
 	 inside old-style command substitution. */
@@ -3299,7 +3368,7 @@ parse_dollar_word:
 	  if (ch == '(')		/* ) */
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
 
@@ -3334,6 +3403,13 @@ parse_comsub (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
+  /* Posix interp 217 says arithmetic expressions have precedence, so
+     assume $(( introduces arithmetic expansion and parse accordingly. */
+  peekc = shell_getc (0);
+  shell_ungetc (peekc);
+  if (peekc == '(')
+    return (parse_matched_pair (qc, open, close, lenp, 0));
+
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
   tflags = LEX_RESWDOK;
@@ -3358,7 +3434,7 @@ parse_comsub (qc, open, close, lenp, flags)
   while (count)
     {
 comsub_readchar:
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -3482,7 +3558,7 @@ eof_error:
 	}
 
       /* Skip whitespace */
-      if MBTEST(shellblank (ch) && lex_rwlen == 0)
+      if MBTEST(shellblank (ch) && (tflags & LEX_HEREDELIM) == 0 && lex_rwlen == 0)
         {
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -3734,7 +3810,7 @@ eof_error:
 	  if (ch == '(')		/* ) */
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
 
@@ -3757,8 +3833,7 @@ eof_error:
   return ret;
 }
 
-/* XXX - this needs to handle functionality like subst.c:no_longjmp_on_fatal_error;
-   maybe extract_command_subst should handle it. */
+/* Recursively call the parser to parse a $(...) command substitution. */
 char *
 xparse_dolparen (base, string, indp, flags)
      char *base;
@@ -4382,7 +4457,7 @@ read_token_word (character)
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
-		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE);
+		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE|P_DOLBRACE);
 	      else if (peek_char == '(')		/* ) */
 		{
 		  /* XXX - push and pop the `(' as a delimiter for use by
@@ -4717,6 +4792,7 @@ reserved_word_acceptable (toksym)
     case THEN:
     case TIME:
     case TIMEOPT:
+    case TIMEIGN:
     case COPROC:
     case UNTIL:
     case WHILE:
@@ -4727,6 +4803,8 @@ reserved_word_acceptable (toksym)
       if (last_read_token == WORD && token_before_that == COPROC)
 	return 1;
 #endif
+      if (last_read_token == WORD && token_before_that == FUNCTION)
+	return 1;
       return 0;
     }
 }
@@ -4787,20 +4865,35 @@ static const int no_semi_successors[] = {
 /* If we are not within a delimited expression, try to be smart
    about which separators can be semi-colons and which must be
    newlines.  Returns the string that should be added into the
-   history entry. */
+   history entry.  LINE is the line we're about to add; it helps
+   make some more intelligent decisions in certain cases. */
 char *
-history_delimiting_chars ()
+history_delimiting_chars (line)
+     const char *line;
 {
+  static int last_was_heredoc = 0;	/* was the last entry the start of a here document? */
   register int i;
+
+  if ((parser_state & PST_HEREDOC) == 0)
+    last_was_heredoc = 0;
 
   if (dstack.delimiter_depth != 0)
     return ("\n");
 
   /* We look for current_command_line_count == 2 because we are looking to
      add the first line of the body of the here document (the second line
-     of the command). */
+     of the command).  We also keep LAST_WAS_HEREDOC as a private sentinel
+     variable to note when we think we added the first line of a here doc
+     (the one with a "<<" somewhere in it) */
   if (parser_state & PST_HEREDOC)
-    return (current_command_line_count == 2 ? "\n" : "");
+    {
+      if (last_was_heredoc)
+	{
+	  last_was_heredoc = 0;
+	  return "\n";
+	}
+      return (current_command_line_count == 2 ? "\n" : "");
+    }
 
   /* First, handle some special cases. */
   /*(*/
@@ -4822,6 +4915,15 @@ history_delimiting_chars ()
     }
   else if (token_before_that == WORD && two_tokens_ago == FUNCTION)
     return " ";		/* function def using `function name' without `()' */
+
+  /* If we're not in a here document, but we think we're about to parse one,
+     and we would otherwise return a `;', return a newline to delimit the
+     line with the here-doc delimiter */
+  else if ((parser_state & PST_HEREDOC) == 0 && current_command_line_count > 1 && last_read_token == '\n' && strstr (line, "<<"))
+    {
+      last_was_heredoc = 1;
+      return "\n";
+    }
 
   else if (token_before_that == WORD && two_tokens_ago == FOR)
     {
@@ -5152,7 +5254,7 @@ decode_prompt_string (string)
 		      {
 			t = strrchr (t_string, '/');
 			if (t)
-			  memmove (t_string, t + 1, strlen (t));
+			  memmove (t_string, t + 1, strlen (t));	/* strlen(t) to copy NULL */
 		      }
 		  }
 #undef ROOT_PATH
@@ -5439,7 +5541,7 @@ static void
 report_syntax_error (message)
      char *message;
 {
-  char *msg;
+  char *msg, *p;
 
   if (message)
     {
@@ -5455,6 +5557,12 @@ report_syntax_error (message)
      parser's complaining about by looking at current_token. */
   if (current_token != 0 && EOF_Reached == 0 && (msg = error_token_from_token (current_token)))
     {
+      if (ansic_shouldquote (msg))
+	{
+	  p = ansic_quote (msg, 0, NULL);
+	  free (msg);
+	  msg = p;
+	}
       parser_error (line_number, _("syntax error near unexpected token `%s'"), msg);
       free (msg);
 
@@ -5764,10 +5872,6 @@ sh_parser_state_t *
 save_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
@@ -5778,6 +5882,8 @@ save_parser_state (ps)
 
   ps->input_line_terminator = shell_input_line_terminator;
   ps->eof_encountered = eof_encountered;
+
+  ps->prompt_string_pointer = prompt_string_pointer;
 
   ps->current_command_line_count = current_command_line_count;
 
@@ -5790,11 +5896,7 @@ save_parser_state (ps)
 
   ps->last_command_exit_value = last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    ps->pipestatus = array_copy (array_cell (v));
-  else
-    ps->pipestatus = (ARRAY *)NULL;
+  ps->pipestatus = save_pipestatus_array ();
 #endif
     
   ps->last_shell_builtin = last_shell_builtin;
@@ -5810,10 +5912,6 @@ void
 restore_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     return;
 
@@ -5827,6 +5925,8 @@ restore_parser_state (ps)
   shell_input_line_terminator = ps->input_line_terminator;
   eof_encountered = ps->eof_encountered;
 
+  prompt_string_pointer = ps->prompt_string_pointer;
+
   current_command_line_count = ps->current_command_line_count;
 
 #if defined (HISTORY)
@@ -5838,12 +5938,7 @@ restore_parser_state (ps)
 
   last_command_exit_value = ps->last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    {
-      array_dispose (array_cell (v));
-      var_setarray (v, ps->pipestatus);
-    }
+  restore_pipestatus_array (ps->pipestatus);
 #endif
 
   last_shell_builtin = ps->last_shell_builtin;

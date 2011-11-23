@@ -1695,7 +1695,9 @@ AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
 AC_CHECK_FUNC(mbscasecmp, AC_DEFINE(HAVE_MBSCMP))
 AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
+AC_CHECK_FUNC(mbsnrtowcs, AC_DEFINE(HAVE_MBSNRTOWCS))
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
+
 
 AC_REPLACE_FUNCS(mbschr)
 
@@ -1704,6 +1706,8 @@ AC_CHECK_FUNC(wcscoll, AC_DEFINE(HAVE_WCSCOLL))
 AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
 AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
+
+AC_REPLACE_FUNCS(wcswidth)
 
 dnl checks for both mbrtowc and mbstate_t
 AC_FUNC_MBRTOWC
@@ -4114,4 +4118,52 @@ main()
     AC_DEFINE(HAVE_VSNPRINTF, 0,
       [Define if you have a standard-conformant vsnprintf function.])
   fi
+])
+
+AC_DEFUN(BASH_STRUCT_WEXITSTATUS_OFFSET,
+[AC_MSG_CHECKING(for offset of exit status in return status from wait)
+AC_CACHE_VAL(bash_cv_wexitstatus_offset,
+[AC_RUN_IFELSE([
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <sys/wait.h>
+
+main(c, v)
+     int c;
+     char **v;
+{
+  pid_t pid, p;
+  int s, i, n;
+
+  s = 0;
+  pid = fork();
+  if (pid == 0)
+    exit (42);
+
+  /* wait for the process */
+  p = wait(&s);
+  if (p != pid)
+    exit (255);
+
+  /* crack s */
+  for (i = 0; i < (sizeof(s) - 8); i++)
+    {
+      n = (s >> i) & 0xff;
+      if (n == 42)
+	exit (i);
+    }
+
+  exit (254);
+}
+], bash_cv_wexitstatus_offset=0, bash_cv_wexitstatus_offset=$?,
+   [AC_MSG_WARN(cannot check WEXITSTATUS offset if cross compiling -- defaulting to 0)
+    bash_cv_wexitstatus_offset=0]
+)])
+if test "$bash_cv_wexitstatus_offset" -gt 32 ; then
+  AC_MSG_WARN(bad exit status from test program -- defaulting to 0)
+  bash_cv_wexitstatus_offset=0
+fi
+AC_MSG_RESULT($bash_cv_wexitstatus_offset)
+AC_DEFINE_UNQUOTED([WEXITSTATUS_OFFSET], [$bash_cv_wexitstatus_offset], [Offset of exit status in wait status word])
 ])

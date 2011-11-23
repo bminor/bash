@@ -145,7 +145,7 @@ _rl_init_eightbit ()
 	_rl_output_meta_chars = 1;
 	break;
       }
-  free (t);
+  xfree (t);
   return (legal_lang_values[i] ? 1 : 0);
 
 #endif /* !HAVE_SETLOCALE */

@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008,2009 Free Software Foundation, Inc.
+Copyright (C) 2008-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,7 +44,8 @@ Arguments:
 
 If -C is supplied without -c, the default quantum is 5000.  When
 CALLBACK is evaluated, it is supplied the index of the next array
-element to be assigned as an additional argument.
+element to be assigned and the line to be assigned to that element
+as additional arguments.
 
 If not supplied with an explicit origin, mapfile will clear ARRAY before
 assigning to it.
@@ -88,7 +89,10 @@ extern int errno;
 
 #if defined (ARRAY_VARS)
 
+static int run_callback __P((const char *, unsigned int, const char *));
+
 #define DEFAULT_ARRAY_NAME	"MAPFILE"
+#define DEFAULT_VARIABLE_NAME	"MAPLINE"	/* not used right now */
 
 /* The value specifying how frequently `mapfile'  calls the callback. */
 #define DEFAULT_QUANTUM 5000
@@ -98,18 +102,20 @@ extern int errno;
 #define MAPF_CHOP	0x02
 
 static int
-run_callback(callback, current_index)
+run_callback (callback, curindex, curline)
      const char *callback;
-     unsigned int current_index;
+     unsigned int curindex;
+     const char *curline;
 {
   unsigned int execlen;
-  char  *execstr;
+  char  *execstr, *qline;
   int flags;
 
-  execlen = strlen (callback) + 10;
-  /* 1 for space between %s and %d,
+  qline = sh_single_quote (curline);
+  execlen = strlen (callback) + strlen (qline) + 10;
+  /* 1 for each space between %s and %d,
      another 1 for the last nul char for C string. */
-  execlen += 2;
+  execlen += 3;
   execstr = xmalloc (execlen);
 
   flags = SEVAL_NOHIST;
@@ -117,8 +123,9 @@ run_callback(callback, current_index)
   if (interactive)
     flags |= SEVAL_INTERACT;
 #endif
-  snprintf (execstr, execlen, "%s %d", callback, current_index);
-  return parse_and_execute(execstr, NULL, flags);
+  snprintf (execstr, execlen, "%s %d %s", callback, curindex, qline);
+  free (qline);
+  return parse_and_execute (execstr, NULL, flags);
 }
 
 static void
@@ -202,7 +209,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
       /* Has a callback been registered and if so is it time to call it? */
       if (callback && line_count && (line_count % callback_quantum) == 0) 
 	{
-	  run_callback (callback, array_index);
+	  run_callback (callback, array_index, line);
 
 	  /* Reset the buffer for bash own stream. */
 	  if (unbuffered_read == 0)

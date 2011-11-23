@@ -1,6 +1,6 @@
 /* sigs - print signal dispositions for a process */
 
-/* Copyright (C) 1990-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,7 +21,7 @@
 #include <signal.h>
 #include <stdio.h>
 
-extern char	*sys_siglist[];
+extern const char	* const sys_siglist[];
 
 typedef void	sighandler();
 

@@ -83,7 +83,7 @@ CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 	   $(srcdir)/histfile.c $(srcdir)/nls.c $(srcdir)/search.c \
 	   $(srcdir)/shell.c $(srcdir)/tilde.c $(srcdir)/savestring.c \
 	   $(srcdir)/text.c $(srcdir)/misc.c $(srcdir)/compat.c \
-	   $(srcdir)/mbutil.c
+	   $(srcdir)/mbutil.c $(srcdir)/xfree.c
 
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
@@ -97,7 +97,7 @@ TILDEOBJ = tilde.o
 OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
 	  rltty.o complete.o bind.o isearch.o display.o signals.o \
 	  util.o kill.o undo.o macro.o input.o callback.o terminal.o \
-	  text.o nls.o misc.o $(HISTOBJ) $(TILDEOBJ) xmalloc.o compat.o
+	  text.o nls.o misc.o $(HISTOBJ) $(TILDEOBJ) xmalloc.o xfree.o compat.o 
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
@@ -123,9 +123,9 @@ libreadline.a: $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
-libhistory.a: $(HISTOBJ) xmalloc.o
+libhistory.a: $(HISTOBJ) xmalloc.o xfree.o
 	$(RM) $@
-	$(AR) $(ARFLAGS) $@ $(HISTOBJ) xmalloc.o
+	$(AR) $(ARFLAGS) $@ $(HISTOBJ) xmalloc.o xfree.o
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 documentation: force
@@ -262,6 +262,7 @@ vi_mode.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 vi_mode.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 vi_mode.o: history.h ansi_stdlib.h rlstdc.h
 xmalloc.o: ${BUILD_DIR}/config.h ansi_stdlib.h
+xfree.o: ${BUILD_DIR}/config.h ansi_stdlib.h
 
 bind.o: rlshell.h
 histfile.o: rlshell.h
@@ -317,6 +318,7 @@ tilde.o: xmalloc.h
 undo.o: xmalloc.h
 util.o: xmalloc.h
 vi_mode.o: xmalloc.h 
+xfree.o: xmalloc.h
 xmalloc.o: xmalloc.h
 
 complete.o: rlmbutil.h
@@ -359,6 +361,7 @@ tilde.o: tilde.c
 undo.o: undo.c
 util.o: util.c
 vi_mode.o: vi_mode.c
+xfree.o: xfree.c
 xmalloc.o: xmalloc.c
 
 histexpand.o: histexpand.c

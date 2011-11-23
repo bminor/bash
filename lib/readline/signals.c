@@ -131,6 +131,7 @@ static sighandler_cxt old_winch;
 /* Called from RL_CHECK_SIGNALS() macro */
 RETSIGTYPE
 _rl_signal_handler (sig)
+     int sig;
 {
   _rl_caught_signal = 0;	/* XXX */
 

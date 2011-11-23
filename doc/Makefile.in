@@ -161,7 +161,7 @@ html: ${HTMLFILES}
 pdf: ${PDFFILES}
 
 bashref.dvi: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
-	${SET_TEXINPUTS} $(TEXI2DVI) $(srcdir)/bashref.texi
+	${SET_TEXINPUTS} $(TEXI2DVI) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
 
 bashref.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi

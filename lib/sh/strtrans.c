@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -51,11 +51,16 @@ ansicstr (string, len, flags, sawc, rlen)
 {
   int c, temp;
   char *ret, *r, *s;
+  unsigned long v;
 
   if (string == 0 || *string == '\0')
     return ((char *)NULL);
 
+#if defined (HANDLE_MULTIBYTE)
+  ret = (char *)xmalloc (4*len + 1);
+#else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
+#endif
   for (r = ret, s = string; s && *s; )
     {
       c = *s++;
@@ -128,6 +133,29 @@ ansicstr (string, len, flags, sawc, rlen)
 		}
 	      c &= 0xFF;
 	      break;
+#if defined (HANDLE_MULTIBYTE)
+	    case 'u':
+	    case 'U':
+	      temp = (c == 'u') ? 4 : 8;	/* \uNNNN \UNNNNNNNN */
+	      for (v = 0; ISXDIGIT ((unsigned char)*s) && temp--; s++)
+		v = (v * 16) + HEXVALUE (*s);
+	      if (temp == ((c == 'u') ? 4 : 8))
+		{
+		  *r++ = '\\';	/* c remains unchanged */
+		  break;
+		}
+	      else if (v <= UCHAR_MAX)
+		{
+		  c = v;
+		  break;
+		}
+	      else
+		{
+		  temp = u32cconv (v, r);
+		  r += temp;
+		  continue;
+		}
+#endif
 	    case '\\':
 	      break;
 	    case '\'': case '"': case '?':
@@ -143,9 +171,13 @@ ansicstr (string, len, flags, sawc, rlen)
 		    *rlen = r - ret;
 		  return ret;
 		}
+	      else if ((flags & 1) == 0 && *s == 0)
+		;		/* pass \c through */
 	      else if ((flags & 1) == 0 && (c = *s))
 		{
 		  s++;
+		  if ((flags & 2) && c == '\\' && c == *s)
+		    s++;	/* Posix requires $'\c\\' do backslash escaping */
 		  c = TOCTRL(c);
 		  break;
 		}

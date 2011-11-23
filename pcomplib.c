@@ -62,6 +62,7 @@ compspec_create ()
   ret->suffix = (char *)NULL;
   ret->funcname = (char *)NULL;
   ret->command = (char *)NULL;
+  ret->lcommand = (char *)NULL;
   ret->filterpat = (char *)NULL;
 
   return ret;
@@ -80,6 +81,7 @@ compspec_dispose (cs)
       FREE (cs->suffix);
       FREE (cs->funcname);
       FREE (cs->command);
+      FREE (cs->lcommand);
       FREE (cs->filterpat);
 
       free (cs);
@@ -104,6 +106,7 @@ compspec_copy (cs)
   new->suffix = STRDUP (cs->suffix);
   new->funcname = STRDUP (cs->funcname);
   new->command = STRDUP (cs->command);
+  new->lcommand = STRDUP (cs->lcommand);
   new->filterpat = STRDUP (cs->filterpat);
 
   return new;

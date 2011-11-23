@@ -24,9 +24,6 @@
  * It also doesn't worry about multi-byte characters.
  * So there.
  *
- * This file is also shipped with GAWK (GNU Awk), gawk specific bits of
- * code are included if GAWK is defined.
- *
  * Arnold Robbins
  * January, February, March, 1991
  * Updated March, April 1992
@@ -39,6 +36,8 @@
  * Updated July, 1997
  * Updated October, 1999
  * Updated September, 2000
+ * Updated December, 2001
+ * Updated January, 2011
  *
  * Fixes from ado@elsie.nci.nih.gov,
  * February 1991, May 1992
@@ -54,14 +53,15 @@
  * July 1997
  * Moved to C99 specification.
  * September 2000
+ * Fixes from Tanaka Akira <akr@m17n.org>
+ * December 2001
  */
 #include <config.h>
 
-#ifndef GAWK
 #include <stdio.h>
 #include <ctype.h>
 #include <time.h>
-#endif
+
 #if defined(TM_IN_SYS_TIME)
 #include <sys/types.h>
 #include <sys/time.h>
@@ -74,9 +74,7 @@
 #define SUNOS_EXT	1	/* stuff in SunOS strftime routine */
 #define VMS_EXT		1	/* include %v for VMS date format */
 #define HPUX_EXT	1	/* non-conflicting stuff in HP-UX date */
-#ifndef GAWK
 #define POSIX_SEMANTICS	1	/* call tzset() if TZ changes */
-#endif
 
 #undef strchr	/* avoid AIX weirdness */
 
@@ -114,6 +112,11 @@ extern int timezone, altzone;
 
 #undef min	/* just in case */
 
+/* format for %+ -- currently unused */
+#ifndef NATIONAL_FORMAT
+#define NATIONAL_FORMAT "%a %b %e %H:%M:%S %Z %Y"
+#endif
+
 /* min --- return minimum of two numbers */
 
 static inline int
@@ -141,7 +144,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 	char *start = s;
 	auto char tbuf[100];
 	long off;
-	int i, w, y;
+	int i, w;
+	long y;
 	static short first = 1;
 #ifdef POSIX_SEMANTICS
 	static char *savetz = NULL;
@@ -282,7 +286,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 
 		case 'C':
 		century:
-			sprintf(tbuf, "%02d", (timeptr->tm_year + 1900) / 100);
+			sprintf(tbuf, "%02ld", (timeptr->tm_year + 1900L) / 100);
 			break;
 
 		case 'd':	/* day of the month, 01 - 31 */
@@ -319,16 +323,16 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			 */
 			w = iso8601wknum(timeptr);
 			if (timeptr->tm_mon == 11 && w == 1)
-				y = 1900 + timeptr->tm_year + 1;
+				y = 1900L + timeptr->tm_year + 1;
 			else if (timeptr->tm_mon == 0 && w >= 52)
-				y = 1900 + timeptr->tm_year - 1;
+				y = 1900L + timeptr->tm_year - 1;
 			else
-				y = 1900 + timeptr->tm_year;
+				y = 1900L + timeptr->tm_year;
 
 			if (*format == 'G')
-				sprintf(tbuf, "%d", y);
+				sprintf(tbuf, "%ld", y);
 			else
-				sprintf(tbuf, "%02d", y % 100);
+				sprintf(tbuf, "%02ld", y % 100);
 			break;
 
 		case 'h':	/* abbreviated month name */
@@ -387,7 +391,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			strftime(tbuf, sizeof tbuf, "%H:%M", timeptr);
 			break;
 
-#if defined(HAVE_MKTIME) || defined(GAWK)
+#if defined(HAVE_MKTIME)
 		case 's':	/* time as seconds since the Epoch */
 		{
 			struct tm non_const_timeptr;
@@ -396,7 +400,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			sprintf(tbuf, "%ld", mktime(& non_const_timeptr));
 			break;
 		}
-#endif /* defined(HAVE_MKTIME) || defined(GAWK) */
+#endif /* defined(HAVE_MKTIME) */
 
 		case 'S':	/* second, 00 - 60 */
 			i = range(0, timeptr->tm_sec, 60);
@@ -452,7 +456,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 
 		case 'Y':	/* year with century */
 		fullyear:
-			sprintf(tbuf, "%d", 1900 + timeptr->tm_year);
+			sprintf(tbuf, "%ld", 1900L + timeptr->tm_year);
 			break;
 
 		/*
@@ -495,6 +499,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 #  ifdef HPUX
 			off = -timezone / 60;
 #  else
+			/* ADR: 4 August 2001, fixed this per gazelle@interaccess.com */
 			off = -(daylight ? altzone : timezone) / 60;
 #  endif /* !HPUX */
 #else /* !HAVE_TZNAME */
@@ -509,7 +514,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			} else {
 				tbuf[0] = '+';
 			}
-			sprintf(tbuf+1, "%02d%02d", off/60, off%60);
+			sprintf(tbuf+1, "%02ld%02ld", off/60, off%60);
 			break;
 
 		case 'Z':	/* time zone name or abbrevation */
@@ -558,10 +563,10 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 
 #ifdef VMS_EXT
 		case 'v':	/* date as dd-bbb-YYYY */
-			sprintf(tbuf, "%2d-%3.3s-%4d",
+			sprintf(tbuf, "%2d-%3.3s-%4ld",
 				range(1, timeptr->tm_mday, 31),
 				months_a[range(0, timeptr->tm_mon, 11)],
-				timeptr->tm_year + 1900);
+				timeptr->tm_year + 1900L);
 			for (i = 3; i < 6; i++)
 				if (islower(tbuf[i]))
 					tbuf[i] = toupper(tbuf[i]);
@@ -594,7 +599,7 @@ out:
 /* isleap --- is a year a leap year? */
 
 static int
-isleap(int year)
+isleap(long year)
 {
 	return ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0);
 }
@@ -677,7 +682,7 @@ iso8601wknum(const struct tm *timeptr)
 			dec31ly.tm_mon = 11;
 			dec31ly.tm_mday = 31;
 			dec31ly.tm_wday = (jan1day == 0) ? 6 : jan1day - 1;
-			dec31ly.tm_yday = 364 + isleap(dec31ly.tm_year + 1900);
+			dec31ly.tm_yday = 364 + isleap(dec31ly.tm_year + 1900L);
 			weeknum = iso8601wknum(& dec31ly);
 #endif
 		}

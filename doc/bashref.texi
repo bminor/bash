@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2009 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2011 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -522,6 +522,12 @@ the eight-bit character whose value is the octal value @var{nnn}
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
+@item \u@var{HHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHH} (one to four hex digits)
+@item \U@var{HHHHHHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHHHHHH} (one to eight hex digits)
 @item \c@var{x}
 a control-@var{x} character
 @end table
@@ -590,6 +596,7 @@ some other grouping.
 * Lists::			How to execute commands sequentially.
 * Compound Commands::		Shell commands for control flow.
 * Coprocesses::			Two-way communication between commands.
+* GNU Parallel::		Running commands in parallel.
 @end menu
 
 @node Simple Commands
@@ -641,12 +648,21 @@ The statistics currently consist of elapsed (wall-clock) time and
 user and system time consumed by the command's execution.
 The @option{-p} option changes the output format to that specified
 by @sc{posix}.
+When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}),
+it does not recognize @code{time} as a reserved word if the next
+token begins with a @samp{-}.
 The @env{TIMEFORMAT} variable may be set to a format string that
 specifies how the timing information should be displayed.
 @xref{Bash Variables}, for a description of the available formats.
 The use of @code{time} as a reserved word permits the timing of
 shell builtins, shell functions, and pipelines.  An external
 @code{time} command cannot time these easily.
+
+When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}), @code{time}
+may be followed by a newline.  In this case, the shell displays the
+total user and system time consumed by the shell and its children.
+The @env{TIMEFORMAT} variable may be used to specify the format of
+the time information.
 
 If the pipeline is not executed asynchronously (@pxref{Lists}), the
 shell waits for all commands in the pipeline to complete.
@@ -804,7 +820,7 @@ until it evaluates to zero.
 Each time @var{expr2} evaluates to a non-zero value, @var{commands} are
 executed and the arithmetic expression @var{expr3} is evaluated.       
 If any expression is omitted, it behaves as if it evaluates to 1.
-The return value is the exit status of the last command in @var{list}
+The return value is the exit status of the last command in @var{commands}
 that is executed, or false if any of the expressions is invalid.
 
 @end table
@@ -979,7 +995,7 @@ substitution, and quote removal are performed.
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
-When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
 
 When the @samp{==} and @samp{!=} operators are used, the string to the
@@ -1119,12 +1135,87 @@ command (@pxref{Redirections}).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
 
-The process id of the shell spawned to execute the coprocess is
+The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable @var{NAME}_PID.
 The @code{wait}
 builtin command may be used to wait for the coprocess to terminate.
 
 The return status of a coprocess is the exit status of @var{command}.
+
+@node GNU Parallel
+@subsection GNU Parallel
+
+GNU Parallel, as its name suggests, can be used to build and run commands
+in parallel.  You may run the same command with different arguments, whether
+they are filenames, usernames, hostnames, or lines read from files.
+
+For a complete description, refer to the GNU Parallel documentation.  A few
+examples should provide a brief introduction to its use.
+
+For example, it is easy to prefix each line in a text file with a specified
+string:
+@example
+cat file | parallel -k echo prefix_string
+@end example
+@noindent
+The @option{-k} option is required to preserve the lines' order.
+
+Similarly, you can append a specified string to each line in a text file:
+@example
+cat file | parallel -k echo @{@} append_string
+@end example
+
+You can use Parallel to move files from the current directory when the
+number of files is too large to process with one @code{mv} invocation:
+@example
+ls | parallel mv @{@} destdir
+@end example
+
+As you can see, the @{@} is replaced with each line read from standard input.
+This will run as many @code{mv} commands as there are files in the current
+directory.  You can emulate a parallel @code{xargs} by adding the @option{-X}
+option:
+@example
+ls | parallel -X mv @{@} destdir
+@end example
+
+GNU Parallel can replace certain common idioms that operate on lines read
+from a file (in this case, filenames):
+@example
+	for x in $(cat list); do
+		do-something1 $x config-$x
+		do-something2 < $x
+	done | process-output
+@end example
+
+@noindent
+with a more compact syntax reminiscent of lambdas:
+@example
+cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
+@end example
+
+Parallel provides a built-in mechanism to remove filename extensions, which
+lends itself to batch file transformations or renaming:
+@example
+ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
+@end example
+@noindent
+This will recompress all files in the current directory with names ending
+in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
+
+If a command generates output, you may want to preserve the input order in
+the output.  For instance, the following command
+@example
+@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
+@end example
+@noindent
+will display as output the traceroute invocation that finishes first.  Using
+the @option{-k} option, as we saw above
+@example
+@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
+@end example
+@noindent
+will ensure that the output of @code{traceroute foss.org.my} is displayed first.
 
 @node Shell Functions
 @section Shell Functions
@@ -1142,7 +1233,8 @@ shell context; no new process is created to interpret them.
 Functions are declared using this syntax:
 @rwindex function
 @example
-[ @code{function} ] @var{name} () @var{compound-command} [ @var{redirections} ]
+@var{name} () @var{compound-command} [ @var{redirections} ]@*or@*
+@code{function} @var{name} [()] @var{compound-command} [ @var{redirections} ]
 @end example
 
 This defines a shell function named @var{name}.  The reserved
@@ -1198,6 +1290,11 @@ shell option has been enabled.
 @xref{Bourne Shell Builtins}, for the description of the
 @code{trap} builtin.
 
+The @env{FUNCNEST} variable, if set to a numeric value greater
+than 0, defines a maximum function nesting level.  Function
+invocations that exceed the limit cause the entire command to
+abort.
+
 If the builtin command @code{return}
 is executed in a function, the function completes and
 execution resumes with the next command after the function
@@ -1232,8 +1329,10 @@ in multiple identically-named entries in the environment passed to the
 shell's children.
 Care should be taken in cases where this may cause a problem.
 
-Functions may be recursive.  No limit is placed on the number of
-recursive  calls.
+Functions may be recursive.
+The @code{FUNCNEST} variable may be used to limit the depth of the
+function call stack and restrict the number of function invocations.
+By default, no limit is placed on the number of recursive  calls.
 
 @node Shell Parameters
 @section Shell Parameters
@@ -1283,7 +1382,7 @@ In the context where an assignment statement is assigning a value
 to a shell variable or array index (@pxref{Arrays}), the @samp{+=}
 operator can be used to   
 append to or add to the variable's previous value.
-When @samp{+=} is applied to a variable for which the integer attribute
+When @samp{+=} is applied to a variable for which the @var{integer} attribute
 has been set, @var{value} is evaluated as an arithmetic expression and
 added to the variable's current value, which is also evaluated.
 When @samp{+=} is applied to an array variable using compound assignment
@@ -1618,7 +1717,7 @@ Bash uses the value of the variable formed from the rest of
 expanded and that value is used in the rest of the substitution, rather
 than the value of @var{parameter} itself.
 This is known as @code{indirect expansion}.
-The exceptions to this are the expansions of $@{!@var{prefix*}@}
+The exceptions to this are the expansions of $@{!@var{prefix}@*@}
 and $@{!@var{name}[@@]@}
 described below.
 The exclamation point must immediately follow the left brace in order to
@@ -1672,9 +1771,13 @@ If @var{length} is omitted, expands to the substring of
 (@pxref{Shell Arithmetic}).
 This is referred to as Substring Expansion.
 
-@var{length} must evaluate to a number greater than or equal to zero.
 If @var{offset} evaluates to a number less than zero, the value
 is used as an offset from the end of the value of @var{parameter}.
+If @var{length} evaluates to a number less than zero, and @var{parameter}
+is not @samp{@@} and not an indexed or associative array, it is interpreted
+as an offset from the end of the value of @var{parameter} rather than
+a number of characters, and the expansion is the characters between the
+two offsets.
 If @var{parameter} is @samp{@@}, the result is @var{length} positional
 parameters beginning at @var{offset}.
 If @var{parameter} is an indexed array name subscripted
@@ -2838,7 +2941,7 @@ The return status is zero unless @var{n} is not greater than or equal to 1.
 @item cd
 @btindex cd
 @example
-cd [-L|-P] [@var{directory}]
+cd [-L|[-P [-e]]] [@var{directory}]
 @end example
 Change the current working directory to @var{directory}.
 If @var{directory} is not given, the value of the @env{HOME} shell
@@ -2848,6 +2951,10 @@ If @var{directory} begins with a slash, @env{CDPATH} is not used.
 
 The @option{-P} option means to not follow symbolic links; symbolic
 links are followed by default or with the @option{-L} option.
+If the @option{-e} option is supplied with @option{-P}
+and the current working directory cannot be successfully determined
+after a successful directory change, @code{cd} will return an unsuccessful
+status.
 If @var{directory} is @samp{-}, it is equivalent to @env{$OLDPWD}.
 
 If a non-empty directory name from @env{CDPATH} is used, or if
@@ -2954,7 +3061,7 @@ invocation if a new set of parameters is to be used.
 When the end of options is encountered, @code{getopts} exits with a
 return value greater than zero.
 @env{OPTIND} is set to the index of the first non-option argument,
-and @code{name} is set to @samp{?}.
+and @var{name} is set to @samp{?}.
 
 @code{getopts}
 normally parses the positional parameters, but if more arguments are
@@ -2986,10 +3093,12 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @example
 hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
-Remember the full pathnames of commands specified as @var{name} arguments,
+Each time @code{hash} is invoked, it remembers the full pathnames of the
+commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
 @env{$PATH}.
+Any previously-remembered pathname is discarded.
 The @option{-p} option inhibits the path search, and @var{filename} is
 used as the location of @var{name}.
 The @option{-r} option causes the shell to forget all remembered locations.
@@ -3023,7 +3132,7 @@ is supplied.
 @item readonly
 @btindex readonly
 @example
-readonly [-aApf] [@var{name}[=@var{value}]] @dots{}
+readonly [-aAf] [-p] [@var{name}[=@var{value}]] @dots{}
 @end example
 Mark each @var{name} as readonly.
 The values of these names may not be changed by subsequent assignment.
@@ -3032,8 +3141,11 @@ function.
 The @option{-a} option means each @var{name} refers to an indexed
 array variable; the @option{-A} option means each @var{name} refers
 to an associative array variable.
+If both options are supplied, @option{-A} takes precedence.
 If no @var{name} arguments are given, or if the @option{-p}
 option is supplied, a list of all readonly names is printed.
+The other options may be used to restrict the output to a subset of
+the set of readonly names.
 The @option{-p} option causes output to be displayed in a format that
 may be reused as input.
 If a variable name is followed by =@var{value}, the value of
@@ -3093,6 +3205,7 @@ be a @code{]}.
 Expressions may be combined using the following operators, listed in
 decreasing order of precedence.
 The evaluation depends on the number of arguments; see below.
+Operator precedence is used when there are five or more arguments.
 
 @table @code
 @item ! @var{expr}
@@ -3129,6 +3242,7 @@ If the first argument is not a valid unary operator, the expression is
 false.
 
 @item 3 arguments
+The following conditions are applied in the order listed.
 If the second argument is one of the binary conditional
 operators (@pxref{Bash Conditional Expressions}), the
 result of the expression is the result of the binary test using the
@@ -3152,6 +3266,9 @@ precedence using the rules listed above.
 The expression is parsed and evaluated according to precedence
 using the rules listed above.
 @end table
+
+When used with @code{test} or @samp{[}, the @samp{<} and @samp{>}
+operators sort lexicographically using ASCII ordering.
 
 @item times
 @btindex times
@@ -3448,6 +3565,11 @@ If the @code{extdebug} shell option is enabled using @code{shopt}
 (@pxref{The Shopt Builtin}), the source file name and line number where
 the function is defined are displayed as well.
 @option{-F} implies @option{-f}.
+
+The @option{-g} option forces variables to be created or modified at
+the global scope, even when @code{declare} is executed in a shell function.
+It is ignored in all other cases.
+
 The following options can be used to restrict output to variables with
 the specified attributes or to give variables attributes:
 
@@ -3496,8 +3618,9 @@ with the exceptions that @samp{+a}
 may not be used to destroy an array variable and @samp{+r} will not
 remove the readonly attribute.
 When used in a function, @code{declare} makes each @var{name} local,
-as with the @code{local} command.  If a variable name is followed by
-=@var{value}, the value of the variable is set to @var{value}.
+as with the @code{local} command, unless the @samp{-g} option is used.
+If a variable name is followed by =@var{value}, the value of the variable
+is set to @var{value}.
 
 The return status is zero unless an invalid option is encountered,
 an attempt is made to define a function using @samp{-f foo=bar},
@@ -3536,6 +3659,7 @@ backspace
 @item \c
 suppress further output
 @item \e
+@itemx \E
 escape
 @item \f
 form feed
@@ -3555,6 +3679,12 @@ the eight-bit character whose value is the octal value @var{nnn}
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
+@item \u@var{HHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHH} (one to four hex digits)
+@item \U@var{HHHHHHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHHHHHH} (one to eight hex digits)
 @end table
 
 @item enable
@@ -3679,7 +3809,8 @@ Specify the number of lines read between each call to @var{callback}.
 If @option{-C} is specified without @option{-c}, 
 the default quantum is 5000.
 When @var{callback}  is evaluated, it is supplied the index of the next
-array element to be assigned as an additional argument.
+array element to be assigned and the line to be assigned to that element
+as additional arguments.
 @var{callback} is evaluated after the line is read but before the 
 array element is assigned.
 
@@ -3697,22 +3828,40 @@ printf [-v @var{var}] @var{format} [@var{arguments}]
 @end example
 Write the formatted @var{arguments} to the standard output under the
 control of the @var{format}.
+The @option{-v} option causes the output to be assigned to the variable
+@var{var} rather than being printed to the standard output.
+
 The @var{format} is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 @var{argument}.
-In addition to the standard @code{printf(1)} formats, @samp{%b} causes
-@code{printf} to expand backslash escape sequences in the corresponding
-@var{argument},
+In addition to the standard @code{printf(1)} formats, @code{printf}
+interprets the following extensions:
+
+@table @code
+@item %b
+causes @code{printf} to expand backslash escape sequences in the
+corresponding @var{argument},
 (except that @samp{\c} terminates output, backslashes in
 @samp{\'}, @samp{\"}, and @samp{\?} are not removed, and octal escapes
-beginning with @samp{\0} may contain up to four digits),
-and @samp{%q} causes @code{printf} to output the
+beginning with @samp{\0} may contain up to four digits).
+@item %q
+causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
+@item %(@var{datefmt})T
+causes @code{printf} to output the date-time string resulting from using
+@var{datefmt} as a format string for @code{strftime}(3).  The corresponding
+@var{argument} is an integer representing the number of seconds since the
+epoch.  Two special argument values may be used: -1 represents the current
+time, and -2 represents the time the shell was invoked.
+@end table
 
-The @option{-v} option causes the output to be assigned to the variable
-@var{var} rather than being printed to the standard output.
+@noindent
+Arguments to non-string format specifiers are treated as C language constants,
+except that a leading plus or minus sign is allowed, and if the leading
+character is a single or double quote, the value is the ASCII value of
+the following character.
 
 The @var{format} is reused as necessary to consume all of the @var{arguments}.
 If the @var{format} requires more @var{arguments} than are supplied, the
@@ -3939,7 +4088,8 @@ The maximum amount of cpu time in seconds.
 The maximum number of processes available to a single user.
 
 @item -v
-The maximum amount of virtual memory available to the process.
+The maximum amount of virtual memory available to the shell, and, on
+some systems, to its children.
 
 @item -x
 The maximum number of file locks.
@@ -3999,8 +4149,8 @@ parameters, or to display the names and values of shell variables.
 @item set
 @btindex set
 @example
-set [--abefhkmnptuvxBCEHPT] [-o @var{option}] [@var{argument} @dots{}]
-set [+abefhkmnptuvxBCEHPT] [+o @var{option}] [@var{argument} @dots{}]
+set [--abefhkmnptuvxBCEHPT] [-o @var{option-name}] [@var{argument} @dots{}]
+set [+abefhkmnptuvxBCEHPT] [+o @var{option-name}] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -4361,7 +4511,29 @@ easy re-editing of multi-line commands.
 @item compat31
 If set, Bash
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's =~ operator.
+arguments to the conditional command's @samp{=~} operator.
+
+@item compat32
+If set, Bash
+changes its behavior to that of version 3.2 with respect to locale-specific
+string comparison when using the @samp{[[}
+conditional command's @samp{<} and @samp{>} operators.
+Bash versions prior to bash-4.0 use ASCII collation and strcmp(3);
+bash-4.1 and later use the current locale's collation sequence and strcoll(3).
+
+@item compat40
+If set, Bash
+changes its behavior to that of version 4.0 with respect to locale-specific
+string comparison when using the @samp{[[}
+conditional command's @samp{<} and @samp{>} operators (see previous item)
+and the effect of interrupting a command list.
+
+@item compat41
+If set, Bash, when in posix mode, treats a single quote in a double-quoted
+parameter expansion as a special character.  The single quotes must match
+(an even number) and the characters between the single quotes are considered
+quoted.  This is the behavior of @sc{posix} mode through version 4.1.
+The default Bash behavior remains as in previous versions.
 
 @item dirspell
 If set, Bash
@@ -4414,7 +4586,7 @@ subshells invoked with @code{( @var{command} )} inherit the
 @item
 Error tracing is enabled:  command substitution, shell functions, and
 subshells invoked with @code{( @var{command} )} inherit the
-@code{ERROR} trap.
+@code{ERR} trap.
 @end enumerate
 
 @item extglob
@@ -4439,7 +4611,7 @@ This option is enabled by default.
 
 @item globstar
 If set, the pattern @samp{**} used in a filename expansion context will
-match a files and zero or more directories and subdirectories.
+match all files and zero or more directories and subdirectories.
 If the pattern is followed by a @samp{/}, only directories and
 subdirectories match.
 
@@ -4478,6 +4650,10 @@ Allow a word beginning with @samp{#}
 to cause that word and all remaining characters on that
 line to be ignored in an interactive shell.
 This option is enabled by default.
+
+@item lastpipe
+If set, and job control is not active, the shell runs the last command of
+a pipeline not executed in the background in the current shell environment.
 
 @item lithist
 If enabled, and the @code{cmdhist}
@@ -4621,9 +4797,10 @@ A list of characters that separate fields; used when the shell splits
 words as part of expansion.
 
 @item MAIL
-If this parameter is set to a filename and the @env{MAILPATH} variable
+If this parameter is set to a filename or directory name
+and the @env{MAILPATH} variable
 is not set, Bash informs the user of the arrival of mail in
-the specified file.
+the specified file or Maildir-format directory.
 
 @item MAILPATH
 A colon-separated list of filenames which the shell periodically checks
@@ -4685,13 +4862,13 @@ starts up, each shell option in the list will be enabled before
 reading any startup files.  This variable is readonly.
 
 @item BASHPID
-Expands to the process id of the current Bash process.
+Expands to the process ID of the current Bash process.
 This differs from @code{$$} under certain circumstances, such as subshells
 that do not require Bash to be re-initialized.
 
 @item BASH_ALIASES
 An associative array variable whose members correspond to the internal
-list of aliases as maintained by the @code{alias} builtin
+list of aliases as maintained by the @code{alias} builtin.
 (@pxref{Bourne Shell Builtins}).
 Elements added to this array appear in the alias list; unsetting array
 elements cause aliases to be removed from the alias list.
@@ -4741,11 +4918,11 @@ The command argument to the @option{-c} invocation option.
 
 @item BASH_LINENO
 An array variable whose members are the line numbers in source files
-corresponding to each member of @var{FUNCNAME}.
-@code{$@{BASH_LINENO[$i]@}} is the line number in the source file where
+where each corresponding member of @var{FUNCNAME} was invoked.
+@code{$@{BASH_LINENO[$i]@}} is the line number in the source file
+(@code{$@{BASH_SOURCE[$i+1]@}}) where
 @code{$@{FUNCNAME[$i]@}} was called (or @code{$@{BASH_LINENO[$i-1]@}} if
-referenced within another shell function).
-The corresponding source file name is @code{$@{BASH_SOURCE[$i]@}}.
+referenced within another shell function). 
 Use @code{LINENO} to obtain the current line number.
 
 @item BASH_REMATCH
@@ -4759,8 +4936,11 @@ string matching the @var{n}th parenthesized subexpression.
 This variable is read-only.
 
 @item BASH_SOURCE
-An array variable whose members are the source filenames corresponding
-to the elements in the @code{FUNCNAME} array variable.
+An array variable whose members are the source filenames where the
+corresponding shell function names in the @code{FUNCNAME} array
+variable are defined.
+The shell function @code{$@{FUNCNAME[$i]@}} is defined in the file
+@code{$@{BASH_SOURCE[$i]@}} and called from @code{$@{BASH_SOURCE[$i+1]@}}
 
 @item BASH_SUBSHELL
 Incremented by one each time a subshell or subshell environment is spawned.
@@ -4811,7 +4991,7 @@ descriptor) and then unsetting it will result in the standard error
 being closed.
 
 @item COLUMNS
-Used by the @code{select} builtin command to determine the terminal width
+Used by the @code{select} command to determine the terminal width
 when printing selection lists.  Automatically set upon receipt of a
 @code{SIGWINCH}.
 
@@ -4872,6 +5052,10 @@ An array variable from which Bash reads the possible completions
 generated by a shell function invoked by the programmable completion
 facility (@pxref{Programmable Completion}).
 
+@item COPROC
+An array variable created to hold the file descriptors
+for output from and input to an unnamed coprocess (@pxref{Coprocesses}).
+
 @item DIRSTACK
 An array variable containing the current contents of the directory stack.
 Directories appear in the stack in the order they are displayed by the
@@ -4886,7 +5070,11 @@ it is subsequently reset.
 @item EMACS
 If Bash finds this variable in the environment when the shell
 starts with value @samp{t}, it assumes that the shell is running in an
-emacs shell buffer and disables line editing.
+Emacs shell buffer and disables line editing.
+
+@item ENV
+Similar to @code{BASH_ENV}; used when the shell is invoked in
+@sc{posix} Mode (@pxref{Bash POSIX Mode}).
 
 @item EUID
 The numeric effective user id of the current user.  This variable
@@ -4909,11 +5097,25 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is @code{"main"}.
+The bottom-most element (the one with the highest index)
+is @code{"main"}.
 This variable exists only when a shell function is executing.
 Assignments to @env{FUNCNAME} have no effect and return an error status.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
 it is subsequently reset.
+
+This variable can be used with @code{BASH_LINENO} and @code{BASH_SOURCE}.
+Each element of @code{FUNCNAME} has corresponding elements in
+@code{BASH_LINENO} and @code{BASH_SOURCE} to describe the call stack.
+For instance, @code{$@{FUNCNAME[$i]@}} was called from the file
+@code{$@{BASH_SOURCE[$i+1]@}} at line number @code{$@{BASH_LINENO[$i]@}}.
+The @code{caller} builtin displays the current call stack using this
+information.
+
+@item FUNCNEST
+If set to a numeric value greater than 0, defines a maximum function
+nesting level.  Function invocations that exceed this nesting level
+will cause the current command to abort.
 
 @item GLOBIGNORE
 A colon-separated list of patterns defining the set of filenames to
@@ -5078,7 +5280,7 @@ This variable determines the locale category used for number formatting.
 The line number in the script or shell function currently executing.
 
 @item LINES
-Used by the @code{select} builtin command to determine the column length
+Used by the @code{select} command to determine the column length
 for printing selection lists.  Automatically set upon receipt of a
 @code{SIGWINCH}.
 
@@ -5093,6 +5295,10 @@ The default is 60 seconds.  When it is time to check
 for mail, the shell does so before displaying the primary prompt.
 If this variable is unset, or set to a value that is not a number
 greater than or equal to zero, the shell disables mail checking.
+
+@item MAPFILE
+An array variable created to hold the text read by the
+@code{mapfile} builtin when no variable name is supplied.
 
 @item OLDPWD
 The previous working directory as set by the @code{cd} builtin.
@@ -5155,6 +5361,14 @@ The current working directory as set by the @code{cd} builtin.
 Each time this parameter is referenced, a random integer
 between 0 and 32767 is generated.  Assigning a value to this
 variable seeds the random number generator.
+
+@item READLINE_LINE
+The contents of the Readline line buffer, for use
+with @samp{bind -x} (@pxref{Bash Builtins}).
+
+@item READLINE_POINT
+The position of the insertion point in the Readline line buffer, for use
+with @samp{bind -x} (@pxref{Bash Builtins}).
 
 @item REPLY
 The default variable for the @code{read} builtin.
@@ -5284,8 +5498,9 @@ bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}]
 bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
 @end example
 
-In addition to the single-character shell command-line options
-(@pxref{The Set Builtin}), there are several multi-character
+All of the single-character options used with the @code{set} builtin
+(@pxref{The Set Builtin}) can be used as options when the shell is invoked.
+In addition, there are several multi-character
 options that you can use.  These options must appear on the command
 line before the single-character options to be recognized. 
 
@@ -5294,9 +5509,7 @@ line before the single-character options to be recognized.
 Arrange for the debugger profile to be executed before the shell
 starts.  Turns on extended debugging mode (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
-builtin) and shell function tracing
-(see @ref{The Set Builtin} for a description of the @code{-o functrace}
-option).
+builtin).
 
 @item --dump-po-strings
 A list of all double-quoted strings preceded by @samp{$}
@@ -5527,7 +5740,7 @@ No other startup files are read.
 @subsubheading Invoked by remote shell daemon
 
 Bash attempts to determine when it is being run with its standard input
-connected to a a network connection, as if by the remote shell
+connected to a network connection, as when executed by the remote shell
 daemon, usually @code{rshd}, or the secure shell daemon @code{sshd}.
 If Bash determines it is being run in
 this fashion, it reads and executes commands from @file{~/.bashrc}, if that
@@ -5722,8 +5935,9 @@ If the @var{file} argument to one of the primaries is one of
 @file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
 descriptor 0, 1, or 2, respectively, is checked.
 
-When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
+The @code{test} command uses ASCII ordering.
 
 Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
@@ -5777,20 +5991,24 @@ True if @var{file} exists and is writable.
 @item -x @var{file}
 True if @var{file} exists and is executable.
 
-@item -O @var{file}
-True if @var{file} exists and is owned by the effective user id.
-
 @item -G @var{file}
 True if @var{file} exists and is owned by the effective group id.
 
 @item -L @var{file}
 True if @var{file} exists and is a symbolic link.
 
+@item -N @var{file}
+True if @var{file} exists and has been modified since it was last read.
+
+@item -O @var{file}
+True if @var{file} exists and is owned by the effective user id.
+
 @item -S @var{file}
 True if @var{file} exists and is a socket.
 
-@item -N @var{file}
-True if @var{file} exists and has been modified since it was last read.
+@item @var{file1} -ef @var{file2}
+True if @var{file1} and @var{file2} refer to the same device and
+inode numbers.
 
 @item @var{file1} -nt @var{file2}
 True if @var{file1} is newer (according to modification date)
@@ -5800,14 +6018,13 @@ than @var{file2}, or if @var{file1} exists and @var{file2} does not.
 True if @var{file1} is older than @var{file2},
 or if @var{file2} exists and @var{file1} does not.
 
-@item @var{file1} -ef @var{file2}
-True if @var{file1} and @var{file2} refer to the same device and
-inode numbers.
-
 @item -o @var{optname}
-True if shell option @var{optname} is enabled.
+True if the shell option @var{optname} is enabled.
 The list of options appears in the description of the @option{-o}
 option to the @code{set} builtin (@pxref{The Set Builtin}).
+
+@item -v @var{varname}
+True if the shell variable @var{varname} is set (has been assigned a value).
 
 @item -z @var{string}
 True if the length of @var{string} is zero.
@@ -5928,12 +6145,12 @@ The value of a variable is evaluated as an arithmetic expression
 when it is referenced, or when a variable which has been given the  
 @var{integer} attribute using @samp{declare -i} is assigned a value.
 A null value evaluates to 0.
-A shell variable need not have its integer attribute turned on
+A shell variable need not have its @var{integer} attribute turned on
 to be used in an expression.
 
 Constants with a leading 0 are interpreted as octal numbers.
 A leading @samp{0x} or @samp{0X} denotes hexadecimal.  Otherwise,
-numbers take the form [@var{base}@code{#}]@var{n}, where @var{base}
+numbers take the form [@var{base}@code{#}]@var{n}, where the optional @var{base}
 is a decimal number between 2 and 64 representing the arithmetic
 base, and @var{n} is a number in that base.  If @var{base}@code{#} is
 omitted, then base 10 is used.
@@ -6028,8 +6245,11 @@ name[@var{subscript}]=@var{value}
 
 @noindent
 The @var{subscript}
-is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an array, use
+is treated as an arithmetic expression that must evaluate to a number.
+If @var{subscript} evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
+To explicitly declare an array, use
 @example
 declare -a @var{name}
 @end example
@@ -6111,6 +6331,7 @@ entire array.
 The @code{declare}, @code{local}, and @code{readonly}
 builtins each accept a @option{-a} option to specify an indexed
 array and a @option{-A} option to specify an associative array.
+If both options are supplied, @option{-A} takes precedence.
 The @code{read} builtin accepts a @option{-a}
 option to assign a list of words read from the standard input
 to an array, and can read values from the standard input into
@@ -6440,6 +6661,11 @@ Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
 
 @item
+Non-interactive shells exit if there is a syntax error in a script read
+with the @code{.} or @code{source} builtins, or in a string processed by
+the @code{eval} builtin.
+
+@item
 Redirection operators do not perform filename expansion on the word
 in the redirection unless the shell is interactive.
 
@@ -6458,19 +6684,28 @@ causes a fatal syntax error in non-interactive shells.
 during command lookup.
 
 @item
-If a @sc{posix} special builtin returns an error status, a
-non-interactive shell exits.  The fatal errors are those listed in
-the POSIX standard, and include things like passing incorrect options,
-redirection errors, variable assignment errors for assignments preceding
-the command name, and so on.
+The @code{time} reserved word may be used by itself as a command.  When
+used in this way, it displays timing statistics for the shell and its
+completed children.  The @env{TIMEFORMAT} variable controls the format
+of the timing information.
 
 @item
-If @env{CDPATH} is set, the @code{cd} builtin will not implicitly
-append the current directory to it.  This means that @code{cd} will
-fail if no valid directory name can be constructed from
-any of the entries in @env{$CDPATH}, even if the a directory with
-the same name as the name given as an argument to @code{cd} exists
-in the current directory.
+When parsing and expanding a $@{@dots{}@} expansion that appears within
+double quotes, single quotes are no longer special and cannot be used to
+quote a closing brace or other special character, unless the operator is
+one of those defined to perform pattern removal.  In this case, they do
+not have to appear as matched pairs.
+
+@item
+The parser does not recognize @code{time} as a reserved word if the next
+token begins with a @samp{-}.
+
+@item
+If a @sc{posix} special builtin returns an error status, a
+non-interactive shell exits.  The fatal errors are those listed in
+the @sc{posix} standard, and include things like passing incorrect options,
+redirection errors, variable assignment errors for assignments preceding
+the command name, and so on.
 
 @item
 A non-interactive shell exits with an error status if a variable
@@ -6478,6 +6713,11 @@ assignment error occurs when no command name follows the assignment
 statements.
 A variable assignment error occurs, for example, when trying to assign
 a value to a readonly variable.
+
+@item
+A non-interactive shell exists with an error status if a variable
+assignment error occurs in an assignment statement preceding a special
+builtin, but not with any other simple command.
 
 @item
 A non-interactive shell exits with an error status if the iteration
@@ -6543,10 +6783,6 @@ When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
 constructed from @code{$PWD} and the directory name supplied as an argument
 does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
-
-@item
-When the @code{pwd} builtin is supplied the @option{-P} option, it resets
-@code{$PWD} to a pathname containing no symlinks.
 
 @item
 The @code{pwd} builtin verifies that the value it prints is the same as the
@@ -7269,7 +7505,7 @@ Include support for the @code{[[} conditional command.
 (@pxref{Conditional Constructs}).
 
 @item --enable-cond-regexp
-Include support for matching POSIX regular expressions using the
+Include support for matching @sc{posix} regular expressions using the
 @samp{=~} binary operator in the @code{[[} conditional command.
 (@pxref{Conditional Constructs}).
 
@@ -7350,8 +7586,8 @@ when called as @code{rbash}, enters a restricted mode.  See
 @ref{The Restricted Shell}, for a description of restricted mode.
 
 @item --enable-select
-Include the @code{select} builtin, which allows the generation of simple
-menus (@pxref{Conditional Constructs}).
+Include the @code{select} compound command, which allows the generation of
+simple menus (@pxref{Conditional Constructs}).
 
 @item --enable-separate-helpfiles
 Use external files for the documentation displayed by the @code{help} builtin

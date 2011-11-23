@@ -1,6 +1,6 @@
-/* evalstring.c - evaluate a string as one or more shell commands. 
+/* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -331,13 +331,9 @@ parse_and_execute (string, from_file, flags)
 	      (this_shell_builtin == source_builtin || this_shell_builtin == eval_builtin) &&
 	      last_command_exit_value == EX_BADSYNTAX && posixly_correct)
 	    {
-#if 0	/* XXX - for bash-4.2 */
 	      should_jump_to_top_level = 1;
 	      code = ERREXIT;
 	      last_command_exit_value = EX_BADUSAGE;
-#else
-	      internal_warning (_("syntax errors in . or eval will cause future versions of the shell to abort as Posix requires"));
-#endif
 	    }
 
 	  /* Since we are shell compatible, syntax errors in a script

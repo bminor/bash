@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -226,7 +226,6 @@ int posixly_correct = 1;	/* Non-zero means posix.2 superset. */
 int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 #endif
 
-
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
 #define Charp 2
@@ -270,6 +269,8 @@ procenv_t subshell_top_level;
 int subshell_argc;
 char **subshell_argv;
 char **subshell_envp;
+
+char *exec_argv0;
 
 #if defined (BUFFERED_INPUT)
 /* The file descriptor from which the shell is reading input. */
@@ -525,21 +526,20 @@ main (argc, argv, env)
   else
     init_noninteractive ();
 
-#define CLOSE_FDS_AT_LOGIN
-#if defined (CLOSE_FDS_AT_LOGIN)
   /*
    * Some systems have the bad habit of starting login shells with lots of open
    * file descriptors.  For instance, most systems that have picked up the
    * pre-4.0 Sun YP code leave a file descriptor open each time you call one
    * of the getpw* functions, and it's set to be open across execs.  That
-   * means one for login, one for xterm, one for shelltool, etc.
+   * means one for login, one for xterm, one for shelltool, etc.  There are
+   * also systems that open persistent FDs to other agents or files as part
+   * of process startup; these need to be set to be close-on-exec.
    */
   if (login_shell && interactive_shell)
     {
       for (i = 3; i < 20; i++)
-	close (i);
+	SET_CLOSE_ON_EXEC (i);
     }
-#endif /* CLOSE_FDS_AT_LOGIN */
 
   /* If we're in a strict Posix.2 mode, turn on interactive comments,
      alias expansion in non-interactive shells, and other Posix.2 things. */
@@ -1415,7 +1415,12 @@ open_shell_script (script_name)
     }
 
   free (dollar_vars[0]);
-  dollar_vars[0] = savestring (script_name);
+  dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (script_name);
+  if (exec_argv0)
+    {
+      free (exec_argv0);
+      exec_argv0 = (char *)NULL;
+    }
 
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
@@ -1470,10 +1475,6 @@ open_shell_script (script_name)
      large one, in the hopes that any descriptors used by the script will
      not match with ours. */
   fd = move_to_high_fd (fd, 1, -1);
-
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (fd, O_TEXT);
-#endif
 
 #if defined (BUFFERED_INPUT)
   default_buffered_input = fd;
@@ -1719,8 +1720,9 @@ shell_initialize ()
   initialize_flags ();
 
   /* Initialize the shell options.  Don't import the shell options
-     from the environment variable $SHELLOPTS if we are running in
-     privileged or restricted mode or if the shell is running setuid. */
+     from the environment variables $SHELLOPTS or $BASHOPTS if we are
+     running in privileged or restricted mode or if the shell is running
+     setuid. */
 #if defined (RESTRICTED_SHELL)
   initialize_shell_options (privileged_mode||restricted||running_setuid);
   initialize_bashopts (privileged_mode||restricted||running_setuid);

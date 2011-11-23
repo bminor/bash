@@ -1,6 +1,6 @@
 /* oslib.c - functions present only in some unix versions. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 1995,2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,10 @@
 #include <posixstat.h>
 #include <filecntl.h>
 #include <bashansi.h>
+
+#if !defined (HAVE_KILLPG)
+#  include <signal.h>
+#endif
 
 #include <stdio.h>
 #include <errno.h>
@@ -209,7 +213,8 @@ gethostname (name, namelen)
 #  else /* !HAVE_UNAME */
 int
 gethostname (name, namelen)
-     int name, namelen;
+     char *name;
+     int namelen;
 {
   strncpy (name, "unknown", namelen);
   name[namelen] = '\0';

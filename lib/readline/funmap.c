@@ -1,6 +1,6 @@
 /* funmap.c -- attach names to functions. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -148,6 +148,8 @@ static const FUNMAP default_funmap[] = {
   { "vi-append-mode", rl_vi_append_mode },
   { "vi-arg-digit", rl_vi_arg_digit },
   { "vi-back-to-indent", rl_vi_back_to_indent },
+  { "vi-backward-bigword", rl_vi_bWord },
+  { "vi-backward-word", rl_vi_bword },
   { "vi-bWord", rl_vi_bWord },
   { "vi-bword", rl_vi_bword },
   { "vi-change-case", rl_vi_change_case },
@@ -160,12 +162,15 @@ static const FUNMAP default_funmap[] = {
   { "vi-delete-to", rl_vi_delete_to },
   { "vi-eWord", rl_vi_eWord },
   { "vi-editing-mode", rl_vi_editing_mode },
+  { "vi-end-bigword", rl_vi_eWord },
   { "vi-end-word", rl_vi_end_word },
   { "vi-eof-maybe", rl_vi_eof_maybe },
   { "vi-eword", rl_vi_eword },
   { "vi-fWord", rl_vi_fWord },
   { "vi-fetch-history", rl_vi_fetch_history },
   { "vi-first-print", rl_vi_first_print },
+  { "vi-forward-bigword", rl_vi_fWord },
+  { "vi-forward-word", rl_vi_fword },
   { "vi-fword", rl_vi_fword },
   { "vi-goto-mark", rl_vi_goto_mark },
   { "vi-insert-beg", rl_vi_insert_beg },

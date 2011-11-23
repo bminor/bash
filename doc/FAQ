@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 4.11, for Bash version 4.1.
+This is the Bash FAQ, version 4.12, for Bash version 4.2.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,8 +36,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 4.1?
-B2) Are there any user-visible incompatibilities between bash-4.1 and
+B1) What's new in version 4.2?
+B2) Are there any user-visible incompatibilities between bash-4.2 and
     previous bash versions?
 
 Section C:  Differences from other Unix shells
@@ -144,26 +144,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 4.1, first made available on 31 December, 2009.
+The latest version is 4.2, first made available on 14 February, 2011.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 4.1:
+The following URLs tell how to get version 4.2:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-4.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-4.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-4.2.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-4.2.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-4.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.2.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-4.2.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-4.1-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-4.2-patches/
 
 A4)  On what machines will bash run?
 
@@ -219,7 +219,7 @@ Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-4.1, but will gladly accept any patches that are needed.
+with building bash-4.2, but will gladly accept any patches that are needed.
 
 A6) How can I build bash with gcc? 
 
@@ -388,13 +388,87 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 4.1?
+B1) What's new in version 4.2?
 
-Bash-4.1 is the first revision to the fourth major release of bash.
+Bash-4.2 is the second revision to the fourth major release of bash.
 
-Bash-4.1 contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-4.1
+Bash-4.2 contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-4.2
 distribution):
+
+o   `exec -a foo' now sets $0 to `foo' in an executable shell script without a
+    leading #!.
+
+o   Subshells begun to execute command substitutions or run shell functions or
+    builtins in subshells do not reset trap strings until a new trap is
+    specified.  This allows $(trap) to display the caller's traps and the
+    trap strings to persist until a new trap is set.
+
+o   `trap -p' will now show signals ignored at shell startup, though their
+    disposition still cannot be modified.
+
+o   $'...', echo, and printf understand \uXXXX and \UXXXXXXXX escape sequences.
+
+o   declare/typeset has a new `-g' option, which creates variables in the
+    global scope even when run in a shell function.
+
+o   test/[/[[ have a new -v variable unary operator, which returns success if
+    `variable' has been set.
+
+o   Posix parsing changes to allow `! time command' and multiple consecutive
+    instances of `!' (which toggle) and `time' (which have no cumulative
+    effect).
+
+o   Posix change to allow `time' as a command by itself to print the elapsed
+    user, system, and real times for the shell and its children.
+
+o   $((...)) is always parsed as an arithmetic expansion first, instead of as
+    a potential nested command substitution, as Posix requires.
+
+o   A new FUNCNEST variable to allow the user to control the maximum shell
+    function nesting (recursive execution) level.
+
+o   The mapfile builtin now supplies a third argument to the callback command:
+    the line about to be assigned to the supplied array index.
+
+o   The printf builtin has as new %(fmt)T specifier, which allows time values
+    to use strftime-like formatting.
+
+o   There is a new `compat41' shell option.
+
+o   The cd builtin has a new Posix-mandated `-e' option.
+
+o   Negative subscripts to indexed arrays, previously errors, now are treated
+    as offsets from the maximum assigned index + 1.
+
+o   Negative length specifications in the ${var:offset:length} expansion,
+    previously errors, are now treated as offsets from the end of the variable.
+
+o   Parsing change to allow `time -p --'.
+
+o   Posix-mode parsing change to not recognize `time' as a keyword if the
+    following token begins with a `-'.  This means no more Posix-mode
+    `time -p'.  Posix interpretation 267.
+
+o   There is a new `lastpipe' shell option that runs the last command of a
+    pipeline in the current shell context.  The lastpipe option has no
+    effect if job control is enabled.
+
+o   History expansion no longer expands the `$!' variable expansion.
+
+o   Posix mode shells no longer exit if a variable assignment error occurs
+    with an assignment preceding a command that is not a special builtin.
+
+o   Non-interactive mode shells exit if -u is enabled an an attempt is made
+    to use an unset variable with the % or # expansions, the `//', `^', or
+    `,' expansions, or the parameter length expansion.
+
+o   Posix-mode shells use the argument passed to `.' as-is if a $PATH search
+    fails, effectively searching the current directory.  Posix-2008 change.
+
+A short feature history dating back to Bash-2.0:
+
+Bash-4.1 contained the following new features:
 
 o   Here-documents within $(...) command substitutions may once more be
     delimited by the closing right paren, instead of requiring a newline.
@@ -501,8 +575,6 @@ o   New bindable readline variable: echo-control-characters.  If enabled, and
 o   New bindable readline variable: enable-meta-key.  Controls whether or not
     readline sends the smm/rmm sequences if the terminal indicates it has a
     meta key that enables eight-bit characters.
-
-A short feature history dating from Bash-2.0:
 
 Bash-4.0 contained the following new features:
 
@@ -901,14 +973,14 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-4.1 and
+B2) Are there any user-visible incompatibilities between bash-4.2 and
     previous bash versions?
 
-There are a few incompatibilities between version 4.1 and previous
+There are a few incompatibilities between version 4.2 and previous
 versions.  They are detailed in the file COMPAT in the bash distribution.
 That file is not meant to be all-encompassing; send mail to
 bash-maintainers@gnu.org (or bug-bash@gnu.org if you would like
-community discussion) if if you find something that's not mentioned there.
+community discussion) if you find something that's not mentioned there.
 
 Section C:  Differences from other Unix shells
 
@@ -1118,7 +1190,7 @@ C3)  Which new features in ksh-93 are not in bash, and which are?
 
 This list is current through ksh93t+ (05/05/2009)
 
-New things in ksh-93 not in bash-4.1:
+New things in ksh-93 not in bash-4.2:
 	floating point arithmetic and variables
 	math library functions
 	${!name[sub]} name of subscript for associative array
@@ -1140,7 +1212,7 @@ New things in ksh-93 not in bash-4.1:
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
 	getopts -a
-	printf %B, %H, %P, %R, %T, %Z modifiers, output base for %d, `=' flag
+	printf %B, %H, %P, %R, %Z modifiers, output base for %d, `=' flag
 	read -n/-N differ/-v
 	set -o showme/-o multiline (bash default)
 	`sleep' and `getconf' builtins (bash has loadable versions)
@@ -1148,16 +1220,14 @@ New things in ksh-93 not in bash-4.1:
 	[[ -R name ]] (checks whether or not name is a nameref)
 	typeset -C/-S/-T/-X/-h/-s
 	experimental `type' definitions (a la typedef) using typeset
-	negative subscripts for indexed array variables
 	array expansions ${array[sub1..sub2]} and ${!array[sub1..sub2]}
 	associative array assignments using `;' as element separator
 	command substitution $(n<#) expands to current byte offset for fd N
 	new '${ ' form of command substitution, executed in current shell
 	new >;/<>;/<#pat/<##pat/<#/># redirections
 	brace expansion printf-like formats 
-	[[ -v var ]] operators (checks whether or not var is set)
 
-New things in ksh-93 present in bash-4.1:
+New things in ksh-93 present in bash-4.2:
 	associative arrays
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
@@ -1165,6 +1235,7 @@ New things in ksh-93 present in bash-4.1:
 	expansions: ${!param}, ${param:offset[:len]}, ${param/pat[/str]},
 		    ${!param*}
 	compound array assignment
+	negative subscripts for indexed array variables
 	the `!' reserved word
 	loadable builtins -- but ksh uses `builtin' while bash uses `enable'
 	new $'...' and $"..." quoting
@@ -1174,6 +1245,7 @@ New things in ksh-93 present in bash-4.1:
 	`command', `builtin', `disown' builtins
 	echo -e
 	exec -c/-a
+	printf %T modifier
 	read -A (bash uses read -a)
         read -t/-d
 	trap -p
@@ -1193,6 +1265,7 @@ New things in ksh-93 present in bash-4.1:
 	negative offsets in ${param:offset:length}
 	redirection operators preceded with {varname} to store fd number in varname
 	DEBUG can force skipping following command
+	[[ -v var ]] operator (checks whether or not var is set)
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1778,7 +1851,8 @@ compat40 set
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings
 	- interrupting a command list such as "a ; b ; c" causes the execution
-	  of the entire list to be aborted
+	  of the entire list to be aborted (in versions before bash-4.0,
+	  interrupting one command in a list caused the next to be executed)
 
 Section F:  Things to watch out for on certain Unix versions
 

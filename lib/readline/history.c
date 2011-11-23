@@ -338,7 +338,7 @@ free_history_entry (hist)
   FREE (hist->line);
   FREE (hist->timestamp);
   x = hist->data;
-  free (hist);
+  xfree (hist);
   return (x);
 }
 

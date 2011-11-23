@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -116,6 +116,10 @@ extern int errno;
    system's <sys/resource.h> isn't very useful to us. */
 #if !defined (RLIMIT_FSIZE) || !defined (HAVE_GETRLIMIT)
 #  undef HAVE_RESOURCE
+#endif
+
+#if !defined (HAVE_RESOURCE) && defined (HAVE_ULIMIT_H)
+#  include <ulimit.h>
 #endif
 
 #if !defined (RLIMTYPE)

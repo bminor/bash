@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -198,11 +198,20 @@ sh_eaccess (path, mode)
      char *path;
      int mode;
 {
+  int ret;
+
   if (path_is_devfd (path))
     return (sh_stataccess (path, mode));
 
-#if defined (HAVE_EACCESS)		/* FreeBSD */
-  return (eaccess (path, mode));
+#if defined (HAVE_FACCESSAT) && defined (AT_EACCESS)
+  return (faccessat (AT_FDCWD, path, mode, AT_EACCESS));
+#elif defined (HAVE_EACCESS)		/* FreeBSD */
+  ret = eaccess (path, mode);	/* XXX -- not always correct for X_OK */
+#  if defined (__FreeBSD__)
+  if (ret == 0 && current_user.euid == 0 && mode == X_OK)
+    return (sh_stataccess (path, mode));
+#  endif
+  return ret;
 #elif defined (EFF_ONLY_OK)		/* SVR4(?), SVR4.2 */
   return access (path, mode|EFF_ONLY_OK);
 #else
@@ -215,7 +224,15 @@ sh_eaccess (path, mode)
 #  endif
 
   if (current_user.uid == current_user.euid && current_user.gid == current_user.egid)
-    return (access (path, mode));  
+    {
+      ret = access (path, mode);
+#if defined (__FreeBSD__) || defined (SOLARIS)
+      if (ret == 0 && current_user.euid == 0 && mode == X_OK)
+	return (sh_stataccess (path, mode));
+#endif
+      return ret;
+      
+    }
 
   return (sh_stataccess (path, mode));
 #endif

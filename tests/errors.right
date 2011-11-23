@@ -15,7 +15,7 @@ unset: usage: unset [-f] [-v] [name ...]
 ./errors.tests: line 52: unset: `/bin/sh': not a valid identifier
 ./errors.tests: line 55: unset: cannot simultaneously unset a function and a variable
 ./errors.tests: line 58: declare: -z: invalid option
-declare: usage: declare [-aAfFilrtux] [-p] [name[=value] ...]
+declare: usage: declare [-aAfFgilrtux] [-p] [name[=value] ...]
 ./errors.tests: line 60: declare: `-z': not a valid identifier
 ./errors.tests: line 61: declare: `/bin/sh': not a valid identifier
 ./errors.tests: line 65: declare: cannot use `-f' to make functions
@@ -69,7 +69,7 @@ source: usage: source filename [arguments]
 ./errors.tests: line 184: .: -i: invalid option
 .: usage: . filename [arguments]
 ./errors.tests: line 187: set: -q: invalid option
-set: usage: set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
+set: usage: set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
 ./errors.tests: line 190: enable: sh: not a shell builtin
 ./errors.tests: line 190: enable: bash: not a shell builtin
 ./errors.tests: line 193: shopt: cannot set and unset shell options simultaneously
@@ -77,7 +77,7 @@ set: usage: set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
 ./errors.tests: line 199: read: `/bin/sh': not a valid identifier
 ./errors.tests: line 202: VAR: readonly variable
 ./errors.tests: line 205: readonly: -x: invalid option
-readonly: usage: readonly [-af] [name[=value] ...] or readonly -p
+readonly: usage: readonly [-aAf] [name[=value] ...] or readonly -p
 ./errors.tests: line 208: eval: -i: invalid option
 eval: usage: eval [arg ...]
 ./errors.tests: line 209: command: -i: invalid option

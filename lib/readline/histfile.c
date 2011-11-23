@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -126,8 +126,12 @@ history_filename (filename)
 
   if (home == 0)
     {
+#if 0
       home = ".";
       home_len = 1;
+#else
+      return (NULL);
+#endif
     }
   else
     home_len = strlen (home);
@@ -179,7 +183,7 @@ read_history_range (filename, from, to)
 
   buffer = last_ts = (char *)NULL;
   input = history_filename (filename);
-  file = open (input, O_RDONLY|O_BINARY, 0666);
+  file = input ? open (input, O_RDONLY|O_BINARY, 0666) : -1;
 
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
@@ -314,7 +318,7 @@ history_truncate_file (fname, lines)
 
   buffer = (char *)NULL;
   filename = history_filename (fname);
-  file = open (filename, O_RDONLY|O_BINARY, 0666);
+  file = filename ? open (filename, O_RDONLY|O_BINARY, 0666) : -1;
   rv = 0;
 
   /* Don't try to truncate non-regular files. */
@@ -413,7 +417,7 @@ history_truncate_file (fname, lines)
 
   FREE (buffer);
 
-  free (filename);
+  xfree (filename);
   return rv;
 }
 
@@ -436,9 +440,10 @@ history_do_write (filename, nelements, overwrite)
   mode = overwrite ? O_WRONLY|O_CREAT|O_TRUNC|O_BINARY : O_WRONLY|O_APPEND|O_BINARY;
 #endif
   output = history_filename (filename);
+  file = output ? open (output, mode, 0600) : -1;
   rv = 0;
 
-  if ((file = open (output, mode, 0600)) == -1)
+  if (file == -1)
     {
       FREE (output);
       return (errno);
@@ -515,7 +520,7 @@ mmap_error:
 #else
     if (write (file, buffer, buffer_size) < 0)
       rv = errno;
-    free (buffer);
+    xfree (buffer);
 #endif
   }
 

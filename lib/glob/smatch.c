@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -241,6 +241,8 @@ is_cclass (c, name)
 #  define STREQ(s1, s2) ((wcscmp (s1, s2) == 0))
 #  define STREQN(a, b, n) ((a)[0] == (b)[0] && wcsncmp(a, b, n) == 0)
 
+extern char *mbsmbchar __P((const char *));
+
 static int
 rangecmp_wc (c1, c2)
      wint_t c1, c2;
@@ -314,7 +316,7 @@ is_wcclass (wc, name)
 
   memset (&state, '\0', sizeof (mbstate_t));
   mbs = (char *) malloc (wcslen(name) * MB_CUR_MAX + 1);
-  mbslength = wcsrtombs(mbs, (const wchar_t **)&name, (wcslen(name) * MB_CUR_MAX + 1), &state);
+  mbslength = wcsrtombs (mbs, (const wchar_t **)&name, (wcslen(name) * MB_CUR_MAX + 1), &state);
 
   if (mbslength == (size_t)-1 || mbslength == (size_t)-2)
     {
@@ -365,6 +367,16 @@ xstrmatch (pattern, string, flags)
   int ret;
   size_t n;
   wchar_t *wpattern, *wstring;
+  size_t plen, slen, mplen, mslen;
+
+#if 0
+  plen = strlen (pattern);
+  mplen = mbstrlen (pattern);
+  if (plen == mplen && strlen (string) == mbstrlen (string))
+#else
+  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
+#endif
+    return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));

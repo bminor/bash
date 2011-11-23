@@ -142,6 +142,15 @@ rl_callback_read_char ()
 	  eof = _rl_nsearch_callback (_rl_nscxt);
 	  return;
 	}
+#if defined (VI_MODE)
+      else if (RL_ISSTATE (RL_STATE_VIMOTION))
+	{
+	  eof = _rl_vi_domove_callback (_rl_vimvcxt);
+	  /* Should handle everything, including cleanup, numeric arguments,
+	     and turning off RL_STATE_VIMOTION */
+	  return;
+	}
+#endif
       else if (RL_ISSTATE (RL_STATE_NUMERICARG))
 	{
 	  eof = _rl_arg_callback (_rl_argcxt);

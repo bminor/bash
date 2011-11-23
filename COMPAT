@@ -295,7 +295,8 @@ version and versions 2.0 and above.
 
 37. Bash-4.0 now allows SIGCHLD to interrupt the wait builtin, as Posix
     specifies, so the SIGCHLD trap is no longer always invoked once per
-    exiting child if you are using `wait' to wait for all children.
+    exiting child if you are using `wait' to wait for all children.  As
+    of bash-4.2, this is the status quo only when in posix mode.
 
 38. Since bash-4.0 now follows Posix rules for finding the closing delimiter
     of a $() command substitution, it will not behave as previous versions
@@ -330,35 +331,58 @@ version and versions 2.0 and above.
 
 44. Bash-4.1 uses the current locale when comparing strings using the < and
     > operators to the `[[' command.  This can be reverted to the previous
-    behavior by setting one of the `compatNN' shopt options.
+    behavior (ASCII collating and strcmp(3)) by setting one of the
+    `compatNN' shopt options, where NN is less than 41.
+
+45. Command substitutions now remove the caller's trap strings when trap is
+    run to set a new trap in the subshell.  Previous to bash-4.2, the old
+    trap strings persisted even though the actual signal handlers were reset.
+
+46. When in Posix mode, a single quote is not treated specially in a
+    double-quoted ${...} expansion, unless the expansion operator is
+    # or % or the new `//', `^', or `,' expansions.  In particular, it
+    does not define a new quoting context.  This is from Posix interpretation
+    221.
+
+47. Posix mode shells no longer exit if a variable assignment error occurs
+    with an assignment preceding a command that is not a special builtin.
+
 
 Shell Compatibility Level
 =========================
 
 Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin (compat31, compat32, compat40 at
-this writing).  There is only one current compatibility level -- each
-option is mutually exclusive.  This list does not mention behavior that is
-standard for a particular version (e.g., setting compat32 means that quoting
-the rhs of the regexp matching operator quotes special regexp characters in
-the word, which is default behavior in bash-3.2 and above).
+as a set of options to the shopt builtin (compat31, compat32, compat40, and
+compat41 at this writing).  There is only one current compatibility level --
+each option is mutually exclusive.  This list does not mention behavior
+that is standard for a particular version (e.g., setting compat32 means that
+quoting the rhs of the regexp matching operator quotes special regexp
+characters in the word, which is default behavior in bash-3.2 and above).
 
 compat31 set
 	- the < and > operators to the [[ command do not consider the current
-	  locale when comparing strings
+	  locale when comparing strings; they use ASCII ordering
 	- quoting the rhs of the regexp matching operator (=~) has no
 	  special effect
 
 compat32 set
 	- the < and > operators to the [[ command do not consider the current
-	  locale when comparing strings
+	  locale when comparing strings; they use ASCII ordering
 
 compat40 set
 	- the < and > operators to the [[ command do not consider the current
-	  locale when comparing strings
+	  locale when comparing strings; they use ASCII ordering
 	- interrupting a command list such as "a ; b ; c" causes the execution
-	  of the entire list to be aborted
+	  of the entire list to be aborted (in versions before bash-4.0,
+	  interrupting one command in a list caused the next to be executed)
 
+compat41 set
+	- interrupting a command list such as "a ; b ; c" causes the execution
+	  of the entire list to be aborted (in versions before bash-4.0,
+	  interrupting one command in a list caused the next to be executed)
+	- when in posix mode, single quotes in the `word' portion of a
+	  double-quoted parameter expansion define a new quoting context and
+	  are treated specially
 -------------------------------------------------------------------------------
 
 Copying and distribution of this file, with or without modification,

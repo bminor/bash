@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,7 +44,7 @@ static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, 
 
 static char *quote_assign __P((const char *));
 static void quote_array_assignment_chars __P((WORD_LIST *));
-static char *array_value_internal __P((char *, int, int, int *));
+static char *array_value_internal __P((char *, int, int, int *, arrayind_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
 const char * const bash_badsub_errmsg = N_("bad array subscript");
@@ -658,6 +658,7 @@ unbind_array_element (var, sub)
 	  return -1;
 	}
       assoc_remove (assoc_cell (var), akey);
+      free (akey);
     }
   else
     {
@@ -842,15 +843,31 @@ array_variable_part (s, subp, lenp)
   return (var == 0 || invisible_p (var)) ? (SHELL_VAR *)0 : var;
 }
 
+#define INDEX_ERROR() \
+  do \
+    { \
+      if (var) \
+	err_badarraysub (var->name); \
+      else \
+	{ \
+	  t[-1] = '\0'; \
+	  err_badarraysub (s); \
+	  t[-1] = '[';	/* ] */\
+	} \
+      return ((char *)NULL); \
+    } \
+  while (0)
+
 /* Return a string containing the elements in the array and subscript
    described by S.  If the subscript is * or @, obeys quoting rules akin
    to the expansion of $* and $@ including double quoting.  If RTYPE
    is non-null it gets 1 if the array reference is name[*], 2 if the
    reference is name[@], and 0 otherwise. */
 static char *
-array_value_internal (s, quoted, allow_all, rtype)
+array_value_internal (s, quoted, flags, rtype, indp)
      char *s;
-     int quoted, allow_all, *rtype;
+     int quoted, flags, *rtype;
+     arrayind_t *indp;
 {
   int len;
   arrayind_t ind;
@@ -876,12 +893,12 @@ array_value_internal (s, quoted, allow_all, rtype)
     {
       if (rtype)
 	*rtype = (t[0] == '*') ? 1 : 2;
-      if (allow_all == 0)
+      if ((flags & AV_ALLOWALL) == 0)
 	{
 	  err_badarraysub (s);
 	  return ((char *)NULL);
 	}
-      else if (var == 0 || value_cell (var) == 0)
+      else if (var == 0 || value_cell (var) == 0)	/* XXX - check for invisible_p(var) ? */
 	return ((char *)NULL);
       else if (array_p (var) == 0 && assoc_p (var) == 0)
 	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
@@ -915,20 +932,22 @@ array_value_internal (s, quoted, allow_all, rtype)
 	*rtype = 0;
       if (var == 0 || array_p (var) || assoc_p (var) == 0)
 	{
-	  ind = array_expand_index (t, len);
-	  if (ind < 0)
+	  if ((flags & AV_USEIND) == 0 || indp == 0)
 	    {
-index_error:
-	      if (var)
-		err_badarraysub (var->name);
-	      else
+	      ind = array_expand_index (t, len);
+	      if (ind < 0)
 		{
-		  t[-1] = '\0';
-		  err_badarraysub (s);
-		  t[-1] = '[';	/* ] */
+		  /* negative subscripts to indexed arrays count back from end */
+		  if (var && array_p (var))
+		    ind = array_max_index (array_cell (var)) + 1 + ind;
+		  if (ind < 0)
+		    INDEX_ERROR();
 		}
-	      return ((char *)NULL);
+	      if (indp)
+		*indp = ind;
 	    }
+	  else if (indp)
+	    ind = *indp;
 	}
       else if (assoc_p (var))
 	{
@@ -936,15 +955,18 @@ index_error:
 	  akey = expand_assignment_string_to_string (t, 0);	/* [ */
 	  t[len - 1] = ']';
 	  if (akey == 0 || *akey == 0)
-	    goto index_error;
+	    INDEX_ERROR();
 	}
      
-      if (var == 0)
+      if (var == 0 || value_cell (var) == 0)	/* XXX - check invisible_p(var) ? */
 	return ((char *)NULL);
       if (array_p (var) == 0 && assoc_p (var) == 0)
 	return (ind == 0 ? value_cell (var) : (char *)NULL);
       else if (assoc_p (var))
-	retval = assoc_reference (assoc_cell (var), akey);
+        {
+	  retval = assoc_reference (assoc_cell (var), akey);
+	  free (akey);
+        }
       else
 	retval = array_reference (array_cell (var), ind);
     }
@@ -955,23 +977,25 @@ index_error:
 /* Return a string containing the elements described by the array and
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
-array_value (s, quoted, rtype)
+array_value (s, quoted, flags, rtype, indp)
      char *s;
-     int quoted, *rtype;
+     int quoted, flags, *rtype;
+     arrayind_t *indp;
 {
-  return (array_value_internal (s, quoted, 1, rtype));
+  return (array_value_internal (s, quoted, flags|AV_ALLOWALL, rtype, indp));
 }
 
 /* Return the value of the array indexing expression S as a single string.
-   If ALLOW_ALL is 0, do not allow `@' and `*' subscripts.  This is used
-   by other parts of the shell such as the arithmetic expression evaluator
-   in expr.c. */
+   If (FLAGS & AV_ALLOWALL) is 0, do not allow `@' and `*' subscripts.  This
+   is used by other parts of the shell such as the arithmetic expression
+   evaluator in expr.c. */
 char *
-get_array_value (s, allow_all, rtype)
+get_array_value (s, flags, rtype, indp)
      char *s;
-     int allow_all, *rtype;
+     int flags, *rtype;
+     arrayind_t *indp;
 {
-  return (array_value_internal (s, 0, allow_all, rtype));
+  return (array_value_internal (s, 0, flags, rtype, indp));
 }
 
 char *
@@ -988,6 +1012,9 @@ array_keys (s, quoted)
 
   /* [ */
   if (var == 0 || ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != ']')
+    return (char *)NULL;
+
+  if (var_isset (var) == 0 || invisible_p (var))
     return (char *)NULL;
 
   if (array_p (var) == 0 && assoc_p (var) == 0)

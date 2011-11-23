@@ -108,7 +108,9 @@ getopts_bind_variable (name, value)
   if (legal_identifier (name))
     {
       v = bind_variable (name, value, 0);
-      return (v && (readonly_p (v) == 0)) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      if (v && (readonly_p (v) || noassign_p (v)))
+	return (EX_MISCERROR);
+      return (v ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
   else
     {

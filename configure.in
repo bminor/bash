@@ -1,11 +1,11 @@
 dnl
-dnl Configure script for bash-4.1
+dnl Configure script for bash-4.2
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2009 Free Software Foundation, Inc.
+# Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,9 +21,9 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.1, version 4.019])dnl
+AC_REVISION([for Bash 4.2, version 4.037])dnl
 
-define(bashvers, 4.1)
+define(bashvers, 4.2)
 define(relstatus, release)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
@@ -98,7 +98,7 @@ esac
 dnl
 dnl macros for the bash debugger
 dnl
-AM_PATH_LISPDIR
+dnl AM_PATH_LISPDIR
 AC_ARG_VAR(DEBUGGER_START_FILE, [location of bash debugger initialization file])
 
 dnl arguments to configure
@@ -659,7 +659,7 @@ BASH_HEADER_INTTYPES
 AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
 		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h regex.h \
-		 syslog.h)
+		 syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h \
 		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
@@ -727,7 +727,7 @@ AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
-AC_CHECK_FUNCS(bcopy bzero confstr fnmatch \
+AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		memmove pathconf putenv raise regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
@@ -739,7 +739,8 @@ AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
-AC_REPLACE_FUNCS(fdprintf)
+AC_REPLACE_FUNCS(dprintf)
+AC_REPLACE_FUNCS(strchrnul)
 
 AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
@@ -904,6 +905,8 @@ BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], int, HAVE_SOCKLEN_T)
 fi
 BASH_TYPE_RLIMIT
 
+AC_CHECK_SIZEOF(intmax_t, 8)
+
 dnl presence and contents of structures used by system calls
 BASH_STRUCT_TERMIOS_LDISC
 BASH_STRUCT_TERMIO_LDISC
@@ -916,6 +919,8 @@ AC_CHECK_MEMBERS([struct stat.st_blocks])
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 BASH_STRUCT_TIMEZONE
+
+BASH_STRUCT_WEXITSTATUS_OFFSET
 
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL

@@ -363,6 +363,16 @@ sh_validfd (fd)
   return (fcntl (fd, F_GETFD, 0) >= 0);
 }
 
+int
+fd_ispipe (fd)
+     int fd;
+{
+  errno = 0;
+  if (lseek ((fd), 0L, SEEK_CUR) < 0)
+    return (errno == ESPIPE);
+  return 0;
+}
+
 /* There is a bug in the NeXT 2.1 rlogind that causes opens
    of /dev/tty to fail. */
 
@@ -547,6 +557,22 @@ file_iswdir (fn)
      char *fn;
 {
   return (file_isdir (fn) && sh_eaccess (fn, W_OK) == 0);
+}
+
+/* Return 1 if STRING is "." or "..", optionally followed by a directory
+   separator */
+int
+dot_or_dotdot (string)
+     const char *string;
+{
+  if (string == 0 || *string == '\0' || *string != '.')
+    return (0);
+
+  /* string[0] == '.' */
+  if (PATHSEP(string[1]) || (string[1] == '.' && PATHSEP(string[2])))
+    return (1);
+
+  return (0);
 }
 
 /* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'

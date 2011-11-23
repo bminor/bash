@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -1424,6 +1424,7 @@ static const struct {
   { "blink-matching-paren",	&rl_blink_matching_paren,	V_SPECIAL },
   { "byte-oriented",		&rl_byte_oriented,		0 },
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
+  { "completion-map-case",	&_rl_completion_case_map,	0 },
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },
   { "disable-completion",	&rl_inhibit_completion,		0 },
   { "echo-control-characters",	&_rl_echo_control_chars,	0 },
@@ -1437,6 +1438,7 @@ static const struct {
   { "mark-modified-lines",	&_rl_mark_modified_lines,	0 },
   { "mark-symlinked-directories", &_rl_complete_mark_symlink_dirs, 0 },
   { "match-hidden-files",	&_rl_match_hidden_files,	0 },
+  { "menu-complete-display-prefix", &_rl_menu_complete_prefix_first, 0 },
   { "meta-flag",		&_rl_meta_flag,			0 },
   { "output-meta",		&_rl_output_meta_chars,		0 },
   { "page-completions",		&_rl_page_completions,		0 },
@@ -1449,7 +1451,7 @@ static const struct {
 #if defined (VISIBLE_STATS)
   { "visible-stats",		&rl_visible_stats,		0 },
 #endif /* VISIBLE_STATS */
-  { (char *)NULL, (int *)NULL }
+  { (char *)NULL, (int *)NULL, 0 }
 };
 
 static int
@@ -1504,6 +1506,7 @@ static int sv_bell_style PARAMS((const char *));
 static int sv_combegin PARAMS((const char *));
 static int sv_dispprefix PARAMS((const char *));
 static int sv_compquery PARAMS((const char *));
+static int sv_compwidth PARAMS((const char *));
 static int sv_editmode PARAMS((const char *));
 static int sv_histsize PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
@@ -1516,13 +1519,14 @@ static const struct {
 } string_varlist[] = {
   { "bell-style",	V_STRING,	sv_bell_style },
   { "comment-begin",	V_STRING,	sv_combegin },
+  { "completion-display-width", V_INT,	sv_compwidth },
   { "completion-prefix-display-length", V_INT,	sv_dispprefix },
   { "completion-query-items", V_INT,	sv_compquery },
   { "editing-mode",	V_STRING,	sv_editmode },
   { "history-size",	V_INT,		sv_histsize },
   { "isearch-terminators", V_STRING,	sv_isrchterm },
   { "keymap",		V_STRING,	sv_keymap },
-  { (char *)NULL,	0 }
+  { (char *)NULL,	0, (_rl_sv_func_t *)0 }
 };
 
 static int
@@ -1659,6 +1663,19 @@ sv_compquery (value)
 	nval = 0;
     }
   rl_completion_query_items = nval;
+  return 0;
+}
+
+static int
+sv_compwidth (value)
+     const char *value;
+{
+  int nval = -1;
+
+  if (value && *value)
+    nval = atoi (value);
+
+  _rl_completion_columns = nval;
   return 0;
 }
 
@@ -2268,6 +2285,11 @@ _rl_get_string_variable_value (name)
     }
   else if (_rl_stricmp (name, "comment-begin") == 0)
     return (_rl_comment_begin ? _rl_comment_begin : RL_COMMENT_BEGIN_DEFAULT);
+  else if (_rl_stricmp (name, "completion-display-width") == 0)
+    {
+      sprintf (numbuf, "%d", _rl_completion_columns);
+      return (numbuf);
+    }
   else if (_rl_stricmp (name, "completion-prefix-display-length") == 0)
     {
       sprintf (numbuf, "%d", _rl_completion_prefix_display_length);
