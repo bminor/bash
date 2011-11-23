@@ -3660,7 +3660,7 @@ chkexport (name)
   SHELL_VAR *v;
 
   v = find_variable (name);
-  if (exported_p (v))
+  if (v && exported_p (v))
     {
       array_needs_making = 1;
       maybe_make_export_env ();
