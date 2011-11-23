@@ -46,6 +46,7 @@
 
 #if defined (READLINE)
 #  include "bashline.h"
+#  include <readline/readline.h>
 #endif
 
 #if defined (HISTORY)
@@ -62,6 +63,7 @@ extern int parse_and_execute_level, shell_initialized;
 #if defined (HISTORY)
 extern int history_lines_this_session;
 #endif
+extern int no_line_editing;
 
 extern void initialize_siglist ();
 
@@ -505,7 +507,10 @@ termsig_sighandler (sig)
     {
 #if defined (HISTORY)
       /* XXX - will inhibit history file being written */
-      history_lines_this_session = 0;
+#  if defined (READLINE)
+      if (interactive_shell == 0 || interactive == 0 || (sig != SIGHUP && sig != SIGTERM) || no_line_editing || (RL_ISSTATE (RL_STATE_READCMD) == 0))
+#  endif
+        history_lines_this_session = 0;
 #endif
       terminate_immediately = 0;
       termsig_handler (sig);
