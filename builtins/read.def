@@ -642,6 +642,12 @@ assign_vars:
 	  xfree (input_string);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
+      if (assoc_p (var))
+	{
+          builtin_error (_("%s: cannot convert associative to indexed array"), arrayname);
+	  xfree (input_string);
+	  return EXECUTION_FAILURE;	/* existing associative array */
+	}
       array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
