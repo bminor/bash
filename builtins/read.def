@@ -505,6 +505,7 @@ read_builtin (list)
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
 	{
+	  word_list_remove_quoted_nulls (alist);
 	  assign_array_var_from_word_list (var, alist);
 	  dispose_words (alist);
 	}

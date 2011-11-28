@@ -30,6 +30,7 @@
 #define SEVAL_INTERACT	0x002
 #define SEVAL_NOHIST	0x004
 #define SEVAL_NOFREE	0x008
+#define SEVAL_RESETLINE	0x010
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */
@@ -105,6 +106,9 @@ extern sh_builtin_func_t *builtin_address __P((char *));
 extern sh_builtin_func_t *find_special_builtin __P((char *));
 extern void initialize_shell_builtins __P((void));
 
+/* Functions from exit.def */
+extern void bash_logout __P((void));
+
 /* Functions from getopts.def */
 extern void getopts_reset __P((int));
 
@@ -150,7 +154,7 @@ extern void parse_and_execute_cleanup __P((void));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));
-extern int source_file __P((const char *));
+extern int source_file __P((const char *, int));
 extern int fc_execute_file __P((const char *));
 
 #endif /* !__COMMON_H */

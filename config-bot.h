@@ -19,10 +19,50 @@
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
+/*********************************************************/
+/* Modify or set defines based on the configure results. */
+/*********************************************************/
+
 #if !defined (HAVE_VPRINTF) && defined (HAVE_DOPRNT)
 #  define USE_VFPRINTF_EMULATION
 #  define HAVE_VPRINTF
 #endif
+
+#if defined (HAVE_SYS_RESOURCE_H) && defined (HAVE_GETRLIMIT)
+#  define HAVE_RESOURCE
+#endif
+
+#if !defined (GETPGRP_VOID)
+#  define HAVE_BSD_PGRP
+#endif
+
+/* Try this without testing __STDC__ for the time being. */
+#if defined (HAVE_STDARG_H)
+#  define PREFER_STDARG
+#  define USE_VARARGS
+#else
+#  if defined (HAVE_VARARGS_H)
+#    define PREFER_VARARGS
+#    define USE_VARARGS
+#  endif
+#endif
+
+#if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && defined (HAVE_NETINET_IN_H)
+#  define HAVE_NETWORK
+#endif
+
+#if defined (HAVE_REGEX_H) && defined (HAVE_REGCOMP) && defined (HAVE_REGEXEC)
+#  define HAVE_POSIX_REGEXP
+#endif
+
+/* backwards compatibility between different autoconf versions */
+#if defined (HAVE_DECL_SYS_SIGLIST) && !defined (SYS_SIGLIST_DECLARED)
+#  define SYS_SIGLIST_DECLARED
+#endif
+
+/***********************************************************************/
+/* Unset defines based on what configure reports as missing or broken. */
+/***********************************************************************/
 
 /* Ultrix botches type-ahead when switching from canonical to
    non-canonical mode, at least through version 4.3 */
@@ -36,22 +76,30 @@
 #  undef HAVE_GETCWD
 #endif
 
-#if defined (HAVE_SYS_RESOURCE_H) && defined (HAVE_GETRLIMIT)
-#  define HAVE_RESOURCE
-#endif
-
-#if !defined (GETPGRP_VOID)
-#  define HAVE_BSD_PGRP
-#endif
-
 #if !defined (HAVE_DEV_FD) && defined (NAMED_PIPES_MISSING)
 #  undef PROCESS_SUBSTITUTION
+#endif
+
+#if defined (JOB_CONTROL_MISSING)
+#  undef JOB_CONTROL
+#endif
+
+#if defined (STRCOLL_BROKEN)
+#  undef HAVE_STRCOLL
+#endif
+
+#if !defined (HAVE_POSIX_REGEXP)
+#  undef COND_REGEXP
 #endif
 
 /* If the shell is called by this name, it will become restricted. */
 #if defined (RESTRICTED_SHELL)
 #  define RESTRICTED_SHELL_NAME "rbash"
 #endif
+
+/***********************************************************/
+/* Make sure feature defines have necessary prerequisites. */
+/***********************************************************/
 
 /* BANG_HISTORY requires HISTORY. */
 #if defined (BANG_HISTORY) && !defined (HISTORY)
@@ -70,28 +118,6 @@
 #  undef DEFAULT_ECHO_TO_XPG
 #endif
 
-#if defined (JOB_CONTROL_MISSING)
-#  undef JOB_CONTROL
-#endif
-
-#if defined (__STDC__) && defined (HAVE_STDARG_H)
-#  define PREFER_STDARG
-#  define USE_VARARGS
-#else
-#  if defined (HAVE_VARARGS_H)
-#    define PREFER_VARARGS
-#    define USE_VARARGS
-#  endif
-#endif
-
-#if defined (STRCOLL_BROKEN)
-#  undef HAVE_STRCOLL
-#endif
-
-#if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && defined (HAVE_NETINET_IN_H)
-#  define HAVE_NETWORK
-#endif
-
 #if !defined (PROMPT_STRING_DECODE)
 #  undef PPROMPT
 #  define PPROMPT "$ "
@@ -107,9 +133,16 @@
 #if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H)
 #  include <wchar.h>
 #  include <wctype.h>
-#  if defined (HAVE_MBSRTOWCS) /* system is supposed to support XPG5 */
+#  if defined (HAVE_MBSRTOWCS) && defined (HAVE_MBRTOWC) && defined (HAVE_MBRLEN) && defined (HAVE_WCWIDTH)
+     /* system is supposed to support XPG5 */
 #    define HANDLE_MULTIBYTE      1
 #  endif
+#endif
+
+/* If we don't want multibyte chars even on a system that supports them, let
+   the configuring user turn multibyte support off. */
+#if defined (NO_MULTIBYTE_SUPPORT)
+#  undef HANDLE_MULTIBYTE
 #endif
 
 /* Some systems, like BeOS, have multibyte encodings but lack mbstate_t.  */
@@ -137,3 +170,12 @@
 /************************************************/
 /* end of multibyte capability checks for I18N	*/
 /************************************************/
+
+/******************************************************************/
+/* Placeholder for builders to #undef any unwanted features from  */
+/* config-top.h or created by configure (such as the default mail */
+/* file for mail checking).					  */
+/******************************************************************/
+
+/* If you don't want bash to provide a default mail file to check. */
+/* #undef DEFAULT_MAIL_DIRECTORY */

@@ -169,7 +169,7 @@ setenv (name, value, rewrite)
     }
 
   var = 0;
-  v = value;
+  v = (char *)value;	/* some compilers need explicit cast */
   /* XXX - should we worry about readonly here? */
   if (rewrite == 0)
     var = find_variable (name);

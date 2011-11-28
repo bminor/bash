@@ -21,8 +21,8 @@ Free Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.  */
 #include <config.h>
 
 /* Get the O_* definitions for open et al.  */
-#ifndef _MINIX
-#include <sys/file.h>
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
+#  include <sys/file.h>
 #endif
 
 #include <fcntl.h>

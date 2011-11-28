@@ -34,20 +34,25 @@ current history to the history file;  `-r' means to read the file and
 append the contents to the history list instead.  `-a' means
 to append history lines from this session to the history file.
 Argument `-n' means to read all history lines not already read
-from the history file and append them to the history list.  If
-FILENAME is given, then that is used as the history file else
+from the history file and append them to the history list.
+
+If FILENAME is given, then that is used as the history file else
 if $HISTFILE has a value, that is used, else ~/.bash_history.
 If the -s option is supplied, the non-option ARGs are appended to
 the history list as a single entry.  The -p option means to perform
 history expansion on each ARG and display the result, without storing
 anything in the history list.
+
+If the $HISTTIMEFORMAT variable is set and not null, its value is used
+as a format string for strftime(3) to print the time stamp associated
+with each displayed history entry.  No time stamps are printed otherwise.
 $END
 
 #include <config.h>
 
 #if defined (HISTORY)
 #include "../bashtypes.h"
-#ifndef _MINIX
+#if ! defined(_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "posixstat.h"
@@ -72,6 +77,7 @@ extern int errno;
 
 extern int current_command_line_count;
 
+static char *histtime __P((HIST_ENTRY *, const char *));
 static void display_history __P((WORD_LIST *));
 static int delete_histent __P((int));
 static int delete_last_history __P((void));
@@ -91,7 +97,7 @@ int
 history_builtin (list)
      WORD_LIST *list;
 {
-  int flags, opt, result, old_history_lines;
+  int flags, opt, result, old_history_lines, obase;
   char *filename, *delete_arg;
   intmax_t delete_offset;
 
@@ -200,11 +206,23 @@ history_builtin (list)
     {
       /* Read all of the lines in the file that we haven't already read. */
       old_history_lines = history_lines_in_file;
+      obase = history_base;
+
       using_history ();
       result = read_history_range (filename, history_lines_in_file, -1);
       using_history ();
+
       history_lines_in_file = where_history ();
-      history_lines_this_session += history_lines_in_file - old_history_lines;
+      /* The question is whether we reset history_lines_this_session to 0,
+	 losing any history entries we had before we read the new entries
+	 from the history file, or whether we count the new entries we just
+	 read from the file as history lines added during this session.
+	 Right now, we do the latter.  This will cause these history entries
+	 to be written to the history file along with any intermediate entries
+	 we add when we do a `history -a', but the alternative is losing
+	 them altogether. */
+      history_lines_this_session += history_lines_in_file - old_history_lines +
+				    history_base - obase;
     }
 
   return (result ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
@@ -214,6 +232,22 @@ history_builtin (list)
 #define histline(i) (hlist[(i)]->line)
 #define histdata(i) (hlist[(i)]->data)
 
+static char *
+histtime (hlist, histtimefmt)
+     HIST_ENTRY *hlist;
+     const char *histtimefmt;
+{
+  static char timestr[128];
+  time_t t;
+
+  t = history_get_time (hlist);
+  if (t)
+    strftime (timestr, sizeof (timestr), histtimefmt, localtime (&t));
+  else
+    strcpy (timestr, "??");
+  return timestr;
+}
+
 static void
 display_history (list)
      WORD_LIST *list;
@@ -221,6 +255,7 @@ display_history (list)
   register int i;
   intmax_t limit;
   HIST_ENTRY **hlist;
+  char *histtimefmt, *timestr;
 
   if (list)
     {
@@ -243,11 +278,17 @@ display_history (list)
       else
 	i = 0;
 
+
+      histtimefmt = get_string_value ("HISTTIMEFORMAT");
+
       while (hlist[i])
 	{
 	  QUIT;
-	  printf ("%5d%c %s\n", i + history_base,
+
+	  timestr = (histtimefmt && *histtimefmt) ? histtime (hlist[i], histtimefmt) : (char *)NULL;
+	  printf ("%5d%c %s%s\n", i + history_base,
 		  histdata(i) ? '*' : ' ',
+		  ((timestr && *timestr) ? timestr : ""),
 		  histline(i));
 	  i++;
 	}
@@ -263,11 +304,8 @@ delete_histent (i)
 
   discard = remove_history (i);
   if (discard)
-    {
-      if (discard->line)
-	free (discard->line);
-      free ((char *) discard);
-    }
+    free_history_entry (discard);
+
   return 1;
 }
 
@@ -276,6 +314,7 @@ delete_last_history ()
 {
   register int i;
   HIST_ENTRY **hlist, *histent;
+  int r;
 
   hlist = history_list ();
   if (hlist == NULL)
@@ -290,7 +329,12 @@ delete_last_history ()
   if (histent == NULL)
     return 0;
 
-  return (delete_histent (i));
+  r = delete_histent (i);
+
+  if (where_history () > history_length)
+    history_set_pos (history_length);
+
+  return r;
 }
 
 /* Remove the last entry in the history list and add each argument in

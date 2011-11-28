@@ -170,6 +170,9 @@ _rl_fix_point (fix_mark_too)
 }
 #undef _RL_FIX_POINT
 
+/* Replace the contents of the line buffer between START and END with
+   TEXT.  The operation is undoable.  To replace the entire line in an
+   undoable mode, use _rl_replace_text(text, 0, rl_end); */
 int
 _rl_replace_text (text, start, end)
      const char *text;
@@ -801,13 +804,10 @@ _rl_overwrite_char (count, c)
     k = _rl_read_mbstring (c, mbkey, MB_LEN_MAX);
 #endif
 
+  rl_begin_undo_group ();
+
   for (i = 0; i < count; i++)
     {
-      rl_begin_undo_group ();
-
-      if (rl_point < rl_end)
-	rl_delete (1, c);
-
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	rl_insert_text (mbkey);
@@ -815,8 +815,11 @@ _rl_overwrite_char (count, c)
 #endif
 	_rl_insert_char (1, c);
 
-      rl_end_undo_group ();
+      if (rl_point < rl_end)
+	rl_delete (1, c);
     }
+
+  rl_end_undo_group ();
 
   return 0;
 }
@@ -935,9 +938,12 @@ _rl_overwrite_rubout (count, key)
     rl_delete_text (opoint, rl_point);
 
   /* Emacs puts point at the beginning of the sequence of spaces. */
-  opoint = rl_point;
-  _rl_insert_char (l, ' ');
-  rl_point = opoint;
+  if (rl_point < rl_end)
+    {
+      opoint = rl_point;
+      _rl_insert_char (l, ' ');
+      rl_point = opoint;
+    }
 
   rl_end_undo_group ();
 

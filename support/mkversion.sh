@@ -147,10 +147,10 @@ echo "/* A version string for use by sccs and the what command. */"
 echo "#define SCCSVERSION \"@(#)Bash version ${sccs_string}\""
 
 # extern function declarations
-echo
-echo '/* Functions from version.c. */'
-echo 'extern char *shell_version_string __P((void));'
-echo 'extern void show_shell_version __P((int));'
+#echo
+#echo '/* Functions from version.c. */'
+#echo 'extern char *shell_version_string __P((void));'
+#echo 'extern void show_shell_version __P((int));'
 
 if [ -n "$inc_build" ]; then
 	# Make sure we can write to .build

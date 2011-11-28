@@ -122,6 +122,18 @@ exit_or_logout (list)
 
   exit_value = get_exitstat (list);
 
+  bash_logout ();
+
+  last_command_exit_value = exit_value;
+
+  /* Exit the program. */
+  jump_to_top_level (EXITPROG);
+  /*NOTREACHED*/
+}
+
+void
+bash_logout ()
+{
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0 && subshell_environment == 0)
     {
@@ -130,10 +142,4 @@ exit_or_logout (list)
       maybe_execute_file (SYS_BASH_LOGOUT, 1);
 #endif
     }
-
-  last_command_exit_value = exit_value;
-
-  /* Exit the program. */
-  jump_to_top_level (EXITPROG);
-  /*NOTREACHED*/
 }

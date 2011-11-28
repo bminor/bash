@@ -498,6 +498,9 @@ recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
 # tests of new prefix expansion ${!prefix*}
 ${THIS_SH} ./new-exp3.sub
 
+# bug with indirect expansion through bash-2.05b
+${THIS_SH} ./new-exp4.sub
+
 # these caused errors and core dumps in versions before bash-2.04
 c=""
 echo ${c//${$(($#-1))}/x/}

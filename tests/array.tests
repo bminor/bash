@@ -289,3 +289,14 @@ echo ${foo[0]} ${#foo[0]}
 echo ${foo[1]} ${#foo[1]}
 echo ${foo[@]} ${#foo[@]}
 echo ${foo[*]} ${#foo[*]}
+
+# new expansions added after bash-2.05b
+x[0]=zero
+x[1]=one
+x[4]=four
+x[10]=ten
+
+recho ${!x[@]}
+recho "${!x[@]}"
+recho ${!x[*]}
+recho "${!x[*]}"

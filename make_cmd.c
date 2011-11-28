@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
 #include <stdio.h>
 #include "bashtypes.h"
-#ifndef _MINIX
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "filecntl.h"
@@ -61,7 +61,7 @@ sh_obj_cache_t wlcache = {0, 0, 0};
 #define WDCACHESIZE	60
 #define WLCACHESIZE	60
 
-static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *));
+static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *, int));
 #if defined (ARITH_FOR_COMMAND)
 static WORD_LIST *make_arith_for_expr __P((char *));
 #endif
@@ -199,39 +199,43 @@ command_connect (com1, com2, connector)
 }
 
 static COMMAND *
-make_for_or_select (type, name, map_list, action)
+make_for_or_select (type, name, map_list, action, lineno)
      enum command_type type;
      WORD_DESC *name;
      WORD_LIST *map_list;
      COMMAND *action;
+     int lineno;
 {
   FOR_COM *temp;
 
   temp = (FOR_COM *)xmalloc (sizeof (FOR_COM));
   temp->flags = 0;
   temp->name = name;
+  temp->line = lineno;
   temp->map_list = map_list;
   temp->action = action;
   return (make_command (type, (SIMPLE_COM *)temp));
 }
 
 COMMAND *
-make_for_command (name, map_list, action)
+make_for_command (name, map_list, action, lineno)
      WORD_DESC *name;
      WORD_LIST *map_list;
      COMMAND *action;
+     int lineno;
 {
-  return (make_for_or_select (cm_for, name, map_list, action));
+  return (make_for_or_select (cm_for, name, map_list, action, lineno));
 }
 
 COMMAND *
-make_select_command (name, map_list, action)
+make_select_command (name, map_list, action, lineno)
      WORD_DESC *name;
      WORD_LIST *map_list;
      COMMAND *action;
+     int lineno;
 {
 #if defined (SELECT_COMMAND)
-  return (make_for_or_select (cm_select, name, map_list, action));
+  return (make_for_or_select (cm_select, name, map_list, action, lineno));
 #else
   last_command_exit_value = 2;
   return ((COMMAND *)NULL);
@@ -244,14 +248,21 @@ make_arith_for_expr (s)
      char *s;
 {
   WORD_LIST *result;
+  WORD_DESC *wd;
 
   if (s == 0 || *s == '\0')
     return ((WORD_LIST *)NULL);
-  result = make_word_list (make_word (s), (WORD_LIST *)NULL);
+  wd = make_word (s);
+  wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED;	/* no word splitting or globbing */
+  result = make_word_list (wd, (WORD_LIST *)NULL);
   return result;
 }
 #endif
 
+/* Note that this function calls dispose_words on EXPRS, since it doesn't
+   use the word list directly.  We free it here rather than at the caller
+   because no other function in this file requires that the caller free
+   any arguments. */
 COMMAND *
 make_arith_for_command (exprs, action, lineno)
      WORD_LIST *exprs;
@@ -318,8 +329,10 @@ make_arith_for_command (exprs, action, lineno)
   temp->step = step ? step : make_arith_for_expr ("1");
   temp->action = action;
 
+  dispose_words (exprs);
   return (make_command (cm_arith_for, (SIMPLE_COM *)temp));
 #else
+  dispose_words (exprs);
   last_command_exit_value = 2;
   return ((COMMAND *)NULL);
 #endif /* ARITH_FOR_COMMAND */
@@ -337,7 +350,7 @@ make_group_command (command)
 }
 
 COMMAND *
-make_case_command (word, clauses)
+make_case_command (word, clauses, lineno)
      WORD_DESC *word;
      PATTERN_LIST *clauses;
 {
@@ -345,6 +358,7 @@ make_case_command (word, clauses)
 
   temp = (CASE_COM *)xmalloc (sizeof (CASE_COM));
   temp->flags = 0;
+  temp->line = lineno;
   temp->word = word;
   temp->clauses = REVERSE_LIST (clauses, PATTERN_LIST *);
   return (make_command (cm_case, (SIMPLE_COM *)temp));
@@ -725,6 +739,11 @@ make_function_def (name, command, lineno, lstart)
      int lineno, lstart;
 {
   FUNCTION_DEF *temp;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *bash_source_v;
+  ARRAY *bash_source_a;
+  char *t;
+#endif
 
   temp = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));
   temp->command = command;
@@ -732,6 +751,18 @@ make_function_def (name, command, lineno, lstart)
   temp->line = lineno;
   temp->flags = 0;
   command->line = lstart;
+
+  /* Information used primarily for debugging. */
+  temp->source_file = 0;
+#if defined (ARRAY_VARS)
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  t = 0;
+  if (bash_source_a && array_num_elements (bash_source_a) > 0)
+    t = array_reference (bash_source_a, 0);
+  temp->source_file = t ? savestring (t) : savestring ("");
+#endif
+  bind_function_def (name->word, temp);
+
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

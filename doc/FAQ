@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.20, for Bash version 2.05b.
+This is the Bash FAQ, version 3.26, for Bash version 2.05b.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -31,7 +31,7 @@ A6) How can I build bash with gcc?
 A7) How can I make bash my login shell?
 A8) I just changed my login shell to bash, and now I can't FTP into my
     machine.  Why not?
-A9) What's the `POSIX 1003.2 standard'?
+A9) What's the `POSIX Shell and Utilities standard'?
 A10) What is the bash `posix mode'?
 
 Section B:  The latest version
@@ -75,6 +75,9 @@ E8) Why does the arithmetic evaluation code complain about `08'?
 E9) Why does the pattern matching expression [A-Z]* match files beginning
     with every letter except `z'?
 E10) Why does `cd //' leave $PWD as `//'?
+E11) If I resize my xterm while another program is running, why doesn't bash
+     notice the change?
+E12) Why don't negative offsets in substring expansion work like I expect?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -271,7 +274,8 @@ it is invoked as a login shell.
 
 Next, add a line similar to the above to ~/.profile:
 
-        [ -f /usr/gnu/bin/bash ] && exec /usr/gnu/bin/bash --login
+	[ -f /usr/gnu/bin/bash ] && [ -x /usr/gnu/bin/bash ] && \
+		exec /usr/gnu/bin/bash --login
 
 This will cause login shells to replace themselves with bash running as
 a login shell.  Once you have this working, you can copy your initialization
@@ -325,7 +329,7 @@ this before you can make bash your login shell.
 Most versions of ftpd use this file to prohibit `special' users
 such as `uucp' and `news' from using FTP. 
 
-A9)  What's the `POSIX 1003.2 standard'?
+A9)  What's the `POSIX Shell and Utilities standard'?
 
 POSIX is a name originally coined by Richard Stallman for a
 family of open system standards based on UNIX.  There are a
@@ -335,44 +339,50 @@ call and C library level to applications and tools to system
 administration and management.  Each area of standardization is
 assigned to a working group in the 1003 series. 
 
-The POSIX Shell and Utilities standard has been developed by IEEE
-Working Group 1003.2 (POSIX.2).  It concentrates on the command
-interpreter interface and utility programs commonly executed from
-the command line or by other programs.  An initial version of the
-standard has been approved and published by the IEEE, and work is
-currently underway to update it. 
+The POSIX Shell and Utilities standard was originally developed by
+IEEE Working Group 1003.2 (POSIX.2).  Today it has been merged with
+the original 1003.1 Working Group and is maintained by the Austin
+Group (a joint working group of the IEEE, The Open Group and
+ISO/IEC SC22/WG15).  Today the Shell and Utilities are a volume
+within the set of documents that make up IEEE Std 1003.1-2001, and
+thus now the former POSIX.2 (from 1992) is now part of the current
+POSIX.1 standard (POSIX 1003.1-2001). 
 
-Bash is concerned with the aspects of the shell's behavior
-defined by POSIX.2.  The shell command language has of course
-been standardized, including the basic flow control and program
-execution constructs, I/O redirection and pipelining, argument
-handling, variable expansion, and quoting. 
+The Shell and Utilities volume concentrates on the command
+interpreter interface and utility programs commonly executed from
+the command line or by other programs.  The standard is freely
+available on the web at http://www.UNIX-systems.org/version3/ . 
+Work continues at the Austin Group on maintenance issues; see
+http://www.opengroup.org/austin/ to join the discussions. 
+
+Bash is concerned with the aspects of the shell's behavior defined
+by the POSIX Shell and Utilities volume.  The shell command
+language has of course been standardized, including the basic flow
+control and program execution constructs, I/O redirection and
+pipelining, argument handling, variable expansion, and quoting. 
 
 The `special' builtins, which must be implemented as part of the
 shell to provide the desired functionality, are specified as
 being part of the shell; examples of these are `eval' and
-`export'.  Other utilities appear in the sections of POSIX.2 not
+`export'.  Other utilities appear in the sections of POSIX not
 devoted to the shell which are commonly (and in some cases must
 be) implemented as builtin commands, such as `read' and `test'. 
-POSIX.2 also specifies aspects of the shell's interactive
+POSIX also specifies aspects of the shell's interactive
 behavior as part of the UPE, including job control and command
 line editing.  Only vi-style line editing commands have been
 standardized; emacs editing commands were left out due to
 objections.
 
-The Open Group has made an older version of its Single Unix
-Specification (version 2), which is very similar to POSIX.2,
-available on the web at
+The latest version of the POSIX Shell and Utilities standard is
+available (now updated to the 2003 Edition incorporating the
+Technical Corrigendum 1), as part of the Single UNIX Specification
+Version 3 at
 
-http://www.opengroup.org/onlinepubs/007908799/
-
-The Single Unix Specification, version 3, is available on the web at
-
-http://www.opengroup.org/onlinepubs/007904975/
+http://www.UNIX-systems.org/version3/
 
 A10)  What is the bash `posix mode'?
 
-Although bash is an implementation of the POSIX.2 shell
+Although bash is an implementation of the POSIX shell
 specification, there are areas where the bash default behavior
 differs from that spec.  The bash `posix mode' changes the bash
 behavior in these areas so that it obeys the spec more closely. 
@@ -821,6 +831,8 @@ New things in ksh-93 not in bash-2.05b:
 	-I invocation option
 	DEBUG trap now executed before each simple command, instead of after
 	printf %H, %P, %T, %Z modifiers, output base for %d
+	lexical scoping for local variables in `ksh' functions
+	no scoping for local variables in `POSIX' functions
 
 New things in ksh-93 present in bash-2.05b:
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
@@ -1305,6 +1317,49 @@ This is, I presume, for historical compatibility.  Certain versions of
 Unix, and early network file systems, used paths of the form
 //hostname/path to access `path' on server `hostname'.
 
+E11) If I resize my xterm while another program is running, why doesn't bash
+     notice the change?
+
+This is another issue that deals with job control.
+
+The kernel maintains a notion of a current terminal process group.  Members
+of this process group (processes whose process group ID is equal to the
+current terminal process group ID) receive terminal-generated signals like
+SIGWINCH.  (For more details, see the JOB CONTROL section of the bash
+man page.)
+
+If a terminal is resized, the kernel sends SIGWINCH to each member of
+the terminal's current process group (the `foreground' process group).
+
+When bash is running with job control enabled, each pipeline (which may be
+a single command) is run in its own process group, different from bash's
+process group.  This foreground process group receives the SIGWINCH; bash
+does not.  Bash has no way of knowing that the terminal has been resized.
+
+There is a `checkwinsize' option, settable with the `shopt' builtin, that
+will cause bash to check the window size and adjust its idea of the
+terminal's dimensions each time a process stops or exits and returns control
+of the terminal to bash.  Enable it with `shopt -s checkwinsize'.
+
+E12) Why don't negative offsets in substring expansion work like I expect?
+
+When substring expansion of the form ${param:offset[:length} is used,
+an `offset' that evaluates to a number less than zero counts back from
+the end of the expanded value of $param.
+
+When a negative `offset' begins with a minus sign, however, unexpected things
+can happen.  Consider
+
+	a=12345678
+	echo ${a:-4}
+
+intending to print the last four characters of $a.  The problem is that
+${param:-word} already has a well-defined meaning: expand to word if the
+expanded value of param is unset or null, and $param otherwise.
+
+To use negative offsets that begin with a minus sign, separate the
+minus sign and the colon with a space.
+
 Section F:  Things to watch out for on certain Unix versions
 
 F1) Why can't I use command line editing in my `cmdtool'?
@@ -1671,6 +1726,12 @@ A second edition of this book is available, published in January, 1998.
 The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
 or on the web.
 
+The GNU Bash Reference Manual has been published as a printed book by
+Network Theory Ltd (Paperback, ISBN: 0-9541617-7-7, Feb 2003).  It covers
+bash-2.0 and is available from most online bookstores (see
+http://www.network-theory.co.uk/bash/manual/ for details).  The publisher
+will donate $1 to the Free Software Foundation for each copy sold. 
+
 H3) What's coming in future versions?
 
 These are features I hope to include in a future version of bash.
@@ -1698,10 +1759,10 @@ Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2002.  Never make predictions. 
+The next version will appear sometime in 2003.  Never make predictions. 
 
 
-This document is Copyright 1995-2002 by Chester Ramey.
+This document is Copyright 1995-2003 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

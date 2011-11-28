@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "chartypes.h"
 #include "bashtypes.h"
-#ifndef _MINIX
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "filecntl.h"
@@ -100,10 +100,7 @@ file_status (name)
   /* We have to use access(2) to determine access because AFS does not
      support Unix file system semantics.  This may produce wrong
      answers for non-AFS files when ruid != euid.  I hate AFS. */
-  if (access (name, X_OK) == 0)
-    return (FS_EXISTS | FS_EXECABLE);
-  else
-    return (FS_EXISTS);
+  return ((access (name, X_OK) == 0) ? (FS_EXISTS|FS_EXECABLE) : FS_EXISTS);
 #else /* !AFS */
 
   /* Find out if the file is actually executable.  By definition, the
@@ -120,24 +117,20 @@ file_status (name)
 	      g_mode_bits (finfo.st_mode) |
 	      o_mode_bits (finfo.st_mode));
 
-      if (X_BIT (bits))
-	return (FS_EXISTS | FS_EXECABLE);
+      return ((X_BIT (bits)) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
     }
 
   /* If we are the owner of the file, the owner execute bit applies. */
-  if (current_user.euid == finfo.st_uid && X_BIT (u_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
+  if (current_user.euid == finfo.st_uid)
+    return ((X_BIT (u_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
 
   /* If we are in the owning group, the group permissions apply. */
-  if (group_member (finfo.st_gid) && X_BIT (g_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
+  else if (group_member (finfo.st_gid))
+    return ((X_BIT (g_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
 
-  /* If `others' have execute permission to the file, then so do we,
-     since we are also `others'. */
-  if (X_BIT (o_mode_bits (finfo.st_mode)))
-    return (FS_EXISTS | FS_EXECABLE);
-
-  return (FS_EXISTS);
+  /* Else we check whether `others' have permission to execute the file */
+  else
+    return ((X_BIT (o_mode_bits (finfo.st_mode))) ? (FS_EXISTS | FS_EXECABLE) : FS_EXISTS);
 #endif /* !AFS */
 }
 

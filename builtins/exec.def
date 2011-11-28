@@ -208,8 +208,7 @@ exec_builtin (list)
     file_error (command);
 
 failed_exec:
-  if (command)
-    free (command);
+  FREE (command);
 
   if (subshell_environment || (interactive == 0 && no_exit_on_failed_exec == 0))
     exit_shell (exit_value);

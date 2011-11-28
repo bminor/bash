@@ -15,7 +15,7 @@ unset: usage: unset [-f] [-v] [name ...]
 ./errors.tests: line 52: unset: `/bin/sh': not a valid identifier
 ./errors.tests: line 55: unset: cannot simultaneously unset a function and a variable
 ./errors.tests: line 58: declare: -z: invalid option
-declare: usage: declare [-afFirtx] [-p] name[=value] ...
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
 ./errors.tests: line 60: declare: `-z': not a valid identifier
 ./errors.tests: line 61: declare: `/bin/sh': not a valid identifier
 ./errors.tests: line 65: declare: cannot use `-f' to make functions
@@ -53,20 +53,20 @@ umask: usage: umask [-p] [-S] [mode]
 ./errors.tests: line 159: declare: VAR: readonly variable
 ./errors.tests: line 161: declare: unset: not found
 ./errors.tests: line 164: VAR: readonly variable
-./errors.tests: command substitution: line 2: syntax error: unexpected end of file
-./errors.tests: command substitution: line 1: syntax error near unexpected token `done'
-./errors.tests: command substitution: line 1: ` for z in 1 2 3; done '
+./errors.tests: command substitution: line 168: syntax error: unexpected end of file
+./errors.tests: command substitution: line 168: syntax error near unexpected token `done'
+./errors.tests: command substitution: line 168: ` for z in 1 2 3; done '
 ./errors.tests: line 171: cd: HOME not set
 ./errors.tests: line 172: cd: /tmp/xyz.bash: No such file or directory
 ./errors.tests: line 174: cd: OLDPWD not set
 ./errors.tests: line 175: cd: /bin/sh: Not a directory
 ./errors.tests: line 177: cd: /tmp/cd-notthere: No such file or directory
 ./errors.tests: line 180: .: filename argument required
-.: usage: . filename
+.: usage: . filename [arguments]
 ./errors.tests: line 181: source: filename argument required
-source: usage: source filename
+source: usage: source filename [arguments]
 ./errors.tests: line 184: .: -i: invalid option
-.: usage: . filename
+.: usage: . filename [arguments]
 ./errors.tests: line 187: set: -q: invalid option
 set: usage: set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
 ./errors.tests: line 190: enable: sh: not a shell builtin
@@ -76,13 +76,13 @@ set: usage: set [--abefhkmnptuvxBCHP] [-o option] [arg ...]
 ./errors.tests: line 199: read: `/bin/sh': not a valid identifier
 ./errors.tests: line 202: VAR: readonly variable
 ./errors.tests: line 205: readonly: -x: invalid option
-readonly: usage: readonly [-anf] [name[=value] ...] or readonly -p
+readonly: usage: readonly [-af] [name[=value] ...] or readonly -p
 ./errors.tests: line 208: eval: -i: invalid option
 eval: usage: eval [arg ...]
 ./errors.tests: line 209: command: -i: invalid option
 command: usage: command [-pVv] command [arg ...]
-./errors.tests: line 1: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 1: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 212: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 213: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
 ./errors.tests: line 216: trap: NOSIG: invalid signal specification
 ./errors.tests: line 219: trap: -s: invalid option
 trap: usage: trap [arg] [signal_spec ...] or trap -l

@@ -68,7 +68,7 @@ shift_builtin (list)
   else if (times > number_of_args ())
     {
       if (print_shift_error)
-	sh_erange (list->word->word, "shift count");
+	sh_erange (list ? list->word->word : NULL, "shift count");
       return (EXECUTION_FAILURE);
     }
 

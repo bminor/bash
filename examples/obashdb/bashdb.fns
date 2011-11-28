@@ -88,7 +88,7 @@ _at_linenumbp() {
 	if [ -z "${_linebp}" ]; then
 		return 1
 	fi
-	echo "${_curline}" | egrep "(${_linebp%\|})" >/dev/null 2>&1
+	echo "${_curline}" | grep -E "(${_linebp%\|})" >/dev/null 2>&1
 	return $?
 }
 
@@ -101,7 +101,7 @@ _at_stringbp() {
 		return 1;
 	fi
 	l=${_lines[$_curline-$_firstline+1]}
-	echo "${l}" | egrep "*(${_stringbp%\|})*" >/dev/null 2>&1
+	echo "${l}" | grep -E "\\*(${_stringbp%\|})\\*" >/dev/null 2>&1
 	return $?
 }
 

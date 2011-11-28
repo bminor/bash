@@ -95,11 +95,11 @@ function strcmp ()
 ###;;;autoload
 function strncmp ()
 {
-    if [ -z "${3}" -o "${3}" -le "0" ]; then
+    if [ -z "${3}" ] || [ "${3}" -le "0" ]; then
        return 0
     fi
    
-    if [ ${3} -ge ${#1} -a ${3} -ge ${#2} ]; then
+    if [ ${3} -ge ${#1} ] && [ ${3} -ge ${#2} ]; then
        strcmp "$1" "$2"
        return $?
     else

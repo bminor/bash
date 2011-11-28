@@ -38,7 +38,7 @@ for i in "$@"; do
         vars="$vars $i"
         ;;
     *)
-        if [ ! -x $i -o ! -d $i ]; then     # arg must be a dir and executable
+        if [ ! -x $i ] || [ ! -d $i ]; then     # arg must be a dir and executable
             echo "$i: directory not accessible."
             exit
         fi

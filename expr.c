@@ -155,6 +155,7 @@ static void	evalerror __P((char *));
 static void	pushexp __P((void));
 static void	popexp __P((void));
 static void	expr_unwind __P((void));
+static void	expr_bind_variable __P((char *, char *));
 
 static intmax_t subexpr __P((char *));
 
@@ -280,6 +281,14 @@ expr_unwind ()
   free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
 }
 
+static void
+expr_bind_variable (lhs, rhs)
+     char *lhs, *rhs;
+{
+  (void)bind_int_variable (lhs, rhs);
+  stupidly_hack_special_variables (lhs);
+}
+
 /* Evaluate EXPR, and return the arithmetic result.  If VALIDP is
    non-null, a zero is stored into the location to which it points
    if the expression is invalid, non-zero otherwise.  If a non-zero
@@ -299,10 +308,16 @@ evalexp (expr, validp)
      int *validp;
 {
   intmax_t val;
+  int c;
+  procenv_t oevalbuf;
 
   val = 0;
 
-  if (setjmp (evalbuf))
+  FASTCOPY (evalbuf, oevalbuf, sizeof (evalbuf));
+
+  c = setjmp (evalbuf);
+
+  if (c)
     {
       FREE (tokstr);
       FREE (expression);
@@ -319,6 +334,8 @@ evalexp (expr, validp)
 
   if (validp)
     *validp = 1;
+
+  FASTCOPY (oevalbuf, evalbuf, sizeof (evalbuf));
 
   return (val);
 }
@@ -449,7 +466,7 @@ expassign ()
 
       rhs = itos (value);
       if (noeval == 0)
-	(void)bind_int_variable (lhs, rhs);
+	expr_bind_variable (lhs, rhs);
       free (rhs);
       free (lhs);
       FREE (tokstr);
@@ -799,7 +816,7 @@ exp0 ()
       v2 = tokval + ((stok == PREINC) ? 1 : -1);
       vincdec = itos (v2);
       if (noeval == 0)
-	(void)bind_int_variable (tokstr, vincdec);
+	expr_bind_variable (tokstr, vincdec);
       free (vincdec);
       val = v2;
 
@@ -837,7 +854,7 @@ exp0 ()
 	  v2 = val + ((*tp == '+') ? 1 : -1);
 	  vincdec = itos (v2);
 	  if (noeval == 0)
-	    (void)bind_int_variable (tokstr, vincdec);
+	    expr_bind_variable (tokstr, vincdec);
 	  free (vincdec);
 	  tp += 2;
 	  curtok = NUM;	/* make sure x++=7 is flagged as an error */

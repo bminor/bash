@@ -46,7 +46,8 @@ extern int
   just_one_command, unbound_vars_is_error, echo_input_at_read,
   echo_command_at_execute, no_invisible_vars, noclobber,
   hashing_enabled, forced_interactive, privileged_mode,
-  asynchronous_notification, interactive_comments, no_symbolic_links;
+  asynchronous_notification, interactive_comments, no_symbolic_links,
+  function_trace_mode, error_trace_mode, pipefail_opt;
 
 #if 0
 extern int lexical_scoping;

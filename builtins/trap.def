@@ -108,6 +108,8 @@ trap_builtin (list)
     }
   list = loptend;
 
+  opt = DSIG_NOCASE|DSIG_SIGPREFIX;	/* flags for decode_signal */
+
   if (list_signal_names)
     return (display_signal_list ((WORD_LIST *)NULL, 1));
   else if (display || list == 0)
@@ -119,8 +121,12 @@ trap_builtin (list)
 
       operation = SET;
       first_arg = list->word->word;
-      if (first_arg && *first_arg && (*first_arg != '-' || first_arg[1]) &&
-		signal_object_p (first_arg))
+      /* When not in posix mode, the historical behavior of looking for a
+	 missing first argument is disabled.  To revert to the original
+	 signal handling disposition, use `-' as the first argument. */
+      if (posixly_correct == 0 && first_arg && *first_arg &&
+		(*first_arg != '-' || first_arg[1]) &&
+		signal_object_p (first_arg, opt))
 	operation = REVERT;
       else
 	{
@@ -133,7 +139,7 @@ trap_builtin (list)
 
       while (list)
 	{
-	  sig = decode_signal (list->word->word);
+	  sig = decode_signal (list->word->word, opt);
 
 	  if (sig == NO_SIG)
 	    {
@@ -235,7 +241,7 @@ display_traps (list)
 
   for (result = EXECUTION_SUCCESS; list; list = list->next)
     {
-      i = decode_signal (list->word->word);
+      i = decode_signal (list->word->word, DSIG_NOCASE|DSIG_SIGPREFIX);
       if (i == NO_SIG)
 	{
 	  sh_invalidsig (list->word->word);

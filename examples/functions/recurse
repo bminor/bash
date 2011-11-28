@@ -44,15 +44,15 @@ function recurse
 
     if cd "$1" ; then
         for file in $2; do
-            if [ -f "$file" -o -d "$file" ]; then
+            if [ -f "$file" ] || [ -d "$file" ]; then
                 eval "$3"
             fi
         done
         for file in .* * ; do
-            if [ "$file" = "." -o "$file" = ".." ] ; then
+            if [ "$file" = "." ] || [ "$file" = ".." ] ; then
                 continue
             fi
-            if [ -d "$file" -a ! -L "$file" ]; then
+            if [ -d "$file" ] && [ ! -L "$file" ]; then
                 recurse "$file" "$2" "$3" "$path"
             fi
         done
@@ -61,4 +61,3 @@ function recurse
 }
 
 recurse "$1" "$2" 'echo "$path$file"'
-

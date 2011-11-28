@@ -62,7 +62,7 @@ processdir()
                 set +f
                 for file in * ; do
                         set -f
-                        if [ "$file" != "." -a "$file" != ".." ] ; then
+                        if [ "$file" != "." ] && [ "$file" != ".." ] ; then
                                 if [ -L "$file" ] ; then
                                         echo "skipping symlink" $file in `pwd`
                                 elif [ -d "$file" ] ; then

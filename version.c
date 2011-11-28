@@ -43,6 +43,10 @@ const char *sccs_version = SCCSVERSION;
 
 /* Functions for getting, setting, and displaying the shell version. */
 
+/* Forward declarations so we don't have to include externs.h */
+extern char *shell_version_string __P((void));
+extern void show_shell_version __P((int));
+
 /* Give version information about this shell. */
 char *
 shell_version_string ()

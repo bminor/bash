@@ -153,3 +153,7 @@ PAT=
 if [[ $STR = $PAT ]]; then
         echo ok
 fi
+
+# bug in all versions up to and including bash-2.05b
+if [[ "123abc" == *?(a)bc ]]; then echo ok 42; else echo bad 42; fi
+if [[ "123abc" == *?(a)bc ]]; then echo ok 43; else echo bad 43; fi

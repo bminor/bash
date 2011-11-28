@@ -29,8 +29,10 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 
 #ifndef _MINIX
-#include "../bashtypes.h"
-#include <sys/file.h>
+#  include "../bashtypes.h"
+#  if defined (HAVE_SYS_FILE_H)
+#    include <sys/file.h>
+#  endif
 #endif
 
 #include "posixstat.h"

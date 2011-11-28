@@ -154,6 +154,12 @@ _rl_unget_char (key)
   return (0);
 }
 
+int
+_rl_pushed_input_available ()
+{
+  return (push_index != pop_index);
+}
+
 /* If a character is available to be read, then read it and stuff it into
    IBUFFER.  Otherwise, just return.  Returns number of characters read
    (0 if none available) and -1 on error (EIO). */
@@ -162,7 +168,7 @@ rl_gather_tyi ()
 {
   int tty;
   register int tem, result;
-  int chars_avail;
+  int chars_avail, k;
   char input;
 #if defined(HAVE_SELECT)
   fd_set readfds, exceptfds;
@@ -225,7 +231,12 @@ rl_gather_tyi ()
   if (result != -1)
     {
       while (chars_avail--)
-	rl_stuff_char ((*rl_getc_function) (rl_instream));
+	{
+	  k = (*rl_getc_function) (rl_instream);
+	  rl_stuff_char (k);
+	  if (k == NEWLINE || k == RETURN)
+	    break;
+	}
     }
   else
     {

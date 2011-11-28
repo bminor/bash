@@ -1,33 +1,34 @@
-This is bashref.info, produced by makeinfo version 4.1 from
+This is bashref.info, produced by makeinfo version 4.5 from
 /usr/homes/chet/src/bash/src/doc/bashref.texi.
 
-INFO-DIR-SECTION Utilities
+This text is a brief description of the features that are present in
+the Bash shell (version 3.0-alpha, 5 August 2003).
+
+   This is Edition 3.0, last updated 5 August 2003, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0-alpha.
+
+   Copyright (C) 1988-2003 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.1 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License."
+
+     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
+     modify this GNU Manual, like GNU software.  Copies published by
+     the Free Software Foundation raise funds for GNU development."
+   
+INFO-DIR-SECTION Basics
 START-INFO-DIR-ENTRY
 * Bash: (bash).                     The GNU Bourne-Again SHell.
 END-INFO-DIR-ENTRY
-
-This text is a brief description of the features that are present in
-the Bash shell.
-
-This is Edition 2.5b, last updated 15 July 2002,
-of `The GNU Bash Reference Manual',
-for `Bash', Version 2.05b.
-
-Copyright (C) 1991-2002 Free Software Foundation, Inc.
-
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the entire
-resulting derived work is distributed under the terms of a permission
-notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation approved
-by the Free Software Foundation.
 
 
 File: bashref.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
@@ -36,12 +37,10 @@ Bash Features
 *************
 
    This text is a brief description of the features that are present in
-the Bash shell.
+the Bash shell (version 3.0-alpha, 5 August 2003)..
 
-   This is Edition 2.5b, last updated 15 July 2002, of `The GNU Bash
-Reference Manual', for `Bash', Version 2.05b.
-
-   Copyright (C) 1991-2002 Free Software Foundation, Inc.
+   This is Edition 3.0, last updated 5 August 2003, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0-alpha.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -86,6 +85,8 @@ on shell behavior.
 						between Bash and historical
 						versions of /bin/sh.
 
+* Copying This Manual::		Copying this manual.
+
 * Builtin Index::		Index of Bash builtin commands.
 
 * Reserved Word Index::		Index of Bash reserved words.
@@ -119,8 +120,8 @@ What is Bash?
    Bash is the shell, or command language interpreter, for the GNU
 operating system.  The name is an acronym for the `Bourne-Again SHell',
 a pun on Stephen Bourne, the author of the direct ancestor of the
-current Unix shell `/bin/sh', which appeared in the Seventh Edition
-Bell Labs Research version of Unix.
+current Unix shell `sh', which appeared in the Seventh Edition Bell
+Labs Research version of Unix.
 
    Bash is largely compatible with `sh' and incorporates useful
 features from the Korn shell `ksh' and the C shell `csh'.  It is
@@ -132,7 +133,7 @@ improvements over `sh' for both interactive and programming use.
 version of `csh', Bash is the default shell.  Like other GNU software,
 Bash is quite portable.  It currently runs on nearly every version of
 Unix and a few other operating systems - independently-supported ports
-exist for MS-DOS, OS/2, Windows 95/98, and Windows NT.
+exist for MS-DOS, OS/2, and Windows platforms.
 
 
 File: bashref.info,  Node: What is a shell?,  Prev: What is Bash?,  Up: Introduction
@@ -141,12 +142,21 @@ What is a shell?
 ================
 
    At its base, a shell is simply a macro processor that executes
-commands.  A Unix shell is both a command interpreter, which provides
-the user interface to the rich set of GNU utilities, and a programming
-language, allowing these utilitites to be combined.  Files containing
+commands.  The term macro processor means functionality where text and
+symbols are expanded to create larger expressions.
+
+   A Unix shell is both a command interpreter and a programming
+language.  As a command interpreter, the shell provides the user
+interface to the rich set of GNU utilities.  The programming language
+features allow these utilitites to be combined.  Files containing
 commands can be created, and become commands themselves.  These new
 commands have the same status as system commands in directories such as
-`/bin', allowing users or groups to establish custom environments.
+`/bin', allowing users or groups to establish custom environments to
+automate their common tasks.
+
+   Shells may be used interactively or non-interactively.  In
+interactive mode, they accept input typed from the keyboard.  When
+executing non-interactively, shells execute commands read from a file.
 
    A shell allows execution of GNU commands, both synchronously and
 asynchronously.  The shell waits for synchronous commands to complete
@@ -154,9 +164,7 @@ before accepting more input; asynchronous commands continue to execute
 in parallel with the shell while it reads and executes additional
 commands.  The "redirection" constructs permit fine-grained control of
 the input and output of those commands.  Moreover, the shell allows
-control over the contents of commands' environments.  Shells may be
-used interactively or non-interactively: they accept input typed from
-the keyboard or from a file.
+control over the contents of commands' environments.
 
    Shells also provide a small set of built-in commands ("builtins")
 implementing functionality impossible or inconvenient to obtain via
@@ -175,8 +183,8 @@ control constructs, quoting, and functions.
 
    Shells offer features geared specifically for interactive use rather
 than to augment the programming language.  These interactive features
-include job control, command line editing, history and aliases.  Each
-of these features is described in this manual.
+include job control, command line editing, command history and aliases.
+Each of these features is described in this manual.
 
 
 File: bashref.info,  Node: Definitions,  Next: Basic Shell Features,  Prev: Introduction,  Up: Top
@@ -275,9 +283,9 @@ Basic Shell Features
 
    Bash is an acronym for `Bourne-Again SHell'.  The Bourne shell is
 the traditional Unix shell originally written by Stephen Bourne.  All
-of the Bourne shell builtin commands are available in Bash, and the
-rules for evaluation and quoting are taken from the POSIX 1003.2
-specification for the `standard' Unix shell.
+of the Bourne shell builtin commands are available in Bash, The rules
+for evaluation and quoting are taken from the POSIX specification for
+the `standard' Unix shell.
 
    This chapter briefly summarizes the shell's `building blocks':
 commands, control structures, shell functions, shell parameters, shell
@@ -289,8 +297,8 @@ from and to named files, and how the shell executes commands.
 * Shell Syntax::		What your input means to the shell.
 * Shell Commands::		The types of commands you can use.
 * Shell Functions::		Grouping commands by name.
-* Shell Parameters::		Special shell variables.
-* Shell Expansions::		How Bash expands variables and the various
+* Shell Parameters::		How the shell stores values.
+* Shell Expansions::		How Bash expands parameters and the various
 				expansions available.
 * Redirections::		A way to control where input and output go.
 * Executing Commands::		What happens when you run a command.
@@ -387,8 +395,10 @@ meaning to the shell and must be quoted if it is to represent itself.
 When the command history expansion facilities are being used, the
 HISTORY EXPANSION character, usually `!', must be quoted to prevent
 history expansion.  *Note Bash History Facilities::, for more details
-concerning history expansion.  There are three quoting mechanisms: the
-ESCAPE CHARACTER, single quotes, and double quotes.
+concerning history expansion.
+
+   There are three quoting mechanisms: the ESCAPE CHARACTER, single
+quotes, and double quotes.
 
 
 File: bashref.info,  Node: Escape Character,  Next: Single Quotes,  Up: Quoting
@@ -428,7 +438,8 @@ characters: `$', ``', `"', `\', or `newline'.  Within double quotes,
 backslashes that are followed by one of these characters are removed.
 Backslashes preceding characters without a special meaning are left
 unmodified.  A double quote may be quoted within double quotes by
-preceding it with a backslash.
+preceding it with a backslash.  When command history is being used, the
+double quote may not be used to quote the history expansion character.
 
    The special parameters `*' and `@' have special meaning when in
 double quotes (*note Shell Parameter Expansion::).
@@ -542,9 +553,7 @@ construct, or in some other grouping.
 * Pipelines::			Connecting the input and output of several
 				commands.
 * Lists::			How to execute commands sequentially.
-* Looping Constructs::		Shell commands for iterative action.
-* Conditional Constructs::	Shell commands for conditional execution.
-* Command Grouping::		Ways to group commands.
+* Compound Commands::		Shell commands for control flow.
 
 
 File: bashref.info,  Node: Simple Commands,  Next: Pipelines,  Up: Shell Commands
@@ -598,7 +607,7 @@ exit status of the last command in the pipeline.  If the reserved word
 the exit status of the last command.
 
 
-File: bashref.info,  Node: Lists,  Next: Looping Constructs,  Prev: Pipelines,  Up: Shell Commands
+File: bashref.info,  Node: Lists,  Next: Compound Commands,  Prev: Pipelines,  Up: Shell Commands
 
 Lists of Commands
 -----------------
@@ -642,10 +651,32 @@ status.
 command executed in the list.
 
 
-File: bashref.info,  Node: Looping Constructs,  Next: Conditional Constructs,  Prev: Lists,  Up: Shell Commands
+File: bashref.info,  Node: Compound Commands,  Prev: Lists,  Up: Shell Commands
+
+Compound Commands
+-----------------
+
+* Menu:
+
+* Looping Constructs::		Shell commands for iterative action.
+* Conditional Constructs::	Shell commands for conditional execution.
+* Command Grouping::		Ways to group commands.
+
+   Compound commands are the shell programming constructs.  Each
+construct begins with a reserved word or control operator and is
+terminated by a corresponding reserved word or operator.  Any
+redirections (*note Redirections::) associated with a compound command
+apply to all commands within that compound command unless explicitly
+overridden.
+
+   Bash provides looping constructs, conditional commands, and
+mechanisms to group commands and execute them as a unit.
+
+
+File: bashref.info,  Node: Looping Constructs,  Next: Conditional Constructs,  Up: Compound Commands
 
 Looping Constructs
-------------------
+..................
 
    Bash supports the following looping constructs.
 
@@ -695,14 +726,15 @@ syntax, it may be replaced with one or more newlines.
      command in LIST that is executed, or false if any of the
      expressions is invalid.
 
+
    The `break' and `continue' builtins (*note Bourne Shell Builtins::)
 may be used to control loop execution.
 
 
-File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: Looping Constructs,  Up: Shell Commands
+File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: Looping Constructs,  Up: Compound Commands
 
 Conditional Constructs
-----------------------
+......................
 
 `if'
      The syntax of the `if' command is:
@@ -813,7 +845,8 @@ Conditional Constructs
      performed on the words between the `[[' and `]]'; tilde expansion,
      parameter and variable expansion, arithmetic expansion, command
      substitution, process substitution, and quote removal are
-     performed.
+     performed.  Conditional operators such as `-f' must be unquoted to
+     be recognized as primaries.
 
      When the `==' and `!=' operators are used, the string to the right
      of the operator is considered a pattern and matched according to
@@ -842,11 +875,12 @@ Conditional Constructs
      value of EXPRESSION1 is sufficient to determine the return value
      of the entire conditional expression.
 
+
 
-File: bashref.info,  Node: Command Grouping,  Prev: Conditional Constructs,  Up: Shell Commands
+File: bashref.info,  Node: Command Grouping,  Prev: Conditional Constructs,  Up: Compound Commands
 
 Grouping Commands
------------------
+.................
 
    Bash provides two ways to group a list of commands to be executed as
 a unit.  When commands are grouped, redirections may be applied to the
@@ -857,9 +891,10 @@ the list may be redirected to a single stream.
           ( LIST )
 
      Placing a list of commands between parentheses causes a subshell
-     to be created, and each of the commands in LIST to be executed in
-     that subshell.  Since the LIST is executed in a subshell, variable
-     assignments do not remain in effect after the subshell completes.
+     environment to be created (*note Command Execution Environment::),
+     and each of the commands in LIST to be executed in that subshell.
+     Since the LIST is executed in a subshell, variable assignments do
+     not remain in effect after the subshell completes.
 
 `{}'
           { LIST; }
@@ -892,40 +927,68 @@ name is executed.  Shell functions are executed in the current shell
 context; no new process is created to interpret them.
 
    Functions are declared using this syntax:
-     [ `function' ] NAME () { COMMAND-LIST; }
+     [ `function' ] NAME () COMPOUND-COMMAND [ REDIRECTIONS ]
 
    This defines a shell function named NAME.  The reserved word
 `function' is optional.  If the `function' reserved word is supplied,
-the parentheses are optional.  The BODY of the function is the
-COMMAND-LIST between { and }.  This list is executed whenever NAME is
-specified as the name of a command.  The exit status of a function is
-the exit status of the last command executed in the body.
+the parentheses are optional.  The BODY of the function is the compound
+command COMPOUND-COMMAND (*note Compound Commands::).  That command is
+usually a LIST enclosed between { and }, but may be any compound
+command listed above.  COMPOUND-COMMAND is executed whenever NAME is
+specified as the name of a command.  Any redirections (*note
+Redirections::) associated with the shell function are performed when
+the function is executed.
 
-   Note that for historical reasons, the curly braces that surround the
-body of the function must be separated from the body by `blank's or
-newlines.  This is because the braces are reserved words and are only
-recognized as such when they are separated by whitespace.  Also, the
-COMMAND-LIST must be terminated with a semicolon or a newline.
+   The exit status of a function definition is zero unless a syntax
+error occurs or a readonly function with the same name already exists.
+When executed, the exit status of a function is the exit status of the
+last command executed in the body.
+
+   Note that for historical reasons, in the most common usage the curly
+braces that surround the body of the function must be separated from
+the body by `blank's or newlines.  This is because the braces are
+reserved words and are only recognized as such when they are separated
+by whitespace.  Also, when using the braces, the LIST must be
+terminated by a semicolon, a `&', or a newline.
 
    When a function is executed, the arguments to the function become
 the positional parameters during its execution (*note Positional
 Parameters::).  The special parameter `#' that expands to the number of
 positional parameters is updated to reflect the change.  Positional
-parameter `0' is unchanged.  The `FUNCNAME' variable is set to the name
-of the function while the function is executing.
+parameter `0' is unchanged.  The first element of the `FUNCNAME'
+variable is set to the name of the function while the function is
+executing.  All other aspects of the shell execution environment are
+identical between a function and its caller with the exception that the
+`DEBUG' trap below) is not inherited unless the function has been given
+the `trace' attribute using the `declare' builtin or the `-o functrace'
+option has been enabled with the `set' builtin, (in which case all
+functions inherit the `DEBUG' trap).  *Note Bourne Shell Builtins::,
+for the description of the `trap' builtin.
 
    If the builtin command `return' is executed in a function, the
 function completes and execution resumes with the next command after
-the function call.  When a function completes, the values of the
-positional parameters and the special parameter `#' are restored to the
-values they had prior to the function's execution.  If a numeric
-argument is given to `return', that is the function's return status;
-otherwise the function's return status is the exit status of the last
-command executed before the `return'.
+the function call.  Any command associated with the `RETURN' trap is
+executed before execution resumes.  When a function completes, the
+values of the positional parameters and the special parameter `#' are
+restored to the values they had prior to the function's execution.  If
+a numeric argument is given to `return', that is the function's return
+status; otherwise the function's return status is the exit status of
+the last command executed before the `return'.
 
    Variables local to the function may be declared with the `local'
 builtin.  These variables are visible only to the function and the
 commands it invokes.
+
+   Function names and definitions may be listed with the `-f' option to
+the `declare' or `typeset' builtin commands (*note Bash Builtins::).
+The `-F' option to `declare' or `typeset' will list the function names
+only (and optionally the source file and line number, if the `extdebug'
+shell option is enabled).  Functions may be exported so that subshells
+automatically have them defined with the `-f' option to the `export'
+builtin (*note Bourne Shell Builtins::).  Note that shell functions and
+variables with the same name may result in multiple identically-named
+entries in the environment passed to the shell's children.  Care should
+be taken in cases where this may cause a problem.
 
    Functions may be recursive.  No limit is placed on the number of
 recursive  calls.
@@ -939,14 +1002,13 @@ Shell Parameters
 * Menu:
 
 * Positional Parameters::	The shell's command-line arguments.
-* Special Parameters::		Parameters with special meanings.
+* Special Parameters::		Parameters denoted by special characters.
 
    A PARAMETER is an entity that stores values.  It can be a `name', a
-number, or one of the special characters listed below.  For the shell's
-purposes, a VARIABLE is a parameter denoted by a `name'.  A variable
-has a VALUE and zero or more ATTRIBUTES.  Attributes are assigned using
-the `declare' builtin command (see the description of the `declare'
-builtin in *Note Bash Builtins::).
+number, or one of the special characters listed below.  A VARIABLE is a
+parameter denoted by a `name'.  A variable has a VALUE and zero or more
+ATTRIBUTES.  Attributes are assigned using the `declare' builtin command
+(see the description of the `declare' builtin in *Note Bash Builtins::).
 
    A parameter is set if it has been assigned a value.  The null string
 is a valid value.  Once a variable is set, it may be unset only by using
@@ -959,12 +1021,12 @@ If VALUE is not given, the variable is assigned the null string.  All
 VALUEs undergo tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal (detailed
 below).  If the variable has its `integer' attribute set, then VALUE is
-subject to arithmetic expansion even if the `$((...))' expansion is not
-used (*note Arithmetic Expansion::).  Word splitting is not performed,
-with the exception of `"$@"' as explained below.  Filename expansion is
-not performed.  Assignment statements may also appear as arguments to
-the `declare', `typeset', `export', `readonly', and `local' builtin
-commands.
+evaluated as an arithmetic expression even if the `$((...))' expansion
+is not used (*note Arithmetic Expansion::).  Word splitting is not
+performed, with the exception of `"$@"' as explained below.  Filename
+expansion is not performed.  Assignment statements may also appear as
+arguments to the `declare', `typeset', `export', `readonly', and
+`local' builtin commands.
 
 
 File: bashref.info,  Node: Positional Parameters,  Next: Special Parameters,  Up: Shell Parameters
@@ -1114,15 +1176,23 @@ Brace Expansion
 generated.  This mechanism is similar to FILENAME EXPANSION (*note
 Filename Expansion::), but the file names generated need not exist.
 Patterns to be brace expanded take the form of an optional PREAMBLE,
-followed by a series of comma-separated strings between a pair of
-braces, followed by an optional POSTSCRIPT.  The preamble is prefixed
-to each string contained within the braces, and the postscript is then
-appended to each resulting string, expanding left to right.
+followed by either a series of comma-separated strings or a sequnce
+expression between a pair of braces, followed by an optional POSTSCRIPT.
+The preamble is prefixed to each string contained within the braces, and
+the postscript is then appended to each resulting string, expanding left
+to right.
 
    Brace expansions may be nested.  The results of each expanded string
 are not sorted; left to right order is preserved.  For example,
      bash$ echo a{d,c,b}e
      ade ace abe
+
+   A sequence expression takes the form `{X..Y}', where X and Y are
+either integers or single characters.  When integers are supplied, the
+expression expands to each number between X and Y, inclusive.  When
+characters are supplied, the expression expands to each character
+lexicographically between X and Y, inclusive.  Note that both X and Y
+must be of the same type.
 
    Brace expansion is performed before any other expansions, and any
 characters special to other expansions are preserved in the result.  It
@@ -1132,8 +1202,13 @@ avoid conflicts with parameter expansion, the string `${' is not
 considered eligible for brace expansion.
 
    A correctly-formed brace expansion must contain unquoted opening and
-closing braces, and at least one unquoted comma.  Any incorrectly
-formed brace expansion is left unchanged.
+closing braces, and at least one unquoted comma or a valid sequence
+expression.  Any incorrectly formed brace expansion is left unchanged.
+
+   A { or `,' may be quoted with a backslash to prevent its being
+considered part of a brace expression.  To avoid conflicts with
+parameter expansion, the string `${' is not considered eligible for
+brace expansion.
 
    This construct is typically used as shorthand when the common prefix
 of the strings to be generated is longer than in the above example:
@@ -1205,6 +1280,7 @@ the expanded value.
 `~-N'
      The string that would be displayed by `dirs -N'
 
+
 
 File: bashref.info,  Node: Shell Parameter Expansion,  Next: Command Substitution,  Prev: Tilde Expansion,  Up: Shell Expansions
 
@@ -1233,8 +1309,10 @@ of variable indirection is introduced.  Bash uses the value of the
 variable formed from the rest of PARAMETER as the name of the variable;
 this variable is then expanded and that value is used in the rest of
 the substitution, rather than the value of PARAMETER itself.  This is
-known as `indirect expansion'.  The exception to this is the expansion
-of ${!PREFIX*} described below.
+known as `indirect expansion'.  The exceptions to this are the
+expansions of ${!PREFIX*} and ${!NAME[@]} described below.  The
+exclamation point must immediately follow the left brace in order to
+introduce indirection.
 
    In each of the cases below, WORD is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
@@ -1284,8 +1362,17 @@ if the colon is omitted, the operator tests only for existence.
      starts at 1.
 
 `${!PREFIX*}'
+`${!PREFIX@}'
      Expands to the names of variables whose names begin with PREFIX,
      separated by the first character of the `IFS' special variable.
+
+`${!NAME[@]}'
+`${!NAME[*]}'
+     If NAME is an array variable, expands to the list of array indices
+     (keys) assigned in NAME.  If NAME is not an array, expands to 0 if
+     NAME is set and null otherwise.  When `@' is used and the
+     expansion appears within double quotes, each key expands to a
+     separate word.
 
 `${#PARAMETER}'
      The length in characters of the expanded value of PARAMETER is
@@ -1340,6 +1427,7 @@ if the colon is omitted, the operator tests only for existence.
      member of the array in turn, and the expansion is the resultant
      list.
 
+
 
 File: bashref.info,  Node: Command Substitution,  Next: Arithmetic Expansion,  Prev: Shell Parameter Expansion,  Up: Shell Expansions
 
@@ -1387,8 +1475,7 @@ arithmetic expansion is:
    The expression is treated as if it were within double quotes, but a
 double quote inside the parentheses is not treated specially.  All
 tokens in the expression undergo parameter expansion, command
-substitution, and quote removal.  Arithmetic substitutions may be
-nested.
+substitution, and quote removal.  Arithmetic expansions may be nested.
 
    The evaluation is performed according to the rules listed below
 (*note Shell Arithmetic::).  If the expression is invalid, Bash prints
@@ -1485,12 +1572,12 @@ description of the `nocaseglob', `nullglob', and `dotglob' options.
 filenames matching a pattern.  If `GLOBIGNORE' is set, each matching
 filename that also matches one of the patterns in `GLOBIGNORE' is
 removed from the list of matches.  The filenames `.' and `..' are
-always ignored, even when `GLOBIGNORE' is set.  However, setting
-`GLOBIGNORE' has the effect of enabling the `dotglob' shell option, so
-all other filenames beginning with a `.' will match.  To get the old
-behavior of ignoring filenames beginning with a `.', make `.*' one of
-the patterns in `GLOBIGNORE'.  The `dotglob' option is disabled when
-`GLOBIGNORE' is unset.
+always ignored when `GLOBIGNORE' is set and not null.  However, setting
+`GLOBIGNORE' to a non-null value has the effect of enabling the
+`dotglob' shell option, so all other filenames beginning with a `.'
+will match.  To get the old behavior of ignoring filenames beginning
+with a `.', make `.*' one of the patterns in `GLOBIGNORE'.  The
+`dotglob' option is disabled when `GLOBIGNORE' is unset.
 
 
 File: bashref.info,  Node: Pattern Matching,  Up: Filename Expansion
@@ -1500,8 +1587,10 @@ Pattern Matching
 
    Any character that appears in a pattern, other than the special
 pattern characters described below, matches itself.  The NUL character
-may not occur in a pattern.  The special pattern characters must be
-quoted if they are to be matched literally.
+may not occur in a pattern.  A backslash escapes the following
+character; the escaping backslash is discarded when matching.  The
+special pattern characters must be quoted if they are to be matched
+literally.
 
    The special pattern characters have the following meanings:
 `*'
@@ -1642,6 +1731,7 @@ redirections, as described in the following table:
      If HOST is a valid hostname or Internet address, and PORT is an
      integer port number or service name, Bash attempts to open a UDP
      connection to the corresponding socket.
+
 
    A failure to open or create a file causes the redirection to fail.
 
@@ -1948,8 +2038,9 @@ inherited from the shell.
 
    * the file creation mode mask
 
-   * shell variables marked for export, along with variables exported
-     for the command, passed in the environment (*note Environment::)
+   * shell variables and functions marked for export, along with
+     variables exported for the command, passed in the environment
+     (*note Environment::)
 
    * traps caught by the shell are reset to the values inherited from
      the shell's parent, and traps ignored by the shell are ignored
@@ -1958,13 +2049,13 @@ inherited from the shell.
    A command invoked in this separate environment cannot affect the
 shell's execution environment.
 
-   Command substitution and asynchronous commands are invoked in a
-subshell environment that is a duplicate of the shell environment,
-except that traps caught by the shell are reset to the values that the
-shell inherited from its parent at invocation.  Builtin commands that
-are invoked as part of a pipeline are also executed in a subshell
-environment.  Changes made to the subshell environment cannot affect
-the shell's execution environment.
+   Command substitution, commands grouped with parentheses, and
+asynchronous commands are invoked in a subshell environment that is a
+duplicate of the shell environment, except that traps caught by the
+shell are reset to the values that the shell inherited from its parent
+at invocation.  Builtin commands that are invoked as part of a pipeline
+are also executed in a subshell environment.  Changes made to the
+subshell environment cannot affect the shell's execution environment.
 
    If a command is followed by a `&' and job control is not active, the
 default standard input for the command is the empty file `/dev/null'.
@@ -2206,11 +2297,19 @@ standard.
      Change the current working directory to DIRECTORY.  If DIRECTORY
      is not given, the value of the `HOME' shell variable is used.  If
      the shell variable `CDPATH' exists, it is used as a search path.
-     If DIRECTORY begins with a slash, `CDPATH' is not used.  The `-P'
-     option means to not follow symbolic links; symbolic links are
-     followed by default or with the `-L' option.  If DIRECTORY is `-',
-     it is equivalent to `$OLDPWD'.  The return status is zero if the
-     directory is successfully changed, non-zero otherwise.
+     If DIRECTORY begins with a slash, `CDPATH' is not used.
+
+     The `-P' option means to not follow symbolic links; symbolic links
+     are followed by default or with the `-L' option.  If DIRECTORY is
+     `-', it is equivalent to `$OLDPWD'.
+
+     If a non-empty directory name from `CDPATH' is used, or if `-' is
+     the first argument, and the directory change is successful, the
+     absolute pathname of the new working directory is written to the
+     standard output.
+
+     The return status is zero if the directory is successfully changed,
+     non-zero otherwise.
 
 `continue'
           continue [N]
@@ -2253,10 +2352,12 @@ standard.
      option means to no longer mark each NAME for export.  If no NAMES
      are supplied, or if the `-p' option is given, a list of exported
      names is displayed.  The `-p' option displays output in a form
-     that may be reused as input.  The return status is zero unless an
-     invalid option is supplied, one of the names is not a valid shell
-     variable name, or `-f' is supplied with a name that is not a shell
-     function.
+     that may be reused as input.  If a variable name is followed by
+     =VALUE, the value of the variable is set to VALUE.
+
+     The return status is zero unless an invalid option is supplied,
+     one of the names is not a valid shell variable name, or `-f' is
+     supplied with a name that is not a shell function.
 
 `getopts'
           getopts OPTSTRING NAME [ARGS]
@@ -2328,17 +2429,19 @@ standard.
      current directory or an invalid option is supplied.
 
 `readonly'
-          readonly [-apf] [NAME] ...
+          readonly [-apf] [NAME[=VALUE]] ...
      Mark each NAME as readonly.  The values of these names may not be
      changed by subsequent assignment.  If the `-f' option is supplied,
      each NAME refers to a shell function.  The `-a' option means each
      NAME refers to an array variable.  If no NAME arguments are given,
      or if the `-p' option is supplied, a list of all readonly names is
      printed.  The `-p' option causes output to be displayed in a
-     format that may be reused as input.  The return status is zero
-     unless an invalid option is supplied, one of the NAME arguments is
-     not a valid shell variable or function name, or the `-f' option is
-     supplied with a name that is not a shell function.
+     format that may be reused as input.  If a variable name is
+     followed by =VALUE, the value of the variable is set to VALUE.
+     The return status is zero unless an invalid option is supplied,
+     one of the NAME arguments is not a valid shell variable or
+     function name, or the `-f' option is supplied with a name that is
+     not a shell function.
 
 `return'
           return [N]
@@ -2348,9 +2451,10 @@ standard.
      terminate execution of a script being executed with the `.' (or
      `source') builtin, returning either N or the exit status of the
      last command executed within the script as the exit status of the
-     script.  The return status is non-zero if `return' is used outside
-     a function and not during the execution of a script by `.' or
-     `source'.
+     script.  Any command associated with the `RETURN' trap is executed
+     before execution resumes after the function or script.  The return
+     status is non-zero if `return' is used outside a function and not
+     during the execution of a script by `.' or `source'.
 
 `shift'
           shift [N]
@@ -2444,17 +2548,26 @@ standard.
      displays the trap commands associated with each SIGSPEC.  If no
      arguments are supplied, or only `-p' is given, `trap' prints the
      list of commands associated with each signal number in a form that
-     may be reused as shell input.  Each SIGSPEC is either a signal
-     name such as `SIGINT' (with or without the `SIG' prefix) or a
-     signal number.  If a SIGSPEC is `0' or `EXIT', ARG is executed
-     when the shell exits.  If a SIGSPEC is `DEBUG', the command ARG is
-     executed after every simple command.  If a SIGSPEC is `ERR', the
-     command ARG is executed whenever a simple command has a non-zero
-     exit status.  The `ERR' trap is not executed if the failed command
-     is part of an `until' or `while' loop, part of an `if' statement,
-     part of a `&&' or `||' list, or if the command's return status is
-     being inverted using `!'.  The `-l' option causes the shell to
+     may be reused as shell input.  The `-l' option causes the shell to
      print a list of signal names and their corresponding numbers.
+
+     Each SIGSPEC is either a signal name such as `SIGINT' (with or
+     without the `SIG' prefix) or a signal number.  If a SIGSPEC is `0'
+     or `EXIT', ARG is executed when the shell exits.  If a SIGSPEC is
+     `DEBUG', the command ARG is executed before every simple command,
+     `for' command, `case' command, `select' command, every arithmetic
+     `for' command, and before the first command executes in a shell
+     function.  Refer to the description of the `extglob' option to the
+     `shopt' builtin (*note Bash Builtins::) for details of its effect
+     on the `DEBUG' trap.  If a SIGSPEC is `ERR', the command ARG is
+     executed whenever a simple command has a non-zero exit status.
+     The `ERR' trap is not executed if the failed command is part of the
+     command list immediately following an `until' or `while' keyword,
+     part of the test in an `if' statement, part of a `&&' or `||'
+     list, or if the command's return status is being inverted using
+     `!'.  If a SIGSPEC is `RETURN', the command ARG is executed each
+     time a shell function or a script executed with the `.' or
+     `source' builtins finishes executing.
 
      Signals ignored upon entry to the shell cannot be trapped or reset.
      Trapped signals are reset to their original values in a child
@@ -2487,7 +2600,7 @@ standard.
      variable.  If the `-f' option is given, the NAMEs refer to shell
      functions, and the function definition is removed.  Readonly
      variables and functions may not be unset.  The return status is
-     zero unless a NAME does not exist or is readonly.
+     zero unless a NAME is readonly.
 
 
 File: bashref.info,  Node: Bash Builtins,  Next: The Set Builtin,  Prev: Bourne Shell Builtins,  Up: Shell Builtin Commands
@@ -2576,6 +2689,7 @@ POSIX 1003.2 standard.
     `-x KEYSEQ:SHELL-COMMAND'
           Cause SHELL-COMMAND to be executed whenever KEYSEQ is entered.
 
+
      The return status is zero unless an invalid option is supplied or
      an error occurs.
 
@@ -2586,6 +2700,23 @@ POSIX 1003.2 standard.
      as a shell builtin, retaining the functionality of the builtin
      within the function.  The return status is non-zero if
      SHELL-BUILTIN is not a shell builtin command.
+
+`caller'
+          caller [EXPR]
+     Returns the context of any active subroutine call (a shell
+     function or a script executed with the `.' or `source' builtins.
+
+     Without EXPR, `caller' displays the line number and source
+     filename of the current subroutine call.  If a non-negative
+     integer is supplied as EXPR, `caller' displays the line number,
+     subroutine name, and source file corresponding to that position in
+     the current execution call stack.  This extra information may be
+     used, for example, to print a stack trace.  The current frame is
+     frame 0.
+
+     The return value is 0 unless the shell is not executing a
+     subroutine call or EXPR does not correspond to a valid position in
+     the call stack.
 
 `command'
           command [-pVv] COMMAND [ARGUMENTS ...]
@@ -2607,7 +2738,7 @@ POSIX 1003.2 standard.
      non-zero if not.
 
 `declare'
-          declare [-afFirtx] [-p] [NAME[=VALUE]]
+          declare [-afFirtx] [-p] [NAME[=VALUE] ...]
 
      Declare variables and give them attributes.  If no NAMEs are
      given, then display the values of variables instead.
@@ -2615,9 +2746,12 @@ POSIX 1003.2 standard.
      The `-p' option will display the attributes and values of each
      NAME.  When `-p' is used, additional options are ignored.  The
      `-F' option inhibits the display of function definitions; only the
-     function name and attributes are printed.  `-F' implies `-f'.  The
-     following options can be used to restrict output to variables with
-     the specified attributes or to give variables attributes:
+     function name and attributes are printed.  If the `extdebug' shell
+     option is enabled using `shopt' (*note Bash Builtins::), the
+     source file name and line number where the function is defined are
+     displayed as well.  `-F' implies `-f'.  The following options can
+     be used to restrict output to variables with the specified
+     attributes or to give variables attributes:
 
     `-a'
           Each NAME is an array variable (*note Arrays::).
@@ -2645,7 +2779,8 @@ POSIX 1003.2 standard.
 
      Using `+' instead of `-' turns off the attribute instead.  When
      used in a function, `declare' makes each NAME local, as with the
-     `local' command.
+     `local' command.  If a variable name is followed by =VALUE, the
+     value of the variable is set to VALUE.
 
      The return status is zero unless an invalid option is encountered,
      an attempt is made to define a function using `-f foo=bar', an
@@ -2755,7 +2890,7 @@ POSIX 1003.2 standard.
      evaluates to 0, `let' returns 1; otherwise 0 is returned.
 
 `local'
-          local [OPTION] NAME[=VALUE]
+          local [OPTION] NAME[=VALUE] ...
      For each argument, a local variable named NAME is created, and
      assigned VALUE.  The OPTION can be any of the options accepted by
      `declare'.  `local' can only be used within a function; it makes
@@ -2848,6 +2983,7 @@ POSIX 1003.2 standard.
     `-u FD'
           Read input from file descriptor FD.
 
+
 `shopt'
           shopt [-pqsu] [-o] [OPTNAME ...]
      Toggle the values of variables controlling optional shell behavior.
@@ -2927,9 +3063,42 @@ POSIX 1003.2 standard.
           *Note Aliases::.  This option is enabled by default for
           interactive shells.
 
+    `extdebug'
+          If set, behavior intended for use by debuggers is enabled:
+
+            1. The `-F' option to the `declare' builtin (*note Bash
+               Builtins::) displays the source file name and line
+               number corresponding to each function name supplied as
+               an argument.
+
+            2. If the command run by the `DEBUG' trap returns a
+               non-zero value, the next command is skipped and not
+               executed.
+
+            3. If the command run by the `DEBUG' trap returns a value
+               of 2, and the shell is executing in a subroutine (a
+               shell function or a shell script executed by the `.' or
+               `source' builtins), a call to `return' is simulated.
+
     `extglob'
           If set, the extended pattern matching features described above
           (*note Pattern Matching::) are enabled.
+
+    `extquote'
+          If set, `$'STRING'' and `$"STRING"' quoting is performed
+          within `${PARAMETER}' expansions enclosed in double quotes.
+          This option is enabled by default.
+
+    `force_fignore'
+          If set, the suffixes specified by the `FIGNORE' shell variable
+          cause words to be ignored when performing word completion
+          even if the ignored words are the only possible completions.
+          *Note Bash Variables::, for a description of `FIGNORE'.  This
+          option is enabled by default.
+
+    `gnu_errfmt'
+          If set, shell error messages are written in the standard GNU
+          error message format.
 
     `histappend'
           If set, the history list is appended to the file named by the
@@ -2994,8 +3163,9 @@ POSIX 1003.2 standard.
           enabled by default.
 
     `promptvars'
-          If set, prompt strings undergo variable and parameter
-          expansion after being expanded (*note Printing a Prompt::).
+          If set, prompt strings undergo parameter expansion, command
+          substitution, arithmetic expansion, and quote removal after
+          being expanded as described below (*note Printing a Prompt::).
           This option is enabled by default.
 
     `restricted_shell'
@@ -3018,6 +3188,7 @@ POSIX 1003.2 standard.
     `xpg_echo'
           If set, the `echo' builtin expands backslash-escape sequences
           by default.
+
 
      The return status when listing options is zero if all OPTNAMES are
      enabled, non-zero otherwise.  When setting or unsetting options,
@@ -3060,7 +3231,7 @@ POSIX 1003.2 standard.
      if none are found.
 
 `typeset'
-          typeset [-afFrxi] [-p] [NAME[=VALUE]]
+          typeset [-afFrxi] [-p] [NAME[=VALUE] ...]
      The `typeset' command is supplied for compatibility with the Korn
      shell; however, it has been deprecated in favor of the `declare'
      builtin command.
@@ -3112,6 +3283,7 @@ POSIX 1003.2 standard.
     `-v'
           The maximum amount of virtual memory available to the process.
 
+
      If LIMIT is given, it is the new value of the specified resource;
      the special LIMIT values `hard', `soft', and `unlimited' stand for
      the current hard limit, the current soft limit, and no limit,
@@ -3131,6 +3303,7 @@ POSIX 1003.2 standard.
 
      Remove each NAME from the list of aliases.  If `-a' is supplied,
      all aliases are removed.  Aliases are described in *Note Aliases::.
+
 
 
 File: bashref.info,  Node: The Set Builtin,  Next: Special Builtins,  Prev: Bash Builtins,  Up: Shell Builtin Commands
@@ -3162,10 +3335,11 @@ The Set Builtin
     `-e'
           Exit immediately if a simple command (*note Simple
           Commands::) exits with a non-zero status, unless the command
-          that fails is part of an `until' or `while' loop, part of an
-          `if' statement, part of a `&&' or `||' list, or if the
-          command's return status is being inverted using `!'.  A trap
-          on `ERR', if set, is executed before the shell exits.
+          that fails is part of the command list immediately following
+          a `while' or `until' keyword, part of the test in an `if'
+          statement, part of a `&&' or `||' list, or if the command's
+          return status is being inverted using `!'.  A trap on `ERR',
+          if set, is executed before the shell exits.
 
     `-f'
           Disable file name generation (globbing).
@@ -3202,6 +3376,12 @@ The Set Builtin
 
          `errexit'
                Same as `-e'.
+
+         `errtrace'
+               Same as `-E'.
+
+         `functrace'
+               Same as `-T'.
 
          `hashall'
                Same as `-h'.
@@ -3290,8 +3470,13 @@ The Set Builtin
           Print shell input lines as they are read.
 
     `-x'
-          Print a trace of simple commands and their arguments after
-          they are expanded and before they are executed.
+          Print a trace of simple commands, \fBfor\fP commands,
+          \fBcase\fP commands, \fBselect\fP commands, and arithmetic
+          \fBfor\fP commands and their arguments or associated word
+          lists after they are expanded and before they are executed.
+          The value of the `PS4' variable is expanded and the resultant
+          value is printed before the command and its expanded
+          arguments.
 
     `-B'
           The shell will perform brace expansion (*note Brace
@@ -3300,6 +3485,12 @@ The Set Builtin
     `-C'
           Prevent output redirection using `>', `>&', and `<>' from
           overwriting existing files.
+
+    `-E'
+          If set, any trap on `ERR' is inherited by shell functions,
+          command substitutions, and commands executed in a subshell
+          environment.  The `ERR' trap is normally not inherited in
+          such cases.
 
     `-H'
           Enable `!' style history substitution (*note History
@@ -3325,6 +3516,12 @@ The Set Builtin
                /usr/local/sys
                $ cd ..; pwd
                /usr/local
+
+    `-T'
+          If set, any trap on `DEBUG' is inherited by shell functions,
+          command substitutions, and commands executed in a subshell
+          environment.  The `DEBUG' trap is normally not inherited in
+          such cases.
 
     `--'
           If no arguments follow this option, then the positional
@@ -3436,7 +3633,9 @@ shell.  In some cases, Bash assigns a default value to the variable.
 
 `PATH'
      A colon-separated list of directories in which the shell looks for
-     commands.
+     commands.  A zero-length (null) directory name in the value of
+     `PATH' indicates the current directory.  A null directory name may
+     appear as two adjacent colons, or as an initial or trailing colon.
 
 `PS1'
      The primary prompt string.  The default value is `\s-\v\$ '.
@@ -3445,6 +3644,7 @@ shell.  In some cases, Bash assigns a default value to the variable.
 
 `PS2'
      The secondary prompt string.  The default value is `> '.
+
 
 
 File: bashref.info,  Node: Bash Variables,  Prev: Bourne Shell Variables,  Up: Shell Variables
@@ -3462,14 +3662,50 @@ Variables::).
 `BASH'
      The full pathname used to execute the current instance of Bash.
 
+`BASH_ARGC'
+     An array variable whose values are the number of parameters in each
+     frame of the current bash execution call stack.  The number of
+     parameters to the current subroutine (shell function or script
+     executed with `.' or `source') is at the top of the stack.  When a
+     subroutine is executed, the number of parameters passed is pushed
+     onto `BASH_ARGC'.
+
+`BASH_ARGV'
+     An array variable containing all of the parameters in the current
+     bash execution call stack.  The final parameter of the last
+     subroutine call is at the top of the stack; the first parameter of
+     the initial call is at the bottom.  When a subroutine is executed,
+     the parameters supplied are pushed onto `BASH_ARGV'.
+
+`BASH_COMMAND'
+     The command currently being executed or about to be executed,
+     unless the shell is executing a command as the result of a trap,
+     in which case it is the command executing at the time of the trap.
+
 `BASH_ENV'
      If this variable is set when Bash is invoked to execute a shell
      script, its value is expanded and used as the name of a startup
      file to read before executing the script.  *Note Bash Startup
      Files::.
 
-`BASH_VERSION'
-     The version number of the current instance of Bash.
+`BASH_EXECUTION_STRING'
+     The command argument to the `-c' invocation option.
+
+`BASH_LINENO'
+     An array variable whose members are the line numbers in source
+     files corresponding to each member of FUNCNAME.
+     `${BASH_LINENO[$i]}' is the line number in the source file where
+     `${FUNCNAME[$i + 1]}' was called.  The corresponding source file
+     name is `${BASH_SOURCE[$i + 1]}'.  Use `LINENO' to obtain the
+     current line number.
+
+`BASH_SOURCE'
+     An array variable whose members are the source filenames
+     corresponding to the elements in the `FUNCNAME' array variable.
+
+`BASH_SUBSHELL'
+     Incremented by one each time a subshell or subshell environment is
+     spawned.  The initial value is 0.
 
 `BASH_VERSINFO'
      A readonly array variable (*note Arrays::) whose members hold
@@ -3493,6 +3729,10 @@ Variables::).
 
     `BASH_VERSINFO[5]'
           The value of `MACHTYPE'.
+
+
+`BASH_VERSION'
+     The version number of the current instance of Bash.
 
 `COLUMNS'
      Used by the `select' builtin command to determine the terminal
@@ -3518,6 +3758,12 @@ Variables::).
      functions and external commands invoked by the programmable
      completion facilities (*note Programmable Completion::).
 
+`COMP_WORDBREAKS'
+     The set of characters that the Readline library treats as word
+     separators when performing word completion.  If `COMP_WORDBREAKS'
+     is unset, it loses its special properties, even if it is
+     subsequently reset.
+
 `COMP_WORDS'
      An array variable consisting of the individual words in the
      current command line.  This variable is available only in shell
@@ -3539,6 +3785,11 @@ Variables::).
      the current directory.  If `DIRSTACK' is unset, it loses its
      special properties, even if it is subsequently reset.
 
+`EMACS'
+     If Bash finds this variable in the environment when the shell
+     starts with value `t', it assumes that the shell is running in an
+     emacs shell buffer and disables line editing.
+
 `EUID'
      The numeric effective user id of the current user.  This variable
      is readonly.
@@ -3554,11 +3805,13 @@ Variables::).
      names.  A sample value is `.o:~'
 
 `FUNCNAME'
-     The name of any currently-executing shell function.  This variable
-     exists only when a shell function is executing.  Assignments to
-     `FUNCNAME' have no effect and return an error status.  If
-     `FUNCNAME' is unset, it loses its special properties, even if it
-     is subsequently reset.
+     An array variable containing the names of all shell functions
+     currently in the execution call stack.  The element with index 0
+     is the name of any currently-executing shell function.  The
+     bottom-most element is "main".  This variable exists only when a
+     shell function is executing.  Assignments to `FUNCNAME' have no
+     effect and return an error status.  If `FUNCNAME' is unset, it
+     loses its special properties, even if it is subsequently reset.
 
 `GLOBIGNORE'
      A colon-separated list of patterns defining the set of filenames to
@@ -3593,14 +3846,20 @@ Variables::).
      even if it is subsequently reset.
 
 `HISTCONTROL'
-     A value of `ignorespace' means to not enter lines which begin with
-     a space or tab into the history list.  A value of `ignoredups'
-     means to not enter lines which match the last entered line.  A
-     value of `ignoreboth' combines the two options.  Unset, or set to
-     any other value than those above, means to save all lines on the
-     history list.  The second and subsequent lines of a multi-line
-     compound command are not tested, and are added to the history
-     regardless of the value of `HISTCONTROL'.
+     A colon-separated list of values controlling how commands are
+     saved on the history list.  If the list of values includes
+     `ignorespace', lines which begin with a space character are not
+     saved in the history list.  A value of `ignoredups' causes lines
+     which match the previous history entry to not be saved.  A value
+     of `ignoreboth' is shorthand for `ignorespace' and `ignoredups'.
+     A value of `erasedups' causes all previous lines matching the
+     current line to be removed from the history list before that line
+     is saved.  Any value not in the above list is ignored.  If
+     `HISTCONTROL' is unset, or does not include a valid value, all
+     lines read by the shell parser are saved on the history list,
+     subject to the value of `HISTIGNORE'.  The second and subsequent
+     lines of a multi-line compound command are not tested, and are
+     added to the history regardless of the value of `HISTCONTROL'.
 
 `HISTFILE'
      The name of the file to which the command history is saved.  The
@@ -3635,6 +3894,13 @@ Variables::).
 `HISTSIZE'
      The maximum number of commands to remember on the history list.
      The default value is 500.
+
+`HISTTIMEFORMAT'
+     If this variable is set and not null, its value is used as a
+     format string for STRFTIME to print the time stamp associated with
+     each history entry displayed by the `history' builtin.  If this
+     variable is set, time stamps are written to the history file so
+     they may be preserved across shell sessions.
 
 `HOSTFILE'
      Contains the name of a file in the same format as `/etc/hosts' that
@@ -3845,6 +4111,7 @@ Variables::).
      The numeric real user id of the current user.  This variable is
      readonly.
 
+
 
 File: bashref.info,  Node: Bash Features,  Next: Job Control,  Prev: Shell Variables,  Up: Top
 
@@ -3884,6 +4151,13 @@ Invoking Bash
 (*note The Set Builtin::), there are several multi-character options
 that you can use.  These options must appear on the command line before
 the single-character options to be recognized.
+
+`--debugger'
+     Arrange for the debugger profile to be executed before the shell
+     starts.  Turns on extended debugging mode (see *Note Bash
+     Builtins:: for a description of the `extdebug' option to the
+     `shopt' builtin) and shell function tracing (see *Note The Set
+     Builtin:: for a description of the `-o functrace' option).
 
 `--dump-po-strings'
      A list of all double-quoted strings preceded by `$' is printed on
@@ -3935,6 +4209,7 @@ the single-character options to be recognized.
      Show version information for this instance of Bash on the standard
      output and exit successfully.
 
+
    There are several single-character options that may be supplied at
 invocation which are not available with the `set' builtin.
 
@@ -3985,6 +4260,7 @@ invocation which are not available with the `set' builtin.
      A `--' signals the end of options and disables further option
      processing.  Any arguments after the `--' are treated as filenames
      and arguments.
+
 
    A _login_ shell is one whose first character of argument zero is
 `-', or one invoked with the `--login' option.
@@ -4377,6 +4653,7 @@ checked.  If the FILE argument to one of the primaries is one of
      greater than or equal to ARG2, respectively.  ARG1 and ARG2 may be
      positive or negative integers.
 
+
 
 File: bashref.info,  Node: Shell Arithmetic,  Next: Aliases,  Prev: Bash Conditional Expressions,  Up: Bash Features
 
@@ -4384,14 +4661,15 @@ Shell Arithmetic
 ================
 
    The shell allows arithmetic expressions to be evaluated, as one of
-the shell expansions or by the `let' builtin.
+the shell expansions or by the `let' and the `-i' option to the
+`declare' builtins.
 
    Evaluation is done in fixed-width integers with no check for
 overflow, though division by 0 is trapped and flagged as an error.  The
-operators and their precedence and associativity are the same as in the
-C language.  The following list of operators is grouped into levels of
-equal-precedence operators.  The levels are listed in order of
-decreasing precedence.
+operators and their precedence, associativity, and values are the same
+as in the C language.  The following list of operators is grouped into
+levels of equal-precedence operators.  The levels are listed in order
+of decreasing precedence.
 
 `ID++ ID--'
      variable post-increment and post-decrement
@@ -4439,7 +4717,7 @@ decreasing precedence.
      logical OR
 
 `expr ? expr : expr'
-     conditional evaluation
+     conditional operator
 
 `= *= /= %= += -= <<= >>= &= ^= |='
      assignment
@@ -4450,9 +4728,13 @@ decreasing precedence.
    Shell variables are allowed as operands; parameter expansion is
 performed before the expression is evaluated.  Within an expression,
 shell variables may also be referenced by name without using the
-parameter expansion syntax.  The value of a variable is evaluated as an
-arithmetic expression when it is referenced.  A shell variable need not
-have its integer attribute turned on to be used in an expression.
+parameter expansion syntax.  A shell variable that is null or unset
+evaluates to 0 when referenced by name without using the parameter
+expansion syntax.  The value of a variable is evaluated as an
+arithmetic expression when it is referenced, or when a variable which
+has been given the INTEGER attribute using `declare -i' is assigned a
+value.  A null value evaluates to 0.  A shell variable need not have
+its integer attribute turned on to be used in an expression.
 
    Constants with a leading 0 are interpreted as octal numbers.  A
 leading `0x' or `0X' denotes hexadecimal.  Otherwise, numbers take the
@@ -4688,6 +4970,7 @@ Directory Stack Builtins
           Makes the current working directory be the top of the stack,
           and then executes the equivalent of ``cd' DIR'.  `cd's to DIR.
 
+
 
 File: bashref.info,  Node: Printing a Prompt,  Next: The Restricted Shell,  Prev: The Directory Stack,  Up: Bash Features
 
@@ -4883,20 +5166,20 @@ startup files.
      performed on the values of `PS1' and `PS2' regardless of the
      setting of the `promptvars' option.
 
-  6. Interactive comments are enabled by default.  (Bash has them on by
-     default anyway.)
-
-  7. The POSIX 1003.2 startup files are executed (`$ENV') rather than
+  6. The POSIX 1003.2 startup files are executed (`$ENV') rather than
      the normal Bash files.
 
-  8. Tilde expansion is only performed on assignments preceding a
+  7. Tilde expansion is only performed on assignments preceding a
      command name, rather than on all assignment statements on the line.
 
-  9. The default history file is `~/.sh_history' (this is the default
+  8. The default history file is `~/.sh_history' (this is the default
      value of `$HISTFILE').
 
- 10. The output of `kill -l' prints all the signal names on a single
-     line, separated by spaces.
+  9. The output of `kill -l' prints all the signal names on a single
+     line, separated by spaces, without the `SIG' prefix.
+
+ 10. The `kill' builtin does not accept signal names with a `SIG'
+     prefix.
 
  11. Non-interactive shells exit if FILENAME in `.' FILENAME is not
      found.
@@ -4957,23 +5240,33 @@ startup files.
 
  26. The `trap' builtin displays signal names without the leading `SIG'.
 
- 27. The `.' and `source' builtins do not search the current directory
+ 27. The `trap' builtin doesn't check the first argument for a possible
+     signal specification and revert the signal handling to the original
+     disposition if it is.  If users want to reset the handler for a
+     given signal to the original disposition, they should use `-' as
+     the first argument.
+
+ 28. The `.' and `source' builtins do not search the current directory
      for the filename argument if it is not found by searching `PATH'.
 
- 28. Subshells spawned to execute command substitutions inherit the
+ 29. Subshells spawned to execute command substitutions inherit the
      value of the `-e' option from the parent shell.  When not in POSIX
      mode, Bash clears the `-e' option in such subshells.
 
- 29. Alias expansion is always enabled, even in non-interactive shells.
+ 30. Alias expansion is always enabled, even in non-interactive shells.
 
- 30. When the `set' builtin is invoked without options, it does not
+ 31. When the `alias' builtin displays alias definitions, it does not
+     display them with a leading `alias ' unless the `-p' option is
+     supplied.
+
+ 32. When the `set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
- 31. When the `set' builtin is invoked without options, it displays
+ 33. When the `set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
- 32. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
+ 34. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from `$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, `cd' will fail
      instead of falling back to PHYSICAL mode.
@@ -5193,6 +5486,7 @@ Job Control Builtins
      signal.  The `-f' option means to suspend even if the shell is a
      login shell.
 
+
    When job control is not active, the `kill' and `wait' builtins do
 not accept JOBSPEC arguments.  They must be supplied process IDs.
 
@@ -5218,6 +5512,7 @@ Job Control Variables
      Basics::).  If set to any other value, the supplied string must be
      a prefix of a stopped job's name; this provides functionality
      analogous to the `%' job ID.
+
 
 
 File: bashref.info,  Node: Command Line Editing,  Next: Installing Bash,  Prev: Using History Interactively,  Up: Top
@@ -5425,6 +5720,7 @@ available to be yanked back later, when you are typing another line.
      Kill from the cursor to the previous whitespace.  This is
      different than `M-<DEL>' because the word boundaries differ.
 
+
    Here is how to "yank" the text back into the line.  Yanking means to
 copy the most-recently-killed text from the kill buffer.
 
@@ -5579,12 +5875,12 @@ Variable Settings
 
     `completion-query-items'
           The number of possible completions that determines when the
-          user is asked whether he wants to see the list of
-          possibilities.  If the number of possible completions is
-          greater than this value, Readline will ask the user whether
-          or not he wishes to view them; otherwise, they are simply
-          listed.  This variable must be set to an integer value
-          greater than or equal to 0.  The default limit is `100'.
+          user is asked whether the list of possibilities should be
+          displayed.  If the number of possible completions is greater
+          than this value, Readline will ask the user whether or not he
+          wishes to view them; otherwise, they are simply listed.  This
+          variable must be set to an integer value greater than or
+          equal to 0.  The default limit is `100'.
 
     `convert-meta'
           If set to `on', Readline will convert characters with the
@@ -5613,7 +5909,7 @@ Variable Settings
           attempts word completion.  The default is `off'.
 
           If set to `on', the history code attempts to place point at
-          the same location on each history line retrived with
+          the same location on each history line retrieved with
           `previous-history' or `next-history'.
 
     `horizontal-scroll-mode'
@@ -5688,10 +5984,20 @@ Variable Settings
           completion cause the matches to be listed immediately instead
           of ringing the bell.  The default value is `off'.
 
+    `show-all-if-unmodified'
+          This alters the default behavior of the completion functions
+          in a fashion similar to SHOW-ALL-IF-AMBIGUOUS.  If set to
+          `on', words which have more than one possible completion
+          without any possible partial completion (the possible
+          completions don't share a common prefix) cause the matches to
+          be listed immediately instead of ringing the bell.  The
+          default value is `off'.
+
     `visible-stats'
           If set to `on', a character denoting a file's type is
           appended to the filename when listing possible completions.
           The default is `off'.
+
 
 Key Bindings
      The syntax for controlling key bindings in the init file is
@@ -5746,6 +6052,7 @@ Key Bindings
           `C-x C-r' is bound to the function `re-read-init-file', and
           `<ESC> <[> <1> <1> <~>' is bound to insert the text `Function
           Key 1'.
+
 
      The following GNU Emacs style escape sequences are available when
      specifying key sequences:
@@ -5811,6 +6118,7 @@ Key Bindings
      the following binding will make `C-x \' insert a single `\' into
      the line:
           "\C-x\\": "\\"
+
 
 
 File: bashref.info,  Node: Conditional Init Constructs,  Next: Sample Init File,  Prev: Readline Init File Syntax,  Up: Readline Init File
@@ -6043,6 +6351,7 @@ Commands For Moving
 `redraw-current-line ()'
      Refresh the current line.  By default, this is unbound.
 
+
 
 File: bashref.info,  Node: Commands For History,  Next: Commands For Text,  Prev: Commands For Moving,  Up: Bindable Readline Commands
 
@@ -6113,6 +6422,7 @@ Commands For Manipulating The History
      through the history list, inserting the last argument of each line
      in turn.
 
+
 
 File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev: Commands For History,  Up: Bindable Readline Commands
 
@@ -6176,6 +6486,7 @@ Commands For Changing Text
      before point with a space.
 
      By default, this command is unbound.
+
 
 
 File: bashref.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: Commands For Text,  Up: Bindable Readline Commands
@@ -6352,6 +6663,7 @@ Letting Readline Type For You
      completions enclosed within braces so the list is available to the
      shell (*note Brace Expansion::).
 
+
 
 File: bashref.info,  Node: Keyboard Macros,  Next: Miscellaneous Commands,  Prev: Commands For Completion,  Up: Bindable Readline Commands
 
@@ -6368,6 +6680,7 @@ Keyboard Macros
 `call-last-kbd-macro (C-x e)'
      Re-execute the last keyboard macro defined, by making the
      characters in the macro appear as if typed at the keyboard.
+
 
 
 File: bashref.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up: Bindable Readline Commands
@@ -6503,6 +6816,7 @@ Some Miscellaneous Commands
      result as shell commands.  Bash attempts to invoke `$FCEDIT',
      `$EDITOR', and `emacs' as the editor, in that order.
 
+
 
 File: bashref.info,  Node: Readline vi Mode,  Next: Programmable Completion,  Prev: Bindable Readline Commands,  Up: Command Line Editing
 
@@ -6611,12 +6925,19 @@ completions.
 the `-o dirnames' option was supplied to `complete' when the compspec
 was defined, directory name completion is attempted.
 
+   If the `-o plusdirs' option was supplied to `complete' when the
+compspec was defined, directory name completion is attempted and any
+matches are added to the results of the other actions.
+
    By default, if a compspec is found, whatever it generates is
 returned to the completion code as the full set of possible completions.
 The default Bash completions are not attempted, and the Readline default
-of filename completion is disabled.  If the `-o default' option was
-supplied to `complete' when the compspec was defined, Readline's
-default completion will be performed if the compspec generates no
+of filename completion is disabled.  If the `-o bashdefault' option was
+supplied to `complete' when the compspec was defined, the default Bash
+completions are attempted if the compspec generates no matches.  If the
+`-o default' option was supplied to `complete' when the compspec was
+defined, Readline's default completion will be performed if the
+compspec (and, if attempted, the default Bash completions) generate no
 matches.
 
    When a compspec indicates that directory name completion is desired,
@@ -6679,6 +7000,10 @@ completion facilities.
           behavior beyond the simple generation of completions.
           COMP-OPTION may be one of:
 
+         `bashdefault'
+               Perform the rest of the default Bash completions if the
+               compspec generates no matches.
+
          `default'
                Use Readline's default filename completion if the
                compspec generates no matches.
@@ -6689,7 +7014,7 @@ completion facilities.
 
          `filenames'
                Tell Readline that the compspec generates filenames, so
-               it can perform any filename\-specific processing (like
+               it can perform any filename-specific processing (like
                adding a slash to directory names or suppressing
                trailing spaces).  This option is intended to be used
                with shell functions specified with `-F'.
@@ -6824,6 +7149,7 @@ completion facilities.
      for a NAME for which no specification exists, or an error occurs
      adding a completion specification.
 
+
 
 File: bashref.info,  Node: Using History Interactively,  Next: Command Line Editing,  Prev: Job Control,  Up: Top
 
@@ -6872,6 +7198,9 @@ file is unwritable, the history is not saved.  After saving the
 history, the history file is truncated to contain no more than
 `$HISTFILESIZE' lines.  If `HISTFILESIZE' is not set, no truncation is
 performed.
+
+   If the `HISTTIMEFORMAT' is set, the time stamp information
+associated with each history entry is written to the history file.
 
    The builtin command `fc' may be used to list or edit and re-execute
 a portion of the history list.  The `history' builtin may be used to
@@ -6937,8 +7266,13 @@ and history file.
 
      With no options, display the history list with line numbers.
      Lines prefixed with a `*' have been modified.  An argument of N
-     lists only the last N lines.  Options, if supplied, have the
-     following meanings:
+     lists only the last N lines.  If the shell variable
+     `HISTTIMEFORMAT' is set and not null, it is used as a format
+     string for STRFTIME to display the time stamp associated with each
+     displayed history entry.  No intervening blank is printed between
+     the formatted time stamp and the history line.
+
+     Options, if supplied, have the following meanings:
 
     `-c'
           Clear the history list.  This may be combined with the other
@@ -6974,9 +7308,11 @@ and history file.
           The ARGs are added to the end of the history list as a single
           entry.
 
+
      When any of the `-w', `-r', `-a', or `-n' options is used, if
      FILENAME is given, then it is used as the history file.  If not,
      then the value of the `HISTFILE' variable is used.
+
 
 
 File: bashref.info,  Node: History Interaction,  Prev: Bash History Builtins,  Up: Using History Interactively
@@ -7040,7 +7376,8 @@ history list.
 
 `!'
      Start a history substitution, except when followed by a space, tab,
-     the end of the line, `=' or `('.
+     the end of the line, `=' or `(' (when the `extglob' shell option
+     is enabled using the `shopt' builtin).
 
 `!N'
      Refer to command line N.
@@ -7065,6 +7402,7 @@ history list.
 
 `!#'
      The entire command line typed so far.
+
 
 
 File: bashref.info,  Node: Word Designators,  Next: Modifiers,  Prev: Event Designators,  Up: History Interaction
@@ -7124,6 +7462,7 @@ line separated by single spaces.
 `X-'
      Abbreviates `X-$' like `X*', but omits the last word.
 
+
    If a word designator is supplied without an event specification, the
 previous command is used as the event.
 
@@ -7171,8 +7510,13 @@ more of the following modifiers, each preceded by a `:'.
      Repeat the previous substitution.
 
 `g'
+`a'
      Cause changes to be applied over the entire event line.  Used in
      conjunction with `s', as in `gs/OLD/NEW/', or with `&'.
+
+`G'
+     Apply the following `s' modifier once to each word in the event.
+
 
 
 File: bashref.info,  Node: Installing Bash,  Next: Reporting Bugs,  Prev: Command Line Editing,  Up: Top
@@ -7184,7 +7528,7 @@ Installing Bash
 various supported platforms.  The distribution supports the GNU
 operating systems, nearly every version of Unix, and several non-Unix
 systems such as BeOS and Interix.  Other independent ports exist for
-MS-DOS, OS/2, Windows 95/98, and Windows NT.
+MS-DOS, OS/2, and Windows platforms.
 
 * Menu:
 
@@ -7554,6 +7898,10 @@ does not provide the necessary support.
      This enables the job control features (*note Job Control::), if
      the operating system supports them.
 
+`--enable-multibyte'
+     This enables support for multibyte characters if the operating
+     system provides the necessary support.
+
 `--enable-net-redirections'
      This enables the special handling of filenames of the form
      `/dev/tcp/HOST/PORT' and `/dev/udp/HOST/PORT' when used in
@@ -7598,6 +7946,7 @@ does not provide the necessary support.
      Specification, version 2.  *Note Bash Builtins::, for a
      description of the escape sequences that `echo' recognizes.
 
+
    The file `config-top.h' contains C Preprocessor `#define' statements
 for options which are not settable from `configure'.  Some of these are
 not meant to be changed; beware of the consequences if you do.  Read
@@ -7612,7 +7961,8 @@ Reporting Bugs
 
    Please report all bugs you find in Bash.  But first, you should make
 sure that it really is a bug, and that it appears in the latest version
-of Bash that you have.
+of Bash.  The latest version of Bash is always available for FTP from
+`ftp://ftp.gnu.org/pub/bash/'.
 
    Once you have determined that a bug actually exists, use the
 `bashbug' command to submit a bug report.  If you have a fix, you are
@@ -7638,7 +7988,7 @@ it provides for filing a bug report.
    Please send all reports concerning this manual to <chet@po.CWRU.Edu>.
 
 
-File: bashref.info,  Node: Major Differences From The Bourne Shell,  Next: Builtin Index,  Prev: Reporting Bugs,  Up: Top
+File: bashref.info,  Node: Major Differences From The Bourne Shell,  Next: Copying This Manual,  Prev: Reporting Bugs,  Up: Top
 
 Major Differences From The Bourne Shell
 ***************************************
@@ -7868,14 +8218,27 @@ included in SVR4.2 as the baseline reference.
 
    * The `trap' builtin (*note Bourne Shell Builtins::) allows a
      `DEBUG' pseudo-signal specification, similar to `EXIT'.  Commands
-     specified with a `DEBUG' trap are executed after every simple
-     command.  The `DEBUG' trap is not inherited by shell functions
-     unless the function has been given the `trace' attribute.
+     specified with a `DEBUG' trap are executed before every simple
+     command, `for' command, `case' command, `select' command, every
+     arithmetic `for' command, and before the first command executes in
+     a shell function.  The `DEBUG' trap is not inherited by shell
+     functions unless the function has been given the `trace' attribute
+     or the `functrace' option has been enabled using the `shopt'
+     builtin.  The `extdebug' shell option has additional effects on the
+     `DEBUG' trap.
 
      The `trap' builtin (*note Bourne Shell Builtins::) allows an `ERR'
      pseudo-signal specification, similar to `EXIT' and `DEBUG'.
      Commands specified with an `ERR' trap are executed after a simple
      command fails, with a few exceptions.  The `ERR' trap is not
+     inherited by shell functions unless the `-o errtrace' option to
+     the `set' builtin is enabled.
+
+     The `trap' builtin (*note Bourne Shell Builtins::) allows a
+     `RETURN' pseudo-signal specification, similar to `EXIT' and
+     `DEBUG'.  Commands specified with an `RETURN' trap are executed
+     before execution resumes after a shell function or a shell script
+     executed with `.' or `source' returns.  The `RETURN' trap is not
      inherited by shell functions.
 
    * The Bash `type' builtin is more extensive and gives more
@@ -7958,7 +8321,448 @@ from many of the limitations of the SVR4.2 shell.  For instance:
      turns on job control).
 
 
-File: bashref.info,  Node: Builtin Index,  Next: Reserved Word Index,  Prev: Major Differences From The Bourne Shell,  Up: Top
+File: bashref.info,  Node: Copying This Manual,  Next: Builtin Index,  Prev: Major Differences From The Bourne Shell,  Up: Top
+
+Copying This Manual
+*******************
+
+* Menu:
+
+* GNU Free Documentation License::      License for copying this manual.
+
+
+File: bashref.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
+
+GNU Free Documentation License
+==============================
+
+                      Version 1.2, November 2002
+     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
+     59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
+     
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided for under this License.  Any other
+     attempt to copy, modify, sublicense or distribute the Document is
+     void, and will automatically terminate your rights under this
+     License.  However, parties who have received copies, or rights,
+     from you under this License will not have their licenses
+     terminated so long as such parties remain in full compliance.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.
+
+ADDENDUM: How to use this License for your documents
+----------------------------------------------------
+
+   To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.2
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+       A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: bashref.info,  Node: Builtin Index,  Next: Reserved Word Index,  Prev: Copying This Manual,  Up: Top
 
 Index of Shell Builtin Commands
 *******************************
@@ -7973,6 +8777,7 @@ Index of Shell Builtin Commands
 * bind:                                  Bash Builtins.
 * break:                                 Bourne Shell Builtins.
 * builtin:                               Bash Builtins.
+* caller:                                Bash Builtins.
 * cd:                                    Bourne Shell Builtins.
 * command:                               Bash Builtins.
 * compgen:                               Programmable Completion Builtins.
@@ -8070,7 +8875,14 @@ Parameter and Variable Index
 * _:                                     Special Parameters.
 * auto_resume:                           Job Control Variables.
 * BASH:                                  Bash Variables.
+* BASH_ARGC:                             Bash Variables.
+* BASH_ARGV:                             Bash Variables.
+* BASH_COMMAND:                          Bash Variables.
 * BASH_ENV:                              Bash Variables.
+* BASH_EXECUTION_STRING:                 Bash Variables.
+* BASH_LINENO:                           Bash Variables.
+* BASH_SOURCE:                           Bash Variables.
+* BASH_SUBSHELL:                         Bash Variables.
 * BASH_VERSINFO:                         Bash Variables.
 * BASH_VERSION:                          Bash Variables.
 * bell-style:                            Readline Init File Syntax.
@@ -8080,6 +8892,7 @@ Parameter and Variable Index
 * COMP_CWORD:                            Bash Variables.
 * COMP_LINE:                             Bash Variables.
 * COMP_POINT:                            Bash Variables.
+* COMP_WORDBREAKS:                       Bash Variables.
 * COMP_WORDS:                            Bash Variables.
 * completion-query-items:                Readline Init File Syntax.
 * COMPREPLY:                             Bash Variables.
@@ -8087,6 +8900,7 @@ Parameter and Variable Index
 * DIRSTACK:                              Bash Variables.
 * disable-completion:                    Readline Init File Syntax.
 * editing-mode:                          Readline Init File Syntax.
+* EMACS:                                 Bash Variables.
 * enable-keypad:                         Readline Init File Syntax.
 * EUID:                                  Bash Variables.
 * expand-tilde:                          Readline Init File Syntax.
@@ -8103,6 +8917,7 @@ Parameter and Variable Index
 * HISTIGNORE:                            Bash Variables.
 * history-preserve-point:                Readline Init File Syntax.
 * HISTSIZE:                              Bash Variables.
+* HISTTIMEFORMAT:                        Bash Variables.
 * HOME:                                  Bourne Shell Variables.
 * horizontal-scroll-mode:                Readline Init File Syntax.
 * HOSTFILE:                              Bash Variables.
@@ -8154,6 +8969,7 @@ Parameter and Variable Index
 * SHELLOPTS:                             Bash Variables.
 * SHLVL:                                 Bash Variables.
 * show-all-if-ambiguous:                 Readline Init File Syntax.
+* show-all-if-unmodified:                Readline Init File Syntax.
 * TEXTDOMAIN:                            Locale Translation.
 * TEXTDOMAINDIR:                         Locale Translation.
 * TIMEFORMAT:                            Bash Variables.
@@ -8266,6 +9082,7 @@ Concept Index
 * command search:                        Command Search and Execution.
 * command substitution:                  Command Substitution.
 * command timing:                        Pipelines.
+* commands, compound:                    Compound Commands.
 * commands, conditional:                 Conditional Constructs.
 * commands, grouping:                    Command Grouping.
 * commands, lists:                       Lists.
@@ -8294,6 +9111,7 @@ Concept Index
 * expansion, tilde:                      Tilde Expansion.
 * expressions, arithmetic:               Shell Arithmetic.
 * expressions, conditional:              Bash Conditional Expressions.
+* FDL, GNU Free Documentation License:   GNU Free Documentation License.
 * field:                                 Definitions.
 * filename:                              Definitions.
 * filename expansion:                    Filename Expansion.
@@ -8308,12 +9126,12 @@ Concept Index
 * initialization file, readline:         Readline Init File.
 * installation:                          Basic Installation.
 * interaction, readline:                 Readline Interaction.
-* interactive shell <1>:                 Invoking Bash.
-* interactive shell:                     Interactive Shells.
+* interactive shell <1>:                 Interactive Shells.
+* interactive shell:                     Invoking Bash.
 * internationalization:                  Locale Translation.
 * job:                                   Definitions.
-* job control <1>:                       Job Control Basics.
-* job control:                           Definitions.
+* job control <1>:                       Definitions.
+* job control:                           Job Control Basics.
 * kill ring:                             Readline Killing Commands.
 * killing text:                          Readline Killing Commands.
 * localization:                          Locale Translation.
@@ -8352,8 +9170,8 @@ Concept Index
 * shell, interactive:                    Interactive Shells.
 * signal:                                Definitions.
 * signal handling:                       Signals.
-* special builtin <1>:                   Special Builtins.
-* special builtin:                       Definitions.
+* special builtin <1>:                   Definitions.
+* special builtin:                       Special Builtins.
 * startup files:                         Bash Startup Files.
 * suspending jobs:                       Job Control Basics.
 * tilde expansion:                       Tilde Expansion.
@@ -8368,126 +9186,129 @@ Concept Index
 
 
 Tag Table:
-Node: Top1160
-Node: Introduction3285
-Node: What is Bash?3510
-Node: What is a shell?4611
-Node: Definitions6845
-Node: Basic Shell Features9585
-Node: Shell Syntax10809
-Node: Shell Operation11833
-Node: Quoting13118
-Node: Escape Character14377
-Node: Single Quotes14849
-Node: Double Quotes15184
-Node: ANSI-C Quoting16085
-Node: Locale Translation17028
-Node: Comments17911
-Node: Shell Commands18516
-Node: Simple Commands19397
-Node: Pipelines20018
-Node: Lists21554
-Node: Looping Constructs23177
-Node: Conditional Constructs25621
-Node: Command Grouping31547
-Node: Shell Functions32924
-Node: Shell Parameters35460
-Node: Positional Parameters37034
-Node: Special Parameters37925
-Node: Shell Expansions40583
-Node: Brace Expansion42503
-Node: Tilde Expansion44172
-Node: Shell Parameter Expansion46503
-Node: Command Substitution53303
-Node: Arithmetic Expansion54625
-Node: Process Substitution55469
-Node: Word Splitting56506
-Node: Filename Expansion57958
-Node: Pattern Matching59916
-Node: Quote Removal63140
-Node: Redirections63426
-Node: Executing Commands70900
-Node: Simple Command Expansion71567
-Node: Command Search and Execution73488
-Node: Command Execution Environment75485
-Node: Environment78192
-Node: Exit Status79843
-Node: Signals81038
-Node: Shell Scripts82949
-Node: Shell Builtin Commands85460
-Node: Bourne Shell Builtins86890
-Node: Bash Builtins102594
-Node: The Set Builtin127866
-Node: Special Builtins134847
-Node: Shell Variables135819
-Node: Bourne Shell Variables136255
-Node: Bash Variables138034
-Node: Bash Features154053
-Node: Invoking Bash154935
-Node: Bash Startup Files160399
-Node: Interactive Shells165269
-Node: What is an Interactive Shell?165671
-Node: Is this Shell Interactive?166306
-Node: Interactive Shell Behavior167112
-Node: Bash Conditional Expressions170379
-Node: Shell Arithmetic173798
-Node: Aliases176236
-Node: Arrays178739
-Node: The Directory Stack181759
-Node: Directory Stack Builtins182465
-Node: Printing a Prompt185343
-Node: The Restricted Shell187969
-Node: Bash POSIX Mode189794
-Node: Job Control195965
-Node: Job Control Basics196431
-Node: Job Control Builtins200711
-Node: Job Control Variables205006
-Node: Command Line Editing206155
-Node: Introduction and Notation207153
-Node: Readline Interaction208770
-Node: Readline Bare Essentials209956
-Node: Readline Movement Commands211736
-Node: Readline Killing Commands212692
-Node: Readline Arguments214600
-Node: Searching215635
-Node: Readline Init File217812
-Node: Readline Init File Syntax218866
-Node: Conditional Init Constructs230030
-Node: Sample Init File232554
-Node: Bindable Readline Commands235737
-Node: Commands For Moving236936
-Node: Commands For History237784
-Node: Commands For Text240672
-Node: Commands For Killing243332
-Node: Numeric Arguments245282
-Node: Commands For Completion246409
-Node: Keyboard Macros249989
-Node: Miscellaneous Commands250547
-Node: Readline vi Mode255845
-Node: Programmable Completion256754
-Node: Programmable Completion Builtins262149
-Node: Using History Interactively269370
-Node: Bash History Facilities270049
-Node: Bash History Builtins272609
-Node: History Interaction276175
-Node: Event Designators278726
-Node: Word Designators279653
-Node: Modifiers281282
-Node: Installing Bash282599
-Node: Basic Installation283741
-Node: Compilers and Options286426
-Node: Compiling For Multiple Architectures287160
-Node: Installation Names288817
-Node: Specifying the System Type289628
-Node: Sharing Defaults290337
-Node: Operation Controls291002
-Node: Optional Features291953
-Node: Reporting Bugs299895
-Node: Major Differences From The Bourne Shell300992
-Node: Builtin Index315476
-Node: Reserved Word Index319067
-Node: Variable Index320543
-Node: Function Index326841
-Node: Concept Index331391
+Node: Top1367
+Node: Introduction3520
+Node: What is Bash?3745
+Node: What is a shell?4833
+Node: Definitions7369
+Node: Basic Shell Features10109
+Node: Shell Syntax11327
+Node: Shell Operation12351
+Node: Quoting13636
+Node: Escape Character14898
+Node: Single Quotes15370
+Node: Double Quotes15705
+Node: ANSI-C Quoting16718
+Node: Locale Translation17661
+Node: Comments18544
+Node: Shell Commands19149
+Node: Simple Commands19910
+Node: Pipelines20531
+Node: Lists22067
+Node: Compound Commands23689
+Node: Looping Constructs24461
+Node: Conditional Constructs26895
+Node: Command Grouping32914
+Node: Shell Functions34350
+Node: Shell Parameters38615
+Node: Positional Parameters40177
+Node: Special Parameters41068
+Node: Shell Expansions43726
+Node: Brace Expansion45646
+Node: Tilde Expansion47962
+Node: Shell Parameter Expansion50294
+Node: Command Substitution57548
+Node: Arithmetic Expansion58870
+Node: Process Substitution59711
+Node: Word Splitting60748
+Node: Filename Expansion62200
+Node: Pattern Matching64185
+Node: Quote Removal67506
+Node: Redirections67792
+Node: Executing Commands75267
+Node: Simple Command Expansion75934
+Node: Command Search and Execution77855
+Node: Command Execution Environment79852
+Node: Environment82614
+Node: Exit Status84265
+Node: Signals85460
+Node: Shell Scripts87371
+Node: Shell Builtin Commands89882
+Node: Bourne Shell Builtins91312
+Node: Bash Builtins108084
+Node: The Set Builtin135896
+Node: Special Builtins143821
+Node: Shell Variables144793
+Node: Bourne Shell Variables145229
+Node: Bash Variables147206
+Node: Bash Features166301
+Node: Invoking Bash167183
+Node: Bash Startup Files172994
+Node: Interactive Shells177864
+Node: What is an Interactive Shell?178266
+Node: Is this Shell Interactive?178901
+Node: Interactive Shell Behavior179707
+Node: Bash Conditional Expressions182974
+Node: Shell Arithmetic186394
+Node: Aliases189134
+Node: Arrays191637
+Node: The Directory Stack194657
+Node: Directory Stack Builtins195363
+Node: Printing a Prompt198242
+Node: The Restricted Shell200868
+Node: Bash POSIX Mode202693
+Node: Job Control209339
+Node: Job Control Basics209805
+Node: Job Control Builtins214085
+Node: Job Control Variables218381
+Node: Command Line Editing219531
+Node: Introduction and Notation220529
+Node: Readline Interaction222146
+Node: Readline Bare Essentials223332
+Node: Readline Movement Commands225112
+Node: Readline Killing Commands226068
+Node: Readline Arguments227977
+Node: Searching229012
+Node: Readline Init File231189
+Node: Readline Init File Syntax232243
+Node: Conditional Init Constructs243887
+Node: Sample Init File246411
+Node: Bindable Readline Commands249594
+Node: Commands For Moving250793
+Node: Commands For History251642
+Node: Commands For Text254531
+Node: Commands For Killing257192
+Node: Numeric Arguments259142
+Node: Commands For Completion260269
+Node: Keyboard Macros263850
+Node: Miscellaneous Commands264409
+Node: Readline vi Mode269708
+Node: Programmable Completion270617
+Node: Programmable Completion Builtins276424
+Node: Using History Interactively283786
+Node: Bash History Facilities284465
+Node: Bash History Builtins287155
+Node: History Interaction291007
+Node: Event Designators293558
+Node: Word Designators294562
+Node: Modifiers296192
+Node: Installing Bash297589
+Node: Basic Installation298723
+Node: Compilers and Options301408
+Node: Compiling For Multiple Architectures302142
+Node: Installation Names303799
+Node: Specifying the System Type304610
+Node: Sharing Defaults305319
+Node: Operation Controls305984
+Node: Optional Features306935
+Node: Reporting Bugs315012
+Node: Major Differences From The Bourne Shell316187
+Node: Copying This Manual331430
+Node: GNU Free Documentation License331684
+Node: Builtin Index354077
+Node: Reserved Word Index357704
+Node: Variable Index359180
+Node: Function Index366116
+Node: Concept Index370666
 
 End Tag Table

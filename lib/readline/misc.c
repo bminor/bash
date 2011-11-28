@@ -253,7 +253,7 @@ rl_maybe_unsave_line ()
 {
   if (_rl_saved_line_for_history)
     {
-      rl_replace_line (_rl_saved_line_for_history->line, 0);
+      rl_replace_line (_rl_saved_line_for_history->line, 1);
       rl_undo_list = (UNDO_LIST *)_rl_saved_line_for_history->data;
       _rl_free_history_entry (_rl_saved_line_for_history);
       _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
@@ -298,7 +298,7 @@ _rl_history_set_point ()
     rl_point = rl_end;
 
 #if defined (VI_MODE)
-  if (rl_editing_mode == vi_mode)
+  if (rl_editing_mode == vi_mode && _rl_keymap != vi_insertion_keymap)
     rl_point = 0;
 #endif /* VI_MODE */
 
@@ -311,6 +311,8 @@ rl_replace_from_history (entry, flags)
      HIST_ENTRY *entry;
      int flags;			/* currently unused */
 {
+  /* Can't call with `1' because rl_undo_list might point to an undo list
+     from a history entry, just like we're setting up here. */
   rl_replace_line (entry->line, 0);
   rl_undo_list = (UNDO_LIST *)entry->data;
   rl_point = rl_end;

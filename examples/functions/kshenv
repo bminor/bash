@@ -207,7 +207,7 @@ substring ()
 		;;
 	esac
 	# test for too few or too many arguments
-	if [ x"$1" = x -o $# -gt 2 ]; then
+	if [ x"$1" = x ] || [ $# -gt 2 ]; then
 		print -u2 'substring: bad argument count'
 		return 1
 	fi

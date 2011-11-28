@@ -151,6 +151,17 @@ int privileged_mode = 0;
 int brace_expansion = 1;
 #endif
 
+/* Non-zero means that shell functions inherit the DEBUG trap. */
+int function_trace_mode = 0;
+
+/* Non-zero means that shell functions inherit the ERR trap. */
+int error_trace_mode = 0;
+
+/* Non-zero means that the rightmost non-zero exit status in a pipeline
+   is the exit status of the entire pipeline.  If each processes exits
+   with a 0 status, the status of the pipeline is 0. */
+int pipefail_opt = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			The Flags ALIST.			    */
@@ -180,24 +191,22 @@ struct flags_alist shell_flags[] = {
   { 'u', &unbound_vars_is_error },
   { 'v', &echo_input_at_read },
   { 'x', &echo_command_at_execute },
-  { 'C', &noclobber },
 
   /* New flags that control non-standard things. */
 #if 0
   { 'l', &lexical_scoping },
 #endif
-  { 'I', &no_invisible_vars },
-
-  { 'P', &no_symbolic_links },
-
 #if defined (BRACE_EXPANSION)
   { 'B', &brace_expansion },
 #endif
-
+  { 'C', &noclobber },
+  { 'E', &error_trace_mode },
 #if defined (BANG_HISTORY)
   { 'H', &history_expansion },
 #endif /* BANG_HISTORY */
-
+  { 'I', &no_invisible_vars },
+  { 'P', &no_symbolic_links },
+  { 'T', &function_trace_mode },
   {0, (int *)NULL}
 };
 
@@ -310,7 +319,7 @@ reset_shell_flags ()
   place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
   noclobber = unbound_vars_is_error = echo_input_at_read = 0;
   echo_command_at_execute = jobs_m_flag = forced_interactive = 0;
-  no_symbolic_links = no_invisible_vars = privileged_mode = 0;
+  no_symbolic_links = no_invisible_vars = privileged_mode = pipefail_opt = 0;
 
   hashing_enabled = interactive_comments = 1;
 

@@ -67,14 +67,17 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_arith, cm_cond, cm_arith_for, cm_subshell };
 
 /* Possible values for the `flags' field of a WORD_DESC. */
-#define W_HASDOLLAR	0x01	/* Dollar sign present. */
-#define W_QUOTED	0x02	/* Some form of quote character is present. */
-#define W_ASSIGNMENT	0x04	/* This word is a variable assignment. */
-#define W_GLOBEXP	0x08	/* This word is the result of a glob expansion. */
-#define W_NOSPLIT	0x10	/* Do not perform word splitting on this word. */
-#define W_NOGLOB	0x20	/* Do not perform globbing on this word. */
-#define W_NOSPLIT2	0x40	/* Don't split word except for $@ expansion. */
-#define W_TILDEEXP	0x80	/* Tilde expand this assignment word */
+#define W_HASDOLLAR	0x0001	/* Dollar sign present. */
+#define W_QUOTED	0x0002	/* Some form of quote character is present. */
+#define W_ASSIGNMENT	0x0004	/* This word is a variable assignment. */
+#define W_GLOBEXP	0x0008	/* This word is the result of a glob expansion. */
+#define W_NOSPLIT	0x0010	/* Do not perform word splitting on this word. */
+#define W_NOGLOB	0x0020	/* Do not perform globbing on this word. */
+#define W_NOSPLIT2	0x0040	/* Don't split word except for $@ expansion. */
+#define W_TILDEEXP	0x0080	/* Tilde expand this assignment word */
+#define W_DOLLARAT	0x0100	/* $@ and its special handling */
+#define W_DOLLARSTAR	0x0200	/* $* and its special handling */
+#define W_NOCOMSUB	0x0400	/* Don't perform command substitution on this word */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -195,6 +198,7 @@ typedef struct pattern_list {
 /* The CASE command. */
 typedef struct case_com {
   int flags;			/* See description of CMD flags. */
+  int line;			/* line number the `case' keyword appears on */
   WORD_DESC *word;		/* The thing to test. */
   PATTERN_LIST *clauses;	/* The clauses to test against, or NULL. */
 } CASE_COM;
@@ -202,6 +206,7 @@ typedef struct case_com {
 /* FOR command. */
 typedef struct for_com {
   int flags;		/* See description of CMD flags. */
+  int line;		/* line number the `for' keyword appears on */
   WORD_DESC *name;	/* The variable name to get mapped over. */
   WORD_LIST *map_list;	/* The things to map over.  This is never NULL. */
   COMMAND *action;	/* The action to execute.
@@ -224,6 +229,7 @@ typedef struct arith_for_com {
 /* KSH SELECT command. */
 typedef struct select_com {
   int flags;		/* See description of CMD flags. */
+  int line;		/* line number the `select' keyword appears on */
   WORD_DESC *name;	/* The variable name to get mapped over. */
   WORD_LIST *map_list;	/* The things to map over.  This is never NULL. */
   COMMAND *action;	/* The action to execute.
@@ -253,8 +259,8 @@ typedef struct while_com {
    time being. */
 typedef struct arith_com {
   int flags;
-  WORD_LIST *exp;
   int line;
+  WORD_LIST *exp;
 } ARITH_COM;
 #endif /* DPAREN_ARITHMETIC */
 
@@ -278,18 +284,19 @@ typedef struct cond_com {
 /* The "simple" command.  Just a collection of words and redirects. */
 typedef struct simple_com {
   int flags;			/* See description of CMD flags. */
+  int line;			/* line number the command starts on */
   WORD_LIST *words;		/* The program name, the arguments,
 				   variable assignments, etc. */
   REDIRECT *redirects;		/* Redirections to perform. */
-  int line;			/* line number the command starts on */
 } SIMPLE_COM;
 
 /* The "function definition" command. */
 typedef struct function_def {
   int flags;			/* See description of CMD flags. */
+  int line;			/* Line number the function def starts on. */
   WORD_DESC *name;		/* The name of the function. */
   COMMAND *command;		/* The parsed execution tree. */
-  int line;			/* Line number the function def starts on. */
+  char *source_file;		/* file in which function was defined, if any */
 } FUNCTION_DEF;
 
 /* A command that is `grouped' allows pipes and redirections to affect all
@@ -315,6 +322,9 @@ extern COMMAND *global_command;
 #define CMDERR_LAST	3
 
 /* Forward declarations of functions declared in copy_cmd.c. */
+
+extern FUNCTION_DEF *copy_function_def_contents __P((FUNCTION_DEF *, FUNCTION_DEF *));
+extern FUNCTION_DEF *copy_function_def __P((FUNCTION_DEF *));
 
 extern WORD_DESC *copy_word __P((WORD_DESC *));
 extern WORD_LIST *copy_word_list __P((WORD_LIST *));

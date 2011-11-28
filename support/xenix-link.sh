@@ -36,7 +36,7 @@ rm -f bash
 
 if [ -z "$CC" ]
 then
-	if [ -f /unix -a ! -f /xenix ]
+	if [ -f /unix ] && [ ! -f /xenix ]
 	then
 		CC="cc -xenix"
 	else

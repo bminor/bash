@@ -14,16 +14,16 @@ T=$'\t'
 cat << \EOF >/tmp/cb$$.1
 mkalias ()
 {
-	if [ "x$2" = "x" ]; then
-		echo alias ${1}="''"
-	elif echo "$2" | egrep -s '(\!|#)' >/dev/null 2>&1; then
+	case $2 in
+	'')	echo alias ${1}="''" ;;
+	*[#\!]*)
 		comm=$(echo $2 | sed  's/\!\*/"$\@"/g
 				      s/\!:\([1-9]\)/"$\1"/g
 			              s/#/\#/g')
 		echo $1 \(\) "{" command "$comm"  "; }"
-	else
-		echo alias ${1}=\'$(echo "${2}" | sed "s:':'\\\\'':")\'
-	fi
+		;;
+	*)	echo alias ${1}=\'$(echo "${2}" | sed "s:':'\\\\'':")\' ;;
+	esac
 }
 EOF
 

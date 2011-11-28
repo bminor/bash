@@ -56,13 +56,13 @@ FindSectionsInIndex ()
 	fi
     done
     [ -z "$indexes" ] && return
-    # Make egrep give filename
+    # Make grep give filename
     [ NIndex -lt 2 ] && indexes="$indexes /dev/null"
     # set positional parameters to
     # indexfile:searchname pagename section ...
     # e.g.
     # /usr/man/index:FP_OFF Routines DOS
-    set -- `egrep "^$page[ 	]" $indexes`
+    set -- `grep "^$page[ 	]" $indexes`
     while [ $# -gt 2 ]; do
 	FileNames[i]=${1%%index*}cat$3/$2.$3
 	Sections[i]=$3

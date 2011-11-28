@@ -50,7 +50,6 @@ static ARITH_COM *copy_arith_command __P((ARITH_COM *));
 static COND_COM *copy_cond_command __P((COND_COM *));
 #endif
 static SIMPLE_COM *copy_simple_command __P((SIMPLE_COM *));
-static FUNCTION_DEF *copy_function_def __P((FUNCTION_DEF *));
 
 WORD_DESC *
 copy_word (w)
@@ -166,6 +165,7 @@ copy_for_command (com)
 
   new_for = (FOR_COM *)xmalloc (sizeof (FOR_COM));
   new_for->flags = com->flags;
+  new_for->line = com->line;
   new_for->name = copy_word (com->name);
   new_for->map_list = copy_word_list (com->map_list);
   new_for->action = copy_command (com->action);
@@ -221,6 +221,7 @@ copy_case_command (com)
 
   new_case = (CASE_COM *)xmalloc (sizeof (CASE_COM));
   new_case->flags = com->flags;
+  new_case->line = com->line;
   new_case->word = copy_word (com->word);
   new_case->clauses = copy_case_clauses (com->clauses);
   return (new_case);
@@ -302,17 +303,26 @@ copy_simple_command (com)
   return (new_simple);
 }
 
-static FUNCTION_DEF *
+FUNCTION_DEF *
+copy_function_def_contents (old, new_def)
+     FUNCTION_DEF *old, *new_def;
+{
+  new_def->name = copy_word (old->name);
+  new_def->command = copy_command (old->command);
+  new_def->flags = old->flags;
+  new_def->line = old->line;
+  new_def->source_file = old->source_file ? savestring (old->source_file) : old->source_file;
+  return (new_def);
+}
+
+FUNCTION_DEF *
 copy_function_def (com)
      FUNCTION_DEF *com;
 {
   FUNCTION_DEF *new_def;
 
   new_def = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));
-  new_def->name = copy_word (com->name);
-  new_def->command = copy_command (com->command);
-  new_def->flags = com->flags;
-  new_def->line = com->line;
+  new_def = copy_function_def_contents (com, new_def);
   return (new_def);
 }
 

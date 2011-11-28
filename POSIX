@@ -29,20 +29,20 @@ The following list is what's changed when `POSIX mode' is in effect:
      performed on the values of `PS1' and `PS2' regardless of the
      setting of the `promptvars' option.
 
-  6. Interactive comments are enabled by default.  (Bash has them on by
-     default anyway.)
-
-  7. The POSIX 1003.2 startup files are executed (`$ENV') rather than
+  6. The POSIX 1003.2 startup files are executed (`$ENV') rather than
      the normal Bash files.
 
-  8. Tilde expansion is only performed on assignments preceding a
+  7. Tilde expansion is only performed on assignments preceding a
      command name, rather than on all assignment statements on the line.
 
-  9. The default history file is `~/.sh_history' (this is the default
+  8. The default history file is `~/.sh_history' (this is the default
      value of `$HISTFILE').
 
- 10. The output of `kill -l' prints all the signal names on a single
-     line, separated by spaces.
+  9. The output of `kill -l' prints all the signal names on a single
+     line, separated by spaces, without the `SIG' prefix.
+
+ 10. The `kill' builtin does not accept signal names with a `SIG'
+     prefix.
 
  11. Non-interactive shells exit if FILENAME in `.' FILENAME is not
      found.
@@ -103,23 +103,33 @@ The following list is what's changed when `POSIX mode' is in effect:
 
  26. The `trap' builtin displays signal names without the leading `SIG'.
 
- 27. The `.' and `source' builtins do not search the current directory
+ 27. The `trap' builtin doesn't check the first argument for a possible
+     signal specification and revert the signal handling to the original
+     disposition if it is.  If users want to reset the handler for a
+     given signal to the original disposition, they should use `-' as
+     the first argument.
+
+ 28. The `.' and `source' builtins do not search the current directory
      for the filename argument if it is not found by searching `PATH'.
 
- 28. Subshells spawned to execute command substitutions inherit the
+ 29. Subshells spawned to execute command substitutions inherit the
      value of the `-e' option from the parent shell.  When not in POSIX
      mode, Bash clears the `-e' option in such subshells.
 
- 29. Alias expansion is always enabled, even in non-interactive shells.
+ 30. Alias expansion is always enabled, even in non-interactive shells.
 
- 30. When the `set' builtin is invoked without options, it does not
+ 31. When the `alias' builtin displays alias definitions, it does not
+     display them with a leading `alias ' unless the `-p' option is
+     supplied.
+
+ 32. When the `set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
- 31. When the `set' builtin is invoked without options, it displays
+ 33. When the `set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
- 32. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
+ 34. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from `$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, `cd' will fail
      instead of falling back to PHYSICAL mode.

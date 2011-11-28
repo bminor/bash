@@ -149,7 +149,7 @@ mailstat(path, st)
       closedir(dd);
     }
 
-    if (atime)
+/*  if (atime) */	/* Set atime even if cur/ is empty */
       st_ret.st_atime = atime;
     if (mtime)
       st_ret.st_mtime = mtime;

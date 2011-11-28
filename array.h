@@ -40,7 +40,7 @@ typedef struct array_element {
 	struct array_element *next, *prev;
 } ARRAY_ELEMENT;
 
-typedef int sh_ae_map_func_t __P((ARRAY_ELEMENT *));
+typedef int sh_ae_map_func_t __P((ARRAY_ELEMENT *, void *));
 
 /* Basic operations on entire arrays */
 extern ARRAY	*array_create __P((void));
@@ -48,13 +48,15 @@ extern void	array_flush __P((ARRAY *));
 extern void	array_dispose __P((ARRAY *));
 extern ARRAY	*array_copy __P((ARRAY *));
 extern ARRAY	*array_slice __P((ARRAY *, ARRAY_ELEMENT *, ARRAY_ELEMENT *));
-extern void	array_walk __P((ARRAY   *, sh_ae_map_func_t *));
+extern void	array_walk __P((ARRAY   *, sh_ae_map_func_t *, void *));
 
 extern ARRAY_ELEMENT *array_shift __P((ARRAY *, int, int));
 extern int	array_rshift __P((ARRAY *, int, char *));
+extern ARRAY_ELEMENT *array_unshift_element __P((ARRAY *));
+extern int	array_shift_element __P((ARRAY *, char *));
 extern ARRAY	*array_quote __P((ARRAY *));
 
-extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int));
+extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int));
 extern char	*array_patsub __P((ARRAY *, char *, char *, int));
 
 /* Basic operations on array elements. */
@@ -69,6 +71,8 @@ extern char	*array_reference __P((ARRAY *, arrayind_t));
 /* Converting to and from arrays */
 extern WORD_LIST *array_to_word_list __P((ARRAY *));
 extern ARRAY *array_from_word_list __P((WORD_LIST *));
+extern WORD_LIST *array_keys_to_word_list __P((ARRAY *));
+
 extern ARRAY *array_assign_list __P((ARRAY *, WORD_LIST *));
 
 extern char **array_to_argv __P((ARRAY *));
@@ -89,6 +93,18 @@ extern ARRAY *array_from_string __P((char *, char *));
 #define element_index(ae)	((ae)->ind)
 #define element_forw(ae)	((ae)->next)
 #define element_back(ae)	((ae)->prev)
+
+/* Convenience */
+#define array_push(a,v)	\
+  do { array_rshift ((a), 1, (v)); } while (0)
+#define array_pop(a) \
+  do { array_dispose_element (array_shift ((a), 1, 0)); } while (0)
+
+#define GET_ARRAY_FROM_VAR(n, v, a) \
+  do { \
+    (v) = find_variable (n); \
+    (a) = ((v) && array_p ((v))) ? array_cell (v) : (ARRAY *)0; \
+  } while (0)
 
 #define ALL_ELEMENT_SUB(c)	((c) == '@' || (c) == '*')
 

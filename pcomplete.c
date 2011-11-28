@@ -371,6 +371,11 @@ init_itemlist_from_varlist (itp, svfunc)
   register int i, n;
 
   vlist = (*svfunc) ();
+  if (vlist == 0)
+    {
+      itp->slist = (STRINGLIST *)NULL;
+      return;
+    }    
   for (n = 0; vlist[n]; n++)
     ;
   sl = strlist_create (n+1);
@@ -628,7 +633,8 @@ it_init_shopts (itp)
 /* Generate a list of all matches for TEXT using the STRINGLIST in itp->slist
    as the list of possibilities.  If the itemlist has been marked dirty or
    it should be regenerated every time, destroy the old STRINGLIST and make a
-   new one before trying the match. */
+   new one before trying the match.  TEXT is dequoted before attempting a
+   match. */
 static STRINGLIST *
 gen_matches_from_itemlist (itp, text)
      ITEMLIST *itp;
@@ -636,6 +642,7 @@ gen_matches_from_itemlist (itp, text)
 {
   STRINGLIST *ret, *sl;
   int tlen, i, n;
+  char *ntxt;
 
   if ((itp->flags & (LIST_DIRTY|LIST_DYNAMIC)) ||
       (itp->flags & LIST_INITIALIZED) == 0)
@@ -649,13 +656,18 @@ gen_matches_from_itemlist (itp, text)
     return ((STRINGLIST *)NULL);
   ret = strlist_create (itp->slist->list_len+1);
   sl = itp->slist;
-  tlen = STRLEN (text);
+
+  ntxt = bash_dequote_text (text);
+  tlen = STRLEN (ntxt);
+
   for (i = n = 0; i < sl->list_len; i++)
     {
-      if (tlen == 0 || STREQN (sl->list[i], text, tlen))
+      if (tlen == 0 || STREQN (sl->list[i], ntxt, tlen))
 	ret->list[n++] = STRDUP (sl->list[i]);
     }
   ret->list[ret->list_len = n] = (char *)NULL;
+
+  FREE (ntxt);
   return ret;
 }
 
@@ -792,7 +804,8 @@ gen_wordlist_matches (cs, text)
 {
   WORD_LIST *l, *l2;
   STRINGLIST *sl;
-  int nw, tlen;
+  int nw, tlen, qc;
+  char *ntxt;		/* dequoted TEXT to use in comparisons */
 
   if (cs->words == 0 || cs->words[0] == '\0')
     return ((STRINGLIST *)NULL);
@@ -810,15 +823,18 @@ gen_wordlist_matches (cs, text)
 
   nw = list_length (l2);
   sl = strlist_create (nw + 1);
-  tlen = STRLEN (text);
+
+  ntxt = bash_dequote_text (text);
+  tlen = STRLEN (ntxt);
 
   for (nw = 0, l = l2; l; l = l->next)
     {
-      if (tlen == 0 || STREQN (l->word->word, text, tlen))
+      if (tlen == 0 || STREQN (l->word->word, ntxt, tlen))
 	sl->list[nw++] = STRDUP (l->word->word);
     }
   sl->list[sl->list_len = nw] = (char *)NULL;
 
+  FREE (ntxt);
   return sl;
 }
 
@@ -1132,6 +1148,7 @@ gen_compspec_completions (cs, cmd, word, start, end)
   char *line;
   int llen, nw, cw;
   WORD_LIST *lwords;
+  COMPSPEC *tcs;
 
 #ifdef DEBUG
   debug_printf ("gen_compspec_completions (%s, %s, %d, %d)", cmd, word, start, end);
@@ -1286,12 +1303,19 @@ gen_compspec_completions (cs, cmd, word, start, end)
       names. */
   if ((ret == 0 || ret->list_len == 0) && (cs->options & COPT_DIRNAMES))
     {
-      COMPSPEC *dummy;
-
-      dummy = compspec_create ();
-      dummy->actions = CA_DIRECTORY;
-      ret = gen_action_completions (dummy, word);
-      compspec_dispose (dummy);
+      tcs = compspec_create ();
+      tcs->actions = CA_DIRECTORY;
+      ret = gen_action_completions (tcs, word);
+      compspec_dispose (tcs);
+    }
+  else if (cs->options & COPT_PLUSDIRS)
+    {
+      tcs = compspec_create ();
+      tcs->actions = CA_DIRECTORY;
+      tmatches = gen_action_completions (tcs, word);
+      ret = strlist_append (ret, tmatches);
+      strlist_dispose (tmatches);
+      compspec_dispose (tcs);
     }
 
   return (ret);
@@ -1326,12 +1350,16 @@ programmable_completions (cmd, word, start, end, foundp)
       return ((char **)NULL);
     }
 
+  cs = compspec_copy (cs);
+
   /* Signal the caller that we found a COMPSPEC for this command, and pass
      back any meta-options associated with the compspec. */
   if (foundp)
     *foundp = 1|cs->options;
 
   ret = gen_compspec_completions (cs, cmd, word, start, end);
+
+  compspec_dispose (cs);
 
   if (ret)
     {

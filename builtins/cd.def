@@ -199,7 +199,11 @@ cd_builtin (list)
 	  builtin_error ("OLDPWD not set");
 	  return (EXECUTION_FAILURE);
 	}
+#if 0
       lflag = interactive ? LCD_PRINTPATH : 0;
+#else
+      lflag = LCD_PRINTPATH;		/* According to SUSv3 */
+#endif
     }
   else if (absolute_pathname (list->word->word))
     dirname = list->word->word;
@@ -343,8 +347,10 @@ pwd_builtin (list)
       if (ferror (stdout))
 	{
 	  builtin_error ("write error: %s", strerror (errno));
+	  clearerr (stdout);
 	  return (EXECUTION_FAILURE);
 	}
+
       return (EXECUTION_SUCCESS);
     }
   else

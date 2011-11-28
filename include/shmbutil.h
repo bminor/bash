@@ -70,6 +70,11 @@ extern size_t xmbsrtowcs __P((wchar_t *, const char **, size_t, mbstate_t *));
 
 extern char *xstrchr __P((const char *, int));
 
+#ifndef MB_INVALIDCH
+#define MB_INVALIDCH(x)		((x) == (size_t)-1 || (x) == (size_t)-2)
+#define MB_NULLWCH(x)		((x) == 0)
+#endif
+
 #else /* !HANDLE_MULTIBYTE */
 
 #undef MB_LEN_MAX
@@ -80,6 +85,11 @@ extern char *xstrchr __P((const char *, int));
 
 #undef xstrchr
 #define xstrchr(s, c)	strchr(s, c)
+
+#ifndef MB_INVALIDCH
+#define MB_INVALIDCH(x)		(0)
+#define MB_NULLWCH(x)		(0)
+#endif
 
 #endif /* !HANDLE_MULTIBYTE */
 
@@ -120,6 +130,8 @@ extern char *xstrchr __P((const char *, int));
 		state = state_bak; \
 		(_i)++; \
 	      } \
+	    else if (mblength == 0) \
+	      (_i)++; \
 	    else \
 	      (_i) += mblength; \
 	  } \

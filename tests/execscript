@@ -1,7 +1,7 @@
 export LC_ALL=C
 export LANG=C
 
-if (( $UID == 0 )); then
+if [ $UID -eq 0 ]; then
         echo "execscript: the test suite should not be run as root" >&2
 fi
 
@@ -94,3 +94,6 @@ ${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-
 # values
 
 ${THIS_SH} ./exec6.sub
+
+# checks for properly deciding what constitutes an executable file
+${THIS_SH} ./exec7.sub

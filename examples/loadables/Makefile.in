@@ -72,7 +72,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 
 ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink cut realpath getconf
+	  uname sync push ln unlink cut realpath getconf strftime
 OTHERPROG = necho hello cat
 
 all:	$(SHOBJ_STATUS)
@@ -172,6 +172,9 @@ cut:	cut.o
 realpath:	realpath.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ realpath.o $(SHOBJ_LIBS)
 
+strftime:	strftime.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strftime.o $(SHOBJ_LIBS)
+
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
 #
@@ -221,3 +224,4 @@ sync.o: sync.c
 push.o: push.c
 mkdir.o: mkdir.c
 realpath.o: realpath.c
+strftime.o: strftime.c

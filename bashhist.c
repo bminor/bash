@@ -58,6 +58,7 @@ extern int errno;
 
 static int histignore_item_func __P((struct ign *));
 static int check_history_control __P((char *));
+static void hc_erasedups __P((char *));
 static void really_add_history __P((char *));
 
 static struct ignorevar histignore =
@@ -77,7 +78,10 @@ static struct ignorevar histignore =
    becomes zero when we read lines from a file, for example. */
 int remember_on_history = 1;
 
-/* The number of lines that Bash has added to this history session. */
+/* The number of lines that Bash has added to this history session.  The
+   difference between the number of the top element in the history list
+   (offset from history_base) and the number of lines in the history file.
+   Appending this session's history to the history file resets this to 0. */
 int history_lines_this_session;
 
 /* The number of lines that Bash has read from the history file. */
@@ -134,10 +138,14 @@ int literal_history;
    exit, even if the history has been stifled. */
 int force_append_history;
 
-/* A nit for picking at history saving.
-   Value of 0 means save all lines parsed by the shell on the history.
-   Value of 1 means save all lines that do not start with a space.
-   Value of 2 means save all lines that do not match the last line saved. */
+/* A nit for picking at history saving.  Flags have the following values:
+
+   Value == 0 means save all lines parsed by the shell on the history.
+   Value & HC_IGNSPACE means save all lines that do not start with a space.
+   Value & HC_IGNDUPS means save all lines that do not match the last
+   line saved.
+   Value & HC_ERASEDUPS means to remove all other matching lines from the
+   history list before saving the latest line. */
 int history_control;
 
 /* Set to 1 if the last command was added to the history list successfully
@@ -206,6 +214,7 @@ bash_initialize_history ()
   history_quotes_inhibit_expansion = 1;
   history_search_delimiter_chars = ";&()|<>";
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+  history_comment_char = '#';
 }
 
 void
@@ -511,27 +520,49 @@ check_history_control (line)
   HIST_ENTRY *temp;
   int r;
 
-  switch (history_control)
+  if (history_control == 0)
+    return 1;
+
+  /* ignorespace or ignoreboth */
+  if ((history_control & HC_IGNSPACE) && *line == ' ')
+    return 0;
+
+  /* ignoredups or ignoreboth */
+  if (history_control & HC_IGNDUPS)
     {
-    case 0:			/* nothing */
-      return 1;
-    case 1:			/* ignorespace */
-      return (*line != ' ');
-    case 3:			/* ignoreboth */
-      if (*line == ' ')
-	return 0;
-      /* FALLTHROUGH if case == 3 (`ignoreboth') */
-    case 2:			/* ignoredups */
       using_history ();
       temp = previous_history ();
 
       r = (temp == 0 || STREQ (temp->line, line) == 0);
 
       using_history ();
-      return r;
+
+      if (r == 0)
+	return r;
     }
 
-  return 0;
+  return 1;
+}
+
+/* Remove all entries matching LINE from the history list.  Triggered when
+   HISTCONTROL includes `erasedups'. */
+static void
+hc_erasedups (line)
+     char *line;
+{
+  HIST_ENTRY *temp;
+  int r;
+
+  using_history ();
+  while (temp = previous_history ())
+    {
+      if (STREQ (temp->line, line))
+	{
+	  r = where_history ();
+	  remove_history (r);
+	}
+    }
+  using_history ();
 }
 
 /* Add LINE to the history list, handling possibly multi-line compound
@@ -577,6 +608,11 @@ check_add_history (line, force)
 {
   if (check_history_control (line) && history_should_ignore (line) == 0)
     {
+      /* We're committed to saving the line.  If the user has requested it,
+	 remove other matching lines from the history. */
+      if (history_control & HC_ERASEDUPS)
+	hc_erasedups (line);
+        
       if (force)
 	{
 	  really_add_history (line);
@@ -635,10 +671,8 @@ bash_add_history (line)
 	  free (new_line);
 
 	  if (old)
-	    {
-	      FREE (old->line);
-	      free (old);
-	    }
+	    free_history_entry (old);
+
 	  add_it = 0;
 	}
     }

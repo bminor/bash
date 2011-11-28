@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include "bashtypes.h"
-#ifndef _MINIX
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "filecntl.h"
@@ -234,7 +234,7 @@ save_bash_input (fd, new_fd)
     {
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */
-      internal_error ("check_bash_input: buffer already exists for new fd %d", nfd);
+      internal_error ("save_bash_input: buffer already exists for new fd %d", nfd);
       free_buffered_stream (buffers[nfd]);
     }
 
@@ -276,8 +276,13 @@ int
 check_bash_input (fd)
      int fd;
 {
-  if (fd > 0 && fd_is_bash_input (fd))
-    return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
+  if (fd_is_bash_input (fd))
+    {
+      if (fd > 0)
+	return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
+      else if (fd == 0)
+        return ((sync_buffered_stream (fd) == -1) ? -1 : 0);
+    }
   return 0;
 }
       

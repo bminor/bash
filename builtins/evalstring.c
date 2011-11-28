@@ -84,6 +84,7 @@ parse_and_execute_cleanup ()
    	(flags & SEVAL_INTERACT) -> interactive = 1;
    	(flags & SEVAL_NOHIST) -> call bash_history_disable ()
    	(flags & SEVAL_NOFREE) -> don't free STRING when finished
+   	(flags & SEVAL_RESETLINE) -> reset line_number to 1
 */
 
 int
@@ -92,7 +93,7 @@ parse_and_execute (string, from_file, flags)
      const char *from_file;
      int flags;
 {
-  int code, x;
+  int code, x, lreset;
   volatile int should_jump_to_top_level, last_result;
   char *orig_string;
   COMMAND *volatile command;
@@ -106,6 +107,8 @@ parse_and_execute (string, from_file, flags)
   unwind_protect_int (line_number);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
+
+  lreset = flags & SEVAL_RESETLINE;
 
 #if defined (HISTORY)
   unwind_protect_int (remember_on_history);	/* can be used in scripts */
@@ -129,7 +132,15 @@ parse_and_execute (string, from_file, flags)
   end_unwind_frame ();
 
   parse_and_execute_level++;
-  push_stream (1);	/* reset the line number */
+
+  /* Reset the line number if the caller wants us to.  If we don't reset the
+     line number, we have to subtract one, because we will add one just
+     before executing the next command (resetting the line number sets it to
+     0; the first line number is 1). */
+  push_stream (lreset);
+  if (lreset == 0)
+    line_number--;
+    
   indirection_level++;
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     interactive = (flags & SEVAL_NONINT) ? 0 : 1;
@@ -141,11 +152,12 @@ parse_and_execute (string, from_file, flags)
 
   code = should_jump_to_top_level = 0;
   last_result = EXECUTION_SUCCESS;
-  command = (COMMAND *)NULL;
 
   with_input_from_string (string, from_file);
   while (*(bash_input.location.string))
     {
+      command = (COMMAND *)NULL;
+
       if (interrupt_state)
 	{
 	  last_result = EXECUTION_FAILURE;
@@ -163,15 +175,18 @@ parse_and_execute (string, from_file, flags)
 	  switch (code)
 	    {
 	    case FORCE_EOF:
+	    case ERREXIT:
 	    case EXITPROG:
-	      run_unwind_frame ("pe_dispose");
+	      if (command)
+		run_unwind_frame ("pe_dispose");
 	      /* Remember to call longjmp (top_level) after the old
 		 value for it is restored. */
 	      should_jump_to_top_level = 1;
 	      goto out;
 
 	    case DISCARD:
-	      run_unwind_frame ("pe_dispose");
+	      if (command)
+		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
 	      if (subshell_environment)
 		{

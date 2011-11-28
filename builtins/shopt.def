@@ -55,15 +55,17 @@ $END
 
 #define OPTFMT		"%-15s\t%s\n"
 
-extern int allow_null_glob_expansion, glob_dot_filenames;
+extern int allow_null_glob_expansion, fail_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
 extern int no_exit_on_failed_exec, print_shift_error;
 extern int check_hashed_filenames, promptvars;
 extern int cdspelling, expand_aliases;
+extern int extended_quote;
 extern int check_window_size;
 extern int glob_ignore_case;
 extern int hup_on_exit;
 extern int xpg_echo;
+extern int gnu_error_format;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -77,6 +79,7 @@ extern int force_append_history;
 #if defined (READLINE)
 extern int hist_verify, history_reediting, perform_hostname_completion;
 extern int no_empty_command_completion;
+extern int force_fignore;
 extern int enable_hostname_completion __P((int));
 #endif
 
@@ -88,9 +91,13 @@ extern int prog_completion_enabled;
 extern char *shell_name;
 #endif
 
+#if defined (DEBUGGER)
+extern int debugging_mode;
+#endif
+
 static void shopt_error __P((char *));
 
-static int set_interactive_comments __P((int));
+static int set_shellopts_after_change __P((int));
 
 #if defined (RESTRICTED_SHELL)
 static int set_restricted_shell __P((int));
@@ -115,10 +122,17 @@ static struct {
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
   { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
+#if defined (DEBUGGER)
+  { "extdebug", &debugging_mode, (shopt_set_func_t *)NULL },
+#endif
 #if defined (EXTENDED_GLOB)
   { "extglob", &extended_glob, (shopt_set_func_t *)NULL },
 #endif
+  { "extquote", &extended_quote, (shopt_set_func_t *)NULL },
+  { "failglob", &fail_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (READLINE)
+  { "force_fignore", &force_fignore, (shopt_set_func_t *)NULL },
+  { "gnu_errfmt", &gnu_error_format, (shopt_set_func_t *)NULL },
   { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
 #endif
 #if defined (HISTORY)
@@ -129,7 +143,7 @@ static struct {
   { "hostcomplete", &perform_hostname_completion, enable_hostname_completion },
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
-  { "interactive_comments", &interactive_comments, set_interactive_comments },
+  { "interactive_comments", &interactive_comments, set_shellopts_after_change },
 #if defined (HISTORY)
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif
@@ -435,7 +449,7 @@ set_shopt_o_options (mode, list, quiet)
 /* If we set or unset interactive_comments with shopt, make sure the
    change is reflected in $SHELLOPTS. */
 static int
-set_interactive_comments (mode)
+set_shellopts_after_change (mode)
      int mode;
 {
   set_shellopts ();

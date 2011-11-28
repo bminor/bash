@@ -56,7 +56,8 @@ convert_var_to_array (var)
 
   oldval = value_cell (var);
   array = array_create ();
-  array_insert (array, 0, oldval);
+  if (oldval)
+    array_insert (array, 0, oldval);
 
   FREE (value_cell (var));
   var_setarray (var, array);
@@ -395,13 +396,13 @@ skipsubscript (s, i)
 	  state_bak = state;
 	  mblength = mbrlen (s + i, slength, &state);
 
-	  if (mblength == (size_t)-2 || mblength == (size_t)-1)
+	  if (MB_INVALIDCH (mblength))
 	    {
 	      state = state_bak;
 	      i++;
 	      slength--;
 	    }
-	  else if (mblength == 0)
+	  else if (MB_NULLWCH (mblength))
 	    return i;
 	  else
 	    {
@@ -623,6 +624,9 @@ array_value_internal (s, quoted, allow_all, rtype)
     return (char *)NULL;
 #endif
 
+  if (len == 0)
+    return ((char *)NULL);	/* error message already printed */
+
   /* [ */
   if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
@@ -704,4 +708,41 @@ get_array_value (s, allow_all, rtype)
   return (array_value_internal (s, 0, allow_all, rtype));
 }
 
+char *
+array_keys (s, quoted)
+     char *s;
+     int quoted;
+{
+  int len;
+  char *retval, *t, *temp;
+  WORD_LIST *l;
+  SHELL_VAR *var;
+
+  var = array_variable_part (s, &t, &len);
+
+  /* [ */
+  if (var == 0 || ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != ']')
+    return (char *)NULL;
+
+  if (array_p (var) == 0)
+    l = add_string_to_list ("0", (WORD_LIST *)NULL);
+  else
+    {
+      l = array_keys_to_word_list (array_cell (var));
+      if (l == (WORD_LIST *)NULL)
+        return ((char *) NULL);
+    }
+
+  if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+    {
+      temp = string_list_dollar_star (l);
+      retval = quote_string (temp);
+      free (temp);
+    }
+  else	/* ${!name[@]} or unquoted ${!name[*]} */
+    retval = string_list_dollar_at (l, quoted);
+
+  dispose_words (l);
+  return retval;
+}
 #endif /* ARRAY_VARS */

@@ -179,13 +179,14 @@ progcomp_insert (cmd, cs)
   if (prog_completes == 0)
     progcomp_create ();
 
+  cs->refcount++;
   item = hash_insert (cmd, prog_completes, 0);
   if (item->data)
     free_progcomp (item->data);
   else
     item->key = savestring (cmd);
   item->data = cs;
-  cs->refcount++;
+
   return 1;
 }
 

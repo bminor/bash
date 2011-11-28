@@ -140,16 +140,17 @@ execute_cmd.h	f
 redir.h		f
 bashtypes.h	f
 mailcheck.h	f
-pathnames.h	f
 xmalloc.h	f
 y.tab.c		f
 y.tab.h		f
 parser-built	f
+pathnames.h.in	f
 builtins/Makefile.in	f
 builtins/alias.def	f
 builtins/bind.def	f
 builtins/break.def	f
 builtins/builtin.def	f
+builtins/caller.def	f
 builtins/cd.def		f
 builtins/colon.def	f
 builtins/command.def	f
@@ -313,14 +314,15 @@ lib/readline/rlstdc.h	f
 lib/readline/rlprivate.h	f
 lib/readline/xmalloc.h	f
 lib/readline/doc/Makefile	f
-lib/readline/doc/manvers.texinfo	f
-lib/readline/doc/rlman.texinfo	f
-lib/readline/doc/rltech.texinfo	f
-lib/readline/doc/rluser.texinfo	f
-lib/readline/doc/rluserman.texinfo	f
-lib/readline/doc/hist.texinfo	f
-lib/readline/doc/hstech.texinfo	f
-lib/readline/doc/hsuser.texinfo	f
+lib/readline/doc/version.texi	f
+lib/readline/doc/rlman.texi	f
+lib/readline/doc/rltech.texi	f
+lib/readline/doc/rluser.texi	f
+lib/readline/doc/rluserman.texi	f
+lib/readline/doc/history.texi	f
+lib/readline/doc/hstech.texi	f
+lib/readline/doc/hsuser.texi	f
+lib/readline/doc/fdl.texi	f
 lib/readline/examples/Makefile	f
 lib/readline/examples/excallback.c	f
 lib/readline/examples/fileman.c	f
@@ -351,6 +353,7 @@ lib/sh/pathcanon.c	f
 lib/sh/pathphys.c	f
 lib/sh/rename.c		f
 lib/sh/setlinebuf.c	f
+lib/sh/shmatch.c	f
 lib/sh/shquote.c	f
 lib/sh/shtty.c		f
 lib/sh/snprintf.c	f
@@ -362,6 +365,7 @@ lib/sh/strindex.c	f
 lib/sh/stringlist.c	f
 lib/sh/stringvec.c	f
 lib/sh/strpbrk.c	f
+lib/sh/strstr.c		f
 lib/sh/strtod.c		f
 lib/sh/strtoimax.c	f
 lib/sh/strtol.c		f
@@ -427,9 +431,13 @@ doc/README	f
 doc/INTRO	f
 doc/texinfo.tex	f
 doc/bashref.texi	f
+doc/version.texi	f
 doc/bashref.info	f
 doc/article.ms	f
 doc/htmlpost.sh	f	755
+doc/infopost.sh	f	755
+doc/fdl.texi	f
+doc/fdl.txt	f
 support/Makefile.in	f
 support/bashversion.c	f
 support/config.guess	f
@@ -450,7 +458,7 @@ support/zecho.c		f
 support/SYMLINKS	f
 support/fixlinks	f	755
 support/install.sh	f	755
-support/texi2dvi	f
+support/texi2dvi	f	755
 support/texi2html	f	755
 support/xenix-link.sh	f	755
 support/shobj-conf	f	755
@@ -468,6 +476,7 @@ examples/complete/complete.ianmac	f
 examples/complete/complete2.ianmac	f
 examples/complete/complete.freebsd	f
 examples/complete/complete.gnu-longopt	f
+examples/complete/bashcc-1.0.1.tar.gz	f
 examples/loadables/README	f
 examples/loadables/template.c	f
 examples/loadables/Makefile.in	f
@@ -476,6 +485,7 @@ examples/loadables/hello.c	f
 examples/loadables/print.c	f
 examples/loadables/realpath.c	f
 examples/loadables/sleep.c	f
+examples/loadables/strftime.c	f
 examples/loadables/truefalse.c	f
 examples/loadables/getconf.h	f
 examples/loadables/getconf.c	f
@@ -601,6 +611,8 @@ examples/misc/aliasconv.sh	f
 examples/misc/aliasconv.bash	f
 examples/misc/cshtobash	f
 tests/README		f
+tests/alias.tests	f
+tests/alias.right	f
 tests/arith-for.tests	f
 tests/arith-for.right	f
 tests/arith.tests	f
@@ -609,7 +621,7 @@ tests/array.tests	f
 tests/array.right	f
 tests/array-at-star	f
 tests/array2.right	f
-tests/braces-tests	f
+tests/braces.tests	f
 tests/braces.right	f
 tests/builtins.tests	f
 tests/builtins.right	f
@@ -624,7 +636,13 @@ tests/cond.tests	f
 tests/cond.right	f
 tests/cprint.tests	f
 tests/cprint.right	f
+tests/dbg-support.right	f
+tests/dbg-support.sub	f
+tests/dbg-support.tests	f
+tests/dbg-support2.right	f
+tests/dbg-support2.tests	f
 tests/dollar-at-star	f
+tests/dollar-star1.sub	f
 tests/dollar.right	f
 tests/dstack.tests	f
 tests/dstack.right	f
@@ -640,6 +658,7 @@ tests/exec3.sub		f
 tests/exec4.sub		f
 tests/exec5.sub		f
 tests/exec6.sub		f
+tests/exec7.sub		f
 tests/exp-tests		f
 tests/exp.right		f
 tests/extglob.tests	f
@@ -690,6 +709,7 @@ tests/new-exp.tests	f
 tests/new-exp1.sub	f
 tests/new-exp2.sub	f
 tests/new-exp3.sub	f
+tests/new-exp4.sub	f
 tests/new-exp.right	f
 tests/nquote.tests	f
 tests/nquote.right	f
@@ -699,6 +719,8 @@ tests/nquote2.tests	f
 tests/nquote2.right	f
 tests/nquote3.tests	f
 tests/nquote3.right	f
+tests/nquote4.tests	f
+tests/nquote4.right	f
 tests/posix2.tests	f
 tests/posix2.right	f
 tests/posixpat.tests	f
@@ -725,12 +747,14 @@ tests/redir3.in2	f
 tests/redir4.sub	f
 tests/redir4.in1	f
 tests/redir5.sub	f
+tests/redir6.sub	f
 tests/rhs-exp.tests	f
 tests/rhs-exp.right	f
 tests/rsh.tests		f
 tests/rsh.right		f
 tests/run-all		f
 tests/run-minimal	f
+tests/run-alias		f
 tests/run-arith-for	f
 tests/run-arith		f
 tests/run-array		f
@@ -739,6 +763,8 @@ tests/run-braces	f
 tests/run-builtins	f
 tests/run-cond		f
 tests/run-cprint	f
+tests/run-dbg-support	f
+tests/run-dbg-support2	f
 tests/run-dirstack	f
 tests/run-dollars	f
 tests/run-errors	f
@@ -763,6 +789,7 @@ tests/run-nquote	f
 tests/run-nquote1	f
 tests/run-nquote2	f
 tests/run-nquote3	f
+tests/run-nquote4	f
 tests/run-posix2	f
 tests/run-posixpat	f
 tests/run-precedence	f
@@ -773,6 +800,7 @@ tests/run-redir		f
 tests/run-rhs-exp	f
 tests/run-rsh		f
 tests/run-set-e		f
+tests/run-set-x		f
 tests/run-shopt		f
 tests/run-strip		f
 tests/run-test		f
@@ -782,6 +810,8 @@ tests/run-type		f
 tests/run-varenv	f
 tests/set-e-test	f
 tests/set-e.right	f
+tests/set-x.tests	f
+tests/set-x.right	f
 tests/shopt.tests	f	
 tests/shopt.right	f
 tests/strip.tests	f

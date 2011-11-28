@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,6 +119,10 @@
    command. */
 #undef COND_COMMAND
 
+/* Define COND_REGEXP if you want extended regular expression matching and the
+   =~ binary operator in the [[...]] conditional command. */
+#define COND_REGEXP
+
 /* Define ARITH_FOR_COMMAND if you want the ksh93-style
 	for (( init; test; step )) do list; done
    arithmetic for command. */
@@ -131,6 +135,14 @@
 /* Define PROGRAMMABLE_COMPLETION for the programmable completion features
    and the complete builtin. */
 #undef PROGRAMMABLE_COMPLETION
+
+/* Define NO_MULTIBYTE_SUPPORT to not compile in support for multibyte
+   characters, even if the OS supports them. */
+#undef NO_MULTIBYTE_SUPPORT
+
+/* Define DEBUGGER if you want to compile in some features used only by the 
+   bash debugger. */
+#undef DEBUGGER
 
 /* Define MEMSCRAMBLE if you want the bash malloc and free to scramble
    memory contents on malloc() and free(). */
@@ -314,6 +326,7 @@
    libraries. */
 
 /* Define if `sys_siglist' is declared by <signal.h> or <unistd.h>.  */
+#undef HAVE_DECL_SYS_SIGLIST
 #undef SYS_SIGLIST_DECLARED
 
 /* Define if `_sys_siglist' is declared by <signal.h> or <unistd.h>.  */
@@ -324,8 +337,6 @@
 #undef HAVE_UNDER_SYS_SIGLIST
 
 #undef HAVE_SYS_ERRLIST
-
-#undef HAVE_TIMEVAL
 
 #undef HAVE_TZNAME
 
@@ -359,6 +370,10 @@
 #undef HAVE_STRUCT_TM_TM_ZONE
 #undef HAVE_TM_ZONE
 
+#undef HAVE_TIMEVAL
+
+#undef HAVE_STRUCT_TIMEZONE
+
 /* Characteristics of definitions in the system header files. */
 
 #undef HAVE_GETPW_DECLS
@@ -380,6 +395,7 @@
 
 #undef HAVE_DECL_STRTOLD
 
+#undef STRTOLD_BROKEN
 
 #undef HAVE_MBSTATE_T
 
@@ -419,6 +435,8 @@
 #undef HAVE_STD_UNSETENV
 
 #undef HAVE_PRINTF_A_FORMAT
+
+#undef CTYPE_NON_ASCII
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 #undef HAVE_LANGINFO_CODESET
@@ -564,6 +582,12 @@
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
+/* Define if you have the mbrlen function. */
+#undef HAVE_MBRLEN
+
+/* Define if you have the mbrtowc function. */
+#undef HAVE_MBRTOWC
+
 /* Define if you have the mbsrtowcs function. */
 #undef HAVE_MBSRTOWCS
 
@@ -584,6 +608,12 @@
 
 /* Define if you have the readlink function. */
 #undef HAVE_READLINK
+
+/* Define if you have the regcomp function. */
+#undef HAVE_REGCOMP
+
+/* Define if you have the regexec function. */
+#undef HAVE_REGEXEC
 
 /* Define if you have the rename function. */
 #undef HAVE_RENAME
@@ -638,6 +668,9 @@
 
 /* Define if you have the strpbrk function. */
 #undef HAVE_STRPBRK
+
+/* Define if you have the strstr function. */
+#undef HAVE_STRSTR
 
 /* Define if you have the strtod function. */
 #undef HAVE_STRTOD
@@ -708,6 +741,9 @@
 /* Define if you have the wait3 function.  */
 #undef HAVE_WAIT3
 
+/* Define if you have the wctomb function.  */
+#undef HAVE_WCTOMB
+
 /* Define if you have the wcwidth function.  */
 #undef HAVE_WCWIDTH
 
@@ -748,6 +784,9 @@
 
 /* Define if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
+
+/* Define if you have the <regex.h> header file. */
+#undef HAVE_REGEX_H
 
 /* Define if you have the <stdlib.h> header file.  */
 #undef HAVE_STDLIB_H

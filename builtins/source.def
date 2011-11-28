@@ -23,16 +23,20 @@ $PRODUCES source.c
 
 $BUILTIN source
 $FUNCTION source_builtin
-$SHORT_DOC source filename
+$SHORT_DOC source filename [arguments]
 Read and execute commands from FILENAME and return.  The pathnames
-in $PATH are used to find the directory containing FILENAME.
+in $PATH are used to find the directory containing FILENAME.  If any
+ARGUMENTS are supplied, they become the positional parameters when
+FILENAME is executed.
 $END
 $BUILTIN .
 $DOCNAME dot
 $FUNCTION source_builtin
-$SHORT_DOC . filename
+$SHORT_DOC . filename [arguments]
 Read and execute commands from FILENAME and return.  The pathnames
-in $PATH are used to find the directory containing FILENAME.
+in $PATH are used to find the directory containing FILENAME.  If any
+ARGUMENTS are supplied, they become the positional parameters when
+FILENAME is executed.
 $END
 /* source.c - Implements the `.' and `source' builtins. */
 
@@ -41,7 +45,7 @@ $END
 #include "../bashtypes.h"
 #include "posixstat.h"
 #include "filecntl.h"
-#ifndef _MINIX
+#if ! defined(_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include <errno.h>
@@ -53,9 +57,11 @@ $END
 #include "../bashansi.h"
 
 #include "../shell.h"
+#include "../flags.h"
 #include "../findcmd.h"
 #include "common.h"
 #include "bashgetopt.h"
+#include "../trap.h"
 
 #if !defined (errno)
 extern int errno;
@@ -85,6 +91,7 @@ maybe_pop_dollar_vars ()
     dispose_saved_dollar_vars ();
   else
     pop_dollar_vars ();
+  pop_args ();	/* restore BASH_ARGC and BASH_ARGV */
   set_dollar_vars_unchanged ();
 }
 
@@ -97,7 +104,7 @@ source_builtin (list)
      WORD_LIST *list;
 {
   int result;
-  char *filename;
+  char *filename, *debug_trap;
 
   if (no_options (list))
     return (EX_USAGE);
@@ -140,10 +147,23 @@ source_builtin (list)
       push_dollar_vars ();
       add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
       remember_args (list->next, 1);
+      push_args (list->next);	/* Update BASH_ARGV and BASH_ARGC */
     }
   set_dollar_vars_unchanged ();
 
-  result = source_file (filename);
+  /* Don't inherit the DEBUG trap unless function_trace_mode (overloaded)
+     is set.  XXX - should sourced files inherit the RETURN trap?  Functions
+     don't. */
+  debug_trap = TRAP_STRING (DEBUG_TRAP);
+  if (debug_trap && function_trace_mode == 0)
+    {
+      debug_trap = savestring (debug_trap);
+      add_unwind_protect (xfree, debug_trap);
+      add_unwind_protect (set_debug_trap, debug_trap);
+      restore_default_signal (DEBUG_TRAP);
+    }
+
+  result = source_file (filename, (list && list->next));
 
   run_unwind_frame ("source");
 

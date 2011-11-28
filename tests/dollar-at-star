@@ -207,4 +207,8 @@ case "$@" in
 *)	echo bad 4;;
 esac
 
+# tests for special expansion of "$*" and "${array[*]}" when used with other
+# expansions -- bugs through bash-2.05b
+${THIS_SH} ./dollar-star1.sub
+
 exit 0

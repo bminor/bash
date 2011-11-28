@@ -73,6 +73,7 @@ $END
 extern int find_reserved_word __P((char *));
 
 extern char *this_command_name;
+extern int expand_aliases;
 
 /* For each word in LIST, find out what the shell is going to do with
    it as a simple command. i.e., which file would this shell use to
@@ -221,7 +222,7 @@ describe_command (command, dflags)
 
 #if defined (ALIAS)
   /* Command is an alias? */
-  if (((dflags & CDESC_FORCE_PATH) == 0) && (alias = find_alias (command)))
+  if (((dflags & CDESC_FORCE_PATH) == 0) && expand_aliases && (alias = find_alias (command)))
     {
       if (dflags & CDESC_TYPE)
 	puts ("alias");

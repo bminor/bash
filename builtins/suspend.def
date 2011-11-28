@@ -104,6 +104,9 @@ suspend_builtin (list)
 	}
     }
 
+  /* XXX - should we put ourselves back into the original pgrp now?  If so,
+     call end_job_control() here and do the right thing in suspend_continue
+     (that is, call restart_job_control()). */
   old_cont = (SigHandler *)set_signal_handler (SIGCONT, suspend_continue);
 #if 0
   old_stop = (SigHandler *)set_signal_handler (SIGSTOP, SIG_DFL);

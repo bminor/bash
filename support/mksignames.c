@@ -1,7 +1,7 @@
 /* signames.c -- Create and write `signames.h', which contains an array of
    signal names. */
 
-/* Copyright (C) 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,10 +39,11 @@
  *	EXIT == 0
  *	DEBUG == NSIG
  *	ERR == NSIG+1
+ *	RETURN == NSIG+2
  */
-#define LASTSIG NSIG+1
+#define LASTSIG NSIG+2
 
-char *signal_names[2 * NSIG + 3];
+char *signal_names[2 * (LASTSIG)];
 
 #define signal_names_size (sizeof(signal_names)/sizeof(signal_names[0]))
 
@@ -369,6 +370,7 @@ initialize_signames ()
 
   signal_names[NSIG] = "DEBUG";
   signal_names[NSIG+1] = "ERR";
+  signal_names[NSIG+2] = "RETURN";
 }
 
 void
@@ -382,7 +384,7 @@ write_signames (stream)
   fprintf (stream, "   Do not edit.  Edit support/mksignames.c instead. */\n\n");
   fprintf (stream,
 	   "/* A translation list so we can be polite to our users. */\n");
-  fprintf (stream, "char *signal_names[NSIG + 3] = {\n");
+  fprintf (stream, "char *signal_names[NSIG + 4] = {\n");
 
   for (i = 0; i <= LASTSIG; i++)
     fprintf (stream, "    \"%s\",\n", signal_names[i]);

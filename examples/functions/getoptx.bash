@@ -134,7 +134,7 @@ function getoptex()
   let OPTIND || OPTIND=1
   [ $OPTIND -lt $# ] || return 1
   shift $OPTIND
-  if [ "$1" != "-" -a "$1" != "${1#-}" ]
+  if [ "$1" != "-" ] && [ "$1" != "${1#-}" ]
   then OPTIND=$[OPTIND+1]; if [ "$1" != "--" ]
   then
     local o
@@ -298,5 +298,4 @@ function getopt()
 #         cut here
 #**************************************
 #*** (end of getopt2) ***
-
 

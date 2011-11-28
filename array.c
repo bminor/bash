@@ -154,16 +154,17 @@ ARRAY_ELEMENT	*s, *e;
  * element as the argument.
  */
 void
-array_walk(a, func)
+array_walk(a, func, udata)
 ARRAY	*a;
 sh_ae_map_func_t *func;
+void	*udata;
 {
 	register ARRAY_ELEMENT *ae;
 
 	if (a == 0 || array_empty(a))
 		return;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
-		if ((*func)(ae) < 0)
+		if ((*func)(ae, udata) < 0)
 			return;
 }
 
@@ -265,6 +266,21 @@ char	*s;
 	return (a->num_elements);
 }
 
+ARRAY_ELEMENT *
+array_unshift_element(a)
+ARRAY	*a;
+{
+	return (array_shift (a, 1, 0));
+}
+
+int
+array_shift_element(a, v)
+ARRAY	*a;
+char	*v;
+{
+	return (array_rshift (a, 1, v));
+}
+
 ARRAY	*
 array_quote(array)
 ARRAY	*array;
@@ -283,13 +299,14 @@ ARRAY	*array;
 }
 
 char *
-array_subrange (a, start, end, quoted)
+array_subrange (a, start, end, starsub, quoted)
 ARRAY	*a;
 arrayind_t	start, end;
-int	quoted;
+int	starsub, quoted;
 {
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
+	char		*ifs, sep[2];
 
 	p = array_head (a);
 	if (p == 0 || array_empty (a) || start > array_num_elements (a))
@@ -302,7 +319,14 @@ int	quoted;
 	for (h = p; p != a->head && i < end; i++, p = element_forw(p))
 		;
 
-	return (array_to_string_internal (h, p, " ", quoted));
+	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
+		ifs = getifs();
+		sep[0] = ifs ? *ifs : '\0';
+	} else
+		sep[0] = ' ';
+	sep[1] = '\0';
+
+	return (array_to_string_internal (h, p, sep, quoted));
 }
 
 char *
@@ -313,7 +337,7 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t;
+	char	*t, *ifs, sifs[2];
 
 	if (array_head (a) == 0 || array_empty (a))
 		return ((char *)NULL);
@@ -327,7 +351,13 @@ int	mflags;
 
 	if (mflags & MATCH_QUOTED)
 		array_quote (a2);
-	t = array_to_string (a2, " ", 0);
+	if (mflags & MATCH_STARSUB) {
+		ifs = getifs();
+		sifs[0] = ifs ? *ifs : '\0';
+		sifs[1] = '\0';
+		t = array_to_string (a2, sifs, 0);
+	} else
+		t = array_to_string (a2, " ", 0);
 	array_dispose (a2);
 
 	return t;
@@ -365,8 +395,10 @@ void
 array_dispose_element(ae)
 ARRAY_ELEMENT	*ae;
 {
-	FREE(ae->value);
-	free(ae);
+	if (ae) {
+		FREE(ae->value);
+		free(ae);
+	}
 }
 
 /*
@@ -460,6 +492,7 @@ arrayind_t	i;
 
 /* Convenience routines for the shell to translate to and from the form used
    by the rest of the code. */
+
 WORD_LIST *
 array_to_word_list(a)
 ARRAY	*a;
@@ -485,6 +518,25 @@ WORD_LIST	*list;
 		return((ARRAY *)NULL);
 	a = array_create();
 	return (array_assign_list (a, list));
+}
+
+WORD_LIST *
+array_keys_to_word_list(a)
+ARRAY	*a;
+{
+	WORD_LIST	*list;
+	ARRAY_ELEMENT	*ae;
+	char		*t;
+
+	if (a == 0 || array_empty(a))
+		return((WORD_LIST *)NULL);
+	list = (WORD_LIST *)NULL;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		t = itos(element_index(ae));
+		list = make_word_list (make_bare_word(t), list);
+		free(t);
+	}
+	return (REVERSE_LIST(list, WORD_LIST *));
 }
 
 ARRAY *
@@ -767,7 +819,7 @@ print_array(a)
 ARRAY	*a;
 {
 	printf("\n");
-	array_walk(a, print_element);
+	array_walk(a, print_element, (void *)NULL);
 }
 
 main()

@@ -981,11 +981,12 @@ AC_MSG_CHECKING(which library has the termcap functions)
 _bash_needmsg=
 fi
 AC_CACHE_VAL(bash_cv_termcap_lib,
-[AC_CHECK_LIB(termcap, tgetent, bash_cv_termcap_lib=libtermcap,
+[AC_CHECK_FUNC(tgetent, bash_cv_termcap_lib=libc,
+  [AC_CHECK_LIB(termcap, tgetent, bash_cv_termcap_lib=libtermcap,
     [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
         [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
 	    [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
-	        bash_cv_termcap_lib=gnutermcap)])])])])
+	        bash_cv_termcap_lib=gnutermcap)])])])])])
 if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
 fi
@@ -1002,6 +1003,9 @@ TERMCAP_LIB=-ltinfo
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncurses; then
 TERMCAP_LIB=-lncurses
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libc; then
+TERMCAP_LIB=
 TERMCAP_DEP=
 else
 TERMCAP_LIB=-lcurses
@@ -1138,6 +1142,22 @@ AC_EGREP_HEADER(struct timeval, sys/time.h,
 AC_MSG_RESULT($bash_cv_struct_timeval)
 if test $bash_cv_struct_timeval = yes; then
   AC_DEFINE(HAVE_TIMEVAL)
+fi
+])
+
+AC_DEFUN(BASH_STRUCT_TIMEZONE,
+[AC_MSG_CHECKING(for struct timezone in sys/time.h and time.h)
+AC_CACHE_VAL(bash_cv_struct_timezone,
+[
+AC_EGREP_HEADER(struct timezone, sys/time.h,
+		bash_cv_struct_timezone=yes,
+		AC_EGREP_HEADER(struct timezone, time.h,
+			bash_cv_struct_timezone=yes,
+			bash_cv_struct_timezone=no))
+])
+AC_MSG_RESULT($bash_cv_struct_timezone)
+if test $bash_cv_struct_timezone = yes; then
+  AC_DEFINE(HAVE_STRUCT_TIMEZONE)
 fi
 ])
 
@@ -1526,9 +1546,9 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
-[if test -d /dev/fd  && test -r /dev/fd/0; then
+[if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
    bash_cv_dev_fd=standard
- elif test -d /proc/self/fd && test -r /proc/self/fd/0; then
+ elif test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
    bash_cv_dev_fd=whacky
  else
    bash_cv_dev_fd=absent
@@ -1547,9 +1567,9 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && test -r /dev/stdin; then
+[if test -d /dev/fd && test -r /dev/stdin < /dev/null; then
    bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && test -r /dev/stdin; then
+ elif test -d /proc/self/fd && test -r /dev/stdin < /dev/null; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent
@@ -1653,17 +1673,18 @@ AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
+AC_CHECK_FUNC(mbrtowc, AC_DEFINE(HAVE_MBRTOWC))
+AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
+AC_CHECK_FUNC(wctomb, AC_DEFINE(HAVE_WCTOMB))
 AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 
 AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
-[AC_TRY_RUN([
-#include <wchar.h>
-int
-main ()
-{
+[AC_TRY_COMPILE([
+#include <wchar.h>], [
   mbstate_t ps;
-  return 0;
-}], bash_cv_have_mbstate_t=yes,  bash_cv_have_mbstate_t=no)])
+  mbstate_t *psp;
+  psp = (mbstate_t *)0;
+], bash_cv_have_mbstate_t=yes,  bash_cv_have_mbstate_t=no)])
 if test $bash_cv_have_mbstate_t = yes; then
 	AC_DEFINE(HAVE_MBSTATE_T)
 fi
@@ -1712,7 +1733,8 @@ LIBS="$LIBS -lreadline ${TERMCAP_LIB}"
 CFLAGS="$CFLAGS -I${ac_cv_rl_includedir}"
 LDFLAGS="$LDFLAGS -L${ac_cv_rl_libdir}"
 
-AC_TRY_RUN([
+AC_CACHE_VAL(ac_cv_rl_version,
+[AC_TRY_RUN([
 #include <stdio.h>
 #include <readline/readline.h>
 
@@ -1728,7 +1750,7 @@ main()
 ],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
-ac_cv_rl_version='4.2')
+ac_cv_rl_version='4.2')])
 
 CFLAGS="$_save_CFLAGS"
 LDFLAGS="$_save_LDFLAGS"
@@ -1789,4 +1811,78 @@ RL_INCLUDEDIR=$ac_cv_rl_includedir
 AC_MSG_RESULT($ac_cv_rl_version)
 
 fi
+])
+
+AC_DEFUN(BASH_FUNC_CTYPE_NONASCII,
+[
+AC_MSG_CHECKING(whether the ctype macros accept non-ascii characters)
+AC_CACHE_VAL(bash_cv_func_ctype_nonascii,
+[AC_TRY_RUN([
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
+#include <stdio.h>
+#include <ctype.h>
+
+main(c, v)
+int	c;
+char	*v[];
+{
+	char	*deflocale;
+	unsigned char x;
+	int	r1, r2;
+
+#ifdef HAVE_SETLOCALE
+	/* We take a shot here.  If that locale is not known, try the
+	   system default.  We try this one because '\342' (226) is
+	   known to be a printable character in that locale. */
+	deflocale = setlocale(LC_ALL, "en_US.ISO8859-1");
+	if (deflocale == 0)
+		deflocale = setlocale(LC_ALL, "");
+#endif
+
+	x = '\342';
+	r1 = isprint(x);
+	x -= 128;
+	r2 = isprint(x);
+	exit (r1 == 0 || r2 == 0);
+}
+], bash_cv_func_ctype_nonascii=yes, bash_cv_func_ctype_nonascii=no,
+   [AC_MSG_WARN(cannot check ctype macros if cross compiling -- defaulting to no)
+    bash_cv_func_ctype_nonascii=no]
+)])
+AC_MSG_RESULT($bash_cv_func_ctype_nonascii)
+if test $bash_cv_func_ctype_nonascii = yes; then
+AC_DEFINE(CTYPE_NON_ASCII)
+fi
+])
+
+dnl
+dnl tests added for bashdb
+dnl
+
+
+AC_DEFUN([AM_PATH_LISPDIR],
+ [AC_ARG_WITH(lispdir, AC_HELP_STRING([--with-lispdir], [override the default lisp directory]),
+  [ lispdir="$withval" 
+    AC_MSG_CHECKING([where .elc files should go])
+    AC_MSG_RESULT([$lispdir])],
+  [
+  # If set to t, that means we are running in a shell under Emacs.
+  # If you have an Emacs named "t", then use the full path.
+  test x"$EMACS" = xt && EMACS=
+  AC_CHECK_PROGS(EMACS, emacs xemacs, no)
+  if test $EMACS != "no"; then
+    if test x${lispdir+set} != xset; then
+      AC_CACHE_CHECK([where .elc files should go], [am_cv_lispdir], [dnl
+	am_cv_lispdir=`$EMACS -batch -q -eval '(while load-path (princ (concat (car load-path) "\n")) (setq load-path (cdr load-path)))' | sed -n -e 's,/$,,' -e '/.*\/lib\/\(x\?emacs\/site-lisp\)$/{s,,${libdir}/\1,;p;q;}' -e '/.*\/share\/\(x\?emacs\/site-lisp\)$/{s,,${datadir}/\1,;p;q;}'`
+	if test -z "$am_cv_lispdir"; then
+	  am_cv_lispdir='${datadir}/emacs/site-lisp'
+	fi
+      ])
+      lispdir="$am_cv_lispdir"
+    fi
+  fi
+ ])
+ AC_SUBST(lispdir)
 ])

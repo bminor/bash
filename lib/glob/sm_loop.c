@@ -134,6 +134,19 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	      if ((flags & FNM_PATHNAME) && sc == L('/'))
 		/* A slash does not match a wildcard under FNM_PATHNAME. */
 		return FNM_NOMATCH;
+#ifdef EXTENDED_GLOB
+	      else if ((flags & FNM_EXTMATCH) && c == L('?') && *p == L('(')) /* ) */
+		{
+		  CHAR *newn;
+		  for (newn = n; newn < se; ++newn)
+		    {
+		      if (EXTMATCH (c, newn, se, p, pe, flags) == 0)
+			return (0);
+		    }
+		  /* We didn't match.  If we have a `?(...)', that's failure. */
+		  return FNM_NOMATCH;
+		}
+#endif
 	      else if (c == L('?'))
 		{
 		  if (sc == L('\0'))

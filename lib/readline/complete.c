@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #if defined (HAVE_SYS_FILE_H)
-#include <sys/file.h>
+#  include <sys/file.h>
 #endif
 
 #if defined (HAVE_UNISTD_H)
@@ -105,6 +105,8 @@ static void set_completion_defaults PARAMS((int));
 static int get_y_or_n PARAMS((int));
 static int _rl_internal_pager PARAMS((int));
 static char *printable_part PARAMS((char *));
+static int fnwidth PARAMS((const char *));
+static int fnprint PARAMS((const char *));
 static int print_filename PARAMS((char *, char *));
 
 static char **gen_completion_matches PARAMS((char *, int, int, rl_compentry_func_t *, int, int));
@@ -129,6 +131,10 @@ static char *make_quoted_replacement PARAMS((char *, int, char *));
 
 /* If non-zero, non-unique completions always show the list of matches. */
 int _rl_complete_show_all = 0;
+
+/* If non-zero, non-unique completions show the list of matches, unless it
+   is not possible to do partial completion and modify the line. */
+int _rl_complete_show_unmodified = 0;
 
 /* If non-zero, completed directory names have a slash appended. */
 int _rl_complete_mark_directories = 1;
@@ -214,7 +220,7 @@ const char *rl_basic_quote_characters = "\"'";
 /* The list of characters that signal a break between words for
    rl_complete_internal.  The default list is the contents of
    rl_basic_word_break_characters.  */
-const char *rl_completer_word_break_characters = (const char *)NULL;
+/*const*/ char *rl_completer_word_break_characters = (/*const*/ char *)NULL;
 
 /* List of characters which can be used to quote a substring of the line.
    Completion occurs on the entire substring, and within the substring
@@ -320,6 +326,8 @@ rl_complete (ignore, invoking_key)
     return (rl_complete_internal ('?'));
   else if (_rl_complete_show_all)
     return (rl_complete_internal ('!'));
+  else if (_rl_complete_show_unmodified)
+    return (rl_complete_internal ('@'));
   else
     return (rl_complete_internal (TAB));
 }
@@ -352,6 +360,8 @@ rl_completion_mode (cfunc)
     return '?';
   else if (_rl_complete_show_all)
     return '!';
+  else if (_rl_complete_show_unmodified)
+    return '@';
   else
     return TAB;
 }
@@ -520,52 +530,139 @@ printable_part (pathname)
     return ++temp;
 }
 
+/* Compute width of STRING when displayed on screen by print_filename */
+static int
+fnwidth (string)
+     const char *string;
+{
+  int width, pos;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+  int left, w;
+  size_t clen;
+  wchar_t wc;
+
+  left = strlen (string) + 1;
+  memset (&ps, 0, sizeof (mbstate_t));
+#endif
+
+  width = pos = 0;
+  while (string[pos])
+    {
+      if (CTRL_CHAR (*string) || *string == RUBOUT)
+	{
+	  width += 2;
+	  pos++;
+	}
+      else
+	{
+#if defined (HANDLE_MULTIBYTE)
+	  clen = mbrtowc (&wc, string + pos, left - pos, &ps);
+	  if (MB_INVALIDCH (clen))
+	    {
+	      width++;
+	      pos++;
+	      memset (&ps, 0, sizeof (mbstate_t));
+	    }
+	  else if (MB_NULLWCH (clen))
+	    break;
+	  else
+	    {
+	      pos += clen;
+	      w = wcwidth (wc);
+	      width += (w >= 0) ? w : 1;
+	    }
+#else
+	  width++;
+	  pos++;
+#endif
+	}
+    }
+
+  return width;
+}
+
+static int
+fnprint (to_print)
+     const char *to_print;
+{
+  int printed_len;
+  const char *s;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+  const char *end;
+  size_t tlen;
+
+  end = to_print + strlen (to_print) + 1;
+  memset (&ps, 0, sizeof (mbstate_t));
+#endif
+
+  printed_len = 0;
+  s = to_print;
+  while (*s)
+    {
+      if (CTRL_CHAR (*s))
+        {
+          putc ('^', rl_outstream);
+          putc (UNCTRL (*s), rl_outstream);
+          printed_len += 2;
+          s++;
+#if defined (HANDLE_MULTIBYTE)
+	  memset (&ps, 0, sizeof (mbstate_t));
+#endif
+        }
+      else if (*s == RUBOUT)
+	{
+	  putc ('^', rl_outstream);
+	  putc ('?', rl_outstream);
+	  printed_len += 2;
+	  s++;
+#if defined (HANDLE_MULTIBYTE)
+	  memset (&ps, 0, sizeof (mbstate_t));
+#endif
+	}
+      else
+	{
+#if defined (HANDLE_MULTIBYTE)
+	  tlen = mbrlen (s, end - s, &ps);
+	  if (MB_INVALIDCH (tlen))
+	    {
+	      tlen = 1;
+	      memset (&ps, 0, sizeof (mbstate_t));
+	    }
+	  else if (MB_NULLWCH (tlen))
+	    break;
+	  fwrite (s, 1, tlen, rl_outstream);
+	  s += tlen;
+#else
+	  putc (*s, rl_outstream);
+	  s++;
+#endif
+	  printed_len++;
+	}
+    }
+
+  return printed_len;
+}
+
 /* Output TO_PRINT to rl_outstream.  If VISIBLE_STATS is defined and we
    are using it, check for and output a single character for `special'
    filenames.  Return the number of characters we output. */
-
-#define PUTX(c) \
-    do { \
-      if (CTRL_CHAR (c)) \
-        { \
-          putc ('^', rl_outstream); \
-          putc (UNCTRL (c), rl_outstream); \
-          printed_len += 2; \
-        } \
-      else if (c == RUBOUT) \
-	{ \
-	  putc ('^', rl_outstream); \
-	  putc ('?', rl_outstream); \
-	  printed_len += 2; \
-	} \
-      else \
-	{ \
-	  putc (c, rl_outstream); \
-	  printed_len++; \
-	} \
-    } while (0)
 
 static int
 print_filename (to_print, full_pathname)
      char *to_print, *full_pathname;
 {
-  int printed_len = 0;
-#if !defined (VISIBLE_STATS)
+  int printed_len;
   char *s;
-
-  for (s = to_print; *s; s++)
-    {
-      PUTX (*s);
-    }
-#else  
-  char *s, c, *new_full_pathname;
+#if defined (VISIBLE_STATS)
+  char c, *new_full_pathname;
   int extension_char, slen, tlen;
+#endif
 
-  for (s = to_print; *s; s++)
-    {
-      PUTX (*s);
-    }
+  printed_len = fnprint (to_print);
 
+#if defined (VISIBLE_STATS)
  if (rl_filename_completion_desired && rl_visible_stats)
     {
       /* If to_print != full_pathname, to_print is the basename of the
@@ -612,6 +709,7 @@ print_filename (to_print, full_pathname)
 	}
     }
 #endif /* VISIBLE_STATS */
+
   return printed_len;
 }
 
@@ -663,7 +761,14 @@ _rl_find_completion_word (fp, dp)
 	 quote substrings for the completer.  Try to find the start
 	 of an unclosed quoted substring. */
       /* FOUND_QUOTE is set so we know what kind of quotes we found. */
+#if defined (HANDLE_MULTIBYTE)
+      for (scan = pass_next = 0; scan < end;
+		scan = ((MB_CUR_MAX == 1 || rl_byte_oriented)
+			? (scan + 1) 
+			: _rl_find_next_mbchar (rl_line_buffer, scan, 1, MB_FIND_ANY)))
+#else
       for (scan = pass_next = 0; scan < end; scan++)
+#endif
 	{
 	  if (pass_next)
 	    {
@@ -1203,7 +1308,7 @@ display_matches (matches)
   for (max = 0, i = 1; matches[i]; i++)
     {
       temp = printable_part (matches[i]);
-      len = strlen (temp);
+      len = fnwidth (temp);
 
       if (len > max)
 	max = len;
@@ -1449,7 +1554,9 @@ _rl_free_match_list (matches)
    TAB means do standard completion.
    `*' means insert all of the possible completions.
    `!' means to do standard completion, and list all possible completions if
-   there is more than one. */
+   there is more than one.
+   `@' means to do standard completion, and list all possible completions if
+   there is more than one and partial completion is not possible. */
 int
 rl_complete_internal (what_to_do)
      int what_to_do;
@@ -1516,6 +1623,7 @@ rl_complete_internal (what_to_do)
     {
     case TAB:
     case '!':
+    case '@':
       /* Insert the first match with proper quoting. */
       if (*matches[0])
 	insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
@@ -1533,6 +1641,12 @@ rl_complete_internal (what_to_do)
 	  if (what_to_do == '!')
 	    {
 	      display_matches (matches);
+	      break;
+	    }
+	  else if (what_to_do == '@')
+	    {
+	      if (nontrivial_lcd == 0)
+		display_matches (matches);
 	      break;
 	    }
 	  else if (rl_editing_mode != vi_mode)

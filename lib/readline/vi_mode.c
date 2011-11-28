@@ -640,7 +640,7 @@ _rl_vi_done_inserting ()
     }
   else
     {
-      if (_rl_vi_last_key_before_insert == 'i' && rl_undo_list)
+      if ((_rl_vi_last_key_before_insert == 'i' || _rl_vi_last_key_before_insert == 'a') && rl_undo_list)
         _rl_vi_save_insert (rl_undo_list);
       /* XXX - Other keys probably need to be checked. */
       else if (_rl_vi_last_key_before_insert == 'C')
@@ -680,7 +680,8 @@ _rl_vi_change_mbchar_case (count)
      int count;
 {
   wchar_t wc;
-  char mb[MB_LEN_MAX];
+  char mb[MB_LEN_MAX+1];
+  int mblen;
   mbstate_t ps;
 
   memset (&ps, 0, sizeof (mbstate_t));
@@ -703,7 +704,9 @@ _rl_vi_change_mbchar_case (count)
       /* Vi is kind of strange here. */
       if (wc)
 	{
-	  wctomb (mb, wc);
+	  mblen = wcrtomb (mb, wc, &ps);
+	  if (mblen >= 0)
+	    mb[mblen] = '\0';
 	  rl_begin_undo_group ();
 	  rl_delete (1, 0);
 	  rl_insert_text (mb);
@@ -1315,7 +1318,7 @@ rl_vi_subst (count, key)
 {
   /* If we are redoing, rl_vi_change_to will stuff the last motion char */
   if (vi_redoing == 0)
-    rl_stuff_char ((key == 'S') ? 'c' : ' ');	/* `S' == `cc', `s' == `c ' */
+    rl_stuff_char ((key == 'S') ? 'c' : 'l');	/* `S' == `cc', `s' == `cl' */
 
   return (rl_vi_change_to (count, 'c'));
 }

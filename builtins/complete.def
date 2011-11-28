@@ -47,6 +47,7 @@ $END
 #include "../shell.h"
 #include "../builtins.h"
 #include "../pcomplete.h"
+#include "../bashline.h"
 
 #include "common.h"
 #include "bashgetopt.h"
@@ -106,10 +107,12 @@ static struct _compopt {
   char *optname;
   int optflag;
 } compopts[] = {
+  { "bashdefault", COPT_BASHDEFAULT },
   { "default",	COPT_DEFAULT },
   { "dirnames", COPT_DIRNAMES },
   { "filenames",COPT_FILENAMES},
   { "nospace",	COPT_NOSPACE },
+  { "plusdirs", COPT_PLUSDIRS },
   { (char *)NULL, 0 },
 };
 
@@ -428,10 +431,12 @@ print_one_completion (cmd, cs)
   copts = cs->options;
 
   /* First, print the -o options. */
+  PRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
   PRINTCOMPOPT (COPT_DEFAULT, "default");
   PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
   PRINTCOMPOPT (COPT_FILENAMES, "filenames");
   PRINTCOMPOPT (COPT_NOSPACE, "nospace");
+  PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
 
   acts = cs->actions;
 
@@ -540,7 +545,7 @@ compgen_builtin (list)
   unsigned long acts, copts;
   COMPSPEC *cs;
   STRINGLIST *sl;
-  char *word;
+  char *word, **matches;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -583,12 +588,19 @@ compgen_builtin (list)
   rval = EXECUTION_FAILURE;
   sl = gen_compspec_completions (cs, "compgen", word, 0, 0);
 
+  /* If the compspec wants the bash default completions, temporarily
+     turn off programmable completion and call the bash completion code. */
+  if ((sl == 0 || sl->list_len == 0) && (copts & COPT_BASHDEFAULT))
+    {
+      matches = bash_default_completion (word, 0, 0, 0, 0);
+      sl = completions_to_stringlist (matches);
+      strvec_dispose (matches);
+    }
+
   /* This isn't perfect, but it's the best we can do, given what readline
      exports from its set of completion utility functions. */
   if ((sl == 0 || sl->list_len == 0) && (copts & COPT_DEFAULT))
     {
-      char **matches;
-
       matches = rl_completion_matches (word, rl_filename_completion_function);
       sl = completions_to_stringlist (matches);
       strvec_dispose (matches);

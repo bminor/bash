@@ -244,7 +244,7 @@ sh_nojobs (s)
      char *s;
 {
   if (s)
-    builtin_error ("%s: no job control");
+    builtin_error ("%s: no job control", s);
   else
     builtin_error ("no job control");
 }
@@ -602,6 +602,9 @@ get_job_spec (list)
 }
 #endif /* JOB_CONTROL */
 
+/*
+ * NOTE:  `kill' calls this function with forcecols == 0
+ */
 int
 display_signal_list (list, forcecols)
      WORD_LIST *list;
@@ -609,8 +612,7 @@ display_signal_list (list, forcecols)
 {
   register int i, column;
   char *name;
-  int result;
-  int signum;
+  int result, signum, dflags;
   intmax_t lsignum;
 
   result = EXECUTION_SUCCESS;
@@ -623,7 +625,13 @@ display_signal_list (list, forcecols)
 	    continue;
 
 	  if (posixly_correct && !forcecols)
-	    printf ("%s%s", name, (i == NSIG - 1) ? "" : " ");
+	    {
+	      /* This is for the kill builtin.  POSIX.2 says the signal names
+		 are displayed without the `SIG' prefix. */
+	      if (STREQN (name, "SIG", 3))
+		name += 3;
+	      printf ("%s%s", name, (i == NSIG - 1) ? "" : " ");
+	    }
 	  else
 	    {
 	      printf ("%2d) %s", i, name);
@@ -677,7 +685,10 @@ display_signal_list (list, forcecols)
 	}
       else
 	{
-	  signum = decode_signal (list->word->word);
+	  dflags = DSIG_NOCASE;
+	  if (posixly_correct == 0 || this_shell_builtin != kill_builtin)
+	    dflags |= DSIG_SIGPREFIX;
+	  signum = decode_signal (list->word->word, dflags);
 	  if (signum == NO_SIG)
 	    {
 	      sh_invalidsig (list->word->word);

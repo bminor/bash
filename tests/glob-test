@@ -35,6 +35,16 @@ recho a* X*
 
 shopt -u nullglob
 
+# see if the failglob option works
+
+mkdir tmp
+touch tmp/l1 tmp/l2 tmp/l3
+builtin echo tmp/l[12] tmp/*4 tmp/*3
+shopt -s failglob
+builtin echo tmp/l[12] tmp/*4 tmp/*3
+rm -r tmp
+shopt -u failglob
+
 # see if the code that expands directories only works
 expect '<bdir/>'
 recho b*/

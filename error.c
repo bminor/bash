@@ -40,11 +40,8 @@ extern int errno;
 #endif /* !errno */
 
 #include "bashansi.h"
+#include "shell.h"
 #include "flags.h"
-#include "error.h"
-#include "command.h"
-#include "general.h"
-#include "externs.h"
 #include "input.h"
 
 #if defined (HISTORY)
@@ -71,20 +68,22 @@ static void error_prolog __P((int));
 
 char *the_current_maintainer = MAINTAINER;
 
+int gnu_error_format = 0;
+
 static void
 error_prolog (print_lineno)
      int print_lineno;
 {
+  char *ename;
   int line;
 
-  fprintf (stderr, "%s: ", get_name_for_error ());
+  ename = get_name_for_error ();
+  line = (print_lineno && interactive_shell == 0) ? executing_line_number () : -1;
 
-  if (print_lineno && interactive_shell == 0)
-    {
-      line = executing_line_number ();
-      if (line > 0)
-	fprintf (stderr, "line %d: ", line);
-    }
+  if (line > 0)
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", line);
+  else
+    fprintf (stderr, "%s: ", ename);
 }
 
 /* Return the name of the shell or the shell script for error reporting. */
@@ -92,10 +91,23 @@ char *
 get_name_for_error ()
 {
   char *name;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *bash_source_v;
+  ARRAY *bash_source_a;
+#endif
 
   name = (char *)NULL;
   if (interactive_shell == 0)
-    name = dollar_vars[0];
+    {
+#if defined (ARRAY_VARS)
+      bash_source_v = find_variable ("BASH_SOURCE");
+      if (bash_source_v && array_p (bash_source_v) &&
+	  (bash_source_a = array_cell (bash_source_v)))
+	name = array_reference (bash_source_a, 0);
+      if (name == 0)
+#endif
+	name = dollar_vars[0];
+    }
   if (name == 0 && shell_name && *shell_name)
     name = base_pathname (shell_name);
   if (name == 0)
@@ -299,11 +311,11 @@ parser_error (lineno, format, va_alist)
   if (interactive)
     fprintf (stderr, "%s: ", ename);
   else if (interactive_shell)
-    fprintf (stderr, "%s: %s: line %d: ", ename, iname, lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
   else if (STREQ (ename, iname))
-    fprintf (stderr, "%s: line %d: ", ename, lineno);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", lineno);
   else
-    fprintf (stderr, "%s: %s: line %d: ", ename, iname, lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
 
   SH_VA_START (args, format);
 

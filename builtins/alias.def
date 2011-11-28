@@ -51,17 +51,23 @@ $END
 #  include "common.h"
 #  include "bashgetopt.h"
 
-static void print_alias __P((alias_t *));
+/* Flags for print_alias */
+#define AL_REUSABLE	0x01
+
+static void print_alias __P((alias_t *, int));
+
+extern int posixly_correct;
 
 /* Hack the alias command in a Korn shell way. */
 int
 alias_builtin (list)
      WORD_LIST *list;
 {
-  int any_failed, offset, pflag;
+  int any_failed, offset, pflag, dflags;
   alias_t **alias_list, *t;
   char *name, *value;
 
+  dflags = posixly_correct ? 0 : AL_REUSABLE;
   pflag = 0;
   reset_internal_getopt ();
   while ((offset = internal_getopt (list, "p")) != -1)
@@ -70,6 +76,7 @@ alias_builtin (list)
 	{
 	case 'p':
 	  pflag = 1;
+	  dflags |= AL_REUSABLE;
 	  break;
 	default:
 	  builtin_usage ();
@@ -90,7 +97,7 @@ alias_builtin (list)
 	return (EXECUTION_SUCCESS);
 
       for (offset = 0; alias_list[offset]; offset++)
-	print_alias (alias_list[offset]);
+	print_alias (alias_list[offset], dflags);
 
       free (alias_list);	/* XXX - Do not free the strings. */
 
@@ -117,7 +124,7 @@ alias_builtin (list)
 	{
 	  t = find_alias (name);
 	  if (t)
-	    print_alias (t);
+	    print_alias (t, dflags);
 	  else
 	    {
 	      sh_notfound (name);
@@ -192,13 +199,16 @@ unalias_builtin (list)
 
 /* Output ALIAS in such a way as to allow it to be read back in. */
 static void
-print_alias (alias)
+print_alias (alias, flags)
      alias_t *alias;
+     int flags;
 {
   char *value;
 
   value = sh_single_quote (alias->value);
-  printf ("alias %s=%s\n", alias->name, value);
+  if (flags & AL_REUSABLE)
+    printf ("alias ");
+  printf ("%s=%s\n", alias->name, value);
   free (value);
 
   fflush (stdout);

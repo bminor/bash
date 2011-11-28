@@ -163,6 +163,7 @@ execute_list_with_replacements (list)
 {
   register WORD_LIST *l;
   int job, result;
+  COMMAND *command;
 
   /* First do the replacement of job specifications with pids. */
   for (l = list; l; l = l->next)
@@ -182,21 +183,18 @@ execute_list_with_replacements (list)
 
   /* Next make a new simple command and execute it. */
   begin_unwind_frame ("jobs_builtin");
-  {
-    COMMAND *command = (COMMAND *)NULL;
 
-    add_unwind_protect (dispose_command, command);
+  command = make_bare_simple_command ();
+  command->value.Simple->words = copy_word_list (list);
+  command->value.Simple->redirects = (REDIRECT *)NULL;
+  command->flags |= CMD_INHIBIT_EXPANSION;
+  command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
 
-    command = make_bare_simple_command ();
-    command->value.Simple->words = copy_word_list (list);
-    command->value.Simple->redirects = (REDIRECT *)NULL;
-    command->flags |= CMD_INHIBIT_EXPANSION;
-    command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
+  add_unwind_protect (dispose_command, command);
+  result = execute_command (command);
+  dispose_command (command);
 
-    result = execute_command (command);
-  }
-
-  run_unwind_frame ("jobs_builtin");
+  discard_unwind_frame ("jobs_builtin");
   return (result);
 }
 #endif /* JOB_CONTROL */

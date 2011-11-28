@@ -47,6 +47,14 @@ static char *default_dir;
    categories */
 static char *lc_all;
 
+/* tracks the value of LC_ALL; used to provide defaults for locale
+   categories */
+static char *lang;
+
+static int reset_locale_vars __P((void));
+
+static void locale_setblanks __P((void));
+
 /* Set the value of default_locale and make the current locale the
    system default locale.  This should be called very early in main(). */
 void
@@ -59,18 +67,25 @@ set_default_locale ()
 #endif /* HAVE_SETLOCALE */
 }
 
-/* Set default values for LC_CTYPE, LC_COLLATE, and LC_MESSAGES if they
-   are not specified in the environment, but LANG or LC_ALL is.  This
+/* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES and LC_NUMERIC
+   if they are not specified in the environment, but LC_ALL is.  This
    should be called from main() after parsing the environment. */
 void
 set_default_locale_vars ()
 {
   char *val;
+  int r;
 
 #if defined (HAVE_SETLOCALE)
+
+#  if defined (LC_CTYPE)
   val = get_string_value ("LC_CTYPE");
   if (val == 0 && lc_all && *lc_all)
-    setlocale (LC_CTYPE, lc_all);
+    {
+      setlocale (LC_CTYPE, lc_all);
+      locale_setblanks ();
+    }
+#  endif
 
 #  if defined (LC_COLLATE)
   val = get_string_value ("LC_COLLATE");
@@ -115,6 +130,8 @@ int
 set_locale_var (var, value)
      char *var, *value;
 {
+  int r;
+
   if (var[0] == 'T' && var[10] == 0)		/* TEXTDOMAIN */
     {
       FREE (default_domain);
@@ -137,15 +154,15 @@ set_locale_var (var, value)
       FREE (lc_all);
       if (value)
 	lc_all = savestring (value);
-      else if (default_locale)
-	lc_all = savestring (default_locale);
       else
 	{
 	  lc_all = (char *)xmalloc (1);
 	  lc_all[0] = '\0';
 	}
 #if defined (HAVE_SETLOCALE)
-      return (setlocale (LC_ALL, lc_all) != 0);
+      r = *lc_all ? (setlocale (LC_ALL, lc_all) != 0) : reset_locale_vars ();
+      locale_setblanks ();
+      return r;
 #else
       return (1);
 #endif
@@ -154,28 +171,34 @@ set_locale_var (var, value)
 #if defined (HAVE_SETLOCALE)
   else if (var[3] == 'C' && var[4] == 'T')	/* LC_CTYPE */
     {
+#  if defined (LC_CTYPE)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_CTYPE, value ? value : "") != 0);
+	{
+	  r = (setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE")) != 0);
+	  locale_setblanks ();
+	  return r;
+	}
+#  endif
     }
   else if (var[3] == 'C' && var[4] == 'O')	/* LC_COLLATE */
     {
 #  if defined (LC_COLLATE)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_COLLATE, value ? value : "") != 0);
+	return (setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE")) != 0);
 #  endif /* LC_COLLATE */
     }
   else if (var[3] == 'M' && var[4] == 'E')	/* LC_MESSAGES */
     {
 #  if defined (LC_MESSAGES)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_MESSAGES, value ? value : "") != 0);
+	return (setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES")) != 0);
 #  endif /* LC_MESSAGES */
     }
   else if (var[3] == 'N' && var[4] == 'U')	/* LC_NUMERIC */
     {
 #  if defined (LC_NUMERIC)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_NUMERIC, value ? value : "") != 0);
+	return (setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC")) != 0);
 #  endif /* LC_NUMERIC */
     }
 #endif /* HAVE_SETLOCALE */
@@ -183,17 +206,28 @@ set_locale_var (var, value)
   return (0);
 }
 
-/* Called when LANG is assigned a value.  Sets LC_ALL category with
-   setlocale(3) if that has not already been set.  Doesn't change any
-   shell variables. */
+/* Called when LANG is assigned a value.  Tracks value in `lang'.  Calls
+   reset_locale_vars() to reset any default values if LC_ALL is unset or
+   null. */
 int
 set_lang (var, value)
      char *var, *value;
 {
-  return ((lc_all == 0 || *lc_all == 0) ? setlocale (LC_ALL, value?value:"") != NULL : 0);
+  FREE (lang);
+  if (value)
+    lang = savestring (value);
+  else
+    {
+      lang = (char *)xmalloc (1);
+      lang[0] = '\0';
+    }
+    
+  return ((lc_all == 0 || *lc_all == 0) ? reset_locale_vars () : 0);
 }
 
-/* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE) */
+/* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE).
+   The precedence is as POSIX.2 specifies:  LC_ALL has precedence over
+   the specific locale variables, and LANG, if set, is used as the default. */
 char *
 get_locale_var (var)
      char *var;
@@ -202,12 +236,45 @@ get_locale_var (var)
 
   locale = lc_all;
 
-  if (locale == 0)
+  if (locale == 0 || *locale == 0)
     locale = get_string_value (var);
-  if (locale == 0)
-    locale = default_locale;
+  if (locale == 0 || *locale == 0)
+    locale = lang;
+  if (locale == 0 || *locale == 0)
+    locale = default_locale;	/* system-dependent; not really portable */
 
   return (locale);
+}
+
+static int
+reset_locale_vars ()
+{
+#if defined (HAVE_SETLOCALE)
+  char *locale;
+
+  locale = lang;
+  if (locale == 0 || *locale == '\0')
+    locale = default_locale;
+  if (setlocale (LC_ALL, locale) == 0)
+    return 0;
+
+#  if defined (LC_CTYPE)
+  setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
+#  endif
+#  if defined (LC_COLLATE)
+  setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
+#  endif
+#  if defined (LC_MESSAGES)
+  setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
+#  endif
+#  if defined (LC_NUMERIC)
+  setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
+#  endif
+
+  locale_setblanks ();  
+
+#endif
+  return 1;
 }
 
 /* Translate the contents of STRING, a $"..." quoted string, according
@@ -376,5 +443,23 @@ localeexpand (string, start, end, lineno, lenp)
       if (lenp)
 	*lenp = 0;
       return (temp);
+    }
+}
+
+/* Set every character in the <blank> character class to be a shell break
+   character for the lexical analyzer when the locale changes. */
+static void
+locale_setblanks ()
+{
+  int x;
+
+  for (x = 0; x < sh_syntabsiz; x++)
+    {
+      if (isblank (x))
+	sh_syntaxtab[x] |= CSHBRK;
+      else if (member (x, shell_break_chars))
+	sh_syntaxtab[x] |= CSHBRK;
+      else
+	sh_syntaxtab[x] &= ~CSHBRK;
     }
 }

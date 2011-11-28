@@ -70,7 +70,7 @@ function whatis ()
 
 function apropos ()
 {
-  whatis_internal "$1" "fgrep"
+  whatis_internal "$1" "grep -F"
 }
 
 # Note: "-" and "-t" together not supported.  This man could be
@@ -102,7 +102,7 @@ function man ()
         g="grep -w"
 	a=$(basename "$2")
       else
-	g=fgrep
+	g="grep -F"
 	a="$2"
       fi
       whatis_internal "$a" "$g"

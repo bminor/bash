@@ -1,6 +1,6 @@
 /* execute_command.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include "chartypes.h"
 #include "bashtypes.h"
-#ifndef _MINIX
+#if !defined (_MINIX) && defined (HAVE_SYS_FILE_H)
 #  include <sys/file.h>
 #endif
 #include "filecntl.h"
@@ -97,7 +97,7 @@ extern int errno;
 extern int posixly_correct;
 extern int breaking, continuing, loop_level;
 extern int expand_aliases;
-extern int parse_and_execute_level, running_trap, trap_line_number;
+extern int parse_and_execute_level, running_trap;
 extern int command_string_index, line_number;
 extern int dot_found_in_search;
 extern int already_making_children;
@@ -196,11 +196,21 @@ int stdin_redir;
    `test' needs this, for example. */
 char *this_command_name;
 
+/* The printed representation of the currently-executing command (same as
+   the_printed_command), except when a trap is being executed.  Useful for
+   a debugger to know where exactly the program is currently executing. */
+char *the_printed_command_except_trap;
+
 static COMMAND *currently_executing_command;
 
 struct stat SB;		/* used for debugging */
 
 static int special_builtin_failed;
+
+/* XXX - set to 1 if we're running the DEBUG trap and we want to show the line
+   number containing the function name.  Used by executing_line_number to
+   report the correct line number.  Kind of a hack. */
+static int showing_function_line;
 
 /* For catching RETURN in a function. */
 int return_catch_flag;
@@ -209,6 +219,10 @@ procenv_t return_catch;
 
 /* The value returned by the last synchronous command. */
 int last_command_exit_value;
+
+/* Whether or not the last command (corresponding to last_command_exit_value)
+   was terminated by a signal, and, if so, which one. */
+int last_command_exit_signal;
 
 /* The list of redirections to perform which will undo the redirections
    that I made in the shell. */
@@ -222,6 +236,9 @@ REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
 int subshell_environment;
+
+/* Count of nested subshells, like SHLVL.  Available via $BASH_SUBSHELL */
+int subshell_level = 0;
 
 /* Currently-executing shell function. */
 SHELL_VAR *this_shell_function;
@@ -282,21 +299,25 @@ close_fd_bitmap (fdbp)
 int
 executing_line_number ()
 {
-  if (executing && (variable_context == 0 || interactive_shell == 0) && currently_executing_command)
+  if (executing && showing_function_line == 0 &&
+      (variable_context == 0 || interactive_shell == 0) &&
+      currently_executing_command)
     {
-      if (currently_executing_command->type == cm_simple)
-	return currently_executing_command->value.Simple->line;
-      else if (currently_executing_command->type == cm_cond)
+#if defined (COND_COMMAND)
+      if (currently_executing_command->type == cm_cond)
 	return currently_executing_command->value.Cond->line;
+#endif
+#if defined (DPAREN_ARITHMETIC)
       else if (currently_executing_command->type == cm_arith)
 	return currently_executing_command->value.Arith->line;
+#endif
+#if defined (ARITH_FOR_COMMAND)
       else if (currently_executing_command->type == cm_arith_for)
 	return currently_executing_command->value.ArithFor->line;
-      else
+#endif
+
 	return line_number;
     }
-  else if (running_trap)
-    return trap_line_number;
   else
     return line_number;
 }
@@ -374,7 +395,7 @@ static void
 cleanup_redirects (list)
      REDIRECT *list;
 {
-  do_redirections (list, 1, 0, 0);
+  do_redirections (list, RX_ACTIVE);
   dispose_redirects (list);
 }
 
@@ -384,7 +405,7 @@ static void
 cleanup_func_redirects (list)
      REDIRECT *list;
 {
-  do_redirections (list, 1, 0, 0);
+  do_redirections (list, RX_ACTIVE);
 }
 #endif
 
@@ -469,13 +490,16 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   int exec_result, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
   volatile pid_t last_pid;
+  volatile int save_line_number;
 
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
 
   run_pending_traps ();
 
+#if 0
   if (running_trap == 0)
+#endif
     currently_executing_command = command;
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
@@ -561,7 +585,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       else
 	{
 	  exec_result = time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+#if 0
 	  if (running_trap == 0)
+#endif
 	    currently_executing_command = (COMMAND *)NULL;
 	}
       return (exec_result);
@@ -573,7 +599,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   /* Handle WHILE FOR CASE etc. with redirections.  (Also '&' input
      redirection.)  */
-  if (do_redirections (command->redirects, 1, 1, 0) != 0)
+  if (do_redirections (command->redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
@@ -616,7 +642,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
     case cm_simple:
       {
-	/* We can't rely on this variable retaining its value across a
+	save_line_number = line_number;
+	/* We can't rely on variables retaining their values across a
 	   call to execute_simple_command if a longjmp occurs as the
 	   result of a `return' builtin.  This is true for sure with gcc. */
 	last_pid = last_made_pid;
@@ -626,9 +653,12 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  command->value.Simple->flags |= CMD_IGNORE_RETURN;
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
+
+	line_number = command->value.Simple->line;
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
+	line_number = save_line_number;
 
 	/* The temporary environment should be used for only the simple
 	   command immediately following its definition. */
@@ -662,12 +692,15 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #endif
 	    /* When executing a shell function that executes other
 	       commands, this causes the last simple command in
-	       the function to be waited for twice. */
+	       the function to be waited for twice.  This also causes
+	       subshells forked to execute builtin commands (e.g., in
+	       pipelines) to be waited for twice. */
 	      exec_result = wait_for (last_made_pid);
 #if defined (RECYCLES_PIDS)
 	      /* LynxOS, for one, recycles pids very quickly -- so quickly
 		 that a new process may have the same pid as the last one
-		 created.  This has been reported to fix the problem. */
+		 created.  This has been reported to fix the problem on that
+		 OS, and a similar problem on Cygwin. */
 	      if (exec_result == 0)
 		last_made_pid = NO_PID;
 #endif
@@ -686,7 +719,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	{
 	  last_command_exit_value = exec_result;
 	  run_pending_traps ();
-	  jump_to_top_level (EXITPROG);
+	  jump_to_top_level (ERREXIT);
 	}
 
       break;
@@ -798,7 +831,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     case cm_cond:
       if (ignore_return)
 	command->value.Cond->flags |= CMD_IGNORE_RETURN;
+      save_line_number = line_number;
       exec_result = execute_cond_command (command->value.Cond);
+      line_number = save_line_number;
       break;
 #endif
     
@@ -813,7 +848,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   if (my_undo_list)
     {
-      do_redirections (my_undo_list, 1, 0, 0);
+      do_redirections (my_undo_list, RX_ACTIVE);
       dispose_redirects (my_undo_list);
     }
 
@@ -831,7 +866,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   last_command_exit_value = exec_result;
   run_pending_traps ();
+#if 0
   if (running_trap == 0)
+#endif
     currently_executing_command = (COMMAND *)NULL;
   return (last_command_exit_value);
 }
@@ -1027,7 +1064,9 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
   struct timeval before, after;
-  struct timezone dtz;
+#  if defined (HAVE_STRUCT_TIMEZONE)
+  struct timezone dtz;				/* posix doesn't define this */
+#  endif
   struct rusage selfb, selfa, kidsb, kidsa;	/* a = after, b = before */
 #else
 #  if defined (HAVE_TIMES)
@@ -1037,7 +1076,11 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
+#  if defined (HAVE_STRUCT_TIMEZONE)
   gettimeofday (&before, &dtz);
+#  else
+  gettimeofday (&before, (void *)NULL);
+#  endif /* !HAVE_STRUCT_TIMEZONE */
   getrusage (RUSAGE_SELF, &selfb);
   getrusage (RUSAGE_CHILDREN, &kidsb);
 #else
@@ -1057,7 +1100,11 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   rsf = usf = ssf = cpu = 0;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
+#  if defined (HAVE_STRUCT_TIMEZONE)
   gettimeofday (&after, &dtz);
+#  else
+  gettimeofday (&after, (void *)NULL);
+#  endif /* !HAVE_STRUCT_TIMEZONE */
   getrusage (RUSAGE_SELF, &selfa);
   getrusage (RUSAGE_CHILDREN, &kidsa);
 
@@ -1125,6 +1172,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   USE_VAR(tcom);
   USE_VAR(asynchronous);
 
+  subshell_level++;
   should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
 			  pipe_in == NO_PIPE &&
 			  stdin_redirects (command->redirects) == 0);
@@ -1215,7 +1263,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* Do redirections, then dispose of them before recursive call. */
   if (command->redirects)
     {
-      if (do_redirections (command->redirects, 1, 0, 0) != 0)
+      if (do_redirections (command->redirects, RX_ACTIVE) != 0)
 	exit (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 
       dispose_redirects (command->redirects);
@@ -1270,6 +1318,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       return_code = run_exit_trap ();
     }
 
+  subshell_level--;
   return (return_code);
   /* NOTREACHED */
 }
@@ -1522,11 +1571,12 @@ execute_for_command (for_command)
   register WORD_LIST *releaser, *list;
   SHELL_VAR *v;
   char *identifier;
-  int retval;
+  int retval, save_line_number;
 #if 0
   SHELL_VAR *old_value = (SHELL_VAR *)NULL; /* Remember the old value of x. */
 #endif
 
+  save_line_number = line_number;
   if (check_identifier (for_command->name, 1) == 0)
     {
       if (posixly_correct && interactive_shell == 0)
@@ -1560,10 +1610,36 @@ execute_for_command (for_command)
   for (retval = EXECUTION_SUCCESS; list; list = list->next)
     {
       QUIT;
+
+      line_number = for_command->line;
+
+      /* Remember what this command looks like, for debugger. */
+      command_string_index = 0;
+      print_for_command_head (for_command);
+
+      if (echo_command_at_execute)
+	xtrace_print_for_command_head (for_command);
+
+      /* Save this command unless it's a trap command. */
+      if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+	{
+	  FREE (the_printed_command_except_trap);
+	  the_printed_command_except_trap = savestring (the_printed_command);
+	}
+
+      retval = run_debug_trap ();
+#if defined (DEBUGGER)
+      /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+	 skip the command. */
+      if (debugging_mode && retval != EXECUTION_SUCCESS)
+        continue;
+#endif
+
       this_command_name = (char *)NULL;
       v = bind_variable (identifier, list->word->word);
       if (readonly_p (v) || noassign_p (v))
 	{
+	  line_number = save_line_number;
 	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
@@ -1571,7 +1647,8 @@ execute_for_command (for_command)
 	    }
 	  else
 	    {
-	      run_unwind_frame ("for");
+	      dispose_words (releaser);
+	      discard_unwind_frame ("for");
 	      loop_level--;
 	      return (EXECUTION_FAILURE);
 	    }
@@ -1595,6 +1672,7 @@ execute_for_command (for_command)
     }
 
   loop_level--;
+  line_number = save_line_number;
 
 #if 0
   if (lexical_scoping)
@@ -1640,6 +1718,7 @@ eval_arith_for_expr (l, okp)
 {
   WORD_LIST *new;
   intmax_t expresult;
+  int r;
 
   new = expand_words_no_vars (l);
   if (new)
@@ -1647,9 +1726,27 @@ eval_arith_for_expr (l, okp)
       if (echo_command_at_execute)
 	xtrace_print_arith_cmd (new);
       this_command_name = "((";		/* )) for expression error messages */
-      if (signal_is_trapped (DEBUG_TRAP) && signal_is_ignored (DEBUG_TRAP) == 0)
-	run_debug_trap ();
+
+      command_string_index = 0;
+      print_arith_command (new);
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+
+      r = run_debug_trap ();
+      /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+	 skip the command. */
+#if defined (DEBUGGER)
+      if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
+	expresult = evalexp (new->word->word, okp);
+      else
+	{
+	  expresult = 0;
+	  if (okp)
+	    *okp = 1;
+	}
+#else
       expresult = evalexp (new->word->word, okp);
+#endif
       dispose_words (new);
     }
   else
@@ -1670,6 +1767,7 @@ execute_arith_for_command (arith_for_command)
 
   body_status = EXECUTION_SUCCESS;
   loop_level++;
+  save_lineno = line_number;
 
   if (arith_for_command->flags & CMD_IGNORE_RETURN)
     arith_for_command->action->flags |= CMD_IGNORE_RETURN;
@@ -1679,19 +1777,21 @@ execute_arith_for_command (arith_for_command)
   /* save the starting line number of the command so we can reset
      line_number before executing each expression -- for $LINENO
      and the DEBUG trap. */
-  arith_lineno = arith_for_command->line;
+  line_number = arith_lineno = arith_for_command->line;
   if (variable_context && interactive_shell)
-    line_number = arith_lineno -= function_line_number;
+    line_number -= function_line_number;
 
   /* Evaluate the initialization expression. */
   expresult = eval_arith_for_expr (arith_for_command->init, &expok);
   if (expok == 0)
-    return (EXECUTION_FAILURE);
+    {
+      line_number = save_lineno;
+      return (EXECUTION_FAILURE);
+    }
 
   while (1)
     {
       /* Evaluate the test expression. */
-      save_lineno = line_number;
       line_number = arith_lineno;
       expresult = eval_arith_for_expr (arith_for_command->test, &expok);
       line_number = save_lineno;
@@ -1725,7 +1825,6 @@ execute_arith_for_command (arith_for_command)
 	}
 
       /* Evaluate the step expression. */
-      save_lineno = line_number;
       line_number = arith_lineno;
       expresult = eval_arith_for_expr (arith_for_command->step, &expok);
       line_number = save_lineno;
@@ -1738,6 +1837,8 @@ execute_arith_for_command (arith_for_command)
     }
 
   loop_level--;
+  line_number = save_lineno;
+
   return (body_status);
 }
 #endif
@@ -1922,10 +2023,30 @@ execute_select_command (select_command)
   WORD_LIST *releaser, *list;
   SHELL_VAR *v;
   char *identifier, *ps3_prompt, *selection;
-  int retval, list_len, show_menu;
+  int retval, list_len, show_menu, save_line_number;
 
   if (check_identifier (select_command->name, 1) == 0)
     return (EXECUTION_FAILURE);
+
+  save_line_number = line_number;
+  line_number = select_command->line;
+
+  command_string_index = 0;
+  print_select_command_head (select_command);
+
+  if (echo_command_at_execute)
+    xtrace_print_select_command_head (select_command);
+
+  FREE (the_printed_command_except_trap);
+  the_printed_command_except_trap = savestring (the_printed_command);
+
+  retval = run_debug_trap ();
+#if defined (DEBUGGER)
+  /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+     skip the command. */
+  if (debugging_mode && retval != EXECUTION_SUCCESS)
+    return (EXECUTION_SUCCESS);
+#endif
 
   loop_level++;
   identifier = select_command->name->word;
@@ -1938,6 +2059,7 @@ execute_select_command (select_command)
     {
       if (list)
 	dispose_words (list);
+      line_number = save_line_number;
       return (EXECUTION_SUCCESS);
     }
 
@@ -1952,6 +2074,7 @@ execute_select_command (select_command)
 
   while (1)
     {
+      line_number = select_command->line;
       ps3_prompt = get_string_value ("PS3");
       if (ps3_prompt == 0)
 	ps3_prompt = "#? ";
@@ -1977,7 +2100,10 @@ execute_select_command (select_command)
 	    }
 	  else
 	    {
-	      run_unwind_frame ("select");
+	      dispose_words (releaser);
+	      discard_unwind_frame ("select");
+	      loop_level--;
+	      line_number = save_line_number;
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -2009,8 +2135,10 @@ execute_select_command (select_command)
     }
 
   loop_level--;
+  line_number = save_line_number;
 
-  run_unwind_frame ("select");
+  dispose_words (releaser);
+  discard_unwind_frame ("select");
   return (retval);
 }
 #endif /* SELECT_COMMAND */
@@ -2027,7 +2155,33 @@ execute_case_command (case_command)
   WORD_LIST *wlist, *es;
   PATTERN_LIST *clauses;
   char *word, *pattern;
-  int retval, match, ignore_return;
+  int retval, match, ignore_return, save_line_number;
+
+  save_line_number = line_number;
+  line_number = case_command->line;
+
+  command_string_index = 0;
+  print_case_command_head (case_command);
+
+  if (echo_command_at_execute)
+    xtrace_print_case_command_head (case_command);
+
+  if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+    }
+
+  retval = run_debug_trap();
+#if defined (DEBUGGER)
+  /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+     skip the command. */
+  if (debugging_mode && retval != EXECUTION_SUCCESS)
+    {
+      line_number = save_line_number;
+      return (EXECUTION_SUCCESS);
+    }
+#endif
 
   /* Posix.2 specifies that the WORD is tilde expanded. */
   if (member ('~', case_command->word->word))
@@ -2096,6 +2250,7 @@ execute_case_command (case_command)
 exit_case_command:
   free (word);
   discard_unwind_frame ("case");
+  line_number = save_line_number;
   return (retval);
 }
 
@@ -2191,10 +2346,12 @@ static int
 execute_if_command (if_command)
      IF_COM *if_command;
 {
-  int return_value;
+  int return_value, save_line_number;
 
+  save_line_number = line_number;
   if_command->test->flags |= CMD_IGNORE_RETURN;
   return_value = execute_command (if_command->test);
+  line_number = save_line_number;
 
   if (return_value == EXECUTION_SUCCESS)
     {
@@ -2221,32 +2378,56 @@ static int
 execute_arith_command (arith_command)
      ARITH_COM *arith_command;
 {
-  int expok;
+  int expok, save_line_number, retval;
   intmax_t expresult;
   WORD_LIST *new;
 
   expresult = 0;
 
+  save_line_number = line_number;
   this_command_name = "((";	/* )) */
+  line_number = arith_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
-    line_number = arith_command->line - function_line_number;
+    line_number -= function_line_number;
+
+  command_string_index = 0;
+  print_arith_command (arith_command->exp);
+  FREE (the_printed_command_except_trap);
+  the_printed_command_except_trap = savestring (the_printed_command);
 
   /* Run the debug trap before each arithmetic command, but do it after we
      update the line number information and before we expand the various
      words in the expression. */
-  if (signal_is_trapped (DEBUG_TRAP) && signal_is_ignored (DEBUG_TRAP) == 0)
-    run_debug_trap ();
+  retval = run_debug_trap ();
+#if defined (DEBUGGER)
+  /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+     skip the command. */
+  if (debugging_mode && retval != EXECUTION_SUCCESS)
+    {
+      line_number = save_line_number;
+      return (EXECUTION_SUCCESS);
+    }
+#endif
 
-  new = expand_words (arith_command->exp);
+  new = expand_words_no_vars (arith_command->exp);
 
   /* If we're tracing, make a new word list with `((' at the front and `))'
      at the back and print it. */
   if (echo_command_at_execute)
     xtrace_print_arith_cmd (new);
 
-  expresult = evalexp (new->word->word, &expok);
-  dispose_words (new);
+  if (new)
+    {
+      expresult = evalexp (new->word->word, &expok);
+      line_number = save_line_number;
+      dispose_words (new);
+    }
+  else
+    {
+      expresult = 0;
+      expok = 1;
+    }
 
   if (expok == 0)
     return (EXECUTION_FAILURE);
@@ -2263,7 +2444,7 @@ static int
 execute_cond_node (cond)
      COND_COM *cond;
 {
-  int result, invert, patmatch;
+  int result, invert, patmatch, rmatch, mflags;
   char *arg1, *arg2;
 
   invert = (cond->flags & CMD_INVERT_RETURN);
@@ -2298,6 +2479,10 @@ execute_cond_node (cond)
       patmatch = ((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
 		  (cond->op->word[0] == '!' || cond->op->word[0] == '=') ||
 		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
+#if defined (COND_REGEXP)
+      rmatch = (cond->op->word[0] == '=' && cond->op->word[1] == '~' &&
+		cond->op->word[2] == '\0');
+#endif
 
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
@@ -2309,7 +2494,19 @@ execute_cond_node (cond)
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, arg2);
 
-      result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP)
+#if defined (COND_REGEXP)
+      if (rmatch)
+	{
+	  mflags = SHMAT_PWARN;
+#if defined (ARRAY_VARS)
+	  mflags |= SHMAT_SUBEXP;
+#endif
+
+	  result = sh_regmatch (arg1, arg2, mflags);
+	}
+      else
+#endif /* COND_REGEXP */
+	result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP)
 				? EXECUTION_SUCCESS
 				: EXECUTION_FAILURE;
       if (arg1 != nullstr)
@@ -2334,25 +2531,42 @@ static int
 execute_cond_command (cond_command)
      COND_COM *cond_command;
 {
-  int result;
+  int retval, save_line_number;
 
-  result = EXECUTION_SUCCESS;
+  retval = EXECUTION_SUCCESS;
+  save_line_number = line_number;
 
   this_command_name = "[[";
+  line_number = cond_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
-    line_number = cond_command->line - function_line_number;
+    line_number -= function_line_number;
+
+  command_string_index = 0;
+  print_cond_command (cond_command);
+  FREE (the_printed_command_except_trap);
+  the_printed_command_except_trap = savestring (the_printed_command);
 
   /* Run the debug trap before each conditional command, but do it after we
      update the line number information. */
-  if (signal_is_trapped (DEBUG_TRAP) && signal_is_ignored (DEBUG_TRAP) == 0)
-    run_debug_trap ();
+  retval = run_debug_trap ();
+#if defined (DEBUGGER)
+  /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+     skip the command. */
+  if (debugging_mode && retval != EXECUTION_SUCCESS)
+    {
+      line_number = save_line_number;
+      return (EXECUTION_SUCCESS);
+    }
+#endif
 
 #if 0
   debug_print_cond_command (cond_command);
 #endif
-  last_command_exit_value = result = execute_cond_node (cond_command);  
-  return (result);
+
+  last_command_exit_value = retval = execute_cond_node (cond_command);
+  line_number = save_line_number;
+  return (retval);
 }
 #endif /* COND_COMMAND */
 
@@ -2377,6 +2591,8 @@ execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subs
      int pipe_in, pipe_out, async;
      pid_t old_last_command_subst_pid;
 {
+  int r;
+
   if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
       /* We have a null command, but we really want a subshell to take
@@ -2390,7 +2606,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subs
 
 	  subshell_environment = SUBSHELL_ASYNC;
 
-	  if (do_redirections (redirects, 1, 0, 0) == 0)
+	  if (do_redirections (redirects, RX_ACTIVE) == 0)
 	    exit (EXECUTION_SUCCESS);
 	  else
 	    exit (EXECUTION_FAILURE);
@@ -2413,7 +2629,11 @@ execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subs
 	 expanding the command or a redirection, return the value of that
 	 substitution.  Otherwise, return EXECUTION_SUCCESS. */
 
-      if (do_redirections (redirects, 0, 0, 0) != 0)
+      r = do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE);
+      cleanup_redirects (redirection_undo_list);
+      redirection_undo_list = (REDIRECT *)NULL;
+
+      if (r != 0)
 	return (EXECUTION_FAILURE);
       else if (old_last_command_subst_pid != last_command_subst_pid)
 	return (last_command_exit_value);
@@ -2471,16 +2691,27 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
-    line_number = simple_command->line - function_line_number;
-
-  /* Run the debug trap before each simple command, but do it after we
-     update the line number information. */
-  if (signal_is_trapped (DEBUG_TRAP) && signal_is_ignored (DEBUG_TRAP) == 0)
-    run_debug_trap ();
+    line_number -= function_line_number;
 
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
   print_simple_command (simple_command);
+
+  if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+    }
+
+  /* Run the debug trap before each simple command, but do it after we
+     update the line number information. */
+  result = run_debug_trap ();
+#if defined (DEBUGGER)
+  /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+     skip the command. */
+  if (debugging_mode && result != EXECUTION_SUCCESS)
+    return (EXECUTION_SUCCESS);
+#endif
 
   first_word_quoted =
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
@@ -2506,14 +2737,20 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (dofork)
     {
+#if 0
       /* XXX memory leak if expand_words() error causes a jump_to_top_level */
       command_line = savestring (the_printed_command);
+#endif
 
       /* Do this now, because execute_disk_command will do it anyway in the
 	 vast majority of cases. */
       maybe_make_export_env ();
 
+#if 0
       if (make_child (command_line, async) == 0)
+#else
+      if (make_child (savestring (the_printed_command), async) == 0)
+#endif
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
@@ -2562,6 +2799,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
      no variable `$foo'. */
   if (words == 0)
     {
+      this_command_name = 0;
       result = execute_null_command (simple_command->redirects,
 				     pipe_in, pipe_out,
 				     already_forked ? 0 : async,
@@ -2581,7 +2819,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   begin_unwind_frame ("simple-command");
 
   if (echo_command_at_execute)
-    xtrace_print_word_list (words);
+    xtrace_print_word_list (words, 1);
 
   builtin = (sh_builtin_func_t *)NULL;
   func = (SHELL_VAR *)NULL;
@@ -2690,10 +2928,12 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	      setup_async_signals ();
 	    }
 
+	  subshell_level++;
 	  execute_subshell_builtin_or_function
 	    (words, simple_command->redirects, builtin, func,
 	     pipe_in, pipe_out, async, fds_to_close,
 	     simple_command->flags);
+	  subshell_level--;
 	}
       else
 	{
@@ -2738,7 +2978,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
  return_result:
   bind_lastarg (lastarg);
   FREE (command_line);
-  run_unwind_frame ("simple-command");
+  dispose_words (words);
+  discard_unwind_frame ("simple-command");
+  this_command_name = (char *)NULL;	/* points to freed memory now */
   return (result);
 }
 
@@ -2850,10 +3092,23 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
      int async, subshell;
 {
   int return_val, result;
-  COMMAND *tc, *fc;
-  char *debug_trap, *error_trap;
+  COMMAND *tc, *fc, *save_current;
+  char *debug_trap, *error_trap, *return_trap;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
+  ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
+#endif
+  FUNCTION_DEF *shell_fn;
+  char *sfile, *t;
+  static int funcnest = 0;
 
   USE_VAR(fc);
+
+#if defined (ARRAY_VARS)
+  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
+#endif
 
   tc = (COMMAND *)copy_command (function_cell (var));
   if (tc && (flags & CMD_IGNORE_RETURN))
@@ -2881,12 +3136,16 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   debug_trap = TRAP_STRING(DEBUG_TRAP);
   error_trap = TRAP_STRING(ERROR_TRAP);
+  return_trap = TRAP_STRING(RETURN_TRAP);
   
-  /* The order of the unwind protects for debug_trap and error_trap is
-     important here!  unwind-protect commands are run in reverse order
-     of registration.  If this causes problems, take out the xfree
-     unwind-protect calls and live with the small memory leak. */
-  if (debug_trap && (trace_p (var) == 0))
+  /* The order of the unwind protects for debug_trap, error_trap and
+     return_trap is important here!  unwind-protect commands are run
+     in reverse order of registration.  If this causes problems, take
+     out the xfree unwind-protect calls and live with the small memory leak. */
+
+  /* function_trace_mode != 0 means that all functions inherit the DEBUG trap.
+     if the function has the trace attribute set, it inherits the DEBUG trap */
+  if (debug_trap && ((trace_p (var) == 0) && function_trace_mode == 0))
     {
       if (subshell == 0)
 	{
@@ -2897,7 +3156,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       restore_default_signal (DEBUG_TRAP);
     }
 
-  if (error_trap)
+  /* error_trace_mode != 0 means that functions inherit the ERR trap. */
+  if (error_trap && error_trace_mode == 0)
     {
       if (subshell == 0)
 	{
@@ -2908,14 +3168,39 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       restore_default_signal (ERROR_TRAP);
     }
 
+  if (return_trap && ((trace_p (var) == 0) && function_trace_mode == 0))
+    {
+      if (subshell == 0)
+	{
+	  return_trap = savestring (return_trap);
+	  add_unwind_protect (xfree, return_trap);
+	  add_unwind_protect (set_return_trap, return_trap);
+	}
+      restore_default_signal (RETURN_TRAP);
+    }
+  
+  funcnest++;
+#if defined (ARRAY_VARS)
+  shell_fn = find_function_def (this_shell_function->name);
+  sfile = shell_fn ? shell_fn->source_file : "";
+  /* This is quite similar to the code in shell.c and elsewhere. */
+  array_push (bash_source_a, sfile);
+  t = itos (executing_line_number ());
+  array_push (bash_lineno_a, t);
+  free (t);
+  array_push (funcname_a, this_shell_function->name);
+#endif
+
   /* The temporary environment for a function is supposed to apply to
      all commands executed within the function body. */
 
   remember_args (words->next, 1);
 
+  /* Update BASH_ARGV and BASH_ARGC */
+  push_args (words->next);
+
   /* Number of the line on which the function body starts. */
-  if (interactive_shell)
-    line_number = function_line_number = tc->line;
+  line_number = function_line_number = tc->line;
 
   if (subshell)
     {
@@ -2936,11 +3221,45 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (return_val)
     result = return_catch_value;
   else
-    result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
+    {
+      /* Run the debug trap here so we can trap at the start of a function's
+	 execution rather than the execution of the body's first command. */
+      showing_function_line = 1;
+      save_current = currently_executing_command;
+      result = run_debug_trap ();
+#if defined (DEBUGGER)
+      /* In debugging mode, if the DEBUG trap returns a non-zero status, we
+	 skip the command. */
+      if (debugging_mode == 0 || result == EXECUTION_SUCCESS)
+	{
+	  showing_function_line = 0;
+	  currently_executing_command = save_current;
+	  result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
+
+	  /* Run the RETURN trap in the function's context */
+	  save_current = currently_executing_command;
+	  run_return_trap ();
+	  currently_executing_command = save_current;
+	}
+#else
+      result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
+#endif
+      showing_function_line = 0;
+    }
+
+  /* Restore BASH_ARGC and BASH_ARGV */
+  pop_args ();
 
   if (subshell == 0)
     run_unwind_frame ("function_calling");
 
+  funcnest--;
+#if defined (ARRAY_VARS)
+  array_pop (bash_source_a);
+  array_pop (bash_lineno_a);
+  array_pop (funcname_a);
+#endif
+  
   if (variable_context == 0 || this_shell_function == 0)
     make_funcname_visible (0);
 
@@ -3023,7 +3342,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 
   do_piping (pipe_in, pipe_out);
 
-  if (do_redirections (redirects, 1, 0, 0) != 0)
+  if (do_redirections (redirects, RX_ACTIVE) != 0)
     exit (EXECUTION_FAILURE);
 
   if (builtin)
@@ -3070,7 +3389,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
   REDIRECT *saved_undo_list;
   sh_builtin_func_t *saved_this_shell_builtin;
 
-  if (do_redirections (redirects, 1, 1, 0) != 0)
+  if (do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
@@ -3103,6 +3422,10 @@ execute_builtin_or_function (words, builtin, var, redirects,
     result = execute_builtin (builtin, words, flags, 0);
   else
     result = execute_function (var, words, flags, fds_to_close, 0, 0);
+
+  /* We do this before undoing the effects of any redirections. */
+  if (ferror (stdout))
+    clearerr (stdout);  
 
   /* If we are executing the `command' builtin, but this_shell_builtin is
      set to `exec_builtin', we know that we have something like
@@ -3167,7 +3490,9 @@ setup_async_signals ()
    Note that the filename hashing stuff has to take place up here,
    in the parent.  This is probably why the Bourne style shells
    don't handle it, since that would require them to go through
-   this gnarly hair, for no good reason.  */
+   this gnarly hair, for no good reason.
+
+   NOTE: callers expect this to fork or exit(). */
 static void
 execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 		      async, fds_to_close, cmdflags)
@@ -3186,12 +3511,19 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   pathname = words->word->word;
 
 #if defined (RESTRICTED_SHELL)
+  command = (char *)NULL;
   if (restricted && xstrchr (pathname, '/'))
     {
       internal_error ("%s: restricted: cannot specify `/' in command names",
 		    pathname);
       last_command_exit_value = EXECUTION_FAILURE;
-      return;
+
+      /* If we're not going to fork below, we must already be in a child
+         process or a context in which it's safe to call exit(2).  */
+      if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
+	exit (last_command_exit_value);
+      else
+	goto parent_return;
     }
 #endif /* RESTRICTED_SHELL */
 
@@ -3255,7 +3587,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
       subshell_environment = SUBSHELL_FORK;
 
-      if (redirects && (do_redirections (redirects, 1, 0, 0) != 0))
+      if (redirects && (do_redirections (redirects, RX_ACTIVE) != 0))
 	{
 #if defined (PROCESS_SUBSTITUTION)
 	  /* Try to remove named pipes that may have been created as the
@@ -3282,6 +3614,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     }
   else
     {
+parent_return:
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
@@ -3436,7 +3769,7 @@ initialize_subshell ()
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */
   if (interactive_shell == 0)
-    unset_bash_input (1);
+    unset_bash_input (0);
 }
 
 #if defined (HAVE_SETOSTYPE) && defined (_POSIX_SOURCE)

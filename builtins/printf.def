@@ -114,7 +114,7 @@ static int  getint __P((void));
 static intmax_t getintmax __P((void));
 static uintmax_t getuintmax __P((void));
 
-#if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD
+#if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
 #  define FLOATMAX_CONV	"L"
 #  define strtofltmax	strtold

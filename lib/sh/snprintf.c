@@ -45,10 +45,11 @@
 
 /*
  * Currently doesn't handle (and bash/readline doesn't use):
- *	*M$ width, precision specifications
- *	%N$ numbered argument conversions
- *	inf, nan floating values imperfect (if isinf(), isnan() not in libc)
- *	support for `F' is imperfect, since underlying printf may not handle it
+ *	* *M$ width, precision specifications
+ *	* %N$ numbered argument conversions
+ *	* inf, nan floating values imperfect (if isinf(), isnan() not in libc)
+ *	* support for `F' is imperfect with ldfallback(), since underlying
+ *	  printf may not handle it -- should ideally have another autoconf test
  */
 
 #define FLOATING_POINT

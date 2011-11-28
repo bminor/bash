@@ -23,6 +23,13 @@
 
 #include "stdc.h"
 
+/* Flag values for history_control */
+#define HC_IGNSPACE	0x01
+#define HC_IGNDUPS	0x02
+#define HC_ERASEDUPS	0x04
+
+#define HC_IGNBOTH	(HC_IGNSPACE|HC_IGNDUPS)
+
 extern int remember_on_history;
 extern int history_lines_this_session;
 extern int history_lines_in_file;

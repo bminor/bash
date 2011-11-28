@@ -236,7 +236,7 @@ static unsigned long binsizes[NBUCKETS] = {
 	8192UL, 16384UL, 32768UL, 65536UL, 131072UL, 262144UL, 524288UL,
 	1048576UL, 2097152UL, 4194304UL, 8388608UL, 16777216UL, 33554432UL,
 	67108864UL, 134217728UL, 268435456UL, 536870912UL, 1073741824UL,
-	2147483648UL, 4294967296UL-1
+	2147483648UL, 4294967295UL
 };
 
 /* binsizes[x] == (1 << ((x) + 3)) */
@@ -291,6 +291,9 @@ extern void mtrace_free __P((PTR_T, int, const char *, int));
 #if !defined (botch)
 static void
 botch (s, file, line)
+     const char *s;
+     const char *file;
+     int line;
 {
   fprintf (stderr, "malloc: failed assertion: %s\n", s);
   (void)fflush (stderr);
@@ -879,6 +882,7 @@ internal_free (mem, file, line, flags)
   busy[nunits] = 0;
 
 free_return:
+  ;		/* Empty statement in case this is the end of the function */
 
 #ifdef MALLOC_STATS
   _mstats.nmalloc[nunits]--;

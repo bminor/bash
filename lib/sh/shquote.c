@@ -83,6 +83,8 @@ sh_double_quote (string)
     {
       if (sh_syntaxtab[c] & CBSDQUOTE)
 	*r++ = '\\';
+      else if (c == CTLESC || c == CTLNUL)
+	*r++ = CTLESC;		/* could be '\\'? */
 
       *r++ = c;
     }
@@ -94,7 +96,8 @@ sh_double_quote (string)
 }
 
 /* Remove backslashes that are quoting characters that are special between
-   double quotes.  Return a new string. */
+   double quotes.  Return a new string.  XXX - should this handle CTLESC
+   and CTLNUL? */
 char *
 sh_un_double_quote (string)
      char *string;
@@ -158,6 +161,11 @@ sh_backslash_quote (string)
 	  *r++ = c;
 	  break;
 #endif
+	case CTLESC: case CTLNUL:		/* internal quoting characters */
+	  *r++ = CTLESC;			/* could be '\\'? */
+	  *r++ = c;
+	  break;
+
 	case '#':				/* comment char */
 	  if (s == string)
 	    *r++ = '\\';
@@ -188,6 +196,9 @@ sh_backslash_quote_for_double_quotes (string)
     {
       if (sh_syntaxtab[c] & CBSDQUOTE)
 	*r++ = '\\';
+      /* I should probably add flags for these to sh_syntaxtab[] */
+      else if (c == CTLESC || c == CTLNUL)
+	*r++ = CTLESC;		/* could be '\\'? */
 
       *r++ = c;
     }
