@@ -9897,4 +9897,23 @@ builtins/fg_bg.def
 
 lib/readline/vi_mode
 	- fix _rl_vi_change_mbchar_case (multibyte-char version of `~'
-	  command) to have the right behavior at EOL
+	  command) to have the right behavior at EOL -- handle case where vi
+	  mode backs up at the end of the line
+
+				   8/18
+				   ----
+array.c
+	- check for an empty array in array_rshift before shifting elements
+	  and adjusting max_index
+	- check for null array in array_subrange
+
+jobs.c
+	- fix raw_job_exit_status to not ignore exit status of the last
+	  process in the pipeline when `set -o pipefail' is enabled
+
+				   8/19
+				   ----
+lib/readline/mbutil.c
+	- make sure _rl_find_next_mbchar_internal has a valid multibyte
+	  character before it checks whether or not it's a zero-width
+	  wide character and adjusts point accordingly

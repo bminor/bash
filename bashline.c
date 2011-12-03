@@ -100,6 +100,7 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
+static int bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
@@ -1406,10 +1407,18 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, tl, vl;
+	      int l, tl, vl, dl;
+	      char *rd;
 	      vl = strlen (val);
 	      tl = strlen (hint_text);
+#if 0
 	      l = vl - hint_len;	/* # of chars added */
+#else
+	      rd = savestring (filename_hint);
+	      bash_directory_expansion (&rd);
+	      dl = strlen (rd);
+	      l = vl - dl;		/* # of chars added */
+#endif
 	      temp = (char *)xmalloc (l + 2 + tl);
 	      strcpy (temp, hint_text);
 	      strcpy (temp + tl, val + vl - l);
@@ -2187,6 +2196,27 @@ bash_ignore_everything (names)
   return 0;
 }
 
+/* Simulate the expansions that will be performed by
+   rl_filename_completion_function.  This must be called with the address of
+   a pointer to malloc'd memory. */
+static int
+bash_directory_expansion (dirname)
+     char **dirname;
+{
+  char *d;
+
+  d = savestring (*dirname);
+
+  if (rl_directory_rewrite_hook)
+    (*rl_directory_rewrite_hook) (&d);
+
+  if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
+    {
+      free (*dirname);
+      *dirname = d;
+    }
+}
+  
 /* Handle symbolic link references and other directory name
    expansions while hacking completion. */
 static int

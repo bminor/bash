@@ -9900,3 +9900,37 @@ lib/readline/vi_mode
 	  command) to have the right behavior at EOL -- handle case where vi
 	  mode backs up at the end of the line
 
+				   8/18
+				   ----
+array.c
+	- check for an empty array in array_rshift before shifting elements
+	  and adjusting max_index
+	- check for null array in array_subrange
+
+jobs.c
+	- fix raw_job_exit_status to not ignore exit status of the last
+	  process in the pipeline when `set -o pipefail' is enabled
+
+				   8/19
+				   ----
+lib/readline/mbutil.c
+	- make sure _rl_find_next_mbchar_internal has a valid multibyte
+	  character before it checks whether or not it's a zero-width
+	  wide character and adjusts point accordingly
+
+                                  8/24
+                                   ----
+bashline.c
+        - new function, bash_directory_expansion, duplicates the expansions
+          performed on the directory name by rl_filename_completion_function
+        - call bash_directory_expansion in command_word_completion_function
+          if we decide we're doing tilde expansion (and any other
+          canonicalization) on the directory name being completed
+
+                                   8/25
+                                   ----
+configure.in
+        - use new-style AC_CHECK_HEADER to check for sys/ptem.h (which requires
+          sys/stream.h).  The correct checks are in the code, but autoconf
+          complains if sys/stream.h is not included, rather than simply
+          checking for the header's presence

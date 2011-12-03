@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.167, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.0, version 3.168, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.0)
 define(relstatus, release)
@@ -574,10 +574,18 @@ BASH_HEADER_INTTYPES
 AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
 		 stddef.h stdint.h netdb.h grp.h strings.h regex.h)
-AC_CHECK_HEADERS(sys/ptem.h sys/pte.h sys/stream.h sys/select.h sys/file.h \
+AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h \
 		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
+
+dnl sys/ptem.h requires definitions from sys/stream.h on systems where it
+dnl exists
+AC_CHECK_HEADER(sys/ptem.h, , ,[[
+#if HAVE_SYS_STREAM_H
+#  include <sys/stream.h>
+#endif
+]])
 
 dnl special checks for libc functions
 AC_FUNC_ALLOCA
