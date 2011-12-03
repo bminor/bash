@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -101,7 +101,7 @@ _rl_abort_internal ()
 {
   rl_ding ();
   rl_clear_message ();
-  _rl_init_argument ();
+  _rl_reset_argument ();
   rl_clear_pending_input ();
 
   RL_UNSETSTATE (RL_STATE_MACRODEF);

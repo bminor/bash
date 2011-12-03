@@ -420,7 +420,7 @@ rl_free_line_state ()
 
   _rl_kill_kbd_macro ();
   rl_clear_message ();
-  _rl_init_argument ();
+  _rl_reset_argument ();
 }
 
 #endif  /* HANDLE_SIGNALS */

@@ -1,6 +1,6 @@
 /* text.c -- text handling commands for readline. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -61,6 +61,11 @@
 /* Forward declarations. */
 static int rl_change_case PARAMS((int, int));
 static int _rl_char_search PARAMS((int, int, int));
+
+#if defined (READLINE_CALLBACKS)
+static int _rl_insert_next_callback PARAMS((_rl_callback_generic_arg *));
+static int _rl_char_search_callback PARAMS((_rl_callback_generic_arg *));
+#endif
 
 /* **************************************************************** */
 /*								    */
@@ -842,25 +847,61 @@ rl_insert (count, c)
 }
 
 /* Insert the next typed character verbatim. */
-int
-rl_quoted_insert (count, key)
-     int count, key;
+static int
+_rl_insert_next (count)
+     int count;
 {
   int c;
-
-#if defined (HANDLE_SIGNALS)
-  _rl_disable_tty_signals ();
-#endif
 
   RL_SETSTATE(RL_STATE_MOREINPUT);
   c = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
 #if defined (HANDLE_SIGNALS)
-  _rl_restore_tty_signals ();
+  if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+    _rl_restore_tty_signals ();
 #endif
 
   return (_rl_insert_char (count, c));  
+}
+
+#if defined (READLINE_CALLBACKS)
+static int
+_rl_insert_next_callback (data)
+     _rl_callback_generic_arg *data;
+{
+  int count;
+
+  count = data->count;
+
+  /* Deregister function, let rl_callback_read_char deallocate data */
+  _rl_callback_func = 0;
+  _rl_want_redisplay = 1;
+ 
+  return _rl_insert_next (count);
+}
+#endif
+  
+int
+rl_quoted_insert (count, key)
+     int count, key;
+{
+  /* Let's see...should the callback interface futz with signal handling? */
+#if defined (HANDLE_SIGNALS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+    _rl_disable_tty_signals ();
+#endif
+
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    {
+      _rl_callback_data = _rl_callback_data_alloc (count);
+      _rl_callback_func = _rl_insert_next_callback;
+      return (0);
+    }
+#endif
+      
+  return _rl_insert_next (count);
 }
 
 /* Insert a tab character. */
@@ -1466,10 +1507,33 @@ _rl_char_search (count, fdir, bdir)
 }
 #endif /* !HANDLE_MULTIBYTE */
 
+#if defined (READLINE_CALLBACKS)
+static int
+_rl_char_search_callback (data)
+     _rl_callback_generic_arg *data;
+{
+  _rl_callback_func = 0;
+  _rl_want_redisplay = 1;
+
+  return (_rl_char_search (data->count, data->i1, data->i2));
+}
+#endif
+
 int
 rl_char_search (count, key)
      int count, key;
 {
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    {
+      _rl_callback_data = _rl_callback_data_alloc (count);
+      _rl_callback_data->i1 = FFIND;
+      _rl_callback_data->i2 = BFIND;
+      _rl_callback_func = _rl_char_search_callback;
+      return (0);
+    }
+#endif
+  
   return (_rl_char_search (count, FFIND, BFIND));
 }
 
@@ -1477,6 +1541,17 @@ int
 rl_backward_char_search (count, key)
      int count, key;
 {
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    {
+      _rl_callback_data = _rl_callback_data_alloc (count);
+      _rl_callback_data->i1 = BFIND;
+      _rl_callback_data->i2 = FFIND;
+      _rl_callback_func = _rl_char_search_callback;
+      return (0);
+    }
+#endif
+
   return (_rl_char_search (count, BFIND, FFIND));
 }
 

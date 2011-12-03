@@ -118,6 +118,7 @@ rl_voidfunc_t *rl_redisplay_function = rl_redisplay;
 int rl_display_fixed = 0;
 
 int _rl_suppress_redisplay = 0;
+int _rl_want_redisplay = 0;
 
 /* The stuff that gets printed out before the actual text of the line.
    This is usually pointing to rl_prompt. */

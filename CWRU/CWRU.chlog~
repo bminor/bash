@@ -11418,4 +11418,48 @@ lib/tilde/tilde.c
 	- guard calls to {get,end}pwent with HAVE_GETPWENT
 
 Makefile.in,builtins/Makefile.in
-	- @CROSS_COMPILE@ is substituted into CFLAGS_FOR_BUILD
+	- @CROSS_COMPILE@ is substituted into CFLAGS_FOR_BUILD (equal to
+	  -DCROSS_COMPILING if bash is being cross-compiled)
+
+				    5/9
+				    ---
+aclocal.m4
+	- print version as `0.0' in RL_LIB_READLINE_VERSION if the
+	  `rl_gnu_readline_p' variable isn't 1 (accept no imitations)
+
+				   5/11
+				   ----
+lib/readline/rlprivate.h
+	- definition of a readline `search context', to be use for incremental
+	  search initially and other types of search later.  Original from
+	  Bob Rossi as part of work on incremental searching problems when
+	  using callback interface
+
+lib/readline/isearch.c
+	- functions to allocate and free search contexts
+	- function to take a search context and a character just read and
+	  `dispatch' on it:  change search parameters, add to search string,
+	  search further, etc.
+	- isearch is now completely context-driven:  a search context is
+	  allocated and passed to the rest of the functions
+
+				   5/12
+				   ----
+lib/readline/isearch.c
+	- an additional `isearch cleanup' function that can be called from
+	  the callback interface functions when the search is to be terminated
+	- an additional `isearch callback' function that can be called from
+	  rl_callback_read_char when input is available
+	- short-circuit from rl_search_history after initialization if
+	  the callback interface is being used
+
+lib/readline/callback.c
+	- in rl_callback_read_char(), if RL_STATE_ISEARCH is set, call
+	  _rl_isearch_callback to read the character and dispatch on it.
+	  If RL_STATE_ISEARCH is unset when that call returns, and there is
+	  input pending, call rl_callback_read_char() again so we don't
+	  have to wait for new input to pick it up
+
+support/shobj-conf,configure.in
+	- add support for dragonfly bsd, the same as freebsd
+

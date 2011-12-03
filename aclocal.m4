@@ -1740,12 +1740,18 @@ AC_CACHE_VAL(ac_cv_rl_version,
 #include <stdio.h>
 #include <readline/readline.h>
 
+extern int rl_gnu_readline_p;
+
 main()
 {
 	FILE *fp;
 	fp = fopen("conftest.rlv", "w");
-	if (fp == 0) exit(1);
-	fprintf(fp, "%s\n", rl_library_version ? rl_library_version : "0.0");
+	if (fp == 0)
+		exit(1);
+	if (rl_gnu_readline_p != 1)
+		fprintf(fp, "0.0\n");
+	else
+		fprintf(fp, "%s\n", rl_library_version ? rl_library_version : "0.0");
 	fclose(fp);
 	exit(0);
 }

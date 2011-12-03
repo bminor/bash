@@ -44,6 +44,11 @@
 #include "readline.h"
 #include "rlprivate.h"
 
+/* Private data for callback registration functions.  See comments in
+   rl_callback_read_char for more details. */
+_rl_callback_func_t *_rl_callback_func = 0;
+_rl_callback_generic_arg *_rl_callback_data = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Callback Readline Functions                 */
@@ -108,7 +113,51 @@ rl_callback_read_char ()
       abort ();
     }
 
-  eof = readline_internal_char ();
+  if  (RL_ISSTATE (RL_STATE_ISEARCH))
+    {
+      eof = _rl_isearch_callback (_rl_iscxt);
+      if (eof == 0 && (RL_ISSTATE (RL_STATE_ISEARCH) == 0) && RL_ISSTATE (RL_STATE_INPUTPENDING))
+	rl_callback_read_char ();
+
+      return;
+    }
+  else if  (RL_ISSTATE (RL_STATE_NSEARCH))
+    {
+      eof = _rl_nsearch_callback (_rl_nscxt);
+      return;
+    }
+  else if (RL_ISSTATE (RL_STATE_NUMERICARG))
+    {
+      eof = _rl_arg_callback (_rl_argcxt);
+      if (eof == 0 && (RL_ISSTATE (RL_STATE_NUMERICARG) == 0) && RL_ISSTATE (RL_STATE_INPUTPENDING))
+        rl_callback_read_char ();
+
+      return;
+    }
+  else if (_rl_callback_func)
+    {
+      /* This allows functions that simply need to read an additional character
+	 (like quoted-insert) to register a function to be called when input is
+	 available.  _rl_callback_data is simply a pointer to a struct that has
+	 the argument count originally passed to the registering function and
+	 space for any additional parameters.  */
+      eof = (*_rl_callback_func) (_rl_callback_data);
+      /* If the function `deregisters' itself, make sure the data is cleaned
+	 up. */
+      if (_rl_callback_func == 0 && _rl_callback_data)
+        {
+          _rl_callback_data_dispose (_rl_callback_data);
+          _rl_callback_data = 0;
+        }
+    }
+  else
+    eof = readline_internal_char ();
+
+  if (rl_done == 0 && _rl_want_redisplay)
+    {
+      (*rl_redisplay_function) ();
+      _rl_want_redisplay = 0;
+    }
 
   /* We loop in case some function has pushed input back with rl_execute_next. */
   for (;;)
@@ -156,6 +205,27 @@ rl_callback_handler_remove ()
       rl_clear_signals ();
 #endif
     }
+}
+
+_rl_callback_generic_arg *
+_rl_callback_data_alloc (count)
+     int count;
+{
+  _rl_callback_generic_arg *arg;
+
+  arg = (_rl_callback_generic_arg *)xmalloc (sizeof (_rl_callback_generic_arg));
+  arg->count = count;
+
+  arg->i1 = arg->i2 = 0;
+
+  return arg;
+}
+
+void _rl_callback_data_dispose (arg)
+     _rl_callback_generic_arg *arg;
+{
+  if (arg)
+    free (arg);
 }
 
 #endif

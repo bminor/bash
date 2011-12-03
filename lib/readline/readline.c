@@ -421,7 +421,7 @@ readline_internal_charloop ()
       if (rl_pending_input == 0)
 	{
 	  /* Then initialize the argument and number of keys read. */
-	  _rl_init_argument ();
+	  _rl_reset_argument ();
 	  rl_key_sequence_length = 0;
 	}
 
