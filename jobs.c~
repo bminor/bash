@@ -699,7 +699,9 @@ bgp_delete (pid)
   if (p == 0)
     return 0;		/* not found */
 
-itrace("bgp_delete: deleting %d", pid);
+#if defined (DEBUG)
+  itrace("bgp_delete: deleting %d", pid);
+#endif
 
   /* Housekeeping in the border cases. */
   if (p == bgpids.list)
@@ -814,13 +816,15 @@ cleanup_dead_jobs ()
 
   /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("cleanup_dead_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+    {
+#if defined (DEBUG)
+      if (i < js.j_firstj && jobs[i])
+	itrace("cleanup_dead_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
 
-    if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
-      delete_job (i, 0);
-}
+      if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
+	delete_job (i, 0);
+    }
   UNQUEUE_SIGCHLD(os);
 }
 
@@ -931,9 +935,14 @@ delete_job (job_index, warn_stopped)
   if (temp->state == JDEAD)
     {
       js.c_reaped -= ndel;
-if (js.c_reaped < 0)
-  itrace("delete_job (%d): js.c_reaped (%d) < 0 ndel = %d", job_index, js.c_reaped, ndel);
       js.j_ndead--;
+      if (js.c_reaped < 0)
+	{
+#ifdef DEBUG
+	  itrace("delete_job (%d pgrp %d): js.c_reaped (%d) < 0 ndel = %d js.j_ndead = %d", job_index, temp->pgrp, js.c_reaped, ndel, js.j_ndead);
+#endif
+	  js.c_reaped = 0;
+	}
     }
 
   if (temp->deferred)
@@ -1088,8 +1097,10 @@ map_over_jobs (func, arg1, arg2)
   /* XXX could use js.j_firstj here */
   for (i = result = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("map_over_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#if defined (DEBUG)
+      if (i < js.j_firstj && jobs[i])
+	itrace("map_over_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
       if (jobs[i])
 	{
 	  result = (*func)(jobs[i], arg1, arg2, i);
@@ -1224,8 +1235,10 @@ find_job (pid, alive_only, procp)
   /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#if defined (DEBUG)
+      if (i < js.j_firstj && jobs[i])
+	itrace("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
       if (jobs[i])
 	{
 	  p = jobs[i]->pipe;
@@ -1989,12 +2002,14 @@ wait_for_background_pids ()
       /* find first running job; if none running in foreground, break */
       /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("wait_for_background_pids: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
-	if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
-	  break;
-}
+	{
+#if defined (DEBUG)
+	  if (i < js.j_firstj && jobs[i])
+	    itrace("wait_for_background_pids: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
+	  if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
+	    break;
+	}
       if (i == js.j_jobslots)
 	{
 	  UNBLOCK_CHILD (oset);
@@ -2255,6 +2270,7 @@ wait_for (pid)
 	      if (job != NO_JOB)
 		{
 		  jobs[job]->state = JDEAD;
+		  js.c_reaped++;
 		  js.j_ndead++;
 		}
 	    }
@@ -2818,6 +2834,7 @@ waitchld (wpid, block)
   PROCESS *child;
   pid_t pid;
   int call_set_current, last_stopped_job, job, children_exited, waitpid_flags;
+  static int wcontinued = WCONTINUED;	/* run-time fix for glibc problem */
 
   call_set_current = children_exited = 0;
   last_stopped_job = NO_JOB;
@@ -2827,11 +2844,18 @@ waitchld (wpid, block)
       /* We don't want to be notified about jobs stopping if job control
 	 is not active.  XXX - was interactive_shell instead of job_control */
       waitpid_flags = (job_control && subshell_environment == 0)
-			? (WUNTRACED|WCONTINUED)
+			? (WUNTRACED|wcontinued)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
       pid = WAITPID (-1, &status, waitpid_flags);
+
+      /* WCONTINUED may be rejected by waitpid as invalid even when defined */
+      if (wcontinued && pid < 0 && errno == EINVAL)
+	{
+	  wcontinued = 0;
+	  continue;	/* jump back to the test and retry without WCONTINUED */
+	}
 
       /* The check for WNOHANG is to make sure we decrement sigchld only
 	 if it was non-zero before we called waitpid. */
@@ -3203,7 +3227,7 @@ notify_of_job_status ()
 	     last CHILD_MAX background processes if the shell is running a
 	     script.  If the shell is not interactive, don't print anything
 	     unless the job was killed by a signal. */
-	  if (startup_state == 0 && WIFSIGNALED (s) == 0 &&
+	  if (startup_state == 0 && WIFSIGNALED (s) == 0 && job_control == 0 &&
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
 	  
@@ -3265,7 +3289,7 @@ notify_of_job_status ()
 		      fprintf (stderr, "\n");
 		    }
 		}
-	      else
+	      else if (job_control)	/* XXX job control test added */
 		{
 		  if (dir == 0)
 		    dir = current_working_directory ();
@@ -3646,12 +3670,14 @@ delete_all_jobs (running_only)
 
       /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("delete_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
-	if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
-	  delete_job (i, 1);
-}
+	{
+#if defined (DEBUG)
+	  if (i < js.j_firstj && jobs[i])
+	    itrace("delete_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
+	  if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
+	    delete_job (i, 1);
+	}
       if (running_only == 0)
 	{
 	  free ((char *)jobs);
@@ -3698,12 +3724,14 @@ count_all_jobs ()
   BLOCK_CHILD (set, oset);
   /* XXX could use js.j_firstj here */
   for (i = n = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
-    if (jobs[i] && DEADJOB(i) == 0)
-      n++;
-}
+    {
+#if defined (DEBUG)
+      if (i < js.j_firstj && jobs[i])
+	itrace("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
+      if (jobs[i] && DEADJOB(i) == 0)
+	n++;
+    }
   UNBLOCK_CHILD (oset);
   return n;
 }
@@ -3770,8 +3798,10 @@ mark_dead_jobs_as_notified (force)
   /* XXX could use js.j_firstj here */
   for (i = ndead = ndeadproc = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#if defined (DEBUG)
+      if (i < js.j_firstj && jobs[i])
+	itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
       if (jobs[i] && DEADJOB (i))
 	{
 	  ndead++;
@@ -3819,8 +3849,10 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
     {
       if (jobs[i] && DEADJOB (i) && (interactive_shell || (find_last_pid (i, 0) != last_asynchronous_pid)))
 	{
-if (i < js.j_firstj && jobs[i])
-  itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#if defined (DEBUG)
+	  if (i < js.j_firstj && jobs[i])
+	    itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+#endif
 	  /* If marking this job as notified would drop us down below
 	     child_max, don't mark it so we can keep at least child_max
 	     statuses.  XXX -- need to check what Posix actually says
@@ -3868,6 +3900,9 @@ without_job_control ()
 {
   stop_making_children ();
   start_pipeline ();
+#if defined (PGRP_PIPE)
+  pipe_close (pgrp_pipe);
+#endif
   delete_all_jobs (0);
   set_job_control (0);
 }

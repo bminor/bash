@@ -11625,3 +11625,105 @@ variables.c
 	- assign export_env to environ (extern char **) every time it changes
 	  (mostly in add_to_export_env define), so maybe getenv will work on
 	  systems that don't allow it to be replaced
+
+				   6/29
+				   ----
+bashline.c
+	- in bash_directory_completion_hook, be careful about not turning `/'
+	  into `//' and `//' into `///' for benefit of those systems that treat
+	  `//' as some sort of `network root'.  Fix from Eric Blake
+	  <ebb9@byu.net>
+
+lib/readline/complete.c
+	- in to_print, do the right thing after stripping the trailing slash
+	  from full_pathname: // doesn't turn into /, and /// doesn't become
+	  //.  Fix from Eric Blake <ebb9@byu.net>
+
+				   6/30
+				   ----
+lib/malloc/trace.c
+	- include <unistd.h> if it's available for a definition of size_t
+
+jobs.c
+	- in wait_for, if a child process is marked as running but waitpid()
+	  returns -1/ECHILD (e.g., when the bash process is being traced by
+	  strace), make sure to increment c_reaped when marking the child as
+	  dead
+	- in without_job_control, make sure to close the pgrp pipe after
+	  calling start_pipeline
+
+				    7/1
+				    ---
+Makefile.in
+	- only remove pathnames.h when the other files created by running
+	  configure are removed (e.g., Makefile).  Fix from William Park
+
+lib/sh/shquote.c
+	- since backslash-newline disappears when within double quotes, don't
+	  add a backslash in front of a newline in sh_double_quote.  Problem
+	  reported by William Park
+
+jobs.c
+	- in notify_of_job_status, don't print status messages about
+	  terminated background processes unless job control is active
+
+bashhist.c
+	- new variable, hist_last_line_pushed, set to 0 in really_add_history
+	  (used by `history -s' code)
+
+bashhist.h
+	- new extern declaration for history -s
+
+builtins/history.def
+	- don't remove last history entry in push_history if it was added by
+	  a call to push_history -- use hist_last_line_pushed as a sentinel
+	  and set it after adding history entry.  This allows multiple
+	  calls to history -s to work right:  adding all lines to the history
+	  rather than deleting all but the last.  Bug reported by Matthias
+	  Schniedermeyer <ms@citd.de>
+	- pay attention to hist_last_line_pushed in expand_and_print_history()
+	  so we don't delete an entry pushed by history -s
+
+				    7/4
+				    ---
+print_cmd.c
+	- fix print_arith_for_command to not print so many blanks between
+	  expressions in ((...))
+
+command.h
+	- new word flag: W_DQUOTE.  Means word should be treated as if double
+	  quoted
+
+make_cmd.c
+	- add W_DQUOTE to word flags in make_arith_for_expr
+
+parse.y
+	- add W_DQUOTE to word flags for (( ... )) arithmetic commands
+
+subst.c
+	- don't perform tilde expansion on a word with W_DQUOTE flag set
+	- don't perform process substitution on a word with W_DQUOTE flag set
+
+arrayfunc.c
+	- expand an array index within [...] the same way as an arithmetic
+	  expansion between (( ... ))
+
+lib/readline/input.c
+	- use getch() instead of read() on mingw
+
+lib/readline/readline.c
+	- add a few key bindings for the arrow keys on mingw
+
+lib/readline/rldefs.h
+	- if on mingw, define NO_TTY_DRIVER
+
+lib/readline/rltty.c
+	- compile in the stub functions for _rl_{disable,restore}_tty_signals
+	  if on mingw
+	- compile in stub function for rl_restart_output on mingw
+	- make sure enough functions and macros are defined to compile if
+	  NO_TTY_DRIVER is defined (lightly tested - builds on MacOS X, at
+	  least)
+
+
+

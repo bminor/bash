@@ -4512,7 +4512,7 @@ command_substitute (string, quoted)
   if ((subshell_environment & SUBSHELL_PIPE) == 0)
     pipeline_pgrp = shell_pgrp;
   cleanup_the_pipeline ();
-#endif
+#endif /* JOB_CONTROL */
 
   old_async_pid = last_asynchronous_pid;
 #if 0
@@ -6703,7 +6703,7 @@ add_string:
 	case '<':
 	case '>':
 	  {
-	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || posixly_correct)
+	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & W_DQUOTE) || posixly_correct)
 	      {
 		sindex--;	/* add_character: label increments sindex */
 		goto add_character;
@@ -6769,7 +6769,7 @@ add_string:
 	  /* If the word isn't supposed to be tilde expanded, or we're not
 	     at the start of a word or after an unquoted : or = in an
 	     assignment statement, we don't do tilde expansion. */
-	  if ((word->flags & W_NOTILDE) ||
+	  if ((word->flags & (W_NOTILDE|W_DQUOTE)) ||
 	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
 	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	    {
@@ -6896,7 +6896,11 @@ add_twochars:
 	  break;
 
 	case '"':
-	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+#if 0
+	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (word->flags & W_DQUOTE))
+#else
+	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+#endif
 	    goto add_character;
 
 	  t_index = ++sindex;
@@ -7042,7 +7046,11 @@ add_twochars:
 	  /* break; */
 
 	case '\'':
-	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+#if 0
+	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (word->flags & W_DQUOTE))
+#else
+	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+#endif
 	    goto add_character;
 
 	  t_index = ++sindex;

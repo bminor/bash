@@ -2309,9 +2309,12 @@ bash_directory_completion_hook (dirname)
       if (temp1[len1 - 1] == '/')
 	{
 	  len2 = strlen (temp2);
-	  temp2 = (char *)xrealloc (temp2, len2 + 2);
-	  temp2[len2] = '/';
-	  temp2[len2 + 1] = '\0';
+	  if (len2 > 2)		/* don't append `/' to `/' or `//' */
+	    {
+	      temp2 = (char *)xrealloc (temp2, len2 + 2);
+	      temp2[len2] = '/';
+	      temp2[len2 + 1] = '\0';
+	    }
 	}
       free (local_dirname);
       *dirname = temp2;

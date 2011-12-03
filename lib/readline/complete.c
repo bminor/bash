@@ -694,7 +694,7 @@ print_filename (to_print, full_pathname)
      char *to_print, *full_pathname;
 {
   int printed_len, extension_char, slen, tlen;
-  char *s, c, *new_full_pathname;
+  char *s, c, *new_full_pathname, *dn;
 
   extension_char = 0;
   printed_len = fnprint (to_print);
@@ -719,7 +719,17 @@ print_filename (to_print, full_pathname)
 	     files in the root directory.  If we pass a null string to the
 	     bash directory completion hook, for example, it will expand it
 	     to the current directory.  We just want the `/'. */
-	  s = tilde_expand (full_pathname && *full_pathname ? full_pathname : "/");
+	  if (full_pathname == 0 || *full_pathname == 0)
+	    dn = "/";
+	  else if (full_pathname[0] != '/')
+	    dn = full_pathname;
+	  else if (full_pathname[1] == 0)
+	    dn = "//";		/* restore trailing slash to `//' */
+	  else if (full_pathname[1] == '/' && full_pathname[2] == 0)
+	    dn = "/";		/* don't turn /// into // */
+	  else
+	    dn = full_pathname;
+	  s = tilde_expand (dn);
 	  if (rl_directory_completion_hook)
 	    (*rl_directory_completion_hook) (&s);
 
@@ -727,6 +737,10 @@ print_filename (to_print, full_pathname)
 	  tlen = strlen (to_print);
 	  new_full_pathname = (char *)xmalloc (slen + tlen + 2);
 	  strcpy (new_full_pathname, s);
+	  if (s[slen - 1] == '/')
+	    slen--;
+	  else
+	    new_full_pathname[slen] = '/';
 	  new_full_pathname[slen] = '/';
 	  strcpy (new_full_pathname + slen + 1, to_print);
 

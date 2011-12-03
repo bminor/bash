@@ -86,6 +86,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_ASSNBLTIN	0x10000 /* word is a builtin command that takes assignments */
 #define W_ASSIGNARG	0x20000 /* word is assignment argument to command */
 #define W_HASQUOTEDNULL	0x40000	/* word contains a quoted null character */
+#define W_DQUOTE	0x80000	/* word should be treated as if double-quoted */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */

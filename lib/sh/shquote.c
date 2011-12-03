@@ -81,7 +81,8 @@ sh_double_quote (string)
 
   for (s = string; s && (c = *s); s++)
     {
-      if (sh_syntaxtab[c] & CBSDQUOTE)
+      /* Backslash-newline disappears within double quotes, so don't add one. */
+      if ((sh_syntaxtab[c] & CBSDQUOTE) && c != '\n')
 	*r++ = '\\';
       else if (c == CTLESC || c == CTLNUL)
 	*r++ = CTLESC;		/* could be '\\'? */

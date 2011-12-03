@@ -592,7 +592,11 @@ array_expand_index (s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
+#if 0
   t = expand_string_to_string (exp, 0);
+#else 
+  t = expand_string_to_string (exp, Q_DOUBLE_QUOTES);
+#endif
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
   free (t);

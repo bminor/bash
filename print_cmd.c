@@ -485,9 +485,9 @@ print_arith_for_command (arith_for_command)
 {
   cprintf ("for ((");
   command_print_word_list (arith_for_command->init, " ");
-  cprintf (" ; ");
+  cprintf ("; ");
   command_print_word_list (arith_for_command->test, " ");
-  cprintf (" ; ");
+  cprintf ("; ");
   command_print_word_list (arith_for_command->step, " ");
   cprintf ("))");
   newline ("do\n");
