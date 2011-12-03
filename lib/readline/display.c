@@ -254,7 +254,8 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
       else if (ignoring && *p == RL_PROMPT_END_IGNORE)
 	{
 	  ignoring = 0;
-	  last = r - ret - 1;
+	  if (p[-1] != RL_PROMPT_START_IGNORE)
+	    last = r - ret - 1;
 	  continue;
 	}
       else

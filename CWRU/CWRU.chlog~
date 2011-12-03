@@ -11497,7 +11497,7 @@ lib/readline/search.c
 	  the callback code more easily
 
 lib/readline/text.c
-	- in rl_quoted_insert(), don't messa around with the tty signals if
+	- in rl_quoted_insert(), don't mess around with the tty signals if
 	  running in `callback mode'
 
 lib/readline/vi_mode.c
@@ -11761,5 +11761,25 @@ configure.in
 input.c
 	- in duplicate_buffered_stream, don't call free_buffered_stream if the
 	  two buffered streams share the same b_buffer object (e.g., if they
-	  had already been duplicated with a previous call).  Fixes bug
+	  had already been duplicated with a previous call).  Fixes Debian bug
 	  reported by eero17@bigfoot.com
+
+				   7/12
+				   ----
+shell.c
+	- make set_shell_name more resistant to a NULL argument
+	- in bind_args, use < instead of != when counting the arguments and
+	  making the arg list
+	- in main(), make sure arg_index is not initialized to a value greater
+	  than argc
+
+				   7/14
+				   ----
+lib/readline/display.c
+	- in expand_prompt, don't set the location of the last invisible
+	  char if the sequence is zero length  (\[\])
+
+				   7/15
+				   ----
+doc/{bash.1,bashref.texi}
+	- document that the shell uses $TMPDIR when creating temporary files

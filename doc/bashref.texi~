@@ -94,46 +94,28 @@ reference on shell behavior.
 
 @menu
 * Introduction::		An introduction to the shell.
-
 * Definitions::			Some definitions used in the rest of this
 				manual.
-
 * Basic Shell Features::	The shell "building blocks".
-
 * Shell Builtin Commands::	Commands that are a part of the shell.
-
 * Shell Variables::		Variables used or set by Bash.
-
 * Bash Features::		Features found only in Bash.
-
-* Job Control::			A chapter describing what job control is
-				and how Bash allows you to use it.
-
-* Using History Interactively::	Chapter dealing with history expansion
-				rules.
-
+* Job Control::			What job control is and how Bash allows you
+				to use it.
+* Using History Interactively::	Command History Expansion
 * Command Line Editing::	Chapter describing the command line
 				editing features.
-
 * Installing Bash::		How to build and install Bash on your system.
-
 * Reporting Bugs::		How to report bugs in Bash.
-
 * Major Differences From The Bourne Shell::	A terse list of the differences
 						between Bash and historical
 						versions of /bin/sh.
-
 * Copying This Manual::		Copying this manual.
-
 * Builtin Index::		Index of Bash builtin commands.
-
 * Reserved Word Index::		Index of Bash reserved words.
-
 * Variable Index::		Quick reference helps you find the
 				variable you want.
-
 * Function Index::		Index of bindable Readline functions.
-
 * Concept Index::		General index for concepts described in
 				this manual.
 @end menu
@@ -143,7 +125,6 @@ reference on shell behavior.
 @chapter Introduction
 @menu
 * What is Bash?::		A short description of Bash.
-
 * What is a shell?::		A brief introduction to shells.
 @end menu
 
@@ -371,9 +352,7 @@ and to named files, and how the shell executes commands.
 @section Shell Syntax
 @menu
 * Shell Operation::	The basic operation of the shell.
-
 * Quoting::		How to remove the special meaning from characters.
-
 * Comments::		How to specify comments.
 @end menu
 
@@ -444,7 +423,6 @@ status (@pxref{Exit Status}).
 * Double Quotes::	How to suppress most of the interpretation of a
 			sequence of characters.
 * ANSI-C Quoting::	How to expand ANSI-C sequences in quoted strings.
-
 * Locale Translation::	How to translate strings into different languages.
 @end menu
 
@@ -2227,21 +2205,15 @@ is not specified.  If the file does not exist, it is created.
 @menu
 * Simple Command Expansion::	How Bash expands simple commands before
 				executing them.
-
 * Command Search and Execution::	How Bash finds commands and runs them.
-
 * Command Execution Environment::	The environment in which Bash
 					executes commands that are not
 					shell builtins.
-
 * Environment::		The environment given to a command.
-
 * Exit Status::		The status returned by commands and how Bash
 			interprets it.
-
 * Signals::		What happens when Bash or a command it runs
 			receives a signal.
-
 @end menu
 
 @node Simple Command Expansion
@@ -2642,6 +2614,8 @@ Many of the builtins have been extended by @sc{posix} or Bash.
 Unless otherwise noted, each builtin command documented as accepting
 options preceded by @samp{-} accepts @samp{--}
 to signify the end of the options.
+For example, the @code{:}, @code{true}, @code{false}, and @code{test}
+builtins do not accept options.
 
 @node Bourne Shell Builtins
 @section Bourne Shell Builtins
@@ -2932,6 +2906,8 @@ Evaluate a conditional expression @var{expr}.
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
 @ref{Bash Conditional Expressions}.
+@code{test} does not accept any options, nor does it accept and ignore
+an argument of @option{--} as signifying the end of options.
 
 When the @code{[} form is used, the last argument to the command must
 be a @code{]}.
@@ -3335,6 +3311,8 @@ even on systems where they are interpreted by default.
 The @code{xpg_echo} shell option may be used to
 dynamically determine whether or not @code{echo} expands these
 escape characters by default.
+@code{echo} does not interpret @option{--} to mean the end of options.
+
 @code{echo} interprets the following escape sequences:
 @table @code
 @item \a
@@ -6408,23 +6386,16 @@ Other independent ports exist for
 
 @menu
 * Basic Installation::	Installation instructions.
-
 * Compilers and Options::	How to set special options for various
 				systems.
-
 * Compiling For Multiple Architectures::	How to compile Bash for more
 						than one kind of system from
 						the same source tree.
-
 * Installation Names::	How to set the various paths used by the installation.
-
 * Specifying the System Type::	How to configure Bash for a particular system.
-
 * Sharing Defaults::	How to share default configuration values among GNU
 			programs.
-
 * Operation Controls::	Options recognized by the configuration program.
-
 * Optional Features::	How to enable and disable optional features when
 			building Bash.
 @end menu

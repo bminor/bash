@@ -11497,7 +11497,7 @@ lib/readline/search.c
 	  the callback code more easily
 
 lib/readline/text.c
-	- in rl_quoted_insert(), don't messa around with the tty signals if
+	- in rl_quoted_insert(), don't mess around with the tty signals if
 	  running in `callback mode'
 
 lib/readline/vi_mode.c
@@ -11527,7 +11527,7 @@ lib/readline/readline.c
 	  to use it - rudimentary support for supporting the existing
 	  recursion using a stack of contexts, each with a reference to the
 	  previous
-	- fix so that  ^G works when in callback mode
+	- fix so that ^G works when in callback mode
 
 lib/readline/callback.c
 	- call the appropriate multiple-key sequence callback if the state is
@@ -11772,3 +11772,14 @@ shell.c
 	  making the arg list
 	- in main(), make sure arg_index is not initialized to a value greater
 	  than argc
+
+				   7/14
+				   ----
+lib/readline/display.c
+	- in expand_prompt, don't set the location of the last invisible
+	  char if the sequence is zero length  (\[\])
+
+				   7/15
+				   ----
+doc/{bash.1,bashref.texi}
+	- document that the shell uses $TMPDIR when creating temporary files
