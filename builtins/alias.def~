@@ -122,9 +122,10 @@ alias_builtin (list)
 	    {
 	      builtin_error ("%s: invalid alias name", name);
 	      any_failed++;
+	      continue;
 	    }
-	  else
-	    add_alias (name, value);
+
+	  add_alias (name, value);
 	}
       else
 	{

@@ -259,7 +259,7 @@ static intmax_t parameter_brace_expand_length __P((char *));
 
 static char *skiparith __P((char *, int));
 static int verify_substring_values __P((char *, char *, int, intmax_t *, intmax_t *));
-static int get_var_and_type __P((char *, char *, SHELL_VAR **, char **));
+static int get_var_and_type __P((char *, char *, int, SHELL_VAR **, char **));
 static char *mb_substring __P((char *, int, int));
 static char *parameter_brace_substring __P((char *, char *, char *, int));
 
@@ -1977,8 +1977,9 @@ do_assignment_internal (string, expand)
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
-  int ni, assign_list = 0;
+  int ni;
 #endif
+  int assign_list = 0;
 
   offset = assignment (string, 0);
   name = savestring (string);
@@ -2022,12 +2023,14 @@ do_assignment_internal (string, expand)
 
   if (echo_command_at_execute)
     {
-#if defined (ARRAY_VARS)
+#if 0
       if (assign_list)
 	fprintf (stderr, "%s%s=(%s)\n", indirection_level_string (), name, value);
       else
+	fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
+#else
+       xtrace_print_assignment (name, value, assign_list, 1);
 #endif
-      fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
     }
 
 #define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
@@ -3530,7 +3533,7 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, &v, &val);
+  vtype = get_var_and_type (varname, value, quoted, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -4446,7 +4449,12 @@ parameter_brace_expand_word (name, var_is_special, quoted)
   if (legal_number (name, &arg_index))
     {
       tt = get_dollar_var_value (arg_index);
-      temp = tt ? quote_escapes (tt) : (char *)NULL;
+      if (tt)
+ 	temp = (*tt && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+ 		  ? quote_string (tt)
+ 		  : quote_escapes (tt);
+      else
+        temp = (char *)NULL;
       FREE (tt);
     }
   else if (var_is_special)      /* ${@} */
@@ -4465,7 +4473,9 @@ parameter_brace_expand_word (name, var_is_special, quoted)
     {
       temp = array_value (name, quoted, &atype);
       if (atype == 0 && temp)
-	temp = quote_escapes (temp);
+ 	temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+ 		  ? quote_string (temp)
+ 		  : quote_escapes (temp);
     }
 #endif
   else if (var = find_variable (name))
@@ -4479,7 +4489,9 @@ parameter_brace_expand_word (name, var_is_special, quoted)
 #endif
 
 	  if (temp)
-	    temp = quote_escapes (temp);
+	    temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+		      ? quote_string (temp)
+		      : quote_escapes (temp);
 	}
       else
 	temp = (char *)NULL;
@@ -4501,6 +4513,15 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   char *temp, *t;
 
   t = parameter_brace_expand_word (name, var_is_special, quoted);
+  /* Have to dequote here if necessary */
+  if (t)
+    {
+      temp = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+		? dequote_string (t)
+		: dequote_escapes (t);
+      free (t);
+      t = temp;
+    }
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
   if (t == 0)
     return (t);
@@ -4895,8 +4916,9 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
    characters in the value are quoted with CTLESC and takes appropriate
    steps.  For convenience, *VALP is set to the dequoted VALUE. */
 static int
-get_var_and_type (varname, value, varp, valp)
+get_var_and_type (varname, value, quoted, varp, valp)
      char *varname, *value;
+     int quoted;
      SHELL_VAR **varp;
      char **valp;
 {
@@ -4943,7 +4965,21 @@ get_var_and_type (varname, value, varp, valp)
     }
   else
 #endif
+#if 1
+    {
+      if (value && vtype == VT_VARIABLE)
+	{
+	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+	    *valp = dequote_string (value);
+	  else
+	    *valp = dequote_escapes (value);
+	}
+      else
+	*valp = value;
+    }
+#else
   *valp = (value && vtype == VT_VARIABLE) ? dequote_escapes (value) : value;
+#endif
 
   return vtype;
 }
@@ -5002,7 +5038,7 @@ parameter_brace_substring (varname, value, substr, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, &v, &val);
+  vtype = get_var_and_type (varname, value, quoted, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -5201,7 +5237,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, &v, &val);
+  vtype = get_var_and_type (varname, value, quoted, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -5736,7 +5772,16 @@ param_expand (string, sindex, quoted, expanded_something,
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  return (interactive_shell ? &expand_param_error : &expand_param_fatal);
 	}
+#if 1
+      if (temp1)
+	temp = (*temp1 && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+		  ? quote_string (temp1)
+		  : quote_escapes (temp1);
+      else
+	temp = (char *)NULL;
+#else
       temp = temp1 ? quote_escapes (temp1) : (char *)NULL;
+#endif
       break;
 
     /* $$ -- pid of the invoking shell. */
@@ -5827,13 +5872,10 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
-if (list && list->next)
-  {
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
-  }
 
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
@@ -5976,13 +6018,22 @@ comsub:
 	    {
 	      temp = array_reference (array_cell (var), 0);
 	      if (temp)
-		temp = quote_escapes (temp);
+		temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+			  ? quote_string (temp)
+			  : quote_escapes (temp);
 	      else if (unbound_vars_is_error)
 		goto unbound_variable;
 	    }
 	  else
 #endif
-	  temp = quote_escapes (value_cell (var));
+	    {
+	      temp = value_cell (var);
+
+	      temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+			? quote_string (temp)
+			: quote_escapes (temp);
+	    }
+
 	  free (temp1);
 
 	  goto return0;

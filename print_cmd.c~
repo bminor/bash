@@ -358,7 +358,7 @@ xtrace_print_assignment (name, value, assign_list, xflags)
     fprintf (stderr, "%s", indirection_level_string ());
 
   /* VALUE should not be NULL when this is called. */
-  if (*value == '\0' || assign_list)
+  if (*value == '\0 || assign_list)
     nval = value;
   else if (sh_contains_shell_metas (value))
     nval = sh_single_quote (value);

@@ -1359,6 +1359,7 @@ make_child (command, async_p)
 	  if (setpgid (mypid, pipeline_pgrp) < 0)
 	    sys_error ("child setpgid (%ld to %ld)", (long)mypid, (long)pipeline_pgrp);
 
+itrace("make_child: setpgid (pid = %d, pgrp = %d)", mypid, pipeline_pgrp);
 	  /* By convention (and assumption above), if
 	     pipeline_pgrp == shell_pgrp, we are making a child for
 	     command substitution.

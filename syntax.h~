@@ -71,8 +71,6 @@ extern int sh_syntabsiz;
 #define shellbreak(c)	(sh_syntaxtab[(unsigned char)(c)] & CSHBRK)
 #define shellquote(c)	(sh_syntaxtab[(unsigned char)(c)] & CQUOTE)
 
-#define shellxquote(c)	(sh_syntaxtab[(unsigned char)(c)] & CXQUOTE)
-
 #define issyntype(c, t)	((sh_syntaxtab[(unsigned char)(c)] & (t)) != 0)
 #define notsyntype(c,t) ((sh_syntaxtab[(unsigned char)(c)] & (t)) == 0)
 

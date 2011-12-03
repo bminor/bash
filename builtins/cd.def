@@ -228,8 +228,8 @@ cd_builtin (list)
 		 is used to find the directory to change to, the new
 		 directory name is echoed to stdout, whether or not
 		 the shell is interactive. */
-	      if (opt)
-		printf ("%s\n", no_symlinks ? temp : the_current_working_directory);
+	      if (opt && (path = no_symlinks ? temp : the_current_working_directory))
+		printf ("%s\n", path);
 
 	      free (temp);
 	      /* Posix.2 says that after using CDPATH, the resultant

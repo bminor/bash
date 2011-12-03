@@ -1977,8 +1977,9 @@ do_assignment_internal (string, expand)
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
-  int ni, assign_list = 0;
+  int ni;
 #endif
+  int assign_list = 0;
 
   offset = assignment (string, 0);
   name = savestring (string);
@@ -2021,14 +2022,7 @@ do_assignment_internal (string, expand)
     }
 
   if (echo_command_at_execute)
-    {
-#if defined (ARRAY_VARS)
-      if (assign_list)
-	fprintf (stderr, "%s%s=(%s)\n", indirection_level_string (), name, value);
-      else
-#endif
-      fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
-    }
+     xtrace_print_assignment (name, value, assign_list, 1);
 
 #define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
 

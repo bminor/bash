@@ -1,6 +1,6 @@
 /* shmbutil.h -- utility functions for multibyte characters. */
 
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,46 +23,8 @@
 
 #include "stdc.h"
 
-/************************************************/
-/* check multibyte capability for I18N code     */
-/************************************************/
-
-/* For platforms which support the ISO C amendement 1 functionality we
-   support user defined character classes.  */
-   /* Solaris 2.5 has a bug: <wchar.h> must be included before <wctype.h>.  */
-#if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H)
-#  include <wchar.h>
-#  include <wctype.h>
-#  if defined (HAVE_MBSRTOWCS) /* system is supposed to support XPG5 */
-#    define HANDLE_MULTIBYTE      1
-#  endif
-#endif /* HAVE_WCTYPE_H && HAVE_WCHAR_H */
-
-/* Some systems, like BeOS, have multibyte encodings but lack mbstate_t.  */
-#if HANDLE_MULTIBYTE && !defined (HAVE_MBSTATE_T)
-#  define wcsrtombs(dest, src, len, ps) (wcsrtombs) (dest, src, len, 0)
-#  define mbsrtowcs(dest, src, len, ps) (mbsrtowcs) (dest, src, len, 0)
-#  define wcrtomb(s, wc, ps) (wcrtomb) (s, wc, 0)
-#  define mbrtowc(pwc, s, n, ps) (mbrtowc) (pwc, s, n, 0)
-#  define mbrlen(s, n, ps) (mbrlen) (s, n, 0)
-#  define mbstate_t int
-#endif /* HANDLE_MULTIBYTE && !HAVE_MBSTATE_T */
-
-/* Make sure MB_LEN_MAX is at least 16 on systems that claim to be able to
-   handle multibyte chars (some systems define MB_LEN_MAX as 1) */
-#ifdef HANDLE_MULTIBYTE
-#  include <limits.h>
-#  if defined(MB_LEN_MAX) && (MB_LEN_MAX < 16)
-#    undef MB_LEN_MAX
-#  endif
-#  if !defined (MB_LEN_MAX)
-#    define MB_LEN_MAX 16
-#  endif
-#endif /* HANDLE_MULTIBYTE */
-
-/************************************************/
-/* end of multibyte capability checks for I18N  */
-/************************************************/
+/* Include config.h for HANDLE_MULTIBYTE */
+#include <config.h>
 
 #if defined (HANDLE_MULTIBYTE)
 

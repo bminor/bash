@@ -9317,3 +9317,53 @@ configure.in
 
 include/posixdir.h
 	- use new and renamed HAVE_STRUCT_DIRENT_D_xxx defines
+
+				    4/7
+				    ---
+builtins/cd.def
+	- ensure that we print out a non-null pathname after getting a
+	  directory from CDPATH and canonicalizing it (e.g., if the result
+	  exceeds PATH_MAX in length and the_current_working_directory is
+	  set to NULL)
+
+				   4/12
+				   ----
+print_cmd.c
+	- new functionto print out assignment statements when `set -x' has
+	  been enabled: xtrace_print_assignment
+
+externs.h
+	- extern declaration for xtrace_print_assignment
+
+				   4/13
+				   ----
+{subst,variables}.c
+	- call xtrace_print_assignment instead of using inline code
+
+jobs.c
+	- if turning on job control when it was previously off, set
+	  pipeline_pgrp to 0 in set_job_control so make_child puts
+	  subsequent children in their own process group
+
+				   4/14
+				   ----
+general.c
+	- new function, legal_alias_name, called to decide whether an
+	  argument to add_alias is a valid alias name -- essentially any
+	  character except one which must be quoted to the shell parser
+	  and `/'
+
+general.h
+	- new extern declaration for legal_alias_name
+
+builtins/alias.def
+	- `unalias' now returns failure status if no NAME arguments are
+	  supplied and -a is not given
+	- call legal_alias_name to make sure alias name is valid before
+	  calling add_alias from alias_builtin
+
+				   4/19
+				   ----
+include/shmbutil.h
+	- include <config.h> for definition of HANDLE_MULTIBYTE rather than
+	  duplicating logic

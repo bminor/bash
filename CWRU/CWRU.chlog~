@@ -9264,6 +9264,13 @@ expr.c
 	  pre-decrement work when separated from their accompanying identifier
 	  by whitespace
 
+				   3/18
+				   ----
+lib/readline/misc.c
+	- in rl_maybe_unsave_line, don't force rl_replace_line to clear
+	  the undo_list, since it might point directly at an undo list
+	  from a history entry (to which we have no handle)
+
 				   3/19
 				   ----
 lib/readline/display.c
@@ -9295,3 +9302,63 @@ bashhist.c
 	  that returned `print only' to the history list, since history_expand
 	  no longer does it (and, when using readline, do it only when
 	  rl_dispatching is zero)
+
+				   3/22
+				   ----
+config.h.in,aclocal.m4
+	- change bash-specific functions that look in struct dirent to define
+	  HAVE_STRUCT_DIRENT_xxx, like AC_CHECK_MEMBERS does (though the
+	  functions are otherwise the same)
+	- new function, BASH_STRUCT_DIRENT_D_NAMLEN, define
+	  HAVE_STRUCT_DIRENT_D_NAMLEN if struct dirent has a `d_namlen' member
+
+configure.in
+	- call BASH_STRUCT_DIRENT_D_NAMLEN
+
+include/posixdir.h
+	- use new and renamed HAVE_STRUCT_DIRENT_D_xxx defines
+
+				    4/7
+				    ---
+builtins/cd.def
+	- ensure that we print out a non-null pathname after getting a
+	  directory from CDPATH and canonicalizing it (e.g., if the result
+	  exceeds PATH_MAX in length and the_current_working_directory is
+	  set to NULL)
+
+				   4/12
+				   ----
+print_cmd.c
+	- new functionto print out assignment statements when `set -x' has
+	  been enabled: xtrace_print_assignment
+
+externs.h
+	- extern declaration for xtrace_print_assignment
+
+				   4/13
+				   ----
+{subst,variables}.c
+	- call xtrace_print_assignment instead of using inline code
+
+jobs.c
+	- if turning on job control when it was previously off, set
+	  pipeline_pgrp to 0 in set_job_control so make_child puts
+	  subsequent children in their own process group
+
+				   4/14
+				   ----
+general.c
+	- new function, legal_alias_name, called to decide whether an
+	  argument to add_alias is a valid alias name -- essentially any
+	  character except one which must be quoted to the shell parser
+	  and `/'
+
+general.h
+	- new extern declaration for legal_alias_name
+
+builtins/alias.def
+	- `unalias' now returns failure status if no NAME arguments are
+	  supplied and -a is not given
+	- call legal_alias_name to make sure alias name is valid before
+	  calling add_alias from alias_builtin
+

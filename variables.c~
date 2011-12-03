@@ -2118,9 +2118,16 @@ assign_in_env (string)
     setifs (var);
 
   if (echo_command_at_execute)
-    /* The Korn shell prints the `+ ' in front of assignment statements,
-	so we do too. */
-    xtrace_print_assignment (name, value, 0, 1);
+    {
+      /* The Korn shell prints the `+ ' in front of assignment statements,
+	 so we do too. */
+#if 0
+      fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
+      fflush (stderr);
+#else
+      xtrace_print_assignment (name, value, 0, 1);
+#endif
+    }
 
   free (name);
   return 1;

@@ -249,7 +249,7 @@ legal_alias_name (string, flags)
   register char *s;
 
   for (s = string; *s; s++)
-    if (shellbreak (*s) || shellxquote (*s) || shellexp (*s) || (*s == '/'))
+    if (shellbreak (*s) || shellquote (*s) || shellexp (*s) || (*s == '/'))
       return 0;
   return 1;
 }
