@@ -1,3 +1,177 @@
+This document details the changes between this version, bash-3.1-rc1,
+and the previous version, bash-3.1-beta1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that could cause core dumps due of accessing the current
+    pipeline while in the middle of modifying it.
+
+b.  Fixed a bug that caused pathnames with backslashes still quoting characters
+    to be passed to opendir().
+
+c.  Command word completion now obeys the setting of completion-ignore-case.
+
+d.  Fixed a problem with redirection that caused file descriptors greater than
+    2 to be inappropriately marked as close-on-exec.
+
+e.  In Posix mode, after `wait' is called to wait for a particular process
+    explicitly, that process is removed from the list of processes known to
+    the shell, and subsequent attempts to wait for it return errors.
+
+f.  Fixed a bug that caused extended pattern matching to incorrectly scan
+    backslash-escaped pattern characters.
+
+g.  Fixed a synchronization problem that could cause core dumps when handling
+    a SIGWINCH.
+
+h.  Fixed a bug that caused an unmatched backquote to be accepted without an
+    error when processing here documents.
+
+i.  Fixed a small memory leak in the `cd' builtin.
+
+j.  Fix for MacOS X so it gets the values for the HOSTTYPE, MACHTYPE, and
+    OSTYPE variables at build time, to support universal binaries.
+
+2.  New Features in Bash
+
+3.  Changes to Readline
+
+a.  Fixed a bug that caused reversing the incremental search direction to
+    not work correctly.
+
+b.  Fixed the vi-mode `U' command to only undo up to the first time insert mode
+    was entered, as Posix specifies.
+
+4.  New Features in Readline
+
+a.  New application-callable auxiliary function, rl_variable_value, returns
+    a string corresponding to a readline variable's value.
+
+b.  When parsing inputrc files and variable binding commands, the parser
+    strips trailing whitespace from values assigned to boolean variables
+    before checking them.
+
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-3.1-beta1,
+and the previous version, bash-3.1-alpha1.
+
+1.  Changes to Bash
+
+a.  Added some system-specific signal names.
+
+b.  Fixed a typo in the ulimit builtin to make `x' the right option to
+    maniuplate the limit on file locks.
+
+c.  Fixed a problem with using += to append to index 0 of an array variable
+    when not using subscript syntax.
+
+d.  A few changes to configure.in to remove calls to obsolete or outdated
+    macros.
+
+e.  Make sure changes to variables bash handles specially (e.g., LC_ALL) are
+    made when the variable is set in the temporary environment to a command.
+
+f.  Make sure changes to variables bash handles specially (e.g., LC_ALL) are
+    made when the variable is modified using `printf -v'.
+
+g.  The export environment is now remade on cygwin when HOME is changed, so
+    DLLs bash is linked against pick up the new value.  This fixes problems
+    with tilde expansion when linking against and already-installed readline.
+
+h.  Small fix to the logic for performing tilde expansion in posix mode, so
+    expansion on the right-hand side of an assignment statement takes place.
+
+i.  Fixed a bug that prevented redirections associated with a shell function
+    from being executed when in a subshell.
+
+j.  Fixed `source' and `.' builtins to not require an executable file when
+    searching $PATH for a file to source.
+
+k.  Fixed a bug that caused incorrect word splitting in a function when IFS
+    was declared local, then unset.
+
+l.  Fixed a problem with the `kill' builtin that prevented sending signals
+    to a process group under certain circumstances when providing a pid < 0.
+
+m.  When in POSIX mode, `pwd' now checks that the value it prints is the same
+    directory as `.', even when displaying $PWD.
+
+n.  Fixed a problem with the `read' builtin when reading a script from standard
+    input and reading data from the same file.
+
+o.  Fixed a problem with the `type' and `command' builtins that caused absolute
+    pathnames to be displayed incorrectly.
+
+p.  Some changes to the `bg' builtin for POSIX conformance.
+
+q.  The `fc' builtin now removes the `fc' command that caused it to invoke an
+    editor on specified history entries from the history entirely, rather than
+    simply ignoring it.
+
+r.  When in POSIX mode, the `v' command in vi editing mode simply invokes vi
+    on the current command, rather than checking $FCEDIT and $EDITOR.
+
+s.  Fixed a small memory leak in the pathname canonicalization code.
+
+t.  Fixed a bug that caused the expanded value of a $'...' string to be
+    incorrectly re-quoted if it occurred within a double-quoted ${...}
+    parameter expansion.
+
+u.  Restored default emacs-mode key binding of M-TAB to dynamic-complete-history.
+
+v.  Fixed a bug that caused core dumps when interrupting loops running builtins
+    on some systems.
+
+w.  Make sure that some of the functions bash provides replacements for are
+    not cpp defines.
+
+x.  The code that scans embedded commands for the parser (`...` and $(...)) is
+    now more aware of embedded comments and their effect on quoted strings.
+
+y.  Changed the `-n' option to the `history' builtin to not reset the number of
+    history lines read in the current session after reading the new lines from
+    the history file if the history is being appended when it is written to
+    the file, since the appending takes care of the problem that the adjustment
+    was intended to solve.
+
+z.  Improved the error message displayed when a shell script fails to execute
+    because the environment and size of command line arguments are too large.
+
+aa. A small fix to make sure that $HISTCMD is evaluated whenever the shell is
+    saving commands to the history list, not just when HISTSIZE is defined.
+
+2.  Changes to Readline
+
+a.  The `change-case' command now correctly changes the case of multibyte
+    characters.
+
+b.  Changes to the shared library construction scripts to deal with Windows
+    DLL naming conventions for Cygwin.
+
+c.  Fixed the redisplay code to avoid core dumps resulting from a poorly-timed
+    SIGWINCH.
+
+d.  Fixed the non-incremental search code in vi mode to dispose of any current
+    undo list when copying a line from the history into the current editing
+    buffer.
+
+e.  The variable assignment code now ignores whitespace at the end of lines.
+
+f.  The `C-w' binding in incremental search now understands multibyte
+    characters.
+
+3.  New Features in Bash
+
+a.  A new configuration option, `--enable-strict-posix-default', which will
+    build bash to be POSIX conforming by default.
+
+4.  New Features in Readline
+
+a.  If the rl_completion_query_items is set to a value < 0, readline never
+    asks the user whether or not to view the possible completions.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.1-alpha1,
 and the previous version, bash-3.0-release.
 
@@ -223,6 +397,12 @@ qqq. Fixed a bug that caused core dumps when the shell was reading its non-
      interactive input from fd 0 and fd 0 was duplicated and restored using a
      combination of `exec' (to save) and redirection (to restore).
 
+rrr. Fixed a problem that caused loops in sourced scripts to not be cleaned
+     up properly when a `return' is executed.
+
+sss. Change internal command substitution completion function to append a slash
+     to directory names in the command.
+
 2.  Changes to Readline
 
 a.  Fixed a bug that caused multiliine prompts to be wrapped and displayed
@@ -283,6 +463,9 @@ r.  Lots of changes so readline builds and runs on MinGW.
 
 s.  Readline no longer tries to modify the terminal settings when running in
     callback mode.
+
+t.  The Readline display code no longer sets the location of the last invisible
+    character in the prompt if the \[\] sequence is empty.
 
 3.  New Features in Bash
 

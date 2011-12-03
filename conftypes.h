@@ -24,7 +24,7 @@
 /* Placeholder for future modifications if cross-compiling or building a
    `fat' binary, e.g. on Apple Rhapsody.  These values are used in multiple
    files, so they appear here. */
-#if !defined (RHAPSODY)
+#if !defined (RHAPSODY) && !defined (MACOSX)
 #  define HOSTTYPE	CONF_HOSTTYPE
 #  define OSTYPE	CONF_OSTYPE
 #  define MACHTYPE	CONF_MACHTYPE

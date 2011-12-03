@@ -1,4 +1,6 @@
-/* Copyright (C) 1996 Free Software Foundation, Inc.
+/* Evaluate a string as one or more shell commands.
+
+   Copyright (C) 1996-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -233,6 +235,7 @@ parse_and_execute (string, from_file, flags)
 	       * IF
 	       *   we were invoked as `bash -c' (startup_state == 2) AND
 	       *   parse_and_execute has not been called recursively AND
+	       *   we're not running a trap AND
 	       *   we have parsed the full command (string == '\0') AND
 	       *   we have a simple command without redirections AND
 	       *   the command is not being timed AND
@@ -241,6 +244,7 @@ parse_and_execute (string, from_file, flags)
 	       *   tell the execution code that we don't need to fork
 	       */
 	      if (startup_state == 2 && parse_and_execute_level == 1 &&
+		  running_trap == 0 &&
 		  *bash_input.location.string == '\0' &&
 		  command->type == cm_simple &&
 		  !command->redirects && !command->value.Simple->redirects &&

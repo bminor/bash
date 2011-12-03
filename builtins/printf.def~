@@ -115,7 +115,10 @@ extern int errno;
   do \
     { \
       if (vflag) \
-	bind_variable  (vname, vbuf, 0); \
+	{ \
+	  bind_variable  (vname, vbuf, 0); \
+	  stupidly_hack_special_variables (vname); \
+	} \
       if (conv_bufsize > 4096 ) \
 	{ \
 	  free (conv_buf); \
@@ -300,9 +303,10 @@ printf_builtin (list)
 	      else
 		{
 		  /* Negative precisions are allowed but treated as if the
-		     precision were missing; as an extension we allow a
-		     leading `+' in the precision number. */
-#if 1
+		     precision were missing; I would like to allow a leading
+		     `+' in the precision number as an extension, but lots
+		     of asprintf/fprintf implementations get this wrong. */
+#if 0
 		  if (*fmt == '-' || *fmt == '+')
 #else
 		  if (*fmt == '-')
@@ -374,7 +378,7 @@ printf_builtin (list)
 		int rlen, r;
 
 		p = getstr ();
-		ch = rlen = 0;
+		ch = rlen = r = 0;
 		xp = bexpand (p, strlen (p), &ch, &rlen);
 
 		if (xp)
@@ -401,6 +405,7 @@ printf_builtin (list)
 		char *p, *xp;
 		int r;
 
+		r = 0;
 		p = getstr ();
 		if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);

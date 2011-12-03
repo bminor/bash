@@ -12309,4 +12309,25 @@ subst.c
 				   -----
 builtins/cd.def
 	- make sure we free TDIR in change_to_directory after calling
-	  set_working_directory (which allocates new memory)
+	  set_working_directory (which allocates new memory) and other places
+	  we short-circuit and return
+
+				   10/24
+				   -----
+subst.c
+	- modified fix from 10/22 to allow bare ` to pass through (for
+	  some backwards compatibility and more correctness)
+
+				   10/27
+				   -----
+conftypes.h
+	- make MacOS X use the RHAPSODY code that gets HOSTTYPE, et al.
+	  at build rather than configure time, to support universal binaries
+	  (fix from llattanzi@apple.com)
+
+				   10/30
+				   -----
+builtins/evalstring.c
+	- make sure we don't turn on CMD_NO_FORK in parse_and_execute if
+	  we're running a trap command on signal receipt or exit
+

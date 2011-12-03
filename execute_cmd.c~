@@ -3050,13 +3050,9 @@ execute_builtin (builtin, words, flags, subshell)
 
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
-#if 0
-     problem only with the `source' and `eval' builtins. */
-  isbltinenv = (builtin == source_builtin || builtin == eval_builtin);
-#else
-     problem only with the `source', `unset', and `eval' builtins. */
+     problem only with the `unset', `source' and `eval' builtins. */
+
   isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin);
-#endif
 
   if (isbltinenv)
     {
@@ -3228,18 +3224,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   /* Number of the line on which the function body starts. */
   line_number = function_line_number = tc->line;
 
-  if (subshell)
-    {
 #if defined (JOB_CONTROL)
-      stop_pipeline (async, (COMMAND *)NULL);
+  if (subshell)
+    stop_pipeline (async, (COMMAND *)NULL);
 #endif
-      fc = (tc->type == cm_group) ? tc->value.Group->command : tc;
 
-      if (fc && (flags & CMD_IGNORE_RETURN))
-	fc->flags |= CMD_IGNORE_RETURN;
-    }
-  else
-    fc = tc;
+  fc = tc;
 
   return_catch_flag++;
   return_val = setjmp (return_catch);
@@ -3790,6 +3780,7 @@ initialize_subshell ()
   /* Forget about the way job control was working. We are in a subshell. */
   without_job_control ();
   set_sigchld_handler ();
+  init_job_stats ();
 #endif /* JOB_CONTROL */
 
   /* Reset the values of the shell flags and options. */
@@ -3864,6 +3855,12 @@ shell_execve (command, args, env)
 	  errno = i;
 	  file_error (command);
 	}
+      /* errors not involving the path argument to execve. */
+      else if (i == E2BIG || i == ENOMEM)
+	{
+	  errno = i;
+	  file_error (command);
+	}
       else
 	{
 	  /* The file has the execute bits set, but the kernel refuses to
@@ -3873,9 +3870,20 @@ shell_execve (command, args, env)
 	  if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
 	    {
 	      char *interp;
+	      int ilen;
 
 	      interp = getinterp (sample, sample_len, (int *)NULL);
+	      ilen = strlen (interp);
 	      errno = i;
+itrace("shell_execve: interp = `%s', ilen = %d", interp, ilen);
+itrace("shell_execve: interp[ilen - 1] = %d", interp[ilen - 1]);
+	      if (interp[ilen - 1] == '\r')
+		{
+		  interp = xrealloc (interp, ilen + 2);
+		  interp[ilen - 1] = '^';
+		  interp[ilen] = 'M';
+		  interp[ilen + 1] = '\0';
+		}
 	      sys_error (_("%s: %s: bad interpreter"), command, interp ? interp : "");
 	      FREE (interp);
 	      return (EX_NOEXEC);

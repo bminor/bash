@@ -6839,12 +6839,16 @@ add_string:
 	  {
 	    t_index = sindex++;
 
-	    if (expanded_something)
-	      *expanded_something = 1;
-
 	    temp = string_extract (string, &sindex, "`", EX_REQMATCH);
+	    /* The test of sindex against t_index is to allow bare instances of
+	       ` to pass through, for backwards compatibility. */
 	    if (temp == &extract_string_error || temp == &extract_string_fatal)
 	      {
+		if (sindex - 1 == t_index)
+		  {
+		    sindex = t_index;
+		    goto add_character;
+		  }
 		report_error ("bad substitution: no closing \"`\" in %s", string+t_index);
 		free (string);
 		free (istring);
@@ -6852,6 +6856,9 @@ add_string:
 							: &expand_word_fatal);
 	      }
 		
+	    if (expanded_something)
+	      *expanded_something = 1;
+
 	    if (word->flags & W_NOCOMSUB)
 	      /* sindex + 1 because string[sindex] == '`' */
 	      temp1 = substring (string, t_index, sindex + 1);

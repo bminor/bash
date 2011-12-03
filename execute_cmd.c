@@ -3870,9 +3870,18 @@ shell_execve (command, args, env)
 	  if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
 	    {
 	      char *interp;
+	      int ilen;
 
 	      interp = getinterp (sample, sample_len, (int *)NULL);
+	      ilen = strlen (interp);
 	      errno = i;
+	      if (interp[ilen - 1] == '\r')
+		{
+		  interp = xrealloc (interp, ilen + 2);
+		  interp[ilen - 1] = '^';
+		  interp[ilen] = 'M';
+		  interp[ilen + 1] = '\0';
+		}
 	      sys_error (_("%s: %s: bad interpreter"), command, interp ? interp : "");
 	      FREE (interp);
 	      return (EX_NOEXEC);

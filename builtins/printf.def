@@ -814,8 +814,10 @@ vbadd (buf, blen)
     }
   vbuf[vblen] = '\0';
 
-if  (strlen (vbuf) != vblen)
-  internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, strlen (vbuf));
+#ifdef DEBUG
+  if  (strlen (vbuf) != vblen)
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, strlen (vbuf));
+#endif
 
   return vbuf;
 }

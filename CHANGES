@@ -1,3 +1,62 @@
+This document details the changes between this version, bash-3.1-rc1,
+and the previous version, bash-3.1-beta1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that could cause core dumps due of accessing the current
+    pipeline while in the middle of modifying it.
+
+b.  Fixed a bug that caused pathnames with backslashes still quoting characters
+    to be passed to opendir().
+
+c.  Command word completion now obeys the setting of completion-ignore-case.
+
+d.  Fixed a problem with redirection that caused file descriptors greater than
+    2 to be inappropriately marked as close-on-exec.
+
+e.  In Posix mode, after `wait' is called to wait for a particular process
+    explicitly, that process is removed from the list of processes known to
+    the shell, and subsequent attempts to wait for it return errors.
+
+f.  Fixed a bug that caused extended pattern matching to incorrectly scan
+    backslash-escaped pattern characters.
+
+g.  Fixed a synchronization problem that could cause core dumps when handling
+    a SIGWINCH.
+
+h.  Fixed a bug that caused an unmatched backquote to be accepted without an
+    error when processing here documents.
+
+i.  Fixed a small memory leak in the `cd' builtin.
+
+j.  Fix for MacOS X so it gets the values for the HOSTTYPE, MACHTYPE, and
+    OSTYPE variables at build time, to support universal binaries.
+
+k.  Fixed a bug that could cause an exit trap to return the exit status of
+    the trap command rather than the status as it was before the trap was
+    run as the shell's exit status.
+
+2.  New Features in Bash
+
+3.  Changes to Readline
+
+a.  Fixed a bug that caused reversing the incremental search direction to
+    not work correctly.
+
+b.  Fixed the vi-mode `U' command to only undo up to the first time insert mode
+    was entered, as Posix specifies.
+
+4.  New Features in Readline
+
+a.  New application-callable auxiliary function, rl_variable_value, returns
+    a string corresponding to a readline variable's value.
+
+b.  When parsing inputrc files and variable binding commands, the parser
+    strips trailing whitespace from values assigned to boolean variables
+    before checking them.
+
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.1-beta1,
 and the previous version, bash-3.1-alpha1.
 

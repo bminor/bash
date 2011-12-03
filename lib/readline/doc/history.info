@@ -1,8 +1,8 @@
-This is history.info, produced by makeinfo version 4.5 from
+This is history.info, produced by makeinfo version 4.7 from
 ./history.texi.
 
-This document describes the GNU History library (version 5.0, 28
-January 2004), a programming tool that provides a consistent user
+   This document describes the GNU History library (version 5.1-beta1,
+7 October 2005), a programming tool that provides a consistent user
 interface for recalling lines of previously typed input.
 
    Copyright (C) 1988-2004 Free Software Foundation, Inc.
@@ -22,7 +22,7 @@ preserved on all copies.
      (a) The FSF's Back-Cover Text is: "You have freedom to copy and
      modify this GNU Manual, like GNU software.  Copies published by
      the Free Software Foundation raise funds for GNU development."
-   
+
 INFO-DIR-SECTION Libraries
 START-INFO-DIR-ENTRY
 * History: (history).       The GNU history library API.
@@ -34,9 +34,9 @@ File: history.info,  Node: Top,  Next: Using History Interactively,  Up: (dir)
 GNU History Library
 *******************
 
-   This document describes the GNU History library, a programming tool
-that provides a consistent user interface for recalling lines of
-previously typed input.
+This document describes the GNU History library, a programming tool that
+provides a consistent user interface for recalling lines of previously
+typed input.
 
 * Menu:
 
@@ -50,13 +50,13 @@ previously typed input.
 
 File: history.info,  Node: Using History Interactively,  Next: Programming with GNU History,  Prev: Top,  Up: Top
 
-Using History Interactively
-***************************
+1 Using History Interactively
+*****************************
 
-   This chapter describes how to use the GNU History Library
-interactively, from a user's standpoint.  It should be considered a
-user's guide.  For information on using the GNU History Library in your
-own programs, *note Programming with GNU History::.
+This chapter describes how to use the GNU History Library interactively,
+from a user's standpoint.  It should be considered a user's guide.  For
+information on using the GNU History Library in your own programs,
+*note Programming with GNU History::.
 
 * Menu:
 
@@ -65,12 +65,12 @@ own programs, *note Programming with GNU History::.
 
 File: history.info,  Node: History Interaction,  Up: Using History Interactively
 
-History Expansion
-=================
+1.1 History Expansion
+=====================
 
-   The History library provides a history expansion feature that is
-similar to the history expansion provided by `csh'.  This section
-describes the syntax used to manipulate the history information.
+The History library provides a history expansion feature that is similar
+to the history expansion provided by `csh'.  This section describes the
+syntax used to manipulate the history information.
 
    History expansions introduce words from the history list into the
 input stream, making it easy to repeat commands, insert the arguments
@@ -97,11 +97,11 @@ appearance of the history expansion character, which is `!' by default.
 
 File: history.info,  Node: Event Designators,  Next: Word Designators,  Up: History Interaction
 
-Event Designators
------------------
+1.1.1 Event Designators
+-----------------------
 
-   An event designator is a reference to a command line entry in the
-history list.
+An event designator is a reference to a command line entry in the
+history list.  
 
 `!'
      Start a history substitution, except when followed by a space, tab,
@@ -135,10 +135,10 @@ history list.
 
 File: history.info,  Node: Word Designators,  Next: Modifiers,  Prev: Event Designators,  Up: History Interaction
 
-Word Designators
-----------------
+1.1.2 Word Designators
+----------------------
 
-   Word designators are used to select desired words from the event.  A
+Word designators are used to select desired words from the event.  A
 `:' separates the event specification from the word designator.  It may
 be omitted if the word designator begins with a `^', `$', `*', `-', or
 `%'.  Words are numbered from the beginning of the line, with the first
@@ -197,10 +197,10 @@ previous command is used as the event.
 
 File: history.info,  Node: Modifiers,  Prev: Word Designators,  Up: History Interaction
 
-Modifiers
----------
+1.1.3 Modifiers
+---------------
 
-   After the optional word designator, you can add a sequence of one or
+After the optional word designator, you can add a sequence of one or
 more of the following modifiers, each preceded by a `:'.
 
 `h'
@@ -242,10 +242,10 @@ more of the following modifiers, each preceded by a `:'.
 
 File: history.info,  Node: Programming with GNU History,  Next: Copying This Manual,  Prev: Using History Interactively,  Up: Top
 
-Programming with GNU History
-****************************
+2 Programming with GNU History
+******************************
 
-   This chapter describes how to interface programs that you write with
+This chapter describes how to interface programs that you write with
 the GNU History Library.  It should be considered a technical guide.
 For information on the interactive use of GNU History, *note Using
 History Interactively::.
@@ -261,10 +261,10 @@ History Interactively::.
 
 File: history.info,  Node: Introduction to History,  Next: History Storage,  Up: Programming with GNU History
 
-Introduction to History
-=======================
+2.1 Introduction to History
+===========================
 
-   Many programs read input from the user a line at a time.  The GNU
+Many programs read input from the user a line at a time.  The GNU
 History library is able to keep track of those lines, associate
 arbitrary data with each line, and utilize information from previous
 lines in composing new ones.
@@ -297,14 +297,14 @@ public data structures.
 
 File: history.info,  Node: History Storage,  Next: History Functions,  Prev: Introduction to History,  Up: Programming with GNU History
 
-History Storage
-===============
+2.2 History Storage
+===================
 
-   The history list is an array of history entries.  A history entry is
+The history list is an array of history entries.  A history entry is
 declared as follows:
 
      typedef void *histdata_t;
-     
+
      typedef struct _hist_entry {
        char *line;
        char *timestamp;
@@ -335,10 +335,10 @@ stifled.
 
 File: history.info,  Node: History Functions,  Next: History Variables,  Prev: History Storage,  Up: Programming with GNU History
 
-History Functions
-=================
+2.3 History Functions
+=====================
 
-   This section describes the calling sequence for the various functions
+This section describes the calling sequence for the various functions
 exported by the GNU History library.
 
 * Menu:
@@ -362,105 +362,105 @@ exported by the GNU History library.
 
 File: history.info,  Node: Initializing History and State Management,  Next: History List Management,  Up: History Functions
 
-Initializing History and State Management
------------------------------------------
+2.3.1 Initializing History and State Management
+-----------------------------------------------
 
-   This section describes functions used to initialize and manage the
+This section describes functions used to initialize and manage the
 state of the History library when you want to use the history functions
 in your program.
 
- - Function: void using_history (void)
+ -- Function: void using_history (void)
      Begin a session in which the history functions might be used.  This
      initializes the interactive variables.
 
- - Function: HISTORY_STATE * history_get_history_state (void)
+ -- Function: HISTORY_STATE * history_get_history_state (void)
      Return a structure describing the current state of the input
      history.
 
- - Function: void history_set_history_state (HISTORY_STATE *state)
+ -- Function: void history_set_history_state (HISTORY_STATE *state)
      Set the state of the history list according to STATE.
 
 
 File: history.info,  Node: History List Management,  Next: Information About the History List,  Prev: Initializing History and State Management,  Up: History Functions
 
-History List Management
------------------------
+2.3.2 History List Management
+-----------------------------
 
-   These functions manage individual entries on the history list, or set
+These functions manage individual entries on the history list, or set
 parameters managing the list itself.
 
- - Function: void add_history (const char *string)
+ -- Function: void add_history (const char *string)
      Place STRING at the end of the history list.  The associated data
      field (if any) is set to `NULL'.
 
- - Function: void add_history_time (const char *string)
+ -- Function: void add_history_time (const char *string)
      Change the time stamp associated with the most recent history
      entry to STRING.
 
- - Function: HIST_ENTRY * remove_history (int which)
+ -- Function: HIST_ENTRY * remove_history (int which)
      Remove history entry at offset WHICH from the history.  The
      removed element is returned so you can free the line, data, and
      containing structure.
 
- - Function: histdata_t free_history_entry (HIST_ENTRY *histent)
+ -- Function: histdata_t free_history_entry (HIST_ENTRY *histent)
      Free the history entry HISTENT and any history library private
      data associated with it.  Returns the application-specific data so
      the caller can dispose of it.
 
- - Function: HIST_ENTRY * replace_history_entry (int which, const char
+ -- Function: HIST_ENTRY * replace_history_entry (int which, const char
           *line, histdata_t data)
      Make the history entry at offset WHICH have LINE and DATA.  This
      returns the old entry so the caller can dispose of any
      application-specific data.  In the case of an invalid WHICH, a
      `NULL' pointer is returned.
 
- - Function: void clear_history (void)
+ -- Function: void clear_history (void)
      Clear the history list by deleting all the entries.
 
- - Function: void stifle_history (int max)
+ -- Function: void stifle_history (int max)
      Stifle the history list, remembering only the last MAX entries.
 
- - Function: int unstifle_history (void)
+ -- Function: int unstifle_history (void)
      Stop stifling the history.  This returns the previously-set
      maximum number of history entries (as set by `stifle_history()').
      The value is positive if the history was stifled, negative if it
      wasn't.
 
- - Function: int history_is_stifled (void)
+ -- Function: int history_is_stifled (void)
      Returns non-zero if the history is stifled, zero if it is not.
 
 
 File: history.info,  Node: Information About the History List,  Next: Moving Around the History List,  Prev: History List Management,  Up: History Functions
 
-Information About the History List
-----------------------------------
+2.3.3 Information About the History List
+----------------------------------------
 
-   These functions return information about the entire history list or
+These functions return information about the entire history list or
 individual list entries.
 
- - Function: HIST_ENTRY ** history_list (void)
+ -- Function: HIST_ENTRY ** history_list (void)
      Return a `NULL' terminated array of `HIST_ENTRY *' which is the
      current input history.  Element 0 of this list is the beginning of
      time.  If there is no history, return `NULL'.
 
- - Function: int where_history (void)
+ -- Function: int where_history (void)
      Returns the offset of the current history element.
 
- - Function: HIST_ENTRY * current_history (void)
+ -- Function: HIST_ENTRY * current_history (void)
      Return the history entry at the current position, as determined by
      `where_history()'.  If there is no entry there, return a `NULL'
      pointer.
 
- - Function: HIST_ENTRY * history_get (int offset)
+ -- Function: HIST_ENTRY * history_get (int offset)
      Return the history entry at position OFFSET, starting from
      `history_base' (*note History Variables::).  If there is no entry
      there, or if OFFSET is greater than the history length, return a
      `NULL' pointer.
 
- - Function: time_t history_get_time (HIST_ENTRY *entry)
+ -- Function: time_t history_get_time (HIST_ENTRY *entry)
      Return the time stamp associated with the history entry ENTRY.
 
- - Function: int history_total_bytes (void)
+ -- Function: int history_total_bytes (void)
      Return the number of bytes that the primary history entries are
      using.  This function returns the sum of the lengths of all the
      lines in the history.
@@ -468,23 +468,23 @@ individual list entries.
 
 File: history.info,  Node: Moving Around the History List,  Next: Searching the History List,  Prev: Information About the History List,  Up: History Functions
 
-Moving Around the History List
-------------------------------
+2.3.4 Moving Around the History List
+------------------------------------
 
-   These functions allow the current index into the history list to be
-set or changed.
+These functions allow the current index into the history list to be set
+or changed.
 
- - Function: int history_set_pos (int pos)
+ -- Function: int history_set_pos (int pos)
      Set the current history offset to POS, an absolute index into the
      list.  Returns 1 on success, 0 if POS is less than zero or greater
      than the number of history entries.
 
- - Function: HIST_ENTRY * previous_history (void)
+ -- Function: HIST_ENTRY * previous_history (void)
      Back up the current history offset to the previous history entry,
      and return a pointer to that entry.  If there is no previous
      entry, return a `NULL' pointer.
 
- - Function: HIST_ENTRY * next_history (void)
+ -- Function: HIST_ENTRY * next_history (void)
      Move the current history offset forward to the next history entry,
      and return the a pointer to that entry.  If there is no next
      entry, return a `NULL' pointer.
@@ -492,16 +492,16 @@ set or changed.
 
 File: history.info,  Node: Searching the History List,  Next: Managing the History File,  Prev: Moving Around the History List,  Up: History Functions
 
-Searching the History List
---------------------------
+2.3.5 Searching the History List
+--------------------------------
 
-   These functions allow searching of the history list for entries
+These functions allow searching of the history list for entries
 containing a specific string.  Searching may be performed both forward
 and backward from the current history position.  The search may be
 "anchored", meaning that the string must match at the beginning of the
-history entry.
+history entry.  
 
- - Function: int history_search (const char *string, int direction)
+ -- Function: int history_search (const char *string, int direction)
      Search the history for STRING, starting at the current history
      offset.  If DIRECTION is less than 0, then the search is through
      previous entries, otherwise through subsequent entries.  If STRING
@@ -510,7 +510,7 @@ history entry.
      entry where STRING was found.  Otherwise, nothing is changed, and
      a -1 is returned.
 
- - Function: int history_search_prefix (const char *string, int
+ -- Function: int history_search_prefix (const char *string, int
           direction)
      Search the history for STRING, starting at the current history
      offset.  The search is anchored: matching lines must begin with
@@ -520,8 +520,8 @@ history entry.
      the return value is 0.  Otherwise, nothing is changed, and a -1 is
      returned.
 
- - Function: int history_search_pos (const char *string, int direction,
-          int pos)
+ -- Function: int history_search_pos (const char *string, int
+          direction, int pos)
      Search for STRING in the history list, starting at POS, an
      absolute index into the list.  If DIRECTION is negative, the search
      proceeds backward from POS, otherwise forward.  Returns the
@@ -531,18 +531,18 @@ history entry.
 
 File: history.info,  Node: Managing the History File,  Next: History Expansion,  Prev: Searching the History List,  Up: History Functions
 
-Managing the History File
--------------------------
+2.3.6 Managing the History File
+-------------------------------
 
-   The History library can read the history from and write it to a file.
+The History library can read the history from and write it to a file.
 This section documents the functions for managing a history file.
 
- - Function: int read_history (const char *filename)
+ -- Function: int read_history (const char *filename)
      Add the contents of FILENAME to the history list, a line at a time.
      If FILENAME is `NULL', then read from `~/.history'.  Returns 0 if
      successful, or `errno' if not.
 
- - Function: int read_history_range (const char *filename, int from,
+ -- Function: int read_history_range (const char *filename, int from,
           int to)
      Read a range of lines from FILENAME, adding them to the history
      list.  Start reading at line FROM and end at TO.  If FROM is zero,
@@ -550,18 +550,18 @@ This section documents the functions for managing a history file.
      the end of the file.  If FILENAME is `NULL', then read from
      `~/.history'.  Returns 0 if successful, or `errno' if not.
 
- - Function: int write_history (const char *filename)
+ -- Function: int write_history (const char *filename)
      Write the current history to FILENAME, overwriting FILENAME if
      necessary.  If FILENAME is `NULL', then write the history list to
      `~/.history'.  Returns 0 on success, or `errno' on a read or write
      error.
 
- - Function: int append_history (int nelements, const char *filename)
+ -- Function: int append_history (int nelements, const char *filename)
      Append the last NELEMENTS of the history list to FILENAME.  If
      FILENAME is `NULL', then append to `~/.history'.  Returns 0 on
      success, or `errno' on a read or write error.
 
- - Function: int history_truncate_file (const char *filename, int
+ -- Function: int history_truncate_file (const char *filename, int
           nlines)
      Truncate the history file FILENAME, leaving only the last NLINES
      lines.  If FILENAME is `NULL', then `~/.history' is truncated.
@@ -570,12 +570,12 @@ This section documents the functions for managing a history file.
 
 File: history.info,  Node: History Expansion,  Prev: Managing the History File,  Up: History Functions
 
-History Expansion
------------------
+2.3.7 History Expansion
+-----------------------
 
-   These functions implement history expansion.
+These functions implement history expansion.
 
- - Function: int history_expand (char *string, char **output)
+ -- Function: int history_expand (char *string, char **output)
      Expand STRING, placing the result into OUTPUT, a pointer to a
      string (*note History Interaction::).  Returns:
     `0'
@@ -596,8 +596,8 @@ History Expansion
      If an error ocurred in expansion, then OUTPUT contains a
      descriptive error message.
 
- - Function: char * get_history_event (const char *string, int *cindex,
-          int qchar)
+ -- Function: char * get_history_event (const char *string, int
+          *cindex, int qchar)
      Returns the text of the history event beginning at STRING +
      *CINDEX.  *CINDEX is modified to point to after the event
      specifier.  At function entry, CINDEX points to the index into
@@ -605,13 +605,13 @@ History Expansion
      character that is allowed to end the event specification in
      addition to the "normal" terminating characters.
 
- - Function: char ** history_tokenize (const char *string)
+ -- Function: char ** history_tokenize (const char *string)
      Return an array of tokens parsed out of STRING, much as the shell
      might.  The tokens are split on the characters in the
      HISTORY_WORD_DELIMITERS variable, and shell quoting conventions
      are obeyed.
 
- - Function: char * history_arg_extract (int first, int last, const
+ -- Function: char * history_arg_extract (int first, int last, const
           char *string)
      Extract a string segment consisting of the FIRST through LAST
      arguments present in STRING.  Arguments are split using
@@ -620,60 +620,60 @@ History Expansion
 
 File: history.info,  Node: History Variables,  Next: History Programming Example,  Prev: History Functions,  Up: Programming with GNU History
 
-History Variables
-=================
+2.4 History Variables
+=====================
 
-   This section describes the externally-visible variables exported by
-the GNU History Library.
+This section describes the externally-visible variables exported by the
+GNU History Library.
 
- - Variable: int history_base
+ -- Variable: int history_base
      The logical offset of the first entry in the history list.
 
- - Variable: int history_length
+ -- Variable: int history_length
      The number of entries currently stored in the history list.
 
- - Variable: int history_max_entries
+ -- Variable: int history_max_entries
      The maximum number of history entries.  This must be changed using
      `stifle_history()'.
 
- - Variable: int history_write_timestamps
+ -- Variable: int history_write_timestamps
      If non-zero, timestamps are written to the history file, so they
      can be preserved between sessions.  The default value is 0,
      meaning that timestamps are not saved.
 
- - Variable: char history_expansion_char
+ -- Variable: char history_expansion_char
      The character that introduces a history event.  The default is `!'.
      Setting this to 0 inhibits history expansion.
 
- - Variable: char history_subst_char
+ -- Variable: char history_subst_char
      The character that invokes word substitution if found at the start
      of a line.  The default is `^'.
 
- - Variable: char history_comment_char
+ -- Variable: char history_comment_char
      During tokenization, if this character is seen as the first
      character of a word, then it and all subsequent characters up to a
      newline are ignored, suppressing history expansion for the
      remainder of the line.  This is disabled by default.
 
- - Variable: char * history_word_delimiters
+ -- Variable: char * history_word_delimiters
      The characters that separate tokens for `history_tokenize()'.  The
      default value is `" \t\n()<>;&|"'.
 
- - Variable: char * history_search_delimiter_chars
+ -- Variable: char * history_search_delimiter_chars
      The list of additional characters which can delimit a history
      search string, in addition to space, TAB, `:' and `?' in the case
      of a substring search.  The default is empty.
 
- - Variable: char * history_no_expand_chars
+ -- Variable: char * history_no_expand_chars
      The list of characters which inhibit history expansion if found
      immediately following HISTORY_EXPANSION_CHAR.  The default is
      space, tab, newline, carriage return, and `='.
 
- - Variable: int history_quotes_inhibit_expansion
+ -- Variable: int history_quotes_inhibit_expansion
      If non-zero, single-quoted words are not scanned for the history
      expansion character.  The default value is 0.
 
- - Variable: rl_linebuf_func_t * history_inhibit_expansion_function
+ -- Variable: rl_linebuf_func_t * history_inhibit_expansion_function
      This should be set to the address of a function that takes two
      arguments: a `char *' (STRING) and an `int' index into that string
      (I).  It should return a non-zero value if the history expansion
@@ -685,24 +685,24 @@ the GNU History Library.
 
 File: history.info,  Node: History Programming Example,  Prev: History Variables,  Up: Programming with GNU History
 
-History Programming Example
-===========================
+2.5 History Programming Example
+===============================
 
-   The following program demonstrates simple use of the GNU History
+The following program demonstrates simple use of the GNU History
 Library.
 
      #include <stdio.h>
      #include <readline/history.h>
-     
+
      main (argc, argv)
           int argc;
           char **argv;
      {
        char line[1024], *t;
        int len, done = 0;
-     
+
        line[0] = 0;
-     
+
        using_history ();
        while (!done)
          {
@@ -715,30 +715,30 @@ Library.
                if (t[len - 1] == '\n')
                  t[len - 1] = '\0';
              }
-     
+
            if (!t)
              strcpy (line, "quit");
-     
+
            if (line[0])
              {
                char *expansion;
                int result;
-     
+
                result = history_expand (line, &expansion);
                if (result)
                  fprintf (stderr, "%s\n", expansion);
-     
+
                if (result < 0 || result == 2)
                  {
                    free (expansion);
                    continue;
                  }
-     
+
                add_history (expansion);
                strncpy (line, expansion, sizeof (line) - 1);
                free (expansion);
              }
-     
+
            if (strcmp (line, "quit") == 0)
              done = 1;
            else if (strcmp (line, "save") == 0)
@@ -749,7 +749,7 @@ Library.
              {
                register HIST_ENTRY **the_list;
                register int i;
-     
+
                the_list = history_list ();
                if (the_list)
                  for (i = 0; the_list[i]; i++)
@@ -780,8 +780,8 @@ Library.
 
 File: history.info,  Node: Copying This Manual,  Next: Concept Index,  Prev: Programming with GNU History,  Up: Top
 
-Copying This Manual
-*******************
+Appendix A Copying This Manual
+******************************
 
 * Menu:
 
@@ -790,13 +790,14 @@ Copying This Manual
 
 File: history.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
 
-GNU Free Documentation License
-==============================
+A.1 GNU Free Documentation License
+==================================
 
                       Version 1.2, November 2002
+
      Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
      59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
-     
+
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
 
@@ -1187,10 +1188,10 @@ GNU Free Documentation License
      you may choose any version ever published (not as a draft) by the
      Free Software Foundation.
 
-ADDENDUM: How to use this License for your documents
-----------------------------------------------------
+A.1.1 ADDENDUM: How to use this License for your documents
+----------------------------------------------------------
 
-   To use this License in a document you have written, include a copy of
+To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license
 notices just after the title page:
 
@@ -1221,97 +1222,131 @@ permit their use in free software.
 
 File: history.info,  Node: Concept Index,  Next: Function and Variable Index,  Prev: Copying This Manual,  Up: Top
 
-Concept Index
-*************
+Appendix B Concept Index
+************************
 
+ [index ]
 * Menu:
 
 * anchored search:                       Searching the History List.
-* event designators:                     Event Designators.
+                                                               (line 10)
+* event designators:                     Event Designators.    (line  6)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
-* history events:                        Event Designators.
-* history expansion:                     History Interaction.
+                                                               (line  6)
+* history events:                        Event Designators.    (line  7)
+* history expansion:                     History Interaction.  (line  6)
 * History Searching:                     Searching the History List.
+                                                               (line  6)
 
 
 File: history.info,  Node: Function and Variable Index,  Prev: Concept Index,  Up: Top
 
-Function and Variable Index
-***************************
+Appendix C Function and Variable Index
+**************************************
 
+ [index ]
 * Menu:
 
 * add_history:                           History List Management.
+                                                               (line 10)
 * add_history_time:                      History List Management.
+                                                               (line 14)
 * append_history:                        Managing the History File.
+                                                               (line 29)
 * clear_history:                         History List Management.
+                                                               (line 35)
 * current_history:                       Information About the History List.
+                                                               (line 18)
 * free_history_entry:                    History List Management.
-* get_history_event:                     History Expansion.
-* history_arg_extract:                   History Expansion.
-* history_base:                          History Variables.
-* history_comment_char:                  History Variables.
-* history_expand:                        History Expansion.
-* history_expansion_char:                History Variables.
+                                                               (line 23)
+* get_history_event:                     History Expansion.    (line 31)
+* history_arg_extract:                   History Expansion.    (line 46)
+* history_base:                          History Variables.    (line 10)
+* history_comment_char:                  History Variables.    (line 33)
+* history_expand:                        History Expansion.    (line  9)
+* history_expansion_char:                History Variables.    (line 25)
 * history_get:                           Information About the History List.
+                                                               (line 23)
 * history_get_history_state:             Initializing History and State Management.
+                                                               (line 15)
 * history_get_time:                      Information About the History List.
-* history_inhibit_expansion_function:    History Variables.
+                                                               (line 29)
+* history_inhibit_expansion_function:    History Variables.    (line 57)
 * history_is_stifled:                    History List Management.
-* history_length:                        History Variables.
+                                                               (line 47)
+* history_length:                        History Variables.    (line 13)
 * history_list:                          Information About the History List.
-* history_max_entries:                   History Variables.
-* history_no_expand_chars:               History Variables.
-* history_quotes_inhibit_expansion:      History Variables.
+                                                               (line 10)
+* history_max_entries:                   History Variables.    (line 16)
+* history_no_expand_chars:               History Variables.    (line 48)
+* history_quotes_inhibit_expansion:      History Variables.    (line 53)
 * history_search:                        Searching the History List.
-* history_search_delimiter_chars:        History Variables.
+                                                               (line 13)
+* history_search_delimiter_chars:        History Variables.    (line 43)
 * history_search_pos:                    Searching the History List.
+                                                               (line 33)
 * history_search_prefix:                 Searching the History List.
+                                                               (line 23)
 * history_set_history_state:             Initializing History and State Management.
+                                                               (line 19)
 * history_set_pos:                       Moving Around the History List.
-* history_subst_char:                    History Variables.
-* history_tokenize:                      History Expansion.
+                                                               (line 10)
+* history_subst_char:                    History Variables.    (line 29)
+* history_tokenize:                      History Expansion.    (line 39)
 * history_total_bytes:                   Information About the History List.
+                                                               (line 32)
 * history_truncate_file:                 Managing the History File.
-* history_word_delimiters:               History Variables.
-* history_write_timestamps:              History Variables.
+                                                               (line 35)
+* history_word_delimiters:               History Variables.    (line 39)
+* history_write_timestamps:              History Variables.    (line 20)
 * next_history:                          Moving Around the History List.
+                                                               (line 20)
 * previous_history:                      Moving Around the History List.
+                                                               (line 15)
 * read_history:                          Managing the History File.
+                                                               (line 10)
 * read_history_range:                    Managing the History File.
+                                                               (line 16)
 * remove_history:                        History List Management.
+                                                               (line 18)
 * replace_history_entry:                 History List Management.
+                                                               (line 29)
 * stifle_history:                        History List Management.
+                                                               (line 38)
 * unstifle_history:                      History List Management.
+                                                               (line 41)
 * using_history:                         Initializing History and State Management.
+                                                               (line 11)
 * where_history:                         Information About the History List.
+                                                               (line 15)
 * write_history:                         Managing the History File.
+                                                               (line 23)
 
 
 
 Tag Table:
-Node: Top1280
-Node: Using History Interactively1908
-Node: History Interaction2415
-Node: Event Designators3834
-Node: Word Designators4758
-Node: Modifiers6388
-Node: Programming with GNU History7606
-Node: Introduction to History8337
-Node: History Storage10022
-Node: History Functions11157
-Node: Initializing History and State Management12141
-Node: History List Management12941
-Node: Information About the History List14955
-Node: Moving Around the History List16437
-Node: Searching the History List17426
-Node: Managing the History File19344
-Node: History Expansion21150
-Node: History Variables23045
-Node: History Programming Example25834
-Node: Copying This Manual28556
-Node: GNU Free Documentation License28794
-Node: Concept Index51187
-Node: Function and Variable Index51737
+Node: Top1285
+Node: Using History Interactively1910
+Node: History Interaction2418
+Node: Event Designators3842
+Node: Word Designators4777
+Node: Modifiers6416
+Node: Programming with GNU History7643
+Node: Introduction to History8375
+Node: History Storage10065
+Node: History Functions11200
+Node: Initializing History and State Management12189
+Node: History List Management13001
+Node: Information About the History List15033
+Node: Moving Around the History List16530
+Node: Searching the History List17531
+Node: Managing the History File19463
+Node: History Expansion21283
+Node: History Variables23191
+Node: History Programming Example25997
+Node: Copying This Manual28674
+Node: GNU Free Documentation License28934
+Node: Concept Index51340
+Node: Function and Variable Index52180
 
 End Tag Table

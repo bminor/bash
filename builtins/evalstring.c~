@@ -1,4 +1,6 @@
-/* Copyright (C) 1996 Free Software Foundation, Inc.
+/* Evaluate a string as one or more shell commands.
+
+   Copyright (C) 1996-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,6 +60,7 @@ extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
+extern int loop_level;
 extern int posixly_correct;
 
 int parse_and_execute_level = 0;
@@ -105,6 +108,7 @@ parse_and_execute (string, from_file, flags)
   unwind_protect_jmp_buf (top_level);
   unwind_protect_int (indirection_level);
   unwind_protect_int (line_number);
+  unwind_protect_int (loop_level);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 
@@ -231,6 +235,7 @@ parse_and_execute (string, from_file, flags)
 	       * IF
 	       *   we were invoked as `bash -c' (startup_state == 2) AND
 	       *   parse_and_execute has not been called recursively AND
+	       *   we're not running a trap AND
 	       *   we have parsed the full command (string == '\0') AND
 	       *   we have a simple command without redirections AND
 	       *   the command is not being timed AND
@@ -239,12 +244,14 @@ parse_and_execute (string, from_file, flags)
 	       *   tell the execution code that we don't need to fork
 	       */
 	      if (startup_state == 2 && parse_and_execute_level == 1 &&
+		  running_trap == 0 &&
 		  *bash_input.location.string == '\0' &&
 		  command->type == cm_simple &&
 		  !command->redirects && !command->value.Simple->redirects &&
 		  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 		  ((command->flags & CMD_INVERT_RETURN) == 0))
 		{
+itrace("parse_and_execute: turning on CMD_NO_FORK");
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;
 		}
@@ -300,6 +307,7 @@ parse_and_execute (string, from_file, flags)
   if (should_jump_to_top_level)
     jump_to_top_level (code);
 
+itrace("parse_and_execute: returning %d", last_result);
   return (last_result);
 }
 
