@@ -2741,35 +2741,20 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (dofork)
     {
-#if 0
-      /* XXX memory leak if expand_words() error causes a jump_to_top_level */
-      command_line = savestring (the_printed_command);
-#endif
-
       /* Do this now, because execute_disk_command will do it anyway in the
 	 vast majority of cases. */
       maybe_make_export_env ();
 
-#if 0
-      if (make_child (command_line, async) == 0)
-#else
       if (make_child (savestring (the_printed_command), async) == 0)
-#endif
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
 
-#if 0
-	  subshell_environment = (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
-					? (SUBSHELL_PIPE|SUBSHELL_FORK)
-	  				: (SUBSHELL_ASYNC|SUBSHELL_FORK);
-#else
 	  subshell_environment = SUBSHELL_FORK;
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	    subshell_environment |= SUBSHELL_PIPE;
 	  if (async)
 	    subshell_environment |= SUBSHELL_ASYNC;
-#endif
 
 	  /* We need to do this before piping to handle some really
 	     pathological cases where one of the pipe file descriptors
@@ -3187,7 +3172,13 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       restore_default_signal (ERROR_TRAP);
     }
 
+  /* Shell functions inherit the RETURN trap if function tracing is on
+     globally or on individually for this function. */
+#if 0
   if (return_trap && ((trace_p (var) == 0) && function_trace_mode == 0))
+#else
+  if (return_trap && (signal_in_progress (DEBUG_TRAP) || ((trace_p (var) == 0) && function_trace_mode == 0)))
+#endif
     {
       if (subshell == 0)
 	{
@@ -3242,14 +3233,10 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (return_val)
     {
       result = return_catch_value;
-#if 0
-      /* Run the RETURN trap in the function's context.  XXX - have to talk
-	 to Rocky about why his bashdb code doesn't have `return' run the
-	 RETURN trap. */
+      /* Run the RETURN trap in the function's context. */
       save_current = currently_executing_command;
       run_return_trap ();
       currently_executing_command = save_current;
-#endif
     }
   else
     {

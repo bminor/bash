@@ -807,6 +807,11 @@ run_return_trap ()
 {
   int old_exit_value;
 
+#if 0
+  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && (sigmodes[DEBUG_TRAP] & SIG_INPROGRESS))
+    return;
+#endif
+
   if ((sigmodes[RETURN_TRAP] & SIG_TRAPPED) && ((sigmodes[RETURN_TRAP] & SIG_IGNORED) == 0) && (sigmodes[RETURN_TRAP] & SIG_INPROGRESS) == 0)
     {
       old_exit_value = last_command_exit_value;

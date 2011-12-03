@@ -1118,12 +1118,12 @@ The first element of the @env{FUNCNAME} variable is set to the
 name of the function while the function is executing.
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with the exception that the @env{DEBUG} trap
-below) is not inherited unless the function has been given the
+with the exception that the @env{DEBUG} and @env{RETURN} traps
+are not inherited unless the function has been given the
 @code{trace} attribute using the @code{declare} builtin or
 the @code{-o functrace} option has been enabled with
 the @code{set} builtin,
-(in which case all functions inherit the @code{DEBUG} trap).
+(in which case all functions inherit the @env{DEBUG} and @env{RETURN} traps).
 @xref{Bourne Shell Builtins}, for the description of the
 @code{trap} builtin.
 
@@ -3283,7 +3283,8 @@ by subsequent assignment statements or unset.
 
 @item -t
 Give each @var{name} the @code{trace} attribute.
-Traced functions inherit the @code{DEBUG} trap from the calling shell.
+Traced functions inherit the @code{DEBUG} and @code{RETURN} traps from
+the calling shell.
 The trace attribute has no special meaning for variables.
 
 @item -x
@@ -4126,9 +4127,11 @@ $ cd ..; pwd
 @end example
 
 @item -T
-If set, any trap on @code{DEBUG} is inherited by shell functions, command
-substitutions, and commands executed in a subshell environment.
-The @code{DEBUG} trap is normally not inherited in such cases.
+If set, any trap on @code{DEBUG} and @code{RETURN} are inherited by
+shell functions, command substitutions, and commands executed
+in a subshell environment.
+The @code{DEBUG} and @code{RETURN} traps are normally not inherited
+in such cases.
 
 @item --
 If no arguments follow this option, then the positional parameters are
@@ -7184,7 +7187,9 @@ The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows a
 Commands specified with an @code{RETURN} trap are executed before
 execution resumes after a shell function or a shell script executed with
 @code{.} or @code{source} returns.
-The @code{RETURN} trap is not inherited by shell functions.
+The @code{RETURN} trap is not inherited by shell functions unless the
+function has been given the @code{trace} attribute or the
+@code{functrace} option has been enabled using the @code{shopt} builtin.
 
 @item
 The Bash @code{type} builtin is more extensive and gives more information

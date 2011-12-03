@@ -225,8 +225,10 @@ _rl_free_history_entry (entry)
 {
   if (entry == 0)
     return;
-  if (entry->line)
-    free (entry->line);
+
+  FREE (entry->line);
+  FREE (entry->timestamp);
+
   free (entry);
 }
 
@@ -242,6 +244,7 @@ rl_maybe_replace_line ()
     {
       temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list);
       free (temp->line);
+      FREE (temp->timestamp);
       free (temp);
     }
   return 0;
@@ -274,6 +277,7 @@ rl_maybe_save_line ()
     {
       _rl_saved_line_for_history = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
       _rl_saved_line_for_history->line = savestring (rl_line_buffer);
+      _rl_saved_line_for_history->timestamp = (char *)NULL;
       _rl_saved_line_for_history->data = (char *)rl_undo_list;
     }
 

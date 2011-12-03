@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Mon Nov 22 11:06:21 EST 2004
+.\"	Last Change: Wed Dec  1 15:39:20 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Nov 22" "GNU Bash-3.1-devel"
+.TH BASH 1 "2004 Dec 1" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3320,19 +3320,21 @@ environment are identical between a function and its caller
 with the exception that the
 .SM
 .B DEBUG
-trap (see the description of the
+and
+.B RETURN
+traps (see the description of the
 .B trap
 builtin under
 .SM
 .B SHELL BUILTIN COMMANDS
-below) is not inherited unless the function has been given the
+below) are not inherited unless the function has been given the
 \fBtrace\fP attribute (see the description of the
 .SM
 .B declare
 builtin below) or the
 \fB\-o functrace\fP shell option has been enabled with
 the \fBset\fP builtin
-(in which case all functions inherit the \fBDEBUG\fP trap).
+(in which case all functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps).
 .PP
 Variables local to the function may be declared with the
 .B local
@@ -6424,7 +6426,8 @@ by subsequent assignment statements or unset.
 .TP
 .B \-t
 Give each \fIname\fP the \fItrace\fP attribute.
-Traced functions inherit the \fBDEBUG\fP trap from the calling shell.
+Traced functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps from
+the calling shell.
 The trace attribute has no special meaning for variables.
 .TP
 .B \-x
@@ -7773,9 +7776,11 @@ follows the logical chain of directories when performing commands
 which change the current directory.
 .TP 8
 .B \-T
-If set, any trap on \fBDEBUG\fP is inherited by shell functions, command
-substitutions, and commands executed in a subshell environment.
-The \fBDEBUG\fP trap is normally not inherited in such cases.
+If set, any traps on \fBDEBUG\fP and \fBRETURN\fP are inherited by shell
+functions, command substitutions, and commands executed in a
+subshell environment.
+The \fBDEBUG\fP and \fBRETURN\fP traps are normally not inherited
+in such cases.
 .TP 8
 .B \-\-
 If no arguments follow this option, then the positional parameters are
