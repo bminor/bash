@@ -2,12 +2,12 @@ This is bashref.info, produced by makeinfo version 4.5 from
 /usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.0-beta1, 20 April 2004).
+the Bash shell (version 3.0-rc1, 27 May 2004).
 
-   This is Edition 3.0, last updated 20 April 2004, of `The GNU Bash
-Reference Manual', for `Bash', Version 3.0-beta1.
+   This is Edition 3.0, last updated 27 May 2004, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0-rc1.
 
-   Copyright (C) 1988-2003 Free Software Foundation, Inc.
+   Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -37,10 +37,10 @@ Bash Features
 *************
 
    This text is a brief description of the features that are present in
-the Bash shell (version 3.0-beta1, 20 April 2004)..
+the Bash shell (version 3.0-rc1, 27 May 2004)..
 
-   This is Edition 3.0, last updated 20 April 2004, of `The GNU Bash
-Reference Manual', for `Bash', Version 3.0-beta1.
+   This is Edition 3.0, last updated 27 May 2004, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0-rc1.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -2567,19 +2567,19 @@ standard.
 `trap'
           trap [-lp] [ARG] [SIGSPEC ...]
      The commands in ARG are to be read and executed when the shell
-     receives signal SIGSPEC.  If ARG is absent or equal to `-', all
-     specified signals are reset to the values they had when the shell
-     was started.  If ARG is the null string, then the signal specified
-     by each SIGSPEC is ignored by the shell and commands it invokes.
-     If ARG is not present and `-p' has been supplied, the shell
-     displays the trap commands associated with each SIGSPEC.  If no
-     arguments are supplied, or only `-p' is given, `trap' prints the
-     list of commands associated with each signal number in a form that
-     may be reused as shell input.  The `-l' option causes the shell to
-     print a list of signal names and their corresponding numbers.
-
-     Each SIGSPEC is either a signal name such as `SIGINT' (with or
-     without the `SIG' prefix) or a signal number.  If a SIGSPEC is `0'
+     receives signal SIGSPEC.  If ARG is absent (and there is a single
+     SIGSPEC) or equal to `-', each specified signal's disposition is
+     reset to the value it had when the shell was started.  If ARG is
+     the null string, then the signal specified by each SIGSPEC is
+     ignored by the shell and commands it invokes.  If ARG is not
+     present and `-p' has been supplied, the shell displays the trap
+     commands associated with each SIGSPEC.  If no arguments are
+     supplied, or only `-p' is given, `trap' prints the list of commands
+     associated with each signal number in a form that may be reused as
+     shell input.  The `-l' option causes the shell to print a list of
+     signal names and their corresponding numbers.  Each SIGSPEC is
+     either a signal name or a signal number.  Signal names are case
+     insensitive and the `SIG' prefix is optional.  If a SIGSPEC is `0'
      or `EXIT', ARG is executed when the shell exits.  If a SIGSPEC is
      `DEBUG', the command ARG is executed before every simple command,
      `for' command, `case' command, `select' command, every arithmetic
@@ -4092,6 +4092,11 @@ Variables::).
      value assigned, and the expanded value becomes the value assigned
      plus the number of seconds since the assignment.
 
+`SHELL'
+     The full pathname to the shell is kept in this environment
+     variable.  If it is not set when the shell starts, Bash assigns to
+     it the full pathname of the current user's login shell.
+
 `SHELLOPTS'
      A colon-separated list of enabled shell options.  Each word in the
      list is a valid argument for the `-o' option to the `set' builtin
@@ -5499,16 +5504,16 @@ Job Control Builtins
           kill -l [EXIT_STATUS]
      Send a signal specified by SIGSPEC or SIGNUM to the process named
      by job specification JOBSPEC or process ID PID.  SIGSPEC is either
-     a signal name such as `SIGINT' (with or without the `SIG' prefix)
-     or a signal number; SIGNUM is a signal number.  If SIGSPEC and
-     SIGNUM are not present, `SIGTERM' is used.  The `-l' option lists
-     the signal names.  If any arguments are supplied when `-l' is
-     given, the names of the signals corresponding to the arguments are
-     listed, and the return status is zero.  EXIT_STATUS is a number
-     specifying a signal number or the exit status of a process
-     terminated by a signal.  The return status is zero if at least one
-     signal was successfully sent, or non-zero if an error occurs or an
-     invalid option is encountered.
+     a case-insensitive signal name such as `SIGINT' (with or without
+     the `SIG' prefix) or a signal number; SIGNUM is a signal number.
+     If SIGSPEC and SIGNUM are not present, `SIGTERM' is used.  The
+     `-l' option lists the signal names.  If any arguments are supplied
+     when `-l' is given, the names of the signals corresponding to the
+     arguments are listed, and the return status is zero.  EXIT_STATUS
+     is a number specifying a signal number or the exit status of a
+     process terminated by a signal.  The return status is zero if at
+     least one signal was successfully sent, or non-zero if an error
+     occurs or an invalid option is encountered.
 
 `wait'
           wait [JOBSPEC or PID]
@@ -9039,6 +9044,7 @@ Parameter and Variable Index
 * RANDOM:                                Bash Variables.
 * REPLY:                                 Bash Variables.
 * SECONDS:                               Bash Variables.
+* SHELL:                                 Bash Variables.
 * SHELLOPTS:                             Bash Variables.
 * SHLVL:                                 Bash Variables.
 * show-all-if-ambiguous:                 Readline Init File Syntax.
@@ -9260,129 +9266,129 @@ Concept Index
 
 
 Tag Table:
-Node: Top1367
-Node: Introduction3520
-Node: What is Bash?3745
-Node: What is a shell?4833
-Node: Definitions7369
-Node: Basic Shell Features10109
-Node: Shell Syntax11327
-Node: Shell Operation12351
-Node: Quoting13636
-Node: Escape Character14898
-Node: Single Quotes15370
-Node: Double Quotes15705
-Node: ANSI-C Quoting16718
-Node: Locale Translation17661
-Node: Comments18544
-Node: Shell Commands19149
-Node: Simple Commands19910
-Node: Pipelines20531
-Node: Lists22397
-Node: Compound Commands24019
-Node: Looping Constructs24791
-Node: Conditional Constructs27225
-Node: Command Grouping34278
-Node: Shell Functions35714
-Node: Shell Parameters39976
-Node: Positional Parameters41547
-Node: Special Parameters42438
-Node: Shell Expansions45096
-Node: Brace Expansion47016
-Node: Tilde Expansion49332
-Node: Shell Parameter Expansion51664
-Node: Command Substitution58918
-Node: Arithmetic Expansion60240
-Node: Process Substitution61081
-Node: Word Splitting62118
-Node: Filename Expansion63570
-Node: Pattern Matching65694
-Node: Quote Removal69015
-Node: Redirections69301
-Node: Executing Commands76776
-Node: Simple Command Expansion77443
-Node: Command Search and Execution79364
-Node: Command Execution Environment81361
-Node: Environment84123
-Node: Exit Status85774
-Node: Signals86969
-Node: Shell Scripts88924
-Node: Shell Builtin Commands91435
-Node: Bourne Shell Builtins93010
-Node: Bash Builtins109893
-Node: The Set Builtin138015
-Node: Special Builtins146233
-Node: Shell Variables147205
-Node: Bourne Shell Variables147641
-Node: Bash Variables149618
-Node: Bash Features169123
-Node: Invoking Bash170005
-Node: Bash Startup Files175816
-Node: Interactive Shells180686
-Node: What is an Interactive Shell?181088
-Node: Is this Shell Interactive?181723
-Node: Interactive Shell Behavior182529
-Node: Bash Conditional Expressions185796
-Node: Shell Arithmetic189216
-Node: Aliases191956
-Node: Arrays194519
-Node: The Directory Stack197539
-Node: Directory Stack Builtins198245
-Node: Printing a Prompt201124
-Node: The Restricted Shell203833
-Node: Bash POSIX Mode205658
-Node: Job Control212304
-Node: Job Control Basics212770
-Node: Job Control Builtins217055
-Node: Job Control Variables221351
-Node: Command Line Editing222501
-Node: Introduction and Notation223499
-Node: Readline Interaction225116
-Node: Readline Bare Essentials226302
-Node: Readline Movement Commands228082
-Node: Readline Killing Commands229038
-Node: Readline Arguments230947
-Node: Searching231982
-Node: Readline Init File234159
-Node: Readline Init File Syntax235213
-Node: Conditional Init Constructs246857
-Node: Sample Init File249381
-Node: Bindable Readline Commands252564
-Node: Commands For Moving253763
-Node: Commands For History254612
-Node: Commands For Text257501
-Node: Commands For Killing260162
-Node: Numeric Arguments262292
-Node: Commands For Completion263419
-Node: Keyboard Macros267000
-Node: Miscellaneous Commands267559
-Node: Readline vi Mode272858
-Node: Programmable Completion273767
-Node: Programmable Completion Builtins279574
-Node: Using History Interactively286936
-Node: Bash History Facilities287615
-Node: Bash History Builtins290305
-Node: History Interaction294157
-Node: Event Designators296708
-Node: Word Designators297712
-Node: Modifiers299342
-Node: Installing Bash300739
-Node: Basic Installation301873
-Node: Compilers and Options304558
-Node: Compiling For Multiple Architectures305292
-Node: Installation Names306949
-Node: Specifying the System Type307760
-Node: Sharing Defaults308469
-Node: Operation Controls309134
-Node: Optional Features310085
-Node: Reporting Bugs318357
-Node: Major Differences From The Bourne Shell319532
-Node: Copying This Manual335280
-Node: GNU Free Documentation License335534
-Node: Builtin Index357927
-Node: Reserved Word Index361554
-Node: Variable Index363030
-Node: Function Index370023
-Node: Concept Index374636
+Node: Top1359
+Node: Introduction3504
+Node: What is Bash?3729
+Node: What is a shell?4817
+Node: Definitions7353
+Node: Basic Shell Features10093
+Node: Shell Syntax11311
+Node: Shell Operation12335
+Node: Quoting13620
+Node: Escape Character14882
+Node: Single Quotes15354
+Node: Double Quotes15689
+Node: ANSI-C Quoting16702
+Node: Locale Translation17645
+Node: Comments18528
+Node: Shell Commands19133
+Node: Simple Commands19894
+Node: Pipelines20515
+Node: Lists22381
+Node: Compound Commands24003
+Node: Looping Constructs24775
+Node: Conditional Constructs27209
+Node: Command Grouping34262
+Node: Shell Functions35698
+Node: Shell Parameters39960
+Node: Positional Parameters41531
+Node: Special Parameters42422
+Node: Shell Expansions45080
+Node: Brace Expansion47000
+Node: Tilde Expansion49316
+Node: Shell Parameter Expansion51648
+Node: Command Substitution58902
+Node: Arithmetic Expansion60224
+Node: Process Substitution61065
+Node: Word Splitting62102
+Node: Filename Expansion63554
+Node: Pattern Matching65678
+Node: Quote Removal68999
+Node: Redirections69285
+Node: Executing Commands76760
+Node: Simple Command Expansion77427
+Node: Command Search and Execution79348
+Node: Command Execution Environment81345
+Node: Environment84107
+Node: Exit Status85758
+Node: Signals86953
+Node: Shell Scripts88908
+Node: Shell Builtin Commands91419
+Node: Bourne Shell Builtins92994
+Node: Bash Builtins109942
+Node: The Set Builtin138064
+Node: Special Builtins146282
+Node: Shell Variables147254
+Node: Bourne Shell Variables147690
+Node: Bash Variables149667
+Node: Bash Features169378
+Node: Invoking Bash170260
+Node: Bash Startup Files176071
+Node: Interactive Shells180941
+Node: What is an Interactive Shell?181343
+Node: Is this Shell Interactive?181978
+Node: Interactive Shell Behavior182784
+Node: Bash Conditional Expressions186051
+Node: Shell Arithmetic189471
+Node: Aliases192211
+Node: Arrays194774
+Node: The Directory Stack197794
+Node: Directory Stack Builtins198500
+Node: Printing a Prompt201379
+Node: The Restricted Shell204088
+Node: Bash POSIX Mode205913
+Node: Job Control212559
+Node: Job Control Basics213025
+Node: Job Control Builtins217310
+Node: Job Control Variables221622
+Node: Command Line Editing222772
+Node: Introduction and Notation223770
+Node: Readline Interaction225387
+Node: Readline Bare Essentials226573
+Node: Readline Movement Commands228353
+Node: Readline Killing Commands229309
+Node: Readline Arguments231218
+Node: Searching232253
+Node: Readline Init File234430
+Node: Readline Init File Syntax235484
+Node: Conditional Init Constructs247128
+Node: Sample Init File249652
+Node: Bindable Readline Commands252835
+Node: Commands For Moving254034
+Node: Commands For History254883
+Node: Commands For Text257772
+Node: Commands For Killing260433
+Node: Numeric Arguments262563
+Node: Commands For Completion263690
+Node: Keyboard Macros267271
+Node: Miscellaneous Commands267830
+Node: Readline vi Mode273129
+Node: Programmable Completion274038
+Node: Programmable Completion Builtins279845
+Node: Using History Interactively287207
+Node: Bash History Facilities287886
+Node: Bash History Builtins290576
+Node: History Interaction294428
+Node: Event Designators296979
+Node: Word Designators297983
+Node: Modifiers299613
+Node: Installing Bash301010
+Node: Basic Installation302144
+Node: Compilers and Options304829
+Node: Compiling For Multiple Architectures305563
+Node: Installation Names307220
+Node: Specifying the System Type308031
+Node: Sharing Defaults308740
+Node: Operation Controls309405
+Node: Optional Features310356
+Node: Reporting Bugs318628
+Node: Major Differences From The Bourne Shell319803
+Node: Copying This Manual335551
+Node: GNU Free Documentation License335805
+Node: Builtin Index358198
+Node: Reserved Word Index361825
+Node: Variable Index363301
+Node: Function Index370351
+Node: Concept Index374964
 
 End Tag Table

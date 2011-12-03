@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Apr 20<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 May 27<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -2421,6 +2421,14 @@ displays during an execution trace.  The first character of
 </FONT>
 is replicated multiple times, as necessary, to indicate multiple
 levels of indirection.  The default is ``<B>+ </B>''.
+<DT><B>SHELL</B>
+
+<DD>
+The full pathname to the shell is kept in this environment variable.
+If it is not set when the shell starts,
+<B>bash</B>
+
+assigns to it the full pathname of the current user's login shell.
 <DT><B>TIMEFORMAT</B>
 
 <DD>
@@ -4605,10 +4613,12 @@ builtin below.
 
 <DD>
 True if the length of <I>string</I> is zero.
+<DT><I>string</I><DD>
+
 <DT><B>-n </B><I>string</I>
 
 <DD>
-<DT><I>string</I><DD>
+
 True if the length of
 <I>string</I>
 
@@ -9130,22 +9140,18 @@ or
 
 <I>sigspec</I>
 
-is either a signal name such as
+is either a case-insensitive signal name such as
 <FONT SIZE=-1><B>SIGKILL</B>
 
 </FONT>
-or a signal number;
-<I>signum</I>
-
-is a signal number.  If
-<I>sigspec</I>
-
-is a signal name, the name may be
-given with or without the
+(with or without the
 <FONT SIZE=-1><B>SIG</B>
 
 </FONT>
-prefix.
+prefix) or a signal number;
+<I>signum</I>
+
+is a signal number.
 If
 <I>sigspec</I>
 
@@ -10503,7 +10509,7 @@ using the rules listed above.
 <DD>
 Print the accumulated user and system times for the shell and
 for processes run from the shell.  The return status is 0.
-<DT><B>trap</B> [<B>-lp</B>] [<I>arg</I>] [<I>sigspec</I> ...]<DD>
+<DT><B>trap</B> [<B>-lp</B>] [[<I>arg</I>] <I>sigspec</I> ...]<DD>
 The command
 <I>arg</I>
 
@@ -10514,11 +10520,11 @@ signal(s)
 If
 <I>arg</I>
 
-is absent or
+is absent (and there is a single <I>sigspec</I>) or
 <B>-</B>,
 
-all specified signals are
-reset to their original values (the values they had
+each specified signal is
+reset to its original disposition (the value it had
 upon entrance to the shell).
 If 
 <I>arg</I>
@@ -10543,7 +10549,7 @@ If no arguments are supplied or if only
 is given,
 <B>trap</B>
 
-prints the list of commands associated with each signal number.
+prints the list of commands associated with each signal.
 The
 <B>-l</B>
 
@@ -10554,6 +10560,7 @@ Each
 
 is either
 a signal name defined in &lt;<I>signal.h</I>&gt;, or a signal number.
+Signal names are case insensitive and the SIG prefix is optional.
 If a
 <I>sigspec</I>
 
@@ -11070,11 +11077,15 @@ turning off restricted mode with
 These restrictions are enforced after any startup files are read.
 <P>
 
-When a command that is found to be a shell script is executed (see
+
+ When a command that is found to be a shell script is executed
+(see
 <FONT SIZE=-1><B>COMMAND EXECUTION</B>
 
 </FONT>
+
 above),
+
 <B>rbash</B>
 
 turns off any restrictions in the shell spawned to execute the
@@ -11344,6 +11355,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 20 April 2004 15:26:54 EDT
+Time: 01 June 2004 12:27:36 EDT
 </BODY>
 </HTML>
