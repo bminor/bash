@@ -883,12 +883,10 @@ rl_redisplay ()
 		  (wrap_offset > visible_wrap_offset) &&
 		  (_rl_last_c_pos < visible_first_line_len))
 		{
-#if defined (HANDLE_MULTIBYTE)
 		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 		    nleft = _rl_screenwidth - _rl_last_c_pos;
 		  else
-#endif
-		  nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
 		  if (nleft)
 		    _rl_clear_to_eol (nleft);
 		}
@@ -966,8 +964,11 @@ rl_redisplay ()
 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
 	      else
 		tx = nleft;
-	      _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
-	      _rl_last_c_pos = tx;
+	      if (_rl_last_c_pos != tx)
+		{
+	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+	          _rl_last_c_pos = tx;
+		}
 	    }
 
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)

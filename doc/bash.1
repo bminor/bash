@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sun Nov  7 14:53:18 EST 2004
+.\"	Last Change: Sat Nov 13 15:05:55 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Nov 7" "GNU Bash-3.1-devel"
+.TH BASH 1 "2004 Nov 13" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2373,6 +2373,10 @@ parameters beginning at \fIoffset\fP.
 If \fIparameter\fP is an array name indexed by @ or *,
 the result is the \fIlength\fP
 members of the array beginning with ${\fIparameter\fP[\fIoffset\fP]}.
+A negative \fIoffset\fP is taken relative to one greater than the maximum
+index of the specified array.
+Note that a negative offset must be separated from the colon by at least
+one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
 are used, in which case the indexing starts at 1.
 .TP

@@ -10547,3 +10547,23 @@ builtins/declare.def
 	  before the assignment is performed, which has implications for things
 	  like `-i' -- if -i is supplied, arithmetic evaluation and increment
 	  will be performed
+
+builtins/setattr.def
+	- add support for `+=' assignment for rest of `assignment builtins':
+	  export, readonly
+
+				   11/12
+				   -----
+lib/readline/display.c
+	- make sure prompt_physical_chars and prompt_invis_chars_first_line
+	  are reset to 0 if the prompt string passed to rl_expand_prompt is
+	  NULL or empty
+
+				   11/14
+				   -----
+{configure,config.h}.in
+	- check for `raise', define HAVE_RAISE if available
+
+lib/intl/dcigettext.c
+	- make sure `raise' is defined if HAVE_RAISE is not before
+	  eval-plurah.h is included

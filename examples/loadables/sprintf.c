@@ -159,7 +159,7 @@ sprintf_builtin (list)
   r = sprintf_main (c, v);
   free (v);
 
-  var = bind_variable (varname, outstr);
+  var = bind_variable (varname, outstr, 0);
   if (readonly_p (var))
     {
       builtin_error ("%s: readonly variable", varname);

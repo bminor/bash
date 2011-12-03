@@ -46,6 +46,17 @@ LOCAL_CFLAGS = @LOCAL_CFLAGS@
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
+CPPFLAGS = @CPPFLAGS@
+
+BASHINCDIR = ${topdir}/include
+
+LIBBUILD = ${BUILD_DIR}/lib
+
+INTL_LIBSRC = ${topdir}/lib/intl
+INTL_BUILDDIR = ${LIBBUILD}/intl
+INTL_INC = @INTL_INC@
+LIBINTL_H = @LIBINTL_H@
+
 CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CFLAGS)
 
 #
@@ -63,8 +74,8 @@ SHOBJ_LIBS = @SHOBJ_LIBS@
 SHOBJ_STATUS = @SHOBJ_STATUS@
 
 INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
-      -I$(topdir)/include -I$(BUILD_DIR) -I$(BUILD_DIR)/lib \
-      -I$(BUILD_DIR)/builtins
+      -I$(BASHINCDIR) -I$(BUILD_DIR) -I$(LIBBUILD) \
+      -I$(BUILD_DIR)/builtins $(INTL_INC)
 
 .c.o:
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
@@ -184,7 +195,7 @@ pushd.c:	${topdir}/builtins/pushd.def
 
 pushd.o:	pushd.c
 	$(RM) $@
-	$(SHOBJ_CC) -DPUSHD_AND_POPD -DLOADABLE_BUILTIN $(SHOBJ_CFLAGS) $(CFLAGS) $(INC) -c -o $@ $<
+	$(SHOBJ_CC) -DHAVE_CONFIG_H -DPUSHD_AND_POPD -DLOADABLE_BUILTIN $(SHOBJ_CFLAGS) $(CFLAGS) $(CPPFLAGS) $(INC) -c -o $@ $<
 
 pushd:	pushd.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ pushd.o $(SHOBJ_LIBS)

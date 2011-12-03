@@ -1208,6 +1208,21 @@ Assignment statements may also appear as arguments to the
 @code{declare}, @code{typeset}, @code{export}, @code{readonly},
 and @code{local} builtin commands.
 
+In the context where an assignment statement is assigning a value  
+to a shell variable or array index (@pxref{Arrays}), the @samp{+=}
+operator can be used to   
+append to or add to the variable's previous value.
+When @samp{+=} is applied to a variable for which the integer attribute
+has been set, @var{value} is evaluated as an arithmetic expression and
+added to the variable's current value, which is also evaluated.
+When @samp{+=} is applied to an array variable using compound assignment
+(@pxref{Arrays}), the
+variable's value is not unset (as it is when using @samp{=}), and new
+values are appended to the array beginning at one greater than the array's
+maximum index.
+When applied to a string-valued variable, @var{value} is expanded and
+appended to the variable's value.
+
 @node Positional Parameters
 @subsection Positional Parameters
 @cindex parameters, positional
@@ -1584,6 +1599,8 @@ parameters beginning at @var{offset}.
 If @var{parameter} is an array name indexed by @samp{@@} or @samp{*},
 the result is the @var{length}
 members of the array beginning with @code{$@{@var{parameter}[@var{offset}]@}}.
+A negative @var{offset} is taken relative to one greater than the maximum
+index of the specified array.
 Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1.
 

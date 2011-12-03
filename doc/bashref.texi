@@ -1599,6 +1599,10 @@ parameters beginning at @var{offset}.
 If @var{parameter} is an array name indexed by @samp{@@} or @samp{*},
 the result is the @var{length}
 members of the array beginning with @code{$@{@var{parameter}[@var{offset}]@}}.
+A negative @var{offset} is taken relative to one greater than the maximum
+index of the specified array.
+Note that a negative offset must be separated from the colon by at least
+one space to avoid being confused with the @samp{:-} expansion.
 Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1.
 

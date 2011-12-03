@@ -340,7 +340,8 @@ rl_expand_prompt (prompt)
   FREE (local_prompt_prefix);
 
   local_prompt = local_prompt_prefix = (char *)0;
-  prompt_last_invisible = prompt_visible_length = 0;
+  prompt_last_invisible = prompt_invis_chars_first_line = 0;
+  prompt_visible_length = prompt_physical_chars = 0;
 
   if (prompt == 0 || *prompt == 0)
     return (0);

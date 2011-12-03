@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sat Oct 30 22:24:07 EDT 2004
+.\"	Last Change: Tue Nov  9 16:30:56 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Oct 30" "GNU Bash-3.1-devel"
+.TH BASH 1 "2004 Nov 9" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1076,6 +1076,20 @@ Assignment statements may also appear as arguments to the
 and
 .B local
 builtin commands.
+.PP
+In the context where an assignment statement is assigning a value
+to a shell variable or array index, the += operator can be used to
+append to or add to the variable's previous value.
+When += is applied to a variable for which the integer attribute has been
+set, \fIvalue\fP is evaluated as an arithmetic expression and added to the
+variable's current value, which is also evaluated.
+When += is applied to an array variable using compound assignment (see
+.B Arrays
+below), the
+variable's value is not unset (as it is when using =), and new values are
+appended to the array beginning at one greater than the array's maximum index.
+When applied to a string-valued variable, \fIvalue\fP is expanded and
+appended to the variable's value.
 .SS Positional Parameters
 .PP
 A
@@ -2359,6 +2373,8 @@ parameters beginning at \fIoffset\fP.
 If \fIparameter\fP is an array name indexed by @ or *,
 the result is the \fIlength\fP
 members of the array beginning with ${\fIparameter\fP[\fIoffset\fP]}.
+A negative \fIoffset\fP is taken relative to one greater than the maximum
+index of the specified array.
 Substring indexing is zero-based unless the positional parameters 
 are used, in which case the indexing starts at 1.
 .TP
