@@ -131,7 +131,7 @@ read_builtin (list)
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-  char *e, *t, *t1, *savei;
+  char *e, *t, *t1;
   struct stat tsb;
   SHELL_VAR *var;
 #if defined (ARRAY_VARS)
@@ -276,7 +276,7 @@ read_builtin (list)
   input_is_tty = isatty (fd);
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
-    input_is_pipe = (lseek (0, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+    input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
 #else
     input_is_pipe = 1;
 #endif
@@ -637,12 +637,12 @@ read_builtin (list)
      number of variables. */
   if (*input_string)
     {
-      savei = input_string;
+      t1 = input_string;
       t = get_word_from_string (&input_string, ifs_chars, &e);
       if (*input_string == 0)
 	input_string = t;
       else
-	input_string = strip_trailing_ifs_whitespace (savei, ifs_chars, saw_escape);
+	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
     }
 #endif
 

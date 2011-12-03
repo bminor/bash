@@ -245,6 +245,9 @@ int subshell_level = 0;
 /* Currently-executing shell function. */
 SHELL_VAR *this_shell_function;
 
+/* If non-zero, matches in case and [[ ... ]] are case-insensitive */
+int match_ignore_case = 0;
+
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
 #define FD_BITMAP_DEFAULT_SIZE 32
@@ -2223,7 +2226,7 @@ execute_case_command (case_command)
 	  /* Since the pattern does not undergo quote removal (as per
 	     Posix.2, section 3.9.4.3), the strmatch () call must be able
 	     to recognize backslashes as escape characters. */
-	  match = strmatch (pattern, word, FNMATCH_EXTFLAG) != FNM_NOMATCH;
+	  match = strmatch (pattern, word, FNMATCH_EXTFLAG|FNMATCH_IGNCASE) != FNM_NOMATCH;
 	  free (pattern);
 
 	  dispose_words (es);

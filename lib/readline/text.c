@@ -785,11 +785,13 @@ _rl_insert_char (count, c)
 	  rl_insert_text (str);
 	}
     }
+#if defined (HANDLE_MULTIBYTE)
   else
     {
       rl_insert_text (incoming);
       stored_count = 0;
     }
+#endif
 
   return 0;
 }

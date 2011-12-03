@@ -369,7 +369,6 @@ shell_control_structure (type)
 {
   switch (type)
     {
-    case cm_for:
 #if defined (ARITH_FOR_COMMAND)
     case cm_arith_for:
 #endif
@@ -386,7 +385,9 @@ shell_control_structure (type)
     case cm_while:
     case cm_until:
     case cm_if:
+    case cm_for:
     case cm_group:
+    case cm_function_def:
       return (1);
 
     default:

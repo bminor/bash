@@ -295,14 +295,16 @@ readline (prompt)
   rl_set_prompt (prompt);
 
   rl_initialize ();
-  (*rl_prep_term_function) (_rl_meta_flag);
+  if (rl_prep_term_function)
+    (*rl_prep_term_function) (_rl_meta_flag);
 
 #if defined (HANDLE_SIGNALS)
   rl_set_signals ();
 #endif
 
   value = readline_internal ();
-  (*rl_deprep_term_function) ();
+  if (rl_deprep_term_function)
+    (*rl_deprep_term_function) ();
 
 #if defined (HANDLE_SIGNALS)
   rl_clear_signals ();

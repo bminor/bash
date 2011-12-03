@@ -617,14 +617,19 @@ pipesize (valuep)
   *valuep = (RLIMTYPE) PIPE_BUF;
   return 0;
 #else
-#  if defined (PIPESIZE)
+#  if defined (_POSIX_PIPE_BUF)
+  *valuep = (RLIMTYPE) _POSIX_PIPE_BUF;
+  return 0;
+#  else
+#    if defined (PIPESIZE)
   /* This is defined by running a program from the Makefile. */
   *valuep = (RLIMTYPE) PIPESIZE;
   return 0;
-#  else
+#    else
   errno = EINVAL;
   return -1;  
-#  endif /* PIPESIZE */
+#    endif /* PIPESIZE */
+#  endif /* _POSIX_PIPE_BUF */
 #endif /* PIPE_BUF */
 }
 

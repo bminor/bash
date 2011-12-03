@@ -11280,3 +11280,50 @@ lib/readline/examples/rl.c
 subst.c
 	- fix mbstrlen to treat invalid multibyte sequences as sequences of
 	  single-byte characters
+
+				    4/8
+				    ---
+configure.in
+	- default SIZE to `:' if cross-compiling and an appropriate size for
+	  the target is not found
+
+				   4/11
+				   ----
+subst.c
+	- change match_upattern and match_wpattern to check whether or not the
+	  supplied pattern matches anywhere in the supplied string, prefixing
+	  and appending the pattern with `*' if necessary.  If it doesn't we
+	  can short-circuit immediately rather than waste time doing up to
+	  N-1 unsuccessful calls to strmatch/wcsmatch (which kills for long
+	  strings, even if the pattern is short)
+
+				   4/12
+				   ----
+configure.in
+	- make sure the special case for MacOS X 10.4 only kicks in if the
+	  `--with-installed-readline' option isn't supplied
+
+lib/readline/{callback,readline,signals}.c
+	- make sure rl_prep_term_function and rl_deprep_term_function aren't
+	  dereferenced if NULL (as the documentation says)
+
+builtins/mkbuiltins.c
+	- don't bother with the special HAVE_BCOPY code; just use straight
+	  assignments
+
+builtins/ulimit.def
+	- use _POSIX_PIPE_BUF in pipesize() if it's defined and PIPE_BUF is
+	  not
+
+				   4/13
+				   ----
+execute_cmd.c
+	- add cm_function_def to the list of control structures for which
+	  child processes are forked when pipes come in or out
+
+				   4/14
+				   ----
+builtins/read.def
+	- make sure the ^As added for internal quoting are not counted as
+	  characters read when -n is supplied
+

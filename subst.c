@@ -3449,8 +3449,37 @@ match_upattern (string, pat, mtype, sp, ep)
      char **sp, **ep;
 {
   int c, len;
-  register char *p, *p1;
+  register char *p, *p1, *npat;
   char *end;
+
+  /* If the pattern doesn't match anywhere in the string, go ahead and
+     short-circuit right away.  A minor optimization, saves a bunch of
+     unnecessary calls to strmatch (up to N calls for a string of N
+     characters) if the match is unsuccessful.  To preserve the semantics
+     of the substring matches below, we make sure that the pattern has
+     `*' as first and last character, making a new pattern if necessary. */
+  /* XXX - check this later if I ever implement `**' with special meaning,
+     since this will potentially result in `**' at the beginning or end */
+  len = STRLEN (pat);
+  if (pat[0] != '*' || pat[len - 1] != '*')
+    {
+      p = npat = xmalloc (len + 3);
+      p1 = pat;
+      if (*p1 != '*')
+	*p++ = '*';
+      while (*p1)
+	*p++ = *p1++;
+      if (p1[-1] != '*' || p[-2] == '\\')
+	*p++ = '*';
+      *p = '\0';
+    }
+  else
+    npat = pat;
+  c = strmatch (npat, string, FNMATCH_EXTFLAG);
+  if (npat != pat)
+    free (npat);
+  if (c == FNM_NOMATCH)
+    return (0);
 
   len = STRLEN (string);
   end = string + len;
@@ -3559,13 +3588,42 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
      int mtype;
      char **sp, **ep;
 {
-  wchar_t wc;
+  wchar_t wc, *wp, *nwpat, *wp1;
   int len;
 #if 0
   size_t n, n1;	/* Apple's gcc seems to miscompile this badly */
 #else
   int n, n1;
 #endif
+
+  /* If the pattern doesn't match anywhere in the string, go ahead and
+     short-circuit right away.  A minor optimization, saves a bunch of
+     unnecessary calls to strmatch (up to N calls for a string of N
+     characters) if the match is unsuccessful.  To preserve the semantics
+     of the substring matches below, we make sure that the pattern has
+     `*' as first and last character, making a new pattern if necessary. */
+  /* XXX - check this later if I ever implement `**' with special meaning,
+     since this will potentially result in `**' at the beginning or end */
+  len = wcslen (wpat);
+  if (wpat[0] != L'*' || wpat[len - 1] != L'*')
+    {
+      wp = nwpat = xmalloc ((len + 3) * sizeof (wchar_t));
+      wp1 = wpat;
+      if (*wp1 != L'*')
+	*wp++ = L'*';
+      while (*wp1 != L'\0')
+	*wp++ = *wp1++;
+      if (wp1[-1] != L'*' || wp1[-2] == L'\\')
+        *wp++ = L'*';
+      *wp = '\0';
+    }
+  else
+    nwpat = wpat;
+  len = wcsmatch (nwpat, wstring, FNMATCH_EXTFLAG);
+  if (nwpat != wpat)
+    free (nwpat);
+  if (len == FNM_NOMATCH)
+    return (0);
 
   switch (mtype)
     {
