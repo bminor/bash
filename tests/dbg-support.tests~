@@ -62,7 +62,7 @@ set -o functrace
 trap 'print_debug_trap $LINENO' DEBUG
 trap 'print_return_trap $LINENO' RETURN
 
-# Funcname is now an array. Vanilla Bash 2.05 doesn't have FUNCNAME array.
+# Funcname is now an array, but you still can't see it outside a function
 echo "FUNCNAME" ${FUNCNAME[0]:-main}
 
 # We should trace into the below. 

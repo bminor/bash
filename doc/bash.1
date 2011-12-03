@@ -7483,7 +7483,10 @@ before execution resumes after the function or script.
 .TP
 \fBset\fP [\fB\-\-abefhkmnptuvxBCHP\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
 Without options, the name and value of each shell variable are displayed
-in a format that can be reused as input.
+in a format that can be reused as input
+for setting or resetting the currently-set variables.
+Read-only variables cannot be reset.
+In \fIposix mode\fP, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after the options are processed are treated
@@ -7656,7 +7659,7 @@ This option is disabled by default.
 Change the behavior of
 .B bash
 where the default operation differs
-from the POSIX 1003.2 standard to match the standard (\fI`posix mode\fP).
+from the POSIX 1003.2 standard to match the standard (\fIposix mode\fP).
 .TP 8
 .B privileged
 Same as

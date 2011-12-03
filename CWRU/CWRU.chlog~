@@ -10611,4 +10611,36 @@ doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
 				   11/23
 				   -----
 execute_cmd.c
-	- changes so that BASH_COMMAND preserves its value into a DEBUG trap
+	- changes so that BASH_COMMAND preserves its value into a DEBUG trap:
+	  for commands, arithmetic for command expressions, select commands,
+	  case commands, (( commands, [[ commands, simple commands
+
+				   11/24
+				   -----
+doc/{bash.1,bashref.texi}
+	- changed description of `set' builtin slightly so that it is clear
+	  that only variables are displayed in posix mode and that read-only
+	  variables can't be reset by simply sourcing the output of `set'
+
+lib/sh/strftime.c
+	- don't try to redefine `inline' if it's already defined
+
+				   11/26
+				   -----
+execute_cmd.c
+	- fix execute_function to check funcname_a after function execution,
+	  since FUNCNAME can be changed or unset within a function
+
+				   11/27
+				   -----
+builtins/evalfile.c
+	- make same changes as 11/26, this time to _evalfile
+
+execute_cmd.c
+	- change execute_function to run the return trap after a function
+	  completes execution even if the shell is compiled without DEBUGGER
+	  defined
+
+trap.c
+	- change reset_or_restore_signal_handlers so that the RETURN trap is
+	  not inherited by command substitution when DEBUGGER is not defined

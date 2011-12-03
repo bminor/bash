@@ -248,12 +248,12 @@ file_error_and_exit:
 
 #if defined (ARRAY_VARS)
   /* These two variables cannot be unset, and cannot be affected by the
-     sourced file. */
+     function. */
   array_pop (bash_source_a);
   array_pop (bash_lineno_a);
 
   /* FUNCNAME can be unset, and so can potentially be changed by the
-     sourced file. */
+     function. */
   GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
   if (nfv == funcname_v)
     array_pop (funcname_a);

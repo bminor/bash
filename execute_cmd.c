@@ -3114,7 +3114,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   COMMAND *tc, *fc, *save_current;
   char *debug_trap, *error_trap, *return_trap;
 #if defined (ARRAY_VARS)
-  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
+  SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
 #endif
   FUNCTION_DEF *shell_fn;
@@ -3240,7 +3240,17 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   return_val = setjmp (return_catch);
 
   if (return_val)
-    result = return_catch_value;
+    {
+      result = return_catch_value;
+#if 0
+      /* Run the RETURN trap in the function's context.  XXX - have to talk
+	 to Rocky about why his bashdb code doesn't have `return' run the
+	 RETURN trap. */
+      save_current = currently_executing_command;
+      run_return_trap ();
+      currently_executing_command = save_current;
+#endif
+    }
   else
     {
       /* Run the debug trap here so we can trap at the start of a function's
@@ -3264,6 +3274,10 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	}
 #else
       result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
+
+      save_current = currently_executing_command;
+      run_return_trap ();
+      currently_executing_command = save_current;
 #endif
       showing_function_line = 0;
     }
@@ -3277,9 +3291,16 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   funcnest--;
 #if defined (ARRAY_VARS)
+  /* These two variables cannot be unset, and cannot be affected by the
+     function. */
   array_pop (bash_source_a);
-  array_pop (funcname_a);
   array_pop (bash_lineno_a);
+
+  /* FUNCNAME can be unset, and so can potentially be changed by the
+     function. */
+  GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
+  if (nfv == funcname_v)
+    array_pop (funcname_a);
 #endif
   
   if (variable_context == 0 || this_shell_function == 0)

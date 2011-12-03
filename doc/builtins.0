@@ -841,13 +841,15 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        sseett [----aabbeeffhhkkmmnnppttuuvvxxBBCCHHPP] [--oo _o_p_t_i_o_n] [_a_r_g ...]
               Without options, the name and value of each shell  variable  are
-              displayed  in  a format that can be reused as input.  The output
-              is sorted according to the current  locale.   When  options  are
-              specified,  they  set  or unset shell attributes.  Any arguments
-              remaining after the options are processed are treated as  values
-              for the positional parameters and are assigned, in order, to $$11,
-              $$22, ......  $$_n.  Options, if specified, have  the  following  mean-
-              ings:
+              displayed in a format that can be reused as input for setting or
+              resetting the currently-set variables.  Read-only variables can-
+              not  be  reset.  In _p_o_s_i_x _m_o_d_e, only shell variables are listed.
+              The output is sorted according  to  the  current  locale.   When
+              options  are specified, they set or unset shell attributes.  Any
+              arguments remaining after the options are processed are  treated
+              as  values  for  the  positional parameters and are assigned, in
+              order, to $$11, $$22, ......  $$_n.  Options, if specified, have the fol-
+              lowing meanings:
               --aa      Automatically  mark  variables  and  functions which are
                       modified or created for export  to  the  environment  of
                       subsequent commands.
@@ -921,7 +923,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               is disabled by default.
                       ppoossiixx   Change  the  behavior  of bbaasshh where the default
                               operation differs from the POSIX 1003.2 standard
-                              to match the standard (_`_p_o_s_i_x _m_o_d_e).
+                              to match the standard (_p_o_s_i_x _m_o_d_e).
                       pprriivviilleeggeedd
                               Same as --pp.
                       vveerrbboossee Same as --vv.
@@ -1006,8 +1008,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               ior.  With no options, or with the --pp option, a list of all set-
               table options is displayed, with an indication of whether or not
               each is set.  The --pp option causes output to be displayed  in  a
-              form  that  may  be  reused  as  input.   Other options have the
-              following meanings:
+              form  that  may be reused as input.  Other options have the fol-
+              lowing meanings:
               --ss     Enable (set) each _o_p_t_n_a_m_e.
               --uu     Disable (unset) each _o_p_t_n_a_m_e.
               --qq     Suppresses normal output (quiet mode); the return  status
@@ -1310,8 +1312,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               _l_i_m_i_t  is  omitted,  the  current value of the soft limit of the
               resource is printed, unless the --HH option is given.   When  more
               than  one  resource  is  specified,  the limit name and unit are
-              printed before the value.   Other  options  are  interpreted  as
-              follows:
+              printed before the value.  Other options are interpreted as fol-
+              lows:
               --aa     All current limits are reported
               --cc     The maximum size of core files created
               --dd     The maximum size of a process's data segment

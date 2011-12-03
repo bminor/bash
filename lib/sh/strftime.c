@@ -88,10 +88,12 @@ extern void tzset(void);
 static int weeknumber(const struct tm *timeptr, int firstweekday);
 static int iso8601wknum(const struct tm *timeptr);
 
+#ifndef inline
 #ifdef __GNUC__
 #define inline	__inline__
 #else
 #define inline	/**/
+#endif
 #endif
 
 #define range(low, item, hi)	max(low, min(item, hi))

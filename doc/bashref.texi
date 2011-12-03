@@ -3912,7 +3912,10 @@ set [--abefhkmnptuvxBCHP] [-o @var{option}] [@var{argument} @dots{}]
 
 If no options or arguments are supplied, @code{set} displays the names
 and values of all shell variables and functions, sorted according to the
-current locale, in a format that may be reused as input.
+current locale, in a format that may be reused as input
+for setting or resetting the currently-set variables.
+Read-only variables cannot be reset.
+In @sc{posix} mode, only shell variables are listed.
 
 When options are supplied, they set or unset shell attributes.
 Options, if specified, have the following meanings:
