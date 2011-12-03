@@ -6645,7 +6645,7 @@ A synonym for @code{--with-bash-malloc}.
 @item --with-installed-readline[=@var{PREFIX}]
 Define this to make Bash link with a locally-installed version of Readline
 rather than the version in @file{lib/readline}.  This works only with
-Readline 4.3 and later versions.  If @var{PREFIX} is @code{yes} or not
+Readline 5.0 and later versions.  If @var{PREFIX} is @code{yes} or not
 supplied, @code{configure} uses the values of the make variables
 @code{includedir} and @code{libdir}, which are subdirectories of @code{prefix}
 by default, to find the installed version of Readline if it is not in
@@ -6733,6 +6733,9 @@ Include support for matching POSIX regular expressions using the
 @samp{=~} binary operator in the @code{[[} conditional command.
 (@pxref{Conditional Constructs}).
 
+@item --enable-debugger
+Include support for the bash debugger (distributed separately).
+
 @item --enable-directory-stack
 Include support for a @code{csh}-like directory stack and the
 @code{pushd}, @code{popd}, and @code{dirs} builtins
@@ -6778,16 +6781,16 @@ when used in redirections (@pxref{Redirections}).
 This enables process substitution (@pxref{Process Substitution}) if
 the operating system provides the necessary support.
 
+@item --enable-progcomp
+Enable the programmable completion facilities
+(@pxref{Programmable Completion}).
+If Readline is not enabled, this option has no effect.
+
 @item --enable-prompt-string-decoding
 Turn on the interpretation of a number of backslash-escaped characters
 in the @env{$PS1}, @env{$PS2}, @env{$PS3}, and @env{$PS4} prompt
 strings.  See @ref{Printing a Prompt}, for a complete list of prompt
 string escape sequences.
-
-@item --enable-progcomp
-Enable the programmable completion facilities
-(@pxref{Programmable Completion}).
-If Readline is not enabled, this option has no effect.
 
 @item --enable-readline
 Include support for command-line editing and history with the Bash
@@ -6802,6 +6805,16 @@ when called as @code{rbash}, enters a restricted mode.  See
 Include the @code{select} builtin, which allows the generation of simple
 menus (@pxref{Conditional Constructs}).
 
+@item --enable-separate-helpfiles
+Use external files for the documentation displayed by the @code{help} builtin
+instead of storing the text internally.
+
+@item --enable-single-help-strings
+Store the text displayed by the @code{help} builtin as a single string for
+each help topic.  This aids in translating the text to different languages.
+You may need to disable this if your compiler cannot handle very long string
+literals.
+
 @item --enable-usg-echo-default
 A synonym for @code{--enable-xpg-echo-default}.
 
@@ -6810,7 +6823,7 @@ Make the @code{echo} builtin expand backslash-escaped characters by default,
 without requiring the @option{-e} option.
 This sets the default value of the @code{xpg_echo} shell option to @code{on},
 which makes the Bash @code{echo} behave more like the version specified in
-the Single Unix Specification, version 2.
+the Single Unix Specification, version 3.
 @xref{Bash Builtins}, for a description of the escape sequences that
 @code{echo} recognizes.
 

@@ -1345,8 +1345,13 @@ yy_stream_get ()
 
   result = EOF;
   if (bash_input.location.file)
-    result = getc_with_restart (bash_input.location.file);
-
+    {
+      if (interactive)
+	interrupt_immediately++;
+      result = getc_with_restart (bash_input.location.file);
+      if (interactive)
+	interrupt_immediately--;
+    }
   return (result);
 }
 
@@ -1659,10 +1664,10 @@ read_a_line (remove_quoted_newline)
   pass_next = 0;
   while (1)
     {
-      c = yy_getc ();
-
       /* Allow immediate exit if interrupted during input. */
       QUIT;
+
+      c = yy_getc ();
 
       /* Ignore null bytes in input. */
       if (c == 0)

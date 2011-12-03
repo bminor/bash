@@ -1947,6 +1947,10 @@ wait_for (pid)
   last_command_exit_signal = (job != NO_JOB) ? job_exit_signal (job)
 					     : process_exit_signal (child->status);
 
+  /* XXX */
+  if ((job != NO_JOB && JOBSTATE (job) == JSTOPPED) || WIFSTOPPED (child->status))
+    termination_state = 128 + WSTOPSIG (child->status);
+
   if (job == NO_JOB || IS_JOBCONTROL (job))
     {
       /* XXX - under what circumstances is a job not present in the jobs
@@ -2663,7 +2667,7 @@ set_job_status_and_cleanup (job)
    * for a foreground job to complete
    */
 
-  if (jobs[job]->state == JDEAD)
+  if (JOBSTATE (job) == JDEAD)
     {
       /* If we're running a shell script and we get a SIGINT with a
 	 SIGINT trap handler, but the foreground job handles it and

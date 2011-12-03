@@ -50,7 +50,7 @@ extern int errno;
    if a signal is received. */
 
 static char localbuf[128];
-static int local_index, local_bufused;
+static int local_index = 0, local_bufused = 0;
 
 /* Posix and USG systems do not guarantee to restart read () if it is
    interrupted by a signal.  We do the read ourselves, and restart it

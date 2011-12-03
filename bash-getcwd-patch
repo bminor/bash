@@ -1,0 +1,287 @@
+*** ../bash-2.05b-patched/builtins/common.c	Fri Jun 28 12:24:31 2002
+--- builtins/common.c	Thu Sep 30 22:25:20 2004
+***************
+*** 455,464 ****
+  {
+    char *directory;
+  
+    if (no_symbolic_links)
+      {
+!       if (the_current_working_directory)
+! 	free (the_current_working_directory);
+! 
+        the_current_working_directory = (char *)NULL;
+      }
+--- 469,477 ----
+  {
+    char *directory;
++   size_t dsize;
+  
+    if (no_symbolic_links)
+      {
+!       FREE (the_current_working_directory);
+        the_current_working_directory = (char *)NULL;
+      }
+***************
+*** 466,480 ****
+    if (the_current_working_directory == 0)
+      {
+!       the_current_working_directory = (char *)xmalloc (PATH_MAX);
+!       the_current_working_directory[0] = '\0';
+!       directory = getcwd (the_current_working_directory, PATH_MAX);
+!       if (directory == 0)
+  	{
+! 	  fprintf (stderr, "%s: could not get current directory: %s: %s\n",
+  		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+! 		   bash_getcwd_errstr, strerror (errno));
+! 
+! 	  free (the_current_working_directory);
+! 	  the_current_working_directory = (char *)NULL;
+  	  return (char *)NULL;
+  	}
+--- 479,488 ----
+    if (the_current_working_directory == 0)
+      {
+!       the_current_working_directory = getcwd (0, 0);
+!       if (the_current_working_directory == 0)
+  	{
+! 	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
+  		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+! 		   _(bash_getcwd_errstr), strerror (errno));
+  	  return (char *)NULL;
+  	}
+*** ../bash-2.05b-patched/builtins/cd.def	Mon Jul 15 14:51:39 2002
+--- builtins/cd.def	Sun Nov  7 15:13:42 2004
+***************
+*** 122,126 ****
+     the_current_working_directory () */
+  static char *
+! resetpwd ()
+  {
+    char *tdir;
+--- 124,129 ----
+     the_current_working_directory () */
+  static char *
+! resetpwd (caller)
+!      char *caller;
+  {
+    char *tdir;
+***************
+*** 128,132 ****
+    FREE (the_current_working_directory);
+    the_current_working_directory = (char *)NULL;
+!   tdir = get_working_directory ("cd");
+    return (tdir);
+  }
+--- 131,135 ----
+    FREE (the_current_working_directory);
+    the_current_working_directory = (char *)NULL;
+!   tdir = get_working_directory (caller);
+    return (tdir);
+  }
+***************
+*** 333,336 ****
+--- 340,349 ----
+    directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
+  		   : get_working_directory ("pwd");
++ 
++   /* Try again using getcwd() if canonicalization fails (for instance, if
++      the file system has changed state underneath bash). */
++   if (tcwd && directory == 0)
++     directory = resetpwd ("pwd");
++ 
+  #undef tcwd
+  
+***************
+*** 364,368 ****
+  {
+    char *t, *tdir;
+!   int err, canon_failed;
+  
+    tdir = (char *)NULL;
+--- 379,383 ----
+  {
+    char *t, *tdir;
+!   int err, canon_failed, r;
+  
+    tdir = (char *)NULL;
+***************
+*** 399,403 ****
+    if (posixly_correct && nolinks == 0 && canon_failed)
+      {
+!       errno = ENOENT;
+        return (0);
+      }
+--- 414,423 ----
+    if (posixly_correct && nolinks == 0 && canon_failed)
+      {
+! #if defined ENAMETOOLONG
+!       if (errno != ENOENT && errno != ENAMETOOLONG)
+! #else
+!       if (errno != ENOENT)
+! #endif
+! 	errno = ENOTDIR;
+        return (0);
+      }
+***************
+*** 409,418 ****
+  	 shell's idea of the_current_working_directory. */
+        if (canon_failed)
+- 	resetpwd ();
+-       else
+  	{
+! 	  FREE (the_current_working_directory);
+! 	  the_current_working_directory = tdir;
+  	}
+  
+        return (1);
+--- 429,439 ----
+  	 shell's idea of the_current_working_directory. */
+        if (canon_failed)
+  	{
+! 	  t = resetpwd ("cd");
+! 	  if (t == 0)
+! 	    set_working_directory (tdir);
+  	}
++       else
++ 	set_working_directory (tdir);
+  
+        return (1);
+***************
+*** 425,429 ****
+  
+    err = errno;
+-   free (tdir);
+  
+    /* We're not in physical mode (nolinks == 0), but we failed to change to
+--- 446,449 ----
+***************
+*** 432,445 ****
+    if (chdir (newdir) == 0)
+      {
+!       tdir = resetpwd ();
+!       FREE (tdir);
+  
+!       return (1);
+      }
+    else
+      {
+        errno = err;
+!       return (0);
+      }
+  }
+  
+--- 452,471 ----
+    if (chdir (newdir) == 0)
+      {
+!       t = resetpwd ("cd");
+!       if (t == 0)
+! 	set_working_directory (tdir);
+!       else
+! 	free (t);
+  
+!       r = 1;
+      }
+    else
+      {
+        errno = err;
+!       r = 0;
+      }
++ 
++   free (tdir);
++   return r;
+  }
+
+
+
+*** ../bash-2.05b-patched/aclocal.m4	Tue Jun 25 09:45:43 2002
+--- aclocal.m4	Sat Oct  9 15:03:28 2004
+***************
+*** 686,691 ****
+  
+  AC_DEFUN(BASH_FUNC_GETCWD,
+! [AC_MSG_CHECKING([if getcwd() calls popen()])
+! AC_CACHE_VAL(bash_cv_getcwd_calls_popen,
+  [AC_TRY_RUN([
+  #include <stdio.h>
+--- 686,691 ----
+  
+  AC_DEFUN(BASH_FUNC_GETCWD,
+! [AC_MSG_CHECKING([if getcwd() will dynamically allocate memory])
+! AC_CACHE_VAL(bash_cv_getcwd_malloc,
+  [AC_TRY_RUN([
+  #include <stdio.h>
+***************
+*** 694,748 ****
+  #endif
+  
+- #ifndef __STDC__
+- #ifndef const
+- #define const
+- #endif
+- #endif
+- 
+- int popen_called;
+- 
+- FILE *
+- popen(command, type)
+-      const char *command;
+-      const char *type;
+- {
+- 	popen_called = 1;
+- 	return (FILE *)NULL;
+- }
+- 
+- FILE *_popen(command, type)
+-      const char *command;
+-      const char *type;
+- {
+-   return (popen (command, type));
+- }
+- 
+- int
+- pclose(stream)
+- FILE *stream;
+- {
+- 	return 0;
+- }
+- 
+- int
+- _pclose(stream)
+- FILE *stream;
+- {
+- 	return 0;
+- }
+- 
+  main()
+  {
+! 	char	lbuf[32];
+! 	popen_called = 0;
+! 	getcwd(lbuf, 32);
+! 	exit (popen_called);
+  }
+! ], bash_cv_getcwd_calls_popen=no, bash_cv_getcwd_calls_popen=yes,
+!    [AC_MSG_WARN(cannot check whether getcwd calls popen if cross compiling -- defaulting to no)
+!     bash_cv_getcwd_calls_popen=no]
+  )])
+! AC_MSG_RESULT($bash_cv_getcwd_calls_popen)
+! if test $bash_cv_getcwd_calls_popen = yes; then
+  AC_DEFINE(GETCWD_BROKEN)
+  AC_LIBOBJ(getcwd)
+--- 694,709 ----
+  #endif
+  
+  main()
+  {
+! 	char	*xpwd;
+! 	xpwd = getcwd(0, 0);
+! 	exit (xpwd == 0);
+  }
+! ], bash_cv_getcwd_malloc=yes, bash_cv_getcwd_malloc=no,
+!    [AC_MSG_WARN(cannot check whether getcwd allocates memory when cross-compiling -- defaulting to no)
+!     bash_cv_getcwd_malloc=no]
+  )])
+! AC_MSG_RESULT($bash_cv_getcwd_malloc)
+! if test $bash_cv_getcwd_malloc = no; then
+  AC_DEFINE(GETCWD_BROKEN)
+  AC_LIBOBJ(getcwd)

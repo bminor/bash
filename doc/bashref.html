@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on December, 7  2004 by texi2html 1.64 -->
+<!-- Created on December, 30  2004 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.1-devel, 1 December 2004)..
+the Bash shell (version 3.1-devel, 30 December 2004)..
 </P><P>
 
-This is Edition 3.1-devel, last updated 1 December 2004,
+This is Edition 3.1-devel, last updated 30 December 2004,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 3.1-devel.
 </P><P>
@@ -646,7 +646,8 @@ parameter expansion.
 Each of the shell metacharacters (see section <A HREF="bashref.html#SEC4">2. Definitions</A>)
 has special meaning to the shell and must be quoted if it is to
 represent itself.
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(see section <A HREF="bashref.html#SEC118">9.3 History Expansion</A>), the
 <VAR>history expansion</VAR> character, usually <SAMP>`!'</SAMP>, must be quoted
 to prevent history expansion.  See section <A HREF="bashref.html#SEC116">9.1 Bash History Facilities</A>, for
 more details concerning history expansion.
@@ -723,7 +724,8 @@ between single quotes, even when preceded by a backslash.
 
 Enclosing characters in double quotes (<SAMP>`"'</SAMP>) preserves the literal value
 of all characters within the quotes, with the exception of
-<SAMP>`$'</SAMP>, <SAMP>``'</SAMP>, and <SAMP>`\'</SAMP>.
+<SAMP>`$'</SAMP>, <SAMP>``'</SAMP>, <SAMP>`\'</SAMP>,
+and, when history expansion is enabled, <SAMP>`!'</SAMP>.
 The characters <SAMP>`$'</SAMP> and <SAMP>``'</SAMP>
 retain their special meaning within double quotes (see section <A HREF="bashref.html#SEC27">3.5 Shell Expansions</A>).
 The backslash retains its special meaning only when followed by one of
@@ -734,8 +736,9 @@ characters are removed.  Backslashes preceding characters without a
 special meaning are left unmodified.
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an <SAMP>`!'</SAMP>
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the <SAMP>`!'</SAMP> is not removed.
 </P><P>
 
 The special parameters <SAMP>`*'</SAMP> and <SAMP>`@'</SAMP> have special meaning
@@ -12001,7 +12004,7 @@ database.
 <DT><CODE>--with-installed-readline[=<VAR>PREFIX</VAR>]</CODE>
 <DD>Define this to make Bash link with a locally-installed version of Readline
 rather than the version in <TT>`lib/readline'</TT>.  This works only with
-Readline 4.3 and later versions.  If <VAR>PREFIX</VAR> is <CODE>yes</CODE> or not
+Readline 5.0 and later versions.  If <VAR>PREFIX</VAR> is <CODE>yes</CODE> or not
 supplied, <CODE>configure</CODE> uses the values of the make variables
 <CODE>includedir</CODE> and <CODE>libdir</CODE>, which are subdirectories of <CODE>prefix</CODE>
 by default, to find the installed version of Readline if it is not in
@@ -12105,6 +12108,10 @@ This allows pipelines as well as shell builtins and functions to be timed.
 (see section <A HREF="bashref.html#SEC21">3.2.4.2 Conditional Constructs</A>).
 <P>
 
+<DT><CODE>--enable-debugger</CODE>
+<DD>Include support for the bash debugger (distributed separately).
+<P>
+
 <DT><CODE>--enable-directory-stack</CODE>
 <DD>Include support for a <CODE>csh</CODE>-like directory stack and the
 <CODE>pushd</CODE>, <CODE>popd</CODE>, and <CODE>dirs</CODE> builtins
@@ -12160,17 +12167,17 @@ when used in redirections (see section <A HREF="bashref.html#SEC38">3.6 Redirect
 the operating system provides the necessary support.
 <P>
 
+<DT><CODE>--enable-progcomp</CODE>
+<DD>Enable the programmable completion facilities
+(see section <A HREF="bashref.html#SEC113">8.6 Programmable Completion</A>).
+If Readline is not enabled, this option has no effect.
+<P>
+
 <DT><CODE>--enable-prompt-string-decoding</CODE>
 <DD>Turn on the interpretation of a number of backslash-escaped characters
 in the <CODE>$PS1</CODE>, <CODE>$PS2</CODE>, <CODE>$PS3</CODE>, and <CODE>$PS4</CODE> prompt
 strings.  See <A HREF="bashref.html#SEC84">6.9 Controlling the Prompt</A>, for a complete list of prompt
 string escape sequences.
-<P>
-
-<DT><CODE>--enable-progcomp</CODE>
-<DD>Enable the programmable completion facilities
-(see section <A HREF="bashref.html#SEC113">8.6 Programmable Completion</A>).
-If Readline is not enabled, this option has no effect.
 <P>
 
 <DT><CODE>--enable-readline</CODE>
@@ -12189,6 +12196,18 @@ when called as <CODE>rbash</CODE>, enters a restricted mode.  See
 menus (see section <A HREF="bashref.html#SEC21">3.2.4.2 Conditional Constructs</A>).
 <P>
 
+<DT><CODE>--enable-separate-helpfiles</CODE>
+<DD>Use external files for the documentation displayed by the <CODE>help</CODE> builtin
+instead of storing the text internally.
+<P>
+
+<DT><CODE>--enable-single-help-strings</CODE>
+<DD>Store the text displayed by the <CODE>help</CODE> builtin as a single string for
+each help topic.  This aids in translating the text to different languages.
+You may need to disable this if your compiler cannot handle very long string
+literals.
+<P>
+
 <DT><CODE>--enable-usg-echo-default</CODE>
 <DD>A synonym for <CODE>--enable-xpg-echo-default</CODE>.
 <P>
@@ -12198,7 +12217,7 @@ menus (see section <A HREF="bashref.html#SEC21">3.2.4.2 Conditional Constructs</
 without requiring the <SAMP>`-e'</SAMP> option.
 This sets the default value of the <CODE>xpg_echo</CODE> shell option to <CODE>on</CODE>,
 which makes the Bash <CODE>echo</CODE> behave more like the version specified in
-the Single Unix Specification, version 2.
+the Single Unix Specification, version 3.
 See section <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>, for a description of the escape sequences that
 <CODE>echo</CODE> recognizes.
 <P>
@@ -15105,7 +15124,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>December, 7  2004</I>
+This document was generated by <I>Chet Ramey</I> on <I>December, 30  2004</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15267,7 +15286,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>December, 7  2004</I>
+by <I>Chet Ramey</I> on <I>December, 30  2004</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

@@ -96,10 +96,11 @@ extern int shell_level;
 extern int subshell_environment;
 extern int last_command_exit_value;
 extern int line_number;
-extern char *primary_prompt, *secondary_prompt;
 extern int expand_aliases;
-extern char *this_command_name;
 extern int array_needs_making;
+extern int gnu_error_format;
+extern char *primary_prompt, *secondary_prompt;
+extern char *this_command_name;
 
 /* Non-zero means that this shell has already been run; i.e. you should
    call shell_reinitialize () if you need to start afresh. */
@@ -539,6 +540,8 @@ main (argc, argv, env)
 #else
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
 #endif
+      if (running_under_emacs)
+	gnu_error_format = 1;
     }
 
   top_level_arg_index = arg_index;
@@ -1478,17 +1481,12 @@ set_bash_input ()
   /* with_input_from_stdin really means `with_input_from_readline' */
   if (interactive && no_line_editing == 0)
     with_input_from_stdin ();
-  else
 #if defined (BUFFERED_INPUT)
-    {
-      if (interactive == 0)
-	with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
-      else
-	with_input_from_stream (default_input, dollar_vars[0]);
-    }
-#else /* !BUFFERED_INPUT */
+  else if (interactive == 0)
+    with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+#endif /* BUFFERED_INPUT */
+  else
     with_input_from_stream (default_input, dollar_vars[0]);
-#endif /* !BUFFERED_INPUT */
 }
 
 /* Close the current shell script input source and forget about it.  This is

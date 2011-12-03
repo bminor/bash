@@ -10714,3 +10714,49 @@ subst.c
 	  string over and over again when doing word splitting (that kills if
 	  it's a long string)
 
+				   12/18
+				   -----
+subst.c
+	- in string_list_dollar_star, make sure to null-terminate the
+	  separator if the character is longer than one byte
+
+				   12/22
+				   -----
+doc/{bash.1,bashref.texi}
+	- changed text in quoting section explaining that double quotes do
+	  not prevent history expansion from taking place, and that backslashes
+	  escaping ! are not removed
+
+				   12/28
+				   -----
+shell.c
+	- set gnu_error_format to 1 if running under emacs.  This should allow
+	  the emacs `next-error' stuff to work, at least for interactive shells
+
+parse.y
+	- change yy_stream_get to set interrupt_immediately before calling
+	  getc_with_restart when the shell is interactive.  This avoids the
+	  synchronization problem caused by the call to QUIT in read_a_line,
+	  which results in the first character after a SIGINT/^C to be
+	  dropped
+
+				   12/30
+				   -----
+builtins/mkbuiltins.c
+	- changes to write long documentation to arrays as a single string by
+	  default, rather than an array of strings -- enabled by default
+	- new option, -S, to restore old behavior of writing multiple strings
+	  for long documentation
+	- changes to avoid filenames written when the separate-filenames option
+	  (-H) has been supplied being run through gettext
+
+configure.in
+	- new cofiguration option, --enable-single-help-strings (on by default),
+	  causes help text to be stored as a single string (or smaller set than
+	  one string per line)
+
+builtins/Makefile.in
+	- pass `-S' to mkbuiltins if single-help-strings is turned off
+
+doc/bashref.texi
+	- documented new `single-help-strings' configure option

@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Dec 1<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Dec 22<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -1154,7 +1154,12 @@ has special meaning to the shell and must be quoted if it is to
 represent itself.
 <P>
 
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(see
+<FONT SIZE=-1><B>HISTORY EXPANSION</B>
+
+</FONT>
+below), the
 <I>history expansion</I> character, usually <B>!</B>, must be quoted
 to prevent history expansion.
 <P>
@@ -1186,8 +1191,10 @@ of all characters within the quotes, with the exception of
 
 <B>`</B>,
 
-and
-<B>\</B>.
+<B>\</B>,
+
+and, when history expansion is enabled,
+<B>!</B>.
 
 The characters
 <B>$</B>
@@ -1210,8 +1217,14 @@ or
 
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an
+<B>!</B>
+
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the
+<B>!</B>
+
+is not removed.
 <P>
 
 The special parameters
@@ -11415,6 +11428,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 07 December 2004 10:58:07 EST
+Time: 30 December 2004 17:01:32 EST
 </BODY>
 </HTML>

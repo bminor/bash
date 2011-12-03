@@ -96,6 +96,7 @@ GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 MKBUILTINS = mkbuiltins$(EXEEXT)
 DIRECTDEFINE = -D $(srcdir)
 HELPDIRDEFINE = @HELPDIRDEFINE@
+HELPSTRINGS = @HELPSTRINGS@
 
 # xxx this is bad style
 RL_LIBSRC = $(topdir)/lib/readline
@@ -160,7 +161,7 @@ builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
 	@-if test -f builtext.h; then mv -f builtext.h old-builtext.h; fi
 	./$(MKBUILTINS) -externfile builtext.h -structfile builtins.c \
-	    -noproduction $(DIRECTDEFINE) $(HELPDIRDEFINE) $(DEFSRC)
+	    -noproduction $(DIRECTDEFINE) $(HELPDIRDEFINE) $(HELPSTRINGS) $(DEFSRC)
 	@-if cmp -s old-builtext.h builtext.h 2>/dev/null; then \
 		mv old-builtext.h builtext.h; \
 	 else \
