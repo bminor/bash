@@ -4990,14 +4990,22 @@ mbstrlen (s)
      const char *s;
 {
   size_t clen, nc;
-  mbstate_t mbs;
+  mbstate_t mbs, mbsbak;
 
   nc = 0;
   memset (&mbs, 0, sizeof (mbs));
-  while ((clen = mbrlen(s, MB_CUR_MAX, &mbs)) != 0 && (MB_INVALIDCH(clen) == 0))
+  mbsbak = mbs;
+  while ((clen = mbrlen(s, MB_CUR_MAX, &mbs)) != 0)
     {
+      if (MB_INVALIDCH(clen))
+        {
+	  clen = 1;	/* assume single byte */
+	  mbs = mbsbak;
+        }
+
       s += clen;
       nc++;
+      mbsbak = mbs;
     }
   return nc;
 }

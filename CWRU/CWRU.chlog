@@ -11208,3 +11208,75 @@ parse.y
 builtins/printf.def
 	- changed -v var behavior so it stores partial output into the named
 	  variable upon an error
+
+				   3/24
+				   ----
+lib/readline/bind.c
+	- bool_to_int now takes a `const char *' argument
+
+support/{printenv,recho,zecho}.c
+	- include config.h
+	- include "bashansi.h" for appropriate extern function declarations
+
+configure.in
+	- on MacOS X 10.4, compensate for loader not allowing static library
+	  to override existing system dynamic library when compiling -dynamic
+	  (affects readline and history libraries); so use absolute pathname
+	  instead of -lreadline as library name
+
+lib/glob/{glob,sm_loop,smatch}.c
+	- make sure to cast arguments to (char *)  or (unsigned char *) as
+	  appropriate to avoid gcc4 warnings
+
+lib/glob/smatch.c
+	- collsym (single-byte version) now takes a (CHAR *) first argument to
+	  match callers; cast argument to strncmp appropriately
+
+lib/sh/snprintf.c
+	- fix ldfallback and dfallback to handle width and precision specs in
+	  the format passed to sprintf()
+	- fix STAR_ARGS macro to deal with negative field widths and precisions
+
+				   3/25
+				   ----
+builtins/printf.def
+	- since a negative precision in a "x.x[fFgGeE]" format specifier should
+	  be allowed but treated as if the precision were missing, let it
+	  through
+
+lib/sh/snprintf.c
+	- fix * code to deal with a negative precision by treating it as if
+	  the `.' and any digit string in the precision had not been specified
+	- fix format parsing code to deal with a negative inline precision,
+	  e.g., "%4.-4f" by treating it as if the `'. and any digit string in
+	  the precision had not been specified
+	- a `+' in a format specifier should only act as a flag if it comes
+	  before a `.' (otherwise it is ignored)
+
+lib/readline/vi_mode.c
+	- new function, rl_vi_rubout, to rl_rubout as rl_vi_delete is to
+	  rl_delete; saves deleted text for possible reinsertion as with any
+	  vi-mode `text modification' command (fixes problem with `X' reported
+	  by beat.wieland@gmx.ch)
+
+lib/readline/vi_keymap.c
+	- bind `X' in vi command mode to rl_vi_rubout
+
+lib/readline/funmap.c
+	- add a bindable `vi-rubout' command, runs rl_vi_rubout
+
+lib/readline/text.c
+	- rewrote internals of _rl_rubout_char to make structure cleaner
+
+lib/readline/{complete,text}.c
+	- changed code to remove #ifdef HANDLE_MULTIBYTE where possible
+
+				   3/28
+				   ----
+lib/readline/examples/rl.c
+	- include <sys/stat.h> instead of posixstat.h if READLINE_LIBRARY not
+	  defined
+
+subst.c
+	- fix mbstrlen to treat invalid multibyte sequences as sequences of
+	  single-byte characters

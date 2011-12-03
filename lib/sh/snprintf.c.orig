@@ -387,10 +387,7 @@ static void xfree __P((void *));
 	      { \
 		(p)->precision = GETARG (int); \
 		if ((p)->precision < 0) \
-		  { \
-		    (p)->flags &= ~PF_STAR_P; \
-		    (p)->precision = NOT_FOUND; \
-		  } \
+		  (p)->flags &= ~PF_STAR_P; \
 	      } \
 	} while (0)
 
@@ -953,8 +950,8 @@ floating(p, d)
   PUT_SPACE(d, p, 0.);
 
   while (*tmp)
-    {
-      PUT_CHAR(*tmp, p);	/* the integral */
+    { /* the integral */
+      PUT_CHAR(*tmp, p);
       tmp++;
     }
   FREE (t);
@@ -1167,7 +1164,6 @@ vsnprintf_internal(data, string, length, format, args)
   wint_t wc;
 #endif
   const char *convstart;
-  int negprec;
 
   /* Sanity check, the string length must be >= 0.  C99 actually says that
      LENGTH can be zero here, in the case of snprintf/vsnprintf (it's never
@@ -1183,7 +1179,6 @@ vsnprintf_internal(data, string, length, format, args)
   decpoint = thoussep = 0;
   grouping = 0;
 
-  negprec = 0;
   for (; c = *(data->pf); data->pf++)
     {
       if (c != '%')
@@ -1240,24 +1235,16 @@ vsnprintf_internal(data, string, length, format, args)
 		  data->flags |= PF_STAR_W;
 		continue;
 	      case '-':
-		if ((data->flags & PF_DOT) == 0)
-		  {
-		    data->flags |= PF_LADJUST;
-		    data->justify = LEFT;
-		  }
-		else
-		  negprec = 1;
+		data->flags |= PF_LADJUST;
+		data->justify = LEFT;
 		continue;
 	      case ' ':
 		if ((data->flags & PF_PLUS) == 0)
 		  data->flags |= PF_SPACE;
 		continue;
 	      case '+':
-		if ((data->flags & PF_DOT) == 0)
-		  {
-		    data->flags |= PF_PLUS;
-		    data->justify = RIGHT;
-		  }
+		data->flags |= PF_PLUS;
+		data->justify = RIGHT;
 		continue;
 	      case '\'':
 		data->flags |= PF_THOUSANDS;
@@ -1277,7 +1264,7 @@ vsnprintf_internal(data, string, length, format, args)
 		if (n < 0)
 		  n = 0;
 		if (data->flags & PF_DOT)
-		  data->precision = negprec ? NOT_FOUND : n;
+		  data->precision = n;
 		else
 		  data->width = n;
 		continue;

@@ -6,7 +6,7 @@
    chet@po.cwru.edu
 */
 
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,11 @@
    You should have received a copy of the GNU General Public License along
    with Bash; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+#if defined (HAVE_CONFIG_H)
+#  include  <config.h>
+#endif
 
+#include "bashansi.h"
 #include <stdio.h>
 
 void strprint();

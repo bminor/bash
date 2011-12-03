@@ -1253,11 +1253,8 @@ vsnprintf_internal(data, string, length, format, args)
 		  data->flags |= PF_SPACE;
 		continue;
 	      case '+':
-		if ((data->flags & PF_DOT) == 0)
-		  {
-		    data->flags |= PF_PLUS;
-		    data->justify = RIGHT;
-		  }
+		data->flags |= PF_PLUS;
+		data->justify = RIGHT;
 		continue;
 	      case '\'':
 		data->flags |= PF_THOUSANDS;

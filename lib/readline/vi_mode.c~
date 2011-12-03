@@ -722,7 +722,7 @@ _rl_vi_change_mbchar_case (count)
 	  rl_begin_undo_group ();
 	  rl_vi_delete (1, 0);
 	  if (rl_point < p)	/* Did we retreat at EOL? */
-	    rl_point++;
+	    rl_point++;	/* XXX - should we advance more than 1 for mbchar? */
 	  rl_insert_text (mb);
 	  rl_end_undo_group ();
 	  rl_vi_check ();
@@ -1074,10 +1074,44 @@ rl_vi_yank_to (count, key)
 }
 
 int
+rl_vi_rubout (count, key)
+     int count, key;
+{
+  int p, opoint;
+
+  if (count < 0)
+    return (rl_vi_delete (-count, key));
+
+  if (rl_point == 0)
+    {
+      rl_ding ();
+      return -1;
+    }
+
+  opoint = rl_point;
+  if (count > 1 && MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    rl_backward_char (count, key);
+  else if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
+  else
+    rl_point -= count;
+
+  if (rl_point < 0)
+    rl_point = 0;
+
+  rl_kill_text (rl_point, opoint);
+  
+  return (0);
+}
+
+int
 rl_vi_delete (count, key)
      int count, key;
 {
   int end;
+
+  if (count < 0)
+    return (rl_vi_rubout (-count, key));
 
   if (rl_end == 0)
     {
@@ -1097,6 +1131,7 @@ rl_vi_delete (count, key)
   
   if (rl_point > 0 && rl_point == rl_end)
     rl_backward_char (1, key);
+
   return (0);
 }
 

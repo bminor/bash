@@ -1476,7 +1476,7 @@ find_string_var (name)
    values result in 0 (false). */
 static int
 bool_to_int (value)
-     char *value;
+     const char *value;
 {
   return (value == 0 || *value == '\0' ||
 		(_rl_stricmp (value, "on") == 0) ||

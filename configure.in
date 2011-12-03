@@ -484,7 +484,13 @@ fi
 
 if test $opt_readline = yes; then
 	AC_DEFINE(READLINE)
-	READLINE_LIB=-lreadline
+	# section for OS versions that ship readline as a standard dynamic
+	# library and don't allow a static version specified as -llibname
+	# to override the dynamic version
+	case "${host_os}" in
+	darwin8*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
+	*)		READLINE_LIB=-lreadline ;;
+	esac
 	if test "$opt_with_installed_readline" != "no" ; then
 		case "$opt_with_installed_readline" in
 		yes)	RL_INCLUDE= ;;
@@ -510,7 +516,13 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 	if test $opt_bang_history = yes; then
 		AC_DEFINE(BANG_HISTORY)
 	fi
-	HISTORY_LIB=-lhistory
+	# section for OS versions that ship history as a standard dynamic
+	# library and don't allow a static version specified as -llibname
+	# to override the dynamic version
+	case "${host_os}" in
+	darwin8*)	HISTORY_LIB='${HISTORY_LIBRARY}' ;;
+	*)		HISTORY_LIB=-lhistory ;;
+	esac
  	if test "$opt_with_installed_readline" != "no"; then
 		HIST_LIBDIR=$RL_LIBDIR
 		HISTORY_DEP=

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -358,7 +358,7 @@ BRACKMATCH (p, test, flags)
 		{
 		  bcopy (p + 1, ccname, (close - p - 1) * sizeof (CHAR));
 		  *(ccname + (close - p - 1)) = L('\0');
-		  pc = IS_CCLASS (test, ccname);
+		  pc = IS_CCLASS (test, (XCHAR *)ccname);
 		}
 	      if (pc == -1)
 		pc = 0;

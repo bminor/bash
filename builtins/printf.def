@@ -298,8 +298,20 @@ printf_builtin (list)
 		  precision = getint ();
 		}
 	      else
-		while (DIGIT (*fmt))
-		  fmt++;
+		{
+		  /* Negative precisions are allowed but treated as if the
+		     precision were missing; I would like to allow a leading
+		     `+' in the precision number as an extension, but lots
+		     of asprintf/fprintf implementations get this wrong. */
+#if 0
+		  if (*fmt == '-' || *fmt == '+')
+#else
+		  if (*fmt == '-')
+#endif
+		    fmt++;
+		  while (DIGIT (*fmt))
+		    fmt++;
+		}
 	    }
 
 	  /* skip possible format modifiers */

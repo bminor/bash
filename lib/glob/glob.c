@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2002 Free Software Foundation, Inc.
+   Copyright (C) 1985-2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -133,13 +133,13 @@ glob_pattern_p (pattern)
   int r;
 
   if (MB_CUR_MAX == 1)
-    return (internal_glob_pattern_p (pattern));
+    return (internal_glob_pattern_p ((unsigned char *)pattern));
 
   /* Convert strings to wide chars, and call the multibyte version. */
   n = xdupmbstowcs (&wpattern, NULL, pattern);
   if (n == (size_t)-1)
     /* Oops.  Invalid multibyte sequence.  Try it as single-byte sequence. */
-    return (internal_glob_pattern_p (pattern));
+    return (internal_glob_pattern_p ((unsigned char *)pattern));
 
   r = internal_glob_wpattern_p (wpattern);
   free (wpattern);

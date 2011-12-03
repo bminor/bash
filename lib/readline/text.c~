@@ -999,49 +999,28 @@ _rl_rubout_char (count, key)
       return -1;
     }
 
+  orig_point = rl_point;
   if (count > 1 || rl_explicit_arg)
     {
-      orig_point = rl_point;
-#if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-	rl_backward_char (count, key);
-      else
-#endif
-        rl_backward_byte (count, key);
+      rl_backward_char (count, key);
       rl_kill_text (orig_point, rl_point);
     }
-  else
+  else if (MB_CUR_MAX == 1 || rl_byte_oriented)
     {
-#if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX == 1 || rl_byte_oriented)
-	{
-#endif
-	  c = rl_line_buffer[--rl_point];
-	  rl_delete_text (rl_point, rl_point + 1);
-#if defined (HANDLE_MULTIBYTE)
-	}
-      else
-	{
-	  int orig_point;
-
-	  orig_point = rl_point;
-	  rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-	  c = rl_line_buffer[rl_point];
-	  rl_delete_text (rl_point, orig_point);
-	}
-#endif /* HANDLE_MULTIBYTE */
-
-      /* I don't think that the hack for end of line is needed for
-	 multibyte chars. */
-#if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX == 1 || rl_byte_oriented)
-#endif
+      c = rl_line_buffer[--rl_point];
+      rl_delete_text (rl_point, orig_point);
+      /* The erase-at-end-of-line hack is of questionable merit now. */
       if (rl_point == rl_end && ISPRINT (c) && _rl_last_c_pos)
 	{
 	  int l;
 	  l = rl_character_len (c, rl_point);
 	  _rl_erase_at_end_of_line (l);
 	}
+    }
+  else
+    {
+      rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
+      rl_delete_text (rl_point, orig_point);
     }
 
   return 0;
@@ -1124,6 +1103,10 @@ rl_delete_horizontal_space (count, ignore)
       rl_delete_text (start, rl_point);
       rl_point = start;
     }
+
+  if (rl_point < 0)
+    rl_point = 0;
+
   return 0;
 }
 

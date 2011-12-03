@@ -22,6 +22,8 @@ find . -type d -name 'savedir' -print | xargs rm -rf
 
 rm parser-built y.tab.c y.tab.h
 
+rm -f d d? ddd		# convention for temp diff files
+
 cd $PARENT || exit 1
 
 tar cvf bash-$DATE.tar bash-$DATE 
