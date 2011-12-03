@@ -9393,3 +9393,30 @@ subst.c
 lib/readline/doc/rluser.texi
 	- fix error in description of emacs-mode C-xC-e command (uses $VISUAL
 	  instead of $FCEDIT)
+
+				   4/28
+				   ----
+support/bashbug.sh
+	- integrate a patch from Stefan Nordhausen
+	  <nordhaus@informatik.hu-berlin.de> that reduces race conditions
+	  by using a temporary directory inside $TMPDIR and creating the
+	  temp files in that
+
+				   4/30
+				   ----
+builtins/common.c
+	- use pathconf(".", _PC_PATH_MAX) where available to size the argument
+	  to getcwd() rather than using a straight PATH_MAX
+
+builtins/cd.def
+	- if get_working_directory fails and returns null (causing resetpwd
+	  to return NULL), use set_working_directory to set $PWD to the
+	  absolute pathname for which chdir just succeeded
+
+				    5/1
+				    ---
+lib/readline/vi_mode.c
+	- in rl_vi_change_to, call _rl_vi_set_last with rl_numeric_arg instead
+	  of `last', since they're equal at call time and rl_vi_domove can
+	  change rl_numeric_arg (which vi apparently updates).  Fixes redo bug
+	  of `c2....' reported by Marion Berryman <mwberryman@copper.net>

@@ -9387,3 +9387,28 @@ subst.c
 	  string_list_dollar_star if the only quoting is Q_HERE_DOCUMENT --
 	  quoted here documents are like double quoting, but not exactly
 	- analogous changes to list_remove_pattern and pos_params
+
+				   4/24
+				   ----
+lib/readline/doc/rluser.texi
+	- fix error in description of emacs-mode C-xC-e command (uses $VISUAL
+	  instead of $FCEDIT)
+
+				   4/28
+				   ----
+support/bashbug.sh
+	- integrate a patch from Stefan Nordhausen
+	  <nordhaus@informatik.hu-berlin.de> that reduces race conditions
+	  by using a temporary directory inside $TMPDIR and creating the
+	  temp files in that
+
+				   4/30
+				   ----
+builtins/common.c
+	- use pathconf(".", _PC_PATH_MAX) where available to size the argument
+	  to getcwd() rather than using a straight PATH_MAX
+
+builtins/cd.def
+	- if get_working_directory fails and returns null (causing resetpwd
+	  to return NULL), use set_working_directory to set $PWD to the
+	  absolute pathname for which chdir just succeeded

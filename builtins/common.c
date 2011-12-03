@@ -462,23 +462,28 @@ get_working_directory (for_whom)
      char *for_whom;
 {
   char *directory;
+  size_t dsize;
 
   if (no_symbolic_links)
     {
-      if (the_current_working_directory)
-	free (the_current_working_directory);
-
+      FREE (the_current_working_directory);
       the_current_working_directory = (char *)NULL;
     }
 
   if (the_current_working_directory == 0)
     {
-      the_current_working_directory = (char *)xmalloc (PATH_MAX);
+#if defined (HAVE_PATHCONF)
+      dsize = pathconf (".", _PC_PATH_MAX);
+#else
+      dsize = PATH_MAX;
+#endif
+
+      the_current_working_directory = (char *)xmalloc (dsize+1);
       the_current_working_directory[0] = '\0';
-      directory = getcwd (the_current_working_directory, PATH_MAX);
+      directory = getcwd (the_current_working_directory, dsize);
       if (directory == 0)
 	{
-	  fprintf (stderr, _("%s: could not get current directory: %s: %s\n"),
+	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
 		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
 		   _(bash_getcwd_errstr), strerror (errno));
 

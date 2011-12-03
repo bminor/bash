@@ -377,7 +377,7 @@ change_to_directory (newdir, nolinks)
      int nolinks;
 {
   char *t, *tdir;
-  int err, canon_failed, r;
+  int err, canon_failed;
 
   tdir = (char *)NULL;
 
@@ -412,11 +412,7 @@ change_to_directory (newdir, nolinks)
      resolved path doesn't exist), fail immediately. */
   if (posixly_correct && nolinks == 0 && canon_failed)
     {
-#if defined ENAMETOOLONG
-      if (errno != ENOENT && errno != ENAMETOOLONG)
-#else
       if (errno != ENOENT)
-#endif
 	errno = ENOTDIR;
       return (0);
     }
@@ -427,13 +423,12 @@ change_to_directory (newdir, nolinks)
       /* If canonicalization failed, but the chdir succeeded, reset the
 	 shell's idea of the_current_working_directory. */
       if (canon_failed)
-	{
-	  t = resetpwd ("cd");
-	  if (t == 0)
-	    set_working_directory (tdir);
-	}
+	resetpwd ("cd");
       else
-	set_working_directory (tdir);
+	{
+	  FREE (the_current_working_directory);
+	  the_current_working_directory = tdir;
+	}
 
       return (1);
     }
@@ -444,28 +439,23 @@ change_to_directory (newdir, nolinks)
     return (0);
 
   err = errno;
+  free (tdir);
 
   /* We're not in physical mode (nolinks == 0), but we failed to change to
      the canonicalized directory name (TDIR).  Try what the user passed
      verbatim. If we succeed, reinitialize the_current_working_directory. */
   if (chdir (newdir) == 0)
     {
-      t = resetpwd ("cd");
-      if (t == 0)
-	set_working_directory (tdir);
-      else
-	free (t);
+      tdir = resetpwd ("cd");
+      FREE (tdir);
 
-      r = 1;
+      return (1);
     }
   else
     {
       errno = err;
-      r = 0;
+      return (0);
     }
-
-  free (tdir);
-  return r;
 }
 
 /* Code for cd spelling correction.  Original patch submitted by

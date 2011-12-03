@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -462,20 +462,25 @@ get_working_directory (for_whom)
      char *for_whom;
 {
   char *directory;
+  size_t dsize;
 
   if (no_symbolic_links)
     {
-      if (the_current_working_directory)
-	free (the_current_working_directory);
-
+      FREE (the_current_working_directory);
       the_current_working_directory = (char *)NULL;
     }
 
   if (the_current_working_directory == 0)
     {
-      the_current_working_directory = (char *)xmalloc (PATH_MAX);
+#if defined (HAVE_PATHCONF)
+      dsize = pathconf (".", _PC_PATH_MAX);
+#else
+      dsize = PATH_MAX;
+#endif
+
+      the_current_working_directory = (char *)xmalloc (dsize+1);
       the_current_working_directory[0] = '\0';
-      directory = getcwd (the_current_working_directory, PATH_MAX);
+      directory = getcwd (the_current_working_directory, dsize);
       if (directory == 0)
 	{
 	  fprintf (stderr, _("%s: could not get current directory: %s: %s\n"),

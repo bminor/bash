@@ -433,7 +433,10 @@ change_to_directory (newdir, nolinks)
 	    set_working_directory (tdir);
 	}
       else
-	set_working_directory (tdir);
+	{
+	  FREE (the_current_working_directory);
+	  the_current_working_directory = tdir;
+	}
 
       return (1);
     }
