@@ -222,6 +222,11 @@ const char *rl_basic_quote_characters = "\"'";
    rl_basic_word_break_characters.  */
 /*const*/ char *rl_completer_word_break_characters = (/*const*/ char *)NULL;
 
+/* Hook function to allow an application to set the completion word
+   break characters before readline breaks up the line.  Allows
+   position-dependent word break characters. */
+rl_cpvfunc_t *rl_completion_word_break_hook = (rl_cpvfunc_t *)NULL;
+
 /* List of characters which can be used to quote a substring of the line.
    Completion occurs on the entire substring, and within the substring
    rl_completer_word_break_characters are treated as any other character,
@@ -762,11 +767,17 @@ _rl_find_completion_word (fp, dp)
      int *fp, *dp;
 {
   int scan, end, found_quote, delimiter, pass_next, isbrk;
-  char quote_char;
+  char quote_char, *brkchars;
 
   end = rl_point;
   found_quote = delimiter = 0;
   quote_char = '\0';
+
+  brkchars = 0;
+  if (rl_completion_word_break_hook)
+    brkchars = (*rl_completion_word_break_hook) ();
+  if (brkchars == 0)
+    brkchars = rl_completer_word_break_characters;
 
   if (rl_completer_quote_characters)
     {
@@ -839,7 +850,7 @@ _rl_find_completion_word (fp, dp)
 	{
 	  scan = rl_line_buffer[rl_point];
 
-	  if (strchr (rl_completer_word_break_characters, scan) == 0)
+	  if (strchr (brkchars, scan) == 0)
 	    continue;
 
 	  /* Call the application-specific function to tell us whether
@@ -867,9 +878,9 @@ _rl_find_completion_word (fp, dp)
       if (rl_char_is_quoted_p)
 	isbrk = (found_quote == 0 ||
 		(*rl_char_is_quoted_p) (rl_line_buffer, rl_point) == 0) &&
-		strchr (rl_completer_word_break_characters, scan) != 0;
+		strchr (brkchars, scan) != 0;
       else
-	isbrk = strchr (rl_completer_word_break_characters, scan) != 0;
+	isbrk = strchr (brkchars, scan) != 0;
 
       if (isbrk)
 	{

@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2003 Nov 13<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Jan 28<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -40,7 +40,7 @@ bash - GNU Bourne-Again SHell
 <H2>COPYRIGHT</H2>
 
 
-Bash is Copyright &#169; 1989-2003 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2004 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
@@ -5404,11 +5404,12 @@ the release of <B>bash</B>, version + patchelvel (e.g., 2.00.0)
 <DT><B>\w</B>
 
 <DD>
-the current working directory
+the current working directory, with <B>$HOME</B> abbreviated with a tilde
 <DT><B>\W</B>
 
 <DD>
-the basename of the current working directory
+the basename of the current working directory, with <B>$HOME</B>
+abbreviated with a tilde
 <DT><B>\!</B>
 
 <DD>
@@ -6513,6 +6514,12 @@ Word boundaries are the same as those used by <B>backward-word</B>.
 
 <DD>
 Kill the word behind point, using white space as a word boundary.
+The killed text is saved on the kill-ring.
+<DT><B>unix-filename-rubout</B>
+
+<DD>
+Kill the word behind point, using white space and the slash character
+as the word boundaries.
 The killed text is saved on the kill-ring.
 <DT><B>delete-horizontal-space (M-\)</B>
 
@@ -11334,6 +11341,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 08 January 2004 10:37:11 EST
+Time: 28 January 2004 15:50:27 EST
 </BODY>
 </HTML>

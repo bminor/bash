@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sat Jan 24 13:18:08 EST 2004
+.\"	Last Change: Wed Jan 28 15:49:29 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Jan 24" "GNU Bash-3.0"
+.TH BASH 1 "2004 Jan 28" "GNU Bash-3.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5001,6 +5001,11 @@ Word boundaries are the same as those used by \fBbackward\-word\fP.
 .TP
 .B unix\-word\-rubout (C\-w)
 Kill the word behind point, using white space as a word boundary.
+The killed text is saved on the kill-ring.
+.TP
+.B unix\-filename\-rubout
+Kill the word behind point, using white space and the slash character
+as the word boundaries.
 The killed text is saved on the kill-ring.
 .TP
 .B delete\-horizontal\-space (M\-\e)

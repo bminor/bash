@@ -9073,3 +9073,31 @@ shell.c
 subst.c
 	- in string_list_internal, short-circuit right away to savestring()
 	  if the list only has a single element
+
+				   1/28
+				   ----
+lib/readline/rltypedefs.h
+	- new set of typedefs for functions returning char * with various
+	  arguments (standard set)
+
+lib/readline/complete.c
+	- new function pointer, rl_completion_word_break_hook, called by
+	  _rl_find_completion_word, used to set word break characters at
+	  completion time, allowing them to be position-based
+
+lib/readline/doc/rltech.texi
+	- documented rl_completion_word_break_hook
+
+lib/readline/kill.c
+	- added new rl_unix_filename_rubout, which deletes one filename
+	  component in a Unix pathname backward (delimiters are whitespace
+	  and `/')
+
+lib/readline/readline.h
+	- extern declaration for rl_unix_filename_rubout
+
+lib/readline/funmap.c
+	- new bindable readline command `unix-filename-rubout'
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- documented `unix-filename-rubout'

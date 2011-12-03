@@ -1,10 +1,10 @@
-This is bashref.info, produced by makeinfo version 4.2 from
-/usr/src/local/bash/bash-20040121/doc/bashref.texi.
+This is bashref.info, produced by makeinfo version 4.5 from
+/usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.0-beta1, 24 January 2004).
+the Bash shell (version 3.0-beta1, 28 January 2004).
 
-   This is Edition 3.0, last updated 24 January 2004, of `The GNU Bash
+   This is Edition 3.0, last updated 28 January 2004, of `The GNU Bash
 Reference Manual', for `Bash', Version 3.0-beta1.
 
    Copyright (C) 1988-2003 Free Software Foundation, Inc.
@@ -37,9 +37,9 @@ Bash Features
 *************
 
    This text is a brief description of the features that are present in
-the Bash shell (version 3.0-beta1, 24 January 2004)..
+the Bash shell (version 3.0-beta1, 28 January 2004)..
 
-   This is Edition 3.0, last updated 24 January 2004, of `The GNU Bash
+   This is Edition 3.0, last updated 28 January 2004, of `The GNU Bash
 Reference Manual', for `Bash', Version 3.0-beta1.
 
    Bash contains features that appear in other popular shells, and some
@@ -731,6 +731,7 @@ syntax, it may be replaced with one or more newlines.
      command in LIST that is executed, or false if any of the
      expressions is invalid.
 
+
    The `break' and `continue' builtins (*note Bourne Shell Builtins::)
 may be used to control loop execution.
 
@@ -894,6 +895,7 @@ Conditional Constructs
      The `&&' and `||' operators do not evaluate EXPRESSION2 if the
      value of EXPRESSION1 is sufficient to determine the return value
      of the entire conditional expression.
+
 
 
 File: bashref.info,  Node: Command Grouping,  Prev: Conditional Constructs,  Up: Compound Commands
@@ -1299,6 +1301,7 @@ the expanded value.
 `~-N'
      The string that would be displayed by `dirs -N'
 
+
 
 File: bashref.info,  Node: Shell Parameter Expansion,  Next: Command Substitution,  Prev: Tilde Expansion,  Up: Shell Expansions
 
@@ -1444,6 +1447,7 @@ if the colon is omitted, the operator tests only for existence.
      with `@' or `*', the substitution operation is applied to each
      member of the array in turn, and the expansion is the resultant
      list.
+
 
 
 File: bashref.info,  Node: Command Substitution,  Next: Arithmetic Expansion,  Prev: Shell Parameter Expansion,  Up: Shell Expansions
@@ -1751,6 +1755,7 @@ redirections, as described in the following table:
      If HOST is a valid hostname or Internet address, and PORT is an
      integer port number or service name, Bash attempts to open a UDP
      connection to the corresponding socket.
+
 
    A failure to open or create a file causes the redirection to fail.
 
@@ -2710,6 +2715,7 @@ POSIX 1003.2 standard.
     `-x KEYSEQ:SHELL-COMMAND'
           Cause SHELL-COMMAND to be executed whenever KEYSEQ is entered.
 
+
      The return status is zero unless an invalid option is supplied or
      an error occurs.
 
@@ -3005,6 +3011,7 @@ POSIX 1003.2 standard.
     `-u FD'
           Read input from file descriptor FD.
 
+
 `shopt'
           shopt [-pqsu] [-o] [OPTNAME ...]
      Toggle the values of variables controlling optional shell behavior.
@@ -3214,6 +3221,7 @@ POSIX 1003.2 standard.
           If set, the `echo' builtin expands backslash-escape sequences
           by default.
 
+
      The return status when listing options is zero if all OPTNAMES are
      enabled, non-zero otherwise.  When setting or unsetting options,
      the return status is zero unless an OPTNAME is not a valid shell
@@ -3307,6 +3315,7 @@ POSIX 1003.2 standard.
     `-v'
           The maximum amount of virtual memory available to the process.
 
+
      If LIMIT is given, it is the new value of the specified resource;
      the special LIMIT values `hard', `soft', and `unlimited' stand for
      the current hard limit, the current soft limit, and no limit,
@@ -3326,6 +3335,7 @@ POSIX 1003.2 standard.
 
      Remove each NAME from the list of aliases.  If `-a' is supplied,
      all aliases are removed.  Aliases are described in *Note Aliases::.
+
 
 
 File: bashref.info,  Node: The Set Builtin,  Next: Special Builtins,  Prev: Bash Builtins,  Up: Shell Builtin Commands
@@ -3673,6 +3683,7 @@ shell.  In some cases, Bash assigns a default value to the variable.
 `PS2'
      The secondary prompt string.  The default value is `> '.
 
+
 
 File: bashref.info,  Node: Bash Variables,  Prev: Bourne Shell Variables,  Up: Shell Variables
 
@@ -3764,6 +3775,7 @@ Variables::).
 
     `BASH_VERSINFO[5]'
           The value of `MACHTYPE'.
+
 
 `BASH_VERSION'
      The version number of the current instance of Bash.
@@ -4145,6 +4157,7 @@ Variables::).
      The numeric real user id of the current user.  This variable is
      readonly.
 
+
 
 File: bashref.info,  Node: Bash Features,  Next: Job Control,  Prev: Shell Variables,  Up: Top
 
@@ -4242,6 +4255,7 @@ the single-character options to be recognized.
      Show version information for this instance of Bash on the standard
      output and exit successfully.
 
+
    There are several single-character options that may be supplied at
 invocation which are not available with the `set' builtin.
 
@@ -4292,6 +4306,7 @@ invocation which are not available with the `set' builtin.
      A `--' signals the end of options and disables further option
      processing.  Any arguments after the `--' are treated as filenames
      and arguments.
+
 
    A _login_ shell is one whose first character of argument zero is
 `-', or one invoked with the `--login' option.
@@ -4684,6 +4699,7 @@ checked.  If the FILE argument to one of the primaries is one of
      greater than or equal to ARG2, respectively.  ARG1 and ARG2 may be
      positive or negative integers.
 
+
 
 File: bashref.info,  Node: Shell Arithmetic,  Next: Aliases,  Prev: Bash Conditional Expressions,  Up: Bash Features
 
@@ -4999,6 +5015,7 @@ Directory Stack Builtins
     `DIR'
           Makes the current working directory be the top of the stack,
           and then executes the equivalent of ``cd' DIR'.  `cd's to DIR.
+
 
 
 File: bashref.info,  Node: Printing a Prompt,  Next: The Restricted Shell,  Prev: The Directory Stack,  Up: Bash Features
@@ -5516,6 +5533,7 @@ Job Control Builtins
      signal.  The `-f' option means to suspend even if the shell is a
      login shell.
 
+
    When job control is not active, the `kill' and `wait' builtins do
 not accept JOBSPEC arguments.  They must be supplied process IDs.
 
@@ -5541,6 +5559,7 @@ Job Control Variables
      Basics::).  If set to any other value, the supplied string must be
      a prefix of a stopped job's name; this provides functionality
      analogous to the `%' job ID.
+
 
 
 File: bashref.info,  Node: Command Line Editing,  Next: Installing Bash,  Prev: Using History Interactively,  Up: Top
@@ -5747,6 +5766,7 @@ available to be yanked back later, when you are typing another line.
 `C-w'
      Kill from the cursor to the previous whitespace.  This is
      different than `M-<DEL>' because the word boundaries differ.
+
 
    Here is how to "yank" the text back into the line.  Yanking means to
 copy the most-recently-killed text from the kill buffer.
@@ -6025,6 +6045,7 @@ Variable Settings
           appended to the filename when listing possible completions.
           The default is `off'.
 
+
 Key Bindings
      The syntax for controlling key bindings in the init file is
      simple.  First you need to find the name of the command that you
@@ -6078,6 +6099,7 @@ Key Bindings
           `C-x C-r' is bound to the function `re-read-init-file', and
           `<ESC> <[> <1> <1> <~>' is bound to insert the text `Function
           Key 1'.
+
 
      The following GNU Emacs style escape sequences are available when
      specifying key sequences:
@@ -6143,6 +6165,7 @@ Key Bindings
      the following binding will make `C-x \' insert a single `\' into
      the line:
           "\C-x\\": "\\"
+
 
 
 File: bashref.info,  Node: Conditional Init Constructs,  Next: Sample Init File,  Prev: Readline Init File Syntax,  Up: Readline Init File
@@ -6375,6 +6398,7 @@ Commands For Moving
 `redraw-current-line ()'
      Refresh the current line.  By default, this is unbound.
 
+
 
 File: bashref.info,  Node: Commands For History,  Next: Commands For Text,  Prev: Commands For Moving,  Up: Bindable Readline Commands
 
@@ -6445,6 +6469,7 @@ Commands For Manipulating The History
      through the history list, inserting the last argument of each line
      in turn.
 
+
 
 File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev: Commands For History,  Up: Bindable Readline Commands
 
@@ -6509,6 +6534,7 @@ Commands For Changing Text
 
      By default, this command is unbound.
 
+
 
 File: bashref.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: Commands For Text,  Up: Bindable Readline Commands
 
@@ -6540,6 +6566,11 @@ Killing And Yanking
 `unix-word-rubout (C-w)'
      Kill the word behind point, using white space as a word boundary.
      The killed text is saved on the kill-ring.
+
+`unix-filename-rubout ()'
+     Kill the word behind point, using white space and the slash
+     character as the word boundaries.  The killed text is saved on the
+     kill-ring.
 
 `delete-horizontal-space ()'
      Delete all spaces and tabs around point.  By default, this is
@@ -6684,6 +6715,7 @@ Letting Readline Type For You
      completions enclosed within braces so the list is available to the
      shell (*note Brace Expansion::).
 
+
 
 File: bashref.info,  Node: Keyboard Macros,  Next: Miscellaneous Commands,  Prev: Commands For Completion,  Up: Bindable Readline Commands
 
@@ -6700,6 +6732,7 @@ Keyboard Macros
 `call-last-kbd-macro (C-x e)'
      Re-execute the last keyboard macro defined, by making the
      characters in the macro appear as if typed at the keyboard.
+
 
 
 File: bashref.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up: Bindable Readline Commands
@@ -6834,6 +6867,7 @@ Some Miscellaneous Commands
      Invoke an editor on the current command line, and execute the
      result as shell commands.  Bash attempts to invoke `$FCEDIT',
      `$EDITOR', and `emacs' as the editor, in that order.
+
 
 
 File: bashref.info,  Node: Readline vi Mode,  Next: Programmable Completion,  Prev: Bindable Readline Commands,  Up: Command Line Editing
@@ -7167,6 +7201,7 @@ completion facilities.
      for a NAME for which no specification exists, or an error occurs
      adding a completion specification.
 
+
 
 File: bashref.info,  Node: Using History Interactively,  Next: Command Line Editing,  Prev: Job Control,  Up: Top
 
@@ -7325,9 +7360,11 @@ and history file.
           The ARGs are added to the end of the history list as a single
           entry.
 
+
      When any of the `-w', `-r', `-a', or `-n' options is used, if
      FILENAME is given, then it is used as the history file.  If not,
      then the value of the `HISTFILE' variable is used.
+
 
 
 File: bashref.info,  Node: History Interaction,  Prev: Bash History Builtins,  Up: Using History Interactively
@@ -7418,6 +7455,7 @@ history list.
 `!#'
      The entire command line typed so far.
 
+
 
 File: bashref.info,  Node: Word Designators,  Next: Modifiers,  Prev: Event Designators,  Up: History Interaction
 
@@ -7476,6 +7514,7 @@ line separated by single spaces.
 `X-'
      Abbreviates `X-$' like `X*', but omits the last word.
 
+
    If a word designator is supplied without an event specification, the
 previous command is used as the event.
 
@@ -7529,6 +7568,7 @@ more of the following modifiers, each preceded by a `:'.
 
 `G'
      Apply the following `s' modifier once to each word in the event.
+
 
 
 File: bashref.info,  Node: Installing Bash,  Next: Reporting Bugs,  Prev: Command Line Editing,  Up: Top
@@ -7962,6 +8002,7 @@ does not provide the necessary support.
      `echo' behave more like the version specified in the Single Unix
      Specification, version 2.  *Note Bash Builtins::, for a
      description of the escape sequences that `echo' recognizes.
+
 
    The file `config-top.h' contains C Preprocessor `#define' statements
 for options which are not settable from `configure'.  Some of these are
@@ -9076,6 +9117,7 @@ Function Index
 * transpose-words (M-t):                 Commands For Text.
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
 * universal-argument ():                 Numeric Arguments.
+* unix-filename-rubout ():               Commands For Killing.
 * unix-line-discard (C-u):               Commands For Killing.
 * unix-word-rubout (C-w):                Commands For Killing.
 * upcase-word (M-u):                     Commands For Text.
@@ -9214,45 +9256,45 @@ Concept Index
 
 
 Tag Table:
-Node: Top1376
-Node: Introduction3533
-Node: What is Bash?3758
-Node: What is a shell?4846
-Node: Definitions7382
-Node: Basic Shell Features10122
-Node: Shell Syntax11340
-Node: Shell Operation12364
-Node: Quoting13649
-Node: Escape Character14911
-Node: Single Quotes15383
-Node: Double Quotes15718
-Node: ANSI-C Quoting16731
-Node: Locale Translation17674
-Node: Comments18557
-Node: Shell Commands19162
-Node: Simple Commands19923
-Node: Pipelines20544
-Node: Lists22410
-Node: Compound Commands24032
-Node: Looping Constructs24804
-Node: Conditional Constructs27237
-Node: Command Grouping34289
-Node: Shell Functions35725
-Node: Shell Parameters39990
-Node: Positional Parameters41561
-Node: Special Parameters42452
-Node: Shell Expansions45110
-Node: Brace Expansion47030
-Node: Tilde Expansion49346
-Node: Shell Parameter Expansion51677
-Node: Command Substitution58930
-Node: Arithmetic Expansion60252
-Node: Process Substitution61093
-Node: Word Splitting62130
-Node: Filename Expansion63582
-Node: Pattern Matching65706
-Node: Quote Removal69027
-Node: Redirections69313
+Node: Top1371
+Node: Introduction3528
+Node: What is Bash?3753
+Node: What is a shell?4841
+Node: Definitions7377
+Node: Basic Shell Features10117
+Node: Shell Syntax11335
+Node: Shell Operation12359
+Node: Quoting13644
+Node: Escape Character14906
+Node: Single Quotes15378
+Node: Double Quotes15713
+Node: ANSI-C Quoting16726
+Node: Locale Translation17669
+Node: Comments18552
+Node: Shell Commands19157
+Node: Simple Commands19918
+Node: Pipelines20539
+Node: Lists22405
+Node: Compound Commands24027
+Node: Looping Constructs24799
+Node: Conditional Constructs27233
+Node: Command Grouping34286
+Node: Shell Functions35722
+Node: Shell Parameters39987
+Node: Positional Parameters41558
+Node: Special Parameters42449
+Node: Shell Expansions45107
+Node: Brace Expansion47027
+Node: Tilde Expansion49343
+Node: Shell Parameter Expansion51675
+Node: Command Substitution58929
+Node: Arithmetic Expansion60251
+Node: Process Substitution61092
+Node: Word Splitting62129
+Node: Filename Expansion63581
+Node: Pattern Matching65705
+Node: Quote Removal69026
+Node: Redirections69312
 Node: Executing Commands76787
 Node: Simple Command Expansion77454
 Node: Command Search and Execution79375
@@ -9264,79 +9306,79 @@ Node: Shell Scripts88935
 Node: Shell Builtin Commands91446
 Node: Bourne Shell Builtins92876
 Node: Bash Builtins109759
-Node: The Set Builtin137876
-Node: Special Builtins146094
-Node: Shell Variables147066
-Node: Bourne Shell Variables147502
-Node: Bash Variables149478
-Node: Bash Features168981
-Node: Invoking Bash169863
-Node: Bash Startup Files175672
-Node: Interactive Shells180542
-Node: What is an Interactive Shell?180944
-Node: Is this Shell Interactive?181579
-Node: Interactive Shell Behavior182385
-Node: Bash Conditional Expressions185652
-Node: Shell Arithmetic189071
-Node: Aliases191811
-Node: Arrays194314
-Node: The Directory Stack197334
-Node: Directory Stack Builtins198040
-Node: Printing a Prompt200918
-Node: The Restricted Shell203627
-Node: Bash POSIX Mode205452
-Node: Job Control212098
-Node: Job Control Basics212564
-Node: Job Control Builtins216844
-Node: Job Control Variables221139
-Node: Command Line Editing222288
-Node: Introduction and Notation223286
-Node: Readline Interaction224903
-Node: Readline Bare Essentials226089
-Node: Readline Movement Commands227869
-Node: Readline Killing Commands228825
-Node: Readline Arguments230733
-Node: Searching231768
-Node: Readline Init File233945
-Node: Readline Init File Syntax234999
-Node: Conditional Init Constructs246640
-Node: Sample Init File249164
-Node: Bindable Readline Commands252347
-Node: Commands For Moving253546
-Node: Commands For History254394
-Node: Commands For Text257282
-Node: Commands For Killing259942
-Node: Numeric Arguments261892
-Node: Commands For Completion263019
-Node: Keyboard Macros266599
-Node: Miscellaneous Commands267157
-Node: Readline vi Mode272455
-Node: Programmable Completion273364
-Node: Programmable Completion Builtins279171
-Node: Using History Interactively286532
-Node: Bash History Facilities287211
-Node: Bash History Builtins289901
-Node: History Interaction293751
-Node: Event Designators296302
-Node: Word Designators297305
-Node: Modifiers298934
-Node: Installing Bash300330
-Node: Basic Installation301464
-Node: Compilers and Options304149
-Node: Compiling For Multiple Architectures304883
-Node: Installation Names306540
-Node: Specifying the System Type307351
-Node: Sharing Defaults308060
-Node: Operation Controls308725
-Node: Optional Features309676
-Node: Reporting Bugs317947
-Node: Major Differences From The Bourne Shell319122
-Node: Copying This Manual334870
-Node: GNU Free Documentation License335124
-Node: Builtin Index357517
-Node: Reserved Word Index361144
-Node: Variable Index362620
-Node: Function Index369613
-Node: Concept Index374163
+Node: The Set Builtin137881
+Node: Special Builtins146099
+Node: Shell Variables147071
+Node: Bourne Shell Variables147507
+Node: Bash Variables149484
+Node: Bash Features168989
+Node: Invoking Bash169871
+Node: Bash Startup Files175682
+Node: Interactive Shells180552
+Node: What is an Interactive Shell?180954
+Node: Is this Shell Interactive?181589
+Node: Interactive Shell Behavior182395
+Node: Bash Conditional Expressions185662
+Node: Shell Arithmetic189082
+Node: Aliases191822
+Node: Arrays194325
+Node: The Directory Stack197345
+Node: Directory Stack Builtins198051
+Node: Printing a Prompt200930
+Node: The Restricted Shell203639
+Node: Bash POSIX Mode205464
+Node: Job Control212110
+Node: Job Control Basics212576
+Node: Job Control Builtins216856
+Node: Job Control Variables221152
+Node: Command Line Editing222302
+Node: Introduction and Notation223300
+Node: Readline Interaction224917
+Node: Readline Bare Essentials226103
+Node: Readline Movement Commands227883
+Node: Readline Killing Commands228839
+Node: Readline Arguments230748
+Node: Searching231783
+Node: Readline Init File233960
+Node: Readline Init File Syntax235014
+Node: Conditional Init Constructs246658
+Node: Sample Init File249182
+Node: Bindable Readline Commands252365
+Node: Commands For Moving253564
+Node: Commands For History254413
+Node: Commands For Text257302
+Node: Commands For Killing259963
+Node: Numeric Arguments262093
+Node: Commands For Completion263220
+Node: Keyboard Macros266801
+Node: Miscellaneous Commands267360
+Node: Readline vi Mode272659
+Node: Programmable Completion273568
+Node: Programmable Completion Builtins279375
+Node: Using History Interactively286737
+Node: Bash History Facilities287416
+Node: Bash History Builtins290106
+Node: History Interaction293958
+Node: Event Designators296509
+Node: Word Designators297513
+Node: Modifiers299143
+Node: Installing Bash300540
+Node: Basic Installation301674
+Node: Compilers and Options304359
+Node: Compiling For Multiple Architectures305093
+Node: Installation Names306750
+Node: Specifying the System Type307561
+Node: Sharing Defaults308270
+Node: Operation Controls308935
+Node: Optional Features309886
+Node: Reporting Bugs318158
+Node: Major Differences From The Bourne Shell319333
+Node: Copying This Manual335081
+Node: GNU Free Documentation License335335
+Node: Builtin Index357728
+Node: Reserved Word Index361355
+Node: Variable Index362831
+Node: Function Index369824
+Node: Concept Index374437
 
 End Tag Table

@@ -10,7 +10,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988-2002 Free Software Foundation, Inc.
+Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -1124,6 +1124,11 @@ Word boundaries are the same as @code{backward-word}.
 
 @item unix-word-rubout (C-w)
 Kill the word behind point, using white space as a word boundary.
+The killed text is saved on the kill-ring.
+
+@item unix-filename-rubout ()
+Kill the word behind point, using white space and the slash character
+as the word boundaries.
 The killed text is saved on the kill-ring.
 
 @item delete-horizontal-space ()

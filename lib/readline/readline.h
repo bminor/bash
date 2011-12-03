@@ -160,6 +160,7 @@ extern int rl_kill_line PARAMS((int, int));
 extern int rl_backward_kill_line PARAMS((int, int));
 extern int rl_kill_full_line PARAMS((int, int));
 extern int rl_unix_word_rubout PARAMS((int, int));
+extern int rl_unix_filename_rubout PARAMS((int, int));
 extern int rl_unix_line_discard PARAMS((int, int));
 extern int rl_copy_region_to_kill PARAMS((int, int));
 extern int rl_kill_region PARAMS((int, int));
@@ -613,6 +614,11 @@ extern const char *rl_basic_word_break_characters;
    rl_complete_internal.  The default list is the contents of
    rl_basic_word_break_characters.  */
 extern /*const*/ char *rl_completer_word_break_characters;
+
+/* Hook function to allow an application to set the completion word
+   break characters before readline breaks up the line.  Allows
+   position-dependent word break characters. */
+extern rl_cpvfunc_t *rl_completion_word_break_hook;
 
 /* List of characters which can be used to quote a substring of the line.
    Completion occurs on the entire substring, and within the substring   

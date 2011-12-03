@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Mon Jun  9 17:37:22 EDT 2003
+.\"	Last Change: Wed Jan 28 15:43:53 EST 2004
 .\"
-.TH READLINE 3 "2003 December 9" "GNU Readline 5.0"
+.TH READLINE 3 "2004 January 28" "GNU Readline 5.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -34,8 +34,8 @@ readline \- get a line from a user with editing
 \fBreadline\fP (\fIconst char *prompt\fP);
 .fi
 .SH COPYRIGHT
-.if n Readline is Copyright (C) 1989\-2002 by the Free Software Foundation, Inc.
-.if t Readline is Copyright \(co 1989\-2002 by the Free Software Foundation, Inc.
+.if n Readline is Copyright (C) 1989\-2004 by the Free Software Foundation, Inc.
+.if t Readline is Copyright \(co 1989\-2004 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .LP
 .B readline
@@ -795,6 +795,11 @@ Word boundaries are the same as those used by \fBbackward\-word\fP.
 .TP
 .B unix\-word\-rubout (C\-w)
 Kill the word behind point, using white space as a word boundary.
+The killed text is saved on the kill-ring.
+.TP
+.B unix\-filename\-rubout
+Kill the word behind point, using white space and the slash character
+as the word boundaries.
 The killed text is saved on the kill-ring.
 .TP
 .B delete\-horizontal\-space (M\-\e)

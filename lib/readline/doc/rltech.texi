@@ -8,7 +8,7 @@ This document describes the GNU Readline Library, a utility for aiding
 in the consitency of user interface across discrete programs that need
 to provide a command line interface.
 
-Copyright (C) 1988-2002 Free Software Foundation, Inc.
+Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1674,6 +1674,15 @@ A list of quote characters which can cause a word break.
 The list of characters that signal a break between words for
 @code{rl_complete_internal()}.  The default list is the value of
 @code{rl_basic_word_break_characters}.
+@end deftypevar
+
+@deftypevar {rl_cpvfunc_t *} rl_completion_word_break_hook
+If non-zero, this is the address of a function to call when Readline is
+deciding where to separate words for word completion.  It should return
+a character string like @code{rl_completer_word_break_characters} to be
+used to perform the current completion.  The function may choose to set
+@code{rl_completer_word_break_characters} itself.  If the function
+returns @code{NULL}, @code{rl_completer_word_break_characters} is used.
 @end deftypevar
 
 @deftypevar {const char *} rl_completer_quote_characters

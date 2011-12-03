@@ -130,6 +130,13 @@ c.  New application variable, rl_completion_found_quote, set to a non-zero
     value if readline determines that the word to be completed is quoted.
     Set before readline calls any application completion function.
 
+d.  New function hook, rl_completion_word_break_hook, called when readline
+    needs to break a line into words when completion is attempted.  Allows
+    the word break characters to vary based on position in the line.
+
+e.  New bindable command: unix-filename-rubout.  Does the same thing as
+    unix-word-rubout, but adds `/' to the set of word delimiters.
+
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-alpha,
 and the previous version, bash-2.05b-release.
