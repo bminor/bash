@@ -127,11 +127,12 @@ fg_bg (list, foreground)
 {
   sigset_t set, oset;
   int job, status, old_async_pid;
+  JOB *j;
 
   BLOCK_CHILD (set, oset);
   job = get_job_spec (list);
 
-  if (job < 0 || job >= job_slots || jobs[job] == 0)
+  if (INVALID_JOB (job))
     {
       if (job != DUP_JOB)
 	sh_badjob (list ? list->word->word : "current");
@@ -139,7 +140,8 @@ fg_bg (list, foreground)
       goto failure;
     }
 
-  /* Or if jobs[job]->pgrp == shell_pgrp. */
+  j = get_job_by_jid (job);
+  /* Or if j->pgrp == shell_pgrp. */
   if (IS_JOBCONTROL (job) == 0)
     {
       builtin_error (_("job %d started without job control"), job + 1);
@@ -149,7 +151,7 @@ fg_bg (list, foreground)
   if (foreground == 0)
     {
       old_async_pid = last_asynchronous_pid;
-      last_asynchronous_pid = jobs[job]->pgrp;	/* As per Posix.2 5.4.2 */
+      last_asynchronous_pid = j->pgrp;	/* As per Posix.2 5.4.2 */
     }
 
   status = start_job (job, foreground);

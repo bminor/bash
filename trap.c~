@@ -807,6 +807,11 @@ run_return_trap ()
 {
   int old_exit_value;
 
+#if 0
+  if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && (sigmodes[DEBUG_TRAP] & SIG_INPROGRESS))
+    return;
+#endif
+
   if ((sigmodes[RETURN_TRAP] & SIG_TRAPPED) && ((sigmodes[RETURN_TRAP] & SIG_IGNORED) == 0) && (sigmodes[RETURN_TRAP] & SIG_INPROGRESS) == 0)
     {
       old_exit_value = last_command_exit_value;
@@ -903,8 +908,8 @@ reset_or_restore_signal_handlers (reset)
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
 #if defined (DEBUGGER)
   if (debugging_mode == 0 || function_trace_mode == 0)
-    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 #endif
+    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 }
 
 /* Reset trapped signals to their original values, but don't free the

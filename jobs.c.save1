@@ -258,12 +258,10 @@ static int set_job_status_and_cleanup __P((int));
 static WAIT raw_job_exit_status __P((int));
 
 static void notify_of_job_status __P((void));
-static void reset_job_indices __P((void));
 static void cleanup_dead_jobs __P((void));
 static int processes_in_job __P((int));
-static void realloc_jobs_list __P((void));
 static int compact_jobs_list __P((int));
-static int discard_pipeline __P((PROCESS *));
+static void discard_pipeline __P((PROCESS *));
 static void add_process __P((char *, pid_t));
 static void print_pipeline __P((PROCESS *, int, int, FILE *));
 static void pretty_print_job __P((int, int, FILE *));
@@ -487,7 +485,6 @@ stop_pipeline (async, deferred)
 
   /* Scan from the last slot backward, looking for the next free one. */
   /* XXX - revisit this interactive assumption */
-  /* XXX - this way for now */
   if (interactive)
     {
       for (i = js.j_jobslots; i; i--)
@@ -496,36 +493,27 @@ stop_pipeline (async, deferred)
     }
   else
     {
-#if 0
-      /* This wraps around, but makes it inconvenient to extend the array */
-      for (i = js.j_lastj+1; i != js.j_lastj; i++)
-	{
-	  if (i >= js.j_jobslots)
-	    i = 0;
-	  if (jobs[i] == 0)
-	    break;
-	}	
-      if (i == js.j_lastj)
-        i = js.j_jobslots;
-#else
-      /* This doesn't wrap around yet. */
-      for (i = js.j_lastj ? js.j_lastj + 1 : js.j_lastj; i < js.j_jobslots; i++)
+      /* If we're not interactive, we don't need to monotonically increase
+	 the job number (in fact, we don't care about the job number at all),
+	 so we can simply scan for the first free slot.  This helps to keep
+	 us from continuously reallocating the jobs array when running
+	 certain kinds of shell loops, and saves time spent searching. */
+      for (i = 0; i < js.j_jobslots; i++)
 	if (jobs[i] == 0)
 	  break;
-#endif
     }
 
   /* Do we need more room? */
 
   /* First try compaction */
-  if ((interactive_shell == 0 || subshell_environment) && i == js.j_jobslots && js.j_jobslots >= MAX_JOBS_IN_ARRAY)
+  if (subshell_environment && interactive_shell && i == js.j_jobslots && js.j_jobslots >= MAX_JOBS_IN_ARRAY)
     i = compact_jobs_list (0);
 
   /* If we can't compact, reallocate */
   if (i == js.j_jobslots)
     {
       js.j_jobslots += JOB_SLOTS;
-      jobs = (JOB **)xrealloc (jobs, (js.j_jobslots * sizeof (JOB *)));
+      jobs = (JOB **)xrealloc (jobs, ((1 + js.j_jobslots) * sizeof (JOB *)));
 
       for (j = i; j < js.j_jobslots; j++)
 	jobs[j] = (JOB *)NULL;
@@ -535,11 +523,11 @@ stop_pipeline (async, deferred)
   if (the_pipeline)
     {
       register PROCESS *p;
-      int any_alive, any_stopped, n;
+      int any_alive, any_stopped;
 
       newjob = (JOB *)xmalloc (sizeof (JOB));
 
-      for (n = 1, p = the_pipeline; p->next != the_pipeline; n++, p = p->next)
+      for (p = the_pipeline; p->next != the_pipeline; p = p->next)
 	;
       p->next = (PROCESS *)NULL;
       newjob->pipe = REVERSE_LIST (the_pipeline, PROCESS *);
@@ -578,12 +566,6 @@ stop_pipeline (async, deferred)
       jobs[i] = newjob;
       if (newjob->state == JDEAD && (newjob->flags & J_FOREGROUND))
 	setjstatus (i);
-      if (newjob->state == JDEAD)
-	{
-	  js.c_reaped += n;	/* wouldn't have been done since this was not part of a job */
-	  js.j_ndead++;
-	}
-      js.c_injobs += n;
 
       js.j_lastj = i;
       js.j_njobs++;
@@ -621,44 +603,6 @@ stop_pipeline (async, deferred)
   return (js.j_current);
 }
 
-/* Reset the values of js.j_lastj and js.j_firstj after one or both have
-   been deleted.  The caller should check whether js.j_njobs is 0 before
-   calling this. */
-static void
-reset_job_indices ()
-{
-  int old;
-
-  if (jobs[js.j_firstj] == 0)
-    {
-      old = js.j_firstj++;
-      while (js.j_firstj != old)
-	{
-	  if (js.j_firstj >= js.j_jobslots)
-	    js.j_firstj = 0;
-	  if (jobs[js.j_firstj])
-	    break;
-	  js.j_firstj++;
-	}
-      if (js.j_firstj == old)
-        js.j_firstj = js.j_lastj = js.j_njobs = 0;
-    }
-  if (jobs[js.j_lastj] == 0)
-    {
-      old = js.j_lastj--;
-      while (js.j_lastj != old)
-	{
-	  if (js.j_lastj < 0)
-	    js.j_lastj = js.j_jobslots - 1;
-	  if (jobs[js.j_lastj])
-	    break;
-	  js.j_lastj--;
-	}
-      if (js.j_lastj == old)
-        js.j_firstj = js.j_lastj = js.j_njobs = 0;
-    }
-}
-      
 /* Delete all DEAD jobs that the user had received notification about. */
 static void
 cleanup_dead_jobs ()
@@ -671,15 +615,10 @@ cleanup_dead_jobs ()
 
   QUEUE_SIGCHLD(os);
 
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("cleanup_dead_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
-
     if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
       delete_job (i, 0);
-}
+
   UNQUEUE_SIGCHLD(os);
 }
 
@@ -701,55 +640,78 @@ processes_in_job (job)
   return nproc;
 }
 
-/* Reallocate and compress the jobs list.  This returns with a jobs array
-   whose size is a multiple of JOB_SLOTS and can hold the current number of
-   jobs.  Heuristics are used to minimize the number of new reallocs. */
-static void
-realloc_jobs_list ()
-{
-  sigset_t set, oset;
-  int nsize, i, j;
-  JOB **nlist;
-
-  nsize = ((js.j_njobs + JOB_SLOTS - 1) / JOB_SLOTS);
-  nsize *= JOB_SLOTS;
-  i = js.j_njobs % JOB_SLOTS;
-  if (i == 0 || i > (JOB_SLOTS >> 1))
-    nsize += JOB_SLOTS;
-
-  BLOCK_CHILD (set, oset);
-  nlist = (JOB **) xmalloc (nsize * sizeof (JOB *));
-  for (i = j = 0; i < js.j_jobslots; i++)
-    if (jobs[i])
-      nlist[j++] = jobs[i];
-
-  js.j_firstj = 0;
-  js.j_lastj = (j > 0) ? j - 1: 0;
-  js.j_jobslots = nsize;
-
-  free (jobs);
-  jobs = nlist;
-
-  UNBLOCK_CHILD (oset);
-}
-
 /* Compact the jobs list by removing dead jobs.  Assumed that we have filled
    the jobs array to some predefined maximum.  Called when the shell is not
    the foreground process (subshell_environment != 0).  Returns the first
    available slot in the compacted list.  If that value is js.j_jobslots, then
    the list needs to be reallocated.  The jobs array is in new memory if
    this returns > 0 and < js.j_jobslots.  FLAGS is reserved for future use. */
+
+/* XXX - this needs changes analogous to mark_dead_jobs_as_notified. */
 static int
 compact_jobs_list (flags)
      int flags;
 {
+  sigset_t set, oset;
+  register int i, j;
+  int nremove, ndel;
+  JOB **newlist;
+
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return js.j_jobslots;
 
-  reap_dead_jobs ();
-  realloc_jobs_list ();
+  if (js.c_childmax < 0)
+    js.c_childmax = getmaxchild ();
 
-  return (js.j_lastj);
+  /* Take out at most a quarter of the jobs in the jobs array, but leave at
+     least js.c_childmax */
+  nremove = js.j_jobslots >> 2;
+  if ((js.j_jobslots - nremove) < js.c_childmax)
+    nremove = js.j_jobslots - js.c_childmax;
+
+  /* need to increase jobs list to at least CHILD_MAX entries */
+  if (nremove < 0)
+    return js.j_jobslots;
+
+  BLOCK_CHILD (set, oset);  
+
+  for (ndel = i = 0; i < js.j_jobslots; i++)
+    if (jobs[i])
+      {
+	if (DEADJOB (i) && (find_last_pid (i, 0) != last_asynchronous_pid))
+	  {
+	    delete_job (i, 0);
+	    ndel++;
+	    if (ndel == nremove)
+	      break;
+	  }
+      }
+
+  if (ndel == 0)
+    {
+      UNBLOCK_CHILD (oset);
+      return js.j_jobslots;
+    }
+
+  newlist = (JOB **)xmalloc ((1 + js.j_jobslots) * sizeof (JOB *));
+  for (i = j = 0; i < js.j_jobslots; i++)
+    if (jobs[i])
+      newlist[j++] = jobs[i];
+
+  js.j_lastj = j - 1;
+  js.j_firstj = 0;
+  js.j_njobs = j;
+
+  ndel = j;
+  for ( ; j < js.j_jobslots; j++)
+    newlist[j] = (JOB *)NULL;
+
+  free (jobs);
+  jobs = newlist;
+
+  UNBLOCK_CHILD (oset);
+
+  return ndel;
 }
 
 /* Delete the job at INDEX from the job list.  Must be called
@@ -759,7 +721,6 @@ delete_job (job_index, warn_stopped)
      int job_index, warn_stopped;
 {
   register JOB *temp;
-  int ndel;
 
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return;
@@ -774,16 +735,7 @@ delete_job (job_index, warn_stopped)
   jobs[job_index] = (JOB *)NULL;
 
   free (temp->wd);
-  ndel = discard_pipeline (temp->pipe);
-
-  js.c_injobs -= ndel;
-  if (temp->state == JDEAD)
-    {
-      js.c_reaped -= ndel;
-if (js.c_reaped < 0)
-  itrace("delete_job (%d): js.c_reaped (%d) < 0 ndel = %d", job_index, js.c_reaped, ndel);
-      js.j_ndead--;
-    }
+  discard_pipeline (temp->pipe);
 
   if (temp->deferred)
     dispose_command (temp->deferred);
@@ -791,10 +743,6 @@ if (js.c_reaped < 0)
   free (temp);
 
   js.j_njobs--;
-  if (js.j_njobs == 0)
-    js.j_firstj = js.j_lastj = 0;
-  else if (jobs[js.j_firstj] == 0 || jobs[js.j_lastj] == 0)
-    reset_job_indices ();
 }
 
 /* Must be called with SIGCHLD blocked. */
@@ -812,26 +760,21 @@ nohup_job (job_index)
 }
 
 /* Get rid of the data structure associated with a process chain. */
-static int
+static void
 discard_pipeline (chain)
      register PROCESS *chain;
 {
   register PROCESS *this, *next;
-  int n;
 
   this = chain;
-  n = 0;
   do
     {
       next = this->next;
       FREE (this->command);
       free (this);
-      n++;
       this = next;
     }
   while (this != chain);
-
-  return n;
 }
 
 /* Add this process to the chain being built in the_pipeline.
@@ -919,11 +862,8 @@ map_over_jobs (func, arg1, arg2)
 
   BLOCK_CHILD (set, oset);
 
-  /* XXX could use js.j_firstj here */
   for (i = result = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("map_over_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
       if (jobs[i])
 	{
 	  result = (*func)(jobs[i], arg1, arg2, i);
@@ -954,7 +894,6 @@ terminate_stopped_jobs ()
 {
   register int i;
 
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
       if (jobs[i] && STOPPED (i))
@@ -972,7 +911,6 @@ hangup_all_jobs ()
 {
   register int i;
 
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
       if (jobs[i])
@@ -1039,11 +977,8 @@ find_job (pid, running_only)
   register int i;
   register PROCESS *p;
 
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
       if (jobs[i])
 	{
 	  p = jobs[i]->pipe;
@@ -1768,14 +1703,10 @@ wait_for_background_pids ()
       BLOCK_CHILD (set, oset);
 
       /* find first running job; if none running in foreground, break */
-      /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("wait_for_background_pids: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
 	if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
 	  break;
-}
+
       if (i == js.j_jobslots)
 	{
 	  UNBLOCK_CHILD (oset);
@@ -2033,10 +1964,7 @@ wait_for (pid)
 	      child->running = PS_DONE;
 	      child->status = 0;	/* XXX -- can't find true status */
 	      if (job != NO_JOB)
-		{
-		  jobs[job]->state = JDEAD;
-		  js.j_ndead++;
-		}
+		jobs[job]->state = JDEAD;
 	    }
 #endif /* WAITPID_BROKEN */
 	}
@@ -2572,6 +2500,7 @@ sigchld_handler (sig)
   oerrno = errno;
   REINSTALL_SIGCHLD_HANDLER;
   sigchld++;
+itrace("sigchld_handler: sigchld = %d", sigchld);
   n = 0;
   if (queue_sigchld == 0)
     n = waitchld (-1, 0);
@@ -2654,11 +2583,10 @@ waitchld (wpid, block)
 
       if (child->running == PS_DONE)
 	{
+	  js.c_reaped++;
 	  js.c_totreaped++;
-	  if (job != NO_JOB)
-	    js.c_reaped++;
 	}
-        
+
       if (job == NO_JOB)
 	continue;
 
@@ -2762,8 +2690,7 @@ set_job_status_and_cleanup (job)
   else
     {
       jobs[job]->state = JDEAD;
-      js.j_ndead++;
-
+itrace("job %d marked as JDEAD", job);
 #if 0
       if (IS_FOREGROUND (job))
 	setjstatus (job);
@@ -2966,7 +2893,6 @@ notify_of_job_status ()
   else
     queue_sigchld++;
 
-  /* XXX could use js.j_firstj here */
   for (job = 0, dir = (char *)NULL; job < js.j_jobslots; job++)
     {
       if (jobs[job] && IS_NOTIFIED (job) == 0)
@@ -3414,14 +3340,10 @@ delete_all_jobs (running_only)
     {
       js.j_current = js.j_previous = NO_JOB;
 
-      /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("delete_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
 	if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
 	  delete_job (i, 1);
-}
+
       if (running_only == 0)
 	{
 	  free ((char *)jobs);
@@ -3446,7 +3368,6 @@ nohup_all_jobs (running_only)
 
   if (js.j_jobslots)
     {
-      /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
 	if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
 	  nohup_job (i);
@@ -3463,14 +3384,9 @@ count_all_jobs ()
 
   /* This really counts all non-dead jobs. */
   BLOCK_CHILD (set, oset);
-  /* XXX could use js.j_firstj here */
   for (i = n = 0; i < js.j_jobslots; i++)
-{
-if (i < js.j_firstj && jobs[i])
-  itrace("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
     if (jobs[i] && DEADJOB(i) == 0)
       n++;
-}
   UNBLOCK_CHILD (oset);
   return n;
 }
@@ -3486,13 +3402,9 @@ mark_all_jobs_as_dead ()
 
   BLOCK_CHILD (set, oset);
 
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     if (jobs[i])
-      {
-	jobs[i]->state = JDEAD;
-	js.j_ndead++;
-      }
+      jobs[i]->state = JDEAD;
 
   UNBLOCK_CHILD (oset);
 }
@@ -3517,7 +3429,6 @@ mark_dead_jobs_as_notified (force)
      around; just run through the array. */
   if (force)
     {
-    /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
 	{
 	  if (jobs[i] && DEADJOB (i) && (interactive_shell || (find_last_pid (i, 0) != last_asynchronous_pid)))
@@ -3527,15 +3438,12 @@ mark_dead_jobs_as_notified (force)
       return;
     }
 
-  /* Mark enough dead jobs as notified to keep CHILD_MAX processes left in the
-     array with the corresponding not marked as notified. */
+  /* Mark enough dead jobs as notified to keep CHILD_MAX jobs left in the
+     array not marked as notified. */
           
   /* Count the number of dead jobs */
-  /* XXX could use js.j_firstj here */
   for (i = ndead = ndeadproc = 0; i < js.j_jobslots; i++)
     {
-if (i < js.j_firstj && jobs[i])
-  itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
       if (jobs[i] && DEADJOB (i))
 	{
 	  ndead++;
@@ -3543,24 +3451,25 @@ if (i < js.j_firstj && jobs[i])
 	}
     }
 
-if (ndeadproc != js.c_reaped)
-  itrace("mark_dead_jobs_as_notified: ndeadproc (%d) != js.c_reaped (%d)", ndeadproc, js.c_reaped);
-if (ndead != js.j_ndead)
-  itrace("mark_dead_jobs_as_notified: ndead (%d) != js.j_ndead (%d)", ndead, js.j_ndead);
-
   if (js.c_childmax < 0)
     js.c_childmax = getmaxchild ();
   if (js.c_childmax < 0)
     js.c_childmax = DEFAULT_CHILD_MAX;
 
-  /* Don't do anything if the number of dead processes is less than CHILD_MAX
-     and we're not forcing a cleanup. */
+itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", js.c_childmax, ndead, ndeadproc);
+  /* Don't do anything if the number of dead jobs is less than CHILD_MAX and
+     we're not forcing a cleanup. */
+#if 1
+  if (ndead <= js.c_childmax)
+#else
   if (ndeadproc <= js.c_childmax)
+#endif
     {
       UNBLOCK_CHILD (oset);
       return;
     }
 
+itrace("marking %d jobs as notified", ndead-js.c_childmax);
   /* Mark enough dead jobs as notified that we keep CHILD_MAX jobs in
      the list.  This isn't exactly right yet; changes need to be made
      to stop_pipeline so we don't mark the newer jobs after we've
@@ -3572,20 +3481,14 @@ if (ndead != js.j_ndead)
      in jobs array.  Then keep a job index corresponding to the `oldest job'
      and start this loop there, wrapping around as necessary.  In effect,
      we turn the list into a circular buffer. */
-  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
       if (jobs[i] && DEADJOB (i) && (interactive_shell || (find_last_pid (i, 0) != last_asynchronous_pid)))
 	{
-if (i < js.j_firstj && jobs[i])
-  itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
-	  /* If marking this job as notified would drop us down below
-	     child_max, don't mark it so we can keep at least child_max
-	     statuses.  XXX -- need to check what Posix actually says
-	     about keeping statuses. */
-	  if ((ndeadproc -= processes_in_job (i)) <= js.c_childmax)
-	    break;
 	  jobs[i]->flags |= J_NOTIFIED;
+itrace("marking job %d as notified", i);
+	  if (--ndead <= js.c_childmax)
+	    break;
 	}
     }
 

@@ -6931,7 +6931,7 @@ add_twochars:
 		     cases:  a quoted null character as above and when
 		     CTLNUL is contained in the (non-null) expansion
 		     of some variable.  We use the had_quoted_null flag to
-		     pass the value through this function to its return value. */
+		     pass the value through this function to its caller. */
 		  if ((tflag & W_HASQUOTEDNULL) && QUOTED_NULL (temp) == 0)
 		    remove_quoted_nulls (temp);	/* XXX */
 		}

@@ -875,9 +875,12 @@ reset_or_restore_signal_handlers (reset)
   /* Take care of the exit trap first */
   if (sigmodes[EXIT_TRAP] & SIG_TRAPPED)
     {
-      free_trap_command (EXIT_TRAP);
-      trap_list[EXIT_TRAP] = (char *)NULL;
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
+      if (reset != reset_signal)
+	{
+	  free_trap_command (EXIT_TRAP);
+	  trap_list[EXIT_TRAP] = (char *)NULL;
+	}
     }
 
   for (i = 1; i < NSIG; i++)

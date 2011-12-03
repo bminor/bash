@@ -708,7 +708,7 @@ array_value_internal (s, quoted, allow_all, rtype)
 	  err_badarraysub (s);
 	  return ((char *)NULL);
 	}
-      else if (var == 0)
+      else if (var == 0 || value_cell (var) == 0)
 	return ((char *)NULL);
       else if (array_p (var) == 0)
 	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);

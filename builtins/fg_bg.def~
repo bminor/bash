@@ -94,6 +94,8 @@ int
 bg_builtin (list)
      WORD_LIST *list;
 {
+  int r;
+
   if (job_control == 0)
     {
       sh_nojobs ((char *)NULL);
@@ -104,7 +106,17 @@ bg_builtin (list)
     return (EX_USAGE);
   list = loptend;
 
-  return (fg_bg (list, 0));
+  /* This relies on the fact that fg_bg() takes a WORD_LIST *, but only acts
+     on the first member (if any) of that list. */
+  do
+    {
+      r = fg_bg (list, 0);
+      if (list)
+	list = list->next;
+    }
+  while (list);
+
+  return r;
 }
 
 /* How to put a job into the foreground/background. */
@@ -119,7 +131,7 @@ fg_bg (list, foreground)
   BLOCK_CHILD (set, oset);
   job = get_job_spec (list);
 
-  if (job < 0 || job >= job_slots || jobs[job] == 0)
+  if (INVALID_JOB (job))
     {
       if (job != DUP_JOB)
 	sh_badjob (list ? list->word->word : "current");

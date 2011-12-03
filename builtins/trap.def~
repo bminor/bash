@@ -23,7 +23,7 @@ $PRODUCES trap.c
 
 $BUILTIN trap
 $FUNCTION trap_builtin
-$SHORT_DOC trap [-lp] [[arg] signal_spec ...]
+$SHORT_DOC trap [-lp] [arg signal_spec ...]
 The command ARG is to be read and executed when the shell receives
 signal(s) SIGNAL_SPEC.  If ARG is absent (and a single SIGNAL_SPEC
 is supplied) or `-', each specified signal is reset to its original
@@ -124,10 +124,13 @@ trap_builtin (list)
       first_arg = list->word->word;
       first_signal = first_arg && *first_arg && all_digits (first_arg) && signal_object_p (first_arg, opt);
 
+      /* Backwards compatibility */
+      if (first_signal)
+	operation = REVERT;
       /* When in posix mode, the historical behavior of looking for a
 	 missing first argument is disabled.  To revert to the original
 	 signal handling disposition, use `-' as the first argument. */
-      if (posixly_correct == 0 && first_arg && *first_arg &&
+      else if (posixly_correct == 0 && first_arg && *first_arg &&
 		(*first_arg != '-' || first_arg[1]) &&
 		signal_object_p (first_arg, opt) && list->next == 0)
 	operation = REVERT;
@@ -211,7 +214,7 @@ showtrap (i)
   char *t, *p, *sn;
 
   p = trap_list[i];
-
+itrace("showtrap: %d", i);
   if (p == (char *)DEFAULT_SIG)
     return;
 
@@ -240,6 +243,7 @@ display_traps (list)
 {
   int result, i;
 
+itrace("trap_builtin");
   if (list == 0)
     {
       for (i = 0; i < BASH_NSIG; i++)

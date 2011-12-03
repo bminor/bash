@@ -230,7 +230,7 @@ distclean maintainer-clean: clean
 $(OFILES):	$(MKBUILTINS) ../config.h
 
 ../version.h: ../config.h ../Makefile Makefile
-	-( cd "${BUILD_DIR}" && ${MAKE} ${MFLAGS} version.h )
+	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
 
 # maintainer special - for now
 po:	builtins.c

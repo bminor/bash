@@ -105,7 +105,7 @@ exit_or_logout (list)
   if (!exit_immediate_okay)
     {
       register int i;
-      for (i = 0; i < js.j_jobslots; i++)
+      for (i = 0; i < job_slots; i++)
 	if (jobs[i] && STOPPED (i))
 	  {
 	    fprintf (stderr, _("There are stopped jobs.\n"));

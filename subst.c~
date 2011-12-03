@@ -4822,7 +4822,6 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
 
   w = parameter_brace_expand_word (name, var_is_special, quoted);
   t = w->word;
-  w->word = 0;
   /* Have to dequote here if necessary */
   if (t)
     {
@@ -5923,7 +5922,6 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     {
       temp = tdesc->word;
       tflag = tdesc->flags;
-      tdesc->word = 0;
       dispose_word_desc (tdesc);
     }
   else
@@ -6751,7 +6749,6 @@ add_string:
 	    had_quoted_null = 1;
 
 	  temp = tword->word;
-	  tword->word = 0;
 	  dispose_word_desc (tword);
 
 	  goto add_string;

@@ -150,6 +150,8 @@ wait_builtin (list)
 	  BLOCK_CHILD (set, oset);
 	  job = get_job_spec (list);
 
+itrace("wait_builtin: get_job_spec returns %d, js.j_current = %d", job, js.j_current);
+
 	  if (INVALID_JOB (job))
 	    {
 	      if (job != DUP_JOB)

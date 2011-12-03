@@ -10901,3 +10901,78 @@ variables.c
 	  generator only gets re-seeded once in a subshell environment, and
 	  assigning a value to RANDOM counts as seeding the generator.  This
 	  makes the sequences a little more predictable
+
+				   1/20
+				   ----
+lib/readline/history.c
+	- fix replace_history_entry, remove_history to return NULL if
+	  passed index is < 0
+
+				   1/22
+				   ----
+lib/sh/netconn.c
+	- fix isnetconn() to understand that getpeername can return ENOTCONN
+	  to indicate that an fd is not a socket
+
+configure.in
+	- set BUILD_DIR to contain backslashes to escape any spaces in the
+	  directory name -- this is what make will accept in targets and
+	  prerequisites, so it's better than trying to use double quotes
+	- set SIZE to the appropriate value if some cross-compiling tool
+	  chain is being used; `size' by default (can be overridden by
+	  SIZE environment variable)
+
+Makefile.in
+	- use $(SIZE) instead of size; set SIZE from configure
+
+				    2/1
+				    ---
+jobs.h
+	- new struct to hold stats and counters for child processes and jobs
+	- change some uses of global and static variables to use members of
+	  new struct (struct jobstats)
+
+				    2/2
+				    ---
+
+jobs.[ch]
+	- change PRUNNING to PALIVE
+	- new define INVALID_JOB
+	- new macro get_job_by_jid(ind), currently expands to jobs[ind]
+	- new define J_JOBSTATE, operates on a JOB * like JOBSTATE operates on
+	  a job index
+	- new function, reset_job_indices, called from delete_job if
+	  js.j_lastj or js.j_firstj are removed
+
+pcomplete.c, builtins/common.c, builtins/{exit,fg_bg,jobs,kill,wait}.def
+	- change global variables (e.g., job_slots) to struct members
+	  (e.g., js.j_jobslots)
+	- use INVALID_JOB define where appropriate
+	- use get_job_by_jid and J_JOBSTATE where appropriate
+
+trap.c
+	- change reset_or_restore_signal_handler to not free the trap
+	  string if the function pointer is reset_signal, which is used when
+	  the trap strings shouldn't be freed, like in command substitution
+
+				    2/4
+				    ---
+jobs.c
+	- new function, realloc_jobs_list, copies jobs array to newly-allocated
+	  memory shrinking (or growing) size to have next multiple of JOB_SLOTS
+	  greater than js.j_njobs
+	- change compact_jobs_list to just call reap_dead_jobs and then
+	  realloc_jobs_list, simplifying it considerably
+	- discard_pipeline now returns `int':  the number of processes freed
+	- slightly changed the logic deciding whether or not to call
+	  compact_jobs_list:  now non-interactive shells will compact the
+	  list if it reaches MAX_JOBS_IN_ARRAY in size
+
+parse.y
+	- move test for backslash-newline after pop_string in shell_getc so
+	  that things like
+
+		((echo 5) \
+		 (echo 6))
+
+	  work right

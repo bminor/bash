@@ -160,7 +160,7 @@ extern procenv_t wait_intr_buf;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
-struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB };
+struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB };
 
 /* The array of known jobs. */
 JOB **jobs = (JOB **)NULL;
@@ -539,7 +539,7 @@ stop_pipeline (async, deferred)
 
       newjob = (JOB *)xmalloc (sizeof (JOB));
 
-      for (n = 1, p = the_pipeline; p->next != the_pipeline; n++, p = p->next)
+      for (n = 0, p = the_pipeline; p->next != the_pipeline; n++, p = p->next)
 	;
       p->next = (PROCESS *)NULL;
       newjob->pipe = REVERSE_LIST (the_pipeline, PROCESS *);
@@ -578,14 +578,11 @@ stop_pipeline (async, deferred)
       jobs[i] = newjob;
       if (newjob->state == JDEAD && (newjob->flags & J_FOREGROUND))
 	setjstatus (i);
-      if (newjob->state == JDEAD)
-	{
-	  js.c_reaped += n;	/* wouldn't have been done since this was not part of a job */
-	  js.j_ndead++;
-	}
+
       js.c_injobs += n;
 
       js.j_lastj = i;
+itrace("stop_pipeline: set js.j_lastj = %d", js.j_lastj);
       js.j_njobs++;
     }
   else
@@ -642,6 +639,7 @@ reset_job_indices ()
 	}
       if (js.j_firstj == old)
         js.j_firstj = js.j_lastj = js.j_njobs = 0;
+itrace("reset_job_indices: reset js.j_firstj from %d to %d", old, js.j_firstj);
     }
   if (jobs[js.j_lastj] == 0)
     {
@@ -656,6 +654,7 @@ reset_job_indices ()
 	}
       if (js.j_lastj == old)
         js.j_firstj = js.j_lastj = js.j_njobs = 0;
+itrace("reset_job_indices: reset js.j_lastj from %d to %d", old, js.j_lastj);
     }
 }
       
@@ -778,18 +777,14 @@ delete_job (job_index, warn_stopped)
 
   js.c_injobs -= ndel;
   if (temp->state == JDEAD)
-    {
-      js.c_reaped -= ndel;
-if (js.c_reaped < 0)
-  itrace("delete_job (%d): js.c_reaped (%d) < 0 ndel = %d", job_index, js.c_reaped, ndel);
-      js.j_ndead--;
-    }
+    js.c_reaped -= ndel;
 
   if (temp->deferred)
     dispose_command (temp->deferred);
 
   free (temp);
 
+itrace("delete_job: deleted job %d", job_index);
   js.j_njobs--;
   if (js.j_njobs == 0)
     js.j_firstj = js.j_lastj = 0;
@@ -2033,10 +2028,7 @@ wait_for (pid)
 	      child->running = PS_DONE;
 	      child->status = 0;	/* XXX -- can't find true status */
 	      if (job != NO_JOB)
-		{
-		  jobs[job]->state = JDEAD;
-		  js.j_ndead++;
-		}
+		jobs[job]->state = JDEAD;
 	    }
 #endif /* WAITPID_BROKEN */
 	}
@@ -2762,8 +2754,7 @@ set_job_status_and_cleanup (job)
   else
     {
       jobs[job]->state = JDEAD;
-      js.j_ndead++;
-
+itrace("job %d marked as JDEAD", job);
 #if 0
       if (IS_FOREGROUND (job))
 	setjstatus (job);
@@ -3489,10 +3480,7 @@ mark_all_jobs_as_dead ()
   /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     if (jobs[i])
-      {
-	jobs[i]->state = JDEAD;
-	js.j_ndead++;
-      }
+      jobs[i]->state = JDEAD;
 
   UNBLOCK_CHILD (oset);
 }
@@ -3545,14 +3533,12 @@ if (i < js.j_firstj && jobs[i])
 
 if (ndeadproc != js.c_reaped)
   itrace("mark_dead_jobs_as_notified: ndeadproc (%d) != js.c_reaped (%d)", ndeadproc, js.c_reaped);
-if (ndead != js.j_ndead)
-  itrace("mark_dead_jobs_as_notified: ndead (%d) != js.j_ndead (%d)", ndead, js.j_ndead);
-
   if (js.c_childmax < 0)
     js.c_childmax = getmaxchild ();
   if (js.c_childmax < 0)
     js.c_childmax = DEFAULT_CHILD_MAX;
 
+itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", js.c_childmax, ndead, ndeadproc);
   /* Don't do anything if the number of dead processes is less than CHILD_MAX
      and we're not forcing a cleanup. */
   if (ndeadproc <= js.c_childmax)
@@ -3561,6 +3547,7 @@ if (ndead != js.j_ndead)
       return;
     }
 
+itrace("marking up to %d jobs as notified", ndead, ndeadproc);
   /* Mark enough dead jobs as notified that we keep CHILD_MAX jobs in
      the list.  This isn't exactly right yet; changes need to be made
      to stop_pipeline so we don't mark the newer jobs after we've
@@ -3586,6 +3573,7 @@ if (i < js.j_firstj && jobs[i])
 	  if ((ndeadproc -= processes_in_job (i)) <= js.c_childmax)
 	    break;
 	  jobs[i]->flags |= J_NOTIFIED;
+itrace("marking job %d as notified", i);
 	}
     }
 

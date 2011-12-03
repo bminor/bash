@@ -1345,8 +1345,13 @@ yy_stream_get ()
 
   result = EOF;
   if (bash_input.location.file)
-    result = getc_with_restart (bash_input.location.file);
-
+    {
+      if (interactive)
+	interrupt_immediately++;
+      result = getc_with_restart (bash_input.location.file);
+      if (interactive)
+	interrupt_immediately--;
+    }
   return (result);
 }
 
@@ -1659,10 +1664,10 @@ read_a_line (remove_quoted_newline)
   pass_next = 0;
   while (1)
     {
-      c = yy_getc ();
-
       /* Allow immediate exit if interrupted during input. */
       QUIT;
+
+      c = yy_getc ();
 
       /* Ignore null bytes in input. */
       if (c == 0)
@@ -2061,6 +2066,7 @@ shell_getc (remove_quoted_newline)
   if (uc)
     shell_input_line_index++;
 
+#if 0
   if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
     {
 	if (SHOULD_PROMPT ())
@@ -2068,6 +2074,7 @@ shell_getc (remove_quoted_newline)
 	line_number++;
 	goto restart_read;
     }
+#endif
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If UC is NULL, we have reached the end of the current input string.  If
@@ -2083,6 +2090,16 @@ shell_getc (remove_quoted_newline)
 	shell_input_line_index++;
     }
 #endif /* ALIAS || DPAREN_ARITHMETIC */
+
+#if 1
+  if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
+    {
+	if (SHOULD_PROMPT ())
+	  prompt_again ();
+	line_number++;
+	goto restart_read;
+    }
+#endif
 
   if (!uc && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);
@@ -2913,9 +2930,10 @@ parse_dparen (c)
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
 	{
+	  wd = alloc_word_desc ();
+	  wd->word = wval;
 	  wd = make_word (wval);
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
-	  free (wval);
 	  return (ARITH_FOR_EXPRS);
 	}
       else
@@ -2931,10 +2949,10 @@ parse_dparen (c)
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)	/* arithmetic command */
 	{
-	  wd = make_word (wval);
+	  wd = alloc_word_desc ();
+	  wd->word = wval;
 	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB;
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
-	  free (wval);	/* make_word copies it */
 	  return (ARITH_CMD);
 	}
       else if (cmdtyp == 0)	/* nested subshell */
@@ -3524,7 +3542,6 @@ read_token_word (character)
 	  goto next_character;
         }
       /* Identify possible compound array variable assignment. */
-      /* XXX - changes here for `+=' */
       else if MBTEST(character == '=' && token_index > 0 && (assignment_acceptable (last_read_token) || (parser_state & PST_ASSIGNOK)) && token_is_assignment (token, token_index))
 	{
 	  peek_char = shell_getc (1);

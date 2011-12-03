@@ -513,20 +513,22 @@ it_init_joblist (itp, jstate)
   register int i;
   register PROCESS *p;
   char *s, *t;
-  JOB_STATE js;
+  JOB *j;
+  JOB_STATE ws;		/* wanted state */
 
   if (jstate == 0)
-    js = JRUNNING;
+    ws = JRUNNING;
   else if (jstate == 1)
-    js = JSTOPPED;
+    ws = JSTOPPED;
 
-  sl = strlist_create (job_slots);
-  for (i = job_slots - 1; i >= 0; i--)
+  sl = strlist_create (js.j_jobslots);
+  for (i = js.j_jobslots - 1; i >= 0; i--)
     {
-      if (jobs[i] == 0)
+      j = get_job_by_jid (i);
+      if (j == 0)
 	continue;
-      p = jobs[i]->pipe;
-      if (jstate == -1 || JOBSTATE(i) == js)
+      p = j->pipe;
+      if (jstate == -1 || JOBSTATE(i) == ws)
 	{
 	  s = savestring (p->command);
 	  t = strpbrk (s, " \t\n");

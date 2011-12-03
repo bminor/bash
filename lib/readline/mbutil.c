@@ -77,10 +77,12 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
      char *string;
      int seed, count, find_non_zero;
 {
-  size_t tmp = 0;
+  size_t tmp;
   mbstate_t ps;
-  int point = 0;
+  int point;
   wchar_t wc;
+
+  tmp = 0;
 
   memset(&ps, 0, sizeof (mbstate_t));
   if (seed < 0)
@@ -88,7 +90,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   if (count <= 0)
     return seed;
 
-  point = seed + _rl_adjust_point(string, seed, &ps);
+  point = seed + _rl_adjust_point (string, seed, &ps);
   /* if this is true, means that seed was not pointed character
      started byte.  So correct the point and consume count */
   if (seed < point)
@@ -134,7 +136,8 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
 	    break;
 	}
     }
-    return point;
+
+  return point;
 }
 
 static int

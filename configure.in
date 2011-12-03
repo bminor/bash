@@ -1,11 +1,11 @@
 dnl
-dnl Configure script for bash-3.0
+dnl Configure script for bash-3.1
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2004 Free Software Foundation, Inc.
+# Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.172, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.1, version 3.173, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.1)
 define(relstatus, devel)
@@ -557,6 +557,28 @@ opennt*|interix*)	MAKE_SHELL="$INTERIX_ROOT/bin/sh" ;;
 esac
 AC_SUBST(MAKE_SHELL)
 
+dnl this is similar to the expanded AC_PROG_RANLIB
+if test x$SIZE = x; then
+	if test x$ac_tool_prefix = x; then
+		SIZE=size
+	else
+		SIZE=${ac_tool_prefix}size
+		save_IFS=$IFS ; IFS=:
+		size_found=0
+		for dir in $PATH; do
+			if test -x $dir/$SIZE ; then
+				size_found=1
+				break
+			fi
+		done
+		if test $size_found -eq 0; then
+			SIZE=size
+		fi
+		IFS=$save_IFS
+	fi
+fi
+AC_SUBST(SIZE)
+
 dnl Turn on any extensions available in the GNU C library.
 AC_DEFINE(_GNU_SOURCE, 1)
 
@@ -1004,6 +1026,10 @@ case "$srcdir" in
 esac
 
 BUILD_DIR=`pwd`
+case "$BUILD_DIR" in
+*\ *)	BUILD_DIR=`echo "$BUILD_DIR" | sed 's: :\\\\ :g'` ;;
+*)	;;
+esac
 
 AC_SUBST(PROFILE_FLAGS)
 
