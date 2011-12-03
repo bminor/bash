@@ -124,9 +124,13 @@ zsyncfd (fd)
      int fd;
 {
   off_t off;
+  int r;
 
   off = lused - lind;
+  r = 0;
   if (off > 0)
-    lseek (fd, -off, SEEK_CUR);
-  lused = lind = 0;
+    r = lseek (fd, -off, SEEK_CUR);
+
+  if (r >= 0)
+    lused = lind = 0;
 }

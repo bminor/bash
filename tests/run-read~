@@ -1,0 +1,4 @@
+echo "warning: different versions of wc put differing amounts of whitespace" >&2
+echo "warning: before their output.  Please do not consider this an error." >&2
+${THIS_SH} ./read.tests > /tmp/xx 2>&1
+diff /tmp/xx read.right && rm -f /tmp/xx

@@ -11151,5 +11151,29 @@ builtins/read.def
 	  the input (including any trailing field delimiters), falling back
 	  to the previous behavior if it does not.  This is what POSIX.2
 	  specifies, I believe (and the consensus of the austin-group list).
-	  This requires a few tests in read.tests to be changed
+	  This requires a few tests in read.tests to be changed: backslashes
+	  escaping IFS whitespace characters at the end of input cause the
+	  whitespace characters to be preserved in the value assigned to the
+	  variable, and the trailing non-whitespace field delimiter issue
 
+				    3/7
+				    ---
+configure.in
+	- add -D_POSIX_SOURCE to the LOCAL_CFLAGS for Interix
+
+				    3/8
+				    ---
+bashline.c
+	- make bash_directory_expansion a void function, since it doesn't have
+	  any return value
+
+				    3/9
+				    ---
+builtins/read.def
+	- when testing for a pipe, use `fd' instead of hard-coding 0, since we
+	  can read from other file descriptors now
+
+lib/sh/zread.c
+	- in zsyncfd, only set lind and lused to 0 if the lseek succeeds.
+	  If the lseek fails, we might steal input from other programs, but
+	  a failed lseek won't cause us to erroneously discard input

@@ -11166,3 +11166,20 @@ configure.in
 bashline.c
 	- make bash_directory_expansion a void function, since it doesn't have
 	  any return value
+
+				    3/9
+				    ---
+builtins/read.def
+	- when testing for a pipe, use `fd' instead of hard-coding 0, since we
+	  can read from other file descriptors now
+
+lib/sh/zread.c
+	- in zsyncfd, only set lind and lused to 0 if the lseek succeeds.
+	  If the lseek fails, we might steal input from other programs, but
+	  a failed lseek won't cause us to erroneously discard input
+
+				   3/11
+				   ----
+builtins/evalstring.c
+	- don't allow parse_and_execute to short-circuit and call exec() if
+	  the command's return value is being inverted
