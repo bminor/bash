@@ -1,711 +1,145 @@
-*** ../bash-3.0-patched/variables.c	Wed Sep  8 11:07:44 2004
---- variables.c	Fri Nov  5 21:17:42 2004
+*** ../bash-3.0-patched/lib/readline/display.c	Wed Sep  8 11:07:51 2004
+--- lib/readline/display.c	Sat Jan  8 21:51:40 2005
 ***************
-*** 200,204 ****
-  static SHELL_VAR *new_shell_variable __P((const char *));
-  static SHELL_VAR *make_new_variable __P((const char *, HASH_TABLE *));
-! static SHELL_VAR *bind_variable_internal __P((const char *, char *, HASH_TABLE *, int));
+*** 181,184 ****
+--- 186,201 ----
+  static int prompt_physical_chars;
   
-  static void free_variable_hash_data __P((PTR_T));
---- 200,204 ----
-  static SHELL_VAR *new_shell_variable __P((const char *));
-  static SHELL_VAR *make_new_variable __P((const char *, HASH_TABLE *));
-! static SHELL_VAR *bind_variable_internal __P((const char *, char *, HASH_TABLE *, int, int));
-  
-  static void free_variable_hash_data __P((PTR_T));
-***************
-*** 321,325 ****
-  #  if 0
-        /* Array variables may not yet be exported. */
-!       else if (*string == '(' && string[1] == '[' && xstrchr (string, ')'))
-  	{
-  	  string_length = 1;
---- 321,325 ----
-  #  if 0
-        /* Array variables may not yet be exported. */
-!       else if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
-  	{
-  	  string_length = 1;
-***************
-*** 334,338 ****
-        else
-  	{
-! 	  temp_var = bind_variable (name, string);
-  	  VSETATTR (temp_var, (att_exported | att_imported));
-  	  array_needs_making = 1;
---- 334,338 ----
-        else
-  	{
-! 	  temp_var = bind_variable (name, string, 0);
-  	  VSETATTR (temp_var, (att_exported | att_imported));
-  	  array_needs_making = 1;
-***************
-*** 351,355 ****
-  
-    /* Set up initial value of $_ */
-!   temp_var = bind_variable ("_", dollar_vars[0]);
-  
-    /* Remember this pid. */
---- 351,355 ----
-  
-    /* Set up initial value of $_ */
-!   temp_var = bind_variable ("_", dollar_vars[0], 0);
-  
-    /* Remember this pid. */
-***************
-*** 373,377 ****
-      char node_name[22];
-      qnx_nidtostr (getnid (), node_name, sizeof (node_name));
-!     temp_var = bind_variable ("NODE", node_name);
-      set_auto_export (temp_var);
-    }
---- 373,377 ----
-      char node_name[22];
-      qnx_nidtostr (getnid (), node_name, sizeof (node_name));
-!     temp_var = bind_variable ("NODE", node_name, 0);
-      set_auto_export (temp_var);
-    }
-***************
-*** 393,397 ****
-  
-    /* Don't allow IFS to be imported from the environment. */
-!   temp_var = bind_variable ("IFS", " \t\n");
-    setifs (temp_var);
-  
---- 393,397 ----
-  
-    /* Don't allow IFS to be imported from the environment. */
-!   temp_var = bind_variable ("IFS", " \t\n", 0);
-    setifs (temp_var);
-  
-***************
-*** 412,418 ****
-  
-    /* Initialize the `getopts' stuff. */
-!   bind_variable ("OPTIND", "1");
-    getopts_reset (0);
-!   bind_variable ("OPTERR", "1");
-    sh_opterr = 1;
-  
---- 412,418 ----
-  
-    /* Initialize the `getopts' stuff. */
-!   bind_variable ("OPTIND", "1", 0);
-    getopts_reset (0);
-!   bind_variable ("OPTERR", "1", 0);
-    sh_opterr = 1;
-  
-***************
-*** 423,427 ****
-       to it. */
-    name = get_bash_name ();
-!   temp_var = bind_variable ("BASH", name);
-    free (name);
-  
---- 423,427 ----
-       to it. */
-    name = get_bash_name ();
-!   temp_var = bind_variable ("BASH", name, 0);
-    free (name);
-  
-***************
-*** 433,437 ****
-  
-    /* Make a variable called BASH_VERSION which contains the version info. */
-!   bind_variable ("BASH_VERSION", shell_version_string ());
-  #if defined (ARRAY_VARS)
-    make_vers_array ();
---- 433,437 ----
-  
-    /* Make a variable called BASH_VERSION which contains the version info. */
-!   bind_variable ("BASH_VERSION", shell_version_string (), 0);
-  #if defined (ARRAY_VARS)
-    make_vers_array ();
-***************
-*** 439,443 ****
-  
-    if (command_execution_string)
-!     bind_variable ("BASH_EXECUTION_STRING", command_execution_string);
-  
-    /* Find out if we're supposed to be in Posix.2 mode via an
---- 439,443 ----
-  
-    if (command_execution_string)
-!     bind_variable ("BASH_EXECUTION_STRING", command_execution_string, 0);
-  
-    /* Find out if we're supposed to be in Posix.2 mode via an
-***************
-*** 557,561 ****
-    temp_var = find_variable ("HOME");
-    if (temp_var == 0)
-!     temp_var = bind_variable ("HOME", sh_get_home_dir ());
-  #if 0
-    VSETATTR (temp_var, att_exported);
---- 557,561 ----
-    temp_var = find_variable ("HOME");
-    if (temp_var == 0)
-!     temp_var = bind_variable ("HOME", sh_get_home_dir (), 0);
-  #if 0
-    VSETATTR (temp_var, att_exported);
-***************
-*** 575,579 ****
-        if (current_user.shell == 0)
-  	get_current_user_info ();
-!       temp_var = bind_variable ("SHELL", current_user.shell);
-      }
-  #if 0
---- 575,579 ----
-        if (current_user.shell == 0)
-  	get_current_user_info ();
-!       temp_var = bind_variable ("SHELL", current_user.shell, 0);
-      }
-  #if 0
-***************
-*** 697,701 ****
-      }
-  
-!   temp_var = bind_variable ("SHLVL", new_level);
-    set_auto_export (temp_var);
-  }
---- 697,701 ----
-      }
-  
-!   temp_var = bind_variable ("SHLVL", new_level, 0);
-    set_auto_export (temp_var);
-  }
-***************
-*** 732,736 ****
-      {
-        set_working_directory (home_string);
-!       temp_var = bind_variable ("PWD", home_string);
-        set_auto_export (temp_var);
-      }
---- 732,736 ----
-      {
-        set_working_directory (home_string);
-!       temp_var = bind_variable ("PWD", home_string, 0);
-        set_auto_export (temp_var);
-      }
-***************
-*** 740,744 ****
-        if (temp_string)
-  	{
-! 	  temp_var = bind_variable ("PWD", temp_string);
-  	  set_auto_export (temp_var);
-  	  free (temp_string);
---- 740,744 ----
-        if (temp_string)
-  	{
-! 	  temp_var = bind_variable ("PWD", temp_string, 0);
-  	  set_auto_export (temp_var);
-  	  free (temp_string);
-***************
-*** 749,753 ****
-       `environment variable' and therefore should be auto-exported.
-       Make a dummy invisible variable for OLDPWD, and mark it as exported. */
-!   temp_var = bind_variable ("OLDPWD", (char *)NULL);
-    VSETATTR (temp_var, (att_exported | att_invisible));
-  }
---- 749,753 ----
-       `environment variable' and therefore should be auto-exported.
-       Make a dummy invisible variable for OLDPWD, and mark it as exported. */
-!   temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
-    VSETATTR (temp_var, (att_exported | att_invisible));
-  }
-***************
-*** 764,768 ****
-    if (temp_var)
-      VUNSETATTR (temp_var, (att_readonly | att_exported));
-!   temp_var = bind_variable ("PPID", name);
-    VSETATTR (temp_var, (att_readonly | att_integer));
-  }
---- 764,768 ----
-    if (temp_var)
-      VUNSETATTR (temp_var, (att_readonly | att_exported));
-!   temp_var = bind_variable ("PPID", name, 0);
-    VSETATTR (temp_var, (att_readonly | att_integer));
-  }
-***************
-*** 778,782 ****
-    if (v == 0)
-      {
-!       v = bind_variable ("UID", b);
-        VSETATTR (v, (att_readonly | att_integer));
-      }
---- 778,782 ----
-    if (v == 0)
-      {
-!       v = bind_variable ("UID", b, 0);
-        VSETATTR (v, (att_readonly | att_integer));
-      }
-***************
-*** 788,792 ****
-    if (v == 0)
-      {
-!       v = bind_variable ("EUID", b);
-        VSETATTR (v, (att_readonly | att_integer));
-      }
---- 788,792 ----
-    if (v == 0)
-      {
-!       v = bind_variable ("EUID", b, 0);
-        VSETATTR (v, (att_readonly | att_integer));
-      }
-***************
-*** 831,838 ****
-  
-    v = inttostr (lines, val, sizeof (val));
-!   bind_variable ("LINES", v);
-  
-    v = inttostr (cols, val, sizeof (val));
-!   bind_variable ("COLUMNS", v);
-  }
-  
---- 831,838 ----
-  
-    v = inttostr (lines, val, sizeof (val));
-!   bind_variable ("LINES", v, 0);
-  
-    v = inttostr (cols, val, sizeof (val));
-!   bind_variable ("COLUMNS", v, 0);
-  }
-  
-***************
-*** 984,988 ****
-    do \
-      { \
-!       v = bind_variable (var, (val)); \
-        v->dynamic_value = gfunc; \
-        v->assign_func = afunc; \
---- 984,988 ----
-    do \
-      { \
-!       v = bind_variable (var, (val), 0); \
-        v->dynamic_value = gfunc; \
-        v->assign_func = afunc; \
-***************
-*** 1229,1233 ****
-    char *p;
-  
-!   p = savestring (the_printed_command_except_trap);
-    FREE (value_cell (var));
-    var_setvalue (var, p);
---- 1229,1240 ----
-    char *p;
-  
-!   
-!   if (the_printed_command_except_trap)
-!     p = savestring (the_printed_command_except_trap);
-!   else
-!     {
-!       p = (char *)xmalloc (1);
-!       p[0] = '\0';
-!     }
-    FREE (value_cell (var));
-    var_setvalue (var, p);
-***************
-*** 1420,1428 ****
-  
-  #  if defined (DEBUGGER)
-!   v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign);
-!   v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign);
-  #  endif /* DEBUGGER */
-!   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign);
-!   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign);
-  #endif
-  
---- 1427,1435 ----
-  
-  #  if defined (DEBUGGER)
-!   v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign|att_nounset);
-!   v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign|att_nounset);
-  #  endif /* DEBUGGER */
-!   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign|att_nounset);
-!   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign|att_nounset);
-  #endif
-  
-***************
-*** 1583,1587 ****
-    v = find_variable (name);
-    if (v == 0)
-!     v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH);
-    return (v);
-  }
---- 1590,1594 ----
-    v = find_variable (name);
-    if (v == 0)
-!     v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH, 0);
-    return (v);
-  }
-***************
-*** 1637,1641 ****
-  
-    if (old_var == 0)
-!     new_var = bind_variable_internal (name, "", vc->table, HASH_NOSRCH);
-    else
-      {
---- 1644,1648 ----
-  
-    if (old_var == 0)
-!     new_var = bind_variable_internal (name, "", vc->table, HASH_NOSRCH, 0);
-    else
-      {
-***************
-*** 1752,1762 ****
-  
-  char *
-! make_variable_value (var, value)
-       SHELL_VAR *var;
-       char *value;
-  {
-!   char *retval;
-!   intmax_t lval;
-!   int expok;
-  
-    /* If this variable has had its type set to integer (via `declare -i'),
---- 1759,1770 ----
-  
-  char *
-! make_variable_value (var, value, flags)
-       SHELL_VAR *var;
-       char *value;
-+      int flags;
-  {
-!   char *retval, *oval;
-!   intmax_t lval, rval;
-!   int expok, olen;
-  
-    /* If this variable has had its type set to integer (via `declare -i'),
-***************
-*** 1767,1778 ****
-    if (integer_p (var))
-      {
-!       lval = evalexp (value, &expok);
-        if (expok == 0)
-  	jump_to_top_level (DISCARD);
-!       retval = itos (lval);
-      }
-    else if (value)
-      {
-!       if (*value)
-  	retval = savestring (value);
-        else
---- 1775,1806 ----
-    if (integer_p (var))
-      {
-!       if (flags & ASS_APPEND)
-! 	{
-! 	  oval = value_cell (var);
-! 	  lval = evalexp (oval, &expok);	/* ksh93 seems to do this */
-! 	  if (expok == 0)
-! 	    jump_to_top_level (DISCARD);
-! 	}
-!       rval = evalexp (value, &expok);
-        if (expok == 0)
-  	jump_to_top_level (DISCARD);
-!       if (flags & ASS_APPEND)
-! 	rval += lval;
-!       retval = itos (rval);
-      }
-    else if (value)
-      {
-!       if (flags & ASS_APPEND)
-! 	{
-! 	  oval = value_cell (var);
-! 	  if (oval == 0)	/* paranoia */
-! 	    oval = "";
-! 	  olen = STRLEN (oval);
-! 	  retval = (char *)xmalloc (olen + (value ? STRLEN (value) : 0) + 1);
-! 	  strcpy (retval, oval);
-! 	  if (value)
-! 	    strcpy (retval+olen, value);
-! 	}
-!       else if (*value)
-  	retval = savestring (value);
-        else
-***************
-*** 1791,1799 ****
-     temporary environment (but usually is not). */
-  static SHELL_VAR *
-! bind_variable_internal (name, value, table, hflags)
-       const char *name;
-       char *value;
-       HASH_TABLE *table;
-!      int hflags;
-  {
-    char *newval;
---- 1819,1827 ----
-     temporary environment (but usually is not). */
-  static SHELL_VAR *
-! bind_variable_internal (name, value, table, hflags, aflags)
-       const char *name;
-       char *value;
-       HASH_TABLE *table;
-!      int hflags, aflags;
-  {
-    char *newval;
-***************
-*** 1805,1809 ****
-      {
-        entry = make_new_variable (name, table);
-!       var_setvalue (entry, make_variable_value (entry, value));
-      }
-    else if (entry->assign_func)	/* array vars have assign functions now */
---- 1833,1837 ----
-      {
-        entry = make_new_variable (name, table);
-!       var_setvalue (entry, make_variable_value (entry, value, 0)); /* XXX */
-      }
-    else if (entry->assign_func)	/* array vars have assign functions now */
-***************
-*** 1824,1828 ****
-        VUNSETATTR (entry, att_invisible);
-  
-!       newval = make_variable_value (entry, value);
-  
-        /* Invalidate any cached export string */
---- 1852,1856 ----
-        VUNSETATTR (entry, att_invisible);
-  
-!       newval = make_variable_value (entry, value, aflags);	/* XXX */
-  
-        /* Invalidate any cached export string */
-***************
-*** 1861,1867 ****
-  
-  SHELL_VAR *
-! bind_variable (name, value)
-       const char *name;
-       char *value;
-  {
-    SHELL_VAR *v;
---- 1889,1896 ----
-  
-  SHELL_VAR *
-! bind_variable (name, value, flags)
-       const char *name;
-       char *value;
-+      int flags;
-  {
-    SHELL_VAR *v;
-***************
-*** 1890,1897 ****
-            v = hash_lookup (name, vc->table);
-            if (v)
-! 	    return (bind_variable_internal (name, value, vc->table, 0));
-          }
-      }
-!   return (bind_variable_internal (name, value, global_variables->table, 0));
-  }
-  
---- 1919,1926 ----
-            v = hash_lookup (name, vc->table);
-            if (v)
-! 	    return (bind_variable_internal (name, value, vc->table, 0, flags));
-          }
-      }
-!   return (bind_variable_internal (name, value, global_variables->table, 0, flags));
-  }
-  
-***************
-*** 1902,1908 ****
-     and note that the export environment needs to be recreated. */
-  SHELL_VAR *
-! bind_variable_value (var, value)
-       SHELL_VAR *var;
-       char *value;
-  {
-    char *t;
---- 1931,1938 ----
-     and note that the export environment needs to be recreated. */
-  SHELL_VAR *
-! bind_variable_value (var, value, aflags)
-       SHELL_VAR *var;
-       char *value;
-+      int aflags;
-  {
-    char *t;
-***************
-*** 1910,1914 ****
-    VUNSETATTR (var, att_invisible);
-  
-!   t = make_variable_value (var, value);
-    FREE (value_cell (var));
-    var_setvalue (var, t);
---- 1940,1944 ----
-    VUNSETATTR (var, att_invisible);
-  
-!   t = make_variable_value (var, value, aflags);
-    FREE (value_cell (var));
-    var_setvalue (var, t);
-***************
-*** 1966,1973 ****
-  #if defined (ARRAY_VARS)
-    if (isarr)
-!     v = assign_array_element (lhs, rhs);
-    else
-  #endif
-!     v = bind_variable (lhs, rhs);
-  
-    if (isint)
---- 1996,2003 ----
-  #if defined (ARRAY_VARS)
-    if (isarr)
-!     v = assign_array_element (lhs, rhs, 0);
-    else
-  #endif
-!     v = bind_variable (lhs, rhs, 0);
-  
-    if (isint)
-***************
-*** 2068,2077 ****
-     temporary environments.  The expansion code in subst.c calls this. */
-  int
-! assign_in_env (string)
-!      const char *string;
-  {
-    int offset;
-    char *name, *temp, *value;
-    SHELL_VAR *var;
-  
-    offset = assignment (string, 0);
---- 2098,2110 ----
-     temporary environments.  The expansion code in subst.c calls this. */
-  int
-! assign_in_env (word)
-!      WORD_DESC *word;
-  {
-    int offset;
-    char *name, *temp, *value;
-    SHELL_VAR *var;
-+   const char *string;
++ /* Variables to save and restore prompt and display information. */
 + 
-+   string = word->word;
-  
-    offset = assignment (string, 0);
-***************
-*** 2083,2086 ****
---- 2116,2123 ----
-        name[offset] = 0;
-  
-+       /* ignore the `+' when assigning temporary environment */
-+       if (name[offset - 1] == '+')
-+ 	name[offset - 1] = '\0';
++ /* These are getting numerous enough that it's time to create a struct. */
 + 
-        var = find_variable (name);
-        if (var && (readonly_p (var) || noassign_p (var)))
++ static char *saved_local_prompt;
++ static char *saved_local_prefix;
++ static int saved_last_invisible;
++ static int saved_visible_length;
++ static int saved_prefix_length;
++ static int saved_invis_chars_first_line;
++ static int saved_physical_chars;
++ 
+  /* Expand the prompt string S and return the number of visible
+     characters in *LP, if LP is not null.  This is currently more-or-less
 ***************
-*** 2093,2100 ****
-  
-        temp = name + offset + 1;
-        temp = (xstrchr (temp, '~') != 0) ? bash_tilde_expand (temp, 1) : savestring (temp);
+*** 1797,1803 ****
+    return ((ISPRINT (uc)) ? 1 : 2);
+  }
 - 
-        value = expand_string_unsplit_to_string (temp, 0);
-        free (temp);
-      }
+  /* How to print things in the "echo-area".  The prompt is treated as a
+     mini-modeline. */
   
---- 2130,2140 ----
+  #if defined (USE_VARARGS)
+--- 1825,1831 ----
+    return ((ISPRINT (uc)) ? 1 : 2);
+  }
+  /* How to print things in the "echo-area".  The prompt is treated as a
+     mini-modeline. */
++ static int msg_saved_prompt = 0;
   
-        temp = name + offset + 1;
-+ #if 0
-        temp = (xstrchr (temp, '~') != 0) ? bash_tilde_expand (temp, 1) : savestring (temp);
-        value = expand_string_unsplit_to_string (temp, 0);
-        free (temp);
-+ #else
-+       value = expand_assignment_string_to_string (temp, 0);
-+ #endif
-      }
-  
+  #if defined (USE_VARARGS)
 ***************
-*** 2306,2309 ****
---- 2346,2355 ----
-    if (old_var && local_p (old_var) && variable_context == old_var->context)
-      {
-+ #if defined (ARRAY_VARS)
-+       if (array_p (old_var))
-+ 	array_dispose (array_cell (old_var));
-+       else
-+ #endif
-+ 	FREE (value_cell (old_var));
-        /* Reset the attributes.  Preserve the export attribute if the variable
-           came from a temporary environment.  Make sure it stays local, and
-***************
-*** 2312,2316 ****
-        VSETATTR (old_var, att_local);
-        VSETATTR (old_var, att_invisible);
--       FREE (value_cell (old_var));
-        var_setvalue (old_var, (char *)NULL);
-        INVALIDATE_EXPORTSTR (old_var);
---- 2358,2361 ----
-***************
-*** 2390,2394 ****
-        if (!entry) \
-  	{ \
-! 	  entry = bind_variable (name, ""); \
-  	  if (!no_invisible_vars) entry->attributes |= att_invisible; \
-  	} \
---- 2435,2439 ----
-        if (!entry) \
-  	{ \
-! 	  entry = bind_variable (name, "", 0); \
-  	  if (!no_invisible_vars) entry->attributes |= att_invisible; \
-  	} \
-***************
-*** 2832,2836 ****
-      }
+*** 1830,1835 ****
+--- 1858,1874 ----
+    va_end (args);
   
-!   v = bind_variable_internal (var->name, value_cell (var), binding_table, 0);
-  
-    /* XXX - should we set the context here?  It shouldn't matter because of how
---- 2877,2881 ----
-      }
-  
-!   v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, 0);
-  
-    /* XXX - should we set the context here?  It shouldn't matter because of how
++   if (saved_local_prompt == 0)
++     {
++       rl_save_prompt ();
++       msg_saved_prompt = 1;
++     }
+    rl_display_prompt = msg_buf;
++   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
++ 					 &prompt_last_invisible,
++ 					 &prompt_invis_chars_first_line,
++ 					 &prompt_physical_chars);
++   local_prompt_prefix = (char *)NULL;
+    (*rl_redisplay_function) ();
++ 
+    return 0;
+  }
 ***************
-*** 3350,3354 ****
-      {
-        /* XXX - should we set v->context here? */
-!       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0);
-        if (shell_variables == global_variables)
-  	var->attributes &= ~(att_tempvar|att_propagate);
---- 3395,3399 ----
-      {
-        /* XXX - should we set v->context here? */
-!       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
-        if (shell_variables == global_variables)
-  	var->attributes &= ~(att_tempvar|att_propagate);
+*** 1841,1846 ****
+--- 1880,1897 ----
+    sprintf (msg_buf, format, arg1, arg2);
+    msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
++ 
+    rl_display_prompt = msg_buf;
++   if (saved_local_prompt == 0)
++     {
++       rl_save_prompt ();
++       msg_saved_prompt = 1;
++     }
++   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
++ 					 &prompt_last_invisible,
++ 					 &prompt_invis_chars_first_line,
++ 					 &prompt_physical_chars);
++   local_prompt_prefix = (char *)NULL;
+    (*rl_redisplay_function) ();
++       
+    return 0;
+  }
 ***************
-*** 3429,3436 ****
-    /* If a temp var had its export attribute set, or it's marked to be
-       propagated, bind it in the previous scope before disposing it. */
-    if (exported_p (var) || (var->attributes & att_propagate))
-      {
-        var->attributes &= ~att_tempvar;		/* XXX */
-!       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0);
-        if (shell_variables == global_variables)
-  	var->attributes &= ~att_propagate;
---- 3474,3487 ----
-    /* If a temp var had its export attribute set, or it's marked to be
-       propagated, bind it in the previous scope before disposing it. */
-+   /* XXX - This isn't exactly right, because all tempenv variables have the
-+     export attribute set. */
-+ #if 0
-    if (exported_p (var) || (var->attributes & att_propagate))
-+ #else
-+   if (tempvar_p (var) && exported_p (var) && (var->attributes & att_propagate))
-+ #endif
-      {
-        var->attributes &= ~att_tempvar;		/* XXX */
-!       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
-        if (shell_variables == global_variables)
-  	var->attributes &= ~att_propagate;
+*** 1852,1855 ****
+--- 1903,1911 ----
+  {
+    rl_display_prompt = rl_prompt;
++   if (msg_saved_prompt)
++     {
++       rl_restore_prompt ();
++       msg_saved_prompt = 0;
++     }
+    (*rl_redisplay_function) ();
+    return 0;
 ***************
-*** 3650,3653 ****
---- 3701,3705 ----
-    { "LC_MESSAGES", sv_locale },
-    { "LC_NUMERIC", sv_locale },
-+   { "LC_TIME", sv_locale },
+*** 1866,1878 ****
+  }
   
-    { "MAIL", sv_mail },
+- /* These are getting numerous enough that it's time to create a struct. */
+- 
+- static char *saved_local_prompt;
+- static char *saved_local_prefix;
+- static int saved_last_invisible;
+- static int saved_visible_length;
+- static int saved_invis_chars_first_line;
+- static int saved_physical_chars;
+- 
+  void
+  rl_save_prompt ()
+--- 1922,1925 ----
+***************
+*** 1880,1883 ****
+--- 1927,1931 ----
+    saved_local_prompt = local_prompt;
+    saved_local_prefix = local_prompt_prefix;
++   saved_prefix_length = prompt_prefix_length;
+    saved_last_invisible = prompt_last_invisible;
+    saved_visible_length = prompt_visible_length;
+***************
+*** 1886,1890 ****
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_visible_length = 0;
+    prompt_invis_chars_first_line = prompt_physical_chars = 0;
+  }
+--- 1934,1938 ----
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
+    prompt_invis_chars_first_line = prompt_physical_chars = 0;
+  }
+***************
+*** 1898,1905 ****
+--- 1946,1959 ----
+    local_prompt = saved_local_prompt;
+    local_prompt_prefix = saved_local_prefix;
++   prompt_prefix_length = saved_prefix_length;
+    prompt_last_invisible = saved_last_invisible;
+    prompt_visible_length = saved_visible_length;
+    prompt_invis_chars_first_line = saved_invis_chars_first_line;
+    prompt_physical_chars = saved_physical_chars;
++ 
++   /* can test saved_local_prompt to see if prompt info has been saved. */
++   saved_local_prompt = saved_local_prefix = (char *)0;
++   saved_last_invisible = saved_visible_length = saved_prefix_length = 0;
++   saved_invis_chars_first_line = saved_physical_chars = 0;
+  }
+  

@@ -2918,9 +2918,10 @@ parse_dparen (c)
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
 	{
+	  wd = alloc_word_desc ();
+	  wd->word = wval;
 	  wd = make_word (wval);
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
-	  free (wval);
 	  return (ARITH_FOR_EXPRS);
 	}
       else
@@ -2936,10 +2937,10 @@ parse_dparen (c)
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)	/* arithmetic command */
 	{
-	  wd = make_word (wval);
+	  wd = alloc_word_desc ();
+	  wd->word = wval;
 	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB;
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
-	  free (wval);	/* make_word copies it */
 	  return (ARITH_CMD);
 	}
       else if (cmdtyp == 0)	/* nested subshell */

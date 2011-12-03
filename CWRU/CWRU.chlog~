@@ -10817,4 +10817,107 @@ pcomplete.c
 	  execute_shell_function in gen_shell_function_matches.  Fixes bug
 	  reported by a050106.1.keeLae3x@captaincrumb.com (cute)
 
+lib/readline/readline.c
+	- fix _rl_dispatch_subseq in the case where we're recursing back up
+	  the chain (r == -2) and we encounter a key shadowed by a keymap,
+	  but originally bound to self-insert.  Calling rl_dispatch with
+	  ANYOTHERKEY as the first argument will call rl_insert, but with
+	  ANYOTHERKEY (256) as the char to insert.  Use the shadow keymap
+	  and set things up to dispatch to rl_insert with the shadowed key
+	  as the argument.  Fixes the bug reported by Thomas Glanzmann
+	  (sithglan@stud.uni-erlangen.de)
 
+				   1/13
+				   ----
+command.h
+	- new word flag: W_HASQUOTEDNULL
+
+make_cmd.c
+	- new function to allocate a WORD_DESC * without doing anything with a
+	  containing string:  alloc_word_desc
+
+make_cmd.h
+	- extern declaration for alloc_word_desc
+
+dispose_cmd.c
+	- new function to just free a WORD_DESC * without freeing the contained
+	  string:  dispose_word_desc
+
+dispose_cmd.h
+	- extern declaration for dispose_word_desc
+
+subst.c
+	- change some places to use alloc_word_desc
+	- make same changes to word_list_quote_removal as were made to
+	  word_list_split
+	- set W_HASQUOTEDNULL when a word is created with w->word[0] ==
+	  CTLNUL and w->word[1] == '\0'
+
+subst.c
+	- parameter_brace_expand_word now returns a WORD_DESC * -- changed
+	  callers to understand
+	- parameter_brace_expand_indir now returns a WORD_DESC * -- changed
+	  callers to understand
+	- parameter_brace_expand_rhs now returns a WORD_DESC * -- changed
+	  callers to understand
+	- remove W_HASQUOTEDNULL from a word's flags when remove_quoted_nulls
+	  is called on the word's enclosed string
+
+				   1/15
+				   ----
+subst.c
+	- param_expand now returns a WORD_DESC * -- changed callers to
+	  understand
+	- parameter_brace_expand now returns a WORD_DESC * -- changed
+	  callers to understand
+	- in expand_word_internal, only call remove_quoted_nulls after a word
+	  is returned with W_HASQUOTEDNULL
+	- changes to pass W_HASQUOTEDNULL flag out of expand_word_internal;
+	  changed callers to call remove_quoted_nulls only if return value has
+	  W_HASQUOTEDNULL set.  This is a mostly-complete fix for the
+	  long-standing CTLNUL confusion between a quoted null expansion and
+	  the expansion of a variable with a literal '\177' in its value
+	- change string_list_dollar_at to compute the separator character the
+	  same way as string_list_dollar_star:  using the already-computed
+	  values generated in setifs()
+	- when expanding unquoted $*, if $IFS is empty, check whether or not
+	  we're eventually going to split the results (e.g., on the rhs of an
+	  assignment statement) and concatenate the positional parameters as
+	  if the expansion were within double quotes if we're not going to
+	  split
+
+tests/iquote.tests
+	- test cases based on old bug reports about the quoted-null vs. 0177
+	  problem the recent code fixes
+
+				   1/16
+				   ----
+dispose_cmd.c
+	- set w->word to 0 before putting a WORD_DESC * back in the cache in
+	  dispose_word_desc; changed callers to delete those assignments
+
+variables.c
+	- change assign_random and get_random_value so that the random number
+	  generator only gets re-seeded once in a subshell environment, and
+	  assigning a value to RANDOM counts as seeding the generator.  This
+	  makes the sequences a little more predictable
+
+				   1/20
+				   ----
+lib/readline/history.c
+	- fix replace_history_entry, remove_history to return NULL if
+	  passed index is < 0
+
+				   1/22
+				   ----
+lib/sh/netconn.c
+	- fix isnetconn() to understand that getpeername can return ENOTCONN
+	  to indicate that an fd is not a socket
+
+configure.in
+	- set BUILD_DIR to contain backslashes to escape any spaces in the
+	  directory name -- this is what make will accept in targets and
+	  prerequisites, so it's better than trying to use double quotes
+
+Makefile.in
+	- use $(SIZE) instead of size; set SIZE from configure

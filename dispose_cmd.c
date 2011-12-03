@@ -239,11 +239,16 @@ dispose_word (w)
      WORD_DESC *w;
 {
   FREE (w->word);
-#if 0
-  free (w);
-#else
   ocache_free (wdcache, WORD_DESC, w);
-#endif
+}
+
+/* Free a WORD_DESC, but not the word contained within. */
+void
+dispose_word_desc (w)
+     WORD_DESC *w;
+{
+  w->word = 0;
+  ocache_free (wdcache, WORD_DESC, w);
 }
 
 /* How to get rid of a linked list of words.  A WORD_LIST. */

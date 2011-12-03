@@ -25,6 +25,7 @@
 
 extern void cmd_init __P((void));
 
+extern WORD_DESC *alloc_word_desc __P((void));
 extern WORD_DESC *make_bare_word __P((const char *));
 extern WORD_DESC *make_word_flags __P((WORD_DESC *, const char *));
 extern WORD_DESC *make_word __P((const char *));

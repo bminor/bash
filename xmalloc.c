@@ -134,7 +134,6 @@ xfree (string)
 #ifdef USING_BASH_MALLOC
 #include <malloc/shmalloc.h>
 
-extern char *rl_completer_word_break_characters;
 PTR_T
 sh_xmalloc (bytes, file, line)
      size_t bytes;
@@ -154,9 +153,6 @@ sh_xmalloc (bytes, file, line)
       fatal_error (_("xmalloc: %s:%d: cannot allocate %lu bytes"), file, line, (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
-
-if (temp == rl_completer_word_break_characters)
-  itrace("xmalloc:%s:%d: reallocating rl_completer_word_break_characters");
 
   return (temp);
 }

@@ -24,6 +24,7 @@
 #include "stdc.h"
 
 extern void dispose_command __P((COMMAND *));
+extern void dispose_word_desc __P((WORD_DESC *));
 extern void dispose_word __P((WORD_DESC *));
 extern void dispose_words __P((WORD_LIST *));
 extern void dispose_word_array __P((char **));

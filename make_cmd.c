@@ -77,15 +77,23 @@ cmd_init ()
 }
 
 WORD_DESC *
+alloc_word_desc ()
+{
+  WORD_DESC *temp;
+
+  ocache_alloc (wdcache, WORD_DESC, temp);
+  temp->flags = 0;
+  temp->word = 0;
+  return temp;
+}
+
+WORD_DESC *
 make_bare_word (string)
      const char *string;
 {
   WORD_DESC *temp;
-#if 0
-  temp = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
-#else
-  ocache_alloc (wdcache, WORD_DESC, temp);
-#endif
+
+  temp = alloc_word_desc ();
 
   if (*string)
     temp->word = savestring (string);
@@ -95,7 +103,6 @@ make_bare_word (string)
       temp->word[0] = '\0';
     }
 
-  temp->flags = 0;
   return (temp);
 }
 
@@ -161,11 +168,8 @@ make_word_list (word, wlink)
 {
   WORD_LIST *temp;
 
-#if 0
-  temp = (WORD_LIST *)xmalloc (sizeof (WORD_LIST));
-#else
   ocache_alloc (wlcache, WORD_LIST, temp);
-#endif
+
   temp->word = word;
   temp->next = wlink;
   return (temp);

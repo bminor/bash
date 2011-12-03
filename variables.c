@@ -1106,6 +1106,7 @@ init_seconds_var ()
 /* The random number seed.  You can change this by setting RANDOM. */
 static unsigned long rseed = 1;
 static int last_random_value;
+static int seeded_subshell = 0;
 
 /* A linear congruential random number generator based on the example
    one in the ANSI C standard.  This one isn't very good, but a more
@@ -1135,6 +1136,8 @@ assign_random (self, value, unused)
      arrayind_t unused;
 {
   sbrand (strtoul (value, (char **)NULL, 10));
+  if (subshell_environment)
+    seeded_subshell = 1;
   return (self);
 }
 
@@ -1144,8 +1147,11 @@ get_random_number ()
   int rv;
 
   /* Reset for command and process substitution. */
-  if (subshell_environment)
-    sbrand (rseed + getpid() + NOW);
+  if (subshell_environment && seeded_subshell == 0)
+    {
+      sbrand (rseed + getpid() + NOW);
+      seeded_subshell = 1;
+    }
 
   do
     rv = brand ();
@@ -3700,7 +3706,7 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
-#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+#if defined (READLINE)
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
@@ -3855,7 +3861,7 @@ sv_mail (name)
     }
 }
 
-#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+#if defined (READLINE)
 void
 sv_comp_wordbreaks (name)
      char *name;

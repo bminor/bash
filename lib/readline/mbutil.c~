@@ -314,12 +314,10 @@ _rl_is_mbchar_matched (string, seed, end, mbchar, length)
   return 1;
 }
 
-#ifdef _rl_char_value
-#error whoops
-#endif
-
 wchar_t
-_rl_char_value (char *buf, int ind)
+_rl_char_value (buf, ind)
+     char *buf;
+     int ind;
 {
   size_t tmp;
   wchar_t wc;
