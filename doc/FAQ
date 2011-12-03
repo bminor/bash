@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.31, for Bash version 3.0.
+This is the Bash FAQ, version 3.32, for Bash version 3.1.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,9 +36,9 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 3.0?
-B2) Are there any user-visible incompatibilities between bash-3.0 and
-    bash-1.14.7?
+B1) What's new in version 3.1?
+B2) Are there any user-visible incompatibilities between bash-3.1 and
+    bash-2.05b?
 
 Section C:  Differences from other Unix shells
 
@@ -140,26 +140,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 3.0, first made available on 27 July, 2004.
+The latest version is 3.1, first made available on 09 December, 2005.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 3.0:
+The following URLs tell how to get version 3.1:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-3.0.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-3.0.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-3.1.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-3.1.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.0.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-3.0.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.1.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-3.1.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-3.0-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-3.1-patches/
 
 A4)  On what machines will bash run?
 
@@ -190,10 +190,10 @@ of their CYGWIN project.  For more information about the project, see
 http://www.cygwin.com/.
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
-early GNU-Win32 (the original name) releases.  Cygnus has also done a
-port of bash-2.05b to the CYGWIN environment, and it is available as
-part of their current release.  Bash-3.0 is currently being tested and
-should be available soon.
+early GNU-Win32 (the original name) releases.  Cygnus has also done
+ports of bash-2.05b and bash-3.0 to the CYGWIN environment, and both
+are available as part of their current release.  Bash-3.1 is currently
+being tested and should be available soon.
 
 Bash-2.05b and later versions should require no local Cygnus changes to
 build and run under CYGWIN.
@@ -215,7 +215,8 @@ ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204s.zip	source
 Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
-for Unix (SFU), once known as Interix.
+for Unix (SFU), once known as Interix.  I do not anticipate any problems
+with building bash-3.1.
 
 A6) How can I build bash with gcc? 
 
@@ -384,15 +385,25 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 3.0?
+B1) What's new in version 3.1?
 
-Bash-3.0 is the third major release of bash.  The features introduced
-in the intermediate releases following bash-2.05 have been completed.
-Support for the bash debugger (a separate project) has been integrated.
+Bash-3.1 is the first maintenance release of the third major release of
+bash.  It contains the following significant new features (see the manual
+page for complete descriptions and the CHANGES and NEWS files in the
+bash-3.1 distribution).
 
-Bash-3.0 contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-3.0
-distribution):
+o Bash-3.1 may now be configured and built in a mode that enforces strict
+  POSIX compliance.
+
+o The `+=' assignment operator, which appends to the value of a string or
+  array variable, has been implemented.
+
+o It is now possible to ignore case when matching in contexts other than
+  filename generation using the new `nocasematch' shell option.
+
+A short feature history dating from Bash-2.0:
+
+Bash-3.0 contained the following new features:
 
 o Features to support the bash debugger have been implemented, and there
   is a new `extdebug' option to turn the non-default options on
@@ -421,8 +432,6 @@ o The `jobs', `kill', and `wait' builtins now accept job control notation
 
 o The `gettext' package and libintl have been integrated, and the shell
   messages may be translated into other languages
-
-A short feature history dating from Bash-2.0:
 
 Bash-2.05b introduced the following new features:
 
@@ -631,10 +640,10 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-3.0 and
-    bash-1.14.7?
+B2) Are there any user-visible incompatibilities between bash-3.1 and
+    bash-2.05b?
 
-There are a few incompatibilities between version 1.14.7 and version 3.0.
+There are a few incompatibilities between version 2.05b and version 3.1.
 They are detailed in the file COMPAT in the bash distribution.  That file
 is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
 if if you find something that's not mentioned there.
@@ -717,11 +726,12 @@ Things bash has that sh does not:
 	case-insensitive pattern matching and globbing
 	variable assignments preceding commands affect only that command,
 		even for builtins and functions
-	posix mode
+	posix mode and strict posix conformance
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr,
 		/dev/tcp/host/port, /dev/udp/host/port
 	debugger support, including `caller' builtin and new variables
 	RETURN trap
+	the `+=' assignment operator
 
 
 Things sh has that bash does not:
@@ -799,6 +809,7 @@ Things bash has or uses that ksh88 does not:
 	RETURN trap
 	Timestamps in history entries
 	{x..y} brace expansion
+	The `+=' assignment operator
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases (alias -t)
@@ -845,7 +856,6 @@ New things in ksh-93 not in bash-3.0:
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
 	exit statuses between 0 and 255
-	`+=' variable assignment operator
 	FPATH and PATH mixing
 	getopts -a
 	-I invocation option
@@ -879,6 +889,7 @@ New things in ksh-93 present in bash-3.0:
 	command name completion
 	ENV processed only for interactive shells
 	set -o pipefail
+	The `+=' assignment operator
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1102,9 +1113,8 @@ will try to write on a pipe without a reader.  In that case, bash
 will print `Broken pipe' to stderr when ps is killed by a
 SIGPIPE. 
 
-You can build a version of bash that will not report SIGPIPE errors
-by uncommenting the definition of DONT_REPORT_SIGPIPE in the file
-config-top.h.
+As of bash-3.1, bash will not report SIGPIPE errors by default.  You
+can build a version of bash that will report such errors.
 
 E3) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
@@ -1770,14 +1780,13 @@ a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
 ksh93-like `nameref' variables
-ksh93-like `+=' variable assignment operator
 ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
 	associated disipline functions
 Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2005.  Never make predictions. 
+The next version will appear sometime in 2006.  Never make predictions. 
 
 This document is Copyright 1995-2005 by Chester Ramey.
 
