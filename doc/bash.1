@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Wed Dec  1 15:39:20 EST 2004
+.\"	Last Change: Wed Dec 22 15:43:06 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Dec 1" "GNU Bash-3.1-devel"
+.TH BASH 1 "2004 Dec 22" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -895,7 +895,11 @@ Each of the \fImetacharacters\fP listed above under
 has special meaning to the shell and must be quoted if it is to
 represent itself.
 .PP
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(see
+.SM
+.B HISTORY EXPANSION
+below), the
 \fIhistory expansion\fP character, usually \fB!\fP, must be quoted
 to prevent history expansion.
 .PP
@@ -919,8 +923,9 @@ Enclosing characters in double quotes preserves the literal value
 of all characters within the quotes, with the exception of
 .BR $ ,
 .BR ` ,
-and
-.BR \e .
+.BR \e ,
+and, when history expansion is enabled,
+.BR ! .
 The characters
 .B $
 and
@@ -936,8 +941,12 @@ or
 .BR <newline> .
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an
+.B !
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the
+.B !
+is not removed.
 .PP
 The special parameters
 .B *

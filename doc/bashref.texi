@@ -457,7 +457,8 @@ parameter expansion.
 Each of the shell metacharacters (@pxref{Definitions})
 has special meaning to the shell and must be quoted if it is to
 represent itself.
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(@pxref{History Interaction}), the
 @var{history expansion} character, usually @samp{!}, must be quoted
 to prevent history expansion.  @xref{Bash History Facilities}, for
 more details concerning history expansion.
@@ -486,7 +487,8 @@ between single quotes, even when preceded by a backslash.
 
 Enclosing characters in double quotes (@samp{"}) preserves the literal value
 of all characters within the quotes, with the exception of
-@samp{$}, @samp{`}, and @samp{\}.
+@samp{$}, @samp{`}, @samp{\},
+and, when history expansion is enabled, @samp{!}.
 The characters @samp{$} and @samp{`}
 retain their special meaning within double quotes (@pxref{Shell Expansions}).
 The backslash retains its special meaning only when followed by one of
@@ -497,8 +499,9 @@ characters are removed.  Backslashes preceding characters without a
 special meaning are left unmodified.
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an @samp{!}
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the @samp{!} is not removed.
 
 The special parameters @samp{*} and @samp{@@} have special meaning
 when in double quotes (@pxref{Shell Parameter Expansion}).
