@@ -10901,26 +10901,3 @@ variables.c
 	  generator only gets re-seeded once in a subshell environment, and
 	  assigning a value to RANDOM counts as seeding the generator.  This
 	  makes the sequences a little more predictable
-
-				   1/20
-				   ----
-lib/readline/history.c
-	- fix replace_history_entry, remove_history to return NULL if
-	  passed index is < 0
-
-				   1/22
-				   ----
-lib/sh/netconn.c
-	- fix isnetconn() to understand that getpeername can return ENOTCONN
-	  to indicate that an fd is not a socket
-
-configure.in
-	- set BUILD_DIR to contain backslashes to escape any spaces in the
-	  directory name -- this is what make will accept in targets and
-	  prerequisites, so it's better than trying to use double quotes
-	- set SIZE to the appropriate value if some cross-compiling tool
-	  chain is being used; `size' by default (can be overridden by
-	  SIZE environment variable)
-
-Makefile.in
-	- use $(SIZE) instead of size; set SIZE from configure

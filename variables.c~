@@ -403,7 +403,10 @@ initialize_shell_variables (env, privmode)
      names a mail file if MAILPATH is not set, and we should provide a
      default only if neither is set. */
   if (interactive_shell)
-    set_if_not ("MAILCHECK", posixly_correct ? "600" : "60");
+    {
+      temp_var = set_if_not ("MAILCHECK", posixly_correct ? "600" : "60");
+      VSETATTR (temp_var, att_integer);
+    }
 
   /* Do some things with shell level. */
   initialize_shell_level ();
@@ -411,7 +414,8 @@ initialize_shell_variables (env, privmode)
   set_ppid ();
 
   /* Initialize the `getopts' stuff. */
-  bind_variable ("OPTIND", "1", 0);
+  temp_var = bind_variable ("OPTIND", "1", 0);
+  VSETATTR (temp_var, att_integer);
   getopts_reset (0);
   bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
@@ -1102,6 +1106,7 @@ init_seconds_var ()
 /* The random number seed.  You can change this by setting RANDOM. */
 static unsigned long rseed = 1;
 static int last_random_value;
+static int seeded_subshell = 0;
 
 /* A linear congruential random number generator based on the example
    one in the ANSI C standard.  This one isn't very good, but a more
@@ -1131,6 +1136,8 @@ assign_random (self, value, unused)
      arrayind_t unused;
 {
   sbrand (strtoul (value, (char **)NULL, 10));
+  if (subshell_environment)
+    seeded_subshell = 1;
   return (self);
 }
 
@@ -1140,8 +1147,12 @@ get_random_number ()
   int rv;
 
   /* Reset for command and process substitution. */
-  if (subshell_environment)
-    sbrand (rseed + getpid() + NOW);
+  if (subshell_environment && seeded_subshell == 0)
+    {
+itrace("seeding random number gen in subshell");
+      sbrand (rseed + getpid() + NOW);
+      seeded_subshell = 1;
+    }
 
   do
     rv = brand ();
@@ -1414,6 +1425,7 @@ initialize_dynamic_variables ()
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);
+  VSETATTR (v, att_integer);
 #endif
 
 #if defined (READLINE)
@@ -3695,7 +3707,7 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
-#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+#if defined (READLINE)
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
@@ -3850,7 +3862,7 @@ sv_mail (name)
     }
 }
 
-#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+#if defined (READLINE)
 void
 sv_comp_wordbreaks (name)
      char *name;
