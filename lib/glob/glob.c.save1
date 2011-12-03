@@ -69,7 +69,7 @@
 /* Don't try to alloca() more than this much memory for `struct globval'
    in glob_vector() */
 #ifndef ALLOCA_MAX
-#  define ALLOCA_MAX	100000
+#  define ALLOCA_MAX	128	/* Testing, was 100000 */
 #endif
 
 extern void throw_to_top_level __P((void));
@@ -556,12 +556,15 @@ glob_vector (pat, dir, flags)
       return ((char **)NULL);
     }
 
+
+  tmplink = lastlink;	/* save in case we need to free */
   /* Copy the name pointers from the linked list into the vector.  */
-  for (tmplink = lastlink, i = 0; i < count; ++i)
+  for (i = 0; i < count; ++i)
     {
-      name_vector[i] = tmplink->name;
-      tmplink = tmplink->next;
+      name_vector[i] = lastlink->name;
+      lastlink = lastlink->next;
     }
+  lastlink = tmplink;	/* restore in case we need to free */
 
   name_vector[count] = NULL;
 

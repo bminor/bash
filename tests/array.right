@@ -128,6 +128,10 @@ grep [ 123 ] *
 length = 3
 value = new1 new2 new3
 ./array.tests: line 237: narray: unbound variable
+./array1.sub: line 1: syntax error near unexpected token `('
+./array1.sub: line 1: `printf "%s\n" -a a=(a 'b  c')'
+./array2.sub: line 1: syntax error near unexpected token `('
+./array2.sub: line 1: `declare -a ''=(a 'b c')'
 
 a b c d e f g
 for case if then else
@@ -135,10 +139,10 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: line 277: syntax error near unexpected token `<>'
-./array.tests: line 277: `metas=( <> < > ! )'
-./array.tests: line 278: syntax error near unexpected token `<>'
-./array.tests: line 278: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
+./array.tests: line 280: syntax error near unexpected token `<>'
+./array.tests: line 280: `metas=( <> < > ! )'
+./array.tests: line 281: syntax error near unexpected token `<>'
+./array.tests: line 281: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
 case 4
 abc case if then else 5
@@ -178,3 +182,13 @@ negative offset 2 - expect seven
 seven
 out-of-range offset
 
+e
+4
+1 4 7 10
+'b
+b  c
+$0
+t
+[3]=abcde r s t u v
+e
+9

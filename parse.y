@@ -2730,7 +2730,11 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
+#if 0
       ch = shell_getc ((qc != '\'' || (flags & P_ALLOWESC)) && pass_next_character == 0);
+#else
+      ch = shell_getc (qc != '\'' && pass_next_character == 0);
+#endif
       if (ch == EOF)
 	{
 	  free (ret);

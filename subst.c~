@@ -2201,7 +2201,11 @@ do_assignment_internal (word, expand)
       tlen = STRLEN (temp);
 
 #if defined (ARRAY_VARS)
+#  if 0
       if (expand && temp[0] == LPAREN && temp[tlen-1] == RPAREN)
+#else
+      if (expand && (word->flags & W_COMPASSIGN))
+#endif
 	{
 	  assign_list = ni = 1;
 	  value = extract_array_assignment_list (temp, &ni);
@@ -4347,7 +4351,7 @@ command_substitute (string, quoted)
      char *string;
      int quoted;
 {
-  pid_t pid, old_pid, old_pipeline_pgrp;
+  pid_t pid, old_pid, old_pipeline_pgrp, old_async_pid;
   char *istring;
   int result, fildes[2], function_value, pflags, rc;
 
@@ -4395,7 +4399,14 @@ command_substitute (string, quoted)
   cleanup_the_pipeline ();
 #endif
 
+  old_async_pid = last_asynchronous_pid;
+#if 0
   pid = make_child ((char *)NULL, 0);
+#else
+  pid = make_child ((char *)NULL, subshell_environment&SUBSHELL_ASYNC);
+#endif
+  last_asynchronous_pid = old_async_pid;
+
   if (pid == 0)
     /* Reset the signal handlers in the child, but don't free the
        trap strings. */

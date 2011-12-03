@@ -6503,10 +6503,12 @@ add_string:
 	    assignoff = sindex;
 	  if (sindex == assignoff && string[sindex+1] == '~')	/* XXX */
 	    word->flags |= W_ITILDE;
+#if 0
 	  else if ((word->flags & W_ASSIGNMENT) &&
 		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 		   string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
+#endif
 	  goto add_character;
 
 	case ':':

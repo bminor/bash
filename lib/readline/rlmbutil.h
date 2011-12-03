@@ -97,7 +97,7 @@ extern int _rl_read_mbstring PARAMS((int, char *, int));
 
 extern int _rl_is_mbchar_matched PARAMS((char *, int, int, char *, int));
 
-extern int _rl_char_value PARAMS((char *, int));
+extern wchar_t _rl_char_value PARAMS((char *, int));
 extern int _rl_walphabetic PARAMS((wchar_t));
 
 #define MB_NEXTCHAR(b,s,c,f) \

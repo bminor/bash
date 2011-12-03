@@ -10422,7 +10422,44 @@ lib/readline/mbutil.c
 lib/readline/rlmbutil.h
 	- extern defines for _rl_walphabetic and _rl_char_value for when
 	  multibyte chars are not being used
+	- new wrapper definitions for _rl_find_next_mbchar (MB_NEXTCHAR) and
+	  _rl_find_prev_mbchar (MB_PREVCHAR) that try to avoid unneeded
+	  function calls
 
 lib/readline/text.c
 	- fix rl_foward_word to work with multibyte characters (or in a
 	  multibyte locale) using above utility functions
+	- fix rl_backward_word to work with multibyte characters (or in a
+	  multibyte locale) using above utility functions
+
+				   10/26
+				   -----
+parse.y
+	- fix parse_matched_pair so that it doesn't swallow \<newline> when
+	  parsing a $'...' construct (call shell_getc with different arg)
+
+				   10/28
+				   -----
+lib/glob/glob.c
+	- after some (compiled-in) threshold, glob_vector will stop using
+	  alloca to allocate `struct globval's and will switch to using
+	  malloc, with appropriate cleanup before returning
+
+subst.c
+	- don't expand tildes after `=' in expand_word_internal, even if the
+	  W_TILDEEXP flag is set, unless it's the first tilde in a word
+	  marked W_ASSIGNMENT
+
+				   10/31
+				   -----
+lib/readline/text.c
+	- make sure rl_point doesn't go below 0 in rl_delete_horizontal_space
+	  (from SUSE, but not sent in)
+
+shell.c
+	- make sure shell_is_restricted skips over a single leading `-' in
+	  the shell name (from SUSE, but not sent in)
+
+lib/readline/display.c
+	- disable `fast redisplay' at the end of the line if in a locale that
+	  supports multibyte characters (from SUSE, but not sent in)
