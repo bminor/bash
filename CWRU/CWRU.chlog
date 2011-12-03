@@ -9763,3 +9763,33 @@ arrayfunc.c
 {locale,variables}.c
 	- support LC_TIME as a special locale variable so HISTTIMEFORMAT tracks
 	  the current locale
+
+				    8/2
+				    ---
+variables.c
+	- fixed small memory leak in makunbound() when a local array variable
+	  is unset.  Fix from William Park
+
+lib/readline/display.c
+	- fixed a problem when computing the number of invisible characters on
+	  the first line of a prompt whose length exceeds the screen width
+	  (should only happen when invisible characters occur after the
+	  line wrap).  Bug reported by agriffis@gentoo.org
+
+builtins/command.def
+	- `command -V' passes a new flag, CDESC_ABSPATH, which means to convert
+	  to an absolute path
+
+builtins/type.def
+	- in posix mode, `type' and `command -v/-V' should not report
+	  non-executable files, even if the execution code will attempt to
+	  run them.  Other posix shells do this
+
+doc/bashref.texi
+	- add note to POSIX Mode section describing behavior of type and command
+	  when finding a non-executable file
+
+execute_cmd.c
+	- force extended_glob to 1 before calling binary_test in
+	  execute_cond_node so that the right extended pattern matching gets
+	  performed

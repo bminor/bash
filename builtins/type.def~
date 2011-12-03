@@ -374,7 +374,7 @@ describe_command (command, dflags)
 	    }
 	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY|CDESC_SHORTDESC))
 	    {
-	      f = MP_DOCWD | ((dflags & CDESC_ABSPATH) ? MP_RMDOT : 0);
+	      f = MP_DOCWD | (dflags & CDESC_ABSPATH) ? MP_RMDOT : 0;
 	      full_path = sh_makepath ((char *)NULL, full_path, f);
 	    }
 	}

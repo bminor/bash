@@ -201,7 +201,7 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
      int *lp, *lip, *niflp, *vlp;
 {
   char *r, *ret, *p;
-  int l, rl, last, ignoring, ninvis, invfl, ind, pind, physchars;
+  int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
 
   /* Short-circuit if we can. */
   if ((MB_CUR_MAX <= 1 || rl_byte_oriented) && strchr (pmt, RL_PROMPT_START_IGNORE) == 0)
@@ -222,6 +222,7 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
   r = ret = (char *)xmalloc (l + 1);
 
   invfl = 0;	/* invisible chars in first line of prompt */
+  invflset = 0;	/* we only want to set invfl once */
 
   for (rl = ignoring = last = ninvis = physchars = 0, p = pmt; p && *p; p++)
     {
@@ -264,8 +265,11 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
 		ninvis++;		/* invisible chars byte counter */
 	    }
 
-	  if (rl >= _rl_screenwidth)
-	    invfl = ninvis;
+	  if (invflset == 0 && rl >= _rl_screenwidth)
+	    {
+	      invfl = ninvis;
+	      invflset = 1;
+	    }
 
 	  if (ignoring == 0)
 	    physchars++;
