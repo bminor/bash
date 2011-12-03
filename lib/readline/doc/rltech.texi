@@ -1728,6 +1728,13 @@ It is set to 0 before any application-specific completion function
 is called, and may only be changed within such a function.
 @end deftypevar
 
+@deftypevar int rl_completion_found_quote
+When Readline is completing quoted text, it sets this variable
+to a non-zero value if the word being completed contains or is delimited
+by any quoting characters, including backslashes.
+This is set before any application-specific completion function is called.
+@end deftypevar
+
 @deftypevar int rl_completion_mark_symlink_dirs
 If non-zero, a slash will be appended to completed filenames that are
 symbolic links to directory names, subject to the value of the

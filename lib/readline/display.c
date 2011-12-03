@@ -316,7 +316,7 @@ rl_expand_prompt (prompt)
       t = ++p;
       local_prompt = expand_prompt (p, &prompt_visible_length,
 				       &prompt_last_invisible,
-				       &prompt_invis_chars_first_line);
+				       (int *)NULL);
       c = *t; *t = '\0';
       /* The portion of the prompt string up to and including the
 	 final newline is now null-terminated. */
@@ -546,15 +546,13 @@ rl_redisplay ()
          prompt_invis_chars_first_line variable could be made into an array
          saying how many invisible characters there are per line, but that's
          probably too much work for the benefit gained.  How many people have
-         prompts that exceed two physical lines? */
+         prompts that exceed two physical lines?
+         Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
       temp = ((newlines + 1) * _rl_screenwidth) +
-#if 0
-             ((newlines == 0) ? prompt_invis_chars_first_line : 0) +
-#else
-             ((newlines == 0 && local_prompt_prefix == 0) ? prompt_invis_chars_first_line : 0) +
-#endif
-             ((newlines == 1) ? wrap_offset : 0);
-
+             ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
+							    : ((newlines == 1) ? wrap_offset : 0))
+					 : ((newlines == 0) ? wrap_offset :0));
+             
       inv_lbreaks[++newlines] = temp;
       lpos -= _rl_screenwidth;
     }

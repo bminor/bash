@@ -3107,8 +3107,6 @@ match_pattern (string, pat, mtype, sp, ep)
 	  else
 	    p++;
 	}
-
-      FREE (mblen);
       return (0);
 
     case MATCH_BEG:
@@ -3138,8 +3136,6 @@ match_pattern (string, pat, mtype, sp, ep)
 	  else
 	    p--;
 	}
-
-      FREE (mblen);
       return (0);
 
     case MATCH_END:
@@ -3165,7 +3161,6 @@ match_pattern (string, pat, mtype, sp, ep)
       return (0);
     }
 
-  FREE (mblen);
   return (0);
 }
 

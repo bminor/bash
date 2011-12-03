@@ -210,8 +210,6 @@ static char *extract_dollar_brace_string __P((char *, int *, int, int));
 
 static char *pos_params __P((char *, int, int, int));
 
-static unsigned char *mb_getcharlens __P((char *, int));
-
 static char *remove_pattern __P((char *, char *, int));
 static int match_pattern_char __P((char *, char *));
 static int match_pattern __P((char *, char *, int, char **, char **));
@@ -2839,31 +2837,6 @@ word_list_remove_quoted_nulls (list)
 /*								    */
 /* **************************************************************** */
 
-#if defined (HANDLE_MULTIBYTE)
-static unsigned char *
-mb_getcharlens (string, len)
-     char *string;
-     int len;
-{
-  int i, offset;
-  unsigned char last, *ret;
-  char *p;
-  DECLARE_MBSTATE;
-
-  i = offset = 0;
-  last = 0;
-  ret = (unsigned char *)xmalloc (len);
-  memset (ret, 0, len);
-  while (string[last])
-    {
-      ADVANCE_CHAR (string, len, offset);
-      ret[last] = offset - last;
-      last = offset;
-    }
-  return ret;
-}
-#endif
-
 /* Remove the portion of PARAM matched by PATTERN according to OP, where OP
    can have one of 4 values:
 	RP_LONG_LEFT	remove longest matching portion at start of PARAM
@@ -2885,9 +2858,6 @@ remove_pattern (param, pattern, op)
   register int len;
   register char *end;
   register char *p, *ret, c;
-  int offset;
-  unsigned char *mblen;
-  DECLARE_MBSTATE;
 
   if (param == NULL)
     return (param);
@@ -2897,42 +2867,25 @@ remove_pattern (param, pattern, op)
   len = STRLEN (param);
   end = param + len;
 
-  mblen = (unsigned char *)0;
-#if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1 && (op == RP_LONG_LEFT || op == RP_SHORT_RIGHT))
-    mblen = mb_getcharlens (param, len);
-#endif
-
   switch (op)
     {
       case RP_LONG_LEFT:	/* remove longest match at start */
-        p = end;
-        while (p >= param)
+        /* BACKUP_CHAR_P (param, len, p); */
+	for (p = end; p >= param; p--)
 	  {
 	    c = *p; *p = '\0';
 	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
 	      {
 		*p = c;
-		FREE (mblen);
 		return (savestring (p));
 	      }
 	    *p = c;
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		while (p >= param)
-		  if (mblen[--p - param])
-		    break;
-	      }
-	    else
-	      p--;
 	  }
 	break;
 
       case RP_SHORT_LEFT:	/* remove shortest match at start */
-        p = param;
-        offset = 0;
-        while (p <= end)
+        /* ADVANCE_CHAR_P (p, end - p),p++ */
+	for (p = param; p <= end; p++)
 	  {
 	    c = *p; *p = '\0';
 	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
@@ -2941,21 +2894,12 @@ remove_pattern (param, pattern, op)
 		return (savestring (p));
 	      }
 	    *p = c;
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		ADVANCE_CHAR (param, len, offset);
-		p = param + offset;
-	      }
-	    else
-	      p++;
 	  }
 	break;
 
       case RP_LONG_RIGHT:	/* remove longest match at end */
-        p = param;
-        offset = 0;
-        while (p <= end)
+        /* ADVANCE_CHAR_P (p, end - p),p++ */
+	for (p = param; p <= end; p++)
 	  {
 	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
 	      {
@@ -2964,43 +2908,23 @@ remove_pattern (param, pattern, op)
 		*p = c;
 		return (ret);
 	      }
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		ADVANCE_CHAR (param, len, offset);
-		p = param + offset;
-	      }
-	    else
-	      p++;
 	  }
 	break;
 
       case RP_SHORT_RIGHT:	/* remove shortest match at end */
-        p = end;
-        while (p >= param)
+        /* BACKUP_CHAR_P (param, len, p); */
+	for (p = end; p >= param; p--)
 	  {
 	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
 	      {
 		c = *p; *p = '\0';
 		ret = savestring (param);
 		*p = c;
-		FREE (mblen);
 		return (ret);
 	      }
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		while (p >= param)
-		  if (mblen[--p - param])
-		    break;
-	      }
-	    else
-	      p--;
 	  }
 	break;
     }
-
-  FREE (mblen);
   return (savestring (param));	/* no match, return original string */
 }
 
@@ -3049,9 +2973,6 @@ match_pattern (string, pat, mtype, sp, ep)
   int c, len;
   register char *p, *p1;
   char *end;
-  int offset;
-  unsigned char *mblen;
-  DECLARE_MBSTATE;
 
   if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
     return (0);
@@ -3059,23 +2980,16 @@ match_pattern (string, pat, mtype, sp, ep)
   len = STRLEN (string);
   end = string + len;
 
-  mblen = (unsigned char *)0;
-#if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1 && (mtype == MATCH_ANY || mtype == MATCH_BEG))
-    mblen = mb_getcharlens (string, len);
-#endif
-
   switch (mtype)
     {
     case MATCH_ANY:
-      p = string;
-      offset = 0;
-      while (p <= end)
+      /* ADVANCE_CHAR_P (p, end - p),p++ */
+      for (p = string; p <= end; p++)
 	{
 	  if (match_pattern_char (pat, p))
 	    {
-	      p1 = end;
-	      while (p1 >= p)
+	      /* BACKUP_CHAR_P (p, end - p, p1) */
+	      for (p1 = end; p1 >= p; p1--)
 		{
 		  c = *p1; *p1 = '\0';
 		  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
@@ -3083,40 +2997,19 @@ match_pattern (string, pat, mtype, sp, ep)
 		      *p1 = c;
 		      *sp = p;
 		      *ep = p1;
-		      FREE (mblen);
 		      return 1;
 		    }
 		  *p1 = c;
-
-		  if (MB_CUR_MAX > 1)
-		    {
-		      while (p1 >= p)
-			if (mblen[--p1 - string])
-			  break;
-		    }
-		  else
-		    p1--;
 		}
 	    }
-
-	  if (MB_CUR_MAX > 1)
-	    {
-	      ADVANCE_CHAR (string, len, offset);
-	      p = string + offset;
-	    }
-	  else
-	    p++;
 	}
-
-      FREE (mblen);
       return (0);
 
     case MATCH_BEG:
       if (match_pattern_char (pat, string) == 0)
 	return (0);
-
-      p = end;
-      while (p >= string)
+      /* BACKUP_CHAR_P (string, len, p) */
+      for (p = end; p >= string; p--)
 	{
 	  c = *p; *p = '\0';
 	  if (strmatch (pat, string, FNMATCH_EXTFLAG) == 0)
@@ -3124,48 +3017,24 @@ match_pattern (string, pat, mtype, sp, ep)
 	      *p = c;
 	      *sp = string;
 	      *ep = p;
-	      FREE (mblen);
 	      return 1;
 	    }
 	  *p = c;
-
-	  if (MB_CUR_MAX > 1)
-	    {
-	      while (p >= string)
-		if (mblen[--p - string])
-		  break;
-	    }
-	  else
-	    p--;
 	}
-
-      FREE (mblen);
       return (0);
 
     case MATCH_END:
-      p = string;
-      offset = 0;
-      while (p <= end)
-	{
-	  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
-	    {
-	      *sp = p;
-	      *ep = end;
-	      return 1;
-	    }
-
-	  if (MB_CUR_MAX > 1)
-	    {
-	      ADVANCE_CHAR (string, len, offset);
-	      p = string + offset;
-	    }
-	  else
-	    p++;
-	}
+      /* ADVANCE_CHAR_P(p, end - p), p++ */
+      for (p = string; p <= end; p++)
+	if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
+	  {
+	    *sp = p;
+	    *ep = end;
+	    return 1;
+	  }
       return (0);
     }
 
-  FREE (mblen);
   return (0);
 }
 
@@ -5914,7 +5783,26 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 #if HANDLE_MULTIBYTE
 	  if (MB_CUR_MAX > 1 && string[sindex])
 	    {
-	      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
+	      int i;
+	      mbstate_t state_bak;
+	      size_t mblength;
+
+	      state_bak = state;
+	      mblength = mbrlen (string + sindex, string_size - sindex, &state);
+	      if (MB_INVALIDCH (mblength))
+		{
+		  state = state_bak;
+		  mblength = 1;
+		}
+	      if (mblength < 1)
+		mblength = 1;
+	      temp = (char *)xmalloc (mblength + 2);
+	      temp[0] = CTLESC;
+	      for (i = 0; i < mblength; i++)
+		temp[i+1] = string[sindex++];
+	      temp[mblength + 1] = '\0';
+
+	      goto add_string;
 	    }
 	  else
 #endif
@@ -6254,12 +6142,31 @@ add_twochars:
 	      else
 		{
 #if HANDLE_MULTIBYTE
-		  if (MB_CUR_MAX > 1)
-		    sindex--;
-
+		  /* XXX - I'd like to use SCOPY_CHAR_I here. */
 		  if (MB_CUR_MAX > 1)
 		    {
-		      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
+		      int i;
+		      mbstate_t state_bak;
+		      size_t mblength;
+
+		      sindex--;
+		      state_bak = state;
+		      mblength = mbrlen (string + sindex, string_size - sindex, &state);
+		      if (MB_INVALIDCH (mblength))
+			{
+			  state = state_bak;
+			  mblength = 1;
+			}
+		      if (mblength < 1)
+			mblength = 1;
+
+		      temp = (char *)xmalloc (mblength + 2);
+		      temp[0] = CTLESC;
+		      for (i = 0; i < mblength; i++)
+			temp[i + 1] = string[sindex++];
+		      temp[mblength + 1] = '\0';
+
+		      goto add_string;
 		    }
 		  else
 #endif

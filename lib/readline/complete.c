@@ -1010,6 +1010,7 @@ compute_lcd_of_matches (match_list, matches, text)
 {
   register int i, c1, c2, si;
   int low;		/* Count of max-matched characters. */
+  char *dtext;		/* dequoted TEXT, if needed */
 #if defined (HANDLE_MULTIBYTE)
   int v;
   mbstate_t ps1, ps2;
@@ -1101,6 +1102,26 @@ compute_lcd_of_matches (match_list, matches, text)
 	 the user typed in the face of multiple matches differing in case. */
       if (_rl_completion_case_fold)
 	{
+	  /* We're making an assumption here:
+		IF we're completing filenames AND
+		   the application has defined a filename dequoting function AND
+		   we found a quote character AND
+		   the application has requested filename quoting
+		THEN
+		   we assume that TEXT was dequoted before checking against
+		   the file system and needs to be dequoted here before we
+		   check against the list of matches
+		FI */
+	  dtext = (char *)NULL;
+	  if (rl_filename_completion_desired &&
+	      rl_filename_dequoting_function &&
+	      rl_completion_found_quote &&
+	      rl_filename_quoting_desired)
+	    {
+	      dtext = (*rl_filename_dequoting_function) (text, rl_completion_quote_character);
+	      text = dtext;
+	    }
+
 	  /* sort the list to get consistent answers. */
 	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
@@ -1120,6 +1141,8 @@ compute_lcd_of_matches (match_list, matches, text)
 	  else
 	    /* otherwise, just use the text the user typed. */
 	    strncpy (match_list[0], text, low);
+
+	  FREE (dtext);
 	}
       else
         strncpy (match_list[0], match_list[1], low);

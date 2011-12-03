@@ -8955,12 +8955,10 @@ subst.c
 	- new static function, mb_getcharlens, allocates and returns an array
 	  of character lengths for (possibly multibyte) characters in the
 	  argument string
-	- change pattern matching operations to use while loops instead of
-	  for loops to handle multibyte characters better (no more simple
-	  increment or decrement)
-	- change pattern matching operations to use multibyte character
-	  operations instead of simple increments and decrements.  Don't
-	  use BACKUP_CHAR_P -- use the mblen array instead, because that
-	  avoids the N**2 behavior of having to count from the beginning
-	  of the string each time you want to back up one character.  Changes
-	  to remove_pattern and match_pattern
+	- change pattern matching operations to use while loops instead of for
+	  loops to handle multibyte characters better (no more simple increment
+	  or decrement); use multibyte character operations instead of simple
+	  increments and decrements.  Don't use BACKUP_CHAR_P -- use the
+	  mblen array instead, because that avoids the N**2 behavior of having
+	  to count from the beginning of the string each time you want to
+	  back up one character.  Changes to remove_pattern and match_pattern
