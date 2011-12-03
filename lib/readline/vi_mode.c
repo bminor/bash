@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -63,6 +63,8 @@
 #define member(c, s) ((c) ? (char *)strchr ((s), (c)) != (char *)NULL : 0)
 #endif
 
+int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
+
 /* Non-zero means enter insertion mode. */
 static int _rl_vi_doing_insert;
 
@@ -83,7 +85,6 @@ static int vi_continued_command;
 static char *vi_insert_buffer;
 static int vi_insert_buffer_size;
 
-static int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
 static int _rl_vi_last_repeat = 1;
 static int _rl_vi_last_arg_sign = 1;
 static int _rl_vi_last_motion;
@@ -820,6 +821,7 @@ rl_vi_domove (key, nextkey)
 	{
 	  save = rl_numeric_arg;
 	  rl_numeric_arg = _rl_digit_value (c);
+	  rl_explicit_arg = 1;
 	  rl_digit_loop1 ();
 	  rl_numeric_arg *= save;
 	  RL_SETSTATE(RL_STATE_MOREINPUT);

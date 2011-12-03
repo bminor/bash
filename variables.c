@@ -1663,8 +1663,9 @@ make_local_array_variable (name)
   ARRAY *array;
 
   var = make_local_variable (name);
-  if (var == 0)
+  if (var == 0 || array_p (var))
     return var;
+
   array = array_create ();
 
   FREE (value_cell(var));

@@ -9412,3 +9412,38 @@ builtins/cd.def
 	- if get_working_directory fails and returns null (causing resetpwd
 	  to return NULL), use set_working_directory to set $PWD to the
 	  absolute pathname for which chdir just succeeded
+
+				    5/1
+				    ---
+lib/readline/vi_mode.c
+	- in rl_vi_change_to, call _rl_vi_set_last with rl_numeric_arg instead
+	  of `last', since they're equal at call time and rl_vi_domove can
+	  change rl_numeric_arg (which vi apparently updates).  Fixes redo bug
+	  of `c2....' reported by Marion Berryman <mwberryman@copper.net>
+
+				    5/4
+				    ---
+parse.y
+	- fix decode_prompt_string to properly deal with strftime() returning 0
+
+				    5/6
+				    ---
+variables.c
+	- in make_local_array_variable, return an already-existing local array
+	  variable immediately rather than creating a new array (causing a
+	  memory leak)
+
+				    5/8
+				    ---
+lib/readline/vi_mode.c
+	- change rl_vi_domove to set rl_explicit_arg before calling
+	  rl_digit_loop1 so that multi-digit numeric arguments work right
+	- _rl_vi_last_command is no longer static
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_vi_last_command
+
+lib/readline/text.c
+	- change rl_newline to only call _rl_vi_reset_last if the last command
+	  (_rl_vi_last_command) is not a text modification command
+

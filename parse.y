@@ -4010,7 +4010,11 @@ decode_prompt_string (string)
 	      else if (c == 'A')
 		n = strftime (timebuf, sizeof (timebuf), "%H:%M", tm);
 
-	      timebuf[sizeof(timebuf) - 1] = '\0';
+	      if (n == 0)
+		timebuf[0] = '\0';
+	      else
+		timebuf[sizeof(timebuf) - 1] = '\0';
+
 	      temp = savestring (timebuf);
 	      goto add_string;
 
@@ -4035,7 +4039,11 @@ decode_prompt_string (string)
 	      n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
 	      free (timefmt);
 
-	      timebuf[sizeof(timebuf) - 1] = '\0';
+	      if (n == 0)
+		timebuf[0] = '\0';
+	      else
+		timebuf[sizeof(timebuf) - 1] = '\0';
+
 	      if (promptvars || posixly_correct)
 		/* Make sure that expand_prompt_string is called with a
 		   second argument of Q_DOUBLE_QUOTES if we use this

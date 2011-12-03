@@ -63,6 +63,8 @@
 #define member(c, s) ((c) ? (char *)strchr ((s), (c)) != (char *)NULL : 0)
 #endif
 
+int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
+
 /* Non-zero means enter insertion mode. */
 static int _rl_vi_doing_insert;
 
@@ -83,7 +85,6 @@ static int vi_continued_command;
 static char *vi_insert_buffer;
 static int vi_insert_buffer_size;
 
-static int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
 static int _rl_vi_last_repeat = 1;
 static int _rl_vi_last_arg_sign = 1;
 static int _rl_vi_last_motion;
@@ -820,6 +821,7 @@ rl_vi_domove (key, nextkey)
 	{
 	  save = rl_numeric_arg;
 	  rl_numeric_arg = _rl_digit_value (c);
+	  rl_explicit_arg = 1;
 	  rl_digit_loop1 ();
 	  rl_numeric_arg *= save;
 	  RL_SETSTATE(RL_STATE_MOREINPUT);
@@ -1018,7 +1020,7 @@ rl_vi_change_to (count, key)
       /* `C' does not save the text inserted for undoing or redoing. */
       if (_rl_uppercase_p (key) == 0)
         _rl_vi_doing_insert = 1;
-      _rl_vi_set_last (key, count, rl_arg_sign);
+      _rl_vi_set_last (key, rl_numeric_arg, rl_arg_sign);
       rl_vi_insertion_mode (1, key);
     }
 
