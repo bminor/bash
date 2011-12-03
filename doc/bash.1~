@@ -6,7 +6,7 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Mon Aug 16 23:07:25 EDT 2004
+.\"	Last Change: Sat Jun 26 14:26:44 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
@@ -5872,8 +5872,8 @@ is supplied, the name and value of the alias is printed.
 \fBAlias\fP returns true unless a \fIname\fP is given for which
 no alias has been defined.
 .TP
-\fBbg\fP [\fIjobspec\fP ...]
-Resume each suspended job \fIjobspec\fP in the background, as if it
+\fBbg\fP [\fIjobspec\fP]
+Resume the suspended job \fIjobspec\fP in the background, as if it
 had been started with
 .BR & .
 If \fIjobspec\fP is not present, the shell's notion of the
@@ -5881,8 +5881,8 @@ If \fIjobspec\fP is not present, the shell's notion of the
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
-job control enabled, if the last \fIjobspec\fP was not found or was
-started without job control.
+job control enabled, if \fIjobspec\fP was not found or started without
+job control.
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSV\fP]
 .PD 0

@@ -9856,3 +9856,45 @@ support/Makefile.in
 lib/readline/vi_mode.c
 	- make same change for EOL in multibyte character case of
 	  rl_vi_change_char
+
+				   8/12
+				   ----
+subst.c
+	- in verify_substring_values, fix off-by-one error checking bounds of
+	  `offset', esp. in array values (e.g., getting the highest element
+	  of an array)
+
+				   8/16
+				   ----
+aclocal.m4
+	- change BASH_CHECK_DEV_FD to make sure that file descriptors > 2 are
+	  accessible via /dev/fd, unlike FreeBSD 5.x
+
+lib/sh/strftime.c
+	- make sure `zone' is initialized with gettimeofday before it is used
+	- work around HPUX lack of `altzone' and differing definitions of
+	  `timezone'
+
+lib/malloc/malloc.c
+	- internal_memalign and memalign now take a `size_t' as their first
+	  argument, which seems to be the prevailing standard
+
+lib/malloc/{malloc.c,shmalloc.h}
+	- change sh_memalign to take a `size_t' as its first argument
+
+builtins/echo.def
+	- if posixly_correct and xpg_echo are both set, don't try to interpret
+	  any arguments at all, as POSIX/XOPEN requires (fix inspired by Paul
+	  Eggert)
+
+doc/bashref.texi
+	- amend description of bash posix mode to include new echo behavior
+
+builtins/fg_bg.def
+	- allow bg to take multiple job arguments, as posix seems to specify,
+	  placing them all in the background, returning the status of the last
+	  one as the status of `bg'
+
+lib/readline/vi_mode
+	- fix _rl_vi_change_mbchar_case (multibyte-char version of `~'
+	  command) to have the right behavior at EOL

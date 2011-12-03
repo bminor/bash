@@ -1541,14 +1541,7 @@ AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
 [if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
-# check for systems like FreeBSD 5 that only provide /dev/fd/[012]
-   exec 3<&0
-   if test -r /dev/fd/3; then
-     bash_cv_dev_fd=standard
-   else
-     bash_cv_dev_fd=absent
-   fi
-   exec 3<&-
+   bash_cv_dev_fd=standard
  elif test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
    bash_cv_dev_fd=whacky
  else

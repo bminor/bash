@@ -94,8 +94,6 @@ int
 bg_builtin (list)
      WORD_LIST *list;
 {
-  int r;
-
   if (job_control == 0)
     {
       sh_nojobs ((char *)NULL);
@@ -106,17 +104,7 @@ bg_builtin (list)
     return (EX_USAGE);
   list = loptend;
 
-  /* This relies on the fact that fg_bg() takes a WORD_LIST *, but only acts
-     on the first member (if any) of that list. */
-  do
-    {
-      r = fg_bg (list, 0);
-      if (list)
-	list = list->next;
-    }
-  while (list);
-
-  return r;
+  return (fg_bg (list, 0));
 }
 
 /* How to put a job into the foreground/background. */

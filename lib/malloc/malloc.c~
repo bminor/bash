@@ -246,7 +246,7 @@ static unsigned long binsizes[NBUCKETS] = {
 static PTR_T internal_malloc __P((size_t, const char *, int, int));
 static PTR_T internal_realloc __P((PTR_T, size_t, const char *, int, int));
 static void internal_free __P((PTR_T, const char *, int, int));
-static PTR_T internal_memalign __P((size_t, size_t, const char *, int, int));
+static PTR_T internal_memalign __P((unsigned int, size_t, const char *, int, int));
 #ifndef NO_CALLOC
 static PTR_T internal_calloc __P((size_t, size_t, const char *, int, int));
 static void internal_cfree __P((PTR_T, const char *, int, int));
@@ -1026,7 +1026,7 @@ internal_realloc (mem, n, file, line, flags)
 
 static PTR_T
 internal_memalign (alignment, size, file, line, flags)
-     size_t alignment;
+     unsigned int alignment;
      size_t size;
      const char *file;
      int line, flags;
@@ -1145,7 +1145,7 @@ sh_free (mem, file, line)
 
 PTR_T
 sh_memalign (alignment, size, file, line)
-     size_t alignment;
+     unsigned int alignment;
      size_t size;
      const char *file;
      int line;
@@ -1212,7 +1212,7 @@ free (mem)
 
 PTR_T
 memalign (alignment, size)
-     size_t alignment;
+     unsigned int alignment;
      size_t size;
 {
   return internal_memalign (alignment, size, (char *)NULL, 0, 0);
