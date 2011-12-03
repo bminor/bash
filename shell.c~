@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -96,10 +96,11 @@ extern int shell_level;
 extern int subshell_environment;
 extern int last_command_exit_value;
 extern int line_number;
-extern char *primary_prompt, *secondary_prompt;
 extern int expand_aliases;
-extern char *this_command_name;
 extern int array_needs_making;
+extern int gnu_error_format;
+extern char *primary_prompt, *secondary_prompt;
+extern char *this_command_name;
 
 /* Non-zero means that this shell has already been run; i.e. you should
    call shell_reinitialize () if you need to start afresh. */
@@ -361,7 +362,7 @@ main (argc, argv, env)
 #endif /* __CYGWIN__ */
 
   /* Wait forever if we are debugging a login shell. */
-  while (debugging_login_shell);
+  while (debugging_login_shell) sleep (3);
 
   set_default_locale ();
 
@@ -386,6 +387,8 @@ main (argc, argv, env)
 
   /* Initialize `local' variables for all `invocations' of main (). */
   arg_index = 1;
+  if (arg_index > argc)
+    arg_index = argc;
   command_execution_string = (char *)NULL;
   want_pending_command = locally_skip_execution = read_from_stdin = 0;
   default_input = stdin;
@@ -511,7 +514,7 @@ main (argc, argv, env)
      alias expansion in non-interactive shells, and other Posix.2 things. */
   if (posixly_correct)
     {
-      bind_variable ("POSIXLY_CORRECT", "y");
+      bind_variable ("POSIXLY_CORRECT", "y", 0);
       sv_strict_posix ("POSIXLY_CORRECT");
     }
 
@@ -532,13 +535,14 @@ main (argc, argv, env)
       term = get_string_value ("TERM");
       no_line_editing |= term && (STREQ (term, "emacs"));
       emacs = get_string_value ("EMACS");
-      running_under_emacs = emacs ? ((strmatch ("*term*", emacs, 0) == 0) ? 2 : 1)
-				 : 0;
+      running_under_emacs = emacs ? ((strstr (emacs, "term") != 0) ? 2 : 1) : 0;
 #if 0
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0';
 #else
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
 #endif
+      if (running_under_emacs)
+	gnu_error_format = 1;
     }
 
   top_level_arg_index = arg_index;
@@ -610,7 +614,7 @@ main (argc, argv, env)
   /* If we are invoked as `sh', turn on Posix mode. */
   if (act_like_sh)
     {
-      bind_variable ("POSIXLY_CORRECT", "y");
+      bind_variable ("POSIXLY_CORRECT", "y", 0);
       sv_strict_posix ("POSIXLY_CORRECT");
     }
 
@@ -1270,7 +1274,7 @@ bind_args (argv, arg_start, arg_end, start_index)
   register int i;
   WORD_LIST *args;
 
-  for (i = arg_start, args = (WORD_LIST *)NULL; i != arg_end; i++)
+  for (i = arg_start, args = (WORD_LIST *)NULL; i < arg_end; i++)
     args = make_word_list (make_word (argv[i]), args);
   if (args)
     {
@@ -1478,17 +1482,12 @@ set_bash_input ()
   /* with_input_from_stdin really means `with_input_from_readline' */
   if (interactive && no_line_editing == 0)
     with_input_from_stdin ();
-  else
 #if defined (BUFFERED_INPUT)
-    {
-      if (interactive == 0)
-	with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
-      else
-	with_input_from_stream (default_input, dollar_vars[0]);
-    }
-#else /* !BUFFERED_INPUT */
+  else if (interactive == 0)
+    with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+#endif /* BUFFERED_INPUT */
+  else
     with_input_from_stream (default_input, dollar_vars[0]);
-#endif /* !BUFFERED_INPUT */
 }
 
 /* Close the current shell script input source and forget about it.  This is
@@ -1526,7 +1525,7 @@ set_shell_name (argv0)
 {
   /* Here's a hack.  If the name of this shell is "sh", then don't do
      any startup files; just try to be more like /bin/sh. */
-  shell_name = base_pathname (argv0);
+  shell_name = argv0 ? base_pathname (argv0) : PROGRAM;
 
   if (*shell_name == '-')
     {
@@ -1539,7 +1538,7 @@ set_shell_name (argv0)
   if (shell_name[0] == 's' && shell_name[1] == 'u' && shell_name[2] == '\0')
     su_shell++;
 
-  shell_name = argv0;
+  shell_name = argv0 ? argv0 : PROGRAM;
   FREE (dollar_vars[0]);
   dollar_vars[0] = savestring (shell_name);
 

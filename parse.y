@@ -2819,9 +2819,17 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
 		  xfree (nestret);
 
-		  nestret = sh_single_quote (ttrans);
-		  free (ttrans);
-		  nestlen = strlen (nestret);
+		  if ((rflags & P_DQUOTE) == 0)
+		    {
+		      nestret = sh_single_quote (ttrans);
+		      free (ttrans);
+		      nestlen = strlen (nestret);
+		    }
+		  else
+		    {
+		      nestret = ttrans;
+		      nestlen = ttranslen;
+		    }
 		  retind -= 2;		/* back up before the $' */
 		}
 	      else if MBTEST(was_dollar && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))

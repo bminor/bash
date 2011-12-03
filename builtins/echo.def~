@@ -31,11 +31,6 @@ $PRODUCES echo.c
 #include <stdio.h>
 #include "../shell.h"
 
-#include <errno.h>
-#if !defined (errno)
-extern int errno;
-#endif
-
 $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON V9_ECHO
@@ -180,7 +175,7 @@ just_echo:
   fflush (stdout);
   if (ferror (stdout))
     {
-      builtin_error ("write error: %s", strerror (errno));
+      sh_wrerror ();
       clearerr (stdout);
       return (EXECUTION_FAILURE);
     }

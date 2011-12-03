@@ -157,7 +157,11 @@ static void fc_addhist __P((char *));
 
 /* String to execute on a file that we want to edit. */
 #define FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-vi}}"
-#define POSIX_FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-ed}}"
+#if defined (STRICT_POSIX)
+#  define POSIX_FC_EDIT_COMMAND "${FCEDIT:-ed}"
+#else
+#  define POSIX_FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-ed}}"
+#endif
 
 int
 fc_builtin (list)

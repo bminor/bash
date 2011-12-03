@@ -2881,18 +2881,8 @@ add_nestret:
 	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
-	  if (nestret == &matched_pair_error)
-	    {
-	      free (ret);
-	      return &matched_pair_error;
-	    }
-	  if (nestlen)
-	    {
-	      RESIZE_MALLOCED_BUFFER (ret, retind, nestlen, retsize, 64);
-	      strcpy (ret + retind, nestret);
-	      retind += nestlen;
-	    }
-	  FREE (nestret);
+
+	  goto add_nestret;
 	}
       was_dollar = MBTEST(ch == '$');
     }

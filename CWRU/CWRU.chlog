@@ -12044,3 +12044,40 @@ doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
 				   ----
 lib/sh/pathphys.c
 	- fix small memory leak in sh_realpath reported by Eric Blake
+
+				   8/31
+				   ----
+doc/bashref.texi
+	- add additional notes to posix mode section
+
+				    9/3
+				    ---
+parse.y
+	- if $'...' occurs within a ${...} parameter expansion within
+	  double quotes, don't single-quote the expanded result -- the double
+	  quotes will cause it to be expanded incorrectly
+
+				    9/4
+				    ---
+builtins/fc.def
+	- if STRICT_POSIX is defined, the posix mode default for the editor to
+	  use is $FCEDIT, then ed
+
+shell.c
+	- if STRICT_POSIX is defined, initialize `posixly_correct' to 1
+
+config.h.in
+	- add #undef STRICT_POSIX
+
+				    9/5
+				    ---
+configure.in
+	- add new option argument, --enable-strict-posix-default, configures
+	  bash to be posix-conformant (including defaulting echo to posix
+	  conformance) by default
+
+builtins/echo.def
+	- if STRICT_POSIX is defined, default echo to xpg-style
+
+doc/bashref.texi
+	- describe the --enable-strict-posix-default option to configure

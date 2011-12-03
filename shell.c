@@ -197,11 +197,17 @@ static int want_initial_help;		/* --help option */
 
 int debugging_mode = 0;		/* In debugging mode with --debugger */
 int no_line_editing = 0;	/* Don't do fancy line editing. */
-int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
 int wordexp_only = 0;		/* Do word expansion only */
 int protected_mode = 0;		/* No command substitution with --wordexp */
+
+#if defined (STRICT_POSIX)
+int posixly_correct = 1;	/* Non-zero means posix.2 superset. */
+#else
+int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
+#endif
+
 
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1

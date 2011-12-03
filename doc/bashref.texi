@@ -5223,6 +5223,7 @@ shell to exit.
 @item
 When running in @sc{posix} mode, a special builtin returning an error
 status will not cause the shell to exit (@pxref{Bash POSIX Mode}).
+
 @item
 A failed @code{exec} will not cause the shell to exit
 (@pxref{Bourne Shell Builtins}).
@@ -5911,6 +5912,11 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
+The @code{bg} builtin uses the required format to describe each job placed
+in the background, which does not include an indication of whether the job
+is the current or previous job.
+
+@item
 Reserved words appearing in a context where reserved words are recognized
 do not undergo alias expansion.
 
@@ -5963,7 +5969,7 @@ may not start with a digit.  Declaring a function with an invalid name
 causes a fatal syntax error in non-interactive shells.
 
 @item
-@sc{posix} 1003.2 `special' builtins are found before shell functions
+@sc{posix} 1003.2 special builtins are found before shell functions
 during command lookup.
 
 @item
@@ -6058,6 +6064,11 @@ When the @code{pwd} builtin is supplied the @option{-P} option, it resets
 @code{$PWD} to a pathname containing no symlinks.
 
 @item
+The @code{pwd} builtin verifies that the value it prints is the same as the
+current directory, even if it is not asked to check the file system with the
+@option{-P} option.
+
+@item
 When listing the history, the @code{fc} builtin does not include an
 indication of whether or not a history entry has been modified.
 
@@ -6070,32 +6081,37 @@ file as having been found, though the shell will attempt to execute such a
 file if it is the only so-named file found in @code{$PATH}.
 
 @item
+The @code{vi} editing mode will invoke the @code{vi} editor directly when
+the @samp{v} command is run, instead of checking @code{$FCEDIT} and
+@code{$EDITOR}.
+
+@item
 When the @code{xpg_echo} option is enabled, Bash does not attempt to interpret
 any arguments to @code{echo} as options.  Each argument is displayed, after
 escape characters are converted.
 
 @end enumerate
 
-There is other @sc{posix} 1003.2 behavior that Bash does not implement.
+There is other @sc{posix} 1003.2 behavior that Bash does not implement by
+default even when in @sc{posix} mode.
 Specifically:
 
 @enumerate
-@item
-Assignment statements affect the execution environment of all
-builtins, not just special ones.
 
 @item
-When a subshell is created to execute a shell script with execute permission,
-but without a leading @samp{#!}, Bash sets @code{$0} to the full pathname of
-the script as found by searching @code{$PATH}, rather than the command as
-typed by the user.
+The @code{fc} builtin checks @code{$EDITOR} as a program to edit history
+entries if @code{FCEDIT} is unset, rather than defaulting directly to
+@code{ed}.  @code{fc} uses @code{ed} if @code{EDITOR} is unset.
 
 @item
-The @code{fc} builtin checks @code{$EDITOR} as a program to edit history lines 
-if @code{FCEDIT} is unset, rather than defaulting directly to @code{ed}.
-@code{fc} uses @code{ed} if @code{EDITOR} is unset.
+As noted above, Bash requires the @code{xpg_echo} option to be enabled for
+the @code{echo} builtin to be fully conformant.
 
 @end enumerate
+
+Bash can be configured to be @sc{posix}-conformant by default, by specifying
+the @option{--enable-strict-posix-default} to @code{configure} when building
+(@pxref{Optional Features}).
 
 @node Job Control
 @chapter Job Control
@@ -6640,10 +6656,10 @@ Define if you are using the Andrew File System from Transarc.
 
 @item --with-bash-malloc
 Use the Bash version of
-@code{malloc} in @file{lib/malloc/malloc.c}.  This is not the same
+@code{malloc} in the directory @file{lib/malloc}.  This is not the same
 @code{malloc} that appears in @sc{gnu} libc, but an older version
-derived from the 4.2 @sc{bsd} @code{malloc}.  This @code{malloc} is
-very fast, but wastes some space on each allocation.
+originally derived from the 4.2 @sc{bsd} @code{malloc}.  This @code{malloc}
+is very fast, but wastes some space on each allocation.
 This option is enabled by default.
 The @file{NOTES} file contains a list of systems for
 which this should be turned off, and @code{configure} disables this
@@ -6830,6 +6846,9 @@ each help topic.  This aids in translating the text to different languages.
 You may need to disable this if your compiler cannot handle very long string
 literals.
 
+@item --enable-strict-posix-default
+Make Bash @sc{posix}-conformant by default (@pxref{Bash Posix Mode}).
+
 @item --enable-usg-echo-default
 A synonym for @code{--enable-xpg-echo-default}.
 
@@ -6902,8 +6921,8 @@ differences between the traditional Bourne shell and Bash; this
 section quickly details the differences of significance.  A
 number of these differences are explained in greater depth in
 previous sections.
-This section uses the version of @code{sh} included in SVR4.2 as
-the baseline reference.
+This section uses the version of @code{sh} included in SVR4.2 (the
+last version of the historical Bourne shell) as the baseline reference.
 
 @itemize @bullet
 
@@ -6955,6 +6974,8 @@ invocation options list the translatable strings found in a script
 Bash implements the @code{!} keyword to negate the return value of
 a pipeline (@pxref{Pipelines}).
 Very useful when an @code{if} statement needs to act only if a test fails.
+The Bash @samp{-o pipefail} option to @code{set} will cause a pipeline to
+return a failure status if any command fails.
 
 @item
 Bash has the @code{time} reserved word and command timing (@pxref{Pipelines}).
@@ -6971,7 +6992,12 @@ generation of simple menus (@pxref{Conditional Constructs}).
 
 @item
 Bash includes the @code{[[} compound command, which makes conditional
-testing part of the shell grammar (@pxref{Conditional Constructs}).
+testing part of the shell grammar (@pxref{Conditional Constructs}), including
+optional regular expression matching.
+
+@item
+Bash provides optional case-insensitive matching for the @code{case} and
+@code{[[} constructs.
 
 @item
 Bash includes brace expansion (@pxref{Brace Expansion}) and tilde
@@ -6991,6 +7017,10 @@ Variables present in the shell's initial environment are automatically
 exported to child processes.  The Bourne shell does not normally do
 this unless the variables are explicitly marked using the @code{export}
 command.
+
+@item
+Bash supports the @samp{+=} assignment operator, which appends to the value
+of the variable named on the left hand side.
 
 @item
 Bash includes the @sc{posix} pattern removal @samp{%}, @samp{#}, @samp{%%}
@@ -7082,6 +7112,14 @@ Bash contains the @samp{<>} redirection operator, allowing a file to be
 opened for both reading and writing, and the @samp{&>} redirection
 operator, for directing standard output and standard error to the same
 file (@pxref{Redirections}).
+
+@item
+Bash includes the @samp{<<<} redirection operator, allowing a string to
+be used as the standard input to a command.
+
+@item
+Bash implements the @samp{[n]<&@var{word}} and @samp{[n]>&@var{word}}
+redirection operators, which move one file descriptor to another.
 
 @item
 Bash treats a number of filenames specially when they are
@@ -7251,6 +7289,10 @@ The @code{disown} builtin can remove a job from the internal shell
 job table (@pxref{Job Control Builtins}) or suppress the sending
 of @code{SIGHUP} to a job when the shell exits as the result of a
 @code{SIGHUP}.
+
+@item
+Bash includes a number of features to support a separate debugger for
+shell scripts.
 
 @item
 The SVR4.2 shell has two privilege-related builtins
