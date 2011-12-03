@@ -9218,7 +9218,7 @@ expr.c
 	- make the exponentiation operator (**) associative, so things like
 	  2**3**4  work right (change `if' to `while')
 
-				    3/2
+				    3/3
 				    ---
 lib/sh/strftime.c
 	- SCO Unix 3.2, like Solaris, requires that the system's `timezone'
@@ -9226,3 +9226,11 @@ lib/sh/strftime.c
 
 lib/readline/{bind,histfile,input,parens}.c
 	- changes for Tandem (including `floss.h' (?))
+
+				    3/4
+				    ---
+subst.c
+	- change param_expand to quote the entire expanded string instead
+	  of just the escape characters if the expansion appears between
+	  double quotes or in a here-document (for simple variable expansions
+	  or expansions of positional parameters)

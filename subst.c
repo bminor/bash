@@ -5736,7 +5736,16 @@ param_expand (string, sindex, quoted, expanded_something,
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  return (interactive_shell ? &expand_param_error : &expand_param_fatal);
 	}
+#if 1
+      if (temp1)
+	temp = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		  ? quote_string (temp1)
+		  : quote_escapes (temp1);
+      else
+	temp = (char *)NULL;
+#else
       temp = temp1 ? quote_escapes (temp1) : (char *)NULL;
+#endif
       break;
 
     /* $$ -- pid of the invoking shell. */
@@ -5827,17 +5836,10 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
-#if 0
-if (list && list->next)
-  {
-#endif
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
-#if 0
-  }
-#endif
 
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
@@ -5980,13 +5982,18 @@ comsub:
 	    {
 	      temp = array_reference (array_cell (var), 0);
 	      if (temp)
-		temp = quote_escapes (temp);
+		temp = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+			  ? quote_string (temp)
+			  : quote_escapes (temp);
 	      else if (unbound_vars_is_error)
 		goto unbound_variable;
 	    }
 	  else
 #endif
-	  temp = quote_escapes (value_cell (var));
+
+	  temp = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		    ? quote_string (value_cell (var))
+		    : quote_escapes (value_cell (var));
 	  free (temp1);
 
 	  goto return0;
