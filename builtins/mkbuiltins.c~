@@ -381,14 +381,8 @@ array_add (element, array)
     array->array = (char **)xrealloc
       (array->array, (array->size += array->growth_rate) * array->width);
 
-#if defined (HAVE_BCOPY)
-  bcopy (&element, (char *) &(array->array[array->sindex]), array->width);
-  array->sindex++;
-  bzero ((char *) &(array->array[array->sindex]), array->width);
-#else
   array->array[array->sindex++] = element;
   array->array[array->sindex] = (char *)NULL;
-#endif /* !HAVE_BCOPY */
 }
 
 /* Free an allocated array and data pointer. */

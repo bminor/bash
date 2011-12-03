@@ -1372,7 +1372,7 @@ write_documentation (stream, documentation, indentation, flags)
       if (single_longdoc_strings)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "N_(\"");
+	    fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
 	  else
 	    fprintf (stream, "\"");
 	}
@@ -1398,7 +1398,7 @@ write_documentation (stream, documentation, indentation, flags)
       if (string_array && single_longdoc_strings == 0)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "  N_(\"");
+	    fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
 	  else
 	    fprintf (stream, "  \"");
 	}
