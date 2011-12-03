@@ -115,7 +115,10 @@ extern int errno;
   do \
     { \
       if (vflag) \
-	bind_variable  (vname, vbuf, 0); \
+	{ \
+	  bind_variable  (vname, vbuf, 0); \
+	  stupidly_hack_special_variables (vname); \
+	} \
       if (conv_bufsize > 4096 ) \
 	{ \
 	  free (conv_buf); \

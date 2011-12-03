@@ -25,8 +25,12 @@
 #include "posixtime.h"
 
 #if defined (qnx)
-#  include <sys/vc.h>
-#endif
+#  if defined (qnx6)
+#    include <sy/netmgr.h>
+#  else
+#    include <sys/vc.h>
+#  endif /* !qnx6 */
+#endif /* qnx */
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -69,6 +73,8 @@
 #define TEMPENV_HASH_BUCKETS	4	/* must be power of two */
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
+
+extern char **environ;
 
 /* Variables used here and defined in other files. */
 extern int posixly_correct;
@@ -350,7 +356,7 @@ initialize_shell_variables (env, privmode)
   set_pwd ();
 
   /* Set up initial value of $_ */
-#if 1
+#if 0
   temp_var = bind_variable ("_", dollar_vars[0], 0);
 #else
   temp_var = set_if_not ("_", dollar_vars[0]);
@@ -375,7 +381,11 @@ initialize_shell_variables (env, privmode)
   /* set node id -- don't import it from the environment */
   {
     char node_name[22];
+#  if defined (qnx6)
+    netmgr_ndtostr(ND2S_LOCAL_STR, ND_LOCAL_NODE, node_name, sizeof(node_name));
+#  else
     qnx_nidtostr (getnid (), node_name, sizeof (node_name));
+#  endif
     temp_var = bind_variable ("NODE", node_name, 0);
     set_auto_export (temp_var);
   }
@@ -1809,7 +1819,7 @@ make_variable_value (var, value, flags)
     {
       if (flags & ASS_APPEND)
 	{
-	  oval = value_cell (var);
+	  oval = get_variable_value (var);
 	  if (oval == 0)	/* paranoia */
 	    oval = "";
 	  olen = STRLEN (oval);
@@ -3134,6 +3144,7 @@ do \
       { \
 	export_env_size += 16; \
 	export_env = strvec_resize (export_env, export_env_size); \
+	environ = export_env; \
       } \
     export_env[export_env_index++] = (do_alloc) ? savestring (envstr) : envstr; \
     export_env[export_env_index] = (char *)NULL; \
@@ -3243,6 +3254,7 @@ maybe_make_export_env ()
 	{
 	  export_env_size = new_size;
 	  export_env = strvec_resize (export_env, export_env_size);
+	  environ = export_env;
 	}
       export_env[export_env_index = 0] = (char *)NULL;
 
@@ -3725,6 +3737,10 @@ static struct name_and_function special_vars[] = {
 #endif
 
 #if defined (READLINE)
+  { "HOME", sv_home },
+#endif
+
+#if defined (READLINE)
   { "HOSTFILE", sv_hostfile },
 #endif
 
@@ -3898,6 +3914,18 @@ sv_terminal (name)
     rl_reset_terminal (get_string_value ("TERM"));
 }
 
+/* Update the value of HOME in the export environment so tilde expansion will
+   work on cygwin. */
+sv_home (name)
+     char *name;
+{
+  if (interactive_shell && no_line_editing == 0)
+    {
+      array_needs_making = 1;
+      maybe_make_export_env ();
+    }
+}
+
 void
 sv_hostfile (name)
      char *name;
@@ -3925,6 +3953,7 @@ sv_histsize (name)
 {
   char *temp;
   intmax_t num;
+  int hmax;
 
   temp = get_string_value (name);
 
@@ -3934,7 +3963,8 @@ sv_histsize (name)
 	{
 	  if (name[4] == 'S')
 	    {
-	      stifle_history (num);
+	      hmax = num;
+	      stifle_history (hmax);
 	      num = where_history ();
 	      if (history_lines_this_session > num)
 		history_lines_this_session = num;

@@ -1131,12 +1131,12 @@ simple calls to `read'.  For example, piping a command's output
 into a `while' loop that repeatedly calls `read' will result in
 the same behavior.
 
-Each element of a pipeline runs in a separate process, a child of
-the shell running the pipeline.  A subprocess cannot affect its
-parent's environment.  When the `read' command sets the variable
-to the input, that variable is set only in the subshell, not the
-parent shell.  When the subshell exits, the value of the variable
-is lost. 
+Each element of a pipeline, even a builtin or shell function,
+runs in a separate process, a child of the shell running the
+pipeline.  A subprocess cannot affect its parent's environment. 
+When the `read' command sets the variable to the input, that
+variable is set only in the subshell, not the parent shell.  When
+the subshell exits, the value of the variable is lost. 
 
 Many pipelines that end with `read variable' can be converted
 into command substitutions, which will capture the output of

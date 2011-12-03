@@ -416,6 +416,8 @@ set_var_attribute (name, attribute, undo)
 	    VSETATTR (var, att_propagate);
 	  SETVARATTR (tv, attribute, undo);	/* XXX */
 
+	  stupidly_hack_special_variables (tv->name);
+
 	  free (tvalue);
 	}
       else

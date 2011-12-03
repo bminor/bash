@@ -3736,6 +3736,10 @@ static struct name_and_function special_vars[] = {
   { "HISTTIMEFORMAT", sv_histtimefmt },
 #endif
 
+#if defined (__CYGWIN__)
+  { "HOME", sv_home },
+#endif
+
 #if defined (READLINE)
   { "HOSTFILE", sv_hostfile },
 #endif
@@ -3923,6 +3927,17 @@ sv_hostfile (name)
     hostname_list_initialized = 0;
 }
 #endif /* READLINE */
+
+/* Update the value of HOME in the export environment so tilde expansion will
+   work on cygwin. */
+#if defined (__CYGWIN__)
+sv_home (name)
+     char *name;
+{
+  array_needs_making = 1;
+  maybe_make_export_env ();
+}
+#endif
 
 #if defined (HISTORY)
 /* What to do after the HISTSIZE or HISTFILESIZE variables change.

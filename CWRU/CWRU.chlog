@@ -11850,3 +11850,43 @@ general.h
 	- fix definitions of ABSPATH and RELPATH for cygwin
 	- fix definition of ISDIRSEP for cygwin to allow backslash as a
 	  directory name separator
+
+				    8/9
+				    ---
+builtins/setattr.def
+	- when setting a variable from the temporary environment in
+	  set_var_attribute  (e.g., `LC_ALL=C export LC_ALL'), make sure to
+	  call stupidly_hack_special_variables after binding the variable in
+	  the current context
+
+builtins/printf.def
+	- make sure to call stupidly_hack_special_variables if using `printf -v'
+	  to put formatted output in a shell variable
+
+				   8/11
+				   ----
+support/shobj-conf
+	- new variable: SHLIB_LIBPREF, prefix for shared library name (defaults
+	  to `lib'
+	- new variable: SHLIB_DLLVERSION, used on Cygwin to set the library
+	  version number
+	- new variable: SHLIB_DOT, separator character between library name and
+	  suffix and version information (defaults to `.')
+	- new stanza for cygwin to generate windows-compatible dll
+
+				   8/14
+				   ----
+variables.c
+	- new special variable function for Cygwin, so the export environment
+	  is remade when HOME is changed.  The environment is the only way to
+	  get information from the shell to cygwin dlls, for instanace, when
+	  bash is compiled to use an already-installed libreadline
+
+variables.h
+	- new extern declaration for sv_home
+
+				   8/15
+				   ----
+lib/readline/display.c
+	- call init_line_structures from rl_redisplay if vis_lbreaks == 0
+	  to avoid consequences of a poorly-timed SIGWINCH

@@ -344,8 +344,8 @@ extern void sv_terminal __P((char *));
 extern void sv_hostfile __P((char *));
 #endif
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
-extern void sv_tz __P((char *));
+#if defined (__CYGWIN__)
+extern void sv_home __P((char *));
 #endif
 
 #if defined (HISTORY)
@@ -357,5 +357,9 @@ extern void sv_histchars __P((char *));
 #  endif
 extern void sv_histtimefmt __P((char *));
 #endif /* HISTORY */
+
+#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+extern void sv_tz __P((char *));
+#endif
 
 #endif /* !_VARIABLES_H_ */

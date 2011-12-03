@@ -254,7 +254,8 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
       else if (ignoring && *p == RL_PROMPT_END_IGNORE)
 	{
 	  ignoring = 0;
-	  last = r - ret - 1;
+	  if (p[-1] != RL_PROMPT_START_IGNORE)
+	    last = r - ret - 1;
 	  continue;
 	}
       else
@@ -423,6 +424,7 @@ init_line_structures (minsize)
       invisible_line[n] = 1;
     }
 
+kill(getpid(), SIGWINCH);
   if (vis_lbreaks == 0)
     {
       /* should be enough. */
@@ -459,7 +461,7 @@ rl_redisplay ()
   if (!rl_display_prompt)
     rl_display_prompt = "";
 
-  if (invisible_line == 0)
+  if (invisible_line == 0 || vis_lbreaks == 0)
     {
       init_line_structures (0);
       rl_on_new_line ();
@@ -602,7 +604,6 @@ rl_redisplay ()
   num = 0;
 #endif
 
-fprintf(stderr, "rl_redisplay: local_prompt = %s\r\n", local_prompt);
   /* prompt_invis_chars_first_line is the number of invisible characters in
      the first physical line of the prompt.
      wrap_offset - prompt_invis_chars_first_line is the number of invis

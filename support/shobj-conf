@@ -41,9 +41,13 @@ SHOBJ_LIBS=
 
 SHLIB_XLDFLAGS=
 SHLIB_LIBS=
+
+SHLIB_DOT='.'
+SHLIB_LIBPREF='lib'
 SHLIB_LIBSUFF='so'
 
 SHLIB_LIBVERSION='$(SHLIB_LIBSUFF)'
+SHLIB_DLLVERSION='$(SHLIB_MAJOR)'
 
 PROGNAME=`basename $0`
 USAGE="$PROGNAME [-C compiler] -c host_cpu -o host_os -v host_vendor"
@@ -466,6 +470,24 @@ msdos*)
 	SHLIB_STATUS=unsupported
 	;;
 
+cygwin*)
+	SHOBJ_LD='$(CC)'
+        SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
+        SHLIB_LIBPREF='cyg'
+        SHLIB_LIBSUFF='dll'
+        SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
+        SHLIB_LIBS='$(TERMCAP_LIB)'
+
+	SHLIB_DOT=
+        # For official cygwin releases, DLLVERSION will be defined in the
+        # environment of configure, and will be incremented any time the API
+        # changes in a non-backwards compatible manner.  Otherwise, it is just
+        # SHLIB_MAJOR.
+        if [ -n "$DLLVERSION" ] ; then
+		SHLIB_DLLVERSION="$DLLVERSION"
+        fi
+	;;
+
 #
 # Rely on correct gcc configuration for everything else
 #
@@ -493,8 +515,14 @@ echo SHOBJ_LIBS=\'"$SHOBJ_LIBS"\'
 
 echo SHLIB_XLDFLAGS=\'"$SHLIB_XLDFLAGS"\'
 echo SHLIB_LIBS=\'"$SHLIB_LIBS"\'
+
+echo SHLIB_DOT=\'"$SHLIB_DOT"\'
+
+echo SHLIB_LIBPREF=\'"$SHLIB_LIBPREF"\'
 echo SHLIB_LIBSUFF=\'"$SHLIB_LIBSUFF"\'
+
 echo SHLIB_LIBVERSION=\'"$SHLIB_LIBVERSION"\'
+echo SHLIB_DLLVERSION=\'"$SHLIB_DLLVERSION"\'
 
 echo SHOBJ_STATUS=\'"$SHOBJ_STATUS"\'
 echo SHLIB_STATUS=\'"$SHLIB_STATUS"\'

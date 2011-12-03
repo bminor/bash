@@ -460,7 +460,7 @@ rl_redisplay ()
   if (!rl_display_prompt)
     rl_display_prompt = "";
 
-  if (invisible_line == 0)
+  if (invisible_line == 0 || vis_lbreaks == 0)
     {
       init_line_structures (0);
       rl_on_new_line ();

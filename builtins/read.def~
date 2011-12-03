@@ -429,11 +429,7 @@ read_builtin (list)
 	  if (c == '\n')
 	    i--;		/* back up over the CTLESC */
 	  else
-#if 0
-	    input_string[i++] = c;
-#else
 	    goto add_char;
-#endif
 	  continue;
 	}
 
@@ -668,6 +664,7 @@ add_char:
   return (retval);
 }
 
+/* XXX - should we call stupidly_hack_special_variables here? */
 static SHELL_VAR *
 bind_read_variable (name, value)
      char *name, *value;
