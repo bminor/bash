@@ -4911,7 +4911,11 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   if (*e1p < 0)		/* negative offsets count from end */
     *e1p += len;
 
+#if 0
   if (*e1p >= len || *e1p < 0)
+#else
+  if (*e1p > len || *e1p < 0)
+#endif
     return (-1);
 
 #if defined (ARRAY_VARS)
@@ -5002,7 +5006,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
       else
 	return -1;
     }
-  else if ((v = find_variable (varname)) && invisible_p (v) == 0 && array_p (v))
+  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && array_p (v))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;

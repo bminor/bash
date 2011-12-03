@@ -1599,7 +1599,10 @@ make_local_variable (name)
   /* local foo; local foo;  is a no-op. */
   old_var = find_variable (name);
   if (old_var && local_p (old_var) && old_var->context == variable_context)
-    return (old_var);
+    {
+      VUNSETATTR (old_var, att_invisible);
+      return (old_var);
+    }
 
   was_tmpvar = old_var && tempvar_p (old_var);
   if (was_tmpvar)

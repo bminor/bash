@@ -9815,4 +9815,44 @@ variables.c
 
 pcomplete.c
 	- make sure COMP_WORDS is not invisible when bind_comp_words returns
-	- ditto for COMPREPLY in gen_shell_function_completions
+	- ditto for COMPREPLY in gen_shell_function_matches
+
+				    8/4
+				    ---
+braces.c
+	- fix problem where ${ was ignored but did not increment the open
+	  brace count.  Bug reported by Tim Waugh <twaugh@redhat.com>
+
+variables.c
+	- if make_local_variable finds a variable in the correct context in
+	  the right variable scope, make sure it's not invisible before
+	  returning it
+
+				    8/5
+				    ---
+builtins/trap.def
+	- fixed usage message to show `action' as not optional, though it
+	  actually is when not in posix mode (for a single argument)
+
+				    8/7
+				    ---
+configure.in
+	- kfreebsd-gnu has had its sbrk() problems fixed, and no longer needs
+	  to be configured --without-gnu-malloc
+
+lib/readline/vi_mode.c
+	- in rl_vi_search, free any saved history line before starting the
+	  search, so failure leaves you at that line, not the last line in
+	  the history (assuming the current line is not the last history line).
+	  Fix from llattanzi@apple.com to replace fix of 7/7
+
+				    8/9
+				    ---
+support/Makefile.in
+	- renamed `mostly-clean' target to `mostlyclean'
+
+				   8/11
+				   ----
+lib/readline/vi_mode.c
+	- make same change for EOL in multibyte character case of
+	  rl_vi_change_char

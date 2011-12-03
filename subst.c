@@ -4911,7 +4911,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   if (*e1p < 0)		/* negative offsets count from end */
     *e1p += len;
 
-  if (*e1p >= len || *e1p < 0)
+  if (*e1p > len || *e1p < 0)
     return (-1);
 
 #if defined (ARRAY_VARS)
