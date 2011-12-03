@@ -11183,3 +11183,28 @@ lib/sh/zread.c
 builtins/evalstring.c
 	- don't allow parse_and_execute to short-circuit and call exec() if
 	  the command's return value is being inverted
+
+				   3/15
+				   ----
+builtins/printf.def
+	- new macro PC to call putchar and increment number of chars printed -
+	  fixes bug in computation of value for %n format char
+	- `tw' is now a global var so printstr can modify it using PC()
+	- convert PF macro to use asprintf into a local buffer
+	  Preparation for printf -v var
+	- add code to add the text printed to a `variable buffer' if -v option
+	  supplied.  The buffer grows as needed
+	- printf now takes a `-v var' option to put the output into the variable
+	  VAR rather than sending it to stdout.  It does not:
+		print partial output on error (e.g., format string error)
+		handle NULs in the variable value, as usual
+
+				   3/16
+				   ----
+parse.y
+	- fix bug in prompt string decoding that caused a core dump when PS1
+	  contained \W and PWD was unset (null pointer deref)
+
+builtins/printf.def
+	- changed -v var behavior so it stores partial output into the named
+	  variable upon an error

@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sat Feb 19 17:38:29 EST 2005
+.\"	Last Change: Tue Mar 15 17:21:41 EST 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Feb 19" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Mar 15" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7290,7 +7290,7 @@ is empty, a non-existent directory stack entry is specified, or the
 directory change fails.
 .RE
 .TP
-\fBprintf\fP \fIformat\fP [\fIarguments\fP]
+\fBprintf\fP [\fB\-v\fP \fIvar\fP] \fIformat\fP [\fIarguments\fP]
 Write the formatted \fIarguments\fP to the standard output under the
 control of the \fIformat\fP.
 The \fIformat\fP is a character string which contains three types of objects:
@@ -7305,6 +7305,9 @@ In addition to the standard \fIprintf\fP(1) formats, \fB%b\fP causes
 beginning with \fB\e0\fP may contain up to four digits),
 and \fB%q\fP causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
+.sp 1
+The \fB\-v\fP option causes the output to be assigned to the variable
+\fIvar\fP rather than being printed to the standard output.
 .sp 1
 The \fIformat\fP is reused as necessary to consume all of the \fIarguments\fP.
 If the \fIformat\fP requires more \fIarguments\fP than are supplied, the

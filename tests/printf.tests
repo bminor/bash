@@ -9,6 +9,13 @@ printf --
 printf ""
 printf -- ""
 
+# in the future this may mean to put the output into VAR, but for
+# now it is an error
+# 2005-03-15 no longer an error
+unset var
+printf -v var "%10d" $RANDOM
+echo ${#var}
+
 # this should expand escape sequences in the format string, nothing else
 printf "\tone\n"
 
@@ -196,10 +203,6 @@ printf "%d\n" 26
 # happily ignore overflow conditions in strtol(3)
 #printf "%ld\n" 4294967296
 
-# in the future this may mean to put the output into VAR, but for
-# now it is an error
-printf -v var "%10d" $RANDOM
-
 printf "%10"
 printf "ab%Mcd\n"
 
@@ -219,6 +222,11 @@ printf '(%*b)(%*s)\n' -4 foo -4 bar
 
 format='%'`printf '%0100384d' 0`'d\n' 
 printf $format 0
+
+# failures in all bash versions through bash-3.0 - undercounted characters
+unset vv
+printf "  %s %s %s  \n%n" ab cd ef vv
+echo "$vv"
 
 # this doesn't work with printf(3) on all systems
 #printf "%'s\n" foo

@@ -4135,7 +4135,7 @@ decode_prompt_string (string)
 #define ROOT_PATH(x)	((x)[0] == '/' && (x)[1] == 0)
 #define DOUBLE_SLASH_ROOT(x)	((x)[0] == '/' && (x)[1] == '/' && (x)[2] == 0)
 		/* Abbreviate \W as ~ if $PWD == $HOME */
-		if (c == 'W' && (((t = get_string_value ("HOME")) == 0) || STREQ (t, temp) == 0))
+		if (c == 'W' && (((t = get_string_value ("HOME")) == 0) || STREQ (t, t_string) == 0))
 		  {
 		    if (ROOT_PATH (t_string) == 0 && DOUBLE_SLASH_ROOT (t_string) == 0)
 		      {

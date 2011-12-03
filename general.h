@@ -129,16 +129,16 @@ typedef struct {
 			: (type)(list))
 
 #if __GNUC__ > 1
-#  define FASTCOPY(s, d, n)  __builtin_memcpy (d, s, n)
+#  define FASTCOPY(s, d, n)  __builtin_memcpy ((d), (s), (n))
 #else /* !__GNUC__ */
 #  if !defined (HAVE_BCOPY)
 #    if !defined (HAVE_MEMMOVE)
-#      define FASTCOPY(s, d, n)  memcpy (d, s, n)
+#      define FASTCOPY(s, d, n)  memcpy ((d), (s), (n))
 #    else
-#      define FASTCOPY(s, d, n)  memmove (d, s, n)
+#      define FASTCOPY(s, d, n)  memmove ((d), (s), (n))
 #    endif /* !HAVE_MEMMOVE */
 #  else /* HAVE_BCOPY */
-#    define FASTCOPY(s, d, n)  bcopy (s, d, n)
+#    define FASTCOPY(s, d, n)  bcopy ((s), (d), (n))
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 

@@ -112,3 +112,32 @@ case "$L1/$L2" in
 4/4) echo ok;;
 *) echo CTLNUL bug: L1=$L1, L2=$L2;;
 esac
+
+x=$'\177'
+recho "aaa${x}bbb"
+recho ccc"${x}"ddd
+recho eee"$x"fff
+recho ggg"$(echo $x)"hhh
+
+x=
+recho "aaa${x}bbb"
+recho ccc"${x}"ddd
+recho eee"$x"fff
+recho ggg"$(echo $x)"hhh
+
+set -- $'\177'
+recho "aaa${1}bbb"
+recho ccc"${1}"ddd
+recho eee"$1"fff
+recho ggg"$(echo $1)"hhh
+
+set -- ""
+recho "aaa${1}bbb"
+recho ccc"${1}"ddd
+recho eee"$1"fff
+recho ggg"$(echo $1)"hhh
+
+recho aaa$'\177'bbb
+recho ccc""ddd
+recho "eeefff"
+recho ggg"$(echo $'\177')"hhh
