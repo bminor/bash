@@ -476,6 +476,7 @@ stop_pipeline (async, deferred)
     }
 
   /* Scan from the last slot backward, looking for the next free one. */
+  /* XXX - revisit this interactive assumption */
   if (interactive)
     {
       for (i = job_slots; i; i--)
@@ -554,6 +555,7 @@ stop_pipeline (async, deferred)
       newjob->j_cleanup = (sh_vptrfunc_t *)NULL;
       newjob->cleanarg = (PTR_T) NULL;
 
+itrace("stop_pipeline: adding new job %d", i + 1);
       jobs[i] = newjob;
       if (newjob->state == JDEAD && (newjob->flags & J_FOREGROUND))
 	setjstatus (i);
@@ -704,6 +706,7 @@ delete_job (job_index, warn_stopped)
   if (temp->deferred)
     dispose_command (temp->deferred);
 
+itrace("delete_job: deleting job %d", job_index + 1);
   free (temp);
 }
 
@@ -1359,7 +1362,6 @@ make_child (command, async_p)
 	  if (setpgid (mypid, pipeline_pgrp) < 0)
 	    sys_error ("child setpgid (%ld to %ld)", (long)mypid, (long)pipeline_pgrp);
 
-itrace("make_child: setpgid (pid = %d, pgrp = %d)", mypid, pipeline_pgrp);
 	  /* By convention (and assumption above), if
 	     pipeline_pgrp == shell_pgrp, we are making a child for
 	     command substitution.

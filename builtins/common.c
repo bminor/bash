@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -573,11 +573,7 @@ get_job_spec (list)
   word = list->word->word;
 
   if (*word == '\0')
-#if 0
-    return (current_job);
-#else
     return (NO_JOB);
-#endif
 
   if (*word == '%')
     word++;

@@ -9367,3 +9367,29 @@ builtins/alias.def
 include/shmbutil.h
 	- include <config.h> for definition of HANDLE_MULTIBYTE rather than
 	  duplicating logic
+
+				   4/20
+				   ----
+
+doc/{bash.1,bashref.texi}
+	- make sure $0 is consistently referred to as a `special parameter'
+	- document which characters are now not allowed in alias names
+
+				   4/23
+				   ----
+
+builtins/{jobs,kill,wait}.def
+	- removed requirement that job control be enabled to use job control
+	  notation, as SUSv3 implies
+
+subst.c
+	- based on a message from David Korn, change param_expand to not call
+	  string_list_dollar_star if the only quoting is Q_HERE_DOCUMENT --
+	  quoted here documents are like double quoting, but not exactly
+	- analogous changes to list_remove_pattern and pos_params
+
+				   4/24
+				   ----
+lib/readline/doc/rluser.texi
+	- fix error in description of emacs-mode C-xC-e command (uses $VISUAL
+	  instead of $FCEDIT)

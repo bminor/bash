@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Wed Jan 28 15:49:29 EST 2004
+.\"	Last Change: Tue Apr 20 13:39:08 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Jan 28" "GNU Bash-3.0"
+.TH BASH 1 "2004 Apr 20" "GNU Bash-3.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3189,16 +3189,18 @@ builtin commands (see
 .SM
 .B SHELL BUILTIN COMMANDS
 below).
-The first word of each command, if unquoted,
+The first word of each simple command, if unquoted,
 is checked to see if it has an
 alias.  If so, that word is replaced by the text of the alias.
-The alias name and the replacement text may contain any valid
-shell input, including the
-.I metacharacters
-listed above, with the exception that the alias name may not
-contain \fI=\fP.  The first word of the replacement text is tested
+The characters \fB/\fP, \fB$\fP, \fB`\fP, and \fB=\fP and
+any of the shell \fImetacharacters\fP or quoting characters
+listed above may not appear in an alias name.
+The replacement text may contain any valid shell input,
+including shell metacharacters.
+The first word of the replacement text is tested
 for aliases, but a word that is identical to an alias being expanded
-is not expanded a second time.  This means that one may alias
+is not expanded a second time.
+This means that one may alias
 .B ls
 to
 .BR "ls \-F" ,
@@ -3272,7 +3274,7 @@ function become the positional parameters
 during its execution.
 The special parameter
 .B #
-is updated to reflect the change.  Positional parameter 0
+is updated to reflect the change.  Special parameter 0
 is unchanged.
 The first element of the
 .SM

@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Jan 28<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Apr 20<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -4156,17 +4156,18 @@ builtin commands (see
 
 </FONT>
 below).
-The first word of each command, if unquoted,
+The first word of each simple command, if unquoted,
 is checked to see if it has an
 alias.  If so, that word is replaced by the text of the alias.
-The alias name and the replacement text may contain any valid
-shell input, including the
-<I>metacharacters</I>
-
-listed above, with the exception that the alias name may not
-contain <I>=</I>.  The first word of the replacement text is tested
+The characters <B>/</B>, <B>$</B>, <B>`</B>, and <B>=</B> and
+any of the shell <I>metacharacters</I> or quoting characters
+listed above may not appear in an alias name.
+The replacement text may contain any valid shell input,
+including shell metacharacters.
+The first word of the replacement text is tested
 for aliases, but a word that is identical to an alias being expanded
-is not expanded a second time.  This means that one may alias
+is not expanded a second time.
+This means that one may alias
 <B>ls</B>
 
 to
@@ -4260,7 +4261,7 @@ during its execution.
 The special parameter
 <B>#</B>
 
-is updated to reflect the change.  Positional parameter 0
+is updated to reflect the change.  Special parameter 0
 is unchanged.
 The first element of the
 <FONT SIZE=-1><B>FUNCNAME</B>
@@ -11343,6 +11344,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 29 January 2004 16:59:30 EST
+Time: 20 April 2004 15:26:54 EDT
 </BODY>
 </HTML>

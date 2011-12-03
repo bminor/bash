@@ -1113,7 +1113,7 @@ function become the positional parameters
 during its execution (@pxref{Positional Parameters}).
 The special parameter @samp{#} that expands to the number of
 positional parameters is updated to reflect the change.
-Positional parameter @code{0} is unchanged.
+Special parameter @code{0} is unchanged.
 The first element of the @env{FUNCNAME} variable is set to the
 name of the function while the function is executing.
 All other aspects of the shell execution
@@ -1545,9 +1545,9 @@ If @var{parameter} is unset or null, the expansion of
 If @var{parameter}
 is unset or null, the expansion of @var{word}
 is assigned to @var{parameter}.
-The value of @var{parameter}
-is then substituted.  Positional parameters and special parameters may
-not be assigned to in this way.
+The value of @var{parameter} is then substituted. 
+Positional parameters and special parameters may not be assigned to
+in this way.
 
 @item $@{@var{parameter}:?@var{word}@}
 If @var{parameter}
@@ -5424,13 +5424,15 @@ the @code{alias} and @code{unalias} builtin commands.
 The first word of each simple command, if unquoted, is checked to see
 if it has an alias.
 If so, that word is replaced by the text of the alias.
-The alias name and the replacement text may contain any valid
-shell input, including shell metacharacters, with the exception
-that the alias name may not contain @samp{=}.
+The characters @samp{/}, @samp{$}, @samp{`}, @samp{=} and any of the
+shell metacharacters or quoting characters listed above may not appear
+in an alias name.
+The replacement text may contain any valid
+shell input, including shell metacharacters.
 The first word of the replacement text is tested for
 aliases, but a word that is identical to an alias being expanded
-is not expanded a second time.  This means that one may alias
-@code{ls} to @code{"ls -F"},
+is not expanded a second time.
+This means that one may alias @code{ls} to @code{"ls -F"},
 for instance, and Bash does not try to recursively expand the
 replacement text. If the last character of the alias value is a
 space or tab character, then the next command word following the
@@ -5718,7 +5720,7 @@ The release of Bash, version + patchlevel (e.g., 2.00.0)
 @item \w
 The current working directory, with @env{$HOME} abbreviated with a tilde.
 @item \W
-The basename of @env{$PWD}.
+The basename of @env{$PWD}, with @env{$HOME} abbreviated with a tilde.
 @item \!
 The history number of this command.
 @item \#
@@ -6106,7 +6108,7 @@ Bash reports such changes immediately (@pxref{The Set Builtin}).
 Any trap on @code{SIGCHLD} is executed for each child process
 that exits.
 
-If an attempt to exit Bash is while jobs are stopped, the
+If an attempt to exit Bash is made while jobs are stopped, the
 shell prints a message warning that there are stopped jobs.
 The @code{jobs} command may then be used to inspect their status.
 If a second attempt to exit is made without an intervening command,

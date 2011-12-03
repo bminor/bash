@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -187,7 +187,7 @@ kill_builtin (list)
 	  builtin_error (_("%s: arguments must be process or job IDs"), list->word->word);
 	  CONTINUE_OR_FAIL;
 	}
-      else if (*word)
+      else if (*word && (interactive || job_control))
 	/* Posix.2 says you can kill without job control active (4.32.4) */
 	{			/* Must be a job spec.  Check it out. */
 	  int job;

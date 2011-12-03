@@ -1729,17 +1729,17 @@ AALLIIAASSEESS
        the first word of a simple command.  The  shell  maintains  a  list  of
        aliases  that  may  be set and unset with the aalliiaass and uunnaalliiaass builtin
        commands (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  The first  word  of  each
-       command,  if  unquoted,  is  checked to see if it has an alias.  If so,
-       that word is replaced by the text of the alias.  The alias name and the
-       replacement  text  may  contain  any  valid  shell input, including the
-       _m_e_t_a_c_h_a_r_a_c_t_e_r_s listed above, with the exception that the alias name may
-       not  contain  _=.   The first word of the replacement text is tested for
-       aliases, but a word that is identical to an alias being expanded is not
-       expanded a second time.  This means that one may alias llss to llss --FF, for
-       instance, and bbaasshh does not try to recursively expand  the  replacement
-       text.   If  the  last character of the alias value is a _b_l_a_n_k, then the
-       next command word following the alias is also checked for alias  expan-
-       sion.
+       simple  command, if unquoted, is checked to see if it has an alias.  If
+       so, that word is replaced by the text of the alias.  The characters  //,
+       $$,  ``,  and == and any of the shell _m_e_t_a_c_h_a_r_a_c_t_e_r_s or quoting characters
+       listed above may not appear in an alias name.  The replacement text may
+       contain  any  valid  shell  input, including shell metacharacters.  The
+       first word of the replacement text is tested for aliases,  but  a  word
+       that  is  identical to an alias being expanded is not expanded a second
+       time.  This means that one may alias llss to llss  --FF,  for  instance,  and
+       bbaasshh  does  not try to recursively expand the replacement text.  If the
+       last character of the alias value is a _b_l_a_n_k,  then  the  next  command
+       word following the alias is also checked for alias expansion.
 
        Aliases are created and listed with the aalliiaass command, and removed with
        the uunnaalliiaass command.
@@ -1778,16 +1778,16 @@ FFUUNNCCTTIIOONNSS
        interpret them (contrast this with the execution of  a  shell  script).
        When  a  function is executed, the arguments to the function become the
        positional parameters during its execution.  The special parameter ## is
-       updated  to  reflect  the change.  Positional parameter 0 is unchanged.
-       The first element of the FFUUNNCCNNAAMMEE variable is set to the  name  of  the
-       function  while  the  function  is executing.  All other aspects of the
-       shell execution environment are identical between a  function  and  its
-       caller  with  the exception that the DDEEBBUUGG trap (see the description of
-       the ttrraapp builtin under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below) is  not  inherited
-       unless  the  function  has  been  given  the  ttrraaccee  attribute (see the
-       description of the ddeeccllaarree builtin below) or  the  --oo  ffuunnccttrraaccee  shell
-       option  has  been enabled with the sseett builtin (in which case all func-
-       tions inherit the DDEEBBUUGG trap).
+       updated  to reflect the change.  Special parameter 0 is unchanged.  The
+       first element of the FFUUNNCCNNAAMMEE variable is set to the name of the  func-
+       tion  while  the function is executing.  All other aspects of the shell
+       execution environment are identical between a function and  its  caller
+       with the exception that the DDEEBBUUGG trap (see the description of the ttrraapp
+       builtin under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below) is not inherited unless the
+       function has been given the ttrraaccee attribute (see the description of the
+       ddeeccllaarree builtin below) or  the  --oo  ffuunnccttrraaccee  shell  option  has  been
+       enabled  with  the sseett builtin (in which case all functions inherit the
+       DDEEBBUUGG trap).
 
        Variables local to the function may be declared with the llooccaall  builtin
        command.  Ordinarily, variables and their values are shared between the
@@ -4775,4 +4775,4 @@ BBUUGGSS
 
 
 
-GNU Bash-3.0                      2004 Jan 28                          BASH(1)
+GNU Bash-3.0                      2004 Apr 20                          BASH(1)

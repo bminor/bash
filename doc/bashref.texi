@@ -1113,7 +1113,7 @@ function become the positional parameters
 during its execution (@pxref{Positional Parameters}).
 The special parameter @samp{#} that expands to the number of
 positional parameters is updated to reflect the change.
-Positional parameter @code{0} is unchanged.
+Special parameter @code{0} is unchanged.
 The first element of the @env{FUNCNAME} variable is set to the
 name of the function while the function is executing.
 All other aspects of the shell execution
@@ -1545,9 +1545,9 @@ If @var{parameter} is unset or null, the expansion of
 If @var{parameter}
 is unset or null, the expansion of @var{word}
 is assigned to @var{parameter}.
-The value of @var{parameter}
-is then substituted.  Positional parameters and special parameters may
-not be assigned to in this way.
+The value of @var{parameter} is then substituted. 
+Positional parameters and special parameters may not be assigned to
+in this way.
 
 @item $@{@var{parameter}:?@var{word}@}
 If @var{parameter}
@@ -2599,6 +2599,10 @@ facilities (@pxref{Job Control Builtins}), the directory stack
 facilities (@pxref{Programmable Completion Builtins}).
 
 Many of the builtins have been extended by @sc{posix} or Bash.
+
+Unless otherwise noted, each builtin command documented as accepting
+options preceded by @samp{-} accepts @samp{--}
+to signify the end of the options.
 
 @node Bourne Shell Builtins
 @section Bourne Shell Builtins
@@ -5424,13 +5428,15 @@ the @code{alias} and @code{unalias} builtin commands.
 The first word of each simple command, if unquoted, is checked to see
 if it has an alias.
 If so, that word is replaced by the text of the alias.
-The alias name and the replacement text may contain any valid
-shell input, including shell metacharacters, with the exception
-that the alias name may not contain @samp{=}.
+The characters @samp{/}, @samp{$}, @samp{`}, @samp{=} and any of the
+shell metacharacters or quoting characters listed above may not appear
+in an alias name.
+The replacement text may contain any valid
+shell input, including shell metacharacters.
 The first word of the replacement text is tested for
 aliases, but a word that is identical to an alias being expanded
-is not expanded a second time.  This means that one may alias
-@code{ls} to @code{"ls -F"},
+is not expanded a second time.
+This means that one may alias @code{ls} to @code{"ls -F"},
 for instance, and Bash does not try to recursively expand the
 replacement text. If the last character of the alias value is a
 space or tab character, then the next command word following the

@@ -573,11 +573,7 @@ get_job_spec (list)
   word = list->word->word;
 
   if (*word == '\0')
-#if 0
-    return (current_job);
-#else
     return (NO_JOB);
-#endif
 
   if (*word == '%')
     word++;
@@ -585,11 +581,7 @@ get_job_spec (list)
   if (DIGIT (*word) && all_digits (word))
     {
       job = atoi (word);
-#if 0
-      return (job >= job_slots ? NO_JOB : job - 1);
-#else
       return (job > job_slots ? NO_JOB : job - 1);
-#endif
     }
 
   jflags = 0;

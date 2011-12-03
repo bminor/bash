@@ -2022,16 +2022,7 @@ do_assignment_internal (string, expand)
     }
 
   if (echo_command_at_execute)
-    {
-#if 0
-      if (assign_list)
-	fprintf (stderr, "%s%s=(%s)\n", indirection_level_string (), name, value);
-      else
-	fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
-#else
-       xtrace_print_assignment (name, value, assign_list, 1);
-#endif
-    }
+     xtrace_print_assignment (name, value, assign_list, 1);
 
 #define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
 
@@ -5844,7 +5835,11 @@ param_expand (string, sindex, quoted, expanded_something,
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
+#if 0
 	  temp = string_list_dollar_star (list);
+#else
+	  temp = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (list) : string_list (list);
+#endif
 	  temp1 = quote_string (temp);
 	  free (temp);
 	  temp = temp1;

@@ -2178,7 +2178,18 @@ pos_params (string, start, end, quoted)
 
   t->next = (WORD_LIST *)NULL;
   if (string[0] == '*')
+#if 0
     ret = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? string_list_dollar_star (quote_list (h)) : string_list (h);
+#else
+    {
+      if (quoted & Q_DOUBLE_QUOTES)
+	ret = string_list_dollar_star (quote_list (h));
+      else if (quoted & Q_HERE_DOCUMENT)
+	ret = string_list (quote_list (h));
+      else
+	ret = string_list (h);
+    }
+#endif
   else
     ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (h) : h);
   if (t != params)
@@ -3457,7 +3468,11 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
 
   l = REVERSE_LIST (new, WORD_LIST *);
   if (itype == '*')
+#if 0
     tword = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? string_list_dollar_star (l) : string_list (l);
+#else
+    tword = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (l) : string_list (l);
+#endif
   else
     tword = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (l) : l);
 
@@ -5835,7 +5850,11 @@ param_expand (string, sindex, quoted, expanded_something,
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
+#if 0
 	  temp = string_list_dollar_star (list);
+#else
+	  temp = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (list) : string_list (list);
+#endif
 	  temp1 = quote_string (temp);
 	  free (temp);
 	  temp = temp1;
