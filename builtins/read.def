@@ -425,11 +425,11 @@ read_builtin (list)
 	 newline pair still disappears from the input. */
       if (pass_next)
 	{
+	  pass_next = 0;
 	  if (c == '\n')
 	    i--;		/* back up over the CTLESC */
 	  else
-	    input_string[i++] = c;
-	  pass_next = 0;
+	    goto add_char;
 	  continue;
 	}
 
@@ -450,6 +450,7 @@ read_builtin (list)
 	  input_string[i++] = CTLESC;
 	}
 
+add_char:
       input_string[i++] = c;
       nr++;
 

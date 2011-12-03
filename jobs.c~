@@ -755,7 +755,6 @@ bgp_prune ()
   while (bgpids.npid > js.c_childmax)
     {
       ps = bgpids.list;
-itrace("bgp_prune: deleting %d -> %d", ps->pid, bgpids.npid - 1);
       bgpids.list = bgpids.list->next;
       free (ps);
       bgpids.npid--;

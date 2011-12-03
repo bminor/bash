@@ -1188,7 +1188,7 @@ _rl_vi_callback_char_search (data)
   _rl_vi_last_search_mblen = _rl_read_mbchar (_rl_vi_last_search_mbchar, MB_LEN_MAX);
 #else
   RL_SETSTATE(RL_STATE_MOREINPUT);
-  _rl_vi_last_search_char = target = rl_read_key ();
+  _rl_vi_last_search_char = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 #endif
 
@@ -1437,9 +1437,7 @@ _rl_vi_callback_change_char (data)
      _rl_callback_generic_arg *data;
 {
   int c;
-#if defined (HANDLE_MULTIBYTE)
   char mb[MB_LEN_MAX];
-#endif
 
   _rl_vi_last_replacement = c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
 

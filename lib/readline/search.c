@@ -421,6 +421,7 @@ rl_noninc_reverse_search_again (count, key)
   return (r != 1);
 }
 
+#if defined (READLINE_CALLBACKS)
 int
 _rl_nsearch_callback (cxt)
      _rl_search_cxt *cxt;
@@ -435,6 +436,7 @@ _rl_nsearch_callback (cxt)
   r = _rl_nsearch_dosearch (cxt);
   return ((r >= 0) ? _rl_nsearch_cleanup (cxt, r) : (r != 1));
 }
+#endif
   
 static int
 rl_history_search_internal (count, dir)

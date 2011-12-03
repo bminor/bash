@@ -51,7 +51,7 @@ _rl_callback_generic_arg *_rl_callback_data = 0;
 
 /* **************************************************************** */
 /*								    */
-/*			Callback Readline Functions                 */
+/*			Callback Readline Functions		 */
 /*								    */
 /* **************************************************************** */
 
@@ -105,12 +105,23 @@ void
 rl_callback_read_char ()
 {
   char *line;
-  int eof;
+  int eof, jcode;
+  static procenv_t olevel;
 
   if (rl_linefunc == NULL)
     {
       fprintf (stderr, "readline: readline_callback_read_char() called with no handler!\r\n");
       abort ();
+    }
+
+  memcpy ((void *)olevel, (void *)readline_top_level, sizeof (procenv_t));
+  jcode = setjmp (readline_top_level);
+  if (jcode)
+    {
+      (*rl_redisplay_function) ();
+      _rl_want_redisplay = 0;
+      memcpy ((void *)readline_top_level, (void *)olevel, sizeof (procenv_t));
+      return;
     }
 
   if  (RL_ISSTATE (RL_STATE_ISEARCH))
@@ -130,9 +141,23 @@ rl_callback_read_char ()
     {
       eof = _rl_arg_callback (_rl_argcxt);
       if (eof == 0 && (RL_ISSTATE (RL_STATE_NUMERICARG) == 0) && RL_ISSTATE (RL_STATE_INPUTPENDING))
-        rl_callback_read_char ();
+	rl_callback_read_char ();
+      /* XXX - this should handle _rl_last_command_was_kill better */
+      else if (RL_ISSTATE (RL_STATE_NUMERICARG) == 0)
+	_rl_internal_char_cleanup ();
 
       return;
+    }
+  else if (RL_ISSTATE (RL_STATE_MULTIKEY))
+    {
+      eof = _rl_dispatch_callback (_rl_kscxt);	/* For now */
+      while ((eof == -1 || eof == -2) && RL_ISSTATE (RL_STATE_MULTIKEY) && _rl_kscxt && (_rl_kscxt->flags & KSEQ_DISPATCHED))
+	eof = _rl_dispatch_callback (_rl_kscxt);
+      if (RL_ISSTATE (RL_STATE_MULTIKEY) == 0)
+	{
+	  _rl_internal_char_cleanup ();
+	  _rl_want_redisplay = 1;
+	}
     }
   else if (_rl_callback_func)
     {
@@ -144,11 +169,15 @@ rl_callback_read_char ()
       eof = (*_rl_callback_func) (_rl_callback_data);
       /* If the function `deregisters' itself, make sure the data is cleaned
 	 up. */
-      if (_rl_callback_func == 0 && _rl_callback_data)
-        {
-          _rl_callback_data_dispose (_rl_callback_data);
-          _rl_callback_data = 0;
-        }
+      if (_rl_callback_func == 0)
+	{
+	  if (_rl_callback_data) 	
+	    {
+	      _rl_callback_data_dispose (_rl_callback_data);
+	      _rl_callback_data = 0;
+	    }
+	  _rl_internal_char_cleanup ();
+	}
     }
   else
     eof = readline_internal_char ();
@@ -183,10 +212,10 @@ rl_callback_read_char ()
 	  if (in_handler == 0 && rl_linefunc)
 	    _rl_callback_newline ();
 	}
-      if (rl_pending_input || _rl_pushed_input_available ())
+      if (rl_pending_input || _rl_pushed_input_available () || RL_ISSTATE (RL_STATE_MACROINPUT))
 	eof = readline_internal_char ();
       else
-        break;
+	break;
     }
 }
 

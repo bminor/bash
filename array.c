@@ -257,13 +257,13 @@ char	*s;
 			return 1;
 	}
 
-	a->max_index += n;
-
 	/*
 	 * Renumber all elements in the array except the one we just added.
 	 */
 	for ( ; ae != a->head; ae = element_forw(ae))
 		element_index(ae) += n;
+
+	a->max_index = element_index(a->head->prev);
 
 	return (a->num_elements);
 }

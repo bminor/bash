@@ -3051,7 +3051,12 @@ execute_builtin (builtin, words, flags, subshell)
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
      problem only with the `source' and `eval' builtins. */
+#if 0
   isbltinenv = (builtin == source_builtin || builtin == eval_builtin);
+#else
+  isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin);
+#endif
+
   if (isbltinenv)
     {
       if (subshell == 0)

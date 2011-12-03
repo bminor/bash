@@ -85,6 +85,26 @@ typedef struct  __rl_search_context
 
 typedef int _rl_arg_cxt;
 
+/* A context for reading key sequences longer than a single character when
+   using the callback interface. */
+#define KSEQ_DISPATCHED	0x01
+#define KSEQ_SUBSEQ	0x02
+#define KSEQ_RECURSIVE	0x04
+
+typedef struct __rl_keyseq_context
+{
+  int flags;
+  int subseq_arg;
+  int subseq_retval;		/* XXX */
+  Keymap dmap;
+
+  Keymap oldmap;
+  int okey;
+  struct __rl_keyseq_context *ocxt;
+  int childval;
+} _rl_keyseq_cxt;
+
+  /* fill in more as needed */
 /* `Generic' callback data and functions */
 typedef struct __rl_callback_generic_arg 
 {
@@ -120,6 +140,8 @@ extern int rl_visible_prompt_length;
 extern int readline_echoing_p;
 extern int rl_key_sequence_length;
 extern int rl_byte_oriented;
+
+extern _rl_keyseq_cxt *_rl_kscxt;
 
 /* display.c */
 extern int rl_display_fixed;
@@ -167,6 +189,12 @@ extern void readline_internal_setup PARAMS((void));
 extern char *readline_internal_teardown PARAMS((int));
 extern int readline_internal_char PARAMS((void));
 
+extern _rl_keyseq_cxt *_rl_keyseq_cxt_alloc PARAMS((void));
+extern void _rl_keyseq_cxt_dispose PARAMS((_rl_keyseq_cxt *));
+extern void _rl_keyseq_chain_dispose PARAMS((void));
+
+extern int _rl_dispatch_callback PARAMS((_rl_keyseq_cxt *));
+     
 /* callback.c */
 extern _rl_callback_generic_arg *_rl_callback_data_alloc PARAMS((int));
 extern void _rl_callback_data_dispose PARAMS((_rl_callback_generic_arg *));
@@ -242,6 +270,7 @@ extern void _rl_init_line_state PARAMS((void));
 extern void _rl_set_the_line PARAMS((void));
 extern int _rl_dispatch PARAMS((int, Keymap));
 extern int _rl_dispatch_subseq PARAMS((int, Keymap, int));
+extern void _rl_internal_char_cleanup PARAMS((void));
 
 /* rltty.c */
 extern int _rl_disable_tty_signals PARAMS((void));

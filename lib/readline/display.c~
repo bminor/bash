@@ -118,6 +118,7 @@ rl_voidfunc_t *rl_redisplay_function = rl_redisplay;
 int rl_display_fixed = 0;
 
 int _rl_suppress_redisplay = 0;
+int _rl_want_redisplay = 0;
 
 /* The stuff that gets printed out before the actual text of the line.
    This is usually pointing to rl_prompt. */
@@ -601,6 +602,7 @@ rl_redisplay ()
   num = 0;
 #endif
 
+fprintf(stderr, "rl_redisplay: local_prompt = %s\r\n", local_prompt);
   /* prompt_invis_chars_first_line is the number of invisible characters in
      the first physical line of the prompt.
      wrap_offset - prompt_invis_chars_first_line is the number of invis
@@ -2050,6 +2052,9 @@ insert_some_chars (string, count, col)
      char *string;
      int count, col;
 {
+#if defined (__MSDOS__) || defined (__MINGW32__)
+  _rl_output_some_chars (string, count);
+#else
   /* DEBUGGING */
   if (MB_CUR_MAX == 1 || rl_byte_oriented)
     if (count != col)
@@ -2088,6 +2093,7 @@ insert_some_chars (string, count, col)
       if (_rl_term_ei && *_rl_term_ei)
 	tputs (_rl_term_ei, 1, _rl_output_character_function);
     }
+#endif /* __MSDOS__ || __MINGW32__ */
 }
 
 /* Delete COUNT characters from the display line. */
@@ -2098,6 +2104,7 @@ delete_chars (count)
   if (count > _rl_screenwidth)	/* XXX */
     return;
 
+#if !defined (__MSDOS__) && !defined (__MINGW32__)
   if (_rl_term_DC && *_rl_term_DC)
     {
       char *buffer;
@@ -2110,6 +2117,7 @@ delete_chars (count)
 	while (count--)
 	  tputs (_rl_term_dc, 1, _rl_output_character_function);
     }
+#endif /* !__MSDOS__ && !__MINGW32__ */
 }
 
 void

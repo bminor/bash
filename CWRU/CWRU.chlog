@@ -11503,3 +11503,109 @@ lib/readline/text.c
 lib/readline/vi_mode.c
 	- changed set-mark, goto-mark, change-char, and char-search to work
 	  when called by callback functions
+
+				   5/17
+				   ----
+
+lib/readline/rlprivate.h
+	- new struct declaration for a `reading key sequence' context
+
+lib/readline/readline.c
+	- new variable, _rl_dispatching_keymap, keeps track of which keymap
+	  we are currently searching
+	- functions to allocate and deallocate contexts for reading multi-char
+	  key sequences
+
+				   5/18
+				   ----
+lib/readline/rlprivate.h
+	- new struct defining a context for multiple-key key sequences (the
+	  base case is escape-prefixed commands)
+
+lib/readline/readline.c
+	- change structure of _rl_dispatch_subseq to allow for callback code
+	  to use it - rudimentary support for supporting the existing
+	  recursion using a stack of contexts, each with a reference to the
+	  previous
+	- fix so that  ^G works when in callback mode
+
+lib/readline/callback.c
+	- call the appropriate multiple-key sequence callback if the state is
+	  set
+
+				   5/19
+				   ----
+lib/readline/readline.c
+	- broke code from _readline_internal_char after call to rl_dispatch
+	  out into separate function:  _rl_internal_char_cleanup, callable by
+	  other parts of the code
+	- change _rl_internal_char_cleanup to unset _rl_want_redisplay after
+	  it calls (*rl_redisplay_func)
+
+lib/readline/callback.c
+	- call _rl_internal_char_cleanup from rl_callback_read_char when
+	  appropriate
+
+				   5/24
+				   ----
+lib/readline/callback.c
+	- use _rl_dispatch_callback and a chain of _rl_keyseq_contexts to
+	  simulate the recursion used to decode multicharacter key sequences
+	  (even things like ESC- as meta-prefix)
+	- call setjmp in rl_callback_read_char to give things like rl_abort
+	  a place to jump, since the saved location in readline() will not
+	  be valid
+	- keep calling _rl_dispatch_callback from rl_callback_read_char while
+	  we are still decoding a multi-key key sequence
+	- keep calling readline_internal_char from rl_callback_read_char while
+	  we are reading characters from a macro
+
+lib/readline/macro.c
+	- use a slightly different strategy upon encountering the end of a macro
+	  when using the callback interface:  when the last character of a
+	  macro is read, and we are reading a command, pop the macro off the	
+	  stack immediately so the loop in rl_callback_read_char terminates
+	  when it should
+
+lib/readline/readline.c
+	- if longjmp() is called and we end up at the saved location while
+	  using the callback interface, just return -- don't go back into a
+	  blocking read
+	- new function to dispose a chain of rl_keyseq_cxts
+	- only read new input in _rl_dispatch_callback if the KSEQ_DISPATCHED
+	  flag is not set in the current keyseq context -- if it is, we are
+	  traversing the chain back up and should use what we already saved
+	- use -3 as a magic value from _rl_dispatch_subseq to indicate that
+	  we're allocating a new context and moving downward in the chain
+	  (a special return value for the benefit of _rl_dispatch_callback)
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_keyseq_chain_dispose
+
+				    6/1
+				    ---
+builtins/read.def
+	- fixed a bug that occurred when reading a set number of chars and
+	  the nth char is a backslash (read one too many).  Bug reported by
+	  Chris Morgan <chmorgan@gmail.com>
+
+execute_cmd.c
+	- fix execute_builtin so the `unset' builtin also operates on the
+	  temporary environment in POSIX mode (as well as source and eval),
+	  so that unsetting variables in the temporary environment doesn't
+	  leave them set when unset completes.  Report by Eric Blake
+	  <ebb9@byu.net>
+
+array.c
+	- fix from William Park for array_rshift when shifting right on an
+	  empty array -- corrects calculation of array->max_index
+
+builtins/exec.def
+	- if an exec fails and the execfail option is set, don't call
+	  restart_job_control unless the shell is interactive or job_control
+	  is set
+
+jobs.c
+	- add a run-time check for WCONTINUED being defined in header files
+	  but rejected with EINVAL by waitpid().  Fix from Maciej Rozycki
+	  <macro@linux-mips.org>

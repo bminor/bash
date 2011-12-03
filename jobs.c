@@ -2818,6 +2818,7 @@ waitchld (wpid, block)
   PROCESS *child;
   pid_t pid;
   int call_set_current, last_stopped_job, job, children_exited, waitpid_flags;
+  static int wcontinued = WCONTINUED;	/* run-time fix for glibc problem */
 
   call_set_current = children_exited = 0;
   last_stopped_job = NO_JOB;
@@ -2827,11 +2828,18 @@ waitchld (wpid, block)
       /* We don't want to be notified about jobs stopping if job control
 	 is not active.  XXX - was interactive_shell instead of job_control */
       waitpid_flags = (job_control && subshell_environment == 0)
-			? (WUNTRACED|WCONTINUED)
+			? (WUNTRACED|wcontinued)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
       pid = WAITPID (-1, &status, waitpid_flags);
+
+      /* WCONTINUED may be rejected by waitpid as invalid even when defined */
+      if (wcontinued && pid < 0 && errno == EINVAL)
+	{
+	  wcontinued = 0;
+	  continue;	/* jump back to the test and retry without WCONTINUED */
+	}
 
       /* The check for WNOHANG is to make sure we decrement sigchld only
 	 if it was non-zero before we called waitpid. */

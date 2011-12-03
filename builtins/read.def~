@@ -124,7 +124,7 @@ read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, i, pass_next, saw_escape, eof, opt, retval, code;
+  int size, i, nr, pass_next, saw_escape, eof, opt, retval, code;
   int input_is_tty, input_is_pipe, unbuffered_read;
   int raw, edit, nchars, silent, have_timeout, fd;
   unsigned int tmout;
@@ -173,7 +173,7 @@ read_builtin (list)
 #endif
 
   tmout = 0;		/* no timeout */
-  nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
+  nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
 
   reset_internal_getopt ();
@@ -425,11 +425,15 @@ read_builtin (list)
 	 newline pair still disappears from the input. */
       if (pass_next)
 	{
+	  pass_next = 0;
 	  if (c == '\n')
 	    i--;		/* back up over the CTLESC */
 	  else
+#if 0
 	    input_string[i++] = c;
-	  pass_next = 0;
+#else
+	    goto add_char;
+#endif
 	  continue;
 	}
 
@@ -450,9 +454,11 @@ read_builtin (list)
 	  input_string[i++] = CTLESC;
 	}
 
+add_char:
       input_string[i++] = c;
+      nr++;
 
-      if (nchars > 0 && i >= nchars)
+      if (nchars > 0 && nr >= nchars)
 	break;
     }
   input_string[i] = '\0';
