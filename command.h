@@ -202,6 +202,7 @@ typedef struct pattern_list {
   struct pattern_list *next;	/* Clause to try in case this one failed. */
   WORD_LIST *patterns;		/* Linked list of patterns to test. */
   COMMAND *action;		/* Thing to execute if a pattern matches. */
+  int flags;
 } PATTERN_LIST;
 
 /* The CASE command. */

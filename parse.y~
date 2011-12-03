@@ -2703,9 +2703,8 @@ read_token (command)
 /*
  * Match a $(...) or other grouping construct.  This has to handle embedded
  * quoted strings ('', ``, "") and nested constructs.  It also must handle
- * reprompting the user, if necessary, after reading a newline (unless the
- * P_NONL flag is passed), and returning correct error values if it reads
- * EOF.
+ * reprompting the user, if necessary, after reading a newline, and returning
+ * correct error values if it reads EOF.
  */
 #define P_FIRSTCLOSE	0x01
 #define P_ALLOWESC	0x02
@@ -2852,6 +2851,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       else if MBTEST(open == '"' && ch == '`')
 	{
 	  nestret = parse_matched_pair (0, '`', '`', &nestlen, rflags);
+add_nestret:
 	  if (nestret == &matched_pair_error)
 	    {
 	      free (ret);
@@ -2864,6 +2864,11 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	      retind += nestlen;
 	    }
 	  FREE (nestret);
+	}
+      else if MBTEST(qc == '`' && (ch == '"' || ch == '\''))
+	{
+	  nestret = parse_matched_pair (0, ch, ch, &nestlen, rflags);
+	  goto add_nestret;
 	}
       else if MBTEST(was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	/* check for $(), $[], or ${} inside quoted string. */

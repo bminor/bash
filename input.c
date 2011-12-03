@@ -312,7 +312,13 @@ duplicate_buffered_stream (fd1, fd2)
 		  (bash_input.location.buffered_fd == fd2);
 
   if (buffers[fd2])
-    free_buffered_stream (buffers[fd2]);
+    {
+      /* If the two objects share the same b_buffer, don't free it. */
+      if (buffers[fd1] && buffers[fd1]->b_buffer && buffers[fd1]->b_buffer == buffers[fd2]->b_buffer)
+	buffers[fd2] = (BUFFERED_STREAM *)NULL;
+      else
+	free_buffered_stream (buffers[fd2]);
+    }
   buffers[fd2] = copy_buffered_stream (buffers[fd1]);
   if (buffers[fd2])
     buffers[fd2]->b_fd = fd2;

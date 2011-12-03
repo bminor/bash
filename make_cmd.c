@@ -382,6 +382,7 @@ make_pattern_list (patterns, action)
   temp->patterns = REVERSE_LIST (patterns, WORD_LIST *);
   temp->action = action;
   temp->next = NULL;
+  temp->flags = 0;
   return (temp);
 }
 

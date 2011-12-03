@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.1, version 3.175, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.1, version 3.177, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.1)
 define(relstatus, devel)
@@ -82,7 +82,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
 *-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
 *-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
-*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2
+*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX 6.x
 *-machten4)	opt_bash_malloc=no ;;	# MachTen 4.x
 *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
@@ -488,6 +488,7 @@ then
 	esac
 fi
 
+TILDE_LIB=-ltilde
 if test $opt_readline = yes; then
 	AC_DEFINE(READLINE)
 	if test "$opt_with_installed_readline" != "no" ; then
@@ -501,10 +502,15 @@ if test $opt_readline = yes; then
 		esac
 		READLINE_DEP=
 		READLINE_LIB=-lreadline
+		# section for OS versions that don't allow unresolved symbols
+		# to be compiled into dynamic libraries.
+		case "$host_os" in
+		cygwin*)	TILDE_LIB= ;;
+		esac
 	else
 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 		READLINE_DEP='$(READLINE_LIBRARY)'
-		# section for OS versions that ship an older version of
+		# section for OS versions that ship an older/broken version of
 		# readline as a standard dynamic library and don't allow a
 		# static version specified as -llibname to override the
 		# dynamic version
@@ -560,6 +566,7 @@ AC_SUBST(RL_INCLUDE)
 AC_SUBST(HISTORY_LIB)
 AC_SUBST(HISTORY_DEP)
 AC_SUBST(HIST_LIBDIR)
+AC_SUBST(TILDE_LIB)
 
 dnl END READLINE and HISTORY LIBRARY SECTION
 
@@ -985,6 +992,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		case "`uname -r`" in
 		2.[[456789]]*|3*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
+*qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;

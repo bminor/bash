@@ -50,7 +50,7 @@ extern int errno;
    if a signal is received. */
 
 static char localbuf[128];
-static int local_index, local_bufused;
+static int local_index = 0, local_bufused = 0;
 
 /* Posix and USG systems do not guarantee to restart read () if it is
    interrupted by a signal.  We do the read ourselves, and restart it
@@ -216,7 +216,6 @@ save_bash_input (fd, new_fd)
 {
   int nfd;
 
-itrace("save_bash_input: %d -> %d", fd, new_fd);
   /* Sync the stream so we can re-read from the new file descriptor.  We
      might be able to avoid this by copying the buffered stream verbatim
      to the new file descriptor. */
@@ -279,7 +278,6 @@ int
 check_bash_input (fd)
      int fd;
 {
-itrace("check_bash_input: %d", fd);
   if (fd_is_bash_input (fd))
     {
       if (fd > 0)
@@ -314,7 +312,13 @@ duplicate_buffered_stream (fd1, fd2)
 		  (bash_input.location.buffered_fd == fd2);
 
   if (buffers[fd2])
-    free_buffered_stream (buffers[fd2]);
+    {
+      /* If the two objects share the same b_buffer, don't free it. */
+      if (buffers[fd1]->b_buffer == buffers[fd2]->b_buffer)
+	buffers[fd2] = (BUFFERED_STREAM *)NULL;
+      else
+	free_buffered_stream (buffers[fd2]);
+    }
   buffers[fd2] = copy_buffered_stream (buffers[fd1]);
   if (buffers[fd2])
     buffers[fd2]->b_fd = fd2;

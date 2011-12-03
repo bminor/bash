@@ -11714,10 +11714,52 @@ lib/readline/input.c
 lib/readline/readline.c
 	- add a few key bindings for the arrow keys on mingw
 
+lib/readline/rldefs.h
+	- if on mingw, define NO_TTY_DRIVER
+
 lib/readline/rltty.c
 	- compile in the stub functions for _rl_{disable,restore}_tty_signals
 	  if on mingw
 	- compile in stub function for rl_restart_output on mingw
+	- make sure enough functions and macros are defined to compile if
+	  NO_TTY_DRIVER is defined (lightly tested - builds on MacOS X, at
+	  least)
 
-lib/readline/rldefs.h
-	- if on mingw, define NO_TTY_DRIVER
+				    7/7
+				    ---
+command.h
+	- add a `flags' member to the PATTERN_LIST structure
+
+make_cmd.c
+	- intialize the `flags' member of a PATTERN_LIST when it's created
+
+builtins/psize.c
+	- protect extern declaration of errno with usual #ifdef errno
+
+configure.in, variables.c
+	- changes for QNX 6.x
+
+				    7/9
+				    ---
+parse.y
+	- fix parse_matched_pair to handle single and double quoted strings
+	  inside old-style command substitution (``) since they can each
+	  quote the ` and embedded $-expansions.  Report by Eric Blake
+	  <ebb9@byu.net>
+
+{configure,Makefile}.in
+	- TILDE_LIB is now substituted into Makefile by configure
+
+configure.in
+	- if configuring --with-installed-readline on cygwin, set TILDE_LIB
+	  to the empty string to avoid multiply-defined symbols.  Cygwin
+	  doesn't allow undefined symbols in dynamic libraries.  Report by
+	  Eric Blake <ebb9@byu.net>
+
+				   7/11
+				   ----
+input.c
+	- in duplicate_buffered_stream, don't call free_buffered_stream if the
+	  two buffered streams share the same b_buffer object (e.g., if they
+	  had already been duplicated with a previous call).  Fixes bug
+	  reported by eero17@bigfoot.com

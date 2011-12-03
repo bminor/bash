@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -362,7 +362,7 @@ main (argc, argv, env)
 #endif /* __CYGWIN__ */
 
   /* Wait forever if we are debugging a login shell. */
-  while (debugging_login_shell);
+  while (debugging_login_shell) sleep (3);
 
   set_default_locale ();
 
@@ -387,6 +387,8 @@ main (argc, argv, env)
 
   /* Initialize `local' variables for all `invocations' of main (). */
   arg_index = 1;
+  if (arg_index > argc)
+    arg_index = argc;
   command_execution_string = (char *)NULL;
   want_pending_command = locally_skip_execution = read_from_stdin = 0;
   default_input = stdin;
@@ -1272,7 +1274,7 @@ bind_args (argv, arg_start, arg_end, start_index)
   register int i;
   WORD_LIST *args;
 
-  for (i = arg_start, args = (WORD_LIST *)NULL; i != arg_end; i++)
+  for (i = arg_start, args = (WORD_LIST *)NULL; i < arg_end; i++)
     args = make_word_list (make_word (argv[i]), args);
   if (args)
     {
@@ -1523,7 +1525,7 @@ set_shell_name (argv0)
 {
   /* Here's a hack.  If the name of this shell is "sh", then don't do
      any startup files; just try to be more like /bin/sh. */
-  shell_name = base_pathname (argv0);
+  shell_name = argv0 ? base_pathname (argv0) : PROGRAM;
 
   if (*shell_name == '-')
     {
@@ -1536,7 +1538,7 @@ set_shell_name (argv0)
   if (shell_name[0] == 's' && shell_name[1] == 'u' && shell_name[2] == '\0')
     su_shell++;
 
-  shell_name = argv0;
+  shell_name = argv0 ? argv0 : PROGRAM;
   FREE (dollar_vars[0]);
   dollar_vars[0] = savestring (shell_name);
 
