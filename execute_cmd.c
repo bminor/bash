@@ -57,6 +57,7 @@ extern int errno;
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "memalloc.h"
 #include "shell.h"
@@ -462,7 +463,7 @@ async_redirect_stdin ()
       close (fd);
     }
   else if (fd < 0)
-    internal_error ("cannot redirect standard input from /dev/null: %s", strerror (errno));
+    internal_error (_("cannot redirect standard input from /dev/null: %s"), strerror (errno));
 }
 
 #define DESCRIBE_PID(pid) do { if (interactive) describe_pid (pid); } while (0)
@@ -1032,7 +1033,7 @@ print_formatted_time (fp, format, rs, rsf, us, usf, ss, ssf, cpu)
 	    len = mkfmt (ts, prec, lng, ss, ssf);
 	  else
 	    {
-	      internal_error ("bad format character in time format: %c", *s);
+	      internal_error (_("TIMEFORMAT: `%c': invalid format character"), *s);
 	      free (str);
 	      return;
 	    }
@@ -1582,7 +1583,7 @@ execute_for_command (for_command)
       if (posixly_correct && interactive_shell == 0)
 	{
 	  last_command_exit_value = EX_USAGE;
-	  jump_to_top_level (EXITPROG);
+	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
     }
@@ -3181,14 +3182,15 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   
   funcnest++;
 #if defined (ARRAY_VARS)
+  /* This is quite similar to the code in shell.c and elsewhere. */
   shell_fn = find_function_def (this_shell_function->name);
   sfile = shell_fn ? shell_fn->source_file : "";
-  /* This is quite similar to the code in shell.c and elsewhere. */
+  array_push (funcname_a, this_shell_function->name);
+
   array_push (bash_source_a, sfile);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
   free (t);
-  array_push (funcname_a, this_shell_function->name);
 #endif
 
   /* The temporary environment for a function is supposed to apply to
@@ -3197,7 +3199,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   remember_args (words->next, 1);
 
   /* Update BASH_ARGV and BASH_ARGC */
-  push_args (words->next);
+  if (debugging_mode)
+    push_args (words->next);
 
   /* Number of the line on which the function body starts. */
   line_number = function_line_number = tc->line;
@@ -3248,7 +3251,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     }
 
   /* Restore BASH_ARGC and BASH_ARGV */
-  pop_args ();
+  if (debugging_mode)
+    pop_args ();
 
   if (subshell == 0)
     run_unwind_frame ("function_calling");
@@ -3256,8 +3260,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   funcnest--;
 #if defined (ARRAY_VARS)
   array_pop (bash_source_a);
-  array_pop (bash_lineno_a);
   array_pop (funcname_a);
+  array_pop (bash_lineno_a);
 #endif
   
   if (variable_context == 0 || this_shell_function == 0)
@@ -3514,7 +3518,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   command = (char *)NULL;
   if (restricted && xstrchr (pathname, '/'))
     {
-      internal_error ("%s: restricted: cannot specify `/' in command names",
+      internal_error (_("%s: restricted: cannot specify `/' in command names"),
 		    pathname);
       last_command_exit_value = EXECUTION_FAILURE;
 
@@ -3602,7 +3606,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
       if (command == 0)
 	{
-	  internal_error ("%s: command not found", pathname);
+	  internal_error (_("%s: command not found"), pathname);
 	  exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	}
 
@@ -3814,7 +3818,7 @@ shell_execve (command, args, env)
   if (i != ENOEXEC)
     {
       if ((stat (command, &finfo) == 0) && (S_ISDIR (finfo.st_mode)))
-	internal_error ("%s: is a directory", command);
+	internal_error (_("%s: is a directory"), command);
       else if (executable_file (command) == 0)
 	{
 	  errno = i;
@@ -3832,7 +3836,7 @@ shell_execve (command, args, env)
 
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      errno = i;
-	      sys_error ("%s: %s: bad interpreter", command, interp ? interp : "");
+	      sys_error (_("%s: %s: bad interpreter"), command, interp ? interp : "");
 	      FREE (interp);
 	      return (EX_NOEXEC);
 	    }
@@ -3869,7 +3873,7 @@ shell_execve (command, args, env)
 #endif
       if (check_binary_file (sample, sample_len))
 	{
-	  internal_error ("%s: cannot execute binary file", command);
+	  internal_error (_("%s: cannot execute binary file"), command);
 	  return (EX_BINARY_FILE);
 	}
     }
@@ -3933,7 +3937,7 @@ execute_intern_function (name, function)
       if (posixly_correct && interactive_shell == 0)
 	{
 	  last_command_exit_value = EX_USAGE;
-	  jump_to_top_level (EXITPROG);
+	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
     }
@@ -3942,7 +3946,7 @@ execute_intern_function (name, function)
   if (var && (readonly_p (var) || noassign_p (var)))
     {
       if (readonly_p (var))
-	internal_error ("%s: readonly function", var->name);
+	internal_error (_("%s: readonly function"), var->name);
       return (EXECUTION_FAILURE);
     }
 
@@ -3977,6 +3981,13 @@ close_pipes (in, out)
     close (out);
 }
 
+static void
+dup_error (oldd, newd)
+     int oldd, newd;
+{
+  sys_error (_("cannot duplicate fd %d to fd %d"), oldd, newd);
+}
+
 /* Redirect input and output to be from and to the specified pipes.
    NO_PIPE and REDIRECT_BOTH are handled correctly. */
 static void
@@ -3986,7 +3997,7 @@ do_piping (pipe_in, pipe_out)
   if (pipe_in != NO_PIPE)
     {
       if (dup2 (pipe_in, 0) < 0)
-	sys_error ("cannot duplicate fd %d to fd 0", pipe_in);
+	dup_error (pipe_in, 0);
       if (pipe_in > 0)
 	close (pipe_in);
     }
@@ -3995,14 +4006,14 @@ do_piping (pipe_in, pipe_out)
       if (pipe_out != REDIRECT_BOTH)
 	{
 	  if (dup2 (pipe_out, 1) < 0)
-	    sys_error ("cannot duplicate fd %d to fd 1", pipe_out);
+	    dup_error (pipe_out, 1);
 	  if (pipe_out == 0 || pipe_out > 1)
 	    close (pipe_out);
 	}
       else
 	{
 	  if (dup2 (1, 2) < 0)
-	    sys_error ("cannot duplicate fd 1 to fd 2");
+	    dup_error (1, 2);
 	}
     }
 }

@@ -35,6 +35,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "flags.h"
@@ -256,7 +257,7 @@ make_command_string_internal (command)
 	      break;
 
 	    default:
-	      cprintf ("print_command: bad connector `%d'",
+	      cprintf (_("print_command: bad connector `%d'"),
 		       command->value.Connection->connector);
 	      break;
 	    }
@@ -1168,7 +1169,7 @@ cprintf (control, va_alist)
 	      break;
 
 	    default:
-	      programming_error ("cprintf: bad `%%' argument (%c)", c);
+	      programming_error (_("cprintf: `%c': invalid format character"), c);
 	      /*NOTREACHED*/
 	    }
 	}

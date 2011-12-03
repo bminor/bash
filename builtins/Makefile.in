@@ -1,6 +1,6 @@
 # This Makefile for building libbuiltins.a is in -*- text -*- for Emacs.
 #
-# Copyright (C) 1996 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2003 Free Software Foundation, Inc.     
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+
+PACKAGE = @PACKAGE@
+PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_STRING = @PACKAGE_STRING@
+PACKAGE_VERSION = @PACKAGE_VERSION@
 
 #
 SHELL = @MAKE_SHELL@
@@ -35,6 +41,7 @@ VPATH = .:@srcdir@
 topdir = @top_srcdir@
 includedir = @includedir@
 datadir = @datadir@
+localedir = $(datadir)/locale
 
 # Support an alternate destination root directory for package building
 DESTDIR =
@@ -217,6 +224,12 @@ $(OFILES):	$(MKBUILTINS) ../config.h
 
 ../version.h: ../config.h ../Makefile Makefile
 	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
+
+# maintainer special - for now
+po:	builtins.c
+	xgettext -L C -o $(topdir)/po/builtins.pot --keyword='N_' builtins.c 2>/dev/null
+
+# dependencies
 
 alias.o: alias.def
 bind.o: bind.def
@@ -562,3 +575,40 @@ complete.o: ${topdir}/pcomplete.h
 complete.o: ${srcdir}/common.h ${srcdir}/bashgetopt.h
 
 #bind.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+
+# libintl dependencies
+bind.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+break.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+caller.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+cd.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+common.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+complete.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+declare.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+enable.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+evalfile.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+exec.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+exit.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+fc.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+fg_bg.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+getopt.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+hash.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+help.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+history.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+inlib.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+jobs.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+kill.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+let.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+mkbuiltins.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+printf.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+pushd.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+read.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+return.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+set.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+setattr.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+shift.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+shopt.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+source.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+suspend.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+type.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+ulimit.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+umask.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h

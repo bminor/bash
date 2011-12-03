@@ -429,7 +429,8 @@ rl_vi_eWord (count, ignore)
 
       /* Move to the next non-whitespace character (to the start of the
 	 next word). */
-      while (++rl_point < rl_end && whitespace (rl_line_buffer[rl_point]));
+      while (rl_point < rl_end && whitespace (rl_line_buffer[rl_point]))
+	rl_point++;
 
       if (rl_point && rl_point < rl_end)
 	{

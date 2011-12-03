@@ -867,7 +867,7 @@ rl_redisplay ()
 #endif
 	      _rl_output_some_chars (local_prompt, nleft);
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos = _rl_col_width(local_prompt, 0, nleft);
+		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft);
 	      else
 		_rl_last_c_pos = nleft;
 	    }
@@ -1126,25 +1126,36 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
-      memset (&ps_new, 0, sizeof(mbstate_t));
-      memset (&ps_old, 0, sizeof(mbstate_t));
-
-      if (omax == nmax && STREQN (new, old, omax))
+      /* See if the old line is a subset of the new line, so that the
+	 only change is adding characters. */
+      temp = (omax < nmax) ? omax : nmax;
+      if (memcmp (old, new, temp) == 0)
 	{
-	  ofd = old + omax;
-	  nfd = new + nmax;
+	  ofd = old + temp;
+	  nfd = new + temp;
 	}
       else
-	{
-	  new_offset = old_offset = 0;
-	  for (ofd = old, nfd = new;
-	       (ofd - old < omax) && *ofd &&
-		_rl_compare_chars(old, old_offset, &ps_old, new, new_offset, &ps_new); )
+	{      
+	  memset (&ps_new, 0, sizeof(mbstate_t));
+	  memset (&ps_old, 0, sizeof(mbstate_t));
+
+	  if (omax == nmax && STREQN (new, old, omax))
 	    {
-	      old_offset = _rl_find_next_mbchar (old, old_offset, 1, MB_FIND_ANY);
-	      new_offset = _rl_find_next_mbchar (new, new_offset, 1, MB_FIND_ANY);
-	      ofd = old + old_offset;
-	      nfd = new + new_offset;
+	      ofd = old + omax;
+	      nfd = new + nmax;
+	    }
+	  else
+	    {
+	      new_offset = old_offset = 0;
+	      for (ofd = old, nfd = new;
+		    (ofd - old < omax) && *ofd &&
+		    _rl_compare_chars(old, old_offset, &ps_old, new, new_offset, &ps_new); )
+		{
+		  old_offset = _rl_find_next_mbchar (old, old_offset, 1, MB_FIND_ANY);
+		  new_offset = _rl_find_next_mbchar (new, new_offset, 1, MB_FIND_ANY);
+		  ofd = old + old_offset;
+		  nfd = new + new_offset;
+		}
 	    }
 	}
     }
@@ -1358,7 +1369,11 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  if ((temp - lendiff) > 0)
 	    {
 	      _rl_output_some_chars (nfd + lendiff, temp - lendiff);
-#if 0
+#if 1
+	     /* XXX -- this bears closer inspection.  Fixes a redisplay bug
+		reported against bash-3.0-alpha by Andreas Schwab involving
+		multibyte characters and prompt strings with invisible
+		characters, but was previously disabled. */
 	      _rl_last_c_pos += _rl_col_width (nfd+lendiff, 0, temp-col_lendiff);
 #else
 	      _rl_last_c_pos += _rl_col_width (nfd+lendiff, 0, temp-lendiff);
@@ -2166,7 +2181,7 @@ _rl_col_width (str, start, end)
 	  memset (&ps, 0, sizeof (mbstate_t));
 	}
       else if (MB_NULLWCH (tmp))
-        break;		/* Found '\0' */
+	break;		/* Found '\0' */
       else
 	{
 	  point += tmp;
@@ -2198,7 +2213,7 @@ _rl_col_width (str, start, end)
 	  memset (&ps, 0, sizeof (mbstate_t));
 	}
       else if (MB_NULLWCH (tmp))
-        break;			/* Found '\0' */
+	break;			/* Found '\0' */
       else
 	{
 	  point += tmp;

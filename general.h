@@ -277,7 +277,7 @@ extern int all_digits __P((char *));
 extern int legal_number __P((char *, intmax_t *));
 extern int legal_identifier __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
-extern int assignment __P((const char *));
+extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
 extern int sh_validfd __P((int));

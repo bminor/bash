@@ -1283,7 +1283,10 @@ get_history_word_specifier (spec, from, caller_index)
   if (spec[i] == '-')
     first = 0;
   else if (spec[i] == '^')
-    first = 1;
+    {
+      first = 1;
+      i++;
+    }
   else if (_rl_digit_p (spec[i]) && expecting_word_spec)
     {
       for (first = 0; _rl_digit_p (spec[i]); i++)

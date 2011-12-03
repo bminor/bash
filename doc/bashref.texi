@@ -1204,6 +1204,7 @@ Word splitting is not performed, with the exception
 of @code{"$@@"} as explained below.
 Filename expansion is not performed.
 Assignment statements may also appear as arguments to the
+@code{alias}, 
 @code{declare}, @code{typeset}, @code{export}, @code{readonly},
 and @code{local} builtin commands.
 
@@ -2472,10 +2473,11 @@ In all cases, Bash ignores @code{SIGQUIT}.
 If job control is in effect (@pxref{Job Control}), Bash
 ignores @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
 
-Commands started by Bash have signal handlers set to the
+Non-builtin commands started by Bash have signal handlers set to the
 values inherited by the shell from its parent.
 When job control is not in effect, asynchronous commands
-ignore @code{SIGINT} and @code{SIGQUIT} as well.
+ignore @code{SIGINT} and @code{SIGQUIT} in addition to these inherited
+handlers.
 Commands run as a result of
 command substitution ignore the keyboard-generated job control signals
 @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
@@ -2495,9 +2497,9 @@ If the  @code{huponexit} shell option has been set with @code{shopt}
 (@pxref{Bash Builtins}), Bash sends a @code{SIGHUP} to all jobs when
 an interactive login shell exits.
 
-When Bash receives a signal for which a trap has been set while waiting
-for a command to complete, the trap will not be executed until the
-command completes. 
+If Bash is waiting for a command to complete and receives a signal
+for which a trap has been set, the trap will not be executed until
+the command completes. 
 When Bash is waiting for an asynchronous
 command via the @code{wait} builtin, the reception of a signal for
 which a trap has been set will cause the @code{wait} builtin to return
@@ -2993,12 +2995,14 @@ Refer to the description of the @code{extglob} option to the
 @code{shopt} builtin (@pxref{Bash Builtins}) for details of its
 effect on the @code{DEBUG} trap.
 If a @var{sigspec} is @code{ERR}, the command @var{arg} 
-is executed whenever a simple command has a non-zero exit status.
+is executed whenever a simple command has a non-zero exit status,
+subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
 part of the test in an @code{if} statement,
 part of a @code{&&} or @code{||} list, or if the command's return
 status is being inverted using @code{!}.
+These are the same conditions obeyed by the @code{errexit} option.
 If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
 each time a shell function or a script executed with the @code{.} or
 @code{source} builtins finishes executing.
@@ -3170,7 +3174,7 @@ builtin command.
 caller [@var{expr}]
 @end example
 Returns the context of any active subroutine call (a shell function or
-a script executed with the @code{.} or @code{source} builtins.
+a script executed with the @code{.} or @code{source} builtins).
 
 Without @var{expr}, @code{caller} displays the line number and source
 filename of the current subroutine call.
@@ -3412,7 +3416,11 @@ format specifications, each of which causes printing of the next successive
 @var{argument}.
 In addition to the standard @code{printf(1)} formats, @samp{%b} causes
 @code{printf} to expand backslash escape sequences in the corresponding
-@var{argument}, and @samp{%q} causes @code{printf} to output the
+@var{argument},
+(except that @samp{\c} terminates output, backslashes in
+@samp{\'}, @samp{\"}, and @samp{\?} are not removed, and octal escapes
+beginning with @samp{\0} may contain up to four digits),
+and @samp{%q} causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
 
 The @var{format} is reused as necessary to consume all of the @var{arguments}.
@@ -6813,6 +6821,8 @@ Bash provides a programmable word completion mechanism
 @item
 Bash has command history (@pxref{Bash History Facilities}) and the
 @code{history} and @code{fc} builtins to manipulate it.
+The Bash history list maintains timestamp information and uses the
+value of the @code{HISTTIMEFORMAT} variable to display it.
 
 @item
 Bash implements @code{csh}-like history expansion
@@ -7062,9 +7072,20 @@ Bash has much more optional behavior controllable with the @code{set}
 builtin (@pxref{The Set Builtin}).
 
 @item
+The @samp{-x} (@code{xtrace}) option displays commands other than
+simple commands when performing an execution trace
+(@pxref{The Set Builtin}).
+
+@item
 The @code{test} builtin (@pxref{Bourne Shell Builtins})
 is slightly different, as it implements the @sc{posix} algorithm,
 which specifies the behavior based on the number of arguments.
+
+@item
+Bash includes the @code{caller} builtin, which displays the context of
+any active subroutine call (a shell function or a script executed with
+the @code{.} or @code{source} builtins).  This supports the bash
+debugger.
 
 @item
 The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows a

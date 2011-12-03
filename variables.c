@@ -36,6 +36,7 @@
 #include "chartypes.h"
 #include <pwd.h>
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "flags.h"
@@ -306,7 +307,7 @@ initialize_shell_variables (env, privmode)
 	      array_needs_making = 1;
 	    }
 	  else
-	    report_error ("error importing function definition for `%s'", name);
+	    report_error (_("error importing function definition for `%s'"), name);
 
 	  /* ( */
 	  if (name[char_index - 1] == ')' && name[char_index - 2] == '\0')
@@ -666,7 +667,7 @@ adjust_shell_level (change)
     shell_level = 0;
   else if (shell_level > 1000)
     {
-      internal_warning ("shell level (%d) too high, resetting to 1", shell_level);
+      internal_warning (_("shell level (%d) too high, resetting to 1"), shell_level);
       shell_level = 1;
     }
 
@@ -1606,7 +1607,7 @@ make_local_variable (name)
 
   if (vc == 0)
     {
-      internal_error ("make_local_variable: no function context at current scope found");
+      internal_error (_("make_local_variable: no function context at current scope"));
       return ((SHELL_VAR *)NULL);
     }
   else if (vc->table == 0)
@@ -2033,6 +2034,7 @@ bind_function_def (name, value)
 {
   FUNCTION_DEF *entry;
   BUCKET_CONTENTS *elt;
+  COMMAND *cmd;
 
   entry = find_function_def (name);
   if (entry)
@@ -2042,7 +2044,10 @@ bind_function_def (name, value)
     }
   else
     {
+      cmd = value->command;
+      value->command = 0;
       entry = copy_function_def (value);
+      value->command = cmd;
 
       elt = hash_insert (savestring (name), shell_function_defs, HASH_NOSRCH);
       elt->data = (PTR_T *)entry;
@@ -2061,7 +2066,7 @@ assign_in_env (string)
   char *name, *temp, *value;
   SHELL_VAR *var;
 
-  offset = assignment (string);
+  offset = assignment (string, 0);
   name = savestring (string);
   value = (char *)NULL;
 
@@ -2120,6 +2125,7 @@ assign_in_env (string)
       fflush (stderr);
     }
 
+  free (name);
   return 1;
 }
 
@@ -2700,7 +2706,7 @@ all_local_variables ()
 
   if (vc == 0)
     {
-      internal_error ("all_local_variables: no function context at current scope found");
+      internal_error (_("all_local_variables: no function context at current scope"));
       return (SHELL_VAR **)NULL;
     }
   if (vc->table == 0 || HASH_ENTRIES (vc->table) == 0 || vc_haslocals (vc) == 0)
@@ -2914,7 +2920,7 @@ valid_exportstr (v)
   s = v->exportstr;
   if (legal_variable_starter ((unsigned char)*s) == 0)
     {
-      internal_error ("invalid character %d in exportstr for %s", *s, v->name);
+      internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);
       return (0);
     }
   for (s = v->exportstr + 1; s && *s; s++)
@@ -2923,13 +2929,13 @@ valid_exportstr (v)
 	break;
       if (legal_variable_char ((unsigned char)*s) == 0)
 	{
-	  internal_error ("invalid character %d in exportstr for %s", *s, v->name);
+	  internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);
 	  return (0);
 	}
     }
   if (*s != '=')
     {
-      internal_error ("no `=' in exportstr for %s", v->name);
+      internal_error (_("no `=' in exportstr for %s"), v->name);
       return (0);
     }
   return (1);
@@ -3055,7 +3061,7 @@ add_or_supercede_exported_var (assign, do_alloc)
   register int i;
   int equal_offset;
 
-  equal_offset = assignment (assign);
+  equal_offset = assignment (assign, 0);
   if (equal_offset == 0)
     return (export_env);
 
@@ -3354,7 +3360,7 @@ pop_var_context ()
   vcxt = shell_variables;
   if (vc_isfuncenv (vcxt) == 0)
     {
-      internal_error ("pop_var_context: head of shell_variables not a function context");
+      internal_error (_("pop_var_context: head of shell_variables not a function context"));
       return;
     }
 
@@ -3367,7 +3373,7 @@ pop_var_context ()
       dispose_var_context (vcxt);
     }
   else
-    internal_error ("pop_var_context: no global_variables context");
+    internal_error (_("pop_var_context: no global_variables context"));
 }
 
 /* Delete the HASH_TABLEs for all variable contexts beginning at VCXT, and
@@ -3433,7 +3439,7 @@ pop_scope (is_special)
   vcxt = shell_variables;
   if (vc_istempscope (vcxt) == 0)
     {
-      internal_error ("pop_scope: head of shell_variables not a temporary environment scope");
+      internal_error (_("pop_scope: head of shell_variables not a temporary environment scope"));
       return;
     }
 

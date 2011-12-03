@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,6 +39,7 @@ $PRODUCES cd.c
 #include <stdio.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include <errno.h>
 #include <tilde/tilde.h>
@@ -184,7 +185,7 @@ cd_builtin (list)
 
       if (dirname == 0)
 	{
-	  builtin_error ("HOME not set");
+	  builtin_error (_("HOME not set"));
 	  return (EXECUTION_FAILURE);
 	}
       lflag = 0;
@@ -196,7 +197,7 @@ cd_builtin (list)
 
       if (dirname == 0)
 	{
-	  builtin_error ("OLDPWD not set");
+	  builtin_error (_("OLDPWD not set"));
 	  return (EXECUTION_FAILURE);
 	}
 #if 0
@@ -346,7 +347,7 @@ pwd_builtin (list)
       fflush (stdout);
       if (ferror (stdout))
 	{
-	  builtin_error ("write error: %s", strerror (errno));
+	  builtin_error (_("write error: %s"), strerror (errno));
 	  clearerr (stdout);
 	  return (EXECUTION_FAILURE);
 	}
@@ -404,7 +405,8 @@ change_to_directory (newdir, nolinks)
      resolved path doesn't exist), fail immediately. */
   if (posixly_correct && nolinks == 0 && canon_failed)
     {
-      errno = ENOENT;
+      if (errno != ENOENT)
+	errno = ENOTDIR;
       return (0);
     }
 

@@ -121,7 +121,7 @@ ansicstr (string, len, flags, sawc, rlen)
 	      break;
 	    case '\\':
 	      break;
-	    case '\'':
+	    case '\'': case '"': case '?':
 	      if (flags & 1)
 		*r++ = '\\';
 	      break;

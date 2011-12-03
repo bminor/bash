@@ -696,6 +696,11 @@ extern int rl_attempted_completion_over;
    functions. */
 extern int rl_completion_type;
 
+/* Up to this many items will be displayed in response to a
+   possible-completions call.  After that, we ask the user if she
+   is sure she wants to see them all.  The default value is 100. */
+extern int rl_completion_query_items;
+
 /* Character appended to completed words when at the end of the line.  The
    default is a space.  Nothing is added if this is '\0'. */
 extern int rl_completion_append_character;
@@ -704,10 +709,18 @@ extern int rl_completion_append_character;
    rl_completion_append_character will not be appended. */
 extern int rl_completion_suppress_append;
 
-/* Up to this many items will be displayed in response to a
-   possible-completions call.  After that, we ask the user if she
-   is sure she wants to see them all.  The default value is 100. */
-extern int rl_completion_query_items;
+/* Set to any quote character readline thinks it finds before any application
+   completion function is called. */
+extern int rl_completion_quote_character;
+
+/* Set to a non-zero value if readline found quoting anywhere in the word to
+   be completed; set before any application completion function is called. */
+extern int rl_completion_found_quote;
+
+/* If non-zero, the completion functions don't append any closing quote.
+   This is set to 0 by rl_complete_internal and may be changed by an
+   application-specific completion function. */
+extern int rl_completion_suppress_quote;
 
 /* If non-zero, a slash will be appended to completed filenames that are
    symbolic links to directory names, subject to the value of the

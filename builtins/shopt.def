@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2002 Free Software Foundation, Inc.
+Copyright (C) 1994-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,8 @@ $END
 #endif
 
 #include <stdio.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../flags.h"
@@ -221,7 +223,7 @@ shopt_builtin (list)
 
   if ((flags & (SFLAG|UFLAG)) == (SFLAG|UFLAG))
     {
-      builtin_error ("cannot set and unset shell options simultaneously");
+      builtin_error (_("cannot set and unset shell options simultaneously"));
       return (EXECUTION_FAILURE);
     }
 
@@ -286,7 +288,7 @@ static void
 shopt_error (s)
      char *s;
 {
-  builtin_error ("%s: invalid shell option name", s);
+  builtin_error (_("%s: invalid shell option name"), s);
 }
 
 static int

@@ -124,9 +124,9 @@ brace_expand (text)
 	    }
 
 	  if (text[j] == brace_arg_separator)
-	    {
+	    {	/* { */
 	      strvec_dispose (result);
-	      report_error ("missing `}'");
+	      report_error ("no closing `%c' in %s", '}', text);
 	      throw_to_top_level ();
 	    }
 	  ADVANCE_CHAR (text, tlen, j);

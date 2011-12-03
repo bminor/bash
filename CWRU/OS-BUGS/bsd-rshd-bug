@@ -1,0 +1,46 @@
+From chet@odin.INS.CWRU.Edu Sat Apr 27 19:54:13 1991
+Flags: 50
+Received: from odin.INS.CWRU.Edu by usenet.INS.CWRU.Edu with SMTP (5.65b+ida+/CWRU-1.5-UUCPGW)
+	id AA05700; Sat, 27 Apr 91 19:54:13 -0400 (from chet@odin.INS.CWRU.Edu for /usr/local/bin/m2mbox /usr/homes/chet/mbox)
+Received:  by odin.INS.CWRU.Edu (5.65b+ida+/CWRU-1.4-ins)
+	id AA17732; Sat, 27 Apr 91 19:54:06 -0400 (from chet for chet@usenet.INS.CWRU.Edu)
+Date: Sat, 27 Apr 91 19:31:16 -0400
+From: Chet Ramey <chet@odin.INS.CWRU.Edu>
+To: bfox@ai.mit.edu
+Subject: Re: [pedz@aixwiz.austin.ibm.com: fd 9 left open bug]
+Cc: chet@odin.INS.CWRU.Edu, pedz@aixwiz.austin.ibm.com
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from bfox@bears.ece.ucsb.edu of Wed, 24 Apr 91 12:49:33 PDT
+Message-Id: <9104272331.AA17706.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> Below is something I call Xemacs which goes across the net, sets up the
+> display variable and then kicks off emacs in such a way that rshd
+> terminates.  The trick is that the shell must die and all file
+> descriptors going back to rshd must be closed.  The same basic script
+> works with csh but I had to add in the "9>&-" part at the end to make
+> it work with bash.   This is because somehow, file descriptor 9 is left
+> open and I guess it must be a dup of stdin, stdout, or stderr.
+
+This is a bug alright, but it's a bug with rshd that's not fixed until
+4.3-reno.
+
+rshd sets up a pipe (int pv[2]; if you have the source to the tahoe rshd)
+to the process it executes and uses it to manage error and control output
+from over the net.  In the child process, it does a dup2(pv[1], 2), but
+never calls close(pv[1]).  Adding that code to the 4.3-tahoe rshd makes it
+(and the Xemacs script) work right.
+
+I don't know how to solve this cleanly in bash.  Doing a blanket close of
+all open file descriptors < 2, < 20 is a no-no, especially when we're not
+interactive.  csh `works' because it does the blanket close on startup, but
+csh can get away with doing that because it doesn't let you manipulate
+arbitrary file descriptors.
+
+Chet
+
+--
+Chet Ramey			  Internet: chet@po.CWRU.Edu
+Case Western Reserve University	  NeXT Mail: chet@macbeth.INS.CWRU.Edu
+
+``Now,  somehow we've brought our sins back physically -- and they're pissed.''

@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Sep 12 18:20:41 EDT 2003
+.\"	Last Change: Thu Nov 13 09:47:27 EST 2003
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2003 Sep 12" "GNU Bash-3.0"
+.TH BASH 1 "2003 Nov 13" "GNU Bash-3.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2002 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2002 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2003 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2003 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -1069,6 +1069,7 @@ of \fB"$@"\fP as explained below under
 .BR "Special Parameters" .
 Pathname expansion is not performed.
 Assignment statements may also appear as arguments to the
+.BR alias ,
 .BR declare ,
 .BR typeset ,
 .BR export ,
@@ -1821,8 +1822,8 @@ The default path is system-dependent,
 and is set by the administrator who installs
 .BR bash .
 A common value is
-.if t \f(CW/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:.\fP.
-.if n ``/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin:.''.
+.if t \f(CW/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin\fP.
+.if n ``/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin''.
 .TP
 .B POSIXLY_CORRECT
 If this variable is in the environment when \fBbash\fP starts, the shell
@@ -3856,7 +3857,7 @@ and
 .SM
 .BR SIGTSTP .
 .PP
-Synchronous jobs started by \fBbash\fP have signal handlers
+Non-builtin commands run by \fBbash\fP have signal handlers
 set to the values inherited by the shell from its parent.
 When job control is not in effect, asynchronous commands
 ignore
@@ -3865,7 +3866,7 @@ ignore
 and
 .SM
 .B SIGQUIT
-as well.
+in addition to these inherited handlers.
 Commands run as a result of command substitution ignore the
 keyboard-generated job control signals
 .SM
@@ -3913,9 +3914,9 @@ sends a
 .B SIGHUP
 to all jobs when an interactive login shell exits.
 .PP
-When \fBbash\fP receives a signal for which a trap has been set while
-waiting for a command to complete, the trap will not be executed until
-the command completes.
+If \Bbash\fP is waiting for a command to complete and receives a signal
+for which a trap has been set, the trap will not be executed until
+the command completes. 
 When \fBbash\fP is waiting for an asynchronous command via the \fBwait\fP
 builtin, the reception of a signal for which a trap has been set will
 cause the \fBwait\fP builtin to return immediately with an exit status
@@ -6650,8 +6651,8 @@ option is supplied, a list
 of all names that are exported in this shell is printed.
 The
 .B \-n
-option causes the export property to be removed from the
-named variables.
+option causes the export property to be removed from each
+\fIname\fP.
 If a variable name is followed by =\fIword\fP, the value of
 the variable is set to \fIword\fP.
 .B export
@@ -7202,7 +7203,10 @@ format specifications, each of which causes printing of the next successive
 \fIargument\fP.
 In addition to the standard \fIprintf\fP(1) formats, \fB%b\fP causes
 \fBprintf\fP to expand backslash escape sequences in the corresponding
-\fIargument\fP, and \fB%q\fP causes \fBprintf\fP to output the corresponding
+\fIargument\fP (except that \fB\ec\fP terminates output, backslashes in
+\fB\e'\fP, \fB\e"\fP, and \fB\e?\fP are not removed, and octal escapes
+beginning with \fB\e0\fP may contain up to four digits),
+and \fB%q\fP causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
 .sp 1
 The \fIformat\fP is reused as necessary to consume all of the \fIarguments\fP.
@@ -7433,8 +7437,8 @@ Options, if specified, have the following meanings:
 .PD 0
 .TP 8
 .B \-a
-Automatically mark variables and functions which are modified or created
-for export to the environment of subsequent commands.
+Automatically mark variables and functions which are modified or
+created for export to the environment of subsequent commands.
 .TP 8
 .B \-b
 Report the status of terminated background jobs
@@ -8224,7 +8228,8 @@ is
 .BR ERR ,
 the command
 .I arg
-is executed whenever a simple command has a non\-zero exit status.
+is executed whenever a simple command has a non\-zero exit status,
+subject to the following conditions.
 The
 .SM
 .B ERR
@@ -8243,6 +8248,7 @@ or
 list, or if the command's return value is
 being inverted via
 .BR ! .
+These are the same conditions obeyed by the \fBerrexit\fP option.
 If a
 .I sigspec
 is

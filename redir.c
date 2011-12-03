@@ -42,6 +42,7 @@ extern int errno;
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "memalloc.h"
 #include "shell.h"
@@ -95,7 +96,7 @@ redirection_error (temp, error)
   if (temp->redirector < 0)
     /* This can happen when read_token_word encounters overflow, like in
        exec 4294967297>x */
-    filename = "file descriptor out of range";
+    filename = _("file descriptor out of range");
 #ifdef EBADF
   else if (temp->redirector >= 0 && errno == EBADF)
     {
@@ -137,21 +138,21 @@ redirection_error (temp, error)
   switch (error)
     {
     case AMBIGUOUS_REDIRECT:
-      internal_error ("%s: ambiguous redirect", filename);
+      internal_error (_("%s: ambiguous redirect"), filename);
       break;
 
     case NOCLOBBER_REDIRECT:
-      internal_error ("%s: cannot overwrite existing file", filename);
+      internal_error (_("%s: cannot overwrite existing file"), filename);
       break;
 
 #if defined (RESTRICTED_SHELL)
     case RESTRICTED_REDIRECT:
-      internal_error ("%s: restricted: cannot redirect output", filename);
+      internal_error (_("%s: restricted: cannot redirect output"), filename);
       break;
 #endif /* RESTRICTED_SHELL */
 
     case HEREDOC_REDIRECT:
-      internal_error ("cannot create temp file for here document: %s", strerror (heredoc_errno));
+      internal_error (_("cannot create temp file for here document: %s"), strerror (heredoc_errno));
       break;
 
     default:
@@ -505,7 +506,7 @@ redir_special_open (spec, filename, flags, mode, ri)
 #if defined (HAVE_NETWORK)
       fd = netopen (filename);
 #else
-      internal_warning ("/dev/(tcp|udp)/host/port not supported without networking");
+      internal_warning (_("/dev/(tcp|udp)/host/port not supported without networking"));
       fd = open (filename, flags, mode);
 #endif
       break;
@@ -945,7 +946,7 @@ add_undo_redirect (fd)
 
   if (new_fd < 0)
     {
-      sys_error ("redirection error: cannot duplicate fd");
+      sys_error (_("redirection error: cannot duplicate fd"));
       return (-1);
     }
 

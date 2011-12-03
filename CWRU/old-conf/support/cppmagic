@@ -1,0 +1,51 @@
+#!/bin/sh
+# Return a full cpp specification, complete with system dependent flags.
+#
+# Syntax: cppmagic [ program-to-generate-flags [ guessed-cpp ]]
+#
+# If only one arg is present it is the name of a program to invoke
+# which should generate -Dfoo defines.
+#
+# If two args are present the second arg is the name of the C
+# preprocessor to use.
+#
+# Invoked with no args, provides a C preprocessor name and
+# -traditional flag if that is appropriate.
+#
+#  ../Makefile calls this file thusly: "cppmagic getcppsyms".
+#
+#  Typical output:
+#
+#    /lib/cpp -Dunix -Dm68k
+#
+
+Cpp=
+
+if [ "$2" ]; then
+   Cpp=$2
+else
+   for cpp in /lib/cpp /usr/lib/cpp /usr/ccs/lib/cpp; do
+      if [ -f $cpp ]; then
+	 Cpp=$cpp
+      fi
+   done
+   if [ "$Cpp" = "" ]; then
+      Cpp=cpp
+   fi
+fi
+
+TRADITIONAL=
+FLAGS=
+
+# First flag might be `-traditional' if this is Gnu Cpp.
+unknown_flag=`$Cpp -traditional /dev/null 2>&1 |
+  		egrep 'known|recognized|valid|bad|legal'`
+if [ "$unknown_flag" = "" ]; then
+  TRADITIONAL=-traditional
+fi
+
+if [ "$1" ]; then
+   FLAGS=`$1`
+fi
+
+echo $Cpp $TRADITIONAL $FLAGS

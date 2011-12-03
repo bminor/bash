@@ -1,6 +1,6 @@
 /* watch.c - watchpoint functions for malloc */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,17 +43,17 @@ watch_warn (addr, file, line, type, data)
   char *tag;
 
   if (type == W_ALLOC)
-    tag = "allocated";
+    tag = _("allocated");
   else if (type == W_FREE)
-    tag = "freed";
+    tag = _("freed");
   else if (type == W_REALLOC)
-    tag = "requesting resize";
+    tag = _("requesting resize");
   else if (type == W_RESIZED)
-    tag = "just resized";
+    tag = _("just resized");
   else
-    tag = "bug: unknown operation";
+    tag = _("bug: unknown operation");
 
-  fprintf (stderr, "malloc: watch alert: %p %s ", addr, tag);
+  fprintf (stderr, _("malloc: watch alert: %p %s "), addr, tag);
   if (data != (unsigned long)-1)
     fprintf (stderr, "(size %lu) ", data);
   fprintf (stderr, "from '%s:%d'\n", file ? file : "unknown", line);

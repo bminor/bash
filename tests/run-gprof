@@ -1,0 +1,53 @@
+#! /bin/sh
+
+PATH=.:$PATH	# just to get recho/zecho/printenv if not run via `make tests'
+export PATH
+
+# unset BASH_ENV only if it is set
+[ "${BASH_ENV+set}" = "set" ] && unset BASH_ENV
+# ditto for SHELLOPTS
+#[ "${SHELLOPTS+set}" = "set" ] && unset SHELLOPTS
+
+: ${THIS_SH:=../bash}
+export THIS_SH
+
+rm -f gmon.sum
+
+${THIS_SH} ./version
+
+rm -f /tmp/xx
+
+# prime the pump; gprof complains if gmon.sum is empty
+[ -f bash.gmon ] && gprof -s ${THIS_SH} bash.gmon >/dev/null
+
+echo Any output from any test, unless otherwise noted, indicates a possible anomaly
+
+for x in run-*
+do
+	case $x in
+	$0|run-all|run-minimal|run-gprof)	;;
+	*.orig|*~) ;;
+	*)	echo $x ; sh $x
+		if [ -f /tmp/bash.gmon ]; then
+			if [ -f bash.gmon ]; then
+				gprof -s ${THIS_SH} gmon.sum bash.gmon /tmp/bash.gmon >/dev/null
+			else
+				gprof -s ${THIS_SH} gmon.sum /tmp/bash.gmon >/dev/null				
+			fi
+		else
+			gprof -s ${THIS_SH} gmon.sum bash.gmon >/dev/null
+		fi
+		rm -f /tmp/bash.gmon bash.gmon
+		;;
+	esac
+done
+
+gprof -s ${THIS_SH} gmon.sum ./-specialname.gmon ./ohio-state.gmon > /dev/null
+rm -f ./-specialname.gmon ./ohio-state.gmon
+
+if [ -f specialname.gmon ]; then
+	gprof -s ${THIS_SH} gmon.sum ./specialname.gmon > /dev/null
+	rm -f specialname.gmon
+fi
+
+exit 0

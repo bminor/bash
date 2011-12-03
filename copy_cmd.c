@@ -308,7 +308,7 @@ copy_function_def_contents (old, new_def)
      FUNCTION_DEF *old, *new_def;
 {
   new_def->name = copy_word (old->name);
-  new_def->command = copy_command (old->command);
+  new_def->command = old->command ? copy_command (old->command) : old->command;
   new_def->flags = old->flags;
   new_def->line = old->line;
   new_def->source_file = old->source_file ? savestring (old->source_file) : old->source_file;

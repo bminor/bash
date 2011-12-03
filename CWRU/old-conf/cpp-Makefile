@@ -1,0 +1,1379 @@
+/* This -*- C -*- file (cpp-Makefile) is run through the C preprocessor
+   to produce bash-Makefile which is machine specific.
+
+   If you have Gcc and/or Bison, you might wish to mention that right
+   below here.
+
+   Since this is to become a Makefile, blank lines which appear outside
+   of comments may not contain a TAB character.
+
+   Copyright (C) 1987,1991 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash, the Bourne Again SHell.
+
+   Bash is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 1, or (at your option) any later
+   version.
+
+   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with Bash; see the file COPYING.  If not, write to the Free Software
+   Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+
+/**/# This Makefile is automagically made from cpp-Makefile.  You should
+/**/# not be editing this file; edit cpp-Makefile, machines.h, or
+/**/# support/mksysdefs instead.  Then, assuming the edits were required
+/**/# to compile Bash on your system, mail the changes you had to make to
+/**/# bash-maintainers@prep.ai.mit.edu.  We will do our best to incorporate
+/**/# them into the next release.
+
+/**/# Make sure the first target in the makefile is the right one
+all: .made
+
+/* **************************************************************** */
+/*								    */
+/*			Which compiler are you using?		    */
+/*								    */
+/* **************************************************************** */
+
+/* Define HAVE_GCC if you have the GNU C compiler. */
+/* #define HAVE_GCC */
+
+#if defined (__GNUC__) && !defined (HAVE_GCC) && !defined (GCC_STANDARD)
+#  define HAVE_GCC
+#endif
+
+/* Undefine HAVE_FIXED_INCLUDES if you are not using GCC with the fixed
+   header files. */
+#if defined (HAVE_GCC) && !defined (HAVE_FIXED_INCLUDES)
+#  define HAVE_FIXED_INCLUDES
+#endif /* HAVE_GCC && !HAVE_FIXED_INCLUDES */
+
+/* Include some boilerplate Gnu makefile definitions. */
+prefix = /usr/local
+
+/**/#prefix = @prefix@
+
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
+manroot = $(prefix)/man
+
+man1ext = 1
+man1dir = $(manroot)/man$(man1ext)
+man3ext = 3
+man3dir = $(manroot)/man$(man3ext)
+mandir = $(man1dir)
+manext = $(man1ext)
+
+infodir = $(prefix)/info
+
+srcdir = .
+/**/#srcdir = @srcdir@
+
+VPATH = .:$(srcdir)
+
+incdir = $(prefix)/include
+/**/#incdir = @incdir@
+
+/* If you have purify, and want to use it, uncomment this definition or
+   run the make as `make -f bash-Makefile bash PURIFY=purify'. */
+PURIFY = # purify
+
+/* This includes the appropriate description for the machine that you are
+   using (we hope).  If the compilation doesn't work correctly, then you
+   will have to edit the file `machines.h' to include a description for the
+   machine that your Cpp uniquely identifies this as.  For example, Sun 4's
+   are recognized by the Cpp identifier `sparc', Vax is recognized with `vax',
+   etc.  The order of these files is very important.  Config.h must come last,
+   since it is capable of undef'ing various things. */
+#define BUILDING_MAKEFILE   /* Tell config.h to avoid #including anything. */
+#include "sysdefs.h"
+#include "machines.h"
+#include "config.h"
+
+/**/# Here is a rule for making .o files from .c files that does not
+/**/# force the type of the machine (like -M_MACHINE) into the flags.
+.c.o:
+	$(RM) $@
+	$(CC) $(CCFLAGS) $(CPPFLAGS) -c $<
+
+YACC = YACC_PROG
+
+#if defined (HAVE_GCC)
+#  if defined (GCC_FLAGS)
+GCC_EXTRAS = GCC_FLAGS
+#  endif /* GCC_FLAGS */
+#  if !defined (HAVE_FIXED_INCLUDES)
+/* This is guaranteed to work, even if you have the fixed includes!
+   (Unless, of course, you have the fixed include files installed in
+   /usr/include.  Then it will break.) */
+CC = gcc -traditional -I/usr/include $(GCC_EXTRAS)
+#  else /* HAVE_FIXED_INCLUDES */
+CC = gcc $(GCC_EXTRAS)
+#  endif /* HAVE_FIXED_INCLUDES */
+#else /* !HAVE_GCC */
+CC = CPP_CC
+#endif /* !HAVE_GCC */
+
+SHELL=/bin/sh
+CP = cp
+RM = rm -f
+AR = ar
+#if defined (RANLIB_LOCATION)
+RANLIB = RANLIB_LOCATION
+#else
+RANLIB = ranlib
+#endif /* RANLIB_LOCATION */
+
+INSTALL_PROGRAM = $(SUPPORT_SRC)install.sh -c -s
+INSTALL_DATA = $(SUPPORT_SRC)install -c -m 644
+
+COMPRESS = gzip
+COMPRESS_EXT = .gz
+
+Machine = M_MACHINE
+OS = M_OS
+
+/**/# PROFILE_FLAGS is either -pg, to generate profiling info for use
+/**/# with gprof, or nothing (the default).
+PROFILE_FLAGS=
+
+/* These are defined in machines.h or sysdefs.h */
+#if defined (SYSDEP_CFLAGS)
+/**/# This system has some peculiar flags that must be passed to the
+/**/# the C compiler (or to cpp).
+SYSDEP = SYSDEP_CFLAGS
+#endif /* SYSDEP_CFLAGS */
+
+#if defined (SYSDEP_LDFLAGS)
+/**/# This system has some peculiar flags that must be passed to the
+/**/# link editor (ld).
+SYSDEP_LD = SYSDEP_LDFLAGS
+#endif /* SYSDEP_LDFLAGS */
+
+#if defined (HAVE_SETLINEBUF)
+/**/# This system has the setlinebuf () call.
+LINEBUF = -DHAVE_SETLINEBUF
+#endif
+
+#if defined (HAVE_VFPRINTF)
+/**/# This system has the vprintf () and vfprintf () calls.
+VPRINTF = -DHAVE_VFPRINTF
+#endif /* HAVE_VFPRINTF */
+
+#if defined (USE_VFPRINTF_EMULATION)
+VPRINTF = -DHAVE_VFPRINTF -DUSE_VFPRINTF_EMULATION
+#endif /* USE_VFPRINTF_EMULATION */
+
+#if defined (VOID_SIGHANDLER)
+/**/# The signal () call provided by the system returns a pointer to
+/**/# a function returning void.  The signal handlers themselves are
+/**/# thus void functions.
+SIGHANDLER = -DVOID_SIGHANDLER
+#endif
+
+#if defined (HAVE_STRERROR)
+/**/# This system has the strerror () function.
+STRERROR = -DHAVE_STRERROR
+#endif
+
+#if defined (HAVE_GETGROUPS)
+/**/# This system has multiple groups.
+GROUPS = -DHAVE_GETGROUPS
+#endif
+
+#if defined (HAVE_GETWD)
+/**/# This system has the getwd () call.
+GETWD = -DHAVE_GETWD
+#endif
+
+#if defined (HAVE_GETCWD)
+/**/# This system has the getcwd () call.
+GETCWD = -DHAVE_GETCWD
+#endif
+
+#if defined (HAVE_DUP2)
+/**/# This system has a working version of dup2 ().
+DUP2 = -DHAVE_DUP2
+#endif /* HAVE_DUP2 */
+
+#if defined (HAVE_DIRENT)
+/**/# This system uses struct dirent for reading directories with readdir.
+DIRENT = -DHAVE_DIRENT
+#endif /* HAVE_DIRENT */
+
+#if defined (HAVE_STRCHR)
+/**/# This system has strchr () and strrchr () string functions.
+STRCHR = -DHAVE_STRCHR
+#endif /* HAVE_STRCHR */
+
+#if defined (HAVE_STRCASECMP)
+STRCASE = -DHAVE_STRCASECMP
+#endif /* HAVE_STRCASECMP */
+
+#if defined (HAVE_SYS_SIGLIST)
+SIGLIST = -DHAVE_SYS_SIGLIST
+#endif /* HAVE_SYS_SIGLIST */
+
+#if defined (HAVE_DLOPEN)
+DLOPEN = -DHAVE_DLOPEN
+#endif
+
+#if defined (HAVE_DLSYM)
+DLSYM = -DHAVE_DLSYM
+#endif
+
+#if defined (HAVE_DLCLOSE)
+DLCLOSE = -DHAVE_DLCLOSE
+#endif
+
+#if defined (HAVE_ALLOCA)
+ALLOCA_DEFINE = -DHAVE_ALLOCA
+#else
+ALLOCA_DEFINE =
+#endif /* HAVE_ALLOCA */
+
+#if defined (HAVE_SYS_STREAM_H)
+/**/# This system has <sys/stream.h>
+STREAM = -DHAVE_SYS_STREAM_H
+#endif /* HAVE_SYS_STREAM_H */
+
+#if defined (HAVE_SYS_PTEM_H)
+/**/# This system has <sys/ptem.h>
+PTEM = -DHAVE_SYS_PTEM_H
+#endif /* HAVE_SYS_PTEM_H */
+
+#if defined (HAVE_SYS_PTE_H)
+/**/# This system has <sys/pte.h>
+PTE = -DHAVE_SYS_PTE_H
+#endif /* HAVE_SYS_PTE_H */
+
+/**/# This system has <unistd.h>.
+#if defined (HAVE_UNISTD_H)
+UNISTD = -DHAVE_UNISTD_H
+#endif
+
+/**/# This system has <stdlib.h>
+#if defined (HAVE_STDLIB_H)
+STDLIB = -DHAVE_STDLIB_H
+#endif
+
+/**/# This system has <limits.h>
+#if defined (HAVE_LIMITS_H)
+LIMITSH = -DHAVE_LIMITS_H
+#endif
+
+/**/# This system has <locale.h>
+#if defined (HAVE_LOCALE_H)
+LOCALE = -DHAVE_LOCALE_H
+#endif
+
+#if defined (HAVE_ALLOCA_H)
+ALLOCA_H_DEFINE = -DHAVE_ALLOCA_H
+#else
+ALLOCA_H_DEFINE =
+#endif /* HAVE_ALLOCA_H */
+
+#if defined (HAVE_RESOURCE)
+/**/# This system has <sys/resource.h>
+RESOURCE = -DHAVE_RESOURCE
+#endif
+
+#if defined (HAVE_SYS_PARAM)
+/**/# This system has <sys/param.h>
+PARAM = -DHAVE_SYS_PARAM
+#endif
+
+#if defined (HAVE_WAIT_H)
+/**/# This system has <sys/wait.h>
+WAITH = -DHAVE_WAIT_H
+#endif
+
+#if defined (HAVE_DIRENT_H)
+/**/# This system has /usr/include/dirent.h
+DIRENTH = -DHAVE_DIRENT_H
+#endif /* HAVE_DIRENT_H */
+
+#if defined (HAVE_STRING_H)
+/**/# This system has /usr/include/string.h
+STRINGH = -DHAVE_STRING_H
+#endif /* HAVE_STRING_H */
+
+#if defined (HAVE_VARARGS_H)
+/**/# This system has /usr/include/varargs.h
+VARARGSH = -DHAVE_VARARGS_H
+#endif /* HAVE_VARARGS_H */
+
+#if defined (HAVE_DEV_FD)
+/**/# This system has the /dev/fd directory for naming open files.
+DEVFD = -DHAVE_DEV_FD
+#endif /* HAVE_DEV_FD */
+
+/**/# The GNU coding standards don't recognize the possibility that
+/**/# other information besides optimization and debugging might be
+/**/# passed to cc.  A different name should have been used.
+CFLAGS = -O -g
+
+SYSTEM_FLAGS = $(LINEBUF) $(VPRINTF) $(UNISTD) $(STDLIB) $(LIMITSH) $(LOCALE) \
+       $(GROUPS) $(RESOURCE) $(PARAM) $(SIGHANDLER) $(SYSDEP) $(WAITH) \
+       $(GETWD) $(GETCWD) $(DUP2) $(STRERROR) $(DIRENT) $(DIRENTH) $(STRINGH) \
+       $(VARARGSH) $(STRCHR) $(STRCASE) $(DEVFD) $(DLOPEN) $(DLSYM) \
+       $(DLCLOSE) $(SIGLIST) -D$(Machine) -D$(OS) -DPROGRAM='"$(Program)"' \
+       -DHOSTTYPE='$(Machine)' -DOSTYPE='$(OS)'
+
+/* Compilation flags to use in the shell directory and to pass to builds
+   in subdirectories (readline, termcap) to ensure that alloca is treated
+   in a consistent fashion. */
+ALLOCA_CFLAGS = $(ALLOCA_DEFINE) $(ALLOCA_H_DEFINE)
+
+LDFLAGS	= $(NOSHARE) $(SYSDEP_LD) $(EXTRA_LD_PATH) $(PROFILE_FLAGS) $(CFLAGS)
+CCFLAGS	= $(PROFILE_FLAGS) $(SYSTEM_FLAGS) -DSHELL $(ALLOCA_CFLAGS) \
+	  $(MALLOC_CFLAGS) $(CFLAGS)
+CPPFLAGS= -I. -I$(srcdir) -I$(LIBSRC) -I$(incdir)
+GCC_LINT_FLAGS = -ansi -Wall -Wshadow -Wpointer-arith -Wcast-qual \
+		 -Wwrite-strings -Werror -Wstrict-prototypes \
+		 -Wmissing-prototypes
+GCC_LINT_CFLAGS = $(CCFLAGS) $(GCC_LINT_FLAGS)
+
+/* It is conceivable that you wish to edit some things beyond this point,
+   but I guess that it is highly unlikely, and may give you a headache. */
+
+/* **************************************************************** */
+/*								    */
+/*		    How to Build the support libraries.		    */
+/*								    */
+/* **************************************************************** */
+
+/**/# The location of sources for the support libraries.
+LIBPATH = ./lib/
+LIBSRC = $(srcdir)/$(LIBPATH)
+
+/**/# Preface building with the full path of the current library source.
+LIBINC_DECL  = topdir=`sh $(srcdir)/support/srcdir $(srcdir)`; export topdir
+LIBINC_USAGE = "-I$${topdir} -I$${topdir}/$(LIBPATH) -I$(LIBSRC)"
+
+/* Defines used when building libraries. */
+#define LIBMAKE_FLAGS CFLAGS='$(LIBRARY_CFLAGS) '$(LIBINC_USAGE) \
+	CPPFLAGS='$(CPPFLAGS)' LDFLAGS='$(LDFLAGS)' \
+	RANLIB='$(RANLIB)' AR='$(AR)' CC='$(CC)' RM='$(RM)' \
+
+/**/# Flags used when building libraries.
+LIBRARY_CFLAGS  = $(PROFILE_FLAGS) $(CFLAGS) $(SIGHANDLER) $(ALLOCA_CFLAGS) \
+		  $(SYSDEP) $(DIRENT) $(DIRENTH) $(STRINGH) $(VARARGSH) \
+		  $(PTEM) $(PTE) $(STREAM) $(STRERROR) $(RESOURCE) \
+		  $(STRCHR) -D$(Machine) -D$(OS) $(UNISTD) $(LIMITSH) \
+		  $(STRCASE) $(STDLIB) -DSHELL
+
+/* Macro used to build a library. */
+#define build_lib_in_dir(directory, target, srcdef, makefile) \
+	@echo "Building in " directory "..."; \
+	sh $(SUPPORT_SRC)mkdirs directory ; \
+	($(LIBINC_DECL); cd directory; \
+	 if [ ! -f Makefile ]; then cp makefile Makefile; fi; \
+	 $(MAKE) target $(MFLAGS) LIBMAKE_FLAGS srcdef)
+
+BUILTIN_CFLAGS = $(CCFLAGS)
+BUILTIN_LIBFLAGS = "-I. -I$${topdir} -I$${topdir}/$(LIBPATH) -I$(incdir)"
+
+/* The builtins are somewhat special in that more information is needed
+   to compile them correctly. */
+#define build_builtins(target) \
+	@sh $(SUPPORT_SRC)mkdirs $(DEFDIR) ; \
+	($(LIBINC_DECL); cd $(DEFDIR); \
+	 if [ ! -f Makefile ]; then \
+		cp $(BUILTIN_ABSSRC)/Makefile Makefile; \
+	 fi; \
+	 $(MAKE) $(MFLAGS) target \
+	 srcdir=$(BUILTIN_ABSSRC) CPPFLAGS='' \
+	 CFLAGS='$(CCFLAGS) -I$(BUILTIN_ABSSRC) '$(BUILTIN_LIBFLAGS) \
+	 LDFLAGS='$(LDFLAGS)' RANLIB='$(RANLIB)' AR='$(AR)' CC='$(CC)' \
+	 RM='$(RM)' RL_LIBSRC='$(RL_ABSSRC)' \
+	 DIRECTDEFINE='-D '$(BUILTIN_SRCDIR))
+
+/**/# The name of this program.
+Program = bash
+
+/* **************************************************************** */
+/*                                                                  */
+/*                 Support for desired libraries.                   */
+/*    This includes Termcap, Glob, Tilde, History, and Readline.    */
+/*                                                                  */
+/* **************************************************************** */
+
+/* Does this machine's linker need a space after -L? */
+#if defined (HAVE_GCC)
+#  undef SEARCH_LIB_NEEDS_SPACE
+#endif /* HAVE_GCC */
+
+#if defined (SEARCH_LIB_NEEDS_SPACE)
+/**/# The native compiler for this machines requires a space after '-L'.
+SEARCH_LIB = -L $(UNSET_VARIABLE_CREATES_SPACE)
+#else
+/**/# The compiler being used to build Bash can handle -L/library/path.
+SEARCH_LIB = -L
+#endif /* !SEARCH_LIB_NEEDS_SPACE */
+
+#if defined (EXTRA_LIB_SEARCH_PATH)
+/**/# Additional instructions to the linker telling it how to find libraries.
+LOCAL_LD_PATH = EXTRA_LIB_SEARCH_PATH
+EXTRA_LD_PATH = $(SEARCH_LIB)$(LOCAL_LD_PATH)
+#endif /* EXTRA_LIB_SEARCH_PATH */
+
+/* Right now we assume that you have the full source code to Bash.  If
+   you simply have the library and header files installed, then
+   undefine HAVE_READLINE_SOURCE. */
+#define HAVE_READLINE_SOURCE
+
+#if defined (HAVE_READLINE_SOURCE)
+
+RL_LIBSRC = $(LIBSRC)readline/
+RL_LIBDOC = $(RL_LIBSRC)doc/
+RL_LIBDIR = $(LIBPATH)readline/
+RL_ABSSRC = $${topdir}/$(RL_LIBDIR)
+
+READLINE_LIBRARY = $(RL_LIBDIR)libreadline.a
+
+/**/# The source, object and documentation of the GNU Readline library.
+READLINE_SOURCE	= $(RL_LIBSRC)rldefs.h $(RL_LIBSRC)rlconf.h \
+		  $(RL_LIBSRC)readline.h \
+		  $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)keymaps.h \
+		  $(RL_LIBSRC)history.h $(RL_LIBSRC)histlib.h \
+		  $(RL_LIBSRC)posixstat.h $(RL_LIBSRC)tilde.h \
+		  $(RL_LIBSRC)funmap.c $(RL_LIBSRC)emacs_keymap.c \
+		  $(RL_LIBSRC)search.c $(RL_LIBSRC)vi_keymap.c \
+		  $(RL_LIBSRC)keymaps.c $(RL_LIBSRC)parens.c \
+		  $(RL_LIBSRC)vi_mode.c $(RL_LIBSRC)callback.c \
+		  $(RL_LIBSRC)readline.c $(RL_LIBSRC)tilde.c \
+		  $(RL_LIBSRC)rltty.c $(RL_LIBSRC)complete.c \
+		  $(RL_LIBSRC)bind.c $(RL_LIBSRC)isearch.c \
+		  $(RL_LIBSRC)display.c $(RL_LIBSRC)signals.c \
+		  $(RL_LIBSRC)util.c $(RL_LIBSRC)kill.c \
+		  $(RL_LIBSRC)undo.c $(RL_LIBSRC)macro.c \
+		  $(RL_LIBSRC)input.c $(RL_LIBSRC)xmalloc.c \
+		  $(RL_LIBSRC)histexpand.c $(RL_LIBSRC)history.c \
+		  $(RL_LIBSRC)histsearch.c $(RL_LIBSRC)histfile.c
+	
+READLINE_OBJ	= $(RL_LIBDIR)readline.o $(RL_LIBDIR)funmap.o \
+		  $(RL_LIBDIR)parens.o $(RL_LIBDIR)search.o \
+		  $(RL_LIBDIR)keymaps.o $(RL_LIBDIR)xmalloc.o \
+		  $(RL_LIBDIR)rltty.o $(RL_LIBDIR)complete.o \
+		  $(RL_LIBDIR)bind.o $(RL_LIBDIR)isearch.o \
+		  $(RL_LIBDIR)display.o $(RL_LIBDIR)signals.o \
+		  $(RL_LIBDIR)tilde.o $(RL_LIBDIR)util.o \
+		  $(RL_LIBDIR)kill.o $(RL_LIBDIR)undo.o \
+		  $(RL_LIBDIR)macro.o $(RL_LIBDIR)input.o \
+		  $(RL_LIBDIR)callback.o \
+		  $(RL_LIBDIR)history.o $(RL_LIBDIR)histexpand.o \
+		  $(RL_LIBDIR)histsearch.o $(RL_LIBDIR)histfile.o
+
+READLINE_DOC	= $(RL_LIBDOC)rlman.texinfo $(RL_LIBDOC)rluser.texinfo \
+		  $(RL_LIBDOC)rltech.texinfo
+
+READLINE_DOC_SUPPORT  = $(RL_LIBDOC)Makefile $(RL_LIBDOC)readline.dvi \
+		  $(RL_LIBDOC)readline.info
+
+/**/# This has to be written funny to avoid looking like a C comment starter.
+READLINE_EXAMPLES = $(RL_LIBSRC)examples/[a-zA-Z]*.[ch] \
+		    $(RL_LIBSRC)examples/Makefile $(RL_LIBSRC)examples/Inputrc
+
+/**/# Support files for GNU Readline.
+READLINE_SUPPORT = $(RL_LIBSRC)Makefile $(RL_LIBSRC)ChangeLog \
+		   $(RL_LIBSRC)COPYING $(READLINE_EXAMPLES) \
+		   $(READLINE_DOC_SUPPORT)
+
+#else /* !HAVE_READLINE_SOURCE */
+
+#  if defined (READLINE)
+READLINE_LIBRARY = -lreadline
+#  endif /* READLINE */
+RL_LIBDIR = $(srcdir)/$(LIBSRC)readline/
+
+#endif /* !HAVE_READLINE_SOURCE */
+
+#if defined (READLINE)
+/**/# You wish to compile with the line editing features installed.
+READLINE_LIB = -lreadline
+
+/**/# You only need termcap (or curses) if you are linking with GNU Readline.
+#  if defined (USE_TERMCAP_EMULATION)
+TERMCAP_LIB = -lcurses
+#  else  /* !USE_TERMCAP_EMULATION */
+TERMCAP_LIB = -ltermcap
+#  endif /* !USE_TERMCAP_EMULATION */
+
+/**/# Directory list for -L so that the link editor (ld) can find -lreadline.
+#  if !defined (LD_HAS_NO_DASH_L)
+#    if defined (HAVE_READLINE_SOURCE)
+READLINE_LDFLAGS = $(SEARCH_LIB)$(RL_LIBDIR) $(TERMCAP_LDFLAGS)
+#    else
+READLINE_LDFLAGS = $(TERMCAP_LDFLAGS) $(SEARCH_LIB)$(libdir) \
+		   $(SEARCH_LIB)/usr/local/lib
+#    endif /* HAVE_READLINE_SOURCE */
+#  endif /* LD_HAS_NO_DASH_L */
+#endif /* READLINE */
+
+/* Right now we assume that you have the full source code to Bash,
+   including the source code to the history library.  If you only have
+   the library and header files installed, then you can undefine
+   HAVE_HISTORY_SOURCE. */
+#define HAVE_HISTORY_SOURCE
+
+#  if defined (HISTORY) && !defined (READLINE)
+/**/# You are compiling with history features but without line editing.
+HISTORY_LIB = -lhistory
+#  endif /* HISTORY && !READLINE */
+
+#if defined (HAVE_HISTORY_SOURCE)
+
+HIST_LIBSRC = $(LIBSRC)readline/
+HIST_LIBDOC = $(HIST_LIBSRC)doc/
+HIST_LIBDIR = $(LIBPATH)readline/
+HIST_ABSSRC = $${topdir}/$(HIST_LIBDIR)/
+
+/* If you are building with readline, then you do not explicitly need the
+   history library. */
+#  if defined (READLINE)
+HISTORY_LIBRARY = 
+#  else
+HISTORY_LIBRARY = $(HIST_LIBDIR)libhistory.a
+#  endif /* !READLINE */
+
+/**/# The source, object and documentation of the history library.
+HISTORY_SOURCE	= $(HIST_LIBSRC)history.c $(HIST_LIBSRC)histexpand.c \
+		  $(HIST_LIBSRC)histsearch.c $(HIST_LIBSRC)histfile.c \
+		  $(HIST_LIBSRC)history.h $(HIST_LIBSRC)histlib.h
+HISTORY_OBJ	= $(HIST_LIBDIR)history.o $(HIST_LIBDIR)histexpand.o \
+		  $(HIST_LIBDIR)histsearch.o $(HIST_LIBDIR)histfile.o
+HISTORY_DOC	= $(HIST_LIBDOC)hist.texinfo $(HIST_LIBDOC)hsuser.texinfo \
+		  $(HIST_LIBDOC)hstech.texinfo
+
+/**/# Directory list for -L so that the link editor (ld) can find -lhistory.
+#  if defined (HISTORY) && !defined (READLINE)
+#    if !defined (LD_HAS_NO_DASH_L)
+HISTORY_LDFLAGS = $(SEARCH_LIB)$(HIST_LIBDIR)
+#    endif /* LD_HAS_NO_DASH_L */
+#  endif /* HISTORY && !READLINE */
+#else /* !HAVE_HISTORY_SOURCE */
+#  if defined (HISTORY) && !defined (READLINE)
+HISTORY_LIBRARY = -lhistory
+HISTORY_LDFLAGS = $(SEARCH_LIB)$(libdir) $(SEARCH_LIB)/usr/local/lib
+#  endif /* HISTORY && !READLINE */
+#endif /* !HAVE_HISTORY_SOURCE */
+
+#if defined (USE_GNU_TERMCAP)
+#  define HAVE_TERMCAP_SOURCE
+TERM_LIBSRC = $(LIBSRC)termcap/
+TERM_LIBDIR = $(LIBPATH)termcap/
+TERM_ABSSRC = $${topdir}/$(TERM_LIBDIR)
+
+/**/# The source, object and documentation for the GNU Termcap library.
+TERMCAP_LIBRARY = $(TERM_LIBDIR)libtermcap.a
+
+TERMCAP_SOURCE	= $(TERM_LIBSRC)termcap.c $(TERM_LIBSRC)tparam.c
+TERMCAP_OBJ	= $(TERM_LIBDIR)termcap.o $(TERM_LIBDIR)tparam.o
+TERMCAP_DOC	= $(TERM_LIBSRC)termcap.texinfo
+TERMCAP_SUPPORT = $(TERM_LIBSRC)Makefile $(TERM_LIBSRC)ChangeLog
+
+#  if !defined (LD_HAS_NO_DASH_L)
+TERMCAP_LDFLAGS = $(SEARCH_LIB)$(TERM_LIBDIR)
+#  endif /* !LD_HAS_NO_DASH_L */
+#else /* !USE_GNU_TERMCAP */
+
+/* Guessed at symbol for LIBRARIES, below. */
+#  if defined (USE_TERMCAP_EMULATION)
+TERMCAP_LIBRARY = -lcurses
+#  else /* !USE_TERMCAP_EMULATION */
+TERMCAP_LIBRARY = -ltermcap
+#  endif /* !USE_TERMCAP_EMULATION */
+#endif /* !USE_GNU_TERMCAP */
+
+/* The glob library is always used. */
+#define USE_GLOB_LIBRARY
+
+#if defined (USE_GLOB_LIBRARY)
+GLOB_LIBSRC = $(LIBSRC)glob/
+GLOB_LIBDIR = $(LIBPATH)glob/
+GLOB_ABSSRC = $${topdir}/$(GLOB_LIBDIR)
+
+GLOB_LIBRARY = $(GLOB_LIBDIR)libglob.a
+
+GLOB_SOURCE = $(GLOB_LIBSRC)glob.c $(GLOB_LIBSRC)fnmatch.c \
+	      $(GLOB_LIBSRC)glob.h $(GLOB_LIBSRC)fnmatch.h
+GLOB_OBJ    = $(GLOB_LIBDIR)glob.o $(GLOB_LIBDIR)fnmatch.o
+GLOB_DOC    = $(GLOB_LIBSRC)doc/glob.texi $(GLOB_LIBSRC)doc/Makefile
+GLOB_SUPPORT= $(GLOB_LIBSRC)Makefile $(GLOB_LIBSRC)ChangeLog
+
+#  if !defined (LD_HAS_NO_DASH_L)
+GLOB_LDFLAGS = $(SEARCH_LIB)$(GLOB_LIBDIR)
+#  endif /* !LD_HAS_NO_DASH_L */
+GLOB_LIB     = -lglob
+#endif /* USE_GLOB_LIBRARY */
+
+/* The source code for the tilde expansion library. */
+#if defined (HAVE_READLINE_SOURCE)
+#  define HAVE_TILDE_SOURCE
+#endif /* HAVE_READLINE_SOURCE */
+
+#if defined (HAVE_TILDE_SOURCE)
+/**/# The source, object and documentation for the GNU Tilde library.
+TILDE_LIBSRC = $(LIBSRC)tilde/
+TILDE_LIBDIR = $(LIBPATH)tilde/
+TILDE_ABSSRC = $${topdir}/$(TILDE_LIBDIR)
+
+TILDE_LIBRARY = $(TILDE_LIBDIR)libtilde.a
+
+TILDE_SOURCE	= $(TILDE_LIBSRC)tilde.c $(TILDE_LIBSRC)tilde.h
+TILDE_OBJ	= $(TILDE_LIBDIR)tilde.o
+TILDE_DOC	= $(TILDE_LIBSRC)doc/tilde.texi $(TILDE_LIBSRC)doc/Makefile
+TILDE_SUPPORT	= $(TILDE_LIBSRC)Makefile $(TILDE_LIBSRC)ChangeLog
+
+TILDE_LIB = -ltilde
+
+#  if !defined (LD_HAS_NO_DASH_L)
+TILDE_LDFLAGS = $(SEARCH_LIB)$(TILDE_LIBDIR)
+#  endif /* !LD_HAS_NO_DASH_L */
+
+#else /* !HAVE_TILDE_SOURCE */
+/**/# Guessed at location of the tilde 
+TILDE_LIBRARY = $(libdir)/libtilde.a
+#endif /* !HAVE_TILDE_SOURCE */
+
+/**/# The directory which contains the source for malloc.  The name must
+/**/# end in a slash, as in "./lib/malloc/".
+ALLOC_LIBSRC = $(LIBSRC)malloc/
+ALLOC_LIBDIR = $(LIBPATH)malloc/
+ALLOC_ABSSRC = $${topdir}/$(ALLOC_LIBDIR)
+
+/**/# Our malloc.
+#if defined (USE_GNU_MALLOC)
+
+MALLOC_OBJ = $(ALLOC_LIBDIR)malloc.o
+MALLOC_SRC = $(ALLOC_LIBSRC)malloc.c
+MALLOC_FLAGS = -Drcheck -Dbotch=programming_error
+
+MALLOC_LIBRARY = $(ALLOC_LIBDIR)libmalloc.a
+
+#  if !defined (LD_HAS_NO_DASH_L)
+MALLOC_LDFLAGS = $(SEARCH_LIB)$(ALLOC_LIBDIR)
+#  endif /* !LD_HAS_NO_DASH_L */
+MALLOC_LIB     = -lmalloc
+
+MALLOC_DEP = $(MALLOC_LIBRARY)
+#endif /* USE_GNU_MALLOC */
+
+/* If this user doesn't have alloca (), then we must try to supply them
+   with a working one. */
+#if !defined (HAVE_ALLOCA)
+ALLOCA = alloca.o
+#  if defined (ALLOCA_ASM)
+ALLOCA_SOURCE = ALLOCA_ASM
+ALLOCA_OBJECT = ALLOCA_OBJ
+#  else
+ALLOCA_SOURCE = alloca.c
+ALLOCA_OBJECT = alloca.o
+#  endif /* ALLOCA_ASM */
+ALLOCA_DEP = $(ALLOC_LIBSRC)$(ALLOCA_SOURCE)
+#endif /* !HAVE_ALLOCA */
+
+/* Protect the `i386' used in the definition of ALLOC_FILES. */
+#if defined (i386)
+#  undef i386
+#  define i386_defined
+#endif /* i386 */
+
+ALLOC_HEADERS = $(ALLOC_LIBSRC)getpagesize.h
+ALLOC_FILES = $(ALLOC_LIBSRC)malloc.c $(ALLOC_LIBSRC)alloca.c \
+	      $(ALLOC_LIBSRC)i386-alloca.s $(ALLOC_LIBSRC)x386-alloca.s \
+	      $(ALLOC_LIBSRC)xmalloc.c
+
+/* Perhaps restore the `i386' define. */
+#if defined (i386_defined)
+#  define i386
+#  undef i386_defined
+#endif /* i386_defined */
+
+#if defined (USE_GNU_MALLOC)
+$(ALLOC_LIBDIR)libmalloc.a: $(MALLOC_SRC) $(ALLOCA_DEP)
+		@sh $(SUPPORT_SRC)mkdirs $(ALLOC_LIBDIR)
+		@$(RM) $@
+		@($(LIBINC_DECL); cd $(ALLOC_LIBDIR) ; \
+		 if [ ! -f Makefile ]; then cp $(ALLOC_ABSSRC)Makefile Makefile ; fi; \
+		 $(MAKE) $(MFLAGS) CC=$(CC) \
+		 CFLAGS='$(LIBRARY_CFLAGS) $(MALLOC_FLAGS)' \
+		 CPPFLAGS='$(CPPFLAGS)' MALLOC_SOURCE=$(MALLOC_SRC) \
+		 ALLOCA=$(ALLOCA) RANLIB=$(RANLIB) \
+		 ALLOCA_SOURCE=$(ALLOCA_SOURCE) \
+		 ALLOCA_OBJECT=$(ALLOCA_OBJECT) \
+		 srcdir=$(ALLOC_ABSSRC) libmalloc.a )
+#endif /* USE_GNU_MALLOC */
+
+BASHPOSIX_LIB     = $(LIBSRC)posixheaders/
+BASHPOSIX_SUPPORT = $(BASHPOSIX_LIB)posixstat.h $(BASHPOSIX_LIB)ansi_stdlib.h \
+		    $(BASHPOSIX_LIB)memalloc.h $(BASHPOSIX_LIB)stdc.h
+
+/**/# Declare all of the sources for the libraries that we have.
+LIBRARY_SOURCE  = $(READLINE_SOURCE) $(HISTORY_SOURCE) $(TERMCAP_SOURCE) \
+		  $(GLOB_SOURCE) $(TILDE_SOURCE) $(MALLOC_SOURCE)
+LIBRARY_DOC    = $(READLINE_DOC) $(HISTORY_DOC) $(TERMCAP_DOC) $(GLOB_DOC) \
+		  $(TILDE_DOC) $(MALLOC_DOC)
+LIBRARY_SUPPORT = $(READLINE_SUPPORT) $(HISTORY_SUPPORT) $(TERMCAP_SUPPORT) \
+		  $(GLOB_SUPPORT) $(TILDE_SUPPORT) $(MALLOC_SUPPORT)
+LIBRARY_TAR     = $(LIBRARY_SOURCE) $(LIBRARY_DOC) $(LIBRARY_SUPPORT)
+
+/**/# The order is important.  Most dependent first.
+#if defined (LD_HAS_NO_DASH_L)
+/**/# This linker does not know how to grok the -l flag, or perhaps how
+/**/# to grok the -L flag, or both.
+LIBRARIES = $(READLINE_LIBRARY) $(HISTORY_LIBRARY) $(TERMCAP_LIBRARY) \
+	    $(GLOB_LIBRARY) $(TILDE_LIBRARY) $(MALLOC_LIBRARY) $(LOCAL_LIBS)
+#else /* !LD_HAS_NO_DASH_L */
+LIBRARIES = $(READLINE_LIB) $(HISTORY_LIB) $(TERMCAP_LIB) $(GLOB_LIB) \
+	    $(TILDE_LIB) $(MALLOC_LIB) $(LOCAL_LIBS)
+#endif /* !LD_HAS_NO_DASH_L */
+
+#if defined (READLINE)
+#  if defined (HAVE_TERMCAP_SOURCE)
+TERMCAP_DEP = $(TERMCAP_LIBRARY)
+#  endif /* HAVE_TERMCAP_SOURCE */
+#  if defined (HAVE_READLINE_SOURCE)
+READLINE_DEP = $(READLINE_LIBRARY)
+#  endif /* HAVE_READLINE_SOURCE */
+#endif /* READLINE */
+
+#if defined (HISTORY) && defined (HAVE_HISTORY_SOURCE) && !defined (READLINE)
+HISTORY_DEP = $(HISTORY_LIBRARY)
+#endif
+
+#if defined (USE_GLOB_LIBRARY)
+GLOB_DEP = $(GLOB_LIBRARY)
+#else
+GLOBC = glob.c fnmatch.c
+GLOBO = glob.o fnmatch.o
+#endif /* USE_GLOB_LIBRARY */
+
+#if defined (HAVE_TILDE_SOURCE)
+TILDE_DEP = $(TILDE_LIBRARY)
+#endif
+
+/**/# Source files for libraries that Bash depends on.
+LIBDEP = $(READLINE_DEP) $(TERMCAP_DEP) $(GLOB_DEP) $(HISTORY_DEP) \
+	 $(TILDE_DEP) $(MALLOC_DEP)
+
+/**/# Rules for cleaning the readline and termcap sources.
+#if defined (HAVE_READLINE_SOURCE)
+CLEAN_READLINE = (cd $(RL_LIBDIR); $(MAKE) $(MFLAGS) clean)
+#else
+CLEAN_READLINE = :
+#endif /* !HAVE_READLINE_SOURCE */
+
+#if defined (HAVE_HISTORY_SOURCE)
+#  if !defined (READLINE)
+CLEAN_HISTORY = (cd $(HIST_LIBDIR); $(MAKE) $(MFLAGS) clean)
+#  else
+CLEAN_HISTORY = :
+#  endif /* READLINE */
+#endif /* !HAVE_HISTORY_SOURCE */
+
+#if defined (HAVE_TERMCAP_SOURCE)
+CLEAN_TERMCAP = (cd $(TERM_LIBDIR); $(MAKE) $(MFLAGS) clean)
+#else
+CLEAN_TERMCAP = :
+#endif /* !HAVE_TERMCAP_SOURCE */
+
+#if defined (USE_GLOB_LIBRARY)
+CLEAN_GLOB = (cd $(GLOB_LIBDIR); $(MAKE) $(MFLAGS) clean)
+#else
+CLEAN_GLOB = :
+#endif /* !USE_GLOB_LIBRARY */
+
+#if defined (HAVE_TILDE_SOURCE)
+CLEAN_TILDE = (cd $(TILDE_LIBDIR); $(MAKE) $(MFLAGS) clean)
+#else
+CLEAN_TILDE = :
+#endif /* !HAVE_TILDE_SOURCE */
+
+CLEAN_MALLOC = (cd $(MALLOC_LIBDIR); $(MAKE) $(MFLAGS) clean)
+
+LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(TILDE_LDFLAGS) \
+		  $(GLOB_LDFLAGS) $(MALLOC_LDFLAGS)
+
+#if defined (REQUIRED_LIBRARIES)
+/**/# Locally required libraries.
+LOCAL_LIBS = REQUIRED_LIBRARIES
+#endif /* REQUIRED_LIBRARIES */
+
+BUILTINS_LIB = builtins/libbuiltins.a
+
+/**/# The main source code for the Bourne Again SHell.
+CSOURCES = shell.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
+	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
+	   expr.c copy_cmd.c flags.c subst.c hash.c mailcheck.c \
+	   test.c trap.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
+	   vprint.c input.c bashhist.c array.c sig.c \
+	   unwind_prot.c siglist.c getcwd.c $(RL_SUPPORT_SRC) error.c
+
+HSOURCES = shell.h flags.h trap.h hash.h jobs.h builtins.h alias.c y.tab.h \
+	   general.h variables.h config.h $(ALLOC_HEADERS) alias.h maxpath.h \
+	   quit.h machines.h posixstat.h filecntl.h unwind_prot.h parser.h \
+	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
+	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
+	   array.h sig.h mailcheck.h
+
+SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
+
+/**/# Matching object files.
+OBJECTS	 = shell.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
+	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
+	   expr.o flags.o jobs.o subst.o hash.o mailcheck.o test.o \
+	   trap.o input.o unwind_prot.o sig.o version.o \
+	   alias.o array.o braces.o bracecomp.o bashhist.o bashline.o \
+	   getcwd.o siglist.o vprint.o \
+	   $(BUILTINS_LIB)
+
+/**/# Where the source code of the shell builtins resides.
+BUILTIN_SRCDIR=$(srcdir)/builtins/
+DEFSRC=$(BUILTIN_SRCDIR)
+/**/# The trailing slash was left off this definition on purpose
+BUILTIN_ABSSRC=$${topdir}/builtins
+DEFDIR = builtins/
+BUILTIN_DEFS = $(DEFSRC)alias.def $(DEFSRC)bind.def $(DEFSRC)break.def \
+	       $(DEFSRC)builtin.def $(DEFSRC)cd.def $(DEFSRC)colon.def \
+	       $(DEFSRC)command.def $(DEFSRC)declare.def \
+	       $(DEFSRC)echo.def $(DEFSRC)enable.def $(DEFSRC)eval.def \
+	       $(DEFSRC)exec.def $(DEFSRC)exit.def $(DEFSRC)fc.def \
+	       $(DEFSRC)fg_bg.def $(DEFSRC)hash.def $(DEFSRC)help.def \
+	       $(DEFSRC)history.def $(DEFSRC)jobs.def $(DEFSRC)kill.def \
+	       $(DEFSRC)let.def $(DEFSRC)read.def $(DEFSRC)return.def \
+	       $(DEFSRC)set.def $(DEFSRC)setattr.def $(DEFSRC)shift.def \
+	       $(DEFSRC)source.def $(DEFSRC)suspend.def $(DEFSRC)test.def \
+	       $(DEFSRC)times.def $(DEFSRC)trap.def $(DEFSRC)type.def \
+	       $(DEFSRC)ulimit.def $(DEFSRC)umask.def $(DEFSRC)wait.def \
+	       $(DEFSRC)getopts.def $(DEFSRC)reserved.def $(DEFSRC)pushd.def \
+	       $(DEFSRC)shopt.def
+BUILTIN_C_SRC  = $(DEFSRC)mkbuiltins.c $(DEFSRC)common.c \
+		  $(DEFSRC)hashcom.h $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE)
+BUILTIN_C_OBJ  = $(DEFDIR)common.o $(DEFDIR)bashgetopt.o
+BUILTIN_OBJS = $(DEFDIR)alias.o $(DEFDIR)bind.o $(DEFDIR)break.o \
+	       $(DEFDIR)builtin.o $(DEFDIR)cd.o $(DEFDIR)colon.o \
+	       $(DEFDIR)command.o $(DEFDIR)declare.o \
+	       $(DEFDIR)echo.o $(DEFDIR)enable.o $(DEFDIR)eval.o \
+	       $(DEFDIR)exec.o $(DEFDIR)exit.o $(DEFDIR)fc.o \
+	       $(DEFDIR)fg_bg.o $(DEFDIR)hash.o $(DEFDIR)help.o \
+	       $(DEFDIR)history.o $(DEFDIR)jobs.o $(DEFDIR)kill.o \
+	       $(DEFDIR)let.o $(DEFDIR)pushd.o $(DEFDIR)read.o \
+	       $(DEFDIR)return.o $(DEFDIR)shopt.o \
+	       $(DEFDIR)set.o $(DEFDIR)setattr.o $(DEFDIR)shift.o \
+	       $(DEFDIR)source.o $(DEFDIR)suspend.o $(DEFDIR)test.o \
+	       $(DEFDIR)times.o $(DEFDIR)trap.o $(DEFDIR)type.o \
+	       $(DEFDIR)ulimit.o $(DEFDIR)umask.o $(DEFDIR)wait.o \
+	       $(DEFDIR)getopts.o $(BUILTIN_C_OBJ)
+GETOPT_SOURCE   = $(DEFSRC)getopt.c $(DEFSRC)getopt.h
+PSIZE_SOURCE	= $(DEFSRC)psize.sh $(DEFSRC)psize.c
+BUILTIN_SUPPORT = $(DEFSRC)Makefile $(PSIZE_SOURCE) $(BUILTIN_C_SRC)
+
+/**/# Documentation for the shell.
+DOCDIR = $(srcdir)/documentation/
+
+ENDIAN_SUPPORT = $(SUPPORT_SRC)endian.c
+#if !defined (HAVE_WAIT_H)
+ENDIAN_HEADER = bash_endian.h
+#endif
+
+SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
+
+SUPPORT_SRC = $(srcdir)/support/
+SDIR = ./support/
+EXAMPLES = ./examples/
+TEST_SUITE = ./test-suite/
+
+CREATED_SUPPORT = bash_endian.h signames.h sysdefs.h \
+		  $(SDIR)getcppsyms recho tests/recho
+
+/**/# Keep GNU Make from exporting the entire environment for small machines.
+.NOEXPORT:
+
+.made: $(Program) bashbug
+	cp .machine .made
+
+$(Program):  .build $(OBJECTS) $(LIBDEP) $(srcdir)/.distribution
+	$(RM) $@
+	$(PURIFY) $(CC) $(LDFLAGS) $(LIBRARY_LDFLAGS) -o $(Program) $(OBJECTS) $(LIBRARIES)
+	ls -l $(Program)
+	size $(Program)
+
+.build:	$(SOURCES) cpp-Makefile mkversion
+	if ./mkversion -dir $(srcdir) -build; then mv -f newversion.h version.h; fi
+	@echo
+	@echo "	  ***************************************************"
+	@echo "	  *						    *"
+	@echo "	  * Making Bash-`cat $(srcdir)/.distribution`.`cat $(srcdir)/.patchlevel` for a $(Machine) running $(OS)"
+	@echo "	  *						    *"
+	@echo "	  ***************************************************"
+	@echo
+	@echo "$(Program) last made for a $(Machine) running $(OS)" >.machine
+
+bashbug: $(SUPPORT_SRC)bashbug.sh cpp-Makefile mkversion
+	@sed -e "s:@MACHINE@:$(Machine):" -e "s:@OS@:$(OS):" \
+	     -e "s:@CFLAGS@:$(CCFLAGS):" -e "s:@CC@:$(CC):" \
+	     -e "s:@RELEASE@:`cat $(srcdir)/.distribution`:" \
+	     -e "s:@PATCHLEVEL@:`cat $(srcdir)/.patchlevel`:" \
+	     $(SUPPORT_SRC)bashbug.sh > $@
+	@chmod a+rx bashbug
+
+version.h:	mkversion
+	if ./mkversion -dir $(srcdir) -build; then mv -f newversion.h version.h; fi
+
+y.tab.c: parser-built
+y.tab.h: parser-built
+parser-built:	parse.y parser.h command.h stdc.h input.h
+	$(RM) $@
+	-if test -f y.tab.h; then mv -f y.tab.h old-y.tab.h; fi
+	$(YACC) -d $(srcdir)/parse.y
+	-if cmp -s old-y.tab.h y.tab.h; then mv old-y.tab.h y.tab.h; fi
+	touch $@
+
+#if defined (READLINE) && defined (HAVE_READLINE_SOURCE)
+$(READLINE_LIBRARY): $(READLINE_SOURCE)
+	build_lib_in_dir ($(RL_LIBDIR), libreadline.a, srcdir=$(RL_ABSSRC), $(RL_ABSSRC)Makefile)
+#endif /* READLINE && HAVE_READLINE_SOURCE */
+
+#if defined (HISTORY) && defined (HAVE_HISTORY_SOURCE) && !defined (READLINE)
+$(HISTORY_LIBRARY): $(HISTORY_SOURCE)
+	build_lib_in_dir ($(HIST_LIBDIR), libhistory.a, srcdir=$(HIST_ABSSRC), $(HIST_ABSSRC)Makefile)
+#endif /* HISTORY && HAVE_HISTORY_SOURCE && !READLINE */
+
+#if defined (HAVE_TERMCAP_SOURCE)
+$(TERMCAP_LIBRARY): $(TERMCAP_SOURCE)
+	build_lib_in_dir ($(TERM_LIBDIR), libtermcap.a, srcdir=$(TERM_ABSSRC), $(TERM_ABSSRC)Makefile)
+#endif /* HAVE_TERMCAP_SOURCE */
+
+#if defined (USE_GLOB_LIBRARY)
+$(GLOB_LIBRARY): $(GLOB_SOURCE)
+	build_lib_in_dir ($(GLOB_LIBDIR), libglob.a, srcdir=$(GLOB_ABSSRC), $(GLOB_ABSSRC)Makefile)
+#endif /* USE_GLOB_LIBRARY */
+
+#if defined (HAVE_TILDE_SOURCE)
+$(TILDE_LIBRARY): $(TILDE_SOURCE)
+	build_lib_in_dir ($(TILDE_LIBDIR), libtilde.a, srcdir=$(TILDE_ABSSRC), $(TILDE_ABSSRC)Makefile)
+#endif /* HAVE_TILDE_SOURCE */
+
+mkendian:	$(SUPPORT_SRC)endian.c
+	$(CC) $(CCFLAGS) $(CPPFLAGS) -o $@ $(SUPPORT_SRC)endian.c
+
+bash_endian.h:     mkendian
+	$(RM) $@
+	./mkendian $@
+
+mksignames:	$(SUPPORT_SRC)mksignames.c
+		$(CC) $(CCFLAGS) $(CPPFLAGS) -o $@ $(SUPPORT_SRC)mksignames.c
+
+signames.h:   mksignames
+	$(RM) $@
+	./mksignames $@
+
+builtins/libbuiltins.a: $(BUILTIN_OBJS) config.h memalloc.h
+	build_builtins (libbuiltins.a)
+
+builtins/common.o:	$(BUILTIN_SRCDIR)common.c
+	build_builtins (common.o)
+builtins/bashgetopt.o:	$(BUILTIN_SRCDIR)bashgetopt.c
+	build_builtins (bashgetopt.o)
+
+builtins/builtext.h: builtins/libbuiltins.a
+
+/* Dependencies for the main bash source. */
+copy_cmd.o: shell.h sig.h command.h stdc.h hash.h
+copy_cmd.o: general.h variables.h config.h memalloc.h quit.h
+copy_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
+dispose_cmd.o: shell.h sig.h command.h stdc.h
+dispose_cmd.o: general.h variables.h config.h memalloc.h quit.h
+dispose_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
+error.o: error.h
+execute_cmd.o: shell.h sig.h command.h stdc.h y.tab.h posixstat.h flags.h jobs.h
+execute_cmd.o: general.h variables.h config.h memalloc.h quit.h hash.h
+execute_cmd.o: unwind_prot.h siglist.h builtins/builtext.h 
+execute_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h bashtypes.h
+expr.o: shell.h sig.h command.h stdc.h hash.h
+expr.o: general.h variables.h config.h memalloc.h quit.h
+expr.o: dispose_cmd.h make_cmd.h subst.h externs.h
+flags.o: flags.h stdc.h config.h memalloc.h general.h quit.h
+general.o: shell.h sig.h command.h stdc.h maxpath.h
+general.o: general.h variables.h config.h memalloc.h quit.h machines.h
+general.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+hash.o: shell.h sig.h command.h stdc.h hash.h
+hash.o: general.h variables.h config.h memalloc.h quit.h
+hash.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+jobs.o: shell.h sig.h command.h stdc.h hash.h trap.h jobs.h siglist.h
+jobs.o: general.h variables.h config.h memalloc.h quit.h
+jobs.o: dispose_cmd.h make_cmd.h subst.h externs.h builtins/builtext.h
+mailcheck.o: posixstat.h maxpath.h variables.h
+mailcheck.o: hash.h quit.h mailcheck.h
+make_cmd.o: shell.h sig.h command.h stdc.h flags.h input.h bashtypes.h
+make_cmd.o: general.h variables.h config.h memalloc.h quit.h
+make_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
+y.tab.o: shell.h sig.h command.h stdc.h flags.h maxpath.h alias.h
+y.tab.o: general.h variables.h config.h memalloc.h quit.h mailcheck.h
+y.tab.o: dispose_cmd.h make_cmd.h subst.h externs.h bashtypes.h bashline.h
+print_cmd.o: shell.h sig.h command.h stdc.h y.tab.h
+print_cmd.o: general.h variables.h config.h memalloc.h quit.h
+print_cmd.o: dispose_cmd.h make_cmd.h subst.h externs.h
+shell.o: shell.h sig.h command.h stdc.h flags.h machines.h stdc.h parser.h
+shell.o: general.h variables.h config.h memalloc.h quit.h
+shell.o: dispose_cmd.h make_cmd.h subst.h externs.h mailcheck.h
+shell.o: posixstat.h filecntl.h jobs.h input.h $(ENDIAN_HEADER)
+subst.o: shell.h sig.h command.h stdc.h flags.h jobs.h siglist.h bashtypes.h
+subst.o: general.h variables.h config.h memalloc.h quit.h
+subst.o: dispose_cmd.h make_cmd.h subst.h externs.h execute_cmd.h
+subst.o: builtins/getopt.h $(GLOB_LIBSRC)glob.h bashline.h
+test.o: posixstat.h
+trap.o: trap.h shell.h sig.h command.h stdc.h hash.h unwind_prot.h signames.h
+trap.o: general.h variables.h config.h memalloc.h quit.h
+trap.o: dispose_cmd.h make_cmd.h subst.h externs.h
+unwind_prot.o: config.h memalloc.h general.h unwind_prot.h sig.h
+variables.o: shell.h sig.h command.h stdc.h hash.h flags.h mailcheck.h
+variables.o: config.h memalloc.h general.h variables.h quit.h
+variables.o: execute_cmd.h dispose_cmd.h make_cmd.h subst.h externs.h
+sig.o: shell.h sig.h command.h stdc.h hash.h flags.h
+sig.o: config.h memalloc.h general.h variables.h quit.h
+sig.o: bashtypes.h jobs.h bashline.h
+version.o: version.h .build
+
+alias.o: ansi_stdlib.h
+bashline.o: ansi_stdlib.h
+variables.o: ansi_stdlib.h
+shell.o: ansi_stdlib.h
+error.o: ansi_stdlib.h
+hash.o: ansi_stdlib.h
+signames.o: ansi_stdlib.h
+expr.o: ansi_stdlib.h
+general.o: ansi_stdlib.h
+input.o: ansi_stdlib.h
+
+#if !defined (JOB_CONTROL)
+jobs.o: nojobs.c
+#endif /* !JOB_CONTROL */
+
+array.o: general.h shell.h sig.h variables.h quit.h config.h memalloc.h
+array.o: command.h error.h maxpath.h unwind_prot.h dispose_cmd.h
+array.o: make_cmd.h subst.h externs.h
+array.o: array.h stdc.h builtins/common.h
+
+braces.o: general.h shell.h sig.h variables.h quit.h config.h memalloc.h
+braces.o: dispose_cmd.h make_cmd.h subst.h externs.h
+braces.o: maxpath.h unwind_prot.h command.h stdc.h
+
+bracecomp.o: bracecomp.c
+bracecomp.o: shell.h sig.h command.h hash.h builtins.h general.h variables.h
+bracecomp.o: quit.h alias.h config.h
+bracecomp.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+#if defined (HAVE_READLINE_SOURCE)
+bracecomp.o: $(RL_LIBSRC)readline.h
+#endif /* HAVE_READLINE_SOURCE */
+
+bashline.o: shell.h sig.h command.h stdc.h hash.h builtins.h execute_cmd.h
+bashline.o: general.h variables.h config.h memalloc.h quit.h alias.h
+bashline.o: dispose_cmd.h make_cmd.h subst.h externs.h config.h bashline.h
+bashline.o: $(GLOB_LIBSRC)glob.h
+
+bashhist.o: config.h bashansi.h posixstat.h filecntl.h
+bashhist.o: shell.h sig.h command.h stdc.h hash.h builtins.h execute_cmd.h
+bashhist.o: general.h variables.h memalloc.h quit.h alias.h
+bashhist.o: dispose_cmd.h make_cmd.h subst.h externs.h flags.h
+
+/* Dependencies which rely on the user using the source to READLINE. */
+#if defined (READLINE) && defined (HAVE_READLINE_SOURCE)
+bashline.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+y.tab.o: $(RL_LIBSRC)keymaps.h $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h
+#endif /* READLINE && HAVE_READLINE_SOURCE */
+
+#if defined (HISTORY) && defined (HAVE_HISTORY_SOURCE)
+subst.o: $(HIST_LIBSRC)history.h
+bashline.o: $(HIST_LIBSRC)history.h
+bashhist.o: $(HIST_LIBSRC)history.h
+y.tab.o: $(HIST_LIBSRC)history.h
+#endif /* HISTORY && HAVE_HISTORY_SOURCE */
+
+#if defined (USE_GLOB_LIBRARY)
+subst.o: $(GLOB_LIBSRC)fnmatch.h
+execute_cmd.o: $(GLOB_LIBSRC)fnmatch.h
+bashhist.o: $(GLOB_LIBSRC)fnmatch.h
+#endif /* USE_GLOB_LIBRARY */
+
+#if defined (HAVE_TILDE_SOURCE)
+execute_cmd.o: $(TILDE_LIBSRC)tilde.h
+general.o: $(TILDE_LIBSRC)tilde.h
+mailcheck.o: $(TILDE_LIBSRC)tilde.h
+shell.o: $(TILDE_LIBSRC)tilde.h
+subst.o: $(TILDE_LIBSRC)tilde.h
+variables.o: $(TILDE_LIBSRC)tilde.h
+#endif /* HAVE_TILDE_SOURCE */
+
+/* Dependencies for the shell builtins. */
+builtins/common.o: shell.h sig.h command.h config.h memalloc.h general.h error.h
+builtins/common.o: variables.h input.h $(DEFDIR)hashcom.h siglist.h
+builtins/common.o: quit.h unwind_prot.h maxpath.h jobs.h builtins.h
+builtins/common.o: dispose_cmd.h make_cmd.h subst.h externs.h bashhist.h
+builtins/common.o: execute_cmd.h stdc.h
+builtins/alias.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/alias.o: quit.h builtins/common.h
+builtins/alias.o: shell.h sig.h command.h stdc.h unwind_prot.h variables.h 
+builtins/alias.o: dispose_cmd.h make_cmd.h subst.h externs.h
+builtins/bind.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/bind.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/bind.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/bind.o: $(DEFDIR)bashgetopt.h
+builtins/break.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/break.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/break.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/builtin.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/builtin.o: quit.h $(DEFDIR)common.h
+builtins/builtin.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/builtin.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/cd.o: command.h config.h memalloc.h error.h general.h maxpath.h quit.h 
+builtins/cd.o: shell.h sig.h unwind_prot.h variables.h $(DEFDIR)common.h
+builtins/cd.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/command.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/command.o: quit.h $(DEFDIR)bashgetopt.h
+builtins/command.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/command.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/declare.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/declare.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/declare.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/echo.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/echo.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/echo.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/enable.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/enable.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/enable.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/eval.o: command.h config.h memalloc.h error.h general.h maxpath.h quit.h 
+builtins/eval.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/eval.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/exec.o: command.h config.h memalloc.h error.h general.h maxpath.h quit.h 
+builtins/exec.o: shell.h sig.h unwind_prot.h variables.h $(DEFDIR)common.h stdc.h
+builtins/exec.o: dispose_cmd.h make_cmd.h subst.h externs.h execute_cmd.h
+builtins/exec.o: flags.h
+builtins/exit.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/exit.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/exit.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/fc.o: builtins.h command.h stdc.h 
+builtins/fc.o: command.h config.h memalloc.h error.h general.h maxpath.h quit.h 
+builtins/fc.o: flags.h unwind_prot.h variables.h shell.h sig.h 
+builtins/fc.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/fc.o: $(DEFDIR)bashgetopt.h bashhist.h
+builtins/fg_bg.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/fg_bg.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/fg_bg.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/getopts.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/getopts.o: shell.h sig.h unwind_prot.h variables.h quit.h 
+builtins/getopts.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/hash.o: builtins.h command.h execute_cmd.h stdc.h
+builtins/hash.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/hash.o: shell.h sig.h unwind_prot.h variables.h $(DEFDIR)common.h quit.h 
+builtins/help.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/help.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/help.o: shell.h sig.h unwind_prot.h variables.h quit.h
+builtins/help.o: $(GLOB_LIBSRC)glob.h
+builtins/history.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/history.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/history.o: filecntl.h shell.h sig.h unwind_prot.h variables.h 
+builtins/history.o: bashhist.h
+builtins/inlib.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/inlib.o: shell.h sig.h unwind_prot.h variables.h quit.h 
+builtins/inlib.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/jobs.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/jobs.o: quit.h $(DEFDIR)bashgetopt.h
+builtins/jobs.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/jobs.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/kill.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/kill.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/kill.o: shell.h sig.h trap.h unwind_prot.h variables.h 
+builtins/let.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/let.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/let.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/pushd.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/pushd.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/pushd.o: shell.h sig.h unwind_prot.h variables.h $(DEFDIR)common.h
+builtins/read.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/read.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/read.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/return.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/return.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/return.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/set.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/set.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h
+builtins/set.o: shell.h sig.h unwind_prot.h variables.h flags.h stdc.h
+builtins/setattr.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/setattr.o: quit.h $(DEFDIR)common.h $(DEFDIR)bashgetopt.h
+builtins/setattr.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/setattr.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/shift.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/shift.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/shift.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/shift.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/source.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/source.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/source.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/suspend.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/suspend.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/suspend.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/test.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/test.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/test.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/times.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/times.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/times.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/trap.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/trap.o: quit.h $(DEFDIR)common.h
+builtins/trap.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/trap.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/type.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/type.o: quit.h $(DEFDIR)common.h
+builtins/type.o: shell.h sig.h unwind_prot.h variables.h execute_cmd.h
+builtins/type.o: dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/ulimit.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/ulimit.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/ulimit.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/umask.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/umask.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/umask.o: shell.h sig.h unwind_prot.h variables.h 
+builtins/wait.o: command.h config.h memalloc.h error.h general.h maxpath.h
+builtins/wait.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h stdc.h
+builtins/wait.o: shell.h sig.h unwind_prot.h variables.h
+builtins/shopt.o: command.h config.h memalloc.h error.h general.h
+builtins/shopt.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h
+builtins/shopt.o: shell.h unwind_prot.h variables.h maxpath.h
+builtins/shopt.o: builtins/common.h builtins/bashgetopt.h
+
+builtins/bashgetopt.o: bashansi.h ansi_stdlib.h
+builtins/mkbuiltins.o: bashansi.h ansi_stdlib.h
+builtins/fc.o: bashansi.h ansi_stdlib.h
+
+#if defined (READLINE) && defined (HAVE_READLINE_SOURCE)
+builtins/bind.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+#endif /* READLINE && HAVE_READLINE_SOURCE */
+
+#if defined (HISTORY) && defined (HAVE_HISTORY_SOURCE)
+builtins/bind.o: $(HIST_LIBSRC)history.h
+builtins/fc.o: $(HIST_LIBSRC)history.h
+builtins/history.o: $(HIST_LIBSRC)history.h
+#endif /* HISTORY && HAVE_HISTORY_SOURCE */
+
+#if defined (HAVE_TILDE_SOURCE)
+builtins/common.o: $(TILDE_LIBSRC)tilde.h
+builtins/cd.o: $(TILDE_LIBSRC)tilde.h 
+#endif /* HAVE_TILDE_SOURCE */
+
+builtins/alias.o: builtins/alias.def
+builtins/bind.o: builtins/bind.def
+builtins/break.o: builtins/break.def
+builtins/builtin.o: builtins/builtin.def
+builtins/cd.o: builtins/cd.def
+builtins/colon.o: builtins/colon.def
+builtins/command.o: builtins/command.def
+builtins/declare.o: builtins/declare.def
+builtins/echo.o: builtins/echo.def
+builtins/enable.o: builtins/enable.def
+builtins/eval.o: builtins/eval.def
+builtins/exec.o: builtins/exec.def
+builtins/exit.o: builtins/exit.def
+builtins/fc.o: builtins/fc.def
+builtins/fg_bg.o: builtins/fg_bg.def
+builtins/getopts.o: builtins/getopts.def
+builtins/hash.o: builtins/hash.def
+builtins/help.o: builtins/help.def
+builtins/history.o: builtins/history.def
+builtins/inlib.o: builtins/inlib.def
+builtins/jobs.o: builtins/jobs.def
+builtins/kill.o: builtins/kill.def
+builtins/let.o: builtins/let.def
+builtins/pushd.o: builtins/pushd.def
+builtins/read.o: builtins/read.def
+builtins/reserved.o: builtins/reserved.def
+builtins/return.o: builtins/return.def
+builtins/set.o: builtins/set.def
+builtins/setattr.o: builtins/setattr.def
+builtins/shift.o: builtins/shift.def
+builtins/shopt.o: builtins/shopt.def
+builtins/source.o: builtins/source.def
+builtins/suspend.o: builtins/suspend.def
+builtins/test.o: builtins/test.def
+builtins/times.o: builtins/times.def
+builtins/trap.o: builtins/trap.def
+builtins/type.o: builtins/type.def
+builtins/ulimit.o: builtins/ulimit.def
+builtins/umask.o: builtins/umask.def
+builtins/wait.o: builtins/wait.def
+
+install:	.made
+		$(INSTALL_PROGRAM) $(Program) $(bindir)/$(Program)
+		$(INSTALL_PROGRAM) bashbug $(bindir)/bashbug
+		$(RM) installed-$(Program)
+		-ln -s $(bindir)/$(Program) installed-$(Program)
+		( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) mandir=$(mandir) \
+			man3dir=$(man3dir) infodir=$(infodir) \
+			INSTALL_PROGRAM="${INSTALL_PROGRAM}" \
+			INSTALL_DATA="${INSTALL_DATA}" $@ )
+
+uninstall:	.made
+		$(RM) $(bindir)/$(Program) installed-$(Program) $(bindir)/bashbug
+		( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) mandir=$(mandir) man3dir=$(man3dir) infodir=$(infodir) $@ )
+		
+.distribution:
+		./mkversion -dir $(srcdir) -dist `$(Program) -c 'echo $$BASH_VERSION'`
+
+mkversion:	$(SUPPORT_SRC)mkversion.c
+		$(CC) $(CCFLAGS) $(CPPFLAGS) -I$(srcdir) -I.. -o $@ $(SUPPORT_SRC)mkversion.c
+
+newversion:	mkversion
+		$(RM) .build
+		./mkversion -dir $(srcdir) -dist
+		mv -f newversion.h version.h
+		$(MAKE) -f $(srcdir)/Makefile $(MFLAGS) srcdir=$(srcdir)
+
+texindex:	force
+		build_lib_in_dir($(LIBPATH)doc-support, texindex, $${topdir}/lib/doc-support, $${topdir}/lib/doc-support/Makefile)
+
+documentation:  force texindex
+		(cd $(DOCDIR); $(MAKE) $(MFLAGS) CFLAGS='$(CCFLAGS)')
+
+force:
+
+tags:		$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
+		etags $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
+
+TAGS:		$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
+		ctags -x $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE) > $@
+
+clean:
+		$(RM) $(OBJECTS) $(Program) bashbug ansi-Makefile *.aux
+		$(RM) .build .made .machine version.h
+		$(RM) $(CREATED_SUPPORT) bash-Makefile tags TAGS
+		(cd $(DOCDIR); $(MAKE) $(MFLAGS) clean)
+		(cd builtins; $(MAKE) $(MFLAGS) clean)
+		$(CLEAN_READLINE) ;
+		$(CLEAN_HISTORY) ;
+		$(CLEAN_TERMCAP) ;
+		$(CLEAN_GLOB) ;
+		$(CLEAN_TILDE) ;
+		$(CLEAN_MALLOC) ;
+
+distclean:	clean
+		$(RM) installed-bash
+
+realclean:	clean
+		$(RM) y.tab.c y.tab.h parser-built installed-bash
+
+recho:		$(SUPPORT_SRC)recho.c
+	@$(CC) -o $@ $(SUPPORT_SRC)recho.c
+
+tests:		force $(Program) recho
+	-[ -d tests ] || mkdir tests
+	@cp recho $(SUPPORT_SRC)printenv tests
+	( cd tests ; sh run-all )

@@ -60,7 +60,9 @@ sh_regmatch (string, pattern, flags)
   int result;  
 
 
+#if defined (ARRAY_VARS)
   rematch = (SHELL_VAR *)NULL;
+#endif
   
   rflags = REG_EXTENDED;
   if (glob_ignore_case)

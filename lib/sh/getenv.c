@@ -115,7 +115,7 @@ putenv (str)
       return -1;
     }
 
-  offset = assignment (str);
+  offset = assignment (str, 0);
   if (str[offset] != '=')
     {
       errno = EINVAL;

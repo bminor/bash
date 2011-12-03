@@ -1,0 +1,74 @@
+From chet@odin.INS.CWRU.Edu Fri Dec 21 10:56:27 1990
+Flags: 50
+Received: from odin.INS.CWRU.Edu by usenet.INS.CWRU.Edu with SMTP (5.61+ida+/CWRU-1.3-UUCPGW)
+	id AA27089; Fri, 21 Dec 90 10:56:27 -0500 (from chet@odin.INS.CWRU.Edu for /usr/local/bin/m2mbox.test /usr/homes/chet/mbox)
+Received:  by odin.INS.CWRU.Edu (5.61+ida+/CWRU-1.4-ins)
+	id AA17558; Fri, 21 Dec 90 10:56:18 -0500 (from chet for chet@usenet.INS.CWRU.Edu)
+Date: Fri, 21 Dec 90 10:36:58 -0500
+From: Chet Ramey <chet@odin.ins.cwru.edu>
+To: dbrooks@osf.org
+Subject: Re: bash and OSF/1
+Cc: chet@odin.INS.CWRU.Edu
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from dbrooks@osf.org of Fri, 21 Dec 90 10:28:26 EST
+Message-Id: <9012211536.AA17531.SM@odin.ins.cwru.edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> Michael Meissner has been suddenly asked to do Real Work (TM) so it's
+> unlikely he'll get to do anything with OSF/1 until the new year.  We
+> talked about it, however, and there are a few issues.
+
+Not (gasp) Real Work!
+
+> The upshot of the above is: expect a block of #defines based on
+> __OSF1__, and expect it possibly not to work under all
+> implementations.
+
+Works for me.
+
+> I have two new bugs for you in 1.06.
+> 
+> - Typeahead is very weird.  Often, I will be in a state where a
+>   command is busy, and I type a new one.  The shell prompts and
+>   nothing happens; I have to type the line again.  Later, if I enter
+>   an interactive command (such as "mail") the missing keystrokes get
+>   delivered to it instead.  This is on a pmax, Ultrix 3.1, with some
+>   patches of my own and Michael's fignore patch (that may have caused
+>   it; I haven't investigated yet.  Just wanted to see if this rang a bell.)
+
+Typeahead under Ultrix is wierd.  This doesn't happen anywhere else.  Here's
+what it does for me:
+
+cwjcc$ sleep 4
+echo hi ; echo hi		<----- typeahead while sleeping
+cwjcc$				<----- nothing comes out
+cwjcc$ more readline.c
+readline.c: No such file or directory
+cwjcc$ echo hi ; echo hi	<----- now it does...
+hi
+hi
+
+I'll look at it today.
+
+> - The sequence
+> 	echo foo > /dev/tty
+> 	cat bar
+>   produces:
+> 	cat: write error: Bad file number
+
+This only happens under Ultrix, too.  It's another consequence of Dec's
+dup2 fuckup (I am *really*pissed*off* about it; it's caused me to waste a
+lot of time already).  File descriptor 1 is getting set to close-on-exec. 
+I haven't decided whether to hack around it in the code or to just make
+Ultrix use the dup2 emulation in general.c.
+
+Cheers,
+
+Chet
+
+--
+Chet Ramey				``I die, Horatio''
+Network Services Group, Case Western Reserve University
+chet@ins.CWRU.Edu
+                My opinions are just those, and mine alone.
+

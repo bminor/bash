@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 4.5 from
 /usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.0-alpha, 5 August 2003).
+the Bash shell (version 3.0-alpha, 13 November 2003).
 
-   This is Edition 3.0, last updated 5 August 2003, of `The GNU Bash
+   This is Edition 3.0, last updated 13 November 2003, of `The GNU Bash
 Reference Manual', for `Bash', Version 3.0-alpha.
 
    Copyright (C) 1988-2003 Free Software Foundation, Inc.
@@ -37,9 +37,9 @@ Bash Features
 *************
 
    This text is a brief description of the features that are present in
-the Bash shell (version 3.0-alpha, 5 August 2003)..
+the Bash shell (version 3.0-alpha, 13 November 2003)..
 
-   This is Edition 3.0, last updated 5 August 2003, of `The GNU Bash
+   This is Edition 3.0, last updated 13 November 2003, of `The GNU Bash
 Reference Manual', for `Bash', Version 3.0-alpha.
 
    Bash contains features that appear in other popular shells, and some
@@ -602,9 +602,14 @@ shell waits for all commands in the pipeline to complete.
 
    Each command in a pipeline is executed in its own subshell (*note
 Command Execution Environment::).  The exit status of a pipeline is the
-exit status of the last command in the pipeline.  If the reserved word
-`!' precedes the pipeline, the exit status is the logical negation of
-the exit status of the last command.
+exit status of the last command in the pipeline, unless the `pipefail'
+option is enabled (*note The Set Builtin::).  If `pipefail' is enabled,
+the pipeline's return status is the value of the last (rightmost)
+command to exit with a non-zero status, or zero if all commands exit
+successfully.  If the reserved word `!' precedes the pipeline, the exit
+status is the logical negation of the exit status as described above.
+The shell waits for all commands in the pipeline to terminate before
+returning a value.
 
 
 File: bashref.info,  Node: Lists,  Next: Compound Commands,  Prev: Pipelines,  Up: Shell Commands
@@ -855,6 +860,22 @@ Conditional Constructs
      respectively, and 1 otherwise.  Any part of the pattern may be
      quoted to force it to be matched as a string.
 
+     An additional binary operator, `=~', is available, with the same
+     precedence as `==' and `!='.  When it is used, the string to the
+     right of the operator is considered an extended regular expression
+     and matched accordingly (as in regex3)).  The return value is 0 if
+     the string matches the pattern, and 1 otherwise.  If the regular
+     expression is syntactically incorrect, the conditional
+     expression's return value is 2.  If the shell option `nocaseglob'
+     (see the description of `shopt' in *Note Bash Builtins::) is
+     enabled, the match is performed without regard to the case of
+     alphabetic characters.  Substrings matched by parenthesized
+     subexpressions within the regular expression are saved in the
+     array variable `BASH_REMATCH'.  The element of `BASH_REMATCH' with
+     index 0 is the portion of the string matching the entire regular
+     expression.  The element of `BASH_REMATCH' with index N is the
+     portion of the string matching the Nth parenthesized subexpression.
+
      Expressions may be combined using the following operators, listed
      in decreasing order of precedence:
 
@@ -1025,8 +1046,8 @@ evaluated as an arithmetic expression even if the `$((...))' expansion
 is not used (*note Arithmetic Expansion::).  Word splitting is not
 performed, with the exception of `"$@"' as explained below.  Filename
 expansion is not performed.  Assignment statements may also appear as
-arguments to the `declare', `typeset', `export', `readonly', and
-`local' builtin commands.
+arguments to the `alias', `declare', `typeset', `export', `readonly',
+and `local' builtin commands.
 
 
 File: bashref.info,  Node: Positional Parameters,  Next: Special Parameters,  Up: Shell Parameters
@@ -1556,8 +1577,10 @@ a PATTERN, and replaced with an alphabetically sorted list of file
 names matching the pattern. If no matching file names are found, and
 the shell option `nullglob' is disabled, the word is left unchanged.
 If the `nullglob' option is set, and no matches are found, the word is
-removed.  If the shell option `nocaseglob' is enabled, the match is
-performed without regard to the case of alphabetic characters.
+removed.  If the `failglob' shell option is set, and no matches are
+found, an error message is printed and the command is not executed.  If
+the shell option `nocaseglob' is enabled, the match is performed
+without regard to the case of alphabetic characters.
 
    When a pattern is used for filename generation, the character `.' at
 the start of a filename or immediately following a slash must be
@@ -1566,7 +1589,8 @@ matching a file name, the slash character must always be matched
 explicitly.  In other cases, the `.' character is not treated specially.
 
    See the description of `shopt' in *Note Bash Builtins::, for a
-description of the `nocaseglob', `nullglob', and `dotglob' options.
+description of the `nocaseglob', `nullglob', `failglob', and `dotglob'
+options.
 
    The `GLOBIGNORE' shell variable may be used to restrict the set of
 filenames matching a pattern.  If `GLOBIGNORE' is set, each matching
@@ -2141,12 +2165,12 @@ executing loops.  In all cases, Bash ignores `SIGQUIT'.  If job control
 is in effect (*note Job Control::), Bash ignores `SIGTTIN', `SIGTTOU',
 and `SIGTSTP'.
 
-   Commands started by Bash have signal handlers set to the values
-inherited by the shell from its parent.  When job control is not in
-effect, asynchronous commands ignore `SIGINT' and `SIGQUIT' as well.
-Commands run as a result of command substitution ignore the
-keyboard-generated job control signals `SIGTTIN', `SIGTTOU', and
-`SIGTSTP'.
+   Non-builtin commands started by Bash have signal handlers set to the
+values inherited by the shell from its parent.  When job control is not
+in effect, asynchronous commands ignore `SIGINT' and `SIGQUIT' in
+addition to these inherited handlers.  Commands run as a result of
+command substitution ignore the keyboard-generated job control signals
+`SIGTTIN', `SIGTTOU', and `SIGTSTP'.
 
    The shell exits by default upon receipt of a `SIGHUP'.  Before
 exiting, an interactive shell resends the `SIGHUP' to all jobs, running
@@ -2160,13 +2184,13 @@ receive `SIGHUP' using `disown -h'.
 Bash Builtins::), Bash sends a `SIGHUP' to all jobs when an interactive
 login shell exits.
 
-   When Bash receives a signal for which a trap has been set while
-waiting for a command to complete, the trap will not be executed until
-the command completes.  When Bash is waiting for an asynchronous
-command via the `wait' builtin, the reception of a signal for which a
-trap has been set will cause the `wait' builtin to return immediately
-with an exit status greater than 128, immediately after which the trap
-is executed.
+   If Bash is waiting for a command to complete and receives a signal
+for which a trap has been set, the trap will not be executed until the
+command completes.  When Bash is waiting for an asynchronous command
+via the `wait' builtin, the reception of a signal for which a trap has
+been set will cause the `wait' builtin to return immediately with an
+exit status greater than 128, immediately after which the trap is
+executed.
 
 
 File: bashref.info,  Node: Shell Scripts,  Prev: Executing Commands,  Up: Basic Shell Features
@@ -2560,14 +2584,16 @@ standard.
      function.  Refer to the description of the `extglob' option to the
      `shopt' builtin (*note Bash Builtins::) for details of its effect
      on the `DEBUG' trap.  If a SIGSPEC is `ERR', the command ARG is
-     executed whenever a simple command has a non-zero exit status.
-     The `ERR' trap is not executed if the failed command is part of the
-     command list immediately following an `until' or `while' keyword,
-     part of the test in an `if' statement, part of a `&&' or `||'
-     list, or if the command's return status is being inverted using
-     `!'.  If a SIGSPEC is `RETURN', the command ARG is executed each
-     time a shell function or a script executed with the `.' or
-     `source' builtins finishes executing.
+     executed whenever a simple command has a non-zero exit status,
+     subject to the following conditions.  The `ERR' trap is not
+     executed if the failed command is part of the command list
+     immediately following an `until' or `while' keyword, part of the
+     test in an `if' statement, part of a `&&' or `||' list, or if the
+     command's return status is being inverted using `!'.  These are
+     the same conditions obeyed by the `errexit' option.  If a SIGSPEC
+     is `RETURN', the command ARG is executed each time a shell
+     function or a script executed with the `.' or `source' builtins
+     finishes executing.
 
      Signals ignored upon entry to the shell cannot be trapped or reset.
      Trapped signals are reset to their original values in a child
@@ -2704,7 +2730,7 @@ POSIX 1003.2 standard.
 `caller'
           caller [EXPR]
      Returns the context of any active subroutine call (a shell
-     function or a script executed with the `.' or `source' builtins.
+     function or a script executed with the `.' or `source' builtins).
 
      Without EXPR, `caller' displays the line number and source
      filename of the current subroutine call.  If a non-negative
@@ -2913,9 +2939,11 @@ POSIX 1003.2 standard.
      specifications, each of which causes printing of the next
      successive ARGUMENT.  In addition to the standard `printf(1)'
      formats, `%b' causes `printf' to expand backslash escape sequences
-     in the corresponding ARGUMENT, and `%q' causes `printf' to output
-     the corresponding ARGUMENT in a format that can be reused as shell
-     input.
+     in the corresponding ARGUMENT, (except that `\c' terminates
+     output, backslashes in `\'', `\"', and `\?' are not removed, and
+     octal escapes beginning with `\0' may contain up to four digits),
+     and `%q' causes `printf' to output the corresponding ARGUMENT in a
+     format that can be reused as shell input.
 
      The FORMAT is reused as necessary to consume all of the ARGUMENTS.
      If the FORMAT requires more ARGUMENTS than are supplied, the extra
@@ -3088,6 +3116,10 @@ POSIX 1003.2 standard.
           If set, `$'STRING'' and `$"STRING"' quoting is performed
           within `${PARAMETER}' expansions enclosed in double quotes.
           This option is enabled by default.
+
+    `failglob'
+          If set, patterns which fail to match filenames during
+          pathname expansion result in an expansion error.
 
     `force_fignore'
           If set, the suffixes specified by the `FIGNORE' shell variable
@@ -3427,6 +3459,12 @@ The Set Builtin
          `physical'
                Same as `-P'.
 
+         `pipefail'
+               If set, the return value of a pipeline is the value of
+               the last (rightmost) command to exit with a non-zero
+               status, or zero if all commands in the pipeline exit
+               successfully.  This option is disabled by default.
+
          `posix'
                Change the behavior of Bash where the default operation
                differs from the POSIX 1003.2 standard to match the
@@ -3698,6 +3736,14 @@ Variables::).
      `${FUNCNAME[$i + 1]}' was called.  The corresponding source file
      name is `${BASH_SOURCE[$i + 1]}'.  Use `LINENO' to obtain the
      current line number.
+
+`BASH_REMATCH'
+     An array variable whose members are assigned by the `=~' binary
+     operator to the `[[' conditional command (*note Conditional
+     Constructs::).  The element with index 0 is the portion of the
+     string matching the entire regular expression.  The element with
+     index N is the portion of the string matching the Nth
+     parenthesized subexpression.  This variable is read-only.
 
 `BASH_SOURCE'
      An array variable whose members are the source filenames
@@ -7865,7 +7911,12 @@ does not provide the necessary support.
      builtins and functions to be timed.
 
 `--enable-cond-command'
-     Include support for the `[[' conditional command (*note
+     Include support for the `[[' conditional command.  (*note
+     Conditional Constructs::).
+
+`--enable-cond-regexp'
+     Include support for matching POSIX regular expressions using the
+     `=~' binary operator in the `[[' conditional command.  (*note
      Conditional Constructs::).
 
 `--enable-directory-stack'
@@ -8016,7 +8067,9 @@ included in SVR4.2 as the baseline reference.
      and `compgen', to manipulate it.
 
    * Bash has command history (*note Bash History Facilities::) and the
-     `history' and `fc' builtins to manipulate it.
+     `history' and `fc' builtins to manipulate it.  The Bash history
+     list maintains timestamp information and uses the value of the
+     `HISTTIMEFORMAT' variable to display it.
 
    * Bash implements `csh'-like history expansion (*note History
      Interaction::).
@@ -8212,9 +8265,18 @@ included in SVR4.2 as the baseline reference.
    * Bash has much more optional behavior controllable with the `set'
      builtin (*note The Set Builtin::).
 
+   * The `-x' (`xtrace') option displays commands other than simple
+     commands when performing an execution trace (*note The Set
+     Builtin::).
+
    * The `test' builtin (*note Bourne Shell Builtins::) is slightly
      different, as it implements the POSIX algorithm, which specifies
      the behavior based on the number of arguments.
+
+   * Bash includes the `caller' builtin, which displays the context of
+     any active subroutine call (a shell function or a script executed
+     with the `.' or `source' builtins).  This supports the bash
+     debugger.
 
    * The `trap' builtin (*note Bourne Shell Builtins::) allows a
      `DEBUG' pseudo-signal specification, similar to `EXIT'.  Commands
@@ -8881,6 +8943,7 @@ Parameter and Variable Index
 * BASH_ENV:                              Bash Variables.
 * BASH_EXECUTION_STRING:                 Bash Variables.
 * BASH_LINENO:                           Bash Variables.
+* BASH_REMATCH:                          Bash Variables.
 * BASH_SOURCE:                           Bash Variables.
 * BASH_SUBSHELL:                         Bash Variables.
 * BASH_VERSINFO:                         Bash Variables.
@@ -9186,129 +9249,129 @@ Concept Index
 
 
 Tag Table:
-Node: Top1367
-Node: Introduction3520
-Node: What is Bash?3745
-Node: What is a shell?4833
-Node: Definitions7369
-Node: Basic Shell Features10109
-Node: Shell Syntax11327
-Node: Shell Operation12351
-Node: Quoting13636
-Node: Escape Character14898
-Node: Single Quotes15370
-Node: Double Quotes15705
-Node: ANSI-C Quoting16718
-Node: Locale Translation17661
-Node: Comments18544
-Node: Shell Commands19149
-Node: Simple Commands19910
-Node: Pipelines20531
-Node: Lists22067
-Node: Compound Commands23689
-Node: Looping Constructs24461
-Node: Conditional Constructs26895
-Node: Command Grouping32914
-Node: Shell Functions34350
-Node: Shell Parameters38615
-Node: Positional Parameters40177
-Node: Special Parameters41068
-Node: Shell Expansions43726
-Node: Brace Expansion45646
-Node: Tilde Expansion47962
-Node: Shell Parameter Expansion50294
-Node: Command Substitution57548
-Node: Arithmetic Expansion58870
-Node: Process Substitution59711
-Node: Word Splitting60748
-Node: Filename Expansion62200
-Node: Pattern Matching64185
-Node: Quote Removal67506
-Node: Redirections67792
-Node: Executing Commands75267
-Node: Simple Command Expansion75934
-Node: Command Search and Execution77855
-Node: Command Execution Environment79852
-Node: Environment82614
-Node: Exit Status84265
-Node: Signals85460
-Node: Shell Scripts87371
-Node: Shell Builtin Commands89882
-Node: Bourne Shell Builtins91312
-Node: Bash Builtins108084
-Node: The Set Builtin135896
-Node: Special Builtins143821
-Node: Shell Variables144793
-Node: Bourne Shell Variables145229
-Node: Bash Variables147206
-Node: Bash Features166301
-Node: Invoking Bash167183
-Node: Bash Startup Files172994
-Node: Interactive Shells177864
-Node: What is an Interactive Shell?178266
-Node: Is this Shell Interactive?178901
-Node: Interactive Shell Behavior179707
-Node: Bash Conditional Expressions182974
-Node: Shell Arithmetic186394
-Node: Aliases189134
-Node: Arrays191637
-Node: The Directory Stack194657
-Node: Directory Stack Builtins195363
-Node: Printing a Prompt198242
-Node: The Restricted Shell200868
-Node: Bash POSIX Mode202693
-Node: Job Control209339
-Node: Job Control Basics209805
-Node: Job Control Builtins214085
-Node: Job Control Variables218381
-Node: Command Line Editing219531
-Node: Introduction and Notation220529
-Node: Readline Interaction222146
-Node: Readline Bare Essentials223332
-Node: Readline Movement Commands225112
-Node: Readline Killing Commands226068
-Node: Readline Arguments227977
-Node: Searching229012
-Node: Readline Init File231189
-Node: Readline Init File Syntax232243
-Node: Conditional Init Constructs243887
-Node: Sample Init File246411
-Node: Bindable Readline Commands249594
-Node: Commands For Moving250793
-Node: Commands For History251642
-Node: Commands For Text254531
-Node: Commands For Killing257192
-Node: Numeric Arguments259142
-Node: Commands For Completion260269
-Node: Keyboard Macros263850
-Node: Miscellaneous Commands264409
-Node: Readline vi Mode269708
-Node: Programmable Completion270617
-Node: Programmable Completion Builtins276424
-Node: Using History Interactively283786
-Node: Bash History Facilities284465
-Node: Bash History Builtins287155
-Node: History Interaction291007
-Node: Event Designators293558
-Node: Word Designators294562
-Node: Modifiers296192
-Node: Installing Bash297589
-Node: Basic Installation298723
-Node: Compilers and Options301408
-Node: Compiling For Multiple Architectures302142
-Node: Installation Names303799
-Node: Specifying the System Type304610
-Node: Sharing Defaults305319
-Node: Operation Controls305984
-Node: Optional Features306935
-Node: Reporting Bugs315012
-Node: Major Differences From The Bourne Shell316187
-Node: Copying This Manual331430
-Node: GNU Free Documentation License331684
-Node: Builtin Index354077
-Node: Reserved Word Index357704
-Node: Variable Index359180
-Node: Function Index366116
-Node: Concept Index370666
+Node: Top1373
+Node: Introduction3532
+Node: What is Bash?3757
+Node: What is a shell?4845
+Node: Definitions7381
+Node: Basic Shell Features10121
+Node: Shell Syntax11339
+Node: Shell Operation12363
+Node: Quoting13648
+Node: Escape Character14910
+Node: Single Quotes15382
+Node: Double Quotes15717
+Node: ANSI-C Quoting16730
+Node: Locale Translation17673
+Node: Comments18556
+Node: Shell Commands19161
+Node: Simple Commands19922
+Node: Pipelines20543
+Node: Lists22409
+Node: Compound Commands24031
+Node: Looping Constructs24803
+Node: Conditional Constructs27237
+Node: Command Grouping34290
+Node: Shell Functions35726
+Node: Shell Parameters39991
+Node: Positional Parameters41562
+Node: Special Parameters42453
+Node: Shell Expansions45111
+Node: Brace Expansion47031
+Node: Tilde Expansion49347
+Node: Shell Parameter Expansion51679
+Node: Command Substitution58933
+Node: Arithmetic Expansion60255
+Node: Process Substitution61096
+Node: Word Splitting62133
+Node: Filename Expansion63585
+Node: Pattern Matching65709
+Node: Quote Removal69030
+Node: Redirections69316
+Node: Executing Commands76791
+Node: Simple Command Expansion77458
+Node: Command Search and Execution79379
+Node: Command Execution Environment81376
+Node: Environment84138
+Node: Exit Status85789
+Node: Signals86984
+Node: Shell Scripts88939
+Node: Shell Builtin Commands91450
+Node: Bourne Shell Builtins92880
+Node: Bash Builtins109763
+Node: The Set Builtin137885
+Node: Special Builtins146103
+Node: Shell Variables147075
+Node: Bourne Shell Variables147511
+Node: Bash Variables149488
+Node: Bash Features168993
+Node: Invoking Bash169875
+Node: Bash Startup Files175686
+Node: Interactive Shells180556
+Node: What is an Interactive Shell?180958
+Node: Is this Shell Interactive?181593
+Node: Interactive Shell Behavior182399
+Node: Bash Conditional Expressions185666
+Node: Shell Arithmetic189086
+Node: Aliases191826
+Node: Arrays194329
+Node: The Directory Stack197349
+Node: Directory Stack Builtins198055
+Node: Printing a Prompt200934
+Node: The Restricted Shell203560
+Node: Bash POSIX Mode205385
+Node: Job Control212031
+Node: Job Control Basics212497
+Node: Job Control Builtins216777
+Node: Job Control Variables221073
+Node: Command Line Editing222223
+Node: Introduction and Notation223221
+Node: Readline Interaction224838
+Node: Readline Bare Essentials226024
+Node: Readline Movement Commands227804
+Node: Readline Killing Commands228760
+Node: Readline Arguments230669
+Node: Searching231704
+Node: Readline Init File233881
+Node: Readline Init File Syntax234935
+Node: Conditional Init Constructs246579
+Node: Sample Init File249103
+Node: Bindable Readline Commands252286
+Node: Commands For Moving253485
+Node: Commands For History254334
+Node: Commands For Text257223
+Node: Commands For Killing259884
+Node: Numeric Arguments261834
+Node: Commands For Completion262961
+Node: Keyboard Macros266542
+Node: Miscellaneous Commands267101
+Node: Readline vi Mode272400
+Node: Programmable Completion273309
+Node: Programmable Completion Builtins279116
+Node: Using History Interactively286478
+Node: Bash History Facilities287157
+Node: Bash History Builtins289847
+Node: History Interaction293699
+Node: Event Designators296250
+Node: Word Designators297254
+Node: Modifiers298884
+Node: Installing Bash300281
+Node: Basic Installation301415
+Node: Compilers and Options304100
+Node: Compiling For Multiple Architectures304834
+Node: Installation Names306491
+Node: Specifying the System Type307302
+Node: Sharing Defaults308011
+Node: Operation Controls308676
+Node: Optional Features309627
+Node: Reporting Bugs317899
+Node: Major Differences From The Bourne Shell319074
+Node: Copying This Manual334822
+Node: GNU Free Documentation License335076
+Node: Builtin Index357469
+Node: Reserved Word Index361096
+Node: Variable Index362572
+Node: Function Index369565
+Node: Concept Index374115
 
 End Tag Table

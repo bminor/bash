@@ -80,10 +80,10 @@ sh_physpath (path, flags)
   char *result, *p, *q, *qsave, *qbase, *workpath;
   int double_slash_path, linklen, nlink;
 
-  /* First sanity check -- punt immediately if the name is too long. */
   linklen = strlen (path);
 
 #if 0
+  /* First sanity check -- punt immediately if the name is too long. */
   if (linklen >= PATH_MAX)
     return (savestring (path));
 #endif
@@ -178,6 +178,8 @@ sh_physpath (path, flags)
 	    {
 #ifdef ELOOP
 	      errno = ELOOP;
+#else
+	      errno = EINVAL;
 #endif
 error:
 	      free (result);

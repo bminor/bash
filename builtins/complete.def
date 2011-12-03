@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete" and "compgen" in Bash.
 
-Copyright (C) 1999-2002 Free Software Foundation, Inc.
+Copyright (C) 1999-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,6 +43,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../builtins.h"
@@ -247,7 +248,7 @@ build_actions (list, pp, rp, actp, optp)
 	  ind = find_compact (list_optarg);
 	  if (ind < 0)
 	    {
-	      builtin_error ("%s: invalid action name", list_optarg);
+	      builtin_error (_("%s: invalid action name"), list_optarg);
 	      return (EX_USAGE);
 	    }
 	  acts |= compacts[ind].actflag;
@@ -377,7 +378,7 @@ remove_cmd_completions (list)
     {
       if (progcomp_remove (l->word->word) == 0)
 	{
-	  builtin_error ("%s: no completion specification", l->word->word);
+	  builtin_error (_("%s: no completion specification"), l->word->word);
 	  ret = EXECUTION_FAILURE;
 	}
     }
@@ -520,7 +521,7 @@ print_cmd_completions (list)
 	print_one_completion (l->word->word, cs);
       else
 	{
-	  builtin_error ("%s: no completion specification", l->word->word);
+	  builtin_error (_("%s: no completion specification"), l->word->word);
 	  ret = EXECUTION_FAILURE;
 	}
     }
@@ -567,9 +568,9 @@ compgen_builtin (list)
   word = (list && list->word) ? list->word->word : "";
 
   if (Farg)
-    internal_warning ("compgen: -F option may not work as you expect");
+    builtin_error (_("warning: -F option may not work as you expect"));
   if (Carg)
-    internal_warning ("compgen: -C option may not work as you expect");
+    builtin_error (_("warning: -C option may not work as you expect"));
 
   /* If we get here, we need to build a compspec and evaluate it. */
   cs = compspec_create ();

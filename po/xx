@@ -1,0 +1,47 @@
+lang=`echo en@quot.po-update-en | sed -e 's/\.po-update-en$//'`; 
+if test "bash" = "gettext"; then PATH=`pwd`/../src:$PATH; GETTEXTLIBDIR=`cd /usr/src/local/bash/bash-20031218/src && pwd`; export GETTEXTLIBDIR; fi; 
+tmpdir=`pwd`; 
+echo "$lang:"; 
+ll=`echo $lang | sed -e 's/@.*//'`; 
+echo ll = $ll
+exit 0
+LC_ALL=C; export LC_ALL; 
+cd /usr/src/local/bash/bash-20031218/po; 
+if msginit -i bash.pot --no-translator -l $ll -o - 2>/dev/null | sed -f $tmpdir/$lang.insert-header | msgconv -t UTF-8 | msgfilter sed -f `echo $lang | sed -e 's/.*@//'`.sed 2>/dev/null > $tmpdir/$lang.new.po; then 
+  if cmp $lang.po $tmpdir/$lang.new.po >/dev/null 2>&1; then 
+    rm -f $tmpdir/$lang.new.po; 
+  else 
+    if mv -f $tmpdir/$lang.new.po $lang.po; then 
+      :; 
+    else 
+      echo "creation of $lang.po failed: cannot move $tmpdir/$lang.new.po to $lang.po" 1>&2; \
+      exit 1; 
+    fi;
+  fi;
+else
+  echo "creation of $lang.po failed!" 1>&2; \
+  rm -f $tmpdir/$lang.new.po; \
+fi
+exit 0
+lang=`echo en@quot.po-update | sed -e 's/\.po-update$//'`; \
+if test "bash" = "gettext-tools"; then PATH=`pwd`/../src:$PATH; fi; \
+tmpdir=`pwd`; \
+echo "$lang:"; \
+test "/usr/src/local/bash/bash-20031218/po" = . && cdcmd="" || cdcmd="cd /usr/src/local/bash/bash-20031218/po && "; \
+echo "${cdcmd}msgmerge $lang.po bash.pot -o $lang.new.po"; \
+cd /usr/src/local/bash/bash-20031218/po; \
+if msgmerge $lang.po bash.pot -o $tmpdir/$lang.new.po; then \
+  if cmp $lang.po $tmpdir/$lang.new.po >/dev/null 2>&1; then \
+    rm -f $tmpdir/$lang.new.po; \
+  else \
+    if mv -f $tmpdir/$lang.new.po $lang.po; then \
+      :; \
+    else \
+      echo "msgmerge for $lang.po failed: cannot move $tmpdir/$lang.new.po to $lang.po" 1>&2; \
+      exit 1; \
+    fi; \
+  fi; \
+else \
+  echo "msgmerge for $lang.po failed!" 1>&2; \
+  rm -f $tmpdir/$lang.new.po; \
+fi

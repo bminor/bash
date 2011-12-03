@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -78,6 +78,7 @@
 #endif
 
 #include "chartypes.h"
+#include "bashintl.h"
 
 #include "shell.h"
 
@@ -201,6 +202,10 @@ static int expr_stack_size;	   /* Number of slots already allocated. */
 extern char *this_command_name;
 extern int unbound_vars_is_error;
 
+#if defined (ARRAY_VARS)
+extern char *bash_badsub_errmsg;
+#endif
+
 #define SAVETOK(X) \
   do { \
     (X)->curtok = curtok; \
@@ -231,7 +236,7 @@ pushexp ()
   EXPR_CONTEXT *context;
 
   if (expr_depth >= MAX_EXPR_RECURSION_LEVEL)
-    evalerror ("expression recursion level exceeded");
+    evalerror (_("expression recursion level exceeded"));
 
   if (expr_depth >= expr_stack_size)
     {
@@ -255,7 +260,7 @@ popexp ()
   EXPR_CONTEXT *context;
 
   if (expr_depth == 0)
-    evalerror ("recursion stack underflow");
+    evalerror (_("recursion stack underflow"));
 
   context = expr_stack[--expr_depth];
 
@@ -366,7 +371,7 @@ subexpr (expr)
   val = EXP_HIGHEST ();
 
   if (curtok != 0)
-    evalerror ("syntax error in expression");
+    evalerror (_("syntax error in expression"));
 
   FREE (tokstr);
   FREE (expression);
@@ -406,7 +411,7 @@ expassign ()
       special = curtok == OP_ASSIGN;
 
       if (lasttok != STR)
-	evalerror ("attempted assignment to non-variable");
+	evalerror (_("attempted assignment to non-variable"));
 
       if (special)
 	{
@@ -427,12 +432,12 @@ expassign ()
 	      break;
 	    case DIV:
 	      if (value == 0)
-		evalerror ("division by 0");
+		evalerror (_("division by 0"));
 	      lvalue /= value;
 	      break;
 	    case MOD:
 	      if (value == 0)
-		evalerror ("division by 0");
+		evalerror (_("division by 0"));
 	      lvalue %= value;
 	      break;
 	    case PLUS:
@@ -458,7 +463,7 @@ expassign ()
 	      break;
 	    default:
 	      free (lhs);
-	      evalerror ("bug: bad expassign token");
+	      evalerror (_("bug: bad expassign token"));
 	      break;
 	    }
 	  value = lvalue;
@@ -488,7 +493,7 @@ expcond ()
     {
       readtok ();
       if (curtok == 0 || curtok == COL)
-	evalerror ("expression expected");
+	evalerror (_("expression expected"));
       if (cval == 0)
 	{
 	  set_noeval = 1;
@@ -500,10 +505,10 @@ expcond ()
       if (set_noeval)
 	noeval--;
       if (curtok != COL)
-	evalerror ("`:' expected for conditional expression");
+	evalerror (_("`:' expected for conditional expression"));
       readtok ();
       if (curtok == 0)
-	evalerror ("expression expected");
+	evalerror (_("expression expected"));
       set_noeval = 0;
       if (cval)
  	{
@@ -742,7 +747,7 @@ exp2 ()
       val2 = exppower ();
 
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
-	evalerror ("division by 0");
+	evalerror (_("division by 0"));
 
       if (op == MUL)
 	val1 *= val2;
@@ -767,7 +772,7 @@ exppower ()
       if (val2 == 0)
 	return (1);
       if (val2 < 0)
-	evalerror ("exponent less than 0");
+	evalerror (_("exponent less than 0"));
       for (c = 1; val2--; c *= val1)
 	;
       val1 = c;
@@ -811,7 +816,7 @@ exp0 ()
       readtok ();
       if (curtok != STR)
 	/* readtok() catches this */
-	evalerror ("identifier expected after pre-increment or pre-decrement");
+	evalerror (_("identifier expected after pre-increment or pre-decrement"));
 
       v2 = tokval + ((stok == PREINC) ? 1 : -1);
       vincdec = itos (v2);
@@ -838,8 +843,8 @@ exp0 ()
       readtok ();
       val = EXP_HIGHEST ();
 
-      if (curtok != RPAR)
-	evalerror ("missing `)'");
+      if (curtok != RPAR) /* ( */
+	evalerror (_("missing `)'"));
 
       /* Skip over closing paren. */
       readtok ();
@@ -863,7 +868,7 @@ exp0 ()
       readtok ();
     }
   else
-    evalerror ("syntax error: operand expected");
+    evalerror (_("syntax error: operand expected"));
 
   return (val);
 }
@@ -976,7 +981,7 @@ readtok ()
 	      e = ']';
 	    }
 	  else
-	    evalerror ("bad array subscript");
+	    evalerror (bash_badsub_errmsg);
 	}
 #endif /* ARRAY_VARS */
 
@@ -1138,11 +1143,11 @@ strlong (num)
       if (c == '#')
 	{
 	  if (foundbase)
-	    evalerror ("bad number");
+	    evalerror (_("invalid number"));
 
 	  /* Illegal base specifications raise an evaluation error. */
 	  if (val < 2 || val > 64)
-	    evalerror ("illegal arithmetic base");
+	    evalerror (_("invalid arithmetic base"));
 
 	  base = val;
 	  val = 0;
@@ -1162,7 +1167,7 @@ strlong (num)
 	    c = 63;
 
 	  if (c >= base)
-	    evalerror ("value too great for base");
+	    evalerror (_("value too great for base"));
 
 	  val = (val * base) + c;
 	}

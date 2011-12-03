@@ -288,6 +288,19 @@ int rl_completion_suppress_append = 0;
    default is a space. */
 int rl_completion_append_character = ' ';
 
+/* If non-zero, the completion functions don't append any closing quote.
+   This is set to 0 by rl_complete_internal and may be changed by an
+   application-specific completion function. */
+int rl_completion_suppress_quote = 0;
+
+/* Set to any quote character readline thinks it finds before any application
+   completion function is called. */
+int rl_completion_quote_character;
+
+/* Set to a non-zero value if readline found quoting anywhere in the word to
+   be completed; set before any application completion function is called. */
+int rl_completion_found_quote;
+
 /* If non-zero, a slash will be appended to completed filenames that are
    symbolic links to directory names, subject to the value of the
    mark-directories variable (which is user-settable).  This exists so
@@ -382,7 +395,7 @@ set_completion_defaults (what_to_do)
   rl_filename_completion_desired = 0;
   rl_filename_quoting_desired = 1;
   rl_completion_type = what_to_do;
-  rl_completion_suppress_append = 0;
+  rl_completion_suppress_append = rl_completion_suppress_quote = 0;
 
   /* The completion entry function may optionally change this. */
   rl_completion_mark_symlink_dirs = _rl_complete_mark_symlink_dirs;
@@ -890,6 +903,9 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      int found_quote, quote_char;
 {
   char **matches, *temp;
+
+  rl_completion_found_quote = found_quote;
+  rl_completion_quote_character = quote_char;
 
   /* If the user wants to TRY to complete, but then wants to give
      up and use the default completion function, they set the
@@ -1443,7 +1459,8 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
   struct stat finfo;
 
   temp_string_index = 0;
-  if (quote_char && rl_point && rl_line_buffer[rl_point - 1] != quote_char)
+  if (quote_char && rl_point && rl_completion_suppress_quote == 0 &&
+      rl_line_buffer[rl_point - 1] != quote_char)
     temp_string[temp_string_index++] = quote_char;
 
   if (delimiter)
@@ -1575,7 +1592,6 @@ rl_complete_internal (what_to_do)
   our_func = rl_completion_entry_function
 		? rl_completion_entry_function
 		: rl_filename_completion_function;
-
   /* We now look backwards for the start of a filename/variable word. */
   end = rl_point;
   found_quote = delimiter = 0;

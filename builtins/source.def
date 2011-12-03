@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -55,6 +55,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../flags.h"
@@ -91,7 +92,8 @@ maybe_pop_dollar_vars ()
     dispose_saved_dollar_vars ();
   else
     pop_dollar_vars ();
-  pop_args ();	/* restore BASH_ARGC and BASH_ARGV */
+  if (debugging_mode)
+    pop_args ();	/* restore BASH_ARGC and BASH_ARGV */
   set_dollar_vars_unchanged ();
 }
 
@@ -112,7 +114,7 @@ source_builtin (list)
 
   if (list == 0)
     {
-      builtin_error ("filename argument required");
+      builtin_error (_("filename argument required"));
       builtin_usage ();
       return (EX_USAGE);
     }
@@ -132,7 +134,7 @@ source_builtin (list)
     {
       if (source_searches_cwd == 0)
 	{
-	  builtin_error ("%s: file not found", list->word->word);
+	  builtin_error (_("%s: file not found"), list->word->word);
 	  return (EXECUTION_FAILURE);
 	}
       else
@@ -147,7 +149,8 @@ source_builtin (list)
       push_dollar_vars ();
       add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
       remember_args (list->next, 1);
-      push_args (list->next);	/* Update BASH_ARGV and BASH_ARGC */
+      if (debugging_mode)
+	push_args (list->next);	/* Update BASH_ARGV and BASH_ARGC */
     }
   set_dollar_vars_unchanged ();
 

@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,6 +32,7 @@ $PRODUCES setattr.c
 
 #include <stdio.h>
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -161,7 +162,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	      var = find_function (name);
 	      if (var == 0)
 		{
-		  builtin_error ("%s: not a function", name);
+		  builtin_error (_("%s: not a function"), name);
 		  any_failed++;
 		}
 	      else
@@ -172,7 +173,7 @@ set_or_show_attributes (list, attribute, nodefs)
 	    }
 
 	  /* xxx [-np] name[=value] */
-	  assign = assignment (name);
+	  assign = assignment (name, 0);
 
 	  if (assign)
 	    name[assign] = '\0';

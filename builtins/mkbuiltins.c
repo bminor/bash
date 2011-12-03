@@ -1129,6 +1129,9 @@ write_file_headers (structfile, externfile)
 
       fprintf (structfile, "#include \"%s\"\n",
 	       extern_filename ? extern_filename : "builtext.h");
+
+      fprintf (structfile, "#include \"bashintl.h\"\n");
+
       fprintf (structfile, "\nstruct builtin static_shell_builtins[] = {\n");
     }
 
@@ -1369,8 +1372,9 @@ write_documentation (stream, documentation, indentation, flags)
 	  continue;
 	}
 
+      /* prefix with N_( for gettext */
       if (string_array)
-	fprintf (stream, "  \"");
+	fprintf (stream, "  N_(\"");
 
       if (indentation)
 	for (j = 0; j < indentation; j++)
@@ -1392,7 +1396,8 @@ write_documentation (stream, documentation, indentation, flags)
 		}
 	    }
 
-	  fprintf (stream, "\",\n");
+	  /* closing right paren for gettext */
+	  fprintf (stream, "\"),\n");
 	}
       else if (texinfo)
 	{

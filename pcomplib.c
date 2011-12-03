@@ -32,6 +32,8 @@
 #  include <unistd.h>
 #endif
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include "pcomplete.h"
 
@@ -174,7 +176,7 @@ progcomp_insert (cmd, cs)
   register BUCKET_CONTENTS *item;
 
   if (cs == NULL)
-    programming_error ("progcomp_insert: %s: NULL COMPSPEC", cmd);
+    programming_error (_("progcomp_insert: %s: NULL COMPSPEC"), cmd);
 
   if (prog_completes == 0)
     progcomp_create ();

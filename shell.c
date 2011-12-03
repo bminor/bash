@@ -43,6 +43,8 @@
 #  include <unistd.h>
 #endif
 
+#include "bashintl.h"
+
 #define NEED_SH_SETLINEBUF_DECL		/* used in externs.h */
 
 #include "shell.h"
@@ -198,6 +200,7 @@ int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
 int wordexp_only = 0;		/* Do word expansion only */
+int protected_mode = 0;		/* No command substitution with --wordexp */
 
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
@@ -221,6 +224,7 @@ struct {
   { "noprofile", Int, &no_profile, (char **)0x0 },
   { "norc", Int, &no_rc, (char **)0x0 },
   { "posix", Int, &posixly_correct, (char **)0x0 },
+  { "protected", Int, &protected_mode, (char **)0x0 },
   { "rcfile", Charp, (int *)0x0, &bashrc_file },
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },
@@ -295,11 +299,11 @@ _cygwin32_check_tmp ()
   struct stat sb;
 
   if (stat ("/tmp", &sb) < 0)
-    internal_warning ("could not find /tmp, please create!");
+    internal_warning (_("could not find /tmp, please create!"));
   else
     {
       if (S_ISDIR (sb.st_mode) == 0)
-	internal_warning ("/tmp must be a valid directory name");
+	internal_warning (_("/tmp must be a valid directory name"));
     }
 }
 #endif /* __CYGWIN__ */
@@ -458,7 +462,7 @@ main (argc, argv, env)
       command_execution_string = argv[arg_index];
       if (command_execution_string == 0)
 	{
-	  report_error ("-c: option requires an argument");
+	  report_error (_("%s: option requires an argument"), "-c");
 	  exit (EX_BADUSAGE);
 	}
       arg_index++;
@@ -730,7 +734,7 @@ parse_long_options (argv, arg_start, arg_end)
 		*long_args[i].int_value = 1;
 	      else if (argv[++arg_index] == 0)
 		{
-		  report_error ("%s: option requires an argument", long_args[i].name);
+		  report_error (_("%s: option requires an argument"), long_args[i].name);
 		  exit (EX_BADUSAGE);
 		}
 	      else
@@ -743,7 +747,7 @@ parse_long_options (argv, arg_start, arg_end)
 	{
 	  if (longarg)
 	    {
-	      report_error ("%s: invalid option", argv[arg_index]);
+	      report_error (_("%s: invalid option"), argv[arg_index]);
 	      show_shell_usage (stderr, 0);
 	      exit (EX_BADUSAGE);
 	    }
@@ -832,7 +836,7 @@ parse_shell_options (argv, arg_start, arg_end)
 	    default:
 	      if (change_flag (arg_character, on_or_off) == FLAG_ERROR)
 		{
-		  report_error ("%c%c: invalid option", on_or_off, arg_character);
+		  report_error (_("%c%c: invalid option"), on_or_off, arg_character);
 		  show_shell_usage (stderr, 0);
 		  exit (EX_BADUSAGE);
 		}
@@ -1155,7 +1159,7 @@ run_wordexp (words)
      char *words;
 {
   int code, nw, nb;
-  WORD_LIST *wl, *result;
+  WORD_LIST *wl, *tl, *result;
 
   code = setjmp (top_level);
 
@@ -1190,6 +1194,9 @@ run_wordexp (words)
       if (global_command->type != cm_simple)
 	return (126);
       wl = global_command->value.Simple->words;
+      if (protected_mode)
+	for (tl = wl; tl; tl = tl->next)
+	  tl->word->flags |= W_NOCOMSUB;
       result = wl ? expand_words_no_vars (wl) : (WORD_LIST *)0;
     }
   else
@@ -1385,7 +1392,7 @@ open_shell_script (script_name)
 	{
 	  e = errno;
 	  if ((fstat (fd, &sb) == 0) && S_ISDIR (sb.st_mode))
-	    internal_error ("%s: is a directory", filename);
+	    internal_error (_("%s: is a directory"), filename);
 	  else
 	    {
 	      errno = e;
@@ -1580,7 +1587,8 @@ get_current_user_info ()
 	}
       else
 	{
-	  current_user.user_name = savestring ("I have no name!");
+	  current_user.user_name = _("I have no name!");
+	  current_user.user_name = savestring (current_user.user_name);
 	  current_user.shell = savestring ("/bin/sh");
 	  current_user.home_dir = savestring ("/");
 	}
@@ -1714,14 +1722,14 @@ show_shell_usage (fp, extra)
 
   if (extra)
     fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
-  fprintf (fp, "Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n",
+  fprintf (fp, _("Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n"),
 	     shell_name, shell_name);
-  fputs ("GNU long options:\n", fp);
+  fputs (_("GNU long options:\n"), fp);
   for (i = 0; long_args[i].name; i++)
     fprintf (fp, "\t--%s\n", long_args[i].name);
 
-  fputs ("Shell options:\n", fp);
-  fputs ("\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n", fp);
+  fputs (_("Shell options:\n"), fp);
+  fputs (_("\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"), fp);
 
   for (i = 0, set_opts = 0; shell_builtins[i].name; i++)
     if (STREQ (shell_builtins[i].name, "set"))
@@ -1736,15 +1744,15 @@ show_shell_usage (fp, extra)
       t = xstrchr (s, ']');
       if (t)
 	*t = '\0';
-      fprintf (fp, "\t-%s or -o option\n", s);
+      fprintf (fp, _("\t-%s or -o option\n"), s);
       free (set_opts);
     }
 
   if (extra)
     {
-      fprintf (fp, "Type `%s -c \"help set\"' for more information about shell options.\n", shell_name);
-      fprintf (fp, "Type `%s -c help' for more information about shell builtin commands.\n", shell_name);
-      fprintf (fp, "Use the `bashbug' command to report bugs.\n");
+      fprintf (fp, _("Type `%s -c \"help set\"' for more information about shell options.\n"), shell_name);
+      fprintf (fp, _("Type `%s -c help' for more information about shell builtin commands.\n"), shell_name);
+      fprintf (fp, _("Use the `bashbug' command to report bugs.\n"));
     }
 }
 

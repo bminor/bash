@@ -65,6 +65,8 @@ set_default_locale ()
   if (default_locale)
     default_locale = savestring (default_locale);
 #endif /* HAVE_SETLOCALE */
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES and LC_NUMERIC
@@ -112,7 +114,10 @@ set_default_locale_vars ()
     {
       FREE (default_domain);
       default_domain = savestring (val);
+#if 0
+      /* Don't want to override the shell's textdomain as the default */
       textdomain (default_domain);
+#endif
     }
 
   val = get_string_value ("TEXTDOMAINDIR");
@@ -120,7 +125,8 @@ set_default_locale_vars ()
     {
       FREE (default_dir);
       default_dir = savestring (val);
-      bindtextdomain (default_domain, default_dir);
+      if (default_domain && *default_domain)
+	bindtextdomain (default_domain, default_dir);
     }
 }
 
@@ -136,14 +142,18 @@ set_locale_var (var, value)
     {
       FREE (default_domain);
       default_domain = value ? savestring (value) : (char *)NULL;
+#if 0
+      /* Don't want to override the shell's textdomain as the default */
       textdomain (default_domain);
+#endif
       return (1);
     }
   else if (var[0] == 'T')			/* TEXTDOMAINDIR */
     {
       FREE (default_dir);
       default_dir = value ? savestring (value) : (char *)NULL;
-      bindtextdomain (default_domain, default_dir);
+      if (default_domain && *default_domain)
+	bindtextdomain (default_domain, default_dir);
       return (1);
     }
 
@@ -287,10 +297,8 @@ localetrans (string, len, lenp)
      int len, *lenp;
 {
   char *locale, *t;
-#if defined (HAVE_GETTEXT)
   char *translated;
   int tlen;
-#endif
 
   /* Don't try to translate null strings. */
   if (string == 0 || *string == 0)
@@ -305,10 +313,8 @@ localetrans (string, len, lenp)
   /* If we don't have setlocale() or the current locale is `C' or `POSIX',
      just return the string.  If we don't have gettext(), there's no use
      doing anything else. */
-#if defined (HAVE_GETTEXT)
   if (locale == 0 || locale[0] == '\0' ||
       (locale[0] == 'C' && locale[1] == '\0') || STREQ (locale, "POSIX"))
-#endif
     {
       t = (char *)xmalloc (len + 1);
       strcpy (t, string);
@@ -317,9 +323,12 @@ localetrans (string, len, lenp)
       return (t);
     }
 
-#if defined (HAVE_GETTEXT)
   /* Now try to translate it. */
-  translated = gettext (string);
+  if (default_domain && *default_domain)
+    translated = dgettext (default_domain, string);
+  else
+    translated = string;
+
   if (translated == string)	/* gettext returns its argument if untranslatable */
     {
       t = (char *)xmalloc (len + 1);
@@ -336,7 +345,6 @@ localetrans (string, len, lenp)
 	*lenp = tlen;
     }
   return (t);
-#endif /* HAVE_GETTEXT */
 }
 
 /* Change a bash string into a string suitable for inclusion in a `po' file.
@@ -406,11 +414,12 @@ localeexpand (string, start, end, lineno, lenp)
   temp[tlen] = '\0';
 
   /* If we're just dumping translatable strings, don't do anything with the
-     string itself, but if we're dumping in `po' file format, convert it into a form more palatable to gettext(3)
-     and friends by quoting `"' and `\' with backslashes and converting <NL>
-     into `\n"<NL>"'.  If we find a newline in TEMP, we first output a
-     `msgid ""' line and then the translated string; otherwise we output the
-     `msgid' and translated string all on one line. */
+     string itself, but if we're dumping in `po' file format, convert it into
+     a form more palatable to gettext(3) and friends by quoting `"' and `\'
+     with backslashes and converting <NL> into `\n"<NL>"'.  If we find a
+     newline in TEMP, we first output a `msgid ""' line and then the
+     translated string; otherwise we output the `msgid' and translated
+     string all on one line. */
   if (dump_translatable_strings)
     {
       if (dump_po_strings)

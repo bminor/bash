@@ -298,10 +298,15 @@ ARRAY	*array;
 	return array;
 }
 
+/*
+ * Return a string whose elements are the members of array A beginning at
+ * index START and spanning NELEM members.  Null elements are counted.
+ * Since arrays are sparse, unset array elements are not counted.
+ */
 char *
-array_subrange (a, start, end, starsub, quoted)
+array_subrange (a, start, nelem, starsub, quoted)
 ARRAY	*a;
-arrayind_t	start, end;
+arrayind_t	start, nelem;
 int	starsub, quoted;
 {
 	ARRAY_ELEMENT	*h, *p;
@@ -309,14 +314,24 @@ int	starsub, quoted;
 	char		*ifs, sep[2];
 
 	p = array_head (a);
-	if (p == 0 || array_empty (a) || start > array_num_elements (a))
+	if (p == 0 || array_empty (a) || start > array_max_index(a))
 		return ((char *)NULL);
 
-	for (i = 0, p = element_forw(p); p != a->head && i < start; i++, p = element_forw(p))
+	/*
+	 * Find element with index START.  If START corresponds to an unset
+	 * element (arrays can be sparse), use the first element whose index
+	 * is >= START.  If START is < 0, we count START indices back from
+	 * the end of A (not elements, even with sparse arrays -- START is an
+	 * index).
+	 */
+	for (p = element_forw(p); p != array_head(a) && start > element_index(p); p = element_forw(p))
 		;
+
 	if (p == a->head)
 		return ((char *)NULL);
-	for (h = p; p != a->head && i < end; i++, p = element_forw(p))
+
+	/* Starting at P, take NELEM elements, inclusive. */
+	for (i = 0, h = p; p != a->head && i < nelem; i++, p = element_forw(p))
 		;
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {

@@ -1,4 +1,4 @@
-# Makefile for bash-2.05b, version 2.145
+# Makefile for bash-3.0, version 2.152
 #
 # Copyright (C) 1996-2002 Free Software Foundation, Inc.
 
@@ -19,6 +19,14 @@
 # Make sure the first target in the makefile is the right one
 all: .made
 
+PACKAGE = @PACKAGE_NAME@
+VERSION = @PACKAGE_VERSION@
+
+PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_STRING = @PACKAGE_STRING@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
 # Include some boilerplate Gnu makefile definitions.
 prefix = @prefix@
 
@@ -28,6 +36,7 @@ libdir = @libdir@
 infodir = @infodir@
 includedir = @includedir@
 datadir = @datadir@
+localedir = $(datadir)/locale
 
 mandir = @mandir@
 manpfx = man
@@ -44,6 +53,7 @@ DESTDIR =
 
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
+top_builddir = @BUILD_DIR@
 srcdir = @srcdir@
 VPATH = .:@srcdir@
 
@@ -113,12 +123,14 @@ LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
 
+LOCALE_DEFS = -DLOCALEDIR='"$(localedir)"' -DPACKAGE='"$(PACKAGE)"'
+
 LOCAL_LIBS = @LOCAL_LIBS@
 LIBS = $(BUILTINS_LIB) $(LIBRARIES) @LIBS@
 STATIC_LD = @STATIC_LD@
 LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 
-SYSTEM_FLAGS = -DPROGRAM='"$(Program)"' -DCONF_HOSTTYPE='"$(Machine)"' -DCONF_OSTYPE='"$(OS)"' -DCONF_MACHTYPE='"$(MACHTYPE)"' -DCONF_VENDOR='"$(VENDOR)"'
+SYSTEM_FLAGS = -DPROGRAM='"$(Program)"' -DCONF_HOSTTYPE='"$(Machine)"' -DCONF_OSTYPE='"$(OS)"' -DCONF_MACHTYPE='"$(MACHTYPE)"' -DCONF_VENDOR='"$(VENDOR)"' $(LOCALE_DEFS)
 
 BASE_CCFLAGS = $(PROFILE_FLAGS) $(SYSTEM_FLAGS) $(LOCAL_DEFS) \
 	  $(DEFS) $(LOCAL_CFLAGS) $(INCLUDES)
@@ -130,7 +142,7 @@ CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LDFLAGS = @LDFLAGS@ $(STATIC_LD) $(LOCAL_LDFLAGS) $(PROFILE_FLAGS) $(CFLAGS)
 LDFLAGS_FOR_BUILD = $(LDFLAGS)
 
-INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC)
+INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
 GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 		 -Wcast-align -Wstrict-prototypes -Wconversion \
@@ -148,6 +160,9 @@ LIBSUBDIR = lib
 LIBSRC = $(srcdir)/$(LIBSUBDIR)
 
 SUBDIR_INCLUDES = -I. @RL_INCLUDE@ -I$(topdir) -I$(topdir)/$(LIBSUBDIR)
+
+BUILD_INCLUDED_LIBINTL = @BUILD_INCLUDED_LIBINTL@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 
 # the bash library
 # the library is a mix of functions that the C library does not provide on
@@ -300,6 +315,22 @@ TILDE_DEP = $(TILDE_LIBRARY)
 TILDE_SOURCE	= $(TILDE_LIBSRC)/tilde.c $(TILDE_LIBSRC)/tilde.h
 TILDE_OBJ	= $(TILDE_LIBDIR)/tilde.o
 
+# libintl
+INTL_LIBSRC = $(LIBSRC)/intl
+INTL_LIBDIR = $(dot)/$(LIBSUBDIR)/intl
+INTL_ABSSRC = ${topdir}/$(INTL_LIB)
+
+INTL_LIB     = @LIBINTL@
+INTL_LIBRARY = $(INTL_LIBDIR)/libintl.a
+INTL_DEP = @INTL_DEP@
+INTL_INC = @INTL_INC@
+
+# tests
+LIBINTL = @LIBINTL@
+LTLIBINTL = @LTLIBINTL@
+INTLLIBS = @INTLLIBS@
+INTLOBJS = @INTLOBJS@
+
 # Our malloc.
 MALLOC_TARGET = @MALLOC_TARGET@
 
@@ -341,9 +372,9 @@ BASHINCFILES =	 $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/ansi_stdlib.h \
 		 $(BASHINCDIR)/ocache.h
 
 LIBRARIES = $(SHLIB_LIB) $(READLINE_LIB) $(HISTORY_LIB) $(TERMCAP_LIB) $(GLOB_LIB) \
-	    $(TILDE_LIB) $(MALLOC_LIB) $(LOCAL_LIBS)
+	    $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LOCAL_LIBS)
 
-LIBDEP = $(SHLIB_DEP) $(READLINE_DEP) $(HISTORY_DEP) $(TERMCAP_DEP) $(GLOB_DEP) \
+LIBDEP = $(SHLIB_DEP) $(INTL_DEP) $(READLINE_DEP) $(HISTORY_DEP) $(TERMCAP_DEP) $(GLOB_DEP) \
 	 $(TILDE_DEP) $(MALLOC_DEP)
 
 LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
@@ -443,6 +474,10 @@ BUILTINS_DEP = $(BUILTINS_LIBRARY)
 DOCSRC = $(srcdir)/doc
 DOCDIR = $(dot)/doc
 
+# Translations and other i18n support files
+PO_SRC = $(srcdir)/po/
+PO_DIR = $(dot)/po/
+
 SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
 
 SUPPORT_SRC = $(srcdir)/support/
@@ -455,12 +490,13 @@ CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
 		  buildversion.o
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
-		    stamp-h
+		    stamp-h po/POTFILES
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    lib/readline/Makefile lib/glob/Makefile \
 		    lib/sh/Makefile lib/tilde/Makefile lib/malloc/Makefile \
 		    lib/termcap/Makefile examples/loadables/Makefile \
-		    examples/loadables/perl/Makefile support/Makefile
+		    examples/loadables/perl/Makefile support/Makefile \
+		    lib/intl/Makefile po/Makefile po/Makefile.in
 
 # Keep GNU Make from exporting the entire environment for small machines.
 .NOEXPORT:
@@ -507,7 +543,7 @@ bashversion$(EXEEXT):	patchlevel.h conftypes.h version.h buildversion.o $(SUPPOR
 	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)bashversion.c buildversion.o
 
 buildversion.o: version.h conftypes.h patchlevel.h $(srcdir)/version.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -c -o $@ $(srcdir)/version.c
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -DBUILDTOOL -c -o $@ $(srcdir)/version.c
 
 # old rules
 GRAM_H = parser-built
@@ -558,6 +594,11 @@ $(SHLIB_LIBRARY): config.h ${SHLIB_SOURCE}
 	@echo making $@ in ${SH_LIBDIR}
 	@(cd ${SH_LIBDIR} && \
 		$(MAKE) $(MFLAGS) DEBUG=${DEBUG} ${SHLIB_LIBNAME}) || exit 1
+
+${INTL_LIBRARY}: config.h ${INTL_LIBDIR}/Makefile
+	@echo making $@ in ${INTL_LIBDIR}
+	@(cd ${INTL_LIBDIR} && \
+		$(MAKE) $(MFLAGS) libintl.a) || exit 1
 
 mksignames$(EXEEXT):	$(SUPPORT_SRC)mksignames.c
 	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)mksignames.c
@@ -645,9 +686,10 @@ TAGS:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
 # Targets that actually do things not part of the build
 
 installdirs:
-	@${SHELL} $(SUPPORT_SRC)mkdirs $(DESTDIR)$(bindir)
-	@${SHELL} $(SUPPORT_SRC)mkdirs $(DESTDIR)$(man1dir)
-	@${SHELL} $(SUPPORT_SRC)mkdirs $(DESTDIR)$(infodir)
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(bindir)
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(man1dir)
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(infodir)
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 install:	.made installdirs
 	$(INSTALL_PROGRAM) $(INSTALLMODE) $(Program) $(DESTDIR)$(bindir)/$(Program)
@@ -657,6 +699,7 @@ install:	.made installdirs
 		man3dir=$(man3dir) man3ext=$(man3ext) \
 		infodir=$(infodir) htmldir=$(htmldir) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(DEFDIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 install-strip:
 	$(MAKE) $(MFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
@@ -669,8 +712,12 @@ uninstall:	.made
 		man1dir=$(man1dir) man1ext=$(man1ext) \
 		man3dir=$(man3dir) man3ext=$(man3ext) \
 		infodir=$(infodir) htmldir=$(htmldir) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 .PHONY: basic-clean clean realclean maintainer-clean distclean mostlyclean maybe-clean
+
+LIB_SUBDIRS = ${RL_LIBDIR}  ${HIST_LIBDIR} ${TERM_LIBDIR} ${GLOB_LIBDIR} \
+		${INTL_LIBDIR} ${TILDE_LIBDIR} ${ALLOC_LIBDIR} ${SH_LIBDIR}
 
 basic-clean:
 	$(RM) $(OBJECTS) $(Program) bashbug
@@ -680,38 +727,29 @@ clean:	basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
 	( cd builtins && $(MAKE) $(MFLAGS) $@ )
 	-( cd $(SDIR) && $(MAKE) $(MFLAGS) $@ )
-	-(cd $(RL_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(HIST_LIBDIR) && test -f Makefile && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TERM_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(GLOB_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TILDE_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(ALLOC_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(SH_LIBDIR) && $(MAKE) $(MFLAGS) $@)
+	-for libdir in ${LIB_SUBDIRS}; do \
+		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
+	done
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_SUPPORT)
 
 mostlyclean: basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
 	( cd builtins && $(MAKE) $(MFLAGS) $@ )
 	-( cd $(SDIR) && $(MAKE) $(MFLAGS) $@ )
-	-(cd $(RL_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(HIST_LIBDIR) && test -f Makefile && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TERM_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(GLOB_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TILDE_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(ALLOC_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(SH_LIBDIR) && $(MAKE) $(MFLAGS) $@)
+	-for libdir in ${LIB_SUBDIRS}; do \
+		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
+	done
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 distclean:	basic-clean maybe-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
 	( cd builtins && $(MAKE) $(MFLAGS) $@ )
 	-( cd $(SDIR) && $(MAKE) $(MFLAGS) $@ )
-	-(cd $(RL_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(HIST_LIBDIR) && test -f Makefile && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TERM_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(GLOB_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TILDE_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(ALLOC_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(SH_LIBDIR) && $(MAKE) $(MFLAGS) $@)
+	-for libdir in ${LIB_SUBDIRS}; do \
+		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
+	done
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) tags TAGS 
 	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES)
 
@@ -722,13 +760,10 @@ maintainer-clean:	basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
 	( cd builtins && $(MAKE) $(MFLAGS) $@ )
 	( cd $(SDIR) && $(MAKE) $(MFLAGS) $@ )
-	-(cd $(RL_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(HIST_LIBDIR) && test -f Makefile && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TERM_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(GLOB_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(TILDE_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(ALLOC_LIBDIR) && $(MAKE) $(MFLAGS) $@)
-	-(cd $(SH_LIBDIR) && $(MAKE) $(MFLAGS) $@)
+	-for libdir in ${LIB_SUBDIRS}; do \
+		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
+	done
+	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) $(CREATED_MAKEFILES)
 	$(RM) $(CREATED_SUPPORT) Makefile
 
@@ -758,9 +793,9 @@ symlinks:
 dist:	force
 	@echo Bash distributions are created using $(srcdir)/support/mkdist.
 	@echo Here is a sample of the necessary commands:
-	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${Program} $(Version)-${RELSTATUS}
-	@echo tar cf $(Program)-$(Version)-${RELSTATUS}.tar ${Program}-$(Version)-${RELSTATUS}
-	@echo gzip $(Program)-$(Version)-${RELSTATUS}.tar
+	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${PACKAGE} $(PACKAGE_VERSION)
+	@echo tar cf $(PACKAGE)-${PACKAGE_VERSION}.tar ${PACKAGE}-$(PACKAGE_VERSION)
+	@echo gzip $(PACKAGE)-$(PACKAGE_VERSION).tar
 
 depend:	depends
 
@@ -1069,6 +1104,36 @@ shell.o: $(TILDE_LIBSRC)/tilde.h
 subst.o: $(TILDE_LIBSRC)/tilde.h
 variables.o: $(TILDE_LIBSRC)/tilde.h
 
+# libintl dependencies
+arrayfunc.o: bashintl.h $(BASHINCDIR)/gettext.h
+bashhist.o: bashintl.h $(BASHINCDIR)/gettext.h
+bashline.o: bashintl.h $(BASHINCDIR)/gettext.h
+braces.o: bashintl.h $(BASHINCDIR)/gettext.h
+error.o: bashintl.h $(BASHINCDIR)/gettext.h
+eval.o: bashintl.h $(BASHINCDIR)/gettext.h
+execute_cmd.o: bashintl.h $(BASHINCDIR)/gettext.h
+expr.o: bashintl.h $(BASHINCDIR)/gettext.h
+general.o: bashintl.h $(BASHINCDIR)/gettext.h
+input.o: bashintl.h $(BASHINCDIR)/gettext.h
+jobs.o: bashintl.h $(BASHINCDIR)/gettext.h
+mailcheck.o: bashintl.h $(BASHINCDIR)/gettext.h
+make_cmd.o: bashintl.h $(BASHINCDIR)/gettext.h
+nojobs.o: bashintl.h $(BASHINCDIR)/gettext.h
+parse.y: bashintl.h $(BASHINCDIR)/gettext.h
+pcomplete.o: bashintl.h $(BASHINCDIR)/gettext.h
+pcomplib.o: bashintl.h $(BASHINCDIR)/gettext.h
+print_cmd.o: bashintl.h $(BASHINCDIR)/gettext.h
+redir.o: bashintl.h $(BASHINCDIR)/gettext.h
+shell.o: bashintl.h $(BASHINCDIR)/gettext.h
+sig.o: bashintl.h $(BASHINCDIR)/gettext.h
+siglist.o: bashintl.h $(BASHINCDIR)/gettext.h
+subst.o: bashintl.h $(BASHINCDIR)/gettext.h
+test.o: bashintl.h $(BASHINCDIR)/gettext.h
+trap.o: bashintl.h $(BASHINCDIR)/gettext.h
+variables.o: bashintl.h $(BASHINCDIR)/gettext.h
+version.o: bashintl.h $(BASHINCDIR)/gettext.h
+xmalloc.o: bashintl.h $(BASHINCDIR)/gettext.h
+
 # XXX - dependencies checked through here
 
 # builtin c sources
@@ -1270,6 +1335,43 @@ builtins/complete.o: bashtypes.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 builtins/complete.o: builtins.h 
 builtins/complete.o: pcomplete.h
 builtins/complete.o: ${DEFSRC}/common.h ${DEFSRC}/bashgetopt.h
+
+# libintl dependencies
+builtins/bind.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/break.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/caller.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/cd.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/common.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/complete.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/declare.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/enable.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/evalfile.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/exec.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/exit.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/fc.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/fg_bg.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/getopt.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/hash.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/help.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/history.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/inlib.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/jobs.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/kill.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/let.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/mkbuiltins.c: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/printf.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/pushd.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/read.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/return.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/set.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/setattr.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/shift.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/shopt.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/source.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/suspend.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/type.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/ulimit.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
+builtins/umask.o: ${topdir}/bashintl.h $(BASHINCDIR)/gettext.h
 
 # builtin library dependencies
 builtins/bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h

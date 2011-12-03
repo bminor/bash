@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -64,6 +64,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../bashhist.h"
@@ -144,7 +145,7 @@ history_builtin (list)
   opt = flags & (AFLAG|RFLAG|WFLAG|NFLAG);
   if (opt && opt != AFLAG && opt != RFLAG && opt != WFLAG && opt != NFLAG)
     {
-      builtin_error ("cannot use more than one of -anrw");
+      builtin_error (_("cannot use more than one of -anrw"));
       return (EXECUTION_FAILURE);
     }
 
@@ -176,7 +177,7 @@ history_builtin (list)
 	  || (delete_offset < history_base)
 	  || (delete_offset > (history_base + history_length)))
 	{
-	  sh_erange (delete_arg, "history position");
+	  sh_erange (delete_arg, _("history position"));
 	  return (EXECUTION_FAILURE);
 	}
       opt = delete_offset;
@@ -386,7 +387,7 @@ expand_and_print_history (list)
       r = history_expand (list->word->word, &s);
       if (r < 0)
 	{
-	  builtin_error ("%s: history expansion failed", list->word->word);
+	  builtin_error (_("%s: history expansion failed"), list->word->word);
 	  result = EXECUTION_FAILURE;
 	}
       else

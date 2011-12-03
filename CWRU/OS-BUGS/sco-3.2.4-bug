@@ -1,0 +1,57 @@
+From gnulists@ai.mit.edu Mon Feb 22 20:41:24 1993
+Flags: 50
+Received: from po.CWRU.Edu by odin.INS.CWRU.Edu with SMTP (5.65b+ida+/CWRU-1.5.4-ins)
+	id AA17713; Mon, 22 Feb 93 20:41:24 -0500 (from gnulists@ai.mit.edu for /usr/homes/chet/bin/mailfilter.sh /usr/homes/chet/mbox)
+Return-Path: <gnulists@ai.mit.edu>
+Received: from life.ai.mit.edu by po.CWRU.Edu with SMTP (5.65b+ida+/CWRU-1.9)
+	id AA29616; Mon, 22 Feb 93 20:41:17 -0500 (from gnulists@ai.mit.edu for chet@odin.INS.CWRU.Edu)
+Received: from raisin-nut (raisin-nut.ai.mit.edu) by life.ai.mit.edu (4.1/AI-4.10) id AA01858; Mon, 22 Feb 93 20:40:47 EST
+Received: by raisin-nut (4.1/AI-4.10) id AA06708; Mon, 22 Feb 93 20:40:46 EST
+Resent-Date: Mon, 22 Feb 1993 13:29:57 -0500
+Resent-Message-Id: <9302230140.AA06708@raisin-nut>
+Received: from odin.INS.CWRU.Edu by life.ai.mit.edu (4.1/AI-4.10) id AA19283; Mon, 22 Feb 93 13:36:48 EST
+Received:  by odin.INS.CWRU.Edu (5.65b+ida+/CWRU-1.5.4-ins)
+	id AA27765; Mon, 22 Feb 93 13:36:44 -0500 (from chet for bug-bash@prep.ai.mit.edu)
+Date: Mon, 22 Feb 1993 13:29:57 -0500
+From: Chet Ramey <chet@odin.ins.cwru.edu>
+Sender: gnulists@ai.mit.edu
+To: pat@bcserv.wustl.edu
+Subject: Re: bash for SCO Unix 3.2.2/4
+Cc: bug-bash@prep.ai.mit.edu, chet@odin.ins.cwru.edu
+Reply-To: chet@po.cwru.edu
+In-Reply-To: Message from pat@bcserv.wustl.edu of 22 Feb 93 06:23:34 GMT (id <pat.730362214@bcserv>)
+Message-Id: <9302221829.AA27553.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Resent-From: bug-bash-request@prep.ai.mit.edu
+
+> I've had no luck making either bash-1.11 or bash-1.12 for 
+> SCO Unix v 3.2.2 or 3.2.4...
+> 
+> bash-1.12 says (specifically) that it's making for 3.2.2, but
+> still has problems.
+> 
+> It locks up after a few commnds...
+> 
+> I don't have GCC right now, so I did have to tell it that I don't
+> have 'alloca' by undefining it in machines.h - if that could be a problem.
+
+You can't run bash-1.12 on a 3.2.4 system if it's been compiled on a
+3.2.2 system.  Bash contains a fix for the broken sigsuspend in 3.2.2
+that breaks bash on 3.2.4, because 3.2.4 has the bug fixed.
+
+Bash 1.12 should build and run OK out of the box on 3.2.2.  For 3.2.4
+you need to locate the code at around line 1250 of jobs.c and change
+#if !defined (SCO) to #if 1 so that sigsuspend is used.  Then take out
+the SCO defines in flush_child().
+
+Chet
+
+--
+``The use of history as therapy means the corruption of history as history.''
+	-- Arthur Schlesinger
+
+Chet Ramey, Case Western Reserve University	Internet: chet@po.CWRU.Edu
+
+

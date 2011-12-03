@@ -38,6 +38,8 @@
 
 #include "error.h"
 
+#include "bashintl.h"
+
 #if !defined (PTR_T)
 #  if defined (__STDC__)
 #    define PTR_T void *
@@ -88,9 +90,9 @@ xmalloc (bytes)
     {
 #if defined (HAVE_SBRK)
       allocated = findbrk ();
-      fatal_error ("xmalloc: cannot allocate %lu bytes (%lu bytes allocated)", (unsigned long)bytes, (unsigned long)allocated);
+      fatal_error (_("xmalloc: cannot allocate %lu bytes (%lu bytes allocated)"), (unsigned long)bytes, (unsigned long)allocated);
 #else
-      fatal_error ("xmalloc: cannot allocate %lu bytes", (unsigned long)bytes);
+      fatal_error (_("xmalloc: cannot allocate %lu bytes"), (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
 
@@ -110,9 +112,9 @@ xrealloc (pointer, bytes)
     {
 #if defined (HAVE_SBRK)
       allocated = findbrk ();
-      fatal_error ("xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)", (unsigned long)bytes, (unsigned long)allocated);
+      fatal_error (_("xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"), (unsigned long)bytes, (unsigned long)allocated);
 #else
-      fatal_error ("xrealloc: cannot allocate %lu bytes", (unsigned long)bytes);
+      fatal_error (_("xrealloc: cannot allocate %lu bytes"), (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
 
@@ -146,9 +148,9 @@ sh_xmalloc (bytes, file, line)
     {
 #if defined (HAVE_SBRK)
       allocated = findbrk ();
-      fatal_error ("xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)", file, line, (unsigned long)bytes, (unsigned long)allocated);
+      fatal_error (_("xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"), file, line, (unsigned long)bytes, (unsigned long)allocated);
 #else
-      fatal_error ("xmalloc: %s:%d: cannot allocate %lu bytes", file, line, (unsigned long)bytes);
+      fatal_error (_("xmalloc: %s:%d: cannot allocate %lu bytes"), file, line, (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
 
@@ -170,9 +172,9 @@ sh_xrealloc (pointer, bytes, file, line)
     {
 #if defined (HAVE_SBRK)
       allocated = findbrk ();
-      fatal_error ("xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)", file, line, (unsigned long)bytes, (unsigned long)allocated);
+      fatal_error (_("xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"), file, line, (unsigned long)bytes, (unsigned long)allocated);
 #else
-      fatal_error ("xrealloc: %s:%d: cannot allocate %lu bytes", file, line, (unsigned long)bytes);
+      fatal_error (_("xrealloc: %s:%d: cannot allocate %lu bytes"), file, line, (unsigned long)bytes);
 #endif /* !HAVE_SBRK */
     }
 

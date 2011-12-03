@@ -172,6 +172,89 @@ extern char *xstrchr __P((const char *, int));
 #  define ADVANCE_CHAR_P(_str, _strsize)
 #endif  /* !HANDLE_MULTIBYTE */
 
+/* Back up one (possibly multi-byte) character in string _STR of length
+   _STRSIZE, starting at index _I.  STATE must have already been declared. */
+#if defined (HANDLE_MULTIBYTE)
+#  define BACKUP_CHAR(_str, _strsize, _i) \
+    do \
+      { \
+	if (MB_CUR_MAX > 1) \
+	  { \
+	    mbstate_t state_bak; \
+	    size_t mblength; \
+	    int _x, _p; /* _x == temp index into string, _p == prev index */ \
+\
+	    _x = _p = 0; \
+	    while (_x < (_i)) \
+	      { \
+	        state_bak = state; \
+	        mblength = mbrlen ((_str) + (_x), (_strsize) - (_x), &state); \
+\
+		if (mblength == (size_t)-2 || mblength == (size_t)-1) \
+		  { \
+		    state = state_bak; \
+		    _x++; \
+		  } \
+		else if (mblength == 0) \
+		  _x++; \
+		else \
+		  { \
+		    _p = _x; /* _p == start of prev mbchar */ \
+		    _x += mblength; \
+		  } \
+	      } \
+	    (_i) = _p; \
+	  } \
+	else \
+	  (_i)--; \
+      } \
+    while (0)
+#else
+#  define BACKUP_CHAR(_str, _strsize, _i)	(_i)--
+#endif  /* !HANDLE_MULTIBYTE */
+
+/* Back up one (possibly multibyte) character in the string _BASE of length
+   _STRSIZE starting at _STR (_BASE <= _STR <= (_BASE + _STRSIZE) ).
+   SPECIAL: DO NOT assume that _STR will be decremented by 1 after this call. */
+#if defined (HANDLE_MULTIBYTE)
+#  define BACKUP_CHAR_P(_base, _strsize, _str) \
+    do \
+      { \
+	if (MB_CUR_MAX > 1) \
+	  { \
+	    mbstate_t state_bak; \
+	    size_t mblength; \
+	    char *_x, _p; /* _x == temp pointer into string, _p == prev pointer */ \
+\
+	    _x = _p = _base; \
+	    while (_x < (_str)) \
+	      { \
+	        state_bak = state; \
+	        mblength = mbrlen (_x, (_strsize) - _x, &state); \
+\
+		if (mblength == (size_t)-2 || mblength == (size_t)-1) \
+		  { \
+		    state = state_bak; \
+		    _x++; \
+		  } \
+		else if (mblength == 0) \
+		  _x++; \
+		else \
+		  { \
+		    _p = _x; /* _p == start of prev mbchar */ \
+		    _x += mblength; \
+		  } \
+	      } \
+	    (_str) = _p; \
+	  } \
+	else \
+	  (_str)--; \
+      } \
+    while (0)
+#else
+#  define BACKUP_CHAR_P(_base, _strsize, _str) (_str)--
+#endif  /* !HANDLE_MULTIBYTE */
+
 /* Copy a single character from the string _SRC to the string _DST.
    _SRCEND is a pointer to the end of _SRC. */
 #if defined (HANDLE_MULTIBYTE)

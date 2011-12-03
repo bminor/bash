@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2002 Free Software Foundation, Inc.
+Copyright (C) 1997-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -55,6 +55,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "stdc.h"
@@ -105,7 +106,7 @@ extern int errno;
 
 static void printf_erange __P((char *));
 static void printstr __P((char *, char *, int, int, int));
-static int tescape __P((char *, int, char *, int *));
+static int tescape __P((char *, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *mklong __P((char *, char *, size_t));
 static int getchr __P((void));
@@ -182,13 +183,12 @@ printf_builtin (list)
 	  precision = fieldwidth = 0;
 	  have_fieldwidth = have_precision = 0;
 
-
 	  if (*fmt == '\\')
 	    {
 	      fmt++;
-	      /* A NULL fourth argument to tescape means to not do special
-		 processing for \c. */
-	      fmt += tescape (fmt, 1, &nextch, (int *)NULL);
+	      /* A NULL third argument to tescape means to bypass the
+		 special processing for arguments to %b. */
+	      fmt += tescape (fmt, &nextch, (int *)NULL);
 	      putchar (nextch);
 	      fmt--;	/* for loop will increment it for us again */
 	      continue;
@@ -246,7 +246,7 @@ printf_builtin (list)
 	    
 	  if (*fmt == 0)
 	    {
-	      builtin_error ("`%s': missing format character", start);
+	      builtin_error (_("`%s': missing format character"), start);
 	      PRETURN (EXECUTION_FAILURE);
 	    }
 
@@ -405,7 +405,7 @@ printf_builtin (list)
 	    /* We don't output unrecognized format characters; we print an
 	       error message and return a failure exit status. */
 	    default:
-	      builtin_error ("`%c': invalid format character", convch);
+	      builtin_error (_("`%c': invalid format character"), convch);
 	      PRETURN (EXECUTION_FAILURE);
 	    }
 
@@ -531,6 +531,7 @@ printstr (fmt, string, len, fieldwidth, precision)
   
 /* Convert STRING by expanding the escape sequences specified by the
    POSIX standard for printf's `%b' format string.  If SAWC is non-null,
+   perform the processing appropriate for %b arguments.  In particular,
    recognize `\c' and use that as a string terminator.  If we see \c, set
    *SAWC to 1 before returning.  LEN is the length of STRING. */
 
@@ -540,11 +541,10 @@ printstr (fmt, string, len, fieldwidth, precision)
    value.  *SAWC is set to 1 if the escape sequence was \c, since that means
    to short-circuit the rest of the processing.  If SAWC is null, we don't
    do the \c short-circuiting, and \c is treated as an unrecognized escape
-   sequence.  */
+   sequence; we also bypass the other processing specific to %b arguments.  */
 static int
-tescape (estart, trans_squote, cp, sawc)
+tescape (estart, cp, sawc)
      char *estart;
-     int trans_squote;
      char *cp;
      int *sawc;
 {
@@ -576,14 +576,13 @@ tescape (estart, trans_squote, cp, sawc)
 
       case 'v': *cp = '\v'; break;
 
-      /* %b octal constants are `\0' followed by one, two, or three
-	 octal digits... */
-      case '0':
-      /* but, as an extension, the other echo-like octal escape
-	 sequences are supported as well. */
-      case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7':
-	for (temp = 2+(c=='0'), evalue = c - '0'; ISOCTAL (*p) && temp--; p++)
+      /* The octal escape sequences are `\0' followed by up to three octal
+	 digits (if SAWC), or `\' followed by up to three octal digits (if
+	 !SAWC).  As an extension, we allow the latter form even if SAWC. */
+      case '0': case '1': case '2': case '3':
+      case '4': case '5': case '6': case '7':
+	evalue = OCTVALUE (c);
+	for (temp = 2 + (!evalue && !!sawc); ISOCTAL (*p) && temp--; p++)
 	  evalue = (evalue * 8) + OCTVALUE (*p);
 	*cp = evalue & 0xFF;
 	break;
@@ -591,11 +590,15 @@ tescape (estart, trans_squote, cp, sawc)
       /* And, as another extension, we allow \xNNN, where each N is a
 	 hex digit. */
       case 'x':
+#if 0
+	for (evalue = 0; ISXDIGIT ((unsigned char)*p); p++)
+#else
 	for (temp = 2, evalue = 0; ISXDIGIT ((unsigned char)*p) && temp--; p++)
+#endif
 	  evalue = (evalue * 16) + HEXVALUE (*p);
-	if (temp == 2)
+	if (p == estart + 1)
 	  {
-	    builtin_error ("missing hex digit for \\x");
+	    builtin_error (_("missing hex digit for \\x"));
 	    *cp = '\\';
 	    return 0;
 	  }
@@ -606,8 +609,11 @@ tescape (estart, trans_squote, cp, sawc)
 	*cp = c;
 	break;
 
-      case '\'':	/* TRANS_SQUOTE != 0 means \' -> ' */
-	if (trans_squote)
+      /* SAWC == 0 means that \', \", and \? are recognized as escape
+	 sequences, though the only processing performed is backslash
+	 removal. */
+      case '\'': case '"': case '?':
+	if (!sawc)
 	  *cp = c;
 	else
 	  {
@@ -657,7 +663,7 @@ bexpand (string, len, sawc, lenp)
 	  continue;
 	}
       temp = 0;
-      s += tescape (s, 0, &c, &temp);
+      s += tescape (s, &c, &temp);
       if (temp)
 	{
 	  if (sawc)

@@ -1,0 +1,115 @@
+This file details the changes between the previous release of CWRU bash
+(3/10/93) and this release.
+
+1. Bugs Fixed
+
+New version of endian.c that handles 64-bit machines better
+
+added code to make readline reset itself when $TERMINFO changes
+
+fixed memory leaks in:
+	builtins/exec.def
+	lib/readline/history.c
+	lib/readline/readline.c
+	parse.y
+	subst.c
+	variables.c
+	dispose_cmd.c
+	mailcheck.c
+	bashline.c
+	execute_cmd.c
+	shell.c
+
+make sure that bash_symbolic_link_hook calls get_working_directory with a
+non-empty string argument
+
+check the return value of getdtablesize() for bad values
+
+make the job control tty handlers print error message only if the shell is
+currently interactive
+
+process substitution no longer tries to close every file descriptor
+
+fixed up the source to contain more extern function declarations rather than
+casting the return values
+
+fixed up handling of embedded quoted strings by the parser so that $ is not
+a special character while parsing one
+
+added escape handling to the read builtin so backslashes can escape $IFS
+characters
+
+fixed the brace expansion code so that backslash can act as a delimiter and
+can escape `"' in a double-quoted string
+
+the `<>' redirection needs to open the file O_RDWR|O_CREAT for Posix.2
+compatibility
+
+fixed up the here document reading code so that it will remove backslash-
+quoted newlines if the document delimiter is not quoted
+
+fixed up the unwind_protect_var code so that the same strategy is used
+for both saving and restoring variables
+
+completion functions may now tell readline not to attempt filename completion
+by returning (char **) -1
+
+improved the error message printed by get_working_directory
+
+Compile for solaris if either USGr4 or __svr4__ is defined
+
+bash does not perform a getwd() on startup unless the inherited value of
+$PWD is wrong or $PWD was not in the environment
+
+fixed up the trap saving and restoring code so that savetrap=$(trap) works
+like Posix.2 says it should
+
+non-interactive shells are now much better about cleaning up dead processes
+and jobs on both job control and non job control systems
+
+fixed the code that saves and restores the dollar variables around a `.'
+script so that if the script changes the positional parameters, the old
+values are not restored
+
+fixed the tokenizer so that it will not return ASSIGNMENT_WORD while
+parsing a case statement pattern list
+
+redid the implementation of cprintf for systems without varargs
+
+fixed up the variable expansion code so that illegal variable names in ${ }
+expansion now generate errors rather than produce incorrect results
+
+fixed up some problems with default_buffered_input and the implicit redirection
+of fd 0 to /dev/null for asynchronous commands without job control
+
+new function internal_error for shell internal error messages
+
+changed the sigint signal handler in nojobs.c to do nothing when it's called,
+not even run a signal handler
+
+made the command substitution code more careful about file descriptors when
+errors occur
+
+2. New Features
+
+SIGWINCH causes bash to reset the values of $LINES and $COLUMNS for both
+readline and non-readline systems
+
+changed the code in readline that handled conditional parsing of `$if term='
+to test the terminal name given to $if against both the `long' and `short'
+(portion up to the first `-') forms of the terminal name
+
+the completion code now single-quotes a match that contains a shell word
+break character
+
+the readline code does not define USE_XON_XOFF.  This causes output to be
+swallowed when using bash over a relatively slow line (like a modem line). 
+
+there is now a bindable readline function to do only history expansion;
+bound to M-^ (M-! was already taken)
+
+ulimit now has a -u option to set and get the limit for the maximum number
+of user processes
+
+config.h.mini is a `minimal' configuration file that compiles out just about
+everything

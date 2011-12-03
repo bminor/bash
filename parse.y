@@ -40,6 +40,8 @@
 
 #include "memalloc.h"
 
+#include "bashintl.h"
+
 #define NEED_STRFTIME_DECL	/* used in externs.h */
 
 #include "shell.h"
@@ -284,6 +286,13 @@ static int arith_for_lineno;
 static int word_lineno[MAX_CASE_NEST];
 static int word_top = -1;
 
+/* If non-zero, it is the token that we want read_token to return
+   regardless of what text is (or isn't) present to be read.  This
+   is reset by read_token.  If token_to_read == WORD or
+   ASSIGNMENT_WORD, yylval.word should be set to word_desc_to_read. */
+static int token_to_read;
+static WORD_DESC *word_desc_to_read;
+
 static REDIRECTEE redir;
 %}
 
@@ -329,6 +338,7 @@ static REDIRECTEE redir;
 %type <word_list> word_list pattern
 %type <pattern> pattern_list case_clause_sequence case_clause
 %type <number> timespec
+%type <number> list_terminator
 
 %start inputunit
 
@@ -889,8 +899,11 @@ simple_list_terminator:	'\n'
 	;
 
 list_terminator:'\n'
+		{ $$ = '\n'; }
 	|	';'
+		{ $$ = ';'; }
 	|	yacc_EOF
+		{ $$ = yacc_EOF; }
 	;
 
 newline_list:
@@ -966,6 +979,24 @@ pipeline_command: pipeline
 			  $3->flags |= $2|CMD_INVERT_RETURN;
 			  $$ = $3;
 			}
+	|	timespec list_terminator
+			{
+			  ELEMENT x;
+
+			  /* Boy, this is unclean.  `time' by itself can
+			     time a null command.  We cheat and push a
+			     newline back if the list_terminator was a newline
+			     to avoid the double-newline problem (one to
+			     terminate this, one to terminate the command) */
+			  x.word = 0;
+			  x.redirect = 0;
+			  $$ = make_simple_command (x, (COMMAND *)NULL);
+			  $$->flags |= $1;
+			  /* XXX - let's cheat and push a newline back */
+			  if ($2 == '\n')
+			    token_to_read = '\n';
+			}
+			
 	;
 
 pipeline:
@@ -996,6 +1027,7 @@ timespec:	TIME
 #define PST_ARITHFOR	0x0400		/* parsing an arithmetic for command */
 #define PST_ALEXPAND	0x0800		/* OK to expand aliases - unused */
 #define PST_CMDTOKEN	0x1000		/* command token OK - unused */
+#define PST_COMPASSIGN	0x2000		/* parsing x=(...) compound assignment */
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
@@ -1024,13 +1056,6 @@ static int token_before_that;
 
 /* The token read prior to token_before_that. */
 static int two_tokens_ago;
-
-/* If non-zero, it is the token that we want read_token to return
-   regardless of what text is (or isn't) present to be read.  This
-   is reset by read_token.  If token_to_read == WORD or
-   ASSIGNMENT_WORD, yylval.word should be set to word_desc_to_read. */
-static int token_to_read;
-static WORD_DESC *word_desc_to_read;
 
 /* The current parser state. */
 static int parser_state;
@@ -2698,7 +2723,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if (ch == EOF)
 	{
 	  free (ret);
-	  parser_error (start_lineno, "unexpected EOF while looking for matching `%c'", close);
+	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
 	  EOF_Reached = 1;	/* XXX */
 	  return (&matched_pair_error);
 	}
@@ -2983,16 +3008,16 @@ cond_error ()
   char *etext;
 
   if (EOF_Reached && cond_token != COND_ERROR)		/* [[ */
-    parser_error (cond_lineno, "unexpected EOF while looking for `]]'");
+    parser_error (cond_lineno, _("unexpected EOF while looking for `]]'"));
   else if (cond_token != COND_ERROR)
     {
       if (etext = error_token_from_token (cond_token))
 	{
-	  parser_error (cond_lineno, "syntax error in conditional expression: unexpected token `%s'", etext);
+	  parser_error (cond_lineno, _("syntax error in conditional expression: unexpected token `%s'"), etext);
 	  free (etext);
 	}
       else
-	parser_error (cond_lineno, "syntax error in conditional expression");
+	parser_error (cond_lineno, _("syntax error in conditional expression"));
     }
 }
 
@@ -3070,11 +3095,11 @@ cond_term ()
 	    dispose_cond_node (term);		/* ( */
 	  if (etext = error_token_from_token (cond_token))
 	    {
-	      parser_error (lineno, "unexpected token `%s', expected `)'", etext);
+	      parser_error (lineno, _("unexpected token `%s', expected `)'"), etext);
 	      free (etext);
 	    }
 	  else
-	    parser_error (lineno, "expected `)'");
+	    parser_error (lineno, _("expected `)'"));
 	  COND_RETURN_ERROR ();
 	}
       term = make_cond_node (COND_EXPR, (WORD_DESC *)NULL, term, (COND_COM *)NULL);
@@ -3102,11 +3127,11 @@ cond_term ()
 	  dispose_word (op);
 	  if (etext = error_token_from_token (tok))
 	    {
-	      parser_error (line_number, "unexpected argument `%s' to conditional unary operator", etext);
+	      parser_error (line_number, _("unexpected argument `%s' to conditional unary operator"), etext);
 	      free (etext);
 	    }
 	  else
-	    parser_error (line_number, "unexpected argument to conditional unary operator");
+	    parser_error (line_number, _("unexpected argument to conditional unary operator"));
 	  COND_RETURN_ERROR ();
 	}
 
@@ -3143,11 +3168,11 @@ cond_term ()
 	{
 	  if (etext = error_token_from_token (tok))
 	    {
-	      parser_error (line_number, "unexpected token `%s', conditional binary operator expected", etext);
+	      parser_error (line_number, _("unexpected token `%s', conditional binary operator expected"), etext);
 	      free (etext);
 	    }
 	  else
-	    parser_error (line_number, "conditional binary operator expected");
+	    parser_error (line_number, _("conditional binary operator expected"));
 	  dispose_cond_node (tleft);
 	  COND_RETURN_ERROR ();
 	}
@@ -3163,11 +3188,11 @@ cond_term ()
 	{
 	  if (etext = error_token_from_token (tok))
 	    {
-	      parser_error (line_number, "unexpected argument `%s' to conditional binary operator", etext);
+	      parser_error (line_number, _("unexpected argument `%s' to conditional binary operator"), etext);
 	      free (etext);
 	    }
 	  else
-	    parser_error (line_number, "unexpected argument to conditional binary operator");
+	    parser_error (line_number, _("unexpected argument to conditional binary operator"));
 	  dispose_cond_node (tleft);
 	  dispose_word (op);
 	  COND_RETURN_ERROR ();
@@ -3178,14 +3203,14 @@ cond_term ()
   else
     {
       if (tok < 256)
-	parser_error (line_number, "unexpected token `%c' in conditional command", tok);
+	parser_error (line_number, _("unexpected token `%c' in conditional command"), tok);
       else if (etext = error_token_from_token (tok))
 	{
-	  parser_error (line_number, "unexpected token `%s' in conditional command", etext);
+	  parser_error (line_number, _("unexpected token `%s' in conditional command"), etext);
 	  free (etext);
 	}
       else
-	parser_error (line_number, "unexpected token %d in conditional command", tok);
+	parser_error (line_number, _("unexpected token %d in conditional command"), tok);
       COND_RETURN_ERROR ();
     }
   return (term);
@@ -3216,7 +3241,7 @@ token_is_assignment (t, i)
 
   c = t[i]; c1 = t[i+1];
   t[i] = '='; t[i+1] = '\0';
-  r = assignment (t);
+  r = assignment (t, (parser_state & PST_COMPASSIGN) != 0);
   t[i] = c; t[i+1] = c1;
   return r;
 }
@@ -3609,11 +3634,11 @@ got_token:
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
      context-dependent, so it cannot be handled in the grammar. */
-  if (assignment (token))
+  if (assignment (token, (parser_state & PST_COMPASSIGN) != 0))
     {
       the_word->flags |= W_ASSIGNMENT;
       /* Don't perform word splitting on assignment statements. */
-      if (assignment_acceptable (last_read_token))
+      if (assignment_acceptable (last_read_token) || (parser_state & PST_COMPASSIGN) != 0)
 	the_word->flags |= W_NOSPLIT;
     }
 
@@ -4372,7 +4397,7 @@ report_syntax_error (message)
      parser's complaining about by looking at current_token. */
   if (current_token != 0 && EOF_Reached == 0 && (msg = error_token_from_token (current_token)))
     {
-      parser_error (line_number, "syntax error near unexpected token `%s'", msg);
+      parser_error (line_number, _("syntax error near unexpected token `%s'"), msg);
       free (msg);
 
       if (interactive == 0)
@@ -4390,7 +4415,7 @@ report_syntax_error (message)
       msg = error_token_from_text ();
       if (msg)
 	{
-	  parser_error (line_number, "syntax error near `%s'", msg);
+	  parser_error (line_number, _("syntax error near `%s'"), msg);
 	  free (msg);
 	}
 
@@ -4400,7 +4425,7 @@ report_syntax_error (message)
     }
   else
     {
-      msg = EOF_Reached ? "syntax error: unexpected end of file" : "syntax error";
+      msg = EOF_Reached ? _("syntax error: unexpected end of file") : _("syntax error");
       parser_error (line_number, "%s", msg);
       /* When the shell is interactive, this file uses EOF_Reached
 	 only for error reporting.  Other mechanisms are used to
@@ -4462,7 +4487,7 @@ handle_eof_input_unit ()
 	{
 	  if (eof_encountered < eof_encountered_limit)
 	    {
-	      fprintf (stderr, "Use \"%s\" to leave the shell.\n",
+	      fprintf (stderr, _("Use \"%s\" to leave the shell.\n"),
 		       login_shell ? "logout" : "exit");
 	      eof_encountered++;
 	      /* Reset the parsing state. */
@@ -4499,8 +4524,9 @@ static WORD_LIST parse_string_error;
 /* Take a string and run it through the shell parser, returning the
    resultant word list.  Used by compound array assignment. */
 WORD_LIST *
-parse_string_to_word_list (s, whom)
+parse_string_to_word_list (s, flags, whom)
      char *s;
+     int flags;
      const char *whom;
 {
   WORD_LIST *wl;
@@ -4532,6 +4558,10 @@ parse_string_to_word_list (s, whom)
 
   with_input_from_string (s, whom);
   wl = (WORD_LIST *)NULL;
+
+  if (flags & 1)
+    parser_state |= PST_COMPASSIGN;
+
   while ((tok = read_token (READ)) != yacc_EOF)
     {
       if (tok == '\n' && *bash_input.location.string == '\0')
@@ -4569,6 +4599,9 @@ parse_string_to_word_list (s, whom)
   current_command_line_count = orig_line_count;
   shell_input_line_terminator = orig_input_terminator;
 
+  if (flags & 1)
+    parser_state &= ~PST_COMPASSIGN;
+
   if (wl == &parse_string_error)
     {
       last_command_exit_value = EXECUTION_FAILURE;
@@ -4599,15 +4632,21 @@ parse_compound_assignment (retlenp)
   token_buffer_size = 0;
 
   wl = (WORD_LIST *)NULL;	/* ( */
+  parser_state |= PST_COMPASSIGN;
+
   while ((tok = read_token (READ)) != ')')
     {
       if (tok == '\n')			/* Allow newlines in compound assignments */
-	continue;
+	{
+	  if (SHOULD_PROMPT ())
+	    prompt_again ();
+	  continue;
+	}
       if (tok != WORD && tok != ASSIGNMENT_WORD)
 	{
 	  current_token = tok;	/* for error reporting */
 	  if (tok == yacc_EOF)	/* ( */
-	    parser_error (orig_line_number, "unexpected EOF while looking for matching `)'");
+	    parser_error (orig_line_number, _("unexpected EOF while looking for matching `)'"));
 	  else
 	    yyerror ((char *)NULL);	/* does the right thing */
 	  if (wl)
@@ -4621,6 +4660,8 @@ parse_compound_assignment (retlenp)
   FREE (token);
   token = saved_token;
   token_buffer_size = orig_token_size;
+
+  parser_state &= ~PST_COMPASSIGN;
 
   if (wl == &parse_string_error)
     {

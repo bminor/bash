@@ -1,7 +1,7 @@
 This file is suspend.def, from which is created suspend.c.
 It implements the builtin "suspend" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,6 +42,7 @@ $END
 
 #include "../bashtypes.h"
 #include <signal.h>
+#include "../bashintl.h"
 #include "../shell.h"
 #include "../jobs.h"
 #include "common.h"
@@ -89,7 +90,7 @@ suspend_builtin (list)
 
   if (job_control == 0)
     {
-      sh_nojobs ("cannot suspend");
+      sh_nojobs (_("cannot suspend"));
       return (EXECUTION_FAILURE);
     }
 
@@ -99,7 +100,7 @@ suspend_builtin (list)
 
       if (login_shell)
 	{
-	  builtin_error ("cannot suspend a login shell");
+	  builtin_error (_("cannot suspend a login shell"));
 	  return (EXECUTION_FAILURE);
 	}
     }

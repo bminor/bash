@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,6 +47,8 @@ $END
 #include <errno.h>
 
 #include <filecntl.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../builtins.h"
@@ -102,7 +104,10 @@ help_builtin (list)
 
   if (glob_pattern_p (list->word->word))
     {
-      printf ("Shell commands matching keyword%s `", list->next ? "s" : "");
+      if (list->next)
+	printf (_("Shell commands matching keywords `"));
+      else
+	printf (_("Shell commands matching keyword `"));
       print_word_list (list, ", ");
       printf ("'\n\n");
     }
@@ -130,7 +135,7 @@ help_builtin (list)
 
   if (match_found == 0)
     {
-      builtin_error ("no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'.", pattern, pattern, pattern);
+      builtin_error (_("no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."), pattern, pattern, pattern);
       return (EXECUTION_FAILURE);
     }
 
@@ -156,7 +161,7 @@ show_longdoc (i)
       fd = open (doc[0], O_RDONLY);
       if (fd == -1)
 	{
-	  builtin_error ("%s: cannot open: %s", doc[0], strerror (errno));
+	  builtin_error (_("%s: cannot open: %s"), doc[0], strerror (errno));
 	  return;
 	}
       zcatfd (fd, 1, doc[0]);
@@ -164,7 +169,7 @@ show_longdoc (i)
     }
   else
     for (j = 0; doc[j]; j++)
-      printf ("    %s\n", doc[j]);
+      printf ("    %s\n", _(doc[j]));
 }
 
 static void
@@ -174,13 +179,13 @@ show_builtin_command_help ()
   char blurb[36];
 
   printf (
-"These shell commands are defined internally.  Type `help' to see this list.\n\
+_("These shell commands are defined internally.  Type `help' to see this list.\n\
 Type `help name' to find out more about the function `name'.\n\
 Use `info bash' to find out more about the shell in general.\n\
 Use `man -k' or `info' to find out more about commands not in this list.\n\
 \n\
 A star (*) next to a name means that the command is disabled.\n\
-\n");
+\n"));
 
   for (i = 0; i < num_shell_builtins; i++)
     {

@@ -75,6 +75,7 @@
 #endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
 #include "bashansi.h"
+#include "bashintl.h"
 #include "shell.h"
 #include "jobs.h"
 #include "flags.h"
@@ -689,7 +690,7 @@ delete_job (job_index, warn_stopped)
     return;
 
   if (warn_stopped && subshell_environment == 0 && STOPPED (job_index))
-    internal_warning ("deleting stopped job %d with process group %ld", job_index+1, (long)jobs[job_index]->pgrp);
+    internal_warning (_("deleting stopped job %d with process group %ld"), job_index+1, (long)jobs[job_index]->pgrp);
 
   temp = jobs[job_index];
   if (job_index == current_job || job_index == previous_job)
@@ -997,7 +998,7 @@ describe_pid (pid)
   if (job != NO_JOB)
     printf ("[%d] %ld\n", job + 1, (long)pid);
   else
-    programming_error ("describe_pid: %ld: no such pid", (long)pid);
+    programming_error (_("describe_pid: %ld: no such pid"), (long)pid);
 
   UNBLOCK_CHILD (oset);
 }
@@ -1357,22 +1358,19 @@ make_child (command, async_p)
 	     shells. */
 	  if (setpgid (mypid, pipeline_pgrp) < 0)
 	    sys_error ("child setpgid (%ld to %ld)", (long)mypid, (long)pipeline_pgrp);
-#if defined (PGRP_PIPE)
-	  if (pipeline_pgrp == mypid)
-	    {
-#endif
-	      /* By convention (and assumption above), if
-		 pipeline_pgrp == shell_pgrp, we are making a child for
-		 command substitution.
-		 In this case, we don't want to give the terminal to the
-		 shell's process group (we could be in the middle of a
-		 pipeline, for example). */
-	      if (async_p == 0 && pipeline_pgrp != shell_pgrp)
-		give_terminal_to (pipeline_pgrp, 0);
+
+	  /* By convention (and assumption above), if
+	     pipeline_pgrp == shell_pgrp, we are making a child for
+	     command substitution.
+	     In this case, we don't want to give the terminal to the
+	     shell's process group (we could be in the middle of a
+	     pipeline, for example). */
+	  if (async_p == 0 && pipeline_pgrp != shell_pgrp)
+	    give_terminal_to (pipeline_pgrp, 0);
 
 #if defined (PGRP_PIPE)
-	      pipe_read (pgrp_pipe);
-	    }
+	  if (pipeline_pgrp == mypid)
+	    pipe_read (pgrp_pipe);
 #endif
 	}
       else			/* Without job control... */
@@ -1631,7 +1629,7 @@ wait_for_single_pid (pid)
 
   if (child == 0)
     {
-      internal_error ("wait: pid %ld is not a child of this shell", (long)pid);
+      internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
       return (127);
     }
 
@@ -1814,7 +1812,7 @@ job_exit_signal (job)
 	{ \
 	  give_terminal_to (shell_pgrp, 0); \
 	  UNBLOCK_CHILD (oset); \
-	  internal_error ("wait_for: No record of process %ld", (long)pid); \
+	  internal_error (_("wait_for: No record of process %ld"), (long)pid); \
 	  restore_sigint_handler (); \
 	  return (termination_state = 127); \
 	} \
@@ -2061,7 +2059,7 @@ wait_for_job (job)
 
   BLOCK_CHILD(set, oset);
   if (JOBSTATE (job) == JSTOPPED)
-    internal_warning ("wait_for_job: job %d is stopped", job+1);
+    internal_warning (_("wait_for_job: job %d is stopped"), job+1);
 
   pid = find_last_pid (job, 0);
   UNBLOCK_CHILD(oset);
@@ -2283,7 +2281,7 @@ start_job (job, foreground)
 
   if (DEADJOB (job))
     {
-      internal_error ("%s: job has terminated", this_command_name);
+      internal_error (_("%s: job has terminated"), this_command_name);
       UNBLOCK_CHILD (oset);
       return (-1);
     }
@@ -2292,7 +2290,7 @@ start_job (job, foreground)
 
   if (foreground == 0 && already_running)
     {
-      internal_error ("%s: job %%%d already in background", this_command_name, job + 1);
+      internal_error (_("%s: job %d already in background"), this_command_name, job + 1);
       UNBLOCK_CHILD (oset);
       return (-1);
     }
@@ -2912,7 +2910,6 @@ notify_of_job_status ()
 		{
 		  if (dir == 0)
 		    dir = current_working_directory ();
-itrace("calling pretty_print_job: startup_state == %d, subshell_environment = %d", startup_state, subshell_environment);
 		  pretty_print_job (job, JLIST_STANDARD, stderr);
 		  if (dir && strcmp (dir, jobs[job]->wd) != 0)
 		    fprintf (stderr,
@@ -3037,7 +3034,7 @@ initialize_job_control (force)
 	    }
 	}
       if (job_control == 0)
-	internal_error ("no job control in this shell");
+	internal_error (_("no job control in this shell"));
     }
 
   if (shell_tty != fileno (stderr))

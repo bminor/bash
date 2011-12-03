@@ -40,6 +40,7 @@
 
 #include <stdio.h>
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "pcomplete.h"
@@ -687,7 +688,15 @@ pcomp_filename_completion_function (text, state)
       /* remove backslashes quoting special characters in filenames. */
       if (rl_filename_dequoting_function)
 	{
+#if 0
 	  qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
+#else
+	  /* Use rl_completion_quote_character because any single or
+	     double quotes have been removed by the time TEXT makes it
+	     here, and we don't want to remove backslashes inside
+	     quoted strings. */
+	  qc = rl_dispatching ? rl_completion_quote_character : 0;
+#endif
 	  dfn = (*rl_filename_dequoting_function) ((char *)text, qc);
 	}
       else
@@ -984,7 +993,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   f = find_function (funcname);
   if (f == 0)
     {
-      internal_error ("completion: function `%s' not found", funcname);
+      internal_error (_("completion: function `%s' not found"), funcname);
       rl_ding ();
       rl_on_new_line ();
       return ((STRINGLIST *)NULL);

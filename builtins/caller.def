@@ -1,7 +1,7 @@
 This file is caller.def, from which is created caller.c.  It implements the
 builtin "caller" in Bash.
 
-Copyright (C) 2002 Rocky Bernstein for Free Software Foundation, Inc.
+Copyright (C) 2002-2003 Rocky Bernstein for Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,6 +49,8 @@ $END
 #endif
 
 #include <errno.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -120,17 +122,16 @@ caller_builtin (list)
 #endif
 }
 
-
 #ifdef LOADABLE_BUILTIN
 static char *caller_doc[] = {
-  "Returns the context of the current subroutine call.",
-  "",
-  "Without EXPR, returns returns \"$line $filename\".  With EXPR,",
-  "returns \"$line $subroutine $filename\"; this extra information",
-  "can be used used to provide a stack trace.",
-  "",
-  "The value of EXPR indicates how many call frames to go back before the",
-  "current one; the top frame is frame 0.",
+  N_("Returns the context of the current subroutine call."),
+  N_(""),
+  N_("Without EXPR, returns returns \"$line $filename\".  With EXPR,"),
+  N_("returns \"$line $subroutine $filename\"; this extra information"),
+  N_("can be used used to provide a stack trace."),
+  N_(""),
+  N_("The value of EXPR indicates how many call frames to go back before the"),
+  N_("current one; the top frame is frame 0."),
   (char *)NULL
 };
 

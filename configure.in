@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-2.05
+dnl Configure script for bash-3.0
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.154, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.0, version 3.159, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.0)
 define(relstatus, alpha)
@@ -555,6 +555,9 @@ AC_C_LONG_DOUBLE
 AC_C_PROTOTYPES
 AC_C_CHAR_UNSIGNED
 
+dnl initialize GNU gettext
+AM_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
+
 dnl header files
 AC_HEADER_DIRENT
 AC_HEADER_TIME
@@ -565,8 +568,8 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
 		 stddef.h stdint.h netdb.h grp.h strings.h regex.h)
 AC_CHECK_HEADERS(sys/ptem.h sys/pte.h sys/stream.h sys/select.h sys/file.h \
-		 sys/resource.h sys/param.h sys/socket.h \
-		 sys/time.h sys/times.h sys/wait.h)
+		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
+		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 
 dnl special checks for libc functions
@@ -664,18 +667,29 @@ BASH_CHECK_DECL(strtoumax)
 
 AC_FUNC_MKTIME
 
-dnl checks for locale functions
-AC_CHECK_HEADERS(libintl.h)
-AC_CHECK_FUNCS(gettext textdomain bindtextdomain)
+dnl
+dnl Checks for lib/intl and related code (uses some of the output from
+dnl AM_GNU_GETTEXT)
+dnl
 
-dnl check for GNU libintl if gettext/textdomain/bindtextdomain
-dnl are not found in libc
-if test "$ac_cv_func_bindtextdomain" = "no"; then
-    AC_CHECK_LIB(intl,bindtextdomain)
-    if test "$ac_cv_lib_intl" = "yes"; then
-	AC_CHECK_FUNCS(gettext textdomain bindtextdomain)
-    fi
+AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
+
+AC_FUNC_MALLOC
+AC_FUNC_MMAP
+AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
+		munmap stpcpy strcspn strdup])
+
+INTL_DEP= INTL_INC=
+if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then
+	INTL_DEP='${INTL_LIBDIR}/libintl.a'
+	INTL_INC='-I${INTL_LIBSRC}'
 fi
+AC_SUBST(INTL_DEP)
+AC_SUBST(INTL_INC)
+
+dnl
+dnl End of checks needed by files in lib/intl
+dnl
 
 BASH_CHECK_MULTIBYTE
 
@@ -1003,8 +1017,9 @@ AC_SUBST(LOCAL_DEFS)
 #AC_SUBST(ALLOCA_OBJECT)
 
 AC_OUTPUT([Makefile builtins/Makefile lib/readline/Makefile lib/glob/Makefile \
+	  lib/intl/Makefile \
 	  lib/malloc/Makefile lib/sh/Makefile lib/termcap/Makefile \
-	  lib/tilde/Makefile doc/Makefile support/Makefile \
+	  lib/tilde/Makefile doc/Makefile support/Makefile po/Makefile.in \
 	  examples/loadables/Makefile examples/loadables/perl/Makefile \
 	  pathnames.h],
 [

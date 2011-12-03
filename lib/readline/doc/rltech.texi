@@ -1709,9 +1709,23 @@ an application-specific command line syntax specification.
 
 @deftypevar int rl_completion_suppress_append
 If non-zero, @var{rl_completion_append_character} is not appended to
-matches at the end of the command line, as described above.  It is
-set to 0 before any application-specific completion function is called,
-and may only be changed within such a function.
+matches at the end of the command line, as described above.
+It is set to 0 before any application-specific completion function
+is called, and may only be changed within such a function.
+@end deftypevar
+
+@deftypevar int rl_completion_quote_character
+When Readline is completing quoted text, as delimited by one of the
+characters in @var{rl_completer_quote_characters}, it sets this variable
+to the quoting character found.
+This is set before any application-specific completion function is called.
+@end deftypevar
+
+@deftypevar int rl_completion_suppress_quote
+If non-zero, Readline does not append a matching quote character when
+performing completion on a quoted string.
+It is set to 0 before any application-specific completion function
+is called, and may only be changed within such a function.
 @end deftypevar
 
 @deftypevar int rl_completion_mark_symlink_dirs

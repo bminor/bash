@@ -75,6 +75,7 @@ extern void sh_badjob __P((char *));
 extern void sh_readonly __P((const char *));
 extern void sh_nojobs __P((char *));
 extern void sh_restricted __P((char *));
+extern void sh_notbuiltin __P((char *));
 
 extern char **make_builtin_argv __P((WORD_LIST *, int *));
 extern void remember_args __P((WORD_LIST *, int));

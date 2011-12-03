@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,7 +25,6 @@ $BUILTIN fc
 $FUNCTION fc_builtin
 $DEPENDS_ON HISTORY
 $SHORT_DOC fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [cmd]
-
 fc is used to list or edit and re-execute commands from the history list.
 FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
@@ -66,6 +65,7 @@ $END
 #include <chartypes.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 #include <errno.h>
 
 #include "../shell.h"
@@ -249,7 +249,7 @@ fc_builtin (list)
 
       if (command == NULL)
 	{
-	  builtin_error ("no command found");
+	  builtin_error (_("no command found"));
 	  if (rlist)
 	    FREE_RLIST ();
 
@@ -314,7 +314,7 @@ fc_builtin (list)
   /* We print error messages for line specifications out of range. */
   if ((histbeg < 0) || (histend < 0))
     {
-      sh_erange ((char *)NULL, "history specification");
+      sh_erange ((char *)NULL, _("history specification"));
       return (EXECUTION_FAILURE);
     }
 
@@ -335,7 +335,7 @@ fc_builtin (list)
       stream = sh_mktmpfp ("bash-fc", MT_USERANDOM|MT_USETMPDIR, &fn);
       if (stream == 0)
 	{
-	  builtin_error ("cannot open temp file %s", fn ? fn : "");
+	  builtin_error (_("%s: cannot open temp file: %s"), fn ? fn : "", strerror (errno));
 	  FREE (fn);
 	  return (EXECUTION_FAILURE);
 	}

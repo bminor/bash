@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,6 +71,8 @@ extern int errno;
 
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../bashline.h"
@@ -189,7 +191,7 @@ bind_builtin (list)
       kmap = rl_get_keymap_by_name (map_name);
       if (!kmap)
 	{
-	  builtin_error ("`%s': invalid keymap name", map_name);
+	  builtin_error (_("`%s': invalid keymap name"), map_name);
 	  BIND_RETURN (EXECUTION_FAILURE);
 	}
     }
@@ -228,7 +230,7 @@ bind_builtin (list)
     {
       if (rl_read_init_file (initfile) != 0)
 	{
-	  builtin_error ("%s: cannot read: %s", initfile, strerror (errno));
+	  builtin_error (_("%s: cannot read: %s"), initfile, strerror (errno));
 	  BIND_RETURN (EXECUTION_FAILURE);
 	}
     }
@@ -243,7 +245,7 @@ bind_builtin (list)
     {
       if (rl_set_key (remove_seq, (rl_command_func_t *)NULL, rl_get_keymap ()) != 0)
 	{
-	  builtin_error ("`%s': cannot unbind", remove_seq);
+	  builtin_error (_("`%s': cannot unbind"), remove_seq);
 	  BIND_RETURN (EXECUTION_FAILURE);
 	}
     }
@@ -278,7 +280,7 @@ query_bindings (name)
   function = rl_named_function (name);
   if (function == 0)
     {
-      builtin_error ("`%s': unknown function name", name);
+      builtin_error (_("`%s': unknown function name"), name);
       return EXECUTION_FAILURE;
     }
 
@@ -286,11 +288,11 @@ query_bindings (name)
 
   if (!keyseqs)
     {
-      printf ("%s is not bound to any keys.\n", name);
+      printf (_("%s is not bound to any keys.\n"), name);
       return EXECUTION_FAILURE;
     }
 
-  printf ("%s can be invoked via ", name);
+  printf (_("%s can be invoked via "), name);
   for (j = 0; j < 5 && keyseqs[j]; j++)
     printf ("\"%s\"%s", keyseqs[j], keyseqs[j + 1] ? ", " : ".\n");
   if (keyseqs[j])

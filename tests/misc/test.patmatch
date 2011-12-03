@@ -1,0 +1,15 @@
+# these will work only if test.c has been compiled with -DPATTERN_MATCHING
+# to get =~ and !~
+
+[ a =\~ a ] && echo OK || echo BAD
+[ a !~ b ] && echo OK || echo BAD
+
+[ a =\~ \* ] && echo OK || echo BAD
+[ a =\~ \? ] && echo OK || echo BAD
+[ abc !~ \? ] && echo OK || echo BAD
+
+[ '' =\~ \* ] && echo OK || echo BAD
+[ '' !~ \?\* ] && echo OK || echo BAD
+
+[ a =\~ \[abc] ] && echo OK || echo BAD
+[ x !~ \[abc] ] && echo OK || echo BAD

@@ -40,6 +40,8 @@
 #include <stdio.h>
 #include "chartypes.h"
 #include "bashansi.h"
+#include "bashintl.h"
+
 #include "shell.h"
 #include "input.h"
 #include "builtins.h"
@@ -983,7 +985,7 @@ attempt_shell_completion (text, start, end)
 #if 1
   /* If this is an open quote, maybe we're trying to complete a quoted
      command name. */
-  if (rl_line_buffer[ti] == '"' || rl_line_buffer[ti] == '\'')
+  if (ti >= 0 && (rl_line_buffer[ti] == '"' || rl_line_buffer[ti] == '\''))
     {
       qc = rl_line_buffer[ti];
       saveti = ti--;
@@ -1447,6 +1449,9 @@ command_subst_completion_function (text, state)
 	text++;
       else if (*text == '$' && text[1] == '(')	/* ) */
 	text += 2;
+      /* If the text was quoted, suppress any quote character that the
+	 readline completion code would insert. */
+      rl_completion_suppress_quote = 1;
       start_len = text - orig_start;
       filename_text = savestring (text);
       if (matches)
@@ -2783,7 +2788,7 @@ bash_execute_unix_command (count, key)
       else
 	{
 	  rl_crlf ();
-	  internal_error ("bash_execute_unix_command: cannot find keymap for command");
+	  internal_error (_("bash_execute_unix_command: cannot find keymap for command"));
 	  rl_forced_update_display ();
 	  return 1;
 	}
@@ -2832,7 +2837,7 @@ isolate_sequence (string, ind, need_dquote, startp)
   /* NEED_DQUOTE means that the first non-white character *must* be `"'. */
   if (need_dquote && string[i] != '"')
     {
-      builtin_error ("%s: first non-whitespace character is not `\"'", string);
+      builtin_error (_("%s: first non-whitespace character is not `\"'"), string);
       return -1;
     }
 
@@ -2861,7 +2866,7 @@ isolate_sequence (string, ind, need_dquote, startp)
 
   if (delim && string[i] != delim)
     {
-      builtin_error ("%s: no closing `%c'", string, delim);
+      builtin_error (_("no closing `%c' in %s"), delim, string);
       return -1;
     }
 
@@ -2895,7 +2900,7 @@ bind_keyseq_to_unix_command (line)
     ;
   if (line[i] != ':')
     {
-      builtin_error ("%s: missing colon separator", line);
+      builtin_error (_("%s: missing colon separator"), line);
       return -1;
     }
 
@@ -2927,7 +2932,11 @@ bash_directory_completion_matches (text)
   char *dfn;
   int qc;
 
+#if 0
   qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
+#else
+  qc = rl_dispatching ? rl_completion_quote_character : 0;  
+#endif
   dfn = bash_dequote_filename ((char *)text, qc);
   m1 = rl_completion_matches (dfn, rl_filename_completion_function);
   free (dfn);

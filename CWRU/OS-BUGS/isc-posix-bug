@@ -1,0 +1,137 @@
+Article 7946 of comp.unix.sysv386:
+Newsgroups: comp.unix.sysv386
+Path: usenet.ins.cwru.edu!agate!stanford.edu!snorkelwacker.mit.edu!think.com!zaphod.mps.ohio-state.edu!rpi!batcomputer!cornell!rochester!lubkin
+From: lubkin@cs.rochester.edu (Saul Lubkin)
+Subject: Binary patch to os.o fixes POSIX panics using VP/ix with job controlled bash
+Message-ID: <1991Apr30.034006.24056@cs.rochester.edu>
+Organization: Computer Science Department University of Rochester
+Date: Tue, 30 Apr 1991 03:40:06 GMT
+
+
+Recently, Uwe Doering posted the following article:
+
+	Article 6891 of comp.unix.sysv386:
+	Path: nancy!uunet!math.fu-berlin.de!fub!geminix.in-berlin.de!gemini
+	From: gemini@geminix.in-berlin.de (Uwe Doering)
+	Newsgroups: comp.unix.sysv386
+	Subject: Re: NAMEI panic - trap "E", address and info follows (+ patch)
+	Message-ID: <KYXPX2E@geminix.in-berlin.de>
+	Date: 13 Apr 91 00:55:41 GMT
+	References: <1991Apr10.040146.645@ddsw1.MCS.COM>
+	Organization: Private UNIX Site
+	Lines: 92
+
+	karl@ddsw1.MCS.COM (Karl Denninger) writes:
+
+	>Is anyone else having problems with a "namei" panic in ISC 2.2 (with NFS,
+	>the NFS/lockd patches, and POSIX patches applied)?
+	>
+	>I have been getting these nearly daily.  Trap type "E", address is d007962f.
+	>That's right near the end of "namei"; here's the relavent line from a "nm"
+	>on the kernel:
+	>
+	>namei               |0xd007919c|extern|       *struct( )|0x0608|     |.text
+	>
+	>Needless to say, I am most displeased with the crashes!
+	>
+	>Near as I can determine, the hardware is fine.  
+	>
+	>All pointers or ideas appreciated...
+
+	I found this bug a few days ago and was about to send a bug report
+	to ISC. The problem is "simply" a NULL pointer reference in the
+	namei() function. The machine I found this on runs ISC 2.21 with
+	the security fix installed. I fixed this bug with a binary patch. It
+	is for the module /etc/conf/pack.d/kernel/os.o. I disassembled the
+	original and then the fixed version of os.o and ran a context diff
+	over the output. Depending on what version of the kernel config kit
+	you have the addresses might be off some bytes. You can apply this
+	patch with every binary file editor.
+
+	***************
+	*** 35349,35364 ****
+			      [%al,%al]
+		cf71:  74 1e                  je     0x1e <cf91>
+			      [0xcf91]
+	! 	cf73:  0f b7 07               movzwl (%edi),%eax
+			      [%edi,%eax]
+	! 	cf76:  3d 11 00 00 00         cmpl   $0x11,%eax
+			      [$0x11,%eax]
+	! 	cf7b:  74 14                  je     0x14 <cf91>
+			      [0xcf91]
+	! 	cf7d:  c7 45 e8 00 00 00 00   movl   $0x0,0xe8(%ebp)
+	!                     [$0x0,-24+%ebp]
+	! 	cf84:  eb 19                  jmp    0x19 <cf9f>
+	!                     [0xcf9f]
+		cf86:  90                     nop    
+			      []
+		cf87:  90                     nop    
+	--- 35349,35372 ----
+			      [%al,%al]
+		cf71:  74 1e                  je     0x1e <cf91>
+			      [0xcf91]
+	! 	cf73:  85 ff                  testl  %edi,%edi
+	!                     [%edi,%edi]
+	! 	cf75:  74 1a                  je     0x1a <cf91>
+	!                     [0xcf91]
+	! 	cf77:  0f b7 07               movzwl (%edi),%eax
+			      [%edi,%eax]
+	! 	cf7a:  3d 11 00 00 00         cmpl   $0x11,%eax
+			      [$0x11,%eax]
+	! 	cf7f:  74 10                  je     0x10 <cf91>
+			      [0xcf91]
+	! 	cf81:  eb 15                  jmp    0x15 <cf98>
+	!                     [0xcf98]
+	! 	cf83:  90                     nop    
+	!                     []
+	! 	cf84:  90                     nop    
+	!                     []
+	! 	cf85:  90                     nop    
+	!                     []
+		cf86:  90                     nop    
+			      []
+		cf87:  90                     nop    
+
+	I'm not absolutely sure whether the action that is now taken in case of
+	a NULL pointer is the right one, but I haven't noticed any problems,
+	and most important, there are no more kernel panics! At least not from
+	that spot. :-) The action that is taken if the pointer in _not_ NULL
+	hasn't changed (this is not very obvious from the patch, but look
+	in the disassembler listing of your own kernel for more details).
+	I use this modified kernel for over a week now and it works for
+	me. Of course, as always, I can't give you any guaranty that this
+	patch does something useful on your machine. :-)
+
+	Hope this helps you.
+
+	     Uwe
+
+	PS: ISC, if you see this posting, could you drop me a note on whether
+	you have put this on your to-do list? This would save me the time
+	needed to file an official bug report.
+	-- 
+	Uwe Doering  |  INET : gemini@geminix.in-berlin.de
+	Berlin       |----------------------------------------------------------------
+	Germany      |  UUCP : ...!unido!fub!geminix.in-berlin.de!gemini
+	=======================================================================
+
+
+Here is a copy of my recent note to Uwe:
+
+
+	I've applied the binary patch that you recently poosted to comp.unix.sysv386
+	for os.o.
+
+	It works beautifully.  Previously, I had compiled bash1.07CWRU, and it worked
+	well (using POSIX job control), job control and all -- but running VP/ix under
+	this bash caused a system panic.  This evidently is the (now infamous) "POSIX
+	namei bug".  After rebuilding the kernel with a patched os.o, the problem
+	simply disappeared.  VP/ix, like everything else, now works fine under
+	bash1.07CWRU.
+
+
+				Yours sincerely,
+
+				Saul Lubkin
+
+

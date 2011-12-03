@@ -68,6 +68,7 @@ $END
 #include <stdio.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -101,7 +102,7 @@ local_builtin (list)
     return (declare_internal (list, 1));
   else
     {
-      builtin_error ("can only be used in a function");
+      builtin_error (_("can only be used in a function"));
       return (EXECUTION_FAILURE);
     }
 }
@@ -227,7 +228,7 @@ declare_internal (list, local_var)
 #endif
 
       name = savestring (list->word->word);
-      offset = assignment (name);
+      offset = assignment (name, 0);
 
       if (offset)	/* declare [-afFirx] name=value */
 	{
@@ -291,7 +292,7 @@ declare_internal (list, local_var)
 	{
 	  if (offset)	/* declare -f [-rix] foo=bar */
 	    {
-	      builtin_error ("cannot use `-f' to make functions");
+	      builtin_error (_("cannot use `-f' to make functions"));
 	      free (name);
 	      return (EXECUTION_FAILURE);
 	    }
@@ -303,7 +304,7 @@ declare_internal (list, local_var)
 		{
 		  if (readonly_p (var) && (flags_off & att_readonly))
 		    {
-		      builtin_error ("%s: readonly function", name);
+		      builtin_error (_("%s: readonly function"), name);
 		      any_failed++;
 		      NEXT_VARIABLE ();
 		    }
@@ -385,7 +386,7 @@ declare_internal (list, local_var)
 	  /* Cannot use declare +a name to remove an array variable. */
 	  if ((flags_off & att_array) && array_p (var))
 	    {
-	      builtin_error ("%s: cannot destroy array variables in this way", name);
+	      builtin_error (_("%s: cannot destroy array variables in this way"), name);
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }

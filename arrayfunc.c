@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2002 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,6 +27,8 @@
 #endif
 #include <stdio.h>
 
+#include "bashintl.h"
+
 #include "shell.h"
 
 #include "shmbutil.h"
@@ -38,6 +40,9 @@ extern int last_command_exit_value;
 
 static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
+
+/* Standard error message to use when encountering an invalid array subscript */
+char *bash_badsub_errmsg = N_("bad array subscript");
 
 /* **************************************************************** */
 /*								    */
@@ -246,7 +251,7 @@ assign_array_var_from_string (var, value)
      shell expansions including pathname generation and word splitting. */
   /* First we split the string on whitespace, using the shell parser
      (ksh93 seems to do this). */
-  list = parse_string_to_word_list (val, "array assign");
+  list = parse_string_to_word_list (val, 1, "array assign");
 
   /* If we're using [subscript]=value, we need to quote each [ and ] to
      prevent unwanted filename expansion. */
@@ -274,7 +279,7 @@ assign_array_var_from_string (var, value)
       w = list->word->word;
 
       /* We have a word of the form [ind]=value */
-      if (w[0] == '[')
+      if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')
 	{
 	  len = skipsubscript (w, 0);
 
@@ -298,7 +303,7 @@ assign_array_var_from_string (var, value)
 
 	  if (ALL_ELEMENT_SUB (w[1]) && len == 2)
 	    {
-	      report_error ("%s: cannot assign to non-numeric index", w);
+	      report_error (_("%s: cannot assign to non-numeric index"), w);
 	      continue;
 	    }
 
@@ -442,7 +447,7 @@ unbind_array_element (var, sub)
   len = skipsubscript (sub, 0);
   if (sub[len] != ']' || len == 0)
     {
-      builtin_error ("%s[%s: bad array subscript", var->name, sub);
+      builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
       return -1;
     }
   sub[len] = '\0';
@@ -455,7 +460,7 @@ unbind_array_element (var, sub)
   ind = array_expand_index (sub, len+1);
   if (ind < 0)
     {
-      builtin_error ("[%s]: bad array subscript", sub);
+      builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));
       return -1;
     }
   ae = array_remove (array_cell (var), ind);
@@ -558,12 +563,22 @@ array_variable_name (s, subp, lenp)
 
   t = xstrchr (s, '[');
   if (t == 0)
-    return ((char *)NULL);
+    {
+      if (subp)
+      	*subp = t;
+      if (lenp)
+	*lenp = 0;
+      return ((char *)NULL);
+    }
   ind = t - s;
   ni = skipsubscript (s, ind);
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);
+      if (subp)
+      	*subp = t;
+      if (lenp)
+	*lenp = 0;
       return ((char *)NULL);
     }
 

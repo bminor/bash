@@ -34,6 +34,8 @@
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
+
 #include "command.h"
 #include "general.h"
 #include "input.h"
@@ -226,7 +228,7 @@ save_bash_input (fd, new_fd)
   if (nfd == -1)
     {
       if (fcntl (fd, F_GETFD, 0) == 0)
-	sys_error ("cannot allocate new file descriptor for bash input from fd %d", fd);
+	sys_error (_("cannot allocate new file descriptor for bash input from fd %d"), fd);
       return -1;
     }
 
@@ -234,7 +236,7 @@ save_bash_input (fd, new_fd)
     {
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */
-      internal_error ("save_bash_input: buffer already exists for new fd %d", nfd);
+      internal_error (_("save_bash_input: buffer already exists for new fd %d"), nfd);
       free_buffered_stream (buffers[nfd]);
     }
 

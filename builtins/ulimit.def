@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,6 +69,8 @@ $END
 
 #include <stdio.h>
 #include <errno.h>
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -327,7 +329,7 @@ ulimit_builtin (list)
         {
           if (STREQ (list->word->word, "unlimited") == 0)
             {
-              builtin_error ("%s: invalid limit argument", list->word->word);
+              builtin_error (_("%s: invalid limit argument"), list->word->word);
               return (EXECUTION_FAILURE);
             }
           return (set_all_limits (mode == 0 ? LIMIT_SOFT|LIMIT_HARD : mode, RLIM_INFINITY));
@@ -353,7 +355,7 @@ ulimit_builtin (list)
       limind = _findlim (cmdlist[c].cmd);
       if (limind == -1)
 	{
-	  builtin_error ("`%c': bad command", cmdlist[c].cmd);
+	  builtin_error (_("`%c': bad command"), cmdlist[c].cmd);
 	  return (EX_USAGE);
 	}
     }
@@ -382,7 +384,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
   opt = get_limit (limind, &soft_limit, &hard_limit);
   if (opt < 0)
     {
-      builtin_error ("%s: cannot get limit: %s", limits[limind].description,
+      builtin_error (_("%s: cannot get limit: %s"), limits[limind].description,
 						 strerror (errno));
       return (EXECUTION_FAILURE);
     }
@@ -420,7 +422,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 
   if (set_limit (limind, real_limit, mode) < 0)
     {
-      builtin_error ("%s: cannot modify limit: %s", limits[limind].description,
+      builtin_error (_("%s: cannot modify limit: %s"), limits[limind].description,
 						    strerror (errno));
       return (EXECUTION_FAILURE);
     }

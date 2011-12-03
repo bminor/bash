@@ -37,6 +37,7 @@
 
 #include "bashansi.h"
 #include "posixstat.h"
+#include "bashintl.h"
 
 #include "shell.h"
 #include "flags.h"
@@ -1007,7 +1008,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{
-	  report_error ("bad substitution: no `%s' in %s", closer, string);
+	  report_error (_("bad substitution: no closing `%s' in %s"), closer, string);
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  exp_jump_to_top_level (DISCARD);
 	}
@@ -1128,7 +1129,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{			/* { */
-	  report_error ("bad substitution: no ending `}' in %s", string);
+	  report_error ("bad substitution: no closing `%s' in %s", "}", string);
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  exp_jump_to_top_level (DISCARD);
 	}
@@ -1533,7 +1534,7 @@ assignment_name (string)
   int offset;
   char *temp;
 
-  offset = assignment (string);
+  offset = assignment (string, 0);
   if (offset == 0)
     return (char *)NULL;
   temp = substring (string, 0, offset);
@@ -1959,7 +1960,7 @@ do_assignment_internal (string, expand)
   int ni, assign_list = 0;
 #endif
 
-  offset = assignment (string);
+  offset = assignment (string, 0);
   name = savestring (string);
   value = (char *)NULL;
 
@@ -2016,7 +2017,7 @@ do_assignment_internal (string, expand)
     {
       if (assign_list)
 	{
-	  report_error ("%s: cannot assign list to array member", name);
+	  report_error (_("%s: cannot assign list to array member"), name);
 	  ASSIGN_RETURN (0);
 	}
       entry = assign_array_element (name, value);
@@ -2857,9 +2858,9 @@ remove_pattern (param, pattern, op)
   register char *end;
   register char *p, *ret, c;
 
-  if (param == NULL || *param == '\0')
+  if (param == NULL)
     return (param);
-  if (pattern == NULL || *pattern == '\0')	/* minor optimization */
+  if (*param == '\0' || pattern == NULL || *pattern == '\0')	/* minor optimization */
     return (savestring (param));
 
   len = STRLEN (param);
@@ -2868,6 +2869,7 @@ remove_pattern (param, pattern, op)
   switch (op)
     {
       case RP_LONG_LEFT:	/* remove longest match at start */
+        /* BACKUP_CHAR_P (param, len, p); */
 	for (p = end; p >= param; p--)
 	  {
 	    c = *p; *p = '\0';
@@ -2881,6 +2883,7 @@ remove_pattern (param, pattern, op)
 	break;
 
       case RP_SHORT_LEFT:	/* remove shortest match at start */
+        /* ADVANCE_CHAR_P (p, end - p),p++ */
 	for (p = param; p <= end; p++)
 	  {
 	    c = *p; *p = '\0';
@@ -2894,6 +2897,7 @@ remove_pattern (param, pattern, op)
 	break;
 
       case RP_LONG_RIGHT:	/* remove longest match at end */
+        /* ADVANCE_CHAR_P (p, end - p),p++ */
 	for (p = param; p <= end; p++)
 	  {
 	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
@@ -2907,6 +2911,7 @@ remove_pattern (param, pattern, op)
 	break;
 
       case RP_SHORT_RIGHT:	/* remove shortest match at end */
+        /* BACKUP_CHAR_P (param, len, p); */
 	for (p = end; p >= param; p--)
 	  {
 	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
@@ -2964,22 +2969,25 @@ match_pattern (string, pat, mtype, sp, ep)
      int mtype;
      char **sp, **ep;
 {
-  int c;
+  int c, len;
   register char *p, *p1;
   char *end;
 
   if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
     return (0);
 
-  end = string + STRLEN (string);
+  len = STRLEN (string);
+  end = string + len;
 
   switch (mtype)
     {
     case MATCH_ANY:
+      /* ADVANCE_CHAR_P (p, end - p),p++ */
       for (p = string; p <= end; p++)
 	{
 	  if (match_pattern_char (pat, p))
 	    {
+	      /* BACKUP_CHAR_P (p, end - p, p1) */
 	      for (p1 = end; p1 >= p; p1--)
 		{
 		  c = *p1; *p1 = '\0';
@@ -2999,6 +3007,7 @@ match_pattern (string, pat, mtype, sp, ep)
     case MATCH_BEG:
       if (match_pattern_char (pat, string) == 0)
 	return (0);
+      /* BACKUP_CHAR_P (string, len, p) */
       for (p = end; p >= string; p--)
 	{
 	  c = *p; *p = '\0';
@@ -3014,6 +3023,7 @@ match_pattern (string, pat, mtype, sp, ep)
       return (0);
 
     case MATCH_END:
+      /* ADVANCE_CHAR_P(p, end - p), p++ */
       for (p = string; p <= end; p++)
 	if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
 	  {
@@ -3120,7 +3130,7 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
     {
       tword = remove_pattern (l->word->word, pattern, patspec);
       w = make_bare_word (tword);
-      free (tword);
+      FREE (tword);
       new = make_word_list (w, new);
     }
 
@@ -3512,7 +3522,7 @@ process_substitute (string, open_for_read_in_child)
 #else /* HAVE_DEV_FD */
   if (pipe (fildes) < 0)
     {
-      sys_error ("cannot make pipe for process substitution");
+      sys_error (_("cannot make pipe for process substitution"));
       return ((char *)NULL);
     }
   /* If OPEN_FOR_READ_IN_CHILD == 1, we want to use the write end of
@@ -3528,7 +3538,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (!pathname)
     {
-      sys_error ("cannot make pipe for process substitution");
+      sys_error (_("cannot make pipe for process substitution"));
       return ((char *)NULL);
     }
 
@@ -3559,7 +3569,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (pid < 0)
     {
-      sys_error ("cannot make child for process substitution");
+      sys_error (_("cannot make child for process substitution"));
       free (pathname);
 #if defined (HAVE_DEV_FD)
       close (parent_pipe_fd);
@@ -3602,15 +3612,19 @@ process_substitute (string, open_for_read_in_child)
   fd = open (pathname, open_for_read_in_child ? O_RDONLY|O_NONBLOCK : O_WRONLY);
   if (fd < 0)
     {
-      sys_error ("cannot open named pipe %s for %s", pathname,
-	open_for_read_in_child ? "reading" : "writing");
+      /* Two separate strings for ease of translation. */
+      if (open_for_read_in_child)
+	sys_error (_("cannot open named pipe %s for reading"), pathname);
+      else
+	sys_error (_("cannot open named pipe %s for writing"), pathname);
+
       exit (127);
     }
   if (open_for_read_in_child)
     {
       if (sh_unset_nodelay_mode (fd) < 0)
 	{
-	  sys_error ("cannout reset nodelay mode for fd %d", fd);
+	  sys_error (_("cannout reset nodelay mode for fd %d"), fd);
 	  exit (127);
 	}
     }
@@ -3620,7 +3634,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (dup2 (fd, open_for_read_in_child ? 0 : 1) < 0)
     {
-      sys_error ("cannot duplicate named pipe %s as fd %d", pathname,
+      sys_error (_("cannot duplicate named pipe %s as fd %d"), pathname,
 	open_for_read_in_child ? 0 : 1);
       exit (127);
     }
@@ -3795,7 +3809,7 @@ command_substitute (string, quoted)
   /* Pipe the output of executing STRING into the current shell. */
   if (pipe (fildes) < 0)
     {
-      sys_error ("cannot make pipe for command substitution");
+      sys_error (_("cannot make pipe for command substitution"));
       goto error_exit;
     }
 
@@ -3824,7 +3838,7 @@ command_substitute (string, quoted)
 
   if (pid < 0)
     {
-      sys_error ("cannot make child for command substitution");
+      sys_error (_("cannot make child for command substitution"));
     error_exit:
 
       FREE (istring);
@@ -3841,7 +3855,7 @@ command_substitute (string, quoted)
 
       if (dup2 (fildes[1], 1) < 0)
 	{
-	  sys_error ("command_substitute: cannot duplicate pipe as fd 1");
+	  sys_error (_("command_substitute: cannot duplicate pipe as fd 1"));
 	  exit (EXECUTION_FAILURE);
 	}
 
@@ -3888,20 +3902,23 @@ command_substitute (string, quoted)
 	function_value = 0;
 
       if (result == ERREXIT)
-	exit (last_command_exit_value);
+	rc = last_command_exit_value;
       else if (result == EXITPROG)
-	exit (last_command_exit_value);
+	rc = last_command_exit_value;
       else if (result)
-	exit (EXECUTION_FAILURE);
+	rc = EXECUTION_FAILURE;
       else if (function_value)
-	exit (return_catch_value);
+	rc = return_catch_value;
       else
 	{
 	  subshell_level++;
 	  rc = parse_and_execute (string, "command substitution", pflags|SEVAL_NOHIST);
 	  subshell_level--;
-	  exit (rc);
 	}
+
+      last_command_exit_value = rc;
+      rc = run_exit_trap ();
+      exit (rc);
     }
   else
     {
@@ -4273,7 +4290,7 @@ parameter_brace_expand_error (name, value)
       dispose_words (l);
     }
   else
-    report_error ("%s: parameter null or not set", name);
+    report_error (_("%s: parameter null or not set"), name);
 
   /* Free the data we have allocated during this expansion, since we
      are about to longjmp out. */
@@ -4484,11 +4501,8 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       a = (ARRAY *)value;
-#if 0
-      len = array_num_elements (a) + 1;
-#else
-      len = array_num_elements (a);	/* arrays index from 0 to n - 1 */
-#endif
+      /* For arrays, the first value deals with array indices. */
+      len = array_max_index (a);	/* arrays index from 0 to n - 1 */
       break;
 #endif
     }
@@ -4501,6 +4515,12 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
 
   if (*e1p >= len || *e1p < 0)
     return (-1);
+
+#if defined (ARRAY_VARS)
+  /* For arrays, the second offset deals with the number of elements. */
+  if (vtype == VT_ARRAYVAR)
+    len = array_num_elements (a);
+#endif
 
   if (t)
     {
@@ -4515,12 +4535,20 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
 	return (0);
       if (*e2p < 0)
 	{
-	  internal_error ("%s: substring expression < 0", t);
+	  internal_error (_("%s: substring expression < 0"), t);
 	  return (0);
 	}
-      *e2p += *e1p;		/* want E2 chars starting at E1 */
-      if (*e2p > len)
-	*e2p = len;
+#if defined (ARRAY_VARS)
+      /* In order to deal with sparse arrays, push the intelligence about how
+	 to deal with the number of elements desired down to the array-
+	 specific functions.  */
+      if (vtype != VT_ARRAYVAR)
+#endif
+	{
+	  *e2p += *e1p;		/* want E2 chars starting at E1 */
+	  if (*e2p > len)
+	    *e2p = len;
+	}
     }
   else
     *e2p = len;
@@ -4649,6 +4677,9 @@ parameter_brace_substring (varname, value, substr, quoted)
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
+      /* We want E2 to be the number of elements desired (arrays can be sparse,
+         so verify_substring_values just returns the numbers specified and we
+         rely on array_subrange to understand how to deal with them). */
       tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
       if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 	{
@@ -4835,10 +4866,16 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   if (rep && *rep == '\0')
     rep = (char *)NULL;
 
+#if 0
   /* Expand PAT and REP for command, variable and parameter, arithmetic,
      and process substitution.  Also perform quote removal.  Do not
      perform word splitting or filename generation. */
   pat = expand_string_if_necessary (lpatsub, (quoted & ~Q_DOUBLE_QUOTES), expand_string_unsplit);
+#else
+  /* Perform the same expansions on the pattern as performed by the
+     pattern removal expansions. */
+  pat = getpattern (lpatsub, quoted, 1);
+#endif
 
   if (rep)
     {
@@ -5088,8 +5125,9 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     }
 
 #if defined (ARRAY_VARS)      
-  /* Process ${!ARRAY[@]} and ${!ARRAY[*]} expansion. */
-  if (want_indir && string[sindex - 1] == RBRACE && valid_array_reference (name+1))
+  /* Process ${!ARRAY[@]} and ${!ARRAY[*]} expansion. */ /* [ */
+  if (want_indir && string[sindex - 1] == RBRACE &&
+      string[sindex - 2] == ']' && valid_array_reference (name+1))
     {
       char *x, *x1;
 
@@ -5177,7 +5215,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     default:
     case '\0':
     bad_substitution:
-      report_error ("%s: bad substitution", string ? string : "??");
+      report_error (_("%s: bad substitution"), string ? string : "??");
       FREE (value);
       FREE (temp);
       free (name);
@@ -5251,7 +5289,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 	  temp = (char *)NULL;
 	  if (c == '=' && var_is_special)
 	    {
-	      report_error ("$%s: cannot assign in this way", name);
+	      report_error (_("$%s: cannot assign in this way"), name);
 	      free (name);
 	      free (value);
 	      return &expand_param_error;
@@ -6620,7 +6658,7 @@ glob_expand_word_list (tlist, eflags)
 	    }
 	  else if (fail_glob_expansion != 0)
 	    {
-	      report_error ("no match: %s", tlist->word->word);
+	      report_error (_("no match: %s"), tlist->word->word);
 	      jump_to_top_level (DISCARD);
 	    }
 	  else if (allow_null_glob_expansion == 0)

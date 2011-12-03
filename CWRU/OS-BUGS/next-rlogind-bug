@@ -1,0 +1,63 @@
+From chet@odin.INS.CWRU.Edu Thu Mar  7 19:16:25 1991
+Flags: 50
+Received: from odin.INS.CWRU.Edu by usenet.INS.CWRU.Edu with SMTP (5.61+ida+/CWRU-1.4-UUCPGW)
+	id AA00967; Thu, 7 Mar 91 19:16:25 -0500 (from chet@odin.INS.CWRU.Edu for /usr/local/bin/m2mbox /usr/homes/chet/mbox)
+Received:  by odin.INS.CWRU.Edu (5.65+ida+/CWRU-1.4-ins)
+	id AA04437; Thu, 7 Mar 91 19:15:31 -0500 (from chet for chet@usenet.INS.CWRU.Edu)
+Date: Thu, 7 Mar 91 19:10:00 -0500
+From: Chet Ramey <chet@odin.INS.CWRU.Edu>
+To: jacob@blackbox.gore.com
+Subject: Re: Library function redefinition
+Cc: chet@odin.INS.CWRU.Edu, bfox@ai.mit.edu
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from jacob@blackbox.gore.com of Sun, 3 Mar 91 19:18:54 MST
+Message-Id: <9103080010.AA04427.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> Now that you're working on bash for NeXT, let me ask you if you've run into
+> this bug under 2.0: bash, as a login shell, hangs on rlogin into the NeXT.
+> But it works fine on telnet.  On rlogin, I even get no output to stdout
+> from the 'tset' (or debugging 'echo's) in my startup files.
+
+It's getting stuck in initialize_jobs ().  There is a bug in the NeXT 
+/usr/etc/rlogind that causes bash to be started with the terminal still
+belonging to the rlogind process, and its process group set to 0 (so
+that getpgrp() returns 0 (!)).  It looks like there's a stray setpgrp(0, 0)
+in the rlogind code that NeXT is not handling like 4.3 BSD.
+
+(Another bug that I've found with NeXT 2.0 is that Terminal starts up the
+shell underneath it with argc == 0 and argv[0] = "-".  Not polite.
+`mount -vat nfs' seems to be broken too.  Any more good ones I should look
+for?)
+
+Here's a diff to jobs.c to work around it.  Your line numbers will certainly
+vary (for all I know, the code might, too).
+
+Chet
+
+*** jobs.c~	Tue Mar  5 17:41:00 1991
+--- jobs.c	Thu Mar  7 18:50:12 1991
+***************
+*** 1839,1842 ****
+--- 1839,1852 ----
+        }
+  
++ #if defined (NeXT)
++       /* This is to compensate for a bug in the NeXT 2.0 /usr/etc/rlogind. */
++       if (shell_pgrp == 0)
++ 	{
++ 	  shell_pgrp = getpid ();
++ 	  setpgid (0, shell_pgrp);
++ 	  tcsetpgrp (shell_tty, shell_pgrp);
++ 	}
++ #endif /* NeXT */
++ 
+        while ((terminal_pgrp = tcgetpgrp (shell_tty)) != -1)
+  	{
+
+--
+Chet Ramey				``Now, somehow we've brought our sins
+Network Services Group			  back physically -- and they're
+Case Western Reserve University		  pissed.''
+chet@ins.CWRU.Edu		My opinions are just those, and mine alone.
+

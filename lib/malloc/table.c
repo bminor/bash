@@ -1,6 +1,6 @@
 /* table.c - bookkeeping functions for allocated memory */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -172,14 +172,14 @@ mregister_alloc (tag, mem, size, file, line)
   if (tentry == 0)
     {
       /* oops.  table is full.  punt. */
-      fprintf (stderr, "register_alloc: alloc table is full with FIND_ALLOC?\n");
+      fprintf (stderr, _("register_alloc: alloc table is full with FIND_ALLOC?\n"));
       return;
     }
   
   if (tentry->flags & MT_ALLOC)
     {
       /* oops.  bad bookkeeping. ignore for now */
-      fprintf (stderr, "register_alloc: %p already in table as allocated?\n", mem);
+      fprintf (stderr, _("register_alloc: %p already in table as allocated?\n"), mem);
     }
 
   tentry->mem = mem;
@@ -215,7 +215,7 @@ mregister_free (mem, size, file, line)
   if (tentry->flags & MT_FREE)
     {
       /* oops.  bad bookkeeping. ignore for now */
-      fprintf (stderr, "register_free: %p already in table as free?\n", mem);
+      fprintf (stderr, _("register_free: %p already in table as free?\n"), mem);
     }
     	
   tentry->flags = MT_FREE;

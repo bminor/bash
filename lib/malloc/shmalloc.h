@@ -1,6 +1,6 @@
 /* Functions (currently) for use by the shell to do malloc debugging and
    tracking. */
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ extern PTR_T sh_valloc __P((size_t, const char *, int));
 /* trace.c */
 extern int malloc_set_trace __P((int));
 extern void malloc_set_tracefp ();	/* full prototype requires stdio.h */
+extern void malloc_set_tracefn __P((char *, char *));
 
 /* table.c */
 extern void mregister_dump_table __P((void));

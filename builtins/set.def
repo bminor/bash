@@ -33,6 +33,7 @@ $PRODUCES set.c
 #include <stdio.h>
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../flags.h"
@@ -739,7 +740,7 @@ unset_builtin (list)
 
   if (unset_function && unset_variable)
     {
-      builtin_error ("cannot simultaneously unset a function and a variable");
+      builtin_error (_("cannot simultaneously unset a function and a variable"));
       return (EXECUTION_FAILURE);
     }
 
@@ -776,14 +777,14 @@ unset_builtin (list)
 
       if (var && !unset_function && non_unsettable_p (var))
 	{
-	  builtin_error ("%s: cannot unset", name);
+	  builtin_error (_("%s: cannot unset"), name);
 	  NEXT_VARIABLE ();
 	}
 
       /* Posix.2 says that unsetting readonly variables is an error. */
       if (var && readonly_p (var))
 	{
-	  builtin_error ("%s: cannot unset: readonly %s",
+	  builtin_error (_("%s: cannot unset: readonly %s"),
 			 name, unset_function ? "function" : "variable");
 	  NEXT_VARIABLE ();
 	}
@@ -794,7 +795,7 @@ unset_builtin (list)
 	{
 	  if (array_p (var) == 0)
 	    {
-	      builtin_error ("%s: not an array variable", name);
+	      builtin_error (_("%s: not an array variable"), name);
 	      NEXT_VARIABLE ();
 	    }
 	  else

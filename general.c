@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,8 @@
 #include "chartypes.h"
 #include <errno.h>
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include <tilde/tilde.h>
 
@@ -55,7 +57,7 @@ static int unquoted_tilde_word __P((const char *));
 static void initialize_group_array __P((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
-char *bash_getcwd_errstr = "getcwd: cannot access parent directories";
+char *bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
 
 /* Do whatever is necessary to initialize `Posix mode'. */
 void
@@ -224,12 +226,12 @@ check_identifier (word, check_word)
 {
   if ((word->flags & (W_HASDOLLAR|W_QUOTED)) || all_digits (word->word))
     {
-      internal_error ("`%s': not a valid identifier", word->word);
+      internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
   else if (check_word && legal_identifier (word->word) == 0)
     {
-      internal_error ("`%s': not a valid identifier", word->word);
+      internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
   else
@@ -239,15 +241,20 @@ check_identifier (word, check_word)
 /* Returns non-zero if STRING is an assignment statement.  The returned value
    is the index of the `=' sign. */
 int
-assignment (string)
+assignment (string, flags)
      const char *string;
+     int flags;
 {
   register unsigned char c;
   register int newi, indx;
 
   c = string[indx = 0];
 
+#if defined (ARRAY_VARS)
+  if ((legal_variable_starter (c) == 0) && (flags && c != '[')) /* ] */
+#else
   if (legal_variable_starter (c) == 0)
+#endif
     return (0);
 
   while (c = string[indx])

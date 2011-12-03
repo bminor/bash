@@ -1,7 +1,7 @@
 This file is return.def, from which is created return.c.
 It implements the builtin "return" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,8 @@ $END
 #  include <unistd.h>
 #endif
 
+#include "../bashintl.h"
+
 #include "../shell.h"
 #include "common.h"
 
@@ -58,7 +60,7 @@ return_builtin (list)
     longjmp (return_catch, 1);
   else
     {
-      builtin_error ("can only `return' from a function or sourced script");
+      builtin_error (_("can only `return' from a function or sourced script"));
       return (EXECUTION_FAILURE);
     }
 }

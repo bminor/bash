@@ -1,0 +1,63 @@
+This file details the changes between the previous release of CWRU bash
+(5/10/93) and this release.
+
+1. Bugs Fixed
+
+commas within backquotes inside matching braces are now treated as
+quoted (e.g., echo {`echo foo:bar | sed s/:/,/`})
+
+don't create the export env unless we are running a command with
+shell_execve (in execute_disk_command), and don't create it anew
+each time a child is forked
+
+make execute_disk_command look in the temp environment for an
+assignment to PATH, and disable hash lookup for the command if
+such an assignment is present 
+
+fixed here documents so that backslash-quoted newlines are treated as
+Posix.2 specifies
+
+removed a number of extraneous unwind-protects or moved them inside
+if statements
+
+only call rl_reset_terminal in sv_term if we're actually using readline
+
+only run traps on SIGCHLD if job_control != 0
+
+fixed readline so it won't try to pass memory allocated with alloca() to
+a separate function
+
+cleaned up the readline global function and variable namespace, and split
+some more code out from readline.c into separate files
+
+added header files that declare extern functions rather than having those
+extern declarations littered throughout the code
+
+readline now allows ^T to be undone
+
+fixed readline so that characters whose screen representation is > 1
+character (e.g., \354) are erased correctly
+
+the read builtin no longer attempts to split its input into words if
+$IFS is unset
+
+changed the terminating signals that bash catches so they're reset to
+their original handlers when a child is forked
+
+the Gnu malloc library code was upgraded to Gnu libc version 1.06
+
+the Gnu termcap library code was upgraded to Gnu termcap version 1.02
+
+the man page was updated to cover the bind -m option
+
+2. New Features
+
+Bash now notices if it's running setuid or setgid and disables $ENV
+processing and importing shell functions from the environment
+
+New flag: -p/-o privileged, set if the shell is running setuid or setgid.
+Turning this off causes the effective uid and gid to be set to the
+real uid and gid
+
+New machine descriptions for the Intel Paragon, Symmetric 375, NeXT 486,
+and HP running 4.4 BSD

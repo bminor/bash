@@ -1,6 +1,6 @@
 /* stats.c - malloc statistics */
 
-/*  Copyright (C) 2001 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@
 extern int malloc_free_blocks __P((int));
 
 extern struct _malstats _mstats;
+
+extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
 
 struct bucket_stats
 malloc_bucket_stats (size)
@@ -129,14 +131,37 @@ fprint_malloc_stats (s, fp)
   _print_malloc_stats (s, fp);
 }
 
-#define TRACEROOT "/var/tmp/maltrace/trace."
-static char mallbuf[1024];
+#define TRACEROOT "/var/tmp/maltrace/stats."
 
 void
 trace_malloc_stats (s, fn)
      char *s, *fn;
 {
+  FILE *fp;
   char defname[sizeof (TRACEROOT) + 64];
+  static char mallbuf[1024];
+
+  fp = _imalloc_fopen (s, fn, TRACEROOT, defname, sizeof (defname));
+  if (fp)
+    {
+      setvbuf (fp, mallbuf, _IOFBF, sizeof (mallbuf));
+      _print_malloc_stats (s, fp);
+      fflush(fp);
+      fclose(fp);
+    }
+}
+
+#endif /* MALLOC_STATS */
+
+#if defined (MALLOC_STATS) || defined (MALLOC_TRACE)
+FILE *
+_imalloc_fopen (s, fn, def, defbuf, defsiz)
+     char *s;
+     char *fn;
+     char *def;
+     char *defbuf;
+     size_t defsiz;
+{
   char fname[1024];
   long l;
   FILE *fp;
@@ -144,8 +169,8 @@ trace_malloc_stats (s, fn)
   l = (long)getpid ();
   if (fn == 0)
     {
-      sprintf (defname, "%s%ld", TRACEROOT, l);  
-      fp = fopen(defname, "w");
+      sprintf (defbuf, "%s%ld", def, l);
+      fp = fopen(defbuf, "w");
     }
   else
     {
@@ -171,14 +196,7 @@ trace_malloc_stats (s, fn)
       *p = '\0';
       fp = fopen (fname, "w");
     }
-        
-  if (fp)
-    {
-      setvbuf (fp, mallbuf, _IOFBF, sizeof (mallbuf));
-      _print_malloc_stats (s, fp);
-      fflush(fp);
-      fclose(fp);
-    }
-}
 
-#endif /* MALLOC_STATS */
+  return fp;
+}
+#endif /* MALLOC_STATS || MALLOC_TRACE */

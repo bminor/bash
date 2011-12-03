@@ -1,6 +1,6 @@
 /* malloc.c - dynamic memory allocation for bash. */
 
-/*  Copyright (C) 1985, 1987, 1997 Free Software Foundation, Inc.
+/*  Copyright (C) 1985-2003 Free Software Foundation, Inc.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -295,7 +295,7 @@ botch (s, file, line)
      const char *file;
      int line;
 {
-  fprintf (stderr, "malloc: failed assertion: %s\n", s);
+  fprintf (stderr, _("malloc: failed assertion: %s\n"), s);
   (void)fflush (stderr);
   abort ();
 }
@@ -311,7 +311,7 @@ xbotch (mem, e, s, file, line)
      const char *file;
      int line;
 {
-  fprintf (stderr, "\r\nmalloc: %s:%d: assertion botched\r\n",
+  fprintf (stderr, _("\r\nmalloc: %s:%d: assertion botched\r\n"),
 			file ? file : "unknown", line);
 #ifdef MALLOC_REGISTER
   if (mem != NULL && malloc_register)
@@ -737,7 +737,7 @@ internal_malloc (n, file, line, flags)		/* get a block */
   /* If not for this check, we would gobble a clobbered free chain ptr
      and bomb out on the NEXT allocate of this size block */
   if (p->mh_alloc != ISFREE || p->mh_index != nunits)
-    xbotch ((PTR_T)(p+1), 0, "malloc: block on free list clobbered", file, line);
+    xbotch ((PTR_T)(p+1), 0, _("malloc: block on free list clobbered"), file, line);
 
   /* Fill in the info, and set up the magic numbers for range checking. */
   p->mh_alloc = ISALLOC;
@@ -814,10 +814,10 @@ internal_free (mem, file, line, flags)
     {
       if (p->mh_alloc == ISFREE)
 	xbotch (mem, ERR_DUPFREE,
-		"free: called with already freed block argument", file, line);
+		_("free: called with already freed block argument"), file, line);
       else
 	xbotch (mem, ERR_UNALLOC,
-		"free: called with unallocated block argument", file, line);
+		_("free: called with unallocated block argument"), file, line);
     }
 
   ASSERT (p->mh_magic2 == MAGIC2);
@@ -836,13 +836,13 @@ internal_free (mem, file, line, flags)
 
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
-	    "free: underflow detected; mh_nbytes out of range", file, line);
+	    _("free: underflow detected; mh_nbytes out of range"), file, line);
 
   ap += p->mh_nbytes;
   z = mg.s;
   *z++ = *ap++, *z++ = *ap++, *z++ = *ap++, *z++ = *ap++;  
   if (mg.i != p->mh_nbytes)
-    xbotch (mem, ERR_ASSERT_FAILED, "free: start and end chunk sizes differ", file, line);
+    xbotch (mem, ERR_ASSERT_FAILED, _("free: start and end chunk sizes differ"), file, line);
 
 #if 1
   if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == memtop))
@@ -939,7 +939,7 @@ internal_realloc (mem, n, file, line, flags)
 
   if (p->mh_alloc != ISALLOC)
     xbotch (mem, ERR_UNALLOC,
-	    "realloc: called with unallocated block argument", file, line);
+	    _("realloc: called with unallocated block argument"), file, line);
 
   ASSERT (p->mh_magic2 == MAGIC2);
   nbytes = ALLOCATED_BYTES(p->mh_nbytes);
@@ -954,13 +954,13 @@ internal_realloc (mem, n, file, line, flags)
      original number of bytes requested. */
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
-	    "realloc: underflow detected; mh_nbytes out of range", file, line);
+	    _("realloc: underflow detected; mh_nbytes out of range"), file, line);
 
   m = (char *)mem + (tocopy = p->mh_nbytes);
   z = mg.s;
   *z++ = *m++, *z++ = *m++, *z++ = *m++, *z++ = *m++;
   if (mg.i != p->mh_nbytes)
-    xbotch (mem, ERR_ASSERT_FAILED, "realloc: start and end chunk sizes differ", file, line);
+    xbotch (mem, ERR_ASSERT_FAILED, _("realloc: start and end chunk sizes differ"), file, line);
 
 #ifdef MALLOC_WATCH
   if (_malloc_nwatch > 0)

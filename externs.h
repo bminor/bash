@@ -93,7 +93,7 @@ extern char **brace_expand __P((char *));
 extern int yyparse __P((void));
 extern int return_EOF __P((void));
 extern void reset_parser __P((void));
-extern WORD_LIST *parse_string_to_word_list __P((char *, const char *));
+extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
 extern void free_pushed_string_input __P((void));
 

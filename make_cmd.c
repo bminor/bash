@@ -32,6 +32,8 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #  include <unistd.h>
 #endif
 
+#include "bashintl.h"
+
 #include "syntax.h"
 #include "command.h"
 #include "general.h"
@@ -313,10 +315,10 @@ make_arith_for_command (exprs, action, lineno)
   if (nsemi != 3)
     {
       if (nsemi < 3)
-	parser_error (lineno, "syntax error: arithmetic expression required");
+	parser_error (lineno, _("syntax error: arithmetic expression required"));
       else
-	parser_error (lineno, "syntax error: `;' unexpected");
-      parser_error (lineno, "syntax error: `((%s))'", exprs->word->word);
+	parser_error (lineno, _("syntax error: `;' unexpected"));
+      parser_error (lineno, _("syntax error: `((%s))'"), exprs->word->word);
       last_command_exit_value = 2;
       return ((COMMAND *)NULL);
     }
@@ -525,7 +527,7 @@ make_simple_command (element, command)
 
   if (element.word)
     command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
-  else
+  else if (element.redirect)
     {
       REDIRECT *r = element.redirect;
       /* Due to the way <> is implemented, there may be more than a single
@@ -555,7 +557,7 @@ make_here_document (temp)
   if (temp->instruction != r_deblank_reading_until &&
       temp->instruction != r_reading_until)
     {
-      internal_error ("make_here_document: bad instruction type %d", temp->instruction);
+      internal_error (_("make_here_document: bad instruction type %d"), temp->instruction);
       return;
     }
 
@@ -725,7 +727,7 @@ make_redirection (source, instruction, dest_and_filename)
       break;
 
     default:
-      programming_error ("make_redirection: redirection instruction `%d' out of range", instruction);
+      programming_error (_("make_redirection: redirection instruction `%d' out of range"), instruction);
       abort ();
       break;
     }
@@ -756,13 +758,12 @@ make_function_def (name, command, lineno, lstart)
   temp->source_file = 0;
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
-  t = 0;
   if (bash_source_a && array_num_elements (bash_source_a) > 0)
-    t = array_reference (bash_source_a, 0);
-  temp->source_file = t ? savestring (t) : savestring ("");
+    temp->source_file = array_reference (bash_source_a, 0);
 #endif
   bind_function_def (name->word, temp);
 
+  temp->source_file = 0;
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

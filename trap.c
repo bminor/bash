@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "bashintl.h"
+
 #include "trap.h"
 
 #include "shell.h"
@@ -102,6 +104,9 @@ int pending_traps[NSIG];
    parse_and_execute does not return normally after executing the
    trap command (e.g., when `return' is executed in the trap command). */
 int running_trap;
+
+/* Set to last_command_exit_value before running a trap. */
+int trap_saved_exit_value;
 
 /* The (trapped) signal received while executing in the `wait' builtin */
 int wait_signal_received;
@@ -185,9 +190,10 @@ signal_name (sig)
   char *ret;
 
   /* on cygwin32, signal_names[sig] could be null */
-  ret = (sig >= BASH_NSIG || sig < 0) ? "bad signal number" : signal_names[sig];
-  if (ret == NULL)
-    ret = "unrecognized signal number";
+  ret = (sig >= BASH_NSIG || sig < 0 || signal_names[sig] == NULL)
+	? _("invalid signal number")
+	: signal_names[sig];
+
   return ret;
 }
 
@@ -300,11 +306,11 @@ run_pending_traps ()
 		 Unless we catch this, the subshell will dump core when
 		 trap_list[SIGTERM] == DEFAULT_SIG, because DEFAULT_SIG is
 		 usually 0x0. */
-	      internal_warning ("run_pending_traps: bad value in trap_list[%d]: %p",
+	      internal_warning (_("run_pending_traps: bad value in trap_list[%d]: %p"),
 				sig, trap_list[sig]);
 	      if (trap_list[sig] == (char *)DEFAULT_SIG)
 		{
-		  internal_warning ("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself", sig, signal_name (sig));
+		  internal_warning (_("run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"), sig, signal_name (sig));
 		  kill (getpid (), sig);
 		}
 	    }
@@ -340,7 +346,7 @@ trap_handler (sig)
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
-    programming_error ("trap_handler: bad signal %d", sig);
+    programming_error (_("trap_handler: bad signal %d"), sig);
   else
     {
       oerrno = errno;
@@ -639,9 +645,9 @@ int
 run_exit_trap ()
 {
   char *trap_command;
-  int code, function_code, old_exit_value;
+  int code, function_code, retval;
 
-  old_exit_value = last_command_exit_value;
+  trap_saved_exit_value = last_command_exit_value;
   function_code = 0;
 
   /* Run the trap only if signal 0 is trapped and not ignored, and we are not
@@ -653,6 +659,9 @@ run_exit_trap ()
       trap_command = savestring (trap_list[EXIT_TRAP]);
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
       sigmodes[EXIT_TRAP] |= SIG_INPROGRESS;
+
+      retval = trap_saved_exit_value;
+      running_trap = 1;
 
       code = setjmp (top_level);
 
@@ -666,16 +675,19 @@ run_exit_trap ()
 	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
 	}
       else if (code == ERREXIT)
-	return (last_command_exit_value);
+	retval = last_command_exit_value;
       else if (code == EXITPROG)
-	return (last_command_exit_value);
+	retval = last_command_exit_value;
       else if (function_code != 0)
-        return (return_catch_value);
+        retval = return_catch_value;
       else
-	return (old_exit_value);
+	retval = trap_saved_exit_value;
+
+      running_trap = 0;
+      return retval;
     }
 
-  return (old_exit_value);
+  return (trap_saved_exit_value);
 }
 
 void
@@ -693,9 +705,11 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int old_exit_value, *token_state, trap_exit_value;
+  int trap_exit_value, *token_state;
+  int save_return_catch_flag, function_code;
+  procenv_t save_return_catch;
 
-  trap_exit_value = 0;
+  trap_exit_value = function_code = 0;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&
@@ -708,15 +722,26 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-      old_exit_value = last_command_exit_value;
+      trap_saved_exit_value = last_command_exit_value;
 
       token_state = save_token_state ();
-      parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+
+      /* If we're in a function, make sure return longjmps come here, too. */
+      save_return_catch_flag = return_catch_flag;
+      if (return_catch_flag)
+	{
+	  COPY_PROCENV (return_catch, save_return_catch);
+	  function_code = setjmp (return_catch);
+	}
+
+      if (function_code == 0)
+	parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+
       restore_token_state (token_state);
       free (token_state);
 
       trap_exit_value = last_command_exit_value;
-      last_command_exit_value = old_exit_value;
+      last_command_exit_value = trap_saved_exit_value;
       running_trap = 0;
 
       sigmodes[sig] &= ~SIG_INPROGRESS;
@@ -732,7 +757,17 @@ _run_trap_internal (sig, tag)
 	    free (old_trap);
 	  sigmodes[sig] &= ~SIG_CHANGED;
 	}
+
+      if (save_return_catch_flag)
+	{
+	  return_catch_flag = save_return_catch_flag;
+	  return_catch_value = trap_exit_value;
+	  COPY_PROCENV (save_return_catch, return_catch);
+	  if (function_code)
+	    longjmp (return_catch, 1);
+	}
     }
+
   return trap_exit_value;
 }
 

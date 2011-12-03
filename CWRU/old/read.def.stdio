@@ -1,0 +1,293 @@
+This file is read.def, from which is created read.c.
+It implements the builtin "read" in Bash.
+
+Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+
+This file is part of GNU Bash, the Bourne Again SHell.
+
+Bash is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 1, or (at your option) any later
+version.
+
+Bash is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Bash; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$PRODUCES read.c
+
+$BUILTIN read
+$FUNCTION read_builtin
+$SHORT_DOC read [-r] [-p prompt] [-a array] [name ...]
+One line is read from the standard input, and the first word is
+assigned to the first NAME, the second word to the second NAME, etc.
+with leftover words assigned to the last NAME.  Only the characters
+found in $IFS are recognized as word delimiters.  The return code is
+zero, unless end-of-file is encountered.  If the -r option is given,
+this signifies `raw' input, and backslash processing is disabled.  If
+the `-p' option is supplied, the string supplied as an argument is
+output without a trailing newline before attempting to read.  If -a
+is supplied, the words read are assigned to sequential indices of ARRAY,
+starting at zero.
+$END
+
+#include <stdio.h>
+#include "../shell.h"
+#include "common.h"
+#include "bashgetopt.h"
+
+static int stream_close ();
+
+extern int interrupt_immediately;
+
+/* Read the value of the shell variables whose names follow.
+   The reading is done from the current input stream, whatever
+   that may be.  Successive words of the input line are assigned
+   to the variables mentioned in LIST.  The last variable in LIST
+   gets the remainder of the words on the line.  If no variables
+   are mentioned in LIST, then the default variable is $REPLY. */
+read_builtin (list)
+     WORD_LIST *list;
+{
+  register char *varname;
+  int size, c, i, fildes, raw_mode, pass_next, saw_escape, opt, retval;
+  char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
+  FILE *input_stream;
+  SHELL_VAR *ifs;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *v;
+  WORD_LIST *alist;
+#endif
+
+  i = 0;		/* Index into the string that we are reading. */
+  raw_mode = 0;		/* Not reading raw input be default. */
+  arrayname = prompt = (char *)NULL;
+
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "rp:a:")) != -1)
+    {
+      switch (opt)
+        {
+        case 'r':
+	  raw_mode = 1;
+	  break;
+	case 'p':
+	  prompt = list_optarg;
+	  break;
+#if defined (ARRAY_VARS)
+	case 'a':
+	  arrayname = list_optarg;
+	  break;
+#endif
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
+
+  /* We need unbuffered input from stdin.  So we make a new stream with
+     the same file descriptor as stdin, then unbuffer it. */
+  fildes = dup (fileno (stdin));
+
+  if (fildes == -1)
+    return (EXECUTION_FAILURE);
+
+  input_stream = fdopen (fildes, "r");
+
+  if (!input_stream)
+    {
+      close (fildes);
+      return (EXECUTION_FAILURE);
+    }
+
+  ifs = find_variable ("IFS");
+  if (ifs == 0)
+    ifs_chars = " \t\n";
+  else
+    ifs_chars = value_cell (ifs);
+
+  input_string = xmalloc (size = 128);
+
+  setbuf (input_stream, (char *)NULL);
+
+  begin_unwind_frame ("read_builtin");
+  add_unwind_protect (xfree, input_string);
+  add_unwind_protect (stream_close, input_stream);
+  interrupt_immediately++;
+
+  if (prompt && isatty (0))
+    {
+      fprintf (stderr, "%s", prompt);
+      fflush (stderr);
+    }
+
+  pass_next = 0;	/* Non-zero signifies last char was backslash. */
+  saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
+
+  while ((c = getc (input_stream)) != EOF)
+    {
+      if (i + 2 >= size)
+	input_string = xrealloc (input_string, size += 128);
+
+      /* If the next character is to be accepted verbatim, a backslash
+	 newline pair still disappears from the input. */
+      if (pass_next)
+	{
+	  if (c == '\n')
+	    i--;		/* back up over the CTLESC */
+	  else
+	    input_string[i++] = c;
+	  pass_next = 0;
+	  continue;
+	}
+
+      if (c == '\\' && !raw_mode)
+	{
+	  pass_next++;
+	  saw_escape++;
+	  input_string[i++] = CTLESC;
+	  continue;
+	}
+
+      if (c == '\n')
+	break;
+
+      if (c == CTLESC || c == CTLNUL)
+	input_string[i++] = CTLESC;
+
+      input_string[i++] = c;
+    }
+  input_string[i] = '\0';
+
+  interrupt_immediately--;
+  discard_unwind_frame ("read_builtin");
+
+  fclose (input_stream);
+
+  if (c == EOF)
+    {
+      retval = EXECUTION_FAILURE;
+      input_string[0] = '\0';
+    }
+  else
+    retval = EXECUTION_SUCCESS;
+
+#if defined (ARRAY_VARS)
+  /* If -a was given, take the string read, break it into a list of words,
+     an assign them to `arrayname' in turn. */
+  if (arrayname)
+    {
+      v = find_variable (arrayname);
+      if (v == 0)
+        v = make_new_array_variable (arrayname);
+      else if (array_p (v) == 0)
+        v = convert_var_to_array (v);
+
+      alist = list_string (input_string, " \t\n", 0);
+      if (alist)
+	{
+	  assign_word_list (array_cell (v), alist);
+	  dispose_words (alist);
+	}
+      free (input_string);
+      return (retval);
+    }
+#endif /* ARRAY_VARS */ 
+
+  if (!list)
+    {
+      SHELL_VAR *var;
+      char *t;
+
+      if (saw_escape)
+	{
+	  t = dequote_string (input_string);
+	  var = bind_variable ("REPLY", t);
+	  free (t);
+	}
+      else
+	var = bind_variable ("REPLY", input_string);
+      var->attributes &= ~att_invisible;
+      free (input_string);
+    }
+  else
+    {
+      SHELL_VAR *var;
+      char *t;
+      /* This code implements the Posix.2 spec for splitting the words
+	 read and assigning them to variables.  If $IFS is unset, we
+	 use the default value of " \t\n". */
+      if (!ifs_chars)
+	ifs_chars = "";
+
+      orig_input_string = input_string;
+      while (list->next)
+	{
+	  char *e, *t1;
+
+	  varname = list->word->word;
+
+	  /* If there are more variables than words read from the input,
+	     the remaining variables are set to the empty string. */
+	  if (*input_string)
+	    {
+	      /* This call updates INPUT_STRING. */
+	      t = get_word_from_string (&input_string, ifs_chars, &e);
+	      if (t)
+		*e = '\0';
+	      /* Don't bother to remove the CTLESC unless we added one
+		 somewhere while reading the string. */
+	      if (t && saw_escape)
+		{
+		  t1 = dequote_string (t);
+		  var = bind_variable (varname, t1);
+		  free (t1);
+		}
+	      else
+		var = bind_variable (varname, t);
+	    }
+	  else
+	    {
+	      t = (char *)0;
+	      var = bind_variable (varname, "");
+	    }
+
+	  stupidly_hack_special_variables (varname);
+	  var->attributes &= ~att_invisible;
+
+	  if (t)
+	    free (t);
+
+	  list = list->next;
+	}
+
+      if (saw_escape)
+	{
+	  t = dequote_string (input_string);
+	  var = bind_variable (list->word->word, t);
+	  free (t);
+	}
+      else
+	var = bind_variable (list->word->word, input_string);
+      stupidly_hack_special_variables (list->word->word);
+      var->attributes &= ~att_invisible;
+      free (orig_input_string);
+    }
+
+  return (retval);
+}
+
+/* This way I don't have to know whether fclose () is a
+   function or a macro. */
+static int
+stream_close (file)
+     FILE *file;
+{
+  return (fclose (file));
+}

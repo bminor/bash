@@ -36,6 +36,8 @@
 #include "posixstat.h"
 #include "filecntl.h"
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include "flags.h"
 #include "input.h"
@@ -214,7 +216,7 @@ bash_initialize_history ()
   history_quotes_inhibit_expansion = 1;
   history_search_delimiter_chars = ";&()|<>";
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
-  history_comment_char = '#';
+  sv_histchars ("histchars");
 }
 
 void
@@ -316,7 +318,7 @@ maybe_append_history (filename)
 	  fd = open (filename, O_WRONLY|O_CREAT, 0600);
 	  if (fd < 0)
 	    {
-	      builtin_error ("%s: cannot create: %s", filename, strerror (errno));
+	      builtin_error (_("%s: cannot create: %s"), filename, strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  close (fd);

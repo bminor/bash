@@ -1,7 +1,7 @@
 This file is break.def, from which is created break.c.
 It implements the builtins "break" and "continue" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2003 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,6 +35,8 @@ $END
 #  endif
 #  include <unistd.h>
 #endif
+
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "common.h"
@@ -123,7 +125,7 @@ check_loop_level ()
 {
 #if defined (BREAK_COMPLAINS)
   if (loop_level == 0 && posixly_correct == 0)
-    builtin_error ("only meaningful in a `for', `while', or `until' loop");
+    builtin_error (_("only meaningful in a `for', `while', or `until' loop"));
 #endif /* BREAK_COMPLAINS */
 
   return (loop_level);

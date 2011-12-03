@@ -40,6 +40,7 @@
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "maxpath.h"
@@ -129,7 +130,7 @@ no_args (list)
 {
   if (list)
     {
-      builtin_error ("too many arguments");
+      builtin_error (_("too many arguments"));
       jump_to_top_level (DISCARD);
     }
 }
@@ -153,21 +154,21 @@ void
 sh_needarg (s)
      char *s;
 {
-  builtin_error ("%s: option requires an argument", s);
+  builtin_error (_("%s: option requires an argument"), s);
 }
 
 void
 sh_neednumarg (s)
      char *s;
 {
-  builtin_error ("%s: numeric argument required", s);
+  builtin_error (_("%s: numeric argument required"), s);
 }
 
 void
 sh_notfound (s)
      char *s;
 {
-  builtin_error ("%s: not found", s);
+  builtin_error (_("%s: not found"), s);
 }
 
 /* Function called when one of the builtin commands detects an invalid
@@ -176,49 +177,49 @@ void
 sh_invalidopt (s)
      char *s;
 {
-  builtin_error ("%s: invalid option", s);
+  builtin_error (_("%s: invalid option"), s);
 }
 
 void
 sh_invalidoptname (s)
      char *s;
 {
-  builtin_error ("%s: invalid option name", s);
+  builtin_error (_("%s: invalid option name"), s);
 }
 
 void
 sh_invalidid (s)
      char *s;
 {
-  builtin_error ("`%s': not a valid identifier", s);
+  builtin_error (_("`%s': not a valid identifier"), s);
 }
 
 void
 sh_invalidnum (s)
      char *s;
 {
-  builtin_error ("%s: invalid number", s);
+  builtin_error (_("%s: invalid number"), s);
 }
 
 void
 sh_invalidsig (s)
      char *s;
 {
-  builtin_error ("%s: invalid signal specification", s);
+  builtin_error (_("%s: invalid signal specification"), s);
 }
 
 void
 sh_badpid (s)
      char *s;
 {
-  builtin_error ("`%s': not a pid or valid job spec", s);
+  builtin_error (_("`%s': not a pid or valid job spec"), s);
 }
 
 void
 sh_readonly (s)
      const char *s;
 {
-  builtin_error ("%s: readonly variable", s);
+  builtin_error (_("%s: readonly variable"), s);
 }
 
 void
@@ -226,9 +227,9 @@ sh_erange (s, desc)
      char *s, *desc;
 {
   if (s)
-    builtin_error ("%s: %s out of range", s, desc ? desc : "argument");
+    builtin_error (_("%s: %s out of range"), s, desc ? desc : _("argument"));
   else
-    builtin_error ("%s out of range", desc ? desc : "argument");
+    builtin_error (_("%s out of range"), desc ? desc : _("argument"));
 }
 
 #if defined (JOB_CONTROL)
@@ -236,7 +237,7 @@ void
 sh_badjob (s)
      char *s;
 {
-  builtin_error ("%s: no such job", s);
+  builtin_error (_("%s: no such job"), s);
 }
 
 void
@@ -244,9 +245,9 @@ sh_nojobs (s)
      char *s;
 {
   if (s)
-    builtin_error ("%s: no job control", s);
+    builtin_error (_("%s: no job control"), s);
   else
-    builtin_error ("no job control");
+    builtin_error (_("no job control"));
 }
 #endif
 
@@ -256,11 +257,18 @@ sh_restricted (s)
      char *s;
 {
   if (s)
-    builtin_error ("%s: restricted", s);
+    builtin_error (_("%s: restricted"), s);
   else
-    builtin_error ("restricted");
+    builtin_error (_("restricted"));
 }
 #endif
+
+void
+sh_notbuiltin (s)
+     char *s;
+{
+  builtin_error (_("%s: not a shell builtin"), s);
+}
 
 /* **************************************************************** */
 /*								    */
@@ -470,9 +478,9 @@ get_working_directory (for_whom)
       directory = getcwd (the_current_working_directory, PATH_MAX);
       if (directory == 0)
 	{
-	  fprintf (stderr, "%s: could not get current directory: %s: %s\n",
+	  fprintf (stderr, _("%s: could not get current directory: %s: %s\n"),
 		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
-		   bash_getcwd_errstr, strerror (errno));
+		   _(bash_getcwd_errstr), strerror (errno));
 
 	  free (the_current_working_directory);
 	  the_current_working_directory = (char *)NULL;
@@ -537,9 +545,9 @@ get_job_by_name (name, flags)
 	  else if (job != NO_JOB)
 	    {
 	      if (this_shell_builtin)
-	        builtin_error ("%s: ambiguous job spec", name);
+	        builtin_error (_("%s: ambiguous job spec"), name);
 	      else
-	        report_error ("%s: ambiguous job spec", name);
+	        report_error (_("%s: ambiguous job spec"), name);
 	      return (DUP_JOB);
 	    }
 	  else

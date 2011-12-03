@@ -52,6 +52,8 @@
 #  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
 #endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
+#include "bashintl.h"
+
 #include "shell.h"
 #include "jobs.h"
 
@@ -63,9 +65,9 @@
 #  define killpg(pg, sig)		kill(-(pg),(sig))
 #endif /* USG || _POSIX_VERSION */
 
-#if !defined (HAVE_SIGINTERRUPT)
+#if !defined (HAVE_SIGINTERRUPT) && !defined (HAVE_POSIX_SIGNALS)
 #  define siginterrupt(sig, code)
-#endif /* !HAVE_SIGINTERRUPT */
+#endif /* !HAVE_SIGINTERRUPT && !HAVE_POSIX_SIGNALS */
 
 #if defined (HAVE_WAITPID)
 #  define WAITPID(pid, statusp, options) waitpid (pid, statusp, options)
@@ -153,6 +155,10 @@ static char *j_strsignal __P((int));
 
 #if defined (HAVE_WAITPID)
 static void reap_zombie_children __P((void));
+#endif
+
+#if !defined (HAVE_SIGINTERRUPT) && defined (HAVE_POSIX_SIGNALS)
+static int siginterrupt __P((int, int));
 #endif
 
 static void restore_sigint_handler __P((void));
@@ -494,15 +500,33 @@ initialize_job_signals ()
 static void
 reap_zombie_children ()
 {
-#if defined (WNOHANG)
+#  if defined (WNOHANG)
   pid_t pid;
   WAIT status;
 
   while ((pid = waitpid (-1, (int *)&status, WNOHANG)) > 0)
     set_pid_status (pid, status);
-#endif
+#  endif /* WNOHANG */
 }
-#endif /* WAITPID && WNOHANG */
+#endif /* WAITPID */
+
+#if !defined (HAVE_SIGINTERRUPT) && defined (HAVE_POSIX_SIGNALS)
+static int
+siginterrupt (sig, flag)
+     int sig, flag;
+{
+  struct sigaction act;
+
+  sigaction (sig, (struct sigaction *)NULL, &act);
+
+  if (flag)
+    act.sa_flags &= ~SA_RESTART;
+  else
+    act.sa_flags |= SA_RESTART;
+
+  return (sigaction (sig, &act, (struct sigaction *)NULL));
+}
+#endif /* !HAVE_SIGINTERRUPT && HAVE_POSIX_SIGNALS */
 
 /* Fork, handling errors.  Returns the pid of the newly made child, or 0.
    COMMAND is just for remembering the name of the command; we don't do
@@ -621,7 +645,7 @@ wait_for_single_pid (pid)
 
   if (pstatus == PROC_BAD)
     {
-      internal_error ("wait: pid %ld is not a child of this shell", (long)pid);
+      internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
       return (127);
     }
 

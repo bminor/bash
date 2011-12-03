@@ -26,6 +26,7 @@ include		d
 lib		d
 lib/glob	d
 lib/glob/doc	d
+lib/intl	d
 lib/malloc	d
 lib/readline	d
 lib/readline/doc d
@@ -35,9 +36,11 @@ lib/termcap	d
 lib/termcap/grot d
 lib/tilde	d
 lib/tilde/doc	d
+po		d
 support		d
 tests		d
 tests/misc	d
+ABOUT-NLS	f
 CHANGES		f
 COMPAT		f
 COPYING		f
@@ -208,6 +211,7 @@ cross-build/opennt.cache	f
 include/ansi_stdlib.h	f
 include/chartypes.h	f
 include/filecntl.h	f
+include/gettext.h	f
 include/maxpath.h	f
 include/memalloc.h	f
 include/ocache.h	f
@@ -235,6 +239,47 @@ lib/glob/collsyms.h	f
 lib/glob/doc/Makefile	f
 lib/glob/doc/glob.texi	f
 lib/glob/ndir.h		f
+lib/intl/ChangeLog	f
+lib/intl/Makefile.in	f
+lib/intl/VERSION	f
+lib/intl/bindtextdom.c	f
+lib/intl/config.charset	f
+lib/intl/dcgettext.c	f
+lib/intl/dcigettext.c	f
+lib/intl/dcngettext.c	f
+lib/intl/dgettext.c	f
+lib/intl/dngettext.c	f
+lib/intl/eval-plural.h	f
+lib/intl/explodename.c	f
+lib/intl/finddomain.c	f
+lib/intl/gettext.c	f
+lib/intl/gettextP.h	f
+lib/intl/gmo.h		f
+lib/intl/hash-string.h	f
+lib/intl/intl-compat.c	f
+lib/intl/l10nflist.c	f
+lib/intl/libgnuintl.h.in	f
+lib/intl/loadinfo.h	f
+lib/intl/loadmsgcat.c	f
+lib/intl/localcharset.c	f
+lib/intl/localcharset.h	f
+lib/intl/locale.alias	f
+lib/intl/localealias.c	f
+lib/intl/localename.c	f
+lib/intl/log.c		f
+lib/intl/ngettext.c	f
+lib/intl/os2compat.c	f
+lib/intl/os2compat.h	f
+lib/intl/osdep.c	f
+lib/intl/plural-exp.c	f
+lib/intl/plural-exp.h	f
+lib/intl/plural.c	f
+lib/intl/plural.y	f
+lib/intl/ref-add.sin	f
+lib/intl/ref-del.sin	f
+lib/intl/relocatable.c	f
+lib/intl/relocatable.h	f
+lib/intl/textdomain.c	f
 lib/malloc/Makefile.in	f
 lib/malloc/getpagesize.h	f
 lib/malloc/imalloc.h	f
@@ -410,6 +455,24 @@ lib/tilde/doc/Makefile	f
 lib/tilde/tilde.c	f
 lib/tilde/tilde.h	f
 lib/tilde/shell.c	f
+po/LINGUAS		f
+po/Makefile.in.in	f
+po/Makevars		f
+po/POTFILES.in		f
+po/Rules-builtins	f
+po/Rules-quot		f
+po/bash.pot		f
+po/boldquot.sed		f
+po/builtins.pot		f
+po/en@quot.header	f
+po/en@boldquot.header	f
+po/en@quot.po		f
+po/en@boldquot.po	f
+po/en@quot.gmo		f
+po/en@boldquot.gmo	f
+po/insert-header.sin	f
+po/quot.sed		f
+po/remove-potcdate.sin	f
 CWRU/misc/open-files.c	f
 CWRU/misc/sigs.c	f
 CWRU/misc/sigstat.c	f
@@ -441,6 +504,7 @@ doc/fdl.txt	f
 support/Makefile.in	f
 support/bashversion.c	f
 support/config.guess	f
+support/config.rpath	f	755
 support/config.sub	f
 support/printenv.sh	f	755
 support/printenv.c	f
@@ -449,6 +513,7 @@ support/missing		f	755
 support/mkclone		f	755
 support/mkconffiles	f	755
 support/mkdirs		f	755
+support/mkinstalldirs	f	755
 support/mkversion.sh	f	755
 support/mksignames.c	f
 support/bashbug.sh	f

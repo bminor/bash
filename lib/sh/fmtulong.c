@@ -44,6 +44,8 @@
 #include <chartypes.h>
 #include <errno.h>
 
+#include <bashintl.h>
+
 #include "stdc.h"
 
 #include <typemax.h>
@@ -96,7 +98,7 @@ fmtulong (ui, base, buf, len, flags)
   if (base < 2 || base > 64)
     {
 #if 1
-      strncpy (buf, "invalid base", len - 1);
+      strncpy (buf, _("invalid base"), len - 1);
       buf[len] = '\0';
       errno = EINVAL;
       return (p = buf);
