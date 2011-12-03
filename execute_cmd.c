@@ -1,6 +1,6 @@
 /* execute_command.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1635,7 +1635,7 @@ execute_for_command (for_command)
 #endif
 
       this_command_name = (char *)NULL;
-      v = bind_variable (identifier, list->word->word);
+      v = bind_variable (identifier, list->word->word, 0);
       if (readonly_p (v) || noassign_p (v))
 	{
 	  line_number = save_line_number;
@@ -1682,7 +1682,7 @@ execute_for_command (for_command)
 	{
 	  SHELL_VAR *new_value;
 
-	  new_value = bind_variable (identifier, value_cell(old_value));
+	  new_value = bind_variable (identifier, value_cell(old_value), 0);
 	  new_value->attributes = old_value->attributes;
 	  dispose_variable (old_value);
 	}
@@ -2089,7 +2089,7 @@ execute_select_command (select_command)
 	  break;
 	}
 
-      v = bind_variable (identifier, selection);
+      v = bind_variable (identifier, selection, 0);
       if (readonly_p (v) || noassign_p (v))
 	{
 	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
@@ -2566,7 +2566,7 @@ bind_lastarg (arg)
 
   if (arg == 0)
     arg = "";
-  var = bind_variable ("_", arg);
+  var = bind_variable ("_", arg, 0);
   VUNSETATTR (var, att_exported);
 }
 

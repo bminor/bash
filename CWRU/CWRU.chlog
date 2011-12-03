@@ -10475,3 +10475,79 @@ lib/readline/display.c
 	  locale, it's used as an absolute cursor position; when not using
 	  multibyte characters, it's a buffer offset.  I should have caught
 	  this when the multibyte character support was donated
+
+				   11/5
+				   ----
+general.c
+	- change `assignment()' to accept `+=' assignment operator
+
+arrayfunc.[ch]
+	- bind_array_variable and assign_array_element both take a new `flags'
+	  argument
+	- assign_array_var_from_string, assign_array_from_string, and
+	  assign_array_var_from_word_list now all take a new `flags' argument
+	- change assign_array_var_from_word_list to understand how to append
+	  to an array variable
+	- change assign_array_var_from_string to understand how to append
+	  to an array variable.  It does not unset the previous value if
+	  appending, allowing both old values to be changed and new ones to
+	  be added
+
+subst.h
+	- new flag #defines to use for evaluating assignment statements
+
+{subst,variables}.c, builtins/{declare,read}.def
+	- change callers of assign_array_element and bind_array_variable
+	- change do_compound_assignment to understand assignment flags
+	- change do_assignment_internal to set assignment flags and pass them
+	  to underlying functions
+
+pcomplete.c,builtins/{declare,read}.def
+	- fix callers of assign_array_var_from_string, assign_array_var_from_word_list
+
+variables.[ch]
+	- make_variable_value now takes a new `flags' argument
+	- make_variable_value now understands how to append to a particular
+	  variable, using the old value
+	- bind_variable_value now takes a new `flags' argument
+	- change make_variable_value to understand ASS_APPEND flag
+	- bind_variable now takes a new `flags' argument
+	- bind_variable_internal now takes a new `flags' argument
+
+arrayfunc.c
+	- change callers of make_variable_value to add flags arg
+
+builtins/declare.def
+	- change callers of bind_variable_value to add flags arg
+
+{execute_cmd,mailcheck,pcomplete,shell,subst,variables}.c,parse.y
+builtins/{cd,command,declare,getopts,read,set,setattr}.def
+	- change callers of bind_variable to add flags arg
+
+variables.c
+	- change callers of bind_variable_internal
+	- change bind_variable_internal to pass assignment flags on to
+	  make_variable_value
+	- change assign_in_env to treat `var+=value' like `var=value'
+
+arrayfunc.c
+	- break code that actually constructs the new value and assigns it
+	  to a particular array index out into a new functions:
+	  bind_array_var_internal.  This fakes out make_variable_value by
+	  passing a dummy SHELL_VAR * so it can do proper appending and other
+	  += processing
+	- changes to assign_array_var_from_string to accept and process as if
+	  they were `standalone' assignment statements array assignment words
+	  of the form [ind]+=val
+
+				   11/7
+				   ----
+builtins/declare.def
+	- added support for `declare [flags] var+=value'.  `Flags' are applied
+	  before the assignment is performed, which has implications for things
+	  like `-i' -- if -i is supplied, arithmetic evaluation and increment
+	  will be performed
+
+builtins/setattr.def
+	- add support for `+=' assignment for rest of `assignment builtins':
+	  export, readonly

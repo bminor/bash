@@ -511,7 +511,7 @@ main (argc, argv, env)
      alias expansion in non-interactive shells, and other Posix.2 things. */
   if (posixly_correct)
     {
-      bind_variable ("POSIXLY_CORRECT", "y");
+      bind_variable ("POSIXLY_CORRECT", "y", 0);
       sv_strict_posix ("POSIXLY_CORRECT");
     }
 
@@ -610,7 +610,7 @@ main (argc, argv, env)
   /* If we are invoked as `sh', turn on Posix mode. */
   if (act_like_sh)
     {
-      bind_variable ("POSIXLY_CORRECT", "y");
+      bind_variable ("POSIXLY_CORRECT", "y", 0);
       sv_strict_posix ("POSIXLY_CORRECT");
     }
 

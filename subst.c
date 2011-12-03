@@ -2143,22 +2143,24 @@ list_string_with_quotes (string)
 
 #if defined (ARRAY_VARS)
 static SHELL_VAR *
-do_compound_assignment (name, value, mklocal)
+do_compound_assignment (name, value, flags)
      char *name, *value;
-     int mklocal;
+     int flags;
 {
   SHELL_VAR *v;
-  int off;
+  int off, mklocal;
+
+  mklocal = flags & ASS_MKLOCAL;
 
   if (mklocal && variable_context)
     {
       v = find_variable (name);
       if (v == 0 || array_p (v) == 0)
         v = make_local_array_variable (name);
-      v = assign_array_var_from_string (v, value);
+      v = assign_array_var_from_string (v, value, flags);
     }
   else
-    v = assign_array_from_string (name, value);
+    v = assign_array_from_string (name, value, flags);
 
   return (v);
 }
@@ -2174,19 +2176,19 @@ do_assignment_internal (word, expand)
      const WORD_DESC *word;
      int expand;
 {
-  int offset, tlen;
-  char *name, *value;
+  int offset, tlen, appendop, assign_list, aflags;
+  char *name, *value, *ovalue, *nvalue;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
   int ni;
 #endif
-  int assign_list = 0;
   const char *string;
 
   if (word == 0 || word->word == 0)
     return 0;
 
+  appendop = assign_list = aflags = 0;
   string = word->word;
   offset = assignment (string, 0);
   name = savestring (string);
@@ -2196,7 +2198,13 @@ do_assignment_internal (word, expand)
     {
       char *temp;
 
-      name[offset] = 0;
+      if (name[offset - 1] == '+')
+	{
+	  appendop = 1;
+	  name[offset - 1] = '\0';
+	}
+
+      name[offset] = 0;		/* might need this set later */
       temp = name + offset + 1;
       tlen = STRLEN (temp);
 
@@ -2226,9 +2234,18 @@ do_assignment_internal (word, expand)
     }
 
   if (echo_command_at_execute)
-     xtrace_print_assignment (name, value, assign_list, 1);
+    {
+      if (appendop)
+	name[offset - 1] = '+';
+      xtrace_print_assignment (name, value, assign_list, 1);
+      if (appendop)
+	name[offset - 1] = '\0';
+    }
 
 #define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
+
+  if (appendop)
+    aflags |= ASS_APPEND;
 
 #if defined (ARRAY_VARS)
   if (t = xstrchr (name, '['))	/*]*/
@@ -2238,15 +2255,19 @@ do_assignment_internal (word, expand)
 	  report_error (_("%s: cannot assign list to array member"), name);
 	  ASSIGN_RETURN (0);
 	}
-      entry = assign_array_element (name, value);
+      entry = assign_array_element (name, value, aflags);
       if (entry == 0)
 	ASSIGN_RETURN (0);
     }
   else if (assign_list)
-    entry = do_compound_assignment (name, value, (word->flags & W_ASSIGNARG));
+    {
+      if (word->flags & W_ASSIGNARG)
+	aflags |= ASS_MKLOCAL;
+      entry = do_compound_assignment (name, value, aflags);
+    }
   else
 #endif /* ARRAY_VARS */
-  entry = bind_variable (name, value);
+  entry = bind_variable (name, value, aflags);
 
   stupidly_hack_special_variables (name);
 
@@ -4854,10 +4875,10 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   free (t);
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name))
-    assign_array_element (name, t1);
+    assign_array_element (name, t1, 0);
   else
 #endif /* ARRAY_VARS */
-  bind_variable (name, t1);
+  bind_variable (name, t1, 0);
   free (t1);
   return (temp);
 }

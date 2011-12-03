@@ -31,13 +31,17 @@
    to unconditionally retain the backslash.  Q_PATQUOTE means that we're
    expanding a pattern ${var%#[#%]pattern} in an expansion surrounded
    by double quotes. */
-#define Q_DOUBLE_QUOTES  0x1
-#define Q_HERE_DOCUMENT  0x2
-#define Q_KEEP_BACKSLASH 0x4
-#define Q_PATQUOTE	 0x8
+#define Q_DOUBLE_QUOTES  0x01
+#define Q_HERE_DOCUMENT  0x02
+#define Q_KEEP_BACKSLASH 0x04
+#define Q_PATQUOTE	 0x08
 #define Q_QUOTED	 0x10
 #define Q_ADDEDQUOTES	 0x20
 #define Q_QUOTEDNULL	 0x40
+
+/* Flag values controlling how assignment statements are treated. */
+#define ASS_APPEND	0x01
+#define ASS_MKLOCAL	0x02
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
@@ -98,6 +102,7 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
    splitting on the result of expansion. */
 extern int do_assignment __P((char *));
 extern int do_assignment_no_expand __P((char *));
+extern int do_word_assignment __P((WORD_DESC *));
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which

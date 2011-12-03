@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,13 +31,17 @@
    to unconditionally retain the backslash.  Q_PATQUOTE means that we're
    expanding a pattern ${var%#[#%]pattern} in an expansion surrounded
    by double quotes. */
-#define Q_DOUBLE_QUOTES  0x1
-#define Q_HERE_DOCUMENT  0x2
-#define Q_KEEP_BACKSLASH 0x4
-#define Q_PATQUOTE	 0x8
+#define Q_DOUBLE_QUOTES  0x01
+#define Q_HERE_DOCUMENT  0x02
+#define Q_KEEP_BACKSLASH 0x04
+#define Q_PATQUOTE	 0x08
 #define Q_QUOTED	 0x10
 #define Q_ADDEDQUOTES	 0x20
 #define Q_QUOTEDNULL	 0x40
+
+/* Flag values controlling how assignment statements are treated. */
+#define ASS_APPEND	0x01
+#define ASS_MKLOCAL	0x02
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */

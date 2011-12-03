@@ -243,9 +243,7 @@ char	*s;
 {
 	register ARRAY_ELEMENT	*ae, *new;
 
-	if (a == 0)
-		return 0;
-	else if (array_empty(a) && s == 0)
+	if (a == 0 || (array_empty(a) && s == 0))
 		return 0;
 	else if (n <= 0)
 		return (a->num_elements);
@@ -558,6 +556,7 @@ ARRAY	*a;
 	return (REVERSE_LIST(list, WORD_LIST *));
 }
 
+/* XXX - changes needed to support `+=' */
 ARRAY *
 array_assign_list (array, list)
 ARRAY	*array;

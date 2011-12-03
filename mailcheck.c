@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -385,7 +385,7 @@ check_mail ()
 	  use_user_notification = mailfiles[i]->msg != (char *)NULL;
 	  message = mailfiles[i]->msg ? mailfiles[i]->msg : _("You have mail in $_");
 
-	  bind_variable ("_", current_mail_file);
+	  bind_variable ("_", current_mail_file, 0);
 
 #define atime mailfiles[i]->access_time
 #define mtime mailfiles[i]->mod_time
@@ -430,7 +430,7 @@ check_mail ()
 
   if (dollar_underscore)
     {
-      bind_variable ("_", dollar_underscore);
+      bind_variable ("_", dollar_underscore, 0);
       free (dollar_underscore);
     }
   else

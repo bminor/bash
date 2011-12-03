@@ -862,7 +862,7 @@ bind_comp_words (lwords)
     VUNSETATTR (v, att_readonly);
   if (array_p (v) == 0)
     v = convert_var_to_array (v);
-  v = assign_array_var_from_word_list (v, lwords);
+  v = assign_array_var_from_word_list (v, lwords, 0);
 
   VUNSETATTR (v, att_invisible);
   return v;
@@ -882,7 +882,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
 
   /* Set the variables that the function expects while it executes.  Maybe
      these should be in the function environment (temporary_env). */
-  v = bind_variable ("COMP_LINE", line);
+  v = bind_variable ("COMP_LINE", line, 0);
   if (v && exported)
     VSETATTR(v, att_exported);
 

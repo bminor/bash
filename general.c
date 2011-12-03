@@ -288,9 +288,15 @@ assignment (string, flags)
 	  newi = skipsubscript (string, indx);
 	  if (string[newi++] != ']')
 	    return (0);
+	  if (string[newi] == '+' && string[newi+1] == '=')
+	    return (newi + 1);
 	  return ((string[newi] == '=') ? newi : 0);
 	}
 #endif /* ARRAY_VARS */
+
+      /* Check for `+=' */
+      if (c == '+' && string[indx+1] == '=')
+	return (indx + 1);
 
       /* Variable names in assignment statements may contain only letters,
 	 digits, and `_'. */

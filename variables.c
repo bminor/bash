@@ -199,7 +199,7 @@ static void initialize_dynamic_variables __P((void));
 static SHELL_VAR *hash_lookup __P((const char *, HASH_TABLE *));
 static SHELL_VAR *new_shell_variable __P((const char *));
 static SHELL_VAR *make_new_variable __P((const char *, HASH_TABLE *));
-static SHELL_VAR *bind_variable_internal __P((const char *, char *, HASH_TABLE *, int));
+static SHELL_VAR *bind_variable_internal __P((const char *, char *, HASH_TABLE *, int, int));
 
 static void free_variable_hash_data __P((PTR_T));
 
@@ -333,7 +333,7 @@ initialize_shell_variables (env, privmode)
 #endif
       else
 	{
-	  temp_var = bind_variable (name, string);
+	  temp_var = bind_variable (name, string, 0);
 	  VSETATTR (temp_var, (att_exported | att_imported));
 	  array_needs_making = 1;
 	}
@@ -350,7 +350,7 @@ initialize_shell_variables (env, privmode)
   set_pwd ();
 
   /* Set up initial value of $_ */
-  temp_var = bind_variable ("_", dollar_vars[0]);
+  temp_var = bind_variable ("_", dollar_vars[0], 0);
 
   /* Remember this pid. */
   dollar_dollar_pid = getpid ();
@@ -372,7 +372,7 @@ initialize_shell_variables (env, privmode)
   {
     char node_name[22];
     qnx_nidtostr (getnid (), node_name, sizeof (node_name));
-    temp_var = bind_variable ("NODE", node_name);
+    temp_var = bind_variable ("NODE", node_name, 0);
     set_auto_export (temp_var);
   }
 #endif
@@ -392,7 +392,7 @@ initialize_shell_variables (env, privmode)
   set_if_not ("PS4", "+ ");
 
   /* Don't allow IFS to be imported from the environment. */
-  temp_var = bind_variable ("IFS", " \t\n");
+  temp_var = bind_variable ("IFS", " \t\n", 0);
   setifs (temp_var);
 
   /* Magic machine types.  Pretty convenient. */
@@ -411,9 +411,9 @@ initialize_shell_variables (env, privmode)
   set_ppid ();
 
   /* Initialize the `getopts' stuff. */
-  bind_variable ("OPTIND", "1");
+  bind_variable ("OPTIND", "1", 0);
   getopts_reset (0);
-  bind_variable ("OPTERR", "1");
+  bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
 
   if (login_shell == 1)
@@ -422,7 +422,7 @@ initialize_shell_variables (env, privmode)
   /* Get the full pathname to THIS shell, and set the BASH variable
      to it. */
   name = get_bash_name ();
-  temp_var = bind_variable ("BASH", name);
+  temp_var = bind_variable ("BASH", name, 0);
   free (name);
 
   /* Make the exported environment variable SHELL be the user's login
@@ -432,13 +432,13 @@ initialize_shell_variables (env, privmode)
   set_shell_var ();
 
   /* Make a variable called BASH_VERSION which contains the version info. */
-  bind_variable ("BASH_VERSION", shell_version_string ());
+  bind_variable ("BASH_VERSION", shell_version_string (), 0);
 #if defined (ARRAY_VARS)
   make_vers_array ();
 #endif
 
   if (command_execution_string)
-    bind_variable ("BASH_EXECUTION_STRING", command_execution_string);
+    bind_variable ("BASH_EXECUTION_STRING", command_execution_string, 0);
 
   /* Find out if we're supposed to be in Posix.2 mode via an
      environment variable. */
@@ -556,7 +556,7 @@ set_home_var ()
 
   temp_var = find_variable ("HOME");
   if (temp_var == 0)
-    temp_var = bind_variable ("HOME", sh_get_home_dir ());
+    temp_var = bind_variable ("HOME", sh_get_home_dir (), 0);
 #if 0
   VSETATTR (temp_var, att_exported);
 #endif
@@ -574,7 +574,7 @@ set_shell_var ()
     {
       if (current_user.shell == 0)
 	get_current_user_info ();
-      temp_var = bind_variable ("SHELL", current_user.shell);
+      temp_var = bind_variable ("SHELL", current_user.shell, 0);
     }
 #if 0
   VSETATTR (temp_var, att_exported);
@@ -696,7 +696,7 @@ adjust_shell_level (change)
       new_level[3] = '\0';
     }
 
-  temp_var = bind_variable ("SHLVL", new_level);
+  temp_var = bind_variable ("SHLVL", new_level, 0);
   set_auto_export (temp_var);
 }
 
@@ -731,7 +731,7 @@ set_pwd ()
 	   same_file (home_string, ".", (struct stat *)NULL, (struct stat *)NULL))
     {
       set_working_directory (home_string);
-      temp_var = bind_variable ("PWD", home_string);
+      temp_var = bind_variable ("PWD", home_string, 0);
       set_auto_export (temp_var);
     }
   else
@@ -739,7 +739,7 @@ set_pwd ()
       temp_string = get_working_directory ("shell-init");
       if (temp_string)
 	{
-	  temp_var = bind_variable ("PWD", temp_string);
+	  temp_var = bind_variable ("PWD", temp_string, 0);
 	  set_auto_export (temp_var);
 	  free (temp_string);
 	}
@@ -748,7 +748,7 @@ set_pwd ()
   /* According to the Single Unix Specification, v2, $OLDPWD is an
      `environment variable' and therefore should be auto-exported.
      Make a dummy invisible variable for OLDPWD, and mark it as exported. */
-  temp_var = bind_variable ("OLDPWD", (char *)NULL);
+  temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
   VSETATTR (temp_var, (att_exported | att_invisible));
 }
 
@@ -763,7 +763,7 @@ set_ppid ()
   temp_var = find_variable ("PPID");
   if (temp_var)
     VUNSETATTR (temp_var, (att_readonly | att_exported));
-  temp_var = bind_variable ("PPID", name);
+  temp_var = bind_variable ("PPID", name, 0);
   VSETATTR (temp_var, (att_readonly | att_integer));
 }
 
@@ -777,7 +777,7 @@ uidset ()
   v = find_variable ("UID");
   if (v == 0)
     {
-      v = bind_variable ("UID", b);
+      v = bind_variable ("UID", b, 0);
       VSETATTR (v, (att_readonly | att_integer));
     }
 
@@ -787,7 +787,7 @@ uidset ()
   v = find_variable ("EUID");
   if (v == 0)
     {
-      v = bind_variable ("EUID", b);
+      v = bind_variable ("EUID", b, 0);
       VSETATTR (v, (att_readonly | att_integer));
     }
 }
@@ -830,10 +830,10 @@ sh_set_lines_and_columns (lines, cols)
   char val[INT_STRLEN_BOUND(int) + 1], *v;
 
   v = inttostr (lines, val, sizeof (val));
-  bind_variable ("LINES", v);
+  bind_variable ("LINES", v, 0);
 
   v = inttostr (cols, val, sizeof (val));
-  bind_variable ("COLUMNS", v);
+  bind_variable ("COLUMNS", v, 0);
 }
 
 /* **************************************************************** */
@@ -983,7 +983,7 @@ print_var_function (var)
 #define INIT_DYNAMIC_VAR(var, val, gfunc, afunc) \
   do \
     { \
-      v = bind_variable (var, (val)); \
+      v = bind_variable (var, (val), 0); \
       v->dynamic_value = gfunc; \
       v->assign_func = afunc; \
     } \
@@ -1589,7 +1589,7 @@ set_if_not (name, value)
 
   v = find_variable (name);
   if (v == 0)
-    v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH);
+    v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH, 0);
   return (v);
 }
 
@@ -1643,7 +1643,7 @@ make_local_variable (name)
     }
 
   if (old_var == 0)
-    new_var = bind_variable_internal (name, "", vc->table, HASH_NOSRCH);
+    new_var = bind_variable_internal (name, "", vc->table, HASH_NOSRCH, 0);
   else
     {
       new_var = make_new_variable (name, vc->table);
@@ -1758,13 +1758,14 @@ make_new_array_variable (name)
 #endif
 
 char *
-make_variable_value (var, value)
+make_variable_value (var, value, flags)
      SHELL_VAR *var;
      char *value;
+     int flags;
 {
-  char *retval;
-  intmax_t lval;
-  int expok;
+  char *retval, *oval;
+  intmax_t lval, rval;
+  int expok, olen;
 
   /* If this variable has had its type set to integer (via `declare -i'),
      then do expression evaluation on it and store the result.  The
@@ -1773,14 +1774,34 @@ make_variable_value (var, value)
      evaluation done. */
   if (integer_p (var))
     {
-      lval = evalexp (value, &expok);
+      if (flags & ASS_APPEND)
+	{
+	  oval = value_cell (var);
+	  lval = evalexp (oval, &expok);	/* ksh93 seems to do this */
+	  if (expok == 0)
+	    jump_to_top_level (DISCARD);
+	}
+      rval = evalexp (value, &expok);
       if (expok == 0)
 	jump_to_top_level (DISCARD);
-      retval = itos (lval);
+      if (flags & ASS_APPEND)
+	rval += lval;
+      retval = itos (rval);
     }
   else if (value)
     {
-      if (*value)
+      if (flags & ASS_APPEND)
+	{
+	  oval = value_cell (var);
+	  if (oval == 0)	/* paranoia */
+	    oval = "";
+	  olen = STRLEN (oval);
+	  retval = (char *)xmalloc (olen + (value ? STRLEN (value) : 0) + 1);
+	  strcpy (retval, oval);
+	  if (value)
+	    strcpy (retval+olen, value);
+	}
+      else if (*value)
 	retval = savestring (value);
       else
 	{
@@ -1797,11 +1818,11 @@ make_variable_value (var, value)
 /* Bind a variable NAME to VALUE in the HASH_TABLE TABLE, which may be the
    temporary environment (but usually is not). */
 static SHELL_VAR *
-bind_variable_internal (name, value, table, hflags)
+bind_variable_internal (name, value, table, hflags, aflags)
      const char *name;
      char *value;
      HASH_TABLE *table;
-     int hflags;
+     int hflags, aflags;
 {
   char *newval;
   SHELL_VAR *entry;
@@ -1811,7 +1832,7 @@ bind_variable_internal (name, value, table, hflags)
   if (entry == 0)
     {
       entry = make_new_variable (name, table);
-      var_setvalue (entry, make_variable_value (entry, value));
+      var_setvalue (entry, make_variable_value (entry, value, 0)); /* XXX */
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
@@ -1830,7 +1851,7 @@ bind_variable_internal (name, value, table, hflags)
       /* Variables which are bound are visible. */
       VUNSETATTR (entry, att_invisible);
 
-      newval = make_variable_value (entry, value);
+      newval = make_variable_value (entry, value, aflags);	/* XXX */
 
       /* Invalidate any cached export string */
       INVALIDATE_EXPORTSTR (entry);
@@ -1867,9 +1888,10 @@ bind_variable_internal (name, value, table, hflags)
    first, then we bind into shell_variables. */
 
 SHELL_VAR *
-bind_variable (name, value)
+bind_variable (name, value, flags)
      const char *name;
      char *value;
+     int flags;
 {
   SHELL_VAR *v;
   VAR_CONTEXT *vc;
@@ -1896,10 +1918,10 @@ bind_variable (name, value)
         {
           v = hash_lookup (name, vc->table);
           if (v)
-	    return (bind_variable_internal (name, value, vc->table, 0));
+	    return (bind_variable_internal (name, value, vc->table, 0, flags));
         }
     }
-  return (bind_variable_internal (name, value, global_variables->table, 0));
+  return (bind_variable_internal (name, value, global_variables->table, 0, flags));
 }
 
 /* Make VAR, a simple shell variable, have value VALUE.  Once assigned a
@@ -1908,15 +1930,16 @@ bind_variable (name, value)
    all modified variables should be exported, mark the variable for export
    and note that the export environment needs to be recreated. */
 SHELL_VAR *
-bind_variable_value (var, value)
+bind_variable_value (var, value, aflags)
      SHELL_VAR *var;
      char *value;
+     int aflags;
 {
   char *t;
 
   VUNSETATTR (var, att_invisible);
 
-  t = make_variable_value (var, value);
+  t = make_variable_value (var, value, aflags);
   FREE (value_cell (var));
   var_setvalue (var, t);
 
@@ -1972,10 +1995,10 @@ bind_int_variable (lhs, rhs)
 
 #if defined (ARRAY_VARS)
   if (isarr)
-    v = assign_array_element (lhs, rhs);
+    v = assign_array_element (lhs, rhs, 0);
   else
 #endif
-    v = bind_variable (lhs, rhs);
+    v = bind_variable (lhs, rhs, 0);
 
   if (isint)
     VSETATTR (v, att_integer);
@@ -2091,6 +2114,10 @@ assign_in_env (word)
   if (name[offset] == '=')
     {
       name[offset] = 0;
+
+      /* ignore the `+' when assigning temporary environment */
+      if (name[offset - 1] == '+')
+	name[offset - 1] = '\0';
 
       var = find_variable (name);
       if (var && (readonly_p (var) || noassign_p (var)))
@@ -2407,7 +2434,7 @@ delete_all_variables (hashed_vars)
       entry = find_variable (name); \
       if (!entry) \
 	{ \
-	  entry = bind_variable (name, ""); \
+	  entry = bind_variable (name, "", 0); \
 	  if (!no_invisible_vars) entry->attributes |= att_invisible; \
 	} \
     } \
@@ -2849,7 +2876,7 @@ push_temp_var (data)
 	binding_table = shell_variables->table = hash_create (TEMPENV_HASH_BUCKETS);
     }
 
-  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0);
+  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, 0);
 
   /* XXX - should we set the context here?  It shouldn't matter because of how
      assign_in_env works, but might want to check. */
@@ -3367,7 +3394,7 @@ push_func_var (data)
   if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
     {
       /* XXX - should we set v->context here? */
-      v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0);
+      v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
       if (shell_variables == global_variables)
 	var->attributes &= ~(att_tempvar|att_propagate);
       else
@@ -3455,7 +3482,7 @@ push_exported_var (data)
 #endif
     {
       var->attributes &= ~att_tempvar;		/* XXX */
-      v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0);
+      v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
       if (shell_variables == global_variables)
 	var->attributes &= ~att_propagate;
       v->attributes |= var->attributes;

@@ -544,11 +544,11 @@ read_builtin (list)
       if (saw_escape)
 	{
 	  t = dequote_string (input_string);
-	  var = bind_variable ("REPLY", t, 0);
+	  var = bind_variable ("REPLY", t);
 	  free (t);
 	}
       else
-	var = bind_variable ("REPLY", input_string, 0);
+	var = bind_variable ("REPLY", input_string);
       VUNSETATTR (var, att_invisible);
 
       free (input_string);
@@ -654,11 +654,11 @@ bind_read_variable (name, value)
 {
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value, 0));
+    return (bind_variable (name, value));
   else
     return (assign_array_element (name, value, 0));
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value, 0);
+  return bind_variable (name, value);
 #endif /* !ARRAY_VARS */
 }
 

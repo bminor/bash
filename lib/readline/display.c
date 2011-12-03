@@ -964,8 +964,11 @@ rl_redisplay ()
 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
 	      else
 		tx = nleft;
-	      _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
-	      _rl_last_c_pos = tx;
+	      if (_rl_last_c_pos != tx)
+		{
+	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+	          _rl_last_c_pos = tx;
+		}
 	    }
 
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)

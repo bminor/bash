@@ -100,14 +100,14 @@ bindpwd (no_symlinks)
   old_anm = array_needs_making;
   pwdvar = get_string_value ("PWD");
 
-  tvar = bind_variable ("OLDPWD", pwdvar);
+  tvar = bind_variable ("OLDPWD", pwdvar, 0);
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("OLDPWD=", 7, pwdvar);
       array_needs_making = 0;
     }
 
-  tvar = bind_variable ("PWD", dirname ? dirname : "");
+  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
@@ -355,7 +355,7 @@ pwd_builtin (list)
       fflush (stdout);
       if (ferror (stdout))
 	{
-	  builtin_error (_("write error: %s"), strerror (errno));
+	  sh_wrerror ();
 	  clearerr (stdout);
 	  return (EXECUTION_FAILURE);
 	}

@@ -39,8 +39,6 @@ extern char *this_command_name;
 extern int last_command_exit_value;
 extern int array_needs_making;
 
-static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, int));
-
 static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
 
@@ -84,15 +82,37 @@ convert_var_to_array (var)
   return var;
 }
 
-static SHELL_VAR *
-bind_array_var_internal (entry, ind, value, flags)
-     SHELL_VAR *entry;
+/* Perform an array assignment name[ind]=value.  If NAME already exists and
+   is not an array, and IND is 0, perform name=value instead.  If NAME exists
+   and is not an array, and IND is not 0, convert it into an array with the
+   existing value as name[0].
+
+   If NAME does not exist, just create an array variable, no matter what
+   IND's value may be. */
+SHELL_VAR *
+bind_array_variable (name, ind, value, flags)
+     char *name;
      arrayind_t ind;
      char *value;
      int flags;
 {
-  SHELL_VAR *dentry;
+  SHELL_VAR *entry, *dentry;
   char *newval;
+
+  entry = var_lookup (name, shell_variables);
+
+  if (entry == (SHELL_VAR *) 0)
+    entry = make_new_array_variable (name);
+  else if (readonly_p (entry) || noassign_p (entry))
+    {
+      if (readonly_p (entry))
+	err_readonly (name);
+      return (entry);
+    }
+  else if (array_p (entry) == 0)
+    entry = convert_var_to_array (entry);
+
+  /* ENTRY is an array variable, and ARRAY points to the value. */
 
   /* If we're appending, we need the old value of the array reference, so
      fake out make_variable_value with a dummy SHELL_VAR */
@@ -125,39 +145,6 @@ bind_array_var_internal (entry, ind, value, flags)
   FREE (newval);
 
   return (entry);
-}
-
-/* Perform an array assignment name[ind]=value.  If NAME already exists and
-   is not an array, and IND is 0, perform name=value instead.  If NAME exists
-   and is not an array, and IND is not 0, convert it into an array with the
-   existing value as name[0].
-
-   If NAME does not exist, just create an array variable, no matter what
-   IND's value may be. */
-SHELL_VAR *
-bind_array_variable (name, ind, value, flags)
-     char *name;
-     arrayind_t ind;
-     char *value;
-     int flags;
-{
-  SHELL_VAR *entry;
-
-  entry = var_lookup (name, shell_variables);
-
-  if (entry == (SHELL_VAR *) 0)
-    entry = make_new_array_variable (name);
-  else if (readonly_p (entry) || noassign_p (entry))
-    {
-      if (readonly_p (entry))
-	err_readonly (name);
-      return (entry);
-    }
-  else if (array_p (entry) == 0)
-    entry = convert_var_to_array (entry);
-
-  /* ENTRY is an array variable, and ARRAY points to the value. */
-  return (bind_array_var_internal (entry, ind, value, flags));
 }
 
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
@@ -333,8 +320,7 @@ assign_array_var_from_string (var, value, flags)
 	  len = skipsubscript (w, 0);
 
 #if 1
-	  /* XXX - changes for `+=' */
- 	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
+	  if (! (w[len] == ']' && (w[len+1] == '=' || (w[len+1] == '+' && w[len+2] == '='))))
 #else
 	  if (w[len] != ']' || w[len+1] != '=')
 #endif
@@ -368,14 +354,7 @@ assign_array_var_from_string (var, value, flags)
 	      continue;
 	    }
 	  last_ind = ind;
-	  /* XXX - changes for `+=' */
-	  if (w[len + 1] == '+' && w[len + 2] == '=')
-	    {
-	      flags |= ASS_APPEND;
-	      val = w + len + 3;
-	    }
-	  else
-	    val = w + len + 2;
+	  val = w + len + 2;
 	}
       else		/* No [ind]=value, just a stray `=' */
 	{
@@ -385,7 +364,12 @@ assign_array_var_from_string (var, value, flags)
 
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
-      bind_array_var_internal (var, ind, val, flags);
+      nval = make_variable_value (var, val, flags);
+      if (var->assign_func)
+	(*var->assign_func) (var, nval, ind);
+      else
+	array_insert (a, ind, nval);
+      FREE (nval);
       last_ind++;
     }
 

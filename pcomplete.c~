@@ -862,7 +862,9 @@ bind_comp_words (lwords)
     VUNSETATTR (v, att_readonly);
   if (array_p (v) == 0)
     v = convert_var_to_array (v);
-  v = assign_array_var_from_word_list (v, lwords);
+  v = assign_array_var_from_word_list (v, lwords, 0);
+
+  VUNSETATTR (v, att_invisible);
   return v;
 }
 #endif /* ARRAY_VARS */
@@ -1021,6 +1023,8 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
     return ((STRINGLIST *)NULL);
   if (array_p (v) == 0)
     v = convert_var_to_array (v);
+
+  VUNSETATTR (v, att_invisible);
 
   a = array_cell (v);
   if (a == 0 || array_empty (a))

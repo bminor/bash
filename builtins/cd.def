@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -100,14 +100,14 @@ bindpwd (no_symlinks)
   old_anm = array_needs_making;
   pwdvar = get_string_value ("PWD");
 
-  tvar = bind_variable ("OLDPWD", pwdvar);
+  tvar = bind_variable ("OLDPWD", pwdvar, 0);
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("OLDPWD=", 7, pwdvar);
       array_needs_making = 0;
     }
 
-  tvar = bind_variable ("PWD", dirname ? dirname : "");
+  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");

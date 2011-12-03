@@ -2281,7 +2281,6 @@ execute_while_or_until (while_command, type)
       return_value = execute_command (while_command->test);
       REAP ();
 
-itrace("execute_while_or_until: test returns %d", return_value);
       /* Need to handle `break' in the test when we would break out of the
          loop.  The job control code will set `breaking' to loop_level
          when a job in a loop is stopped with SIGTSTP.  If the stopped job
@@ -2304,7 +2303,6 @@ itrace("execute_while_or_until: test returns %d", return_value);
       body_status = execute_command (while_command->action);
       QUIT;
 
-itrace("execute_while_or_until: body returns %d", body_status);
       if (breaking)
 	{
 	  breaking--;

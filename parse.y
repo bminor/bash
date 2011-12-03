@@ -2145,7 +2145,7 @@ execute_prompt_command (command)
   parse_and_execute (savestring (command), "PROMPT_COMMAND", SEVAL_NONINT|SEVAL_NOHIST);
 
   restore_parser_state (&ps);
-  bind_variable ("_", last_lastarg);
+  bind_variable ("_", last_lastarg, 0);
   FREE (last_lastarg);
 
   if (token_to_read == '\n')	/* reset_parser was called */
@@ -3252,6 +3252,7 @@ token_is_assignment (t, i)
   return r;
 }
 
+/* XXX - possible changes here for `+=' */
 static int
 token_is_ident (t, i)
      char *t;

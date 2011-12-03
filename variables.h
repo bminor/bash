@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -224,7 +224,7 @@ extern SHELL_VAR *find_variable_internal __P((const char *, int));
 extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
 extern SHELL_VAR *make_local_variable __P((const char *));
-extern SHELL_VAR *bind_variable __P((const char *, char *));
+extern SHELL_VAR *bind_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
 
 extern void bind_function_def __P((const char *, FUNCTION_DEF *));
@@ -250,9 +250,9 @@ extern char **add_or_supercede_exported_var __P((char *, int));
 extern char *get_variable_value __P((SHELL_VAR *));
 extern char *get_string_value __P((const char *));
 extern char *sh_get_env_value __P((const char *));
-extern char *make_variable_value __P((SHELL_VAR *, char *));
+extern char *make_variable_value __P((SHELL_VAR *, char *, int));
 
-extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *));
+extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *, int));
 extern SHELL_VAR *bind_int_variable __P((char *, char *));
 extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 

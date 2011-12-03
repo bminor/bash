@@ -78,7 +78,7 @@ command_builtin (list)
 	  use_standard_path = 1;
 	  break;
 	case 'V':
-	  verbose = CDESC_SHORTDESC;	/* look in common.h for constants */
+	  verbose = CDESC_SHORTDESC|CDESC_ABSPATH;	/* look in common.h for constants */
 	  break;
 	case 'v':
 	  verbose = CDESC_REUSABLE;	/* ditto */
@@ -131,7 +131,7 @@ command_builtin (list)
       add_unwind_protect ((Function *)restore_path, old_path);
 
       standard_path = get_standard_path ();
-      bind_variable ("PATH", standard_path ? standard_path : "");
+      bind_variable ("PATH", standard_path ? standard_path : "", 0);
       FREE (standard_path);
     }
 
@@ -170,7 +170,7 @@ restore_path (var)
 {
   if (var)
     {
-      bind_variable ("PATH", var);
+      bind_variable ("PATH", var, 0);
       free (var);
     }
   else

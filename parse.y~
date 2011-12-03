@@ -962,22 +962,26 @@ pipeline_command: pipeline
 			{ $$ = $1; }
 	|	BANG pipeline
 			{
-			  $2->flags |= CMD_INVERT_RETURN;
+			  if ($2)
+			    $2->flags |= CMD_INVERT_RETURN;
 			  $$ = $2;
 			}
 	|	timespec pipeline
 			{
-			  $2->flags |= $1;
+			  if ($2)
+			    $2->flags |= $1;
 			  $$ = $2;
 			}
 	|	timespec BANG pipeline
 			{
-			  $3->flags |= $1|CMD_INVERT_RETURN;
+			  if ($3)
+			    $3->flags |= $1|CMD_INVERT_RETURN;
 			  $$ = $3;
 			}
 	|	BANG timespec pipeline
 			{
-			  $3->flags |= $2|CMD_INVERT_RETURN;
+			  if ($3)
+			    $3->flags |= $2|CMD_INVERT_RETURN;
 			  $$ = $3;
 			}
 	|	timespec list_terminator
@@ -2141,7 +2145,7 @@ execute_prompt_command (command)
   parse_and_execute (savestring (command), "PROMPT_COMMAND", SEVAL_NONINT|SEVAL_NOHIST);
 
   restore_parser_state (&ps);
-  bind_variable ("_", last_lastarg);
+  bind_variable ("_", last_lastarg, 0);
   FREE (last_lastarg);
 
   if (token_to_read == '\n')	/* reset_parser was called */
@@ -2726,7 +2730,11 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
+#if 0
       ch = shell_getc ((qc != '\'' || (flags & P_ALLOWESC)) && pass_next_character == 0);
+#else
+      ch = shell_getc (qc != '\'' && pass_next_character == 0);
+#endif
       if (ch == EOF)
 	{
 	  free (ret);
@@ -2806,6 +2814,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  /* Translate $'...' here. */
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
 		  xfree (nestret);
+
 		  nestret = sh_single_quote (ttrans);
 		  free (ttrans);
 		  nestlen = strlen (nestret);
@@ -2816,13 +2825,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  /* Locale expand $"..." here. */
 		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
 		  xfree (nestret);
-		  nestret = (char *)xmalloc (ttranslen + 3);
-		  nestret[0] = '"';
-		  strcpy (nestret + 1, ttrans);
-		  nestret[ttranslen + 1] = '"';
-		  nestret[ttranslen += 2] = '\0';
+
+		  nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
-		  nestlen = ttranslen;
+		  nestlen = ttranslen + 2;
 		  retind -= 2;		/* back up before the $" */
 		}
 
@@ -2921,19 +2927,12 @@ parse_dparen (c)
   if (reserved_word_acceptable (last_read_token))
     {
       sline = line_number;
-#if 0
-      cmdtyp = parse_arith_cmd (&wval, 1);
-#else
+
       cmdtyp = parse_arith_cmd (&wval, 0);
-#endif
       if (cmdtyp == 1)	/* arithmetic command */
 	{
 	  wd = make_word (wval);
-#if 0
-	  wd->flags = W_QUOTED;
-#else
 	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB;
-#endif
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
 	  free (wval);	/* make_word copies it */
 	  return (ARITH_CMD);
@@ -3253,6 +3252,7 @@ token_is_assignment (t, i)
   return r;
 }
 
+/* XXX - possible changes here for `+=' */
 static int
 token_is_ident (t, i)
      char *t;
@@ -3285,6 +3285,10 @@ read_token_word (character)
   /* DOLLAR_PRESENT becomes non-zero if we see a `$'. */
   int dollar_present;
 
+  /* COMPOUND_ASSIGNMENT becomes non-zero if we are parsing a compound
+     assignment. */
+  int compound_assignment;
+
   /* QUOTED becomes non-zero if we see one of ("), ('), (`), or (\). */
   int quoted;
 
@@ -3304,7 +3308,7 @@ read_token_word (character)
 
   token_index = 0;
   all_digit_token = DIGIT (character);
-  dollar_present = quoted = pass_next_character = 0;
+  dollar_present = quoted = pass_next_character = compound_assignment = 0;
 
   for (;;)
     {
@@ -3449,27 +3453,25 @@ read_token_word (character)
 		{
 		  ttrans = ansiexpand (ttok, 0, ttoklen - 1, &ttranslen);
 		  free (ttok);
+
 		  /* Insert the single quotes and correctly quote any
 		     embedded single quotes (allowed because P_ALLOWESC was
 		     passed to parse_matched_pair). */
 		  ttok = sh_single_quote (ttrans);
 		  free (ttrans);
+		  ttranslen = strlen (ttok);
 		  ttrans = ttok;
-		  ttranslen = strlen (ttrans);
 		}
 	      else
 		{
-		  /* Try to locale-expand the converted string. */
+		  /* Try to locale)-expand the converted string. */
 		  ttrans = localeexpand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
 		  free (ttok);
 
 		  /* Add the double quotes back */
-		  ttok = (char *)xmalloc (ttranslen + 3);
-		  ttok[0] = '"';
-		  strcpy (ttok + 1, ttrans);
-		  ttok[ttranslen + 1] = '"';
-		  ttok[ttranslen += 2] = '\0';
+		  ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
+		  ttranslen += 2;
 		  ttrans = ttok;
 		}
 
@@ -3522,6 +3524,7 @@ read_token_word (character)
 	  goto next_character;
         }
       /* Identify possible compound array variable assignment. */
+      /* XXX - changes here for `+=' */
       else if MBTEST(character == '=' && token_index > 0 && (assignment_acceptable (last_read_token) || (parser_state & PST_ASSIGNOK)) && token_is_assignment (token, token_index))
 	{
 	  peek_char = shell_getc (1);
@@ -3543,7 +3546,12 @@ read_token_word (character)
 	      token[token_index++] = ')';
 	      FREE (ttok);
 	      all_digit_token = 0;
+	      compound_assignment = 1;
+#if 0
 	      goto next_character;
+#else
+	      goto got_token;		/* ksh93 seems to do this */
+#endif
 	    }
 	  else
 	    shell_ungetc (peek_char);
@@ -3638,6 +3646,8 @@ got_token:
     the_word->flags |= W_HASDOLLAR;
   if (quoted)
     the_word->flags |= W_QUOTED;
+  if (compound_assignment)
+    the_word->flags |= W_COMPASSIGN;
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
      context-dependent, so it cannot be handled in the grammar. */
@@ -3814,6 +3824,8 @@ history_delimiting_chars ()
 	return " ";
       return ";";
     }
+  else if (two_tokens_ago == CASE && token_before_that == WORD && (parser_state & PST_CASESTMT))
+    return " ";
 
   for (i = 0; no_semi_successors[i]; i++)
     {

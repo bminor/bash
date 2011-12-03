@@ -353,6 +353,9 @@ echo a@(.|[^[:alnum:]])b
 builtin cd /
 rm -rf $TESTDIR
 
+x=abcdef
+recho "${x#*(a|b)cd}"
+
 # this is for the benefit of pure coverage, so it writes the pcv file
 # in the right place
 builtin cd $MYDIR

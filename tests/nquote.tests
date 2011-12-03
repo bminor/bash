@@ -77,4 +77,26 @@ printf "\'abcd\'\n"
 echo -e "\'abcd\'"
 echo -e "\\'abcd\\'"
 
+# and what do we do about unrecognized escape sequences?
 
+shopt -s xpg_echo
+
+recho $'A\CB'
+
+recho "A\CB"
+
+cde=c
+recho $'ab$cde'
+
+printf "%b\n" 'A\CB'
+printf 'A\CB\n'
+
+echo 'A\CB'
+
+world=chet
+
+recho $'hello, $"world"'
+recho $'hello, \$"world"'
+recho $'hello, $\"world"'
+
+recho "hello, $"world""

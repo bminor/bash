@@ -269,7 +269,7 @@ assignment (string, flags)
   c = string[indx = 0];
 
 #if defined (ARRAY_VARS)
-  if ((legal_variable_starter (c) == 0) && (flags && c != '[')) /* ] */
+  if ((legal_variable_starter (c) == 0) && (flags == 0 || c != '[')) /* ] */
 #else
   if (legal_variable_starter (c) == 0)
 #endif
@@ -288,9 +288,15 @@ assignment (string, flags)
 	  newi = skipsubscript (string, indx);
 	  if (string[newi++] != ']')
 	    return (0);
+	  if (string[newi] == '+' && string[newi+1] == '=')
+	    return (flags ? 0 : (newi + 1));
 	  return ((string[newi] == '=') ? newi : 0);
 	}
 #endif /* ARRAY_VARS */
+
+      /* Check for `+=' */
+      if (c == '+' && string[indx+1] == '=')
+	return (indx + 1);
 
       /* Variable names in assignment statements may contain only letters,
 	 digits, and `_'. */
@@ -802,6 +808,10 @@ bash_tilde_find_word (s, flags, lenp)
 
   for (r = s; *r && *r != '/'; r++)
     {
+      /* Short-circuit immediately if we see a quote character.  Even though
+	 POSIX says that `the first unquoted slash' (or `:') terminates the
+	 tilde-prefix, in practice, any quoted portion of the tilde prefix
+	 will cause it to not be expanded. */
       if (*r == '\\' || *r == '\'' || *r == '"')  
 	{
 	  ret = savestring (s);
