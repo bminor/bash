@@ -276,6 +276,13 @@ rl_maybe_save_line ()
       _rl_saved_line_for_history->line = savestring (rl_line_buffer);
       _rl_saved_line_for_history->data = (char *)rl_undo_list;
     }
+  else if (STREQ (rl_line_buffer, _rl_saved_line_for_history->line) == 0)
+    {
+      free (_rl_saved_line_for_history->line);
+      _rl_saved_line_for_history->line = savestring (rl_line_buffer);
+      _rl_saved_line_for_history->data = (char *)rl_undo_list;	/* XXX possible memleak */
+    }
+
   return 0;
 }
 
@@ -439,6 +446,7 @@ rl_get_previous_history (count, key)
       rl_replace_from_history (temp, 0);
       _rl_history_set_point ();
     }
+
   return 0;
 }
 

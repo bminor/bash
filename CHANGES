@@ -1,3 +1,25 @@
+This document details the changes between this version, bash-3.0-release,
+and the previous version, bash-3.0-rc1.
+
+1.  Changes to Bash
+
+a.  Fixed a boundary overrun that could cause segmentation faults when the
+    completion code hands an incomplete construct to the word expansion
+    functions.
+
+b.  Changed posix mode behavior so that an error in a variable assignment
+    preceding a special builtin causes a non-interactive shell to exit.
+
+c.  Change the directory expansion portion of the completion code to not
+    expand embedded command substitutions if the directory name appears in
+    the file system.
+
+2.  Changes to Readline
+
+a.  Fixed a problem with readline saving the contents of the current line
+    before beginning a non-interactive search.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-rc1,
 and the previous version, bash-3.0-beta1.
 
