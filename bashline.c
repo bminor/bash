@@ -1905,7 +1905,7 @@ tcsh_magic_space (count, ignore)
   else
     return (1);
 }
-#endif
+#endif /* BANG_HISTORY */
 
 /* History and alias expand the line. */
 static int
@@ -1914,7 +1914,10 @@ history_and_alias_expand_line (count, ignore)
 {
   char *new_line;
 
+  new_line = 0;
+#if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
+#endif
 
 #if defined (ALIAS)
   if (new_line)
@@ -1950,7 +1953,10 @@ shell_expand_line (count, ignore)
   char *new_line;
   WORD_LIST *expanded_string;
 
+  new_line = 0;
+#if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
+#endif
 
 #if defined (ALIAS)
   if (new_line)

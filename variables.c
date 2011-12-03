@@ -70,6 +70,8 @@
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 
+extern char **environ;
+
 /* Variables used here and defined in other files. */
 extern int posixly_correct;
 extern int line_number;
@@ -3134,6 +3136,7 @@ do \
       { \
 	export_env_size += 16; \
 	export_env = strvec_resize (export_env, export_env_size); \
+	environ = export_env; \
       } \
     export_env[export_env_index++] = (do_alloc) ? savestring (envstr) : envstr; \
     export_env[export_env_index] = (char *)NULL; \
@@ -3243,6 +3246,7 @@ maybe_make_export_env ()
 	{
 	  export_env_size = new_size;
 	  export_env = strvec_resize (export_env, export_env_size);
+	  environ = export_env;
 	}
       export_env[export_env_index = 0] = (char *)NULL;
 

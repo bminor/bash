@@ -217,7 +217,9 @@ bash_initialize_history ()
   history_quotes_inhibit_expansion = 1;
   history_search_delimiter_chars = ";&()|<>";
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+#if defined (BANG_HISTORY)
   sv_histchars ("histchars");
+#endif
 }
 
 void

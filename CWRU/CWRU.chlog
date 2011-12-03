@@ -11609,3 +11609,19 @@ jobs.c
 	- add a run-time check for WCONTINUED being defined in header files
 	  but rejected with EINVAL by waitpid().  Fix from Maciej Rozycki
 	  <macro@linux-mips.org>
+
+				   6/20
+				   ----
+bashhist.c
+	- make sure calls to sv_histchars are protected by #ifdef BANG_HISTORY
+	- ditto for calls to history_expand_line_internal
+
+				   6/23
+				   ----
+doc/bashref.texi
+	- remove extra blank lines in @menu constructs
+
+variables.c
+	- assign export_env to environ (extern char **) every time it changes
+	  (mostly in add_to_export_env define), so maybe getenv will work on
+	  systems that don't allow it to be replaced
