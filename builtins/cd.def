@@ -444,6 +444,7 @@ change_to_directory (newdir, nolinks)
       if (errno != ENOENT)
 #endif
 	errno = ENOTDIR;
+      free (tdir);
       return (0);
     }
 
@@ -461,13 +462,17 @@ change_to_directory (newdir, nolinks)
       else
 	set_working_directory (tdir);
 
+      free (tdir);
       return (1);
     }
 
   /* We failed to change to the appropriate directory name.  If we tried
      what the user passed (nolinks != 0), punt now. */
   if (nolinks)
-    return (0);
+    {
+      free (tdir);
+      return (0);
+    }
 
   err = errno;
 

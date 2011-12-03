@@ -12259,3 +12259,54 @@ lib/readline/bind.c
 	- change rl_parse_and_bind so only `set' commands involving boolean
 	  readline variables have trailing whitespace stripped from the value
 	  string
+
+				   10/16
+				   -----
+lib/glob/sm_loop.c
+	- fix patscan() to correctly scan backslash-escaped characters
+
+				   10/18
+				   -----
+lib/sh/{winsize.c,Makefile.in},{jobs,nojobs}.c,Makefile.in,externs.h
+	- moved get_new_window_size from jobs.c/nojobs.c to new file,
+	  lib/sh/winsize.c, made function global
+
+{jobs,nojobs,sig}.c,{jobs,sig}.h
+	- moved SIGWINCH handling code to sig.c rather than duplicate it in
+	  jobs.c and nojobs.c
+	- call set_sigwinch_handler from sig.c code rather than job control
+	  signal initialization
+
+sig.[ch]
+	- new variable, sigwinch_received, acts like interrupt_state for
+	  SIGWINCH, set by sigwinch_sighandler.  sigwinch_sighandler no longer
+	  calls get_new_window_size
+
+parse.y
+	- add call to get_new_window_size if sigwinch_received at top of
+	  shell_getc
+
+				   10/19
+				   -----
+lib/malloc/malloc.c
+	- to avoid orphaning memory on free if the right bucket is busy, use a
+	  new function xplit(mem, bucket) to split the block into two or more
+	  smaller ones and add those to the right bucket (appropriately marking
+	  it as busy)
+	- audit bsplit(), bcoalesce(), and xsplit() for proper use of busy[],
+	  since they're dealing with two separate buckets
+
+				   10/22
+				   -----
+subst.c
+	- new flag for string_extract: EX_REQMATCH, means to return an error
+	  if a matching/closing character is not found before EOS
+	- new static flag variables: extract_string_error and extract_string_fatal
+	- change expand_word_internal to check for new error returns from
+	  string_extract and return errors if appropriate
+
+				   10/23
+				   -----
+builtins/cd.def
+	- make sure we free TDIR in change_to_directory after calling
+	  set_working_directory (which allocates new memory)

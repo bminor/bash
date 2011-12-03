@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,17 +41,6 @@
 /* Need to include this up here for *_TTY_DRIVER definitions. */
 #include "shtty.h"
 
-#if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
-/* For struct winsize on SCO */
-/*   sys/ptem.h has winsize but needs mblk_t from sys/stream.h */
-#  if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
-#    if defined (HAVE_SYS_STREAM_H)
-#      include <sys/stream.h>
-#    endif
-#    include <sys/ptem.h>
-#  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
-#endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
-
 #include "bashintl.h"
 
 #include "shell.h"
@@ -81,10 +70,6 @@
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-#if defined (READLINE)
-extern void rl_set_screen_size __P((int, int));
-#endif
 
 extern int interactive, interactive_shell, login_shell;
 extern int subshell_environment;
@@ -148,8 +133,6 @@ static int get_pid_flags __P((pid_t));
 static void add_pid __P((pid_t, int));
 static void mark_dead_jobs_as_notified __P((int));
 
-static void get_new_window_size __P((int));
-static sighandler sigwinch_sighandler __P((int));
 static sighandler wait_sigint_handler __P((int));
 static char *j_strsignal __P((int));
 
@@ -424,69 +407,11 @@ initialize_job_control (force)
     get_tty_state ();
 }
 
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-static SigHandler *old_winch = (SigHandler *)SIG_DFL;
-
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-  struct winsize win;
-  int tty;
-
-  tty = input_tty ();
-  if (tty >= 0 && (ioctl (tty, TIOCGWINSZ, &win) == 0) &&
-      win.ws_row > 0 && win.ws_col > 0)
-    {
-#if defined (aixpc)
-      shell_tty_info.c_winsize = win;	/* structure copying */
-#endif
-      sh_set_lines_and_columns (win.ws_row, win.ws_col);
-#if defined (READLINE)
-      rl_set_screen_size (win.ws_row, win.ws_col);
-#endif
-    }
-}
-
-static sighandler
-sigwinch_sighandler (sig)
-     int sig;
-{
-#if defined (MUST_REINSTALL_SIGHANDLERS)
-  set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif /* MUST_REINSTALL_SIGHANDLERS */
-  get_new_window_size (1);
-}
-#else
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-}
-#endif /* TIOCGWINSZ && SIGWINCH */
-
-void
-set_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-  old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif
-}
-
-void
-unset_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-  set_signal_handler (SIGWINCH, old_winch);
-#endif
-}
-
 /* Setup this shell to handle C-C, etc. */
 void
 initialize_job_signals ()
 {
   set_signal_handler (SIGINT, sigint_sighandler);
-  set_sigwinch_handler ();
 
   /* If this is a login shell we don't wish to be disturbed by
      stop signals. */

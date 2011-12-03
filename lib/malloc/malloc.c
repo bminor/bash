@@ -1,6 +1,6 @@
 /* malloc.c - dynamic memory allocation for bash. */
 
-/*  Copyright (C) 1985-2003 Free Software Foundation, Inc.
+/*  Copyright (C) 1985-2005 Free Software Foundation, Inc.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -221,7 +221,7 @@ typedef union _malloc_guard {
 
 static union mhead *nextf[NBUCKETS];
 
-/* busy[i] is nonzero while allocation of block size i is in progress.  */
+/* busy[i] is nonzero while allocation or free of block size i is in progress. */
 
 static char busy[NBUCKETS];
 
@@ -323,7 +323,8 @@ xbotch (mem, e, s, file, line)
 
 /* Coalesce two adjacent free blocks off the free list for size NU - 1,
    as long as we can find two adjacent free blocks.  nextf[NU -1] is
-   assumed to not be busy; the caller (morecore()) checks for this. */
+   assumed to not be busy; the caller (morecore()) checks for this. 
+   BUSY[NU] must be set to 1. */
 static void
 bcoalesce (nu)
      register int nu;
@@ -333,9 +334,10 @@ bcoalesce (nu)
   unsigned long siz;
 
   nbuck = nu - 1;
-  if (nextf[nbuck] == 0)
+  if (nextf[nbuck] == 0 || busy[nbuck])
     return;
 
+  busy[nbuck] = 1;
   siz = binsize (nbuck);
 
   mp2 = mp1 = nextf[nbuck];
@@ -346,22 +348,27 @@ bcoalesce (nu)
       mp1 = mp;
       mp = CHAIN (mp);
     }
+
   if (mp == 0)
-    return;
+    {
+      busy[nbuck] = 0;
+      return;
+    }
 
   /* OK, now we have mp1 pointing to the block we want to add to nextf[NU].
      CHAIN(mp2) must equal mp1.  Check that mp1 and mp are adjacent. */
   if (mp2 != mp1 && CHAIN(mp2) != mp1)
-    xbotch ((PTR_T)0, 0, "bcoalesce: CHAIN(mp2) != mp1", (char *)NULL, 0);
+    {
+      busy[nbuck] = 0;
+      xbotch ((PTR_T)0, 0, "bcoalesce: CHAIN(mp2) != mp1", (char *)NULL, 0);
+    }
 
 #ifdef MALLOC_DEBUG
   if (CHAIN (mp1) != (union mhead *)((char *)mp1 + siz))
-    return;	/* not adjacent */
-#endif
-
-#ifdef MALLOC_STATS
-  _mstats.tbcoalesce++;
-  _mstats.ncoalesce[nbuck]++;
+    {
+      busy[nbuck] = 0;
+      return;	/* not adjacent */
+    }
 #endif
 
   /* Since they are adjacent, remove them from the free list */
@@ -369,6 +376,12 @@ bcoalesce (nu)
     nextf[nbuck] = CHAIN (mp);
   else
     CHAIN (mp2) = CHAIN (mp);
+  busy[nbuck] = 0;
+
+#ifdef MALLOC_STATS
+  _mstats.tbcoalesce++;
+  _mstats.ncoalesce[nbuck]++;
+#endif
 
   /* And add the combined two blocks to nextf[NU]. */
   mp1->mh_alloc = ISFREE;
@@ -380,7 +393,7 @@ bcoalesce (nu)
 /* Split a block at index > NU (but less than SPLIT_MAX) into a set of
    blocks of the correct size, and attach them to nextf[NU].  nextf[NU]
    is assumed to be empty.  Must be called with signals blocked (e.g.,
-   by morecore()). */
+   by morecore()).  BUSY[NU] must be set to 1. */
 static void
 bsplit (nu)
      register int nu;
@@ -416,6 +429,12 @@ bsplit (nu)
   /* XXX might want to split only if nextf[nbuck] has >= 2 blocks free
      and nbuck is below some threshold. */
 
+  /* Remove the block from the chain of larger blocks. */
+  busy[nbuck] = 1;
+  mp = nextf[nbuck];
+  nextf[nbuck] = CHAIN (mp);
+  busy[nbuck] = 0;
+
 #ifdef MALLOC_STATS
   _mstats.tbsplit++;
   _mstats.nsplit[nbuck]++;
@@ -424,10 +443,6 @@ bsplit (nu)
   /* Figure out how many blocks we'll get. */
   siz = binsize (nu);
   nblks = binsize (nbuck) / siz;
-
-  /* Remove the block from the chain of larger blocks. */
-  mp = nextf[nbuck];
-  nextf[nbuck] = CHAIN (mp);
 
   /* Split the block and put it on the requested chain. */
   nextf[nu] = mp;
@@ -440,6 +455,49 @@ bsplit (nu)
       mp = (union mhead *)((char *)mp + siz);
     }
   CHAIN (mp) = 0;
+}
+
+/* Take the memory block MP and add it to a chain < NU.  NU is the right bucket,
+   but is busy.  This avoids memory orphaning. */
+static void
+xsplit (mp, nu)
+     union mhead *mp;
+     int nu;
+{
+  union mhead *nh;
+  int nbuck, nblks, split_max;
+  unsigned long siz;
+
+  nbuck = nu - 1;
+  while (nbuck >= SPLIT_MIN && busy[nbuck])
+    nbuck--;
+  if (nbuck < SPLIT_MIN)
+    return;
+
+#ifdef MALLOC_STATS
+  _mstats.tbsplit++;
+  _mstats.nsplit[nu]++;
+#endif
+
+  /* Figure out how many blocks we'll get. */
+  siz = binsize (nu);			/* original block size */
+  nblks = siz / binsize (nbuck);	/* should be 2 most of the time */
+
+  /* And add it to nextf[nbuck] */
+  siz = binsize (nbuck);		/* XXX - resetting here */
+  nh = mp;
+  while (1)
+    {
+      mp->mh_alloc = ISFREE;
+      mp->mh_index = nbuck;
+      if (--nblks <= 0) break;
+      CHAIN (mp) = (union mhead *)((char *)mp + siz);
+      mp = (union mhead *)((char *)mp + siz);
+    }
+  busy[nbuck] = 1;
+  CHAIN (mp) = nextf[nbuck];
+  nextf[nbuck] = nh;
+  busy[nbuck] = 0;
 }
 
 static void
@@ -490,9 +548,10 @@ lesscore (nu)			/* give system back some memory */
   _mstats.nlesscore[nu]++;
 #endif
 }
-  
+
+/* Ask system for more memory; add to NEXTF[NU].  BUSY[NU] must be set to 1. */  
 static void
-morecore (nu)			/* ask system for more memory */
+morecore (nu)
      register int nu;		/* size index to get more of  */
 {
   register union mhead *mp;
@@ -531,7 +590,7 @@ morecore (nu)			/* ask system for more memory */
     }
 
   /* Try to coalesce two adjacent blocks from the free list on nextf[nu - 1],
-     if we can, and we're withing the range of the block coalescing limits. */
+     if we can, and we're within the range of the block coalescing limits. */
   if (nu >= COMBINE_MIN && nu < COMBINE_MAX && busy[nu - 1] == 0 && nextf[nu - 1])
     {
       bcoalesce (nu);
@@ -852,9 +911,8 @@ internal_free (mem, file, line, flags)
     {
       /* If above LESSCORE_FRC, give back unconditionally.  This should be set
 	 high enough to be infrequently encountered.  If between LESSCORE_MIN
-	 and LESSCORE_FRC, call lesscore if the bucket is marked as busy (in
-	 which case we would punt below and leak memory) or if there's already
-	 a block on the free list. */
+	 and LESSCORE_FRC, call lesscore if the bucket is marked as busy or if
+	 there's already a block on the free list. */
       if ((nunits >= LESSCORE_FRC) || busy[nunits] || nextf[nunits] != 0)
 	{
 	  lesscore (nunits);
@@ -869,11 +927,14 @@ internal_free (mem, file, line, flags)
 #endif
 
   ASSERT (nunits < NBUCKETS);
-  p->mh_alloc = ISFREE;
 
   if (busy[nunits] == 1)
-    return;	/* this is bogus, but at least it won't corrupt the chains */
+    {
+      xsplit (p, nunits);	/* split block and add to different chain */
+      goto free_return;
+    }
 
+  p->mh_alloc = ISFREE;
   /* Protect against signal handlers calling malloc.  */
   busy[nunits] = 1;
   /* Put this block on the free list.  */

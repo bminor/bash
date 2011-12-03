@@ -63,17 +63,6 @@
 #  include <bsdtty.h>
 #endif /* hpux && !TERMIOS_TTY_DRIVER */
 
-#if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
-/* For struct winsize on SCO */
-/*   sys/ptem.h has winsize but needs mblk_t from sys/stream.h */
-#  if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
-#    if defined (HAVE_SYS_STREAM_H)
-#      include <sys/stream.h>
-#    endif
-#    include <sys/ptem.h>
-#  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
-#endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
-
 #include "bashansi.h"
 #include "bashintl.h"
 #include "shell.h"
@@ -141,10 +130,6 @@ extern int errno;
 #define JOB_SLOTS 8
 
 typedef int sh_job_map_func_t __P((JOB *, int, int, int));
-
-#if defined (READLINE)
-extern void rl_set_screen_size __P((int, int));
-#endif
 
 /* Variables used here but defined in other files. */
 extern int subshell_environment, line_number;
@@ -224,13 +209,10 @@ int check_window_size;
 
 /* Functions local to this file. */
 
-static void get_new_window_size __P((int));
-
 static void run_sigchld_trap __P((int));
 
 static sighandler wait_sigint_handler __P((int));
 static sighandler sigchld_handler __P((int));
-static sighandler sigwinch_sighandler __P((int));
 static sighandler sigcont_sighandler __P((int));
 static sighandler sigstop_sighandler __P((int));
 
@@ -312,10 +294,6 @@ static int queue_sigchld;
 
 static SigHandler *old_tstp, *old_ttou, *old_ttin;
 static SigHandler *old_cont = (SigHandler *)SIG_DFL;
-
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-static SigHandler *old_winch = (SigHandler *)SIG_DFL;
-#endif
 
 /* A place to temporarily save the current pipeline. */
 static PROCESS *saved_pipeline;
@@ -3546,60 +3524,6 @@ set_new_line_discipline (tty)
 #endif
 }
 
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-  struct winsize win;
-
-  if ((ioctl (shell_tty, TIOCGWINSZ, &win) == 0) &&
-      win.ws_row > 0 && win.ws_col > 0)
-    {
-#if defined (aixpc)
-      shell_tty_info.c_winsize = win;	/* structure copying */
-#endif
-      sh_set_lines_and_columns (win.ws_row, win.ws_col);
-#if defined (READLINE)
-      rl_set_screen_size (win.ws_row, win.ws_col);
-#endif
-    }
-}
-
-static sighandler
-sigwinch_sighandler (sig)
-     int sig;
-{
-#if defined (MUST_REINSTALL_SIGHANDLERS)
-  set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif /* MUST_REINSTALL_SIGHANDLERS */
-  get_new_window_size (1);
-  SIGRETURN (0);
-}
-#else
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-}
-#endif /* TIOCGWINSZ && SIGWINCH */
-
-void
-set_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
- old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif
-}
-
-void
-unset_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-  set_signal_handler (SIGWINCH, old_winch);
-#endif
-}
-
 /* Setup this shell to handle C-C, etc. */
 void
 initialize_job_signals ()
@@ -3610,7 +3534,6 @@ initialize_job_signals ()
       set_signal_handler (SIGTSTP, SIG_IGN);
       set_signal_handler (SIGTTOU, SIG_IGN);
       set_signal_handler (SIGTTIN, SIG_IGN);
-      set_sigwinch_handler ();
     }
   else if (job_control)
     {

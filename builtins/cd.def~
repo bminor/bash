@@ -360,7 +360,8 @@ pwd_builtin (list)
 
   /* Try again using getcwd() if canonicalization fails (for instance, if
      the file system has changed state underneath bash). */
-  if ((tcwd && directory == 0) || (posixly_correct && file_isdir (tcwd) == 0))
+  if ((tcwd && directory == 0) ||
+      (posixly_correct && same_file (".", tcwd, (struct stat *)0, (struct stat *)0) == 0))
     directory = resetpwd ("pwd");
 
 #undef tcwd
@@ -399,7 +400,7 @@ change_to_directory (newdir, nolinks)
      int nolinks;
 {
   char *t, *tdir;
-  int err, canon_failed, r;
+  int err, canon_failed, r, ndlen, dlen;
 
   tdir = (char *)NULL;
 
@@ -417,6 +418,9 @@ change_to_directory (newdir, nolinks)
   tdir = nolinks ? sh_physpath (t, 0)
 		 : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
 
+  ndlen = strlen (newdir);
+  dlen = strlen (t);
+
   /* Use the canonicalized version of NEWDIR, or, if canonicalization
      failed, use the non-canonical form. */
   canon_failed = 0;
@@ -432,7 +436,7 @@ change_to_directory (newdir, nolinks)
   /* In POSIX mode, if we're resolving symlinks logically and sh_canonpath
      returns NULL (because it checks the path, it will return NULL if the
      resolved path doesn't exist), fail immediately. */
-  if (posixly_correct && nolinks == 0 && canon_failed)
+  if (posixly_correct && nolinks == 0 && canon_failed && (errno != ENAMETOOLONG || ndlen > PATH_MAX))
     {
 #if defined ENAMETOOLONG
       if (errno != ENOENT && errno != ENAMETOOLONG)
@@ -457,6 +461,7 @@ change_to_directory (newdir, nolinks)
       else
 	set_working_directory (tdir);
 
+      free (tdir);
       return (1);
     }
 

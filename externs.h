@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -368,6 +368,9 @@ extern void print_timeval ();
 extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
+
+/* declarations for functions defined in lib/sh/winsize.c */
+extern void get_new_window_size __P((int));
 
 /* declarations for functions defined in lib/sh/xstrchr.c */
 #undef xstrchr

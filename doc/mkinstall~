@@ -16,7 +16,7 @@ trap 'rm -f $TMPOUT $TMPINFO $OUT; trap '' 0; exit 1' 1 2 3 6 15
 trap 'rm -f $TMPOUT $TMPINFO' 0
 
 # create an info file without paragraph indentation
-makeinfo --no-split --no-number-sections -I../lib/readline/doc --paragraph-indent 0 -o $TMPINFO $TEXI
+makeinfo --no-split -I../lib/readline/doc --paragraph-indent 0 -o $TMPINFO $TEXI
 
 # write out the text from the `Installing Bash' node to INSTALL.tmp
 info --file $TMPINFO --node "$NODE" --subnodes --output $TMPOUT

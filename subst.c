@@ -81,6 +81,7 @@ extern int errno;
 /* Flags for the string extraction functions. */
 #define EX_NOALLOC	0x01	/* just skip; don't return substring */
 #define EX_VARNAME	0x02	/* variable name; for string_extract () */
+#define EX_REQMATCH	0x04	/* closing/matching delimiter required */
 
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
@@ -165,6 +166,7 @@ static int glob_argv_flags_size;
 static WORD_LIST expand_word_error, expand_word_fatal;
 static WORD_DESC expand_wdesc_error, expand_wdesc_fatal;
 static char expand_param_error, expand_param_fatal;
+static char extract_string_error, extract_string_fatal;
 
 /* Tell the expansion functions to not longjmp back to top_level on fatal
    errors.  Enabled when doing completion and prompt string expansion. */
@@ -543,7 +545,8 @@ sub_append_number (number, target, indx, size)
    is non-zero, and array variables have been compiled into the shell,
    everything between a `[' and a corresponding `]' is skipped over.
    If (flags & EX_NOALLOC) is non-zero, don't return the substring, just
-   update SINDEX. */
+   update SINDEX.  If (flags & EX_REQMATCH) is non-zero, the string must
+   contain a closing character from CHARLIST. */
 static char *
 string_extract (string, sindex, charlist, flags)
      char *string;
@@ -552,12 +555,14 @@ string_extract (string, sindex, charlist, flags)
      int flags;
 {
   register int c, i;
+  int found;
   size_t slen;
   char *temp;
   DECLARE_MBSTATE;
 
   slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
+  found = 0;
   while (c = string[i])
     {
       if (c == '\\')
@@ -578,13 +583,25 @@ string_extract (string, sindex, charlist, flags)
 	}
 #endif
       else if (MEMBER (c, charlist))
+	{
+	  found = 1;
 	  break;
+	}
 
       ADVANCE_CHAR (string, slen, i);
     }
 
+  /* If we had to have a matching delimiter and didn't find one, return an
+     error and let the caller deal with it. */
+  if ((flags & EX_REQMATCH) && found == 0)
+    {
+      *sindex = i;
+      return (&extract_string_error);
+    }
+  
   temp = (flags & EX_NOALLOC) ? (char *)NULL : substring (string, *sindex, i);
   *sindex = i;
+  
   return (temp);
 }
 
@@ -6825,7 +6842,16 @@ add_string:
 	    if (expanded_something)
 	      *expanded_something = 1;
 
-	    temp = string_extract (string, &sindex, "`", 0);
+	    temp = string_extract (string, &sindex, "`", EX_REQMATCH);
+	    if (temp == &extract_string_error || temp == &extract_string_fatal)
+	      {
+		report_error ("bad substitution: no closing \"`\" in %s", string+t_index);
+		free (string);
+		free (istring);
+		return ((temp == &extract_string_error) ? &expand_word_error
+							: &expand_word_fatal);
+	      }
+		
 	    if (word->flags & W_NOCOMSUB)
 	      /* sindex + 1 because string[sindex] == '`' */
 	      temp1 = substring (string, t_index, sindex + 1);

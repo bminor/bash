@@ -1873,6 +1873,12 @@ shell_getc (remove_quoted_newline)
 
   QUIT;
 
+  if (sigwinch_received)
+    {
+      sigwinch_received = 0;
+      get_new_window_size (0);
+    }
+      
   if (eol_ungetc_lookahead)
     {
       c = eol_ungetc_lookahead;

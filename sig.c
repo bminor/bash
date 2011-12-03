@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,6 +61,9 @@ extern int parse_and_execute_level, shell_initialized;
 /* Non-zero after SIGINT. */
 int interrupt_state;
 
+/* Non-zero after SIGWINCH */
+volatile int sigwinch_received = 0;
+
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
 procenv_t top_level;
@@ -72,6 +75,10 @@ sigset_t top_level_mask;
 
 /* When non-zero, we throw_to_top_level (). */
 int interrupt_immediately = 0;
+
+#if defined (SIGWINCH)
+static SigHandler *old_winch = (SigHandler *)SIG_DFL;
+#endif
 
 static void initialize_shell_signals __P((void));
 
@@ -295,6 +302,7 @@ initialize_shell_signals ()
     {
       set_signal_handler (SIGINT, sigint_sighandler);
       set_signal_handler (SIGTERM, SIG_IGN);
+      set_sigwinch_handler ();
     }
 }
 
@@ -463,6 +471,35 @@ sigint_sighandler (sig)
     }
 
   SIGRETURN (0);
+}
+
+#if defined (SIGWINCH)
+sighandler
+sigwinch_sighandler (sig)
+     int sig;
+{
+#if defined (MUST_REINSTALL_SIGHANDLERS)
+  set_signal_handler (SIGWINCH, sigwinch_sighandler);
+#endif /* MUST_REINSTALL_SIGHANDLERS */
+  sigwinch_received = 1;
+  SIGRETURN (0);
+}
+#endif /* SIGWINCH */
+
+void
+set_sigwinch_handler ()
+{
+#if defined (SIGWINCH)
+ old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
+#endif
+}
+
+void
+unset_sigwinch_handler ()
+{
+#if defined (SIGWINCH)
+  set_signal_handler (SIGWINCH, old_winch);
+#endif
 }
 
 /* Signal functions used by the rest of the code. */
