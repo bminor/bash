@@ -1,12 +1,11 @@
 This is readline.info, produced by makeinfo version 4.5 from
 ./rlman.texi.
 
-This manual describes the GNU Readline Library (version 5.0, 19
-September 2003), a library which aids in the consistency of user
-interface across discrete programs which provide a command line
-interface.
+This manual describes the GNU Readline Library (version 5.0, 28 January
+2004), a library which aids in the consistency of user interface across
+discrete programs which provide a command line interface.
 
-   Copyright (C) 1988-2003 Free Software Foundation, Inc.
+   Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -1040,6 +1039,11 @@ Killing And Yanking
      Kill the word behind point, using white space as a word boundary.
      The killed text is saved on the kill-ring.
 
+`unix-filename-rubout ()'
+     Kill the word behind point, using white space and the slash
+     character as the word boundaries.  The killed text is saved on the
+     kill-ring.
+
 `delete-horizontal-space ()'
      Delete all spaces and tabs around point.  By default, this is
      unbound.
@@ -1261,7 +1265,7 @@ the standard `vi' movement keys, move to previous history lines with
 aiding in the consitency of user interface across discrete programs
 that need to provide a command line interface.
 
-   Copyright (C) 1988-2002 Free Software Foundation, Inc.
+   Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice pare
@@ -2141,7 +2145,12 @@ Redisplay
      primary prompt if the `rl_on_new_line_with_prompt()' function or
      `rl_already_prompted' variable is used.  It returns the number of
      visible characters on the last line of the (possibly multi-line)
-     prompt.
+     prompt.  Applications may indicate that the prompt contains
+     characters that take up no physical screen space when displayed by
+     bracketing a sequence of such characters with the special markers
+     `RL_PROMPT_START_IGNORE' and `RL_PROMPT_END_IGNORE' (declared in
+     `readline.h'.  This may be used to embed terminal-specific escape
+     sequences in prompts.
 
  - Function: int rl_set_prompt (const char *prompt)
      Make Readline use PROMPT for subsequent redisplay.  This calls
@@ -2836,6 +2845,15 @@ Completion Variables
      `rl_complete_internal()'.  The default list is the value of
      `rl_basic_word_break_characters'.
 
+ - Variable: rl_cpvfunc_t * rl_completion_word_break_hook
+     If non-zero, this is the address of a function to call when
+     Readline is deciding where to separate words for word completion.
+     It should return a character string like
+     `rl_completer_word_break_characters' to be used to perform the
+     current completion.  The function may choose to set
+     `rl_completer_word_break_characters' itself.  If the function
+     returns `NULL', `rl_completer_word_break_characters' is used.
+
  - Variable: const char * rl_completer_quote_characters
      A list of characters which can be used to quote a substring of the
      line.  Completion occurs on the entire substring, and within the
@@ -2874,6 +2892,25 @@ Completion Variables
      matches at the end of the command line, as described above.  It is
      set to 0 before any application-specific completion function is
      called, and may only be changed within such a function.
+
+ - Variable: int rl_completion_quote_character
+     When Readline is completing quoted text, as delimited by one of the
+     characters in RL_COMPLETER_QUOTE_CHARACTERS, it sets this variable
+     to the quoting character found.  This is set before any
+     application-specific completion function is called.
+
+ - Variable: int rl_completion_suppress_quote
+     If non-zero, Readline does not append a matching quote character
+     when performing completion on a quoted string.  It is set to 0
+     before any application-specific completion function is called, and
+     may only be changed within such a function.
+
+ - Variable: int rl_completion_found_quote
+     When Readline is completing quoted text, it sets this variable to
+     a non-zero value if the word being completed contains or is
+     delimited by any quoting characters, including backslashes.  This
+     is set before any application-specific completion function is
+     called.
 
  - Variable: int rl_completion_mark_symlink_dirs
      If non-zero, a slash will be appended to completed filenames that
@@ -3958,21 +3995,25 @@ Function and Variable Index
 * rl_clear_message:                      Redisplay.
 * rl_clear_pending_input:                Character Input.
 * rl_clear_signals:                      Readline Signal Handling.
-* rl_complete <1>:                       Completion Functions.
-* rl_complete:                           How Completing Works.
+* rl_complete <1>:                       How Completing Works.
+* rl_complete:                           Completion Functions.
 * rl_complete_internal:                  Completion Functions.
 * rl_completer_quote_characters:         Completion Variables.
 * rl_completer_word_break_characters:    Completion Variables.
 * rl_completion_append_character:        Completion Variables.
 * rl_completion_display_matches_hook:    Completion Variables.
-* rl_completion_entry_function <1>:      How Completing Works.
-* rl_completion_entry_function:          Completion Variables.
+* rl_completion_entry_function <1>:      Completion Variables.
+* rl_completion_entry_function:          How Completing Works.
+* rl_completion_found_quote:             Completion Variables.
 * rl_completion_mark_symlink_dirs:       Completion Variables.
 * rl_completion_matches:                 Completion Functions.
 * rl_completion_mode:                    Completion Functions.
 * rl_completion_query_items:             Completion Variables.
+* rl_completion_quote_character:         Completion Variables.
 * rl_completion_suppress_append:         Completion Variables.
+* rl_completion_suppress_quote:          Completion Variables.
 * rl_completion_type:                    Completion Variables.
+* rl_completion_word_break_hook:         Completion Variables.
 * rl_copy_keymap:                        Keymaps.
 * rl_copy_text:                          Modifying Text.
 * rl_crlf:                               Redisplay.
@@ -4098,6 +4139,7 @@ Function and Variable Index
 * transpose-words (M-t):                 Commands For Text.
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
 * universal-argument ():                 Numeric Arguments.
+* unix-filename-rubout ():               Commands For Killing.
 * unix-line-discard (C-u):               Commands For Killing.
 * unix-word-rubout (C-w):                Commands For Killing.
 * upcase-word (M-u):                     Commands For Text.
@@ -4110,58 +4152,58 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top1298
-Node: Command Line Editing1939
-Node: Introduction and Notation2590
-Node: Readline Interaction4208
-Node: Readline Bare Essentials5395
-Node: Readline Movement Commands7176
-Node: Readline Killing Commands8133
-Node: Readline Arguments10043
-Node: Searching11079
-Node: Readline Init File13222
-Node: Readline Init File Syntax14283
-Node: Conditional Init Constructs25646
-Node: Sample Init File28171
-Node: Bindable Readline Commands31355
-Node: Commands For Moving32405
-Node: Commands For History33255
-Node: Commands For Text36114
-Node: Commands For Killing38829
-Node: Numeric Arguments40780
-Node: Commands For Completion41908
-Node: Keyboard Macros43441
-Node: Miscellaneous Commands44001
-Node: Readline vi Mode47351
-Node: Programming with GNU Readline49169
-Node: Basic Behavior50143
-Node: Custom Functions53573
-Node: Readline Typedefs55051
-Node: Function Writing56681
-Node: Readline Variables57889
-Node: Readline Convenience Functions67312
-Node: Function Naming68294
-Node: Keymaps69546
-Node: Binding Keys71302
-Node: Associating Function Names and Bindings75824
-Node: Allowing Undoing78069
-Node: Redisplay80604
-Node: Modifying Text83675
-Node: Character Input84904
-Node: Terminal Management86684
-Node: Utility Functions88103
-Node: Miscellaneous Functions90442
-Node: Alternate Interface92506
-Node: A Readline Example94651
-Node: Readline Signal Handling96588
-Node: Custom Completers102191
-Node: How Completing Works102906
-Node: Completion Functions106209
-Node: Completion Variables109764
-Node: A Short Completion Example120386
-Node: Copying This Manual132939
-Node: GNU Free Documentation License133179
-Node: Concept Index155573
-Node: Function and Variable Index156522
+Node: Top1296
+Node: Command Line Editing1937
+Node: Introduction and Notation2588
+Node: Readline Interaction4206
+Node: Readline Bare Essentials5393
+Node: Readline Movement Commands7174
+Node: Readline Killing Commands8131
+Node: Readline Arguments10041
+Node: Searching11077
+Node: Readline Init File13220
+Node: Readline Init File Syntax14281
+Node: Conditional Init Constructs25644
+Node: Sample Init File28169
+Node: Bindable Readline Commands31353
+Node: Commands For Moving32403
+Node: Commands For History33253
+Node: Commands For Text36112
+Node: Commands For Killing38827
+Node: Numeric Arguments40958
+Node: Commands For Completion42086
+Node: Keyboard Macros43619
+Node: Miscellaneous Commands44179
+Node: Readline vi Mode47529
+Node: Programming with GNU Readline49347
+Node: Basic Behavior50321
+Node: Custom Functions53751
+Node: Readline Typedefs55229
+Node: Function Writing56859
+Node: Readline Variables58067
+Node: Readline Convenience Functions67490
+Node: Function Naming68472
+Node: Keymaps69724
+Node: Binding Keys71480
+Node: Associating Function Names and Bindings76002
+Node: Allowing Undoing78247
+Node: Redisplay80782
+Node: Modifying Text84216
+Node: Character Input85445
+Node: Terminal Management87225
+Node: Utility Functions88644
+Node: Miscellaneous Functions90983
+Node: Alternate Interface93047
+Node: A Readline Example95192
+Node: Readline Signal Handling97129
+Node: Custom Completers102732
+Node: How Completing Works103447
+Node: Completion Functions106750
+Node: Completion Variables110305
+Node: A Short Completion Example122375
+Node: Copying This Manual134928
+Node: GNU Free Documentation License135168
+Node: Concept Index157562
+Node: Function and Variable Index158511
 
 End Tag Table

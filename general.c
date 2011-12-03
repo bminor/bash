@@ -39,6 +39,8 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "test.h"
+
 #include <tilde/tilde.h>
 
 #if !defined (errno)

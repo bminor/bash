@@ -39,6 +39,7 @@
 #include "../flags.h"
 #include "../input.h"
 #include "../execute_cmd.h"
+#include "../trap.h"
 
 #if defined (HISTORY)
 #  include "../bashhist.h"

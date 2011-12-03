@@ -362,6 +362,9 @@ extern int sh_mktmpfd __P((char *, int, char **));
 #undef xstrchr
 extern char *xstrchr __P((const char *, int));
 
+/* declarations for functions defined in lib/sh/zcatfd.c */
+extern int zcatfd __P((int, int, char *));
+
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));
 extern ssize_t zreadintr __P((int, char *, size_t));

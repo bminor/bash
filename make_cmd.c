@@ -355,6 +355,7 @@ COMMAND *
 make_case_command (word, clauses, lineno)
      WORD_DESC *word;
      PATTERN_LIST *clauses;
+     int lineno;
 {
   CASE_COM *temp;
 

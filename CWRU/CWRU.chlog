@@ -9638,3 +9638,40 @@ flags.c
 	  error messages
 
 [bash-3.0 frozen]
+
+				   7/27
+				   ----
+doc/Makefile.in
+	- small fixes
+
+[bash-3.0-released]
+
+				   7/28
+				   ----
+array.c
+	- in array_insert(), make sure the value to be added is non-NULL before
+	  calling savestring() on it
+
+builtins/reserved.def
+	- fix description of `CDPATH'
+
+lib/readline/display.c
+	- when expanding a prompt that spans multiple lines with embedded
+	  newlines, set prompt_physical_chars from the portion after the
+	  final newline, not the preceding portion.  Bug reported by
+	  "Ralf S. Engelschall" <rse@engelschall.com>
+
+make_cmd.c
+	- explicitly declare `lineno' in function prologue for make_case_command
+
+builtins/evalfile.c
+	- include `trap.h' for declaration for run_return_trap
+
+bashline.c
+	- fix a `return' without a value in enable_hostname_completion
+
+general.c
+	- include test.h for extern declaration for test_eaccess
+
+externs.h
+	- add declaration for zcatfd

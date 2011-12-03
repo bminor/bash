@@ -292,7 +292,7 @@ enable_hostname_completion (on_or_off)
       /* See if we have anything to do. */
       at = strchr (rl_completer_word_break_characters, '@');
       if ((at == 0 && on_or_off == 0) || (at != 0 && on_or_off != 0))
-        return;
+        return old_value;
 
       /* We have something to do.  Do it. */
       nval = (char *)xmalloc (strlen (rl_completer_word_break_characters) + 1 + on_or_off);
