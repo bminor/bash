@@ -27,6 +27,8 @@
 #define RX_ACTIVE	0x01	/* do it; don't just go through the motions */
 #define RX_UNDOABLE	0x02	/* make a list to undo these redirections */
 #define RX_CLEXEC	0x04	/* set close-on-exec for opened fds > 2 */
+#define RX_INTERNAL	0x08
+#define RX_USER		0x10
 
 extern void redirection_error __P((REDIRECT *, int));
 extern int do_redirections __P((REDIRECT *, int));

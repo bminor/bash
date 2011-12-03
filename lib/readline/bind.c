@@ -77,6 +77,8 @@ static char *_rl_read_file PARAMS((char *, size_t *));
 static void _rl_init_file_error PARAMS((const char *));
 static int _rl_read_init_file PARAMS((const char *, int));
 static int glean_key_from_name PARAMS((char *));
+static int find_boolean_var PARAMS((const char *));
+
 static char *_rl_get_string_variable_value PARAMS((const char *));
 static int substring_member_of_array PARAMS((char *, const char **));
 
@@ -1206,13 +1208,19 @@ rl_parse_and_bind (string)
 	*value++ = '\0';
       while (*value && whitespace (*value)) value++;
 
-      /* remove trailing whitespace */
-      e = value + strlen (value) - 1;
-      while (e >= value && whitespace (*e))
-        e--;
-      e++;		/* skip back to whitespace or EOS */
-      if (*e && e >= value)
-        *e = '\0';
+      /* Strip trailing whitespace from values to boolean variables.  Temp
+	 fix until I get a real quoted-string parser here. */
+      i = find_boolean_var (var);
+      if (i >= 0)
+	{
+	  /* remove trailing whitespace */
+	  e = value + strlen (value) - 1;
+	  while (e >= value && whitespace (*e))
+	    e--;
+	  e++;		/* skip back to whitespace or EOS */
+	  if (*e && e >= value)
+	    *e = '\0';
+	}
 
       rl_variable_bind (var, value);
       return 0;

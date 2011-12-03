@@ -131,6 +131,8 @@ _rl_vi_initialize_line ()
 
   for (i = 0; i < sizeof (vi_mark_chars) / sizeof (int); i++)
     vi_mark_chars[i] = -1;
+
+  RL_UNSETSTATE(RL_STATE_VICMDONCE);
 }
 
 void
@@ -686,6 +688,13 @@ rl_vi_movement_mode (count, key)
 
   _rl_keymap = vi_movement_keymap;
   _rl_vi_done_inserting ();
+
+  /* This is how POSIX.2 says `U' should behave -- everything up until the
+     first time you go into command mode should not be undone. */
+  if (RL_ISSTATE (RL_STATE_VICMDONCE) == 0)
+    rl_free_undo_list ();
+
+  RL_SETSTATE (RL_STATE_VICMDONCE);
   return (0);
 }
 

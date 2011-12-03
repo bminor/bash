@@ -383,7 +383,7 @@ fc_builtin (list)
     {
       fcedit = posixly_correct ? POSIX_FC_EDIT_COMMAND : FC_EDIT_COMMAND;
       command = (char *)xmalloc (3 + strlen (fcedit) + strlen (fn));
-      sprintf (command, "%s %s", FC_EDIT_COMMAND, fn);
+      sprintf (command, "%s %s", fcedit, fn);
     }
   retval = parse_and_execute (command, "fc", SEVAL_NOHIST);
   if (retval != EXECUTION_SUCCESS)

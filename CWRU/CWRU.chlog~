@@ -12211,4 +12211,51 @@ bashline.c
 	  rl_completion_found_quote, but doesn't set rl_completion_quote_character,
 	  we have an embedded quoted string or backslash-escaped character in
 	  the passed text.  We need to dequote that before calling
-	  filename_completion_function
+	  filename_completion_function.  So far, this is in place only for
+	  absolute program names (those containing a `/')
+	- in command_word_completion_function, use rl_variable_value to decide
+	  whether or not we should ignore case, and use strncasecmp instead of
+	  strncmp where appropriate
+
+				   10/11
+				   -----
+builtins/fc.def
+	- fixed a typo when using POSIX_FC_EDIT_COMMAND
+
+redir.h
+	- new flag values for redirections: RX_INTERNAL and RX_USER (currently
+	  unused)
+
+redir.c
+	- add_undo_redirect and add_undo_close_redirect now set RX_INTERNAL
+	  flag when making new redirects
+	- in do_redirection_internal, only set file descriptors > 2 to CLEXEC
+	  if they're marked as RX_INTERNAL
+
+				   10/12
+				   -----
+jobs.c
+	- in wait_for_single_pid, if in posix mode, remove the waited-for pid
+	  from the list of background pids, forgetting it entirely.  POSIX
+	  conformance tests test for this.
+
+lib/readline/{readline.h,vi_mode.c}
+	- new state flag, RL_STATE_VICMDONCE, set after entering vi command
+	  mode the first time; reset on each call to readline()
+
+				   10/13
+				   -----
+lib/readline/undo.c
+	- in rl_revert_line, make sure that revert-line in vi mode leaves
+	  rl_point set to 0 no matter the state of the line buffer
+
+lib/readline/vi_mode.c
+	- when entering vi_command mode for the first time, free any existing
+	  undo list so the previous insertions won't be undone by the `U'
+	  command.  This is how POSIX.2 says `U' should work (and the test
+	  suite tests for it)
+
+lib/readline/bind.c
+	- change rl_parse_and_bind so only `set' commands involving boolean
+	  readline variables have trailing whitespace stripped from the value
+	  string

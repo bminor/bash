@@ -522,11 +522,11 @@ PATSCAN (string, end, delim)
      CHAR *string, *end;
      INT delim;
 {
-  int pnest, bnest, skip;
+  int pnest, bnest;
   INT cchar;
   CHAR *s, c, *bfirst;
 
-  pnest = bnest = skip = 0;
+  pnest = bnest = 0;
   cchar = 0;
   bfirst = NULL;
 
@@ -534,16 +534,10 @@ PATSCAN (string, end, delim)
     {
       if (s >= end)
 	return (s);
-      if (skip)
-	{
-	  skip = 0;
-	  continue;
-	}
       switch (c)
 	{
 	case L('\\'):
-	  skip = 1;
-	  break;
+	  continue;
 
 	case L('\0'):
 	  return ((CHAR *)NULL);

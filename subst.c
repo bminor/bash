@@ -1010,6 +1010,7 @@ extract_array_assignment_list (string, sindex)
       *sindex = slen - 1;
       return ret;
     }
+  return 0;  
 }
 #endif
 
@@ -2325,7 +2326,7 @@ do_assignment_no_expand (string)
   td.flags = W_ASSIGNMENT;
   td.word = string;
 
-  do_assignment_internal (&td, 0);
+  return (do_assignment_internal (&td, 0));
 }
 
 /***************************************************

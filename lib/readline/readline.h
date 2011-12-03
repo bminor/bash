@@ -786,6 +786,7 @@ extern int rl_inhibit_completion;
 #define RL_STATE_CALLBACK	0x080000	/* using the callback interface */
 #define RL_STATE_VIMOTION	0x100000	/* reading vi motion arg */
 #define RL_STATE_MULTIKEY	0x200000	/* reading multiple-key command */
+#define RL_STATE_VICMDONCE	0x400000	/* entered vi command mode at least once */
 
 #define RL_STATE_DONE		0x800000	/* done; accepted line */
 

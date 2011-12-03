@@ -630,6 +630,9 @@ do_redirection_internal (redirect, flags)
   redirector = redirect->redirector;
   ri = redirect->instruction;
 
+if (redirect->flags & RX_INTERNAL)
+  flags |= RX_INTERNAL;
+
   if (TRANSLATE_REDIRECT (ri))
     {
       /* We have [N]>&WORD[-] or [N]<&WORD[-].  Expand WORD, then translate
@@ -903,8 +906,13 @@ do_redirection_internal (redirect, flags)
 	     always be open. */
 	  /* if ((already_set || set_unconditionally) && (ok_to_set))
 		set_it () */
+#if 0
 	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || redir_fd < 2 || (flags & RX_CLEXEC)) &&
 	       (redirector > 2))
+#else
+	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (redir_fd < 2 && (flags & RX_INTERNAL)) || (flags & RX_CLEXEC)) &&
+	       (redirector > 2))
+#endif
 	    SET_CLOSE_ON_EXEC (redirector);
 
 	  /* dup-and-close redirection */
@@ -961,6 +969,7 @@ add_undo_redirect (fd)
 
   rd.dest = 0;
   closer = make_redirection (new_fd, r_close_this, rd);
+  closer->flags |= RX_INTERNAL;
   dummy_redirect = copy_redirects (closer);
 
   rd.dest = new_fd;
@@ -968,6 +977,7 @@ add_undo_redirect (fd)
     new_redirect = make_redirection (fd, r_duplicating_input, rd);
   else
     new_redirect = make_redirection (fd, r_duplicating_output, rd);
+  new_redirect->flags |= RX_INTERNAL;
   new_redirect->next = closer;
 
   closer->next = redirection_undo_list;
@@ -1016,6 +1026,7 @@ add_undo_close_redirect (fd)
 
   rd.dest = 0;
   closer = make_redirection (fd, r_close_this, rd);
+  closer->flags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
 }

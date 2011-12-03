@@ -1999,7 +1999,10 @@ wait_for_single_pid (pid)
 
   /* If running in posix mode, remove the job from the jobs table immediately */
   if (posixly_correct)
-    cleanup_dead_jobs ();
+    {
+      cleanup_dead_jobs ();
+      bgp_delete (pid);
+    }
 
   return r;
 }
