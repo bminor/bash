@@ -2975,8 +2975,8 @@ trap [-lp] [@var{arg}] [@var{sigspec} @dots{}]
 The commands in @var{arg} are to be read and executed when the
 shell receives signal @var{sigspec}.  If @var{arg} is absent (and
 there is a single @var{sigspec}) or
-equal to @samp{-}, all specified signals are reset to the values
-they had when the shell was started.
+equal to @samp{-}, each specified signal's disposition is reset
+to the value it had when the shell was started.
 If @var{arg} is the null string, then the signal specified by
 each @var{sigspec} is ignored by the shell and commands it invokes.
 If @var{arg} is not present and @option{-p} has been supplied,
@@ -6199,8 +6199,9 @@ kill -l [@var{exit_status}]
 @end example
 Send a signal specified by @var{sigspec} or @var{signum} to the process
 named by job specification @var{jobspec} or process @sc{id} @var{pid}.
-@var{sigspec} is either a signal name such as @code{SIGINT} (with or without
-the @code{SIG} prefix) or a signal number; @var{signum} is a signal number.
+@var{sigspec} is either a case-insensitive signal name such as
+@code{SIGINT} (with or without the @code{SIG} prefix)
+or a signal number; @var{signum} is a signal number.
 If @var{sigspec} and @var{signum} are not present, @code{SIGTERM} is used.
 The @option{-l} option lists the signal names.
 If any arguments are supplied when @option{-l} is given, the names of the

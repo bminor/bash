@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.163, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.0, version 3.164, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.0)
 define(relstatus, rc1)
@@ -433,7 +433,14 @@ if test "$opt_static_link" = yes; then
 	fi
 fi
 
-test -z "$CPPFLAGS_FOR_BUILD" && CPPFLAGS_FOR_BUILD="$CPPFLAGS"
+if test "X$cross_compiling" = "Xno"; then
+	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}
+	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+else
+	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-""}
+	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-""}
+fi
+
 test -z "$CFLAGS_FOR_BUILD" && CFLAGS_FOR_BUILD="-g"
 
 AC_SUBST(CFLAGS)

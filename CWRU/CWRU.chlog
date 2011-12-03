@@ -9490,3 +9490,62 @@ subst.c
 	- in string_extract_double_quoted, cope with extract_delimited_string
 	  returning NULL, as it can when attempting completion on an unclosed
 	  command substitution
+
+				   6/24
+				   ----
+lib/readline/complete.c
+	- change print_filename to add a `/' to listed directory names if
+	  `mark-directories' has been enabled
+
+builtins/umask.def
+	- make sure that the mask passed to parse_symbolic_mode has all but
+	  the operative low eight bits masked off, to avoid complementing
+	  all 0s to -1, which is the error return code.  This makes things
+	  like `a=rwx' and `ugo=rwx' work and turn off the umask
+
+				   6/26
+				   ----
+builtins/getopts.def
+	- when `getopts' reaches the end of options, unset OPTARG before
+	  returning EOF.  In response to a bug report from Apple
+
+configure.in
+	- when cross-compiling, don't set CPPFLAGS_FOR_BUILD and
+	  LDFLAGS_FOR_BUILD from CPPFLAGS and LDFLAGS, respectively, since
+	  those are for the target instead of the build platform (report
+	  from robert@schwebel.de)
+
+shell.c
+	- a shell whose standard error (but not standard output) is directed
+	  to a terminal should be interactive, according to POSIX/SUS.  This
+	  means that sh > sh.out will start an interactive shell.  Bug report
+	  from llattanzi@apple.com
+
+doc/{bash.1,bashref.texi}
+	- change mention of standard output to standard error in definition
+	  of interactive shell
+
+lib/readline/vi_mode.c
+	- new convenience function, rl_vi_start_inserting, calls
+	  _rl_vi_set_last to save the last textmod command state and then calls
+	  rl_vi_insertion_mode to enter insert mode
+	- change functions to use rl_vi_start_inserting
+
+lib/readline/readline.h
+	- extern declaration for rl_vi_start_inserting
+
+bashline.c
+	- new function for vi-mode completion, bash_vi_complete.  Does
+	  filename expansion as POSIX specifies, unlike the default readline
+	  bindings (which don't know about globbing).  Bound to `\', `*',
+	  and `=' in vi command keymap.  Internals very similar to
+	  rl_vi_complete; just calls bash glob expansion functions
+
+lib/readline/vi_mode.c
+	- change rl_vi_change_char so that an entire change is a single
+	  undoable event, rather than each individual change in a [count]r
+	  command
+	- fix rl_vi_change_char so that replacing characters up to EOL works
+	  rather than generating rl_ding
+	- fix rl_vi_change_case so that replacing characters up to EOL works
+	  rather than generating rl_ding

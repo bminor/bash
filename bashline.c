@@ -193,11 +193,13 @@ static int bash_glob_completion_internal __P((int));
 static int bash_glob_complete_word __P((int, int));
 static int bash_glob_expand_word __P((int, int));
 static int bash_glob_list_expansions __P((int, int));
+
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
 static int edit_and_execute_command __P((int, int, int, char *));
 #if defined (VI_MODE)
 static int vi_edit_and_execute_command __P((int, int));
+static int bash_vi_complete __P((int, int));
 #endif
 static int emacs_edit_and_execute_command __P((int, int));
 
@@ -463,6 +465,10 @@ initialize_readline ()
 #  if defined (ALIAS)
   rl_bind_key_if_unbound_in_map ('@', posix_edit_macros, vi_movement_keymap);
 #  endif
+
+  rl_bind_key_in_map ('\\', bash_vi_complete, vi_movement_keymap);
+  rl_bind_key_in_map ('*', bash_vi_complete, vi_movement_keymap);
+  rl_bind_key_in_map ('=', bash_vi_complete, vi_movement_keymap);
 #endif
 
   rl_completer_quote_characters = "'\"";
@@ -2607,6 +2613,46 @@ bash_specific_completion (what_to_do, generator)
 }
 
 #endif	/* SPECIFIC_COMPLETION_FUNCTIONS */
+
+#if defined (VI_MODE)
+/* Completion, from vi mode's point of view.  This is a modified version of
+   rl_vi_complete which uses the bash globbing code to implement what POSIX
+   specifies, which is to append a `*' and attempt filename generation (which
+   has the side effect of expanding any globbing characters in the word). */
+static int
+bash_vi_complete (count, key)
+     int count, key;
+{
+#if defined (SPECIFIC_COMPLETION_FUNCTIONS)
+  int r;
+
+  if ((rl_point < rl_end) && (!whitespace (rl_line_buffer[rl_point])))
+    {
+      if (!whitespace (rl_line_buffer[rl_point + 1]))
+	rl_vi_end_word (1, 'E');
+      rl_point++;
+    }
+
+  rl_explicit_arg = 1;	/* XXX - force glob_complete_word to append `*' */
+
+  if (key == '*')	/* Expansion and replacement. */
+    r = bash_glob_expand_word (count, key);
+  else if (key == '=')	/* List possible completions. */
+    r = bash_glob_list_expansions (count, key);
+  else if (key == '\\')	/* Standard completion */
+    r = bash_glob_complete_word (count, key);
+  else
+    r = rl_complete (0, key);
+
+  if (key == '*' || key == '\\')
+    rl_vi_start_inserting (key, 1, 1);
+
+  return (r);
+#else
+  return rl_vi_complete (count, key);
+#endif /* !SPECIFIC_COMPLETION_FUNCTIONS */
+}
+#endif /* VI_MODE */
 
 /* Filename quoting for completion. */
 /* A function to strip unquoted quote characters (single quotes, double

@@ -136,6 +136,16 @@ _rl_vi_set_last (key, repeat, sign)
   _rl_vi_last_arg_sign = sign;
 }
 
+/* A convenience function that calls _rl_vi_set_last to save the last command
+   information and enters insertion mode. */
+void
+rl_vi_start_inserting (key, repeat, sign)
+     int key, repeat, sign;
+{
+  _rl_vi_set_last (key, repeat, sign);
+  rl_vi_insertion_mode (1, key);
+}
+
 /* Is the command C a VI mode text modification command? */
 int
 _rl_vi_textmod_command (c)
@@ -298,10 +308,8 @@ rl_vi_complete (ignore, key)
     rl_complete (0, key);
 
   if (key == '*' || key == '\\')
-    {
-      _rl_vi_set_last (key, 1, rl_arg_sign);
-      rl_vi_insertion_mode (1, key);
-    }
+    rl_vi_start_inserting (key, 1, rl_arg_sign);
+
   return (0);
 }
 
@@ -311,8 +319,7 @@ rl_vi_tilde_expand (ignore, key)
      int ignore, key;
 {
   rl_tilde_expand (0, key);
-  _rl_vi_set_last (key, 1, rl_arg_sign);	/* XXX */
-  rl_vi_insertion_mode (1, key);
+  rl_vi_start_inserting (key, 1, rl_arg_sign);
   return (0);
 }
 
@@ -727,12 +734,13 @@ int
 rl_vi_change_case (count, ignore)
      int count, ignore;
 {
-  char c = 0;
+  int c, p;
 
   /* Don't try this on an empty line. */
   if (rl_point >= rl_end)
     return (0);
 
+  c = 0;
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     return (_rl_vi_change_mbchar_case (count));
@@ -754,8 +762,11 @@ rl_vi_change_case (count, ignore)
       /* Vi is kind of strange here. */
       if (c)
 	{
+	  p = rl_point;
 	  rl_begin_undo_group ();
-	  rl_delete (1, c);
+	  rl_vi_delete (1, c);
+	  if (rl_point < p)	/* Did we retreat at EOL? */
+	    rl_point++;
 	  _rl_insert_char (1, c);
 	  rl_end_undo_group ();
 	  rl_vi_check ();
@@ -1020,8 +1031,7 @@ rl_vi_change_to (count, key)
       /* `C' does not save the text inserted for undoing or redoing. */
       if (_rl_uppercase_p (key) == 0)
         _rl_vi_doing_insert = 1;
-      _rl_vi_set_last (key, rl_numeric_arg, rl_arg_sign);
-      rl_vi_insertion_mode (1, key);
+      rl_vi_start_inserting (key, rl_numeric_arg, rl_arg_sign);
     }
 
   return (0);
@@ -1270,14 +1280,14 @@ rl_vi_bracktype (c)
 
 /* XXX - think about reading an entire mbchar with _rl_read_mbchar and
    inserting it in one bunch instead of the loop below (like in
-   rl_vi_char_search or _rl_vi_change_mbchar_case.  Set c to mbchar[0]
+   rl_vi_char_search or _rl_vi_change_mbchar_case).  Set c to mbchar[0]
    for test against 033 or ^C.  Make sure that _rl_read_mbchar does
    this right. */
 int
 rl_vi_change_char (count, key)
      int count, key;
 {
-  int c;
+  int c, p;
 
   if (vi_redoing)
     c = _rl_vi_last_replacement;
@@ -1291,11 +1301,11 @@ rl_vi_change_char (count, key)
   if (c == '\033' || c == CTRL ('C'))
     return -1;
 
+  rl_begin_undo_group ();
   while (count-- && rl_point < rl_end)
     {
-      rl_begin_undo_group ();
-
-      rl_delete (1, c);
+      p = rl_point;
+      rl_vi_delete (1, c);
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	while (_rl_insert_char (1, c))
@@ -1306,12 +1316,14 @@ rl_vi_change_char (count, key)
 	  }
       else
 #endif
-	_rl_insert_char (1, c);
-      if (count == 0)
-	rl_backward_char (1, c);
-
-      rl_end_undo_group ();
+	{
+	  if (rl_point < p)		/* Did we retreat at EOL? */
+	    rl_point++;
+	  _rl_insert_char (1, c);
+	}
     }
+  rl_end_undo_group ();
+
   return (0);
 }
 

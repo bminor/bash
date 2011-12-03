@@ -99,6 +99,8 @@ rl_compdisp_func_t *rl_completion_display_matches_hook = (rl_compdisp_func_t *)N
 static int stat_char PARAMS((char *));
 #endif
 
+static int path_isdir PARAMS((const char *));
+
 static char *rl_quote_filename PARAMS((char *, int, char *));
 
 static void set_completion_defaults PARAMS((int));
@@ -451,6 +453,15 @@ _rl_internal_pager (lines)
     return 0;
 }
 
+static int
+path_isdir (filename)
+     const char *filename;
+{
+  struct stat finfo;
+
+  return (stat (filename, &finfo) == 0 && S_ISDIR (finfo.st_mode));
+}
+
 #if defined (VISIBLE_STATS)
 /* Return the character which best describes FILENAME.
      `@' for symbolic links
@@ -671,17 +682,16 @@ static int
 print_filename (to_print, full_pathname)
      char *to_print, *full_pathname;
 {
-  int printed_len;
-  char *s;
-#if defined (VISIBLE_STATS)
-  char c, *new_full_pathname;
-  int extension_char, slen, tlen;
-#endif
+  int printed_len, extension_char, slen, tlen;
+  char *s, c, *new_full_pathname;
 
   printed_len = fnprint (to_print);
 
 #if defined (VISIBLE_STATS)
- if (rl_filename_completion_desired && rl_visible_stats)
+ if (rl_filename_completion_desired && (rl_visible_stats || _rl_complete_mark_directories))
+#else
+ if (rl_filename_completion_desired && _rl_complete_mark_directories)
+#endif
     {
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed.  In this case, we try to expand the directory
@@ -708,7 +718,13 @@ print_filename (to_print, full_pathname)
 	  new_full_pathname[slen] = '/';
 	  strcpy (new_full_pathname + slen + 1, to_print);
 
-	  extension_char = stat_char (new_full_pathname);
+#if defined (VISIBLE_STATS)
+	  if (rl_visible_stats)
+	    extension_char = stat_char (new_full_pathname);
+	  else
+#endif
+	  if (path_isdir (new_full_pathname))
+	    extension_char = '/';
 
 	  free (new_full_pathname);
 	  to_print[-1] = c;
@@ -716,7 +732,13 @@ print_filename (to_print, full_pathname)
       else
 	{
 	  s = tilde_expand (full_pathname);
-	  extension_char = stat_char (s);
+#if defined (VISIBLE_STATS)
+	  if (rl_visible_stats)
+	    extension_char = stat_char (s);
+	  else
+#endif
+	    if (path_isdir (new_full_pathname))
+	      extension_char = '/';
 	}
 
       free (s);
@@ -726,7 +748,6 @@ print_filename (to_print, full_pathname)
 	  printed_len++;
 	}
     }
-#endif /* VISIBLE_STATS */
 
   return printed_len;
 }

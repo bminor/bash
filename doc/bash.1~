@@ -7089,18 +7089,15 @@ to the processes named by
 or
 .IR jobspec .
 .I sigspec
-is either a signal name such as
+is either a case-insensitive signal name such as
 .SM
 .B SIGKILL
-or a signal number;
-.I signum
-is a signal number.  If
-.I sigspec
-is a signal name, the name may be
-given with or without the
+(with or without the
 .SM
 .B SIG
-prefix.
+prefix) or a signal number;
+.I signum
+is a signal number.
 If
 .I sigspec
 is not present, then
@@ -8186,8 +8183,8 @@ If
 .I arg
 is absent (and there is a single \fIsigspec\fP) or
 .BR \- ,
-all specified signals are
-reset to their original values (the values they had
+each specified signal is
+reset to its original disposition (the value it had
 upon entrance to the shell).
 If 
 .I arg

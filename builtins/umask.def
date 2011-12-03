@@ -1,7 +1,7 @@
 This file is umask.def, from which is created umask.c.
 It implements the builtin "umask" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -300,7 +300,7 @@ symbolic_umask (list)
   /* All work is done with the complement of the umask -- it's
      more intuitive and easier to deal with.  It is complemented
      again before being returned. */
-  bits = parse_symbolic_mode (list->word->word, ~um);
+  bits = parse_symbolic_mode (list->word->word, ~um & 0777);
   if (bits == -1)
     return (-1);
 

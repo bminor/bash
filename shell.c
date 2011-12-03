@@ -477,7 +477,7 @@ main (argc, argv, env)
 	no -c command
 	no arguments remaining or the -s flag given
 	standard input is a terminal
-	standard output is a terminal
+	standard error is a terminal
      Refer to Posix.2, the description of the `sh' utility. */
 
   if (forced_interactive ||		/* -i flag */
@@ -486,7 +486,7 @@ main (argc, argv, env)
        ((arg_index == argc) ||		/*   no remaining args or... */
 	read_from_stdin) &&		/*   -s flag with args, and */
        isatty (fileno (stdin)) &&	/* Input is a terminal and */
-       isatty (fileno (stdout))))	/* output is a terminal. */
+       isatty (fileno (stderr))))	/* error output is a terminal. */
     init_interactive ();
   else
     init_noninteractive ();
