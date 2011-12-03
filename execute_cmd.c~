@@ -2753,7 +2753,11 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	 vast majority of cases. */
       maybe_make_export_env ();
 
+#if 0
       if (make_child (savestring (the_printed_command), async) == 0)
+#else
+      if (make_child (savestring (the_printed_command_except_trap), async) == 0)
+#endif
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
@@ -3875,8 +3879,6 @@ shell_execve (command, args, env)
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      ilen = strlen (interp);
 	      errno = i;
-itrace("shell_execve: interp = `%s', ilen = %d", interp, ilen);
-itrace("shell_execve: interp[ilen - 1] = %d", interp[ilen - 1]);
 	      if (interp[ilen - 1] == '\r')
 		{
 		  interp = xrealloc (interp, ilen + 2);

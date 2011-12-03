@@ -12335,3 +12335,31 @@ execute_cmd.c
 	- in shell_execve, improve the error message a little bit if the
 	  interpreter name in a #! exec header ends with a ^M (as in a DOS-
 	  format file)
+
+				   11/1
+				   ----
+lib/readline/vi_mode.c
+	- fix vi-mode `r' command to leave the cursor in the right place
+
+[bash-3.1-rc1 frozen]
+
+				   11/5
+				   ----
+execute_cmd.c
+	- make sure a DEBUG trap doesn't overwrite a command string passed to
+	  make_child in execute_simple_command
+
+bashline.c
+	- rearrange some code in bash_quote_filename so filenames with leading
+	  tildes containing spaces aren't tilde-expanded before being
+	  returned to the caller
+
+				   11/6
+				   ----
+lib/readline/display.c
+	- when deciding where to move the cursor in rl_redisplay and needing
+	  to move the cursor back after moving it vertically and compensate
+	  for invisible characters in the prompt string, make sure that
+	  _rl_last_c_pos is treated as an absolute cursor position in a
+	  multibyte locale and the wrap offset (number of invisible characters)
+	  is added explicitly when deciding how many characters to backspace

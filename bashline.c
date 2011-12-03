@@ -2879,10 +2879,6 @@ bash_quote_filename (s, rtype, qcp)
      to perform tilde expansion, because single and double
      quotes inhibit tilde expansion by the shell. */
 
-  mtext = s;
-  if (mtext[0] == '~' && rtype == SINGLE_MATCH)
-    mtext = bash_tilde_expand (s, 0);
-
   cs = completion_quoting_style;
   /* Might need to modify the default completion style based on *qcp,
      since it's set to any user-provided opening quote.  We also change
@@ -2890,7 +2886,7 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (mtext, '\n'))
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -2898,16 +2894,22 @@ bash_quote_filename (s, rtype, qcp)
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
   else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
-	   history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
+	   history_expansion_inhibited == 0 && xstrchr (s, '!'))
     cs = COMPLETE_BSQUOTE;
 
   if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
-	history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
+	history_expansion_inhibited == 0 && xstrchr (s, '!'))
     {
       cs = COMPLETE_BSQUOTE;
       *qcp = '\0';
     }
 #endif
+
+  /* Don't tilde-expand backslash-quoted filenames, since only single and
+     double quotes inhibit tilde expansion. */
+  mtext = s;
+  if (mtext[0] == '~' && rtype == SINGLE_MATCH && cs != COMPLETE_BSQUOTE)
+    mtext = bash_tilde_expand (s, 0);
 
   switch (cs)
     {

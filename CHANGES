@@ -46,6 +46,9 @@ a.  Fixed a bug that caused reversing the incremental search direction to
 b.  Fixed the vi-mode `U' command to only undo up to the first time insert mode
     was entered, as Posix specifies.
 
+c.  Fixed a bug in the vi-mode `r' command that left the cursor in the wrong
+    place.
+
 4.  New Features in Readline
 
 a.  New application-callable auxiliary function, rl_variable_value, returns
@@ -160,7 +163,8 @@ d.  Fixed the non-incremental search code in vi mode to dispose of any current
     undo list when copying a line from the history into the current editing
     buffer.
 
-e.  The variable assignment code now ignores whitespace at the end of lines.
+e.  The variable assignment code now ignores whitespace at the end of lines
+    when assigning to boolean variables.
 
 f.  The `C-w' binding in incremental search now understands multibyte
     characters.

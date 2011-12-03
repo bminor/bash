@@ -1,0 +1,438 @@
+*** ../../../bash-3.0-patched/lib/readline/display.c	2004-09-08 11:07:51.000000000 -0400
+--- display.c	2005-11-06 21:32:59.000000000 -0500
+***************
+*** 1,5 ****
+  /* display.c -- readline redisplay facility. */
+  
+! /* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+  
+     This file is part of the GNU Readline Library, a library for
+--- 1,5 ----
+  /* display.c -- readline redisplay facility. */
+  
+! /* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+  
+     This file is part of the GNU Readline Library, a library for
+***************
+*** 119,122 ****
+--- 119,123 ----
+  
+  int _rl_suppress_redisplay = 0;
++ int _rl_want_redisplay = 0;
+  
+  /* The stuff that gets printed out before the actual text of the line.
+***************
+*** 125,129 ****
+--- 126,135 ----
+  
+  /* Pseudo-global variables declared here. */
++ 
+  /* The visible cursor position.  If you print some text, adjust this. */
++ /* NOTE: _rl_last_c_pos is used as a buffer index when not in a locale
++    supporting multibyte characters, and an absolute cursor position when
++    in such a locale.  This is an artifact of the donated multibyte support.
++    Care must be taken when modifying its value. */
+  int _rl_last_c_pos = 0;
+  int _rl_last_v_pos = 0;
+***************
+*** 181,184 ****
+--- 187,202 ----
+  static int prompt_physical_chars;
+  
++ /* Variables to save and restore prompt and display information. */
++ 
++ /* These are getting numerous enough that it's time to create a struct. */
++ 
++ static char *saved_local_prompt;
++ static char *saved_local_prefix;
++ static int saved_last_invisible;
++ static int saved_visible_length;
++ static int saved_prefix_length;
++ static int saved_invis_chars_first_line;
++ static int saved_physical_chars;
++ 
+  /* Expand the prompt string S and return the number of visible
+     characters in *LP, if LP is not null.  This is currently more-or-less
+***************
+*** 237,241 ****
+  	{
+  	  ignoring = 0;
+! 	  last = r - ret - 1;
+  	  continue;
+  	}
+--- 255,260 ----
+  	{
+  	  ignoring = 0;
+! 	  if (p[-1] != RL_PROMPT_START_IGNORE)
+! 	    last = r - ret - 1;
+  	  continue;
+  	}
+***************
+*** 336,340 ****
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_visible_length = 0;
+  
+    if (prompt == 0 || *prompt == 0)
+--- 355,360 ----
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_invis_chars_first_line = 0;
+!   prompt_visible_length = prompt_physical_chars = 0;
+  
+    if (prompt == 0 || *prompt == 0)
+***************
+*** 441,445 ****
+      rl_display_prompt = "";
+  
+!   if (invisible_line == 0)
+      {
+        init_line_structures (0);
+--- 461,465 ----
+      rl_display_prompt = "";
+  
+!   if (invisible_line == 0 || vis_lbreaks == 0)
+      {
+        init_line_structures (0);
+***************
+*** 834,838 ****
+    if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
+      {
+!       int nleft, pos, changed_screen_line;
+  
+        if (!rl_display_fixed || forced_display)
+--- 854,858 ----
+    if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
+      {
+!       int nleft, pos, changed_screen_line, tx, fudge;
+  
+        if (!rl_display_fixed || forced_display)
+***************
+*** 879,883 ****
+  		  (_rl_last_c_pos < visible_first_line_len))
+  		{
+! 		  nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+  		  if (nleft)
+  		    _rl_clear_to_eol (nleft);
+--- 899,906 ----
+  		  (_rl_last_c_pos < visible_first_line_len))
+  		{
+! 		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		    nleft = _rl_screenwidth - _rl_last_c_pos;
+! 		  else
+! 		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+  		  if (nleft)
+  		    _rl_clear_to_eol (nleft);
+***************
+*** 915,919 ****
+  		 but the buffer position needs to be adjusted to account
+  		 for invisible characters. */
+! 	      if (cursor_linenum == 0 && wrap_offset)
+  		_rl_last_c_pos += wrap_offset;
+  	    }
+--- 938,942 ----
+  		 but the buffer position needs to be adjusted to account
+  		 for invisible characters. */
+! 	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) && cursor_linenum == 0 && wrap_offset)
+  		_rl_last_c_pos += wrap_offset;
+  	    }
+***************
+*** 948,951 ****
+--- 971,980 ----
+  	  nleft = c_pos - pos;
+  
++ 	  /* NLEFT is now a number of characters in a buffer.  When in a
++ 	     multibyte locale, however, _rl_last_c_pos is an absolute cursor
++ 	     position that doesn't take invisible characters in the prompt
++ 	     into account.  We use a fudge factor to compensate. */
++ 	  fudge = (MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? wrap_offset : 0;
++ 
+  	  /* Since _rl_backspace() doesn't know about invisible characters in the
+  	     prompt, and there's no good way to tell it, we compensate for
+***************
+*** 953,961 ****
+  	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
+  	    {
+- 	      _rl_backspace (_rl_last_c_pos - nleft);
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		_rl_last_c_pos = _rl_col_width (&visible_line[pos], 0, nleft);
+  	      else
+! 		_rl_last_c_pos = nleft;
+  	    }
+  
+--- 982,994 ----
+  	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
+  	    {
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
+  	      else
+! 		tx = nleft;
+! 	      if ((_rl_last_c_pos+fudge) != tx)
+! 		{
+! 	          _rl_backspace (_rl_last_c_pos + fudge - tx);	/* XXX */
+! 	          _rl_last_c_pos = tx;
+! 		}
+  	    }
+  
+***************
+*** 1118,1122 ****
+       emulators.  In this calculation, TEMP is the physical screen
+       position of the cursor. */
+!   temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+--- 1151,1158 ----
+       emulators.  In this calculation, TEMP is the physical screen
+       position of the cursor. */
+!   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+!     temp = _rl_last_c_pos;
+!   else
+!     temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+***************
+*** 1324,1328 ****
+      {
+        _rl_move_vert (current_line);
+!       if (current_line == 0 && visible_wrap_offset)
+  	_rl_last_c_pos += visible_wrap_offset;
+      }
+--- 1360,1364 ----
+      {
+        _rl_move_vert (current_line);
+!       if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
+  	_rl_last_c_pos += visible_wrap_offset;
+      }
+***************
+*** 1415,1419 ****
+  	      _rl_last_c_pos += col_lendiff;
+  	    }
+! 	  else if (*ols == 0 && lendiff > 0)
+  	    {
+  	      /* At the end of a line the characters do not have to
+--- 1451,1455 ----
+  	      _rl_last_c_pos += col_lendiff;
+  	    }
+! 	  else if ((MB_CUR_MAX == 1 || rl_byte_oriented != 0) && *ols == 0 && lendiff > 0)
+  	    {
+  	      /* At the end of a line the characters do not have to
+***************
+*** 1797,1803 ****
+    return ((ISPRINT (uc)) ? 1 : 2);
+  }
+- 
+  /* How to print things in the "echo-area".  The prompt is treated as a
+     mini-modeline. */
+  
+  #if defined (USE_VARARGS)
+--- 1833,1839 ----
+    return ((ISPRINT (uc)) ? 1 : 2);
+  }
+  /* How to print things in the "echo-area".  The prompt is treated as a
+     mini-modeline. */
++ static int msg_saved_prompt = 0;
+  
+  #if defined (USE_VARARGS)
+***************
+*** 1830,1835 ****
+--- 1866,1882 ----
+    va_end (args);
+  
++   if (saved_local_prompt == 0)
++     {
++       rl_save_prompt ();
++       msg_saved_prompt = 1;
++     }
+    rl_display_prompt = msg_buf;
++   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
++ 					 &prompt_last_invisible,
++ 					 &prompt_invis_chars_first_line,
++ 					 &prompt_physical_chars);
++   local_prompt_prefix = (char *)NULL;
+    (*rl_redisplay_function) ();
++ 
+    return 0;
+  }
+***************
+*** 1841,1846 ****
+--- 1888,1905 ----
+    sprintf (msg_buf, format, arg1, arg2);
+    msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
++ 
+    rl_display_prompt = msg_buf;
++   if (saved_local_prompt == 0)
++     {
++       rl_save_prompt ();
++       msg_saved_prompt = 1;
++     }
++   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
++ 					 &prompt_last_invisible,
++ 					 &prompt_invis_chars_first_line,
++ 					 &prompt_physical_chars);
++   local_prompt_prefix = (char *)NULL;
+    (*rl_redisplay_function) ();
++       
+    return 0;
+  }
+***************
+*** 1852,1855 ****
+--- 1911,1919 ----
+  {
+    rl_display_prompt = rl_prompt;
++   if (msg_saved_prompt)
++     {
++       rl_restore_prompt ();
++       msg_saved_prompt = 0;
++     }
+    (*rl_redisplay_function) ();
+    return 0;
+***************
+*** 1866,1878 ****
+  }
+  
+- /* These are getting numerous enough that it's time to create a struct. */
+- 
+- static char *saved_local_prompt;
+- static char *saved_local_prefix;
+- static int saved_last_invisible;
+- static int saved_visible_length;
+- static int saved_invis_chars_first_line;
+- static int saved_physical_chars;
+- 
+  void
+  rl_save_prompt ()
+--- 1930,1933 ----
+***************
+*** 1880,1883 ****
+--- 1935,1939 ----
+    saved_local_prompt = local_prompt;
+    saved_local_prefix = local_prompt_prefix;
++   saved_prefix_length = prompt_prefix_length;
+    saved_last_invisible = prompt_last_invisible;
+    saved_visible_length = prompt_visible_length;
+***************
+*** 1886,1890 ****
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_visible_length = 0;
+    prompt_invis_chars_first_line = prompt_physical_chars = 0;
+  }
+--- 1942,1946 ----
+  
+    local_prompt = local_prompt_prefix = (char *)0;
+!   prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
+    prompt_invis_chars_first_line = prompt_physical_chars = 0;
+  }
+***************
+*** 1898,1905 ****
+--- 1954,1967 ----
+    local_prompt = saved_local_prompt;
+    local_prompt_prefix = saved_local_prefix;
++   prompt_prefix_length = saved_prefix_length;
+    prompt_last_invisible = saved_last_invisible;
+    prompt_visible_length = saved_visible_length;
+    prompt_invis_chars_first_line = saved_invis_chars_first_line;
+    prompt_physical_chars = saved_physical_chars;
++ 
++   /* can test saved_local_prompt to see if prompt info has been saved. */
++   saved_local_prompt = saved_local_prefix = (char *)0;
++   saved_last_invisible = saved_visible_length = saved_prefix_length = 0;
++   saved_invis_chars_first_line = saved_physical_chars = 0;
+  }
+  
+***************
+*** 1935,1938 ****
+--- 1997,2002 ----
+      }
+  
++   prompt_physical_chars = saved_physical_chars + 1;
++ 
+    return pmt;
+  }
+***************
+*** 1995,1998 ****
+--- 2059,2065 ----
+       int count, col;
+  {
++ #if defined (__MSDOS__) || defined (__MINGW32__)
++   _rl_output_some_chars (string, count);
++ #else
+    /* DEBUGGING */
+    if (MB_CUR_MAX == 1 || rl_byte_oriented)
+***************
+*** 2033,2036 ****
+--- 2100,2104 ----
+  	tputs (_rl_term_ei, 1, _rl_output_character_function);
+      }
++ #endif /* __MSDOS__ || __MINGW32__ */
+  }
+  
+***************
+*** 2043,2046 ****
+--- 2111,2115 ----
+      return;
+  
++ #if !defined (__MSDOS__) && !defined (__MINGW32__)
+    if (_rl_term_DC && *_rl_term_DC)
+      {
+***************
+*** 2055,2058 ****
+--- 2124,2128 ----
+  	  tputs (_rl_term_dc, 1, _rl_output_character_function);
+      }
++ #endif /* !__MSDOS__ && !__MINGW32__ */
+  }
+  
+***************
+*** 2110,2125 ****
+       char *t;
+  {
+!   char *oldp, *oldl, *oldlprefix;
+!   int oldlen, oldlast, oldplen, oldninvis, oldphyschars;
+  
+-   /* Geez, I should make this a struct. */
+    oldp = rl_display_prompt;
+!   oldl = local_prompt;
+!   oldlprefix = local_prompt_prefix;
+!   oldlen = prompt_visible_length;
+!   oldplen = prompt_prefix_length;
+!   oldlast = prompt_last_invisible;
+!   oldninvis = prompt_invis_chars_first_line;
+!   oldphyschars = prompt_physical_chars;
+  
+    rl_display_prompt = t;
+--- 2180,2187 ----
+       char *t;
+  {
+!   char *oldp;
+  
+    oldp = rl_display_prompt;
+!   rl_save_prompt ();
+  
+    rl_display_prompt = t;
+***************
+*** 2129,2142 ****
+  				   &prompt_physical_chars);
+    local_prompt_prefix = (char *)NULL;
+    rl_forced_update_display ();
+  
+    rl_display_prompt = oldp;
+!   local_prompt = oldl;
+!   local_prompt_prefix = oldlprefix;
+!   prompt_visible_length = oldlen;
+!   prompt_prefix_length = oldplen;
+!   prompt_last_invisible = oldlast;
+!   prompt_invis_chars_first_line = oldninvis;
+!   prompt_physical_chars = oldphyschars;
+  }
+        
+--- 2191,2199 ----
+  				   &prompt_physical_chars);
+    local_prompt_prefix = (char *)NULL;
++ 
+    rl_forced_update_display ();
+  
+    rl_display_prompt = oldp;
+!   rl_restore_prompt();
+  }
+        

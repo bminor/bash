@@ -1443,7 +1443,11 @@ command_word_completion_function (hint_text, state)
 
       if (absolute_program (hint))
 	{
-	  match = strncmp (val, hint, hint_len) == 0;
+	  if (igncase == 0)
+	    match = strncmp (val, hint, hint_len) == 0;
+	  else
+	    match = strncasecmp (val, hint, hint_len) == 0;
+
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
 	  if (*hint_text == '~')
@@ -1476,7 +1480,10 @@ command_word_completion_function (hint_text, state)
 	  if (temp)
 	    {
 	      temp++;
-	      freetemp = match = strncmp (temp, hint, hint_len) == 0;
+	      if (igncase == 0)
+		freetemp = match = strncmp (temp, hint, hint_len) == 0;
+	      else
+		freetemp = match = strncasecmp (temp, hint, hint_len) == 0;
 	      if (match)
 		temp = savestring (temp);
 	    }
@@ -2872,10 +2879,6 @@ bash_quote_filename (s, rtype, qcp)
      to perform tilde expansion, because single and double
      quotes inhibit tilde expansion by the shell. */
 
-  mtext = s;
-  if (mtext[0] == '~' && rtype == SINGLE_MATCH)
-    mtext = bash_tilde_expand (s, 0);
-
   cs = completion_quoting_style;
   /* Might need to modify the default completion style based on *qcp,
      since it's set to any user-provided opening quote.  We also change
@@ -2883,7 +2886,7 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (mtext, '\n'))
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -2891,16 +2894,20 @@ bash_quote_filename (s, rtype, qcp)
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
   else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
-	   history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
+	   history_expansion_inhibited == 0 && xstrchr (s, '!'))
     cs = COMPLETE_BSQUOTE;
 
   if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
-	history_expansion_inhibited == 0 && xstrchr (mtext, '!'))
+	history_expansion_inhibited == 0 && xstrchr (s, '!'))
     {
       cs = COMPLETE_BSQUOTE;
       *qcp = '\0';
     }
 #endif
+
+  mtext = s;
+  if (mtext[0] == '~' && rtype == SINGLE_MATCH && cs != COMPLETE_BSQUOTE)
+    mtext = bash_tilde_expand (s, 0);
 
   switch (cs)
     {

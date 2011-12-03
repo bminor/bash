@@ -2753,7 +2753,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	 vast majority of cases. */
       maybe_make_export_env ();
 
-      if (make_child (savestring (the_printed_command), async) == 0)
+      /* Don't let a DEBUG trap overwrite the command string to be saved with
+	 the process/job associated with this child. */
+      if (make_child (savestring (the_printed_command_except_trap), async) == 0)
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;

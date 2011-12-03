@@ -63,17 +63,6 @@
 #  include <bsdtty.h>
 #endif /* hpux && !TERMIOS_TTY_DRIVER */
 
-#if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
-/* For struct winsize on SCO */
-/*   sys/ptem.h has winsize but needs mblk_t from sys/stream.h */
-#  if defined (HAVE_SYS_PTEM_H) && defined (TIOCGWINSZ) && defined (SIGWINCH)
-#    if defined (HAVE_SYS_STREAM_H)
-#      include <sys/stream.h>
-#    endif
-#    include <sys/ptem.h>
-#  endif /* HAVE_SYS_PTEM_H && TIOCGWINSZ && SIGWINCH */
-#endif /* !STRUCT_WINSIZE_IN_SYS_IOCTL */
-
 #include "bashansi.h"
 #include "bashintl.h"
 #include "shell.h"
@@ -142,10 +131,6 @@ extern int errno;
 
 typedef int sh_job_map_func_t __P((JOB *, int, int, int));
 
-#if defined (READLINE)
-extern void rl_set_screen_size __P((int, int));
-#endif
-
 /* Variables used here but defined in other files. */
 extern int subshell_environment, line_number;
 extern int posixly_correct, shell_level;
@@ -160,6 +145,7 @@ extern procenv_t wait_intr_buf;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
+static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 
 struct bgpids bgpids = { 0, 0, 0 };
@@ -223,13 +209,10 @@ int check_window_size;
 
 /* Functions local to this file. */
 
-static void get_new_window_size __P((int));
-
 static void run_sigchld_trap __P((int));
 
 static sighandler wait_sigint_handler __P((int));
 static sighandler sigchld_handler __P((int));
-static sighandler sigwinch_sighandler __P((int));
 static sighandler sigcont_sighandler __P((int));
 static sighandler sigstop_sighandler __P((int));
 
@@ -312,10 +295,6 @@ static int queue_sigchld;
 static SigHandler *old_tstp, *old_ttou, *old_ttin;
 static SigHandler *old_cont = (SigHandler *)SIG_DFL;
 
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-static SigHandler *old_winch = (SigHandler *)SIG_DFL;
-#endif
-
 /* A place to temporarily save the current pipeline. */
 static PROCESS *saved_pipeline;
 static int saved_already_making_children;
@@ -348,6 +327,13 @@ tcgetpgrp (fd)
 }
 
 #endif /* !_POSIX_VERSION */
+
+/* Initialize the global job stats structure. */
+void
+init_job_stats ()
+{
+  js = zerojs;
+}
 
 /* Return the working directory for the current process.  Unlike
    job_working_directory, this does not call malloc (), nor do any
@@ -410,11 +396,16 @@ stop_making_children ()
 void
 cleanup_the_pipeline ()
 {
-  if (the_pipeline)
-    {
-      discard_pipeline (the_pipeline);
-      the_pipeline = (PROCESS *)NULL;
-    }
+  PROCESS *disposer;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+  disposer = the_pipeline;
+  the_pipeline = (PROCESS *)NULL;
+  UNBLOCK_CHILD (oset);
+
+  if (disposer)
+    discard_pipeline (disposer);
 }
 
 void
@@ -422,9 +413,9 @@ save_pipeline (clear)
      int clear;
 {
   saved_pipeline = the_pipeline;
-  saved_already_making_children = already_making_children;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
+  saved_already_making_children = already_making_children;
 }
 
 void
@@ -1019,6 +1010,7 @@ add_process (name, pid)
     }
 #endif
 
+itrace("add_process: %s %d", name, pid);
   t = (PROCESS *)xmalloc (sizeof (PROCESS));
   t->next = the_pipeline;
   t->pid = pid;
@@ -1984,6 +1976,13 @@ wait_for_single_pid (pid)
     jobs[job]->flags |= J_NOTIFIED;
   UNBLOCK_CHILD (oset);
 
+  /* If running in posix mode, remove the job from the jobs table immediately */
+  if (posixly_correct)
+    {
+      cleanup_dead_jobs ();
+      bgp_delete (pid);
+    }
+
   return r;
 }
 
@@ -2635,7 +2634,7 @@ start_job (job, foreground)
   register PROCESS *p;
   int already_running;
   sigset_t set, oset;
-  char *wd;
+  char *wd, *s;
   static TTYSTRUCT save_stty;
 
   BLOCK_CHILD (set, oset);
@@ -2653,7 +2652,7 @@ start_job (job, foreground)
     {
       internal_error (_("%s: job %d already in background"), this_command_name, job + 1);
       UNBLOCK_CHILD (oset);
-      return (-1);
+      return (0);		/* XPG6/SUSv3 says this is not an error */
     }
 
   wd = current_working_directory ();
@@ -2671,8 +2670,15 @@ start_job (job, foreground)
   p = jobs[job]->pipe;
 
   if (foreground == 0)
-    printf ("[%d]%c ", job + 1,
-	   (job == js.j_current) ? '+': ((job == js.j_previous) ? '-' : ' '));
+    {
+      /* POSIX.2 says `bg' doesn't give any indication about current or
+	 previous job. */
+      if (posixly_correct == 0)
+	s = (job == js.j_current) ? "+ ": ((job == js.j_previous) ? "- " : " ");       
+      else
+	s = " ";
+      printf ("[%d]%s", job + 1, s);
+    }
 
   do
     {
@@ -2744,8 +2750,16 @@ kill_pid (pid, sig, group)
      int sig, group;
 {
   register PROCESS *p;
-  int job, result;
+  int job, result, negative;
   sigset_t set, oset;
+
+  if (pid < -1)
+    {
+      pid = -pid;
+      group = negative = 1;
+    }
+  else
+    negative = 0;
 
   result = EXECUTION_SUCCESS;
   if (group)
@@ -2758,8 +2772,26 @@ kill_pid (pid, sig, group)
 	  jobs[job]->flags &= ~J_NOTIFIED;
 
 	  /* Kill process in backquotes or one started without job control? */
-	  if (jobs[job]->pgrp == shell_pgrp)
+
+	  /* If we're passed a pid < -1, just call killpg and see what happens  */
+	  if (negative && jobs[job]->pgrp == shell_pgrp)
 	    result = killpg (pid, sig);
+	  /* If we're killing using job control notification, for example,
+	     without job control active, we have to do things ourselves. */
+	  else if (jobs[job]->pgrp == shell_pgrp)
+	    {
+	      p = jobs[job]->pipe;
+	      do
+		{
+		  if (PALIVE (p) == 0)
+		    continue;		/* avoid pid recycling problem */
+		  kill (p->pid, sig);
+		  if (PEXITED (p) && (sig == SIGTERM || sig == SIGHUP))
+		    kill (p->pid, SIGCONT);
+		  p = p->next;
+		}
+	      while  (p != jobs[job]->pipe);
+	    }
 	  else
 	    {
 	      result = killpg (jobs[job]->pgrp, sig);
@@ -3493,60 +3525,6 @@ set_new_line_discipline (tty)
 #endif
 }
 
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-  struct winsize win;
-
-  if ((ioctl (shell_tty, TIOCGWINSZ, &win) == 0) &&
-      win.ws_row > 0 && win.ws_col > 0)
-    {
-#if defined (aixpc)
-      shell_tty_info.c_winsize = win;	/* structure copying */
-#endif
-      sh_set_lines_and_columns (win.ws_row, win.ws_col);
-#if defined (READLINE)
-      rl_set_screen_size (win.ws_row, win.ws_col);
-#endif
-    }
-}
-
-static sighandler
-sigwinch_sighandler (sig)
-     int sig;
-{
-#if defined (MUST_REINSTALL_SIGHANDLERS)
-  set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif /* MUST_REINSTALL_SIGHANDLERS */
-  get_new_window_size (1);
-  SIGRETURN (0);
-}
-#else
-static void
-get_new_window_size (from_sig)
-     int from_sig;
-{
-}
-#endif /* TIOCGWINSZ && SIGWINCH */
-
-void
-set_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
- old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
-#endif
-}
-
-void
-unset_sigwinch_handler ()
-{
-#if defined (TIOCGWINSZ) && defined (SIGWINCH)
-  set_signal_handler (SIGWINCH, old_winch);
-#endif
-}
-
 /* Setup this shell to handle C-C, etc. */
 void
 initialize_job_signals ()
@@ -3557,7 +3535,6 @@ initialize_job_signals ()
       set_signal_handler (SIGTSTP, SIG_IGN);
       set_signal_handler (SIGTTOU, SIG_IGN);
       set_signal_handler (SIGTTIN, SIG_IGN);
-      set_sigwinch_handler ();
     }
   else if (job_control)
     {

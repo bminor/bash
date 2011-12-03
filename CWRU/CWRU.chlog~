@@ -12331,3 +12331,25 @@ builtins/evalstring.c
 	- make sure we don't turn on CMD_NO_FORK in parse_and_execute if
 	  we're running a trap command on signal receipt or exit
 
+execute_cmd.c
+	- in shell_execve, improve the error message a little bit if the
+	  interpreter name in a #! exec header ends with a ^M (as in a DOS-
+	  format file)
+
+				   11/1
+				   ----
+lib/readline/vi_mode.c
+	- fix vi-mode `r' command to leave the cursor in the right place
+
+[bash-3.1-rc1 frozen]
+
+				   11/5
+				   ----
+execute_cmd.c
+	- make sure a DEBUG trap doesn't overwrite a command string passed to
+	  make_child in execute_simple_command
+
+bashline.c
+	- rearrange some code in bash_quote_filename so filenames with leading
+	  tildes containing spaces aren't tilde-expanded before being
+	  returned to the caller

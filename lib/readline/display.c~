@@ -424,7 +424,6 @@ init_line_structures (minsize)
       invisible_line[n] = 1;
     }
 
-kill(getpid(), SIGWINCH);
   if (vis_lbreaks == 0)
     {
       /* should be enough. */
@@ -445,7 +444,7 @@ rl_redisplay ()
   register int in, out, c, linenum, cursor_linenum;
   register char *line;
   int c_pos, inv_botlin, lb_botlin, lb_linenum;
-  int newlines, lpos, temp, modmark, n0, num;
+  int newlines, lpos, temp, modmark, n0, num, fudge;
   char *prompt_this_line;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
@@ -938,7 +937,7 @@ rl_redisplay ()
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
-	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) &&  cursor_linenum == 0 && wrap_offset)
+	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) && cursor_linenum == 0 && wrap_offset)
 		_rl_last_c_pos += wrap_offset;
 	    }
 
@@ -971,6 +970,12 @@ rl_redisplay ()
 	     start of the line and the cursor position. */
 	  nleft = c_pos - pos;
 
+	  /* NLEFT is now a number of characters in a buffer.  When in a
+	     multibyte locale, however, _rl_last_c_pos is an absolute cursor
+	     position that doesn't take invisible characters in the prompt
+	     into account.  We use a fudge factor to compensate. */
+	  fudge = (MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? wrap_offset : 0;
+
 	  /* Since _rl_backspace() doesn't know about invisible characters in the
 	     prompt, and there's no good way to tell it, we compensate for
 	     those characters here and call _rl_backspace() directly. */
@@ -980,9 +985,9 @@ rl_redisplay ()
 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
 	      else
 		tx = nleft;
-	      if (_rl_last_c_pos != tx)
+	      if ((_rl_last_c_pos+fudge) != tx)
 		{
-	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+	          _rl_backspace (_rl_last_c_pos + fudge - tx);	/* XXX */
 	          _rl_last_c_pos = tx;
 		}
 	    }

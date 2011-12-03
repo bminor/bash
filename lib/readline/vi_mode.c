@@ -1416,6 +1416,10 @@ _rl_vi_change_char (count, c, mb)
 #endif
 	_rl_insert_char (1, c);
     }
+
+  /* The cursor shall be left on the last character changed. */
+  rl_backward_char (1, c);
+
   rl_end_undo_group ();
 
   return (0);
