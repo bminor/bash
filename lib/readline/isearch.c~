@@ -423,6 +423,8 @@ _rl_isearch_dispatch (cxt, c)
       cxt->direction = -cxt->direction;
       if (cxt->direction < 0)
 	cxt->sflags |= SF_REVERSE;
+      else
+	cxt->sflags &= ~SF_REVERSE;
       break;
 
     /* delete character from search string. */
@@ -457,7 +459,7 @@ _rl_isearch_dispatch (cxt, c)
 
       /* if not in a word, move to one. */
       cval = _rl_char_value (rl_line_buffer, wstart);
-      if (rl_walphabetic (cval) == 0)
+      if (_rl_walphabetic (cval) == 0)
 	{
 	  rl_ding ();
 	  break;
@@ -466,7 +468,7 @@ _rl_isearch_dispatch (cxt, c)
       while (n < rl_end)
 	{
 	  cval = _rl_char_value (rl_line_buffer, n);
-	  if (rl_walphabetic (cval) == 0)
+	  if (_rl_walphabetic (cval) == 0)
 	    break;
 	  n = MB_NEXTCHAR (rl_line_buffer, n, 1, MB_FIND_NONZERO);;
 	}

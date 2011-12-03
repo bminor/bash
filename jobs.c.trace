@@ -421,6 +421,7 @@ cleanup_the_pipeline ()
   PROCESS *disposer;
   sigset_t set, oset;
 
+itrace("cleanup_the_pipeline: the_pipeline = 0x%x", the_pipeline);
   BLOCK_CHILD (set, oset);
   disposer = the_pipeline;
   the_pipeline = (PROCESS *)NULL;
@@ -561,6 +562,7 @@ stop_pipeline (async, deferred)
       register PROCESS *p;
       int any_running, any_stopped, n;
 
+itrace("stop_pipeline: adding 0x%x as new job", the_pipeline);
       newjob = (JOB *)xmalloc (sizeof (JOB));
 
       for (n = 1, p = the_pipeline; p->next != the_pipeline; n++, p = p->next)
@@ -1033,6 +1035,7 @@ add_process (name, pid)
 #endif
 
   t = (PROCESS *)xmalloc (sizeof (PROCESS));
+itrace("add_process: adding 0x%x to 0x%x", t, the_pipeline);
   t->next = the_pipeline;
   t->pid = pid;
   WSTATUS (t->status) = 0;

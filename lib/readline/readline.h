@@ -303,6 +303,8 @@ extern int rl_bind_keyseq_in_map PARAMS((const char *, rl_command_func_t *, Keym
 extern int rl_bind_keyseq_if_unbound PARAMS((const char *, rl_command_func_t *));
 extern int rl_bind_keyseq_if_unbound_in_map PARAMS((const char *, rl_command_func_t *, Keymap));
 extern int rl_generic_bind PARAMS((int, const char *, char *, Keymap));
+
+extern char *rl_variable_value PARAMS((const char *));
 extern int rl_variable_bind PARAMS((const char *, const char *));
 
 /* Backwards compatibility, use rl_bind_keyseq_in_map instead. */

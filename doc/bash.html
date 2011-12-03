@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2005 Mar 15<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2005 Aug 27<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -58,6 +58,9 @@ shells (<B>ksh</B> and <B>csh</B>).
 
 is intended to be a conformant implementation of the IEEE
 POSIX Shell and Tools specification (IEEE Working Group 1003.2).
+<B>Bash</B>
+
+can be configured to be POSIX-conformant by default.
 <A NAME="lbAF">&nbsp;</A>
 <H2>OPTIONS</H2>
 
@@ -2561,6 +2564,11 @@ number of seconds to wait for input after issuing the primary prompt.
 
 terminates after waiting for that number of seconds if input does
 not arrive.
+<DT><B>TMPDIR</B>
+
+<DD>
+If set, <B>Bash</B> uses its value as the name of a directory in which
+<B>Bash</B> creates temporary files for the shell's use.
 <DT><B>auto_resume</B>
 
 <DD>
@@ -2707,6 +2715,8 @@ The
 
 builtin is used to destroy arrays.  <B>unset</B> <I>name</I>[<I>subscript</I>]
 destroys the array element at index <I>subscript</I>.
+Care must be taken to avoid unwanted side effects caused by filename
+generation.
 <B>unset</B> <I>name</I>, where <I>name</I> is an array, or
 <B>unset</B> <I>name</I>[<I>subscript</I>], where
 <I>subscript</I> is <B>*</B> or <B>@</B>, removes the entire array.
@@ -5943,8 +5953,13 @@ Except where noted, readline variables can take the values
 <B>On</B>
 
 or
-<B>Off</B>.
+<B>Off</B>
 
+(without regard to case).
+Unrecognized variable names are ignored.
+When a variable value is read, empty or null values, &quot;on&quot; (case-insensitive),
+and &quot;1&quot; are equivalent to <B>On</B>.  All other values are equivalent to
+<B>Off</B>.
 The variables and their default values are:
 <P>
 
@@ -6030,7 +6045,7 @@ arrow keys.
 <DD>
 If set to <B>on</B>, tilde expansion is performed when readline
 attempts word completion.
-<DT><B>history-preserve-point</B>
+<DT><B>history-preserve-point (Off)</B>
 
 <DD>
 If set to <B>on</B>, the history code attempts to place point at the
@@ -7664,6 +7679,8 @@ accepts
 <B>--</B>
 
 to signify the end of the options.
+For example, the <B>:</B>, <B>true</B>, <B>false</B>, and <B>test</B> builtins
+do not accept options.
 <P>
 
 <DL COMPACT>
@@ -7751,8 +7768,8 @@ If <I>jobspec</I> is not present, the shell's notion of the
 <I>jobspec</I>
 
 returns 0 unless run when job control is disabled or, when run with
-job control enabled, if the last <I>jobspec</I> was not found or was
-started without job control.
+job control enabled, any specified <I>jobspec</I> was not found
+or was started without job control.
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-lpsvPSV</B>]<DD>
 
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-q</B> <I>function</I>] [<B>-u</B> <I>function</I>] [<B>-r</B> <I>keyseq</I>]<DD>
@@ -8505,10 +8522,7 @@ dynamically determine whether or not <B>echo</B> expands these
 escape characters by default.
 <B>echo</B>
 
-does not interpret
-<B>--</B>
-
-to mean the end of options.
+does not interpret <B>--</B> to mean the end of options.
 <B>echo</B>
 
 interprets the following escape sequences:
@@ -9576,7 +9590,7 @@ Cause <B>read</B> to time out and return failure if a complete line of
 input is not read within <I>timeout</I> seconds.
 This option has no effect if <B>read</B> is not reading input from the
 terminal or a pipe.
-<DT><B>-u </B><I>fdFP</I>
+<DT><B>-u </B><I>fd</I>
 
 <DD>
 Read input from file descriptor <I>fd</I>.
@@ -10548,6 +10562,8 @@ Expressions are composed of the primaries described above under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>.
 
 </FONT>
+<B>test</B> does not accept any options, nor does it accept and ignore
+an argument of <B>--</B> as signifying the end of options.
 <P>
 
 
@@ -11487,6 +11503,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 15 March 2005 17:27:07 EST
+Time: 03 October 2005 15:07:47 EDT
 </BODY>
 </HTML>

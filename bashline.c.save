@@ -1224,8 +1224,7 @@ command_word_completion_function (hint_text, state)
   static char *path = (char *)NULL;
   static char *val = (char *)NULL;
   static char *filename_hint = (char *)NULL;
-  static char *dequoted_hint = (char *)NULL;
-  static int path_index, hint_len, dequoted_len, istate, igncase;
+  static int path_index, hint_len, istate;
   static int mapping_over, local_index;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
 #if defined (ALIAS)
@@ -1237,16 +1236,11 @@ command_word_completion_function (hint_text, state)
      no state, then make one just for that purpose. */
   if (!state)
     {
-      if (dequoted_hint && dequoted_hint != hint)
-	free (dequoted_hint);
       if (hint)
 	free (hint);
 
       mapping_over = 0;
       val = (char *)NULL;
-
-      temp = rl_variable_value ("completion-ignore-case");
-      igncase = strcmp (temp, "on") == 0;
 
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
@@ -1261,7 +1255,6 @@ command_word_completion_function (hint_text, state)
 	  else
 	    hint = savestring (hint_text);
 
-	  dequoted_hint = hint;
 	  /* If readline's completer found a quote character somewhere, but
 	     didn't set the quote character, there must have been a quote
 	     character embedded in the filename.  It can't be at the start of
@@ -1269,11 +1262,11 @@ command_word_completion_function (hint_text, state)
 	     in the file system for it. */
 	  if (rl_completion_found_quote && rl_completion_quote_character == 0)
 	    {
-	      dequoted_hint = bash_dequote_filename (hint, 0);
+	      temp = bash_dequote_filename (hint, 0);
 	      free (hint);
-	      hint = dequoted_hint;
+	      hint = temp;
 	    }
-	  dequoted_len = hint_len = strlen (hint);
+	  hint_len = strlen (hint);
 
 	  if (filename_hint)
 	    free (filename_hint);
@@ -1285,15 +1278,9 @@ command_word_completion_function (hint_text, state)
 	  goto inner;
 	}
 
-      dequoted_hint = hint = savestring (hint_text);
-      dequoted_len = hint_len = strlen (hint);
+      hint = savestring (hint_text);
+      hint_len = strlen (hint);
 
-      if (rl_completion_found_quote && rl_completion_quote_character == 0)
-	{
-	  dequoted_hint = bash_dequote_filename (hint, 0);
-	  dequoted_len = strlen (dequoted_hint);
-	}
-      
       path = get_string_value ("PATH");
       path_index = dot_in_path = 0;
 
@@ -1420,6 +1407,7 @@ command_word_completion_function (hint_text, state)
 	free (filename_hint);
 
       filename_hint = sh_makepath (current_path, hint, 0);
+
       free (current_path);
     }
 
@@ -1443,11 +1431,7 @@ command_word_completion_function (hint_text, state)
 
       if (absolute_program (hint))
 	{
-	  if (igncase == 0)
-	    match = strncmp (val, hint, hint_len) == 0;
-	  else
-	    match = strncasecmp (val, hint, hint_len) == 0;
-
+	  match = strncmp (val, hint, hint_len) == 0;
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
 	  if (*hint_text == '~')
@@ -1480,10 +1464,7 @@ command_word_completion_function (hint_text, state)
 	  if (temp)
 	    {
 	      temp++;
-	      if (igncase == 0)
-		freetemp = match = strncmp (temp, hint, hint_len) == 0;
-	      else
-		freetemp = match = strncasecmp (temp, hint, hint_len) == 0;
+	      freetemp = match = strncmp (temp, hint, hint_len) == 0;
 	      if (match)
 		temp = savestring (temp);
 	    }

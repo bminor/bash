@@ -12159,3 +12159,56 @@ execute_cmd.c
 	- in shell_execve, if the exec fails due to E2BIG or ENOMEM, just print
 	  the appropriate error message instead of checking out any interpreter
 	  specified with #!
+
+				   9/30
+				   ----
+bashhist.c
+	- make $HISTCMD available anytime remember_on_history is non-zero,	
+	  which indicates that we're saving commands to the history, and
+	  let it evaluate to 1 if we're not
+
+				   10/4
+				   ----
+lib/sh/snprintf.c
+	- in floating(), make sure d != 0 before calling chkinfnan -- gcc on the
+	  version of Solaris 9 I have translates 0 to -inf on the call
+
+[bash-3.1-beta1 frozen]
+
+				   10/6
+				   ----
+jobs.c
+	- set the_pipeline to NULL right away in cleanup_the_pipeline, and
+	  dispose a copy of the pointer so we don't mess with the_pipeline
+	  while we're in the process of destroying it
+	- block and unblock SIGCHLD around manipulating the_pipeline in
+	  cleanup_the_pipeline	
+
+				   10/7
+				   ----
+[bash-3.1-beta1 released]
+
+lib/readline/isearch.c
+	- when switching directions, make sure we turn off the SF_REVERSE
+	  flag in the search context's flags word if we're going from reverse
+	  to forward i-search
+
+lib/readline/bind.c
+	- new function, rl_variable_value, returns a string representing a
+	  bindable readline variable's value
+	- new auxiliary function, _rl_get_string_variable_value, encapsulates
+	  everything needed to get a bindable string variable's value
+	- rewrote rl_variable_dumper to use _rl_get_string_variable_value
+
+lib/readline/readline.h
+	- new extern declaration for rl_variable_value
+
+lib/readline/doc/rltech.texi
+	- documented rl_variable_value
+
+bashline.c
+	- in command_word_completion_function, if readline sets
+	  rl_completion_found_quote, but doesn't set rl_completion_quote_character,
+	  we have an embedded quoted string or backslash-escaped character in
+	  the passed text.  We need to dequote that before calling
+	  filename_completion_function

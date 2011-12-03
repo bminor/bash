@@ -932,7 +932,7 @@ floating(p, d)
   char *tmp, *tmp2, *t;
   int i;
 
-  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+  if (d != 0 && (chkinfnan(p, d, 1) || chkinfnan(p, d, 2)))
     return;	/* already printed nan or inf */
 
   GETLOCALEDATA(decpoint, thoussep, grouping);

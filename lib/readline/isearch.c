@@ -148,7 +148,7 @@ rl_forward_search_history (sign, key)
 
 /* Display the current state of the search in the echo-area.
    SEARCH_STRING contains the string that is being searched for,
-   DIRECTION is zero for forward, or 1 for reverse,
+   DIRECTION is zero for forward, or non-zero for reverse,
    WHERE is the history list number of the current line.  If it is
    -1, then this line is the starting one. */
 static void
@@ -423,6 +423,8 @@ _rl_isearch_dispatch (cxt, c)
       cxt->direction = -cxt->direction;
       if (cxt->direction < 0)
 	cxt->sflags |= SF_REVERSE;
+      else
+	cxt->sflags &= ~SF_REVERSE;
       break;
 
     /* delete character from search string. */
