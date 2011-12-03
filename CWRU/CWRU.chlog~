@@ -12081,3 +12081,34 @@ builtins/echo.def
 
 doc/bashref.texi
 	- describe the --enable-strict-posix-default option to configure
+
+				   9/10
+				   ----
+builtins/mkbuiltins.c
+	- change to not generate N_(""), because the translated empty string is
+	  special to GNU gettext
+
+				   9/13
+				   ----
+lib/readline/complete.c
+	- a negative value for rl_completion_query_items means to not ask
+
+lib/readline/doc/{{rltech,rluser}.texi,readline.3}
+	- documented new semantics for rl_completion_query_items/
+	  completion-query-items
+
+				   9/14
+				   ----
+bashline.c
+	- bind M-TAB in emacs mode to dynamic-complete-history even if the
+	  current binding is `tab-insert' (which is what it is by default),
+	  not just if it's unbound
+
+				   9/15
+				   ----
+eval.c
+	- call QUIT before calling dispose_command on current_command after
+	  the  `exec_done' label.  If we dispose current_command first, the
+	  longjmp might restore the value of current_command after we've
+	  disposed it, and the subsequent call to dispose_command from the
+	  DISCARD case will free memory twice

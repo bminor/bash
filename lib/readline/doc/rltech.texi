@@ -931,7 +931,7 @@ Restore the local Readline prompt display state saved by the most
 recent call to @code{rl_save_prompt}.
 if @code{rl_save_prompt} was called to save the prompt before a call
 to @code{rl_message}, this function should be called before the
-corresponding call to @coode{rl_clear_message}.
+corresponding call to @code{rl_clear_message}.
 @end deftypefun
 
 @deftypefun int rl_expand_prompt (char *prompt)
@@ -1716,8 +1716,9 @@ shell variables and hostnames.
 
 @deftypevar int rl_completion_query_items
 Up to this many items will be displayed in response to a
-possible-completions call.  After that, we ask the user if she is sure
-she wants to see them all.  The default value is 100.
+possible-completions call.  After that, readline asks the user if she is sure
+she wants to see them all.  The default value is 100.  A negative value 
+indicates that Readline should never ask the user.
 @end deftypevar
 
 @deftypevar {int} rl_completion_append_character

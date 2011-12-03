@@ -208,7 +208,8 @@ int rl_completion_type = 0;
 
 /* Up to this many items will be displayed in response to a
    possible-completions call.  After that, we ask the user if
-   she is sure she wants to see them all. */
+   she is sure she wants to see them all.  A negative value means
+   don't ask. */
 int rl_completion_query_items = 100;
 
 int _rl_page_completions = 1;
@@ -1411,7 +1412,7 @@ display_matches (matches)
 	
   /* If there are many items, then ask the user if she really wants to
      see them all. */
-  if (len >= rl_completion_query_items)
+  if (rl_completion_query_items > 0 && len >= rl_completion_query_items)
     {
       rl_crlf ();
       fprintf (rl_outstream, "Display all %d possibilities? (y or n)", len);

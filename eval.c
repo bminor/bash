@@ -146,13 +146,13 @@ reader_loop ()
 	      execute_command (current_command);
 
 	    exec_done:
+	      QUIT;
+
 	      if (current_command)
 		{
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
-
-	      QUIT;
 	    }
 	}
       else

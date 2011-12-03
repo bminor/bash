@@ -449,7 +449,11 @@ initialize_readline ()
 
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
-  rl_bind_key_if_unbound_in_map (TAB, dynamic_complete_history, emacs_meta_keymap);
+  kseq[0] = TAB;
+  kseq[1] = '\0';
+  func = rl_function_of_keyseq (kseq, emacs_meta_keymap, (int *)NULL);
+  if (func == 0 || func == rl_tab_insert)
+    rl_bind_key_in_map (TAB, dynamic_complete_history, emacs_meta_keymap);
 
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = attempt_shell_completion;
