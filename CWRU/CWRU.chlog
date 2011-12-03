@@ -12430,3 +12430,27 @@ lib/readline/rltty.c
 	  special characters in the vi insertion keymap if in vi mode.  This
 	  matters if we get accept-line for the previous line while in vi
 	  command mode
+
+				   11/14
+				   -----
+builtins/pushd.def
+	- make sure any call to cd_builtin includes a leading `--' from the
+	  argument list (or constructs one)
+
+				   11/16
+				   -----
+pcomplete.c
+	- fix small memory leak in gen_wordlist_matches
+
+[bash-3.1-rc2 frozen]
+
+				   11/23
+				   -----
+lib/readline/display.c
+	- changes to rl_redisplay to compensate for update_line updating
+	  _rl_last_c_pos without taking invisible characters in the line into
+	  account.  Important in multibyte locales where _rl_last_c_pos is an
+	  absolute cursor position
+	- changes to _rl_move_cursor_relative to account for _rl_last_c_pos
+	  being an absolute cursor position in a multibyte character locale
+	- rewrote _rl_move_cursor_relative to make it a little simpler

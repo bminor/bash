@@ -845,6 +845,7 @@ gen_wordlist_matches (cs, text)
     }
   sl->list[sl->list_len = nw] = (char *)NULL;
 
+  dispose_words (l2);
   FREE (ntxt);
   return sl;
 }

@@ -1,3 +1,39 @@
+This document details the changes between this version, bash-3.1-rc2,
+and the previous version, bash-3.1-rc1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused a DEBUG trap to overwrite a command string that's
+    eventually attached to a background job.
+
+b.  Changed some code so that filenames with leading tildes with spaces in the
+    name aren't tilde-expanded by the bash completion code.
+
+c.  Fixed a bug that caused the pushd builtin to fail to change to
+    directories with leading `-'.
+
+d.  Fixed a small memory leak in the programmable completion code.
+
+2.  Changes to Readline
+
+a.  Fixed a redisplay bug caused by moving the cursor vertically to a line
+    with invisible characters in the prompt in a multibyte locale.
+
+b.  Fixed a bug that could cause the terminal special chars to be bound in the
+    wrong keymap in vi mode.
+
+3.  New Features in Bash
+
+a.  If compiled for strict POSIX conformance, LINES and COLUMNS may now
+    override the true terminal size.
+
+4.  New Features in Readline
+
+a.  A new external application-controllable variable that allows the LINES
+    and COLUMNS environment variables to set the window size regardless of
+    what the kernel returns.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.1-rc1,
 and the previous version, bash-3.1-beta1.
 

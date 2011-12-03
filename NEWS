@@ -62,6 +62,9 @@ s.  Bash now sets the extern variable `environ' to the export environment it
 t.  A new configuration option, `--enable-strict-posix-default', which will
     build bash to be POSIX conforming by default.
 
+u.  If compiled for strict POSIX conformance, LINES and COLUMNS may now
+    override the true terminal size.
+
 2.  New Features in Readline
 
 a.  The key sequence sent by the keypad `delete' key is now automatically
@@ -77,6 +80,10 @@ c.  A new bindable readline variable:  bind-tty-special-chars.  If non-zero,
 d.  New bindable command: vi-rubout.  Saves deleted text for possible
     reinsertion, as with any vi-mode `text modification' command; `X' is bound
     to this in vi command mode.
+
+e.  A new external application-controllable variable that allows the LINES
+    and COLUMNS environment variables to set the window size regardless of
+    what the kernel returns: rl_prefer_env_winsize
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-3.0 since

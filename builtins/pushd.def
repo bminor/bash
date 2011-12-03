@@ -151,11 +151,13 @@ int
 pushd_builtin (list)
      WORD_LIST *list;
 {
+  WORD_LIST *orig_list;
   char *temp, *current_directory, *top;
   int j, flags, skipopt;
   intmax_t num;
   char direction;
 
+  orig_list = list;
   if (list && list->word && ISOPTION (list->word->word, '-'))
     {
       list = list->next;
@@ -270,7 +272,7 @@ pushd_builtin (list)
   if (current_directory == 0)
     return (EXECUTION_FAILURE);
 
-  j = ((flags & NOCD) == 0) ? cd_builtin (list) : EXECUTION_SUCCESS;
+  j = ((flags & NOCD) == 0) ? cd_builtin (skipopt ? orig_list : list) : EXECUTION_SUCCESS;
   if (j == EXECUTION_SUCCESS)
     {
       add_dirstack_element ((flags & NOCD) ? savestring (list->word->word) : current_directory);
@@ -504,9 +506,11 @@ cd_to_string (name)
      char *name;
 {
   WORD_LIST *tlist;
+  WORD_LIST *dir;
   int result;
 
-  tlist = make_word_list (make_word (name), NULL);
+  dir = make_word_list (make_word (name), NULL);
+  tlist = make_word_list (make_word ("--"), dir);
   result = cd_builtin (tlist);
   dispose_words (tlist);
   return (result);

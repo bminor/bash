@@ -443,7 +443,7 @@ rl_redisplay ()
 {
   register int in, out, c, linenum, cursor_linenum;
   register char *line;
-  int c_pos, inv_botlin, lb_botlin, lb_linenum;
+  int c_pos, inv_botlin, lb_botlin, lb_linenum, o_cpos;
   int newlines, lpos, temp, modmark, n0, num;
   char *prompt_this_line;
 #if defined (HANDLE_MULTIBYTE)
@@ -853,7 +853,7 @@ rl_redisplay ()
 
   if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
     {
-      int nleft, pos, changed_screen_line, tx, fudge;
+      int nleft, pos, changed_screen_line, tx;
 
       if (!rl_display_fixed || forced_display)
 	{
@@ -884,9 +884,23 @@ rl_redisplay ()
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
+	      o_cpos = _rl_last_c_pos;
 	      update_line (VIS_LINE(linenum), INV_LINE(linenum), linenum,
 			   VIS_LLEN(linenum), INV_LLEN(linenum), inv_botlin);
 
+#if 1
+	      /* update_line potentially changes _rl_last_c_pos, but doesn't
+		 take invisible characters into account, since _rl_last_c_pos
+		 is an absolute cursor position in a multibyte locale.  See
+		 if compensating here is the right thing, or if we have to
+		 change update_line itself. */
+	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+		  _rl_last_c_pos != o_cpos &&
+		  _rl_last_c_pos > wrap_offset &&
+		  o_cpos < prompt_last_invisible)
+		_rl_last_c_pos -= wrap_offset;
+#endif
+		  
 	      /* If this is the line with the prompt, we might need to
 		 compensate for invisible characters in the new line. Do
 		 this only if there is not more than one new line (which
@@ -958,7 +972,7 @@ rl_redisplay ()
 #endif
 	      _rl_output_some_chars (local_prompt, nleft);
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft);
+		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft) - wrap_offset;
 	      else
 		_rl_last_c_pos = nleft;
 	    }
@@ -974,7 +988,6 @@ rl_redisplay ()
 	     multibyte locale, however, _rl_last_c_pos is an absolute cursor
 	     position that doesn't take invisible characters in the prompt
 	     into account.  We use a fudge factor to compensate. */
-	  fudge = (MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? wrap_offset : 0;
 
 	  /* Since _rl_backspace() doesn't know about invisible characters in the
 	     prompt, and there's no good way to tell it, we compensate for
@@ -982,16 +995,20 @@ rl_redisplay ()
 	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
 	    {
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		tx = _rl_col_width (&visible_line[pos], 0, nleft);
+		tx = _rl_col_width (&visible_line[pos], 0, nleft) - visible_wrap_offset;
 	      else
 		tx = nleft;
-	      if ((_rl_last_c_pos+fudge) != tx)
+	      if (_rl_last_c_pos > tx)
 		{
-	          _rl_backspace (_rl_last_c_pos + fudge - tx);	/* XXX */
+	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
 	          _rl_last_c_pos = tx;
 		}
 	    }
 
+	  /* We need to note that in a multibyte locale we are dealing with
+	     _rl_last_c_pos as an absolute cursor position, but moving to a
+	     point specified by a buffer position (NLEFT) that doesn't take
+	     invisible characters into account. */
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	    _rl_move_cursor_relative (nleft, &invisible_line[pos]);
 	  else if (nleft != _rl_last_c_pos)
@@ -1388,7 +1405,11 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 #endif
       _rl_output_some_chars (local_prompt, lendiff);
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+#if 0
+	_rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
+#else
 	_rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff);
+#endif
       else
 	_rl_last_c_pos = lendiff;
     }
@@ -1465,7 +1486,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 		 the end.  We have invisible characters in this line.  This
 		 is a dumb update. */
 	      _rl_output_some_chars (nfd, temp);
-	      _rl_last_c_pos += col_temp;
+	      _rl_last_c_pos += col_temp;	/* XXX */
 	      return;
 	    }
 	  /* Copy (new) chars to screen from first diff to last match. */
@@ -1489,6 +1510,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  /* cannot insert chars, write to EOL */
 	  _rl_output_some_chars (nfd, temp);
 	  _rl_last_c_pos += col_temp;
+	  /* If we're in a multibyte locale and before the last invisible char
+	     in the current line (which assumes we just output some invisible
+	     characters) we need to adjust _rl_last_c_pos, since it represents
+	     a physical character position. */
 	}
     }
   else				/* Delete characters from line. */
@@ -1520,7 +1545,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  if (temp > 0)
 	    {
 	      _rl_output_some_chars (nfd, temp);
-	      _rl_last_c_pos += col_temp;
+	      _rl_last_c_pos += col_temp;		/* XXX */
 	    }
 	  lendiff = (oe - old) - (ne - new);
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1582,7 +1607,7 @@ rl_on_new_line_with_prompt ()
 
   l = strlen (prompt_last_line);
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    _rl_last_c_pos = _rl_col_width (prompt_last_line, 0, l);
+    _rl_last_c_pos = _rl_col_width (prompt_last_line, 0, l);	/* XXX */
   else
     _rl_last_c_pos = l;
 
@@ -1631,6 +1656,8 @@ rl_forced_update_display ()
 }
 
 /* Move the cursor from _rl_last_c_pos to NEW, which are buffer indices.
+   (Well, when we don't have multibyte characters, _rl_last_c_pos is a
+   buffer index.)
    DATA is the contents of the screen line of interest; i.e., where
    the movement is being done. */
 void
@@ -1639,28 +1666,40 @@ _rl_move_cursor_relative (new, data)
      const char *data;
 {
   register int i;
+  int woff;			/* number of invisible chars on current line */
+  int cpos, dpos;		/* current and desired cursor positions */
 
-  /* If we don't have to do anything, then return. */
+  woff = W_OFFSET (_rl_last_v_pos, wrap_offset);
+  cpos = _rl_last_c_pos;
 #if defined (HANDLE_MULTIBYTE)
   /* If we have multibyte characters, NEW is indexed by the buffer point in
      a multibyte string, but _rl_last_c_pos is the display position.  In
      this case, NEW's display position is not obvious and must be
-     calculated. */
-  if (MB_CUR_MAX == 1 || rl_byte_oriented)
+     calculated.  We need to account for invisible characters in this line,
+     as long as we are past them and they are counted by _rl_col_width. */
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
-      if (_rl_last_c_pos == new)
-	return;
+      dpos = _rl_col_width (data, 0, new);
+      if (dpos > woff)
+	dpos -= woff;
     }
-  else if (_rl_last_c_pos == _rl_col_width (data, 0, new))
-    return;
-#else
-  if (_rl_last_c_pos == new) return;
+  else
 #endif
+    dpos = new;
+
+  /* If we don't have to do anything, then return. */
+  if (cpos == dpos)
+    return;
 
   /* It may be faster to output a CR, and then move forwards instead
      of moving backwards. */
   /* i == current physical cursor position. */
-  i = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+#if defined (HANDLE_MULTIBYTE)
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    i = _rl_last_c_pos;
+  else
+#endif
+  i = _rl_last_c_pos - woff;
   if (new == 0 || CR_FASTER (new, _rl_last_c_pos) ||
       (_rl_term_autowrap && i == _rl_screenwidth))
     {
@@ -1669,10 +1708,10 @@ _rl_move_cursor_relative (new, data)
 #else
       tputs (_rl_term_cr, 1, _rl_output_character_function);
 #endif /* !__MSDOS__ */
-      _rl_last_c_pos = 0;
+      cpos = _rl_last_c_pos = 0;
     }
 
-  if (_rl_last_c_pos < new)
+  if (cpos < dpos)
     {
       /* Move the cursor forward.  We do it by printing the command
 	 to move the cursor forward if there is one, else print that
@@ -1686,31 +1725,11 @@ _rl_move_cursor_relative (new, data)
 #if defined (HACK_TERMCAP_MOTION)
       if (_rl_term_forward_char)
 	{
-	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-	    {
-	      int width;
-	      width = _rl_col_width (data, _rl_last_c_pos, new);
-	      for (i = 0; i < width; i++)
-		tputs (_rl_term_forward_char, 1, _rl_output_character_function);
-	    }
-	  else
-	    {
-	      for (i = _rl_last_c_pos; i < new; i++)
-		tputs (_rl_term_forward_char, 1, _rl_output_character_function);
-	    }
-	}
-      else if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-	{
-	  tputs (_rl_term_cr, 1, _rl_output_character_function);
-	  for (i = 0; i < new; i++)
-	    putc (data[i], rl_outstream);
+	  for (i = cpos; i < dpos; i++)
+	    tputs (_rl_term_forward_char, 1, _rl_output_character_function);
 	}
       else
-	for (i = _rl_last_c_pos; i < new; i++)
-	  putc (data[i], rl_outstream);
-
-#else /* !HACK_TERMCAP_MOTION */
-
+#endif /* HACK_TERMCAP_MOTION */
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
 	  tputs (_rl_term_cr, 1, _rl_output_character_function);
@@ -1718,32 +1737,20 @@ _rl_move_cursor_relative (new, data)
 	    putc (data[i], rl_outstream);
 	}
       else
-	for (i = _rl_last_c_pos; i < new; i++)
+	for (i = cpos; i < new; i++)
 	  putc (data[i], rl_outstream);
-
-#endif /* !HACK_TERMCAP_MOTION */
-
     }
+
 #if defined (HANDLE_MULTIBYTE)
   /* NEW points to the buffer point, but _rl_last_c_pos is the display point.
      The byte length of the string is probably bigger than the column width
      of the string, which means that if NEW == _rl_last_c_pos, then NEW's
      display point is less than _rl_last_c_pos. */
-  else if (_rl_last_c_pos >= new)
-#else
-  else if (_rl_last_c_pos > new)
 #endif
-    {
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-	_rl_backspace (_rl_last_c_pos - _rl_col_width (data, 0, new));
-      else
-	_rl_backspace (_rl_last_c_pos - new);
-    }
+  else if (cpos > dpos)
+    _rl_backspace (cpos - dpos);
 
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    _rl_last_c_pos =  _rl_col_width (data, 0, new);
-  else
-    _rl_last_c_pos = new;
+  _rl_last_c_pos = dpos;
 }
 
 /* PWP: move the cursor up or down. */

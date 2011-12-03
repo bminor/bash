@@ -12422,3 +12422,24 @@ lib/readline/readline.h
 
 lib/readline/doc/rltech.texi
 	- document rl_prefer_env_winsize
+
+				   11/13
+				   -----
+lib/readline/rltty.c
+	- change rl_prep_terminal to make sure we set and reset the tty
+	  special characters in the vi insertion keymap if in vi mode.  This
+	  matters if we get accept-line for the previous line while in vi
+	  command mode
+
+				   11/14
+				   -----
+builtins/pushd.def
+	- make sure any call to cd_builtin includes a leading `--' from the
+	  argument list (or constructs one)
+
+				   11/16
+				   -----
+pcomplete.c
+	- fix small memory leak in gen_wordlist_matches
+
+[bash-3.1-rc2 frozen]
