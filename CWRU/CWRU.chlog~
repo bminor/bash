@@ -10595,3 +10595,20 @@ redir.c
 	  using explicit redirections (e.g., `exec 3>&1').  This keeps file
 	  descriptors pointing to pipes from being left open but doesn't
 	  change the shell's file descriptor semantics
+
+				   11/20
+				   -----
+doc/{bash.1,bashref.texi}
+	- correct some minor typos, forwarded from doko@debian.org
+
+				   11/22
+				   -----
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- documented detail that yank-last-arg and yank-nth-arg use the history
+	  arg expansion code (and, as a result, are subject to restrictions
+	  of the history-comment character)
+
+				   11/23
+				   -----
+execute_cmd.c
+	- changes so that BASH_COMMAND preserves its value into a DEBUG trap

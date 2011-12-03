@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sat Nov 20 12:23:43 EST 2004
+.\"	Last Change: Mon Nov 22 11:06:21 EST 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Nov 20" "GNU Bash-3.1-devel"
+.TH BASH 1 "2004 Nov 22" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4894,6 +4894,8 @@ With an argument
 insert the \fIn\fPth word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
 inserts the \fIn\fPth word from the end of the previous command.
+Once the argument \fIn\fP is computed, the argument is extracted
+as if the "!\fIn\fP" history expansion had been specified.
 .TP
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
@@ -4902,6 +4904,8 @@ the previous history entry).  With an argument,
 behave exactly like \fByank\-nth\-arg\fP.
 Successive calls to \fByank\-last\-arg\fP move back through the history
 list, inserting the last argument of each line in turn.
+The history expansion facilities are used to extract the last argument,
+as if the "!$" history expansion had been specified.
 .TP
 .B shell\-expand\-line (M\-C\-e)
 Expand the line as the shell does.  This

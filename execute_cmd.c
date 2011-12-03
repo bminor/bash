@@ -1619,8 +1619,9 @@ execute_for_command (for_command)
       if (echo_command_at_execute)
 	xtrace_print_for_command_head (for_command);
 
-      /* Save this command unless it's a trap command. */
-      if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+      /* Save this command unless it's a trap command and we're not running
+	 a debug trap. */
+      if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
 	{
 	  FREE (the_printed_command_except_trap);
 	  the_printed_command_except_trap = savestring (the_printed_command);
@@ -1728,8 +1729,11 @@ eval_arith_for_expr (l, okp)
 
       command_string_index = 0;
       print_arith_command (new);
-      FREE (the_printed_command_except_trap);
-      the_printed_command_except_trap = savestring (the_printed_command);
+      if (signal_in_progress (DEBUG_TRAP) == 0)
+	{
+	  FREE (the_printed_command_except_trap);
+	  the_printed_command_except_trap = savestring (the_printed_command);
+	}
 
       r = run_debug_trap ();
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
@@ -2036,8 +2040,11 @@ execute_select_command (select_command)
   if (echo_command_at_execute)
     xtrace_print_select_command_head (select_command);
 
-  FREE (the_printed_command_except_trap);
-  the_printed_command_except_trap = savestring (the_printed_command);
+  if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+    }
 
   retval = run_debug_trap ();
 #if defined (DEBUGGER)
@@ -2165,7 +2172,7 @@ execute_case_command (case_command)
   if (echo_command_at_execute)
     xtrace_print_case_command_head (case_command);
 
-  if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+  if (signal_in_progress (DEBUG_TRAP == 0) && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -2375,8 +2382,12 @@ execute_arith_command (arith_command)
 
   command_string_index = 0;
   print_arith_command (arith_command->exp);
-  FREE (the_printed_command_except_trap);
-  the_printed_command_except_trap = savestring (the_printed_command);
+
+  if (signal_in_progress (DEBUG_TRAP) == 0)
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+    }
 
   /* Run the debug trap before each arithmetic command, but do it after we
      update the line number information and before we expand the various
@@ -2532,8 +2543,12 @@ execute_cond_command (cond_command)
 
   command_string_index = 0;
   print_cond_command (cond_command);
-  FREE (the_printed_command_except_trap);
-  the_printed_command_except_trap = savestring (the_printed_command);
+
+  if (signal_in_progress (DEBUG_TRAP) == 0)
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = savestring (the_printed_command);
+    }
 
   /* Run the debug trap before each conditional command, but do it after we
      update the line number information. */
@@ -2686,7 +2701,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_string_index = 0;
   print_simple_command (simple_command);
 
-  if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
+  if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = the_printed_command ? savestring (the_printed_command) : (char *)0;

@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Wed Jan 28 15:43:53 EST 2004
+.\"	Last Change: Mon Nov 22 11:10:14 EST 2004
 .\"
-.TH READLINE 3 "2004 October 15" "GNU Readline 5.0"
+.TH READLINE 3 "2004 Nov 22" "GNU Readline 5.1-devel"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -696,6 +696,8 @@ With an argument
 insert the \fIn\fPth word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
 inserts the \fIn\fPth word from the end of the previous command.
+Once the argument \fIn\fP is computed, the argument is extracted
+as if the "!\fIn\fP" history expansion had been specified.
 .TP
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
@@ -704,6 +706,8 @@ the previous history entry).  With an argument,
 behave exactly like \fByank\-nth\-arg\fP.
 Successive calls to \fByank\-last\-arg\fP move back through the history
 list, inserting the last argument of each line in turn.
+The history expansion facilities are used to extract the last argument,
+as if the "!$" history expansion had been specified.
 .PD
 .SS Commands for Changing Text
 .PP

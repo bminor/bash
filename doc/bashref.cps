@@ -13,10 +13,10 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{85}
-\entry {command execution}{28}
+\entry {command execution}{29}
 \entry {command expansion}{28}
 \entry {command history}{111}
-\entry {command search}{28}
+\entry {command search}{29}
 \entry {command substitution}{21}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
@@ -39,13 +39,13 @@
 \entry {evaluation, arithmetic}{70}
 \entry {event designators}{113}
 \entry {execution environment}{29}
-\entry {exit status}{3, 30}
+\entry {exit status}{3, 31}
 \entry {expansion}{16}
 \entry {expansion, arithmetic}{21}
 \entry {expansion, brace}{17}
-\entry {expansion, filename}{22}
-\entry {expansion, parameter}{18}
-\entry {expansion, pathname}{22}
+\entry {expansion, filename}{23}
+\entry {expansion, parameter}{19}
+\entry {expansion, pathname}{23}
 \entry {expansion, tilde}{18}
 \entry {expressions, arithmetic}{70}
 \entry {expressions, conditional}{69}
@@ -53,7 +53,7 @@
 \entry {FDL, GNU Free Documentation License}{133}
 \entry {field}{3}
 \entry {filename}{3}
-\entry {filename expansion}{22}
+\entry {filename expansion}{23}
 \entry {foreground}{81}
 \entry {functions, shell}{13}
 \initial {H}
@@ -88,11 +88,11 @@
 \initial {O}
 \entry {operator, shell}{3}
 \initial {P}
-\entry {parameter expansion}{18}
+\entry {parameter expansion}{19}
 \entry {parameters}{15}
 \entry {parameters, positional}{15}
 \entry {parameters, special}{15}
-\entry {pathname expansion}{22}
+\entry {pathname expansion}{23}
 \entry {pattern matching}{23}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
@@ -114,7 +114,7 @@
 \initial {S}
 \entry {shell arithmetic}{70}
 \entry {shell function}{13}
-\entry {shell script}{31}
+\entry {shell script}{32}
 \entry {shell variable}{15}
 \entry {shell, interactive}{67}
 \entry {signal}{4}
