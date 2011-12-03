@@ -2759,21 +2759,7 @@ kill_pid (pid, sig, group)
 
 	  /* Kill process in backquotes or one started without job control? */
 	  if (jobs[job]->pgrp == shell_pgrp)
-	    {
-	      p = jobs[job]->pipe;
-
-	      do
-		{
-		  if (PALIVE (p) == 0)
-		    continue;	/* avoid pid recycling problems */
-
-		  kill (p->pid, sig);
-		  if (PEXITED (p) && (sig == SIGTERM || sig == SIGHUP))
-		    kill (p->pid, SIGCONT);
-		  p = p->next;
-		}
-	      while (p != jobs[job]->pipe);
-	    }
+	    result = killpg (pid, sig);
 	  else
 	    {
 	      result = killpg (jobs[job]->pgrp, sig);
@@ -3104,10 +3090,10 @@ set_job_status_and_cleanup (job)
 	      if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
 		  temp_handler = trap_to_sighandler (SIGINT);
 		restore_sigint_handler ();
-		if (temp_handler == SIG_DFL)
-		  termination_unwind_protect (SIGINT);
-		else if (temp_handler != SIG_IGN)
-		  (*temp_handler) (SIGINT);
+	      if (temp_handler == SIG_DFL)
+		termination_unwind_protect (SIGINT);
+	      else if (temp_handler != SIG_IGN)
+		(*temp_handler) (SIGINT);
 	    }
 	}
     }
@@ -3225,9 +3211,10 @@ notify_of_job_status ()
 
 	  /* POSIX.2 says we have to hang onto the statuses of at most the
 	     last CHILD_MAX background processes if the shell is running a
-	     script.  If the shell is not interactive, don't print anything
-	     unless the job was killed by a signal. */
-	  if (startup_state == 0 && WIFSIGNALED (s) == 0 && job_control == 0 &&
+	     script.  If the shell is running a script, either from a file
+	     or standard input, don't print anything unless the job was
+	     killed by a signal. */
+	  if (startup_state == 0 && WIFSIGNALED (s) == 0 &&
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
 	  

@@ -315,7 +315,7 @@ cd_builtin (list)
 
 $BUILTIN pwd
 $FUNCTION pwd_builtin
-$SHORT_DOC pwd [-PL]
+$SHORT_DOC pwd [-LP]
 Print the current working directory.  With the -P option, pwd prints
 the physical directory, without any symbolic links; the -L option
 makes pwd follow symbolic links.
@@ -360,7 +360,8 @@ pwd_builtin (list)
 
   /* Try again using getcwd() if canonicalization fails (for instance, if
      the file system has changed state underneath bash). */
-  if (tcwd && directory == 0)
+  if ((tcwd && directory == 0) ||
+      (posixly_correct && same_file (".", tcwd, (struct stat *)0, (struct stat *)0) == 0))
     directory = resetpwd ("pwd");
 
 #undef tcwd

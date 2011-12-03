@@ -79,6 +79,10 @@ $END
 #include <readline/readline.h>
 #endif
 
+#if defined (BUFFERED_INPUT)
+#  include "input.h"
+#endif
+
 #if !defined(errno)
 extern int errno;
 #endif
@@ -272,6 +276,11 @@ read_builtin (list)
     }
 
   begin_unwind_frame ("read_builtin");
+
+#if defined (BUFFERED_INPUT)
+  if (interactive == 0 && default_buffered_input >= 0 && fd_is_bash_input (fd))
+    sync_buffered_stream (default_buffered_input);
+#endif
 
   input_is_tty = isatty (fd);
   if (input_is_tty == 0)
@@ -664,7 +673,6 @@ add_char:
   return (retval);
 }
 
-/* XXX - should we call stupidly_hack_special_variables here? */
 static SHELL_VAR *
 bind_read_variable (name, value)
      char *name, *value;
@@ -689,7 +697,7 @@ edit_line (p)
   char *ret;
   int len;
 
-  if (!bash_readline_initialized)
+  if (bash_readline_initialized == 0)
     initialize_readline ();
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;

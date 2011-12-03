@@ -1984,6 +1984,10 @@ wait_for_single_pid (pid)
     jobs[job]->flags |= J_NOTIFIED;
   UNBLOCK_CHILD (oset);
 
+  /* If running in posix mode, remove the job from the jobs table immediately */
+  if (posixly_correct)
+    cleanup_dead_jobs ();
+
   return r;
 }
 
@@ -2759,21 +2763,7 @@ kill_pid (pid, sig, group)
 
 	  /* Kill process in backquotes or one started without job control? */
 	  if (jobs[job]->pgrp == shell_pgrp)
-	    {
-	      p = jobs[job]->pipe;
-
-	      do
-		{
-		  if (PALIVE (p) == 0)
-		    continue;	/* avoid pid recycling problems */
-
-		  kill (p->pid, sig);
-		  if (PEXITED (p) && (sig == SIGTERM || sig == SIGHUP))
-		    kill (p->pid, SIGCONT);
-		  p = p->next;
-		}
-	      while (p != jobs[job]->pipe);
-	    }
+	    result = killpg (pid, sig);
 	  else
 	    {
 	      result = killpg (jobs[job]->pgrp, sig);

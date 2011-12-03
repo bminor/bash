@@ -3050,12 +3050,9 @@ execute_builtin (builtin, words, flags, subshell)
 
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
-     problem only with the `source' and `eval' builtins. */
-#if 0
-  isbltinenv = (builtin == source_builtin || builtin == eval_builtin);
-#else
+     problem only with the `unset', `source' and `eval' builtins. */
+
   isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin);
-#endif
 
   if (isbltinenv)
     {
@@ -3227,18 +3224,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   /* Number of the line on which the function body starts. */
   line_number = function_line_number = tc->line;
 
-  if (subshell)
-    {
 #if defined (JOB_CONTROL)
-      stop_pipeline (async, (COMMAND *)NULL);
+  if (subshell)
+    stop_pipeline (async, (COMMAND *)NULL);
 #endif
-      fc = (tc->type == cm_group) ? tc->value.Group->command : tc;
 
-      if (fc && (flags & CMD_IGNORE_RETURN))
-	fc->flags |= CMD_IGNORE_RETURN;
-    }
-  else
-    fc = tc;
+  fc = tc;
 
   return_catch_flag++;
   return_val = setjmp (return_catch);

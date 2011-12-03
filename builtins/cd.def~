@@ -85,6 +85,23 @@ instead of following symbolic links; the -L option forces symbolic links
 to be followed.
 $END
 
+/* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
+static void
+setpwd (dirname)
+     char *dirname;
+{
+  int old_anm;
+  SHELL_VAR *tvar;
+
+  old_anm = array_needs_making;
+  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
+  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+    {
+      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
+      array_needs_making = 0;
+    }
+}
+
 static int
 bindpwd (no_symlinks)
      int no_symlinks;
@@ -108,34 +125,12 @@ bindpwd (no_symlinks)
       array_needs_making = 0;
     }
 
-  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
-  if (old_anm == 0 && array_needs_making && exported_p (tvar))
-    {
-      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
-      array_needs_making = 0;
-    }
+  setpwd (dirname);
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
 
   return (EXECUTION_SUCCESS);
-}
-
-/* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
-static void
-setpwd (dirname)
-     char *dirname;
-{
-  int old_anm;
-  SHELL_VAR *tvar;
-
-  old_anm = array_needs_making;
-  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
-  if (old_anm == 0 && array_needs_making && exported_p (tvar))
-    {
-      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
-      array_needs_making = 0;
-    }
 }
 
 /* Call get_working_directory to reset the value of
@@ -251,9 +246,13 @@ cd_builtin (list)
 		printf ("%s\n", path);
 
 	      free (temp);
+#if 0
 	      /* Posix.2 says that after using CDPATH, the resultant
 		 value of $PWD will not contain `.' or `..'. */
 	      return (bindpwd (posixly_correct || no_symlinks));
+#else
+	      return (bindpwd (no_symlinks));
+#endif
 	    }
 	  else
 	    free (temp);
@@ -316,7 +315,7 @@ cd_builtin (list)
 
 $BUILTIN pwd
 $FUNCTION pwd_builtin
-$SHORT_DOC pwd [-PL]
+$SHORT_DOC pwd [-LP]
 Print the current working directory.  With the -P option, pwd prints
 the physical directory, without any symbolic links; the -L option
 makes pwd follow symbolic links.
@@ -361,7 +360,7 @@ pwd_builtin (list)
 
   /* Try again using getcwd() if canonicalization fails (for instance, if
      the file system has changed state underneath bash). */
-  if (tcwd && directory == 0)
+  if ((tcwd && directory == 0) || (posixly_correct && file_isdir (tcwd) == 0))
     directory = resetpwd ("pwd");
 
 #undef tcwd

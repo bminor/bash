@@ -11890,3 +11890,62 @@ variables.h
 lib/readline/display.c
 	- call init_line_structures from rl_redisplay if vis_lbreaks == 0
 	  to avoid consequences of a poorly-timed SIGWINCH
+
+				   8/16
+				   ----
+subst.c
+	- fix logic for performing tilde expansion when in posix mode (don't
+	  rely on W_TILDEEXP flag always being set, because it won't be when
+	  expanding the RHS of assignment statement).  Use W_TILDEEXP only
+	  when deciding to expand a word marked as W_ASSIGNMENT that doesn't
+	  precede a command name
+
+				   8/17
+				   ----
+execute_cmd.c
+	- in execute_function, when subshell == 1, don't short-cut by using
+	  the command contained in the group command -- if you do, any
+	  redirections attached to the group command (function) don't get
+	  executed
+
+general.h
+	- new #define, FS_READABLE, indicates file is readable by current
+	  user
+
+findcmd.c
+	- rewrote file_status to use S_xxx POSIX file mode bits and to add
+	  support for FS_READABLE (affects ./source and searching $PATH for
+	  scripts whose names are supplied as arguments on the command line)
+	- change find_path_file to look for readable files -- source requires
+	  it
+	- change find_in_path_element to do the right thing when FS_READABLE
+	  is supplied as a flag
+
+doc/bashref.texi
+	- remove note about posix non-compliance in `.': we now require and
+	  look for readable files when searching $PATH
+
+				   8/20
+				   ----
+subst.c
+	- fix setifs to handle case where passed variable is non-zero but
+	  v->value == 0 (as in an unset local variable); treat IFS as unset
+	  in this case
+
+jobs.c
+	- in kill_pid, if asked to killpg a process or pgrp whose pgrp is
+	  recorded as the same as the shell's, just call killpg and let the
+	  chips fall where they may -- there may be other processes in that
+	  pgrp that are not children of the shell, so killing each process
+	  in the pipeline will not do a complete job, and killpg'ing each
+	  such process will send too many signals in the majority of cases
+
+builtins/cd.def
+	- in posix mode, pwd needs to check that the value it prints and `.'
+	  are the same file
+
+builtins/read.def
+	- if reading input from stdin in a non-interactive shell and calling
+	  `read', call sync_buffered_stream to seek backward in the input
+	  stream if necessary (XXX - should we do this for all shell builtins?)
+

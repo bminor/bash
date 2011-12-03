@@ -232,6 +232,7 @@ typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 #define FS_EXEC_ONLY	  0x8
 #define FS_DIRECTORY	  0x10
 #define FS_NODIRS	  0x20
+#define FS_READABLE	  0x40
 
 /* Default maximum for move_to_high_fd */
 #define HIGH_FD_MAX	256

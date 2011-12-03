@@ -3816,13 +3816,8 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
   for (new = (WORD_LIST *)NULL, l = list; l; l = l->next)
     {
       tword = remove_pattern (l->word->word, pattern, patspec);
-#if 0
-      w = make_bare_word (tword);
-      FREE (tword);
-#else
       w = alloc_word_desc ();
       w->word = tword ? tword : savestring ("");
-#endif
       new = make_word_list (w, new);
     }
 
@@ -5615,13 +5610,8 @@ pos_params_pat_subst (string, pat, rep, mflags)
   for ( ; params; params = params->next)
     {
       ret = pat_subst (params->word->word, pat, rep, mflags);
-#if 0
-      w = make_bare_word (ret);
-      FREE (ret);
-#else
       w = alloc_word_desc ();
       w->word = ret ? ret : savestring ("");
-#endif
       dispose_word (params->word);
       params->word = w;
     }
@@ -6759,8 +6749,8 @@ add_string:
 	case ':':
 	  if (word->flags & W_NOTILDE)
 	    goto add_character;
-	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS)) &&
-	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
+
+	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS|W_TILDEEXP)) &&
 	      string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 	  goto add_character;
@@ -6779,8 +6769,7 @@ add_string:
 
 	  if (word->flags & W_ASSIGNRHS)
 	    tflag = 2;
-	  else if ((word->flags & W_ASSIGNMENT) &&
-		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)))
+	  else if (word->flags & (W_ASSIGNMENT|W_TILDEEXP))
 	    tflag = 1;
 	  else
 	    tflag = 0;
@@ -7372,7 +7361,11 @@ setifs (v)
   unsigned char uc;
 
   ifs_var = v;
+#if 0
   ifs_value = v ? value_cell (v) : " \t\n";
+#else
+  ifs_value = (v && value_cell (v)) ? value_cell (v) : " \t\n";
+#endif
 
   /* Should really merge ifs_cmap with sh_syntaxtab.  XXX - doesn't yet
      handle multibyte chars in IFS */
