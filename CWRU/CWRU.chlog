@@ -11369,3 +11369,54 @@ builtins/caller.def
 doc/{bash.1,bashref.texi}
 	- note explicitly that test, :, true, and false don't understand --
 	  as meaning the end of options
+
+				    5/7
+				    ---
+support/shobj-conf
+	- darwin 8 needs the same LDFLAGS setting as darwin 7
+
+parse.y
+	- in save_parser_state, make sure we cast the return value from
+	  xmalloc() to the right type
+	- remove casts to (char *) in calls to yyerror()
+
+lib/readline/signals.c
+	- make SIGQUIT and SIGALRM code conditional on their definition
+	- use raise() to send a signal if we don't have kill()
+
+lib/readline/display.c
+	- some MS-DOS and MINGW changes from the cygwin and mingw folks
+
+config.h.in
+	- add HAVE_PWD_H for <pwd.h>
+	- add HAVE_FCNTL, HAVE_KILL for respective system calls
+	- add HAVE_GETPW{ENT,NAM,UID} for passwd functions
+
+configure.in
+	- add check for <pwd.h>
+	- add checks for fcntl, kill system calls
+	- add checks for getpw{ent,nam,uid} C library functions
+	- pass a flag indicating we're cross compiling through to
+	  CFLAGS_FOR_BUILD in Makefile.in
+
+lib/readline/complete.c
+	- guard inclusion of <pwd.h> with HAVE_PWD_H
+	- don't provide a missing declaration for getpwent if we don't have it
+	- guard calls to {get,end}pwent with HAVE_GETPWENT
+
+lib/readline/shell.c
+	- guard inclusion of <pwd.h> with HAVE_PWD_H
+	- guard inclusion of <fcntl.h> with HAVE_FCNTL_H
+	- don't provide a missing declaration for getpwuid if we don't have it
+	- guard calls to getpwuid with HAVE_GETPWUID
+	- don't bother with body of sh_unset_nodelay_mode if we don't have
+	  fcntl
+
+lib/tilde/tilde.c
+	- guard inclusion of <pwd.h> with HAVE_PWD_H
+	- guard calls to getpw{nam,uid} with HAVE_GETPW{NAM,UID}
+	- guard calls to {get,end}pwent with HAVE_GETPWENT
+
+Makefile.in,builtins/Makefile.in
+	- @CROSS_COMPILE@ is substituted into CFLAGS_FOR_BUILD (equal to
+	  -DCROSS_COMPILING if bash is being cross-compiled)

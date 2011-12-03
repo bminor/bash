@@ -816,14 +816,7 @@ _rl_find_completion_word (fp, dp)
 	 quote substrings for the completer.  Try to find the start
 	 of an unclosed quoted substring. */
       /* FOUND_QUOTE is set so we know what kind of quotes we found. */
-#if defined (HANDLE_MULTIBYTE)
-      for (scan = pass_next = 0; scan < end;
-		scan = ((MB_CUR_MAX == 1 || rl_byte_oriented)
-			? (scan + 1) 
-			: _rl_find_next_mbchar (rl_line_buffer, scan, 1, MB_FIND_ANY)))
-#else
-      for (scan = pass_next = 0; scan < end; scan++)
-#endif
+      for (scan = pass_next = 0; scan < end; scan = MB_NEXTCHAR (rl_line_buffer, scan, 1, MB_FIND_ANY))
 	{
 	  if (pass_next)
 	    {
@@ -873,11 +866,7 @@ _rl_find_completion_word (fp, dp)
       /* We didn't find an unclosed quoted substring upon which to do
          completion, so use the word break characters to find the
          substring on which to complete. */
-#if defined (HANDLE_MULTIBYTE)
-      while (rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_ANY))
-#else
-      while (--rl_point)
-#endif
+      while (rl_point = MB_PREVCHAR (rl_line_buffer, rl_point, MB_FIND_ANY))
 	{
 	  scan = rl_line_buffer[rl_point];
 

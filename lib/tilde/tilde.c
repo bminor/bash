@@ -43,7 +43,9 @@
 #endif /* HAVE_STDLIB_H */
 
 #include <sys/types.h>
+#if defined (HAVE_PWD_H)
 #include <pwd.h>
+#endif
 
 #include "tilde.h"
 
@@ -54,8 +56,12 @@ static void *xmalloc (), *xrealloc ();
 #endif /* TEST || STATIC_MALLOC */
 
 #if !defined (HAVE_GETPW_DECLS)
+#  if defined (HAVE_GETPWUID)
 extern struct passwd *getpwuid PARAMS((uid_t));
+#  endif
+#  if defined (HAVE_GETPWNAM)
 extern struct passwd *getpwnam PARAMS((const char *));
+#  endif
 #endif /* !HAVE_GETPW_DECLS */
 
 #if !defined (savestring)
@@ -380,7 +386,11 @@ tilde_expand_word (filename)
   /* No preexpansion hook, or the preexpansion hook failed.  Look in the
      password database. */
   dirname = (char *)NULL;
+#if defined (HAVE_GETPWNAM)
   user_entry = getpwnam (username);
+#else
+  user_entry = 0;
+#endif
   if (user_entry == 0)
     {
       /* If the calling program has a special syntax for expanding tildes,
@@ -405,8 +415,9 @@ tilde_expand_word (filename)
       free (username);
       dirname = glue_prefix_and_suffix (user_entry->pw_dir, filename, user_len);
     }
-
+#if defined (HAVE_GETPWENT)
   endpwent ();
+#endif
   return (dirname);
 }
 

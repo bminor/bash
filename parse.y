@@ -4614,7 +4614,7 @@ parse_string_to_word_list (s, flags, whom)
 	  line_number = orig_line_number + line_number - 1;
 	  orig_current_token = current_token;
 	  current_token = tok;
-	  yyerror ((char *)NULL);	/* does the right thing */
+	  yyerror (NULL);	/* does the right thing */
 	  current_token = orig_current_token;
 	  if (wl)
 	    dispose_words (wl);
@@ -4689,7 +4689,7 @@ parse_compound_assignment (retlenp)
 	  if (tok == yacc_EOF)	/* ( */
 	    parser_error (orig_line_number, _("unexpected EOF while looking for matching `)'"));
 	  else
-	    yyerror ((char *)NULL);	/* does the right thing */
+	    yyerror(NULL);	/* does the right thing */
 	  if (wl)
 	    dispose_words (wl);
 	  wl = &parse_string_error;
@@ -4744,7 +4744,7 @@ save_parser_state (ps)
 #endif
 
   if (ps == 0)
-    ps = xmalloc (sizeof (sh_parser_state_t));
+    ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
     return ((sh_parser_state_t *)NULL);
 

@@ -369,7 +369,8 @@ AC_MINGW32
 
 AC_SYS_LARGEFILE
 
-dnl BEGIN changes for cross-building for cygwin and BeOS
+dnl BEGIN changes for cross-building (currently cygwin, minGW, and
+dnl (obsolete) BeOS)
 
 SIGNAMES_H=lsignames.h
 
@@ -386,6 +387,9 @@ if test "x$cross_compiling" = "xyes"; then
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
 	;;
+    *-mingw*)
+	cross_cache=${srcdir}/cross-build/cygwin32.cache
+	;;
     i[[3456]]86-*-beos*)
 	cross_cache=${srcdir}/cross-build/x86-beos.cache
 	SIGNAMES_H='${srcdir}/cross-build/beos-sig.h'
@@ -398,6 +402,8 @@ if test "x$cross_compiling" = "xyes"; then
 	. ${cross_cache}
     fi
     unset cross_cache
+    CROSS_COMPILE='-DCROSS_COMPILING'
+    AC_SUBST(CROSS_COMPILE)
 fi
 AC_SUBST(SIGNAMES_H)
 
@@ -618,7 +624,7 @@ BASH_HEADER_INTTYPES
 
 AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
-		 stddef.h stdint.h netdb.h grp.h strings.h regex.h)
+		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h regex.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h \
 		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
@@ -678,20 +684,23 @@ dnl checks for missing libc functions
 AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 
 dnl checks for system calls
-AC_CHECK_FUNCS(dup2 select getdtablesize getgroups gethostname \
-		setdtablesize getpagesize killpg lstat getpeername sbrk \
-		getrlimit getrusage gettimeofday waitpid tcgetpgrp \
-		readlink)
+AC_CHECK_FUNCS(dup2 fcntl getdtablesize getgroups gethostname getpagesize \
+		getpeername getrlimit getrusage gettimeofday kill killpg \
+		lstat readlink sbrk select setdtablesize tcgetpgrp uname \
+		ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
-AC_CHECK_FUNCS(bcopy bzero confstr sysconf pathconf setenv putenv unsetenv \
-		setlinebuf setvbuf setlocale strchr tcgetattr uname \
-		ulimit tzset siginterrupt memmove ttyname times raise \
+AC_CHECK_FUNCS(bcopy bzero confstr fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
-		vsnprintf snprintf vasprintf asprintf fnmatch regcomp regexec)
+		memmove pathconf putenv raise regcomp regexec \
+		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
+		sysconf tcgetattr times ttyname tzset unsetenv)
+
+AC_CHECK_FUNCS(vsnprintf snprintf vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
-AC_REPLACE_FUNCS(getcwd strcasecmp strerror strftime strpbrk memset strstr strnlen)
+AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
+AC_REPLACE_FUNCS(getcwd memset strcasecmp strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
 
 AC_CHECK_DECLS([confstr])

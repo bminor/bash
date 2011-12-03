@@ -48,8 +48,12 @@
 #  include <limits.h>
 #endif
 
+#if defined (HAVE_FCNTL_H)
 #include <fcntl.h>
+#endif
+#if defined (HAVE_PWD_H)
 #include <pwd.h>
+#endif
 
 #include <stdio.h>
 
@@ -57,9 +61,9 @@
 #include "rlshell.h"
 #include "xmalloc.h"
 
-#if !defined (HAVE_GETPW_DECLS)
+#if defined (HAVE_GETPWUID) && !defined (HAVE_GETPW_DECLS)
 extern struct passwd *getpwuid PARAMS((uid_t));
-#endif /* !HAVE_GETPW_DECLS */
+#endif /* HAVE_GETPWUID && !HAVE_GETPW_DECLS */
 
 #ifndef NULL
 #  define NULL 0
@@ -159,9 +163,11 @@ sh_get_home_dir ()
   struct passwd *entry;
 
   home_dir = (char *)NULL;
+#if defined (HAVE_GETPWUID)
   entry = getpwuid (getuid ());
   if (entry)
     home_dir = entry->pw_dir;
+#endif
   return (home_dir);
 }
 
@@ -175,6 +181,7 @@ int
 sh_unset_nodelay_mode (fd)
      int fd;
 {
+#if defined (HAVE_FCNTL)
   int flags, bflags;
 
   if ((flags = fcntl (fd, F_GETFL, 0)) < 0)
@@ -195,6 +202,7 @@ sh_unset_nodelay_mode (fd)
       flags &= ~bflags;
       return (fcntl (fd, F_SETFL, flags));
     }
+#endif
 
   return 0;
 }
