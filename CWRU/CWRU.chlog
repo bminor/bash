@@ -9329,7 +9329,7 @@ builtins/cd.def
 				   4/12
 				   ----
 print_cmd.c
-	- new functionto print out assignment statements when `set -x' has
+	- new function to print out assignment statements when `set -x' has
 	  been enabled: xtrace_print_assignment
 
 externs.h
@@ -9448,4 +9448,13 @@ lib/readline/text.c
 	  (_rl_vi_last_command) is not a text modification command.  This lets
 	  the last-command and last-argument work across command lines
 
+				   5/13
+				   ----
+builtins/common.c
+	- use getcwd(0,0) rather than providing a fixed pathname with a fixed
+	  length (PATH_MAX) so getcwd() will allocate sufficient memory
 
+aclocal.m4
+	- change BASH_FUNC_GETCWD to check whether or not getcwd(0,0) will
+	  allocate memory for the returned value -- nobody implements that
+	  and getcwd-via-popen, so it should capture the old test as well

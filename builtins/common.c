@@ -472,23 +472,12 @@ get_working_directory (for_whom)
 
   if (the_current_working_directory == 0)
     {
-#if defined (HAVE_PATHCONF)
-      dsize = pathconf (".", _PC_PATH_MAX);
-#else
-      dsize = PATH_MAX;
-#endif
-
-      the_current_working_directory = (char *)xmalloc (dsize+1);
-      the_current_working_directory[0] = '\0';
-      directory = getcwd (the_current_working_directory, dsize);
-      if (directory == 0)
+      the_current_working_directory = getcwd (0, 0);
+      if (the_current_working_directory == 0)
 	{
 	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
 		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
 		   _(bash_getcwd_errstr), strerror (errno));
-
-	  free (the_current_working_directory);
-	  the_current_working_directory = (char *)NULL;
 	  return (char *)NULL;
 	}
     }

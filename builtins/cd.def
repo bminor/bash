@@ -107,15 +107,16 @@ bindpwd (no_symlinks)
       array_needs_making = 0;
     }
 
-  tvar = bind_variable ("PWD", dirname);
+  tvar = bind_variable ("PWD", dirname ? dirname : "");
   if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
-      update_export_env_inplace ("PWD=", 4, dirname);
+      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
       array_needs_making = 0;
     }
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
+
   return (EXECUTION_SUCCESS);
 }
 

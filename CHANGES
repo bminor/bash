@@ -17,6 +17,56 @@ d.  Fixed a bug that caused `pwd' to not display anything in physical mode
 e.  Fixed a bug in the pre- and post- increment and decrement parsing in the
     expression evaluator that caused errors when the operands and corresponding
     operators were separated by whitespace.
+
+f.  Fixed a bug that caused `history -p' to add an entry to the history list,
+    counter to the documentation.  (Keeps the history expansions invoked by
+    emacs-mode command line editing from doing that as well.)
+
+g.  Fixed a bug that could cause a core dump if `cd' is asked to print out a
+    pathname longer than PATH_MAX characters.
+
+h.  Fixed a bug that caused jobs to be put into the wrong process group under
+    some circumstances after enabling job control with `set -m'.
+
+i.  `unalias' now  returns failure if no alias name arguments are supplied.
+
+j.  Documented the characters not allowed to appear in an alias name.
+
+k.  $* is no longer expanded as if in double quotes when it appears in the
+    body of a here document, as the SUS seems to require.
+
+l.  The `bashbug' script now uses a directory in $TMPDIR for exclusive
+    access rather than trying to guess how the underlying OS provides for
+    secure temporary file creation.
+
+m.  Fixed a few problems with `cd' and `pwd' when asked to operate on pathnames
+    longer than PATH_MAX characters.
+
+n.  Fixed a memory leak caused when creating multiple local array variables
+    with identical names.
+
+2.  Changes to Readline
+
+a.  Fixed a problem that could cause readline to refer to freed memory when
+    moving between history lines while doing searches.
+
+b.  Improvements to the code that expands and displays prompt strings
+    containing multibyte characters.
+
+c.  Fixed a problem with vi-mode not correctly remembering the numeric argument
+    to the last `c'hange command for later use with `.'.
+
+d.  Fixed a bug in vi-mode that caused multi-digit count arguments to work
+    incorrectly.
+
+e.  Fixed a problem in vi-mode that caused the last text modification command
+    to not be remembered across different command lines.
+
+3.  New Features in Bash
+
+a.  The `jobs', `kill', and `wait' builtins now accept job control notation
+    even if job control is not enabled.
+
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-beta1,
 and the previous version, bash-3.0-alpha.
