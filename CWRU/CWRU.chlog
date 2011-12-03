@@ -11114,3 +11114,44 @@ builtins/shopt.def
 doc/{bashref.texi,bash.1}
 	- updated descriptions of [[ and case to include reference to
 	  nocasematch option
+
+				   2/22
+				   ----
+builtins/mkbuiltins.c
+	- add `times' to the list of posix special builtins
+
+				   2/23
+				   ----
+builtins/cd.def
+	- posix mode no longer turns on effect of -P option on $PWD if a
+	  directory is chosen from CDPATH
+
+doc/bashref.texi
+	- clarified that in posix mode, reserved words are not alias expanded
+	  only in a reserved word context
+	- removed item about cd, $CDPATH, and -P from posix mode section
+
+				   2/24
+				   ----
+builtins/reserved.def
+	- minor cleanups to the description of `if'
+
+				    3/2
+				    ---
+subst.c
+	- change list_string and get_word_from_string to explicitly treat an
+	  IFS character that is not space, tab, or newline *and any adjacent
+	  IFS white space* as a single delimiter, as SUSv3/XPG6 says
+
+builtins/read.def
+	- check whether or not the number of fields is exactly the same as
+	  the number of variables instead of just assigning the rest of the
+	  line (minus any trailing IFS white space) to the last variable.
+	  This parses a field and checks whether or not it consumes all of
+	  the input (including any trailing field delimiters), falling back
+	  to the previous behavior if it does not.  This is what POSIX.2
+	  specifies, I believe (and the consensus of the austin-group list).
+	  This requires a few tests in read.tests to be changed: backslashes
+	  escaping IFS whitespace characters at the end of input cause the
+	  whitespace characters to be preserved in the value assigned to the
+	  variable, and the trailing non-whitespace field delimiter issue

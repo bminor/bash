@@ -36,14 +36,14 @@
 \entry{commands, looping}{9}{commands, looping}
 \entry{commands, conditional}{10}{commands, conditional}
 \entry{commands, grouping}{13}{commands, grouping}
-\entry{shell function}{13}{shell function}
-\entry{functions, shell}{13}{functions, shell}
+\entry{shell function}{14}{shell function}
+\entry{functions, shell}{14}{functions, shell}
 \entry{parameters}{15}{parameters}
 \entry{variable, shell}{15}{variable, shell}
 \entry{shell variable}{15}{shell variable}
 \entry{parameters, positional}{15}{parameters, positional}
-\entry{parameters, special}{15}{parameters, special}
-\entry{expansion}{16}{expansion}
+\entry{parameters, special}{16}{parameters, special}
+\entry{expansion}{17}{expansion}
 \entry{brace expansion}{17}{brace expansion}
 \entry{expansion, brace}{17}{expansion, brace}
 \entry{tilde expansion}{18}{tilde expansion}
@@ -51,8 +51,8 @@
 \entry{parameter expansion}{19}{parameter expansion}
 \entry{expansion, parameter}{19}{expansion, parameter}
 \entry{command substitution}{21}{command substitution}
-\entry{expansion, arithmetic}{21}{expansion, arithmetic}
-\entry{arithmetic expansion}{21}{arithmetic expansion}
+\entry{expansion, arithmetic}{22}{expansion, arithmetic}
+\entry{arithmetic expansion}{22}{arithmetic expansion}
 \entry{process substitution}{22}{process substitution}
 \entry{word splitting}{22}{word splitting}
 \entry{expansion, filename}{23}{expansion, filename}
@@ -61,7 +61,7 @@
 \entry{pathname expansion}{23}{pathname expansion}
 \entry{pattern matching}{23}{pattern matching}
 \entry{matching, pattern}{23}{matching, pattern}
-\entry{redirection}{24}{redirection}
+\entry{redirection}{25}{redirection}
 \entry{command expansion}{28}{command expansion}
 \entry{command execution}{29}{command execution}
 \entry{command search}{29}{command search}
@@ -71,48 +71,48 @@
 \entry{signal handling}{31}{signal handling}
 \entry{shell script}{32}{shell script}
 \entry{special builtin}{54}{special builtin}
-\entry{login shell}{65}{login shell}
-\entry{interactive shell}{65}{interactive shell}
-\entry{startup files}{65}{startup files}
+\entry{login shell}{67}{login shell}
 \entry{interactive shell}{67}{interactive shell}
-\entry{shell, interactive}{67}{shell, interactive}
-\entry{expressions, conditional}{69}{expressions, conditional}
-\entry{arithmetic, shell}{70}{arithmetic, shell}
-\entry{shell arithmetic}{70}{shell arithmetic}
-\entry{expressions, arithmetic}{70}{expressions, arithmetic}
-\entry{evaluation, arithmetic}{70}{evaluation, arithmetic}
-\entry{arithmetic evaluation}{70}{arithmetic evaluation}
-\entry{alias expansion}{71}{alias expansion}
-\entry{arrays}{72}{arrays}
-\entry{directory stack}{73}{directory stack}
-\entry{prompting}{75}{prompting}
-\entry{restricted shell}{76}{restricted shell}
-\entry{POSIX Mode}{76}{POSIX Mode}
-\entry{job control}{81}{job control}
-\entry{foreground}{81}{foreground}
-\entry{background}{81}{background}
-\entry{suspending jobs}{81}{suspending jobs}
-\entry{Readline, how to use}{84}{Readline, how to use}
-\entry{interaction, readline}{85}{interaction, readline}
-\entry{notation, readline}{85}{notation, readline}
-\entry{command editing}{85}{command editing}
-\entry{editing command lines}{85}{editing command lines}
-\entry{killing text}{87}{killing text}
-\entry{yanking text}{87}{yanking text}
-\entry{kill ring}{87}{kill ring}
-\entry{initialization file, readline}{88}{initialization file, readline}
-\entry{variables, readline}{89}{variables, readline}
-\entry{programmable completion}{105}{programmable completion}
-\entry{completion builtins}{107}{completion builtins}
-\entry{History, how to use}{110}{History, how to use}
-\entry{command history}{111}{command history}
-\entry{history list}{111}{history list}
-\entry{history builtins}{111}{history builtins}
-\entry{history expansion}{113}{history expansion}
-\entry{event designators}{113}{event designators}
-\entry{history events}{113}{history events}
-\entry{installation}{117}{installation}
-\entry{configuration}{117}{configuration}
-\entry{Bash installation}{117}{Bash installation}
-\entry{Bash configuration}{117}{Bash configuration}
-\entry{FDL, GNU Free Documentation License}{133}{FDL, GNU Free Documentation License}
+\entry{startup files}{67}{startup files}
+\entry{interactive shell}{69}{interactive shell}
+\entry{shell, interactive}{69}{shell, interactive}
+\entry{expressions, conditional}{71}{expressions, conditional}
+\entry{arithmetic, shell}{72}{arithmetic, shell}
+\entry{shell arithmetic}{72}{shell arithmetic}
+\entry{expressions, arithmetic}{72}{expressions, arithmetic}
+\entry{evaluation, arithmetic}{72}{evaluation, arithmetic}
+\entry{arithmetic evaluation}{72}{arithmetic evaluation}
+\entry{alias expansion}{73}{alias expansion}
+\entry{arrays}{74}{arrays}
+\entry{directory stack}{75}{directory stack}
+\entry{prompting}{77}{prompting}
+\entry{restricted shell}{78}{restricted shell}
+\entry{POSIX Mode}{78}{POSIX Mode}
+\entry{job control}{83}{job control}
+\entry{foreground}{83}{foreground}
+\entry{background}{83}{background}
+\entry{suspending jobs}{83}{suspending jobs}
+\entry{Readline, how to use}{86}{Readline, how to use}
+\entry{interaction, readline}{87}{interaction, readline}
+\entry{notation, readline}{87}{notation, readline}
+\entry{command editing}{87}{command editing}
+\entry{editing command lines}{87}{editing command lines}
+\entry{killing text}{89}{killing text}
+\entry{yanking text}{89}{yanking text}
+\entry{kill ring}{89}{kill ring}
+\entry{initialization file, readline}{90}{initialization file, readline}
+\entry{variables, readline}{91}{variables, readline}
+\entry{programmable completion}{107}{programmable completion}
+\entry{completion builtins}{109}{completion builtins}
+\entry{History, how to use}{112}{History, how to use}
+\entry{command history}{113}{command history}
+\entry{history list}{113}{history list}
+\entry{history builtins}{113}{history builtins}
+\entry{history expansion}{115}{history expansion}
+\entry{event designators}{115}{event designators}
+\entry{history events}{115}{history events}
+\entry{installation}{119}{installation}
+\entry{configuration}{119}{configuration}
+\entry{Bash installation}{119}{Bash installation}
+\entry{Bash configuration}{119}{Bash configuration}
+\entry{FDL, GNU Free Documentation License}{135}{FDL, GNU Free Documentation License}

@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -131,7 +131,7 @@ read_builtin (list)
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-  char *e, *t, *t1;
+  char *e, *t, *t1, *savei;
   struct stat tsb;
   SHELL_VAR *var;
 #if defined (ARRAY_VARS)
@@ -544,11 +544,11 @@ read_builtin (list)
       if (saw_escape)
 	{
 	  t = dequote_string (input_string);
-	  var = bind_variable ("REPLY", t);
+	  var = bind_variable ("REPLY", t, 0);
 	  free (t);
 	}
       else
-	var = bind_variable ("REPLY", input_string);
+	var = bind_variable ("REPLY", input_string, 0);
       VUNSETATTR (var, att_invisible);
 
       free (input_string);
@@ -627,10 +627,24 @@ read_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
+#if 0
   /* This has to be done this way rather than using string_list
      and list_string because Posix.2 says that the last variable gets the
      remaining words and their intervening separators. */
   input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
+#else
+  /* Check whether or not the number of fields is exactly the same as the
+     number of variables. */
+  if (*input_string)
+    {
+      savei = input_string;
+      t = get_word_from_string (&input_string, ifs_chars, &e);
+      if (*input_string == 0)
+	input_string = t;
+      else
+	input_string = strip_trailing_ifs_whitespace (savei, ifs_chars, saw_escape);
+    }
+#endif
 
   if (saw_escape)
     {
@@ -654,11 +668,11 @@ bind_read_variable (name, value)
 {
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value));
+    return (bind_variable (name, value, 0));
   else
     return (assign_array_element (name, value, 0));
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value);
+  return bind_variable (name, value, 0);
 #endif /* !ARRAY_VARS */
 }
 

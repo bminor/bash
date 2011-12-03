@@ -246,9 +246,13 @@ cd_builtin (list)
 		printf ("%s\n", path);
 
 	      free (temp);
+#if 0
 	      /* Posix.2 says that after using CDPATH, the resultant
 		 value of $PWD will not contain `.' or `..'. */
 	      return (bindpwd (posixly_correct || no_symlinks));
+#else
+	      return (bindpwd (no_symlinks));
+#endif
 	    }
 	  else
 	    free (temp);

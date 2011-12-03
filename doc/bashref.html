@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on February, 14  2005 by texi2html 1.64 -->
+<!-- Created on February, 22  2005 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.1-devel, 11 February 2005)..
+the Bash shell (version 3.1-devel, 19 February 2005)..
 </P><P>
 
-This is Edition 3.1-devel, last updated 11 February 2005,
+This is Edition 3.1-devel, last updated 19 February 2005,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 3.1-devel.
 </P><P>
@@ -1266,6 +1266,10 @@ The syntax of the <CODE>case</CODE> command is:
 
 <CODE>case</CODE> will selectively execute the <VAR>command-list</VAR> corresponding to
 the first <VAR>pattern</VAR> that matches <VAR>word</VAR>.
+If the shell option <CODE>nocasematch</CODE>
+(see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>)
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The <SAMP>`|'</SAMP> is used to separate multiple patterns, and the <SAMP>`)'</SAMP>
 operator terminates a pattern list.
 A list of patterns and an associated command-list is known
@@ -1376,6 +1380,10 @@ as primaries.
 When the <SAMP>`=='</SAMP> and <SAMP>`!='</SAMP> operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in <A HREF="bashref.html#SEC36">3.5.8.1 Pattern Matching</A>.
+If the shell option <CODE>nocasematch</CODE>
+(see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>)
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The return value is 0 if the string matches or does not match
 the pattern, respectively, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
@@ -1390,7 +1398,7 @@ The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
-If the shell option <CODE>nocaseglob</CODE>
+If the shell option <CODE>nocasematch</CODE>
 (see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>)
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -4792,6 +4800,23 @@ If the command run by the <CODE>DEBUG</CODE> trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
 executed by the <CODE>.</CODE> or <CODE>source</CODE> builtins), a call to
 <CODE>return</CODE> is simulated.
+<P>
+
+<LI>
+<CODE>BASH_ARGC</CODE> and <CODE>BASH_ARGV</CODE> are updated as described in their
+descriptions (see section <A HREF="bashref.html#SEC63">5.2 Bash Variables</A>).
+<P>
+
+<LI>
+Function tracing is enabled:  command substitution, shell functions, and
+subshells invoked with <CODE>( <VAR>command</VAR> )</CODE> inherit the
+<CODE>DEBUG</CODE> and <CODE>RETURN</CODE> traps.
+<P>
+
+<LI>
+Error tracing is enabled:  command substitution, shell functions, and
+subshells invoked with <CODE>( <VAR>command</VAR> )</CODE> inherit the
+<CODE>ERROR</CODE> trap.
 </OL>
 <P>
 
@@ -4889,6 +4914,12 @@ on an empty line.
 <DT><CODE>nocaseglob</CODE>
 <DD>If set, Bash matches filenames in a case-insensitive fashion when
 performing filename expansion.
+<P>
+
+<DT><CODE>nocasematch</CODE>
+<DD>If set, Bash matches patterns in a case-insensitive fashion when
+performing matching while executing <CODE>case</CODE> or <CODE>[[</CODE>
+conditional commands.
 <P>
 
 <DT><CODE>nullglob</CODE>
@@ -5650,6 +5681,10 @@ parameters to the current subroutine (shell function or script executed
 with <CODE>.</CODE> or <CODE>source</CODE>) is at the top of the stack.  When a
 subroutine is executed, the number of parameters passed is pushed onto
 <CODE>BASH_ARGC</CODE>.
+The shell sets <CODE>BASH_ARGC</CODE> only when in extended debugging mode
+(see <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>  
+for a description of the <CODE>extdebug</CODE> option to the <CODE>shopt</CODE>
+builtin).
 <P>
 
 <A NAME="IDX134"></A>
@@ -5660,6 +5695,10 @@ execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
 are pushed onto <CODE>BASH_ARGV</CODE>.
+The shell sets <CODE>BASH_ARGV</CODE> only when in extended debugging mode
+(see <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>  
+for a description of the <CODE>extdebug</CODE> option to the <CODE>shopt</CODE>
+builtin).
 <P>
 
 <A NAME="IDX136"></A>
@@ -8033,6 +8072,11 @@ When the <CODE>cd</CODE> builtin is invoked in <VAR>logical</VAR> mode, and the 
 constructed from <CODE>$PWD</CODE> and the directory name supplied as an argument
 does not refer to an existing directory, <CODE>cd</CODE> will fail instead of
 falling back to <VAR>physical</VAR> mode.
+<P>
+
+<LI>
+When the <CODE>pwd</CODE> builtin is supplied the <SAMP>`-P'</SAMP> option, it resets
+<CODE>$PWD</CODE> to a pathname containing no symlinks.
 <P>
 
 <LI>
@@ -15125,7 +15169,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>February, 14  2005</I>
+This document was generated by <I>Chet Ramey</I> on <I>February, 22  2005</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15287,7 +15331,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>February, 14  2005</I>
+by <I>Chet Ramey</I> on <I>February, 22  2005</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

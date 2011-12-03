@@ -134,7 +134,7 @@ ARRAY *saved_builtins = (ARRAY *)NULL;
 char *special_builtins[] =
 {
   ":", ".", "source", "break", "continue", "eval", "exec", "exit",
-  "export", "readonly", "return", "set", "shift", "trap", "unset",
+  "export", "readonly", "return", "set", "shift", "times", "trap", "unset",
   (char *)NULL
 };
 

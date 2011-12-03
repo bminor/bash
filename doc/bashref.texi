@@ -5924,7 +5924,8 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
-Reserved words may not be aliased.
+Reserved words appearing in a context where reserved words are recognized
+do not undergo alias expansion.
 
 @item
 The @sc{posix} 1003.2 @env{PS1} and @env{PS2} expansions of @samp{!} to
@@ -5984,12 +5985,6 @@ non-interactive shell exits.  The fatal errors are those listed in
 the POSIX.2 standard, and include things like passing incorrect options,
 redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
-
-@item
-If the @code{cd} builtin finds a directory to change to
-using @env{$CDPATH}, the
-value it assigns to the @env{PWD} variable does not contain any
-symbolic links, as if @samp{cd -P} had been executed.
 
 @item
 If @env{CDPATH} is set, the @code{cd} builtin will not implicitly
@@ -6072,7 +6067,7 @@ does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
 
 @item
-When the @code{pwd} builtin is supplied the @opt{-P} option, it resets
+When the @code{pwd} builtin is supplied the @option{-P} option, it resets
 @code{$PWD} to a pathname containing no symlinks.
 
 @item

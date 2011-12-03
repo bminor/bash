@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -627,24 +627,10 @@ read_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-#if 0
   /* This has to be done this way rather than using string_list
      and list_string because Posix.2 says that the last variable gets the
      remaining words and their intervening separators. */
   input_string = strip_trailing_ifs_whitespace (input_string, ifs_chars, saw_escape);
-#else
-  /* Check whether or not the number of fields is exactly the same as the
-     number of variables. */
-  if (*input_string)
-    {
-      t1 = input_string;
-      t = get_word_from_string (&input_string, ifs_chars, &e);
-      if (*input_string == 0)
-	input_string = t;
-      else
-	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
-    }
-#endif
 
   if (saw_escape)
     {

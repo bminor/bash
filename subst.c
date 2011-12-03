@@ -1974,7 +1974,13 @@ list_string (string, separators, quoted)
 	 field delimiter, not a separate delimiter that would result in an
 	 empty field.  Look at POSIX.2, 3.6.5, (3)(b). */
       if (string[sindex] && whitesep && issep (string[sindex]) && !spctabnl (string[sindex]))
-	sindex++;
+	{
+	  sindex++;
+	  /* An IFS character that is not IFS white space, along with any
+	     adjacent IFS white space, shall delimit a field. (SUSv3) */
+	  while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+	    sindex++;
+	}
     }
   return (REVERSE_LIST (result, WORD_LIST *));
 }
@@ -2059,7 +2065,13 @@ get_word_from_string (stringp, separators, endptr)
      delimiter, not a separate delimiter that would result in an empty field.
      Look at POSIX.2, 3.6.5, (3)(b). */
   if (s[sindex] && whitesep && isifs (s[sindex]) && !spctabnl (s[sindex]))
-    sindex++;
+    {
+      sindex++;
+      /* An IFS character that is not IFS white space, along with any adjacent
+	 IFS white space, shall delimit a field. */
+      while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+	sindex++;
+    }
 
   /* Update STRING to point to the next field. */
   *stringp = s + sindex;

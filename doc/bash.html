@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2005 Feb 11<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2005 Feb 19<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -182,13 +182,15 @@ single-character options to be recognized.
 
 <DD>
 Arrange for the debugger profile to be executed before the shell
-starts.  Turns on extended debugging mode (see the description of the
+starts.
+Turns on extended debugging mode (see the description of the
 <B>extdebug</B>
 
 option to the
 <B>shopt</B>
 
-builtin below) and shell function tracing (see the description of the
+builtin below)
+and shell function tracing (see the description of the
 <B>-o functrace</B> option to the
 <B>set</B>
 
@@ -885,6 +887,11 @@ as primaries.
 When the <B>==</B> and <B>!=</B> operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under <B>Pattern Matching</B>.
+If the shell option
+<B>nocasematch</B>
+
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The return value is 0 if the string matches or does not match
 the pattern, respectively, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
@@ -901,7 +908,7 @@ the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
 If the shell option
-<B>nocaseglob</B>
+<B>nocasematch</B>
 
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -1036,7 +1043,13 @@ it against each <I>pattern</I> in turn, using the same matching rules
 as for pathname expansion (see
 <B>Pathname Expansion</B>
 
-below).  When a match is found, the
+below).
+If the shell option
+<B>nocasematch</B>
+
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
+When a match is found, the
 corresponding <I>list</I> is executed.  After the first match, no
 subsequent matches are attempted.  The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
@@ -1604,11 +1617,20 @@ Expands to the full file name used to invoke this instance of
 
 <DD>
 An array variable whose values are the number of parameters in each
-frame of the current bash execution call stack.  The number of
+frame of the current bash execution call stack.
+The number of
 parameters to the current subroutine (shell function or script executed
-with <B>.</B> or <B>source</B>) is at the top of the stack.  When a
-subroutine is executed, the number of parameters passed is pushed onto
+with <B>.</B> or <B>source</B>) is at the top of the stack.
+When a subroutine is executed, the number of parameters passed is pushed onto
 <B>BASH_ARGC</B>.
+The shell sets <B>BASH_ARGC</B> only when in extended debugging mode
+(see the description of the
+<B>extdebug</B>
+
+option to the
+<B>shopt</B>
+
+builtin below)
 <DT><B>BASH_ARGV</B>
 
 <DD>
@@ -1617,6 +1639,14 @@ execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
 are pushed onto <B>BASH_ARGV</B>.
+The shell sets <B>BASH_ARGV</B> only when in extended debugging mode
+(see the description of the
+<B>extdebug</B>
+
+option to the
+<B>shopt</B>
+
+builtin below)
 <DT><B>BASH_COMMAND</B>
 
 <DD>
@@ -10261,6 +10291,23 @@ If the command run by the <B>DEBUG</B> trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
 executed by the <B>.</B> or <B>source</B> builtins), a call to
 <B>return</B> is simulated.
+<DT><B>4.</B>
+
+<DD>
+<B>BASH_ARGC</B> and <B>BASH_ARGV</B> are updated as described in their
+descriptions above.
+<DT><B>5.</B>
+
+<DD>
+Function tracing is enabled:  command substitution, shell functions, and
+subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
+<B>DEBUG</B> and <B>RETURN</B> traps.
+<DT><B>6.</B>
+
+<DD>
+Error tracing is enabled:  command substitution, shell functions, and
+subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
+<B>ERROR</B> trap.
 </DL></DL>
 
 <DT><B>extglob</B>
@@ -10400,6 +10447,14 @@ expansion (see
 <B>Pathname Expansion</B>
 
 above).
+<DT><B>nocasematch</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+matches patterns in a case-insensitive fashion when performing matching
+while executing <B>case</B> or <B>[[</B> conditional commands.
 <DT><B>nullglob</B>
 
 <DD>
@@ -11429,6 +11484,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 14 February 2005 11:56:43 EST
+Time: 22 February 2005 13:44:29 EST
 </BODY>
 </HTML>
