@@ -403,7 +403,10 @@ initialize_shell_variables (env, privmode)
      names a mail file if MAILPATH is not set, and we should provide a
      default only if neither is set. */
   if (interactive_shell)
-    set_if_not ("MAILCHECK", posixly_correct ? "600" : "60");
+    {
+      temp_var = set_if_not ("MAILCHECK", posixly_correct ? "600" : "60");
+      VSETATTR (temp_var, att_integer);
+    }
 
   /* Do some things with shell level. */
   initialize_shell_level ();
@@ -411,7 +414,8 @@ initialize_shell_variables (env, privmode)
   set_ppid ();
 
   /* Initialize the `getopts' stuff. */
-  bind_variable ("OPTIND", "1", 0);
+  temp_var = bind_variable ("OPTIND", "1", 0);
+  VSETATTR (temp_var, att_integer);
   getopts_reset (0);
   bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
@@ -1408,10 +1412,13 @@ initialize_dynamic_variables ()
   INIT_DYNAMIC_VAR ("BASH_SUBSHELL", (char *)NULL, get_subshell, assign_subshell);
 
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
+  VSETATTR (v, att_integer);
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
+  VSETATTR (v, att_integer);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);
+  VSETATTR (v, att_integer);
 #endif
 
 #if defined (READLINE)
@@ -1837,7 +1844,11 @@ bind_variable_internal (name, value, table, hflags, aflags)
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
       INVALIDATE_EXPORTSTR (entry);
-      return ((*(entry->assign_func)) (entry, value, -1));
+      newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
+      entry = (*(entry->assign_func)) (entry, newval, -1);
+      if (newval != value)
+        free (newval);
+      return (entry);
     }
   else
     {
@@ -1939,9 +1950,21 @@ bind_variable_value (var, value, aflags)
 
   VUNSETATTR (var, att_invisible);
 
-  t = make_variable_value (var, value, aflags);
-  FREE (value_cell (var));
-  var_setvalue (var, t);
+  if (var->assign_func)
+    {
+      /* If we're appending, we need the old value, so use
+	 make_variable_value */
+      t = (aflags & ASS_APPEND) ? make_variable_value (var, value, aflags) : value;
+      (*(var->assign_func)) (var, t, -1);
+      if (t != value && t)
+	free (t);      
+    }
+  else
+    {
+      t = make_variable_value (var, value, aflags);
+      FREE (value_cell (var));
+      var_setvalue (var, t);
+    }
 
   INVALIDATE_EXPORTSTR (var);
 
@@ -3677,6 +3700,10 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+  { "COMP_WORDBREAKS", sv_comp_wordbreaks },
+#endif
+
   { "GLOBIGNORE", sv_globignore },
 
 #if defined (HISTORY)
@@ -3827,6 +3854,19 @@ sv_mail (name)
       remember_mail_dates ();
     }
 }
+
+#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+void
+sv_comp_wordbreaks (name)
+     char *name;
+{
+  SHELL_VAR *sv;
+
+  sv = find_variable (name);
+  if (sv == 0)
+    rl_completer_word_break_characters = (char *)NULL;
+}
+#endif
 
 /* What to do when GLOBIGNORE changes. */
 void

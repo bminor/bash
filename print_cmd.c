@@ -41,6 +41,9 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "shell.h"
 #include "flags.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */
+
+#include "shmbutil.h"
+
 #include "builtins/common.h"
 
 #if !HAVE_DECL_PRINTF
@@ -322,6 +325,8 @@ indirection_level_string ()
 {
   register int i, j;
   char *ps4;
+  char ps4_firstc[MB_LEN_MAX+1];
+  int ps4_firstc_len, ps4_len;
 
   indirection_string[0] = '\0';
   ps4 = get_string_value ("PS4");
@@ -336,10 +341,30 @@ indirection_level_string ()
   if (ps4 == 0 || *ps4 == '\0')
     return (indirection_string);
 
-  for (i = 0; *ps4 && i < indirection_level && i < 99; i++)
-    indirection_string[i] = *ps4;
+#if defined (HANDLE_MULTIBYTE)
+  ps4_len = strnlen (ps4, MB_CUR_MAX);
+  ps4_firstc_len = MBLEN (ps4, ps4_len);
+  if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || MB_INVALIDCH (ps4_firstc_len))
+    {
+      ps4_firstc[0] = ps4[0];
+      ps4_firstc[ps4_firstc_len = 1] = '\0';
+    }
+  else
+    memcpy (ps4_firstc, ps4, ps4_firstc_len);
+#else
+  ps4_firstc[0] = ps4[0];
+  ps4_firstc[ps4_firstc_len = 1] = '\0';
+#endif
+      
+  for (i = j = 0; ps4_firstc[0] && j < indirection_level && i < 99; i += ps4_firstc_len, j++)
+    {
+      if (ps4_firstc_len == 1)
+	indirection_string[i] = ps4_firstc[0];
+      else
+	memcpy (indirection_string+i, ps4_firstc, ps4_firstc_len);
+    }      
 
-  for (j = 1; *ps4 && ps4[j] && i < 99; i++, j++)
+  for (j = ps4_firstc_len; *ps4 && ps4[j] && i < 99; i++, j++)
     indirection_string[i] = ps4[j];
 
   indirection_string[i] = '\0';

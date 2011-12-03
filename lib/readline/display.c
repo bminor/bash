@@ -185,6 +185,18 @@ static int prompt_last_screen_line;
 
 static int prompt_physical_chars;
 
+/* Variables to save and restore prompt and display information. */
+
+/* These are getting numerous enough that it's time to create a struct. */
+
+static char *saved_local_prompt;
+static char *saved_local_prefix;
+static int saved_last_invisible;
+static int saved_visible_length;
+static int saved_prefix_length;
+static int saved_invis_chars_first_line;
+static int saved_physical_chars;
+
 /* Expand the prompt string S and return the number of visible
    characters in *LP, if LP is not null.  This is currently more-or-less
    a placeholder for expansion.  LIP, if non-null is a place to store the
@@ -1812,9 +1824,9 @@ rl_character_len (c, pos)
 
   return ((ISPRINT (uc)) ? 1 : 2);
 }
-
 /* How to print things in the "echo-area".  The prompt is treated as a
    mini-modeline. */
+static int msg_saved_prompt = 0;
 
 #if defined (USE_VARARGS)
 int
@@ -1845,8 +1857,19 @@ rl_message (va_alist)
 #endif
   va_end (args);
 
+  if (saved_local_prompt == 0)
+    {
+      rl_save_prompt ();
+      msg_saved_prompt = 1;
+    }
   rl_display_prompt = msg_buf;
+  local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
+					 &prompt_last_invisible,
+					 &prompt_invis_chars_first_line,
+					 &prompt_physical_chars);
+  local_prompt_prefix = (char *)NULL;
   (*rl_redisplay_function) ();
+
   return 0;
 }
 #else /* !USE_VARARGS */
@@ -1856,8 +1879,20 @@ rl_message (format, arg1, arg2)
 {
   sprintf (msg_buf, format, arg1, arg2);
   msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
+
   rl_display_prompt = msg_buf;
+  if (saved_local_prompt == 0)
+    {
+      rl_save_prompt ();
+      msg_saved_prompt = 1;
+    }
+  local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
+					 &prompt_last_invisible,
+					 &prompt_invis_chars_first_line,
+					 &prompt_physical_chars);
+  local_prompt_prefix = (char *)NULL;
   (*rl_redisplay_function) ();
+      
   return 0;
 }
 #endif /* !USE_VARARGS */
@@ -1867,6 +1902,11 @@ int
 rl_clear_message ()
 {
   rl_display_prompt = rl_prompt;
+  if (msg_saved_prompt)
+    {
+      rl_restore_prompt ();
+      msg_saved_prompt = 0;
+    }
   (*rl_redisplay_function) ();
   return 0;
 }
@@ -1881,27 +1921,19 @@ rl_reset_line_state ()
   return 0;
 }
 
-/* These are getting numerous enough that it's time to create a struct. */
-
-static char *saved_local_prompt;
-static char *saved_local_prefix;
-static int saved_last_invisible;
-static int saved_visible_length;
-static int saved_invis_chars_first_line;
-static int saved_physical_chars;
-
 void
 rl_save_prompt ()
 {
   saved_local_prompt = local_prompt;
   saved_local_prefix = local_prompt_prefix;
+  saved_prefix_length = prompt_prefix_length;
   saved_last_invisible = prompt_last_invisible;
   saved_visible_length = prompt_visible_length;
   saved_invis_chars_first_line = prompt_invis_chars_first_line;
   saved_physical_chars = prompt_physical_chars;
 
   local_prompt = local_prompt_prefix = (char *)0;
-  prompt_last_invisible = prompt_visible_length = 0;
+  prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
   prompt_invis_chars_first_line = prompt_physical_chars = 0;
 }
 
@@ -1913,10 +1945,16 @@ rl_restore_prompt ()
 
   local_prompt = saved_local_prompt;
   local_prompt_prefix = saved_local_prefix;
+  prompt_prefix_length = saved_prefix_length;
   prompt_last_invisible = saved_last_invisible;
   prompt_visible_length = saved_visible_length;
   prompt_invis_chars_first_line = saved_invis_chars_first_line;
   prompt_physical_chars = saved_physical_chars;
+
+  /* can test saved_local_prompt to see if prompt info has been saved. */
+  saved_local_prompt = saved_local_prefix = (char *)0;
+  saved_last_invisible = saved_visible_length = saved_prefix_length = 0;
+  saved_invis_chars_first_line = saved_physical_chars = 0;
 }
 
 char *
@@ -1949,6 +1987,8 @@ _rl_make_prompt_for_search (pchar)
       prompt_last_invisible = saved_last_invisible;
       prompt_visible_length = saved_visible_length + 1;
     }
+
+  prompt_physical_chars = saved_physical_chars + 1;
 
   return pmt;
 }
@@ -2125,18 +2165,10 @@ static void
 redraw_prompt (t)
      char *t;
 {
-  char *oldp, *oldl, *oldlprefix;
-  int oldlen, oldlast, oldplen, oldninvis, oldphyschars;
+  char *oldp;
 
-  /* Geez, I should make this a struct. */
   oldp = rl_display_prompt;
-  oldl = local_prompt;
-  oldlprefix = local_prompt_prefix;
-  oldlen = prompt_visible_length;
-  oldplen = prompt_prefix_length;
-  oldlast = prompt_last_invisible;
-  oldninvis = prompt_invis_chars_first_line;
-  oldphyschars = prompt_physical_chars;
+  rl_save_prompt ();
 
   rl_display_prompt = t;
   local_prompt = expand_prompt (t, &prompt_visible_length,
@@ -2144,16 +2176,11 @@ redraw_prompt (t)
 				   &prompt_invis_chars_first_line,
 				   &prompt_physical_chars);
   local_prompt_prefix = (char *)NULL;
+
   rl_forced_update_display ();
 
   rl_display_prompt = oldp;
-  local_prompt = oldl;
-  local_prompt_prefix = oldlprefix;
-  prompt_visible_length = oldlen;
-  prompt_prefix_length = oldplen;
-  prompt_last_invisible = oldlast;
-  prompt_invis_chars_first_line = oldninvis;
-  prompt_physical_chars = oldphyschars;
+  rl_restore_prompt();
 }
       
 /* Redisplay the current line after a SIGWINCH is received. */

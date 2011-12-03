@@ -340,7 +340,8 @@ rl_expand_prompt (prompt)
   FREE (local_prompt_prefix);
 
   local_prompt = local_prompt_prefix = (char *)0;
-  prompt_last_invisible = prompt_visible_length = 0;
+  prompt_last_invisible = prompt_invis_chars_first_line = 0;
+  prompt_visible_length = prompt_physical_chars = 0;
 
   if (prompt == 0 || *prompt == 0)
     return (0);
@@ -883,12 +884,10 @@ rl_redisplay ()
 		  (wrap_offset > visible_wrap_offset) &&
 		  (_rl_last_c_pos < visible_first_line_len))
 		{
-#if defined (HANDLE_MULTIBYTE)
 		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 		    nleft = _rl_screenwidth - _rl_last_c_pos;
 		  else
-#endif
-		  nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
 		  if (nleft)
 		    _rl_clear_to_eol (nleft);
 		}
@@ -924,11 +923,7 @@ rl_redisplay ()
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
-#if defined (HANDLE_MULTIBYTE)
 	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) &&  cursor_linenum == 0 && wrap_offset)
-#else
-	      if (cursor_linenum == 0 && wrap_offset)
-#endif
 		_rl_last_c_pos += wrap_offset;
 	    }
 
@@ -970,8 +965,11 @@ rl_redisplay ()
 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
 	      else
 		tx = nleft;
-	      _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
-	      _rl_last_c_pos = tx;
+	      if (_rl_last_c_pos != tx)
+		{
+	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+	          _rl_last_c_pos = tx;
+		}
 	    }
 
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1132,12 +1130,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      the exact cursor position and cut-and-paste with certain terminal
      emulators.  In this calculation, TEMP is the physical screen
      position of the cursor. */
-#if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     temp = _rl_last_c_pos;
   else
-#endif
-  temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
   if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
 	&& _rl_last_v_pos == current_line - 1)
     {
@@ -1343,11 +1339,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (_rl_last_v_pos != current_line)
     {
       _rl_move_vert (current_line);
-#if defined (HANDLE_MULTIBYTE)
       if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
-#else
-      if (current_line == 0 && visible_wrap_offset)
-#endif
 	_rl_last_c_pos += visible_wrap_offset;
     }
 

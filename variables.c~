@@ -1408,7 +1408,9 @@ initialize_dynamic_variables ()
   INIT_DYNAMIC_VAR ("BASH_SUBSHELL", (char *)NULL, get_subshell, assign_subshell);
 
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
+  VSETATTR (v, att_integer);
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
+  VSETATTR (v, att_integer);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);
@@ -1837,7 +1839,11 @@ bind_variable_internal (name, value, table, hflags, aflags)
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
       INVALIDATE_EXPORTSTR (entry);
-      return ((*(entry->assign_func)) (entry, value, -1));
+      newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
+      entry = (*(entry->assign_func)) (entry, newval, -1);
+      if (newval != value)
+        free (newval);
+      return (entry);
     }
   else
     {
@@ -1939,9 +1945,21 @@ bind_variable_value (var, value, aflags)
 
   VUNSETATTR (var, att_invisible);
 
-  t = make_variable_value (var, value, aflags);
-  FREE (value_cell (var));
-  var_setvalue (var, t);
+  if (var->assign_func)
+    {
+      /* If we're appending, we need the old value, so use
+	 make_variable_value */
+      t = (aflags & ASS_APPEND) ? make_variable_value (var, value, aflags) : value;
+      (*(var->assign_func)) (var, t, -1);
+      if (t != value && t)
+	free (t);      
+    }
+  else
+    {
+      t = make_variable_value (var, value, aflags);
+      FREE (value_cell (var));
+      var_setvalue (var, t);
+    }
 
   INVALIDATE_EXPORTSTR (var);
 
@@ -2096,8 +2114,6 @@ bind_function_def (name, value)
    HASH_TABLE (temporary_env).  The functions in execute_cmd.c are
    responsible for moving the main temporary env to one of the other
    temporary environments.  The expansion code in subst.c calls this. */
-
-   /* XXX - changes needed for `+=' */
 int
 assign_in_env (word)
      WORD_DESC *word;
@@ -3679,6 +3695,10 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+  { "COMP_WORDBREAKS", sv_comp_wordbreaks },
+#endif
+
   { "GLOBIGNORE", sv_globignore },
 
 #if defined (HISTORY)
@@ -3829,6 +3849,19 @@ sv_mail (name)
       remember_mail_dates ();
     }
 }
+
+#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+void
+sv_comp_wordbreaks (name)
+     char *name;
+{
+  SHELL_VAR *sv;
+
+  sv = find_variable (name);
+  if (sv == 0)
+    rl_completer_word_break_characters = (char *)NULL;
+}
+#endif
 
 /* What to do when GLOBIGNORE changes. */
 void

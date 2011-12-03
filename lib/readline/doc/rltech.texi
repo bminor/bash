@@ -911,10 +911,14 @@ possibly containing conversion specifications such as @samp{%d}, and
 any additional arguments necessary to satisfy the conversion specifications.
 The resulting string is displayed in the @dfn{echo area}.  The echo area
 is also used to display numeric arguments and search strings.
+You should call @code{rl_save_prompt} to save the prompt information
+before calling this function.
 @end deftypefun
 
 @deftypefun int rl_clear_message (void)
-Clear the message in the echo area.
+Clear the message in the echo area.  If the prompt was saved with a call to
+@code{rl_save_prompt} before the last call to @code{rl_message},
+call @code{rl_restore_prompt} before calling this function.
 @end deftypefun
 
 @deftypefun void rl_save_prompt (void)
@@ -925,6 +929,9 @@ displaying a new message in the message area with @code{rl_message()}.
 @deftypefun void rl_restore_prompt (void)
 Restore the local Readline prompt display state saved by the most
 recent call to @code{rl_save_prompt}.
+if @code{rl_save_prompt} was called to save the prompt before a call
+to @code{rl_message}, this function should be called before the
+corresponding call to @coode{rl_clear_message}.
 @end deftypefun
 
 @deftypefun int rl_expand_prompt (char *prompt)

@@ -10768,3 +10768,61 @@ jobs.c
 	  waited for is suspended.  Returns 128 + stop signal.  This fixes
 	  the problem with `echo one && sleep 5 && echo two' displaying
 	  `two' after the sleep is suspended
+
+				    1/5
+				    ---
+print_cmd.c
+	- change indirection_level_string so the code duplicates the first
+	  character of $PS4 to indicate the indirection level, rather than
+	  the first byte
+
+				    1/8
+				    ---
+variables.c
+	- new special variable hook function for COMP_WORDBREAKS; sets
+	  rl_completer_word_break_characters back to NULL when the variable
+	  is unset
+	- change bind_variable_value to understand dynamic variables with
+	  assign_function set, and handle them correctly.  If the variable is
+	  being appended to, use make_variable_value to create the new
+	  value
+	- change bind_variable_internal to understand dynamic variables with
+	  assign_function set, and handle them the same way
+	- RANDOM and LINENO now get the integer attribute, so appending works
+	  as expected
+	- ditto for HISTCMD, MAILCHECK, OPTIND
+
+lib/readline/display.c
+	- change _rl_make_prompt_for_search to set prompt_physical_chars
+	  appropriately
+	- rl_save_prompt and rl_restore_prompt save and restore
+	  prompt_prefix_length
+	- change redraw_prompt to use rl_save_prompt and rl_restore_prompt
+	- change rl_restore_prompt to set the `save' variables back to
+	  NULL/0 so code can check whether or not the prompt has been saved
+	- change rl_message and rl_clear_message to save and restore the
+	  prompt if the caller has not already done it (using a simple
+	  semaphore-like variable)
+	- change rl_message to call expand_prompt, so that local_prompt and
+	  local_prompt prefix are set before calling the redisplay functions,
+	  in case the prompt is longer than a screenwidth (fixes bug
+	  reported to debian by epl@unimelb.edu.au)
+
+lib/readline/doc/rltech.texi
+	- make sure to note that rl_save_prompt should be called before
+	  rl_message, and rl_restore_prompt before rl_clear_message
+
+pcomplete.c
+	- make sure to save and restore the parser state around the call to
+	  execute_shell_function in gen_shell_function_matches.  Fixes bug
+	  reported by a050106.1.keeLae3x@captaincrumb.com (cute)
+
+lib/readline/readline.c
+	- fix _rl_dispatch_subseq in the case where we're recursing back up
+	  the chain (r == -2) and we encounter a key shadowed by a keymap,
+	  but originally bound to self-insert.  Calling rl_dispatch with
+	  ANYOTHERKEY as the first argument will call rl_insert, but with
+	  ANYOTHERKEY (256) as the char to insert.  Use the shadow keymap
+	  and set things up to dispatch to rl_insert with the shadowed key
+	  as the argument.  Fixes the bug reported by Thomas Glanzmann
+	  (sithglan@stud.uni-erlangen.de)

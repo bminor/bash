@@ -666,6 +666,20 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	      func = m[ANYOTHERKEY].function;
 	      if (type == ISFUNC && func == rl_do_lowercase_version)
 		r = _rl_dispatch (_rl_to_lower (key), map);
+	      else if (type == ISFUNC && func == rl_insert)
+		{
+		  /* If the function that was shadowed was self-insert, we
+		     somehow need a keymap with map[key].func == self-insert.
+		     Let's use this one. */
+		  int nt = m[key].type;
+		  rl_command_func_t *nf = m[key].function;
+
+		  m[key].type = type;
+		  m[key].function = func;
+		  r = _rl_dispatch (key, m);
+		  m[key].type = nt;
+		  m[key].function = nf;
+		}
 	      else
 		r = _rl_dispatch (ANYOTHERKEY, m);
 #endif
@@ -876,7 +890,7 @@ readline_default_bindings ()
 static void
 reset_default_bindings ()
 {
-  if (rl_bind_stty_chars)
+  if (_rl_bind_stty_chars)
     {
       rl_tty_unset_default_bindings (_rl_keymap);
       rl_tty_set_default_bindings (_rl_keymap);

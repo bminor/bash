@@ -656,19 +656,27 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	       already taken care of pushing any necessary input back onto
 	       the input queue with _rl_unget_char. */
 	    {
-#if 0
-	      r = _rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key));
-#else
-	      /* XXX - experimental code -- might never be executed.  Save
-		 for later. */
 	      Keymap m = FUNCTION_TO_KEYMAP (map, key);
 	      int type = m[ANYOTHERKEY].type;
 	      func = m[ANYOTHERKEY].function;
 	      if (type == ISFUNC && func == rl_do_lowercase_version)
 		r = _rl_dispatch (_rl_to_lower (key), map);
+	      else if (type == ISFUNC && func == rl_insert)
+		{
+		  /* If the function that was shadowed was self-insert, we
+		     somehow need a keymap with map[key].func == self-insert.
+		     Let's use this one. */
+		  int nt = m[key].type;
+		  rl_command_func_t *nf = m[key].function;
+
+		  m[key].type = type;
+		  m[key].function = func;
+		  r = _rl_dispatch (key, m);
+		  m[key].type = nt;
+		  m[key].function = nf;
+		}
 	      else
 		r = _rl_dispatch (ANYOTHERKEY, m);
-#endif
 	    }
 	  else if (r && map[ANYOTHERKEY].function)
 	    {
