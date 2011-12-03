@@ -1433,7 +1433,9 @@ make_child (command, async_p)
 
       last_made_pid = pid;
 
-      /* Unblock SIGINT and SIGCHLD. */
+      /* Unblock SIGINT and SIGCHLD unless creating a pipeline, in which case
+	 SIGCHLD remains blocked until all commands in the pipeline have been
+	 created. */
       sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
     }
 

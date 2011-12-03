@@ -1360,14 +1360,12 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #if defined (JOB_CONTROL)
 	  terminate_current_pipeline ();
 	  kill_current_pipeline ();
+	  UNBLOCK_CHILD (oset);
 #endif /* JOB_CONTROL */
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  /* The unwind-protects installed below will take care
 	     of closing all of the open file descriptors. */
 	  throw_to_top_level ();
-#if defined (JOB_CONTROL)
-	  UNBLOCK_CHILD (oset);
-#endif
 	  return (EXECUTION_FAILURE);	/* XXX */
 	}
 
@@ -2663,8 +2661,10 @@ fix_assignment_words (words)
 	    b = builtin_address_internal (words->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
+	    else if (b && (b->flags & ASSIGNMENT_BUILTIN))
+	      words->word->flags |= W_ASSNBLTIN;
 	  }
-	w->word->flags |= (W_NOSPLIT|W_NOGLOB|W_TILDEEXP);
+	w->word->flags |= (W_NOSPLIT|W_NOGLOB|W_TILDEEXP|W_ASSIGNARG);
       }
 }
 
@@ -2699,7 +2699,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   if (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0))
     {
       FREE (the_printed_command_except_trap);
-      the_printed_command_except_trap = savestring (the_printed_command);
+      the_printed_command_except_trap = the_printed_command ? savestring (the_printed_command) : (char *)0;
     }
 
   /* Run the debug trap before each simple command, but do it after we
@@ -2754,9 +2754,17 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
 
+#if 0
 	  subshell_environment = (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 					? (SUBSHELL_PIPE|SUBSHELL_FORK)
 	  				: (SUBSHELL_ASYNC|SUBSHELL_FORK);
+#else
+	  subshell_environment = SUBSHELL_FORK;
+	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+	    subshell_environment |= SUBSHELL_PIPE;
+	  if (async)
+	    subshell_environment |= SUBSHELL_ASYNC;
+#endif
 
 	  /* We need to do this before piping to handle some really
 	     pathological cases where one of the pipe file descriptors
