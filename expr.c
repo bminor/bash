@@ -769,7 +769,7 @@ exppower ()
   while (curtok == POWER)
     {
       readtok ();
-      val2 = exp1 ();
+      val2 = exppower ();	/* exponentiation is right-associative */
       if (val2 == 0)
 	return (1);
       if (val2 < 0)

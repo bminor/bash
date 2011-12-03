@@ -32,7 +32,7 @@ strnlen (s, maxlen)
   register const char *e;
   size_t n;
 
-  for (e = s,n = 0; *e && n < maxlen; e++, n++)
+  for (e = s, n = 0; *e && n < maxlen; e++, n++)
     ;
   return n;
 }

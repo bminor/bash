@@ -10028,3 +10028,12 @@ parse.y
 	- don't attempt to parse a compound assignment specially unless we're
 	  in a position where an assignment statement is acceptable, or
 	  PST_ASSIGNOK is set
+
+				   9/13
+				   ----
+variables.c
+	- make BASH_ARGC, BASH_ARGV, BASH_LINENO, and BASH_SOURCE
+	  non-unsettable, since the shell uses those values internally
+
+expr.c
+	- make exponentiation right-associative, as is apparently correct
