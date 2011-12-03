@@ -924,7 +924,11 @@ rl_redisplay ()
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
+#if defined (HANDLE_MULTIBYTE)
 	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) &&  cursor_linenum == 0 && wrap_offset)
+#else
+	      if (cursor_linenum == 0 && wrap_offset)
+#endif
 		_rl_last_c_pos += wrap_offset;
 	    }
 
@@ -1128,10 +1132,12 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      the exact cursor position and cut-and-paste with certain terminal
      emulators.  In this calculation, TEMP is the physical screen
      position of the cursor. */
+#if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     temp = _rl_last_c_pos;
   else
-    temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+#endif
+  temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
   if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
 	&& _rl_last_v_pos == current_line - 1)
     {
@@ -1337,7 +1343,11 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (_rl_last_v_pos != current_line)
     {
       _rl_move_vert (current_line);
+#if defined (HANDLE_MULTIBYTE)
       if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
+#else
+      if (current_line == 0 && visible_wrap_offset)
+#endif
 	_rl_last_c_pos += visible_wrap_offset;
     }
 

@@ -10467,3 +10467,11 @@ lib/readline/display.c
 lib/readline/histexpand.c
 	- fix a problem with finding the delimiter of a `?' substring when
 	  compiled for multibyte characters (from SUSE, but not sent in)
+
+				   11/1
+				   ----
+lib/readline/display.c
+	- correct some assignments to _rl_last_c_pos:  when in a multibyte
+	  locale, it's used as an absolute cursor position; when not using
+	  multibyte characters, it's a buffer offset.  I should have caught
+	  this when the multibyte character support was donated

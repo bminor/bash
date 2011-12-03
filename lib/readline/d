@@ -1,0 +1,270 @@
+*** display.c.orig	Thu May 27 22:57:51 2004
+--- display.c	Tue Nov  2 23:59:42 2004
+***************
+*** 125,129 ****
+--- 125,134 ----
+  
+  /* Pseudo-global variables declared here. */
++ 
+  /* The visible cursor position.  If you print some text, adjust this. */
++ /* NOTE: _rl_last_c_pos is used as a buffer index when not in a locale
++    supporting multibyte characters, and an absolute cursor position when
++    in such a locale.  This is an artifact of the donated multibyte support.
++    Care must be taken when modifying its value. */
+  int _rl_last_c_pos = 0;
+  int _rl_last_v_pos = 0;
+***************
+*** 202,206 ****
+  {
+    char *r, *ret, *p;
+!   int l, rl, last, ignoring, ninvis, invfl, ind, pind, physchars;
+  
+    /* Short-circuit if we can. */
+--- 207,211 ----
+  {
+    char *r, *ret, *p;
+!   int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
+  
+    /* Short-circuit if we can. */
+***************
+*** 223,226 ****
+--- 228,232 ----
+  
+    invfl = 0;	/* invisible chars in first line of prompt */
++   invflset = 0;	/* we only want to set invfl once */
+  
+    for (rl = ignoring = last = ninvis = physchars = 0, p = pmt; p && *p; p++)
+***************
+*** 250,254 ****
+  	        *r++ = *p++;
+  	      if (!ignoring)
+! 		rl += ind - pind;
+  	      else
+  		ninvis += ind - pind;
+--- 256,263 ----
+  	        *r++ = *p++;
+  	      if (!ignoring)
+! 		{
+! 		  rl += ind - pind;
+! 		  physchars += _rl_col_width (pmt, pind, ind);
+! 		}
+  	      else
+  		ninvis += ind - pind;
+***************
+*** 260,273 ****
+  	      *r++ = *p;
+  	      if (!ignoring)
+! 		rl++;			/* visible length byte counter */
+  	      else
+  		ninvis++;		/* invisible chars byte counter */
+  	    }
+  
+! 	  if (rl >= _rl_screenwidth)
+! 	    invfl = ninvis;
+! 
+! 	  if (ignoring == 0)
+! 	    physchars++;
+  	}
+      }
+--- 269,285 ----
+  	      *r++ = *p;
+  	      if (!ignoring)
+! 		{
+! 		  rl++;			/* visible length byte counter */
+! 		  physchars++;
+! 		}
+  	      else
+  		ninvis++;		/* invisible chars byte counter */
+  	    }
+  
+! 	  if (invflset == 0 && rl >= _rl_screenwidth)
+! 	    {
+! 	      invfl = ninvis;
+! 	      invflset = 1;
+! 	    }
+  	}
+      }
+***************
+*** 352,356 ****
+  				       &prompt_last_invisible,
+  				       (int *)NULL,
+! 				       (int *)NULL);
+        c = *t; *t = '\0';
+        /* The portion of the prompt string up to and including the
+--- 364,368 ----
+  				       &prompt_last_invisible,
+  				       (int *)NULL,
+! 				       &prompt_physical_chars);
+        c = *t; *t = '\0';
+        /* The portion of the prompt string up to and including the
+***************
+*** 359,363 ****
+  						   (int *)NULL,
+  						   &prompt_invis_chars_first_line,
+! 						   &prompt_physical_chars);
+        *t = c;
+        return (prompt_prefix_length);
+--- 371,375 ----
+  						   (int *)NULL,
+  						   &prompt_invis_chars_first_line,
+! 						   (int *)NULL);
+        *t = c;
+        return (prompt_prefix_length);
+***************
+*** 418,422 ****
+    register char *line;
+    int c_pos, inv_botlin, lb_botlin, lb_linenum;
+!   int newlines, lpos, temp, modmark;
+    char *prompt_this_line;
+  #if defined (HANDLE_MULTIBYTE)
+--- 430,434 ----
+    register char *line;
+    int c_pos, inv_botlin, lb_botlin, lb_linenum;
+!   int newlines, lpos, temp, modmark, n0, num;
+    char *prompt_this_line;
+  #if defined (HANDLE_MULTIBYTE)
+***************
+*** 574,577 ****
+--- 586,590 ----
+  #if defined (HANDLE_MULTIBYTE)
+    memset (_rl_wrapped_line, 0, vis_lbsize);
++   num = 0;
+  #endif
+  
+***************
+*** 592,596 ****
+--- 605,624 ----
+           prompts that exceed two physical lines?
+           Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
++ #if defined (HANDLE_MULTIBYTE)
++       n0 = num;
++       temp = local_prompt ? strlen (local_prompt) : 0;
++       while (num < temp)
++ 	{
++ 	  if (_rl_col_width  (local_prompt, n0, num) > _rl_screenwidth)
++ 	    {
++ 	      num = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
++ 	      break;
++ 	    }
++ 	  num++;
++ 	}
++       temp = num +
++ #else
+        temp = ((newlines + 1) * _rl_screenwidth) +
++ #endif /* !HANDLE_MULTIBYTE */
+               ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
+  							    : ((newlines == 1) ? wrap_offset : 0))
+***************
+*** 598,602 ****
+--- 626,634 ----
+               
+        inv_lbreaks[++newlines] = temp;
++ #if defined (HANDLE_MULTIBYTE)
++       lpos -= _rl_col_width (local_prompt, n0, num);
++ #else
+        lpos -= _rl_screenwidth;
++ #endif
+      }
+  
+***************
+*** 807,811 ****
+    if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
+      {
+!       int nleft, pos, changed_screen_line;
+  
+        if (!rl_display_fixed || forced_display)
+--- 839,843 ----
+    if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
+      {
+!       int nleft, pos, changed_screen_line, tx;
+  
+        if (!rl_display_fixed || forced_display)
+***************
+*** 852,855 ****
+--- 884,892 ----
+  		  (_rl_last_c_pos < visible_first_line_len))
+  		{
++ #if defined (HANDLE_MULTIBYTE)
++ 		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
++ 		    nleft = _rl_screenwidth - _rl_last_c_pos;
++ 		  else
++ #endif
+  		  nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+  		  if (nleft)
+***************
+*** 888,892 ****
+  		 but the buffer position needs to be adjusted to account
+  		 for invisible characters. */
+! 	      if (cursor_linenum == 0 && wrap_offset)
+  		_rl_last_c_pos += wrap_offset;
+  	    }
+--- 925,929 ----
+  		 but the buffer position needs to be adjusted to account
+  		 for invisible characters. */
+! 	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) &&  cursor_linenum == 0 && wrap_offset)
+  		_rl_last_c_pos += wrap_offset;
+  	    }
+***************
+*** 926,934 ****
+  	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
+  	    {
+- 	      _rl_backspace (_rl_last_c_pos - nleft);
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		_rl_last_c_pos = _rl_col_width (&visible_line[pos], 0, nleft);
+  	      else
+! 		_rl_last_c_pos = nleft;
+  	    }
+  
+--- 963,972 ----
+  	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
+  	    {
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		tx = _rl_col_width (&visible_line[pos], 0, nleft);
+  	      else
+! 		tx = nleft;
+! 	      _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+! 	      _rl_last_c_pos = tx;
+  	    }
+  
+***************
+*** 1091,1095 ****
+       emulators.  In this calculation, TEMP is the physical screen
+       position of the cursor. */
+!   temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+--- 1129,1136 ----
+       emulators.  In this calculation, TEMP is the physical screen
+       position of the cursor. */
+!   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+!     temp = _rl_last_c_pos;
+!   else
+!     temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+***************
+*** 1297,1301 ****
+      {
+        _rl_move_vert (current_line);
+!       if (current_line == 0 && visible_wrap_offset)
+  	_rl_last_c_pos += visible_wrap_offset;
+      }
+--- 1338,1342 ----
+      {
+        _rl_move_vert (current_line);
+!       if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
+  	_rl_last_c_pos += visible_wrap_offset;
+      }
+***************
+*** 1388,1392 ****
+  	      _rl_last_c_pos += col_lendiff;
+  	    }
+! 	  else if (*ols == 0 && lendiff > 0)
+  	    {
+  	      /* At the end of a line the characters do not have to
+--- 1429,1433 ----
+  	      _rl_last_c_pos += col_lendiff;
+  	    }
+! 	  else if ((MB_CUR_MAX == 1 || rl_byte_oriented != 0) && *ols == 0 && lendiff > 0)
+  	    {
+  	      /* At the end of a line the characters do not have to

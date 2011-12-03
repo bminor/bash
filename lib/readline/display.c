@@ -124,7 +124,12 @@ int _rl_suppress_redisplay = 0;
 char *rl_display_prompt = (char *)NULL;
 
 /* Pseudo-global variables declared here. */
+
 /* The visible cursor position.  If you print some text, adjust this. */
+/* NOTE: _rl_last_c_pos is used as a buffer index when not in a locale
+   supporting multibyte characters, and an absolute cursor position when
+   in such a locale.  This is an artifact of the donated multibyte support.
+   Care must be taken when modifying its value. */
 int _rl_last_c_pos = 0;
 int _rl_last_v_pos = 0;
 
@@ -833,7 +838,7 @@ rl_redisplay ()
 
   if (_rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
     {
-      int nleft, pos, changed_screen_line;
+      int nleft, pos, changed_screen_line, tx;
 
       if (!rl_display_fixed || forced_display)
 	{
@@ -878,7 +883,10 @@ rl_redisplay ()
 		  (wrap_offset > visible_wrap_offset) &&
 		  (_rl_last_c_pos < visible_first_line_len))
 		{
-		  nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		    nleft = _rl_screenwidth - _rl_last_c_pos;
+		  else
+		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
 		  if (nleft)
 		    _rl_clear_to_eol (nleft);
 		}
@@ -914,7 +922,7 @@ rl_redisplay ()
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
-	      if (cursor_linenum == 0 && wrap_offset)
+	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) &&  cursor_linenum == 0 && wrap_offset)
 		_rl_last_c_pos += wrap_offset;
 	    }
 
@@ -952,11 +960,12 @@ rl_redisplay ()
 	     those characters here and call _rl_backspace() directly. */
 	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
 	    {
-	      _rl_backspace (_rl_last_c_pos - nleft);
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos = _rl_col_width (&visible_line[pos], 0, nleft);
+		tx = _rl_col_width (&visible_line[pos], 0, nleft);
 	      else
-		_rl_last_c_pos = nleft;
+		tx = nleft;
+	      _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
+	      _rl_last_c_pos = tx;
 	    }
 
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1117,7 +1126,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      the exact cursor position and cut-and-paste with certain terminal
      emulators.  In this calculation, TEMP is the physical screen
      position of the cursor. */
-  temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    temp = _rl_last_c_pos;
+  else
+    temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
   if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
 	&& _rl_last_v_pos == current_line - 1)
     {
@@ -1323,7 +1335,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (_rl_last_v_pos != current_line)
     {
       _rl_move_vert (current_line);
-      if (current_line == 0 && visible_wrap_offset)
+      if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
 	_rl_last_c_pos += visible_wrap_offset;
     }
 

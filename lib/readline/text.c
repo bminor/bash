@@ -1032,7 +1032,7 @@ _rl_rubout_char (count, key)
 #endif /* HANDLE_MULTIBYTE */
 
       /* I don't think that the hack for end of line is needed for
-	 multibyte chars. */
+	 multibyte chars (and it doesn't work for those chars, anyway). */
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX == 1 || rl_byte_oriented)
 #endif
