@@ -55,6 +55,8 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 BUILD_DIR = @BUILD_DIR@
 
+SUPPORT_SRCDIR = $(topdir)/support
+
 # bad style
 RL_LIBDIR = $(topdir)/lib/readline
 
@@ -63,8 +65,8 @@ TEXINDEX    = texindex
 TEX	    = tex
 
 MAKEINFO    = makeinfo
-TEXI2DVI    = ${topdir}/support/texi2dvi
-TEXI2HTML   = ${topdir}/support/texi2html
+TEXI2DVI    = ${SUPPORT_SRCDIR}/texi2dvi
+TEXI2HTML   = ${SUPPORT_SRCDIR}/texi2html
 MAN2HTML    = ${BUILD_DIR}/support/man2html
 HTMLPOST    = ${srcdir}/htmlpost.sh
 INFOPOST    = ${srcdir}/infopost.sh
@@ -80,7 +82,7 @@ SET_TEXINPUTS = TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS
 DVIPDF	    = dvipdfm -o $@ -p ${PAPERSIZE}
 PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -sOutputFile=$@
 
-MKDIRS      = ${topdir}/support/mkdirs
+MKDIRS      = ${SUPPORT_SRCDIR}/mkdirs
 
 # This should be a program that converts troff to an ascii-readable format
 NROFF	    = groff -Tascii
@@ -166,7 +168,7 @@ bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bash.info: bashref.info
-	${SHELL} ${INFOPOST} < bashref.info > $@
+	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@ ; \
 
 bash.txt: bash.1
 bash.ps: bash.1
@@ -212,10 +214,10 @@ maybe-clean:
 	fi
 
 installdirs:
-	-test -d $(man1dir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(man1dir)
-	-test -d $(infodir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(infodir)
+	-$(SHELL) $(SUPPORT_SRCDIR)/mkinstalldirs $(DESTDIR)$(man1dir)
+	-$(SHELL) $(SUPPORT_SRCDIR)/mkinstalldirs $(DESTDIR)$(infodir)
 	-if test -n "$(htmldir)" ; then \
-		test -d $(htmldir) || $(SHELL) ${MKDIRS} $(DESTDIR)$(htmldir) ; \
+		$(SHELL) $(SUPPORT_SRCDIR)/mkinstalldirs $(DESTDIR)$(htmldir) ; \
 	fi
 	
 install: info installdirs bash.info

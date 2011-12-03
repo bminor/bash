@@ -1,11 +1,11 @@
-This is bashref.info, produced by makeinfo version 4.2 from
+This is bashref.info, produced by makeinfo version 4.7 from
 /Users/chet/src/bash/src/doc/bashref.texi.
 
-This text is a brief description of the features that are present in
-the Bash shell (version 3.0-rc1, 26 June 2004).
+   This text is a brief description of the features that are present in
+the Bash shell (version 3.0, 27 July 2004).
 
-   This is Edition 3.0, last updated 26 June 2004, of `The GNU Bash
-Reference Manual', for `Bash', Version 3.0-rc1.
+   This is Edition 3.0, last updated 27 July 2004, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0.
 
    Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
@@ -24,7 +24,7 @@ preserved on all copies.
      (a) The FSF's Back-Cover Text is: "You have freedom to copy and
      modify this GNU Manual, like GNU software.  Copies published by
      the Free Software Foundation raise funds for GNU development."
-   
+
 INFO-DIR-SECTION Basics
 START-INFO-DIR-ENTRY
 * Bash: (bash).                     The GNU Bourne-Again SHell.
@@ -36,11 +36,11 @@ File: bashref.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Bash Features
 *************
 
-   This text is a brief description of the features that are present in
-the Bash shell (version 3.0-rc1, 26 June 2004)..
+This text is a brief description of the features that are present in
+the Bash shell (version 3.0, 27 July 2004)..
 
-   This is Edition 3.0, last updated 26 June 2004, of `The GNU Bash
-Reference Manual', for `Bash', Version 3.0-rc1.
+   This is Edition 3.0, last updated 27 July 2004, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.0.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -102,8 +102,8 @@ on shell behavior.
 
 File: bashref.info,  Node: Introduction,  Next: Definitions,  Prev: Top,  Up: Top
 
-Introduction
-************
+1 Introduction
+**************
 
 * Menu:
 
@@ -114,10 +114,10 @@ Introduction
 
 File: bashref.info,  Node: What is Bash?,  Next: What is a shell?,  Up: Introduction
 
-What is Bash?
-=============
+1.1 What is Bash?
+=================
 
-   Bash is the shell, or command language interpreter, for the GNU
+Bash is the shell, or command language interpreter, for the GNU
 operating system.  The name is an acronym for the `Bourne-Again SHell',
 a pun on Stephen Bourne, the author of the direct ancestor of the
 current Unix shell `sh', which appeared in the Seventh Edition Bell
@@ -138,10 +138,10 @@ exist for MS-DOS, OS/2, and Windows platforms.
 
 File: bashref.info,  Node: What is a shell?,  Prev: What is Bash?,  Up: Introduction
 
-What is a shell?
-================
+1.2 What is a shell?
+====================
 
-   At its base, a shell is simply a macro processor that executes
+At its base, a shell is simply a macro processor that executes
 commands.  The term macro processor means functionality where text and
 symbols are expanded to create larger expressions.
 
@@ -189,10 +189,10 @@ Each of these features is described in this manual.
 
 File: bashref.info,  Node: Definitions,  Next: Basic Shell Features,  Prev: Introduction,  Up: Top
 
-Definitions
-***********
+2 Definitions
+*************
 
-   These definitions are used throughout the remainder of this manual.
+These definitions are used throughout the remainder of this manual.
 
 `POSIX'
      A family of open system standards based on Unix.  Bash is
@@ -278,14 +278,14 @@ Definitions
 
 File: bashref.info,  Node: Basic Shell Features,  Next: Shell Builtin Commands,  Prev: Definitions,  Up: Top
 
-Basic Shell Features
-********************
+3 Basic Shell Features
+**********************
 
-   Bash is an acronym for `Bourne-Again SHell'.  The Bourne shell is
-the traditional Unix shell originally written by Stephen Bourne.  All
-of the Bourne shell builtin commands are available in Bash, The rules
-for evaluation and quoting are taken from the POSIX specification for
-the `standard' Unix shell.
+Bash is an acronym for `Bourne-Again SHell'.  The Bourne shell is the
+traditional Unix shell originally written by Stephen Bourne.  All of
+the Bourne shell builtin commands are available in Bash, The rules for
+evaluation and quoting are taken from the POSIX specification for the
+`standard' Unix shell.
 
    This chapter briefly summarizes the shell's `building blocks':
 commands, control structures, shell functions, shell parameters, shell
@@ -307,8 +307,8 @@ from and to named files, and how the shell executes commands.
 
 File: bashref.info,  Node: Shell Syntax,  Next: Shell Commands,  Up: Basic Shell Features
 
-Shell Syntax
-============
+3.1 Shell Syntax
+================
 
 * Menu:
 
@@ -335,10 +335,10 @@ exit status available for further inspection or processing.
 
 File: bashref.info,  Node: Shell Operation,  Next: Quoting,  Up: Shell Syntax
 
-Shell Operation
----------------
+3.1.1 Shell Operation
+---------------------
 
-   The following is a brief description of the shell's operation when it
+The following is a brief description of the shell's operation when it
 reads and executes a command.  Basically, the shell does the following:
 
   1. Reads its input from a file (*note Shell Scripts::), from a string
@@ -370,8 +370,8 @@ reads and executes a command.  Basically, the shell does the following:
 
 File: bashref.info,  Node: Quoting,  Next: Comments,  Prev: Shell Operation,  Up: Shell Syntax
 
-Quoting
--------
+3.1.2 Quoting
+-------------
 
 * Menu:
 
@@ -403,12 +403,12 @@ quotes, and double quotes.
 
 File: bashref.info,  Node: Escape Character,  Next: Single Quotes,  Up: Quoting
 
-Escape Character
-................
+3.1.2.1 Escape Character
+........................
 
-   A non-quoted backslash `\' is the Bash escape character.  It
-preserves the literal value of the next character that follows, with
-the exception of `newline'.  If a `\newline' pair appears, and the
+A non-quoted backslash `\' is the Bash escape character.  It preserves
+the literal value of the next character that follows, with the
+exception of `newline'.  If a `\newline' pair appears, and the
 backslash itself is not quoted, the `\newline' is treated as a line
 continuation (that is, it is removed from the input stream and
 effectively ignored).
@@ -416,22 +416,22 @@ effectively ignored).
 
 File: bashref.info,  Node: Single Quotes,  Next: Double Quotes,  Prev: Escape Character,  Up: Quoting
 
-Single Quotes
-.............
+3.1.2.2 Single Quotes
+.....................
 
-   Enclosing characters in single quotes (`'') preserves the literal
-value of each character within the quotes.  A single quote may not occur
+Enclosing characters in single quotes (`'') preserves the literal value
+of each character within the quotes.  A single quote may not occur
 between single quotes, even when preceded by a backslash.
 
 
 File: bashref.info,  Node: Double Quotes,  Next: ANSI-C Quoting,  Prev: Single Quotes,  Up: Quoting
 
-Double Quotes
-.............
+3.1.2.3 Double Quotes
+.....................
 
-   Enclosing characters in double quotes (`"') preserves the literal
-value of all characters within the quotes, with the exception of `$',
-``', and `\'.  The characters `$' and ``' retain their special meaning
+Enclosing characters in double quotes (`"') preserves the literal value
+of all characters within the quotes, with the exception of `$', ``',
+and `\'.  The characters `$' and ``' retain their special meaning
 within double quotes (*note Shell Expansions::).  The backslash retains
 its special meaning only when followed by one of the following
 characters: `$', ``', `"', `\', or `newline'.  Within double quotes,
@@ -447,13 +447,13 @@ double quotes (*note Shell Parameter Expansion::).
 
 File: bashref.info,  Node: ANSI-C Quoting,  Next: Locale Translation,  Prev: Double Quotes,  Up: Quoting
 
-ANSI-C Quoting
-..............
+3.1.2.4 ANSI-C Quoting
+......................
 
-   Words of the form `$'STRING'' are treated specially.  The word
-expands to STRING, with backslash-escaped characters replaced as
-specified by the ANSI C standard.  Backslash escape sequences, if
-present, are decoded as follows:
+Words of the form `$'STRING'' are treated specially.  The word expands
+to STRING, with backslash-escaped characters replaced as specified by
+the ANSI C standard.  Backslash escape sequences, if present, are
+decoded as follows:
 
 `\a'
      alert (bell)
@@ -502,11 +502,11 @@ been present.
 
 File: bashref.info,  Node: Locale Translation,  Prev: ANSI-C Quoting,  Up: Quoting
 
-Locale-Specific Translation
-...........................
+3.1.2.5 Locale-Specific Translation
+...................................
 
-   A double-quoted string preceded by a dollar sign (`$') will cause
-the string to be translated according to the current locale.  If the
+A double-quoted string preceded by a dollar sign (`$') will cause the
+string to be translated according to the current locale.  If the
 current locale is `C' or `POSIX', the dollar sign is ignored.  If the
 string is translated and replaced, the replacement is double-quoted.
 
@@ -521,10 +521,10 @@ Still others use both variables in this fashion:
 
 File: bashref.info,  Node: Comments,  Prev: Quoting,  Up: Shell Syntax
 
-Comments
---------
+3.1.3 Comments
+--------------
 
-   In a non-interactive shell, or an interactive shell in which the
+In a non-interactive shell, or an interactive shell in which the
 `interactive_comments' option to the `shopt' builtin is enabled (*note
 Bash Builtins::), a word beginning with `#' causes that word and all
 remaining characters on that line to be ignored.  An interactive shell
@@ -536,10 +536,10 @@ what makes a shell interactive.
 
 File: bashref.info,  Node: Shell Commands,  Next: Shell Functions,  Prev: Shell Syntax,  Up: Basic Shell Features
 
-Shell Commands
-==============
+3.2 Shell Commands
+==================
 
-   A simple shell command such as `echo a b c' consists of the command
+A simple shell command such as `echo a b c' consists of the command
 itself followed by arguments, separated by spaces.
 
    More complex shell commands are composed of simple commands arranged
@@ -558,12 +558,12 @@ construct, or in some other grouping.
 
 File: bashref.info,  Node: Simple Commands,  Next: Pipelines,  Up: Shell Commands
 
-Simple Commands
----------------
+3.2.1 Simple Commands
+---------------------
 
-   A simple command is the kind of command encountered most often.
-It's just a sequence of words separated by `blank's, terminated by one
-of the shell's control operators (*note Definitions::).  The first word
+A simple command is the kind of command encountered most often.  It's
+just a sequence of words separated by `blank's, terminated by one of
+the shell's control operators (*note Definitions::).  The first word
 generally specifies a command to be executed, with the rest of the
 words being that command's arguments.
 
@@ -574,10 +574,10 @@ exit status as provided by the POSIX 1003.1 `waitpid' function, or
 
 File: bashref.info,  Node: Pipelines,  Next: Lists,  Prev: Simple Commands,  Up: Shell Commands
 
-Pipelines
----------
+3.2.2 Pipelines
+---------------
 
-   A `pipeline' is a sequence of simple commands separated by `|'.
+A `pipeline' is a sequence of simple commands separated by `|'.
 
    The format for a pipeline is
      [`time' [`-p']] [`!'] COMMAND1 [`|' COMMAND2 ...]
@@ -614,12 +614,12 @@ returning a value.
 
 File: bashref.info,  Node: Lists,  Next: Compound Commands,  Prev: Pipelines,  Up: Shell Commands
 
-Lists of Commands
------------------
+3.2.3 Lists of Commands
+-----------------------
 
-   A `list' is a sequence of one or more pipelines separated by one of
-the operators `;', `&', `&&', or `||', and optionally terminated by one
-of `;', `&', or a `newline'.
+A `list' is a sequence of one or more pipelines separated by one of the
+operators `;', `&', `&&', or `||', and optionally terminated by one of
+`;', `&', or a `newline'.
 
    Of these list operators, `&&' and `||' have equal precedence,
 followed by `;' and `&', which have equal precedence.
@@ -658,8 +658,8 @@ command executed in the list.
 
 File: bashref.info,  Node: Compound Commands,  Prev: Lists,  Up: Shell Commands
 
-Compound Commands
------------------
+3.2.4 Compound Commands
+-----------------------
 
 * Menu:
 
@@ -680,10 +680,10 @@ mechanisms to group commands and execute them as a unit.
 
 File: bashref.info,  Node: Looping Constructs,  Next: Conditional Constructs,  Up: Compound Commands
 
-Looping Constructs
-..................
+3.2.4.1 Looping Constructs
+..........................
 
-   Bash supports the following looping constructs.
+Bash supports the following looping constructs.
 
    Note that wherever a `;' appears in the description of a command's
 syntax, it may be replaced with one or more newlines.
@@ -731,14 +731,15 @@ syntax, it may be replaced with one or more newlines.
      command in LIST that is executed, or false if any of the
      expressions is invalid.
 
+
    The `break' and `continue' builtins (*note Bourne Shell Builtins::)
 may be used to control loop execution.
 
 
 File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: Looping Constructs,  Up: Compound Commands
 
-Conditional Constructs
-......................
+3.2.4.2 Conditional Constructs
+..............................
 
 `if'
      The syntax of the `if' command is:
@@ -836,7 +837,6 @@ Conditional Constructs
      expression is non-zero, the return status is 0; otherwise the
      return status is 1.  This is exactly equivalent to
           let "EXPRESSION"
-
      *Note Bash Builtins::, for a full description of the `let' builtin.
 
 `[[...]]'
@@ -890,19 +890,19 @@ Conditional Constructs
 
     `EXPRESSION1 || EXPRESSION2'
           True if either EXPRESSION1 or EXPRESSION2 is true.
-
      The `&&' and `||' operators do not evaluate EXPRESSION2 if the
      value of EXPRESSION1 is sufficient to determine the return value
      of the entire conditional expression.
 
+
 
 File: bashref.info,  Node: Command Grouping,  Prev: Conditional Constructs,  Up: Compound Commands
 
-Grouping Commands
-.................
+3.2.4.3 Grouping Commands
+.........................
 
-   Bash provides two ways to group a list of commands to be executed as
-a unit.  When commands are grouped, redirections may be applied to the
+Bash provides two ways to group a list of commands to be executed as a
+unit.  When commands are grouped, redirections may be applied to the
 entire command list.  For example, the output of all the commands in
 the list may be redirected to a single stream.
 
@@ -935,17 +935,17 @@ LIST.
 
 File: bashref.info,  Node: Shell Functions,  Next: Shell Parameters,  Prev: Shell Commands,  Up: Basic Shell Features
 
-Shell Functions
-===============
+3.3 Shell Functions
+===================
 
-   Shell functions are a way to group commands for later execution
-using a single name for the group.  They are executed just like a
-"regular" command.  When the name of a shell function is used as a
-simple command name, the list of commands associated with that function
-name is executed.  Shell functions are executed in the current shell
-context; no new process is created to interpret them.
+Shell functions are a way to group commands for later execution using a
+single name for the group.  They are executed just like a "regular"
+command.  When the name of a shell function is used as a simple command
+name, the list of commands associated with that function name is
+executed.  Shell functions are executed in the current shell context;
+no new process is created to interpret them.
 
-   Functions are declared using this syntax:
+   Functions are declared using this syntax: 
      [ `function' ] NAME () COMPOUND-COMMAND [ REDIRECTIONS ]
 
    This defines a shell function named NAME.  The reserved word
@@ -1015,8 +1015,8 @@ recursive  calls.
 
 File: bashref.info,  Node: Shell Parameters,  Next: Shell Expansions,  Prev: Shell Functions,  Up: Basic Shell Features
 
-Shell Parameters
-================
+3.4 Shell Parameters
+====================
 
 * Menu:
 
@@ -1035,8 +1035,7 @@ the `unset' builtin command.
 
    A variable may be assigned to by a statement of the form
      NAME=[VALUE]
-
-If VALUE is not given, the variable is assigned the null string.  All
+   If VALUE is not given, the variable is assigned the null string.  All
 VALUEs undergo tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal (detailed
 below).  If the variable has its `integer' attribute set, then VALUE is
@@ -1050,10 +1049,10 @@ and `local' builtin commands.
 
 File: bashref.info,  Node: Positional Parameters,  Next: Special Parameters,  Up: Shell Parameters
 
-Positional Parameters
----------------------
+3.4.1 Positional Parameters
+---------------------------
 
-   A POSITIONAL PARAMETER is a parameter denoted by one or more digits,
+A POSITIONAL PARAMETER is a parameter denoted by one or more digits,
 other than the single digit `0'.  Positional parameters are assigned
 from the shell's arguments when it is invoked, and may be reassigned
 using the `set' builtin command.  Positional parameter `N' may be
@@ -1069,10 +1068,10 @@ is expanded, it must be enclosed in braces.
 
 File: bashref.info,  Node: Special Parameters,  Prev: Positional Parameters,  Up: Shell Parameters
 
-Special Parameters
-------------------
+3.4.2 Special Parameters
+------------------------
 
-   The shell treats several parameters specially.  These parameters may
+The shell treats several parameters specially.  These parameters may
 only be referenced; assignment to them is not allowed.
 
 `*'
@@ -1133,11 +1132,11 @@ only be referenced; assignment to them is not allowed.
 
 File: bashref.info,  Node: Shell Expansions,  Next: Redirections,  Prev: Shell Parameters,  Up: Basic Shell Features
 
-Shell Expansions
-================
+3.5 Shell Expansions
+====================
 
-   Expansion is performed on the command line after it has been split
-into `token's.  There are seven kinds of expansion performed:
+Expansion is performed on the command line after it has been split into
+`token's.  There are seven kinds of expansion performed:
    * brace expansion
 
    * tilde expansion
@@ -1188,10 +1187,10 @@ performed.
 
 File: bashref.info,  Node: Brace Expansion,  Next: Tilde Expansion,  Up: Shell Expansions
 
-Brace Expansion
----------------
+3.5.1 Brace Expansion
+---------------------
 
-   Brace expansion is a mechanism by which arbitrary strings may be
+Brace expansion is a mechanism by which arbitrary strings may be
 generated.  This mechanism is similar to FILENAME EXPANSION (*note
 Filename Expansion::), but the file names generated need not exist.
 Patterns to be brace expanded take the form of an optional PREAMBLE,
@@ -1238,10 +1237,10 @@ of the strings to be generated is longer than in the above example:
 
 File: bashref.info,  Node: Tilde Expansion,  Next: Shell Parameter Expansion,  Prev: Brace Expansion,  Up: Shell Expansions
 
-Tilde Expansion
----------------
+3.5.2 Tilde Expansion
+---------------------
 
-   If a word begins with an unquoted tilde character (`~'), all of the
+If a word begins with an unquoted tilde character (`~'), all of the
 characters up to the first unquoted slash (or all characters, if there
 is no unquoted slash) are considered a TILDE-PREFIX.  If none of the
 characters in the tilde-prefix are quoted, the characters in the
@@ -1299,17 +1298,18 @@ the expanded value.
 `~-N'
      The string that would be displayed by `dirs -N'
 
+
 
 File: bashref.info,  Node: Shell Parameter Expansion,  Next: Command Substitution,  Prev: Tilde Expansion,  Up: Shell Expansions
 
-Shell Parameter Expansion
--------------------------
+3.5.3 Shell Parameter Expansion
+-------------------------------
 
-   The `$' character introduces parameter expansion, command
-substitution, or arithmetic expansion.  The parameter name or symbol to
-be expanded may be enclosed in braces, which are optional but serve to
-protect the variable to be expanded from characters immediately
-following it which could be interpreted as part of the name.
+The `$' character introduces parameter expansion, command substitution,
+or arithmetic expansion.  The parameter name or symbol to be expanded
+may be enclosed in braces, which are optional but serve to protect the
+variable to be expanded from characters immediately following it which
+could be interpreted as part of the name.
 
    When braces are used, the matching ending brace is the first `}' not
 escaped by a backslash or within a quoted string, and not within an
@@ -1445,18 +1445,18 @@ if the colon is omitted, the operator tests only for existence.
      member of the array in turn, and the expansion is the resultant
      list.
 
+
 
 File: bashref.info,  Node: Command Substitution,  Next: Arithmetic Expansion,  Prev: Shell Parameter Expansion,  Up: Shell Expansions
 
-Command Substitution
---------------------
+3.5.4 Command Substitution
+--------------------------
 
-   Command substitution allows the output of a command to replace the
+Command substitution allows the output of a command to replace the
 command itself.  Command substitution occurs when a command is enclosed
 as follows:
      $(COMMAND)
-
-or
+   or
      `COMMAND`
 
 Bash performs the expansion by executing COMMAND and replacing the
@@ -1480,12 +1480,12 @@ filename expansion are not performed on the results.
 
 File: bashref.info,  Node: Arithmetic Expansion,  Next: Process Substitution,  Prev: Command Substitution,  Up: Shell Expansions
 
-Arithmetic Expansion
---------------------
+3.5.5 Arithmetic Expansion
+--------------------------
 
-   Arithmetic expansion allows the evaluation of an arithmetic
-expression and the substitution of the result.  The format for
-arithmetic expansion is:
+Arithmetic expansion allows the evaluation of an arithmetic expression
+and the substitution of the result.  The format for arithmetic
+expansion is:
 
      $(( EXPRESSION ))
 
@@ -1502,20 +1502,18 @@ occurs.
 
 File: bashref.info,  Node: Process Substitution,  Next: Word Splitting,  Prev: Arithmetic Expansion,  Up: Shell Expansions
 
-Process Substitution
---------------------
+3.5.6 Process Substitution
+--------------------------
 
-   Process substitution is supported on systems that support named
-pipes (FIFOs) or the `/dev/fd' method of naming open files.  It takes
-the form of
+Process substitution is supported on systems that support named pipes
+(FIFOs) or the `/dev/fd' method of naming open files.  It takes the
+form of
      <(LIST)
-
-or
+   or
      >(LIST)
-
-The process LIST is run with its input or output connected to a FIFO or
-some file in `/dev/fd'.  The name of this file is passed as an argument
-to the current command as the result of the expansion.  If the
+   The process LIST is run with its input or output connected to a FIFO
+or some file in `/dev/fd'.  The name of this file is passed as an
+argument to the current command as the result of the expansion.  If the
 `>(LIST)' form is used, writing to the file will provide input for
 LIST.  If the `<(LIST)' form is used, the file passed as an argument
 should be read to obtain the output of LIST.  Note that no space may
@@ -1529,10 +1527,10 @@ expansion.
 
 File: bashref.info,  Node: Word Splitting,  Next: Filename Expansion,  Prev: Process Substitution,  Up: Shell Expansions
 
-Word Splitting
---------------
+3.5.7 Word Splitting
+--------------------
 
-   The shell scans the results of parameter expansion, command
+The shell scans the results of parameter expansion, command
 substitution, and arithmetic expansion that did not occur within double
 quotes for word splitting.
 
@@ -1559,8 +1557,8 @@ expanded within double quotes, a null argument results and is retained.
 
 File: bashref.info,  Node: Filename Expansion,  Next: Quote Removal,  Prev: Word Splitting,  Up: Shell Expansions
 
-Filename Expansion
-------------------
+3.5.8 Filename Expansion
+------------------------
 
 * Menu:
 
@@ -1602,15 +1600,14 @@ with a `.', make `.*' one of the patterns in `GLOBIGNORE'.  The
 
 File: bashref.info,  Node: Pattern Matching,  Up: Filename Expansion
 
-Pattern Matching
-................
+3.5.8.1 Pattern Matching
+........................
 
-   Any character that appears in a pattern, other than the special
-pattern characters described below, matches itself.  The NUL character
-may not occur in a pattern.  A backslash escapes the following
-character; the escaping backslash is discarded when matching.  The
-special pattern characters must be quoted if they are to be matched
-literally.
+Any character that appears in a pattern, other than the special pattern
+characters described below, matches itself.  The NUL character may not
+occur in a pattern.  A backslash escapes the following character; the
+escaping backslash is discarded when matching.  The special pattern
+characters must be quoted if they are to be matched literally.
 
    The special pattern characters have the following meanings:
 `*'
@@ -1646,7 +1643,6 @@ literally.
      defined in the POSIX 1003.2 standard:
           alnum   alpha   ascii   blank   cntrl   digit   graph   lower
           print   punct   space   upper   word    xdigit
-
      A character class matches any character belonging to that class.
      The `word' character class matches letters, digits, and the
      character `_'.
@@ -1683,20 +1679,20 @@ of the following sub-patterns:
 
 File: bashref.info,  Node: Quote Removal,  Prev: Filename Expansion,  Up: Shell Expansions
 
-Quote Removal
--------------
+3.5.9 Quote Removal
+-------------------
 
-   After the preceding expansions, all unquoted occurrences of the
+After the preceding expansions, all unquoted occurrences of the
 characters `\', `'', and `"' that did not result from one of the above
 expansions are removed.
 
 
 File: bashref.info,  Node: Redirections,  Next: Executing Commands,  Prev: Shell Expansions,  Up: Basic Shell Features
 
-Redirections
-============
+3.6 Redirections
+================
 
-   Before a command is executed, its input and output may be REDIRECTED
+Before a command is executed, its input and output may be REDIRECTED
 using a special notation interpreted by the shell.  Redirection may
 also be used to open and close files for the current shell execution
 environment.  The following redirection operators may precede or appear
@@ -1718,14 +1714,12 @@ it expands to more than one word, Bash reports an error.
    Note that the order of redirections is significant.  For example,
 the command
      ls > DIRLIST 2>&1
-
-directs both standard output (file descriptor 1) and standard error
+   directs both standard output (file descriptor 1) and standard error
 (file descriptor 2) to the file DIRLIST, while the command
      ls 2>&1 > DIRLIST
-
-directs only the standard output to file DIRLIST, because the standard
-error was duplicated as standard output before the standard output was
-redirected to DIRLIST.
+   directs only the standard output to file DIRLIST, because the
+standard error was duplicated as standard output before the standard
+output was redirected to DIRLIST.
 
    Bash handles several filenames specially when they are used in
 redirections, as described in the following table:
@@ -1752,22 +1746,23 @@ redirections, as described in the following table:
      integer port number or service name, Bash attempts to open a UDP
      connection to the corresponding socket.
 
+
    A failure to open or create a file causes the redirection to fail.
 
-Redirecting Input
------------------
+3.6.1 Redirecting Input
+-----------------------
 
-   Redirection of input causes the file whose name results from the
+Redirection of input causes the file whose name results from the
 expansion of WORD to be opened for reading on file descriptor `n', or
 the standard input (file descriptor 0) if `n' is not specified.
 
    The general format for redirecting input is:
      [N]<WORD
 
-Redirecting Output
-------------------
+3.6.2 Redirecting Output
+------------------------
 
-   Redirection of output causes the file whose name results from the
+Redirection of output causes the file whose name results from the
 expansion of WORD to be opened for writing on file descriptor N, or the
 standard output (file descriptor 1) if N is not specified.  If the file
 does not exist it is created; if it does exist it is truncated to zero
@@ -1783,10 +1778,10 @@ regular file.  If the redirection operator is `>|', or the redirection
 operator is `>' and the `noclobber' option is not enabled, the
 redirection is attempted even if the file named by WORD exists.
 
-Appending Redirected Output
----------------------------
+3.6.3 Appending Redirected Output
+---------------------------------
 
-   Redirection of output in this fashion causes the file whose name
+Redirection of output in this fashion causes the file whose name
 results from the expansion of WORD to be opened for appending on file
 descriptor N, or the standard output (file descriptor 1) if N is not
 specified.  If the file does not exist it is created.
@@ -1794,28 +1789,26 @@ specified.  If the file does not exist it is created.
    The general format for appending output is:
      [N]>>WORD
 
-Redirecting Standard Output and Standard Error
-----------------------------------------------
+3.6.4 Redirecting Standard Output and Standard Error
+----------------------------------------------------
 
-   Bash allows both the standard output (file descriptor 1) and the
+Bash allows both the standard output (file descriptor 1) and the
 standard error output (file descriptor 2) to be redirected to the file
 whose name is the expansion of WORD with this construct.
 
    There are two formats for redirecting standard output and standard
 error:
      &>WORD
-
-and
+   and
      >&WORD
-
-Of the two forms, the first is preferred.  This is semantically
+   Of the two forms, the first is preferred.  This is semantically
 equivalent to
      >WORD 2>&1
 
-Here Documents
---------------
+3.6.5 Here Documents
+--------------------
 
-   This type of redirection instructs the shell to read input from the
+This type of redirection instructs the shell to read input from the
 current source until a line containing only WORD (with no trailing
 blanks) is seen.  All of the lines read up to that point are then used
 as the standard input for a command.
@@ -1839,69 +1832,64 @@ characters are stripped from input lines and the line containing
 DELIMITER.  This allows here-documents within shell scripts to be
 indented in a natural fashion.
 
-Here Strings
-------------
+3.6.6 Here Strings
+------------------
 
-   A variant of here documents, the format is:
+A variant of here documents, the format is:
      <<< WORD
 
    The WORD is expanded and supplied to the command on its standard
 input.
 
-Duplicating File Descriptors
-----------------------------
+3.6.7 Duplicating File Descriptors
+----------------------------------
 
-   The redirection operator
+The redirection operator
      [N]<&WORD
-
-is used to duplicate input file descriptors.  If WORD expands to one or
-more digits, the file descriptor denoted by N is made to be a copy of
-that file descriptor.  If the digits in WORD do not specify a file
+   is used to duplicate input file descriptors.  If WORD expands to one
+or more digits, the file descriptor denoted by N is made to be a copy
+of that file descriptor.  If the digits in WORD do not specify a file
 descriptor open for input, a redirection error occurs.  If WORD
 evaluates to `-', file descriptor N is closed.  If N is not specified,
 the standard input (file descriptor 0) is used.
 
    The operator
      [N]>&WORD
-
-is used similarly to duplicate output file descriptors.  If N is not
+   is used similarly to duplicate output file descriptors.  If N is not
 specified, the standard output (file descriptor 1) is used.  If the
 digits in WORD do not specify a file descriptor open for output, a
 redirection error occurs.  As a special case, if N is omitted, and WORD
 does not expand to one or more digits, the standard output and standard
 error are redirected as described previously.
 
-Moving File Descriptors
------------------------
+3.6.8 Moving File Descriptors
+-----------------------------
 
-   The redirection operator
+The redirection operator
      [N]<&DIGIT-
-
-moves the file descriptor DIGIT to file descriptor N, or the standard
-input (file descriptor 0) if N is not specified.  DIGIT is closed after
-being duplicated to N.
+   moves the file descriptor DIGIT to file descriptor N, or the
+standard input (file descriptor 0) if N is not specified.  DIGIT is
+closed after being duplicated to N.
 
    Similarly, the redirection operator
      [N]>&DIGIT-
+   moves the file descriptor DIGIT to file descriptor N, or the
+standard output (file descriptor 1) if N is not specified.
 
-moves the file descriptor DIGIT to file descriptor N, or the standard
-output (file descriptor 1) if N is not specified.
+3.6.9 Opening File Descriptors for Reading and Writing
+------------------------------------------------------
 
-Opening File Descriptors for Reading and Writing
-------------------------------------------------
-
-   The redirection operator
+The redirection operator
      [N]<>WORD
-
-causes the file whose name is the expansion of WORD to be opened for
+   causes the file whose name is the expansion of WORD to be opened for
 both reading and writing on file descriptor N, or on file descriptor 0
 if N is not specified.  If the file does not exist, it is created.
 
 
 File: bashref.info,  Node: Executing Commands,  Next: Shell Scripts,  Prev: Redirections,  Up: Basic Shell Features
 
-Executing Commands
-==================
+3.7 Executing Commands
+======================
 
 * Menu:
 
@@ -1925,10 +1913,10 @@ Executing Commands
 
 File: bashref.info,  Node: Simple Command Expansion,  Next: Command Search and Execution,  Up: Executing Commands
 
-Simple Command Expansion
-------------------------
+3.7.1 Simple Command Expansion
+------------------------------
 
-   When a simple command is executed, the shell performs the following
+When a simple command is executed, the shell performs the following
 expansions, assignments, and redirections, from left to right.
 
   1. The words that the parser has marked as variable assignments (those
@@ -1968,10 +1956,10 @@ of zero.
 
 File: bashref.info,  Node: Command Search and Execution,  Next: Command Execution Environment,  Prev: Simple Command Expansion,  Up: Executing Commands
 
-Command Search and Execution
-----------------------------
+3.7.2 Command Search and Execution
+----------------------------------
 
-   After a command has been split into words, if it results in a simple
+After a command has been split into words, if it results in a simple
 command and an optional list of arguments, the following actions are
 taken.
 
@@ -2011,11 +1999,10 @@ taken.
 
 File: bashref.info,  Node: Command Execution Environment,  Next: Environment,  Prev: Command Search and Execution,  Up: Executing Commands
 
-Command Execution Environment
------------------------------
+3.7.3 Command Execution Environment
+-----------------------------------
 
-   The shell has an EXECUTION ENVIRONMENT, which consists of the
-following:
+The shell has an EXECUTION ENVIRONMENT, which consists of the following:
 
    * open files inherited by the shell at invocation, as modified by
      redirections supplied to the `exec' builtin
@@ -2084,10 +2071,10 @@ calling shell as modified by redirections.
 
 File: bashref.info,  Node: Environment,  Next: Exit Status,  Prev: Command Execution Environment,  Up: Executing Commands
 
-Environment
------------
+3.7.4 Environment
+-----------------
 
-   When a program is invoked it is given an array of strings called the
+When a program is invoked it is given an array of strings called the
 ENVIRONMENT.  This is a list of name-value pairs, of the form
 `name=value'.
 
@@ -2120,11 +2107,11 @@ environment.
 
 File: bashref.info,  Node: Exit Status,  Next: Signals,  Prev: Environment,  Up: Executing Commands
 
-Exit Status
------------
+3.7.5 Exit Status
+-----------------
 
-   For the shell's purposes, a command which exits with a zero exit
-status has succeeded.  A non-zero exit status indicates failure.  This
+For the shell's purposes, a command which exits with a zero exit status
+has succeeded.  A non-zero exit status indicates failure.  This
 seemingly counter-intuitive scheme is used so there is one well-defined
 way to indicate success and a variety of ways to indicate various
 failure modes.  When a command terminates on a fatal signal whose
@@ -2149,10 +2136,10 @@ conditional and list constructs.  All builtins return an exit status of
 
 File: bashref.info,  Node: Signals,  Prev: Exit Status,  Up: Executing Commands
 
-Signals
--------
+3.7.6 Signals
+-------------
 
-   When Bash is interactive, in the absence of any traps, it ignores
+When Bash is interactive, in the absence of any traps, it ignores
 `SIGTERM' (so that `kill 0' does not kill an interactive shell), and
 `SIGINT' is caught and handled (so that the `wait' builtin is
 interruptible).  When Bash receives a `SIGINT', it breaks out of any
@@ -2190,11 +2177,11 @@ executed.
 
 File: bashref.info,  Node: Shell Scripts,  Prev: Executing Commands,  Up: Basic Shell Features
 
-Shell Scripts
-=============
+3.8 Shell Scripts
+=================
 
-   A shell script is a text file containing shell commands.  When such
-a file is used as the first non-option argument when invoking Bash, and
+A shell script is a text file containing shell commands.  When such a
+file is used as the first non-option argument when invoking Bash, and
 neither the `-c' nor `-s' option is supplied (*note Invoking Bash::),
 Bash reads and executes commands from the file, then exits.  This mode
 of operation creates a non-interactive shell.  The shell first searches
@@ -2212,8 +2199,7 @@ to turn on the execute bit.  When Bash finds such a file while
 searching the `$PATH' for a command, it spawns a subshell to execute
 it.  In other words, executing
      filename ARGUMENTS
-
-is equivalent to executing
+   is equivalent to executing
      bash filename ARGUMENTS
 
 if `filename' is an executable shell script.  This subshell
@@ -2243,8 +2229,8 @@ interpret the script, even if it is executed under another shell.
 
 File: bashref.info,  Node: Shell Builtin Commands,  Next: Shell Variables,  Prev: Basic Shell Features,  Up: Top
 
-Shell Builtin Commands
-**********************
+4 Shell Builtin Commands
+************************
 
 * Menu:
 
@@ -2282,10 +2268,10 @@ options preceded by `-' accepts `--' to signify the end of the options.
 
 File: bashref.info,  Node: Bourne Shell Builtins,  Next: Bash Builtins,  Up: Shell Builtin Commands
 
-Bourne Shell Builtins
-=====================
+4.1 Bourne Shell Builtins
+=========================
 
-   The following shell builtin commands are inherited from the Bourne
+The following shell builtin commands are inherited from the Bourne
 Shell.  These commands are implemented as specified by the POSIX 1003.2
 standard.
 
@@ -2629,10 +2615,10 @@ standard.
 
 File: bashref.info,  Node: Bash Builtins,  Next: The Set Builtin,  Prev: Bourne Shell Builtins,  Up: Shell Builtin Commands
 
-Bash Builtin Commands
-=====================
+4.2 Bash Builtin Commands
+=========================
 
-   This section describes builtin commands which are unique to or have
+This section describes builtin commands which are unique to or have
 been extended in Bash.  Some of these commands are specified in the
 POSIX 1003.2 standard.
 
@@ -2712,6 +2698,7 @@ POSIX 1003.2 standard.
 
     `-x KEYSEQ:SHELL-COMMAND'
           Cause SHELL-COMMAND to be executed whenever KEYSEQ is entered.
+
 
      The return status is zero unless an invalid option is supplied or
      an error occurs.
@@ -3008,6 +2995,7 @@ POSIX 1003.2 standard.
     `-u FD'
           Read input from file descriptor FD.
 
+
 `shopt'
           shopt [-pqsu] [-o] [OPTNAME ...]
      Toggle the values of variables controlling optional shell behavior.
@@ -3217,6 +3205,7 @@ POSIX 1003.2 standard.
           If set, the `echo' builtin expands backslash-escape sequences
           by default.
 
+
      The return status when listing options is zero if all OPTNAMES are
      enabled, non-zero otherwise.  When setting or unsetting options,
      the return status is zero unless an OPTNAME is not a valid shell
@@ -3310,6 +3299,7 @@ POSIX 1003.2 standard.
     `-v'
           The maximum amount of virtual memory available to the process.
 
+
      If LIMIT is given, it is the new value of the specified resource;
      the special LIMIT values `hard', `soft', and `unlimited' stand for
      the current hard limit, the current soft limit, and no limit,
@@ -3330,13 +3320,14 @@ POSIX 1003.2 standard.
      Remove each NAME from the list of aliases.  If `-a' is supplied,
      all aliases are removed.  Aliases are described in *Note Aliases::.
 
+
 
 File: bashref.info,  Node: The Set Builtin,  Next: Special Builtins,  Prev: Bash Builtins,  Up: Shell Builtin Commands
 
-The Set Builtin
-===============
+4.3 The Set Builtin
+===================
 
-   This builtin is so complicated that it deserves its own section.
+This builtin is so complicated that it deserves its own section.
 
 `set'
           set [--abefhkmnptuvxBCHP] [-o OPTION] [ARGUMENT ...]
@@ -3580,10 +3571,10 @@ The Set Builtin
 
 File: bashref.info,  Node: Special Builtins,  Prev: The Set Builtin,  Up: Shell Builtin Commands
 
-Special Builtins
-================
+4.4 Special Builtins
+====================
 
-   For historical reasons, the POSIX 1003.2 standard has classified
+For historical reasons, the POSIX 1003.2 standard has classified
 several builtin commands as _special_.  When Bash is executing in POSIX
 mode, the special builtins differ from other builtin commands in three
 respects:
@@ -3608,8 +3599,8 @@ mode is described in *Note Bash POSIX Mode::.
 
 File: bashref.info,  Node: Shell Variables,  Next: Bash Features,  Prev: Shell Builtin Commands,  Up: Top
 
-Shell Variables
-***************
+5 Shell Variables
+*****************
 
 * Menu:
 
@@ -3623,11 +3614,11 @@ automatically assigns default values to a number of variables.
 
 File: bashref.info,  Node: Bourne Shell Variables,  Next: Bash Variables,  Up: Shell Variables
 
-Bourne Shell Variables
-======================
+5.1 Bourne Shell Variables
+==========================
 
-   Bash uses certain shell variables in the same way as the Bourne
-shell.  In some cases, Bash assigns a default value to the variable.
+Bash uses certain shell variables in the same way as the Bourne shell.
+In some cases, Bash assigns a default value to the variable.
 
 `CDPATH'
      A colon-separated list of directories used as a search path for
@@ -3676,13 +3667,14 @@ shell.  In some cases, Bash assigns a default value to the variable.
 `PS2'
      The secondary prompt string.  The default value is `> '.
 
+
 
 File: bashref.info,  Node: Bash Variables,  Prev: Bourne Shell Variables,  Up: Shell Variables
 
-Bash Variables
-==============
+5.2 Bash Variables
+==================
 
-   These variables are set or used by Bash, but other shells do not
+These variables are set or used by Bash, but other shells do not
 normally treat them specially.
 
    A few variables used by Bash are described in different chapters:
@@ -3767,6 +3759,7 @@ Variables::).
 
     `BASH_VERSINFO[5]'
           The value of `MACHTYPE'.
+
 
 `BASH_VERSION'
      The version number of the current instance of Bash.
@@ -4041,7 +4034,6 @@ Variables::).
      supplied.  If it is set while the shell is running, `bash' enables
      POSIX mode, as if the command
           `set -o posix'
-
      had been executed.
 
 `PPID'
@@ -4153,13 +4145,14 @@ Variables::).
      The numeric real user id of the current user.  This variable is
      readonly.
 
+
 
 File: bashref.info,  Node: Bash Features,  Next: Job Control,  Prev: Shell Variables,  Up: Top
 
-Bash Features
-*************
+6 Bash Features
+***************
 
-   This section describes features unique to Bash.
+This section describes features unique to Bash.
 
 * Menu:
 
@@ -4181,8 +4174,8 @@ Bash Features
 
 File: bashref.info,  Node: Invoking Bash,  Next: Bash Startup Files,  Up: Bash Features
 
-Invoking Bash
-=============
+6.1 Invoking Bash
+=================
 
      bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o OPTION] [-O SHOPT_OPTION] [ARGUMENT ...]
      bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o OPTION] [-O SHOPT_OPTION] -c STRING [ARGUMENT ...]
@@ -4250,6 +4243,7 @@ the single-character options to be recognized.
      Show version information for this instance of Bash on the standard
      output and exit successfully.
 
+
    There are several single-character options that may be supplied at
 invocation which are not available with the `set' builtin.
 
@@ -4301,6 +4295,7 @@ invocation which are not available with the `set' builtin.
      processing.  Any arguments after the `--' are treated as filenames
      and arguments.
 
+
    A _login_ shell is one whose first character of argument zero is
 `-', or one invoked with the `--login' option.
 
@@ -4322,20 +4317,20 @@ script.  If no commands are executed, the exit status is 0.
 
 File: bashref.info,  Node: Bash Startup Files,  Next: Interactive Shells,  Prev: Invoking Bash,  Up: Bash Features
 
-Bash Startup Files
-==================
+6.2 Bash Startup Files
+======================
 
-   This section describs how Bash executes its startup files.  If any
-of the files exist but cannot be read, Bash reports an error.  Tildes
-are expanded in file names as described above under Tilde Expansion
-(*note Tilde Expansion::).
+This section describs how Bash executes its startup files.  If any of
+the files exist but cannot be read, Bash reports an error.  Tildes are
+expanded in file names as described above under Tilde Expansion (*note
+Tilde Expansion::).
 
    Interactive shells are described in *Note Interactive Shells::.
 
 Invoked as an interactive login shell, or with `--login'
 ........................................................
 
-   When Bash is invoked as an interactive login shell, or as a
+When Bash is invoked as an interactive login shell, or as a
 non-interactive shell with the `--login' option, it first reads and
 executes commands from the file `/etc/profile', if that file exists.
 After reading that file, it looks for `~/.bash_profile',
@@ -4350,7 +4345,7 @@ file `~/.bash_logout', if it exists.
 Invoked as an interactive non-login shell
 .........................................
 
-   When an interactive shell that is not a login shell is started, Bash
+When an interactive shell that is not a login shell is started, Bash
 reads and executes commands from `~/.bashrc', if that file exists.
 This may be inhibited by using the `--norc' option.  The `--rcfile
 FILE' option will force Bash to read and execute commands from FILE
@@ -4358,21 +4353,19 @@ instead of `~/.bashrc'.
 
    So, typically, your `~/.bash_profile' contains the line
      `if [ -f ~/.bashrc ]; then . ~/.bashrc; fi'
-
-after (or before) any login-specific initializations.
+   after (or before) any login-specific initializations.
 
 Invoked non-interactively
 .........................
 
-   When Bash is started non-interactively, to run a shell script, for
+When Bash is started non-interactively, to run a shell script, for
 example, it looks for the variable `BASH_ENV' in the environment,
 expands its value if it appears there, and uses the expanded value as
 the name of a file to read and execute.  Bash behaves as if the
 following command were executed:
      `if [ -n "$BASH_ENV" ]; then . "$BASH_ENV"; fi'
-
-but the value of the `PATH' variable is not used to search for the file
-name.
+   but the value of the `PATH' variable is not used to search for the
+file name.
 
    As noted above, if a non-interactive shell is invoked with the
 `--login' option, Bash attempts to read and execute commands from the
@@ -4381,7 +4374,7 @@ login shell startup files.
 Invoked with name `sh'
 ......................
 
-   If Bash is invoked with the name `sh', it tries to mimic the startup
+If Bash is invoked with the name `sh', it tries to mimic the startup
 behavior of historical versions of `sh' as closely as possible, while
 conforming to the POSIX standard as well.
 
@@ -4403,16 +4396,16 @@ are read.
 Invoked in POSIX mode
 .....................
 
-   When Bash is started in POSIX mode, as with the `--posix' command
-line option, it follows the POSIX standard for startup files.  In this
-mode, interactive shells expand the `ENV' variable and commands are
-read and executed from the file whose name is the expanded value.  No
-other startup files are read.
+When Bash is started in POSIX mode, as with the `--posix' command line
+option, it follows the POSIX standard for startup files.  In this mode,
+interactive shells expand the `ENV' variable and commands are read and
+executed from the file whose name is the expanded value.  No other
+startup files are read.
 
 Invoked by remote shell daemon
 ..............................
 
-   Bash attempts to determine when it is being run by the remote shell
+Bash attempts to determine when it is being run by the remote shell
 daemon, usually `rshd'.  If Bash determines it is being run by rshd, it
 reads and executes commands from `~/.bashrc', if that file exists and
 is readable.  It will not do this if invoked as `sh'.  The `--norc'
@@ -4424,19 +4417,19 @@ specified.
 Invoked with unequal effective and real UID/GIDs
 ................................................
 
-   If Bash is started with the effective user (group) id not equal to
-the real user (group) id, and the `-p' option is not supplied, no
-startup files are read, shell functions are not inherited from the
-environment, the `SHELLOPTS' variable, if it appears in the
-environment, is ignored, and the effective user id is set to the real
-user id.  If the `-p' option is supplied at invocation, the startup
-behavior is the same, but the effective user id is not reset.
+If Bash is started with the effective user (group) id not equal to the
+real user (group) id, and the `-p' option is not supplied, no startup
+files are read, shell functions are not inherited from the environment,
+the `SHELLOPTS' variable, if it appears in the environment, is ignored,
+and the effective user id is set to the real user id.  If the `-p'
+option is supplied at invocation, the startup behavior is the same, but
+the effective user id is not reset.
 
 
 File: bashref.info,  Node: Interactive Shells,  Next: Bash Conditional Expressions,  Prev: Bash Startup Files,  Up: Bash Features
 
-Interactive Shells
-==================
+6.3 Interactive Shells
+======================
 
 * Menu:
 
@@ -4447,10 +4440,10 @@ Interactive Shells
 
 File: bashref.info,  Node: What is an Interactive Shell?,  Next: Is this Shell Interactive?,  Up: Interactive Shells
 
-What is an Interactive Shell?
------------------------------
+6.3.1 What is an Interactive Shell?
+-----------------------------------
 
-   An interactive shell is one started without non-option arguments,
+An interactive shell is one started without non-option arguments,
 unless `-s' is specified, without specifiying the `-c' option, and
 whose input and error output are both connected to terminals (as
 determined by `isatty(3)'), or one started with the `-i' option.
@@ -4464,10 +4457,10 @@ parameters when an interactive shell is started.
 
 File: bashref.info,  Node: Is this Shell Interactive?,  Next: Interactive Shell Behavior,  Prev: What is an Interactive Shell?,  Up: Interactive Shells
 
-Is this Shell Interactive?
---------------------------
+6.3.2 Is this Shell Interactive?
+--------------------------------
 
-   To determine within a startup script whether or not Bash is running
+To determine within a startup script whether or not Bash is running
 interactively, test the value of the `-' special parameter.  It
 contains `i' when the shell is interactive.  For example:
 
@@ -4488,10 +4481,10 @@ unset in non-interactive shells, and set in interactive shells.  Thus:
 
 File: bashref.info,  Node: Interactive Shell Behavior,  Prev: Is this Shell Interactive?,  Up: Interactive Shells
 
-Interactive Shell Behavior
---------------------------
+6.3.3 Interactive Shell Behavior
+--------------------------------
 
-   When the shell is running interactively, it changes its behavior in
+When the shell is running interactively, it changes its behavior in
 several ways.
 
   1. Startup files are read and executed as described in *Note Bash
@@ -4570,11 +4563,11 @@ several ways.
 
 File: bashref.info,  Node: Bash Conditional Expressions,  Next: Shell Arithmetic,  Prev: Interactive Shells,  Up: Bash Features
 
-Bash Conditional Expressions
-============================
+6.4 Bash Conditional Expressions
+================================
 
-   Conditional expressions are used by the `[[' compound command and
-the `test' and `[' builtin commands.
+Conditional expressions are used by the `[[' compound command and the
+`test' and `[' builtin commands.
 
    Expressions may be unary or binary.  Unary expressions are often
 used to examine the status of a file.  There are string operators and
@@ -4692,15 +4685,16 @@ checked.  If the FILE argument to one of the primaries is one of
      greater than or equal to ARG2, respectively.  ARG1 and ARG2 may be
      positive or negative integers.
 
+
 
 File: bashref.info,  Node: Shell Arithmetic,  Next: Aliases,  Prev: Bash Conditional Expressions,  Up: Bash Features
 
-Shell Arithmetic
-================
+6.5 Shell Arithmetic
+====================
 
-   The shell allows arithmetic expressions to be evaluated, as one of
-the shell expansions or by the `let' and the `-i' option to the
-`declare' builtins.
+The shell allows arithmetic expressions to be evaluated, as one of the
+shell expansions or by the `let' and the `-i' option to the `declare'
+builtins.
 
    Evaluation is done in fixed-width integers with no check for
 overflow, though division by 0 is trapped and flagged as an error.  The
@@ -4791,11 +4785,11 @@ above.
 
 File: bashref.info,  Node: Aliases,  Next: Arrays,  Prev: Shell Arithmetic,  Up: Bash Features
 
-Aliases
-=======
+6.6 Aliases
+===========
 
-   ALIASES allow a string to be substituted for a word when it is used
-as the first word of a simple command.  The shell maintains a list of
+ALIASES allow a string to be substituted for a word when it is used as
+the first word of a simple command.  The shell maintains a list of
 aliases that may be set and unset with the `alias' and `unalias'
 builtin commands.
 
@@ -4843,10 +4837,10 @@ in compound commands.
 
 File: bashref.info,  Node: Arrays,  Next: The Directory Stack,  Prev: Aliases,  Up: Bash Features
 
-Arrays
-======
+6.7 Arrays
+==========
 
-   Bash provides one-dimensional array variables.  Any variable may be
+Bash provides one-dimensional array variables.  Any variable may be
 used as an array; the `declare' builtin will explicitly declare an
 array.  There is no maximum limit on the size of an array, nor any
 requirement that members be indexed or assigned contiguously.  Arrays
@@ -4860,18 +4854,15 @@ The SUBSCRIPT is treated as an arithmetic expression that must evaluate
 to a number greater than or equal to zero.  To explicitly declare an
 array, use
      declare -a NAME
-
-The syntax
+   The syntax
      declare -a NAME[SUBSCRIPT]
-
-is also accepted; the SUBSCRIPT is ignored.  Attributes may be
+   is also accepted; the SUBSCRIPT is ignored.  Attributes may be
 specified for an array variable using the `declare' and `readonly'
 builtins.  Each attribute applies to all members of an array.
 
    Arrays are assigned to using compound assignments of the form
      name=(value1 ... valueN)
-
-where each VALUE is of the form `[[SUBSCRIPT]=]'STRING.  If the
+   where each VALUE is of the form `[[SUBSCRIPT]=]'STRING.  If the
 optional subscript is supplied, that index is assigned to; otherwise
 the index of the element assigned is the last index assigned to by the
 statement plus one.  Indexing starts at zero.  This syntax is also
@@ -4908,8 +4899,8 @@ allows them to be reused as input.
 
 File: bashref.info,  Node: The Directory Stack,  Next: Printing a Prompt,  Prev: Arrays,  Up: Bash Features
 
-The Directory Stack
-===================
+6.8 The Directory Stack
+=======================
 
 * Menu:
 
@@ -4928,8 +4919,8 @@ the `DIRSTACK' shell variable.
 
 File: bashref.info,  Node: Directory Stack Builtins,  Up: The Directory Stack
 
-Directory Stack Builtins
-------------------------
+6.8.1 Directory Stack Builtins
+------------------------------
 
 `dirs'
           dirs [+N | -N] [-clpv]
@@ -5009,14 +5000,15 @@ Directory Stack Builtins
           Makes the current working directory be the top of the stack,
           and then executes the equivalent of ``cd' DIR'.  `cd's to DIR.
 
+
 
 File: bashref.info,  Node: Printing a Prompt,  Next: The Restricted Shell,  Prev: The Directory Stack,  Up: Bash Features
 
-Controlling the Prompt
-======================
+6.9 Controlling the Prompt
+==========================
 
-   The value of the variable `PROMPT_COMMAND' is examined just before
-Bash prints each primary prompt.  If `PROMPT_COMMAND' is set and has a
+The value of the variable `PROMPT_COMMAND' is examined just before Bash
+prints each primary prompt.  If `PROMPT_COMMAND' is set and has a
 non-null value, then the value is executed just as if it had been typed
 on the command line.
 
@@ -5122,11 +5114,11 @@ to the value of the `promptvars' shell option (*note Bash Builtins::).
 
 File: bashref.info,  Node: The Restricted Shell,  Next: Bash POSIX Mode,  Prev: Printing a Prompt,  Up: Bash Features
 
-The Restricted Shell
-====================
+6.10 The Restricted Shell
+=========================
 
-   If Bash is started with the name `rbash', or the `--restricted' or
-`-r' option is supplied at invocation, the shell becomes restricted.  A
+If Bash is started with the name `rbash', or the `--restricted' or `-r'
+option is supplied at invocation, the shell becomes restricted.  A
 restricted shell is used to set up an environment more controlled than
 the standard shell.  A restricted shell behaves identically to `bash'
 with the exception that the following are disallowed or not performed:
@@ -5174,13 +5166,13 @@ spawned to execute the script.
 
 File: bashref.info,  Node: Bash POSIX Mode,  Prev: The Restricted Shell,  Up: Bash Features
 
-Bash POSIX Mode
-===============
+6.11 Bash POSIX Mode
+====================
 
-   Starting Bash with the `--posix' command-line option or executing
-`set -o posix' while Bash is running will cause Bash to conform more
-closely to the POSIX 1003.2 standard by changing the behavior to match
-that specified by POSIX in areas where the Bash default differs.
+Starting Bash with the `--posix' command-line option or executing `set
+-o posix' while Bash is running will cause Bash to conform more closely
+to the POSIX 1003.2 standard by changing the behavior to match that
+specified by POSIX in areas where the Bash default differs.
 
    When invoked as `sh', Bash enters POSIX mode after reading the
 startup files.
@@ -5329,11 +5321,11 @@ Specifically:
 
 File: bashref.info,  Node: Job Control,  Next: Using History Interactively,  Prev: Bash Features,  Up: Top
 
-Job Control
-***********
+7 Job Control
+*************
 
-   This chapter discusses what job control is, how it works, and how
-Bash allows you to access its facilities.
+This chapter discusses what job control is, how it works, and how Bash
+allows you to access its facilities.
 
 * Menu:
 
@@ -5346,10 +5338,10 @@ Bash allows you to access its facilities.
 
 File: bashref.info,  Node: Job Control Basics,  Next: Job Control Builtins,  Up: Job Control
 
-Job Control Basics
-==================
+7.1 Job Control Basics
+======================
 
-   Job control refers to the ability to selectively stop (suspend) the
+Job control refers to the ability to selectively stop (suspend) the
 execution of processes and continue (resume) their execution at a later
 point.  A user typically employs this facility via an interactive
 interface supplied jointly by the system's terminal driver and Bash.
@@ -5358,11 +5350,10 @@ interface supplied jointly by the system's terminal driver and Bash.
 currently executing jobs, which may be listed with the `jobs' command.
 When Bash starts a job asynchronously, it prints a line that looks like:
      [1] 25647
-
-indicating that this job is job number 1 and that the process ID of the
-last process in the pipeline associated with this job is 25647.  All of
-the processes in a single pipeline are members of the same job.  Bash
-uses the JOB abstraction as the basis for job control.
+   indicating that this job is job number 1 and that the process ID of
+the last process in the pipeline associated with this job is 25647.
+All of the processes in a single pipeline are members of the same job.
+Bash uses the JOB abstraction as the basis for job control.
 
    To facilitate the implementation of the user interface to job
 control, the operating system maintains the notion of a current terminal
@@ -5429,8 +5420,8 @@ another warning, and the stopped jobs are terminated.
 
 File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  Prev: Job Control Basics,  Up: Job Control
 
-Job Control Builtins
-====================
+7.2 Job Control Builtins
+========================
 
 `bg'
           bg [JOBSPEC]
@@ -5525,14 +5516,15 @@ Job Control Builtins
      signal.  The `-f' option means to suspend even if the shell is a
      login shell.
 
+
    When job control is not active, the `kill' and `wait' builtins do
 not accept JOBSPEC arguments.  They must be supplied process IDs.
 
 
 File: bashref.info,  Node: Job Control Variables,  Prev: Job Control Builtins,  Up: Job Control
 
-Job Control Variables
-=====================
+7.3 Job Control Variables
+=========================
 
 `auto_resume'
      This variable controls how the shell interacts with the user and
@@ -5551,13 +5543,14 @@ Job Control Variables
      a prefix of a stopped job's name; this provides functionality
      analogous to the `%' job ID.
 
+
 
 File: bashref.info,  Node: Command Line Editing,  Next: Installing Bash,  Prev: Using History Interactively,  Up: Top
 
-Command Line Editing
-********************
+8 Command Line Editing
+**********************
 
-   This chapter describes the basic features of the GNU command line
+This chapter describes the basic features of the GNU command line
 editing interface.  Command line editing is provided by the Readline
 library, which is used by several different programs, including Bash.
 
@@ -5579,10 +5572,10 @@ library, which is used by several different programs, including Bash.
 
 File: bashref.info,  Node: Introduction and Notation,  Next: Readline Interaction,  Up: Command Line Editing
 
-Introduction to Line Editing
-============================
+8.1 Introduction to Line Editing
+================================
 
-   The following paragraphs describe the notation used to represent
+The following paragraphs describe the notation used to represent
 keystrokes.
 
    The text `C-k' is read as `Control-K' and describes the character
@@ -5615,10 +5608,10 @@ some keyboards.
 
 File: bashref.info,  Node: Readline Interaction,  Next: Readline Init File,  Prev: Introduction and Notation,  Up: Command Line Editing
 
-Readline Interaction
-====================
+8.2 Readline Interaction
+========================
 
-   Often during an interactive session you type in a long line of text,
+Often during an interactive session you type in a long line of text,
 only to notice that the first word on the line is misspelled.  The
 Readline library gives you a set of commands for manipulating the text
 as you type it in, allowing you to just fix your typo, and not forcing
@@ -5640,13 +5633,13 @@ location of the cursor within the line.
 
 File: bashref.info,  Node: Readline Bare Essentials,  Next: Readline Movement Commands,  Up: Readline Interaction
 
-Readline Bare Essentials
-------------------------
+8.2.1 Readline Bare Essentials
+------------------------------
 
-   In order to enter characters into the line, simply type them.  The
-typed character appears where the cursor was, and then the cursor moves
-one space to the right.  If you mistype a character, you can use your
-erase character to back up and delete the mistyped character.
+In order to enter characters into the line, simply type them.  The typed
+character appears where the cursor was, and then the cursor moves one
+space to the right.  If you mistype a character, you can use your erase
+character to back up and delete the mistyped character.
 
    Sometimes you may mistype a character, and not notice the error
 until you have typed several other characters.  In that case, you can
@@ -5688,10 +5681,10 @@ character to the left of the cursor.)
 
 File: bashref.info,  Node: Readline Movement Commands,  Next: Readline Killing Commands,  Prev: Readline Bare Essentials,  Up: Readline Interaction
 
-Readline Movement Commands
---------------------------
+8.2.2 Readline Movement Commands
+--------------------------------
 
-   The above table describes the most basic keystrokes that you need in
+The above table describes the most basic keystrokes that you need in
 order to do editing of the input line.  For your convenience, many
 other commands have been added in addition to `C-b', `C-f', `C-d', and
 <DEL>.  Here are some commands for moving more rapidly about the line.
@@ -5719,11 +5712,11 @@ operate on characters while meta keystrokes operate on words.
 
 File: bashref.info,  Node: Readline Killing Commands,  Next: Readline Arguments,  Prev: Readline Movement Commands,  Up: Readline Interaction
 
-Readline Killing Commands
--------------------------
+8.2.3 Readline Killing Commands
+-------------------------------
 
-   "Killing" text means to delete the text from the line, but to save
-it away for later use, usually by "yanking" (re-inserting) it back into
+"Killing" text means to delete the text from the line, but to save it
+away for later use, usually by "yanking" (re-inserting) it back into
 the line.  (`Cut' and `paste' are more recent jargon for `kill' and
 `yank'.)
 
@@ -5735,7 +5728,7 @@ place later.
 Any number of consecutive kills save all of the killed text together, so
 that when you yank it back, you get it all.  The kill ring is not line
 specific; the text that you killed on a previously typed line is
-available to be yanked back later, when you are typing another line.
+available to be yanked back later, when you are typing another line.  
 
    Here is the list of commands for killing text.
 
@@ -5757,6 +5750,7 @@ available to be yanked back later, when you are typing another line.
      Kill from the cursor to the previous whitespace.  This is
      different than `M-<DEL>' because the word boundaries differ.
 
+
    Here is how to "yank" the text back into the line.  Yanking means to
 copy the most-recently-killed text from the kill buffer.
 
@@ -5771,10 +5765,10 @@ copy the most-recently-killed text from the kill buffer.
 
 File: bashref.info,  Node: Readline Arguments,  Next: Searching,  Prev: Readline Killing Commands,  Up: Readline Interaction
 
-Readline Arguments
-------------------
+8.2.4 Readline Arguments
+------------------------
 
-   You can pass numeric arguments to Readline commands.  Sometimes the
+You can pass numeric arguments to Readline commands.  Sometimes the
 argument acts as a repeat count, other times it is the sign of the
 argument that is significant.  If you pass a negative argument to a
 command which normally acts in a forward direction, that command will
@@ -5792,10 +5786,10 @@ will delete the next ten characters on the input line.
 
 File: bashref.info,  Node: Searching,  Prev: Readline Arguments,  Up: Readline Interaction
 
-Searching for Commands in the History
--------------------------------------
+8.2.5 Searching for Commands in the History
+-------------------------------------------
 
-   Readline provides commands for searching through the command history
+Readline provides commands for searching through the command history
 (*note Bash History Facilities::) for lines containing a specified
 string.  There are two search modes:  "incremental" and
 "non-incremental".
@@ -5834,10 +5828,10 @@ typed by the user or be part of the contents of the current line.
 
 File: bashref.info,  Node: Readline Init File,  Next: Bindable Readline Commands,  Prev: Readline Interaction,  Up: Command Line Editing
 
-Readline Init File
-==================
+8.3 Readline Init File
+======================
 
-   Although the Readline library comes with a set of Emacs-like
+Although the Readline library comes with a set of Emacs-like
 keybindings installed by default, it is possible to use a different set
 of keybindings.  Any user can customize programs that use Readline by
 putting commands in an "inputrc" file, conventionally in his home
@@ -5862,10 +5856,10 @@ incorporating any changes that you might have made to it.
 
 File: bashref.info,  Node: Readline Init File Syntax,  Next: Conditional Init Constructs,  Up: Readline Init File
 
-Readline Init File Syntax
--------------------------
+8.3.1 Readline Init File Syntax
+-------------------------------
 
-   There are only a few basic constructs allowed in the Readline init
+There are only a few basic constructs allowed in the Readline init
 file.  Blank lines are ignored.  Lines beginning with a `#' are
 comments.  Lines beginning with a `$' indicate conditional constructs
 (*note Conditional Init Constructs::).  Other lines denote variable
@@ -6034,6 +6028,7 @@ Variable Settings
           appended to the filename when listing possible completions.
           The default is `off'.
 
+
 Key Bindings
      The syntax for controlling key bindings in the init file is
      simple.  First you need to find the name of the command that you
@@ -6087,6 +6082,7 @@ Key Bindings
           `C-x C-r' is bound to the function `re-read-init-file', and
           `<ESC> <[> <1> <1> <~>' is bound to insert the text `Function
           Key 1'.
+
 
      The following GNU Emacs style escape sequences are available when
      specifying key sequences:
@@ -6153,13 +6149,14 @@ Key Bindings
      the line:
           "\C-x\\": "\\"
 
+
 
 File: bashref.info,  Node: Conditional Init Constructs,  Next: Sample Init File,  Prev: Readline Init File Syntax,  Up: Readline Init File
 
-Conditional Init Constructs
----------------------------
+8.3.2 Conditional Init Constructs
+---------------------------------
 
-   Readline implements a facility similar in spirit to the conditional
+Readline implements a facility similar in spirit to the conditional
 compilation features of the C preprocessor which allows key bindings
 and variable settings to be performed as the result of tests.  There
 are four parser directives used.
@@ -6216,11 +6213,11 @@ are four parser directives used.
 
 File: bashref.info,  Node: Sample Init File,  Prev: Conditional Init Constructs,  Up: Readline Init File
 
-Sample Init File
-----------------
+8.3.3 Sample Init File
+----------------------
 
-   Here is an example of an INPUTRC file.  This illustrates key
-binding, variable assignment, and conditional syntax.
+Here is an example of an INPUTRC file.  This illustrates key binding,
+variable assignment, and conditional syntax.
 
 
      # This file controls the behaviour of line input editing for
@@ -6233,16 +6230,16 @@ binding, variable assignment, and conditional syntax.
      # First, include any systemwide bindings and variable
      # assignments from /etc/Inputrc
      $include /etc/Inputrc
-     
+
      #
      # Set various bindings for emacs mode.
-     
+
      set editing-mode emacs
-     
+
      $if mode=emacs
-     
+
      Meta-Control-h:	backward-kill-word	Text after the function name is ignored
-     
+
      #
      # Arrow keys in keypad mode
      #
@@ -6271,14 +6268,14 @@ binding, variable assignment, and conditional syntax.
      #"\M-\C-[C":       forward-char
      #"\M-\C-[A":       previous-history
      #"\M-\C-[B":       next-history
-     
+
      C-q: quoted-insert
-     
+
      $endif
-     
+
      # An old-style binding.  This happens to be the default.
      TAB: complete
-     
+
      # Macros that are convenient for shell interaction
      $if Bash
      # edit the path
@@ -6297,25 +6294,25 @@ binding, variable assignment, and conditional syntax.
      # Edit variable on current line.
      "\M-\C-v": "\C-a\C-k$\C-y\M-\C-e\C-a\C-y="
      $endif
-     
+
      # use a visible bell if one is available
      set bell-style visible
-     
+
      # don't strip characters to 7 bits when reading
      set input-meta on
-     
+
      # allow iso-latin1 characters to be inserted rather
      # than converted to prefix-meta sequences
      set convert-meta off
-     
+
      # display characters with the eighth bit set directly
      # rather than as meta-prefixed characters
      set output-meta on
-     
+
      # if there are more than 150 possible completions for
      # a word, ask the user if he wants to see all of them
      set completion-query-items 150
-     
+
      # For FTP
      $if Ftp
      "\C-xg": "get \M-?"
@@ -6326,8 +6323,8 @@ binding, variable assignment, and conditional syntax.
 
 File: bashref.info,  Node: Bindable Readline Commands,  Next: Readline vi Mode,  Prev: Readline Init File,  Up: Command Line Editing
 
-Bindable Readline Commands
-==========================
+8.4 Bindable Readline Commands
+==============================
 
 * Menu:
 
@@ -6354,8 +6351,8 @@ as the "region".
 
 File: bashref.info,  Node: Commands For Moving,  Next: Commands For History,  Up: Bindable Readline Commands
 
-Commands For Moving
--------------------
+8.4.1 Commands For Moving
+-------------------------
 
 `beginning-of-line (C-a)'
      Move to the start of the current line.
@@ -6384,11 +6381,12 @@ Commands For Moving
 `redraw-current-line ()'
      Refresh the current line.  By default, this is unbound.
 
+
 
 File: bashref.info,  Node: Commands For History,  Next: Commands For Text,  Prev: Commands For Moving,  Up: Bindable Readline Commands
 
-Commands For Manipulating The History
--------------------------------------
+8.4.2 Commands For Manipulating The History
+-------------------------------------------
 
 `accept-line (Newline or Return)'
      Accept the line regardless of where the cursor is.  If this line is
@@ -6454,11 +6452,12 @@ Commands For Manipulating The History
      through the history list, inserting the last argument of each line
      in turn.
 
+
 
 File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev: Commands For History,  Up: Bindable Readline Commands
 
-Commands For Changing Text
---------------------------
+8.4.3 Commands For Changing Text
+--------------------------------
 
 `delete-char (C-d)'
      Delete the character at point.  If point is at the beginning of
@@ -6518,11 +6517,12 @@ Commands For Changing Text
 
      By default, this command is unbound.
 
+
 
 File: bashref.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: Commands For Text,  Up: Bindable Readline Commands
 
-Killing And Yanking
--------------------
+8.4.4 Killing And Yanking
+-------------------------
 
 `kill-line (C-k)'
      Kill the text from point to the end of the line.
@@ -6587,8 +6587,8 @@ Killing And Yanking
 
 File: bashref.info,  Node: Numeric Arguments,  Next: Commands For Completion,  Prev: Commands For Killing,  Up: Bindable Readline Commands
 
-Specifying Numeric Arguments
-----------------------------
+8.4.5 Specifying Numeric Arguments
+----------------------------------
 
 `digit-argument (M-0, M-1, ... M--)'
      Add this digit to the argument already accumulating, or start a new
@@ -6610,8 +6610,8 @@ Specifying Numeric Arguments
 
 File: bashref.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Prev: Numeric Arguments,  Up: Bindable Readline Commands
 
-Letting Readline Type For You
------------------------------
+8.4.6 Letting Readline Type For You
+-----------------------------------
 
 `complete (<TAB>)'
      Attempt to perform completion on the text before point.  The
@@ -6698,11 +6698,12 @@ Letting Readline Type For You
      completions enclosed within braces so the list is available to the
      shell (*note Brace Expansion::).
 
+
 
 File: bashref.info,  Node: Keyboard Macros,  Next: Miscellaneous Commands,  Prev: Commands For Completion,  Up: Bindable Readline Commands
 
-Keyboard Macros
----------------
+8.4.7 Keyboard Macros
+---------------------
 
 `start-kbd-macro (C-x ()'
      Begin saving the characters typed into the current keyboard macro.
@@ -6715,11 +6716,12 @@ Keyboard Macros
      Re-execute the last keyboard macro defined, by making the
      characters in the macro appear as if typed at the keyboard.
 
+
 
 File: bashref.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up: Bindable Readline Commands
 
-Some Miscellaneous Commands
----------------------------
+8.4.8 Some Miscellaneous Commands
+---------------------------------
 
 `re-read-init-file (C-x C-r)'
      Read in the contents of the INPUTRC file, and incorporate any
@@ -6849,13 +6851,14 @@ Some Miscellaneous Commands
      result as shell commands.  Bash attempts to invoke `$VISUAL',
      `$EDITOR', and `emacs' as the editor, in that order.
 
+
 
 File: bashref.info,  Node: Readline vi Mode,  Next: Programmable Completion,  Prev: Bindable Readline Commands,  Up: Command Line Editing
 
-Readline vi Mode
-================
+8.5 Readline vi Mode
+====================
 
-   While the Readline library does not have a full set of `vi' editing
+While the Readline library does not have a full set of `vi' editing
 functions, it does contain enough to allow simple editing of the line.
 The Readline `vi' mode behaves as specified in the POSIX 1003.2
 standard.
@@ -6873,10 +6876,10 @@ the standard `vi' movement keys, move to previous history lines with
 
 File: bashref.info,  Node: Programmable Completion,  Next: Programmable Completion Builtins,  Prev: Readline vi Mode,  Up: Command Line Editing
 
-Programmable Completion
-=======================
+8.6 Programmable Completion
+===========================
 
-   When word completion is attempted for an argument to a command for
+When word completion is attempted for an argument to a command for
 which a completion specification (a COMPSPEC) has been defined using
 the `complete' builtin (*note Programmable Completion Builtins::), the
 programmable completion facilities are invoked.
@@ -6981,10 +6984,10 @@ setting of the MARK-SYMLINKED-DIRECTORIES Readline variable.
 
 File: bashref.info,  Node: Programmable Completion Builtins,  Prev: Programmable Completion,  Up: Command Line Editing
 
-Programmable Completion Builtins
-================================
+8.7 Programmable Completion Builtins
+====================================
 
-   Two builtin commands are available to manipulate the programmable
+Two builtin commands are available to manipulate the programmable
 completion facilities.
 
 `compgen'
@@ -7181,13 +7184,14 @@ completion facilities.
      for a NAME for which no specification exists, or an error occurs
      adding a completion specification.
 
+   
 
 File: bashref.info,  Node: Using History Interactively,  Next: Command Line Editing,  Prev: Job Control,  Up: Top
 
-Using History Interactively
-***************************
+9 Using History Interactively
+*****************************
 
-   This chapter describes how to use the GNU History Library
+This chapter describes how to use the GNU History Library
 interactively, from a user's standpoint.  It should be considered a
 user's guide.  For information on using the GNU History Library in
 other programs, see the GNU Readline Library Manual.
@@ -7203,18 +7207,17 @@ other programs, see the GNU Readline Library Manual.
 
 File: bashref.info,  Node: Bash History Facilities,  Next: Bash History Builtins,  Up: Using History Interactively
 
-Bash History Facilities
-=======================
+9.1 Bash History Facilities
+===========================
 
-   When the `-o history' option to the `set' builtin is enabled (*note
-The Set Builtin::), the shell provides access to the "command history",
-the list of commands previously typed.  The value of the `HISTSIZE'
-shell variable is used as the number of commands to save in a history
-list.  The text of the last `$HISTSIZE' commands (default 500) is saved.
-The shell stores each command in the history list prior to parameter
-and variable expansion but after history expansion is performed,
-subject to the values of the shell variables `HISTIGNORE' and
-`HISTCONTROL'.
+When the `-o history' option to the `set' builtin is enabled (*note The
+Set Builtin::), the shell provides access to the "command history", the
+list of commands previously typed.  The value of the `HISTSIZE' shell
+variable is used as the number of commands to save in a history list.
+The text of the last `$HISTSIZE' commands (default 500) is saved.  The
+shell stores each command in the history list prior to parameter and
+variable expansion but after history expansion is performed, subject to
+the values of the shell variables `HISTIGNORE' and `HISTCONTROL'.
 
    When the shell starts up, the history is initialized from the file
 named by the `HISTFILE' variable (default `~/.bash_history').  The file
@@ -7253,10 +7256,10 @@ options.  *Note Bash Builtins::, for a description of `shopt'.
 
 File: bashref.info,  Node: Bash History Builtins,  Next: History Interaction,  Prev: Bash History Facilities,  Up: Using History Interactively
 
-Bash History Builtins
-=====================
+9.2 Bash History Builtins
+=========================
 
-   Bash provides two builtin commands which manipulate the history list
+Bash provides two builtin commands which manipulate the history list
 and history file.
 
 `fc'
@@ -7339,19 +7342,21 @@ and history file.
           The ARGs are added to the end of the history list as a single
           entry.
 
+
      When any of the `-w', `-r', `-a', or `-n' options is used, if
      FILENAME is given, then it is used as the history file.  If not,
      then the value of the `HISTFILE' variable is used.
 
+
 
 File: bashref.info,  Node: History Interaction,  Prev: Bash History Builtins,  Up: Using History Interactively
 
-History Expansion
-=================
+9.3 History Expansion
+=====================
 
-   The History library provides a history expansion feature that is
-similar to the history expansion provided by `csh'.  This section
-describes the syntax used to manipulate the history information.
+The History library provides a history expansion feature that is similar
+to the history expansion provided by `csh'.  This section describes the
+syntax used to manipulate the history information.
 
    History expansions introduce words from the history list into the
 input stream, making it easy to repeat commands, insert the arguments
@@ -7397,11 +7402,11 @@ history expansion mechanism with the `histchars' variable.
 
 File: bashref.info,  Node: Event Designators,  Next: Word Designators,  Up: History Interaction
 
-Event Designators
------------------
+9.3.1 Event Designators
+-----------------------
 
-   An event designator is a reference to a command line entry in the
-history list.
+An event designator is a reference to a command line entry in the
+history list.  
 
 `!'
      Start a history substitution, except when followed by a space, tab,
@@ -7432,13 +7437,14 @@ history list.
 `!#'
      The entire command line typed so far.
 
+
 
 File: bashref.info,  Node: Word Designators,  Next: Modifiers,  Prev: Event Designators,  Up: History Interaction
 
-Word Designators
-----------------
+9.3.2 Word Designators
+----------------------
 
-   Word designators are used to select desired words from the event.  A
+Word designators are used to select desired words from the event.  A
 `:' separates the event specification from the word designator.  It may
 be omitted if the word designator begins with a `^', `$', `*', `-', or
 `%'.  Words are numbered from the beginning of the line, with the first
@@ -7490,16 +7496,17 @@ line separated by single spaces.
 `X-'
      Abbreviates `X-$' like `X*', but omits the last word.
 
+
    If a word designator is supplied without an event specification, the
 previous command is used as the event.
 
 
 File: bashref.info,  Node: Modifiers,  Prev: Word Designators,  Up: History Interaction
 
-Modifiers
----------
+9.3.3 Modifiers
+---------------
 
-   After the optional word designator, you can add a sequence of one or
+After the optional word designator, you can add a sequence of one or
 more of the following modifiers, each preceded by a `:'.
 
 `h'
@@ -7544,13 +7551,14 @@ more of the following modifiers, each preceded by a `:'.
 `G'
      Apply the following `s' modifier once to each word in the event.
 
+
 
 File: bashref.info,  Node: Installing Bash,  Next: Reporting Bugs,  Prev: Command Line Editing,  Up: Top
 
-Installing Bash
-***************
+10 Installing Bash
+******************
 
-   This chapter provides basic instructions for installing Bash on the
+This chapter provides basic instructions for installing Bash on the
 various supported platforms.  The distribution supports the GNU
 operating systems, nearly every version of Unix, and several non-Unix
 systems such as BeOS and Interix.  Other independent ports exist for
@@ -7582,10 +7590,10 @@ MS-DOS, OS/2, and Windows platforms.
 
 File: bashref.info,  Node: Basic Installation,  Next: Compilers and Options,  Up: Installing Bash
 
-Basic Installation
-==================
+10.1 Basic Installation
+=======================
 
-   These are installation instructions for Bash.
+These are installation instructions for Bash.
 
    The simplest way to compile Bash is:
 
@@ -7645,10 +7653,10 @@ computer), type `make distclean'.
 
 File: bashref.info,  Node: Compilers and Options,  Next: Compiling For Multiple Architectures,  Prev: Basic Installation,  Up: Installing Bash
 
-Compilers and Options
-=====================
+10.2 Compilers and Options
+==========================
 
-   Some systems require unusual options for compilation or linking that
+Some systems require unusual options for compilation or linking that
 the `configure' script does not know about.  You can give `configure'
 initial values for variables by setting them in the environment.  Using
 a Bourne-compatible shell, you can do that on the command line like
@@ -7665,10 +7673,10 @@ this:
 
 File: bashref.info,  Node: Compiling For Multiple Architectures,  Next: Installation Names,  Prev: Compilers and Options,  Up: Installing Bash
 
-Compiling For Multiple Architectures
-====================================
+10.3 Compiling For Multiple Architectures
+=========================================
 
-   You can compile Bash for more than one kind of computer at the same
+You can compile Bash for more than one kind of computer at the same
 time, by placing the object files for each architecture in their own
 directory.  To do this, you must use a version of `make' that supports
 the `VPATH' variable, such as GNU `make'.  `cd' to the directory where
@@ -7699,10 +7707,10 @@ for other architectures.
 
 File: bashref.info,  Node: Installation Names,  Next: Specifying the System Type,  Prev: Compiling For Multiple Architectures,  Up: Installing Bash
 
-Installation Names
-==================
+10.4 Installation Names
+=======================
 
-   By default, `make install' will install into `/usr/local/bin',
+By default, `make install' will install into `/usr/local/bin',
 `/usr/local/man', etc.  You can specify an installation prefix other
 than `/usr/local' by giving `configure' the option `--prefix=PATH', or
 by specifying a value for the `DESTDIR' `make' variable when running
@@ -7717,10 +7725,10 @@ Documentation and other data files will still use the regular prefix.
 
 File: bashref.info,  Node: Specifying the System Type,  Next: Sharing Defaults,  Prev: Installation Names,  Up: Installing Bash
 
-Specifying the System Type
-==========================
+10.5 Specifying the System Type
+===============================
 
-   There may be some features `configure' can not figure out
+There may be some features `configure' can not figure out
 automatically, but need to determine by the type of host Bash will run
 on.  Usually `configure' can figure that out, but if it prints a
 message saying it can not guess the host type, give it the
@@ -7734,13 +7742,13 @@ field.
 
 File: bashref.info,  Node: Sharing Defaults,  Next: Operation Controls,  Prev: Specifying the System Type,  Up: Installing Bash
 
-Sharing Defaults
-================
+10.6 Sharing Defaults
+=====================
 
-   If you want to set default values for `configure' scripts to share,
-you can create a site shell script called `config.site' that gives
-default values for variables like `CC', `cache_file', and `prefix'.
-`configure' looks for `PREFIX/share/config.site' if it exists, then
+If you want to set default values for `configure' scripts to share, you
+can create a site shell script called `config.site' that gives default
+values for variables like `CC', `cache_file', and `prefix'.  `configure'
+looks for `PREFIX/share/config.site' if it exists, then
 `PREFIX/etc/config.site' if it exists.  Or, you can set the
 `CONFIG_SITE' environment variable to the location of the site script.
 A warning: the Bash `configure' looks for a site script, but not all
@@ -7749,11 +7757,10 @@ A warning: the Bash `configure' looks for a site script, but not all
 
 File: bashref.info,  Node: Operation Controls,  Next: Optional Features,  Prev: Sharing Defaults,  Up: Installing Bash
 
-Operation Controls
-==================
+10.7 Operation Controls
+=======================
 
-   `configure' recognizes the following options to control how it
-operates.
+`configure' recognizes the following options to control how it operates.
 
 `--cache-file=FILE'
      Use and save the results of the tests in FILE instead of
@@ -7782,14 +7789,14 @@ options.  `configure --help' prints the complete list.
 
 File: bashref.info,  Node: Optional Features,  Prev: Operation Controls,  Up: Installing Bash
 
-Optional Features
-=================
+10.8 Optional Features
+======================
 
-   The Bash `configure' has a number of `--enable-FEATURE' options,
-where FEATURE indicates an optional part of Bash.  There are also
-several `--with-PACKAGE' options, where PACKAGE is something like
-`bash-malloc' or `purify'.  To turn off the default use of a package,
-use `--without-PACKAGE'.  To configure Bash without a feature that is
+The Bash `configure' has a number of `--enable-FEATURE' options, where
+FEATURE indicates an optional part of Bash.  There are also several
+`--with-PACKAGE' options, where PACKAGE is something like `bash-malloc'
+or `purify'.  To turn off the default use of a package, use
+`--without-PACKAGE'.  To configure Bash without a feature that is
 enabled by default, use `--disable-FEATURE'.
 
    Here is a complete list of the `--enable-' and `--with-' options
@@ -7977,6 +7984,7 @@ does not provide the necessary support.
      Specification, version 2.  *Note Bash Builtins::, for a
      description of the escape sequences that `echo' recognizes.
 
+
    The file `config-top.h' contains C Preprocessor `#define' statements
 for options which are not settable from `configure'.  Some of these are
 not meant to be changed; beware of the consequences if you do.  Read
@@ -7986,10 +7994,10 @@ its effect.
 
 File: bashref.info,  Node: Reporting Bugs,  Next: Major Differences From The Bourne Shell,  Prev: Installing Bash,  Up: Top
 
-Reporting Bugs
-**************
+Appendix A Reporting Bugs
+*************************
 
-   Please report all bugs you find in Bash.  But first, you should make
+Please report all bugs you find in Bash.  But first, you should make
 sure that it really is a bug, and that it appears in the latest version
 of Bash.  The latest version of Bash is always available for FTP from
 `ftp://ftp.gnu.org/pub/bash/'.
@@ -8020,10 +8028,10 @@ it provides for filing a bug report.
 
 File: bashref.info,  Node: Major Differences From The Bourne Shell,  Next: Copying This Manual,  Prev: Reporting Bugs,  Up: Top
 
-Major Differences From The Bourne Shell
-***************************************
+Appendix B Major Differences From The Bourne Shell
+**************************************************
 
-   Bash implements essentially the same grammar, parameter and variable
+Bash implements essentially the same grammar, parameter and variable
 expansion, redirection, and quoting as the Bourne Shell.  Bash uses the
 POSIX 1003.2 standard as the specification of how these features are to
 be implemented.  There are some differences between the traditional
@@ -8317,11 +8325,11 @@ included in SVR4.2 as the baseline reference.
 
 More features unique to Bash may be found in *Note Bash Features::.
 
-Implementation Differences From The SVR4.2 Shell
-================================================
+B.1 Implementation Differences From The SVR4.2 Shell
+====================================================
 
-   Since Bash is a completely new implementation, it does not suffer
-from many of the limitations of the SVR4.2 shell.  For instance:
+Since Bash is a completely new implementation, it does not suffer from
+many of the limitations of the SVR4.2 shell.  For instance:
 
    * Bash does not fork a subshell when redirecting into or out of a
      shell control structure such as  an `if' or `while' statement.
@@ -8364,8 +8372,8 @@ from many of the limitations of the SVR4.2 shell.  For instance:
 
 File: bashref.info,  Node: Copying This Manual,  Next: Builtin Index,  Prev: Major Differences From The Bourne Shell,  Up: Top
 
-Copying This Manual
-*******************
+Appendix C Copying This Manual
+******************************
 
 * Menu:
 
@@ -8374,13 +8382,14 @@ Copying This Manual
 
 File: bashref.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
 
-GNU Free Documentation License
-==============================
+C.1 GNU Free Documentation License
+==================================
 
                       Version 1.2, November 2002
+
      Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
      59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
-     
+
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
 
@@ -8771,10 +8780,10 @@ GNU Free Documentation License
      you may choose any version ever published (not as a draft) by the
      Free Software Foundation.
 
-ADDENDUM: How to use this License for your documents
-----------------------------------------------------
+C.1.1 ADDENDUM: How to use this License for your documents
+----------------------------------------------------------
 
-   To use this License in a document you have written, include a copy of
+To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license
 notices just after the title page:
 
@@ -8808,64 +8817,100 @@ File: bashref.info,  Node: Builtin Index,  Next: Reserved Word Index,  Prev: Cop
 Index of Shell Builtin Commands
 *******************************
 
+ [index ]
 * Menu:
 
 * .:                                     Bourne Shell Builtins.
+                                                              (line  16)
 * ::                                     Bourne Shell Builtins.
+                                                              (line  11)
 * [:                                     Bourne Shell Builtins.
-* alias:                                 Bash Builtins.
+                                                              (line 212)
+* alias:                                 Bash Builtins.       (line  11)
 * bg:                                    Job Control Builtins.
-* bind:                                  Bash Builtins.
+                                                              (line   7)
+* bind:                                  Bash Builtins.       (line  21)
 * break:                                 Bourne Shell Builtins.
-* builtin:                               Bash Builtins.
-* caller:                                Bash Builtins.
+                                                              (line  29)
+* builtin:                               Bash Builtins.       (line  92)
+* caller:                                Bash Builtins.       (line 100)
 * cd:                                    Bourne Shell Builtins.
-* command:                               Bash Builtins.
+                                                              (line  36)
+* command:                               Bash Builtins.       (line 117)
 * compgen:                               Programmable Completion Builtins.
+                                                              (line  10)
 * complete:                              Programmable Completion Builtins.
+                                                              (line  28)
 * continue:                              Bourne Shell Builtins.
-* declare:                               Bash Builtins.
+                                                              (line  55)
+* declare:                               Bash Builtins.       (line 136)
 * dirs:                                  Directory Stack Builtins.
+                                                              (line   7)
 * disown:                                Job Control Builtins.
-* echo:                                  Bash Builtins.
-* enable:                                Bash Builtins.
+                                                              (line  83)
+* echo:                                  Bash Builtins.       (line 191)
+* enable:                                Bash Builtins.       (line 244)
 * eval:                                  Bourne Shell Builtins.
+                                                              (line  63)
 * exec:                                  Bourne Shell Builtins.
+                                                              (line  70)
 * exit:                                  Bourne Shell Builtins.
+                                                              (line  82)
 * export:                                Bourne Shell Builtins.
+                                                              (line  88)
 * fc:                                    Bash History Builtins.
+                                                              (line  10)
 * fg:                                    Job Control Builtins.
+                                                              (line  16)
 * getopts:                               Bourne Shell Builtins.
+                                                              (line 103)
 * hash:                                  Bourne Shell Builtins.
-* help:                                  Bash Builtins.
+                                                              (line 145)
+* help:                                  Bash Builtins.       (line 272)
 * history:                               Bash History Builtins.
+                                                              (line  39)
 * jobs:                                  Job Control Builtins.
+                                                              (line  25)
 * kill:                                  Job Control Builtins.
-* let:                                   Bash Builtins.
-* local:                                 Bash Builtins.
-* logout:                                Bash Builtins.
+                                                              (line  57)
+* let:                                   Bash Builtins.       (line 281)
+* local:                                 Bash Builtins.       (line 288)
+* logout:                                Bash Builtins.       (line 298)
 * popd:                                  Directory Stack Builtins.
-* printf:                                Bash Builtins.
+                                                              (line  37)
+* printf:                                Bash Builtins.       (line 302)
 * pushd:                                 Directory Stack Builtins.
+                                                              (line  58)
 * pwd:                                   Bourne Shell Builtins.
-* read:                                  Bash Builtins.
+                                                              (line 163)
+* read:                                  Bash Builtins.       (line 324)
 * readonly:                              Bourne Shell Builtins.
+                                                              (line 172)
 * return:                                Bourne Shell Builtins.
-* set:                                   The Set Builtin.
+                                                              (line 187)
+* set:                                   The Set Builtin.     (line   9)
 * shift:                                 Bourne Shell Builtins.
-* shopt:                                 Bash Builtins.
-* source:                                Bash Builtins.
+                                                              (line 200)
+* shopt:                                 Bash Builtins.       (line 385)
+* source:                                Bash Builtins.       (line 600)
 * suspend:                               Job Control Builtins.
+                                                              (line  94)
 * test:                                  Bourne Shell Builtins.
+                                                              (line 212)
 * times:                                 Bourne Shell Builtins.
+                                                              (line 276)
 * trap:                                  Bourne Shell Builtins.
-* type:                                  Bash Builtins.
-* typeset:                               Bash Builtins.
-* ulimit:                                Bash Builtins.
+                                                              (line 281)
+* type:                                  Bash Builtins.       (line 604)
+* typeset:                               Bash Builtins.       (line 635)
+* ulimit:                                Bash Builtins.       (line 641)
 * umask:                                 Bourne Shell Builtins.
-* unalias:                               Bash Builtins.
+                                                              (line 322)
+* unalias:                               Bash Builtins.       (line 703)
 * unset:                                 Bourne Shell Builtins.
+                                                              (line 339)
 * wait:                                  Job Control Builtins.
+                                                              (line  73)
 
 
 File: bashref.info,  Node: Reserved Word Index,  Next: Variable Index,  Prev: Builtin Index,  Up: Top
@@ -8873,29 +8918,41 @@ File: bashref.info,  Node: Reserved Word Index,  Next: Variable Index,  Prev: Bu
 Index of Shell Reserved Words
 *****************************
 
+ [index ]
 * Menu:
 
-* !:                                     Pipelines.
+* !:                                     Pipelines.           (line   8)
 * [[:                                    Conditional Constructs.
+                                                              (line 105)
 * ]]:                                    Conditional Constructs.
+                                                              (line 105)
 * case:                                  Conditional Constructs.
-* do:                                    Looping Constructs.
-* done:                                  Looping Constructs.
+                                                              (line  28)
+* do:                                    Looping Constructs.  (line  12)
+* done:                                  Looping Constructs.  (line  12)
 * elif:                                  Conditional Constructs.
+                                                              (line   7)
 * else:                                  Conditional Constructs.
+                                                              (line   7)
 * esac:                                  Conditional Constructs.
+                                                              (line  28)
 * fi:                                    Conditional Constructs.
-* for:                                   Looping Constructs.
-* function:                              Shell Functions.
+                                                              (line   7)
+* for:                                   Looping Constructs.  (line  29)
+* function:                              Shell Functions.     (line  13)
 * if:                                    Conditional Constructs.
+                                                              (line   7)
 * in:                                    Conditional Constructs.
+                                                              (line  28)
 * select:                                Conditional Constructs.
+                                                              (line  64)
 * then:                                  Conditional Constructs.
-* time:                                  Pipelines.
-* until:                                 Looping Constructs.
-* while:                                 Looping Constructs.
-* {:                                     Command Grouping.
-* }:                                     Command Grouping.
+                                                              (line   7)
+* time:                                  Pipelines.           (line   8)
+* until:                                 Looping Constructs.  (line  12)
+* while:                                 Looping Constructs.  (line  20)
+* {:                                     Command Grouping.    (line  21)
+* }:                                     Command Grouping.    (line  21)
 
 
 File: bashref.info,  Node: Variable Index,  Next: Function Index,  Prev: Reserved Word Index,  Up: Top
@@ -8903,122 +8960,156 @@ File: bashref.info,  Node: Variable Index,  Next: Function Index,  Prev: Reserve
 Parameter and Variable Index
 ****************************
 
+ [index ]
 * Menu:
 
-* !:                                     Special Parameters.
-* #:                                     Special Parameters.
-* $:                                     Special Parameters.
-* *:                                     Special Parameters.
-* -:                                     Special Parameters.
-* 0:                                     Special Parameters.
-* ?:                                     Special Parameters.
-* @:                                     Special Parameters.
-* _:                                     Special Parameters.
+* !:                                     Special Parameters.  (line  42)
+* #:                                     Special Parameters.  (line  26)
+* $:                                     Special Parameters.  (line  38)
+* *:                                     Special Parameters.  (line   9)
+* -:                                     Special Parameters.  (line  33)
+* 0:                                     Special Parameters.  (line  46)
+* ?:                                     Special Parameters.  (line  29)
+* @:                                     Special Parameters.  (line  19)
+* _:                                     Special Parameters.  (line  55)
 * auto_resume:                           Job Control Variables.
-* BASH:                                  Bash Variables.
-* BASH_ARGC:                             Bash Variables.
-* BASH_ARGV:                             Bash Variables.
-* BASH_COMMAND:                          Bash Variables.
-* BASH_ENV:                              Bash Variables.
-* BASH_EXECUTION_STRING:                 Bash Variables.
-* BASH_LINENO:                           Bash Variables.
-* BASH_REMATCH:                          Bash Variables.
-* BASH_SOURCE:                           Bash Variables.
-* BASH_SUBSHELL:                         Bash Variables.
-* BASH_VERSINFO:                         Bash Variables.
-* BASH_VERSION:                          Bash Variables.
+                                                              (line   6)
+* BASH:                                  Bash Variables.      (line  13)
+* BASH_ARGC:                             Bash Variables.      (line  16)
+* BASH_ARGV:                             Bash Variables.      (line  24)
+* BASH_COMMAND:                          Bash Variables.      (line  31)
+* BASH_ENV:                              Bash Variables.      (line  36)
+* BASH_EXECUTION_STRING:                 Bash Variables.      (line  42)
+* BASH_LINENO:                           Bash Variables.      (line  45)
+* BASH_REMATCH:                          Bash Variables.      (line  53)
+* BASH_SOURCE:                           Bash Variables.      (line  61)
+* BASH_SUBSHELL:                         Bash Variables.      (line  65)
+* BASH_VERSINFO:                         Bash Variables.      (line  69)
+* BASH_VERSION:                          Bash Variables.      (line  93)
 * bell-style:                            Readline Init File Syntax.
+                                                              (line  34)
 * CDPATH:                                Bourne Shell Variables.
-* COLUMNS:                               Bash Variables.
+                                                              (line   9)
+* COLUMNS:                               Bash Variables.      (line  96)
 * comment-begin:                         Readline Init File Syntax.
-* COMP_CWORD:                            Bash Variables.
-* COMP_LINE:                             Bash Variables.
-* COMP_POINT:                            Bash Variables.
-* COMP_WORDBREAKS:                       Bash Variables.
-* COMP_WORDS:                            Bash Variables.
+                                                              (line  41)
+* COMP_CWORD:                            Bash Variables.      (line 101)
+* COMP_LINE:                             Bash Variables.      (line 107)
+* COMP_POINT:                            Bash Variables.      (line 112)
+* COMP_WORDBREAKS:                       Bash Variables.      (line 120)
+* COMP_WORDS:                            Bash Variables.      (line 126)
 * completion-query-items:                Readline Init File Syntax.
-* COMPREPLY:                             Bash Variables.
+                                                              (line  51)
+* COMPREPLY:                             Bash Variables.      (line 132)
 * convert-meta:                          Readline Init File Syntax.
-* DIRSTACK:                              Bash Variables.
+                                                              (line  60)
+* DIRSTACK:                              Bash Variables.      (line 137)
 * disable-completion:                    Readline Init File Syntax.
+                                                              (line  66)
 * editing-mode:                          Readline Init File Syntax.
-* EMACS:                                 Bash Variables.
+                                                              (line  71)
+* EMACS:                                 Bash Variables.      (line 147)
 * enable-keypad:                         Readline Init File Syntax.
-* EUID:                                  Bash Variables.
+                                                              (line  77)
+* EUID:                                  Bash Variables.      (line 152)
 * expand-tilde:                          Readline Init File Syntax.
-* FCEDIT:                                Bash Variables.
-* FIGNORE:                               Bash Variables.
-* FUNCNAME:                              Bash Variables.
-* GLOBIGNORE:                            Bash Variables.
-* GROUPS:                                Bash Variables.
-* histchars:                             Bash Variables.
-* HISTCMD:                               Bash Variables.
-* HISTCONTROL:                           Bash Variables.
-* HISTFILE:                              Bash Variables.
-* HISTFILESIZE:                          Bash Variables.
-* HISTIGNORE:                            Bash Variables.
+                                                              (line  82)
+* FCEDIT:                                Bash Variables.      (line 156)
+* FIGNORE:                               Bash Variables.      (line 160)
+* FUNCNAME:                              Bash Variables.      (line 166)
+* GLOBIGNORE:                            Bash Variables.      (line 175)
+* GROUPS:                                Bash Variables.      (line 181)
+* histchars:                             Bash Variables.      (line 187)
+* HISTCMD:                               Bash Variables.      (line 202)
+* HISTCONTROL:                           Bash Variables.      (line 207)
+* HISTFILE:                              Bash Variables.      (line 223)
+* HISTFILESIZE:                          Bash Variables.      (line 227)
+* HISTIGNORE:                            Bash Variables.      (line 234)
 * history-preserve-point:                Readline Init File Syntax.
-* HISTSIZE:                              Bash Variables.
-* HISTTIMEFORMAT:                        Bash Variables.
+                                                              (line  85)
+* HISTSIZE:                              Bash Variables.      (line 253)
+* HISTTIMEFORMAT:                        Bash Variables.      (line 257)
 * HOME:                                  Bourne Shell Variables.
+                                                              (line  13)
 * horizontal-scroll-mode:                Readline Init File Syntax.
-* HOSTFILE:                              Bash Variables.
-* HOSTNAME:                              Bash Variables.
-* HOSTTYPE:                              Bash Variables.
+                                                              (line  90)
+* HOSTFILE:                              Bash Variables.      (line 264)
+* HOSTNAME:                              Bash Variables.      (line 275)
+* HOSTTYPE:                              Bash Variables.      (line 278)
 * IFS:                                   Bourne Shell Variables.
-* IGNOREEOF:                             Bash Variables.
+                                                              (line  18)
+* IGNOREEOF:                             Bash Variables.      (line 281)
 * input-meta:                            Readline Init File Syntax.
-* INPUTRC:                               Bash Variables.
+                                                              (line  97)
+* INPUTRC:                               Bash Variables.      (line 291)
 * isearch-terminators:                   Readline Init File Syntax.
+                                                              (line 104)
 * keymap:                                Readline Init File Syntax.
-* LANG:                                  Bash Variables.
-* LC_ALL:                                Bash Variables.
-* LC_COLLATE:                            Bash Variables.
-* LC_CTYPE:                              Bash Variables.
-* LC_MESSAGES <1>:                       Locale Translation.
-* LC_MESSAGES:                           Bash Variables.
-* LC_NUMERIC:                            Bash Variables.
-* LINENO:                                Bash Variables.
-* LINES:                                 Bash Variables.
-* MACHTYPE:                              Bash Variables.
+                                                              (line 111)
+* LANG:                                  Bash Variables.      (line 295)
+* LC_ALL:                                Bash Variables.      (line 299)
+* LC_COLLATE:                            Bash Variables.      (line 303)
+* LC_CTYPE:                              Bash Variables.      (line 310)
+* LC_MESSAGES <1>:                       Locale Translation.  (line  11)
+* LC_MESSAGES:                           Bash Variables.      (line 315)
+* LC_NUMERIC:                            Bash Variables.      (line 319)
+* LINENO:                                Bash Variables.      (line 323)
+* LINES:                                 Bash Variables.      (line 327)
+* MACHTYPE:                              Bash Variables.      (line 332)
 * MAIL:                                  Bourne Shell Variables.
-* MAILCHECK:                             Bash Variables.
+                                                              (line  22)
+* MAILCHECK:                             Bash Variables.      (line 336)
 * MAILPATH:                              Bourne Shell Variables.
+                                                              (line  27)
 * mark-modified-lines:                   Readline Init File Syntax.
+                                                              (line 124)
 * mark-symlinked-directories:            Readline Init File Syntax.
+                                                              (line 129)
 * match-hidden-files:                    Readline Init File Syntax.
+                                                              (line 134)
 * meta-flag:                             Readline Init File Syntax.
-* OLDPWD:                                Bash Variables.
+                                                              (line  97)
+* OLDPWD:                                Bash Variables.      (line 344)
 * OPTARG:                                Bourne Shell Variables.
-* OPTERR:                                Bash Variables.
+                                                              (line  34)
+* OPTERR:                                Bash Variables.      (line 347)
 * OPTIND:                                Bourne Shell Variables.
-* OSTYPE:                                Bash Variables.
+                                                              (line  38)
+* OSTYPE:                                Bash Variables.      (line 351)
 * output-meta:                           Readline Init File Syntax.
+                                                              (line 141)
 * page-completions:                      Readline Init File Syntax.
+                                                              (line 146)
 * PATH:                                  Bourne Shell Variables.
-* PIPESTATUS:                            Bash Variables.
-* POSIXLY_CORRECT:                       Bash Variables.
-* PPID:                                  Bash Variables.
-* PROMPT_COMMAND:                        Bash Variables.
+                                                              (line  42)
+* PIPESTATUS:                            Bash Variables.      (line 354)
+* POSIXLY_CORRECT:                       Bash Variables.      (line 359)
+* PPID:                                  Bash Variables.      (line 368)
+* PROMPT_COMMAND:                        Bash Variables.      (line 372)
 * PS1:                                   Bourne Shell Variables.
+                                                              (line  48)
 * PS2:                                   Bourne Shell Variables.
-* PS3:                                   Bash Variables.
-* PS4:                                   Bash Variables.
-* PWD:                                   Bash Variables.
-* RANDOM:                                Bash Variables.
-* REPLY:                                 Bash Variables.
-* SECONDS:                               Bash Variables.
-* SHELL:                                 Bash Variables.
-* SHELLOPTS:                             Bash Variables.
-* SHLVL:                                 Bash Variables.
+                                                              (line  53)
+* PS3:                                   Bash Variables.      (line 376)
+* PS4:                                   Bash Variables.      (line 381)
+* PWD:                                   Bash Variables.      (line 387)
+* RANDOM:                                Bash Variables.      (line 390)
+* REPLY:                                 Bash Variables.      (line 395)
+* SECONDS:                               Bash Variables.      (line 398)
+* SHELL:                                 Bash Variables.      (line 404)
+* SHELLOPTS:                             Bash Variables.      (line 409)
+* SHLVL:                                 Bash Variables.      (line 418)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
+                                                              (line 156)
 * show-all-if-unmodified:                Readline Init File Syntax.
-* TEXTDOMAIN:                            Locale Translation.
-* TEXTDOMAINDIR:                         Locale Translation.
-* TIMEFORMAT:                            Bash Variables.
-* TMOUT:                                 Bash Variables.
-* UID:                                   Bash Variables.
+                                                              (line 162)
+* TEXTDOMAIN:                            Locale Translation.  (line  11)
+* TEXTDOMAINDIR:                         Locale Translation.  (line  11)
+* TIMEFORMAT:                            Bash Variables.      (line 423)
+* TMOUT:                                 Bash Variables.      (line 461)
+* UID:                                   Bash Variables.      (line 473)
 * visible-stats:                         Readline Init File Syntax.
+                                                              (line 171)
 
 
 File: bashref.info,  Node: Function Index,  Next: Concept Index,  Prev: Variable Index,  Up: Top
@@ -9026,79 +9117,101 @@ File: bashref.info,  Node: Function Index,  Next: Concept Index,  Prev: Variable
 Function Index
 **************
 
+ [index ]
 * Menu:
 
 * abort (C-g):                           Miscellaneous Commands.
-* accept-line (Newline or Return):       Commands For History.
-* backward-char (C-b):                   Commands For Moving.
-* backward-delete-char (Rubout):         Commands For Text.
-* backward-kill-line (C-x Rubout):       Commands For Killing.
-* backward-kill-word (M-<DEL>):          Commands For Killing.
-* backward-word (M-b):                   Commands For Moving.
-* beginning-of-history (M-<):            Commands For History.
-* beginning-of-line (C-a):               Commands For Moving.
-* call-last-kbd-macro (C-x e):           Keyboard Macros.
-* capitalize-word (M-c):                 Commands For Text.
+                                                               (line 10)
+* accept-line (Newline or Return):       Commands For History. (line  6)
+* backward-char (C-b):                   Commands For Moving.  (line 15)
+* backward-delete-char (Rubout):         Commands For Text.    (line 11)
+* backward-kill-line (C-x Rubout):       Commands For Killing. (line  9)
+* backward-kill-word (M-<DEL>):          Commands For Killing. (line 24)
+* backward-word (M-b):                   Commands For Moving.  (line 22)
+* beginning-of-history (M-<):            Commands For History. (line 20)
+* beginning-of-line (C-a):               Commands For Moving.  (line  6)
+* call-last-kbd-macro (C-x e):           Keyboard Macros.      (line 13)
+* capitalize-word (M-c):                 Commands For Text.    (line 46)
 * character-search (C-]):                Miscellaneous Commands.
+                                                               (line 41)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
-* clear-screen (C-l):                    Commands For Moving.
+                                                               (line 46)
+* clear-screen (C-l):                    Commands For Moving.  (line 26)
 * complete (<TAB>):                      Commands For Completion.
-* copy-backward-word ():                 Commands For Killing.
-* copy-forward-word ():                  Commands For Killing.
-* copy-region-as-kill ():                Commands For Killing.
-* delete-char (C-d):                     Commands For Text.
+                                                               (line  6)
+* copy-backward-word ():                 Commands For Killing. (line 49)
+* copy-forward-word ():                  Commands For Killing. (line 54)
+* copy-region-as-kill ():                Commands For Killing. (line 45)
+* delete-char (C-d):                     Commands For Text.    (line  6)
 * delete-char-or-list ():                Commands For Completion.
-* delete-horizontal-space ():            Commands For Killing.
-* digit-argument (M-0, M-1, ... M--):    Numeric Arguments.
+                                                               (line 34)
+* delete-horizontal-space ():            Commands For Killing. (line 37)
+* digit-argument (M-0, M-1, ... M--):    Numeric Arguments.    (line  6)
 * do-uppercase-version (M-a, M-b, M-X, ...): Miscellaneous Commands.
-* downcase-word (M-l):                   Commands For Text.
+                                                               (line 14)
+* downcase-word (M-l):                   Commands For Text.    (line 42)
 * dump-functions ():                     Miscellaneous Commands.
+                                                               (line 64)
 * dump-macros ():                        Miscellaneous Commands.
+                                                               (line 76)
 * dump-variables ():                     Miscellaneous Commands.
-* end-kbd-macro (C-x )):                 Keyboard Macros.
-* end-of-history (M->):                  Commands For History.
-* end-of-line (C-e):                     Commands For Moving.
+                                                               (line 70)
+* end-kbd-macro (C-x )):                 Keyboard Macros.      (line  9)
+* end-of-history (M->):                  Commands For History. (line 23)
+* end-of-line (C-e):                     Commands For Moving.  (line  9)
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
-* forward-backward-delete-char ():       Commands For Text.
-* forward-char (C-f):                    Commands For Moving.
-* forward-search-history (C-s):          Commands For History.
-* forward-word (M-f):                    Commands For Moving.
-* history-search-backward ():            Commands For History.
-* history-search-forward ():             Commands For History.
+                                                               (line 36)
+* forward-backward-delete-char ():       Commands For Text.    (line 15)
+* forward-char (C-f):                    Commands For Moving.  (line 12)
+* forward-search-history (C-s):          Commands For History. (line 31)
+* forward-word (M-f):                    Commands For Moving.  (line 18)
+* history-search-backward ():            Commands For History. (line 51)
+* history-search-forward ():             Commands For History. (line 46)
 * insert-comment (M-#):                  Miscellaneous Commands.
+                                                               (line 51)
 * insert-completions (M-*):              Commands For Completion.
-* kill-line (C-k):                       Commands For Killing.
-* kill-region ():                        Commands For Killing.
-* kill-whole-line ():                    Commands For Killing.
-* kill-word (M-d):                       Commands For Killing.
+                                                               (line 18)
+* kill-line (C-k):                       Commands For Killing. (line  6)
+* kill-region ():                        Commands For Killing. (line 41)
+* kill-whole-line ():                    Commands For Killing. (line 15)
+* kill-word (M-d):                       Commands For Killing. (line 19)
 * menu-complete ():                      Commands For Completion.
-* next-history (C-n):                    Commands For History.
+                                                               (line 22)
+* next-history (C-n):                    Commands For History. (line 17)
 * non-incremental-forward-search-history (M-n): Commands For History.
+                                                               (line 41)
 * non-incremental-reverse-search-history (M-p): Commands For History.
-* overwrite-mode ():                     Commands For Text.
+                                                               (line 36)
+* overwrite-mode ():                     Commands For Text.    (line 50)
 * possible-completions (M-?):            Commands For Completion.
+                                                               (line 15)
 * prefix-meta (<ESC>):                   Miscellaneous Commands.
-* previous-history (C-p):                Commands For History.
-* quoted-insert (C-q or C-v):            Commands For Text.
+                                                               (line 18)
+* previous-history (C-p):                Commands For History. (line 13)
+* quoted-insert (C-q or C-v):            Commands For Text.    (line 20)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
-* redraw-current-line ():                Commands For Moving.
-* reverse-search-history (C-r):          Commands For History.
+                                                               (line  6)
+* redraw-current-line ():                Commands For Moving.  (line 30)
+* reverse-search-history (C-r):          Commands For History. (line 27)
 * revert-line (M-r):                     Miscellaneous Commands.
-* self-insert (a, b, A, 1, !, ...):      Commands For Text.
+                                                               (line 25)
+* self-insert (a, b, A, 1, !, ...):      Commands For Text.    (line 24)
 * set-mark (C-@):                        Miscellaneous Commands.
-* start-kbd-macro (C-x ():               Keyboard Macros.
-* transpose-chars (C-t):                 Commands For Text.
-* transpose-words (M-t):                 Commands For Text.
+                                                               (line 32)
+* start-kbd-macro (C-x ():               Keyboard Macros.      (line  6)
+* transpose-chars (C-t):                 Commands For Text.    (line 27)
+* transpose-words (M-t):                 Commands For Text.    (line 33)
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
-* universal-argument ():                 Numeric Arguments.
-* unix-filename-rubout ():               Commands For Killing.
-* unix-line-discard (C-u):               Commands For Killing.
-* unix-word-rubout (C-w):                Commands For Killing.
-* upcase-word (M-u):                     Commands For Text.
-* yank (C-y):                            Commands For Killing.
-* yank-last-arg (M-. or M-_):            Commands For History.
-* yank-nth-arg (M-C-y):                  Commands For History.
-* yank-pop (M-y):                        Commands For Killing.
+                                                               (line 22)
+* universal-argument ():                 Numeric Arguments.    (line 10)
+* unix-filename-rubout ():               Commands For Killing. (line 32)
+* unix-line-discard (C-u):               Commands For Killing. (line 12)
+* unix-word-rubout (C-w):                Commands For Killing. (line 28)
+* upcase-word (M-u):                     Commands For Text.    (line 38)
+* yank (C-y):                            Commands For Killing. (line 59)
+* yank-last-arg (M-. or M-_):            Commands For History. (line 63)
+* yank-nth-arg (M-C-y):                  Commands For History. (line 56)
+* yank-pop (M-y):                        Commands For Killing. (line 62)
 
 
 File: bashref.info,  Node: Concept Index,  Prev: Function Index,  Up: Top
@@ -9106,253 +9219,285 @@ File: bashref.info,  Node: Concept Index,  Prev: Function Index,  Up: Top
 Concept Index
 *************
 
+ [index ]
 * Menu:
 
-* alias expansion:                       Aliases.
-* arithmetic evaluation:                 Shell Arithmetic.
+* alias expansion:                       Aliases.             (line   6)
+* arithmetic evaluation:                 Shell Arithmetic.    (line   6)
 * arithmetic expansion:                  Arithmetic Expansion.
-* arithmetic, shell:                     Shell Arithmetic.
-* arrays:                                Arrays.
-* background:                            Job Control Basics.
-* Bash configuration:                    Basic Installation.
-* Bash installation:                     Basic Installation.
+                                                              (line   6)
+* arithmetic, shell:                     Shell Arithmetic.    (line   6)
+* arrays:                                Arrays.              (line   6)
+* background:                            Job Control Basics.  (line   6)
+* Bash configuration:                    Basic Installation.  (line   6)
+* Bash installation:                     Basic Installation.  (line   6)
 * Bourne shell:                          Basic Shell Features.
-* brace expansion:                       Brace Expansion.
-* builtin:                               Definitions.
+                                                              (line   6)
+* brace expansion:                       Brace Expansion.     (line   6)
+* builtin:                               Definitions.         (line  16)
 * command editing:                       Readline Bare Essentials.
+                                                              (line   6)
 * command execution:                     Command Search and Execution.
+                                                              (line   6)
 * command expansion:                     Simple Command Expansion.
+                                                              (line   6)
 * command history:                       Bash History Facilities.
+                                                              (line   6)
 * command search:                        Command Search and Execution.
+                                                              (line   6)
 * command substitution:                  Command Substitution.
-* command timing:                        Pipelines.
-* commands, compound:                    Compound Commands.
+                                                              (line   6)
+* command timing:                        Pipelines.           (line   8)
+* commands, compound:                    Compound Commands.   (line   6)
 * commands, conditional:                 Conditional Constructs.
-* commands, grouping:                    Command Grouping.
-* commands, lists:                       Lists.
-* commands, looping:                     Looping Constructs.
-* commands, pipelines:                   Pipelines.
-* commands, shell:                       Shell Commands.
-* commands, simple:                      Simple Commands.
-* comments, shell:                       Comments.
+                                                              (line   6)
+* commands, grouping:                    Command Grouping.    (line   6)
+* commands, lists:                       Lists.               (line   6)
+* commands, looping:                     Looping Constructs.  (line   6)
+* commands, pipelines:                   Pipelines.           (line   6)
+* commands, shell:                       Shell Commands.      (line   6)
+* commands, simple:                      Simple Commands.     (line   6)
+* comments, shell:                       Comments.            (line   6)
 * completion builtins:                   Programmable Completion Builtins.
-* configuration:                         Basic Installation.
-* control operator:                      Definitions.
-* directory stack:                       The Directory Stack.
+                                                              (line   6)
+* configuration:                         Basic Installation.  (line   6)
+* control operator:                      Definitions.         (line  20)
+* directory stack:                       The Directory Stack. (line   6)
 * editing command lines:                 Readline Bare Essentials.
-* environment:                           Environment.
-* evaluation, arithmetic:                Shell Arithmetic.
-* event designators:                     Event Designators.
+                                                              (line   6)
+* environment:                           Environment.         (line   6)
+* evaluation, arithmetic:                Shell Arithmetic.    (line   6)
+* event designators:                     Event Designators.   (line   6)
 * execution environment:                 Command Execution Environment.
-* exit status <1>:                       Exit Status.
-* exit status:                           Definitions.
-* expansion:                             Shell Expansions.
+                                                              (line   6)
+* exit status <1>:                       Exit Status.         (line   6)
+* exit status:                           Definitions.         (line  24)
+* expansion:                             Shell Expansions.    (line   6)
 * expansion, arithmetic:                 Arithmetic Expansion.
-* expansion, brace:                      Brace Expansion.
-* expansion, filename:                   Filename Expansion.
+                                                              (line   6)
+* expansion, brace:                      Brace Expansion.     (line   6)
+* expansion, filename:                   Filename Expansion.  (line   9)
 * expansion, parameter:                  Shell Parameter Expansion.
-* expansion, pathname:                   Filename Expansion.
-* expansion, tilde:                      Tilde Expansion.
-* expressions, arithmetic:               Shell Arithmetic.
+                                                              (line   6)
+* expansion, pathname:                   Filename Expansion.  (line   9)
+* expansion, tilde:                      Tilde Expansion.     (line   6)
+* expressions, arithmetic:               Shell Arithmetic.    (line   6)
 * expressions, conditional:              Bash Conditional Expressions.
+                                                              (line   6)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
-* field:                                 Definitions.
-* filename:                              Definitions.
-* filename expansion:                    Filename Expansion.
-* foreground:                            Job Control Basics.
-* functions, shell:                      Shell Functions.
+                                                              (line   6)
+* field:                                 Definitions.         (line  28)
+* filename:                              Definitions.         (line  33)
+* filename expansion:                    Filename Expansion.  (line   9)
+* foreground:                            Job Control Basics.  (line   6)
+* functions, shell:                      Shell Functions.     (line   6)
 * history builtins:                      Bash History Builtins.
-* history events:                        Event Designators.
-* history expansion:                     History Interaction.
+                                                              (line   6)
+* history events:                        Event Designators.   (line   7)
+* history expansion:                     History Interaction. (line   6)
 * history list:                          Bash History Facilities.
+                                                              (line   6)
 * History, how to use:                   Programmable Completion Builtins.
-* identifier:                            Definitions.
-* initialization file, readline:         Readline Init File.
-* installation:                          Basic Installation.
+                                                              (line 203)
+* identifier:                            Definitions.         (line  49)
+* initialization file, readline:         Readline Init File.  (line   6)
+* installation:                          Basic Installation.  (line   6)
 * interaction, readline:                 Readline Interaction.
-* interactive shell <1>:                 Interactive Shells.
-* interactive shell:                     Invoking Bash.
-* internationalization:                  Locale Translation.
-* job:                                   Definitions.
-* job control <1>:                       Definitions.
-* job control:                           Job Control Basics.
+                                                              (line   6)
+* interactive shell <1>:                 Interactive Shells.  (line   6)
+* interactive shell:                     Invoking Bash.       (line 128)
+* internationalization:                  Locale Translation.  (line   6)
+* job:                                   Definitions.         (line  36)
+* job control <1>:                       Definitions.         (line  40)
+* job control:                           Job Control Basics.  (line   6)
 * kill ring:                             Readline Killing Commands.
+                                                              (line  19)
 * killing text:                          Readline Killing Commands.
-* localization:                          Locale Translation.
-* login shell:                           Invoking Bash.
-* matching, pattern:                     Pattern Matching.
-* metacharacter:                         Definitions.
-* name:                                  Definitions.
-* native languages:                      Locale Translation.
+                                                              (line   6)
+* localization:                          Locale Translation.  (line   6)
+* login shell:                           Invoking Bash.       (line 125)
+* matching, pattern:                     Pattern Matching.    (line   6)
+* metacharacter:                         Definitions.         (line  44)
+* name:                                  Definitions.         (line  49)
+* native languages:                      Locale Translation.  (line   6)
 * notation, readline:                    Readline Bare Essentials.
-* operator, shell:                       Definitions.
+                                                              (line   6)
+* operator, shell:                       Definitions.         (line  55)
 * parameter expansion:                   Shell Parameter Expansion.
-* parameters:                            Shell Parameters.
+                                                              (line   6)
+* parameters:                            Shell Parameters.    (line   6)
 * parameters, positional:                Positional Parameters.
-* parameters, special:                   Special Parameters.
-* pathname expansion:                    Filename Expansion.
-* pattern matching:                      Pattern Matching.
-* pipeline:                              Pipelines.
-* POSIX:                                 Definitions.
-* POSIX Mode:                            Bash POSIX Mode.
-* process group:                         Definitions.
-* process group ID:                      Definitions.
+                                                              (line   6)
+* parameters, special:                   Special Parameters.  (line   6)
+* pathname expansion:                    Filename Expansion.  (line   9)
+* pattern matching:                      Pattern Matching.    (line   6)
+* pipeline:                              Pipelines.           (line   6)
+* POSIX:                                 Definitions.         (line   9)
+* POSIX Mode:                            Bash POSIX Mode.     (line   6)
+* process group:                         Definitions.         (line  59)
+* process group ID:                      Definitions.         (line  63)
 * process substitution:                  Process Substitution.
+                                                              (line   6)
 * programmable completion:               Programmable Completion.
-* prompting:                             Printing a Prompt.
-* quoting:                               Quoting.
-* quoting, ANSI:                         ANSI-C Quoting.
+                                                              (line   6)
+* prompting:                             Printing a Prompt.   (line   6)
+* quoting:                               Quoting.             (line   6)
+* quoting, ANSI:                         ANSI-C Quoting.      (line   6)
 * Readline, how to use:                  Job Control Variables.
-* redirection:                           Redirections.
-* reserved word:                         Definitions.
+                                                              (line  24)
+* redirection:                           Redirections.        (line   6)
+* reserved word:                         Definitions.         (line  67)
 * restricted shell:                      The Restricted Shell.
-* return status:                         Definitions.
-* shell arithmetic:                      Shell Arithmetic.
-* shell function:                        Shell Functions.
-* shell script:                          Shell Scripts.
-* shell variable:                        Shell Parameters.
-* shell, interactive:                    Interactive Shells.
-* signal:                                Definitions.
-* signal handling:                       Signals.
-* special builtin <1>:                   Definitions.
-* special builtin:                       Special Builtins.
-* startup files:                         Bash Startup Files.
-* suspending jobs:                       Job Control Basics.
-* tilde expansion:                       Tilde Expansion.
-* token:                                 Definitions.
-* translation, native languages:         Locale Translation.
-* variable, shell:                       Shell Parameters.
+                                                              (line   6)
+* return status:                         Definitions.         (line  72)
+* shell arithmetic:                      Shell Arithmetic.    (line   6)
+* shell function:                        Shell Functions.     (line   6)
+* shell script:                          Shell Scripts.       (line   6)
+* shell variable:                        Shell Parameters.    (line   6)
+* shell, interactive:                    Interactive Shells.  (line   6)
+* signal:                                Definitions.         (line  75)
+* signal handling:                       Signals.             (line   6)
+* special builtin <1>:                   Definitions.         (line  79)
+* special builtin:                       Special Builtins.    (line   6)
+* startup files:                         Bash Startup Files.  (line   6)
+* suspending jobs:                       Job Control Basics.  (line   6)
+* tilde expansion:                       Tilde Expansion.     (line   6)
+* token:                                 Definitions.         (line  83)
+* translation, native languages:         Locale Translation.  (line   6)
+* variable, shell:                       Shell Parameters.    (line   6)
 * variables, readline:                   Readline Init File Syntax.
-* word:                                  Definitions.
-* word splitting:                        Word Splitting.
+                                                              (line  33)
+* word:                                  Definitions.         (line  87)
+* word splitting:                        Word Splitting.      (line   6)
 * yanking text:                          Readline Killing Commands.
+                                                              (line   6)
 
 
 
 Tag Table:
-Node: Top1357
-Node: Introduction3504
-Node: What is Bash?3729
-Node: What is a shell?4817
-Node: Definitions7353
-Node: Basic Shell Features10093
-Node: Shell Syntax11311
-Node: Shell Operation12335
-Node: Quoting13620
-Node: Escape Character14882
-Node: Single Quotes15354
-Node: Double Quotes15689
-Node: ANSI-C Quoting16702
-Node: Locale Translation17645
-Node: Comments18528
-Node: Shell Commands19133
-Node: Simple Commands19894
-Node: Pipelines20515
-Node: Lists22381
-Node: Compound Commands24003
-Node: Looping Constructs24775
-Node: Conditional Constructs27208
-Node: Command Grouping34260
-Node: Shell Functions35696
-Node: Shell Parameters39958
-Node: Positional Parameters41529
-Node: Special Parameters42420
-Node: Shell Expansions45078
-Node: Brace Expansion46998
-Node: Tilde Expansion49314
-Node: Shell Parameter Expansion51645
-Node: Command Substitution58898
-Node: Arithmetic Expansion60220
-Node: Process Substitution61061
-Node: Word Splitting62098
-Node: Filename Expansion63550
-Node: Pattern Matching65674
-Node: Quote Removal68995
-Node: Redirections69281
-Node: Executing Commands76755
-Node: Simple Command Expansion77422
-Node: Command Search and Execution79343
-Node: Command Execution Environment81340
-Node: Environment84102
-Node: Exit Status85753
-Node: Signals86948
-Node: Shell Scripts88903
-Node: Shell Builtin Commands91414
-Node: Bourne Shell Builtins92989
-Node: Bash Builtins109937
-Node: The Set Builtin138054
-Node: Special Builtins146272
-Node: Shell Variables147244
-Node: Bourne Shell Variables147680
-Node: Bash Variables149656
-Node: Bash Features169365
-Node: Invoking Bash170247
-Node: Bash Startup Files176056
-Node: Interactive Shells180926
-Node: What is an Interactive Shell?181328
-Node: Is this Shell Interactive?181969
-Node: Interactive Shell Behavior182775
-Node: Bash Conditional Expressions186042
-Node: Shell Arithmetic189461
-Node: Aliases192201
-Node: Arrays194764
-Node: The Directory Stack197784
-Node: Directory Stack Builtins198490
-Node: Printing a Prompt201368
-Node: The Restricted Shell204077
-Node: Bash POSIX Mode205902
-Node: Job Control212548
-Node: Job Control Basics213014
-Node: Job Control Builtins217299
-Node: Job Control Variables221610
-Node: Command Line Editing222759
-Node: Introduction and Notation223757
-Node: Readline Interaction225374
-Node: Readline Bare Essentials226560
-Node: Readline Movement Commands228340
-Node: Readline Killing Commands229296
-Node: Readline Arguments231204
-Node: Searching232239
-Node: Readline Init File234416
-Node: Readline Init File Syntax235470
-Node: Conditional Init Constructs247111
-Node: Sample Init File249635
-Node: Bindable Readline Commands252818
-Node: Commands For Moving254017
-Node: Commands For History254865
-Node: Commands For Text257753
-Node: Commands For Killing260413
-Node: Numeric Arguments262543
-Node: Commands For Completion263670
-Node: Keyboard Macros267250
-Node: Miscellaneous Commands267808
-Node: Readline vi Mode273106
-Node: Programmable Completion274015
-Node: Programmable Completion Builtins279822
-Node: Using History Interactively287183
-Node: Bash History Facilities287862
-Node: Bash History Builtins290552
-Node: History Interaction294402
-Node: Event Designators296953
-Node: Word Designators297956
-Node: Modifiers299585
-Node: Installing Bash300981
-Node: Basic Installation302115
-Node: Compilers and Options304800
-Node: Compiling For Multiple Architectures305534
-Node: Installation Names307191
-Node: Specifying the System Type308002
-Node: Sharing Defaults308711
-Node: Operation Controls309376
-Node: Optional Features310327
-Node: Reporting Bugs318598
-Node: Major Differences From The Bourne Shell319773
-Node: Copying This Manual335521
-Node: GNU Free Documentation License335775
-Node: Builtin Index358168
-Node: Reserved Word Index361795
-Node: Variable Index363271
-Node: Function Index370321
-Node: Concept Index374934
+Node: Top1349
+Node: Introduction3485
+Node: What is Bash?3714
+Node: What is a shell?4807
+Node: Definitions7348
+Node: Basic Shell Features10089
+Node: Shell Syntax11308
+Node: Shell Operation12340
+Node: Quoting13634
+Node: Escape Character14908
+Node: Single Quotes15393
+Node: Double Quotes15741
+Node: ANSI-C Quoting16767
+Node: Locale Translation17723
+Node: Comments18619
+Node: Shell Commands19233
+Node: Simple Commands19999
+Node: Pipelines20630
+Node: Lists22505
+Node: Compound Commands24136
+Node: Looping Constructs24920
+Node: Conditional Constructs27367
+Node: Command Grouping34434
+Node: Shell Functions35883
+Node: Shell Parameters40151
+Node: Positional Parameters41732
+Node: Special Parameters42632
+Node: Shell Expansions45299
+Node: Brace Expansion47224
+Node: Tilde Expansion49549
+Node: Shell Parameter Expansion51890
+Node: Command Substitution59153
+Node: Arithmetic Expansion60486
+Node: Process Substitution61336
+Node: Word Splitting62386
+Node: Filename Expansion63847
+Node: Pattern Matching65983
+Node: Quote Removal69316
+Node: Redirections69611
+Node: Executing Commands77190
+Node: Simple Command Expansion77865
+Node: Command Search and Execution79795
+Node: Command Execution Environment81801
+Node: Environment84572
+Node: Exit Status86232
+Node: Signals87436
+Node: Shell Scripts89400
+Node: Shell Builtin Commands91918
+Node: Bourne Shell Builtins93497
+Node: Bash Builtins110450
+Node: The Set Builtin138577
+Node: Special Builtins146800
+Node: Shell Variables147777
+Node: Bourne Shell Variables148217
+Node: Bash Variables150198
+Node: Bash Features169913
+Node: Invoking Bash170796
+Node: Bash Startup Files176615
+Node: Interactive Shells181473
+Node: What is an Interactive Shell?181883
+Node: Is this Shell Interactive?182533
+Node: Interactive Shell Behavior183348
+Node: Bash Conditional Expressions186624
+Node: Shell Arithmetic190049
+Node: Aliases192794
+Node: Arrays195362
+Node: The Directory Stack198393
+Node: Directory Stack Builtins199107
+Node: Printing a Prompt201998
+Node: The Restricted Shell204712
+Node: Bash POSIX Mode206544
+Node: Job Control213197
+Node: Job Control Basics213664
+Node: Job Control Builtins217954
+Node: Job Control Variables222274
+Node: Command Line Editing223432
+Node: Introduction and Notation224431
+Node: Readline Interaction226053
+Node: Readline Bare Essentials227244
+Node: Readline Movement Commands229033
+Node: Readline Killing Commands229998
+Node: Readline Arguments231918
+Node: Searching232962
+Node: Readline Init File235148
+Node: Readline Init File Syntax236207
+Node: Conditional Init Constructs247860
+Node: Sample Init File250393
+Node: Bindable Readline Commands253510
+Node: Commands For Moving254717
+Node: Commands For History255578
+Node: Commands For Text258479
+Node: Commands For Killing261152
+Node: Numeric Arguments263294
+Node: Commands For Completion264433
+Node: Keyboard Macros268026
+Node: Miscellaneous Commands268597
+Node: Readline vi Mode273908
+Node: Programmable Completion274822
+Node: Programmable Completion Builtins280634
+Node: Using History Interactively288004
+Node: Bash History Facilities288684
+Node: Bash History Builtins291379
+Node: History Interaction295236
+Node: Event Designators297792
+Node: Word Designators298807
+Node: Modifiers300446
+Node: Installing Bash301852
+Node: Basic Installation302989
+Node: Compilers and Options305681
+Node: Compiling For Multiple Architectures306422
+Node: Installation Names308086
+Node: Specifying the System Type308904
+Node: Sharing Defaults309620
+Node: Operation Controls310293
+Node: Optional Features311251
+Node: Reporting Bugs319530
+Node: Major Differences From The Bourne Shell320724
+Node: Copying This Manual336496
+Node: GNU Free Documentation License336772
+Node: Builtin Index359178
+Node: Reserved Word Index365727
+Node: Variable Index368163
+Node: Function Index378882
+Node: Concept Index385602
 
 End Tag Table
