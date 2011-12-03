@@ -88,31 +88,31 @@
 \entry{prompting}{75}{prompting}
 \entry{restricted shell}{76}{restricted shell}
 \entry{POSIX Mode}{76}{POSIX Mode}
-\entry{job control}{79}{job control}
-\entry{foreground}{79}{foreground}
-\entry{background}{79}{background}
-\entry{suspending jobs}{79}{suspending jobs}
-\entry{Readline, how to use}{82}{Readline, how to use}
-\entry{interaction, readline}{83}{interaction, readline}
-\entry{notation, readline}{83}{notation, readline}
-\entry{command editing}{83}{command editing}
-\entry{editing command lines}{83}{editing command lines}
-\entry{killing text}{85}{killing text}
-\entry{yanking text}{85}{yanking text}
-\entry{kill ring}{85}{kill ring}
-\entry{initialization file, readline}{86}{initialization file, readline}
-\entry{variables, readline}{87}{variables, readline}
-\entry{programmable completion}{103}{programmable completion}
-\entry{completion builtins}{105}{completion builtins}
-\entry{History, how to use}{108}{History, how to use}
-\entry{command history}{109}{command history}
-\entry{history list}{109}{history list}
-\entry{history builtins}{109}{history builtins}
-\entry{history expansion}{111}{history expansion}
-\entry{event designators}{111}{event designators}
-\entry{history events}{111}{history events}
-\entry{installation}{115}{installation}
-\entry{configuration}{115}{configuration}
-\entry{Bash installation}{115}{Bash installation}
-\entry{Bash configuration}{115}{Bash configuration}
-\entry{FDL, GNU Free Documentation License}{131}{FDL, GNU Free Documentation License}
+\entry{job control}{81}{job control}
+\entry{foreground}{81}{foreground}
+\entry{background}{81}{background}
+\entry{suspending jobs}{81}{suspending jobs}
+\entry{Readline, how to use}{84}{Readline, how to use}
+\entry{interaction, readline}{85}{interaction, readline}
+\entry{notation, readline}{85}{notation, readline}
+\entry{command editing}{85}{command editing}
+\entry{editing command lines}{85}{editing command lines}
+\entry{killing text}{87}{killing text}
+\entry{yanking text}{87}{yanking text}
+\entry{kill ring}{87}{kill ring}
+\entry{initialization file, readline}{88}{initialization file, readline}
+\entry{variables, readline}{89}{variables, readline}
+\entry{programmable completion}{105}{programmable completion}
+\entry{completion builtins}{107}{completion builtins}
+\entry{History, how to use}{110}{History, how to use}
+\entry{command history}{111}{command history}
+\entry{history list}{111}{history list}
+\entry{history builtins}{111}{history builtins}
+\entry{history expansion}{113}{history expansion}
+\entry{event designators}{113}{event designators}
+\entry{history events}{113}{history events}
+\entry{installation}{117}{installation}
+\entry{configuration}{117}{configuration}
+\entry{Bash installation}{117}{Bash installation}
+\entry{Bash configuration}{117}{Bash configuration}
+\entry{FDL, GNU Free Documentation License}{133}{FDL, GNU Free Documentation License}

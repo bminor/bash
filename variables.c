@@ -1419,11 +1419,11 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("GROUPS", get_groupset, null_array_assign, att_noassign);
 
 #  if defined (DEBUGGER)
-  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, (att_invisible|att_noassign));
-  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign);
+  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign);
 #  endif /* DEBUGGER */
-  v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, (att_invisible|att_noassign));
-  v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, (att_invisible|att_noassign));
+  v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign);
+  v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign);
 #endif
 
   v = init_funcname_var ();

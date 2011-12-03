@@ -443,7 +443,11 @@ printstr (fmt, string, len, fieldwidth, precision)
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
 
+#if 0
   if (string == 0 || *string == '\0')
+#else
+  if (string == 0 || len == 0)
+#endif
     return;
 
 #if 0
@@ -644,7 +648,11 @@ bexpand (string, len, sawc, lenp)
   int temp;
   char *ret, *r, *s, c;
 
+#if 0
   if (string == 0 || *string == '\0')
+#else
+  if (string == 0 || len == 0)
+#endif
     {
       if (sawc)
 	*sawc = 0;

@@ -9793,3 +9793,26 @@ execute_cmd.c
 	- force extended_glob to 1 before calling binary_test in
 	  execute_cond_node so that the right extended pattern matching gets
 	  performed
+
+				    8/3
+				    ---
+braces.c
+	- make sure lhs[0] and rhs[0] are cast to `unsigned char' so chars
+	  with values > 128 are handled correctly
+
+builtins/printf.def
+	- change bexpand() and printstr() to handle strings with a leading
+	  '\0' whose length is non-zero, since that's valid input for the
+	  `%b' format specifier
+
+subst.c
+	- fix a couple of instances of find_variable that didn't check the
+	  result for an invisible variable
+
+variables.c
+	- BASH_ARGC, BASH_ARGV, BASH_SOURCE, BASH_LINENO no longer created as
+	  invisible vars
+
+pcomplete.c
+	- make sure COMP_WORDS is not invisible when bind_comp_words returns
+	- ditto for COMPREPLY in gen_shell_function_matches

@@ -4770,7 +4770,7 @@ parameter_brace_expand_length (name)
 	  FREE (t);
 	}
 #if defined (ARRAY_VARS)
-      else if ((var = find_variable (name + 1)) && array_p (var))
+      else if ((var = find_variable (name + 1)) && (invisible_p (var) == 0) && array_p (var))
 	{
 	  t = array_reference (array_cell (var), 0);
 	  number = MB_STRLEN (t);
@@ -5002,7 +5002,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
       else
 	return -1;
     }
-  else if ((v = find_variable (varname)) && array_p (v))
+  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && array_p (v))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;
