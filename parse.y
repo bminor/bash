@@ -2810,6 +2810,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  /* Translate $'...' here. */
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
 		  xfree (nestret);
+
 		  nestret = sh_single_quote (ttrans);
 		  free (ttrans);
 		  nestlen = strlen (nestret);
@@ -2820,13 +2821,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  /* Locale expand $"..." here. */
 		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
 		  xfree (nestret);
-		  nestret = (char *)xmalloc (ttranslen + 3);
-		  nestret[0] = '"';
-		  strcpy (nestret + 1, ttrans);
-		  nestret[ttranslen + 1] = '"';
-		  nestret[ttranslen += 2] = '\0';
+
+		  nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
-		  nestlen = ttranslen;
+		  nestlen = ttranslen + 2;
 		  retind -= 2;		/* back up before the $" */
 		}
 
@@ -2925,19 +2923,12 @@ parse_dparen (c)
   if (reserved_word_acceptable (last_read_token))
     {
       sline = line_number;
-#if 0
-      cmdtyp = parse_arith_cmd (&wval, 1);
-#else
+
       cmdtyp = parse_arith_cmd (&wval, 0);
-#endif
       if (cmdtyp == 1)	/* arithmetic command */
 	{
 	  wd = make_word (wval);
-#if 0
-	  wd->flags = W_QUOTED;
-#else
 	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB;
-#endif
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
 	  free (wval);	/* make_word copies it */
 	  return (ARITH_CMD);
@@ -3457,27 +3448,25 @@ read_token_word (character)
 		{
 		  ttrans = ansiexpand (ttok, 0, ttoklen - 1, &ttranslen);
 		  free (ttok);
+
 		  /* Insert the single quotes and correctly quote any
 		     embedded single quotes (allowed because P_ALLOWESC was
 		     passed to parse_matched_pair). */
 		  ttok = sh_single_quote (ttrans);
 		  free (ttrans);
+		  ttranslen = strlen (ttok);
 		  ttrans = ttok;
-		  ttranslen = strlen (ttrans);
 		}
 	      else
 		{
-		  /* Try to locale-expand the converted string. */
+		  /* Try to locale)-expand the converted string. */
 		  ttrans = localeexpand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
 		  free (ttok);
 
 		  /* Add the double quotes back */
-		  ttok = (char *)xmalloc (ttranslen + 3);
-		  ttok[0] = '"';
-		  strcpy (ttok + 1, ttrans);
-		  ttok[ttranslen + 1] = '"';
-		  ttok[ttranslen += 2] = '\0';
+		  ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
+		  ttranslen += 2;
 		  ttrans = ttok;
 		}
 

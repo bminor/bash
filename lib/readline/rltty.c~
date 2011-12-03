@@ -520,6 +520,7 @@ get_tty_settings (tty, tiop)
   set_winsize (tty);
 
   errno = 0;
+fprintf(stderr, "get_tty_settings: errno = %d\n", errno);
   if (_get_tty_settings (tty, tiop) < 0)
     return -1;
 
@@ -651,15 +652,12 @@ rl_prep_terminal (meta_flag)
 
   tty = fileno (rl_instream);
 
+  errno = 0;
   if (get_tty_settings (tty, &tio) < 0)
     {
-#if defined (ENOTSUP)
-      /* MacOS X, at least, lies about the value of errno if tcgetattr fails. */
-      if (errno == ENOTTY || errno == ENOTSUP)
-#else
       if (errno == ENOTTY)
-#endif
 	readline_echoing_p = 1;		/* XXX */
+else fprintf(stderr, "get_tty_settings fails but errno == %d\n", errno);
       release_sigint ();
       return;
     }

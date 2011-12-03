@@ -1166,7 +1166,10 @@ bash_default_completion (text, start, end, qc, in_command_position)
 	       directory (because it's not in $PATH), but the found name is
 	       also a command in the current directory, suppress appending any
 	       terminating character, since it's ambiguous. */
-	    rl_completion_suppress_append = 1;
+	    {
+	      rl_completion_suppress_append = 1;
+	      rl_filename_completion_desired = 0;
+	    }
 	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) && CMD_IS_DIR (matches[0]))
 	    /* There are multiple instances of the same match (duplicate
 	       completions haven't yet been removed).  In this case, all of
@@ -1176,7 +1179,10 @@ bash_default_completion (text, start, end, qc, in_command_position)
 	       Remember: we only care if there's eventually a single unique
 	       completion.  If there are multiple completions this won't
 	       make a difference and the problem won't occur. */
-	    rl_completion_suppress_append = 1;
+	    {
+	      rl_completion_suppress_append = 1;
+	      rl_filename_completion_desired = 0;
+	    }
 	}
     }
 

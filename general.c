@@ -269,7 +269,7 @@ assignment (string, flags)
   c = string[indx = 0];
 
 #if defined (ARRAY_VARS)
-  if ((legal_variable_starter (c) == 0) && (flags && c != '[')) /* ] */
+  if ((legal_variable_starter (c) == 0) && (flags == 0 || c != '[')) /* ] */
 #else
   if (legal_variable_starter (c) == 0)
 #endif

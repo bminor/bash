@@ -10358,3 +10358,76 @@ builtins/pushd.def
 lib/readline/shell.c
 	- change sh_set_lines_and_columns to prefer setenv, which has
 	  predictable memory allocation behavior, to putenv, which does not
+
+				   10/19
+				   -----
+variables.c
+	- change push_exported_var so that a tempenv variable has to have the
+	  export attribute set (which they all do -- something to look at) and
+	  the `propagate' attribute set to be propagated down to the next
+	  scope
+
+execute_cmd.c
+	- change execute_builtin so that if CMD_COMMAND_BUILTIN is set in the
+	  passed flags argument, call pop_scope with a value that says the
+	  builtin is not special, since `command' means that preceding variable
+	  assignments don't persist in the environment.  Fixes problem with
+	  variable assignments preceding command preceding special builtin
+	  kept those variable assignments around (when in posix mode)
+
+				   10/20
+				   -----
+lib/sh/shquote.c
+	- new function, sh_mkdoublequoted, brackets a given string with
+	  double quotes and returns a new string.  Flags argument, if non-
+	  zero, means to quote embedded double quotes with backslashes
+
+externs.h
+	- new extern declaration for sh_mkdoublequoted
+
+parse.y
+	- use sh_mkdoublequoted after calling localeexpand()
+
+lib/sh/strtrans.c
+	- change ansicstr to understand that  (flags & 4) != 0 means to remove
+	  backslash from unrecognized escape sequences
+
+general.c
+	- fix logic problem in assignment() that caused non-variable-starter
+	  characters to be allowed, resulting in things like `1=xxx' creating
+	  a variable `1' in the hash table
+
+				   10/21
+				   -----
+bashline.c
+	- don't call programmable_completions with an assignment statement
+	  argument
+
+				   10/22
+				   -----
+lib/readline/rltty.c
+	- in prepare_terminal_settings, turn echoing on (readline_echoing_p)
+	  if get_tty_settings fails because the input is not a terminal
+
+				   10/24
+				   -----
+lib/readline/util.c
+	- include rlmbutil.h for multibyte definitions
+	- new function, _rl_walphabetic, wide char version of rl_alphabetic
+
+lib/readline/mbutil.c
+	- new function, _rl_char_value(buf, ind), returns value of (possibly
+	  multibyte) character at buf[ind]
+
+lib/readline/rlmbutil.h
+	- extern defines for _rl_walphabetic and _rl_char_value for when
+	  multibyte chars are not being used
+	- new wrapper definitions for _rl_find_next_mbchar (MB_NEXTCHAR) and
+	  _rl_find_prev_mbchar (MB_PREVCHAR) that try to avoid unneeded
+	  function calls
+
+lib/readline/text.c
+	- fix rl_foward_word to work with multibyte characters (or in a
+	  multibyte locale) using above utility functions
+	- fix rl_backward_word to work with multibyte characters (or in a
+	  multibyte locale) using above utility functions

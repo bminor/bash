@@ -420,7 +420,8 @@ rl_end_of_line (count, key)
   return 0;
 }
 
-/* Move forward a word.  We do what Emacs does.  Handles multibyte chars. */
+/* XXX - these might need changes for multibyte characters */
+/* Move forward a word.  We do what Emacs does. */
 int
 rl_forward_word (count, key)
      int count, key;
@@ -441,26 +442,26 @@ rl_forward_word (count, key)
 
       if (_rl_walphabetic (c) == 0)
 	{
-	  rl_point = MB_NEXTCHAR (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
+	  rl_point = _rl_find_next_mbchar (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
 	  while (rl_point < rl_end)
 	    {
 	      c = _rl_char_value (rl_line_buffer, rl_point);
 	      if (_rl_walphabetic (c))
 		break;
-	      rl_point = MB_NEXTCHAR (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
+	      rl_point = _rl_find_next_mbchar (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
 	    }
 	}
 
       if (rl_point == rl_end)
 	return 0;
 
-      rl_point = MB_NEXTCHAR (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
+      rl_point = _rl_find_next_mbchar (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
       while (rl_point < rl_end)
 	{
 	  c = _rl_char_value (rl_line_buffer, rl_point);
 	  if (_rl_walphabetic (c) == 0)
 	    break;
-	  rl_point = MB_NEXTCHAR (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
+	  rl_point = _rl_find_next_mbchar (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
 	}
 
       --count;
@@ -469,48 +470,42 @@ rl_forward_word (count, key)
   return 0;
 }
 
-/* Move backward a word.  We do what Emacs does.  Handles multibyte chars. */
+/* Move backward a word.  We do what Emacs does. */
 int
 rl_backward_word (count, key)
      int count, key;
 {
-  int c, p;
+  int c;
 
   if (count < 0)
     return (rl_forward_word (-count, key));
 
   while (count)
     {
-      if (rl_point == 0)
+      if (!rl_point)
 	return 0;
 
       /* Like rl_forward_word (), except that we look at the characters
 	 just before point. */
 
-      p = MB_PREVCHAR (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-      c = _rl_char_value (rl_line_buffer, p);
-
-      if (_rl_walphabetic (c) == 0)
+      c = rl_line_buffer[rl_point - 1];
+      if (rl_alphabetic (c) == 0)
 	{
-	  rl_point = p;
-	  while (rl_point > 0)
+	  while (--rl_point)
 	    {
-	      p = MB_PREVCHAR (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-	      c = _rl_char_value (rl_line_buffer, p);
-	      if (_rl_walphabetic (c))
+	      c = rl_line_buffer[rl_point - 1];
+	      if (rl_alphabetic (c))
 		break;
-	      rl_point = p;
 	    }
 	}
 
       while (rl_point)
 	{
-	  p = MB_PREVCHAR (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-	  c = _rl_char_value (rl_line_buffer, p);	  
-	  if (_rl_walphabetic (c) == 0)
+	  c = rl_line_buffer[rl_point - 1];
+	  if (rl_alphabetic (c) == 0)
 	    break;
 	  else
-	    rl_point = p;
+	    --rl_point;
 	}
 
       --count;

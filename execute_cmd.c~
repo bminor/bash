@@ -2281,6 +2281,7 @@ execute_while_or_until (while_command, type)
       return_value = execute_command (while_command->test);
       REAP ();
 
+itrace("execute_while_or_until: test returns %d", return_value);
       /* Need to handle `break' in the test when we would break out of the
          loop.  The job control code will set `breaking' to loop_level
          when a job in a loop is stopped with SIGTSTP.  If the stopped job
@@ -2303,6 +2304,7 @@ execute_while_or_until (while_command, type)
       body_status = execute_command (while_command->action);
       QUIT;
 
+itrace("execute_while_or_until: body returns %d", body_status);
       if (breaking)
 	{
 	  breaking--;
@@ -3053,7 +3055,7 @@ execute_builtin (builtin, words, flags, subshell)
 	{
 	  push_scope (VC_BLTNENV, temporary_env);
 	  if (subshell == 0)
-	    add_unwind_protect (pop_scope, "1");
+	    add_unwind_protect (pop_scope, (flags & CMD_COMMAND_BUILTIN) ? 0 : "1");
           temporary_env = (HASH_TABLE *)NULL;	  
 	}
     }

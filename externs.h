@@ -235,6 +235,7 @@ extern int sh_regmatch __P((const char *, const char *, int));
 /* declarations for functions defined in lib/sh/shquote.c */
 extern char *sh_single_quote __P((char *));
 extern char *sh_double_quote __P((char *));
+extern char *sh_mkdoublequoted __P((const char *, int, int));
 extern char *sh_un_double_quote __P((char *));
 extern char *sh_backslash_quote __P((char *));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));

@@ -3053,7 +3053,7 @@ execute_builtin (builtin, words, flags, subshell)
 	{
 	  push_scope (VC_BLTNENV, temporary_env);
 	  if (subshell == 0)
-	    add_unwind_protect (pop_scope, "1");
+	    add_unwind_protect (pop_scope, (flags & CMD_COMMAND_BUILTIN) ? 0 : "1");
           temporary_env = (HASH_TABLE *)NULL;	  
 	}
     }
