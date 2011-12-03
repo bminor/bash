@@ -375,7 +375,7 @@ printf_builtin (list)
 		int rlen, r;
 
 		p = getstr ();
-		ch = rlen = 0;
+		ch = rlen = r = 0;
 		xp = bexpand (p, strlen (p), &ch, &rlen);
 
 		if (xp)
@@ -402,6 +402,7 @@ printf_builtin (list)
 		char *p, *xp;
 		int r;
 
+		r = 0;
 		p = getstr ();
 		if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);

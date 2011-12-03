@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHacdflmnpstuv] [limit]
+$SHORT_DOC ulimit [-SHacdfilmnpqstuvx] [limit]
 Ulimit provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
 option is given, it is interpreted as follows:
@@ -231,7 +231,7 @@ static RESOURCE_LIMITS limits[] = {
   { 'w',	RLIMIT_SWAP,	1024,	"swap size",		"kbytes" },
 #endif
 #ifdef RLIMIT_LOCKS
-  { 'w',	RLIMIT_LOCKS,	1,	"file locks",		(char *)NULL },
+  { 'x',	RLIMIT_LOCKS,	1,	"file locks",		(char *)NULL },
 #endif
   { -1, -1, -1, (char *)NULL, (char *)NULL }
 };

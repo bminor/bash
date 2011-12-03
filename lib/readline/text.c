@@ -1234,42 +1234,81 @@ static int
 rl_change_case (count, op)
      int count, op;
 {
-  register int start, end;
-  int inword, c;
+  int start, next, end;
+  int inword, c, nc, nop;
+#if defined (HANDLE_MULTIBYTE)
+  wchar_t wc, nwc;
+  char mb[MB_LEN_MAX+1];
+  int mblen, p;
+  mbstate_t ps;
+#endif
 
   start = rl_point;
   rl_forward_word (count, 0);
   end = rl_point;
 
+  if (op != UpCase && op != DownCase && op != CapCase)
+    {
+      rl_ding ();
+      return -1;
+    }
+
   if (count < 0)
     SWAP (start, end);
+
+#if defined (HANDLE_MULTIBYTE)
+  memset (&ps, 0, sizeof (mbstate_t));
+#endif
 
   /* We are going to modify some text, so let's prepare to undo it. */
   rl_modifying (start, end);
 
-  for (inword = 0; start < end; start++)
+  inword = 0;
+  while (start < end)
     {
-      c = rl_line_buffer[start];
-      switch (op)
+      c = _rl_char_value (rl_line_buffer, start);
+      /*  This assumes that the upper and lower case versions are the same width. */
+      next = MB_NEXTCHAR (rl_line_buffer, start, 1, MB_FIND_NONZERO);
+
+      if (_rl_walphabetic (c) == 0)
 	{
-	case UpCase:
-	  rl_line_buffer[start] = _rl_to_upper (c);
-	  break;
-
-	case DownCase:
-	  rl_line_buffer[start] = _rl_to_lower (c);
-	  break;
-
-	case CapCase:
-	  rl_line_buffer[start] = (inword == 0) ? _rl_to_upper (c) : _rl_to_lower (c);
-	  inword = rl_alphabetic (rl_line_buffer[start]);
-	  break;
-
-	default:
-	  rl_ding ();
-	  return -1;
+	  inword = 0;
+	  start = next;
+	  continue;
 	}
+
+      if (op == CapCase)
+	{
+	  nop = inword ? DownCase : UpCase;
+	  inword = 1;
+	}
+      else
+	nop = op;
+      if (MB_CUR_MAX == 1 || rl_byte_oriented || isascii (c))
+	{
+	  nc = (nop == UpCase) ? _rl_to_upper (c) : _rl_to_lower (c);
+	  rl_line_buffer[start] = nc;
+	}
+#if defined (HANDLE_MULTIBYTE)
+      else
+	{
+	  mbrtowc (&wc, rl_line_buffer + start, end - start, &ps);
+	  nwc = (nop == UpCase) ? (iswlower (wc) ? towupper (wc) : wc)
+				: (iswupper (wc) ? towlower (wc) : wc);
+	  if  (nwc != wc)	/*  just skip unchanged characters */
+	    {
+	      mblen = wcrtomb (mb, nwc, &ps);
+	      if (mblen > 0)
+		mb[mblen] = '\0';
+	      /* Assume the same width */
+	      strncpy (rl_line_buffer + start, mb, mblen);
+	    }
+	}
+#endif
+
+      start = next;
     }
+
   rl_point = end;
   return 0;
 }

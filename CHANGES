@@ -223,6 +223,12 @@ qqq. Fixed a bug that caused core dumps when the shell was reading its non-
      interactive input from fd 0 and fd 0 was duplicated and restored using a
      combination of `exec' (to save) and redirection (to restore).
 
+rrr. Fixed a problem that caused loops in sourced scripts to not be cleaned
+     up properly when a `return' is executed.
+
+sss. Change internal command substitution completion function to append a slash
+     to directory names in the command.
+
 2.  Changes to Readline
 
 a.  Fixed a bug that caused multiliine prompts to be wrapped and displayed
@@ -283,6 +289,9 @@ r.  Lots of changes so readline builds and runs on MinGW.
 
 s.  Readline no longer tries to modify the terminal settings when running in
     callback mode.
+
+t.  The Readline display code no longer sets the location of the last invisible
+    character in the prompt if the \[\] sequence is empty.
 
 3.  New Features in Bash
 

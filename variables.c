@@ -1819,7 +1819,7 @@ make_variable_value (var, value, flags)
     {
       if (flags & ASS_APPEND)
 	{
-	  oval = value_cell (var);
+	  oval = get_variable_value (var);
 	  if (oval == 0)	/* paranoia */
 	    oval = "";
 	  olen = STRLEN (oval);
@@ -3937,6 +3937,7 @@ sv_histsize (name)
 {
   char *temp;
   intmax_t num;
+  int hmax;
 
   temp = get_string_value (name);
 
@@ -3946,7 +3947,8 @@ sv_histsize (name)
 	{
 	  if (name[4] == 'S')
 	    {
-	      stifle_history (num);
+	      hmax = num;
+	      stifle_history (hmax);
 	      num = where_history ();
 	      if (history_lines_this_session > num)
 		history_lines_this_session = num;

@@ -11797,6 +11797,43 @@ builtins/evalstring.c
 
 bashline.c
 	- change command_subst_completion_function to suppress appending
-	  any character to a unique completion, instead of a space, which
-	  can be misleading when the last word in the quoted command
-	  substitution completes to a directory name
+	  any character to a unique completion, instead of a space, unless
+	  the last word in the quoted command substitution completes to a
+	  directory name.  In that case we append the expected slash
+
+				    8/1
+				    ---
+builtins/printf.def
+	- make sure variables are initialized if their values are tested later
+
+[bash-3.1-alpha1 updated and re-frozen]
+
+				    8/2
+				    ---
+variables.c
+	- make sure to call stifle_history with an `int' instead of an intmax_t.
+	  Sometimes it makes a difference
+
+				    8/3
+				    ---
+[bash-3.1-alpha1 released]
+
+support/mksignames.c
+	- add `SIGSTKFLT' (RHE3)
+	- add `SIGXRES' (Solaris 9)
+
+				    8/4
+				    ---
+builtins/ulimit.def
+	- fix typo to make `x' the right option for locks
+	- add new options to short help synopsis
+
+variables.c
+	- use get_variable_value instead of direct reference to value_cell
+	  in make_variable_value when appending to the current value, so
+	  references to array variables without subscripts will be equivalent
+	  to element 0
+
+lib/readline/text.c
+	- rewrote rl_change_case to correctly change the case of multibyte
+	  characters where appropriate

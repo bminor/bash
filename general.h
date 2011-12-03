@@ -24,6 +24,7 @@
 #include "stdc.h"
 
 #include "bashtypes.h"
+#include "chartypes.h"
 
 #if defined (HAVE_SYS_RESOURCE_H) && defined (RLIMTYPE)
 #  if defined (HAVE_SYS_TIME_H)
@@ -249,14 +250,18 @@ typedef int QSFUNC ();
 #  define ABSPATH(x)	((x)[0] == '/')
 #  define RELPATH(x)	((x)[0] != '/')
 #else /* __CYGWIN__ */
-#  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':' && (x)[2] == '/') || (x)[0] == '/')
-#  define RELPATH(x)	(!(x)[0] || ((x)[1] != ':' && (x)[0] != '/'))
+#  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':') || ISDIRSEP((x)[0]))
+#  define RELPATH(x)	(ABSPATH(x) == 0)
 #endif /* __CYGWIN__ */
 
 #define ROOTEDPATH(x)	(ABSPATH(x))
 
 #define DIRSEP	'/'
-#define ISDIRSEP(c)	((c) == '/')
+#if !defined (__CYGWIN__)
+#  define ISDIRSEP(c)	((c) == '/')
+#else
+#  define ISDIRSEP(c)	((c) == '/' || (c) == '\\')
+#endif /* __CYGWIN__ */
 #define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
 
 #if 0
