@@ -11155,3 +11155,14 @@ builtins/read.def
 	  escaping IFS whitespace characters at the end of input cause the
 	  whitespace characters to be preserved in the value assigned to the
 	  variable, and the trailing non-whitespace field delimiter issue
+
+				    3/7
+				    ---
+configure.in
+	- add -D_POSIX_SOURCE to the LOCAL_CFLAGS for Interix
+
+				    3/8
+				    ---
+bashline.c
+	- make bash_directory_expansion a void function, since it doesn't have
+	  any return value

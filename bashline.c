@@ -100,7 +100,7 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
-static int bash_directory_expansion __P((char **));
+static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
@@ -2207,7 +2207,7 @@ bash_ignore_everything (names)
 /* Simulate the expansions that will be performed by
    rl_filename_completion_function.  This must be called with the address of
    a pointer to malloc'd memory. */
-static int
+static void
 bash_directory_expansion (dirname)
      char **dirname;
 {
