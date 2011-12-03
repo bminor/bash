@@ -1,6 +1,6 @@
 /* execute_command.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -491,6 +491,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 {
   int exec_result, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
+  volatile int last_pid;
   volatile int save_line_number;
 
   if (command == 0 || breaking || continuing || read_but_dont_execute)
@@ -647,7 +648,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	/* We can't rely on variables retaining their values across a
 	   call to execute_simple_command if a longjmp occurs as the
 	   result of a `return' builtin.  This is true for sure with gcc. */
+#if defined (RECYCLES_PIDS)
 	last_made_pid = NO_PID;
+#endif
+	last_pid = last_made_pid;
 	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
 
 	if (ignore_return && command->value.Simple)
@@ -677,7 +681,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	/* XXX - this is something to watch out for if there are problems
 	   when the shell is compiled without job control. */
 	if (already_making_children && pipe_out == NO_PIPE &&
-	    last_made_pid != NO_PID)
+	    last_made_pid != last_pid)
 	  {
 	    stop_pipeline (asynchronous, (COMMAND *)NULL);
 

@@ -1857,12 +1857,17 @@ rl_message (va_alist)
 #endif
   va_end (args);
 
-  rl_display_prompt = msg_buf;
   if (saved_local_prompt == 0)
     {
       rl_save_prompt ();
       msg_saved_prompt = 1;
     }
+  rl_display_prompt = msg_buf;
+  local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
+					 &prompt_last_invisible,
+					 &prompt_invis_chars_first_line,
+					 &prompt_physical_chars);
+  local_prompt_prefix = (char *)NULL;
   (*rl_redisplay_function) ();
 
   return 0;
@@ -1881,6 +1886,11 @@ rl_message (format, arg1, arg2)
       rl_save_prompt ();
       msg_saved_prompt = 1;
     }
+  local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
+					 &prompt_last_invisible,
+					 &prompt_invis_chars_first_line,
+					 &prompt_physical_chars);
+  local_prompt_prefix = (char *)NULL;
   (*rl_redisplay_function) ();
       
   return 0;

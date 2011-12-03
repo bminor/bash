@@ -1,4 +1,4 @@
-.\"
+\"
 .\" MAN PAGE COMMENTS to
 .\"
 .\"	Chet Ramey
@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Sat Nov 13 15:05:55 EST 2004
+.\"	Last Change: Tue Jan  4 17:23:59 EST 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Nov 13" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Jan 4" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2004 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2004 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2005 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2005 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -895,7 +895,11 @@ Each of the \fImetacharacters\fP listed above under
 has special meaning to the shell and must be quoted if it is to
 represent itself.
 .PP
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(see
+.SM
+.B HISTORY EXPANSION
+below), the
 \fIhistory expansion\fP character, usually \fB!\fP, must be quoted
 to prevent history expansion.
 .PP
@@ -919,8 +923,9 @@ Enclosing characters in double quotes preserves the literal value
 of all characters within the quotes, with the exception of
 .BR $ ,
 .BR ` ,
-and
-.BR \e .
+.BR \e ,
+and, when history expansion is enabled,
+.BR ! .
 The characters
 .B $
 and
@@ -936,8 +941,12 @@ or
 .BR <newline> .
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an
+.B !
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the
+.B !
+is not removed.
 .PP
 The special parameters
 .B *
@@ -951,7 +960,7 @@ below).
 .PP
 Words of the form \fB$\fP'\fIstring\fP' are treated specially.  The
 word expands to \fIstring\fP, with backslash-escaped characters replaced
-as specifed by the ANSI C standard.  Backslash escape sequences, if
+as specified by the ANSI C standard.  Backslash escape sequences, if
 present, are decoded as follows:
 .RS
 .PD 0
@@ -2273,7 +2282,7 @@ interpreted as part of the name.
 .PP
 When braces are used, the matching ending brace is the first `\fB}\fP'
 not escaped by a backslash or within a quoted string, and not within an
-embedded arithmetic expansion, command substitution, or paramter
+embedded arithmetic expansion, command substitution, or parameter
 expansion.
 .PP
 .PD 0
@@ -3320,19 +3329,21 @@ environment are identical between a function and its caller
 with the exception that the
 .SM
 .B DEBUG
-trap (see the description of the
+and
+.B RETURN
+traps (see the description of the
 .B trap
 builtin under
 .SM
 .B SHELL BUILTIN COMMANDS
-below) is not inherited unless the function has been given the
+below) are not inherited unless the function has been given the
 \fBtrace\fP attribute (see the description of the
 .SM
 .B declare
 builtin below) or the
 \fB\-o functrace\fP shell option has been enabled with
 the \fBset\fP builtin
-(in which case all functions inherit the \fBDEBUG\fP trap).
+(in which case all functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps).
 .PP
 Variables local to the function may be declared with the
 .B local
@@ -3471,7 +3482,7 @@ If \fIbase#\fP is omitted, then base 10 is used.
 The digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If \fIbase\fP is less than or equal to 36, lowercase and uppercase
-letters may be used interchangably to represent numbers between 10
+letters may be used interchangeably to represent numbers between 10
 and 35.
 .PP
 Operators are evaluated in order of precedence.  Sub-expressions in
@@ -4594,7 +4605,7 @@ attempts word completion.
 .TP
 .B history-preserve-point
 If set to \fBon\fP, the history code attempts to place point at the
-same location on each history line retrived with \fBprevious-history\fP
+same location on each history line retrieved with \fBprevious-history\fP
 or \fBnext-history\fP.
 .TP
 .B horizontal\-scroll\-mode (Off)
@@ -4894,6 +4905,8 @@ With an argument
 insert the \fIn\fPth word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
 inserts the \fIn\fPth word from the end of the previous command.
+Once the argument \fIn\fP is computed, the argument is extracted
+as if the "!\fIn\fP" history expansion had been specified.
 .TP
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
@@ -4902,6 +4915,8 @@ the previous history entry).  With an argument,
 behave exactly like \fByank\-nth\-arg\fP.
 Successive calls to \fByank\-last\-arg\fP move back through the history
 list, inserting the last argument of each line in turn.
+The history expansion facilities are used to extract the last argument,
+as if the "!$" history expansion had been specified.
 .TP
 .B shell\-expand\-line (M\-C\-e)
 Expand the line as the shell does.  This
@@ -5378,7 +5393,7 @@ special variable as delimiters.
 Shell quoting is honored.
 Each word is then expanded using
 brace expansion, tilde expansion, parameter and variable expansion,
-command substitution, arithmetic expansion, and pathname expansion,
+command substitution, and arithmetic expansion,
 as described above under 
 .SM
 .BR EXPANSION .
@@ -6420,7 +6435,8 @@ by subsequent assignment statements or unset.
 .TP
 .B \-t
 Give each \fIname\fP the \fItrace\fP attribute.
-Traced functions inherit the \fBDEBUG\fP trap from the calling shell.
+Traced functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps from
+the calling shell.
 The trace attribute has no special meaning for variables.
 .TP
 .B \-x
@@ -7479,7 +7495,10 @@ before execution resumes after the function or script.
 .TP
 \fBset\fP [\fB\-\-abefhkmnptuvxBCHP\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
 Without options, the name and value of each shell variable are displayed
-in a format that can be reused as input.
+in a format that can be reused as input
+for setting or resetting the currently-set variables.
+Read-only variables cannot be reset.
+In \fIposix mode\fP, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after the options are processed are treated
@@ -7652,7 +7671,7 @@ This option is disabled by default.
 Change the behavior of
 .B bash
 where the default operation differs
-from the POSIX 1003.2 standard to match the standard (\fI`posix mode\fP).
+from the POSIX 1003.2 standard to match the standard (\fIposix mode\fP).
 .TP 8
 .B privileged
 Same as
@@ -7766,9 +7785,11 @@ follows the logical chain of directories when performing commands
 which change the current directory.
 .TP 8
 .B \-T
-If set, any trap on \fBDEBUG\fP is inherited by shell functions, command
-substitutions, and commands executed in a subshell environment.
-The \fBDEBUG\fP trap is normally not inherited in such cases.
+If set, any traps on \fBDEBUG\fP and \fBRETURN\fP are inherited by shell
+functions, command substitutions, and commands executed in a
+subshell environment.
+The \fBDEBUG\fP and \fBRETURN\fP traps are normally not inherited
+in such cases.
 .TP 8
 .B \-\-
 If no arguments follow this option, then the positional parameters are
@@ -8531,8 +8552,7 @@ refers to a shell variable.
 Read-only variables may not be unset.
 If
 .B \-f
-is specifed, 
-each
+is specified, each
 .I name
 refers to a shell function, and the function definition
 is removed.

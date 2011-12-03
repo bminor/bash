@@ -141,7 +141,7 @@ jobs_builtin (list)
       BLOCK_CHILD (set, oset);
       job = get_job_spec (list);
 
-      if ((job == NO_JOB) || !jobs || !jobs[job])
+      if ((job == NO_JOB) || jobs == 0 || get_job_by_jid (job) == 0)
 	{
 	  sh_badjob (list->word->word);
 	  any_failed++;
@@ -162,6 +162,7 @@ execute_list_with_replacements (list)
   register WORD_LIST *l;
   int job, result;
   COMMAND *command;
+  JOB *j;
 
   /* First do the replacement of job specifications with pids. */
   for (l = list; l; l = l->next)
@@ -174,8 +175,9 @@ execute_list_with_replacements (list)
 	  if (INVALID_JOB (job))
 	    continue;
 
+	  j = get_job_by_jid (job);
 	  free (l->word->word);
-	  l->word->word = itos (jobs[job]->pgrp);
+	  l->word->word = itos (j->pgrp);
 	}
     }
 

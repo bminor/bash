@@ -78,10 +78,14 @@ sunos4*)
 sunos5*-*gcc*|solaris2*-*gcc*)
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD='${CC}'
-	# This line works for the Solaris linker in /usr/ccs/bin/ld
-	SHOBJ_LDFLAGS='-shared -Wl,-i -Wl,-h,$@'
-	# This line works for the GNU ld
-#	SHOBJ_LDFLAGS='-shared -Wl,-h,$@'
+	ld_used=`gcc -print-prog-name=ld`
+	if ${ld_used} -V 2>&1 | grep GNU >/dev/null 2>&1; then
+		# This line works for the GNU ld
+		SHOBJ_LDFLAGS='-shared -Wl,-h,$@'
+	else
+		# This line works for the Solaris linker in /usr/ccs/bin/ld
+		SHOBJ_LDFLAGS='-shared -Wl,-i -Wl,-h,$@'
+	fi
 
 #	SHLIB_XLDFLAGS='-R $(libdir)'
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'

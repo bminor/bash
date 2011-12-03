@@ -1,10 +1,10 @@
 ## -*- text -*- ####################################################
 #								   #
-# Makefile for the GNU Glob Library.				   #
+# Makefile for the GNU Tilde Library.				   #
 #								   #
 ####################################################################
-#
-# Copyright (C) 1996-2005 Free Software Foundation, Inc.     
+
+# Copyright (C) 1996 Free Software Foundation, Inc.     
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,31 +51,28 @@ LOCAL_DEFS = @LOCAL_DEFS@
 
 BASHINCDIR = ${topdir}/include
 
-INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib
+INCLUDES = -I. -I../.. -I$(topdir) -I${BASHINCDIR} -I$(topdir)/lib
 
-CCFLAGS = $(PROFILE_FLAGS) $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) ${INCLUDES} \
-	  $(LOCAL_CFLAGS) $(CFLAGS)
+CCFLAGS = $(PROFILE_FLAGS) $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) \
+	  ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
 
-# Here is a rule for making .o files from .c files that doesn't force
-# the type of the machine (like -sun3) into the flags.
 .c.o:
 	$(CC) -c $(CCFLAGS) $<
 
 # The name of the library target.
-LIBRARY_NAME = libglob.a
+LIBRARY_NAME = libtilde.a
 
 # The C code source files for this library.
-CSOURCES = $(srcdir)/glob.c $(srcdir)/strmatch.c $(srcdir)/smatch.c \
-	   $(srcdir)/xmbsrtowcs.c
+CSOURCES = $(srcdir)/tilde.c
 
 # The header files for this library.
-HSOURCES = $(srcdir)/strmatch.h
+HSOURCES = $(srcdir)/tilde.h
 
-OBJECTS = glob.o strmatch.o smatch.o xmbsrtowcs.o
+OBJECTS = tilde.o
 
 # The texinfo files which document this library.
-DOCSOURCE = doc/glob.texi
-DOCOBJECT = doc/glob.dvi
+DOCSOURCE = doc/tilde.texi
+DOCOBJECT = doc/tilde.dvi
 DOCSUPPORT = doc/Makefile
 DOCUMENTATION = $(DOCSOURCE) $(DOCOBJECT) $(DOCSUPPORT)
 
@@ -94,23 +91,21 @@ $(LIBRARY_NAME): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
-what-tar:
-	@for file in $(THINGS_TO_TAR); do \
-	  echo $(selfdir)$$file; \
-	done
-
 documentation: force
 	-(cd doc; $(MAKE) $(MFLAGS))
+
 force:
 
 # The rule for 'includes' is written funny so that the if statement
 # always returns TRUE unless there really was an error installing the
 # include files.
 install:
+	$(INSTALL_DATA) -c -m 644 $(LIBRARY_NAME) $(libdir)/$(LIBRARY_NAME)
+	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/$(LIBRARY_NAME)
 
 clean:
-	rm -f $(OBJECTS) $(LIBRARY_NAME)
-	-(cd doc && $(MAKE) $(MFLAGS) $@ )
+	$(RM) -f $(OBJECTS) $(LIBRARY_NAME)
+	-( cd doc && $(MAKE) $(MFLAGS) $@ )
 
 realclean distclean maintainer-clean: clean
 	-( cd doc && $(MAKE) $(MFLAGS) $@ )
@@ -125,34 +120,8 @@ mostlyclean: clean
 #								     #
 ######################################################################
 
-smatch.o: strmatch.h
-smatch.o: $(BUILD_DIR)/config.h
-smatch.o: $(BASHINCDIR)/chartypes.h
-smatch.o: $(BASHINCDIR)/ansi_stdlib.h $(topdir)/bashansi.h
-smatch.o: $(BASHINCDIR)/shmbutil.h
-smatch.o: $(topdir)/xmalloc.h
-
-strmatch.o: strmatch.h
-strmatch.o: $(BUILD_DIR)/config.h
-strmatch.o: $(BASHINCDIR)/stdc.h
-
-glob.o: $(BUILD_DIR)/config.h
-glob.o: $(topdir)/bashtypes.h $(BASHINCDIR)/ansi_stdlib.h $(topdir)/bashansi.h
-glob.o: $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/memalloc.h
-glob.o: strmatch.h glob.h
-glob.o: $(BASHINCDIR)/shmbutil.h
-glob.o: $(topdir)/xmalloc.h
-
-xmbsrtowcs.o: ${BUILD_DIR}/config.h
-xmbsrtowcs.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
-xmbsrtowcs.o: ${BASHINCDIR}/shmbutil.h
+tilde.o: tilde.h $(BASHINCDIR)/ansi_stdlib.h
+tilde.o: $(BUILD_DIR)/config.h
 
 # Rules for deficient makes, like SunOS and Solaris
-glob.o: glob.c
-strmatch.o: strmatch.c
-smatch.o: smatch.c
-xmbsrtowcs.o: xmbsrtowcs.c
-
-# dependencies for C files that include other C files
-glob.o: glob_loop.c
-smatch.o: sm_loop.c
+tilde.o: tilde.c

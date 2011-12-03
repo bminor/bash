@@ -10925,6 +10925,12 @@ configure.in
 Makefile.in
 	- use $(SIZE) instead of size; set SIZE from configure
 
+				   1/31
+				   ----
+arrayfunc.c
+	- in array_value_internal, return NULL right away if the variable's
+	  value is NULL, instead of passing a null string to add_string_to_list
+
 				    2/1
 				    ---
 jobs.h
@@ -10943,6 +10949,7 @@ jobs.[ch]
 	  a job index
 	- new function, reset_job_indices, called from delete_job if
 	  js.j_lastj or js.j_firstj are removed
+	- change various functions to keep counters and stats in struct jobstats
 
 pcomplete.c, builtins/common.c, builtins/{exit,fg_bg,jobs,kill,wait}.def
 	- change global variables (e.g., job_slots) to struct members
@@ -10951,7 +10958,7 @@ pcomplete.c, builtins/common.c, builtins/{exit,fg_bg,jobs,kill,wait}.def
 	- use get_job_by_jid and J_JOBSTATE where appropriate
 
 trap.c
-	- change reset_or_restore_signal_handler to not free the trap
+	- change reset_or_restore_signal_handler to not free the exit trap
 	  string if the function pointer is reset_signal, which is used when
 	  the trap strings shouldn't be freed, like in command substitution
 
@@ -10976,3 +10983,83 @@ parse.y
 		 (echo 6))
 
 	  work right
+
+				    2/8
+				    ---
+jobs.h
+	- new structs for holding status of exited background processes, as
+	  POSIX specifies
+	- new job flag: J_ASYNC
+
+jobs.c
+	- new functions to manipulate struct holding status of exited
+	  background processes
+	- new members in struct jobstats to hold pointer to last created job
+	  and last created asynchronous job
+	- initialize js.c_childmax in initialize_job_control
+	- if the `async' arg to stop_pipeline is non-null, set the J_ASYNC
+	  flag in the job struct
+	- set js.j_last_made_job and js.j_last_asynchronous_job in
+	  stop_pipeline
+	- new function: find_last_proc, returns the PROCESS * to the last proc
+	  in a job's pipeline
+	- changed find_last_pid to call find_last_proc
+	- change delete_job to call bgp_add on the last proc of the job being
+	  deleted
+	- change delete_all_jobs and wait_for_background_pids to call bgp_clear
+
+				    2/9
+				    ---
+jobs.c
+	- change wait_for_single_pid to look for pid in bgpids.list (using
+	  bgp_search()) if find_pipeline returns NULL
+
+				   2/10
+				   ----
+support/shobj-conf
+	- change the solaris-gcc stanza so that it auto-selects the appropriate
+	  options for ld depending on which `ld' gcc says it's going to run
+
+				   2/11
+				   ----
+jobs.h
+	- add support for PS_RECYCLED as a process state, add PRECYCLED macro
+	  to test it.  Change PALIVE and PRUNNING macros to not count processes
+	  in PS_RECYCLED state
+
+execute_cmd.c
+	- restore use of last_pid as sentinel value; use NO_PID as sentinel
+	  only if RECYCLES_PIDS is defined
+
+jobs.c
+	- change find_job to return a pointer to the PROCESS the desired pid
+	  belongs to, analogous to find_pipeline returning pointer to JOB
+	- change find_job callers to add extra argument
+	- change running_only arguments to find_pipeline and find_job to
+	  alive_only, since we don't want recycled pids returned here and it
+	  better describes the result
+	- new function find_process, calls find_pipeline and searches the
+	  returned pipeline for the PROCESS * describing the desired pid
+	- in make_child, if fork() returns the same pid as the value of
+	  last_asynchronous_pid when RECYCLES_PIDS is defined, avoid pid
+	  aliasing by resetting last_asynchronous_pid to 1
+	- use PRUNNING instead of child->running, since we, for the most
+	  part, don't want to consider recycled pids (e.g., in make_child())
+	- call find_process instead of find_pipeline in waitchld()
+	- use PEXITED(p) instead of testing p->running == PS_DONE
+	- in make_child, call bgp_delete to remove a just-created pid from the
+	  last of saved pid statuses
+	- in add_process, check whether or not pid being added is already in
+	  the_pipeline or the jobs list (using find_process) and mark it as
+	  recycled if so
+	- This set of fixes mostly came from Pierre Humblet
+	  <pierre.humblet@ieee.org> to fix pid aliasing and reuse problems on
+	  cygwin
+
+variables.c
+	- set $_ from the environment if we get it there, set to $0 by
+	  default if not in env
+
+doc/{bashref.texi,bash.1}
+	- a couple of clarifying changes to the description of $_ based on
+	  comments from Glenn Morris <gmorris+mail@ast.cam.ac.uk>

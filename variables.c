@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -350,7 +350,11 @@ initialize_shell_variables (env, privmode)
   set_pwd ();
 
   /* Set up initial value of $_ */
+#if 0
   temp_var = bind_variable ("_", dollar_vars[0], 0);
+#else
+  temp_var = set_if_not ("_", dollar_vars[0]);
+#endif
 
   /* Remember this pid. */
   dollar_dollar_pid = getpid ();

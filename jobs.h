@@ -1,6 +1,6 @@
 /* jobs.h -- structures and stuff used by the jobs.c file. */
 
-/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,9 +46,10 @@
 #define PS_DONE		0
 #define PS_RUNNING	1
 #define PS_STOPPED	2
+#define PS_RECYCLED	4
 
-/* Each child of the shell is remembered in a STRUCT PROCESS.  A chain of
-   such structures is a pipeline.  The chain is circular. */
+/* Each child of the shell is remembered in a STRUCT PROCESS.  A circular
+   chain of such structures is a pipeline. */
 typedef struct process {
   struct process *next;	/* Next process in the pipeline.  A circular chain. */
   pid_t pid;		/* Process ID. */
@@ -57,10 +58,18 @@ typedef struct process {
   char *command;	/* The particular program that is running. */
 } PROCESS;
 
-/* PRUNNING really means `not exited' */
-#define PALIVE(p)	((p)->running || WIFSTOPPED((p)->status))
+/* PALIVE really means `not exited' */
 #define PSTOPPED(p)	(WIFSTOPPED((p)->status))
-#define PDEADPROC(p)	((p)->running == PS_DONE)
+#define PRUNNING(p)	((p)->running == PS_RUNNING)
+#define PALIVE(p)	(PRUNNING(p) || PSTOPPED(p))
+
+#define PEXITED(p)	((p)->running == PS_DONE)
+#if defined (RECYCLES_PIDS)
+#  define PRECYCLED(p)	((p)->running == PS_RECYCLED)
+#else
+#  define PRECYCLED(p)	(0)
+#endif
+#define PDEADPROC(p)	(PEXITED(p) || PRECYCLED(p))
 
 #define get_job_by_jid(ind)	(jobs[(ind)])
 
@@ -73,7 +82,7 @@ typedef enum { JRUNNING, JSTOPPED, JDEAD, JMIXED } JOB_STATE;
 #define RUNNING(j)	(jobs[(j)]->state == JRUNNING)
 #define DEADJOB(j)	(jobs[(j)]->state == JDEAD)
 
-#define INVALID_JOB(j)	((j) < 0 || (j) >= js.j_jobslots || jobs[(j)] == 0)
+#define INVALID_JOB(j)	((j) < 0 || (j) >= js.j_jobslots || get_job_by_jid(j) == 0)
 
 /* Values for the FLAGS field in the JOB struct below. */
 #define J_FOREGROUND 0x01 /* Non-zero if this is running in the foreground.  */
@@ -81,10 +90,12 @@ typedef enum { JRUNNING, JSTOPPED, JDEAD, JMIXED } JOB_STATE;
 #define J_JOBCONTROL 0x04 /* Non-zero if this job started under job control. */
 #define J_NOHUP      0x08 /* Don't send SIGHUP to job if shell gets SIGHUP. */
 #define J_STATSAVED  0x10 /* A process in this job had had status saved via $! */
+#define J_ASYNC	     0x20 /* Job was started asynchronously */
 
 #define IS_FOREGROUND(j)	((jobs[j]->flags & J_FOREGROUND) != 0)
 #define IS_NOTIFIED(j)		((jobs[j]->flags & J_NOTIFIED) != 0)
 #define IS_JOBCONTROL(j)	((jobs[j]->flags & J_JOBCONTROL) != 0)
+#define IS_ASYNC(j)		((jobs[j]->flags & J_ASYNC) != 0)
 
 typedef struct job {
   char *wd;	   /* The working directory at time of invocation. */
@@ -118,6 +129,21 @@ struct jobstats {
   /* */
   int j_current;	/* current job */
   int j_previous;	/* previous job */
+  /* */
+  JOB *j_lastmade;	/* last job allocated by stop_pipeline */
+  JOB *j_lastasync;	/* last async job allocated by stop_pipeline */
+};
+
+struct pidstat {
+ struct pidstat *next;
+ pid_t pid;
+ int status;
+};
+
+struct bgpids {
+  struct pidstat *list;
+  struct pidstat *end;
+  int npid;
 };
 
 #define NO_JOB  -1	/* An impossible job array index. */
@@ -137,10 +163,9 @@ extern struct jobstats js;
 
 extern pid_t original_pgrp, shell_pgrp, pipeline_pgrp;
 extern pid_t last_made_pid, last_asynchronous_pid;
-extern int current_job, previous_job;
 extern int asynchronous_notification;
+
 extern JOB **jobs;
-extern int job_slots;
 
 extern void making_children __P((void));
 extern void stop_making_children __P((void));

@@ -1,10 +1,10 @@
-/* subst.c -- The part of the shell that does parameter, command, and
-   globbing substitutions. */
+/* subst.c -- The part of the shell that does parameter, command, arithmetic,
+   and globbing substitutions. */
 
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

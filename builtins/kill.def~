@@ -192,6 +192,7 @@ kill_builtin (list)
 	{			/* Must be a job spec.  Check it out. */
 	  int job;
 	  sigset_t set, oset;
+	  JOB *j;
 
 	  BLOCK_CHILD (set, oset);
 	  job = get_job_spec (list);
@@ -204,11 +205,12 @@ kill_builtin (list)
 	      CONTINUE_OR_FAIL;
 	    }
 
+	  j = get_job_by_jid (job);
 	  /* Job spec used.  Kill the process group. If the job was started
 	     without job control, then its pgrp == shell_pgrp, so we have
 	     to be careful.  We take the pid of the first job in the pipeline
 	     in that case. */
-	  pid = IS_JOBCONTROL (job) ? jobs[job]->pgrp : jobs[job]->pipe->pid;
+	  pid = IS_JOBCONTROL (job) ? j->pgrp : j->pipe->pid;
 
 	  UNBLOCK_CHILD (oset);
 

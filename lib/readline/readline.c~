@@ -656,11 +656,6 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	       already taken care of pushing any necessary input back onto
 	       the input queue with _rl_unget_char. */
 	    {
-#if 0
-	      r = _rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key));
-#else
-	      /* XXX - experimental code -- might never be executed.  Save
-		 for later. */
 	      Keymap m = FUNCTION_TO_KEYMAP (map, key);
 	      int type = m[ANYOTHERKEY].type;
 	      func = m[ANYOTHERKEY].function;
@@ -682,7 +677,6 @@ _rl_dispatch_subseq (key, map, got_subseq)
 		}
 	      else
 		r = _rl_dispatch (ANYOTHERKEY, m);
-#endif
 	    }
 	  else if (r && map[ANYOTHERKEY].function)
 	    {

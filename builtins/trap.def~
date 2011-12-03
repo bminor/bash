@@ -214,7 +214,6 @@ showtrap (i)
   char *t, *p, *sn;
 
   p = trap_list[i];
-itrace("showtrap: %d", i);
   if (p == (char *)DEFAULT_SIG)
     return;
 
@@ -243,7 +242,6 @@ display_traps (list)
 {
   int result, i;
 
-itrace("trap_builtin");
   if (list == 0)
     {
       for (i = 0; i < BASH_NSIG; i++)

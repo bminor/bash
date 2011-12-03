@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Tue Jan  4 17:23:59 EST 2005
+.\"	Last Change: Fri Feb 11 15:43:40 EST 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Jan 4" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Feb 11" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1205,12 +1205,13 @@ to the file name used to invoke
 as given by argument zero.
 .TP
 .B _
-At shell startup, set to the absolute file name of the shell or shell
-script being executed as passed in the argument list.
+At shell startup, set to the absolute pathname used to invoke the
+shell or shell script being executed as passed in the environment
+or argument list.
 Subsequently, expands to the last argument to the previous command,
 after expansion.
-Also set to the full file name of each command executed and placed in
-the environment exported to that command.
+Also set to the full pathname used to invoke each command executed
+and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file
 currently being checked.
 .PD

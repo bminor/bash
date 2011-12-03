@@ -2066,16 +2066,6 @@ shell_getc (remove_quoted_newline)
   if (uc)
     shell_input_line_index++;
 
-#if 0
-  if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
-    {
-	if (SHOULD_PROMPT ())
-	  prompt_again ();
-	line_number++;
-	goto restart_read;
-    }
-#endif
-
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If UC is NULL, we have reached the end of the current input string.  If
      pushed_string_list is non-empty, it's time to pop to the previous string
@@ -2091,7 +2081,6 @@ shell_getc (remove_quoted_newline)
     }
 #endif /* ALIAS || DPAREN_ARITHMETIC */
 
-#if 1
   if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
     {
 	if (SHOULD_PROMPT ())
@@ -2099,7 +2088,6 @@ shell_getc (remove_quoted_newline)
 	line_number++;
 	goto restart_read;
     }
-#endif
 
   if (!uc && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);

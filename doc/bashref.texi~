@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988-2004 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2005 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -457,7 +457,8 @@ parameter expansion.
 Each of the shell metacharacters (@pxref{Definitions})
 has special meaning to the shell and must be quoted if it is to
 represent itself.
-When the command history expansion facilities are being used, the
+When the command history expansion facilities are being used
+(@pxref{History Interaction}), the
 @var{history expansion} character, usually @samp{!}, must be quoted
 to prevent history expansion.  @xref{Bash History Facilities}, for
 more details concerning history expansion.
@@ -486,7 +487,8 @@ between single quotes, even when preceded by a backslash.
 
 Enclosing characters in double quotes (@samp{"}) preserves the literal value
 of all characters within the quotes, with the exception of
-@samp{$}, @samp{`}, and @samp{\}.
+@samp{$}, @samp{`}, @samp{\},
+and, when history expansion is enabled, @samp{!}.
 The characters @samp{$} and @samp{`}
 retain their special meaning within double quotes (@pxref{Shell Expansions}).
 The backslash retains its special meaning only when followed by one of
@@ -497,8 +499,9 @@ characters are removed.  Backslashes preceding characters without a
 special meaning are left unmodified.
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-When command history is being used, the double quote may not be used to
-quote the history expansion character.
+If enabled, history expansion will be performed unless an @samp{!}
+appearing in double quotes is escaped using a backslash.
+The backslash preceding the @samp{!} is not removed.
 
 The special parameters @samp{*} and @samp{@@} have special meaning
 when in double quotes (@pxref{Shell Parameter Expansion}).
@@ -1118,12 +1121,12 @@ The first element of the @env{FUNCNAME} variable is set to the
 name of the function while the function is executing.
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with the exception that the @env{DEBUG} trap
-below) is not inherited unless the function has been given the
+with the exception that the @env{DEBUG} and @env{RETURN} traps
+are not inherited unless the function has been given the
 @code{trace} attribute using the @code{declare} builtin or
 the @code{-o functrace} option has been enabled with
 the @code{set} builtin,
-(in which case all functions inherit the @code{DEBUG} trap).
+(in which case all functions inherit the @env{DEBUG} and @env{RETURN} traps).
 @xref{Bourne Shell Builtins}, for the description of the
 @code{trap} builtin.
 
@@ -1311,12 +1314,13 @@ to the filename used to invoke Bash, as given by argument zero.
 
 @item _
 (An underscore.)
-At shell startup, set to the absolute filename of the shell or shell
-script being executed as passed in the argument list.
+At shell startup, set to the absolute file name used to invoke the
+shell or shell script being executed as passed in the environment
+or argument list.
 Subsequently, expands to the last argument to the previous command,
 after expansion.   
-Also set to the full pathname of each command executed and placed in
-the environment exported to that command.
+Also set to the full pathname used to invoke each command executed
+and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file.
 @end vtable
 
@@ -3283,7 +3287,8 @@ by subsequent assignment statements or unset.
 
 @item -t
 Give each @var{name} the @code{trace} attribute.
-Traced functions inherit the @code{DEBUG} trap from the calling shell.
+Traced functions inherit the @code{DEBUG} and @code{RETURN} traps from
+the calling shell.
 The trace attribute has no special meaning for variables.
 
 @item -x
@@ -3912,7 +3917,10 @@ set [--abefhkmnptuvxBCHP] [-o @var{option}] [@var{argument} @dots{}]
 
 If no options or arguments are supplied, @code{set} displays the names
 and values of all shell variables and functions, sorted according to the
-current locale, in a format that may be reused as input.
+current locale, in a format that may be reused as input
+for setting or resetting the currently-set variables.
+Read-only variables cannot be reset.
+In @sc{posix} mode, only shell variables are listed.
 
 When options are supplied, they set or unset shell attributes.
 Options, if specified, have the following meanings:
@@ -4123,9 +4131,11 @@ $ cd ..; pwd
 @end example
 
 @item -T
-If set, any trap on @code{DEBUG} is inherited by shell functions, command
-substitutions, and commands executed in a subshell environment.
-The @code{DEBUG} trap is normally not inherited in such cases.
+If set, any trap on @code{DEBUG} and @code{RETURN} are inherited by
+shell functions, command substitutions, and commands executed
+in a subshell environment.
+The @code{DEBUG} and @code{RETURN} traps are normally not inherited
+in such cases.
 
 @item --
 If no arguments follow this option, then the positional parameters are
@@ -5444,7 +5454,7 @@ omitted, then base 10 is used.
 The digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @samp{@@}, and @samp{_}, in that order.
 If @var{base} is less than or equal to 36, lowercase and uppercase
-letters may be used interchangably to represent numbers between 10
+letters may be used interchangeably to represent numbers between 10
 and 35.
 
 Operators are evaluated in order of precedence.  Sub-expressions in
@@ -6636,7 +6646,7 @@ A synonym for @code{--with-bash-malloc}.
 @item --with-installed-readline[=@var{PREFIX}]
 Define this to make Bash link with a locally-installed version of Readline
 rather than the version in @file{lib/readline}.  This works only with
-Readline 4.3 and later versions.  If @var{PREFIX} is @code{yes} or not
+Readline 5.0 and later versions.  If @var{PREFIX} is @code{yes} or not
 supplied, @code{configure} uses the values of the make variables
 @code{includedir} and @code{libdir}, which are subdirectories of @code{prefix}
 by default, to find the installed version of Readline if it is not in
@@ -6724,6 +6734,9 @@ Include support for matching POSIX regular expressions using the
 @samp{=~} binary operator in the @code{[[} conditional command.
 (@pxref{Conditional Constructs}).
 
+@item --enable-debugger
+Include support for the bash debugger (distributed separately).
+
 @item --enable-directory-stack
 Include support for a @code{csh}-like directory stack and the
 @code{pushd}, @code{popd}, and @code{dirs} builtins
@@ -6769,16 +6782,16 @@ when used in redirections (@pxref{Redirections}).
 This enables process substitution (@pxref{Process Substitution}) if
 the operating system provides the necessary support.
 
+@item --enable-progcomp
+Enable the programmable completion facilities
+(@pxref{Programmable Completion}).
+If Readline is not enabled, this option has no effect.
+
 @item --enable-prompt-string-decoding
 Turn on the interpretation of a number of backslash-escaped characters
 in the @env{$PS1}, @env{$PS2}, @env{$PS3}, and @env{$PS4} prompt
 strings.  See @ref{Printing a Prompt}, for a complete list of prompt
 string escape sequences.
-
-@item --enable-progcomp
-Enable the programmable completion facilities
-(@pxref{Programmable Completion}).
-If Readline is not enabled, this option has no effect.
 
 @item --enable-readline
 Include support for command-line editing and history with the Bash
@@ -6793,6 +6806,16 @@ when called as @code{rbash}, enters a restricted mode.  See
 Include the @code{select} builtin, which allows the generation of simple
 menus (@pxref{Conditional Constructs}).
 
+@item --enable-separate-helpfiles
+Use external files for the documentation displayed by the @code{help} builtin
+instead of storing the text internally.
+
+@item --enable-single-help-strings
+Store the text displayed by the @code{help} builtin as a single string for
+each help topic.  This aids in translating the text to different languages.
+You may need to disable this if your compiler cannot handle very long string
+literals.
+
 @item --enable-usg-echo-default
 A synonym for @code{--enable-xpg-echo-default}.
 
@@ -6801,7 +6824,7 @@ Make the @code{echo} builtin expand backslash-escaped characters by default,
 without requiring the @option{-e} option.
 This sets the default value of the @code{xpg_echo} shell option to @code{on},
 which makes the Bash @code{echo} behave more like the version specified in
-the Single Unix Specification, version 2.
+the Single Unix Specification, version 3.
 @xref{Bash Builtins}, for a description of the escape sequences that
 @code{echo} recognizes.
 
@@ -7181,7 +7204,9 @@ The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows a
 Commands specified with an @code{RETURN} trap are executed before
 execution resumes after a shell function or a shell script executed with
 @code{.} or @code{source} returns.
-The @code{RETURN} trap is not inherited by shell functions.
+The @code{RETURN} trap is not inherited by shell functions unless the
+function has been given the @code{trace} attribute or the
+@code{functrace} option has been enabled using the @code{shopt} builtin.
 
 @item
 The Bash @code{type} builtin is more extensive and gives more information
