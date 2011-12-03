@@ -896,7 +896,7 @@ do_redirection_internal (redirect, flags)
 	     unless closed by something like `exec 2<&-'. */
 	  /* if ((already_set || set_unconditionally) && (ok_to_set))
 		set_it () */
-	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (flags & RX_CLEXEC)) &&
+	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (flags & RX_CLEXEC) || redir_fd < 2) &&
 	       (redirector > 2))
 	    SET_CLOSE_ON_EXEC (redirector);
 
@@ -943,6 +943,7 @@ add_undo_redirect (fd)
   REDIRECT *new_redirect, *closer, *dummy_redirect;
 
   new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
+
   if (new_fd < 0)
     {
       sys_error (_("redirection error: cannot duplicate fd"));

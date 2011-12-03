@@ -1,0 +1,52 @@
+*** ../bash-2.05b-patched/builtins/common.c	Fri Jun 28 12:24:31 2002
+--- builtins/common.c	Thu Sep 30 22:25:20 2004
+***************
+*** 455,464 ****
+  {
+    char *directory;
+  
+    if (no_symbolic_links)
+      {
+!       if (the_current_working_directory)
+! 	free (the_current_working_directory);
+! 
+        the_current_working_directory = (char *)NULL;
+      }
+--- 469,477 ----
+  {
+    char *directory;
++   size_t dsize;
+  
+    if (no_symbolic_links)
+      {
+!       FREE (the_current_working_directory);
+        the_current_working_directory = (char *)NULL;
+      }
+***************
+*** 466,480 ****
+    if (the_current_working_directory == 0)
+      {
+!       the_current_working_directory = (char *)xmalloc (PATH_MAX);
+!       the_current_working_directory[0] = '\0';
+!       directory = getcwd (the_current_working_directory, PATH_MAX);
+!       if (directory == 0)
+  	{
+! 	  fprintf (stderr, "%s: could not get current directory: %s: %s\n",
+  		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+! 		   bash_getcwd_errstr, strerror (errno));
+! 
+! 	  free (the_current_working_directory);
+! 	  the_current_working_directory = (char *)NULL;
+  	  return (char *)NULL;
+  	}
+--- 479,488 ----
+    if (the_current_working_directory == 0)
+      {
+!       the_current_working_directory = getcwd (0, 0);
+!       if (the_current_working_directory == 0)
+  	{
+! 	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
+  		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+! 		   _(bash_getcwd_errstr), strerror (errno));
+  	  return (char *)NULL;
+  	}

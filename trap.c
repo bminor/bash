@@ -384,8 +384,8 @@ set_sigchld_trap (command_string)
 }
 #endif
 
-/* Make COMMAND_STRING be executed when SIGCHLD is caught iff the current
-   SIGCHLD trap handler is DEFAULT_SIG. */
+/* Make COMMAND_STRING be executed when SIGCHLD is caught iff SIGCHLD
+   is not already trapped. */
 void
 maybe_set_sigchld_trap (command_string)
      char *command_string;
@@ -984,4 +984,11 @@ set_signal_ignored (sig)
 {
   sigmodes[sig] |= SIG_HARD_IGNORE;
   original_signals[sig] = SIG_IGN;
+}
+
+int
+signal_in_progress (sig)
+     int sig;
+{
+  return (sigmodes[sig] & SIG_INPROGRESS);
 }

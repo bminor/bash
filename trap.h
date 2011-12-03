@@ -93,5 +93,6 @@ extern int signal_is_trapped __P((int));
 extern int signal_is_ignored __P((int));
 extern int signal_is_special __P((int));
 extern void set_signal_ignored __P((int));
+extern int signal_in_progress __P((int));
 
 #endif /* _TRAP_H_ */

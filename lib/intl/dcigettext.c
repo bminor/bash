@@ -134,6 +134,10 @@ extern int errno;
 
 /* @@ end of prolog @@ */
 
+#if defined (SHELL) && !defined (HAVE_GETCWD)
+#  define HAVE_GETCWD
+#endif
+
 #ifdef _LIBC
 /* Rename the non ANSI C functions.  This is required by the standard
    because some ANSI C functions will require linking with this object

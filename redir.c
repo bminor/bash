@@ -893,10 +893,14 @@ do_redirection_internal (redirect, flags)
 	     leaves the flag unset on the new descriptor, which means it
 	     stays open.  Only set the close-on-exec bit for file descriptors
 	     greater than 2 in any case, since 0-2 should always be open
-	     unless closed by something like `exec 2<&-'. */
+	     unless closed by something like `exec 2<&-'.  It should always
+	     be safe to set fds > 2 to close-on-exec if they're being used to
+	     save file descriptors < 2, since we don't need to preserve the
+	     state of the close-on-exec flag for those fds -- they should
+	     always be open. */
 	  /* if ((already_set || set_unconditionally) && (ok_to_set))
 		set_it () */
-	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (flags & RX_CLEXEC)) &&
+	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || redir_fd < 2 || (flags & RX_CLEXEC)) &&
 	       (redirector > 2))
 	    SET_CLOSE_ON_EXEC (redirector);
 

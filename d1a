@@ -1,0 +1,144 @@
+*** ../bash-2.05b-patched/builtins/cd.def	Mon Jul 15 14:51:39 2002
+--- builtins/cd.def	Sun Nov  7 15:13:42 2004
+***************
+*** 122,126 ****
+     the_current_working_directory () */
+  static char *
+! resetpwd ()
+  {
+    char *tdir;
+--- 124,129 ----
+     the_current_working_directory () */
+  static char *
+! resetpwd (caller)
+!      char *caller;
+  {
+    char *tdir;
+***************
+*** 128,132 ****
+    FREE (the_current_working_directory);
+    the_current_working_directory = (char *)NULL;
+!   tdir = get_working_directory ("cd");
+    return (tdir);
+  }
+--- 131,135 ----
+    FREE (the_current_working_directory);
+    the_current_working_directory = (char *)NULL;
+!   tdir = get_working_directory (caller);
+    return (tdir);
+  }
+***************
+*** 333,336 ****
+--- 340,349 ----
+    directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
+  		   : get_working_directory ("pwd");
++ 
++   /* Try again using getcwd() if canonicalization fails (for instance, if
++      the file system has changed state underneath bash). */
++   if (tcwd && directory == 0)
++     directory = resetpwd ("pwd");
++ 
+  #undef tcwd
+  
+***************
+*** 364,368 ****
+  {
+    char *t, *tdir;
+!   int err, canon_failed;
+  
+    tdir = (char *)NULL;
+--- 379,383 ----
+  {
+    char *t, *tdir;
+!   int err, canon_failed, r;
+  
+    tdir = (char *)NULL;
+***************
+*** 399,403 ****
+    if (posixly_correct && nolinks == 0 && canon_failed)
+      {
+!       errno = ENOENT;
+        return (0);
+      }
+--- 414,423 ----
+    if (posixly_correct && nolinks == 0 && canon_failed)
+      {
+! #if defined ENAMETOOLONG
+!       if (errno != ENOENT && errno != ENAMETOOLONG)
+! #else
+!       if (errno != ENOENT)
+! #endif
+! 	errno = ENOTDIR;
+        return (0);
+      }
+***************
+*** 409,418 ****
+  	 shell's idea of the_current_working_directory. */
+        if (canon_failed)
+- 	resetpwd ();
+-       else
+  	{
+! 	  FREE (the_current_working_directory);
+! 	  the_current_working_directory = tdir;
+  	}
+  
+        return (1);
+--- 429,439 ----
+  	 shell's idea of the_current_working_directory. */
+        if (canon_failed)
+  	{
+! 	  t = resetpwd ("cd");
+! 	  if (t == 0)
+! 	    set_working_directory (tdir);
+  	}
++       else
++ 	set_working_directory (tdir);
+  
+        return (1);
+***************
+*** 425,429 ****
+  
+    err = errno;
+-   free (tdir);
+  
+    /* We're not in physical mode (nolinks == 0), but we failed to change to
+--- 446,449 ----
+***************
+*** 432,445 ****
+    if (chdir (newdir) == 0)
+      {
+!       tdir = resetpwd ();
+!       FREE (tdir);
+  
+!       return (1);
+      }
+    else
+      {
+        errno = err;
+!       return (0);
+      }
+  }
+  
+--- 452,471 ----
+    if (chdir (newdir) == 0)
+      {
+!       t = resetpwd ("cd");
+!       if (t == 0)
+! 	set_working_directory (tdir);
+!       else
+! 	free (t);
+  
+!       r = 1;
+      }
+    else
+      {
+        errno = err;
+!       r = 0;
+      }
++ 
++   free (tdir);
++   return r;
+  }
+
+
+

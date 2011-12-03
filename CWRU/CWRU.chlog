@@ -10373,7 +10373,7 @@ execute_cmd.c
 	  builtin is not special, since `command' means that preceding variable
 	  assignments don't persist in the environment.  Fixes problem with
 	  variable assignments preceding command preceding special builtin
-	  kept those variable assignments around (when in posix mode)
+	  keeping those variable assignments around (when in posix mode)
 
 				   10/20
 				   -----
@@ -10571,3 +10571,32 @@ lib/intl/dcigettext.c
 lib/malloc/trace.c
 	- put extern declaration for imalloc_fopen inside the MALLOC_TRACE
 	  #ifdef
+
+				   11/16
+				   -----
+lib/intl/Makefile.in
+	- make sure SHELL is defined to cpp
+
+lib/intl/dcigettext.c
+	- make sure we use getcwd() even if HAVE_GETCWD is not defined after
+	  including config.h; if SHELL is defined, #define HAVE_GETCWD
+
+				   11/18
+				   -----
+trap.[ch]
+	- new function, int signal_in_progress(int sig), returns TRUE if the
+	  trap handler for signal SIG is currently executing
+
+				   11/19
+				   -----
+redir.c
+	- slightly change do_redirection_internal to set the close-on-exec
+	  flag for file descriptors > 2 used to save file descriptors < 2
+	  using explicit redirections (e.g., `exec 3>&1').  This keeps file
+	  descriptors pointing to pipes from being left open but doesn't
+	  change the shell's file descriptor semantics
+
+				   11/20
+				   -----
+doc/{bash.1,bashref.texi}
+	- correct some minor typos, forwarded from doko@debian.org
