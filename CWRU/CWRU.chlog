@@ -12444,6 +12444,10 @@ pcomplete.c
 
 [bash-3.1-rc2 frozen]
 
+				   11/21
+				   -----
+[bash-3.1-rc2 released]
+
 				   11/23
 				   -----
 lib/readline/display.c
@@ -12454,3 +12458,20 @@ lib/readline/display.c
 	- changes to _rl_move_cursor_relative to account for _rl_last_c_pos
 	  being an absolute cursor position in a multibyte character locale
 	- rewrote _rl_move_cursor_relative to make it a little simpler
+
+				   11/29
+				   -----
+lib/readline/display.c
+	- changes to rl_redisplay and update_line for update_line to communicate
+	  upward that it took the number of invisible characters on the current
+	  line into account when modifying _rl_last_c_pos
+	- in update_line, adjust _rl_last_c_pos by wrap_offset before calling
+	  _rl_move_cursor_relative, so we pass correct information about the
+	  true cursor position
+
+				   12/1
+				   ----
+configure.in
+	- changed release status to `release'
+
+[bash-3.1 frozen]

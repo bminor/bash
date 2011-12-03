@@ -134,6 +134,8 @@ char *rl_display_prompt = (char *)NULL;
 int _rl_last_c_pos = 0;
 int _rl_last_v_pos = 0;
 
+static int cpos_adjusted;
+
 /* Number of lines currently on screen minus 1. */
 int _rl_vis_botlin = 0;
 
@@ -885,21 +887,24 @@ rl_redisplay ()
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
 	      o_cpos = _rl_last_c_pos;
+	      cpos_adjusted = 0;
 	      update_line (VIS_LINE(linenum), INV_LINE(linenum), linenum,
 			   VIS_LLEN(linenum), INV_LLEN(linenum), inv_botlin);
 
-#if 1
 	      /* update_line potentially changes _rl_last_c_pos, but doesn't
 		 take invisible characters into account, since _rl_last_c_pos
 		 is an absolute cursor position in a multibyte locale.  See
 		 if compensating here is the right thing, or if we have to
-		 change update_line itself. */
+		 change update_line itself.  There is one case in which
+		 update_line adjusts _rl_last_c_pos itself (so it can pass
+		 _rl_move_cursor_relative accurate values); it communicates
+		 this back by setting cpos_adjusted */
 	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+		  cpos_adjusted == 0 &&
 		  _rl_last_c_pos != o_cpos &&
 		  _rl_last_c_pos > wrap_offset &&
 		  o_cpos < prompt_last_invisible)
 		_rl_last_c_pos -= wrap_offset;
-#endif
 		  
 	      /* If this is the line with the prompt, we might need to
 		 compensate for invisible characters in the new line. Do
@@ -1235,7 +1240,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	    putc (new[0], rl_outstream);
 	  else
 	    putc (' ', rl_outstream);
-	  _rl_last_c_pos = 1;		/* XXX */
+	  _rl_last_c_pos = 1;
 	  _rl_last_v_pos++;
 	  if (old[0] && new[0])
 	    old[0] = new[0];
@@ -1405,11 +1410,12 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 #endif
       _rl_output_some_chars (local_prompt, lendiff);
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-#if 0
-	_rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
-#else
-	_rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff);
-#endif
+	{
+	  /* We take wrap_offset into account here so we can pass correct
+	     information to _rl_move_cursor_relative. */
+	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
+	  cpos_adjusted = 1;
+	}
       else
 	_rl_last_c_pos = lendiff;
     }
@@ -1486,7 +1492,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 		 the end.  We have invisible characters in this line.  This
 		 is a dumb update. */
 	      _rl_output_some_chars (nfd, temp);
-	      _rl_last_c_pos += col_temp;	/* XXX */
+	      _rl_last_c_pos += col_temp;
 	      return;
 	    }
 	  /* Copy (new) chars to screen from first diff to last match. */
@@ -1510,8 +1516,8 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  /* cannot insert chars, write to EOL */
 	  _rl_output_some_chars (nfd, temp);
 	  _rl_last_c_pos += col_temp;
-	  /* If we're in a multibyte locale and before the last invisible char
-	     in the current line (which assumes we just output some invisible
+	  /* If we're in a multibyte locale and were before the last invisible
+	     char in the current line (which implies we just output some invisible
 	     characters) we need to adjust _rl_last_c_pos, since it represents
 	     a physical character position. */
 	}
