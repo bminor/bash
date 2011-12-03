@@ -9958,3 +9958,70 @@ lib/readline/display.c
 	  that might contain double-width multibyte characters.  Fixes from
 	  Tomohiro Kubota
 
+				    9/6
+				    ---
+subst.c
+	- change word_list_split to avoid really bad behavior caused by calling
+	  list_append for each split word -- as the list gets long, you have
+	  to traverse it every time.  Keep a pointer to the end of the list and
+	  and just tack onto it
+
+				    9/8
+				    ---
+lib/readline/complete.c
+	- change fnprint to calculate the displayed width of a filename in
+	  the same way as fnwidth
+
+subst.c
+	- in verify_substring_values, when expanding ${array[@]:offset}, make
+	  sure negative offsets count from one greater than the array's
+	  maximum index so things like ${x[@}: -1} work to give the last element
+	  (requires fixing array tests)
+
+builtins/common.c
+	- new error function, sh_wrerror(),  for builtins to call when a write
+	  error occurs
+
+builtins/common.h
+	- extern declaration for sh_wrerror()
+
+builtins/cd.def
+	- change builtin_error call to use sh_wrerror()
+
+builtins/echo.def
+	- report write errors with sh_wrerror() instead of just returning
+	  failure
+
+builtins/printf.def
+	- change printstr to return failure (-1) or success (0) indication
+	  rather than void
+	- report write errors when printstr() fails, return failure
+	- if any of the PF/printf calls fail, report write error and return
+	  failure
+
+execute_cmd.c
+	- change execute_in_subshell so the subshell command inherits the
+	  command timing flags from the enclosing COMMAND *
+
+				   9/11
+				   ----
+[prayers for the victims of 9/11/2001]
+
+lib/sh/strnlen.c
+	- new file, implementation of GNU libc extension function strnlen
+
+lib/sh/Makefile.in, {config.h,configure,Makefile}.in, MANIFEST
+	- changes for strnlen
+
+configure.in
+	- version changed to 3.1-devel
+
+doc/bash.1, lib/readline/doc/rluser.texi
+	- added description of `-o plusdirs' to complete/compgen (thanks,
+	  Arnold)
+
+parse.y
+	- new parser_state flag, PST_ASSIGNOK, if set indicates we're parsing
+	  arguments to a builtin that accepts assignment statement arguments
+	- turn on PST_ASSIGNOK in read_token_word when appropriate
+	- turn off PST_ASSIGNOK in read_token when appropriate

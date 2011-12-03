@@ -270,6 +270,12 @@ sh_notbuiltin (s)
   builtin_error (_("%s: not a shell builtin"), s);
 }
 
+void
+sh_wrerror ()
+{
+  builtin_error (_("write error: %s"), strerror (errno));
+}
+
 /* **************************************************************** */
 /*								    */
 /*	     Shell positional parameter manipulation		    */

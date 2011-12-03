@@ -50,6 +50,7 @@
 #include "parser.h"
 #include "mailcheck.h"
 #include "test.h"
+#include "builtins.h"
 #include "builtins/common.h"
 #include "builtins/builtext.h"
 
@@ -1028,6 +1029,7 @@ timespec:	TIME
 #define PST_ALEXPAND	0x0800		/* OK to expand aliases - unused */
 #define PST_CMDTOKEN	0x1000		/* command token OK - unused */
 #define PST_COMPASSIGN	0x2000		/* parsing x=(...) compound assignment */
+#define PST_ASSIGNOK	0x4000		/* assignment statement ok in this context */
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
@@ -2567,6 +2569,8 @@ read_token (command)
       parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
 
+      parser_state &= ~PST_ASSIGNOK;
+
       return (character);
     }
 
@@ -2579,6 +2583,8 @@ read_token (command)
       if (character == '<' || character == '>')
 	parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
+
+      parser_state &= ~PST_ASSIGNOK;
 
       peek_char = shell_getc (1);
       if (character == peek_char)
@@ -2607,6 +2613,7 @@ read_token (command)
 #if defined (ALIAS)
 	      parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
+
 	      return (SEMI_SEMI);
 
 	    case '&':
@@ -3515,7 +3522,7 @@ read_token_word (character)
 	  goto next_character;
         }
       /* Identify possible compound array variable assignment. */
-      else if MBTEST(character == '=' && token_index > 0 && token_is_assignment (token, token_index))
+      else if MBTEST(character == '=' && token_index > 0 && (assignment_acceptable (last_read_token) || (parser_state & PST_ASSIGNOK)) && token_is_assignment (token, token_index))
 	{
 	  peek_char = shell_getc (1);
 	  if MBTEST(peek_char == '(')		/* ) */
@@ -3640,6 +3647,14 @@ got_token:
       /* Don't perform word splitting on assignment statements. */
       if (assignment_acceptable (last_read_token) || (parser_state & PST_COMPASSIGN) != 0)
 	the_word->flags |= W_NOSPLIT;
+    }
+
+  if (command_token_position (last_read_token))
+    {
+      struct builtin *b;
+      b = builtin_address_internal (token, 0);
+      if (b && (b->flags & ASSIGNMENT_BUILTIN))
+        parser_state |= PST_ASSIGNOK;
     }
 
   yylval.word = the_word;

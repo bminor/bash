@@ -105,7 +105,7 @@ extern int errno;
 #define LENMODS "hjlLtz"
 
 static void printf_erange __P((char *));
-static void printstr __P((char *, char *, int, int, int));
+static int printstr __P((char *, char *, int, int, int));
 static int tescape __P((char *, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *mklong __P((char *, char *, size_t));
@@ -297,7 +297,7 @@ printf_builtin (list)
 	    case 'b':		/* expand escapes in argument */
 	      {
 		char *p, *xp;
-		int rlen;
+		int rlen, r;
 
 		p = getstr ();
 		ch = rlen = 0;
@@ -307,11 +307,17 @@ printf_builtin (list)
 		  {
 		    /* Have to use printstr because of possible NUL bytes
 		       in XP -- printf does not handle that well. */
-		    printstr (start, xp, rlen, fieldwidth, precision);
+		    r = printstr (start, xp, rlen, fieldwidth, precision);
+		    if (r < 0)
+		      {
+		        sh_wrerror ();
+			clearerr (stdout);
+		        retval = EXECUTION_FAILURE;
+		      }
 		    free (xp);
 		  }
 
-		if (ch)
+		if (ch || r < 0)
 		  PRETURN (retval);
 		break;
 	      }
@@ -319,6 +325,7 @@ printf_builtin (list)
 	    case 'q':		/* print with shell quoting */
 	      {
 		char *p, *xp;
+		int r;
 
 		p = getstr ();
 		if (ansic_shouldquote (p))
@@ -328,9 +335,17 @@ printf_builtin (list)
 		if (xp)
 		  {
 		    /* Use printstr to get fieldwidth and precision right. */
-		    printstr (start, xp, strlen (xp), fieldwidth, precision);
+		    r = printstr (start, xp, strlen (xp), fieldwidth, precision);
+		    if (r < 0)
+		      {
+			sh_wrerror ();
+			clearerr (stdout);
+		      }
 		    free (xp);
 		  }
+
+		if (r < 0)
+		  PRETURN (EXECUTION_FAILURE);
 		break;
 	      }
 
@@ -412,6 +427,13 @@ printf_builtin (list)
 	  modstart[0] = thisch;
 	  modstart[1] = nextch;
 	}
+
+      if (ferror (stdout))
+	{
+	  sh_wrerror ();
+	  clearerr (stdout);
+	  PRETURN (EXECUTION_FAILURE);
+	}
     }
   while (garglist && garglist != list->next);
 
@@ -429,7 +451,7 @@ printf_erange (s)
 }
 
 /* We duplicate a lot of what printf(3) does here. */
-static void
+static int
 printstr (fmt, string, len, fieldwidth, precision)
      char *fmt;			/* format */
      char *string;		/* expanded string argument */
@@ -531,6 +553,8 @@ printstr (fmt, string, len, fieldwidth, precision)
   /* output any necessary trailing padding */
   for (; padlen < 0; padlen++)
     putchar (' ');
+
+  return (ferror (stdout) ? -1 : 0);
 }
   
 /* Convert STRING by expanding the escape sequences specified by the

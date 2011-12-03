@@ -621,6 +621,8 @@ fnprint (to_print)
   mbstate_t ps;
   const char *end;
   size_t tlen;
+  int width, w;
+  wchar_t wc;
 
   end = to_print + strlen (to_print) + 1;
   memset (&ps, 0, sizeof (mbstate_t));
@@ -653,21 +655,28 @@ fnprint (to_print)
       else
 	{
 #if defined (HANDLE_MULTIBYTE)
-	  tlen = mbrlen (s, end - s, &ps);
+	  tlen = mbrtowc (&wc, s, end - s, &ps);
 	  if (MB_INVALIDCH (tlen))
 	    {
 	      tlen = 1;
+	      width = 1;
 	      memset (&ps, 0, sizeof (mbstate_t));
 	    }
 	  else if (MB_NULLWCH (tlen))
 	    break;
+	  else
+	    {
+	      w = wcwidth (wc);
+	      width = (w >= 0) ? w : 1;
+	    }
 	  fwrite (s, 1, tlen, rl_outstream);
 	  s += tlen;
+	  printed_len += width;
 #else
 	  putc (*s, rl_outstream);
 	  s++;
-#endif
 	  printed_len++;
+#endif
 	}
     }
 

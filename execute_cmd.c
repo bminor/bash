@@ -1274,6 +1274,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   tcom = (command->type == cm_subshell) ? command->value.Subshell->command : command;
 
+  if (command->flags & CMD_TIME_PIPELINE)
+    tcom->flags |= CMD_TIME_PIPELINE;
+  if (command->flags & CMD_TIME_POSIX)
+    tcom->flags |= CMD_TIME_POSIX;
+  
   /* Make sure the subshell inherits any CMD_IGNORE_RETURN flag. */
   if ((command->flags & CMD_IGNORE_RETURN) && tcom != command)
     tcom->flags |= CMD_IGNORE_RETURN;

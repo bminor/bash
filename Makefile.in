@@ -1,4 +1,4 @@
-# Makefile for bash-3.0, version 2.152
+# Makefile for bash-3.0, version 2.153
 #
 # Copyright (C) 1996-2004 Free Software Foundation, Inc.
 
@@ -196,7 +196,8 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/fmtumax.c ${SH_LIBSRC}/netconn.c \
 		${SH_LIBSRC}/mktime.c ${SH_LIBSRC}/strftime.c \
 		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
-		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c
+		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
+		${SH_LIBSRC}/strnlen.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -668,7 +669,7 @@ $(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/confi
 
 # for chet
 reconfig: force
-	sh $(srcdir)/configure
+	sh $(srcdir)/configure -C
 
 #newversion:	mkversion
 #	$(RM) .build

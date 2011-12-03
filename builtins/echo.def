@@ -175,6 +175,7 @@ just_echo:
   fflush (stdout);
   if (ferror (stdout))
     {
+      sh_wrerror ();
       clearerr (stdout);
       return (EXECUTION_FAILURE);
     }

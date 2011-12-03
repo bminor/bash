@@ -4899,8 +4899,9 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       a = (ARRAY *)value;
-      /* For arrays, the first value deals with array indices. */
-      len = array_max_index (a);	/* arrays index from 0 to n - 1 */
+      /* For arrays, the first value deals with array indices.  Negative
+	 offsets count from one past the array's maximum index. */
+      len = array_max_index (a) + (*e1p < 0);	/* arrays index from 0 to n - 1 */
       break;
 #endif
     }

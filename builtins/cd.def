@@ -355,7 +355,7 @@ pwd_builtin (list)
       fflush (stdout);
       if (ferror (stdout))
 	{
-	  builtin_error (_("write error: %s"), strerror (errno));
+	  sh_wrerror ();
 	  clearerr (stdout);
 	  return (EXECUTION_FAILURE);
 	}
