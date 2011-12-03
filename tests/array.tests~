@@ -236,7 +236,12 @@ echo "value = ${barray[*]}"
 set -u
 ( echo ${#narray[4]} )
 
+${THIS_SH} ./array1.sub
+${THIS_SH} ./array2.sub
+
 # some old bugs and ksh93 compatibility tests
+${THIS_SH} ./array3.sub
+
 set +u
 cd /tmp
 
@@ -392,5 +397,3 @@ x[9]='9'
 
 echo ${x[*]: -1}
 
-${THIS_SH} ./array1.sub
-${THIS_SH} ./array2.sub

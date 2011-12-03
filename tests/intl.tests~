@@ -21,8 +21,8 @@ a=$(printf '%b' 'A\303\251B')
 IFS=$(printf '%b' '\303\251')
 
 case "$a" in
-"A${IFS}B")	echo yes ;;
-*)		echo no ;;
+"A${IFS}B")	echo ok 1 ;;
+*)		echo bad 1 ;;
 esac
 
 set $a

@@ -209,7 +209,7 @@ static SHELL_VAR *do_compound_assignment __P((char *, char *, int));
 #endif
 static int do_assignment_internal __P((const WORD_DESC *, int));
 
-static char *string_extract_verbatim __P((char *, int *, char *));
+static char *string_extract_verbatim __P((char *, size_t, int *, char *));
 static char *string_extract __P((char *, int *, char *, int));
 static char *string_extract_double_quoted __P((char *, int *, int));
 static inline char *string_extract_single_quoted __P((char *, int *));
@@ -555,7 +555,7 @@ string_extract (string, sindex, charlist, flags)
   char *temp;
   DECLARE_MBSTATE;
 
-  slen = strlen (string + *sindex) + *sindex;
+  slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
   while (c = string[i])
     {
@@ -830,7 +830,8 @@ string_extract_single_quoted (string, sindex)
   char *t;
   DECLARE_MBSTATE;
 
-  slen = strlen (string + *sindex) + *sindex;
+  /* Don't need slen for ADVANCE_CHAR unless multibyte chars possible. */
+  slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
   while (string[i] && string[i] != '\'')
     ADVANCE_CHAR (string, slen, i);
@@ -865,13 +866,13 @@ skip_single_quoted (string, slen, sind)
 /* Just like string_extract, but doesn't hack backslashes or any of
    that other stuff.  Obeys CTLESC quoting.  Used to do splitting on $IFS. */
 static char *
-string_extract_verbatim (string, sindex, charlist)
+string_extract_verbatim (string, slen, sindex, charlist)
      char *string;
+     size_t slen;
      int *sindex;
      char *charlist;
 {
   register int i = *sindex;
-  size_t slen;
 #if defined (HANDLE_MULTIBYTE)
   size_t clen;
   wchar_t *wcharlist;
@@ -887,8 +888,12 @@ string_extract_verbatim (string, sindex, charlist)
       return temp;
     }
 
-  slen = strlen (string + *sindex) + *sindex;
   i = *sindex;
+#if 0
+  /* See how the MBLEN and ADVANCE_CHAR macros work to understand why we need
+     this only if MB_CUR_MAX > 1. */
+  slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 1;
+#endif
 #if defined (HANDLE_MULTIBYTE)
   clen = strlen (charlist);
   wcharlist = 0;
@@ -905,7 +910,7 @@ string_extract_verbatim (string, sindex, charlist)
 	}
 
 #if defined (HANDLE_MULTIBYTE)
-      mblength = MBLEN (string + i, slen - 1);
+      mblength = MBLEN (string + i, slen - i);
       if (mblength > 1)
 	{
 	  wchar_t wc;
@@ -1768,7 +1773,10 @@ string_list_dollar_star (list)
       sep[1] = '\0';
     }
   else
-    memcpy (sep, ifs_firstc, ifs_firstc_len);
+    {
+      memcpy (sep, ifs_firstc, ifs_firstc_len);
+      sep[ifs_firstc_len] = '\0';
+    }
 #else
   sep[0] = ifs_firstc;
   sep[1] = '\0';
@@ -1906,9 +1914,12 @@ list_string (string, separators, quoted)
 	extract a word, stopping at a separator
 	skip sequences of spc, tab, or nl as long as they are separators
      This obeys the field splitting rules in Posix.2. */
+  slen = (MB_CUR_MAX > 1) ? strlen (string) : 1;
   for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
     {
-      current_word = string_extract_verbatim (string, &sindex, separators);
+      /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
+	 unless multibyte chars are possible. */
+      current_word = string_extract_verbatim (string, slen, &sindex, separators);
       if (current_word == 0)
 	break;
 
@@ -1954,8 +1965,6 @@ list_string (string, separators, quoted)
       if (string[sindex])
 	{
 	  DECLARE_MBSTATE;
-	  if (slen == 0)
-	    slen = strlen (string);
 	  ADVANCE_CHAR (string, slen, sindex);
 	}
 
@@ -2025,7 +2034,10 @@ get_word_from_string (stringp, separators, endptr)
 
      This obeys the field splitting rules in Posix.2. */
   sindex = 0;
-  current_word = string_extract_verbatim (s, &sindex, separators);
+  /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
+     unless multibyte chars are possible. */
+  slen = (MB_CUR_MAX > 1) ? strlen (s) : 1;
+  current_word = string_extract_verbatim (s, slen, &sindex, separators);
 
   /* Set ENDPTR to the first character after the end of the word. */
   if (endptr)
@@ -2038,8 +2050,6 @@ get_word_from_string (stringp, separators, endptr)
   if (s[sindex])
     {
       DECLARE_MBSTATE;
-      if (slen == 0)
-	slen = strlen (s);
       ADVANCE_CHAR (s, slen, sindex);
     }
 
@@ -2201,7 +2211,7 @@ do_assignment_internal (word, expand)
       if (name[offset - 1] == '+')
 	{
 	  appendop = 1;
-	  name[offset - 1] = 0;
+	  name[offset - 1] = '\0';
 	}
 
       name[offset] = 0;		/* might need this set later */
@@ -2239,7 +2249,7 @@ do_assignment_internal (word, expand)
 	name[offset - 1] = '+';
       xtrace_print_assignment (name, value, assign_list, 1);
       if (appendop)
-	name[offset - 1] = '+';
+	name[offset - 1] = '\0';
     }
 
 #define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
@@ -2464,7 +2474,8 @@ expand_string_if_necessary (string, quoted, func)
   char *ret;
   DECLARE_MBSTATE;
 
-  slen = strlen (string);
+  /* Don't need string length for ADVANCE_CHAR unless multibyte chars possible. */
+  slen = (MB_CUR_MAX > 1) ? strlen (string) : 0;
   i = saw_quote = 0;
   while (string[i])
     {
@@ -5235,6 +5246,15 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	    }
 	  *varp = v;
 	}
+      else if (v && (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']'))
+	{
+	  vtype = VT_VARIABLE;
+	  *varp = v;
+	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+	    *valp = dequote_string (value);
+	  else
+	    *valp = dequote_escapes (value);
+	}
       else
 	return -1;
     }
@@ -5286,7 +5306,8 @@ mb_substring (string, s, e)
   DECLARE_MBSTATE;
 
   start = 0;
-  slen = STRLEN (string);
+  /* Don't need string length in ADVANCE_CHAR unless multibyte chars possible. */
+  slen = (MB_CUR_MAX > 1) ? STRLEN (string) : 0;
 
   i = s;
   while (string[start] && i--)
@@ -6426,7 +6447,9 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   string = word->word;
   if (string == 0)
     goto finished_with_string;
-  string_size = strlen (string);
+  /* Don't need the string length for the SADD... and COPY_ macros unless
+     multibyte characters are possible. */
+  string_size = (MB_CUR_MAX > 1) ? strlen (string) : 1;
 
   if (contains_dollar_at)
     *contains_dollar_at = 0;
@@ -6574,7 +6597,7 @@ add_string:
 	      goto add_string;
 	    }
 	  else
-	    {
+b	    {
 	      FREE (temp);
 	      goto add_character;
 	    }

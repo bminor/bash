@@ -10696,3 +10696,26 @@ builtins/set.def
 builtins/shopt.def
 	- fix bug that caused `gnu_errfmt' to not be compiled in unless
 	  READLINE is defined
+
+				   12/16
+				   -----
+subst.c
+	- fixed a typo in string_extract_verbatim in first call to MBLEN
+	  (used `slen - 1' instead of `slen - i')
+
+				   12/17
+				   -----
+subst.c
+	- avoid some calls to strlen if the value is only being used for
+	  ADVANCE_CHAR and MB_CUR_MAX == 1 (since ADVANCE_CHAR doesn't need
+	  it unless multibyte characters are possible)
+	- change string_extract_verbatim so it takes the length of the string
+	  as a parameter, so we don't have to recompute the length of the same
+	  string over and over again when doing word splitting (that kills if
+	  it's a long string)
+
+				   12/18
+				   -----
+subst.c
+	- in string_list_dollar_star, make sure to null-terminate the
+	  separator if the character is longer than one byte
