@@ -1256,6 +1256,10 @@ Expands to the positional parameters, starting from one.  When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, @code{"$@@"} is equivalent to
 @code{"$1" "$2" @dots{}}.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
 When there are no positional parameters, @code{"$@@"} and
 @code{$@@}
 expand to nothing (i.e., they are removed).
@@ -5201,6 +5205,9 @@ If the @var{file} argument to one of the primaries is one of
 @file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
 descriptor 0, 1, or 2, respectively, is checked.
 
+Unless otherwise specified, primaries that operate on files follow symbolic
+links and operate on the target of the link, rather than the link itself.
+
 @table @code
 @item -a @var{file}
 True if @var{file} exists.
@@ -5534,12 +5541,18 @@ The braces are required to avoid
 conflicts with the shell's filename expansion operators.  If the
 @var{subscript} is @samp{@@} or @samp{*}, the word expands to all members
 of the array @var{name}.  These subscripts differ only when the word
-appears within double quotes.  If the word is double-quoted,
+appears within double quotes.
+If the word is double-quoted,
 @code{$@{name[*]@}} expands to a single word with
 the value of each array member separated by the first character of the
 @env{IFS} variable, and @code{$@{name[@@]@}} expands each element of
 @var{name} to a separate word.  When there are no array members,
-@code{$@{name[@@]@}} expands to nothing.  This is analogous to the
+@code{$@{name[@@]@}} expands to nothing.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
+This is analogous to the
 expansion of the special parameters @samp{@@} and @samp{*}. 
 @code{$@{#name[}@var{subscript}@code{]@}} expands to the length of
 @code{$@{name[}@var{subscript}@code{]@}}.

@@ -6,7 +6,7 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Mon Aug 16 23:07:25 EDT 2004
+.\"	Last Change: Fri Aug 27 12:14:46 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
@@ -1130,6 +1130,10 @@ Expands to the positional parameters, starting from one.  When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, "\fB$@\fP" is equivalent to
 "\fB$1\fP" "\fB$2\fP" ...
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
 When there are no positional parameters, "\fB$@\fP" and 
 .B $@
 expand to nothing (i.e., they are removed).
@@ -1222,7 +1226,7 @@ The command argument to the \fB\-c\fP invocation option.
 .TP
 .B BASH_LINENO
 An array variable whose members are the line numbers in source files
-corresponding to each member of @var{FUNCNAME}.
+corresponding to each member of \fBFUNCNAME\fP.
 \fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
 file where \fB${FUNCNAME[\fP\fI$i + 1\fP\fB]}\fP was called.
 The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i + 1\fP\fB]}\fB.
@@ -2035,7 +2039,12 @@ character of the
 .B IFS
 special variable, and ${\fIname\fP[@]} expands each element of
 \fIname\fP to a separate word.  When there are no array members,
-${\fIname\fP[@]} expands to nothing.  This is analogous to the expansion
+${\fIname\fP[@]} expands to nothing.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
+This is analogous to the expansion
 of the special parameters \fB*\fP and \fB@\fP (see
 .B Special Parameters
 above).  ${#\fIname\fP[\fIsubscript\fP]} expands to the length of
@@ -3458,6 +3467,9 @@ If any \fIfile\fP argument to one of the primaries is of the form
 If the \fIfile\fP argument to one of the primaries is one of
 \fI/dev/stdin\fP, \fI/dev/stdout\fP, or \fI/dev/stderr\fP, file
 descriptor 0, 1, or 2, respectively, is checked.
+.PP
+Unless otherwise specified, primaries that operate on files follow symbolic
+links and operate on the target of the link, rather than the link itself.
 .sp 1
 .PD 0
 .TP

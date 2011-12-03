@@ -6,7 +6,7 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Mon Aug 16 23:07:25 EDT 2004
+.\"	Last Change: Fri Aug 27 12:14:46 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
@@ -3458,6 +3458,9 @@ If any \fIfile\fP argument to one of the primaries is of the form
 If the \fIfile\fP argument to one of the primaries is one of
 \fI/dev/stdin\fP, \fI/dev/stdout\fP, or \fI/dev/stderr\fP, file
 descriptor 0, 1, or 2, respectively, is checked.
+.PP
+Unless otherwise specified, primaries that operate on files follow symbolic
+links and operate on the target of the link, rather than the link itself.
 .sp 1
 .PD 0
 .TP
@@ -8232,7 +8235,7 @@ command, and before the first command executes in a shell function (see
 .SM
 .B SHELL GRAMMAR
 above).
-Refer to the description of the \fBextglob\fP option to the
+Refer to the description of the \fBextdebug\fP option to the
 \fBshopt\fP builtin for details of its effect on the \fBDEBUG\fP trap.
 If a
 .I sigspec

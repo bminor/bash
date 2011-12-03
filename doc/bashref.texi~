@@ -5201,6 +5201,9 @@ If the @var{file} argument to one of the primaries is one of
 @file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
 descriptor 0, 1, or 2, respectively, is checked.
 
+Unless otherwise specified, primaries that operate on files follow symbolic
+links and operate on the target of the link, rather than the link itself.
+
 @table @code
 @item -a @var{file}
 True if @var{file} exists.
@@ -6150,15 +6153,15 @@ Bash does not print another warning, and the stopped jobs are terminated.
 @item bg
 @btindex bg
 @example
-bg [@var{jobspec}]
+bg [@var{jobspec} @dots{}]
 @end example
-Resume the suspended job @var{jobspec} in the background, as if it
+Resume each suspended job @var{jobspec} in the background, as if it
 had been started with @samp{&}.
 If @var{jobspec} is not supplied, the current job is used.
 The return status is zero unless it is run when job control is not
-enabled, or, when run with job control enabled, if @var{jobspec} was
-not found or @var{jobspec} specifies a job that was started without
-job control.
+enabled, or, when run with job control enabled, if the last
+@var{jobspec} was not found or the last @var{jobspec} specifies a job
+that was started without job control.
 
 @item fg
 @btindex fg

@@ -165,10 +165,13 @@ hash_builtin (list)
 	}
       else if (absolute_program (w))
 	continue;
-      else if (delete && phash_remove (w))
+      else if (delete)
 	{
-	  sh_notfound (w);
-	  opt = EXECUTION_FAILURE;
+	  if (phash_remove (w))
+	    {
+	      sh_notfound (w);
+	      opt = EXECUTION_FAILURE;
+	    }
 	}
       else if (add_hashed_command (w, 0))
 	opt = EXECUTION_FAILURE;

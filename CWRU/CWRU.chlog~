@@ -9917,3 +9917,33 @@ lib/readline/mbutil.c
 	- make sure _rl_find_next_mbchar_internal has a valid multibyte
 	  character before it checks whether or not it's a zero-width
 	  wide character and adjusts point accordingly
+
+                                  8/24
+                                   ----
+bashline.c
+        - new function, bash_directory_expansion, duplicates the expansions
+          performed on the directory name by rl_filename_completion_function
+        - call bash_directory_expansion in command_word_completion_function
+          if we decide we're doing tilde expansion (and any other
+          canonicalization) on the directory name being completed
+
+                                   8/25
+                                   ----
+configure.in
+        - use new-style AC_CHECK_HEADER to check for sys/ptem.h (which requires
+          sys/stream.h).  The correct checks are in the code, but autoconf
+          complains if sys/stream.h is not included, rather than simply
+          checking for the header's presence
+
+				   8/26
+				   ----
+builtins/hash.def
+	- fix a bug that prevented `hash -d' from working right (as soon as
+	  hash removed a command from the table, the bug caused it to be added
+	  right back)
+
+				   8/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- explicitly note that condition primaries that operate on files operate
+	  on the targets of symbolic links rather than the links themselves
