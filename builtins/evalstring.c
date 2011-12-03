@@ -58,6 +58,7 @@ extern int indirection_level, startup_state, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
 extern int running_trap;
+extern int loop_level;
 extern int posixly_correct;
 
 int parse_and_execute_level = 0;
@@ -105,6 +106,7 @@ parse_and_execute (string, from_file, flags)
   unwind_protect_jmp_buf (top_level);
   unwind_protect_int (indirection_level);
   unwind_protect_int (line_number);
+  unwind_protect_int (loop_level);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 

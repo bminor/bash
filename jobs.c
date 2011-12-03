@@ -3104,10 +3104,10 @@ set_job_status_and_cleanup (job)
 	      if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
 		  temp_handler = trap_to_sighandler (SIGINT);
 		restore_sigint_handler ();
-		if (temp_handler == SIG_DFL)
-		  termination_unwind_protect (SIGINT);
-		else if (temp_handler != SIG_IGN)
-		  (*temp_handler) (SIGINT);
+	      if (temp_handler == SIG_DFL)
+		termination_unwind_protect (SIGINT);
+	      else if (temp_handler != SIG_IGN)
+		(*temp_handler) (SIGINT);
 	    }
 	}
     }

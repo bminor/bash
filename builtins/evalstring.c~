@@ -233,7 +233,8 @@ parse_and_execute (string, from_file, flags)
 	       *   parse_and_execute has not been called recursively AND
 	       *   we have parsed the full command (string == '\0') AND
 	       *   we have a simple command without redirections AND
-	       *   the command is not being timed
+	       *   the command is not being timed AND
+	       *   the command's return status is not being inverted
 	       * THEN
 	       *   tell the execution code that we don't need to fork
 	       */

@@ -11527,7 +11527,7 @@ lib/readline/readline.c
 	  to use it - rudimentary support for supporting the existing
 	  recursion using a stack of contexts, each with a reference to the
 	  previous
-	- fix so that  ^G works when in callback mode
+	- fix so that ^G works when in callback mode
 
 lib/readline/callback.c
 	- call the appropriate multiple-key sequence callback if the state is
@@ -11783,3 +11783,20 @@ lib/readline/display.c
 				   ----
 doc/{bash.1,bashref.texi}
 	- document that the shell uses $TMPDIR when creating temporary files
+
+				   7/20
+				   ----
+[bash-3.1-alpha1 frozen]
+
+				   7/29
+				   ----
+builtins/evalstring.c
+	- make sure that parse_and_execute saves and restores the value of
+	  loop_level, so loops in sourced scripts and eval'd strings don't
+	  mess up the shell's parser state
+
+bashline.c
+	- change command_subst_completion_function to suppress appending
+	  any character to a unique completion, instead of a space, which
+	  can be misleading when the last word in the quoted command
+	  substitution completes to a directory name

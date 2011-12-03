@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -100,7 +100,7 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
-static int bash_directory_expansion __P((char **));
+static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
@@ -1073,7 +1073,7 @@ attempt_shell_completion (text, start, end)
       s = find_cmd_start (start);
       e = find_cmd_end (end);
       n = find_cmd_name (s);
-      if (e > s)
+      if (e > s && assignment (n, 0) == 0)
 	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
       else
 	foundcs = 0;
@@ -1521,6 +1521,11 @@ command_subst_completion_function (text, state)
       /* If there is more than one match, rl_completion_matches has already
 	 put the lcd in matches[0].  Skip over it. */
       cmd_index = matches && matches[0] && matches[1];
+
+      if (matches && matches[0] && matches[1] == 0 && test_for_directory (matches[0]))
+	rl_completion_append_character = '/';
+      else
+	rl_completion_suppress_append = 1;
     }
 
   if (!matches || !matches[cmd_index])
@@ -1905,7 +1910,7 @@ tcsh_magic_space (count, ignore)
   else
     return (1);
 }
-#endif
+#endif /* BANG_HISTORY */
 
 /* History and alias expand the line. */
 static int
@@ -1914,7 +1919,10 @@ history_and_alias_expand_line (count, ignore)
 {
   char *new_line;
 
+  new_line = 0;
+#if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
+#endif
 
 #if defined (ALIAS)
   if (new_line)
@@ -1950,7 +1958,10 @@ shell_expand_line (count, ignore)
   char *new_line;
   WORD_LIST *expanded_string;
 
+  new_line = 0;
+#if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
+#endif
 
 #if defined (ALIAS)
   if (new_line)
@@ -2207,7 +2218,7 @@ bash_ignore_everything (names)
 /* Simulate the expansions that will be performed by
    rl_filename_completion_function.  This must be called with the address of
    a pointer to malloc'd memory. */
-static int
+static void
 bash_directory_expansion (dirname)
      char **dirname;
 {
@@ -2303,9 +2314,12 @@ bash_directory_completion_hook (dirname)
       if (temp1[len1 - 1] == '/')
 	{
 	  len2 = strlen (temp2);
-	  temp2 = (char *)xrealloc (temp2, len2 + 2);
-	  temp2[len2] = '/';
-	  temp2[len2 + 1] = '\0';
+	  if (len2 > 2)		/* don't append `/' to `/' or `//' */
+	    {
+	      temp2 = (char *)xrealloc (temp2, len2 + 2);
+	      temp2[len2] = '/';
+	      temp2[len2 + 1] = '\0';
+	    }
 	}
       free (local_dirname);
       *dirname = temp2;

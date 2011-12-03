@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1521,6 +1521,13 @@ command_subst_completion_function (text, state)
       /* If there is more than one match, rl_completion_matches has already
 	 put the lcd in matches[0].  Skip over it. */
       cmd_index = matches && matches[0] && matches[1];
+
+      /* If there's a single match and it's a directory, set the append char
+	 to the expected `/'.  Otherwise, don't append anything. */
+      if (matches && matches[0] && matches[1] == 0 && test_for_directory (matches[0]))
+	rl_completion_append_character = '/';
+      else
+	rl_completion_suppress_append = 1;
     }
 
   if (!matches || !matches[cmd_index])
