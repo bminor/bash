@@ -462,6 +462,29 @@ check_binary_file (sample, sample_len)
 
 /* **************************************************************** */
 /*								    */
+/*		    Functions to inspect pathnames		    */
+/*								    */
+/* **************************************************************** */
+
+int
+file_isdir (fn)
+     char *fn;
+{
+  struct stat sb;
+
+  return ((stat (fn, &sb) == 0) && S_ISDIR (sb.st_mode));
+}
+
+int
+file_iswdir (fn)
+     char *fn;
+{
+  return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
+}
+
+
+/* **************************************************************** */
+/*								    */
 /*		    Functions to manipulate pathnames		    */
 /*								    */
 /* **************************************************************** */

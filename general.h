@@ -289,6 +289,9 @@ extern int check_binary_file __P((char *, int));
 extern int same_file __P((char *, char *, struct stat *, struct stat *));
 #endif
 
+extern int file_isdir __P((char  *));
+extern int file_iswdir __P((char  *));
+
 extern char *make_absolute __P((char *, char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));

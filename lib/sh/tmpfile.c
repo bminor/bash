@@ -62,20 +62,20 @@ get_sys_tmpdir ()
 
 #ifdef P_tmpdir
   sys_tmpdir = P_tmpdir;
-  if (stat (sys_tmpdir, &sb) == 0)
+  if (file_iswdir (sys_tmpdir))
     return sys_tmpdir;
 #endif
 
   sys_tmpdir = "/tmp";
-  if (stat (sys_tmpdir, &sb) == 0)
+  if (file_iswdir (sys_tmpdir))
     return sys_tmpdir;
 
   sys_tmpdir = "/var/tmp";
-  if (stat (sys_tmpdir, &sb) == 0)
+  if (file_iswdir (sys_tmpdir))
     return sys_tmpdir;
 
   sys_tmpdir = "/usr/tmp";
-  if (stat (sys_tmpdir, &sb) == 0)
+  if (file_iswdir (sys_tmpdir))
     return sys_tmpdir;
 
   sys_tmpdir = DEFAULT_TMPDIR;

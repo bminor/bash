@@ -63,7 +63,7 @@ shift_builtin (list)
     return (EXECUTION_SUCCESS);
   else if (times < 0)
     {
-      sh_erange (list->word->word, _("shift count"));
+      sh_erange (list ? list->word->word : NULL, _("shift count"));
       return (EXECUTION_FAILURE);
     }
   else if (times > number_of_args ())

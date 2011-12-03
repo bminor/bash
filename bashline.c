@@ -419,7 +419,14 @@ initialize_readline ()
   rl_bind_key_if_unbound_in_map ('/', bash_complete_filename, emacs_meta_keymap);
   rl_bind_key_if_unbound_in_map ('/', bash_possible_filename_completions, emacs_ctlx_keymap);
 
-  rl_bind_key_if_unbound_in_map ('~', bash_complete_username, emacs_meta_keymap);
+  /* Have to jump through hoops here because there is a default binding for
+     M-~ (rl_tilde_expand) */
+  kseq[0] = '~';
+  kseq[1] = '\0';
+  func = rl_function_of_keyseq (kseq, emacs_meta_keymap, (int *)NULL);
+  if (func == 0 || func == rl_tilde_expand)
+    rl_bind_keyseq_in_map (kseq, bash_complete_username, emacs_meta_keymap);
+
   rl_bind_key_if_unbound_in_map ('~', bash_possible_username_completions, emacs_ctlx_keymap);
 
   rl_bind_key_if_unbound_in_map ('@', bash_complete_hostname, emacs_meta_keymap);

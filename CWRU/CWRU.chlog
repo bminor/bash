@@ -9177,3 +9177,28 @@ aclocal.m4
 
 config.h.in
 	- add HAVE_WCSDUP define
+
+				    2/9
+				    ---
+builtins/shift.def
+	- fix a call to sh_erange that possibly dereferences a NULL pointer
+
+				   2/12
+				   ----
+general.c
+	- start at a general set of file property checking functions:
+	  file_isdir(), file_iswdir() (is writable directory)
+
+general.h
+	- extern declarations for new functions
+
+lib/sh/tmpfile.c
+	- use file_iswdir() to make sure the temporary directory used for
+	  here documents and other temp files is writable in get_sys_tmpdir()
+
+				   2/17
+				   ----
+bashline.c
+	- fix conditional binding of emacs-mode M-~ -- there is a default
+	  binding for it (rl_tilde_expand), so a straight call to
+	  rl_bind_key_if_unbound_in_map doesn't do the right thing
