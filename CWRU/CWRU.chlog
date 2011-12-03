@@ -11327,3 +11327,8 @@ builtins/read.def
 	- make sure the ^As added for internal quoting are not counted as
 	  characters read when -n is supplied
 
+				   4/20
+				   ----
+redir.c
+	- fix redir_open so that the repeat open on failure that AFS support
+	  adds restores the correct value of errno for any error message
