@@ -533,8 +533,7 @@ main (argc, argv, env)
       term = get_string_value ("TERM");
       no_line_editing |= term && (STREQ (term, "emacs"));
       emacs = get_string_value ("EMACS");
-      running_under_emacs = emacs ? ((strmatch ("*term*", emacs, 0) == 0) ? 2 : 1)
-				 : 0;
+      running_under_emacs = emacs ? ((strstr (emacs, "term") != 0) ? 2 : 1) : 0;
 #if 0
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0';
 #else

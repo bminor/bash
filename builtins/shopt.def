@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2003 Free Software Foundation, Inc.
+Copyright (C) 1994-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -64,7 +64,7 @@ extern int check_hashed_filenames, promptvars;
 extern int cdspelling, expand_aliases;
 extern int extended_quote;
 extern int check_window_size;
-extern int glob_ignore_case;
+extern int glob_ignore_case, match_ignore_case;
 extern int hup_on_exit;
 extern int xpg_echo;
 extern int gnu_error_format;
@@ -155,6 +155,7 @@ static struct {
   { "no_empty_cmd_completion", &no_empty_command_completion, (shopt_set_func_t *)NULL },
 #endif
   { "nocaseglob", &glob_ignore_case, (shopt_set_func_t *)NULL },
+  { "nocasematch", &match_ignore_case, (shopt_set_func_t *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },

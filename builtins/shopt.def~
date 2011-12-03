@@ -64,7 +64,7 @@ extern int check_hashed_filenames, promptvars;
 extern int cdspelling, expand_aliases;
 extern int extended_quote;
 extern int check_window_size;
-extern int glob_ignore_case;
+extern int glob_ignore_case, match_ignore_case;
 extern int hup_on_exit;
 extern int xpg_echo;
 extern int gnu_error_format;
@@ -134,13 +134,13 @@ static struct {
   { "failglob", &fail_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (READLINE)
   { "force_fignore", &force_fignore, (shopt_set_func_t *)NULL },
-  { "gnu_errfmt", &gnu_error_format, (shopt_set_func_t *)NULL },
-  { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
 #endif
+  { "gnu_errfmt", &gnu_error_format, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "histappend", &force_append_history, (shopt_set_func_t *)NULL },
 #endif
 #if defined (READLINE)
+  { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
   { "histverify", &hist_verify, (shopt_set_func_t *)NULL },
   { "hostcomplete", &perform_hostname_completion, enable_hostname_completion },
 #endif
@@ -155,6 +155,7 @@ static struct {
   { "no_empty_cmd_completion", &no_empty_command_completion, (shopt_set_func_t *)NULL },
 #endif
   { "nocaseglob", &glob_ignore_case, (shopt_set_func_t *)NULL },
+  { "nocasematch", &match_ignore_case, (shopt_set_func_t *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },

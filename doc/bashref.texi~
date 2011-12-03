@@ -867,6 +867,10 @@ The syntax of the @code{case} command is:
 
 @code{case} will selectively execute the @var{command-list} corresponding to
 the first @var{pattern} that matches @var{word}.
+If the shell option @code{nocasematch}
+(see the description of @code{shopt} in @ref{Bash Builtins})
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The @samp{|} is used to separate multiple patterns, and the @samp{)}
 operator terminates a pattern list.
 A list of patterns and an associated command-list is known
@@ -975,6 +979,10 @@ as primaries.
 When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching}.
+If the shell option @code{nocasematch}
+(see the description of @code{shopt} in @ref{Bash Builtins})
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The return value is 0 if the string matches or does not match
 the pattern, respectively, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
@@ -988,7 +996,7 @@ The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
-If the shell option @code{nocaseglob}
+If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{Bash Builtins})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -1314,7 +1322,7 @@ to the filename used to invoke Bash, as given by argument zero.
 
 @item _
 (An underscore.)
-At shell startup, set to the absolute file name used to invoke the
+At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
 Subsequently, expands to the last argument to the previous command,
@@ -3642,6 +3650,20 @@ If the command run by the @code{DEBUG} trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
 executed by the @code{.} or @code{source} builtins), a call to
 @code{return} is simulated.
+
+@item
+@code{BASH_ARGC} and @code{BASH_ARGV} are updated as described in their
+descriptions (@pxref{Bash Variables}).
+
+@item
+Function tracing is enabled:  command substitution, shell functions, and
+subshells invoked with @code{( @var{command} )} inherit the
+@code{DEBUG} and @code{RETURN} traps.
+
+@item
+Error tracing is enabled:  command substitution, shell functions, and
+subshells invoked with @code{( @var{command} )} inherit the
+@code{ERROR} trap.
 @end enumerate
 
 @item extglob
@@ -4286,6 +4308,10 @@ parameters to the current subroutine (shell function or script executed
 with @code{.} or @code{source}) is at the top of the stack.  When a
 subroutine is executed, the number of parameters passed is pushed onto
 @code{BASH_ARGC}.
+The shell sets @code{BASH_ARGC} only when in extended debugging mode
+(see @ref{Bash Builtins}  
+for a description of the @code{extdebug} option to the @code{shopt}
+builtin).
 
 @item BASH_ARGV
 An array variable containing all of the parameters in the current bash
@@ -4293,6 +4319,10 @@ execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
 are pushed onto @code{BASH_ARGV}.
+The shell sets @code{BASH_ARGV} only when in extended debugging mode
+(see @ref{Bash Builtins}  
+for a description of the @code{extdebug} option to the @code{shopt}
+builtin).
 
 @item BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -6035,6 +6065,10 @@ When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
 constructed from @code{$PWD} and the directory name supplied as an argument
 does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
+
+@item
+When the @code{pwd} builtin is supplied the @opt{-P} option, it resets
+@code{$PWD} to a pathname containing no symlinks.
 
 @item
 When listing the history, the @code{fc} builtin does not include an

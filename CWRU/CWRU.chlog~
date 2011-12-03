@@ -11056,6 +11056,57 @@ jobs.c
 	  <pierre.humblet@ieee.org> to fix pid aliasing and reuse problems on
 	  cygwin
 
+variables.c
+	- set $_ from the environment if we get it there, set to $0 by
+	  default if not in env
+
 doc/{bashref.texi,bash.1}
 	- a couple of clarifying changes to the description of $_ based on
 	  comments from Glenn Morris <gmorris+mail@ast.cam.ac.uk>
+
+				   2/15
+				   ----
+shell.c
+	- use strstr instead of strmatch when checking whether $EMACS contains
+	  `term' -- simpler and faster
+
+				   2/18
+				   ----
+builtins/cd.def
+	- implement posix requirement that `pwd -P' set $PWD to a directory
+	  name containing no symlinks
+	- add new function, setpwd(), just sets (and changes exported value)
+	  of PWD
+
+doc/bashref.texi
+	- add note to posix mode section about pwd -P setting $PWD
+
+doc{bash.1,bashref.texi}
+	- added note that BASH_ARGC and BASH_ARGV are only set in extended
+	  debug mode
+	- expand description of extdebug option to include everything changed
+	  by extended debug mode
+
+				   2/19
+				   ----
+pathexp.h
+	- new flag macro, FNMATCH_IGNCASE, evaluates to FNM_CASEFOLD if the
+	  match_ignore_case variable is non-zero
+
+execute_cmd.c
+	- new variable, match_ignore_case
+	- change call to strmatch() in execute_case_command so it includes
+	  FNMATCH_IGNCASE
+
+test.c
+	- change call to strmatch() in patcomp() so that pattern matching
+	  calls for [[ ... ]] obey the match_ignore_case variable
+
+lib/sh/shmatch.c
+	- if match_ignore_case is set, enable REG_ICASE in the regexp match
+	  flags
+
+builtins/shopt.def
+	- new settable option, `nocasematch', controls the match_ignore_case
+	  variable.  Currently alters pattern matching for case and [[ ... ]]
+	  commands (==, !=, and =~ operators)

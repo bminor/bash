@@ -100,3 +100,15 @@ recho "-${*:1}-"
 
 recho  ${*:1}
 recho -${*:1}-
+
+shift $#
+
+DEL=`awk 'END{printf("%c", 0+127)}' </dev/null`
+T1=a\ $DEL
+T2="a $DEL"
+set -- x $(echo $T1|wc -c) $(echo $T2|wc -c); shift
+L1=$1; L2=$2
+case "$L1/$L2" in
+4/4) echo ok;;
+*) echo CTLNUL bug: L1=$L1, L2=$L2;;
+esac

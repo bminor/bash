@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,6 +59,7 @@ extern int array_needs_making;
 extern char *bash_getcwd_errstr;
 
 static int bindpwd __P((int));
+static void setpwd __P((char *));
 static int change_to_directory __P((char *, int));
 
 static char *cdspell __P((char *));
@@ -118,6 +119,23 @@ bindpwd (no_symlinks)
     free (dirname);
 
   return (EXECUTION_SUCCESS);
+}
+
+/* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
+static void
+setpwd (dirname)
+     char *dirname;
+{
+  int old_anm;
+  SHELL_VAR *tvar;
+
+  old_anm = array_needs_making;
+  tvar = bind_variable ("PWD", dirname ? dirname : "", 0);
+  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+    {
+      update_export_env_inplace ("PWD=", 4, dirname ? dirname : "");
+      array_needs_making = 0;
+    }
 }
 
 /* Call get_working_directory to reset the value of
@@ -314,16 +332,17 @@ pwd_builtin (list)
      WORD_LIST *list;
 {
   char *directory;
-  int opt;
+  int opt, pflag;
 
   verbatim_pwd = no_symbolic_links;
+  pflag = 0;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "LP")) != -1)
     {
       switch (opt)
 	{
 	case 'P':
-	  verbatim_pwd = 1;
+	  verbatim_pwd = pflag = 1;
 	  break;
 	case 'L':
 	  verbatim_pwd = 0;
@@ -350,6 +369,9 @@ pwd_builtin (list)
   if (directory)
     {
       printf ("%s\n", directory);
+      /* This is dumb but posix-mandated. */
+      if (posixly_correct && pflag)
+	setpwd (directory);
       if (directory != the_current_working_directory)
 	free (directory);
       fflush (stdout);

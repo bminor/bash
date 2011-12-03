@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Feb 11 15:43:40 EST 2005
+.\"	Last Change: Sat Feb 19 17:38:29 EST 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Feb 11" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Feb 19" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -154,11 +154,13 @@ single-character options to be recognized.
 .TP
 .B \-\-debugger
 Arrange for the debugger profile to be executed before the shell
-starts.  Turns on extended debugging mode (see the description of the
+starts.
+Turns on extended debugging mode (see the description of the
 .B extdebug
 option to the
 .B shopt
-builtin below) and shell function tracing (see the description of the
+builtin below)
+and shell function tracing (see the description of the
 \fB\-o functrace\fP option to the
 .B set
 builtin below).
@@ -669,6 +671,10 @@ as primaries.
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under \fBPattern Matching\fP.
+If the shell option
+.B nocasematch
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 The return value is 0 if the string matches or does not match
 the pattern, respectively, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
@@ -684,7 +690,7 @@ the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
 If the shell option
-.B nocaseglob
+.B nocasematch
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Substrings matched by parenthesized subexpressions within the regular
@@ -798,7 +804,12 @@ A \fBcase\fP command first expands \fIword\fP, and tries to match
 it against each \fIpattern\fP in turn, using the same matching rules
 as for pathname expansion (see
 .B Pathname Expansion
-below).  When a match is found, the
+below).
+If the shell option
+.B nocasematch
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
+When a match is found, the
 corresponding \fIlist\fP is executed.  After the first match, no
 subsequent matches are attempted.  The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
@@ -1227,11 +1238,18 @@ Expands to the full file name used to invoke this instance of
 .TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
-frame of the current bash execution call stack.  The number of
+frame of the current bash execution call stack.
+The number of
 parameters to the current subroutine (shell function or script executed
-with \fB.\fP or \fBsource\fP) is at the top of the stack.  When a
-subroutine is executed, the number of parameters passed is pushed onto
+with \fB.\fP or \fBsource\fP) is at the top of the stack.
+When a subroutine is executed, the number of parameters passed is pushed onto
 \fBBASH_ARGC\fP.
+The shell sets \fBBASH_ARGC\fP only when in extended debugging mode
+(see the description of the
+.B extdebug
+option to the
+.B shopt
+builtin below)
 .TP
 .B BASH_ARGV
 An array variable containing all of the parameters in the current bash
@@ -1239,6 +1257,12 @@ execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
 are pushed onto \fBBASH_ARGV\fP.
+The shell sets \fBBASH_ARGV\fP only when in extended debugging mode
+(see the description of the
+.B extdebug
+option to the
+.B shopt
+builtin below)
 .TP
 .B BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -7970,6 +7994,20 @@ If the command run by the \fBDEBUG\fP trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
 executed by the \fB.\fP or \fBsource\fP builtins), a call to
 \fBreturn\fP is simulated.
+.TP
+.B 4.
+\fBBASH_ARGC\fP and \fBBASH_ARGV\fP are updated as described in their
+descriptions above.
+.TP
+.B 5.
+Function tracing is enabled:  command substitution, shell functions, and
+subshells invoked with \fB(\fP \fIcommand\fP \fB)\fP inherit the
+\fBDEBUG\fP and \fBRETURN\fP traps.
+.TP
+.B 6.
+Error tracing is enabled:  command substitution, shell functions, and
+subshells invoked with \fB(\fP \fIcommand\fP \fB)\fP inherit the
+\fBERROR\fP trap.
 .RE
 .TP 8
 .B extglob
@@ -8078,6 +8116,12 @@ matches filenames in a case\-insensitive fashion when performing pathname
 expansion (see
 .B Pathname Expansion
 above).
+.TP 8
+.B nocasematch
+If set,
+.B bash
+matches patterns in a case\-insensitive fashion when performing matching
+while executing \fBcase\fP or \fB[[\fP conditional commands.
 .TP 8
 .B nullglob
 If set,
