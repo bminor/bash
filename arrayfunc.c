@@ -37,6 +37,7 @@
 
 extern char *this_command_name;
 extern int last_command_exit_value;
+extern int array_needs_making;
 
 static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
@@ -72,6 +73,8 @@ convert_var_to_array (var)
   var->assign_func = (sh_var_assign_func_t *)NULL;
 
   INVALIDATE_EXPORTSTR (var);
+  if (exported_p (var))
+    array_needs_making++;
 
   VSETATTR (var, att_array);
   VUNSETATTR (var, att_invisible);

@@ -1543,7 +1543,7 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
 		: stat (filename, &finfo);
       if (s == 0 && S_ISDIR (finfo.st_mode))
 	{
-	  if (_rl_complete_mark_directories /* && rl_completion_suppress_append == 0 */)
+	  if (_rl_complete_mark_directories && rl_completion_suppress_append == 0)
 	    {
 	      /* This is clumsy.  Avoid putting in a double slash if point
 		 is at the end of the line and the previous character is a

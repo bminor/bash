@@ -3814,6 +3814,8 @@ history_delimiting_chars ()
 	return " ";
       return ";";
     }
+  else if (two_tokens_ago == CASE && token_before_that == WORD && (parser_state & PST_CASESTMT))
+    return " ";
 
   for (i = 0; no_semi_successors[i]; i++)
     {

@@ -124,13 +124,7 @@ pid_t current_command_subst_pid = NO_PID;
 SHELL_VAR *ifs_var;
 char *ifs_value;
 unsigned char ifs_cmap[UCHAR_MAX + 1];
-
-#if defined (HANDLE_MULTIBYTE)
-unsigned char ifs_firstc[MB_LEN_MAX];
-size_t ifs_firstc_len;
-#else
 unsigned char ifs_firstc;
-#endif
 
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
@@ -791,7 +785,7 @@ skip_double_quoted (string, slen, sind)
 	{
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_delimited_string (string, &si, "$(", "(", ")", EX_NOALLOC); /* ) */
+	    ret = extract_delimited_string (string, &si, "$(", "(", ")", EX_NOALLOC);
 	  else
 	    ret = extract_dollar_brace_string (string, &si, 0, EX_NOALLOC);
 
@@ -868,14 +862,8 @@ string_extract_verbatim (string, sindex, charlist)
      char *charlist;
 {
   register int i = *sindex;
-  size_t slen;
-#if defined (HANDLE_MULTIBYTE)
-  size_t clen;
-  wchar_t *wcharlist;
-#endif
   int c;
   char *temp;
-  DECLARE_MBSTATE;
 
   if (charlist[0] == '\'' && charlist[1] == '\0')
     {
@@ -884,61 +872,17 @@ string_extract_verbatim (string, sindex, charlist)
       return temp;
     }
 
-  slen = strlen (string + *sindex) + *sindex;
-  i = *sindex;
-#if defined (HANDLE_MULTIBYTE)
-  clen = strlen (charlist);
-  wcharlist = 0;
-#endif
-  while (c = string[i])
+  for (i = *sindex; c = string[i]; i++)
     {
-#if defined (HANDLE_MULTIBYTE)
-      size_t mblength;
-#endif
       if (c == CTLESC)
 	{
-	  i += 2;
+	  i++;
 	  continue;
 	}
 
-#if defined (HANDLE_MULTIBYTE)
-      mblength = MBLEN (string + i, slen - 1);
-      if (mblength > 1)
-	{
-	  wchar_t wc;
-	  mblength = mbtowc (&wc, string + i, slen - i);
-	  if (MB_INVALIDCH (mblength))
-	    {
-	      if (MEMBER (c, charlist))
-		break;
-	    }
-	  else
-	    {
-	      if (wcharlist == 0)
-		{
-		  size_t len;
-		  len = mbstowcs (wcharlist, charlist, 0);
-		  if (len == -1)
-		    len = 0;
-		  wcharlist = xmalloc ((sizeof (wchar_t) * len) + 1);
-		  mbstowcs (wcharlist, charlist, len);
-		}
-
-	      if (wcschr (wcharlist, wc))
-		break;
-	    }
-	}
-      else		
-#endif
       if (MEMBER (c, charlist))
 	break;
-
-      ADVANCE_CHAR (string, slen, i);
     }
-
-#if defined (HANDLE_MULTIBYTE)
-  FREE (wcharlist);
-#endif
 
   temp = substring (string, *sindex, i);
   *sindex = i;
@@ -948,13 +892,13 @@ string_extract_verbatim (string, sindex, charlist)
 
 /* Extract the $( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$(".
-   Make (SINDEX) get the position of the matching ")". ) */
+   Make (SINDEX) get the position of the matching ")". */
 char *
 extract_command_subst (string, sindex)
      char *string;
      int *sindex;
 {
-  return (extract_delimited_string (string, sindex, "$(", "(", ")", 0)); /*)*/
+  return (extract_delimited_string (string, sindex, "$(", "(", ")", 0));
 }
 
 /* Extract the $[ construct in STRING, and return a new string. (])
@@ -1512,36 +1456,11 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
   d2 = 0;
   if (delims)
     {
-      size_t slength;
-#if defined (HANDLE_MULTIBYTE)
-      size_t mblength = 1;
-#endif
-      DECLARE_MBSTATE;
-
-      slength = strlen (delims);
-      d2 = (char *)xmalloc (slength + 1);
-      i = ts = 0;
-      while (delims[i])
+      d2 = (char *)xmalloc (strlen (delims) + 1);
+      for (i = ts = 0; delims[i]; i++)
 	{
-#if defined (HANDLE_MULTIBYTE)
-	  mbstate_t state_bak = state;
-	  mblength = MBRLEN (delims + i, slength, &state);
-	  if (MB_INVALIDCH (mblength))
-	    state = state_bak;
-	  else if (mblength != 1)
-	    {
-	      memcpy (d2 + ts, delims + i, mblength);
-	      ts += mblength;
-	      i += mblength;
-	      slength -= mblength;
-	      continue;
-	    }
-#endif
-	  if (whitespace (delims[i]) == 0)
+	  if (whitespace(delims[i]) == 0)
 	    d2[ts++] = delims[i];
-
-	  i++;
-	  slength--;
 	}
       d2[ts] = '\0';
     }
@@ -1735,25 +1654,10 @@ char *
 string_list_dollar_star (list)
      WORD_LIST *list;
 {
-#if defined (HANDLE_MULTIBYTE)
-  char sep[MB_CUR_MAX + 1];
-#else
   char sep[2];
-#endif
 
-
-#if defined (HANDLE_MULTIBYTE)
-  if (ifs_firstc_len == 1)
-    {
-      sep[0] = ifs_firstc[0];
-      sep[1] = '\0';
-    }
-  else
-    memcpy (sep, ifs_firstc, ifs_firstc_len);
-#else
   sep[0] = ifs_firstc;
   sep[1] = '\0';
-#endif
 
   return (string_list_internal (list, sep));
 }
@@ -1772,42 +1676,14 @@ string_list_dollar_at (list, quoted)
      WORD_LIST *list;
      int quoted;
 {
-  char *ifs;
-#if defined (HANDLE_MULTIBYTE)
-  char sep[MB_CUR_MAX + 1];
-#else
-  char sep[2];
-#endif
+  char *ifs, sep[2];
   WORD_LIST *tlist;
 
   /* XXX this could just be ifs = ifs_value; */
   ifs = ifs_var ? value_cell (ifs_var) : (char *)0;
 
-#if defined (HANDLE_MULTIBYTE)
-  if (ifs && *ifs)
-    {
-      size_t mblength;
-      mblength = MBLEN (ifs, strnlen (ifs, MB_CUR_MAX));
-      if (MB_INVALIDCH (mblength) || mblength == 1)
-	{
-	  sep[0] = *ifs;
-	  sep[1] = '\0';
-	}
-      else
-	{
-	  memcpy (sep, ifs, mblength);
-	  sep[mblength] = '\0';
-	}
-    }
-  else
-    {
-      sep[0] = ' ';
-      sep[1] = '\0';
-    }
-#else
   sep[0] = (ifs == 0 || *ifs == 0) ? ' ' : *ifs;
   sep[1] = '\0';
-#endif
 
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
 		? quote_list (list)
@@ -1856,7 +1732,6 @@ list_string (string, separators, quoted)
   WORD_DESC *t;
   char *current_word, *s;
   int sindex, sh_style_split, whitesep;
-  size_t slen;
 
   if (!string || !*string)
     return ((WORD_LIST *)NULL);
@@ -1866,7 +1741,6 @@ list_string (string, separators, quoted)
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
 
-  slen = 0;
   /* Remove sequences of whitespace at the beginning of STRING, as
      long as those characters appear in IFS.  Do not do this if
      STRING is quoted or if there are no separator characters. */
@@ -1931,12 +1805,7 @@ list_string (string, separators, quoted)
 
       /* Move past the current separator character. */
       if (string[sindex])
-	{
-	  DECLARE_MBSTATE;
-	  if (slen == 0)
-	    slen = strlen (string);
-	  ADVANCE_CHAR (string, slen, sindex);
-	}
+	sindex++;
 
       /* Now skip sequences of space, tab, or newline characters if they are
 	 in the list of separators. */
@@ -1967,7 +1836,6 @@ get_word_from_string (stringp, separators, endptr)
   register char *s;
   char *current_word;
   int sindex, sh_style_split, whitesep;
-  size_t slen;
 
   if (!stringp || !*stringp || !**stringp)
     return ((char *)NULL);
@@ -1978,8 +1846,6 @@ get_word_from_string (stringp, separators, endptr)
 				 separators[1] == '\t' &&
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
-
-  slen = 0;
 
   /* Remove sequences of whitespace at the beginning of STRING, as
      long as those characters appear in IFS. */
@@ -2015,12 +1881,7 @@ get_word_from_string (stringp, separators, endptr)
 
   /* Move past the current separator character. */
   if (s[sindex])
-    {
-      DECLARE_MBSTATE;
-      if (slen == 0)
-	slen = strlen (s);
-      ADVANCE_CHAR (s, slen, sindex);
-    }
+    sindex++;
 
   /* Now skip sequences of space, tab, or newline characters if they are
      in the list of separators. */
@@ -6948,8 +6809,7 @@ setifs (v)
   ifs_var = v;
   ifs_value = v ? value_cell (v) : " \t\n";
 
-  /* Should really merge ifs_cmap with sh_syntaxtab.  XXX - doesn't yet
-     handle multibyte chars in IFS */
+  /* Should really merge ifs_cmap with sh_syntaxtab. */
   memset (ifs_cmap, '\0', sizeof (ifs_cmap));
   for (t = ifs_value ; t && *t; t++)
     {
@@ -6957,29 +6817,7 @@ setifs (v)
       ifs_cmap[uc] = 1;
     }
 
-#if defined (HANDLE_MULTIBYTE)
-  if (ifs_value == 0)
-    {
-      ifs_firstc[0] = '\0';
-      ifs_firstc_len = 1;
-    }
-  else
-    {
-      size_t ifs_len;
-      ifs_len = strnlen (ifs_value, MB_CUR_MAX);
-      ifs_firstc_len = MBLEN (ifs_value, ifs_len);
-      if (ifs_firstc_len == 1 || MB_INVALIDCH (ifs_firstc_len))
-	{
-	  ifs_firstc[0] = ifs_value[0];
-	  ifs_firstc[1] = '\0';
-	  ifs_firstc_len = 1;
-	}
-      else
-	memcpy (ifs_firstc, ifs_value, ifs_firstc_len);
-    }
-#else
   ifs_firstc = ifs_value ? *ifs_value : 0;
-#endif
 }
 
 char *

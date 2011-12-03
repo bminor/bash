@@ -226,6 +226,8 @@ static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
 
 static rl_hook_func_t *old_rl_startup_hook = (rl_hook_func_t *)NULL;
 
+static int dot_in_path = 0;
+
 /* What kind of quoting is performed by bash_quote_filename:
 	COMPLETE_DQUOTE = double-quoting the filename
 	COMPLETE_SQUOTE = single_quoting the filename
@@ -1149,6 +1151,7 @@ bash_default_completion (text, start, end, qc, in_command_position)
 	{
 #define CMD_IS_DIR(x)	(absolute_pathname(x) == 0 && absolute_program(x) == 0 && *(x) != '~' && test_for_directory (x))
 
+	  dot_in_path = 0;
 	  matches = rl_completion_matches (text, command_word_completion_function);
 
 	  /* If we are attempting command completion and nothing matches, we
@@ -1158,27 +1161,28 @@ bash_default_completion (text, start, end, qc, in_command_position)
 	     filenames and leave directories in the match list. */
 	  if (matches == (char **)NULL)
 	    rl_ignore_some_completions_function = bash_ignore_filenames;
-#if 0
-	  else if (matches[1] == 0 && CMD_IS_DIR(matches[0]))
-	    /* Turn off rl_filename_completion_desired so readline doesn't
-	       append a slash if there is a directory with the same name
-	       in the current directory, or other filename-specific things.
-	       If the name begins with a slash, we're either completing a
-	       full pathname or a directory pathname, and readline won't be
-	       looking in the current directory anyway, so there's no
-	       conflict. */
-	    rl_filename_completion_desired = 0;
+	  else if (matches[1] == 0 && CMD_IS_DIR(matches[0]) && dot_in_path == 0)
+	    /* If we found a single match, without looking in the current
+	       directory (because it's not in $PATH), but the found name is
+	       also a command in the current directory, suppress appending any
+	       terminating character, since it's ambiguous. */
+	    {
+	      rl_completion_suppress_append = 1;
+	      rl_filename_completion_desired = 0;
+	    }
 	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) && CMD_IS_DIR (matches[0]))
 	    /* There are multiple instances of the same match (duplicate
 	       completions haven't yet been removed).  In this case, all of
 	       the matches will be the same, and the duplicate removal code
-	       will distill them all down to one.  We turn off
-	       rl_filename_completion_desired for the same reason as above.
+	       will distill them all down to one.  We turn on
+	       rl_completion_suppress_append for the same reason as above.
 	       Remember: we only care if there's eventually a single unique
 	       completion.  If there are multiple completions this won't
 	       make a difference and the problem won't occur. */
-	    rl_filename_completion_desired = 0;
-#endif
+	    {
+	      rl_completion_suppress_append = 1;
+	      rl_filename_completion_desired = 0;
+	    }
 	}
     }
 
@@ -1256,7 +1260,7 @@ command_word_completion_function (hint_text, state)
       hint_len = strlen (hint);
 
       path = get_string_value ("PATH");
-      path_index = 0;
+      path_index = dot_in_path = 0;
 
       /* Initialize the variables for each type of command word. */
       local_index = 0;
@@ -1373,6 +1377,9 @@ command_word_completion_function (hint_text, state)
 	  free (current_path);
 	  current_path = t;
 	}
+
+      if (current_path[0] == '.' && current_path[1] == '\0')
+	dot_in_path = 1;
 
       if (filename_hint)
 	free (filename_hint);

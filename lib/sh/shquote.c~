@@ -128,11 +128,7 @@ sh_un_double_quote (string)
 }
 
 /* Quote special characters in STRING using backslashes.  Return a new
-   string.  NOTE:  if the string is to be further expanded, we need a
-   way to protect the CTLESC and CTLNUL characters.  As I write this,
-   the current callers will never cause the string to be expanded without
-   going through the shell parser, which will protect the internal
-   quoting characters. */
+   string. */
 char *
 sh_backslash_quote (string)
      char *string;
@@ -164,12 +160,11 @@ sh_backslash_quote (string)
 	    *r++ = '\\';
 	  *r++ = c;
 	  break;
-
+#endif
 	case CTLESC: case CTLNUL:		/* internal quoting characters */
 	  *r++ = CTLESC;			/* could be '\\'? */
 	  *r++ = c;
 	  break;
-#endif
 
 	case '#':				/* comment char */
 	  if (s == string)

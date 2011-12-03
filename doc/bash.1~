@@ -3935,7 +3935,7 @@ sends a
 .B SIGHUP
 to all jobs when an interactive login shell exits.
 .PP
-If \Bbash\fP is waiting for a command to complete and receives a signal
+If \fBbash\fP is waiting for a command to complete and receives a signal
 for which a trap has been set, the trap will not be executed until
 the command completes. 
 When \fBbash\fP is waiting for an asynchronous command via the \fBwait\fP
@@ -6186,6 +6186,11 @@ suppressing trailing spaces).  Intended to be used with shell functions.
 .B nospace
 Tell readline not to append a space (the default) to words completed at
 the end of the line.
+.TP 8
+.B plusdirs
+After any matches defined by the compspec are generated, 
+directory name completion is attempted and any
+matches are added to the results of the other actions.
 .RE
 .TP 8
 \fB\-A\fP \fIaction\fP

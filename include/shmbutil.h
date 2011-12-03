@@ -43,6 +43,9 @@ extern char *xstrchr __P((const char *, int));
 #define MBSLEN(s)	(((s) && (s)[0]) ? ((s)[1] ? mbstrlen (s) : 1) : 0)
 #define MB_STRLEN(s)	((MB_CUR_MAX > 1) ? MBSLEN (s) : STRLEN (s))
 
+#define MBLEN(s, n)	((MB_CUR_MAX > 1) ? mblen ((s), (n)) : 1)
+#define MBRLEN(s, n, p)	((MB_CUR_MAX > 1) ? mbrlen ((s), (n), (p)) : 1)
+
 #else /* !HANDLE_MULTIBYTE */
 
 #undef MB_LEN_MAX
@@ -60,6 +63,9 @@ extern char *xstrchr __P((const char *, int));
 #endif
 
 #define MB_STRLEN(s)		(STRLEN(s))
+
+#define MBLEN(s, n)		1
+#define MBRLEN(s, n, p)		1
 
 #endif /* !HANDLE_MULTIBYTE */
 

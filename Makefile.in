@@ -1,4 +1,4 @@
-# Makefile for bash-3.0, version 2.153
+# Makefile for bash-3.0, version 2.154
 #
 # Copyright (C) 1996-2004 Free Software Foundation, Inc.
 
@@ -514,7 +514,7 @@ $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
 	$(RM) $@
 	$(PURIFY) $(CC) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
 	ls -l $(Program)
-	size $(Program)
+	-size $(Program)
 
 .build:	$(SOURCES) config.h Makefile version.h $(VERSPROG)
 	@echo
@@ -536,7 +536,7 @@ bashbug: $(SUPPORT_SRC)bashbug.sh config.h Makefile $(VERSPROG)
 strip:	$(Program) .made
 	strip $(Program)
 	ls -l $(Program)
-	size $(Program)
+	-size $(Program)
 
 lint:
 	${MAKE} ${MFLAGS} CFLAGS='${GCC_LINT_FLAGS}' .made

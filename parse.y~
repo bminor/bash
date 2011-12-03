@@ -3522,7 +3522,7 @@ read_token_word (character)
 	  goto next_character;
         }
       /* Identify possible compound array variable assignment. */
-      else if MBTEST(character == '=' && token_index > 0 && token_is_assignment (token, token_index))
+      else if MBTEST(character == '=' && token_index > 0 && (assignment_acceptable (last_read_token) || (parser_state & PST_ASSIGNOK)) && token_is_assignment (token, token_index))
 	{
 	  peek_char = shell_getc (1);
 	  if MBTEST(peek_char == '(')		/* ) */

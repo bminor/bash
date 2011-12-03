@@ -10037,3 +10037,78 @@ variables.c
 
 expr.c
 	- make exponentiation right-associative, as is apparently correct
+
+				   9/16
+				   ----
+arrayfunc.c
+	- make sure convert_var_to_array marks the environment as needing
+	  recreation if the converted variable was exported
+
+				   9/17
+				   ----
+braces.c
+	- mark ${ as introducing an additional level of braces only if it's
+	  not in a quoted string -- quoted strings are handled before brace
+	  matching is done
+
+parse.y
+	- fixed an obscure problem in history_delimiting_chars where the `in'
+	  in a case statement could have a semicolon added after it, if the
+	  `case word' was on a previous line
+
+support/config.guess
+	- support for newest versions of tandem non-stop kernel
+
+lib/readline/display.c
+	- in compute_lcd_of_matches, explicitly cast `text' to `char *' before
+	  passing it to rl_filename_dequoting_function
+
+lib/readline/terminal.c
+	- bind the key sequence sent by the keypad `delete' key to delete-char
+	  (same as ^D in emacs mode)
+
+builtins/ulimit.def
+	- in print_all_limits, don't print anything if get_limit returns
+	  -1/EINVAL, indicating that the kernel doesn't support that particular
+	  limit
+	- add -i (max number of pending signals), -q (max size of posix msg
+	  queues), -x (max number of file locks) for systems (Linux) that
+	  support them
+
+doc/{bash.1,bashref.texi}
+	- fix description of correspondence between FUNCNAME, BASH_LINENO,
+	  and BASH_SOURCE indices in description of BASH_LINENO
+
+				   9/18
+				   ----
+lib/sh/shquote.c
+	- don't quote CTLESC and CTLNUL with CTLESC in sh_backslash_quote, as
+	  long as the resultant string never gets sent to the word expansion
+	  functions without going through the shell parser
+
+externs.h
+	- add extern declarations for strnlen and strpbkrk from lib/sh
+
+subst.[ch]
+	- changes to handle case where IFS consists of multibyte characters.
+	  Changed: string_extract_verbatim, split_at_delims,
+	  string_list_dollar_star, string_list_dollar_at, list_string,
+	  get_word_from_string, setifs
+
+				   9/19
+				   ----
+mailcheck.c
+	- change file_mod_date_changed to reset the cached mail file data if
+	  the file size drops to zero
+
+lib/readline/complete.c
+	- change append_to_match so that a non-zero value for
+	  rl_completion_suppress_append will cause no `/' to be appended to a
+	  directory name
+
+bashline.c
+	- experimental change to suppress appending a slash for a completed
+	  filename that is found in PATH as well as a directory in the current
+	  directory under certain circumstances:  a single instance found in
+	  $PATH when `.' is not in $PATH, and multiple instances found in the
+	  $PATH, even when `.' is in the $PATH

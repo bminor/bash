@@ -145,9 +145,6 @@ static char *_rl_term_kh;
 static char *_rl_term_kH;
 static char *_rl_term_at7;	/* @7 */
 
-/* Delete key */
-static char *_rl_term_kD;
-
 /* Insert key */
 static char *_rl_term_kI;
 
@@ -316,7 +313,6 @@ static struct _tc_string tc_strings[] =
   { "ei", &_rl_term_ei },
   { "ic", &_rl_term_ic },
   { "im", &_rl_term_im },
-  { "kD", &_rl_term_kD },	/* delete */
   { "kH", &_rl_term_kH },	/* home down ?? */
   { "kI", &_rl_term_kI },	/* insert */
   { "kd", &_rl_term_kd },
@@ -420,7 +416,7 @@ _rl_init_terminal_io (terminal_name)
       _rl_term_im = _rl_term_ei = _rl_term_ic = _rl_term_IC = (char *)NULL;
       _rl_term_up = _rl_term_dc = _rl_term_DC = _rl_visible_bell = (char *)NULL;
       _rl_term_ku = _rl_term_kd = _rl_term_kl = _rl_term_kr = (char *)NULL;
-      _rl_term_kh = _rl_term_kH = _rl_term_kI = _rl_term_kD = (char *)NULL;
+      _rl_term_kh = _rl_term_kH = _rl_term_kI = (char *)NULL;
       _rl_term_ks = _rl_term_ke = _rl_term_at7 = (char *)NULL;
       _rl_term_mm = _rl_term_mo = (char *)NULL;
       _rl_term_ve = _rl_term_vs = (char *)NULL;
@@ -496,8 +492,6 @@ bind_termcap_arrow_keys (map)
 
   rl_bind_keyseq_if_unbound (_rl_term_kh, rl_beg_of_line);	/* Home */
   rl_bind_keyseq_if_unbound (_rl_term_at7, rl_end_of_line);	/* End */
-
-  rl_bind_keyseq_if_unbound (_rl_term_kD, rl_delete);
 
   _rl_keymap = xkeymap;
 }

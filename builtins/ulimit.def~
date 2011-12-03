@@ -35,17 +35,14 @@ option is given, it is interpreted as follows:
     -c	the maximum size of core files created
     -d	the maximum size of a process's data segment
     -f	the maximum size of files created by the shell
-    -i  the maximum number of pending signals
     -l	the maximum size a process may lock into memory
     -m	the maximum resident set size
     -n	the maximum number of open file descriptors
     -p	the pipe buffer size
-    -q  the maximum number of bytes in POSIX message queues
     -s	the maximum stack size
     -t	the maximum amount of cpu time in seconds
     -u	the maximum number of user processes
-    -v	the size of virtual memory
-    -x  the maximum number of file locks
+    -v	the size of virtual memory 
 
 If LIMIT is given, it is the new value of the specified resource;
 the special LIMIT values `soft', `hard', and `unlimited' stand for
@@ -203,9 +200,6 @@ static RESOURCE_LIMITS limits[] = {
   { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
 #endif
   { 'f',	RLIMIT_FILESIZE, 1024,	"file size",		"blocks" },
-#ifdef RLIMIT_SIGPENDING
-  { 'i',	RLIMIT_SIGPENDING, 1,	"pending signals",	(char *)NULL },
-#endif
 #ifdef RLIMIT_MEMLOCK
   { 'l',	RLIMIT_MEMLOCK, 1024,	"max locked memory",	"kbytes" },
 #endif
@@ -214,9 +208,6 @@ static RESOURCE_LIMITS limits[] = {
 #endif /* RLIMIT_RSS */
   { 'n',	RLIMIT_OPENFILES, 1,	"open files",		(char *)NULL},
   { 'p',	RLIMIT_PIPESIZE, 512,	"pipe size", 		"512 bytes" },
-#ifdef RLIMIT_MSGQUEUE
-  { 'q',	RLIMIT_MSGQUEUE, 1,	"POSIX message queues",	"bytes" },
-#endif
 #ifdef RLIMIT_STACK
   { 's',	RLIMIT_STACK, 1024,	"stack size",		"kbytes" },
 #endif
@@ -229,9 +220,6 @@ static RESOURCE_LIMITS limits[] = {
 #endif
 #ifdef RLIMIT_SWAP
   { 'w',	RLIMIT_SWAP,	1024,	"swap size",		"kbytes" },
-#endif
-#ifdef RLIMIT_LOCKS
-  { 'w',	RLIMIT_LOCKS,	1,	"file locks",		(char *)NULL },
 #endif
   { -1, -1, -1, (char *)NULL, (char *)NULL }
 };
@@ -659,11 +647,11 @@ print_all_limits (mode)
 
   for (i = 0; limits[i].option > 0; i++)
     {
-      if (get_limit (i, &softlim, &hardlim) == 0)
-	printone (i, (mode & LIMIT_SOFT) ? softlim : hardlim, 1);
-      else if (errno != EINVAL)
+      if (get_limit (i, &softlim, &hardlim) < 0)
 	builtin_error ("%s: cannot get limit: %s", limits[i].description,
 						   strerror (errno));
+      else
+	printone (i, (mode & LIMIT_SOFT) ? softlim : hardlim, 1);
     }
 }
 
@@ -682,7 +670,7 @@ printone (limind, curlim, pdesc)
       else
         sprintf (unitstr, "(-%c) ", limits[limind].option);
 
-      printf ("%-20s %16s", limits[limind].description, unitstr);
+      printf ("%-18s %16s", limits[limind].description, unitstr);
     }
   if (curlim == RLIM_INFINITY)
     puts ("unlimited");
