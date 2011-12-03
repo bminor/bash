@@ -9302,3 +9302,18 @@ bashhist.c
 	  that returned `print only' to the history list, since history_expand
 	  no longer does it (and, when using readline, do it only when
 	  rl_dispatching is zero)
+
+				   3/22
+				   ----
+config.h.in,aclocal.m4
+	- change bash-specific functions that look in struct dirent to define
+	  HAVE_STRUCT_DIRENT_xxx, like AC_CHECK_MEMBERS does (though the
+	  functions are otherwise the same)
+	- new function, BASH_STRUCT_DIRENT_D_NAMLEN, define
+	  HAVE_STRUCT_DIRENT_D_NAMLEN if struct dirent has a `d_namlen' member
+
+configure.in
+	- call BASH_STRUCT_DIRENT_D_NAMLEN
+
+include/posixdir.h
+	- use new and renamed HAVE_STRUCT_DIRENT_D_xxx defines

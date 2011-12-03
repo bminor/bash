@@ -473,6 +473,11 @@ glob_vector (pat, dir, flags)
 	  if (REAL_DIR_ENTRY (dp) == 0)
 	    continue;
 
+#if 0
+	  if (dp->d_name == 0 || *dp->d_name == 0)
+	    continue;
+#endif
+
 #if HANDLE_MULTIBYTE
 	  if (MB_CUR_MAX > 1 && mbskipname (pat, dp->d_name))
 	    continue;

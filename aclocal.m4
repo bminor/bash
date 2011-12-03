@@ -1065,7 +1065,7 @@ fi
 
 AC_DEFUN(BASH_STRUCT_DIRENT_D_INO,
 [AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(if struct dirent has a d_ino member)
+AC_MSG_CHECKING(for struct dirent.d_ino)
 AC_CACHE_VAL(bash_cv_dirent_has_dino,
 [AC_TRY_COMPILE([
 #include <stdio.h>
@@ -1092,13 +1092,13 @@ struct dirent d; int z; z = d.d_ino;
 ], bash_cv_dirent_has_dino=yes, bash_cv_dirent_has_dino=no)])
 AC_MSG_RESULT($bash_cv_dirent_has_dino)
 if test $bash_cv_dirent_has_dino = yes; then
-AC_DEFINE(STRUCT_DIRENT_HAS_D_INO)
+AC_DEFINE(HAVE_STRUCT_DIRENT_D_INO)
 fi
 ])
 
 AC_DEFUN(BASH_STRUCT_DIRENT_D_FILENO,
 [AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(if struct dirent has a d_fileno member)
+AC_MSG_CHECKING(for struct dirent.d_fileno)
 AC_CACHE_VAL(bash_cv_dirent_has_d_fileno,
 [AC_TRY_COMPILE([
 #include <stdio.h>
@@ -1125,7 +1125,40 @@ struct dirent d; int z; z = d.d_fileno;
 ], bash_cv_dirent_has_d_fileno=yes, bash_cv_dirent_has_d_fileno=no)])
 AC_MSG_RESULT($bash_cv_dirent_has_d_fileno)
 if test $bash_cv_dirent_has_d_fileno = yes; then
-AC_DEFINE(STRUCT_DIRENT_HAS_D_FILENO)
+AC_DEFINE(HAVE_STRUCT_DIRENT_D_FILENO)
+fi
+])
+
+AC_DEFUN(BASH_STRUCT_DIRENT_D_NAMLEN,
+[AC_REQUIRE([AC_HEADER_DIRENT])
+AC_MSG_CHECKING(for struct dirent.d_namlen)
+AC_CACHE_VAL(bash_cv_dirent_has_d_namlen,
+[AC_TRY_COMPILE([
+#include <stdio.h>
+#include <sys/types.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#if defined(HAVE_DIRENT_H)
+# include <dirent.h>
+#else
+# define dirent direct
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif /* SYSNDIR */
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif /* SYSDIR */
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif /* HAVE_DIRENT_H */
+],[
+struct dirent d; int z; z = d.d_namlen;
+], bash_cv_dirent_has_d_namlen=yes, bash_cv_dirent_has_d_namlen=no)])
+AC_MSG_RESULT($bash_cv_dirent_has_d_namlen)
+if test $bash_cv_dirent_has_d_namlen = yes; then
+AC_DEFINE(HAVE_STRUCT_DIRENT_D_NAMLEN)
 fi
 ])
 

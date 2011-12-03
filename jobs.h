@@ -1,6 +1,6 @@
 /* jobs.h -- structures and stuff used by the jobs.c file. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
