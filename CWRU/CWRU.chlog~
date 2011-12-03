@@ -10105,3 +10105,47 @@ lib/readline/complete.c
 	- change append_to_match so that a non-zero value for
 	  rl_completion_suppress_append will cause no `/' to be appended to a
 	  directory name
+
+bashline.c
+	- experimental change to suppress appending a slash for a completed
+	  filename that is found in PATH as well as a directory in the current
+	  directory under certain circumstances:  a single instance found in
+	  $PATH when `.' is not in $PATH, and multiple instances found in the
+	  $PATH, even when `.' is in the $PATH
+
+				   9/24
+				   ----
+command.h
+	- new word flag: W_ASSIGNRHS, means word is rhs of assignment statement
+	- new word flag: W_NOTILDE, means word is not to be tilde expanded
+	- new word flag (internal): W_ITILDE, means the next character is a
+	  tilde that should be expanded
+
+general.c
+	- new set of tilde suffixes for use when parsing the RHS of an
+	  assignment statement and =~ should not be subject to tilde expansion
+	- if ASSIGN_P argument to bash_tilde_expand is 2, use tilde prefixes
+	  for parsing RHS of assignment statement
+
+general.[ch]
+	- new function bash_tilde_find_word, drop-in replacement for
+	  tilde_find_word
+
+subst.c
+	- call bash_tilde_expand with secord argument of 2 when expanding rhs
+	  of an assignment statement, so tildes after second and subsequent
+	  `=' in an assignment are not expanded
+	- new function, expand_string_assignment, to expand the rhs of an
+	  assignment statement
+	- add `~' to EXP_CHAR, the characters that will cause the word
+	  expansion functions to be called
+	- move tilde expansion into expand_word_internal instead of many
+	  different calls to bash_tilde_expand scattered across different
+	  functions.  NOTE:  This means that double quotes surrounding a
+	  {paramOPword} expansion will cause tilde expansion to NOT be
+	  performed on `word'.  I think this is right, what POSIX specifies,
+	  and consistent with the behavior of other characters in the rhs
+
+execute_cmd.c
+	- take out calls to bash_tilde_expand before calling word expansion
+	  functions

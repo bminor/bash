@@ -1528,7 +1528,7 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
 	  mblength = MBRLEN (delims + i, slength, &state);
 	  if (MB_INVALIDCH (mblength))
 	    state = state_bak;
-	  else if (mblength != 1)
+	  else if (mblength > 1)
 	    {
 	      memcpy (d2 + ts, delims + i, mblength);
 	      ts += mblength;
@@ -1793,6 +1793,8 @@ string_list_dollar_at (list, quoted)
 	  sep[0] = *ifs;
 	  sep[1] = '\0';
 	}
+      else if (mblength == 0)
+	sep[0] = '\0';
       else
 	{
 	  memcpy (sep, ifs, mblength);
@@ -2161,14 +2163,7 @@ do_assignment_internal (string, expand)
 
       /* Perform tilde expansion. */
       if (expand && temp[0])
-	{
-	  temp = (xstrchr (temp, '~') && unquoted_member ('~', temp))
-			? bash_tilde_expand (temp, 1)
-			: savestring (temp);
-
-	  value = expand_string_if_necessary (temp, 0, expand_string_unsplit);
-	  free (temp);
-	}
+	value = expand_string_if_necessary (temp, 0, expand_string_assignment);
       else
 	value = savestring (temp);
     }
@@ -2336,9 +2331,6 @@ pos_params (string, start, end, quoted)
 
   t->next = (WORD_LIST *)NULL;
   if (string[0] == '*')
-#if 0
-    ret = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? string_list_dollar_star (quote_list (h)) : string_list (h);
-#else
     {
       if (quoted & Q_DOUBLE_QUOTES)
 	ret = string_list_dollar_star (quote_list (h));
@@ -2347,7 +2339,6 @@ pos_params (string, start, end, quoted)
       else
 	ret = string_list (h);
     }
-#endif
   else
     ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (h) : h);
   if (t != params)
@@ -2364,9 +2355,9 @@ pos_params (string, start, end, quoted)
 /******************************************************************/
 
 #if defined (PROCESS_SUBSTITUTION)
-#define EXP_CHAR(s) (s == '$' || s == '`' || s == '<' || s == '>' || s == CTLESC)
+#define EXP_CHAR(s) (s == '$' || s == '`' || s == '<' || s == '>' || s == CTLESC || s == '~')
 #else
-#define EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC)
+#define EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC || s == '~')
 #endif
 
 /* If there are any characters in STRING that require full expansion,
@@ -2493,13 +2484,6 @@ cond_expand_word (w, special)
   if (w->word == 0 || w->word[0] == '\0')
     return ((char *)NULL);
 
-  if (xstrchr (w->word, '~') && unquoted_member ('~', w->word))
-    {
-      p = bash_tilde_expand (w->word, 0);
-      free (w->word);
-      w->word = p;
-    }
-
   l = call_expand_word_internal (w, 0, 0, (int *)0, (int *)0);
   if (l)
     {
@@ -2588,6 +2572,36 @@ expand_string_unsplit (string, quoted)
 
   expand_no_split_dollar_star = 1;
   value = expand_string_internal (string, quoted);
+  expand_no_split_dollar_star = 0;
+
+  if (value)
+    {
+      if (value->word)
+	remove_quoted_nulls (value->word->word);
+      dequote_list (value);
+    }
+  return (value);
+}
+
+/* Expand the rhs of an assignment statement */
+WORD_LIST *
+expand_string_assignment (string, quoted)
+     char *string;
+     int quoted;
+{
+  WORD_DESC td;
+  WORD_LIST *value;
+
+  if (string == 0 || *string == '\0')
+    return ((WORD_LIST *)NULL);
+
+  expand_no_split_dollar_star = 1;
+
+  td.flags = W_ASSIGNRHS;
+  td.word = savestring (string);
+  value = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
+  FREE (td.word);
+
   expand_no_split_dollar_star = 0;
 
   if (value)
@@ -3555,8 +3569,6 @@ getpattern (value, quoted, expandpat)
   WORD_LIST *l;
   int i;
 
-  tword = xstrchr (value, '~') ? bash_tilde_expand (value, 0) : savestring (value);
-
   /* There is a problem here:  how to handle single or double quotes in the
      pattern string when the whole expression is between double quotes?
      POSIX.2 says that enclosing double quotes do not cause the pattern to
@@ -3574,11 +3586,10 @@ getpattern (value, quoted, expandpat)
 
   /* expand_string_for_rhs () leaves WORD quoted and does not perform
      word splitting. */
-  l = *tword ? expand_string_for_rhs (tword,
+  l = *value ? expand_string_for_rhs (value,
 				      (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? Q_PATQUOTE : quoted,
 				      (int *)NULL, (int *)NULL)
 	     : (WORD_LIST *)0;
-  free (tword);
   pat = string_list (l);
   dispose_words (l);
   if (pat)
@@ -3626,11 +3637,7 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
 
   l = REVERSE_LIST (new, WORD_LIST *);
   if (itype == '*')
-#if 0
-    tword = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? string_list_dollar_star (l) : string_list (l);
-#else
     tword = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (l) : string_list (l);
-#endif
   else
     tword = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (l) : l);
 
@@ -4707,24 +4714,16 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   char *t, *t1, *temp;
   int hasdol;
 
-  /* XXX - Should we tilde expand in an assignment context if C is `='? */
-  if (*value == '~')
-    temp = bash_tilde_expand (value, 0);
-  else if (xstrchr (value, '~')  && unquoted_substring ("=~", value))
-    temp = bash_tilde_expand (value, 1);
-  else
-    temp = savestring (value);
-
   /* If the entire expression is between double quotes, we want to treat
      the value as a double-quoted string, with the exception that we strip
      embedded unescaped double quotes. */
-  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *temp)
+  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *value)
     {
       hasdol = 0;
-      t = string_extract_double_quoted (temp, &hasdol, 1);
-      free (temp);
-      temp = t;
+      temp = string_extract_double_quoted (value, &hasdol, 1);
     }
+  else
+    temp = value;
 
   hasdol = 0;
   /* XXX was 0 not quoted */
@@ -4732,7 +4731,8 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
 	    : (WORD_LIST *)0;
   if (hasdollarat)
     *hasdollarat = hasdol || (l && l->next);
-  free (temp);
+  if (temp != value)
+    free (temp);
   if (l)
     {
       /* The expansion of TEMP returned something.  We need to treat things
@@ -4792,15 +4792,7 @@ parameter_brace_expand_error (name, value)
 
   if (value && *value)
     {
-      if (*value == '~')
-	temp = bash_tilde_expand (value, 0);
-      else if (xstrchr (value, '~')  && unquoted_substring ("=~", value))
-	temp = bash_tilde_expand (value, 1);
-      else
-	temp = savestring (value);
-
-      l = expand_string (temp, 0);
-      FREE (temp);
+      l = expand_string (value, 0);
       temp =  string_list (l);
       report_error ("%s: %s", name, temp ? temp : "");	/* XXX was value not "" */
       FREE (temp);
@@ -5454,16 +5446,9 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   if (rep && *rep == '\0')
     rep = (char *)NULL;
 
-#if 0
-  /* Expand PAT and REP for command, variable and parameter, arithmetic,
-     and process substitution.  Also perform quote removal.  Do not
-     perform word splitting or filename generation. */
-  pat = expand_string_if_necessary (lpatsub, (quoted & ~Q_DOUBLE_QUOTES), expand_string_unsplit);
-#else
   /* Perform the same expansions on the pattern as performed by the
      pattern removal expansions. */
   pat = getpattern (lpatsub, quoted, 1);
-#endif
 
   if (rep)
     {
@@ -6029,11 +6014,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
-#if 0
-	  temp = string_list_dollar_star (list);
-#else
 	  temp = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (list) : string_list (list);
-#endif
 	  temp1 = quote_string (temp);
 	  free (temp);
 	  temp = temp1;
@@ -6319,9 +6300,12 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
      string (e.g., "xx"ab), or is fully quoted (e.g., "xxab"). */
   int quoted_state;
 
+  /* State flags */
   int had_quoted_null;
   int has_dollar_at;
   int tflag;
+
+  int assignoff;		/* If assignment, offset of `=' */
 
   register unsigned char c;	/* Current character. */
   int t_index;			/* For calls to string_extract_xxx. */
@@ -6342,6 +6326,8 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   if (contains_dollar_at)
     *contains_dollar_at = 0;
+
+  assignoff = -1;
 
   /* Begin the expansion. */
 
@@ -6412,6 +6398,81 @@ add_string:
 	  }
 #endif /* PROCESS_SUBSTITUTION */
 
+	case '=':
+	  /* Posix.2 section 3.6.1 says that tildes following `=' in words
+	     which are not assignment statements are not expanded.  If the
+	     shell isn't in posix mode, though, we perform tilde expansion
+	     on `likely candidate' unquoted assignment statements (flags
+	     include W_ASSIGNMENT but not W_QUOTED).  A likely candidate
+	     contains an unquoted :~ or =~.  Something to think about: we
+	     now have a flag that says  to perform tilde expansion on arguments
+	     to `assignment builtins' like declare and export that look like
+	     assignment statements.  We now do tilde expansion on such words
+	     even in POSIX mode. */	
+	  if (word->flags & (W_ASSIGNRHS|W_NOTILDE))
+	    goto add_character;
+	  /* If we're not in posix mode or forcing assignment-statement tilde
+	     expansion, note where the `=' appears in the word and prepare to
+	     do tilde expansion following the first `='. */
+	  if ((word->flags & W_ASSIGNMENT) &&
+	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
+	      assignoff == -1 && sindex > 0)
+	    assignoff = sindex;
+	  if (sindex == assignoff && string[sindex+1] == '~')	/* XXX */
+	    word->flags |= W_ITILDE;
+	  else if ((word->flags & W_ASSIGNMENT) &&
+		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
+		   string[sindex+1] == '~')
+	    word->flags |= W_ITILDE;
+	  goto add_character;
+
+	case ':':
+	  if (word->flags & W_NOTILDE)
+	    goto add_character;
+	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS)) &&
+		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
+		   string[sindex+1] == '~')
+	    word->flags |= W_ITILDE;
+	  goto add_character;
+
+	case '~':
+	  /* If the word isn't supposed to be tilde expanded, or we're not
+	     at the start of a word or after an unquoted : or = in an
+	     assignment statement, we don't do tilde expansion. */
+	  if ((word->flags & W_NOTILDE) ||
+	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
+	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	    {
+	      word->flags &= ~W_ITILDE;
+	      goto add_character;
+	    }
+
+	  if (word->flags & W_ASSIGNRHS)
+	    tflag = 2;
+	  else if ((word->flags & W_ASSIGNMENT) &&
+		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)))
+	    tflag = 1;
+	  else
+	    tflag = 0;
+
+	  temp = bash_tilde_find_word (string + sindex, tflag, &t_index);
+	    
+	  word->flags &= ~W_ITILDE;
+
+	  if (temp && *temp && t_index > 0)
+	    {
+	      temp1 = bash_tilde_expand (temp, tflag);
+	      free (temp);
+	      temp = temp1;
+	      sindex += t_index;
+	      goto add_string;
+	    }
+	  else
+	    {
+	      FREE (temp);
+	      goto add_character;
+	    }
+	
 	case '$':
 	  if (expanded_something)
 	    *expanded_something = 1;
@@ -6498,11 +6559,7 @@ add_twochars:
 	  break;
 
 	case '"':
-#if 0
-	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT|Q_PATQUOTE))
-#else
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-#endif
 	    goto add_character;
 
 	  t_index = ++sindex;
@@ -6644,11 +6701,7 @@ add_twochars:
 	  /* break; */
 
 	case '\'':
-#if 0
-	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT|Q_PATQUOTE))
-#else
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-#endif
 	    goto add_character;
 
 	  t_index = ++sindex;
@@ -6968,10 +7021,11 @@ setifs (v)
       size_t ifs_len;
       ifs_len = strnlen (ifs_value, MB_CUR_MAX);
       ifs_firstc_len = MBLEN (ifs_value, ifs_len);
-      if (ifs_firstc_len == 1 || MB_INVALIDCH (ifs_firstc_len))
+      if (ifs_firstc_len == 1 || ifs_firstc_len == 0 || MB_INVALIDCH (ifs_firstc_len))
 	{
 	  ifs_firstc[0] = ifs_value[0];
 	  ifs_firstc[1] = '\0';
+	  ifs_firstc_len = 1;
 	}
       else
 	memcpy (ifs_firstc, ifs_value, ifs_firstc_len);
@@ -7380,29 +7434,6 @@ shell_expand_word_list (tlist, eflags)
       temp_string = tlist->word->word;
 
       next = tlist->next;
-
-      /* Posix.2 section 3.6.1 says that tildes following `=' in words
-	 which are not assignment statements are not expanded.  If the
-	 shell isn't in posix mode, though, we perform tilde expansion
-	 on `likely candidate' unquoted assignment statements (flags
-	 include W_ASSIGNMENT but not W_QUOTED).  A likely candidate
-	 contains an unquoted :~ or =~.  Something to think about: we
-	 now have a flag that says  to perform tilde expansion on arguments
-	 to `assignment builtins' like declare and export that look like
-	 assignment statements.  We now do tilde expansion on such words
-	 even in POSIX mode. */
-      if (((tlist->word->flags & (W_ASSIGNMENT|W_QUOTED)) == W_ASSIGNMENT) &&
-	     (posixly_correct == 0 || (tlist->word->flags & W_TILDEEXP)) &&
-	     (unquoted_substring ("=~", temp_string) || unquoted_substring (":~", temp_string)))
-	{
-	  tlist->word->word = bash_tilde_expand (temp_string, 1);
-	  free (temp_string);
-	}
-      else if (temp_string[0] == '~')
-	{
-	  tlist->word->word = bash_tilde_expand (temp_string, 0);
-	  free (temp_string);
-	}
 
       expanded_something = 0;
       expanded = expand_word_internal

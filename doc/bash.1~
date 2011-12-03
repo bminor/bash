@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Aug 27 12:14:46 EDT 2004
+.\"	Last Change: Fri Sep 17 22:44:17 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 June 26" "GNU Bash-3.0"
+.TH BASH 1 "2004 Sep 17" "GNU Bash-3.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -115,7 +115,7 @@ when invoking an interactive shell.
 .TP
 .B \-D
 A list of all double-quoted strings preceded by \fB$\fP
-is printed on the standard ouput.
+is printed on the standard output.
 These are the strings that
 are subject to language translation when the current locale
 is not \fBC\fP or \fBPOSIX\fP.
@@ -1228,8 +1228,8 @@ The command argument to the \fB\-c\fP invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of \fBFUNCNAME\fP.
 \fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
-file where \fB${FUNCNAME[\fP\fI$i + 1\fP\fB]}\fP was called.
-The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i + 1\fP\fB]}\fB.
+file where \fB${FUNCNAME[\fP\fI$ifP\fB]}\fP was called.
+The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
 .B BASH_REMATCH
@@ -1963,9 +1963,7 @@ job identifier (see
 .B JOB CONTROL
 below).  If set to any other value, the supplied string must
 be a prefix of a stopped job's name; this provides functionality
-analogous to the
-.B %
-job identifier.
+analogous to the \fB%\fP\fIstring\fP job identifier.
 .TP
 .B histchars
 The two or three characters which control history expansion

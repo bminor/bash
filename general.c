@@ -690,7 +690,9 @@ extern char *get_dirstack_from_string __P((char *));
 #endif
 
 static char **bash_tilde_prefixes;
+static char **bash_tilde_prefixes2;
 static char **bash_tilde_suffixes;
+static char **bash_tilde_suffixes2;
 
 /* If tilde_expand hasn't been able to expand the text, perhaps it
    is a special shell expansion.  This function is installed as the
@@ -738,6 +740,10 @@ tilde_initialize ()
       bash_tilde_prefixes[1] = ":~";
       bash_tilde_prefixes[2] = (char *)NULL;
 
+      bash_tilde_prefixes2 = strvec_create (2);
+      bash_tilde_prefixes2[0] = ":~";
+      bash_tilde_prefixes2[1] = (char *)NULL;
+
       tilde_additional_prefixes = bash_tilde_prefixes;
 
       bash_tilde_suffixes = strvec_create (3);
@@ -746,6 +752,10 @@ tilde_initialize ()
       bash_tilde_suffixes[2] = (char *)NULL;
 
       tilde_additional_suffixes = bash_tilde_suffixes;
+
+      bash_tilde_suffixes2 = strvec_create (2);
+      bash_tilde_suffixes2[0] = ":";
+      bash_tilde_suffixes2[1] = (char *)NULL;
     }
 }
 
@@ -777,9 +787,49 @@ unquoted_tilde_word (s)
   return 1;
 }
 
+/* Find the end of the tilde-prefix starting at S, and return the tilde
+   prefix in newly-allocated memory.  Return the length of the string in
+   *LENP.  FLAGS tells whether or not we're in an assignment context --
+   if so, `:' delimits the end of the tilde prefix as well. */
+char *
+bash_tilde_find_word (s, flags, lenp)
+     const char *s;
+     int flags, *lenp;
+{
+  const char *r;
+  char *ret;
+  int l;
+
+  for (r = s; *r && *r != '/'; r++)
+    {
+      /* Short-circuit immediately if we see a quote character.  Even though
+	 POSIX says that `the first unquoted slash' (or `:') terminates the
+	 tilde-prefix, in practice, any quoted portion of the tilde prefix
+	 will cause it to not be expanded. */
+      if (*r == '\\' || *r == '\'' || *r == '"')  
+	{
+	  ret = savestring (s);
+	  if (lenp)
+	    *lenp = 0;
+	  return ret;
+	}
+      else if (flags && *r == ':')
+	break;
+    }
+  l = r - s;
+  ret = xmalloc (l + 1);
+  strncpy (ret, s, l);
+  ret[l] = '\0';
+  if (lenp)
+    *lenp = l;
+  return ret;
+}
+    
 /* Tilde-expand S by running it through the tilde expansion library.
    ASSIGN_P is 1 if this is a variable assignment, so the alternate
-   tilde prefixes should be enabled (`=~' and `:~', see above). */
+   tilde prefixes should be enabled (`=~' and `:~', see above).  If
+   ASSIGN_P is 2, we are expanding the rhs of an assignment statement,
+   so `=~' is not valid. */
 char *
 bash_tilde_expand (s, assign_p)
      const char *s;
@@ -790,7 +840,12 @@ bash_tilde_expand (s, assign_p)
 
   old_immed = interrupt_immediately;
   interrupt_immediately = 1;
-  tilde_additional_prefixes = assign_p ? bash_tilde_prefixes : (char **)0;
+
+  tilde_additional_prefixes = assign_p == 0 ? (char **)0
+  					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
+  if (assign_p == 2)
+    tilde_additional_suffixes = bash_tilde_suffixes2;
+
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
   interrupt_immediately = old_immed;

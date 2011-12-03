@@ -65,10 +65,7 @@ HOME=/usr/homes/chet
 somevar=
 expect "<$HOME>"
 recho ${somevar:-~}
-# This changed after bash-3.0, when the tilde implementation was redone.  It's
-# not backward compatible, but it's very hard to be backward-compatible here,
-# and I think the old behavior was a bug
-expect '<~>'
+expect "<$HOME>"
 recho "${somevar:-~}"
 expect '<~>'
 recho "${somevar:-"~"}"

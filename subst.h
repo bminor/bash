@@ -126,6 +126,9 @@ extern int number_of_args __P((void));
    takes care of quote removal. */
 extern WORD_LIST *expand_string_unsplit __P((char *, int));
 
+/* Expand the rhs of an assignment statement. */
+extern WORD_LIST *expand_string_assignment __P((char *, int));
+
 /* Expand a prompt string. */
 extern WORD_LIST *expand_prompt_string __P((char *, int));
 

@@ -1778,8 +1778,13 @@ raw_job_exit_status (job)
   if (pipefail_opt)
     {
       fail = 0;
-      for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
-        if (p->status != EXECUTION_SUCCESS) fail = p->status;
+      p = jobs[job]->pipe;
+      do
+	{
+	  if (p->status != EXECUTION_SUCCESS) fail = p->status;
+	  p = p->next;
+	}
+      while (p != jobs[job]->pipe);
       return fail;
     }
 
@@ -2311,12 +2316,12 @@ start_job (job, foreground)
   p = jobs[job]->pipe;
 
   if (foreground == 0)
-    fprintf (stderr, "[%d]%c ", job + 1,
+    printf ("[%d]%c ", job + 1,
 	   (job == current_job) ? '+': ((job == previous_job) ? '-' : ' '));
 
   do
     {
-      fprintf (stderr, "%s%s",
+      printf ("%s%s",
 	       p->command ? p->command : "",
 	       p->next != jobs[job]->pipe? " | " : "");
       p = p->next;
@@ -2324,12 +2329,12 @@ start_job (job, foreground)
   while (p != jobs[job]->pipe);
 
   if (foreground == 0)
-    fprintf (stderr, " &");
+    printf (" &");
 
   if (strcmp (wd, jobs[job]->wd) != 0)
-    fprintf (stderr, "	(wd: %s)", polite_directory_format (jobs[job]->wd));
+    printf ("	(wd: %s)", polite_directory_format (jobs[job]->wd));
 
-  fprintf (stderr, "\n");
+  printf ("\n");
 
   /* Run the job. */
   if (already_running == 0)

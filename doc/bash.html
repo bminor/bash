@@ -2,7 +2,7 @@
 <TITLE>BASH(1) Manual Page</TITLE>
 </HEAD>
 <BODY><TABLE WIDTH=100%>
-<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 June 26<TH ALIGN=RIGHT>BASH(1)
+<TH ALIGN=LEFT>BASH(1)<TH ALIGN=CENTER>2004 Sep 17<TH ALIGN=RIGHT>BASH(1)
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
@@ -1603,8 +1603,8 @@ The command argument to the <B>-c</B> invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of <B>FUNCNAME</B>.
 <B>${BASH_LINENO[</B><I>$i</I><B>]}</B> is the line number in the source
-file where <B>${FUNCNAME[</B><I>$i + 1</I><B>]}</B> was called.
-The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i + 1</I><B>]}.
+file where <B>${FUNCNAME[</B><I>$ifP</I><B>]}</B> was called.
+The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}.
 Use LINENO</B> to obtain the current line number.
 <DT><B>BASH_REMATCH</B>
 
@@ -5096,7 +5096,7 @@ sends a
 to all jobs when an interactive login shell exits.
 <P>
 
-If Bbash is waiting for a command to complete and receives a signal
+If <B>bash</B> is waiting for a command to complete and receives a signal
 for which a trap has been set, the trap will not be executed until
 the command completes. 
 When <B>bash</B> is waiting for an asynchronous command via the <B>wait</B>
@@ -8023,6 +8023,12 @@ suppressing trailing spaces).  Intended to be used with shell functions.
 <DD>
 Tell readline not to append a space (the default) to words completed at
 the end of the line.
+<DT><B>plusdirs</B>
+
+<DD>
+After any matches defined by the compspec are generated, 
+directory name completion is attempted and any
+matches are added to the results of the other actions.
 </DL></DL>
 
 <DT><B>-A</B> <I>action</I><DD>
@@ -11367,6 +11373,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 30 August 2004 08:27:20 EDT
+Time: 21 September 2004 11:57:09 EDT
 </BODY>
 </HTML>

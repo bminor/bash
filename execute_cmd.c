@@ -1360,6 +1360,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #if defined (JOB_CONTROL)
 	  terminate_current_pipeline ();
 	  kill_current_pipeline ();
+	  UNBLOCK_CHILD (oset);
 #endif /* JOB_CONTROL */
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  /* The unwind-protects installed below will take care
@@ -2190,14 +2191,6 @@ execute_case_command (case_command)
     }
 #endif
 
-  /* Posix.2 specifies that the WORD is tilde expanded. */
-  if (member ('~', case_command->word->word))
-    {
-      word = bash_tilde_expand (case_command->word->word, 0);
-      free (case_command->word->word);
-      case_command->word->word = word;
-    }
-
   wlist = expand_word_unsplit (case_command->word, 0);
   word = wlist ? string_list (wlist) : savestring ("");
   dispose_words (wlist);
@@ -2215,15 +2208,6 @@ execute_case_command (case_command)
       QUIT;
       for (list = clauses->patterns; list; list = list->next)
 	{
-	  /* Posix.2 specifies to tilde expand each member of the pattern
-	     list. */
-	  if (member ('~', list->word->word))
-	    {
-	      pattern = bash_tilde_expand (list->word->word, 0);
-	      free (list->word->word);
-	      list->word->word = pattern;
-	    }
-
 	  es = expand_word_leave_quoted (list->word, 0);
 
 	  if (es && es->word && es->word->word && *(es->word->word))
