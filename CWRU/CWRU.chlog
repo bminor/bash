@@ -10155,3 +10155,129 @@ execute_cmd.c
 execute_cmd.c
 	- make sure to call UNBLOCK_CHILD before returning on a pipe creation
 	  failure in execute_pipeline
+
+				   9/27
+				   ----
+variables.c
+	- change get_bash_command to deal with the_printed_command_except_trap
+	  being NULL
+
+execute_cmd.c
+	- fix execute_simple_command to deal with the_printed_command being
+	  NULL when assigning to the_printed_command_except_trap -- fixes
+	  seg fault in savestring()
+
+parse.y
+	- change the parser so that the closing `)' in a compound variable
+	  assignment delimits a token -- ksh93 does it this way
+
+doc/{bash.1,bashref.texi}
+	- change description of tilde expansion to note that expansion is
+	  attempted only after the first =~ in an assignment statement
+
+builtins/declare.def
+	- when assigning to an array variable with declare -a x=(...), make
+	  sure the last character in the rhs  of the variable assignment is
+	  `)', not just that it appears somewhere
+
+				   9/28
+				   ----
+command.h
+	- add a `W_NOEXPAND' flag to inhibit all expansion except quote removal
+	- add a `W_COMPASSIGN' flag to denote a word is a compound assignment
+	  statement
+
+parse.y
+	- set W_COMPASSIGN on words that appear to be compound assignments
+
+subst.c
+	- pass W_NOXPAND and W_COMPASSIGN through end of expand_word_internal
+
+subst.[ch]
+	- new function, expand_assignment_string_to_string, calls
+	  expand_string_assignment and then string_list on the result
+
+variables.c
+	- assign_in_env now calls expand_assignment_string_to_string
+
+				   9/30
+				   ----
+builtins/common.c
+	- change get_job_spec so the null job `%' once again means the current
+	  job
+
+				   10/1
+				   ----
+subst.c
+	- do_assignment_internal now takes a WORD_DESC * as its first
+	  argument, and uses its `word' member as the assignment string
+	- change expand_word_list_internal to call do_word_assignment instead
+	  of do_assignment, passing it `word' instead of, e.g., `word->word'
+	- change extract_array_assignment_list to just return the passed
+	  string minus a trailing `)' if the last character is a right
+	  paren
+	- change do_assignment_internal to call extract_array_assignment_list
+
+subst.[ch]
+	- change do_assignment and do_assignment_no_expand to take a `char *'
+	  instead of `const char *' first argument; change extern prototypes
+	- new function, do_word_assignment, takes a WORD_DESC * and calls
+	  do_assignment_internal on it; add extern declaration with prototype
+
+general.h
+	- new typedef, sh_wassign_func_t, like sh_assign_func_t but takes a
+	  WORD_DESC * as its first argument
+
+variables.[ch]
+	- assign_in_env now takes a WORD_DESC * as its first argument
+
+				   10/2
+				   ----
+command.h
+	- new word flag, W_ASSNBLTIN, denotes that the word is a builtin
+	  command (in a command position) that takes assignment statements
+	  as arguments, like `declare'
+	- new word flags, W_ASSIGNARG, denotes that word is an assignment
+	  statement given as argument to assignment builtin
+
+execute_cmd.c
+	- set W_ASSNBLTIN flag in fix_assignment_words if necessary (if there
+	  are any arguments that are assignment statements)
+	- set W_ASSIGNARG flag in fix_assignment_words if necessary
+
+subst.c
+	- new function, do_compound_assignment, encapsulates the necessary
+	  code to perform a compound array assignment (including creation of
+	  local variables); called from do_assignment_internal
+	- to fix the double-expansion problem with compound array assignments
+	  that are arguments to builtins like `declare', changed
+	  shell_expand_word_list to treat those arguments like assignment
+	  statements (with proper creation of local variables inside shell
+	  functions) and pass the attribute-setting portion of the statement
+	  onto the builtin.  This is what ksh93 appears to do, from inspection
+	  of the `ksh93 -x' output
+
+execute_cmd.c
+	- fix execute_simple_command:  in case of pipeline or async command,
+	  when forking early, set `subshell_environment' so that it can contain
+	  both SUBSHELL_PIPE and SUBSHELL_ASYNC -- the two should not be
+	  mutually exclusive.  Fixes bug reported by pierre.humblet@ieee.org
+	- remove references to last_pid, old_command_subst_pid; use NO_PID as
+	  a sentinel value to decide whether or not a child process has been
+	  created and needs to be waited for.  Submitted by
+	  pierre.humblet@ieee.org to fix recycling-pid problem on cygwin
+
+doc/{bash.1,bashref.texi}
+	- fixed documentation of `@(pattern)' extended globbing operator --
+	  it succeeds if the string matches one of the patterns, not exactly
+	  one.  This is what ksh93 does, too
+
+lib/readline/complete.c
+	- fixed rl_menu_complete so that a negative argument cycles backwards
+	  through the list
+
+				   10/3
+				   ----
+subst.c
+	- use W_COMPASSIGN flag in do_assignment_internal instead of deciding
+	  lexically which assignments are compound array assignments

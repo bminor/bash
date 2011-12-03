@@ -377,7 +377,13 @@ declare_internal (list, local_var)
 #if defined (ARRAY_VARS)
 	  if ((making_array_special || (flags_on & att_array) || array_p (var)) && offset)
 	    {
+	      int vlen;
+	      vlen = STRLEN (value);
+#if 0
 	      if (value[0] == '(' && strchr (value, ')'))
+#else
+	      if (value[0] == '(' && value[vlen-1] == ')')
+#endif
 		compound_array_assign = 1;
 	      else
 		simple_array_assign = 1;

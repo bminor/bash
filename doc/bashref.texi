@@ -1456,7 +1456,7 @@ If the login name is invalid, or the tilde expansion fails, the word is
 left unchanged.
 
 Each variable assignment is checked for unquoted tilde-prefixes immediately
-following a @samp{:} or @samp{=}.
+following a @samp{:} or the first @samp{=}.
 In these cases, tilde expansion is also performed.
 Consequently, one may use file names with tildes in assignments to
 @env{PATH}, @env{MAILPATH}, and @env{CDPATH},
@@ -1931,7 +1931,7 @@ Matches zero or more occurrences of the given patterns.
 Matches one or more occurrences of the given patterns.
 
 @item @@(@var{pattern-list})
-Matches exactly one of the given patterns.
+Matches one of the given patterns.
 
 @item !(@var{pattern-list})
 Matches anything except one of the given patterns.
@@ -6118,11 +6118,12 @@ There are a number of ways to refer to a job in the shell.  The
 character @samp{%} introduces a job name.
 
 Job number @code{n} may be referred to as @samp{%n}.
-The symbols @samp{%%} and
-@samp{%+} refer to the shell's notion of the current job, which
-is the last job stopped while it was in the foreground or started
-in the background.  The
-previous job may be referenced using @samp{%-}.  In output
+The symbols @samp{%%} and  @samp{%+} refer to the shell's notion of the
+current job, which is the last job stopped while it was in the foreground
+or started in the background.
+A single @samp{%} (with no accompanying job specification) also refers
+to the current job.
+The previous job may be referenced using @samp{%-}.  In output
 pertaining to jobs (e.g., the output of the @code{jobs} command),
 the current job is always flagged with a @samp{+}, and the
 previous job with a @samp{-}. 

@@ -216,6 +216,7 @@ typedef void sh_resetsig_func_t __P((int));	/* sh_vintfunc_t */
 typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 
 typedef int sh_assign_func_t __P((const char *));	/* sh_icpfunc_t */
+typedef int sh_wassign_func_t __P((WORD_DESC *));
 
 typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 

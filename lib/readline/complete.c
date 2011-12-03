@@ -2178,9 +2178,11 @@ rl_menu_complete (count, ignore)
       return (0);
     }
 
-  match_list_index = (match_list_index + count) % match_list_size;
+  match_list_index += count;
   if (match_list_index < 0)
     match_list_index += match_list_size;
+  else
+    match_list_index %= match_list_size;
 
   if (match_list_index == 0 && match_list_size > 1)
     {

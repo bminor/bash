@@ -3285,6 +3285,10 @@ read_token_word (character)
   /* DOLLAR_PRESENT becomes non-zero if we see a `$'. */
   int dollar_present;
 
+  /* COMPOUND_ASSIGNMENT becomes non-zero if we are parsing a compound
+     assignment. */
+  int compound_assignment;
+
   /* QUOTED becomes non-zero if we see one of ("), ('), (`), or (\). */
   int quoted;
 
@@ -3304,7 +3308,7 @@ read_token_word (character)
 
   token_index = 0;
   all_digit_token = DIGIT (character);
-  dollar_present = quoted = pass_next_character = 0;
+  dollar_present = quoted = pass_next_character = compound_assignment = 0;
 
   for (;;)
     {
@@ -3543,7 +3547,12 @@ read_token_word (character)
 	      token[token_index++] = ')';
 	      FREE (ttok);
 	      all_digit_token = 0;
+	      compound_assignment = 1;
+#if 0
 	      goto next_character;
+#else
+	      goto got_token;		/* ksh93 seems to do this */
+#endif
 	    }
 	  else
 	    shell_ungetc (peek_char);
@@ -3638,6 +3647,8 @@ got_token:
     the_word->flags |= W_HASDOLLAR;
   if (quoted)
     the_word->flags |= W_QUOTED;
+  if (compound_assignment)
+    the_word->flags |= W_COMPASSIGN;
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
      context-dependent, so it cannot be handled in the grammar. */

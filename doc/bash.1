@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Sep 17 22:44:17 EDT 2004
+.\"	Last Change: Sat Oct  2 18:05:57 EDT 2004
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2004 Sep 17" "GNU Bash-3.0"
+.TH BASH 1 "2004 Oct 2" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2236,7 +2236,7 @@ is unchanged.
 Each variable assignment is checked for unquoted tilde-prefixes immediately
 following a
 .B :
-or
+or the first
 .BR = .
 In these cases, tilde expansion is also performed.
 Consequently, one may use file names with tildes in assignments to
@@ -2853,7 +2853,7 @@ Matches zero or more occurrences of the given patterns
 Matches one or more occurrences of the given patterns
 .TP
 \fB@(\fP\^\fIpattern-list\^\fP\fB)\fP
-Matches exactly one of the given patterns
+Matches one of the given patterns
 .TP
 \fB!(\fP\^\fIpattern-list\^\fP\fB)\fP
 Matches anything except one of the given patterns
@@ -4063,6 +4063,8 @@ command), the current job is always flagged with a
 .BR + ,
 and the previous job with a
 .BR \- .
+A single % (with no accompanying job specification) also refers to the
+current job.
 .PP
 Simply naming a job can be used to bring it into the
 foreground:

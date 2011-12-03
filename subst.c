@@ -204,7 +204,10 @@ static char *remove_quoted_nulls __P((char *));
 static int unquoted_substring __P((char *, char *));
 static int unquoted_member __P((int, char *));
 
-static int do_assignment_internal __P((const char *, int));
+#if defined (ARRAY_VARS)
+static SHELL_VAR *do_compound_assignment __P((char *, char *, int));
+#endif
+static int do_assignment_internal __P((const WORD_DESC *, int));
 
 static char *string_extract_verbatim __P((char *, int *, char *));
 static char *string_extract __P((char *, int *, char *, int));
@@ -983,12 +986,28 @@ extract_process_subst (string, starter, sindex)
 #endif /* PROCESS_SUBSTITUTION */
 
 #if defined (ARRAY_VARS)
+/* This can be fooled by unquoted right parens in the passed string. If
+   each caller verifies that the last character in STRING is a right paren,
+   we don't even need to call extract_delimited_string. */
 char *
 extract_array_assignment_list (string, sindex)
      char *string;
      int *sindex;
 {
+#if 0
   return (extract_delimited_string (string, sindex, "(", (char *)NULL, ")", 0));
+#else
+  int slen;
+  char *ret;
+
+  slen = strlen (string);	/* ( */
+  if (string[slen - 1] == ')')
+   {
+      ret = substring (string, *sindex, slen - 1);
+      *sindex = slen - 1;
+      return ret;
+    }
+#endif
 }
 #endif
 
@@ -2122,17 +2141,40 @@ list_string_with_quotes (string)
 /*							*/
 /********************************************************/
 
+#if defined (ARRAY_VARS)
+static SHELL_VAR *
+do_compound_assignment (name, value, mklocal)
+     char *name, *value;
+     int mklocal;
+{
+  SHELL_VAR *v;
+  int off;
+
+  if (mklocal && variable_context)
+    {
+      v = find_variable (name);
+      if (v == 0 || array_p (v) == 0)
+        v = make_local_array_variable (name);
+      v = assign_array_var_from_string (v, value);
+    }
+  else
+    v = assign_array_from_string (name, value);
+
+  return (v);
+}
+#endif
+
 /* Given STRING, an assignment string, get the value of the right side
    of the `=', and bind it to the left side.  If EXPAND is true, then
    perform parameter expansion, command substitution, and arithmetic
    expansion on the right-hand side.  Perform tilde expansion in any
    case.  Do not perform word splitting on the result of expansion. */
 static int
-do_assignment_internal (string, expand)
-     const char *string;
+do_assignment_internal (word, expand)
+     const WORD_DESC *word;
      int expand;
 {
-  int offset;
+  int offset, tlen;
   char *name, *value;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
@@ -2140,7 +2182,12 @@ do_assignment_internal (string, expand)
   int ni;
 #endif
   int assign_list = 0;
+  const char *string;
 
+  if (word == 0 || word->word == 0)
+    return 0;
+
+  string = word->word;
   offset = assignment (string, 0);
   name = savestring (string);
   value = (char *)NULL;
@@ -2151,17 +2198,21 @@ do_assignment_internal (string, expand)
 
       name[offset] = 0;
       temp = name + offset + 1;
+      tlen = STRLEN (temp);
 
 #if defined (ARRAY_VARS)
-      if (expand && temp[0] == LPAREN && xstrchr (temp, RPAREN))
+#  if 0
+      if (expand && temp[0] == LPAREN && temp[tlen-1] == RPAREN)
+#else
+      if (expand && (word->flags & W_COMPASSIGN))
+#endif
 	{
 	  assign_list = ni = 1;
-	  value = extract_delimited_string (temp, &ni, "(", (char *)NULL, ")", 0);
+	  value = extract_array_assignment_list (temp, &ni);
 	}
       else
 #endif
 
-      /* Perform tilde expansion. */
       if (expand && temp[0])
 	value = expand_string_if_necessary (temp, 0, expand_string_assignment);
       else
@@ -2192,7 +2243,7 @@ do_assignment_internal (string, expand)
 	ASSIGN_RETURN (0);
     }
   else if (assign_list)
-    entry = assign_array_from_string (name, value);
+    entry = do_compound_assignment (name, value, (word->flags & W_ASSIGNARG));
   else
 #endif /* ARRAY_VARS */
   entry = bind_variable (name, value);
@@ -2207,22 +2258,39 @@ do_assignment_internal (string, expand)
 }
 
 /* Perform the assignment statement in STRING, and expand the
-   right side by doing command and parameter expansion. */
+   right side by doing tilde, command and parameter expansion. */
 int
 do_assignment (string)
-     const char *string;
+     char *string;
 {
-  return do_assignment_internal (string, 1);
+  WORD_DESC td;
+
+  td.flags = W_ASSIGNMENT;
+  td.word = string;
+
+  return do_assignment_internal (&td, 1);
+}
+
+int
+do_word_assignment (word)
+     WORD_DESC *word;
+{
+  return do_assignment_internal (word, 1);
 }
 
 /* Given STRING, an assignment string, get the value of the right side
-   of the `=', and bind it to the left side.  Do not do command and
-   parameter substitution on the right hand side. */
+   of the `=', and bind it to the left side.  Do not perform any word
+   expansions on the right hand side. */
 int
 do_assignment_no_expand (string)
-     const char *string;
+     char *string;
 {
-  return do_assignment_internal (string, 0);
+  WORD_DESC td;
+
+  td.flags = W_ASSIGNMENT;
+  td.word = string;
+
+  do_assignment_internal (&td, 0);
 }
 
 /***************************************************
@@ -2443,6 +2511,14 @@ expand_string_unsplit_to_string (string, quoted)
      int quoted;
 {
   return (expand_string_to_string_internal (string, quoted, expand_string_unsplit));
+}
+
+char *
+expand_assignment_string_to_string (string, quoted)
+     char *string;
+     int quoted;
+{
+  return (expand_string_to_string_internal (string, quoted, expand_string_assignment));
 }
 
 #if defined (COND_COMMAND)
@@ -6845,8 +6921,12 @@ finished_with_string:
       list = make_word_list (tword, (WORD_LIST *)NULL);
       if (word->flags & W_ASSIGNMENT)
 	tword->flags |= W_ASSIGNMENT;	/* XXX */
+      if (word->flags & W_COMPASSIGN)
+	tword->flags |= W_COMPASSIGN;	/* XXX */
       if (word->flags & W_NOGLOB)
 	tword->flags |= W_NOGLOB;	/* XXX */
+      if (word->flags & W_NOEXPAND)
+	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
     }
@@ -6872,8 +6952,12 @@ finished_with_string:
 	    tword->flags |= W_QUOTED;
 	  if (word->flags & W_ASSIGNMENT)
 	    tword->flags |= W_ASSIGNMENT;
+	  if (word->flags & W_COMPASSIGN)
+	    tword->flags |= W_COMPASSIGN;
 	  if (word->flags & W_NOGLOB)
 	    tword->flags |= W_NOGLOB;
+	  if (word->flags & W_NOEXPAND)
+	    tword->flags |= W_NOEXPAND;
 	}
     }
 
@@ -7435,6 +7519,31 @@ shell_expand_word_list (tlist, eflags)
 
       next = tlist->next;
 
+#if defined (ARRAY_VARS)
+      /* If this is a compound array assignment to a builtin that accepts
+         such assignments (e.g., `declare'), take the assignment and perform
+         it separately, handling the semantics of declarations inside shell
+         functions.  This avoids the double-evaluation of such arguments,
+         because `declare' does some evaluation of compound assignments on
+         its own. */
+      if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
+	{
+	  int t;
+
+	  t = do_word_assignment (tlist->word);
+	  if (t == 0)
+	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
+	      exp_jump_to_top_level (DISCARD);
+	    }
+
+	  /* Now transform the word as ksh93 appears to do and go on */
+	  t = assignment (tlist->word->word, 0);
+	  tlist->word->word[t] = '\0';
+	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG); 
+	}
+#endif
+
       expanded_something = 0;
       expanded = expand_word_internal
 	(tlist->word, 0, 0, &has_dollar_at, &expanded_something);
@@ -7521,7 +7630,7 @@ expand_word_list_internal (list, eflags)
 	      for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 		{
 		  this_command_name = (char *)NULL;	/* no arithmetic errors */
-		  tint = do_assignment (temp_list->word->word);
+		  tint = do_word_assignment (temp_list->word);
 		  /* Variable assignment errors in non-interactive shells
 		     running in Posix.2 mode cause the shell to exit. */
 		  if (tint == 0)
@@ -7569,23 +7678,23 @@ expand_word_list_internal (list, eflags)
 
   if ((eflags & WEXP_VARASSIGN) && subst_assign_varlist)
     {
-      sh_assign_func_t *assign_func;
+      sh_wassign_func_t *assign_func;
 
       /* If the remainder of the words expand to nothing, Posix.2 requires
 	 that the variable and environment assignments affect the shell's
 	 environment. */
-      assign_func = new_list ? assign_in_env : do_assignment;
+      assign_func = new_list ? assign_in_env : do_word_assignment;
       tempenv_assign_error = 0;
 
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
 	  this_command_name = (char *)NULL;
-	  tint = (*assign_func) (temp_list->word->word);
+	  tint = (*assign_func) (temp_list->word);
 	  /* Variable assignment errors in non-interactive shells running
 	     in Posix.2 mode cause the shell to exit. */
 	  if (tint == 0)
 	    {
-	      if (assign_func == do_assignment)
+	      if (assign_func == do_word_assignment)
 		{
 		  last_command_exit_value = EXECUTION_FAILURE;
 		  if (interactive_shell == 0 && posixly_correct)

@@ -320,7 +320,7 @@ initialize_shell_variables (env, privmode)
 #if defined (ARRAY_VARS)
 #  if 0
       /* Array variables may not yet be exported. */
-      else if (*string == '(' && string[1] == '[' && xstrchr (string, ')'))
+      else if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
 	{
 	  string_length = 1;
 	  temp_string = extract_array_assignment_list (string, &string_length);
@@ -1228,7 +1228,14 @@ get_bash_command (var)
 {
   char *p;
 
-  p = savestring (the_printed_command_except_trap);
+  
+  if (the_printed_command_except_trap)
+    p = savestring (the_printed_command_except_trap);
+  else
+    {
+      p = (char *)xmalloc (1);
+      p[0] = '\0';
+    }
   FREE (value_cell (var));
   var_setvalue (var, p);
   return (var);
@@ -2067,12 +2074,15 @@ bind_function_def (name, value)
    responsible for moving the main temporary env to one of the other
    temporary environments.  The expansion code in subst.c calls this. */
 int
-assign_in_env (string)
-     const char *string;
+assign_in_env (word)
+     WORD_DESC *word;
 {
   int offset;
   char *name, *temp, *value;
   SHELL_VAR *var;
+  const char *string;
+
+  string = word->word;
 
   offset = assignment (string, 0);
   name = savestring (string);
@@ -2092,10 +2102,13 @@ assign_in_env (string)
 	}
 
       temp = name + offset + 1;
+#if 0
       temp = (xstrchr (temp, '~') != 0) ? bash_tilde_expand (temp, 1) : savestring (temp);
-
       value = expand_string_unsplit_to_string (temp, 0);
       free (temp);
+#else
+      value = expand_assignment_string_to_string (temp, 0);
+#endif
     }
 
   if (temporary_env == 0)

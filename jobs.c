@@ -129,7 +129,8 @@ extern int errno;
 #endif /* !MUST_REINSTALL_SIGHANDLERS */
 
 /* Some systems let waitpid(2) tell callers about stopped children. */
-#if !defined (WCONTINUED)
+#if !defined (WCONTINUED) || defined (WCONTINUED_BROKEN)
+#  undef WCONTINUED
 #  define WCONTINUED 0
 #endif
 #if !defined (WIFCONTINUED)

@@ -588,7 +588,6 @@ get_job_spec (list)
   switch (*word)
     {
     case 0:
-	return NO_JOB;
     case '%':
     case '+':
       return (current_job);

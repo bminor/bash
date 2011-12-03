@@ -93,11 +93,12 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
 
 /* Given STRING, an assignment string, get the value of the right side
    of the `=', and bind it to the left side.  If EXPAND is true, then
-   perform parameter expansion, command substitution, and arithmetic
-   expansion on the right-hand side.  Perform tilde expansion in any
-   case.  Do not perform word splitting on the result of expansion. */
-extern int do_assignment __P((const char *));
-extern int do_assignment_no_expand __P((const char *));
+   perform tilde expansion, parameter expansion, command substitution,
+   and arithmetic expansion on the right-hand side.  Do not perform word
+   splitting on the result of expansion. */
+extern int do_assignment __P((char *));
+extern int do_assignment_no_expand __P((char *));
+extern int do_word_assignment __P((WORD_DESC *));
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
@@ -144,6 +145,7 @@ extern WORD_LIST *expand_string __P((char *, int));
    to a string and deallocating the WORD_LIST *. */
 extern char *expand_string_to_string __P((char *, int));
 extern char *expand_string_unsplit_to_string __P((char *, int));
+extern char *expand_assignment_string_to_string __P((char *, int));
 
 /* De-quoted quoted characters in STRING. */
 extern char *dequote_string __P((char *));
