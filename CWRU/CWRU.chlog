@@ -8964,3 +8964,33 @@ subst.c
 	  avoids the N**2 behavior of having to count from the beginning
 	  of the string each time you want to back up one character.  Changes
 	  to remove_pattern and match_pattern
+
+				   1/12
+				   ----
+lib/readline/display.c
+	- make expand_prompt count multbyte characters in the prompt string
+	  by using _rl_find_next_mbchar (and copying possibly more than one
+	  byte) instead of a simple increment and single byte copy
+
+				   1/13
+				   ----
+lib/readline/display.c
+	- expand_prompt takes a new reference argument -- it returns
+	  the actual count of (possibly multibyte) characters displayed
+	  on the screen
+	- don't short-circuit in expand_prompt unless we're not going to
+	  be using any multibyte characters
+	- change calls  to expand_prompt to pass an argument for the
+	  number of physical characters the prompt occupies
+	  (prompt_physical_chars)
+	- initialize `lpos' (the physical cursor position) from
+	  prompt_physical_chars in rl_redisplay
+
+lib/readline/mbutil.c
+	- in _rl_find_prev_mbchar_internal, if mbrtowc returns -1 or -2, and
+	  we assume that the character is a single-byte char, make sure we
+	  update `prev' so it doesn't get lost.  Fixes problems encountered
+	  when a non-ascii char is the last char on the line and we're moving
+	  back past it with ^B, and other display problems caused by the same
+	  situation
+

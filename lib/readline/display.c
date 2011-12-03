@@ -178,12 +178,15 @@ static int prompt_invis_chars_first_line;
 
 static int prompt_last_screen_line;
 
+static int prompt_physical_chars;
+
 /* Expand the prompt string S and return the number of visible
    characters in *LP, if LP is not null.  This is currently more-or-less
    a placeholder for expansion.  LIP, if non-null is a place to store the
    index of the last invisible character in the returned string. NIFLP,
    if non-zero, is a place to store the number of invisible characters in
-   the first prompt line. */
+   the first prompt line.  The previous are used as byte counts -- indexes
+   into a character buffer. */
 
 /* Current implementation:
 	\001 (^A) start non-visible characters
@@ -193,19 +196,25 @@ static int prompt_last_screen_line;
    \002 are assumed to be `visible'. */	
 
 static char *
-expand_prompt (pmt, lp, lip, niflp)
+expand_prompt (pmt, lp, lip, niflp, vlp)
      char *pmt;
-     int *lp, *lip, *niflp;
+     int *lp, *lip, *niflp, *vlp;
 {
   char *r, *ret, *p;
-  int l, rl, last, ignoring, ninvis, invfl;
+  int l, rl, last, ignoring, ninvis, invfl, ind, pind, physchars;
 
   /* Short-circuit if we can. */
-  if (strchr (pmt, RL_PROMPT_START_IGNORE) == 0)
+  if ((MB_CUR_MAX <= 1 || rl_byte_oriented) && strchr (pmt, RL_PROMPT_START_IGNORE) == 0)
     {
       r = savestring (pmt);
       if (lp)
 	*lp = strlen (r);
+      if (lip)
+	*lip = 0;
+      if (niflp)
+	*niflp = 0;
+      if (vlp)
+	*vlp = lp ? *lp : strlen (r);
       return r;
     }
 
@@ -214,7 +223,7 @@ expand_prompt (pmt, lp, lip, niflp)
 
   invfl = 0;	/* invisible chars in first line of prompt */
 
-  for (rl = ignoring = last = ninvis = 0, p = pmt; p && *p; p++)
+  for (rl = ignoring = last = ninvis = physchars = 0, p = pmt; p && *p; p++)
     {
       /* This code strips the invisible character string markers
 	 RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE */
@@ -231,13 +240,35 @@ expand_prompt (pmt, lp, lip, niflp)
 	}
       else
 	{
-	  *r++ = *p;
-	  if (!ignoring)
-	    rl++;
+#if defined (HANDLE_MULTIBYTE)
+	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	    {
+	      pind = p - pmt;
+	      ind = _rl_find_next_mbchar (pmt, pind, 1, MB_FIND_NONZERO);
+	      l = ind - pind;
+	      while (l--)
+	        *r++ = *p++;
+	      if (!ignoring)
+		rl += ind - pind;
+	      else
+		ninvis += ind - pind;
+	      p--;			/* compensate for later increment */
+	    }
 	  else
-	    ninvis++;
-	  if (rl == _rl_screenwidth)
+#endif
+	    {
+	      *r++ = *p;
+	      if (!ignoring)
+		rl++;			/* visible length byte counter */
+	      else
+		ninvis++;		/* invisible chars byte counter */
+	    }
+
+	  if (rl >= _rl_screenwidth)
 	    invfl = ninvis;
+
+	  if (ignoring == 0)
+	    physchars++;
 	}
     }
 
@@ -251,6 +282,8 @@ expand_prompt (pmt, lp, lip, niflp)
     *lip = last;
   if (niflp)
     *niflp = invfl;
+  if  (vlp)
+    *vlp = physchars;
   return ret;
 }
 
@@ -262,7 +295,7 @@ _rl_strip_prompt (pmt)
 {
   char *ret;
 
-  ret = expand_prompt (pmt, (int *)NULL, (int *)NULL, (int *)NULL);
+  ret = expand_prompt (pmt, (int *)NULL, (int *)NULL, (int *)NULL, (int *)NULL);
   return ret;
 }
 
@@ -306,7 +339,8 @@ rl_expand_prompt (prompt)
       /* The prompt is only one logical line, though it might wrap. */
       local_prompt = expand_prompt (prompt, &prompt_visible_length,
 					    &prompt_last_invisible,
-					    &prompt_invis_chars_first_line);
+					    &prompt_invis_chars_first_line,
+					    &prompt_physical_chars);
       local_prompt_prefix = (char *)0;
       return (prompt_visible_length);
     }
@@ -316,13 +350,15 @@ rl_expand_prompt (prompt)
       t = ++p;
       local_prompt = expand_prompt (p, &prompt_visible_length,
 				       &prompt_last_invisible,
+				       (int *)NULL,
 				       (int *)NULL);
       c = *t; *t = '\0';
       /* The portion of the prompt string up to and including the
 	 final newline is now null-terminated. */
       local_prompt_prefix = expand_prompt (prompt, &prompt_prefix_length,
 						   (int *)NULL,
-						   &prompt_invis_chars_first_line);
+						   &prompt_invis_chars_first_line,
+						   &prompt_physical_chars);
       *t = c;
       return (prompt_prefix_length);
     }
@@ -381,7 +417,7 @@ rl_redisplay ()
   register int in, out, c, linenum, cursor_linenum;
   register char *line;
   int c_pos, inv_botlin, lb_botlin, lb_linenum;
-  int newlines, lpos, temp;
+  int newlines, lpos, temp, modmark;
   char *prompt_this_line;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
@@ -411,10 +447,12 @@ rl_redisplay ()
 
   /* Mark the line as modified or not.  We only do this for history
      lines. */
+  modmark = 0;
   if (_rl_mark_modified_lines && current_history () && rl_undo_list)
     {
       line[out++] = '*';
       line[out] = '\0';
+      modmark = 1;
     }
 
   /* If someone thought that the redisplay was handled, but the currently
@@ -527,7 +565,12 @@ rl_redisplay ()
 
   /* inv_lbreaks[i] is where line i starts in the buffer. */
   inv_lbreaks[newlines = 0] = 0;
+#if 0
   lpos = out - wrap_offset;
+#else
+  lpos = prompt_physical_chars + modmark;
+#endif
+
 #if defined (HANDLE_MULTIBYTE)
   memset (_rl_wrapped_line, 0, vis_lbsize);
 #endif
@@ -2032,7 +2075,7 @@ redraw_prompt (t)
      char *t;
 {
   char *oldp, *oldl, *oldlprefix;
-  int oldlen, oldlast, oldplen, oldninvis;
+  int oldlen, oldlast, oldplen, oldninvis, oldphyschars;
 
   /* Geez, I should make this a struct. */
   oldp = rl_display_prompt;
@@ -2042,11 +2085,13 @@ redraw_prompt (t)
   oldplen = prompt_prefix_length;
   oldlast = prompt_last_invisible;
   oldninvis = prompt_invis_chars_first_line;
+  oldphyschars = prompt_physical_chars;
 
   rl_display_prompt = t;
   local_prompt = expand_prompt (t, &prompt_visible_length,
 				   &prompt_last_invisible,
-				   &prompt_invis_chars_first_line);
+				   &prompt_invis_chars_first_line,
+				   &prompt_physical_chars);
   local_prompt_prefix = (char *)NULL;
   rl_forced_update_display ();
 
@@ -2057,6 +2102,7 @@ redraw_prompt (t)
   prompt_prefix_length = oldplen;
   prompt_last_invisible = oldlast;
   prompt_invis_chars_first_line = oldninvis;
+  prompt_physical_chars = oldphyschars;
 }
       
 /* Redisplay the current line after a SIGWINCH is received. */

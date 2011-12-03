@@ -51,6 +51,8 @@ static char *lc_all;
    categories */
 static char *lang;
 
+/* Called to reset all of the locale variables to their appropriate values
+   if (and only if) LC_ALL has not been assigned a value. */
 static int reset_locale_vars __P((void));
 
 static void locale_setblanks __P((void));
@@ -256,6 +258,9 @@ get_locale_var (var)
   return (locale);
 }
 
+/* Called to reset all of the locale variables to their appropriate values
+   if (and only if) LC_ALL has not been assigned a value.  DO NOT CALL THIS
+   IF LC_ALL HAS BEEN ASSIGNED A VALUE. */
 static int
 reset_locale_vars ()
 {

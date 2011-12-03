@@ -168,6 +168,10 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
 	  /* clear the state of the byte sequence, because
 	     in this case effect of mbstate is undefined  */
 	  memset(&ps, 0, sizeof (mbstate_t));
+
+	  /* Since we're assuming that this byte represents a single
+	     non-zero-width character, don't forget about it. */
+	  prev = point;
 	}
       else if (MB_NULLWCH (tmp))
 	break;			/* Found '\0' char.  Can this happen? */
