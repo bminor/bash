@@ -116,6 +116,10 @@ int variable_context = 0;
    for a single command. */
 HASH_TABLE *temporary_env = (HASH_TABLE *)NULL;
 
+/* Set to non-zero if an assignment error occurs while putting variables
+   into the temporary environment. */
+int tempenv_assign_errors;
+
 /* Some funky variables which are known about specially.  Here is where
    "$*", "$1", and all the cruft is kept. */
 char *dollar_vars[10];
@@ -1663,8 +1667,9 @@ make_local_array_variable (name)
   ARRAY *array;
 
   var = make_local_variable (name);
-  if (var == 0)
+  if (var == 0 || array_p (var))
     return var;
+
   array = array_create ();
 
   FREE (value_cell(var));
@@ -2118,16 +2123,9 @@ assign_in_env (string)
     setifs (var);
 
   if (echo_command_at_execute)
-    {
-      /* The Korn shell prints the `+ ' in front of assignment statements,
-	 so we do too. */
-#if 0
-      fprintf (stderr, "%s%s=%s\n", indirection_level_string (), name, value);
-      fflush (stderr);
-#else
-      xtrace_print_assignment (name, value, 0, 1);
-#endif
-    }
+    /* The Korn shell prints the `+ ' in front of assignment statements,
+	so we do too. */
+    xtrace_print_assignment (name, value, 0, 1);
 
   free (name);
   return 1;

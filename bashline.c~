@@ -2196,6 +2196,7 @@ bash_directory_completion_hook (dirname)
   char *local_dirname, *new_dirname, *t;
   int return_value, should_expand_dirname;
   WORD_LIST *wl;
+  struct stat sb;
 
   return_value = should_expand_dirname = 0;
   local_dirname = *dirname;
@@ -2212,6 +2213,9 @@ bash_directory_completion_hook (dirname)
 	should_expand_dirname = 1;
     }
 #endif
+
+  if (should_expand_dirname && lstat (local_dirname, &sb) == 0)
+    should_expand_dirname = 0;
 
   if (should_expand_dirname)  
     {
@@ -2566,7 +2570,8 @@ bash_glob_complete_word (count, key)
   int r;
   rl_quote_func_t *orig_quoting_function;
 
-  rl_explicit_arg = 1;	/* force `*' append */
+  if (rl_editing_mode == EMACS_EDITING_MODE)
+    rl_explicit_arg = 1;	/* force `*' append */
   orig_quoting_function = rl_filename_quoting_function;
   rl_filename_quoting_function = bash_glob_quote_filename;
   
@@ -2624,7 +2629,8 @@ bash_vi_complete (count, key)
      int count, key;
 {
 #if defined (SPECIFIC_COMPLETION_FUNCTIONS)
-  int r;
+  int p, r;
+  char *t;
 
   if ((rl_point < rl_end) && (!whitespace (rl_line_buffer[rl_point])))
     {
@@ -2633,7 +2639,23 @@ bash_vi_complete (count, key)
       rl_point++;
     }
 
-  rl_explicit_arg = 1;	/* XXX - force `*' to be appended */
+  /* Find boundaries of current word, according to vi definition of a
+     `bigword'. */
+  t = 0;
+  if (rl_point > 0)
+    {
+      p = rl_point;
+      rl_vi_bWord (1, 'B');
+      r = rl_point;
+      rl_point = p;
+      p = r;
+
+      t = substring (rl_line_buffer, p, rl_point);
+    }      
+
+  if (t && glob_pattern_p (t) == 0)
+    rl_explicit_arg = 1;	/* XXX - force glob_complete_word to append `*' */
+  FREE (t);
 
   if (key == '*')	/* Expansion and replacement. */
     r = bash_glob_expand_word (count, key);

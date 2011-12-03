@@ -138,6 +138,7 @@ extern char *this_command_name;
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
 extern int expanding_redir;
+extern int tempenv_assign_error;
 
 /* Non-zero means to allow unmatched globbed filenames to expand to
    a null file. */
@@ -699,9 +700,16 @@ add_one_character:
 
 	  for (t = 0; ret[t]; t++, j++)
 	    temp[j] = ret[t];
-	  temp[j++] = string[si];
+	  temp[j] = string[si];
 
-	  i = si + 1;
+	  if (string[si])
+	    {
+	      j++;
+	      i = si + 1;
+	    }
+	  else
+	    i = si;
+
 	  if (free_ret)
 	    free (ret);
 	  continue;
@@ -7343,6 +7351,7 @@ expand_word_list_internal (list, eflags)
 	 that the variable and environment assignments affect the shell's
 	 environment. */
       assign_func = new_list ? assign_in_env : do_assignment;
+      tempenv_assign_error = 0;
 
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
@@ -7350,13 +7359,18 @@ expand_word_list_internal (list, eflags)
 	  tint = (*assign_func) (temp_list->word->word);
 	  /* Variable assignment errors in non-interactive shells running
 	     in Posix.2 mode cause the shell to exit. */
-	  if (tint == 0 && assign_func == do_assignment)
+	  if (tint == 0)
 	    {
-	      last_command_exit_value = EXECUTION_FAILURE;
-	      if (interactive_shell == 0 && posixly_correct)
-		exp_jump_to_top_level (FORCE_EOF);
+	      if (assign_func == do_assignment)
+		{
+		  last_command_exit_value = EXECUTION_FAILURE;
+		  if (interactive_shell == 0 && posixly_correct)
+		    exp_jump_to_top_level (FORCE_EOF);
+		  else
+		    exp_jump_to_top_level (DISCARD);
+		}
 	      else
-		exp_jump_to_top_level (DISCARD);
+		tempenv_assign_error++;
 	    }
 	}
 

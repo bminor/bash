@@ -685,7 +685,6 @@ print_filename (to_print, full_pathname)
   int printed_len, extension_char, slen, tlen;
   char *s, c, *new_full_pathname;
 
-  extension_char = 0;
   printed_len = fnprint (to_print);
 
 #if defined (VISIBLE_STATS)
@@ -738,7 +737,7 @@ print_filename (to_print, full_pathname)
 	    extension_char = stat_char (s);
 	  else
 #endif
-	    if (path_isdir (s))
+	    if (path_isdir (new_full_pathname))
 	      extension_char = '/';
 	}
 

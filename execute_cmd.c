@@ -102,6 +102,7 @@ extern int parse_and_execute_level, running_trap;
 extern int command_string_index, line_number;
 extern int dot_found_in_search;
 extern int already_making_children;
+extern int tempenv_assign_error;
 extern char *the_printed_command, *shell_name;
 extern pid_t last_command_subst_pid;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
@@ -2840,6 +2841,14 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	}
       if (builtin == 0)
 	func = find_function (words->word->word);
+    }
+
+  /* In POSIX mode, assignment errors in the temporary environment cause a
+     non-interactive shell to exit. */
+  if (builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      jump_to_top_level (ERREXIT);
     }
 
   add_unwind_protect (dispose_words, words);

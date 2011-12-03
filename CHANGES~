@@ -1,3 +1,105 @@
+This document details the changes between this version, bash-3.0-rc1,
+and the previous version, bash-3.0-beta1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused incorrect behavior when referecing element 0 of
+    an array using $array, element 0 was unset, and `set -u' was enabled.
+
+b.  System-specific changes for: SCO Unix 3.2, Tandem.
+
+c.  Fixed a bug that caused inappropriate word splitting when a variable was
+    expanded within a double-quoted string that also included $@.
+
+d.  Fixed a bug that caused `pwd' to not display anything in physical mode
+    when the file system had changed underneath the shell.
+
+e.  Fixed a bug in the pre- and post- increment and decrement parsing in the
+    expression evaluator that caused errors when the operands and corresponding
+    operators were separated by whitespace.
+
+f.  Fixed a bug that caused `history -p' to add an entry to the history list,
+    counter to the documentation.  (Keeps the history expansions invoked by
+    emacs-mode command line editing from doing that as well.)
+
+g.  Fixed a bug that could cause a core dump if `cd' is asked to print out a
+    pathname longer than PATH_MAX characters.
+
+h.  Fixed a bug that caused jobs to be put into the wrong process group under
+    some circumstances after enabling job control with `set -m'.
+
+i.  `unalias' now  returns failure if no alias name arguments are supplied.
+
+j.  Documented the characters not allowed to appear in an alias name.
+
+k.  $* is no longer expanded as if in double quotes when it appears in the
+    body of a here document, as the SUS seems to require.
+
+l.  The `bashbug' script now uses a directory in $TMPDIR for exclusive
+    access rather than trying to guess how the underlying OS provides for
+    secure temporary file creation.
+
+m.  Fixed a few problems with `cd' and `pwd' when asked to operate on pathnames
+    longer than PATH_MAX characters.
+
+n.  Fixed a memory leak caused when creating multiple local array variables
+    with identical names.
+
+o.  Fixed a problem with calls to getcwd() so that bash now operates better
+    when the full pathname to the current directory is longer than PATH_MAX
+    bytes.
+
+p.  The `trap' builtin now reports an error if a single non-signal argument
+    is specified.
+
+q.  Fixed a bug that caused `umask' to not work correctly when presented
+    with a mask of all 0s.
+
+r.  When `getopts' reaches the end of options, OPTARG is unset, as POSIX
+    appears to specify.
+
+s.  Interactive mode now depends on whether or not stdin and stderr are
+    connected to a tty; formerly it  was stdin and stdout.  POSIX requires
+    this.
+
+t.  Fixed vi-mode completion to work more as POSIX specifies (e.g., doing the
+    right kind of filename generation).
+
+2.  Changes to Readline
+
+a.  Fixed a problem that could cause readline to refer to freed memory when
+    moving between history lines while doing searches.
+
+b.  Improvements to the code that expands and displays prompt strings
+    containing multibyte characters.
+
+c.  Fixed a problem with vi-mode not correctly remembering the numeric argument
+    to the last `c'hange command for later use with `.'.
+
+d.  Fixed a bug in vi-mode that caused multi-digit count arguments to work
+    incorrectly.
+
+e.  Fixed a problem in vi-mode that caused the last text modification command
+    to not be remembered across different command lines.
+
+f.  Fixed problems with changing characters and changing case at the end of
+    the line.
+
+3.  New Features in Bash
+
+a.  The `jobs', `kill', and `wait' builtins now accept job control notation
+    even if job control is not enabled.
+
+b.  The historical behavior of `trap' that allows a missing `action' argument
+    to cause each specified signal's handling to be reset to its default is
+    now only supported when `trap' is given a single non-option argument.
+
+4.  New Features in Readline
+
+a.  When listing completions, directories have a `/' appended if the
+    `mark-directories' option has been enabled.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-beta1,
 and the previous version, bash-3.0-alpha.
 
@@ -57,7 +159,7 @@ q.  Fixed a bug that could cause core dumps when checking whether a quoted
     command name was being completed.
 
 r.  Fixes to the pattern removal and pattern replacement expansions to deal
-    with multibyte characters better.
+    with multibyte characters better (and faster).
 
 s.  Fix to the substring expansion (${param:off[:len]}) to deal with (possibly
     multibyte) characters instead of raw bytes.
@@ -74,6 +176,12 @@ v.  Fixed a bug that caused invalid variables to be created when using
 w.  Fixed a bug that caused "$@" to expand incorrectly when used as the right
     hand side of a parameter expansion such as ${word:="$@"} if the first
     character of $IFS was not a space.
+
+x.  Fixed a slight cosmetic problem when printing commands containing a
+    `>&word' redirection.
+
+y.  Fixed a problem that could cause here documents to not be created correctly
+    if the system temporary directory did not allow writing.
 
 2.  Changes to Readline
 
@@ -101,6 +209,9 @@ g.  Fixed some display (and other) bugs encountered in multibyte locales
 
 h.  Fixed some display bugs caused by multibyte characters in prompt strings.
 
+i.  Fixed a problem with history expansion caused by non-whitespace characters
+    used as history word delimiters.
+
 3.  New Features in Bash
 
 a.  printf builtin understands two new escape sequences:  \" and \?.
@@ -111,6 +222,10 @@ c.  The GNU `gettext' package and libintl have been integrated; the shell's
     messages can be translated into different languages.
 
 d.  The `\W' prompt expansion now abbreviates $HOME as `~', like `\w'.
+
+e.  The error message printed when bash cannot open a shell script supplied
+    as argument 1 now includes the name of the shell, to better identify
+    the error as coming from bash.
 
 4.  New Features in Readline
 
@@ -125,6 +240,13 @@ b.  New application variable, rl_completion_suppress_quote, settable by an
 c.  New application variable, rl_completion_found_quote, set to a non-zero
     value if readline determines that the word to be completed is quoted.
     Set before readline calls any application completion function.
+
+d.  New function hook, rl_completion_word_break_hook, called when readline
+    needs to break a line into words when completion is attempted.  Allows
+    the word break characters to vary based on position in the line.
+
+e.  New bindable command: unix-filename-rubout.  Does the same thing as
+    unix-word-rubout, but adds `/' to the set of word delimiters.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-alpha,

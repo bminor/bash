@@ -116,6 +116,10 @@ int variable_context = 0;
    for a single command. */
 HASH_TABLE *temporary_env = (HASH_TABLE *)NULL;
 
+/* Set to non-zero if an assignment error occurs while putting variables
+   into the temporary environment. */
+int tempenv_assign_error;
+
 /* Some funky variables which are known about specially.  Here is where
    "$*", "$1", and all the cruft is kept. */
 char *dollar_vars[10];

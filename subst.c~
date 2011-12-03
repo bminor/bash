@@ -689,6 +689,8 @@ add_one_character:
 	  temp[j++] = '$';
 	  temp[j++] = string[i + 1];
 
+	  /* Just paranoia; ret will not be 0 unless no_longjmp_on_fatal_error
+	     is set. */
 	  if (ret == 0 && no_longjmp_on_fatal_error)
 	    {
 	      free_ret = 0;
@@ -697,9 +699,16 @@ add_one_character:
 
 	  for (t = 0; ret[t]; t++, j++)
 	    temp[j] = ret[t];
-	  temp[j++] = string[si];
+	  temp[j] = string[si];
 
-	  i = si + 1;
+	  if (string[si])
+	    {
+	      j++;
+	      i = si + 1;
+	    }
+	  else
+	    i = si;
+
 	  if (free_ret)
 	    free (ret);
 	  continue;

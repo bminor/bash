@@ -526,8 +526,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       pid_t paren_pid;
 
-if (asynchronous)
-itrace("execute_command_internal: making child: asynchronous = 1 job_control = %d", job_control);
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
       paren_pid = make_child (savestring (make_command_string (command)),
@@ -1184,8 +1182,6 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
 
   command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
-
-itrace("execute_in_subshell: job_control = %d user_subshell = %d", job_control, user_subshell);
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
      the special case of an asynchronous GROUP command where the
@@ -2844,6 +2840,14 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	}
       if (builtin == 0)
 	func = find_function (words->word->word);
+    }
+
+  /* In POSIX mode, assignment errors in the temporary environment cause a
+     non-interactive shell to exit. */
+  if (builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      jump_to_top_level (ERREXIT);
     }
 
   add_unwind_protect (dispose_words, words);
