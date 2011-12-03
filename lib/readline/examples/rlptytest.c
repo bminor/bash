@@ -1,3 +1,10 @@
+/*
+ *
+ * Another test harness for the readline callback interface.
+ *
+ * Author: Bob Rossi <bob@brasko.net>
+ */
+
 #if defined (HAVE_CONFIG_H)
 #include <config.h>
 #endif
@@ -229,7 +236,21 @@ int tty_cbreak(int fd){
    buf.c_cc[VDSUSP] = _POSIX_VDISABLE;
 #endif
 
-   if(tcsetattr(fd, TCSAFLUSH, &buf) < 0)
+  /* enable flow control; only stty start char can restart output */
+#if 0
+  buf.c_iflag |= (IXON|IXOFF);
+#ifdef IXANY
+  buf.c_iflag &= ~IXANY;
+#endif
+#endif
+
+  /* disable flow control; let ^S and ^Q through to pty */
+  buf.c_iflag &= ~(IXON|IXOFF);
+#ifdef IXANY
+  buf.c_iflag &= ~IXANY;
+#endif
+
+  if(tcsetattr(fd, TCSAFLUSH, &buf) < 0)
       return -1;
 
    ttystate = TCBREAK;
@@ -246,6 +267,23 @@ int tty_cbreak(int fd){
    return (0);   
 }
 
+int 
+tty_off_xon_xoff (int fd)
+{
+  struct termios buf;
+  int ttysavefd = -1;
+
+  if(tcgetattr(fd, &buf) < 0)
+    return -1;
+     
+  buf.c_iflag &= ~(IXON|IXOFF);
+
+  if(tcsetattr(fd, TCSAFLUSH, &buf) < 0)
+    return -1;
+
+  return 0;   
+}
+
 /* tty_reset: Sets the terminal attributes back to their previous state.
  * PRE: tty_cbreak must have already been called.
  * 
@@ -253,7 +291,8 @@ int tty_cbreak(int fd){
  * 
  * Returns: 0 on success, -1 on error
  */
-int tty_reset(int fd){
+int tty_reset(int fd)
+{
    if(ttystate != TCBREAK)
       return (0);
 
@@ -270,6 +309,10 @@ main()
 {
   int val;
   val = openpty (&masterfd, &slavefd, NULL, NULL, NULL);
+  if (val == -1)
+    return -1;
+
+  val = tty_off_xon_xoff (masterfd);
   if (val == -1)
     return -1;
 

@@ -3855,6 +3855,12 @@ shell_execve (command, args, env)
 	  errno = i;
 	  file_error (command);
 	}
+      /* errors not involving the path argument to execve. */
+      else if (i == E2BIG || i == ENOMEM)
+	{
+	  errno = i;
+	  file_error (command);
+	}
       else
 	{
 	  /* The file has the execute bits set, but the kernel refuses to

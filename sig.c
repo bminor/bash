@@ -413,10 +413,14 @@ sighandler
 termination_unwind_protect (sig)
      int sig;
 {
+  /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
     run_interrupt_trap ();
 
 #if defined (HISTORY)
+  /* This might be unsafe, since it eventually calls functions POSIX says
+     not to call from signal handlers.  If it's a problem, take this code
+     out. */
   if (interactive_shell && sig != SIGABRT)
     maybe_save_shell_history ();
 #endif /* HISTORY */

@@ -71,6 +71,18 @@ v.  Fixed a bug that caused core dumps when interrupting loops running builtins
 w.  Make sure that some of the functions bash provides replacements for are
     not cpp defines.
 
+x.  The code that scans embedded commands for the parser (`...` and $(...)) is
+    now more aware of embedded comments and their effect on quoted strings.
+
+y.  Changed the `-n' option to the `history' builtin to not reset the number of
+    history lines read in the current session after reading the new lines from
+    the history file if the history is being appended when it is written to
+    the file, since the appending takes care of the problem that the adjustment
+    was intended to solve.
+
+z.  Improved the error message displayed when a shell script fails to execute
+    because the environment and size of command line arguments is too large.
+
 2.  Changes to Readline
 
 a.  The `change-case' command now correctly changes the case of multibyte
@@ -87,6 +99,9 @@ d.  Fixed the non-incremental search code in vi mode to dispose of any current
     buffer.
 
 e.  The variable assignment code now ignores whitespace at the end of lines.
+
+f.  The `C-w' binding in incremental search now understands multibyte
+    characters.
 
 3.  New Features in Bash
 

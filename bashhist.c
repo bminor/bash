@@ -713,7 +713,7 @@ int
 history_number ()
 {
   using_history ();
-  return (get_string_value ("HISTSIZE") ? history_base + where_history () : 1);
+  return (remember_on_history ? history_base + where_history () : 1);
 }
 
 static int

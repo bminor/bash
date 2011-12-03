@@ -12146,3 +12146,16 @@ builtins/history.def
 
 lib/readline/isearch.c
 	- fix C-w handler for isearch string reader to handle multibyte chars
+
+lib/readline/rlmbutil.h
+	- new defines for _rl_to_wupper and _rl_to_wlower
+
+lib/readline/text.c
+	- use _rl_to_wupper and _rl_to_wlower as appropriate
+
+				   9/26
+				   ----
+execute_cmd.c
+	- in shell_execve, if the exec fails due to E2BIG or ENOMEM, just print
+	  the appropriate error message instead of checking out any interpreter
+	  specified with #!
