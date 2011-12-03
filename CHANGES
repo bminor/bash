@@ -14,10 +14,20 @@ c.  Change the directory expansion portion of the completion code to not
     expand embedded command substitutions if the directory name appears in
     the file system.
 
+d.  Fixed a problem that caused `bash -r' to turn on restrictions before
+    reading the startup files.
+
+e.  Fixed a problem with the default operation of the `umask' builtin.
+
 2.  Changes to Readline
 
 a.  Fixed a problem with readline saving the contents of the current line
     before beginning a non-interactive search.
+
+b.  Fixed a problem with EOF detection when using rl_event_hook.
+
+c.  Fixed a problem with the vi mode `p' and `P' commands ignoring numeric
+    arguments.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-rc1,

@@ -784,7 +784,9 @@ rl_vi_put (count, key)
   if (!_rl_uppercase_p (key) && (rl_point + 1 <= rl_end))
     rl_point = _rl_find_next_mbchar (rl_line_buffer, rl_point, 1, MB_FIND_NONZERO);
 
-  rl_yank (1, key);
+  while (count--)
+    rl_yank (1, key);
+
   rl_backward_char (1, key);
   return (0);
 }

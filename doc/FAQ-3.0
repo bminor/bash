@@ -147,7 +147,7 @@ A3)  Where can I get it?
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 2.05b:
+The following URLs tell how to get version 3.0:
 
 ftp://ftp.gnu.org/pub/gnu/bash/bash-3.0.tar.gz
 ftp://ftp.cwru.edu/pub/bash/bash-3.0.tar.gz
@@ -159,10 +159,10 @@ ftp://ftp.cwru.edu/pub/bash/bash-doc-3.0.tar.gz
 
 A4)  On what machines will bash run?
 
-Bash has been ported to nearly every version of UNIX.  All you
+Bash has been ported to nearly every version of Unix.  All you
 should have to do to build it on a machine for which a port
 exists is to type `configure' and then `make'.  The build process
-will attempt to discover the version of UNIX you have and tailor
+will attempt to discover the version of Unix you have and tailor
 itself accordingly, using a script created by GNU autoconf.
 
 More information appears in the file `INSTALL' in the distribution.
@@ -195,11 +195,6 @@ part of their current release.
 Bash-2.05b and later versions should require no local Cygnus changes to
 build and run under CYGWIN.
 
-The Cygnus port works only on Intel machines.  There is a port of bash
-(I don't know which version) to the alpha/NT environment available from
-
-ftp://ftp.gnustep.org//pub/win32/bash-alpha-nt-1.01.tar.gz
-
 DJ Delorie has a port of bash-2.x which runs under MS-DOS, as part
 of the DJGPP project.  For more information on the project, see
 
@@ -214,7 +209,7 @@ ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204b.zip	binary
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204d.zip	documentation
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204s.zip	source
 
-Mark has begun to work with bash-2.05, but I don't know the status.
+Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.
@@ -797,7 +792,7 @@ Things bash has or uses that ksh88 does not:
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr
 	arrays of unlimited size
 	TMOUT is default timeout for `read' and `select'
-	debugger support
+	debugger support, including the `caller' builtin
 	RETURN trap
 	Timestamps in history entries
 	{x..y} brace expansion
@@ -1758,7 +1753,7 @@ H3) What's coming in future versions?
 
 These are features I hope to include in a future version of bash.
 
-a better bash debugger (a minimally-tested version is included with bash-2.05b)
+Rocky Bernstein's bash debugger (support is included with bash-3.0)
 associative arrays
 co-processes, but with a new-style syntax that looks like function declaration
 

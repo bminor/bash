@@ -9596,3 +9596,43 @@ execute_cmd.c
 	  POSIX mode to exit if an assignment to the temporary environment
 	  preceding a special builtin fails (bug report from
 	  llattanzi@apple.com)
+
+				    7/5
+				    ---
+bashline.c
+	- in bash_directory_completion_hook, don't perform word expansions
+	  if the filename appears to have been completed from the file
+	  system rather than typed in by the user.  Bug reported by Tim
+	  Waugh <twaugh@redhat.com>
+
+				    7/7
+				    ---
+lib/readline/misc.c
+	- if _rl_maybe_save_line is being asked to save a line other than
+	  what's already saved, free up the current saved line and save the
+	  current contents of rl_line_buffer.  Bug reported by
+	  llattanzi@apple.com
+
+				   7/12
+				   ----
+lib/readline/input.c
+	- do better EOF detection in rl_gather_tyi -- if a read returns 0 when
+	  the fd is in non-blocking mode, stuff an EOF into the input stream
+	  (reported by mattias@virtutech.se)
+
+				   7/13
+				   ----
+lib/readline/vi_mode.c
+	- make sure rl_vi_put honors `count' arguments and yanks things
+	  multiple times if requested
+
+				   7/16
+				   ----
+builtins/umask.def
+	- make sure that the `who' part of the umask symbolic mode argument
+	  defaults to `a' if it's missing
+
+flags.c
+	- make sure that maybe_make_restricted only gets called after the
+	  shell is initialized, so `bash -r' doesn't result in inappropriate
+	  error messages

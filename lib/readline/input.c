@@ -212,6 +212,11 @@ rl_gather_tyi ()
       fcntl (tty, F_SETFL, tem);
       if (chars_avail == -1 && errno == EAGAIN)
 	return 0;
+      if (chars_avail == 0)	/* EOF */
+	{
+	  rl_stuff_char (EOF);
+	  return (0);
+	}
     }
 #endif /* O_NDELAY */
 

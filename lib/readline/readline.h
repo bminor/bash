@@ -816,6 +816,12 @@ struct readline_state {
   int catchsigs;
   int catchsigwinch;
 
+  /* search state */
+
+  /* completion state */
+
+  /* options state */
+
   /* reserved for future expansion, so the struct size doesn't change */
   char reserved[64];
 };

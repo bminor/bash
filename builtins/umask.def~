@@ -262,8 +262,6 @@ parse_symbolic_mode (mode, initial_bits)
 	      bits &= ~perm;
 	      break;
 	    case '=':
-	      if (who == 0)
-		who = S_IRWXU | S_IRWXG | S_IRWXO;
 	      bits &= ~who;
 	      bits |= perm;
 	      break;
