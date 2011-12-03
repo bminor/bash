@@ -2950,6 +2950,10 @@ a UDP connection to the corresponding socket.
 .RE
 .PP
 A failure to open or create a file causes the redirection to fail.
+.PP
+Redirections using file descriptors greater than 9 should be used with
+care, as they may conflict with file descriptors the shell uses
+internally.
 .SS Redirecting Input
 .PP
 Redirection of input causes the file whose name results from

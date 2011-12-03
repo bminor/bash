@@ -657,10 +657,12 @@ rl_prep_terminal (meta_flag)
 
   otio = tio;
 
-  rl_tty_unset_default_bindings (_rl_keymap);
+  if (_rl_bind_stty_chars)
+    rl_tty_unset_default_bindings (_rl_keymap);
   save_tty_chars (&otio);
   RL_SETSTATE(RL_STATE_TTYCSAVED);
-  _rl_bind_tty_special_chars (_rl_keymap, tio);
+  if (_rl_bind_stty_chars)
+    _rl_bind_tty_special_chars (_rl_keymap, tio);
 
   prepare_terminal_settings (meta_flag, otio, &tio);
 

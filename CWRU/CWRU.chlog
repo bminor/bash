@@ -10318,3 +10318,43 @@ doc/{bash.1,bashref.texi}
 	- note that redirections using file descriptors > 9 should be used
 	  carefully, because they might conflict with file descriptors the
 	  shell uses internally
+
+				   10/11
+				   -----
+parse.y
+	- fix pipeline_command production to handle case where `pipeline'
+	  as `argument' of `!' or `time' is null (e.g., a syntax error not
+	  handled by the grammar)
+
+				   10/13
+				   -----
+lib/readline/readline.c
+	- new internal variable, _rl_bind_stty_chars; if non-zero, bind the
+	  terminal special characters to readline equivalents at startup
+	- change readline_default_bindings() and reset_default_bindings() to
+	  understand _rl_bind_stty_chars
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_bind_stty_chars
+
+lib/readline/rltty.c
+	- change rl_prep_terminal to add support for _rl_bind_stty_chars
+
+				   10/15
+				   -----
+lib/readline/bind.c
+	- new bindable variable, `bind-tty-special-chars', bound to value of
+	  _rl_bind_stty_chars
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- documented new readline variable `bind-tty-special-chars'
+
+builtins/pushd.def
+	- make the first check for option `--' skip the rest of option
+	  checking
+
+				   10/16
+				   -----
+lib/readline/shell.c
+	- change sh_set_lines_and_columns to prefer setenv, which has
+	  predictable memory allocation behavior, to putenv, which does not

@@ -962,22 +962,26 @@ pipeline_command: pipeline
 			{ $$ = $1; }
 	|	BANG pipeline
 			{
-			  $2->flags |= CMD_INVERT_RETURN;
+			  if ($2)
+			    $2->flags |= CMD_INVERT_RETURN;
 			  $$ = $2;
 			}
 	|	timespec pipeline
 			{
-			  $2->flags |= $1;
+			  if ($2)
+			    $2->flags |= $1;
 			  $$ = $2;
 			}
 	|	timespec BANG pipeline
 			{
-			  $3->flags |= $1|CMD_INVERT_RETURN;
+			  if ($3)
+			    $3->flags |= $1|CMD_INVERT_RETURN;
 			  $$ = $3;
 			}
 	|	BANG timespec pipeline
 			{
-			  $3->flags |= $2|CMD_INVERT_RETURN;
+			  if ($3)
+			    $3->flags |= $2|CMD_INVERT_RETURN;
 			  $$ = $3;
 			}
 	|	timespec list_terminator

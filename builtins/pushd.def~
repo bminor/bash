@@ -152,17 +152,12 @@ pushd_builtin (list)
      WORD_LIST *list;
 {
   char *temp, *current_directory, *top;
-  int j, flags, skipopt;
+  int j, flags;
   intmax_t num;
   char direction;
 
   if (list && list->word && ISOPTION (list->word->word, '-'))
-    {
-      list = list->next;
-      skipopt = 1;
-    }
-  else
-    skipopt = 0;
+    list = list->next;
 
   /* If there is no argument list then switch current and
      top of list. */
@@ -186,7 +181,7 @@ pushd_builtin (list)
       return j;
     }
 
-  for (flags = 0; skipopt == 0 && list; list = list->next)
+  for (flags = 0; list; list = list->next)
     {
       if (ISOPTION (list->word->word, 'n'))
 	{
