@@ -2513,7 +2513,7 @@ glob_complete_word (text, state)
   static char **matches = (char **)NULL;
   static int ind;
   int glen;
-  char *ret, *ttext;
+  char *ret;
 
   if (state == 0)
     {
@@ -2523,22 +2523,17 @@ glob_complete_word (text, state)
 	FREE (globorig);
       FREE (globtext);
 
-      ttext = bash_tilde_expand (text, 0);
-
       if (rl_explicit_arg)
 	{
-	  globorig = savestring (ttext);
-	  glen = strlen (ttext);
+	  globorig = savestring (text);
+	  glen = strlen (text);
 	  globtext = (char *)xmalloc (glen + 2);
-	  strcpy (globtext, ttext);
+	  strcpy (globtext, text);
 	  globtext[glen] = '*';
 	  globtext[glen+1] = '\0';
 	}
       else
-        globtext = globorig = savestring (ttext);
-
-      if (ttext != text)
-	free (ttext);
+        globtext = globorig = savestring (text);
 
       matches = shell_glob_filename (globtext);
       if (GLOB_FAILED (matches))

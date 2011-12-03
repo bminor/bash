@@ -2311,12 +2311,12 @@ start_job (job, foreground)
   p = jobs[job]->pipe;
 
   if (foreground == 0)
-    printf ("[%d]%c ", job + 1,
+    fprintf (stderr, "[%d]%c ", job + 1,
 	   (job == current_job) ? '+': ((job == previous_job) ? '-' : ' '));
 
   do
     {
-      printf ("%s%s",
+      fprintf (stderr, "%s%s",
 	       p->command ? p->command : "",
 	       p->next != jobs[job]->pipe? " | " : "");
       p = p->next;
@@ -2324,12 +2324,12 @@ start_job (job, foreground)
   while (p != jobs[job]->pipe);
 
   if (foreground == 0)
-    printf (" &");
+    fprintf (stderr, " &");
 
   if (strcmp (wd, jobs[job]->wd) != 0)
-    printf ("	(wd: %s)", polite_directory_format (jobs[job]->wd));
+    fprintf (stderr, "	(wd: %s)", polite_directory_format (jobs[job]->wd));
 
-  printf ("\n");
+  fprintf (stderr, "\n");
 
   /* Run the job. */
   if (already_running == 0)

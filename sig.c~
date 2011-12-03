@@ -230,7 +230,6 @@ initialize_terminating_signals ()
 
       sigaction (XSIG (i), &act, &oact);
       XHANDLER(i) = oact.sa_handler;
-      XSAFLAGS(i) = oact.sa_flags;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
@@ -253,7 +252,6 @@ initialize_terminating_signals ()
 	continue;
 
       XHANDLER(i) = signal (XSIG (i), termination_unwind_protect);
-      XSAFLAGS(i) = 0;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       if (!interactive_shell && XHANDLER (i) == SIG_IGN)
@@ -320,7 +318,6 @@ reset_terminating_signals ()
 	continue;
 
       act.sa_handler = XHANDLER (i);
-      act.sa_flags = XSAFLAGS (i);
       sigaction (XSIG (i), &act, (struct sigaction *) NULL);
     }
 #else /* !HAVE_POSIX_SIGNALS */

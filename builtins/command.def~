@@ -53,7 +53,7 @@ $END
 extern size_t confstr __P((int, char *, size_t));
 #endif
 
-extern int subshell_environment;
+extern int subshell_environment, posixly_correct;
 
 static void restore_path __P((char *));
 static char *get_standard_path __P((void));
@@ -101,7 +101,7 @@ command_builtin (list)
 	{
 	  found = describe_command (list->word->word, verbose);
 
-	  if (found == 0 && verbose != CDESC_REUSABLE)
+	  if (found == 0 && (posixly_correct == 0 || verbose != CDESC_REUSABLE))
 	    sh_notfound (list->word->word);
 
 	  any_found += found;

@@ -124,13 +124,10 @@ trap_builtin (list)
       first_arg = list->word->word;
       first_signal = first_arg && *first_arg && all_digits (first_arg) && signal_object_p (first_arg, opt);
 
-      /* Backwards compatibility */
-      if (first_signal)
-	operation = REVERT;
       /* When in posix mode, the historical behavior of looking for a
 	 missing first argument is disabled.  To revert to the original
 	 signal handling disposition, use `-' as the first argument. */
-      else if (posixly_correct == 0 && first_arg && *first_arg &&
+      if (posixly_correct == 0 && first_arg && *first_arg &&
 		(*first_arg != '-' || first_arg[1]) &&
 		signal_object_p (first_arg, opt) && list->next == 0)
 	operation = REVERT;
