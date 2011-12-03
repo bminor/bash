@@ -1,0 +1,30 @@
+*** ../bash-3.0/include/shmbutil.h	Mon Apr 19 09:59:42 2004
+--- include/shmbutil.h	Thu Sep  2 15:20:47 2004
+***************
+*** 32,35 ****
+--- 32,37 ----
+  extern size_t xdupmbstowcs __P((wchar_t **, char ***, const char *));
+  
++ extern size_t mbstrlen __P((const char *));
++ 
+  extern char *xstrchr __P((const char *, int));
+  
+***************
+*** 39,42 ****
+--- 41,47 ----
+  #endif
+  
++ #define MBSLEN(s)	(((s) && (s)[0]) ? ((s)[1] ? mbstrlen (s) : 1) : 0)
++ #define MB_STRLEN(s)	((MB_CUR_MAX > 1) ? MBSLEN (s) : STRLEN (s))
++ 
+  #else /* !HANDLE_MULTIBYTE */
+  
+***************
+*** 54,57 ****
+--- 59,64 ----
+  #define MB_NULLWCH(x)		(0)
+  #endif
++ 
++ #define MB_STRLEN(s)		(STRLEN(s))
+  
+  #endif /* !HANDLE_MULTIBYTE */

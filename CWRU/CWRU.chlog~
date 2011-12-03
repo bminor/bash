@@ -9945,5 +9945,16 @@ builtins/hash.def
 				   8/27
 				   ----
 doc/{bash.1,bashref.texi}
-	- explicitly note that condition primaries that operate on files operate
-	  on the targets of symbolic links rather than the links themselves
+	- explicitly note that conditional primaries that operate on files
+	  operate on the targets of symbolic links rather than the links
+	  themselves
+
+				   8/30
+				   ----
+lib/readline/display.c
+	- fix multibyte calculation of `physchars' in prompt expansion, to
+	  handle double-width multibyte characters correctly
+	- changes to rl_redisplay to handle prompts longer than the screenwidth
+	  that might contain double-width multibyte characters.  Fixes from
+	  Tomohiro Kubota
+

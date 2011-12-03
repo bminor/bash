@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on August, 3  2004 by texi2html 1.64 -->
+<!-- Created on August, 30  2004 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.0, 1 August 2004)..
+the Bash shell (version 3.0, 27 August 2004)..
 </P><P>
 
-This is Edition 3.0, last updated 1 August 2004,
+This is Edition 3.0, last updated 27 August 2004,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 3.0.
 </P><P>
@@ -1750,6 +1750,10 @@ Expands to the positional parameters, starting from one.  When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, <CODE>"$@"</CODE> is equivalent to
 <CODE>"$1" "$2" <small>...</small></CODE>.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
 When there are no positional parameters, <CODE>"$@"</CODE> and
 <CODE>$@</CODE>
 expand to nothing (i.e., they are removed).
@@ -6980,6 +6984,10 @@ If the <VAR>file</VAR> argument to one of the primaries is one of
 descriptor 0, 1, or 2, respectively, is checked.
 </P><P>
 
+Unless otherwise specified, primaries that operate on files follow symbolic
+links and operate on the target of the link, rather than the link itself.
+</P><P>
+
 <DL COMPACT>
 <DT><CODE>-a <VAR>file</VAR></CODE>
 <DD>True if <VAR>file</VAR> exists.
@@ -7406,12 +7414,18 @@ The braces are required to avoid
 conflicts with the shell's filename expansion operators.  If the
 <VAR>subscript</VAR> is <SAMP>`@'</SAMP> or <SAMP>`*'</SAMP>, the word expands to all members
 of the array <VAR>name</VAR>.  These subscripts differ only when the word
-appears within double quotes.  If the word is double-quoted,
+appears within double quotes.
+If the word is double-quoted,
 <CODE>${name[*]}</CODE> expands to a single word with
 the value of each array member separated by the first character of the
 <CODE>IFS</CODE> variable, and <CODE>${name[@]}</CODE> expands each element of
 <VAR>name</VAR> to a separate word.  When there are no array members,
-<CODE>${name[@]}</CODE> expands to nothing.  This is analogous to the
+<CODE>${name[@]}</CODE> expands to nothing.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.
+This is analogous to the
 expansion of the special parameters <SAMP>`@'</SAMP> and <SAMP>`*'</SAMP>. 
 <CODE>${#name[</CODE><VAR>subscript</VAR><CODE>]}</CODE> expands to the length of
 <CODE>${name[</CODE><VAR>subscript</VAR><CODE>]}</CODE>.
@@ -7995,6 +8009,18 @@ indication of whether or not a history entry has been modified.
 The default editor used by <CODE>fc</CODE> is <CODE>ed</CODE>.
 <P>
 
+<LI>
+The <CODE>type</CODE> and <CODE>command</CODE> builtins will not report a non-executable
+file as having been found, though the shell will attempt to execute such a
+file if it is the only so-named file found in <CODE>$PATH</CODE>.
+<P>
+
+<LI>
+When the <CODE>xpg_echo</CODE> option is enabled, Bash does not attempt to interpret
+any arguments to <CODE>echo</CODE> as options.  Each argument is displayed, after
+escape characters are converted.
+<P>
+
 </OL>
 <P>
 
@@ -8193,14 +8219,14 @@ Bash does not print another warning, and the stopped jobs are terminated.
 
 <DT><CODE>bg</CODE>
 <DD><A NAME="IDX273"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>bg [<VAR>jobspec</VAR>]
-</pre></td></tr></table>Resume the suspended job <VAR>jobspec</VAR> in the background, as if it
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>bg [<VAR>jobspec</VAR> <small>...</small>]
+</pre></td></tr></table>Resume each suspended job <VAR>jobspec</VAR> in the background, as if it
 had been started with <SAMP>`&#38;'</SAMP>.
 If <VAR>jobspec</VAR> is not supplied, the current job is used.
 The return status is zero unless it is run when job control is not
-enabled, or, when run with job control enabled, if <VAR>jobspec</VAR> was
-not found or <VAR>jobspec</VAR> specifies a job that was started without
-job control.
+enabled, or, when run with job control enabled, if the last
+<VAR>jobspec</VAR> was not found or the last <VAR>jobspec</VAR> specifies a job
+that was started without job control.
 <P>
 
 <DT><CODE>fg</CODE>
@@ -15025,7 +15051,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>August, 3  2004</I>
+This document was generated by <I>Chet Ramey</I> on <I>August, 30  2004</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15187,7 +15213,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>August, 3  2004</I>
+by <I>Chet Ramey</I> on <I>August, 30  2004</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

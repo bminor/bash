@@ -1,0 +1,68 @@
+*** ../bash-3.0/variables.c	Sun Jul  4 13:57:26 2004
+--- variables.c	Wed Aug  4 15:28:04 2004
+***************
+*** 1420,1428 ****
+  
+  #  if defined (DEBUGGER)
+!   v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, (att_invisible|att_noassign));
+!   v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, (att_invisible|att_noassign));
+  #  endif /* DEBUGGER */
+!   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, (att_invisible|att_noassign));
+!   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, (att_invisible|att_noassign));
+  #endif
+  
+--- 1420,1428 ----
+  
+  #  if defined (DEBUGGER)
+!   v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign);
+!   v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign);
+  #  endif /* DEBUGGER */
+!   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign);
+!   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign);
+  #endif
+  
+***************
+*** 1600,1604 ****
+    old_var = find_variable (name);
+    if (old_var && local_p (old_var) && old_var->context == variable_context)
+!     return (old_var);
+  
+    was_tmpvar = old_var && tempvar_p (old_var);
+--- 1600,1607 ----
+    old_var = find_variable (name);
+    if (old_var && local_p (old_var) && old_var->context == variable_context)
+!     {
+!       VUNSETATTR (old_var, att_invisible);
+!       return (old_var);
+!     }
+  
+    was_tmpvar = old_var && tempvar_p (old_var);
+***************
+*** 2303,2306 ****
+--- 2306,2315 ----
+    if (old_var && local_p (old_var) && variable_context == old_var->context)
+      {
++ #if defined (ARRAY_VARS)
++       if (array_p (old_var))
++ 	array_dispose (array_cell (old_var));
++       else
++ #endif
++ 	FREE (value_cell (old_var));
+        /* Reset the attributes.  Preserve the export attribute if the variable
+           came from a temporary environment.  Make sure it stays local, and
+***************
+*** 2309,2313 ****
+        VSETATTR (old_var, att_local);
+        VSETATTR (old_var, att_invisible);
+-       FREE (value_cell (old_var));
+        var_setvalue (old_var, (char *)NULL);
+        INVALIDATE_EXPORTSTR (old_var);
+--- 2318,2321 ----
+***************
+*** 3647,3650 ****
+--- 3655,3659 ----
+    { "LC_MESSAGES", sv_locale },
+    { "LC_NUMERIC", sv_locale },
++   { "LC_TIME", sv_locale },
+  
+    { "MAIL", sv_mail },

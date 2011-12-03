@@ -1,0 +1,125 @@
+*** ../bash-3.0/array.c	Thu May  6 08:24:13 2004
+--- array.c	Wed Aug 25 15:50:42 2004
+***************
+*** 108,112 ****
+  	ARRAY_ELEMENT	*ae, *new;
+  
+! 	if (!a)
+  		return((ARRAY *) NULL);
+  	a1 = array_create();
+--- 108,112 ----
+  	ARRAY_ELEMENT	*ae, *new;
+  
+! 	if (a == 0)
+  		return((ARRAY *) NULL);
+  	a1 = array_create();
+***************
+*** 244,250 ****
+  	register ARRAY_ELEMENT	*ae, *new;
+  
+! 	if (a == 0)
+  		return 0;
+! 	if (n <= 0)
+  		return (a->num_elements);
+  
+--- 244,250 ----
+  	register ARRAY_ELEMENT	*ae, *new;
+  
+! 	if (a == 0 || (array_empty(a) && s == 0))
+  		return 0;
+! 	else if (n <= 0)
+  		return (a->num_elements);
+  
+***************
+*** 254,257 ****
+--- 254,259 ----
+  		ADD_BEFORE(ae, new);
+  		a->num_elements++;
++ 		if (array_num_elements(a) == 1)		/* array was empty */
++ 			return 1;
+  	}
+  
+***************
+*** 289,293 ****
+  	char	*t;
+  
+! 	if (array == 0 || array->head == 0 || array_empty (array))
+  		return (ARRAY *)NULL;
+  	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+--- 291,295 ----
+  	char	*t;
+  
+! 	if (array == 0 || array_head(array) == 0 || array_empty(array))
+  		return (ARRAY *)NULL;
+  	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+***************
+*** 314,318 ****
+  	char		*ifs, sep[2];
+  
+! 	p = array_head (a);
+  	if (p == 0 || array_empty (a) || start > array_max_index(a))
+  		return ((char *)NULL);
+--- 316,320 ----
+  	char		*ifs, sep[2];
+  
+! 	p = a ? array_head (a) : 0;
+  	if (p == 0 || array_empty (a) || start > array_max_index(a))
+  		return ((char *)NULL);
+***************
+*** 355,362 ****
+  	char	*t, *ifs, sifs[2];
+  
+! 	if (array_head (a) == 0 || array_empty (a))
+  		return ((char *)NULL);
+  
+! 	a2 = array_copy (a);
+  	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
+  		t = pat_subst(element_value(e), pat, rep, mflags);
+--- 357,364 ----
+  	char	*t, *ifs, sifs[2];
+  
+! 	if (a == 0 || array_head(a) == 0 || array_empty(a))
+  		return ((char *)NULL);
+  
+! 	a2 = array_copy(a);
+  	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
+  		t = pat_subst(element_value(e), pat, rep, mflags);
+***************
+*** 428,432 ****
+  	register ARRAY_ELEMENT *new, *ae;
+  
+! 	if (!a)
+  		return(-1);
+  	new = array_create_element(i, v);
+--- 430,434 ----
+  	register ARRAY_ELEMENT *new, *ae;
+  
+! 	if (a == 0)
+  		return(-1);
+  	new = array_create_element(i, v);
+***************
+*** 452,456 ****
+  			array_dispose_element(new);
+  			free(element_value(ae));
+! 			ae->value = savestring(v);
+  			return(0);
+  		} else if (element_index(ae) > i) {
+--- 454,458 ----
+  			array_dispose_element(new);
+  			free(element_value(ae));
+! 			ae->value = v ? savestring(v) : (char *)NULL;
+  			return(0);
+  		} else if (element_index(ae) > i) {
+***************
+*** 474,478 ****
+  	register ARRAY_ELEMENT *ae;
+  
+! 	if (!a || array_empty(a))
+  		return((ARRAY_ELEMENT *) NULL);
+  	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
+--- 476,480 ----
+  	register ARRAY_ELEMENT *ae;
+  
+! 	if (a == 0 || array_empty(a))
+  		return((ARRAY_ELEMENT *) NULL);
+  	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))

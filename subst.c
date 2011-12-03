@@ -6854,12 +6854,23 @@ static WORD_LIST *
 word_list_split (list)
      WORD_LIST *list;
 {
-  WORD_LIST *result, *t, *tresult;
+  WORD_LIST *result, *t, *tresult, *e;
 
   for (t = list, result = (WORD_LIST *)NULL; t; t = t->next)
     {
       tresult = word_split (t->word, ifs_value);
+#if 0
       result = (WORD_LIST *) list_append (result, tresult);
+#else
+      if (result == 0)
+        result = e = tresult;
+      else
+	{
+	  e->next = tresult;
+	  while (e->next)
+	    e = e->next;
+	}
+#endif
     }
   return (result);
 }

@@ -48,13 +48,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               returns  true unless a _n_a_m_e is given for which no alias has been
               defined.
 
-       bbgg [_j_o_b_s_p_e_c]
-              Resume the suspended job _j_o_b_s_p_e_c in the background, as if it had
-              been  started  with  &&.   If _j_o_b_s_p_e_c is not present, the shell's
+       bbgg [_j_o_b_s_p_e_c ...]
+              Resume each suspended job _j_o_b_s_p_e_c in the background,  as  if  it
+              had been started with &&.  If _j_o_b_s_p_e_c is not present, the shell's
               notion of the _c_u_r_r_e_n_t _j_o_b is used.  bbgg _j_o_b_s_p_e_c returns 0  unless
               run  when  job control is disabled or, when run with job control
-              enabled, if _j_o_b_s_p_e_c was not found or started  without  job  con-
-              trol.
+              enabled, if the last _j_o_b_s_p_e_c was not found or was started  with-
+              out job control.
 
        bbiinndd [--mm _k_e_y_m_a_p] [--llppssvvPPSSVV]
        bbiinndd [--mm _k_e_y_m_a_p] [--qq _f_u_n_c_t_i_o_n] [--uu _f_u_n_c_t_i_o_n] [--rr _k_e_y_s_e_q]
@@ -1253,7 +1253,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r command, _c_a_s_e command, _s_e_l_e_c_t command, every
               arithmetic _f_o_r command, and before the first command executes in
               a shell function  (see  SSHHEELLLL  GGRRAAMMMMAARR  above).   Refer  to  the
-              description  of  the  eexxttgglloobb  option  to  the sshhoopptt builtin for
+              description  of  the  eexxttddeebbuugg  option  to the sshhoopptt builtin for
               details of its effect on the DDEEBBUUGG trap.  If a _s_i_g_s_p_e_c  is  EERRRR,
               the  command  _a_r_g  is  executed  whenever a simple command has a
               non-zero exit status, subject to the following conditions.   The

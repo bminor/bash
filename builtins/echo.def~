@@ -31,6 +31,11 @@ $PRODUCES echo.c
 #include <stdio.h>
 #include "../shell.h"
 
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif
+
 $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON V9_ECHO
@@ -77,6 +82,8 @@ int xpg_echo = 1;
 #else
 int xpg_echo = 0;
 #endif /* DEFAULT_ECHO_TO_XPG */
+
+extern int posixly_correct;
 
 /* Print the words in LIST to standard output.  If the first word is
    `-n', then don't print a trailing newline.  We also support the
@@ -173,6 +180,7 @@ just_echo:
   fflush (stdout);
   if (ferror (stdout))
     {
+      builtin_error ("write error: %s", strerror (errno));
       clearerr (stdout);
       return (EXECUTION_FAILURE);
     }

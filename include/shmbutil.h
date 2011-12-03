@@ -40,7 +40,8 @@ extern char *xstrchr __P((const char *, int));
 #define MB_NULLWCH(x)		((x) == 0)
 #endif
 
-#define MB_STRLEN(s)	((MB_CUR_MAX > 1) ? mbstrlen (s) : STRLEN (s))
+#define MBSLEN(s)	(((s) && (s)[0]) ? ((s)[1] ? mbstrlen (s) : 1) : 0)
+#define MB_STRLEN(s)	((MB_CUR_MAX > 1) ? MBSLEN (s) : STRLEN (s))
 
 #else /* !HANDLE_MULTIBYTE */
 

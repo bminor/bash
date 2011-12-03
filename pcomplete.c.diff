@@ -1,0 +1,20 @@
+*** ../bash-3.0/pcomplete.c	Thu Jan  8 10:36:17 2004
+--- pcomplete.c	Tue Aug  3 23:15:41 2004
+***************
+*** 864,867 ****
+--- 864,869 ----
+      v = convert_var_to_array (v);
+    v = assign_array_var_from_word_list (v, lwords);
++ 
++   VUNSETATTR (v, att_invisible);
+    return v;
+  }
+***************
+*** 1022,1025 ****
+--- 1024,1029 ----
+    if (array_p (v) == 0)
+      v = convert_var_to_array (v);
++ 
++   VUNSETATTR (v, att_invisible);
+  
+    a = array_cell (v);

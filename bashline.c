@@ -1418,6 +1418,7 @@ command_word_completion_function (hint_text, state)
 	      bash_directory_expansion (&rd);
 	      dl = strlen (rd);
 	      l = vl - dl;		/* # of chars added */
+	      free (rd);
 #endif
 	      temp = (char *)xmalloc (l + 2 + tl);
 	      strcpy (temp, hint_text);
