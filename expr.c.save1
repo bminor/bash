@@ -808,7 +808,6 @@ exp0 ()
   register intmax_t val = 0, v2;
   char *vincdec;
   int stok;
-  EXPR_CONTEXT ec;
 
   /* XXX - might need additional logic here to decide whether or not
 	   pre-increment or pre-decrement is legal at this point. */
@@ -854,36 +853,17 @@ exp0 ()
   else if ((curtok == NUM) || (curtok == STR))
     {
       val = tokval;
-      if (curtok == STR)
+      if (curtok == STR && (*tp == '+' || *tp == '-') && tp[1] == *tp &&
+		(tp[2] == '\0' || (ISALNUM ((unsigned char)tp[2]) == 0)))
 	{
-	  SAVETOK (&ec);
-	  tokstr = (char *)NULL;	/* keep it from being freed */
-          noeval = 1;
-          readtok ();
-          stok = curtok;
-
 	  /* post-increment or post-decrement */
- 	  if (stok == POSTINC || stok == POSTDEC)
- 	    {
- 	      /* restore certain portions of EC */
- 	      tokstr = ec.tokstr;
- 	      noeval = ec.noeval;
- 	      lasttok = STR;	/* ec.curtok */
-
-	      v2 = val + ((stok == POSTINC) ? 1 : -1);
-	      vincdec = itos (v2);
-	      if (noeval == 0)
-		expr_bind_variable (tokstr, vincdec);
-	      free (vincdec);
-	      curtok = NUM;	/* make sure x++=7 is flagged as an error */
- 	    }
- 	  else
- 	    {
-	      if (stok == STR)	/* free new tokstr before old one is restored */
-		FREE (tokstr);
-	      RESTORETOK (&ec);
- 	    }
-
+	  v2 = val + ((*tp == '+') ? 1 : -1);
+	  vincdec = itos (v2);
+	  if (noeval == 0)
+	    expr_bind_variable (tokstr, vincdec);
+	  free (vincdec);
+	  tp += 2;
+	  curtok = NUM;	/* make sure x++=7 is flagged as an error */
 	}
 	  
       readtok ();
@@ -956,7 +936,7 @@ expr_streval (tok, e)
 static void
 readtok ()
 {
-  register char *cp, *xp;
+  register char *cp;
   register unsigned char c, c1;
   register int e;
 
@@ -1015,7 +995,6 @@ readtok ()
       tokstr = (char *)NULL;	/* keep it from being freed */
       tp = savecp = cp;
       noeval = 1;
-      curtok = STR;
       readtok ();
       peektok = curtok;
       if (peektok == STR)	/* free new tokstr before old one is restored */
@@ -1085,20 +1064,10 @@ readtok ()
 	c = LOR;
       else if ((c == '*') && (c1 == '*'))
 	c = POWER;
-      else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
-	c = (c == '-') ? POSTDEC : POSTINC;
-      else if ((c == '-' || c == '+') && c1 == c)
-	{
-	  /* Quickly scan forward to see if this is followed by optional
-	     whitespace and an identifier. */
-	  xp = cp;
-	  while (xp && *xp && cr_whitespace (*xp))
-	    xp++;
-	  if (legal_variable_starter ((unsigned char)*xp))
-	    c = (c == '-') ? PREDEC : PREINC;
-	  else
-	    cp--;	/* not preinc or predec, so unget the character */
-	}
+      else if ((c == '-') && (c1 == '-') && legal_variable_starter ((unsigned char)*cp))
+	c = PREDEC;
+      else if ((c == '+') && (c1 == '+') && legal_variable_starter ((unsigned char)*cp))
+	c = PREINC;
       else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{
 	  assigntok = c;	/* a OP= b */

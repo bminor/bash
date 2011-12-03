@@ -1,3 +1,23 @@
+This document details the changes between this version, bash-3.0-rc1,
+and the previous version, bash-3.0-beta1.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused incorrect behavior when referecing element 0 of
+    an array using $array, element 0 was unset, and `set -u' was enabled.
+
+b.  System-specific changes for: SCO Unix 3.2, Tandem.
+
+c.  Fixed a bug that caused inappropriate word splitting when a variable was
+    expanded within a double-quoted string that also included $@.
+
+d.  Fixed a bug that caused `pwd' to not display anything in physical mode
+    when the file system had changed underneath the shell.
+
+e.  Fixed a bug in the pre- and post- increment and decrement parsing in the
+    expression evaluator that caused errors when the operands and corresponding
+    operators were separated by whitespace.
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.0-beta1,
 and the previous version, bash-3.0-alpha.
 

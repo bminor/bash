@@ -9218,8 +9218,80 @@ expr.c
 	- make the exponentiation operator (**) associative, so things like
 	  2**3**4  work right (change `if' to `while')
 
-				    3/2
+				    3/3
 				    ---
 lib/sh/strftime.c
 	- SCO Unix 3.2, like Solaris, requires that the system's `timezone'
 	  variable be declared as long
+
+lib/readline/{bind,histfile,input,parens}.c
+	- changes for Tandem (including `floss.h' (?))
+
+				    3/4
+				    ---
+subst.c
+	- change param_expand to quote the entire expanded string instead
+	  of just the escape characters if the expansion appears between
+	  double quotes or in a here-document (for simple variable expansions
+	  or expansions of positional parameters)
+
+				    3/8
+				    ---
+subst.c
+	- analogous changes to parameter_brace_expand_word to fix the same
+	  quoting problem as on 3/4; fix callers to understand that  the
+	  value returned might be quoted now and should be dequoted if
+	  necessary
+	- add a `quoted' argument to get_var_and_type, change callers
+	- change today's fix and fix from 3/4 to not call quote_string if the
+	  value is "" (because quote_string turns that into CTLNUL\0)
+
+				    3/9
+				    ---
+builtins/cd.def
+	- resetpwd() now takes a `caller' argument so it can be used by pwd
+	  as well as cd
+	- change pwd_builtin to call resetpwd() if sh_physpath() fails to
+	  return a valid pathname
+
+				   3/14
+				   ----
+expr.c
+	- reworked exp0 and readtok() to make post-increment and post-decrement
+	  into real tokens, which may be separated from their accompanying
+	  variables by whitesapce
+	- made analogous changes to readtok() to make pre-increment and
+	  pre-decrement work when separated from their accompanying identifier
+	  by whitespace
+
+				   3/19
+				   ----
+lib/readline/display.c
+	- rl_save_prompt and rl_restore_prompt now save and restore the value
+	  of prompt_physical_chars
+	- set prompt_physical_chars in rl_redisplay when expand_prompt has
+	  not been called (e.g., when rl_display_prompt is set and is not
+	  equal to rl_prompt, like when searching)
+
+lib/readline/histexpand.c
+	- don't call add_history in history_expand if the `:p' modifier is
+	  supplied; leave that to the calling application.  This means that
+	  `history -p', for example, will not add anything to the history
+	  list (as documented), nor will history expansions invoked by
+	  emacs-mode M-C-e line editing
+
+config-bot.h
+	- check whether HAVE_DECL_SYS_SIGLIST is defined to 1 rather than just
+	  defined, to work around newer versions of autoconf defining it to 0
+
+config.h.in
+	- change default status of HAVE_MALLOC to #undef instead of #define
+
+bashhist.c
+	- extern declarations for rl_done and rl_dispatching
+	- don't call re_edit from pre_process_line unless rl_dispatcing is zero,
+	  so we don't call it from something like shell-expand-line
+	- change pre_process_line to add an expanded history specification
+	  that returned `print only' to the history list, since history_expand
+	  no longer does it (and, when using readline, do it only when
+	  rl_dispatching is zero)

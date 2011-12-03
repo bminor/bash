@@ -122,13 +122,14 @@ bindpwd (no_symlinks)
 /* Call get_working_directory to reset the value of
    the_current_working_directory () */
 static char *
-resetpwd ()
+resetpwd (caller)
+     char *caller;
 {
   char *tdir;
       
   FREE (the_current_working_directory);
   the_current_working_directory = (char *)NULL;
-  tdir = get_working_directory ("cd");
+  tdir = get_working_directory (caller);
   return (tdir);
 }
 
@@ -337,6 +338,12 @@ pwd_builtin (list)
 
   directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
 		   : get_working_directory ("pwd");
+
+  /* Try again using getcwd() if canonicalization fails (for instance, if
+     the file system has changed state underneath bash). */
+  if (tcwd && directory == 0)
+    directory = resetpwd ("pwd");
+
 #undef tcwd
 
   if (directory)
@@ -416,7 +423,7 @@ change_to_directory (newdir, nolinks)
       /* If canonicalization failed, but the chdir succeeded, reset the
 	 shell's idea of the_current_working_directory. */
       if (canon_failed)
-	resetpwd ();
+	resetpwd ("cd");
       else
 	{
 	  FREE (the_current_working_directory);
@@ -439,7 +446,7 @@ change_to_directory (newdir, nolinks)
      verbatim. If we succeed, reinitialize the_current_working_directory. */
   if (chdir (newdir) == 0)
     {
-      tdir = resetpwd ();
+      tdir = resetpwd ("cd");
       FREE (tdir);
 
       return (1);

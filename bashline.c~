@@ -1765,7 +1765,7 @@ cleanup_expansion_error ()
   hist_verify = old_verify;
 #endif
   if (to_free != rl_line_buffer)
-    FREE (to_free);
+    free (to_free);
   putc ('\r', rl_outstream);
   rl_forced_update_display ();
 }

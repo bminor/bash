@@ -506,7 +506,7 @@ rl_redisplay ()
 	    }
 	}
 
-      prompt_physical_chars = pmtlen = strlen (prompt_this_line);
+      pmtlen = strlen (prompt_this_line);
       temp = pmtlen + out + 2;
       if (temp >= line_size)
 	{
@@ -1841,7 +1841,6 @@ static char *saved_local_prefix;
 static int saved_last_invisible;
 static int saved_visible_length;
 static int saved_invis_chars_first_line;
-static int saved_physical_chars;
 
 void
 rl_save_prompt ()
@@ -1851,11 +1850,10 @@ rl_save_prompt ()
   saved_last_invisible = prompt_last_invisible;
   saved_visible_length = prompt_visible_length;
   saved_invis_chars_first_line = prompt_invis_chars_first_line;
-  saved_physical_chars = prompt_physical_chars;
 
   local_prompt = local_prompt_prefix = (char *)0;
   prompt_last_invisible = prompt_visible_length = 0;
-  prompt_invis_chars_first_line = prompt_physical_chars = 0;
+  prompt_invis_chars_first_line = 0;
 }
 
 void
@@ -1869,7 +1867,6 @@ rl_restore_prompt ()
   prompt_last_invisible = saved_last_invisible;
   prompt_visible_length = saved_visible_length;
   prompt_invis_chars_first_line = saved_invis_chars_first_line;
-  prompt_physical_chars = saved_physical_chars;
 }
 
 char *
@@ -1902,7 +1899,6 @@ _rl_make_prompt_for_search (pchar)
       prompt_last_invisible = saved_last_invisible;
       prompt_visible_length = saved_visible_length + 1;
     }
-
   return pmt;
 }
 

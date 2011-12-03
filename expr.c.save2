@@ -956,7 +956,7 @@ expr_streval (tok, e)
 static void
 readtok ()
 {
-  register char *cp, *xp;
+  register char *cp;
   register unsigned char c, c1;
   register int e;
 
@@ -1085,20 +1085,14 @@ readtok ()
 	c = LOR;
       else if ((c == '*') && (c1 == '*'))
 	c = POWER;
-      else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
-	c = (c == '-') ? POSTDEC : POSTINC;
-      else if ((c == '-' || c == '+') && c1 == c)
-	{
-	  /* Quickly scan forward to see if this is followed by optional
-	     whitespace and an identifier. */
-	  xp = cp;
-	  while (xp && *xp && cr_whitespace (*xp))
-	    xp++;
-	  if (legal_variable_starter ((unsigned char)*xp))
-	    c = (c == '-') ? PREDEC : PREINC;
-	  else
-	    cp--;	/* not preinc or predec, so unget the character */
-	}
+      else if ((c == '-') && (c1 == '-') && legal_variable_starter ((unsigned char)*cp))
+	c = PREDEC;
+      else if ((c == '+') && (c1 == '+') && legal_variable_starter ((unsigned char)*cp))
+	c = PREINC;
+      else if ((c == '-') && (c1 == '-') && (curtok == STR))
+	c = POSTDEC;
+      else if ((c == '+') && (c1 == '+') && (curtok == STR))
+	c = POSTINC;
       else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{
 	  assigntok = c;	/* a OP= b */
