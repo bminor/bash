@@ -1528,7 +1528,18 @@ history_tokenize_internal (string, wind, indp)
 
       start = i;
 
-      i = history_tokenize_word (string, start);      
+      i = history_tokenize_word (string, start);
+
+      /* If we have a non-whitespace delimiter character (which would not be
+	 skipped by the loop above), use it and any adjacent delimiters to
+	 make a separate field.  Any adjacent white space will be skipped the
+	 next time through the loop. */
+      if (i == start && history_word_delimiters)
+	{
+	  i++;
+	  while (string[i] && member (string[i], history_word_delimiters))
+	    i++;
+	}
 
       /* If we are looking for the word in which the character at a
 	 particular index falls, remember it. */

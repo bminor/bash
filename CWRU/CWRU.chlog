@@ -9101,3 +9101,65 @@ lib/readline/funmap.c
 
 lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
 	- documented `unix-filename-rubout'
+
+				   1/29
+				   ----
+lib/readline/histexpand.c
+	- change history_tokenize_internal to handle non-whitespace delimiter
+	  characters by creating separate fields (like the shell does when
+	  splitting on $IFS)
+
+				   1/30
+				   ----
+lib/glob/xmbsrtowcs.c
+	- new function, xdupmbstowcs, for convenience:  calls xmbsrtowcs
+	  while allocating memory for the new wide character string
+	- some small efficiency improvments to xmbsrtowcs
+
+include/shmbutil.h
+	- extern declaration for xdupmbstowcs
+
+lib/glob/strmatch.h
+	- include config.h for definition of HANDLE_MULTIBYTE
+	- remove the HAVE_LIBC_FNM_EXTMATCH tests
+	- new extern declaration for wcsmatch(whchar_t *, wchar_t *, int)
+
+configure.in
+	- remove call to BASH_FUNC_FNMATCH_EXTMATCH; it's no longer used
+
+lib/glob/smatch.c
+	- simplify xstrmatch() by using xdupmbstowcs() instead of inline code
+
+lib/glob/glob.c
+	- modify mbskipname() to avoid the use of alloca
+	- simplify mbskipname() by using xdupmbstowcs() instead of inline code
+	- simplify glob_pattern_p() by using xdupmbstowcs() instead of
+	  inline code
+	- fix memory leak in wdequote_pathname
+	- simplify wdequote_pathname() by using xdupmbstowcs() instead of
+	  inline code
+
+lib/glob/strmatch.c
+	- new function, wcsmatch(), `exported' wide-character equivalent of
+	  strmatch()
+
+subst.c
+	- old match_pattern is now match_upattern
+	- match_pattern now either calls match_upattern or converts
+	  mbstrings to wide chars and calls match_wpattern
+	- match_upattern reverted to old non-multibyte code
+	- new function: match_pattern_wchar, wide character version of
+	  match_pattern_char
+
+				    2/1
+				    ---
+subst.c
+	- old remove_pattern is now remove_upattern
+	- remove_upattern reverted to old non-multibyte code (pre-Waugh patch)
+	- new multibyte version of remove_pattern: remove_wpattern
+	- remove_pattern now calls either remove_upattern or converts a
+	  multibyte string to a wide character string and calls
+	  remove_wpattern
+	- new function, wcsdup, wide-character version of strdup(3)
+
+	

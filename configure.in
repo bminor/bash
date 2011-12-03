@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.160, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.0, version 3.161, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.0)
 define(relstatus, beta1)
@@ -831,18 +831,6 @@ BASH_FUNC_STD_UNSETENV
 else
 AC_DEFINE(HAVE_STD_UNSETENV)
 fi
-
-dnl I have removed this check.  The existing libc FNM_EXTMATCH implementation
-dnl (glibc-2.2.4) disagrees with bash on the matching of incorrectly-formed
-dnl patterns (bash treats them as strings or characters to be matched without
-dnl any special meaning) and has one outright bug:  a[X-]b should match
-dnl both a-b and aXb.
-dnl
-dnl Once Ulrich and I get together on this, the check can return
-dnl
-dnl chet 10/31/2001
-dnl
-dnl BASH_FUNC_FNMATCH_EXTMATCH
 
 BASH_FUNC_PRINTF_A_FORMAT
 

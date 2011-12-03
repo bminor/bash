@@ -362,25 +362,44 @@ xstrmatch (pattern, string, flags)
 {
 #if HANDLE_MULTIBYTE
   int ret;
+  mbstate_t ps;
   size_t n;
+  char *pattern_bak;
   wchar_t *wpattern, *wstring;
 
   if (MB_CUR_MAX == 1)
     return (internal_strmatch (pattern, string, flags));
 
-  n = xdupmbstowcs (&wpattern, NULL, pattern);
-  if (n == (size_t)-1 || n == (size_t)-2)
-    return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
+  pattern_bak = (char *)xmalloc (strlen (pattern) + 1);
+  strcpy (pattern_bak, pattern);
 
-  n = xdupmbstowcs (&wstring, NULL, string);
+  memset (&ps, '\0', sizeof (mbstate_t));
+  n = xmbsrtowcs (NULL, (const char **)&pattern, 0, &ps);
   if (n == (size_t)-1 || n == (size_t)-2)
     {
-      free (wpattern);
+      free (pattern_bak);
       return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
     }
 
+  wpattern = (wchar_t *)xmalloc ((n + 1) * sizeof (wchar_t));
+  (void) xmbsrtowcs (wpattern, (const char **)&pattern, n + 1, &ps);
+
+  memset (&ps, '\0', sizeof (mbstate_t));
+  n = xmbsrtowcs (NULL, (const char **)&string, 0, &ps);
+  if (n == (size_t)-1 || n == (size_t)-2)
+    {
+      free (wpattern);
+      ret = internal_strmatch (pattern_bak, string, flags);
+      free (pattern_bak);
+      return ret;
+    }
+
+  wstring = (wchar_t *)xmalloc ((n + 1) * sizeof (wchar_t));
+  (void) xmbsrtowcs (wstring, (const char **)&string, n + 1, &ps);
+
   ret = internal_wstrmatch (wpattern, wstring, flags);
 
+  free (pattern_bak);
   free (wpattern);
   free (wstring);
 

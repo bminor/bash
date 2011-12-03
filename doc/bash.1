@@ -8720,7 +8720,9 @@ a unit.
 .PP
 Commands inside of \fB$(\fP...\fB)\fP command substitution are not
 parsed until substitution is attempted.  This will delay error
-reporting until some time after the command is entered.
+reporting until some time after the command is entered.  For example,
+unmatched parentheses, even inside shell comments, will result in
+error messages while the construct is being read.
 .PP
 Array variables may not (yet) be exported.
 .zZ

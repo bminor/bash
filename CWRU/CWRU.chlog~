@@ -9069,3 +9069,84 @@ shell.c
 	- in open_shell_script, check to see whether or not we can find and
 	  open the filename argument before setting dollar_vars[0] or
 	  manipulating BASH_SOURCE, so the error messages come out better
+
+subst.c
+	- in string_list_internal, short-circuit right away to savestring()
+	  if the list only has a single element
+
+				   1/28
+				   ----
+lib/readline/rltypedefs.h
+	- new set of typedefs for functions returning char * with various
+	  arguments (standard set)
+
+lib/readline/complete.c
+	- new function pointer, rl_completion_word_break_hook, called by
+	  _rl_find_completion_word, used to set word break characters at
+	  completion time, allowing them to be position-based
+
+lib/readline/doc/rltech.texi
+	- documented rl_completion_word_break_hook
+
+lib/readline/kill.c
+	- added new rl_unix_filename_rubout, which deletes one filename
+	  component in a Unix pathname backward (delimiters are whitespace
+	  and `/')
+
+lib/readline/readline.h
+	- extern declaration for rl_unix_filename_rubout
+
+lib/readline/funmap.c
+	- new bindable readline command `unix-filename-rubout'
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- documented `unix-filename-rubout'
+
+				   1/29
+				   ----
+lib/readline/histexpand.c
+	- change history_tokenize_internal to handle non-whitespace delimiter
+	  characters by creating separate fields (like the shell does when
+	  splitting on $IFS)
+
+				   1/30
+				   ----
+lib/glob/xmbsrtowcs.c
+	- new function, xdupmbstowcs, for convenience:  calls xmbsrtowcs
+	  while allocating memory for the new wide character string
+	- some small efficiency improvments to xmbsrtowcs
+
+include/shmbutil.h
+	- extern declaration for xdupmbstowcs
+
+lib/glob/strmatch.h
+	- include config.h for definition of HANDLE_MULTIBYTE
+	- remove the HAVE_LIBC_FNM_EXTMATCH tests
+	- new extern declaration for wcsmatch(whchar_t *, wchar_t *, int)
+
+configure.in
+	- remove call to BASH_FUNC_FNMATCH_EXTMATCH; it's no longer used
+
+lib/glob/smatch.c
+	- simplify xstrmatch() by using xdupmbstowcs() instead of inline code
+
+lib/glob/glob.c
+	- modify mbskipname() to avoid the use of alloca
+	- simplify mbskipname() by using xdupmbstowcs() instead of inline code
+	- simplify glob_pattern_p() by using xdupmbstowcs() instead of
+	  inline code
+	- fix memory leak in wdequote_pathname
+	- simplify wdequote_pathname() by using xdupmbstowcs() instead of
+	  inline code
+
+lib/glob/strmatch.c
+	- new function, wcsmatch(), `exported' wide-character equivalent of
+	  strmatch()
+
+subst.c
+	- old match_pattern is now internal_match_pattern
+	- match_pattern now either calls internal_match_pattern or converts
+	  mbstrings to wide chars and calls internal_match_wpattern
+	- internal_match_pattern reverted to old non-multibyte code
+	- new function: match_pattern_wchar, wide character version of
+	  match_pattern_char

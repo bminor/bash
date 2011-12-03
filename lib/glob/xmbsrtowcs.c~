@@ -59,16 +59,18 @@ xmbsrtowcs (dest, src, len, pstate)
   if (dest == NULL)
     {
       wchar_t *wsbuf;
-      const char *mbs;
+      char *mbsbuf, *mbsbuf_top;
       mbstate_t psbuf;
 
       wsbuf = (wchar_t *) malloc ((n + 1) * sizeof(wchar_t));
-      mbs = *src;
+      mbsbuf_top = mbsbuf = (char *) malloc (n + 1);
+      memcpy(mbsbuf, *src, n + 1);
       psbuf = *ps;
 
-      wclength = mbsrtowcs (wsbuf, &mbs, n, &psbuf);
+      wclength = mbsrtowcs (wsbuf, (const char **)&mbsbuf, n, &psbuf);
 
       free (wsbuf);
+      free (mbsbuf_top);
       return wclength;
     }
       

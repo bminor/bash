@@ -239,7 +239,7 @@ wdequote_pathname (pathname)
   size_t len, n;
   wchar_t *wpathname;
   int i, j;
-  wchar_t *orig_wpathname;
+wchar_t *orig_wpathname;
 
   len = strlen (pathname);
   /* Convert the strings into wide characters.  */
@@ -247,7 +247,8 @@ wdequote_pathname (pathname)
   if (n == (size_t) -1)
     /* Something wrong. */
     return;
-  orig_wpathname = wpathname;
+
+orig_wpathname = wpathname;
 
   for (i = j = 0; wpathname && wpathname[i]; )
     {
@@ -261,12 +262,15 @@ wdequote_pathname (pathname)
     }
   wpathname[j] = L'\0';
 
+if (wpathname != orig_wpathname)
+  itrace("wdequote_pathname: 1: wpathname (%p) != orig_wpathname (%p)", wpathname, orig_wpathname);
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
   n = wcsrtombs(pathname, (const wchar_t **)&wpathname, len, &ps);
   pathname[len] = '\0';
 
-  /* Can't just free wpathname here; wcsrtombs changes it in many cases. */
+if (wpathname != orig_wpathname)
+  itrace("wdequote_pathname: 2: wpathname (%p) != orig_wpathname (%p)", wpathname, orig_wpathname);
   free (orig_wpathname);
 }
 

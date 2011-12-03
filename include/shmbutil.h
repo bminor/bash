@@ -67,6 +67,7 @@
 #if defined (HANDLE_MULTIBYTE)
 
 extern size_t xmbsrtowcs __P((wchar_t *, const char **, size_t, mbstate_t *));
+extern size_t xdupmbstowcs __P((wchar_t **, char ***, const char *));
 
 extern char *xstrchr __P((const char *, int));
 
