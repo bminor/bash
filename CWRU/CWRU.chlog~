@@ -9144,9 +9144,82 @@ lib/glob/strmatch.c
 	  strmatch()
 
 subst.c
-	- old match_pattern is now internal_match_pattern
-	- match_pattern now either calls internal_match_pattern or converts
-	  mbstrings to wide chars and calls internal_match_wpattern
-	- internal_match_pattern reverted to old non-multibyte code
+	- old match_pattern is now match_upattern
+	- match_pattern now either calls match_upattern or converts
+	  mbstrings to wide chars and calls match_wpattern
+	- match_upattern reverted to old non-multibyte code
 	- new function: match_pattern_wchar, wide character version of
 	  match_pattern_char
+
+				    2/1
+				    ---
+subst.c
+	- old remove_pattern is now remove_upattern
+	- remove_upattern reverted to old non-multibyte code (pre-Waugh patch)
+	- new multibyte version of remove_pattern: remove_wpattern
+	- remove_pattern now calls either remove_upattern or converts a
+	  multibyte string to a wide character string and calls
+	  remove_wpattern
+	- new function, wcsdup, wide-character version of strdup(3)
+
+				    2/4
+				    ---
+print_cmd.c
+	- temporarily translate a >&filename redirection from
+	  r_duplicating_output_word to r_err_and_out (as the expansion code
+	  in redir.c does) so it prints without a leading `1' (file
+	  descriptor)
+
+				    2/5
+				    ---
+aclocal.m4
+	- add a check for wcsdup to BASH_CHECK_MULTIBYTE
+
+config.h.in
+	- add HAVE_WCSDUP define
+
+				    2/9
+				    ---
+builtins/shift.def
+	- fix a call to sh_erange that possibly dereferences a NULL pointer
+
+				   2/12
+				   ----
+general.c
+	- start at a general set of file property checking functions:
+	  file_isdir(), file_iswdir() (is writable directory)
+
+general.h
+	- extern declarations for new functions
+
+lib/sh/tmpfile.c
+	- use file_iswdir() to make sure the temporary directory used for
+	  here documents and other temp files is writable in get_sys_tmpdir()
+
+				   2/17
+				   ----
+bashline.c
+	- fix conditional binding of emacs-mode M-~ -- there is a default
+	  binding for it (rl_tilde_expand), so a straight call to
+	  rl_bind_key_if_unbound_in_map doesn't do the right thing
+
+				   2/27
+				   ----
+[bash-3.0-beta1 released]
+
+				   2/29
+				   ----
+subst.c
+	- fixed expansion so referencing $a, when a is an array variable
+	  without an element assigned to index 0, exits the shell when
+	  `-u' is enabled
+
+expr.c
+	- make the exponentiation operator (**) associative, so things like
+	  2**3**4  work right (change `if' to `while')
+
+				    3/2
+				    ---
+lib/sh/strftime.c
+	- SCO Unix 3.2, like Solaris, requires that the system's `timezone'
+	  variable be declared as long

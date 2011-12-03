@@ -212,8 +212,21 @@ static char *pos_params __P((char *, int, int, int));
 
 static unsigned char *mb_getcharlens __P((char *, int));
 
+static char *remove_upattern __P((char *, char *, int));
+#if defined (HANDLE_MULTIBYTE)
+#  if !defined (HAVE_WCSDUP)
+static wchar_t *wcsdup __P((wchar_t *));
+#  endif
+static wchar_t *remove_wpattern __P((wchar_t *, size_t, wchar_t *, int));
+#endif
 static char *remove_pattern __P((char *, char *, int));
+
 static int match_pattern_char __P((char *, char *));
+static int match_upattern __P((char *, char *, int, char **, char **));
+#if defined (HANDLE_MULTIBYTE)
+static int match_pattern_wchar __P((wchar_t *, wchar_t *));
+static int match_wpattern __P((wchar_t *, char **, size_t, wchar_t *, int, char **, char **));
+#endif
 static int match_pattern __P((char *, char *, int, char **, char **));
 static int getpatspec __P((int, char *));
 static char *getpattern __P((char *, int, int));
@@ -1171,9 +1184,9 @@ de_backslash (string)
       prev_i = i;
       ADVANCE_CHAR (string, slen, i);
       if (j < prev_i)
-        do string[j++] = string[prev_i++]; while (prev_i < i);
+	do string[j++] = string[prev_i++]; while (prev_i < i);
       else
-        j = i;
+	j = i;
     }
   string[j] = '\0';
 
@@ -1564,6 +1577,10 @@ string_list_internal (list, sep)
 
   if (list == 0)
     return ((char *)NULL);
+
+  /* Short-circuit quickly if we don't need to separate anything. */
+  if (list->next == 0)
+    return (savestring (list->word->word));
 
   /* This is nearly always called with either sep[0] == 0 or sep[1] == 0. */
   sep_len = STRLEN (sep);
@@ -2795,17 +2812,17 @@ remove_quoted_nulls (string)
   while (i < slen)
     {
       if (string[i] == CTLESC)
-        {
+	{
 	  /* Old code had j++, but we cannot assume that i == j at this
 	     point -- what if a CTLNUL has already been removed from the
 	     string?  We don't want to drop the CTLESC or recopy characters
 	     that we've already copied down. */
 	  i++; string[j++] = CTLESC;
-          if (i == slen)
-            break;
-        }
+	  if (i == slen)
+	    break;
+	}
       else if (string[i] == CTLNUL)
-        i++;
+	i++;
 
       prev_i = i;
       ADVANCE_CHAR (string, slen, i);
@@ -2840,13 +2857,14 @@ word_list_remove_quoted_nulls (list)
 /* **************************************************************** */
 
 #if defined (HANDLE_MULTIBYTE)
+#if 0 /* Currently unused */
 static unsigned char *
 mb_getcharlens (string, len)
      char *string;
      int len;
 {
-  int i, offset;
-  unsigned char last, *ret;
+  int i, offset, last;
+  unsigned char *ret;
   char *p;
   DECLARE_MBSTATE;
 
@@ -2863,6 +2881,7 @@ mb_getcharlens (string, len)
   return ret;
 }
 #endif
+#endif
 
 /* Remove the portion of PARAM matched by PATTERN according to OP, where OP
    can have one of 4 values:
@@ -2878,130 +2897,208 @@ mb_getcharlens (string, len)
 #define RP_SHORT_RIGHT	4
 
 static char *
-remove_pattern (param, pattern, op)
+remove_upattern (param, pattern, op)
      char *param, *pattern;
      int op;
 {
   register int len;
   register char *end;
   register char *p, *ret, c;
-  int offset;
-  unsigned char *mblen;
-  DECLARE_MBSTATE;
 
+  len = STRLEN (param);
+  end = param + len;
+
+  switch (op)
+    {
+      case RP_LONG_LEFT:	/* remove longest match at start */
+	for (p = end; p >= param; p--)
+	  {
+	    c = *p; *p = '\0';
+	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		*p = c;
+		return (savestring (p));
+	      }
+	    *p = c;
+
+	  }
+	break;
+
+      case RP_SHORT_LEFT:	/* remove shortest match at start */
+	for (p = param; p <= end; p++)
+	  {
+	    c = *p; *p = '\0';
+	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		*p = c;
+		return (savestring (p));
+	      }
+	    *p = c;
+	  }
+	break;
+
+      case RP_LONG_RIGHT:	/* remove longest match at end */
+	for (p = param; p <= end; p++)
+	  {
+	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		c = *p; *p = '\0';
+		ret = savestring (param);
+		*p = c;
+		return (ret);
+	      }
+	  }
+	break;
+
+      case RP_SHORT_RIGHT:	/* remove shortest match at end */
+	for (p = end; p >= param; p--)
+	  {
+	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		c = *p; *p = '\0';
+		ret = savestring (param);
+		*p = c;
+		return (ret);
+	      }
+	  }
+	break;
+    }
+
+  return (savestring (param));	/* no match, return original string */
+}
+
+#if defined (HANDLE_MULTIBYTE)
+
+#if !defined (HAVE_WCSDUP)
+static wchar_t *
+wcsdup (ws)
+     wchar_t *ws;
+{
+  wchar_t *ret;
+  size_t len;
+
+  len = wcslen (ws);
+  ret = xmalloc ((len + 1) * sizeof (wchar_t));
+  if (ret == 0)
+    return ret;
+  return (wcscpy (ret, ws));
+}
+#endif /* !HAVE_WCSDUP */
+
+static wchar_t *
+remove_wpattern (wparam, wstrlen, wpattern, op)
+     wchar_t *wparam;
+     size_t wstrlen;
+     wchar_t *wpattern;
+     int op;
+{
+  wchar_t wc;
+  int n, n1;
+  wchar_t *ret;
+
+  switch (op)
+    {
+      case RP_LONG_LEFT:	/* remove longest match at start */
+        for (n = wstrlen; n >= 0; n--)
+	  {
+	    wc = wparam[n]; wparam[n] = L'\0';
+	    if (wcsmatch (wpattern, wparam, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		wparam[n] = wc;
+		return (wcsdup (wparam + n));
+	      }
+	    wparam[n] = wc;
+	  }
+	break;
+
+      case RP_SHORT_LEFT:	/* remove shortest match at start */
+	for (n = 0; n <= wstrlen; n++)
+	  {
+	    wc = wparam[n]; wparam[n] = L'\0';
+	    if (wcsmatch (wpattern, wparam, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		wparam[n] = wc;
+		return (wcsdup (wparam + n));
+	      }
+	    wparam[n] = wc;
+	  }
+	break;
+
+      case RP_LONG_RIGHT:	/* remove longest match at end */
+        for (n = 0; n <= wstrlen; n++)
+	  {
+	    if (wcsmatch (wpattern, wparam + n, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		wc = wparam[n]; wparam[n] = L'\0';
+		ret = wcsdup (wparam);
+		wparam[n] = wc;
+		return (ret);
+	      }
+	  }
+	break;
+
+      case RP_SHORT_RIGHT:	/* remove shortest match at end */
+	for (n = wstrlen; n >= 0; n--)
+	  {
+	    if (wcsmatch (wpattern, wparam + n, FNMATCH_EXTFLAG) != FNM_NOMATCH)
+	      {
+		wc = wparam[n]; wparam[n] = L'\0';
+		ret = wcsdup (wparam);
+		wparam[n] = wc;
+		return (ret);
+	      }
+	  }
+	break;
+    }
+
+  return (wcsdup (wparam));	/* no match, return original string */
+}
+#endif /* HANDLE_MULTIBYTE */
+
+static char *
+remove_pattern (param, pattern, op)
+     char *param, *pattern;
+     int op;
+{
   if (param == NULL)
     return (param);
   if (*param == '\0' || pattern == NULL || *pattern == '\0')	/* minor optimization */
     return (savestring (param));
 
-  len = STRLEN (param);
-  end = param + len;
-
-  mblen = (unsigned char *)0;
 #if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1 && (op == RP_LONG_LEFT || op == RP_SHORT_RIGHT))
-    mblen = mb_getcharlens (param, len);
-#endif
-
-  switch (op)
+  if (MB_CUR_MAX > 1)
     {
-      case RP_LONG_LEFT:	/* remove longest match at start */
-        p = end;
-        while (p >= param)
-	  {
-	    c = *p; *p = '\0';
-	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
-	      {
-		*p = c;
-		FREE (mblen);
-		return (savestring (p));
-	      }
-	    *p = c;
+      wchar_t *ret, *oret;
+      size_t n;
+      wchar_t *wparam, *wpattern;
+      mbstate_t ps;
+      char *xret;
 
-	    if (MB_CUR_MAX > 1)
-	      {
-		while (p >= param)
-		  if (mblen[--p - param])
-		    break;
-	      }
-	    else
-	      p--;
-	  }
-	break;
+      n = xdupmbstowcs (&wpattern, NULL, pattern);
+      if (n == (size_t)-1)
+	return (remove_upattern (param, pattern, op));
+      n = xdupmbstowcs (&wparam, NULL, param);
+      if (n == (size_t)-1)
+	{
+	  free (wpattern);
+	  return (remove_upattern (param, pattern, op));
+	}
+      oret = ret = remove_wpattern (wparam, n, wpattern, op);
 
-      case RP_SHORT_LEFT:	/* remove shortest match at start */
-        p = param;
-        offset = 0;
-        while (p <= end)
-	  {
-	    c = *p; *p = '\0';
-	    if (strmatch (pattern, param, FNMATCH_EXTFLAG) != FNM_NOMATCH)
-	      {
-		*p = c;
-		return (savestring (p));
-	      }
-	    *p = c;
+      free (wparam);
+      free (wpattern);
 
-	    if (MB_CUR_MAX > 1)
-	      {
-		ADVANCE_CHAR (param, len, offset);
-		p = param + offset;
-	      }
-	    else
-	      p++;
-	  }
-	break;
-
-      case RP_LONG_RIGHT:	/* remove longest match at end */
-        p = param;
-        offset = 0;
-        while (p <= end)
-	  {
-	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
-	      {
-		c = *p; *p = '\0';
-		ret = savestring (param);
-		*p = c;
-		return (ret);
-	      }
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		ADVANCE_CHAR (param, len, offset);
-		p = param + offset;
-	      }
-	    else
-	      p++;
-	  }
-	break;
-
-      case RP_SHORT_RIGHT:	/* remove shortest match at end */
-        p = end;
-        while (p >= param)
-	  {
-	    if (strmatch (pattern, p, FNMATCH_EXTFLAG) != FNM_NOMATCH)
-	      {
-		c = *p; *p = '\0';
-		ret = savestring (param);
-		*p = c;
-		FREE (mblen);
-		return (ret);
-	      }
-
-	    if (MB_CUR_MAX > 1)
-	      {
-		while (p >= param)
-		  if (mblen[--p - param])
-		    break;
-	      }
-	    else
-	      p--;
-	  }
-	break;
+      n = strlen (param);
+      xret = xmalloc (n + 1);
+      memset (&ps, '\0', sizeof (mbstate_t));
+      n = wcsrtombs (xret, (const wchar_t **)&ret, n, &ps);
+      xret[n] = '\0';		/* just to make sure */
+      free (oret);
+      return xret;      
     }
-
-  FREE (mblen);
-  return (savestring (param));	/* no match, return original string */
+  else
+#endif
+    return (remove_upattern (param, pattern, op));
 }
 
 /* Return 1 of the first character of STRING could match the first
@@ -3041,7 +3138,7 @@ match_pattern_char (pat, string)
    MATCH_BEG and MATCH_END anchor the match at the beginning and end
    of the string, respectively.  The longest match is returned. */
 static int
-match_pattern (string, pat, mtype, sp, ep)
+match_upattern (string, pat, mtype, sp, ep)
      char *string, *pat;
      int mtype;
      char **sp, **ep;
@@ -3049,33 +3146,18 @@ match_pattern (string, pat, mtype, sp, ep)
   int c, len;
   register char *p, *p1;
   char *end;
-  int offset;
-  unsigned char *mblen;
-  DECLARE_MBSTATE;
-
-  if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
-    return (0);
 
   len = STRLEN (string);
   end = string + len;
 
-  mblen = (unsigned char *)0;
-#if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1 && (mtype == MATCH_ANY || mtype == MATCH_BEG))
-    mblen = mb_getcharlens (string, len);
-#endif
-
   switch (mtype)
     {
     case MATCH_ANY:
-      p = string;
-      offset = 0;
-      while (p <= end)
+      for (p = string; p <= end; p++)
 	{
 	  if (match_pattern_char (pat, p))
 	    {
-	      p1 = end;
-	      while (p1 >= p)
+	      for (p1 = end; p1 >= p; p1--)
 		{
 		  c = *p1; *p1 = '\0';
 		  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
@@ -3083,40 +3165,20 @@ match_pattern (string, pat, mtype, sp, ep)
 		      *p1 = c;
 		      *sp = p;
 		      *ep = p1;
-		      FREE (mblen);
 		      return 1;
 		    }
 		  *p1 = c;
-
-		  if (MB_CUR_MAX > 1)
-		    {
-		      while (p1 >= p)
-			if (mblen[--p1 - string])
-			  break;
-		    }
-		  else
-		    p1--;
 		}
 	    }
-
-	  if (MB_CUR_MAX > 1)
-	    {
-	      ADVANCE_CHAR (string, len, offset);
-	      p = string + offset;
-	    }
-	  else
-	    p++;
 	}
 
-      FREE (mblen);
       return (0);
 
     case MATCH_BEG:
       if (match_pattern_char (pat, string) == 0)
 	return (0);
 
-      p = end;
-      while (p >= string)
+      for (p = end; p >= string; p--)
 	{
 	  c = *p; *p = '\0';
 	  if (strmatch (pat, string, FNMATCH_EXTFLAG) == 0)
@@ -3124,28 +3186,15 @@ match_pattern (string, pat, mtype, sp, ep)
 	      *p = c;
 	      *sp = string;
 	      *ep = p;
-	      FREE (mblen);
 	      return 1;
 	    }
 	  *p = c;
-
-	  if (MB_CUR_MAX > 1)
-	    {
-	      while (p >= string)
-		if (mblen[--p - string])
-		  break;
-	    }
-	  else
-	    p--;
 	}
 
-      FREE (mblen);
       return (0);
 
     case MATCH_END:
-      p = string;
-      offset = 0;
-      while (p <= end)
+      for (p = string; p <= end; p++)
 	{
 	  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
 	    {
@@ -3154,19 +3203,165 @@ match_pattern (string, pat, mtype, sp, ep)
 	      return 1;
 	    }
 
-	  if (MB_CUR_MAX > 1)
-	    {
-	      ADVANCE_CHAR (string, len, offset);
-	      p = string + offset;
-	    }
-	  else
-	    p++;
 	}
+
       return (0);
     }
 
-  FREE (mblen);
   return (0);
+}
+
+#if defined (HANDLE_MULTIBYTE)
+/* Return 1 of the first character of WSTRING could match the first
+   character of pattern WPAT.  Wide character version. */
+static int
+match_pattern_wchar (wpat, wstring)
+     wchar_t *wpat, *wstring;
+{
+  wchar_t wc;
+
+  if (*wstring == 0)
+    return (0);
+
+  switch (wc = *wpat++)
+    {
+    default:
+      return (*wstring == wc);
+    case L'\\':
+      return (*wstring == *wpat);
+    case L'?':
+      return (*wpat == LPAREN ? 1 : (*wstring != L'\0'));
+    case L'*':
+      return (1);
+    case L'+':
+    case L'!':
+    case L'@':
+      return (*wpat == LPAREN ? 1 : (*wstring == wc));
+    case L'[':
+      return (*wstring != L'\0');
+    }
+}
+
+/* Match WPAT anywhere in WSTRING and return the match boundaries.
+   This returns 1 in case of a successful match, 0 otherwise.  Wide
+   character version. */
+static int
+match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
+     wchar_t *wstring;
+     char **indices;
+     size_t wstrlen;
+     wchar_t *wpat;
+     int mtype;
+     char **sp, **ep;
+{
+  wchar_t wc;
+  int len;
+#if 0
+  size_t n, n1;	/* Apple's gcc seems to miscompile this badly */
+#else
+  int n, n1;
+#endif
+
+  switch (mtype)
+    {
+    case MATCH_ANY:
+      for (n = 0; n <= wstrlen; n++)
+	{
+	  if (match_pattern_wchar (wpat, wstring + n))
+	    {
+	      for (n1 = wstrlen; n1 >= n; n1--)
+		{
+		  wc = wstring[n1]; wstring[n1] = L'\0';
+		  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
+		    {
+		      wstring[n1] = wc;
+		      *sp = indices[n];
+		      *ep = indices[n1];
+		      return 1;
+		    }
+		  wstring[n1] = wc;
+		}
+	    }
+	}
+
+      return (0);
+
+    case MATCH_BEG:
+      if (match_pattern_wchar (wpat, wstring) == 0)
+	return (0);
+
+      for (n = wstrlen; n >= 0; n--)
+	{
+	  wc = wstring[n]; wstring[n] = L'\0';
+	  if (wcsmatch (wpat, wstring, FNMATCH_EXTFLAG) == 0)
+	    {
+	      wstring[n] = wc;
+	      *sp = indices[0];
+	      *ep = indices[n];
+	      return 1;
+	    }
+	  wstring[n] = wc;
+	}
+
+      return (0);
+
+    case MATCH_END:
+      for (n = 0; n <= wstrlen; n++)
+	{
+	  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
+	    {
+	      *sp = indices[n];
+	      *ep = indices[wstrlen];
+	      return 1;
+	    }
+	}
+
+      return (0);
+    }
+
+  return (0);
+}
+#endif /* HANDLE_MULTIBYTE */
+
+static int
+match_pattern (string, pat, mtype, sp, ep)
+     char *string, *pat;
+     int mtype;
+     char **sp, **ep;
+{
+#if defined (HANDLE_MULTIBYTE)
+  int ret;
+  size_t n;
+  wchar_t *wstring, *wpat;
+  char **indices;
+#endif
+
+  if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
+    return (0);
+
+#if defined (HANDLE_MULTIBYTE)
+  if (MB_CUR_MAX > 1)
+    {
+      n = xdupmbstowcs (&wpat, NULL, pat);
+      if (n == (size_t)-1)
+	return (match_upattern (string, pat, mtype, sp, ep));
+      n = xdupmbstowcs (&wstring, &indices, string);
+      if (n == (size_t)-1)
+	{
+	  free (wpat);
+	  return (match_upattern (string, pat, mtype, sp, ep));
+	}
+      ret = match_wpattern (wstring, indices, n, wpat, mtype, sp, ep);
+
+      free (wpat);
+      free (wstring);
+      free (indices);
+
+      return (ret);
+    }
+  else
+#endif
+    return (match_upattern (string, pat, mtype, sp, ep));
 }
 
 static int
@@ -4850,8 +5045,8 @@ parameter_brace_substring (varname, value, substr, quoted)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       /* We want E2 to be the number of elements desired (arrays can be sparse,
-         so verify_substring_values just returns the numbers specified and we
-         rely on array_subrange to understand how to deal with them). */
+	 so verify_substring_values just returns the numbers specified and we
+	 rely on array_subrange to understand how to deal with them). */
       tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
       if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 	{
@@ -5632,10 +5827,13 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
+if (list && list->next)
+  {
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
+  }
 
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
@@ -5779,6 +5977,8 @@ comsub:
 	      temp = array_reference (array_cell (var), 0);
 	      if (temp)
 		temp = quote_escapes (temp);
+	      else if (unbound_vars_is_error)
+		goto unbound_variable;
 	    }
 	  else
 #endif
@@ -5790,6 +5990,7 @@ comsub:
 
       temp = (char *)NULL;
 
+unbound_variable:
       if (unbound_vars_is_error)
 	err_unboundvar (temp1);
       else

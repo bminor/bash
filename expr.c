@@ -42,6 +42,7 @@
 	"||"
 	"expr ? expr : expr"
 	"=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
+	,			[comma]
 
  (Note that most of these operators have special meaning to bash, and an
  entire expression should be quoted, e.g. "a=$a+1" or "a=a+1" to ensure
@@ -765,7 +766,7 @@ exppower ()
   register intmax_t val1, val2, c;
 
   val1 = exp1 ();
-  if (curtok == POWER)
+  while (curtok == POWER)
     {
       readtok ();
       val2 = exp1 ();

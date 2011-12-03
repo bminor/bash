@@ -9202,3 +9202,27 @@ bashline.c
 	- fix conditional binding of emacs-mode M-~ -- there is a default
 	  binding for it (rl_tilde_expand), so a straight call to
 	  rl_bind_key_if_unbound_in_map doesn't do the right thing
+
+				   2/27
+				   ----
+[bash-3.0-beta1 released]
+
+				   2/29
+				   ----
+subst.c
+	- fixed expansion so referencing $a, when a is an array variable
+	  without an element assigned to index 0, exits the shell when
+	  `-u' is enabled
+
+expr.c
+	- make the exponentiation operator (**) associative, so things like
+	  2**3**4  work right (change `if' to `while')
+
+				    3/2
+				    ---
+lib/sh/strftime.c
+	- SCO Unix 3.2, like Solaris, requires that the system's `timezone'
+	  variable be declared as long
+
+lib/readline/{bind,histfile,input,parens}.c
+	- changes for Tandem (including `floss.h' (?))

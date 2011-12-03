@@ -5827,10 +5827,17 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
+#if 0
+if (list && list->next)
+  {
+#endif
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
+#if 0
+  }
+#endif
 
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
@@ -5974,6 +5981,8 @@ comsub:
 	      temp = array_reference (array_cell (var), 0);
 	      if (temp)
 		temp = quote_escapes (temp);
+	      else if (unbound_vars_is_error)
+		goto unbound_variable;
 	    }
 	  else
 #endif
@@ -5985,6 +5994,7 @@ comsub:
 
       temp = (char *)NULL;
 
+unbound_variable:
       if (unbound_vars_is_error)
 	err_unboundvar (temp1);
       else
