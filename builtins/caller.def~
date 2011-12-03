@@ -55,7 +55,6 @@ $END
 #include "../shell.h"
 #include "common.h"
 #include "builtext.h"
-#include "bashgetopt.h"
 
 #ifdef LOADABLE_BUILTIN
 #  include "builtins.h"
@@ -88,10 +87,6 @@ caller_builtin (list)
 
   if (bash_source_a == 0 || array_empty (bash_source_a))
     return (EXECUTION_FAILURE);
-
- if (no_options (list))
-    return (EX_USAGE);
-  list = loptend;       /* skip over possible `--' */
 
   /* If there is no argument list, then give short form: line filename. */
   if (list == 0)

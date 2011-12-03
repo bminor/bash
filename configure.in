@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.1, version 3.174, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.1, version 3.175, from autoconf version] AC_ACVERSION)dnl
 
 define(bashvers, 3.1)
 define(relstatus, devel)
@@ -972,7 +972,10 @@ sco3.2*)	LOCAL_CFLAGS=-DMUST_UNBLOCK_CHLD ;;
 sunos4*)	LOCAL_CFLAGS=-DSunOS4 ;;
 solaris2.5*)	LOCAL_CFLAGS=-DSunOS5 ;;
 lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
-linux*)		LOCAL_LDFLAGS=-rdynamic ;;	 # allow dynamic loading
+linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
+		case "`uname -r`" in
+		2.[[456789]]*|3*)	AC_DEFINE(PGRP_PIPE) ;;
+		esac ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;

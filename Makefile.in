@@ -619,7 +619,7 @@ mksyntax$(EXEEXT):	${srcdir}/mksyntax.c config.h syntax.h ${BASHINCDIR}/chartype
 # *not* cross-compiling
 lsignames.h:   mksignames$(EXEEXT)
 	$(RM) $@
-	./mksignames $@
+	./mksignames$(EXEEXT) $@
 
 # copy the correct signames header file to signames.h
 signames.h: $(SIGNAMES_H)
@@ -627,7 +627,7 @@ signames.h: $(SIGNAMES_H)
 
 syntax.c:	mksyntax${EXEEXT} $(srcdir)/syntax.h 
 	$(RM) $@
-	./mksyntax -o $@
+	./mksyntax$(EXEEXT) -o $@
 
 $(BUILTINS_LIBRARY): $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h version.h
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) DEBUG=${DEBUG} libbuiltins.a ) || exit 1

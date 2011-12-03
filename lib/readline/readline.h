@@ -781,6 +781,7 @@ extern int rl_inhibit_completion;
 #define RL_STATE_UNDOING	0x10000		/* doing an undo */
 #define RL_STATE_INPUTPENDING	0x20000		/* rl_execute_next called */
 #define RL_STATE_TTYCSAVED	0x40000		/* tty special chars saved */
+#define RL_STATE_CALLBACK	0x80000		/* using the callback interface */
 
 #define RL_STATE_DONE		0x80000		/* done; accepted line */
 

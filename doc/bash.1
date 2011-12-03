@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Wed Mar 23 21:06:23 EST 2005
+.\"	Last Change: Sat Apr 30 19:09:18 EDT 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Mar 23" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Apr 30" "GNU Bash-3.1-devel"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5887,6 +5887,8 @@ section as accepting options preceded by
 accepts
 .B \-\-
 to signify the end of the options.
+For example, the \fB:\fP, \fBtrue\fP, \fBfalse\fP, and \fBtest\fP builtins
+do not accept options.
 .sp .5
 .PD 0
 .TP
@@ -6582,9 +6584,7 @@ The \fBxpg_echo\fP shell option may be used to
 dynamically determine whether or not \fBecho\fP expands these
 escape characters by default.
 .B echo
-does not interpret
-.B \-\-
-to mean the end of options.
+does not interpret \fB\-\-\fP to mean the end of options.
 .B echo
 interprets the following escape sequences:
 .RS
@@ -8201,6 +8201,8 @@ Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described above under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" .
+\fBtest\fP does not accept any options, nor does it accept and ignore
+an argument of \fB\-\-\fP as signifying the end of options.
 .if t .sp 0.5
 .if n .sp 1
 Expressions may be combined using the following operators, listed

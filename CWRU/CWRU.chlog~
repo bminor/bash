@@ -11320,3 +11320,48 @@ builtins/ulimit.def
 execute_cmd.c
 	- add cm_function_def to the list of control structures for which
 	  child processes are forked when pipes come in or out
+
+				   4/14
+				   ----
+builtins/read.def
+	- make sure the ^As added for internal quoting are not counted as
+	  characters read when -n is supplied
+
+				   4/20
+				   ----
+redir.c
+	- fix redir_open so that the repeat open on failure that AFS support
+	  adds restores the correct value of errno for any error message
+
+				   4/26
+				   ----
+
+Makefile.in
+	- make sure mksignames and mksyntax are invoked with the $(EXEEXT)
+	  extension
+
+				   4/28
+				   ----
+lib/readline/readline.h
+	- new state variable: RL_STATE_CALLBACK, means readline is using the
+	  callback interface
+
+lib/readline/callback.c
+	- set RL_STATE_CALLBACK in rl_callback_handler_install, unset in
+	  rl_callback_handler_remove
+
+				   4/29
+				   ----
+config-top.h
+	- DONT_REPORT_SIGPIPE is now on by default, since it apparently
+	  interferes with scripts
+
+configure.in
+	- arrange things so PGRP_PIPE is defined on Linux-2.4+ and version 3
+	  kernels (ones that apparently schedule children to run before their
+	  parent)
+
+				   4/30
+				   ----
+builtins/caller.def
+	- add call to no_options, so it can handle `--' option

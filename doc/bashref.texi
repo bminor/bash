@@ -2642,6 +2642,8 @@ Many of the builtins have been extended by @sc{posix} or Bash.
 Unless otherwise noted, each builtin command documented as accepting
 options preceded by @samp{-} accepts @samp{--}
 to signify the end of the options.
+For example, the @code{:}, @code{true}, @code{false}, and @code{test}
+builtins do not accept options.
 
 @node Bourne Shell Builtins
 @section Bourne Shell Builtins
@@ -2932,6 +2934,8 @@ Evaluate a conditional expression @var{expr}.
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
 @ref{Bash Conditional Expressions}.
+@code{test} does not accept any options, nor does it accept and ignore
+an argument of @option{--} as signifying the end of options.
 
 When the @code{[} form is used, the last argument to the command must
 be a @code{]}.
@@ -3335,6 +3339,8 @@ even on systems where they are interpreted by default.
 The @code{xpg_echo} shell option may be used to
 dynamically determine whether or not @code{echo} expands these
 escape characters by default.
+@code{echo} does not interpret @option{--} to mean the end of options.
+
 @code{echo} interprets the following escape sequences:
 @table @code
 @item \a

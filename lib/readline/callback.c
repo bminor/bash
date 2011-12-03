@@ -90,6 +90,7 @@ rl_callback_handler_install (prompt, linefunc)
      rl_vcpfunc_t *linefunc;
 {
   rl_set_prompt (prompt);
+  RL_SETSTATE (RL_STATE_CALLBACK);
   rl_linefunc = linefunc;
   _rl_callback_newline ();
 }
@@ -145,6 +146,7 @@ void
 rl_callback_handler_remove ()
 {
   rl_linefunc = NULL;
+  RL_UNSETSTATE (RL_STATE_CALLBACK);
   if (in_handler)
     {
       in_handler = 0;
