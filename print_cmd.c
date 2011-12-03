@@ -775,6 +775,13 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
+      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector == 1)
+	{
+	  /* Temporarily translate it as the execution code does. */
+	  redirects->instruction = r_err_and_out;
+	  print_redirection (redirects);
+	  redirects->instruction = r_duplicating_output_word;
+	}
       else
 	print_redirection (redirects);
 

@@ -214,7 +214,9 @@ static unsigned char *mb_getcharlens __P((char *, int));
 
 static char *remove_upattern __P((char *, char *, int));
 #if defined (HANDLE_MULTIBYTE)
+#  if !defined (HAVE_WCSDUP)
 static wchar_t *wcsdup __P((wchar_t *));
+#  endif
 static wchar_t *remove_wpattern __P((wchar_t *, size_t, wchar_t *, int));
 #endif
 static char *remove_pattern __P((char *, char *, int));
@@ -2966,6 +2968,8 @@ remove_upattern (param, pattern, op)
 }
 
 #if defined (HANDLE_MULTIBYTE)
+
+#if !defined (HAVE_WCSDUP)
 static wchar_t *
 wcsdup (ws)
      wchar_t *ws;
@@ -2979,6 +2983,7 @@ wcsdup (ws)
     return ret;
   return (wcscpy (ret, ws));
 }
+#endif /* !HAVE_WCSDUP */
 
 static wchar_t *
 remove_wpattern (wparam, wstrlen, wpattern, op)

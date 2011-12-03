@@ -57,7 +57,7 @@ q.  Fixed a bug that could cause core dumps when checking whether a quoted
     command name was being completed.
 
 r.  Fixes to the pattern removal and pattern replacement expansions to deal
-    with multibyte characters better.
+    with multibyte characters better (and faster).
 
 s.  Fix to the substring expansion (${param:off[:len]}) to deal with (possibly
     multibyte) characters instead of raw bytes.
@@ -74,6 +74,9 @@ v.  Fixed a bug that caused invalid variables to be created when using
 w.  Fixed a bug that caused "$@" to expand incorrectly when used as the right
     hand side of a parameter expansion such as ${word:="$@"} if the first
     character of $IFS was not a space.
+
+x.  Fixed a slight cosmetic problem when printing commands containing a
+    `>&word' redirection.
 
 2.  Changes to Readline
 

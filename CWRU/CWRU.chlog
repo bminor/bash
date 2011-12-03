@@ -9162,4 +9162,18 @@ subst.c
 	  remove_wpattern
 	- new function, wcsdup, wide-character version of strdup(3)
 
-	
+				    2/4
+				    ---
+print_cmd.c
+	- temporarily translate a >&filename redirection from
+	  r_duplicating_output_word to r_err_and_out (as the expansion code
+	  in redir.c does) so it prints without a leading `1' (file
+	  descriptor)
+
+				    2/5
+				    ---
+aclocal.m4
+	- add a check for wcsdup to BASH_CHECK_MULTIBYTE
+
+config.h.in
+	- add HAVE_WCSDUP define
