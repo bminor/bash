@@ -1000,9 +1000,6 @@ extract_array_assignment_list (string, sindex)
      char *string;
      int *sindex;
 {
-#if 0
-  return (extract_delimited_string (string, sindex, "(", (char *)NULL, ")", 0));
-#else
   int slen;
   char *ret;
 
@@ -1013,7 +1010,6 @@ extract_array_assignment_list (string, sindex)
       *sindex = slen - 1;
       return ret;
     }
-#endif
 }
 #endif
 

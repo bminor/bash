@@ -77,6 +77,7 @@ extern int errno;
 #endif
 
 extern int current_command_line_count;
+extern int force_append_history;	/* shopt -s histappend */
 
 int delete_last_history __P((void));
 
@@ -215,15 +216,19 @@ history_builtin (list)
       using_history ();
 
       history_lines_in_file = where_history ();
-      /* The question is whether we reset history_lines_this_session to 0,
-	 losing any history entries we had before we read the new entries
-	 from the history file, or whether we count the new entries we just
-	 read from the file as history lines added during this session.
+
+      /* If we're rewriting the history file at shell exit rather than just
+	 appending the lines from this session to it, the question is whether
+	 we reset history_lines_this_session to 0, losing any history entries
+	 we had before we read the new entries from the history file, or
+	 whether we count the new entries we just read from the file as
+	 history lines added during this session.
 	 Right now, we do the latter.  This will cause these history entries
 	 to be written to the history file along with any intermediate entries
 	 we add when we do a `history -a', but the alternative is losing
 	 them altogether. */
-      history_lines_this_session += history_lines_in_file - old_history_lines +
+      if (force_append_history == 0)
+	history_lines_this_session += history_lines_in_file - old_history_lines +
 				    history_base - obase;
     }
 

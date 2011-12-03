@@ -63,6 +63,14 @@ t.  Fixed a bug that caused the expanded value of a $'...' string to be
     incorrectly re-quoted if it occurred within a double-quoted ${...}
     parameter expansion.
 
+u.  Restored default emacs-mode key binding of M-TAB to dynamic-complete-history.
+
+v.  Fixed a bug that caused core dumps when interrupting loops running builtins
+    on some systems.
+
+w.  Make sure that some of the functions bash provides replacements for are
+    not cpp defines.
+
 2.  Changes to Readline
 
 a.  The `change-case' command now correctly changes the case of multibyte
@@ -86,6 +94,9 @@ a.  A new configuration option, `--enable-strict-posix-default', which will
     build bash to be POSIX conforming by default.
 
 4.  New Features in Readline
+
+a.  If the rl_completion_query_items is set to a value < 0, readline never
+    asks the user whether or not to view the possible completions.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.1-alpha1,

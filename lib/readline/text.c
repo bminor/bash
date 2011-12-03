@@ -1293,8 +1293,7 @@ rl_change_case (count, op)
       else
 	{
 	  mbrtowc (&wc, rl_line_buffer + start, end - start, &ps);
-	  nwc = (nop == UpCase) ? (iswlower (wc) ? towupper (wc) : wc)
-				: (iswupper (wc) ? towlower (wc) : wc);
+	  nwc = (nop == UpCase) ? _rl_to_wupper (wc) : _rl_to_wlower (wc);
 	  if  (nwc != wc)	/*  just skip unchanged characters */
 	    {
 	      mblen = wcrtomb (mb, nwc, &ps);

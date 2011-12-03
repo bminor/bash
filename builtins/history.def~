@@ -78,10 +78,11 @@ extern int errno;
 
 extern int current_command_line_count;
 
+int delete_last_history __P((void));
+
 static char *histtime __P((HIST_ENTRY *, const char *));
 static void display_history __P((WORD_LIST *));
 static int delete_histent __P((int));
-static int delete_last_history __P((void));
 static void push_history __P((WORD_LIST *));
 static int expand_and_print_history __P((WORD_LIST *));
 
@@ -214,15 +215,19 @@ history_builtin (list)
       using_history ();
 
       history_lines_in_file = where_history ();
-      /* The question is whether we reset history_lines_this_session to 0,
-	 losing any history entries we had before we read the new entries
-	 from the history file, or whether we count the new entries we just
-	 read from the file as history lines added during this session.
+
+      /* If we're rewriting the history file at shell exit rather than just
+	 appending the lines from this session to it, the question is whether
+	 we reset history_lines_this_session to 0, losing any history entries
+	 we had before we read the new entries from the history file, or
+	 whether we count the new entries we just read from the file as
+	 history lines added during this session.
 	 Right now, we do the latter.  This will cause these history entries
 	 to be written to the history file along with any intermediate entries
 	 we add when we do a `history -a', but the alternative is losing
 	 them altogether. */
-      history_lines_this_session += history_lines_in_file - old_history_lines +
+      if (force_append_history == 0)
+	history_lines_this_session += history_lines_in_file - old_history_lines +
 				    history_base - obase;
     }
 
@@ -310,7 +315,7 @@ delete_histent (i)
   return 1;
 }
 
-static int
+int
 delete_last_history ()
 {
   register int i;
@@ -346,8 +351,6 @@ push_history (list)
 {
   char *s;
 
-if (current_command_line_count == 0)
-  itrace("push_history: current_command_line_count == 0");
   /* Delete the last history entry if it was a single entry added to the
      history list (generally the `history -s' itself), or if `history -s'
      is being used in a compound command and the compound command was
@@ -385,7 +388,7 @@ expand_and_print_history (list)
   char *s;
   int r, result;
 
-  if (hist_last_line_added && delete_last_history () == 0)
+  if (hist_last_line_pushed == 0 && hist_last_line_added && delete_last_history () == 0)
     return EXECUTION_FAILURE;
   result = EXECUTION_SUCCESS;
   while (list)

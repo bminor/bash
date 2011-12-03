@@ -323,7 +323,7 @@ _rl_isearch_dispatch (cxt, c)
      _rl_search_cxt *cxt;
      int c;
 {
-  int n, wstart, wlen, limit;
+  int n, wstart, wlen, limit, cval;
   rl_command_func_t *f;
 
   f = (rl_command_func_t *)NULL;
@@ -456,14 +456,20 @@ _rl_isearch_dispatch (cxt, c)
 	}
 
       /* if not in a word, move to one. */
-      if (rl_alphabetic(rl_line_buffer[wstart]) == 0)
+      cval = _rl_char_value (rl_line_buffer, wstart);
+      if (_rl_walphabetic (cval) == 0)
 	{
 	  rl_ding ();
 	  break;
 	}
-      n = wstart;
-      while (n < rl_end && rl_alphabetic(rl_line_buffer[n]))
-	n++;
+      n = MB_NEXTCHAR (rl_line_buffer, wstart, 1, MB_FIND_NONZERO);;
+      while (n < rl_end)
+	{
+	  cval = _rl_char_value (rl_line_buffer, n);
+	  if (_rl_walphabetic (cval) == 0)
+	    break;
+	  n = MB_NEXTCHAR (rl_line_buffer, n, 1, MB_FIND_NONZERO);;
+	}
       wlen = n - wstart + 1;
       if (cxt->search_string_index + wlen + 1 >= cxt->search_string_size)
 	{
