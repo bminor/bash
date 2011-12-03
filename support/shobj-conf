@@ -408,7 +408,39 @@ sysv5uw7*)
 
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
 	;;
-	
+
+sysv5UnixWare*-*gcc*)
+	SHOBJ_CFLAGS=-fpic
+	SHOBJ_LD='${CC}'
+	SHOBJ_LDFLAGS='-shared'
+
+	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
+	;;
+
+sysv5UnixWare*)
+	SHOBJ_CFLAGS='-K PIC'
+	SHOBJ_LD=ld
+	SHOBJ_LDFLAGS='-G -dy -z text -h $@'
+
+	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
+	;;
+
+sysv5OpenUNIX*-*gcc*)
+	SHOBJ_CFLAGS=-fpic
+	SHOBJ_LD='${CC}'
+	SHOBJ_LDFLAGS='-shared'
+
+	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
+	;;
+
+sysv5OpenUNIX*)
+	SHOBJ_CFLAGS='-K PIC'
+	SHOBJ_LD=ld
+	SHOBJ_LDFLAGS='-G -dy -z text -h $@'
+
+	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
+	;;
+
 dgux*-*gcc*)
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD='${CC}'

@@ -2017,6 +2017,10 @@ connection to the corresponding socket.
 
 A failure to open or create a file causes the redirection to fail.
 
+Redirections using file descriptors greater than 9 should be used with
+care, as they may conflict with file descriptors the shell uses
+internally.
+
 @subsection Redirecting Input
 Redirection of input causes the file whose name results from
 the expansion of @var{word}

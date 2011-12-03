@@ -22,10 +22,10 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.0, version 3.168, from autoconf version] AC_ACVERSION)dnl
+AC_REVISION([for Bash 3.0, version 3.169, from autoconf version] AC_ACVERSION)dnl
 
-define(bashvers, 3.0)
-define(relstatus, release)
+define(bashvers, 3.1)
+define(relstatus, devel)
 
 AC_INIT(bash, bashvers-relstatus, bug-bash@gnu.org)
 
@@ -646,7 +646,7 @@ AC_CHECK_FUNCS(bcopy bzero confstr sysconf pathconf setenv putenv unsetenv \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		vsnprintf snprintf vasprintf asprintf fnmatch regcomp regexec)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
-AC_REPLACE_FUNCS(getcwd strcasecmp strerror strftime strpbrk memset strstr)
+AC_REPLACE_FUNCS(getcwd strcasecmp strerror strftime strpbrk memset strstr strnlen)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
 
 AC_CHECK_DECLS([confstr])

@@ -943,7 +943,6 @@ add_undo_redirect (fd)
   REDIRECT *new_redirect, *closer, *dummy_redirect;
 
   new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
-
   if (new_fd < 0)
     {
       sys_error (_("redirection error: cannot duplicate fd"));

@@ -10281,3 +10281,40 @@ lib/readline/complete.c
 subst.c
 	- use W_COMPASSIGN flag in do_assignment_internal instead of deciding
 	  lexically which assignments are compound array assignments
+
+				   10/6
+				   ----
+support/shobj-conf
+	- additions for System V.5 from Boyd Gerber <gerberb@zenez.com>
+
+subst.c
+	- in command_substitute, if subshell_environment includes
+	  SUBSHELL_ASYNC, call make_child with the `async_p' argument set to
+	  non-zero.  This keeps command substitutions for async commands or
+	  pipelines from trying to give the terminal back to the shell's
+	  pgrp.  make sure to save and restore last_asynchronous_pid.  Fix
+	  suggested by <pierre.humblet@ieee.org>
+
+				   10/7
+				   ----
+config.h.in
+	- add a placeholder definition for WCONTINUED_BROKEN
+
+				   10/9
+				   ----
+aclocal.m4
+	- add BASH_CHECK_WCONTINUED, checks for glibc bug where WCONTINUED is
+	  defined but rejected as invalid by waitpid(2)
+
+configure.in
+	- add call to BASH_CHECK_WCONTINUED, defines WCONTINUED_BROKEN
+
+redir.c
+	- experimental change to add_undo_redirect to save manipulations to
+	  file descriptors >= SHELL_FD_BASE (10) on the list of redirections
+	  to be undone even if `exec' causes the list to be discarded
+
+doc/{bash.1,bashref.texi}
+	- note that redirections using file descriptors > 9 should be used
+	  carefully, because they might conflict with file descriptors the
+	  shell uses internally

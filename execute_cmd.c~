@@ -160,7 +160,7 @@ static int execute_while_command __P((WHILE_COM *));
 static int execute_until_command __P((WHILE_COM *));
 static int execute_while_or_until __P((WHILE_COM *, int));
 static int execute_if_command __P((IF_COM *));
-static int execute_null_command __P((REDIRECT *, int, int, int, pid_t));
+static int execute_null_command __P((REDIRECT *, int, int, int));
 static void fix_assignment_words __P((WORD_LIST *));
 static int execute_simple_command __P((SIMPLE_COM *, int, int, int, struct fd_bitmap *));
 static int execute_builtin __P((sh_builtin_func_t *, WORD_LIST *, int, int));
@@ -491,7 +491,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 {
   int exec_result, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
-  volatile pid_t last_pid;
   volatile int save_line_number;
 
   if (command == 0 || breaking || continuing || read_but_dont_execute)
@@ -648,7 +647,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	/* We can't rely on variables retaining their values across a
 	   call to execute_simple_command if a longjmp occurs as the
 	   result of a `return' builtin.  This is true for sure with gcc. */
-	last_pid = last_made_pid;
+	last_made_pid = NO_PID;
 	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
 
 	if (ignore_return && command->value.Simple)
@@ -678,7 +677,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	/* XXX - this is something to watch out for if there are problems
 	   when the shell is compiled without job control. */
 	if (already_making_children && pipe_out == NO_PIPE &&
-	    last_pid != last_made_pid)
+	    last_made_pid != NO_PID)
 	  {
 	    stop_pipeline (asynchronous, (COMMAND *)NULL);
 
@@ -698,14 +697,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	       subshells forked to execute builtin commands (e.g., in
 	       pipelines) to be waited for twice. */
 	      exec_result = wait_for (last_made_pid);
-#if defined (RECYCLES_PIDS)
-	      /* LynxOS, for one, recycles pids very quickly -- so quickly
-		 that a new process may have the same pid as the last one
-		 created.  This has been reported to fix the problem on that
-		 OS, and a similar problem on Cygwin. */
-	      if (exec_result == 0)
-		last_made_pid = NO_PID;
-#endif
 	  }
       }
 
@@ -2583,10 +2574,9 @@ bind_lastarg (arg)
    to be run asynchronously.  This handles all the side effects that are
    supposed to take place. */
 static int
-execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subst_pid)
+execute_null_command (redirects, pipe_in, pipe_out, async)
      REDIRECT *redirects;
      int pipe_in, pipe_out, async;
-     pid_t old_last_command_subst_pid;
 {
   int r;
 
@@ -2632,7 +2622,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async, old_last_command_subs
 
       if (r != 0)
 	return (EXECUTION_FAILURE);
-      else if (old_last_command_subst_pid != last_command_subst_pid)
+      else if (last_command_subst_pid != NO_PID)
 	return (last_command_exit_value);
       else
 	return (EXECUTION_SUCCESS);
@@ -2680,7 +2670,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
   int first_word_quoted, result, builtin_is_special, already_forked, dofork;
-  pid_t old_last_command_subst_pid, old_last_async_pid;
+  pid_t old_last_async_pid;
   sh_builtin_func_t *builtin;
   SHELL_VAR *func;
 
@@ -2715,7 +2705,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   first_word_quoted =
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
 
-  old_last_command_subst_pid = last_command_subst_pid;
+  last_command_subst_pid = NO_PID;
   old_last_async_pid = last_asynchronous_pid;
 
   already_forked = dofork = 0;
@@ -2809,8 +2799,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       this_command_name = 0;
       result = execute_null_command (simple_command->redirects,
 				     pipe_in, pipe_out,
-				     already_forked ? 0 : async,
-				     old_last_command_subst_pid);
+				     already_forked ? 0 : async);
       if (already_forked)
 	exit (result);
       else

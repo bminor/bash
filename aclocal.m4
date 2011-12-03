@@ -1859,6 +1859,39 @@ AC_DEFINE(CTYPE_NON_ASCII)
 fi
 ])
 
+AC_DEFUN(BASH_CHECK_WCONTINUED,
+[
+AC_MSG_CHECKING(whether WCONTINUED flag to waitpid is unavailable or available but broken)
+AC_CACHE_VAL(bash_cv_wcontinued_broken,
+[AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
+
+#ifndef errno
+extern int errno;
+#endif
+main()
+{
+	int	x;
+
+	x = waitpid(-1, (int *)0, WNOHANG|WCONTINUED);
+	if (x == -1 && errno == EINVAL)
+		exit (1);
+	else
+		exit (0);
+}
+], bash_cv_wcontinued_broken=no,bash_cv_wcontinued_broken=yes,
+   [AC_MSG_WARN(cannot check WCONTINUED if cross compiling -- defaulting to no)
+    bash_cv_wcontinued_broken=no]
+)])
+AC_MSG_RESULT($bash_cv_wcontinued_broken)
+if test $bash_cv_wcontinued_broken = yes; then
+AC_DEFINE(WCONTINUED_BROKEN)
+fi
+])
+
 dnl
 dnl tests added for bashdb
 dnl
