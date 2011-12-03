@@ -140,6 +140,10 @@ oo. Fixed a bug in the `shift' builtin that could cause core dumps when
 pp. The `jobs', `kill', and `wait' builtins now accept job control notation
     even if job control is not enabled.
 
+qq. The historical behavior of `trap' that allows a missing `action' argument
+    to cause each specified signal's handling to be reset to its default is
+    now only supported when `trap' is given a single non-option argument.
+
 2.  New Features in Readline
 
 a.  History expansion has a new `a' modifier equivalent to the `g' modifier

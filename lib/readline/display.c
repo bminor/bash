@@ -1493,12 +1493,13 @@ rl_on_new_line ()
 
 /* Tell the update routines that we have moved onto a new line with the
    prompt already displayed.  Code originally from the version of readline
-   distributed with CLISP. */
+   distributed with CLISP.  rl_expand_prompt must have already been called
+   (explicitly or implicitly).  This still doesn't work exactly right. */
 int
 rl_on_new_line_with_prompt ()
 {
   int prompt_size, i, l, real_screenwidth, newlines;
-  char *prompt_last_line;
+  char *prompt_last_line, *lprompt;
 
   /* Initialize visible_line and invisible_line to ensure that they can hold
      the already-displayed prompt. */
@@ -1507,8 +1508,9 @@ rl_on_new_line_with_prompt ()
 
   /* Make sure the line structures hold the already-displayed prompt for
      redisplay. */
-  strcpy (visible_line, rl_prompt);
-  strcpy (invisible_line, rl_prompt);
+  lprompt = local_prompt ? local_prompt : rl_prompt;
+  strcpy (visible_line, lprompt);
+  strcpy (invisible_line, lprompt);
 
   /* If the prompt contains newlines, take the last tail. */
   prompt_last_line = strrchr (rl_prompt, '\n');
@@ -1542,6 +1544,8 @@ rl_on_new_line_with_prompt ()
     }
   vis_lbreaks[newlines] = l;
   visible_wrap_offset = 0;
+
+  rl_display_prompt = rl_prompt;	/* XXX - make sure it's set */
 
   return 0;
 }

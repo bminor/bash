@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988-2003 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2004 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -2973,9 +2973,10 @@ The return status is zero.
 trap [-lp] [@var{arg}] [@var{sigspec} @dots{}]
 @end example
 The commands in @var{arg} are to be read and executed when the
-shell receives signal @var{sigspec}.  If @var{arg} is absent or
-equal to @samp{-}, all specified signals are reset to the values
-they had when the shell was started.
+shell receives signal @var{sigspec}.  If @var{arg} is absent (and
+there is a single @var{sigspec}) or
+equal to @samp{-}, each specified signal's disposition is reset
+to the value it had when the shell was started.
 If @var{arg} is the null string, then the signal specified by
 each @var{sigspec} is ignored by the shell and commands it invokes.
 If @var{arg} is not present and @option{-p} has been supplied,
@@ -2986,9 +2987,8 @@ associated with each signal number in a form that may be reused as
 shell input.
 The @option{-l} option causes the shell to print a list of signal names
 and their corresponding numbers.
-
-Each @var{sigspec} is either a signal name such as @code{SIGINT} (with
-or without the @code{SIG} prefix) or a signal number.
+Each @var{sigspec} is either a signal name or a signal number.
+Signal names are case insensitive and the @code{SIG} prefix is optional.
 If a @var{sigspec}
 is @code{0} or @code{EXIT}, @var{arg} is executed when the shell exits.
 If a @var{sigspec} is @code{DEBUG}, the command @var{arg} is executed
@@ -4653,6 +4653,11 @@ the count to the value assigned, and the expanded value
 becomes the value assigned plus the number of seconds
 since the assignment.
 
+@item SHELL
+The full pathname to the shell is kept in this environment variable.
+If it is not set when the shell starts,
+Bash assigns to it the full pathname of the current user's login shell.
+
 @item SHELLOPTS
 A colon-separated list of enabled shell options.  Each word in
 the list is a valid argument for the @option{-o} option to the
@@ -6194,8 +6199,9 @@ kill -l [@var{exit_status}]
 @end example
 Send a signal specified by @var{sigspec} or @var{signum} to the process
 named by job specification @var{jobspec} or process @sc{id} @var{pid}.
-@var{sigspec} is either a signal name such as @code{SIGINT} (with or without
-the @code{SIG} prefix) or a signal number; @var{signum} is a signal number.
+@var{sigspec} is either a case-insensitive signal name such as
+@code{SIGINT} (with or without the @code{SIG} prefix)
+or a signal number; @var{signum} is a signal number.
 If @var{sigspec} and @var{signum} are not present, @code{SIGTERM} is used.
 The @option{-l} option lists the signal names.
 If any arguments are supplied when @option{-l} is given, the names of the

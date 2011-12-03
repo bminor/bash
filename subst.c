@@ -678,6 +678,8 @@ add_one_character:
 	 ${ ... } pair through according to the Posix.2 specification. */
       if (c == '$' && ((string[i + 1] == LPAREN) || (string[i + 1] == LBRACE)))
 	{
+	  int free_ret = 1;
+
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_delimited_string (string, &si, "$(", "(", ")", 0); /*)*/
@@ -687,12 +689,21 @@ add_one_character:
 	  temp[j++] = '$';
 	  temp[j++] = string[i + 1];
 
+	  /* Just paranoia; ret will not be 0 unless no_longjmp_on_fatal_error
+	     is set. */
+	  if (ret == 0 && no_longjmp_on_fatal_error)
+	    {
+	      free_ret = 0;
+	      ret = string + i + 2;
+	    }
+
 	  for (t = 0; ret[t]; t++, j++)
 	    temp[j] = ret[t];
 	  temp[j++] = string[si];
 
 	  i = si + 1;
-	  free (ret);
+	  if (free_ret)
+	    free (ret);
 	  continue;
 	}
 

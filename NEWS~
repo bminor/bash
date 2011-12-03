@@ -115,6 +115,31 @@ gg. New `set -o pipefail' option that causes a pipeline to return a failure
     status if any of the processes in the pipeline fail, not just the last
     one.
 
+hh. printf builtin understands two new escape sequences:  \" and \?.
+
+ii. `echo -e' understands two new escape sequences:  \" and \?.
+
+jj. The GNU `gettext' package and libintl have been integrated; the shell's
+    messages can be translated into different languages.
+
+kk. The `\W' prompt expansion now abbreviates $HOME as `~', like `\w'.
+
+ll. The error message printed when bash cannot open a shell script supplied
+    as argument 1 now includes the name of the shell, to better identify
+    the error as coming from bash.
+
+mm. A bug that caused here documents to not work if the directory the shell
+    used for the temporary files was not writable has been fixed.
+
+nn. The parameter pattern removal and substitution expansions are now much
+    faster and more efficient when using multibyte characters.
+
+oo. Fixed a bug in the `shift' builtin that could cause core dumps when
+    reporting an out-of-range argument.
+
+pp. The `jobs', `kill', and `wait' builtins now accept job control notation
+    even if job control is not enabled.
+
 2.  New Features in Readline
 
 a.  History expansion has a new `a' modifier equivalent to the `g' modifier
@@ -145,6 +170,25 @@ h.  Four new key binding functions have been added:
 	rl_bind_key_if_unbound_in_map()
 	rl_bind_keyseq_if_unbound()
 	rl_bind_keyseq_if_unbound_in_map()
+
+i.  New application variable, rl_completion_quote_character, set to any
+    quote character readline finds before it calls the application completion
+    function.
+
+j.  New application variable, rl_completion_suppress_quote, settable by an
+    application completion function.  If set to non-zero, readline does not
+    attempt to append a closing quote to a completed word.
+
+k.  New application variable, rl_completion_found_quote, set to a non-zero
+    value if readline determines that the word to be completed is quoted.
+    Set before readline calls any application completion function.
+
+l.  New function hook, rl_completion_word_break_hook, called when readline
+    needs to break a line into words when completion is attempted.  Allows
+    the word break characters to vary based on position in the line.
+
+m.  New bindable command: unix-filename-rubout.  Does the same thing as
+    unix-word-rubout, but adds `/' to the set of word delimiters.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-2.05b since

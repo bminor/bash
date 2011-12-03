@@ -23,20 +23,21 @@ $PRODUCES trap.c
 
 $BUILTIN trap
 $FUNCTION trap_builtin
-$SHORT_DOC trap [arg] [signal_spec ...] or trap -l
+$SHORT_DOC trap [-lp] [[arg] signal_spec ...]
 The command ARG is to be read and executed when the shell receives
-signal(s) SIGNAL_SPEC.  If ARG is absent all specified signals are
-reset to their original values.  If ARG is the null string each
-SIGNAL_SPEC is ignored by the shell and by the commands it invokes.
-If a SIGNAL_SPEC is EXIT (0) the command ARG is executed on exit from
-the shell.  If a SIGNAL_SPEC is DEBUG, ARG is executed after every
-command.  If ARG is `-p' then the trap commands associated with
-each SIGNAL_SPEC are displayed.  If no arguments are supplied or if
-only `-p' is given, trap prints the list of commands associated with
-each signal number.  Each SIGNAL_SPEC is either a signal name in <signal.h>
-or a signal number.  `trap -l' prints a list of signal names and their
-corresponding numbers.  Note that a signal can be sent to the shell
-with "kill -signal $$".
+signal(s) SIGNAL_SPEC.  If ARG is absent (and a single SIGNAL_SPEC
+is supplied) or `-', each specified signal is reset to its original
+value.  If ARG is the null string each SIGNAL_SPEC is ignored by the
+shell and by the commands it invokes.  If a SIGNAL_SPEC is EXIT (0)
+the command ARG is executed on exit from the shell.  If a SIGNAL_SPEC
+is DEBUG, ARG is executed after every simple command.  If the`-p' option
+is supplied then the trap commands associated with each SIGNAL_SPEC are
+displayed.  If no arguments are supplied or if only `-p' is given, trap
+prints the list of commands associated with each signal.  Each SIGNAL_SPEC
+is either a signal name in <signal.h> or a signal number.  Signal names
+are case insensitive and the SIG prefix is optional.  `trap -l' prints
+a list of signal names and their corresponding numbers.  Note that a
+signal can be sent to the shell with "kill -signal $$".
 $END
 
 #include <config.h>
@@ -126,12 +127,17 @@ trap_builtin (list)
 	 signal handling disposition, use `-' as the first argument. */
       if (posixly_correct == 0 && first_arg && *first_arg &&
 		(*first_arg != '-' || first_arg[1]) &&
-		signal_object_p (first_arg, opt))
+		signal_object_p (first_arg, opt) && list->next == 0)
 	operation = REVERT;
       else
 	{
 	  list = list->next;
-	  if (*first_arg == '\0')
+	  if (list == 0)
+	    {
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
+	  else if (*first_arg == '\0')
 	    operation = IGNORE;
 	  else if (first_arg[0] == '-' && !first_arg[1])
 	    operation = REVERT;

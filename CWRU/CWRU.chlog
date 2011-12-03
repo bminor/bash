@@ -9458,3 +9458,35 @@ aclocal.m4
 	- change BASH_FUNC_GETCWD to check whether or not getcwd(0,0) will
 	  allocate memory for the returned value -- nobody implements that
 	  and getcwd-via-popen, so it should capture the old test as well
+
+				   5/27
+				   ----
+
+builtins/trap.def
+	- the historical behavior of assuming that a signal's handling should
+	  be set to its original disposition is only in effect if a single
+	  argument is given, otherwise the first argument is assumed to be a
+	  command to execute
+	- when in posix mode, if trap gets a single argument, display an
+	  error message and return EX_USAGE
+	- change the help message and usage string to better explain trap's
+	  behavior
+
+doc/{bash.1,bashref.texi}
+	- describe the new default behavior when the first argument is a
+	  signal spec
+	- note that signal names are case insensitive and the SIG prefix is
+	  optional in arguments to `trap'
+	- note that signal name arguments to `kill' are case-insensitive
+
+lib/readline/display.c
+	- make sure rl_on_new_line_with_prompt sets rl_display_prompt to
+	  rl_prompt (just to make sure it's set)
+	- have rl_on_new_line_with_prompt use local_prompt if it's set
+
+				    6/2
+				    ---
+subst.c
+	- in string_extract_double_quoted, cope with extract_delimited_string
+	  returning NULL, as it can when attempting completion on an unclosed
+	  command substitution
