@@ -5235,6 +5235,15 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	    }
 	  *varp = v;
 	}
+      else if (v && (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']'))
+	{
+	  vtype = VT_VARIABLE;
+	  *varp = v;
+	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+	    *valp = dequote_string (value);
+	  else
+	    *valp = dequote_escapes (value);
+	}
       else
 	return -1;
     }

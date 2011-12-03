@@ -2,10 +2,10 @@ This is bashref.info, produced by makeinfo version 4.7 from
 /Users/chet/src/bash/src/doc/bashref.texi.
 
    This text is a brief description of the features that are present in
-the Bash shell (version 3.1-devel, 24 November 2004).
+the Bash shell (version 3.1-devel, 1 December 2004).
 
-   This is Edition 3.1-devel, last updated 24 November 2004, of `The
-GNU Bash Reference Manual', for `Bash', Version 3.1-devel.
+   This is Edition 3.1-devel, last updated 1 December 2004, of `The GNU
+Bash Reference Manual', for `Bash', Version 3.1-devel.
 
    Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
@@ -37,10 +37,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.1-devel, 24 November 2004)..
+the Bash shell (version 3.1-devel, 1 December 2004)..
 
-   This is Edition 3.1-devel, last updated 24 November 2004, of `The
-GNU Bash Reference Manual', for `Bash', Version 3.1-devel.
+   This is Edition 3.1-devel, last updated 1 December 2004, of `The GNU
+Bash Reference Manual', for `Bash', Version 3.1-devel.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -978,11 +978,11 @@ parameter `0' is unchanged.  The first element of the `FUNCNAME'
 variable is set to the name of the function while the function is
 executing.  All other aspects of the shell execution environment are
 identical between a function and its caller with the exception that the
-`DEBUG' trap below) is not inherited unless the function has been given
-the `trace' attribute using the `declare' builtin or the `-o functrace'
-option has been enabled with the `set' builtin, (in which case all
-functions inherit the `DEBUG' trap).  *Note Bourne Shell Builtins::,
-for the description of the `trap' builtin.
+`DEBUG' and `RETURN' traps are not inherited unless the function has
+been given the `trace' attribute using the `declare' builtin or the `-o
+functrace' option has been enabled with the `set' builtin, (in which
+case all functions inherit the `DEBUG' and `RETURN' traps).  *Note
+Bourne Shell Builtins::, for the description of the `trap' builtin.
 
    If the builtin command `return' is executed in a function, the
 function completes and execution resumes with the next command after
@@ -2803,8 +2803,8 @@ POSIX 1003.2 standard.
 
     `-t'
           Give each NAME the `trace' attribute.  Traced functions
-          inherit the `DEBUG' trap from the calling shell.  The trace
-          attribute has no special meaning for variables.
+          inherit the `DEBUG' and `RETURN' traps from the calling shell.
+          The trace attribute has no special meaning for variables.
 
     `-x'
           Mark each NAME for export to subsequent commands via the
@@ -3566,10 +3566,10 @@ This builtin is so complicated that it deserves its own section.
                /usr/local
 
     `-T'
-          If set, any trap on `DEBUG' is inherited by shell functions,
-          command substitutions, and commands executed in a subshell
-          environment.  The `DEBUG' trap is normally not inherited in
-          such cases.
+          If set, any trap on `DEBUG' and `RETURN' are inherited by
+          shell functions, command substitutions, and commands executed
+          in a subshell environment.  The `DEBUG' and `RETURN' traps
+          are normally not inherited in such cases.
 
     `--'
           If no arguments follow this option, then the positional
@@ -8353,7 +8353,9 @@ included in SVR4.2 as the baseline reference.
      `DEBUG'.  Commands specified with an `RETURN' trap are executed
      before execution resumes after a shell function or a shell script
      executed with `.' or `source' returns.  The `RETURN' trap is not
-     inherited by shell functions.
+     inherited by shell functions unless the function has been given
+     the `trace' attribute or the `functrace' option has been enabled
+     using the `shopt' builtin.
 
    * The Bash `type' builtin is more extensive and gives more
      information about the names it finds (*note Bash Builtins::).
@@ -9442,129 +9444,129 @@ Concept Index
 
 
 Tag Table:
-Node: Top1375
-Node: Introduction3537
-Node: What is Bash?3766
-Node: What is a shell?4859
-Node: Definitions7400
-Node: Basic Shell Features10141
-Node: Shell Syntax11360
-Node: Shell Operation12392
-Node: Quoting13686
-Node: Escape Character14960
-Node: Single Quotes15445
-Node: Double Quotes15793
-Node: ANSI-C Quoting16819
-Node: Locale Translation17775
-Node: Comments18671
-Node: Shell Commands19285
-Node: Simple Commands20051
-Node: Pipelines20682
-Node: Lists22557
-Node: Compound Commands24188
-Node: Looping Constructs24972
-Node: Conditional Constructs27419
-Node: Command Grouping34486
-Node: Shell Functions35935
-Node: Shell Parameters40203
-Node: Positional Parameters42533
-Node: Special Parameters43433
-Node: Shell Expansions46358
-Node: Brace Expansion48283
-Node: Tilde Expansion50608
-Node: Shell Parameter Expansion52959
-Node: Command Substitution60468
-Node: Arithmetic Expansion61801
-Node: Process Substitution62651
-Node: Word Splitting63701
-Node: Filename Expansion65162
-Node: Pattern Matching67298
-Node: Quote Removal70623
-Node: Redirections70918
-Node: Executing Commands78648
-Node: Simple Command Expansion79323
-Node: Command Search and Execution81253
-Node: Command Execution Environment83259
-Node: Environment86030
-Node: Exit Status87690
-Node: Signals88894
-Node: Shell Scripts90858
-Node: Shell Builtin Commands93376
-Node: Bourne Shell Builtins94955
-Node: Bash Builtins111908
-Node: The Set Builtin140035
-Node: Special Builtins148413
-Node: Shell Variables149390
-Node: Bourne Shell Variables149830
-Node: Bash Variables151811
-Node: Bash Features171518
-Node: Invoking Bash172401
-Node: Bash Startup Files178222
-Node: Interactive Shells183080
-Node: What is an Interactive Shell?183490
-Node: Is this Shell Interactive?184140
-Node: Interactive Shell Behavior184955
-Node: Bash Conditional Expressions188231
-Node: Shell Arithmetic191810
-Node: Aliases194556
-Node: Arrays197124
-Node: The Directory Stack200391
-Node: Directory Stack Builtins201105
-Node: Printing a Prompt203996
-Node: The Restricted Shell206710
-Node: Bash POSIX Mode208542
-Node: Job Control215875
-Node: Job Control Basics216342
-Node: Job Control Builtins220718
-Node: Job Control Variables225070
-Node: Command Line Editing226228
-Node: Introduction and Notation227227
-Node: Readline Interaction228849
-Node: Readline Bare Essentials230040
-Node: Readline Movement Commands231829
-Node: Readline Killing Commands232794
-Node: Readline Arguments234714
-Node: Searching235758
-Node: Readline Init File237944
-Node: Readline Init File Syntax239003
-Node: Conditional Init Constructs250862
-Node: Sample Init File253395
-Node: Bindable Readline Commands256512
-Node: Commands For Moving257719
-Node: Commands For History258580
-Node: Commands For Text261735
-Node: Commands For Killing264408
-Node: Numeric Arguments266550
-Node: Commands For Completion267689
-Node: Keyboard Macros271282
-Node: Miscellaneous Commands271853
-Node: Readline vi Mode277164
-Node: Programmable Completion278078
-Node: Programmable Completion Builtins283890
-Node: Using History Interactively291486
-Node: Bash History Facilities292166
-Node: Bash History Builtins294861
-Node: History Interaction298718
-Node: Event Designators301274
-Node: Word Designators302289
-Node: Modifiers303928
-Node: Installing Bash305334
-Node: Basic Installation306471
-Node: Compilers and Options309163
-Node: Compiling For Multiple Architectures309904
-Node: Installation Names311568
-Node: Specifying the System Type312386
-Node: Sharing Defaults313102
-Node: Operation Controls313775
-Node: Optional Features314733
-Node: Reporting Bugs323012
-Node: Major Differences From The Bourne Shell324206
-Node: Copying This Manual339978
-Node: GNU Free Documentation License340254
-Node: Builtin Index362660
-Node: Reserved Word Index369209
-Node: Variable Index371645
-Node: Function Index382505
-Node: Concept Index389225
+Node: Top1373
+Node: Introduction3533
+Node: What is Bash?3762
+Node: What is a shell?4855
+Node: Definitions7396
+Node: Basic Shell Features10137
+Node: Shell Syntax11356
+Node: Shell Operation12388
+Node: Quoting13682
+Node: Escape Character14956
+Node: Single Quotes15441
+Node: Double Quotes15789
+Node: ANSI-C Quoting16815
+Node: Locale Translation17771
+Node: Comments18667
+Node: Shell Commands19281
+Node: Simple Commands20047
+Node: Pipelines20678
+Node: Lists22553
+Node: Compound Commands24184
+Node: Looping Constructs24968
+Node: Conditional Constructs27415
+Node: Command Grouping34482
+Node: Shell Functions35931
+Node: Shell Parameters40221
+Node: Positional Parameters42551
+Node: Special Parameters43451
+Node: Shell Expansions46376
+Node: Brace Expansion48301
+Node: Tilde Expansion50626
+Node: Shell Parameter Expansion52977
+Node: Command Substitution60486
+Node: Arithmetic Expansion61819
+Node: Process Substitution62669
+Node: Word Splitting63719
+Node: Filename Expansion65180
+Node: Pattern Matching67316
+Node: Quote Removal70641
+Node: Redirections70936
+Node: Executing Commands78666
+Node: Simple Command Expansion79341
+Node: Command Search and Execution81271
+Node: Command Execution Environment83277
+Node: Environment86048
+Node: Exit Status87708
+Node: Signals88912
+Node: Shell Scripts90876
+Node: Shell Builtin Commands93394
+Node: Bourne Shell Builtins94973
+Node: Bash Builtins111926
+Node: The Set Builtin140066
+Node: Special Builtins148473
+Node: Shell Variables149450
+Node: Bourne Shell Variables149890
+Node: Bash Variables151871
+Node: Bash Features171578
+Node: Invoking Bash172461
+Node: Bash Startup Files178282
+Node: Interactive Shells183140
+Node: What is an Interactive Shell?183550
+Node: Is this Shell Interactive?184200
+Node: Interactive Shell Behavior185015
+Node: Bash Conditional Expressions188291
+Node: Shell Arithmetic191870
+Node: Aliases194616
+Node: Arrays197184
+Node: The Directory Stack200451
+Node: Directory Stack Builtins201165
+Node: Printing a Prompt204056
+Node: The Restricted Shell206770
+Node: Bash POSIX Mode208602
+Node: Job Control215935
+Node: Job Control Basics216402
+Node: Job Control Builtins220778
+Node: Job Control Variables225130
+Node: Command Line Editing226288
+Node: Introduction and Notation227287
+Node: Readline Interaction228909
+Node: Readline Bare Essentials230100
+Node: Readline Movement Commands231889
+Node: Readline Killing Commands232854
+Node: Readline Arguments234774
+Node: Searching235818
+Node: Readline Init File238004
+Node: Readline Init File Syntax239063
+Node: Conditional Init Constructs250922
+Node: Sample Init File253455
+Node: Bindable Readline Commands256572
+Node: Commands For Moving257779
+Node: Commands For History258640
+Node: Commands For Text261795
+Node: Commands For Killing264468
+Node: Numeric Arguments266610
+Node: Commands For Completion267749
+Node: Keyboard Macros271342
+Node: Miscellaneous Commands271913
+Node: Readline vi Mode277224
+Node: Programmable Completion278138
+Node: Programmable Completion Builtins283950
+Node: Using History Interactively291546
+Node: Bash History Facilities292226
+Node: Bash History Builtins294921
+Node: History Interaction298778
+Node: Event Designators301334
+Node: Word Designators302349
+Node: Modifiers303988
+Node: Installing Bash305394
+Node: Basic Installation306531
+Node: Compilers and Options309223
+Node: Compiling For Multiple Architectures309964
+Node: Installation Names311628
+Node: Specifying the System Type312446
+Node: Sharing Defaults313162
+Node: Operation Controls313835
+Node: Optional Features314793
+Node: Reporting Bugs323072
+Node: Major Differences From The Bourne Shell324266
+Node: Copying This Manual340174
+Node: GNU Free Documentation License340450
+Node: Builtin Index362856
+Node: Reserved Word Index369405
+Node: Variable Index371841
+Node: Function Index382701
+Node: Concept Index389421
 
 End Tag Table

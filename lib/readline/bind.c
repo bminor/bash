@@ -369,7 +369,7 @@ rl_generic_bind (type, keyseq, data, map)
       if (ic < 0 || ic >= KEYMAP_SIZE)
 	return -1;
 
-      if (_rl_convert_meta_chars_to_ascii && META_CHAR (ic))
+      if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
 	{
 	  ic = UNMETA (ic);
 	  if (map[ESC].type == ISKMAP)
@@ -460,7 +460,14 @@ rl_translate_keyseq (seq, array, len)
 	      else if (c == 'M')
 		{
 		  i++;
-		  array[l++] = ESC;	/* ESC is meta-prefix */
+		  /* XXX - should obey convert-meta setting? */
+		  if (_rl_convert_meta_chars_to_ascii && _rl_keymap[ESC].type == ISKMAP)
+		    array[l++] = ESC;	/* ESC is meta-prefix */
+		  else
+		    {
+		      i++;
+		      array[l++] = META (seq[i]);
+		    }
 		}
 	      else if (c == 'C')
 		{

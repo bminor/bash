@@ -10674,3 +10674,25 @@ execute_cmd.c
 lib/glob/xmbsrtowcs.c
 	- change xmbsrtowcs to handle the one case where malloc can fail
 	  (though it should not matter) -- don't try to free a null pointer
+
+				   12/9
+				   ----
+subst.c
+	- fix get_var_and_type to handle var[@], where `var' is a scalar
+	  variable, identically to var -- all calling expansions can now
+	  handle var[@] like var.  Bug reported by agriffis@gentoo.org
+
+				   12/10
+				   -----
+lib/readline/bind.c
+	- make new-style "\M-x" keybindings obey `convert-meta' settings
+	  (bug reported by twaugh@redhat.com)
+
+				   12/14
+				   -----
+builtins/set.def
+	- added description of `-' option to help text
+
+builtins/shopt.def
+	- fix bug that caused `gnu_errfmt' to not be compiled in unless
+	  READLINE is defined

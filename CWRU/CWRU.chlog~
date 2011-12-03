@@ -2874,7 +2874,7 @@ lib/sh/stringlist.c
 subst.c
 	- in skip_to_delim(), if we have an unclosed ${, and it's at the end
 	  of the string (string[i] == '{', string[i+1] == '{' and
-	  string[i+2] == 0, return si (i +2) immediately without bothering
+	  string[i+2] == 0, return si (i + 2) immediately without bothering
 	  to call extract_dollar_brace_string or extract_delimited_string
 	- in skip_to_delim(), if string[i] is 0 after a call to
 	  extract_dollar_brace_string or extract_delimited_string (meaning we
@@ -10644,3 +10644,46 @@ execute_cmd.c
 trap.c
 	- change reset_or_restore_signal_handlers so that the RETURN trap is
 	  not inherited by command substitution when DEBUGGER is not defined
+
+				   11/30
+				   -----
+lib/readline/misc.c
+	- fix memory leaks in _rl_free_history_entry and rl_maybe_replace_line
+	  caused by not freeing `timestamp' member of history entry
+	- make sure timestamp is initialized to NULL in rl_maybe_save_line
+
+				   12/1
+				   ----
+execute_cmd.c
+	- fix execute_function so a function calling `return' will run the
+	  RETURN trap, if one's defined
+
+doc/{bash.1,bashref.texi}
+	- fix description of RETURN trap in various places to indicate that it's
+	  only inherited by shell functions if function tracing is on globally
+	  or has been enabled for that function
+	- fix documentation to indicate that the DEBUG and RETURN traps are
+	  inherited under the same conditions
+
+execute_cmd.c
+	- a function does not inherit the RETURN trap if a DEBUG trap is
+	  currently running
+
+				   12/2
+				   ----
+lib/glob/xmbsrtowcs.c
+	- change xmbsrtowcs to handle the one case where malloc can fail
+	  (though it should not matter) -- don't try to free a null pointer
+
+				   12/9
+				   ----
+subst.c
+	- fix get_var_and_type to handle var[@], where `var' is a scalar
+	  variable, identically to var -- all calling expansions can now
+	  handle var[@] like var.  Bug reported by agriffis@gentoo.org
+
+				   12/10
+				   -----
+lib/readline/bind.c
+	- make new-style "\M-x" keybindings obey `convert-meta' settings
+	  (bug reported by twaugh@redhat.com)
