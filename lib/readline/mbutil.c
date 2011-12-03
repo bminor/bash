@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2004 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -92,7 +92,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   /* if this is true, means that seed was not pointed character
      started byte.  So correct the point and consume count */
   if (seed < point)
-    count --;
+    count--;
 
   while (count > 0)  
     {

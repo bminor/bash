@@ -603,7 +603,7 @@ $(SHLIB_LIBRARY): config.h ${SHLIB_SOURCE}
 ${INTL_LIBRARY}: config.h ${INTL_LIBDIR}/Makefile
 	@echo making $@ in ${INTL_LIBDIR}
 	@(cd ${INTL_LIBDIR} && \
-		$(MAKE) $(MFLAGS) all) || exit 1
+		$(MAKE) $(MFLAGS) libintl.a) || exit 1
 
 ${LIBINTL_H}:	${INTL_LIBRARY}
 

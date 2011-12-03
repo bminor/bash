@@ -1332,7 +1332,24 @@ open_shell_script (script_name)
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
 #endif
 
+  free (dollar_vars[0]);
+  dollar_vars[0] = savestring (script_name);
   filename = savestring (script_name);
+
+#if defined (ARRAY_VARS)
+  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
+
+  array_push (bash_source_a, filename);
+  if (bash_lineno_a)
+    {
+      t = itos (executing_line_number ());
+      array_push (bash_lineno_a, t);
+      free (t);
+    }
+  array_push (funcname_a, "main");
+#endif
 
   fd = open (filename, O_RDONLY);
   if ((fd < 0) && (errno == ENOENT) && (absolute_program (filename) == 0))
@@ -1357,24 +1374,6 @@ open_shell_script (script_name)
       file_error (filename);
       exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
-
-  free (dollar_vars[0]);
-  dollar_vars[0] = savestring (script_name);
-
-#if defined (ARRAY_VARS)
-  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
-  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
-  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
-
-  array_push (bash_source_a, filename);
-  if (bash_lineno_a)
-    {
-      t = itos (executing_line_number ());
-      array_push (bash_lineno_a, t);
-      free (t);
-    }
-  array_push (funcname_a, "main");
-#endif
 
 #ifdef HAVE_DEV_FD
   fd_is_tty = isatty (fd);

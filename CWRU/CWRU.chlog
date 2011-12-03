@@ -8994,3 +8994,82 @@ lib/readline/mbutil.c
 	  back past it with ^B, and other display problems caused by the same
 	  situation
 
+				   1/15
+				   ----
+lib/readline/doc/rltech.texi
+	- document RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE in the
+	  description of rl_expand_prompt()
+
+				   1/20
+				   ----
+bashline.c
+	- in initialize_readline, make sure M-C-j and M-C-m are still bound to
+	  vi-editing-mode before unbinding them -- they may have been rebound
+	  in an inputrc
+
+variables.c
+	- in unbind_variable, unset attributes other than `local' and exported
+	  (if the variable came from a temporary environment) when unsetting a
+	  local variable inside a function
+
+				   1/21
+				   ----
+configure.in
+	- add libintl build directory to the list of include directories if
+	  it's being built (using INTL_BUILDDIR)
+
+Makefile.in,{builtins,lib/{sh,malloc}}/Makefile.in
+	- substitute LIBBUILD as ${BUILD_DIR}/${LIBSUBDIR}
+	- define INTL_BUILDDIR as ${LIBBUILD}/intl
+
+{builtins,lib/sh}/Makefile.in
+	- make sure INTL_INC is added to  the list of include directories
+	- make sure INTL_LIBSRC is defined with the correct value
+
+{configure,Makefile,{builtins,lib/sh}/Makefile}.in
+	- substitute LIBINTL_H as ${INTL_BUILDDIR}/libintl.h
+
+Makefile.in,builtins/Makefile.iin
+	- all files depending on bashintl.h also depend on ${LIBINTL_H}
+	  (which may be empty)
+
+Makefile.in
+	- make a rule telling how to build lib/intl/libintl.h if necessary
+
+				   1/24
+				   ----
+builtins/read.def
+	- make sure that the array name supplied as an argument to -a is a
+	  valid identifier
+
+parse.y
+	- make the \W expansion abbreviate $HOME with a ~ (seems to be more
+	  useful)
+
+doc/{bash.1,bashref.texi}
+	- document new behavior of \W
+
+subst.c
+	- make sure parameter_brace_expand_rhs uses the first character of
+	  $IFS when making the string to return from the expanded word
+	  (which, in the case of "$@" or $@, contains multiple words that
+	  need to be separated)
+
+				   1/25
+				   ----
+builtins/common.c
+	- change get_job_spec to make `%' by itself or an empty argument
+	  return NO_JOB
+
+jobs.h
+	- new possible value for a job spec return value:  BAD_JOBSPEC
+	  (for syntactically invalid specs, like the empty string)
+
+shell.c
+	- in open_shell_script, check to see whether or not we can find and
+	  open the filename argument before setting dollar_vars[0] or
+	  manipulating BASH_SOURCE, so the error messages come out better
+
+subst.c
+	- in string_list_internal, short-circuit right away to savestring()
+	  if the list only has a single element

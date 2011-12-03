@@ -1565,6 +1565,10 @@ string_list_internal (list, sep)
   if (list == 0)
     return ((char *)NULL);
 
+  /* Short-circuit quickly if we don't need to separate anything. */
+  if (list->next == 0)
+    return (savestring (list->word->word));
+
   /* This is nearly always called with either sep[0] == 0 or sep[1] == 0. */
   sep_len = STRLEN (sep);
   result_size = 0;
@@ -4356,11 +4360,16 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   if (l)
     {
       /* The expansion of TEMP returned something.  We need to treat things
-	  slightly differently if HASDOL is non-zero. */
-      temp = string_list (l);
+	  slightly differently if HASDOL is non-zero.  If we have "$@", the
+	  individual words have already been quoted.  We need to turn them
+	  into a string with the words separated by the first character of
+	  $IFS without any additional quoting, so string_list_dollar_at won't
+	  do the right thing.  We use string_list_dollar_star instead. */
+      temp = (hasdol || l->next) ? string_list_dollar_star (l) : string_list (l);
+
       /* If l->next is not null, we know that TEMP contained "$@", since that
 	 is the only expansion that creates more than one word. */
-      if ((hasdol && quoted) || l->next)
+      if (qdollaratp && ((hasdol && quoted) || l->next))
 	*qdollaratp = 1;
       dispose_words (l);
     }

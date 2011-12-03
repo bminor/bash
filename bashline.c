@@ -324,6 +324,9 @@ enable_hostname_completion (on_or_off)
 void
 initialize_readline ()
 {
+  rl_command_func_t *func;
+  char kseq[2];
+
   if (bash_readline_initialized)
     return;
 
@@ -395,8 +398,15 @@ initialize_readline ()
   /* In Bash, the user can switch editing modes with "set -o [vi emacs]",
      so it is not necessary to allow C-M-j for context switching.  Turn
      off this occasionally confusing behaviour. */
-  rl_unbind_key_in_map (CTRL('J'), emacs_meta_keymap);
-  rl_unbind_key_in_map (CTRL('M'), emacs_meta_keymap);
+  kseq[0] = CTRL('J');
+  kseq[1] = '\0';
+  func = rl_function_of_keyseq (kseq, emacs_meta_keymap, (int *)NULL);
+  if (func == rl_vi_editing_mode)
+    rl_unbind_key_in_map (CTRL('J'), emacs_meta_keymap);
+  kseq[0] = CTRL('M');
+  func = rl_function_of_keyseq (kseq, emacs_meta_keymap, (int *)NULL);
+  if (func == rl_vi_editing_mode)
+    rl_unbind_key_in_map (CTRL('M'), emacs_meta_keymap);
 #if defined (VI_MODE)
   rl_unbind_key_in_map (CTRL('E'), vi_movement_keymap);
 #endif

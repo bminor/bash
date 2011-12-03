@@ -585,7 +585,11 @@ get_job_spec (list)
   if (DIGIT (*word) && all_digits (word))
     {
       job = atoi (word);
+#if 0
+      return (job >= job_slots ? NO_JOB : job - 1);
+#else
       return (job > job_slots ? NO_JOB : job - 1);
+#endif
     }
 
   jflags = 0;

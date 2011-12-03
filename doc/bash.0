@@ -9,7 +9,7 @@ SSYYNNOOPPSSIISS
        bbaasshh [options] [file]
 
 CCOOPPYYRRIIGGHHTT
-       Bash is Copyright (C) 1989-2003 by the Free Software Foundation, Inc.
+       Bash is Copyright (C) 1989-2004 by the Free Software Foundation, Inc.
 
 DDEESSCCRRIIPPTTIIOONN
        BBaasshh  is  an  sshh-compatible  command language interpreter that executes
@@ -2293,8 +2293,10 @@ PPRROOMMPPTTIINNGG
               \\uu     the username of the current user
               \\vv     the version of bbaasshh (e.g., 2.00)
               \\VV     the release of bbaasshh, version + patchelvel (e.g., 2.00.0)
-              \\ww     the current working directory
-              \\WW     the basename of the current working directory
+              \\ww     the current working  directory,  with  $$HHOOMMEE  abbreviated
+                     with a tilde
+              \\WW     the basename of the current working directory, with $$HHOOMMEE
+                     abbreviated with a tilde
               \\!!     the history number of this command
               \\##     the command number of this command
               \\$$     if the effective UID is 0, a ##, otherwise a $$
@@ -3133,8 +3135,8 @@ HHIISSTTOORRYY
        are  appended  to the history file, otherwise the history file is over-
        written.  If HHIISSTTFFIILLEE is unset, or if the history file  is  unwritable,
        the  history  is not saved.  After saving the history, the history file
-       is  truncated  to  contain  no  more  than  HHIISSTTFFIILLEESSIIZZEE   lines.    If
-       HHIISSTTFFIILLEESSIIZZEE is not set, no truncation is performed.
+       is truncated to contain no more than HHIISSTTFFIILLEESSIIZZEE lines.  If  HHIISSTTFFIILLEE--
+       SSIIZZEE is not set, no truncation is performed.
 
        The  builtin  command ffcc (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below) may be used
        to list or edit and re-execute a portion of the history list.  The hhiiss--
@@ -4515,8 +4517,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               given, ttrraapp prints the list of  commands  associated  with  each
               signal  number.   The --ll option causes the shell to print a list
               of signal names and their corresponding numbers.   Each  _s_i_g_s_p_e_c
-              is  either  a  signal  name  defined  in <_s_i_g_n_a_l_._h>, or a signal
-              number.  If a _s_i_g_s_p_e_c is EEXXIITT (0) the command _a_r_g is executed on
+              is  either a signal name defined in <_s_i_g_n_a_l_._h>, or a signal num-
+              ber.  If a _s_i_g_s_p_e_c is EEXXIITT (0) the command _a_r_g  is  executed  on
               exit  from the shell.  If a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is
               executed before every _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r command, _c_a_s_e command,
               _s_e_l_e_c_t  command,  every  arithmetic  _f_o_r command, and before the
@@ -4767,4 +4769,4 @@ BBUUGGSS
 
 
 
-GNU Bash-3.0                      2003 Nov 13                          BASH(1)
+GNU Bash-3.0                      2004 Jan 24                          BASH(1)
