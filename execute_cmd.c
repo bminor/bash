@@ -3780,6 +3780,7 @@ initialize_subshell ()
   /* Forget about the way job control was working. We are in a subshell. */
   without_job_control ();
   set_sigchld_handler ();
+  init_job_stats ();
 #endif /* JOB_CONTROL */
 
   /* Reset the values of the shell flags and options. */

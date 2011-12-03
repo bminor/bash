@@ -383,7 +383,11 @@ set editing-mode vi
 @end example
 
 Variable names and values, where appropriate, are recognized without regard
-to case. 
+to case.  Unrecognized variable names are ignored.
+
+Boolean variables (those that can be set to on or off) are set to on if
+the value is null or empty, @var{on} (case-insensitive), or 1.  Any other
+value results in the variable being set to off.
 
 @ifset BashFeatures
 The @w{@code{bind -V}} command lists the current Readline variable names

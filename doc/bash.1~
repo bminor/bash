@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Jul 15 23:15:01 EDT 2005
+.\"	Last Change: Wed Aug 24 17:20:03 EDT 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Jul 15" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Aug 24" "GNU Bash-3.1-alpha1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4634,7 +4634,7 @@ arrow keys.
 If set to \fBon\fP, tilde expansion is performed when readline
 attempts word completion.
 .TP
-.B history-preserve-point
+.B history\-preserve\-point (Off)
 If set to \fBon\fP, the history code attempts to place point at the
 same location on each history line retrieved with \fBprevious-history\fP
 or \fBnext-history\fP.
@@ -5968,8 +5968,8 @@ If \fIjobspec\fP is not present, the shell's notion of the
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
-job control enabled, if the last \fIjobspec\fP was not found or was
-started without job control.
+job control enabled, any specified \fIjobspec\fP was not found
+or was started without job control.
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSV\fP]
 .PD 0

@@ -1192,9 +1192,9 @@ rl_parse_and_bind (string)
   /* If this is a command to set a variable, then do that. */
   if (_rl_stricmp (string, "set") == 0)
     {
-      char *var = string + i;
-      char *value;
+      char *var, *value, *e;
 
+      var = string + i;
       /* Make VAR point to start of variable name. */
       while (*var && whitespace (*var)) var++;
 
@@ -1204,6 +1204,14 @@ rl_parse_and_bind (string)
       if (*value)
 	*value++ = '\0';
       while (*value && whitespace (*value)) value++;
+
+      /* remove trailing whitespace */
+      e = value + strlen (value) - 1;
+      while (e >= value && whitespace (*e))
+        e--;
+      e++;		/* skip back to whitespace or EOS */
+      if (*e && e >= value)
+        *e = '\0';
 
       rl_variable_bind (var, value);
       return 0;
@@ -1225,8 +1233,9 @@ rl_parse_and_bind (string)
      the quoted string delimiter, like the shell. */
   if (*funname == '\'' || *funname == '"')
     {
-      int delimiter = string[i++], passc;
+      int delimiter, passc;
 
+      delimiter = string[i++];
       for (passc = 0; c = string[i]; i++)
 	{
 	  if (passc)

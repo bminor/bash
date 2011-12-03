@@ -369,7 +369,7 @@ rl_generic_bind (type, keyseq, data, map)
       if (ic < 0 || ic >= KEYMAP_SIZE)
 	return -1;
 
-      if (_rl_convert_meta_chars_to_ascii && META_CHAR (ic))
+      if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
 	{
 	  ic = UNMETA (ic);
 	  if (map[ESC].type == ISKMAP)
@@ -460,7 +460,14 @@ rl_translate_keyseq (seq, array, len)
 	      else if (c == 'M')
 		{
 		  i++;
-		  array[l++] = ESC;	/* ESC is meta-prefix */
+		  /* XXX - should obey convert-meta setting? */
+		  if (_rl_convert_meta_chars_to_ascii && _rl_keymap[ESC].type == ISKMAP)
+		    array[l++] = ESC;	/* ESC is meta-prefix */
+		  else
+		    {
+		      i++;
+		      array[l++] = META (seq[i]);
+		    }
 		}
 	      else if (c == 'C')
 		{
@@ -1185,9 +1192,9 @@ rl_parse_and_bind (string)
   /* If this is a command to set a variable, then do that. */
   if (_rl_stricmp (string, "set") == 0)
     {
-      char *var = string + i;
-      char *value;
+      char *var, *value, *e;
 
+      var = string + i;
       /* Make VAR point to start of variable name. */
       while (*var && whitespace (*var)) var++;
 
@@ -1197,6 +1204,13 @@ rl_parse_and_bind (string)
       if (*value)
 	*value++ = '\0';
       while (*value && whitespace (*value)) value++;
+
+      /* remove trailing whitespace */
+      e = value + strlen (value) - 1;
+      while (e >= value && whitespace (*e))
+        e--;
+      if (*e && e >= value)
+        *e = '\0';
 
       rl_variable_bind (var, value);
       return 0;
@@ -1218,8 +1232,9 @@ rl_parse_and_bind (string)
      the quoted string delimiter, like the shell. */
   if (*funname == '\'' || *funname == '"')
     {
-      int delimiter = string[i++], passc;
+      int delimiter, passc;
 
+      delimiter = string[i++];
       for (passc = 0; c = string[i]; i++)
 	{
 	  if (passc)
@@ -1469,7 +1484,7 @@ find_string_var (name)
    values result in 0 (false). */
 static int
 bool_to_int (value)
-     char *value;
+     const char *value;
 {
   return (value == 0 || *value == '\0' ||
 		(_rl_stricmp (value, "on") == 0) ||

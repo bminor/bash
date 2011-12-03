@@ -1522,6 +1522,8 @@ command_subst_completion_function (text, state)
 	 put the lcd in matches[0].  Skip over it. */
       cmd_index = matches && matches[0] && matches[1];
 
+      /* If there's a single match and it's a directory, set the append char
+	 to the expected `/'.  Otherwise, don't append anything. */
       if (matches && matches[0] && matches[1] == 0 && test_for_directory (matches[0]))
 	rl_completion_append_character = '/';
       else

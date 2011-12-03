@@ -204,7 +204,7 @@ history_get (offset)
   int local_index;
 
   local_index = offset - history_base;
-  return (local_index >= history_length || local_index < 0 || !the_history)
+  return (local_index >= history_length || local_index < 0 || the_history == 0)
 		? (HIST_ENTRY *)NULL
 		: the_history[local_index];
 }
@@ -364,7 +364,7 @@ remove_history (which)
   HIST_ENTRY *return_value;
   register int i;
 
-  if (which < 0 || which >= history_length || history_length ==  0)
+  if (which < 0 || which >= history_length || history_length ==  0 || the_history == 0)
     return ((HIST_ENTRY *)NULL);
 
   return_value = the_history[which];

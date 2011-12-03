@@ -372,6 +372,8 @@ describe_command (command, dflags)
 	      if (all == 0)
 		break;
 	    }
+	  else if (ABSPATH (full_path))
+	    ;	/* placeholder; don't need to do anything yet */
 	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY|CDESC_SHORTDESC))
 	    {
 	      f = MP_DOCWD | ((dflags & CDESC_ABSPATH) ? MP_RMDOT : 0);

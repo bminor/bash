@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2005 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -89,6 +89,7 @@ extern int posixly_correct;
 extern int unlink __P((const char *));
 
 extern FILE *sh_mktmpfp __P((char *, int, char **));
+extern int delete_last_history __P((void));
 
 /* **************************************************************** */
 /*								    */
@@ -285,6 +286,11 @@ fc_builtin (list)
      the user entered before the fc.  We need to check whether the
      line was actually added (HISTIGNORE may have caused it to not be),
      so we check hist_last_line_added. */
+
+  /* "When not  listing, he fc command that caused the editing shall not be
+     entered into the history list." */
+  if (listing == 0 && hist_last_line_added)
+    delete_last_history ();
 
   last_hist = i - 1 - hist_last_line_added;
 
@@ -497,7 +503,7 @@ fc_gethist (command, hlist)
 {
   int i;
 
-  if (!hlist)
+  if (hlist == 0)
     return ((char *)NULL);
 
   i = fc_gethnum (command, hlist);
@@ -581,41 +587,18 @@ static void
 fc_replhist (command)
      char *command;
 {
-  register int i;
-  HIST_ENTRY **hlist, *histent, *discard;
   int n;
 
   if (command == 0 || *command == '\0')
     return;
 
-  hlist = history_list ();
-
-  if (hlist == NULL)
-    return;
-
-  for (i = 0; hlist[i]; i++);
-  i--;
-
-  /* History_get () takes a parameter that should be
-     offset by history_base. */
-
-  histent = history_get (history_base + i);	/* Don't free this */
-  if (histent == NULL)
-    return;
-
   n = strlen (command);
-
   if (command[n - 1] == '\n')
     command[n - 1] = '\0';
 
   if (command && *command)
     {
-      discard = remove_history (i);
-      if (discard)
-	{
-	  FREE (discard->line);
-	  free ((char *) discard);
-	}
+      delete_last_history ();
       maybe_add_history (command);	/* Obeys HISTCONTROL setting. */
     }
 }
@@ -628,13 +611,16 @@ fc_addhist (line)
 {
   register int n;
 
+  if (line == 0 || *line == 0)
+    return;
+
   n = strlen (line);
 
   if (line[n - 1] == '\n')
     line[n - 1] = '\0';
 
   if (line && *line)
-    maybe_add_history (line);
+    maybe_add_history (line);		/* Obeys HISTCONTROL setting. */
 }
 #endif
 

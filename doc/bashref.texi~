@@ -4784,6 +4784,10 @@ prompt when the shell is interactive.
 Bash terminates after that number of seconds if input does
 not arrive.
 
+@item TMPDIR
+If set, Bash uses its value as the name of a directory in which
+Bash creates temporary files for the shell's use.
+
 @item UID
 The numeric real user id of the current user.  This variable is readonly.
 
@@ -6086,11 +6090,6 @@ but without a leading @samp{#!}, Bash sets @code{$0} to the full pathname of
 the script as found by searching @code{$PATH}, rather than the command as
 typed by the user.
 
-@item
-When using @samp{.} to source a shell script found in @code{$PATH}, bash
-checks execute permission bits rather than read permission bits, just as
-if it were searching for a command.
-
 @end enumerate
 
 @node Job Control
@@ -6220,8 +6219,8 @@ Resume each suspended job @var{jobspec} in the background, as if it
 had been started with @samp{&}.
 If @var{jobspec} is not supplied, the current job is used.
 The return status is zero unless it is run when job control is not
-enabled, or, when run with job control enabled, if the last
-@var{jobspec} was not found or the last @var{jobspec} specifies a job
+enabled, or, when run with job control enabled, any
+@var{jobspec} was not found or specifies a job
 that was started without job control.
 
 @item fg

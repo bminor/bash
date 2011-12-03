@@ -798,6 +798,7 @@ operate_and_get_next (count, c)
 
 #define VI_EDIT_COMMAND		"fc -e \"${VISUAL:-${EDITOR:-vi}}\""
 #define EMACS_EDIT_COMMAND	"fc -e \"${VISUAL:-${EDITOR:-emacs}}\""
+#define POSIX_VI_EDIT_COMMAND	"fc -e vi"
 
 static int
 edit_and_execute_command (count, c, editing_mode, edit_command)
@@ -857,7 +858,10 @@ static int
 vi_edit_and_execute_command (count, c)
      int count, c;
 {
-  return (edit_and_execute_command (count, c, VI_EDITING_MODE, VI_EDIT_COMMAND));
+  if (posixly_correct)
+    return (edit_and_execute_command (count, c, VI_EDITING_MODE, POSIX_VI_EDIT_COMMAND));
+  else
+    return (edit_and_execute_command (count, c, VI_EDITING_MODE, VI_EDIT_COMMAND));
 }
 #endif /* VI_MODE */
 

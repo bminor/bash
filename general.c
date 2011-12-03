@@ -506,6 +506,36 @@ file_iswdir (fn)
   return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
 }
 
+/* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'
+   to decide whether or not to look up a directory name in $CDPATH. */
+int
+absolute_pathname (string)
+     const char *string;
+{
+  if (string == 0 || *string == '\0')
+    return (0);
+
+  if (ABSPATH(string))
+    return (1);
+
+  if (string[0] == '.' && PATHSEP(string[1]))	/* . and ./ */
+    return (1);
+
+  if (string[0] == '.' && string[1] == '.' && PATHSEP(string[2]))	/* .. and ../ */
+    return (1);
+
+  return (0);
+}
+
+/* Return 1 if STRING is an absolute program name; it is absolute if it
+   contains any slashes.  This is used to decide whether or not to look
+   up through $PATH. */
+int
+absolute_program (string)
+     const char *string;
+{
+  return ((char *)xstrchr (string, '/') != (char *)NULL);
+}
 
 /* **************************************************************** */
 /*								    */
@@ -538,37 +568,6 @@ make_absolute (string, dot_path)
     result = sh_makepath (dot_path, string, 0);
 
   return (result);
-}
-
-/* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'
-   to decide whether or not to look up a directory name in $CDPATH. */
-int
-absolute_pathname (string)
-     const char *string;
-{
-  if (string == 0 || *string == '\0')
-    return (0);
-
-  if (ABSPATH(string))
-    return (1);
-
-  if (string[0] == '.' && PATHSEP(string[1]))	/* . and ./ */
-    return (1);
-
-  if (string[0] == '.' && string[1] == '.' && PATHSEP(string[2]))	/* .. and ../ */
-    return (1);
-
-  return (0);
-}
-
-/* Return 1 if STRING is an absolute program name; it is absolute if it
-   contains any slashes.  This is used to decide whether or not to look
-   up through $PATH. */
-int
-absolute_program (string)
-     const char *string;
-{
-  return ((char *)xstrchr (string, '/') != (char *)NULL);
 }
 
 /* Return the `basename' of the pathname in STRING (the stuff after the

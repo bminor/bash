@@ -6090,6 +6090,11 @@ but without a leading @samp{#!}, Bash sets @code{$0} to the full pathname of
 the script as found by searching @code{$PATH}, rather than the command as
 typed by the user.
 
+@item
+The @code{fc} builtin checks @code{$EDITOR} as a program to edit history lines 
+if @code{FCEDIT} is unset, rather than defaulting directly to @code{ed}.
+@code{fc} uses @code{ed} if @code{EDITOR} is unset.
+
 @end enumerate
 
 @node Job Control
@@ -6219,8 +6224,8 @@ Resume each suspended job @var{jobspec} in the background, as if it
 had been started with @samp{&}.
 If @var{jobspec} is not supplied, the current job is used.
 The return status is zero unless it is run when job control is not
-enabled, or, when run with job control enabled, if the last
-@var{jobspec} was not found or the last @var{jobspec} specifies a job
+enabled, or, when run with job control enabled, any
+@var{jobspec} was not found or specifies a job
 that was started without job control.
 
 @item fg

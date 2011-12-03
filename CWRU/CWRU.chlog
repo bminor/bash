@@ -11949,3 +11949,98 @@ builtins/read.def
 	  `read', call sync_buffered_stream to seek backward in the input
 	  stream if necessary (XXX - should we do this for all shell builtins?)
 
+				   8/23
+				   ----
+builtins/cd.def
+	- in posix mode, if canonicalization of the absolute pathname fails
+	  because the path length exceeds PATH_MAX, but the length of the passed
+	  (non-absolute) pathname does not, attempt the chdir, just as when
+	  not in posix mode
+
+builtins/type.def
+	- don't have describe_command call sh_makepath if the full path found
+	  is already an absolute pathname (sh_makepath will stick $PWD onto the
+	  front of it)
+
+				   8/24
+				   ----
+
+jobs.c
+	- in posix mode, don't have start_job print out and indication of
+	  whether the job started by `bg' is the current or previous job
+	- change start_job to return success if a job to be resumed in the
+	  background is already running.  This means that bg won't fail when
+	  asked to bg a background job, as SUSv3/XPG6 requires
+	- new function, init_job_stats, to zero out the global jobstats struct
+
+{jobs,nojobs}.c
+	- change kill_pid to handle pids < -1 by killing process groups
+
+jobs.h
+	- extern declaration for init_job_stats
+
+lib/readline/history.c
+	- check whether or not the history list is null in remove_history
+
+builtins/history.def
+	- delete_last_history is no longer static so fc builtin can use it
+
+builtins/fc.def
+	- use free_history_entry in fc_replhist instead of freeing struct
+	  members individually
+	- call delete_last_history from fc_replhist instead of using inline
+	  code
+	- if editing (-l not specified), make sure the fc command that caused
+	  the editing is removed from the history list, as POSIX specifies
+
+builtins/kill.def
+	- just call kill_pid with any pid argument and let it handle pids < -1
+	  This is the only way to let kill_pid know whether a negative pid or
+	  a job spec was supplied as an argument to kill
+
+builtins/fg_bg.def
+	- force fg_bg to return EXECUTION_SUCCESS explicitly if called by bg
+	  and start_job returns successfully
+	- bg now returns success only if all the specified jobs were resumed
+	  successfully
+
+execute_cmd.c
+	- call init_job_stats from initialize_subshell to zero out the global
+	  job stats structure
+
+				   8/25
+				   ----
+bashline.c
+	- change vi_edit_and_execute_command to just call vi when in posix
+	  mode, instead of checking $FCEDIT and $EDITOR
+
+lib/readline/search.c
+	- if in vi_mode, call rl_free_undo_list in make_history_line_current
+	  to dispose of undo list accumulated while reading the search string
+	  (if this isn't done, since vi mode leaves the current history
+	  position at the entry which matched the search, the call to
+	  rl_revert_line in rl_internal_teardown will mangle the matched
+	  history entry using a bogus rl_undo_list)
+	- call rl_free_undo_list after reading a non-incremental search string
+	  into rl_line_buffer -- that undo list should be discarded
+
+lib/readline/rlprivate.h
+	- add UNDO_LIST * member to search context struct
+
+lib/readline/isearch.c
+	- initialize UNDO_LIST *save_undo_list member of search context struct
+
+				   8/27
+				   ----
+lib/readline/bind.c
+	- change rl_parse_and_bind to strip whitespace from the end of a
+	  variable value assignment before calling rl_variable_bind
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- clarified the language concerning parsing values for boolean
+	  variables in assignment statements
+
+				   8/28
+				   ----
+lib/sh/pathphys.c
+	- fix small memory leak in sh_realpath reported by Eric Blake

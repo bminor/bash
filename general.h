@@ -299,10 +299,10 @@ extern int same_file __P((char *, char *, struct stat *, struct stat *));
 
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
-
-extern char *make_absolute __P((char *, char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));
+
+extern char *make_absolute __P((char *, char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));

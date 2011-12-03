@@ -289,7 +289,7 @@ assignment (string, flags)
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')
-	    return (flags ? 0 : (newi + 1));
+	    return (newi + 1);
 	  return ((string[newi] == '=') ? newi : 0);
 	}
 #endif /* ARRAY_VARS */

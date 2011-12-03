@@ -170,7 +170,7 @@ kill_builtin (list)
 	{
 	  pid = (pid_t) pid_value;
 
-	  if ((pid < -1 ? kill_pid (-pid, sig, 1) : kill_pid (pid, sig, 0)) < 0)
+	  if (kill_pid (pid, sig, pid < -1) < 0)
 	    {
 	      if (errno == EINVAL)
 		sh_invalidsig (sigspec);

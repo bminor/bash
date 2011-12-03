@@ -94,10 +94,10 @@ make_history_line_current (entry)
   _rl_fix_point (1);
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
-    /* POSIX.2 says that the `U' command doesn't affect the copy of any
-       command lines to the edit line.  We're going to implement that by
-       making the undo list start after the matching line is copied to the
-       current editing buffer. */
+    /* POSIX.2 says that the `U' command doesn't affect command lines copied
+       to the edit line.  That's ambiguous, but we're going to interpret it
+       to mean that the undo list starts after the matching line is copied to
+       the current editing buffer. */
     rl_free_undo_list ();
 #endif
 

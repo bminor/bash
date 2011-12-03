@@ -160,6 +160,7 @@ extern procenv_t wait_intr_buf;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
+static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 
 struct bgpids bgpids = { 0, 0, 0 };
@@ -348,6 +349,13 @@ tcgetpgrp (fd)
 }
 
 #endif /* !_POSIX_VERSION */
+
+/* Initialize the global job stats structure. */
+void
+init_job_stats ()
+{
+  js = zerojs;
+}
 
 /* Return the working directory for the current process.  Unlike
    job_working_directory, this does not call malloc (), nor do any
@@ -2639,7 +2647,7 @@ start_job (job, foreground)
   register PROCESS *p;
   int already_running;
   sigset_t set, oset;
-  char *wd;
+  char *wd, *s;
   static TTYSTRUCT save_stty;
 
   BLOCK_CHILD (set, oset);
@@ -2657,7 +2665,7 @@ start_job (job, foreground)
     {
       internal_error (_("%s: job %d already in background"), this_command_name, job + 1);
       UNBLOCK_CHILD (oset);
-      return (-1);
+      return (0);		/* XPG6/SUSv3 says this is not an error */
     }
 
   wd = current_working_directory ();
@@ -2675,8 +2683,15 @@ start_job (job, foreground)
   p = jobs[job]->pipe;
 
   if (foreground == 0)
-    printf ("[%d]%c ", job + 1,
-	   (job == js.j_current) ? '+': ((job == js.j_previous) ? '-' : ' '));
+    {
+      /* POSIX.2 says `bg' doesn't give any indication about current or
+	 previous job. */
+      if (posixly_correct == 0)
+	s = (job == js.j_current) ? "+ ": ((job == js.j_previous) ? "- " : " ");       
+      else
+	s = " ";
+      printf ("[%d]%s", job + 1, s);
+    }
 
   do
     {
@@ -2748,8 +2763,16 @@ kill_pid (pid, sig, group)
      int sig, group;
 {
   register PROCESS *p;
-  int job, result;
+  int job, result, negative;
   sigset_t set, oset;
+
+  if (pid < -1)
+    {
+      pid = -pid;
+      group = negative = 1;
+    }
+  else
+    negative = 0;
 
   result = EXECUTION_SUCCESS;
   if (group)
@@ -2762,8 +2785,26 @@ kill_pid (pid, sig, group)
 	  jobs[job]->flags &= ~J_NOTIFIED;
 
 	  /* Kill process in backquotes or one started without job control? */
-	  if (jobs[job]->pgrp == shell_pgrp)
+
+	  /* If we're passed a pid < -1, just call killpg and see what happens  */
+	  if (negative && jobs[job]->pgrp == shell_pgrp)
 	    result = killpg (pid, sig);
+	  /* If we're killing using job control notification, for example,
+	     without job control active, we have to do things ourselves. */
+	  else if (jobs[job]->pgrp == shell_pgrp)
+	    {
+	      p = jobs[job]->pipe;
+	      do
+		{
+		  if (PALIVE (p) == 0)
+		    continue;		/* avoid pid recycling problem */
+		  kill (p->pid, sig);
+		  if (PEXITED (p) && (sig == SIGTERM || sig == SIGHUP))
+		    kill (p->pid, SIGCONT);
+		  p = p->next;
+		}
+	      while  (p != jobs[job]->pipe);
+	    }
 	  else
 	    {
 	      result = killpg (jobs[job]->pgrp, sig);

@@ -82,8 +82,8 @@ fg_builtin (list)
 $BUILTIN bg
 $FUNCTION bg_builtin
 $DEPENDS_ON JOB_CONTROL
-$SHORT_DOC bg [job_spec]
-Place JOB_SPEC in the background, as if it had been started with
+$SHORT_DOC bg [job_spec ...]
+Place each JOB_SPEC in the background, as if it had been started with
 `&'.  If JOB_SPEC is not present, the shell's notion of the current
 job is used.
 $END
@@ -108,9 +108,11 @@ bg_builtin (list)
 
   /* This relies on the fact that fg_bg() takes a WORD_LIST *, but only acts
      on the first member (if any) of that list. */
+  r = EXECUTION_SUCCESS;
   do
     {
-      r = fg_bg (list, 0);
+      if (fg_bg (list, 0) == EXECUTION_FAILURE)
+	r = EXECUTION_FAILURE;
       if (list)
 	list = list->next;
     }
@@ -160,7 +162,7 @@ fg_bg (list, foreground)
     {
     /* win: */
       UNBLOCK_CHILD (oset);
-      return (status);
+      return (foreground ? status : EXECUTION_SUCCESS);
     }
   else
     {

@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.CWRU.Edu
 .\"
-.\"	Last Change: Fri Jul 15 23:15:01 EDT 2005
+.\"	Last Change: Sat Aug 27 13:28:44 EDT 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Jul 15" "GNU Bash-3.1-devel"
+.TH BASH 1 "2005 Aug 27" "GNU Bash-3.1-alpha1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4565,7 +4565,12 @@ file with a statement of the form
 Except where noted, readline variables can take the values
 .B On
 or
-.BR Off .
+.B Off
+(without regard to case).
+Unrecognized variable names are ignored.
+When a variable value is read, empty or null values, "on" (case-insensitive),
+and "1" are equivalent to \fBOn\fP.  All other values are equivalent to
+\fBOff\fP.
 The variables and their default values are:
 .PP
 .PD 0
@@ -5968,8 +5973,8 @@ If \fIjobspec\fP is not present, the shell's notion of the
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
-job control enabled, if the last \fIjobspec\fP was not found or was
-started without job control.
+job control enabled, any specified \fIjobspec\fP was not found
+or was started without job control.
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSV\fP]
 .PD 0

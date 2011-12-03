@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Mon Nov 22 11:10:14 EST 2004
+.\"	Last Change: Sat Aug 27 13:29:08 EDT 2005
 .\"
-.TH READLINE 3 "2004 Nov 22" "GNU Readline 5.1-devel"
+.TH READLINE 3 "2005 Aug 27" "GNU Readline 5.1-alpha1"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -328,6 +328,10 @@ Except where noted, readline variables can take the values
 or
 .B Off
 (without regard to case).
+Unrecognized variable names are ignored.
+When a variable value is read, empty or null values, "on" (case-insensitive),
+and "1" are equivalent to \fBOn\fP.  All other values are equivalent to
+\fBOff\fP.
 The variables and their default values are:
 .PP
 .PD 0

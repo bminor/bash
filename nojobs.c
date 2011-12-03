@@ -887,10 +887,8 @@ wait_for (pid)
   return (return_val);
 }
 
-/* Give PID SIGNAL.  This determines what job the pid belongs to (if any).
-   If PID does belong to a job, and the job is stopped, then CONTinue the
-   job after giving it SIGNAL.  Returns -1 on failure.  If GROUP is non-null,
-   then kill the process group associated with PID. */
+/* Send PID SIGNAL.  Returns -1 on failure, 0 on success.  If GROUP is non-zero,
+   or PID is less than -1, then kill the process group associated with PID. */
 int
 kill_pid (pid, signal, group)
      pid_t pid;
@@ -898,6 +896,11 @@ kill_pid (pid, signal, group)
 {
   int result;
 
+  if (pid < -1)
+    {
+      pid = -pid;
+      group = 1;
+    }
   result = group ? killpg (pid, signal) : kill (pid, signal);
   return (result);
 }
