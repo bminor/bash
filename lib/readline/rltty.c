@@ -683,11 +683,29 @@ rl_prep_terminal (meta_flag)
   otio = tio;
 
   if (_rl_bind_stty_chars)
-    rl_tty_unset_default_bindings (_rl_keymap);
+    {
+#if defined (VI_MODE)
+      /* If editing in vi mode, make sure we restore the bindings in the
+	 insertion keymap no matter what keymap we ended up in. */
+      if (rl_editing_mode == vi_mode)
+	rl_tty_unset_default_bindings (vi_insertion_keymap);
+      else
+#endif
+	rl_tty_unset_default_bindings (_rl_keymap);
+    }
   save_tty_chars (&otio);
   RL_SETSTATE(RL_STATE_TTYCSAVED);
   if (_rl_bind_stty_chars)
-    _rl_bind_tty_special_chars (_rl_keymap, tio);
+    {
+#if defined (VI_MODE)
+      /* If editing in vi mode, make sure we set the bindings in the
+	 insertion keymap no matter what keymap we ended up in. */
+      if (rl_editing_mode == vi_mode)
+	_rl_bind_tty_special_chars (vi_insertion_keymap, tio);	
+      else
+#endif
+	_rl_bind_tty_special_chars (_rl_keymap, tio);
+    }
 
   prepare_terminal_settings (meta_flag, otio, &tio);
 

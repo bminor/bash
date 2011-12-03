@@ -153,7 +153,7 @@ set_winsize (tty)
 }
 
 #if defined (NO_TTY_DRIVER)
-
+/* Nothing */
 #elif defined (NEW_TTY_DRIVER)
 
 /* Values for the `flags' field of a struct bsdtty.  This tells which
@@ -635,7 +635,7 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
 
 #endif /* TERMIOS_TTY_DRIVER && _POSIX_VDISABLE */
 }
-#endif  /* NEW_TTY_DRIVER */
+#endif  /* !NEW_TTY_DRIVER */
 
 /* Put the terminal in CBREAK mode so that we can detect key presses. */
 #if defined (NO_TTY_DRIVER)

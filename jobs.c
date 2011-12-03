@@ -1858,7 +1858,7 @@ get_tty_state ()
 	}
 #endif /* TERMIOS_TTY_DRIVER */
       if (check_window_size)
-	get_new_window_size (0);
+	get_new_window_size (0, (int *)0, (int *)0);
     }
   return 0;
 }
@@ -2356,7 +2356,7 @@ if (job == NO_JOB)
 	      /* If the current job was stopped or killed by a signal, and
 		 the user has requested it, get a possibly new window size */
 	      if (check_window_size && (job == js.j_current || IS_FOREGROUND (job)))
-		get_new_window_size (0);
+		get_new_window_size (0, (int *)0, (int *)0);
 	    }
 	  else
 	    get_tty_state ();

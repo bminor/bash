@@ -12353,3 +12353,72 @@ bashline.c
 	- rearrange some code in bash_quote_filename so filenames with leading
 	  tildes containing spaces aren't tilde-expanded before being
 	  returned to the caller
+
+				   11/6
+				   ----
+lib/readline/display.c
+	- when deciding where to move the cursor in rl_redisplay and needing
+	  to move the cursor back after moving it vertically and compensate
+	  for invisible characters in the prompt string, make sure that
+	  _rl_last_c_pos is treated as an absolute cursor position in a
+	  multibyte locale and the wrap offset (number of invisible characters)
+	  is added explicitly when deciding how many characters to backspace
+
+				   11/10
+				   -----
+lib/readline/terminal.c
+	- _rl_set_screen_size now interprets a lines or columns argument < 0
+	  as an indication not to change the current value
+
+				   11/11
+				   -----
+
+lib/readline/terminal.c
+	- new function, rl_reset_screen_size, calls _rl_get_screen_size to
+	  reset readline's idea of the terminal size
+	- don't call _rl_get_screen_size in _rl_init_terminal_io if both	
+	  _rl_screenheight and _rl_screenwidth are > 0
+	- don't initialize _rl_screenheight and _rl_screenwidth to 0 in
+	  _rl_init_terminal_io; let caller take care of it
+	- set _rl_screenheight and _rl_screenwidth to 0 before calling
+	  _rl_init_terminal_io
+
+lib/readline/readline.h
+	- new extern declaration for rl_reset_screen_size
+
+lib/readline/doc/rltech.texi
+	- documented rl_reset_screen_size
+
+variables.c
+	- if readline is being used, compile in a special var function for
+	  assignments to LINES and COLUMNS that calls rl_set_screen_size or
+	  rl_reset_screen_size as appropriate.  Only do this in posix mode
+	  and only when STRICT_POSIX is defined at compile time
+	- new semaphore variable, winsize_assignment, set while doing an
+	  assignment to LINES or COLUMNS
+	- new variable, winsize_assigned, says LINES or COLUMNS was assigned
+	  to or found in the environment
+	- if in the middle of an assignment to LINES or COLUMNS, make
+	  sh_set_lines_and_columns a no-op
+
+lib/sh/winsize.c
+	- get_new_window_size now takes two int * arguments, to return the
+	  screen dimensions
+
+externs.h
+	- change extern declaration for get_new_window_size
+
+{jobs,nojobs}.c, parse.y
+	- change callers of get_new_window_size
+
+				   11/12
+				   -----
+lib/readline/terminal.c
+	- new variable, rl_prefer_env_winsize, gives LINES and COLUMNS
+	  precedence over values from the kernel when computing window size
+
+lib/readline/readline.h
+	- extern declaration for rl_prefer_env_winsize
+
+lib/readline/doc/rltech.texi
+	- document rl_prefer_env_winsize

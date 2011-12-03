@@ -1876,7 +1876,7 @@ shell_getc (remove_quoted_newline)
   if (sigwinch_received)
     {
       sigwinch_received = 0;
-      get_new_window_size (0);
+      get_new_window_size (0, (int *)0, (int *)0);
     }
       
   if (eol_ungetc_lookahead)

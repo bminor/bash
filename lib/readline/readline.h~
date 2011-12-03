@@ -303,6 +303,8 @@ extern int rl_bind_keyseq_in_map PARAMS((const char *, rl_command_func_t *, Keym
 extern int rl_bind_keyseq_if_unbound PARAMS((const char *, rl_command_func_t *));
 extern int rl_bind_keyseq_if_unbound_in_map PARAMS((const char *, rl_command_func_t *, Keymap));
 extern int rl_generic_bind PARAMS((int, const char *, char *, Keymap));
+
+extern char *rl_variable_value PARAMS((const char *));
 extern int rl_variable_bind PARAMS((const char *, const char *));
 
 /* Backwards compatibility, use rl_bind_keyseq_in_map instead. */
@@ -402,6 +404,7 @@ extern int rl_reset_terminal PARAMS((const char *));
 extern void rl_resize_terminal PARAMS((void));
 extern void rl_set_screen_size PARAMS((int, int));
 extern void rl_get_screen_size PARAMS((int *, int *));
+extern void rl_reset_screen_size PARAMS((void));
 
 extern char *rl_get_termcap PARAMS((const char *));
 
@@ -784,6 +787,7 @@ extern int rl_inhibit_completion;
 #define RL_STATE_CALLBACK	0x080000	/* using the callback interface */
 #define RL_STATE_VIMOTION	0x100000	/* reading vi motion arg */
 #define RL_STATE_MULTIKEY	0x200000	/* reading multiple-key command */
+#define RL_STATE_VICMDONCE	0x400000	/* entered vi command mode at least once */
 
 #define RL_STATE_DONE		0x800000	/* done; accepted line */
 

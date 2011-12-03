@@ -164,6 +164,9 @@ static void uidset __P((void));
 #if defined (ARRAY_VARS)
 static void make_vers_array __P((void));
 #endif
+#if defined (READLINE) && defined (STRICT_POSIX)
+static void init_lines_and_columns __P((void));
+#endif
 
 static SHELL_VAR *null_assign __P((SHELL_VAR *, char *, arrayind_t));
 #if defined (ARRAY_VARS)
@@ -510,11 +513,11 @@ initialize_shell_variables (env, privmode)
     }
 #endif /* HISTORY */
 
-#if defined (READLINE)
+#if defined (READLINE) && defined (STRICT_POSIX)
   /* POSIXLY_CORRECT will only be 1 here if the shell was compiled
      -DSTRICT_POSIX */
-  if (interactive_shell && /*posixly_correct && */no_line_editing == 0)
-    rl_prefer_env_winsize = 1;
+  if (interactive_shell && posixly_correct && no_line_editing == 0)
+    init_lines_and_columns ();
 #endif /* READLINE && STRICT_POSIX */
 
      /*
@@ -852,6 +855,55 @@ make_vers_array ()
 }
 #endif /* ARRAY_VARS */
 
+#if defined (READLINE) && defined (STRICT_POSIX)
+/* POSIX.2 says that LINES or COLUMNS found in the environment overrides
+   what the kernel says about the terminal size.  The easiest case is when
+   both are supplied; when only one is supplied we need to get defaults
+   from somewhere.  This is called before readline is initialized, so we
+   can't count on the current readline screen size.  We use the
+   WINSIZE_ASSIGNMENT semaphore to suppress changes to the variables while
+   getting the default values. */
+static void
+init_lines_and_columns ()
+{
+  SHELL_VAR *lv, *cv;
+  intmax_t xl, xc;
+  int l, c, rl, rc;
+
+  l = c = -1;
+  lv = find_variable ("LINES");
+  cv = find_variable ("COLUMNS");
+
+  /* If neither is supplied in the environment, we just return. */
+  if (lv == 0 && cv == 0)
+    return;
+  if (lv && legal_number (value_cell (lv), &xl))
+    l = xl;
+  if (cv && legal_number (value_cell (cv), &xc))
+    c = xc;
+  if (l > 0 && c > 0)
+    {
+      rl_set_screen_size (l, c);
+      return;
+    }
+
+  winsize_assignment = 1;		/* suppress variable modifications */  
+  get_new_window_size (0, &rl, &rc);	/* defaults */
+  winsize_assignment = 0;
+
+  if (l <= 0)
+    l = rl;
+  if (c <= 0)
+    c = rc;
+  /* This isn't exactly right if the terminal provides the autowrap capability,
+     but this will not be executed unless the shell is compiled for strict
+     posix compatibility and COLUMNS does not appear in the environment but
+     LINES does. */
+  rl_set_screen_size (l, c);
+  sh_set_lines_and_columns (l, c);	/* can now modify $LINES and $COLUMNS */
+}
+#endif /* READLINE && STRICT_POSIX */
+  
 /* Set the environment variables $LINES and $COLUMNS in response to
    a window size change. */
 void

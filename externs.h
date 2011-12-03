@@ -370,7 +370,7 @@ extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
 /* declarations for functions defined in lib/sh/winsize.c */
-extern void get_new_window_size __P((int));
+extern void get_new_window_size __P((int, int *, int *));
 
 /* declarations for functions defined in lib/sh/xstrchr.c */
 #undef xstrchr

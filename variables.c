@@ -94,6 +94,7 @@ extern char *command_execution_string;
 extern time_t shell_start_time;
 
 #if defined (READLINE)
+extern int no_line_editing;
 extern int perform_hostname_completion;
 #endif
 
@@ -140,6 +141,11 @@ pid_t dollar_dollar_pid;
 char **export_env = (char **)NULL;
 static int export_env_index;
 static int export_env_size;
+
+#if defined (READLINE)
+static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
+static int winsize_assigned;		/* assigned to LINES or COLUMNS */
+#endif
 
 /* Non-zero means that we have to remake EXPORT_ENV. */
 int array_needs_making = 1;
@@ -504,6 +510,13 @@ initialize_shell_variables (env, privmode)
     }
 #endif /* HISTORY */
 
+#if defined (READLINE) && defined (STRICT_POSIX)
+  /* POSIXLY_CORRECT will only be 1 here if the shell was compiled
+     -DSTRICT_POSIX */
+  if (interactive_shell && posixly_correct && no_line_editing == 0)
+    rl_prefer_env_winsize = 1;
+#endif /* READLINE && STRICT_POSIX */
+
      /*
       * 24 October 2001
       *
@@ -846,6 +859,10 @@ sh_set_lines_and_columns (lines, cols)
      int lines, cols;
 {
   char val[INT_STRLEN_BOUND(int) + 1], *v;
+
+  /* If we are currently assigning to LINES or COLUMNS, don't do anything. */
+  if (winsize_assignment)
+    return;
 
   v = inttostr (lines, val, sizeof (val));
   bind_variable ("LINES", v, 0);
@@ -3704,7 +3721,6 @@ pop_args ()
 extern int eof_encountered, eof_encountered_limit, ignoreeof;
 
 #if defined (READLINE)
-extern int no_line_editing;
 extern int hostname_list_initialized;
 #endif
 
@@ -3723,6 +3739,9 @@ struct name_and_function {
 
 static struct name_and_function special_vars[] = {
 #if defined (READLINE)
+#  if defined (STRICT_POSIX)
+  { "COLUMNS", sv_winsize },
+#  endif
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
@@ -3754,6 +3773,10 @@ static struct name_and_function special_vars[] = {
   { "LC_MESSAGES", sv_locale },
   { "LC_NUMERIC", sv_locale },
   { "LC_TIME", sv_locale },
+
+#if defined (READLINE) && defined (STRICT_POSIX)
+  { "LINES", sv_winsize },
+#endif
 
   { "MAIL", sv_mail },
   { "MAILCHECK", sv_mail },
@@ -3881,6 +3904,14 @@ sv_mail (name)
     }
 }
 
+/* What to do when GLOBIGNORE changes. */
+void
+sv_globignore (name)
+     char *name;
+{
+  setup_glob_ignore (name);
+}
+
 #if defined (READLINE)
 void
 sv_comp_wordbreaks (name)
@@ -3892,17 +3923,7 @@ sv_comp_wordbreaks (name)
   if (sv == 0)
     rl_completer_word_break_characters = (char *)NULL;
 }
-#endif
 
-/* What to do when GLOBIGNORE changes. */
-void
-sv_globignore (name)
-     char *name;
-{
-  setup_glob_ignore (name);
-}
-
-#if defined (READLINE)
 /* What to do just after one of the TERMxxx variables has changed.
    If we are an interactive shell, then try to reset the terminal
    information in readline. */
@@ -3926,6 +3947,39 @@ sv_hostfile (name)
   else
     hostname_list_initialized = 0;
 }
+
+#if defined (STRICT_POSIX)
+/* In strict posix mode, we allow assignments to LINES and COLUMNS (and values
+   found in the initial environment) to override the terminal size reported by
+   the kernel. */
+void
+sv_winsize (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  intmax_t xd;
+  int d;
+
+  if (posixly_correct == 0 || interactive_shell == 0 || no_line_editing)
+    return;
+
+  v = find_variable (name);
+  if (v == 0 || var_isnull (v))
+    rl_reset_screen_size ();
+  else
+    {
+      if (legal_number (value_cell (v), &xd) == 0)
+	return;
+      winsize_assignment = winsize_assigned = 1;
+      d = xd;			/* truncate */
+      if (name[0] == 'L')	/* LINES */
+	rl_set_screen_size (d, -1);
+      else			/* COLUMNS */
+	rl_set_screen_size (-1, d);
+      winsize_assignment = 0;
+    }
+}
+#endif /* STRICT_POSIX */
 #endif /* READLINE */
 
 /* Update the value of HOME in the export environment so tilde expansion will

@@ -404,6 +404,7 @@ extern int rl_reset_terminal PARAMS((const char *));
 extern void rl_resize_terminal PARAMS((void));
 extern void rl_set_screen_size PARAMS((int, int));
 extern void rl_get_screen_size PARAMS((int *, int *));
+extern void rl_reset_screen_size PARAMS((void));
 
 extern char *rl_get_termcap PARAMS((const char *));
 
@@ -530,6 +531,11 @@ extern const char *rl_terminal_name;
 /* The input and output streams. */
 extern FILE *rl_instream;
 extern FILE *rl_outstream;
+
+/* If non-zero, Readline gives values of LINES and COLUMNS from the environment
+   greater precedence than values fetched from the kernel when computing the
+   screen dimensions. */
+extern int rl_prefer_env_winsize;
 
 /* If non-zero, then this is the address of a function to call just
    before readline_internal () prints the first prompt. */

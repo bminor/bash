@@ -400,6 +400,12 @@ The stdio stream to which Readline performs output.
 If @code{NULL}, Readline defaults to @var{stdout}.
 @end deftypevar
 
+@detypevar int rl_prefer_env_winsize
+If non-zero, Readline gives values found in the @env{LINES} and
+@env{COLUMNS} environment variables greater precedence than values fetched
+from the kernel when computing the screen dimensions.
+@end deftypevar
+
 @deftypevar {rl_command_func_t *} rl_last_func
 The address of the last command function Readline executed.  May be used to
 test whether or not a function is being executed twice in succession, for
@@ -1392,7 +1398,8 @@ Update Readline's internal screen size by reading values from the kernel.
 
 @deftypefun void rl_set_screen_size (int rows, int cols)
 Set Readline's idea of the terminal size to @var{rows} rows and
-@var{cols} columns.
+@var{cols} columns.  If either @var{rows} or @var{columns} is less than
+or equal to 0, Readline's idea of that terminal dimension is unchanged.
 @end deftypefun
 
 If an application does not want to install a @code{SIGWINCH} handler, but
@@ -1402,6 +1409,10 @@ size may be queried.
 @deftypefun void rl_get_screen_size (int *rows, int *cols)
 Return Readline's idea of the terminal's size in the
 variables pointed to by the arguments.
+@end deftypefun
+
+@deftypefun void rl_reset_screen_size (void)
+Cause Readline to reobtain the screen size and recalculate its dimensions.
 @end deftypefun
 
 The following functions install and remove Readline's signal handlers.

@@ -342,6 +342,7 @@ extern void sv_locale __P((char *));
 extern void sv_comp_wordbreaks __P((char *));
 extern void sv_terminal __P((char *));
 extern void sv_hostfile __P((char *));
+extern void sv_winsize __P((char *));
 #endif
 
 #if defined (__CYGWIN__)
