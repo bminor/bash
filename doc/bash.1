@@ -1,4 +1,4 @@
-\"
+.\"
 .\" MAN PAGE COMMENTS to
 .\"
 .\"	Chet Ramey
@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Sep  8 13:43:16 EDT 2006
+.\"	Last Change: Thu Sep 28 10:25:59 EDT 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 September 8" "GNU Bash-3.2"
+.TH BASH 1 "2006 September 28" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1375,6 +1375,8 @@ subsequently reset.
 .B COMP_WORDS
 An array variable (see \fBArrays\fP below) consisting of the individual
 words in the current command line.
+The words are split on shell metacharacters as the shell parser would
+separate them.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).

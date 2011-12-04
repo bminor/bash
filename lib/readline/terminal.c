@@ -197,6 +197,7 @@ _emx_get_screensize (swp, shp)
 #endif
 
 #if defined (__MINGW32__)
+static void
 _win_get_screensize (swp, shp)
      int *swp, *shp;
 {
@@ -206,9 +207,11 @@ _win_get_screensize (swp, shp)
   hConOut = GetStdHandle (STD_OUTPUT_HANDLE);
   if (hConOut != INVALID_HANDLE_VALUE)
     {
-      GetConsoleScreenBufferInfo (hConOut, &scr);
-      *swp = scr.dwSize.X;
-      *shp = scr.srWindow.Bottom - scr.srWindow.Top + 1;
+      if (GetConsoleScreenBufferInfo (hConOut, &scr))
+	{
+	  *swp = scr.dwSize.X;
+	  *shp = scr.srWindow.Bottom - scr.srWindow.Top + 1;
+	}
     }
 }
 #endif
