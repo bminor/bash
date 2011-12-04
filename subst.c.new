@@ -6907,7 +6907,7 @@ add_string:
 	  {
 	    t_index = sindex++;
 
-	    temp = string_extract (string, &sindex, "`", EX_REQMATCH);
+	    temp = string_extract (string, &sindex, "`", EX_REQMATCH|EX_BACKQ);
 	    /* The test of sindex against t_index is to allow bare instances of
 	       ` to pass through, for backwards compatibility. */
 	    if (temp == &extract_string_error || temp == &extract_string_fatal)

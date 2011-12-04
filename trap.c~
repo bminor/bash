@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -452,7 +452,7 @@ set_sigint_handler ()
   else if (interactive)	/* XXX - was interactive_shell */
     return (set_signal_handler (SIGINT, sigint_sighandler));
   else
-    return (set_signal_handler (SIGINT, termination_unwind_protect));
+    return (set_signal_handler (SIGINT, termsig_sighandler));
 }
 
 /* Return the correct handler for signal SIG according to the values in
@@ -494,17 +494,9 @@ set_signal (sig, string)
     {
       /* If we aren't sure of the original value, check it. */
       if (original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER)
-	{
-	  original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL);
-	  set_signal_handler (sig, original_signals[sig]);
-	}
-
-      /* Signals ignored on entry to the shell cannot be trapped or reset. */
+        GETORIGSIG (sig);
       if (original_signals[sig] == SIG_IGN)
-	{
-	  sigmodes[sig] |= SIG_HARD_IGNORE;
-	  return;
-	}
+	return;
     }
 
   /* Only change the system signal handler if SIG_NO_TRAP is not set.
@@ -897,15 +889,15 @@ reset_or_restore_signal_handlers (reset)
      substitutions inherit them.  Let command substitution inherit the
      RETURN trap if we're in the debugger and tracing functions. */
 #if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
+  if (debugging_mode == 0 && function_trace_mode == 0)
 #endif
     sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
 #if defined (DEBUGGER)
-  if (debugging_mode == 0 || error_trace_mode == 0)
+  if (debugging_mode == 0 && error_trace_mode == 0)
 #endif
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
 #if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
+  if (debugging_mode == 0 && function_trace_mode == 0)
 #endif
     sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 }

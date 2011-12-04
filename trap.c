@@ -888,18 +888,13 @@ reset_or_restore_signal_handlers (reset)
      `functrace' or `errtrace' options have been set, then let command
      substitutions inherit them.  Let command substitution inherit the
      RETURN trap if we're in the debugger and tracing functions. */
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
-#endif
-    sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || error_trace_mode == 0)
-#endif
+  if (function_trace_mode == 0)
+    {
+      sigmodes[DEBUG_TRAP] &= ~SIG_TRAPPED;
+      sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
+    }
+  if (error_trace_mode == 0)
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
-#if defined (DEBUGGER)
-  if (debugging_mode == 0 || function_trace_mode == 0)
-#endif
-    sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
 }
 
 /* Reset trapped signals to their original values, but don't free the

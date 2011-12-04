@@ -313,6 +313,9 @@ mkseq (start, end, incr, type)
   n = start;
   do
     {
+#if defined (SHELL)
+      QUIT;		/* XXX - memory leak here */
+#endif
       if (type == ST_INT)
 	result[i++] = itos (n);
       else

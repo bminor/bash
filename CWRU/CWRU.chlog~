@@ -12958,7 +12958,7 @@ bashline.c
 	  and bash_directory_expansion
 
 lib/readline/doc/rltech.texi
-	- add note to description of rl_direcotory_completion_hook that it
+	- add note to description of rl_directory_completion_hook that it
 	  needs to dequote the directory name even if no other expansions are
 	  performed
 
@@ -13082,7 +13082,8 @@ lib/readline/bind.c
 	  functions using the ANYOTHERKEY binding code.
 
 variables.c
-	- shells running in posix mode do not set $HOME, as POSIX requires
+	- shells running in posix mode do not set $HOME, as POSIX apparently
+	  requires
 
 				   2/15
 				   ----
@@ -13105,3 +13106,48 @@ lib/readline/readline.c
 lib/readline/display.c
 	- further fixes to _rl_make_prompt_for_search from Eric Blake to deal
 	  with multiple calls to expand_prompt
+
+				   2/21
+				   ----
+builtins/hash.def
+	- don't print `hash table empty' message in posix mode
+
+				   2/27
+				   ----
+lib/glob/sm_loop.c
+	- change extmatch() to turn off FNM_PERIOD in flags passed to recursive
+	  calls to gmatch() when calling it with a substring after the start
+	  of the string it receives.  Changed `+', `*', `?, `@', and `!' cases
+	  to do the right thing.  Fixes bug reported by Benoit Vila
+	  <bvila@free.fr>
+
+braces.c
+	- add QUIT; statements to mkseq to make large sequence generation
+	  interruptible
+
+				   2/28
+				   ----
+lib/glob/glob.c
+	- initialize nalloca in glob_vector
+
+				    3/1
+				    ---
+lib/glob/glob.c
+	- in glob_vector, when freeing up the linked list after some error,
+	  make sure to set `tmplink' to 0 if `firstlink' is set to 0, else we
+	  get multiple-free errors
+
+				    3/5
+				    ---
+trap.c
+	- change `||' to `&&' and make the DEBUG, ERR, and RETURN traps
+	  inherited when the appropriate shell options are set, not just when
+	  the shell is in debugging mode and the appropriate options are set.
+	  This matches the documentation.
+	  Reported by Philip Susi <psusi@cfl.rr.com>
+
+parse.y
+	- in parse_matched_pair, don't recursively parse ${...} or other
+	  ${...} constructs inside ``
+	- in parse_matched_pair, remove special code that recursively parses
+	  quoted strings inside `` constructs.  For Bourne shell compatibility

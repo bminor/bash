@@ -193,7 +193,7 @@ esac
 
 MYDIR=$PWD      # save where we are
 
-TESTDIR=/tmp/eglob-test
+TESTDIR=/tmp/eglob-test-$$
 mkdir $TESTDIR
 builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
 rm -rf *
@@ -359,5 +359,7 @@ recho "${x#*(a|b)cd}"
 # this is for the benefit of pure coverage, so it writes the pcv file
 # in the right place
 builtin cd $MYDIR
+
+${THIS_SH} ./extglob1.sub
 
 exit 0

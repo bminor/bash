@@ -178,7 +178,7 @@ helpdoc:	$(MKBUILTINS) $(DEFSRC)
 
 install-help:
 	@-if test -n "${HELPDIR}" && test -d helpfiles ; then \
-		test -d ${HELPDIR} || ${SHELL} ${MKDIRS} $(DESTDIR)$(HELPDIR) ;\
+		test -d $(DESTDIR)${HELPDIR} || ${SHELL} ${MKDIRS} $(DESTDIR)$(HELPDIR) ;\
 		( for f in helpfiles/*; do \
 			echo installing $$f; \
 			${INSTALL_DATA} $$f $(DESTDIR)$(HELPDIR); \

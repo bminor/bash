@@ -2737,6 +2737,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
+/* itrace("parse_matched_pair: open = %c close = %c", open, close); */
   count = 1;
   pass_next_character = backq_backslash = was_dollar = in_comment = 0;
   check_comment = (flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
@@ -2824,8 +2825,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	{
 	  if MBTEST((flags & P_ALLOWESC) && ch == '\\')
 	    pass_next_character++;
+#if 0
 	  else if MBTEST((flags & P_BACKQUOTE) && ch == '\\')
 	    backq_backslash++;
+#endif
 	  continue;
 	}
 
@@ -2908,6 +2911,7 @@ add_nestret:
 	    }
 	  FREE (nestret);
 	}
+#if 0
       else if MBTEST(qc == '`' && (ch == '"' || ch == '\'') && in_comment == 0)
 	{
 	  /* Add P_BACKQUOTE so backslash quotes the next character and
@@ -2917,7 +2921,8 @@ add_nestret:
 	  nestret = parse_matched_pair (0, ch, ch, &nestlen, rflags|P_BACKQUOTE);
 	  goto add_nestret;
 	}
-      else if MBTEST(was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+#endif
+      else if MBTEST(open != '`' && was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	/* check for $(), $[], or ${} inside quoted string. */
 	{
 	  if (open == ch)	/* undo previous increment */

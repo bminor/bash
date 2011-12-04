@@ -508,7 +508,10 @@ glob_vector (pat, dir, flags)
 		{
 		  nextlink = (struct globval *) malloc (sizeof (struct globval));
 		  if (firstmalloc == 0)
+{
 		    firstmalloc = nextlink;
+itrace("glob_vector: switching from alloca to malloc for nextlink: count = %d", count);
+}
 		}
 	      nextname = (char *) malloc (D_NAMLEN (dp) + 1);
 	      if (nextlink == 0 || nextname == 0)
