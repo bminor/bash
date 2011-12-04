@@ -1461,7 +1461,9 @@ command_word_completion_function (hint_text, state)
   else
     {
       int match, freetemp;
-      char *temp;
+#if 0
+      char *temp;		/* shadows previous declaration */
+#endif
 
       if (absolute_program (hint))
 	{
@@ -1760,8 +1762,9 @@ bash_servicename_completion_function (text, state)
       if (snamelen == 0 || (STREQN (sname, srvent->s_name, snamelen)))
 	break;
       /* Not primary, check aliases */
-      for (alist = srvent->s_aliases; aentry = *alist; alist++)
+      for (alist = srvent->s_aliases; *alist; alist++)
 	{
+	  aentry = *alist;
 	  if (STREQN (sname, aentry, snamelen))
 	    {
 	      afound = 1;

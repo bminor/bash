@@ -273,7 +273,6 @@ expand_compound_array_assignment (value, flags)
   WORD_LIST *list, *nlist;
   char *val;
   int ni;
-  arrayind_t ind, last_ind;
 
   /* I don't believe this condition is ever true any more. */
   if (*value == '(')	/*)*/

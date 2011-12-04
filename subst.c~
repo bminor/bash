@@ -949,8 +949,8 @@ string_extract_verbatim (string, slen, sindex, charlist)
 		  len = mbstowcs (wcharlist, charlist, 0);
 		  if (len == -1)
 		    len = 0;
-		  wcharlist = (wchar_t *)xmalloc ((sizeof (wchar_t) * len) + 1);
-		  mbstowcs (wcharlist, charlist, len);
+		  wcharlist = (wchar_t *)xmalloc (sizeof (wchar_t) * (len + 1));
+		  mbstowcs (wcharlist, charlist, len + 1);
 		}
 
 	      if (wcschr (wcharlist, wc))
@@ -1583,7 +1583,8 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
       while (delims[i])
 	{
 #if defined (HANDLE_MULTIBYTE)
-	  mbstate_t state_bak = state;
+	  mbstate_t state_bak;
+	  state_bak = state;
 	  mblength = MBRLEN (delims + i, slength, &state);
 	  if (MB_INVALIDCH (mblength))
 	    state = state_bak;
@@ -2035,7 +2036,7 @@ list_string (string, separators, quoted)
 	  sindex++;
 	  /* An IFS character that is not IFS white space, along with any
 	     adjacent IFS white space, shall delimit a field. (SUSv3) */
-	  while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+	  while (string[sindex] && spctabnl (string[sindex]) && isifs (string[sindex]))
 	    sindex++;
 	}
     }
@@ -2223,7 +2224,7 @@ do_compound_assignment (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
-  int off, mklocal;
+  int mklocal;
   WORD_LIST *list;
 
   mklocal = flags & ASS_MKLOCAL;
@@ -2254,7 +2255,7 @@ do_assignment_internal (word, expand)
      int expand;
 {
   int offset, tlen, appendop, assign_list, aflags;
-  char *name, *value, *ovalue, *nvalue;
+  char *name, *value;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
@@ -2286,11 +2287,7 @@ do_assignment_internal (word, expand)
       tlen = STRLEN (temp);
 
 #if defined (ARRAY_VARS)
-#  if 0
-      if (expand && temp[0] == LPAREN && temp[tlen-1] == RPAREN)
-#else
       if (expand && (word->flags & W_COMPASSIGN))
-#endif
 	{
 	  assign_list = ni = 1;
 	  value = extract_array_assignment_list (temp, &ni);
@@ -3346,9 +3343,8 @@ remove_wpattern (wparam, wstrlen, wpattern, op)
      wchar_t *wpattern;
      int op;
 {
-  wchar_t wc;
-  int n, n1;
-  wchar_t *ret;
+  wchar_t wc, *ret;
+  int n;
 
   switch (op)
     {
@@ -3802,7 +3798,9 @@ getpattern (value, quoted, expandpat)
 {
   char *pat, *tword;
   WORD_LIST *l;
+#if 0
   int i;
+#endif
 
   /* There is a problem here:  how to handle single or double quotes in the
      pattern string when the whole expression is between double quotes?
@@ -5655,7 +5653,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
 {
   WORD_LIST *save, *params;
   WORD_DESC *w;
-  char *ret, *tt;
+  char *ret;
 
   save = params = list_rest_of_args ();
   if (save == 0)

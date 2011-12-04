@@ -76,7 +76,6 @@ static void restore_signal __P((int));
 static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
 
 /* Variables used here but defined in other files. */
-extern int interrupt_immediately;
 extern int last_command_exit_value;
 extern int line_number;
 

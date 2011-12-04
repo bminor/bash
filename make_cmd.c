@@ -750,7 +750,6 @@ make_function_def (name, command, lineno, lstart)
 #if defined (ARRAY_VARS)
   SHELL_VAR *bash_source_v;
   ARRAY *bash_source_a;
-  char *t;
 #endif
 
   temp = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));

@@ -2365,11 +2365,13 @@ _rl_col_width (str, start, end)
      int start, end;
 {
   wchar_t wc;
-  mbstate_t ps = {0};
+  mbstate_t ps;
   int tmp, point, width, max;
 
   if (end <= start)
     return 0;
+
+  memset (&ps, 0, sizeof (mbstate_t));
 
   point = 0;
   max = end;

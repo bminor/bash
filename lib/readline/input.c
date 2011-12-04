@@ -550,21 +550,21 @@ _rl_read_mbchar (mbchar, size)
 }
 
 /* Read a multibyte-character string whose first character is FIRST into
-   the buffer MB of length MBLEN.  Returns the last character read, which
+   the buffer MB of length MLEN.  Returns the last character read, which
    may be FIRST.  Used by the search functions, among others.  Very similar
    to _rl_read_mbchar. */
 int
-_rl_read_mbstring (first, mb, mblen)
+_rl_read_mbstring (first, mb, mlen)
      int first;
      char *mb;
-     int mblen;
+     int mlen;
 {
   int i, c;
   mbstate_t ps;
 
   c = first;
-  memset (mb, 0, mblen);
-  for (i = 0; i < mblen; i++)
+  memset (mb, 0, mlen);
+  for (i = 0; i < mlen; i++)
     {
       mb[i] = (char)c;
       memset (&ps, 0, sizeof (mbstate_t));

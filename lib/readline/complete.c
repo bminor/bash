@@ -1104,7 +1104,8 @@ compute_lcd_of_matches (match_list, matches, text)
 #if defined (HANDLE_MULTIBYTE)
 	    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	      {
-		mbstate_t ps_back = ps1;
+		mbstate_t ps_back;
+		ps_back = ps1;
 		if (!_rl_compare_chars (match_list[i], si, &ps1, match_list[i+1], si, &ps2))
 		  break;
 		else if ((v = _rl_get_char_len (&match_list[i][si], &ps_back)) > 1)
@@ -1896,7 +1897,6 @@ rl_filename_completion_function (text, state)
   static char *filename = (char *)NULL;
   static char *dirname = (char *)NULL;
   static char *users_dirname = (char *)NULL;
-  static char *orig_filename = (char *)NULL;
   static int filename_len;
   char *temp;
   int dirlen;

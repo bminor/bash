@@ -48,7 +48,6 @@ extern int errno;
 #endif /* !errno */
 
 extern int expand_aliases;
-extern int interrupt_immediately;
 extern int interactive_comments;
 extern int check_hashed_filenames;
 extern int source_uses_path;

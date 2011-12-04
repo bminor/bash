@@ -950,7 +950,7 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      rl_compentry_func_t *our_func;
      int found_quote, quote_char;
 {
-  char **matches, *temp;
+  char **matches;
 
   rl_completion_found_quote = found_quote;
   rl_completion_quote_character = quote_char;
@@ -969,28 +969,9 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
 	}
     }
 
-  /* Beware -- we're stripping the quotes here.  Do this only if we know
-     we are doing filename completion and the application has defined a
-     filename dequoting function. */
-  /* XXX -- can move this into rl_filename_completion_function and use
-     rl_completion_found_quote and rl_completion_quote_char.  Should be
-     after the directory rewriting hook and maybe the directory completion
-     hook.  Also need to change bash_directory_expansion in the same way
-     as rl_filename_completion_function. */
-  temp = (char *)NULL;
-
-#if 0
-  if (found_quote && our_func == rl_filename_completion_function &&
-      rl_filename_dequoting_function)
-    {
-      /* delete single and double quotes */
-      temp = (*rl_filename_dequoting_function) (text, quote_char);
-      text = temp;	/* not freeing text is not a memory leak */
-    }
-#endif
+  /* XXX -- filename dequoting moved into rl_filename_completion_function */
 
   matches = rl_completion_matches (text, our_func);
-  FREE (temp);
   return matches;  
 }
 

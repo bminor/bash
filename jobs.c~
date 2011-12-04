@@ -142,7 +142,6 @@ typedef int sh_job_map_func_t __P((JOB *, int, int, int));
 /* Variables used here but defined in other files. */
 extern int subshell_environment, line_number;
 extern int posixly_correct, shell_level;
-extern int interrupt_immediately;
 extern int last_command_exit_value, last_command_exit_signal;
 extern int loop_level, breaking;
 extern int sourcelevel;
@@ -761,7 +760,7 @@ bgp_search (pid)
 static void
 bgp_prune ()
 {
-  struct pidstat *ps, *p;
+  struct pidstat *ps;
 
   while (bgpids.npid > js.c_childmax)
     {
@@ -975,8 +974,7 @@ delete_job (job_index, dflags)
 {
   register JOB *temp;
   PROCESS *proc;
-  int ndel, status;
-  pid_t pid;
+  int ndel;
 
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return;
@@ -1079,7 +1077,6 @@ add_process (name, pid)
 {
   PROCESS *t, *p;
 
-itrace("add_process: name = %s running_trap = %d", name, running_trap);
 #if defined (RECYCLES_PIDS)
   int j;
   p = find_process (pid, 0, &j);
@@ -1670,7 +1667,6 @@ make_child (command, async_p)
   sigemptyset (&oset);
   sigprocmask (SIG_BLOCK, &set, &oset);
 
-itrace("make_child: command = %s", command ? command : "");
   making_children ();
 
 #if defined (BUFFERED_INPUT)
@@ -3436,7 +3432,6 @@ notify_of_job_status ()
 	      fprintf (stderr, "\n");
 	      if (dir == 0)
 		dir = current_working_directory ();
-itrace("calling pretty_print_job for job %d", job);
 	      pretty_print_job (job, JLIST_STANDARD, stderr);
 	      if (dir && (strcmp (dir, jobs[job]->wd) != 0))
 		fprintf (stderr,

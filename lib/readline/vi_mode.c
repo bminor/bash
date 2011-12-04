@@ -738,7 +738,7 @@ _rl_vi_change_mbchar_case (count)
 {
   wchar_t wc;
   char mb[MB_LEN_MAX+1];
-  int mblen, p;
+  int mlen, p;
   mbstate_t ps;
 
   memset (&ps, 0, sizeof (mbstate_t));
@@ -762,9 +762,9 @@ _rl_vi_change_mbchar_case (count)
       if (wc)
 	{
 	  p = rl_point;
-	  mblen = wcrtomb (mb, wc, &ps);
-	  if (mblen >= 0)
-	    mb[mblen] = '\0';
+	  mlen = wcrtomb (mb, wc, &ps);
+	  if (mlen >= 0)
+	    mb[mlen] = '\0';
 	  rl_begin_undo_group ();
 	  rl_vi_delete (1, 0);
 	  if (rl_point < p)	/* Did we retreat at EOL? */
@@ -1457,9 +1457,9 @@ _rl_vi_change_char (count, c, mb)
 }
 
 static int
-_rl_vi_callback_getchar (mb, mblen)
+_rl_vi_callback_getchar (mb, mlen)
      char *mb;
-     int mblen;
+     int mlen;
 {
   int c;
 
@@ -1469,7 +1469,7 @@ _rl_vi_callback_getchar (mb, mblen)
 
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    c = _rl_read_mbstring (c, mb, mblen);
+    c = _rl_read_mbstring (c, mb, mlen);
 #endif
 
   return c;

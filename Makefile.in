@@ -147,8 +147,11 @@ LDFLAGS_FOR_BUILD = $(LDFLAGS)
 
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
-GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
-		 -Wcast-align -Wstrict-prototypes -Wconversion \
+# Maybe add: -Wextra
+GCC_LINT_FLAGS = -O -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wno-parentheses \
+		 -Wcast-align -Wstrict-prototypes -Wconversion -Wformat \
+		 -Wformat-nonliteral -Wmissing-braces -Wuninitialized \
+		 -Wmissing-declarations  -Winline \
 		 -Wmissing-prototypes -Wtraditional -Wredundant-decls -pedantic
 
 GCC_LINT_CFLAGS = $(BASE_CCFLAGS) $(CPPFLAGS) $(GCC_LINT_FLAGS)

@@ -1306,20 +1306,11 @@ static SHELL_VAR *
 get_comp_wordbreaks (var)
      SHELL_VAR *var;
 {
-  char *p;
-
   /* If we don't have anything yet, assign a default value. */
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
-#if 0
-  FREE (value_cell (var));
-  p = savestring (rl_completer_word_break_characters);
-  
-  var_setvalue (var, p);
-#else
   var_setvalue (var, rl_completer_word_break_characters);
-#endif
 
   return (var);
 }
@@ -2033,16 +2024,11 @@ bind_int_variable (lhs, rhs)
      char *lhs, *rhs;
 {
   register SHELL_VAR *v;
-  char *t;
   int isint, isarr;
 
   isint = isarr = 0;
 #if defined (ARRAY_VARS)
-#  if 0
-  if (t = xstrchr (lhs, '['))	/*]*/
-#  else
   if (valid_array_reference (lhs))
-#  endif
     {
       isarr = 1;
       v = array_variable_part (lhs, (char **)0, (int *)0);

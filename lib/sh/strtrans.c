@@ -176,7 +176,7 @@ ansic_quote (str, flags, rlen)
      int flags, *rlen;
 {
   char *r, *ret, *s;
-  int l, rsize, t;
+  int l, rsize;
   unsigned char c;
 
   if (str == 0 || *str == 0)

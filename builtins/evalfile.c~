@@ -201,7 +201,6 @@ file_error_and_exit:
 #if defined (ARRAY_VARS)
   array_push (bash_source_a, (char *)filename);
   t = itos (executing_line_number ());
-itrace("evalfile: pushing %s to bash_lineno array");
   array_push (bash_lineno_a, t);
   free (t);
   array_push (funcname_a, "source");	/* not exactly right */

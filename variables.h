@@ -330,7 +330,6 @@ extern int get_random_number __P((void));
 extern void sv_ifs __P((char *));
 extern void sv_path __P((char *));
 extern void sv_mail __P((char *));
-extern void sv_comp_wordbreaks __P((char *));
 extern void sv_globignore __P((char *));
 extern void sv_ignoreeof __P((char *));
 extern void sv_strict_posix __P((char *));

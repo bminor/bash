@@ -205,10 +205,6 @@ static void reset_readline_prompt __P((void));
 #endif
 static void print_prompt __P((void));
 
-#if defined (HISTORY)
-char *history_delimiting_chars __P((void));
-#endif
-
 #if defined (HANDLE_MULTIBYTE)
 static void set_line_mbstate __P((void));
 static char *shell_input_line_property = NULL;
@@ -1876,7 +1872,6 @@ shell_getc (remove_quoted_newline)
   register int i;
   int c;
   unsigned char uc;
-  static int mustpop = 0;
 
   QUIT;
 
@@ -2956,8 +2951,8 @@ static int
 parse_dparen (c)
      int c;
 {
-  int cmdtyp, len, sline;
-  char *wval, *wv2;
+  int cmdtyp, sline;
+  char *wval;
   WORD_DESC *wd;
 
 #if defined (ARITH_FOR_COMMAND)
@@ -4160,7 +4155,7 @@ decode_prompt_string (string)
 	    case 'W':
 	      {
 		/* Use the value of PWD because it is much more efficient. */
-		char t_string[PATH_MAX], *t;
+		char t_string[PATH_MAX];
 		int tlen;
 
 		temp = get_string_value ("PWD");
@@ -4371,15 +4366,15 @@ yyerror (msg)
 }
 
 static char *
-error_token_from_token (token)
-     int token;
+error_token_from_token (tok)
+     int tok;
 {
   char *t;
 
-  if (t = find_token_in_alist (token, word_token_alist, 0))
+  if (t = find_token_in_alist (tok, word_token_alist, 0))
     return t;
 
-  if (t = find_token_in_alist (token, other_token_alist, 0))
+  if (t = find_token_in_alist (tok, other_token_alist, 0))
     return t;
 
   t = (char *)NULL;

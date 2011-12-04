@@ -653,7 +653,7 @@ _rl_vi_save_insert (up)
 {
   int len, start, end;
 
-  if (up == 0)
+  if (up == 0 || up->what != UNDO_INSERT)
     {
       if (vi_insert_buffer_size >= 1)
 	vi_insert_buffer[0] = '\0';
@@ -1457,9 +1457,9 @@ _rl_vi_change_char (count, c, mb)
 }
 
 static int
-_rl_vi_callback_getchar (mb, mblen)
+_rl_vi_callback_getchar (mb, mlen)
      char *mb;
-     int mblen;
+     int mlen;
 {
   int c;
 
@@ -1469,7 +1469,7 @@ _rl_vi_callback_getchar (mb, mblen)
 
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    c = _rl_read_mbstring (c, mb, mblen);
+    c = _rl_read_mbstring (c, mb, mlen);
 #endif
 
   return c;

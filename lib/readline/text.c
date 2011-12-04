@@ -1237,8 +1237,8 @@ rl_change_case (count, op)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc, nwc;
   char mb[MB_LEN_MAX+1];
-  int mblen;
-  mbstate_t ps;
+  int mlen;
+  mbstate_t mps;
 #endif
 
   start = rl_point;
@@ -1255,7 +1255,7 @@ rl_change_case (count, op)
     SWAP (start, end);
 
 #if defined (HANDLE_MULTIBYTE)
-  memset (&ps, 0, sizeof (mbstate_t));
+  memset (&mps, 0, sizeof (mbstate_t));
 #endif
 
   /* We are going to modify some text, so let's prepare to undo it. */
@@ -1290,15 +1290,15 @@ rl_change_case (count, op)
 #if defined (HANDLE_MULTIBYTE)
       else
 	{
-	  mbrtowc (&wc, rl_line_buffer + start, end - start, &ps);
+	  mbrtowc (&wc, rl_line_buffer + start, end - start, &mps);
 	  nwc = (nop == UpCase) ? _rl_to_wupper (wc) : _rl_to_wlower (wc);
 	  if  (nwc != wc)	/*  just skip unchanged characters */
 	    {
-	      mblen = wcrtomb (mb, nwc, &ps);
-	      if (mblen > 0)
-		mb[mblen] = '\0';
+	      mlen = wcrtomb (mb, nwc, &mps);
+	      if (mlen > 0)
+		mb[mlen] = '\0';
 	      /* Assume the same width */
-	      strncpy (rl_line_buffer + start, mb, mblen);
+	      strncpy (rl_line_buffer + start, mb, mlen);
 	    }
 	}
 #endif

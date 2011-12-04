@@ -142,7 +142,6 @@ typedef int sh_job_map_func_t __P((JOB *, int, int, int));
 /* Variables used here but defined in other files. */
 extern int subshell_environment, line_number;
 extern int posixly_correct, shell_level;
-extern int interrupt_immediately;
 extern int last_command_exit_value, last_command_exit_signal;
 extern int loop_level, breaking;
 extern int sourcelevel;
@@ -761,7 +760,7 @@ bgp_search (pid)
 static void
 bgp_prune ()
 {
-  struct pidstat *ps, *p;
+  struct pidstat *ps;
 
   while (bgpids.npid > js.c_childmax)
     {
@@ -975,8 +974,7 @@ delete_job (job_index, dflags)
 {
   register JOB *temp;
   PROCESS *proc;
-  int ndel, status;
-  pid_t pid;
+  int ndel;
 
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return;
@@ -2827,14 +2825,14 @@ start_job (job, foreground)
   if (foreground)
     {
       pid_t pid;
-      int s;
+      int st;
 
       pid = find_last_pid (job, 0);
       UNBLOCK_CHILD (oset);
-      s = wait_for (pid);
+      st = wait_for (pid);
       shell_tty_info = save_stty;
       set_tty_state ();
-      return (s);
+      return (st);
     }
   else
     {

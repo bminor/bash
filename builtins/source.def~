@@ -68,7 +68,9 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static void maybe_pop_dollar_vars __P((void));
+#if defined (RESTRICTED_SHELL)
+extern int restricted;
+#endif
 
 /* If non-zero, `.' uses $PATH to look up the script to be sourced. */
 int source_uses_path = 1;

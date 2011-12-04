@@ -815,7 +815,7 @@ gen_wordlist_matches (cs, text)
 {
   WORD_LIST *l, *l2;
   STRINGLIST *sl;
-  int nw, tlen, qc;
+  int nw, tlen;
   char *ntxt;		/* dequoted TEXT to use in comparisons */
 
   if (cs->words == 0 || cs->words[0] == '\0')

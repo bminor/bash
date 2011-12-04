@@ -147,8 +147,11 @@ LDFLAGS_FOR_BUILD = $(LDFLAGS)
 
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
-GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
-		 -Wcast-align -Wstrict-prototypes -Wconversion \
+# Maybe add: -Wextra
+GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wno-parentheses \
+		 -Wcast-align -Wstrict-prototypes -Wconversion -Wformat \
+		 -Wformat-nonliteral -Wmissing-braces -Wuninitialized \
+		 -Wmissing-declarations  -Winline \
 		 -Wmissing-prototypes -Wtraditional -Wredundant-decls -pedantic
 
 GCC_LINT_CFLAGS = $(BASE_CCFLAGS) $(CPPFLAGS) $(GCC_LINT_FLAGS)
@@ -201,7 +204,7 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
 		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
 		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c \
-		${SH_LIBSRC}/shaccess.c
+		${SH_LIBSRC}/eaccess.c ${SH_LIBSRC}/wcsdup.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -499,7 +502,7 @@ CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  tests/recho$(EXEEXT) tests/zecho$(EXEEXT) \
 		  tests/printenv$(EXEEXT) mksignames$(EXEEXT) lsignames.h \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
-		  buildversion.o mksignames.o signames.o
+		  buildversion.o mksignames.o signames.o buildsignames.o
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
 		    stamp-h po/POTFILES
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \

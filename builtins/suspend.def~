@@ -48,15 +48,13 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-static sighandler suspend_continue __P((int));
-
 static SigHandler *old_cont;
 #if 0
 static SigHandler *old_stop;
 #endif
 
 /* Continue handler. */
-static sighandler
+sighandler
 suspend_continue (sig)
      int sig;
 {

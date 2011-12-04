@@ -78,7 +78,6 @@ void
 set_default_locale_vars ()
 {
   char *val;
-  int r;
 
 #if defined (HAVE_SETLOCALE)
 

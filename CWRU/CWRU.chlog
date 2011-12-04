@@ -13516,7 +13516,7 @@ lib/readline/display.c
 				    7/5
 				    ---
 builtins/printf.def
-	- add echo's write error handling to printf.  Suggested by
+	- add more of echo's write error handling to printf.  Suggested by
 	  martin.wilck@fujitsu-siemens.com
 
 				    7/7
@@ -13566,3 +13566,17 @@ lib/malloc/{stats,table}.h
 lib/termcap/{termcap,tparam}.c
 	- include <string.h> and provide macro replacement for bcopy if
 	  necessary
+
+				   7/27
+				   ----
+lib/readline/histexpand.c
+	- add support for `<<<' here-string redirection operator to
+	  history_tokenize_word.  Bug reported by agriffis@gentoo.org
+
+externs.h	
+	- don't add prototype for strerror() if HAVE_STRERROR defined
+
+				   7/29
+				   ----
+subst.c
+	- in list_string, use `string' instead of `s' -- s is not initialized

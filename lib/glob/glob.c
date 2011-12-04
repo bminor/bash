@@ -184,7 +184,7 @@ mbskipname (pat, dname)
 {
   int ret;
   wchar_t *pat_wc, *dn_wc;
-  size_t pat_n, dn_n, n;
+  size_t pat_n, dn_n;
 
   pat_n = xdupmbstowcs (&pat_wc, NULL, pat);
   dn_n = xdupmbstowcs (&dn_wc, NULL, dname);

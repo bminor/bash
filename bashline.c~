@@ -1254,7 +1254,6 @@ command_word_completion_function (hint_text, state)
 
       mapping_over = searching_path = 0;
       hint_is_dir = CMD_IS_DIR (hint_text);
-
       val = (char *)NULL;
 
       temp = rl_variable_value ("completion-ignore-case");
@@ -1462,7 +1461,9 @@ command_word_completion_function (hint_text, state)
   else
     {
       int match, freetemp;
-      char *temp;
+#if 0
+      char *temp;		/* shadows previous declaration */
+#endif
 
       if (absolute_program (hint))
 	{

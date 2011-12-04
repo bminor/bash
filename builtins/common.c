@@ -467,9 +467,6 @@ char *
 get_working_directory (for_whom)
      char *for_whom;
 {
-  char *directory;
-  size_t dsize;
-
   if (no_symbolic_links)
     {
       FREE (the_current_working_directory);

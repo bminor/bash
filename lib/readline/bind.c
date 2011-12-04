@@ -1537,7 +1537,6 @@ rl_variable_value (name)
      const char *name;
 {
   register int i;
-  int	v;
 
   /* Check for simple variables first. */
   i = find_boolean_var (name);
