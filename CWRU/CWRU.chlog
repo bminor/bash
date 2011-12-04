@@ -13241,3 +13241,55 @@ execute_cmd.c
 lib/sh/strtrans.c
 	- add code to echo -e and echo with xpg_echo enabled to require
 	  a leading 0 to specify octal constants
+
+				    4/3
+				    ---
+subst.c
+	- slight change to wcsdup() replacement: use memcpy instead of wcscpy
+
+parse.y
+	- before turning on W_COMPASSIGN, make sure the final character in the
+	  token is a `(' (avoids problems with things like a=(4*3)/2)
+
+				    4/4
+				    ---
+lib/sh/snprintf.c
+	- in number() and lnumber(), turn off PF_ZEROPAD if explicit precision
+	  supplied in format
+	- change number() and lnumber() to correctly implement zero-padding
+	  specified by a non-zero `.precision' part of the format
+
+subst.c
+	- new flag for extract_delimited_string: EX_COMMAND.  For $(...), so
+	  we can do things like skip over delimiters in comments.  Added to
+	  appropriate callers
+	- changes to extract_delimited_string to skip over shell comments when
+	  extracting a command for $(...) (EX_COMMAND is contained in the
+	  flags argument)
+
+				    4/5
+				    ---
+subst.c
+	- first argument to skip_single_quoted is now a const char *
+	- new function, chk_arithsub, checks for valid arithmetic expressions
+	  by balancing parentheses.  Fix based on a patch from Len Lattanzi
+
+				    4/6
+				    ---
+{configure,config.h}.in
+	- add separate test for isnan in libc, instead of piggybacking on
+	  isinf-in-libc test
+
+lib/sh/snprintf.c
+	- separate the isnan replacement function so it's guarded by its own
+	  HAVE_ISNAN_IN_LIBC define
+
+lib/sh/wcsdup.c
+	- new file, contains replacement wcsdup library function from subst.c
+	  with change back to using wcscpy
+
+Makefile.in,lib/sh/Makefile.in
+	- make sure wcsdup.c is compiled and linked in
+
+subst.c
+	- wcsdup now found in libsh; removed static definition

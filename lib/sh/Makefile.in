@@ -88,7 +88,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   shquote.c strtrans.c strindex.c snprintf.c mailstat.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
-	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c eaccess.c
+	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c eaccess.c \
+	   wcsdup.c
 
 # The header files for this library.
 HSOURCES = 
@@ -100,7 +101,8 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  netconn.o netopen.o timeval.o makepath.o pathcanon.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
-	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o winsize.o ${LIBOBJS}
+	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o winsize.o wcsdup.o \
+	  ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -177,6 +179,7 @@ times.o: times.c
 timeval.o: timeval.c
 tmpfile.o: tmpfile.c
 vprint.o: vprint.c
+wcsdup.o: wcsdup.c
 xstrchr.o: xstrchr.c
 zcatfd.o: zcatfd.c
 zread.o: zread.c
@@ -235,6 +238,7 @@ times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
 tmpfile.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
+wcsdup.o: ${BUILD_DIR}/config.h
 xstrchr.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
 zread.o: ${BUILD_DIR}/config.h
@@ -464,6 +468,10 @@ fmtumax.o: ${BASHINCDIR}/chartypes.h
 fmtumax.o: ${BASHINCDIR}/stdc.h
 fmtumax.o: ${BASHINCDIR}/typemax.h
 fmtumax.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+
+wcsdup.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+wcsdup.o: ${BASHINCDIR}/stdc.h
+wcsdup.o: ${topdir}/xmalloc.h
 
 xstrchr.o: ${topdir}/bashansi.h
 xstrchr.o: ${BASHINCDIR}/ansi_stdlib.h

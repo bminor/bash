@@ -2776,7 +2776,9 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
 	  continue;
 	}
-      /* Not exactly right yet */
+      /* Not exactly right yet, should handle shell metacharacters, too.  If
+	 any changes are made to this test, make analogous changes to subst.c:
+	 extract_delimited_string(). */
       else if MBTEST(check_comment && in_comment == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
 	in_comment = 1;
 
@@ -3696,8 +3698,8 @@ got_token:
   if (dollar_present)
     the_word->flags |= W_HASDOLLAR;
   if (quoted)
-    the_word->flags |= W_QUOTED;
-  if (compound_assignment)
+    the_word->flags |= W_QUOTED;		/*(*/
+  if (compound_assignment && token[token_index-1] == ')')
     the_word->flags |= W_COMPASSIGN;
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
