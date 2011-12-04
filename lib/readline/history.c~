@@ -209,22 +209,6 @@ history_get (offset)
 		: the_history[local_index];
 }
 
-HIST_ENTRY *
-alloc_history_entry (string, ts)
-     char *string;
-     char *ts;
-{
-  HIST_ENTRY *temp;
-
-  temp = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
-
-  temp->line = string ? savestring (string) : string;
-  temp->data = (char *)NULL;
-  temp->timestamp = ts;
-
-  return temp;
-}
-
 time_t
 history_get_time (hist)
      HIST_ENTRY *hist;
@@ -306,7 +290,11 @@ add_history (string)
 	}
     }
 
-  temp = alloc_history_entry (string, hist_inittime ());
+  temp = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
+  temp->line = savestring (string);
+  temp->data = (char *)NULL;
+
+  temp->timestamp = hist_inittime ();
 
   the_history[history_length] = (HIST_ENTRY *)NULL;
   the_history[history_length - 1] = temp;
@@ -339,26 +327,6 @@ free_history_entry (hist)
   x = hist->data;
   free (hist);
   return (x);
-}
-
-HIST_ENTRY *
-copy_history_entry (hist)
-     HIST_ENTRY *hist;
-{
-  HIST_ENTRY *ret;
-  char *ts;
-
-  if (hist == 0)
-    return hist;
-
-  ret = alloc_history_entry (hist->line, (char *)NULL);
-
-  ts = hist->timestamp ? savestring (hist->timestamp) : hist->timestamp;
-  ret->timestamp = ts;
-
-  ret->data = hist->data;
-
-  return ret;
 }
   
 /* Make the history entry at WHICH have LINE and DATA.  This returns

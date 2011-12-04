@@ -2503,6 +2503,7 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_BINARY)
     {
+      rmatch = 0;
       patmatch = ((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
 		  (cond->op->word[0] == '!' || cond->op->word[0] == '=') ||
 		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
@@ -2514,7 +2515,7 @@ execute_cond_node (cond)
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
 	arg1 = nullstr;
-      arg2 = cond_expand_word (cond->right->op, patmatch);
+      arg2 = cond_expand_word (cond->right->op, patmatch||rmatch);
       if (arg2 == 0)
 	arg2 = nullstr;
 

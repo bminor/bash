@@ -66,6 +66,7 @@ set_default_locale ()
   default_locale = setlocale (LC_ALL, "");
   if (default_locale)
     default_locale = savestring (default_locale);
+itrace("default locale = %s", default_locale ? default_locale : "NULL");
 #endif /* HAVE_SETLOCALE */
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
@@ -293,10 +294,16 @@ static int
 reset_locale_vars ()
 {
 #if defined (HAVE_SETLOCALE)
+  char *locale;
+
   if (lang == 0 || *lang == '\0')
     maybe_make_export_env ();		/* trust that this will change environment for setlocale */
   if (setlocale (LC_ALL, lang ? lang : "") == 0)
     return 0;
+
+itrace("setlocale(LC_ALL, \"%s\")", lang ? lang : "");
+locale = setlocale(LC_ALL, (char *)NULL);
+itrace("current locale = %s", locale ? locale : "NULL");
 
 #  if defined (LC_CTYPE)
   setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));

@@ -532,6 +532,7 @@ main (argc, argv, env)
      Variables from the environment are expected to be set, etc. */
   shell_initialize ();
 
+  set_default_lang ();
   set_default_locale_vars ();
 
   if (interactive_shell)

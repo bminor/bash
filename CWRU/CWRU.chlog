@@ -13384,3 +13384,38 @@ subst.c
 doc/{bash.1,bashref.texi}
 	- clarifed `trap' description to make it clear that trapped signals
 	  that are not set to SIG_IGN are reset when a subshell is created
+
+				   5/18
+				   ----
+locale.c
+	- change reset_locale_vars to call setlocale (LC_ALL, "") if LANG
+	  is unset or NULL
+	- if LANG is unset or NULL, reset the export environment before
+	  calling setlocale in reset_locale_vars, and trust that it will
+	  change the environment setlocale() inspects
+
+				   5/21
+				   ----
+lib/readline/history.c
+	- new function, HIST_ENTRY *alloc_history_entry (char *string, char *ts);
+	  creates a new history entry with text STRING and timestamp TS (both
+	  of which may be NULL)
+	- new function, HIST_ENTRY *copy_history_entry (HIST_ENTRY *hist),
+	  which copies the line and timestamp entries to new memory but just
+	  copies the data member, since that's an opaque pointer
+	- new function, void replace_history_data (int which, histdata_t *old, histdata_t *new)
+	  which replaces the `data' member of specified history entries with
+	  NEW, as long as it is OLD.  WHICH says which history entries to
+  	  modify
+	- add calls to replace_history_data in rl_free_undo_list and
+	  rl_do_undo
+
+lib/readline/undo.c
+	- new function, alloc_undo_entry (enum undo_code what, int start, int end, char *text)
+	  takes care of allocating and populating a struct for an individual
+	  undo list entry
+	- new function: _rl_copy_undo_entry(UNDO_LIST *entry)
+	- new function: _rl_copy_undo_list(UNDO_LIST *head)
+
+lib/readline/rlprivate.h
+	- new extern declarations for _rl_copy_undo_{entry,list}

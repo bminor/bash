@@ -346,6 +346,8 @@ initialize_shell_variables (env, privmode)
       else
 	{
 	  temp_var = bind_variable (name, string, 0);
+if (strcmp(name,"LANG") == 0)
+  itrace("bound LANG to %s", string);
 	  VSETATTR (temp_var, (att_exported | att_imported));
 	  array_needs_making = 1;
 	}
@@ -440,7 +442,7 @@ initialize_shell_variables (env, privmode)
   bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
 
-  if (login_shell == 1)
+  if (login_shell == 1 && posixly_correct == 0)
     set_home_var ();
 
   /* Get the full pathname to THIS shell, and set the BASH variable
@@ -1359,7 +1361,7 @@ get_dirstack (self)
   ARRAY *a;
   WORD_LIST *l;
 
-  l = get_directory_stack ();
+  l = get_directory_stack (0);
   a = array_from_word_list (l);
   array_dispose (array_cell (self));
   dispose_words (l);

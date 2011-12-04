@@ -122,42 +122,6 @@ rl_free_undo_list ()
   replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
 }
 
-UNDO_LIST *
-_rl_copy_undo_entry (entry)
-     UNDO_LIST *entry;
-{
-  UNDO_LIST *new;
-
-  new = alloc_undo_entry (entry->what, entry->start, entry->end, (char *)NULL);
-  new->text = entry->text ? savestring (entry->text) : 0;
-  return new;
-}
-
-UNDO_LIST *
-_rl_copy_undo_list (head)
-     UNDO_LIST *head;
-{
-  UNDO_LIST *list, *new, *roving, *c;
-
-  list = head;
-  new = 0;
-  while (list)
-    {
-      c = _rl_copy_undo_entry (list);
-      if (new == 0)
-	roving = new = c;
-      else
-	{
-	  roving->next = c;
-	  roving = roving->next;
-	}
-      list = list->next;
-    }
-
-  roving->next = 0;
-  return new;
-}
-
 /* Undo the next thing in the list.  Return 0 if there
    is nothing to undo, or non-zero if there was. */
 int
