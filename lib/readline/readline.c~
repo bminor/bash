@@ -49,6 +49,11 @@
 
 #include <stdio.h>
 #include "posixjmp.h"
+#include <errno.h>
+
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
 
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
@@ -282,6 +287,7 @@ rl_set_prompt (prompt)
 {
   FREE (rl_prompt);
   rl_prompt = prompt ? savestring (prompt) : (char *)NULL;
+  rl_display_prompt = rl_prompt ? rl_prompt : "";
 
   rl_visible_prompt_length = rl_expand_prompt (rl_prompt);
   return 0;
@@ -478,10 +484,25 @@ readline_internal_charloop ()
       c = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_READCMD);
 
+      if (c == READERR)
+	{
+fprintf(stderr, "\r\nread error, errno = %d\r\n", errno);
+#if defined (READLINE_CALLBACKS)
+	  RL_SETSTATE(RL_STATE_DONE);
+	  return (rl_done = 1);
+#else
+	  eof_found = 1;
+	  break;
+#endif
+	}
+
       /* EOF typed to a non-blank line is a <NL>. */
       if (c == EOF && rl_end)
+{
+fprintf(stderr, "\r\nsaw EOF on non-empty line, converting to newline\r\n");
+sleep(4);
 	c = NEWLINE;
-
+}
       /* The character _rl_eof_char typed to blank line, and not as the
 	 previous character is interpreted as EOF. */
       if (((c == _rl_eof_char && lastc != c) || c == EOF) && !rl_end)

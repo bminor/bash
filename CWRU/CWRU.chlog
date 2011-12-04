@@ -13580,3 +13580,32 @@ externs.h
 				   ----
 subst.c
 	- in list_string, use `string' instead of `s' -- s is not initialized
+
+				    8/9
+				    ---
+subst.c
+	- fix parameter_brace_expand to set W_HASQUOTEDNULL in the WORD_DESC it
+	  returns if the result of parameter_brace_substring is a quoted null
+	  ("\177").  Fixes bug reported by Igor Peshansky <pechtcha@cs.nyu.edu>
+
+				   8/16
+				   ----
+lib/readline/readline.h
+	- new #define, READERR, intended to be used to denote read/input errors
+
+lib/readline/input.c
+	- in rl_getc, if read() returns an error other than EINTR (after the
+	  EWOULDBLOCK/EAGAIN cases are handled), return READERR rather than
+	  converting return value to EOF if readline is reading a top-level
+	  command (RL_STATE_READCMD)
+
+lib/readline/readline.c
+	- if rl_read_key returns READERR to readline_internal_char[loop],
+	  abort as if it had read EOF on an empty line, without any conversion
+	  to newline, which would cause a partial line to be executed.  This
+	  fixes the bug reported by mathieu Bonnet <mathieu.bonnet@nalkym.org>
+
+aclocal.m4
+	- when testing for validity of /dev/fd/3, use /dev/null instead of
+	  standard input, since the standard input fails with linux and `su'.
+	  Bug reported by Greg Shafer <gschafer@zip.com.au>

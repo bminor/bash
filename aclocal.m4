@@ -1543,7 +1543,7 @@ AC_CACHE_VAL(bash_cv_dev_fd,
 [bash_cv_dev_fd=""
 if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
-   exec 3<&0
+   exec 3</dev/null
    if test -r /dev/fd/3; then
      bash_cv_dev_fd=standard
    else

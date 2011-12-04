@@ -33,6 +33,7 @@
  * Global structs undocumented in texinfo manual and not in readline.h   *
  *									 *
  *************************************************************************/
+ 
 /* search types */
 #define RL_SEARCH_ISEARCH	0x01		/* incremental search */
 #define RL_SEARCH_NSEARCH	0x02		/* non-incremental search */

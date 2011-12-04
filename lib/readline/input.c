@@ -502,7 +502,7 @@ rl_getc (stream)
 	 this is simply an interrupted system call to read ().
 	 Otherwise, some error ocurred, also signifying EOF. */
       if (errno != EINTR)
-	return (EOF);
+	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
     }
 }
 
