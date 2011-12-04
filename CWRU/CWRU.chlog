@@ -13641,6 +13641,10 @@ variables.c
 
 				    9/5
 				    ---
+[bash-3.2-beta released]
+
+				    9/8
+				    ---
 variables.c
 	- change dispose_used_env_vars to call maybe_make_export_env
 	  immediately if we're disposing a temporary environment, since
@@ -13653,3 +13657,56 @@ builtins/echo.def,doc/{bash.1,bashref.texi}
 	- clarify that `echo -e' and echo when the `xpg_echo' shell option is
 	  enabled require the \0 to precede any octal constant to be expanded.
 	  Reported by Vasco Pedro <vp@di.uevora.pt>
+
+				   9/12
+				   ----
+builtins/printf.def
+	- make sure `%q' format specifier outputs '' for empty string arguments
+	  Bug reported by Egmont Koblinger <egmont@uhulinux.hu>
+
+make_cmd.c
+	- change make_here_document to echo lines in here-doc if set -v has
+	  been executed.  Reported by Eduardo Ochs <eduardoochs@gmail.com>
+
+aclocal.m4
+	- change BASH_CHECK_MULTIBYTE:
+		o replace check for wctomb with check for wcrtomb
+		o add checks for wcscoll, iswctype, iswupper, iswlower,
+		  towupper, towlower
+		o add call to AC_FUNC_MBRTOWC to check for mbrtowc and mbstate_t
+		  define HAVE_MBSTATE_T manually
+		o add checks for wchar_t, wctype_t, wint_t
+
+config.h.in
+	- add defines for wcscoll, iswctype, iswupper, iswlower, towupper,
+	  towlower functions
+	- replace define for wctomb with one for wcrtomb
+	- add defines for wchar_t, wint_t, wctype_t types
+
+config-bot.h, lib/readline/rlmbutil.h
+	- add check for HAVE_LOCALE_H before defining HANDLE_MULTIBYTE
+	- add checks for: ISWCTYPE, ISWLOWER, ISWUPPER, TOWLOWER, TOWUPPER
+	- add checks for: WCTYPE_T, WCHAR_T, WCTYPE_T
+
+				   9/13
+				   ----
+lib/readline/display.c
+	- when displaying prompts longer than the screenwidth in rl_redisplay,
+	  and looking for the index of the last character whose buffer index
+	  is <= the screen width to set up the inv_lbreaks array, make sure to
+	  catch the case where the index == the screen width (an off-by-one
+	  error occurs otherwise with prompts one character longer than the
+	  screen width).  Bug reported by Alexey Toptygin <alexeyt@freeshell.org>
+
+configure.in
+	- change DEBUGGER_START_FILE to start with ${ac_default_prefix}/share,
+	  like bashdb installs itself.  Reported by Nick Brown
+	  <nickbroon@blueyonder.co.uk>
+
+				   9/14
+				   ----
+lib/readline/display.c
+	- make multibyte code that computes the buffer indices of line breaks
+	  for a multi-line prompt dependent on MB_CUR_MAX, so we don't take
+	  the function call hit unless we're in a locale that can have
+	  multibyte characters

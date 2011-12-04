@@ -1693,7 +1693,7 @@ if test "$opt_curses" = yes; then
 fi
 
 if test -z "${DEBUGGER_START_FILE}"; then
-	DEBUGGER_START_FILE=${datadir}/bashdb/bashdb-main.inc
+	DEBUGGER_START_FILE=${ac_default_prefix}/share/bashdb/bashdb-main.inc
 fi
 
 opt_minimal_config=no
@@ -15797,103 +15797,6 @@ _ACEOF
 
 fi
 
-echo "$as_me:$LINENO: checking for mbrtowc" >&5
-echo $ECHO_N "checking for mbrtowc... $ECHO_C" >&6
-if test "${ac_cv_func_mbrtowc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-/* Define mbrtowc to an innocuous variant, in case <limits.h> declares mbrtowc.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define mbrtowc innocuous_mbrtowc
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char mbrtowc (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef mbrtowc
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char mbrtowc ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_mbrtowc) || defined (__stub___mbrtowc)
-choke me
-#else
-char (*f) () = mbrtowc;
-#endif
-#ifdef __cplusplus
-}
-#endif
-
-int
-main ()
-{
-return f != mbrtowc;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_func_mbrtowc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_func_mbrtowc=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $ac_cv_func_mbrtowc" >&5
-echo "${ECHO_T}$ac_cv_func_mbrtowc" >&6
-if test $ac_cv_func_mbrtowc = yes; then
-  cat >>confdefs.h <<\_ACEOF
-#define HAVE_MBRTOWC 1
-_ACEOF
-
-fi
-
 echo "$as_me:$LINENO: checking for mbrlen" >&5
 echo $ECHO_N "checking for mbrlen... $ECHO_C" >&6
 if test "${ac_cv_func_mbrlen+set}" = set; then
@@ -15991,9 +15894,10 @@ _ACEOF
 
 fi
 
-echo "$as_me:$LINENO: checking for wctomb" >&5
-echo $ECHO_N "checking for wctomb... $ECHO_C" >&6
-if test "${ac_cv_func_wctomb+set}" = set; then
+
+echo "$as_me:$LINENO: checking for wcrtomb" >&5
+echo $ECHO_N "checking for wcrtomb... $ECHO_C" >&6
+if test "${ac_cv_func_wcrtomb+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -16002,12 +15906,12 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* Define wctomb to an innocuous variant, in case <limits.h> declares wctomb.
+/* Define wcrtomb to an innocuous variant, in case <limits.h> declares wcrtomb.
    For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define wctomb innocuous_wctomb
+#define wcrtomb innocuous_wcrtomb
 
 /* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char wctomb (); below.
+    which can conflict with char wcrtomb (); below.
     Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
     <limits.h> exists even on freestanding compilers.  */
 
@@ -16017,7 +15921,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 # include <assert.h>
 #endif
 
-#undef wctomb
+#undef wcrtomb
 
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -16026,14 +15930,14 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char wctomb ();
+char wcrtomb ();
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_wctomb) || defined (__stub___wctomb)
+#if defined (__stub_wcrtomb) || defined (__stub___wcrtomb)
 choke me
 #else
-char (*f) () = wctomb;
+char (*f) () = wcrtomb;
 #endif
 #ifdef __cplusplus
 }
@@ -16042,7 +15946,7 @@ char (*f) () = wctomb;
 int
 main ()
 {
-return f != wctomb;
+return f != wcrtomb;
   ;
   return 0;
 }
@@ -16069,28 +15973,28 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_func_wctomb=yes
+  ac_cv_func_wcrtomb=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_func_wctomb=no
+ac_cv_func_wcrtomb=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $ac_cv_func_wctomb" >&5
-echo "${ECHO_T}$ac_cv_func_wctomb" >&6
-if test $ac_cv_func_wctomb = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_func_wcrtomb" >&5
+echo "${ECHO_T}$ac_cv_func_wcrtomb" >&6
+if test $ac_cv_func_wcrtomb = yes; then
   cat >>confdefs.h <<\_ACEOF
-#define HAVE_WCTOMB 1
+#define HAVE_WCRTOMB 1
 _ACEOF
 
 fi
 
-echo "$as_me:$LINENO: checking for wcwidth" >&5
-echo $ECHO_N "checking for wcwidth... $ECHO_C" >&6
-if test "${ac_cv_func_wcwidth+set}" = set; then
+echo "$as_me:$LINENO: checking for wcscoll" >&5
+echo $ECHO_N "checking for wcscoll... $ECHO_C" >&6
+if test "${ac_cv_func_wcscoll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -16099,12 +16003,12 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* Define wcwidth to an innocuous variant, in case <limits.h> declares wcwidth.
+/* Define wcscoll to an innocuous variant, in case <limits.h> declares wcscoll.
    For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define wcwidth innocuous_wcwidth
+#define wcscoll innocuous_wcscoll
 
 /* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char wcwidth (); below.
+    which can conflict with char wcscoll (); below.
     Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
     <limits.h> exists even on freestanding compilers.  */
 
@@ -16114,7 +16018,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 # include <assert.h>
 #endif
 
-#undef wcwidth
+#undef wcscoll
 
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -16123,14 +16027,14 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char wcwidth ();
+char wcscoll ();
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_wcwidth) || defined (__stub___wcwidth)
+#if defined (__stub_wcscoll) || defined (__stub___wcscoll)
 choke me
 #else
-char (*f) () = wcwidth;
+char (*f) () = wcscoll;
 #endif
 #ifdef __cplusplus
 }
@@ -16139,7 +16043,7 @@ char (*f) () = wcwidth;
 int
 main ()
 {
-return f != wcwidth;
+return f != wcscoll;
   ;
   return 0;
 }
@@ -16166,21 +16070,21 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_func_wcwidth=yes
+  ac_cv_func_wcscoll=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_func_wcwidth=no
+ac_cv_func_wcscoll=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $ac_cv_func_wcwidth" >&5
-echo "${ECHO_T}$ac_cv_func_wcwidth" >&6
-if test $ac_cv_func_wcwidth = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_func_wcscoll" >&5
+echo "${ECHO_T}$ac_cv_func_wcscoll" >&6
+if test $ac_cv_func_wcscoll = yes; then
   cat >>confdefs.h <<\_ACEOF
-#define HAVE_WCWIDTH 1
+#define HAVE_WCSCOLL 1
 _ACEOF
 
 fi
@@ -16278,6 +16182,103 @@ echo "${ECHO_T}$ac_cv_func_wcsdup" >&6
 if test $ac_cv_func_wcsdup = yes; then
   cat >>confdefs.h <<\_ACEOF
 #define HAVE_WCSDUP 1
+_ACEOF
+
+fi
+
+echo "$as_me:$LINENO: checking for wcwidth" >&5
+echo $ECHO_N "checking for wcwidth... $ECHO_C" >&6
+if test "${ac_cv_func_wcwidth+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define wcwidth to an innocuous variant, in case <limits.h> declares wcwidth.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define wcwidth innocuous_wcwidth
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char wcwidth (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef wcwidth
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char wcwidth ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_wcwidth) || defined (__stub___wcwidth)
+choke me
+#else
+char (*f) () = wcwidth;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != wcwidth;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_wcwidth=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_func_wcwidth=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_wcwidth" >&5
+echo "${ECHO_T}$ac_cv_func_wcwidth" >&6
+if test $ac_cv_func_wcwidth = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_WCWIDTH 1
 _ACEOF
 
 fi
@@ -16380,9 +16381,10 @@ _ACEOF
 fi
 
 
-echo "$as_me:$LINENO: checking for mbstate_t" >&5
-echo $ECHO_N "checking for mbstate_t... $ECHO_C" >&6
-if test "${bash_cv_have_mbstate_t+set}" = set; then
+
+  echo "$as_me:$LINENO: checking whether mbrtowc and mbstate_t are properly declared" >&5
+echo $ECHO_N "checking whether mbrtowc and mbstate_t are properly declared... $ECHO_C" >&6
+if test "${ac_cv_func_mbrtowc+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -16391,23 +16393,18 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
 #include <wchar.h>
 int
 main ()
 {
-
-  mbstate_t ps;
-  mbstate_t *psp;
-  psp = (mbstate_t *)0;
-
+mbstate_t state; return ! (sizeof state && mbrtowc);
   ;
   return 0;
 }
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
   ac_status=$?
   grep -v '^ *+' conftest.er1 >conftest.err
   rm -f conftest.er1
@@ -16421,29 +16418,145 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
+	 { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bash_cv_have_mbstate_t=yes
+  ac_cv_func_mbrtowc=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bash_cv_have_mbstate_t=no
+ac_cv_func_mbrtowc=no
 fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $bash_cv_have_mbstate_t" >&5
-echo "${ECHO_T}$bash_cv_have_mbstate_t" >&6
-if test $bash_cv_have_mbstate_t = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_func_mbrtowc" >&5
+echo "${ECHO_T}$ac_cv_func_mbrtowc" >&6
+  if test $ac_cv_func_mbrtowc = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MBRTOWC 1
+_ACEOF
+
+  fi
+
+if test $ac_cv_func_mbrtowc = yes; then
 	cat >>confdefs.h <<\_ACEOF
 #define HAVE_MBSTATE_T 1
 _ACEOF
 
 fi
+
+
+
+
+
+
+for ac_func in iswlower iswupper towlower towupper iswctype
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $ac_func innocuous_$ac_func
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $ac_func
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+char (*f) () = $ac_func;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != $ac_func;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+eval "$as_ac_var=no"
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
 
 echo "$as_me:$LINENO: checking for nl_langinfo and CODESET" >&5
 echo $ECHO_N "checking for nl_langinfo and CODESET... $ECHO_C" >&6
@@ -16502,6 +16615,199 @@ echo "${ECHO_T}$bash_cv_langinfo_codeset" >&6
 if test $bash_cv_langinfo_codeset = yes; then
   cat >>confdefs.h <<\_ACEOF
 #define HAVE_LANGINFO_CODESET 1
+_ACEOF
+
+fi
+
+echo "$as_me:$LINENO: checking for wchar_t in wchar.h" >&5
+echo $ECHO_N "checking for wchar_t in wchar.h... $ECHO_C" >&6
+if test "${bash_cv_type_wchar_t+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <wchar.h>
+
+int
+main ()
+{
+
+        wchar_t foo;
+        foo = 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bash_cv_type_wchar_t=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bash_cv_type_wchar_t=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $bash_cv_type_wchar_t" >&5
+echo "${ECHO_T}$bash_cv_type_wchar_t" >&6
+if test $bash_cv_type_wchar_t = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_WCHAR_T 1
+_ACEOF
+
+fi
+
+echo "$as_me:$LINENO: checking for wctype_t in wctype.h" >&5
+echo $ECHO_N "checking for wctype_t in wctype.h... $ECHO_C" >&6
+if test "${bash_cv_type_wctype_t+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <wctype.h>
+int
+main ()
+{
+
+        wctype_t foo;
+        foo = 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bash_cv_type_wctype_t=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bash_cv_type_wctype_t=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $bash_cv_type_wctype_t" >&5
+echo "${ECHO_T}$bash_cv_type_wctype_t" >&6
+if test $bash_cv_type_wctype_t = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_WCTYPE_T 1
+_ACEOF
+
+fi
+
+echo "$as_me:$LINENO: checking for wint_t in wctype.h" >&5
+echo $ECHO_N "checking for wint_t in wctype.h... $ECHO_C" >&6
+if test "${bash_cv_type_wint_t+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <wctype.h>
+int
+main ()
+{
+
+        wint_t foo;
+        foo = 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bash_cv_type_wint_t=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bash_cv_type_wint_t=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $bash_cv_type_wint_t" >&5
+echo "${ECHO_T}$bash_cv_type_wint_t" >&6
+if test $bash_cv_type_wint_t = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_WINT_T 1
 _ACEOF
 
 fi

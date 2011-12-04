@@ -1680,23 +1680,21 @@ AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
-AC_CHECK_FUNC(mbrtowc, AC_DEFINE(HAVE_MBRTOWC))
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
-AC_CHECK_FUNC(wctomb, AC_DEFINE(HAVE_WCTOMB))
-AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
+
+AC_CHECK_FUNC(wcrtomb, AC_DEFINE(HAVE_WCRTOMB))
+AC_CHECK_FUNC(wcscoll, AC_DEFINE(HAVE_WCSCOLL))
 AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
+AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
 
-AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
-[AC_TRY_COMPILE([
-#include <wchar.h>], [
-  mbstate_t ps;
-  mbstate_t *psp;
-  psp = (mbstate_t *)0;
-], bash_cv_have_mbstate_t=yes,  bash_cv_have_mbstate_t=no)])
-if test $bash_cv_have_mbstate_t = yes; then
+dnl checks for both mbrtowc and mbstate_t
+AC_FUNC_MBRTOWC
+if test $ac_cv_func_mbrtowc = yes; then
 	AC_DEFINE(HAVE_MBSTATE_T)
 fi
+
+AC_CHECK_FUNCS(iswlower iswupper towlower towupper iswctype)
 
 AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
 [AC_TRY_LINK(
@@ -1705,6 +1703,43 @@ AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
 bash_cv_langinfo_codeset=yes, bash_cv_langinfo_codeset=no)])
 if test $bash_cv_langinfo_codeset = yes; then
   AC_DEFINE(HAVE_LANGINFO_CODESET)
+fi
+
+dnl check for wchar_t in <wchar.h>
+AC_CACHE_CHECK([for wchar_t in wchar.h], bash_cv_type_wchar_t,
+[AC_TRY_COMPILE(
+[#include <wchar.h>
+],
+[
+        wchar_t foo;
+        foo = 0;
+], bash_cv_type_wchar_t=yes, bash_cv_type_wchar_t=no)])
+if test $bash_cv_type_wchar_t = yes; then
+        AC_DEFINE(HAVE_WCHAR_T, 1, [systems should define this type here])
+fi
+
+dnl check for wctype_t in <wctype.h>
+AC_CACHE_CHECK([for wctype_t in wctype.h], bash_cv_type_wctype_t,
+[AC_TRY_COMPILE(
+[#include <wctype.h>],
+[
+        wctype_t foo;
+        foo = 0;
+], bash_cv_type_wctype_t=yes, bash_cv_type_wctype_t=no)])
+if test $bash_cv_type_wctype_t = yes; then
+        AC_DEFINE(HAVE_WCTYPE_T, 1, [systems should define this type here])
+fi
+
+dnl check for wint_t in <wctype.h>
+AC_CACHE_CHECK([for wint_t in wctype.h], bash_cv_type_wint_t,
+[AC_TRY_COMPILE(
+[#include <wctype.h>],
+[
+        wint_t foo;
+        foo = 0;
+], bash_cv_type_wint_t=yes, bash_cv_type_wint_t=no)])
+if test $bash_cv_type_wint_t = yes; then
+        AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi
 
 ])

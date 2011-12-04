@@ -418,7 +418,9 @@ printf_builtin (list)
 
 		r = 0;
 		p = getstr ();
-		if (ansic_shouldquote (p))
+		if (p && *p == 0)	/* XXX - getstr never returns null */
+		  xp = savestring ("''");
+		else if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
 		else
 		  xp = sh_backslash_quote (p);

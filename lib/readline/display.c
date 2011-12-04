@@ -626,6 +626,7 @@ rl_redisplay ()
      contents of the command line? */
   while (lpos >= _rl_screenwidth)
     {
+      int z;
       /* fix from Darin Johnson <darin@acuson.com> for prompt string with
          invisible characters that is longer than the screen width.  The
          prompt_invis_chars_first_line variable could be made into an array
@@ -634,31 +635,40 @@ rl_redisplay ()
          prompts that exceed two physical lines?
          Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
 #if defined (HANDLE_MULTIBYTE)
-      n0 = num;
-      temp = local_prompt_len;
-      while (num < temp)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
-	  if (_rl_col_width  (local_prompt, n0, num) > _rl_screenwidth)
+	  n0 = num;
+          temp = local_prompt_len;
+          while (num < temp)
 	    {
-	      num = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
-	      break;
+	      z = _rl_col_width  (local_prompt, n0, num);
+	      if (z > _rl_screenwidth)
+		{
+	          num = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
+	          break;
+		}
+	      else if (z == _rl_screenwidth)
+	        break;
+	      num++;
 	    }
-	  num++;
+          temp = num;
 	}
-      temp = num +
-#else
-      temp = ((newlines + 1) * _rl_screenwidth) +
+      else
 #endif /* !HANDLE_MULTIBYTE */
-             ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
-							    : ((newlines == 1) ? wrap_offset : 0))
-					 : ((newlines == 0) ? wrap_offset :0));
+	temp = ((newlines + 1) * _rl_screenwidth);
+
+      /* Now account for invisible characters in the current line. */
+      temp += ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
+							     : ((newlines == 1) ? wrap_offset : 0))
+					  : ((newlines == 0) ? wrap_offset :0));
              
       inv_lbreaks[++newlines] = temp;
 #if defined (HANDLE_MULTIBYTE)
-      lpos -= _rl_col_width (local_prompt, n0, num);
-#else
-      lpos -= _rl_screenwidth;
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	lpos -= _rl_col_width (local_prompt, n0, num);
+      else
 #endif
+	lpos -= _rl_screenwidth;
     }
 
   prompt_last_screen_line = newlines;
