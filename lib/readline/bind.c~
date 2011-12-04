@@ -691,7 +691,7 @@ rl_function_of_keyseq (keyseq, map, type)
 {
   register int i;
 
-  if (!map)
+  if (map == 0)
     map = _rl_keymap;
 
   for (i = 0; keyseq && keyseq[i]; i++)
@@ -705,9 +705,9 @@ rl_function_of_keyseq (keyseq, map, type)
 	      map = FUNCTION_TO_KEYMAP (map, ESC);
 	      ic = UNMETA (ic);
 	    }
-	  else if (map[ESC].type != ISKMAP && keyseq[i+1])
-	    return ((rl_command_func_t *)NULL);
-	  else		/* map[ESC].type != ISKMAP && keyseq[i+1] == 0 */
+	  /* XXX - should we just return NULL here, since this obviously
+	     doesn't match? */
+	  else
 	    {
 	      if (type)
 		*type = map[ESC].type;

@@ -1209,6 +1209,10 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      the special case of an asynchronous GROUP command where the
      the subshell bit is turned on down in case cm_group: below),
      turn off `asynchronous', so that two subshells aren't spawned.
+     XXX - asynchronous used to be set to 0 in this block, but that
+     means that setup_async_signals was never run.  Now it's set to
+     0 after subshell_environment is set appropriately and setup_async_signals
+     is run.
 
      This seems semantically correct to me.  For example,
      ( foo ) & seems to say ``do the command `foo' in a subshell
@@ -1236,7 +1240,6 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 aliases. */
       if (ois != interactive_shell)
 	expand_aliases = 0;
-      asynchronous = 0;
     }
 
   /* Subshells are neither login nor interactive. */
@@ -1256,8 +1259,16 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
   restore_original_signals ();
+
+  /* Make sure restore_original_signals doesn't undo the work done by
+     make_child to ensure that asynchronous children are immune to SIGINT
+     and SIGQUIT.  Turn off asynchronous to make sure more subshells are
+     not spawned. */
   if (asynchronous)
-    setup_async_signals ();
+    {
+      setup_async_signals ();
+      asynchronous = 0;
+    }
 
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();

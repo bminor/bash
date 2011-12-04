@@ -329,8 +329,10 @@ read_builtin (list)
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
+#if defined (READLINE)
       if (edit)
 	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
+#endif
       alarm (tmout);
     }
 

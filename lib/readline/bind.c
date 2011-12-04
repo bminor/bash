@@ -370,7 +370,10 @@ rl_generic_bind (type, keyseq, data, map)
 
       ic = uc;
       if (ic < 0 || ic >= KEYMAP_SIZE)
-	return -1;
+        {
+          free (keys);
+	  return -1;
+        }
 
       if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
 	{

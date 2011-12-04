@@ -1930,6 +1930,7 @@ rl_message (va_alist)
 					 &prompt_invis_chars_first_line,
 					 &prompt_physical_chars);
   local_prompt_prefix = (char *)NULL;
+  local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
   (*rl_redisplay_function) ();
 
   return 0;

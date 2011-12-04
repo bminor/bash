@@ -879,13 +879,13 @@ print_redirection (redirect)
     case r_output_direction:
       if (redirector != 1)
 	cprintf ("%d", redirector);
-      cprintf ("> %s", redirectee->word);
+      cprintf (">%s", redirectee->word);
       break;
 
     case r_input_direction:
       if (redirector != 0)
 	cprintf ("%d", redirector);
-      cprintf ("< %s", redirectee->word);
+      cprintf ("<%s", redirectee->word);
       break;
 
     case r_inputa_direction:	/* Redirection created by the shell. */
@@ -895,7 +895,7 @@ print_redirection (redirect)
     case r_appending_to:
       if (redirector != 1)
 	cprintf ("%d", redirector);
-      cprintf (">> %s", redirectee->word);
+      cprintf (">>%s", redirectee->word);
       break;
 
     case r_deblank_reading_until:
@@ -975,7 +975,7 @@ print_redirection (redirect)
     case r_input_output:
       if (redirector != 1)
 	cprintf ("%d", redirector);
-      cprintf ("<> %s", redirectee->word);
+      cprintf ("<>%s", redirectee->word);
       break;
 
     case r_output_force:

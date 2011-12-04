@@ -2563,7 +2563,7 @@ read_token (command)
 #endif /* ALIAS */
 
   /* Read a single word from input.  Start by skipping blanks. */
-  while ((character = shell_getc (1)) != EOF && whitespace (character))
+  while ((character = shell_getc (1)) != EOF && shellblank (character))
     ;
 
   if (character == EOF)

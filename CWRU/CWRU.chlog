@@ -13456,3 +13456,59 @@ execute_cmd.c
 	  Gillmor <dkg-debian.org@fifthhorseman.net>
 
 [bash-3.2-alpha frozen]
+
+				   6/22
+				   ----
+syntax.h
+	- add new CBLANK (for [:blank:] class) flag value for syntax table and
+	  shellblank(c) character test macro
+
+mksyntax.c
+	- add support for setting CBLANK flag in the syntax table depending on
+	  whether or not isblank(x) returns true for character x
+
+locale.c
+	- change locale_setblanks to set or unset CBLANK flag for each
+	  character when locale changes
+
+parse.y
+	- change call to whitespace(c) in lexical analyzer (read_token()) to
+	  call shellblank(c) instead, so locale-specific blank characters are
+	  treated as white space.  Fixes bug reported by Serge van deb Boom
+	  <svdb+bug-bash@stack.nl>
+
+print_cmd.c
+	- when printing redirections, add a space between <, >, and <> and the
+	  following word, to avoid conflicts with process substitution.  Bug
+	  reported by Ittay Dror <ittyad@qlusters.com>
+
+				   6/26
+				   ----
+configure.in
+	- set CROSS_COMPILE to the empty string by default, so we don't inherit
+	  a random value from the environment
+
+				   6/29
+				   ----
+lib/glob/xmbsrtowcs.c
+	- make sure destp is non-null before assigning a 0 to *destp in
+	  xdupmbstowcs.  Fix from Louiwa Salem <loulwas@us.ibm.com>
+
+execute_cmd.c
+	- fix execute_in_subshell to make sure asynchronous isn't set to 0
+	  before subshell_environment is set appropriately and
+	  setup_async_signals is run.  Based on report by Louiwa Salem
+	  <loulwas@us.ibm.com>
+
+lib/readline/bind.c
+	- in rl_generic_bind(), make sure that the keys array is freed before
+	  an error return.  Fix from Louiwa Salem <loulwas@us.ibm.com>
+
+				    7/1
+				    ---
+builtins/read.def
+	- make sure all editing code is protected with #ifdef READLINE, esp.
+	  unwind-protect that restores the default completion function
+
+lib/readline/display.c
+	- make sure to set local_prompt_len in rl_message()
