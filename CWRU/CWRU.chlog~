@@ -13325,3 +13325,20 @@ lib/readline/input.c
 lib/readline/display.c
 	- calculate (in expand_prompt) and keep track of length of local_prompt
 	  in local_prompt_len; use where appropriate
+	- when using o_pos to check whether or not we need to adjust
+	  _rl_last_c_pos after calling update_line, assume that it's correct
+	  (a buffer index in non-multibyte locales and a cursor position in
+	  multibyte locales) and adjust with wrap_offset as appropriate
+	- in update_line, set cpos_adjusted to 1 after calling
+	  _rl_move_cursor_relative to move to the end of the displayed prompt
+	  string
+	- in _rl_move_cursor_relative, check that the multibyte display
+	  position is after the last invisible character in the prompt string
+	  before offsetting it by the number of invisible characters in the
+	  prompt (woff)
+
+				   4/26
+				   ----
+lib/readline/doc/{rluser.texi,readline.3}
+	- make sure to note that key bindings don't allow any whitespace
+	  between the key name or sequence to be bound and the colon

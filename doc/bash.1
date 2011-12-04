@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Jan 26 09:04:43 EST 2006
+.\"	Last Change: Thu Apr 27 15:39:53 EDT 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 Jan 26" "GNU Bash-3.2"
+.TH BASH 1 "2006 Apr 27" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1693,7 +1693,8 @@ command history is not saved when an interactive shell exits.
 .B HISTFILESIZE
 The maximum number of lines contained in the history file.  When this
 variable is assigned a value, the history file is truncated, if
-necessary, to contain no more than that number of lines.  The default
+necessary, by removing the oldest entries,
+to contain no more than that number of lines.  The default
 value is 500.  The history file is also truncated to this size after
 writing it when an interactive shell exits.
 .TP

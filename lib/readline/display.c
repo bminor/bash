@@ -899,6 +899,8 @@ rl_redisplay ()
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
+	      /* This can lead us astray if we execute a program that changes
+		 the locale from a non-multibyte to a multibyte one. */
 	      o_cpos = _rl_last_c_pos;
 	      cpos_adjusted = 0;
 	      update_line (VIS_LINE(linenum), INV_LINE(linenum), linenum,
@@ -920,7 +922,7 @@ rl_redisplay ()
 		  cpos_adjusted == 0 &&
 		  _rl_last_c_pos != o_cpos &&
 		  _rl_last_c_pos > wrap_offset &&
-		  o_cpos < (prompt_last_invisible-wrap_offset))
+		  o_cpos < prompt_last_invisible)
 		_rl_last_c_pos -= wrap_offset;
 		  
 	      /* If this is the line with the prompt, we might need to
@@ -1422,7 +1424,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   od = ofd - old;	/* index of first difference in visible line */
   if (current_line == 0 && !_rl_horizontal_scroll_mode &&
       _rl_term_cr && lendiff > prompt_visible_length && _rl_last_c_pos > 0 &&
-      od >= lendiff && _rl_last_c_pos <= PROMPT_ENDING_INDEX)
+      od >= lendiff && _rl_last_c_pos < PROMPT_ENDING_INDEX)
     {
 #if defined (__MSDOS__)
       putc ('\r', rl_outstream);

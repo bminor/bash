@@ -899,6 +899,8 @@ rl_redisplay ()
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
+	      /* This can lead us astray if we execute a program that changes
+		 the locale from a non-multibyte to a multibyte one. */
 	      o_cpos = _rl_last_c_pos;
 	      cpos_adjusted = 0;
 	      update_line (VIS_LINE(linenum), INV_LINE(linenum), linenum,
@@ -920,7 +922,7 @@ rl_redisplay ()
 		  cpos_adjusted == 0 &&
 		  _rl_last_c_pos != o_cpos &&
 		  _rl_last_c_pos > wrap_offset &&
-		  o_cpos < (prompt_last_invisible-wrap_offset))
+		  o_cpos < prompt_last_invisible)
 		_rl_last_c_pos -= wrap_offset;
 		  
 	      /* If this is the line with the prompt, we might need to
@@ -1446,11 +1448,13 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      multibyte locale. */
   _rl_move_cursor_relative (od, old);
 #if 1
+#if defined (HANDLE_MULTIBYTE)
   /* We need to indicate that the cursor position is correct in the presence of
      invisible characters in the prompt string.  Let's see if setting this when
      we make sure we're at the end of the drawn prompt string works. */
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && _rl_last_c_pos == prompt_physical_chars)
+  if (current_line == 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0 && _rl_last_c_pos == prompt_physical_chars)
     cpos_adjusted = 1;
+#endif
 #endif
 
   /* if (len (new) > len (old))

@@ -13336,3 +13336,16 @@ lib/readline/display.c
 	  position is after the last invisible character in the prompt string
 	  before offsetting it by the number of invisible characters in the
 	  prompt (woff)
+
+				   4/26
+				   ----
+lib/readline/doc/{rluser.texi,readline.3}
+	- make sure to note that key bindings don't allow any whitespace
+	  between the key name or sequence to be bound and the colon
+
+				   4/28
+				   ----
+lib/readline/display.c
+	- in update_line, make sure we compare _rl_last_c_pos as strictly less
+	  than PROMPT_ENDING_INDEX, since it's 0-based, to avoid multiple
+	  prompt redraws
