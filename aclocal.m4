@@ -1667,6 +1667,8 @@ fi
 dnl
 dnl check for availability of multibyte characters and functions
 dnl
+dnl geez, I wish I didn't have to check for all of this stuff separately
+dnl
 AC_DEFUN(BASH_CHECK_MULTIBYTE,
 [
 AC_CHECK_HEADERS(wctype.h)
@@ -1679,6 +1681,7 @@ AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
 AC_CHECK_FUNC(wctomb, AC_DEFINE(HAVE_WCTOMB))
 AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
+AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
 
 AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
 [AC_TRY_COMPILE([

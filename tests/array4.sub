@@ -1,0 +1,20 @@
+# compound assignment parsing problems in bash-3.1-release
+func()
+{
+	local -a x=() y=()
+}
+
+a=() b=()
+eval foo=()
+eval foo=() bar=() qux=( "bash" )
+
+foo=( "bash" )
+eval foo=( "bash" )
+eval bar=( "bash" ) bax=( "bash" )
+
+let a=(5 + 3) b=(4 + 7)
+echo $a $b
+
+typeset -i a b
+a=(5+3) b=(4+7)
+echo $a $b

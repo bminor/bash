@@ -2198,7 +2198,7 @@ execute_case_command (case_command)
   if (echo_command_at_execute)
     xtrace_print_case_command_head (case_command);
 
-  if (signal_in_progress (DEBUG_TRAP == 0) && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+  if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);

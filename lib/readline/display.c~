@@ -220,7 +220,7 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
      char *pmt;
      int *lp, *lip, *niflp, *vlp;
 {
-  char *r, *ret, *p, *igstart;
+  char *r, *ret, *p;
   int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
 
   /* Short-circuit if we can. */
@@ -244,15 +244,13 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
   invfl = 0;	/* invisible chars in first line of prompt */
   invflset = 0;	/* we only want to set invfl once */
 
-  igstart = -1;
   for (rl = ignoring = last = ninvis = physchars = 0, p = pmt; p && *p; p++)
     {
       /* This code strips the invisible character string markers
 	 RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE */
-      if (*p == RL_PROMPT_START_IGNORE)		/* XXX - check ignoring? */
+      if (*p == RL_PROMPT_START_IGNORE)
 	{
-	  ignoring = 1;
-	  igstart = p;
+	  ignoring++;
 	  continue;
 	}
       else if (ignoring && *p == RL_PROMPT_END_IGNORE)

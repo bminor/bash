@@ -4248,7 +4248,7 @@ decode_prompt_string (string)
 		  break;
 		}
 	      temp = (char *)xmalloc (3);
-	      temp[0] = CTLESC;
+	      temp[0] = '\001';		/* CTLESC */
 	      temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
 	      temp[2] = '\0';
 	      goto add_string;

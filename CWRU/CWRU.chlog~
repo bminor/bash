@@ -12498,3 +12498,50 @@ builtins/read.def
 execute_cmd.c
 	- change execute_command_internal to set $PIPESTATUS for ((...)) and
 	  [[ ... ]] commands
+
+doc/{bash.1,bashref.texi,version.texi}
+	- add documentation for ulimit -[iqx] and bump revision date
+
+				   12/12
+				   -----
+parse.y
+	- make sure parse_compound_assignment saves and restores the
+	  PST_ASSIGNOK parser state flag around its calls to read_token.
+	  Fixes bug reported by Mike Frysinger
+
+				   12/13
+				   -----
+parse.y
+	- change parse_compound_assignment to save and restore the value of
+	  last_read_token.  Not sure why it was set unconditionally in the
+	  first place after parsing the complete compound assignment
+
+				   12/14
+				   -----
+lib/readline/text.c
+	- don't use return value of rl_kill_text (which always succeeds and
+	  returns the number of characters killed) in rl_delete as an indication
+	  of success or failure
+	- ditto for return value of rl_delete_text
+
+lib/readline/readline.c
+	- don't return the value of the called readline function as the return
+	  value from _rl_dispatch_subseq; -1 means something different to the
+	  callers (return 0 all the time to indicate that a readline function
+	  was found and dispatched).  Fix from Andreas Schwab for <DEL><DEL>
+	  bug in callback interface first reported by Mike Frysinger
+
+execute_cmd.c
+	- fixed a typo in execute_case_command
+
+				   12/15
+				   -----
+aclocal.m4
+	- add check for wctype() to BASH_CHECK_MULTIBYTE, define HAVE_WCTYPE
+
+config.h.in
+	- add HAVE_WCTYPE #define
+
+config-bot.h
+	- add HAVE_WCTYPE to the set of checks for HANDLE_MULTIBYTE.  This
+	  should catch the deficient NetBSD multibyte support
