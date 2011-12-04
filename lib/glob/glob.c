@@ -470,7 +470,7 @@ glob_vector (pat, dir, flags)
       while (1)
 	{
 	  /* Make globbing interruptible in the shell. */
-	  if (interrupt_state)
+	  if (interrupt_state || terminating_signal)
 	    {
 	      lose = 1;
 	      break;

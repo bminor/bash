@@ -1369,7 +1369,7 @@ write_documentation (stream, documentation, indentation, flags)
   register char *line;
   int string_array, texinfo, base_indent, last_cpp, filename_p;
 
-  if (!stream)
+  if (stream == 0)
     return;
 
   string_array = flags & STRING_ARRAY;
@@ -1381,7 +1381,12 @@ write_documentation (stream, documentation, indentation, flags)
       if (single_longdoc_strings)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
+	    {
+	      if (documentation && documentation[0] && documentation[0][0])
+		fprintf (stream,  "N_(\"");
+	      else
+		fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
+	    }
 	  else
 	    fprintf (stream, "\"");
 	}
@@ -1407,7 +1412,12 @@ write_documentation (stream, documentation, indentation, flags)
       if (string_array && single_longdoc_strings == 0)
 	{
 	  if (filename_p == 0)
-	    fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
+	    {
+	      if (line[0])	      
+		fprintf (stream, "  N_(\"");
+	      else
+		fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
+	    }
 	  else
 	    fprintf (stream, "  \"");
 	}

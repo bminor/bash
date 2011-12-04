@@ -1230,8 +1230,9 @@ hangup_all_jobs ()
     {
       if (jobs[i])
 	{
-	  if  ((jobs[i]->flags & J_NOHUP) == 0)
-	    killpg (jobs[i]->pgrp, SIGHUP);
+	  if  (jobs[i]->flags & J_NOHUP)
+	    continue;
+	  killpg (jobs[i]->pgrp, SIGHUP);
 	  if (STOPPED (i))
 	    killpg (jobs[i]->pgrp, SIGCONT);
 	}

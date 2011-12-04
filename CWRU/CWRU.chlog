@@ -13150,3 +13150,44 @@ parse.y
 	  ${...} constructs inside ``
 	- in parse_matched_pair, remove special code that recursively parses
 	  quoted strings inside `` constructs.  For Bourne shell compatibility
+
+				    3/6
+				    ---
+builtins/pushd.def
+	- let get_directory_stack take take an `int flags' argument and convert
+	  $HOME to ~ if flags&1 is non-zero
+
+builtins/common.h
+	- change extern declaration for get_directory_stack
+
+variables.c
+	- call get_directory_stack with an arg of 0 to inhibit converting
+	  $HOME to  ~ in the result.  Fixes cd ${DIRSTACK[1]} problem
+	  reported by Len Lattanzi <llattanzi@apple.com> (cd fails because
+	  the tildes won't be expanded after variable expansion)
+
+jobs.c
+	- changed hangup_all_jobs slightly so stopped jobs marked J_NOHUP
+	  won't get a SIGCONT
+
+general.c
+	- changed check_binary_file() to check for a NUL byte instead of a
+	  non-printable character.  Might at some point want to check
+	  entire (possibly multibyte) characters instead of just bytes.  Hint
+	  from ksh via David Korn
+
+				    3/7
+				    ---
+builtins/reserved.def
+	- changed runs of spaces to tabs in variables help text to make
+	  indentation better when displayed
+
+builtins/mkbuiltins.c
+	- changes to avoid the annoying extra space that keeps gettext from
+	  being passed an empty string
+
+				    3/9
+				    ---
+lib/glob/glob.c
+	- make sure globbing is interrupted if the shell receives a terminating
+	  signal
