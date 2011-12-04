@@ -106,11 +106,7 @@ extern int errno;
 	  (void)vbadd (b, nw); \
 	else \
 	  (void)fputs (b, stdout); \
-	if (ferror (stdout)) \
-	  { \
-	    clearerr (stdout); \
-	    return (EXECUTION_FAILURE); \
-	  } \
+	if (ferror (stdout))
 	free (b); \
       } \
   } while (0)

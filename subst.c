@@ -949,8 +949,8 @@ string_extract_verbatim (string, slen, sindex, charlist)
 		  len = mbstowcs (wcharlist, charlist, 0);
 		  if (len == -1)
 		    len = 0;
-		  wcharlist = (wchar_t *)xmalloc ((sizeof (wchar_t) * len) + 1);
-		  mbstowcs (wcharlist, charlist, len);
+		  wcharlist = (wchar_t *)xmalloc (sizeof (wchar_t) * (len + 1));
+		  mbstowcs (wcharlist, charlist, len + 1);
 		}
 
 	      if (wcschr (wcharlist, wc))

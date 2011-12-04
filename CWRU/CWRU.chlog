@@ -13512,3 +13512,26 @@ builtins/read.def
 
 lib/readline/display.c
 	- make sure to set local_prompt_len in rl_message()
+
+				    7/5
+				    ---
+builtins/printf.def
+	- add echo's write error handling to printf.  Suggested by
+	  martin.wilck@fujitsu-siemens.com
+
+				    7/7
+				    ---
+lib/readline/display.c
+	- save and restore local_prompt_len in rl_{save,restore}_prompt
+
+				    7/9
+				    ---
+lib/readline/display.c
+	- make sure that _rl_move_cursor_relative sets cpos_adjusted when it
+	  offsets `dpos' by wrap_offset in a multi-byte locale.  Bug reported
+	  by Andreas Schwab
+
+subst.c
+	- make sure that the call to mbstowcs in string_extract_verbatim is
+	  passed a string with enough space for the closing NUL.  Reported
+	  by Andreas Schwab

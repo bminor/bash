@@ -206,6 +206,7 @@ static char *saved_local_prefix;
 static int saved_last_invisible;
 static int saved_visible_length;
 static int saved_prefix_length;
+static int saved_local_length;
 static int saved_invis_chars_first_line;
 static int saved_physical_chars;
 
@@ -1728,7 +1729,13 @@ _rl_move_cursor_relative (new, data)
 #else
       if (dpos > prompt_last_invisible)
 #endif
-	dpos -= woff;
+	{
+	  dpos -= woff;
+	  /* Since this will be assigned to _rl_last_c_pos at the end (more
+	     precisely, _rl_last_c_pos == dpos when this function returns),
+	     let the caller know. */
+	  cpos_adjusted = 1;
+	}
     }
   else
 #endif
@@ -1954,6 +1961,7 @@ rl_message (format, arg1, arg2)
 					 &prompt_invis_chars_first_line,
 					 &prompt_physical_chars);
   local_prompt_prefix = (char *)NULL;
+  local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
   (*rl_redisplay_function) ();
       
   return 0;
@@ -1990,12 +1998,14 @@ rl_save_prompt ()
   saved_local_prompt = local_prompt;
   saved_local_prefix = local_prompt_prefix;
   saved_prefix_length = prompt_prefix_length;
+  saved_local_length = local_prompt_len;
   saved_last_invisible = prompt_last_invisible;
   saved_visible_length = prompt_visible_length;
   saved_invis_chars_first_line = prompt_invis_chars_first_line;
   saved_physical_chars = prompt_physical_chars;
 
   local_prompt = local_prompt_prefix = (char *)0;
+  local_prompt_len = 0;
   prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
   prompt_invis_chars_first_line = prompt_physical_chars = 0;
 }
@@ -2008,6 +2018,7 @@ rl_restore_prompt ()
 
   local_prompt = saved_local_prompt;
   local_prompt_prefix = saved_local_prefix;
+  local_prompt_len = saved_local_length;
   prompt_prefix_length = saved_prefix_length;
   prompt_last_invisible = saved_last_invisible;
   prompt_visible_length = saved_visible_length;
@@ -2016,6 +2027,7 @@ rl_restore_prompt ()
 
   /* can test saved_local_prompt to see if prompt info has been saved. */
   saved_local_prompt = saved_local_prefix = (char *)0;
+  saved_local_length = 0;
   saved_last_invisible = saved_visible_length = saved_prefix_length = 0;
   saved_invis_chars_first_line = saved_physical_chars = 0;
 }
@@ -2247,6 +2259,7 @@ redraw_prompt (t)
 				   &prompt_invis_chars_first_line,
 				   &prompt_physical_chars);
   local_prompt_prefix = (char *)NULL;
+  local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
 
   rl_forced_update_display ();
 
