@@ -2599,10 +2599,10 @@ expand_assignment_string_to_string (string, quoted)
 }
 
 char *
-expand_arith_string (string)
+expand_arith_string (string, quoted)
      char *string;
 {
-  return (expand_string_if_necessary (string, Q_DOUBLE_QUOTES, expand_string));
+  return (expand_string_if_necessary (string, quoted, expand_string));
 }
 
 #if defined (COND_COMMAND)
@@ -5278,11 +5278,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   else
     t = (char *)0;
 
-#if 0
-  temp1 = expand_string_if_necessary (substr, Q_DOUBLE_QUOTES, expand_string);
-#else
-  temp1 = expand_arith_string (substr);
-#endif
+  temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES);
   *e1p = evalexp (temp1, &expok);
   free (temp1);
   if (expok == 0)
@@ -5327,11 +5323,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
     {
       t++;
       temp2 = savestring (t);
-#if 0
-      temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
-#else
-      temp1 = expand_arith_string (temp2);
-#endif
+      temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);
       free (temp2);
       t[-1] = ':';
       *e2p = evalexp (temp1, &expok);
@@ -6481,11 +6473,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  temp2[t_index] = '\0';
 
 	  /* Expand variables found inside the expression. */
-#if 0
-	  temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
-#else
-	  temp1 = expand_arith_string (temp2);
-#endif
+	  temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);
 	  free (temp2);
 
 arithsub:
@@ -6527,11 +6515,7 @@ comsub:
       zindex = t_index;
 
        /* Do initial variable expansion. */
-#if 0
-      temp1 = expand_string_if_necessary (temp, Q_DOUBLE_QUOTES, expand_string);
-#else
-      temp1 = expand_arith_string (temp);
-#endif
+      temp1 = expand_arith_string (temp, Q_DOUBLE_QUOTES);
 
       goto arithsub;
 

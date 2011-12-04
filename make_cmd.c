@@ -507,7 +507,6 @@ make_bare_simple_command ()
   command->value.Simple = temp = (SIMPLE_COM *)xmalloc (sizeof (SIMPLE_COM));
 
   temp->flags = 0;
-itrace("make_bare_simple_command: line_number = %d", line_number);
   temp->line = line_number;
   temp->words = (WORD_LIST *)NULL;
   temp->redirects = (REDIRECT *)NULL;
@@ -533,10 +532,7 @@ make_simple_command (element, command)
     command = make_bare_simple_command ();
 
   if (element.word)
-{
-  itrace("make_simple_command: adding %s", element.word->word);
     command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
-}
   else if (element.redirect)
     {
       REDIRECT *r = element.redirect;

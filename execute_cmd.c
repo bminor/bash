@@ -214,6 +214,8 @@ static int special_builtin_failed;
    report the correct line number.  Kind of a hack. */
 static int showing_function_line;
 
+static int line_number_for_err_trap;
+
 /* For catching RETURN in a function. */
 int return_catch_flag;
 int return_catch_value;
@@ -665,7 +667,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
-	line_number = command->value.Simple->line;
+	line_number_for_err_trap = line_number = command->value.Simple->line;
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);

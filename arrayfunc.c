@@ -590,7 +590,7 @@ array_expand_index (s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-  t = expand_arith_string (exp);
+  t = expand_arith_string (exp, 0);
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
   free (t);

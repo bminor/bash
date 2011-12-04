@@ -13209,8 +13209,29 @@ parse.y, eval.c, input.h
 				   ----
 bashline.c
 	- command_word_completion_function keeps track of when it's searching
-	  $PATH and doesn't return directory names as matches in that case
+	  $PATH and doesn't return directory names as matches in that case.
+	  Problem reported by Pascal Terjan <pterjan@mandriva.com>
 	- command_word_completion_function returns what it's passed as a
 	  possible match if it's the name of a directory in the current
-	  directory (only non-absolute pathnames are so tested).  Problem
-	  reported by Pascal Terjan <pterjan@mandriva.com>
+	  directory (only non-absolute pathnames are so tested).
+
+				   3/27
+				   ----
+subst.c
+	- expand_arith_string takes a new argument: quoted.  Either 0 (outside
+	  subst.c) or Q_DOUBLE_QUOTES (substitution functions); changed callers
+
+subst.h
+	- changed extern declaration for expand_arith_string
+
+arrayfunc.c
+	- changed call to expand_arith_string in array_expand_index
+
+				   3/31
+				   ----
+lib/readline/histfile.c
+	- change read_history_range to allow windows-like \r\n line endings
+
+execute_cmd.c
+	- add new variable, line_number_for_err_trap, currently set but not
+	  used

@@ -152,7 +152,7 @@ extern char *expand_string_unsplit_to_string __P((char *, int));
 extern char *expand_assignment_string_to_string __P((char *, int));
 
 /* Expand an arithmetic expression string */
-extern char *expand_arith_string __P((char *));
+extern char *expand_arith_string __P((char *, int));
 
 /* De-quoted quoted characters in STRING. */
 extern char *dequote_string __P((char *));
