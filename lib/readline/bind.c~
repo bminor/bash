@@ -463,7 +463,7 @@ rl_translate_keyseq (seq, array, len)
 	      else if (c == 'M')
 		{
 		  i++;		/* seq[i] == '-' */
-		  /* XXX - should obey convert-meta setting? */
+		  /* XXX - obey convert-meta setting */
 		  if (_rl_convert_meta_chars_to_ascii && _rl_keymap[ESC].type == ISKMAP)
 		    array[l++] = ESC;	/* ESC is meta-prefix */
 		  else if (seq[i+1] == '\\' && seq[i+2] == 'C' && seq[i+3] == '-')
@@ -1956,12 +1956,12 @@ rl_invoking_keyseqs_in_map (function, map)
 		char *keyname = (char *)xmalloc (6 + strlen (seqs[i]));
 
 		if (key == ESC)
-#if 0
-		  sprintf (keyname, "\\e");
-#else
-		/* XXX - experimental */
-		  sprintf (keyname, "\\M-");
-#endif
+		  {
+		    if (_rl_convert_meta_chars_to_ascii && map[ESC].type == ISKMAP)
+		      sprintf (keyname, "\\M-");
+		    else
+		      sprintf (keyname, "\\e");
+		  }
 		else if (CTRL_CHAR (key))
 		  sprintf (keyname, "\\C-%c", _rl_to_lower (UNCTRL (key)));
 		else if (key == RUBOUT)

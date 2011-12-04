@@ -501,6 +501,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
 
+  QUIT;
   run_pending_traps ();
 
 #if 0
@@ -2625,7 +2626,6 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 {
   int r;
 
-itrace("execute_null_command: async = %d subshell_environment = %d", async, subshell_environment);
   if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
       /* We have a null command, but we really want a subshell to take

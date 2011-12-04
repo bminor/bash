@@ -359,6 +359,7 @@ execute_command (command)
     unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
+  QUIT;
   return (result);
 }
 
@@ -501,6 +502,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
 
+  QUIT;
   run_pending_traps ();
 
 #if 0

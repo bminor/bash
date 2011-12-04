@@ -61,3 +61,25 @@ echo "$(echo 'foo
 bar')"
 echo "$(echo 'foo\
 bar')"
+
+# old-style command substitution parsing compatibility tests -- post bash-3.1
+recho 'foo \\
+bar'
+
+recho 'foo \
+bar'
+
+echo `recho sed -e 's/[	:]/\\
+/g'`
+
+echo `recho sed -e 's/[	:]/\
+/g'`
+
+echo `recho 'foo\\
+bar'`
+
+echo `recho 'foo\
+bar'`  
+
+echo $(recho 'foo\
+bar')

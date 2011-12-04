@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -574,6 +574,11 @@ rl_untranslate_keyseq (seq)
       kseq[i++] = '-';
       c = UNMETA (c);
     }
+  else if (c == ESC)
+    {
+      kseq[i++] = '\\';
+      c = 'e';
+    }
   else if (CTRL_CHAR (c))
     {
       kseq[i++] = '\\';
@@ -622,7 +627,12 @@ _rl_untranslate_macro_value (seq)
 	  *r++ = '-';
 	  c = UNMETA (c);
 	}
-      else if (CTRL_CHAR (c) && c != ESC)
+      else if (c == ESC)
+	{
+	  *r++ = '\\';
+	  c = 'e';
+	}
+      else if (CTRL_CHAR (c))
 	{
 	  *r++ = '\\';
 	  *r++ = 'C';
@@ -1956,12 +1966,16 @@ rl_invoking_keyseqs_in_map (function, map)
 		char *keyname = (char *)xmalloc (6 + strlen (seqs[i]));
 
 		if (key == ESC)
-#if 0
-		  sprintf (keyname, "\\e");
-#else
-		/* XXX - experimental */
-		  sprintf (keyname, "\\M-");
-#endif
+		  {
+		    /* If ESC is the meta prefix and we're converting chars
+		       with the eighth bit set to ESC-prefixed sequences, then
+		       we can use \M-.  Otherwise we need to use the sequence
+		       for ESC. */
+		    if (_rl_convert_meta_chars_to_ascii && map[ESC].type == ISKMAP)
+		      sprintf (keyname, "\\M-");
+		    else
+		      sprintf (keyname, "\\e");
+		  }
 		else if (CTRL_CHAR (key))
 		  sprintf (keyname, "\\C-%c", _rl_to_lower (UNCTRL (key)));
 		else if (key == RUBOUT)

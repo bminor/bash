@@ -12845,4 +12845,33 @@ jobs.c
 subst.c
 	- in parameter_brace_expand, if extracting ${#varname}, only allow
 	  `}' to end the expansion, since none of the other expansions are
-	  valid
+	  valid.  Fixes Debian bug reported by Jan Nordhorlz <jckn@gmx.net>
+
+				   1/17
+				   ----
+parse.y
+	- in parse_matched_pair, protect all character tests with the MBTEST
+	  macro
+	- in parse_dparen, take out extra make_word after call to alloc_word_desc
+	  (mem leak)
+
+				   1/18
+				   ----
+parse.y
+	- in parse_matched_pair, add P_ALLOWESC to flags passed to recursive
+	  parse_matched_pair call when encountering a single or double quote
+	  inside a ``-style command substitution
+
+execute_cmd.c
+	- add call to QUIT at beginning of execute_command_internal; better
+	  responsiveness to SIGINT
+
+				   1/21
+				   ----
+lib/readline/bind.c
+	- change rl_invoking_keyseqs_in_map to honor the setting of
+	  convert-meta when listing key bindings, since if convert-meta is off,
+	  using '\M-' as the prefix for bindings in, for instance,
+	  emacs-escape-keymap, is wrong.  This affects `bind -p' output
+	- change rl_untranslate_keyseq to add '\e' instead of '\C-[' for
+	  ESC
