@@ -3005,7 +3005,9 @@ dequote_escapes (string)
   return result;
 }
 
-/* Return a new string with the quoted representation of character C. */
+/* Return a new string with the quoted representation of character C.
+   This turns "" into QUOTED_NULL, so the W_HASQUOTEDNULL flag needs to be
+   set in any resultant WORD_DESC where this value is the word. */
 static char *
 make_quoted_char (c)
      int c;
@@ -3027,7 +3029,9 @@ make_quoted_char (c)
   return (temp);
 }
 
-/* Quote STRING.  Return a new string. */
+/* Quote STRING, returning a new string.  This turns "" into QUOTED_NULL, so
+   the W_HASQUOTEDNULL flag needs to be set in any resultant WORD_DESC where
+   this value is the word. */
 char *
 quote_string (string)
      char *string;
@@ -3117,6 +3121,7 @@ quote_list (list)
       w->word->word = quote_string (t);
       free (t);
       w->word->flags |= W_QUOTED;
+      /* XXX - turn on W_HAVEQUOTEDNULL here? */
     }
   return list;
 }
@@ -3133,6 +3138,7 @@ dequote_list (list)
       s = dequote_string (tlist->word->word);
       free (tlist->word->word);
       tlist->word->word = s;
+      /* XXX - turn off W_HAVEQUOTEDNULL here? */
     }
   return list;
 }
@@ -5011,9 +5017,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
 	 a $@ in TEMP.  It does not matter if the $@ is quoted, as long as
 	 it does not expand to anything.  In this case, we want to return
 	 a quoted empty string. */
-      temp = (char *)xmalloc (2);
-      temp[0] = CTLNUL;
-      temp[1] = '\0';
+      temp = make_quoted_char ('\0');
       w->flags |= W_HASQUOTEDNULL;
     }
   else

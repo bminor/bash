@@ -1259,6 +1259,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
   restore_original_signals ();
+
+  /* Make sure restore_original_signals doesn't undo the work done by
+     make_child to ensure that asynchronous children are immune to SIGINT
+     and SIGQUIT.  Turn off asynchronous to make sure more subshells are
+     not spawned. */
   if (asynchronous)
     {
       setup_async_signals ();

@@ -13486,7 +13486,8 @@ print_cmd.c
 				   ----
 configure.in
 	- set CROSS_COMPILE to the empty string by default, so we don't inherit
-	  a random value from the environment
+	  a random value from the environment.   Bug reported by
+	  Lee Revell <rlrevell@joe-job.com>
 
 				   6/29
 				   ----
@@ -13525,6 +13526,10 @@ lib/readline/display.c
 	- save and restore local_prompt_len in rl_{save,restore}_prompt
 	  [in bash-3.2-alpha]
 
+				    7/8
+				    ---
+[bash-3.2-alpha released]
+
 				    7/9
 				    ---
 lib/readline/display.c
@@ -13553,7 +13558,8 @@ lib/readline/display.c
 	- in _rl_move_cursor_relative, we can use _rl_term_forward_char to
 	  move the cursor forward in a multibyte locale, if it's available.
 	  Since that function doesn't have a handle on where the cursor is in
-	  the display buffer, it has to output a cr and print all the data
+	  the display buffer, it has to output a cr and print all the data.
+	  Fixes rest of problem reported by Egmont Koblinger
 	- change variable denoting the position of the cursor in the line buffer
 	  from c_pos (variable local to rl_redisplay) to cpos_buffer_position
 	  (variable local to file) for future use by other functions
@@ -13603,9 +13609,23 @@ lib/readline/readline.c
 	- if rl_read_key returns READERR to readline_internal_char[loop],
 	  abort as if it had read EOF on an empty line, without any conversion
 	  to newline, which would cause a partial line to be executed.  This
-	  fixes the bug reported by mathieu Bonnet <mathieu.bonnet@nalkym.org>
+	  fixes the bug reported by Mathieu Bonnet <mathieu.bonnet@nalkym.org>
 
 aclocal.m4
 	- when testing for validity of /dev/fd/3, use /dev/null instead of
 	  standard input, since the standard input fails with linux and `su'.
 	  Bug reported by Greg Shafer <gschafer@zip.com.au>
+
+				   8/17
+				   ----
+Makefile.in
+	- switch the TAGS and tags targets so TAGS is the output of `etags' and
+	  tags is the output of `ctags'.  Suggested by Masatake YAMATO
+
+				   8/25
+				   ----
+execute_cmd.c
+	- change code to match documentation: set BASH_COMMAND (which takes its
+	  value from the_printed_command_except_trap) only when not running a
+	  trap.  Rocky says the debugger is ok with this, and this is what his
+	  original diffs did

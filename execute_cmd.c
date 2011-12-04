@@ -1670,7 +1670,11 @@ execute_for_command (for_command)
 
       /* Save this command unless it's a trap command and we're not running
 	 a debug trap. */
+#if 0
       if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+      if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
 	{
 	  FREE (the_printed_command_except_trap);
 	  the_printed_command_except_trap = savestring (the_printed_command);
@@ -2089,7 +2093,11 @@ execute_select_command (select_command)
   if (echo_command_at_execute)
     xtrace_print_select_command_head (select_command);
 
+#if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -2221,7 +2229,11 @@ execute_case_command (case_command)
   if (echo_command_at_execute)
     xtrace_print_case_command_head (case_command);
 
+#if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -2758,7 +2770,11 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_string_index = 0;
   print_simple_command (simple_command);
 
+#if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
+#else
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+#endif
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = the_printed_command ? savestring (the_printed_command) : (char *)0;
