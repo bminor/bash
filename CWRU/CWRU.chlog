@@ -12712,9 +12712,6 @@ builtins/mkbuiltins.c
 	  set of default #defines based on a minimal POSIX system
 
 jobs.c
-	- change find_job to check jobs[i]->pipe as well as jobs[i] before
-	  trying to walk the pipeline -- should also check js.j_lastj in
-	  the for loop
 	- change find_process to handle a NULL return value from find_pipeline
 	- return immediately from delete_job if jobs[index] is already NULL or
 	  if it has a null pipeline associated with it
@@ -12730,3 +12727,122 @@ doc/bash.1
 jobs.c
 	- in realloc_jobs_list, make sure to zero out slots after j_lastj
 	  in the new list
+
+				    1/9
+				    ---
+support/mksignames.c
+	- make sure to include <signal.h> to get right value of NSIG from
+	  (usually) <sys/signal.h>
+
+				   1/10
+				   ----
+parse.y
+	- when calling parse_matched_pair on a $(...) command substitution,
+	  don't pass the P_DQUOTE flag so that single quotes don't get
+	  stripped from $'...' inside the command substitution.  Bug report
+	  and fix from Mike Stroyan <mike.stroyan@hp.com>
+
+jobs.c
+	- start maintaining true count of living children in js.c_living
+	- call reset_current in realloc_jobs_list, since old values for current
+	  and previous job are most likely incorrect
+	- don't allocate a new list in realloc_jobs_list if the old size and
+	  new size are the same; just compact the existing list
+	- make sure realloc_jobs_list updates value of js.j_njobs
+	- add some more itrace messages about non-null jobs after j_lastj in
+	  jobs array
+
+				   1/11
+				   ----
+bashjmp.h
+	- new value for second argument to longjmp: SIGEXIT.  Reserved for
+	  future use
+
+				   1/12
+				   ----
+jobs.c
+	- add logic to make_child to figure out when pids wrap around
+	- turn second argument to delete_job into flags word, added flag to
+	  prevent adding proc to bgpids list
+
+				   1/13
+				   ----
+lib/readline/vi_mode.c
+	- move code that moves forward a character out of rl_vi_append_mode
+	  into a separate function, _rl_vi_append_forward
+	- change _rl_vi_append_mode to save `a' as the last command, so it
+	  can be redone properly
+	- new function _rl_vi_backup, moves point back a character taking
+	  multibyte locales into account
+	- change rl_vi_redo to handle redoing an `a' command specially --
+	  it should be redone like `i' but after moving forward a character
+	- change rl_vi_redo to use _rl_vi_backup to move point backward
+	  after redoing `i' or `a'
+
+jobs.c
+	- new function, delete_old_job (pid), checks whether or not PID is in
+	  a job in the jobs list.  If so, and the job is dead, it just removes
+	  the job from the list.  If so, and the job is not dead, it zeros
+	  the pid in the appropriate PROCESS so pid aliasing doesn't occur
+	- make_child calls delete_old_job to potentially remove an already-used
+	  instance of the pid just forked from the jobs list if pids have
+	  wrapped around.  Finally fixes the bug reported by Tim Waugh
+	  <twaugh@redhat.com>
+
+trap.c
+	- new define, GETORIGSIG(sig), gets the original handling for SIG and
+	  sets SIG_HARD_IGNORE if that handler is SIG_IGN
+	- call GETORIGSIG from initialize_traps, get_original_signal, and
+	  set_signal
+
+jobs.c
+	- in wait_for, if the original SIGINT handler is SIG_IGN, don't set
+	  the handler to wait_sigint_handler.  This keeps scripts started in
+	  the background (and ignoring SIGINT) from dying due to SIGINT while
+	  they're waiting for a child to exit.  Bug reported by Ingemar
+	  Nilsson <init@kth.se>
+
+lib/readline/vi_mode.c
+	- don't save text to buffer unless undo pointer points to a record of
+	  type UNDO_INSERT; zero it out instead.  This fixes bug reported by
+	  Craig Turner <craig@synect.com> with redoing `ctd[ESC]' (empty
+	  insert after change to)
+
+shell.c
+	- change set_shell_name so invocations like "-/bin/bash" are marked as
+	  login shells
+
+doc/bash.1
+	- add note about destroying functions with `unset -f' to the section
+	  on shell functions
+
+lib/readline/terminal.c
+	- if readline hasn't been initialized (_rl_term_autowrap == -1, the
+	  value it's now initialized with), call _rl_init_terminal_io from
+	  _rl_set_screen_size before deciding whether or not to decrement
+	  _rl_screenwidth.  Fixes bug from Mike Frysinger <vapier@gentoo.org>
+
+				   1/14
+				   ----
+lib/readline/input.c
+	- allow rl_set_keyboard_input_timeout to set the timeout to 0, for
+	  applications that want to use select() like a poll without any
+	  waiting
+
+lib/readline/doc/rltech.texi
+	- documented valid values for timeout in rl_set_keyboard_input_timeout
+
+jobs.c
+	- in stop_pipeline, don't have the parent shell call give_terminal_to
+	  if subshell_environment contains SUBSHELL_ASYNC (no background
+	  process should ever give the terminal to anything other than
+	  shell_pgrp)
+	- in make_child, don't give the terminal away if subshell_environment
+	  contains SUBSHELL_ASYNC
+
+				   1/15
+				   ----
+subst.c
+	- in parameter_brace_expand, if extracting ${#varname}, only allow
+	  `}' to end the expansion, since none of the other expansions are
+	  valid.  Fixes Debian bug reported by Jan Nordhorlz <jckn@gmx.net>

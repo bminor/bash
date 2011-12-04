@@ -134,7 +134,7 @@ initialize_signames ()
 	  signal_names[rtmin+rtcnt+1] = (char *)malloc(RTLEN);
 	  if (signal_names[rtmin+rtcnt+1])
 	    sprintf (signal_names[rtmin+rtcnt+1], "SIGRTMIN+%d", rtcnt+1);
-v	}
+	}
     }
 #endif /* SIGRTMIN && SIGRTMAX */
 

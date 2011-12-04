@@ -633,11 +633,8 @@ stop_pipeline (async, deferred)
 	   * once in the parent and once in each child.  This is where
 	   * the parent gives it away.
 	   *
-	   * Don't give the terminal away if this shell is an asynchronous
-	   * subshell.
-	   *
 	   */
-	  if (job_control && newjob->pgrp && (subshell_environment&SUBSHELL_ASYNC) == 0)
+	  if (job_control && newjob->pgrp)
 	    give_terminal_to (newjob->pgrp, 0);
 	}
     }
@@ -865,19 +862,7 @@ delete_old_job (pid)
 
   job = find_job (pid, 0, &p);
   if (job != NO_JOB)
-    {
-#ifdef DEBUG
-      itrace ("delete_old_job: found pid %d in job %d with state %d", pid, job, jobs[job]->state);
-#endif
-      if (JOBSTATE (job) == JDEAD)
-	delete_job (job, DEL_NOBGPID);
-      else
-	{
-	  internal_warning (_("forked pid %d appears in running job %d"), pid, job);
-	  if (p)
-	    p->pid = 0;
-	}
-    }
+    itrace ("delete_old_job: found pid %d in job %d with state %d", pid, job, jobs[job]->state);
 }
 
 /* Reallocate and compress the jobs list.  This returns with a jobs array
@@ -1742,7 +1727,7 @@ make_child (command, async_p)
 	     In this case, we don't want to give the terminal to the
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
-	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0))
+	  if (async_p == 0 && pipeline_pgrp != shell_pgrp)
 	    give_terminal_to (pipeline_pgrp, 0);
 
 #if defined (PGRP_PIPE)
@@ -1787,9 +1772,15 @@ make_child (command, async_p)
       if (first_pid == NO_PID)
 	first_pid = pid;
       else if (pid_wrap == -1 && pid < first_pid)
+{
 	pid_wrap = 0;
+itrace("make_child: PID CYCLE: first_pid = %d pid = %d", first_pid, pid);
+}
       else if (pid_wrap == 0 && pid >= first_pid)
+{
 	pid_wrap = 1;
+itrace("make_child: PID WRAP: first_pid = %d pid = %d", first_pid, pid);
+}
 
       if (job_control)
 	{
@@ -2297,11 +2288,7 @@ wait_for (pid)
   /* This is possibly a race condition -- should it go in stop_pipeline? */
   wait_sigint_received = 0;
   if (job_control == 0)
-    {
-      old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
-      if (old_sigint_handler == SIG_IGN)
-	set_signal_handler (SIGINT, old_sigint_handler);
-    }
+    old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
 
   termination_state = last_command_exit_value;
 
@@ -2420,6 +2407,7 @@ wait_for (pid)
 if (job == NO_JOB)
   itrace("wait_for: job == NO_JOB, giving the terminal to shell_pgrp (%ld)", (long)shell_pgrp);
 #endif
+
       give_terminal_to (shell_pgrp, 0);
     }
 

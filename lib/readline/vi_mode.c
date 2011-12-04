@@ -109,11 +109,15 @@ static int vi_mark_chars['z' - 'a' + 1];
 static void _rl_vi_stuff_insert PARAMS((int));
 static void _rl_vi_save_insert PARAMS((UNDO_LIST *));
 
+static void _rl_vi_backup PARAMS((void));
+
 static int _rl_vi_arg_dispatch PARAMS((int));
 static int rl_digit_loop1 PARAMS((void));
 
 static int _rl_vi_set_mark PARAMS((void));
 static int _rl_vi_goto_mark PARAMS((void));
+
+static void _rl_vi_append_forward PARAMS((int));
 
 static int _rl_vi_callback_getchar PARAMS((char *, int));
 
@@ -205,7 +209,16 @@ rl_vi_redo (count, c)
       _rl_vi_stuff_insert (count);
       /* And back up point over the last character inserted. */
       if (rl_point > 0)
-	rl_point--;
+	_rl_vi_backup ();
+    }
+  /* Ditto for redoing an insert with `a', but move forward a character first
+     like the `a' command does. */
+  else if (_rl_vi_last_command == 'a' && vi_insert_buffer && *vi_insert_buffer)
+    {
+      _rl_vi_append_forward ('a');
+      _rl_vi_stuff_insert (count);
+      if (rl_point > 0)
+	_rl_vi_backup ();
     }
   else
     r = _rl_dispatch (_rl_vi_last_command, _rl_keymap);
@@ -575,23 +588,32 @@ rl_vi_insert_beg (count, key)
   return (0);
 }
 
-int
-rl_vi_append_mode (count, key)
-     int count, key;
+static void
+_rl_vi_append_forward (key)
+     int key;
 {
+  int point;
+
   if (rl_point < rl_end)
     {
       if (MB_CUR_MAX == 1 || rl_byte_oriented)
 	rl_point++;
       else
         {
-          int point = rl_point;
+          point = rl_point;
           rl_forward_char (1, key);
           if (point == rl_point)
             rl_point = rl_end;
         }
     }
-  rl_vi_insertion_mode (1, key);
+}
+
+int
+rl_vi_append_mode (count, key)
+     int count, key;
+{
+  _rl_vi_append_forward (key);
+  rl_vi_start_inserting (key, 1, rl_arg_sign);
   return (0);
 }
 
@@ -631,7 +653,7 @@ _rl_vi_save_insert (up)
 {
   int len, start, end;
 
-  if (up == 0)
+  if (up == 0 || up->what != UNDO_INSERT)
     {
       if (vi_insert_buffer_size >= 1)
 	vi_insert_buffer[0] = '\0';
@@ -818,6 +840,15 @@ rl_vi_put (count, key)
 
   rl_backward_char (1, key);
   return (0);
+}
+
+static void
+_rl_vi_backup ()
+{
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
+  else
+    rl_point--;
 }
 
 int

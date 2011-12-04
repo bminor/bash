@@ -21,6 +21,9 @@
 
 #include <config.h>
 
+#include <sys/types.h>
+#include <signal.h>
+
 #include <stdio.h>
 #if defined (HAVE_STDLIB_H)
 #  include <stdlib.h>

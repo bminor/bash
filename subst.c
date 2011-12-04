@@ -5836,7 +5836,11 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
   sindex = *indexp;
   t_index = ++sindex;
-  name = string_extract (string, &t_index, "#%:-=?+/}", EX_VARNAME);
+  /* ${#var} doesn't have any of the other parameter expansions on it. */
+  if (string[t_index] == '#' && legal_variable_starter (string[t_index+1]))		/* {{ */
+    name = string_extract (string, &t_index, "}", EX_VARNAME);
+  else
+    name = string_extract (string, &t_index, "#%:-=?+/}", EX_VARNAME);
 
   ret = 0;
   tflag = 0;

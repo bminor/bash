@@ -2396,6 +2396,7 @@ execute_arith_command (arith_command)
   int expok, save_line_number, retval;
   intmax_t expresult;
   WORD_LIST *new;
+  char *exp;
 
   expresult = 0;
 
@@ -2438,8 +2439,11 @@ execute_arith_command (arith_command)
 
   if (new)
     {
-      expresult = evalexp (new->word->word, &expok);
+      exp = new->next ? string_list (new) : new->word->word;
+      expresult = evalexp (exp, &expok);
       line_number = save_line_number;
+      if (exp != new->word->word)
+	free (exp);
       dispose_words (new);
     }
   else
@@ -2621,6 +2625,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 {
   int r;
 
+itrace("execute_null_command: async = %d subshell_environment = %d", async, subshell_environment);
   if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
       /* We have a null command, but we really want a subshell to take

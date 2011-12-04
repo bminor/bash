@@ -100,3 +100,12 @@ recho $'hello, \$"world"'
 recho $'hello, $\"world"'
 
 recho "hello, $"world""
+
+# ansi quoting inside double-quoted command subst - bash-3.1 bug
+function args
+{
+ for a in "$@";do echo "'$a'";done
+}
+unset mytab
+recho "${mytab:-$'\t'}"
+recho "$( args $'A\tB' )"

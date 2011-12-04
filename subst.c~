@@ -946,7 +946,7 @@ string_extract_verbatim (string, slen, sindex, charlist)
 		  len = mbstowcs (wcharlist, charlist, 0);
 		  if (len == -1)
 		    len = 0;
-		  wcharlist = xmalloc ((sizeof (wchar_t) * len) + 1);
+		  wcharlist = (wchar_t *)xmalloc ((sizeof (wchar_t) * len) + 1);
 		  mbstowcs (wcharlist, charlist, len);
 		}
 
@@ -5836,7 +5836,11 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
   sindex = *indexp;
   t_index = ++sindex;
-  name = string_extract (string, &t_index, "#%:-=?+/}", EX_VARNAME);
+  /* ${#var} doesn't have any of the other parameter expansions on it. */
+  if (string[t_index] == '#' && legal_variable_starter (string[sindex]))		/* {{ */
+    name = string_extract (string, &t_index, "}", EX_VARNAME);
+  else
+    name = string_extract (string, &t_index, "#%:-=?+/}", EX_VARNAME);
 
   ret = 0;
   tflag = 0;

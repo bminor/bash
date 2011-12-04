@@ -114,6 +114,18 @@ int wait_signal_received;
 /* A value which can never be the target of a trap handler. */
 #define IMPOSSIBLE_TRAP_HANDLER (SigHandler *)initialize_traps
 
+#define GETORIGSIG(sig) \
+  do { \
+    original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL); \
+    set_signal_handler (sig, original_signals[sig]); \
+    if (original_signals[sig] == SIG_IGN) \
+      sigmodes[sig] |= SIG_HARD_IGNORE; \
+  } while (0)
+
+#define GET_ORIGINAL_SIGNAL(sig) \
+  if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
+    GETORIGSIG(sig)
+
 void
 initialize_traps ()
 {
@@ -135,32 +147,25 @@ initialize_traps ()
 
   /* Show which signals are treated specially by the shell. */
 #if defined (SIGCHLD)
-  original_signals[SIGCHLD] =
-    (SigHandler *) set_signal_handler (SIGCHLD, SIG_DFL);
-  set_signal_handler (SIGCHLD, original_signals[SIGCHLD]);
+  GETORIGSIG (SIGCHLD);
   sigmodes[SIGCHLD] |= (SIG_SPECIAL | SIG_NO_TRAP);
 #endif /* SIGCHLD */
 
-  original_signals[SIGINT] =
-    (SigHandler *) set_signal_handler (SIGINT, SIG_DFL);
-  set_signal_handler (SIGINT, original_signals[SIGINT]);
+  GETORIGSIG (SIGINT);
   sigmodes[SIGINT] |= SIG_SPECIAL;
 
 #if defined (__BEOS__)
   /* BeOS sets SIGINT to SIG_IGN! */
   original_signals[SIGINT] = SIG_DFL;
+  sigmodes[SIGINT] &= ~SIG_HARD_IGNORE;
 #endif
 
-  original_signals[SIGQUIT] =
-    (SigHandler *) set_signal_handler (SIGQUIT, SIG_DFL);
-  set_signal_handler (SIGQUIT, original_signals[SIGQUIT]);
+  GETORIGSIG (SIGQUIT);
   sigmodes[SIGQUIT] |= SIG_SPECIAL;
 
   if (interactive)
     {
-      original_signals[SIGTERM] =
-	(SigHandler *)set_signal_handler (SIGTERM, SIG_DFL);
-      set_signal_handler (SIGTERM, original_signals[SIGTERM]);
+      GETORIGSIG (SIGTERM);
       sigmodes[SIGTERM] |= SIG_SPECIAL;
     }
 }
@@ -489,17 +494,9 @@ set_signal (sig, string)
     {
       /* If we aren't sure of the original value, check it. */
       if (original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER)
-	{
-	  original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL);
-	  set_signal_handler (sig, original_signals[sig]);
-	}
-
-      /* Signals ignored on entry to the shell cannot be trapped or reset. */
+        GETORIGSIG (sig);
       if (original_signals[sig] == SIG_IGN)
-	{
-	  sigmodes[sig] |= SIG_HARD_IGNORE;
-	  return;
-	}
+	return;
     }
 
   /* Only change the system signal handler if SIG_NO_TRAP is not set.
@@ -547,25 +544,13 @@ change_signal (sig, value)
     sigmodes[sig] |= SIG_CHANGED;
 }
 
-#define GET_ORIGINAL_SIGNAL(sig) \
-  if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
-    get_original_signal (sig)
-
 static void
 get_original_signal (sig)
      int sig;
 {
   /* If we aren't sure the of the original value, then get it. */
   if (original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
-    {
-      original_signals[sig] =
-	(SigHandler *) set_signal_handler (sig, SIG_DFL);
-      set_signal_handler (sig, original_signals[sig]);
-
-      /* Signals ignored on entry to the shell cannot be trapped. */
-      if (original_signals[sig] == SIG_IGN)
-	sigmodes[sig] |= SIG_HARD_IGNORE;
-    }
+    GETORIGSIG (sig);
 }
 
 /* Restore the default action for SIG; i.e., the action the shell

@@ -1533,9 +1533,10 @@ set_shell_name (argv0)
      any startup files; just try to be more like /bin/sh. */
   shell_name = argv0 ? base_pathname (argv0) : PROGRAM;
 
-  if (*shell_name == '-')
+  if (argv0 && *argv0 == '-')
     {
-      shell_name++;
+      if (*shell_name == '-')
+	shell_name++;
       login_shell++;
     }
 

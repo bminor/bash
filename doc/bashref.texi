@@ -1084,6 +1084,9 @@ name of a command.
 Any redirections (@pxref{Redirections}) associated with the shell function
 are performed when the function is executed.
 
+A function definition may be deleted using the @option{-f} option to the
+@code{unset} builtin (@pxref{Bourne Shell Builtins}).
+
 The exit status of a function definition is zero unless a syntax error
 occurs or a readonly function with the same name already exists.
 When executed, the exit status of a function is the exit status of the
@@ -2807,7 +2810,7 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @item hash
 @btindex hash
 @example
-hash [-'r] [-p @var{filename}] [-dt] [@var{name}]
+hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
 Remember the full pathnames of commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
