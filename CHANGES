@@ -1,3 +1,39 @@
+This document details the changes between this version, bash-3.2-beta,
+and the previous version, bash-3.2-alpha.
+
+1.  Changes to Bash
+
+a.  Changed the lexical analyzer to treat locale-specific blank characters as
+    white space.
+
+b.  Fixed a bug in command printing to avoid confusion between redirections and
+    process substitution.
+
+c.  Fixed problems with cross-compiling originating from inherited environment
+    variables.
+
+d.  Added write error reporting to printf builtin.
+
+e.  Fixed a bug in the variable expansion code that could cause a core dump in
+    a multi-byte locale.
+
+f.  Fixed a bug that caused substring expansion of a null string to return
+    incorrect results.
+
+g.  BASH_COMMAND now retains its previous value while executing commands as the
+    result of a trap, as the documentation states.
+
+2.  Changes to Readline
+
+a.  Fixed a bug with prompt redisplay in a multi-byte locale to avoid redrawing
+    the prompt and input line multiple times.
+
+b.  Fixed history expansion to not be confused by here-string redirection.
+
+c.  Readline no longer treats read errors by converting them to newlines, as
+    it does with EOF.  This caused partial lines to be returned from readline().
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.2-alpha,
 and the previous version, bash-3.1-release.
 

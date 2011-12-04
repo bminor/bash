@@ -201,7 +201,9 @@ bash-2.0 were significant.)
     Bash-2.x does not support it.
 
 15. Bash no longer auto-exports the HOME, PATH, SHELL, TERM, HOSTNAME,
-    HOSTTYPE, MACHTYPE, or OSTYPE variables.
+    HOSTTYPE, MACHTYPE, or OSTYPE variables.  If they appear in the initial
+    environment, the export attribute will be set, but if bash provides a
+    default value, they will remain local to the current shell.
 
 16. Bash no longer initializes the FUNCNAME, GROUPS, or DIRSTACK variables
     to have special behavior if they appear in the initial environment.

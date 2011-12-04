@@ -13629,3 +13629,12 @@ execute_cmd.c
 	  value from the_printed_command_except_trap) only when not running a
 	  trap.  Rocky says the debugger is ok with this, and this is what his
 	  original diffs did
+
+				   8/29
+				   ----
+variables.c
+	- change set_if_not to create shell_variables if it is NULL, since
+	  -o invocation options can cause variables to be set before the
+	  environment is scanned
+
+[bash-3.2-beta frozen]

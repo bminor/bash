@@ -155,6 +155,8 @@ int array_needs_making = 1;
 int shell_level = 0;
 
 /* Some forward declarations. */
+static void create_variable_tables __P((void));
+
 static void set_machine_vars __P((void));
 static void set_home_var __P((void));
 static void set_shell_var __P((void));
@@ -252,19 +254,10 @@ static void push_func_var __P((PTR_T));
 static void push_exported_var __P((PTR_T));
 
 static inline int find_special_var __P((const char *));
-	       
-/* Initialize the shell variables from the current environment.
-   If PRIVMODE is nonzero, don't import functions from ENV or
-   parse $SHELLOPTS. */
-void
-initialize_shell_variables (env, privmode)
-     char **env;
-     int privmode;
-{
-  char *name, *string, *temp_string;
-  int c, char_index, string_index, string_length;
-  SHELL_VAR *temp_var;
 
+static void
+create_variable_tables ()
+{
   if (shell_variables == 0)
     {
       shell_variables = global_variables = new_var_context ((char *)NULL, 0);
@@ -279,6 +272,21 @@ initialize_shell_variables (env, privmode)
   if (shell_function_defs == 0)
     shell_function_defs = hash_create (0);
 #endif
+}
+
+/* Initialize the shell variables from the current environment.
+   If PRIVMODE is nonzero, don't import functions from ENV or
+   parse $SHELLOPTS. */
+void
+initialize_shell_variables (env, privmode)
+     char **env;
+     int privmode;
+{
+  char *name, *string, *temp_string;
+  int c, char_index, string_index, string_length;
+  SHELL_VAR *temp_var;
+
+  create_variable_tables ();
 
   for (string_index = 0; string = env[string_index++]; )
     {
@@ -362,11 +370,7 @@ initialize_shell_variables (env, privmode)
   set_pwd ();
 
   /* Set up initial value of $_ */
-#if 0
-  temp_var = bind_variable ("_", dollar_vars[0], 0);
-#else
   temp_var = set_if_not ("_", dollar_vars[0]);
-#endif
 
   /* Remember this pid. */
   dollar_dollar_pid = getpid ();
@@ -1626,6 +1630,9 @@ set_if_not (name, value)
 {
   SHELL_VAR *v;
 
+  if (shell_variables == 0)
+    create_variable_tables ();
+
   v = find_variable (name);
   if (v == 0)
     v = bind_variable_internal (name, value, global_variables->table, HASH_NOSRCH, 0);
@@ -1768,11 +1775,7 @@ make_new_variable (name, table)
 
   /* Make sure we have a shell_variables hash table to add to. */
   if (shell_variables == 0)
-    {
-      shell_variables = global_variables = new_var_context ((char *)NULL, 0);
-      shell_variables->scope = 0;
-      shell_variables->table = hash_create (0);
-    }
+    create_variable_tables ();
 
   elt = hash_insert (savestring (name), table, HASH_NOSRCH);
   elt->data = (PTR_T)entry;
@@ -1940,11 +1943,7 @@ bind_variable (name, value, flags)
   VAR_CONTEXT *vc;
 
   if (shell_variables == 0)
-    {
-      shell_variables = global_variables = new_var_context ((char *)NULL, 0);
-      shell_variables->scope = 0;
-      shell_variables->table = hash_create (0);
-    }
+    create_variable_tables ();
 
   /* If we have a temporary environment, look there first for the variable,
      and, if found, modify the value there before modifying it in the
