@@ -5485,22 +5485,27 @@ parameter_brace_substring (varname, value, substr, quoted)
 {
   intmax_t e1, e2;
   int vtype, r, starsub;
-  char *temp, *val, *tt;
+  char *temp, *val, *tt, *oname;
   SHELL_VAR *v;
 
   if (value == 0)
     return ((char *)NULL);
 
+  oname = this_command_name;
   this_command_name = varname;
 
   vtype = get_var_and_type (varname, value, quoted, &v, &val);
   if (vtype == -1)
-    return ((char *)NULL);
+    {
+      this_command_name = oname;
+      return ((char *)NULL);
+    }
 
   starsub = vtype & VT_STARSUB;
   vtype &= ~VT_STARSUB;
 
   r = verify_substring_values (val, substr, vtype, &e1, &e2);
+  this_command_name = oname;
   if (r <= 0)
     return ((r == 0) ? &expand_param_error : (char *)NULL);
 

@@ -63,7 +63,7 @@ extern REDIRECT *exec_redirection_undo_list;
 /* Static functions defined and used in this file. */
 static void add_undo_close_redirect __P((int));
 static void add_exec_redirect __P((REDIRECT *));
-static int add_undo_redirect __P((int));
+static int add_undo_redirect __P((int, enum r_instruction));
 static int expandable_redirection_filename __P((REDIRECT *));
 static int stdin_redirection __P((enum r_instruction, int));
 static int do_redirection_internal __P((REDIRECT *, int));
@@ -630,8 +630,8 @@ do_redirection_internal (redirect, flags)
   redirector = redirect->redirector;
   ri = redirect->instruction;
 
-if (redirect->flags & RX_INTERNAL)
-  flags |= RX_INTERNAL;
+  if (redirect->flags & RX_INTERNAL)
+    flags |= RX_INTERNAL;
 
   if (TRANSLATE_REDIRECT (ri))
     {
@@ -757,7 +757,7 @@ if (redirect->flags & RX_INTERNAL)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		add_undo_redirect (redirector);
+		add_undo_redirect (redirector, ri);
 	      else
 		add_undo_close_redirect (redirector);
 	    }
@@ -808,7 +808,7 @@ if (redirect->flags & RX_INTERNAL)
 	  if (flags & RX_ACTIVE)
 	    {
 	      if (flags & RX_UNDOABLE)
-		add_undo_redirect (2);
+		add_undo_redirect (2, ri);
 	      if (dup2 (1, 2) < 0)
 		return (errno);
 	    }
@@ -836,7 +836,7 @@ if (redirect->flags & RX_INTERNAL)
 	        {
 		  /* Only setup to undo it if the thing to undo is active. */
 		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		    add_undo_redirect (redirector);
+		    add_undo_redirect (redirector, ri);
 		  else
 		    add_undo_close_redirect (redirector);
 	        }
@@ -878,7 +878,7 @@ if (redirect->flags & RX_INTERNAL)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if (fcntl (redirector, F_GETFD, 0) != -1)
-		add_undo_redirect (redirector);
+		add_undo_redirect (redirector, ri);
 	      else
 		add_undo_close_redirect (redirector);
 	    }
@@ -925,7 +925,7 @@ if (redirect->flags & RX_INTERNAL)
       if (flags & RX_ACTIVE)
 	{
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
-	    add_undo_redirect (redirector);
+	    add_undo_redirect (redirector, ri);
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -951,8 +951,9 @@ if (redirect->flags & RX_INTERNAL)
    even if REDIRECTION_UNDO_LIST is discarded by the exec builtin
    are also saved on EXEC_REDIRECTION_UNDO_LIST. */
 static int
-add_undo_redirect (fd)
+add_undo_redirect (fd, ri)
      int fd;
+     enum r_instruction ri;
 {
   int new_fd, clexec_flag;
   REDIRECT *new_redirect, *closer, *dummy_redirect;
@@ -990,7 +991,7 @@ add_undo_redirect (fd)
   /* experimental:  if we're saving a redirection to undo for a file descriptor
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
      causes redirections to be discarded. */
-  if (fd >= SHELL_FD_BASE)
+  if (fd >= SHELL_FD_BASE && ri != r_close_this)
     {
       rd.dest = new_fd;
       new_redirect = make_redirection (fd, r_duplicating_output, rd);

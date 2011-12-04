@@ -13419,3 +13419,23 @@ lib/readline/undo.c
 
 lib/readline/rlprivate.h
 	- new extern declarations for _rl_copy_undo_{entry,list}
+
+execute_cmd.c
+	- change execute_cond_node so that quoting the rhs of the =~
+	  operator forces string matching, like the == and != operators
+
+				   5/23
+				   ----
+redir.c
+	- add_undo_redirect now takes as an additional argument the type of
+	  redirection we're trying to undo
+	- don't add a "preservation" redirection for fds > SHELL_FD_BASE if
+	  the redirection is closing the fd
+
+				   5/24
+				   ----
+subst.c
+	- make sure that parameter_brace_substring leaves this_command_name
+	  set to either NULL or its previous value after setting it so that
+	  arithmetic evaluation errors while expanding substring values
+	  contain meaningful informationn
