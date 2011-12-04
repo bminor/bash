@@ -1,3 +1,192 @@
+This document details the changes between this version, bash-3.2-alpha,
+and the previous version, bash-3.1-release.
+
+1.  Changes to Bash
+
+a.  Fixed a source bug that caused the minimal configuration to not compile.
+
+b.  Fixed memory leaks in error handling for the `read' builtin.
+
+c.  Changed the [[ and (( compound commands to set PIPESTATUS with their exit
+    status.
+
+d.  Fixed some parsing problems with compound array assignments.
+
+e.  Added additional configuration changes for: NetBSD (incomplete multibyte
+    character support)
+
+f.  Fixed two bugs with local array variable creation when shadowing a variable
+    of the same name from a previous context.
+
+g.  Fixed the `read' builtin to restore the correct set of completion functions
+    if a timeout occurs.
+
+h.  Added code to defer the initialization of HISTSIZE (and its stifling of the
+    history list) until the history file is loaded, allowing a startup file to
+    override the default value.
+
+i.  Tightened up the arithmetic expression parsing to produce better error
+    messages when presented with invalid operators.
+
+j.  Fixed the cross-compilation support to build the signal list at shell
+    invocation rather than compile time if cross-compiling.
+
+k.  Fixed multibyte support for non-gcc compilers (or compilers that do not
+    allow automatic array variable sizing based on a non-constant value).
+
+l.  Several fixes to the code that manages the list of terminated jobs and
+    their exit statuses, and the list of active and recently-terminated jobs
+    to avoid pid aliasing/wraparound and allocation errors.
+
+m.  Fixed a problem that allowed scripts to die due to SIGINT while waiting
+    for children, even when started in the background or otherwise ignoring
+    SIGINT.
+
+n.  Fixed a bug that caused shells invoked as -/bin/bash from not being
+    recognized as login shells.
+
+o.  Fixed a problem that caused shells in the background to give the terminal
+    to a process group other than the foreground shell process group.
+
+p.  Fixed a problem with extracting the `varname' in ${#varname}.
+
+q.  Fixed the code that handles SIGQUIT to not exit immediately -- thereby
+    calling functions that may not be called in a signal handler context --
+    but set a flag and exit afterward (like SIGINT).
+
+r.  Changed the brace expansion code to skip over braces that don't begin a
+    valid matched brace expansion construct.
+
+s.  Fixed `typeset' and `declare' to not require that their shell function
+    operands to be valid shell identifiers.
+
+t.  Changed `test' to use access(2) with a temporary uid/euid swap when testing
+    file attributes and running setuid, and access(2) in most other cases.
+
+u.  Changed completion code to not attempt command name completion on a line
+    consisting solely of whitespace when no_empty_command_completion is set.
+
+v.  The `hash' builtin now prints nothing in posix mode when the hash table is
+    empty, and prints a message to that effect to stdout instead of stderr
+    when not in posix mode.
+
+w.  Fixed a bug in the extended pattern matching code that caused it to fail to
+    match periods with certain patterns.
+
+x.  Fixed a bug that caused the shell to dump core when performing filename
+    generation in directories with thousands of files.
+
+y.  Returned to the original Bourne shell rules for parsing ``:  no recursive
+    parsing of embedded quoted strings or ${...} constructs.
+
+z.  The inheritence of the DEBUG, RETURN, and ERR traps is now dependent only
+    on the settings of the `functrace' and `errtrace' shell options, rather
+    than whether or not the shell is in debugging mode.
+
+aa. Fixed a problem with $HOME being converted to ~ in the expansion of
+    members of the DIRSTACK array.
+
+bb. Fixed a problem with quoted arguments to arithmetic expansions in certain
+    constructs.
+
+cc. The command word completion code now no longer returns matching directories
+    while searching $PATH.
+
+dd. Fixed a bug with zero-padding and precision handling in snprintf()
+    replacement.
+
+ee. Fixed a bug that caused the command substitution code not to take embedded
+    shell comments into account.
+
+ff. Fixed a bug that caused $((...);(...)) to be misinterpreted as an
+    arithmetic substitution.
+
+gg. Fixed a bug in the prompt expansion code that inappropriately added a
+    \001 before a \002 under certain circumstances.
+
+hh. Fixed a bug that caused `unset LANG' to not properly reset the locale
+    (previous versions would set the locale back to what it was when bash
+    was started rather than the system's "native" locale).
+
+ii. Fixed a bug that could cause file descriptors > 10 to not be closed even
+    when closed explicitly by a script.
+
+2.  Changes to Readline
+
+a.  Fixed a problem that caused segmentation faults when using readline in
+    callback mode and typing consecutive DEL characters on an empty line.
+
+b.  Fixed several redisplay problems with multibyte characters, all having to
+    do with the different code paths and variable meanings between single-byte
+    and multibyte character redisplay.
+
+c.  Fixed a problem with key sequence translation when presented with the
+    sequence \M-\C-x.
+
+d.  Fixed a problem that prevented the `a' command in vi mode from being
+    undone and redone properly.
+
+e.  Fixed a problem that prevented empty inserts in vi mode from being undone
+    properly.
+
+f.  Fixed a problem that caused readline to initialize with an incorrect idea
+    of whether or not the terminal can autowrap.
+
+g.  Fixed output of key bindings (like bash `bind -p') to honor the setting of
+    convert-meta and use \e where appropriate.
+
+h.  Changed the default filename completion function to call the filename
+    dequoting function if the directory completion hook isn't set.  This means
+    that any directory completion hooks need to dequote the directory name,
+    since application-specific hooks need to know how the word was quoted,
+    even if no other changes are made.
+
+i.  Fixed a bug with creating the prompt for a non-interactive search string
+    when there are non-printing characters in the primary prompt.
+
+j.  Fixed a bug that caused prompts with invisible characters to be redrawn
+    multiple times in a multibyte locale.
+
+k.  Fixed a bug that could cause the key sequence scanning code to return the
+    wrong function.
+
+l.  Fixed a problem with the callback interface that caused it to fail when
+    using multi-character keyboard macros.
+
+m.  Fixed a bug that could cause a core dump when an edited history entry was
+    re-executed under certain conditions.
+
+3.  New Features in Bash
+
+a.  Changed the parameter pattern replacement functions to not anchor the
+    pattern at the beginning of the string if doing global replacement - that
+    combination doesn't make any sense.
+
+b.  When running in `word expansion only' mode (--wordexp option), inhibit
+    process substitution.
+
+c.  Loadable builtins now work on MacOS X 10.[34].
+
+d.  Shells running in posix mode no longer set $HOME, as POSIX requires.
+
+e.  The code that checks for binary files being executed as shell scripts now
+    checks only for NUL rather than any non-printing character.
+
+f.  Quoting the string argument to the [[ command's  =~ operator now forces
+    string matching, as with the other pattern-matching operators.
+
+4.  New Features in Readline
+
+a.  Calling applications can now set the keyboard timeout to 0, allowing
+    poll-like behavior.
+
+b.  The value of SYS_INPUTRC (configurable at compilation time) is now used as
+    the default last-ditch startup file.
+
+c.  The history file reading functions now allow windows-like \r\n line
+    terminators.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-3.1-release,
 and the previous version, bash-3.1-rc2.
 
@@ -48,7 +237,7 @@ and the previous version, bash-3.1-beta1.
 
 1.  Changes to Bash
 
-a.  Fixed a bug that could cause core dumps due of accessing the current
+a.  Fixed a bug that could cause core dumps due to accessing the current
     pipeline while in the middle of modifying it.
 
 b.  Fixed a bug that caused pathnames with backslashes still quoting characters
