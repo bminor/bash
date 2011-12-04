@@ -1,8 +1,8 @@
 This is readline.info, produced by makeinfo version 4.7 from
 ./rlman.texi.
 
-   This manual describes the GNU Readline Library (version 5.1-beta1,
-11 November 2005), a library which aids in the consistency of user
+   This manual describes the GNU Readline Library (version 5.2, 9
+February 2006), a library which aids in the consistency of user
 interface across discrete programs which provide a command line
 interface.
 
@@ -334,7 +334,8 @@ of keybindings.  Any user can customize programs that use Readline by
 putting commands in an "inputrc" file, conventionally in his home
 directory.  The name of this file is taken from the value of the
 environment variable `INPUTRC'.  If that variable is unset, the default
-is `~/.inputrc'.
+is `~/.inputrc'.  If that file does not exist or cannot be read, the
+ultimate default is `/etc/inputrc'.
 
    When a program which uses the Readline library starts up, the init
 file is read, and the key bindings are set.
@@ -2251,8 +2252,10 @@ File: readline.info,  Node: Character Input,  Next: Terminal Management,  Prev: 
  -- Function: int rl_set_keyboard_input_timeout (int u)
      While waiting for keyboard input in `rl_read_key()', Readline will
      wait for U microseconds for input before calling any function
-     assigned to `rl_event_hook'.  The default waiting period is
-     one-tenth of a second.  Returns the old timeout value.
+     assigned to `rl_event_hook'.  U must be greater than or equal to
+     zero (a zero-length timeout is equivalent to a poll).  The default
+     waiting period is one-tenth of a second.  Returns the old timeout
+     value.
 
 
 File: readline.info,  Node: Terminal Management,  Next: Utility Functions,  Prev: Character Input,  Up: Readline Convenience Functions
@@ -2853,7 +2856,10 @@ File: readline.info,  Node: Completion Variables,  Next: A Short Completion Exam
      portion of the pathname the user typed.  It returns an integer
      that should be non-zero if the function modifies its directory
      argument.  It could be used to expand symbolic links or shell
-     variables in pathnames.
+     variables in pathnames.  At the least, even if no other expansion
+     is performed, this function should remove any quote characters
+     from the directory name, because its result will be passed
+     directly to `opendir()'.
 
  -- Variable: rl_compdisp_func_t * rl_completion_display_matches_hook
      If non-zero, then this is the address of a function to call when
@@ -4084,11 +4090,11 @@ Function and Variable Index
 * rl_attempted_completion_function:      Completion Variables.
                                                               (line  12)
 * rl_attempted_completion_over:          Completion Variables.
-                                                              (line 207)
+                                                              (line 210)
 * rl_basic_quote_characters:             Completion Variables.
-                                                              (line  96)
+                                                              (line  99)
 * rl_basic_word_break_characters:        Completion Variables.
-                                                              (line  90)
+                                                              (line  93)
 * rl_begin_undo_group:                   Allowing Undoing.    (line  29)
 * rl_bind_key:                           Binding Keys.        (line  22)
 * rl_bind_key_if_unbound:                Binding Keys.        (line  32)
@@ -4121,37 +4127,37 @@ Function and Variable Index
 * rl_complete_internal:                  Completion Functions.
                                                               (line  10)
 * rl_completer_quote_characters:         Completion Variables.
-                                                              (line 113)
+                                                              (line 116)
 * rl_completer_word_break_characters:    Completion Variables.
-                                                              (line  99)
+                                                              (line 102)
 * rl_completion_append_character:        Completion Variables.
-                                                              (line 137)
+                                                              (line 140)
 * rl_completion_display_matches_hook:    Completion Variables.
-                                                              (line  77)
+                                                              (line  80)
 * rl_completion_entry_function <1>:      Completion Variables.
                                                               (line   7)
 * rl_completion_entry_function:          How Completing Works.
                                                               (line  55)
 * rl_completion_found_quote:             Completion Variables.
-                                                              (line 165)
+                                                              (line 168)
 * rl_completion_mark_symlink_dirs:       Completion Variables.
-                                                              (line 172)
+                                                              (line 175)
 * rl_completion_matches:                 Completion Functions.
                                                               (line  45)
 * rl_completion_mode:                    Completion Functions.
                                                               (line  37)
 * rl_completion_query_items:             Completion Variables.
-                                                              (line 131)
+                                                              (line 134)
 * rl_completion_quote_character:         Completion Variables.
-                                                              (line 153)
+                                                              (line 156)
 * rl_completion_suppress_append:         Completion Variables.
-                                                              (line 147)
+                                                              (line 150)
 * rl_completion_suppress_quote:          Completion Variables.
-                                                              (line 159)
+                                                              (line 162)
 * rl_completion_type:                    Completion Variables.
-                                                              (line 214)
+                                                              (line 217)
 * rl_completion_word_break_hook:         Completion Variables.
-                                                              (line 104)
+                                                              (line 107)
 * rl_copy_keymap:                        Keymaps.             (line  17)
 * rl_copy_text:                          Modifying Text.      (line  15)
 * rl_crlf:                               Redisplay.           (line  30)
@@ -4178,15 +4184,15 @@ Function and Variable Index
 * rl_explicit_arg:                       Readline Variables.  (line 233)
 * rl_extend_line_buffer:                 Utility Functions.   (line  12)
 * rl_filename_completion_desired:        Completion Variables.
-                                                              (line 187)
+                                                              (line 190)
 * rl_filename_completion_function:       Completion Functions.
                                                               (line  59)
 * rl_filename_dequoting_function:        Completion Variables.
                                                               (line  37)
 * rl_filename_quote_characters:          Completion Variables.
-                                                              (line 119)
+                                                              (line 122)
 * rl_filename_quoting_desired:           Completion Variables.
-                                                              (line 197)
+                                                              (line 200)
 * rl_filename_quoting_function:          Completion Variables.
                                                               (line  24)
 * rl_forced_update_display:              Redisplay.           (line  11)
@@ -4211,11 +4217,11 @@ Function and Variable Index
 * rl_getc_function:                      Readline Variables.  (line 125)
 * rl_gnu_readline_p:                     Readline Variables.  (line  78)
 * rl_ignore_completion_duplicates:       Completion Variables.
-                                                              (line 183)
+                                                              (line 186)
 * rl_ignore_some_completions_function:   Completion Variables.
                                                               (line  56)
 * rl_inhibit_completion:                 Completion Variables.
-                                                              (line 222)
+                                                              (line 225)
 * rl_initialize:                         Utility Functions.   (line  16)
 * rl_insert_completions:                 Completion Functions.
                                                               (line  32)
@@ -4288,7 +4294,7 @@ Function and Variable Index
                                                               (line 113)
 * rl_show_char:                          Redisplay.           (line  33)
 * rl_special_prefixes:                   Completion Variables.
-                                                              (line 124)
+                                                              (line 127)
 * rl_startup_hook:                       Readline Variables.  (line 110)
 * rl_stuff_char:                         Character Input.     (line  19)
 * rl_terminal_name:                      Readline Variables.  (line  82)
@@ -4340,58 +4346,58 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top1303
-Node: Command Line Editing1941
-Node: Introduction and Notation2593
-Node: Readline Interaction4216
-Node: Readline Bare Essentials5408
-Node: Readline Movement Commands7198
-Node: Readline Killing Commands8164
-Node: Readline Arguments10085
-Node: Searching11130
-Node: Readline Init File13282
-Node: Readline Init File Syntax14348
-Node: Conditional Init Constructs26283
-Node: Sample Init File28817
-Node: Bindable Readline Commands31935
-Node: Commands For Moving32993
-Node: Commands For History33855
-Node: Commands For Text36980
-Node: Commands For Killing39707
-Node: Numeric Arguments41850
-Node: Commands For Completion42990
-Node: Keyboard Macros44535
-Node: Miscellaneous Commands45107
-Node: Readline vi Mode48469
-Node: Programming with GNU Readline50293
-Node: Basic Behavior51268
-Node: Custom Functions54685
-Node: Readline Typedefs56169
-Node: Function Writing57808
-Node: Readline Variables59115
-Node: Readline Convenience Functions68817
-Node: Function Naming69807
-Node: Keymaps71069
-Node: Binding Keys72841
-Node: Associating Function Names and Bindings77388
-Node: Allowing Undoing79650
-Node: Redisplay82200
-Node: Modifying Text86100
-Node: Character Input87346
-Node: Terminal Management89144
-Node: Utility Functions90580
-Node: Miscellaneous Functions92945
-Node: Alternate Interface95242
-Node: A Readline Example97401
-Node: Readline Signal Handling99304
-Node: Custom Completers105172
-Node: How Completing Works105892
-Node: Completion Functions109206
-Node: Completion Variables112778
-Node: A Short Completion Example124968
-Node: Copying This Manual137141
-Node: GNU Free Documentation License137403
-Node: Concept Index159810
-Node: Function and Variable Index161466
+Node: Top1296
+Node: Command Line Editing1934
+Node: Introduction and Notation2586
+Node: Readline Interaction4209
+Node: Readline Bare Essentials5401
+Node: Readline Movement Commands7191
+Node: Readline Killing Commands8157
+Node: Readline Arguments10078
+Node: Searching11123
+Node: Readline Init File13275
+Node: Readline Init File Syntax14429
+Node: Conditional Init Constructs26364
+Node: Sample Init File28898
+Node: Bindable Readline Commands32016
+Node: Commands For Moving33074
+Node: Commands For History33936
+Node: Commands For Text37061
+Node: Commands For Killing39788
+Node: Numeric Arguments41931
+Node: Commands For Completion43071
+Node: Keyboard Macros44616
+Node: Miscellaneous Commands45188
+Node: Readline vi Mode48550
+Node: Programming with GNU Readline50374
+Node: Basic Behavior51349
+Node: Custom Functions54766
+Node: Readline Typedefs56250
+Node: Function Writing57889
+Node: Readline Variables59196
+Node: Readline Convenience Functions68898
+Node: Function Naming69888
+Node: Keymaps71150
+Node: Binding Keys72922
+Node: Associating Function Names and Bindings77469
+Node: Allowing Undoing79731
+Node: Redisplay82281
+Node: Modifying Text86181
+Node: Character Input87427
+Node: Terminal Management89325
+Node: Utility Functions90761
+Node: Miscellaneous Functions93126
+Node: Alternate Interface95423
+Node: A Readline Example97582
+Node: Readline Signal Handling99485
+Node: Custom Completers105353
+Node: How Completing Works106073
+Node: Completion Functions109387
+Node: Completion Variables112959
+Node: A Short Completion Example125353
+Node: Copying This Manual137526
+Node: GNU Free Documentation License137788
+Node: Concept Index160195
+Node: Function and Variable Index161851
 
 End Tag Table

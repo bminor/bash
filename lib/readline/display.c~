@@ -88,7 +88,7 @@ static int inv_lbsize, vis_lbsize;
    current cursor position is in the middle of a prompt string containing
    invisible characters. */
 #define PROMPT_ENDING_INDEX \
-  ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible)
+  ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
   
 
 /* **************************************************************** */
@@ -977,7 +977,11 @@ rl_redisplay ()
 	     invisible character in the prompt string. */
 	  nleft = prompt_visible_length + wrap_offset;
 	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
+#if 0
 	      _rl_last_c_pos <= PROMPT_ENDING_INDEX && local_prompt)
+#else
+	      _rl_last_c_pos < PROMPT_ENDING_INDEX && local_prompt)
+#endif
 	    {
 #if defined (__MSDOS__)
 	      putc ('\r', rl_outstream);
@@ -1386,6 +1390,15 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	}
     }
 
+if (*old == 0 && *new != 0)
+  {
+    fprintf (stderr, "old == 0x%x new = 0x%x\r\n", old, new);
+    fprintf (stderr, "omax == %d nmax = %d\r\n", omax, nmax);
+    fprintf (stderr, "ne == 0x%x nfd = 0x%x\r\n", ne, nfd);
+    fprintf (stderr, "oe == 0x%x ofd = 0x%x\r\n", oe, ofd);
+    fprintf (stderr, "ols == 0x%x nls = 0x%x\r\n", ols, nls);
+  }    
+    
   /* count of invisible characters in the current invisible line. */
   current_invis_chars = W_OFFSET (current_line, wrap_offset);
   if (_rl_last_v_pos != current_line)

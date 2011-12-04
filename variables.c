@@ -440,7 +440,7 @@ initialize_shell_variables (env, privmode)
   bind_variable ("OPTERR", "1", 0);
   sh_opterr = 1;
 
-  if (login_shell == 1)
+  if (login_shell == 1 && posixly_correct == 0)
     set_home_var ();
 
   /* Get the full pathname to THIS shell, and set the BASH variable

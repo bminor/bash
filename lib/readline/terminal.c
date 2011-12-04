@@ -1,6 +1,6 @@
 /* terminal.c -- controlling the terminal with termcap. */
 
-/* Copyright (C) 1996-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -65,6 +65,17 @@
 #include "rlprivate.h"
 #include "rlshell.h"
 #include "xmalloc.h"
+
+#if defined (__MINGW32__)
+#  include <windows.h>
+#  include <wincon.h>
+
+static void _win_get_screensize PARAMS((int *, int *));
+#endif
+
+#if defined (__EMX__)
+static void _emx_get_screensize PARAMS((int *, int *));
+#endif
 
 #define CUSTOM_REDISPLAY_FUNC() (rl_redisplay_function != rl_redisplay)
 #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
@@ -187,6 +198,23 @@ _emx_get_screensize (swp, shp)
 }
 #endif
 
+#if defined (__MINGW32__)
+_win_get_screensize (swp, shp)
+     int *swp, *shp;
+{
+  HANDLE hConOut;
+  CONSOLE_SCREEN_BUFFER_INFO scr;
+
+  hConOut = GetStdHandle (STD_OUTPUT_HANDLE);
+  if (hConOut != INVALID_HANDLE_VALUE)
+    {
+      GetConsoleScreenBufferInfo (hConOut, &scr);
+      *swp = scr.dwSize.X;
+      *shp = scr.srWindow.Bottom - scr.srWindow.Top + 1;
+    }
+}
+#endif
+
 /* Get readline's idea of the screen size.  TTY is a file descriptor open
    to the terminal.  If IGNORE_ENV is true, we do not pay attention to the
    values of $LINES and $COLUMNS.  The tests for TERM_STRING_BUFFER being
@@ -211,7 +239,9 @@ _rl_get_screen_size (tty, ignore_env)
 #endif /* TIOCGWINSZ */
 
 #if defined (__EMX__)
-  _emx_get_screensize (&_rl_screenwidth, &_rl_screenheight);
+  _emx_get_screensize (&wc, &wr);
+#elif defined (__MINGW32__)
+  _win_get_screensize (&wc, &wr);
 #endif
 
   if (ignore_env || rl_prefer_env_winsize == 0)

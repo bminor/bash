@@ -10,7 +10,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988-2005 Free Software Foundation, Inc.
+Copyright (C) 1988-2006 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -336,7 +336,9 @@ file is taken from the value of the shell variable @env{INPUTRC}.  If
 @ifclear BashFeatures
 file is taken from the value of the environment variable @env{INPUTRC}.  If
 @end ifclear
-that variable is unset, the default is @file{~/.inputrc}.
+that variable is unset, the default is @file{~/.inputrc}.  If that
+file does not exist or cannot be read, the ultimate default is
+@file{/etc/inputrc}.
 
 When a program which uses the Readline library starts up, the
 init file is read, and the key bindings are set.

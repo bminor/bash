@@ -13043,4 +13043,40 @@ lib/readline/display.c
 	  which caused a prompt with invisible characters to be redrawn one
 	  extra time in a multibyte locale.  Change from <= to < fixes
 	  multibyte locale, but I added 1 to single-byte definition of
-	  PROMPT_ENDING_INDEX (worth checking) to compensate
+	  PROMPT_ENDING_INDEX (worth checking) to compensate.  Bug reported
+	  by Egmont Koblinger <egmont@uhulinux.hu>
+
+				    2/8
+				    ---
+lib/readline/terminal.c
+	- call _emx_get_screensize with wr, wc like ioctl code for consistency
+	- new function, _win_get_screensize, gets screen dimensions using
+	  standard Windows API for mingw32 (code from Denis Pilat)
+	- call _win_get_screensize from _rl_get_screen_size on mingw32
+
+lib/readline/rlconf.h
+	- define SYS_INPUTRC (/etc/inputrc) as system-wide default inputrc
+	  filename
+
+support/shobj-conf
+	- changes to make loadable builtins work on MacOS X 10.[34]
+
+builtins/pushd.def
+	- changes to make it work as a loadable builtin compiled with gcc4
+
+				    2/9
+				    ---
+lib/readline/bind.c
+	- add SYS_INPUTRC as last-ditch default (if DEFAULT_INPUTRC does not
+	  exist or can't be read) in rl_read_init_file
+
+lib/readline/doc/rluser.texi
+	- add description of /etc/inputrc as ultimate default startup file
+
+				   2/10
+				   ----
+lib/readline/bind.c
+	- fix problem with rl_function_of_keyseq that returns a non-keymap
+	  bound to a portion of the passed key sequence without processing
+	  the entire thing.  We can bind maps with existing non-map
+	  functions using the ANYOTHERKEY binding code.

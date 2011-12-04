@@ -691,7 +691,7 @@ rl_function_of_keyseq (keyseq, map, type)
 {
   register int i;
 
-  if (!map)
+  if (map == 0)
     map = _rl_keymap;
 
   for (i = 0; keyseq && keyseq[i]; i++)
@@ -700,17 +700,19 @@ rl_function_of_keyseq (keyseq, map, type)
 
       if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
 	{
-	  if (map[ESC].type != ISKMAP)
+	  if (map[ESC].type == ISKMAP)
+	    {
+	      map = FUNCTION_TO_KEYMAP (map, ESC);
+	      ic = UNMETA (ic);
+	    }
+	  /* XXX - should we just return NULL here, since this obviously
+	     doesn't match? */
+	  else
 	    {
 	      if (type)
 		*type = map[ESC].type;
 
 	      return (map[ESC].function);
-	    }
-	  else
-	    {
-	      map = FUNCTION_TO_KEYMAP (map, ESC);
-	      ic = UNMETA (ic);
 	    }
 	}
 
@@ -718,7 +720,7 @@ rl_function_of_keyseq (keyseq, map, type)
 	{
 	  /* If this is the last key in the key sequence, return the
 	     map. */
-	  if (!keyseq[i + 1])
+	  if (keyseq[i + 1] == '\0')
 	    {
 	      if (type)
 		*type = ISKMAP;
@@ -728,7 +730,12 @@ rl_function_of_keyseq (keyseq, map, type)
 	  else
 	    map = FUNCTION_TO_KEYMAP (map, ic);
 	}
-      else
+      /* If we're not at the end of the key sequence, and the current key
+	 is bound to something other than a keymap, then the entire key
+	 sequence is not bound. */
+      else if (map[ic].type != ISKMAP && keyseq[i+1])
+	return ((rl_command_func_t *)NULL);
+      else	/* map[ic].type != ISKMAP && keyseq[i+1] == 0 */
 	{
 	  if (type)
 	    *type = map[ic].type;
@@ -810,6 +817,7 @@ rl_re_read_init_file (count, ignore)
      1. the filename used for the previous call
      2. the value of the shell variable `INPUTRC'
      3. ~/.inputrc
+     4. /etc/inputrc
    If the file existed and could be opened and read, 0 is returned,
    otherwise errno is returned. */
 int
@@ -818,16 +826,17 @@ rl_read_init_file (filename)
 {
   /* Default the filename. */
   if (filename == 0)
+    filename = last_readline_init_file;
+  if (filename == 0)
+    filename = sh_get_env_value ("INPUTRC");
+  if (filename == 0 || *filename == 0)
     {
-      filename = last_readline_init_file;
-      if (filename == 0)
-        filename = sh_get_env_value ("INPUTRC");
-      if (filename == 0)
-	filename = DEFAULT_INPUTRC;
+      filename = DEFAULT_INPUTRC;
+      /* Try to read DEFAULT_INPUTRC; fall back to SYS_INPUTRC on failure */
+      if (_rl_read_init_file (filename, 0) == 0)
+	return 0;
+      filename = SYS_INPUTRC;
     }
-
-  if (*filename == 0)
-    filename = DEFAULT_INPUTRC;
 
 #if defined (__MSDOS__)
   if (_rl_read_init_file (filename, 0) == 0)

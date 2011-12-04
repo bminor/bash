@@ -483,8 +483,10 @@ initialize_shell_variables (env, privmode)
       set_if_not ("HISTFILE", name);
       free (name);
 
+#if 0
       set_if_not ("HISTSIZE", "500");
       sv_histsize ("HISTSIZE");
+#endif
     }
 #endif /* HISTORY */
 
