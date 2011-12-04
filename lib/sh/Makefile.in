@@ -88,7 +88,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   shquote.c strtrans.c strindex.c snprintf.c mailstat.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
-	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c
+	   mktime.c strftime.c xstrchr.c zcatfd.c winsize.c eaccess.c
 
 # The header files for this library.
 HSOURCES = 
@@ -96,7 +96,7 @@ HSOURCES =
 # The object files contained in $(LIBRARY_NAME)
 LIBOBJS = @LIBOBJS@
 OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
-	  itos.o zread.o zwrite.o shtty.o shmatch.o \
+	  itos.o zread.o zwrite.o shtty.o shmatch.o eaccess.o \
 	  netconn.o netopen.o timeval.o makepath.o pathcanon.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
@@ -134,6 +134,7 @@ ${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
 # rules for losing makes, like SunOS
 clktck.o: clktck.c
 clock.o: clock.c
+eaccess.o: eaccess.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
@@ -191,6 +192,7 @@ strtoull.o: strtol.c
 # all files in the library depend on config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
+eaccess.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
@@ -326,6 +328,19 @@ rename.o: ${BASHINCDIR}/posixstat.h
 
 setlinebuf.o: ${topdir}/xmalloc.h ${topdir}/bashansi.h
 setlinebuf.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/stdc.h
+
+eaccess.o: ${topdir}/bashtypes.h
+eaccess.o: ${BASHINCDIR}/posixstat.h
+eaccess.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+eaccess.o: ${BASHINCDIR}/filecntl.h
+eaccess.o: ${BASHINCDIR}/stdc.h
+eaccess.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+eaccess.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+eaccess.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+eaccess.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+eaccess.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+eaccess.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+eaccess.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h ${BUILD_DIR}/version.h
 
 shquote.o: ${BASHINCDIR}/stdc.h ${topdir}/bashansi.h
 shquote.o: ${BASHINCDIR}/ansi_stdlib.h ${topdir}/xmalloc.h

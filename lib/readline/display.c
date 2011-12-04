@@ -83,6 +83,14 @@ static int inv_lbsize, vis_lbsize;
    by backing up or outputting a carriage return and moving forward. */
 #define CR_FASTER(new, cur) (((new) + 1) < ((cur) - (new)))
 
+/* _rl_last_c_pos is an absolute cursor position in multibyte locales and a
+   buffer index in others.  This macro is used when deciding whether the
+   current cursor position is in the middle of a prompt string containing
+   invisible characters. */
+#define PROMPT_ENDING_INDEX \
+  ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible)
+  
+
 /* **************************************************************** */
 /*								    */
 /*			Display stuff				    */
@@ -969,7 +977,7 @@ rl_redisplay ()
 	     invisible character in the prompt string. */
 	  nleft = prompt_visible_length + wrap_offset;
 	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
-	      _rl_last_c_pos <= prompt_last_invisible && local_prompt)
+	      _rl_last_c_pos <= PROMPT_ENDING_INDEX && local_prompt)
 	    {
 #if defined (__MSDOS__)
 	      putc ('\r', rl_outstream);
@@ -1403,7 +1411,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   od = ofd - old;	/* index of first difference in visible line */
   if (current_line == 0 && !_rl_horizontal_scroll_mode &&
       _rl_term_cr && lendiff > prompt_visible_length && _rl_last_c_pos > 0 &&
-      od >= lendiff && _rl_last_c_pos <= prompt_last_invisible)
+      od >= lendiff && _rl_last_c_pos <= PROMPT_ENDING_INDEX)
     {
 #if defined (__MSDOS__)
       putc ('\r', rl_outstream);

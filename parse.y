@@ -1,6 +1,6 @@
 /* Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -118,7 +118,6 @@ extern int current_command_number;
 extern int sourcelevel;
 extern int posixly_correct;
 extern int last_command_exit_value;
-extern int interrupt_immediately;
 extern char *shell_name, *current_host_name;
 extern char *dist_version;
 extern int patch_level;
@@ -1212,10 +1211,12 @@ yy_readline_get ()
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	  interrupt_immediately++;
 	}
+      terminate_immediately = 1;
 
       current_readline_line = readline (current_readline_prompt ?
       					  current_readline_prompt : "");
 
+      terminate_immediately = 0;
       if (signal_is_ignored (SIGINT) == 0 && old_sigint)
 	{
 	  interrupt_immediately--;
@@ -1347,10 +1348,16 @@ yy_stream_get ()
   if (bash_input.location.file)
     {
       if (interactive)
-	interrupt_immediately++;
+	{
+	  interrupt_immediately++;
+	  terminate_immediately++;
+	}
       result = getc_with_restart (bash_input.location.file);
       if (interactive)
-	interrupt_immediately--;
+	{
+	  interrupt_immediately--;
+	  terminate_immediately--;
+	}
     }
   return (result);
 }
@@ -3576,7 +3583,7 @@ read_token_word (character)
 	      FREE (ttok);
 	      all_digit_token = 0;
 	      compound_assignment = 1;
-#if 0
+#if 1
 	      goto next_character;
 #else
 	      goto got_token;		/* ksh93 seems to do this */

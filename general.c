@@ -503,7 +503,7 @@ int
 file_iswdir (fn)
      char *fn;
 {
-  return (file_isdir (fn) && test_eaccess (fn, W_OK) == 0);
+  return (file_isdir (fn) && sh_eaccess (fn, W_OK) == 0);
 }
 
 /* Return 1 if STRING contains an absolute pathname, else 0.  Used by `cd'

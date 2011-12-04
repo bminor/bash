@@ -950,7 +950,7 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      rl_compentry_func_t *our_func;
      int found_quote, quote_char;
 {
-  char **matches, *temp;
+  char **matches;
 
   rl_completion_found_quote = found_quote;
   rl_completion_quote_character = quote_char;
@@ -969,21 +969,9 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
 	}
     }
 
-  /* Beware -- we're stripping the quotes here.  Do this only if we know
-     we are doing filename completion and the application has defined a
-     filename dequoting function. */
-  temp = (char *)NULL;
-
-  if (found_quote && our_func == rl_filename_completion_function &&
-      rl_filename_dequoting_function)
-    {
-      /* delete single and double quotes */
-      temp = (*rl_filename_dequoting_function) (text, quote_char);
-      text = temp;	/* not freeing text is not a memory leak */
-    }
+  /* XXX -- filename dequoting moved into rl_filename_completion_function */
 
   matches = rl_completion_matches (text, our_func);
-  FREE (temp);
   return matches;  
 }
 
@@ -1908,6 +1896,7 @@ rl_filename_completion_function (text, state)
   static char *filename = (char *)NULL;
   static char *dirname = (char *)NULL;
   static char *users_dirname = (char *)NULL;
+  static char *orig_filename = (char *)NULL;
   static int filename_len;
   char *temp;
   int dirlen;
@@ -1974,13 +1963,30 @@ rl_filename_completion_function (text, state)
       if (rl_directory_rewrite_hook)
 	(*rl_directory_rewrite_hook) (&dirname);
 
+      /* The directory completion hook should perform any necessary
+	 dequoting. */
       if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&dirname))
 	{
 	  free (users_dirname);
 	  users_dirname = savestring (dirname);
 	}
-
+      else if (rl_completion_found_quote && rl_filename_dequoting_function)
+	{
+	  /* delete single and double quotes */
+	  temp = (*rl_filename_dequoting_function) (users_dirname, rl_completion_quote_character);
+	  free (users_dirname);
+	  users_dirname = temp;
+	}
       directory = opendir (dirname);
+
+      /* Now dequote a non-null filename. */
+      if (filename && *filename && rl_completion_found_quote && rl_filename_dequoting_function)
+	{
+	  /* delete single and double quotes */
+	  temp = (*rl_filename_dequoting_function) (filename, rl_completion_quote_character);
+	  free (filename);
+	  filename = temp;
+	}
       filename_len = strlen (filename);
 
       rl_filename_completion_desired = 1;

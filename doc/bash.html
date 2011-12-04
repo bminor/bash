@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2005 Aug 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 Jan 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -58,8 +58,9 @@ shells (<B>ksh</B> and <B>csh</B>).
 
 <B>Bash</B>
 
-is intended to be a conformant implementation of the IEEE
-POSIX Shell and Tools specification (IEEE Working Group 1003.2).
+is intended to be a conformant implementation of the
+Shell and Utilities portion of the IEEE POSIX specification
+(IEEE Standard 1003.1).
 <B>Bash</B>
 
 can be configured to be POSIX-conformant by default.
@@ -276,7 +277,7 @@ This option is on by default if the shell is invoked as
 
 <DD>
 Change the behavior of <B>bash</B> where the default operation differs
-from the POSIX 1003.2 standard to match the standard (<I>posix mode</I>).
+from the POSIX standard to match the standard (<I>posix mode</I>).
 <DT><B>--restricted</B>
 
 <DD>
@@ -897,8 +898,8 @@ If the shell option
 
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-The return value is 0 if the string matches or does not match
-the pattern, respectively, and 1 otherwise.
+The return value is 0 if the string matches (<B>==</B>) or does not match
+(<B>!=</B>) the pattern, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
 string.
 <P>
@@ -1049,6 +1050,12 @@ as for pathname expansion (see
 <B>Pathname Expansion</B>
 
 below).
+The <I>word</I> is expanded using tilde
+expansion, parameter and variable expansion, arithmetic substituion,
+command substitution, process substitution and quote removal.
+Each <I>pattern</I> examined is expanded using tilde
+expansion, parameter and variable expansion, arithmetic substituion,
+command substitution, and process substitution.
 If the shell option
 <B>nocasematch</B>
 
@@ -1259,7 +1266,7 @@ quotes (see
 below).
 <P>
 
-Words of the form <B>$</B>'<I>string</I>' are treated specially.  The
+Words of the form <B>$</B>aq<I>string</I>aq are treated specially.  The
 word expands to <I>string</I>, with backslash-escaped characters replaced
 as specified by the ANSI C standard.  Backslash escape sequences, if
 present, are decoded as follows:
@@ -1302,7 +1309,7 @@ vertical tab
 
 <DD>
 backslash
-<DT><B>\'</B>
+<DT><B>\aq</B>
 
 <DD>
 single quote
@@ -2380,7 +2387,7 @@ Example:
 <DL COMPACT><DT><DD>
 <P>
 
-<B>MAILPATH</B>='/var/mail/bfox?&quot;You have mail&quot;:~/shell-mail?&quot;$_ has mail!&quot;'
+<B>MAILPATH</B>=aq/var/mail/bfox?&quot;You have mail&quot;:~/shell-mail?&quot;$_ has mail!&quot;aq
 <P>
 
 <B>Bash</B>
@@ -2550,7 +2557,7 @@ The value of <I>p</I> determines whether or not the fraction is
 included.
 <DT><DD>
 If this variable is not set, <B>bash</B> acts as if it had the
-value <B>$'\nreal\t%3lR\nuser\t%3lU\nsys	%3lS'</B>.
+value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys	%3lSaq</B>.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 <DT><B>TMOUT</B>
@@ -3230,16 +3237,12 @@ or
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}<DD>
-
-<DT>${<I>parameter</I><B>//</B><I>pattern</I><B>/</B><I>string</I>}<DD>
-
 The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
 <I>Parameter</I> is expanded and the longest match of <I>pattern</I>
 against its value is replaced with <I>string</I>.
-In the first form, only the first match is replaced.
-The second form causes all matches of <I>pattern</I> to be
-replaced with <I>string</I>.
+If Ipattern begins with <B>/</B>, all matches of <I>pattern</I> are
+replaced with <I>string</I>.  Normally only the first match is replaced.
 If <I>pattern</I> begins with <B>#</B>, it must match at the beginning
 of the expanded value of <I>parameter</I>.
 If <I>pattern</I> begins with <B>%</B>, it must match at the end
@@ -3463,7 +3466,7 @@ If the value of
 is null, no word splitting occurs.
 <P>
 
-Explicit null arguments (<B>&quot;&quot;</B> or <B>''</B>) are retained.
+Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
@@ -3678,7 +3681,7 @@ and
 
 <I>character classes</I> can be specified using the syntax
 <B>[:</B><I>class</I><B>:]</B>, where <I>class</I> is one of the
-following classes defined in the POSIX.2 standard:
+following classes defined in the POSIX standard:
 </DL>
 <P>
 
@@ -3756,7 +3759,7 @@ After the preceding expansions, all unquoted occurrences of the
 characters
 <B>\</B>,
 
-<B>'</B>,
+<B>aq</B>,
 
 and <B>&quot;</B> that did not result from one of the above
 expansions are removed.
@@ -4440,6 +4443,11 @@ automatically have them defined with the
 
 option to the 
 <B>export</B>
+
+builtin.
+A function definition may be deleted using the <B>-f</B> option to
+the
+<B>unset</B>
 
 builtin.
 Note that shell functions and variables with the same name may result
@@ -5846,10 +5854,10 @@ backslash
 
 <DD>
 literal &quot;
-<DT><B>\'</B>
+<DT><B>\aq</B>
 
 <DD>
-literal '
+literal aq
 </DL></DL>
 
 
@@ -5912,7 +5920,7 @@ be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
 In the macro body, the backslash escapes described above are expanded.
 Backslash will quote any other character in the macro text,
-including &quot; and '.
+including &quot; and aq.
 <P>
 
 <B>Bash</B>
@@ -9411,7 +9419,7 @@ format specifications, each of which causes printing of the next successive
 In addition to the standard <I>printf</I>(1) formats, <B>%b</B> causes
 <B>printf</B> to expand backslash escape sequences in the corresponding
 <I>argument</I> (except that <B>\c</B> terminates output, backslashes in
-<B>\'</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
+<B>\aq</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
 beginning with <B>\0</B> may contain up to four digits),
 and <B>%q</B> causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
@@ -9919,7 +9927,7 @@ Change the behavior of
 <B>bash</B>
 
 where the default operation differs
-from the POSIX 1003.2 standard to match the standard (<I>posix mode</I>).
+from the POSIX standard to match the standard (<I>posix mode</I>).
 <DT><B>privileged</B>
 
 <DD>
@@ -10337,7 +10345,7 @@ If set, the extended pattern matching features described above under
 <DT><B>extquote</B>
 
 <DD>
-If set, <B>$</B>'<I>string</I>' and <B>$</B>&quot;<I>string</I>&quot; quoting is
+If set, <B>$</B>aq<I>string</I>aq and <B>$</B>&quot;<I>string</I>&quot; quoting is
 performed within <B>${</B><I>parameter</I><B>}</B> expansions
 enclosed in double quotes.  This option is enabled by default.
 <DT><B>failglob</B>
@@ -10904,7 +10912,7 @@ option suppresses shell function lookup, as with the <B>command</B> builtin.
 
 returns true if any of the arguments are found, false if
 none are found.
-<DT><B>ulimit</B> [<B>-SHacdflmnpstuv</B> [<I>limit</I>]]<DD>
+<DT><B>ulimit</B> [<B>-SHacdefilmnpqrstuvx</B> [<I>limit</I>]]<DD>
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The <B>-H</B> and <B>-S</B> options specify that the hard or soft limit is
@@ -10948,10 +10956,18 @@ The maximum size of core files created
 
 <DD>
 The maximum size of a process's data segment
+<DT><B>-e</B>
+
+<DD>
+The maximum scheduling priority (&quot;nice&quot;)
 <DT><B>-f</B>
 
 <DD>
 The maximum size of files created by the shell
+<DT><B>-i</B>
+
+<DD>
+The maximum number of pending signals
 <DT><B>-l</B>
 
 <DD>
@@ -10969,6 +10985,14 @@ allow this value to be set)
 
 <DD>
 The pipe size in 512-byte blocks (this may not be set)
+<DT><B>-q</B>
+
+<DD>
+The maximum number of bytes in POSIX message queues
+<DT><B>-r</B>
+
+<DD>
+The maximum real-time scheduling priority
 <DT><B>-s</B>
 
 <DD>
@@ -10985,6 +11009,10 @@ The maximum number of processes available to a single user
 
 <DD>
 The maximum amount of virtual memory available to the shell
+<DT><B>-x</B>
+
+<DD>
+The maximum number of file locks
 
 </DL>
 <P>
@@ -11407,7 +11435,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.1-beta1<TH ALIGN=CENTER width=33%>2005 Aug 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 Jan 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11511,6 +11539,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 12 October 2005 16:46:47 EDT
+Time: 26 January 2006 11:19:07 EST
 </BODY>
 </HTML>

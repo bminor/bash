@@ -2968,6 +2968,7 @@ waitchld (wpid, block)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
+      CHECK_TERMSIG;
       pid = WAITPID (-1, &status, waitpid_flags);
 
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
@@ -2994,6 +2995,7 @@ waitchld (wpid, block)
 
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
+      CHECK_TERMSIG;
       if (pid <= 0)
 	continue;	/* jumps right to the test */
 
@@ -3228,7 +3230,7 @@ set_job_status_and_cleanup (job)
 		  temp_handler = trap_to_sighandler (SIGINT);
 		restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
-		termination_unwind_protect (SIGINT);
+		termsig_handler (SIGINT);
 	      else if (temp_handler != SIG_IGN)
 		(*temp_handler) (SIGINT);
 	    }

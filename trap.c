@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -452,7 +452,7 @@ set_sigint_handler ()
   else if (interactive)	/* XXX - was interactive_shell */
     return (set_signal_handler (SIGINT, sigint_sighandler));
   else
-    return (set_signal_handler (SIGINT, termination_unwind_protect));
+    return (set_signal_handler (SIGINT, termsig_sighandler));
 }
 
 /* Return the correct handler for signal SIG according to the values in

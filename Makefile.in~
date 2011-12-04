@@ -200,7 +200,8 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/mktime.c ${SH_LIBSRC}/strftime.c \
 		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
 		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
-		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c
+		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c \
+		${SH_LIBSRC}/shaccess.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -420,6 +421,7 @@ SIGNAMES_H = @SIGNAMES_H@
 # object files chosen based on running of configure
 JOBS_O = @JOBS_O@
 SIGLIST_O = @SIGLIST_O@
+SIGNAMES_O = @SIGNAMES_O@
 
 # Matching object files.
 OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
@@ -428,7 +430,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
 	   alias.o array.o arrayfunc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
-	   pcomplete.o pcomplib.o syntax.o xmalloc.o
+	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
 # Where the source code of the shell builtins resides.
 BUILTIN_SRCDIR=$(srcdir)/builtins

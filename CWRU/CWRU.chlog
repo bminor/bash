@@ -12878,3 +12878,140 @@ lib/readline/bind.c
 
 execute_cmd.c
 	- add call to QUIT at end of execute_command
+
+				   1/23
+				   ----
+lib/readline/display.c
+	- changed two places in update_line where a check of whether the cursor
+	  is before the last invisible character in the prompt string to
+	  differentiate between the multibyte character case (where
+	  _rl_last_c_pos is a physical cursor position) and the single-byte
+	  case (where it is a buffer index).  This prevents many unnecessary
+	  \r-redraw the line sequences.  Reported by Dan Jacobson.
+
+				   1/24
+				   ----
+quit.h
+	- wrap QUIT macro in do...while(0) like other compound statement
+	  macros
+	- CHECK_TERMSIG define (placeholder for now); future use will be to
+	  handle any received signals that should  cause the shell to
+	  terminate (e.g., SIGHUP)
+
+{input,jobs,nojobs}.c
+	- add calls to CHECK_TERMSIG where appropriate (reading input and
+	  waiting for children)
+	- include quit.h if necessary
+
+				   1/25
+				   ----
+parse.y
+	- undo change that makes `)' in a compound assignment delimit a token.
+	  It messes up arithmetic expressions in assignments to `let', among
+	  other things
+
+sig.h,{jobs,nojobs,sig,trap}.c,builtins/trap.def
+	- rename termination_unwind_protect to termsig_sighandler
+
+sig.c
+	- split termsig_sighandler into two functions: termsig_sighandler, which
+	  runs as a signal handler and sets a flag noting that a terminating
+	  signal was received, and termsig_handler, which runs when it is `safe'
+	  to handle the signal and exit
+	- new terminate_immediately variable, similar to interrupt_immediately
+	- termsig_sighandler calls termsig_handler immediately if
+	  terminate_immediately is non-zero
+
+quit.h
+	- change CHECK_TERMSIG macro to check terminating_signal and call
+	  termsig_handler if it's non-zero
+	- add same check of terminating_signal and call to termsig_handler to
+	  QUIT macro
+
+{jobs,nojobs}.c
+	- change call to termsig_sighandler to call termsig_handler directly,
+	  as was intended
+
+parse.y,builtins/read.def
+	- set terminate_immediately to non-zero value when reading interactive
+	  input, as is done with interrupt_immediately
+
+				   1/26
+				   ----
+doc/{bash.1,bashref.texi}
+	- reworded the POSIX standard references to remove mention of POSIX.2
+	  or 1003.2 -- it's all the 1003.1 standard now.  Recommended by
+	  Arnold Robbins
+
+				   1/27
+				   ----
+lib/readline/complete.c
+	- move call to filename dequoting function into
+	  rl_filename_completion_function; call only if directory completion
+	  hook isn't set.  This means that directory-completion-hook now needs
+	  to dequote the directory name.  We don't want to dequote the directory
+	  name before calling the directory-completion-hook.  Bug reported by
+	  Andrew Parker <andrewparker@bigfoot.com>
+
+bashline.c
+	- add necessary directory name dequoting to bash_directory_completion_hook
+	  and bash_directory_expansion
+
+lib/readline/doc/rltech.texi
+	- add note to description of rl_direcotory_completion_hook that it
+	  needs to dequote the directory name even if no other expansions are
+	  performed
+
+				   1/28
+				   ----
+braces.c
+	- make sure that we skip over braces that don't start a valid matched
+	  brace expansion construct in brace_expand -- there might be a valid
+	  brace expansion after the unmatched `{' later in the string
+	- brace_gobbler now checks that when looking for a `}' to end a brace
+	  expansion word, there is an unquoted `,' or `..' that's not inside
+	  another pair of braces.  Fixes the a{b{c,d}e}f problem reported by
+	  Tim Waugh
+
+builtins/declare.def
+	- when not in posix mode, and operating on shell functions, typeset
+	  and declare do not require their variable operands to be valid
+	  shell identifiers.  The other `attribute' builtins work this way.
+	  Fixes inconsistency reported by Mike Frysinger
+
+{configure,config.h}.in
+	- add test for setregid, define HAVE_SETREGID and HAVE_DECL_SETREGID
+	  as appropriate
+	- add test for eaccess, define HAVE_EACCESS if found
+
+lib/sh/eaccess.c
+	- new file, with sh_stat and sh_eaccess functions, moved from test.c
+	- renamed old sh_eaccess as sh_stataccess, since it uses the stat(2)
+	  information to determine file accessibility
+	- new function, sh_euidaccess, to call when uid != euid or gid != egid;
+	  temporarily swaps uid/euid and gid/egid around call to access
+	- rewrote sh_eaccess to call eaccess, access, sh_euidaccess or
+	  sh_stataccess as appropriate.  access(2) will take into account
+	  things like ACLs, read-only file systems, file flags, and so on.
+
+lib/sh/Makefile.in,Makefile.in
+	- add necessary entries for eaccess.[co]
+
+test.c
+	- change calls to test_stat to call sh_stat
+
+{test,general}.c
+	- change calls to test_eaccess to call sh_eaccess
+
+externs.h
+	- new extern declaration for sh_eaccess
+
+test.[ch]
+	- remove test_stat and test_eaccess
+
+				   1/29
+				   ----
+braces.c
+	- make change from 1/28 dependant on CSH_BRACE_COMPAT not being
+	  defined (since old bash behavior is what csh does, defining
+	  CSH_BRACE_COMPAT will produce old bash behavior)

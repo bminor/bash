@@ -2265,7 +2265,7 @@ static void
 bash_directory_expansion (dirname)
      char **dirname;
 {
-  char *d;
+  char *d, *nd;
 
   d = savestring (*dirname);
 
@@ -2276,6 +2276,13 @@ bash_directory_expansion (dirname)
     {
       free (*dirname);
       *dirname = d;
+    }
+  else if (rl_completion_found_quote)
+    {
+      nd = bash_dequote_filename (d, rl_completion_quote_character);
+      free (*dirname);
+      free (d);
+      *dirname = nd;
     }
 }
   
@@ -2336,6 +2343,13 @@ bash_directory_completion_hook (dirname)
 	  **dirname = '\0';
 	  return 1;
 	}
+    }
+  else 
+    {
+      /* Dequote the filename even if we don't expand it. */
+      new_dirname = bash_dequote_filename (local_dirname, rl_completion_quote_character);
+      free (local_dirname);
+      local_dirname = *dirname = new_dirname;
     }
 
   if (!no_symbolic_links && (local_dirname[0] != '.' || local_dirname[1]))
@@ -3123,11 +3137,7 @@ bash_directory_completion_matches (text)
   char *dfn;
   int qc;
 
-#if 0
-  qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
-#else
   qc = rl_dispatching ? rl_completion_quote_character : 0;  
-#endif
   dfn = bash_dequote_filename ((char *)text, qc);
   m1 = rl_completion_matches (dfn, rl_filename_completion_function);
   free (dfn);

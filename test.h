@@ -27,8 +27,6 @@
 #define TEST_PATMATCH	0x01
 #define TEST_ARITHEXP	0x02
 
-extern int test_eaccess __P((char *, int));
-
 extern int test_unop __P((char *));
 extern int test_binop __P((char *));
 

@@ -225,6 +225,9 @@ extern char *sh_realpath __P((const char *, char *));
 extern int sh_setlinebuf __P((FILE *));
 #endif
 
+/* declarations for functions defined in lib/sh/shaccess.c */
+extern int sh_eaccess __P((char *, int));
+
 /* declarations for functions defined in lib/sh/shmatch.c */
 extern int sh_regmatch __P((const char *, const char *, int));
 

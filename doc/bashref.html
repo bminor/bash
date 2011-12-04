@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on October, 3  2005 by texi2html 1.64 -->
+<!-- Created on January, 26  2006 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,12 +33,12 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.1-beta1, 5 September 2005)..
+the Bash shell (version 3.2, 26 January 2006)..
 </P><P>
 
-This is Edition 3.1-beta1, last updated 5 September 2005,
+This is Edition 3.2, last updated 26 January 2006,
 of <CITE>The GNU Bash Reference Manual</CITE>,
-for <CODE>Bash</CODE>, Version 3.1-beta1.
+for <CODE>Bash</CODE>, Version 3.2.
 </P><P>
 
 Bash contains features that appear in other popular shells, and some
@@ -136,7 +136,8 @@ of Unix.
 Bash is largely compatible with <CODE>sh</CODE> and incorporates useful
 features from the Korn shell <CODE>ksh</CODE> and the C shell <CODE>csh</CODE>.
 It is intended to be a conformant implementation of the IEEE
-POSIX Shell and Tools specification (IEEE Working Group 1003.2).
+POSIX Shell and Tools portion of the IEEE POSIX
+specification (IEEE Standard 1003.1).
 It offers functional improvements over <CODE>sh</CODE> for both interactive and
 programming use.
 </P><P>
@@ -250,7 +251,8 @@ These definitions are used throughout the remainder of this manual.
 <DT><CODE>POSIX</CODE>
 <DD><A NAME="IDX1"></A>
 A family of open system standards based on Unix.  Bash
-is concerned with POSIX 1003.2, the Shell and Tools Standard.
+is primarily concerned with the Shell and Utilities portion of the
+POSIX 1003.1 standard. 
 <P>
 
 <DT><CODE>blank</CODE>
@@ -357,7 +359,7 @@ of an event occurring in the system.
 <DT><CODE>special builtin</CODE>
 <DD><A NAME="IDX18"></A>
 A shell builtin command that has been classified as special by the
-POSIX 1003.2 standard.
+POSIX standard.
 <P>
 
 <DT><CODE>token</CODE>
@@ -1299,8 +1301,8 @@ If the shell option <CODE>nocasematch</CODE>
 (see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC58">4.2 Bash Builtin Commands</A>)
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-The return value is 0 if the string matches or does not match
-the pattern, respectively, and 1 otherwise.
+The return value is 0 if the string matches (<SAMP>`=='</SAMP>) or does not
+match (<SAMP>`!='</SAMP>)the pattern, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
 string.
 </P><P>
@@ -1458,6 +1460,10 @@ may be any compound command listed above.
 name of a command.
 Any redirections (see section <A HREF="bashref.html#SEC38">3.6 Redirections</A>) associated with the shell function
 are performed when the function is executed.
+</P><P>
+
+A function definition may be deleted using the <SAMP>`-f'</SAMP> option to the
+<CODE>unset</CODE> builtin (see section <A HREF="bashref.html#SEC57">4.1 Bourne Shell Builtins</A>).
 </P><P>
 
 The exit status of a function definition is zero unless a syntax error
@@ -2197,16 +2203,14 @@ array in turn, and the expansion is the resultant list.
 <P>
 
 <DT><CODE>${<VAR>parameter</VAR>/<VAR>pattern</VAR>/<VAR>string</VAR>}</CODE>
-<DD><DT><CODE>${<VAR>parameter</VAR>//<VAR>pattern</VAR>/<VAR>string</VAR>}</CODE>
 <DD><P>
 
 The <VAR>pattern</VAR> is expanded to produce a pattern just as in
 filename expansion.
 <VAR>Parameter</VAR> is expanded and the longest match of <VAR>pattern</VAR>
 against its value is replaced with <VAR>string</VAR>.
-In the first form, only the first match is replaced.
-The second form causes all matches of <VAR>pattern</VAR> to be
-replaced with <VAR>string</VAR>.
+If <VAR>pattern</VAR> begins with <SAMP>`/'</SAMP>, all matches of <VAR>pattern</VAR> are
+replaced with <VAR>string</VAR>.  Normally only the first match is replaced.
 If <VAR>pattern</VAR> begins with <SAMP>`#'</SAMP>, it must match at the beginning
 of the expanded value of <VAR>parameter</VAR>.
 If <VAR>pattern</VAR> begins with <SAMP>`%'</SAMP>, it must match at the end
@@ -2542,7 +2546,7 @@ force the use of the C locale by setting the <CODE>LC_COLLATE</CODE> or
 Within <SAMP>`['</SAMP> and <SAMP>`]'</SAMP>, <VAR>character classes</VAR> can be specified
 using the syntax
 <CODE>[:</CODE><VAR>class</VAR><CODE>:]</CODE>, where <VAR>class</VAR> is one of the
-following classes defined in the POSIX 1003.2 standard:
+following classes defined in the POSIX standard:
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>alnum   alpha   ascii   blank   cntrl   digit   graph   lower
 print   punct   space   upper   word    xdigit
 </pre></td></tr></table>A character class matches any character belonging to that class.
@@ -3566,7 +3570,7 @@ under another shell.
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC59">4.3 The Set Builtin</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">This builtin is so overloaded it
 				deserves its own section.</TD></TR>
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC60">4.4 Special Builtins</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Builtin commands classified specially by
-				POSIX.2.</TD></TR>
+				POSIX.</TD></TR>
 </TABLE></BLOCKQUOTE>
 <P>
 
@@ -3578,7 +3582,7 @@ Builtin commands are necessary to implement functionality impossible
 or inconvenient to obtain with separate utilities.
 </P><P>
 
-This section briefly the builtins which Bash inherits from
+This section briefly describes the builtins which Bash inherits from
 the Bourne Shell, as well as the builtin commands which are unique
 to or have been extended in Bash.
 </P><P>
@@ -3620,7 +3624,7 @@ builtins do not accept options.
 <P>
 
 The following shell builtin commands are inherited from the Bourne Shell.
-These commands are implemented as specified by the POSIX 1003.2 standard.
+These commands are implemented as specified by the POSIX standard.
 </P><P>
 
 <DL COMPACT>
@@ -3807,7 +3811,7 @@ If <CODE>getopts</CODE> is silent, then a colon (<SAMP>`:'</SAMP>) is placed in
 
 <DT><CODE>hash</CODE>
 <DD><A NAME="IDX78"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>hash [-'r] [-p <VAR>filename</VAR>] [-dt] [<VAR>name</VAR>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>hash [-r] [-p <VAR>filename</VAR>] [-dt] [<VAR>name</VAR>]
 </pre></td></tr></table>Remember the full pathnames of commands specified as <VAR>name</VAR> arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
@@ -4095,7 +4099,7 @@ The return status is zero unless a <VAR>name</VAR> is readonly.
 
 This section describes builtin commands which are unique to
 or have been extended in Bash.
-Some of these commands are specified in the POSIX 1003.2 standard.
+Some of these commands are specified in the POSIX standard.
 </P><P>
 
 <DL COMPACT>
@@ -4937,7 +4941,7 @@ builtin command.
 
 <DT><CODE>ulimit</CODE>
 <DD><A NAME="IDX107"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>ulimit [-acdflmnpstuvSH] [<VAR>limit</VAR>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>ulimit [-acdefilmnpqrstuvxSH] [<VAR>limit</VAR>]
 </pre></td></tr></table><CODE>ulimit</CODE> provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
 option is given, it is interpreted as follows:
@@ -4962,8 +4966,16 @@ option is given, it is interpreted as follows:
 <DD>The maximum size of a process's data segment.
 <P>
 
+<DT><CODE>-e</CODE>
+<DD>The maximum scheduling priority ("nice").
+<P>
+
 <DT><CODE>-f</CODE>
 <DD>The maximum size of files created by the shell.
+<P>
+
+<DT><CODE>-i</CODE>
+<DD>The maximum number of pending signals.
 <P>
 
 <DT><CODE>-l</CODE>
@@ -4982,6 +4994,14 @@ option is given, it is interpreted as follows:
 <DD>The pipe buffer size.
 <P>
 
+<DT><CODE>-q</CODE>
+<DD>The maximum number of bytes in POSIX message queues.
+<P>
+
+<DT><CODE>-r</CODE>
+<DD>The maximum real-time scheduling priority.
+<P>
+
 <DT><CODE>-s</CODE>
 <DD>The maximum stack size.
 <P>
@@ -4996,6 +5016,10 @@ option is given, it is interpreted as follows:
 
 <DT><CODE>-v</CODE>
 <DD>The maximum amount of virtual memory available to the process.
+<P>
+
+<DT><CODE>-x</CODE>
+<DD>The maximum number of file locks.
 <P>
 
 </DL>
@@ -5214,7 +5238,7 @@ This option is disabled by default.
 
 <DT><CODE>posix</CODE>
 <DD>Change the behavior of Bash where the default operation differs
-from the POSIX 1003.2 standard to match the standard
+from the POSIX standard to match the standard
 (see section <A HREF="bashref.html#SEC86">6.11 Bash POSIX Mode</A>).
 This is intended to make Bash behave as a strict superset of that
 standard.
@@ -5267,8 +5291,8 @@ shell will exit.
 <P>
 
 <DT><CODE>-x</CODE>
-<DD>Print a trace of simple commands, \fBfor\fP commands, \fBcase\fP
-commands, \fBselect\fP commands, and arithmetic \fBfor\fP commands
+<DD>Print a trace of simple commands, <CODE>for</CODE> commands, <CODE>case</CODE>
+commands, <CODE>select</CODE> commands, and arithmetic <CODE>for</CODE> commands
 and their arguments or associated word lists after they are
 expanded and before they are executed.  The value of the <CODE>PS4</CODE>
 variable is expanded and the resultant value is printed before
@@ -5373,7 +5397,7 @@ The return status is always zero unless an invalid option is supplied.
 <!--docid::SEC60::-->
 <P>
 
-For historical reasons, the POSIX 1003.2 standard has classified
+For historical reasons, the POSIX standard has classified
 several builtin commands as <EM>special</EM>.
 When Bash is executing in POSIX mode, the special builtins
 differ from other builtin commands in three respects:
@@ -6424,7 +6448,7 @@ invoked as <CODE>sh</CODE>.
 
 <DT><CODE>--posix</CODE>
 <DD>Change the behavior of Bash where the default operation differs
-from the POSIX 1003.2 standard to match the standard.  This
+from the POSIX standard to match the standard.  This
 is intended to make Bash behave as a strict superset of that
 standard.  See section <A HREF="bashref.html#SEC86">6.11 Bash POSIX Mode</A>, for a description of the Bash
 POSIX mode.
@@ -7780,7 +7804,7 @@ the shell spawned to execute the script.
 
 Starting Bash with the <SAMP>`--posix'</SAMP> command-line option or executing
 <SAMP>`set -o posix'</SAMP> while Bash is running will cause Bash to conform more
-closely to the POSIX 1003.2 standard by changing the behavior to
+closely to the POSIX standard by changing the behavior to
 match that specified by POSIX in areas where the Bash default differs.
 </P><P>
 
@@ -7821,14 +7845,14 @@ do not undergo alias expansion.
 <P>
 
 <LI>
-The POSIX 1003.2 <CODE>PS1</CODE> and <CODE>PS2</CODE> expansions of <SAMP>`!'</SAMP> to
+The POSIX <CODE>PS1</CODE> and <CODE>PS2</CODE> expansions of <SAMP>`!'</SAMP> to
 the history number and <SAMP>`!!'</SAMP> to <SAMP>`!'</SAMP> are enabled,
 and parameter expansion is performed on the values of <CODE>PS1</CODE> and
 <CODE>PS2</CODE> regardless of the setting of the <CODE>promptvars</CODE> option.
 <P>
 
 <LI>
-The POSIX 1003.2 startup files are executed (<CODE>$ENV</CODE>) rather than
+The POSIX startup files are executed (<CODE>$ENV</CODE>) rather than
 the normal Bash files.
 <P>
 
@@ -7880,14 +7904,14 @@ causes a fatal syntax error in non-interactive shells.
 <P>
 
 <LI>
-POSIX 1003.2 special builtins are found before shell functions
+POSIX special builtins are found before shell functions
 during command lookup.
 <P>
 
 <LI>
-If a POSIX 1003.2 special builtin returns an error status, a
+If a POSIX special builtin returns an error status, a
 non-interactive shell exits.  The fatal errors are those listed in
-the POSIX.2 standard, and include things like passing incorrect options,
+the POSIX standard, and include things like passing incorrect options,
 redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
 <P>
@@ -7920,7 +7944,7 @@ Process substitution is not available.
 <P>
 
 <LI>
-Assignment statements preceding POSIX 1003.2 special builtins
+Assignment statements preceding POSIX special builtins
 persist in the shell environment after the builtin completes.
 <P>
 
@@ -7932,7 +7956,7 @@ special builtin command had been executed.
 
 <LI>
 The <CODE>export</CODE> and <CODE>readonly</CODE> builtin commands display their
-output in the format required by POSIX 1003.2.
+output in the format required by POSIX.
 <P>
 
 <LI>
@@ -8029,7 +8053,7 @@ escape characters are converted.
 </OL>
 <P>
 
-There is other POSIX 1003.2 behavior that Bash does not implement by
+There is other POSIX behavior that Bash does not implement by
 default even when in POSIX mode.
 Specifically:
 </P><P>
@@ -12266,7 +12290,7 @@ Please send all reports concerning this manual to
 
 Bash implements essentially the same grammar, parameter and
 variable expansion, redirection, and quoting as the Bourne Shell. 
-Bash uses the POSIX 1003.2 standard as the specification of
+Bash uses the POSIX standard as the specification of
 how these features are to be implemented.  There are some
 differences between the traditional Bourne shell and Bash; this
 section quickly details the differences of significance.  A
@@ -12462,7 +12486,7 @@ This closes a longstanding shell security hole.
 <P>
 
 <LI>
-Bash implements the full set of POSIX 1003.2 filename expansion operators,
+Bash implements the full set of POSIX filename expansion operators,
 including <VAR>character classes</VAR>, <VAR>equivalence classes</VAR>, and
 <VAR>collating symbols</VAR> (see section <A HREF="bashref.html#SEC35">3.5.8 Filename Expansion</A>).
 <P>
@@ -12814,8 +12838,8 @@ with a <SAMP>`-'</SAMP>.
 
 <LI>
 The SVR4.2 shell exits a script if any builtin fails; Bash exits
-a script only if one of the POSIX 1003.2 special builtins fails, and
-only for certain failures, as enumerated in the POSIX 1003.2 standard.
+a script only if one of the POSIX special builtins fails, and
+only for certain failures, as enumerated in the POSIX standard.
 <P>
 
 <LI>
@@ -15108,7 +15132,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>October, 3  2005</I>
+This document was generated by <I>Chet Ramey</I> on <I>January, 26  2006</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15270,7 +15294,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>October, 3  2005</I>
+by <I>Chet Ramey</I> on <I>January, 26  2006</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

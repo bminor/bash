@@ -1670,6 +1670,9 @@ the directory portion of the pathname the user typed.
 It returns an integer that should be non-zero if the function modifies
 its directory argument.
 It could be used to expand symbolic links or shell variables in pathnames.
+At the least, even if no other expansion is performed, this function should
+remove any quote characters from the directory name, because its result will
+be passed directly to @code{opendir()}.
 @end deftypevar
 
 @deftypevar {rl_compdisp_func_t *} rl_completion_display_matches_hook
