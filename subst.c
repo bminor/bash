@@ -2224,15 +2224,17 @@ do_compound_assignment (name, value, flags)
 {
   SHELL_VAR *v;
   int off, mklocal;
+  WORD_LIST *list;
 
   mklocal = flags & ASS_MKLOCAL;
 
   if (mklocal && variable_context)
     {
+      list = expand_compound_array_assignment (value, flags);
       v = find_variable (name);
       if (v == 0 || array_p (v) == 0 || v->context != variable_context)
         v = make_local_array_variable (name);
-      v = assign_array_var_from_string (v, value, flags);
+      assign_compound_array_list (v, list, flags);
     }
   else
     v = assign_array_from_string (name, value, flags);

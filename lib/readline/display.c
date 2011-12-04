@@ -1009,7 +1009,7 @@ rl_redisplay ()
 	     in the buffer? */
 	  pos = inv_lbreaks[cursor_linenum];
 	  /* nleft == number of characters in the line buffer between the
-	     start of the line and the cursor position. */
+	     start of the line and the desired cursor position. */
 	  nleft = c_pos - pos;
 
 	  /* NLEFT is now a number of characters in a buffer.  When in a
@@ -1022,6 +1022,7 @@ rl_redisplay ()
 	     those characters here and call _rl_backspace() directly. */
 	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
 	    {
+	      /* TX == new physical cursor position in multibyte locale. */
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 		tx = _rl_col_width (&visible_line[pos], 0, nleft) - visible_wrap_offset;
 	      else

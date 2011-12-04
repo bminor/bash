@@ -3998,7 +3998,7 @@ decode_prompt_string (string)
   int last_exit_value;
 #if defined (PROMPT_STRING_DECODE)
   int result_size, result_index;
-  int c, n;
+  int c, n, i;
   char *temp, octal_string[4];
   struct tm *tm;  
   time_t the_time;
@@ -4270,9 +4270,12 @@ decode_prompt_string (string)
 		  break;
 		}
 	      temp = (char *)xmalloc (3);
-	      temp[0] = CTLESC;
-	      temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
-	      temp[2] = '\0';
+	      n = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
+	      i = 0;
+	      if (n == CTLESC || n == CTLNUL)
+		temp[i++] = CTLESC;
+	      temp[i++] = n;
+	      temp[i] = '\0';
 	      goto add_string;
 #endif /* READLINE */
 

@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2006 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -265,17 +265,22 @@ assign_array_var_from_word_list (var, list, flags)
   return var;
 }
 
-static WORD_LIST empty_compound_list;
-
-WORD_LIST *
-expand_compound_array_assignment (value, flags)
+/* Perform a compound array assignment:  VAR->name=( VALUE ).  The
+   VALUE has already had the parentheses stripped. */
+SHELL_VAR *
+assign_array_var_from_string (var, value, flags)
+     SHELL_VAR *var;
      char *value;
      int flags;
 {
+  ARRAY *a;
   WORD_LIST *list, *nlist;
-  char *val;
-  int ni;
+  char *w, *val, *nval;
+  int ni, len;
   arrayind_t ind, last_ind;
+
+  if (value == 0)
+    return var;
 
   /* If this is called from declare_builtin, value[0] == '(' and
      xstrchr(value, ')') != 0.  In this case, we need to extract
@@ -285,7 +290,7 @@ expand_compound_array_assignment (value, flags)
       ni = 1;
       val = extract_array_assignment_list (value, &ni);
       if (val == 0)
-	return &empty_compound_list;
+	return var;
     }
   else
     val = value;
@@ -310,21 +315,6 @@ expand_compound_array_assignment (value, flags)
   if (val != value)
     free (val);
 
-  return nlist;
-}
-
-void
-assign_compound_array_list (var, nlist, flags)
-     SHELL_VAR *var;
-     WORD_LIST *nlist;
-     int flags;
-{
-  ARRAY *a;
-  WORD_LIST *list;
-  char *w, *val, *nval;
-  int len, iflags;
-  arrayind_t ind, last_ind;
-
   a = array_cell (var);
 
   /* Now that we are ready to assign values to the array, kill the existing
@@ -335,7 +325,6 @@ assign_compound_array_list (var, nlist, flags)
 
   for (list = nlist; list; list = list->next)
     {
-      iflags = flags;
       w = list->word->word;
 
       /* We have a word of the form [ind]=value */
@@ -343,8 +332,12 @@ assign_compound_array_list (var, nlist, flags)
 	{
 	  len = skipsubscript (w, 0);
 
+#if 1
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
+#else
+	  if (w[len] != ']' || w[len+1] != '=')
+#endif
 	    {
 	      nval = make_variable_value (var, w, flags);
 	      if (var->assign_func)
@@ -375,10 +368,10 @@ assign_compound_array_list (var, nlist, flags)
 	      continue;
 	    }
 	  last_ind = ind;
-	  /* XXX - changes for `+=' -- just accept the syntax.  ksh93 doesn't do this */
+	  /* XXX - changes for `+=' */
 	  if (w[len + 1] == '+' && w[len + 2] == '=')
 	    {
-	      iflags |= ASS_APPEND;
+	      flags |= ASS_APPEND;
 	      val = w + len + 3;
 	    }
 	  else
@@ -392,32 +385,9 @@ assign_compound_array_list (var, nlist, flags)
 
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
-      bind_array_var_internal (var, ind, val, iflags);
+      bind_array_var_internal (var, ind, val, flags);
       last_ind++;
     }
-}
-
-/* Perform a compound array assignment:  VAR->name=( VALUE ).  The
-   VALUE has already had the parentheses stripped. */
-SHELL_VAR *
-assign_array_var_from_string (var, value, flags)
-     SHELL_VAR *var;
-     char *value;
-     int flags;
-{
-  WORD_LIST *nlist;
-
-  if (value == 0)
-    return var;
-
-  nlist = expand_compound_array_assignment (value, flags);
-  /* XXX - I don't think the code path that produces this is executed
-     any more with the changes in how local array assignments are
-     performed. */
-  if (nlist == &empty_compound_list)
-    return var;
-
-  assign_compound_array_list (var, nlist, flags);
 
   dispose_words (nlist);
   return (var);

@@ -13342,3 +13342,33 @@ lib/readline/display.c
 lib/readline/doc/{rluser.texi,readline.3}
 	- make sure to note that key bindings don't allow any whitespace
 	  between the key name or sequence to be bound and the colon
+
+				   4/28
+				   ----
+lib/readline/display.c
+	- in update_line, make sure we compare _rl_last_c_pos as strictly less
+	  than PROMPT_ENDING_INDEX, since it's 0-based, to avoid multiple
+	  prompt redraws
+
+				    5/4
+				    ---
+parse.y
+	- in decode_prompt_string, only prefix the expansion of \[ or \]
+	  with CTLESC if the corresponding readline escape character is
+	  CTLESC (coincidentally the same as \[) or CTLNUL.  Bug report sent
+	  by Mike Frysinger <vapier@gentoo.org> prompted the discovery
+
+aclocal.m4
+	- slight change to test for /dev/fd to compensate for a linux
+	  failing; suggested by Mike Frysinger <vapier@gentoo.org>
+
+				    5/9
+				    ---
+arrayfunc.c
+	- broke assign_array_var_from_string into two functions:
+	  expand_compound_array_assignment and assign_compound_array_list;
+	  assign_array_var_from_string just calls those functions now
+
+arrayfunc.h
+	- new extern declarations for expand_compound_array_assignment and
+	  assign_compound_array_list

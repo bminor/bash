@@ -26868,7 +26868,8 @@ echo $ECHO_N "checking whether /dev/fd is available... $ECHO_C" >&6
 if test "${bash_cv_dev_fd+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
+  bash_cv_dev_fd=""
+if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
    exec 3<&0
    if test -r /dev/fd/3; then
@@ -26877,11 +26878,14 @@ else
      bash_cv_dev_fd=absent
    fi
    exec 3<&-
- elif test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
-   bash_cv_dev_fd=whacky
- else
-   bash_cv_dev_fd=absent
- fi
+fi
+if test -z "$bash_cv_dev_fd" ; then 
+  if test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
+    bash_cv_dev_fd=whacky
+  else
+    bash_cv_dev_fd=absent
+  fi
+fi
 
 fi
 
