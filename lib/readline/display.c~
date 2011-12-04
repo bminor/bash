@@ -170,6 +170,7 @@ static int line_size = 1024;
    include invisible characters. */
 
 static char *local_prompt, *local_prompt_prefix;
+static int local_prompt_len;
 static int prompt_visible_length, prompt_prefix_length;
 
 /* The number of invisible characters in the line currently being
@@ -366,6 +367,7 @@ rl_expand_prompt (prompt)
   FREE (local_prompt_prefix);
 
   local_prompt = local_prompt_prefix = (char *)0;
+  local_prompt_len = 0;
   prompt_last_invisible = prompt_invis_chars_first_line = 0;
   prompt_visible_length = prompt_physical_chars = 0;
 
@@ -381,6 +383,7 @@ rl_expand_prompt (prompt)
 					    &prompt_invis_chars_first_line,
 					    &prompt_physical_chars);
       local_prompt_prefix = (char *)0;
+      local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
       return (prompt_visible_length);
     }
   else
@@ -399,6 +402,7 @@ rl_expand_prompt (prompt)
 						   &prompt_invis_chars_first_line,
 						   (int *)NULL);
       *t = c;
+      local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
       return (prompt_prefix_length);
     }
 }
@@ -506,24 +510,23 @@ rl_redisplay ()
      number of non-visible characters in the prompt string. */
   if (rl_display_prompt == rl_prompt || local_prompt)
     {
-      int local_len = local_prompt ? strlen (local_prompt) : 0;
       if (local_prompt_prefix && forced_display)
 	_rl_output_some_chars (local_prompt_prefix, strlen (local_prompt_prefix));
 
-      if (local_len > 0)
+      if (local_prompt_len > 0)
 	{
-	  temp = local_len + out + 2;
+	  temp = local_prompt_len + out + 2;
 	  if (temp >= line_size)
 	    {
 	      line_size = (temp + 1024) - (temp % 1024);
 	      visible_line = (char *)xrealloc (visible_line, line_size);
 	      line = invisible_line = (char *)xrealloc (invisible_line, line_size);
 	    }
-	  strncpy (line + out, local_prompt, local_len);
-	  out += local_len;
+	  strncpy (line + out, local_prompt, local_prompt_len);
+	  out += local_prompt_len;
 	}
       line[out] = '\0';
-      wrap_offset = local_len - prompt_visible_length;
+      wrap_offset = local_prompt_len - prompt_visible_length;
     }
   else
     {
@@ -633,7 +636,7 @@ rl_redisplay ()
          Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
 #if defined (HANDLE_MULTIBYTE)
       n0 = num;
-      temp = local_prompt ? strlen (local_prompt) : 0;
+      temp = local_prompt_len;
       while (num < temp)
 	{
 	  if (_rl_col_width  (local_prompt, n0, num) > _rl_screenwidth)
@@ -908,12 +911,16 @@ rl_redisplay ()
 		 change update_line itself.  There is one case in which
 		 update_line adjusts _rl_last_c_pos itself (so it can pass
 		 _rl_move_cursor_relative accurate values); it communicates
-		 this back by setting cpos_adjusted */
+		 this back by setting cpos_adjusted.  If we assume that
+		 _rl_last_c_pos is correct (an absolute cursor position) each
+		 time update_line is called, then we can assume in our
+		 calculations that o_cpos does not need to be adjusted by
+		 wrap_offset. */
 	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 		  cpos_adjusted == 0 &&
 		  _rl_last_c_pos != o_cpos &&
 		  _rl_last_c_pos > wrap_offset &&
-		  o_cpos < prompt_last_invisible)
+		  o_cpos < (prompt_last_invisible-wrap_offset))
 		_rl_last_c_pos -= wrap_offset;
 		  
 	      /* If this is the line with the prompt, we might need to
@@ -1411,7 +1418,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      sequences (like drawing the `unbold' sequence without a corresponding
      `bold') that manifests itself on certain terminals. */
 
-  lendiff = local_prompt ? strlen (local_prompt) : 0;
+  lendiff = local_prompt_len;
   od = ofd - old;	/* index of first difference in visible line */
   if (current_line == 0 && !_rl_horizontal_scroll_mode &&
       _rl_term_cr && lendiff > prompt_visible_length && _rl_last_c_pos > 0 &&
@@ -1434,7 +1441,17 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	_rl_last_c_pos = lendiff;
     }
 
+  /* When this function returns, _rl_last_c_pos is correct, and an absolute
+     cursor postion in multibyte mode, but a buffer index when not in a
+     multibyte locale. */
   _rl_move_cursor_relative (od, old);
+#if 1
+  /* We need to indicate that the cursor position is correct in the presence of
+     invisible characters in the prompt string.  Let's see if setting this when
+     we make sure we're at the end of the drawn prompt string works. */
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && _rl_last_c_pos == prompt_physical_chars)
+    cpos_adjusted = 1;
+#endif
 
   /* if (len (new) > len (old))
      lendiff == difference in buffer
@@ -1701,7 +1718,11 @@ _rl_move_cursor_relative (new, data)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
       dpos = _rl_col_width (data, 0, new);
+#if 0
       if (dpos > woff)
+#else
+      if (dpos > prompt_last_invisible)
+#endif
 	dpos -= woff;
     }
   else
@@ -1998,20 +2019,36 @@ _rl_make_prompt_for_search (pchar)
      int pchar;
 {
   int len;
-  char *pmt;
+  char *pmt, *p;
 
   rl_save_prompt ();
 
-  len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
-  pmt = (char *)xmalloc (len + 2);
-  if (len)
-    strcpy (pmt, rl_prompt);
-  pmt[len] = pchar;
-  pmt[len+1] = '\0';
+  /* We've saved the prompt, and can do anything with the various prompt
+     strings we need before they're restored.  We want the unexpanded
+     portion of the prompt string after any final newline. */
+  p = rl_prompt ? strrchr (rl_prompt, '\n') : 0;
+  if (p == 0)
+    {
+      len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
+      pmt = (char *)xmalloc (len + 2);
+      if (len)
+	strcpy (pmt, rl_prompt);
+      pmt[len] = pchar;
+      pmt[len+1] = '\0';
+    }
+  else
+    {
+      p++;
+      len = strlen (p);
+      pmt = (char *)xmalloc (len + 2);
+      if (len)
+	strcpy (pmt, p);
+      pmt[len] = pchar;
+      pmt[len+1] = '\0';
+    }  
 
   /* will be overwritten by expand_prompt, called from rl_message */
   prompt_physical_chars = saved_physical_chars + 1;
-
   return pmt;
 }
 

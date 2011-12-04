@@ -13293,3 +13293,46 @@ Makefile.in,lib/sh/Makefile.in
 
 subst.c
 	- wcsdup now found in libsh; removed static definition
+
+				   4/10
+				   ----
+lib/readline/callback.c
+	- loop over body of rl_callback_read_char as long as there is additional
+	  input rather than just calling readline_internal_char, which does
+	  not handle multi-character key sequences or escape-prefixed chars
+
+lib/readline/macro.c
+	- make sure we turn off RL_STATE_MACROINPUT when the macro stack is
+	  empty if we are reading additional input with RL_STATE_MOREINPUT
+
+support/shobj-conf
+	- Mac OS X no longer likes the `-bundle' option to gcc when creating a
+	  dynamic shared library
+
+				   4/11
+				   ----
+lib/tilde/tilde.c
+	- don't try to dereference user_entry if HAVE_GETPWENT isn't defined
+
+lib/readline/input.c
+	- make sure chars_avail is not used without being assigned a value in
+	  rl_gather_tyi
+	- use _kbhit() to check for available input on Windows consoles, in
+	  rl_gather_tyi and _rl_input_available
+
+				   4/21
+				   ----
+lib/readline/display.c
+	- calculate (in expand_prompt) and keep track of length of local_prompt
+	  in local_prompt_len; use where appropriate
+	- when using o_pos to check whether or not we need to adjust
+	  _rl_last_c_pos after calling update_line, assume that it's correct
+	  (a buffer index in non-multibyte locales and a cursor position in
+	  multibyte locales) and adjust with wrap_offset as appropriate
+	- in update_line, set cpos_adjusted to 1 after calling
+	  _rl_move_cursor_relative to move to the end of the displayed prompt
+	  string
+	- in _rl_move_cursor_relative, check that the multibyte display
+	  position is after the last invisible character in the prompt string
+	  before offsetting it by the number of invisible characters in the
+	  prompt (woff)

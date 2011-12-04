@@ -179,6 +179,7 @@ rl_gather_tyi ()
   struct timeval timeout;
 #endif
 
+  chars_avail = 0;
   tty = fileno (rl_instream);
 
 #if defined (HAVE_SELECT)
@@ -219,6 +220,13 @@ rl_gather_tyi ()
 	}
     }
 #endif /* O_NDELAY */
+
+#if defined (__MINGW32__)
+  /* Use getch/_kbhit to check for available console input, in the same way
+     that we read it normally. */
+   chars_avail = isatty (tty) ? _kbhit () : 0;
+   result = 0;
+#endif
 
   /* If there's nothing available, don't waste time trying to read
      something. */
@@ -303,6 +311,11 @@ _rl_input_available ()
     return (chars_avail);
 #endif
 
+#endif
+
+#if defined (__MINGW32__)
+  if (isatty (tty))
+    return (_kbhit ());
 #endif
 
   return 0;
