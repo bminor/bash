@@ -13014,4 +13014,33 @@ test.[ch]
 braces.c
 	- make change from 1/28 dependant on CSH_BRACE_COMPAT not being
 	  defined (since old bash behavior is what csh does, defining
-	  CSH_BRACE_COMPAT produces old bash behavior)
+	  CSH_BRACE_COMPAT will produce old bash behavior)
+
+				   1/30
+				   ----
+bashline.c
+	- last argument of bash_default_completion is now a flags word:
+	  DEFCOMP_CMDPOS (in command position) is only current value
+	- attempt_shell_completion now computes flags before calling
+	  bash_default_completion
+	- if no_empty_command_completion is set, bash does not attempt command
+	  word completion even if not at the beginning of the line, as long
+	  as the word to be completed is empty and start == end (catches
+	  beginning of line and all whitespace preceding point)
+
+				    2/4
+				    ---
+lib/readline/display.c
+	- change _rl_make_prompt_for_search to use rl_prompt and append the
+	  search character to it, so the call to expand_prompt in rl_message
+	  will process the non-printing characters correctly.  Bug reported
+	  by Mike Stroyan <mike.stroyan@hp.com>
+
+				    2/5
+				    ---
+lib/readline/display.c
+	- fix off-by-one error when comparing against PROMPT_ENDING_INDEX,
+	  which caused a prompt with invisible characters to be redrawn one
+	  extra time in a multibyte locale.  Change from <= to < fixes
+	  multibyte locale, but I added 1 to single-byte definition of
+	  PROMPT_ENDING_INDEX (worth checking) to compensate

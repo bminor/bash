@@ -69,7 +69,10 @@
 #define CUSTOM_REDISPLAY_FUNC() (rl_redisplay_function != rl_redisplay)
 #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
 
-int rl_prefer_env_winsize;
+/*  If the calling application sets this to a non-zero value, readline will
+    use the $LINES and $COLUMNS environment variables to set its idea of the
+    window size before interrogating the kernel. */
+int rl_prefer_env_winsize = 0;
 
 /* **************************************************************** */
 /*								    */

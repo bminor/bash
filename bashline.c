@@ -238,6 +238,9 @@ static int dot_in_path = 0;
 #define COMPLETE_BSQUOTE 3
 static int completion_quoting_style = COMPLETE_BSQUOTE;
 
+/* Flag values for the final argument to bash_default_completion */
+#define DEFCOMP_CMDPOS		1
+
 /* Change the readline VI-mode keymaps into or out of Posix.2 compliance.
    Called when the shell is put into or out of `posix' mode. */
 void
@@ -999,7 +1002,7 @@ attempt_shell_completion (text, start, end)
      const char *text;
      int start, end;
 {
-  int in_command_position, ti, saveti, qc;
+  int in_command_position, ti, saveti, qc, dflags;
   char **matches, *command_separator_chars;
 
   command_separator_chars = COMMAND_SEPARATORS;
@@ -1112,15 +1115,20 @@ attempt_shell_completion (text, start, end)
 #endif
 
   if (matches == 0)
-    matches = bash_default_completion (text, start, end, qc, in_command_position);
+    {
+      dflags = 0;
+      if (in_command_position)
+	dflags |= DEFCOMP_CMDPOS;
+      matches = bash_default_completion (text, start, end, qc, dflags);
+    }
 
   return matches;
 }
 
 char **
-bash_default_completion (text, start, end, qc, in_command_position)
+bash_default_completion (text, start, end, qc, compflags)
      const char *text;
-     int start, end, qc, in_command_position;
+     int start, end, qc, compflags;
 {
   char **matches;
 
@@ -1148,9 +1156,11 @@ bash_default_completion (text, start, end, qc, in_command_position)
   /* And last, (but not least) if this word is in a command position, then
      complete over possible command names, including aliases, functions,
      and command names. */
-  if (!matches && in_command_position)
+  if (matches == 0 && (compflags & DEFCOMP_CMDPOS))
     {
-      if (start == 0 && end == 0 && text[0] == '\0' && no_empty_command_completion)
+      /* If END == START and text[0] == 0, we are trying to complete an empty
+	 command word. */
+      if (no_empty_command_completion && end == start && text[0] == '\0')
 	{
 	  matches = (char **)NULL;
 	  rl_ignore_some_completions_function = bash_ignore_everything;

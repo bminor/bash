@@ -88,7 +88,7 @@ static int inv_lbsize, vis_lbsize;
    current cursor position is in the middle of a prompt string containing
    invisible characters. */
 #define PROMPT_ENDING_INDEX \
-  ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible)
+  ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
   
 
 /* **************************************************************** */
@@ -977,7 +977,11 @@ rl_redisplay ()
 	     invisible character in the prompt string. */
 	  nleft = prompt_visible_length + wrap_offset;
 	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
+#if 0
 	      _rl_last_c_pos <= PROMPT_ENDING_INDEX && local_prompt)
+#else
+	      _rl_last_c_pos < PROMPT_ENDING_INDEX && local_prompt)
+#endif
 	    {
 #if defined (__MSDOS__)
 	      putc ('\r', rl_outstream);
@@ -1997,28 +2001,14 @@ _rl_make_prompt_for_search (pchar)
 
   rl_save_prompt ();
 
-  if (saved_local_prompt == 0)
-    {
-      len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
-      pmt = (char *)xmalloc (len + 2);
-      if (len)
-	strcpy (pmt, rl_prompt);
-      pmt[len] = pchar;
-      pmt[len+1] = '\0';
-    }
-  else
-    {
-      len = *saved_local_prompt ? strlen (saved_local_prompt) : 0;
-      pmt = (char *)xmalloc (len + 2);
-      if (len)
-	strcpy (pmt, saved_local_prompt);
-      pmt[len] = pchar;
-      pmt[len+1] = '\0';
-      local_prompt = savestring (pmt);
-      prompt_last_invisible = saved_last_invisible;
-      prompt_visible_length = saved_visible_length + 1;
-    }
+  len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
+  pmt = (char *)xmalloc (len + 2);
+  if (len)
+    strcpy (pmt, rl_prompt);
+  pmt[len] = pchar;
+  pmt[len+1] = '\0';
 
+  /* will be overwritten by expand_prompt, called from rl_message */
   prompt_physical_chars = saved_physical_chars + 1;
 
   return pmt;

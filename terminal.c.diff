@@ -1,0 +1,41 @@
+*** ../bash-3.1/lib/readline/terminal.c	Sat Nov 12 20:46:54 2005
+--- lib/readline/terminal.c	Tue Jan 31 10:57:54 2006
+***************
+*** 70,74 ****
+  #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
+  
+! int rl_prefer_env_winsize;
+  
+  /* **************************************************************** */
+--- 70,77 ----
+  #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
+  
+! /*  If the calling application sets this to a non-zero value, readline will
+!     use the $LINES and $COLUMNS environment variables to set its idea of the
+!     window size before interrogating the kernel. */
+! int rl_prefer_env_winsize = 0;
+  
+  /* **************************************************************** */
+***************
+*** 123,127 ****
+  
+  /* Non-zero means the terminal can auto-wrap lines. */
+! int _rl_term_autowrap;
+  
+  /* Non-zero means that this terminal has a meta key. */
+--- 126,130 ----
+  
+  /* Non-zero means the terminal can auto-wrap lines. */
+! int _rl_term_autowrap = -1;
+  
+  /* Non-zero means that this terminal has a meta key. */
+***************
+*** 275,278 ****
+--- 278,284 ----
+       int rows, cols;
+  {
++   if (_rl_term_autowrap == -1)
++     _rl_init_terminal_io (rl_terminal_name);
++ 
+    if (rows > 0)
+      _rl_screenheight = rows;

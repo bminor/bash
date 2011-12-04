@@ -77,8 +77,8 @@ extern int errno;
 #endif /* !errno */
 
 #define DEFAULT_CHILD_MAX 32
-#if 1
-#define MAX_JOBS_IN_ARRAY 4096		/* production*/
+#if !defined (DEBUG)
+#define MAX_JOBS_IN_ARRAY 4096		/* production */
 #else
 #define MAX_JOBS_IN_ARRAY 128		/* testing */
 #endif
@@ -962,7 +962,7 @@ compact_jobs_list (flags)
 
   reap_dead_jobs ();
   realloc_jobs_list ();
-  
+
   return (js.j_lastj);
 }
 
