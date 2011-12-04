@@ -13185,3 +13185,32 @@ builtins/reserved.def
 builtins/mkbuiltins.c
 	- changes to avoid the annoying extra space that keeps gettext from
 	  being passed an empty string
+
+				    3/9
+				    ---
+lib/glob/glob.c
+	- make sure globbing is interrupted if the shell receives a terminating
+	  signal
+
+				   3/14
+				   ----
+lib/readline/search.c
+	- call rl_message with format argument of "%" in _rl_nsearch_init
+	  to avoid `%' characters in the prompt string from being interpreted
+	  as format specifiers to vsnprintf/vsprintf
+
+				   3/19
+				   ----
+parse.y, eval.c, input.h
+	- change execute_prompt_command to execute_variable_command; takes the
+	  variable name as a new second argument
+
+				   3/25
+				   ----
+bashline.c
+	- command_word_completion_function keeps track of when it's searching
+	  $PATH and doesn't return directory names as matches in that case
+	- command_word_completion_function returns what it's passed as a
+	  possible match if it's the name of a directory in the current
+	  directory (only non-absolute pathnames are so tested).  Problem
+	  reported by Pascal Terjan <pterjan@mandriva.com>

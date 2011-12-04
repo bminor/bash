@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1236,7 +1236,7 @@ command_word_completion_function (hint_text, state)
   static char *filename_hint = (char *)NULL;
   static char *dequoted_hint = (char *)NULL;
   static int path_index, hint_len, dequoted_len, istate, igncase;
-  static int mapping_over, local_index;
+  static int mapping_over, local_index, searching_path, hint_is_dir;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
@@ -1252,7 +1252,8 @@ command_word_completion_function (hint_text, state)
       if (hint)
 	free (hint);
 
-      mapping_over = 0;
+      mapping_over = searching_path = 0;
+      hint_is_dir = CMD_IS_DIR (hint_text);
       val = (char *)NULL;
 
       temp = rl_variable_value ("completion-ignore-case");
@@ -1391,6 +1392,16 @@ command_word_completion_function (hint_text, state)
       mapping_over++;
     }
 
+  /* If the text passed is a directory in the current directory, return it
+     as a possible match.  Executables in directories in the current
+     directory can be specified using relative pathnames and successfully
+     executed even when `.' is not in $PATH. */
+  if (hint_is_dir)
+    {
+      hint_is_dir = 0;	/* only return the hint text once */
+      return (savestring (hint_text));
+    }
+    
   /* Repeatedly call filename_completion_function while we have
      members of PATH left.  Question:  should we stat each file?
      Answer: we call executable_file () on each file. */
@@ -1408,6 +1419,7 @@ command_word_completion_function (hint_text, state)
 	  (current_path = extract_colon_unit (path, &path_index)) == 0)
 	return ((char *)NULL);
 
+      searching_path = 1;
       if (*current_path == 0)
 	{
 	  free (current_path);
@@ -1501,9 +1513,18 @@ command_word_completion_function (hint_text, state)
 	    freetemp = match = 0;
 	}
 
+#if 0
       /* If we have found a match, and it is an executable file or a
 	 directory name, return it. */
       if (match && executable_or_directory (val))
+#else
+      /* If we have found a match, and it is an executable file, return it.
+	 We don't return directory names when searching $PATH, since the
+	 bash execution code won't find executables in directories which
+	 appear in directories in $PATH when they're specified using
+	 relative pathnames. */
+      if (match && (searching_path ? executable_file (val) : executable_or_directory (val)))
+#endif
 	{
 	  free (val);
 	  val = "";		/* So it won't be NULL. */

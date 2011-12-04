@@ -2149,8 +2149,8 @@ discard_until (character)
 }
 
 void
-execute_prompt_command (command)
-     char *command;
+execute_variable_command (command, vname)
+     char *command, *vname;
 {
   char *last_lastarg;
   sh_parser_state_t ps;
@@ -2160,7 +2160,7 @@ execute_prompt_command (command)
   if (last_lastarg)
     last_lastarg = savestring (last_lastarg);
 
-  parse_and_execute (savestring (command), "PROMPT_COMMAND", SEVAL_NONINT|SEVAL_NOHIST);
+  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST);
 
   restore_parser_state (&ps);
   bind_variable ("_", last_lastarg, 0);

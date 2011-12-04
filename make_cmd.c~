@@ -533,10 +533,7 @@ make_simple_command (element, command)
     command = make_bare_simple_command ();
 
   if (element.word)
-{
-  itrace("make_simple_command: adding %s", element.word->word);
     command->value.Simple->words = make_word_list (element.word, command->value.Simple->words);
-}
   else if (element.redirect)
     {
       REDIRECT *r = element.redirect;

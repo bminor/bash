@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -237,6 +237,9 @@ static int dot_in_path = 0;
 #define COMPLETE_SQUOTE  2
 #define COMPLETE_BSQUOTE 3
 static int completion_quoting_style = COMPLETE_BSQUOTE;
+
+/* Flag values for the final argument to bash_default_completion */
+#define DEFCOMP_CMDPOS		1
 
 /* Change the readline VI-mode keymaps into or out of Posix.2 compliance.
    Called when the shell is put into or out of `posix' mode. */
@@ -999,7 +1002,7 @@ attempt_shell_completion (text, start, end)
      const char *text;
      int start, end;
 {
-  int in_command_position, ti, saveti, qc;
+  int in_command_position, ti, saveti, qc, dflags;
   char **matches, *command_separator_chars;
 
   command_separator_chars = COMMAND_SEPARATORS;
@@ -1112,15 +1115,20 @@ attempt_shell_completion (text, start, end)
 #endif
 
   if (matches == 0)
-    matches = bash_default_completion (text, start, end, qc, in_command_position);
+    {
+      dflags = 0;
+      if (in_command_position)
+	dflags |= DEFCOMP_CMDPOS;
+      matches = bash_default_completion (text, start, end, qc, dflags);
+    }
 
   return matches;
 }
 
 char **
-bash_default_completion (text, start, end, qc, in_command_position)
+bash_default_completion (text, start, end, qc, compflags)
      const char *text;
-     int start, end, qc, in_command_position;
+     int start, end, qc, compflags;
 {
   char **matches;
 
@@ -1148,9 +1156,11 @@ bash_default_completion (text, start, end, qc, in_command_position)
   /* And last, (but not least) if this word is in a command position, then
      complete over possible command names, including aliases, functions,
      and command names. */
-  if (!matches && in_command_position)
+  if (matches == 0 && (compflags & DEFCOMP_CMDPOS))
     {
-      if (start == 0 && end == 0 && text[0] == '\0' && no_empty_command_completion)
+      /* If END == START and text[0] == 0, we are trying to complete an empty
+	 command word. */
+      if (no_empty_command_completion && end == start && text[0] == '\0')
 	{
 	  matches = (char **)NULL;
 	  rl_ignore_some_completions_function = bash_ignore_everything;
@@ -1226,7 +1236,7 @@ command_word_completion_function (hint_text, state)
   static char *filename_hint = (char *)NULL;
   static char *dequoted_hint = (char *)NULL;
   static int path_index, hint_len, dequoted_len, istate, igncase;
-  static int mapping_over, local_index;
+  static int mapping_over, local_index, searching_path, hint_is_dir;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
@@ -1242,7 +1252,9 @@ command_word_completion_function (hint_text, state)
       if (hint)
 	free (hint);
 
-      mapping_over = 0;
+      mapping_over = searching_path = 0;
+      hint_is_dir = CMD_IS_DIR (hint_text);
+
       val = (char *)NULL;
 
       temp = rl_variable_value ("completion-ignore-case");
@@ -1381,6 +1393,16 @@ command_word_completion_function (hint_text, state)
       mapping_over++;
     }
 
+  /* If the text passed is a directory in the current directory, return it
+     as a possible match.  Executables in directories in the current
+     directory can be specified using relative pathnames and successfully
+     executed even when `.' is not in $PATH. */
+  if (hint_is_dir)
+    {
+      hint_is_dir = 0;	/* only return the hint text once */
+      return (savestring (hint_text));
+    }
+    
   /* Repeatedly call filename_completion_function while we have
      members of PATH left.  Question:  should we stat each file?
      Answer: we call executable_file () on each file. */
@@ -1398,6 +1420,7 @@ command_word_completion_function (hint_text, state)
 	  (current_path = extract_colon_unit (path, &path_index)) == 0)
 	return ((char *)NULL);
 
+      searching_path = 1;
       if (*current_path == 0)
 	{
 	  free (current_path);
@@ -1491,9 +1514,18 @@ command_word_completion_function (hint_text, state)
 	    freetemp = match = 0;
 	}
 
+#if 0
       /* If we have found a match, and it is an executable file or a
 	 directory name, return it. */
       if (match && executable_or_directory (val))
+#else
+      /* If we have found a match, and it is an executable file, return it.
+	 We don't return directory names when searching $PATH, since the
+	 bash execution code won't find executables in directories which
+	 appear in directories in $PATH when they're specified using
+	 relative pathnames. */
+      if (match && (searching_path ? executable_file (val) : executable_or_directory (val)))
+#endif
 	{
 	  free (val);
 	  val = "";		/* So it won't be NULL. */
@@ -3137,11 +3169,7 @@ bash_directory_completion_matches (text)
   char *dfn;
   int qc;
 
-#if 0
-  qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
-#else
   qc = rl_dispatching ? rl_completion_quote_character : 0;  
-#endif
   dfn = bash_dequote_filename ((char *)text, qc);
   m1 = rl_completion_matches (dfn, rl_filename_completion_function);
   free (dfn);

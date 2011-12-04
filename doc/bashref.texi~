@@ -24,7 +24,7 @@ are preserved on all copies.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
+under the terms of the GNU Free Documentation License, Version 1.2 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
 and with the Back-Cover Texts as in (a) below.  A copy of the license is
@@ -74,7 +74,7 @@ USA @*
 @top Bash Features
 
 This text is a brief description of the features that are present in
-the Bash shell (version @value{VERSION}, @value{UPDATED})..
+the Bash shell (version @value{VERSION}, @value{UPDATED}).
 
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
@@ -142,7 +142,8 @@ of Unix.
 Bash is largely compatible with @code{sh} and incorporates useful
 features from the Korn shell @code{ksh} and the C shell @code{csh}.
 It is intended to be a conformant implementation of the @sc{ieee}
-@sc{posix} Shell and Tools specification (@sc{ieee} Working Group 1003.2).
+@sc{posix} Shell and Tools portion of the @sc{ieee} @sc{posix}
+specification (@sc{ieee} Standard 1003.1).
 It offers functional improvements over @code{sh} for both interactive and
 programming use.
 
@@ -217,7 +218,8 @@ These definitions are used throughout the remainder of this manual.
 @item POSIX
 @cindex POSIX
 A family of open system standards based on Unix.  Bash
-is concerned with @sc{posix} 1003.2, the Shell and Tools Standard.
+is primarily concerned with the Shell and Utilities portion of the
+@sc{posix} 1003.1 standard. 
 
 @item blank
 A space or tab character.
@@ -307,7 +309,7 @@ of an event occurring in the system.
 @item special builtin
 @cindex special builtin
 A shell builtin command that has been classified as special by the
-@sc{posix} 1003.2 standard.
+@sc{posix} standard.
 
 @item token
 @cindex token
@@ -1083,6 +1085,9 @@ may be any compound command listed above.
 name of a command.
 Any redirections (@pxref{Redirections}) associated with the shell function
 are performed when the function is executed.
+
+A function definition may be deleted using the @option{-f} option to the
+@code{unset} builtin (@pxref{Bourne Shell Builtins}).
 
 The exit status of a function definition is zero unless a syntax error
 occurs or a readonly function with the same name already exists.
@@ -1901,7 +1906,7 @@ force the use of the C locale by setting the @env{LC_COLLATE} or
 Within @samp{[} and @samp{]}, @var{character classes} can be specified
 using the syntax
 @code{[:}@var{class}@code{:]}, where @var{class} is one of the
-following classes defined in the @sc{posix} 1003.2 standard:
+following classes defined in the @sc{posix} standard:
 @example
 alnum   alpha   ascii   blank   cntrl   digit   graph   lower
 print   punct   space   upper   word    xdigit
@@ -2586,7 +2591,7 @@ under another shell.
 * The Set Builtin::		This builtin is so overloaded it
 				deserves its own section.
 * Special Builtins::		Builtin commands classified specially by
-				POSIX.2.
+				POSIX.
 @end menu
 
 Builtin commands are contained within the shell itself.
@@ -2619,7 +2624,7 @@ builtins do not accept options.
 @section Bourne Shell Builtins
 
 The following shell builtin commands are inherited from the Bourne Shell.
-These commands are implemented as specified by the @sc{posix} 1003.2 standard.
+These commands are implemented as specified by the @sc{posix} standard.
 
 @table @code
 @item :    @r{(a colon)}
@@ -2807,7 +2812,7 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @item hash
 @btindex hash
 @example
-hash [-'r] [-p @var{filename}] [-dt] [@var{name}]
+hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
 Remember the full pathnames of commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
@@ -3071,7 +3076,7 @@ The return status is zero unless a @var{name} is readonly.
 
 This section describes builtin commands which are unique to
 or have been extended in Bash.
-Some of these commands are specified in the @sc{posix} 1003.2 standard.
+Some of these commands are specified in the @sc{posix} standard.
 
 @table @code
 
@@ -4058,7 +4063,7 @@ This option is disabled by default.
 
 @item posix
 Change the behavior of Bash where the default operation differs
-from the @sc{posix} 1003.2 standard to match the standard
+from the @sc{posix} standard to match the standard
 (@pxref{Bash POSIX Mode}).
 This is intended to make Bash behave as a strict superset of that
 standard.
@@ -4185,7 +4190,7 @@ The return status is always zero unless an invalid option is supplied.
 @section Special Builtins
 @cindex special builtin
 
-For historical reasons, the @sc{posix} 1003.2 standard has classified
+For historical reasons, the @sc{posix} standard has classified
 several builtin commands as @emph{special}.
 When Bash is executing in @sc{posix} mode, the special builtins
 differ from other builtin commands in three respects:
@@ -4888,7 +4893,7 @@ invoked as @code{sh}.
 
 @item --posix
 Change the behavior of Bash where the default operation differs
-from the @sc{posix} 1003.2 standard to match the standard.  This
+from the @sc{posix} standard to match the standard.  This
 is intended to make Bash behave as a strict superset of that
 standard.  @xref{Bash POSIX Mode}, for a description of the Bash
 @sc{posix} mode.
@@ -5901,7 +5906,7 @@ the shell spawned to execute the script.
 
 Starting Bash with the @option{--posix} command-line option or executing
 @samp{set -o posix} while Bash is running will cause Bash to conform more
-closely to the @sc{posix} 1003.2 standard by changing the behavior to
+closely to the @sc{posix} standard by changing the behavior to
 match that specified by @sc{posix} in areas where the Bash default differs.
 
 When invoked as @code{sh}, Bash enters @sc{posix} mode after reading the
@@ -5934,13 +5939,13 @@ Reserved words appearing in a context where reserved words are recognized
 do not undergo alias expansion.
 
 @item
-The @sc{posix} 1003.2 @env{PS1} and @env{PS2} expansions of @samp{!} to
+The @sc{posix} @env{PS1} and @env{PS2} expansions of @samp{!} to
 the history number and @samp{!!} to @samp{!} are enabled,
 and parameter expansion is performed on the values of @env{PS1} and
 @env{PS2} regardless of the setting of the @code{promptvars} option.
 
 @item
-The @sc{posix} 1003.2 startup files are executed (@env{$ENV}) rather than
+The @sc{posix} startup files are executed (@env{$ENV}) rather than
 the normal Bash files.
 
 @item
@@ -5982,13 +5987,13 @@ may not start with a digit.  Declaring a function with an invalid name
 causes a fatal syntax error in non-interactive shells.
 
 @item
-@sc{posix} 1003.2 special builtins are found before shell functions
+@sc{posix} special builtins are found before shell functions
 during command lookup.
 
 @item
-If a @sc{posix} 1003.2 special builtin returns an error status, a
+If a @sc{posix} special builtin returns an error status, a
 non-interactive shell exits.  The fatal errors are those listed in
-the POSIX.2 standard, and include things like passing incorrect options,
+the POSIX standard, and include things like passing incorrect options,
 redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
 
@@ -6016,7 +6021,7 @@ variable in a @code{for} statement or the selection variable in a
 Process substitution is not available.
 
 @item
-Assignment statements preceding @sc{posix} 1003.2 special builtins
+Assignment statements preceding @sc{posix} special builtins
 persist in the shell environment after the builtin completes.
 
 @item
@@ -6026,7 +6031,7 @@ special builtin command had been executed.
 
 @item
 The @code{export} and @code{readonly} builtin commands display their
-output in the format required by @sc{posix} 1003.2.
+output in the format required by @sc{posix}.
 
 @item
 The @code{trap} builtin displays signal names without the leading
@@ -6105,7 +6110,7 @@ escape characters are converted.
 
 @end enumerate
 
-There is other @sc{posix} 1003.2 behavior that Bash does not implement by
+There is other @sc{posix} behavior that Bash does not implement by
 default even when in @sc{posix} mode.
 Specifically:
 
@@ -6928,7 +6933,7 @@ Please send all reports concerning this manual to
 
 Bash implements essentially the same grammar, parameter and
 variable expansion, redirection, and quoting as the Bourne Shell. 
-Bash uses the @sc{posix} 1003.2 standard as the specification of
+Bash uses the @sc{posix} standard as the specification of
 how these features are to be implemented.  There are some
 differences between the traditional Bourne shell and Bash; this
 section quickly details the differences of significance.  A
@@ -7092,7 +7097,7 @@ not all words (@pxref{Word Splitting}).
 This closes a longstanding shell security hole.
 
 @item
-Bash implements the full set of @sc{posix} 1003.2 filename expansion operators,
+Bash implements the full set of @sc{posix} filename expansion operators,
 including @var{character classes}, @var{equivalence classes}, and
 @var{collating symbols} (@pxref{Filename Expansion}).
 
@@ -7377,8 +7382,8 @@ with a @samp{-}.
 
 @item
 The SVR4.2 shell exits a script if any builtin fails; Bash exits
-a script only if one of the @sc{posix} 1003.2 special builtins fails, and
-only for certain failures, as enumerated in the @sc{posix} 1003.2 standard.
+a script only if one of the @sc{posix} special builtins fails, and
+only for certain failures, as enumerated in the @sc{posix} standard.
 
 @item 
 The SVR4.2 shell behaves differently when invoked as @code{jsh}
