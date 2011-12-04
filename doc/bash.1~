@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Jan 26 09:04:43 EST 2006
+.\"	Last Change: Thu May 11 14:25:48 EDT 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 Jan 26" "GNU Bash-3.2"
+.TH BASH 1 "2006 May 11" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -809,10 +809,10 @@ as for pathname expansion (see
 .B Pathname Expansion
 below).
 The \fIword\fP is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, process substitution and quote removal.
 Each \fIpattern\fP examined is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, and process substitution.
 If the shell option
 .B nocasematch
@@ -1693,7 +1693,8 @@ command history is not saved when an interactive shell exits.
 .B HISTFILESIZE
 The maximum number of lines contained in the history file.  When this
 variable is assigned a value, the history file is truncated, if
-necessary, to contain no more than that number of lines.  The default
+necessary, by removing the oldest entries,
+to contain no more than that number of lines.  The default
 value is 500.  The history file is also truncated to this size after
 writing it when an interactive shell exits.
 .TP
@@ -8406,8 +8407,8 @@ the command
 is executed each time a shell function or a script executed with the
 \fB.\fP or \fBsource\fP builtins finishes executing.
 Signals ignored upon entry to the shell cannot be trapped or reset.
-Trapped signals are reset to their original values in a child
-process when it is created.
+Trapped signals that are not being ignored are reset to their original
+values in a child process when it is created.
 The return status is false if any
 .I sigspec
 is invalid; otherwise
@@ -8530,7 +8531,7 @@ The maximum size of a process's data segment
 The maximum scheduling priority ("nice")
 .TP
 .B \-f
-The maximum size of files created by the shell
+The maximum size of files written by the shell and its children
 .TP
 .B \-i
 The maximum number of pending signals

@@ -13621,3 +13621,30 @@ aclocal.m4
 Makefile.in
 	- switch the TAGS and tags targets so TAGS is the output of `etags' and
 	  tags is the output of `ctags'.  Suggested by Masatake YAMATO
+
+				   8/25
+				   ----
+execute_cmd.c
+	- change code to match documentation: set BASH_COMMAND (which takes its
+	  value from the_printed_command_except_trap) only when not running a
+	  trap.  Rocky says the debugger is ok with this, and this is what his
+	  original diffs did
+
+				   8/29
+				   ----
+variables.c
+	- change set_if_not to create shell_variables if it is NULL, since
+	  -o invocation options can cause variables to be set before the
+	  environment is scanned
+
+[bash-3.2-beta frozen]
+
+				    9/5
+				    ---
+variables.c
+	- change dispose_used_env_vars to call maybe_make_export_env
+	  immediately if we're disposing a temporary environment, since
+	  `environ' points to the export environment and getenv() will use
+	  that on systems that don't allow getenv() to be replaced.  This
+	  could cause the temporary environment to affect the shell.  Bug
+	  reported by Vasco Pedro <vp@di.uevora.pt>

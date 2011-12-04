@@ -13638,3 +13638,18 @@ variables.c
 	  environment is scanned
 
 [bash-3.2-beta frozen]
+
+				    9/5
+				    ---
+variables.c
+	- change dispose_used_env_vars to call maybe_make_export_env
+	  immediately if we're disposing a temporary environment, since
+	  `environ' points to the export environment and getenv() will use
+	  that on systems that don't allow getenv() to be replaced.  This
+	  could cause the temporary environment to affect the shell.  Bug
+	  reported by Vasco Pedro <vp@di.uevora.pt>
+
+builtins/echo.def,doc/{bash.1,bashref.texi}
+	- clarify that `echo -e' and echo when the `xpg_echo' shell option is
+	  enabled require the \0 to precede any octal constant to be expanded.
+	  Reported by Vasco Pedro <vp@di.uevora.pt>

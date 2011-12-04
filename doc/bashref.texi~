@@ -3030,8 +3030,8 @@ each time a shell function or a script executed with the @code{.} or
 @code{source} builtins finishes executing.
 
 Signals ignored upon entry to the shell cannot be trapped or reset.
-Trapped signals are reset to their original values in a child  
-process when it is created.
+Trapped signals that are not being ignored are reset to their original
+values in a child process when it is created.
 
 The return status is zero unless a @var{sigspec} does not specify a
 valid signal.
@@ -3861,7 +3861,7 @@ The maximum size of a process's data segment.
 The maximum scheduling priority ("nice").
 
 @item -f
-The maximum size of files created by the shell.
+The maximum size of files written by the shell and its children.
 
 @item -i
 The maximum number of pending signals.
@@ -4543,7 +4543,8 @@ default value is @file{~/.bash_history}.
 @item HISTFILESIZE
 The maximum number of lines contained in the history file.  When this
 variable is assigned a value, the history file is truncated, if
-necessary, to contain no more than that number of lines.
+necessary, by removing the oldest entries,
+to contain no more than that number of lines.
 The history file is also truncated to this size after
 writing it when an interactive shell exits.
 The default value is 500.

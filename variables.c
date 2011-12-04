@@ -2976,7 +2976,10 @@ void
 dispose_used_env_vars ()
 {
   if (temporary_env)
-    dispose_temporary_env (propagate_temp_var);
+    {
+      dispose_temporary_env (propagate_temp_var);
+      maybe_make_export_env ();
+    }
 }
 
 /* Take all of the shell variables in the temporary environment HASH_TABLE
