@@ -1337,7 +1337,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --cc     The maximum size of core files created
               --dd     The maximum size of a process's data segment
               --ee     The maximum scheduling priority ("nice")
-              --ff     The maximum size of files created by the shell
+              --ff     The  maximum  size  of files written by the shell and its
+                     children
               --ii     The maximum number of pending signals
               --ll     The maximum size that may be locked into memory
               --mm     The maximum resident set size
@@ -1348,57 +1349,57 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --rr     The maximum real-time scheduling priority
               --ss     The maximum stack size
               --tt     The maximum amount of cpu time in seconds
-              --uu     The maximum number of processes  available  to  a  single
+              --uu     The  maximum  number  of  processes available to a single
                      user
-              --vv     The  maximum  amount  of  virtual memory available to the
+              --vv     The maximum amount of virtual  memory  available  to  the
                      shell
               --xx     The maximum number of file locks
 
               If _l_i_m_i_t is given, it is the new value of the specified resource
               (the --aa option is display only).  If no option is given, then --ff
-              is assumed.  Values are in 1024-byte increments, except for  --tt,
-              which  is  in seconds, --pp, which is in units of 512-byte blocks,
-              and --nn and --uu, which are unscaled values.  The return status  is
-              0  unless an invalid option or argument is supplied, or an error
+              is  assumed.  Values are in 1024-byte increments, except for --tt,
+              which is in seconds, --pp, which is in units of  512-byte  blocks,
+              and  --nn and --uu, which are unscaled values.  The return status is
+              0 unless an invalid option or argument is supplied, or an  error
               occurs while setting a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
               The user file-creation mask is set to _m_o_d_e.  If _m_o_d_e begins with
-              a  digit,  it is interpreted as an octal number; otherwise it is
-              interpreted as a symbolic mode mask similar to that accepted  by
-              _c_h_m_o_d(1).   If _m_o_d_e is omitted, the current value of the mask is
-              printed.  The --SS option causes the mask to be  printed  in  sym-
-              bolic  form;  the  default output is an octal number.  If the --pp
+              a digit, it is interpreted as an octal number; otherwise  it  is
+              interpreted  as a symbolic mode mask similar to that accepted by
+              _c_h_m_o_d(1).  If _m_o_d_e is omitted, the current value of the mask  is
+              printed.   The  --SS  option causes the mask to be printed in sym-
+              bolic form; the default output is an octal number.   If  the  --pp
               option is supplied, and _m_o_d_e is omitted, the output is in a form
               that may be reused as input.  The return status is 0 if the mode
-              was successfully changed or if no _m_o_d_e  argument  was  supplied,
+              was  successfully  changed  or if no _m_o_d_e argument was supplied,
               and false otherwise.
 
        uunnaalliiaass [-aa] [_n_a_m_e ...]
-              Remove  each  _n_a_m_e  from  the list of defined aliases.  If --aa is
-              supplied, all alias definitions are removed.  The  return  value
+              Remove each _n_a_m_e from the list of defined  aliases.   If  --aa  is
+              supplied,  all  alias definitions are removed.  The return value
               is true unless a supplied _n_a_m_e is not a defined alias.
 
        uunnsseett [-ffvv] [_n_a_m_e ...]
-              For  each  _n_a_m_e,  remove the corresponding variable or function.
+              For each _n_a_m_e, remove the corresponding  variable  or  function.
               If no options are supplied, or the --vv option is given, each _n_a_m_e
-              refers  to  a  shell  variable.   Read-only variables may not be
-              unset.  If --ff is specified, each _n_a_m_e refers to  a  shell  func-
-              tion,  and the function definition is removed.  Each unset vari-
-              able or function is removed from the environment passed to  sub-
-              sequent  commands.   If any of RRAANNDDOOMM, SSEECCOONNDDSS, LLIINNEENNOO, HHIISSTTCCMMDD,
+              refers to a shell variable.   Read-only  variables  may  not  be
+              unset.   If  --ff  is specified, each _n_a_m_e refers to a shell func-
+              tion, and the function definition is removed.  Each unset  vari-
+              able  or function is removed from the environment passed to sub-
+              sequent commands.  If any of RRAANNDDOOMM, SSEECCOONNDDSS,  LLIINNEENNOO,  HHIISSTTCCMMDD,
               FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are unset, they lose their special
-              properties,  even if they are subsequently reset.  The exit sta-
+              properties, even if they are subsequently reset.  The exit  sta-
               tus is true unless a _n_a_m_e is readonly.
 
        wwaaiitt [_n _._._.]
-              Wait for each specified process and return its termination  sta-
-              tus.   Each  _n  may be a process ID or a job specification; if a
-              job spec is given, all processes  in  that  job's  pipeline  are
-              waited  for.  If _n is not given, all currently active child pro-
-              cesses are waited for, and the return  status  is  zero.   If  _n
-              specifies  a  non-existent  process or job, the return status is
-              127.  Otherwise, the return status is the  exit  status  of  the
+              Wait  for each specified process and return its termination sta-
+              tus.  Each _n may be a process ID or a job  specification;  if  a
+              job  spec  is  given,  all  processes in that job's pipeline are
+              waited for.  If _n is not given, all currently active child  pro-
+              cesses  are  waited  for,  and  the return status is zero.  If _n
+              specifies a non-existent process or job, the  return  status  is
+              127.   Otherwise,  the  return  status is the exit status of the
               last process or job waited for.
 
 SSEEEE AALLSSOO

@@ -265,8 +265,6 @@ assign_array_var_from_word_list (var, list, flags)
   return var;
 }
 
-static WORD_LIST empty_compound_list;
-
 WORD_LIST *
 expand_compound_array_assignment (value, flags)
      char *value;
@@ -277,15 +275,13 @@ expand_compound_array_assignment (value, flags)
   int ni;
   arrayind_t ind, last_ind;
 
-  /* If this is called from declare_builtin, value[0] == '(' and
-     xstrchr(value, ')') != 0.  In this case, we need to extract
-     the value from between the parens before going on. */
+  /* I don't believe this condition is ever true any more. */
   if (*value == '(')	/*)*/
     {
       ni = 1;
       val = extract_array_assignment_list (value, &ni);
       if (val == 0)
-	return &empty_compound_list;
+	return (WORD_LIST *)NULL;
     }
   else
     val = value;
@@ -411,15 +407,10 @@ assign_array_var_from_string (var, value, flags)
     return var;
 
   nlist = expand_compound_array_assignment (value, flags);
-  /* XXX - I don't think the code path that produces this is executed
-     any more with the changes in how local array assignments are
-     performed. */
-  if (nlist == &empty_compound_list)
-    return var;
-
   assign_compound_array_list (var, nlist, flags);
 
-  dispose_words (nlist);
+  if (nlist)
+    dispose_words (nlist);
   return (var);
 }
 

@@ -3030,8 +3030,8 @@ each time a shell function or a script executed with the @code{.} or
 @code{source} builtins finishes executing.
 
 Signals ignored upon entry to the shell cannot be trapped or reset.
-Trapped signals are reset to their original values in a child  
-process when it is created.
+Trapped signals that are not being ignored are reset to their original
+values in a child process when it is created.
 
 The return status is zero unless a @var{sigspec} does not specify a
 valid signal.
