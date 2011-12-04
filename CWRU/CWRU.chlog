@@ -12710,3 +12710,23 @@ builtins/mkbuiltins.c
 	- when cross-compiling, don't include <config.h>, since it's for the
 	  target rather than the host system.  Instead, choose a reasonable
 	  set of default #defines based on a minimal POSIX system
+
+jobs.c
+	- change find_job to check jobs[i]->pipe as well as jobs[i] before
+	  trying to walk the pipeline -- should also check js.j_lastj in
+	  the for loop
+	- change find_process to handle a NULL return value from find_pipeline
+	- return immediately from delete_job if jobs[index] is already NULL or
+	  if it has a null pipeline associated with it
+	- in delete_job, if find_last_proc returns NULL, don't try to call
+	  bgp_delete
+
+				    1/7
+				    ---
+doc/bash.1
+	- patch from Tim Waugh to replace some literal single quotes with
+	  \(aq, the groff special character for it
+
+jobs.c
+	- in realloc_jobs_list, make sure to zero out slots after j_lastj
+	  in the new list

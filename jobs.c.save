@@ -654,6 +654,7 @@ bgp_add (pid, status)
 {
   struct pidstat *ps;
 
+itrace("bgp_add: adding pid %d with status %d", pid, status);
   ps = bgp_alloc (pid, status);
 
   if (bgpids.list == 0)
@@ -863,10 +864,6 @@ realloc_jobs_list ()
   js.j_lastj = (j > 0) ? j - 1: 0;
   js.j_jobslots = nsize;
 
-  /* Zero out remaining slots in new jobs list */
-  for ( ; j < nsize; j++)
-    jobs[j] = (JOB *)NULL;
-
   free (jobs);
   jobs = nlist;
 
@@ -909,17 +906,15 @@ delete_job (job_index, warn_stopped)
   if (warn_stopped && subshell_environment == 0 && STOPPED (job_index))
     internal_warning (_("deleting stopped job %d with process group %ld"), job_index+1, (long)jobs[job_index]->pgrp);
   temp = jobs[job_index];
-  if (temp == 0 || temp->pipe == 0)
-    return;
   if (job_index == js.j_current || job_index == js.j_previous)
     reset_current ();
 
   proc = find_last_proc (job_index, 0);
   /* Could do this just for J_ASYNC jobs, but we save all. */
-  if (proc)
-    bgp_add (proc->pid, process_exit_status (proc->status));
+  bgp_add (proc->pid, process_exit_status (proc->status));
 
   jobs[job_index] = (JOB *)NULL;
+itrace("delete_job: setting jobs[%d] (pgrp %d) to NULL", job_index, proc->pid);
   if (temp == js.j_lastmade)
     js.j_lastmade = 0;
   else if (temp == js.j_lastasync)
@@ -1229,14 +1224,14 @@ find_job (pid, alive_only, procp)
   register int i;
   PROCESS *p;
 
-  /* XXX could use js.j_firstj here, and should check js.j_lastj */
+  /* XXX could use js.j_firstj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
 #if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
 	itrace("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
 #endif
-      if (jobs[i] && jobs[i]->pipe)
+      if (jobs[i])
 	{
 	  p = jobs[i]->pipe;
 

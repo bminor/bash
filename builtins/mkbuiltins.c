@@ -19,8 +19,7 @@ You should have received a copy of the GNU General Public License along
 with Bash; see the file COPYING.  If not, write to the Free Software
 Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-/* #if !defined (CROSS_COMPILING) */
-#if 0
+#if !defined (CROSS_COMPILING) 
 #  include <config.h>
 #else	/* CROSS_COMPILING */
 /* A conservative set of defines based on POSIX/SUS3/XPG6 */

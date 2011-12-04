@@ -863,10 +863,6 @@ realloc_jobs_list ()
   js.j_lastj = (j > 0) ? j - 1: 0;
   js.j_jobslots = nsize;
 
-  /* Zero out remaining slots in new jobs list */
-  for ( ; j < nsize; j++)
-    jobs[j] = (JOB *)NULL;
-
   free (jobs);
   jobs = nlist;
 

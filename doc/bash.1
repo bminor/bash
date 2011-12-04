@@ -977,7 +977,7 @@ quotes (see
 .B PARAMETERS
 below).
 .PP
-Words of the form \fB$\fP'\fIstring\fP' are treated specially.  The
+Words of the form \fB$\fP\(aq\fIstring\fP\(aq are treated specially.  The
 word expands to \fIstring\fP, with backslash-escaped characters replaced
 as specified by the ANSI C standard.  Backslash escape sequences, if
 present, are decoded as follows:
@@ -1011,7 +1011,7 @@ vertical tab
 .B \e\e
 backslash
 .TP
-.B \e'
+.B \e\(aq
 single quote
 .TP   
 .B \e\fInnn\fP
@@ -1845,7 +1845,7 @@ the current mailfile.
 Example:
 .RS
 .PP
-\fBMAILPATH\fP='/var/mail/bfox?"You have mail":~/shell\-mail?"$_ has mail!"'
+\fBMAILPATH\fP=\(aq/var/mail/bfox?"You have mail":~/shell\-mail?"$_ has mail!"\(aq
 .PP
 .B Bash
 supplies a default value for this variable, but the location of the user
@@ -1979,7 +1979,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$'\enreal\et%3lR\enuser\et%3lU\ensys\t%3lS'\fP.
+value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\t%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .TP
@@ -2703,7 +2703,7 @@ If the value of
 .B IFS
 is null, no word splitting occurs.
 .PP
-Explicit null arguments (\^\f3"\^"\fP or \^\f3'\^'\fP\^) are retained.
+Explicit null arguments (\^\f3"\^"\fP or \^\f3\(aq\^\(aq\fP\^) are retained.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
@@ -2925,7 +2925,7 @@ Matches anything except one of the given patterns
 After the preceding expansions, all unquoted occurrences of the
 characters
 .BR \e ,
-.BR ' ,
+.BR \(aq ,
 and \^\f3"\fP\^ that did not result from one of the above
 expansions are removed.
 .SH REDIRECTION
@@ -4490,8 +4490,8 @@ backslash
 .B \e"
 literal "
 .TP
-.B \e'
-literal '
+.B \e\(aq
+literal \(aq
 .RE
 .PD
 .PP
@@ -4539,7 +4539,7 @@ be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
 In the macro body, the backslash escapes described above are expanded.
 Backslash will quote any other character in the macro text,
-including " and '.
+including " and \(aq.
 .PP
 .B Bash
 allows the current readline key bindings to be displayed or modified
@@ -7315,7 +7315,7 @@ format specifications, each of which causes printing of the next successive
 In addition to the standard \fIprintf\fP(1) formats, \fB%b\fP causes
 \fBprintf\fP to expand backslash escape sequences in the corresponding
 \fIargument\fP (except that \fB\ec\fP terminates output, backslashes in
-\fB\e'\fP, \fB\e"\fP, and \fB\e?\fP are not removed, and octal escapes
+\fB\e\(aq\fP, \fB\e"\fP, and \fB\e?\fP are not removed, and octal escapes
 beginning with \fB\e0\fP may contain up to four digits),
 and \fB%q\fP causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
@@ -8032,7 +8032,7 @@ If set, the extended pattern matching features described above under
 \fBPathname Expansion\fP are enabled.
 .TP 8
 .B extquote
-If set, \fB$\fP'\fIstring\fP' and \fB$\fP"\fIstring\fP" quoting is
+If set, \fB$\fP\(aq\fIstring\fP\(aq and \fB$\fP"\fIstring\fP" quoting is
 performed within \fB${\fP\fIparameter\fP\fB}\fP expansions
 enclosed in double quotes.  This option is enabled by default.
 .TP 8
