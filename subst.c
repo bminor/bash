@@ -205,7 +205,6 @@ static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static char *dequote_escapes __P((char *));
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
-static WORD_LIST *dequote_list __P((WORD_LIST *));
 static char *remove_quoted_escapes __P((char *));
 static char *remove_quoted_nulls __P((char *));
 
@@ -3065,7 +3064,7 @@ quote_string (string)
   return (result);
 }
 
-/* De-quoted quoted characters in STRING. */
+/* De-quote quoted characters in STRING. */
 char *
 dequote_string (string)
      char *string;
@@ -3126,7 +3125,8 @@ quote_list (list)
   return list;
 }
 
-static WORD_LIST *
+/* De-quote quoted characters in each word in LIST. */
+WORD_LIST *
 dequote_list (list)
      WORD_LIST *list;
 {

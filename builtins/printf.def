@@ -91,6 +91,7 @@ extern int errno;
   do { \
     char *b = 0; \
     int nw; \
+    clearerr (stdout); \
     if (have_fieldwidth && have_precision) \
       nw = asprintf(&b, f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \

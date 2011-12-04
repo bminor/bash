@@ -534,7 +534,10 @@ add_char:
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
 	{
-	  word_list_remove_quoted_nulls (alist);
+	  if (saw_escape)
+	    dequote_list (alist);
+	  else
+	    word_list_remove_quoted_nulls (alist);
 	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}
