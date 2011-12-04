@@ -1,4 +1,4 @@
-# Makefile for bash-3.1, version 2.157
+# Makefile for bash-3.1, version 2.159
 #
 # Copyright (C) 1996-2005 Free Software Foundation, Inc.
 
@@ -128,6 +128,8 @@ LOCALE_DEFS = -DLOCALEDIR='"$(localedir)"' -DPACKAGE='"$(PACKAGE)"'
 
 LOCAL_LIBS = @LOCAL_LIBS@
 LIBS = $(BUILTINS_LIB) $(LIBRARIES) @LIBS@
+LIBS_FOR_BUILD = 
+
 STATIC_LD = @STATIC_LD@
 LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 
@@ -418,6 +420,7 @@ SIGNAMES_H = @SIGNAMES_H@
 # object files chosen based on running of configure
 JOBS_O = @JOBS_O@
 SIGLIST_O = @SIGLIST_O@
+SIGNAMES_O = @SIGNAMES_O@
 
 # Matching object files.
 OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
@@ -426,7 +429,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
 	   alias.o array.o arrayfunc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
-	   pcomplete.o pcomplib.o syntax.o xmalloc.o
+	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
 # Where the source code of the shell builtins resides.
 BUILTIN_SRCDIR=$(srcdir)/builtins
@@ -495,7 +498,7 @@ CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  tests/recho$(EXEEXT) tests/zecho$(EXEEXT) \
 		  tests/printenv$(EXEEXT) mksignames$(EXEEXT) lsignames.h \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
-		  buildversion.o
+		  buildversion.o mksignames.o signames.o
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
 		    stamp-h po/POTFILES
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
@@ -547,7 +550,7 @@ version.h:  $(SOURCES) config.h Makefile
 		&& mv newversion.h version.h
 
 bashversion$(EXEEXT):	patchlevel.h conftypes.h version.h buildversion.o $(SUPPORT_SRC)bashversion.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)bashversion.c buildversion.o
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)bashversion.c buildversion.o ${LIBS_FOR_BUILD}
 
 buildversion.o: version.h conftypes.h patchlevel.h $(srcdir)/version.c
 	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -DBUILDTOOL -c -o $@ $(srcdir)/version.c
@@ -609,11 +612,25 @@ ${INTL_LIBRARY}: config.h ${INTL_LIBDIR}/Makefile
 
 ${LIBINTL_H}:	${INTL_LIBRARY}
 
-mksignames$(EXEEXT):	$(SUPPORT_SRC)mksignames.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)mksignames.c
+signames.o: $(SUPPORT_SRC)signames.c
+	$(RM) $@
+	$(CC) $(CCFLAGS) -c $(SUPPORT_SRC)signames.c
+
+buildsignames.o:	$(SUPPORT_SRC)signames.c
+	$(RM) $@
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -DBUILDTOOL -o $@ -c $(SUPPORT_SRC)signames.c
+
+mksignames.o:	$(SUPPORT_SRC)mksignames.c
+	$(RM) $@
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -DBUILDTOOL -c $(SUPPORT_SRC)mksignames.c
+
+mksignames$(EXEEXT):	mksignames.o buildsignames.o
+	$(RM) $@
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ mksignames.o buildsignames.o ${LIBS_FOR_BUILD}
 
 mksyntax$(EXEEXT):	${srcdir}/mksyntax.c config.h syntax.h ${BASHINCDIR}/chartypes.h
-	${CC_FOR_BUILD} ${CCFLAGS_FOR_BUILD} -o $@ ${srcdir}/mksyntax.c
+	$(RM) $@
+	${CC_FOR_BUILD} ${CCFLAGS_FOR_BUILD} -o $@ ${srcdir}/mksyntax.c ${LIBS_FOR_BUILD}
 
 # make a list of signals for the local system -- this is done when we're
 # *not* cross-compiling
@@ -782,13 +799,13 @@ maybe-clean:
 	fi
 
 recho$(EXEEXT):		$(SUPPORT_SRC)recho.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)recho.c
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)recho.c ${LIBS_FOR_BUILD}
 
 zecho$(EXEEXT):		$(SUPPORT_SRC)zecho.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)zecho.c
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)zecho.c ${LIBS_FOR_BUILD}
 
 printenv$(EXEEXT):	$(SUPPORT_SRC)printenv.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)printenv.c
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)printenv.c ${LIBS_FOR_BUILD}
 
 test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
@@ -1142,6 +1159,8 @@ trap.o: bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 variables.o: bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 version.o: bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 xmalloc.o: bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+
+signames.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 
 # XXX - dependencies checked through here
 

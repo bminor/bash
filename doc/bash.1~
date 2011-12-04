@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Aug 27 13:28:44 EDT 2005
+.\"	Last Change: Mon Dec 19 09:04:39 EST 2005
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2005 Aug 27" "GNU Bash-3.1"
+.TH BASH 1 "2005 Dec 19" "GNU Bash-3.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -677,8 +677,8 @@ If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-The return value is 0 if the string matches or does not match
-the pattern, respectively, and 1 otherwise.
+The return value is 0 if the string matches (\fB==\fP) or does not match
+(\fB!=\fP) the pattern, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
 string.
 .if t .sp 0.5
@@ -807,6 +807,12 @@ it against each \fIpattern\fP in turn, using the same matching rules
 as for pathname expansion (see
 .B Pathname Expansion
 below).
+The \fIword\fP is expanded using tilde
+expansion, parameter and variable expansion, arithmetic substituion,
+command substitution, process substitution and quote removal.
+Each \fIpattern\fP examined is expanded using tilde
+expansion, parameter and variable expansion, arithmetic substituion,
+command substitution, and process substitution.
 If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
@@ -8484,7 +8490,7 @@ option suppresses shell function lookup, as with the \fBcommand\fP builtin.
 returns true if any of the arguments are found, false if
 none are found.
 .TP
-\fBulimit\fP [\fB\-SHacdfilmnpqstuvx\fP [\fIlimit\fP]]
+\fBulimit\fP [\fB\-SHacdefilmnpqrstuvx\fP [\fIlimit\fP]]
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The \fB\-H\fP and \fB\-S\fP options specify that the hard or soft limit is
@@ -8520,6 +8526,9 @@ The maximum size of core files created
 .B \-d
 The maximum size of a process's data segment
 .TP
+.B \-e
+The maximum scheduling priority ("nice")
+.TP
 .B \-f
 The maximum size of files created by the shell
 .TP
@@ -8541,6 +8550,9 @@ The pipe size in 512-byte blocks (this may not be set)
 .TP
 .B \-q
 The maximum number of bytes in POSIX message queues
+.TP
+.B \-r
+The maximum real-time scheduling priority
 .TP
 .B \-s
 The maximum stack size

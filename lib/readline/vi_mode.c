@@ -1111,7 +1111,7 @@ int
 rl_vi_rubout (count, key)
      int count, key;
 {
-  int p, opoint;
+  int opoint;
 
   if (count < 0)
     return (rl_vi_delete (-count, key));

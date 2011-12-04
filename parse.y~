@@ -4248,7 +4248,7 @@ decode_prompt_string (string)
 		  break;
 		}
 	      temp = (char *)xmalloc (3);
-	      temp[0] = '\001';		/* CTLESC */
+	      temp[0] = CTLESC;
 	      temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
 	      temp[2] = '\0';
 	      goto add_string;
@@ -4745,7 +4745,11 @@ parse_compound_assignment (retlenp)
 	jump_to_top_level (DISCARD);
     }
 
+#if 0
   last_read_token = orig_last_token;		/* XXX - was WORD? */
+#else
+  last_read_token = WORD;
+#endif
   if (wl)
     {
       rl = REVERSE_LIST (wl, WORD_LIST *);

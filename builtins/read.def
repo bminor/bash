@@ -90,6 +90,7 @@ extern int errno;
 extern int interrupt_immediately;
 
 #if defined (READLINE)
+static void reset_attempted_completion_function __P((char *));
 static char *edit_line __P((char *));
 static void set_eol_delim __P((int));
 static void reset_eol_delim __P((char *));
@@ -330,6 +331,8 @@ read_builtin (list)
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
+      if (edit)
+	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
       alarm (tmout);
     }
 
@@ -692,7 +695,15 @@ bind_read_variable (name, value)
 }
 
 #if defined (READLINE)
-static rl_completion_func_t *old_attempted_completion_function;
+static rl_completion_func_t *old_attempted_completion_function = 0;
+
+static void
+reset_attempted_completion_function (cp)
+     char *cp;
+{
+  if (rl_attempted_completion_function == 0 && old_attempted_completion_function)
+    rl_attempted_completion_function = old_attempted_completion_function;
+}
 
 static char *
 edit_line (p)
@@ -703,10 +714,13 @@ edit_line (p)
 
   if (bash_readline_initialized == 0)
     initialize_readline ();
+
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   ret = readline (p);
   rl_attempted_completion_function = old_attempted_completion_function;
+  old_attempted_completion_function = (rl_completion_func_t *)NULL;
+
   if (ret == 0)
     return ret;
   len = strlen (ret);

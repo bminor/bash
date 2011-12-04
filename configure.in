@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-3.1
+dnl Configure script for bash-3.2
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.1, version 3.183])dnl
+AC_REVISION([for Bash 3.2, version 3.186])dnl
 
 define(bashvers, 3.2)
 define(relstatus, devel)
@@ -373,6 +373,7 @@ AC_SYS_LARGEFILE
 dnl BEGIN changes for cross-building (currently cygwin, minGW, and
 dnl (obsolete) BeOS)
 
+SIGNAMES_O=
 SIGNAMES_H=lsignames.h
 
 dnl load up the cross-building cache file -- add more cases and cache
@@ -386,14 +387,12 @@ if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
     *-cygwin*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
 	;;
     *-mingw*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	;;
     i[[3456]]86-*-beos*)
 	cross_cache=${srcdir}/cross-build/x86-beos.cache
-	SIGNAMES_H='${srcdir}/cross-build/beos-sig.h'
 	;;
     *)	echo "configure: cross-compiling for $host is not supported" >&2
 	;;
@@ -403,10 +402,12 @@ if test "x$cross_compiling" = "xyes"; then
 	. ${cross_cache}
     fi
     unset cross_cache
+    SIGNAMES_O='signames.o'
     CROSS_COMPILE='-DCROSS_COMPILING'
     AC_SUBST(CROSS_COMPILE)
 fi
 AC_SUBST(SIGNAMES_H)
+AC_SUBST(SIGNAMES_O)
 
 if test -z "$CC_FOR_BUILD"; then
     if test "x$cross_compiling" = "xno"; then

@@ -946,7 +946,7 @@ string_extract_verbatim (string, slen, sindex, charlist)
 		  len = mbstowcs (wcharlist, charlist, 0);
 		  if (len == -1)
 		    len = 0;
-		  wcharlist = xmalloc ((sizeof (wchar_t) * len) + 1);
+		  wcharlist = (wchar_t *)xmalloc ((sizeof (wchar_t) * len) + 1);
 		  mbstowcs (wcharlist, charlist, len);
 		}
 
@@ -1774,14 +1774,21 @@ char *
 string_list_dollar_star (list)
      WORD_LIST *list;
 {
+  char *ret;
 #if defined (HANDLE_MULTIBYTE)
+#  if defined (__GNUC__)
   char sep[MB_CUR_MAX + 1];
+#  else
+  char *sep = 0;
+#  endif
 #else
   char sep[2];
 #endif
 
-
 #if defined (HANDLE_MULTIBYTE)
+#  if !defined (__GNUC__)
+  sep = (char *)xmalloc (MB_CUR_MAX + 1);
+#  endif /* !__GNUC__ */
   if (ifs_firstc_len == 1)
     {
       sep[0] = ifs_firstc[0];
@@ -1797,7 +1804,11 @@ string_list_dollar_star (list)
   sep[1] = '\0';
 #endif
 
-  return (string_list_internal (list, sep));
+  ret = string_list_internal (list, sep);
+#if defined (HANDLE_MULTIBYTE) && !defined (__GNUC__)
+  free (sep);
+#endif
+  return ret;
 }
 
 /* Turn $@ into a string.  If (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
@@ -1816,7 +1827,11 @@ string_list_dollar_at (list, quoted)
 {
   char *ifs, *ret;
 #if defined (HANDLE_MULTIBYTE)
+#  if defined (__GNUC__)
   char sep[MB_CUR_MAX + 1];
+#  else
+  char *sep = 0;
+#  endif /* !__GNUC__ */
 #else
   char sep[2];
 #endif
@@ -1826,6 +1841,9 @@ string_list_dollar_at (list, quoted)
   ifs = ifs_var ? value_cell (ifs_var) : (char *)0;
 
 #if defined (HANDLE_MULTIBYTE)
+#  if !defined (__GNUC__)
+  sep = (char *)xmalloc (MB_CUR_MAX + 1);
+#  endif /* !__GNUC__ */
   if (ifs && *ifs)
     {
       if (ifs_firstc_len == 1)
@@ -1852,7 +1870,12 @@ string_list_dollar_at (list, quoted)
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
 		? quote_list (list)
 		: list_quote_escapes (list);
-  return (string_list_internal (tlist, sep));
+
+  ret = string_list_internal (tlist, sep);
+#if defined (HANDLE_MULTIBYTE) && !defined (__GNUC__)
+  free (sep);
+#endif
+  return ret;
 }
 
 /* Return the list of words present in STRING.  Separate the string into
@@ -2187,7 +2210,7 @@ do_compound_assignment (name, value, flags)
   if (mklocal && variable_context)
     {
       v = find_variable (name);
-      if (v == 0 || array_p (v) == 0)
+      if (v == 0 || array_p (v) == 0 || v->context != variable_context)
         v = make_local_array_variable (name);
       v = assign_array_var_from_string (v, value, flags);
     }
@@ -2573,6 +2596,13 @@ expand_assignment_string_to_string (string, quoted)
      int quoted;
 {
   return (expand_string_to_string_internal (string, quoted, expand_string_assignment));
+}
+
+char *
+expand_arith_string (string)
+     char *string;
+{
+  return (expand_string_if_necessary (string, Q_DOUBLE_QUOTES, expand_string));
 }
 
 #if defined (COND_COMMAND)
@@ -3408,7 +3438,7 @@ remove_pattern (param, pattern, op)
       free (wpattern);
 
       n = strlen (param);
-      xret = xmalloc (n + 1);
+      xret = (char *)xmalloc (n + 1);
       memset (&ps, '\0', sizeof (mbstate_t));
       n = wcsrtombs (xret, (const wchar_t **)&ret, n, &ps);
       xret[n] = '\0';		/* just to make sure */
@@ -3477,7 +3507,7 @@ match_upattern (string, pat, mtype, sp, ep)
   len = STRLEN (pat);
   if (pat[0] != '*' || pat[len - 1] != '*')
     {
-      p = npat = xmalloc (len + 3);
+      p = npat = (char *)xmalloc (len + 3);
       p1 = pat;
       if (*p1 != '*')
 	*p++ = '*';
@@ -3621,7 +3651,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   len = wcslen (wpat);
   if (wpat[0] != L'*' || wpat[len - 1] != L'*')
     {
-      wp = nwpat = xmalloc ((len + 3) * sizeof (wchar_t));
+      wp = nwpat = (wchar_t *)xmalloc ((len + 3) * sizeof (wchar_t));
       wp1 = wpat;
       if (*wp1 != L'*')
 	*wp++ = L'*';
@@ -5248,7 +5278,11 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   else
     t = (char *)0;
 
+#if 0
   temp1 = expand_string_if_necessary (substr, Q_DOUBLE_QUOTES, expand_string);
+#else
+  temp1 = expand_arith_string (substr);
+#endif
   *e1p = evalexp (temp1, &expok);
   free (temp1);
   if (expok == 0)
@@ -5293,7 +5327,11 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
     {
       t++;
       temp2 = savestring (t);
+#if 0
       temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
+#else
+      temp1 = expand_arith_string (temp2);
+#endif
       free (temp2);
       t[-1] = ':';
       *e2p = evalexp (temp1, &expok);
@@ -5665,11 +5703,6 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   vtype &= ~VT_STARSUB;
 
   mflags = 0;
-  if (*patsub == '/')
-    {
-      mflags |= MATCH_GLOBREP;
-      patsub++;
-    }
 
   /* Malloc this because expand_string_if_necessary or one of the expansion
      functions in its call chain may free it on a substitution error. */
@@ -5681,7 +5714,9 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   if (starsub)
     mflags |= MATCH_STARSUB;
 
-  if (rep = quoted_strchr (lpatsub, '/', ST_BACKSL))
+  /* If the pattern starts with a `/', make sure we skip over it when looking
+     for the replacement delimiter. */
+  if (rep = quoted_strchr ((*patsub == '/') ? lpatsub+1 : lpatsub, '/', ST_BACKSL))
     *rep++ = '\0';
   else
     rep = (char *)NULL;
@@ -5701,8 +5736,15 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 	rep = expand_string_to_string_internal (rep, quoted, expand_string_unsplit);
     }
 
+  /* ksh93 doesn't allow the match specifier to be a part of the expanded
+     pattern.  This is an extension. */
   p = pat;
-  if (pat && pat[0] == '#')
+  if (pat && pat[0] == '/')
+    {
+      mflags |= MATCH_GLOBREP|MATCH_ANY;
+      p++;
+    }
+  else if (pat && pat[0] == '#')
     {
       mflags |= MATCH_BEG;
       p++;
@@ -6435,7 +6477,11 @@ param_expand (string, sindex, quoted, expanded_something,
 	  temp2[t_index] = '\0';
 
 	  /* Expand variables found inside the expression. */
+#if 0
 	  temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
+#else
+	  temp1 = expand_arith_string (temp2);
+#endif
 	  free (temp2);
 
 arithsub:
@@ -6477,7 +6523,11 @@ comsub:
       zindex = t_index;
 
        /* Do initial variable expansion. */
+#if 0
       temp1 = expand_string_if_necessary (temp, Q_DOUBLE_QUOTES, expand_string);
+#else
+      temp1 = expand_arith_string (temp);
+#endif
 
       goto arithsub;
 
@@ -6707,7 +6757,7 @@ add_string:
 	case '<':
 	case '>':
 	  {
-	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & W_DQUOTE) || posixly_correct)
+	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
 	      {
 		sindex--;	/* add_character: label increments sindex */
 		goto add_character;
@@ -6795,6 +6845,12 @@ add_string:
 	  if (temp && *temp && t_index > 0)
 	    {
 	      temp1 = bash_tilde_expand (temp, tflag);
+	      if  (temp1 && *temp1 == '~' && STREQ (temp, temp1))
+		{
+		  FREE (temp);
+		  FREE (temp1);
+		  goto add_character;		/* tilde expansion failed */
+		}
 	      free (temp);
 	      temp = temp1;
 	      sindex += t_index;

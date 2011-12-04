@@ -70,7 +70,6 @@ static int rl_history_search_pos;
 static char *history_search_string;
 static int history_string_size;
 
-static UNDO_LIST *noninc_saved_undo_list;
 static void make_history_line_current PARAMS((HIST_ENTRY *));
 static int noninc_search_from_pos PARAMS((char *, int, int));
 static int noninc_dosearch PARAMS((char *, int));

@@ -860,9 +860,11 @@ sh_set_lines_and_columns (lines, cols)
 {
   char val[INT_STRLEN_BOUND(int) + 1], *v;
 
+#if defined (READLINE)
   /* If we are currently assigning to LINES or COLUMNS, don't do anything. */
   if (winsize_assignment)
     return;
+#endif
 
   v = inttostr (lines, val, sizeof (val));
   bind_variable ("LINES", v, 0);
@@ -4014,19 +4016,19 @@ sv_histsize (name)
     {
       if (legal_number (temp, &num))
 	{
+	  hmax = num;
 	  if (name[4] == 'S')
 	    {
-	      hmax = num;
 	      stifle_history (hmax);
-	      num = where_history ();
-	      if (history_lines_this_session > num)
-		history_lines_this_session = num;
+	      hmax = where_history ();
+	      if (history_lines_this_session > hmax)
+		history_lines_this_session = hmax;
 	    }
 	  else
 	    {
-	      history_truncate_file (get_string_value ("HISTFILE"), (int)num);
-	      if (num <= history_lines_in_file)
-		history_lines_in_file = num;
+	      history_truncate_file (get_string_value ("HISTFILE"), hmax);
+	      if (hmax <= history_lines_in_file)
+		history_lines_in_file = hmax;
 	    }
 	}
     }

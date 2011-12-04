@@ -212,9 +212,9 @@ recho ${av[1]/??/za}
 expect '<zaza>'
 recho ${av[1]//??/za}
 expect '<zagh>'
-recho ${av[1]//#??/za}
+recho ${av[1]/#??/za}
 expect '<efza>'
-recho ${av[1]//%??/za}
+recho ${av[1]/%??/za}
 
 expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
 recho ${av[@]/*/yyy}
@@ -238,17 +238,17 @@ recho ${@/%??/xx}
 expect '<zaza>'
 recho ${3//??/za}
 expect '<efza>'
-recho ${3//%??/za}
+recho ${3/%??/za}
 expect '<zaza> <zaza> <zaza> <zaza> <zaza> <zaza>'
 recho ${@//??/za}
 expect '<zacd> <zagh> <zakl> <zaop> <zast> <zawx>'
-recho ${@//#??/za}
+recho ${@/#??/za}
 expect '<yyy> <yyy> <yyy> <yyy> <yyy> <yyy>'
 recho ${@//*/yyy}
 expect '<yyy> <efgh> <ijkl> <mnop> <qrst> <uvwx>'
 recho ${@//a*/yyy}
 expect '<abcd> <efgh> <ijkl> <mnop> <qrst> <uvwyyy>'
-recho ${@//%x*/yyy}
+recho ${@/%x*/yyy}
 
 expect a newline
 echo $abmcde
@@ -548,8 +548,8 @@ var=blah
 # these had better agree
 echo ${var[@]:3}
 echo ${var:3}
-echo ${var[@]//#/--}
-echo ${var//#/--}
+echo ${var[@]/#/--}
+echo ${var/#/--}
 echo ${var[@]##?}
 echo ${var##?}
 

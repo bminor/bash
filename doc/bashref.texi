@@ -961,8 +961,8 @@ If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{Bash Builtins})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-The return value is 0 if the string matches or does not match
-the pattern, respectively, and 1 otherwise.
+The return value is 0 if the string matches (@samp{==}) or does not
+match (@samp{!=})the pattern, and 1 otherwise.
 Any part of the pattern may be quoted to force it to be matched as a
 string.
 
@@ -1652,15 +1652,13 @@ the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 
 @item $@{@var{parameter}/@var{pattern}/@var{string}@} 
-@itemx $@{@var{parameter}//@var{pattern}/@var{string}@}
 
 The @var{pattern} is expanded to produce a pattern just as in
 filename expansion.
 @var{Parameter} is expanded and the longest match of @var{pattern}
 against its value is replaced with @var{string}.
-In the first form, only the first match is replaced.
-The second form causes all matches of @var{pattern} to be
-replaced with @var{string}.
+If @var{pattern} begins with @samp{/}, all matches of @var{pattern} are
+replaced with @var{string}.  Normally only the first match is replaced.
 If @var{pattern} begins with @samp{#}, it must match at the beginning
 of the expanded value of @var{parameter}.
 If @var{pattern} begins with @samp{%}, it must match at the end
@@ -2598,7 +2596,7 @@ the command directly, without invoking another program.
 Builtin commands are necessary to implement functionality impossible
 or inconvenient to obtain with separate utilities.
 
-This section briefly the builtins which Bash inherits from
+This section briefly describes the builtins which Bash inherits from
 the Bourne Shell, as well as the builtin commands which are unique
 to or have been extended in Bash.
 
@@ -3833,7 +3831,7 @@ builtin command.
 @item ulimit
 @btindex ulimit
 @example
-ulimit [-acdfilmnpqstuvxSH] [@var{limit}]
+ulimit [-acdefilmnpqrstuvxSH] [@var{limit}]
 @end example
 @code{ulimit} provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
@@ -3853,6 +3851,9 @@ The maximum size of core files created.
 
 @item -d
 The maximum size of a process's data segment.
+
+@item -e
+The maximum scheduling priority ("nice").
 
 @item -f
 The maximum size of files created by the shell.
@@ -3874,6 +3875,9 @@ The pipe buffer size.
 
 @item -q
 The maximum number of bytes in POSIX message queues.
+
+@item -r
+The maximum real-time scheduling priority.
 
 @item -s
 The maximum stack size.
@@ -4098,8 +4102,8 @@ shell will exit.
 Print shell input lines as they are read.
 
 @item -x
-Print a trace of simple commands, \fBfor\fP commands, \fBcase\fP
-commands, \fBselect\fP commands, and arithmetic \fBfor\fP commands
+Print a trace of simple commands, @code{for} commands, @code{case}
+commands, @code{select} commands, and arithmetic @code{for} commands
 and their arguments or associated word lists after they are
 expanded and before they are executed.  The value of the @env{PS4}
 variable is expanded and the resultant value is printed before

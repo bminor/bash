@@ -483,8 +483,10 @@ initialize_shell_variables (env, privmode)
       set_if_not ("HISTFILE", name);
       free (name);
 
+#if 0
       set_if_not ("HISTSIZE", "500");
       sv_histsize ("HISTSIZE");
+#endif
     }
 #endif /* HISTORY */
 
@@ -4016,19 +4018,19 @@ sv_histsize (name)
     {
       if (legal_number (temp, &num))
 	{
+	  hmax = num;
 	  if (name[4] == 'S')
 	    {
-	      hmax = num;
 	      stifle_history (hmax);
-	      num = where_history ();
-	      if (history_lines_this_session > num)
-		history_lines_this_session = num;
+	      hmax = where_history ();
+	      if (history_lines_this_session > hmax)
+		history_lines_this_session = hmax;
 	    }
 	  else
 	    {
-	      history_truncate_file (get_string_value ("HISTFILE"), (int)num);
-	      if (num <= history_lines_in_file)
-		history_lines_in_file = num;
+	      history_truncate_file (get_string_value ("HISTFILE"), hmax);
+	      if (hmax <= history_lines_in_file)
+		history_lines_in_file = hmax;
 	    }
 	}
     }

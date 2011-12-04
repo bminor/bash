@@ -2396,6 +2396,7 @@ execute_arith_command (arith_command)
   int expok, save_line_number, retval;
   intmax_t expresult;
   WORD_LIST *new;
+  char *exp;
 
   expresult = 0;
 
@@ -2438,8 +2439,11 @@ execute_arith_command (arith_command)
 
   if (new)
     {
-      expresult = evalexp (new->word->word, &expok);
+      exp = new->next ? string_list (new) : new->word->word;
+      expresult = evalexp (exp, &expok);
       line_number = save_line_number;
+      if (exp != new->word->word)
+	free (exp);
       dispose_words (new);
     }
   else

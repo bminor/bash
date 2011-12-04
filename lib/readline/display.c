@@ -244,12 +244,12 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
   invfl = 0;	/* invisible chars in first line of prompt */
   invflset = 0;	/* we only want to set invfl once */
 
-  igstart = -1;
+  igstart = 0;
   for (rl = ignoring = last = ninvis = physchars = 0, p = pmt; p && *p; p++)
     {
       /* This code strips the invisible character string markers
 	 RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE */
-      if (*p == RL_PROMPT_START_IGNORE)		/* XXX - check ignoring? */
+      if (ignoring == 0 && *p == RL_PROMPT_START_IGNORE)		/* XXX - check ignoring? */
 	{
 	  ignoring = 1;
 	  igstart = p;
@@ -258,7 +258,7 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
       else if (ignoring && *p == RL_PROMPT_END_IGNORE)
 	{
 	  ignoring = 0;
-	  if (p[-1] != RL_PROMPT_START_IGNORE)
+	  if (p != (igstart + 1))
 	    last = r - ret - 1;
 	  continue;
 	}
@@ -1166,7 +1166,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   int col_lendiff, col_temp;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps_new, ps_old;
-  int new_offset, old_offset, tmp;
+  int new_offset, old_offset;
 #endif
 
   /* If we're at the right edge of a terminal that supports xn, we're

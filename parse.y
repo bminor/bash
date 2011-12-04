@@ -4746,6 +4746,7 @@ parse_compound_assignment (retlenp)
     }
 
   last_read_token = orig_last_token;		/* XXX - was WORD? */
+
   if (wl)
     {
       rl = REVERSE_LIST (wl, WORD_LIST *);

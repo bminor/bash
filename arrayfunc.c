@@ -438,13 +438,11 @@ skipsubscript (s, i)
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t state, state_bak;
   size_t slength, mblength;
-  size_t mb_cur_max;
 #endif
 
 #if defined (HANDLE_MULTIBYTE)
   memset (&state, '\0', sizeof (mbstate_t));
   slength = strlen (s + i);
-  mb_cur_max = MB_CUR_MAX;
 #endif
   
   count = 1;
@@ -452,7 +450,7 @@ skipsubscript (s, i)
     {
       /* Advance one (possibly multibyte) character in S starting at I. */
 #if defined (HANDLE_MULTIBYTE)
-      if (mb_cur_max > 1)
+      if (MB_CUR_MAX > 1)
 	{
 	  state_bak = state;
 	  mblength = mbrlen (s + i, slength, &state);
@@ -592,11 +590,7 @@ array_expand_index (s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 0
-  t = expand_string_to_string (exp, 0);
-#else 
-  t = expand_string_to_string (exp, Q_DOUBLE_QUOTES);
-#endif
+  t = expand_arith_string (exp);
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
   free (t);

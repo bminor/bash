@@ -462,12 +462,21 @@ rl_translate_keyseq (seq, array, len)
 		}
 	      else if (c == 'M')
 		{
-		  i++;
-		  /* XXX - should obey convert-meta setting? */
+		  i++;		/* seq[i] == '-' */
+		  /* XXX - obey convert-meta setting */
 		  if (_rl_convert_meta_chars_to_ascii && _rl_keymap[ESC].type == ISKMAP)
 		    array[l++] = ESC;	/* ESC is meta-prefix */
+		  else if (seq[i+1] == '\\' && seq[i+2] == 'C' && seq[i+3] == '-')
+		    {
+		      i += 4;
+		      temp = (seq[i] == '?') ? RUBOUT : CTRL (_rl_to_upper (seq[i]));
+		      array[l++] = META (temp);
+		    }
 		  else
 		    {
+		      /* This doesn't yet handle things like \M-\a, which may
+			 or may not have any reasonable meaning.  You're
+			 probably better off using straight octal or hex. */
 		      i++;
 		      array[l++] = META (seq[i]);
 		    }
@@ -1507,7 +1516,6 @@ rl_variable_value (name)
 {
   register int i;
   int	v;
-  char *ret;
 
   /* Check for simple variables first. */
   i = find_boolean_var (name);
@@ -2170,7 +2178,6 @@ _rl_get_string_variable_value (name)
 {
   static char numbuf[32];
   char *ret;
-  int n;
 
   if (_rl_stricmp (name, "bell-style") == 0)
     {

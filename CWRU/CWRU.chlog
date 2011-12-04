@@ -12552,3 +12552,161 @@ parse.y
 	- use CTLESC instead of literal '\001' when decode_prompt_string
 	  prefixes RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE
 
+				   12/20
+				   -----
+lib/readline/display.c
+	- don't treat RL_PROMPT_START_IGNORE specially inside a sequence of
+	  ignored characters
+	- keep track of the start of the current sequence of ignored
+	  characters; make sure that an empty sequence of such characters
+	  really is an empty sequence, not one that happens to end with '\001'
+	  (RL_PROMPT_START_IGNORE)
+
+				   12/21
+				   -----
+subst.c
+	- change expand_word_internal to process rest of `tilde-word' as a
+	  regular part of the word if tilde expansion leaves the tilde-word
+	  unchanged.  This means that ~$USER expands to ~chet, which seems
+	  more intuitive, and is effectively what bash-3.0 did
+
+				   12/23
+				   -----
+subst.c
+	- when making a local array variable in do_compound_assignment, make
+	  sure that we don't use a variable of the same name from a previous
+	  context
+
+doc/bash.1
+	- documented expansions for word and patterns in case statement
+
+builtins/ulimit.def,doc/{bashref.texi,bash.1}
+	- added new -e and -r (nice and rtprio) options to ulimit; documented
+	  them
+
+				   12/26
+				   -----
+variables.c
+	- use `hmax' instead of `num' in sv_histsize to avoid integer overflow
+	  problems with intmax_t
+
+builtins/read.def
+	- add unwind-protect to restore rl_attempted_completion_function in
+	  case of a timeout
+
+{bashline,variables}.c
+	- move initialization of HISTSIZE from initialization path to
+	  load_history, so it can be overridden by a value assigned in a
+	  startup file
+
+lib/readline/misc.c
+	- add a missing `return r' so that rl_digit_loop returns a meaningful
+	  value
+
+lib/readline/{bind,callback,display,isearch,rltty,search,text,vi_mode}.c
+	- minor cleanups to satisfy compiler warnings, mostly removing unused
+	  variables
+
+				   12/27
+				   -----
+support/Makefile.in
+	- add LIBS_FOR_BUILD support; defaults to ${LIBS}
+
+Makefile.in
+	- add LIBS_FOR_BUILD with no default value; use when linking programs
+	  using CC_FOR_BUILD (e.g., bashversion)
+
+				   12/28
+				   -----
+lib/readline/bind.c
+	- fix rl_translate_keyseq bad translation of \M-\C-x sequences
+
+execute_cmd.c
+	- in execute_arith_command, if the expression expands to more than one
+	  word, make sure we join the words into a single string and pass the
+	  entire thing to evalexp()
+
+expr.c
+	- new functions: _is_arithop(c), returns true if C is a valid single-
+	  character arithmetic operator; _is_multiop(c), returns true if C is
+	  a token corresponding to a valid multi-character arithmetic operator
+	- if we encounter a character that isn't a valid arithmetic
+	  operator, throw an error.  Try to be intelligent about what type of
+	  error message to print
+
+subst.c
+	- new function, expand_arith_string, calls expand_string_if_necessary;
+	  used where an arithmetic expression needs to be expanded
+
+subst.h
+	- new extern declaration for expand_arith_string
+
+arrayfunc.c
+	- in array_expand_index, call expand_arith_string to expand the
+	  subscript in a fashion consistent with other arithmetic expressions
+
+subst.c
+	- fix parameter_brace_patsub so that we don't try to anchor the pattern
+	  at the beginning or end of the string if we're doing global
+	  replacement -- that combination doesn't doesn't make sense, and
+	  the changed behavior is compatible with ksh93
+
+doc/{bash.1,bashref.texi}
+	- changed description of pattern substitution to match the new
+	  semantics
+
+tests/new-exp.tests
+	- change tests to remove all ${pat//#rep} and ${pat//%rep}
+	  expansions, since they don't mean the same thing anymore
+
+				   12/29
+				   -----
+support/signames.c
+	- new file, initialize_signames() function from old mksignames.c.  This
+	  file builds the signal_names array
+
+support/mksignames.c
+	- strip out initialize_signames(), move to signames.c.  This file only
+	  writes signames.h
+	- set up to only write a stub signames.h if CROSS_COMPILING is defined,
+	  with extern declaration for initialize_signames
+	- if not cross compiling, #define initialize_signames to nothing
+
+Makefile.in
+	- mksignames is now linked from mksignames.o and buildsignames.o
+	- add rules to build signames.o, assuming we're building it as part
+	  of the shell (cross-compiling)
+
+trap.c
+	- call initialize_signames from initialize_traps
+
+configure.in
+	- set SIGNAMES_O to nothing (normal) or signames.o (cross-compiling),
+	  substitute into Makefile
+	- don't set SIGNAMES_H if cross-compiling any more
+
+				   12/30
+				   -----
+command.h
+	- new word flag: W_NOPROCSUB, inhibits process substitution on a word
+
+subst.c
+	- change expand_word_internal to suppress process substitution if the
+	  word has the W_NOPROCSUB flag
+
+shell.c
+	- --wordexp turns on W_NOPROCSUB in addition to W_NOCOMSUB
+
+subst.c
+	- change string_list_dollar_at and string_list_dollar_star so that
+	  MB_CUR_MAX is used to size an array only when using gcc, since gcc
+	  can handle non-constant array sizes using a mechanism like alloca.
+	  Other compilers, e.g. Sun's compiler, do not implement that
+	  extension
+
+				   12/31
+				   -----
+builtins/mkbuiltins.c
+	- when cross-compiling, don't include <config.h>, since it's for the
+	  target rather than the host system.  Instead, choose a reasonable
+	  set of default #defines based on a minimal POSIX system

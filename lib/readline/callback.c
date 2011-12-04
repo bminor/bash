@@ -43,6 +43,7 @@
 #include "rldefs.h"
 #include "readline.h"
 #include "rlprivate.h"
+#include "xmalloc.h"
 
 /* Private data for callback registration functions.  See comments in
    rl_callback_read_char for more details. */

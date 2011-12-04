@@ -1,0 +1,152 @@
+*** ../bash-3.1/subst.c	Mon Oct 24 09:51:13 2005
+--- subst.c	Fri Dec 30 12:11:53 2005
+***************
+*** 2188,2192 ****
+      {
+        v = find_variable (name);
+!       if (v == 0 || array_p (v) == 0)
+          v = make_local_array_variable (name);
+        v = assign_array_var_from_string (v, value, flags);
+--- 2188,2192 ----
+      {
+        v = find_variable (name);
+!       if (v == 0 || array_p (v) == 0 || v->context != variable_context)
+          v = make_local_array_variable (name);
+        v = assign_array_var_from_string (v, value, flags);
+***************
+*** 2576,2579 ****
+--- 2576,2586 ----
+  }
+  
++ char *
++ expand_arith_string (string)
++      char *string;
++ {
++   return (expand_string_if_necessary (string, Q_DOUBLE_QUOTES, expand_string));
++ }
++ 
+  #if defined (COND_COMMAND)
+  /* Just remove backslashes in STRING.  Returns a new string. */
+***************
+*** 5249,5253 ****
+--- 5256,5264 ----
+      t = (char *)0;
+  
++ #if 0
+    temp1 = expand_string_if_necessary (substr, Q_DOUBLE_QUOTES, expand_string);
++ #else
++   temp1 = expand_arith_string (substr);
++ #endif
+    *e1p = evalexp (temp1, &expok);
+    free (temp1);
+***************
+*** 5294,5298 ****
+--- 5305,5313 ----
+        t++;
+        temp2 = savestring (t);
++ #if 0
+        temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
++ #else
++       temp1 = expand_arith_string (temp2);
++ #endif
+        free (temp2);
+        t[-1] = ':';
+***************
+*** 5666,5674 ****
+  
+    mflags = 0;
+-   if (*patsub == '/')
+-     {
+-       mflags |= MATCH_GLOBREP;
+-       patsub++;
+-     }
+  
+    /* Malloc this because expand_string_if_necessary or one of the expansion
+--- 5681,5684 ----
+***************
+*** 5682,5686 ****
+      mflags |= MATCH_STARSUB;
+  
+!   if (rep = quoted_strchr (lpatsub, '/', ST_BACKSL))
+      *rep++ = '\0';
+    else
+--- 5692,5698 ----
+      mflags |= MATCH_STARSUB;
+  
+!   /* If the pattern starts with a `/', make sure we skip over it when looking
+!      for the replacement delimiter. */
+!   if (rep = quoted_strchr ((*patsub == '/') ? lpatsub+1 : lpatsub, '/', ST_BACKSL))
+      *rep++ = '\0';
+    else
+***************
+*** 5702,5707 ****
+      }
+  
+    p = pat;
+!   if (pat && pat[0] == '#')
+      {
+        mflags |= MATCH_BEG;
+--- 5714,5726 ----
+      }
+  
++   /* ksh93 doesn't allow the match specifier to be a part of the expanded
++      pattern.  This is an extension. */
+    p = pat;
+!   if (pat && pat[0] == '/')
+!     {
+!       mflags |= MATCH_GLOBREP|MATCH_ANY;
+!       p++;
+!     }
+!   else if (pat && pat[0] == '#')
+      {
+        mflags |= MATCH_BEG;
+***************
+*** 6436,6440 ****
+--- 6455,6463 ----
+  
+  	  /* Expand variables found inside the expression. */
++ #if 0
+  	  temp1 = expand_string_if_necessary (temp2, Q_DOUBLE_QUOTES, expand_string);
++ #else
++ 	  temp1 = expand_arith_string (temp2);
++ #endif
+  	  free (temp2);
+  
+***************
+*** 6478,6482 ****
+--- 6501,6509 ----
+  
+         /* Do initial variable expansion. */
++ #if 0
+        temp1 = expand_string_if_necessary (temp, Q_DOUBLE_QUOTES, expand_string);
++ #else
++       temp1 = expand_arith_string (temp);
++ #endif
+  
+        goto arithsub;
+***************
+*** 6708,6712 ****
+  	case '>':
+  	  {
+! 	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & W_DQUOTE) || posixly_correct)
+  	      {
+  		sindex--;	/* add_character: label increments sindex */
+--- 6735,6739 ----
+  	case '>':
+  	  {
+! 	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
+  	      {
+  		sindex--;	/* add_character: label increments sindex */
+***************
+*** 6796,6799 ****
+--- 6823,6832 ----
+  	    {
+  	      temp1 = bash_tilde_expand (temp, tflag);
++ 	      if  (temp1 && *temp1 == '~' && STREQ (temp, temp1))
++ 		{
++ 		  FREE (temp);
++ 		  FREE (temp1);
++ 		  goto add_character;		/* tilde expansion failed */
++ 		}
+  	      free (temp);
+  	      temp = temp1;

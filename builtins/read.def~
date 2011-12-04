@@ -90,6 +90,7 @@ extern int errno;
 extern int interrupt_immediately;
 
 #if defined (READLINE)
+static void reset_attempted_completion_function __P((char *));
 static char *edit_line __P((char *));
 static void set_eol_delim __P((int));
 static void reset_eol_delim __P((char *));
@@ -330,6 +331,8 @@ read_builtin (list)
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
+      if (edit)
+	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
       alarm (tmout);
     }
 
@@ -472,6 +475,7 @@ add_char:
   if (retval < 0)
     {
       builtin_error (_("read error: %d: %s"), fd, strerror (errno));
+      run_unwind_frame ("read_builtin");
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -519,7 +523,10 @@ add_char:
 
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
-	return EXECUTION_FAILURE;	/* readonly or noassign */
+	{
+	  xfree (input_string);
+	  return EXECUTION_FAILURE;	/* readonly or noassign */
+	}
       array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
@@ -688,7 +695,17 @@ bind_read_variable (name, value)
 }
 
 #if defined (READLINE)
-static rl_completion_func_t *old_attempted_completion_function;
+static rl_completion_func_t *old_attempted_completion_function = 0;
+
+static void
+reset_attempted_completion_function (cp)
+     char *cp;
+{
+  if (rl_attempted_completion_function == 0)
+    rl_attempted_completion_function = old_attempted_completion_function ?
+					 old_attempted_completion_function :
+					 attempt_shell_completion;
+}
 
 static char *
 edit_line (p)
@@ -703,6 +720,7 @@ edit_line (p)
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   ret = readline (p);
   rl_attempted_completion_function = old_attempted_completion_function;
+  old_attempted_completion_function = 0;
   if (ret == 0)
     return ret;
   len = strlen (ret);

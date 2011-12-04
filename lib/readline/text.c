@@ -1237,7 +1237,7 @@ rl_change_case (count, op)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc, nwc;
   char mb[MB_LEN_MAX+1];
-  int mblen, p;
+  int mblen;
   mbstate_t ps;
 #endif
 

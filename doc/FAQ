@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.32, for Bash version 3.1.
+This is the Bash FAQ, version 3.33, for Bash version 3.1.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -697,7 +697,7 @@ Things bash has that sh does not:
 		  read -e/-p/-a/-t/-n/-d/-s/-u,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
-		  unset -f/-v, ulimit -m/-p/-u,
+		  unset -f/-v, ulimit -i/-m/-p/-q/-u/-x,
 		  type -a/-p/-t/-f/-P, suspend -f, kill -n,
 		  test -o optname/s1 == s2/s1 < s2/s1 > s2/-nt/-ot/-ef/-O/-G/-S
 	bash reads ~/.bashrc for interactive shells, $ENV for non-interactive
@@ -793,8 +793,8 @@ Things bash has or uses that ksh88 does not:
 		  set -o braceexpand/-o histexpand/-o interactive-comments/
 		  -o notify/-o physical/-o posix/-o hashall/-o onecmd/
 		  -h/-B/-C/-b/-H/-P, set +o, suspend, trap -l, type,
-		  typeset -a/-F/-p, ulimit -u, umask -S, alias -p, shopt,
-		  disown, printf, complete, compgen
+		  typeset -a/-F/-p, ulimit -i/-q/-u/-x, umask -S, alias -p,
+		  shopt, disown, printf, complete, compgen
 	`!' csh-style history expansion
 	POSIX.2-style globbing character classes
 	POSIX.2-style globbing equivalence classes
@@ -1575,6 +1575,9 @@ this.  These variables can be set in your .inputrc or using the bash
 The `set' commands between the single quotes may also be placed
 in ~/.inputrc.
 
+The script examples/scripts.noah/meta.bash encapsulates the bind
+commands in a shell function.
+
 G2) How do I write a function `x' to replace builtin command `x', but
     still invoke the command from within the function?
 
@@ -1748,19 +1751,25 @@ ftp.cwru.edu in the `pub/bash' directory.
 Cameron Newham and Bill Rosenblatt have written a book on bash, published
 by O'Reilly and Associates.  The book is based on Bill Rosenblatt's Korn
 Shell book.  The title is ``Learning the Bash Shell'', and the ISBN number
-is 1-56592-147-X.  Look for it in fine bookstores near you.  This book
-covers bash-1.14, but has an appendix describing some of the new features
-in bash-2.0.  
-
-A second edition of this book is available, published in January, 1998.
-The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
-or on the web.
+of the third edition, published in March, 2005, is 0-596-00965-8.  Look for
+it in fine bookstores near you.  This edition of the book has been updated
+to cover bash-3.0.
 
 The GNU Bash Reference Manual has been published as a printed book by
 Network Theory Ltd (Paperback, ISBN: 0-9541617-7-7, Feb 2003).  It covers
 bash-2.0 and is available from most online bookstores (see
 http://www.network-theory.co.uk/bash/manual/ for details).  The publisher
 will donate $1 to the Free Software Foundation for each copy sold. 
+
+Arnold Robbins and Nelson Beebe have written ``Classic Shell Scripting'',
+published by O'Reilly.  The first edition, with ISBN number 0-596-00595-4,
+was published in May, 2005.
+
+Chris F. A. Johnson, a frequent contributor to comp.unix.shell and
+gnu.bash.bug, has written ``Shell Scripting Recipes: A Problem-Solution
+Approach,'' a new book on shell scripting, concentrating on features of
+the POSIX standard helpful to shell script writers.  The first edition from
+Apress, with ISBN number 1-59059-471-1, was published in May, 2005.
 
 H3) What's coming in future versions?
 

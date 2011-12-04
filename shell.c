@@ -1208,7 +1208,7 @@ run_wordexp (words)
       wl = global_command->value.Simple->words;
       if (protected_mode)
 	for (tl = wl; tl; tl = tl->next)
-	  tl->word->flags |= W_NOCOMSUB;
+	  tl->word->flags |= W_NOCOMSUB|W_NOPROCSUB;
       result = wl ? expand_words_no_vars (wl) : (WORD_LIST *)0;
     }
   else
