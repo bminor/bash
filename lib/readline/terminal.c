@@ -125,9 +125,7 @@ char *_rl_term_IC;
 char *_rl_term_dc;
 char *_rl_term_DC;
 
-#if defined (HACK_TERMCAP_MOTION)
 char *_rl_term_forward_char;
-#endif  /* HACK_TERMCAP_MOTION */
 
 /* How to go up a line. */
 char *_rl_term_up;
@@ -391,9 +389,7 @@ static struct _tc_string tc_strings[] =
   { "le", &_rl_term_backspace },
   { "mm", &_rl_term_mm },
   { "mo", &_rl_term_mo },
-#if defined (HACK_TERMCAP_MOTION)
   { "nd", &_rl_term_forward_char },
-#endif
   { "pc", &_rl_term_pc },
   { "up", &_rl_term_up },
   { "vb", &_rl_visible_bell },
@@ -490,9 +486,7 @@ _rl_init_terminal_io (terminal_name)
       _rl_term_ks = _rl_term_ke = _rl_term_at7 = (char *)NULL;
       _rl_term_mm = _rl_term_mo = (char *)NULL;
       _rl_term_ve = _rl_term_vs = (char *)NULL;
-#if defined (HACK_TERMCAP_MOTION)
-      term_forward_char = (char *)NULL;
-#endif
+      _rl_term_forward_char = (char *)NULL;
       _rl_terminal_can_insert = term_has_meta = 0;
 
       /* Reasonable defaults for tgoto().  Readline currently only uses
