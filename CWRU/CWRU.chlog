@@ -12958,7 +12958,7 @@ bashline.c
 	  and bash_directory_expansion
 
 lib/readline/doc/rltech.texi
-	- add note to description of rl_direcotory_completion_hook that it
+	- add note to description of rl_directory_completion_hook that it
 	  needs to dequote the directory name even if no other expansions are
 	  performed
 
@@ -13082,4 +13082,27 @@ lib/readline/bind.c
 	  functions using the ANYOTHERKEY binding code.
 
 variables.c
-	- shells running in posix mode do not set $HOME, as POSIX requires
+	- shells running in posix mode do not set $HOME, as POSIX apparently
+	  requires
+
+				   2/15
+				   ----
+braces.c
+	- mkseq() now takes the increment as an argument; changed callers
+
+				   2/16
+				   ----
+builtins/hash.def
+	- print `hash table empty' message to stdout instead of stderr
+
+				   2/17
+				   ----
+lib/readline/readline.c
+	- when resetting rl_prompt in rl_set_prompt, make sure rl_display_prompt
+	  is set when the function returns
+
+				   2/18
+				   ----
+lib/readline/display.c
+	- further fixes to _rl_make_prompt_for_search from Eric Blake to deal
+	  with multiple calls to expand_prompt

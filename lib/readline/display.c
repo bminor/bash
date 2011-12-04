@@ -1662,10 +1662,11 @@ rl_on_new_line_with_prompt ()
 int
 rl_forced_update_display ()
 {
+  register char *temp;
+
   if (visible_line)
     {
-      register char *temp = visible_line;
-
+      temp = visible_line;
       while (*temp)
 	*temp++ = '\0';
     }
@@ -1997,20 +1998,36 @@ _rl_make_prompt_for_search (pchar)
      int pchar;
 {
   int len;
-  char *pmt;
+  char *pmt, *p;
 
   rl_save_prompt ();
 
-  len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
-  pmt = (char *)xmalloc (len + 2);
-  if (len)
-    strcpy (pmt, rl_prompt);
-  pmt[len] = pchar;
-  pmt[len+1] = '\0';
+  /* We've saved the prompt, and can do anything with the various prompt
+     strings we need before they're restored.  We want the unexpanded
+     portion of the prompt string after any final newline. */
+  p = rl_prompt ? strrchr (rl_prompt, '\n') : 0;
+  if (p == 0)
+    {
+      len = (rl_prompt && *rl_prompt) ? strlen (rl_prompt) : 0;
+      pmt = (char *)xmalloc (len + 2);
+      if (len)
+	strcpy (pmt, rl_prompt);
+      pmt[len] = pchar;
+      pmt[len+1] = '\0';
+    }
+  else
+    {
+      p++;
+      len = strlen (p);
+      pmt = (char *)xmalloc (len + 2);
+      if (len)
+	strcpy (pmt, p);
+      pmt[len] = pchar;
+      pmt[len+1] = '\0';
+    }  
 
   /* will be overwritten by expand_prompt, called from rl_message */
   prompt_physical_chars = saved_physical_chars + 1;
-
   return pmt;
 }
 

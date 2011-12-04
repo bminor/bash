@@ -13080,3 +13080,28 @@ lib/readline/bind.c
 	  bound to a portion of the passed key sequence without processing
 	  the entire thing.  We can bind maps with existing non-map
 	  functions using the ANYOTHERKEY binding code.
+
+variables.c
+	- shells running in posix mode do not set $HOME, as POSIX requires
+
+				   2/15
+				   ----
+braces.c
+	- mkseq() now takes the increment as an argument; changed callers
+
+				   2/16
+				   ----
+builtins/hash.def
+	- print `hash table empty' message to stdout instead of stderr
+
+				   2/17
+				   ----
+lib/readline/readline.c
+	- when resetting rl_prompt in rl_set_prompt, make sure rl_display_prompt
+	  is set when the function returns
+
+				   2/18
+				   ----
+lib/readline/display.c
+	- further fixes to _rl_make_prompt_for_search from Eric Blake to deal
+	  with multiple calls to expand_prompt

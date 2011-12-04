@@ -125,7 +125,7 @@ hash_builtin (list)
   if (list == 0 && expunge_hash_table == 0)
     {
       if (print_hashed_commands (list_portably) == 0)
-	printf (_("%s: hash table empty\n"), this_command_name);
+	fprintf (stderr, _("%s: hash table empty\n"), this_command_name);
 
       return (EXECUTION_SUCCESS);
     }

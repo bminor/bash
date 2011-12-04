@@ -1390,15 +1390,6 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	}
     }
 
-if (*old == 0 && *new != 0)
-  {
-    fprintf (stderr, "old == 0x%x new = 0x%x\r\n", old, new);
-    fprintf (stderr, "omax == %d nmax = %d\r\n", omax, nmax);
-    fprintf (stderr, "ne == 0x%x nfd = 0x%x\r\n", ne, nfd);
-    fprintf (stderr, "oe == 0x%x ofd = 0x%x\r\n", oe, ofd);
-    fprintf (stderr, "ols == 0x%x nls = 0x%x\r\n", ols, nls);
-  }    
-    
   /* count of invisible characters in the current invisible line. */
   current_invis_chars = W_OFFSET (current_line, wrap_offset);
   if (_rl_last_v_pos != current_line)
@@ -1671,10 +1662,11 @@ rl_on_new_line_with_prompt ()
 int
 rl_forced_update_display ()
 {
+  register char *temp;
+
   if (visible_line)
     {
-      register char *temp = visible_line;
-
+      temp = visible_line;
       while (*temp)
 	*temp++ = '\0';
     }
