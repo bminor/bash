@@ -111,6 +111,9 @@ hh. Fixed a bug that caused `unset LANG' to not properly reset the locale
 ii. Fixed a bug that could cause file descriptors > 10 to not be closed even
     when closed explicitly by a script.
 
+jj. Fixed a bug that caused single quotes to be stripped from ANSI-C quoting
+    inside double-quoted command substitutions.
+
 2.  Changes to Readline
 
 a.  Fixed a problem that caused segmentation faults when using readline in
@@ -155,6 +158,9 @@ l.  Fixed a problem with the callback interface that caused it to fail when
 
 m.  Fixed a bug that could cause a core dump when an edited history entry was
     re-executed under certain conditions.
+
+n.  Fixed a bug that caused readline to reference freed memory when attmpting
+    to display a portion of the prompt.
 
 3.  New Features in Bash
 

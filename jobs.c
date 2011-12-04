@@ -146,6 +146,7 @@ extern int interrupt_immediately;
 extern int last_command_exit_value, last_command_exit_signal;
 extern int loop_level, breaking;
 extern int sourcelevel;
+extern int running_trap;
 extern sh_builtin_func_t *this_shell_builtin;
 extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;

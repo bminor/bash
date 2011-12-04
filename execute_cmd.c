@@ -1242,7 +1242,16 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* Subshells are neither login nor interactive. */
   login_shell = interactive = 0;
 
-  subshell_environment = user_subshell ? SUBSHELL_PAREN : SUBSHELL_ASYNC;
+  if (user_subshell)
+    subshell_environment = SUBSHELL_PAREN;
+  else
+    {
+      subshell_environment = 0;			/* XXX */
+      if (asynchronous)
+	subshell_environment |= SUBSHELL_ASYNC;
+      if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+	subshell_environment |= SUBSHELL_PIPE;
+    }
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
@@ -1330,8 +1339,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (function_value)
     return_code = return_catch_value;
   else
-    return_code = execute_command_internal
-      (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
+    return_code = execute_command_internal (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);
 
   /* If we are asked to, invert the return value. */
   if (invert)
@@ -2641,7 +2649,10 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 
 	  do_piping (pipe_in, pipe_out);
 
-	  subshell_environment = SUBSHELL_ASYNC;
+	  if (async)
+	    subshell_environment |= SUBSHELL_ASYNC;
+	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+	    subshell_environment |= SUBSHELL_PIPE;
 
 	  if (do_redirections (redirects, RX_ACTIVE) == 0)
 	    exit (EXECUTION_SUCCESS);
@@ -3010,7 +3021,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     }
 
   if (command_line == 0)
-    command_line = savestring (the_printed_command);
+    command_line = savestring (the_printed_command_except_trap);
 
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
@@ -3369,7 +3380,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
      struct fd_bitmap *fds_to_close;
      int flags;
 {
-  int result, r;
+  int result, r, funcvalue;
 #if defined (JOB_CONTROL)
   int jobs_hack;
 
@@ -3380,7 +3391,10 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
   /* A subshell is neither a login shell nor interactive. */
   login_shell = interactive = 0;
 
-  subshell_environment = SUBSHELL_ASYNC;
+  if (async)
+    subshell_environment |= SUBSHELL_ASYNC;
+  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
+    subshell_environment |= SUBSHELL_PIPE;
 
   maybe_make_export_env ();	/* XXX - is this needed? */
 
@@ -3414,10 +3428,18 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 	 so we don't go back up to main(). */
       result = setjmp (top_level);
 
+      /* Give the return builtin a place to jump to when executed in a subshell
+         or pipeline */
+      funcvalue = 0;
+      if (return_catch_flag && builtin == return_builtin)
+        funcvalue = setjmp (return_catch);
+
       if (result == EXITPROG)
 	exit (last_command_exit_value);
       else if (result)
 	exit (EXECUTION_FAILURE);
+      else if (funcvalue)
+	exit (return_catch_value);
       else
 	{
 	  r = execute_builtin (builtin, words, flags, 1);

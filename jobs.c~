@@ -77,8 +77,8 @@ extern int errno;
 #endif /* !errno */
 
 #define DEFAULT_CHILD_MAX 32
-#if 1
-#define MAX_JOBS_IN_ARRAY 4096		/* production*/
+#if !defined (DEBUG)
+#define MAX_JOBS_IN_ARRAY 4096		/* production */
 #else
 #define MAX_JOBS_IN_ARRAY 128		/* testing */
 #endif
@@ -146,6 +146,7 @@ extern int interrupt_immediately;
 extern int last_command_exit_value, last_command_exit_signal;
 extern int loop_level, breaking;
 extern int sourcelevel;
+extern int running_trap;
 extern sh_builtin_func_t *this_shell_builtin;
 extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;
@@ -962,7 +963,7 @@ compact_jobs_list (flags)
 
   reap_dead_jobs ();
   realloc_jobs_list ();
-  
+
   return (js.j_lastj);
 }
 
@@ -1078,6 +1079,7 @@ add_process (name, pid)
 {
   PROCESS *t, *p;
 
+itrace("add_process: name = %s running_trap = %d", name, running_trap);
 #if defined (RECYCLES_PIDS)
   int j;
   p = find_process (pid, 0, &j);
@@ -1230,8 +1232,9 @@ hangup_all_jobs ()
     {
       if (jobs[i])
 	{
-	  if  ((jobs[i]->flags & J_NOHUP) == 0)
-	    killpg (jobs[i]->pgrp, SIGHUP);
+	  if  (jobs[i]->flags & J_NOHUP)
+	    continue;
+	  killpg (jobs[i]->pgrp, SIGHUP);
 	  if (STOPPED (i))
 	    killpg (jobs[i]->pgrp, SIGCONT);
 	}
@@ -1667,6 +1670,7 @@ make_child (command, async_p)
   sigemptyset (&oset);
   sigprocmask (SIG_BLOCK, &set, &oset);
 
+itrace("make_child: command = %s", command ? command : "");
   making_children ();
 
 #if defined (BUFFERED_INPUT)
@@ -2968,6 +2972,7 @@ waitchld (wpid, block)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
+      CHECK_TERMSIG;
       pid = WAITPID (-1, &status, waitpid_flags);
 
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
@@ -2994,6 +2999,7 @@ waitchld (wpid, block)
 
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
+      CHECK_TERMSIG;
       if (pid <= 0)
 	continue;	/* jumps right to the test */
 
@@ -3228,7 +3234,7 @@ set_job_status_and_cleanup (job)
 		  temp_handler = trap_to_sighandler (SIGINT);
 		restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
-		termination_unwind_protect (SIGINT);
+		termsig_handler (SIGINT);
 	      else if (temp_handler != SIG_IGN)
 		(*temp_handler) (SIGINT);
 	    }
@@ -3430,6 +3436,7 @@ notify_of_job_status ()
 	      fprintf (stderr, "\n");
 	      if (dir == 0)
 		dir = current_working_directory ();
+itrace("calling pretty_print_job for job %d", job);
 	      pretty_print_job (job, JLIST_STANDARD, stderr);
 	      if (dir && (strcmp (dir, jobs[job]->wd) != 0))
 		fprintf (stderr,
@@ -3704,7 +3711,7 @@ give_terminal_to (pgrp, force)
       if (tcsetpgrp (shell_tty, pgrp) < 0)
 	{
 	  /* Maybe we should print an error message? */
-#ifdef DEBUG
+#if 0
 	  sys_error ("tcsetpgrp(%d) failed: pid %ld to pgrp %ld",
 	    shell_tty, (long)getpid(), (long)pgrp);
 #endif
