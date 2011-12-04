@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,6 +59,7 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
+extern int posixly_correct;
 extern int dot_found_in_search;
 extern char *this_command_name;
 
@@ -124,7 +125,8 @@ hash_builtin (list)
      we test expunge_hash_table. */
   if (list == 0 && expunge_hash_table == 0)
     {
-      if (print_hashed_commands (list_portably) == 0)
+      opt = print_hashed_commands (list_portably);
+      if (opt == 0 && posixly_correct == 0)
 	printf (_("%s: hash table empty\n"), this_command_name);
 
       return (EXECUTION_SUCCESS);

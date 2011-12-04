@@ -2723,6 +2723,7 @@ read_token (command)
 #define P_ALLOWESC	0x02
 #define P_DQUOTE	0x04
 #define P_COMMAND	0x08	/* parsing a command, so look for comments */
+#define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
 
 static char matched_pair_error;
 static char *
@@ -2732,12 +2733,12 @@ parse_matched_pair (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int count, ch, was_dollar, in_comment, check_comment;
-  int pass_next_character, nestlen, ttranslen, start_lineno;
+  int pass_next_character, backq_backslash, nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
   count = 1;
-  pass_next_character = was_dollar = in_comment = 0;
+  pass_next_character = backq_backslash = was_dollar = in_comment = 0;
   check_comment = (flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
 
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
@@ -2749,7 +2750,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && pass_next_character == 0);
+      ch = shell_getc (qc != '\'' && pass_next_character == 0 && backq_backslash == 0);
 
       if (ch == EOF)
 	{
@@ -2777,6 +2778,13 @@ parse_matched_pair (qc, open, close, lenp, flags)
       /* Not exactly right yet */
       else if MBTEST(check_comment && in_comment == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
 	in_comment = 1;
+
+      /* last char was backslash inside backquoted command substitution */
+      if (backq_backslash)
+	{
+	  backq_backslash = 0;
+	  /* Placeholder for adding special characters */
+	}
 
       if (pass_next_character)		/* last char was backslash */
 	{
@@ -2816,6 +2824,8 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	{
 	  if MBTEST((flags & P_ALLOWESC) && ch == '\\')
 	    pass_next_character++;
+	  else if MBTEST((flags & P_BACKQUOTE) && ch == '\\')
+	    backq_backslash++;
 	  continue;
 	}
 
@@ -2900,11 +2910,11 @@ add_nestret:
 	}
       else if MBTEST(qc == '`' && (ch == '"' || ch == '\'') && in_comment == 0)
 	{
-	  /* Add P_ALLOWESC so backslash quotes the next character and
+	  /* Add P_BACKQUOTE so backslash quotes the next character and
 	     shell_getc does the right thing with \<newline>.  We do this for
 	     a measure  of backwards compatibility -- it's not strictly the
 	     right POSIX thing. */
-	  nestret = parse_matched_pair (0, ch, ch, &nestlen, rflags|P_ALLOWESC);
+	  nestret = parse_matched_pair (0, ch, ch, &nestlen, rflags|P_BACKQUOTE);
 	  goto add_nestret;
 	}
       else if MBTEST(was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
