@@ -67,8 +67,8 @@ extern int inet_aton __P((const char *, struct in_addr *));
 #endif
 
 #ifndef HAVE_GETADDRINFO
-static int _getaddr __P((char *, struct in_addr));
-static int _getserv __P((char *, int, unsigned short));
+static int _getaddr __P((char *, struct in_addr *));
+static int _getserv __P((char *, int, unsigned short *));
 static int _netopen4 __P((char *, char *, int));
 #else /* HAVE_GETADDRINFO */
 static int _netopen6 __P((char *, char *, int));
