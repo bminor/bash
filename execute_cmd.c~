@@ -865,23 +865,17 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 		    ? EXECUTION_FAILURE
 		    : EXECUTION_SUCCESS;
 
-#if defined (DPAREN_ARITHMETIC) || defined (COND_COMMAND)
   /* This is where we set PIPESTATUS from the exit status of the appropriate
      compound commands (the ones that look enough like simple commands to
      cause confusion).  We might be able to optimize by not doing this if
      subshell_environment != 0. */
   switch (command->type)
     {
-#  if defined (DPAREN_ARITHMETIC)
-    case cm_arith:
-#  endif
-#  if defined (COND_COMMAND)
+    case cm_arith_for:
     case cm_cond:
-#  endif
       set_pipestatus_from_exit (exec_result);
       break;
     }
-#endif
 
   last_command_exit_value = exec_result;
   run_pending_traps ();

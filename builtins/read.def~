@@ -472,7 +472,6 @@ add_char:
   if (retval < 0)
     {
       builtin_error (_("read error: %d: %s"), fd, strerror (errno));
-      run_unwind_frame ("read_builtin");
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -520,10 +519,7 @@ add_char:
 
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
-	{
-	  xfree (input_string);
-	  return EXECUTION_FAILURE;	/* readonly or noassign */
-	}
+	return EXECUTION_FAILURE;	/* readonly or noassign */
       array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
