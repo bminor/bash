@@ -1,6 +1,6 @@
 /* xmalloc.h -- memory allocation that aborts on errors. */
 
-/* Copyright (C) 1999-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      

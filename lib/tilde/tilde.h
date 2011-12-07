@@ -1,6 +1,6 @@
 /* tilde.h: Externally available variables and function in libtilde.a. */
 
-/* Copyright (C) 1992-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2009 Free Software Foundation, Inc.
 
    This file contains the Readline Library (Readline), a set of
    routines for providing Emacs style line input to programs that ask

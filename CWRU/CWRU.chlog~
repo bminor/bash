@@ -7246,3 +7246,27 @@ subst.c
 	- fix off-by-one error in /dev/fd version of add_fifo_list; make
 	  sure we add to totfds when it is == fd, not just when fd > totfds.
 	  Fixes bug reported by marciso@gmail.com
+
+[bash-4.0-beta2 frozen]
+
+				   12/29
+				   -----
+doc/{bash.1,bashref.texi}
+	- document more clearly that when not in Posix mode, command
+	  substitution does not inherit the -e option.  From bug report from
+	  Freddy Vulto <fvulto@gmail.com>
+
+{execute_cmd,sig,builtins/evalstring}.c
+	- sentinel variable to keep track of whether or not we're supposed to
+	  ignore the failure status of a command executed in a command
+	  substitution even if the `-e' option is set: comsub_ignore_return
+	- increment and decrement comsub_ignore_return in execute_simple_command
+	  before calling expand_words
+	- in parse_and_execute, if comsub_ignore_return is non-zero and the
+	  SUBSHELL_COMSUB bit is set in subshell_environment, enable the
+	  CMD_IGNORE_RETURN flag in every command executed from the passed
+	  string.  Fixes problem reported by Freddy Vulto <fvulto@gmail.com>
+	- make sure to reset comsub_ignore_return every time we throw to the
+	  top level, like executing_list flag
+
+

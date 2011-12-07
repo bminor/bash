@@ -1,6 +1,6 @@
 /* siglist.c -- signal list for those machines that don't have one. */
 
-/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

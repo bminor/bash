@@ -1,6 +1,6 @@
 /* dcigettext.c - Implementation of the internal dcigettext function. */
 
-/* Copyright (C) 1995-1999, 2000-2003, 2006-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000-2003, 2006-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

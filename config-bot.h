@@ -1,7 +1,7 @@
 /* config-bot.h */
 /* modify settings or make new ones based on what autoconf tells us. */
 
-/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

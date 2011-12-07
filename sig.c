@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,6 +57,7 @@ extern int last_command_exit_signal;
 extern int return_catch_flag;
 extern int loop_level, continuing, breaking;
 extern int executing_list;
+extern int comsub_ignore_return;
 extern int parse_and_execute_level, shell_initialized;
 
 /* Non-zero after SIGINT. */
@@ -366,8 +367,8 @@ top_level_cleanup ()
 #endif /* PROCESS_SUBSTITUTION */
 
   run_unwind_protects ();
-  loop_level = continuing = breaking = executing_list = 0;
-  return_catch_flag = 0;
+  loop_level = continuing = breaking = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = 0;
 }
 
 /* What to do when we've been interrupted, and it is safe to handle it. */
@@ -417,8 +418,8 @@ throw_to_top_level ()
 #endif /* PROCESS_SUBSTITUTION */
 
   run_unwind_protects ();
-  loop_level = continuing = breaking = executing_list = 0;
-  return_catch_flag = 0;
+  loop_level = continuing = breaking = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = 0;
 
   if (interactive && print_newline)
     {
@@ -493,7 +494,8 @@ termsig_handler (sig)
 #endif /* PROCESS_SUBSTITUTION */
 
   /* Reset execution context */
-  loop_level = continuing = breaking = executing_list = return_catch_flag = 0;
+  loop_level = continuing = breaking = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = 0;
 
   run_exit_trap ();
   set_signal_handler (sig, SIG_DFL);

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Oct 28 11:24:02 EDT 2008
+.\"	Last Change: Mon Dec 29 16:49:01 EST 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 October 28" "GNU Bash-4.0"
+.TH BASH 1 "2008 December 29" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2008 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2008 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2009 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2009 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -4061,6 +4061,10 @@ that the shell inherited from its parent at invocation.  Builtin
 commands that are invoked as part of a pipeline are also executed in a
 subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
+.PP
+Subshells spawned to execute command substitutions inherit the value of
+the \fB\-e\fP option from the parent shell.  When not in posix mode,
+Bash clears the \fB\-e\fP option in such subshells.
 .PP
 If a command is followed by a \fB&\fP and job control is not active, the
 default standard input for the command is the empty file \fI/dev/null\fP.
@@ -9374,12 +9378,6 @@ command in the sequence.
 It suffices to place the sequence of commands between
 parentheses to force it into a subshell, which may be stopped as
 a unit.
-.PP
-Commands inside of \fB$(\fP...\fB)\fP command substitution are not
-parsed until substitution is attempted.  This will delay error
-reporting until some time after the command is entered.  For example,
-unmatched parentheses, even inside shell comments, will result in
-error messages while the construct is being read.
 .PP
 Array variables may not (yet) be exported.
 .PP

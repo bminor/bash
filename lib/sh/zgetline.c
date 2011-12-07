@@ -1,7 +1,7 @@
 /* zgetline - read a line of input from a specified file descriptor and return
 	      a pointer to a newly-allocated buffer containing the data. */
 
-/* Copyright (C) 2008 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

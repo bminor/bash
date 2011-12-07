@@ -4,7 +4,7 @@
    "Keep this file name-space clean" means, talk to roland@gnu.ai.mit.edu
    before changing it! */
 
-/* Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, 2008,2009 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

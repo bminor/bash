@@ -1,7 +1,7 @@
 /* input_avail.c -- check whether or not data is available for reading on a
 		    specified file descriptor. */
 
-/* Copyright (C) 2008 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

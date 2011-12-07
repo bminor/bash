@@ -1,6 +1,6 @@
 /* xmalloc.h -- defines for the `x' memory allocation functions */
 
-/* Copyright (C) 2001-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

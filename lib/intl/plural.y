@@ -1,7 +1,7 @@
 %{
 /* plural.y - Expression parsing for plural form selection. */
 
-/* Copyright (C) 2000, 2001, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2001, 2005-2009 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 2000.
 
    This file is part of GNU Bash.

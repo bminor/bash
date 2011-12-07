@@ -1,6 +1,6 @@
 /* gettext.c - Implementation of gettext(3) function. */
 
-/* Copyright (C) 1995, 1997, 2000, 2001, 2002, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 1997, 2000, 2001, 2002, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

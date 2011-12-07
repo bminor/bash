@@ -1,7 +1,7 @@
 /* os2compat.h - OS/2 compatibility defines. */
 
 /* This file is intended to be included from config.h
-   Copyright (C) 2001-2002, 2005-2008 Free Software Foundation, Inc.
+   Copyright (C) 2001-2002, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

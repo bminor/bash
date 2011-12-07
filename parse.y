@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1438,6 +1438,8 @@ rewind_input_string ()
   /* number of unconsumed characters in the input -- XXX need to take newlines
      into account, e.g., $(...\n) */
   xchars = shell_input_line_len - shell_input_line_index;
+  if (bash_input.location.string[-1] == '\n')
+    xchars++;
 
   /* XXX - how to reflect bash_input.location.string back to string passed to
      parse_and_execute or xparse_dolparen?  xparse_dolparen needs to know how

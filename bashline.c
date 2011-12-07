@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -962,7 +962,7 @@ bash_forward_shellword (count, key)
   DECLARE_MBSTATE;
 
   if (count < 0)
-    return (bash_backward_shellword (-count, c));
+    return (bash_backward_shellword (-count, key));
 
   /* The tricky part of this is deciding whether or not the first character
      we're on is an unquoted metacharacter.  Not completely handled yet. */
@@ -1057,7 +1057,7 @@ bash_backward_shellword (count, key)
   DECLARE_MBSTATE;
   
   if (count < 0)
-    return (bash_forward_shellword (-count, c));
+    return (bash_forward_shellword (-count, key));
 
   p = rl_point;
   slen = rl_end;

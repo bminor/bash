@@ -1,6 +1,6 @@
 /* eval-plural.c - Plural expression evaluation. */
 
-/* Copyright (C) 2000-2002, 2006-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002, 2006-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

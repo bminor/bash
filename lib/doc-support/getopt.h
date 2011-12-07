@@ -1,6 +1,6 @@
 /* getopt.h - public declarations for getopt. */
 
-/* Copyright (C) 1989, 1990, 1991, 1992, 1993, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989, 1990, 1991, 1992, 1993, 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

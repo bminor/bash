@@ -1,6 +1,6 @@
 /* getopt1.c - getopt_long and getopt_long_only entry points for GNU getopt.
 
-/* Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

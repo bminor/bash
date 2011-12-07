@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. 
 
-/* Copyright (C) 1996-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -65,6 +65,7 @@ extern int last_command_exit_value;
 extern int running_trap;
 extern int loop_level;
 extern int executing_list;
+extern int comsub_ignore_return;
 extern int posixly_correct;
 
 int parse_and_execute_level = 0;
@@ -116,6 +117,7 @@ parse_prologue (string, flags, tag)
   unwind_protect_int (line_number);
   unwind_protect_int (loop_level);
   unwind_protect_int (executing_list);
+  unwind_protect_int (comsub_ignore_return);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 
@@ -262,6 +264,12 @@ parse_and_execute (string, from_file, flags)
 	      add_unwind_protect (dispose_command, command);	/* XXX */
 
 	      global_command = (COMMAND *)NULL;
+
+	      if ((subshell_environment & SUBSHELL_COMSUB) && comsub_ignore_return)
+{
+		command->flags |= CMD_IGNORE_RETURN;
+itrace("parse_and_execute: turned on CMD_IGNORE_RETURN from comsub_ignore_return");
+}
 
 #if defined (ONESHOT)
 	      /*

@@ -1,7 +1,7 @@
 /* pcomplete.h - structure definitions and other stuff for programmable
 n		 completion. */
 
-/* Copyright (C) 1999-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

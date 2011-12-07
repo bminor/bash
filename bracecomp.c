@@ -4,7 +4,7 @@
 
 /* Original version by tromey@cns.caltech.edu,  Fri Feb  7 1992. */
 
-/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

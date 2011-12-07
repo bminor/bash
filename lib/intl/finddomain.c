@@ -1,6 +1,6 @@
 /* finddomain.c - Handle list of needed message catalogs */
 
-/* Copyright (C) 1995-1999, 2000, 2001, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000, 2001, 2005-2009 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@gnu.org>, 1995.
 
    This file is part of GNU Bash.

@@ -1,6 +1,6 @@
 /* os2compat.c - OS/2 compatibility functions. */
 
-/* Copyright (C) 2001-2002, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2002, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

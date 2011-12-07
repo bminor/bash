@@ -1,7 +1,7 @@
 /* true and false builtins */
 
 /*
-   Copyright (C) 1999-2008 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify

@@ -1,6 +1,6 @@
 /* intl-compat.c - Stub functions to call gettext functions from GNU gettext library. */
 
-/* Copyright (C) 1995, 2000-2003, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 2000-2003, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

@@ -1,7 +1,7 @@
 /* uconvert - convert string representations of decimal numbers into whole
 	      number/fractional value pairs. */
 
-/* Copyright (C) 2008 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

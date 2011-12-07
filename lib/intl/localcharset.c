@@ -1,6 +1,6 @@
 /* localcharset.c - Determine a canonical name for the current locale's character encoding. */
 
-/* Copyright (C) 2000-2003, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2003, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

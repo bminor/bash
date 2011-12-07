@@ -1,6 +1,6 @@
 /* gmo.h - Description of GNU message catalog format: general file layout. */
 
-/* Copyright (C) 1995, 1997, 2000-2002, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 1997, 2000-2002, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

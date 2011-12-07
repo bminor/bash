@@ -1,6 +1,6 @@
 /* bashintl.h -- Internationalization functions and defines. */
 
-/* Copyright (C) 1996-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

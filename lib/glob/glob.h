@@ -1,5 +1,5 @@
 /* File-name wildcard pattern matching for GNU.
-   Copyright (C) 1985, 1988, 1989, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1985, 1988, 1989, 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 

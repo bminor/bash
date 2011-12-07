@@ -1,6 +1,6 @@
 /* version.c -- distribution and version numbers. */
 
-/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -83,7 +83,7 @@ show_shell_version (extended)
   printf (_("GNU bash, version %s (%s)\n"), shell_version_string (), MACHTYPE);
   if (extended)
     {
-      printf (_("Copyright (C) 2008 Free Software Foundation, Inc.\n"));
+      printf (_("Copyright (C) 2009 Free Software Foundation, Inc.\n"));
       printf (_("License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>\n"));
       printf (_("This is free software; you are free to change and redistribute it.\n"));
       printf (_("There is NO WARRANTY, to the extent permitted by law.\n"));

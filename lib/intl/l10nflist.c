@@ -1,6 +1,6 @@
 /* l10nflist.c - make localization file list. */
 
-/* Copyright (C) 1995-1999, 2000, 2001, 2002, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000, 2001, 2002, 2005-2009 Free Software Foundation, Inc.
    Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
 
    This file is part of GNU Bash.

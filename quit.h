@@ -1,6 +1,6 @@
 /* quit.h -- How to handle SIGINT gracefully. */
 
-/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

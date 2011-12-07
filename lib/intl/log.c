@@ -1,6 +1,6 @@
 /* log.c - Log file output. */
 
-/* Copyright (C) 2003, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2003, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

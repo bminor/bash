@@ -1,6 +1,6 @@
 /* hash-string.h - Description of GNU message catalog format: string hashing function. */
 
-/* Copyright (C) 1995, 1997, 1998, 2000, 2001, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 1997, 1998, 2000, 2001, 2005-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 

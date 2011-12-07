@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -232,6 +232,11 @@ int executing_builtin = 0;
 
 /* Non-zero if we are executing a command list (a;b;c, etc.) */
 int executing_list = 0;
+
+/* Non-zero if failing commands in a command substitution should not exit the
+   shell even if -e is set.  Used to pass the CMD_IGNORE_RETURN flag down to
+   commands run in command substitutions by parse_and_execute. */
+int comsub_ignore_return = 0;
 
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
@@ -3454,7 +3459,12 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     {
       current_fds_to_close = fds_to_close;
       fix_assignment_words (simple_command->words);
+      /* Pass the ignore return flag down to command substitutions */
+      if (simple_command->flags & CMD_IGNORE_RETURN)	/* XXX */
+	comsub_ignore_return++;
       words = expand_words (simple_command->words);
+      if (simple_command->flags & CMD_IGNORE_RETURN)
+	comsub_ignore_return--;
       current_fds_to_close = (struct fd_bitmap *)NULL;
     }
   else

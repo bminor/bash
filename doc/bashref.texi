@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2008 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2009 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -2533,6 +2533,10 @@ that the shell inherited from its parent at invocation.  Builtin
 commands that are invoked as part of a pipeline are also executed
 in a subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
+
+Subshells spawned to execute command substitutions inherit the value of
+the @option{-e} option from the parent shell.  When not in @sc{posix} mode,
+Bash clears the @option{-e} option in such subshells.
 
 If a command is followed by a @samp{&} and job control is not active, the
 default standard input for the command is the empty file @file{/dev/null}.

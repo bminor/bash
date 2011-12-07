@@ -1,6 +1,6 @@
 /* siglist.h -- encapsulate various definitions for sys_siglist */
 
-/* Copyright (C) 1993, 2001, 2005, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1993, 2001, 2005, 2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

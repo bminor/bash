@@ -1,6 +1,6 @@
 /* termcap.c - Work-alike for termcap, plus extra features. */
 
-/* Copyright (C) 1985, 1986, 1993,1994, 1995, 1998, 2001,2003,2005,2006,2008Free Software Foundation, Inc.
+/* Copyright (C) 1985, 1986, 1993,1994, 1995, 1998, 2001,2003,2005,2006,2008,2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

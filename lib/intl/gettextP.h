@@ -1,6 +1,6 @@
 /* gettextP.h - Header describing internals of libintl library. */
 
-/* Copyright (C) 1995-1999, 2000-2003, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000-2003, 2005-2009 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 1995.
 
    This file is part of GNU Bash.

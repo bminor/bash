@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -137,7 +137,7 @@ ARRAY_ELEMENT	*s, *e;
 	a = array_create ();
 	a->type = array->type;
 
-	for (p = s, i = 0; p != e; p = element_forw(p), i++) {
+	for (mi = 0, p = s, i = 0; p != e; p = element_forw(p), i++) {
 		n = array_create_element (element_index(p), element_value(p));
 		ADD_BEFORE(a->head, n);
 		mi = element_index(n);

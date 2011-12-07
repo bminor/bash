@@ -8,7 +8,7 @@
 .\"
 .\"	Last Change: Thu May  8 09:29:59 EDT 2008
 .\"
-.TH READLINE 3 "2008 May 8" "GNU Readline 5.2"
+.TH READLINE 3 "2008 May 8" "GNU Readline 6.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -480,6 +480,12 @@ to display a screenful of possible completions at a time.
 .B print\-completions\-horizontally (Off)
 If set to \fBOn\fP, readline will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
+.TP
+.B revert\-all\-at\-newline (Off)
+If set to \fBon\fP, readline will undo all changes to history lines
+before returning when \fBaccept\-line\fP is executed.  By default,
+history lines may be modified and retain individual undo lists across
+calls to \fBreadline\fP.
 .TP
 .B show\-all\-if\-ambiguous (Off)
 This alters the default behavior of the completion functions.  If

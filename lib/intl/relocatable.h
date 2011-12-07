@@ -1,6 +1,6 @@
 /* relocatable.h - Provide relocatable packages. */
 
-/* Copyright (C) 2003, 2005-2008 Free Software Foundation, Inc.
+/* Copyright (C) 2003, 2005-2009 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This file is part of GNU Bash.

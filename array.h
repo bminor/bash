@@ -1,7 +1,7 @@
 /* array.h -- definitions for the interface exported by array.c that allows
    the rest of the shell to manipulate array variables. */
 
-/* Copyright (C) 1997-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

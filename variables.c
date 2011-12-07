@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -328,6 +328,8 @@ initialize_shell_variables (env, privmode)
       name[char_index] = '\0';
       /* Now, name = env variable name, string = env variable value, and
 	 char_index == strlen (name) */
+
+      temp_var = (SHELL_VAR *)NULL;
 
       /* If exported function, define it now.  Don't import functions from
 	 the environment in privileged mode. */

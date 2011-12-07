@@ -1,6 +1,6 @@
 /* list.c - Functions for manipulating linked lists of objects. */
 
-/* Copyright (C) 1996-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

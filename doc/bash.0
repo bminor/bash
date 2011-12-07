@@ -1614,9 +1614,9 @@ EEXXPPAANNSSIIOONN
        each word for the characters **, ??, and [[.  If one of  these  characters
        appears,  then  the word is regarded as a _p_a_t_t_e_r_n, and replaced with an
        alphabetically sorted list of file names matching the pattern.   If  no
-       matching  file  names  are found, and the shell option nnuullllgglloobb is dis-
-       abled, the word is left unchanged.  If the nnuullllgglloobb option is set,  and
-       no  matches  are  found,  the  word  is removed.  If the ffaaiillgglloobb shell
+       matching  file  names  are  found, and the shell option nnuullllgglloobb is not
+       enabled, the word is left unchanged.  If the nnuullllgglloobb  option  is  set,
+       and  no  matches are found, the word is removed.  If the ffaaiillgglloobb shell
        option is set, and no matches are found, an error  message  is  printed
        and  the  command  is  not executed.  If the shell option nnooccaasseegglloobb is
        enabled, the match is performed without regard to the  case  of  alpha-
@@ -1840,7 +1840,7 @@ RREEDDIIRREECCTTIIOONN
 
    HHeerree DDooccuummeennttss
        This type of redirection instructs the shell to  read  input  from  the
-       current  source  until  a  line  containing only _w_o_r_d (with no trailing
+       current source until a line containing only _d_e_l_i_m_i_t_e_r (with no trailing
        blanks) is seen.  All of the lines read up to that point are then  used
        as the standard input for a command.
 
@@ -4487,10 +4487,10 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               not be reset.  In _p_o_s_i_x _m_o_d_e, only shell variables  are  listed.
               The  output  is  sorted  according  to the current locale.  When
               options are specified, they set or unset shell attributes.   Any
-              arguments  remaining after the options are processed are treated
-              as values for the positional parameters  and  are  assigned,  in
-              order, to $$11, $$22, ......  $$_n.  Options, if specified, have the fol-
-              lowing meanings:
+              arguments  remaining after option processing are treated as val-
+              ues for the positional parameters and are assigned, in order, to
+              $$11,  $$22,  ......   $$_n.   Options,  if specified, have the following
+              meanings:
               --aa      Automatically mark variables  and  functions  which  are
                       modified  or  created  for  export to the environment of
                       subsequent commands.
@@ -4555,7 +4555,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       nnoocclloobbbbeerr
                               Same as --CC.
                       nnooeexxeecc  Same as --nn.
-                      nnoogglloobb  Same as --ff.  nnoolloogg Currently ignored.
+                      nnoogglloobb  Same as --ff.
+                      nnoolloogg   Currently ignored.
                       nnoottiiffyy  Same as --bb.
                       nnoouunnsseett Same as --uu.
                       oonneeccmmdd  Same as --tt.
