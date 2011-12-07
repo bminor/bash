@@ -125,10 +125,7 @@ help_builtin (list)
 
   if (glob_pattern_p (list->word->word))
     {
-      if (list->next)
-	printf (_("Shell commands matching keywords `"));
-      else
-	printf (_("Shell commands matching keyword `"));
+      printf (ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
       print_word_list (list, ", ");
       printf ("'\n\n");
     }

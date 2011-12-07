@@ -43,7 +43,7 @@ const char * const release_status = (char *)0;
 #endif
 const char * const sccs_version = SCCSVERSION;
 
-/* If == 31, shell compatible with bash-3.1, = =32 with bash-3.2, and so on */
+/* If == 31, shell compatible with bash-3.1, == 32 with bash-3.2, and so on */
 int shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
 /* Functions for getting, setting, and displaying the shell version. */

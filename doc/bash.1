@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Apr 12 17:15:24 EDT 2008
+.\"	Last Change: Fri Apr 25 12:26:57 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 April 12" "GNU Bash-3.2"
+.TH BASH 1 "2008 April 25" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3791,7 +3791,12 @@ A full search of the directories in
 .SM
 .B PATH
 is performed only if the command is not found in the hash table.
-If the search is unsuccessful, the shell prints an error
+If the search is unsuccessful, the shell searches for a defined shell
+function named \fBcommand_not_found_handle\fP.
+If that function exists, it is invoked with the original command and
+the original command's arguments as its arguments, and the function's
+exit status becomes the exit status of the shell.
+If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 .PP
 If the search is successful, or if the command name contains

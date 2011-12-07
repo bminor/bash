@@ -37,6 +37,8 @@
 #define N_(msgid)	msgid
 #define D_(d, msgid)	dgettext(d, msgid)
 
+#define P_(m1, m2, n)	ngettext(m1, m2, n)
+
 #if defined (HAVE_SETLOCALE) && !defined (LC_ALL)
 #  undef HAVE_SETLOCALE
 #endif

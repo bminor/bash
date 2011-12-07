@@ -7389,6 +7389,66 @@ is supplied, or
 .B logout
 Exit a login shell.
 .TP
+\fBmapfile\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcou
+nt\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \f
+Iquantum\fP] [\fIarray\fP]
+Read lines from the standard input into array variable
+.IR array ,
+or from file descriptor 
+.IR fd
+if the 
+.B \-u
+option is supplied.
+The variable \fBMAPFILE\fP is the default \fIarray\fP.
+Options, if supplied, have the following meanings:
+.RS
+.PD 0
+.TP
+.B \-n
+Copy at most
+.I count
+lines.  If \fIcount\fP is 0, all lines are copied.
+.TP
+.B \-O
+Begin assigning to
+.I array
+at index
+.IR origin .
+The default index is 0.
+.TP
+.B \-s
+Discard the first \fIcount\fP lines read.
+.TP
+.B \-t
+Remove a trailing line from each line read.
+.TP
+.B \-u
+Read lines from file descriptor \fIfd\fP instead of the standard input.
+.TP
+.B \-C
+Evaluate
+.I callback
+each time \fIquantum\fP lines are read.  The \fB\-c\fP option specifies
+.IR quantum .
+.TP
+.B \-c
+Specify the number of lines read between each call to
+.IR callback .
+.PD
+.PP
+If
+.B \-C
+is specified without 
+.BR \-c ,
+the default quantum is 5000.
+.PP
+If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
+before assigning to it.
+.PP
+\fBmapfile\fP returns successfully unless an invalid option or option
+argument is supplied, or \fIarray\fP is invalid or unassignable.
+.RE
+.TP
 \fBpopd\fP [\-\fBn\fP] [+\fIn\fP] [\-\fIn\fP]
 Removes entries from the directory stack.  With no arguments,
 removes the top directory from the stack, and performs a

@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3646,6 +3646,12 @@ setup_async_signals ()
    this gnarly hair, for no good reason.
 
    NOTE: callers expect this to fork or exit(). */
+
+/* Name of a shell function to call when a command name is not found. */
+#ifndef NOTFOUND_HOOK
+#  define NOTFOUND_HOOK "command_not_found_handle"
+#endif
+
 static void
 execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 		      async, fds_to_close, cmdflags)
@@ -3659,6 +3665,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   char *pathname, *command, **args;
   int nofork;
   pid_t pid;
+  SHELL_VAR *hookf;
+  WORD_LIST *wl;
 
   nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
@@ -3755,8 +3763,15 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
       if (command == 0)
 	{
-	  internal_error (_("%s: command not found"), pathname);
-	  exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
+	  hookf = find_function (NOTFOUND_HOOK);
+	  if (hookf == 0)
+	    {
+	      internal_error (_("%s: command not found"), pathname);
+	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
+	    }
+
+	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
+	  exit (execute_shell_function (hookf, wl));
 	}
 
       /* Execve expects the command name to be in args[0].  So we

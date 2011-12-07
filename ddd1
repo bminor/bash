@@ -1,441 +1,282 @@
-*** ../bash-3.2-patched/builtins/read.def	2007-08-25 13:47:07.000000000 -0400
---- builtins/read.def	2008-02-09 16:34:39.000000000 -0500
+*** ../bash-20080221/doc/bashref.texi	2008-02-22 21:44:51.000000000 -0500
+--- doc/bashref.texi	2008-04-25 12:32:42.000000000 -0400
 ***************
-*** 1,7 ****
-  This file is read.def, from which is created read.c.
-  It implements the builtin "read" in Bash.
+*** 681,688 ****
+  waits for each command to terminate in turn.  The return status is the
+  exit status of the last command executed.
   
-! Copyright (C) 1987-2005 Free Software Foundation, Inc.
+! The control operators @samp{&&} and @samp{||}
+! denote @sc{and} lists and @sc{or} lists, respectively.
+  An @sc{and} list has the form
+  @example
+  @var{command1} && @var{command2}
+--- 681,691 ----
+  waits for each command to terminate in turn.  The return status is the
+  exit status of the last command executed.
   
-  This file is part of GNU Bash, the Bourne Again SHell.
-  
---- 1,7 ----
-  This file is read.def, from which is created read.c.
-  It implements the builtin "read" in Bash.
-  
-! Copyright (C) 1987-2008 Free Software Foundation, Inc.
-  
-  This file is part of GNU Bash, the Bourne Again SHell.
-  
-***************
-*** 23,50 ****
-  
-  $BUILTIN read
-  $FUNCTION read_builtin
-! $SHORT_DOC read [-ers] [-u fd] [-t timeout] [-p prompt] [-a array] [-n nchars] [-d delim] [name ...]
-! One line is read from the standard input, or from file descriptor FD if the
-! -u option is supplied, and the first word is assigned to the first NAME,
-! the second word to the second NAME, and so on, with leftover words assigned
-! to the last NAME.  Only the characters found in $IFS are recognized as word
-! delimiters.  If no NAMEs are supplied, the line read is stored in the REPLY
-! variable.  If the -r option is given, this signifies `raw' input, and
-! backslash escaping is disabled.  The -d option causes read to continue
-! until the first character of DELIM is read, rather than newline.  If the -p
-! option is supplied, the string PROMPT is output without a trailing newline
-! before attempting to read.  If -a is supplied, the words read are assigned
-! to sequential indices of ARRAY, starting at zero.  If -e is supplied and
-! the shell is interactive, readline is used to obtain the line.  If -n is
-! supplied with a non-zero NCHARS argument, read returns after NCHARS
-! characters have been read.  The -s option causes input coming from a
-! terminal to not be echoed.
+! @sc{and} and @sc{or} lists are sequences of one or more pipelines
+! separated by the control operators @samp{&&} and @samp{||},
+! respectively.  @sc{and} and @sc{or} lists are executed with left
+! associativity.
 ! 
-! The -t option causes read to time out and return failure if a complete line
-! of input is not read within TIMEOUT seconds.  If the TMOUT variable is set,
-! its value is the default timeout.  The return code is zero, unless end-of-file
-! is encountered, read times out, or an invalid file descriptor is supplied as
-! the argument to -u.
-  $END
+  An @sc{and} list has the form
+  @example
+  @var{command1} && @var{command2}
+***************
+*** 2298,2304 ****
+  (see the description of @code{hash} in @ref{Bourne Shell Builtins}).
+  A full search of the directories in @env{$PATH}
+  is performed only if the command is not found in the hash table.
+! If the search is unsuccessful, the shell prints an error
+  message and returns an exit status of 127.
   
-  #include <config.h>
---- 23,57 ----
+  @item
+--- 2301,2312 ----
+  (see the description of @code{hash} in @ref{Bourne Shell Builtins}).
+  A full search of the directories in @env{$PATH}
+  is performed only if the command is not found in the hash table.
+! If the search is unsuccessful, the shell searches for a defined shell
+! function named @code{command_not_found_handle}.
+! If that function exists, it is invoked with the original command and
+! the original command's arguments as its arguments, and the function's
+! exit status becomes the exit status of the shell.
+! If that function is not defined, the shell prints an error
+  message and returns an exit status of 127.
   
-  $BUILTIN read
-  $FUNCTION read_builtin
-! $SHORT_DOC read [-ers] [-a array] [-d delim] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
-! Reads a single line from the standard input, or from file descriptor FD
-! if the -u option is supplied.  The line is split into fields as with word
-! splitting, and the first word is assigned to the first NAME, the second
-! word to the second NAME, and so on, with any leftover words assigned to
-! the last NAME.  Only the characters found in $IFS are recognized as word
-! delimiters.
+  @item
+***************
+*** 3129,3134 ****
+--- 3137,3143 ----
+  Readline initialization file (@pxref{Readline Init File}),
+  but each binding or command must be passed as a separate argument;  e.g.,
+  @samp{"\C-x\C-r":re-read-init-file}.
++ 
+  Options, if supplied, have the following meanings:
+  
+  @table @code
+***************
+*** 3262,3268 ****
+  
+  The @option{-p} option will display the attributes and values of each
+  @var{name}.
+! When @option{-p} is used, additional options are ignored.
+  The @option{-F} option inhibits the display of function definitions;
+  only the function name and attributes are printed.
+  If the @code{extdebug} shell option is enabled using @code{shopt}
+--- 3271,3286 ----
+  
+  The @option{-p} option will display the attributes and values of each
+  @var{name}.
+! When @option{-p} is used with @var{name} arguments, additional options
+! are ignored.
 ! 
-! If no NAMEs are supplied, the line read is stored in the REPLY variable.
+! When @option{-p} is supplied without @var{name} arguments, @code{declare}
+! will display the attributes and values of all variables having the
+! attributes specified by the additional options.
+! If no other options are supplied with @option{-p}, @code{declare} will
+! display the attributes and values of all shell variables.  The @option{-f}
+! option will restrict the display to shell functions.
 ! 
-! Options:
-!   -a array	assign the words read to sequential indices of the array
-! 		variable ARRAY, starting at zero
-!   -d delim	continue until the first character of DELIM is read, rather
-! 		than newline
-!   -e		use Readline to obtain the line in an interactive shell
-!   -n nchars	return after reading NCHARS characters rather than waiting
-! 		for a newline
-!   -p prompt	output the string PROMPT without a trailing newline before
-! 		attempting to read
-!   -r		do not allow backslashes to escape any characters
-!   -s		do not echo input coming from a terminal
-!   -t timeout	time out and return failure if a complete line of input is
-! 		not read withint TIMEOUT seconds.  The value of the TMOUT
-! 		variable is the default timeout.
-!   -u fd		read from file descriptor FD instead of the standard input
+  The @option{-F} option inhibits the display of function definitions;
+  only the function name and attributes are printed.
+  If the @code{extdebug} shell option is enabled using @code{shopt}
+***************
+*** 3400,3413 ****
+  @item help
+  @btindex help
+  @example
+! help [-s] [@var{pattern}]
+  @end example
+  Display helpful information about builtin commands.
+  If @var{pattern} is specified, @code{help} gives detailed help
+  on all commands matching @var{pattern}, otherwise a list of
+  the builtins is printed.
+! The @option{-s} option restricts the information displayed to a short
+! usage synopsis.
+  The return status is zero unless no command matches @var{pattern}.
+  
+  @item let
+--- 3418,3441 ----
+  @item help
+  @btindex help
+  @example
+! help [-dms] [@var{pattern}]
+  @end example
+  Display helpful information about builtin commands.
+  If @var{pattern} is specified, @code{help} gives detailed help
+  on all commands matching @var{pattern}, otherwise a list of
+  the builtins is printed.
 ! 
-! The return code is zero, unless end-of-file is encountered, read times out,
-! or an invalid file descriptor is supplied as the argument to -u.
-  $END
-  
-  #include <config.h>
-***************
-*** 87,92 ****
---- 94,105 ----
-  extern int errno;
-  #endif
-  
-+ struct ttsave
-+ {
-+   int fd;
-+   TTYSTRUCT *attrs;
-+ };
-+ 
-  #if defined (READLINE)
-  static void reset_attempted_completion_function __P((char *));
-  static char *edit_line __P((char *));
-***************
-*** 94,99 ****
---- 107,116 ----
-  static void reset_eol_delim __P((char *));
-  #endif
-  static SHELL_VAR *bind_read_variable __P((char *, char *));
-+ #if defined (HANDLE_MULTIBYTE)
-+ static int read_mbchar __P((int, char *, int, int, int));
-+ #endif
-+ static void ttyrestore __P((struct ttsave *));
-  
-  static sighandler sigalrm __P((int));
-  static void reset_alarm __P((void));
-***************
-*** 134,142 ****
-    intmax_t intval;
-    char c;
-    char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-!   char *e, *t, *t1, *ps2;
-    struct stat tsb;
-    SHELL_VAR *var;
-  #if defined (ARRAY_VARS)
-    WORD_LIST *alist;
-  #endif
---- 151,161 ----
-    intmax_t intval;
-    char c;
-    char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-!   char *e, *t, *t1, *ps2, *tofree;
-    struct stat tsb;
-    SHELL_VAR *var;
-+   TTYSTRUCT ttattrs, ttset;
-+   struct ttsave termsave;
-  #if defined (ARRAY_VARS)
-    WORD_LIST *alist;
-  #endif
-***************
-*** 263,268 ****
---- 282,289 ----
-    ifs_chars = getifs ();
-    if (ifs_chars == 0)		/* XXX - shouldn't happen */
-      ifs_chars = "";
-+   for (skip_ctlesc = skip_ctlnul = 0, e = ifs_chars; *e; e++)
-+     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
-  
-    input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
-  
-***************
-*** 326,333 ****
---- 347,359 ----
-        code = setjmp (alrmbuf);
-        if (code)
-  	{
-+ #if 0
-  	  run_unwind_frame ("read_builtin");
-  	  return (EXECUTION_FAILURE);
-+ #else
-+ 	  retval = EXECUTION_FAILURE;
-+ 	  goto assign_vars;
-+ #endif
-  	}
-        old_alrm = set_signal_handler (SIGALRM, sigalrm);
-        add_unwind_protect (reset_alarm, (char *)NULL);
-***************
-*** 361,379 ****
-  #endif
-        if (input_is_tty)
-  	{
-! 	  ttsave ();
-  	  if (silent)
-! 	    ttcbreak ();
-  	  else
-! 	    ttonechar ();
-! 	  add_unwind_protect ((Function *)ttrestore, (char *)NULL);
-  	}
-      }
-    else if (silent)	/* turn off echo but leave term in canonical mode */
-      {
-!       ttsave ();
-!       ttnoecho ();
-!       add_unwind_protect ((Function *)ttrestore, (char *)NULL);
-      }
-  
-    /* This *must* be the top unwind-protect on the stack, so the manipulation
---- 387,416 ----
-  #endif
-        if (input_is_tty)
-  	{
-! 	  /* ttsave() */
-! 	  termsave.fd = fd;
-! 	  ttgetattr (fd, &ttattrs);
-! 	  termsave.attrs = &ttattrs;
+! Options, if supplied, have the following meanings:
 ! 
-! 	  ttset = ttattrs;	  
-  	  if (silent)
-! 	    ttfd_cbreak (fd, &ttset);		/* ttcbreak () */
-  	  else
-! 	    ttfd_onechar (fd, &ttset);		/* ttonechar () */
-! 	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
-  	}
-      }
-    else if (silent)	/* turn off echo but leave term in canonical mode */
-      {
-!       /* ttsave (); */
-!       termsave.fd = fd;
-!       ttgetattr (fd, &ttattrs);
-!       termsave.attrs = &ttattrs;
+! @table @code
+! @item -d
+! Display a short description of each @var{pattern}
+! @item -m
+! Display the description of each @var{pattern} in a manpage-like format
+! @item -s
+! Display only a short usage synopsis for each @var{pattern}
+! @end table
 ! 
-!       ttset = ttattrs;
-!       ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
-! 
-!       add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
-      }
+  The return status is zero unless no command matches @var{pattern}.
   
-    /* This *must* be the top unwind-protect on the stack, so the manipulation
+  @item let
 ***************
-*** 439,445 ****
-  	}
-  #endif
+*** 3443,3448 ****
+--- 3471,3516 ----
+  Exit a login shell, returning a status of @var{n} to the shell's
+  parent.
   
-!       if (i + 2 >= size)
-  	{
-  	  input_string = (char *)xrealloc (input_string, size += 128);
-  	  remove_unwind_protect ();
---- 476,482 ----
-  	}
-  #endif
-  
-!       if (i + 4 >= size)	/* XXX was i + 2; use i + 4 for multibyte/read_mbchar */
-  	{
-  	  input_string = (char *)xrealloc (input_string, size += 128);
-  	  remove_unwind_protect ();
++ @item mapfile
++ @btindex mapfile
++ @example
++ mapfile [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
++ -C @var{callback}] [-c @var{quantum}] [@var{array}]
++ @end example
++ Read lines from the standard input into array variable @var{array},
++ or from file descriptor @var{fd}
++ if the @option{-u} option is supplied.
++ The variable @code{MAPFILE} is the default @var{array}.
++ Options, if supplied, have the following meanings:
++ @table @code
++ 
++ @item -n
++ Copy at most @var{count} lines.  If @var{count} is 0, all lines are copied.
++ @item -O
++ Begin assigning to @var{array} at index @var{origin}.
++ The default index is 0.
++ @item -s
++ Discard the first @var{count} lines read.
++ @item -t
++ Remove a trailing line from each line read.
++ @item -u
++ Read lines from file descriptor @var{fd} instead of the standard input.
++ @item -C
++ Evaluate @var{callback} each time @var{quantum}P lines are read.
++ The @option{-c} option specifies @var{quantum}.
++ @item -c
++ Specify the number of lines read between each call to @var{callback}.
++ @end table
++ 
++ If @option{-C} is specified without @option{-c}, 
++ the default quantum is 5000.
++ 
++ If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
++ before assigning to it.
++ 
++ @code{mapfile} returns successfully unless an invalid option or option
++ argument is supplied, or @var{array} is invalid or unassignable.
++ 
+  @item printf
+  @btindex printf
+  @example
 ***************
-*** 462,479 ****
-  	  continue;
-  	}
-  
-        if (c == '\\' && raw == 0)
-  	{
-  	  pass_next++;
-! 	  saw_escape++;
-! 	  input_string[i++] = CTLESC;
-  	  continue;
-  	}
-  
-        if ((unsigned char)c == delim)
-  	break;
-  
-!       if (c == CTLESC || c == CTLNUL)
-  	{
-  	  saw_escape++;
-  	  input_string[i++] = CTLESC;
---- 499,520 ----
-  	  continue;
-  	}
-  
-+       /* This may cause problems if IFS contains CTLESC */
-        if (c == '\\' && raw == 0)
-  	{
-  	  pass_next++;
-! 	  if (skip_ctlesc == 0)
-! 	    {
-! 	      saw_escape++;
-! 	      input_string[i++] = CTLESC;
-! 	    }
-  	  continue;
-  	}
-  
-        if ((unsigned char)c == delim)
-  	break;
-  
-!       if ((skip_ctlesc == 0 && c == CTLESC) || (skip_ctlnul == 0 && c == CTLNUL))
-  	{
-  	  saw_escape++;
-  	  input_string[i++] = CTLESC;
+*** 3476,3482 ****
+  @item read
+  @btindex read
+  @example
+! read [-ers] [-a @var{aname}] [-d @var{delim}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
+  @end example
+  One line is read from the standard input, or from the file descriptor
+  @var{fd} supplied as an argument to the @option{-u} option, and the first word
+--- 3544,3550 ----
+  @item read
+  @btindex read
+  @example
+! read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
+  @end example
+  One line is read from the standard input, or from the file descriptor
+  @var{fd} supplied as an argument to the @option{-u} option, and the first word
 ***************
-*** 481,486 ****
---- 522,536 ----
+*** 3510,3515 ****
+--- 3578,3587 ----
+  @item -e
+  Readline (@pxref{Command Line Editing}) is used to obtain the line.
   
-  add_char:
-        input_string[i++] = c;
++ @item -i @var{text}
++ If Readline is being used to read the line, @var{text} is placed into
++ the editing buffer before editing begins.
 + 
-+ #if defined (HANDLE_MULTIBYTE)
-+       if (nchars > 0 && MB_CUR_MAX > 1)
-+ 	{
-+ 	  input_string[i] = '\0';	/* for simplicity and debugging */
-+ 	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
-+ 	}
-+ #endif
-+ 
-        nr++;
-  
-        if (nchars > 0 && nr >= nchars)
+  @item -n @var{nchars}
+  @code{read} returns after reading @var{nchars} characters rather than
+  waiting for a complete line of input.
 ***************
-*** 513,522 ****
-        else
-  #endif
-        if (input_is_tty)
-! 	ttrestore ();
-      }
-    else if (silent)
-!     ttrestore ();
+*** 3581,3588 ****
+  If the @option{-f} option is used, @code{type} does not attempt to find
+  shell functions, as with the @code{command} builtin.
   
-    if (unbuffered_read == 0)
-      zsyncfd (fd);
---- 563,572 ----
-        else
-  #endif
-        if (input_is_tty)
-! 	ttyrestore (&termsave);
-      }
-    else if (silent)
-!     ttyrestore (&termsave);
+! The return status is zero if any of the @var{names} are found, non-zero
+! if none are found.
   
-    if (unbuffered_read == 0)
-      zsyncfd (fd);
+  @item typeset
+  @btindex typeset
+--- 3653,3660 ----
+  If the @option{-f} option is used, @code{type} does not attempt to find
+  shell functions, as with the @code{command} builtin.
+  
+! The return status is zero if all of the @var{names} are found, non-zero
+! if any are not found.
+  
+  @item typeset
+  @btindex typeset
 ***************
-*** 527,532 ****
---- 577,584 ----
-  
-    retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
-  
-+ assign_vars:
-+ 
-  #if defined (ARRAY_VARS)
-    /* If -a was given, take the string read, break it into a list of words,
-       an assign them to `arrayname' in turn. */
+*** 3596,3602 ****
+  @item ulimit
+  @btindex ulimit
+  @example
+! ulimit [-acdefilmnpqrstuvxSH] [@var{limit}]
+  @end example
+  @code{ulimit} provides control over the resources available to processes
+  started by the shell, on systems that allow such control.  If an
+--- 3668,3674 ----
+  @item ulimit
+  @btindex ulimit
+  @example
+! ulimit [-abcdefilmnpqrstuvxHST] [@var{limit}]
+  @end example
+  @code{ulimit} provides control over the resources available to processes
+  started by the shell, on systems that allow such control.  If an
 ***************
-*** 603,609 ****
-    for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && isifs(*t); t++)
-      ;
-    input_string = t;
-- 
-    for (; list->next; list = list->next)
-      {
-        varname = list->word->word;
---- 655,660 ----
-***************
-*** 674,685 ****
-  #else
-    /* Check whether or not the number of fields is exactly the same as the
-       number of variables. */
-    if (*input_string)
-      {
-        t1 = input_string;
-        t = get_word_from_string (&input_string, ifs_chars, &e);
-        if (*input_string == 0)
-! 	input_string = t;
-        else
-  	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
-      }
---- 725,737 ----
-  #else
-    /* Check whether or not the number of fields is exactly the same as the
-       number of variables. */
-+   tofree = NULL;
-    if (*input_string)
-      {
-        t1 = input_string;
-        t = get_word_from_string (&input_string, ifs_chars, &e);
-        if (*input_string == 0)
-! 	tofree = input_string = t;
-        else
-  	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
-      }
-***************
-*** 694,699 ****
---- 746,753 ----
-    else
-      var = bind_read_variable (list->word->word, input_string);
-    stupidly_hack_special_variables (list->word->word);
-+   FREE (tofree);
-+ 
-    if (var)
-      VUNSETATTR (var, att_invisible);
-    xfree (orig_input_string);
-***************
-*** 715,720 ****
---- 769,830 ----
-  #endif /* !ARRAY_VARS */
-  }
+*** 3611,3616 ****
+--- 3683,3691 ----
+  @item -a
+  All current limits are reported.
   
-+ #if defined (HANDLE_MULTIBYTE)
-+ static int
-+ read_mbchar (fd, string, ind, ch, unbuffered)
-+      int fd;
-+      char *string;
-+      int ind, ch, unbuffered;
-+ {
-+   char mbchar[MB_LEN_MAX + 1];
-+   int i, n, r;
-+   char c;
-+   size_t ret;
-+   mbstate_t ps, ps_back;
-+   wchar_t wc;
++ @item -b
++ The maximum socket buffer size.
 + 
-+   memset (&ps, '\0', sizeof (mbstate_t));
-+   memset (&ps_back, '\0', sizeof (mbstate_t));
-+   
-+   mbchar[0] = ch;
-+   i = 1;
-+   for (n = 0; n <= MB_LEN_MAX; n++)
-+     {
-+       ps_back = ps;
-+       ret = mbrtowc (&wc, mbchar, i, &ps);
-+       if (ret == (size_t)-2)
-+ 	{
-+ 	  ps = ps_back;
-+ 	  if (unbuffered)
-+ 	    r = zread (fd, &c, 1);
-+ 	  else
-+ 	    r = zreadc (fd, &c);
-+ 	  if (r < 0)
-+ 	    goto mbchar_return;
-+ 	  mbchar[i++] = c;	
-+ 	  continue;
-+ 	}
-+       else if (ret == (size_t)-1 || ret == (size_t)0 || ret > (size_t)0)
-+ 	break;
-+     }
-+ 
-+ mbchar_return:
-+   if (i > 1)	/* read a multibyte char */
-+     /* mbchar[0] is already string[ind-1] */
-+     for (r = 1; r < i; r++)
-+       string[ind+r-1] = mbchar[r];
-+   return i - 1;
-+ }
-+ #endif
-+ 
-+ 
-+ static void
-+ ttyrestore (ttp)
-+      struct ttsave *ttp;
-+ {
-+   ttsetattr (ttp->fd, ttp->attrs);
-+ }
-+ 
-  #if defined (READLINE)
-  static rl_completion_func_t *old_attempted_completion_function = 0;
+  @item -c
+  The maximum size of core files created.
   
+***************
+*** 3659,3664 ****
+--- 3734,3742 ----
+  @item -x
+  The maximum number of file locks.
+  
++ @item -T
++ The maximum number of threads.
++ 
+  @end table
+  
+  If @var{limit} is given, it is the new value of the specified resource;
+***************
+*** 7049,7056 ****
+  
+  @item
+  Bash provides a programmable word completion mechanism
+! (@pxref{Programmable Completion}), and two builtin commands,
+! @code{complete} and @code{compgen}, to manipulate it.
+  
+  @item
+  Bash has command history (@pxref{Bash History Facilities}) and the
+--- 7127,7135 ----
+  
+  @item
+  Bash provides a programmable word completion mechanism
+! (@pxref{Programmable Completion}), and builtin commands
+! @code{complete}, @code{compgen}, and @code{compopt}, to
+! manipulate it.
+  
+  @item
+  Bash has command history (@pxref{Bash History Facilities}) and the

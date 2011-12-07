@@ -15331,7 +15331,7 @@ lib/readline/rltty.c
 				    3/6
 				    ---
 {MANIFEST,Makefile.in},lib/sh/{casemod,uconvert,ufuncs}.c
-	- new library sources from bash-4.0-devel triee
+	- new library sources from bash-4.0-devel tree
 
 lib/sh/spell.c
 	- moved cdspell() here from builtins/cd.def, renamed dirspell()
@@ -15592,3 +15592,24 @@ expr.c
 	- fix operator precendence in expcond():  term after the `:' is
 	  a conditional-expression, not a logical-OR-expression (using C
 	  terminology).  Bug reported by <archimerged@gmail.com>
+
+				   4/22
+				   ----
+bashintl.h
+	- new P_ define for using ngettext to decide on plural forms
+	  (currently unused)
+
+				   4/25
+				   ----
+execute_cmd.c
+	- in execute_disk_command, if the command is not found, search for
+	  a shell function named `command_not_found_handle' and call it
+	  with the words in the command as arguments.  Inspired by Debian
+	  feature.
+
+doc/{bash.1,bashref.texi}
+	- document new command_not_found_handle behavior in COMMAND EXECUTION
+	  section
+
+configure.in
+	- change default version to bash-4.0-devel
