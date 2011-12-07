@@ -15730,6 +15730,49 @@ array.h
 lib/readline/complete.c
 	- new variable, rl_menu_completion_entry_function, generator for
 	  rl_menu_complete
+	- new menu completion `browsing' implementation, with several
+	  improvements over the old code.  Inspired by Sami
 
 lib/readline/readline.h
 	- extern declaration for rl_menu_completion_entry_function
+
+				    5/8
+				    ---
+lib/readline/bind.c
+
+lib/readline/complete.c
+	- add support for a third argument to fnprint and print_filename,
+	  which supports replacing a specified portion of the pathnames
+	  printed when displaying possible completions with a `...' (or
+	  `___', if the prefix would be confused with a portion of the
+	  filename)
+	- new variable, _rl_completion_prefix_display_length, sets the
+ 	  number of characters in a common prefix to be replaced with an
+	  ellipsis when displaying possible completions
+	- add support to _rl_display_match_list to find the length of the
+	  common prefix of all items being displayed, and passing that
+	  value to print_filename for possible replacement with an ellipsis
+	  if that length is longer than _rl_completion_prefix_display_length
+
+lib/readline/bind.c
+	- add support for retrieving value of history-size variable to
+	  _rl_get_string_variable_value
+	- new bindable variable, completion-prefix-display-length.  When
+	  displaying possible completions, matches with a common prefix
+	  longer than this value have the common prefix replaced with an
+	  ellipsis
+	- support for retrieving value of completion-prefix-display-length
+	  variable to _rl_get_string_variable_value
+	- new bindable variable, revert-all-at-newline:  if enabled, causes
+	  all changes in history lines to be undone before readline returns
+	  after processing a newline
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- document new `completion-prefix-display-length' variable
+	- document new `revert-all-at-newline' variable
+
+execute_cmd.c
+	- change execute_builtin to not inherit the `-e' flag into commands
+	  executed by the `command' or `source/.' builtins if we are supposed
+	  to be ignoring the return value.  This is like `eval'.  Fixes bug
+	  reported by Hiroshi Fujishima <hirobo@tonteki.org>

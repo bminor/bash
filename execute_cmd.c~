@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3137,8 +3137,10 @@ execute_builtin (builtin, words, flags, subshell)
      flags that will exit the shell on an error if -e is set.  If the
      eval builtin is being called, and we're supposed to ignore the exit
      value of the command, we turn the -e flag off ourselves, then
-     restore it when the command completes. */
-  if (subshell == 0 && builtin == eval_builtin && (flags & CMD_IGNORE_RETURN))
+     restore it when the command completes.  This is also a problem (as
+     below) for the command and source builtins. */
+  if (subshell == 0 && (flags & CMD_IGNORE_RETURN) &&
+	(builtin == eval_builtin || builtin == command_builtin || builtin == source_builtin))
     {
       begin_unwind_frame ("eval_builtin");
       unwind_protect_int (exit_immediately_on_error);

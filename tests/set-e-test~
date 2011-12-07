@@ -82,24 +82,3 @@ echo ! eval succeeded -- 1
 
 ! eval '(exit 5)'
 echo ! eval succeeded -- 2
-
-set -e
-until builtin false; do echo a; break; done
-echo $?
-
-until eval false; do echo b; break; done
-echo $?
-
-: ${TMPDIR:=/tmp}
-FN=$TMPDIR/set-e-$$
-cat > $FN << EOF
-false
-echo after 1
-false
-EOF
-
-set -e
-until . $FN; do echo a; break; done
-echo $?
-
-rm -f $FN

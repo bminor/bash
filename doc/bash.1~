@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun May  4 22:27:45 EDT 2008
+.\"	Last Change: Thu May  8 09:32:34 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 May 4" "GNU Bash-4.0"
+.TH BASH 1 "2008 May 8" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4678,6 +4678,12 @@ in vi command mode.
 If set to \fBOn\fP, readline performs filename matching and completion
 in a case\-insensitive fashion.
 .TP
+.B completion\-prefix\-display\-length (0)
+The length in characters of the common prefix of a list of possible
+completions that is displayed without modification.  When set to a
+value greater than zero, common prefixes longer than this value are
+replaced with an ellipsis when displaying possible completions.
+.TP
 .B completion\-query\-items (100)
 This determines when the user is queried about viewing
 the number of possible completions
@@ -7676,7 +7682,8 @@ not echoed.
 .B \-t \fItimeout\fP
 Cause \fBread\fP to time out and return failure if a complete line of
 input is not read within \fItimeout\fP seconds.
-\fItimeout\fP may be a decimal number with a fractional portion.
+\fItimeout\fP may be a decimal number with a fractional portion following
+the decimal point.
 This option has no effect if \fBread\fP is not reading input from the
 terminal or a pipe.
 .TP

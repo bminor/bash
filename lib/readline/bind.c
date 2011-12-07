@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -1431,6 +1431,7 @@ static const struct {
   { "page-completions",		&_rl_page_completions,		0 },
   { "prefer-visible-bell",	&_rl_prefer_visible_bell,	V_SPECIAL },
   { "print-completions-horizontally", &_rl_print_completions_horizontally, 0 },
+  { "revert-all-at-newline",	&_rl_revert_all_at_newline,	0 },
   { "show-all-if-ambiguous",	&_rl_complete_show_all,		0 },
   { "show-all-if-unmodified",	&_rl_complete_show_unmodified,	0 },
 #if defined (VISIBLE_STATS)
@@ -1489,11 +1490,12 @@ typedef int _rl_sv_func_t PARAMS((const char *));
 /* Forward declarations */
 static int sv_bell_style PARAMS((const char *));
 static int sv_combegin PARAMS((const char *));
+static int sv_dispprefix PARAMS((const char *));
 static int sv_compquery PARAMS((const char *));
 static int sv_editmode PARAMS((const char *));
+static int sv_histsize PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
 static int sv_keymap PARAMS((const char *));
-static int sv_histsize PARAMS((const char *));
 
 static const struct {
   const char * const name;
@@ -1502,6 +1504,7 @@ static const struct {
 } string_varlist[] = {
   { "bell-style",	V_STRING,	sv_bell_style },
   { "comment-begin",	V_STRING,	sv_combegin },
+  { "completion-prefix-display-length", V_INT,	sv_dispprefix },
   { "completion-query-items", V_INT,	sv_compquery },
   { "editing-mode",	V_STRING,	sv_editmode },
   { "history-size",	V_INT,		sv_histsize },
@@ -1616,6 +1619,22 @@ sv_combegin (value)
 }
 
 static int
+sv_dispprefix (value)
+     const char *value;
+{
+  int nval = 0;
+
+  if (value && *value)
+    {
+      nval = atoi (value);
+      if (nval < 0)
+	nval = 0;
+    }
+  _rl_completion_prefix_display_length = nval;
+  return 0;
+}
+
+static int
 sv_compquery (value)
      const char *value;
 {
@@ -1628,6 +1647,22 @@ sv_compquery (value)
 	nval = 0;
     }
   rl_completion_query_items = nval;
+  return 0;
+}
+
+static int
+sv_histsize (value)
+     const char *value;
+{
+  int nval = 500;
+
+  if (value && *value)
+    {
+      nval = atoi (value);
+      if (nval < 0)
+	return 1;
+    }
+  stifle_history (nval);
   return 0;
 }
 
@@ -1699,22 +1734,6 @@ sv_isrchterm (value)
   return 0;
 }
       
-static int
-sv_histsize (value)
-     const char *value;
-{
-  int nval = 500;
-
-  if (value && *value)
-    {
-      nval = atoi (value);
-      if (nval < 0)
-	return 1;
-    }
-  stifle_history (nval);
-  return 0;
-}
-
 /* Return the character which matches NAME.
    For example, `Space' returns ' '. */
 
@@ -2237,6 +2256,11 @@ _rl_get_string_variable_value (name)
     }
   else if (_rl_stricmp (name, "comment-begin") == 0)
     return (_rl_comment_begin ? _rl_comment_begin : RL_COMMENT_BEGIN_DEFAULT);
+  else if (_rl_stricmp (name, "completion-prefix-display-length") == 0)
+    {
+      sprintf (numbuf, "%d", _rl_completion_prefix_display_length);
+      return (numbuf);
+    }
   else if (_rl_stricmp (name, "completion-query-items") == 0)
     {
       sprintf (numbuf, "%d", rl_completion_query_items);
@@ -2244,6 +2268,11 @@ _rl_get_string_variable_value (name)
     }
   else if (_rl_stricmp (name, "editing-mode") == 0)
     return (rl_get_keymap_name_from_edit_mode ());
+  else if (_rl_stricmp (name, "history-size") == 0)
+    {
+      sprintf (numbuf, "%d", history_is_stifled() ? history_max_entries : 0);
+      return (numbuf);
+    }
   else if (_rl_stricmp (name, "isearch-terminators") == 0)
     {
       if (_rl_isearch_terminators == 0)

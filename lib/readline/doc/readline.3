@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Thu Feb  9 09:49:51 EST 2006
+.\"	Last Change: Thu May  8 09:29:59 EDT 2008
 .\"
-.TH READLINE 3 "2006 Apr 26" "GNU Readline 5.2"
+.TH READLINE 3 "2008 May 8" "GNU Readline 5.2"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -34,8 +34,8 @@ readline \- get a line from a user with editing
 \fBreadline\fP (\fIconst char *prompt\fP);
 .fi
 .SH COPYRIGHT
-.if n Readline is Copyright (C) 1989\-2004 by the Free Software Foundation, Inc.
-.if t Readline is Copyright \(co 1989\-2004 by the Free Software Foundation, Inc.
+.if n Readline is Copyright (C) 1989\-2008 by the Free Software Foundation, Inc.
+.if t Readline is Copyright \(co 1989\-2008 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .LP
 .B readline
@@ -365,6 +365,12 @@ in vi command mode.
 If set to \fBOn\fP, readline performs filename matching and completion
 in a case\-insensitive fashion.
 .TP
+.B completion\-prefix\-display\-length (0)
+The length in characters of the common prefix of a list of possible
+completions that is displayed without modification.  When set to a
+value greater than zero, common prefixes longer than this value are
+replaced with an ellipsis when displaying possible completions.
+.TP
 .B completion\-query\-items (100)
 This determines when the user is queried about viewing
 the number of possible completions
@@ -474,6 +480,12 @@ to display a screenful of possible completions at a time.
 .B print\-completions\-horizontally (Off)
 If set to \fBOn\fP, readline will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
+.TP
+.B revert\-all\-at\-newline (Off)
+If set to \fBon\fP, readline will undo all changes to history lines
+before returning when \fBaccept\-line\fP is executed.  By default,
+history lines may be modified and retain individual undo lists across
+calls to \fBreadline\fP.
 .TP
 .B show\-all\-if\-ambiguous (Off)
 This alters the default behavior of the completion functions.  If

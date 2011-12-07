@@ -158,7 +158,7 @@ history_set_pos (pos)
   return (1);
 }
  
-/* Return the current history array.  The caller has to be carefull, since this
+/* Return the current history array.  The caller has to be careful, since this
    is the actual array of data, and could be bashed or made corrupt easily.
    The array is terminated with a NULL pointer. */
 HIST_ENTRY **

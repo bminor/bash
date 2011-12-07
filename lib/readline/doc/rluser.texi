@@ -426,6 +426,13 @@ If set to @samp{on}, Readline performs filename matching and completion
 in a case-insensitive fashion.
 The default value is @samp{off}.
 
+@item completion-prefix-display-length
+@vindex completion-prefix-display-length
+The length in characters of the common prefix of a list of possible
+completions that is displayed without modification.  When set to a
+value greater than zero, common prefixes longer than this value are
+replaced with an ellipsis when displaying possible completions.
+
 @item completion-query-items
 @vindex completion-query-items
 The number of possible completions that determines when the user is
@@ -562,6 +569,13 @@ This variable is @samp{on} by default.
 If set to @samp{on}, Readline will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
 The default is @samp{off}.
+
+@item revert-all-at-newline
+@vindex revert-all-at-newline
+If set to @samp{on}, Readline will undo all changes to history lines
+before returning when @code{accept-line} is executed.  By default,
+history lines may be modified and retain individual undo lists across
+calls to @code{readline}.  The default is @samp{off}.
 
 @item show-all-if-ambiguous
 @vindex show-all-if-ambiguous

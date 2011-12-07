@@ -110,8 +110,8 @@ static int get_y_or_n PARAMS((int));
 static int _rl_internal_pager PARAMS((int));
 static char *printable_part PARAMS((char *));
 static int fnwidth PARAMS((const char *));
-static int fnprint PARAMS((const char *));
-static int print_filename PARAMS((char *, char *));
+static int fnprint PARAMS((const char *, int));
+static int print_filename PARAMS((char *, char *, int));
 
 static char **gen_completion_matches PARAMS((char *, int, int, rl_compentry_func_t *, int, int));
 
@@ -163,6 +163,12 @@ int _rl_completion_case_fold;
 /* If non-zero, don't match hidden files (filenames beginning with a `.' on
    Unix) when doing filename completion. */
 int _rl_match_hidden_files = 1;
+
+/* Length in characters of a common prefix replaced with an ellipsis (`...')
+   when displaying completion matches.  Matches whose printable portion has
+   more than this number of displaying characters in common will have the common
+   display prefix replaced with an ellipsis. */
+int _rl_completion_prefix_display_length = 0;
 
 /* Global variables available to applications using readline. */
 
@@ -647,9 +653,12 @@ fnwidth (string)
   return width;
 }
 
+#define ELLIPSIS_LEN	3
+
 static int
-fnprint (to_print)
+fnprint (to_print, prefix_bytes)
      const char *to_print;
+     int prefix_bytes;
 {
   int printed_len;
   const char *s;
@@ -665,7 +674,23 @@ fnprint (to_print)
 #endif
 
   printed_len = 0;
-  s = to_print;
+
+  /* Don't print only the ellipsis if the common prefix is one of the
+     possible completions */
+  if (to_print[prefix_bytes] == '\0')
+    prefix_bytes = 0;
+
+  if (prefix_bytes)
+    {
+      char ellipsis;
+
+      ellipsis = (to_print[prefix_bytes] == '.') ? '_' : '.';
+      for (w = 0; w < ELLIPSIS_LEN; w++)
+	putc (ellipsis, rl_outstream);
+      printed_len = ELLIPSIS_LEN;
+    }
+
+  s = to_print + prefix_bytes;
   while (*s)
     {
       if (CTRL_CHAR (*s))
@@ -724,14 +749,15 @@ fnprint (to_print)
    filenames.  Return the number of characters we output. */
 
 static int
-print_filename (to_print, full_pathname)
+print_filename (to_print, full_pathname, prefix_bytes)
      char *to_print, *full_pathname;
+     int prefix_bytes;
 {
   int printed_len, extension_char, slen, tlen;
   char *s, c, *new_full_pathname, *dn;
 
   extension_char = 0;
-  printed_len = fnprint (to_print);
+  printed_len = fnprint (to_print, prefix_bytes);
 
 #if defined (VISIBLE_STATS)
  if (rl_filename_completion_desired && (rl_visible_stats || _rl_complete_mark_directories))
@@ -1289,8 +1315,24 @@ rl_display_match_list (matches, len, max)
      int len, max;
 {
   int count, limit, printed_len, lines;
-  int i, j, k, l;
-  char *temp;
+  int i, j, k, l, common_length, sind;
+  char *temp, *t;
+
+  /* Find the length of the prefix common to all items: length as displayed
+     characters (common_length) and as a byte index into the matches (sind) */
+  common_length = sind = 0;
+  if (_rl_completion_prefix_display_length > 0)
+    {
+      t = printable_part (matches[0]);
+      temp = strrchr (t, '/');
+      common_length = temp ? fnwidth (temp) : fnwidth (t);
+      sind = temp ? strlen (temp) : strlen (t);
+
+      if (common_length > _rl_completion_prefix_display_length && common_length > ELLIPSIS_LEN)
+	max -= common_length - ELLIPSIS_LEN;
+      else
+	common_length = sind = 0;
+    }
 
   /* How many items of MAX length can we fit in the screen window? */
   max += 2;
@@ -1329,7 +1371,7 @@ rl_display_match_list (matches, len, max)
 	      else
 		{
 		  temp = printable_part (matches[l]);
-		  printed_len = print_filename (temp, matches[l]);
+		  printed_len = print_filename (temp, matches[l], sind);
 
 		  if (j + 1 < limit)
 		    for (k = 0; k < max - printed_len; k++)
@@ -1353,7 +1395,7 @@ rl_display_match_list (matches, len, max)
       for (i = 1; matches[i]; i++)
 	{
 	  temp = printable_part (matches[i]);
-	  printed_len = print_filename (temp, matches[i]);
+	  printed_len = print_filename (temp, matches[i], sind);
 	  /* Have we reached the end of this line? */
 	  if (matches[i+1])
 	    {
@@ -1403,7 +1445,7 @@ display_matches (matches)
     {
       temp = printable_part (matches[0]);
       rl_crlf ();
-      print_filename (temp, matches[0]);
+      print_filename (temp, matches[0], 0);
       rl_crlf ();
 
       rl_forced_update_display ();
@@ -2221,8 +2263,7 @@ rl_old_menu_complete (count, invoking_key)
       /* matches[0] is lcd if match_list_size > 1, but the circular buffer
 	 code below should take care of it. */
 
-      if
- (match_list_size > 1 && _rl_complete_show_all)
+      if (match_list_size > 1 && _rl_complete_show_all)
 	display_matches (matches);
     }
 

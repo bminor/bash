@@ -356,7 +356,7 @@ initialize_shell_variables (env, privmode)
 	}
 #  endif
 #endif
-      else
+      else if (legal_identifier (name))
 	{
 	  temp_var = bind_variable (name, string, 0);
 	  VSETATTR (temp_var, (att_exported | att_imported));

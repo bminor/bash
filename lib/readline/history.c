@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (the Library), a set of
    routines for managing the text of previously typed lines.
@@ -483,7 +483,7 @@ stifle_history (max)
 
 /* Stop stifling the history.  This returns the previous maximum
    number of history entries.  The value is positive if the history
-   was stifled,  negative if it wasn't. */
+   was stifled, negative if it wasn't. */
 int
 unstifle_history ()
 {
