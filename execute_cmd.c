@@ -4549,7 +4549,6 @@ shell_execve (command, args, env)
      char *command;
      char **args, **env;
 {
-  struct stat finfo;
   int larray, i, fd;
   char sample[80];
   int sample_len;
@@ -4564,7 +4563,7 @@ shell_execve (command, args, env)
      Maybe it is something we can hack ourselves. */
   if (i != ENOEXEC)
     {
-      if ((stat (command, &finfo) == 0) && (S_ISDIR (finfo.st_mode)))
+      if (file_isdir (command))
 	internal_error (_("%s: is a directory"), command);
       else if (executable_file (command) == 0)
 	{

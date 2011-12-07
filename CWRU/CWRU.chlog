@@ -7147,3 +7147,35 @@ subst.c
 	- call set_pipestatus_from_exit in exp_jump_to_top_level so that
 	  failed expansions that set $? will set $PIPESTATUS.  Fixes bug
 	  reported by Eric Blake <ebb9@byu.net>
+
+				   11/20
+				   -----
+general.c
+	- new 'file_exists(fn)' primitive; just calls stat(2)
+
+general.h
+	- new extern declaration for file_exists
+
+bashline.c
+	- add `~' to rl_filename_quote_characters so make_quoted_replacement
+	  will call bash_quote_filename for words containing `~'.  Then
+	  bash_quote_filename can make choices based on that
+	- change quote_word_break_chars to backslash-quote the tilde in a
+	  filename with a leading tilde that exists in the current directory,
+	  since we want to inhibit tilde expansion in this case
+
+execute_cmd.c
+	- call file_isdir from shell_execve instead of stat(2) directly
+
+bashhist.c
+	- use file_exists and file_isdir primitives instead of calling stat
+
+				   11/21
+				   -----
+redir.c
+	- When undoing saving of non-standard file descriptors (>=3) using
+	  file descriptors >= SHELL_FD_BASE, we set the saving fd to be
+	  close-on-exec and use a flag (RX_SAVCLEXEC) to decide how to set
+	  close-on-exec when the fd is restored.  Set flag in add_undo_redirect,
+	  check in do_redirection_internal.  Fixes problem reported by Andreas
+	  Schwab <schwab@suse.de>

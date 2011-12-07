@@ -300,6 +300,7 @@ extern int same_file __P((char *, char *, struct stat *, struct stat *));
 extern int sh_openpipe __P((int *));
 extern int sh_closepipe __P((int *));
 
+extern int file_exists __P((char *));
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
 extern int absolute_pathname __P((const char *));

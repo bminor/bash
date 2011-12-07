@@ -3943,6 +3943,7 @@ match_pattern (string, pat, mtype, sp, ep)
       free (wstring);
       free (indices);
 
+itrace("match_pattern: pat = `%s' string = `%s' -> %d", pat, string, ret);
       return (ret);
     }
   else
@@ -3979,7 +3980,6 @@ getpattern (value, quoted, expandpat)
 #if 0
   int i;
 #endif
-
   /* There is a problem here:  how to handle single or double quotes in the
      pattern string when the whole expression is between double quotes?
      POSIX.2 says that enclosing double quotes do not cause the pattern to
@@ -8106,6 +8106,8 @@ static void
 exp_jump_to_top_level (v)
      int v;
 {
+  set_pipestatus_from_exit (last_command_exit_value);
+
   /* Cleanup code goes here. */
   expand_no_split_dollar_star = 0;	/* XXX */
   expanding_redir = 0;

@@ -12,7 +12,7 @@
 \entry {brace expansion}{18}
 \entry {builtin}{3}
 \initial {C}
-\entry {command editing}{91}
+\entry {command editing}{92}
 \entry {command execution}{30}
 \entry {command expansion}{30}
 \entry {command history}{119}
@@ -35,7 +35,7 @@
 \initial {D}
 \entry {directory stack}{79}
 \initial {E}
-\entry {editing command lines}{91}
+\entry {editing command lines}{92}
 \entry {environment}{32}
 \entry {evaluation, arithmetic}{76}
 \entry {event designators}{122}
@@ -61,7 +61,7 @@
 \entry {history events}{122}
 \entry {history expansion}{121}
 \entry {history list}{119}
-\entry {History, how to use}{117}
+\entry {History, how to use}{118}
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{94}
@@ -84,7 +84,7 @@
 \initial {N}
 \entry {name}{3}
 \entry {native languages}{7}
-\entry {notation, readline}{91}
+\entry {notation, readline}{92}
 \initial {O}
 \entry {operator, shell}{3}
 \initial {P}
@@ -100,7 +100,7 @@
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{23}
-\entry {programmable completion}{112}
+\entry {programmable completion}{113}
 \entry {prompting}{81}
 \initial {Q}
 \entry {quoting}{6}
@@ -110,7 +110,7 @@
 \entry {redirection}{26}
 \entry {reserved word}{3}
 \entry {restricted shell}{82}
-\entry {return status}{3}
+\entry {return status}{4}
 \initial {S}
 \entry {shell arithmetic}{76}
 \entry {shell function}{14}

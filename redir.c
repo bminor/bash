@@ -949,6 +949,13 @@ do_redirection_internal (redirect, flags)
 #endif
 	    SET_CLOSE_ON_EXEC (redirector);
 
+	  /* When undoing saving of non-standard file descriptors (>=3) using
+	     file descriptors >= SHELL_FD_BASE, we set the saving fd to be
+	     close-on-exec and use a flag to decide how to set close-on-exec
+	     when the fd is restored. */
+	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && redir_fd >= SHELL_FD_BASE)
+	    SET_OPEN_ON_EXEC (redirector);
+	    
 	  /* dup-and-close redirection */
 	  if (ri == r_move_input || ri == r_move_output)
 	    {
@@ -1030,6 +1037,8 @@ add_undo_redirect (fd, ri, fdbase)
   else
     new_redirect = make_redirection (fd, r_duplicating_output, rd);
   new_redirect->flags |= RX_INTERNAL;
+  if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
+    new_redirect->flags |= RX_SAVCLEXEC;
   new_redirect->next = closer;
 
   closer->next = redirection_undo_list;
@@ -1065,6 +1074,8 @@ add_undo_redirect (fd, ri, fdbase)
      because file descriptors 0-2 should always be open-on-exec,
      and the restore above in do_redirection() will take care of it. */
   if (clexec_flag || fd < 3)
+    SET_CLOSE_ON_EXEC (new_fd);
+  else if (redirection_undo_list->flags & RX_SAVCLEXEC)
     SET_CLOSE_ON_EXEC (new_fd);
 
   return (0);

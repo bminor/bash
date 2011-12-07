@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 July 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 October 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2977,7 +2977,7 @@ For example, a<B>{</B>d,c,b<B>}</B>e expands into `ade ace abe'.
 <P>
 
 A sequence expression takes the form
-<B>{</B><I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I>]},
+<B>{</B><I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I><B>]}</B>,
 where <I>x</I> and <I>y</I> are either integers or single characters,
 and <I>incr</I>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -3283,6 +3283,7 @@ prefixed to the list.
 
 <DT>${<B>!</B><I>prefix</I><B>@</B>}<DD>
 
+<B>Names matching prefix.</B>
 Expands to the names of variables whose names begin with <I>prefix</I>,
 separated by the first character of the
 <FONT SIZE=-1><B>IFS</B>
@@ -3295,6 +3296,7 @@ variable name expands to a separate word.
 
 <DT>${<B>!</B><I>name</I>[<I>*</I>]}<DD>
 
+<B>List of array keys.</B>
 If <I>name</I> is an array variable, expands to the list of array indices
 (keys) assigned in <I>name</I>.
 If <I>name</I> is not an array, expands to 0 if <I>name</I> is set and null
@@ -3302,6 +3304,7 @@ otherwise.
 When <I>@</I> is used and the expansion appears within double quotes, each
 key expands to a separate word.
 <DT>${<B>#</B><I>parameter</I>}<DD>
+<B>Parameter length.</B>
 The length in characters of the value of <I>parameter</I> is substituted.
 If
 <I>parameter</I>
@@ -3327,6 +3330,7 @@ the value substituted is the number of elements in the array.
 
 <DT>${<I>parameter</I><B>##</B><I>word</I>}<DD>
 
+<B>Remove matching prefix pattern.</B>
 The 
 <I>word</I>
 
@@ -3366,6 +3370,7 @@ array in turn, and the expansion is the resultant list.
 
 <DT>${<I>parameter</I><B>%%</B><I>word</I>}<DD>
 
+<B>Remove matching suffix pattern.</B>
 The <I>word</I> is expanded to produce a pattern just as in
 pathname expansion.
 If the pattern matches a trailing portion of the expanded value of
@@ -3399,6 +3404,7 @@ or
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}<DD>
+<B>Pattern substitution.</B>
 The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
 <I>Parameter</I> is expanded and the longest match of <I>pattern</I>
@@ -3439,6 +3445,7 @@ array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>,</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,,</B><I>pattern</I>}<DD>
 
+<B>Case modification.</B>
 This expansion modifies the case of alphabetic characters in <I>parameter</I>.
 The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
@@ -5575,7 +5582,7 @@ There are a number of ways to refer to a job in the shell.
 The character
 <B>%</B>
 
-introduces a job name.  Job number
+introduces a job specification (<I>jobspec</I>).  Job number
 <I>n</I>
 
 may be referred to as
@@ -5863,13 +5870,15 @@ shell, unless the
 <B>--noediting</B>
 
 option is given at shell invocation.
+Line editing is also used when using the <B>-e</B> option to the
+<B>read</B> builtin.
 By default, the line editing commands are similar to those of emacs.
 A vi-style line editing interface is also available.
-To turn off line editing after the shell is running, use the
-<B>+o emacs</B>
+Line editing can be enabled at any time using the
+<B>-o emacs</B>
 
 or
-<B>+o vi</B>
+<B>-o vi</B>
 
 options to the
 <B>set</B>
@@ -5879,6 +5888,16 @@ builtin (see
 
 </FONT>
 below).
+To turn off line editing after the shell is running, use the
+<B>+o emacs</B>
+
+or
+<B>+o vi</B>
+
+options to the
+<B>set</B>
+
+builtin.
 <A NAME="lbCG">&nbsp;</A>
 <H4>Readline Notation</H4>
 
@@ -6636,8 +6655,18 @@ alphanumeric characters (letters and digits).
 <DT><B>backward-word (M-b)</B>
 
 <DD>
-Move back to the start of the current or previous word.  Words are
-composed of alphanumeric characters (letters and digits).
+Move back to the start of the current or previous word.
+Words are composed of alphanumeric characters (letters and digits).
+<DT><B>shell-forward-word</B>
+
+<DD>
+Move forward to the end of the next word.
+Words are delimited by non-quoted shell metacharacters.
+<DT><B>shell-backward-word</B>
+
+<DD>
+Move back to the start of the current or previous word.
+Words are delimited by non-quoted shell metacharacters.
 <DT><B>clear-screen (C-l)</B>
 
 <DD>
@@ -6798,7 +6827,7 @@ argument is ignored.
 Invoke an editor on the current command line, and execute the result as shell
 commands.
 <B>Bash</B> attempts to invoke
-<FONT SIZE=-1><B>$FCEDIT</B>,
+<FONT SIZE=-1><B>$VISUAL</B>,
 
 </FONT>
 <FONT SIZE=-1><B>$EDITOR</B>,
@@ -6928,6 +6957,17 @@ Word boundaries are the same as those used by <B>forward-word</B>.
 <DD>
 Kill the word behind point.
 Word boundaries are the same as those used by <B>backward-word</B>.
+<DT><B>shell-kill-word  (M-d)</B>
+
+<DD>
+Kill from point to the end of the current word, or if between
+words, to the end of the next word.
+Word boundaries are the same as those used by <B>shell-forward-word</B>.
+<DT><B>shell-backward-kill-word (M-Rubout)</B>
+
+<DD>
+Kill the word behind point.
+Word boundaries are the same as those used by <B>shell-backward-word</B>.
 <DT><B>unix-word-rubout (C-w)</B>
 
 <DD>
@@ -8461,8 +8501,9 @@ Perform directory name completion if the compspec generates no matches.
 
 <DD>
 Tell readline that the compspec generates filenames, so it can perform any
-filename-specific processing (like adding a slash to directory names or
-suppressing trailing spaces).  Intended to be used with shell functions.
+filename-specific processing (like adding a slash to directory names,
+quoting special characters, or suppressing trailing spaces).
+Intended to be used with shell functions.
 <DT><B>nospace</B>
 
 <DD>
@@ -8935,7 +8976,7 @@ backspace
 <DT><B>\c</B>
 
 <DD>
-suppress trailing newline
+suppress further output
 <DT><B>\e</B>
 
 <DD>
@@ -10051,6 +10092,8 @@ is coming from a terminal,
 
 </FONT>
 above) is used to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings.
 <DT><B>-i </B><I>text</I>
 
 <DD>
@@ -10092,6 +10135,8 @@ the decimal point.
 This option is only effective if <B>read</B> is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
+If <I>timeout</I> is 0, <B>read</B> returns success if input is available on
+the specified file descriptor, failure otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 <DT><B>-u </B><I>fd</I>
 
@@ -10311,6 +10356,7 @@ with the
 <B>--noediting</B>
 
 option.
+This also affects the editing interface used for <B>read -e</B>.
 <DT><B>errtrace</B>
 
 <DD>
@@ -10448,6 +10494,7 @@ Same as
 
 <DD>
 Use a vi-style command line editing interface.
+This also affects the editing interface used for <B>read -e</B>.
 <DT><B>xtrace</B>
 
 <DD>
@@ -10489,10 +10536,15 @@ and
 </FONT>
 files are not processed, shell functions are not inherited from the
 environment, and the
-<FONT SIZE=-1><B>SHELLOPTS</B>
+<FONT SIZE=-1><B>SHELLOPTS</B>,
 
 </FONT>
-variable, if it appears in the environment, is ignored.
+<B>CDPATH</B>,
+
+and
+<B>GLOBIGNORE</B>
+
+variables, if they appear in the environment, are ignored.
 If the shell is started with the effective user (group) id not equal to the
 real user (group) id, and the <B>-p</B> option is not supplied, these actions
 are taken and the effective user id is set to the real user id.
@@ -11992,7 +12044,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 July 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 October 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12098,6 +12150,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 24 July 2008 09:12:48 EDT
+Time: 17 November 2008 17:38:14 EST
 </BODY>
 </HTML>

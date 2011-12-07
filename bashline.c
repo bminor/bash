@@ -518,7 +518,11 @@ initialize_readline ()
   enable_hostname_completion (perform_hostname_completion);
 
   /* characters that need to be quoted when appearing in filenames. */
+#if 0
   rl_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{";	/*}*/
+#else
+  rl_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{~";	/*}*/
+#endif
   rl_filename_quoting_function = bash_quote_filename;
   rl_filename_dequoting_function = bash_dequote_filename;
   rl_char_is_quoted_p = char_is_quoted;
@@ -3269,6 +3273,9 @@ quote_word_break_chars (text)
 	 rl_completer_word_break_characters. */
       if (xstrchr (rl_completer_word_break_characters, *s))
 	*r++ = '\\';
+      /* XXX -- check for standalone tildes here and backslash-quote them */
+      if (s == text && *s == '~' && file_exists (text))
+        *r++ = '\\';
       *r++ = *s;
     }
   *r = '\0';

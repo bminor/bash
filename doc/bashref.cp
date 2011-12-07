@@ -13,7 +13,7 @@
 \entry{process group}{3}{process group}
 \entry{process group ID}{3}{process group ID}
 \entry{reserved word}{3}{reserved word}
-\entry{return status}{3}{return status}
+\entry{return status}{4}{return status}
 \entry{signal}{4}{signal}
 \entry{special builtin}{4}{special builtin}
 \entry{token}{4}{token}
@@ -95,17 +95,17 @@
 \entry{suspending jobs}{87}{suspending jobs}
 \entry{Readline, how to use}{90}{Readline, how to use}
 \entry{interaction, readline}{91}{interaction, readline}
-\entry{notation, readline}{91}{notation, readline}
-\entry{command editing}{91}{command editing}
-\entry{editing command lines}{91}{editing command lines}
+\entry{notation, readline}{92}{notation, readline}
+\entry{command editing}{92}{command editing}
+\entry{editing command lines}{92}{editing command lines}
 \entry{killing text}{93}{killing text}
 \entry{yanking text}{93}{yanking text}
 \entry{kill ring}{93}{kill ring}
 \entry{initialization file, readline}{94}{initialization file, readline}
 \entry{variables, readline}{95}{variables, readline}
-\entry{programmable completion}{112}{programmable completion}
+\entry{programmable completion}{113}{programmable completion}
 \entry{completion builtins}{114}{completion builtins}
-\entry{History, how to use}{117}{History, how to use}
+\entry{History, how to use}{118}{History, how to use}
 \entry{command history}{119}{command history}
 \entry{history list}{119}{history list}
 \entry{history builtins}{119}{history builtins}

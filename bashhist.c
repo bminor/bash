@@ -265,7 +265,6 @@ void
 load_history ()
 {
   char *hf;
-  struct stat buf;
 
   /* Truncate history file for interactive shells which desire it.
      Note that the history file is automatically truncated to the
@@ -280,7 +279,7 @@ load_history ()
   /* Read the history in HISTFILE into the history list. */
   hf = get_string_value ("HISTFILE");
 
-  if (hf && *hf && stat (hf, &buf) == 0)
+  if (hf && *hf && file_exists (hf))
     {
       read_history (hf);
       using_history ();
@@ -344,10 +343,9 @@ void
 save_history ()
 {
   char *hf;
-  struct stat buf;
 
   hf = get_string_value ("HISTFILE");
-  if (hf && *hf && stat (hf, &buf) == 0)
+  if (hf && *hf && file_exists (hf))
     {
       /* Append only the lines that occurred this session to
 	 the history file. */
@@ -398,7 +396,6 @@ maybe_save_shell_history ()
 {
   int result;
   char *hf;
-  struct stat buf;
 
   result = 0;
   if (history_lines_this_session)
@@ -408,7 +405,7 @@ maybe_save_shell_history ()
       if (hf && *hf)
 	{
 	  /* If the file doesn't exist, then create it. */
-	  if (stat (hf, &buf) == -1)
+	  if (file_exists (hf) == 0)
 	    {
 	      int file;
 	      file = open (hf, O_CREAT | O_TRUNC | O_WRONLY, 0600);

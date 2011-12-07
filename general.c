@@ -525,6 +525,15 @@ sh_closepipe (pv)
 /* **************************************************************** */
 
 int
+file_exists (fn)
+     char *fn;
+{
+  struct stat sb;
+
+  return (stat (fn, &sb) == 0);
+}
+
+int
 file_isdir (fn)
      char *fn;
 {

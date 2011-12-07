@@ -29,6 +29,7 @@
 #define RX_CLEXEC	0x04	/* set close-on-exec for opened fds > 2 */
 #define RX_INTERNAL	0x08
 #define RX_USER		0x10
+#define RX_SAVCLEXEC	0x20	/* set close-on-exec off in restored fd even though saved on has it on */
 
 extern void redirection_error __P((REDIRECT *, int));
 extern int do_redirections __P((REDIRECT *, int));

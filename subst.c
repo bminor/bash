@@ -3979,7 +3979,6 @@ getpattern (value, quoted, expandpat)
 #if 0
   int i;
 #endif
-
   /* There is a problem here:  how to handle single or double quotes in the
      pattern string when the whole expression is between double quotes?
      POSIX.2 says that enclosing double quotes do not cause the pattern to
