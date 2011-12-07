@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -110,6 +110,8 @@ unquoted_glob_pattern_p (string)
   return (0);
 }
 
+/* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
+   be quoted to match itself. */
 static inline int
 ere_char (c)
      int c;
