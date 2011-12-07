@@ -14323,5 +14323,20 @@ builtins/printf.def
 Makefile.in,{builtins,doc}/Makefile.in,lib/*/Makefile.in
 	- add assignment for datarootdir as per GNU coding standards
 
-Makefile.in,builtins/Makefile.in,lib/intl/Makefile.in
+Makefile.in,builtins/Makefile.in,lib/intl/Makefile.in,po/Makefile.in.in
 	- use @localedir@ instead of $(datadir)/locale in assignment
+
+				   2/13
+				   ----
+jobs.c
+	- fix compact_jobs_list to not return js.j_lastj, since that is in use
+	  and should not be overwritten.  Fix from Len Lattanzi
+	  <llattanzi@apple.com>
+
+				   2/16
+				   ----
+lib/readline/text.c
+	- change rl_forward_char to allow moving to the end of the line when
+	  using the arrow keys in vi insertion mode, rather than having the
+	  behavior identical between vi command and insertion modes.  Change
+	  suggested by Hugh Sasse

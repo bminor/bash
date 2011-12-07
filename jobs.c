@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -963,7 +963,7 @@ compact_jobs_list (flags)
   reap_dead_jobs ();
   realloc_jobs_list ();
 
-  return (js.j_lastj);
+  return (js.j_lastj ? js.j_lastj + 1 : 0);
 }
 
 /* Delete the job at INDEX from the job list.  Must be called

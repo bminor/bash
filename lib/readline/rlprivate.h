@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2007 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -27,6 +27,15 @@
 #include "rlconf.h"	/* for VISIBLE_STATS */
 #include "rlstdc.h"
 #include "posixjmp.h"	/* defines procenv_t */
+
+/*************************************************************************
+ *									 *
+ * Convenience definitions						 *
+ *									 *
+ *************************************************************************/
+
+#define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
+#define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
 
 /*************************************************************************
  *									 *
