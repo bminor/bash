@@ -47,6 +47,7 @@ $END
 
 #include "../shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 extern int last_command_exit_value;
 extern int subshell_environment;
@@ -59,6 +60,10 @@ int
 return_builtin (list)
      WORD_LIST *list;
 {
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;	/* skip over possible `--' */
+
   return_catch_value = get_exitstat (list);
 
   if (return_catch_flag)

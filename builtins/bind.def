@@ -115,7 +115,10 @@ bind_builtin (list)
   char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq;
 
   if (no_line_editing)
-    return (EXECUTION_FAILURE);
+    {
+      builtin_error ("line editing not enabled");
+      return (EXECUTION_FAILURE);
+    }
 
   kmap = saved_keymap = (Keymap) NULL;
   flags = 0;

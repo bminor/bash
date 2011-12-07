@@ -6873,3 +6873,26 @@ builtins/common.h
 
 trap.c
 	- include jobs.h for extern declaration for run_sigchld_trap
+
+general.c
+	- fix call to strtoimax in legal_number; if ep == string when function
+	  returns, the number was not converted, even if errno is not set.
+	  Fix from Paul Jarc <prj@case.edu>
+
+				   9/11
+				   ----
+[prayers for the victims of 9/11/2001]
+
+builtins/return.def
+	- call no_options, as Posix requires.  This also has the effect of
+	  disallowing negative return values unless they're prefixed by `--'
+
+				   9/12
+				   ----
+
+
+				   9/13
+				   ----
+builtins/bind.def
+	- add an error message when bind is used without line editing active,
+	  instead of just returning an error status

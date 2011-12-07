@@ -1912,7 +1912,7 @@ make_local_variable (name)
     }
 
   if (old_var == 0)
-    new_var = bind_variable_internal (name, "", vc->table, HASH_NOSRCH, 0);
+    new_var = make_new_variable (name, vc->table);
   else
     {
       new_var = make_new_variable (name, vc->table);

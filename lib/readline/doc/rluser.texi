@@ -47,6 +47,16 @@ command line editing interface.
 @ifset BashFeatures
 Command line editing is provided by the Readline library, which is
 used by several different programs, including Bash.
+Command line editing is enabled by default when using an interactive shell,
+unless the @option{--noediting} option is supplied at shell invocation.
+Line editing is also used when using the @option{-e} option to the
+@code{read} builtin command (@pxref{Bash Builtins}).
+By default, the line editing commands are similar to those of emacs.
+A vi-style line editing interface is also available.
+Line editing can be enabled at any time using the @option{-o emacs} or
+@option{-o vi} options to the @code{set} builtin command
+(@pxref{The Set Builtin}), or disabled using the @option{+o emacs} or 
+@option{+o vi} options to @code{set}.
 @end ifset
 
 @menu

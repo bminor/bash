@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: bash 4.0-pre1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-25 11:13-0400\n"
-"PO-Revision-Date: 2008-09-07 11:46+0200\n"
+"PO-Revision-Date: 2008-09-10 22:16+0200\n"
 "Last-Translator: Nils Naumann <nnau@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -78,9 +78,9 @@ msgid "`%s': cannot unbind"
 msgstr "%s: Kommando nicht gefunden."
 
 #: builtins/bind.def:288 builtins/bind.def:318
-#, fuzzy, c-format
+#, c-format
 msgid "`%s': unknown function name"
-msgstr "%s: Schreibgeschützte Funktion."
+msgstr "%s: Unbekannter Funktionsname."
 
 #: builtins/bind.def:296
 #, c-format
@@ -223,9 +223,9 @@ msgid "%s: not a shell builtin"
 msgstr ""
 
 #: builtins/common.c:292
-#, fuzzy, c-format
+#, c-format
 msgid "write error: %s"
-msgstr "Pipe-Fehler: %s."
+msgstr "Schreibfehler: %s."
 
 #: builtins/common.c:523
 #, c-format
@@ -254,7 +254,7 @@ msgstr "Warnung: Die -F Option könnte unerwartete Ergebnisse liefern."
 
 #: builtins/complete.def:669
 msgid "warning: -C option may not work as you expect"
-msgstr ""
+msgstr "Warnung: Die -C Option könnte unerwartete Ergebnisse liefern."
 
 #: builtins/complete.def:786
 msgid "not currently executing completion function"
@@ -395,9 +395,9 @@ msgid "%s: hash table empty\n"
 msgstr ""
 
 #: builtins/hash.def:244
-#, fuzzy, c-format
+#, c-format
 msgid "hits\tcommand\n"
-msgstr "`r', das zuletzt eingegebene Kommando wiederholt."
+msgstr ""
 
 #: builtins/help.def:130
 #, c-format
@@ -427,6 +427,14 @@ msgid ""
 "A star (*) next to a name means that the command is disabled.\n"
 "\n"
 msgstr ""
+"Die Shell Kommandos sind intern definiert.  Mit `help' kann eine Liste\n"
+"angesehen werden.  Durch `help Name' wird eine Beschreibung der\n"
+"Funktion `Name' angezeigt.  Die Dokumentation ist mit `info bash'\n"
+"einsehbar.  Detaillierte Beschreibungen der Shellkommandos sind mit\n"
+"`man -k' oder `info' abrufbar.\n"
+"\n"
+"Ein Stern (*) neben dem Namen kennzeichnet deaktivierte Kommandos.\n"
+"\n"
 
 #: builtins/history.def:154
 msgid "cannot use more than one of -anrw"
@@ -437,14 +445,14 @@ msgid "history position"
 msgstr ""
 
 #: builtins/history.def:366
-#, fuzzy, c-format
+#, c-format
 msgid "%s: history expansion failed"
-msgstr "%s: Ganzzahliger Ausdruck erwartet."
+msgstr ""
 
 #: builtins/inlib.def:71
-#, fuzzy, c-format
+#, c-format
 msgid "%s: inlib failed"
-msgstr "%s ist nicht gesetzt."
+msgstr ""
 
 #: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
@@ -479,9 +487,9 @@ msgid "%s: invalid line count"
 msgstr ""
 
 #: builtins/mapfile.def:243
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid array origin"
-msgstr "%s: Falscher Feldvariablenindex."
+msgstr ""
 
 #: builtins/mapfile.def:260
 #, c-format
@@ -577,6 +585,27 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
+"Legt ein Verzeichniseintrag auf den Verzeichnisstapel ab oder rotiert\n"
+"den Stapel so, dass das aktuelle Verzeichnis oben liegt.  Ohne Argumente\n"
+"werden die beiden oberen Einträge vertauscht.\n"
+"\n"
+"    Optionen: \n"
+"       -n\tVermeidet das Wechseln des Verzeichnisses, so dass\n"
+"\tnur der Verzeichnisstapel geändert wird.\n"
+"\n"
+"    Argumente:\n"
+"      +N\tRotiert den Verzeichnisstapel, dass das N-te Verzeichnis\n"
+"\tvon links, das von `dirs' angezeigt wird, nach oben kommt.  Die Zählung\n"
+"\tbeginnt dabei mit Null.\n"
+"\n"
+"      -N\tRotiert den Verzeichnisstapel, dass das N-te Verzeichnis\n"
+"\tvon rechts, das von `dirs' angezeigt wird, nach oben kommt.  Die \n"
+"\tZählung beginnt dabei mit Null.\n"
+"\n"
+"      dir\tLegt DIR auf den Verzeichnisstapel und wechselt in dieses\n"
+"      Verzeichnis.\n"
+"    \n"
+"    Das `dirs' Kommando zeigt den Verueichnisstapel an."
 
 #: builtins/pushd.def:730
 msgid ""
@@ -598,6 +627,26 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
+"Erntfernt Einträge vom Stapel.  Ohne Argumente wird der oberste Eintrag\n"
+"    gelöscht und anschließend in das das neue oben liegede Verzeichnis\n"
+"    gewechselt.\n"
+"    \n"
+"    Optionen:\n"
+"      -n\tVermeidet das Wechseln des Verzeichnisses, so dass\n"
+"\tnur der Verzeichnisstapel geändert wird.\n"
+"    \n"
+"    Argumente:\n"
+"      +N\tEntfernt den N-ten Eintrag von links, der von `dirs'\n"
+"\tangezeigt wird.  Dabei beginnt die Zählung von Null.  So\n"
+"\tentfernt z.B. `popd +0' den ersten und `popd +1' den zweiten\n"
+"\tEintrag.\n"
+"    \n"
+"      -N\tEntfernt den N-ten Eintrag von rechts, der von `dirs'\n"
+"\tangezeigt wird.  Dabei beginnt die Zählung von Null.  So\n"
+"\tentfernt z.B. `popd -0' den letzten und `popd +1' den vorletzten\n"
+"\tEintrag.\n"
+"    \n"
+"    Das `dirs' Kommando zeigt den Verzeichnisstapel an."
 
 #: builtins/read.def:247
 #, c-format
@@ -605,43 +654,41 @@ msgid "%s: invalid timeout specification"
 msgstr ""
 
 #: builtins/read.def:569
-#, fuzzy, c-format
+#, c-format
 msgid "read error: %d: %s"
-msgstr "Pipe-Fehler: %s."
+msgstr "Lesefehler: %d: %s"
 
 #: builtins/return.def:68
 msgid "can only `return' from a function or sourced script"
 msgstr ""
 
 #: builtins/set.def:768
-#, fuzzy
 msgid "cannot simultaneously unset a function and a variable"
-msgstr "nur innerhalb einer Funktion benutzt werden. Die erzeugte Variable Name ist"
+msgstr ""
 
 #: builtins/set.def:805
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot unset"
-msgstr "%s: Kann die Datei %s nicht erzeugen."
+msgstr ""
 
 #: builtins/set.def:812
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot unset: readonly %s"
-msgstr "%s: Kann die Datei %s nicht erzeugen."
+msgstr ""
 
 #: builtins/set.def:823
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not an array variable"
-msgstr "%s ist nicht gesetzt."
+msgstr ""
 
 #: builtins/setattr.def:186
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not a function"
-msgstr "%s: Schreibgeschützte Funktion."
+msgstr ""
 
 #: builtins/shift.def:71 builtins/shift.def:77
-#, fuzzy
 msgid "shift count"
-msgstr "shift [n]"
+msgstr ""
 
 #: builtins/shopt.def:250
 msgid "cannot set and unset shell options simultaneously"
@@ -657,9 +704,9 @@ msgid "filename argument required"
 msgstr ""
 
 #: builtins/source.def:153
-#, fuzzy, c-format
+#, c-format
 msgid "%s: file not found"
-msgstr "%s: Kommando nicht gefunden."
+msgstr "%s: Datei nicht gefunden."
 
 #: builtins/suspend.def:101
 msgid "cannot suspend"
@@ -800,9 +847,8 @@ msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr ""
 
 #: execute_cmd.c:1930
-#, fuzzy
 msgid "pipe error"
-msgstr "Pipe-Fehler: %s."
+msgstr "Pipe-Fehler"
 
 #: execute_cmd.c:4243
 #, c-format
@@ -894,7 +940,6 @@ msgid "%s: expression error\n"
 msgstr "Umlenkfehler"
 
 #: general.c:61
-#, fuzzy
 msgid "getcwd: cannot access parent directories"
 msgstr "getwd: Kann nicht auf das übergeordnete Verzeichnis zugreifen."
 
@@ -916,7 +961,7 @@ msgstr "check_bash_input: buffer already exists for new fd %d"
 
 #: jobs.c:464
 msgid "start_pipeline: pgrp pipe"
-msgstr ""
+msgstr "start_pipeline: pgrp pipe"
 
 #: jobs.c:879
 #, c-format
@@ -1062,9 +1107,9 @@ msgid "no job control in this shell"
 msgstr "Keine Job Steuerung in dieser Shell."
 
 #: lib/malloc/malloc.c:296
-#, c-format
+#, fuzzy, c-format
 msgid "malloc: failed assertion: %s\n"
-msgstr ""
+msgstr "malloc:  Fehler bei Speicherzuweisung: %s\n"
 
 #: lib/malloc/malloc.c:312
 #, c-format
@@ -1349,11 +1394,11 @@ msgstr "Umlenkfehler"
 
 #: shell.c:328
 msgid "could not find /tmp, please create!"
-msgstr ""
+msgstr "Konnte das /tmp Verzeichnis nicht finden, bitte anlegen."
 
 #: shell.c:332
 msgid "/tmp must be a valid directory name"
-msgstr ""
+msgstr "/tmp muß ein gültiger Verzeichnisname sein."
 
 #: shell.c:876
 #, fuzzy, c-format
@@ -1362,7 +1407,7 @@ msgstr "%c%c: Falsche Option"
 
 #: shell.c:1637
 msgid "I have no name!"
-msgstr "Ich habe keinen Namen!"
+msgstr "Ich habe keinen Benutzernamen!"
 
 #: shell.c:1777
 #, c-format
@@ -1410,12 +1455,12 @@ msgstr "`%s -c help' für mehr Information über Shell-Kommandos.\n"
 #: shell.c:1808
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
-msgstr ""
+msgstr "Mit dem `bashbug' Kommando können Fehler gemeldet werden.\n"
 
 #: sig.c:576
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
-msgstr ""
+msgstr "sigprocmask: %d: Ungültige Operation"
 
 #: siglist.c:47
 msgid "Bogus signal"
@@ -2093,13 +2138,12 @@ msgid "(( expression ))"
 msgstr "(( Ausdruck ))"
 
 #: builtins.c:206
-#, fuzzy
 msgid "[[ expression ]]"
 msgstr "[[ Ausdruck ]]"
 
 #: builtins.c:208
 msgid "variables - Names and meanings of some shell variables"
-msgstr ""
+msgstr "variables - Namen und Bedeutung einiger Shell Variablen"
 
 #: builtins.c:211
 msgid "pushd [-n] [+N | -N | dir]"
@@ -2123,11 +2167,11 @@ msgstr "printf [-v var] Format [Argumente]"
 
 #: builtins.c:227
 msgid "complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]"
-msgstr ""
+msgstr "complete [-abcdefgjksuv] [-pr] [-o Option] [-A Aktion] [-G Suchmuster] [-W Wortliste]  [-F Funktion] [-C Kommando] [-X Filtermuster] [-P Prefix] [-S Suffix] [Name ...]"
 
 #: builtins.c:231
 msgid "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
-msgstr ""
+msgstr "compgen [-abcdefgjksuv] [-o Option]  [-A Aktion] [-G Suchmuster] [-W Wortliste]  [-F Funktion] [-C Kommando] [-X Filtermuster] [-P Prefix] [-S Suffix] [Wort]"
 
 #: builtins.c:235
 msgid "compopt [-o|+o option] [name ...]"
@@ -2138,6 +2182,7 @@ msgid "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c 
 msgstr ""
 
 #: builtins.c:250
+#, fuzzy
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2155,6 +2200,22 @@ msgid ""
 "    alias returns true unless a NAME is supplied for which no alias has been\n"
 "    defined."
 msgstr ""
+"Definiert Aliase oder zeigt sie an.\n"
+"    \n"
+"    Ohne Argumente wird die Liste der Aliase (Synonyme) in der Form \n"
+"    `alias Name=Wert' auf die Standardausgabe gedruckt.\n"
+"\n"
+"    Sonst wird ein Alias für jeden angegebenen Namen definiert, für den ein\n"
+"    Wert angegeben wurde.  \n"
+"    A trailing space in VALUE causes the next word to be checked for\n"
+"    alias substitution when the alias is expanded.\n"
+"    \n"
+"    Options:\n"
+"      -p\tPrint all defined aliases in a reusable format\n"
+"    \n"
+"    Exit Status:\n"
+"    alias returns true unless a NAME is supplied for which no alias has been\n"
+"    defined."
 
 #: builtins.c:272
 msgid ""
@@ -2165,6 +2226,12 @@ msgid ""
 "    \n"
 "    Return success unless a NAME is not an existing alias."
 msgstr ""
+"Entferne jeden Namen von der Aliasliste.\n"
+"    \n"
+"    Optionen:\n"
+"      -a\tEnferne alle Alias Definitionen.\n"
+"    \n"
+"    Gibt immer Erfolg zurück, wenn der Name existiert."
 
 #: builtins.c:285
 msgid ""
@@ -2211,6 +2278,13 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+"Beendet for, while oder until Schleifen.\n"
+"    \n"
+"    Break beendet eine FOR, WHILE oder UNTIL Schleife.  Wenn N angegeben ist, werden N geschachtelte\n"
+"    Schleifen beendet.\n"
+"    \n"
+"    Rückgabewert:\n"
+"    Der Rückgabewert ist 0, es sei den N ist größer oder gleich 1."
 
 #: builtins.c:334
 msgid ""
@@ -2222,6 +2296,14 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+"Springt zum Schleifenanfang von for, while, oder until Schleifen.\n"
+"    \n"
+"    Continoue springt zum Schleifenanfang der aktuellen FOR, WHILE oder UNTIL \n"
+"    Schleife. Wenn N angegeben ist, werden N wird zum Beginn der N-ten\n"
+"    übergeordneten Schleife gesprungen.\n"
+"    \n"
+"    Rückgabewert:\n"
+"    Der Rückgabewert ist 0, außer wenn N größer oder gleich 1 ist."
 
 #: builtins.c:346
 msgid ""
@@ -2294,10 +2376,22 @@ msgid ""
 "    Returns 0 unless an invalid option is given or the current directory\n"
 "    cannot be read."
 msgstr ""
+"Gibt den Namen des aktuellen Arbeitsverzeichnis aus.\n"
+"    \n"
+"    Optionen:\n"
+"      -L\tGibt den Wert der $PWD Umgebungsvariable aus, wenn diese\n"
+"\tauf das aktuelle Arbeitsverzeichnis verweist.\n"
+"\n"
+"      -P\tGibt den wirklichen Verzeichnisnahen aus, ohne symbolische Verweise.\n"
+"    \n"
+"    Standardmäßig wird die -L Option verwendet.\n"
+"    \n"
+"    Rückgabewert:\n"
+"    Der Rückgabewert ist 0, außer wenn eine ungültige Option angegeben oder das aktuelle\n"
+"    Verzeichnis nicht gelesen werden kann."
 
 # colon
 #: builtins.c:424
-#, fuzzy
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2305,7 +2399,13 @@ msgid ""
 "    \n"
 "    Exit Status:\n"
 "    Always succeeds."
-msgstr "Leeranweisung; das Kommando hat keine Wirkung. Es wird Null zurückgegeben."
+msgstr ""
+"Leeranweisung.\n"
+"\n"
+"    Leeranweisung; das Kommando hat keine Wirkung.\n"
+"\n"
+"    Rückgabewert:\n"
+"    Das Kommando ist immer erfolgreich."
 
 #: builtins.c:435
 msgid ""
@@ -2557,13 +2657,16 @@ msgstr ""
 
 # exit
 #: builtins.c:685
-#, fuzzy
 msgid ""
 "Exit the shell.\n"
 "    \n"
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
-msgstr "Verläßt die Shell mit dem Status N.  Wenn N nicht angegeben ist, dann wird"
+msgstr ""
+"Beendet die aktuelle Shell.\n"
+"\n"
+"    Beendt die die aktuelle Shell mit dem Rückgabewert N.  Wenn N nicht angegeben ist,\n"
+"    wird der Rückgabewert des letzten ausgeführten Kommandos übernommen."
 
 #: builtins.c:694
 msgid ""

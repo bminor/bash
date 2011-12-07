@@ -10,21 +10,23 @@
 # Chet Ramey
 # chet@po.cwru.edu
 
-# Copyright (C) 1996-2007 Free Software Foundation, Inc.
+#   Copyright (C) 1996-2008 Free Software Foundation, Inc.
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+#   This file is part of GNU Bash, the Bourne Again SHell.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 #
 # defaults
@@ -173,7 +175,7 @@ darwin*|macosx*)
 	SHLIB_LIBSUFF='dylib'
 
 	case "${host_os}" in
-	darwin[789]*)	SHOBJ_LDFLAGS=''
+	darwin[789]*|darwin10*)	SHOBJ_LDFLAGS=''
 			SHLIB_XLDFLAGS='-dynamiclib -arch_only `/usr/bin/arch` -install_name $(libdir)/$@ -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
 			;;
 	*)		SHOBJ_LDFLAGS='-dynamic'
@@ -491,20 +493,37 @@ msdos*)
 
 cygwin*)
 	SHOBJ_LD='$(CC)'
-        SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
-        SHLIB_LIBPREF='cyg'
-        SHLIB_LIBSUFF='dll'
-        SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
-        SHLIB_LIBS='$(TERMCAP_LIB)'
+	SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
+	SHLIB_LIBPREF='cyg'
+	SHLIB_LIBSUFF='dll'
+	SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
+	SHLIB_LIBS='$(TERMCAP_LIB)'
 
 	SHLIB_DOT=
-        # For official cygwin releases, DLLVERSION will be defined in the
-        # environment of configure, and will be incremented any time the API
-        # changes in a non-backwards compatible manner.  Otherwise, it is just
-        # SHLIB_MAJOR.
-        if [ -n "$DLLVERSION" ] ; then
+	# For official cygwin releases, DLLVERSION will be defined in the
+	# environment of configure, and will be incremented any time the API
+	# changes in a non-backwards compatible manner.  Otherwise, it is just
+	# SHLIB_MAJOR.
+	if [ -n "$DLLVERSION" ] ; then
 		SHLIB_DLLVERSION="$DLLVERSION"
-        fi
+	fi
+	;;
+
+mingw*)
+	SHOBJ_LD='$(CC)'
+	SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
+	SHLIB_LIBSUFF='dll'
+	SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
+	SHLIB_LIBS='$(TERMCAP_LIB)'
+
+	SHLIB_DOT=
+	# For official cygwin releases, DLLVERSION will be defined in the
+	# environment of configure, and will be incremented any time the API
+	# changes in a non-backwards compatible manner.  Otherwise, it is just
+	# SHLIB_MAJOR.
+	if [ -n "$DLLVERSION" ] ; then
+		SHLIB_DLLVERSION="$DLLVERSION"
+	fi
 	;;
 
 #
