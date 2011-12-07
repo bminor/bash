@@ -64,10 +64,11 @@ static int subst_lhs_len;
 static int subst_rhs_len;
 
 static char *get_history_word_specifier PARAMS((char *, char *, int *));
-static char *history_find_word PARAMS((char *, int));
 static int history_tokenize_word PARAMS((const char *, int));
 static char **history_tokenize_internal PARAMS((const char *, int, int *));
 static char *history_substring PARAMS((const char *, int, int));
+static void freewords PARAMS((char **, int));
+static char *history_find_word PARAMS((char *, int));
 
 static char *quote_breaks PARAMS((char *));
 
@@ -1570,6 +1571,18 @@ history_tokenize (string)
   return (history_tokenize_internal (string, -1, (int *)NULL));
 }
 
+/* Free members of WORDS from START to an empty string */
+static void
+freewords (words, start)
+     char **words;
+     int start;
+{
+  register int i;
+
+  for (i = start; words[i]; i++)
+    free (words[i]);
+}
+
 /* Find and return the word which contains the character at index IND
    in the history line LINE.  Used to save the word matched by the
    last history !?string? search. */
@@ -1584,14 +1597,15 @@ history_find_word (line, ind)
   words = history_tokenize_internal (line, ind, &wind);
   if (wind == -1 || words == 0)
     {
+      if (words)
+	freewords (words, 0);
       FREE (words);
       return ((char *)NULL);
     }
   s = words[wind];
   for (i = 0; i < wind; i++)
     free (words[i]);
-  for (i = wind + 1; words[i]; i++)
-    free (words[i]);
+  freewords (words, wind + 1);
   free (words);
   return s;
 }

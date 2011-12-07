@@ -2279,7 +2279,7 @@ do_assignment_internal (word, expand)
      const WORD_DESC *word;
      int expand;
 {
-  int offset, tlen, appendop, assign_list, aflags;
+  int offset, tlen, appendop, assign_list, aflags, retval;
   char *name, *value;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
@@ -2370,11 +2370,27 @@ do_assignment_internal (word, expand)
 
   stupidly_hack_special_variables (name);
 
+#if 1
+  /* Return 1 if the assignment seems to have been performed correctly. */
+  if (entry == 0 || readonly_p (entry))
+    retval = 0;		/* assignment failure */
+  else if (noassign_p (entry))
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      retval = 1;	/* error status, but not assignment failure */
+    }
+  else
+    retval = 1;
+  ASSIGN_RETURN (retval);
+
+  if (entry && retval != 0)
+    VUNSETATTR (entry, att_invisible);
+#else
   if (entry)
     VUNSETATTR (entry, att_invisible);
 
-  /* Return 1 if the assignment seems to have been performed correctly. */
   ASSIGN_RETURN (entry ? ((readonly_p (entry) == 0) && noassign_p (entry) == 0) : 0);
+#endif
 }
 
 /* Perform the assignment statement in STRING, and expand the
@@ -7708,7 +7724,6 @@ exp_jump_to_top_level (v)
   assigning_in_environment = 0;
 
   top_level_cleanup ();			/* from sig.c */
-
   jump_to_top_level (v);
 }
 

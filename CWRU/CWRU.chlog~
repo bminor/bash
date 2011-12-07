@@ -14829,4 +14829,19 @@ examples/loadables/Makefile.in
 	- add @LDFLAGS@ to SHOBJ_LDFLAGS assignment -- experimental.  Suggested
 	  by Mike Frysinger <vapier@gentoo.org>
 
-examples/loadables/{
+examples/loadables/{basename,cut,dirname,finfo,head,ln,logname,mkdir,pathchk,print,printenv,push,realpath,rmdir,sleep,tee,truefalse,tty,uname,unlink,whoami}.c
+	- fix up some includes.  Fix from Mike Frysinger <vapier@gentoo.org>
+
+				   8/21
+				   ----
+histexpand.c
+	- fix another memory leak in history_find_word.  Bug report originally
+	  from Michael Snyder <msnyder@sonic.net>; test case suggested by Jim
+	  Blandy <jimb@codesourcery.com>
+
+				   8/26
+				   ----
+subst.c
+	- change to do_assignment_internal to make an assignment to a variable
+	  with the `noassign' internal attribute not a variable assignment
+	  error

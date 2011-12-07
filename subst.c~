@@ -163,8 +163,6 @@ int allow_null_glob_expansion;
 /* Non-zero means to throw an error when globbing fails to match anything. */
 int fail_glob_expansion;
 
-int assigining_in_environment;
-
 #if 0
 /* Variables to keep track of which words in an expanded word list (the
    output of expand_word_list_internal) are the result of globbing
@@ -2281,7 +2279,7 @@ do_assignment_internal (word, expand)
      const WORD_DESC *word;
      int expand;
 {
-  int offset, tlen, appendop, assign_list, aflags;
+  int offset, tlen, appendop, assign_list, aflags, retval;
   char *name, *value;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
@@ -2375,8 +2373,21 @@ do_assignment_internal (word, expand)
   if (entry)
     VUNSETATTR (entry, att_invisible);
 
+#if 1
   /* Return 1 if the assignment seems to have been performed correctly. */
+  if (entry == 0 || readonly_p (entry))
+    retval = 0;		/* assignment failure */
+  else if (noassign_p (entry))
+    {
+      last_command_exit_value = EXECUTION_FAILURE;
+      retval = 1;	/* error status, but not assignment failure */
+    }
+  else
+    retval = 1;
+  ASSIGN_RETURN (retval);
+#else
   ASSIGN_RETURN (entry ? ((readonly_p (entry) == 0) && noassign_p (entry) == 0) : 0);
+#endif
 }
 
 /* Perform the assignment statement in STRING, and expand the
@@ -4995,7 +5006,7 @@ parameter_brace_expand_word (name, var_is_special, quoted)
  	temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
  		  ? quote_string (temp)
  		  : quote_escapes (temp);
-      else if (atype == 1 && temp && *temp == 0 && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+      else if (atype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	rflags |= W_HASQUOTEDNULL;
     }
 #endif
@@ -7710,7 +7721,6 @@ exp_jump_to_top_level (v)
   assigning_in_environment = 0;
 
   top_level_cleanup ();			/* from sig.c */
-
   jump_to_top_level (v);
 }
 
