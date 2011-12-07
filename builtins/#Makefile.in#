@@ -75,7 +75,6 @@ RL_INCLUDEDIR = @RL_INCLUDEDIR@
 INTL_LIBSRC = ${topdir}/lib/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_LIBDIR = ${INTL_BUILDDIR}
-INTL_LIBRARY = ${INTL_BUILDDIR}/libintl.a
 INTL_INC = @INTL_INC@
 INTL_DEP = @INTL_DEP@
 LIBINTL_H = @LIBINTL_H@
@@ -239,11 +238,12 @@ $(OFILES):	$(MKBUILTINS) ../config.h
 po:	builtins.c
 	xgettext -L C -o $(topdir)/po/builtins.pot --keyword='N_' builtins.c 2>/dev/null
 
-${LIBINTL_H}:
-	@echo making $@ in ${INTL_BUILDDIR}
-	@(cd ${INTL_BUILDDIR} && \
-		$(MAKE) $(MFLAGS) libintl.h) || exit 1
+${LIBINTL_H}:	${INTL_DEP}
 
+${INTL_LIBRARY}:	../config.h ${INTL_BUILDDIR}/Makefile
+	@echo making $@ in ${INTL_LIBDIR}
+        @(cd ${INTL_LIBDIR} && \   
+                $(MAKE) $(MFLAGS) all) || ex
 # dependencies
 
 alias.o: alias.def

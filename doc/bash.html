@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 November 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1625,6 +1625,12 @@ The following variables are set by the shell:
 Expands to the full file name used to invoke this instance of
 <B>bash</B>.
 
+<DT><B>BASHPID</B>
+
+<DD>
+Expands to the process id of the current bash process.
+This differs from <B>$$</B> under certain circumstances, such as subshells
+that do not require bash to be re-initialized.
 <DT><B>BASH_ARGC</B>
 
 <DD>
@@ -1751,6 +1757,11 @@ cursor position.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
+<DT><B>COMP_KEY</B>
+
+<DD>
+The key (or final key of a key sequence) used to invoke the current
+completion function.
 <DT><B>COMP_LINE</B>
 
 <DD>
@@ -1766,6 +1777,21 @@ The index of the current cursor position relative to the beginning of
 the current command.
 If the current cursor position is at the end of the current command,
 the value of this variable is equal to <B>${#COMP_LINE}</B>.
+This variable is available only in shell functions and external
+commands invoked by the
+programmable completion facilities (see <B>Programmable Completion</B>
+below).
+<DT><B>COMP_TYPE</B>
+
+<DD>
+Set to an integer value corresponding to the type of completion attempted
+that caused a completion function to be called:
+<I>TAB</I>, for normal completion,
+<I>?</I>, for listing completions after successive tabs,
+<I>!</I>, for listing alternatives on partial word completion,
+<I>@</I>, to list completions if the word is not unmodified,
+or
+<I>%</I>, for menu completion.
 This variable is available only in shell functions and external
 commands invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
@@ -3424,11 +3450,22 @@ value is exactly
 <B>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</B>,
 
 the default, then
+sequences of
+<B>&lt;space&gt;</B>,
+
+<B>&lt;tab&gt;</B>,
+
+and
+<B>&lt;newline&gt;</B>
+
+at the beginning and end of the results of the previous
+expansions are ignored, and
 any sequence of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-characters serves to delimit words.  If
+characters not at the beginning or end serves to delimit words.
+If
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
@@ -5418,12 +5455,16 @@ is executed for each child that exits.
 If an attempt to exit
 <B>bash</B>
 
-is made while jobs are stopped, the shell prints a warning message.  The
+is made while jobs are stopped (or, if the <B>checkjobs</B> shell option has
+been enabled using the <B>shopt</B> builtin, running), the shell prints a
+warning message, and, if the <B>checkjobs</B> option is enabled, lists the
+jobs and their statuses.
+The
 <B>jobs</B>
 
-command may then be used to inspect their status.
+command may then be used to inspect their status. 
 If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and the stopped
+the shell does not print another warning, and any stopped
 jobs are terminated.
 <A NAME="lbCC">&nbsp;</A>
 <H3>PROMPTING</H3>
@@ -7093,11 +7134,17 @@ completed, and the matching words become the possible completions.
 After these matches have been generated, any shell function or command
 specified with the <B>-F</B> and <B>-C</B> options is invoked.
 When the command or function is invoked, the
-<FONT SIZE=-1><B>COMP_LINE</B>
+<FONT SIZE=-1><B>COMP_LINE</B>,
+
+</FONT>
+<FONT SIZE=-1><B>COMP_POINT</B>,
+
+</FONT>
+<FONT SIZE=-1><B>COMP_KEY</B>,
 
 </FONT>
 and
-<FONT SIZE=-1><B>COMP_POINT</B>
+<FONT SIZE=-1><B>COMP_TYPE</B>
 
 </FONT>
 variables are assigned values as described above under
@@ -7848,15 +7895,6 @@ that they can be re-read.
 
 <DD>
 List current <B>readline</B> function names and bindings.
-<DT><B>-v</B>
-
-<DD>
-Display <B>readline</B> variable names and values in such a way that they
-can be re-read.
-<DT><B>-V</B>
-
-<DD>
-List current <B>readline</B> variable names and values.
 <DT><B>-s</B>
 
 <DD>
@@ -7867,6 +7905,15 @@ they output in such a way that they can be re-read.
 <DD>
 Display <B>readline</B> key sequences bound to macros and the strings
 they output.
+<DT><B>-v</B>
+
+<DD>
+Display <B>readline</B> variable names and values in such a way that they
+can be re-read.
+<DT><B>-V</B>
+
+<DD>
+List current <B>readline</B> variable names and values.
 <DT><B>-f </B><I>filename</I>
 
 <DD>
@@ -8083,10 +8130,10 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
 <BR>
 
-[<B>-X</B> <I>filterpat</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>] <I>name</I> [<I>name ...</I>]
+[<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
 <DT><B>complete</B> <B>-pr</B> [<I>name</I> ...]<DD>
 
@@ -8611,7 +8658,7 @@ the eight-bit character whose value is the hexadecimal value <I>HH</I>
 
 </DL></DL>
 
-<DT><B>enable</B> [<B>-adnps</B>] [<B>-f</B> <I>filename</I>] [<I>name</I> ...]<DD>
+<DT><B>enable</B> [<B>-a</B>] [<B>-dnps</B>] [<B>-f</B> <I>filename</I>] [<I>name</I> ...]<DD>
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
@@ -8774,7 +8821,7 @@ is supplied with a
 <I>name</I>
 
 that is not a function.
-<DT><B>fc</B> [<B>-e</B> <I>ename</I>] [<B>-nlr</B>] [<I>first</I>] [<I>last</I>]<DD>
+<DT><B>fc</B> [<B>-e</B> <I>ename</I>] [<B>-lnr</B>] [<I>first</I>] [<I>last</I>]<DD>
 
 <DT><B>fc</B> <B>-s</B> [<I>pat</I>=<I>rep</I>] [<I>cmd</I>]<DD>
 
@@ -9529,7 +9576,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-u</B> <I>fd</I>] [<B>-t</B> <I>timeout</I>] [<B>-a</B> <I>aname</I>] [<B>-p</B> <I>prompt</I>] [<B>-n</B> <I>nchars</I>] [<B>-d</B> <I>delim</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
 is assigned to the first
@@ -9698,7 +9745,10 @@ function and not during execution of a script by <B>.</B>,
 the return status is false.
 Any command associated with the <B>RETURN</B> trap is executed
 before execution resumes after the function or script.
-<DT><B>set</B> [<B>--abefhkmnptuvxBCHP</B>] [<B>-o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+<DT><B>set</B> [<B>--abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+
+<DT><B>set</B> [<B>+abefhkmnptuvxBCEHPT</B>] [<B>+o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
@@ -10235,6 +10285,12 @@ The list of <B>shopt</B> options is:
 
 
 <DL COMPACT>
+<DT><B>autocd</B>
+
+<DD>
+If set, a command name that is the name of a directory is executed as if
+it were the argument to the <B>cd</B> command.
+This option is only used by interactive shells.
 <DT><B>cdable_vars</B>
 
 <DD>
@@ -10262,6 +10318,14 @@ This option is only used by interactive shells.
 If set, <B>bash</B> checks that a command found in the hash
 table exists before trying to execute it.  If a hashed command no
 longer exists, a normal path search is performed.
+<DT><B>checkjobs</B>
+
+<DD>
+If set, bash lists the status of any stopped and running jobs before
+exiting an interactive shell.  If any jobs are running, this causes
+the exit to be deferred until a second exit is attempted without an
+intervening command (see <B>JOB CONTROL</B> above).  The shell always
+postpones exiting if any jobs are stopped.
 <DT><B>checkwinsize</B>
 
 <DD>
@@ -11451,7 +11515,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 November 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11555,6 +11619,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 12 December 2006 14:43:32 EST
+Time: 02 January 2007 10:25:26 EST
 </BODY>
 </HTML>

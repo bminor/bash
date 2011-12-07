@@ -179,7 +179,11 @@ time_t shell_start_time;
 int running_under_emacs;
 
 /* Do we have /dev/fd? */
+#ifdef HAVE_DEV_FD
 int have_devfd = HAVE_DEV_FD;
+#else
+int have_devfd = 0;
+#endif
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";

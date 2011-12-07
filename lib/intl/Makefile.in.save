@@ -229,7 +229,7 @@ libgnuintl.h: $(srcdir)/libgnuintl.h.in
 	cp $(srcdir)/libgnuintl.h.in libgnuintl.h
 
 libintl.h: libgnuintl.h
-	cmp libgnuintl.h libintl.h || cp libgnuintl.h libintl.h
+	cp libgnuintl.h libintl.h
 
 charset.alias: $(srcdir)/config.charset
 	$(SHELL) $(srcdir)/config.charset '@host@' > t-$@

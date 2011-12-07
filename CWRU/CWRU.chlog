@@ -14174,3 +14174,12 @@ doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
 	  text sharing.  Changes originally from Andreas Mohr
 	  <andi@rhlx01.fht-esslingen.de>
 
+				 1/4/2007
+				 --------
+lib/intl/Makefile.in
+	- use cmp before copying libgnuintl.h to libintl.h -- maybe save a few
+	  rebuilds
+
+lib/builtins/Makefile
+	- fixes to build LIBINTL_H if necessary, dependency on this for
+	  mkbuiltins.o prevented `make -j 6' from working correctly
