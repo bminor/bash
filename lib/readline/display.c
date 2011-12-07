@@ -506,7 +506,7 @@ rl_redisplay ()
   int _rl_wrapped_multicolumn = 0;
 #endif
 
-  if (readline_echoing_p == 0)
+  if (_rl_echoing_p == 0)
     return;
 
   /* Block keyboard interrupts because this function manipulates global
@@ -2464,7 +2464,7 @@ _rl_redisplay_after_sigwinch ()
 void
 _rl_clean_up_for_exit ()
 {
-  if (readline_echoing_p)
+  if (_rl_echoing_p)
     {
       _rl_move_vert (_rl_vis_botlin);
       _rl_vis_botlin = 0;

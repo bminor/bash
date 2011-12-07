@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Feb 22 21:45:32 EST 2008
+.\"	Last Change: Thu Mar 27 22:15:12 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 February 22" "GNU Bash-3.2"
+.TH BASH 1 "2008 March 27" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -594,11 +594,9 @@ are executed sequentially; the shell waits for each
 command to terminate in turn.  The return status is the
 exit status of the last command executed.
 .PP
-The control operators
-.B &&
-and
-.B \(bv\(bv
-denote AND lists and OR lists, respectively.
+AND and OR lists are sequences of one of more pipelines separated by the
+\fB&&\fP and \fB\(bv\(bv\fP control operators, respectively.
+AND and OR lists are executed with left associativity.
 An AND list has the form
 .RS
 .PP
@@ -620,7 +618,8 @@ An OR list has the form
 .I command2
 is executed if and only if
 .I command1
-returns a non-zero exit status.  The return status of
+returns a non-zero exit status.
+The return status of
 AND and OR lists is the exit status of the last command
 executed in the list.
 .SS Compound Commands
@@ -6495,6 +6494,19 @@ a \fIname\fP for which no specification exists, or
 an error occurs adding a completion specification.
 .RE
 .TP
+\fBcompopt\fP [\fB\-o\fP \fIoption\fP] [\fB+o\fP \fIoption\fP] [\fIname\fP]
+Modify completion options for each \fIname\fP according to the
+\fIoption\fPs, or for the
+currently-execution completion if no \fIname\fPs are supplied.
+If no \fIoption\fPs are given, display the completion options for each
+\fIname\fP or the current completion.
+The possible values of \fIoption\fP are those valid for the \fBcomplete\fP
+builtin described above.
+.PP
+The return value is true unless an invalid option is supplied, an attempt
+is made to modify the options for a \fIname\fP for which no completion
+specification exists, or an output error occurs.
+.TP
 \fBcontinue\fP [\fIn\fP]
 Resume the next iteration of the enclosing
 .BR for ,
@@ -6528,7 +6540,15 @@ option will display the attributes and values of each
 .IR name .
 When
 .B \-p
-is used, additional options are ignored.
+is used with \fIname\fP arguments, additional options are ignored.
+When
+.B \-p
+is supplied without \fIname\fP arguments, it will display the attributes
+and values of all variables having the attributes specified by the
+additional options.
+If no other options are supplied with \fB\-p\fP, \fBdeclare\fP will display
+the attributes and values of all shell variables.  The \fB\-f\fP option
+will restrict the display to shell functions.
 The
 .B \-F
 option inhibits the display of function definitions; only the
@@ -8609,7 +8629,7 @@ option suppresses shell function lookup, as with the \fBcommand\fP builtin.
 returns true if any of the arguments are found, false if
 none are found.
 .TP
-\fBulimit\fP [\fB\-SHacdefilmnpqrstuvx\fP [\fIlimit\fP]]
+\fBulimit\fP [\fB\-HSTabcdefilmnpqrstuvx\fP [\fIlimit\fP]]
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The \fB\-H\fP and \fB\-S\fP options specify that the hard or soft limit is
@@ -8639,6 +8659,9 @@ Other options are interpreted as follows:
 .TP
 .B \-a
 All current limits are reported
+.TP
+.B \-b
+The maximum socket buffer size
 .TP
 .B \-c
 The maximum size of core files created
@@ -8688,6 +8711,9 @@ The maximum amount of virtual memory available to the shell
 .TP
 .B \-x
 The maximum number of file locks
+.TP
+.B \-T
+The maximum number of threads
 .PD
 .PP
 If
@@ -8703,7 +8729,9 @@ which is in seconds,
 .BR \-p ,
 which is in units of 512-byte blocks,
 and
-.B \-n
+.BR \-T ,
+.BR \-b ,
+.BR \-n ,
 and
 .BR \-u ,
 which are unscaled values.

@@ -1574,7 +1574,7 @@ the matches.
 
 Any function specified with @option{-F} is invoked first.
 The function may use any of the shell facilities, including the
-@code{compgen} builtin described below
+@code{compgen} and @code{compopt} builtins described below
 (@pxref{Programmable Completion Builtins}), to generate the matches.
 It must put the possible completions in the @env{COMPREPLY} array
 variable.
@@ -1847,4 +1847,22 @@ a @var{name} for which no specification exists, or
 an error occurs adding a completion specification.
 
 @end table
+
+@item compopt
+@btindex compopt
+@example
+@code{compopt} [-o @var{option}] [+o @var{option}] [@var{name}]
+@end example
+Modify completion options for each @var{name} according to the
+@var{option}s, or for the currently-execution completion if no @var{name}s
+are supplied.
+If no @var{option}s are given, display the completion options for each
+@var{name} or the current completion.
+The possible values of @var{option} are those valid for the @code{complete}
+builtin described above.
+
+The return value is true unless an invalid option is supplied, an attempt
+is made to modify the options for a @var{name} for which no completion
+specification exists, or an output error occurs.
+
 @end ifset

@@ -15430,3 +15430,55 @@ builtins/printf.def
 lib/readline/doc/rltech.texi
 	- documented rest of readline's state flags, including RL_STATE_CALLBACK
 	- documented rl_save_state and rl_restore_state
+
+				   3/27
+				   ----
+lib/readline/{rlprivate.h,{display,readline,rltty,terminal,text}.c}
+	- rename readline_echoing_p to _rl_echoing_p for namespace consistency
+
+lib/readline/{rlprivate.h,{callback,readline,util}.c}
+	- rename readline_top_level to _rl_top_level for namespace consistency
+
+builtins/ulimit.def
+	- new -b (socket buffer size) and -T (number of threads) options
+
+array.c
+	- fix bug in calculation of the array element assignment string length:
+	  use length of `is' instead of `indstr'.  Reported as ubuntu bug
+	  #202885 by John McCabe-Dansted
+
+builtins/setattr.def
+	- new function, show_all_var_attributes, displays attributes and
+	  values for all shell variables (or shell functions) in a reusable
+	  format
+
+builtins/common.h
+	- new extern declaration for show_all_var_attributes
+
+builtins/declare.def
+	- change `declare -p' to print out all variable attributes and values,
+	  and `declare -fp' to print out all function attributes and
+	  definitions.  Inspired by request from John Love-Jensen
+	  <eljay@adobe.com>
+
+doc/{bash.1,bashref.texi}
+	- document new -b and -T options to ulimit
+	- tighten up language describing AND and OR lists
+	- add description of new behavior of `declare -p'
+
+				   3/28
+				   ----
+pcomplete.c
+	- rename curcs -> pcomp_curcs
+	- new global completion variable, pcomp_curcmd, the current command
+	  name being completed
+
+builtins/complete.def
+	- new builtin, compopt, allows completion options for command names
+	  supplied as arguments or the current completion being executed to
+	  be modified.  Suggested by Mika Fischer <mf+ubuntu@zoopnet.de>
+
+				   3/30
+				   ----
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- document new compopt builtin

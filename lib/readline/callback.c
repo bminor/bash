@@ -115,13 +115,13 @@ rl_callback_read_char ()
       abort ();
     }
 
-  memcpy ((void *)olevel, (void *)readline_top_level, sizeof (procenv_t));
-  jcode = setjmp (readline_top_level);
+  memcpy ((void *)olevel, (void *)_rl_top_level, sizeof (procenv_t));
+  jcode = setjmp (_rl_top_level);
   if (jcode)
     {
       (*rl_redisplay_function) ();
       _rl_want_redisplay = 0;
-      memcpy ((void *)readline_top_level, (void *)olevel, sizeof (procenv_t));
+      memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
       return;
     }
 

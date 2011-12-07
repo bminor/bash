@@ -192,6 +192,8 @@ declare_internal (list, local_var)
 	      free (vlist);
 	    }
 	}
+      else if (pflag && (flags_on == 0 || flags_on == att_function))
+	show_all_var_attributes (flags_on == 0, nodefs);
       else if (flags_on == 0)
 	return (set_builtin ((WORD_LIST *)NULL));
       else

@@ -681,8 +681,11 @@ Commands separated by a @samp{;} are executed sequentially; the shell
 waits for each command to terminate in turn.  The return status is the
 exit status of the last command executed.
 
-The control operators @samp{&&} and @samp{||}
-denote @sc{and} lists and @sc{or} lists, respectively.
+@sc{and} and @sc{or} lists are sequences of one or more pipelines
+separated by the control operators @samp{&&} and @samp{||},
+respectively.  @sc{and} and @sc{or} lists are executed with left
+associativity.
+
 An @sc{and} list has the form
 @example
 @var{command1} && @var{command2}
@@ -3262,7 +3265,16 @@ are given, then display the values of variables instead.
 
 The @option{-p} option will display the attributes and values of each
 @var{name}.
-When @option{-p} is used, additional options are ignored.
+When @option{-p} is used with @var{name} arguments, additional options
+are ignored.
+
+When @option{-p} is supplied without @var{name} arguments, @code{declare}
+will display the attributes and values of all variables having the
+attributes specified by the additional options.
+If no other options are supplied with @option{-p}, @code{declare} will
+display the attributes and values of all shell variables.  The @option{-f}
+option will restrict the display to shell functions.
+
 The @option{-F} option inhibits the display of function definitions;
 only the function name and attributes are printed.
 If the @code{extdebug} shell option is enabled using @code{shopt}
@@ -3596,7 +3608,7 @@ builtin command.
 @item ulimit
 @btindex ulimit
 @example
-ulimit [-acdefilmnpqrstuvxSH] [@var{limit}]
+ulimit [-abcdefilmnpqrstuvxHST] [@var{limit}]
 @end example
 @code{ulimit} provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
@@ -3610,6 +3622,9 @@ Change and report the hard limit associated with a resource.
 
 @item -a
 All current limits are reported.
+
+@item -b
+The maximum socket buffer size.
 
 @item -c
 The maximum size of core files created.
@@ -3658,6 +3673,9 @@ The maximum amount of virtual memory available to the process.
 
 @item -x
 The maximum number of file locks.
+
+@item -T
+The maximum number of threads.
 
 @end table
 
@@ -4059,6 +4077,11 @@ If set, Bash
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+
+@item compat31
+If set, Bash
+changes its behavior to that of version 3.1 with respect to quoted
+arguments to the conditional command's =~ operator.
 
 @item dotglob
 If set, Bash includes filenames beginning with a `.' in

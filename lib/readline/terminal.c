@@ -350,7 +350,7 @@ rl_reset_screen_size ()
 void
 rl_resize_terminal ()
 {
-  if (readline_echoing_p)
+  if (_rl_echoing_p)
     {
       _rl_get_screen_size (fileno (rl_instream), 1);
       if (CUSTOM_REDISPLAY_FUNC ())
@@ -653,7 +653,7 @@ rl_crlf ()
 int
 rl_ding ()
 {
-  if (readline_echoing_p)
+  if (_rl_echoing_p)
     {
       switch (_rl_bell_preference)
         {

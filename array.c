@@ -693,7 +693,7 @@ int	quoted;
 		is = inttostr (element_index(ae), indstr, sizeof(indstr));
 		valstr = element_value (ae) ? sh_double_quote (element_value(ae))
 					    : (char *)NULL;
-		elen = STRLEN (indstr) + 8 + STRLEN (valstr);
+		elen = STRLEN (is) + 8 + STRLEN (valstr);
 		RESIZE_MALLOCED_BUFFER (result, rlen, (elen + 1), rsize, rsize);
 
 		result[rlen++] = '[';

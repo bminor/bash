@@ -124,7 +124,8 @@ extern ITEMLIST it_stopped;
 extern ITEMLIST it_users;
 extern ITEMLIST it_variables;
 
-extern COMPSPEC *curcs;
+extern COMPSPEC *pcomp_curcs;
+extern const char *pcomp_curcmd;
 
 /* Functions from pcomplib.c */
 extern COMPSPEC *compspec_create __P((void));

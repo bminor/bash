@@ -28,14 +28,12 @@ Declare variables and give them attributes.  If no NAMEs are given,
 display the attributes and values of all variables.
 
 Options:
-
   -f	restrict action or display to function names and definitions
   -F	restrict display to function names only (plus line number and
 	source file when debugging)
   -p	display the attributes and value of each NAME
 
 Options which set attributes:
-
   -a	to make NAMEs arrays (if supported)
   -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
@@ -194,6 +192,10 @@ declare_internal (list, local_var)
 	      free (vlist);
 	    }
 	}
+      else if (pflag && (flags_on == 0 || flags_on == att_function))
+	{
+	  show_all_var_attributes (flags_on == 0, nodefs);
+	}	  
       else if (flags_on == 0)
 	return (set_builtin ((WORD_LIST *)NULL));
       else

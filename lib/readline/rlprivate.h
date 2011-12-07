@@ -149,11 +149,8 @@ extern int rl_visible_stats;
 extern int rl_line_buffer_len;
 extern int rl_arg_sign;
 extern int rl_visible_prompt_length;
-extern int readline_echoing_p;
 extern int rl_key_sequence_length;
 extern int rl_byte_oriented;
-
-extern _rl_keyseq_cxt *_rl_kscxt;
 
 /* display.c */
 extern int rl_display_fixed;
@@ -400,6 +397,7 @@ extern int _rl_history_saved_point;
 extern _rl_arg_cxt _rl_argcxt;
 
 /* readline.c */
+extern int _rl_echoing_p;
 extern int _rl_horizontal_scroll_mode;
 extern int _rl_mark_modified_lines;
 extern int _rl_bell_preference;
@@ -415,7 +413,8 @@ extern FILE *_rl_in_stream;
 extern FILE *_rl_out_stream;
 extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
-extern procenv_t readline_top_level;
+extern procenv_t _rl_top_level;
+extern _rl_keyseq_cxt *_rl_kscxt;
 
 /* search.c */
 extern _rl_search_cxt *_rl_nscxt;

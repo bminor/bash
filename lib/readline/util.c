@@ -109,7 +109,7 @@ _rl_abort_internal ()
     _rl_pop_executing_macro ();
 
   rl_last_func = (rl_command_func_t *)NULL;
-  longjmp (readline_top_level, 1);
+  longjmp (_rl_top_level, 1);
   return (0);
 }
 

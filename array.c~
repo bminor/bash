@@ -329,7 +329,7 @@ int	starsub, quoted;
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, sep[2], *t;
+	char		*ifs, *sep, *t;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -354,20 +354,31 @@ int	starsub, quoted;
 
 	a2 = array_slice(a, h, p);
 
-	if (mflags & MATCH_QUOTED)
-		array_quote (a2);
+	if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+		array_quote(a2);
 	else
-		array_quote_escapes (a2);
+		array_quote_escapes(a2);
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
-		ifs = getifs();
-		sep[0] = ifs ? *ifs : '\0';
-	} else
+		/* ${array[*]} */
+		sep = ifs_firstchar ((int *)NULL);
+	} else if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) {
+		/* ${array[@]} */
+		sep = ifs_firstchar ((int *)NULL);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			sep[0] = ' ';
+			sep[1] = '\0';
+		}
+	} else {
+		sep = xmalloc (2);
 		sep[0] = ' ';
-	sep[1] = '\0';
+		sep[1] = '\0';
+	}
 
 	t = array_to_string (a2, sep, 0);
 	array_dispose(a2);
+	free (sep);
 
 	return t;
 }
@@ -380,7 +391,7 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t, *ifs, sifs[2];
+	char	*t, *sifs;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
@@ -393,14 +404,13 @@ int	mflags;
 	}
 
 	if (mflags & MATCH_QUOTED)
-		array_quote (a2);
+		array_quote(a2);
 	else
-		array_quote_escapes (a2);
+		array_quote_escapes(a2);
 	if (mflags & MATCH_STARSUB) {
-		ifs = getifs();
-		sifs[0] = ifs ? *ifs : '\0';
-		sifs[1] = '\0';
+		sifs = ifs_firstchar((int *)NULL);
 		t = array_to_string (a2, sifs, 0);
+		free(sifs);
 	} else
 		t = array_to_string (a2, " ", 0);
 	array_dispose (a2);
@@ -618,8 +628,8 @@ ARRAY	*a;
 }
 	
 /*
- * Return a string that is the concatenation of all the elements in A,
- * separated by SEP.
+ * Return a string that is the concatenation of the elements in A from START
+ * to END, separated by SEP.
  */
 static char *
 array_to_string_internal (start, end, sep, quoted)

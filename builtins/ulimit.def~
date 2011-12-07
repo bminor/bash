@@ -53,9 +53,11 @@ If LIMIT is given, it is the new value of the specified resource; the
 special LIMIT values `soft', `hard', and `unlimited' stand for the
 current soft limit, the current hard limit, and no limit, respectively.
 Otherwise, the current value of the specified resource is printed.  If
-no option is given, then -f is assumed.  Values are in 1024-byte
-increments, except for -t, which is in seconds, -p, which is in increments
-of 512 bytes, and -u, which is an unscaled number of processes.
+no option is given, then -f is assumed.
+
+Values are in 1024-byte increments, except for -t, which is in seconds,
+-p, which is in increments of 512 bytes, and -u, which is an unscaled
+number of processes.
 $END
 
 #if !defined (_MINIX)
@@ -202,7 +204,6 @@ static RESOURCE_LIMITS limits[] = {
 #endif
 #ifdef RLIMIT_DATA
   { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
-
 #endif
 #ifdef RLIMIT_NICE
   { 'e',	RLIMIT_NICE,  1,	"scheduling priority",	(char *)NULL },

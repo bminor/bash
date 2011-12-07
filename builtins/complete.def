@@ -1,5 +1,5 @@
 This file is complete.def, from which is created complete.c.
-It implements the builtins "complete" and "compgen" in Bash.
+It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
 Copyright (C) 1999-2008 Free Software Foundation, Inc.
 
@@ -25,9 +25,11 @@ $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
 $SHORT_DOC complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
-For each NAME, specify how arguments are to be completed by Readline.
-If no options are supplied, existing completion specifications are printed
-in a way that allows them to be reused as input.
+Specify how arguments are to be completed by Readline.
+
+For each NAME, specify how arguments are to be completed.  If no options
+are supplied, existing completion specifications are printed in a way that
+allows them to be reused as input.
 
 Options:
   -p	print existing completion specifications in a reusable format
@@ -72,6 +74,7 @@ static int remove_cmd_completions __P((WORD_LIST *));
 
 static int print_one_completion __P((char *, COMPSPEC *));
 static int print_compitem __P((BUCKET_CONTENTS *));
+static void print_compopts __P((const char *, COMPSPEC *, int));
 static void print_all_completions __P((void));
 static int print_cmd_completions __P((WORD_LIST *));
 
@@ -425,6 +428,14 @@ remove_cmd_completions (list)
       printf ("-o %s ", f); \
   } while (0)
 
+#define XPRINTCOMPOPT(a, f) \
+  do { \
+    if (copts & a) \
+      printf ("-o %s ", f); \
+    else \
+      printf ("+o %s ", f); \
+  } while (0)
+
 static int
 print_one_completion (cmd, cs)
      char *cmd;
@@ -489,9 +500,42 @@ print_one_completion (cmd, cs)
   /* simple arguments that don't require quoting */
   PRINTARG (cs->funcname, "-F");
 
-  printf ("%s\n", x);
+  printf ("%s\n", cmd);
 
   return (0);
+}
+
+static void
+print_compopts (cmd, cs, full)
+     const char *cmd;
+     COMPSPEC *cs;
+     int full;
+{
+  int copts;
+
+  printf ("compopt ");
+  copts = cs->options;
+
+  if (full)
+    {
+      XPRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
+      XPRINTCOMPOPT (COPT_DEFAULT, "default");
+      XPRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
+      XPRINTCOMPOPT (COPT_FILENAMES, "filenames");
+      XPRINTCOMPOPT (COPT_NOSPACE, "nospace");
+      XPRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
+    }
+  else
+    {
+      PRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
+      PRINTCOMPOPT (COPT_DEFAULT, "default");
+      PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
+      PRINTCOMPOPT (COPT_FILENAMES, "filenames");
+      PRINTCOMPOPT (COPT_NOSPACE, "nospace");
+      PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
+    }
+
+  printf ("%s\n", cmd);
 }
 
 static int
@@ -540,10 +584,11 @@ $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
 $SHORT_DOC compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
-Display the possible completions depending on the options.  Intended
-to be used from within a shell function generating possible completions.
-If the optional WORD argument is supplied, matches against WORD are
-generated.
+Display the possible completions depending on the options.
+
+Intended to be used from within a shell function generating possible
+completions.  If the optional WORD argument is supplied, matches against
+WORD are generated.
 $END
 
 int
@@ -627,4 +672,111 @@ compgen_builtin (list)
 
   compspec_dispose (cs);
   return (rval);
+}
+
+$BUILTIN compopt
+$DEPENDS_ON PROGRAMMABLE_COMPLETION
+$FUNCTION compopt_builtin
+$SHORT_DOC compopt [-o|+o option] [name ...]
+Modify or display completion options.
+
+Modify the completion options for each NAME, or, if no NAMEs are supplied,
+the completion currently begin executed.  If no OPTIONs are givenm, print
+the completion options for each NAME or the current completion specification.
+
+Options:
+	-o option	Set completion option OPTION for each NAME
+
+Using `+o' instead of `-o' turns off the specified option.
+
+Arguments:
+
+Each NAME refers to a command for which a completion specification must
+have previously been defined using the `complete' builtin.  If no NAMEs
+are supplied, compopt must be called by a function currently generating
+completions, and the options for that currently-executing completion
+generator are modified.
+$END
+
+int
+compopt_builtin (list)
+     WORD_LIST *list;
+{
+  int opts_on, opts_off, *opts, opt, oind, ret;
+  WORD_LIST *l;
+  COMPSPEC *cs;
+
+  opts_on = opts_off = 0;
+  ret = EXECUTION_SUCCESS;
+
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "+o:")) != EOF)
+    {
+      opts = (list_opttype == '-') ? &opts_on : &opts_off;
+
+      switch (opt)
+	{
+	case 'o':
+	  oind = find_compopt (list_optarg);
+	  if (oind < 0)
+	    {
+	      sh_invalidoptname (list_optarg);
+	      return (EX_USAGE);
+	    }
+	  *opts |= compopts[oind].optflag;
+	  break;
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+  list = loptend;
+
+  if (list == 0)
+    {
+      if (RL_ISSTATE (RL_STATE_COMPLETING) == 0 || pcomp_curcs == 0)
+	{
+	  builtin_error (_("not currently executing completion function"));
+	  return (EXECUTION_FAILURE);
+	}
+      cs = pcomp_curcs;
+
+      if (opts_on == 0 && opts_off == 0)
+	{
+	  print_compopts (pcomp_curcmd, cs, 1);
+          return (sh_chkwrite (ret));
+	}
+
+      /* Set the compspec options */
+      pcomp_set_compspec_options (cs, opts_on, 1);
+      pcomp_set_compspec_options (cs, opts_off, 0);
+
+      /* And change the readline variables the options control */
+      pcomp_set_readline_variables (opts_on, 1);
+      pcomp_set_readline_variables (opts_off, 0);
+
+      return (ret);
+    }
+
+  for (l = list; l; l = l->next)
+    {
+      cs = progcomp_search (l->word->word);
+      if (cs == 0)
+	{
+	  builtin_error (_("%s: no completion specification"), l->word->word);
+	  ret = EXECUTION_FAILURE;
+	  continue;
+	}
+      if (opts_on == 0 && opts_off == 0)
+	{
+	  print_compopts (l->word->word, cs, 1);
+	  continue;			/* XXX -- fill in later */
+	}
+
+      /* Set the compspec options */
+      pcomp_set_compspec_options (cs, opts_on, 1);
+      pcomp_set_compspec_options (cs, opts_off, 0);
+    }
+
+  return (ret);
 }

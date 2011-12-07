@@ -57,7 +57,6 @@ Marks each NAME for automatic export to the environment of subsequently
 executed commands.  If VALUE is supplied, assign VALUE before exporting.
 
 Options:
-
   -f	refer to shell functions
   -n	remove the export property from each NAME
   -p	display a list of all exported variables and functions
@@ -85,7 +84,6 @@ changed by subsequent assignment.  If VALUE is supplied, assign VALUE
 before marking as read-only.
 
 Options:
-
   -a	refer to array variables
   -f	refer to shell functions
   -p	display a list of all readonly variables and functions
@@ -288,6 +286,30 @@ set_or_show_attributes (list, attribute, nodefs)
   return (assign_error ? EX_BADASSIGN
 		       : ((any_failed == 0) ? EXECUTION_SUCCESS
   					    : EXECUTION_FAILURE));
+}
+
+/* Show all variable variables (v == 1) or functions (v == 0) with
+   attributes. */
+int
+show_all_var_attributes (v, nodefs)
+     int v, nodefs;
+{
+  SHELL_VAR **variable_list;
+  int any_failed;
+  register int i;
+
+  variable_list = v ? all_shell_variables () : all_shell_functions ();
+  if (variable_list == 0)  
+    return (EXECUTION_SUCCESS);
+
+  for (i = any_failed = 0; var = variable_list[i]; i++)
+    {
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      if (any_failed = sh_chkwrite (any_failed))
+        break;
+    }
+  free (variable_list);
+  return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
 /* Show the attributes for shell variable VAR.  If NODEFS is non-zero,

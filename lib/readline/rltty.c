@@ -201,7 +201,7 @@ set_tty_settings (tty, tiop)
       ioctl (tty, TIOCSETN, &(tiop->sgttyb));
       tiop->flags &= ~SGTTY_SET;
     }
-  readline_echoing_p = 1;
+  _rl_echoing_p = 1;
 
 #if defined (TIOCLSET)
   if (tiop->flags & LFLAG_SET)
@@ -235,7 +235,7 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
      int meta_flag;
      TIOTYPE oldtio, *tiop;
 {
-  readline_echoing_p = (oldtio.sgttyb.sg_flags & ECHO);
+  _rl_echoing_p = (oldtio.sgttyb.sg_flags & ECHO);
 
   /* Copy the original settings to the structure we're going to use for
      our settings. */
@@ -513,7 +513,7 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
      int meta_flag;
      TIOTYPE oldtio, *tiop;
 {
-  readline_echoing_p = (oldtio.c_lflag & ECHO);
+  _rl_echoing_p = (oldtio.c_lflag & ECHO);
 
   tiop->c_lflag &= ~(ICANON | ECHO);
 
@@ -576,7 +576,7 @@ void
 rl_prep_terminal (meta_flag)
      int meta_flag;
 {
-  readline_echoing_p = 1;
+  _rl_echoing_p = 1;
 }
 
 void
@@ -609,7 +609,7 @@ rl_prep_terminal (meta_flag)
 #else
       if (errno == ENOTTY || errno == EINVAL)
 #endif
-	readline_echoing_p = 1;		/* XXX */
+	_rl_echoing_p = 1;		/* XXX */
 
       _rl_release_sigint ();
       return;

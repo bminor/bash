@@ -163,7 +163,7 @@ int rl_done;
 rl_command_func_t *rl_last_func = (rl_command_func_t *)NULL;
 
 /* Top level environment for readline_internal (). */
-procenv_t readline_top_level;
+procenv_t _rl_top_level;
 
 /* The streams we interact with. */
 FILE *_rl_in_stream, *_rl_out_stream;
@@ -176,7 +176,7 @@ FILE *rl_outstream = (FILE *)NULL;
    set to 1 if there is a controlling terminal, we can get its attributes,
    and the attributes include `echo'.  Look at rltty.c:prepare_terminal_settings
    for the code that sets it. */
-int readline_echoing_p = 0;
+int _rl_echoing_p = 0;
 
 /* Current prompt. */
 char *rl_prompt = (char *)NULL;
@@ -371,7 +371,7 @@ readline_internal_setup ()
   /* If we're not echoing, we still want to at least print a prompt, because
      rl_redisplay will not do it for us.  If the calling application has a
      custom redisplay function, though, let that function handle it. */
-  if (readline_echoing_p == 0 && rl_redisplay_function == rl_redisplay)
+  if (_rl_echoing_p == 0 && rl_redisplay_function == rl_redisplay)
     {
       if (rl_prompt && rl_already_prompted == 0)
 	{
@@ -484,7 +484,7 @@ readline_internal_charloop ()
 #endif
       lk = _rl_last_command_was_kill;
 
-      code = setjmp (readline_top_level);
+      code = setjmp (_rl_top_level);
 
       if (code)
 	{
@@ -492,7 +492,7 @@ readline_internal_charloop ()
 	  _rl_want_redisplay = 0;
 	  /* If we get here, we're not being called from something dispatched
 	     from _rl_callback_read_char(), which sets up its own value of
-	     readline_top_level (saving and restoring the old, of course), so
+	     _rl_top_level (saving and restoring the old, of course), so
 	     we can just return here. */
 	  if (RL_ISSTATE (RL_STATE_CALLBACK))
 	    return (0);
