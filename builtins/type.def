@@ -108,14 +108,14 @@ int
 type_builtin (list)
      WORD_LIST *list;
 {
-  int dflags, successful_finds, opt;
+  int dflags, any_failed, opt;
   WORD_LIST *this;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
 
   dflags = CDESC_SHORTDESC;	/* default */
-  successful_finds = 0;
+  any_failed = 0;
 
   /* Handle the obsolescent `-type', `-path', and `-all' by prescanning
      the arguments and converting those options to the form that
@@ -181,11 +181,11 @@ type_builtin (list)
       if (!found && (dflags & (CDESC_PATH_ONLY|CDESC_TYPE)) == 0)
 	sh_notfound (list->word->word);
 
-      successful_finds += found;
+      any_failed += found == 0;
       list = list->next;
     }
 
-  opt = (successful_finds != 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+  opt = (any_failed == 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
   return (sh_chkwrite (opt));
 }
 

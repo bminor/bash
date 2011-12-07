@@ -14914,3 +14914,52 @@ pathexp.c
 	  code will interpret backslashes as quoting characters internally.
 	  Bug reported by <herbert@gondor.apana.org.au> on the debian list
 	  (443685)
+
+				   10/8
+				   ----
+lib/readline/display.c
+	- in update_line, make sure _rl_last_c_pos is > 0 before setting
+	  cpos_adjusted (or we actually moved the cursor to column 0 in
+	  _rl_move_cursor_relative).  Fixes redisplay bug with prompt with
+	  only invisible characters reported by dAniel hAhler
+	  <ubuntu@thequod.de>
+
+				   10/10
+				   -----
+lib/readline/display.c
+	- in rl_redisplay, when calculating the new physical cursor position
+	  in a multibyte locale (`tx'), do not call rl_backspace if tx ends
+	  up < 0.  Rest of fix for bug reported by dAniel hAhler
+	  <ubuntu@thequod.de>
+
+				   10/12
+				   -----
+lib/sh/getcwd.c
+	- fix memory overwrite problem that's possible if buf is NULL and
+	  passed size is greater than the pathname length.  Reported by
+	  Ian Campbell <ian.campbell@xensource.com>
+
+builtins/ulimit.def
+	- change the multiplier for the -c and -f options (`blocks') to 512,
+	  the traditional value (and the one POSIX specifies).  Bug reported
+	  by Pete Graner <pgraner@redhat.com>
+
+braces.c
+	- pass process substitution through unchanged the same as command
+	  substitution.  Prompted by suggestion from Stephane Chazelas
+	  <stephane_chazelas@yahoo.fr>
+
+lib/readline/input.c
+	- in rl_unget_char, fix off-by-one error when resetting pop_index if
+	  it's < 0.  Bug reported by Uwe Doering <gemini@geminix.org>
+
+builtins/type.def
+	- change exit status of `type' to not successful if any of the
+	  requested commands are not found.  Reported by Stephane Chazleas
+	  <stephane_chazelas@yahoo.fr>
+
+pcomplete.c
+	- change command_line_to_word_list to use rl_completer_word_break_characters
+	  instead of the shell metacharacters to split words, so programmable
+	  completion does the same thing readline does internally.  Reported
+	  by Vasily Tarasov <vtaras@sw.ru>

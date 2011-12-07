@@ -486,8 +486,8 @@ brace_gobbler (text, tlen, indx, satisfy)
 	}
 
 #if defined (SHELL)
-      /* Pass new-style command substitutions through unchanged. */
-      if (c == '$' && text[i+1] == '(')			/* ) */
+      /* Pass new-style command and process substitutions through unchanged. */
+      if ((c == '$' || c == '<' || c == '>') && text[i+1] == '(')			/* ) */
 	{
 	  si = i + 2;
 	  t = extract_command_subst (text, &si);

@@ -14888,3 +14888,72 @@ config-top.h
 	- new builder-modifiable define:  DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS
 	  Turning it on will cause errors from EPIPE to not be reported by
 	  the normal shell write error message mechanism
+
+builtins/common.c
+	- if DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS is defined, don't print an
+	  error message from sh_wrerror if errno == EPIPE.  Suggestion from
+	  Petr Sumbera <petr.sumbera@sun.com>
+
+				   9/19
+				   ----
+{jobs,nojobs}.c,jobs.h
+	- add code to retry fork() after EAGAIN, with a progressively longer
+	  sleep between attempts, up to FORKSLEEP_MAX (16) seconds.  Suggested
+	  by Martin Koeppe <mkoeppe@gmx.de>
+
+				   9/21
+				   ----
+version.c
+	- change copyright year to 2007
+
+				   9/25
+				   ----
+pathexp.c
+	- change quote_string_for_globbing to add a backslash in front of a
+	  backslash appearing in the pathname string, since the globbing
+	  code will interpret backslashes as quoting characters internally.
+	  Bug reported by <herbert@gondor.apana.org.au> on the debian list
+	  (443685)
+
+				   10/8
+				   ----
+lib/readline/display.c
+	- in update_line, make sure _rl_last_c_pos is > 0 before setting
+	  cpos_adjusted (or we actually moved the cursor to column 0 in
+	  _rl_move_cursor_relative).  Fixes redisplay bug with prompt with
+	  only invisible characters reported by dAniel hAhler
+	  <ubuntu@thequod.de>
+
+				   10/10
+				   -----
+lib/readline/display.c
+	- in rl_redisplay, when calculating the new physical cursor position
+	  in a multibyte locale (`tx'), do not call rl_backspace if tx ends
+	  up < 0.  Rest of fix for bug reported by dAniel hAhler
+	  <ubuntu@thequod.de>
+
+				   10/12
+				   -----
+lib/sh/getcwd.c
+	- fix memory overwrite problem that's possible if buf is NULL and
+	  passed size is greater than the pathname length.  Reported by
+	  Ian Campbell <ian.campbell@xensource.com>
+
+builtins/ulimit.def
+	- change the multiplier for the -c and -f options (`blocks') to 512,
+	  the traditional value (and the one POSIX specifies).  Bug reported
+	  by Pete Graner <pgraner@redhat.com>
+
+braces.c
+	- pass process substitution through unchanged the same as command
+	  substitution.  Prompted by suggestion from Stephane Chazelas
+	  <stephane_chazelas@yahoo.fr>
+
+lib/readline/input.c
+	- in rl_unget_char, fix off-by-one error when resetting pop_index if
+	  it's < 0.  Bug reported by Uwe Doering <gemini@geminix.org>
+
+builtins/type.def
+	- change exit status of `type' to not successful if any of the
+	  requested commands are not found.  Reported by Stephane Chazleas
+	  <stephane_chazelas@yahoo.fr>

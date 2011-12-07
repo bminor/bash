@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 May 1<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 September 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -775,7 +775,7 @@ have equal precedence, followed by
 <B>;</B>
 
 and
-<B>&amp;,</B>
+<B>&amp;</B>,
 
 which have equal precedence.
 <P>
@@ -919,6 +919,8 @@ If the shell option
 
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
+Any part of the pattern may be quoted to force it to be matched as a
+string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable <B>BASH_REMATCH</B>.
 The element of <B>BASH_REMATCH</B> with index 0 is the portion of the string
@@ -9839,6 +9841,9 @@ or if the command's return value is
 being inverted via
 <B>!</B>.
 
+Failing simple commands that are part of shell functions or command lists
+enclosed in braces or parentheses satisfying the above conditions do not
+cause the shell to exit.
 A trap on <B>ERR</B>, if set, is executed before the shell exits.
 <DT><B>-f</B>
 
@@ -11024,8 +11029,9 @@ none are found.
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The <B>-H</B> and <B>-S</B> options specify that the hard or soft limit is
-set for the given resource.  A hard limit cannot be increased once it
-is set; a soft limit may be increased up to the value of the hard limit.
+set for the given resource.
+A hard limit cannot be increased by a non-root user once it is set;
+a soft limit may be increased up to the value of the hard limit.
 If neither <B>-H</B> nor <B>-S</B> is specified, both the soft and hard
 limits are set.
 The value of
@@ -11543,7 +11549,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 May 1<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 September 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11647,6 +11653,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 11 May 2007 16:18:51 EDT
+Time: 10 October 2007 09:50:38 EDT
 </BODY>
 </HTML>

@@ -26,6 +26,10 @@
   #pragma alloca
 #endif /* _AIX && RISC6000 && !__GNUC__ */
 
+#if defined (__QNX__)
+#  undef HAVE_LSTAT
+#endif
+
 #include <bashtypes.h>
 #include <errno.h>
 

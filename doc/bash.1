@@ -944,19 +944,19 @@ between single quotes, even when preceded by a backslash.
 Enclosing characters in double quotes preserves the literal value
 of all characters within the quotes, with the exception of
 .BR $ ,
-.BR ` ,
+.BR \` ,
 .BR \e ,
 and, when history expansion is enabled,
 .BR ! .
 The characters
 .B $
 and
-.B `
+.B \`
 retain their special meaning within double quotes.  The backslash
 retains its special meaning only when followed by one of the following
 characters:
 .BR $ ,
-.BR ` ,
+.BR \` ,
 \^\fB"\fP\^,
 .BR \e ,
 or
@@ -1292,7 +1292,9 @@ The command argument to the \fB\-c\fP invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of \fBFUNCNAME\fP.
 \fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
-file where \fB${FUNCNAME[\fP\fI$ifP\fB]}\fP was called.
+file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
+(or \fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP if referenced within another
+shell function).
 The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
@@ -2607,7 +2609,7 @@ the command name.  There are two forms:
 .RE
 or
 .RS
-\fB`\fP\fIcommand\fP\fB`\fP
+\fB\`\fP\fIcommand\fP\fB\`\fP
 .RE
 .PP
 .B Bash
@@ -2622,7 +2624,7 @@ the equivalent but faster \fB$(< \fIfile\fP)\fR.
 When the old-style backquote form of substitution is used,
 backslash retains its literal meaning except when followed by
 .BR $ ,
-.BR ` ,
+.BR \` ,
 or
 .BR \e .
 The first backquote not preceded by a backslash terminates the
@@ -3200,7 +3202,7 @@ must be used to quote the characters
 .BR \e ,
 .BR $ ,
 and
-.BR ` .
+.BR \` .
 .PP
 If the redirection operator is
 .BR <<\- ,
@@ -3314,7 +3316,7 @@ below).
 The first word of each simple command, if unquoted,
 is checked to see if it has an
 alias.  If so, that word is replaced by the text of the alias.
-The characters \fB/\fP, \fB$\fP, \fB`\fP, and \fB=\fP and
+The characters \fB/\fP, \fB$\fP, \fB\`\fP, and \fB=\fP and
 any of the shell \fImetacharacters\fP or quoting characters
 listed above may not appear in an alias name.
 The replacement text may contain any valid shell input,

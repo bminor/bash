@@ -1164,7 +1164,11 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
   WORD_LIST *ret;
   char *delims;
 
+#if 0
   delims = "()<>;&| \t\n";	/* shell metacharacters break words */
+#else
+  delims = rl_completer_word_break_characters;
+#endif
   ret = split_at_delims (line, llen, delims, sentinel, nwp, cwp);
   return (ret);
 }

@@ -873,8 +873,11 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       list immediately following a  wwhhiillee  or  uunnttiill  keyword,
                       part  of the test in an iiff statement, part of a &&&& or ||||
                       list, any command in a pipeline but the last, or if  the
-                      command's  return value is being inverted via !!.  A trap
-                      on EERRRR, if set, is executed before the shell exits.
+                      command's return value is being inverted via !!.  Failing
+                      simple commands that are part of shell functions or com-
+                      mand  lists enclosed in braces or parentheses satisfying
+                      the above conditions do not cause the shell to exit.   A
+                      trap on EERRRR, if set, is executed before the shell exits.
               --ff      Disable pathname expansion.
               --hh      Remember the location of commands as they are looked  up
                       for execution.  This is enabled by default.
@@ -1338,18 +1341,18 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               Provides control over the resources available to the  shell  and
               to  processes started by it, on systems that allow such control.
               The --HH and --SS options specify that the hard or soft limit is set
-              for  the  given resource.  A hard limit cannot be increased once
-              it is set; a soft limit may be increased up to the value of  the
-              hard  limit.   If  neither --HH nor --SS is specified, both the soft
-              and hard limits are set.  The value of _l_i_m_i_t can be a number  in
-              the unit specified for the resource or one of the special values
-              hhaarrdd, ssoofftt, or uunnlliimmiitteedd,  which  stand  for  the  current  hard
-              limit,  the  current soft limit, and no limit, respectively.  If
-              _l_i_m_i_t is omitted, the current value of the  soft  limit  of  the
-              resource  is  printed, unless the --HH option is given.  When more
-              than one resource is specified, the  limit  name  and  unit  are
-              printed before the value.  Other options are interpreted as fol-
-              lows:
+              for  the  given resource.  A hard limit cannot be increased by a
+              non-root user once it is set; a soft limit may be  increased  up
+              to  the value of the hard limit.  If neither --HH nor --SS is speci-
+              fied, both the soft and hard limits are set.  The value of _l_i_m_i_t
+              can be a number in the unit specified for the resource or one of
+              the special values hhaarrdd, ssoofftt, or uunnlliimmiitteedd, which stand for the
+              current  hard  limit,  the  current  soft  limit,  and no limit,
+              respectively.  If _l_i_m_i_t is omitted, the  current  value  of  the
+              soft  limit  of the resource is printed, unless the --HH option is
+              given.  When more than one resource is specified, the limit name
+              and unit are printed before the value.  Other options are inter-
+              preted as follows:
               --aa     All current limits are reported
               --cc     The maximum size of core files created
               --dd     The maximum size of a process's data segment

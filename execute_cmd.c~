@@ -3011,7 +3011,7 @@ run_builtin:
   if (builtin || func)
     {
       if (builtin)
-	unwind_protect_int (executing_builtin);
+	unwind_protect_int (executing_builtin);	/* modified in execute_builtin */
       if (already_forked)
 	{
 	  /* reset_terminating_signals (); */	/* XXX */
@@ -3309,6 +3309,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   array_push (bash_source_a, sfile);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
+itrace("execute_function: pushed %s to BASH_LINENO", t);
   free (t);
 #endif
 
@@ -3575,6 +3576,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
 
   /* We do this before undoing the effects of any redirections. */
   fflush (stdout);
+  fpurge (stdout);
   if (ferror (stdout))
     clearerr (stdout);  
 

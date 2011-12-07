@@ -272,7 +272,7 @@ describe_command (command, dflags)
 
 	  /* We're blowing away THE_PRINTED_COMMAND here... */
 
-	  result = named_function_string (command, function_cell (func), FUNC_MULTILINE);
+	  result = named_function_string (command, function_cell (func), FUNC_MULTILINE|FUNC_EXTERNAL);
 	  printf ("%s\n", result);
 	}
       else if (dflags & CDESC_REUSABLE)

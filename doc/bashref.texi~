@@ -3655,6 +3655,8 @@ If @var{limit} is given, it is the new value of the specified resource;
 the special @var{limit} values @code{hard}, @code{soft}, and
 @code{unlimited} stand for the current hard limit, the current soft limit,
 and no limit, respectively.
+A hard limit cannot be increased by a non-root user once it is set;
+a soft limit may be increased up to the value of the hard limit.
 Otherwise, the current value of the soft limit for the specified resource
 is printed, unless the @option{-H} option is supplied.
 When setting new limits, if neither @option{-H} nor @option{-S} is supplied,
@@ -3730,6 +3732,9 @@ part of the test in an @code{if} statement,
 part of a @code{&&} or @code{||} list,
 any command in a pipeline but the last,
 or if the command's return status is being inverted using @code{!}.
+Failing simple commands that are part of shell functions or command lists
+enclosed in braces or parentheses satisfying the above conditions do not
+cause the shell to exit.
 A trap on @code{ERR}, if set, is executed before the shell exits.
 
 @item -f

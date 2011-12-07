@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue May  1 10:05:17 EDT 2007
+.\"	Last Change: Fri Sep 14 13:44:37 EDT 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2007 May 1" "GNU Bash-3.2"
+.TH BASH 1 "2007 September 14" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -944,19 +944,19 @@ between single quotes, even when preceded by a backslash.
 Enclosing characters in double quotes preserves the literal value
 of all characters within the quotes, with the exception of
 .BR $ ,
-.BR ` ,
+.BR \` ,
 .BR \e ,
 and, when history expansion is enabled,
 .BR ! .
 The characters
 .B $
 and
-.B `
+.B \`
 retain their special meaning within double quotes.  The backslash
 retains its special meaning only when followed by one of the following
 characters:
 .BR $ ,
-.BR ` ,
+.BR \` ,
 \^\fB"\fP\^,
 .BR \e ,
 or
@@ -1291,8 +1291,8 @@ The command argument to the \fB\-c\fP invocation option.
 .B BASH_LINENO
 An array variable whose members are the line numbers in source files
 corresponding to each member of \fBFUNCNAME\fP.
-\fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
-file where \fB${FUNCNAME[\fP\fI$ifP\fB]}\fP was called.
+\fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP is the line number in the source
+file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called.
 The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
@@ -2607,7 +2607,7 @@ the command name.  There are two forms:
 .RE
 or
 .RS
-\fB`\fP\fIcommand\fP\fB`\fP
+\fB\`\fP\fIcommand\fP\fB\`\fP
 .RE
 .PP
 .B Bash
@@ -2622,7 +2622,7 @@ the equivalent but faster \fB$(< \fIfile\fP)\fR.
 When the old-style backquote form of substitution is used,
 backslash retains its literal meaning except when followed by
 .BR $ ,
-.BR ` ,
+.BR \` ,
 or
 .BR \e .
 The first backquote not preceded by a backslash terminates the
@@ -3200,7 +3200,7 @@ must be used to quote the characters
 .BR \e ,
 .BR $ ,
 and
-.BR ` .
+.BR \` .
 .PP
 If the redirection operator is
 .BR <<\- ,
@@ -3314,7 +3314,7 @@ below).
 The first word of each simple command, if unquoted,
 is checked to see if it has an
 alias.  If so, that word is replaced by the text of the alias.
-The characters \fB/\fP, \fB$\fP, \fB`\fP, and \fB=\fP and
+The characters \fB/\fP, \fB$\fP, \fB\`\fP, and \fB=\fP and
 any of the shell \fImetacharacters\fP or quoting characters
 listed above may not appear in an alias name.
 The replacement text may contain any valid shell input,
@@ -7672,6 +7672,9 @@ any command in a pipeline but the last,
 or if the command's return value is
 being inverted via
 .BR ! .
+Failing simple commands that are part of shell functions or command lists
+enclosed in braces or parentheses satisfying the above conditions do not
+cause the shell to exit.
 A trap on \fBERR\fP, if set, is executed before the shell exits.
 .TP 8
 .B \-f
@@ -8592,8 +8595,9 @@ none are found.
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The \fB\-H\fP and \fB\-S\fP options specify that the hard or soft limit is
-set for the given resource.  A hard limit cannot be increased once it
-is set; a soft limit may be increased up to the value of the hard limit.
+set for the given resource.
+A hard limit cannot be increased by a non-root user once it is set;
+a soft limit may be increased up to the value of the hard limit.
 If neither \fB\-H\fP nor \fB\-S\fP is specified, both the soft and hard
 limits are set.
 The value of

@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -305,6 +305,7 @@ static int uidget __P((void));
 
 static void init_interactive __P((void));
 static void init_noninteractive __P((void));
+static void init_interactive_script __P((void));
 
 static void set_shell_name __P((char *));
 static void shell_initialize __P((void));
@@ -1393,12 +1394,14 @@ open_shell_script (script_name)
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
 
   array_push (bash_source_a, filename);
+#if 0
   if (bash_lineno_a)
     {
       t = itos (executing_line_number ());
       array_push (bash_lineno_a, t);
       free (t);
     }
+#endif
   array_push (funcname_a, "main");
 #endif
 
@@ -1480,7 +1483,7 @@ open_shell_script (script_name)
     /* But if a script is called with something like `bash -i scriptname',
        we need to do a non-interactive setup here, since we didn't do it
        before. */
-    init_noninteractive ();
+    init_interactive_script ();
 
   free (filename);
   return (fd);
@@ -1573,8 +1576,8 @@ set_shell_name (argv0)
 static void
 init_interactive ()
 {
-  interactive_shell = startup_state = interactive = 1;
-  expand_aliases = 1;
+  expand_aliases = interactive_shell = startup_state = 1;
+  interactive = 1;
 }
 
 static void
@@ -1589,6 +1592,13 @@ init_noninteractive ()
 #if defined (JOB_CONTROL)
   set_job_control (0);
 #endif /* JOB_CONTROL */
+}
+
+static void
+init_interactive_script ()
+{
+  init_noninteractive ();
+  expand_aliases = interactive_shell = startup_state = 1;
 }
 
 void

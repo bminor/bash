@@ -329,7 +329,7 @@ hpux10*-*gcc*)
 	SHOBJ_LD='${CC}'
 	# if you have problems linking here, moving the `-Wl,+h,$@' from
 	# SHLIB_XLDFLAGS to SHOBJ_LDFLAGS has been reported to work
-	SHOBJ_LDFLAGS='-shared -Wl,-b -Wl,+s'
+	SHOBJ_LDFLAGS='-shared -fpic -Wl,-b -Wl,+s'
 
 	SHLIB_XLDFLAGS='-Wl,+h,$@ -Wl,+b,$(libdir)'
 	SHLIB_LIBSUFF='sl'

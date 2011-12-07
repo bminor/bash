@@ -199,15 +199,16 @@ typedef struct {
 
 static RESOURCE_LIMITS limits[] = {
 #ifdef RLIMIT_CORE
-  { 'c',	RLIMIT_CORE,  1024,	"core file size",	"blocks" },
+  { 'c',	RLIMIT_CORE,  512,	"core file size",	"blocks" },
 #endif
 #ifdef RLIMIT_DATA
   { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
+
 #endif
 #ifdef RLIMIT_NICE
   { 'e',	RLIMIT_NICE,  1,	"scheduling priority",	(char *)NULL },
 #endif
-  { 'f',	RLIMIT_FILESIZE, 1024,	"file size",		"blocks" },
+  { 'f',	RLIMIT_FILESIZE, 512,	"file size",		"blocks" },
 #ifdef RLIMIT_SIGPENDING
   { 'i',	RLIMIT_SIGPENDING, 1,	"pending signals",	(char *)NULL },
 #endif

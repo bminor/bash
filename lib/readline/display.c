@@ -1102,7 +1102,7 @@ rl_redisplay ()
 		tx = _rl_col_width (&visible_line[pos], 0, nleft) - visible_wrap_offset;
 	      else
 		tx = nleft;
-	      if (_rl_last_c_pos > tx)
+	      if (tx >= 0 && _rl_last_c_pos > tx)
 		{
 	          _rl_backspace (_rl_last_c_pos - tx);	/* XXX */
 	          _rl_last_c_pos = tx;
@@ -1251,7 +1251,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      int current_line, omax, nmax, inv_botlin;
 {
   register char *ofd, *ols, *oe, *nfd, *nls, *ne;
-  int temp, lendiff, wsatend, od, nd, twidth;
+  int temp, lendiff, wsatend, od, nd, twidth, o_cpos;
   int current_invis_chars;
   int col_lendiff, col_temp;
 #if defined (HANDLE_MULTIBYTE)
@@ -1514,6 +1514,8 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	_rl_last_c_pos = lendiff + modmark;
     }
 
+  o_cpos = _rl_last_c_pos;
+
   /* When this function returns, _rl_last_c_pos is correct, and an absolute
      cursor postion in multibyte mode, but a buffer index when not in a
      multibyte locale. */
@@ -1523,7 +1525,9 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   /* We need to indicate that the cursor position is correct in the presence of
      invisible characters in the prompt string.  Let's see if setting this when
      we make sure we're at the end of the drawn prompt string works. */
-  if (current_line == 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0 && _rl_last_c_pos == prompt_physical_chars)
+  if (current_line == 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0 &&
+      (_rl_last_c_pos > 0 || o_cpos > 0) &&
+      _rl_last_c_pos == prompt_physical_chars)
     cpos_adjusted = 1;
 #endif
 #endif

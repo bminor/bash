@@ -4395,7 +4395,8 @@ The command argument to the @option{-c} invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of @var{FUNCNAME}.
 @code{$@{BASH_LINENO[$i]@}} is the line number in the source file where
-@code{$@{FUNCNAME[$i]@}} was called.
+@code{$@{FUNCNAME[$i]@}} was called (or @code{$@{BASH_LINENO[$i-1]@}} if
+referenced within another shell function).
 The corresponding source file name is @code{$@{BASH_SOURCE[$i]@}}.
 Use @code{LINENO} to obtain the current line number.
 
