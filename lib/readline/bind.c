@@ -317,7 +317,7 @@ rl_macro_bind (keyseq, macro, map)
 
   if (rl_translate_keyseq (macro, macro_keys, &macro_keys_len))
     {
-      free (macro_keys);
+      xfree (macro_keys);
       return -1;
     }
   rl_generic_bind (ISMACR, keyseq, macro_keys, map);
@@ -347,7 +347,7 @@ rl_generic_bind (type, keyseq, data, map)
   if (keyseq == 0 || *keyseq == 0)
     {
       if (type == ISMACR)
-	free (data);
+	xfree (data);
       return -1;
     }
 
@@ -358,7 +358,7 @@ rl_generic_bind (type, keyseq, data, map)
      KEYS into KEYS_LEN. */
   if (rl_translate_keyseq (keyseq, keys, &keys_len))
     {
-      free (keys);
+      xfree (keys);
       return -1;
     }
 
@@ -371,7 +371,7 @@ rl_generic_bind (type, keyseq, data, map)
       ic = uc;
       if (ic < 0 || ic >= KEYMAP_SIZE)
         {
-          free (keys);
+          xfree (keys);
 	  return -1;
         }
 
@@ -414,7 +414,7 @@ rl_generic_bind (type, keyseq, data, map)
       else
 	{
 	  if (map[ic].type == ISMACR)
-	    free ((char *)map[ic].function);
+	    xfree ((char *)map[ic].function);
 	  else if (map[ic].type == ISKMAP)
 	    {
 	      map = FUNCTION_TO_KEYMAP (map, ic);
@@ -427,7 +427,7 @@ rl_generic_bind (type, keyseq, data, map)
 
       rl_binding_keymap = map;
     }
-  free (keys);
+  xfree (keys);
   return 0;
 }
 
@@ -793,7 +793,7 @@ _rl_read_file (filename, sizep)
 
   if (i < 0)
     {
-      free (buffer);
+      xfree (buffer);
       return ((char *)NULL);
     }
 
@@ -863,7 +863,7 @@ _rl_read_init_file (filename, include_level)
 
   openname = tilde_expand (filename);
   buffer = _rl_read_file (openname, &file_size);
-  free (openname);
+  xfree (openname);
 
   if (buffer == 0)
     return (errno);
@@ -911,7 +911,7 @@ _rl_read_init_file (filename, include_level)
       current_readline_init_lineno++;
     }
 
-  free (buffer);
+  xfree (buffer);
   currently_reading_init_file = 0;
   return (0);
 }
@@ -1002,7 +1002,7 @@ parser_if (args)
 	 `$if term=sun-cmd' into their .inputrc. */
       _rl_parsing_conditionalized_out = _rl_stricmp (args + 5, tname) &&
 					_rl_stricmp (args + 5, rl_terminal_name);
-      free (tname);
+      xfree (tname);
     }
 #if defined (VI_MODE)
   else if (_rl_strnicmp (args, "mode=", 5) == 0)
@@ -1352,7 +1352,7 @@ rl_parse_and_bind (string)
       else
 	rl_bind_keyseq (seq, rl_named_function (funname));
 
-      free (seq);
+      xfree (seq);
       return 0;
     }
 
@@ -1695,7 +1695,7 @@ sv_isrchterm (value)
   rl_translate_keyseq (v + beg, _rl_isearch_terminators, &end);
   _rl_isearch_terminators[end] = '\0';
 
-  free (v);
+  xfree (v);
   return 0;
 }
       
@@ -1856,7 +1856,7 @@ rl_list_funmap_names ()
   for (i = 0; funmap_names[i]; i++)
     fprintf (rl_outstream, "%s\n", funmap_names[i]);
 
-  free (funmap_names);
+  xfree (funmap_names);
 }
 
 static char *
@@ -2022,7 +2022,7 @@ rl_invoking_keyseqs_in_map (function, map)
 		  }
 		
 		strcat (keyname, seqs[i]);
-		free (seqs[i]);
+		xfree (seqs[i]);
 
 		if (result_index + 2 > result_size)
 		  {
@@ -2034,7 +2034,7 @@ rl_invoking_keyseqs_in_map (function, map)
 		result[result_index] = (char *)NULL;
 	      }
 
-	    free (seqs);
+	    xfree (seqs);
 	  }
 	  break;
 	}
@@ -2086,10 +2086,10 @@ rl_function_dumper (print_readably)
 		{
 		  fprintf (rl_outstream, "\"%s\": %s\n",
 			   invokers[j], name);
-		  free (invokers[j]);
+		  xfree (invokers[j]);
 		}
 
-	      free (invokers);
+	      xfree (invokers);
 	    }
 	}
       else
@@ -2113,9 +2113,9 @@ rl_function_dumper (print_readably)
 		fprintf (rl_outstream, "...\n");
 
 	      for (j = 0; invokers[j]; j++)
-		free (invokers[j]);
+		xfree (invokers[j]);
 
-	      free (invokers);
+	      xfree (invokers);
 	    }
 	}
     }
@@ -2161,8 +2161,8 @@ _rl_macro_dumper_internal (print_readably, map, prefix)
 	    fprintf (rl_outstream, "%s%s outputs %s\n", prefix ? prefix : "",
 							keyname,
 							out ? out : "");
-	  free (keyname);
-	  free (out);
+	  xfree (keyname);
+	  xfree (out);
 	  break;
 	case ISFUNC:
 	  break;
@@ -2185,13 +2185,13 @@ _rl_macro_dumper_internal (print_readably, map, prefix)
 		  out = (char *)xmalloc (strlen (keyname) + prefix_len + 1);
 		  strcpy (out, prefix);
 		  strcpy (out + prefix_len, keyname);
-		  free (keyname);
+		  xfree (keyname);
 		  keyname = out;
 		}
 	    }
 
 	  _rl_macro_dumper_internal (print_readably, FUNCTION_TO_KEYMAP (map, key), keyname);
-	  free (keyname);
+	  xfree (keyname);
 	  break;
 	}
     }
@@ -2252,7 +2252,7 @@ _rl_get_string_variable_value (name)
       if (ret)
 	{
 	  strncpy (numbuf, ret, sizeof (numbuf) - 1);
-	  free (ret);
+	  xfree (ret);
 	  numbuf[sizeof(numbuf) - 1] = '\0';
 	}
       else

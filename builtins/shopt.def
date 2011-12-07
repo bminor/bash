@@ -71,7 +71,7 @@ extern int allow_null_glob_expansion, fail_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
 extern int no_exit_on_failed_exec, print_shift_error;
 extern int check_hashed_filenames, promptvars;
-extern int cdspelling, expand_aliases;
+extern int cdspelling, dircomplete_spelling, expand_aliases;
 extern int extended_quote;
 extern int check_window_size;
 extern int glob_ignore_case, match_ignore_case;
@@ -80,6 +80,7 @@ extern int xpg_echo;
 extern int gnu_error_format;
 extern int check_jobs_at_exit;
 extern int autocd;
+extern int glob_star;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -142,6 +143,7 @@ static struct {
   { "cmdhist", &command_oriented_history, (shopt_set_func_t *)NULL },
 #endif
   { "compat31", &shopt_compat31, set_compatibility_level },
+  { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
   { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
@@ -156,6 +158,7 @@ static struct {
 #if defined (READLINE)
   { "force_fignore", &force_fignore, (shopt_set_func_t *)NULL },
 #endif
+  { "globstar", &glob_star, (shopt_set_func_t *)NULL },
   { "gnu_errfmt", &gnu_error_format, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "histappend", &force_append_history, (shopt_set_func_t *)NULL },

@@ -1013,24 +1013,6 @@ timespec:	TIME
 	;
 %%
 
-/* Possible states for the parser that require it to do special things. */
-#define PST_CASEPAT	0x0001		/* in a case pattern list */
-#define PST_ALEXPNEXT	0x0002		/* expand next word for aliases */
-#define PST_ALLOWOPNBRC	0x0004		/* allow open brace for function def */
-#define PST_NEEDCLOSBRC	0x0008		/* need close brace */
-#define PST_DBLPAREN	0x0010		/* double-paren parsing */
-#define PST_SUBSHELL	0x0020		/* ( ... ) subshell */
-#define PST_CMDSUBST	0x0040		/* $( ... ) command substitution */
-#define PST_CASESTMT	0x0080		/* parsing a case statement */
-#define PST_CONDCMD	0x0100		/* parsing a [[...]] command */
-#define PST_CONDEXPR	0x0200		/* parsing the guts of [[...]] */
-#define PST_ARITHFOR	0x0400		/* parsing an arithmetic for command */
-#define PST_ALEXPAND	0x0800		/* OK to expand aliases - unused */
-#define PST_CMDTOKEN	0x1000		/* command token OK - unused */
-#define PST_COMPASSIGN	0x2000		/* parsing x=(...) compound assignment */
-#define PST_ASSIGNOK	0x4000		/* assignment statement ok in this context */
-#define PST_REGEXP	0x8000		/* parsing an ERE/BRE as a single word */
-
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
 #define TOKEN_DEFAULT_INITIAL_SIZE 496

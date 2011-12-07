@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -297,6 +297,9 @@ extern int check_binary_file __P((char *, int));
 extern int same_file __P((char *, char *, struct stat *, struct stat *));
 #endif
 
+extern int sh_openpipe __P((int *));
+extern int sh_closepipe __P((int *));
+
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
 extern int absolute_pathname __P((const char *));
@@ -306,6 +309,7 @@ extern char *make_absolute __P((char *, char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
+extern char *trim_pathname __P((char *, int));
 
 extern char *extract_colon_unit __P((char *, int *));
 

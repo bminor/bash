@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Apr 12 17:15:24 EDT 2008
+.\"	Last Change: Sun May  4 22:27:45 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 April 12" "GNU Bash-3.2"
+.TH BASH 1 "2008 May 4" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2872,6 +2872,12 @@ The special pattern characters have the following meanings:
 .TP
 .B *
 Matches any string, including the null string.
+When the \fBglobstar\fP shell option is enabled, and \fB*\fP is used in
+a filename expansion context, two adjacent \fB*\fPs used as a single
+pattern will match all files and zero or more directories and
+subdirectories.
+If followed by a \fB/\fP, two adjacent \fB*\fPs will match only directories
+and subdirectories.
 .TP
 .B ?
 Matches any single character.
@@ -3791,7 +3797,12 @@ A full search of the directories in
 .SM
 .B PATH
 is performed only if the command is not found in the hash table.
-If the search is unsuccessful, the shell prints an error
+If the search is unsuccessful, the shell searches for a defined shell
+function named \fBcommand_not_found_handle\fP.
+If that function exists, it is invoked with the original command and
+the original command's arguments as its arguments, and the function's
+exit status becomes the exit status of the shell.
+If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 .PP
 If the search is successful, or if the command name contains
@@ -7665,6 +7676,7 @@ not echoed.
 .B \-t \fItimeout\fP
 Cause \fBread\fP to time out and return failure if a complete line of
 input is not read within \fItimeout\fP seconds.
+\fItimeout\fP may be a decimal number with a fractional portion.
 This option has no effect if \fBread\fP is not reading input from the
 terminal or a pipe.
 .TP
@@ -8200,6 +8212,12 @@ If set,
 changes its behavior to that of version 3.1 with respect to quoted
 arguments to the conditional command's =~ operator.
 .TP 8
+.B dirspell
+If set,
+.B bash
+attempts spelling correction on directory names during word completion
+if the directory name initially supplied does not exist.
+.TP 8
 .B dotglob
 If set, 
 .B bash
@@ -8276,6 +8294,12 @@ See
 \fBSHELL VARIABLES\fP
 above for a description of \fBFIGNORE\fP.
 This option is enabled by default.
+.TP 8
+.B globstar
+If set, the pattern \fB**\fP used in a filename expansion context will
+match a files and zero or more directories and subdirectories.
+If the pattern is followed by a \fB/\fP, only directories and
+subdirectories match.
 .TP 8
 .B gnu_errfmt
 If set, shell error messages are written in the standard GNU error

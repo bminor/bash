@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -272,7 +272,6 @@ static void mark_dead_jobs_as_notified __P((int));
 static void restore_sigint_handler __P((void));
 #if defined (PGRP_PIPE)
 static void pipe_read __P((int *));
-static void pipe_close __P((int *));
 #endif
 
 static struct pidstat *bgp_alloc __P((pid_t, int));
@@ -455,7 +454,7 @@ start_pipeline ()
       cleanup_the_pipeline ();
       pipeline_pgrp = 0;
 #if defined (PGRP_PIPE)
-      pipe_close (pgrp_pipe);
+      sh_closepipe (pgrp_pipe);
 #endif
     }
 
@@ -485,7 +484,7 @@ stop_pipeline (async, deferred)
 
 #if defined (PGRP_PIPE)
   /* The parent closes the process group synchronization pipe. */
-  pipe_close (pgrp_pipe);
+  sh_closepipe (pgrp_pipe);
 #endif
 
   cleanup_dead_jobs ();
@@ -1104,7 +1103,7 @@ add_process (name, pid)
 	internal_warning (_("add_process: process %5ld (%s) in the_pipeline"), (long)p->pid, p->command);
 #  endif
       if (PALIVE (p))
-        internal_warning ("add_process: pid %5ld (%s) marked as still alive", (long)p->pid, p->command);
+        internal_warning (_("add_process: pid %5ld (%s) marked as still alive"), (long)p->pid, p->command);
       p->running = PS_RECYCLED;		/* mark as recycled */
     }
 #endif
@@ -1793,16 +1792,18 @@ make_child (command, async_p)
 
 #if defined (PGRP_PIPE)
       /* Release the process group pipe, since our call to setpgid ()
-	 is done.  The last call to pipe_close is done in stop_pipeline. */
-      pipe_close (pgrp_pipe);
+	 is done.  The last call to sh_closepipe is done in stop_pipeline. */
+      sh_closepipe (pgrp_pipe);
 #endif /* PGRP_PIPE */
 
 #if 0
+      /* Don't set last_asynchronous_pid in the child */
       if (async_p)
 	last_asynchronous_pid = mypid;		/* XXX */
+      else
 #endif
 #if defined (RECYCLES_PIDS)
-      else if (last_asynchronous_pid == mypid)
+      if (last_asynchronous_pid == mypid)
         /* Avoid pid aliasing.  1 seems like a safe, unusual pid value. */
 	last_asynchronous_pid = 1;
 #endif
@@ -2213,6 +2214,7 @@ wait_sigint_handler (sig)
   /* XXX - should this be interrupt_state?  If it is, the shell will act
      as if it got the SIGINT interrupt. */
   wait_sigint_received = 1;
+
   /* Otherwise effectively ignore the SIGINT and allow the running job to
      be killed. */
   SIGRETURN (0);
@@ -3032,6 +3034,7 @@ waitchld (wpid, block)
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
       CHECK_TERMSIG;
+
       pid = WAITPID (-1, &status, waitpid_flags);
 
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
@@ -3078,7 +3081,11 @@ waitchld (wpid, block)
 	 a pipeline in backquote substitution.  Even so, I'm not
 	 sure child is ever non-zero. */
       if (child == 0)
-	continue;
+	{
+	  if (WIFEXITED (status) || WIFSIGNALED (status))
+	    js.c_reaped++;
+	  continue;
+	}
 
       /* Remember status, and whether or not the process is running. */
       child->status = status;
@@ -4073,7 +4080,7 @@ without_job_control ()
   stop_making_children ();
   start_pipeline ();
 #if defined (PGRP_PIPE)
-  pipe_close (pgrp_pipe);
+  sh_closepipe (pgrp_pipe);
 #endif
   delete_all_jobs (0);
   set_job_control (0);
@@ -4136,25 +4143,11 @@ pipe_read (pp)
     }
 }
 
-/* Close the read and write ends of PP, an array of file descriptors. */
-static void
-pipe_close (pp)
-     int *pp;
-{
-  if (pp[0] >= 0)
-    close (pp[0]);
-
-  if (pp[1] >= 0)
-    close (pp[1]);
-
-  pp[0] = pp[1] = -1;
-}
-
 /* Functional interface closes our local-to-job-control pipes. */
 void
 close_pgrp_pipe ()
 {
-  pipe_close (pgrp_pipe);
+  sh_closepipe (pgrp_pipe);
 }
 
 #endif /* PGRP_PIPE */

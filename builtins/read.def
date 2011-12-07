@@ -50,7 +50,8 @@ Options:
   -s		do not echo input coming from a terminal
   -t timeout	time out and return failure if a complete line of input is
 		not read withint TIMEOUT seconds.  The value of the TMOUT
-		variable is the default timeout.
+		variable is the default timeout.  TIMEOUT may be a
+		fractional number.
   -u fd		read from file descriptor FD instead of the standard input
 
 Exit Status:
@@ -135,7 +136,7 @@ static void
 reset_alarm ()
 {
   set_signal_handler (SIGALRM, old_alrm);
-  alarm (0);
+  falarm (0, 0);
 }
 
 /* Read the value of the shell variables whose names follow.
@@ -152,7 +153,8 @@ read_builtin (list)
   int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, fd;
-  unsigned int tmout;
+  unsigned int tmsec, tmusec;
+  long ival, uval;
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
@@ -177,7 +179,8 @@ read_builtin (list)
   USE_VAR(input_is_pipe);
 /*  USE_VAR(raw); */
   USE_VAR(edit);
-  USE_VAR(tmout);
+  USE_VAR(tmsec);
+  USE_VAR(tmusec);
   USE_VAR(nchars);
   USE_VAR(silent);
   USE_VAR(ifs_chars);
@@ -202,7 +205,7 @@ read_builtin (list)
   rlind = 0;
 #endif
 
-  tmout = 0;		/* no timeout */
+  tmsec = tmusec = 0;		/* no timeout */
   nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
 
@@ -236,8 +239,8 @@ read_builtin (list)
 	  break;
 #endif
 	case 't':
-	  code = legal_number (list_optarg, &intval);
-	  if (code == 0 || intval < 0 || intval != (unsigned int)intval)
+	  code = uconvert (list_optarg, &ival, &uval);
+	  if (code == 0 || ival < 0 || uval < 0)
 	    {
 	      builtin_error (_("%s: invalid timeout specification"), list_optarg);
 	      return (EXECUTION_FAILURE);
@@ -245,7 +248,8 @@ read_builtin (list)
 	  else
 	    {
 	      have_timeout = 1;
-	      tmout = intval;
+	      tmsec = ival;
+	      tmusec = uval;
 	    }
 	  break;
 	case 'n':
@@ -286,7 +290,7 @@ read_builtin (list)
   /* `read -t 0 var' returns failure immediately.  XXX - should it test
      whether input is available with select/FIONREAD, and fail if those
      are unavailable? */
-  if (have_timeout && tmout == 0)
+  if (have_timeout && tmsec == 0 && tmusec == 0)
     return (EXECUTION_FAILURE);
 
   /* IF IFS is unset, we use the default of " \t\n". */
@@ -302,11 +306,14 @@ read_builtin (list)
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
     {
-      code = legal_number (e, &intval);
-      if (code == 0 || intval < 0 || intval != (unsigned int)intval)
-	tmout = 0;
+      code = uconvert (e, &ival, &uval);
+      if (code == 0 || ival < 0 || uval < 0)
+	tmsec = tmusec = 0;
       else
-	tmout = intval;
+	{
+	  tmsec = ival;
+	  tmusec = uval;
+	}
     }
 
   begin_unwind_frame ("read_builtin");
@@ -349,15 +356,15 @@ read_builtin (list)
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
   saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
 
-  if (tmout > 0)
+  if (tmsec > 0 || tmusec > 0)
     {
       /* Turn off the timeout if stdin is a regular file (e.g. from
 	 input redirection). */
       if ((fstat (fd, &tsb) < 0) || S_ISREG (tsb.st_mode))
-	tmout = 0;
+	tmsec = tmusec = 0;
     }
 
-  if (tmout > 0)
+  if (tmsec > 0 || tmusec > 0)
     {
       code = setjmp (alrmbuf);
       if (code)
@@ -377,7 +384,7 @@ read_builtin (list)
       if (edit)
 	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
 #endif
-      alarm (tmout);
+      falarm (tmsec, tmusec);
     }
 
   /* If we've been asked to read only NCHARS chars, or we're using some
@@ -563,7 +570,7 @@ add_char:
     }
 #endif
 
-  if (tmout > 0)
+  if (tmsec > 0 || tmusec > 0)
     reset_alarm ();
 
   if (nchars > 0 || delim != '\n')

@@ -325,7 +325,17 @@ fc_builtin (list)
   /* "When not listing, the fc command that caused the editing shall not be
      entered into the history list." */
   if (listing == 0 && hist_last_line_added)
-    delete_last_history ();
+    {
+      delete_last_history ();
+      /* If we're editing a single command -- the last command in the
+	 history -- and we just removed the dummy command added by
+	 edit_and_execute_command (), we need to check whether or not we
+	 just removed the last command in the history and need to back
+	 the pointer up.  remember_on_history is off because we're running
+	 in parse_and_execute(). */
+      if (histbeg == histend && histend == last_hist && hlist[last_hist] == 0)
+	last_hist = histbeg = --histend;
+    }
 
   /* We print error messages for line specifications out of range. */
   if ((histbeg < 0) || (histend < 0))

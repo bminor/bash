@@ -160,6 +160,16 @@ bind_array_variable (name, ind, value, flags)
   return (bind_array_var_internal (entry, ind, value, flags));
 }
 
+SHELL_VAR *
+bind_array_element (entry, ind, value, flags)
+     SHELL_VAR *entry;
+     arrayind_t ind;
+     char *value;
+     int flags;
+{
+  return (bind_array_var_internal (entry, ind, value, flags));
+}
+                    
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
    assign VALUE to that array element by calling bind_array_variable(). */
 SHELL_VAR *

@@ -605,6 +605,10 @@ extern int rl_catch_sigwinch;
    filename completer. */
 extern rl_compentry_func_t *rl_completion_entry_function;
 
+/* Optional generator for menu completion.  Default is
+   rl_completion_entry_function (rl_filename_completion_function). */
+ extern rl_compentry_func_t *rl_menu_completion_entry_function;
+
 /* If rl_ignore_some_completions_function is non-NULL it is the address
    of a function to call after all of the possible matches have been
    generated, but before the actual completion is done to the input line.

@@ -1886,6 +1886,12 @@ The special pattern characters have the following meanings:
 @table @code
 @item *
 Matches any string, including the null string.
+When the @code{globstar} shell option is enabled, and @samp{*} is used in
+a filename expansion context, two adjacent @samp{*}s used as a single
+pattern will match all files and zero or more directories and
+subdirectories.
+If followed by a @samp{/}, two adjacent @samp{*}s will match only
+directories and subdirectories.
 @item ?
 Matches any single character.
 @item [@dots{}]
@@ -2301,7 +2307,12 @@ pathnames of executable files to avoid multiple @env{PATH} searches
 (see the description of @code{hash} in @ref{Bourne Shell Builtins}).
 A full search of the directories in @env{$PATH}
 is performed only if the command is not found in the hash table.
-If the search is unsuccessful, the shell prints an error
+If the search is unsuccessful, the shell searches for a defined shell
+function named @code{command_not_found_handle}.
+If that function exists, it is invoked with the original command and
+the original command's arguments as its arguments, and the function's
+exit status becomes the exit status of the shell.
+If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 
 @item
@@ -4138,6 +4149,11 @@ If set, Bash
 changes its behavior to that of version 3.1 with respect to quoted
 arguments to the conditional command's =~ operator.
 
+@item dirspell
+If set, Bash
+attempts spelling correction on directory names during word completion 
+if the directory name initially supplied does not exist.
+
 @item dotglob
 If set, Bash includes filenames beginning with a `.' in
 the results of filename expansion.
@@ -4206,6 +4222,12 @@ cause words to be ignored when performing word completion even if
 the ignored words are the only possible completions.
 @xref{Bash Variables}, for a description of @env{FIGNORE}.
 This option is enabled by default.
+
+@item globstar
+If set, the pattern @samp{**} used in a filename expansion context will
+match a files and zero or more directories and subdirectories.
+If the pattern is followed by a @samp{/}, only directories and
+subdirectories match.
 
 @item gnu_errfmt
 If set, shell error messages are written in the standard @sc{gnu} error

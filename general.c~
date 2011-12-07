@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,6 +69,7 @@ posix_initialize (on)
   if (on != 0)
     {
       interactive_comments = source_uses_path = expand_aliases = 1;
+      source_searches_cwd = 0;
     }
 
   /* Things that should be turned on when posix mode is disabled. */
@@ -486,6 +487,41 @@ check_binary_file (sample, sample_len)
     }
 
   return (0);
+}
+
+/* **************************************************************** */
+/*								    */
+/*		    Functions to manipulate pipes		    */
+/*								    */
+/* **************************************************************** */
+
+int
+sh_openpipe (pv)
+     int *pv;
+{
+  int r;
+
+  if ((r = pipe (pv)) < 0)
+    return r;
+
+  pv[0] = move_to_high_fd (pv[0], 1, 64);
+  pv[1] = move_to_high_fd (pv[1], 1, 64);
+
+  return 0;  
+}
+
+int
+sh_closepipe (pv)
+     int *pv;
+{
+  if (pv[0] >= 0)
+    close (pv[0]);
+
+  if (pv[1] >= 0)
+    close (pv[1]);
+
+  pv[0] = pv[1] = -1;
+  return 0;
 }
 
 /* **************************************************************** */

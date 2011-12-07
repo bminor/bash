@@ -411,7 +411,7 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
 	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
 	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
 	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
-	   input.c bashhist.c array.c arrayfunc.c sig.c pathexp.c \
+	   input.c bashhist.c array.c arrayfunc.c assoc.c sig.c pathexp.c \
 	   unwind_prot.c siglist.c bashline.c bracecomp.c error.c \
 	   list.c stringlib.c locale.c findcmd.c redir.c \
 	   pcomplete.c pcomplib.c syntax.c xmalloc.c
@@ -422,7 +422,7 @@ HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
 	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
-	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h \
+	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h assoc.h \
 	   $(BASHINCFILES)
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
@@ -440,7 +440,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
-	   alias.o array.o arrayfunc.o braces.o bracecomp.o bashhist.o \
+	   alias.o array.o arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
 	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
@@ -1076,6 +1076,14 @@ arrayfunc.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 arrayfunc.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 arrayfunc.o: $(DEFSRC)/common.h
 arrayfunc.o: ${BASHINCDIR}/shmbutil.h
+assoc.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+assoc.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h
+assoc.o: command.h ${BASHINCDIR}/stdc.h error.h
+assoc.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h
+assoc.o: assoc.h hashlib.h
+assoc.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
+assoc.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
+assoc.o: $(DEFSRC)/common.h
 braces.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 braces.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 braces.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h

@@ -23,8 +23,11 @@
 #define GX_MARKDIRS	0x001	/* mark directory names with trailing `/' */
 #define GX_NOCASE	0x002	/* ignore case */
 #define GX_MATCHDOT	0x004	/* match `.' literally */
-#define GX_ALLDIRS	0x008	/* match all directories */
-#define GX_MATCHDIRS	0x010	/* return only matching directory names */
+#define GX_MATCHDIRS	0x008	/* match only directory names */
+#define GX_ALLDIRS	0x010	/* match all directory names, no others */
+#define GX_NULLDIR	0x100	/* internal -- no directory preceding pattern */
+#define GX_ADDCURDIR	0x200	/* internal -- add passed directory name */
+#define GX_GLOBSTAR	0x400	/* turn on special handling of ** */
 
 extern int glob_pattern_p __P((const char *));
 extern char **glob_vector __P((char *, char *, int));

@@ -73,6 +73,8 @@
 #  define VI_EDITING_MODE	 0
 #endif
 
+#define RL_BOOLEAN_VARIABLE_VALUE(s)	((s)[0] == 'o' && (s)[1] == 'n' && (s)[2] == '\0')
+
 #if defined (BRACE_COMPLETION)
 extern int bash_brace_completion __P((int, int));
 #endif /* BRACE_COMPLETION */
@@ -221,6 +223,9 @@ int no_empty_command_completion;
    only possible matches.  Set to 0 if you want to match filenames if they
    are the only possible matches, even if FIGNORE says to. */
 int force_fignore = 1;
+
+/* Perform spelling correction on directory names during word completion */
+int dircomplete_spelling = 0;
 
 static char *bash_completer_word_break_characters = " \t\n\"'@><=;|&(:";
 static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
@@ -814,8 +819,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      int count, c, editing_mode;
      char *edit_command;
 {
-  char *command;
-  int r, cclc, rrs;
+  char *command, *metaval;
+  int r, cclc, rrs, metaflag;
 
   rrs = rl_readline_state;
   cclc = current_command_line_count;
@@ -842,10 +847,17 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
       command = savestring (edit_command);
     }
 
+  metaval = rl_variable_value ("input-meta");
+  metaflag = RL_BOOLEAN_VARIABLE_VALUE (metaval);
+  
   /* Now, POSIX.1-2001 and SUSv3 say that the commands executed from the
      temporary file should be placed into the history.  We don't do that
      yet. */
+  if (rl_deprep_term_function)
+    (*rl_deprep_term_function) ();
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
+  if (rl_prep_term_function)
+    (*rl_prep_term_function) (metaflag);
 
   current_command_line_count = cclc;
 
@@ -1260,7 +1272,7 @@ command_word_completion_function (hint_text, state)
       val = (char *)NULL;
 
       temp = rl_variable_value ("completion-ignore-case");
-      igncase = strcmp (temp, "on") == 0;
+      igncase = RL_BOOLEAN_VARIABLE_VALUE (temp);
 
       if (glob_matches)
 	{
@@ -2481,6 +2493,19 @@ bash_directory_completion_hook (dirname)
       temp1 = make_absolute (local_dirname, t);
       free (t);
       temp2 = sh_canonpath (temp1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+
+      /* Try spelling correction if initial canonicalization fails. */
+      if (temp2 == 0 && dircomplete_spelling)
+	{
+	  temp2 = dirspell (temp1);
+	  if (temp2)
+	    {
+	      free (temp1);
+	      temp1 = temp2;
+	      temp2 = sh_canonpath (temp1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+	      return_value = temp2 != 0;
+	    }
+	}
       /* If we can't canonicalize, bail. */
       if (temp2 == 0)
 	{

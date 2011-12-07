@@ -2616,9 +2616,9 @@ read_token (command)
 	      /* If '<' then we could be at "<<" or at "<<-".  We have to
 		 look ahead one more character. */
 	      peek_char = shell_getc (1);
-	      if (peek_char == '-')
+	      if MBTEST(peek_char == '-')
 		return (LESS_LESS_MINUS);
-	      else if (peek_char == '<')
+	      else if MBTEST(peek_char == '<')
 		return (LESS_LESS_LESS);
 	      else
 		{

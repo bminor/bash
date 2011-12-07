@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -188,6 +188,10 @@ int rl_complete_with_tilde_expansion = 0;
    completer. */
 rl_compentry_func_t *rl_completion_entry_function = (rl_compentry_func_t *)NULL;
 
+/* Pointer to generator function for rl_menu_complete ().  NULL means to use
+   *rl_completion_entry_function (see above). */
+rl_compentry_func_t *rl_menu_completion_entry_function = (rl_compentry_func_t *)NULL;
+
 /* Pointer to alternative function to create matches.
    Function is called with TEXT, START, and END.
    START and END are indices in RL_LINE_BUFFER saying what the boundaries
@@ -335,6 +339,9 @@ int rl_sort_completion_matches = 1;
 
 /* Local variable states what happened during the last completion attempt. */
 static int completion_changed_buffer;
+
+/* The result of the query to the user about displaying completion matches */
+static int completion_y_or_n;
 
 /*************************************/
 /*				     */
@@ -1186,8 +1193,7 @@ compute_lcd_of_matches (match_list, matches, text)
 	    }
 
 	  /* sort the list to get consistent answers. */
-	  if (rl_sort_completion_matches)
-	    qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
+	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
 	  if (si <= low)
@@ -1433,7 +1439,7 @@ display_matches (matches)
       rl_crlf ();
       fprintf (rl_outstream, "Display all %d possibilities? (y or n)", len);
       fflush (rl_outstream);
-      if (get_y_or_n (0) == 0)
+      if ((completion_y_or_n = get_y_or_n (0)) == 0)
 	{
 	  rl_crlf ();
 
@@ -2140,7 +2146,7 @@ rl_filename_completion_function (text, state)
    hit the end of the match list, we restore the original unmatched text,
    ring the bell, and reset the counter to zero. */
 int
-rl_menu_complete (count, invoking_key)
+rl_old_menu_complete (count, invoking_key)
      int count, invoking_key;
 {
   rl_compentry_func_t *our_func;
@@ -2171,7 +2177,9 @@ rl_menu_complete (count, invoking_key)
       /* Only the completion entry function can change these. */
       set_completion_defaults ('%');
 
-      our_func = rl_completion_entry_function
+      our_func = rl_menu_completion_entry_function;
+      if (our_func == 0)
+	our_func = rl_completion_entry_function
 			? rl_completion_entry_function
 			: rl_filename_completion_function;
 
@@ -2212,6 +2220,10 @@ rl_menu_complete (count, invoking_key)
         ;
       /* matches[0] is lcd if match_list_size > 1, but the circular buffer
 	 code below should take care of it. */
+
+      if
+ (match_list_size > 1 && _rl_complete_show_all)
+	display_matches (matches);
     }
 
   /* Now we have the list of matches.  Replace the text between
@@ -2237,6 +2249,161 @@ rl_menu_complete (count, invoking_key)
     {
       rl_ding ();
       insert_match (orig_text, orig_start, MULT_MATCH, &quote_char);
+    }
+  else
+    {
+      insert_match (matches[match_list_index], orig_start, SINGLE_MATCH, &quote_char);
+      append_to_match (matches[match_list_index], delimiter, quote_char,
+		       strcmp (orig_text, matches[match_list_index]));
+    }
+
+  completion_changed_buffer = 1;
+  return (0);
+}
+
+int
+rl_menu_complete (count, ignore)
+     int count, ignore;
+{
+  rl_compentry_func_t *our_func;
+  int matching_filenames, found_quote;
+
+  static char *orig_text;
+  static char **matches = (char **)0;
+  static int match_list_index = 0;
+  static int match_list_size = 0;
+  static int nontrivial_lcd = 0;
+  static int full_completion = 0;	/* set to 1 if menu completion should reinitialize on next call */
+  static int orig_start, orig_end;
+  static char quote_char;
+  static int delimiter;
+
+  /* The first time through, we generate the list of matches and set things
+     up to insert them. */
+  if (rl_last_func != rl_menu_complete || full_completion)
+    {
+      /* Clean up from previous call, if any. */
+      FREE (orig_text);
+      if (matches)
+	_rl_free_match_list (matches);
+
+      match_list_index = match_list_size = 0;
+      matches = (char **)NULL;
+
+      full_completion = 0;
+
+      /* Only the completion entry function can change these. */
+      set_completion_defaults ('%');
+
+      our_func = rl_menu_completion_entry_function;
+      if (our_func == 0)
+	our_func = rl_completion_entry_function
+			? rl_completion_entry_function
+			: rl_filename_completion_function;
+
+      /* We now look backwards for the start of a filename/variable word. */
+      orig_end = rl_point;
+      found_quote = delimiter = 0;
+      quote_char = '\0';
+
+      if (rl_point)
+	/* This (possibly) changes rl_point.  If it returns a non-zero char,
+	   we know we have an open quote. */
+	quote_char = _rl_find_completion_word (&found_quote, &delimiter);
+
+      orig_start = rl_point;
+      rl_point = orig_end;
+
+      orig_text = rl_copy_text (orig_start, orig_end);
+      matches = gen_completion_matches (orig_text, orig_start, orig_end,
+					our_func, found_quote, quote_char);
+
+      nontrivial_lcd = matches && strcmp (orig_text, matches[0]) != 0;
+
+      /* If we are matching filenames, the attempted completion function will
+	 have set rl_filename_completion_desired to a non-zero value.  The basic
+	 rl_filename_completion_function does this. */
+      matching_filenames = rl_filename_completion_desired;
+
+      if (matches == 0 || postprocess_matches (&matches, matching_filenames) == 0)
+	{
+    	  rl_ding ();
+	  FREE (matches);
+	  matches = (char **)0;
+	  FREE (orig_text);
+	  orig_text = (char *)0;
+    	  completion_changed_buffer = 0;
+          return (0);
+	}
+
+      for (match_list_size = 0; matches[match_list_size]; match_list_size++)
+        ;
+
+      if (match_list_size == 0) 
+	{
+	  rl_ding ();
+	  FREE (matches);
+	  matches = (char **)0;
+	  match_list_index = 0;
+	  completion_changed_buffer = 0;
+	  return (0);
+        }
+
+      /* matches[0] is lcd if match_list_size > 1, but the circular buffer
+	 code below should take care of it. */
+      if (*matches[0])
+	{
+	  insert_match (matches[0], orig_start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+	  orig_end = orig_start + strlen (matches[0]);
+	  completion_changed_buffer = STREQ (orig_text, matches[0]) == 0;
+	}
+
+      if (match_list_size > 1 && _rl_complete_show_all)
+	{
+	  display_matches (matches);
+	  /* If there are so many matches that the user has to be asked
+	     whether or not he wants to see the matches, menu completion
+	     is unwieldy. */
+	  if (rl_completion_query_items > 0 && match_list_size >= rl_completion_query_items)
+	    {
+	      rl_ding ();
+	      FREE (matches);
+	      matches = (char **)0;
+	      full_completion = 1;
+	      return (0);
+	    }
+	}
+      else if (match_list_size <= 1)
+	{
+	  append_to_match (matches[0], delimiter, quote_char, nontrivial_lcd);
+	  full_completion = 1;
+	  return (0);
+	}
+    }
+
+  /* Now we have the list of matches.  Replace the text between
+     rl_line_buffer[orig_start] and rl_line_buffer[rl_point] with
+     matches[match_list_index], and add any necessary closing char. */
+
+  if (matches == 0 || match_list_size == 0) 
+    {
+      rl_ding ();
+      FREE (matches);
+      matches = (char **)0;
+      completion_changed_buffer = 0;
+      return (0);
+    }
+
+  match_list_index += count;
+  if (match_list_index < 0)
+    match_list_index += match_list_size;
+  else
+    match_list_index %= match_list_size;
+
+  if (match_list_index == 0 && match_list_size > 1)
+    {
+      rl_ding ();
+      insert_match (matches[0], orig_start, MULT_MATCH, &quote_char);
     }
   else
     {

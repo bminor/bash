@@ -1709,7 +1709,7 @@ sv_histsize (value)
     {
       nval = atoi (value);
       if (nval < 0)
-	nval = 0;
+	return 1;
     }
   stifle_history (nval);
   return 0;

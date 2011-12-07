@@ -1,6 +1,6 @@
-# Makefile for bash-3.1, version 2.159
+# Makefile for bash-4.0, version 3.4
 #
-# Copyright (C) 1996-2005 Free Software Foundation, Inc.
+# Copyright (C) 1996-2008 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -411,7 +411,7 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
 	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
 	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
 	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
-	   input.c bashhist.c array.c arrayfunc.c sig.c pathexp.c \
+	   input.c bashhist.c array.c arrayfunc.c assoc.c sig.c pathexp.c \
 	   unwind_prot.c siglist.c bashline.c bracecomp.c error.c \
 	   list.c stringlib.c locale.c findcmd.c redir.c \
 	   pcomplete.c pcomplib.c syntax.c xmalloc.c
@@ -422,7 +422,7 @@ HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
 	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
-	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h \
+	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h assoc.h \
 	   $(BASHINCFILES)
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
@@ -440,7 +440,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
-	   alias.o array.o arrayfunc.o braces.o bracecomp.o bashhist.o \
+	   alias.o array.o arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
 	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
@@ -465,7 +465,8 @@ BUILTIN_DEFS = $(DEFSRC)/alias.def $(DEFSRC)/bind.def $(DEFSRC)/break.def \
 	       $(DEFSRC)/times.def $(DEFSRC)/trap.def $(DEFSRC)/type.def \
 	       $(DEFSRC)/ulimit.def $(DEFSRC)/umask.def $(DEFSRC)/wait.def \
 	       $(DEFSRC)/getopts.def $(DEFSRC)/reserved.def \
-	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def $(DEFSRC)/printf.def
+	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def $(DEFSRC)/printf.def \
+	       $(DEFSRC)/mapfile.def
 BUILTIN_C_SRC  = $(DEFSRC)/mkbuiltins.c $(DEFSRC)/common.c \
 		 $(DEFSRC)/evalstring.c $(DEFSRC)/evalfile.c \
 		 $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE)
@@ -484,7 +485,7 @@ BUILTIN_OBJS = $(DEFDIR)/alias.o $(DEFDIR)/bind.o $(DEFDIR)/break.o \
 	       $(DEFDIR)/source.o $(DEFDIR)/suspend.o $(DEFDIR)/test.o \
 	       $(DEFDIR)/times.o $(DEFDIR)/trap.o $(DEFDIR)/type.o \
 	       $(DEFDIR)/ulimit.o $(DEFDIR)/umask.o $(DEFDIR)/wait.o \
-	       $(DEFDIR)/getopts.o $(BUILTIN_C_OBJ)
+	       $(DEFDIR)/getopts.o $(DEFDIR)/mapfile.o $(BUILTIN_C_OBJ)
 GETOPT_SOURCE   = $(DEFSRC)/getopt.c $(DEFSRC)/getopt.h
 PSIZE_SOURCE	= $(DEFSRC)/psize.sh $(DEFSRC)/psize.c
 
@@ -1383,6 +1384,9 @@ builtins/complete.o: bashtypes.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 builtins/complete.o: builtins.h 
 builtins/complete.o: pcomplete.h
 builtins/complete.o: ${DEFSRC}/common.h ${DEFSRC}/bashgetopt.h
+builtins/mapfile.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
+builtins/mapfile.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h
+builtins/mapfile.o: shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h unwind_prot.h variables.h arrayfunc.h conftypes.h 
 
 # libintl dependencies
 builtins/bind.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
@@ -1406,6 +1410,7 @@ builtins/inlib.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/jobs.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/kill.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/let.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+builtins/mapfile.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/mkbuiltins.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/printf.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/pushd.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
@@ -1457,6 +1462,7 @@ builtins/inlib.o: $(DEFSRC)/inlib.def
 builtins/jobs.o: $(DEFSRC)/jobs.def
 builtins/kill.o: $(DEFSRC)/kill.def
 builtins/let.o: $(DEFSRC)/let.def
+builtins/mapfile.o: $(DEFSRC)/mapfile.def
 builtins/pushd.o: $(DEFSRC)/pushd.def
 builtins/read.o: $(DEFSRC)/read.def
 builtins/reserved.o: $(DEFSRC)/reserved.def

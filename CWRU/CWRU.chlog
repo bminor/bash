@@ -15613,3 +15613,125 @@ doc/{bash.1,bashref.texi}
 
 configure.in
 	- change default version to bash-4.0-devel
+
+				   4/28
+				   ----
+variables.c
+	- change push_func_var and push_exported_var to call
+	  stupidly_hack_special_variables if the temporary variable is going
+	  to be disposed.  This undoes any internal changes caused by a local
+	  variable assignment in the environment or in a shell function.  Bug
+	  reported by Morita Sho <morita-pub-en-debian@inz.sakura.ne.jp> in
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=478096
+
+				    5/3
+				    ---
+builtins/fc.def
+	- fixed a problem caused by change of 1/21 to use remember_on_history,
+	  since it's turned off by parse_and_execute(), but can cause the
+	  last command in history to be deleted and leave last_hist pointing
+	  beyond the end of the history list.  edit_and_execute_command can
+	  do this.
+
+bashline.c
+	- new define, RL_BOOLEAN_VAR_VALUE, to take a readline boolean variable
+	  and get its value as 0 or 1 (consider making readline global)
+	- put tty back into canonical mode before calling parse_and_execute in
+	  edit_and_execute_command and then back into raw mode after it
+	  returns.  Fixes problem identified by <koersen@gmail.com>.
+
+				    5/4
+				    ---
+lib/glob/glob.c
+	- code to support `globstar' option: GX_GLOBSTAR and two internal
+	  flags.  Changes to skipname, glob_vector, mbskipname, glob_filename.
+	  New function finddirs().
+
+lib/glob/glob.h
+	- new defines to support globstar code
+
+builtins/shopt.def
+	- new shell option, `globstar', enables special handling of `**' in
+	  glob patterns -- matches all directories recursively
+
+pathexp.h
+	- extern declaration for glob_star
+
+pathexp.c
+	- break inline code out of quote_globbing_chars into a separate
+	  function to decide whether a character is a globbing char:
+	  glob_char_p
+	- change shell_glob_filename to call glob_filename with the
+	  GX_GLOBSTAR flag if glob_star is set
+
+doc/{bash.1,bashref.texi}
+	- document new `globstar' shell option
+
+arrayfunc.c
+	- new function, broken out of quote_array_assignment_chars:
+	  quote_assign; extended from old code to make sure that globbing
+	  chars and chars in $IFS are quoted when displaying assignment
+	  statements, especially in compound array assignments
+
+				    5/5
+				    ---
+bashline.c
+	- new variable, dircomplete_spelling, controls spelling correction
+	  of directory names when doing filename completion
+	- change bash_directory_completion_hook to incorporate spelling
+	  correction if initial canonicalization of directory name fails
+
+builtins/shopt.def
+	- new shell option, `dirspell', enables and disables spelling
+	  correction of directory names during word completion
+
+builtins/read.def
+	- support for fractional timeout values (ival.uval); uses uconvert
+	  and falarm/setitimer
+
+config.h.in
+	- new `HAVE_SETITIMER' define
+
+configure.in
+	- look for setitimer(2), define HAVE_SETITIMER if found
+
+doc/{bash.1,bashref.texi}
+	- document new `dirspell' shopt option
+	- document new fractional values to `read -t timeout'
+
+				    5/6
+				    ---
+assoc.[ch]
+	- new files, basic support for associative array implementation
+
+general.h
+	- new extern declarations for sh_openpipe, sh_closepipe, trim_pathname
+
+general.c
+	 - new functions: sh_openpipe to create a pipe and move the file
+	   descriptors to a high range; sh_closepipe, to close pipe fds and
+	   clean up, and trim_pathname, to replace portions of a pathname
+	   with `...' (for prompting)
+
+jobs.c
+	- don't set last_asynchronous_pid in child shell (messes up $!, among
+	  other things)
+
+parse.y,parser.h
+	- moved definitions of parser flags to parser.h
+
+array.c
+	- imported array_modcase (case-changing operations on arrays) from
+	  4.0-devel branch
+
+array.h
+	- new extern declaration for array_modcase
+
+lib/readline/complete.c
+	- new variable, rl_menu_completion_entry_function, generator for
+	  rl_menu_complete
+	- new menu completion `browsing' implementation, with several
+	  improvements over the old code.  Inspired by Sami
+
+lib/readline/readline.h
+	- extern declaration for rl_menu_completion_entry_function

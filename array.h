@@ -1,7 +1,7 @@
 /* array.h -- definitions for the interface exported by array.c that allows
    the rest of the shell to manipulate array variables. */
 
-/* Copyright (C) 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,6 +59,7 @@ extern ARRAY	*array_quote_escapes __P((ARRAY *));
 
 extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int));
 extern char	*array_patsub __P((ARRAY *, char *, char *, int));
+extern char	*array_modcase __P((ARRAY *, char *, int, int));
 
 /* Basic operations on array elements. */
 extern ARRAY_ELEMENT *array_create_element __P((arrayind_t, char *));

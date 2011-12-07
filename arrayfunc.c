@@ -41,6 +41,7 @@ extern int array_needs_making;
 
 static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, int));
 
+static char *quote_assign __P((const char *));
 static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
 
@@ -423,6 +424,34 @@ assign_array_var_from_string (var, value, flags)
   return (var);
 }
 
+static char *
+quote_assign (string)
+     const char *string;
+{
+  size_t slen;
+  int saw_eq;
+  char *temp, *t;
+  const char *s, *send;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string);
+  send = string + slen;
+
+  t = temp = (char *)xmalloc (slen * 2 + 1);
+  saw_eq = 0;
+  for (s = string; *s; )
+    {
+      if (*s == '=')
+	saw_eq = 1;
+      if (saw_eq == 0 && (glob_char_p (s) || isifs (*s)))
+	*t++ = '\\';
+
+      COPY_CHAR_P (t, s, send);
+    }
+  *t = '\0';
+  return temp;
+}
+
 /* For each word in a compound array assignment, if the word looks like
    [ind]=value, quote the `[' and `]' before the `=' to protect them from
    unwanted filename expansion. */
@@ -430,8 +459,7 @@ static void
 quote_array_assignment_chars (list)
      WORD_LIST *list;
 {
-  char *s, *t, *nword;
-  int saw_eq;
+  char *nword;
   WORD_LIST *l;
 
   for (l = list; l; l = l->next)
@@ -441,17 +469,7 @@ quote_array_assignment_chars (list)
       /* Don't bother if it doesn't look like [ind]=value */
       if (l->word->word[0] != '[' || xstrchr (l->word->word, '=') == 0) /* ] */
 	continue;
-      s = nword = (char *)xmalloc (strlen (l->word->word) * 2 + 1);
-      saw_eq = 0;
-      for (t = l->word->word; *t; )
-	{
-	  if (*t == '=')
-	    saw_eq = 1;
-	  if (saw_eq == 0 && (*t == '[' || *t == ']'))
-	    *s++ = '\\';
-	  *s++ = *t++;
-	}
-      *s = '\0';
+      nword = quote_assign (l->word->word);
       free (l->word->word);
       l->word->word = nword;
     }

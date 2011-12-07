@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -418,6 +418,41 @@ int	mflags;
 	return t;
 }
 
+char *
+array_modcase (a, pat, modop, mflags)
+ARRAY	*a;
+char	*pat;
+int	modop;
+int	mflags;
+{
+	ARRAY		*a2;
+	ARRAY_ELEMENT	*e;
+	char	*t, *sifs;
+
+	if (a == 0 || array_head(a) == 0 || array_empty(a))
+		return ((char *)NULL);
+
+	a2 = array_copy(a);
+	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
+		t = sh_modcase(element_value(e), pat, modop);
+		FREE(element_value(e));
+		e->value = t;
+	}
+
+	if (mflags & MATCH_QUOTED)
+		array_quote(a2);
+	else
+		array_quote_escapes(a2);
+	if (mflags & MATCH_STARSUB) {
+		sifs = ifs_firstchar((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else
+		t = array_to_string (a2, " ", 0);
+	array_dispose (a2);
+
+	return t;
+}
 /*
  * Allocate and return a new array element with index INDEX and value
  * VALUE.
