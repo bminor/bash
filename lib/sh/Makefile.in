@@ -92,7 +92,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c xstrchr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c fdprintf.c
+	   casemod.c fdprintf.c input_avail.c
 
 # The header files for this library.
 HSOURCES = 
@@ -105,7 +105,8 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
-	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o ${LIBOBJS}
+	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
+	  fdprintf.o input_avail.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -141,6 +142,7 @@ casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
 eaccess.o: eaccess.c
+fdprintf.o: fdprintf.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
@@ -148,6 +150,7 @@ fpurge.o: fpurge.c
 getcwd.o: getcwd.c
 getenv.o: getenv.c
 inet_aton.o: inet_aton.c
+input_avail.o: input_avail.c
 itos.o: itos.c
 mailstat.o: mailstat.c
 makepath.o: makepath.c
@@ -207,6 +210,7 @@ casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
+fdprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
@@ -214,6 +218,7 @@ fpurge.o: ${BUILD_DIR}/config.h
 getcwd.o: ${BUILD_DIR}/config.h
 getenv.o: ${BUILD_DIR}/config.h
 inet_aton.o: ${BUILD_DIR}/config.h
+input_avail.o: ${BUILD_DIR}/config.h
 itos.o: ${BUILD_DIR}/config.h
 mailstat.o: ${BUILD_DIR}/config.h
 makepath.o: ${BUILD_DIR}/config.h
@@ -513,3 +518,11 @@ casemod.o: ${topdir}/xmalloc.h
 casemod.o: ${topdir}/bashtypes.h
 casemod.o: ${BASHINCDIR}/shmbutil.h
 casemod.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
+
+fdprintf.o: ${BASHINCDIR}/stdc.h
+
+input_avail.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+input_avail.o: ${BASHINCDIR}/stdc.h
+input_avail.o: ${topdir}/xmalloc.h
+
+

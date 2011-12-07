@@ -3843,6 +3843,8 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
   int tpgrp;
 
   tpgrp = tcgetpgrp (shell_tty);
+  if (tpgrp < 0 && errno == ENOTTY)
+    return -1;
   if (tpgrp == npgrp)
     {
       terminal_pgrp = npgrp;
@@ -3851,7 +3853,7 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
   else if (tpgrp != opgrp)
     {
 #if defined (DEBUG)
-      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d", tpgrp, opgrp);
+      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d", tpgrp, opgrp, npgrp);
 #endif
       return -1;
     }

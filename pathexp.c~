@@ -34,6 +34,7 @@
 #include "flags.h"
 
 #include "shmbutil.h"
+#include "bashintl.h"
 
 #include <glob/strmatch.h>
 
@@ -229,7 +230,7 @@ quote_globbing_chars (string)
   temp = (char *)xmalloc (slen * 2 + 1);
   for (t = temp, s = string; *s; )
     {
-      if (glob_char_p (*s))
+      if (glob_char_p (s))
 	*t++ = '\\';
 
       /* Copy a single (possibly multibyte) character from s to t,
@@ -300,6 +301,8 @@ shell_glob_filename (pathname)
   temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
   results = glob_filename (temp, glob_star ? GX_GLOBSTAR : 0);
   free (temp);
+
+itrace("shell_glob_filename: LC_COLLATE = %s", setlocale(LC_COLLATE, (char *)NULL));
 
   if (results && ((GLOB_FAILED (results)) == 0))
     {

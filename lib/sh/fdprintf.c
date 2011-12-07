@@ -45,9 +45,11 @@ fdprintf(fd, format, va_alist)
 #endif
 {
   FILE *fp;
-  int rc, r2;
+  int fd2, rc, r2;
   va_list args;
 
+  if ((fd2 = dup(fd)) < 0)
+    return -1;
   fp = fdopen (dup (fd), "w");
   if (fp == 0)
     return -1;

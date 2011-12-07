@@ -30,9 +30,14 @@
 #include "bashansi.h"
 #include <stdio.h>
 #include "chartypes.h"
+#include <errno.h>
 
 #include "shell.h"
 #include "input.h"	/* For bash_input */
+
+#ifndef errno
+extern int errno;
+#endif
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -144,7 +149,10 @@ set_locale_var (var, value)
      char *var, *value;
 {
   int r;
+  char *x;
 
+  x = "";
+  errno = 0;
   if (var[0] == 'T' && var[10] == 0)		/* TEXTDOMAIN */
     {
       FREE (default_domain);
@@ -177,7 +185,9 @@ set_locale_var (var, value)
 	  lc_all[0] = '\0';
 	}
 #if defined (HAVE_SETLOCALE)
-      r = *lc_all ? (setlocale (LC_ALL, lc_all) != 0) : reset_locale_vars ();
+      r = *lc_all ? ((x = setlocale (LC_ALL, lc_all)) != 0) : reset_locale_vars ();
+      if (x == 0)
+	internal_warning("setlocale: LC_ALL: cannot change locale (%s): %s", lc_all, strerror(errno));
       locale_setblanks ();
       return r;
 #else
@@ -191,9 +201,8 @@ set_locale_var (var, value)
 #  if defined (LC_CTYPE)
       if (lc_all == 0 || *lc_all == '\0')
 	{
-	  r = (setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE")) != 0);
+	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
-	  return r;
 	}
 #  endif
     }
@@ -201,34 +210,36 @@ set_locale_var (var, value)
     {
 #  if defined (LC_COLLATE)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE")) != 0);
+	x = setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
 #  endif /* LC_COLLATE */
     }
   else if (var[3] == 'M' && var[4] == 'E')	/* LC_MESSAGES */
     {
 #  if defined (LC_MESSAGES)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES")) != 0);
+	x = setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
 #  endif /* LC_MESSAGES */
     }
   else if (var[3] == 'N' && var[4] == 'U')	/* LC_NUMERIC */
     {
 #  if defined (LC_NUMERIC)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC")) != 0);
+	x = setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
 #  endif /* LC_NUMERIC */
     }
   else if (var[3] == 'T' && var[4] == 'I')	/* LC_TIME */
     {
 #  if defined (LC_TIME)
       if (lc_all == 0 || *lc_all == '\0')
-	return (setlocale (LC_TIME, get_locale_var ("LC_TIME")) != 0);
+	x = setlocale (LC_TIME, get_locale_var ("LC_TIME"));
 #  endif /* LC_TIME */
     }
 #endif /* HAVE_SETLOCALE */
   
+  if (x == 0)
+    internal_warning("setlocale: %s: cannot change locale (%s): %s", var, get_locale_var (var), strerror(errno));
 
-  return (0);
+  return (x != 0);
 }
 
 /* Called when LANG is assigned a value.  Tracks value in `lang'.  Calls

@@ -34,6 +34,7 @@
 #include "flags.h"
 
 #include "shmbutil.h"
+#include "bashintl.h"
 
 #include <glob/strmatch.h>
 

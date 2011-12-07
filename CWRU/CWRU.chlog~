@@ -6693,3 +6693,28 @@ shell.c
 	  for `eterm', since bash sends $PWD to eterm with control sequences
 	  that confuse other programs.  Problem reported by Micah Cowan
 	  <micah@cowan.name>
+
+
+				   7/12
+				   ----
+print_cmd.c
+	- break code that prints here-documents into two functions:
+	  print_heredoc_header, which prints the operator and delimiter, and
+	  print_heredoc_body, which prints the body text and closing delimiter
+	- change print_redirection to call print_heredoc_{header,body}
+	- sentinel variable, printing_connection, used when printing a command
+	  of type `connection' (|, &&, ||, etc.)
+	- change print_redirection_list to save any here documents it finds
+	  while printing a connection and save them in `deferred_heredocs'
+	- new function, print_deferred_heredocs, called from print_redirection
+	  in the cm_connection case, calls print_heredoc_header for all the
+	  here documents, then prints the operator (|, &&, ||, etc.), then
+	  the here-document body.  This preserves syntactic correctness; the
+	  old code printed the control operator after the body of the here
+	  document.  Fixes bug reported by <buport@figpost.com>
+
+				   7/16
+				   ----
+locale.c
+	- in set_locale_var, print a warning message if setlocale() fails any
+	  time it's called -- required some code restructuring
