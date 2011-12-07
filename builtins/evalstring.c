@@ -79,11 +79,13 @@ parse_and_execute_cleanup ()
   run_unwind_frame ("parse_and_execute_top");
 }
 
+#if defined (HISTORY)
 static void
 set_history_remembering ()
 {
   remember_on_history = enable_history_list;
 }
+#endif
 
 /* Parse and execute the commands in STRING.  Returns whatever
    execute_command () returns.  This frees STRING.  FLAGS is a

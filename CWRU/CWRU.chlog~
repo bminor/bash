@@ -14313,6 +14313,11 @@ subst.c
 	- change cond_expand_word to translate SPECIAL==2 into passing
 	  QGLOB_REGEXP to quote_string_for_globbing
 
+locale.c
+	- by default, if all else fails, set shell's idea of locale to ""
+	  instead of its idea of `default_locale' -- the library functions
+	  behave better with that value
+
 				    2/2
 				    ---
 builtins/printf.def

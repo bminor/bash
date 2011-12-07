@@ -84,12 +84,6 @@ echo $(( 4<(2+3) ? 1 : 32))
 echo $(( (2+2)<(2+3) ? 1 : 32))
 echo $(( (2+2)>(2+3) ? 1 : 32))
 
-# bug in bash versions through bash-3.2
-S=105
-W=$((S>99?4:S>9?3:S>0?2:0))
-echo $W
-unset W S
-
 # check that the unevaluated part of the ternary operator does not do
 # evaluation or assignment
 x=i+=2

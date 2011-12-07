@@ -520,7 +520,8 @@ expcond ()
  	  set_noeval = 1;
 	  noeval++;
  	}
-      val2 = explor ();
+
+      val2 = expcond ();
       if (set_noeval)
 	noeval--;
       rval = cval ? val1 : val2;

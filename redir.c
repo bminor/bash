@@ -156,7 +156,7 @@ redirection_error (temp, error)
 #endif /* RESTRICTED_SHELL */
 
     case HEREDOC_REDIRECT:
-      internal_error (_("cannot create temp file for here document: %s"), strerror (heredoc_errno));
+      internal_error (_("cannot create temp file for here-document: %s"), strerror (heredoc_errno));
       break;
 
     default:

@@ -15585,3 +15585,10 @@ MANIFEST,Makefile.in,builtins/Makefile.in
 
 arrayfunc.[ch]
 	- new function, bind_array_element, to support mapfile builtin
+
+				   4/20
+				   ----
+expr.c
+	- fix operator precendence in expcond():  term after the `:' is
+	  a conditional-expression, not a logical-OR-expression (using C
+	  terminology).  Bug reported by <archimerged@gmail.com>
