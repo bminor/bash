@@ -159,7 +159,7 @@ sh_modcase (string, pat, flags)
 	  if (usewords)
 	    nop = inword ? CASE_LOWER : CASE_UPPER;
 	  else
-	    nop = (start > 0) ? CASE_LOWER : CASE_UPPER;
+	    nop = (start > 0) ? CASE_NOOP : CASE_UPPER;
 	  inword = 1;
 	}
       else if (flags == CASE_UNCAP)
@@ -167,7 +167,7 @@ sh_modcase (string, pat, flags)
 	  if (usewords)
 	    nop = inword ? CASE_UPPER : CASE_LOWER;
 	  else
-	    nop = (start > 0) ? CASE_UPPER : CASE_LOWER;
+	    nop = (start > 0) ? CASE_NOOP : CASE_LOWER;
 	  inword = 1;
 	}
       else if (flags == CASE_UPFIRST)

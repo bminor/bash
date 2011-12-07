@@ -42,6 +42,8 @@ extern ssize_t zreadcintr __P((int, char *));
 typedef ssize_t breadfunc_t __P((int, char *, size_t));
 typedef ssize_t creadfunc_t __P((int, char *));
 
+static ssize_t _internal_zgetline __P((int, char **, size_t *, int, breadfunc_t *, creadfunc_t *));
+
 /* Initial memory allocation for automatic growing buffer in zreadlinec */
 #define GET_LINE_INITIAL_ALLOCATION 16
 
@@ -57,12 +59,14 @@ typedef ssize_t creadfunc_t __P((int, char *));
 
    Returns number of bytes read or -1 on error. */
 
-ssize_t
-zgetline (fd, lineptr, n, unbuffered_read)
+static ssize_t
+_internal_zgetline (fd, lineptr, n, unbuffered_read, brfunc, crfunc)
      int fd;
      char **lineptr;
      size_t *n;
      int unbuffered_read;
+     breadfunc_t *brfunc;
+     creadfunc_t *crfunc;
 {
   int nr, retval;
   char *line, c;
@@ -75,36 +79,36 @@ zgetline (fd, lineptr, n, unbuffered_read)
   
   while (1)
     {
-      retval = unbuffered_read ? zread (fd, &c, 1) : zreadc(fd, &c);
+      retval = unbuffered_read ? (*brfunc) (fd, &c, 1) : (*crfunc) (fd, &c);
 
       if (retval <= 0)
 	{
-	  if (line && nr > 0)
+	  if (line)
 	    line[nr] = '\0';
 	  break;
 	}
 
       if (nr + 2 >= *n)
 	{
-	  size_t new_size;
+	 size_t new_size;
 
-	  new_size = (*n == 0) ? GET_LINE_INITIAL_ALLOCATION : *n * 2;
-	  line = (*n >= new_size) ? NULL : xrealloc (*lineptr, new_size);
+	 new_size = (*n == 0) ? GET_LINE_INITIAL_ALLOCATION : *n * 2;
+	 line = xrealloc (*lineptr, new_size);
 
-	  if (line)
-	    {
-	      *lineptr = line;
-	      *n = new_size;
-	    }
-	  else
-	    {
-	      if (*n > 0)
-		{
-		  (*lineptr)[*n - 1] = '\0';
-		  nr = *n - 2;
-		}
-	      break;
-	    }
+	 if (line)
+	   {
+	     *lineptr = line;
+	     *n = new_size;
+	   }
+	 else
+	   {
+	     if (*n > 0)
+	       {
+		 (*lineptr)[*n - 1] = '\0';
+		 nr = *n - 2;
+	       }
+	     break;
+	   }
 	}
 
       line[nr] = c;
@@ -117,5 +121,26 @@ zgetline (fd, lineptr, n, unbuffered_read)
 	}
     }
 
+itrace("zgetline: returning %d", nr-1);
   return nr - 1;
+}
+
+ssize_t
+zgetline (fd, lineptr, n, unbuffered_read)
+     int fd;
+     char **lineptr;
+     size_t *n;
+     int unbuffered_read;
+{
+  return _internal_zgetline (fd, lineptr, n, unbuffered_read, zread, zreadc);
+}
+
+ssize_t
+zgetlineintr (fd, lineptr, n, unbuffered_read)
+     int fd;
+     char **lineptr;
+     size_t *n;
+     int unbuffered_read;
+{
+  return _internal_zgetline (fd, lineptr, n, unbuffered_read, zreadintr, zreadcintr);
 }

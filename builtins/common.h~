@@ -59,6 +59,7 @@
 
 /* Functions from common.c */
 extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+extern void builtin_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_usage __P((void));
 extern void no_args __P((WORD_LIST *));
 extern int no_options __P((WORD_LIST *));
@@ -158,6 +159,7 @@ extern WORD_LIST *get_directory_stack __P((int));
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
+extern int parse_string __P((char *, const char *, int, char **));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));

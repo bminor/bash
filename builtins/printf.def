@@ -879,16 +879,18 @@ vbprintf (format, va_alist)
 
   SH_VA_START (args, format);
   blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+  va_end (args);
 
   nlen = vblen + blen + 1;
   if (nlen >= vbsize)
     {
       vbsize = ((nlen + 63) >> 6) << 6;
       vbuf = (char *)xrealloc (vbuf, vbsize);
+      SH_VA_START (args, format);
       blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+      va_end (args);
     }
 
-  va_end (args);
   vblen += blen;
   vbuf[vblen] = '\0';
 

@@ -334,6 +334,9 @@ typedef struct subshell_com {
   COMMAND *command;
 } SUBSHELL_COM;
 
+#define COPROC_RUNNING	0x01
+#define COPROC_DEAD	0x02
+
 typedef struct coproc {
   char *c_name;
   pid_t c_pid;

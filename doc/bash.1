@@ -887,6 +887,9 @@ The format for a coprocess is:
 .PP
 This creates a coprocess named \fINAME\fP.
 If \fINAME\fP is not supplied, the default name is \fICOPROC\fP.
+\fINAME\fP must not be supplied if \fIcommand\fP is a \fIsimple
+command\fP (see above); otherwise, it is interpreted as the first word
+of the simple command.
 When the coproc is executed, the shell creates an array variable (see
 .B Arrays
 below) named \fINAME\fP in the context of the executing shell.
@@ -2484,9 +2487,10 @@ introduce indirection.
 .PP
 In each of the cases below, \fIword\fP is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
-When not performing substring expansion, \fBbash\fP tests for a parameter
-that is unset or null; omitting the colon results in a test only for a
-parameter that is unset.
+.PP
+When not performing substring expansion, using the forms documented below,
+\fBbash\fP tests for a parameter that is unset or null.  Omitting the colon
+results in a test only for a parameter that is unset.
 .PP
 .PD 0
 .TP
@@ -2723,7 +2727,7 @@ to uppercase; the \fB,\fP operator converts matching uppercase letters
 to lowercase.
 The \fB^^\fP and \fB,,\fP expansions convert each matched character in the
 expanded value; the \fB^\fP and \fB,\fP expansions match and convert only
-the first character.
+the first character in the expanded value..
 If \fIpattern\fP is omitted, it is treated like a \fB?\fP, which matches
 every character.
 If
@@ -7636,6 +7640,10 @@ is supplied, or
 Exit a login shell.
 .TP
 \fBmapfile\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
+.PD 0
+.TP
+\fBreadarray\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
+.PD
 Read lines from the standard input into array variable
 .IR array ,
 or from file descriptor 
@@ -7685,6 +7693,10 @@ If
 is specified without 
 .BR \-c ,
 the default quantum is 5000.
+When \fIcallback\fP is evaluated, it is supplied the index of the next
+array element to be assigned as an additional argument.
+\fIcallback\fP is evaluated after the line is read but before the 
+array element is assigned.
 .PP
 If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
 before assigning to it.

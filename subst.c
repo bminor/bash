@@ -4405,7 +4405,7 @@ make_dev_fd_filename (fd)
 {
   char *ret, intbuf[INT_STRLEN_BOUND (int) + 1], *p;
 
-  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 4);
+  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 8);
 
   strcpy (ret, DEV_FD_PREFIX);
   p = inttostr (fd, intbuf, sizeof (intbuf));
@@ -6191,13 +6191,13 @@ parameter_brace_casemod (varname, value, modspec, patspec, quoted)
   if (modspec == '^')
     {
       x = p && p[0] == modspec;
-      modop = x ? CASE_UPPER : CASE_CAPITALIZE;
+      modop = x ? CASE_UPPER : CASE_UPFIRST;
       p += x;
     }
   else if (modspec == ',')
     {
       x = p && p[0] == modspec;
-      modop = x ? CASE_LOWER : CASE_UNCAP;
+      modop = x ? CASE_LOWER : CASE_LOWFIRST;
       p += x;
     }
   else if (modspec == '~')

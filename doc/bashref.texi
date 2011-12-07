@@ -1095,6 +1095,9 @@ The format for a coprocess is:
 @noindent
 This creates a coprocess named @var{NAME}.
 If @var{NAME} is not supplied, the default name is @var{COPROC}.
+@var{NAME} must not be supplied if @var{command} is a simple
+command (@pxref{Simple Commands}); otherwise, it is interpreted as
+the first word of the simple command.
 
 When the coproc is executed, the shell creates an array variable
 (@pxref{Arrays})
@@ -1614,11 +1617,12 @@ introduce indirection.
 In each of the cases below, @var{word} is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 
-When not performing substring expansion, Bash tests for a parameter
-that is unset or null; omitting the colon results in a test only for a
-parameter that is unset.  Put another way, if the colon is included,
-the operator tests for both existence and that the value is not null;
-if the colon is omitted, the operator tests only for existence.
+When not performing substring expansion, using the form described
+below, Bash tests for a parameter that is unset or null.
+Omitting the colon results in a test only for a parameter that is unset.
+Put another way, if the colon is included,
+the operator tests for both @var{parameter}'s existence and that its value
+is not null; if the colon is omitted, the operator tests only for existence.
 
 @table @code
 
@@ -1769,7 +1773,7 @@ to uppercase; the @samp{,} operator converts matching uppercase letters
 to lowercase.
 The @samp{^^} and @samp{,,} expansions convert each matched character in the
 expanded value; the @samp{^} and @samp{,} expansions match and convert only
-the first character.
+the first character in the expanded value.
 If @var{pattern} is omitted, it is treated like a @samp{?}, which matches
 every character.
 If @var{parameter} is @samp{@@} or @samp{*},
@@ -3648,6 +3652,10 @@ Specify the number of lines read between each call to @var{callback}.
 
 If @option{-C} is specified without @option{-c}, 
 the default quantum is 5000.
+When @var{callback}  is evaluated, it is supplied the index of the next
+array element to be assigned as an additional argument.
+@var{callback} is evaluated after the line is read but before the 
+array element is assigned.
 
 If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
 before assigning to it.
@@ -3764,6 +3772,18 @@ The exit status is greater than 128 if the timeout is exceeded.
 Read input from file descriptor @var{fd}.
 
 @end table
+
+@item readarray
+@btindex readarray
+@example
+readarray [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
+-C @var{callback}] [-c @var{quantum}] [@var{array}]
+@end example
+Read lines from the standard input into array variable @var{array},
+or from file descriptor @var{fd}
+if the @option{-u} option is supplied.
+
+A synonym for @code{mapfile}.
 
 @item source
 @btindex source

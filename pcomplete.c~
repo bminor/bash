@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -518,7 +518,7 @@ it_init_joblist (itp, jstate)
   JOB *j;
   JOB_STATE ws;		/* wanted state */
 
-  ws = -1;
+  ws = JNONE;
   if (jstate == 0)
     ws = JRUNNING;
   else if (jstate == 1)

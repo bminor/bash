@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2008 Free Software Foundation, Inc.
+Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -290,9 +290,8 @@ read_builtin (list)
     }
   list = loptend;
 
-  /* `read -t 0 var' returns failure immediately.  XXX - should it test
-     whether input is available with select/FIONREAD, and fail if those
-     are unavailable? */
+  /* `read -t 0 var' tests whether input is available with select/FIONREAD,
+     and fails if those are unavailable */
   if (have_timeout && tmsec == 0 && tmusec == 0)
 #if 0
     return (EXECUTION_FAILURE);
@@ -342,7 +341,6 @@ read_builtin (list)
      terminal, turn them off. */
   if ((prompt || edit || silent) && input_is_tty == 0)
     {
-itrace("read_builtin: input_is_tty == 0: disabling silent");
       prompt = (char *)NULL;
 #if defined (READLINE)
       itext = (char *)NULL;
@@ -353,14 +351,6 @@ itrace("read_builtin: input_is_tty == 0: disabling silent");
 #if defined (READLINE)
   if (edit)
     add_unwind_protect (xfree, rlbuf);
-#endif
-
-#if 0
-  if (prompt && edit == 0)
-    {
-      fprintf (stderr, "%s", prompt);
-      fflush (stderr);
-    }
 #endif
 
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
@@ -420,16 +410,16 @@ itrace("read_builtin: input_is_tty == 0: disabling silent");
 #endif
       if (input_is_tty)
 	{
+itrace("read_builtin: input_is_tty = %d", input_is_tty);
 	  /* ttsave() */
 	  termsave.fd = fd;
 	  ttgetattr (fd, &ttattrs);
 	  termsave.attrs = &ttattrs;
 
 	  ttset = ttattrs;	  
-	  if (silent)
-	    ttfd_cbreak (fd, &ttset);		/* ttcbreak () */
-	  else
-	    ttfd_onechar (fd, &ttset);		/* ttonechar () */
+	  i = silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset);
+	  if (i < 0)
+	    sh_ttyerror (1);
 	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
 	}
     }
@@ -441,7 +431,9 @@ itrace("read_builtin: input_is_tty == 0: disabling silent");
       termsave.attrs = &ttattrs;
 
       ttset = ttattrs;
-      ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
+      i = ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
+      if (i < 0)
+	sh_ttyerror (1);
 
       add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
     }
@@ -450,17 +442,15 @@ itrace("read_builtin: input_is_tty == 0: disabling silent");
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
   interrupt_immediately++;
-  terminate_immediately = 1;
+  terminate_immediately++;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
 
-#if 1
   if (prompt && edit == 0)
     {
       fprintf (stderr, "%s", prompt);
       fflush (stderr);
     }
-#endif
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (0, O_TEXT);
@@ -613,7 +603,7 @@ add_char:
     zsyncfd (fd);
 
   interrupt_immediately--;
-  terminate_immediately = 0;
+  terminate_immediately--;
   discard_unwind_frame ("read_builtin");
 
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;

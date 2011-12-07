@@ -154,12 +154,16 @@ extern char *sh_modcase __P((const char *, char *, int));
 
 /* Defines for flags argument to sh_modcase.  These need to agree with what's
    in lib/sh/casemode.c */
-#define CASE_LOWER	0x01
-#define CASE_UPPER	0x02
-#define CASE_CAPITALIZE	0x04
-#define CASE_UNCAP	0x08
-#define CASE_TOGGLE	0x10
-#define CASE_TOGGLEALL	0x20
+#define CASE_LOWER	0x0001
+#define CASE_UPPER	0x0002
+#define CASE_CAPITALIZE	0x0004
+#define CASE_UNCAP	0x0008
+#define CASE_TOGGLE	0x0010
+#define CASE_TOGGLEALL	0x0020
+#define CASE_UPFIRST	0x0040
+#define CASE_LOWFIRST	0x0080
+
+#define CASE_USEWORDS	0x1000
 
 /* declarations for functions defined in lib/sh/clktck.c */
 extern long get_clk_tck __P((void));
@@ -433,8 +437,10 @@ extern int zmapfd __P((int, char **, char *));
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));
+extern ssize_t zreadretry __P((int, char *, size_t));
 extern ssize_t zreadintr __P((int, char *, size_t));
 extern ssize_t zreadc __P((int, char *));
+extern ssize_t zreadcintr __P((int, char *));
 extern void zreset __P((void));
 extern void zsyncfd __P((int));
 

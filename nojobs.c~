@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,6 +45,7 @@
 
 #include "shell.h"
 #include "jobs.h"
+#include "execute_cmd.h"
 
 #include "builtins/builtext.h"	/* for wait_builtin */
 
@@ -232,7 +233,7 @@ find_termsig_by_pid (pid)
     return (0);
   if (pid_list[i].flags & PROC_RUNNING)
     return (0);
-  return (get_termsig (pid_list[i].status));
+  return (get_termsig ((WAIT)pid_list[i].status));
 }
 
 /* Set LAST_COMMAND_EXIT_SIGNAL depending on STATUS.  If STATUS is -1, look
@@ -255,6 +256,10 @@ set_pid_status (pid, status)
      WAIT status;
 {
   int slot;
+
+#if defined (COPROCESS_SUPPORT)
+  coproc_pidchk (pid, status);
+#endif
 
   slot = find_index_by_pid (pid);
   if (slot == NO_PID)

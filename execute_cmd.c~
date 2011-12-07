@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -232,6 +232,11 @@ int executing_builtin = 0;
 
 /* Non-zero if we are executing a command list (a;b;c, etc.) */
 int executing_list = 0;
+
+/* Non-zero if failing commands in a command substitution should not exit the
+   shell even if -e is set.  Used to pass the CMD_IGNORE_RETURN flag down to
+   commands run in command substitutions by parse_and_execute. */
+int comsub_ignore_return = 0;
 
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
@@ -1433,6 +1438,7 @@ static struct cpelement *cpe_alloc __P((struct coproc *));
 static void cpe_dispose __P((struct cpelement *));
 static struct cpelement *cpl_add __P((struct coproc *));
 static struct cpelement *cpl_delete __P((pid_t));
+static void cpl_reap __P((void));
 static void cpl_flush __P((void));
 static struct cpelement *cpl_search __P((pid_t));
 static struct cpelement *cpl_searchbyname __P((char *));
@@ -1442,8 +1448,7 @@ Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0 };
 
 cplist_t coproc_list = {0, 0, 0};
 
-/* Functions to manage the list of exited background pids whose status has
-   been saved. */
+/* Functions to manage the list of coprocs */
 
 static struct cpelement *
 cpe_alloc (cp)
@@ -1520,6 +1525,37 @@ cpl_delete (pid)
     coproc_list.tail = coproc_list.head;		/* just to make sure */
 
   return (p);
+}
+
+static void
+cpl_reap ()
+{
+  struct cpelement *prev, *p;
+
+  for (prev = p = coproc_list.head; p; prev = p, p = p->next)
+    if (p->coproc->c_flags & COPROC_DEAD)
+      {
+        prev->next = p->next;	/* remove from list */
+
+	/* Housekeeping in the border cases. */
+	if (p == coproc_list.head)
+	  coproc_list.head = coproc_list.head->next;
+	else if (p == coproc_list.tail)
+	  coproc_list.tail = prev;
+
+	coproc_list.ncoproc--;
+	if (coproc_list.ncoproc == 0)
+	  coproc_list.head = coproc_list.tail = 0;
+	else if (coproc_list.ncoproc == 1)
+	  coproc_list.tail = coproc_list.head;		/* just to make sure */
+
+#if defined (DEBUG)
+	itrace("cpl_reap: deleting %d", p->coproc->c_pid);
+#endif
+
+	coproc_dispose (p->coproc);
+	cpe_dispose (p);
+      }
 }
 
 /* Clear out the list of saved statuses */
@@ -1675,6 +1711,19 @@ coproc_closeall ()
 }
 
 void
+coproc_reap ()
+{
+  struct coproc *cp;
+
+  cp = &sh_coproc;
+  if (cp && (cp->c_flags & COPROC_DEAD))
+{
+itrace("coproc_reap: disposing %d", cp->c_pid);
+    coproc_dispose (cp);
+}
+}
+
+void
 coproc_rclose (cp, fd)
      struct coproc *cp;
      int fd;
@@ -1746,9 +1795,9 @@ coproc_fdrestore (cp)
   cp->c_rfd = cp->c_rsave;
   cp->c_wfd = cp->c_wsave;
 }
-  
+
 void
-coproc_pidchk (pid)
+coproc_pidchk (pid, status)
      pid_t pid;
 {
   struct coproc *cp;
@@ -1759,7 +1808,15 @@ coproc_pidchk (pid)
     itrace("coproc_pidchk: pid %d has died", pid);
 #endif
   if (cp)
-    coproc_dispose (cp);
+    {
+      cp->c_status = status;
+      cp->c_flags |= COPROC_DEAD;
+      cp->c_flags &= ~COPROC_RUNNING;
+itrace("coproc_pidchk: marked cproc with pid %d as COPROC_DEAD", pid);
+#if 0
+      coproc_dispose (cp);
+#endif
+    }
 }
 
 void
@@ -3454,7 +3511,12 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     {
       current_fds_to_close = fds_to_close;
       fix_assignment_words (simple_command->words);
+      /* Pass the ignore return flag down to command substitutions */
+      if (simple_command->flags & CMD_IGNORE_RETURN)	/* XXX */
+	comsub_ignore_return++;
       words = expand_words (simple_command->words);
+      if (simple_command->flags & CMD_IGNORE_RETURN)
+	comsub_ignore_return--;
       current_fds_to_close = (struct fd_bitmap *)NULL;
     }
   else
@@ -3707,8 +3769,10 @@ execute_builtin (builtin, words, flags, subshell)
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
 
+#if 0
   /* XXX -- added 12/11 */
-/*   terminate_immediately++; */
+  terminate_immediately++;
+#endif
 
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
@@ -3776,8 +3840,10 @@ execute_builtin (builtin, words, flags, subshell)
       discard_unwind_frame ("eval_builtin");
     }
 
+#if 0
   /* XXX -- added 12/11 */
-/*  terminate_immediately--; */
+  terminate_immediately--;
+#endif
 
   return (result);
 }

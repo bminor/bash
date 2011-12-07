@@ -2,23 +2,22 @@ This file is reserved.def, in which the shell reserved words are defined.
 It has no direct C file production, but defines builtins for the Bash
 builtin help command.
 
-Copyright (C) 1987-2007 Free Software Foundation, Inc.
+Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
-Bash is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
+Bash is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+Bash is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with Bash; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+You should have received a copy of the GNU General Public License
+along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 
 $BUILTIN for
 $SHORT_DOC for NAME [in WORDS ... ] ; do COMMANDS; done
@@ -28,6 +27,9 @@ The `for' loop executes a sequence of commands for each member in a
 list of items.  If `in WORDS ...;' is not present, then `in "$@"' is
 assumed.  For each element in WORDS, NAME is set to that element, and
 the COMMANDS are executed.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN for ((
@@ -43,10 +45,15 @@ Equivalent to
 	done
 EXP1, EXP2, and EXP3 are arithmetic expressions.  If any expression is
 omitted, it behaves as if it evaluates to 1.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN select
 $SHORT_DOC select NAME [in WORDS ... ;] do COMMANDS; done
+Select words from a list and execute commands.
+
 The WORDS are expanded, generating a list of words.  The
 set of expanded words is printed on the standard error, each
 preceded by a number.  If `in WORDS' is not present, `in "$@"'
@@ -58,6 +65,9 @@ redisplayed.  If EOF is read, the command completes.  Any other
 value read causes NAME to be set to null.  The line read is saved
 in the variable REPLY.  COMMANDS are executed after each selection
 until a break command is executed.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN time
@@ -70,8 +80,10 @@ and system CPU time spent executing PIPELINE when it terminates.
 Options:
   -p	print the timing summary in the portable Posix format
 
-The value of the TIMEFORMAT variable is used as the output format.  The
-return status is the return status of PIPELINE.
+The value of the TIMEFORMAT variable is used as the output format.
+
+Exit Status:
+The return status is the return status of PIPELINE.
 $END
 
 $BUILTIN case
@@ -80,6 +92,9 @@ Execute commands based on pattern matching.
 
 Selectively execute COMMANDS based upon WORD matching PATTERN.  The
 `|' is used to separate multiple patterns.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN if
@@ -93,6 +108,9 @@ executed in turn, and if its exit status is zero, the corresponding
 the `else COMMANDS' list is executed, if present.  The exit status of the
 entire construct is the exit status of the last command executed, or zero
 if no condition tested true.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN while
@@ -101,6 +119,9 @@ Execute commands as long as a test succeeds.
 
 Expand and execute COMMANDS as long as the final command in the
 `while' COMMANDS has an exit status of zero.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN until
@@ -109,7 +130,22 @@ Execute commands as long as a test does not succeed.
 
 Expand and execute COMMANDS as long as the final command in the
 `until' COMMANDS has an exit status which is not zero.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
+
+$BUILTIN coproc
+$SHORT_DOC coproc [NAME] command [redirections]
+Create a coprocess named NAME.
+
+Execute COMMAND asynchronously, with the standard output and standard
+input of the command connected via a pipe to file descriptors assigned
+to indices 0 and 1 of an array variable NAME in the executing shell.
+The default NAME is "COPROC".
+
+Exit Status:
+Returns the exit status of COMMAND.
 
 $BUILTIN function
 $SHORT_DOC function name { COMMANDS ; } or name () { COMMANDS ; }
@@ -119,6 +155,9 @@ Create a shell function named NAME.  When invoked as a simple command,
 NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,
 the arguments are passed to the function as $1...$n, and the function's
 name is in $FUNCNAME.
+
+Exit Status:
+Returns success unless NAME is readonly.
 $END
 
 $BUILTIN { ... }
@@ -128,6 +167,9 @@ Group commands as a unit.
 
 Run a set of commands in a group.  This is one way to redirect an
 entire set of commands.
+
+Exit Status:
+Returns the status of the last command executed.
 $END
 
 $BUILTIN %
@@ -140,6 +182,9 @@ stopped or background job.  JOB_SPEC can specify either a job name
 or a job number.  Following JOB_SPEC with a `&' places the job in
 the background, as if the job specification had been supplied as an
 argument to `bg'.
+
+Exit Status:
+Returns the status of the resumed job.
 $END
 
 $BUILTIN (( ... ))
@@ -149,6 +194,9 @@ Evaluate arithmetic expression.
 
 The EXPRESSION is evaluated according to the rules for arithmetic
 evaluation.  Equivalent to "let EXPRESSION".
+
+Exit Status:
+Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise.
 $END
 
 $BUILTIN [[ ... ]]
@@ -172,6 +220,9 @@ is matched as a regular expression.
 
 The && and || operators do not evaluate EXPR2 if EXPR1 is sufficient to
 determine the expression's value.
+
+Exit Status:
+0 or 1 depending on value of EXPRESSION.
 $END
 
 $BUILTIN variables

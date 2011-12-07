@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1873,7 +1873,6 @@ make_child (command, async_p)
       js.c_totforked++;
       js.c_living++;
 
-itrace("make_child: `%s' --> %ld", command, pid);
       /* Unblock SIGINT and SIGCHLD unless creating a pipeline, in which case
 	 SIGCHLD remains blocked until all commands in the pipeline have been
 	 created. */
@@ -3082,7 +3081,7 @@ waitchld (wpid, block)
       child = find_process (pid, 1, &job);	/* want living procs only */
 
 #if defined (COPROCESS_SUPPORT)
-      coproc_pidchk (pid);
+      coproc_pidchk (pid, status);
 #endif
 
       /* It is not an error to have a child terminate that we did

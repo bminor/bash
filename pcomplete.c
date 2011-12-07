@@ -941,11 +941,12 @@ unbind_compfunc_variables (exported)
 
 	$0 == function or command being invoked
    	$1 == command name
-   	$2 = word to be completed (possibly null)
-   	$3 = previous word
+   	$2 == word to be completed (possibly null)
+   	$3 == previous word
 
    Functions can access all of the words in the current command line
-   with the COMP_WORDS array.  External commands cannot. */
+   with the COMP_WORDS array.  External commands cannot; they have to
+   make do  with the COMP_LINE and COMP_POINT variables. */
 
 static WORD_LIST *
 build_arg_list (cmd, text, lwords, ind)

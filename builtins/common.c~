@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -88,16 +88,10 @@ sh_builtin_func_t *this_shell_builtin = (sh_builtin_func_t *)NULL;
 /* This is a lot like report_error (), but it is for shell builtins
    instead of shell control structures, and it won't ever exit the
    shell. */
-void
-#if defined (PREFER_STDARG)
-builtin_error (const char *format, ...)
-#else
-builtin_error (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
+
+static void
+builtin_error_prolog ()
 {
-  va_list args;
   char *name;
 
   name = get_name_for_error ();
@@ -108,6 +102,41 @@ builtin_error (format, va_alist)
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
+}
+
+void
+#if defined (PREFER_STDARG)
+builtin_error (const char *format, ...)
+#else
+builtin_error (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  builtin_error_prolog ();
+
+  SH_VA_START (args, format);
+
+  vfprintf (stderr, format, args);
+  va_end (args);
+  fprintf (stderr, "\n");
+}
+
+void
+#if defined (PREFER_STDARG)
+builtin_warning (const char *format, ...)
+#else
+builtin_warning (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  builtin_error_prolog ();
+  fprintf (stderr, _("warning: "));
 
   SH_VA_START (args, format);
 
@@ -292,8 +321,15 @@ sh_wrerror ()
   builtin_error (_("write error: %s"), strerror (errno));
 }
 
+void
+sh_ttyerror ()
+{
+  builtin_error (_("error getting terminal attributes: %s"), strerror (errno));
+}
+
 int
 sh_chkwrite (s)
+     int s;
 {
   fflush (stdout);
   if (ferror (stdout))

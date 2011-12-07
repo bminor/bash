@@ -45,6 +45,7 @@
 
 #include "shell.h"
 #include "jobs.h"
+#include "execute_cmd.h"
 
 #include "builtins/builtext.h"	/* for wait_builtin */
 
@@ -256,6 +257,10 @@ set_pid_status (pid, status)
 {
   int slot;
 
+#if defined (COPROCESS_SUPPORT)
+  coproc_pidchk (pid, status);
+#endif
+
   slot = find_index_by_pid (pid);
   if (slot == NO_PID)
     return;
@@ -386,6 +391,10 @@ cleanup_dead_jobs ()
 	  (pid_list[i].flags & PROC_NOTIFIED))
 	pid_list[i].pid = NO_PID;
     }
+
+#if defined (COPROCESS_SUPPORT)
+  coproc_reap ();
+#endif
 
   return 0;
 }

@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -160,6 +160,8 @@ extern char *sh_modcase __P((const char *, char *, int));
 #define CASE_UNCAP	0x08
 #define CASE_TOGGLE	0x10
 #define CASE_TOGGLEALL	0x20
+#define CASE_UPFIRST	0x40
+#define CASE_LOWFIRST	0x80
 
 /* declarations for functions defined in lib/sh/clktck.c */
 extern long get_clk_tck __P((void));
@@ -167,6 +169,9 @@ extern long get_clk_tck __P((void));
 /* declarations for functions defined in lib/sh/clock.c */
 extern void clock_t_to_secs ();
 extern void print_clock_t ();
+
+/* Declarations for functions defined in lib/sh/fdprintf.c */
+extern void fdprintf __P((int, const char *, ...))  __attribute__((__format__ (printf, 2, 3)));
 
 /* Declarations for functions defined in lib/sh/fmtulong.c */
 #define FL_PREFIX     0x01    /* add 0x, 0X, or 0 prefix as appropriate */
@@ -185,20 +190,23 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
 
 /* Declarations for functions defined in lib/sh/fpurge.c */
-#if defined (NEED_FPURGE_DECL)
+#if !HAVE_DECL_FPURGE
 
 #if HAVE_FPURGE
 #  define fpurge _bash_fpurge
 #endif
 extern int fpurge __P((FILE *stream));
 
-#endif /* NEED_FPURGE_DECL */
+#endif /* HAVE_DECL_FPURGE */
 
 
 /* Declarations for functions defined in lib/sh/getcwd.c */
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
 #endif
+
+/* Declarations for functions defined in lib/sh/input_avail.c */
+extern int input_avail __P((int));
 
 /* Declarations for functions defined in lib/sh/itos.c */
 extern char *inttostr __P((intmax_t, char *, size_t));
@@ -427,8 +435,10 @@ extern int zmapfd __P((int, char **, char *));
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));
+extern ssize_t zreadretry __P((int, char *, size_t));
 extern ssize_t zreadintr __P((int, char *, size_t));
 extern ssize_t zreadc __P((int, char *));
+extern ssize_t zreadcintr __P((int, char *));
 extern void zreset __P((void));
 extern void zsyncfd __P((int));
 

@@ -81,6 +81,7 @@ extern void sh_nojobs __P((char *));
 extern void sh_restricted __P((char *));
 extern void sh_notbuiltin __P((char *));
 extern void sh_wrerror __P((void));
+extern void sh_ttyerror __P((int));
 extern int sh_chkwrite __P((int));
 
 extern char **make_builtin_argv __P((WORD_LIST *, int *));

@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,7 @@
 #include "shell.h"
 #include "flags.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
+#include "jobs.h"
 #include "signames.h"
 #include "builtins.h"
 #include "builtins/common.h"
@@ -331,7 +332,7 @@ run_pending_traps ()
 	  else
 	    {
 	      token_state = save_token_state ();
-	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST);
+	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      restore_token_state (token_state);
 	      free (token_state);
 	    }
@@ -691,7 +692,7 @@ run_exit_trap ()
       if (code == 0 && function_code == 0)
 	{
 	  reset_parser ();
-	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST);
+	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	}
       else if (code == ERREXIT)
 	retval = last_command_exit_value;
@@ -725,7 +726,7 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value, *token_state;
-  int save_return_catch_flag, function_code;
+  int save_return_catch_flag, function_code, flags;
   procenv_t save_return_catch;
 
   trap_exit_value = function_code = 0;
@@ -753,8 +754,11 @@ _run_trap_internal (sig, tag)
 	  function_code = setjmp (return_catch);
 	}
 
+      flags = SEVAL_NONINT|SEVAL_NOHIST;
+      if (sig != DEBUG_TRAP)
+	flags |= SEVAL_RESETLINE;
       if (function_code == 0)
-	parse_and_execute (trap_command, tag, SEVAL_NONINT|SEVAL_NOHIST);
+	parse_and_execute (trap_command, tag, flags);
 
       restore_token_state (token_state);
       free (token_state);

@@ -7296,5 +7296,118 @@ locale.c
 	- make sure the error messages printed when setlocale fails are
 	  localizable
 
-builtins/shopt.def
-	- include <readline/history.h> if history in use
+				   1/11
+				   ----
+lib/readline/histexpand.c
+	- make sure that every time history_no_expand_chars is tested, we
+	  also call the history_inhibit_expansion_function if it's set.
+	  Fixes bug reported by Yang Zhang <yanghatespam@gmail.com>
+
+				   1/12
+				   ----
+trap.c
+	- make sure to call parse_and_execute with the SEVAL_RESETLINE bit
+	  set in the flags so it will reset the line number when running
+	  the trap commands.  Partial fix for bug reported by
+	  peter360@fastmail.us
+
+				   1/14
+				   ----
+builtins/reserved.def
+	- document `coproc' so it can be used with `help' builtin.  Pointed
+	  out by Pierre Gaston <pgas@freeshell.org>
+
+lib/sh/casemod.c
+	- added two new flags: CASE_UPFIRST and CASE_LOWFIRST to casemod
+	  the first character of the passed string and pass the rest
+	  through unchanged.  Fixes bug reported by Jan Schampera
+	  <jan.schampera@web.de>
+
+externs.h
+	- new defines for CASE_UPFIRST and CASE_LOWFIRST
+
+subst.c
+	- use CASE_UPFIRST for ^ and CASE_LOWFIRST for , casemod operators
+
+builtins/mapfile.def
+	- call zreset() before calling first zgetline(), to clean out any
+	  remaining data in local buffer used by zreadc.  Fixes bug
+	  reported by Pierre Gaston <pierre.gaston@gmail.com>
+
+				   1/15
+				   ----
+lib/sh/zread.c
+	- renamed zreadintr to zreadretry -- not perfect, but better
+	- new functions: zreadintr, which just calls read so it can be
+	  interruptible, and zreadcintr, which is like zreadc but uses
+	  zreadintr to fill the buffer
+
+lib/sh/zgetline.c
+	- in zgetline, when zread/zreadc return <= 0, make sure line is
+	  non-null before assigning to line[nr]
+
+builtins/mapfile.def
+	- return an error right away if the supplied array variable name
+	  refers to a readonly or noassign array
+	- set interrupt_immediately so calls to zgetline can be
+	  interrupted.  Fixes bug reported by Pierre Gaston
+	  <pierre.gaston@gmail.com>
+	- if interactive, pass the SEVAL_INTERACT and SEVAL_NOHIST flags
+	  to parse_and_execute when calling callbacks.  Fixes bug reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>
+	- add `readarray' as a synonym for mapfile
+
+doc/{bash.1,bashref.texi}
+	- document behavior of mapfile builtin adding index of array element
+	  to be assigned as additional argument to callback string.  Reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>
+	- document readarray as synonym for mapfile
+
+builtins/common.c
+	- new error function, sh_ttyerror(set), prints an error message having
+	  to do with setting or getting terminal attributes
+
+builtins/read.def
+	- print error message if read fails to set terminal attributes
+
+				   1/16
+				   ----
+execute_cmd.c
+	- new function, coproc_reap, calls coproc_dispose if sh_coproc is
+	  marked as COPROC_DEAD
+	- new function, cpl_reap, disposes coprocs marked as COPROC_DEAD
+	  from coproc list
+	- change coproc_pidchk to just mark the coproc as dead instead of
+	  calling coproc_dispose, so we don't call unsafe functions from
+	  a signal handler.  Fixes bug reported by Andreas Schwab
+	  <schwab@suse.de>
+
+execute_cmd.h
+	- new extern declaration for coproc_reap
+
+command.h
+	- new flags for c_flags member of a struct coproc
+
+{jobs,nojobs}.c
+	- add call to coproc_reap in cleanup_dead_jobs, which will do the
+	  right queueing or blocking of SIGCHLD
+
+trap.c
+	- modify change from 1/12 to not reset the line number when running
+	  the DEBUG and RETURN traps
+
+				   1/18
+				   ----
+lib/sh/casemod.c
+	- change default operations to work on entire passed string instead
+	  of breaking into words at non-alpha-numerics.  Use new
+	  CASE_USEWORDS flag to enable by-word behavior.  Fixes bug reported
+	  by Jan Schampera <jan.schampera@web.de>
+
+builtins/printf.def
+	- in vbprintf, bracket each call to vsnprintf (which uses the args
+	  passed to vbprintf) with SH_VA_START and va_end, so we can
+	  reninitialize the argument list for each call.  This is actually
+	  what the C standard requires.  Fixes bug that caused printf -b
+	  to `ignore' first % format specifier if it came first in the
+	  string.  Reported by David Leverton <levertond@googlemail.com>

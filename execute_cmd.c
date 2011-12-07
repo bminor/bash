@@ -1438,6 +1438,7 @@ static struct cpelement *cpe_alloc __P((struct coproc *));
 static void cpe_dispose __P((struct cpelement *));
 static struct cpelement *cpl_add __P((struct coproc *));
 static struct cpelement *cpl_delete __P((pid_t));
+static void cpl_reap __P((void));
 static void cpl_flush __P((void));
 static struct cpelement *cpl_search __P((pid_t));
 static struct cpelement *cpl_searchbyname __P((char *));
@@ -1447,8 +1448,7 @@ Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0 };
 
 cplist_t coproc_list = {0, 0, 0};
 
-/* Functions to manage the list of exited background pids whose status has
-   been saved. */
+/* Functions to manage the list of coprocs */
 
 static struct cpelement *
 cpe_alloc (cp)
@@ -1525,6 +1525,37 @@ cpl_delete (pid)
     coproc_list.tail = coproc_list.head;		/* just to make sure */
 
   return (p);
+}
+
+static void
+cpl_reap ()
+{
+  struct cpelement *prev, *p;
+
+  for (prev = p = coproc_list.head; p; prev = p, p = p->next)
+    if (p->coproc->c_flags & COPROC_DEAD)
+      {
+        prev->next = p->next;	/* remove from list */
+
+	/* Housekeeping in the border cases. */
+	if (p == coproc_list.head)
+	  coproc_list.head = coproc_list.head->next;
+	else if (p == coproc_list.tail)
+	  coproc_list.tail = prev;
+
+	coproc_list.ncoproc--;
+	if (coproc_list.ncoproc == 0)
+	  coproc_list.head = coproc_list.tail = 0;
+	else if (coproc_list.ncoproc == 1)
+	  coproc_list.tail = coproc_list.head;		/* just to make sure */
+
+#if defined (DEBUG)
+	itrace("cpl_reap: deleting %d", p->coproc->c_pid);
+#endif
+
+	coproc_dispose (p->coproc);
+	cpe_dispose (p);
+      }
 }
 
 /* Clear out the list of saved statuses */
@@ -1680,6 +1711,16 @@ coproc_closeall ()
 }
 
 void
+coproc_reap ()
+{
+  struct coproc *cp;
+
+  cp = &sh_coproc;
+  if (cp && (cp->c_flags & COPROC_DEAD))
+    coproc_dispose (cp);
+}
+
+void
 coproc_rclose (cp, fd)
      struct coproc *cp;
      int fd;
@@ -1751,9 +1792,9 @@ coproc_fdrestore (cp)
   cp->c_rfd = cp->c_rsave;
   cp->c_wfd = cp->c_wsave;
 }
-  
+
 void
-coproc_pidchk (pid)
+coproc_pidchk (pid, status)
      pid_t pid;
 {
   struct coproc *cp;
@@ -1764,7 +1805,14 @@ coproc_pidchk (pid)
     itrace("coproc_pidchk: pid %d has died", pid);
 #endif
   if (cp)
-    coproc_dispose (cp);
+    {
+      cp->c_status = status;
+      cp->c_flags |= COPROC_DEAD;
+      cp->c_flags &= ~COPROC_RUNNING;
+#if 0
+      coproc_dispose (cp);
+#endif
+    }
 }
 
 void

@@ -60,7 +60,7 @@ zread (fd, buf, len)
 #define NUM_INTR 3
 
 ssize_t
-zreadintr (fd, buf, len)
+zreadretry (fd, buf, len)
      int fd;
      char *buf;
      size_t len;
@@ -75,12 +75,22 @@ zreadintr (fd, buf, len)
 	return r;
       if (r == -1 && errno == EINTR)
 	{
-	  if (++nintr > NUM_INTR)
+	  if (++nintr >= NUM_INTR)
 	    return -1;
 	  continue;
 	}
       return r;
     }
+}
+
+/* Call read(2) and allow it to be interrupted.  Just a stub for now. */
+ssize_t
+zreadintr (fd, buf, len)
+     int fd;
+     char *buf;
+     size_t len;
+{
+  return (read (fd, buf, len));
 }
 
 /* Read one character from FD and return it in CP.  Return values are as
@@ -100,6 +110,31 @@ zreadc (fd, cp)
   if (lind == lused || lused == 0)
     {
       nr = zread (fd, lbuf, sizeof (lbuf));
+      lind = 0;
+      if (nr <= 0)
+	{
+	  lused = 0;
+	  return nr;
+	}
+      lused = nr;
+    }
+  if (cp)
+    *cp = lbuf[lind++];
+  return 1;
+}
+
+/* Don't mix calls to zreadc and zreadcintr in the same function, since they
+   use the same local buffer. */
+ssize_t
+zreadcintr (fd, cp)
+     int fd;
+     char *cp;
+{
+  ssize_t nr;
+
+  if (lind == lused || lused == 0)
+    {
+      nr = zreadintr (fd, lbuf, sizeof (lbuf));
       lind = 0;
       if (nr <= 0)
 	{
