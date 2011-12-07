@@ -7026,3 +7026,29 @@ execute_cmd.c
 	- fix errexit logic to not cause the shell to exit when a command in
 	  a pipeline fails.  Fixes bug reported by Marcin Owsiany
 	  <marcin@owsiany.pl>
+
+				   10/14
+				   -----
+builtins/evalstring.c
+	- don't short-circuit execution in parse_and_execute if we want to
+	  run an exit trap.  Fixes bug reported by Steffen Kiess
+	  <s-kiess@web.de>
+
+				   10/18
+				   -----
+parse.y
+	- fix error production to only call YYACCEPT if the shell is currently
+	  interactive and not in parse_and_execute (so parser errors in
+	  things like eval will correctly set $?).  Fixes bug reported by
+	  marco-oweber@gmx.de
+
+execute_cmd.c
+	- make sure variable name errors in execute_for_command and non-
+	  identifier function names in execute_intern_function set the
+	  return status to EX_BADUSAGE (2), not EX_USAGE (258)
+
+parser.h
+	- new parser state, PST_REPARSE
+
+parse.y
+	- turn PST_REPARSE on in parse_string_to_word_list

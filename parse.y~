@@ -1,22 +1,22 @@
-/* Yacc grammar for bash. */
+/* parse.y - Yacc grammar for bash. */
 
 /* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file LICENSE.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 %{
 #include "config.h"
@@ -115,7 +115,7 @@ extern int extended_glob;
 extern int eof_encountered;
 extern int no_line_editing, running_under_emacs;
 extern int current_command_number;
-extern int sourcelevel;
+extern int sourcelevel, parse_and_execute_level;
 extern int posixly_correct;
 extern int last_command_exit_value;
 extern char *shell_name, *current_host_name;
@@ -392,7 +392,7 @@ inputunit:	simple_list simple_list_terminator
 			  global_command = (COMMAND *)NULL;
 			  eof_encountered = 0;
 			  /* discard_parser_constructs (1); */
-			  if (interactive)
+			  if (interactive && parse_and_execute_level == 0)
 			    {
 			      YYACCEPT;
 			    }
@@ -3024,6 +3024,16 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  ret[retind++] = ch;
 	  continue;
 	}
+      /* If we're reparsing the input (e.g., from parse_string_to_word_list),
+	 we've already prepended CTLESC to single-quoted results of $'...'.
+	 We may want to do this for other CTLESC-quoted characters in
+	 reparse, too. */
+      else if MBTEST((parser_state & PST_REPARSE) && open == '\'' && (ch == CTLESC || ch == CTLNUL))
+	{
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  continue;
+	}
       else if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
 	{
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
@@ -3058,9 +3068,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	tflags |= LEX_PASSNEXT;
 
 #if 0
-      /* The big hammer.  Single quotes aren't special in double quotes, even
-	 double-quoted parameter expansions.  XXX - do the same thing for
-	 command substitution/arithmetic expansion? */
+      /* The big hammer.  Single quotes aren't special in double quotes.  The
+         problem is that Posix says the single quotes are semi-special:
+         within a double-quoted ${...} construct "an even number of
+         unescaped double-quotes or single-quotes, if any, shall occur." */
       if MBTEST(open == '{' && (flags & P_DQUOTE) && ch == '\'')	/* } */
 	continue;
 #endif
@@ -5340,7 +5351,7 @@ parse_string_to_word_list (s, flags, whom)
   wl = (WORD_LIST *)NULL;
 
   if (flags & 1)
-    parser_state |= PST_COMPASSIGN;
+    parser_state |= PST_COMPASSIGN|PST_REPARSE;
 
   while ((tok = read_token (READ)) != yacc_EOF)
     {
@@ -5380,7 +5391,7 @@ parse_string_to_word_list (s, flags, whom)
   shell_input_line_terminator = orig_input_terminator;
 
   if (flags & 1)
-    parser_state &= ~PST_COMPASSIGN;
+    parser_state &= ~(PST_COMPASSIGN|PST_REPARSE);
 
   if (wl == &parse_string_error)
     {

@@ -669,7 +669,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     add_unwind_protect ((Function *)dispose_redirects, exec_undo_list);
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
-itrace("execute_command_internal: ignore_return = %d", ignore_return);
+
   QUIT;
 
   switch (command->type)
@@ -743,7 +743,6 @@ itrace("execute_command_internal: ignore_return = %d", ignore_return);
       if (was_error_trap && ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
-itrace("execute_command: simple_command: exit_immediately_on_error = %d pipe_in = %d pipe_out = %d running error trap", exit_immediately_on_error, pipe_in, pipe_out);
 	  run_error_trap ();
 	}
 
@@ -751,7 +750,6 @@ itrace("execute_command: simple_command: exit_immediately_on_error = %d pipe_in 
 	  ((posixly_correct && interactive == 0 && special_builtin_failed) ||
 	   (exit_immediately_on_error && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)))
 	{
-itrace("execute_command: simple_command: exec_result = %d, exiting immediately", exec_result);
 	  last_command_exit_value = exec_result;
 	  run_pending_traps ();
 	  jump_to_top_level (ERREXIT);
@@ -1930,7 +1928,6 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   prev = pipe_in;
   cmd = command;
 
-itrace("execute_pipeline: ignore_return = %d", ignore_return);
   while (cmd && cmd->type == cm_connection &&
 	 cmd->value.Connection && cmd->value.Connection->connector == '|')
     {
@@ -2175,7 +2172,7 @@ execute_for_command (for_command)
     {
       if (posixly_correct && interactive_shell == 0)
 	{
-	  last_command_exit_value = EX_USAGE;
+	  last_command_exit_value = EX_BADUSAGE;
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
@@ -3410,7 +3407,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       /* Do this now, because execute_disk_command will do it anyway in the
 	 vast majority of cases. */
       maybe_make_export_env ();
-itrace("execute_simple_command: %s: dofork = 1", the_printed_command_except_trap);
+
       /* Don't let a DEBUG trap overwrite the command string to be saved with
 	 the process/job associated with this child. */
       if (make_child (savestring (the_printed_command_except_trap), async) == 0)
@@ -3446,7 +3443,6 @@ itrace("execute_simple_command: %s: dofork = 1", the_printed_command_except_trap
 #endif
 	  command_line = (char *)NULL;      /* don't free this. */
 	  bind_lastarg ((char *)NULL);
-itrace("execute_simple_command: parent: returning %d", result);
 	  return (result);
 	}
     }
@@ -4030,7 +4026,6 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 		((subshell_environment & SUBSHELL_ASYNC) == 0 || pipe_out != NO_PIPE);
 #endif
 
-itrace("execute_subshell_builtin_or_function:");
   /* A subshell is neither a login shell nor interactive. */
   login_shell = interactive = 0;
 

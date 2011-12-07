@@ -115,7 +115,7 @@ extern int extended_glob;
 extern int eof_encountered;
 extern int no_line_editing, running_under_emacs;
 extern int current_command_number;
-extern int sourcelevel;
+extern int sourcelevel, parse_and_execute_level;
 extern int posixly_correct;
 extern int last_command_exit_value;
 extern char *shell_name, *current_host_name;
@@ -392,7 +392,7 @@ inputunit:	simple_list simple_list_terminator
 			  global_command = (COMMAND *)NULL;
 			  eof_encountered = 0;
 			  /* discard_parser_constructs (1); */
-			  if (interactive)
+			  if (interactive && parse_and_execute_level == 0)
 			    {
 			      YYACCEPT;
 			    }
@@ -3024,6 +3024,16 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  ret[retind++] = ch;
 	  continue;
 	}
+      /* If we're reparsing the input (e.g., from parse_string_to_word_list),
+	 we've already prepended CTLESC to single-quoted results of $'...'.
+	 We may want to do this for other CTLESC-quoted characters in
+	 reparse, too. */
+      else if MBTEST((parser_state & PST_REPARSE) && open == '\'' && (ch == CTLESC || ch == CTLNUL))
+	{
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  continue;
+	}
       else if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
 	{
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
@@ -5341,7 +5351,7 @@ parse_string_to_word_list (s, flags, whom)
   wl = (WORD_LIST *)NULL;
 
   if (flags & 1)
-    parser_state |= PST_COMPASSIGN;
+    parser_state |= PST_COMPASSIGN|PST_REPARSE;
 
   while ((tok = read_token (READ)) != yacc_EOF)
     {
@@ -5381,7 +5391,7 @@ parse_string_to_word_list (s, flags, whom)
   shell_input_line_terminator = orig_input_terminator;
 
   if (flags & 1)
-    parser_state &= ~PST_COMPASSIGN;
+    parser_state &= ~(PST_COMPASSIGN|PST_REPARSE);
 
   if (wl == &parse_string_error)
     {

@@ -44,6 +44,7 @@
 #define PST_EOFTOKEN	0x08000		/* yylex checks against shell_eof_token */
 #define PST_REGEXP	0x10000		/* parsing an ERE/BRE as a single word */
 #define PST_HEREDOC	0x20000		/* reading body of here-document */
+#define PST_REPARSE	0x40000		/* re-parsing in parse_string_to_word_list */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {

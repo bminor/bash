@@ -2172,7 +2172,7 @@ execute_for_command (for_command)
     {
       if (posixly_correct && interactive_shell == 0)
 	{
-	  last_command_exit_value = EX_USAGE;
+	  last_command_exit_value = EX_BADUSAGE;
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
@@ -4698,7 +4698,7 @@ execute_intern_function (name, function)
     {
       if (posixly_correct && interactive_shell == 0)
 	{
-	  last_command_exit_value = EX_USAGE;
+	  last_command_exit_value = EX_BADUSAGE;
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
