@@ -168,6 +168,9 @@ extern long get_clk_tck __P((void));
 extern void clock_t_to_secs ();
 extern void print_clock_t ();
 
+/* Declarations for functions defined in lib/sh/fdprintf.c */
+extern void fdprintf __P((int, const char *, ...))  __attribute__((__format__ (printf, 2, 3)));
+
 /* Declarations for functions defined in lib/sh/fmtulong.c */
 #define FL_PREFIX     0x01    /* add 0x, 0X, or 0 prefix as appropriate */
 #define FL_ADDBASE    0x02    /* add base# prefix to converted value */
@@ -199,6 +202,9 @@ extern int fpurge __P((FILE *stream));
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
 #endif
+
+/* Declarations for functions defined in lib/sh/input_avail.c */
+extern int input_avail __P((int));
 
 /* Declarations for functions defined in lib/sh/itos.c */
 extern char *inttostr __P((intmax_t, char *, size_t));

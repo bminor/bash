@@ -52,9 +52,12 @@ fdprintf(fd, format, va_alist)
 
   if ((fd2 = dup(fd)) < 0)
     return -1;
-  fp = fdopen (dup (fd), "w");
+  fp = fdopen (fd2, "w");
   if (fp == 0)
-    return -1;
+    {
+      close (fd2);
+      return -1;
+    }
 
   SH_VA_START (args, format);
   rc = vfprintf (fp, format, args);

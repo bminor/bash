@@ -50,8 +50,9 @@ extern void internal_error __P((const char *, ...))  __attribute__((__format__ (
 /* Report an internal warning. */
 extern void internal_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
-/* Debugging function, not enabled in released version. */
+/* Debugging functions, not enabled in released version. */
 extern void itrace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
+extern void trace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
 
 /* Report an error having to do with command parsing or execution. */
 extern void command_error __P((const char *, int, int, int));

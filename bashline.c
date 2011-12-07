@@ -1006,8 +1006,8 @@ bash_forward_shellword (count, key)
 
       if (rl_line_buffer[p] == 0 || p == rl_end)
         {
-          rl_point = rl_end;
-          ding ();
+	  rl_point = rl_end;
+	  rl_ding ();
 	  return 0;
         }
 	

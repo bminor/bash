@@ -62,6 +62,7 @@ $END
 #include "bashgetopt.h"
 
 #if defined (HISTORY)
+#  include <readline/history.h>
 #  include "../bashhist.h"
 #endif
 
@@ -69,6 +70,10 @@ $END
 #define SETOPT		1
 
 #define OPTFMT		"%-15s\t%s\n"
+
+/* When `extglob' is enabled, we don't want to history-expand !(...) */
+#define EXTGLOB_HIST_NOEXPAND	" \t\n\r=("	/*)*/
+#define BASIC_HIST_NOEXPAND	" \t\n\r="
 
 extern int allow_null_glob_expansion, fail_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
@@ -116,6 +121,10 @@ static int set_shellopts_after_change __P((int));
 
 static int set_compatibility_level __P((int));
 
+#if defined (EXTENDED_GLOB)
+static int set_extglob __P((int));
+#endif
+
 #if defined (RESTRICTED_SHELL)
 static int set_restricted_shell __P((int));
 #endif
@@ -154,7 +163,7 @@ static struct {
   { "extdebug", &debugging_mode, (shopt_set_func_t *)NULL },
 #endif
 #if defined (EXTENDED_GLOB)
-  { "extglob", &extended_glob, (shopt_set_func_t *)NULL },
+  { "extglob", &extended_glob, set_extglob },
 #endif
   { "extquote", &extended_quote, (shopt_set_func_t *)NULL },
   { "failglob", &fail_glob_expansion, (shopt_set_func_t *)NULL },
@@ -499,6 +508,19 @@ set_compatibility_level (mode)
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
   return 0;
 }
+
+#if defined (EXTENDED_GLOB)
+static int
+set_extglob (mode)
+     int mode;
+{
+#  if defined (BANG_HISTORY)
+  history_no_expand_chars = extended_glob ? EXTGLOB_HIST_NOEXPAND : BASIC_HIST_NOEXPAND;
+#  endif
+
+  return 0;
+}
+#endif
 
 #if defined (RESTRICTED_SHELL)
 /* Don't allow the value of restricted_shell to be modified. */

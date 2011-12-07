@@ -1430,7 +1430,7 @@ with_input_from_string (string, name)
    That is the true input location.  Rewind bash_input.location.string by
    that number of characters, so it points to the last character actually
    consumed by the parser. */
-void
+static void
 rewind_input_string ()
 {
   int xchars;

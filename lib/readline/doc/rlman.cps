@@ -1,11 +1,9 @@
 \initial {A}
-\entry {application-specific completion functions}{42}
+\entry {application-specific completion functions}{41}
 \initial {C}
 \entry {command editing}{1}
 \initial {E}
 \entry {editing command lines}{1}
-\initial {F}
-\entry {FDL, GNU Free Documentation License}{57}
 \initial {I}
 \entry {initialization file, readline}{4}
 \entry {interaction, readline}{1}
@@ -15,7 +13,7 @@
 \initial {N}
 \entry {notation, readline}{1}
 \initial {R}
-\entry {readline, function}{21}
+\entry {readline, function}{20}
 \initial {V}
 \entry {variables, readline}{5}
 \initial {Y}

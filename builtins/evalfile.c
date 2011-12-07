@@ -179,7 +179,7 @@ file_error_and_exit:
     }
       
   if ((flags & FEVAL_CHECKBINARY) && 
-      check_binary_file (string, (result > 80) ? 80 : result))
+      check_binary_file (string, (nr > 80) ? 80 : nr))
     {
       free (string);
       (*errfunc) (_("%s: cannot execute binary file"), filename);

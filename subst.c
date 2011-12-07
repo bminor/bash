@@ -3684,11 +3684,11 @@ match_upattern (string, pat, mtype, sp, ep)
   /* XXX - check this later if I ever implement `**' with special meaning,
      since this will potentially result in `**' at the beginning or end */
   len = STRLEN (pat);
-  if (pat[0] != '*' || pat[len - 1] != '*')
+  if (pat[0] != '*' || (pat[0] == '*' && pat[1] == '(' && extended_glob) || pat[len - 1] != '*')	/*)*/
     {
       p = npat = (char *)xmalloc (len + 3);
       p1 = pat;
-      if (*p1 != '*')
+      if (*p1 != '*' || (*p1 == '*' && p1[1] == '(' && extended_glob))	/*)*/
 	*p++ = '*';
       while (*p1)
 	*p++ = *p1++;
@@ -3828,11 +3828,11 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   /* XXX - check this later if I ever implement `**' with special meaning,
      since this will potentially result in `**' at the beginning or end */
   len = wcslen (wpat);
-  if (wpat[0] != L'*' || wpat[len - 1] != L'*')
+  if (wpat[0] != L'*' || (wpat[0] == L'*' && wpat[1] == L'(' && extended_glob) || wpat[len - 1] != L'*')	/*)*/
     {
       wp = nwpat = (wchar_t *)xmalloc ((len + 3) * sizeof (wchar_t));
       wp1 = wpat;
-      if (*wp1 != L'*')
+      if (*wp1 != L'*' || (*wp1 == '*' && wp1[1] == '(' && extended_glob))	/*)*/
 	*wp++ = L'*';
       while (*wp1 != L'\0')
 	*wp++ = *wp1++;
@@ -4405,7 +4405,7 @@ make_dev_fd_filename (fd)
 {
   char *ret, intbuf[INT_STRLEN_BOUND (int) + 1], *p;
 
-  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 4);
+  ret = (char *)xmalloc (sizeof (DEV_FD_PREFIX) + 8);
 
   strcpy (ret, DEV_FD_PREFIX);
   p = inttostr (fd, intbuf, sizeof (intbuf));

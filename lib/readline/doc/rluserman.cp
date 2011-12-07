@@ -7,4 +7,3 @@
 \entry{kill ring}{3}{kill ring}
 \entry{initialization file, readline}{4}{initialization file, readline}
 \entry{variables, readline}{5}{variables, readline}
-\entry{FDL, GNU Free Documentation License}{21}{FDL, GNU Free Documentation License}

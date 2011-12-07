@@ -1,12 +1,12 @@
-This is rluserman.info, produced by makeinfo version 4.8 from
+This is rluserman.info, produced by makeinfo version 4.13 from
 ./rluserman.texi.
 
-   This manual describes the end user interface of the GNU Readline
-Library (version 5.2, 27 February 2007), a library which aids in the
-consistency of user interface across discrete programs which provide a
-command line interface.
+This manual describes the end user interface of the GNU Readline Library
+(version 6.0, 28 October 2008), a library which aids in the consistency
+of user interface across discrete programs which provide a command line
+interface.
 
-   Copyright (C) 1988-2006 Free Software Foundation, Inc.
+   Copyright (C) 1988-2009 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -16,13 +16,14 @@ preserved on all copies.
      document under the terms of the GNU Free Documentation License,
      Version 1.2 or any later version published by the Free Software
      Foundation; with no Invariant Sections, with the Front-Cover texts
-     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
      below.  A copy of the license is included in the section entitled
-     "GNU Free Documentation License."
+     "GNU Free Documentation License".
 
-     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
-     modify this GNU Manual, like GNU software.  Copies published by
-     the Free Software Foundation raise funds for GNU development."
+     (a) The FSF's Back-Cover Text is: You are free to copy and modify
+     this GNU manual.  Buying copies from GNU Press supports the FSF in
+     developing GNU and promoting software freedom."
+
 
 INFO-DIR-SECTION Libraries
 START-INFO-DIR-ENTRY
@@ -42,10 +43,10 @@ across discrete programs which provide a command line interface.
 * Menu:
 
 * Command Line Editing::	   GNU Readline User's Manual.
-* Copying This Manual::		Copying This Manual.
+* GNU Free Documentation License::	License for copying this manual.
 
 
-File: rluserman.info,  Node: Command Line Editing,  Next: Copying This Manual,  Prev: Top,  Up: Top
+File: rluserman.info,  Node: Command Line Editing,  Next: GNU Free Documentation License,  Prev: Top,  Up: Top
 
 1 Command Line Editing
 **********************
@@ -403,6 +404,13 @@ Variable Settings
           completion in a case-insensitive fashion.  The default value
           is `off'.
 
+    `completion-prefix-display-length'
+          The length in characters of the common prefix of a list of
+          possible completions that is displayed without modification.
+          When set to a value greater than zero, common prefixes longer
+          than this value are replaced with an ellipsis when displaying
+          possible completions.
+
     `completion-query-items'
           The number of possible completions that determines when the
           user is asked whether the list of possibilities should be
@@ -444,6 +452,11 @@ Variable Settings
           (the current cursor position) at the same location on each
           history line retrieved with `previous-history' or
           `next-history'.  The default is `off'.
+
+    `history-size'
+          Set the maximum number of history entries saved in the
+          history list.  If set to zero, the number of entries in the
+          history list is not limited.
 
     `horizontal-scroll-mode'
           This variable can be set to either `on' or `off'.  Setting it
@@ -510,6 +523,12 @@ Variable Settings
           If set to `on', Readline will display completions with matches
           sorted horizontally in alphabetical order, rather than down
           the screen.  The default is `off'.
+
+    `revert-all-at-newline'
+          If set to `on', Readline will undo all changes to history
+          lines before returning when `accept-line' is executed.  By
+          default, history lines may be modified and retain individual
+          undo lists across calls to `readline'.  The default is `off'.
 
     `show-all-if-ambiguous'
           This alters the default behavior of the completion functions.
@@ -1276,25 +1295,15 @@ the standard `vi' movement keys, move to previous history lines with
 `k' and subsequent lines with `j', and so forth.
 
 
-File: rluserman.info,  Node: Copying This Manual,  Prev: Command Line Editing,  Up: Top
+File: rluserman.info,  Node: GNU Free Documentation License,  Prev: Command Line Editing,  Up: Top
 
-Appendix A Copying This Manual
-******************************
-
-* Menu:
-
-* GNU Free Documentation License::	License for copying this manual.
-
-
-File: rluserman.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
-
-A.1 GNU Free Documentation License
-==================================
+Appendix A GNU Free Documentation License
+*****************************************
 
                       Version 1.2, November 2002
 
      Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
-     59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
+     51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
 
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
@@ -1625,7 +1634,7 @@ A.1 GNU Free Documentation License
      a storage or distribution medium, is called an "aggregate" if the
      copyright resulting from the compilation is not used to limit the
      legal rights of the compilation's users beyond what the individual
-     works permit.  When the Document is included an aggregate, this
+     works permit.  When the Document is included in an aggregate, this
      License does not apply to the other works in the aggregate which
      are not themselves derivative works of the Document.
 
@@ -1686,8 +1695,8 @@ A.1 GNU Free Documentation License
      you may choose any version ever published (not as a draft) by the
      Free Software Foundation.
 
-A.1.1 ADDENDUM: How to use this License for your documents
-----------------------------------------------------------
+ADDENDUM: How to use this License for your documents
+====================================================
 
 To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license
@@ -1697,8 +1706,8 @@ notices just after the title page:
        Permission is granted to copy, distribute and/or modify this document
        under the terms of the GNU Free Documentation License, Version 1.2
        or any later version published by the Free Software Foundation;
-       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
-       A copy of the license is included in the section entitled ``GNU
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
        Free Documentation License''.
 
    If you have Invariant Sections, Front-Cover Texts and Back-Cover
@@ -1720,30 +1729,29 @@ permit their use in free software.
 
 
 Tag Table:
-Node: Top1340
-Node: Command Line Editing1772
-Node: Introduction and Notation2415
-Node: Readline Interaction4039
-Node: Readline Bare Essentials5232
-Node: Readline Movement Commands7023
-Node: Readline Killing Commands7990
-Node: Readline Arguments9912
-Node: Searching10958
-Node: Readline Init File13111
-Node: Readline Init File Syntax14266
-Node: Conditional Init Constructs26361
-Node: Sample Init File28896
-Node: Bindable Readline Commands32015
-Node: Commands For Moving33074
-Node: Commands For History33937
-Node: Commands For Text37063
-Node: Commands For Killing39791
-Node: Numeric Arguments41935
-Node: Commands For Completion43076
-Node: Keyboard Macros44622
-Node: Miscellaneous Commands45195
-Node: Readline vi Mode48558
-Node: Copying This Manual49479
-Node: GNU Free Documentation License49711
+Node: Top1328
+Node: Command Line Editing1782
+Node: Introduction and Notation2436
+Node: Readline Interaction4060
+Node: Readline Bare Essentials5253
+Node: Readline Movement Commands7044
+Node: Readline Killing Commands8011
+Node: Readline Arguments9933
+Node: Searching10979
+Node: Readline Init File13132
+Node: Readline Init File Syntax14287
+Node: Conditional Init Constructs27241
+Node: Sample Init File29776
+Node: Bindable Readline Commands32895
+Node: Commands For Moving33954
+Node: Commands For History34817
+Node: Commands For Text37943
+Node: Commands For Killing40671
+Node: Numeric Arguments42815
+Node: Commands For Completion43956
+Node: Keyboard Macros45502
+Node: Miscellaneous Commands46075
+Node: Readline vi Mode49438
+Node: GNU Free Documentation License50359
 
 End Tag Table

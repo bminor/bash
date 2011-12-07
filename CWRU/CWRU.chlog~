@@ -7269,4 +7269,32 @@ doc/{bash.1,bashref.texi}
 	- make sure to reset comsub_ignore_return every time we throw to the
 	  top level, like executing_list flag
 
+				 1/2/2009
+				 --------
+parse.y
+	- fix to rewind_input_stream to handle case of $(...) command
+	  substitution followed by a quoted literal newline.  Report and fix
+	  from Andreas Schwab <schwab@suse.de>
 
+				    1/7
+				    ---
+
+subst.c
+	- fix match_wpattern and match_upattern to prefix a `*' to the
+	  pattern even if it starts with a `*(' (if extglob is enabled)
+	  before checking whether or not it can match anywhere in the
+	  string.  Fixes bug reported by os@sernet.de.
+
+[bash-4.0-rc1 frozen]
+
+				    1/9
+				    ---
+locale.c
+	- since setlocale() doesn't set errno to anything meaningful,
+	  don't include the strerror() result in the error message if
+	  it fails
+	- make sure the error messages printed when setlocale fails are
+	  localizable
+
+builtins/shopt.def
+	- include <readline/history.h> if history in use

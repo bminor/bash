@@ -7,6 +7,5 @@
 \entry{kill ring}{3}{kill ring}
 \entry{initialization file, readline}{4}{initialization file, readline}
 \entry{variables, readline}{5}{variables, readline}
-\entry{readline, function}{21}{readline, function}
-\entry{application-specific completion functions}{42}{application-specific completion functions}
-\entry{FDL, GNU Free Documentation License}{57}{FDL, GNU Free Documentation License}
+\entry{readline, function}{20}{readline, function}
+\entry{application-specific completion functions}{41}{application-specific completion functions}

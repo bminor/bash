@@ -165,6 +165,7 @@ sh_modcase (string, pat, flags)
 	{
 	  switch (nop)
 	  {
+	  default:
 	  case CASE_NOOP:  nc = wc; break;
 	  case CASE_UPPER:  nc = TOUPPER (wc); break;
 	  case CASE_LOWER:  nc = TOLOWER (wc); break;
@@ -179,6 +180,7 @@ sh_modcase (string, pat, flags)
 	  mbrtowc (&wc, string + start, end - start, &state);
 	  switch (nop)
 	  {
+	  default:
 	  case CASE_NOOP:  nwc = wc; break;
 	  case CASE_UPPER:  nwc = TOUPPER (wc); break;
 	  case CASE_LOWER:  nwc = TOLOWER (wc); break;

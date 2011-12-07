@@ -53,7 +53,7 @@ falarm(secs, usecs)
   it.it_value.tv_usec = usecs;
 
   if (setitimer(ITIMER_REAL, &it, &oit) < 0)
-    return (-1);
+    return (-1);		/* XXX will be converted to unsigned */
 
   /* Backwards compatibility with alarm(3) */
   if (oit.it_value.tv_usec)

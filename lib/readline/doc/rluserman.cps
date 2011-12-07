@@ -2,8 +2,6 @@
 \entry {command editing}{1}
 \initial {E}
 \entry {editing command lines}{1}
-\initial {F}
-\entry {FDL, GNU Free Documentation License}{21}
 \initial {I}
 \entry {initialization file, readline}{4}
 \entry {interaction, readline}{1}

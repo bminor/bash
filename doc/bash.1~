@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Sep 13 18:27:41 EDT 2008
+.\"	Last Change: Mon Dec 29 16:49:01 EST 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 September 13" "GNU Bash-4.0"
+.TH BASH 1 "2008 December 29" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2008 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2008 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2009 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2009 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -2570,7 +2570,7 @@ ${\fB!\fP\fIprefix\fP\fB*\fP}
 .TP
 ${\fB!\fP\fIprefix\fP\fB@\fP}
 .PD
-\fBExpand to names matching\fP \fIprefix\fP\fB.\fP
+\fBNames matching prefix.\fP
 Expands to the names of variables whose names begin with \fIprefix\fP,
 separated by the first character of the
 .SM
@@ -2584,7 +2584,7 @@ ${\fB!\fP\fIname\fP[\fI@\fP]}
 .TP
 ${\fB!\fP\fIname\fP[\fI*\fP]}
 .PD
-\fBExpand to list of array keys.\fP
+\fBList of array keys.\fP
 If \fIname\fP is an array variable, expands to the list of array indices
 (keys) assigned in \fIname\fP.
 If \fIname\fP is not an array, expands to 0 if \fIname\fP is set and null
@@ -2714,6 +2714,7 @@ ${\fIparameter\fP\fB,\fP\fIpattern\fP}
 .TP
 ${\fIparameter\fP\fB,,\fP\fIpattern\fP}
 .PD
+\fBCase modification.\fP
 This expansion modifies the case of alphabetic characters in \fIparameter\fP.
 The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion.
@@ -2921,7 +2922,7 @@ file names matching the pattern.
 If no matching file names are found,
 and the shell option
 .B nullglob
-is disabled, the word is left unchanged.
+is not enabled, the word is left unchanged.
 If the 
 .B nullglob
 option is set, and no matches are found,
@@ -3333,7 +3334,7 @@ This is semantically equivalent to
 .PP
 This type of redirection instructs the shell to read input from the
 current source until a line containing only
-.I word
+.I delimiter
 (with no trailing blanks)
 is seen.  All of
 the lines read up to that point are then used as the standard
@@ -4060,6 +4061,10 @@ that the shell inherited from its parent at invocation.  Builtin
 commands that are invoked as part of a pipeline are also executed in a
 subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
+.PP
+Subshells spawned to execute command substitutions inherit the value of
+the \fB\-e\fP option from the parent shell.  When not in posix mode,
+Bash clears the \fB\-e\fP option in such subshells.
 .PP
 If a command is followed by a \fB&\fP and job control is not active, the
 default standard input for the command is the empty file \fI/dev/null\fP.
@@ -5137,8 +5142,16 @@ Move forward to the end of the next word.  Words are composed of
 alphanumeric characters (letters and digits).
 .TP
 .B backward\-word (M\-b)
-Move back to the start of the current or previous word.  Words are
-composed of alphanumeric characters (letters and digits).
+Move back to the start of the current or previous word.
+Words are composed of alphanumeric characters (letters and digits).
+.TP
+.B shell\-forward\-word
+Move forward to the end of the next word.
+Words are delimited by non-quoted shell metacharacters.
+.TP
+.B shell\-backward\-word
+Move back to the start of the current or previous word.
+Words are delimited by non-quoted shell metacharacters.
 .TP
 .B clear\-screen (C\-l)
 Clear the screen leaving the current line at the top of the screen.
@@ -5365,6 +5378,15 @@ Word boundaries are the same as those used by \fBforward\-word\fP.
 .B backward\-kill\-word (M\-Rubout)
 Kill the word behind point.
 Word boundaries are the same as those used by \fBbackward\-word\fP.
+.TP
+.B shell\-kill\-word  (M\-d)
+Kill from point to the end of the current word, or if between
+words, to the end of the next word.
+Word boundaries are the same as those used by \fBshell\-forward\-word\fP.
+.TP
+.B shell\-backward\-kill\-word (M\-Rubout)
+Kill the word behind point.
+Word boundaries are the same as those used by \fBshell\-backward\-word\fP.
 .TP
 .B unix\-word\-rubout (C\-w)
 Kill the word behind point, using white space as a word boundary.
@@ -7979,7 +8001,7 @@ Read-only variables cannot be reset.
 In \fIposix mode\fP, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
-Any arguments remaining after the options are processed are treated
+Any arguments remaining after option processing are treated
 as values for the positional parameters and are assigned, in order, to 
 .BR $1 ,
 .BR $2 ,
@@ -8126,6 +8148,7 @@ Same as
 .B noglob
 Same as
 .BR \-f .
+.TP 8
 .B nolog
 Currently ignored.
 .TP 8
@@ -9355,12 +9378,6 @@ command in the sequence.
 It suffices to place the sequence of commands between
 parentheses to force it into a subshell, which may be stopped as
 a unit.
-.PP
-Commands inside of \fB$(\fP...\fB)\fP command substitution are not
-parsed until substitution is attempted.  This will delay error
-reporting until some time after the command is entered.  For example,
-unmatched parentheses, even inside shell comments, will result in
-error messages while the construct is being read.
 .PP
 Array variables may not (yet) be exported.
 .PP

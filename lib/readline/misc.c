@@ -442,7 +442,7 @@ void
 _rl_revert_all_lines ()
 {
   int hpos;
-  HIST_ENTRY *entry, *cur;
+  HIST_ENTRY *entry;
   UNDO_LIST *ul, *saved_undo_list;
   char *lbuf;
 

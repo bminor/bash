@@ -426,9 +426,9 @@ extern _rl_search_cxt *_rl_nscxt;
 /* signals.c */
 extern int _rl_echoctl;
 
-extern _rl_intr_char;
-extern _rl_quit_char;
-extern _rl_susp_char;
+extern int _rl_intr_char;
+extern int _rl_quit_char;
+extern int _rl_susp_char;
 
 /* terminal.c */
 extern int _rl_enable_keypad;
