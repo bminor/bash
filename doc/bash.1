@@ -5985,8 +5985,9 @@ no alias has been defined.
 Resume each suspended job \fIjobspec\fP in the background, as if it
 had been started with
 .BR & .
-If \fIjobspec\fP is not present, the shell's notion of the
-\fIcurrent job\fP is used.
+If
+.I jobspec
+is not present, the shell's notion of the \fIcurrent job\fP is used.
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
@@ -6572,6 +6573,10 @@ of the directory stack.
 Without options, each
 .I jobspec
 is removed from the table of active jobs.
+If
+.I jobspec
+is not present, and neither \fB\-a\fB nor \fB\-r\fP is supplied,
+the shell's notion of the \fIcurrent job\fP is used.
 If the \fB\-h\fP option is given, each
 .I jobspec
 is not removed from the table, but is marked so that
@@ -7587,12 +7592,14 @@ or
 .B until
 keyword, 
 part of the test in an
-.I if
+.B if
 statement, part of a
 .B &&
 or
 .B \(bv\(bv
-list, or if the command's return value is
+list,
+any command in a pipeline but the last,
+or if the command's return value is
 being inverted via
 .BR ! .
 A trap on \fBERR\fP, if set, is executed before the shell exits.

@@ -7,7 +7,7 @@
    Unix snprintf implementation.
    derived from inetutils/libinetutils/snprintf.c Version 1.1
 
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001,2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General License as published by
@@ -673,9 +673,8 @@ number(p, d, base)
     p->flags &= ~PF_ZEROPAD;
 
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
-  if (*p->pf == 'x' || *p->pf == 'X')
-    flags |= FL_UNSIGNED;	/* %x, %X treated as unsigned */
+  flags = 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
@@ -745,7 +744,7 @@ lnumber(p, d, base)
     p->flags &= ~PF_ZEROPAD;
 
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
