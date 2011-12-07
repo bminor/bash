@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.2, version 3.196])dnl
+AC_REVISION([for Bash 3.2, version 3.197])dnl
 
 define(bashvers, 3.2)
 define(relstatus, maint)
@@ -518,7 +518,7 @@ if test $opt_readline = yes; then
 		# static version specified as -llibname to override the
 		# dynamic version
 		case "${host_os}" in
-		darwin8*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
+		darwin[[89]]*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
 		*)		READLINE_LIB=-lreadline ;;
 		esac
 	fi
@@ -553,7 +553,7 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 		# static version specified as -llibname to override the
 		# dynamic version
 		case "${host_os}" in
-		darwin8*)	HISTORY_LIB='${HISTORY_LIBRARY}' ;;
+		darwin[[89]]*)	HISTORY_LIB='${HISTORY_LIBRARY}' ;;
 		*)		HISTORY_LIB=-lhistory ;;
 		esac
 	fi

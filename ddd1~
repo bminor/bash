@@ -1,54 +1,42 @@
-*** builtins/printf.def	Fri Feb  2 20:00:48 2007
---- ../bash-3.2-patched/builtins/printf.def	Mon Nov 13 08:58:52 2006
+*** ../bash-3.2-patched/version.c	2005-05-16 11:58:34.000000000 -0400
+--- version.c	2007-11-23 16:03:40.000000000 -0500
 ***************
-*** 2,6 ****
-  It implements the builtin "printf" in Bash.
+*** 34,46 ****
   
-! Copyright (C) 1997-2006 Free Software Foundation, Inc.
+  /* Defines from version.h */
+! const char *dist_version = DISTVERSION;
+! int patch_level = PATCHLEVEL;
+! int build_version = BUILDVERSION;
+  #ifdef RELSTATUS
+! const char *release_status = RELSTATUS;
+  #else
+! const char *release_status = (char *)0;
+  #endif
+! const char *sccs_version = SCCSVERSION;
   
-  This file is part of GNU Bash, the Bourne Again SHell.
---- 2,6 ----
-  It implements the builtin "printf" in Bash.
+  /* Functions for getting, setting, and displaying the shell version. */
+--- 34,46 ----
   
-! Copyright (C) 1997-2005 Free Software Foundation, Inc.
+  /* Defines from version.h */
+! const char * const dist_version = DISTVERSION;
+! const int patch_level = PATCHLEVEL;
+! const int build_version = BUILDVERSION;
+  #ifdef RELSTATUS
+! const char * const release_status = RELSTATUS;
+  #else
+! const char * const release_status = (char *)0;
+  #endif
+! const char * const sccs_version = SCCSVERSION;
   
-  This file is part of GNU Bash, the Bourne Again SHell.
+  /* Functions for getting, setting, and displaying the shell version. */
 ***************
-*** 27,32 ****
-  printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
-  is a character string which contains three types of objects: plain
-! characters, which are simply copied to standard output; character escape
-! sequences, which are converted and copied to the standard output; and
-  format specifications, each of which causes printing of the next successive
-  argument.  In addition to the standard printf(1) formats, %b means to
---- 27,32 ----
-  printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
-  is a character string which contains three types of objects: plain
-! characters, which are simply copied to standard output, character escape
-! sequences which are converted and copied to the standard output, and
-  format specifications, each of which causes printing of the next successive
-  argument.  In addition to the standard printf(1) formats, %b means to
-***************
-*** 71,78 ****
-  #include "common.h"
-  
-- #if defined (PRI_MACROS_BROKEN)
-- #  undef PRIdMAX
-- #endif
-- 
-  #if !defined (PRIdMAX)
-  #  if HAVE_LONG_LONG
---- 71,74 ----
-***************
-*** 555,559 ****
-       char *s;
-  {
-!   builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
+*** 80,83 ****
+    printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
+    if (extended)
+!     printf (_("Copyright (C) 2005 Free Software Foundation, Inc.\n"));
   }
-  
---- 551,555 ----
-       char *s;
-  {
-!   builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+--- 80,83 ----
+    printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
+    if (extended)
+!     printf (_("Copyright (C) 2007 Free Software Foundation, Inc.\n"));
   }
-  

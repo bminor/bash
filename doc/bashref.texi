@@ -102,9 +102,9 @@ reference on shell behavior.
 * Bash Features::		Features found only in Bash.
 * Job Control::			What job control is and how Bash allows you
 				to use it.
-* Using History Interactively::	Command History Expansion
 * Command Line Editing::	Chapter describing the command line
 				editing features.
+* Using History Interactively::	Command History Expansion
 * Installing Bash::		How to build and install Bash on your system.
 * Reporting Bugs::		How to report bugs in Bash.
 * Major Differences From The Bourne Shell::	A terse list of the differences
@@ -3028,7 +3028,8 @@ subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
 part of the test in an @code{if} statement,
-part of a @code{&&} or @code{||} list, or if the command's return
+part of a command executed in a @code{&&} or @code{||} list,
+or if the command's return
 status is being inverted using @code{!}.
 These are the same conditions obeyed by the @code{errexit} option.
 If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
@@ -3729,7 +3730,7 @@ Exit immediately if a simple command (@pxref{Simple Commands}) exits
 with a non-zero status, unless the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
 part of the test in an @code{if} statement,
-part of a @code{&&} or @code{||} list,
+part of a command executed in a @code{&&} or @code{||b} list,
 any command in a pipeline but the last,
 or if the command's return status is being inverted using @code{!}.
 Failing simple commands that are part of shell functions or command lists

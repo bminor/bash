@@ -3028,7 +3028,8 @@ subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
 part of the test in an @code{if} statement,
-part of a @code{&&} or @code{||} list, or if the command's return
+part of a command executed in a @code{&&} or @code{||} list,
+or if the command's return
 status is being inverted using @code{!}.
 These are the same conditions obeyed by the @code{errexit} option.
 If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
@@ -3729,7 +3730,7 @@ Exit immediately if a simple command (@pxref{Simple Commands}) exits
 with a non-zero status, unless the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
 part of the test in an @code{if} statement,
-part of a @code{&&} or @code{||} list,
+part of a command executed in a @code{&&} or @code{||b} list,
 any command in a pipeline but the last,
 or if the command's return status is being inverted using @code{!}.
 Failing simple commands that are part of shell functions or command lists
@@ -4395,7 +4396,8 @@ The command argument to the @option{-c} invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of @var{FUNCNAME}.
 @code{$@{BASH_LINENO[$i]@}} is the line number in the source file where
-@code{$@{FUNCNAME[$i]@}} was called.
+@code{$@{FUNCNAME[$i]@}} was called (or @code{$@{BASH_LINENO[$i-1]@}} if
+referenced within another shell function).
 The corresponding source file name is @code{$@{BASH_SOURCE[$i]@}}.
 Use @code{LINENO} to obtain the current line number.
 

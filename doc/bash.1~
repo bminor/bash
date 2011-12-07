@@ -10,7 +10,7 @@
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2007 September 14" "GNU Bash-3.2"
+.TH BASH 1 "2007 November 21" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1291,8 +1291,10 @@ The command argument to the \fB\-c\fP invocation option.
 .B BASH_LINENO
 An array variable whose members are the line numbers in source files
 corresponding to each member of \fBFUNCNAME\fP.
-\fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP is the line number in the source
-file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called.
+\fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
+file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
+(or \fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP if referenced within another
+shell function).
 The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
@@ -8489,7 +8491,7 @@ or
 keyword, 
 part of the test in an
 .I if
-statement, part of a
+statement, part of a command executed in a
 .B &&
 or
 .B \(bv\(bv

@@ -15024,7 +15024,7 @@ subst.c
 	  unchanged in that case.  Fixes tab completion bug reported by
 	  Heikki Hokkanen <hoxu@users.sf.net> (debian bug 451263)
 
-lib/readline/display.c
+lib/readline/mbutil.c
 	- fix _rl_find_next_mbchar_internal to deal with invalid multibyte
 	  character sequences when finding non-zero-length chars.  Fixes
 	  bug reported by Morita Sho <morita-pub-en-debian@inz.sakura.ne.jp>
@@ -15038,3 +15038,14 @@ variables.c
 	- replace the rng in brand() with a slightly better one from FreeBSD
 	  (filtered through Mac OS X 10.5).  Replacement suggested by
 	  Steve Grubb <sgrubb@redhat.com>
+
+				   11/21
+				   -----
+configure.in
+	- darwin 9 also requires linking against libreadline.a and
+	  libhistory.a because of Apple's questionable decision to ship a
+	  libreadline "replacement" that doesn't provide all functions
+
+doc/{bash.1,bashref.texi}
+	- slight change to the text describing the effect of set -e when
+	  in a || or && list

@@ -14999,7 +14999,7 @@ execute_cmd.c
 				   ----
 builtins/read.def
 	- make sure the return value from get_word_from_string is freed if
-	  non-null.  Fixes bug reported by Lars Ellenberg
+	  non-null.  Fixes memory leak bug reported by Lars Ellenberg
 	  <lars.ellenberg@linbit.com>
 
 				   11/10
@@ -15038,3 +15038,14 @@ variables.c
 	- replace the rng in brand() with a slightly better one from FreeBSD
 	  (filtered through Mac OS X 10.5).  Replacement suggested by
 	  Steve Grubb <sgrubb@redhat.com>
+
+				   11/21
+				   -----
+configure.in
+	- darwin 9 also requires linking against libreadline.a and
+	  libhistory.a because of Apple's questionable decision to ship a
+	  libreadline "replacement" that doesn't provide all functions
+
+doc/{bash.1,bashref.texi}
+	- slight change to the text describing the effect of set -e when
+	  in a || or && list

@@ -1,11 +1,11 @@
 This is bashref.info, produced by makeinfo version 4.8 from
-/Users/chet/src/bash/src/doc/bashref.texi.
+/usr/src/local/bash/bash-20071121/doc/bashref.texi.
 
    This text is a brief description of the features that are present in
-the Bash shell (version 3.2, 14 September 2007).
+the Bash shell (version 3.2, 21 November 2007).
 
-   This is Edition 3.2, last updated 14 September 2007, of `The GNU
-Bash Reference Manual', for `Bash', Version 3.2.
+   This is Edition 3.2, last updated 21 November 2007, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.2.
 
    Copyright (C) 1988-2005 Free Software Foundation, Inc.
 
@@ -37,10 +37,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.2, 14 September 2007).
+the Bash shell (version 3.2, 21 November 2007).
 
-   This is Edition 3.2, last updated 14 September 2007, of `The GNU
-Bash Reference Manual', for `Bash', Version 3.2.
+   This is Edition 3.2, last updated 21 November 2007, of `The GNU Bash
+Reference Manual', for `Bash', Version 3.2.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -64,9 +64,9 @@ on shell behavior.
 * Bash Features::		Features found only in Bash.
 * Job Control::			What job control is and how Bash allows you
 				to use it.
-* Using History Interactively::	Command History Expansion
 * Command Line Editing::	Chapter describing the command line
 				editing features.
+* Using History Interactively::	Command History Expansion
 * Installing Bash::		How to build and install Bash on your system.
 * Reporting Bugs::		How to report bugs in Bash.
 * Major Differences From The Bourne Shell::	A terse list of the differences
@@ -2589,12 +2589,12 @@ standard.
      subject to the following conditions.  The `ERR' trap is not
      executed if the failed command is part of the command list
      immediately following an `until' or `while' keyword, part of the
-     test in an `if' statement, part of a `&&' or `||' list, or if the
-     command's return status is being inverted using `!'.  These are
-     the same conditions obeyed by the `errexit' option.  If a SIGSPEC
-     is `RETURN', the command ARG is executed each time a shell
-     function or a script executed with the `.' or `source' builtins
-     finishes executing.
+     test in an `if' statement, part of a command executed in a `&&' or
+     `||' list, or if the command's return status is being inverted
+     using `!'.  These are the same conditions obeyed by the `errexit'
+     option.  If a SIGSPEC is `RETURN', the command ARG is executed
+     each time a shell function or a script executed with the `.' or
+     `source' builtins finishes executing.
 
      Signals ignored upon entry to the shell cannot be trapped or reset.
      Trapped signals that are not being ignored are reset to their
@@ -3195,13 +3195,13 @@ parameters, or to display the names and values of shell variables.
           Commands::) exits with a non-zero status, unless the command
           that fails is part of the command list immediately following
           a `while' or `until' keyword, part of the test in an `if'
-          statement, part of a `&&' or `||' list, any command in a
-          pipeline but the last, or if the command's return status is
-          being inverted using `!'.  Failing simple commands that are
-          part of shell functions or command lists enclosed in braces
-          or parentheses satisfying the above conditions do not cause
-          the shell to exit.  A trap on `ERR', if set, is executed
-          before the shell exits.
+          statement, part of a command executed in a `&&' or `||b' list,
+          any command in a pipeline but the last, or if the command's
+          return status is being inverted using `!'.  Failing simple
+          commands that are part of shell functions or command lists
+          enclosed in braces or parentheses satisfying the above
+          conditions do not cause the shell to exit.  A trap on `ERR',
+          if set, is executed before the shell exits.
 
     `-f'
           Disable file name generation (globbing).
@@ -3825,9 +3825,10 @@ Variables::).
      An array variable whose members are the line numbers in source
      files corresponding to each member of FUNCNAME.
      `${BASH_LINENO[$i]}' is the line number in the source file where
-     `${FUNCNAME[$i]}' was called.  The corresponding source file name
-     is `${BASH_SOURCE[$i]}'.  Use `LINENO' to obtain the current line
-     number.
+     `${FUNCNAME[$i]}' was called (or `${BASH_LINENO[$i-1]}' if
+     referenced within another shell function).  The corresponding
+     source file name is `${BASH_SOURCE[$i]}'.  Use `LINENO' to obtain
+     the current line number.
 
 `BASH_REMATCH'
      An array variable whose members are assigned by the `=~' binary
@@ -5484,7 +5485,7 @@ specifying the `--enable-strict-posix-default' to `configure' when
 building (*note Optional Features::).
 
 
-File: bashref.info,  Node: Job Control,  Next: Using History Interactively,  Prev: Bash Features,  Up: Top
+File: bashref.info,  Node: Job Control,  Next: Command Line Editing,  Prev: Bash Features,  Up: Top
 
 7 Job Control
 *************
@@ -5713,7 +5714,7 @@ File: bashref.info,  Node: Job Control Variables,  Prev: Job Control Builtins,  
 
 
 
-File: bashref.info,  Node: Command Line Editing,  Next: Installing Bash,  Prev: Using History Interactively,  Up: Top
+File: bashref.info,  Node: Command Line Editing,  Next: Using History Interactively,  Prev: Job Control,  Up: Top
 
 8 Command Line Editing
 **********************
@@ -7376,7 +7377,7 @@ completion facilities.
 
    
 
-File: bashref.info,  Node: Using History Interactively,  Next: Command Line Editing,  Prev: Job Control,  Up: Top
+File: bashref.info,  Node: Using History Interactively,  Next: Installing Bash,  Prev: Command Line Editing,  Up: Top
 
 9 Using History Interactively
 *****************************
@@ -7749,7 +7750,7 @@ more of the following modifiers, each preceded by a `:'.
 
 
 
-File: bashref.info,  Node: Installing Bash,  Next: Reporting Bugs,  Prev: Command Line Editing,  Up: Top
+File: bashref.info,  Node: Installing Bash,  Next: Reporting Bugs,  Prev: Using History Interactively,  Up: Top
 
 10 Installing Bash
 ******************
@@ -9223,11 +9224,11 @@ D.3 Parameter and Variable Index
 * BASH_ENV:                              Bash Variables.      (line  46)
 * BASH_EXECUTION_STRING:                 Bash Variables.      (line  52)
 * BASH_LINENO:                           Bash Variables.      (line  55)
-* BASH_REMATCH:                          Bash Variables.      (line  63)
-* BASH_SOURCE:                           Bash Variables.      (line  71)
-* BASH_SUBSHELL:                         Bash Variables.      (line  75)
-* BASH_VERSINFO:                         Bash Variables.      (line  79)
-* BASH_VERSION:                          Bash Variables.      (line 103)
+* BASH_REMATCH:                          Bash Variables.      (line  64)
+* BASH_SOURCE:                           Bash Variables.      (line  72)
+* BASH_SUBSHELL:                         Bash Variables.      (line  76)
+* BASH_VERSINFO:                         Bash Variables.      (line  80)
+* BASH_VERSION:                          Bash Variables.      (line 104)
 * BASHPID:                               Bash Variables.      (line  16)
 * bell-style:                            Readline Init File Syntax.
                                                               (line  38)
@@ -9235,77 +9236,77 @@ D.3 Parameter and Variable Index
                                                               (line  45)
 * CDPATH:                                Bourne Shell Variables.
                                                               (line   9)
-* COLUMNS:                               Bash Variables.      (line 106)
+* COLUMNS:                               Bash Variables.      (line 107)
 * comment-begin:                         Readline Init File Syntax.
                                                               (line  50)
-* COMP_CWORD:                            Bash Variables.      (line 111)
-* COMP_KEY:                              Bash Variables.      (line 140)
-* COMP_LINE:                             Bash Variables.      (line 117)
-* COMP_POINT:                            Bash Variables.      (line 122)
-* COMP_TYPE:                             Bash Variables.      (line 130)
-* COMP_WORDBREAKS:                       Bash Variables.      (line 144)
-* COMP_WORDS:                            Bash Variables.      (line 150)
+* COMP_CWORD:                            Bash Variables.      (line 112)
+* COMP_KEY:                              Bash Variables.      (line 141)
+* COMP_LINE:                             Bash Variables.      (line 118)
+* COMP_POINT:                            Bash Variables.      (line 123)
+* COMP_TYPE:                             Bash Variables.      (line 131)
+* COMP_WORDBREAKS:                       Bash Variables.      (line 145)
+* COMP_WORDS:                            Bash Variables.      (line 151)
 * completion-query-items:                Readline Init File Syntax.
                                                               (line  60)
-* COMPREPLY:                             Bash Variables.      (line 157)
+* COMPREPLY:                             Bash Variables.      (line 158)
 * convert-meta:                          Readline Init File Syntax.
                                                               (line  70)
-* DIRSTACK:                              Bash Variables.      (line 162)
+* DIRSTACK:                              Bash Variables.      (line 163)
 * disable-completion:                    Readline Init File Syntax.
                                                               (line  76)
 * editing-mode:                          Readline Init File Syntax.
                                                               (line  81)
-* EMACS:                                 Bash Variables.      (line 172)
+* EMACS:                                 Bash Variables.      (line 173)
 * enable-keypad:                         Readline Init File Syntax.
                                                               (line  87)
-* EUID:                                  Bash Variables.      (line 177)
+* EUID:                                  Bash Variables.      (line 178)
 * expand-tilde:                          Readline Init File Syntax.
                                                               (line  92)
-* FCEDIT:                                Bash Variables.      (line 181)
-* FIGNORE:                               Bash Variables.      (line 185)
-* FUNCNAME:                              Bash Variables.      (line 191)
-* GLOBIGNORE:                            Bash Variables.      (line 200)
-* GROUPS:                                Bash Variables.      (line 206)
-* histchars:                             Bash Variables.      (line 212)
-* HISTCMD:                               Bash Variables.      (line 227)
-* HISTCONTROL:                           Bash Variables.      (line 232)
-* HISTFILE:                              Bash Variables.      (line 248)
-* HISTFILESIZE:                          Bash Variables.      (line 252)
-* HISTIGNORE:                            Bash Variables.      (line 260)
+* FCEDIT:                                Bash Variables.      (line 182)
+* FIGNORE:                               Bash Variables.      (line 186)
+* FUNCNAME:                              Bash Variables.      (line 192)
+* GLOBIGNORE:                            Bash Variables.      (line 201)
+* GROUPS:                                Bash Variables.      (line 207)
+* histchars:                             Bash Variables.      (line 213)
+* HISTCMD:                               Bash Variables.      (line 228)
+* HISTCONTROL:                           Bash Variables.      (line 233)
+* HISTFILE:                              Bash Variables.      (line 249)
+* HISTFILESIZE:                          Bash Variables.      (line 253)
+* HISTIGNORE:                            Bash Variables.      (line 261)
 * history-preserve-point:                Readline Init File Syntax.
                                                               (line  96)
-* HISTSIZE:                              Bash Variables.      (line 279)
-* HISTTIMEFORMAT:                        Bash Variables.      (line 283)
+* HISTSIZE:                              Bash Variables.      (line 280)
+* HISTTIMEFORMAT:                        Bash Variables.      (line 284)
 * HOME:                                  Bourne Shell Variables.
                                                               (line  13)
 * horizontal-scroll-mode:                Readline Init File Syntax.
                                                               (line 102)
-* HOSTFILE:                              Bash Variables.      (line 292)
-* HOSTNAME:                              Bash Variables.      (line 303)
-* HOSTTYPE:                              Bash Variables.      (line 306)
+* HOSTFILE:                              Bash Variables.      (line 293)
+* HOSTNAME:                              Bash Variables.      (line 304)
+* HOSTTYPE:                              Bash Variables.      (line 307)
 * IFS:                                   Bourne Shell Variables.
                                                               (line  18)
-* IGNOREEOF:                             Bash Variables.      (line 309)
+* IGNOREEOF:                             Bash Variables.      (line 310)
 * input-meta:                            Readline Init File Syntax.
                                                               (line 109)
-* INPUTRC:                               Bash Variables.      (line 319)
+* INPUTRC:                               Bash Variables.      (line 320)
 * isearch-terminators:                   Readline Init File Syntax.
                                                               (line 116)
 * keymap:                                Readline Init File Syntax.
                                                               (line 123)
-* LANG:                                  Bash Variables.      (line 323)
-* LC_ALL:                                Bash Variables.      (line 327)
-* LC_COLLATE:                            Bash Variables.      (line 331)
-* LC_CTYPE:                              Bash Variables.      (line 338)
+* LANG:                                  Bash Variables.      (line 324)
+* LC_ALL:                                Bash Variables.      (line 328)
+* LC_COLLATE:                            Bash Variables.      (line 332)
+* LC_CTYPE:                              Bash Variables.      (line 339)
 * LC_MESSAGES <1>:                       Locale Translation.  (line  11)
-* LC_MESSAGES:                           Bash Variables.      (line 343)
-* LC_NUMERIC:                            Bash Variables.      (line 347)
-* LINENO:                                Bash Variables.      (line 351)
-* LINES:                                 Bash Variables.      (line 355)
-* MACHTYPE:                              Bash Variables.      (line 360)
+* LC_MESSAGES:                           Bash Variables.      (line 344)
+* LC_NUMERIC:                            Bash Variables.      (line 348)
+* LINENO:                                Bash Variables.      (line 352)
+* LINES:                                 Bash Variables.      (line 356)
+* MACHTYPE:                              Bash Variables.      (line 361)
 * MAIL:                                  Bourne Shell Variables.
                                                               (line  22)
-* MAILCHECK:                             Bash Variables.      (line 364)
+* MAILCHECK:                             Bash Variables.      (line 365)
 * MAILPATH:                              Bourne Shell Variables.
                                                               (line  27)
 * mark-modified-lines:                   Readline Init File Syntax.
@@ -9316,46 +9317,46 @@ D.3 Parameter and Variable Index
                                                               (line 146)
 * meta-flag:                             Readline Init File Syntax.
                                                               (line 109)
-* OLDPWD:                                Bash Variables.      (line 372)
+* OLDPWD:                                Bash Variables.      (line 373)
 * OPTARG:                                Bourne Shell Variables.
                                                               (line  34)
-* OPTERR:                                Bash Variables.      (line 375)
+* OPTERR:                                Bash Variables.      (line 376)
 * OPTIND:                                Bourne Shell Variables.
                                                               (line  38)
-* OSTYPE:                                Bash Variables.      (line 379)
+* OSTYPE:                                Bash Variables.      (line 380)
 * output-meta:                           Readline Init File Syntax.
                                                               (line 153)
 * page-completions:                      Readline Init File Syntax.
                                                               (line 158)
 * PATH:                                  Bourne Shell Variables.
                                                               (line  42)
-* PIPESTATUS:                            Bash Variables.      (line 382)
-* POSIXLY_CORRECT:                       Bash Variables.      (line 387)
-* PPID:                                  Bash Variables.      (line 396)
-* PROMPT_COMMAND:                        Bash Variables.      (line 400)
+* PIPESTATUS:                            Bash Variables.      (line 383)
+* POSIXLY_CORRECT:                       Bash Variables.      (line 388)
+* PPID:                                  Bash Variables.      (line 397)
+* PROMPT_COMMAND:                        Bash Variables.      (line 401)
 * PS1:                                   Bourne Shell Variables.
                                                               (line  48)
 * PS2:                                   Bourne Shell Variables.
                                                               (line  53)
-* PS3:                                   Bash Variables.      (line 404)
-* PS4:                                   Bash Variables.      (line 409)
-* PWD:                                   Bash Variables.      (line 415)
-* RANDOM:                                Bash Variables.      (line 418)
-* REPLY:                                 Bash Variables.      (line 423)
-* SECONDS:                               Bash Variables.      (line 426)
-* SHELL:                                 Bash Variables.      (line 432)
-* SHELLOPTS:                             Bash Variables.      (line 437)
-* SHLVL:                                 Bash Variables.      (line 446)
+* PS3:                                   Bash Variables.      (line 405)
+* PS4:                                   Bash Variables.      (line 410)
+* PWD:                                   Bash Variables.      (line 416)
+* RANDOM:                                Bash Variables.      (line 419)
+* REPLY:                                 Bash Variables.      (line 424)
+* SECONDS:                               Bash Variables.      (line 427)
+* SHELL:                                 Bash Variables.      (line 433)
+* SHELLOPTS:                             Bash Variables.      (line 438)
+* SHLVL:                                 Bash Variables.      (line 447)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
                                                               (line 168)
 * show-all-if-unmodified:                Readline Init File Syntax.
                                                               (line 174)
 * TEXTDOMAIN:                            Locale Translation.  (line  11)
 * TEXTDOMAINDIR:                         Locale Translation.  (line  11)
-* TIMEFORMAT:                            Bash Variables.      (line 451)
-* TMOUT:                                 Bash Variables.      (line 489)
-* TMPDIR:                                Bash Variables.      (line 501)
-* UID:                                   Bash Variables.      (line 505)
+* TIMEFORMAT:                            Bash Variables.      (line 452)
+* TMOUT:                                 Bash Variables.      (line 490)
+* TMPDIR:                                Bash Variables.      (line 502)
+* UID:                                   Bash Variables.      (line 506)
 * visible-stats:                         Readline Init File Syntax.
                                                               (line 183)
 
@@ -9623,132 +9624,132 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top1359
-Node: Introduction3171
-Node: What is Bash?3399
-Node: What is a shell?4512
-Node: Definitions7052
-Node: Basic Shell Features9821
-Node: Shell Syntax11040
-Node: Shell Operation12070
-Node: Quoting13364
-Node: Escape Character14667
-Node: Single Quotes15152
-Node: Double Quotes15500
-Node: ANSI-C Quoting16625
-Node: Locale Translation17581
-Node: Comments18477
-Node: Shell Commands19095
-Node: Simple Commands19861
-Node: Pipelines20492
-Node: Lists22367
-Node: Compound Commands23998
-Node: Looping Constructs24782
-Node: Conditional Constructs27229
-Node: Command Grouping34789
-Node: Shell Functions36268
-Node: Shell Parameters40729
-Node: Positional Parameters43059
-Node: Special Parameters43959
-Node: Shell Expansions46923
-Node: Brace Expansion48848
-Node: Tilde Expansion51174
-Node: Shell Parameter Expansion53525
-Node: Command Substitution61225
-Node: Arithmetic Expansion62558
-Node: Process Substitution63408
-Node: Word Splitting64458
-Node: Filename Expansion66081
-Node: Pattern Matching68221
-Node: Quote Removal71539
-Node: Redirections71834
-Node: Executing Commands79564
-Node: Simple Command Expansion80234
-Node: Command Search and Execution82164
-Node: Command Execution Environment84170
-Node: Environment86969
-Node: Exit Status88629
-Node: Signals89833
-Node: Shell Scripts91801
-Node: Shell Builtin Commands94319
-Node: Bourne Shell Builtins95996
-Node: Bash Builtins113204
-Node: Modifying Shell Behavior133336
-Node: The Set Builtin133681
-Node: The Shopt Builtin142506
-Node: Special Builtins152736
-Node: Shell Variables153715
-Node: Bourne Shell Variables154155
-Node: Bash Variables156136
-Node: Bash Features177431
-Node: Invoking Bash178314
-Node: Bash Startup Files184123
-Node: Interactive Shells188982
-Node: What is an Interactive Shell?189392
-Node: Is this Shell Interactive?190041
-Node: Interactive Shell Behavior190856
-Node: Bash Conditional Expressions194136
-Node: Shell Arithmetic197715
-Node: Aliases200461
-Node: Arrays203033
-Node: The Directory Stack206382
-Node: Directory Stack Builtins207096
-Node: Printing a Prompt209988
-Node: The Restricted Shell212702
-Node: Bash POSIX Mode214534
-Node: Job Control222293
-Node: Job Control Basics222760
-Node: Job Control Builtins227269
-Node: Job Control Variables231596
-Node: Command Line Editing232754
-Node: Introduction and Notation233753
-Node: Readline Interaction235375
-Node: Readline Bare Essentials236566
-Node: Readline Movement Commands238355
-Node: Readline Killing Commands239320
-Node: Readline Arguments241240
-Node: Searching242284
-Node: Readline Init File244470
-Node: Readline Init File Syntax245617
-Node: Conditional Init Constructs257992
-Node: Sample Init File260525
-Node: Bindable Readline Commands263642
-Node: Commands For Moving264849
-Node: Commands For History265710
-Node: Commands For Text268865
-Node: Commands For Killing271538
-Node: Numeric Arguments273680
-Node: Commands For Completion274819
-Node: Keyboard Macros278412
-Node: Miscellaneous Commands278983
-Node: Readline vi Mode284294
-Node: Programmable Completion285208
-Node: Programmable Completion Builtins291026
-Node: Using History Interactively298622
-Node: Bash History Facilities299302
-Node: Bash History Builtins302216
-Node: History Interaction306073
-Node: Event Designators308778
-Node: Word Designators309793
-Node: Modifiers311432
-Node: Installing Bash312836
-Node: Basic Installation313966
-Node: Compilers and Options316658
-Node: Compiling For Multiple Architectures317399
-Node: Installation Names319063
-Node: Specifying the System Type319881
-Node: Sharing Defaults320597
-Node: Operation Controls321270
-Node: Optional Features322228
-Node: Reporting Bugs331159
-Node: Major Differences From The Bourne Shell332353
-Node: Copying This Manual349022
-Node: GNU Free Documentation License349292
-Node: Indexes371698
-Node: Builtin Index372141
-Node: Reserved Word Index378674
-Node: Variable Index381122
-Node: Function Index392286
-Node: Concept Index399018
+Node: Top1366
+Node: Introduction3176
+Node: What is Bash?3404
+Node: What is a shell?4517
+Node: Definitions7057
+Node: Basic Shell Features9826
+Node: Shell Syntax11045
+Node: Shell Operation12075
+Node: Quoting13369
+Node: Escape Character14672
+Node: Single Quotes15157
+Node: Double Quotes15505
+Node: ANSI-C Quoting16630
+Node: Locale Translation17586
+Node: Comments18482
+Node: Shell Commands19100
+Node: Simple Commands19866
+Node: Pipelines20497
+Node: Lists22372
+Node: Compound Commands24003
+Node: Looping Constructs24787
+Node: Conditional Constructs27234
+Node: Command Grouping34794
+Node: Shell Functions36273
+Node: Shell Parameters40734
+Node: Positional Parameters43064
+Node: Special Parameters43964
+Node: Shell Expansions46928
+Node: Brace Expansion48853
+Node: Tilde Expansion51179
+Node: Shell Parameter Expansion53530
+Node: Command Substitution61230
+Node: Arithmetic Expansion62563
+Node: Process Substitution63413
+Node: Word Splitting64463
+Node: Filename Expansion66086
+Node: Pattern Matching68226
+Node: Quote Removal71544
+Node: Redirections71839
+Node: Executing Commands79569
+Node: Simple Command Expansion80239
+Node: Command Search and Execution82169
+Node: Command Execution Environment84175
+Node: Environment86974
+Node: Exit Status88634
+Node: Signals89838
+Node: Shell Scripts91806
+Node: Shell Builtin Commands94324
+Node: Bourne Shell Builtins96001
+Node: Bash Builtins113231
+Node: Modifying Shell Behavior133363
+Node: The Set Builtin133708
+Node: The Shopt Builtin142556
+Node: Special Builtins152786
+Node: Shell Variables153765
+Node: Bourne Shell Variables154205
+Node: Bash Variables156186
+Node: Bash Features177558
+Node: Invoking Bash178441
+Node: Bash Startup Files184250
+Node: Interactive Shells189109
+Node: What is an Interactive Shell?189519
+Node: Is this Shell Interactive?190168
+Node: Interactive Shell Behavior190983
+Node: Bash Conditional Expressions194263
+Node: Shell Arithmetic197842
+Node: Aliases200588
+Node: Arrays203160
+Node: The Directory Stack206509
+Node: Directory Stack Builtins207223
+Node: Printing a Prompt210115
+Node: The Restricted Shell212829
+Node: Bash POSIX Mode214661
+Node: Job Control222420
+Node: Job Control Basics222880
+Node: Job Control Builtins227389
+Node: Job Control Variables231716
+Node: Command Line Editing232874
+Node: Introduction and Notation233869
+Node: Readline Interaction235491
+Node: Readline Bare Essentials236682
+Node: Readline Movement Commands238471
+Node: Readline Killing Commands239436
+Node: Readline Arguments241356
+Node: Searching242400
+Node: Readline Init File244586
+Node: Readline Init File Syntax245733
+Node: Conditional Init Constructs258108
+Node: Sample Init File260641
+Node: Bindable Readline Commands263758
+Node: Commands For Moving264965
+Node: Commands For History265826
+Node: Commands For Text268981
+Node: Commands For Killing271654
+Node: Numeric Arguments273796
+Node: Commands For Completion274935
+Node: Keyboard Macros278528
+Node: Miscellaneous Commands279099
+Node: Readline vi Mode284410
+Node: Programmable Completion285324
+Node: Programmable Completion Builtins291142
+Node: Using History Interactively298738
+Node: Bash History Facilities299422
+Node: Bash History Builtins302336
+Node: History Interaction306193
+Node: Event Designators308898
+Node: Word Designators309913
+Node: Modifiers311552
+Node: Installing Bash312956
+Node: Basic Installation314093
+Node: Compilers and Options316785
+Node: Compiling For Multiple Architectures317526
+Node: Installation Names319190
+Node: Specifying the System Type320008
+Node: Sharing Defaults320724
+Node: Operation Controls321397
+Node: Optional Features322355
+Node: Reporting Bugs331286
+Node: Major Differences From The Bourne Shell332480
+Node: Copying This Manual349149
+Node: GNU Free Documentation License349419
+Node: Indexes371825
+Node: Builtin Index372268
+Node: Reserved Word Index378801
+Node: Variable Index381249
+Node: Function Index392413
+Node: Concept Index399145
 
 End Tag Table
