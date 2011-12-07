@@ -3688,7 +3688,7 @@ with_input_from_string (string, name)
    That is the true input location.  Rewind bash_input.location.string by
    that number of characters, so it points to the last character actually
    consumed by the parser. */
-void
+static void
 rewind_input_string ()
 {
   int xchars;
@@ -3696,6 +3696,8 @@ rewind_input_string ()
   /* number of unconsumed characters in the input -- XXX need to take newlines
      into account, e.g., $(...\n) */
   xchars = shell_input_line_len - shell_input_line_index;
+  if (bash_input.location.string[-1] == '\n')
+    xchars++;
 
   /* XXX - how to reflect bash_input.location.string back to string passed to
      parse_and_execute or xparse_dolparen?  xparse_dolparen needs to know how
