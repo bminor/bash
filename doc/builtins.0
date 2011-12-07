@@ -631,11 +631,15 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      the _a_r_g_s are added.
 
               If the HHIISSTTTTIIMMEEFFOORRMMAATT is set, the time stamp information associ-
-              ated with each history entry is written  to  the  history  file.
-              The  return  value is 0 unless an invalid option is encountered,
-              an error occurs while reading or writing the  history  file,  an
-              invalid  _o_f_f_s_e_t is supplied as an argument to --dd, or the history
-              expansion supplied as an argument to --pp fails.
+              ated with each history entry is written  to  the  history  file,
+              marked  with  the  history  comment character.  When the history
+              file is read, lines beginning with the history comment character
+              followed  immediately  by  a digit are interpreted as timestamps
+              for the previous history line.  The return value is 0 unless  an
+              invalid  option is encountered, an error occurs while reading or
+              writing the history file, an invalid _o_f_f_s_e_t is  supplied  as  an
+              argument to --dd, or the history expansion supplied as an argument
+              to --pp fails.
 
        jjoobbss [--llnnpprrss] [ _j_o_b_s_p_e_c ... ]
        jjoobbss --xx _c_o_m_m_a_n_d [ _a_r_g_s ... ]

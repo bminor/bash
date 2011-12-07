@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2005 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2007 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -2260,6 +2260,8 @@ for <I>strftime</I>(3) to print the time stamp associated with each history
 entry displayed by the <B>history</B> builtin.
 If this variable is set, time stamps are written to the history file so
 they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
 <DT><B>HOME</B>
 
 <DD>
@@ -7279,6 +7281,14 @@ the number of lines specified by the value of
 <FONT SIZE=-1><B>HISTFILESIZE</B>.
 
 </FONT>
+When the history file is read,
+lines beginning with the history comment character followed immediately
+by a digit are interpreted as timestamps for the preceding history line.
+These timestamps are optionally displayed depending on the value of the
+<FONT SIZE=-1><B>HISTTIMEFORMAT</B>
+
+</FONT>
+variable.
 When an interactive shell exits, the last
 <FONT SIZE=-1><B>$HISTSIZE</B>
 
@@ -7305,7 +7315,16 @@ If
 
 </FONT>
 is unset, or if the history file is unwritable, the history is
-not saved.  After saving the history, the history file is truncated
+not saved.
+If the
+<FONT SIZE=-1>
+</FONT>
+variable is set, time stamps are written to the history file, marked
+with the history comment character, so
+they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
+After saving the history, the history file is truncated
 to contain no more than
 <FONT SIZE=-1><B>HISTFILESIZE</B>
 
@@ -7478,6 +7497,9 @@ history expansion mechanism (see the description of
 above under
 <B>Shell Variables</B>).
 
+The shell uses
+the history comment character to mark history timestamps when
+writing the history file.
 <A NAME="lbCW">&nbsp;</A>
 <H4>Event Designators</H4>
 
@@ -9229,7 +9251,11 @@ are added.
 <P>
 
 If the <B>HISTTIMEFORMAT</B> is set, the time stamp information
-associated with each history entry is written to the history file.
+associated with each history entry is written to the history file,
+marked with the history comment character.
+When the history file is read, lines beginning with the history
+comment character followed immediately by a digit are interpreted
+as timestamps for the previous history line.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 <I>offset</I> is supplied as an argument to <B>-d</B>, or the
@@ -11515,7 +11541,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11619,6 +11645,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 09 January 2007 09:51:43 EST
+Time: 16 January 2007 11:15:22 EST
 </BODY>
 </HTML>

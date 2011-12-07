@@ -37,7 +37,7 @@
 \entry {editing command lines}{91}
 \entry {environment}{31}
 \entry {evaluation, arithmetic}{76}
-\entry {event designators}{119}
+\entry {event designators}{120}
 \entry {execution environment}{30}
 \entry {exit status}{3, 31}
 \entry {expansion}{17}
@@ -58,7 +58,7 @@
 \entry {functions, shell}{14}
 \initial {H}
 \entry {history builtins}{117}
-\entry {history events}{119}
+\entry {history events}{120}
 \entry {history expansion}{119}
 \entry {history list}{117}
 \entry {History, how to use}{116}

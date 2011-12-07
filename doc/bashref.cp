@@ -109,8 +109,8 @@
 \entry{history list}{117}{history list}
 \entry{history builtins}{117}{history builtins}
 \entry{history expansion}{119}{history expansion}
-\entry{event designators}{119}{event designators}
-\entry{history events}{119}{history events}
+\entry{event designators}{120}{event designators}
+\entry{history events}{120}{history events}
 \entry{installation}{123}{installation}
 \entry{configuration}{123}{configuration}
 \entry{Bash installation}{123}{Bash installation}
