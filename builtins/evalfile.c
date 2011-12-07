@@ -147,9 +147,14 @@ file_error_and_exit:
   setmode (fd, O_TEXT);
 #endif
 
-  string = (char *)xmalloc (1 + file_size);
-  result = read (fd, string, file_size);
-  string[result] = '\0';
+  if (S_ISREG (finfo.st_mode))
+    {
+      string = (char *)xmalloc (1 + file_size);
+      result = read (fd, string, file_size);
+      string[result] = '\0';
+    }
+  else
+    result = zmapfd (fd, &string, 0);
 
   return_val = errno;
   close (fd);

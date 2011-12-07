@@ -383,6 +383,9 @@ extern char *xstrchr __P((const char *, int));
 /* declarations for functions defined in lib/sh/zcatfd.c */
 extern int zcatfd __P((int, int, char *));
 
+/* declarations for functions defined in lib/sh/zmapfd.c */
+extern int zmapfd __P((int, char **, char *));
+
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));
 extern ssize_t zreadintr __P((int, char *, size_t));

@@ -24,29 +24,30 @@ $PRODUCES declare.c
 $BUILTIN declare
 $FUNCTION declare_builtin
 $SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
-Declare variables and give them attributes.  If no NAMEs are
-given, then display the values of variables instead.  When
-displaying variable values, the -f option restricts the display
-to function names and definitions; the -F option restricts the
-display to function names only (plus line number and source file
-when debugging).  The -p option will display the attributes and
-values of each NAME. 
+Declare variables and/or give them attributes.  If no NAMEs are
+given, then display the values of variables instead.  The -p option
+will display the attributes and values of each NAME.
 
-The options which set attributes are:
+The flags are:
 
   -a	to make NAMEs arrays (if supported)
+  -f	to select from among function names only
+  -F	to display function names (and line number and source file name if
+	debugging) without definitions 
   -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
   -x	to make NAMEs export
 
-Using `+' instead of `-' turns off the given attribute.
-
 Variables with the integer attribute have arithmetic evaluation (see
-the `let' command) done when the variable is assigned a value.
+`let') done when the variable is assigned to.
 
-When used in a function, `declare' makes NAMEs local, as with the `local'
-command.
+When displaying values of variables, -f displays a function's name
+and definition.  The -F option restricts the display to function
+name only.
+
+Using `+' instead of `-' turns off the given attribute instead.  When
+used in a function, makes NAMEs local, as with the `local' command.
 $END
 
 $BUILTIN typeset

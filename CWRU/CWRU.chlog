@@ -13981,3 +13981,32 @@ lib/readline/readline.c
 	  variable _rl_revert_all_at_newline is non-zero
 	- declare _rl_revert_all_lines initially 0
 
+				   11/27
+				   -----
+doc/{bash.1,bashref.texi}
+	- make sure to be explicit that `typeset +r' cannot remove the readonly
+	  attribute from a variable
+
+				   11/28
+				   -----
+lib/sh/zmapfd.c
+	- new file, implements zmapfd(), which takes a file and returns its
+	  contents in a string
+
+externs.h
+	- extern declaration for zmapfd
+
+				   11/29
+				   -----
+builtins/evalfile.c
+	- in _evalfile, use zmapfd to read the contents of the file into a
+	  string, rather than using the size reported by stat and reading that
+	  many characters, if the file is not a regular file (for things like
+	  named pipes, stat reports the size as 0)
+
+				   12/3
+				   ----
+lib/sh/snprintf.c
+	- make sure number() sets the FL_UNSIGNED flag for %x and %X, so
+	  fmtulong treats them as unsigned numbers.  Fixes bug reported by
+	  James Botte <James.M.Botte@lowes.com>

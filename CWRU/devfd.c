@@ -31,7 +31,7 @@ char	**v;
 	fd = open("/dev/null", O_RDONLY, 0666);
 	if (fd == -1)
 		exit (2);
-	if (dup2(fd, 3) == -1)
+	if (fd != 3 && (dup2(fd, 3) == -1))
 		exit (1);
 	/* test -r /dev/fd/3 */
 	r = access("/dev/fd/3", R_OK);

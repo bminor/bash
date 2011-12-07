@@ -674,6 +674,8 @@ number(p, d, base)
 
   sd = d;	/* signed for ' ' padding in base 10 */
   flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  if (*p->pf == 'x' || *p->pf == 'X')
+    flags |= FL_UNSIGNED;	/* %x, %X treated as unsigned */
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 

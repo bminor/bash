@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Nov 21 10:50:26 EST 2006
+.\"	Last Change: Mon Nov 27 12:02:01 EST 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 November 21" "GNU Bash-3.2"
+.TH BASH 1 "2006 November 27" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -6499,8 +6499,11 @@ Mark \fIname\fPs for export to subsequent commands via the environment.
 .PD
 .PP
 Using `+' instead of `\-'
-turns off the attribute instead, with the exception that \fB+a\fP
-may not be used to destroy an array variable.  When used in a function,
+turns off the attribute instead,
+with the exceptions that \fB+a\fP
+may not be used to destroy an array variable and \fB+r\fB will not
+remove the readonly attribute.
+When used in a function,
 makes each
 \fIname\fP local, as with the 
 .B local
