@@ -1235,6 +1235,7 @@ command_word_completion_function (hint_text, state)
   static char *val = (char *)NULL;
   static char *filename_hint = (char *)NULL;
   static char *dequoted_hint = (char *)NULL;
+  static char *directory_part = (char *)NULL;
   static int path_index, hint_len, dequoted_len, istate, igncase;
   static int mapping_over, local_index, searching_path, hint_is_dir;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
@@ -1268,7 +1269,18 @@ command_word_completion_function (hint_text, state)
 	  /* Perform tilde expansion on what's passed, so we don't end up
 	     passing filenames with tildes directly to stat(). */
 	  if (*hint_text == '~')
-	    hint = bash_tilde_expand (hint_text, 0);
+	    {
+	      hint = bash_tilde_expand (hint_text, 0);
+	      directory_part = savestring (hint_text);
+	      temp = strchr (directory_part, '/');
+	      if (temp)
+		*temp = 0;
+	      else
+		{
+		  free (directory_part);
+		  directory_part = (char *)NULL;
+		}
+	    }
 	  else
 	    hint = savestring (hint_text);
 
@@ -1442,7 +1454,6 @@ command_word_completion_function (hint_text, state)
 	free (filename_hint);
 
       filename_hint = sh_makepath (current_path, hint, 0);
-      free (current_path);
     }
 
  inner:
@@ -1461,9 +1472,6 @@ command_word_completion_function (hint_text, state)
   else
     {
       int match, freetemp;
-#if 0
-      char *temp;		/* shadows previous declaration */
-#endif
 
       if (absolute_program (hint))
 	{
@@ -1476,26 +1484,39 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, tl, vl, dl;
-	      char *rd, *dh;
-
-	      dh = bash_dequote_filename ((char *)hint_text, 0);
+	      int l, vl, dl, dl2, xl;
+	      char *rd, *dh2, *expdir;
 
 	      vl = strlen (val);
-	      tl = strlen (dh);
-#if 0
-	      l = vl - hint_len;	/* # of chars added */
-#else
+
 	      rd = savestring (filename_hint);
 	      bash_directory_expansion (&rd);
 	      dl = strlen (rd);
-	      l = vl - dl;		/* # of chars added */
 	      free (rd);
-#endif
-	      temp = (char *)xmalloc (l + 2 + tl);
-	      strcpy (temp, dh);
-	      strcpy (temp + tl, val + vl - l);
-	      free (dh);
+
+	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
+	      bash_directory_expansion (&dh2);
+	      dl2 = strlen (dh2);
+
+	      expdir = bash_tilde_expand (directory_part, 0);
+	      xl = strlen (expdir);
+	      free (expdir);
+
+	      /*
+		 dh2 = unexpanded but dequoted tilde-prefix
+		 dl = length of entire passed filename
+		 dl2 = length of tilde-prefix
+		 expdir = tilde-expanded tilde-prefix
+		 xl = length of expanded tilde-prefix
+		 l = length of remainder after tilde-prefix
+	      */
+	      l = (vl - xl) + 1;
+
+	      temp = (char *)xmalloc (dl2 + 2 + l);
+	      strcpy (temp, dh2);
+	      strcpy (temp + dl2, val + xl);
+
+	      free (dh2);
 	    }
 	  else
 	    temp = savestring (val);
@@ -2254,22 +2275,19 @@ filename_completion_ignore (names)
   return 0;
 }
 
-/* Return 1 if NAME is a directory. */
+/* Return 1 if NAME is a directory.  NAME undergoes tilde expansion. */
 static int
 test_for_directory (name)
      const char *name;
 {
-  struct stat finfo;
   char *fn;
+  int r;
 
   fn = bash_tilde_expand (name, 0);
-  if (stat (fn, &finfo) != 0)
-    {
-      free (fn);
-      return 0;
-    }
+  r = file_isdir (fn);
   free (fn);
-  return (S_ISDIR (finfo.st_mode));
+
+  return (r);
 }
 
 /* Remove files from NAMES, leaving directories. */
@@ -2338,9 +2356,6 @@ bash_directory_completion_hook (dirname)
   return_value = should_expand_dirname = 0;
   local_dirname = *dirname;
 
-#if 0
-  should_expand_dirname = xstrchr (local_dirname, '$') || xstrchr (local_dirname, '`');
-#else
   if (xstrchr (local_dirname, '$'))
     should_expand_dirname = 1;
   else
@@ -2349,7 +2364,6 @@ bash_directory_completion_hook (dirname)
       if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
 	should_expand_dirname = 1;
     }
-#endif
 
 #if defined (HAVE_LSTAT)
   if (should_expand_dirname && lstat (local_dirname, &sb) == 0)
@@ -2390,7 +2404,7 @@ bash_directory_completion_hook (dirname)
       local_dirname = *dirname = new_dirname;
     }
 
-  if (!no_symbolic_links && (local_dirname[0] != '.' || local_dirname[1]))
+  if (no_symbolic_links == 0 && (local_dirname[0] != '.' || local_dirname[1]))
     {
       char *temp1, *temp2;
       int len1, len2;

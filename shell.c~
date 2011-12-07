@@ -1394,14 +1394,12 @@ open_shell_script (script_name)
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
 
   array_push (bash_source_a, filename);
-#if 0
   if (bash_lineno_a)
     {
       t = itos (executing_line_number ());
       array_push (bash_lineno_a, t);
       free (t);
     }
-#endif
   array_push (funcname_a, "main");
 #endif
 

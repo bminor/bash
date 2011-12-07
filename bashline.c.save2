@@ -1484,12 +1484,14 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, vl, dl, dl2, xl;
-	      char *rd, *dh2, *expdir;
+	      int l, tl, vl, dl, dl2, tlen, xl;
+	      char *rd, *dh, *dh2, *expdir;
 
+	      dh = bash_dequote_filename ((char *)hint_text, 0);
 	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
 
 	      vl = strlen (val);
+	      tl = strlen (dh);
 
 	      rd = savestring (filename_hint);
 	      bash_directory_expansion (&rd);
@@ -1501,22 +1503,23 @@ command_word_completion_function (hint_text, state)
 
 	      expdir = bash_tilde_expand (directory_part, 0);
 	      xl = strlen (expdir);
-	      free (expdir);
 
 	      /*
-		 dh2 = unexpanded but dequoted tilde-prefix
 		 dl = length of entire passed filename
 		 dl2 = length of tilde-prefix
+		 tlen = number of characters past tilde prefix in original name
 		 expdir = tilde-expanded tilde-prefix
 		 xl = length of expanded tilde-prefix
 		 l = length of remainder after tilde-prefix
 	      */
+	      tlen = dl - dl2;
 	      l = (vl - xl) + 1;
 
 	      temp = (char *)xmalloc (dl2 + 2 + l);
 	      strcpy (temp, dh2);
 	      strcpy (temp + dl2, val + xl);
 
+	      free (dh);
 	      free (dh2);
 	    }
 	  else

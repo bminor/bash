@@ -1269,18 +1269,7 @@ command_word_completion_function (hint_text, state)
 	  /* Perform tilde expansion on what's passed, so we don't end up
 	     passing filenames with tildes directly to stat(). */
 	  if (*hint_text == '~')
-	    {
-	      hint = bash_tilde_expand (hint_text, 0);
-	      directory_part = savestring (hint_text);
-	      temp = strchr (directory_part, '/');
-	      if (temp)
-		*temp = 0;
-	      else
-		{
-		  free (directory_part);
-		  directory_part = (char *)NULL;
-		}
-	    }
+	    hint = bash_tilde_expand (hint_text, 0);
 	  else
 	    hint = savestring (hint_text);
 
@@ -1484,40 +1473,24 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, vl, dl, dl2, xl;
-	      char *rd, *dh2, *expdir;
+	      int l, tl, vl, dl, dl2;
+	      char *rd, *dh;
 
-	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
+	      dh = bash_dequote_filename ((char *)hint_text, 0);
 
 	      vl = strlen (val);
+	      tl = strlen (dh);
 
 	      rd = savestring (filename_hint);
 	      bash_directory_expansion (&rd);
 	      dl = strlen (rd);
+	      l = vl - dl;		/* # of chars added */
 	      free (rd);
 
-	      bash_directory_expansion (&dh2);
-	      dl2 = strlen (dh2);
-
-	      expdir = bash_tilde_expand (directory_part, 0);
-	      xl = strlen (expdir);
-	      free (expdir);
-
-	      /*
-		 dh2 = unexpanded but dequoted tilde-prefix
-		 dl = length of entire passed filename
-		 dl2 = length of tilde-prefix
-		 expdir = tilde-expanded tilde-prefix
-		 xl = length of expanded tilde-prefix
-		 l = length of remainder after tilde-prefix
-	      */
-	      l = (vl - xl) + 1;
-
-	      temp = (char *)xmalloc (dl2 + 2 + l);
-	      strcpy (temp, dh2);
-	      strcpy (temp + dl2, val + xl);
-
-	      free (dh2);
+	      temp = (char *)xmalloc (l + 2 + tl);
+	      strcpy (temp, dh);
+	      strcpy (temp + tl, val + vl - l);
+	      free (dh);
 	    }
 	  else
 	    temp = savestring (val);

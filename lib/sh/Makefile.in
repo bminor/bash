@@ -91,7 +91,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c xstrchr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
-	   wcsdup.c fpurge.c zgetline.c
+	   wcsdup.c fpurge.c zgetline.c mbscmp.c
 
 # The header files for this library.
 HSOURCES = 
@@ -104,7 +104,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
-	  fpurge.o zgetline.o ${LIBOBJS}
+	  fpurge.o zgetline.o mbscmp.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -149,6 +149,7 @@ inet_aton.o: inet_aton.c
 itos.o: itos.c
 mailstat.o: mailstat.c
 makepath.o: makepath.c
+mbscmp.o: mbscmp.c
 memset.o: memset.c
 mktime.o: mktime.c
 netconn.o: netconn.c
@@ -211,6 +212,7 @@ inet_aton.o: ${BUILD_DIR}/config.h
 itos.o: ${BUILD_DIR}/config.h
 mailstat.o: ${BUILD_DIR}/config.h
 makepath.o: ${BUILD_DIR}/config.h
+mbscmp.o: ${BUILD_DIR}/config.h
 memset.o: ${BUILD_DIR}/config.h
 mktime.o: ${BUILD_DIR}/config.h
 netconn.o: ${BUILD_DIR}/config.h
@@ -489,3 +491,7 @@ zgetline.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 zgetline.o: ${BASHINCDIR}/stdc.h
 zgetline.o: ${topdir}/xmalloc.h
 zgetline.o: ${topdir}/bashtypes.h
+
+mbscmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+mbscmp.o: ${BASHINCDIR}/stdc.h
+mbscmp.o: ${topdir}/xmalloc.h
