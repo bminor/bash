@@ -1,7 +1,7 @@
 This file is times.def, from which is created times.c.
 It implements the builtin "times" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,8 +24,8 @@ $PRODUCES times.c
 $BUILTIN times
 $FUNCTION times_builtin
 $SHORT_DOC times
-Print the accumulated user and system times for processes run from
-the shell.
+Prints the accumulated user and system times for the shell and all of its
+child processes.
 $END
 
 #include <config.h>
@@ -111,5 +111,5 @@ times_builtin (list)
 #  endif /* HAVE_TIMES */
 #endif /* !HAVE_TIMES */
 
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }

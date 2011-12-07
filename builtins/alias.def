@@ -1,7 +1,7 @@
 This file is alias.def, from which is created alias.c
 It implements the builtins "alias" and "unalias" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,12 +24,18 @@ $FUNCTION alias_builtin
 $DEPENDS_ON ALIAS
 $PRODUCES alias.c
 $SHORT_DOC alias [-p] [name[=value] ... ]
-`alias' with no arguments or with the -p option prints the list
-of aliases in the form alias NAME=VALUE on standard output.
+Without arguments, `alias' prints the list of aliases in the reusable
+form `alias NAME=VALUE' on standard output.
+
 Otherwise, an alias is defined for each NAME whose VALUE is given.
 A trailing space in VALUE causes the next word to be checked for
-alias substitution when the alias is expanded.  Alias returns
-true unless a NAME is given for which no alias has been defined.
+alias substitution when the alias is expanded.
+
+Options:
+  -p	Print all defined aliases in a reusable format
+
+Alias returns true unless a NAME is supplied for which no alias has been
+defined.
 $END
 
 #include <config.h>
@@ -149,8 +155,12 @@ $BUILTIN unalias
 $FUNCTION unalias_builtin
 $DEPENDS_ON ALIAS
 $SHORT_DOC unalias [-a] name [name ...]
-Remove NAMEs from the list of defined aliases.  If the -a option is given,
-then remove all alias definitions.
+Remove each NAME from the list of defined aliases.
+
+Options:
+  -a	remove all alias definitions.
+
+Return success unless a NAME is not an existing alias.
 $END
 
 #if defined (ALIAS)

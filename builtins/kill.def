@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,13 +24,19 @@ $PRODUCES kill.c
 $BUILTIN kill
 $FUNCTION kill_builtin
 $SHORT_DOC kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-Send the processes named by PID (or JOBSPEC) the signal SIGSPEC.  If
-SIGSPEC is not present, then SIGTERM is assumed.  An argument of `-l'
-lists the signal names; if arguments follow `-l' they are assumed to
-be signal numbers for which names should be listed.  Kill is a shell
-builtin for two reasons: it allows job IDs to be used instead of
-process IDs, and, if you have reached the limit on processes that
-you can create, you don't have to start a process to kill another one.
+Send the processes identified by PID or JOBSPEC the signal named by
+SIGSPEC or SIGNUM.  If neither SIGSPEC nor SIGNUM is present, then
+SIGTERM is assumed.
+
+Options:
+  -s sig	SIG is a signal name
+  -n sig	SIG is a signal number
+  -l	list the signal names; if arguments follow `-l' they are
+	assumed to be signal numbers for which names should be listed
+
+Kill is a shell builtin for two reasons: it allows job IDs to be used
+instead of process IDs, and allows processes to be killed if the limit
+on processes that you can create is reached.
 $END
 
 #include <config.h>

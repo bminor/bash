@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete" and "compgen" in Bash.
 
-Copyright (C) 1999-2006 Free Software Foundation, Inc.
+Copyright (C) 1999-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,11 +25,15 @@ $BUILTIN complete
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION complete_builtin
 $SHORT_DOC complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
-For each NAME, specify how arguments are to be completed.
-If the -p option is supplied, or if no options are supplied, existing
-completion specifications are printed in a way that allows them to be
-reused as input.  The -r option removes a completion specification for
-each NAME, or, if no NAMEs are supplied, all completion specifications.
+For each NAME, specify how arguments are to be completed by Readline.
+If no options are supplied, existing completion specifications are printed
+in a way that allows them to be reused as input.
+
+Options:
+  -p	print existing completion specifications in a reusable format
+  -r	remove a completion specification for each NAME, or, if no NAMEs
+	are supplied, all completion specifications
+
 When completion is attempted, the actions are applied in the order the
 uppercase-letter options are listed above.
 $END
@@ -480,13 +484,12 @@ print_one_completion (cmd, cs)
   SQPRINTARG (cs->suffix, "-S");
   SQPRINTARG (cs->filterpat, "-X");
 
+  SQPRINTARG (cs->command, "-C");
+
   /* simple arguments that don't require quoting */
   PRINTARG (cs->funcname, "-F");
-  PRINTARG (cs->command, "-C");
 
-  x = sh_single_quote (cmd);
   printf ("%s\n", x);
-  free (x);
 
   return (0);
 }
@@ -529,7 +532,8 @@ print_cmd_completions (list)
 	  ret = EXECUTION_FAILURE;
 	}
     }
-  return (ret);
+
+  return (sh_chkwrite (ret));
 }
 
 $BUILTIN compgen

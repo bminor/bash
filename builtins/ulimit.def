@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2007 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,38 +25,39 @@ $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
 $SHORT_DOC ulimit [-SHacdefilmnpqrstuvx] [limit]
-Ulimit provides control over the resources available to processes
-started by the shell, on systems that allow such control.  If an
-option is given, it is interpreted as follows:
+Provides control over the resources available to the shell and processes
+it creates, on systems that allow such control.
 
-    -S	use the `soft' resource limit
-    -H	use the `hard' resource limit
-    -a	all current limits are reported
-    -c	the maximum size of core files created
-    -d	the maximum size of a process's data segment
-    -e	the maximum scheduling priority (`nice')
-    -f	the maximum size of files written by the shell and its children
-    -i	the maximum number of pending signals
-    -l	the maximum size a process may lock into memory
-    -m	the maximum resident set size
-    -n	the maximum number of open file descriptors
-    -p	the pipe buffer size
-    -q	the maximum number of bytes in POSIX message queues
-    -r	the maximum real-time scheduling priority
-    -s	the maximum stack size
-    -t	the maximum amount of cpu time in seconds
-    -u	the maximum number of user processes
-    -v	the size of virtual memory
-    -x	the maximum number of file locks
+Options:
+  -S	use the `soft' resource limit
+  -H	use the `hard' resource limit
+  -a	all current limits are reported
+  -c	the maximum size of core files created
+  -d	the maximum size of a process's data segment
+  -e	the maximum scheduling priority (`nice')
+  -f	the maximum size of files written by the shell and its children
+  -i	the maximum number of pending signals
+  -l	the maximum size a process may lock into memory
+  -m	the maximum resident set size
+  -n	the maximum number of open file descriptors
+  -p	the pipe buffer size
+  -q	the maximum number of bytes in POSIX message queues
+  -r	the maximum real-time scheduling priority
+  -s	the maximum stack size
+  -t	the maximum amount of cpu time in seconds
+  -u	the maximum number of user processes
+  -v	the size of virtual memory
+  -x	the maximum number of file locks
 
-If LIMIT is given, it is the new value of the specified resource;
-the special LIMIT values `soft', `hard', and `unlimited' stand for
-the current soft limit, the current hard limit, and no limit, respectively.
-Otherwise, the current value of the specified resource is printed.
-If no option is given, then -f is assumed.  Values are in 1024-byte
-increments, except for -t, which is in seconds, -p, which is in
-increments of 512 bytes, and -u, which is an unscaled number of
-processes.
+If LIMIT is given, it is the new value of the specified resource; the
+special LIMIT values `soft', `hard', and `unlimited' stand for the
+current soft limit, the current hard limit, and no limit, respectively.
+Otherwise, the current value of the specified resource is printed.  If
+no option is given, then -f is assumed.
+
+Values are in 1024-byte increments, except for -t, which is in seconds,
+-p, which is in increments of 512 bytes, and -u, which is an unscaled
+number of processes.
 $END
 
 #if !defined (_MINIX)

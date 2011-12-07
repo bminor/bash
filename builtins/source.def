@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,19 +24,19 @@ $PRODUCES source.c
 $BUILTIN source
 $FUNCTION source_builtin
 $SHORT_DOC source filename [arguments]
-Read and execute commands from FILENAME and return.  The pathnames
-in $PATH are used to find the directory containing FILENAME.  If any
-ARGUMENTS are supplied, they become the positional parameters when
-FILENAME is executed.
+Read and execute commands from FILENAME in the current shell.  The
+entries in $PATH are used to find the directory containing FILENAME.
+If any ARGUMENTS are supplied, they become the positional parameters
+when FILENAME is executed.
 $END
 $BUILTIN .
 $DOCNAME dot
 $FUNCTION source_builtin
 $SHORT_DOC . filename [arguments]
-Read and execute commands from FILENAME and return.  The pathnames
-in $PATH are used to find the directory containing FILENAME.  If any
-ARGUMENTS are supplied, they become the positional parameters when
-FILENAME is executed.
+Read and execute commands from FILENAME in the current shell.  The
+entries in $PATH are used to find the directory containing FILENAME.
+If any ARGUMENTS are supplied, they become the positional parameters
+when FILENAME is executed.
 $END
 
 #include <config.h>

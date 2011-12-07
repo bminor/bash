@@ -1,7 +1,7 @@
 This file is builtin.def, from which is created builtin.c.
 It implements the builtin "builtin" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,9 +24,9 @@ $PRODUCES builtin.c
 $BUILTIN builtin
 $FUNCTION builtin_builtin
 $SHORT_DOC builtin [shell-builtin [arg ...]]
-Run a shell builtin.  This is useful when you wish to rename a
-shell builtin to be a function, but need the functionality of the
-builtin within the function itself.
+Execute SHELL-BUILTIN with arguments ARGs without performing command lookup.
+This is useful when you wish to reimplement a shell builtin as a shell
+function, but need to execute the builtin within the function.
 $END
 #include <config.h>
 

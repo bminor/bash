@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,21 +23,21 @@ $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
 $PRODUCES wait.c
-$SHORT_DOC wait [n]
-Wait for the specified process and report its termination status.  If
-N is not given, all currently active child processes are waited for,
-and the return code is zero.  N may be a process ID or a job
-specification; if a job spec is given, all processes in the job's
-pipeline are waited for.
+$SHORT_DOC wait [id]
+Waits for the process identified by ID, which may be a process ID or a
+job specification, and reports its termination status.  If ID is not
+given, waits for all currently active child processes, and the return
+status is zero.  If ID is a a job specification, waits for all processes
+in the job's pipeline.
 $END
 
 $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON !JOB_CONTROL
-$SHORT_DOC wait [n]
-Wait for the specified process and report its termination status.  If
-N is not given, all currently active child processes are waited for,
-and the return code is zero.  N must be a process ID.
+$SHORT_DOC wait [pid]
+Waits for the specified process and reports its termination status.  If
+PID is not given, all currently active child processes are waited for,
+and the return code is zero.  PID must be a process ID.
 $END
 
 #include <config.h>

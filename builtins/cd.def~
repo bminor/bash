@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,17 +73,25 @@ int cdable_vars;
 $BUILTIN cd
 $FUNCTION cd_builtin
 $SHORT_DOC cd [-L|-P] [dir]
-Change the current directory to DIR.  The default for DIR is the value
-of the HOME shell variable.  The variable CDPATH defines the search
-path for the directory containing DIR.  Alternative directory names in
-CDPATH are separated by a colon (:).  A null directory name is the same
-as the current directory, i.e., `.'.  If DIR begins with a slash (/),
-then CDPATH is not used.  If the directory is not found, and the
-shell option `cdable_vars' is set, then try the word as a variable
-name.  If that variable has a value, then cd to the value of that
-variable.  The -P option says to use the physical directory structure
-instead of following symbolic links; the -L option forces symbolic links
-to be followed.
+Change the current directory to DIR.  The default DIR is the value of the
+HOME shell variable.
+
+The variable CDPATH defines the search path for the directory containing
+DIR.  Alternative directory names in CDPATH are separated by a colon (:).
+A null directory name is the same as the current directory.  If DIR begins
+with a slash (/), then CDPATH is not used.
+
+If the directory is not found, and the shell option `cdable_vars' is set,
+the word is assumed to be  a variable name.  If that variable has a value,
+its value is used for DIR.
+
+Options, if specified, are interpreted as follows:
+
+    -L	force symbolic links to be followed
+    -P	use the physical directory structure without following symbolic
+	links
+
+The default is to follow symbolic links, as if `-L' were specified.
 $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
@@ -319,9 +327,14 @@ cd_builtin (list)
 $BUILTIN pwd
 $FUNCTION pwd_builtin
 $SHORT_DOC pwd [-LP]
-Print the current working directory.  With the -P option, pwd prints
-the physical directory, without any symbolic links; the -L option
-makes pwd follow symbolic links.
+Print the name of the current working directory.
+
+Options:
+  -L	print the value of $PWD if it names the current working
+	directory
+  -P	print the physical directory, without any symbolic links
+
+By default, `pwd' behaves as if `-L' were specified.
 $END
 
 /* Non-zero means that pwd always prints the physical directory, without

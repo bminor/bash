@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@ $PRODUCES exit.c
 $BUILTIN exit
 $FUNCTION exit_builtin
 $SHORT_DOC exit [n]
-Exit the shell with a status of N.  If N is omitted, the exit status
+Exits the shell with a status of N.  If N is omitted, the exit status
 is that of the last command executed.
 $END
 
@@ -71,7 +71,7 @@ exit_builtin (list)
 $BUILTIN logout
 $FUNCTION logout_builtin
 $SHORT_DOC logout
-Logout of a login shell.
+Exits a login shell.  Returns an error if not executed in a login shell.
 $END
 
 /* How to logout. */

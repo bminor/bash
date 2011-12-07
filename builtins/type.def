@@ -1,7 +1,7 @@
 This file is type.def, from which is created type.c.
 It implements the builtin "type" in Bash.
 
-Copyright (C) 1987-2007 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,24 +27,20 @@ $SHORT_DOC type [-afptP] name [name ...]
 For each NAME, indicate how it would be interpreted if used as a
 command name.
 
-If the -t option is used, `type' outputs a single word which is one of
-`alias', `keyword', `function', `builtin', `file' or `', if NAME is an
-alias, shell reserved word, shell function, shell builtin, disk file,
-or unfound, respectively.
-
-If the -p flag is used, `type' either returns the name of the disk
-file that would be executed, or nothing if `type -t NAME' would not
-return `file'.
-
-If the -a flag is used, `type' displays all of the places that contain
-an executable named `file'.  This includes aliases, builtins, and
-functions, if and only if the -p flag is not also used.
-
-The -f flag suppresses shell function lookup.
-
-The -P flag forces a PATH search for each NAME, even if it is an alias,
-builtin, or function, and returns the name of the disk file that would
-be executed.
+Options:
+  -a	display all locations containing an executable named NAME;
+	includes aliases, builtins, and functions, if and only if
+	the `-p' option is not also used
+  -f	suppress shell function lookup
+  -P	force a PATH search for each NAME, even if it is an alias,
+	builtin, or function, and returns the name of the disk file
+	that would be executed
+  -p	returns either the name of the disk file that would be executed,
+	or nothing if `type -t NAME' would not return `file'.
+  -t	output a single word which is one of `alias', `keyword',
+	`function', `builtin', `file' or `', if NAME is an alias, shell
+	reserved word, shell function, shell builtin, disk file, or not 
+	found, respectively
 $END
 
 #include <config.h>

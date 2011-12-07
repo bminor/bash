@@ -1,7 +1,7 @@
 This file is break.def, from which is created break.c.
 It implements the builtins "break" and "continue" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,8 +24,7 @@ $PRODUCES break.c
 $BUILTIN break
 $FUNCTION break_builtin
 $SHORT_DOC break [n]
-Exit from within a FOR, WHILE or UNTIL loop.  If N is specified,
-break N levels.
+Exit a FOR, WHILE or UNTIL loop.  If N is specified, break N enclosing loops.
 $END
 #include <config.h>
 
@@ -86,8 +85,8 @@ break_builtin (list)
 $BUILTIN continue
 $FUNCTION continue_builtin
 $SHORT_DOC continue [n]
-Resume the next iteration of the enclosing FOR, WHILE or UNTIL loop.
-If N is specified, resume at the N-th enclosing loop.
+Resumes the next iteration of the enclosing FOR, WHILE or UNTIL loop.
+If N is specified, resumes the Nth enclosing loop.
 $END
 
 /* Set up to continue x levels, where x defaults to 1, but can be specified

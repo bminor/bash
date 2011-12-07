@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,11 +25,13 @@ $BUILTIN help
 $FUNCTION help_builtin
 $DEPENDS_ON HELP_BUILTIN
 $SHORT_DOC help [-s] [pattern ...]
-Display helpful information about builtin commands.  If PATTERN is
+Displays brief information about builtin commands.  If PATTERN is
 specified, gives detailed help on all commands matching PATTERN,
-otherwise a list of the builtins is printed.  The -s option
-restricts the output for each builtin command matching PATTERN to
-a short usage synopsis.
+otherwise the list of help topics is printed.
+
+Options:
+  -s	output only a short usage synopsis for each topic matching
+	PATTERN
 $END
 
 #include <config.h>

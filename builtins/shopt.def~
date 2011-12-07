@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2006 Free Software Foundation, Inc.
+Copyright (C) 1994-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,14 +24,18 @@ $PRODUCES shopt.c
 $BUILTIN shopt
 $FUNCTION shopt_builtin
 $SHORT_DOC shopt [-pqsu] [-o] [optname ...]
-Toggle the values of variables controlling optional behavior.
-The -s flag means to enable (set) each OPTNAME; the -u flag
-unsets each OPTNAME.  The -q flag suppresses output; the exit
-status indicates whether each OPTNAME is set or unset.  The -o
-option restricts the OPTNAMEs to those defined for use with
-`set -o'.  With no options, or with the -p option, a list of all
-settable options is displayed, with an indication of whether or
-not each is set.
+Set and unset shell options.  Without any option arguments, list all
+shell options with an indication of whether or not each is set.
+
+Options:
+
+  -o	restrict OPTNAMEs to those defined for use with `set -o'
+  -p	print each shell option with an indication of its status
+  -q	suppress output
+  -s	enable (set) each OPTNAME
+  -u	disable (unset) each OPTNAME
+
+The exit status indicates whether or not each OPTNAME is set.
 $END
 
 #include <config.h>
@@ -174,8 +178,8 @@ static struct {
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
 
-static char *on = "on";
-static char *off = "off";
+static const char * const on = "on";
+static const char * const off = "off";
 
 static int find_shopt __P((char *));
 static int toggle_shopts __P((int, WORD_LIST *, int));
@@ -352,7 +356,7 @@ list_shopts (list, flags)
 	  if ((flags & QFLAG) == 0)
 	    print_shopt (shopt_vars[i].name, val, flags);
 	}
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   for (l = list, rval = EXECUTION_SUCCESS; l; l = l->next)
@@ -371,7 +375,7 @@ list_shopts (list, flags)
 	print_shopt (l->word->word, val, flags);
     }
 
-  return (rval);
+  return (sh_chkwrite (rval));
 }
 
 static int
@@ -386,7 +390,7 @@ list_some_shopts (mode, flags)
       if (((flags & QFLAG) == 0) && mode == val)
 	print_shopt (shopt_vars[i].name, val, flags);
     }
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
@@ -401,7 +405,7 @@ list_shopt_o_options (list, flags)
     {
       if ((flags & QFLAG) == 0)
 	list_minus_o_opts (-1, (flags & PFLAG));
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   for (l = list, rval = EXECUTION_SUCCESS; l; l = l->next)
@@ -423,7 +427,7 @@ list_shopt_o_options (list, flags)
 	    printf (OPTFMT, l->word->word, val ? on : off);
 	}
     }
-  return (rval);
+  return (sh_chkwrite (rval));
 }
 
 static int
@@ -432,7 +436,7 @@ list_some_o_options (mode, flags)
 {
   if ((flags & QFLAG) == 0)
     list_minus_o_opts (mode, (flags & PFLAG));
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
@@ -540,5 +544,5 @@ shopt_listopt (name, reusable)
     }
 
   print_shopt (name, *shopt_vars[i].value, reusable ? PFLAG : 0);
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }

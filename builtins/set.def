@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,83 +61,84 @@ extern int no_line_editing;
 $BUILTIN set
 $FUNCTION set_builtin
 $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
-Change the value of shell attributes and positional parameters, or display
-the names and values of shell variables.  Available
-shell options are:
-    -a  Mark variables which are modified or created for export.
-    -b  Notify of job termination immediately.
-    -e  Exit immediately if a command exits with a non-zero status.
-    -f  Disable file name generation (globbing).
-    -h  Remember the location of commands as they are looked up.
-    -k  All assignment arguments are placed in the environment for a
-        command, not just those that precede the command name.
-    -m  Job control is enabled.
-    -n  Read commands but do not execute them.
-    -o option-name
-        Set the variable corresponding to option-name:
-            allexport    same as -a
-            braceexpand  same as -B
+Changes the value of shell attributes and positional parameters, or
+displays the names and values of shell variables.
+
+Options:
+  -a  Mark variables which are modified or created for export.
+  -b  Notify of job termination immediately.
+  -e  Exit immediately if a command exits with a non-zero status.
+  -f  Disable file name generation (globbing).
+  -h  Remember the location of commands as they are looked up.
+  -k  All assignment arguments are placed in the environment for a
+      command, not just those that precede the command name.
+  -m  Job control is enabled.
+  -n  Read commands but do not execute them.
+  -o option-name
+      Set the variable corresponding to option-name:
+          allexport    same as -a
+          braceexpand  same as -B
 #if defined (READLINE)
-            emacs        use an emacs-style line editing interface
+          emacs        use an emacs-style line editing interface
 #endif /* READLINE */
-            errexit      same as -e
-            errtrace     same as -E
-            functrace    same as -T
-            hashall      same as -h
+          errexit      same as -e
+          errtrace     same as -E
+          functrace    same as -T
+          hashall      same as -h
 #if defined (BANG_HISTORY)
-            histexpand   same as -H
+          histexpand   same as -H
 #endif /* BANG_HISTORY */
 #if defined (HISTORY)
-            history      enable command history
+          history      enable command history
 #endif
-            ignoreeof    the shell will not exit upon reading EOF
-            interactive-comments
-                         allow comments to appear in interactive commands
-            keyword      same as -k
-            monitor      same as -m
-            noclobber    same as -C
-            noexec       same as -n
-            noglob       same as -f
-            nolog        currently accepted but ignored
-            notify       same as -b
-            nounset      same as -u
-            onecmd       same as -t
-            physical     same as -P
-            pipefail     the return value of a pipeline is the status of
-                         the last command to exit with a non-zero status,
-                         or zero if no command exited with a non-zero status
-            posix        change the behavior of bash where the default
-                         operation differs from the 1003.2 standard to
-                         match the standard
-            privileged   same as -p
-            verbose      same as -v
+          ignoreeof    the shell will not exit upon reading EOF
+          interactive-comments
+                       allow comments to appear in interactive commands
+          keyword      same as -k
+          monitor      same as -m
+          noclobber    same as -C
+          noexec       same as -n
+          noglob       same as -f
+          nolog        currently accepted but ignored
+          notify       same as -b
+          nounset      same as -u
+          onecmd       same as -t
+          physical     same as -P
+          pipefail     the return value of a pipeline is the status of
+                       the last command to exit with a non-zero status,
+                       or zero if no command exited with a non-zero status
+          posix        change the behavior of bash where the default
+                       operation differs from the Posix standard to
+                       match the standard
+          privileged   same as -p
+          verbose      same as -v
 #if defined (READLINE)
-            vi           use a vi-style line editing interface
+          vi           use a vi-style line editing interface
 #endif /* READLINE */
-            xtrace       same as -x
-    -p  Turned on whenever the real and effective user ids do not match.
-        Disables processing of the $ENV file and importing of shell
-        functions.  Turning this option off causes the effective uid and
-        gid to be set to the real uid and gid.
-    -t  Exit after reading and executing one command.
-    -u  Treat unset variables as an error when substituting.
-    -v  Print shell input lines as they are read.
-    -x  Print commands and their arguments as they are executed.
+          xtrace       same as -x
+  -p  Turned on whenever the real and effective user ids do not match.
+      Disables processing of the $ENV file and importing of shell
+      functions.  Turning this option off causes the effective uid and
+      gid to be set to the real uid and gid.
+  -t  Exit after reading and executing one command.
+  -u  Treat unset variables as an error when substituting.
+  -v  Print shell input lines as they are read.
+  -x  Print commands and their arguments as they are executed.
 #if defined (BRACE_EXPANSION)
-    -B  the shell will perform brace expansion
+  -B  the shell will perform brace expansion
 #endif /* BRACE_EXPANSION */
-    -C  If set, disallow existing regular files to be overwritten
-        by redirection of output.
-    -E  If set, the ERR trap is inherited by shell functions.
+  -C  If set, disallow existing regular files to be overwritten
+      by redirection of output.
+  -E  If set, the ERR trap is inherited by shell functions.
 #if defined (BANG_HISTORY)
-    -H  Enable ! style history substitution.  This flag is on
-        by default when the shell is interactive.
+  -H  Enable ! style history substitution.  This flag is on
+      by default when the shell is interactive.
 #endif /* BANG_HISTORY */
-    -P  If set, do not follow symbolic links when executing commands
-        such as cd which change the current directory.
-    -T  If set, the DEBUG trap is inherited by shell functions.
-    -   Assign any remaining arguments to the positional parameters.
-        The -x and -v options are turned off.
+  -P  If set, do not follow symbolic links when executing commands
+      such as cd which change the current directory.
+  -T  If set, the DEBUG trap is inherited by shell functions.
+  -   Assign any remaining arguments to the positional parameters.
+      The -x and -v options are turned off.
 
 Using + rather than - causes these flags to be turned off.  The
 flags can also be used upon invocation of the shell.  The current
@@ -707,11 +708,16 @@ set_builtin (list)
 $BUILTIN unset
 $FUNCTION unset_builtin
 $SHORT_DOC unset [-f] [-v] [name ...]
-For each NAME, remove the corresponding variable or function.  Given
-the `-v', unset will only act on variables.  Given the `-f' flag,
-unset will only act on functions.  With neither flag, unset first
-tries to unset a variable, and if that fails, then tries to unset a
-function.  Some variables cannot be unset; also see readonly.
+For each NAME, remove the corresponding variable or function.
+
+Options:
+  -f	treat each NAME as a shell function
+  -v	treat each NAME as a shell variable
+
+Without options, unset first tries to unset a variable, and if that fails,
+tries to unset a function.
+
+Some variables cannot be unset; also see `readonly'.
 $END
 
 #define NEXT_VARIABLE()	any_failed++; list = list->next; continue;

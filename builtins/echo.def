@@ -1,7 +1,7 @@
 This file is echo.def, from which is created echo.c.
 It implements the builtin "echo" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,33 +37,38 @@ $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON V9_ECHO
 $SHORT_DOC echo [-neE] [arg ...]
-Output the ARGs.  If -n is specified, the trailing newline is
-suppressed.  If the -e option is given, interpretation of the
-following backslash-escaped characters is turned on:
-	\a	alert (bell)
-	\b	backspace
-	\c	suppress trailing newline
-	\e	escape character
-	\f	form feed
-	\n	new line
-	\r	carriage return
-	\t	horizontal tab
-	\v	vertical tab
-	\\	backslash
-	\0nnn	the character whose ASCII code is NNN (octal).  NNN can be
-		0 to 3 octal digits
-	\xHH	the eight-bit character whose value is HH (hexadecimal).  HH
-		can be one or two hex digits
+Display the ARGs on the standard output followed by a newline.
 
-You can explicitly turn off the interpretation of the above characters
-with the -E option.
+Options:
+  -n	do not append a newline
+  -e	enable interpretation of the following backslash escapes
+  -E	explicitly suppress interpretation of backslash escapes
+
+`echo' interprets the following backslash-escaped characters:
+  \a	alert (bell)
+  \b	backspace
+  \c	suppress trailing newline
+  \e	escape character
+  \f	form feed
+  \n	new line
+  \r	carriage return
+  \t	horizontal tab
+  \v	vertical tab
+  \\	backslash
+  \0nnn	the character whose ASCII code is NNN (octal).  NNN can be
+	0 to 3 octal digits
+  \xHH	the eight-bit character whose value is HH (hexadecimal).  HH
+	can be one or two hex digits
 $END
 
 $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON !V9_ECHO
 $SHORT_DOC echo [-n] [arg ...]
-Output the ARGs.  If -n is specified, the trailing newline is suppressed.
+Display the ARGs on the standard output followed by a newline.
+
+Options:
+  -n	do not append a newline
 $END
 
 #if defined (V9_ECHO)

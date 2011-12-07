@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,43 +29,46 @@ Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
 directory.  With no arguments, exchanges the top two directories.
 
--n	Suppresses the normal change of directory when adding directories
-	to the stack, so only the stack is manipulated.
+Options:
+  -n	Suppresses the normal change of directory when adding
+	directorie to the stack, so only the stack is manipulated.
 
-+N	Rotates the stack so that the Nth directory (counting
+Arguments:
+  +N	Rotates the stack so that the Nth directory (counting
 	from the left of the list shown by `dirs', starting with
 	zero) is at the top.
 
--N	Rotates the stack so that the Nth directory (counting
+  -N	Rotates the stack so that the Nth directory (counting
 	from the right of the list shown by `dirs', starting with
 	zero) is at the top.
 
-dir	Adds DIR to the directory stack at the top, making it the
+  dir	Adds DIR to the directory stack at the top, making it the
 	new current working directory.
 
-You can see the directory stack with the `dirs' command.
+The `dirs' builtin displays the directory stack.
 $END
 
 $BUILTIN popd
 $FUNCTION popd_builtin
 $DEPENDS_ON PUSHD_AND_POPD
 $SHORT_DOC popd [-n] [+N | -N]
-Removes entries from the directory stack.  With no arguments,
-removes the top directory from the stack, and cd's to the new
-top directory.
+Removes entries from the directory stack.  With no arguments, removes
+the top directory from the stack, and changes to the new top directory.
 
--n	Suppresses the normal change of directory when removing directories
-	from the stack, so only the stack is manipulated.
+Options:
+  -n	Suppresses the normal change of directory when removing
+	directories from the stack, so only the stack is manipulated.
 
-+N	Removes the Nth entry counting from the left of the list
+Arguments:
+  +N	Removes the Nth entry counting from the left of the list
 	shown by `dirs', starting with zero.  For example: `popd +0'
 	removes the first directory, `popd +1' the second.
 
--N	Removes the Nth entry counting from the right of the list
+  -N	Removes the Nth entry counting from the right of the list
 	shown by `dirs', starting with zero.  For example: `popd -0'
 	removes the last directory, `popd -1' the next to last.
 
-You can see the directory stack with the `dirs' command.
+The `dirs' builtin displays the directory stack.
 $END
 
 $BUILTIN dirs
@@ -76,18 +79,19 @@ Display the list of currently remembered directories.  Directories
 find their way onto the list with the `pushd' command; you can get
 back up through the list with the `popd' command.
 
-The -c flag clears the directory stack by deleting all of the elements.
-The -l flag specifies that `dirs' should not print shorthand versions
-of directories which are relative to your home directory.  This means
-that `~/bin' might be displayed as `/homes/bfox/bin'.  The -p flag
-causes `dirs' to print the directory stack with one entry per line.
-The -v flag does the same thing, prefixing each directory name with its
-position in the stack.
+Options:
+  -c	clear the directory stack by deleting all of the elements
+  -l	do not print tilde-prefixed versions of directories relative
+	to your home directory
+  -p	print the directory stack with one entry per line
+  -v	print the directory stack with one entry per line prefixed
+	with its position in the stack
 
-+N	Displays the Nth entry counting from the left of the list shown by
+Arguments:
+  +N	Displays the Nth entry counting from the left of the list shown by
 	dirs when invoked without options, starting with zero.
 
--N	Displays the Nth entry counting from the right of the list shown by
+  -N	Displays the Nth entry counting from the right of the list shown by
 	dirs when invoked without options, starting with zero.
 $END
 

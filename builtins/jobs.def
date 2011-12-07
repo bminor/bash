@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,14 +25,19 @@ $BUILTIN jobs
 $FUNCTION jobs_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC jobs [-lnprs] [jobspec ...] or jobs -x command [args]
-Lists the active jobs.  The -l option lists process id's in addition
-to the normal information; the -p option lists process id's only.
-If -n is given, only processes that have changed status since the last
-notification are printed.  JOBSPEC restricts output to that job.  The
--r and -s options restrict output to running and stopped jobs only,
-respectively.  Without options, the status of all active jobs is
-printed.  If -x is given, COMMAND is run after all job specifications
-that appear in ARGS have been replaced with the process ID of that job's
+Lists the active jobs.  JOBSPEC restricts output to that job.
+Without options, the status of all active jobs is displayed.
+
+Options:
+  -l	lists process IDs in addition to the normal information
+  -n	list only processes that have changed status since the last
+	notification
+  -p	lists process IDs only
+  -r	restrict output to running jobs
+  -s	restrict output to stopped jobs
+
+If -x is supplied, COMMAND is run after all job specifications that
+appear in ARGS have been replaced with the process ID of that job's
 process group leader.
 $END
 
@@ -203,11 +208,14 @@ $BUILTIN disown
 $FUNCTION disown_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC disown [-h] [-ar] [jobspec ...]
-By default, removes each JOBSPEC argument from the table of active jobs.
-If the -h option is given, the job is not removed from the table, but is
-marked so that SIGHUP is not sent to the job if the shell receives a
-SIGHUP.  The -a option, when JOBSPEC is not supplied, means to remove all
-jobs from the job table; the -r option means to remove only running jobs.
+Removes each JOBSPEC argument from the table of active jobs.  Without
+any JOBSPECs, the shell uses its notion of the current job.
+
+Options:
+  -a	remove all jobs if JOBSPEC is not supplied
+  -h	mark each JOBSPEC so that SIGHUP is not sent to the job if the
+	shell receives a SIGHUP
+  -r	remove only running jobs
 $END
 
 #if defined (JOB_CONTROL)

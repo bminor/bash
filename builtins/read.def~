@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2007 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,27 +24,34 @@ $PRODUCES read.c
 $BUILTIN read
 $FUNCTION read_builtin
 $SHORT_DOC read [-ers] [-a array] [-d delim] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
-One line is read from the standard input, or from file descriptor FD if the
--u option is supplied, and the first word is assigned to the first NAME,
-the second word to the second NAME, and so on, with leftover words assigned
-to the last NAME.  Only the characters found in $IFS are recognized as word
-delimiters.  If no NAMEs are supplied, the line read is stored in the REPLY
-variable.  If the -r option is given, this signifies `raw' input, and
-backslash escaping is disabled.  The -d option causes read to continue
-until the first character of DELIM is read, rather than newline.  If the -p
-option is supplied, the string PROMPT is output without a trailing newline
-before attempting to read.  If -a is supplied, the words read are assigned
-to sequential indices of ARRAY, starting at zero.  If -e is supplied and
-the shell is interactive, readline is used to obtain the line.  If -n is
-supplied with a non-zero NCHARS argument, read returns after NCHARS
-characters have been read.  The -s option causes input coming from a
-terminal to not be echoed.
+Reads a single line from the standard input, or from file descriptor FD
+if the -u option is supplied.  The line is split into fields as with word
+splitting, and the first word is assigned to the first NAME, the second
+word to the second NAME, and so on, with any leftover words assigned to
+the last NAME.  Only the characters found in $IFS are recognized as word
+delimiters.
 
-The -t option causes read to time out and return failure if a complete line
-of input is not read within TIMEOUT seconds.  If the TMOUT variable is set,
-its value is the default timeout.  The return code is zero, unless end-of-file
-is encountered, read times out, or an invalid file descriptor is supplied as
-the argument to -u.
+If no NAMEs are supplied, the line read is stored in the REPLY variable.
+
+Options:
+  -a array	assign the words read to sequential indices of the array
+	variable ARRAY, starting at zero
+  -d delim	continue until the first character of DELIM is read, rather
+	than newline
+  -e	use Readline to obtain the line in an interactive shell
+  -n nchars	return after reading NCHARS characters rather than waiting
+	for a newline
+  -p prompt	output the string PROMPT without a trailing newline before
+	attempting to read
+  -r	do not allow backslashes to escape any characters
+  -s	do not echo input coming from a terminal
+  -t timeout	time out and return failure if a complete line of input is
+	not read withint TIMEOUT seconds.  The value of the TMOUT
+	variable is the default timeout.
+  -u fd	read from file descriptor FD instead of the standard input
+
+The return code is zero, unless end-of-file is encountered, read times out,
+or an invalid file descriptor is supplied as the argument to -u.
 $END
 
 #include <config.h>
@@ -340,7 +347,6 @@ read_builtin (list)
       code = setjmp (alrmbuf);
       if (code)
 	{
-itrace("sigalrm: input_string = %s input_is_tty = %d", input_string, input_is_tty);
 #if 0
 	  run_unwind_frame ("read_builtin");
 	  return (EXECUTION_FAILURE);

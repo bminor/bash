@@ -29,7 +29,7 @@ $FUNCTION bind_builtin
 $SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]
 Bind a key sequence to a Readline function or a macro, or set
 a Readline variable.  The non-option argument syntax is equivalent
-to that found in ~/.inputrc, but must be passed as a single argument:
+to that found in ~/.inputrc, but must be passed as a single argument:  e.g.,
 bind '"\C-x\C-r": re-read-init-file'.
 bind accepts the following options:
   -m  keymap         Use KEYMAP as the keymap for the duration of this
@@ -266,7 +266,7 @@ bind_builtin (list)
 
   run_unwind_frame ("bind_builtin");
 
-  return (return_code);
+  return (sh_chkwrite (return_code));
 }
 
 static int

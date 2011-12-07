@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2007 Free Software Foundation, Inc.
+Copyright (C) 1997-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,16 +24,23 @@ $PRODUCES printf.c
 $BUILTIN printf
 $FUNCTION printf_builtin
 $SHORT_DOC printf [-v var] format [arguments]
-printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
-is a character string which contains three types of objects: plain
+Formats and prints ARGUMENTS under control of the FORMAT.
+
+Options:
+  -v var	assign the output to shell variable VAR rather than
+		display it on the standard output
+
+FORMAT is a character string which contains three types of objects: plain
 characters, which are simply copied to standard output; character escape
 sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
-argument.  In addition to the standard printf(1) formats, %b means to
-expand backslash escape sequences in the corresponding argument, and %q
-means to quote the argument in a way that can be reused as shell input.
-If the -v option is supplied, the output is placed into the value of the
-shell variable VAR rather than being sent to the standard output.
+argument.
+
+In addition to the standard format specifications described in printf(1)
+and printf(3), print interprets:
+
+  %b	expand backslash escape sequences in the corresponding argument
+  %q	quote the argument in a way that can be reused as shell input
 $END
 
 #include <config.h>
@@ -1031,18 +1038,15 @@ asciicode ()
 
 #if defined (HANDLE_MULTIBYTE)
   slen = strlen (garglist->word->word+1);
-  mblength = mbrlen (garglist->word->word+1, slen, NULL);
-#if 0
+  mblength = MBLEN (garglist->word->word+1, slen);
   if (mblength > 1)
-#else
-  if (1)
     {
-      mblength = mbrtowc (&wc, garglist->word->word+1, slen, NULL);
+      mblength = mbtowc (&wc, garglist->word->word+1, slen);
       ch = wc;		/* XXX */
     }
   else
 #endif
-    ch = garglist->word->word[1];
+    ch = (unsigned char)garglist->word->word[1];
 
   garglist = garglist->next;
   return (ch);

@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -30,12 +30,13 @@ FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
 string.
 
-   -e ENAME selects which editor to use.  Default is FCEDIT, then EDITOR,
-      then vi.
+Options:
 
-   -l means list lines instead of editing.
-   -n means no line numbers listed.
-   -r means reverse the order of the lines (making it newest listed first).
+  -e ENAME	select which editor to use.  Default is FCEDIT, then EDITOR,
+		then vi
+  -l 	list lines instead of editing
+  -n	omit line numbers when listing
+  -r	reverse the order of the lines (newest listed first)
 
 With the `fc -s [pat=rep ...] [command]' format, COMMAND is
 re-executed after the substitution OLD=NEW is performed.
@@ -296,7 +297,6 @@ fc_builtin (list)
     delete_last_history ();
 
   last_hist = i - remember_on_history - hist_last_line_added;
-itrace("fc: i = %d last_hist = %d remember_on_history = %d hist_last_line_added = %d", i, last_hist, remember_on_history, hist_last_line_added);
 
   if (list)
     {
@@ -307,7 +307,6 @@ itrace("fc: i = %d last_hist = %d remember_on_history = %d hist_last_line_added 
 	histend = fc_gethnum (list->word->word, hlist);
       else
 	histend = listing ? last_hist : histbeg;
-itrace("fc: histbeg = %d histend = %d", histbeg, histend);
     }
   else
     {

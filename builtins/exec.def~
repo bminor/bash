@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2007 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,14 +26,16 @@ $FUNCTION exec_builtin
 $SHORT_DOC exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
 Execute COMMAND, replacing this shell with the specified program.
 ARGUMENTS become the arguments to COMMAND.  If COMMAND is not specified,
-any redirections take effect in the current shell.  If the `-l' option
-is supplied, the shell places a dash in the zeroth argument to the
-COMMAND, as login does.  If the `-c' option is supplied, COMMAND is
-executed with an empty environment.  The `-a' option causes the shell
-to pass NAME as the zeroth argument to COMMAND.  If the command cannot be
-executed, a non-interactive shell exits, unless the shell option `execfail'
-is set.  If COMMAND is absent, any redirections take effect in the
-calling shell.
+any redirections take effect in the current shell.
+
+Options:
+
+  -a name	pass NAME as the zeroth argument to COMMAND
+  -c		execute COMMAND with an empty environment
+  -l		place a dash in the zeroth argument to COMMAND
+
+If the command cannot be executed, a non-interactive shell exits, unless
+the shell option `execfail' is set.
 $END
 
 #include <config.h>

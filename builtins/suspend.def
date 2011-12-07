@@ -1,7 +1,7 @@
 This file is suspend.def, from which is created suspend.c.
 It implements the builtin "suspend" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,9 +25,10 @@ $BUILTIN suspend
 $DEPENDS_ON JOB_CONTROL
 $FUNCTION suspend_builtin
 $SHORT_DOC suspend [-f]
-Suspend the execution of this shell until it receives a SIGCONT
-signal.  The `-f' if specified says not to complain about this
-being a login shell if it is; just suspend anyway.
+Suspend the execution of this shell until it receives a SIGCONT signal.
+
+Options:
+  -f	force the suspend, even if the shell is a login shell
 $END
 
 #include <config.h>

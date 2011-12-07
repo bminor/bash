@@ -60,9 +60,12 @@ $BUILTIN time
 $SHORT_DOC time [-p] pipeline
 Execute PIPELINE and print a summary of the real time, user CPU time,
 and system CPU time spent executing PIPELINE when it terminates.
-The return status is the return status of PIPELINE.  The `-p' option
-prints the timing summary in the portable Posix format; otherwise, the
-the value of the TIMEFORMAT variable is used as the output format.
+
+Options:
+  -p	print the timing summary in the portable Posix format
+
+The value of the TIMEFORMAT variable is used as the output format.  The
+return status is the return status of PIPELINE.
 $END
 
 $BUILTIN case
@@ -95,10 +98,11 @@ Expand and execute COMMANDS as long as the final command in the
 $END
 
 $BUILTIN function
-$SHORT_DOC function NAME { COMMANDS ; } or NAME () { COMMANDS ; }
-Create a simple command invoked by NAME which runs COMMANDS.
-Arguments on the command line along with NAME are passed to the
-function as $0 .. $n.
+$SHORT_DOC function name { COMMANDS ; } or name () { COMMANDS ; }
+Create a shell function named NAME.  When invoked as a simple command,
+NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,
+the arguments are passed to the function as $1...$n, and the function's
+name is in $FUNCNAME.
 $END
 
 $BUILTIN { ... }
@@ -130,16 +134,19 @@ $DOCNAME conditional
 $SHORT_DOC [[ expression ]]
 Returns a status of 0 or 1 depending on the evaluation of the conditional
 expression EXPRESSION.  Expressions are composed of the same primaries used
-by the `test' builtin, and may be combined using the following operators
+by the `test' builtin, and may be combined using the following operators:
 
-	( EXPRESSION )	Returns the value of EXPRESSION
-	! EXPRESSION	True if EXPRESSION is false; else false
-	EXPR1 && EXPR2	True if both EXPR1 and EXPR2 are true; else false
-	EXPR1 || EXPR2	True if either EXPR1 or EXPR2 is true; else false
+  ( EXPRESSION )	Returns the value of EXPRESSION
+  ! EXPRESSION		True if EXPRESSION is false; else false
+  EXPR1 && EXPR2	True if both EXPR1 and EXPR2 are true; else false
+  EXPR1 || EXPR2	True if either EXPR1 or EXPR2 is true; else false
 
-When the `==' and `!=' operators are used, the string to the right of the
-operator is used as a pattern and pattern matching is performed.  The
-&& and || operators do not evaluate EXPR2 if EXPR1 is sufficient to
+When the `==' and `!=' operators are used, the string to the right of
+the operator is used as a pattern and pattern matching is performed.
+When the `=~' operator is used, the string to the right of the operator
+is matched as a regular expression.
+
+The && and || operators do not evaluate EXPR2 if EXPR1 is sufficient to
 determine the expression's value.
 $END
 

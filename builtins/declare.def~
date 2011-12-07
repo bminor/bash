@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,15 +24,17 @@ $PRODUCES declare.c
 $BUILTIN declare
 $FUNCTION declare_builtin
 $SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
-Declare variables and give them attributes.  If no NAMEs are
-given, then display the values of variables instead.  When
-displaying variable values, the -f option restricts the display
-to function names and definitions; the -F option restricts the
-display to function names only (plus line number and source file
-when debugging).  The -p option will display the attributes and
-values of each NAME. 
+Declare variables and give them attributes.  If no NAMEs are given,
+display the attributes and values of all variables.
 
-The options which set attributes are:
+Options:
+
+  -f	restrict action or display to function names and definitions
+  -F	restrict display to function names only (plus line number and
+	source file when debugging)
+  -p	display the attributes and value of each NAME
+
+Options which set attributes:
 
   -a	to make NAMEs arrays (if supported)
   -i	to make NAMEs have the `integer' attribute
@@ -43,7 +45,7 @@ The options which set attributes are:
 Using `+' instead of `-' turns off the given attribute.
 
 Variables with the integer attribute have arithmetic evaluation (see
-the `let' command) done when the variable is assigned a value.
+the `let' command) performed when the variable is assigned a value.
 
 When used in a function, `declare' makes NAMEs local, as with the `local'
 command.
@@ -52,7 +54,7 @@ $END
 $BUILTIN typeset
 $FUNCTION declare_builtin
 $SHORT_DOC typeset [-afFirtx] [-p] name[=value] ...
-Obsolete.  See `declare'.
+Obsolete.  See `help declare'.
 $END
 
 #include <config.h>
@@ -90,10 +92,11 @@ declare_builtin (list)
 $BUILTIN local
 $FUNCTION local_builtin
 $SHORT_DOC local [option] name[=value] ...
-Create a local variable called NAME, and give it VALUE.  LOCAL
-can only be used within a function; it makes the variable NAME
-have a visible scope restricted to that function and its children.
-OPTION can be any of the options accepted by `declare'.
+Create a local variable called NAME, and give it VALUE.  OPTION can
+be any option accepted by `declare'.
+
+Local variables can only be used within a function; they are visible
+only to the function where they are defined and its children.
 $END
 int
 local_builtin (list)

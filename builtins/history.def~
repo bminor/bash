@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,24 +24,27 @@ $PRODUCES history.c
 $BUILTIN history
 $FUNCTION history_builtin
 $DEPENDS_ON HISTORY
-$SHORT_DOC history [-c] [-d offset] [n] or history -awrn [filename] or history -ps arg [arg...]
-Display the history list with line numbers.  Lines listed with
-with a `*' have been modified.  Argument of N says to list only
-the last N lines.  The `-c' option causes the history list to be
-cleared by deleting all of the entries.  The `-d' option deletes
-the history entry at offset OFFSET.  The `-w' option writes out the
-current history to the history file;  `-r' means to read the file and
-append the contents to the history list instead.  `-a' means
-to append history lines from this session to the history file.
-Argument `-n' means to read all history lines not already read
-from the history file and append them to the history list.
+$SHORT_DOC history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]
+Display the history list with line numbers, prefixing each modified entry
+with a `*'.  An argument of N lists only the last N entries.
 
-If FILENAME is given, then that is used as the history file.  Otherwise,
+Options:
+  -c	clear the history list by deleting all of the entries
+  -d offset	delete the history entry at offset OFFSET.
+
+  -a	append history lines from this session to the history file
+  -n	read all history lines not already read from the history file
+  -r	read the history file and append the contents to the history
+	list
+  -w	write the current history to the history file
+	and append them to the history list
+
+  -p	perform history expansion on each ARG and display the result
+	without storing it in the history list
+  -s	append the ARGs to the history list as a single entry
+
+If FILENAME is given, it is used as the history file.  Otherwise,
 if $HISTFILE has a value, that is used, else ~/.bash_history.
-If the -s option is supplied, the non-option ARGs are appended to
-the history list as a single entry.  The -p option means to perform
-history expansion on each ARG and display the result, without storing
-anything in the history list.
 
 If the $HISTTIMEFORMAT variable is set and not null, its value is used
 as a format string for strftime(3) to print the time stamp associated
@@ -170,7 +173,7 @@ history_builtin (list)
     {
       if (list)
 	return (expand_and_print_history (list));
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 #endif
   else if (flags & DFLAG)
@@ -193,7 +196,7 @@ history_builtin (list)
   else if ((flags & (AFLAG|RFLAG|NFLAG|WFLAG|CFLAG)) == 0)
     {
       display_history (list);
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");

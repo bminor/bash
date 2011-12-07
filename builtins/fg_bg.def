@@ -1,7 +1,7 @@
 This file is fg_bg.def, from which is created fg_bg.c.
 It implements the builtins "bg" and "fg" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,9 +25,9 @@ $BUILTIN fg
 $FUNCTION fg_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC fg [job_spec]
-Place JOB_SPEC in the foreground, and make it the current job.  If
-JOB_SPEC is not present, the shell's notion of the current job is
-used.
+Place the job identified by JOB_SPEC in the foreground, making it the
+current job.  If JOB_SPEC is not present, the shell's notion of the
+current job is used.
 $END
 
 #include <config.h>
@@ -83,9 +83,9 @@ $BUILTIN bg
 $FUNCTION bg_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC bg [job_spec ...]
-Place each JOB_SPEC in the background, as if it had been started with
-`&'.  If JOB_SPEC is not present, the shell's notion of the current
-job is used.
+Place the jobs identified by each JOB_SPEC in the background, as if they
+had been started with `&'.  If JOB_SPEC is not present, the shell's notion
+of the current job is used.
 $END
 
 #if defined (JOB_CONTROL)
