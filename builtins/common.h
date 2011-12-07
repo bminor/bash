@@ -59,6 +59,7 @@
 
 /* Functions from common.c */
 extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+extern void builtin_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_usage __P((void));
 extern void no_args __P((WORD_LIST *));
 extern int no_options __P((WORD_LIST *));

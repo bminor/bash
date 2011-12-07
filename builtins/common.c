@@ -88,16 +88,10 @@ sh_builtin_func_t *this_shell_builtin = (sh_builtin_func_t *)NULL;
 /* This is a lot like report_error (), but it is for shell builtins
    instead of shell control structures, and it won't ever exit the
    shell. */
-void
-#if defined (PREFER_STDARG)
-builtin_error (const char *format, ...)
-#else
-builtin_error (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
+
+static void
+builtin_error_prolog ()
 {
-  va_list args;
   char *name;
 
   name = get_name_for_error ();
@@ -108,6 +102,41 @@ builtin_error (format, va_alist)
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
+}
+
+void
+#if defined (PREFER_STDARG)
+builtin_error (const char *format, ...)
+#else
+builtin_error (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  builtin_error_prolog ();
+
+  SH_VA_START (args, format);
+
+  vfprintf (stderr, format, args);
+  va_end (args);
+  fprintf (stderr, "\n");
+}
+
+void
+#if defined (PREFER_STDARG)
+builtin_warning (const char *format, ...)
+#else
+builtin_warning (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  builtin_error_prolog ();
+  fprintf (stderr, _("warning: "));
 
   SH_VA_START (args, format);
 

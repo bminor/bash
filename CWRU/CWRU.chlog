@@ -6928,9 +6928,28 @@ jobs.c
 	  interrupt occurred.  The behavior is dependent on the shell
 	  compatibility level being > 32 (bash-4.0 and above)
 
-				   9/24
+				   9/23
 				   ----
+redir.c
+	- don't bother reporting an error with a file descriptor, even if
+	  the errno is EBADF, if the redirection error (e.g., NOCLOBBER)
+	  can't have anything to do with the fd.  Fixes bug reported by
+	  "David A. Harding" <dave@dtrt.org>, debian bug #499633.
+
+				   9/24
+  				   ----
 builtins/declare.def
 	- make `declare [option] var' (and the `typeset' equivalent) create
 	  invisible variables, instead of assigning the null string to a
-	  visible variable.
+	  visible variable.  Fixes bug reported by Bernd Eggink <monoped@sudrala.de>
+
+				   9/25
+				   ----
+builtins/common.[ch]
+	- new function, builtin_warning(), like builtin_error but for warning
+	  messages
+
+builtins/bind.def
+	- experimental: print a warning, but go on, if line editing not active
+	  when bind is invoked.  Suggested by Rocky Bernstein
+	  <rocky.bernstein@gmail.com>

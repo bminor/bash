@@ -103,7 +103,8 @@ redirection_error (temp, error)
        exec 4294967297>x */
     filename = _("file descriptor out of range");
 #ifdef EBADF
-  else if (temp->redirector >= 0 && errno == EBADF)
+  /* This error can never involve NOCLOBBER */
+  else if (error != NOCLOBBER_REDIRECT && temp->redirector >= 0 && errno == EBADF)
     {
       /* If we're dealing with two file descriptors, we have to guess about
          which one is invalid; in the cases of r_{duplicating,move}_input and

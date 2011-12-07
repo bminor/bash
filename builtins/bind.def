@@ -116,8 +116,12 @@ bind_builtin (list)
 
   if (no_line_editing)
     {
-      builtin_error ("line editing not enabled");
+#if 0
+      builtin_error (_("line editing not enabled"));
       return (EXECUTION_FAILURE);
+#else
+      builtin_warning (_("line editing not enabled"));
+#endif
     }
 
   kmap = saved_keymap = (Keymap) NULL;
@@ -125,7 +129,7 @@ bind_builtin (list)
   initfile = map_name = fun_name = unbind_name = remove_seq = (char *)NULL;
   return_code = EXECUTION_SUCCESS;
 
-  if (!bash_readline_initialized)
+  if (bash_readline_initialized == 0)
     initialize_readline ();
 
   begin_unwind_frame ("bind_builtin");
