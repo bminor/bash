@@ -64,6 +64,7 @@ extern int current_token, shell_eof_token;
 extern int last_command_exit_value;
 extern int running_trap;
 extern int loop_level;
+extern int executing_list;
 extern int posixly_correct;
 
 int parse_and_execute_level = 0;
@@ -110,6 +111,7 @@ parse_prologue (string, flags, tag)
   unwind_protect_int (indirection_level);
   unwind_protect_int (line_number);
   unwind_protect_int (loop_level);
+  unwind_protect_int (executing_list);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 

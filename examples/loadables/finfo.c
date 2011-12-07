@@ -1,5 +1,8 @@
 /*
  * finfo - print file info
+ *
+ * Chet Ramey
+ * chet@po.cwru.edu
  */
 
 #ifdef HAVE_CONFIG_H

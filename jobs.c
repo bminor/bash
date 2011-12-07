@@ -145,6 +145,7 @@ extern int subshell_environment, line_number;
 extern int posixly_correct, shell_level;
 extern int last_command_exit_value, last_command_exit_signal;
 extern int loop_level, breaking;
+extern int executing_list;
 extern int sourcelevel;
 extern int running_trap;
 extern sh_builtin_func_t *this_shell_builtin;
@@ -2525,7 +2526,7 @@ if (job == NO_JOB)
 		 or until loop, act as if the shell received SIGINT as
 		 well, so the loop can be broken.  This doesn't call the
 		 SIGINT signal handler; maybe it should. */
-	      if (signal_is_trapped (SIGINT) == 0 && loop_level)
+	      if (signal_is_trapped (SIGINT) == 0 && (loop_level || (shell_compatibility_level > 32 && executing_list)))
 		ADDINTERRUPT;
 	      else
 		{
@@ -3834,6 +3835,7 @@ give_terminal_to (pgrp, force)
 
   if (r == -1)
     errno = e;
+
   return r;
 }
 

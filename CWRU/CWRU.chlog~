@@ -6896,3 +6896,41 @@ builtins/return.def
 builtins/bind.def
 	- add an error message when bind is used without line editing active,
 	  instead of just returning an error status
+
+variables.c
+	- make sure make_local_variable never creates visible variables with
+	  a value, whether or not a variable with the same name existed in a
+	  previous context.  This is consistent with ksh93.  Fix from
+	  <neil@s-z.org>
+
+				   9/16
+				   ----
+execute_cmd.c
+	- add call to CHECK_TERMSIG in shell_execve after the call to execve
+	  returns.  Recommended by Roman Rakus <rrakus@redhat.com>
+	- add QUIT check in execute_connection after executing first command
+	  in a `&' connection
+
+				   9/22
+				   ----
+execute_cmd.c
+	- new semaphore variable, executing_list, incremented every time a
+	  list (command1;command2 or command1 || command2 or command1 &&
+	  command2) is executed; used as sentinel for rest of shell
+
+sig.c,builtins/evalstring.c
+	- set executing_list to 0 when throwing execution back to top level;
+	  make sure to unwind-protect it in appropriate places
+
+jobs.c
+	- if a pipeline is killed by SIGINT while executing a list (when
+	  executing_list is non-zero), make sure the shell acts as if an
+	  interrupt occurred.  The behavior is dependent on the shell
+	  compatibility level being > 32 (bash-4.0 and above)
+
+				   9/24
+				   ----
+builtins/declare.def
+	- make `declare [option] var' (and the `typeset' equivalent) create
+	  invisible variables, instead of assigning the null string to a
+	  visible variable

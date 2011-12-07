@@ -230,6 +230,9 @@ REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
    currently executing (e.g. `eval echo a' would have it set to 2). */
 int executing_builtin = 0;
 
+/* Non-zero if we are executing a command list (a;b;c, etc.) */
+int executing_list = 0;
+
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
 int subshell_environment;
@@ -2052,6 +2055,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	tc->flags |= CMD_STDIN_REDIR;
 
       exec_result = execute_command_internal (tc, 1, pipe_in, pipe_out, fds_to_close);
+      QUIT;
 
       if (tc->flags & CMD_STDIN_REDIR)
 	tc->flags &= ~CMD_STDIN_REDIR;
@@ -2076,12 +2080,14 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  if (command->value.Connection->second)
 	    command->value.Connection->second->flags |= CMD_IGNORE_RETURN;
 	}
+      executing_list++;
       QUIT;
       execute_command (command->value.Connection->first);
       QUIT;
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
 				      fds_to_close);
+      executing_list--;
       break;
 
     case '|':
@@ -2107,6 +2113,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 and the connector is OR_OR, then execute the second command,
 	 otherwise return. */
 
+      executing_list++;
       if (command->value.Connection->first)
 	command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
 
@@ -2122,6 +2129,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
 	  exec_result = execute_command (command->value.Connection->second);
 	}
+      executing_list--;
       break;
 
     default:
@@ -4502,6 +4510,8 @@ initialize_subshell ()
   /* We're no longer inside a shell function. */
   variable_context = return_catch_flag = 0;
 
+  executing_list = 0;		/* XXX */
+
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */
   if (interactive_shell == 0)
@@ -4543,6 +4553,7 @@ shell_execve (command, args, env)
   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */
   execve (command, args, env);
   i = errno;			/* error from execve() */
+  CHECK_TERMSIG;
   SETOSTYPE (1);
 
   /* If we get to this point, then start checking out the file.

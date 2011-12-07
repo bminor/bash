@@ -414,7 +414,14 @@ declare_internal (list, local_var)
 		var = make_new_array_variable (name);
 	      else
 #endif
-	      var = bind_variable (name, "", 0);
+
+	      if (offset)
+		var = bind_variable (name, "", 0);
+	      else
+		{
+		  var = bind_variable (name, (char *)NULL, 0);
+		  VSETATTR (var, att_invisible);
+		}
 	    }
 
 	  /* Cannot use declare +r to turn off readonly attribute. */ 

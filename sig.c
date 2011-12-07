@@ -56,6 +56,7 @@ extern int last_command_exit_value;
 extern int last_command_exit_signal;
 extern int return_catch_flag;
 extern int loop_level, continuing, breaking;
+extern int executing_list;
 extern int parse_and_execute_level, shell_initialized;
 
 /* Non-zero after SIGINT. */
@@ -365,7 +366,7 @@ top_level_cleanup ()
 #endif /* PROCESS_SUBSTITUTION */
 
   run_unwind_protects ();
-  loop_level = continuing = breaking = 0;
+  loop_level = continuing = breaking = executing_list = 0;
   return_catch_flag = 0;
 }
 
@@ -416,7 +417,7 @@ throw_to_top_level ()
 #endif /* PROCESS_SUBSTITUTION */
 
   run_unwind_protects ();
-  loop_level = continuing = breaking = 0;
+  loop_level = continuing = breaking = executing_list = 0;
   return_catch_flag = 0;
 
   if (interactive && print_newline)
