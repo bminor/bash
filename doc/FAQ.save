@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 3.33, for Bash version 3.1.
+This is the Bash FAQ, version 3.24, for Bash version 2.05b.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -31,14 +31,14 @@ A6) How can I build bash with gcc?
 A7) How can I make bash my login shell?
 A8) I just changed my login shell to bash, and now I can't FTP into my
     machine.  Why not?
-A9) What's the `POSIX Shell and Utilities standard'?
+A9) What's the `POSIX 1003.2 standard'?
 A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 3.1?
-B2) Are there any user-visible incompatibilities between bash-3.1 and
-    bash-2.05b?
+B1) What's new in version 2.05b?
+B2) Are there any user-visible incompatibilities between bash-2.05b and
+    bash-1.14.7?
 
 Section C:  Differences from other Unix shells
 
@@ -77,7 +77,6 @@ E9) Why does the pattern matching expression [A-Z]* match files beginning
 E10) Why does `cd //' leave $PWD as `//'?
 E11) If I resize my xterm while another program is running, why doesn't bash
      notice the change?
-E12) Why don't negative offsets in substring expansion work like I expect?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -140,33 +139,30 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 3.1, first made available on 09 December, 2005.
+The latest version is 2.05b, first made available on Wednesday, 17
+July, 2002.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 3.1:
+The following URLs tell how to get version 2.05b:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-3.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-3.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-2.05b.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-2.05b.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-3.1.tar.gz
-
-Any patches for the current version are available with the URL:
-
-ftp://ftp.cwru.edu/pub/bash/bash-3.1-patches/
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-2.05b.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-2.05b.tar.gz
 
 A4)  On what machines will bash run?
 
-Bash has been ported to nearly every version of Unix.  All you
+Bash has been ported to nearly every version of UNIX.  All you
 should have to do to build it on a machine for which a port
 exists is to type `configure' and then `make'.  The build process
-will attempt to discover the version of Unix you have and tailor
+will attempt to discover the version of UNIX you have and tailor
 itself accordingly, using a script created by GNU autoconf.
 
 More information appears in the file `INSTALL' in the distribution.
@@ -185,18 +181,24 @@ earlier Minix versions yet.
 
 Bash has been ported to versions of Windows implementing the Win32
 programming interface.  This includes Windows 95 and Windows NT.
-The port was done by Cygnus Solutions (now part of Red Hat) as part
-of their CYGWIN project.  For more information about the project, see
-http://www.cygwin.com/.
+The port was done by Cygnus Solutions as part of their CYGWIN
+project.  For more information about the project, look at the URLs
+
+http://www.cygwin.com/
+http://sourceware.cygnus.com/cygwin
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
-early GNU-Win32 (the original name) releases.  Cygnus has also done
-ports of bash-2.05b and bash-3.0 to the CYGWIN environment, and both
-are available as part of their current release.  Bash-3.1 is currently
-being tested and should be available soon.
+early GNU-Win32 (the original name) releases.  Cygnus has also done a
+port of bash-2.05 to the CYGWIN environment, and it is available as
+part of their current release.
 
-Bash-2.05b and later versions should require no local Cygnus changes to
-build and run under CYGWIN.
+Bash-2.05b should require no local Cygnus changes to build and run under
+CYGWIN.
+
+The Cygnus port works only on Intel machines.  There is a port of bash
+(I don't know which version) to the alpha/NT environment available from
+
+ftp://ftp.gnustep.org//pub/win32/bash-alpha-nt-1.01.tar.gz
 
 DJ Delorie has a port of bash-2.x which runs under MS-DOS, as part
 of the DJGPP project.  For more information on the project, see
@@ -212,11 +214,19 @@ ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204b.zip	binary
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204d.zip	documentation
 ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/bsh204s.zip	source
 
-Mark began to work with bash-2.05, but I don't know the current status.
+Mark has begun to work with bash-2.05, but I don't know the status.
 
-Bash-3.0 compiles and runs with no modifications under Microsoft's Services
-for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-3.1.
+Ports of bash-1.12 and bash-2.0 are available for OS/2 from
+
+ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash_112.zip
+ftp://hobbes.nmsu.edu/pub/os2/util/shell/bash-2.0(253).zip
+
+I haven't looked at either, but the second appears to be a binary-only
+distribution.  Beware.
+
+I have received word that Bash (I'm not sure which version, but I
+believe that it's at least bash-2.02.1) is the standard shell on
+BeOS.
 
 A6) How can I build bash with gcc? 
 
@@ -318,7 +328,7 @@ this before you can make bash your login shell.
 Most versions of ftpd use this file to prohibit `special' users
 such as `uucp' and `news' from using FTP. 
 
-A9)  What's the `POSIX Shell and Utilities standard'?
+A9)  What's the `POSIX 1003.2 standard'?
 
 POSIX is a name originally coined by Richard Stallman for a
 family of open system standards based on UNIX.  There are a
@@ -328,49 +338,44 @@ call and C library level to applications and tools to system
 administration and management.  Each area of standardization is
 assigned to a working group in the 1003 series. 
 
-The POSIX Shell and Utilities standard was originally developed by
-IEEE Working Group 1003.2 (POSIX.2).  Today it has been merged with
-the original 1003.1 Working Group and is maintained by the Austin
-Group (a joint working group of the IEEE, The Open Group and
-ISO/IEC SC22/WG15).  Today the Shell and Utilities are a volume
-within the set of documents that make up IEEE Std 1003.1-2001, and
-thus now the former POSIX.2 (from 1992) is now part of the current
-POSIX.1 standard (POSIX 1003.1-2001). 
-
-The Shell and Utilities volume concentrates on the command
+The POSIX Shell and Utilities standard has been developed by IEEE
+Working Group 1003.2 (POSIX.2).  It concentrates on the command
 interpreter interface and utility programs commonly executed from
-the command line or by other programs.  The standard is freely
-available on the web at http://www.UNIX-systems.org/version3/ . 
-Work continues at the Austin Group on maintenance issues; see
-http://www.opengroup.org/austin/ to join the discussions. 
+the command line or by other programs.  An initial version of the
+standard has been approved and published by the IEEE, and work is
+currently underway to update it. 
 
-Bash is concerned with the aspects of the shell's behavior defined
-by the POSIX Shell and Utilities volume.  The shell command
-language has of course been standardized, including the basic flow
-control and program execution constructs, I/O redirection and
-pipelining, argument handling, variable expansion, and quoting. 
+Bash is concerned with the aspects of the shell's behavior
+defined by POSIX.2.  The shell command language has of course
+been standardized, including the basic flow control and program
+execution constructs, I/O redirection and pipelining, argument
+handling, variable expansion, and quoting. 
 
 The `special' builtins, which must be implemented as part of the
 shell to provide the desired functionality, are specified as
 being part of the shell; examples of these are `eval' and
-`export'.  Other utilities appear in the sections of POSIX not
+`export'.  Other utilities appear in the sections of POSIX.2 not
 devoted to the shell which are commonly (and in some cases must
 be) implemented as builtin commands, such as `read' and `test'. 
-POSIX also specifies aspects of the shell's interactive
+POSIX.2 also specifies aspects of the shell's interactive
 behavior as part of the UPE, including job control and command
 line editing.  Only vi-style line editing commands have been
 standardized; emacs editing commands were left out due to
 objections.
 
-The latest version of the POSIX Shell and Utilities standard is
-available (now updated to the 2004 Edition) as part of the Single
-UNIX Specification Version 3 at
+The Open Group has made an older version of its Single Unix
+Specification (version 2), which is very similar to POSIX.2,
+available on the web at
 
-http://www.UNIX-systems.org/version3/
+http://www.opengroup.org/onlinepubs/007908799/
+
+The Single Unix Specification, version 3, is available on the web at
+
+http://www.opengroup.org/onlinepubs/007904975/
 
 A10)  What is the bash `posix mode'?
 
-Although bash is an implementation of the POSIX shell
+Although bash is an implementation of the POSIX.2 shell
 specification, there are areas where the bash default behavior
 differs from that spec.  The bash `posix mode' changes the bash
 behavior in these areas so that it obeys the spec more closely. 
@@ -385,55 +390,17 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 3.1?
+B1) What's new in version 2.05b?
 
-Bash-3.1 is the first maintenance release of the third major release of
-bash.  It contains the following significant new features (see the manual
-page for complete descriptions and the CHANGES and NEWS files in the
-bash-3.1 distribution).
+The raison d'etre for bash-2.05b is to make a second intermediate
+release containing the first of the new features to be available
+in bash-3.0 and get feedback on those features before proceeding.
+The major new feature is multibyte character support in both Bash
+and Readline.
 
-o Bash-3.1 may now be configured and built in a mode that enforces strict
-  POSIX compliance.
-
-o The `+=' assignment operator, which appends to the value of a string or
-  array variable, has been implemented.
-
-o It is now possible to ignore case when matching in contexts other than
-  filename generation using the new `nocasematch' shell option.
-
-A short feature history dating from Bash-2.0:
-
-Bash-3.0 contained the following new features:
-
-o Features to support the bash debugger have been implemented, and there
-  is a new `extdebug' option to turn the non-default options on
-
-o HISTCONTROL is now a colon-separated list of options and has been
-  extended with a new `erasedups' option that will result in only one
-  copy of a command being kept in the history list
-
-o Brace expansion has been extended with a new {x..y} form, producing
-  sequences of digits or characters
-
-o Timestamps are now kept with history entries, with an option to save
-  and restore them from the history file; there is a new HISTTIMEFORMAT
-  variable describing how to display the timestamps when listing history
-  entries
-
-o The `[[' command can now perform extended regular expression (egrep-like)
-  matching, with matched subexpressions placed in the BASH_REMATCH array
-  variable
-
-o A new `pipefail' option causes a pipeline to return a failure status if
-  any command in it fails
-
-o The `jobs', `kill', and `wait' builtins now accept job control notation
-  in their arguments even if job control is not enabled
-
-o The `gettext' package and libintl have been integrated, and the shell
-  messages may be translated into other languages
-
-Bash-2.05b introduced the following new features:
+Bash-2.05b contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-2.05b
+distribution):
 
 o support for multibyte characters has been added to both bash and readline
 
@@ -462,6 +429,9 @@ o the expansion of $LINENO inside a shell function is only relative to the
   function start if the shell is interactive -- if the shell is running a
   script, $LINENO expands to the line number in the script.  This is as
   POSIX-2001 requires
+
+
+A short feature history dating from Bash-2.0:
 
 Bash-2.05a introduced the following new features:
 
@@ -640,10 +610,10 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-3.1 and
-    bash-2.05b?
+B2) Are there any user-visible incompatibilities between bash-2.05b and
+    bash-1.14.7?
 
-There are a few incompatibilities between version 2.05b and version 3.1.
+There are a few incompatibilities between version 1.14.7 and version 2.05b.
 They are detailed in the file COMPAT in the bash distribution.  That file
 is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
 if if you find something that's not mentioned there.
@@ -697,7 +667,7 @@ Things bash has that sh does not:
 		  read -e/-p/-a/-t/-n/-d/-s/-u,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
-		  unset -f/-v, ulimit -i/-m/-p/-q/-u/-x,
+		  unset -f/-v, ulimit -m/-p/-u,
 		  type -a/-p/-t/-f/-P, suspend -f, kill -n,
 		  test -o optname/s1 == s2/s1 < s2/s1 > s2/-nt/-ot/-ef/-O/-G/-S
 	bash reads ~/.bashrc for interactive shells, $ENV for non-interactive
@@ -726,13 +696,9 @@ Things bash has that sh does not:
 	case-insensitive pattern matching and globbing
 	variable assignments preceding commands affect only that command,
 		even for builtins and functions
-	posix mode and strict posix conformance
+	posix mode
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr,
 		/dev/tcp/host/port, /dev/udp/host/port
-	debugger support, including `caller' builtin and new variables
-	RETURN trap
-	the `+=' assignment operator
-
 
 Things sh has that bash does not:
 	uses variable SHACCT to do shell accounting
@@ -793,8 +759,8 @@ Things bash has or uses that ksh88 does not:
 		  set -o braceexpand/-o histexpand/-o interactive-comments/
 		  -o notify/-o physical/-o posix/-o hashall/-o onecmd/
 		  -h/-B/-C/-b/-H/-P, set +o, suspend, trap -l, type,
-		  typeset -a/-F/-p, ulimit -i/-q/-u/-x, umask -S, alias -p,
-		  shopt, disown, printf, complete, compgen
+		  typeset -a/-F/-p, ulimit -u, umask -S, alias -p, shopt,
+		  disown, printf, complete, compgen
 	`!' csh-style history expansion
 	POSIX.2-style globbing character classes
 	POSIX.2-style globbing equivalence classes
@@ -805,11 +771,6 @@ Things bash has or uses that ksh88 does not:
 	redirection to /dev/fd/N, /dev/stdin, /dev/stdout, /dev/stderr
 	arrays of unlimited size
 	TMOUT is default timeout for `read' and `select'
-	debugger support, including the `caller' builtin
-	RETURN trap
-	Timestamps in history entries
-	{x..y} brace expansion
-	The `+=' assignment operator
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases (alias -t)
@@ -818,9 +779,9 @@ Things ksh88 has or uses that bash does not:
 	weirdly-scoped functions
 	typeset +f to list all function names without definitions
 	text of command history kept in a file, not memory
-	builtins: alias -x, cd old new, newgrp, print,
+	builtins: alias -x, cd old new, fc -e -, newgrp, print,
 		  read -p/-s/var?prompt, set -A/-o gmacs/
-		  -o bgnice/-o markdirs/-o trackall/-o viraw/-s,
+		  -o bgnice/-o markdirs/-o nolog/-o trackall/-o viraw/-s,
 		  typeset -H/-L/-R/-Z/-A/-ft/-fu/-fx/-l/-u/-t, whence
 	using environment to pass attributes of exported variables
 	arithmetic evaluation done on arguments to some builtins
@@ -837,7 +798,7 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-3.0:
+New things in ksh-93 not in bash-2.05b:
 	associative arrays
 	floating point arithmetic and variables
 	math library functions
@@ -856,14 +817,17 @@ New things in ksh-93 not in bash-3.0:
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
 	exit statuses between 0 and 255
+	set -o pipefail
+	`+=' variable assignment operator
 	FPATH and PATH mixing
 	getopts -a
 	-I invocation option
+	DEBUG trap now executed before each simple command, instead of after
 	printf %H, %P, %T, %Z modifiers, output base for %d
 	lexical scoping for local variables in `ksh' functions
 	no scoping for local variables in `POSIX' functions
 
-New things in ksh-93 present in bash-3.0:
+New things in ksh-93 present in bash-2.05b:
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
         ?:, ++, --, `expr1 , expr2' arithmetic operators
@@ -888,8 +852,6 @@ New things in ksh-93 present in bash-3.0:
 	command and arithmetic substitution performed on PS1, PS4, and ENV
 	command name completion
 	ENV processed only for interactive shells
-	set -o pipefail
-	The `+=' assignment operator
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1113,8 +1075,9 @@ will try to write on a pipe without a reader.  In that case, bash
 will print `Broken pipe' to stderr when ps is killed by a
 SIGPIPE. 
 
-As of bash-3.1, bash will not report SIGPIPE errors by default.  You
-can build a version of bash that will report such errors.
+You can build a version of bash that will not report SIGPIPE errors
+by uncommenting the definition of DONT_REPORT_SIGPIPE in the file
+config-top.h.
 
 E3) When I have terminal escape sequences in my prompt, why does bash
     wrap lines at the wrong column?
@@ -1141,12 +1104,12 @@ simple calls to `read'.  For example, piping a command's output
 into a `while' loop that repeatedly calls `read' will result in
 the same behavior.
 
-Each element of a pipeline, even a builtin or shell function,
-runs in a separate process, a child of the shell running the
-pipeline.  A subprocess cannot affect its parent's environment. 
-When the `read' command sets the variable to the input, that
-variable is set only in the subshell, not the parent shell.  When
-the subshell exits, the value of the variable is lost. 
+Each element of a pipeline runs in a separate process, a child of
+the shell running the pipeline.  A subprocess cannot affect its
+parent's environment.  When the `read' command sets the variable
+to the input, that variable is set only in the subshell, not the
+parent shell.  When the subshell exits, the value of the variable
+is lost. 
 
 Many pipelines that end with `read variable' can be converted
 into command substitutions, which will capture the output of
@@ -1277,9 +1240,9 @@ subdirs-clean:
 		( cd $$d && ${MAKE} ${MFLAGS} clean ) \
 	done
 
-The latest updated POSIX standard has changed this:  the word list
-is no longer required.  Bash versions 2.05a and later accept the
-new syntax.
+The latest drafts of the updated POSIX standard have changed this:  the
+word list is no longer required.  Bash versions 2.05a and later accept
+the new syntax.
 
 E8) Why does the arithmetic evaluation code complain about `08'?
 
@@ -1370,25 +1333,6 @@ There is a `checkwinsize' option, settable with the `shopt' builtin, that
 will cause bash to check the window size and adjust its idea of the
 terminal's dimensions each time a process stops or exits and returns control
 of the terminal to bash.  Enable it with `shopt -s checkwinsize'.
-
-E12) Why don't negative offsets in substring expansion work like I expect?
-
-When substring expansion of the form ${param:offset[:length} is used,
-an `offset' that evaluates to a number less than zero counts back from
-the end of the expanded value of $param.
-
-When a negative `offset' begins with a minus sign, however, unexpected things
-can happen.  Consider
-
-	a=12345678
-	echo ${a:-4}
-
-intending to print the last four characters of $a.  The problem is that
-${param:-word} already has a well-defined meaning: expand to word if the
-expanded value of param is unset or null, and $param otherwise.
-
-To use negative offsets that begin with a minus sign, separate the
-minus sign and the colon with a space.
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -1495,7 +1439,7 @@ comp.unix.shell).  While most commands of the form
 can be converted to `< file command', shell control structures such as
 loops and subshells require `command < file'.
 
-The file CWRU/sh-redir-hack in the bash distribution is an
+The file CWRU/sh-redir-hack in the bash-2.05a distribution is an
 (unofficial) patch to parse.y that will modify the grammar to
 support this construct.  It will not apply with `patch'; you must
 modify parse.y by hand.  Note that if you apply this, you must
@@ -1574,9 +1518,6 @@ this.  These variables can be set in your .inputrc or using the bash
 
 The `set' commands between the single quotes may also be placed
 in ~/.inputrc.
-
-The script examples/scripts.noah/meta.bash encapsulates the bind
-commands in a shell function.
 
 G2) How do I write a function `x' to replace builtin command `x', but
     still invoke the command from within the function?
@@ -1751,9 +1692,13 @@ ftp.cwru.edu in the `pub/bash' directory.
 Cameron Newham and Bill Rosenblatt have written a book on bash, published
 by O'Reilly and Associates.  The book is based on Bill Rosenblatt's Korn
 Shell book.  The title is ``Learning the Bash Shell'', and the ISBN number
-of the third edition, published in March, 2005, is 0-596-00965-8.  Look for
-it in fine bookstores near you.  This edition of the book has been updated
-to cover bash-3.0.
+is 1-56592-147-X.  Look for it in fine bookstores near you.  This book
+covers bash-1.14, but has an appendix describing some of the new features
+in bash-2.0.  
+
+A second edition of this book is available, published in January, 1998.
+The ISBN number is 1-56592-347-2.  Look for it in the same fine bookstores
+or on the web.
 
 The GNU Bash Reference Manual has been published as a printed book by
 Network Theory Ltd (Paperback, ISBN: 0-9541617-7-7, Feb 2003).  It covers
@@ -1761,21 +1706,11 @@ bash-2.0 and is available from most online bookstores (see
 http://www.network-theory.co.uk/bash/manual/ for details).  The publisher
 will donate $1 to the Free Software Foundation for each copy sold. 
 
-Arnold Robbins and Nelson Beebe have written ``Classic Shell Scripting'',
-published by O'Reilly.  The first edition, with ISBN number 0-596-00595-4,
-was published in May, 2005.
-
-Chris F. A. Johnson, a frequent contributor to comp.unix.shell and
-gnu.bash.bug, has written ``Shell Scripting Recipes: A Problem-Solution
-Approach,'' a new book on shell scripting, concentrating on features of
-the POSIX standard helpful to shell script writers.  The first edition from
-Apress, with ISBN number 1-59059-471-1, was published in May, 2005.
-
 H3) What's coming in future versions?
 
 These are features I hope to include in a future version of bash.
 
-Rocky Bernstein's bash debugger (support is included with bash-3.0)
+a better bash debugger (a minimally-tested version is included with bash-2.05b)
 associative arrays
 co-processes, but with a new-style syntax that looks like function declaration
 
@@ -1785,19 +1720,23 @@ These are features that may or may not appear in a future version of bash.
 
 breaking some of the shell functionality into embeddable libraries
 a module system like zsh's, using dynamic loading like builtins
+better internationalization using GNU `gettext'
+date-stamped command history
 a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
 ksh93-like `nameref' variables
+ksh93-like `+=' variable assignment operator
 ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
 	associated disipline functions
 Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2006.  Never make predictions. 
+The next version will appear sometime in 2002.  Never make predictions. 
 
-This document is Copyright 1995-2005 by Chester Ramey.
+
+This document is Copyright 1995-2003 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute
