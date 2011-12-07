@@ -5158,9 +5158,11 @@ No other startup files are read.
 
 @subsubheading Invoked by remote shell daemon
 
-Bash attempts to determine when it is being run by the remote shell
-daemon, usually @code{rshd}.  If Bash determines it is being run by
-rshd, it reads and executes commands from @file{~/.bashrc}, if that
+Bash attempts to determine when it is being run with its standard input
+connected to a a network connection, as if by the remote shell
+daemon, usually @code{rshd}, or the secure shell daemon @code{sshd}.
+If Bash determines it is being run in
+this fashion, it reads and executes commands from @file{~/.bashrc}, if that
 file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the

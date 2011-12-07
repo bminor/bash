@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -508,7 +508,7 @@ sigint_sighandler (sig)
      right.  Should it be set unconditionally? */
   if (interrupt_state == 0)
     ADDINTERRUPT;
-itrace("sigint_sighandler");
+
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;

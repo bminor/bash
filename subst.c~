@@ -2370,9 +2370,6 @@ do_assignment_internal (word, expand)
 
   stupidly_hack_special_variables (name);
 
-  if (entry)
-    VUNSETATTR (entry, att_invisible);
-
 #if 1
   /* Return 1 if the assignment seems to have been performed correctly. */
   if (entry == 0 || readonly_p (entry))
@@ -2385,7 +2382,13 @@ do_assignment_internal (word, expand)
   else
     retval = 1;
   ASSIGN_RETURN (retval);
+
+  if (entry && retval != 0)
+    VUNSETATTR (entry, att_invisible);
 #else
+  if (entry)
+    VUNSETATTR (entry, att_invisible);
+
   ASSIGN_RETURN (entry ? ((readonly_p (entry) == 0) && noassign_p (entry) == 0) : 0);
 #endif
 }
@@ -4388,6 +4391,7 @@ process_substitute (string, open_for_read_in_child)
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();
   stop_making_children ();
+  /* XXX - should we only do this in the parent? (as in command subst) */
   pipeline_pgrp = old_pipeline_pgrp;
 #endif /* JOB_CONTROL */
 
@@ -4677,9 +4681,11 @@ command_substitute (string, quoted)
     reset_signal_handlers ();
 
 #if defined (JOB_CONTROL)
+  /* XXX DO THIS ONLY IN PARENT ? XXX */
   set_sigchld_handler ();
   stop_making_children ();
-  pipeline_pgrp = old_pipeline_pgrp;
+  if (pid != 0)
+    pipeline_pgrp = old_pipeline_pgrp;
 #else
   stop_making_children ();
 #endif /* JOB_CONTROL */
@@ -6692,6 +6698,13 @@ comsub:
       t_index = zindex + 1;
       temp = extract_arithmetic_subst (string, &t_index);
       zindex = t_index;
+      if (temp == 0)
+	{
+	  temp = savestring (string);
+	  if (expanded_something)
+	    *expanded_something = 0;
+	  goto return0;
+	}	  
 
        /* Do initial variable expansion. */
       temp1 = expand_arith_string (temp, Q_DOUBLE_QUOTES);

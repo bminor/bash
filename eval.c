@@ -100,7 +100,11 @@ reader_loop ()
 	      goto exec_done;
 
 	    case DISCARD:
-	      last_command_exit_value = 1;
+	      /* Make sure the exit status is reset to a non-zero value, but
+		 leave existing non-zero values (e.g., > 128 on signal)
+		 alone. */
+	      if (last_command_exit_value == 0)
+		last_command_exit_value = EXECUTION_FAILURE;
 	      if (subshell_environment)
 		{
 		  current_command = (COMMAND *)NULL;

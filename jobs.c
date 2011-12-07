@@ -250,6 +250,7 @@ static int job_exit_status __P((int));
 static int job_exit_signal __P((int));
 static int set_job_status_and_cleanup __P((int));
 
+static WAIT job_signal_status __P((int));
 static WAIT raw_job_exit_status __P((int));
 
 static void notify_of_job_status __P((void));
@@ -453,7 +454,6 @@ start_pipeline ()
     {
       cleanup_the_pipeline ();
       pipeline_pgrp = 0;
-itrace("start_pipeline: set pipeline_pgrp = 0");
 #if defined (PGRP_PIPE)
       pipe_close (pgrp_pipe);
 #endif
@@ -567,7 +567,6 @@ stop_pipeline (async, deferred)
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
       pipeline_pgrp = 0;
-itrace("stop_pipeline: set pipeline_pgrp = 0");
 
       newjob->flags = 0;
 
@@ -1686,8 +1685,6 @@ make_child (command, async_p)
   sigemptyset (&oset);
   sigprocmask (SIG_BLOCK, &set, &oset);
 
-itrace("make_child start: pipeline_pgrp = %d", pipeline_pgrp);
-
   making_children ();
 
 #if defined (BUFFERED_INPUT)
@@ -1746,10 +1743,7 @@ itrace("make_child start: pipeline_pgrp = %d", pipeline_pgrp);
 	     process group. */
 
 	  if (pipeline_pgrp == 0)	/* This is the first child. */
-{
 	    pipeline_pgrp = mypid;
-itrace("make_child: child proc: set pipeline_pgrp = %d (mypid)", pipeline_pgrp);
-}
 
 	  /* Check for running command in backquotes. */
 	  if (pipeline_pgrp == shell_pgrp)
@@ -1775,10 +1769,7 @@ itrace("make_child: child proc: set pipeline_pgrp = %d (mypid)", pipeline_pgrp);
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
 	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0))
-{
-itrace("make_child: give terminal to %d shell_pgrp = %d subshell_environment = %d", pipeline_pgrp, shell_pgrp, subshell_environment);
 	    give_terminal_to (pipeline_pgrp, 0);
-}
 
 #if defined (PGRP_PIPE)
 	  if (pipeline_pgrp == mypid)
@@ -1788,10 +1779,7 @@ itrace("make_child: give terminal to %d shell_pgrp = %d subshell_environment = %
       else			/* Without job control... */
 	{
 	  if (pipeline_pgrp == 0)
-{
 	    pipeline_pgrp = shell_pgrp;
-itrace("make_child: child proc: set pipeline_pgrp = %d (shell_pgrp)", pipeline_pgrp);
-}
 
 	  /* If these signals are set to SIG_DFL, we encounter the curious
 	     situation of an interactive ^Z to a running process *working*
@@ -1836,7 +1824,6 @@ itrace("make_child: child proc: set pipeline_pgrp = %d (shell_pgrp)", pipeline_p
 	  if (pipeline_pgrp == 0)
 	    {
 	      pipeline_pgrp = pid;
-itrace("make_child: parent proc: set pipeline_pgrp = %d (pid)", pipeline_pgrp);
 	      /* Don't twiddle terminal pgrps in the parent!  This is the bug,
 		 not the good thing of twiddling them in the child! */
 	      /* give_terminal_to (pipeline_pgrp, 0); */
@@ -1850,11 +1837,7 @@ itrace("make_child: parent proc: set pipeline_pgrp = %d (pid)", pipeline_pgrp);
       else
 	{
 	  if (pipeline_pgrp == 0)
-{
 	    pipeline_pgrp = shell_pgrp;
-itrace("make_child: parent proc: set pipeline_pgrp = %d (shell_pgrp)", pipeline_pgrp);
-}
-	   
 	}
 
       /* Place all processes into the jobs array regardless of the
@@ -2230,7 +2213,6 @@ wait_sigint_handler (sig)
   /* XXX - should this be interrupt_state?  If it is, the shell will act
      as if it got the SIGINT interrupt. */
   wait_sigint_received = 1;
-itrace("wait_sigint_handler: wait_sigint_received -> 1");
   /* Otherwise effectively ignore the SIGINT and allow the running job to
      be killed. */
   SIGRETURN (0);
@@ -2255,6 +2237,26 @@ process_exit_status (status)
     return (EXECUTION_SUCCESS);
 }
 
+static WAIT
+job_signal_status (job)
+     int job;
+{
+  register PROCESS *p;
+  WAIT s;
+
+  p = jobs[job]->pipe;
+  do
+    {
+      s = p->status;
+      if (WIFSIGNALED(s) || WIFSTOPPED(s))
+	break;
+      p = p->next;
+    }
+  while (p != jobs[job]->pipe);
+
+  return s;
+}
+  
 /* Return the exit status of the last process in the pipeline for job JOB.
    This is the exit status of the entire job. */
 static WAIT
@@ -2263,6 +2265,7 @@ raw_job_exit_status (job)
 {
   register PROCESS *p;
   int fail;
+  WAIT ret;
 
   if (pipefail_opt)
     {
@@ -2270,11 +2273,13 @@ raw_job_exit_status (job)
       p = jobs[job]->pipe;
       do
 	{
-	  if (WSTATUS (p->status) != EXECUTION_SUCCESS) fail = WSTATUS(p->status);
+	  if (WSTATUS (p->status) != EXECUTION_SUCCESS)
+	    fail = WSTATUS(p->status);
 	  p = p->next;
 	}
       while (p != jobs[job]->pipe);
-      return fail;
+      WSTATUS (ret) = fail;
+      return ret;
     }
 
   for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
@@ -2448,7 +2453,6 @@ wait_for (pid)
   /* XXX */
   if ((job != NO_JOB && JOBSTATE (job) == JSTOPPED) || WIFSTOPPED (child->status))
     termination_state = 128 + WSTOPSIG (child->status);
-itrace("wait_for (%d): termination_state = %d last_command_exit_signal = %d", pid, termination_state, last_command_exit_signal);
 
   if (job == NO_JOB || IS_JOBCONTROL (job))
     {
@@ -2491,15 +2495,7 @@ if (job == NO_JOB)
 	     to a signal.  We might want to change this later to just check
 	     the last process in the pipeline.  If no process exits due to a
 	     signal, S is left as the status of the last job in the pipeline. */
-	  p = jobs[job]->pipe;
-	  do
-	    {
-	      s = p->status;
-	      if (WIFSIGNALED(s) || WIFSTOPPED(s))
-		break;
-	      p = p->next;
-	    }
-	  while (p != jobs[job]->pipe);
+	  s = job_signal_status (job);
 
 	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
@@ -2531,6 +2527,24 @@ if (job == NO_JOB)
 		  putchar ('\n');
 		  fflush (stdout);
 		}
+	    }
+	}
+      else if ((subshell_environment & SUBSHELL_COMSUB) && wait_sigint_received)
+	{
+	  /* If waiting for a job in a subshell started to do command
+	     substitution, simulate getting and being killed by the SIGINT to
+	     pass the status back to our parent. */
+	  s = job_signal_status (job);
+	
+	  if (WIFSIGNALED (s) && WTERMSIG (s) == SIGINT && signal_is_trapped (SIGINT) == 0)
+	    {
+	      UNBLOCK_CHILD (oset);
+	      restore_sigint_handler ();
+	      old_sigint_handler = set_signal_handler (SIGINT, SIG_DFL);
+	      if (old_sigint_handler == SIG_IGN)
+		restore_sigint_handler ();
+	      else
+		kill (getpid (), SIGINT);
 	    }
 	}
 
@@ -3026,7 +3040,6 @@ waitchld (wpid, block)
 	  wcontinued = 0;
 	  continue;	/* jump back to the test and retry without WCONTINUED */
 	}
-itrace("waitchld: waitpid returns %d (status %d)", pid, status);
 
       /* The check for WNOHANG is to make sure we decrement sigchld only
 	 if it was non-zero before we called waitpid. */
@@ -4047,10 +4060,7 @@ set_job_control (arg)
   /* If we're turning on job control, reset pipeline_pgrp so make_child will
      put new child processes into the right pgrp */
   if (job_control != old && job_control)
-{
     pipeline_pgrp = 0;
-itrace("set_job_control: set pipeline_pgrp = 0");
-}
 
   return (old);
 }

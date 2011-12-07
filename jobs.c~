@@ -137,8 +137,6 @@ extern int errno;
 /* The number of additional slots to allocate when we run out. */
 #define JOB_SLOTS 8
 
-#define CTTYFD	2
-
 typedef int sh_job_map_func_t __P((JOB *, int, int, int));
 
 /* Variables used here but defined in other files. */
@@ -252,6 +250,7 @@ static int job_exit_status __P((int));
 static int job_exit_signal __P((int));
 static int set_job_status_and_cleanup __P((int));
 
+static WAIT job_signal_status __P((int));
 static WAIT raw_job_exit_status __P((int));
 
 static void notify_of_job_status __P((void));
@@ -1676,6 +1675,7 @@ make_child (command, async_p)
      char *command;
      int async_p;
 {
+  int forksleep;
   sigset_t set, oset;
   pid_t pid;
 
@@ -1697,8 +1697,16 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  /* Create the child, handle severe errors. */
-  if ((pid = fork ()) < 0)
+  /* Create the child, handle severe errors.  Retry on EAGAIN. */
+  while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
+    {
+      sys_error ("fork: retry");
+      if (sleep (forksleep) != 0)
+	break;
+      forksleep <<= 1;
+    }
+
+  if (pid < 0)
     {
       sys_error ("fork");
 
@@ -2205,7 +2213,6 @@ wait_sigint_handler (sig)
   /* XXX - should this be interrupt_state?  If it is, the shell will act
      as if it got the SIGINT interrupt. */
   wait_sigint_received = 1;
-
   /* Otherwise effectively ignore the SIGINT and allow the running job to
      be killed. */
   SIGRETURN (0);
@@ -2230,6 +2237,26 @@ process_exit_status (status)
     return (EXECUTION_SUCCESS);
 }
 
+static WAIT
+job_signal_status (job)
+     int job;
+{
+  register PROCESS *p;
+  WAIT s;
+
+  p = jobs[job]->pipe;
+  do
+    {
+      s = p->status;
+      if (WIFSIGNALED(s) || WIFSTOPPED(s))
+	break;
+      p = p->next;
+    }
+  while (p != jobs[job]->pipe);
+
+  return s;
+}
+  
 /* Return the exit status of the last process in the pipeline for job JOB.
    This is the exit status of the entire job. */
 static WAIT
@@ -2238,6 +2265,7 @@ raw_job_exit_status (job)
 {
   register PROCESS *p;
   int fail;
+  WAIT ret;
 
   if (pipefail_opt)
     {
@@ -2245,11 +2273,13 @@ raw_job_exit_status (job)
       p = jobs[job]->pipe;
       do
 	{
-	  if (WSTATUS (p->status) != EXECUTION_SUCCESS) fail = WSTATUS(p->status);
+	  if (WSTATUS (p->status) != EXECUTION_SUCCESS)
+	    fail = WSTATUS(p->status);
 	  p = p->next;
 	}
       while (p != jobs[job]->pipe);
-      return fail;
+      WSTATUS (ret) = fail;
+      return ret;
     }
 
   for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
@@ -2312,11 +2342,14 @@ wait_for (pid)
      to finish.  We don't want the shell to exit if an interrupt is
      received, only if one of the jobs run is killed via SIGINT.  If
      job control is not set, the job will be run in the same pgrp as
-     the shell, and the shell will see any signals the job gets. */
+     the shell, and the shell will see any signals the job gets.  In
+     fact, we want this set every time the waiting shell and the waited-
+     for process are in the same process group, including command
+     substitution. */
 
   /* This is possibly a race condition -- should it go in stop_pipeline? */
   wait_sigint_received = 0;
-  if (job_control == 0)
+  if (job_control == 0 || (subshell_environment&SUBSHELL_COMSUB))
     {
       old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
       if (old_sigint_handler == SIG_IGN)
@@ -2462,15 +2495,7 @@ if (job == NO_JOB)
 	     to a signal.  We might want to change this later to just check
 	     the last process in the pipeline.  If no process exits due to a
 	     signal, S is left as the status of the last job in the pipeline. */
-	  p = jobs[job]->pipe;
-	  do
-	    {
-	      s = p->status;
-	      if (WIFSIGNALED(s) || WIFSTOPPED(s))
-		break;
-	      p = p->next;
-	    }
-	  while (p != jobs[job]->pipe);
+	  s = job_signal_status (job);
 
 	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
@@ -2502,6 +2527,24 @@ if (job == NO_JOB)
 		  putchar ('\n');
 		  fflush (stdout);
 		}
+	    }
+	}
+      else if ((subshell_environment & SUBSHELL_COMSUB) && wait_sigint_received)
+	{
+	  /* If waiting for a job in a subshell started to do command
+	     substitution, simulate getting and being killed by the SIGINT to
+	     pass the status back to our parent. */
+	  s = job_signal_status (job);
+	
+	  if (WIFSIGNALED (s) && WTERMSIG (s) == SIGINT && signal_is_trapped (SIGINT) == 0)
+	    {
+	      UNBLOCK_CHILD (oset);
+	      restore_sigint_handler ();
+	      old_sigint_handler = set_signal_handler (SIGINT, SIG_DFL);
+	      if (old_sigint_handler == SIG_IGN)
+		restore_sigint_handler ();
+	      else
+		kill (getpid (), SIGINT);
 	    }
 	}
 
@@ -3501,6 +3544,12 @@ initialize_job_control (force)
   else
     {
       shell_tty = -1;
+
+      /* If forced_interactive is set, we skip the normal check that stderr
+	 is attached to a tty, so we need to check here.  If it's not, we
+	 need to see whether we have a controlling tty by opening /dev/tty,
+	 since trying to use job control tty pgrp manipulations on a non-tty
+	 is going to fail. */
       if (forced_interactive && isatty (fileno (stderr)) == 0)
 	shell_tty = open ("/dev/tty", O_RDWR|O_NONBLOCK);
 
@@ -3844,7 +3893,7 @@ count_all_jobs ()
     {
 #if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	itrace<("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
       if (i > js.j_lastj && jobs[i])
 	itrace("count_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
 #endif

@@ -714,7 +714,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	       subshells forked to execute builtin commands (e.g., in
 	       pipelines) to be waited for twice. */
 	      exec_result = wait_for (last_made_pid);
-itrace("execute_command_internal: wait_for (%d) = %d", last_made_pid, exec_result);
 	  }
       }
 
@@ -894,7 +893,6 @@ itrace("execute_command_internal: wait_for (%d) = %d", last_made_pid, exec_resul
 #endif
 
   last_command_exit_value = exec_result;
-itrace("execute_command_internal: last_command_exit_value -> %d last_command_exit_signal = %d", last_command_exit_value, last_command_exit_signal);
   run_pending_traps ();
 #if 0
   if (running_trap == 0)

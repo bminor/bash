@@ -15049,3 +15049,55 @@ configure.in
 doc/{bash.1,bashref.texi}
 	- slight change to the text describing the effect of set -e when
 	  in a || or && list
+
+				   12/5
+				   ----
+jobs.c
+	- fix raw_job_exit_status to correct mixing of int/WAIT values (need
+	  to return a WAIT)
+	- arrange so that children run as part of command substitutions also
+	  set the SIGINT handler to wait_sigint_handler, since they effectively
+	  don't do job control
+	- in wait_for, if a child run as part of a command substitution exits
+	  due to SIGINT, resend the SIGINT to the waiting shell with kill(2).
+	  This makes sure the exit status propagates 
+
+doc/{bash.1,bashref.texi}
+	- tighten up the language describing when bash tries to see if its
+	  stdin is a socket, so it can run the startup files.  Suggested by
+	  Vincent Lefevre <vincent@vinc17.org>
+
+eval.c
+	- in the DISCARD case of a longjmp to top_level, make sure
+	  last_command_exit_value is set to EXECUTION_FAILURE if it's 0,
+	  but leave existing non-zero values alone
+
+subst.c
+	- in command_substitute, don't reset pipeline_pgrp in the child
+	  process -- this means that second and subsequent children spawned by
+	  this comsub shell get put into the wrong process group, not the
+	  shell's.  Fix for bug reported by Ingo Molnar <mingo@elte.hu>
+
+				   12/6
+				   ----
+support/shobj-conf
+	- make sure the cases for darwin8.x (Mac OS X 10.4.x) are extended to
+	  darwin9.x (Mac OS X 10.5.x).  Fixes problem originally reported
+	  against readline-5.2 by schneecrash@gmail.com
+
+				   12/8
+				   ----
+subst.c
+	- make sure to add the results of (successful) tilde expansion as a
+	  quoted string, to inhibit pathname expansion and word splitting.
+	  From recent Austin Group interpretation.
+
+include/shtty.h, lib/sh/shtty.c
+	- add ttfd_onechar, ttfd_noecho, ttfd_eightbit, ttfd_nocanon, and
+	  ttfd_cbreak to set tty attributes associated with a particular
+	  file descriptor (which is presumed to point to a terminal)
+
+lib/readline/display.c
+	- make sure we only use rl_invis_chars_first_line when the number of
+	  physical characters exceeds the screen width, since that's the
+	  only time expand_prompt sets it to a valid value

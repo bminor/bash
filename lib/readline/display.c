@@ -938,8 +938,9 @@ rl_redisplay ()
 	     second and subsequent lines start at inv_lbreaks[N], offset by
 	     OFFSET (which has already been calculated above).  */
 
+#define INVIS_FIRST()	(prompt_physical_chars > _rl_screenwidth ? prompt_invis_chars_first_line : wrap_offset)
 #define WRAP_OFFSET(line, offset)  ((line == 0) \
-					? (offset ? prompt_invis_chars_first_line : 0) \
+					? (offset ? INVIS_FIRST() : 0) \
 					: ((line == prompt_last_screen_line) ? wrap_offset-prompt_invis_chars_first_line : 0))
 #define W_OFFSET(line, offset) ((line) == 0 ? offset : 0)
 #define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))

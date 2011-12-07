@@ -5,13 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Nov 21 22:39:33 EST 2007
-
+.\"	Last Change: Wed Dec  5 22:08:48 EST 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2007 November 21" "GNU Bash-3.2"
+.TH BASH 1 "2007 December 5" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -410,11 +409,12 @@ whose name is the expanded value.
 No other startup files are read.
 .PP
 .B Bash
-attempts to determine when it is being run by the remote shell
-daemon, usually \fIrshd\fP.
+attempts to determine when it is being run with its standard input
+connected to a a network connection, as if by the remote shell
+daemon, usually \fIrshd\fP, or the secure shell daemon \fIsshd\fP.
 If
 .B bash
-determines it is being run by \fIrshd\fP, it reads and executes
+determines it is being run in this fashion, it reads and executes
 commands from \fI~/.bashrc\fP, if that file exists and is readable.
 It will not do this if invoked as \fBsh\fP.
 The

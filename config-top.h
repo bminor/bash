@@ -88,5 +88,7 @@
 /* #define NON_INTERACTIVE_LOGIN_SHELLS */
 
 /* Define this if you want bash to try to check whether it's being run by
-   sshd and source the .bashrc if so (like the rshd behavior). */
+   sshd and source the .bashrc if so (like the rshd behavior).  This checks
+   for the presence of SSH_CLIENT or SSH2_CLIENT in the initial environment,
+   which can be fooled under certain not-uncommon circumstances. */
 /* #define SSH_SOURCE_BASHRC */
