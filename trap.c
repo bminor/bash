@@ -38,6 +38,7 @@
 #include "shell.h"
 #include "flags.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
+#include "jobs.h"
 #include "signames.h"
 #include "builtins.h"
 #include "builtins/common.h"

@@ -67,6 +67,7 @@
 #include "bashintl.h"
 #include "shell.h"
 #include "jobs.h"
+#include "execute_cmd.h"
 #include "flags.h"
 
 #include "builtins/builtext.h"
@@ -843,6 +844,7 @@ cleanup_dead_jobs ()
 
 static int
 processes_in_job (job)
+     int job;
 {
   int nproc;
   register PROCESS *p;
@@ -1684,6 +1686,8 @@ make_child (command, async_p)
   sigprocmask (SIG_BLOCK, &set, &oset);
 
   making_children ();
+
+  forksleep = 1;
 
 #if defined (BUFFERED_INPUT)
   /* If default_buffered_input is active, we are reading a script.  If

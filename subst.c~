@@ -2758,6 +2758,7 @@ expand_assignment_string_to_string (string, quoted)
 char *
 expand_arith_string (string, quoted)
      char *string;
+     int quoted;
 {
   return (expand_string_if_necessary (string, quoted, expand_string));
 }
@@ -6616,6 +6617,10 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
       ret = alloc_word_desc ();
       ret->word = temp1;
+      ret = alloc_word_desc ();
+      ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
 #if defined (CASEMOD_EXPANSIONS)
@@ -6633,6 +6638,8 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
       ret = alloc_word_desc ();
       ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
 #endif

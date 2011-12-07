@@ -1,20 +1,22 @@
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* common.c - utility functions for all builtins */
+
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
-   
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <config.h>
 
@@ -284,6 +286,9 @@ sh_notbuiltin (s)
 void
 sh_wrerror ()
 {
+#if defined (DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS) && defined (EPIPE)
+  if (errno != EPIPE)
+#endif /* DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS && EPIPE */
   builtin_error (_("write error: %s"), strerror (errno));
 }
 
@@ -396,30 +401,35 @@ set_dollar_vars_changed ()
 /* Read a numeric arg for this_command_name, the name of the shell builtin
    that wants it.  LIST is the word list that the arg is to come from.
    Accept only the numeric argument; report an error if other arguments
-   follow.  If FATAL is true, call throw_to_top_level, which exits the
-   shell; if not, call jump_to_top_level (DISCARD), which aborts the
-   current command. */
-intmax_t
-get_numeric_arg (list, fatal)
+   follow.  If FATAL is 1, call throw_to_top_level, which exits the
+   shell; if it's 2, call jump_to_top_level (DISCARD), which aborts the
+   current command; if FATAL is 0, return an indication of an invalid
+   number by setting *NUMOK == 0 and return -1. */
+int
+get_numeric_arg (list, fatal, count)
      WORD_LIST *list;
      int fatal;
+     intmax_t *count;
 {
-  intmax_t count = 1;
+  char *arg;
+
+  if (count)
+    *count = 1;
 
   if (list && list->word && ISOPTION (list->word->word, '-'))
     list = list->next;
 
   if (list)
     {
-      register char *arg;
-
       arg = list->word->word;
-      if (arg == 0 || (legal_number (arg, &count) == 0))
+      if (arg == 0 || (legal_number (arg, count) == 0))
 	{
-	  sh_neednumarg (list->word->word);
-	  if (fatal)
+	  sh_neednumarg (list->word->word ? list->word->word : "`'");
+	  if (fatal == 0)
+	    return 0;
+	  else if (fatal == 1)		/* fatal == 1; abort */
 	    throw_to_top_level ();
-	  else
+	  else				/* fatal == 2; discard current command */
 	    {
 	      top_level_cleanup ();
 	      jump_to_top_level (DISCARD);
@@ -428,7 +438,7 @@ get_numeric_arg (list, fatal)
       no_args (list->next);
     }
 
-  return (count);
+  return (1);
 }
 
 /* Get an eight-bit status value from LIST */

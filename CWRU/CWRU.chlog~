@@ -6825,3 +6825,51 @@ subst.c
 	  W_HASQUOTEDNULL flag in the returned WORD_DESC * if the return value
 	  from parameter_brace_remove_pattern is a quoted null string.  Fixes
 	  bug reported by Andreas Schwab <schwab@suse.de>
+	- set the W_HASQUOTEDNULL flag in the return value from
+	  parameter_brace_expand if the return value from parameter_brace_patsub
+	  is a quoted null string
+
+				    9/6
+				    ---
+builtins/read.def
+	- change read -t 0 to return success if there is input available to be
+	  read -- allows scripts to poll for input.  Uses input_avail libsh
+	  function
+
+				    9/9
+				    ---
+externs.h
+	- fix extern fpurge declaration -- use HAVE_DECL_FPURGE instead of
+	  NEED_FPURGE_DECL, since the former is set by `configure'
+
+jobs.h
+	- add extern declaration for close_pgrp_pipe
+	- add a new job state JNONE (-1) to the enum
+
+jobs.c
+	- include execute_cmd.h for extern declarations for coproc functions
+
+subst.c
+	- include builtins/builtext.h for extern declarations for functions
+	  implementing builtins (e.g., declare_builtin)
+
+arrayfunc.c
+	- include "pathexp.h" for extern declaration for glob_char_p
+
+braces.c
+	- add extern declaration for `asprintf'
+
+lib/readline/rlprivate.h
+	- add extern declarations for _rl_trace, _rl_tropen
+
+lib/sh/zgetline.c
+	- add extern declarations for zread, zreadc
+
+lib/sh/mktime.c
+	- include "bashansi.h" for string function declarations
+
+builtins/common.h
+	- add extern declaration for parse_string
+
+trap.c
+	- include jobs.h for extern declaration for run_sigchld_trap

@@ -173,7 +173,7 @@ legal_number (string, result)
 
   errno = 0;
   value = strtoimax (string, &ep, 10);
-  if (errno)
+  if (errno || ep == string)
     return 0;	/* errno is set on overflow or underflow */
 
   /* Skip any trailing whitespace, since strtoimax does not. */

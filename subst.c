@@ -53,6 +53,8 @@
 #include "builtins/getopt.h"
 #include "builtins/common.h"
 
+#include "builtins/builtext.h"
+
 #include <tilde/tilde.h>
 #include <glob/strmatch.h>
 
@@ -2758,6 +2760,7 @@ expand_assignment_string_to_string (string, quoted)
 char *
 expand_arith_string (string, quoted)
      char *string;
+     int quoted;
 {
   return (expand_string_if_necessary (string, quoted, expand_string));
 }

@@ -185,14 +185,14 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
 
 /* Declarations for functions defined in lib/sh/fpurge.c */
-#if defined (NEED_FPURGE_DECL)
+#if !HAVE_DECL_FPURGE
 
 #if HAVE_FPURGE
 #  define fpurge _bash_fpurge
 #endif
 extern int fpurge __P((FILE *stream));
 
-#endif /* NEED_FPURGE_DECL */
+#endif /* HAVE_DECL_FPURGE */
 
 
 /* Declarations for functions defined in lib/sh/getcwd.c */

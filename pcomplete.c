@@ -518,7 +518,7 @@ it_init_joblist (itp, jstate)
   JOB *j;
   JOB_STATE ws;		/* wanted state */
 
-  ws = -1;
+  ws = JNONE;
   if (jstate == 0)
     ws = JRUNNING;
   else if (jstate == 1)

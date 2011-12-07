@@ -158,6 +158,7 @@ extern WORD_LIST *get_directory_stack __P((int));
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
+extern int parse_string __P((char *, const char *, int, char **));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));

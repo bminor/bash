@@ -183,7 +183,7 @@ _imalloc_fopen (s, fn, def, defbuf, defsiz)
 
       sprintf (pidbuf, "%ld", l);
       if ((strlen (pidbuf) + strlen (fn) + 2) >= sizeof (fname))
-	return ((FILE *)0);
+	return;
       for (sp = 0, p = fname, q = fn; *q; )
 	{
 	  if (sp == 0 && *q == '%' && q[1] == 'p')

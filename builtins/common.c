@@ -294,6 +294,7 @@ sh_wrerror ()
 
 int
 sh_chkwrite (s)
+     int s;
 {
   fflush (stdout);
   if (ferror (stdout))

@@ -45,6 +45,8 @@
 
 #define BRACE_SEQ_SPECIFIER	".."
 
+extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+
 /* Basic idea:
 
    Segregate the text into 3 sections: preamble (stuff before an open brace),

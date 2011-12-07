@@ -1,0 +1,11 @@
+# test read with a timeout of 0 -- input polling
+
+echo abcde | read -t 0
+echo $?
+
+read -t 0 < $0
+echo $?
+
+read -t 0
+echo $?
+

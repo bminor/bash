@@ -330,10 +330,14 @@ extern UNDO_LIST *_rl_copy_undo_list PARAMS((UNDO_LIST *));
 #if defined (USE_VARARGS) && defined (PREFER_STDARG)
 extern void _rl_ttymsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 extern void _rl_errmsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+extern void _rl_trace (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 #else
 extern void _rl_ttymsg ();
 extern void _rl_errmsg ();
+extern void _rl_trace ();
 #endif
+
+extern int _rl_tropen PARAMS((void));
 
 extern int _rl_abort_internal PARAMS((void));
 extern char *_rl_strindex PARAMS((const char *, const char *));

@@ -30,6 +30,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "pathexp.h"
 
 #include "shmbutil.h"
 

@@ -50,10 +50,11 @@
 #include <limits.h>
 #endif
 
-#include "bashansi.h"
-
 #if DEBUG
 #include <stdio.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 /* Make it work even if the system's libc has its own mktime routine.  */
 #define mktime my_mktime
 #endif /* DEBUG */

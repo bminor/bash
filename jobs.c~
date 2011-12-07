@@ -1,4 +1,4 @@
-/* The thing that makes children, remembers them, and contains wait loops. */
+/* jobs.c - functions that make children, remember them, and handle their termination. */
 
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
@@ -7,19 +7,19 @@
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -769,7 +769,7 @@ bgp_prune ()
       bgpids.npid--;
     }
 }
-    
+
 /* Reset the values of js.j_lastj and js.j_firstj after one or both have
    been deleted.  The caller should check whether js.j_njobs is 0 before
    calling this.  This wraps around, but the rest of the code does not.  At
@@ -843,6 +843,7 @@ cleanup_dead_jobs ()
 
 static int
 processes_in_job (job)
+     int job;
 {
   int nproc;
   register PROCESS *p;
@@ -1684,6 +1685,8 @@ make_child (command, async_p)
   sigprocmask (SIG_BLOCK, &set, &oset);
 
   making_children ();
+
+  forksleep = 1;
 
 #if defined (BUFFERED_INPUT)
   /* If default_buffered_input is active, we are reading a script.  If
@@ -3058,8 +3061,6 @@ waitchld (wpid, block)
 	    break;
 	}
 
-itrace("waitchld: waitpid returns %d", pid);
-
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
       CHECK_TERMSIG;
@@ -3845,6 +3846,8 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
   int tpgrp;
 
   tpgrp = tcgetpgrp (shell_tty);
+  if (tpgrp < 0 && errno == ENOTTY)
+    return -1;
   if (tpgrp == npgrp)
     {
       terminal_pgrp = npgrp;
@@ -3853,7 +3856,7 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
   else if (tpgrp != opgrp)
     {
 #if defined (DEBUG)
-      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d", tpgrp, opgrp);
+      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d", tpgrp, opgrp, npgrp);
 #endif
       return -1;
     }

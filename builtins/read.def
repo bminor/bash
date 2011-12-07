@@ -50,8 +50,9 @@ Options:
   -t timeout	time out and return failure if a complete line of input is
 		not read withint TIMEOUT seconds.  The value of the TMOUT
 		variable is the default timeout.  TIMEOUT may be a
-		fractional number.  The exit status is greater than 128 if
-		the timeout is exceeded
+		fractional number.  If TIMEOUT is 0, read returns success only
+		if input is available on the specified file descriptor.  The
+		exit status is greater than 128 if the timeout is exceeded
   -u fd		read from file descriptor FD instead of the standard input
 
 Exit Status:
@@ -293,7 +294,11 @@ read_builtin (list)
      whether input is available with select/FIONREAD, and fail if those
      are unavailable? */
   if (have_timeout && tmsec == 0 && tmusec == 0)
+#if 0
     return (EXECUTION_FAILURE);
+#else
+    return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+#endif
 
   /* IF IFS is unset, we use the default of " \t\n". */
   ifs_chars = getifs ();
