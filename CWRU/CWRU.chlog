@@ -7457,3 +7457,31 @@ configure.in
 config.h.in
 	- empty define for sig_atomic_t
 	- empty define for volatile
+
+				   1/27
+				   ----
+subst.c
+	- audit calls to add_character and change to add_ifs_character (which
+	  quotes characters in $IFS).  Affects primarily `:', `=', and `~'.
+	  Fixes bug reported by Jan Schampera <jan.schampera@web.de>; fix
+	  suggested by Stephane Chazelas <stephane_chazelas@yahoo.fr>
+
+				    2/1
+				    ---
+configure.in
+	- call AC_C_RESTRICT
+
+config.h.in
+	- add empty defintion for `restrict'
+
+pcomplete.c
+	- use unwind_protects around call to execute_shell_function in
+	  gen_shell_function_matches to prevent data corruption if
+	  throw_to_top_level is called.  Bug report and fix from
+	  werner@suse.de.
+
+execute_cmd.c
+	- don't clamp CPU usage at 100% in print_formatted_time.  Bug reported
+	  by Linda Walsh <bash@tlinx.org>
+
+[bash-4.0-release frozen]

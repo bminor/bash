@@ -1006,6 +1006,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   WORD_LIST *cmdlist;
   int fval;
   sh_parser_state_t ps;
+  sh_parser_state_t * restrict pps;
 #if defined (ARRAY_VARS)
   ARRAY *a;
 #endif
@@ -1030,9 +1031,16 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
 
   cmdlist = build_arg_list (funcname, text, lwords, cw);
 
-  save_parser_state (&ps);  
+  pps = &ps;
+  begin_unwind_frame ("gen-shell-function-matches");
+  add_unwind_protect (restore_parser_state, (char *)pps);
+  add_unwind_protect (dispose_words, (char *)cmdlist);
+  add_unwind_protect (unbind_compfunc_variables, (char *)0);
+
   fval = execute_shell_function (f, cmdlist);  
-  restore_parser_state (&ps);
+
+  discard_unwind_frame ("gen-shell-function-matches");
+  restore_parser_state (pps);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);

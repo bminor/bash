@@ -1056,8 +1056,11 @@ print_formatted_time (fp, format, rs, rsf, us, usf, ss, ssf, cpu)
       else if (s[1] == 'P')
 	{
 	  s++;
+#if 0
+	  /* clamp CPU usage at 100% */
 	  if (cpu > 10000)
 	    cpu = 10000;
+#endif
 	  sum = cpu / 100;
 	  sum_frac = (cpu % 100) * 10;
 	  len = mkfmt (ts, 2, 0, sum, sum_frac);

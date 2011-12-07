@@ -1717,10 +1717,7 @@ coproc_reap ()
 
   cp = &sh_coproc;
   if (cp && (cp->c_flags & COPROC_DEAD))
-{
-itrace("coproc_reap: disposing %d", cp->c_pid);
     coproc_dispose (cp);
-}
 }
 
 void
@@ -1812,7 +1809,6 @@ coproc_pidchk (pid, status)
       cp->c_status = status;
       cp->c_flags |= COPROC_DEAD;
       cp->c_flags &= ~COPROC_RUNNING;
-itrace("coproc_pidchk: marked cproc with pid %d as COPROC_DEAD", pid);
 #if 0
       coproc_dispose (cp);
 #endif
