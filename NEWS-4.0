@@ -122,3 +122,17 @@ o   There is a new `coproc' reserved word that specifies a coprocess: an
     Coprocs can be named.  The input and output file descriptors and the
     PID of the coprocess are available to the calling shell in variables
     with coproc-specific names.
+
+o   A value of 0 for the -t option to `read' now returns success if there is
+    input available to be read from the specified file descriptor.
+
+o   CDPATH and GLOBIGNORE are ignored when the shell is running in privileged
+    mode.
+
+o   New bindable readline functions shell-forward-word and shell-backward-word,
+    which move forward and backward words delimited by shell metacharacters
+    and honor shell quoting.
+
+o   New bindable readline functions shell-backward-kill-word and shell-kill-word
+    which kill words backward and forward, but use the same word boundaries
+    as shell-forward-word and shell-backward-word.

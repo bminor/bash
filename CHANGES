@@ -1,3 +1,75 @@
+This document details the changes between this version, bash-4.0-beta,
+and the previous version, bash-4.0-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed a typo that caused a variable to be used before initialization
+    while parsing Posix-style command substitutions.
+
+b.  Fixed a bug that caused stray ^? when the expansion of a parameter used
+    as part of a pattern removal expansion is empty, but part of a non-
+    empty string.
+
+c.  Fixed a bug that could cause strings not converted to numbers by strtol
+    to be treated as if the conversion had been successful.
+
+d.  The `return' builtin now accepts no options and requires a `--' before
+    a negative return value, as Posix requires.
+
+e.  Fixed a bug that caused local variables to be created with the empty
+    string for a value rather than no value.
+
+f.  Changed behavior so the shell now acts as if it received an interrupt
+    when a pipeline is killed by SIGINT while executing a list.
+
+g.  Fixed a bug that caused `declare var' and `typeset var' to initialize
+    `var' to the empty string.
+
+h.  Changed `bind' builtin to print a warning but proceed if invoked when
+    line editing is not active.
+
+i.  Fixed a bug that caused the shell to exit when the `errexit' option is
+    set and a command in a pipeline returns a non-zero exit status.
+
+j.  Fixed a bug that caused the shell to not run the exit trap in a command
+    run with `bash -c' under some circumstances.
+
+k.  Fixed a bug that caused parser errors to occasionally not set $? when
+    running commands with `eval'.
+
+l.  Fixed a bug that caused stray control characters when evaluating compound
+    array assignments containing $'\x7f' escapes.
+
+m.  Fixed a bug that caused redirections involving file descriptor 10 as the
+    target to behave incorrectly.
+
+n.  Fixed a bug that could cause memory to be freed multiple times when
+    assigning to COMP_WORDBREAKS.
+
+2.  Changes to Readline
+
+3.  New Features in Bash
+
+a.  A value of 0 for the -t option to `read' now returns success if there is
+    input available to be read from the specified file descriptor.
+
+b.  CDPATH and GLOBIGNORE are ignored when the shell is running in privileged
+    mode.
+
+c.  New bindable readline functions shell-forward-word and shell-backward-word,
+    which move forward and backward words delimited by shell metacharacters
+    and honor shell quoting.
+
+d.  New bindable readline functions shell-backward-kill-word and shell-kill-word
+    which kill words backward and forward, but use the same word boundaries
+    as shell-forward-word and shell-backward-word.
+
+4.  New Features in Readline
+
+a.  If the kernel supports it, readline displays special characters
+    corresponding to a keyboard-generated signal when the signal is received.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.0-alpha,
 and the previous version, bash-3.2-release.
 

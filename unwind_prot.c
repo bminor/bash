@@ -176,6 +176,12 @@ clear_unwind_protect_list (flags)
     }
 }
 
+int
+have_unwind_protects ()
+{
+  return (unwind_protect_list != 0);
+}
+
 /* **************************************************************** */
 /*								    */
 /*			The Actual Functions		 	    */

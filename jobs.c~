@@ -1873,6 +1873,7 @@ make_child (command, async_p)
       js.c_totforked++;
       js.c_living++;
 
+itrace("make_child: `%s' --> %ld", command, pid);
       /* Unblock SIGINT and SIGCHLD unless creating a pipeline, in which case
 	 SIGCHLD remains blocked until all commands in the pipeline have been
 	 created. */
@@ -2526,7 +2527,7 @@ if (job == NO_JOB)
 		 or until loop, act as if the shell received SIGINT as
 		 well, so the loop can be broken.  This doesn't call the
 		 SIGINT signal handler; maybe it should. */
-	      if (signal_is_trapped (SIGINT) == 0 && (loop_level || executing_list))
+	      if (signal_is_trapped (SIGINT) == 0 && (loop_level || (shell_compatibility_level > 32 && executing_list)))
 		ADDINTERRUPT;
 	      else
 		{

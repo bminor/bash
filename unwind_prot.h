@@ -29,6 +29,7 @@ extern void add_unwind_protect (); /* Not portable to arbitrary C99 hosts.  */
 extern void remove_unwind_protect __P((void));
 extern void run_unwind_protects __P((void));
 extern void clear_unwind_protect_list __P((int));
+extern int have_unwind_protects __P((void));
 extern void uwp_init __P((void));
 
 /* Define for people who like their code to look a certain way. */

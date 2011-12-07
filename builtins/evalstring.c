@@ -91,7 +91,11 @@ parse_and_execute_cleanup ()
       run_trap_cleanup (running_trap - 1);
       unfreeze_jobs_list ();
     }
-  run_unwind_frame (PE_TAG);
+
+  if (have_unwind_protects ())
+     run_unwind_frame (PE_TAG);
+  else
+    parse_and_execute_level = 0;			/* XXX */
 }
 
 static void

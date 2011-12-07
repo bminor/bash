@@ -1419,7 +1419,8 @@ get_comp_wordbreaks (var)
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
-  var_setvalue (var, rl_completer_word_break_characters);
+  FREE (value_cell (var));
+  var_setvalue (var, savestring (rl_completer_word_break_characters));
 
   return (var);
 }

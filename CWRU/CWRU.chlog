@@ -7101,3 +7101,29 @@ redir.c
 	  a file descriptor must be > fdbase if fdbase >= SHELL_FD_BASE.  A
 	  value of -1 for fdbase means to just use SHELL_FD_BASE.  Fixes bug
 	  with 0<&10 reported by Clark Jian Wang <dearvoid@gmail.com>
+
+				   11/5
+				   ----
+unwind_prot.c
+	- new function: have_unwind_protects(); returns 1 if unwind_protect_list
+	  is not empty
+
+unwind_prot.h
+	- extern declaration for have_unwind_protects
+
+builtins/evalstring.c
+	- in parse_and_execute_cleanup, make sure that we don't call
+	  run_unwind_frame and expect it to decrement parse_and_execute_level
+	  if there's no unwind_protect_list, since there's a while loop in
+	  throw_to_top_level that calls parse_and_execute_cleanup as long as
+	  parse_and_execute_level is non-zero
+
+				   11/9
+				   ----
+variables.c
+	- fix the assign function for COMP_WORDBREAKS to allocate new memory
+	  to store as the variable's value, to avoid freeing memory twice
+	  if the variable is unset after rl_completer_word_break_characters
+	  is freed and reallocated.  Fix from Mike Stroyan <mike@stroyan.net
+
+[bash-4.0-beta frozen]
