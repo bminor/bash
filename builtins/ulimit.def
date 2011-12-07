@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -687,7 +687,9 @@ printone (limind, curlim, pdesc)
      int pdesc;
 {
   char unitstr[64];
+  int factor;
 
+  factor = limits[limind].block_factor;
   if (pdesc)
     {
       if (limits[limind].units)
@@ -704,7 +706,7 @@ printone (limind, curlim, pdesc)
   else if (curlim == RLIM_SAVED_CUR)
     puts ("soft");
   else
-    print_rlimtype ((curlim / limits[limind].block_factor), 1);
+    print_rlimtype ((curlim / factor), 1);
 }
 
 /* Set all limits to NEWLIM.  NEWLIM currently must be RLIM_INFINITY, which
