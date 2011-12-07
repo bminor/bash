@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 3.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-22 10:15-0400\n"
+"POT-Creation-Date: 2008-08-20 08:51-0400\n"
 "PO-Revision-Date: 2007-07-26 07:18+0300\n"
 "Last-Translator: Alexander Shopov <ash@contact.bg>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
@@ -16,80 +16,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: arrayfunc.c:48
+#: arrayfunc.c:49
 msgid "bad array subscript"
 msgstr "неправилен индекс на масив"
 
-#: arrayfunc.c:372
+#: arrayfunc.c:312 builtins/declare.def:467
+#, c-format
+msgid "%s: cannot convert indexed to associative array"
+msgstr ""
+
+#: arrayfunc.c:478
+#, fuzzy, c-format
+msgid "%s: invalid associative array key"
+msgstr "%s: грешно име на действие"
+
+#: arrayfunc.c:480
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: не може да се присвоява на нецифров индекс"
 
-#: bashhist.c:332
+#: arrayfunc.c:516
+#, c-format
+msgid "%s: %s: must use subscript when assigning associative array"
+msgstr ""
+
+#: bashhist.c:382
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: не може да се създаде: %s"
 
-#: bashline.c:3124
+#: bashline.c:3190
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "изпълнение на команда на Юникс от bash: не може да се открие подредбата на\n"
 "функциите на клавишите за командата"
 
-#: bashline.c:3173
+#: bashline.c:3268
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: първият непразен знак не е „\"“"
 
-#: bashline.c:3202
+#: bashline.c:3297
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "в %2$s липсва затварящ знак „%1$c“"
 
-#: bashline.c:3236
+#: bashline.c:3331
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: разделителят двоеточие липсва"
 
-#: builtins/bind.def:200
+#: builtins/bind.def:199
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr "„%s“: грешно име на подредбата на функциите на клавишите"
 
-#: builtins/bind.def:239
+#: builtins/bind.def:238
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: не може да се прочете: %s"
 
-#: builtins/bind.def:254
+#: builtins/bind.def:253
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "„%s“: не може да се премахне присвояване"
 
-#: builtins/bind.def:289 builtins/bind.def:319
+#: builtins/bind.def:288 builtins/bind.def:318
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "„%s“: непознато име на функция"
 
-#: builtins/bind.def:297
+#: builtins/bind.def:296
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s не може да се зададе на никой клавиш.\n"
 
-#: builtins/bind.def:301
+#: builtins/bind.def:300
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s може да се извика чрез "
 
-#: builtins/break.def:78 builtins/break.def:118
+#: builtins/break.def:77 builtins/break.def:117
 msgid "loop count"
 msgstr ""
 
-#: builtins/break.def:138
+#: builtins/break.def:137
 msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "валидно само за циклите с „for“, „while“ и „until“"
 
-#: builtins/caller.def:134
+#: builtins/caller.def:133
 #, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
@@ -97,308 +112,313 @@ msgid ""
 "    Without EXPR, returns "
 msgstr "Връща контекста на текущото извикване на подпрограма."
 
-#: builtins/cd.def:216
+#: builtins/cd.def:215
 msgid "HOME not set"
 msgstr "Променливата $HOME не зададена"
 
-#: builtins/cd.def:228
+#: builtins/cd.def:227
 msgid "OLDPWD not set"
 msgstr "Променливата $OLDPWD не е зададена"
 
-#: builtins/common.c:105
+#: builtins/common.c:107
 #, c-format
 msgid "line %d: "
 msgstr ""
 
-#: builtins/common.c:122
+#: builtins/common.c:124
 #, fuzzy, c-format
 msgid "%s: usage: "
 msgstr "%s: предупреждение: "
 
-#: builtins/common.c:135 test.c:822
+#: builtins/common.c:137 test.c:822
 msgid "too many arguments"
 msgstr "прекалено много аргументи"
 
-#: builtins/common.c:160 shell.c:488 shell.c:762
+#: builtins/common.c:162 shell.c:493 shell.c:774
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: опцията изисква аргумент"
 
-#: builtins/common.c:167
+#: builtins/common.c:169
 #, c-format
 msgid "%s: numeric argument required"
 msgstr "%s: изисква се числов аргумент"
 
-#: builtins/common.c:174
+#: builtins/common.c:176
 #, c-format
 msgid "%s: not found"
 msgstr "%s: не е открит"
 
-#: builtins/common.c:183 shell.c:775
+#: builtins/common.c:185 shell.c:787
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: грешна опция"
 
-#: builtins/common.c:190
+#: builtins/common.c:192
 #, c-format
 msgid "%s: invalid option name"
 msgstr "%s: грешно име на опция"
 
-#: builtins/common.c:197 general.c:231 general.c:236
+#: builtins/common.c:199 general.c:231 general.c:236
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s“: грешен идентификатор"
 
-#: builtins/common.c:207
+#: builtins/common.c:209
 #, fuzzy
 msgid "invalid octal number"
 msgstr "неправилен номер на сигнал"
 
-#: builtins/common.c:209
+#: builtins/common.c:211
 #, fuzzy
 msgid "invalid hex number"
 msgstr "грешно число"
 
-#: builtins/common.c:211 expr.c:1255
+#: builtins/common.c:213 expr.c:1255
 msgid "invalid number"
 msgstr "грешно число"
 
-#: builtins/common.c:219
+#: builtins/common.c:221
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr "%s: грешно указване на сигнал"
 
-#: builtins/common.c:226
+#: builtins/common.c:228
 #, c-format
 msgid "`%s': not a pid or valid job spec"
 msgstr "„%s“: неправилен идентификатор на процес или задача"
 
-#: builtins/common.c:233 error.c:452
+#: builtins/common.c:235 error.c:453
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: променлива с права само за четене"
 
-#: builtins/common.c:241
+#: builtins/common.c:243
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s: %s е извън допустимия диапазон"
 
-#: builtins/common.c:241 builtins/common.c:243
+#: builtins/common.c:243 builtins/common.c:245
 msgid "argument"
 msgstr "аргументът"
 
-#: builtins/common.c:243
+#: builtins/common.c:245
 #, c-format
 msgid "%s out of range"
 msgstr "%s е извън допустимия диапазон"
 
-#: builtins/common.c:251
+#: builtins/common.c:253
 #, c-format
 msgid "%s: no such job"
 msgstr "%s: няма такава задача"
 
-#: builtins/common.c:259
+#: builtins/common.c:261
 #, c-format
 msgid "%s: no job control"
 msgstr "%s: няма управление на задачите"
 
-#: builtins/common.c:261
+#: builtins/common.c:263
 msgid "no job control"
 msgstr "няма управление на задачите"
 
-#: builtins/common.c:271
+#: builtins/common.c:273
 #, c-format
 msgid "%s: restricted"
 msgstr "%s: ограничена обвивка"
 
-#: builtins/common.c:273
+#: builtins/common.c:275
 msgid "restricted"
 msgstr "ограничена обвивка"
 
-#: builtins/common.c:281
+#: builtins/common.c:283
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s: не е команда вградена в обвивката"
 
-#: builtins/common.c:290
+#: builtins/common.c:292
 #, c-format
 msgid "write error: %s"
 msgstr "грешка при запис: %s"
 
-#: builtins/common.c:516
+#: builtins/common.c:523
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: грешка при получаването на текущата директория: %s: %s\n"
 
-#: builtins/common.c:582 builtins/common.c:584
+#: builtins/common.c:589 builtins/common.c:591
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: нееднозначно указана задача"
 
-#: builtins/complete.def:271
+#: builtins/complete.def:270
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: грешно име на действие"
 
-#: builtins/complete.def:431 builtins/complete.def:616
-#: builtins/complete.def:814
+#: builtins/complete.def:430 builtins/complete.def:615
+#: builtins/complete.def:813
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: не е указано дописване"
 
-#: builtins/complete.def:668
+#: builtins/complete.def:667
 msgid "warning: -F option may not work as you expect"
 msgstr "предупреждение: опцията „-F“ може да не работи според очакванията ви"
 
-#: builtins/complete.def:670
+#: builtins/complete.def:669
 msgid "warning: -C option may not work as you expect"
 msgstr "предупреждение: опцията „-C“ може да не работи според очакванията ви"
 
-#: builtins/complete.def:787
+#: builtins/complete.def:786
 msgid "not currently executing completion function"
 msgstr ""
 
-#: builtins/declare.def:120
+#: builtins/declare.def:122
 msgid "can only be used in a function"
 msgstr "може да се използва само във функция"
 
-#: builtins/declare.def:318
+#: builtins/declare.def:353
 msgid "cannot use `-f' to make functions"
 msgstr "„-f“ не може да се използва за създаването на функции"
 
-#: builtins/declare.def:330 execute_cmd.c:4116
+#: builtins/declare.def:365 execute_cmd.c:4696
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: функция с права само за четене"
 
-#: builtins/declare.def:416
+#: builtins/declare.def:454
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: променливите за масиви не могат да се унищожават така"
 
-#: builtins/enable.def:138 builtins/enable.def:146
+#: builtins/declare.def:461
+#, c-format
+msgid "%s: cannot convert associative to indexed array"
+msgstr ""
+
+#: builtins/enable.def:137 builtins/enable.def:145
 msgid "dynamic loading not available"
 msgstr "липсва възможност за динамично зареждане"
 
-#: builtins/enable.def:313
+#: builtins/enable.def:312
 #, c-format
 msgid "cannot open shared object %s: %s"
 msgstr "споделеният обект %s не може да бъде зареден: %s"
 
-#: builtins/enable.def:336
+#: builtins/enable.def:335
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "не може да се открие %s в споделения обект %s: %s"
 
-#: builtins/enable.def:460
+#: builtins/enable.def:459
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s: не е зареден динамично"
 
-#: builtins/enable.def:475
+#: builtins/enable.def:474
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: не може да се изтрие: %s"
 
-#: builtins/evalfile.c:132 builtins/hash.def:170 execute_cmd.c:3973
-#: shell.c:1423
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4553
+#: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: е директория"
 
-#: builtins/evalfile.c:137
+#: builtins/evalfile.c:139
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: не е обикновен файл"
 
-#: builtins/evalfile.c:145
+#: builtins/evalfile.c:147
 #, c-format
 msgid "%s: file is too large"
 msgstr "%s: файлът е прекалено голям"
 
-#: builtins/evalfile.c:183 execute_cmd.c:4043 shell.c:1433
+#: builtins/evalfile.c:185 execute_cmd.c:4623 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: двоичният файл не може да бъде изпълнен"
 
-#: builtins/exec.def:213
+#: builtins/exec.def:212
 #, c-format
 msgid "%s: cannot execute: %s"
 msgstr "%s: не може да се изпълни: %s"
 
-#: builtins/exit.def:66
+#: builtins/exit.def:65
 #, c-format
 msgid "logout\n"
 msgstr ""
 
-#: builtins/exit.def:89
+#: builtins/exit.def:88
 msgid "not login shell: use `exit'"
 msgstr "това не е входна обвивка: използвайте „exit“"
 
-#: builtins/exit.def:121
+#: builtins/exit.def:120
 #, c-format
 msgid "There are stopped jobs.\n"
 msgstr "Има спрени задачи.\n"
 
-#: builtins/exit.def:123
+#: builtins/exit.def:122
 #, fuzzy, c-format
 msgid "There are running jobs.\n"
 msgstr "Има спрени задачи.\n"
 
-#: builtins/fc.def:263
+#: builtins/fc.def:261
 msgid "no command found"
 msgstr "не е открита команда"
 
-#: builtins/fc.def:333
+#: builtins/fc.def:341
 msgid "history specification"
 msgstr "указване на историята"
 
-#: builtins/fc.def:354
+#: builtins/fc.def:362
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: не може да се отвори временен файл: %s"
 
-#: builtins/fg_bg.def:150 builtins/jobs.def:283
+#: builtins/fg_bg.def:149 builtins/jobs.def:282
 msgid "current"
 msgstr ""
 
-#: builtins/fg_bg.def:159
+#: builtins/fg_bg.def:158
 #, c-format
 msgid "job %d started without job control"
 msgstr "задача %d е стартирана без управление на задачите"
 
-#: builtins/getopt.c:109
+#: builtins/getopt.c:110
 #, c-format
 msgid "%s: illegal option -- %c\n"
 msgstr "%s: непозволена опция -- %c\n"
 
-#: builtins/getopt.c:110
+#: builtins/getopt.c:111
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
 msgstr "%s: опцията изисква аргумент -- %c\n"
 
-#: builtins/hash.def:93
+#: builtins/hash.def:92
 msgid "hashing disabled"
 msgstr "хеширането е изключено"
 
-#: builtins/hash.def:139
+#: builtins/hash.def:138
 #, c-format
 msgid "%s: hash table empty\n"
 msgstr "%s: таблицата с хешове е празна\n"
 
-#: builtins/hash.def:245
+#: builtins/hash.def:244
 #, fuzzy, c-format
 msgid "hits\tcommand\n"
 msgstr "последна команда: %s\n"
 
-#: builtins/help.def:128
+#: builtins/help.def:130
 #, fuzzy, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
 msgstr[0] "Команди на обвивката, които напасват на ключовата дума „"
 msgstr[1] "Команди на обвивката, които напасват на ключовата дума „"
 
-#: builtins/help.def:166
+#: builtins/help.def:168
 #, c-format
 msgid ""
 "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
@@ -406,22 +426,12 @@ msgstr ""
 "няма теми в помощта, които да отговарят на „%s“.  Опитайте с\n"
 "„help help“, „man -k %s“ или „info %s“."
 
-#: builtins/help.def:183
+#: builtins/help.def:185
 #, c-format
 msgid "%s: cannot open: %s"
 msgstr "%s: не може да се отвори: %s"
 
-#: builtins/help.def:318 version.c:85
-#, fuzzy, c-format
-msgid "Copyright (C) 2008 Free Software Foundation, Inc.\n"
-msgstr "Авторски права (C) 2005 Free Software Foundation, Inc.\n"
-
-#: builtins/help.def:320
-#, c-format
-msgid "License: GNU General Public License, version 2\n"
-msgstr ""
-
-#: builtins/help.def:335
+#: builtins/help.def:337
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -442,112 +452,159 @@ msgstr ""
 "Знакът звездичка „*“ до името на команда означава, че тя е изключена.\n"
 "\n"
 
-#: builtins/history.def:158
+#: builtins/history.def:154
 msgid "cannot use more than one of -anrw"
 msgstr "не може да се ползва едновременно повече от една от опциите -anrw"
 
-#: builtins/history.def:190
+#: builtins/history.def:186
 msgid "history position"
 msgstr "позиция в историята"
 
-#: builtins/history.def:408
+#: builtins/history.def:366
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: неуспешно заместване чрез историята"
 
-#: builtins/inlib.def:72
+#: builtins/inlib.def:71
 #, fuzzy, c-format
 msgid "%s: inlib failed"
 msgstr "%s: неуспешно заместване чрез историята"
 
-#: builtins/jobs.def:110
+#: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
 msgstr "не е позволена друга опция с „-x“"
 
-#: builtins/kill.def:198
+#: builtins/kill.def:197
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: аргументите трябва да са идентификатори на процеси или задачи"
 
-#: builtins/kill.def:261
+#: builtins/kill.def:260
 msgid "Unknown error"
 msgstr "Неизвестна грешка"
 
-#: builtins/let.def:96 builtins/let.def:121 expr.c:501 expr.c:516
+#: builtins/let.def:95 builtins/let.def:120 expr.c:501 expr.c:516
 msgid "expression expected"
 msgstr "очаква се израз"
 
-#: builtins/mapfile.def:216 builtins/read.def:265
+#: builtins/mapfile.def:215 builtins/read.def:271
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: грешно указване на файловия дескриптор"
 
-#: builtins/mapfile.def:224 builtins/read.def:272
+#: builtins/mapfile.def:223 builtins/read.def:278
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: грешен файлов дескриптор: %s"
 
-#: builtins/mapfile.def:233 builtins/mapfile.def:271
+#: builtins/mapfile.def:232 builtins/mapfile.def:270
 #, fuzzy, c-format
 msgid "%s: invalid line count"
 msgstr "%s: грешна опция"
 
-#: builtins/mapfile.def:244
+#: builtins/mapfile.def:243
 #, fuzzy, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: грешна опция"
 
-#: builtins/mapfile.def:261
+#: builtins/mapfile.def:260
 #, fuzzy, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: грешно име на действие"
 
-#: builtins/mapfile.def:293
+#: builtins/mapfile.def:292
 #, fuzzy
 msgid "empty array variable name"
 msgstr "%s: не е променлива за масив"
 
-#: builtins/mapfile.def:314
+#: builtins/mapfile.def:313
 msgid "array variable support required"
 msgstr ""
 
-#: builtins/printf.def:365
+#: builtins/printf.def:364
 #, c-format
 msgid "`%s': missing format character"
 msgstr "„%s“: липсва форматиращ знак"
 
-#: builtins/printf.def:542
+#: builtins/printf.def:541
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "„%c“: грешен форматиращ знак"
 
-#: builtins/printf.def:569
+#: builtins/printf.def:568
 #, fuzzy, c-format
 msgid "warning: %s: %s"
 msgstr "%s: предупреждение: "
 
-#: builtins/printf.def:748
+#: builtins/printf.def:747
 msgid "missing hex digit for \\x"
 msgstr "липсва шестнадесетична цифра за \\x"
 
-#: builtins/pushd.def:196
+#: builtins/pushd.def:195
 msgid "no other directory"
 msgstr "няма друга директория"
 
-#: builtins/pushd.def:463
+#: builtins/pushd.def:462
 msgid "<no current directory>"
 msgstr "«няма текуща директория»"
 
-#: builtins/pushd.def:507
+#: builtins/pushd.def:506
 msgid "directory stack empty"
 msgstr ""
 
-#: builtins/pushd.def:509
+#: builtins/pushd.def:508
 #, fuzzy
 msgid "directory stack index"
 msgstr "отрицателно препълване на стека за рекурсии"
 
-#: builtins/pushd.def:706
+#: builtins/pushd.def:683
+#, fuzzy
+msgid ""
+"Display the list of currently remembered directories.  Directories\n"
+"    find their way onto the list with the `pushd' command; you can get\n"
+"    back up through the list with the `popd' command.\n"
+"    \n"
+"    Options:\n"
+"      -c\tclear the directory stack by deleting all of the elements\n"
+"      -l\tdo not print tilde-prefixed versions of directories relative\n"
+"    \tto your home directory\n"
+"      -p\tprint the directory stack with one entry per line\n"
+"      -v\tprint the directory stack with one entry per line prefixed\n"
+"    \twith its position in the stack\n"
+"    \n"
+"    Arguments:\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown "
+"by\n"
+"    \tdirs when invoked without options, starting with zero.\n"
+"    \n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown "
+"by\n"
+"\tdirs when invoked without options, starting with zero."
+msgstr ""
+" Показва списъка с текущо запомнените директории.  Списъкът се попълва чрез\n"
+"    командата „pushd“.  Можете да вадите директории от списъка с командата\n"
+"    „popd“.\n"
+"    \n"
+"    Опцията „-l“ кара командата „dirs“ да извежда пълните имена на "
+"директориите,\n"
+"    а не съкратените спрямо домашната директория имена.  Това означава, че\n"
+"    „~/bin“ може да се покаже като „/homes/pesho/bin“.  Опцията „-v“ води "
+"до\n"
+"    отпечатване на стека на директориите, като всеки елемент се извежда на "
+"нов\n"
+"    ред и се предхожда от номера си в стека.  Опцията „-p“ също води до "
+"поредово\n"
+"    отпечатване, но без поредния номер в стека.  Опцията „-c“ изчиства стека "
+"на\n"
+"    директориите като изтрива всички елементи.\n"
+"    \n"
+"    +N  показва N-тия елемент отляво в списъка показван от\n"
+"        командата „dirs“, когато е стартирана без опции.  Брои се от 0.\n"
+"    \n"
+"    -N  показва N-тия елемент отдясно в списъка показван от\n"
+"        командата „dirs“, когато е стартирана без опции.  Брои се от 0."
+
+#: builtins/pushd.def:705
 #, fuzzy
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
@@ -592,7 +649,7 @@ msgstr ""
 "    \n"
 "    Можете да изведете стека на директорията с командата „dirs“."
 
-#: builtins/pushd.def:731
+#: builtins/pushd.def:730
 #, fuzzy
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
@@ -631,52 +688,42 @@ msgstr ""
 "\n"
 "    Стекът с директориите се визуализира с командата „dirs“."
 
-#: builtins/pushd.def:684
-msgid ""
-"Display the list of currently remembered directories.  Directories\n"
-"    find their way onto the list with the `pushd' command; you can get\n"
-"    back up through the list with the `popd' command.\n"
-"    \n"
-"    Options:\n"
-"\\    "
-msgstr ""
-
-#: builtins/read.def:242
+#: builtins/read.def:247
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: грешно указване на изтичането на времето"
 
-#: builtins/read.def:560
+#: builtins/read.def:569
 #, c-format
 msgid "read error: %d: %s"
 msgstr "грешка при четене: %d: %s"
 
-#: builtins/return.def:69
+#: builtins/return.def:68
 msgid "can only `return' from a function or sourced script"
 msgstr ""
 "„return“ е възможен само от функция или изпълнен в текущата обвивка скрипт"
 
-#: builtins/set.def:769
+#: builtins/set.def:768
 msgid "cannot simultaneously unset a function and a variable"
 msgstr ""
 "не може едновременно да се премахват задаванията на функция и променлива"
 
-#: builtins/set.def:806
+#: builtins/set.def:805
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: не може да се премахне"
 
-#: builtins/set.def:813
+#: builtins/set.def:812
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: не може да се премахне: %s е само за четене"
 
-#: builtins/set.def:824
+#: builtins/set.def:823
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: не е променлива за масив"
 
-#: builtins/setattr.def:181
+#: builtins/setattr.def:186
 #, c-format
 msgid "%s: not a function"
 msgstr "%s: не е функция"
@@ -685,21 +732,21 @@ msgstr "%s: не е функция"
 msgid "shift count"
 msgstr "брой на преместванията"
 
-#: builtins/shopt.def:248
+#: builtins/shopt.def:249
 msgid "cannot set and unset shell options simultaneously"
 msgstr ""
 "не може едновременно да се задават и да се премахват опции на обвивката"
 
-#: builtins/shopt.def:313
+#: builtins/shopt.def:314
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: грешно име на опция на обвивката"
 
-#: builtins/source.def:129
+#: builtins/source.def:128
 msgid "filename argument required"
 msgstr "изисква се аргумент име на файл"
 
-#: builtins/source.def:154
+#: builtins/source.def:153
 #, c-format
 msgid "%s: file not found"
 msgstr "%s: файлът не е открит"
@@ -712,75 +759,75 @@ msgstr "не може да бъде временно спряна"
 msgid "cannot suspend a login shell"
 msgstr "входната обвивка не може да бъде временно спряна"
 
-#: builtins/type.def:235
+#: builtins/type.def:234
 #, c-format
 msgid "%s is aliased to `%s'\n"
 msgstr "%s е синоним на „%s“\n"
 
-#: builtins/type.def:256
+#: builtins/type.def:255
 #, c-format
 msgid "%s is a shell keyword\n"
 msgstr "%s в ключова дума на обвивката\n"
 
-#: builtins/type.def:275
+#: builtins/type.def:274
 #, c-format
 msgid "%s is a function\n"
 msgstr "%s е функция\n"
 
-#: builtins/type.def:297
+#: builtins/type.def:296
 #, c-format
 msgid "%s is a shell builtin\n"
 msgstr "%s е вградена команда в обвивката\n"
 
-#: builtins/type.def:318 builtins/type.def:392
+#: builtins/type.def:317 builtins/type.def:391
 #, c-format
 msgid "%s is %s\n"
 msgstr "%s е %s\n"
 
-#: builtins/type.def:338
+#: builtins/type.def:337
 #, c-format
 msgid "%s is hashed (%s)\n"
 msgstr "%s е хеширан (%s)\n"
 
-#: builtins/ulimit.def:365
+#: builtins/ulimit.def:372
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: неправилен аргумент за ограничение"
 
-#: builtins/ulimit.def:391
+#: builtins/ulimit.def:398
 #, c-format
 msgid "`%c': bad command"
 msgstr "„%c“: неправилна команда"
 
-#: builtins/ulimit.def:420
+#: builtins/ulimit.def:427
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: ограничението не може да бъде получено: %s"
 
-#: builtins/ulimit.def:446
+#: builtins/ulimit.def:453
 msgid "limit"
 msgstr ""
 
-#: builtins/ulimit.def:458 builtins/ulimit.def:758
+#: builtins/ulimit.def:465 builtins/ulimit.def:765
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: ограничението не може да бъде променено: %s"
 
-#: builtins/umask.def:119
+#: builtins/umask.def:118
 msgid "octal number"
 msgstr "осмично число"
 
-#: builtins/umask.def:232
+#: builtins/umask.def:231
 #, c-format
 msgid "`%c': invalid symbolic mode operator"
 msgstr "„%c“: неправилен оператор за описателен режим"
 
-#: builtins/umask.def:287
+#: builtins/umask.def:286
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "„%c“: неправилен знак за описателен режим"
 
-#: error.c:89 error.c:319 error.c:321 error.c:323
+#: error.c:89 error.c:320 error.c:322 error.c:324
 msgid " line "
 msgstr ""
 
@@ -794,71 +841,71 @@ msgstr "последна команда: %s\n"
 msgid "Aborting..."
 msgstr "Преустановяване…"
 
-#: error.c:259
-#, c-format
-msgid "%s: warning: "
+#: error.c:260
+#, fuzzy, c-format
+msgid "warning: "
 msgstr "%s: предупреждение: "
 
-#: error.c:404
+#: error.c:405
 msgid "unknown command error"
 msgstr "неизвестна грешка в команда"
 
-#: error.c:405
+#: error.c:406
 msgid "bad command type"
 msgstr "неправилен вид команда"
 
-#: error.c:406
+#: error.c:407
 msgid "bad connector"
 msgstr "лоша връзка"
 
-#: error.c:407
+#: error.c:408
 msgid "bad jump"
 msgstr "неправилен преход"
 
-#: error.c:445
+#: error.c:446
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: променлива без стойност"
 
-#: eval.c:180
+#: eval.c:181
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr ""
 "^Gвремето за изчакване на вход изтече: следва автоматично излизане от "
 "системата\n"
 
-#: execute_cmd.c:479
+#: execute_cmd.c:483
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "стандартният вход от /dev/null не може да бъде пренасочен: %s"
 
-#: execute_cmd.c:1063
+#: execute_cmd.c:1079
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "в променливата $TIMEFORMAT: „%c“: грешен форматиращ знак"
 
-#: execute_cmd.c:1404
+#: execute_cmd.c:1930
 #, fuzzy
 msgid "pipe error"
 msgstr "грешка при запис: %s"
 
-#: execute_cmd.c:3670
+#: execute_cmd.c:4243
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr ""
 "%s: ограничение: в имената на командите не може да присъства знакът „/“"
 
-#: execute_cmd.c:3758
+#: execute_cmd.c:4334
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: командата не е открита"
 
-#: execute_cmd.c:4006
+#: execute_cmd.c:4586
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: лош интерпретатор"
 
-#: execute_cmd.c:4155
+#: execute_cmd.c:4735
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "файловият дескриптор %d не може да се дублира като дескриптор %d"
@@ -934,91 +981,101 @@ msgstr "%s: очаква се целочислен израз"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: родителските директории не могат да бъдат достъпени"
 
-#: input.c:237
+#: input.c:94 subst.c:4551
+#, c-format
+msgid "cannot reset nodelay mode for fd %d"
+msgstr "не може да се изчисти режимът без забавяне на файловия дескриптор %d"
+
+#: input.c:258
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
 msgstr ""
 "не може да се задели нов файлов дескриптор за вход на bash от дескриптор %d"
 
-#: input.c:245
+#: input.c:266
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr ""
 "запазване на входа на bash: вече съществува буфер за новия файлов дескриптор "
 "%d"
 
-#: jobs.c:466
+#: jobs.c:464
 msgid "start_pipeline: pgrp pipe"
 msgstr ""
 
-#: jobs.c:881
+#: jobs.c:879
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr ""
 
-#: jobs.c:999
+#: jobs.c:997
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "изтриване на спряната задача %d в групата процеси %ld"
 
-#: jobs.c:1104
+#: jobs.c:1102
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr ""
 
-#: jobs.c:1395
+#: jobs.c:1105
+#, c-format
+msgid "add_process: pid %5ld (%s) marked as still alive"
+msgstr ""
+
+#: jobs.c:1393
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr ""
 "описателен идентификатор на процес: %ld: няма такъв идентификатор на процес"
 
-#: jobs.c:1410
+#: jobs.c:1408
 #, c-format
 msgid "Signal %d"
 msgstr ""
 
-#: jobs.c:1424 jobs.c:1449
+#: jobs.c:1422 jobs.c:1447
 msgid "Done"
 msgstr ""
 
-#: jobs.c:1429 siglist.c:122
+#: jobs.c:1427 siglist.c:122
 msgid "Stopped"
 msgstr ""
 
-#: jobs.c:1433
+#: jobs.c:1431
 #, c-format
 msgid "Stopped(%s)"
 msgstr ""
 
-#: jobs.c:1437
+#: jobs.c:1435
 msgid "Running"
 msgstr ""
 
-#: jobs.c:1451
+#: jobs.c:1449
 #, c-format
 msgid "Done(%d)"
 msgstr ""
 
-#: jobs.c:1453
+#: jobs.c:1451
 #, c-format
 msgid "Exit %d"
 msgstr ""
 
-#: jobs.c:1456
+#: jobs.c:1454
 msgid "Unknown status"
 msgstr ""
 
-#: jobs.c:1543
+#: jobs.c:1541
 #, c-format
 msgid "(core dumped) "
 msgstr ""
 
-#: jobs.c:1562
+#: jobs.c:1560
 #, c-format
 msgid "  (wd: %s)"
 msgstr ""
 
-#: jobs.c:1763
+#: jobs.c:1761
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr ""
@@ -1028,68 +1085,68 @@ msgstr ""
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "изчакване: процесът с идентификатор %ld не е дъщерен на тази обвивка"
 
-#: jobs.c:2315
+#: jobs.c:2316
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "изчакване: липсват данни за процес с идентификатор %ld"
 
-#: jobs.c:2587
+#: jobs.c:2588
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "изчакване на задача: задачата %d е спряна"
 
-#: jobs.c:2809
+#: jobs.c:2810
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: задачата е приключила"
 
-#: jobs.c:2818
+#: jobs.c:2819
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: задача %d вече е във фонов режим"
 
-#: jobs.c:3462
+#: jobs.c:3482
 #, fuzzy, c-format
 msgid "%s: line %d: "
 msgstr "%s: предупреждение: "
 
-#: jobs.c:3476 nojobs.c:805
+#: jobs.c:3496 nojobs.c:805
 #, c-format
 msgid " (core dumped)"
 msgstr ""
 
-#: jobs.c:3488 jobs.c:3501
+#: jobs.c:3508 jobs.c:3521
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr ""
 
-#: jobs.c:3533
+#: jobs.c:3553
 msgid "initialize_job_control: getpgrp failed"
 msgstr ""
 
-#: jobs.c:3593
+#: jobs.c:3613
 msgid "initialize_job_control: line discipline"
 msgstr ""
 
-#: jobs.c:3603
+#: jobs.c:3623
 msgid "initialize_job_control: setpgid"
 msgstr ""
 
-#: jobs.c:3631
+#: jobs.c:3651
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr ""
 
-#: jobs.c:3636
+#: jobs.c:3656
 msgid "no job control in this shell"
 msgstr "в тази обвивка няма управление на задачите"
 
-#: lib/malloc/malloc.c:298
+#: lib/malloc/malloc.c:296
 #, c-format
 msgid "malloc: failed assertion: %s\n"
 msgstr "заделяне на памет: грешно предположение: %s\n"
 
-#: lib/malloc/malloc.c:314
+#: lib/malloc/malloc.c:312
 #, c-format
 msgid ""
 "\r\n"
@@ -1098,62 +1155,62 @@ msgstr ""
 "\r\n"
 "заделяне на памет: %s:%d: предположението е отпечатано\r\n"
 
-#: lib/malloc/malloc.c:315
+#: lib/malloc/malloc.c:313
 #, fuzzy
 msgid "unknown"
 msgstr "%s: непознат хост"
 
-#: lib/malloc/malloc.c:799
+#: lib/malloc/malloc.c:797
 msgid "malloc: block on free list clobbered"
 msgstr ""
 "заделяне на памет: блок в списъка със свободни блокове е зает или неподходящ"
 
-#: lib/malloc/malloc.c:876
+#: lib/malloc/malloc.c:874
 msgid "free: called with already freed block argument"
 msgstr ""
 "изчистване на памет: извикано е с блоков аргумент, който вече е изчистен"
 
-#: lib/malloc/malloc.c:879
+#: lib/malloc/malloc.c:877
 msgid "free: called with unallocated block argument"
 msgstr "изчистване на памет: извикано е с незаделен блоков аргумент"
 
-#: lib/malloc/malloc.c:898
+#: lib/malloc/malloc.c:896
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr ""
 "изчистване на памет: открито е отрицателно препълване с mh_nbytes извън\n"
 "допустимия диапазон"
 
-#: lib/malloc/malloc.c:904
+#: lib/malloc/malloc.c:902
 msgid "free: start and end chunk sizes differ"
 msgstr ""
 "изчистване на памет: късовете на началната и крайната области се различават"
 
-#: lib/malloc/malloc.c:1003
+#: lib/malloc/malloc.c:1001
 msgid "realloc: called with unallocated block argument"
 msgstr "презаделяне: извикано е с аргумент с незаделен блок"
 
-#: lib/malloc/malloc.c:1018
+#: lib/malloc/malloc.c:1016
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr ""
 "презаделяне: открито е отрицателно препълване с mh_nbytes извън допустимия\n"
 "диапазон"
 
-#: lib/malloc/malloc.c:1024
+#: lib/malloc/malloc.c:1022
 msgid "realloc: start and end chunk sizes differ"
 msgstr "презаделяне: късовете на началната и крайната области се различават"
 
-#: lib/malloc/table.c:176
+#: lib/malloc/table.c:177
 #, c-format
 msgid "register_alloc: alloc table is full with FIND_ALLOC?\n"
 msgstr ""
 "регистриране на презаделяне: таблицата за заделянията е пълна с FIND_ALLOC?\n"
 
-#: lib/malloc/table.c:183
+#: lib/malloc/table.c:184
 #, c-format
 msgid "register_alloc: %p already in table as allocated?\n"
 msgstr "регистриране на презаделяне: %p вече е в таблицата като заделен?\n"
 
-#: lib/malloc/table.c:219
+#: lib/malloc/table.c:220
 #, c-format
 msgid "register_free: %p already in table as free?\n"
 msgstr "регистриране на свободни: %p вече е в таблицата като свободен?\n"
@@ -1207,111 +1264,116 @@ msgstr "синтактична грешка: неочакван знак „;“
 msgid "syntax error: `((%s))'"
 msgstr "синтактична грешка: „((%s))“"
 
-#: make_cmd.c:566
+#: make_cmd.c:567
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "вътрешен документ с „<<“: неправилен вид инструкция %d"
 
-#: make_cmd.c:741
+#: make_cmd.c:651
+#, c-format
+msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
+msgstr ""
+
+#: make_cmd.c:746
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 "пренасочване: инструкцията за пренасочване „%d“ е извън допустимия диапазон"
 
-#: parse.y:2759
+#: parse.y:2982 parse.y:3204
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr ""
 "неочакван знак за край на файл „EOF“, а се очакваше съответстващ знак „%c“"
 
-#: parse.y:3071
+#: parse.y:3708
 msgid "unexpected EOF while looking for `]]'"
 msgstr "неочакван знак за край на файл „EOF“, а се очакваше „]]“"
 
-#: parse.y:3076
+#: parse.y:3713
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "синтактична грешка в условен израз: неочаквана лексема „%s“"
 
-#: parse.y:3080
+#: parse.y:3717
 msgid "syntax error in conditional expression"
 msgstr "синтактична грешка в условен израз"
 
-#: parse.y:3158
+#: parse.y:3795
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "неочаквана лексема „%s“, а се очакваше знакът „)“"
 
-#: parse.y:3162
+#: parse.y:3799
 msgid "expected `)'"
 msgstr "очакваше се „)“"
 
-#: parse.y:3190
+#: parse.y:3827
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "неочакван аргумент „%s“ за унарен условен оператор"
 
-#: parse.y:3194
+#: parse.y:3831
 msgid "unexpected argument to conditional unary operator"
 msgstr "неочакван аргумент за унарен условен оператор"
 
-#: parse.y:3234
+#: parse.y:3871
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "неочаквана лексема „%s“, очакваше се бинарен условен оператор"
 
-#: parse.y:3238
+#: parse.y:3875
 msgid "conditional binary operator expected"
 msgstr "очакваше се бинарен условен оператор"
 
-#: parse.y:3255
+#: parse.y:3892
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "неочакван аргумент „%s“ за бинарен условен оператор"
 
-#: parse.y:3259
+#: parse.y:3896
 msgid "unexpected argument to conditional binary operator"
 msgstr "неочакван аргумент за бинарен условен оператор"
 
-#: parse.y:3270
+#: parse.y:3907
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "неочаквана лексема „%c“ в условна команда"
 
-#: parse.y:3273
+#: parse.y:3910
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "неочаквана лексема „%s“ в условна команда"
 
-#: parse.y:3277
+#: parse.y:3914
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "неочаквана лексема %d в условна команда"
 
-#: parse.y:4525
+#: parse.y:5181
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "синтактична грешка в близост до неочакваната лексема „%s“"
 
-#: parse.y:4543
+#: parse.y:5199
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "синтактична грешка в близост до „%s“"
 
-#: parse.y:4553
+#: parse.y:5209
 msgid "syntax error: unexpected end of file"
 msgstr "синтактична грешка: неочакван край на файл"
 
-#: parse.y:4553
+#: parse.y:5209
 msgid "syntax error"
 msgstr "синтактична грешка"
 
-#: parse.y:4615
+#: parse.y:5271
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Използвайте „%s“, за да излезете от обвивката.\n"
 
-#: parse.y:4777
+#: parse.y:5433
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "неочакван знак за край на файл „EOF“, очакваше се знакът „)“"
 
@@ -1326,71 +1388,71 @@ msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr ""
 "вмъкване на завършване на команда: %s указване на команда, което е NULL"
 
-#: print_cmd.c:264
+#: print_cmd.c:287
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "команда за печат: лош конектор „%d“"
 
-#: print_cmd.c:1240
+#: print_cmd.c:1347
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "отпечатване: „%c“: неправилен форматиращ знак"
 
-#: redir.c:103
+#: redir.c:104
 msgid "file descriptor out of range"
 msgstr "файловият дескриптор е извън допустимия диапазон"
 
-#: redir.c:145
+#: redir.c:146
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: двусмислено пренасочване"
 
-#: redir.c:149
+#: redir.c:150
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: не може да се презапише съществуващ файл"
 
-#: redir.c:154
+#: redir.c:155
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: поради ограничение изходът не може да се пренасочи"
 
-#: redir.c:159
+#: redir.c:160
 #, fuzzy, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "не може да се създаде временен файл за вътрешен документ с „<<“: %s"
 
-#: redir.c:513
+#: redir.c:515
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port не се поддържа, ако няма поддръжка на мрежа"
 
-#: redir.c:980
+#: redir.c:992
 msgid "redirection error: cannot duplicate fd"
 msgstr "грешка при пренасочване: файловият дескриптор не може да бъде дублиран"
 
-#: shell.c:323
+#: shell.c:328
 msgid "could not find /tmp, please create!"
 msgstr "не е открита директорията /tmp. Създайте я!"
 
-#: shell.c:327
+#: shell.c:332
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp трябва да е директория"
 
-#: shell.c:864
+#: shell.c:876
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: неправилна опция"
 
-#: shell.c:1621
+#: shell.c:1637
 msgid "I have no name!"
 msgstr "Не може да се получи името на текущия потребител!"
 
-#: shell.c:1755
+#: shell.c:1777
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr ""
 
-#: shell.c:1756
+#: shell.c:1778
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1399,38 +1461,38 @@ msgstr ""
 "Употреба:    %s [дълга опция на GNU] [опция] …\n"
 "             %s [дълга опция на GNU] [опция] файл-скрипт …\n"
 
-#: shell.c:1758
+#: shell.c:1780
 msgid "GNU long options:\n"
 msgstr "Дълги опции на GNU:\n"
 
-#: shell.c:1762
+#: shell.c:1784
 msgid "Shell options:\n"
 msgstr "Опции на обвивката:\n"
 
-#: shell.c:1763
+#: shell.c:1785
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr ""
 "    -irsD или -c команда, или -O къса_опция        (само при стартиране)\n"
 
-#: shell.c:1778
+#: shell.c:1800
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "    -%s или -o опция\n"
 
-#: shell.c:1784
+#: shell.c:1806
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "За повече информация за опциите на обвивката въведете „%s -c \"help set\"“.\n"
 
-#: shell.c:1785
+#: shell.c:1807
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "За повече информация за вградените в обвивката команди въведете „%s -c "
 "help“.\n"
 
-#: shell.c:1786
+#: shell.c:1808
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "За да докладвате грешки използвайте командата „bashbug“.\n"
@@ -1611,84 +1673,79 @@ msgstr ""
 msgid "Unknown Signal #%d"
 msgstr ""
 
-#: subst.c:1171 subst.c:1292
+#: subst.c:1177 subst.c:1298
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "лошо заместване: липсва затварящ знак „%s“ в %s"
 
-#: subst.c:2392
+#: subst.c:2450
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: на член от масив не може да се присвои списък"
 
-#: subst.c:4391 subst.c:4407
+#: subst.c:4448 subst.c:4464
 msgid "cannot make pipe for process substitution"
 msgstr "не може да се създаде програмен канал за заместване на процеси"
 
-#: subst.c:4439
+#: subst.c:4496
 msgid "cannot make child for process substitution"
 msgstr "не може да се създаде дъщерен процес за заместване на процеси"
 
-#: subst.c:4484
+#: subst.c:4541
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "именуваният програмен канал %s не може да се отвори за четене"
 
-#: subst.c:4486
+#: subst.c:4543
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "именуваният програмен канал %s не може да се отвори за запис"
 
-#: subst.c:4494
-#, c-format
-msgid "cannot reset nodelay mode for fd %d"
-msgstr "не може да се изчисти режимът без забавяне на файловия дескриптор %d"
-
-#: subst.c:4504
+#: subst.c:4561
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr ""
 "именуваният програмен канал %s не може да се\n"
 "дублира като файловия дескриптор %d"
 
-#: subst.c:4700
+#: subst.c:4757
 msgid "cannot make pipe for command substitution"
 msgstr "не може да се създаде програмен канал за заместване на команди"
 
-#: subst.c:4734
+#: subst.c:4791
 msgid "cannot make child for command substitution"
 msgstr "не може да се създаде дъщерен процес за заместване на команди"
 
-#: subst.c:4751
+#: subst.c:4808
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "заместване на команди: каналът не може да се дублира като fd 1"
 
-#: subst.c:5226
+#: subst.c:5310
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: аргументът е null или не е зададен"
 
-#: subst.c:5502
+#: subst.c:5600
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: изразът от подниза е < 0"
 
-#: subst.c:6345
+#: subst.c:6645
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: лошо заместване"
 
-#: subst.c:6421
+#: subst.c:6721
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: не може да се задава по този начин"
 
-#: subst.c:7138
+#: subst.c:7440
 #, fuzzy, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "лошо заместване: липсва затварящ знак „%s“ в %s"
 
-#: subst.c:8003
+#: subst.c:8313
 #, c-format
 msgid "no match: %s"
 msgstr "няма съвпадение: %s"
@@ -1729,13 +1786,13 @@ msgstr "липсва „]“"
 msgid "invalid signal number"
 msgstr "неправилен номер на сигнал"
 
-#: trap.c:315
+#: trap.c:323
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr ""
 "стартиране на предстоящите капани: неправилна стойност в trap_list[%d]: %p"
 
-#: trap.c:319
+#: trap.c:327
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -1743,113 +1800,134 @@ msgstr ""
 "стартиране на предстоящите капани: обработката на сигнали е SIG_DFL.\n"
 "%d (%s) е преизпратено на текущата обвивка"
 
-#: trap.c:363
+#: trap.c:371
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "обработка на капани: неправилен сигнал %d"
 
-#: variables.c:339
+#: variables.c:354
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "грешка при внасянето на дефиницията на функция за „%s“"
 
-#: variables.c:717
+#: variables.c:732
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "нивото на обвивката (%d) е прекалено голямо. Задава се да е 1"
 
-#: variables.c:1729
+#: variables.c:1891
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 "създаване на локална променлива: липсва контекст на функция в текущата "
 "област\n"
 "на видимост"
 
-#: variables.c:2876
+#: variables.c:3120
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 "всички локални променливи: липсва контекст на функция в текущата област на\n"
 "видимост"
 
-#: variables.c:3093 variables.c:3102
+#: variables.c:3337 variables.c:3346
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "неправилен знак на позиция %d в низа за изнасяне за %s"
 
-#: variables.c:3108
+#: variables.c:3352
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "липсва „=“ в низа за изнасяне за %s"
 
-#: variables.c:3535
+#: variables.c:3787
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "изваждане на контекст на променливи: в началото на структурата за променливи "
 "на\n"
 "обвивката (shell_variables) е нещо, което не е контекст на функция"
 
-#: variables.c:3548
+#: variables.c:3800
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 "изваждане на контекст на променливи: липсва контекст за глобални променливи\n"
 "(global_variables)"
 
-#: variables.c:3620
+#: variables.c:3874
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "изваждане на област: последният елемент структурата за променливи на "
 "обвивката\n"
 "(shell_variables) не е временна област в обкръжението"
 
-#: version.c:83
+#: version.c:46
+#, fuzzy
+msgid "Copyright (C) 2008 Free Software Foundation, Inc."
+msgstr "Авторски права (C) 2005 Free Software Foundation, Inc.\n"
+
+#: version.c:47
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+msgstr ""
+
+#: version.c:86
 #, c-format
 msgid "GNU bash, version %s (%s)\n"
 msgstr ""
 
-#: xmalloc.c:93
+#: version.c:91
+#, c-format
+msgid "This is free software; you are free to change and redistribute it.\n"
+msgstr ""
+
+#: version.c:92
+#, c-format
+msgid "There is NO WARRANTY, to the extent permitted by law.\n"
+msgstr ""
+
+#: xmalloc.c:92
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes (%lu bytes allocated)"
 msgstr ""
 "заделяне на памет: %lu байта не могат да се заделят (заделени са\n"
 "%lu байта)"
 
-#: xmalloc.c:95
+#: xmalloc.c:94
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes"
 msgstr "заделяне на памет: %lu байта не могат да се заделят"
 
-#: xmalloc.c:115
+#: xmalloc.c:114
 #, c-format
 msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
 msgstr ""
 "презаделяне на памет: %lu байта не могат да се заделят наново (заделени са\n"
 "%lu байта)"
 
-#: xmalloc.c:117
+#: xmalloc.c:116
 #, c-format
 msgid "xrealloc: cannot allocate %lu bytes"
 msgstr "презаделяне на памет: %lu байта не могат да се заделят"
 
-#: xmalloc.c:151
+#: xmalloc.c:150
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
 msgstr ""
 "заделяне на памет: %s:%d: %lu байта не могат да се заделят (заделени са\n"
 "%lu байта)"
 
-#: xmalloc.c:153
+#: xmalloc.c:152
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes"
 msgstr "заделяне на памет: %s:%d: %lu байта не могат да се заделят"
 
-#: xmalloc.c:175
+#: xmalloc.c:174
 #, c-format
 msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
 msgstr ""
 "презаделяне на памет: %s:%d: %lu байта не могат да се заделят (заделени са %"
 "lu байта)"
 
-#: xmalloc.c:177
+#: xmalloc.c:176
 #, c-format
 msgid "xrealloc: %s:%d: cannot allocate %lu bytes"
 msgstr "презаделяне на памет: %s:%d: %lu байта не могат да се заделят"
@@ -1909,11 +1987,11 @@ msgid "command [-pVv] command [arg ...]"
 msgstr ""
 
 #: builtins.c:76
-msgid "declare [-afFirtx] [-p] [name[=value] ...]"
+msgid "declare [-aAfFilrtux] [-p] [name[=value] ...]"
 msgstr ""
 
 #: builtins.c:78
-msgid "typeset [-afFirtx] [-p] name[=value] ..."
+msgid "typeset [-aAfFilrtux] [-p] name[=value] ..."
 msgstr ""
 
 #: builtins.c:80
@@ -2309,6 +2387,7 @@ msgstr ""
 "                           използва за вход."
 
 #: builtins.c:322
+#, fuzzy
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2316,8 +2395,10 @@ msgid ""
 "    loops.\n"
 "    \n"
 "    Exit Status:\n"
-"    The exit status is 0 unless the shell is not executing a loop."
+"    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+" Продължение със следващата итерация от цикъл ползващ FOR, WHILE или UNTIL.\n"
+"    Ако е указан N, се продължава от N-тия обхващащ цикъл."
 
 #: builtins.c:334
 #, fuzzy
@@ -2328,7 +2409,7 @@ msgid ""
 "    If N is specified, resumes the Nth enclosing loop.\n"
 "    \n"
 "    Exit Status:\n"
-"    The exit status is 0 unless the shell is not executing a loop."
+"    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
 " Продължение със следващата итерация от цикъл ползващ FOR, WHILE или UNTIL.\n"
 "    Ако е указан N, се продължава от N-тия обхващащ цикъл."
@@ -2498,10 +2579,13 @@ msgid ""
 "      -p\tdisplay the attributes and value of each NAME\n"
 "    \n"
 "    Options which set attributes:\n"
-"      -a\tto make NAMEs arrays (if supported)\n"
+"      -a\tto make NAMEs indexed arrays (if supported)\n"
+"      -A\tto make NAMEs associative arrays (if supported)\n"
 "      -i\tto make NAMEs have the `integer' attribute\n"
+"      -l\tto convert NAMEs to lower case on assignment\n"
 "      -r\tto make NAMEs readonly\n"
 "      -t\tto make NAMEs have the `trace' attribute\n"
+"      -u\tto convert NAMEs to upper case on assignment\n"
 "      -x\tto make NAMEs export\n"
 "    \n"
 "    Using `+' instead of `-' turns off the given attribute.\n"
@@ -2547,14 +2631,14 @@ msgstr ""
 "    функция ИМЕната стават локални, както при използването на командата "
 "„local“."
 
-#: builtins.c:505
+#: builtins.c:508
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
 
-#: builtins.c:513
+#: builtins.c:516
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2569,7 +2653,7 @@ msgid ""
 "    or the shell is not executing a function."
 msgstr ""
 
-#: builtins.c:530
+#: builtins.c:533
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -2584,7 +2668,7 @@ msgid ""
 "    `echo' interprets the following backslash-escaped characters:\n"
 "      \\a\talert (bell)\n"
 "      \\b\tbackspace\n"
-"      \\c\tsuppress trailing newline\n"
+"      \\c\tsuppress further output\n"
 "      \\e\tescape character\n"
 "      \\f\tform feed\n"
 "      \\n\tnew line\n"
@@ -2620,7 +2704,7 @@ msgstr ""
 "    Можете изрично да спрете интерпретирането на горните знаци с опцията „-"
 "E“."
 
-#: builtins.c:564
+#: builtins.c:567
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2633,7 +2717,7 @@ msgid ""
 "    Returns success unless a write error occurs."
 msgstr ""
 
-#: builtins.c:579
+#: builtins.c:582
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2660,7 +2744,7 @@ msgid ""
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 msgstr ""
 
-#: builtins.c:607
+#: builtins.c:610
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2672,7 +2756,7 @@ msgid ""
 "    Returns exit status of command or success if command is null."
 msgstr ""
 
-#: builtins.c:619
+#: builtins.c:622
 #, fuzzy
 msgid ""
 "Parse option arguments.\n"
@@ -2755,7 +2839,7 @@ msgstr ""
 "са\n"
 "    дадени повече аргументи, те биват анализирани вместо това."
 
-#: builtins.c:661
+#: builtins.c:664
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2778,7 +2862,7 @@ msgid ""
 "occurs."
 msgstr ""
 
-#: builtins.c:682
+#: builtins.c:685
 #, fuzzy
 msgid ""
 "Exit the shell.\n"
@@ -2789,7 +2873,7 @@ msgstr ""
 " Изход от обвивката с код N.  Ако N е изпуснат, то изходният код е този на\n"
 "     последната изпълнена команда."
 
-#: builtins.c:691
+#: builtins.c:694
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2798,7 +2882,7 @@ msgid ""
 "    in a login shell."
 msgstr ""
 
-#: builtins.c:701
+#: builtins.c:704
 #, fuzzy
 msgid ""
 "Display or execute commands from the history list.\n"
@@ -2854,7 +2938,7 @@ msgstr ""
 "когато\n"
 "    се въведе само „-r“, ще се изпълни последната команда."
 
-#: builtins.c:731
+#: builtins.c:734
 #, fuzzy
 msgid ""
 "Move job to the foreground.\n"
@@ -2869,7 +2953,7 @@ msgstr ""
 " Изважда ЗАДАЧА от фонов режим и я прави текуща задача.  Ако липсва\n"
 "    аргумент ЗАДАЧА, се използва текущата задача според обвивката."
 
-#: builtins.c:746
+#: builtins.c:749
 #, fuzzy
 msgid ""
 "Move jobs to the background.\n"
@@ -2886,7 +2970,7 @@ msgstr ""
 " Поставя всяка ЗАДАЧА във фонов режим, все едно е била стартирана с „&“.\n"
 "    Ако липсва аргумент ЗАДАЧА, се използва текущата задача според обвивката."
 
-#: builtins.c:760
+#: builtins.c:763
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -2910,7 +2994,7 @@ msgid ""
 "    Returns success unless NAME is not found or an invalid option is given."
 msgstr ""
 
-#: builtins.c:785
+#: builtins.c:788
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -2932,7 +3016,7 @@ msgid ""
 "given."
 msgstr ""
 
-#: builtins.c:809
+#: builtins.c:812
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3000,7 +3084,7 @@ msgstr ""
 "времето не\n"
 "    се записва."
 
-#: builtins.c:845
+#: builtins.c:848
 #, fuzzy
 msgid ""
 "Display status of jobs.\n"
@@ -3041,7 +3125,7 @@ msgstr ""
 "като\n"
 "    аргументи, се заменят с идентификатора на водача на групата процеси."
 
-#: builtins.c:872
+#: builtins.c:875
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3058,7 +3142,7 @@ msgid ""
 "    Returns success unless an invalid option or JOBSPEC is given."
 msgstr ""
 
-#: builtins.c:891
+#: builtins.c:894
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3090,7 +3174,7 @@ msgstr ""
 "    за вас брой процеси, няма да ви се налага да пуснете още един процес,\n"
 "    за да убиете друг."
 
-#: builtins.c:914
+#: builtins.c:917
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expressions.\n"
@@ -3174,7 +3258,7 @@ msgstr ""
 "    Ако последният АРГУМЕНТ се изчислява като 0, „let“ връща 1. В\n"
 "    противен случай - връща 0."
 
-#: builtins.c:959
+#: builtins.c:962
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3207,7 +3291,9 @@ msgid ""
 "      -t timeout\ttime out and return failure if a complete line of input "
 "is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
-"    \t\tvariable is the default timeout.\n"
+"    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
+"    \t\tfractional number.  The exit status is greater than 128 if\n"
+"    \t\tthe timeout is exceeded\n"
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
@@ -3251,7 +3337,7 @@ msgstr ""
 "    ИНТЕРВАЛът за въвеждане или е зададен неправилен файлов дескриптор като\n"
 "    аргумент на „-u“."
 
-#: builtins.c:996
+#: builtins.c:1001
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3263,7 +3349,7 @@ msgid ""
 "    Returns N, or failure if the shell is not executing a function or script."
 msgstr ""
 
-#: builtins.c:1009
+#: builtins.c:1014
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3432,7 +3518,7 @@ msgstr ""
 "    съответно на $1, $2,… $n.  Ако не са зададени АРГументи, се извеждат\n"
 "    всички променливи на средата."
 
-#: builtins.c:1091
+#: builtins.c:1096
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3452,7 +3538,7 @@ msgid ""
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
 
-#: builtins.c:1111
+#: builtins.c:1116
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3471,7 +3557,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1130
+#: builtins.c:1135
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3480,7 +3566,8 @@ msgid ""
 "    before marking as read-only.\n"
 "    \n"
 "    Options:\n"
-"      -a\trefer to array variables\n"
+"      -a\trefer to indexed array variables\n"
+"      -A\trefer to associative array variables\n"
 "      -f\trefer to shell functions\n"
 "      -p\tdisplay a list of all readonly variables and functions\n"
 "    \n"
@@ -3490,7 +3577,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1150
+#: builtins.c:1156
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3501,7 +3588,7 @@ msgid ""
 "    Returns success unless N is negative or greater than $#."
 msgstr ""
 
-#: builtins.c:1162 builtins.c:1177
+#: builtins.c:1168 builtins.c:1183
 #, fuzzy
 msgid ""
 "Execute commands from a file in the current shell.\n"
@@ -3522,11 +3609,12 @@ msgstr ""
 "    са зададени АРГУМЕНТИ, те се превръщат в позиционни аргументи при\n"
 "    изпълнението на ФАЙЛа."
 
-#: builtins.c:1193
+#: builtins.c:1199
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
 "    Suspend the execution of this shell until it receives a SIGCONT signal.\n"
+"    Unless forced, login shells cannot be suspended.\n"
 "    \n"
 "    Options:\n"
 "      -f\tforce the suspend, even if the shell is a login shell\n"
@@ -3535,7 +3623,7 @@ msgid ""
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
 
-#: builtins.c:1208
+#: builtins.c:1215
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3686,7 +3774,7 @@ msgstr ""
 "                                    „-eq“ (=),  „-ne“ (!=), „-lt“ (<),\n"
 "                                    „-le“ (<=), „-gt“ (>) , „-ge“ (>=)."
 
-#: builtins.c:1284
+#: builtins.c:1291
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3698,7 +3786,7 @@ msgstr ""
 "    задължително да е знакът „]“, който да съответства на отварящата скоба "
 "„[“."
 
-#: builtins.c:1293
+#: builtins.c:1300
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3710,7 +3798,7 @@ msgid ""
 "    Always succeeds."
 msgstr ""
 
-#: builtins.c:1305
+#: builtins.c:1312
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -3766,7 +3854,7 @@ msgstr ""
 "на\n"
 "    обвивката с командата „kill -signal $$“."
 
-#: builtins.c:1337
+#: builtins.c:1344
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -3796,7 +3884,7 @@ msgid ""
 "found."
 msgstr ""
 
-#: builtins.c:1368
+#: builtins.c:1375
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -3875,7 +3963,7 @@ msgstr ""
 "        - опцията „-t“, при която стойността е в секунди;\n"
 "        - опцията „-u“, при която стойността е точният брой процеси."
 
-#: builtins.c:1413
+#: builtins.c:1420
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -3893,7 +3981,7 @@ msgid ""
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
 
-#: builtins.c:1433
+#: builtins.c:1440
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -3910,7 +3998,7 @@ msgid ""
 "    given."
 msgstr ""
 
-#: builtins.c:1451
+#: builtins.c:1458
 #, fuzzy
 msgid ""
 "Wait for process completion and return exit status.\n"
@@ -3932,7 +4020,7 @@ msgstr ""
 "се\n"
 "    всички процеси в програмния канал на задачата."
 
-#: builtins.c:1466
+#: builtins.c:1473
 #, fuzzy
 msgid ""
 "Execute commands for each member in a list.\n"
@@ -3952,7 +4040,7 @@ msgstr ""
 "    всеки елемент в ДУМИте, ИМЕто се задава да е елементът и се изпълняват\n"
 "    КОМАНДИте."
 
-#: builtins.c:1480
+#: builtins.c:1487
 #, fuzzy
 msgid ""
 "Arithmetic for loop.\n"
@@ -3979,10 +4067,10 @@ msgstr ""
 "се\n"
 "    изчислява да е 1."
 
-#: builtins.c:1498
+#: builtins.c:1505
 #, fuzzy
 msgid ""
-"Select words from a list and execute commands..\n"
+"Select words from a list and execute commands.\n"
 "    \n"
 "    The WORDS are expanded, generating a list of words.  The\n"
 "    set of expanded words is printed on the standard error, each\n"
@@ -4017,7 +4105,7 @@ msgstr ""
 "    изпълняват след всеки избор до изпълняването на команда за прекъсване\n"
 "    (break)."
 
-#: builtins.c:1519
+#: builtins.c:1526
 #, fuzzy
 msgid ""
 "Report time consumed by pipeline's execution.\n"
@@ -4041,7 +4129,7 @@ msgstr ""
 "според\n"
 "    стойността на променливата на средата $TIMEFORMAT."
 
-#: builtins.c:1536
+#: builtins.c:1543
 #, fuzzy
 msgid ""
 "Execute commands based on pattern matching.\n"
@@ -4055,7 +4143,7 @@ msgstr ""
 " Избирателно се изпълняват КОМАНДИ на база ДУМА, която напасва на ШАБЛОН.\n"
 "    Шаблоните се разделят със знака „|“."
 
-#: builtins.c:1548
+#: builtins.c:1555
 #, fuzzy
 msgid ""
 "Execute commands based on conditional.\n"
@@ -4092,7 +4180,7 @@ msgstr ""
 "ако\n"
 "    никое тестово условие, не се е оценило като истина."
 
-#: builtins.c:1565
+#: builtins.c:1572
 #, fuzzy
 msgid ""
 "Execute commands as long as a test succeeds.\n"
@@ -4107,7 +4195,7 @@ msgstr ""
 "„while“\n"
 "    е с изходен код, който е 0."
 
-#: builtins.c:1577
+#: builtins.c:1584
 #, fuzzy
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
@@ -4122,7 +4210,7 @@ msgstr ""
 "„until“\n"
 "    е с изходен код, който не е 0."
 
-#: builtins.c:1589
+#: builtins.c:1596
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4136,7 +4224,7 @@ msgid ""
 "    Returns success unless NAME is readonly."
 msgstr ""
 
-#: builtins.c:1603
+#: builtins.c:1610
 #, fuzzy
 msgid ""
 "Group commands as a unit.\n"
@@ -4151,7 +4239,7 @@ msgstr ""
 "се\n"
 "    цял набор от команди."
 
-#: builtins.c:1615
+#: builtins.c:1622
 #, fuzzy
 msgid ""
 "Resume job in foreground.\n"
@@ -4171,7 +4259,7 @@ msgstr ""
 "    се изпълнява във фонов режим, все едно е била подадена като аргумент\n"
 "    на командата „bg“."
 
-#: builtins.c:1630
+#: builtins.c:1637
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
@@ -4185,7 +4273,7 @@ msgstr ""
 " ИЗРАЗът се изчислява според правилата на аритметичното оценяване.\n"
 "    Еквивалентно на „let ИЗРАЗ“."
 
-#: builtins.c:1642
+#: builtins.c:1649
 #, fuzzy
 msgid ""
 "Execute conditional command.\n"
@@ -4235,7 +4323,7 @@ msgstr ""
 "    „&&“ и „||“ не оценят ИЗРАЗ2, ако ИЗРАЗ1 е достатъчен за определяне на\n"
 "    стойността на израза."
 
-#: builtins.c:1668
+#: builtins.c:1675
 #, fuzzy
 msgid ""
 "Common shell variable names and usage.\n"
@@ -4364,7 +4452,7 @@ msgstr ""
 "кои\n"
 "                        команди да не се запазват в историята.\n"
 
-#: builtins.c:1725
+#: builtins.c:1732
 #, fuzzy
 msgid ""
 "Add directories to stack.\n"
@@ -4415,7 +4503,7 @@ msgstr ""
 "    \n"
 "    Можете да изведете стека на директорията с командата „dirs“."
 
-#: builtins.c:1759
+#: builtins.c:1766
 #, fuzzy
 msgid ""
 "Remove directories from stack.\n"
@@ -4460,7 +4548,7 @@ msgstr ""
 "\n"
 "    Стекът с директориите се визуализира с командата „dirs“."
 
-#: builtins.c:1789
+#: builtins.c:1796
 #, fuzzy
 msgid ""
 "Display directory stack.\n"
@@ -4512,7 +4600,7 @@ msgstr ""
 "    -N  показва N-тия елемент отдясно в списъка показван от\n"
 "        командата „dirs“, когато е стартирана без опции.  Брои се от 0."
 
-#: builtins.c:1818
+#: builtins.c:1825
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -4533,7 +4621,7 @@ msgid ""
 "    given or OPTNAME is disabled."
 msgstr ""
 
-#: builtins.c:1839
+#: builtins.c:1846
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -4580,7 +4668,7 @@ msgstr ""
 "    вход за обвивката. Ако е включена опцията „-v“, изходът се поставя в\n"
 "    променливата на обвивката VAR, вместо да се извежда на стандартния изход."
 
-#: builtins.c:1866
+#: builtins.c:1873
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -4602,7 +4690,7 @@ msgid ""
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
 
-#: builtins.c:1889
+#: builtins.c:1896
 #, fuzzy
 msgid ""
 "Display possible completions depending on the options.\n"
@@ -4623,7 +4711,7 @@ msgstr ""
 "с\n"
 "    него."
 
-#: builtins.c:1904
+#: builtins.c:1911
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4652,7 +4740,7 @@ msgid ""
 "    have a completion specification defined."
 msgstr ""
 
-#: builtins.c:1932
+#: builtins.c:1939
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

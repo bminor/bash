@@ -74,6 +74,9 @@ $END
 extern int errno;
 #endif
 
+extern const char * const bash_copyright;
+extern const char * const bash_license;
+
 static void show_builtin_command_help __P((void));
 static int open_helpfile __P((char *));
 static void show_desc __P((char *, int));
@@ -314,9 +317,9 @@ show_manpage (name, i)
   printf ("%*s", BASE_INDENT, " ");
   show_shell_version (0);
   printf ("%*s", BASE_INDENT, " ");
-  printf (_("Copyright (C) 2008 Free Software Foundation, Inc.\n"));
+  printf ("%s\n", _(bash_copyright));
   printf ("%*s", BASE_INDENT, " ");
-  printf (_("License: GNU General Public License, version 2\n"));
+  printf ("%s\n", _(bash_license));
 
   fflush (stdout);
   if (usefile)

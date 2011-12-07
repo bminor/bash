@@ -507,10 +507,11 @@ SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
 SUPPORT_SRC = $(srcdir)/support/
 SDIR = $(dot)/support/
 
-TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT)
+TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) xcase$(EXEEXT)
 CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  tests/recho$(EXEEXT) tests/zecho$(EXEEXT) \
-		  tests/printenv$(EXEEXT) mksignames$(EXEEXT) lsignames.h \
+		  tests/printenv$(EXEEXT) xcase$(EXEEXT) tests/xcase$(EXEEXT) \
+		  mksignames$(EXEEXT) lsignames.h \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
 		  buildversion.o mksignames.o signames.o buildsignames.o
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
@@ -826,6 +827,9 @@ zecho$(EXEEXT):		$(SUPPORT_SRC)zecho.c
 
 printenv$(EXEEXT):	$(SUPPORT_SRC)printenv.c
 	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)printenv.c ${LIBS_FOR_BUILD}
+
+xcase$(EXEEXT):	$(SUPPORT_SRC)xcase.c
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)xcase.c ${LIBS_FOR_BUILD}
 
 test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests

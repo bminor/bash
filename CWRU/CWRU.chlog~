@@ -4588,7 +4588,7 @@ doc/bashref.texi
 				   ----
 subst.c
 	- add call to sv_histtimefmt in initialize_variables so HISTTIMEFORMAT
-	  rom the environment is honored.  Fix from Ark Submedes (heh)
+	  from the environment is honored.  Fix from Ark Submedes (heh)
 	  <archimerged@gmail.com>
 
 lib/readline/histfile.c
@@ -6749,3 +6749,49 @@ parse.y
 	- change read_secondary_line to save lines in the body of a here-
 	  document in the shell history list if remember_on_history is
 	  set.  Fixes bug reported by Gene Golub <gene_golub@hotmail.com>
+
+				    8/4
+				    ---
+configure.in
+	- changed to 4.0-alpha
+
+lib/readline/readline.h
+	- changed constants to reflect readline-6.0 version
+
+				   8/11
+				   ----
+lib/readline/signals.c
+	- make sure we don't use SIGWINCH without checking whether or not it's
+	  defined.  Fix from Pedro Alves <pedro@codesourcery.com>
+
+				   8/12
+				   ----
+
+COPYING
+	- updated to GPLv3; edits in every file with a copyright or license
+	  declaration to update to gpl3
+
+version.c
+	- update extended version info to latest gnu standard
+
+				   8/17
+				   ----
+subst.c
+	- change exp_jump_to_top_level to only call top_level_cleanup if
+	  parse_and_execute_level is 0.  If it's not, the longjmp to
+	  parse_and_execute will run the unwind-protect stack.  Fixes bug
+	  most recently reported by Roman Rakus <rrakus@redhat.com>
+
+				   8/18
+				   ----
+support/config.{guess,sub}
+	- updated to newer versions from autoconf-2.62 distribution
+
+				   8/20
+				   ----
+subst.c
+	- fixed parameter_brace_substring to differentiate between indexed and
+	  associative arrays when computing second offset, instead of
+	  assuming indexed array
+
+[bash-4.0-alpha frozen]

@@ -21,7 +21,7 @@ echo $LINE
 kill $REFLECT_PID
 wait $REFLECT_PID
 
-coproc tr -u 'a-z' 'A-Z'
+coproc xcase -n -u
 
 echo $COPROC_PID
 echo ${COPROC[@]}

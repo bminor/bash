@@ -43,6 +43,9 @@ const char * const release_status = (char *)0;
 #endif
 const char * const sccs_version = SCCSVERSION;
 
+const char * const bash_copyright = N_("Copyright (C) 2008 Free Software Foundation, Inc.");
+const char * const bash_license = N_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+
 /* If == 31, shell compatible with bash-3.1, == 32 with bash-3.2, and so on */
 int shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
@@ -83,8 +86,8 @@ show_shell_version (extended)
   printf (_("GNU bash, version %s (%s)\n"), shell_version_string (), MACHTYPE);
   if (extended)
     {
-      printf (_("Copyright (C) 2008 Free Software Foundation, Inc.\n"));
-      printf (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"));
+      printf ("%s\n", _(bash_copyright));
+      printf ("%s\n", _(bash_license));
       printf (_("This is free software; you are free to change and redistribute it.\n"));
       printf (_("There is NO WARRANTY, to the extent permitted by law.\n"));
     }

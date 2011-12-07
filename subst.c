@@ -5581,7 +5581,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 #if defined (ARRAY_VARS)
   /* For arrays, the second offset deals with the number of elements. */
   if (vtype == VT_ARRAYVAR)
-    len = array_num_elements (a);
+    len = assoc_p (v) ? assoc_num_elements (h) : array_num_elements (a);
 #endif
 
   if (t)
@@ -5651,6 +5651,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
 	    {
+	      /* Callers have to differentiate betwen indexed and associative */
 	      vtype = VT_ARRAYVAR;
 	      if (temp[0] == '*')
 		vtype |= VT_STARSUB;

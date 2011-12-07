@@ -1747,7 +1747,7 @@ coproc_pidchk (pid)
   struct coproc *cp;
 
   cp = getcoprocbypid (pid);
-#if defined (DEBUG)
+#if 0
   if (cp)
     itrace("coproc_pidchk: pid %d has died", pid);
 #endif
@@ -1885,7 +1885,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   coproc_setvars (cp);
 
-#if defined (DEBUG)
+#if 0
   itrace ("execute_coproc: [%d] %s", coproc_pid, the_printed_command);
 #endif
 

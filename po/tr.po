@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 3.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-22 10:15-0400\n"
+"POT-Creation-Date: 2008-08-20 08:51-0400\n"
 "PO-Revision-Date: 2006-10-30 20:00+0200\n"
 "Last-Translator: Nilgün Belma Bugüner <nilgun@buguner.name.tr>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
@@ -16,78 +16,93 @@ msgstr ""
 "X-Generator: KBabel 1.11.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: arrayfunc.c:48
+#: arrayfunc.c:49
 msgid "bad array subscript"
 msgstr "hatalı dizi indisi"
 
-#: arrayfunc.c:372
+#: arrayfunc.c:312 builtins/declare.def:467
+#, c-format
+msgid "%s: cannot convert indexed to associative array"
+msgstr ""
+
+#: arrayfunc.c:478
+#, fuzzy, c-format
+msgid "%s: invalid associative array key"
+msgstr "%s: eylem adı geçersiz"
+
+#: arrayfunc.c:480
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: sayısal olmayan indise atama yapılamaz"
 
-#: bashhist.c:332
+#: arrayfunc.c:516
+#, c-format
+msgid "%s: %s: must use subscript when assigning associative array"
+msgstr ""
+
+#: bashhist.c:382
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: oluşturulamıyor: %s"
 
-#: bashline.c:3124
+#: bashline.c:3190
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: komut için kısayol bulunamıyor"
 
-#: bashline.c:3173
+#: bashline.c:3268
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: boşluk olmayan ilk karakter `\"' değil"
 
-#: bashline.c:3202
+#: bashline.c:3297
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "%2$s içinde kapatan `%1$c' yok"
 
-#: bashline.c:3236
+#: bashline.c:3331
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: ikinokta imi eksik"
 
-#: builtins/bind.def:200
+#: builtins/bind.def:199
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr "`%s': kısayol ismi geçersiz"
 
-#: builtins/bind.def:239
+#: builtins/bind.def:238
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: okunamıyor: %s"
 
-#: builtins/bind.def:254
+#: builtins/bind.def:253
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "`%s': kısayol değiştirilemiyor"
 
-#: builtins/bind.def:289 builtins/bind.def:319
+#: builtins/bind.def:288 builtins/bind.def:318
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "`%s': işlev ismi bilinmiyor"
 
-#: builtins/bind.def:297
+#: builtins/bind.def:296
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s için bir kısayol atanmamış.\n"
 
-#: builtins/bind.def:301
+#: builtins/bind.def:300
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s bunun üzerinden çağrılabilir: "
 
-#: builtins/break.def:78 builtins/break.def:118
+#: builtins/break.def:77 builtins/break.def:117
 msgid "loop count"
 msgstr ""
 
-#: builtins/break.def:138
+#: builtins/break.def:137
 msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "sadece bir `for', `while' veya `until' döngüsünde anlamlı"
 
-#: builtins/caller.def:134
+#: builtins/caller.def:133
 #, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
@@ -95,308 +110,313 @@ msgid ""
 "    Without EXPR, returns "
 msgstr "Geçerli altyordam çağrısının bağlamı döner."
 
-#: builtins/cd.def:216
+#: builtins/cd.def:215
 msgid "HOME not set"
 msgstr "HOME atanmamış"
 
-#: builtins/cd.def:228
+#: builtins/cd.def:227
 msgid "OLDPWD not set"
 msgstr "OLDPWD boş"
 
-#: builtins/common.c:105
+#: builtins/common.c:107
 #, c-format
 msgid "line %d: "
 msgstr ""
 
-#: builtins/common.c:122
+#: builtins/common.c:124
 #, fuzzy, c-format
 msgid "%s: usage: "
 msgstr "%s: uyarı: "
 
-#: builtins/common.c:135 test.c:822
+#: builtins/common.c:137 test.c:822
 msgid "too many arguments"
 msgstr "çok fazla argüman"
 
-#: builtins/common.c:160 shell.c:488 shell.c:762
+#: builtins/common.c:162 shell.c:493 shell.c:774
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: seçenek bir argüman gerektirir"
 
-#: builtins/common.c:167
+#: builtins/common.c:169
 #, c-format
 msgid "%s: numeric argument required"
 msgstr "%s: sayısal argüman gerekli"
 
-#: builtins/common.c:174
+#: builtins/common.c:176
 #, c-format
 msgid "%s: not found"
 msgstr "%s:yok"
 
-#: builtins/common.c:183 shell.c:775
+#: builtins/common.c:185 shell.c:787
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: seçenek geçersiz"
 
-#: builtins/common.c:190
+#: builtins/common.c:192
 #, c-format
 msgid "%s: invalid option name"
 msgstr "%s: seçenek ismi geçersiz"
 
-#: builtins/common.c:197 general.c:231 general.c:236
+#: builtins/common.c:199 general.c:231 general.c:236
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s': geçerli bir belirteç değil"
 
-#: builtins/common.c:207
+#: builtins/common.c:209
 #, fuzzy
 msgid "invalid octal number"
 msgstr "geçersiz sinyal numarası"
 
-#: builtins/common.c:209
+#: builtins/common.c:211
 #, fuzzy
 msgid "invalid hex number"
 msgstr "geçersiz sayı"
 
-#: builtins/common.c:211 expr.c:1255
+#: builtins/common.c:213 expr.c:1255
 msgid "invalid number"
 msgstr "geçersiz sayı"
 
-#: builtins/common.c:219
+#: builtins/common.c:221
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr "%s: sinyal belirtimi geçersiz"
 
-#: builtins/common.c:226
+#: builtins/common.c:228
 #, c-format
 msgid "`%s': not a pid or valid job spec"
 msgstr "`%s': geçerli bir iş belirtimi veya süreç numarası değil"
 
-#: builtins/common.c:233 error.c:452
+#: builtins/common.c:235 error.c:453
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: salt okunur değişken"
 
-#: builtins/common.c:241
+#: builtins/common.c:243
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s: %s aralık dışı"
 
-#: builtins/common.c:241 builtins/common.c:243
+#: builtins/common.c:243 builtins/common.c:245
 msgid "argument"
 msgstr "argüman"
 
-#: builtins/common.c:243
+#: builtins/common.c:245
 #, c-format
 msgid "%s out of range"
 msgstr "%s aralık dışı"
 
-#: builtins/common.c:251
+#: builtins/common.c:253
 #, c-format
 msgid "%s: no such job"
 msgstr "%s: böyle bir iş yok"
 
-#: builtins/common.c:259
+#: builtins/common.c:261
 #, c-format
 msgid "%s: no job control"
 msgstr "%s: iş denetimi yok"
 
-#: builtins/common.c:261
+#: builtins/common.c:263
 msgid "no job control"
 msgstr "iş denetimi yok"
 
-#: builtins/common.c:271
+#: builtins/common.c:273
 #, c-format
 msgid "%s: restricted"
 msgstr "%s: kısıtlı"
 
-#: builtins/common.c:273
+#: builtins/common.c:275
 msgid "restricted"
 msgstr "kısıtlı"
 
-#: builtins/common.c:281
+#: builtins/common.c:283
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s: bir kabuk yerleşiği değil"
 
-#: builtins/common.c:290
+#: builtins/common.c:292
 #, c-format
 msgid "write error: %s"
 msgstr "yazma hatası: %s"
 
-#: builtins/common.c:516
+#: builtins/common.c:523
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: geçerli dizin alınırken hata: %s: %s\n"
 
-#: builtins/common.c:582 builtins/common.c:584
+#: builtins/common.c:589 builtins/common.c:591
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: iş belirtimi belirsiz"
 
-#: builtins/complete.def:271
+#: builtins/complete.def:270
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: eylem adı geçersiz"
 
-#: builtins/complete.def:431 builtins/complete.def:616
-#: builtins/complete.def:814
+#: builtins/complete.def:430 builtins/complete.def:615
+#: builtins/complete.def:813
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: tamamlama belirtimi yok"
 
-#: builtins/complete.def:668
+#: builtins/complete.def:667
 msgid "warning: -F option may not work as you expect"
 msgstr "uyarı: -F seçeneği umduğunuz gibi çalışmayabilir"
 
-#: builtins/complete.def:670
+#: builtins/complete.def:669
 msgid "warning: -C option may not work as you expect"
 msgstr "uyarı: -C seçeneği umduğunuz gibi çalışmayabilir"
 
-#: builtins/complete.def:787
+#: builtins/complete.def:786
 msgid "not currently executing completion function"
 msgstr ""
 
-#: builtins/declare.def:120
+#: builtins/declare.def:122
 msgid "can only be used in a function"
 msgstr "sadece bir işlevde kullanılabilir"
 
-#: builtins/declare.def:318
+#: builtins/declare.def:353
 msgid "cannot use `-f' to make functions"
 msgstr "işlev yapmak için `-f' kullanılamaz"
 
-#: builtins/declare.def:330 execute_cmd.c:4116
+#: builtins/declare.def:365 execute_cmd.c:4696
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: salt okunur işlev"
 
-#: builtins/declare.def:416
+#: builtins/declare.def:454
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: dizi değişkenleri bu yolla iptal edilemez"
 
-#: builtins/enable.def:138 builtins/enable.def:146
+#: builtins/declare.def:461
+#, c-format
+msgid "%s: cannot convert associative to indexed array"
+msgstr ""
+
+#: builtins/enable.def:137 builtins/enable.def:145
 msgid "dynamic loading not available"
 msgstr "özdevimli yükleme mümkün değil"
 
-#: builtins/enable.def:313
+#: builtins/enable.def:312
 #, c-format
 msgid "cannot open shared object %s: %s"
 msgstr "%s paylaşımlı nesnesi açılamıyor: %s"
 
-#: builtins/enable.def:336
+#: builtins/enable.def:335
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "%2$s paylaşımlı nesnesinde %1$s bulunamıyor: %3$s"
 
-#: builtins/enable.def:460
+#: builtins/enable.def:459
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s: özdevimli olarak yüklenmemiş"
 
-#: builtins/enable.def:475
+#: builtins/enable.def:474
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: silinemiyor: %s"
 
-#: builtins/evalfile.c:132 builtins/hash.def:170 execute_cmd.c:3973
-#: shell.c:1423
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4553
+#: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: bir dizin"
 
-#: builtins/evalfile.c:137
+#: builtins/evalfile.c:139
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: bir dosya değil"
 
-#: builtins/evalfile.c:145
+#: builtins/evalfile.c:147
 #, c-format
 msgid "%s: file is too large"
 msgstr "%s: dosya çok büyük"
 
-#: builtins/evalfile.c:183 execute_cmd.c:4043 shell.c:1433
+#: builtins/evalfile.c:185 execute_cmd.c:4623 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: ikili dosya çalıştırılamıyor"
 
-#: builtins/exec.def:213
+#: builtins/exec.def:212
 #, c-format
 msgid "%s: cannot execute: %s"
 msgstr "%s: çalıştırılamıyor: %s"
 
-#: builtins/exit.def:66
+#: builtins/exit.def:65
 #, c-format
 msgid "logout\n"
 msgstr ""
 
-#: builtins/exit.def:89
+#: builtins/exit.def:88
 msgid "not login shell: use `exit'"
 msgstr "oturum açma kabuğu değil: `exit' kullanın"
 
-#: builtins/exit.def:121
+#: builtins/exit.def:120
 #, c-format
 msgid "There are stopped jobs.\n"
 msgstr "Durmuş işler var.\n"
 
-#: builtins/exit.def:123
+#: builtins/exit.def:122
 #, fuzzy, c-format
 msgid "There are running jobs.\n"
 msgstr "Durmuş işler var.\n"
 
-#: builtins/fc.def:263
+#: builtins/fc.def:261
 msgid "no command found"
 msgstr "komut yok"
 
-#: builtins/fc.def:333
+#: builtins/fc.def:341
 msgid "history specification"
 msgstr "geçmiş belirtimi"
 
-#: builtins/fc.def:354
+#: builtins/fc.def:362
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: geçici dosya açılamıyor: %s"
 
-#: builtins/fg_bg.def:150 builtins/jobs.def:283
+#: builtins/fg_bg.def:149 builtins/jobs.def:282
 msgid "current"
 msgstr ""
 
-#: builtins/fg_bg.def:159
+#: builtins/fg_bg.def:158
 #, c-format
 msgid "job %d started without job control"
 msgstr "%d. iş, iş denetimsiz başlamış"
 
-#: builtins/getopt.c:109
+#: builtins/getopt.c:110
 #, c-format
 msgid "%s: illegal option -- %c\n"
 msgstr "%s: kuraldışı seçenek -- %c\n"
 
-#: builtins/getopt.c:110
+#: builtins/getopt.c:111
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
 msgstr "%s: seçenek bir argüman gerektirir -- %c\n"
 
-#: builtins/hash.def:93
+#: builtins/hash.def:92
 msgid "hashing disabled"
 msgstr "çitleme iptal edildi"
 
-#: builtins/hash.def:139
+#: builtins/hash.def:138
 #, c-format
 msgid "%s: hash table empty\n"
 msgstr "%s: çitleme tablosu boş\n"
 
-#: builtins/hash.def:245
+#: builtins/hash.def:244
 #, fuzzy, c-format
 msgid "hits\tcommand\n"
 msgstr "son komut: %s\n"
 
-#: builtins/help.def:128
+#: builtins/help.def:130
 #, fuzzy, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
 msgstr[0] "Bu anahtar sözcüğe uygun kabuk komutları: `"
 msgstr[1] "Bu anahtar sözcüğe uygun kabuk komutları: `"
 
-#: builtins/help.def:166
+#: builtins/help.def:168
 #, c-format
 msgid ""
 "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
@@ -404,22 +424,12 @@ msgstr ""
 "`%s' ile ilgili bir yardım metni yok.  `help help' veya `man -k %s' ya da "
 "`info %s'.yazmayı deneyebilirsiniz."
 
-#: builtins/help.def:183
+#: builtins/help.def:185
 #, c-format
 msgid "%s: cannot open: %s"
 msgstr "%s: açılamıyor: %s"
 
-#: builtins/help.def:318 version.c:85
-#, fuzzy, c-format
-msgid "Copyright (C) 2008 Free Software Foundation, Inc.\n"
-msgstr "Copyright © 2006 Free Software Foundation, Inc.\n"
-
-#: builtins/help.def:320
-#, c-format
-msgid "License: GNU General Public License, version 2\n"
-msgstr ""
-
-#: builtins/help.def:335
+#: builtins/help.def:337
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -439,112 +449,153 @@ msgstr ""
 "Bir ismin yanında bir yıldız imi (*) varsa komut iptal edilmiş demektir.\n"
 "\n"
 
-#: builtins/history.def:158
+#: builtins/history.def:154
 msgid "cannot use more than one of -anrw"
 msgstr "tek bir -anrw kullanılabilir"
 
-#: builtins/history.def:190
+#: builtins/history.def:186
 msgid "history position"
 msgstr "geçmiş konumu"
 
-#: builtins/history.def:408
+#: builtins/history.def:366
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: geçmiş yorumlaması başarısız"
 
-#: builtins/inlib.def:72
+#: builtins/inlib.def:71
 #, fuzzy, c-format
 msgid "%s: inlib failed"
 msgstr "%s: geçmiş yorumlaması başarısız"
 
-#: builtins/jobs.def:110
+#: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
 msgstr "`-x' ile başka seçenek kullanılamaz"
 
-#: builtins/kill.def:198
+#: builtins/kill.def:197
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: argümanlar süreç veya iş kimlikleri olmalı"
 
-#: builtins/kill.def:261
+#: builtins/kill.def:260
 msgid "Unknown error"
 msgstr "Bilinmeyen hata"
 
-#: builtins/let.def:96 builtins/let.def:121 expr.c:501 expr.c:516
+#: builtins/let.def:95 builtins/let.def:120 expr.c:501 expr.c:516
 msgid "expression expected"
 msgstr "ifade bekleniyordu"
 
-#: builtins/mapfile.def:216 builtins/read.def:265
+#: builtins/mapfile.def:215 builtins/read.def:271
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: dosya tanıtıcı belirtimi geçersiz"
 
-#: builtins/mapfile.def:224 builtins/read.def:272
+#: builtins/mapfile.def:223 builtins/read.def:278
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: dosya tanıtıcı geçersiz: %s"
 
-#: builtins/mapfile.def:233 builtins/mapfile.def:271
+#: builtins/mapfile.def:232 builtins/mapfile.def:270
 #, fuzzy, c-format
 msgid "%s: invalid line count"
 msgstr "%s: seçenek geçersiz"
 
-#: builtins/mapfile.def:244
+#: builtins/mapfile.def:243
 #, fuzzy, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: seçenek geçersiz"
 
-#: builtins/mapfile.def:261
+#: builtins/mapfile.def:260
 #, fuzzy, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: eylem adı geçersiz"
 
-#: builtins/mapfile.def:293
+#: builtins/mapfile.def:292
 #, fuzzy
 msgid "empty array variable name"
 msgstr "%s: bir dizi değişkeni değil"
 
-#: builtins/mapfile.def:314
+#: builtins/mapfile.def:313
 msgid "array variable support required"
 msgstr ""
 
-#: builtins/printf.def:365
+#: builtins/printf.def:364
 #, c-format
 msgid "`%s': missing format character"
 msgstr "`%s': biçim karakteri eksik"
 
-#: builtins/printf.def:542
+#: builtins/printf.def:541
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "`%c': biçim karakteri geçersiz"
 
-#: builtins/printf.def:569
+#: builtins/printf.def:568
 #, fuzzy, c-format
 msgid "warning: %s: %s"
 msgstr "%s: uyarı: "
 
-#: builtins/printf.def:748
+#: builtins/printf.def:747
 msgid "missing hex digit for \\x"
 msgstr "\\x için onaltılık rakam eksik"
 
-#: builtins/pushd.def:196
+#: builtins/pushd.def:195
 msgid "no other directory"
 msgstr "başka dizin yok"
 
-#: builtins/pushd.def:463
+#: builtins/pushd.def:462
 msgid "<no current directory>"
 msgstr "<geçerli dizin yok>"
 
-#: builtins/pushd.def:507
+#: builtins/pushd.def:506
 msgid "directory stack empty"
 msgstr ""
 
-#: builtins/pushd.def:509
+#: builtins/pushd.def:508
 #, fuzzy
 msgid "directory stack index"
 msgstr "özyineleme yığıtı alttan taştı"
 
-#: builtins/pushd.def:706
+#: builtins/pushd.def:683
+#, fuzzy
+msgid ""
+"Display the list of currently remembered directories.  Directories\n"
+"    find their way onto the list with the `pushd' command; you can get\n"
+"    back up through the list with the `popd' command.\n"
+"    \n"
+"    Options:\n"
+"      -c\tclear the directory stack by deleting all of the elements\n"
+"      -l\tdo not print tilde-prefixed versions of directories relative\n"
+"    \tto your home directory\n"
+"      -p\tprint the directory stack with one entry per line\n"
+"      -v\tprint the directory stack with one entry per line prefixed\n"
+"    \twith its position in the stack\n"
+"    \n"
+"    Arguments:\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown "
+"by\n"
+"    \tdirs when invoked without options, starting with zero.\n"
+"    \n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown "
+"by\n"
+"\tdirs when invoked without options, starting with zero."
+msgstr ""
+"\rdirs [-clpv] [+N] [-N]\n"
+"    O an anımsanan dizinleri listeler.  Dizinler listeye `pushd'\n"
+"    komutuyla eklenir; listeden tek tek geri almak içinse `popd'\n"
+"    komutu kullanılır.\n"
+"    -l seçeneği `dirs'in dizinleri ev dizininize göreli kısayollar\n"
+"    olarak göstermemesine yol açar.  Yani `~/bin' yerine `/homes/bfox/bin'\n"
+"    gibi bir gösterimle karşılaşabilirsiniz. -v seçeneği `dirs'in\n"
+"    dizin yığıtını dizin adının önüne yığıt konumunu ekleyerek her\n"
+"    satırda bir girdi göstermesini sağlar. -p seçeneği yığıttaki\n"
+"    konumu göstermemesi dışında aynı çıktıyı verir. -c seçeneği tüm\n"
+"    girdileri silerek dizin yığıtını boşaltır. \n"
+"    +N   dirs seçeneksiz çağrıldığında gösterdiği listenin solundan\n"
+"         sıfırla başlayarak sayılan N'inci girdiyi gösterir.\n"
+"\n"
+"    -N   dirs seçeneksiz çağrıldığında gösterdiği listenin sağından\n"
+"         sıfırla başlayarak sayılan N'inci girdiyi gösterir."
+
+#: builtins/pushd.def:705
 #, fuzzy
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
@@ -590,7 +641,7 @@ msgstr ""
 "\n"
 "    Dizin yığıtını `dirs' komutuyla görebilirsiniz."
 
-#: builtins/pushd.def:731
+#: builtins/pushd.def:730
 #, fuzzy
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
@@ -625,50 +676,40 @@ msgstr ""
 "          engeller, böylece sadece yığıt değiştirilmiş olur. \n"
 "    Dizin yığıtını `dirs' komutuyla görebilirsiniz."
 
-#: builtins/pushd.def:684
-msgid ""
-"Display the list of currently remembered directories.  Directories\n"
-"    find their way onto the list with the `pushd' command; you can get\n"
-"    back up through the list with the `popd' command.\n"
-"    \n"
-"    Options:\n"
-"\\    "
-msgstr ""
-
-#: builtins/read.def:242
+#: builtins/read.def:247
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: zamanaşımı belirtimi geçersiz"
 
-#: builtins/read.def:560
+#: builtins/read.def:569
 #, c-format
 msgid "read error: %d: %s"
 msgstr "okuma hatası: %d: %s"
 
-#: builtins/return.def:69
+#: builtins/return.def:68
 msgid "can only `return' from a function or sourced script"
 msgstr "sadece bir işlev veya betikten kaynaklı olarak `return' yapılabilir"
 
-#: builtins/set.def:769
+#: builtins/set.def:768
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "bir işlev ve bir değişken aynı anda unset yapılamaz"
 
-#: builtins/set.def:806
+#: builtins/set.def:805
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: unset yapılamaz"
 
-#: builtins/set.def:813
+#: builtins/set.def:812
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s:unset yapılamaz: %s salt okunur"
 
-#: builtins/set.def:824
+#: builtins/set.def:823
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: bir dizi değişkeni değil"
 
-#: builtins/setattr.def:181
+#: builtins/setattr.def:186
 #, c-format
 msgid "%s: not a function"
 msgstr "%s: bir işlev değil"
@@ -677,20 +718,20 @@ msgstr "%s: bir işlev değil"
 msgid "shift count"
 msgstr "shift sayısı"
 
-#: builtins/shopt.def:248
+#: builtins/shopt.def:249
 msgid "cannot set and unset shell options simultaneously"
 msgstr "kabuk seçenekleri aynı anda hem atanıp hem de iptal edilemez"
 
-#: builtins/shopt.def:313
+#: builtins/shopt.def:314
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: kabuk seçenek ismi geçersiz"
 
-#: builtins/source.def:129
+#: builtins/source.def:128
 msgid "filename argument required"
 msgstr "dosya ismi argüman gerekir"
 
-#: builtins/source.def:154
+#: builtins/source.def:153
 #, c-format
 msgid "%s: file not found"
 msgstr "%s: dosya yok"
@@ -703,75 +744,75 @@ msgstr "engellenemez"
 msgid "cannot suspend a login shell"
 msgstr "bir oturum açma kabuğu engellenemez"
 
-#: builtins/type.def:235
+#: builtins/type.def:234
 #, c-format
 msgid "%s is aliased to `%s'\n"
 msgstr "%s `%s' için takma addır\n"
 
-#: builtins/type.def:256
+#: builtins/type.def:255
 #, c-format
 msgid "%s is a shell keyword\n"
 msgstr "%s bir kabuk anahtar sözcüğüdür\n"
 
-#: builtins/type.def:275
+#: builtins/type.def:274
 #, c-format
 msgid "%s is a function\n"
 msgstr "%s bir işlevdir\n"
 
-#: builtins/type.def:297
+#: builtins/type.def:296
 #, c-format
 msgid "%s is a shell builtin\n"
 msgstr "%s bir kabuk yerleşiğidir\n"
 
-#: builtins/type.def:318 builtins/type.def:392
+#: builtins/type.def:317 builtins/type.def:391
 #, c-format
 msgid "%s is %s\n"
 msgstr "%s %s'dir\n"
 
-#: builtins/type.def:338
+#: builtins/type.def:337
 #, c-format
 msgid "%s is hashed (%s)\n"
 msgstr "%s çitilmiş (%s)\n"
 
-#: builtins/ulimit.def:365
+#: builtins/ulimit.def:372
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: sınırlama argümanı geçersiz"
 
-#: builtins/ulimit.def:391
+#: builtins/ulimit.def:398
 #, c-format
 msgid "`%c': bad command"
 msgstr "`%c': hatalı komut"
 
-#: builtins/ulimit.def:420
+#: builtins/ulimit.def:427
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: sınır alınamıyor: %s"
 
-#: builtins/ulimit.def:446
+#: builtins/ulimit.def:453
 msgid "limit"
 msgstr ""
 
-#: builtins/ulimit.def:458 builtins/ulimit.def:758
+#: builtins/ulimit.def:465 builtins/ulimit.def:765
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: sınır değiştirilemiyor: %s"
 
-#: builtins/umask.def:119
+#: builtins/umask.def:118
 msgid "octal number"
 msgstr "sekizlik sayı"
 
-#: builtins/umask.def:232
+#: builtins/umask.def:231
 #, c-format
 msgid "`%c': invalid symbolic mode operator"
 msgstr "`%c': simgesel kip işleci geçersiz"
 
-#: builtins/umask.def:287
+#: builtins/umask.def:286
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "`%c': simgesel kip karakteri geçersiz"
 
-#: error.c:89 error.c:319 error.c:321 error.c:323
+#: error.c:89 error.c:320 error.c:322 error.c:324
 msgid " line "
 msgstr ""
 
@@ -785,68 +826,68 @@ msgstr "son komut: %s\n"
 msgid "Aborting..."
 msgstr "Çıkılıyor..."
 
-#: error.c:259
-#, c-format
-msgid "%s: warning: "
+#: error.c:260
+#, fuzzy, c-format
+msgid "warning: "
 msgstr "%s: uyarı: "
 
-#: error.c:404
+#: error.c:405
 msgid "unknown command error"
 msgstr "bilinmeyen komut hatası"
 
-#: error.c:405
+#: error.c:406
 msgid "bad command type"
 msgstr "hatalı komut türü"
 
-#: error.c:406
+#: error.c:407
 msgid "bad connector"
 msgstr "hatalı bağlantı"
 
-#: error.c:407
+#: error.c:408
 msgid "bad jump"
 msgstr "hatalı sıçrama"
 
-#: error.c:445
+#: error.c:446
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: bağlanmamış değişken"
 
-#: eval.c:180
+#: eval.c:181
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\agirdi beklerken zamanaşımı: auto-logout\n"
 
-#: execute_cmd.c:479
+#: execute_cmd.c:483
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "/dev/null'dan standart girdiye yönlendirme yapılamaz: %s"
 
-#: execute_cmd.c:1063
+#: execute_cmd.c:1079
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': biçim karakteri geçersiz"
 
-#: execute_cmd.c:1404
+#: execute_cmd.c:1930
 #, fuzzy
 msgid "pipe error"
 msgstr "yazma hatası: %s"
 
-#: execute_cmd.c:3670
+#: execute_cmd.c:4243
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: kısıtlı: komut adında `/' kullanamazsınız"
 
-#: execute_cmd.c:3758
+#: execute_cmd.c:4334
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: komut yok"
 
-#: execute_cmd.c:4006
+#: execute_cmd.c:4586
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: hatalı yorumlayıcı"
 
-#: execute_cmd.c:4155
+#: execute_cmd.c:4735
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "fd %d, fd %d olarak yinelenemiyor"
@@ -921,88 +962,98 @@ msgstr "%s: tamsayı ifadesi bekleniyordu"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: üst dizinlere erişilemiyor"
 
-#: input.c:237
+#: input.c:94 subst.c:4551
+#, fuzzy, c-format
+msgid "cannot reset nodelay mode for fd %d"
+msgstr "fd %d için geciktirmeme kipi sıfırlanamıyor"
+
+#: input.c:258
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
 msgstr ""
 "fd %d tanıtıcısındaki bash girdisi için yeni dosya tanıtıcısı ayrılamıyor"
 
-#: input.c:245
+#: input.c:266
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: yeni fd %d için tampon zaten var"
 
-#: jobs.c:466
+#: jobs.c:464
 msgid "start_pipeline: pgrp pipe"
 msgstr ""
 
-#: jobs.c:881
+#: jobs.c:879
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "çatallanan pid %d, çalışan iş %d içinde görünüyor"
 
-#: jobs.c:999
+#: jobs.c:997
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "durdurulan %2$ld süreç gruplu iş %1$d  siliniyor"
 
-#: jobs.c:1104
+#: jobs.c:1102
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr ""
 
-#: jobs.c:1395
+#: jobs.c:1105
+#, c-format
+msgid "add_process: pid %5ld (%s) marked as still alive"
+msgstr ""
+
+#: jobs.c:1393
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: böyle bir pid yok"
 
-#: jobs.c:1410
+#: jobs.c:1408
 #, c-format
 msgid "Signal %d"
 msgstr ""
 
-#: jobs.c:1424 jobs.c:1449
+#: jobs.c:1422 jobs.c:1447
 msgid "Done"
 msgstr ""
 
-#: jobs.c:1429 siglist.c:122
+#: jobs.c:1427 siglist.c:122
 msgid "Stopped"
 msgstr ""
 
-#: jobs.c:1433
+#: jobs.c:1431
 #, c-format
 msgid "Stopped(%s)"
 msgstr ""
 
-#: jobs.c:1437
+#: jobs.c:1435
 msgid "Running"
 msgstr ""
 
-#: jobs.c:1451
+#: jobs.c:1449
 #, c-format
 msgid "Done(%d)"
 msgstr ""
 
-#: jobs.c:1453
+#: jobs.c:1451
 #, c-format
 msgid "Exit %d"
 msgstr ""
 
-#: jobs.c:1456
+#: jobs.c:1454
 msgid "Unknown status"
 msgstr ""
 
-#: jobs.c:1543
+#: jobs.c:1541
 #, c-format
 msgid "(core dumped) "
 msgstr ""
 
-#: jobs.c:1562
+#: jobs.c:1560
 #, c-format
 msgid "  (wd: %s)"
 msgstr ""
 
-#: jobs.c:1763
+#: jobs.c:1761
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr ""
@@ -1012,68 +1063,68 @@ msgstr ""
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld bu kabuğun bir alt sürecine ait değil"
 
-#: jobs.c:2315
+#: jobs.c:2316
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: süreç %ld için kayıt yok"
 
-#: jobs.c:2587
+#: jobs.c:2588
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: iş %d durdu"
 
-#: jobs.c:2809
+#: jobs.c:2810
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: iş sonlanmış"
 
-#: jobs.c:2818
+#: jobs.c:2819
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: iş %d zaten artalanda"
 
-#: jobs.c:3462
+#: jobs.c:3482
 #, fuzzy, c-format
 msgid "%s: line %d: "
 msgstr "%s: uyarı: "
 
-#: jobs.c:3476 nojobs.c:805
+#: jobs.c:3496 nojobs.c:805
 #, c-format
 msgid " (core dumped)"
 msgstr ""
 
-#: jobs.c:3488 jobs.c:3501
+#: jobs.c:3508 jobs.c:3521
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr ""
 
-#: jobs.c:3533
+#: jobs.c:3553
 msgid "initialize_job_control: getpgrp failed"
 msgstr ""
 
-#: jobs.c:3593
+#: jobs.c:3613
 msgid "initialize_job_control: line discipline"
 msgstr ""
 
-#: jobs.c:3603
+#: jobs.c:3623
 msgid "initialize_job_control: setpgid"
 msgstr ""
 
-#: jobs.c:3631
+#: jobs.c:3651
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr ""
 
-#: jobs.c:3636
+#: jobs.c:3656
 msgid "no job control in this shell"
 msgstr "bu kabukta iş denetimi yok"
 
-#: lib/malloc/malloc.c:298
+#: lib/malloc/malloc.c:296
 #, c-format
 msgid "malloc: failed assertion: %s\n"
 msgstr "malloc: kanaat doğrulaması başarısız: %s\n"
 
-#: lib/malloc/malloc.c:314
+#: lib/malloc/malloc.c:312
 #, c-format
 msgid ""
 "\r\n"
@@ -1082,54 +1133,54 @@ msgstr ""
 "\r\n"
 "malloc: %s:%d: kanaat doğrulaması battı\r\n"
 
-#: lib/malloc/malloc.c:315
+#: lib/malloc/malloc.c:313
 #, fuzzy
 msgid "unknown"
 msgstr "%s: konak bilinmiyor"
 
-#: lib/malloc/malloc.c:799
+#: lib/malloc/malloc.c:797
 msgid "malloc: block on free list clobbered"
 msgstr "malloc: serbest bırakılmış liste üstünde blok üste yazdı"
 
-#: lib/malloc/malloc.c:876
+#: lib/malloc/malloc.c:874
 msgid "free: called with already freed block argument"
 msgstr "free: zaten serbest bırakılmış blok argümanı ile çağrıldı"
 
-#: lib/malloc/malloc.c:879
+#: lib/malloc/malloc.c:877
 msgid "free: called with unallocated block argument"
 msgstr "free: ayrılmamış blok argümanı ile çağrıldı"
 
-#: lib/malloc/malloc.c:898
+#: lib/malloc/malloc.c:896
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr "free: alttan taşma saptandı; mh_nbytes aralık dışında"
 
-#: lib/malloc/malloc.c:904
+#: lib/malloc/malloc.c:902
 msgid "free: start and end chunk sizes differ"
 msgstr "free: başlangıç ve son tomar boyutları farklı"
 
-#: lib/malloc/malloc.c:1003
+#: lib/malloc/malloc.c:1001
 msgid "realloc: called with unallocated block argument"
 msgstr "realloc: ayrılmamış blok argümanı ile çağrıldı"
 
-#: lib/malloc/malloc.c:1018
+#: lib/malloc/malloc.c:1016
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr "realloc: alttan taşma saptandı; mh_nbytes aralık dışında"
 
-#: lib/malloc/malloc.c:1024
+#: lib/malloc/malloc.c:1022
 msgid "realloc: start and end chunk sizes differ"
 msgstr "realloc: başlangıç ve son tomar boyutları farklı"
 
-#: lib/malloc/table.c:176
+#: lib/malloc/table.c:177
 #, c-format
 msgid "register_alloc: alloc table is full with FIND_ALLOC?\n"
 msgstr "register_alloc: alloc tablosu FIND_ALLOC ile dolu olabilir mi?\n"
 
-#: lib/malloc/table.c:183
+#: lib/malloc/table.c:184
 #, c-format
 msgid "register_alloc: %p already in table as allocated?\n"
 msgstr "register_alloc: %p zaten ayrılmış olarak tabloda değil mi?\n"
 
-#: lib/malloc/table.c:219
+#: lib/malloc/table.c:220
 #, c-format
 msgid "register_free: %p already in table as free?\n"
 msgstr "register_free: %p zaten serbest bırakılmış olarak tabloda değil mi?\n"
@@ -1183,109 +1234,114 @@ msgstr "sözdizimi hatası: `;' beklenmiyordu"
 msgid "syntax error: `((%s))'"
 msgstr "sözdizimi hatası: `((%s))'"
 
-#: make_cmd.c:566
+#: make_cmd.c:567
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "make_here_document: hatalı yönerge türü %d"
 
-#: make_cmd.c:741
+#: make_cmd.c:651
+#, c-format
+msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
+msgstr ""
+
+#: make_cmd.c:746
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: yönlendirme yönergesi `%d' aralık dışında"
 
-#: parse.y:2759
+#: parse.y:2982 parse.y:3204
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "`%c' için eşleşme aranırken beklenmedik dosya sonu"
 
-#: parse.y:3071
+#: parse.y:3708
 msgid "unexpected EOF while looking for `]]'"
 msgstr "`]]' aranırken beklenmedik dosya sonu"
 
-#: parse.y:3076
+#: parse.y:3713
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "koşullu ifadede sözdizimi hatası: beklenmedik dizgecik `%s'"
 
-#: parse.y:3080
+#: parse.y:3717
 msgid "syntax error in conditional expression"
 msgstr "koşullu ifadede sözdizimi hatası"
 
-#: parse.y:3158
+#: parse.y:3795
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "beklenmedik dizgecik `%s', `)' umuluyordu"
 
-#: parse.y:3162
+#: parse.y:3799
 msgid "expected `)'"
 msgstr "`)' umuluyordu"
 
-#: parse.y:3190
+#: parse.y:3827
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "koşullu tek terimli işlece beklenmedik argüman `%s'"
 
-#: parse.y:3194
+#: parse.y:3831
 msgid "unexpected argument to conditional unary operator"
 msgstr "koşullu tek terimli işlece beklenmedik argüman"
 
-#: parse.y:3234
+#: parse.y:3871
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "beklenmedik dizgecik `%s', koşullu iki terimli işleç umuluyordu"
 
-#: parse.y:3238
+#: parse.y:3875
 msgid "conditional binary operator expected"
 msgstr "koşullu iki terimli işleç umuluyordu"
 
-#: parse.y:3255
+#: parse.y:3892
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "koşullu iki terimli işlece beklenmedik argüman `%s'"
 
-#: parse.y:3259
+#: parse.y:3896
 msgid "unexpected argument to conditional binary operator"
 msgstr "koşullu iki terimli işlece beklenmedik argüman"
 
-#: parse.y:3270
+#: parse.y:3907
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "koşullu komutta beklenmeyen dizgecik `%c'"
 
-#: parse.y:3273
+#: parse.y:3910
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "koşullu komutta beklenmeyen dizgecik `%s'"
 
-#: parse.y:3277
+#: parse.y:3914
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "koşullu komutta beklenmeyen dizgecik %d"
 
-#: parse.y:4525
+#: parse.y:5181
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "beklenmeyen dizgecik `%s' yakınında sözdizimi hatası"
 
-#: parse.y:4543
+#: parse.y:5199
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "`%s' yakınında sözdizimi hatası"
 
-#: parse.y:4553
+#: parse.y:5209
 msgid "syntax error: unexpected end of file"
 msgstr "sözdizimi hatası: beklenmeyen dosya sonu"
 
-#: parse.y:4553
+#: parse.y:5209
 msgid "syntax error"
 msgstr "sözdizimi hatası"
 
-#: parse.y:4615
+#: parse.y:5271
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Kabuğu bırakmak için \"%s\" kullanın.\n"
 
-#: parse.y:4777
+#: parse.y:5433
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "`)' için eşleşme aranırken beklenmedik dosya sonu"
 
@@ -1299,71 +1355,71 @@ msgstr "completion: `%s' işlevi yok"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:264
+#: print_cmd.c:287
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: hatalı bağlayıcı `%d'"
 
-#: print_cmd.c:1240
+#: print_cmd.c:1347
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: `%c': geçersiz biçim karakteri"
 
-#: redir.c:103
+#: redir.c:104
 msgid "file descriptor out of range"
 msgstr "dosya tanıtıcı aralık dışında"
 
-#: redir.c:145
+#: redir.c:146
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: belirsiz yönlendirme"
 
-#: redir.c:149
+#: redir.c:150
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: mevcut dosyanın üzerine yazılamıyor"
 
-#: redir.c:154
+#: redir.c:155
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: kısıtlı: çıktı yönlendirilemiyor"
 
-#: redir.c:159
+#: redir.c:160
 #, fuzzy, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "belge için geçici dosya oluşturulamıyor: %s"
 
-#: redir.c:513
+#: redir.c:515
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port ağ olmaksızın desteklenmiyor"
 
-#: redir.c:980
+#: redir.c:992
 msgid "redirection error: cannot duplicate fd"
 msgstr "yönlendirme hatası: fd yinelenemiyor"
 
-#: shell.c:323
+#: shell.c:328
 msgid "could not find /tmp, please create!"
 msgstr "/tmp bulunamadı, lütfen oluşturun!"
 
-#: shell.c:327
+#: shell.c:332
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp geçerli bir dizinin adı olmalıdır"
 
-#: shell.c:864
+#: shell.c:876
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: geçersiz seçenek"
 
-#: shell.c:1621
+#: shell.c:1637
 msgid "I have no name!"
 msgstr "Hiç ismim yok!"
 
-#: shell.c:1755
+#: shell.c:1777
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr ""
 
-#: shell.c:1756
+#: shell.c:1778
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1372,37 +1428,37 @@ msgstr ""
 "Kullanım:\t%s [GNU uzun seçeneği] [seçenek] ...\n"
 "\t%s [GNU uzun seçeneği] [seçenek] betik-dosyası ...\n"
 
-#: shell.c:1758
+#: shell.c:1780
 msgid "GNU long options:\n"
 msgstr "GNU uzun seçenekleri:\n"
 
-#: shell.c:1762
+#: shell.c:1784
 msgid "Shell options:\n"
 msgstr "Kabuk seçenekleri:\n"
 
-#: shell.c:1763
+#: shell.c:1785
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD veya -c KOMUT veya -O shopt_seçeneği\t(sadece çağrı için)\n"
 
-#: shell.c:1778
+#: shell.c:1800
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s ya da -o seçeneği\n"
 
-#: shell.c:1784
+#: shell.c:1806
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Kabuk seçenekleriyle ilgili daha fazla bilgi için `%s -c \"help set\"' "
 "yazın.\n"
 
-#: shell.c:1785
+#: shell.c:1807
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Kabuk yerleşik komutlarıyla ilgili bilgi almak için `%s -c help' yazın.\n"
 
-#: shell.c:1786
+#: shell.c:1808
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr ""
@@ -1585,82 +1641,77 @@ msgstr ""
 msgid "Unknown Signal #%d"
 msgstr ""
 
-#: subst.c:1171 subst.c:1292
+#: subst.c:1177 subst.c:1298
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "hatalı ikame: %2$s içinde kapatan `%1$s' yok"
 
-#: subst.c:2392
+#: subst.c:2450
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: dizi üyesine liste atanamaz"
 
-#: subst.c:4391 subst.c:4407
+#: subst.c:4448 subst.c:4464
 msgid "cannot make pipe for process substitution"
 msgstr "süreç ikamesi için borulama yapılamıyor"
 
-#: subst.c:4439
+#: subst.c:4496
 msgid "cannot make child for process substitution"
 msgstr "süreç ikamesi için alt süreç yapılamıyor"
 
-#: subst.c:4484
+#: subst.c:4541
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "isimli boru %s okumak için açılamıyor"
 
-#: subst.c:4486
+#: subst.c:4543
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "isimli boru %s yazmak için açılamıyor"
 
-#: subst.c:4494
-#, fuzzy, c-format
-msgid "cannot reset nodelay mode for fd %d"
-msgstr "fd %d için geciktirmeme kipi sıfırlanamıyor"
-
-#: subst.c:4504
+#: subst.c:4561
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "isimli boru %s fd %d olarak yinelenemiyor"
 
-#: subst.c:4700
+#: subst.c:4757
 msgid "cannot make pipe for command substitution"
 msgstr "komut ikamesi için boru yapılamıyor"
 
-#: subst.c:4734
+#: subst.c:4791
 msgid "cannot make child for command substitution"
 msgstr "komut ikamesi için alt süreç yapılamıyor"
 
-#: subst.c:4751
+#: subst.c:4808
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: boru fd 1 olarak yinelenemiyor"
 
-#: subst.c:5226
+#: subst.c:5310
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametre boş ya da değer atanmamış"
 
-#: subst.c:5502
+#: subst.c:5600
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: altdizge ifadesi < 0"
 
-#: subst.c:6345
+#: subst.c:6645
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: hatalı ikame"
 
-#: subst.c:6421
+#: subst.c:6721
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: bu yolla atama yapılmaz"
 
-#: subst.c:7138
+#: subst.c:7440
 #, fuzzy, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "hatalı ikame: %2$s içinde kapatan `%1$s' yok"
 
-#: subst.c:8003
+#: subst.c:8313
 #, c-format
 msgid "no match: %s"
 msgstr "eşleşme yok: %s"
@@ -1701,105 +1752,126 @@ msgstr "eksik `]'"
 msgid "invalid signal number"
 msgstr "geçersiz sinyal numarası"
 
-#: trap.c:315
+#: trap.c:323
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps:trap_list[%d] içinde hatalı değer: %p"
 
-#: trap.c:319
+#: trap.c:327
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr ""
 "run_pending_traps: sinyal yakalayıcı SIG_DFL'dir, kendime %d (%s) göndererek"
 
-#: trap.c:363
+#: trap.c:371
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler:hatalı sinyal %d"
 
-#: variables.c:339
+#: variables.c:354
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "`%s'nin işlev tanımının içeri aktarılmasında hata"
 
-#: variables.c:717
+#: variables.c:732
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "kabuk düzeyi (%d) çok yüksek, 1 yapılıyor"
 
-#: variables.c:1729
+#: variables.c:1891
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: geçerli etki alanında hiç işlev bağlamı yok"
 
-#: variables.c:2876
+#: variables.c:3120
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: geçerli etki alanında hiç işlev bağlamı yok"
 
-#: variables.c:3093 variables.c:3102
+#: variables.c:3337 variables.c:3346
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "%2$s için exportstr içinde geçersiz karakter %1$d"
 
-#: variables.c:3108
+#: variables.c:3352
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "%s için exportstr içinde `=' yok"
 
-#: variables.c:3535
+#: variables.c:3787
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: kabuk değişkenlerinin başı bir işlev bağlamı değil"
 
-#: variables.c:3548
+#: variables.c:3800
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: genel değişkenler bağlamı yok"
 
-#: variables.c:3620
+#: variables.c:3874
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: kabuk değişkenlerinin başı bir geçici ortam etki alanı değil"
 
-#: version.c:83
+#: version.c:46
+#, fuzzy
+msgid "Copyright (C) 2008 Free Software Foundation, Inc."
+msgstr "Copyright © 2006 Free Software Foundation, Inc.\n"
+
+#: version.c:47
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+msgstr ""
+
+#: version.c:86
 #, c-format
 msgid "GNU bash, version %s (%s)\n"
 msgstr ""
 
-#: xmalloc.c:93
+#: version.c:91
+#, c-format
+msgid "This is free software; you are free to change and redistribute it.\n"
+msgstr ""
+
+#: version.c:92
+#, c-format
+msgid "There is NO WARRANTY, to the extent permitted by law.\n"
+msgstr ""
+
+#: xmalloc.c:92
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes (%lu bytes allocated)"
 msgstr "xmalloc: %lu bayt ayrılamıyor (%lu bayt ayrıldı)"
 
-#: xmalloc.c:95
+#: xmalloc.c:94
 #, c-format
 msgid "xmalloc: cannot allocate %lu bytes"
 msgstr "xmalloc: %lu bayt ayrılamıyor"
 
-#: xmalloc.c:115
+#: xmalloc.c:114
 #, c-format
 msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
 msgstr "xrealloc: %lu bayt yeniden ayrılamıyor (%lu bayt ayrıldı)"
 
-#: xmalloc.c:117
+#: xmalloc.c:116
 #, c-format
 msgid "xrealloc: cannot allocate %lu bytes"
 msgstr "xrealloc: %lu bayt yeniden ayrılamıyor"
 
-#: xmalloc.c:151
+#: xmalloc.c:150
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
 msgstr "xmalloc: %s:%d: %lu bayt ayrılamıyor (%lu bayt ayrıldı)"
 
-#: xmalloc.c:153
+#: xmalloc.c:152
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes"
 msgstr "xmalloc: %s:%d: %lu bayt ayrılamıyor"
 
-#: xmalloc.c:175
+#: xmalloc.c:174
 #, c-format
 msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
 msgstr "xrealloc: %s:%d: %lu bayt yeniden ayrılamıyor (%lu bayt ayrıldı)"
 
-#: xmalloc.c:177
+#: xmalloc.c:176
 #, c-format
 msgid "xrealloc: %s:%d: cannot allocate %lu bytes"
 msgstr "xrealloc: %s:%d: %lu bayt yeniden ayrılamıyor"
@@ -1859,11 +1931,11 @@ msgid "command [-pVv] command [arg ...]"
 msgstr ""
 
 #: builtins.c:76
-msgid "declare [-afFirtx] [-p] [name[=value] ...]"
+msgid "declare [-aAfFilrtux] [-p] [name[=value] ...]"
 msgstr ""
 
 #: builtins.c:78
-msgid "typeset [-afFirtx] [-p] name[=value] ..."
+msgid "typeset [-aAfFilrtux] [-p] name[=value] ..."
 msgstr ""
 
 #: builtins.c:80
@@ -2250,6 +2322,7 @@ msgstr ""
 "                         girdi olarak kullanılabilir biçimde listeler."
 
 #: builtins.c:322
+#, fuzzy
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2257,8 +2330,11 @@ msgid ""
 "    loops.\n"
 "    \n"
 "    Exit Status:\n"
-"    The exit status is 0 unless the shell is not executing a loop."
+"    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+"\rcontinue [N]\n"
+"    FOR, WHILE veya UNTIL döngülerinin sonraki yinelemesinden devam edilir.\n"
+"    N verilirse dışa doğru N. döngüden devam edilir. N >= 1 olmalıdır."
 
 #: builtins.c:334
 #, fuzzy
@@ -2269,7 +2345,7 @@ msgid ""
 "    If N is specified, resumes the Nth enclosing loop.\n"
 "    \n"
 "    Exit Status:\n"
-"    The exit status is 0 unless the shell is not executing a loop."
+"    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
 "\rcontinue [N]\n"
 "    FOR, WHILE veya UNTIL döngülerinin sonraki yinelemesinden devam edilir.\n"
@@ -2457,10 +2533,13 @@ msgid ""
 "      -p\tdisplay the attributes and value of each NAME\n"
 "    \n"
 "    Options which set attributes:\n"
-"      -a\tto make NAMEs arrays (if supported)\n"
+"      -a\tto make NAMEs indexed arrays (if supported)\n"
+"      -A\tto make NAMEs associative arrays (if supported)\n"
 "      -i\tto make NAMEs have the `integer' attribute\n"
+"      -l\tto convert NAMEs to lower case on assignment\n"
 "      -r\tto make NAMEs readonly\n"
 "      -t\tto make NAMEs have the `trace' attribute\n"
+"      -u\tto convert NAMEs to upper case on assignment\n"
 "      -x\tto make NAMEs export\n"
 "    \n"
 "    Using `+' instead of `-' turns off the given attribute.\n"
@@ -2502,14 +2581,14 @@ msgstr ""
 "kullanılmış\n"
 "    gibi yerel yapar."
 
-#: builtins.c:505
+#: builtins.c:508
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
 
-#: builtins.c:513
+#: builtins.c:516
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2524,7 +2603,7 @@ msgid ""
 "    or the shell is not executing a function."
 msgstr ""
 
-#: builtins.c:530
+#: builtins.c:533
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -2539,7 +2618,7 @@ msgid ""
 "    `echo' interprets the following backslash-escaped characters:\n"
 "      \\a\talert (bell)\n"
 "      \\b\tbackspace\n"
-"      \\c\tsuppress trailing newline\n"
+"      \\c\tsuppress further output\n"
 "      \\e\tescape character\n"
 "      \\f\tform feed\n"
 "      \\n\tnew line\n"
@@ -2577,7 +2656,7 @@ msgstr ""
 "    -E seçeneği ile yukarıdaki karakterlerin yorumlanmasını öntanımlı\n"
 "    olarak etkin olduğu sistemlerde bile kapatabilirsiniz."
 
-#: builtins.c:564
+#: builtins.c:567
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2590,7 +2669,7 @@ msgid ""
 "    Returns success unless a write error occurs."
 msgstr ""
 
-#: builtins.c:579
+#: builtins.c:582
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2617,7 +2696,7 @@ msgid ""
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 msgstr ""
 
-#: builtins.c:607
+#: builtins.c:610
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2629,7 +2708,7 @@ msgid ""
 "    Returns exit status of command or success if command is null."
 msgstr ""
 
-#: builtins.c:619
+#: builtins.c:622
 #, fuzzy
 msgid ""
 "Parse option arguments.\n"
@@ -2721,7 +2800,7 @@ msgstr ""
 "başka\n"
 "    argümanlar verilmişse bunları çözümler."
 
-#: builtins.c:661
+#: builtins.c:664
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2744,7 +2823,7 @@ msgid ""
 "occurs."
 msgstr ""
 
-#: builtins.c:682
+#: builtins.c:685
 #, fuzzy
 msgid ""
 "Exit the shell.\n"
@@ -2756,7 +2835,7 @@ msgstr ""
 "    N durumu ile dönerek kabuk çıkar. N verilmezse son çalıştırılan komutun\n"
 "    çıkış durumu döner."
 
-#: builtins.c:691
+#: builtins.c:694
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2765,7 +2844,7 @@ msgid ""
 "    in a login shell."
 msgstr ""
 
-#: builtins.c:701
+#: builtins.c:704
 #, fuzzy
 msgid ""
 "Display or execute commands from the history list.\n"
@@ -2820,7 +2899,7 @@ msgstr ""
 "    Böylece `r cc' yazarak `cc' ile başlayan son komut,\n"
 "    r' yazarak en son komut çalıştırılabilir."
 
-#: builtins.c:731
+#: builtins.c:734
 #, fuzzy
 msgid ""
 "Move job to the foreground.\n"
@@ -2837,7 +2916,7 @@ msgstr ""
 "    Eğer İŞ_BELİRTİMİ belirtilmemişse kabuk iş belirtimi olarak\n"
 "    o an ki işi kullanır."
 
-#: builtins.c:746
+#: builtins.c:749
 #, fuzzy
 msgid ""
 "Move jobs to the background.\n"
@@ -2855,7 +2934,7 @@ msgstr ""
 "    `&' ile başlatılmışçasına İŞ_BELİRTİMİni artalana yerleştirir.\n"
 "    İŞ_BELİRTİMİ verilmemişse, iş belirtimi olarak o an ki iş kullanılır."
 
-#: builtins.c:760
+#: builtins.c:763
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -2879,7 +2958,7 @@ msgid ""
 "    Returns success unless NAME is not found or an invalid option is given."
 msgstr ""
 
-#: builtins.c:785
+#: builtins.c:788
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -2901,7 +2980,7 @@ msgid ""
 "given."
 msgstr ""
 
-#: builtins.c:809
+#: builtins.c:812
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -2959,7 +3038,7 @@ msgstr ""
 "    damgasını basacak olan strftime(3) işlevine biçim girdisi olur; aksi\n"
 "    takdirde hiç zaman damgası basılmaz."
 
-#: builtins.c:845
+#: builtins.c:848
 #, fuzzy
 msgid ""
 "Display status of jobs.\n"
@@ -2996,7 +3075,7 @@ msgstr ""
 "    ARGümanlar  ile  belirtilen tüm iş belirtimleri,  işlerin süreç grup\n"
 "    liderinin süreç grup kimliğine yerleştirilip KOMUT çalıştırılır."
 
-#: builtins.c:872
+#: builtins.c:875
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3013,7 +3092,7 @@ msgid ""
 "    Returns success unless an invalid option or JOBSPEC is given."
 msgstr ""
 
-#: builtins.c:891
+#: builtins.c:894
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3051,7 +3130,7 @@ msgstr ""
 "    sınırını  aşarsanız  başka  bir  süreci  öldürecek bir süreci başlatmak\n"
 "    zorunda kalmazsınız."
 
-#: builtins.c:914
+#: builtins.c:917
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expressions.\n"
@@ -3136,7 +3215,7 @@ msgstr ""
 "\n"
 "    Son ifade'nin sonucu 0 ise dönüş durumu 1 dir, aksi takdirde 0 dır."
 
-#: builtins.c:959
+#: builtins.c:962
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3169,7 +3248,9 @@ msgid ""
 "      -t timeout\ttime out and return failure if a complete line of input "
 "is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
-"    \t\tvariable is the default timeout.\n"
+"    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
+"    \t\tfractional number.  The exit status is greater than 128 if\n"
+"    \t\tthe timeout is exceeded\n"
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
@@ -3222,7 +3303,7 @@ msgstr ""
 "    okuma zamanaşımına düşmedikçe ya da -u seçeneği ile sağlanan\n"
 "    DoSYaTaNıTıcı geçersiz olmadıkça dönüş durumu sıfırdır."
 
-#: builtins.c:996
+#: builtins.c:1001
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3234,7 +3315,7 @@ msgid ""
 "    Returns N, or failure if the shell is not executing a function or script."
 msgstr ""
 
-#: builtins.c:1009
+#: builtins.c:1014
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3407,7 +3488,7 @@ msgstr ""
 "    atanır. Özel parametre # ise N'e ayarlanır. Hiç argüman verilmezse,\n"
 "    tüm kabuk değişkenleri basılır."
 
-#: builtins.c:1091
+#: builtins.c:1096
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3427,7 +3508,7 @@ msgid ""
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
 
-#: builtins.c:1111
+#: builtins.c:1116
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3446,7 +3527,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1130
+#: builtins.c:1135
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3455,7 +3536,8 @@ msgid ""
 "    before marking as read-only.\n"
 "    \n"
 "    Options:\n"
-"      -a\trefer to array variables\n"
+"      -a\trefer to indexed array variables\n"
+"      -A\trefer to associative array variables\n"
 "      -f\trefer to shell functions\n"
 "      -p\tdisplay a list of all readonly variables and functions\n"
 "    \n"
@@ -3465,7 +3547,7 @@ msgid ""
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
 
-#: builtins.c:1150
+#: builtins.c:1156
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3476,7 +3558,7 @@ msgid ""
 "    Returns success unless N is negative or greater than $#."
 msgstr ""
 
-#: builtins.c:1162 builtins.c:1177
+#: builtins.c:1168 builtins.c:1183
 #, fuzzy
 msgid ""
 "Execute commands from a file in the current shell.\n"
@@ -3504,11 +3586,12 @@ msgstr ""
 "parametreler\n"
 "    değiştirilmez."
 
-#: builtins.c:1193
+#: builtins.c:1199
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
 "    Suspend the execution of this shell until it receives a SIGCONT signal.\n"
+"    Unless forced, login shells cannot be suspended.\n"
 "    \n"
 "    Options:\n"
 "      -f\tforce the suspend, even if the shell is a login shell\n"
@@ -3517,7 +3600,7 @@ msgid ""
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
 
-#: builtins.c:1208
+#: builtins.c:1215
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3671,7 +3754,7 @@ msgstr ""
 "    küçüklük, büyüklük, küçüklük veya eşitlik, büyüklük veya eşitlik varsa\n"
 "    ifadenin sonucu doğrudur."
 
-#: builtins.c:1284
+#: builtins.c:1291
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -3683,7 +3766,7 @@ msgstr ""
 "   test yerleşiği ile aynıdır, fakat son argüman açan `[' ile eşleşen\n"
 "   kapatan `]' olmak zorundadır."
 
-#: builtins.c:1293
+#: builtins.c:1300
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3695,7 +3778,7 @@ msgid ""
 "    Always succeeds."
 msgstr ""
 
-#: builtins.c:1305
+#: builtins.c:1312
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -3748,7 +3831,7 @@ msgstr ""
 "    numaraları  ile  birlikte  listelemesini  sağlar.  Kabuğa  bir  sinyal\n"
 "    göndermek isterseniz \"kill -SİGNAL $$\" sözdizimini kullanabilirsiniz."
 
-#: builtins.c:1337
+#: builtins.c:1344
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -3778,7 +3861,7 @@ msgid ""
 "found."
 msgstr ""
 
-#: builtins.c:1368
+#: builtins.c:1375
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -3855,7 +3938,7 @@ msgstr ""
 "    için 512 baytlık blok sayısı olarak,  -n  ve  -u  için birimsiz,  kalan\n"
 "    seçenekler için 1024 baytlık blok sayısı olarak belirtilmelidir."
 
-#: builtins.c:1413
+#: builtins.c:1420
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -3873,7 +3956,7 @@ msgid ""
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
 
-#: builtins.c:1433
+#: builtins.c:1440
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -3890,7 +3973,7 @@ msgid ""
 "    given."
 msgstr ""
 
-#: builtins.c:1451
+#: builtins.c:1458
 #, fuzzy
 msgid ""
 "Wait for process completion and return exit status.\n"
@@ -3911,7 +3994,7 @@ msgstr ""
 "    belirtimi de olabilir; bir iş belirtimi verilirse işin\n"
 "    boruhattındaki tüm süreçler için beklenir."
 
-#: builtins.c:1466
+#: builtins.c:1473
 #, fuzzy
 msgid ""
 "Execute commands for each member in a list.\n"
@@ -3930,7 +4013,7 @@ msgstr ""
 "    yoksa, `in \"$@\"' belirtilmiş gibi kümeyi oluşturan her parametre\n"
 "    için KOMUTlar birer kere çalıştırılır."
 
-#: builtins.c:1480
+#: builtins.c:1487
 #, fuzzy
 msgid ""
 "Arithmetic for loop.\n"
@@ -3957,10 +4040,10 @@ msgstr ""
 "    İFADE1, İFADE2 ve İFADE3 aritmetik ifadelerdir. Verilmeyen her\n"
 "    ifade için 1 verilmiş gibi işlem yapılır."
 
-#: builtins.c:1498
+#: builtins.c:1505
 #, fuzzy
 msgid ""
-"Select words from a list and execute commands..\n"
+"Select words from a list and execute commands.\n"
 "    \n"
 "    The WORDS are expanded, generating a list of words.  The\n"
 "    set of expanded words is printed on the standard error, each\n"
@@ -3997,7 +4080,7 @@ msgstr ""
 "    değişkeninde tutulur. Her seçimden sonra bir break komutu ile\n"
 "    sonlandırılıncaya kadar komutlar çalıştırılır."
 
-#: builtins.c:1519
+#: builtins.c:1526
 #, fuzzy
 msgid ""
 "Report time consumed by pipeline's execution.\n"
@@ -4021,7 +4104,7 @@ msgstr ""
 "    istatistiklerinin  biraz farklı bir biçimde basılmasını sağlar;  çıktı\n"
 "    biçimi olarak TIMEFORMAT değişkeninin değerini kullanır."
 
-#: builtins.c:1536
+#: builtins.c:1543
 #, fuzzy
 msgid ""
 "Execute commands based on pattern matching.\n"
@@ -4036,7 +4119,7 @@ msgstr ""
 "    SÖZcük ile eşleşen ilk KALIP'a karşı düşen KOMUTları çalıştırır.\n"
 "    `|' çok sayıda kalıbı ayırmak için kullanılır."
 
-#: builtins.c:1548
+#: builtins.c:1555
 #, fuzzy
 msgid ""
 "Execute commands based on conditional.\n"
@@ -4071,7 +4154,7 @@ msgstr ""
 "    çıkış durumudur.  Bir komut çalıştırılmamışsa  ve hiçbir koşul\n"
 "    doğru sonuç vermemişse sıfır döner."
 
-#: builtins.c:1565
+#: builtins.c:1572
 #, fuzzy
 msgid ""
 "Execute commands as long as a test succeeds.\n"
@@ -4086,7 +4169,7 @@ msgstr ""
 "    `while KOMUTlar; listesinin çıkış durumu sıfır olduğu sürece\n"
 "    `do KOMUTlar;' listesi çalıştırılır."
 
-#: builtins.c:1577
+#: builtins.c:1584
 #, fuzzy
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
@@ -4101,7 +4184,7 @@ msgstr ""
 "    `until KOMUTlar; listesinin çıkış durumu sıfırdan farklı olduğu sürece\n"
 "    `do KOMUTlar;' listesi çalıştırılır."
 
-#: builtins.c:1589
+#: builtins.c:1596
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4115,7 +4198,7 @@ msgid ""
 "    Returns success unless NAME is readonly."
 msgstr ""
 
-#: builtins.c:1603
+#: builtins.c:1610
 #, fuzzy
 msgid ""
 "Group commands as a unit.\n"
@@ -4130,7 +4213,7 @@ msgstr ""
 "    KOMUTlar bir grup olarak çalıştırılır. Bu, bir komut kümesini bir\n"
 "    yönlendirmede kullanmanın tek yoludur."
 
-#: builtins.c:1615
+#: builtins.c:1622
 #, fuzzy
 msgid ""
 "Resume job in foreground.\n"
@@ -4151,7 +4234,7 @@ msgstr ""
 "    İŞ_BELİRTİMİ'nden sonra bir & gelmesi işin `bg' komutununa argüman\n"
 "    olarak kullanılmış gibi artalana yerleştirilmesine sebep olur."
 
-#: builtins.c:1630
+#: builtins.c:1637
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
@@ -4166,7 +4249,7 @@ msgstr ""
 "    Verilen aritmetik İFADE aritmetik değerlendirme kurallarına göre\n"
 "    değerlendirilir. \"let İFADE\" ile eşdeğerdir."
 
-#: builtins.c:1642
+#: builtins.c:1649
 #, fuzzy
 msgid ""
 "Execute conditional command.\n"
@@ -4209,7 +4292,7 @@ msgstr ""
 "   olarak ele alınır ve kalıp eşleştirmesi uygulanır. && ve || işleçleri\n"
 "   eğer ilk ifade sonuç için belirleyici ise ikincisine bakmazlar."
 
-#: builtins.c:1668
+#: builtins.c:1675
 #, fuzzy
 msgid ""
 "Common shell variable names and usage.\n"
@@ -4330,7 +4413,7 @@ msgstr ""
 "                       gerektiğine karar vermek için kullanılan kalıpların\n"
 "                       ikinokta imi ayraçlı listesi.\n"
 
-#: builtins.c:1725
+#: builtins.c:1732
 #, fuzzy
 msgid ""
 "Add directories to stack.\n"
@@ -4382,7 +4465,7 @@ msgstr ""
 "\n"
 "    Dizin yığıtını `dirs' komutuyla görebilirsiniz."
 
-#: builtins.c:1759
+#: builtins.c:1766
 #, fuzzy
 msgid ""
 "Remove directories from stack.\n"
@@ -4423,7 +4506,7 @@ msgstr ""
 "          engeller, böylece sadece yığıt değiştirilmiş olur. \n"
 "    Dizin yığıtını `dirs' komutuyla görebilirsiniz."
 
-#: builtins.c:1789
+#: builtins.c:1796
 #, fuzzy
 msgid ""
 "Display directory stack.\n"
@@ -4469,7 +4552,7 @@ msgstr ""
 "    -N   dirs seçeneksiz çağrıldığında gösterdiği listenin sağından\n"
 "         sıfırla başlayarak sayılan N'inci girdiyi gösterir."
 
-#: builtins.c:1818
+#: builtins.c:1825
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -4490,7 +4573,7 @@ msgid ""
 "    given or OPTNAME is disabled."
 msgstr ""
 
-#: builtins.c:1839
+#: builtins.c:1846
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -4532,7 +4615,7 @@ msgstr ""
 "    biçimde çıktılamasını sağlar. -v seçeneği çıktının standart çıktıya\n"
 "    basılması yerine DEĞİŞKENe atanmasını sağlar. "
 
-#: builtins.c:1866
+#: builtins.c:1873
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -4554,7 +4637,7 @@ msgid ""
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
 
-#: builtins.c:1889
+#: builtins.c:1896
 #, fuzzy
 msgid ""
 "Display possible completions depending on the options.\n"
@@ -4574,7 +4657,7 @@ msgstr ""
 "    amacıyla tasarlanmıştır. İsteğe bağlı SÖZCÜK argümanı sağlandığı\n"
 "    takdirde eşleşmelerden sadece SÖZCÜK ile eşleşenler üretilir."
 
-#: builtins.c:1904
+#: builtins.c:1911
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4603,7 +4686,7 @@ msgid ""
 "    have a completion specification defined."
 msgstr ""
 
-#: builtins.c:1932
+#: builtins.c:1939
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

@@ -6781,3 +6781,31 @@ subst.c
 	  parse_and_execute_level is 0.  If it's not, the longjmp to
 	  parse_and_execute will run the unwind-protect stack.  Fixes bug
 	  most recently reported by Roman Rakus <rrakus@redhat.com>
+
+				   8/18
+				   ----
+support/config.{guess,sub}
+	- updated to newer versions from autoconf-2.62 distribution
+
+				   8/20
+				   ----
+subst.c
+	- fixed parameter_brace_substring to differentiate between indexed and
+	  associative arrays when computing second offset, instead of
+	  assuming indexed array
+
+				   8/21
+				   ----
+support/xcase.c
+	- simple program to convert input from lower to uppercase and vice
+	  versa.  Now used by coproc test suite, since `tr -u' is not
+	  portable.
+
+				   8/22
+				   ----
+doc/bash.1
+	- fixed description of the bindable edit-and-execute commands to note
+	  they check $VISUAL first, instead of $FCEDIT.  Fixed bug reported
+	  by
+
+[bash-4.0-alpha frozen]

@@ -1,0 +1,56 @@
+#! /bin/sh
+#
+# relicense - change copyrights between GPL2 and GPL3
+#
+# usage: relicense [n]
+#
+# n is `2' or `3'.  The default `n' is 2
+#
+# Chet Ramey
+# chet.ramey@case.edu
+#
+SRC=/usr/homes/chet/src/bash/src
+
+V=2
+
+if [ ! -f parse.y ]; then
+	echo "relicense: must be run from source directory to be relicensed" >&2
+	exit 2
+fi
+
+case "$1" in
+2)	V=2 ;;
+3)	V=3 ;;
+"")	;;
+*)	echo "relicense: usage: relicense [2|3]" >&2  ; exit 2 ;;
+esac
+
+LIC2="version 2 of the License"
+LIC3="version 3 of the License"
+
+VS2='GPLv2+: GNU GPL version 2 or later'
+VS3='GPLv3+: GNU GPL version 3 or later'
+
+case "$V" in
+2)	PAT1="$LIC3" REP1="$LIC2" PAT2="$VS3" REP2="$VS2" ;;
+3)	PAT1="$LIC2" REP1="$LIC3" PAT2="$VS2" REP2="$VS3" ;;
+esac
+
+find . -type f -print |
+	while read fn ; do
+		BASE=${fn##*/}
+		sed -e "s|$PAT1|$REP1|g" -e "s|$PAT2|$REP2|g" < $fn > /tmp/$BASE && touch -r $fn /tmp/$BASE
+		cmp -s /tmp/$BASE $fn || mv /tmp/$BASE $fn
+		echo $fn
+		rm -f /tmp/$BASE
+	done
+
+echo "relicense: copying appropriate license file"
+case "$V" in
+2)	cp -p $SRC/COPYINGv2 COPYING
+	cp -p $SRC/COPYINGv2 lib/readline/COPYING ;;
+3)	cp -p $SRC/COPYINGv3 COPYING
+	cp -p $SRC/COPYINGv3 lib/readline/COPYING ;;
+esac
+
+exit 0
