@@ -66,6 +66,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "shmbutil.h"
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "common.h"
@@ -148,6 +149,8 @@ extern int errno;
 	  vbsize = 0; \
 	  vbuf = 0; \
 	} \
+      else if (vbuf) \
+	vbuf[0] = 0; \
       fflush (stdout); \
       if (ferror (stdout)) \
 	{ \
@@ -188,7 +191,7 @@ typedef double floatmax_t;
 #endif
 static floatmax_t getfloatmax __P((void));
 
-static int asciicode __P((void));
+static intmax_t asciicode __P((void));
 
 static WORD_LIST *garglist;
 static int retval;
@@ -1016,12 +1019,31 @@ getfloatmax ()
 }
 
 /* NO check is needed for garglist here. */
-static int
+static intmax_t
 asciicode ()
 {
-  register int ch;
+  register intmax_t ch;
+#if defined (HANDLE_MULTIBYTE)
+  wchar_t wc;
+  size_t mblength, slen;
+#endif
+  DECLARE_MBSTATE;
 
-  ch = garglist->word->word[1];
+#if defined (HANDLE_MULTIBYTE)
+  slen = strlen (garglist->word->word+1);
+  mblength = mbrlen (garglist->word->word+1, slen, NULL);
+#if 0
+  if (mblength > 1)
+#else
+  if (1)
+    {
+      mblength = mbrtowc (&wc, garglist->word->word+1, slen, NULL);
+      ch = wc;		/* XXX */
+    }
+  else
+#endif
+    ch = garglist->word->word[1];
+
   garglist = garglist->next;
   return (ch);
 }

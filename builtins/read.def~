@@ -137,7 +137,7 @@ read_builtin (list)
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-  char *e, *t, *t1, *ps2;
+  char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
   SHELL_VAR *var;
 #if defined (ARRAY_VARS)
@@ -492,7 +492,7 @@ add_char:
       input_string[i++] = c;
 
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1)
+      if (nchars > 0 && MB_CUR_MAX > 1)
 	{
 	  input_string[i] = '\0';	/* for simplicity and debugging */
 	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
@@ -695,7 +695,8 @@ add_char:
   if (*input_string)
     {
       t1 = input_string;
-      t = get_word_from_string (&input_string, ifs_chars, &e);
+      tofree = NULL;
+      tofree = t = get_word_from_string (&input_string, ifs_chars, &e);
       if (*input_string == 0)
 	input_string = t;
       else

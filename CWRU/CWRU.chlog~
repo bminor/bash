@@ -14957,3 +14957,53 @@ builtins/type.def
 	- change exit status of `type' to not successful if any of the
 	  requested commands are not found.  Reported by Stephane Chazleas
 	  <stephane_chazelas@yahoo.fr>
+
+pcomplete.c
+	- change command_line_to_word_list to use rl_completer_word_break_characters
+	  instead of the shell metacharacters to split words, so programmable
+	  completion does the same thing readline does internally.  Reported
+	  by Vasily Tarasov <vtaras@sw.ru>
+
+				   10/16
+				   -----
+bashline.c
+	- When completing a command name beginnig with a tilde and containing
+	  escaped specical characters, dequote the filename before prefixing
+	  it to the matches, so the escapes are not quoted again.  Reported
+	  by neil@s-z.org
+
+				   10/17
+				   -----
+expr.c
+	- in readtok(), don't reset lasttp if we've consumed the whitespace
+	  at the end of the expression string.  Fixes error message problem
+	  reported by <anmaster@tele2.se>
+
+				   11/1
+				   ----
+builtins/printf.def
+	- change asciicode() to return intmax_t; add multibyte character
+	  support instead of assuming ASCII (depending on behavior of system
+	  multibyte support functions).  Fixes bug reported by Rich
+	  Felker <dalias@aerifal.cx>
+
+				   11/9
+				   ----
+builtins/read.def
+	- make sure the return value from get_word_from_string is freed if
+	  non-null.  Fixes bug reported by Lars Ellenberg
+	  <lars.ellenberg@linbit.com>
+
+				   11/10
+				   -----
+variables.c
+	- use getpid() as value of seeded_subshell to avoid problems with
+	  random number generator not getting re-seeded correctly when
+	  subshells are created.  Fix from Tomas Janousek <tjanouse@redhat.com>
+
+lib/readline/display.c
+	- in update_line(), when outputting characters at the end of the line,
+	  e.g., when displaying the prompt string, adjust _rl_last_c_pos by
+	  wrap_offset if the text we're drawing begins before the last
+	  invisible character in the line.  Similar to fix from 5/24.  Fixes
+	  bug reported by Miroslav Lichvar <mlichvar@redhat.com>

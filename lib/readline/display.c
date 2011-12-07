@@ -1618,11 +1618,16 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	    }
 	  else
 	    {
-	      /* We have horizontal scrolling and we are not inserting at
-		 the end.  We have invisible characters in this line.  This
-		 is a dumb update. */
 	      _rl_output_some_chars (nfd, temp);
 	      _rl_last_c_pos += col_temp;
+	      /* If nfd begins before any invisible characters in the prompt,
+		 adjust _rl_last_c_pos to account for wrap_offset and set
+		 cpos_adjusted to let the caller know. */
+	      if (current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
+		{
+		  _rl_last_c_pos -= wrap_offset;
+		  cpos_adjusted = 1;
+		}
 	      return;
 	    }
 	  /* Copy (new) chars to screen from first diff to last match. */

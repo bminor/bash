@@ -619,7 +619,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
       dispose_exec_redirects ();
-      return (EXECUTION_FAILURE);
+      return (last_command_exit_value = EXECUTION_FAILURE);
     }
 
   if (redirection_undo_list)

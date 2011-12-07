@@ -1186,20 +1186,21 @@ assign_random (self, value, unused)
 {
   sbrand (strtoul (value, (char **)NULL, 10));
   if (subshell_environment)
-    seeded_subshell = 1;
+    seeded_subshell = getpid ();
   return (self);
 }
 
 int
 get_random_number ()
 {
-  int rv;
+  int rv, pid;
 
   /* Reset for command and process substitution. */
-  if (subshell_environment && seeded_subshell == 0)
+  pid = getpid ();
+  if (subshell_environment && seeded_subshell != pid)
     {
-      sbrand (rseed + getpid() + NOW);
-      seeded_subshell = 1;
+      sbrand (rseed + pid + NOW);
+      seeded_subshell = pid;
     }
 
   do
