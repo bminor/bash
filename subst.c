@@ -4006,7 +4006,11 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
   if (patspec == RP_LONG_LEFT || patspec == RP_LONG_RIGHT)
     patstr++;
 
-  pattern = getpattern (patstr, quoted, 1);
+  /* Need to pass getpattern newly-allocated memory in case of expansion --
+     the expansion code will free the passed string on an error. */
+  temp1 = savestring (patstr);
+  pattern = getpattern (temp1, quoted, 1);
+  free (temp1);
 
   temp1 = (char *)NULL;		/* shut up gcc */
   switch (vtype)
@@ -5974,7 +5978,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
   int t_index, sindex, c, tflag;
   intmax_t number;
 
-  value = (char *)NULL;
+  temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
   want_substring = want_indir = want_patsub = 0;
 
@@ -6059,7 +6063,6 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       temp = (char *)NULL;
       goto bad_substitution;
     }
-
   /* Indirect expansion begins with a `!'.  A valid indirect expansion is
      either a variable name, one of the positional parameters or a special
      variable that expands to one of the positional parameters. */

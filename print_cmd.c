@@ -106,15 +106,7 @@ int command_string_index = 0;
 
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
-
-/* Used to decide where to put the `|' if the command in the pipeline has
-   here documents associated with it.  If non-zero, print_redirection
-   prints the `|' before the text of the here document and print_connection
-   suppresses the `|'. */
-static int inside_pipeline;
 static int skip_this_indent;
-
-/* Flag indicating we printed a here-document. */
 static int was_heredoc;
 
 /* The depth of the group commands that we are currently printing.  This
@@ -141,7 +133,7 @@ char *
 make_command_string (command)
      COMMAND *command;
 {
-  command_string_index = was_heredoc = inside_pipeline = 0;
+  command_string_index = was_heredoc = 0;
   make_command_string_internal (command);
   return (the_printed_command);
 }
@@ -223,11 +215,7 @@ make_command_string_internal (command)
 	case cm_connection:
 
 	  skip_this_indent++;
-	  if (command->value.Connection->connector == '|')
-	    inside_pipeline = 1;
 	  make_command_string_internal (command->value.Connection->first);
-	  if (command->value.Connection->connector == '|')
-	    inside_pipeline = 0;
 
 	  switch (command->value.Connection->connector)
 	    {
@@ -235,10 +223,7 @@ make_command_string_internal (command)
 	    case '|':
 	      {
 		char c = command->value.Connection->connector;
-		if (c == '&' || was_heredoc == 0)
-		  cprintf (" %c", c);
-		else
-		  was_heredoc = 0;
+		cprintf (" %c", c);
 		if (c != '&' || command->value.Connection->second)
 		  {
 		    cprintf (" ");
@@ -866,10 +851,6 @@ print_redirection_list (redirects)
      print the here documents. */
   if (heredocs)
     {
-if (inside_pipeline)
-{
-itrace("print_redirection_list: here documents inside pipeline");
-}
       cprintf (" "); 
       for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
 	{
@@ -887,7 +868,6 @@ print_redirection (redirect)
 {
   int kill_leading, redirector, redir_fd;
   WORD_DESC *redirectee;
-  char *x;
 
   kill_leading = 0;
   redirectee = redirect->redirectee.filename;
@@ -925,16 +905,17 @@ print_redirection (redirect)
       if (redirector != 0)
 	cprintf ("%d", redirector);
       /* If the here document delimiter is quoted, single-quote it. */
-      x = (redirect->redirectee.filename->flags & W_QUOTED)
-		? sh_single_quote (redirect->here_doc_eof)
-		: redirect->here_doc_eof;
-      cprintf ("<<%s%s", kill_leading? "-" : "", x);
-      if (x != redirect->here_doc_eof)
-	free (x);
-if (inside_pipeline)
-  cprintf (" |");
-      cprintf ("\n");
-      cprintf ("%s%s", redirect->redirectee.filename->word, redirect->here_doc_eof);
+      if (redirect->redirectee.filename->flags & W_QUOTED)
+	{
+	  char *x;
+	  x = sh_single_quote (redirect->here_doc_eof);
+	  cprintf ("<<%s%s\n", kill_leading? "-" : "", x);
+	  free (x);
+	}
+      else
+	cprintf ("<<%s%s\n", kill_leading? "-" : "", redirect->here_doc_eof);
+      cprintf ("%s%s",
+	       redirect->redirectee.filename->word, redirect->here_doc_eof);
       break;
 
     case r_reading_string:
@@ -1010,7 +991,6 @@ reset_locals ()
 {
   inside_function_def = 0;
   indentation = 0;
-  inside_pipeline = 0;
 }
 
 static void
@@ -1030,7 +1010,7 @@ print_function_def (func)
   inside_function_def++;
   indentation += indentation_amount;
 
-  cmdcopy = copy_command (func->command);	/* possible mem leak on unwind-protect */
+  cmdcopy = copy_command (func->command);
   if (cmdcopy->type == cm_group)
     {
       func_redirects = cmdcopy->redirects;
@@ -1075,7 +1055,6 @@ named_function_string (name, command, multi_line)
   old_indent = indentation;
   old_amount = indentation_amount;
   command_string_index = was_heredoc = 0;
-  inside_pipeline = 0;
 
   if (name && *name)
     cprintf ("%s ", name);

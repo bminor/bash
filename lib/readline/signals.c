@@ -300,7 +300,7 @@ rl_set_signals ()
       sigemptyset (&bset);
 
       sigaddset (&bset, SIGINT);
-      sigaddset (&bset, SIGINT);
+      sigaddset (&bset, SIGTERM);
 #if defined (SIGQUIT)
       sigaddset (&bset, SIGQUIT);
 #endif

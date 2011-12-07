@@ -2,16 +2,15 @@
 .\" MAN PAGE COMMENTS to
 .\"
 .\"	Chet Ramey
-.\"	Information Network Services
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Jan 12 16:29:22 EST 2007
+.\"	Last Change: Tue May  1 10:05:17 EDT 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2007 January 12" "GNU Bash-3.2"
+.TH BASH 1 "2007 May 1" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2005 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2005 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2007 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2007 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -646,7 +645,8 @@ The return status is the exit status of
 Note that unlike the metacharacters \fB(\fP and \fB)\fP, \fB{\fP and
 \fB}\fP are \fIreserved words\fP and must occur where a reserved
 word is permitted to be recognized.  Since they do not cause a word
-break, they must be separated from \fIlist\fP by whitespace.
+break, they must be separated from \fIlist\fP by whitespace or another
+shell metacharacter.
 .TP
 ((\fIexpression\fP))
 The \fIexpression\fP is evaluated according to the rules described
@@ -2570,7 +2570,7 @@ The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion.
 \fIParameter\fP is expanded and the longest match of \fIpattern\fP
 against its value is replaced with \fIstring\fP.
-If \Ipattern\fP begins with \fB/\fP, all matches of \fIpattern\fP are
+If \fIpattern\fP begins with \fB/\fP, all matches of \fIpattern\fP are
 replaced with \fIstring\fP.  Normally only the first match is replaced.
 If \fIpattern\fP begins with \fB#\fP, it must match at the beginning
 of the expanded value of \fIparameter\fP.
@@ -8319,6 +8319,7 @@ an argument of \fB\-\-\fP as signifying the end of options.
 .if n .sp 1
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence.
+The evaluation depends on the number of arguments; see below.
 .RS
 .PD 0
 .TP
@@ -8376,14 +8377,14 @@ under
 .BR "CONDITIONAL EXPRESSIONS" ,
 the result of the expression is the result of the binary test using
 the first and third arguments as operands.
+The \fB\-a\fP and \fB\-o\fP operators are considered binary operators
+when there are three arguments.  
 If the first argument is \fB!\fP, the value is the negation of
 the two-argument test using the second and third arguments.
 If the first argument is exactly \fB(\fP and the third argument is
 exactly \fB)\fP, the result is the one-argument test of the second
 argument.
 Otherwise, the expression is false.
-The \fB\-a\fP and \fB\-o\fP operators are considered binary operators
-in this case.  
 .TP
 4 arguments
 If the first argument is \fB!\fP, the result is the negation of
