@@ -46,7 +46,7 @@
 #define V9_ECHO
 
 /* Define DONT_REPORT_SIGPIPE if you don't want to see `Broken pipe' messages
-   when a job like `cat jobs.c | exit 1' is executed. */
+   when a job like `cat jobs.c | exit 1' terminates due to a SIGPIPE. */
 #define DONT_REPORT_SIGPIPE
 
 /* The default value of the PATH variable. */

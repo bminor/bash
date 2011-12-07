@@ -14845,3 +14845,15 @@ subst.c
 	- change to do_assignment_internal to make an assignment to a variable
 	  with the `noassign' internal attribute not a variable assignment
 	  error.
+	- fix do_assignment_internal so assignment to a `noassign' variable
+	  does not cause it to suddenly become visible if it's currently
+	  invisible
+
+				    9/3
+				    ---
+stringlib.c
+	- change strsub to check whether or not temp is non-null before
+	  trying to null-terminate it.  Also make sure temp is allocated
+	  even if the pattern and replacement strings are empty, and set
+	  to a copy of string (like ${foo//})
+	  Bug report from Timo Lindfors <timo.lindfors@iki.fi>

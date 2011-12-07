@@ -155,8 +155,12 @@ strsub (string, pat, rep, global)
     {
       if (repl && STREQN (string + i, pat, patlen))
 	{
+#if 0
 	  if (replen)
 	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
+#else
+	  RESIZE_MALLOCED_BUFFER (temp, templen, replen ? replen : 1, tempsize, replen ? (replen * 2) : 16);
+#endif
 
 	  for (r = rep; *r; )
 	    temp[templen++] = *r++;
@@ -172,8 +176,6 @@ strsub (string, pat, rep, global)
     }
   if (temp)
     temp[templen] = 0;
-  else
-    temp = savestring (string);
   return (temp);
 }
 
