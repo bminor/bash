@@ -1861,10 +1861,10 @@ make_variable_value (var, value, flags)
 	}
       rval = evalexp (value, &expok);
       if (expok == 0)
-        {
-          top_level_cleanup ();
+	{
+	  top_level_cleanup ();
 	  jump_to_top_level (DISCARD);
-        }
+	}
       if (flags & ASS_APPEND)
 	rval += lval;
       retval = itos (rval);

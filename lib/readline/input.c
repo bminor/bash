@@ -578,7 +578,7 @@ _rl_read_mbstring (first, mb, mlen)
 
   c = first;
   memset (mb, 0, mlen);
-  for (i = 0; c > 0 && i < mlen; i++)
+  for (i = 0; c >= 0 && i < mlen; i++)
     {
       mb[i] = (char)c;
       memset (&ps, 0, sizeof (mbstate_t));

@@ -163,8 +163,6 @@ int allow_null_glob_expansion;
 /* Non-zero means to throw an error when globbing fails to match anything. */
 int fail_glob_expansion;
 
-int assigining_in_environment;
-
 #if 0
 /* Variables to keep track of which words in an expanded word list (the
    output of expand_word_list_internal) are the result of globbing
