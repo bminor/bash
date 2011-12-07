@@ -1366,6 +1366,7 @@ get_comp_wordbreaks (var)
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
+itrace("get: rl_completer_word_break_characters = `%s'", rl_completer_word_break_characters);
   var_setvalue (var, rl_completer_word_break_characters);
 
   return (var);
@@ -1384,6 +1385,7 @@ assign_comp_wordbreaks (self, value, unused)
     free (rl_completer_word_break_characters);
 
   rl_completer_word_break_characters = savestring (value);
+itrace("assign: rl_completer_word_break_characters = `%s'", rl_completer_word_break_characters);
   return self;
 }
 #endif /* READLINE */
@@ -3922,6 +3924,18 @@ stupidly_hack_special_variables (name)
   i = find_special_var (name);
   if (i != -1)
     (*(special_vars[i].function)) (name);
+}
+
+/* Special variables that need hooks to be run when they are unset as part
+   of shell reinitialization should have their sv_ functions run here. */
+void
+reinit_special_variables ()
+{
+#if defined (READLINE)
+  sv_comp_wordbreaks ("COMP_WORDBREAKS");
+#endif
+  sv_globignore ("GLOBIGNORE");
+  sv_opterr ("OPTERR");
 }
 
 void

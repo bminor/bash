@@ -331,7 +331,7 @@ enable_hostname_completion (on_or_off)
       free (rl_completer_word_break_characters);
       rl_completer_word_break_characters = nval;
     }
-
+itrace("enable_hostname_completion: rl_completer_word_break_characters = %s", rl_completer_word_break_characters);
   return (old_value);
 }
 
@@ -511,6 +511,12 @@ initialize_readline ()
 #endif
 
   bash_readline_initialized = 1;
+}
+
+void
+bashline_reset ()
+{
+  bash_readline_initialized = 0;
 }
 
 /* On Sun systems at least, rl_attempted_completion_function can end up

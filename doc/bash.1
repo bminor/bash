@@ -6193,10 +6193,8 @@ loop.  If \fIn\fP is specified, break \fIn\fP levels.
 must be \(>= 1.  If
 .I n
 is greater than the number of enclosing loops, all enclosing loops
-are exited.  The return value is 0 unless the shell is not executing
-a loop when
-.B break
-is executed.
+are exited.
+The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
 \fBbuiltin\fP \fIshell\-builtin\fP [\fIarguments\fP]
 Execute the specified shell builtin, passing it
@@ -6552,10 +6550,8 @@ is specified, resume at the \fIn\fPth enclosing loop.
 must be \(>= 1.  If
 .I n
 is greater than the number of enclosing loops, the last enclosing loop
-(the ``top-level'' loop) is resumed.  The return value is 0 unless the
-shell is not executing a loop when
-.B continue
-is executed.
+(the ``top-level'' loop) is resumed.
+The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
 \fBdeclare\fP [\fB\-afFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0

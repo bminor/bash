@@ -7581,6 +7581,11 @@ string_quote_removal (string, quoted)
 	{
 	case '\\':
 	  c = string[++sindex];
+	  if (c == 0)
+	    {
+	      *r++ = '\\';
+	      break;
+	    }
 	  if (((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || dquote) && (sh_syntaxtab[c] & CBSDQUOTE) == 0)
 	    *r++ = '\\';
 	  /* FALLTHROUGH */

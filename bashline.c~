@@ -225,7 +225,7 @@ int no_empty_command_completion;
 int force_fignore = 1;
 
 /* Perform spelling correction on directory names during word completion */
-int dircomplete_spelling = 1;
+int dircomplete_spelling = 0;
 
 static char *bash_completer_word_break_characters = " \t\n\"'@><=;|&(:";
 static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
@@ -331,7 +331,7 @@ enable_hostname_completion (on_or_off)
       free (rl_completer_word_break_characters);
       rl_completer_word_break_characters = nval;
     }
-
+itrace("enable_hostname_completion: rl_completer_word_break_characters = %s", rl_completer_word_break_characters);
   return (old_value);
 }
 

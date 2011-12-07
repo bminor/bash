@@ -71,6 +71,10 @@
 #  include <readline/history.h>
 #endif
 
+#if defined (READLINE)
+#  include "bashline.h"
+#endif
+
 #include <tilde/tilde.h>
 #include <glob/strmatch.h>
 
@@ -184,9 +188,6 @@ int have_devfd = HAVE_DEV_FD;
 #else
 int have_devfd = 0;
 #endif
-
-/* If == 31, shell compatible with bash-3.1, = =32 with bash-3.2, and so on */
-int shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -1742,6 +1743,12 @@ shell_reinitialize ()
      the environment is parsed. */
   delete_all_contexts (shell_variables);
   delete_all_variables (shell_functions);
+
+  reinit_special_variables ();
+
+#if defined (READLINE)
+  bash_readline_initialized = 0;
+#endif
 
   shell_reinitialized = 1;
 }

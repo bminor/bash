@@ -325,6 +325,10 @@ extern void set_pipestatus_from_exit __P((int));
    is one of the special ones where something special happens. */
 extern void stupidly_hack_special_variables __P((char *));
 
+/* Reinitialize some special variables that have external effects upon unset
+   when the shell reinitializes itself. */
+extern void reinit_special_variables __P((void));
+
 extern int get_random_number __P((void));
 
 /* The `special variable' functions that get called when a particular

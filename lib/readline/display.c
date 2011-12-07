@@ -682,7 +682,7 @@ rl_redisplay ()
          prompts that exceed two physical lines?
          Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
 	{
 	  n0 = num;
           temp = local_prompt_len;
@@ -713,7 +713,7 @@ rl_redisplay ()
              
       inv_lbreaks[++newlines] = temp;
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
 	lpos -= _rl_col_width (local_prompt, n0, num);
       else
 #endif
@@ -985,13 +985,17 @@ rl_redisplay ()
 		  _rl_last_c_pos != o_cpos &&
 		  _rl_last_c_pos > wrap_offset &&
 		  o_cpos < prompt_last_invisible)
-		_rl_last_c_pos -= wrap_offset;
+		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 
 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
 			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 			cpos_adjusted == 0 &&
 			_rl_last_c_pos != o_cpos &&
+#if 0
 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - (wrap_offset-prompt_invis_chars_first_line)))
+#else
+			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))
+#endif
 		_rl_last_c_pos -= (wrap_offset-prompt_invis_chars_first_line);
 		  
 	      /* If this is the line with the prompt, we might need to

@@ -362,8 +362,6 @@ initialize_shell_variables (env, privmode)
 	  VSETATTR (temp_var, (att_exported | att_imported));
 	  array_needs_making = 1;
 	}
-else
-  internal_error (_("`%s': not a valid identifier"), name);
 
       name[char_index] = '=';
       /* temp_var can be NULL if it was an exported function with a syntax
@@ -1368,6 +1366,7 @@ get_comp_wordbreaks (var)
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
+itrace("get: rl_completer_word_break_characters = `%s'", rl_completer_word_break_characters);
   var_setvalue (var, rl_completer_word_break_characters);
 
   return (var);
@@ -1386,6 +1385,7 @@ assign_comp_wordbreaks (self, value, unused)
     free (rl_completer_word_break_characters);
 
   rl_completer_word_break_characters = savestring (value);
+itrace("assign: rl_completer_word_break_characters = `%s'", rl_completer_word_break_characters);
   return self;
 }
 #endif /* READLINE */

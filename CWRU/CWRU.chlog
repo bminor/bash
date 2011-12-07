@@ -15783,3 +15783,54 @@ variables.c
 	- when reading the initial environment, don't create variables with
 	  names that are not valid shell identifiers.  Fixes bug reported by
 	  Stephane Chazleas <stephane_chazelas@yahoo.fr>
+
+				   5/13
+				   ----
+subst.c
+	- fix string_quote_removal to gracefully handle the case where a
+	  backslash is the final character in the string (leaves the backslash
+	  in place).  Fixes bug reported by Ian Robertson
+	  <iroberts@u.washington.edu>
+
+				   5/16
+				   ----
+support/checkbashisms
+	- Perl script that purports to check for bash-specific features in a
+	  shell script.  Lifted from Debian via ubuntu
+
+				   5/20
+				   ----
+lib/readline/display.c
+	- in update_line, when deciding whether or not to adjust _rl_last_c_pos
+	  in a multibyte environment after printing the last line of a multiline
+	  prompt with invisible characters on the first and last lines, use
+	  the number of inivisible chars on the first line in the calculation
+	  deciding whether or not we're past the last invisible character and
+	  need to adjust the cursor position.  Old code used the number of
+	  invisible chars on the last prompt line.  Fixes bug reported by
+	  stuff@slinkp.com.
+	- in update_line, when fixing _rl_last_c_pos after drawing the first
+	  line of the prompt, use the number of invisible chars on the first
+	  line as the offset, instead of the total number of invisible chars
+
+				   5/21
+				   ----
+variables.c
+	- new function, reinit_special_variables(), a hook for special
+	  vars that need their hook functions called when they're unset as
+	  a result of the shell reinitializing itself to run a script
+
+shell.c
+	- shell_reinitialize now calls reinit_special_variables
+	- shell_reinitialize now calls bashline_reset
+
+variables.h
+	- new extern declaration for reinit_special_variables
+
+bashline.c
+	- new function, bashline_reset(), called when the shell reinitializes
+	  in shell_reinitialize.  Right now, just resets
+	  bash_readline_initialized to 0.
+
+bashline.h
+	- new extern declaration for bashline_reset()
