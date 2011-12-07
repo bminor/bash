@@ -271,6 +271,12 @@ posix_readline_initialize (on_or_off)
 #endif
 }
 
+void
+reset_completer_word_break_chars ()
+{
+  rl_completer_word_break_characters = perform_hostname_completion ? savestring (bash_completer_word_break_characters) : savestring (bash_nohostname_word_break_characters);
+}
+
 /* When this function returns, rl_completer_word_break_characters points to
    dynamically allocated memory. */
 int

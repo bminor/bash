@@ -4248,7 +4248,7 @@ sv_comp_wordbreaks (name)
 
   sv = find_variable (name);
   if (sv == 0)
-    rl_completer_word_break_characters = (char *)NULL;
+    reset_completer_word_break_chars ();
 }
 
 /* What to do just after one of the TERMxxx variables has changed.

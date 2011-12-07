@@ -26,6 +26,7 @@
 extern int bash_readline_initialized;
 
 extern void posix_readline_initialize __P((int));
+extern void reset_completer_word_break_chars __P((void));
 extern int enable_hostname_completion __P((int));
 extern void initialize_readline __P((void));
 extern void bashline_reset __P((void));
