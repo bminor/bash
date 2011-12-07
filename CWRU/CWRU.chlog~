@@ -13744,15 +13744,3 @@ parse.y
 	- change parse_matched_pair to make sure `` command substitution does
 	  not check for shell comments while parsing.  Bug reported against
 	  bash-3.2 by Greg Schaefer <gschafer@zip.com.au>
-
-				   10/14
-				   -----
-parse.y
-	- add new parser_state flag: PST_REGEXP; means we are parsing a
-	  regular expression following the =~ conditional operator
-	- cond_node sets PST_REGEXP after reading the `=~' operator	
-	- change read_token to call read_token_word immediately if the
-	  PST_REGEXP bit is set in parser_state
-	- change read_token_word to skip over `(' and `|' if PST_REGEXP is
-	  set, since those characters are legitimate regexp chars (but still
-	  parse matched pairs of parens)

@@ -79,5 +79,5 @@ show_shell_version (extended)
 {
   printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
   if (extended)
-    printf (_("Copyright (C) 2005 Free Software Foundation, Inc.\n"));
+    printf (_("Copyright (C) 2006 Free Software Foundation, Inc.\n"));
 }

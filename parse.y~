@@ -2593,7 +2593,10 @@ read_token (command)
     }
 
   if (parser_state & PST_REGEXP)
+{
+itrace("read_token: parser_state & PST_REGEXP; goto tokword");
     goto tokword;
+}
 
   /* Shell meta-characters. */
   if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
@@ -3208,10 +3211,10 @@ cond_term ()
 	op = yylval.word;
 #if defined (COND_REGEXP)
       else if (tok == WORD && STREQ (yylval.word->word, "=~"))
-	{
-	  op = yylval.word;
-	  parser_state |= PST_REGEXP;
-	}
+{
+	op = yylval.word;
+parser_state |= PST_REGEXP;
+}
 #endif
       else if (tok == '<' || tok == '>')
 	op = make_word_from_token (tok);  /* ( */
@@ -3242,7 +3245,7 @@ cond_term ()
 
       /* rhs */
       tok = read_token (READ);
-      parser_state &= ~PST_REGEXP;
+parser_state &= ~PST_REGEXP;
       if (tok == WORD)
 	{
 	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);

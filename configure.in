@@ -25,7 +25,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_REVISION([for Bash 3.2, version 3.190])dnl
 
 define(bashvers, 3.2)
-define(relstatus, release)
+define(relstatus, maint)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -43,7 +43,7 @@ RELSTATUS=relstatus
 
 dnl defaults for debug settings
 case "$RELSTATUS" in
-alp*|bet*|dev*|rc*)	DEBUG='-DDEBUG' MALLOC_DEBUG='-DMALLOC_DEBUG' ;;
+alp*|bet*|dev*|rc*|maint*)	DEBUG='-DDEBUG' MALLOC_DEBUG='-DMALLOC_DEBUG' ;;
 *)	DEBUG= MALLOC_DEBUG= ;;
 esac
 

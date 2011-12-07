@@ -1,18 +1,18 @@
 From: chet@po.cwru.edu (Chet Ramey)
 To: bug-bash@gnu.org
-Subject: BASH Frequently-Asked Questions (FAQ version 3.33)
+Subject: BASH Frequently-Asked Questions (FAQ version 3.34)
 Reply-To: chet@po.cwru.edu
 
 Archive-name: unix-faq/shell/bash
 Posting-Frequency: monthly
 Submitted-By: chet@po.cwru.edu (Chet Ramey)
-Last-Modified: Thu Apr 13 13:19:33 EDT 2006
-FAQ-Version: 3.33
-Bash-Version: 3.1
+Last-Modified: Tue Oct 10 10:15:38 EDT 2006
+FAQ-Version: 3.34
+Bash-Version: 3.2
 URL: ftp://ftp.cwru.edu/pub/bash/FAQ
 Maintainer: chet@po.cwru.edu (Chet Ramey)
 
-This is the Bash FAQ, version 3.33, for Bash version 3.1.
+This is the Bash FAQ, version 3.34, for Bash version 3.2.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -23,7 +23,7 @@ Another good source of basic information about shells is the collection
 of FAQ articles periodically posted to comp.unix.shell.
 
 Questions and comments concerning this document should be sent to
-chet@po.cwru.edu.
+chet.ramey@case.edu.
 
 This document is available for anonymous FTP with the URL
 
@@ -50,8 +50,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 3.1?
-B2) Are there any user-visible incompatibilities between bash-3.1 and
+B1) What's new in version 3.2?
+B2) Are there any user-visible incompatibilities between bash-3.2 and
     bash-2.05b?
 
 Section C:  Differences from other Unix shells
@@ -92,6 +92,7 @@ E10) Why does `cd //' leave $PWD as `//'?
 E11) If I resize my xterm while another program is running, why doesn't bash
      notice the change?
 E12) Why don't negative offsets in substring expansion work like I expect?
+E13) Why does filename completion misbehave if a colon appears in the filename?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -154,26 +155,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 3.1, first made available on 09 December, 2005.
+The latest version is 3.2, first made available on 12 October, 2006.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 3.1:
+The following URLs tell how to get version 3.2:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-3.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-3.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-3.2.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-3.2.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.1.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-3.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-3.2.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-3.2.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-3.1-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-3.2-patches/
 
 A4)  On what machines will bash run?
 
@@ -206,7 +207,7 @@ http://www.cygwin.com/.
 Cygnus originally ported bash-1.14.7, and that port was part of their
 early GNU-Win32 (the original name) releases.  Cygnus has also done
 ports of bash-2.05b and bash-3.0 to the CYGWIN environment, and both
-are available as part of their current release.  Bash-3.1 is currently
+are available as part of their current release.  Bash-3.2 is currently
 being tested and should be available soon.
 
 Bash-2.05b and later versions should require no local Cygnus changes to
@@ -230,7 +231,7 @@ Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-3.1.
+with building bash-3.1 or bash-3.2.
 
 A6) How can I build bash with gcc? 
 
@@ -399,12 +400,22 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 3.1?
+B1) What's new in version 3.2?
 
-Bash-3.1 is the first maintenance release of the third major release of
+Bash-3.2 is the second maintenance release of the third major release of
 bash.  It contains the following significant new features (see the manual
 page for complete descriptions and the CHANGES and NEWS files in the
-bash-3.1 distribution).
+bash-3.2 distribution).
+
+o Bash-3.2 now checks shell scripts for NUL characters rather than non-printing
+  characters when deciding whether or not a script is a binary file.
+
+o Quoting the string argument to the [[ command's  =~ (regexp) operator now
+  forces string matching, as with the other pattern-matching operators.
+
+A short feature history dating from Bash-2.0:
+
+Bash-3.1 contained the following new features:
 
 o Bash-3.1 may now be configured and built in a mode that enforces strict
   POSIX compliance.
@@ -414,8 +425,6 @@ o The `+=' assignment operator, which appends to the value of a string or
 
 o It is now possible to ignore case when matching in contexts other than
   filename generation using the new `nocasematch' shell option.
-
-A short feature history dating from Bash-2.0:
 
 Bash-3.0 contained the following new features:
 
@@ -654,10 +663,10 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-3.1 and
+B2) Are there any user-visible incompatibilities between bash-3.2 and
     bash-2.05b?
 
-There are a few incompatibilities between version 2.05b and version 3.1.
+There are a few incompatibilities between version 2.05b and version 3.2.
 They are detailed in the file COMPAT in the bash distribution.  That file
 is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
 if if you find something that's not mentioned there.
@@ -851,7 +860,7 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-New things in ksh-93 not in bash-3.0:
+New things in ksh-93 not in bash-3.2:
 	associative arrays
 	floating point arithmetic and variables
 	math library functions
@@ -877,7 +886,7 @@ New things in ksh-93 not in bash-3.0:
 	lexical scoping for local variables in `ksh' functions
 	no scoping for local variables in `POSIX' functions
 
-New things in ksh-93 present in bash-3.0:
+New things in ksh-93 present in bash-3.2:
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
         ?:, ++, --, `expr1 , expr2' arithmetic operators
@@ -1127,7 +1136,7 @@ will try to write on a pipe without a reader.  In that case, bash
 will print `Broken pipe' to stderr when ps is killed by a
 SIGPIPE. 
 
-As of bash-3.1, bash will not report SIGPIPE errors by default.  You
+As of bash-3.1, bash does not report SIGPIPE errors by default.  You
 can build a version of bash that will report such errors.
 
 E3) When I have terminal escape sequences in my prompt, why does bash
@@ -1403,6 +1412,32 @@ expanded value of param is unset or null, and $param otherwise.
 
 To use negative offsets that begin with a minus sign, separate the
 minus sign and the colon with a space.
+
+E13) Why does filename completion misbehave if a colon appears in the filename?
+
+Filename completion (and word completion in general) may appear to behave
+improperly if there is a colon in the word to be completed.
+
+The colon is special to readline's word completion code:  it is one of the
+characters that breaks words for the completer.  Readline uses these characters
+in sort of the same way that bash uses $IFS: they break or separate the words
+the completion code hands to the application-specific or default word
+completion functions.  The original intent was to make it easy to edit
+colon-separated lists (such as $PATH in bash) in various applications using
+readline for input.
+
+This is complicated by the fact that some versions of the popular
+`bash-completion' programmable completion package have problems with the
+default completion behavior in the presence of colons.  
+
+The current set of completion word break characters is available in bash as
+the value of the COMP_WORDBREAKS variable.  Removing `:' from that value is
+enough to make the colon not special to completion:
+
+COMP_WORDBREAKS=${COMP_WORDBREAKS//:}
+
+You can also quote the colon with a backslash to achieve the same result
+temporarily.
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -1809,9 +1844,9 @@ Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2006.  Never make predictions. 
+The next version will appear sometime in 2007.  Never make predictions. 
 
-This document is Copyright 1995-2005 by Chester Ramey.
+This document is Copyright 1995-2006 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute
