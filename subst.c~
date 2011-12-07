@@ -244,7 +244,7 @@ static char *variable_remove_pattern __P((char *, char *, int, int));
 static char *list_remove_pattern __P((WORD_LIST *, char *, int, int, int));
 static char *parameter_list_remove_pattern __P((int, char *, int, int));
 #ifdef ARRAY_VARS
-static char *array_remove_pattern __P((ARRAY *, char *, int, char *, int));
+static char *array_remove_pattern __P((SHELL_VAR *, char *, int, char *, int));
 #endif
 static char *parameter_brace_remove_pattern __P((char *, char *, char *, int, int));
 
@@ -291,6 +291,9 @@ static WORD_LIST *separate_out_assignments __P((WORD_LIST *));
 static WORD_LIST *glob_expand_word_list __P((WORD_LIST *, int));
 #ifdef BRACE_EXPANSION
 static WORD_LIST *brace_expand_word_list __P((WORD_LIST *, int));
+#endif
+#if defined (ARRAY_VARS)
+static int make_internal_declare __P((char *, char *));
 #endif
 static WORD_LIST *shell_expand_word_list __P((WORD_LIST *, int));
 static WORD_LIST *expand_word_list_internal __P((WORD_LIST *, int));
@@ -2345,8 +2348,8 @@ do_compound_assignment (name, value, flags)
 
   if (mklocal && variable_context)
     {
-      list = expand_compound_array_assignment (value, flags);
       v = find_variable (name);
+      list = expand_compound_array_assignment (v, value, flags);
       if (v == 0 || array_p (v) == 0 || v->context != variable_context)
         v = make_local_array_variable (name);
       assign_compound_array_list (v, list, flags);
@@ -4028,20 +4031,7 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
     }
 
   l = REVERSE_LIST (new, WORD_LIST *);
-#if 0
-  if (itype == '*' && (quoted & Q_DOUBLE_QUOTES))
-    tword = string_list_dollar_star (quote_list (l));
-  else if (itype == '*')
-    tword = string_list_dollar_star (l);
-  else if (itype == '@' && (quoted & Q_DOUBLE_QUOTES))
-    tword = string_list_dollar_at (l, quoted);
-  else if (itype == '@')
-    tword = string_list_dollar_star (l);
-  else
-    tword = string_list (l);
-#else
   tword = string_list_pos_params (itype, l, quoted);
-#endif
   dispose_words (l);
 
   return (tword);
@@ -4066,13 +4056,15 @@ parameter_list_remove_pattern (itype, pattern, patspec, quoted)
 
 #if defined (ARRAY_VARS)
 static char *
-array_remove_pattern (a, pattern, patspec, varname, quoted)
-     ARRAY *a;
+array_remove_pattern (var, pattern, patspec, varname, quoted)
+     SHELL_VAR *var;
      char *pattern;
      int patspec;
      char *varname;	/* so we can figure out how it's indexed */
      int quoted;
 {
+  ARRAY *a;
+  HASH_TABLE *h;
   int itype;
   char *ret;
   WORD_LIST *list;
@@ -4082,7 +4074,10 @@ array_remove_pattern (a, pattern, patspec, varname, quoted)
   v = array_variable_part (varname, &ret, 0);
   itype = ret[0];
 
-  list = array_to_word_list (a);
+  a = (v && array_p (v)) ? array_cell (v) : 0;
+  h = (v && assoc_p (v)) ? assoc_cell (v) : 0;
+  
+  list = a ? array_to_word_list (a) : (h ? assoc_to_word_list (h) : 0);
   if (list == 0)
    return ((char *)NULL);
   ret = list_remove_pattern (list, pattern, patspec, itype, quoted);
@@ -4142,7 +4137,7 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp1 = array_remove_pattern (array_cell (v), pattern, patspec, varname, quoted);
+      temp1 = array_remove_pattern (v, pattern, patspec, varname, quoted);
       if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
@@ -4932,6 +4927,7 @@ array_length_reference (s)
 {
   int len;
   arrayind_t ind;
+  char *akey;
   char *t, c;
   ARRAY *array;
   SHELL_VAR *var;
@@ -4940,7 +4936,7 @@ array_length_reference (s)
 
   /* If unbound variables should generate an error, report one and return
      failure. */
-  if ((var == 0 || array_p (var) == 0) && unbound_vars_is_error)
+  if ((var == 0 || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
     {
       c = *--t;
       *t = '\0';
@@ -4958,19 +4954,40 @@ array_length_reference (s)
   array = array_p (var) ? array_cell (var) : (ARRAY *)NULL;
 
   if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
-    return (array_p (var) ? array_num_elements (array) : 1);
-
-  ind = array_expand_index (t, len);
-  if (ind < 0)
     {
-      err_badarraysub (t);
-      return (-1);
+      if (assoc_p (var))
+	return (assoc_num_elements (assoc_cell (var)));
+      else if (array_p (var))
+	return (array_num_elements (array));
+      else
+	return 1;
     }
 
-  if (array_p (var))
-    t = array_reference (array, ind);
+  if (assoc_p (var))
+    {
+      t[len - 1] = '\0';
+      akey = expand_assignment_string_to_string (t, 0);		/* [ */
+      t[len - 1] = ']';
+      if (akey == 0 || *akey == 0)
+	{
+	  err_badarraysub (t);
+	  return (-1);
+	}
+      t = assoc_reference (assoc_cell (var), akey);
+    }
   else
-    t = (ind == 0) ? value_cell (var) : (char *)NULL;
+    {
+      ind = array_expand_index (t, len);
+      if (ind < 0)
+	{
+	  err_badarraysub (t);
+	  return (-1);
+	}
+      if (array_p (var))
+	t = array_reference (array, ind);
+      else
+	t = (ind == 0) ? value_cell (var) : (char *)NULL;
+    }
 
   len = STRLEN (t);
   return (len);
@@ -5115,7 +5132,12 @@ parameter_brace_expand_word (name, var_is_special, quoted)
       if (var_isset (var) && invisible_p (var) == 0)
 	{
 #if defined (ARRAY_VARS)
-	  temp = array_p (var) ? array_reference (array_cell (var), 0) : value_cell (var);
+	  if (assoc_p (var))
+	    temp = assoc_reference (assoc_cell (var), "0");
+	  else if (array_p (var))
+	    temp = array_reference (array_cell (var), 0);
+	  else
+	    temp = value_cell (var);
 #else
 	  temp = value_cell (var);
 #endif
@@ -5388,9 +5410,12 @@ parameter_brace_expand_length (name)
 	  FREE (t);
 	}
 #if defined (ARRAY_VARS)
-      else if ((var = find_variable (name + 1)) && (invisible_p (var) == 0) && array_p (var))
+      else if ((var = find_variable (name + 1)) && (invisible_p (var) == 0) && (array_p (var) || assoc_p (var)))
 	{
-	  t = array_reference (array_cell (var), 0);
+	  if (assoc_p (var))
+	    t = assoc_reference (assoc_cell (var), "0");
+	  else
+	    t = array_reference (array_cell (var), 0);
 	  number = MB_STRLEN (t);
 	}
 #endif
@@ -5604,14 +5629,14 @@ get_var_and_type (varname, value, quoted, varp, valp)
   if (valid_array_reference (varname))
     {
       v = array_variable_part (varname, &temp, (int *)0);
-      if (v && array_p (v))
+      if (v && (array_p (v) || assoc_p (v)))
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
 	    {
 	      vtype = VT_ARRAYVAR;
 	      if (temp[0] == '*')
 		vtype |= VT_STARSUB;
-	      *valp = (char *)array_cell (v);
+	      *valp = array_p (v) ? (char *)array_cell (v) : (char *)assoc_cell (v);
 	    }
 	  else
 	    {
@@ -5630,13 +5655,17 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	    *valp = dequote_escapes (value);
 	}
       else
-	return -1;
+	{
+	  vtype = VT_ARRAYMEMBER;
+	  *varp = v;
+	  *valp = array_value (varname, 1, (int *)NULL);
+	}
     }
-  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && array_p (v))
+  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;
-      *valp = array_reference (array_cell (v), 0);
+      *valp = assoc_p (v) ? assoc_reference (assoc_cell (v), "0") : array_reference (array_cell (v), 0);
     }
   else
 #endif
@@ -5757,10 +5786,13 @@ parameter_brace_substring (varname, value, substr, quoted)
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
+      if (assoc_p (v))
+	tt = (char *)NULL;
+      else
       /* We want E2 to be the number of elements desired (arrays can be sparse,
 	 so verify_substring_values just returns the numbers specified and we
 	 rely on array_subrange to understand how to deal with them). */
-      temp = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+	temp = array_subrange (array_cell (v), e1, e2, starsub, quoted);
       /* array_subrange now calls array_quote_escapes as appropriate, so the
 	 caller no longer needs to. */
       break;
@@ -6035,10 +6067,11 @@ parameter_brace_patsub (varname, value, patsub, quoted)
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp = array_patsub (array_cell (v), p, rep, mflags);
+      temp = assoc_p (v) ? assoc_patsub (assoc_cell (v), p, rep, mflags)
+			 : array_patsub (array_cell (v), p, rep, mflags);
       /* Don't call quote_escapes anymore; array_patsub calls
 	 array_quote_escapes as appropriate before adding the
-	 space separators. */
+	 space separators; ditto for assoc_patsub. */
       break;
 #endif
     }
@@ -6302,7 +6335,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       FREE (x);
       if (ALL_ELEMENT_SUB (x1[0]) && x1[1] == ']')
 	{
-	  temp = array_keys (temp1, quoted);
+	  temp = array_keys (temp1, quoted);	/* handles assoc vars too */
 	  if (x1[0] == '@')
 	    {
 	      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && quoted_dollar_atp)
@@ -6857,9 +6890,10 @@ comsub:
       if (var && invisible_p (var) == 0 && var_isset (var))
 	{
 #if defined (ARRAY_VARS)
-	  if (array_p (var))
+	  if (assoc_p (var) || array_p (var))
 	    {
-	      temp = array_reference (array_cell (var), 0);
+	      temp = array_p (var) ? array_reference (array_cell (var), 0)
+				   : assoc_reference (assoc_cell (var), "0");
 	      if (temp)
 		temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 			  ? quote_string (temp)
@@ -8172,6 +8206,30 @@ brace_expand_word_list (tlist, eflags)
 }
 #endif
 
+#if defined (ARRAY_VARS)
+/* Take WORD, a compound associative array assignment, and internally run
+   'declare -A w', where W is the variable name portion of WORD. */
+static int
+make_internal_declare (word, option)
+     char *word;
+     char *option;
+{
+  int t;
+  WORD_LIST *wl;
+  WORD_DESC *w;
+
+  w = make_word (word);
+
+  t = assignment (w->word, 0);
+  w->word[t] = '\0';
+
+  wl = make_word_list (w, (WORD_LIST *)NULL);
+  wl = make_word_list (make_word (option), wl);
+
+  return (declare_builtin (wl));  
+}  
+#endif
+
 static WORD_LIST *
 shell_expand_word_list (tlist, eflags)
      WORD_LIST *tlist;
@@ -8200,7 +8258,9 @@ shell_expand_word_list (tlist, eflags)
 	{
 	  int t;
 
-	  t = do_word_assignment (tlist->word);
+	  if (tlist->word->flags & W_ASSIGNASSOC)
+	    make_internal_declare (tlist->word->word, "-A");
+
 	  if (t == 0)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
@@ -8210,7 +8270,7 @@ shell_expand_word_list (tlist, eflags)
 	  /* Now transform the word as ksh93 appears to do and go on */
 	  t = assignment (tlist->word->word, 0);
 	  tlist->word->word[t] = '\0';
-	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG); 
+	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC);
 	}
 #endif
 

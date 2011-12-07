@@ -558,7 +558,7 @@ initialize_shell_options (no_shellopts)
       /* set up any shell options we may have inherited. */
       if (var && imported_p (var))
 	{
-	  temp = (array_p (var)) ? (char *)NULL : savestring (value_cell (var));
+	  temp = (array_p (var) || assoc_p (var)) ? (char *)NULL : savestring (value_cell (var));
 	  if (temp)
 	    {
 	      parse_shellopts (temp);
@@ -819,7 +819,7 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       if (var && unset_array)
 	{
-	  if (array_p (var) == 0)
+	  if (array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), name);
 	      NEXT_VARIABLE ();

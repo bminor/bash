@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -66,7 +66,7 @@ enum r_instruction {
 /* Command Types: */
 enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_connection, cm_function_def, cm_until, cm_group,
-		    cm_arith, cm_cond, cm_arith_for, cm_subshell };
+		    cm_arith, cm_cond, cm_arith_for, cm_subshell, cm_coproc };
 
 /* Possible values for the `flags' field of a WORD_DESC. */
 #define W_HASDOLLAR	0x000001	/* Dollar sign present. */
@@ -162,6 +162,7 @@ typedef struct element {
 #define CMD_AMPERSAND	   0x200 /* command & */
 #define CMD_STDIN_REDIR	   0x400 /* async command needs implicit </dev/null */
 #define CMD_COMMAND_BUILTIN 0x0800 /* command executed by `command' builtin */
+#define CMD_COPROC_SUBSHELL 0x1000
 
 /* What a command looks like. */
 typedef struct command {
@@ -191,6 +192,7 @@ typedef struct command {
     struct arith_for_com *ArithFor;
 #endif
     struct subshell_com *Subshell;
+    struct coproc_com *Coproc;
   } value;
 } COMMAND;
 
@@ -332,7 +334,25 @@ typedef struct subshell_com {
   COMMAND *command;
 } SUBSHELL_COM;
 
+typedef struct coproc {
+  char *c_name;
+  pid_t c_pid;
+  int c_rfd;
+  int c_wfd;
+  int c_rsave;
+  int c_wsave;
+  int c_flags;
+  int c_status;
+} Coproc;
+
+typedef struct coproc_com {
+  int flags;
+  char *name;
+  COMMAND *command;
+} COPROC_COM;
+
 extern COMMAND *global_command;
+extern Coproc sh_coproc;
 
 /* Possible command errors */
 #define CMDERR_DEFAULT	0

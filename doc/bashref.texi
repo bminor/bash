@@ -1234,7 +1234,8 @@ When @samp{+=} is applied to an array variable using compound assignment
 (@pxref{Arrays}), the
 variable's value is not unset (as it is when using @samp{=}), and new
 values are appended to the array beginning at one greater than the array's
-maximum index.
+maximum index (for indexed arrays),  or added as additional key-value pairs
+in an associative array.
 When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
 
@@ -2921,13 +2922,15 @@ is supplied.
 @item readonly
 @btindex readonly
 @example
-readonly [-apf] [@var{name}[=@var{value}]] @dots{}
+readonly [-aApf] [@var{name}[=@var{value}]] @dots{}
 @end example
 Mark each @var{name} as readonly.
 The values of these names may not be changed by subsequent assignment.
 If the @option{-f} option is supplied, each @var{name} refers to a shell
 function.
-The @option{-a} option means each @var{name} refers to an array variable.
+The @option{-a} option means each @var{name} refers to an indexed
+array variable; the @option{-A} option means each @var{name} refers
+to an associative array variable.
 If no @var{name} arguments are given, or if the @option{-p}
 option is supplied, a list of all readonly names is printed.
 The @option{-p} option causes output to be displayed in a format that
@@ -3318,7 +3321,7 @@ zero if @var{command} is found, and non-zero if not.
 @item declare
 @btindex declare
 @example
-declare [-afFirtx] [-p] [@var{name}[=@var{value}] @dots{}]
+declare [-aAfFirtx] [-p] [@var{name}[=@var{value}] @dots{}]
 @end example
 
 Declare variables and give them attributes.  If no @var{name}s
@@ -3347,7 +3350,10 @@ the specified attributes or to give variables attributes:
 
 @table @code
 @item -a
-Each @var{name} is an array variable (@pxref{Arrays}).
+Each @var{name} is an indexed array variable (@pxref{Arrays}).
+
+@item -A
+Each @var{name} is an associative array variable (@pxref{Arrays}).
 
 @item -f
 Use function names only.
@@ -4518,6 +4524,13 @@ Expands to the process id of the current Bash process.
 This differs from @code{$$} under certain circumstances, such as subshells
 that do not require Bash to be re-initialized.
 
+@item BASH_ALIASES
+An associative array variable whose members correspond to the internal
+list of aliases as maintained by the @code{alias} builtin
+(@pxref{Bourne Shell Builtins}).
+Elements added to this array appear in the alias list; unsetting array
+elements cause aliases to be removed from the alias list.
+
 @item BASH_ARGC
 An array variable whose values are the number of parameters in each
 frame of the current bash execution call stack.  The number of
@@ -4540,6 +4553,13 @@ The shell sets @code{BASH_ARGV} only when in extended debugging mode
 (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
+
+@item BASH_CMDS
+An associative array variable whose members correspond to the internal
+hash table of commands as maintained by the @code{hash} builtin
+(@pxref{Bourne Shell Builtins}).
+Elements added to this array appear in the hash table; unsetting array
+elements cause commands to be removed from the hash table.
 
 @item BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -5807,14 +5827,18 @@ For almost every purpose, shell functions are preferred over aliases.
 @section Arrays
 @cindex arrays
 
-Bash provides one-dimensional array variables.  Any variable may be used as
-an array; the @code{declare} builtin will explicitly declare an array.
+Bash provides one-dimensional indexed and associative array variables.
+Any variable may be used as an array; the @code{declare} builtin will
+explicitly declare an array.
 There is no maximum
 limit on the size of an array, nor any requirement that members
-be indexed or assigned contiguously.  Arrays are zero-based.
+be indexed or assigned contiguously.
+Indexed arrays are referenced using integers (including arithmetic
+expressions (@pxref{Shell Arithmetic}) and are zero-based;
+associative arrays use arbitrary strings.
 
-An array is created automatically if any variable is assigned to using
-the syntax
+An indexed array is created automatically if any variable is assigned to
+using the syntax
 @example
 name[@var{subscript}]=@var{value}
 @end example
@@ -5837,16 +5861,25 @@ specified for an array variable using the @code{declare} and
 @code{readonly} builtins.  Each attribute applies to all members of
 an array.
 
+Associative arrays are created using
+@example
+declare -A @var{name}.
+@end example
+
 Arrays are assigned to using compound assignments of the form
 @example
 name=(value@var{1} @dots{} value@var{n})
 @end example
 @noindent
 where each
-@var{value} is of the form @code{[[@var{subscript}]=]}@var{string}.  If
+@var{value} is of the form @code{[[@var{subscript}]=]}@var{string}.
+When using indexed arrays, if
 the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
+
+When assigning to an associative array, the subscript is required.
+
 This syntax is also accepted by the @code{declare}
 builtin.  Individual array elements may be assigned to using the
 @code{name[}@var{subscript}@code{]=}@var{value} syntax introduced above.
@@ -5875,7 +5908,7 @@ expansion of the special parameters @samp{@@} and @samp{*}.
 If @var{subscript} is @samp{@@} or
 @samp{*}, the expansion is the number of elements in the array. 
 Referencing an array variable without a subscript is equivalent to
-referencing element zero. 
+referencing with a subscript of 0. 
 
 The @code{unset} builtin is used to destroy arrays.
 @code{unset} @var{name}[@var{subscript}]
@@ -5887,9 +5920,9 @@ entire array. A subscript of @samp{*} or @samp{@@} also removes the
 entire array.
 
 The @code{declare}, @code{local}, and @code{readonly}
-builtins each accept a @option{-a}
-option to specify an array.  The @code{read}
-builtin accepts a @option{-a}
+builtins each accept a @option{-a} option to specify an indexed
+array and a @option{-A} option to specify an associative array.
+The @code{read} builtin accepts a @option{-a}
 option to assign a list of words read from the standard input
 to an array, and can read values from the standard input into
 individual array elements.  The @code{set} and @code{declare}
@@ -7019,6 +7052,14 @@ Include support for @code{csh}-like history substitution
 Include @code{csh}-like brace expansion
 ( @code{b@{a,b@}c} @expansion{} @code{bac bbc} ).
 See @ref{Brace Expansion}, for a complete description.
+
+@item --enable-casemod-attributes
+Include support for case-modifying attributes in the @code{declare} builtin
+and assignment statements.  Variables with the @var{uppercase} attribute,
+for example, will have their values converted to uppercase upon assignment.
+
+@item --enable-casemod-expansion
+Include support for case-modifying word expansions.
 
 @item --enable-command-timing
 Include support for recognizing @code{time} as a reserved word and for

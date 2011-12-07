@@ -1130,7 +1130,9 @@ When += is applied to an array variable using compound assignment (see
 .B Arrays
 below), the
 variable's value is not unset (as it is when using =), and new values are
-appended to the array beginning at one greater than the array's maximum index.
+appended to the array beginning at one greater than the array's maximum index
+(for indexed arrays) or added as additional key\-value pairs in an
+associative array.
 When applied to a string-valued variable, \fIvalue\fP is expanded and
 appended to the variable's value.
 .SS Positional Parameters
@@ -1264,6 +1266,12 @@ Expands to the process id of the current \fBbash\fP process.
 This differs from \fB$$\fP under certain circumstances, such as subshells
 that do not require \fBbash\fP to be re-initialized.
 .TP
+.B BASH_ALIASES
+An associative array variable whose members correspond to the internal
+list of aliases as maintained by the \fBalias\fP builtin
+Elements added to this array appear in the alias list; unsetting array
+elements cause aliases to be removed from the alias list.
+.TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
 frame of the current \fBbash\fP execution call stack.
@@ -1291,6 +1299,12 @@ The shell sets \fBBASH_ARGV\fP only when in extended debugging mode
 option to the
 .B shopt
 builtin below)
+.TP
+.B BASH_CMDS
+An associative array variable whose members correspond to the internal
+hash table of commands as maintained by the \fBhash\fP builtin.
+Elements added to this array appear in the hash table; unsetting array
+elements cause commands to be removed from the hash table.
 .TP
 .B BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -2101,19 +2115,23 @@ parser to treat the rest of the line as a comment.
 .PD
 .SS Arrays
 .B Bash
-provides one-dimensional array variables.  Any variable may be used as
-an array; the
+provides one-dimensional indexed and associative array variables.
+Any variable may be used as an array; the
 .B declare
-builtin will explicitly declare an array.  There is no maximum
+builtin will explicitly declare an array.
+There is no maximum
 limit on the size of an array, nor any requirement that members
-be indexed or assigned contiguously.  Arrays are indexed using
-integers and are zero-based.
+be indexed or assigned contiguously.
+Indexed arrays are referenced using integers (including arithmetic
+expressions)  and are zero-based; associative arrays use arbitrary
+strings.
 .PP
-An array is created automatically if any variable is assigned to using
-the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
+An indexed array is created automatically if any variable is assigned to
+using the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
 .I subscript
 is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an array, use
+greater than or equal to zero.  To explicitly declare an indexed array,
+use
 .B declare \-a \fIname\fP
 (see
 .SM
@@ -2127,13 +2145,19 @@ and
 .B readonly
 builtins.  Each attribute applies to all members of an array.
 .PP
+Associative arrays are created using
+.BR declare \-A \fIname\fP .
+.PP
 Arrays are assigned to using compound assignments of the form
 \fIname\fP=\fB(\fPvalue\fI1\fP ... value\fIn\fP\fB)\fP, where each
 \fIvalue\fP is of the form [\fIsubscript\fP]=\fIstring\fP.  Only
-\fIstring\fP is required.  If
+\fIstring\fP is required.  When using indexed arrays, if
 the optional brackets and subscript are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
+.PP
+When assigning to an associative array, the subscript is required.
+.PP
 This syntax is also accepted by the
 .B declare
 builtin.  Individual array elements may be assigned to using the
@@ -2164,7 +2188,7 @@ above).  ${#\fIname\fP[\fIsubscript\fP]} expands to the length of
 ${\fIname\fP[\fIsubscript\fP]}.  If \fIsubscript\fP is \fB*\fP or
 \fB@\fP, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
-referencing element zero.
+referencing the array with a subscript of 0.
 .PP
 The
 .B unset
@@ -2183,7 +2207,10 @@ and
 .B readonly
 builtins each accept a
 .B \-a
-option to specify an array.  The
+option to specify an indexed array and a
+.B \-A
+option to specify an associative array.
+The
 .B read
 builtin accepts a
 .B \-a
@@ -6618,10 +6645,10 @@ is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
-\fBdeclare\fP [\fB\-afFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBdeclare\fP [\fB\-aAfFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0
 .TP
-\fBtypeset\fP [\fB\-afFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBtypeset\fP [\fB\-aAfFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -6657,7 +6684,12 @@ to give variables attributes:
 .PD 0
 .TP
 .B \-a
-Each \fIname\fP is an array variable (see
+Each \fIname\fP is an indexed array variable (see
+.B Arrays
+above).
+.TP
+.B \-A
+Each \fIname\fP is an associative array variable (see
 .B Arrays
 above).
 .TP
@@ -7754,6 +7786,7 @@ the decimal point.
 This option is only effective if \fBread\fP is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
+The exit status is greater than 128 if the timeout is exceeded.
 .TP
 .B \-u \fIfd\fP
 Read input from file descriptor \fIfd\fP.
@@ -7769,7 +7802,7 @@ times out, or an invalid file descriptor is supplied as the argument to
 \fB\-u\fP.
 .RE
 .TP
-\fBreadonly\fP [\fB\-apf\fP] [\fIname\fP[=\fIword\fP] ...]
+\fBreadonly\fP [\fB\-aApf\fP] [\fIname\fP[=\fIword\fP] ...]
 .PD
 The given
 \fInames\fP are marked readonly; the values of these
@@ -7782,7 +7815,9 @@ option is supplied, the functions corresponding to the
 marked.
 The
 .B \-a
-option restricts the variables to arrays.
+option restricts the variables to indexed arrays; the
+.B \-A
+option restricts the variables to associative arrays.
 If no
 .I name
 arguments are given, or if the

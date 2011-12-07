@@ -42,6 +42,7 @@
 /* Flag values controlling how assignment statements are treated. */
 #define ASS_APPEND	0x01
 #define ASS_MKLOCAL	0x02
+#define ASS_MKASSOC	0x04
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x01	/* just skip; don't return substring */

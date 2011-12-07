@@ -506,8 +506,15 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   volatile int last_pid;
   volatile int save_line_number;
 
+#if 0
   if (command == 0 || breaking || continuing || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
+#else
+  if (breaking || continuing)
+    return (last_command_exit_value);
+  if (command == 0 || read_but_dont_execute)
+    return (EXECUTION_SUCCESS);
+#endif
 
   QUIT;
   run_pending_traps ();
@@ -2735,11 +2742,13 @@ fix_assignment_words (words)
 {
   WORD_LIST *w;
   struct builtin *b;
+  int assoc;
 
   if (words == 0)
     return;
 
   b = 0;
+  assoc = 0;
 
   for (w = words; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
@@ -2753,7 +2762,28 @@ fix_assignment_words (words)
 	      words->word->flags |= W_ASSNBLTIN;
 	  }
 	w->word->flags |= (W_NOSPLIT|W_NOGLOB|W_TILDEEXP|W_ASSIGNARG);
+#if defined (ARRAY_VARS)
+	if (assoc)
+	  w->word->flags |= W_ASSIGNASSOC;
+#endif
       }
+#if defined (ARRAY_VARS)
+    /* Note that we saw an associative array option to a builtin that takes
+       assignment statements.  This is a bit of a kludge. */
+    else if (w->word->word[0] == '-' && strchr (w->word->word, 'A'))
+      {
+	if (b == 0)
+	  {
+	    b = builtin_address_internal (words->word->word, 0);
+	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
+	      return;
+	    else if (b && (b->flags & ASSIGNMENT_BUILTIN))
+	      words->word->flags |= W_ASSNBLTIN;
+	  }
+	if (words->word->flags & W_ASSNBLTIN)
+	  assoc = 1;
+      }
+#endif
 }
 
 /* Return 1 if the file found by searching $PATH for PATHNAME, defaulting

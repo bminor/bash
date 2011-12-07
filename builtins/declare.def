@@ -36,7 +36,8 @@ Options:
   -p	display the attributes and value of each NAME
 
 Options which set attributes:
-  -a	to make NAMEs arrays (if supported)
+  -a	to make NAMEs indexed arrays (if supported)
+  -A	to make NAMEs associative arrays (if supported)
   -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
@@ -123,7 +124,7 @@ local_builtin (list)
 }
 
 #if defined (ARRAY_VARS)
-#  define DECLARE_OPTS	"+afiprtxF"
+#  define DECLARE_OPTS	"+afiprtxAF"
 #else
 #  define DECLARE_OPTS	"+fiprtxF"
 #endif
@@ -134,7 +135,8 @@ declare_internal (list, local_var)
      register WORD_LIST *list;
      int local_var;
 {
-  int flags_on, flags_off, *flags, any_failed, assign_error, pflag, nodefs, opt;
+  int flags_on, flags_off, *flags;
+  int any_failed, assign_error, pflag, nodefs, opt;
   char *t, *subscript_start;
   SHELL_VAR *var;
   FUNCTION_DEF *shell_fn;
@@ -150,8 +152,19 @@ declare_internal (list, local_var)
 	case 'a':
 #if defined (ARRAY_VARS)
 	  *flags |= att_array;
-#endif
 	  break;
+#else
+	  builtin_usage ();
+	  return (EX_USAGE);
+#endif
+	case 'A':
+#if defined (ARRAY_VARS)
+	  *flags |= att_assoc;
+	  break;
+#else
+	  builtin_usage ();
+	  return (EX_USAGE);
+#endif
 	case 'p':
 	  if (local_var == 0)
 	    pflag++;
@@ -186,7 +199,7 @@ declare_internal (list, local_var)
 
   /* If there are no more arguments left, then we just want to show
      some variables. */
-  if (list == 0)	/* declare -[afFirtx] */
+  if (list == 0)	/* declare -[aAfFirtx] */
     {
       /* Show local variables defined at this context level if this is
 	 the `local' builtin. */
@@ -215,7 +228,7 @@ declare_internal (list, local_var)
       return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
-  if (pflag)	/* declare -p [-afFirtx] name [name...] */
+  if (pflag)	/* declare -p [-aAfFirtx] name [name...] */
     {
       for (any_failed = 0; list; list = list->next)
 	{
@@ -232,7 +245,7 @@ declare_internal (list, local_var)
 #define NEXT_VARIABLE() free (name); list = list->next; continue
 
   /* There are arguments left, so we are making variables. */
-  while (list)		/* declare [-afFirx] name [name ...] */
+  while (list)		/* declare [-aAfFirx] name [name ...] */
     {
       char *value, *name;
       int offset, aflags;
@@ -244,7 +257,7 @@ declare_internal (list, local_var)
       offset = assignment (name, 0);
       aflags = 0;
 
-      if (offset)	/* declare [-afFirx] name=value */
+      if (offset)	/* declare [-aAfFirx] name=value */
 	{
 	  name[offset] = '\0';
 	  value = name + offset + 1;
@@ -291,7 +304,9 @@ declare_internal (list, local_var)
       if (variable_context && ((flags_on & att_function) == 0))
 	{
 #if defined (ARRAY_VARS)
-	  if ((flags_on & att_array) || making_array_special)
+	  if (flags_on & att_assoc)
+	    var = make_local_assoc_variable (name);
+	  else if ((flags_on & att_array) || making_array_special)
 	    var = make_local_array_variable (name);
 	  else
 #endif
@@ -364,7 +379,7 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 	}
-      else		/* declare -[airx] name [name...] */
+      else		/* declare -[aAirx] name [name...] */
 	{
 	  /* Non-null if we just created or fetched a local variable. */
 	  if (var == 0)
@@ -373,7 +388,9 @@ declare_internal (list, local_var)
 	  if (var == 0)
 	    {
 #if defined (ARRAY_VARS)
-	      if ((flags_on & att_array) || making_array_special)
+	      if (flags_on & att_assoc)
+		var = make_new_assoc_variable (name);
+	      else if ((flags_on & att_array) || making_array_special)
 		var = make_new_array_variable (name);
 	      else
 #endif
@@ -399,7 +416,7 @@ declare_internal (list, local_var)
 	    }
 
 #if defined (ARRAY_VARS)
-	  if ((making_array_special || (flags_on & att_array) || array_p (var)) && offset)
+	  if ((making_array_special || (flags_on & (att_array|att_assoc)) || array_p (var) || assoc_p (var)) && offset)
 	    {
 	      int vlen;
 	      vlen = STRLEN (value);
@@ -410,16 +427,37 @@ declare_internal (list, local_var)
 		simple_array_assign = 1;
 	    }
 
-	  /* Cannot use declare +a name to remove an array variable. */
-	  if ((flags_off & att_array) && array_p (var))
+	  /* Cannot use declare +a name or declare +A name to remove an
+	     array variable. */
+	  if (((flags_off & att_array) && array_p (var)) || ((flags_off & att_assoc) && assoc_p (var)))
 	    {
 	      builtin_error (_("%s: cannot destroy array variables in this way"), name);
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
 
-	  /* declare -a name makes name an array variable. */
-	  if ((making_array_special || (flags_on & att_array)) && array_p (var) == 0)
+	  if ((flags_on & att_array) && assoc_p (var))
+	    {
+	      builtin_error (_("%s: cannot convert associative to indexed array"), name);
+	      any_failed++;
+	      NEXT_VARIABLE ();
+	    }
+	  if ((flags_on & att_assoc) && array_p (var))
+	    {
+	      builtin_error (_("%s: cannot convert indexed to associative array"), name);
+	      any_failed++;
+	      NEXT_VARIABLE ();
+	    }
+
+	  /* declare -A name[[n]] makes name an associative array variable. */
+	  if (flags_on & att_assoc)
+	    {
+	      if (assoc_p (var) == 0)
+		var = convert_var_to_assoc (var);
+	    }
+	  /* declare -a name[[n]] or declare name[n] makes name an indexed
+	     array variable. */
+	  else if ((making_array_special || (flags_on & att_array)) && array_p (var) == 0)
 	    var = convert_var_to_array (var);
 #endif /* ARRAY_VARS */
 

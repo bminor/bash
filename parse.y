@@ -2304,7 +2304,7 @@ gather_here_documents ()
   int r = 0;
   while (need_here_doc)
     {
-      make_here_document (redir_stack[r++]);
+      make_here_document (redir_stack[r++], line_number);
       need_here_doc--;
     }
 }
@@ -4142,8 +4142,12 @@ read_token_word (character)
 	}
 
 #if defined (ARRAY_VARS)
-      /* Identify possible array subscript assignment; match [...] */
-      else if MBTEST(character == '[' && token_index > 0 && assignment_acceptable (last_read_token) && token_is_ident (token, token_index))	/* ] */
+      /* Identify possible array subscript assignment; match [...].  If
+	 parser_state&PST_COMPASSIGN, we need to parse [sub]=words treating
+	 `sub' as if it were enclosed in double quotes. */
+      else if MBTEST(character == '[' &&		/* ] */
+		     ((token_index > 0 && assignment_acceptable (last_read_token) && token_is_ident (token, token_index)) ||
+		      (token_index == 0 && (parser_state&PST_COMPASSIGN))))
         {
 	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
 	  if (ttok == &matched_pair_error)

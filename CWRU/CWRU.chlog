@@ -16068,3 +16068,102 @@ variables.h
 	- include assoc.h for associative arrays
 	- defines for case-modifying expansions and associative array variables
 	- sh_var_assign_func_t functions now take an extra char * parameter
+
+				   6/25
+				   ----
+variables.c
+	- change declarations and definitions of sh_var_assign_func_t functions
+	  to add the extra char * parameter: null_assign, null_array_assign,
+	  assign_seconds, assign_random, assign_lineno, assign_subshell,
+	  assign_dirstack
+	- change calls to var->assign_func to add extra char * argument
+	- broke part of body of dispose_variable out into a new function,
+	  dispose_variable_value, which knows how to free all kinds of shell
+	  variable data
+	- changes to deal with variables with the internal `nofree' attribute
+
+arrayfunc.c
+	- change calls to var->assign_func to add extra char * argument
+	- bind_array_var_internal now takes an extra `char *key' argument
+	- additions for associative array implementation; from bash-4.0-devel
+	  tree
+
+arrayfunc.[ch],subst.c
+	- expand_compound_array_assignment now takes the variable as the first
+	  argument (SHELL_VAR *); changed function definition and callers
+
+builtins/set.def
+	- changes to handle associative arrays in `unset'
+
+{execute_cmd,command}.h
+	- definitions for coproc implementation; from bash-4.0-devel tree
+
+variables.c
+	- new functions for associative arrays: make_new_assoc_variable,
+	  make_local_assoc_variable
+
+				   6/26
+				   ----
+variables.c
+	- more infrastructure for associative arrays; from bash-4.0-devel tree
+	- infrastructure for handling assignments to variables with
+	  case-modifying attributes; from bash-4.0-devel tree
+
+config.h.in
+	- add #defines controlling case-modifying variable attributes and word
+	  expansions
+
+configure.in
+	- add enable options for case-modifying variable attributes and word
+	  expansions (--enable-casemod-attributes and --enable-casemod-expansions,
+	  respectively); from bash-4.0-devel tree
+
+execute_cmd.c
+	- add code to fix_assignment_words to handle assignment statements to
+	  "assignment builtins" that seem to be associative arrays.  Imperfect
+
+subst.c
+	- array_remove_pattern now takes a SHELL_VAR * as its first argument
+	  instead of an ARRAY *; from the bash-4.0-devel tree
+	- changes to array_length_reference for associative arrays; from the
+	  bash-4.0-devel tree
+	- changes to get_var_and_type for associative arrays; from the
+	  bash-4.0-devel tree
+	- changes to parameter_brace_substring for associative arrays; from the
+	  bash-4.0-devel tree
+	- changes to param_expand for associative arrays; from the
+	  bash-4.0-devel tree
+
+builtins/declare.def
+	- changes for associative arrays: new `-A' option, changes to make
+	  local and global associative array variables; from the bash-4.0-devel
+	  tree
+
+				   6/27
+				   ----
+execute_cmd.c
+	- in execute_command_internal, when short-circuiting execution
+	  because `breaking' or `continuing' is non-zero, preserve the exit
+	  status by returning `last_command_exit_value' instead of an
+	  unconditional EXECUTION_SUCCESS.  Fixes bug reported by Roman
+	  Rakus <rrakus@redhat.com>
+
+				   6/28
+				   ----
+variables.c
+	- fix get_var_and_type to appropriately handle references like
+	  ${varname[0]}, where `varname' is a scalar variable
+
+make_cmd.[ch],parse.y
+	- make_here_document now takes a second argument: the current line
+	  number; changed caller (gather_here_documents)
+
+builtins/setattr.def
+	- added support for associative arrays and the `-A' variable attribute
+	  option; from the bash-4.0-devel tree
+
+subst.c
+	- change code that transforms `declare -A xxx=(yyy)' to perform the
+	  internal `declare -A xxx' before doing the variable assignment,
+	  because associative arrays have to be declared before being assigned
+	  to as such; uses new function make_internal_declare
