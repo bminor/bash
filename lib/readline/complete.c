@@ -599,7 +599,7 @@ fnwidth (string)
   width = pos = 0;
   while (string[pos])
     {
-      if (CTRL_CHAR (*string) || *string == RUBOUT)
+      if (CTRL_CHAR (string[pos]) || string[pos] == RUBOUT)
 	{
 	  width += 2;
 	  pos++;

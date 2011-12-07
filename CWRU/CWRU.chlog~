@@ -15242,4 +15242,13 @@ lib/readline/{misc,readline,vi_mode,vi_keymap}.c
 builtins/read.def
 	- change timeout behavior when not reading from a tty device to save
 	  any partial input in the variable list, but still return failure.
-	  Fix inspired by Brian Craft <bcboy@thecraftstudio.com>
+	  This also causes variables specified as arguments to read to be
+	  set to null when there is no input available.  Fix inspired by
+	  Brian Craft <bcboy@thecraftstudio.com>
+
+				   1/21
+				   ----
+builtins/fc.def
+	- change computation of last_hist to use remember_on_history instead
+	  of a hard-coded `1'.  This keeps fc -l -1 in PROMPT_COMMAND from
+	  looking too far back
