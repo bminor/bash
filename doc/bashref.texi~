@@ -3986,17 +3986,24 @@ Cause the status of terminated background jobs to be reported
 immediately, rather than before printing the next primary prompt.
 
 @item -e
-Exit immediately if a simple command (@pxref{Simple Commands}) exits
-with a non-zero status, unless the command that fails is part of the
+Exit immediately if a pipeline (@pxref{Pipelines}), which may consist
+of a single simple command (@pxref{Simple Commands}),
+a subshell command enclosed in parentheses (@pxref{Grouping Commands}),
+or one of the commands executed as part of a command list enclosed
+by braces (@pxref{Grouping Commands})
+returns a non-zero status.
+The shell does not exit if the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
 part of the test in an @code{if} statement,
-part of a command executed in a @code{&&} or @code{||b} list,
+part of any command executed in a @code{&&} or @code{||} list except
+the command following the final @code{&&} or @code{||},
 any command in a pipeline but the last,
-or if the command's return status is being inverted using @code{!}.
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
+or if the command's return status is being inverted with @code{!}.
 A trap on @code{ERR}, if set, is executed before the shell exits.
+
+This option applies to the shell environment and each subshell environment
+separately (@pxref{Command Execution Environment}), and may cause
+subshells to exit before executing all the commands in the subshell.
 
 @item -f
 Disable file name generation (globbing).
@@ -4794,8 +4801,7 @@ even if it is subsequently reset.
 An array variable consisting of the individual
 words in the current command line.
 The line is split into words as Readline would split it, using
-@var{rl_completer_word_break_characters}
-(@pxref{Completion Variables}).
+@code{COMP_WORDBREAKS} as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
 
@@ -7339,7 +7345,7 @@ to reproduce it.
 the template it provides for filing a bug report.
 
 Please send all reports concerning this manual to
-@email{chet@@po.CWRU.Edu}.
+@email{chet.ramey@case.edu}.
 
 @node Major Differences From The Bourne Shell
 @appendix Major Differences From The Bourne Shell

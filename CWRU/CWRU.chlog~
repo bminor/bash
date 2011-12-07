@@ -7490,4 +7490,19 @@ locale.c
 	- in set_locale_var, set errno to 0 before calling setlocale(), and
 	  print strerror (errno) if setlocale fails and errno ends up non-zero
 
-[bash-4.0-release frozen]
+				    2/6
+				    ---
+configure.in
+	- backed out of solaris change from 10/23/2008 (adding `-z interpose'
+	  to LDFLAGS) due to solaris updates to fix a linker problem.
+	  Updatted by Serge Dussud <Serge.Dussud@Sun.COM>
+
+				   2/12
+				   ----
+execute_cmd.c
+	- change execute_connection so failure of a pipeline will cause the
+	  shell to exit if -e is on.  From discussion on austin-group
+	  mailing list
+	- change execute_command_internal so failure of a user-specified
+	  subshell will cause the shell to exit if -e is on.  From discussion
+	  on austin-group mailing list

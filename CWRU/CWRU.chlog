@@ -7497,4 +7497,18 @@ configure.in
 	  to LDFLAGS) due to solaris updates to fix a linker problem.
 	  Updatted by Serge Dussud <Serge.Dussud@Sun.COM>
 
-[bash-4.0-release frozen]
+				   2/12
+				   ----
+execute_cmd.c
+	- change execute_connection so failure of a pipeline will cause the
+	  shell to exit if -e is on.  From discussion on austin-group
+	  mailing list
+	- change execute_command_internal so failure of a user-specified
+	  subshell will cause the shell to exit if -e is on.  From discussion
+	  on austin-group mailing list
+
+				   2/13
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarified description of set -e option to accurately reflect current
+	  implementation

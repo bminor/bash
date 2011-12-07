@@ -513,7 +513,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int exec_result, invert, ignore_return, was_error_trap;
+  int exec_result, user_subshell, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
   volatile int last_pid;
   volatile int save_line_number;
@@ -557,6 +557,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     return (execute_coproc (command, pipe_in, pipe_out, fds_to_close));
 #endif
 
+  user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
+
   if (command->type == cm_subshell ||
       (command->flags & (CMD_WANT_SUBSHELL|CMD_FORCE_SUBSHELL)) ||
       (shell_control_structure (command->type) &&
@@ -590,6 +592,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	  if (asynchronous == 0)
 	    {
+	      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+	      invert = (command->flags & CMD_INVERT_RETURN) != 0;
+	      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+
 	      last_command_exit_value = wait_for (paren_pid);
 
 	      /* If we have to, invert the return value. */
@@ -599,6 +605,20 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 				: EXECUTION_SUCCESS);
 	      else
 		exec_result = last_command_exit_value;
+
+
+	      if (user_subshell && was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
+		{
+		  last_command_exit_value = exec_result;
+		  run_error_trap ();
+		}
+
+	      if (user_subshell && ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
+		{
+		  last_command_exit_value = exec_result;
+		  run_pending_traps ();
+		  jump_to_top_level (ERREXIT);
+		}
 
 	      return (last_command_exit_value = exec_result);
 	    }
@@ -741,10 +761,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  }
       }
 
-      /* 10/6/2008 -- added test for pipe_in and pipe_out because they indicate
-	 the presence of a pipeline, and (until Posix changes things), a
-	 pipeline failure should not cause the parent shell to exit on an
-	 unsuccessful return status, even in the presence of errexit.. */
+      /* 2009/02/13 -- pipeline failure is processed elsewhere.  This handles
+	 only the failure of a simple command. */
       if (was_error_trap && ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
@@ -2086,7 +2104,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 {
   REDIRECT *rp;
   COMMAND *tc, *second;
-  int ignore_return, exec_result;
+  int ignore_return, exec_result, was_error_trap, invert;
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
@@ -2152,7 +2170,25 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       break;
 
     case '|':
+      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+      invert = (command->flags & CMD_INVERT_RETURN) != 0;
+      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+
+      if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  run_error_trap ();
+	}
+
+      if (ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = exec_result;
+	  run_pending_traps ();
+	  jump_to_top_level (ERREXIT);
+	}
+
       break;
 
     case AND_AND:

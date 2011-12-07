@@ -1,3 +1,96 @@
+This document details the changes between this version, bash-4.0-release,
+and the previous version, bash-4.0-rc1.
+
+This document details the changes between this version, bash-4.0-rc1,
+and the previous version, bash-4.0-beta2.
+
+1.  Changes to Bash
+
+a.  Changed the message printed when setlocale(3) fails to only include the
+    strerror error text if the call changes errno.
+
+b.  Changed trap command execution to reset the line number before running a
+    trap (except DEBUG and RETURN traps).
+
+c.  Fixed behavior of case-modifiying word expansions to not work on
+    individual words within a variable's value.
+
+d.  Fixed a bug that caused mapfile to not be interruptible when run in an
+    interactive shell.
+
+e.  Fixed a bug that caused mapfile to not run callbacks for the first line
+    read.
+
+f.  Fixed a bug that caused mapfile to not honor EOF typed in an interactive
+    shell.
+
+g.  Fixed the coprocess reaping code to not run straight from a signal handler.
+
+h.  Fixed a bug that caused printf -b to ignore the first % conversion specifier
+    in the format string on 64-bit systems.
+
+i.  Fixed a bug that caused incorrect word splitting when `:', `=', or `~'
+    appeared in $IFS.
+
+j.  Fixed a bug that caused data corruption in the programmable completion code
+    when a shell function called from a completion aborted execution.
+
+k.  Fixed a bug that caused the CPU usage reported by the `time' builtin to be
+    capped at 100%.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused !(...) extended glob patterns to inhibit later
+    history expansion.
+
+b.  Reworked the signal handling to avoid calling disallowed functions from a
+    signal handler.
+
+3.  New Features in Bash
+
+a.  `readarray' is now a synonym for `mapfile'.
+------------------------------------------------------------------------------
+1.  Changes to Bash
+
+a.  Fixed a bug that caused parsing errors when a $()-style command
+    substitution was follwed immediately by a quoted newline.
+
+b.  Fixed a bug that caused extended shell globbing patterns beginning with
+    `*(' to not work when used with pattern substitution word expansions.
+ 
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-4.0-beta2,
+and the previous version, bash-4.0-beta.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused failed word expansions to set $? but not
+    PIPESTATUS.
+
+b.  Changed filename completion to quote the tilde in a filename with a
+    leading tilde that exists in the current directory.
+
+c.  Fixed a bug that caused a file descriptor leak when performing
+    redirections attached to a compound command.
+
+d.  Fixed a bug that caused expansions of $@ and $* to not exit the shell if
+    the -u option was enabled and there were no posititional parameters.
+
+e.  Fixed a bug that resulted in bash not terminating immediately if a
+    terminating signal was received while performing output.
+
+f.  Fixed a bug that caused the shell to crash after creating 256 process
+    substitutions during word completion.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused redisplay errors when using prompts with invisible
+    characters and numeric arguments to a command in a multibyte locale.
+
+b.  Fixed a bug that caused redisplay errors when using prompts with invisible
+    characters spanning more than two physical screen lines.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.0-beta,
 and the previous version, bash-4.0-alpha.
 

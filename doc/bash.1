@@ -8033,7 +8033,10 @@ immediately, rather than before the next primary prompt.  This is
 effective only when job control is enabled.
 .TP 8
 .B \-e
-Exit immediately if a \fIsimple command\fP (see
+Exit immediately if a \fIpipeline\fP (which may consist of a single
+\fIsimple command\fP),  a \fIsubshell\fP command enclosed in parentheses,
+or one of the commands executed as part of a command list enclosed
+by braces (see
 .SM
 .B SHELL GRAMMAR
 above) exits with a non-zero status.
@@ -8045,19 +8048,21 @@ or
 keyword, 
 part of the test in an
 .B if
-statement, part of a command executed in a
+statement, part of any command executed in a
 .B &&
 or
 .B \(bv\(bv
-list,
+list except the command following the final \fB&&\fP or \fB\(bv\(bv\fP,
 any command in a pipeline but the last,
 or if the command's return value is
-being inverted via
+being inverted with
 .BR ! .
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
 A trap on \fBERR\fP, if set, is executed before the shell exits.
+This option applies to the shell environment and each subshell environment
+separately (see
+.B "COMMAND EXECUTION ENVIRONMENT"
+above), and may cause
+subshells to exit before executing all the commands in the subshell.
 .TP 8
 .B \-f
 Disable pathname expansion.
