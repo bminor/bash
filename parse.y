@@ -3433,9 +3433,9 @@ read_token_word (character)
 	 we need to special-case characters special to both the shell and
 	 regular expressions.  Right now, that is only '(' and '|'. */ /*)*/
       if MBTEST((parser_state & PST_REGEXP) && (character == '(' || character == '|'))		/*)*/
-        {
-          if (character == '|')
-            goto got_character;
+	{
+	  if (character == '|')
+	    goto got_character;
 
 	  push_delimiter (dstack, character);
 	  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
@@ -3450,7 +3450,7 @@ read_token_word (character)
 	  FREE (ttok);
 	  dollar_present = all_digit_token = 0;
 	  goto next_character;
-        }
+	}
 #endif /* COND_REGEXP */
 
 #ifdef EXTENDED_GLOB
