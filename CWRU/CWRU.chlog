@@ -7066,3 +7066,38 @@ configure.in
 doc/bash.1
 	- add single-sentence descriptions to rest of parameter expansions.
 	  Suggested by Ken Irving <fnkci@uaf.edu>
+
+				   10/27
+				   -----
+subst.c
+	- rearrange code in skip_to_delims to allow quote characters and other
+	  shell expansion characters to be delimiters
+	- add new flags value for inverting search: skip to the next character
+	  NOT in the set of delimiters passed as an argument
+
+subst.h
+	- define for new SD_INVERT flag value for skip_to_delims
+
+				   10/28
+				   -----
+bashline.c
+	- new bindable functions: shell-forward-word and shell-backward-word.
+	  Like forward-word and backward-word, but understand shell quoting
+	  and use shell metacharacters and whitespace as delimiters.
+	  Suggested by Andre Majorel <amajorel@teaser.fr>
+	- new bindable functions: shell-kill-word and shell-backward-kill-word.
+	  Like kill-word and backward-kill-word, but understand shell quoting
+	  and  use shell metacharacters and whitespace as delimiters.
+	  Suggested by Andre Majorel <amajorel@teaser.fr>
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- documented shell-forward-word and shell-backward-word
+	- documented shell-kill-word and shell-backward-kill-word
+
+				   11/1
+				   ----
+redir.c
+ 	- add extra argument to add_undo_redirect: fdbase.  FD used to save
+	  a file descriptor must be > fdbase if fdbase >= SHELL_FD_BASE.  A
+	  value of -1 for fdbase means to just use SHELL_FD_BASE.  Fixes bug
+	  with 0<&10 reported by Clark Jian Wang <dearvoid@gmail.com>

@@ -265,6 +265,7 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 
 /* Flags for skip_to_delim */
 #define SD_NOJMP	0x01	/* don't longjmp on fatal error. */
+#define SD_INVERT	0x02	/* look for chars NOT in passed set */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

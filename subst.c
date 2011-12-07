@@ -1387,7 +1387,7 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c;
+  int i, pass_next, backq, si, c, invert;
   size_t slen;
   char *temp;
   DECLARE_MBSTATE;
@@ -1395,6 +1395,8 @@ skip_to_delim (string, start, delims, flags)
   slen = strlen (string + start) + start;
   if (flags & SD_NOJMP)
     no_longjmp_on_fatal_error = 1;
+  invert = (flags & SD_INVERT);
+
   i = start;
   pass_next = backq = 0;
   while (c = string[i])
@@ -1426,6 +1428,8 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
+      else if (invert == 0 && member (c, delims))
+	break;
       else if (c == '\'' || c == '"')
 	{
 	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
@@ -1448,7 +1452,7 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
-      else if (member (c, delims))
+      else if (invert && (member (c, delims) == 0))
 	break;
       else
 	ADVANCE_CHAR (string, slen, i);

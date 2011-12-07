@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-24 11:49-0400\n"
+"POT-Creation-Date: 2008-10-27 08:53-0400\n"
 "PO-Revision-Date: 2002-06-14 09:49GMT\n"
 "Last-Translator: Gábor István <stive@mezobereny.hu>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
@@ -19,7 +19,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "hibás tömb a  tömbindexben"
 
-#: arrayfunc.c:313 builtins/declare.def:467
+#: arrayfunc.c:313 builtins/declare.def:474
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr ""
@@ -63,32 +63,36 @@ msgstr ""
 msgid "%s: missing colon separator"
 msgstr ""
 
-#: builtins/bind.def:202
+#: builtins/bind.def:120 builtins/bind.def:123
+msgid "line editing not enabled"
+msgstr ""
+
+#: builtins/bind.def:206
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr ""
 
-#: builtins/bind.def:241
+#: builtins/bind.def:245
 #, fuzzy, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: nem lehet létrehozni: %s"
 
-#: builtins/bind.def:256
+#: builtins/bind.def:260
 #, fuzzy, c-format
 msgid "`%s': cannot unbind"
 msgstr "%s: parancs nem található"
 
-#: builtins/bind.def:291 builtins/bind.def:321
+#: builtins/bind.def:295 builtins/bind.def:325
 #, fuzzy, c-format
 msgid "`%s': unknown function name"
 msgstr "%s Csak olvasható funkció"
 
-#: builtins/bind.def:299
+#: builtins/bind.def:303
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr ""
 
-#: builtins/bind.def:303
+#: builtins/bind.def:307
 #, c-format
 msgid "%s can be invoked via "
 msgstr ""
@@ -117,136 +121,141 @@ msgstr ""
 msgid "OLDPWD not set"
 msgstr ""
 
-#: builtins/common.c:107
+#: builtins/common.c:101
 #, fuzzy, c-format
 msgid "line %d: "
 msgstr "foglalat %3d: "
 
-#: builtins/common.c:124
+#: builtins/common.c:139 error.c:260
+#, fuzzy, c-format
+msgid "warning: "
+msgstr "írás"
+
+#: builtins/common.c:153
 #, c-format
 msgid "%s: usage: "
 msgstr ""
 
-#: builtins/common.c:137 test.c:822
+#: builtins/common.c:166 test.c:822
 msgid "too many arguments"
 msgstr "túl sok argumentum"
 
-#: builtins/common.c:162 shell.c:493 shell.c:774
+#: builtins/common.c:191 shell.c:493 shell.c:774
 #, fuzzy, c-format
 msgid "%s: option requires an argument"
 msgstr "az opció paramétert igényel:-"
 
-#: builtins/common.c:169
+#: builtins/common.c:198
 #, c-format
 msgid "%s: numeric argument required"
 msgstr ""
 
-#: builtins/common.c:176
+#: builtins/common.c:205
 #, fuzzy, c-format
 msgid "%s: not found"
 msgstr "%s: parancs nem található"
 
-#: builtins/common.c:185 shell.c:787
+#: builtins/common.c:214 shell.c:787
 #, fuzzy, c-format
 msgid "%s: invalid option"
 msgstr "%c%c: rossz opció"
 
-#: builtins/common.c:192
+#: builtins/common.c:221
 #, fuzzy, c-format
 msgid "%s: invalid option name"
 msgstr "%c%c: rossz opció"
 
-#: builtins/common.c:199 general.c:231 general.c:236
+#: builtins/common.c:228 general.c:231 general.c:236
 #, fuzzy, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s' nem érvényes azonosító"
 
-#: builtins/common.c:209
+#: builtins/common.c:238
 #, fuzzy
 msgid "invalid octal number"
 msgstr "rossz jel(signal) szám"
 
-#: builtins/common.c:211
+#: builtins/common.c:240
 #, fuzzy
 msgid "invalid hex number"
 msgstr "rossz jel(signal) szám"
 
-#: builtins/common.c:213 expr.c:1255
+#: builtins/common.c:242 expr.c:1255
 #, fuzzy
 msgid "invalid number"
 msgstr "rossz jel(signal) szám"
 
-#: builtins/common.c:221
+#: builtins/common.c:250
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr ""
 
-#: builtins/common.c:228
+#: builtins/common.c:257
 #, c-format
 msgid "`%s': not a pid or valid job spec"
 msgstr ""
 
-#: builtins/common.c:235 error.c:453
+#: builtins/common.c:264 error.c:453
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s Csak olvasható változó"
 
-#: builtins/common.c:243
+#: builtins/common.c:272
 #, c-format
 msgid "%s: %s out of range"
 msgstr ""
 
-#: builtins/common.c:243 builtins/common.c:245
+#: builtins/common.c:272 builtins/common.c:274
 #, fuzzy
 msgid "argument"
 msgstr "paraméter szükséges"
 
-#: builtins/common.c:245
+#: builtins/common.c:274
 #, c-format
 msgid "%s out of range"
 msgstr ""
 
-#: builtins/common.c:253
+#: builtins/common.c:282
 #, c-format
 msgid "%s: no such job"
 msgstr ""
 
-#: builtins/common.c:261
+#: builtins/common.c:290
 #, fuzzy, c-format
 msgid "%s: no job control"
 msgstr "nincs munkafolyamat ellenõrzés ezen a parancsértelmezõn"
 
-#: builtins/common.c:263
+#: builtins/common.c:292
 #, fuzzy
 msgid "no job control"
 msgstr "nincs munkafolyamat ellenõrzés ezen a parancsértelmezõn"
 
-#: builtins/common.c:273
+#: builtins/common.c:302
 #, fuzzy, c-format
 msgid "%s: restricted"
 msgstr "%s: munkafolyamat megszakadt"
 
-#: builtins/common.c:275
+#: builtins/common.c:304
 #, fuzzy
 msgid "restricted"
 msgstr "Félbeszakítva"
 
-#: builtins/common.c:283
+#: builtins/common.c:312
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr ""
 
-#: builtins/common.c:292
+#: builtins/common.c:321
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "Csõ (pipe)hiba %s"
 
-#: builtins/common.c:524
+#: builtins/common.c:553
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr ""
 
-#: builtins/common.c:590 builtins/common.c:592
+#: builtins/common.c:619 builtins/common.c:621
 #, fuzzy, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: Nem egyértelmû átirányítás"
@@ -283,17 +292,17 @@ msgstr "A local-t csak funkción belül lehet használni, létrehozott változó NÉV"
 msgid "cannot use `-f' to make functions"
 msgstr ""
 
-#: builtins/declare.def:365 execute_cmd.c:4707
+#: builtins/declare.def:365 execute_cmd.c:4711
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s Csak olvasható funkció"
 
-#: builtins/declare.def:454
+#: builtins/declare.def:461
 #, fuzzy, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "$%s így nem lehet hozzárendelni"
 
-#: builtins/declare.def:461
+#: builtins/declare.def:468
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr ""
@@ -322,7 +331,7 @@ msgstr ""
 msgid "%s: cannot delete: %s"
 msgstr "%s: nem lehet létrehozni: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4564
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4568
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -338,7 +347,7 @@ msgstr "%s: nem futtatható bináris fájl"
 msgid "%s: file is too large"
 msgstr ""
 
-#: builtins/evalfile.c:185 execute_cmd.c:4634 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4638 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: nem futtatható bináris fájl"
@@ -777,11 +786,6 @@ msgstr "újra futtathatja az utolsó parancsot."
 msgid "Aborting..."
 msgstr ""
 
-#: error.c:260
-#, fuzzy, c-format
-msgid "warning: "
-msgstr "írás"
-
 #: error.c:405
 #, fuzzy
 msgid "unknown command error"
@@ -817,32 +821,32 @@ msgstr "%c túl sokáig nem csinált semmit:automatikus kilépés\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr ""
 
-#: execute_cmd.c:1082
+#: execute_cmd.c:1086
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr ""
 
-#: execute_cmd.c:1933
+#: execute_cmd.c:1937
 #, fuzzy
 msgid "pipe error"
 msgstr "Csõ (pipe)hiba %s"
 
-#: execute_cmd.c:4251
+#: execute_cmd.c:4255
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: fenntartva: parancs nem tartalmazhat '/' karaktert"
 
-#: execute_cmd.c:4342
+#: execute_cmd.c:4346
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: parancs nem található"
 
-#: execute_cmd.c:4597
+#: execute_cmd.c:4601
 #, fuzzy, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: egy könyvtár"
 
-#: execute_cmd.c:4746
+#: execute_cmd.c:4750
 #, fuzzy, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "nem másolható a  fd %d  fd 0: %s-re"
@@ -921,7 +925,7 @@ msgstr "%s egész szám szükséges"
 msgid "getcwd: cannot access parent directories"
 msgstr "getwd: nem elérhetõ a szülõ könyvtár"
 
-#: input.c:94 subst.c:4554
+#: input.c:94 subst.c:4556
 #, fuzzy, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nem másolható a  fd %d  fd 0: %s-re"
@@ -1211,103 +1215,103 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 
-#: parse.y:2982 parse.y:3204
+#: parse.y:2982 parse.y:3214
 #, fuzzy, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "váratlan EOF amíg vizsgáltam a  `%c'-t"
 
-#: parse.y:3708
+#: parse.y:3718
 #, fuzzy
 msgid "unexpected EOF while looking for `]]'"
 msgstr "váratlan EOF amíg vizsgáltam a  `%c'-t"
 
-#: parse.y:3713
+#: parse.y:3723
 #, fuzzy, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "szintaktikai hiba a váratlan %s vezérjel körül"
 
-#: parse.y:3717
+#: parse.y:3727
 #, fuzzy
 msgid "syntax error in conditional expression"
 msgstr "szintaktikai hiba a kifelyezésben"
 
-#: parse.y:3795
+#: parse.y:3805
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr ""
 
-#: parse.y:3799
+#: parse.y:3809
 #, fuzzy
 msgid "expected `)'"
 msgstr "')' szükséges"
 
-#: parse.y:3827
+#: parse.y:3837
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr ""
 
-#: parse.y:3831
+#: parse.y:3841
 msgid "unexpected argument to conditional unary operator"
 msgstr ""
 
-#: parse.y:3871
+#: parse.y:3881
 #, fuzzy, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "%s:bináris mûvelet szükséges"
 
-#: parse.y:3875
+#: parse.y:3885
 #, fuzzy
 msgid "conditional binary operator expected"
 msgstr "%s:bináris mûvelet szükséges"
 
-#: parse.y:3892
+#: parse.y:3902
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr ""
 
-#: parse.y:3896
+#: parse.y:3906
 msgid "unexpected argument to conditional binary operator"
 msgstr ""
 
-#: parse.y:3907
+#: parse.y:3917
 #, fuzzy, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "`:' túllépte a kifelyezés feltételeit"
 
-#: parse.y:3910
+#: parse.y:3920
 #, fuzzy, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "`:' túllépte a kifelyezés feltételeit"
 
-#: parse.y:3914
+#: parse.y:3924
 #, fuzzy, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "`:' túllépte a kifelyezés feltételeit"
 
-#: parse.y:5181
+#: parse.y:5191
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "szintaktikai hiba a váratlan %s vezérjel körül"
 
-#: parse.y:5199
+#: parse.y:5209
 #, fuzzy, c-format
 msgid "syntax error near `%s'"
 msgstr "szintaktikai hiba a váratlan %s vezérjel körül"
 
-#: parse.y:5209
+#: parse.y:5219
 msgid "syntax error: unexpected end of file"
 msgstr "szintaktikai hiba:  váratlan fájl vég"
 
-#: parse.y:5209
+#: parse.y:5219
 msgid "syntax error"
 msgstr "szintaktikai hiba"
 
-#: parse.y:5271
+#: parse.y:5281
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Használja \"%s\" a parancsértelmezõ elhagyásához.\n"
 
-#: parse.y:5433
+#: parse.y:5443
 #, fuzzy
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "váratlan EOF amíg vizsgáltam a  `%c'-t"
@@ -1378,16 +1382,16 @@ msgstr ""
 msgid "%c%c: invalid option"
 msgstr "%c%c: rossz opció"
 
-#: shell.c:1637
+#: shell.c:1638
 msgid "I have no name!"
 msgstr "Nincs nevem!"
 
-#: shell.c:1777
+#: shell.c:1778
 #, fuzzy, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU %s, verzió %s\n"
 
-#: shell.c:1778
+#: shell.c:1779
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1396,39 +1400,39 @@ msgstr ""
 "Használat:\t%s [GNU hosszú opció] [opció] ...\n"
 "\t%s [GNU hosszú opció] [opció] parancs fájl ...\n"
 
-#: shell.c:1780
+#: shell.c:1781
 msgid "GNU long options:\n"
 msgstr "GNU hosszú opciók:\n"
 
-#: shell.c:1784
+#: shell.c:1785
 msgid "Shell options:\n"
 msgstr "Parancsértelmezõ opciók:\n"
 
-#: shell.c:1785
+#: shell.c:1786
 #, fuzzy
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD vagy -c parancs\t\t(csak végrehajtható)\n"
 
-#: shell.c:1800
+#: shell.c:1801
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s vagy -o opciók\n"
 
-#: shell.c:1806
+#: shell.c:1807
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Írja be a `%s -c \"help set\"' ha több információra van szüksége a "
 "parancsértelmezõ opcióival kapcsolatban.\n"
 
-#: shell.c:1807
+#: shell.c:1808
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Írja be a `%s -c \"help set\"' ha több információra van szüksége a "
 "parancsértelmezõ beépített utasításaival kapcsolatban.\n"
 
-#: shell.c:1808
+#: shell.c:1809
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr ""
@@ -1608,84 +1612,84 @@ msgstr "Ismeretlen # Szignál"
 msgid "Unknown Signal #%d"
 msgstr "Ismeretlen #%d Szignál"
 
-#: subst.c:1179 subst.c:1300
+#: subst.c:1181 subst.c:1302
 #, fuzzy, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "rossz behelyettesítés: ne a %s be a %s-t"
 
-#: subst.c:2452
+#: subst.c:2454
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: nem lehet a listához rendelni az elemet"
 
-#: subst.c:4451 subst.c:4467
+#: subst.c:4453 subst.c:4469
 #, fuzzy
 msgid "cannot make pipe for process substitution"
 msgstr "nem lehet létrehozni a pipe-ot feladat behelyettesítéshez: %s"
 
-#: subst.c:4499
+#: subst.c:4501
 #, fuzzy
 msgid "cannot make child for process substitution"
 msgstr ""
 "nem lehet létrehozni a gyermekfolyamatott feladat behelyettesítéshez: %s"
 
-#: subst.c:4544
+#: subst.c:4546
 #, fuzzy, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nem lehet létrehozni a  %s \"named pipe\"-ot a %s-nek: %s"
 
-#: subst.c:4546
+#: subst.c:4548
 #, fuzzy, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nem lehet létrehozni a  %s \"named pipe\"-ot a %s-nek: %s"
 
-#: subst.c:4564
+#: subst.c:4566
 #, fuzzy, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nem lehet másolni a %s \"named pipe\"-ot mint fd %d :%s"
 
-#: subst.c:4760
+#: subst.c:4762
 #, fuzzy
 msgid "cannot make pipe for command substitution"
 msgstr "nem lehet létrehozni a \"pipe\"-ot parancs behelyettesítéséhez: %s"
 
-#: subst.c:4794
+#: subst.c:4796
 #, fuzzy
 msgid "cannot make child for command substitution"
 msgstr ""
 "nem lehet létrehozni a gyermekfolyamatot a parancs behelyettesítéséhez: %s"
 
-#: subst.c:4811
+#: subst.c:4813
 #, fuzzy
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: nem lehet másolni a \"pipe\"-ot mint fd 1: %s"
 
-#: subst.c:5313
+#: subst.c:5315
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s paraméter semmis vagy nincs beállítva"
 
-#: subst.c:5603
+#: subst.c:5605
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s szövegrész kifejezés < 0"
 
-#: subst.c:6655
+#: subst.c:6657
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s rossz behelyettesítés"
 
-#: subst.c:6735
+#: subst.c:6737
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s így nem lehet hozzárendelni"
 
-#: subst.c:7454
+#: subst.c:7456
 #, fuzzy, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "rossz behelyettesítés: ne a %s be a %s-t"
 
-#: subst.c:8327
+#: subst.c:8329
 #, c-format
 msgid "no match: %s"
 msgstr ""
@@ -1743,43 +1747,43 @@ msgstr ""
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: Rossz jel(signal) %d"
 
-#: variables.c:354
+#: variables.c:356
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "hiba a %s funkció definíció importálásakor"
 
-#: variables.c:732
+#: variables.c:734
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr ""
 
-#: variables.c:1893
+#: variables.c:1895
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 
-#: variables.c:3122
+#: variables.c:3124
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 
-#: variables.c:3339 variables.c:3348
+#: variables.c:3341 variables.c:3350
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr ""
 
-#: variables.c:3354
+#: variables.c:3356
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr ""
 
-#: variables.c:3789
+#: variables.c:3791
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 
-#: variables.c:3802
+#: variables.c:3804
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 
-#: variables.c:3876
+#: variables.c:3878
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Sep 13 18:27:41 EDT 2008
+.\"	Last Change: Tue Oct 28 11:24:02 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 September 13" "GNU Bash-4.0"
+.TH BASH 1 "2008 October 28" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5138,8 +5138,16 @@ Move forward to the end of the next word.  Words are composed of
 alphanumeric characters (letters and digits).
 .TP
 .B backward\-word (M\-b)
-Move back to the start of the current or previous word.  Words are
-composed of alphanumeric characters (letters and digits).
+Move back to the start of the current or previous word.
+Words are composed of alphanumeric characters (letters and digits).
+.TP
+.B shell\-forward\-word
+Move forward to the end of the next word.
+Words are delimited by non-quoted shell metacharacters.
+.TP
+.B shell\-backward\-word
+Move back to the start of the current or previous word.
+Words are delimited by non-quoted shell metacharacters.
 .TP
 .B clear\-screen (C\-l)
 Clear the screen leaving the current line at the top of the screen.
@@ -5366,6 +5374,15 @@ Word boundaries are the same as those used by \fBforward\-word\fP.
 .B backward\-kill\-word (M\-Rubout)
 Kill the word behind point.
 Word boundaries are the same as those used by \fBbackward\-word\fP.
+.TP
+.B shell\-kill\-word  (M\-d)
+Kill from point to the end of the current word, or if between
+words, to the end of the next word.
+Word boundaries are the same as those used by \fBshell\-forward\-word\fP.
+.TP
+.B shell\-backward\-kill\-word (M\-Rubout)
+Kill the word behind point.
+Word boundaries are the same as those used by \fBshell\-backward\-word\fP.
 .TP
 .B unix\-word\-rubout (C\-w)
 Kill the word behind point, using white space as a word boundary.

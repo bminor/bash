@@ -50,7 +50,10 @@
 #include "execute_cmd.h"
 #include "findcmd.h"
 #include "pathexp.h"
+#include "shmbutil.h"
+
 #include "builtins/common.h"
+
 #include <readline/rlconf.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -100,6 +103,11 @@ static int alias_expand_line __P((int, int));
 #if defined (BANG_HISTORY) && defined (ALIAS)
 static int history_and_alias_expand_line __P((int, int));
 #endif
+
+static int bash_forward_shellword __P((int, int));
+static int bash_backward_shellword __P((int, int));
+static int bash_kill_shellword __P((int, int));
+static int bash_backward_kill_shellword __P((int, int));
 
 /* Helper functions for Readline. */
 static char *restore_tilde __P((char *, char *));
@@ -361,6 +369,11 @@ initialize_readline ()
   rl_add_defun ("history-expand-line", history_expand_line, -1);
   rl_add_defun ("magic-space", tcsh_magic_space, -1);
 #endif
+
+  rl_add_defun ("shell-forward-word", bash_forward_shellword, -1);
+  rl_add_defun ("shell-backward-word", bash_backward_shellword, -1);
+  rl_add_defun ("shell-kill-word", bash_kill_shellword, -1);
+  rl_add_defun ("shell-backward-kill-word", bash_backward_kill_shellword, -1);
 
 #ifdef ALIAS
   rl_add_defun ("alias-expand-line", alias_expand_line, -1);
@@ -924,6 +937,203 @@ posix_edit_macros (count, key)
   return 0;
 }
 #endif
+
+/* Bindable commands that move `shell-words': that is, sequences of
+   non-unquoted-metacharacters. */
+
+#define WORDDELIM(c)	(shellmeta(c) || shellblank(c))
+
+static int
+bash_forward_shellword (count, key)
+     int count, key;
+{
+  size_t slen;
+  int sindex, c, p;
+  DECLARE_MBSTATE;
+
+  if (count < 0)
+    return (bash_backward_shellword (-count, c));
+
+  /* The tricky part of this is deciding whether or not the first character
+     we're on is an unquoted metacharacter.  Not completely handled yet. */
+  /* XXX - need to test this stuff with backslash-escaped shell
+     metacharacters and unclosed single- and double-quoted strings. */
+
+  p = rl_point;
+  slen = rl_end;
+
+  while (count)
+    {
+      if (p == rl_end)
+	{
+	  rl_point = rl_end;
+	  return 0;
+	}
+
+      /* Move forward until we hit a non-metacharacter. */
+      while (p < rl_end && (c = rl_line_buffer[p]) && WORDDELIM (c))
+	{
+	  switch (c)
+	    {
+	    default:
+	      ADVANCE_CHAR (rl_line_buffer, slen, p);
+	      continue;		/* straight back to loop, don't increment p */
+	    case '\\':
+	      if (p < rl_end && rl_line_buffer[p])
+		ADVANCE_CHAR (rl_line_buffer, slen, p);
+	      break;
+	    case '\'':
+	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP);
+	      break;
+	    case '"':
+	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP);
+	      break;
+	    }
+
+	  if (p < rl_end)
+	    p++;
+	}
+
+      if (rl_line_buffer[p] == 0 || p == rl_end)
+        {
+          rl_point = rl_end;
+          ding ();
+	  return 0;
+        }
+	
+      /* Now move forward until we hit a non-quoted metacharacter or EOL */
+      while (p < rl_end && (c = rl_line_buffer[p]) && WORDDELIM (c) == 0)
+	{
+	  switch (c)
+	    {
+	    default:
+	      ADVANCE_CHAR (rl_line_buffer, slen, p);
+	      continue;		/* straight back to loop, don't increment p */
+	    case '\\':
+	      if (p < rl_end && rl_line_buffer[p])
+		ADVANCE_CHAR (rl_line_buffer, slen, p);
+	      break;
+	    case '\'':
+	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP);
+	      break;
+	    case '"':
+	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP);
+	      break;
+	    }
+
+	  if (p < rl_end)
+	    p++;
+	}
+
+      if (p == rl_end || rl_line_buffer[p] == 0)
+	{
+	  rl_point = rl_end;
+	  return (0);
+	}
+
+      count--;      
+    }
+
+  rl_point = p;
+  return (0);
+}
+
+static int
+bash_backward_shellword (count, key)
+     int count, key;
+{
+  size_t slen;
+  int sindex, c, p;
+  DECLARE_MBSTATE;
+  
+  if (count < 0)
+    return (bash_forward_shellword (-count, c));
+
+  p = rl_point;
+  slen = rl_end;
+  
+  while (count)
+    {
+      if (p == 0)
+	{
+	  rl_point = 0;
+	  return 0;
+	}
+
+      /* Move backward until we hit a non-metacharacter. */
+      while (p > 0)
+	{
+	  c = rl_line_buffer[p];
+	  if (WORDDELIM (c) && char_is_quoted (rl_line_buffer, p) == 0)
+	    BACKUP_CHAR (rl_line_buffer, slen, p);
+	  break;
+	}
+
+      if (p == 0)
+	{
+	  rl_point = 0;
+	  return 0;
+	}
+
+      /* Now move backward until we hit a metacharacter or BOL. */
+      while (p > 0)
+	{
+	  c = rl_line_buffer[p];
+	  if (WORDDELIM (c) && char_is_quoted (rl_line_buffer, p) == 0)
+	    break;
+	  BACKUP_CHAR (rl_line_buffer, slen, p);
+	}
+
+      count--;
+    }
+
+  rl_point = p;
+  return 0;
+}
+
+static int
+bash_kill_shellword (count, key)
+     int count, key;
+{
+  int p;
+
+  if (count < 0)
+    return (bash_backward_kill_shellword (-count, key));
+
+  p = rl_point;
+  bash_forward_shellword (count, key);
+
+  if (rl_point != p)
+    rl_kill_text (p, rl_point);
+
+  rl_point = p;
+  if (rl_editing_mode == 1)	/* 1 == emacs_mode */
+    rl_mark = rl_point;
+
+  return 0;
+}
+
+static int
+bash_backward_kill_shellword (count, key)
+     int count, key;
+{
+  int p;
+
+  if (count < 0)
+    return (bash_kill_shellword (-count, key));
+
+  p = rl_point;
+  bash_backward_shellword (count, key);
+
+  if (rl_point != p)
+    rl_kill_text (p, rl_point);
+
+  if (rl_editing_mode == 1)	/* 1 == emacs_mode */
+    rl_mark = rl_point;
+
+  return 0;
+}
+
 
 /* **************************************************************** */
 /*								    */

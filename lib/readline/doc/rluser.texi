@@ -970,12 +970,22 @@ Move forward a character.
 Move back a character.
 
 @item forward-word (M-f)
-Move forward to the end of the next word.  Words are composed of
-letters and digits.
+Move forward to the end of the next word.
+Words are composed of letters and digits.
 
 @item backward-word (M-b)
-Move back to the start of the current or previous word.  Words are
-composed of letters and digits.
+Move back to the start of the current or previous word.
+Words are composed of letters and digits.
+
+@ifset BashFeatures
+@item shell-forward-word ()
+Move forward to the end of the next word.
+Words are delimited by non-quoted shell metacharacters.
+
+@item shell-backward-word ()
+Move back to the start of the current or previous word.
+Words are delimited by non-quoted shell metacharacters.
+@end ifset
 
 @item clear-screen (C-l)
 Clear the screen and redraw the current line,
@@ -1170,6 +1180,17 @@ Word boundaries are the same as @code{forward-word}.
 @item backward-kill-word (M-@key{DEL})
 Kill the word behind point.
 Word boundaries are the same as @code{backward-word}.
+
+@ifset BashFeatures
+@item shell-kill-word ()
+Kill from point to the end of the current word, or if between
+words, to the end of the next word.
+Word boundaries are the same as @code{shell-forward-word}.
+
+@item backward-kill-word ()
+Kill the word behind point.
+Word boundaries are the same as @code{shell-backward-word}.
+@end ifset
 
 @item unix-word-rubout (C-w)
 Kill the word behind point, using white space as a word boundary.

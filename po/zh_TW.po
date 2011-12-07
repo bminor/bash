@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-3.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-24 11:49-0400\n"
+"POT-Creation-Date: 2008-10-27 08:53-0400\n"
 "PO-Revision-Date: 2008-08-20 20:12+0800\n"
 "Last-Translator: Zi-You Dai  <ioppooster@gmail.com>\n"
 "Language-Team: Chinese (traditional)  <zh-l10n@linux.org.tw>\n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr ""
 
-#: arrayfunc.c:313 builtins/declare.def:467
+#: arrayfunc.c:313 builtins/declare.def:474
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr ""
@@ -64,32 +64,36 @@ msgstr ""
 msgid "%s: missing colon separator"
 msgstr ""
 
-#: builtins/bind.def:202
+#: builtins/bind.def:120 builtins/bind.def:123
+msgid "line editing not enabled"
+msgstr ""
+
+#: builtins/bind.def:206
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr ""
 
-#: builtins/bind.def:241
+#: builtins/bind.def:245
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s：不能讀取： %s"
 
-#: builtins/bind.def:256
+#: builtins/bind.def:260
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr ""
 
-#: builtins/bind.def:291 builtins/bind.def:321
+#: builtins/bind.def:295 builtins/bind.def:325
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "`%s'：未知函數名稱"
 
-#: builtins/bind.def:299
+#: builtins/bind.def:303
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr ""
 
-#: builtins/bind.def:303
+#: builtins/bind.def:307
 #, c-format
 msgid "%s can be invoked via "
 msgstr ""
@@ -117,132 +121,137 @@ msgstr "HOME 沒有設置"
 msgid "OLDPWD not set"
 msgstr "OLDPWD 沒有設置"
 
-#: builtins/common.c:107
+#: builtins/common.c:101
 #, c-format
 msgid "line %d: "
 msgstr ""
 
-#: builtins/common.c:124
+#: builtins/common.c:139 error.c:260
+#, fuzzy, c-format
+msgid "warning: "
+msgstr "%s：警告："
+
+#: builtins/common.c:153
 #, fuzzy, c-format
 msgid "%s: usage: "
 msgstr "%s：警告："
 
-#: builtins/common.c:137 test.c:822
+#: builtins/common.c:166 test.c:822
 msgid "too many arguments"
 msgstr "太多引數"
 
-#: builtins/common.c:162 shell.c:493 shell.c:774
+#: builtins/common.c:191 shell.c:493 shell.c:774
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s：選項需要一個引數"
 
-#: builtins/common.c:169
+#: builtins/common.c:198
 #, c-format
 msgid "%s: numeric argument required"
 msgstr "%s：數字引數必須"
 
-#: builtins/common.c:176
+#: builtins/common.c:205
 #, c-format
 msgid "%s: not found"
 msgstr "%s：沒有找到"
 
-#: builtins/common.c:185 shell.c:787
+#: builtins/common.c:214 shell.c:787
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s：無效選項"
 
-#: builtins/common.c:192
+#: builtins/common.c:221
 #, c-format
 msgid "%s: invalid option name"
 msgstr "%s：無效選項名"
 
-#: builtins/common.c:199 general.c:231 general.c:236
+#: builtins/common.c:228 general.c:231 general.c:236
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s'：不是一個有效的識別符"
 
-#: builtins/common.c:209
+#: builtins/common.c:238
 #, fuzzy
 msgid "invalid octal number"
 msgstr "無效信號數"
 
-#: builtins/common.c:211
+#: builtins/common.c:240
 #, fuzzy
 msgid "invalid hex number"
 msgstr "%s：無效的號碼"
 
-#: builtins/common.c:213 expr.c:1255
+#: builtins/common.c:242 expr.c:1255
 msgid "invalid number"
 msgstr ""
 
-#: builtins/common.c:221
+#: builtins/common.c:250
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr "%s：無效的信號規格"
 
-#: builtins/common.c:228
+#: builtins/common.c:257
 #, c-format
 msgid "`%s': not a pid or valid job spec"
 msgstr "`%s'：不是一個 pid 或有效的工作規格"
 
-#: builtins/common.c:235 error.c:453
+#: builtins/common.c:264 error.c:453
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s：只讀變數"
 
-#: builtins/common.c:243
+#: builtins/common.c:272
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s：%s 超出範圍"
 
-#: builtins/common.c:243 builtins/common.c:245
+#: builtins/common.c:272 builtins/common.c:274
 msgid "argument"
 msgstr "引數"
 
-#: builtins/common.c:245
+#: builtins/common.c:274
 #, c-format
 msgid "%s out of range"
 msgstr "%s 超出範圍"
 
-#: builtins/common.c:253
+#: builtins/common.c:282
 #, c-format
 msgid "%s: no such job"
 msgstr "%s：沒有此類的工作"
 
-#: builtins/common.c:261
+#: builtins/common.c:290
 #, c-format
 msgid "%s: no job control"
 msgstr "%s：沒有工作控制"
 
-#: builtins/common.c:263
+#: builtins/common.c:292
 msgid "no job control"
 msgstr "沒有工作控制"
 
-#: builtins/common.c:273
+#: builtins/common.c:302
 #, c-format
 msgid "%s: restricted"
 msgstr "%s：有限的"
 
-#: builtins/common.c:275
+#: builtins/common.c:304
 msgid "restricted"
 msgstr "有限的"
 
-#: builtins/common.c:283
+#: builtins/common.c:312
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s：不是一個內建 shell"
 
-#: builtins/common.c:292
+#: builtins/common.c:321
 #, c-format
 msgid "write error: %s"
 msgstr "寫入錯誤： %s"
 
-#: builtins/common.c:524
+#: builtins/common.c:553
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s：錯誤檢索當前目錄： %s： %s\n"
 
-#: builtins/common.c:590 builtins/common.c:592
+#: builtins/common.c:619 builtins/common.c:621
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s：含糊的工作規格"
@@ -278,17 +287,17 @@ msgstr "只能用在一個函數"
 msgid "cannot use `-f' to make functions"
 msgstr ""
 
-#: builtins/declare.def:365 execute_cmd.c:4707
+#: builtins/declare.def:365 execute_cmd.c:4711
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s：只讀函數"
 
-#: builtins/declare.def:454
+#: builtins/declare.def:461
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr ""
 
-#: builtins/declare.def:461
+#: builtins/declare.def:468
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr ""
@@ -317,7 +326,7 @@ msgstr ""
 msgid "%s: cannot delete: %s"
 msgstr ""
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4564
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4568
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -333,7 +342,7 @@ msgstr ""
 msgid "%s: file is too large"
 msgstr ""
 
-#: builtins/evalfile.c:185 execute_cmd.c:4634 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4638 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr ""
@@ -760,11 +769,6 @@ msgstr "最後的命令： %s\n"
 msgid "Aborting..."
 msgstr ""
 
-#: error.c:260
-#, fuzzy, c-format
-msgid "warning: "
-msgstr "%s：警告："
-
 #: error.c:405
 msgid "unknown command error"
 msgstr "未知命令錯誤"
@@ -796,32 +800,32 @@ msgstr ""
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr ""
 
-#: execute_cmd.c:1082
+#: execute_cmd.c:1086
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr ""
 
-#: execute_cmd.c:1933
+#: execute_cmd.c:1937
 #, fuzzy
 msgid "pipe error"
 msgstr "寫入錯誤： %s"
 
-#: execute_cmd.c:4251
+#: execute_cmd.c:4255
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr ""
 
-#: execute_cmd.c:4342
+#: execute_cmd.c:4346
 #, c-format
 msgid "%s: command not found"
 msgstr "%s：命令找不到"
 
-#: execute_cmd.c:4597
+#: execute_cmd.c:4601
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr ""
 
-#: execute_cmd.c:4746
+#: execute_cmd.c:4750
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr ""
@@ -896,7 +900,7 @@ msgstr ""
 msgid "getcwd: cannot access parent directories"
 msgstr ""
 
-#: input.c:94 subst.c:4554
+#: input.c:94 subst.c:4556
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr ""
@@ -1180,99 +1184,99 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection：重新導向指示 `%d' 超出範圍"
 
-#: parse.y:2982 parse.y:3204
+#: parse.y:2982 parse.y:3214
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr ""
 
-#: parse.y:3708
+#: parse.y:3718
 msgid "unexpected EOF while looking for `]]'"
 msgstr ""
 
-#: parse.y:3713
+#: parse.y:3723
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr ""
 
-#: parse.y:3717
+#: parse.y:3727
 msgid "syntax error in conditional expression"
 msgstr "語法錯誤，在有條件的表達"
 
-#: parse.y:3795
+#: parse.y:3805
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr ""
 
-#: parse.y:3799
+#: parse.y:3809
 msgid "expected `)'"
 msgstr "預期 `)'"
 
-#: parse.y:3827
+#: parse.y:3837
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr ""
 
-#: parse.y:3831
+#: parse.y:3841
 msgid "unexpected argument to conditional unary operator"
 msgstr ""
 
-#: parse.y:3871
+#: parse.y:3881
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr ""
 
-#: parse.y:3875
+#: parse.y:3885
 msgid "conditional binary operator expected"
 msgstr ""
 
-#: parse.y:3892
+#: parse.y:3902
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr ""
 
-#: parse.y:3896
+#: parse.y:3906
 msgid "unexpected argument to conditional binary operator"
 msgstr ""
 
-#: parse.y:3907
+#: parse.y:3917
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr ""
 
-#: parse.y:3910
+#: parse.y:3920
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr ""
 
-#: parse.y:3914
+#: parse.y:3924
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr ""
 
-#: parse.y:5181
+#: parse.y:5191
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr ""
 
-#: parse.y:5199
+#: parse.y:5209
 #, c-format
 msgid "syntax error near `%s'"
 msgstr ""
 
-#: parse.y:5209
+#: parse.y:5219
 msgid "syntax error: unexpected end of file"
 msgstr ""
 
-#: parse.y:5209
+#: parse.y:5219
 msgid "syntax error"
 msgstr "語法錯誤"
 
-#: parse.y:5271
+#: parse.y:5281
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr ""
 
-#: parse.y:5433
+#: parse.y:5443
 msgid "unexpected EOF while looking for matching `)'"
 msgstr ""
 
@@ -1341,16 +1345,16 @@ msgstr ""
 msgid "%c%c: invalid option"
 msgstr "%c%c：無效選項"
 
-#: shell.c:1637
+#: shell.c:1638
 msgid "I have no name!"
 msgstr "我沒有名字！"
 
-#: shell.c:1777
+#: shell.c:1778
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr ""
 
-#: shell.c:1778
+#: shell.c:1779
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1359,34 +1363,34 @@ msgstr ""
 "用法：\t%s [GNU 長選項] [選項] ...\n"
 "\t%s [GNU 長選項] [選項] script-file ...\n"
 
-#: shell.c:1780
+#: shell.c:1781
 msgid "GNU long options:\n"
 msgstr "GNU 長選項：\n"
 
-#: shell.c:1784
+#: shell.c:1785
 msgid "Shell options:\n"
 msgstr "Shell 選項：\n"
 
-#: shell.c:1785
+#: shell.c:1786
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD 或 -c 命令或 -O shopt_option\t\t(只有引用)\n"
 
-#: shell.c:1800
+#: shell.c:1801
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s or -o 選項\n"
 
-#: shell.c:1806
+#: shell.c:1807
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "輸入 `%s -c \"help set\"' 更多訊息關於 shell 選項。\n"
 
-#: shell.c:1807
+#: shell.c:1808
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "輸入 `%s -c help' 更多訊息關於內建 shell 命令。\n"
 
-#: shell.c:1808
+#: shell.c:1809
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "使用 `bashbug' 命令報告臭蟲。\n"
@@ -1567,77 +1571,77 @@ msgstr ""
 msgid "Unknown Signal #%d"
 msgstr ""
 
-#: subst.c:1179 subst.c:1300
+#: subst.c:1181 subst.c:1302
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr ""
 
-#: subst.c:2452
+#: subst.c:2454
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr ""
 
-#: subst.c:4451 subst.c:4467
+#: subst.c:4453 subst.c:4469
 msgid "cannot make pipe for process substitution"
 msgstr ""
 
-#: subst.c:4499
+#: subst.c:4501
 msgid "cannot make child for process substitution"
-msgstr ""
-
-#: subst.c:4544
-#, c-format
-msgid "cannot open named pipe %s for reading"
 msgstr ""
 
 #: subst.c:4546
 #, c-format
+msgid "cannot open named pipe %s for reading"
+msgstr ""
+
+#: subst.c:4548
+#, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr ""
 
-#: subst.c:4564
+#: subst.c:4566
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr ""
 
-#: subst.c:4760
+#: subst.c:4762
 msgid "cannot make pipe for command substitution"
 msgstr ""
 
-#: subst.c:4794
+#: subst.c:4796
 msgid "cannot make child for command substitution"
 msgstr ""
 
-#: subst.c:4811
+#: subst.c:4813
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 
-#: subst.c:5313
+#: subst.c:5315
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr ""
 
-#: subst.c:5603
+#: subst.c:5605
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr ""
 
-#: subst.c:6655
+#: subst.c:6657
 #, c-format
 msgid "%s: bad substitution"
 msgstr ""
 
-#: subst.c:6735
+#: subst.c:6737
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr ""
 
-#: subst.c:7454
+#: subst.c:7456
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr ""
 
-#: subst.c:8327
+#: subst.c:8329
 #, c-format
 msgid "no match: %s"
 msgstr ""
@@ -1694,43 +1698,43 @@ msgstr "run_pending_traps： 信號處理是 SIG_DFL, resending %d (%s) to mysel
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler：壞的信號 %d"
 
-#: variables.c:354
+#: variables.c:356
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "錯誤，輸入的函數定義為 `%s'"
 
-#: variables.c:732
+#: variables.c:734
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr ""
 
-#: variables.c:1893
+#: variables.c:1895
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 
-#: variables.c:3122
+#: variables.c:3124
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 
-#: variables.c:3339 variables.c:3348
+#: variables.c:3341 variables.c:3350
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr ""
 
-#: variables.c:3354
+#: variables.c:3356
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr ""
 
-#: variables.c:3789
+#: variables.c:3791
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 
-#: variables.c:3802
+#: variables.c:3804
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 
-#: variables.c:3876
+#: variables.c:3878
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 
