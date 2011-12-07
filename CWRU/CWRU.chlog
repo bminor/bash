@@ -6757,3 +6757,27 @@ configure.in
 
 lib/readline/readline.h
 	- changed constants to reflect readline-6.0 version
+
+				   8/11
+				   ----
+lib/readline/signals.c
+	- make sure we don't use SIGWINCH without checking whether or not it's
+	  defined.  Fix from Pedro Alves <pedro@codesourcery.com>
+
+				   8/12
+				   ----
+
+COPYING
+	- updated to GPLv3; edits in every file with a copyright or license
+	  declaration to update to gpl3
+
+version.c
+	- update extended version info to latest gnu standard
+
+				   8/17
+				   ----
+subst.c
+	- change exp_jump_to_top_level to only call top_level_cleanup if
+	  parse_and_execute_level is 0.  If it's not, the longjmp to
+	  parse_and_execute will run the unwind-protect stack.  Fixes bug
+	  most recently reported by Roman Rakus <rrakus@redhat.com>

@@ -1940,10 +1940,12 @@ history list.
 #  include <stdlib.h>
 #endif
 
+#include <time.h>
+
 #include <readline/readline.h>
 #include <readline/history.h>
 
-extern char *xmalloc ();
+extern char *xmalloc PARAMS((size_t));
 
 /* The names of functions that actually do the manipulation. */
 int com_list PARAMS((char *));

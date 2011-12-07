@@ -1,7 +1,7 @@
+/* strftime - formatted time and date to a string */
 /*
  * Modified slightly by Chet Ramey for inclusion in Bash
  */
-
 /*
  * strftime.c
  *
