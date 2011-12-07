@@ -14900,3 +14900,17 @@ builtins/common.c
 	- add code to retry fork() after EAGAIN, with a progressively longer
 	  sleep between attempts, up to FORKSLEEP_MAX (16) seconds.  Suggested
 	  by Martin Koeppe <mkoeppe@gmx.de>
+
+				   9/21
+				   ----
+version.c
+	- change copyright year to 2007
+
+				   9/25
+				   ----
+pathexp.c
+	- change quote_string_for_globbing to add a backslash in front of a
+	  backslash appearing in the pathname string, since the globbing
+	  code will interpret backslashes as quoting characters internally.
+	  Bug reported by <herbert@gondor.apana.org.au> on the debian list
+	  (443685)

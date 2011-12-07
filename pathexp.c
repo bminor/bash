@@ -176,6 +176,13 @@ quote_string_for_globbing (pathname, qflags)
 	  if (pathname[i] == '\0')
 	    break;
 	}
+      else if (pathname[i] == '\\')
+	{
+	  temp[j++] = '\\';
+	  i++;
+	  if (pathname[i] == '\0')
+	    break;
+	}
       temp[j++] = pathname[i];
     }
   temp[j] = '\0';
