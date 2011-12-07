@@ -3655,6 +3655,8 @@ If @var{limit} is given, it is the new value of the specified resource;
 the special @var{limit} values @code{hard}, @code{soft}, and
 @code{unlimited} stand for the current hard limit, the current soft limit,
 and no limit, respectively.
+A hard limit cannot be increased by a non-root user once it is set;
+a soft limit may be increased up to the value of the hard limit.
 Otherwise, the current value of the soft limit for the specified resource
 is printed, unless the @option{-H} option is supplied.
 When setting new limits, if neither @option{-H} nor @option{-S} is supplied,

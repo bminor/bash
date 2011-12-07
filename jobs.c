@@ -1674,6 +1674,7 @@ make_child (command, async_p)
      char *command;
      int async_p;
 {
+  int forksleep;
   sigset_t set, oset;
   pid_t pid;
 
@@ -1695,8 +1696,16 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  /* Create the child, handle severe errors. */
-  if ((pid = fork ()) < 0)
+  /* Create the child, handle severe errors.  Retry on EAGAIN. */
+  while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
+    {
+      sys_error ("fork: retry");
+      if (sleep (forksleep) != 0)
+	break;
+      forksleep <<= 1;
+    }
+
+  if (pid < 0)
     {
       sys_error ("fork");
 

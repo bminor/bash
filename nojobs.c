@@ -465,9 +465,7 @@ make_child (command, async_p)
      int async_p;
 {
   pid_t pid;
-#if defined (HAVE_WAITPID)
-  int retry = 1;
-#endif /* HAVE_WAITPID */
+  int forksleep;
 
   /* Discard saved memory. */
   if (command)
@@ -484,26 +482,27 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  /* Create the child, handle severe errors. */
-#if defined (HAVE_WAITPID)
-  retry_fork:
-#endif /* HAVE_WAITPID */
-
-  if ((pid = fork ()) < 0)
+  /* Create the child, handle severe errors.  Retry on EAGAIN. */
+  forksleep = 1;
+  while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
+      sys_error ("fork: retry");
 #if defined (HAVE_WAITPID)
       /* Posix systems with a non-blocking waitpid () system call available
 	 get another chance after zombies are reaped. */
-      if (errno == EAGAIN && retry)
-	{
-	  reap_zombie_children ();
-	  retry = 0;
-	  goto retry_fork;
-	}
+      reap_zombie_children ();
+      if (forksleep > 1 && sleep (forksleep) != 0)
+        break;
+#else
+      if (sleep (forksleep) != 0)
+	break;
 #endif /* HAVE_WAITPID */
+      forksleep <<= 1;
+    }
 
+  if (pid < 0)
+    {
       sys_error ("fork");
-
       throw_to_top_level ();
     }
 

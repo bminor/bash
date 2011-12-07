@@ -38,6 +38,9 @@
 /* I looked it up.  For pretty_print_job ().  The real answer is 24. */
 #define LONGEST_SIGNAL_DESC 24
 
+/* The max time to sleep while retrying fork() on EAGAIN failure */
+#define FORKSLEEP_MAX	16
+
 /* We keep an array of jobs.  Each entry in the array is a linked list
    of processes that are piped together.  The first process encountered is
    the group leader. */
