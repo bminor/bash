@@ -25,6 +25,8 @@ $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
 $SHORT_DOC ulimit [-SHacdefilmnpqrstuvx] [limit]
+Modify shell resource limits.
+
 Provides control over the resources available to the shell and processes
 it creates, on systems that allow such control.
 
@@ -59,6 +61,9 @@ no option is given, then -f is assumed.
 Values are in 1024-byte increments, except for -t, which is in seconds,
 -p, which is in increments of 512 bytes, and -u, which is an unscaled
 number of processes.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 #if !defined (_MINIX)

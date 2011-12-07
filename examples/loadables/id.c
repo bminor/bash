@@ -294,7 +294,9 @@ id_prall (uname)
 }
 
 char *id_doc[] = {
-	"return information about user identity",
+	"Display information about user."
+	"",
+	"Return information about user identity",
 	(char *)NULL
 };
 

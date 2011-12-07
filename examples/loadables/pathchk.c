@@ -113,6 +113,8 @@ pathchk_builtin (list)
 }
 
 char *pathchk_doc[] = {
+	"Check pathnames for validity.",
+	"",
 	"Check each pathname argument for validity (i.e., it may be used to",
 	"create or access a file without casuing syntax errors) and portability",
 	"(i.e., no filename truncation will result).  If the `-p' option is",

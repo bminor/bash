@@ -56,6 +56,8 @@ enable_mypid_builtin(WORD_LIST *list)
 }
 
 char const *enable_mypid_doc[] = {
+  "Enable $MYPID.",
+  "",
   "Enables use of the ${MYPID} dynamic variable.  ",
   "It will yield the current pid of a subshell.",
   (char *)0

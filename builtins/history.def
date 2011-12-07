@@ -25,6 +25,8 @@ $BUILTIN history
 $FUNCTION history_builtin
 $DEPENDS_ON HISTORY
 $SHORT_DOC history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]
+Display or manipulate the history list.
+
 Display the history list with line numbers, prefixing each modified
 entry with a `*'.  An argument of N lists only the last N entries.
 
@@ -49,6 +51,9 @@ if $HISTFILE has a value, that is used, else ~/.bash_history.
 If the $HISTTIMEFORMAT variable is set and not null, its value is used
 as a format string for strftime(3) to print the time stamp associated
 with each displayed history entry.  No time stamps are printed otherwise.
+
+Exit Status:
+Returns success unless an invalid option is given or an error occurs.
 $END
 
 #include <config.h>

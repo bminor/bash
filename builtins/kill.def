@@ -24,6 +24,8 @@ $PRODUCES kill.c
 $BUILTIN kill
 $FUNCTION kill_builtin
 $SHORT_DOC kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
+Send a signal to a job.
+
 Send the processes identified by PID or JOBSPEC the signal named by
 SIGSPEC or SIGNUM.  If neither SIGSPEC nor SIGNUM is present, then
 SIGTERM is assumed.
@@ -37,6 +39,9 @@ Options:
 Kill is a shell builtin for two reasons: it allows job IDs to be used
 instead of process IDs, and allows processes to be killed if the limit
 on processes that you can create is reached.
+
+Exit Status:
+Returns success unless an invalid option is given or an error occurs.
 $END
 
 #include <config.h>

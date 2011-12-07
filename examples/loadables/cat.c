@@ -84,6 +84,8 @@ WORD_LIST *list;
 }
 
 char *cat_doc[] = {
+	"Display files.",
+	"",
 	"Read each FILE and display it on the standard output.   If any",
 	"FILE is `-' or if no FILE argument is given, the standard input",
 	"is read.",

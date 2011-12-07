@@ -23,7 +23,7 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-a array] [-d delim] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+$SHORT_DOC read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 Read a line from the standard input and split it into fields.
 
 Reads a single line from the standard input, or from file descriptor FD
@@ -41,6 +41,7 @@ Options:
   -d delim	continue until the first character of DELIM is read, rather
 		than newline
   -e		use Readline to obtain the line in an interactive shell
+  -i text	Use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
 		for a newline
   -p prompt	output the string PROMPT without a trailing newline before
@@ -104,7 +105,8 @@ struct ttsave
 
 #if defined (READLINE)
 static void reset_attempted_completion_function __P((char *));
-static char *edit_line __P((char *));
+static int set_itext __P((void));
+static char *edit_line __P((char *, char *));
 static void set_eol_delim __P((int));
 static void reset_eol_delim __P((char *));
 #endif
@@ -162,7 +164,7 @@ read_builtin (list)
   WORD_LIST *alist;
 #endif
 #if defined (READLINE)
-  char *rlbuf;
+  char *rlbuf, *itext;
   int rlind;
 #endif
 
@@ -183,6 +185,7 @@ read_builtin (list)
 #if defined (READLINE)
   USE_VAR(rlbuf);
   USE_VAR(rlind);
+  USE_VAR(itext);
 #endif
   USE_VAR(list);
   USE_VAR(ps2);
@@ -194,7 +197,7 @@ read_builtin (list)
   fd = 0;		/* file descriptor to read from */
 
 #if defined (READLINE)
-  rlbuf = (char *)0;
+  rlbuf = itext = (char *)0;
   rlind = 0;
 #endif
 
@@ -203,7 +206,7 @@ read_builtin (list)
   delim = '\n';		/* read until newline */
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "ersa:d:n:p:t:u:")) != -1)
+  while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:")) != -1)
     {
       switch (opt)
 	{
@@ -219,6 +222,11 @@ read_builtin (list)
 	case 'e':
 #if defined (READLINE)
 	  edit = 1;
+#endif
+	  break;
+	case 'i':
+#if defined (READLINE)
+	  itext = list_optarg;
 #endif
 	  break;
 #if defined (ARRAY_VARS)
@@ -320,6 +328,9 @@ read_builtin (list)
   if ((prompt || edit || silent) && input_is_tty == 0)
     {
       prompt = (char *)NULL;
+#if defined (READLINE)
+      itext = (char *)NULL;
+#endif
       edit = silent = 0;
     }
 
@@ -442,7 +453,7 @@ read_builtin (list)
 	    }
 	  if (rlbuf == 0)
 	    {
-	      rlbuf = edit_line (prompt ? prompt : "");
+	      rlbuf = edit_line (prompt ? prompt : "", itext);
 	      rlind = 0;
 	    }
 	  if (rlbuf == 0)
@@ -831,6 +842,8 @@ ttyrestore (ttp)
 
 #if defined (READLINE)
 static rl_completion_func_t *old_attempted_completion_function = 0;
+static rl_hook_func_t *old_startup_hook;
+static char *deftext;
 
 static void
 reset_attempted_completion_function (cp)
@@ -840,9 +853,28 @@ reset_attempted_completion_function (cp)
     rl_attempted_completion_function = old_attempted_completion_function;
 }
 
+static int
+set_itext ()
+{
+  int r1, r2;
+
+  r1 = r2 = 0;
+  if (old_startup_hook)
+    r1 = (*old_startup_hook) ();
+  if (deftext)
+    {
+      r2 = rl_insert_text (deftext);
+      deftext = (char *)NULL;
+      rl_startup_hook = old_startup_hook;
+      old_startup_hook = (rl_hook_func_t *)NULL;
+    }
+  return (r1 || r2);
+}
+
 static char *
-edit_line (p)
+edit_line (p, itext)
      char *p;
+     char *itext;
 {
   char *ret;
   int len;
@@ -852,6 +884,12 @@ edit_line (p)
 
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  if (itext)
+    {
+      old_startup_hook = rl_startup_hook;
+      rl_startup_hook = set_itext;
+      deftext = itext;
+    }
   ret = readline (p);
   rl_attempted_completion_function = old_attempted_completion_function;
   old_attempted_completion_function = (rl_completion_func_t *)NULL;

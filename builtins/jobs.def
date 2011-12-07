@@ -25,6 +25,8 @@ $BUILTIN jobs
 $FUNCTION jobs_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC jobs [-lnprs] [jobspec ...] or jobs -x command [args]
+Display status of jobs.
+
 Lists the active jobs.  JOBSPEC restricts output to that job.
 Without options, the status of all active jobs is displayed.
 
@@ -39,6 +41,10 @@ Options:
 If -x is supplied, COMMAND is run after all job specifications that
 appear in ARGS have been replaced with the process ID of that job's
 process group leader.
+
+Exit Status:
+Returns success unless an invalid option is given or an error occurs.
+If -x is used, returns the exit status of COMMAND.
 $END
 
 #include <config.h>
@@ -208,6 +214,8 @@ $BUILTIN disown
 $FUNCTION disown_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC disown [-h] [-ar] [jobspec ...]
+Remove jobs from current shell.
+
 Removes each JOBSPEC argument from the table of active jobs.  Without
 any JOBSPECs, the shell uses its notion of the current job.
 
@@ -216,6 +224,9 @@ Options:
   -h	mark each JOBSPEC so that SIGHUP is not sent to the job if the
 	shell receives a SIGHUP
   -r	remove only running jobs
+
+Exit Status:
+Returns success unless an invalid option or JOBSPEC is given.
 $END
 
 #if defined (JOB_CONTROL)

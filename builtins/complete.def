@@ -38,6 +38,9 @@ Options:
 
 When completion is attempted, the actions are applied in the order the
 uppercase-letter options are listed above.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 #include <config.h>
@@ -65,10 +68,18 @@ $END
 
 #define STRDUP(x)       ((x) ? savestring (x) : (char *)NULL)
 
+/* Structure containing all the non-action (binary) options; filled in by
+   build_actions(). */
+struct _optflags {
+  int pflag;
+  int rflag;
+  int Eflag;
+};
+
 static int find_compact __P((char *));
 static int find_compopt __P((char *));
 
-static int build_actions __P((WORD_LIST *, int *, int *, unsigned long *, unsigned long *));
+static int build_actions __P((WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *));
 
 static int remove_cmd_completions __P((WORD_LIST *));
 
@@ -165,9 +176,9 @@ find_compopt (name)
 */
 
 static int
-build_actions (list, pp, rp, actp, optp)
+build_actions (list, flagp, actp, optp)
      WORD_LIST *list;
-     int *pp, *rp;
+     struct _optflags *flagp;
      unsigned long *actp, *optp;
 {
   int opt, ind, opt_given;
@@ -177,15 +188,15 @@ build_actions (list, pp, rp, actp, optp)
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:E")) != -1)
     {
       opt_given = 1;
       switch (opt)
 	{
 	case 'r':
-	  if (rp)
+	  if (flagp)
 	    {
-	      *rp = 1;
+	      flagp->rflag = 1;
 	      break;
 	    }
 	  else
@@ -196,9 +207,9 @@ build_actions (list, pp, rp, actp, optp)
 	    }
 
 	case 'p':
-	  if (pp)
+	  if (flagp)
 	    {
-	      *pp = 1;
+	      flagp->pflag = 1;
 	      break;
 	    }
 	  else
@@ -265,6 +276,18 @@ build_actions (list, pp, rp, actp, optp)
 	case 'C':
 	  Carg = list_optarg;
 	  break;
+	case 'E':
+	  if (flagp)
+	    {
+	      flagp->Eflag = 1;
+	      break;
+	    }
+	  else
+	    {
+	      sh_invalidopt ("-E");
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
 	case 'F':
 	  Farg = list_optarg;
 	  break;
@@ -300,9 +323,11 @@ int
 complete_builtin (list)
      WORD_LIST *list;
 {
-  int opt_given, pflag, rflag, rval;
+  int opt_given, rval;
   unsigned long acts, copts;
   COMPSPEC *cs;
+  struct _optflags oflags;
+  WORD_LIST *l, *wl;
 
   if (list == 0)
     {
@@ -310,24 +335,33 @@ complete_builtin (list)
       return (EXECUTION_SUCCESS);
     }
 
-  opt_given = pflag = rflag = 0;
+  opt_given = oflags.pflag = oflags.rflag = oflags.Eflag = 0;
+
   acts = copts = (unsigned long)0L;
   Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, &pflag, &rflag, &acts, &copts);
+  rval = build_actions (list, &oflags, &acts, &copts);
   if (rval == EX_USAGE)
     return (rval);
   opt_given = rval != EXECUTION_FAILURE;
 
   list = loptend;
 
+  wl = oflags.Eflag ? make_word_list (make_bare_word ("_EmptycmD_"), (WORD_LIST *)NULL) : 0;
+
   /* -p overrides everything else */
-  if (pflag || (list == 0 && opt_given == 0))
+  if (oflags.pflag || (list == 0 && opt_given == 0))
     {
-      if (list == 0)
+      if (wl)
+	{
+	  rval = print_cmd_completions (wl);
+	  dispose_words (wl);
+	  return rval;
+	}
+      else if (list == 0)
 	{
 	  print_all_completions ();
 	  return (EXECUTION_SUCCESS);
@@ -336,9 +370,15 @@ complete_builtin (list)
     }
 
   /* next, -r overrides everything else. */
-  if (rflag)
+  if (oflags.rflag)
     {
-      if (list == 0)
+      if (wl)
+	{
+	  rval = remove_cmd_completions (wl);
+	  dispose_words (wl);
+	  return rval;
+	}
+      else if (list == 0)
 	{
 	  progcomp_flush ();
 	  return (EXECUTION_SUCCESS);
@@ -346,7 +386,7 @@ complete_builtin (list)
       return (remove_cmd_completions (list));
     }
 
-  if (list == 0 && opt_given)
+  if (wl == 0 && list == 0 && opt_given)
     {
       builtin_usage ();
       return (EX_USAGE);
@@ -366,13 +406,14 @@ complete_builtin (list)
   cs->command = STRDUP (Carg);
   cs->filterpat = STRDUP (Xarg);
 
-  for (rval = EXECUTION_SUCCESS ; list; list = list->next)
+  for (rval = EXECUTION_SUCCESS, l = wl ? wl : list ; l; l = l->next)
     {
       /* Add CS as the compspec for the specified commands. */
-      if (progcomp_insert (list->word->word, cs) == 0)
+      if (progcomp_insert (l->word->word, cs) == 0)
 	rval = EXECUTION_FAILURE;
     }
 
+  dispose_words (wl);
   return (rval);
 }
 
@@ -589,6 +630,9 @@ Display possible completions depending on the options.
 Intended to be used from within a shell function generating possible
 completions.  If the optional WORD argument is supplied, matches against
 WORD are generated.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 int
@@ -610,7 +654,7 @@ compgen_builtin (list)
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, (int *)NULL, (int *)NULL, &acts, &copts);
+  rval = build_actions (list, (struct _optflags *)NULL, &acts, &copts);
   if (rval == EX_USAGE)
     return (rval);
   if (rval == EXECUTION_FAILURE)
@@ -696,13 +740,17 @@ have previously been defined using the `complete' builtin.  If no NAMEs
 are supplied, compopt must be called by a function currently generating
 completions, and the options for that currently-executing completion
 generator are modified.
+
+Exit Status:
+Returns success unless an invalid option is supplied or NAME does not
+have a completion specification defined.
 $END
 
 int
 compopt_builtin (list)
      WORD_LIST *list;
 {
-  int opts_on, opts_off, *opts, opt, oind, ret;
+  int opts_on, opts_off, *opts, opt, oind, ret, Eflag;
   WORD_LIST *l;
   COMPSPEC *cs;
 

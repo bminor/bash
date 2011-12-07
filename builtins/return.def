@@ -1,7 +1,7 @@
 This file is return.def, from which is created return.c.
 It implements the builtin "return" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,9 +25,14 @@ $BUILTIN return
 
 $FUNCTION return_builtin
 $SHORT_DOC return [n]
+Return from a shell function.
+
 Causes a function or sourced script to exit with the return value
 specified by N.  If N is omitted, the return status is that of the
 last command executed within the function or script.
+
+Exit Status:
+Returns N, or failure if the shell is not executing a function or script.
 $END
 
 #include <config.h>

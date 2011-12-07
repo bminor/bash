@@ -36,7 +36,9 @@ logname_builtin (list)
 }
 
 char *logname_doc[] = {
-	"write the current user's login name to the standard output",
+	"Display user login name.",
+	"",
+	"Write the current user's login name to the standard output",
 	"and exit.  logname ignores the LOGNAME and USER variables.",
 	"logname ignores any non-option arguments.",
 	(char *)NULL

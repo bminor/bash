@@ -25,6 +25,8 @@ $BUILTIN fc
 $FUNCTION fc_builtin
 $DEPENDS_ON HISTORY
 $SHORT_DOC fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]
+Display or execute commands from the history list.
+
 fc is used to list or edit and re-execute commands from the history list.
 FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
@@ -290,11 +292,6 @@ fc_builtin (list)
      line was actually added (HISTIGNORE may have caused it to not be),
      so we check hist_last_line_added. */
 
-  /* "When not listing, the fc command that caused the editing shall not be
-     entered into the history list." */
-  if (listing == 0 && hist_last_line_added)
-    delete_last_history ();
-
   last_hist = i - remember_on_history - hist_last_line_added;
 
   if (list)
@@ -321,6 +318,11 @@ fc_builtin (list)
 	/* For editing, it is the last history command. */
 	histbeg = histend = last_hist;
     }
+
+  /* "When not listing, the fc command that caused the editing shall not be
+     entered into the history list." */
+  if (listing == 0 && hist_last_line_added)
+    delete_last_history ();
 
   /* We print error messages for line specifications out of range. */
   if ((histbeg < 0) || (histend < 0))

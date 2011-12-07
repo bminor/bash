@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,11 +27,14 @@ $BUILTIN bind
 $DEPENDS_ON READLINE
 $FUNCTION bind_builtin
 $SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]
-Bind a key sequence to a Readline function or a macro, or set
-a Readline variable.  The non-option argument syntax is equivalent
-to that found in ~/.inputrc, but must be passed as a single argument:  e.g.,
-bind '"\C-x\C-r": re-read-init-file'.
-bind accepts the following options:
+Set Readline key bindings and variables.
+
+Bind a key sequence to a Readline function or a macro, or set a
+Readline variable.  The non-option argument syntax is equivalent to
+that found in ~/.inputrc, but must be passed as a single argument:
+e.g., bind '"\C-x\C-r": re-read-init-file'.
+
+Options:
   -m  keymap         Use KEYMAP as the keymap for the duration of this
                      command.  Acceptable keymap names are emacs,
                      emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,

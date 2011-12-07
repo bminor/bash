@@ -1,7 +1,7 @@
 This file is let.def, from which is created let.c.
 It implements the builtin "let" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,11 +23,13 @@ $BUILTIN let
 $FUNCTION let_builtin
 $PRODUCES let.c
 $SHORT_DOC let arg [arg ...]
-Each ARG is an arithmetic expression to be evaluated.  Evaluation
-is done in fixed-width integers with no check for overflow, though
-division by 0 is trapped and flagged as an error.  The following
-list of operators is grouped into levels of equal-precedence operators.
-The levels are listed in order of decreasing precedence.
+Evaluate arithmetic expressions.
+
+Evaluate each ARG as an arithmetic expression.  Evaluation is done in
+fixed-width integers with no check for overflow, though division by 0
+is trapped and flagged as an error.  The following list of operators is
+grouped into levels of equal-precedence operators.  The levels are listed
+in order of decreasing precedence.
 
 	id++, id--	variable post-increment, post-decrement
 	++id, --id	variable pre-increment, pre-decrement

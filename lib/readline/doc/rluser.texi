@@ -1666,10 +1666,10 @@ matches were generated.
 @item complete
 @btindex complete
 @example
-@code{complete [-abcdefgjksuv] [-o @var{comp-option}] [-A @var{action}] [-G @var{globpat}] [-W @var{wordlist}]
+@code{complete [-abcdefgjksuv] [-o @var{comp-option}] [-E] [-A @var{action}] [-G @var{globpat}] [-W @var{wordlist}]
 [-F @var{function}] [-C @var{command}] [-X @var{filterpat}]
 [-P @var{prefix}] [-S @var{suffix}] @var{name} [@var{name} @dots{}]}
-@code{complete -pr [@var{name} @dots{}]}
+@code{complete -pr [-E] [@var{name} @dots{}]}
 @end example
 
 Specify how arguments to each @var{name} should be completed.
@@ -1679,6 +1679,9 @@ reused as input.
 The @option{-r} option removes a completion specification for
 each @var{name}, or, if no @var{name}s are supplied, all
 completion specifications.
+The @option{-E} option indicates that the remaining options and actions should
+apply to ``empty'' command completion; that is, completion attempted on a 
+blank line.
 
 The process of applying these completion specifications when word completion
 is attempted is described above (@pxref{Programmable Completion}).
@@ -1851,8 +1854,6 @@ argument, an attempt is made to remove a completion specification for
 a @var{name} for which no specification exists, or
 an error occurs adding a completion specification.
 
-@end table
-
 @item compopt
 @btindex compopt
 @example
@@ -1869,5 +1870,7 @@ builtin described above.
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a @var{name} for which no completion
 specification exists, or an output error occurs.
+
+@end table
 
 @end ifset

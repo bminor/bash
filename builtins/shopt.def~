@@ -24,8 +24,11 @@ $PRODUCES shopt.c
 $BUILTIN shopt
 $FUNCTION shopt_builtin
 $SHORT_DOC shopt [-pqsu] [-o] [optname ...]
-Set and unset shell options.  Without any option arguments, list all
-shell options with an indication of whether or not each is set.
+Set and unset shell options.
+
+Change the setting of each shell option OPTNAME.  Without any option
+arguments, list all shell options with an indication of whether or not each
+is set. 
 
 Options:
   -o	restrict OPTNAMEs to those defined for use with `set -o'
@@ -34,7 +37,9 @@ Options:
   -s	enable (set) each OPTNAME
   -u	disable (unset) each OPTNAME
 
-The exit status indicates whether or not each OPTNAME is set.
+Exit Status:
+Returns success if OPTNAME is enabled; fails if an invalid option is
+given or OPTNAME is disabled.
 $END
 
 #include <config.h>
@@ -116,6 +121,7 @@ static int set_restricted_shell __P((int));
 
 static int shopt_login_shell;
 static int shopt_compat31;
+static int shopt_compat32;
 
 typedef int shopt_set_func_t __P((int));
 
@@ -476,8 +482,13 @@ static int
 set_compatibility_level (mode)
      int mode;
 {
-  /* Need to change logic here if we add more compatibility levels */
-  shell_compatibility_level = shopt_compat31 ? 31 : DEFAULT_COMPAT_LEVEL;
+  /* Need to change logic here as we add more compatibility levels */
+  if (shopt_compat31)
+    shell_compatibility_level = 31;
+  else if (shopt_compat32)
+    shell_compatibility_level = 32;
+  else
+    shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
   return 0;
 }
 

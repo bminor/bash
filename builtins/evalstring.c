@@ -79,6 +79,12 @@ parse_and_execute_cleanup ()
   run_unwind_frame ("parse_and_execute_top");
 }
 
+static void
+set_history_remembering ()
+{
+  remember_on_history = enable_history_list;
+}
+
 /* Parse and execute the commands in STRING.  Returns whatever
    execute_command () returns.  This frees STRING.  FLAGS is a
    flags word; look in common.h for the possible values.  Actions
@@ -115,7 +121,10 @@ parse_and_execute (string, from_file, flags)
   lreset = flags & SEVAL_RESETLINE;
 
 #if defined (HISTORY)
-  unwind_protect_int (remember_on_history);	/* can be used in scripts */
+  if (parse_and_execute_level == 0)
+    add_unwind_protect (set_history_remembering, (char *)NULL);
+  else
+    unwind_protect_int (remember_on_history);
 #  if defined (BANG_HISTORY)
   if (interactive_shell)
     {

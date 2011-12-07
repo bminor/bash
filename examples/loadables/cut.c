@@ -360,6 +360,8 @@ _cut_strsep(stringp, delim)
 }
 
 static char *cut_doc[] = {
+	"Select portions of lines.",
+	"",
 	"Select portions of each line (as specified by LIST) from each FILE",
 	"(by default, the standard input), and write them to the standard output.",
 	"Items specified by LIST are either column positions or fields delimited",

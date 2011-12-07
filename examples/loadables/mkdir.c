@@ -192,6 +192,8 @@ make_path (path, nmode, parent_mode)
 }
 
 char *mkdir_doc[] = {
+	"Create directories.",
+	"",
 	"Make directories.  Create the directories named as arguments, in",
 	"the order specified, using mode rwxrwxrwx as modified by the current",
 	"umask (see `help umask').  The -m option causes the file permission",

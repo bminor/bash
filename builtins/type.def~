@@ -24,6 +24,8 @@ $PRODUCES type.c
 $BUILTIN type
 $FUNCTION type_builtin
 $SHORT_DOC type [-afptP] name [name ...]
+Display information about command type.
+
 For each NAME, indicate how it would be interpreted if used as a
 command name.
 
@@ -37,9 +39,13 @@ Options:
 	that would be executed
   -p	returns either the name of the disk file that would be executed,
 	or nothing if `type -t NAME' would not return `file'.
-  -t	output a single word which is one of `alias', `keyword', `function',
-	`builtin', `file' or `', if NAME is an alias, shell reserved word,
-	shell function, shell builtin, disk file, or not found, respectively
+  -t	output a single word which is one of `alias', `keyword',
+	`function', `builtin', `file' or `', if NAME is an alias, shell
+	reserved word, shell function, shell builtin, disk file, or not 
+	found, respectively
+
+Arguments:
+  NAME	Command name to be interpreted.
 $END
 
 #include <config.h>

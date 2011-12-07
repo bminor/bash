@@ -34,6 +34,8 @@ rmdir_builtin (list)
 }
 
 char *rmdir_doc[] = {
+	"Remove directory.",
+	"",
 	"rmdir removes the directory entry specified by each argument,",
 	"provided the directory is empty.",
 	(char *)NULL

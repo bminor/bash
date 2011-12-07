@@ -85,6 +85,8 @@ strftime_builtin (list)
 /* An array of strings forming the `long' documentation for a builtin xxx,
    which is printed by `help xxx'.  It must end with a NULL. */
 char *strftime_doc[] = {
+	"Display formatted time.",
+	"",
 	"Converts date and time format to a string and displays it on the",
 	"standard output.  If the optional second argument is supplied, it",
 	"is used as the number of seconds since the epoch to use in the",

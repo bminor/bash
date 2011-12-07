@@ -141,6 +141,8 @@ tee_builtin (list)
 }
 
 char *tee_doc[] = {
+	"Duplicate standard output.",
+	"",
 	"Copy standard input to standard output, making a copy in each",
 	"filename argument.  If the `-a' option is gived, the specified",
 	"files are appended to, otherwise they are overwritten.  If the",

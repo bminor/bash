@@ -71,6 +71,8 @@ int cdable_vars;
 $BUILTIN cd
 $FUNCTION cd_builtin
 $SHORT_DOC cd [-L|-P] [dir]
+Change the shell working directory.
+
 Change the current directory to DIR.  The default DIR is the value of the
 HOME shell variable.
 
@@ -89,6 +91,9 @@ Options:
 	links
 
 The default is to follow symbolic links, as if `-L' were specified.
+
+Exit Status:
+Returns 0 if the directory is changed; non-zero otherwise.
 $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
@@ -332,6 +337,10 @@ Options:
   -P	print the physical directory, without any symbolic links
 
 By default, `pwd' behaves as if `-L' were specified.
+
+Exit Status:
+Returns 0 unless an invalid option is given or the current directory
+cannot be read.
 $END
 
 /* Non-zero means that pwd always prints the physical directory, without

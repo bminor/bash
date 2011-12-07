@@ -102,6 +102,8 @@ extern char *single_quote ();
 extern char **make_builtin_argv ();
 
 static char *sprintf_doc[] = {
+  "Format arguments and assign result to variable.",
+  "",
   "sprintf formats and outputs its arguments, after the second, under control",
   "of the format and assigns the result to the variable named by its first",
   "argument. The format is a character string which contains three types",

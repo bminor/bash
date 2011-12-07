@@ -43,6 +43,9 @@ template_builtin (list)
 }
 
 char *template_doc[] = {
+	"Short description.",
+	""
+	"Longer description of builtin and usage.",
 	(char *)NULL
 };
 

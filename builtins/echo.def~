@@ -37,10 +37,12 @@ $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON V9_ECHO
 $SHORT_DOC echo [-neE] [arg ...]
-Display each ARG on the standard output.
+Write arguments to the standard output.
+
+Display the ARGs on the standard output followed by a newline.
 
 Options:
-  -n	do not append a trailing newline
+  -n	do not append a newline
   -e	enable interpretation of the following backslash escapes
   -E	explicitly suppress interpretation of backslash escapes
 
@@ -59,17 +61,16 @@ Options:
 	0 to 3 octal digits
   \xHH	the eight-bit character whose value is HH (hexadecimal).  HH
 	can be one or two hex digits
-
 $END
 
 $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON !V9_ECHO
 $SHORT_DOC echo [-n] [arg ...]
-Display each ARG on the standard output.
+Display the ARGs on the standard output followed by a newline.
 
 Options:
-  -n	do not append a trailing newline
+  -n	do not append a newline
 $END
 
 #if defined (V9_ECHO)

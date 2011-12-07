@@ -128,6 +128,8 @@ head_builtin (list)
 }
 
 char *head_doc[] = {
+	"Display lines from beginning of file.",
+	"",
 	"Copy the first N lines from the input files to the standard output.",
 	"N is supplied as an argument to the `-n' option.  If N is not given,",
 	"the first ten lines are copied.",

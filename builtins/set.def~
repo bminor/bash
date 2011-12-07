@@ -61,8 +61,10 @@ extern int no_line_editing;
 $BUILTIN set
 $FUNCTION set_builtin
 $SHORT_DOC set [--abefhkmnptuvxBCHP] [-o option-name] [arg ...]
-Changes the value of shell attributes and positional parameters, or
-displays the names and values of shell variables.
+Set or unset values of shell options and positional parameters.
+
+Change the value of shell attributes and positional parameters, or
+display the names and values of shell variables.
 
 Options:
   -a  Mark variables which are modified or created for export.
@@ -108,7 +110,7 @@ Options:
                        the last command to exit with a non-zero status,
                        or zero if no command exited with a non-zero status
           posix        change the behavior of bash where the default
-                       operation differs from the 1003.2 standard to
+                       operation differs from the Posix standard to
                        match the standard
           privileged   same as -p
           verbose      same as -v
@@ -193,7 +195,7 @@ const struct {
   { "histexpand", 'H', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
 #endif /* BANG_HISTORY */
 #if defined (HISTORY)
-  { "history",   '\0', &remember_on_history, bash_set_history, (setopt_get_func_t *)NULL },
+  { "history",   '\0', &enable_history_list, bash_set_history, (setopt_get_func_t *)NULL },
 #endif
   { "ignoreeof", '\0', &ignoreeof, set_ignoreeof, (setopt_get_func_t *)NULL },
   { "interactive-comments", '\0', &interactive_comments, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL },
@@ -385,13 +387,17 @@ bash_set_history (on_or_off, option_name)
 {
   if (on_or_off == FLAG_ON)
     {
+      enable_history_list = 1;
       bash_history_enable ();
       if (history_lines_this_session == 0)
 	load_history ();
     }
   else
-    bash_history_disable ();
-  return (1 - remember_on_history);
+    {
+      enable_history_list = 0;
+      bash_history_disable ();
+    }
+  return (1 - enable_history_list);
 }
 #endif
 
@@ -569,7 +575,7 @@ void
 reset_shell_options ()
 {
 #if defined (HISTORY)
-  remember_on_history = 1;
+  remember_on_history = enable_history_list = 1;
 #endif
   ignoreeof = 0;
 }
@@ -708,6 +714,8 @@ set_builtin (list)
 $BUILTIN unset
 $FUNCTION unset_builtin
 $SHORT_DOC unset [-f] [-v] [name ...]
+Unset values and attributes of shell variables and functions.
+
 For each NAME, remove the corresponding variable or function.
 
 Options:

@@ -15495,3 +15495,88 @@ builtins/read.def
 
 doc/{bash.1,bashref.texi}
 	- document new `-i text' option to read builtin
+
+				    4/7
+				    ---
+lib/readline/bind.c
+	- new settable variable, `history-size', sets the max number of
+	  entries in the history list
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- document new `history-size' settable readline variable
+
+				    4/8
+				    ---
+builtins/complete.def
+	- change build_actions calling sequence to take a struct with `other'
+	  (non-action) flag arguments (-p, -r)
+	- add support for `-E' option to build_actions and complete builtin --
+	  modifies or displays (internal) `_EmptycmD_' completion spec
+
+bashline.c
+	- change attempt_shell_completion to try programmable completion on an
+	  `empty' command line and return the results
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- documented new `-E' option to `complete'
+
+				    4/9
+				    ---
+bashline.c
+	- new variable, `enable_history_list', used to reflect setting of
+	  `-o history' option
+	- change bash_history_{enable,disable,reinit} to set enable_history_list
+	  as well as remember_on_history
+
+builtins/set.def
+	- use `enable_history_list' instead of `remember_on_history' to keep
+	  value of `-o history' option
+
+builtins/evalstring.c
+	- instead of unwind-protecting remember_on_history, use a function to
+	  restore it to the value of `enable_history_list' after
+	  parse_and_execute runs the commands in the string.  This allows
+	  history to be turned off in a startup file, for instance.  Problem
+	  reported by Dan Jacobson <jidanni@jidanni.org>
+
+				   4/11
+				   ----
+bashline.c
+	- limited support for completing command words with globbing characters
+	  (only a single match completed on TAB, absolute or relative
+	  pathnames supported, no $PATH searching, some support for displaying
+	  possible matches, can be used with menu completion).
+	  Suggested by Harald Koenig <h.koenig@science-computing.de>
+
+print_cmd.c
+	- change redirection printing to output r_err_and_out as `&>file',
+	  since the man page says that's the preferred form
+
+				   4/12
+				   ----
+builtins/*.def
+	- change long doc so the first line is a short description
+	- add `Exit Status:' section to each longdoc describing exit values
+
+builtins/help.def
+	- new `-d' option to print short description of each utility
+	- new `-m' option to print description of each builtin in a
+	  pseudo-manpage format (inspired by ksh93)
+
+doc/{bash.1,bashref.texi}
+	- document new `-d' and `-m' options to `help'
+
+builtins/mapfile.def
+	- new builtin, `mapfile', imported from bash-4.0-devel branch
+
+tests/{mapfile.{data,right,tests},run-mapfile}
+	- tests for `mapfile' builtin
+
+doc/{bash.1,bashref.texi}
+	- added description of `mapfile' builtin
+
+MANIFEST,Makefile.in,builtins/Makefile.in
+	- added entries for mapfile source files
+
+arrayfunc.[ch]
+	- new function, bind_array_element, to support mapfile builtin

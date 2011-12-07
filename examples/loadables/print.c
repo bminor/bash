@@ -32,6 +32,8 @@ static FILE *ofp;
 extern char *this_command_name;
 
 static char *print_doc[] = {
+  "Display arguments.",
+  "",
   "Output the arguments.  The -f option means to use the argument as a",
   "format string as would be supplied to printf(1).  The rest of the",
   "options are as in ksh.",

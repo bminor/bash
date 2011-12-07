@@ -24,6 +24,8 @@ $PRODUCES test.c
 $BUILTIN test
 $FUNCTION test_builtin
 $SHORT_DOC test [expr]
+Evaluate conditional expression.
+
 Exits with a status of 0 (true) or 1 (false) depending on
 the evaluation of EXPR.  Expressions may be unary or binary.  Unary
 expressions are often used to examine the status of a file.  There
@@ -89,12 +91,18 @@ Other operators:
 Arithmetic binary operators return true if ARG1 is equal, not-equal,
 less-than, less-than-or-equal, greater-than, or greater-than-or-equal
 than ARG2.
+
+Exit Status:
+Returns success if EXPR evaluates to true; fails if EXPR evaluates to
+false or an invalid argument is given.
 $END
 
 $BUILTIN [
 $DOCNAME test_bracket
 $FUNCTION test_builtin
 $SHORT_DOC [ arg... ]
+Evaluate conditional expression.
+
 This is a synonym for the "test" builtin, but the last argument must
 be a literal `]', to match the opening `['.
 $END

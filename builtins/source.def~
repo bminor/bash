@@ -24,19 +24,23 @@ $PRODUCES source.c
 $BUILTIN source
 $FUNCTION source_builtin
 $SHORT_DOC source filename [arguments]
-Read and execute commands from FILENAME in the current shell.  The entries
-in $PATH are used to find the directory containing FILENAME.  If any
-ARGUMENTS are supplied, they become the positional parameters when
-FILENAME is executed.
+Execute commands from a file in the current shell.
+
+Read and execute commands from FILENAME in the current shell.  The
+entries in $PATH are used to find the directory containing FILENAME.
+If any ARGUMENTS are supplied, they become the positional parameters
+when FILENAME is executed.
 $END
 $BUILTIN .
 $DOCNAME dot
 $FUNCTION source_builtin
 $SHORT_DOC . filename [arguments]
-Read and execute commands from FILENAME in the current shell.  The entries
-in $PATH are used to find the directory containing FILENAME.  If any
-ARGUMENTS are supplied, they become the positional parameters when
-FILENAME is executed.
+Execute commands from a file in the current shell.
+
+Read and execute commands from FILENAME in the current shell.  The
+entries in $PATH are used to find the directory containing FILENAME.
+If any ARGUMENTS are supplied, they become the positional parameters
+when FILENAME is executed.
 $END
 
 #include <config.h>
@@ -66,6 +70,8 @@ $END
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
+
+extern int posixly_correct;
 
 static void maybe_pop_dollar_vars __P((void));
 
@@ -125,7 +131,12 @@ source_builtin (list)
 #endif
 
   filename = (char *)NULL;
-  if (source_uses_path)
+  /* XXX -- should this be absolute_pathname? */
+  if (posixly_correct && strchr (list->word->word, '/'))
+    filename = savestring (list->word->word);
+  else if (absolute_pathname (list->word->word))
+    filename = savestring (list->word->word);
+  else if (source_uses_path)
     filename = find_path_file (list->word->word);
   if (filename == 0)
     {

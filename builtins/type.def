@@ -24,6 +24,8 @@ $PRODUCES type.c
 $BUILTIN type
 $FUNCTION type_builtin
 $SHORT_DOC type [-afptP] name [name ...]
+Display information about command type.
+
 For each NAME, indicate how it would be interpreted if used as a
 command name.
 
@@ -41,6 +43,12 @@ Options:
 	`function', `builtin', `file' or `', if NAME is an alias, shell
 	reserved word, shell function, shell builtin, disk file, or not 
 	found, respectively
+
+Arguments:
+  NAME	Command name to be interpreted.
+
+Exit Status:
+Returns success if all of the NAMEs are found; fails if any are not found.
 $END
 
 #include <config.h>

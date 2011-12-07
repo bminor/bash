@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -100,6 +100,8 @@ static int history_and_alias_expand_line __P((int, int));
 #endif
 
 /* Helper functions for Readline. */
+static char *restore_tilde __P((char *, char *));
+
 static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
@@ -1070,8 +1072,9 @@ attempt_shell_completion (text, start, end)
 
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
-  if (!matches && in_command_position == 0 && prog_completion_enabled &&
-      (progcomp_size () > 0) && current_prompt_string == ps1_prompt)
+  if (matches == 0 && (in_command_position == 0 || text[0] == '\0') &&
+      prog_completion_enabled && (progcomp_size () > 0) &&
+      current_prompt_string == ps1_prompt)
     {
       int s, e, foundcs;
       char *n;
@@ -1084,7 +1087,9 @@ attempt_shell_completion (text, start, end)
       s = find_cmd_start (start);
       e = find_cmd_end (end);
       n = find_cmd_name (s);
-      if (e > s && assignment (n, 0) == 0)
+      if (e == 0 && e == s && text[0] == '\0')
+        prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+      else if (e > s && assignment (n, 0) == 0)
 	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
       else
 	foundcs = 0;
@@ -1092,7 +1097,8 @@ attempt_shell_completion (text, start, end)
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default
 	 filename completion that readline will do unless the COPT_DEFAULT
-	 option has been set with the `-o default' option to complete. */
+	 option has been set with the `-o default' option to complete or
+	 compopt. */
       if (foundcs)
 	{
 	  pcomp_set_readline_variables (foundcs, 1);
@@ -1230,8 +1236,10 @@ command_word_completion_function (hint_text, state)
   static char *filename_hint = (char *)NULL;
   static char *dequoted_hint = (char *)NULL;
   static char *directory_part = (char *)NULL;
+  static char **glob_matches = (char **)NULL;
   static int path_index, hint_len, dequoted_len, istate, igncase;
   static int mapping_over, local_index, searching_path, hint_is_dir;
+  static int old_glob_ignore_case, globpat;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
@@ -1240,7 +1248,7 @@ command_word_completion_function (hint_text, state)
 
   /* We have to map over the possibilities for command words.  If we have
      no state, then make one just for that purpose. */
-  if (!state)
+  if (state == 0)
     {
       if (dequoted_hint && dequoted_hint != hint)
 	free (dequoted_hint);
@@ -1254,11 +1262,19 @@ command_word_completion_function (hint_text, state)
       temp = rl_variable_value ("completion-ignore-case");
       igncase = strcmp (temp, "on") == 0;
 
+      if (glob_matches)
+	{
+	  free (glob_matches);
+	  glob_matches = (char **)NULL;
+	}
+
+      globpat = glob_pattern_p (hint_text);
+
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
 	 whether or not it is unique, and, if so, whether that filename
 	 is executable. */
-      if (absolute_program (hint_text))
+      if (globpat || absolute_program (hint_text))
 	{
 	  /* Perform tilde expansion on what's passed, so we don't end up
 	     passing filenames with tildes directly to stat(). */
@@ -1297,9 +1313,18 @@ command_word_completion_function (hint_text, state)
 
 	  filename_hint = savestring (hint);
 
-	  mapping_over = 4;
 	  istate = 0;
-	  goto inner;
+
+	  if (globpat)
+	    {
+	      mapping_over = 5;
+	      goto globword;
+	    }
+	  else
+	    {
+	      mapping_over = 4;
+	      goto inner;
+	    }
 	}
 
       dequoted_hint = hint = savestring (hint_text);
@@ -1398,6 +1423,50 @@ command_word_completion_function (hint_text, state)
       mapping_over++;
     }
 
+globword:
+  /* Limited support for completing command words with globbing chars.  Only
+     a single match (multiple matches that end up reducing the number of
+     characters in the common prefix are bad) will ever be returned on
+     regular completion. */
+  if (glob_pattern_p (hint))
+    {
+      if (state == 0)
+	{
+	  glob_ignore_case = igncase;
+	  glob_matches = shell_glob_filename (hint);
+	  glob_ignore_case = old_glob_ignore_case;
+
+	  if (GLOB_FAILED (glob_matches) || glob_matches == 0)
+	    {
+	      glob_matches = (char **)NULL;
+	      return ((char *)NULL);
+	    }
+
+	  local_index = 0;
+		
+	  if (glob_matches[1] && rl_completion_type == TAB)	/* multiple matches are bad */
+	    return ((char *)NULL);
+	}
+
+      while (val = glob_matches[local_index++])
+        {
+	  if (executable_or_directory (val))
+	    {
+	      if (*hint_text == '~')
+		{
+		  temp = restore_tilde (val, directory_part);
+		  free (val);
+		  val = temp;
+		}
+	      return (val);
+	    }
+	  free (val);
+        }
+
+      glob_ignore_case = old_glob_ignore_case;
+      return ((char *)NULL);
+    }
+
   /* If the text passed is a directory in the current directory, return it
      as a possible match.  Executables in directories in the current
      directory can be specified using relative pathnames and successfully
@@ -1415,7 +1484,7 @@ command_word_completion_function (hint_text, state)
 
   istate = (val != (char *)NULL);
 
-  if (!istate)
+  if (istate == 0)
     {
       char *current_path;
 
@@ -1477,41 +1546,7 @@ command_word_completion_function (hint_text, state)
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
 	  if (*hint_text == '~')
-	    {
-	      int l, vl, dl, dl2, xl;
-	      char *rd, *dh2, *expdir;
-
-	      vl = strlen (val);
-
-	      rd = savestring (filename_hint);
-	      bash_directory_expansion (&rd);
-	      dl = strlen (rd);
-	      free (rd);
-
-	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
-	      bash_directory_expansion (&dh2);
-	      dl2 = strlen (dh2);
-
-	      expdir = bash_tilde_expand (directory_part, 0);
-	      xl = strlen (expdir);
-	      free (expdir);
-
-	      /*
-		 dh2 = unexpanded but dequoted tilde-prefix
-		 dl = length of entire passed filename
-		 dl2 = length of tilde-prefix
-		 expdir = tilde-expanded tilde-prefix
-		 xl = length of expanded tilde-prefix
-		 l = length of remainder after tilde-prefix
-	      */
-	      l = (vl - xl) + 1;
-
-	      temp = (char *)xmalloc (dl2 + 2 + l);
-	      strcpy (temp, dh2);
-	      strcpy (temp + dl2, val + xl);
-
-	      free (dh2);
-	    }
+	    temp = restore_tilde (val, directory_part);
 	  else
 	    temp = savestring (val);
 	  freetemp = 1;
@@ -2306,6 +2341,45 @@ bash_ignore_everything (names)
 {
   _ignore_completion_names (names, return_zero);
   return 0;
+}
+
+/* Replace a tilde-prefix in VAL with a `~', assuming the user typed it.  VAL
+   is an expanded filename.  DIRECTORY_PART is the tilde-prefix portion
+   of the un-tilde-expanded version of VAL (what the user typed). */
+static char *
+restore_tilde (val, directory_part)
+     char *val, *directory_part;
+{
+  int l, vl, dl2, xl;
+  char *dh2, *expdir, *ret;
+
+  vl = strlen (val);
+
+  /* We need to duplicate the expansions readline performs on the directory
+     portion before passing it to our completion function. */
+  dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
+  bash_directory_expansion (&dh2);
+  dl2 = strlen (dh2);
+
+  expdir = bash_tilde_expand (directory_part, 0);
+  xl = strlen (expdir);
+  free (expdir);
+
+  /*
+     dh2 = unexpanded but dequoted tilde-prefix
+     dl2 = length of tilde-prefix
+     expdir = tilde-expanded tilde-prefix
+     xl = length of expanded tilde-prefix
+     l = length of remainder after tilde-prefix
+  */
+  l = (vl - xl) + 1;
+
+  ret = (char *)xmalloc (dl2 + 2 + l);
+  strcpy (ret, dh2);
+  strcpy (ret + dl2, val + xl);
+
+  free (dh2);
+  return (ret);
 }
 
 /* Simulate the expansions that will be performed by

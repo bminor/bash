@@ -24,6 +24,8 @@ $PRODUCES declare.c
 $BUILTIN declare
 $FUNCTION declare_builtin
 $SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
+Set variable values and attributes.
+
 Declare variables and give them attributes.  If no NAMEs are given,
 display the attributes and values of all variables.
 
@@ -47,11 +49,16 @@ the `let' command) performed when the variable is assigned a value.
 
 When used in a function, `declare' makes NAMEs local, as with the `local'
 command.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 $BUILTIN typeset
 $FUNCTION declare_builtin
 $SHORT_DOC typeset [-afFirtx] [-p] name[=value] ...
+Set variable values and attributes.
+
 Obsolete.  See `help declare'.
 $END
 
@@ -90,11 +97,17 @@ declare_builtin (list)
 $BUILTIN local
 $FUNCTION local_builtin
 $SHORT_DOC local [option] name[=value] ...
+Define local variables.
+
 Create a local variable called NAME, and give it VALUE.  OPTION can
 be any option accepted by `declare'.
 
 Local variables can only be used within a function; they are visible
 only to the function where they are defined and its children.
+
+Exit Status:
+Returns success unless an invalid option is supplied, an error occurs,
+or the shell is not executing a function.
 $END
 int
 local_builtin (list)
@@ -390,11 +403,8 @@ declare_internal (list, local_var)
 	    {
 	      int vlen;
 	      vlen = STRLEN (value);
-#if 0
-	      if (value[0] == '(' && strchr (value, ')'))
-#else
+
 	      if (value[0] == '(' && value[vlen-1] == ')')
-#endif
 		compound_array_assign = 1;
 	      else
 		simple_array_assign = 1;

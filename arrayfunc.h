@@ -28,6 +28,7 @@
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 
 extern SHELL_VAR *bind_array_variable __P((char *, arrayind_t, char *, int));
+extern SHELL_VAR *bind_array_element __P((SHELL_VAR *, arrayind_t, char *, int));
 extern SHELL_VAR *assign_array_element __P((char *, char *, int));
 
 extern SHELL_VAR *find_or_make_array_variable __P((char *, int));

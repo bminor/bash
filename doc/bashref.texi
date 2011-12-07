@@ -3132,6 +3132,7 @@ Each non-option argument is a command as it would appear in a
 Readline initialization file (@pxref{Readline Init File}),
 but each binding or command must be passed as a separate argument;  e.g.,
 @samp{"\C-x\C-r":re-read-init-file}.
+
 Options, if supplied, have the following meanings:
 
 @table @code
@@ -3412,14 +3413,24 @@ or there is an error loading a new builtin from a shared object.
 @item help
 @btindex help
 @example
-help [-s] [@var{pattern}]
+help [-dms] [@var{pattern}]
 @end example
 Display helpful information about builtin commands.
 If @var{pattern} is specified, @code{help} gives detailed help
 on all commands matching @var{pattern}, otherwise a list of
 the builtins is printed.
-The @option{-s} option restricts the information displayed to a short
-usage synopsis.
+
+Options, if supplied, have the following meanings:
+
+@table @code
+@item -d
+Display a short description of each @var{pattern}
+@item -m
+Display the description of each @var{pattern} in a manpage-like format
+@item -s
+Display only a short usage synopsis for each @var{pattern}
+@end table
+
 The return status is zero unless no command matches @var{pattern}.
 
 @item let
@@ -3454,6 +3465,46 @@ logout [@var{n}]
 @end example
 Exit a login shell, returning a status of @var{n} to the shell's
 parent.
+
+@item mapfile
+@btindex mapfile
+@example
+mapfile [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
+-C @var{callback}] [-c @var{quantum}] [@var{array}]
+@end example
+Read lines from the standard input into array variable @var{array},
+or from file descriptor @var{fd}
+if the @option{-u} option is supplied.
+The variable @code{MAPFILE} is the default @var{array}.
+Options, if supplied, have the following meanings:
+@table @code
+
+@item -n
+Copy at most @var{count} lines.  If @var{count} is 0, all lines are copied.
+@item -O
+Begin assigning to @var{array} at index @var{origin}.
+The default index is 0.
+@item -s
+Discard the first @var{count} lines read.
+@item -t
+Remove a trailing line from each line read.
+@item -u
+Read lines from file descriptor @var{fd} instead of the standard input.
+@item -C
+Evaluate @var{callback} each time @var{quantum}P lines are read.
+The @option{-c} option specifies @var{quantum}.
+@item -c
+Specify the number of lines read between each call to @var{callback}.
+@end table
+
+If @option{-C} is specified without @option{-c}, 
+the default quantum is 5000.
+
+If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
+before assigning to it.
+
+@code{mapfile} returns successfully unless an invalid option or option
+argument is supplied, or @var{array} is invalid or unassignable.
 
 @item printf
 @btindex printf
@@ -3597,8 +3648,8 @@ is not also used.
 If the @option{-f} option is used, @code{type} does not attempt to find
 shell functions, as with the @code{command} builtin.
 
-The return status is zero if any of the @var{names} are found, non-zero
-if none are found.
+The return status is zero if all of the @var{names} are found, non-zero
+if any are not found.
 
 @item typeset
 @btindex typeset

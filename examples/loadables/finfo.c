@@ -376,6 +376,8 @@ finfo_builtin(list)
 }
 
 static char *finfo_doc[] = {
+  "Display information about file attributes.",
+  "",
   "Display information about each FILE.  Only single operators should",
   "be supplied.  If no options are supplied, a summary of the info",
   "available about each FILE is printed.  If FILE is of the form",

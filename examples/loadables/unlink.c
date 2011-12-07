@@ -40,6 +40,8 @@ unlink_builtin (list)
 
 char *unlink_doc[] = {
 	"Remove a directory entry.",
+	"",
+	"Forcibly remove a directory entry, even if it's a directory.",
 	(char *)NULL
 };
 

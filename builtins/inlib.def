@@ -29,12 +29,17 @@ $BUILTIN inlib
 $FUNCTION inlib_builtin
 $DEPENDS_ON apollo
 $SHORT_DOC inlib pathname [pathname...]
+Install user-supplied library.
+
 Install a user-supplied library specified by pathname in the current
 shell process. The library is used to resolve external references
 in programs and libraries loaded after its installation.  Note
 that the library is not loaded into the address space unless it is
 needed to resolve an external reference.  The list of inlibed
 libraries is passed to all children of the current shell.
+
+Exit Status:
+Returns success unless PATHNAME is not found or an error occurs.
 $END
 
 #if defined (apollo)

@@ -685,7 +685,7 @@ make_redirection (source, instruction, dest_and_filename)
 
     case r_output_direction:		/* >foo */
     case r_output_force:		/* >| foo */
-    case r_err_and_out:			/* command &>filename */
+    case r_err_and_out:			/* &>filename */
       temp->flags = O_TRUNC | O_WRONLY | O_CREAT;
       break;
 

@@ -25,6 +25,8 @@ $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
 $SHORT_DOC ulimit [-SHacdefilmnpqrstuvx] [limit]
+Modify shell resource limits.
+
 Provides control over the resources available to the shell and processes
 it creates, on systems that allow such control.
 
@@ -32,6 +34,7 @@ Options:
   -S	use the `soft' resource limit
   -H	use the `hard' resource limit
   -a	all current limits are reported
+  -b	the socket buffer size
   -c	the maximum size of core files created
   -d	the maximum size of a process's data segment
   -e	the maximum scheduling priority (`nice')
@@ -199,6 +202,12 @@ typedef struct {
 } RESOURCE_LIMITS;
 
 static RESOURCE_LIMITS limits[] = {
+#ifdef RLIMIT_PTHREAD
+  { 'T',	RLIMIT_PTHREAD,  1,	"number of threads",	(char *)NULL },
+#endif
+#ifdef RLIMIT_SBSIZE
+  { 'b',	RLIMIT_SBSIZE,  1,	"socket buffer size",	"bytes" },
+#endif
 #ifdef RLIMIT_CORE
   { 'c',	RLIMIT_CORE,  512,	"core file size",	"blocks" },
 #endif

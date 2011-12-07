@@ -187,6 +187,8 @@ dolink (src, dst, flags)
 }
 
 char *ln_doc[] = {
+	"Link files.",
+	"",
 	"Create a new directory entry with the same modes as the original",
 	"file.  The -f option means to unlink any existing file, permitting",
 	"the link to occur.  The -s option means to create a symbolic link.",

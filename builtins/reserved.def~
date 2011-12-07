@@ -22,6 +22,8 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
 
 $BUILTIN for
 $SHORT_DOC for NAME [in WORDS ... ] ; do COMMANDS; done
+Execute commands for each member in a list.
+
 The `for' loop executes a sequence of commands for each member in a
 list of items.  If `in WORDS ...;' is not present, then `in "$@"' is
 assumed.  For each element in WORDS, NAME is set to that element, and
@@ -31,6 +33,8 @@ $END
 $BUILTIN for ((
 $DOCNAME arith_for
 $SHORT_DOC for (( exp1; exp2; exp3 )); do COMMANDS; done
+Arithmetic for loop.
+
 Equivalent to
 	(( EXP1 ))
 	while (( EXP2 )); do
@@ -58,6 +62,8 @@ $END
 
 $BUILTIN time
 $SHORT_DOC time [-p] pipeline
+Report time consumed by pipeline's execution.
+
 Execute PIPELINE and print a summary of the real time, user CPU time,
 and system CPU time spent executing PIPELINE when it terminates.
 
@@ -70,12 +76,16 @@ $END
 
 $BUILTIN case
 $SHORT_DOC case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac
+Execute commands based on pattern matching.
+
 Selectively execute COMMANDS based upon WORD matching PATTERN.  The
 `|' is used to separate multiple patterns.
 $END
 
 $BUILTIN if
 $SHORT_DOC if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else COMMANDS; ] fi
+Execute commands based on conditional.
+
 The `if COMMANDS' list is executed.  If its exit status is zero, then the
 `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list is
 executed in turn, and if its exit status is zero, the corresponding
@@ -87,18 +97,24 @@ $END
 
 $BUILTIN while
 $SHORT_DOC while COMMANDS; do COMMANDS; done
+Execute commands as long as a test succeeds.
+
 Expand and execute COMMANDS as long as the final command in the
 `while' COMMANDS has an exit status of zero.
 $END
 
 $BUILTIN until
 $SHORT_DOC until COMMANDS; do COMMANDS; done
+Execute commands as long as a test does not succeed.
+
 Expand and execute COMMANDS as long as the final command in the
 `until' COMMANDS has an exit status which is not zero.
 $END
 
 $BUILTIN function
 $SHORT_DOC function name { COMMANDS ; } or name () { COMMANDS ; }
+Define shell function.
+
 Create a shell function named NAME.  When invoked as a simple command,
 NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,
 the arguments are passed to the function as $1...$n, and the function's
@@ -108,6 +124,8 @@ $END
 $BUILTIN { ... }
 $DOCNAME grouping_braces
 $SHORT_DOC { COMMANDS ; }
+Group commands as a unit.
+
 Run a set of commands in a group.  This is one way to redirect an
 entire set of commands.
 $END
@@ -115,6 +133,8 @@ $END
 $BUILTIN %
 $DOCNAME fg_percent
 $SHORT_DOC job_spec [&]
+Resume job in foreground.
+
 Equivalent to the JOB_SPEC argument to the `fg' command.  Resume a
 stopped or background job.  JOB_SPEC can specify either a job name
 or a job number.  Following JOB_SPEC with a `&' places the job in
@@ -125,6 +145,8 @@ $END
 $BUILTIN (( ... ))
 $DOCNAME arith
 $SHORT_DOC (( expression ))
+Evaluate arithmetic expression.
+
 The EXPRESSION is evaluated according to the rules for arithmetic
 evaluation.  Equivalent to "let EXPRESSION".
 $END
@@ -132,6 +154,8 @@ $END
 $BUILTIN [[ ... ]]
 $DOCNAME conditional
 $SHORT_DOC [[ expression ]]
+Execute conditional command.
+
 Returns a status of 0 or 1 depending on the evaluation of the conditional
 expression EXPRESSION.  Expressions are composed of the same primaries used
 by the `test' builtin, and may be combined using the following operators:
@@ -141,10 +165,10 @@ by the `test' builtin, and may be combined using the following operators:
   EXPR1 && EXPR2	True if both EXPR1 and EXPR2 are true; else false
   EXPR1 || EXPR2	True if either EXPR1 or EXPR2 is true; else false
 
-When the `==' and `!=' operators are used, the string to the right of the
-operator is used as a pattern and pattern matching is performed.  When
-the `=~' operator is used, the string to the right of the operator is
-matched as a regular expression.
+When the `==' and `!=' operators are used, the string to the right of
+the operator is used as a pattern and pattern matching is performed.
+When the `=~' operator is used, the string to the right of the operator
+is matched as a regular expression.
 
 The && and || operators do not evaluate EXPR2 if EXPR1 is sufficient to
 determine the expression's value.
@@ -153,6 +177,8 @@ $END
 $BUILTIN variables
 $DOCNAME variable_help
 $SHORT_DOC variables - Names and meanings of some shell variables
+Common shell variable names and usage.
+
 BASH_VERSION	Version information for this Bash.
 CDPATH	A colon-separated list of directories to search
 		for directories given as arguments to `cd'.

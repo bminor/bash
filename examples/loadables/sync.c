@@ -18,7 +18,9 @@ sync_builtin (list)
 }
 
 char *sync_doc[] = {
-	"force completion of pending disk writes",
+	"Sync disks.",
+	""
+	"Force completion of pending disk writes",
 	(char *)NULL
 };
 

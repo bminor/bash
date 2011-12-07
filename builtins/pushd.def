@@ -25,6 +25,8 @@ $BUILTIN pushd
 $FUNCTION pushd_builtin
 $DEPENDS_ON PUSHD_AND_POPD
 $SHORT_DOC pushd [-n] [+N | -N | dir]
+Add directories to stack.
+
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
 directory.  With no arguments, exchanges the top two directories.
@@ -46,12 +48,18 @@ Arguments:
 	new current working directory.
 
 The `dirs' builtin displays the directory stack.
+
+Exit Status:
+Returns success unless an invalid argument is supplied or the directory
+change fails.
 $END
 
 $BUILTIN popd
 $FUNCTION popd_builtin
 $DEPENDS_ON PUSHD_AND_POPD
 $SHORT_DOC popd [-n] [+N | -N]
+Remove directories from stack.
+
 Removes entries from the directory stack.  With no arguments, removes
 the top directory from the stack, and changes to the new top directory.
 
@@ -69,12 +77,18 @@ Arguments:
 	removes the last directory, `popd -1' the next to last.
 
 The `dirs' builtin displays the directory stack.
+
+Exit Status:
+Returns success unless an invalid argument is supplied or the directory
+change fails.
 $END
 
 $BUILTIN dirs
 $FUNCTION dirs_builtin
 $DEPENDS_ON PUSHD_AND_POPD
 $SHORT_DOC dirs [-clpv] [+N] [-N]
+Display directory stack.
+
 Display the list of currently remembered directories.  Directories
 find their way onto the list with the `pushd' command; you can get
 back up through the list with the `popd' command.
@@ -93,6 +107,9 @@ Arguments:
 
   -N	Displays the Nth entry counting from the right of the list shown by
 	dirs when invoked without options, starting with zero.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 #include <config.h>

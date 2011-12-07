@@ -41,6 +41,8 @@ tty_builtin (list)
 }
 
 char *tty_doc[] = {
+	"Display terminal name.",
+	"",
 	"tty writes the name of the terminal that is opened for standard",
 	"input to standard output.  If the `-s' option is supplied, nothing",
 	"is written; the exit status determines whether or not the standard",

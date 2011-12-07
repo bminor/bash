@@ -24,6 +24,8 @@ $PRODUCES hash.c
 $BUILTIN hash
 $FUNCTION hash_builtin
 $SHORT_DOC hash [-lr] [-p pathname] [-dt] [name ...]
+Remember or display program locations.
+
 Determine and remember the full pathname of each command NAME.  If
 no arguments are given, information about remembered commands is displayed.
 
@@ -35,6 +37,12 @@ Options:
   -t		print the remembered location of each NAME, preceding
 		each location with the corresponding NAME if multiple
 		NAMEs are given
+Arguments:
+  NAME		Each NAME is searched for in $PATH and added to the list
+		of remembered commands.
+
+Exit Status:
+Returns success unless NAME is not found or an invalid option is given.
 $END
 
 #include <config.h>

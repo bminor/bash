@@ -24,8 +24,11 @@ $PRODUCES shopt.c
 $BUILTIN shopt
 $FUNCTION shopt_builtin
 $SHORT_DOC shopt [-pqsu] [-o] [optname ...]
-Set and unset shell options.  Without any option arguments, list all
-shell options with an indication of whether or not each is set.
+Set and unset shell options.
+
+Change the setting of each shell option OPTNAME.  Without any option
+arguments, list all shell options with an indication of whether or not each
+is set. 
 
 Options:
   -o	restrict OPTNAMEs to those defined for use with `set -o'
@@ -34,7 +37,9 @@ Options:
   -s	enable (set) each OPTNAME
   -u	disable (unset) each OPTNAME
 
-The exit status indicates whether or not each OPTNAME is set.
+Exit Status:
+Returns success if OPTNAME is enabled; fails if an invalid option is
+given or OPTNAME is disabled.
 $END
 
 #include <config.h>
@@ -129,7 +134,9 @@ static struct {
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
   { "checkhash", &check_hashed_filenames, (shopt_set_func_t *)NULL },
+#if defined (JOB_CONTROL)
   { "checkjobs", &check_jobs_at_exit, (shopt_set_func_t *)NULL },
+#endif
   { "checkwinsize", &check_window_size, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "cmdhist", &command_oriented_history, (shopt_set_func_t *)NULL },

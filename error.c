@@ -1,5 +1,6 @@
 /* error.c -- Functions for handling errors. */
-/* Copyright (C) 1993-2006 Free Software Foundation, Inc.
+
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

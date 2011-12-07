@@ -102,6 +102,8 @@ WORD_LIST	*list;
 }
 
 char *realpath_doc[] = {
+	"Display pathname in canonical form.",
+	"",
 	"Display the canonicalized version of each PATHNAME argument, resolving",
 	"symbolic links.  The -c option checks whether or not each resolved name",
 	"exists.  The -s option produces no output; the exit status determines the",

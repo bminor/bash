@@ -1343,6 +1343,8 @@ getconf_one(list)
 }
 
 static char *getconf_doc[] = {
+	"Display values of system limits and options.",
+	"",
 	"getconf writes the current value of a configurable system limit or",
 	"option variable to the standard output.",
 	(char *)NULL

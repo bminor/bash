@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1070,8 +1070,9 @@ attempt_shell_completion (text, start, end)
 
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
-  if (!matches && in_command_position == 0 && prog_completion_enabled &&
-      (progcomp_size () > 0) && current_prompt_string == ps1_prompt)
+  if (matches == 0 && (in_command_position == 0 || text[0] == '\0') &&
+      prog_completion_enabled && (progcomp_size () > 0) &&
+      current_prompt_string == ps1_prompt)
     {
       int s, e, foundcs;
       char *n;
@@ -1084,7 +1085,9 @@ attempt_shell_completion (text, start, end)
       s = find_cmd_start (start);
       e = find_cmd_end (end);
       n = find_cmd_name (s);
-      if (e > s && assignment (n, 0) == 0)
+      if (e == 0 && e == s && text[0] == '\0')
+        prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+      else if (e > s && assignment (n, 0) == 0)
 	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
       else
 	foundcs = 0;
@@ -1092,16 +1095,11 @@ attempt_shell_completion (text, start, end)
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default
 	 filename completion that readline will do unless the COPT_DEFAULT
-	 option has been set with the `-o default' option to complete. */
+	 option has been set with the `-o default' option to complete or
+	 compopt. */
       if (foundcs)
 	{
-	  /* If the user specified that the compspec returns filenames, make
-	     sure that readline knows it. */
-	  if (foundcs & COPT_FILENAMES)
-	    rl_filename_completion_desired = 1;
-	  /* If the user doesn't want a space appended, tell readline. */
-	  if (foundcs & COPT_NOSPACE)
-	    rl_completion_suppress_append = 1;
+	  pcomp_set_readline_variables (foundcs, 1);
 	  /* Turn what the programmable completion code returns into what
 	     readline wants.  I should have made compute_lcd_of_matches
 	     external... */
@@ -1238,6 +1236,7 @@ command_word_completion_function (hint_text, state)
   static char *directory_part = (char *)NULL;
   static int path_index, hint_len, dequoted_len, istate, igncase;
   static int mapping_over, local_index, searching_path, hint_is_dir;
+  static int old_glob_ignore_case;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
@@ -1246,7 +1245,7 @@ command_word_completion_function (hint_text, state)
 
   /* We have to map over the possibilities for command words.  If we have
      no state, then make one just for that purpose. */
-  if (!state)
+  if (state == 0)
     {
       if (dequoted_hint && dequoted_hint != hint)
 	free (dequoted_hint);
@@ -1259,6 +1258,8 @@ command_word_completion_function (hint_text, state)
 
       temp = rl_variable_value ("completion-ignore-case");
       igncase = strcmp (temp, "on") == 0;
+
+      old_glob_ignore_case = glob_ignore_case;
 
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
@@ -1421,7 +1422,7 @@ command_word_completion_function (hint_text, state)
 
   istate = (val != (char *)NULL);
 
-  if (!istate)
+  if (istate == 0)
     {
       char *current_path;
 
@@ -1460,6 +1461,36 @@ command_word_completion_function (hint_text, state)
   val = rl_filename_completion_function (filename_hint, istate);
   istate = 1;
 
+  /* Limited support for completing command words with globbing chars.  Only
+     a single match (multiple matches that end up reducing the number of
+     characters in the common prefix are bad) will ever be returned. */
+  if (glob_pattern_p (hint))
+    {
+      char **temp;
+
+      if (state > 0)
+	{
+          glob_ignore_case = old_glob_ignore_case;
+	  return ((char *)NULL);
+	}
+      glob_ignore_case = igncase;
+      temp = shell_glob_filename (hint);
+      glob_ignore_case = old_glob_ignore_case;
+      if (GLOB_FAILED (temp))
+	return ((char *)NULL);
+      if (temp && temp[1])	/* multiple matches are bad */
+	{
+	  strvec_dispose (temp);
+	  return ((char *)NULL);
+	}
+      val = temp[0];
+      free (temp);
+      if (val && executable_or_directory (val))
+        return (val);
+      free (val);
+      return ((char *)NULL);
+    }      
+
   if (val == 0)
     {
       /* If the hint text is an absolute program, then don't bother
@@ -1484,42 +1515,38 @@ command_word_completion_function (hint_text, state)
 	     filename. */
 	  if (*hint_text == '~')
 	    {
-	      int l, tl, vl, dl, dl2, tlen, xl;
-	      char *rd, *dh, *dh2, *expdir;
-
-	      dh = bash_dequote_filename ((char *)hint_text, 0);
-	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
+	      int l, vl, dl, dl2, xl;
+	      char *rd, *dh2, *expdir;
 
 	      vl = strlen (val);
-	      tl = strlen (dh);
 
 	      rd = savestring (filename_hint);
 	      bash_directory_expansion (&rd);
 	      dl = strlen (rd);
 	      free (rd);
 
+	      dh2 = directory_part ? bash_dequote_filename (directory_part, 0) : 0;
 	      bash_directory_expansion (&dh2);
 	      dl2 = strlen (dh2);
 
 	      expdir = bash_tilde_expand (directory_part, 0);
 	      xl = strlen (expdir);
+	      free (expdir);
 
 	      /*
+		 dh2 = unexpanded but dequoted tilde-prefix
 		 dl = length of entire passed filename
 		 dl2 = length of tilde-prefix
-		 tlen = number of characters past tilde prefix in original name
 		 expdir = tilde-expanded tilde-prefix
 		 xl = length of expanded tilde-prefix
 		 l = length of remainder after tilde-prefix
 	      */
-	      tlen = dl - dl2;
 	      l = (vl - xl) + 1;
 
 	      temp = (char *)xmalloc (dl2 + 2 + l);
 	      strcpy (temp, dh2);
 	      strcpy (temp + dl2, val + xl);
 
-	      free (dh);
 	      free (dh2);
 	    }
 	  else
@@ -2866,9 +2893,17 @@ bash_dequote_filename (text, quote_char)
   ret = (char *)xmalloc (l + 1);
   for (quoted = quote_char, p = text, r = ret; p && *p; p++)
     {
-      /* Allow backslash-quoted characters to pass through unscathed. */
+      /* Allow backslash-escaped characters to pass through unscathed. */
       if (*p == '\\')
 	{
+	  /* Backslashes are preserved within single quotes. */
+	  if (quoted == '\'')
+	    *r++ = *p;
+	  /* Backslashes are preserved within double quotes unless the
+	     character is one that is defined to be escaped */
+	  else if (quoted == '"' && ((sh_syntaxtab[p[1]] & CBSDQUOTE) == 0))
+	    *r++ = *p;
+
 	  *r++ = *++p;
 	  if (*p == '\0')
 	    break;

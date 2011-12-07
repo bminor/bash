@@ -39,7 +39,9 @@ whoami_builtin (list)
 }
 
 char *whoami_doc[] = {
-	"display name of current user",
+	"Print user name",
+	"",
+	"Display name of current user.",
 	(char *)NULL
 };
 

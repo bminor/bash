@@ -79,6 +79,8 @@ push_builtin (list)
 }
 
 char *push_doc[] = {
+	"Create child shell.",
+	"",
 	"Create a child that is an exact duplicate of the running shell",
 	"and wait for it to exit.  The $SHLVL, $!, $$, and $PPID variables",
 	"are adjusted in the child.  The return value is the exit status",

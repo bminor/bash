@@ -19,11 +19,15 @@ false_builtin (list)
 }
 
 static char *true_doc[] = {
+	"Exit successfully.",
+	"",
 	"Return a successful result.",
 	(char *)NULL
 };
 
 static char *false_doc[] = {
+	"Exit unsuccessfully.",
+	"",
 	"Return an unsuccessful result.",
 	(char *)NULL
 };

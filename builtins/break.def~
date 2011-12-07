@@ -24,7 +24,10 @@ $PRODUCES break.c
 $BUILTIN break
 $FUNCTION break_builtin
 $SHORT_DOC break [n]
-Exit a FOR, WHILE or UNTIL loop.  If N is specified, break N enclosing loops.
+Exit for, while, or until loops.
+
+Exit a FOR, WHILE or UNTIL loop.  If N is specified, break N enclosing
+loops.
 $END
 #include <config.h>
 
@@ -85,6 +88,8 @@ break_builtin (list)
 $BUILTIN continue
 $FUNCTION continue_builtin
 $SHORT_DOC continue [n]
+Resume for, while, or until loops.
+
 Resumes the next iteration of the enclosing FOR, WHILE or UNTIL loop.
 If N is specified, resumes the Nth enclosing loop.
 $END

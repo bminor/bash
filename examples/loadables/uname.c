@@ -126,7 +126,9 @@ uprint (flag, info)
 }
 
 char *uname_doc[] = {
-	"display information about the system",
+	"Display system information.",
+	"",
+	"Display information about the system hardware and OS.",
 	(char *)NULL
 };
 

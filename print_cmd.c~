@@ -1124,7 +1124,7 @@ named_function_string (name, command, flags)
   dispose_command (cmdcopy);
 
   if (flags & FUNC_EXTERNAL)
-    remove_quoted_escapes (result);
+    result = remove_quoted_escapes (result);
 
   return (result);
 }

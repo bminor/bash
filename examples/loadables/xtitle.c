@@ -164,6 +164,8 @@ int main(int argc, char *argv[])
 #ifdef BASH_BUILTIN
 
 static char *xtitle_doc[] = {
+  "Set xterm window title.",
+  "",
   "Either set or read the title of the current xterm window.  With the",
   "-q option, writes the current xterm title to standard output.  Without",
   "the -q option, sets the xterm title to be the arguments given,",

@@ -969,7 +969,7 @@ print_redirection (redirect)
       break;
 
     case r_err_and_out:
-      cprintf (">&%s", redirectee->word);
+      cprintf ("&>%s", redirectee->word);
       break;
 
     case r_input_output:

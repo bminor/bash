@@ -47,7 +47,7 @@ extern int want_pending_command, read_from_stdin;
 
 /* **************************************************************** */
 /*								    */
-/*			The Standard Sh Flags.			    */
+/*			The Standard sh Flags.			    */
 /*								    */
 /* **************************************************************** */
 

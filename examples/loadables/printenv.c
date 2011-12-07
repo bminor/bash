@@ -58,7 +58,9 @@ printenv_builtin (list)
 }
 
 char *printenv_doc[] = {
-	"print values of environment variables",
+	"Display environment.",
+	"",
+	"Print names and values of environment variables",
 	(char *)NULL
 };
 

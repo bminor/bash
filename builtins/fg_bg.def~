@@ -25,9 +25,11 @@ $BUILTIN fg
 $FUNCTION fg_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC fg [job_spec]
+Move job to the foreground.
+
 Place the job identified by JOB_SPEC in the foreground, making it the
-current job.  If JOB_SPEC is not present, the shell's notion of the current
-job is used.
+current job.  If JOB_SPEC is not present, the shell's notion of the
+current job is used.
 $END
 
 #include <config.h>
@@ -83,6 +85,8 @@ $BUILTIN bg
 $FUNCTION bg_builtin
 $DEPENDS_ON JOB_CONTROL
 $SHORT_DOC bg [job_spec ...]
+Move jobs to the background.
+
 Place the jobs identified by each JOB_SPEC in the background, as if they
 had been started with `&'.  If JOB_SPEC is not present, the shell's notion
 of the current job is used.

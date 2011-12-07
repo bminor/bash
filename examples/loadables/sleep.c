@@ -133,6 +133,8 @@ WORD_LIST	*list;
 }
 
 static char *sleep_doc[] = {
+	"Suspend execution for specified period.",
+	""
 	"sleep suspends execution for a minimum of SECONDS[.FRACTION] seconds.",
 	(char *)NULL
 };

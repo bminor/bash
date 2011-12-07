@@ -23,7 +23,9 @@ $BUILTIN let
 $FUNCTION let_builtin
 $PRODUCES let.c
 $SHORT_DOC let arg [arg ...]
-Evaluates ach ARG as an arithmetic expression.  Evaluation is done in
+Evaluate arithmetic expressions.
+
+Evaluate each ARG as an arithmetic expression.  Evaluation is done in
 fixed-width integers with no check for overflow, though division by 0
 is trapped and flagged as an error.  The following list of operators is
 grouped into levels of equal-precedence operators.  The levels are listed
@@ -59,8 +61,8 @@ Operators are evaluated in order of precedence.  Sub-expressions in
 parentheses are evaluated first and may override the precedence
 rules above.
 
-If the last ARG evaluates to 0, let returns 1; 0 is returned
-otherwise.
+Exit Status:
+If the last ARG evaluates to 0, let returns 1; let returns 0 otherwise..
 $END
 
 #include <config.h>

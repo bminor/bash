@@ -27,10 +27,12 @@ $BUILTIN bind
 $DEPENDS_ON READLINE
 $FUNCTION bind_builtin
 $SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]
-Bind a key sequence to a Readline function or a macro, or set a Readline
-variable.  The non-option argument syntax is equivalent to that found in
-~/.inputrc, but must be passed as a single argument:  e.g.,
-bind '"\C-x\C-r": re-read-init-file'.
+Set Readline key bindings and variables.
+
+Bind a key sequence to a Readline function or a macro, or set a
+Readline variable.  The non-option argument syntax is equivalent to
+that found in ~/.inputrc, but must be passed as a single argument:
+e.g., bind '"\C-x\C-r": re-read-init-file'.
 
 Options:
   -m  keymap         Use KEYMAP as the keymap for the duration of this
@@ -53,6 +55,9 @@ Options:
   -f  filename       Read key bindings from FILENAME.
   -x  keyseq:shell-command	Cause SHELL-COMMAND to be executed when
 				KEYSEQ is entered.
+
+Exit Status:
+bind returns 0 unless an unrecognized option is given or an error occurs.
 $END
 
 #if defined (READLINE)

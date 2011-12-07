@@ -29,6 +29,8 @@ $BUILTIN inlib
 $FUNCTION inlib_builtin
 $DEPENDS_ON apollo
 $SHORT_DOC inlib pathname [pathname...]
+Install user-supplied library.
+
 Install a user-supplied library specified by pathname in the current
 shell process. The library is used to resolve external references
 in programs and libraries loaded after its installation.  Note
@@ -64,7 +66,7 @@ inlib_builtin (list)
 
       if (status.all != status_$ok)
 	{
-	  builtin_error ("%s: inlib failed", list->word->word);
+	  builtin_error (_("%s: inlib failed"), list->word->word);
 	  return_value = EXECUTION_FAILURE;
 	}
 

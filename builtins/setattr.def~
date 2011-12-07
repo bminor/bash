@@ -53,6 +53,8 @@ extern int declare_builtin __P((WORD_LIST *));
 $BUILTIN export
 $FUNCTION export_builtin
 $SHORT_DOC export [-fn] [name[=value] ...] or export -p
+Set export attribute for shell variables.
+
 Marks each NAME for automatic export to the environment of subsequently
 executed commands.  If VALUE is supplied, assign VALUE before exporting.
 
@@ -62,6 +64,9 @@ Options:
   -p	display a list of all exported variables and functions
 
 An argument of `--' disables further option processing.
+
+Exit Status:
+Returns success unless an invalid option is given or NAME is invalid.
 $END
 
 /* For each variable name in LIST, make that variable appear in the
@@ -79,6 +84,8 @@ export_builtin (list)
 $BUILTIN readonly
 $FUNCTION readonly_builtin
 $SHORT_DOC readonly [-af] [name[=value] ...] or readonly -p
+Mark shell variables as unchangeable.
+
 Mark each NAME as read-only; the values of these NAMEs may not be
 changed by subsequent assignment.  If VALUE is supplied, assign VALUE
 before marking as read-only.
@@ -89,6 +96,9 @@ Options:
   -p	display a list of all readonly variables and functions
 
 An argument of `--' disables further option processing.
+
+Exit Status:
+Returns success unless an invalid option is given or NAME is invalid.
 $END
 
 /* For each variable name in LIST, make that variable readonly.  Given an
@@ -294,7 +304,7 @@ int
 show_all_var_attributes (v, nodefs)
      int v, nodefs;
 {
-  SHELL_VAR **variable_list;
+  SHELL_VAR **variable_list, *var;
   int any_failed;
   register int i;
 
