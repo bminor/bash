@@ -1,0 +1,29 @@
+# tests sourcing non-regular files, fixed post-3.2
+
+: ${TMPDIR:=/tmp}
+
+rm -f $TMPDIR/foo
+echo "echo one - OK" > $TMPDIR/foo
+. $TMPDIR/foo
+echo $?
+rm -f $TMPDIR/foo
+
+# non-regular readable file
+. /dev/null
+echo $?
+
+# FIFO or pipe via /dev/fd
+. <(echo "echo two - OK")
+echo $?
+
+# pipe
+echo "echo three - OK" | . /dev/stdin
+echo $?
+
+# FIFO
+mkfifo $TMPDIR/fifo-$$
+echo "echo four - OK" > $TMPDIR/fifo-$$ &
+sleep 1		# allow the child echo to execute
+. $TMPDIR/fifo-$$
+echo $?
+rm -f $TMPDIR/fifo-$$
