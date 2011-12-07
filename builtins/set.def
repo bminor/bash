@@ -164,13 +164,13 @@ static int get_edit_mode __P((char *));
 static int bash_set_history __P((int, char *));
 #endif
 
-static char *on = "on";
-static char *off = "off";
+static const char * const on = "on";
+static const char * const off = "off";
 
 /* A struct used to match long options for set -o to the corresponding
    option letter or internal variable.  The functions can be called to
    dynamically generate values. */
-struct {
+const struct {
   char *name;
   int letter;
   int *variable;

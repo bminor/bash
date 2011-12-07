@@ -59,7 +59,7 @@ extern int give_terminal_to __P((pid_t, int));
 #endif /* JOB_CONTROL */
 
 #if defined (ARRAY_VARS)
-extern char *bash_badsub_errmsg;
+extern const char * const bash_badsub_errmsg;
 #endif
 
 static void error_prolog __P((int));
@@ -70,7 +70,7 @@ static void error_prolog __P((int));
 #define MAINTAINER "bash-maintainers@gnu.org"
 #endif
 
-char *the_current_maintainer = MAINTAINER;
+const char * const the_current_maintainer = MAINTAINER;
 
 int gnu_error_format = 0;
 
@@ -399,7 +399,7 @@ trace (format, va_alist)
 /* **************************************************************** */
 
 
-static char *cmd_error_table[] = {
+static const char * const cmd_error_table[] = {
 	N_("unknown command error"),	/* CMDERR_DEFAULT */
 	N_("bad command type"),		/* CMDERR_BADTYPE */
 	N_("bad connector"),		/* CMDERR_BADCONN */

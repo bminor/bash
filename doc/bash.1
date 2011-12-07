@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Nov 27 12:02:01 EST 2006
+.\"	Last Change: Tue Dec 26 19:01:54 EST 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 November 27" "GNU Bash-3.2"
+.TH BASH 1 "2006 December 26" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1245,6 +1245,11 @@ The following variables are set by the shell:
 Expands to the full file name used to invoke this instance of
 .BR bash .
 .TP
+.B BASHPID
+Expands to the process id of the current bash process.
+This differs from \fB$$\fP under certain circumstances, such as subshells
+that do not require bash to be re-initialized.
+.TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
 frame of the current bash execution call stack.
@@ -1346,6 +1351,10 @@ This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
 .TP
+.B COMP_KEY
+The key (or final key of a key sequence) used to invoke the current
+completion function.
+.TP
 .B COMP_LINE
 The current command line.
 This variable is available only in shell functions and external
@@ -1358,6 +1367,20 @@ The index of the current cursor position relative to the beginning of
 the current command.
 If the current cursor position is at the end of the current command,
 the value of this variable is equal to \fB${#COMP_LINE}\fP.
+This variable is available only in shell functions and external
+commands invoked by the
+programmable completion facilities (see \fBProgrammable Completion\fP
+below).
+.TP
+.B COMP_TYPE
+Set to an integer value corresponding to the type of completion attempted
+that caused a completion function to be called:
+\fITAB\fP, for normal completion,
+\fI?\fP, for listing completions after successive tabs,
+\fI!\fP, for listing alternatives on partial word completion,
+\fI@\fP, to list completions if the word is not unmodified,
+or
+\fI%\fP, for menu completion.
 This variable is available only in shell functions and external
 commands invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
@@ -2674,10 +2697,18 @@ is unset, or its
 value is exactly
 .BR <space><tab><newline> ,
 the default, then
+sequences of
+.BR <space> ,
+.BR <tab> ,
+and
+.B <newline>
+at the beginning and end of the results of the previous
+expansions are ignored, and
 any sequence of
 .SM
 .B IFS
-characters serves to delimit words.  If
+characters not at the beginning or end serves to delimit words.
+If
 .SM
 .B IFS
 has a value other than the default, then sequences of
@@ -4178,11 +4209,15 @@ is executed for each child that exits.
 .PP
 If an attempt to exit
 .B bash
-is made while jobs are stopped, the shell prints a warning message.  The
+is made while jobs are stopped (or, if the \fBcheckjobs\fP shell option has
+been enabled using the \fBshopt\fP builtin, running), the shell prints a
+warning message, and, if the \fBcheckjobs\fP option is enabled, lists the
+jobs and their statuses.
+The
 .B jobs
-command may then be used to inspect their status.
+command may then be used to inspect their status. 
 If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and the stopped
+the shell does not print another warning, and any stopped
 jobs are terminated.
 .SH PROMPTING
 When executing interactively, 
@@ -5459,10 +5494,14 @@ After these matches have been generated, any shell function or command
 specified with the \fB\-F\fP and \fB\-C\fP options is invoked.
 When the command or function is invoked, the
 .SM
-.B COMP_LINE
+.BR COMP_LINE ,
+.SM
+.BR COMP_POINT ,
+.SM
+.BR COMP_KEY ,
 and
 .SM
-.B COMP_POINT
+.B COMP_TYPE
 variables are assigned values as described above under
 \fBShell Variables\fP.
 If a shell function is being invoked, the 
@@ -7554,6 +7593,10 @@ Any command associated with the \fBRETURN\fP trap is executed
 before execution resumes after the function or script.
 .TP
 \fBset\fP [\fB\-\-abefhkmnptuvxBCEHPT\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
+.PD 0
+.TP
+\fBset\fP [\fB+abefhkmnptuvxBCEHPT\fP] [\fB+o\fP \fIoption\fP] [\fIarg\fP ...]
+.PD
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
@@ -7955,6 +7998,11 @@ The list of \fBshopt\fP options is:
 .if n .sp 1v
 .PD 0
 .TP 8
+.B autocd
+If set, a command name that is the name of a directory is executed as if
+it were the argument to the \fBcd\fP command.
+This option is only used by interactive shells.
+.TP 8
 .B cdable_vars
 If set, an argument to the
 .B cd
@@ -7976,6 +8024,13 @@ This option is only used by interactive shells.
 If set, \fBbash\fP checks that a command found in the hash
 table exists before trying to execute it.  If a hashed command no
 longer exists, a normal path search is performed.
+.TP 8
+.B checkjobs
+If set, bash lists the status of any stopped and running jobs before
+exiting an interactive shell.  If any jobs are running, this causes
+the exit to be deferred until a second exit is attempted without an
+intervening command (see \fBJOB CONTROL\fP above).  The shell always
+postpones exiting if any jobs are stopped.
 .TP 8
 .B checkwinsize
 If set, \fBbash\fP checks the window size after each command

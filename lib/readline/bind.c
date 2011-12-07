@@ -80,7 +80,7 @@ static int glean_key_from_name PARAMS((char *));
 static int find_boolean_var PARAMS((const char *));
 
 static char *_rl_get_string_variable_value PARAMS((const char *));
-static int substring_member_of_array PARAMS((char *, const char **));
+static int substring_member_of_array PARAMS((const char *, const char * const *));
 
 static int currently_reading_init_file;
 
@@ -936,11 +936,11 @@ _rl_init_file_error (msg)
 typedef int _rl_parser_func_t PARAMS((char *));
 
 /* Things that mean `Control'. */
-const char *_rl_possible_control_prefixes[] = {
+const char * const _rl_possible_control_prefixes[] = {
   "Control-", "C-", "CTRL-", (const char *)NULL
 };
 
-const char *_rl_possible_meta_prefixes[] = {
+const char * const _rl_possible_meta_prefixes[] = {
   "Meta", "M-", (const char *)NULL
 };
 
@@ -1099,8 +1099,8 @@ parser_include (args)
 }
   
 /* Associate textual names with actual functions. */
-static struct {
-  const char *name;
+static const struct {
+  const char * const name;
   _rl_parser_func_t *function;
 } parser_directives [] = {
   { "if", parser_if },
@@ -1406,8 +1406,8 @@ rl_parse_and_bind (string)
 
 #define V_SPECIAL	0x1
 
-static struct {
-  const char *name;
+static const struct {
+  const char * const name;
   int *value;
   int flags;
 } boolean_varlist [] = {
@@ -1494,8 +1494,8 @@ static int sv_editmode PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
 static int sv_keymap PARAMS((const char *));
 
-static struct {
-  const char *name;
+static const struct {
+  const char * const name;
   int flags;
   _rl_sv_func_t *set_func;
 } string_varlist[] = {
@@ -1701,11 +1701,11 @@ sv_isrchterm (value)
    For example, `Space' returns ' '. */
 
 typedef struct {
-  const char *name;
+  const char * const name;
   int value;
 } assoc_list;
 
-static assoc_list name_key_alist[] = {
+static const assoc_list name_key_alist[] = {
   { "DEL", 0x7f },
   { "ESC", '\033' },
   { "Escape", '\033' },
@@ -1734,8 +1734,8 @@ glean_key_from_name (name)
 }
 
 /* Auxiliary functions to manage keymaps. */
-static struct {
-  const char *name;
+static const struct {
+  const char * const name;
   Keymap map;
 } keymap_names[] = {
   { "emacs", emacs_standard_keymap },
@@ -2298,8 +2298,8 @@ rl_dump_variables (count, key)
 /* Return non-zero if any members of ARRAY are a substring in STRING. */
 static int
 substring_member_of_array (string, array)
-     char *string;
-     const char **array;
+     const char *string;
+     const char * const *array;
 {
   while (*array)
     {

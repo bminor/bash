@@ -75,7 +75,7 @@ static int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 static char *last_isearch_string;
 static int last_isearch_string_len;
 
-static char *default_isearch_terminators = "\033\012";
+static char * const default_isearch_terminators = "\033\012";
 
 _rl_search_cxt *
 _rl_scxt_alloc (type, flags)

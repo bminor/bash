@@ -4134,7 +4134,7 @@ make_named_pipe ()
 {
   char *tname;
 
-  tname = sh_mktmpname ("sh-np", MT_USERANDOM);
+  tname = sh_mktmpname ("sh-np", MT_USERANDOM|MT_USETMPDIR);
   if (mkfifo (tname, 0600) < 0)
     {
       free (tname);

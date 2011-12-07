@@ -325,6 +325,12 @@ int rl_completion_mark_symlink_dirs;
 /* If non-zero, inhibit completion (temporarily). */
 int rl_inhibit_completion;
 
+/* Set to the last key used to invoke one of the completion functions */
+int rl_completion_invoking_key;
+
+/* If non-zero, sort the completion matches.  On by default. */
+int rl_sort_completion_matches = 1;
+
 /* Variables local to this file. */
 
 /* Local variable states what happened during the last completion attempt. */
@@ -343,6 +349,8 @@ int
 rl_complete (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
+
   if (rl_inhibit_completion)
     return (_rl_insert_char (ignore, invoking_key));
   else if (rl_last_func == rl_complete && !completion_changed_buffer)
@@ -360,6 +368,7 @@ int
 rl_possible_completions (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
   return (rl_complete_internal ('?'));
 }
 
@@ -367,6 +376,7 @@ int
 rl_insert_completions (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
   return (rl_complete_internal ('*'));
 }
 
@@ -999,7 +1009,7 @@ remove_duplicate_matches (matches)
 
   /* Sort the array without matches[0], since we need it to
      stay in place no matter what. */
-  if (i)
+  if (i && rl_sort_completion_matches)
     qsort (matches+1, i-1, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
 
   /* Remember the lowest common denominator for it may be unique. */
@@ -1167,7 +1177,8 @@ compute_lcd_of_matches (match_list, matches, text)
 	    }
 
 	  /* sort the list to get consistent answers. */
-	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
+	  if (rl_sort_completion_matches)
+	    qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
 	  if (si <= low)
@@ -1285,7 +1296,7 @@ rl_display_match_list (matches, len, max)
 	   0 < len <= limit  implies  count = 1. */
 
   /* Sort the items if they are not already sorted. */
-  if (rl_ignore_completion_duplicates == 0)
+  if (rl_ignore_completion_duplicates == 0 && rl_sort_completion_matches)
     qsort (matches + 1, len, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
 
   rl_crlf ();
@@ -2116,8 +2127,8 @@ rl_filename_completion_function (text, state)
    hit the end of the match list, we restore the original unmatched text,
    ring the bell, and reset the counter to zero. */
 int
-rl_menu_complete (count, ignore)
-     int count, ignore;
+rl_menu_complete (count, invoking_key)
+     int count, invoking_key;
 {
   rl_compentry_func_t *our_func;
   int matching_filenames, found_quote;
@@ -2141,6 +2152,8 @@ rl_menu_complete (count, ignore)
 
       match_list_index = match_list_size = 0;
       matches = (char **)NULL;
+
+      rl_completion_invoking_key = invoking_key;
 
       /* Only the completion entry function can change these. */
       set_completion_defaults ('%');

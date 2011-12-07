@@ -894,6 +894,16 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
   if (v && exported)
     VSETATTR(v, att_exported);
 
+  value = inttostr (rl_completion_type, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("COMP_TYPE", value);
+  if (v && exported)
+    VSETATTR(v, att_exported);
+
+  value = inttostr (rl_completion_invoking_key, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("COMP_KEY", value);
+  if (v && exported)
+    VSETATTR(v, att_exported);
+
   /* Since array variables can't be exported, we don't bother making the
      array of words. */
   if (exported == 0)
@@ -914,6 +924,8 @@ unbind_compfunc_variables (exported)
 {
   unbind_variable ("COMP_LINE");
   unbind_variable ("COMP_POINT");
+  unbind_variable ("COMP_TYPE");
+  unbind_variable ("COMP_KEY");
 #ifdef ARRAY_VARS
   unbind_variable ("COMP_WORDS");
   unbind_variable ("COMP_CWORD");

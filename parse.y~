@@ -2593,10 +2593,7 @@ read_token (command)
     }
 
   if (parser_state & PST_REGEXP)
-{
-itrace("read_token: parser_state & PST_REGEXP; goto tokword");
     goto tokword;
-}
 
   /* Shell meta-characters. */
   if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
@@ -3211,10 +3208,10 @@ cond_term ()
 	op = yylval.word;
 #if defined (COND_REGEXP)
       else if (tok == WORD && STREQ (yylval.word->word, "=~"))
-{
-	op = yylval.word;
-parser_state |= PST_REGEXP;
-}
+	{
+	  op = yylval.word;
+	  parser_state |= PST_REGEXP;
+	}
 #endif
       else if (tok == '<' || tok == '>')
 	op = make_word_from_token (tok);  /* ( */
@@ -3245,7 +3242,7 @@ parser_state |= PST_REGEXP;
 
       /* rhs */
       tok = read_token (READ);
-parser_state &= ~PST_REGEXP;
+      parser_state &= ~PST_REGEXP;
       if (tok == WORD)
 	{
 	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
@@ -3436,9 +3433,9 @@ read_token_word (character)
 	 we need to special-case characters special to both the shell and
 	 regular expressions.  Right now, that is only '(' and '|'. */ /*)*/
       if MBTEST((parser_state & PST_REGEXP) && (character == '(' || character == '|'))		/*)*/
-        {
-          if (character == '|')
-            goto got_character;
+	{
+	  if (character == '|')
+	    goto got_character;
 
 	  push_delimiter (dstack, character);
 	  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
@@ -3453,7 +3450,7 @@ read_token_word (character)
 	  FREE (ttok);
 	  dollar_present = all_digit_token = 0;
 	  goto next_character;
-        }
+	}
 #endif /* COND_REGEXP */
 
 #ifdef EXTENDED_GLOB

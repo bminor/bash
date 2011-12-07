@@ -56,7 +56,7 @@ static int funmap_entry;
    program specific function. */
 int funmap_program_specific_entry_start;
 
-static FUNMAP default_funmap[] = {
+static const FUNMAP default_funmap[] = {
   { "abort", rl_abort },
   { "accept-line", rl_newline },
   { "arrow-key-prefix", rl_arrow_keys },

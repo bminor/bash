@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -69,7 +69,7 @@ int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
 static int _rl_vi_doing_insert;
 
 /* Command keys which do movement for xxx_to commands. */
-static const char *vi_motion = " hl^$0ftFT;,%wbeWBE|";
+static const char * const vi_motion = " hl^$0ftFT;,%wbeWBE|`";
 
 /* Keymap used for vi replace characters.  Created dynamically since
    rarely used. */
@@ -101,7 +101,7 @@ static int _rl_vi_last_key_before_insert;
 static int vi_redoing;
 
 /* Text modification commands.  These are the `redoable' commands. */
-static const char *vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
+static const char * const vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
 
 /* Arrays for the saved marks. */
 static int vi_mark_chars['z' - 'a' + 1];
@@ -1033,12 +1033,14 @@ int
 rl_vi_delete_to (count, key)
      int count, key;
 {
-  int c;
+  int c, start_pos;
 
   if (_rl_uppercase_p (key))
     rl_stuff_char ('$');
   else if (vi_redoing)
     rl_stuff_char (_rl_vi_last_motion);
+
+  start_pos = rl_point;
 
   if (rl_vi_domove (key, &c))
     {
@@ -1048,7 +1050,8 @@ rl_vi_delete_to (count, key)
 
   /* These are the motion commands that do not require adjusting the
      mark. */
-  if ((strchr (" l|h^0bB", c) == 0) && (rl_mark < rl_end))
+  if (((strchr (" l|h^0bBFT`", c) == 0) && (rl_point >= start_pos)) &&
+      (rl_mark < rl_end))
     rl_mark++;
 
   rl_kill_text (rl_point, rl_mark);
@@ -1077,7 +1080,8 @@ rl_vi_change_to (count, key)
   /* These are the motion commands that do not require adjusting the
      mark.  c[wW] are handled by special-case code in rl_vi_domove(),
      and already leave the mark at the correct location. */
-  if ((strchr (" l|hwW^0bB", c) == 0) && (rl_mark < rl_end))
+  if (((strchr (" l|hwW^0bBFT`", c) == 0) && (rl_point >= start_pos)) &&
+      (rl_mark < rl_end))
     rl_mark++;
 
   /* The cursor never moves with c[wW]. */
@@ -1112,11 +1116,12 @@ int
 rl_vi_yank_to (count, key)
      int count, key;
 {
-  int c, save;
+  int c, start_pos;
 
-  save = rl_point;
   if (_rl_uppercase_p (key))
     rl_stuff_char ('$');
+
+  start_pos = rl_point;
 
   if (rl_vi_domove (key, &c))
     {
@@ -1126,14 +1131,15 @@ rl_vi_yank_to (count, key)
 
   /* These are the motion commands that do not require adjusting the
      mark. */
-  if ((strchr (" l|h^0%bB", c) == 0) && (rl_mark < rl_end))
+  if (((strchr (" l|h^0%bBFT`", c) == 0) && (rl_point >= start_pos)) &&
+      (rl_mark < rl_end))
     rl_mark++;
 
   rl_begin_undo_group ();
   rl_kill_text (rl_point, rl_mark);
   rl_end_undo_group ();
   rl_do_undo ();
-  rl_point = save;
+  rl_point = start_pos;
 
   return (0);
 }

@@ -96,8 +96,9 @@ extern int errno;
 #endif
 
 extern int posixly_correct;
-extern int breaking, continuing, loop_level;
 extern int expand_aliases;
+extern int autocd;
+extern int breaking, continuing, loop_level;
 extern int parse_and_execute_level, running_trap;
 extern int command_string_index, line_number;
 extern int dot_found_in_search;
@@ -907,7 +908,7 @@ extern int timeval_to_cpu __P((struct timeval *, struct timeval *, struct timeva
 #define POSIX_TIMEFORMAT "real %2R\nuser %2U\nsys %2S"
 #define BASH_TIMEFORMAT  "\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS"
 
-static int precs[] = { 0, 100, 10, 1 };
+static const int precs[] = { 0, 100, 10, 1 };
 
 /* Expand one `%'-prefixed escape sequence from a time format string. */
 static int
@@ -2496,7 +2497,7 @@ execute_arith_command (arith_command)
 
 #if defined (COND_COMMAND)
 
-static char *nullstr = "";
+static char * const nullstr = "";
 
 static int
 execute_cond_node (cond)
@@ -2743,6 +2744,17 @@ fix_assignment_words (words)
       }
 }
 
+/* Return 1 if the file found by searching $PATH for PATHNAME, defaulting
+   to PATHNAME, is a directory.  Used by the autocd code below. */
+static int
+is_dirname (pathname)
+     char *pathname;
+{
+  char *temp;
+  temp = search_for_command (pathname);
+  return (temp ? file_isdir (temp) : file_isdir (pathname));
+}
+
 /* The meaty part of all the executions.  We have to start hacking the
    real execution of commands here.  Fork a process, set things up,
    execute the command. */
@@ -2792,7 +2804,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 #endif
 
   first_word_quoted =
-    simple_command->words ? (simple_command->words->word->flags & W_QUOTED): 0;
+    simple_command->words ? (simple_command->words->word->flags & W_QUOTED) : 0;
 
   last_command_subst_pid = NO_PID;
   old_last_async_pid = last_asynchronous_pid;
@@ -2975,6 +2987,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     }
 #endif /* JOB_CONTROL */
 
+run_builtin:
   /* Remember the name of this command globally. */
   this_command_name = words->word->word;
 
@@ -3046,6 +3059,13 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
 	  goto return_result;
 	}
+    }
+
+  if (autocd && interactive && words->word && is_dirname (words->word->word))
+    {
+      words = make_word_list (make_word ("cd"), words);
+      xtrace_print_word_list (words, 0);
+      goto run_builtin;
     }
 
   if (command_line == 0)

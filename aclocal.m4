@@ -215,7 +215,7 @@ AC_CACHE_VAL(bash_cv_sys_siglist,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifndef SYS_SIGLIST_DECLARED
+#if !HAVE_DECL_SYS_SIGLIST
 extern char *sys_siglist[];
 #endif
 main()

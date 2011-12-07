@@ -562,7 +562,7 @@ fashion:
 
 In a non-interactive shell, or an interactive shell in which the
 @code{interactive_comments} option to the @code{shopt}
-builtin is enabled (@pxref{Bash Builtins}),
+builtin is enabled (@pxref{The Shopt Builtin}),
 a word beginning with @samp{#}
 causes that word and all remaining characters on that line to
 be ignored.  An interactive shell without the @code{interactive_comments}
@@ -848,7 +848,7 @@ The syntax of the @code{case} command is:
 @code{case} will selectively execute the @var{command-list} corresponding to
 the first @var{pattern} that matches @var{word}.
 If the shell option @code{nocasematch}
-(see the description of @code{shopt} in @ref{Bash Builtins})
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The @samp{|} is used to separate multiple patterns, and the @samp{)}
@@ -960,7 +960,7 @@ When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching}.
 If the shell option @code{nocasematch}
-(see the description of @code{shopt} in @ref{Bash Builtins})
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (@samp{==}) or does not
@@ -977,7 +977,7 @@ the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
 If the shell option @code{nocasematch}
-(see the description of @code{shopt} in @ref{Bash Builtins})
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Substrings matched by parenthesized subexpressions within the regular
@@ -1785,13 +1785,15 @@ The shell scans the results of parameter expansion, command substitution,
 and arithmetic expansion that did not occur within double quotes for
 word splitting.
 
-The shell treats each character of @env{$IFS}
-as a delimiter, and splits the results of the other
-expansions into words on these characters.  If
-@env{IFS} is unset, or its value is exactly @code{<space><tab><newline>},
-the default, then any sequence of @env{IFS}
-characters serves to delimit words.  If @env{IFS}
-has a value other than the default, then sequences of
+The shell treats each character of @env{$IFS} as a delimiter, and splits
+the results of the other expansions into words on these characters.
+If @env{IFS} is unset, or its value is exactly @code{<space><tab><newline>},
+the default, then sequences of
+@code{ <space>}, @code{<tab>}, and @code{<newline>}
+at the beginning and end of the results of the previous
+expansions are ignored, and any sequence of @env{IFS}
+characters not at the beginning or end serves to delimit words.
+If @env{IFS} has a value other than the default, then sequences of
 the whitespace characters @code{space} and @code{tab}
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
@@ -1844,7 +1846,7 @@ When matching a file name, the slash character must always be
 matched explicitly.
 In other cases, the @samp{.} character is not treated specially.
 
-See the description of @code{shopt} in @ref{Bash Builtins},
+See the description of @code{shopt} in @ref{The Shopt Builtin},
 for a description of the @code{nocaseglob}, @code{nullglob},
 @code{failglob}, and @code{dotglob} options.
 
@@ -2355,7 +2357,7 @@ options enabled at invocation (either by default or with command-line
 arguments) or by @code{set}
 
 @item
-options enabled by @code{shopt}
+options enabled by @code{shopt} (@pxref{The Shopt Builtin})
 
 @item
 shell aliases defined with @code{alias} (@pxref{Aliases})
@@ -2512,7 +2514,7 @@ builtin (@pxref{Job Control Builtins}) or marked
 to not receive @code{SIGHUP} using @code{disown -h}.
 
 If the  @code{huponexit} shell option has been set with @code{shopt}
-(@pxref{Bash Builtins}), Bash sends a @code{SIGHUP} to all jobs when
+(@pxref{The Shopt Builtin}), Bash sends a @code{SIGHUP} to all jobs when
 an interactive login shell exits.
 
 If Bash is waiting for a command to complete and receives a signal
@@ -2592,8 +2594,8 @@ under another shell.
 * Bourne Shell Builtins::	Builtin commands inherited from the Bourne
 				Shell.
 * Bash Builtins::		Table of builtins specific to Bash.
-* The Set Builtin::		Change the values of shell attributes and
-				positional parameters.
+* Modifying Shell Behavior::	Builtins to modify shell attributes and
+				optional behavior.
 * Special Builtins::		Builtin commands classified specially by
 				POSIX.
 @end menu
@@ -2896,8 +2898,9 @@ shift [@var{n}]
 @end example
 Shift the positional parameters to the left by @var{n}.
 The positional parameters from @var{n}+1 @dots{} @code{$#} are
-renamed to @code{$1} @dots{} @code{$#}-@var{n}+1.
-Parameters represented by the numbers @code{$#} to @var{n}+1 are unset.
+renamed to @code{$1} @dots{} @code{$#}-@var{n}.
+Parameters represented by the numbers @code{$#} to @code{$#}-@var{n}+1
+are unset.
 @var{n} must be a non-negative number less than or equal to @code{$#}.
 If @var{n} is zero or greater than @code{$#}, the positional parameters
 are not changed.
@@ -3018,7 +3021,7 @@ before every simple command, @code{for} command, @code{case} command,
 @code{select} command, every arithmetic @code{for} command, and before
 the first command executes in a shell function.
 Refer to the description of the @code{extglob} option to the
-@code{shopt} builtin (@pxref{Bash Builtins}) for details of its
+@code{shopt} builtin (@pxref{The Shopt Builtin}) for details of its
 effect on the @code{DEBUG} trap.
 If a @var{sigspec} is @code{ERR}, the command @var{arg} 
 is executed whenever a simple command has a non-zero exit status,
@@ -3254,7 +3257,7 @@ When @option{-p} is used, additional options are ignored.
 The @option{-F} option inhibits the display of function definitions;
 only the function name and attributes are printed.
 If the @code{extdebug} shell option is enabled using @code{shopt}
-(@pxref{Bash Builtins}), the source file name and line number where
+(@pxref{The Shopt Builtin}), the source file name and line number where
 the function is defined are displayed as well.
 @option{-F} implies @option{-f}.
 The following options can be used to restrict output to variables with
@@ -3528,262 +3531,6 @@ Read input from file descriptor @var{fd}.
 
 @end table
 
-@item shopt
-@btindex shopt
-@example
-shopt [-pqsu] [-o] [@var{optname} @dots{}]
-@end example
-Toggle the values of variables controlling optional shell behavior.
-With no options, or with the @option{-p} option, a list of all settable
-options is displayed, with an indication of whether or not each is set.
-The @option{-p} option causes output to be displayed in a form that
-may be reused as input.
-Other options have the following meanings:
-
-@table @code
-@item -s
-Enable (set) each @var{optname}.
-
-@item -u
-Disable (unset) each @var{optname}.
-
-@item -q
-Suppresses normal output; the return status
-indicates whether the @var{optname} is set or unset.
-If multiple @var{optname} arguments are given with @option{-q},
-the return status is zero if all @var{optnames} are enabled;
-non-zero otherwise.
-
-@item -o
-Restricts the values of
-@var{optname} to be those defined for the @option{-o} option to the
-@code{set} builtin (@pxref{The Set Builtin}).
-@end table
-
-If either @option{-s} or @option{-u}
-is used with no @var{optname} arguments, the display is limited to
-those options which are set or unset, respectively.
-
-Unless otherwise noted, the @code{shopt} options are disabled (off)
-by default.
-
-The return status when listing options is zero if all @var{optnames}
-are enabled, non-zero otherwise.  When setting or unsetting options,
-the return status is zero unless an @var{optname} is not a valid shell
-option.
-
-The list of @code{shopt} options is:
-@table @code
-@item cdable_vars
-If this is set, an argument to the @code{cd}
-builtin command that
-is not a directory is assumed to be the name of a variable whose
-value is the directory to change to.
-
-@item cdspell
-If set, minor errors in the spelling of a directory component in a
-@code{cd} command will be corrected.
-The errors checked for are transposed characters,
-a missing character, and a character too many.
-If a correction is found, the corrected path is printed,
-and the command proceeds.
-This option is only used by interactive shells.
-
-@item checkhash
-If this is set, Bash checks that a command found in the hash
-table exists before trying to execute it.  If a hashed command no
-longer exists, a normal path search is performed.
-
-@item checkwinsize
-If set, Bash checks the window size after each command
-and, if necessary, updates the values of    
-@env{LINES} and @env{COLUMNS}.
-
-@item cmdhist
-If set, Bash
-attempts to save all lines of a multiple-line
-command in the same history entry.  This allows
-easy re-editing of multi-line commands.
-
-@item dotglob
-If set, Bash includes filenames beginning with a `.' in
-the results of filename expansion.
-
-@item execfail
-If this is set, a non-interactive shell will not exit if
-it cannot execute the file specified as an argument to the @code{exec}
-builtin command.  An interactive shell does not exit if @code{exec}
-fails.
-
-@item expand_aliases
-If set, aliases are expanded as described below under Aliases,
-@ref{Aliases}.
-This option is enabled by default for interactive shells.
-
-@item extdebug
-If set, behavior intended for use by debuggers is enabled:
-
-@enumerate
-@item
-The @option{-F} option to the @code{declare} builtin (@pxref{Bash Builtins})
-displays the source file name and line number corresponding to each function
-name supplied as an argument.
-
-@item
-If the command run by the @code{DEBUG} trap returns a non-zero value, the
-next command is skipped and not executed.
-
-@item
-If the command run by the @code{DEBUG} trap returns a value of 2, and the
-shell is executing in a subroutine (a shell function or a shell script
-executed by the @code{.} or @code{source} builtins), a call to
-@code{return} is simulated.
-
-@item
-@code{BASH_ARGC} and @code{BASH_ARGV} are updated as described in their
-descriptions (@pxref{Bash Variables}).
-
-@item
-Function tracing is enabled:  command substitution, shell functions, and
-subshells invoked with @code{( @var{command} )} inherit the
-@code{DEBUG} and @code{RETURN} traps.
-
-@item
-Error tracing is enabled:  command substitution, shell functions, and
-subshells invoked with @code{( @var{command} )} inherit the
-@code{ERROR} trap.
-@end enumerate
-
-@item extglob
-If set, the extended pattern matching features described above
-(@pxref{Pattern Matching}) are enabled.
-
-@item extquote
-If set, @code{$'@var{string}'} and @code{$"@var{string}"} quoting is  
-performed within @code{$@{@var{parameter}@}} expansions                     
-enclosed in double quotes.  This option is enabled by default. 
-
-@item failglob
-If set, patterns which fail to match filenames during pathname expansion
-result in an expansion error.
-
-@item force_fignore
-If set, the suffixes specified by the @env{FIGNORE} shell variable
-cause words to be ignored when performing word completion even if
-the ignored words are the only possible completions.
-@xref{Bash Variables}, for a description of @env{FIGNORE}.
-This option is enabled by default.
-
-@item gnu_errfmt
-If set, shell error messages are written in the standard @sc{gnu} error
-message format.
-
-@item histappend
-If set, the history list is appended to the file named by the value
-of the @env{HISTFILE}
-variable when the shell exits, rather than overwriting the file.
-
-@item histreedit
-If set, and Readline
-is being used, a user is given the opportunity to re-edit a
-failed history substitution.
-
-@item histverify
-If set, and Readline
-is being used, the results of history substitution are not immediately
-passed to the shell parser.  Instead, the resulting line is loaded into
-the Readline editing buffer, allowing further modification.
-
-@item hostcomplete
-If set, and Readline is being used, Bash will attempt to perform
-hostname completion when a word containing a @samp{@@} is being
-completed (@pxref{Commands For Completion}).  This option is enabled
-by default.
-
-@item huponexit
-If set, Bash will send @code{SIGHUP} to all jobs when an interactive
-login shell exits (@pxref{Signals}).
-
-@item interactive_comments
-Allow a word beginning with @samp{#}
-to cause that word and all remaining characters on that
-line to be ignored in an interactive shell.
-This option is enabled by default.
-
-@item lithist
-If enabled, and the @code{cmdhist}
-option is enabled, multi-line commands are saved to the history with
-embedded newlines rather than using semicolon separators where possible.
-
-@item login_shell
-The shell sets this option if it is started as a login shell
-(@pxref{Invoking Bash}).
-The value may not be changed.
-
-@item mailwarn
-If set, and a file that Bash is checking for mail has been  
-accessed since the last time it was checked, the message
-@code{"The mail in @var{mailfile} has been read"} is displayed.
-
-@item no_empty_cmd_completion
-If set, and Readline is being used, Bash will not attempt to search
-the @env{PATH} for possible completions when completion is attempted
-on an empty line.
-
-@item nocaseglob
-If set, Bash matches filenames in a case-insensitive fashion when
-performing filename expansion.
-
-@item nocasematch
-If set, Bash matches patterns in a case-insensitive fashion when
-performing matching while executing @code{case} or @code{[[}
-conditional commands.
-
-@item nullglob
-If set, Bash allows filename patterns which match no
-files to expand to a null string, rather than themselves.
-
-@item progcomp
-If set, the programmable completion facilities
-(@pxref{Programmable Completion}) are enabled.
-This option is enabled by default.
-
-@item promptvars
-If set, prompt strings undergo
-parameter expansion, command substitution, arithmetic
-expansion, and quote removal after being expanded
-as described below (@pxref{Printing a Prompt}).
-This option is enabled by default.
-
-@item restricted_shell
-The shell sets this option if it is started in restricted mode
-(@pxref{The Restricted Shell}).
-The value may not be changed.
-This is not reset when the startup files are executed, allowing
-the startup files to discover whether or not a shell is restricted.
-
-@item shift_verbose
-If this is set, the @code{shift}
-builtin prints an error message when the shift count exceeds the
-number of positional parameters.
-
-@item sourcepath
-If set, the @code{source} builtin uses the value of @env{PATH}
-to find the directory containing the file supplied as an argument.
-This option is enabled by default.
-
-@item xpg_echo
-If set, the @code{echo} builtin expands backslash-escape sequences
-by default.
-
-@end table
-
-@noindent
-The return status when listing options is zero if all @var{optnames}
-are enabled, non-zero otherwise.
-When setting or unsetting options, the return status is zero unless an
-@var{optname} is not a valid shell option.
-
 @item source
 @btindex source
 @example
@@ -3933,16 +3680,28 @@ Aliases are described in @ref{Aliases}.
 
 @end table
 
-@node The Set Builtin
-@section The Set Builtin
+@node Modifying Shell Behavior
+@section Modifying Shell Behavior
+ 
+@menu
+* The Set Builtin::		Change the values of shell attributes and
+				positional parameters.
+* The Shopt Builtin::		Modify shell optional behavior.
+@end menu
 
-This builtin is so complicated that it deserves its own section.
+@node The Set Builtin
+@subsection The Set Builtin
+
+This builtin is so complicated that it deserves its own section.  @code{set}
+allows you to change the values of shell options and set the positional
+parameters, or to display the names and values of shell variables.
 
 @table @code
 @item set
 @btindex set
 @example
 set [--abefhkmnptuvxBCEHPT] [-o @var{option}] [@var{argument} @dots{}]
+set [+abefhkmnptuvxBCEHPT] [+o @var{option}] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -4191,6 +3950,283 @@ The special parameter @code{#} is set to N.
 The return status is always zero unless an invalid option is supplied.
 @end table
 
+@node The Shopt Builtin
+@subsection The Shopt Builtin
+
+This builtin allows you to change additional shell optional behavior.
+
+@table @code
+
+@item shopt
+@btindex shopt
+@example
+shopt [-pqsu] [-o] [@var{optname} @dots{}]
+@end example
+Toggle the values of variables controlling optional shell behavior.
+With no options, or with the @option{-p} option, a list of all settable
+options is displayed, with an indication of whether or not each is set.
+The @option{-p} option causes output to be displayed in a form that
+may be reused as input.
+Other options have the following meanings:
+
+@table @code
+@item -s
+Enable (set) each @var{optname}.
+
+@item -u
+Disable (unset) each @var{optname}.
+
+@item -q
+Suppresses normal output; the return status
+indicates whether the @var{optname} is set or unset.
+If multiple @var{optname} arguments are given with @option{-q},
+the return status is zero if all @var{optnames} are enabled;
+non-zero otherwise.
+
+@item -o
+Restricts the values of
+@var{optname} to be those defined for the @option{-o} option to the
+@code{set} builtin (@pxref{The Set Builtin}).
+@end table
+
+If either @option{-s} or @option{-u}
+is used with no @var{optname} arguments, the display is limited to
+those options which are set or unset, respectively.
+
+Unless otherwise noted, the @code{shopt} options are disabled (off)
+by default.
+
+The return status when listing options is zero if all @var{optnames}
+are enabled, non-zero otherwise.  When setting or unsetting options,
+the return status is zero unless an @var{optname} is not a valid shell
+option.
+
+The list of @code{shopt} options is:
+@table @code
+
+@item autocd
+If set, a command name that is the name of a directory is executed as if
+it were the argument to the @code{cd} command.
+This option is only used by interactive shells.
+
+@item cdable_vars
+If this is set, an argument to the @code{cd} builtin command that
+is not a directory is assumed to be the name of a variable whose
+value is the directory to change to.
+
+@item cdspell
+If set, minor errors in the spelling of a directory component in a
+@code{cd} command will be corrected.
+The errors checked for are transposed characters,
+a missing character, and a character too many.
+If a correction is found, the corrected path is printed,
+and the command proceeds.
+This option is only used by interactive shells.
+
+@item checkhash
+If this is set, Bash checks that a command found in the hash
+table exists before trying to execute it.  If a hashed command no
+longer exists, a normal path search is performed.
+
+@item checkjobs
+If set, Bash lists the status of any stopped and running jobs before
+exiting an interactive shell.  If any jobs are running, this causes
+the exit to be deferred until a second exit is attempted without an
+intervening command (@pxref{Job Control}).
+The shell always postpones exiting if any jobs are stopped.
+
+@item checkwinsize
+If set, Bash checks the window size after each command
+and, if necessary, updates the values of    
+@env{LINES} and @env{COLUMNS}.
+
+@item cmdhist
+If set, Bash
+attempts to save all lines of a multiple-line
+command in the same history entry.  This allows
+easy re-editing of multi-line commands.
+
+@item dotglob
+If set, Bash includes filenames beginning with a `.' in
+the results of filename expansion.
+
+@item execfail
+If this is set, a non-interactive shell will not exit if
+it cannot execute the file specified as an argument to the @code{exec}
+builtin command.  An interactive shell does not exit if @code{exec}
+fails.
+
+@item expand_aliases
+If set, aliases are expanded as described below under Aliases,
+@ref{Aliases}.
+This option is enabled by default for interactive shells.
+
+@item extdebug
+If set, behavior intended for use by debuggers is enabled:
+
+@enumerate
+@item
+The @option{-F} option to the @code{declare} builtin (@pxref{Bash Builtins})
+displays the source file name and line number corresponding to each function
+name supplied as an argument.
+
+@item
+If the command run by the @code{DEBUG} trap returns a non-zero value, the
+next command is skipped and not executed.
+
+@item
+If the command run by the @code{DEBUG} trap returns a value of 2, and the
+shell is executing in a subroutine (a shell function or a shell script
+executed by the @code{.} or @code{source} builtins), a call to
+@code{return} is simulated.
+
+@item
+@code{BASH_ARGC} and @code{BASH_ARGV} are updated as described in their
+descriptions (@pxref{Bash Variables}).
+
+@item
+Function tracing is enabled:  command substitution, shell functions, and
+subshells invoked with @code{( @var{command} )} inherit the
+@code{DEBUG} and @code{RETURN} traps.
+
+@item
+Error tracing is enabled:  command substitution, shell functions, and
+subshells invoked with @code{( @var{command} )} inherit the
+@code{ERROR} trap.
+@end enumerate
+
+@item extglob
+If set, the extended pattern matching features described above
+(@pxref{Pattern Matching}) are enabled.
+
+@item extquote
+If set, @code{$'@var{string}'} and @code{$"@var{string}"} quoting is  
+performed within @code{$@{@var{parameter}@}} expansions                     
+enclosed in double quotes.  This option is enabled by default. 
+
+@item failglob
+If set, patterns which fail to match filenames during pathname expansion
+result in an expansion error.
+
+@item force_fignore
+If set, the suffixes specified by the @env{FIGNORE} shell variable
+cause words to be ignored when performing word completion even if
+the ignored words are the only possible completions.
+@xref{Bash Variables}, for a description of @env{FIGNORE}.
+This option is enabled by default.
+
+@item gnu_errfmt
+If set, shell error messages are written in the standard @sc{gnu} error
+message format.
+
+@item histappend
+If set, the history list is appended to the file named by the value
+of the @env{HISTFILE}
+variable when the shell exits, rather than overwriting the file.
+
+@item histreedit
+If set, and Readline
+is being used, a user is given the opportunity to re-edit a
+failed history substitution.
+
+@item histverify
+If set, and Readline
+is being used, the results of history substitution are not immediately
+passed to the shell parser.  Instead, the resulting line is loaded into
+the Readline editing buffer, allowing further modification.
+
+@item hostcomplete
+If set, and Readline is being used, Bash will attempt to perform
+hostname completion when a word containing a @samp{@@} is being
+completed (@pxref{Commands For Completion}).  This option is enabled
+by default.
+
+@item huponexit
+If set, Bash will send @code{SIGHUP} to all jobs when an interactive
+login shell exits (@pxref{Signals}).
+
+@item interactive_comments
+Allow a word beginning with @samp{#}
+to cause that word and all remaining characters on that
+line to be ignored in an interactive shell.
+This option is enabled by default.
+
+@item lithist
+If enabled, and the @code{cmdhist}
+option is enabled, multi-line commands are saved to the history with
+embedded newlines rather than using semicolon separators where possible.
+
+@item login_shell
+The shell sets this option if it is started as a login shell
+(@pxref{Invoking Bash}).
+The value may not be changed.
+
+@item mailwarn
+If set, and a file that Bash is checking for mail has been  
+accessed since the last time it was checked, the message
+@code{"The mail in @var{mailfile} has been read"} is displayed.
+
+@item no_empty_cmd_completion
+If set, and Readline is being used, Bash will not attempt to search
+the @env{PATH} for possible completions when completion is attempted
+on an empty line.
+
+@item nocaseglob
+If set, Bash matches filenames in a case-insensitive fashion when
+performing filename expansion.
+
+@item nocasematch
+If set, Bash matches patterns in a case-insensitive fashion when
+performing matching while executing @code{case} or @code{[[}
+conditional commands.
+
+@item nullglob
+If set, Bash allows filename patterns which match no
+files to expand to a null string, rather than themselves.
+
+@item progcomp
+If set, the programmable completion facilities
+(@pxref{Programmable Completion}) are enabled.
+This option is enabled by default.
+
+@item promptvars
+If set, prompt strings undergo
+parameter expansion, command substitution, arithmetic
+expansion, and quote removal after being expanded
+as described below (@pxref{Printing a Prompt}).
+This option is enabled by default.
+
+@item restricted_shell
+The shell sets this option if it is started in restricted mode
+(@pxref{The Restricted Shell}).
+The value may not be changed.
+This is not reset when the startup files are executed, allowing
+the startup files to discover whether or not a shell is restricted.
+
+@item shift_verbose
+If this is set, the @code{shift}
+builtin prints an error message when the shift count exceeds the
+number of positional parameters.
+
+@item sourcepath
+If set, the @code{source} builtin uses the value of @env{PATH}
+to find the directory containing the file supplied as an argument.
+This option is enabled by default.
+
+@item xpg_echo
+If set, the @code{echo} builtin expands backslash-escape sequences
+by default.
+
+@end table
+
+@noindent
+The return status when listing options is zero if all @var{optnames}
+are enabled, non-zero otherwise.
+When setting or unsetting options, the return status is zero unless an
+@var{optname} is not a valid shell option.
+
+@end table
+
 @node Special Builtins
 @section Special Builtins
 @cindex special builtin
@@ -4310,6 +4346,11 @@ variables for controlling the job control facilities
 @item BASH
 The full pathname used to execute the current instance of Bash.
 
+@item BASHPID
+Expands to the process id of the current Bash process.
+This differs from @code{$$} under certain circumstances, such as subshells
+that do not require Bash to be re-initialized.
+
 @item BASH_ARGC
 An array variable whose values are the number of parameters in each
 frame of the current bash execution call stack.  The number of
@@ -4318,7 +4359,7 @@ with @code{.} or @code{source}) is at the top of the stack.  When a
 subroutine is executed, the number of parameters passed is pushed onto
 @code{BASH_ARGC}.
 The shell sets @code{BASH_ARGC} only when in extended debugging mode
-(see @ref{Bash Builtins}  
+(see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
 
@@ -4329,7 +4370,7 @@ is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
 are pushed onto @code{BASH_ARGV}.
 The shell sets @code{BASH_ARGV} only when in extended debugging mode
-(see @ref{Bash Builtins}  
+(see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
 
@@ -4427,6 +4468,23 @@ the value of this variable is equal to @code{$@{#COMP_LINE@}}.
 This variable is available only in shell functions and external
 commands invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
+
+@item COMP_TYPE
+Set to an integer value corresponding to the type of completion attempted
+that caused a completion function to be called:
+@var{TAB}, for normal completion,
+@samp{?}, for listing completions after successive tabs,
+@samp{!}, for listing alternatives on partial word completion,
+@samp{@@}, to list completions if the word is not unmodified,
+or
+@samp{%}, for menu completion.
+This variable is available only in shell functions and external
+commands invoked by the
+programmable completion facilities (@pxref{Programmable Completion}).
+
+@item COMP_KEY
+The key (or final key of a key sequence) used to invoke the current
+completion function.
 
 @item COMP_WORDBREAKS
 The set of characters that the Readline library treats as word
@@ -4858,7 +4916,7 @@ line before the single-character options to be recognized.
 @table @code
 @item --debugger
 Arrange for the debugger profile to be executed before the shell
-starts.  Turns on extended debugging mode (see @ref{Bash Builtins}
+starts.  Turns on extended debugging mode (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin) and shell function tracing
 (see @ref{The Set Builtin} for a description of the @code{-o functrace}
@@ -4961,7 +5019,7 @@ This implies the @option{-n} option; no commands will be executed.
 
 @item [-+]O [@var{shopt_option}]
 @var{shopt_option} is one of the shell options accepted by the
-@code{shopt} builtin (@pxref{Shell Builtin Commands}).
+@code{shopt} builtin (@pxref{The Shopt Builtin}).
 If @var{shopt_option} is present, @option{-O} sets the value of that option;
 @option{+O} unsets it.  
 If @var{shopt_option} is not supplied, the names and values of the shell
@@ -5260,7 +5318,7 @@ Parser syntax errors will not cause the shell to exit.
 @item
 Simple spelling correction for directory arguments to the @code{cd}
 builtin is enabled by default (see the description of the @code{cdspell}
-option to the @code{shopt} builtin in @ref{Bash Builtins}).
+option to the @code{shopt} builtin in @ref{The Shopt Builtin}).
 
 @item
 The shell will check the value of the @env{TMOUT} variable and exit
@@ -5544,7 +5602,7 @@ If arguments are needed, a shell function should be used
 
 Aliases are not expanded when the shell is not interactive,
 unless the @code{expand_aliases} shell option is set using
-@code{shopt} (@pxref{Bash Builtins}).
+@code{shopt} (@pxref{The Shopt Builtin}).
 
 The rules concerning the definition and use of aliases are
 somewhat confusing.  Bash
@@ -6246,11 +6304,13 @@ Bash reports such changes immediately (@pxref{The Set Builtin}).
 Any trap on @code{SIGCHLD} is executed for each child process
 that exits.
 
-If an attempt to exit Bash is made while jobs are stopped, the
-shell prints a message warning that there are stopped jobs.
+If an attempt to exit Bash is made while jobs are stopped, (or running, if
+the @code{checkjobs} option is enabled -- see @ref{The Shopt Builtin}), the
+shell prints a warning message, and if the @code{checkjobs} option is
+enabled, lists the jobs and their statuses.
 The @code{jobs} command may then be used to inspect their status.
 If a second attempt to exit is made without an intervening command,
-Bash does not print another warning, and the stopped jobs are terminated.
+Bash does not print another warning, and any stopped jobs are terminated.
 
 @node Job Control Builtins
 @section Job Control Builtins
@@ -7233,7 +7293,7 @@ executed with the @code{.} or @code{source} builtins
 
 @item
 Bash includes the @code{shopt} builtin, for finer control of shell
-optional capabilities (@pxref{Bash Builtins}), and allows these options
+optional capabilities (@pxref{The Shopt Builtin}), and allows these options
 to be set and unset at shell invocation (@pxref{Invoking Bash}).
 
 @item

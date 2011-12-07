@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -139,6 +139,12 @@ int interactive_shell = 0;
    shell exits. */
 int hup_on_exit = 0;
 
+/* Non-zero means to list status of running and stopped jobs at shell exit */
+int check_jobs_at_exit = 0;
+
+/* Non-zero means to change to a directory name supplied as a command name */
+int autocd = 1;
+
 /* Tells what state the shell was in when it started:
 	0 = non-interactive shell script
 	1 = interactive
@@ -171,6 +177,9 @@ time_t shell_start_time;
 
 /* Are we running in an emacs shell window? */
 int running_under_emacs;
+
+/* Do we have /dev/fd? */
+int have_devfd = HAVE_DEV_FD;
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -1731,7 +1740,7 @@ show_shell_usage (fp, extra)
   char *set_opts, *s, *t;
 
   if (extra)
-    fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
+    fprintf (fp, _("GNU bash, version %s-(%s)\n"), shell_version_string (), MACHTYPE);
   fprintf (fp, _("Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n"),
 	     shell_name, shell_name);
   fputs (_("GNU long options:\n"), fp);

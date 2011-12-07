@@ -20,9 +20,11 @@
 
 #include "stdc.h"
 
-#define GX_MARKDIRS	0x01	/* mark directory names with trailing `/' */
-#define GX_NOCASE	0x02	/* ignore case */
-#define GX_MATCHDOT	0x04	/* match `.' literally */
+#define GX_MARKDIRS	0x001	/* mark directory names with trailing `/' */
+#define GX_NOCASE	0x002	/* ignore case */
+#define GX_MATCHDOT	0x004	/* match `.' literally */
+#define GX_ALLDIRS	0x008	/* match all directories */
+#define GX_MATCHDIRS	0x010	/* return only matching directory names */
 
 extern int glob_pattern_p __P((const char *));
 extern char **glob_vector __P((char *, char *, int));

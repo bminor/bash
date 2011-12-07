@@ -231,7 +231,7 @@ static int maxbuck;	/* highest bucket receiving allocation request. */
 
 static char *memtop;	/* top of heap */
 
-static unsigned long binsizes[NBUCKETS] = {
+static const unsigned long binsizes[NBUCKETS] = {
 	8UL, 16UL, 32UL, 64UL, 128UL, 256UL, 512UL, 1024UL, 2048UL, 4096UL,
 	8192UL, 16384UL, 32768UL, 65536UL, 131072UL, 262144UL, 524288UL,
 	1048576UL, 2097152UL, 4194304UL, 8388608UL, 16777216UL, 33554432UL,

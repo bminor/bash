@@ -170,7 +170,7 @@ int pipefail_opt = 0;
 /*								    */
 /* **************************************************************** */
 
-struct flags_alist shell_flags[] = {
+const struct flags_alist shell_flags[] = {
   /* Standard sh flags. */
   { 'a', &mark_modified_vars },
 #if defined (JOB_CONTROL)

@@ -55,7 +55,7 @@
  */
 
 /* The character which is used to separate arguments. */
-int brace_arg_separator = ',';
+static const int brace_arg_separator = ',';
 
 #if defined (__P)
 static int brace_gobbler __P((char *, size_t, int *, int));

@@ -1,5 +1,5 @@
 /* error.c -- Functions for handling errors. */
-/* Copyright (C) 1993-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,7 +85,7 @@ error_prolog (print_lineno)
   line = (print_lineno && interactive_shell == 0) ? executing_line_number () : -1;
 
   if (line > 0)
-    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", line);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : _(" line "), line);
   else
     fprintf (stderr, "%s: ", ename);
 }
@@ -315,11 +315,11 @@ parser_error (lineno, format, va_alist)
   if (interactive)
     fprintf (stderr, "%s: ", ename);
   else if (interactive_shell)
-    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : _(" line "), lineno);
   else if (STREQ (ename, iname))
-    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : _(" line "), lineno);
   else
-    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : _(" line "), lineno);
 
   SH_VA_START (args, format);
 

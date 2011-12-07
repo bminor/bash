@@ -361,13 +361,13 @@ rl_resize_terminal ()
 }
 
 struct _tc_string {
-     const char *tc_var;
+     const char * const tc_var;
      char **tc_value;
 };
 
 /* This should be kept sorted, just in case we decide to change the
    search algorithm to something smarter. */
-static struct _tc_string tc_strings[] =
+static const struct _tc_string tc_strings[] =
 {
   { "@7", &_rl_term_at7 },
   { "DC", &_rl_term_DC },

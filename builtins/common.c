@@ -69,7 +69,7 @@ extern int last_command_exit_value;
 extern int running_trap;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
-extern char *bash_getcwd_errstr;
+extern const char * const bash_getcwd_errstr;
 
 /* Used by some builtins and the mainline code. */
 sh_builtin_func_t *last_shell_builtin = (sh_builtin_func_t *)NULL;
@@ -639,7 +639,7 @@ display_signal_list (list, forcecols)
 	    {
 	      printf ("%2d) %s", i, name);
 
-	      if (++column < 4)
+	      if (++column < 5)
 		printf ("\t");
 	      else
 		{

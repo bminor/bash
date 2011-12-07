@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -60,7 +60,7 @@ exit_builtin (list)
 {
   if (interactive)
     {
-      fprintf (stderr, login_shell ? "logout\n" : "exit\n");
+      fprintf (stderr, login_shell ? _("logout\n") : "exit\n");
       fflush (stderr);
     }
 
@@ -102,7 +102,7 @@ exit_or_logout (list)
 			 last_shell_builtin == jobs_builtin);
 
   /* Check for stopped jobs if the user wants to. */
-  if (!exit_immediate_okay)
+  if (exit_immediate_okay == 0)
     {
       register int i;
       for (i = 0; i < js.j_jobslots; i++)

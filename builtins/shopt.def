@@ -68,6 +68,8 @@ extern int glob_ignore_case, match_ignore_case;
 extern int hup_on_exit;
 extern int xpg_echo;
 extern int gnu_error_format;
+extern int check_jobs_at_exit;
+extern int autocd;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -114,9 +116,11 @@ static struct {
   int  *value;
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
+  { "autocd", &autocd, (shopt_set_func_t *)NULL },
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
   { "checkhash", &check_hashed_filenames, (shopt_set_func_t *)NULL },
+  { "checkjobs", &check_jobs_at_exit, (shopt_set_func_t *)NULL },
   { "checkwinsize", &check_window_size, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "cmdhist", &command_oriented_history, (shopt_set_func_t *)NULL },
@@ -170,8 +174,8 @@ static struct {
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
 
-static char *on = "on";
-static char *off = "off";
+static const char * const on = "on";
+static const char * const off = "off";
 
 static int find_shopt __P((char *));
 static int toggle_shopts __P((int, WORD_LIST *, int));

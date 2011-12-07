@@ -347,8 +347,8 @@ extern void _rl_vi_done_inserting PARAMS((void));
  *************************************************************************/
 
 /* bind.c */
-extern const char *_rl_possible_control_prefixes[];
-extern const char *_rl_possible_meta_prefixes[];
+extern const char * const _rl_possible_control_prefixes[];
+extern const char * const _rl_possible_meta_prefixes[];
 
 /* callback.c */
 extern _rl_callback_func_t *_rl_callback_func;

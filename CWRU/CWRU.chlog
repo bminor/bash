@@ -14048,3 +14048,129 @@ builtins/{common,evalfile}.c
 {error,expr,jobs,mksyntax,nojobs,shell,subst,version,siglist}.c
 	- add gettextizing marks to untranslated strings
 	  From Benno Schulenberg <bensberg@justemail.net>
+
+				   12/19
+				   -----
+builtins/common.c
+	- change display_signal_list (used by `trap -l' and `kill -l') to use
+	  five columns instead of 4 to display signal names
+
+builtins/help.def
+	- use the true terminal width instead of assuming 80 when displaying
+	  help topics, leaving two characters of whitespace between horizontal
+	  descriptions instead of 1
+	- change to print in columns with entries sorted down rather than across
+	  (that is, like `ls' rather than `ls -x').  Change inspired by Benno 
+	  Schulenberg <bensberg@justemail.net>
+
+jobs.h
+	- give values to the JOB_STATE enumerations so they can be used as
+	  bitmasks, too
+
+				   12/22
+				   -----
+doc/{bash.1,bashref.texi}
+	- change description of `set' to make it clearer that you can use
+	  `+' to turn off options
+	- clarify in the description of word splitting that sequences of
+	  IFS whitespace at the beginning or end of the string are ignored
+
+				   12/26
+				   -----
+doc/bashref.texi
+	- move `shopt' builtin to its own section; change internal references
+	  from `Bash Builtins' to the new shopt builtin
+	- new section for builtins that modify shell behavior in `Shell
+	  Builtin Commands'; move set and shopt to new section.  Changes
+	  inspired by Benno Schulenberg <bensberg@justemail.net>
+
+{redir,subst}.c
+	- add MT_USETMPDIR flag to calls to sh_mktmpfd and sh_mktmpname.  Bug
+	  reported by Eric Blake <ebb9@byu.net>
+
+{configure,Makefile}.in
+	- changes so that the pathname for DEBUGGER_START_FILE is substituted
+	  into pathnames.h at make time (allowing more flexibility in setting
+	  `prefix' or `datadir') instead of at configure time.  Suggested by
+	  Nick Brown <nickbroon@blueyonder.co.uk>
+
+shell.c
+	- declaration for  have_devfd; initialized from HAVE_DEV_FD
+	- declaration for check_jobs_at_exit; initialized to 0
+	- declaration for autocd; initialized to 0
+
+variables.c
+	- new dynamic variable, BASHPID, always set from return value from
+	  getpid() (changes even when $$ doesn't change).  Idea from Bruce
+	  Korb <bruce.corb@3pardata.com>
+
+builtins/exit.def
+	- if check_jobs_at_exit is non-zero, list jobs if there are any stopped
+	  or running background jobs; don't exit shell if any running jobs
+
+execute_cmd.c
+	- in execute_simple_command, if the first word of a simple command is
+	  a directory name (after looking for builtins, so `.' isn't caught)
+	  that isn't found in $PATH, and `autocd' is non-zero, prefix a "cd"
+	  to the command words
+
+builtins/shopt.def
+	- new `checkjobs' option, changes value of check_jobs_at_exit
+	- new `autocd' option, changes value of autocd
+
+pcomplete.c
+	- add COMP_TYPE, set to rl_completion_type, to list of variables set
+	  by bind_compfunc_variables and unset by unbind_compfunc_variables
+
+doc/{bash.1,bashref.texi}
+	- document BASHPID
+	- document new shopt `checkjobs' option
+	- document new shopt `autocd' option
+	- document COMP_TYPE completion variable
+
+				   12/29
+				   -----
+aclocal.m4
+	- in BASH_SYS_SIGLIST, check HAVE_DECL_SYS_SIGLIST instead of the
+	  obsolete and no-longer-supported SYS_SIGLIST_DECLARED
+
+				   12/30
+				   -----
+lib/readline/vi_mode.c
+	- add ` (backquote) to the list of vi motion characters
+	- in rl_vi_delete_to, rl_vi_change_to, and rl_vi_yank_to, don't delete
+	  character under the cursor if the motion command moves the cursor
+	  backward, so add F and T to the commands that don't cause the
+	  mark to be adjusted
+	- add ` to the characters that don't cause the mark to be adjusted
+	  when used as a motion command, since it's defined to behave that way
+	- when a motion character that may adjust the mark moves point
+	  backward, don't adjust the mark so the character under the cursor
+	  isn't deleted
+
+lib/readline/complete.c
+	- add variable rl_sort_completion_matches; allows application to
+	  inhibit match list sorting
+	- add variable rl_completion_invoking_key; allows applications to
+	  discover the key that invoked rl_complete or rl_menu_complete
+
+lib/readline/readline.h
+	- extern declarations for rl_completion_invoking_key and
+	  rl_sort_completion_matches
+
+lib/readline/doc/rltech.texi
+	- documented rl_completion_invoking_key and rl_sort_completion_matches
+
+pcomplete.c
+	- export variable COMP_KEY to completion functions; initialized from
+	  rl_completion_invoking_key; unset along with rest of completion
+	  variables
+
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- document COMP_KEY
+
+[many files]
+	- changes to make variables and function parameters `const' for better
+	  text sharing.  Changes originally from Andreas Mohr
+	  <andi@rhlx01.fht-esslingen.de>
+

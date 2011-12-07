@@ -192,6 +192,8 @@ static SHELL_VAR *get_lineno __P((SHELL_VAR *));
 static SHELL_VAR *assign_subshell __P((SHELL_VAR *, char *, arrayind_t));
 static SHELL_VAR *get_subshell __P((SHELL_VAR *));
 
+static SHELL_VAR *get_bashpid __P((SHELL_VAR *));
+
 #if defined (HISTORY)
 static SHELL_VAR *get_histcmd __P((SHELL_VAR *));
 #endif
@@ -1272,6 +1274,22 @@ get_subshell (var)
 }
 
 static SHELL_VAR *
+get_bashpid (var)
+     SHELL_VAR *var;
+{
+  int pid;
+  char *p;
+
+  pid = getpid ();
+  p = itos (pid);
+
+  FREE (value_cell (var));
+  VSETATTR (var, att_integer|att_readonly);
+  var_setvalue (var, p);
+  return (var);
+}
+
+static SHELL_VAR *
 get_bash_command (var)
      SHELL_VAR *var;
 {
@@ -1451,6 +1469,9 @@ initialize_dynamic_variables ()
   VSETATTR (v, att_integer);
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
   VSETATTR (v, att_integer);
+
+  INIT_DYNAMIC_VAR ("BASHPID", (char *)NULL, get_bashpid, null_assign);
+  VSETATTR (v, att_integer|att_readonly);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);

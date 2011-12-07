@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -176,7 +176,8 @@ static void
 show_builtin_command_help ()
 {
   int i, j;
-  char blurb[36];
+  int height, width;
+  char *t, blurb[128];
 
   printf (
 _("These shell commands are defined internally.  Type `help' to see this list.\n\
@@ -187,21 +188,42 @@ Use `man -k' or `info' to find out more about commands not in this list.\n\
 A star (*) next to a name means that the command is disabled.\n\
 \n"));
 
-  for (i = 0; i < num_shell_builtins; i++)
+  t = get_string_value ("COLUMNS");
+  width = (t && *t) ? atoi (t) : 80;
+  if (width <= 0)
+    width = 80;
+
+  width /= 2;
+  if (width > sizeof (blurb))
+    width = sizeof (blurb);
+  height = (num_shell_builtins + 1) / 2;	/* number of rows */
+
+  for (i = 0; i < height; i++)
     {
       QUIT;
-      blurb[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
-      strncpy (blurb + 1, shell_builtins[i].short_doc, 34);
-      blurb[35] = '\0';
-      printf ("%s", blurb);
 
-      if (i % 2)
-	printf ("\n");
-      else
-	for (j = strlen (blurb); j < 35; j++)
-	  putc (' ', stdout);
+      /* first column */
+      blurb[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
+      strncpy (blurb + 1, shell_builtins[i].short_doc, width - 2);
+      blurb[width - 2] = '>';		/* indicate truncation */
+      blurb[width - 1] = '\0';
+      printf ("%s", blurb);
+      if ((i << 1) == num_shell_builtins)
+	{
+	  printf ("\n");
+	  break;
+	}
+
+      /* two spaces */
+      for (j = strlen (blurb); j < width; j++)
+        putc (' ', stdout);
+
+      /* second column */
+      blurb[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*';
+      strncpy (blurb + 1, shell_builtins[i+height].short_doc, width - 3);
+      blurb[width - 3] = '>';		/* indicate truncation */
+      blurb[width - 2] = '\0';
+      printf ("%s\n", blurb);
     }
-  if (i % 2)
-    printf ("\n");
 }
 #endif /* HELP_BUILTIN */

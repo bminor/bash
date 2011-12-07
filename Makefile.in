@@ -78,6 +78,8 @@ INSTALLMODE2 = -m 0555
 
 TESTSCRIPT = @TESTSCRIPT@
 
+DEBUGGER_START_FILE = @DEBUGGER_START_FILE@
+
 #If you have purify, and want to use it, uncomment this definition or
 # run the make as `make PURIFY=purify'
 # or run configure with the --with-purify argument.
@@ -670,9 +672,6 @@ ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 Makefile makefile:	config.status $(srcdir)/Makefile.in
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
-pathnames.h:		config.status $(srcdir)/Makefile.in
-	CONFIG_HEADERS= $(SHELL) ./config.status
-
 Makefiles makefiles:	config.status $(srcdir)/Makefile.in
 	@for mf in $(CREATED_MAKEFILES); do \
 		CONFIG_FILES=$$mf CONFIG_HEADERS= $(SHELL) ./config.status ; \
@@ -685,6 +684,15 @@ stamp-h:	config.status $(srcdir)/config.h.in $(srcdir)/config-top.h $(srcdir)/co
 
 config.status:	$(srcdir)/configure
 	$(SHELL) ./config.status --recheck
+
+pathnames.h:		Makefile $(srcdir)/pathnames.h.in
+	@sed -e 's|@DEBUGGER_START_FILE\@|${DEBUGGER_START_FILE}|g' $(srcdir)/pathnames.h.in > pathnames.tmp
+	@if test -f $@; then \
+		cmp -s pathnames.tmp $@ || mv pathnames.tmp $@; \
+	else \
+		mv pathnames.tmp $@; \
+	fi
+	@${RM} pathnames.tmp
 
 # comment out for distribution
 $(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/config.h.in

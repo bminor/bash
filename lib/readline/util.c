@@ -66,7 +66,7 @@
    in words, or 1 if it is. */
 
 int _rl_allow_pathname_alphabetic_chars = 0;
-static const char *pathname_alphabetic_chars = "/-_=~.#$";
+static const char * const pathname_alphabetic_chars = "/-_=~.#$";
 
 int
 rl_alphabetic (c)

@@ -139,6 +139,12 @@ int interactive_shell = 0;
    shell exits. */
 int hup_on_exit = 0;
 
+/* Non-zero means to list status of running and stopped jobs at shell exit */
+int check_jobs_at_exit = 0;
+
+/* Non-zero means to change to a directory name supplied as a command name */
+int autocd = 1;
+
 /* Tells what state the shell was in when it started:
 	0 = non-interactive shell script
 	1 = interactive
@@ -171,6 +177,9 @@ time_t shell_start_time;
 
 /* Are we running in an emacs shell window? */
 int running_under_emacs;
+
+/* Do we have /dev/fd? */
+int have_devfd = HAVE_DEV_FD;
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -212,8 +221,8 @@ int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
 #define Charp 2
-struct {
-  char *name;
+static const struct {
+  const char *name;
   int type;
   int *int_value;
   char **char_value;

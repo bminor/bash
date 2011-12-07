@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.2, version 3.192])dnl
+AC_REVISION([for Bash 3.2, version 3.193])dnl
 
 define(bashvers, 3.2)
 define(relstatus, maint)
@@ -149,7 +149,7 @@ if test "$opt_curses" = yes; then
 fi
 
 if test -z "${DEBUGGER_START_FILE}"; then
-	DEBUGGER_START_FILE=${ac_default_prefix}/share/bashdb/bashdb-main.inc
+	DEBUGGER_START_FILE='${datadir}/bashdb/bashdb-main.inc'
 fi
 
 dnl optional shell features in config.h.in
@@ -782,7 +782,7 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen dlclose dlsym)
 fi
 
-dnl this defines SYS_SIGLIST_DECLARED
+dnl this defines HAVE_DECL_SYS_SIGLIST
 AC_DECL_SYS_SIGLIST
 
 dnl network functions -- check for inet_aton again
@@ -1103,8 +1103,7 @@ AC_OUTPUT([Makefile builtins/Makefile lib/readline/Makefile lib/glob/Makefile \
 	  lib/intl/Makefile \
 	  lib/malloc/Makefile lib/sh/Makefile lib/termcap/Makefile \
 	  lib/tilde/Makefile doc/Makefile support/Makefile po/Makefile.in \
-	  examples/loadables/Makefile examples/loadables/perl/Makefile \
-	  pathnames.h],
+	  examples/loadables/Makefile examples/loadables/perl/Makefile],
 [
 # Makefile uses this timestamp file to record whether config.h is up to date.
 echo timestamp > stamp-h
