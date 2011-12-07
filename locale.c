@@ -187,7 +187,12 @@ set_locale_var (var, value)
 #if defined (HAVE_SETLOCALE)
       r = *lc_all ? ((x = setlocale (LC_ALL, lc_all)) != 0) : reset_locale_vars ();
       if (x == 0)
-	internal_warning(_("setlocale: LC_ALL: cannot change locale (%s)"), lc_all);
+	{
+	  if (errno == 0)
+	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s)"), lc_all);
+	  else
+	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s): %s"), lc_all, strerror (errno));
+	}
       locale_setblanks ();
       return r;
 #else
@@ -237,7 +242,12 @@ set_locale_var (var, value)
 #endif /* HAVE_SETLOCALE */
   
   if (x == 0)
-    internal_warning(_("setlocale: %s: cannot change locale (%s)"), var, get_locale_var (var));
+    {
+      if (errno == 0)
+	internal_warning(_("setlocale: %s: cannot change locale (%s)"), var, get_locale_var (var));
+      else
+	internal_warning(_("setlocale: %s: cannot change locale (%s): %s"), var, get_locale_var (var), strerror (errno));
+    }
 
   return (x != 0);
 }

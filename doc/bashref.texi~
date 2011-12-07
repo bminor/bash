@@ -2110,7 +2110,7 @@ ls 2>&1 > @var{dirlist}
 @end example
 @noindent
 directs only the standard output to file @var{dirlist},
-because the standard error was duplicated as standard output
+because the standard error was made a copy of the standard output
 before the standard output was redirected to @var{dirlist}.
 
 Bash handles several filenames specially when they are used in
@@ -3654,6 +3654,8 @@ If @option{-C} is specified without @option{-c},
 the default quantum is 5000.
 When @var{callback}  is evaluated, it is supplied the index of the next
 array element to be assigned as an additional argument.
+@var{callback} is evaluated after the line is read but before the 
+array element is assigned.
 
 If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
 before assigning to it.
@@ -4791,8 +4793,9 @@ even if it is subsequently reset.
 @item COMP_WORDS
 An array variable consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as Readline would split it, using
+@var{rl_completer_word_break_characters}
+(@pxref{Completion Variables}).
 This variable is available only in shell functions invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
 

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 October 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2008 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2009 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1137,6 +1137,9 @@ The format for a coprocess is:
 
 This creates a coprocess named <I>NAME</I>.
 If <I>NAME</I> is not supplied, the default name is <I>COPROC</I>.
+<I>NAME</I> must not be supplied if <I>command</I> is a <I>simple
+command</I> (see above); otherwise, it is interpreted as the first word
+of the simple command.
 When the coproc is executed, the shell creates an array variable (see
 <B>Arrays</B>
 
@@ -3192,9 +3195,11 @@ introduce indirection.
 
 In each of the cases below, <I>word</I> is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
-When not performing substring expansion, <B>bash</B> tests for a parameter
-that is unset or null; omitting the colon results in a test only for a
-parameter that is unset.
+<P>
+
+When not performing substring expansion, using the forms documented below,
+<B>bash</B> tests for a parameter that is unset or null.  Omitting the colon
+results in a test only for a parameter that is unset.
 <P>
 
 
@@ -3454,7 +3459,7 @@ to uppercase; the <B>,</B> operator converts matching uppercase letters
 to lowercase.
 The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
 expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
-the first character.
+the first character in the expanded value..
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
 If
@@ -5222,6 +5227,11 @@ that the shell inherited from its parent at invocation.  Builtin
 commands that are invoked as part of a pipeline are also executed in a
 subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
+<P>
+
+Subshells spawned to execute command substitutions inherit the value of
+the <B>-e</B> option from the parent shell.  When not in posix mode,
+Bash clears the <B>-e</B> option in such subshells.
 <P>
 
 If a command is followed by a <B>&amp;</B> and job control is not active, the
@@ -9793,6 +9803,9 @@ is supplied, or
 <DD>
 Exit a login shell.
 <DT><B>mapfile</B> [<B>-n</B> <I>count</I>] [<B>-O</B> <I>origin</I>] [<B>-s</B> <I>count</I>] [<B>-t</B>] [<B>-u</B> <I>fd</I>] [<B>-C</B> <I>callback</I>] [<B>-c</B> <I>quantum</I>] [<I>array</I>]<DD>
+
+<DT><B>readarray</B> [<B>-n</B> <I>count</I>] [<B>-O</B> <I>origin</I>] [<B>-s</B> <I>count</I>] [<B>-t</B>] [<B>-u</B> <I>fd</I>] [<B>-C</B> <I>callback</I>] [<B>-c</B> <I>quantum</I>] [<I>array</I>]<DD>
+
 Read lines from the standard input into array variable
 <I>array</I>,
 
@@ -9863,6 +9876,10 @@ is specified without
 <B>-c</B>,
 
 the default quantum is 5000.
+When <I>callback</I> is evaluated, it is supplied the index of the next
+array element to be assigned as an additional argument.
+<I>callback</I> is evaluated after the line is read but before the 
+array element is assigned.
 <P>
 
 If not supplied with an explicit origin, <B>mapfile</B> will clear <I>array</I>
@@ -12028,13 +12045,6 @@ parentheses to force it into a subshell, which may be stopped as
 a unit.
 <P>
 
-Commands inside of <B>$(</B>...<B>)</B> command substitution are not
-parsed until substitution is attempted.  This will delay error
-reporting until some time after the command is entered.  For example,
-unmatched parentheses, even inside shell comments, will result in
-error messages while the construct is being read.
-<P>
-
 Array variables may not (yet) be exported.
 <P>
 
@@ -12045,7 +12055,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 October 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12151,6 +12161,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 29 December 2008 10:37:31 EST
+Time: 05 February 2009 08:05:34 EST
 </BODY>
 </HTML>

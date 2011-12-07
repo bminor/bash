@@ -2110,7 +2110,7 @@ ls 2>&1 > @var{dirlist}
 @end example
 @noindent
 directs only the standard output to file @var{dirlist},
-because the standard error was duplicated as standard output
+because the standard error was made a copy of the standard output
 before the standard output was redirected to @var{dirlist}.
 
 Bash handles several filenames specially when they are used in
@@ -4793,8 +4793,8 @@ even if it is subsequently reset.
 @item COMP_WORDS
 An array variable consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as Readline would split it, using
+@code{COMP_WORDBREAKS} as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
 

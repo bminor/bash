@@ -734,6 +734,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        mmaappffiillee  [--nn  _c_o_u_n_t]  [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC _c_a_l_l_b_a_c_k]
        [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
+       rreeaaddaarrrraayy  [--nn _c_o_u_n_t] [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC _c_a_l_l_b_a_c_k]
+       [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
               Read lines from the standard input into array variable _a_r_r_a_y, or
               from file descriptor _f_d if the --uu option is supplied.  The vari-
               able  MMAAPPFFIILLEE  is the default _a_r_r_a_y.  Options, if supplied, have
@@ -751,7 +753,11 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --cc     Specify the number of lines read  between  each  call  to
                      _c_a_l_l_b_a_c_k.
 
-              If --CC is specified without --cc, the default quantum is 5000.
+              If  --CC  is  specified  without  --cc, the default quantum is 5000.
+              When _c_a_l_l_b_a_c_k is evaluated, it is supplied the index of the next
+              array  element  to be assigned as an additional argument.  _c_a_l_l_-
+              _b_a_c_k is evaluated after the line is read but  before  the  array
+              element is assigned.
 
               If  not  supplied  with  an  explicit origin, mmaappffiillee will clear
               _a_r_r_a_y before assigning to it.

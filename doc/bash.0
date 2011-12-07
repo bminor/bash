@@ -9,7 +9,7 @@ SSYYNNOOPPSSIISS
        bbaasshh [options] [file]
 
 CCOOPPYYRRIIGGHHTT
-       Bash is Copyright (C) 1989-2008 by the Free Software Foundation, Inc.
+       Bash is Copyright (C) 1989-2009 by the Free Software Foundation, Inc.
 
 DDEESSCCRRIIPPTTIIOONN
        BBaasshh  is  an  sshh-compatible  command language interpreter that executes
@@ -475,7 +475,9 @@ SSHHEELLLL GGRRAAMMMMAARR
               ccoopprroocc [_N_A_M_E] _c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n_s]
 
        This creates a coprocess named _N_A_M_E.  If  _N_A_M_E  is  not  supplied,  the
-       default name is _C_O_P_R_O_C.  When the coproc is executed, the shell creates
+       default name is _C_O_P_R_O_C.  _N_A_M_E must not be supplied if _c_o_m_m_a_n_d is a _s_i_m_-
+       _p_l_e _c_o_m_m_a_n_d (see above); otherwise, it is interpreted as the first word
+       of  the simple command.  When the coproc is executed, the shell creates
        an array variable (see AArrrraayyss below) named _N_A_M_E in the context  of  the
        executing  shell.   The  standard  output of _c_o_m_m_a_n_d is connected via a
        pipe to a file  descriptor  in  the  executing  shell,  and  that  file
@@ -1391,138 +1393,140 @@ EEXXPPAANNSSIIOONN
        tion.
 
        In each of the cases below, _w_o_r_d is subject to tilde expansion, parame-
-       ter  expansion,  command  substitution, and arithmetic expansion.  When
-       not performing substring expansion, bbaasshh tests for a parameter that  is
-       unset  or null; omitting the colon results in a test only for a parame-
-       ter that is unset.
+       ter expansion, command substitution, and arithmetic expansion.
+
+       When  not  performing  substring  expansion, using the forms documented
+       below, bbaasshh tests for a parameter that is unset or null.  Omitting  the
+       colon results in a test only for a parameter that is unset.
 
        ${_p_a_r_a_m_e_t_e_r::--_w_o_r_d}
-              UUssee DDeeffaauulltt VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null,  the  expan-
-              sion  of _w_o_r_d is substituted.  Otherwise, the value of _p_a_r_a_m_e_t_e_r
+              UUssee  DDeeffaauulltt  VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null, the expan-
+              sion of _w_o_r_d is substituted.  Otherwise, the value of  _p_a_r_a_m_e_t_e_r
               is substituted.
        ${_p_a_r_a_m_e_t_e_r::==_w_o_r_d}
-              AAssssiiggnn DDeeffaauulltt VVaalluueess.  If  _p_a_r_a_m_e_t_e_r  is  unset  or  null,  the
+              AAssssiiggnn  DDeeffaauulltt  VVaalluueess.   If  _p_a_r_a_m_e_t_e_r  is  unset or null, the
               expansion of _w_o_r_d is assigned to _p_a_r_a_m_e_t_e_r.  The value of _p_a_r_a_m_-
-              _e_t_e_r is then substituted.   Positional  parameters  and  special
+              _e_t_e_r  is  then  substituted.   Positional parameters and special
               parameters may not be assigned to in this way.
        ${_p_a_r_a_m_e_t_e_r::??_w_o_r_d}
-              DDiissppllaayy  EErrrroorr iiff NNuullll oorr UUnnsseett.  If _p_a_r_a_m_e_t_e_r is null or unset,
-              the expansion of _w_o_r_d (or a message to that effect  if  _w_o_r_d  is
-              not  present) is written to the standard error and the shell, if
+              DDiissppllaayy EErrrroorr iiff NNuullll oorr UUnnsseett.  If _p_a_r_a_m_e_t_e_r is null or  unset,
+              the  expansion  of  _w_o_r_d (or a message to that effect if _w_o_r_d is
+              not present) is written to the standard error and the shell,  if
               it is not interactive, exits.  Otherwise, the value of _p_a_r_a_m_e_t_e_r
               is substituted.
        ${_p_a_r_a_m_e_t_e_r::++_w_o_r_d}
-              UUssee  AAlltteerrnnaattee VVaalluuee.  If _p_a_r_a_m_e_t_e_r is null or unset, nothing is
+              UUssee AAlltteerrnnaattee VVaalluuee.  If _p_a_r_a_m_e_t_e_r is null or unset, nothing  is
               substituted, otherwise the expansion of _w_o_r_d is substituted.
        ${_p_a_r_a_m_e_t_e_r::_o_f_f_s_e_t}
        ${_p_a_r_a_m_e_t_e_r::_o_f_f_s_e_t::_l_e_n_g_t_h}
-              SSuubbssttrriinngg EExxppaannssiioonn..  Expands to  up  to  _l_e_n_g_t_h  characters  of
-              _p_a_r_a_m_e_t_e_r  starting  at  the  character specified by _o_f_f_s_e_t.  If
-              _l_e_n_g_t_h is omitted, expands to the substring of _p_a_r_a_m_e_t_e_r  start-
+              SSuubbssttrriinngg  EExxppaannssiioonn..   Expands  to  up  to _l_e_n_g_t_h characters of
+              _p_a_r_a_m_e_t_e_r starting at the character  specified  by  _o_f_f_s_e_t.   If
+              _l_e_n_g_t_h  is omitted, expands to the substring of _p_a_r_a_m_e_t_e_r start-
               ing at the character specified by _o_f_f_s_e_t.  _l_e_n_g_t_h and _o_f_f_s_e_t are
-              arithmetic  expressions  (see  AARRIITTHHMMEETTIICC   EEVVAALLUUAATTIIOONN   below).
-              _l_e_n_g_t_h  must evaluate to a number greater than or equal to zero.
-              If _o_f_f_s_e_t evaluates to a number less than  zero,  the  value  is
-              used  as  an  offset from the end of the value of _p_a_r_a_m_e_t_e_r.  If
-              _p_a_r_a_m_e_t_e_r is @@,  the  result  is  _l_e_n_g_t_h  positional  parameters
+              arithmetic   expressions   (see  AARRIITTHHMMEETTIICC  EEVVAALLUUAATTIIOONN  below).
+              _l_e_n_g_t_h must evaluate to a number greater than or equal to  zero.
+              If  _o_f_f_s_e_t  evaluates  to  a number less than zero, the value is
+              used as an offset from the end of the value  of  _p_a_r_a_m_e_t_e_r.   If
+              _p_a_r_a_m_e_t_e_r  is  @@,  the  result  is  _l_e_n_g_t_h positional parameters
               beginning at _o_f_f_s_e_t.  If _p_a_r_a_m_e_t_e_r is an indexed array name sub-
-              scripted by @ or *, the result is  the  _l_e_n_g_t_h  members  of  the
+              scripted  by  @  or  *,  the result is the _l_e_n_g_t_h members of the
               array beginning with ${_p_a_r_a_m_e_t_e_r[_o_f_f_s_e_t]}.  A negative _o_f_f_s_e_t is
-              taken relative to one greater than  the  maximum  index  of  the
-              specified  array.  Substring expansion applied to an associative
-              array produces undefined results.  Note that a  negative  offset
-              must  be separated from the colon by at least one space to avoid
-              being confused with the :-  expansion.   Substring  indexing  is
-              zero-based  unless  the positional parameters are used, in which
-              case the indexing starts at 1 by default.  If _o_f_f_s_e_t is  0,  and
-              the  positional parameters are used, $$00 is prefixed to the list.
+              taken  relative  to  one  greater  than the maximum index of the
+              specified array.  Substring expansion applied to an  associative
+              array  produces  undefined results.  Note that a negative offset
+              must be separated from the colon by at least one space to  avoid
+              being  confused  with  the  :- expansion.  Substring indexing is
+              zero-based unless the positional parameters are used,  in  which
+              case  the  indexing starts at 1 by default.  If _o_f_f_s_e_t is 0, and
+              the positional parameters are used, $$00 is prefixed to the  list.
 
        ${!!_p_r_e_f_i_x**}
        ${!!_p_r_e_f_i_x@@}
-              NNaammeess mmaattcchhiinngg pprreeffiixx..  Expands to the names of variables  whose
+              NNaammeess  mmaattcchhiinngg pprreeffiixx..  Expands to the names of variables whose
               names begin with _p_r_e_f_i_x, separated by the first character of the
-              IIFFSS special variable.  When _@ is used and the expansion  appears
-              within  double  quotes, each variable name expands to a separate
+              IIFFSS  special variable.  When _@ is used and the expansion appears
+              within double quotes, each variable name expands to  a  separate
               word.
 
        ${!!_n_a_m_e[_@]}
        ${!!_n_a_m_e[_*]}
-              LLiisstt ooff aarrrraayy kkeeyyss..  If _n_a_m_e is an array  variable,  expands  to
-              the  list  of array indices (keys) assigned in _n_a_m_e.  If _n_a_m_e is
-              not an array, expands to 0 if _n_a_m_e is set  and  null  otherwise.
-              When  _@  is used and the expansion appears within double quotes,
+              LLiisstt  ooff  aarrrraayy  kkeeyyss..  If _n_a_m_e is an array variable, expands to
+              the list of array indices (keys) assigned in _n_a_m_e.  If  _n_a_m_e  is
+              not  an  array,  expands to 0 if _n_a_m_e is set and null otherwise.
+              When _@ is used and the expansion appears within  double  quotes,
               each key expands to a separate word.
 
        ${##_p_a_r_a_m_e_t_e_r}
-              PPaarraammeetteerr lleennggtthh..  The length in  characters  of  the  value  of
-              _p_a_r_a_m_e_t_e_r  is  substituted.   If  _p_a_r_a_m_e_t_e_r is ** or @@, the value
-              substituted is the number of positional parameters.  If  _p_a_r_a_m_e_-
-              _t_e_r  is  an  array name subscripted by ** or @@, the value substi-
+              PPaarraammeetteerr  lleennggtthh..   The  length  in  characters of the value of
+              _p_a_r_a_m_e_t_e_r is substituted.  If _p_a_r_a_m_e_t_e_r is **  or  @@,  the  value
+              substituted  is the number of positional parameters.  If _p_a_r_a_m_e_-
+              _t_e_r is an array name subscripted by ** or @@,  the  value  substi-
               tuted is the number of elements in the array.
 
        ${_p_a_r_a_m_e_t_e_r##_w_o_r_d}
        ${_p_a_r_a_m_e_t_e_r####_w_o_r_d}
               RReemmoovvee mmaattcchhiinngg pprreeffiixx ppaatttteerrnn..  The _w_o_r_d is expanded to produce
               a pattern just as in pathname expansion.  If the pattern matches
-              the beginning of the value of _p_a_r_a_m_e_t_e_r, then the result of  the
-              expansion  is  the expanded value of _p_a_r_a_m_e_t_e_r with the shortest
-              matching pattern (the ``##'' case) or the longest  matching  pat-
-              tern  (the  ``####''  case)  deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the
-              pattern removal operation is applied to each positional  parame-
+              the  beginning of the value of _p_a_r_a_m_e_t_e_r, then the result of the
+              expansion is the expanded value of _p_a_r_a_m_e_t_e_r with  the  shortest
+              matching  pattern  (the ``##'' case) or the longest matching pat-
+              tern (the ``####'' case) deleted.  If _p_a_r_a_m_e_t_e_r is  @@  or  **,  the
+              pattern  removal operation is applied to each positional parame-
               ter in turn, and the expansion is the resultant list.  If _p_a_r_a_m_-
-              _e_t_e_r is an array variable subscripted with @@ or **,  the  pattern
-              removal  operation  is  applied  to  each member of the array in
+              _e_t_e_r  is  an array variable subscripted with @@ or **, the pattern
+              removal operation is applied to each  member  of  the  array  in
               turn, and the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r%%_w_o_r_d}
        ${_p_a_r_a_m_e_t_e_r%%%%_w_o_r_d}
               RReemmoovvee mmaattcchhiinngg ssuuffffiixx ppaatttteerrnn..  The _w_o_r_d is expanded to produce
               a pattern just as in pathname expansion.  If the pattern matches
-              a trailing portion of the expanded value of _p_a_r_a_m_e_t_e_r, then  the
-              result  of the expansion is the expanded value of _p_a_r_a_m_e_t_e_r with
-              the shortest matching pattern (the ``%%'' case)  or  the  longest
-              matching  pattern  (the ``%%%%'' case) deleted.  If _p_a_r_a_m_e_t_e_r is @@
-              or **, the pattern removal operation is  applied  to  each  posi-
-              tional  parameter  in  turn,  and the expansion is the resultant
-              list.  If _p_a_r_a_m_e_t_e_r is an array variable subscripted with  @@  or
-              **,  the  pattern  removal operation is applied to each member of
+              a  trailing portion of the expanded value of _p_a_r_a_m_e_t_e_r, then the
+              result of the expansion is the expanded value of _p_a_r_a_m_e_t_e_r  with
+              the  shortest  matching  pattern (the ``%%'' case) or the longest
+              matching pattern (the ``%%%%'' case) deleted.  If _p_a_r_a_m_e_t_e_r  is  @@
+              or  **,  the  pattern  removal operation is applied to each posi-
+              tional parameter in turn, and the  expansion  is  the  resultant
+              list.   If  _p_a_r_a_m_e_t_e_r is an array variable subscripted with @@ or
+              **, the pattern removal operation is applied to  each  member  of
               the array in turn, and the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r//_p_a_t_t_e_r_n//_s_t_r_i_n_g}
               PPaatttteerrnn ssuubbssttiittuuttiioonn..  The _p_a_t_t_e_r_n is expanded to produce a pat-
-              tern  just  as in pathname expansion.  _P_a_r_a_m_e_t_e_r is expanded and
-              the longest match of _p_a_t_t_e_r_n against its value is replaced  with
-              _s_t_r_i_n_g.   If  _p_a_t_t_e_r_n  begins with //, all matches of _p_a_t_t_e_r_n are
-              replaced  with  _s_t_r_i_n_g.   Normally  only  the  first  match   is
+              tern just as in pathname expansion.  _P_a_r_a_m_e_t_e_r is  expanded  and
+              the  longest match of _p_a_t_t_e_r_n against its value is replaced with
+              _s_t_r_i_n_g.  If _p_a_t_t_e_r_n begins with //, all matches  of  _p_a_t_t_e_r_n  are
+              replaced   with  _s_t_r_i_n_g.   Normally  only  the  first  match  is
               replaced.  If _p_a_t_t_e_r_n begins with ##, it must match at the begin-
               ning of the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n begins with
-              %%,  it must match at the end of the expanded value of _p_a_r_a_m_e_t_e_r.
+              %%, it must match at the end of the expanded value of  _p_a_r_a_m_e_t_e_r.
               If _s_t_r_i_n_g is null, matches of _p_a_t_t_e_r_n are deleted and the // fol-
               lowing _p_a_t_t_e_r_n may be omitted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the sub-
-              stitution operation is applied to each positional  parameter  in
-              turn,  and the expansion is the resultant list.  If _p_a_r_a_m_e_t_e_r is
-              an array variable subscripted with  @@  or  **,  the  substitution
-              operation  is  applied  to each member of the array in turn, and
+              stitution  operation  is applied to each positional parameter in
+              turn, and the expansion is the resultant list.  If _p_a_r_a_m_e_t_e_r  is
+              an  array  variable  subscripted  with  @@ or **, the substitution
+              operation is applied to each member of the array  in  turn,  and
               the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r^^^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,,,_p_a_t_t_e_r_n}
-              CCaassee mmooddiiffiiccaattiioonn..  This expansion modifies the case  of  alpha-
-              betic  characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to pro-
-              duce a pattern just as in pathname expansion.   The  ^^  operator
-              converts  lowercase letters matching _p_a_t_t_e_r_n to uppercase; the ,,
-              operator converts matching uppercase letters to lowercase.   The
-              ^^^^  and  ,,,,  expansions  convert  each  matched character in the
-              expanded value; the ^^ and ,, expansions match  and  convert  only
-              the  first character.  If _p_a_t_t_e_r_n is omitted, it is treated like
-              a ??, which matches every character.  If _p_a_r_a_m_e_t_e_r is @@ or **, the
-              case modification operation is applied to each positional param-
-              eter in turn, and the  expansion  is  the  resultant  list.   If
-              _p_a_r_a_m_e_t_e_r is an array variable subscripted with @@ or **, the case
-              modification operation is applied to each member of the array in
-              turn, and the expansion is the resultant list.
+              CCaassee  mmooddiiffiiccaattiioonn..   This expansion modifies the case of alpha-
+              betic characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to  pro-
+              duce  a  pattern  just as in pathname expansion.  The ^^ operator
+              converts lowercase letters matching _p_a_t_t_e_r_n to uppercase; the  ,,
+              operator  converts matching uppercase letters to lowercase.  The
+              ^^^^ and ,,,, expansions  convert  each  matched  character  in  the
+              expanded  value;  the  ^^ and ,, expansions match and convert only
+              the first character in the expanded value..  If _p_a_t_t_e_r_n is omit-
+              ted,  it is treated like a ??, which matches every character.  If
+              _p_a_r_a_m_e_t_e_r is @@ or **, the case modification operation is  applied
+              to  each  positional parameter in turn, and the expansion is the
+              resultant list.  If _p_a_r_a_m_e_t_e_r is an array  variable  subscripted
+              with  @@ or **, the case modification operation is applied to each
+              member of the array in turn, and the expansion is the  resultant
+              list.
 
    CCoommmmaanndd SSuubbssttiittuuttiioonn
        _C_o_m_m_a_n_d _s_u_b_s_t_i_t_u_t_i_o_n allows the output of a command to replace the com-
@@ -2310,6 +2314,10 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN EENNVVIIRROONNMMEENN
        tion.  Builtin commands that are invoked as part of a pipeline are also
        executed in a subshell environment.  Changes made to the subshell envi-
        ronment cannot affect the shell's execution environment.
+
+       Subshells spawned to execute command substitutions inherit the value of
+       the  --ee  option  from  the  parent shell.  When not in posix mode, Bash
+       clears the --ee option in such subshells.
 
        If a command is followed by a && and job  control  is  not  active,  the
        default  standard  input  for  the command is the empty file _/_d_e_v_/_n_u_l_l.
@@ -4286,6 +4294,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        mmaappffiillee  [--nn  _c_o_u_n_t]  [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC _c_a_l_l_b_a_c_k]
        [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
+       rreeaaddaarrrraayy  [--nn _c_o_u_n_t] [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC _c_a_l_l_b_a_c_k]
+       [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
               Read lines from the standard input into array variable _a_r_r_a_y, or
               from file descriptor _f_d if the --uu option is supplied.  The vari-
               able  MMAAPPFFIILLEE  is the default _a_r_r_a_y.  Options, if supplied, have
@@ -4303,7 +4313,11 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --cc     Specify the number of lines read  between  each  call  to
                      _c_a_l_l_b_a_c_k.
 
-              If --CC is specified without --cc, the default quantum is 5000.
+              If  --CC  is  specified  without  --cc, the default quantum is 5000.
+              When _c_a_l_l_b_a_c_k is evaluated, it is supplied the index of the next
+              array  element  to be assigned as an additional argument.  _c_a_l_l_-
+              _b_a_c_k is evaluated after the line is read but  before  the  array
+              element is assigned.
 
               If  not  supplied  with  an  explicit origin, mmaappffiillee will clear
               _a_r_r_a_y before assigning to it.
@@ -5194,16 +5208,10 @@ BBUUGGSS
        parentheses to force it into a subshell, which  may  be  stopped  as  a
        unit.
 
-       Commands  inside  of  $$((...))  command substitution are not parsed until
-       substitution is attempted.  This will delay error reporting until  some
-       time after the command is entered.  For example, unmatched parentheses,
-       even inside shell comments, will result in  error  messages  while  the
-       construct is being read.
-
        Array variables may not (yet) be exported.
 
        There may be only one active coprocess at a time.
 
 
 
-GNU Bash-4.0                    2008 October 28                        BASH(1)
+GNU Bash-4.0                   2008 December 29                        BASH(1)

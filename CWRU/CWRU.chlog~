@@ -7483,3 +7483,11 @@ pcomplete.c
 execute_cmd.c
 	- don't clamp CPU usage at 100% in print_formatted_time.  Bug reported
 	  by Linda Walsh <bash@tlinx.org>
+
+				    2/5
+				    ---
+locale.c
+	- in set_locale_var, set errno to 0 before calling setlocale(), and
+	  print strerror (errno) if setlocale fails and errno ends up non-zero
+
+[bash-4.0-release frozen]

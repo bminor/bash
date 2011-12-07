@@ -1364,7 +1364,7 @@ corresponding to each member of \fBFUNCNAME\fP.
 file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
 (or \fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP if referenced within another
 shell function).
-The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fB.
+The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fP.
 Use \fBLINENO\fP to obtain the current line number.
 .TP
 .B BASH_REMATCH
@@ -1460,7 +1460,7 @@ programmable completion facilities (see \fBProgrammable Completion\fP
 below).
 .TP
 .B COMP_WORDBREAKS
-The set of characters that the Readline library treats as word
+The set of characters that the \fBreadline\fP library treats as word
 separators when performing word completion.
 If
 .SM
@@ -1471,8 +1471,8 @@ subsequently reset.
 .B COMP_WORDS
 An array variable (see \fBArrays\fP below) consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as \fBreadline\fP would split it, using
+\fBCOMP_WORDBREAKS\fP as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
@@ -3177,7 +3177,7 @@ ls 2\fB>&\fP1 \fB>\fP dirlist
 .PP
 directs only the standard output to file
 .IR dirlist ,
-because the standard error was duplicated as standard output
+because the standard error was duplicated from the standard output
 before the standard output was redirected to
 .IR dirlist .
 .PP
@@ -5623,7 +5623,7 @@ variable is inserted at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle:  if
 the characters at the beginning of the line do not match the value
 of \fBcomment\-begin\fP, the value is inserted, otherwise
-the characters in \fBcomment-begin\fP are deleted from the beginning of 
+the characters in \fBcomment\-begin\fP are deleted from the beginning of 
 the line.
 In either case, the line is accepted as if a newline had been typed.
 The default value of
@@ -7695,6 +7695,8 @@ is specified without
 the default quantum is 5000.
 When \fIcallback\fP is evaluated, it is supplied the index of the next
 array element to be assigned as an additional argument.
+\fIcallback\fP is evaluated after the line is read but before the 
+array element is assigned.
 .PP
 If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
 before assigning to it.
@@ -7847,7 +7849,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -9047,7 +9049,7 @@ The maximum number of pending signals
 The maximum size that may be locked into memory
 .TP
 .B \-m
-The maximum resident set size
+The maximum resident set size (many systems do not honor this limit)
 .TP
 .B \-n
 The maximum number of open file descriptors (most systems do not
@@ -9322,7 +9324,7 @@ bfox@gnu.org
 .PP
 Chet Ramey, Case Western Reserve University
 .br
-chet@po.cwru.edu
+chet.ramey@case.edu
 .SH BUG REPORTS
 If you find a bug in
 .B bash,
