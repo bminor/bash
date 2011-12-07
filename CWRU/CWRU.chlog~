@@ -14694,3 +14694,28 @@ variables.c,builtins/{declare,setattr,type}.def
 builtins/help.def
 	- fix bug in `help' two-column printing to avoid referencing
 	  shell_builtins[num_shell_builtins]
+
+error.c
+	- in get_name_for_error, use dollar_vars[0] if the name returned from
+	  looking in $BASH_SOURCE[0] is the empty string as well as if it's
+	  null
+
+				   5/31
+				   ----
+arrayfunc.c
+	- change array_value_internal to set *RTYPE to 1 if the reference is
+	  array[*] and 2 if the reference is array[@]
+
+subst.c
+	- in parameter_brace_expand_word, set the flags returned by the word
+	  desc to include W_HASQUOTEDNULL if array_value returns QUOTED_NULL
+	  for an array reference like x[*] and the word is quoted.  Fixes bug
+	  reported by Christophe Martin <schplurtz@free.fr>
+
+				    6/1
+				    ---
+jobs.c
+	- several changes to preserve errno if tcgetpgrp/tcgetattr/tcsetattr
+	  fail, for subsequent error messages
+	- change initialize_job_control to turn off job control if the terminal
+	  pgrp == -1 or is not equal to shell_pgrp (with an error message)

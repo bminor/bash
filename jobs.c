@@ -1967,7 +1967,7 @@ get_tty_state ()
 	  /* Only print an error message if we're really interactive at
 	     this time. */
 	  if (interactive)
-	    sys_error ("[%ld: %d] tcgetattr", (long)getpid (), shell_level);
+	    sys_error ("[%ld: %d (%d)] tcgetattr", (long)getpid (), shell_level, tty);
 #endif
 	  return -1;
 	}
@@ -2006,7 +2006,7 @@ set_tty_state ()
 	  /* Only print an error message if we're really interactive at
 	     this time. */
 	  if (interactive)
-	    sys_error ("[%ld: %d] tcsetattr", (long)getpid (), shell_level);
+	    sys_error ("[%ld: %d (%d)] tcsetattr", (long)getpid (), shell_level, tty);
 	  return -1;
 	}
 #endif /* TERMIOS_TTY_DRIVER */
@@ -3477,6 +3477,10 @@ int
 initialize_job_control (force)
      int force;
 {
+  pid_t t;
+  int t_errno;
+
+  t_errno = -1;
   shell_pgrp = getpgid (0);
 
   if (shell_pgrp == -1)
@@ -3494,10 +3498,21 @@ initialize_job_control (force)
     }
   else
     {
+      shell_tty = -1;
+
+      /* If forced_interactive is set, we skip the normal check that stderr
+	 is attached to a tty, so we need to check here.  If it's not, we
+	 need to see whether we have a controlling tty by opening /dev/tty,
+	 since trying to use job control tty pgrp manipulations on a non-tty
+	 is going to fail. */
+      if (forced_interactive && isatty (fileno (stderr)) == 0)
+	shell_tty = open ("/dev/tty", O_RDWR|O_NONBLOCK);
+
       /* Get our controlling terminal.  If job_control is set, or
 	 interactive is set, then this is an interactive shell no
 	 matter where fd 2 is directed. */
-      shell_tty = dup (fileno (stderr));	/* fd 2 */
+      if (shell_tty == -1)
+	shell_tty = dup (fileno (stderr));	/* fd 2 */
 
       shell_tty = move_to_high_fd (shell_tty, 1, -1);
 
@@ -3523,6 +3538,9 @@ initialize_job_control (force)
 	    }
 	  break;
 	}
+
+      if (terminal_pgrp == -1)
+	t_errno = errno;
 
       /* Make sure that we are using the new line discipline. */
       if (set_new_line_discipline (shell_tty) < 0)
@@ -3554,10 +3572,19 @@ initialize_job_control (force)
 	    {
 	      if (give_terminal_to (shell_pgrp, 0) < 0)
 		{
+		  t_errno = errno;
 		  setpgid (0, original_pgrp);
 		  shell_pgrp = original_pgrp;
 		  job_control = 0;
 		}
+	    }
+
+	  if (job_control && ((t = tcgetpgrp (shell_tty)) == -1 || t != shell_pgrp))
+	    {
+	      if (t_errno != -1)
+		errno = t_errno;
+	      sys_error (_("cannot set terminal process group (%d)"), t);
+	      job_control = 0;
 	    }
 	}
       if (job_control == 0)
@@ -3708,7 +3735,7 @@ give_terminal_to (pgrp, force)
      int force;
 {
   sigset_t set, oset;
-  int r;
+  int r, e;
 
   r = 0;
   if (job_control || force)
@@ -3729,12 +3756,15 @@ give_terminal_to (pgrp, force)
 	    shell_tty, (long)getpid(), (long)pgrp);
 #endif
 	  r = -1;
+	  e = errno;
 	}
       else
 	terminal_pgrp = pgrp;
       sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
     }
 
+  if (r == -1)
+    errno = e;
   return r;
 }
 

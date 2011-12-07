@@ -693,8 +693,8 @@ array_variable_part (s, subp, lenp)
 /* Return a string containing the elements in the array and subscript
    described by S.  If the subscript is * or @, obeys quoting rules akin
    to the expansion of $* and $@ including double quoting.  If RTYPE
-   is non-null it gets 1 if the array reference is name[@] or name[*]
-   and 0 otherwise. */
+   is non-null it gets 1 if the array reference is name[*], 2 if the
+   reference is name[@], and 0 otherwise. */
 static char *
 array_value_internal (s, quoted, allow_all, rtype)
      char *s;
@@ -722,7 +722,7 @@ array_value_internal (s, quoted, allow_all, rtype)
   if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
       if (rtype)
-	*rtype = 1;
+	*rtype = (t[0] == '*') ? 1 : 2;
       if (allow_all == 0)
 	{
 	  err_badarraysub (s);

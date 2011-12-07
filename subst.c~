@@ -211,7 +211,6 @@ static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static char *dequote_escapes __P((char *));
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
-/*static*/ char *remove_quoted_escapes __P((char *));
 static char *remove_quoted_nulls __P((char *));
 
 static int unquoted_substring __P((char *, char *));
@@ -3201,7 +3200,7 @@ dequote_list (list)
 
 /* Remove CTLESC protecting a CTLESC or CTLNUL in place.  Return the passed
    string. */
-/*static*/ char *
+char *
 remove_quoted_escapes (string)
      char *string;
 {
@@ -4959,10 +4958,11 @@ parameter_brace_expand_word (name, var_is_special, quoted)
   char *temp, *tt;
   intmax_t arg_index;
   SHELL_VAR *var;
-  int atype;
+  int atype, rflags;
 
   ret = 0;
   temp = 0;
+  rflags = 0;
 
   /* Handle multiple digit arguments, as in ${11}. */  
   if (legal_number (name, &arg_index))
@@ -4995,6 +4995,8 @@ parameter_brace_expand_word (name, var_is_special, quoted)
  	temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
  		  ? quote_string (temp)
  		  : quote_escapes (temp);
+      else if (atype == 1 && temp && *temp == 0 && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	rflags |= W_HASQUOTEDNULL;
     }
 #endif
   else if (var = find_variable (name))
@@ -5022,6 +5024,7 @@ parameter_brace_expand_word (name, var_is_special, quoted)
     {
       ret = alloc_word_desc ();
       ret->word = temp;
+      ret->flags |= rflags;
     }
   return ret;
 }
