@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,6 +23,7 @@
 
 #include "stdc.h"
 #include "array.h"
+#include "assoc.h"
 
 /* Shell variables and functions are stored in hash tables. */
 #include "hashlib.h"
@@ -61,7 +62,7 @@ typedef struct var_context {
 /* What a shell variable looks like. */
 
 typedef struct variable *sh_var_value_func_t __P((struct variable *));
-typedef struct variable *sh_var_assign_func_t __P((struct variable *, char *, arrayind_t));
+typedef struct variable *sh_var_assign_func_t __P((struct variable *, char *, arrayind_t, char *));
 
 /* For the future */
 union _value {
@@ -108,8 +109,11 @@ typedef struct _vlist {
 #define att_local	0x0000020	/* variable is local to a function */
 #define att_assoc	0x0000040	/* variable is an associative array */
 #define att_trace	0x0000080	/* function is traced with DEBUG trap */
+#define att_uppercase	0x0000100	/* word converted to uppercase on assignment */
+#define att_lowercase	0x0000200	/* word converted to lowercase on assignment */
+#define att_capcase	0x0000400	/* word capitalized  on assignment */
 
-#define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace)
+#define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace|att_uppercase|att_lowercase|att_capcase)
 
 #define attmask_user	0x0000fff
 
@@ -119,6 +123,7 @@ typedef struct _vlist {
 #define att_noassign	0x0004000	/* assignment not allowed */
 #define att_imported	0x0008000	/* came from environment */
 #define att_special	0x0010000	/* requires special handling */
+#define att_nofree	0x0020000	/* do not free value on unset */
 
 #define	attmask_int	0x00ff000
 
@@ -136,12 +141,16 @@ typedef struct _vlist {
 #define local_p(var)		((((var)->attributes) & (att_local)))
 #define assoc_p(var)		((((var)->attributes) & (att_assoc)))
 #define trace_p(var)		((((var)->attributes) & (att_trace)))
+#define uppercase_p(var)	((((var)->attributes) & (att_uppercase)))
+#define lowercase_p(var)	((((var)->attributes) & (att_lowercase)))
+#define capcase_p(var)		((((var)->attributes) & (att_capcase)))
 
 #define invisible_p(var)	((((var)->attributes) & (att_invisible)))
 #define non_unsettable_p(var)	((((var)->attributes) & (att_nounset)))
 #define noassign_p(var)		((((var)->attributes) & (att_noassign)))
 #define imported_p(var)		((((var)->attributes) & (att_imported)))
 #define specialvar_p(var)	((((var)->attributes) & (att_special)))
+#define nofree_p(var)		((((var)->attributes) & (att_nofree)))
 
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
 
@@ -149,6 +158,7 @@ typedef struct _vlist {
 #define value_cell(var)		((var)->value)
 #define function_cell(var)	(COMMAND *)((var)->value)
 #define array_cell(var)		(ARRAY *)((var)->value)
+#define assoc_cell(var)		(HASH_TABLE *)((var)->value)
 
 #define var_isnull(var)		((var)->value == 0)
 #define var_isset(var)		((var)->value != 0)
@@ -157,6 +167,7 @@ typedef struct _vlist {
 #define var_setvalue(var, str)	((var)->value = (str))
 #define var_setfunc(var, func)	((var)->value = (char *)(func))
 #define var_setarray(var, arr)	((var)->value = (char *)(arr))
+#define var_setassoc(var, arr)	((var)->value = (char *)(arr))
 
 /* Make VAR be auto-exported. */
 #define set_auto_export(var) \
@@ -316,6 +327,9 @@ extern void print_var_function __P((SHELL_VAR *));
 extern SHELL_VAR *make_new_array_variable __P((char *));
 extern SHELL_VAR *make_local_array_variable __P((char *));
 
+extern SHELL_VAR *make_new_assoc_variable __P((char *));
+extern SHELL_VAR *make_local_assoc_variable __P((char *));
+
 extern void set_pipestatus_array __P((int *, int));
 #endif
 
@@ -324,6 +338,10 @@ extern void set_pipestatus_from_exit __P((int));
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
 extern void stupidly_hack_special_variables __P((char *));
+
+/* Reinitialize some special variables that have external effects upon unset
+   when the shell reinitializes itself. */
+extern void reinit_special_variables __P((void));
 
 extern int get_random_number __P((void));
 

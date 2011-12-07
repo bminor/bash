@@ -15989,3 +15989,82 @@ parse.y
 
 doc/{bash.1,bashref.texi}
 	- document the effect of setting PROMPT_DIRTRIM
+
+				    6/3
+				    ---
+builtins/ulimit.def
+	- make the multiplier (block size) for -c and -f 512 bytes only if in
+	  Posix mode and 1024 bytes otherwise (as in previous versions).  Uses
+	  POSIXBLK and BLOCK_SIZE defines to parameterize size based on value
+	  of posixly_correct
+
+doc/bashref.texi
+	- document this addition to posix mode
+
+builtins/common.c
+	- change get_numeric_arg to have a calling sequence and return value
+	  more closely mimicking general.c:legal_number(), with the addition
+	  of a flags word
+	- add extra value for `fatal' argument to get_numeric_arg to force it
+	  to return failure to the caller rather than longjmping
+
+builtins/common.h
+	- change prototype declaration for get_numeric_arg
+
+builtins/{break,shift}.def
+	- change calls to get_numeric_arg to deal with new semantics and calling
+	  sequence
+
+builtins/history.def
+	- display_history now returns an int
+	- change calling sequence for get_numeric_arg in display_history
+	- display_history now returns failure to the caller if get_numeric_arg
+	  detects an invalid number, rather than jumping back to the top level
+	- use value returned by display_history as return status of history
+	  builtin, filtered through sh_chkwrite
+	- history no longer aborts compound commands on invalid arguments.
+	  fixes problem reported by Chu Li <chul@cn.fujitsu.com>
+
+{braces,subst}.c
+      - extract_command_subst now takes a third flags argument; passed flags
+	 are ORd into flags passed to other functions; changed callers
+
+subst.h
+	- move SX_* defines here from subst.c so parse.y:xparse_dolparen can
+	  see them and behave appropriately
+	- extract_command_subst now takes a third flags argument; change
+	  prototype
+
+subst.c
+	- change extract_command_subst to call xparse_dolparen when extracting
+	  a $() construct
+	- change calls to extract_delimited_string to extract_command_subst
+	  as appropriate
+	- if command_substitute returns a NULL word desc, don't call
+	  dispose_word_desc on it
+
+parse.y
+	- change xparse_dolparen to use the SX_* flags now in subst.h
+
+				   6/16
+				   ----
+subst.c
+	- in quote_list, set W_HASQUOTEDNULL flag in the word if quote_string
+	  turns "" into CTLNUL
+	- in dequote_list, turn off W_HASQUOTEDNULL flag in the word if
+	  dequote_string turns CTLNUL into ""
+	- new function, string_list_pos_params, encapsulates everything
+	  needed to turn the positional parameters or an array indexed with
+	  '@' or '*' into a string, including taking care of quoting and
+	  using the first char of $IFS, when used in another expansion like
+	  pattern removal or pattern substitution
+	- change list_remove_pattern, pos_params, pos_params_pat_subst to
+	  call string_list_pos_params.  Fixes problems reported by
+	  Stephane Chazelas <stephane_chazelas@yahoo.fr>
+
+				   6/22
+				   ----
+variables.h
+	- include assoc.h for associative arrays
+	- defines for case-modifying expansions and associative array variables
+	- sh_var_assign_func_t functions now take an extra char * parameter

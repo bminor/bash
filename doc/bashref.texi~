@@ -3661,8 +3661,9 @@ Cause @code{read} to time out and return failure if a complete line of
 input is not read within @var{timeout} seconds.
 @var{timeout}  may be a decimal number with a fractional portion following
 the decimal point.
-This option has no effect if @code{read} is not reading input from the
-terminal or a pipe.
+This option is only effective if @code{read} is reading input from a
+terminal, pipe, or other special file; it has no effect when reading
+from regular files.
 
 @item -u @var{fd}
 Read input from file descriptor @var{fd}.
@@ -6056,7 +6057,8 @@ The version of Bash (e.g., 2.00)
 @item \V
 The release of Bash, version + patchlevel (e.g., 2.00.0)
 @item \w
-The current working directory, with @env{$HOME} abbreviated with a tilde.
+The current working directory, with @env{$HOME} abbreviated with a tilde
+(uses the @env{$PROMPT_DIRTRIM} variable).
 @item \W
 The basename of @env{$PWD}, with @env{$HOME} abbreviated with a tilde.
 @item \!
@@ -6350,6 +6352,10 @@ When the @code{xpg_echo} option is enabled, Bash does not attempt to interpret
 any arguments to @code{echo} as options.  Each argument is displayed, after
 escape characters are converted.
 
+@item
+The @code{ulimit} builtin uses a block size of 512 bytes for the @option{-c}
+and @option{-f} options.
+
 @end enumerate
 
 There is other @sc{posix} behavior that Bash does not implement by
@@ -6453,9 +6459,11 @@ current job, which is the last job stopped while it was in the foreground
 or started in the background.
 A single @samp{%} (with no accompanying job specification) also refers
 to the current job.
-The previous job may be referenced using @samp{%-}.  In output
-pertaining to jobs (e.g., the output of the @code{jobs} command),
-the current job is always flagged with a @samp{+}, and the
+The previous job may be referenced using @samp{%-}.
+If there is only a single job, @samp{%+} and @samp{%-} can both be used
+to refer to that job.
+In output pertaining to jobs (e.g., the output of the @code{jobs}
+command), the current job is always flagged with a @samp{+}, and the
 previous job with a @samp{-}. 
 
 A job may also be referred to

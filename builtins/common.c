@@ -399,30 +399,35 @@ set_dollar_vars_changed ()
 /* Read a numeric arg for this_command_name, the name of the shell builtin
    that wants it.  LIST is the word list that the arg is to come from.
    Accept only the numeric argument; report an error if other arguments
-   follow.  If FATAL is true, call throw_to_top_level, which exits the
-   shell; if not, call jump_to_top_level (DISCARD), which aborts the
-   current command. */
-intmax_t
-get_numeric_arg (list, fatal)
+   follow.  If FATAL is 1, call throw_to_top_level, which exits the
+   shell; if it's 2, call jump_to_top_level (DISCARD), which aborts the
+   current command; if FATAL is 0, return an indication of an invalid
+   number by setting *NUMOK == 0 and return -1. */
+int
+get_numeric_arg (list, fatal, count)
      WORD_LIST *list;
      int fatal;
+     intmax_t *count;
 {
-  intmax_t count = 1;
+  char *arg;
+
+  if (count)
+    *count = 1;
 
   if (list && list->word && ISOPTION (list->word->word, '-'))
     list = list->next;
 
   if (list)
     {
-      register char *arg;
-
       arg = list->word->word;
-      if (arg == 0 || (legal_number (arg, &count) == 0))
+      if (arg == 0 || (legal_number (arg, count) == 0))
 	{
-	  sh_neednumarg (list->word->word);
-	  if (fatal)
+	  sh_neednumarg (list->word->word ? list->word->word : "`'");
+	  if (fatal == 0)
+	    return 0;
+	  else if (fatal == 1)		/* fatal == 1; abort */
 	    throw_to_top_level ();
-	  else
+	  else				/* fatal == 2; discard current command */
 	    {
 	      top_level_cleanup ();
 	      jump_to_top_level (DISCARD);
@@ -431,7 +436,7 @@ get_numeric_arg (list, fatal)
       no_args (list->next);
     }
 
-  return (count);
+  return (1);
 }
 
 /* Get an eight-bit status value from LIST */

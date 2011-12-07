@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,6 +69,7 @@ extern int errno;
 #define VT_POSPARMS	1
 #define VT_ARRAYVAR	2
 #define VT_ARRAYMEMBER	3
+#define VT_ASSOCVAR	4
 
 #define VT_STARSUB	128	/* $* or ${array[*]} -- used to split */
 
@@ -77,14 +78,6 @@ extern int errno;
 #define ST_CTLESC	0x02
 #define ST_SQUOTE	0x04	/* unused yet */
 #define ST_DQUOTE	0x08	/* unused yet */
-
-/* Flags for the string extraction functions. */
-#define SX_NOALLOC	0x01	/* just skip; don't return substring */
-#define SX_VARNAME	0x02	/* variable name; for string_extract () */
-#define SX_REQMATCH	0x04	/* closing/matching delimiter required */
-#define SX_COMMAND	0x08	/* extracting a shell script/command */
-#define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
-#define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
 
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
@@ -715,7 +708,7 @@ add_one_character:
 
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_delimited_string (string, &si, "$(", "(", ")", SX_COMMAND); /*)*/
+	    ret = extract_command_subst (string, &si, 0);
 	  else
 	    ret = extract_dollar_brace_string (string, &si, 1, 0);
 
@@ -817,7 +810,7 @@ skip_double_quoted (string, slen, sind)
 	{
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
+	    ret = extract_command_subst (string, &si, SX_NOALLOC);
 	  else
 	    ret = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
 
@@ -940,6 +933,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 	  i += 2;
 	  continue;
 	}
+
 #if defined (HANDLE_MULTIBYTE)
       mblength = MBLEN (string + i, slen - i);
       if (mblength > 1)
@@ -987,13 +981,21 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 
 /* Extract the $( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$(".
-   Make (SINDEX) get the position of the matching ")". ) */
+   Make (SINDEX) get the position of the matching ")". )
+   XFLAGS is additional flags to pass to other extraction functions, */
 char *
-extract_command_subst (string, sindex)
+extract_command_subst (string, sindex, xflags)
      char *string;
      int *sindex;
+     int xflags;
 {
-  return (extract_delimited_string (string, sindex, "$(", "(", ")", SX_COMMAND)); /*)*/
+  if (string[*sindex] == '(')	/*)*/
+    return (extract_delimited_string (string, sindex, "$(", "(", ")", xflags|SX_COMMAND)); /*)*/
+  else
+    {
+      xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
+      return (xparse_dolparen (string, string+*sindex, sindex, xflags));
+    }
 }
 
 /* Extract the $[ construct in STRING, and return a new string. (])
@@ -1100,7 +1102,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 
       /* Not exactly right yet; should handle shell metacharacters and
 	 multibyte characters, too. */
-      if ((flags & SX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || whitespace (string[i - 1])))
+      if ((flags & SX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || shellblank (string[i - 1])))
 	{
           in_comment = 1;
           ADVANCE_CHAR (string, slen, i);
@@ -1265,7 +1267,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (string[i] == '$' && string[i+1] == LPAREN)
 	{
 	  si = i + 2;
-	  t = extract_delimited_string (string, &si, "$(", "(", ")", flags|SX_NOALLOC|SX_COMMAND); /*)*/
+	  t = extract_command_subst (string, &si, flags|SX_NOALLOC);
 	  i = si + 1;
 	  continue;
 	}
@@ -1953,6 +1955,55 @@ string_list_dollar_at (list, quoted)
   return ret;
 }
 
+/* Turn the positional paramters into a string, understanding quoting and
+   the various subtleties of using the first character of $IFS as the
+   separator.  Calls string_list_dollar_at, string_list_dollar_star, and
+   string_list as appropriate. */
+char *
+string_list_pos_params (pchar, list, quoted)
+     int pchar;
+     WORD_LIST *list;
+     int quoted;
+{
+  char *ret;
+  WORD_LIST *tlist;
+
+  if (pchar == '*' && (quoted & Q_DOUBLE_QUOTES))
+    {
+      tlist = quote_list (list);
+      word_list_remove_quoted_nulls (tlist);
+      ret = string_list_dollar_star (tlist);
+    }
+  else if (pchar == '*' && (quoted & Q_HERE_DOCUMENT))
+    {
+      tlist = quote_list (list);
+      word_list_remove_quoted_nulls (tlist);
+      ret = string_list (tlist);
+    }
+  else if (pchar == '*')
+    {
+      /* Even when unquoted, string_list_dollar_star does the right thing
+	 making sure that the first character of $IFS is used as the
+	 separator. */
+      ret = string_list_dollar_star (list);
+    }
+  else if (pchar == '@' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+    /* We use string_list_dollar_at, but only if the string is quoted, since
+       that quotes the escapes if it's not, which we don't want.  We could
+       use string_list (the old code did), but that doesn't do the right
+       thing if the first character of $IFS is not a space.  We use
+       string_list_dollar_star if the string is unquoted so we make sure that
+       the elements of $@ are separated by the first character of $IFS for
+       later splitting. */
+    ret = string_list_dollar_at (list, quoted);
+  else if (pchar == '@')
+    ret = string_list_dollar_star (list);
+  else
+    ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (list) : list);
+
+  return ret;
+}
+
 /* Return the list of words present in STRING.  Separate the string into
    words at any of the characters found in SEPARATORS.  If QUOTED is
    non-zero then word in the list will have its quoted flag set, otherwise
@@ -2578,17 +2629,9 @@ pos_params (string, start, end, quoted)
     }
 
   t->next = (WORD_LIST *)NULL;
-  if (string[0] == '*')
-    {
-      if (quoted & Q_DOUBLE_QUOTES)
-	ret = string_list_dollar_star (quote_list (h));
-      else if (quoted & Q_HERE_DOCUMENT)
-	ret = string_list (quote_list (h));
-      else
-	ret = string_list (h);
-    }
-  else
-    ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (h) : h);
+
+  ret = string_list_pos_params (string[0], h, quoted);
+
   if (t != params)
     t->next = params;
 
@@ -2894,9 +2937,10 @@ expand_string_assignment (string, quoted)
    passed string when an error occurs.  Might want to trap other calls
    to jump_to_top_level here so we don't endlessly loop. */
 WORD_LIST *
-expand_prompt_string (string, quoted)
+expand_prompt_string (string, quoted, wflags)
      char *string;
      int quoted;
+     int wflags;
 {
   WORD_LIST *value;
   WORD_DESC td;
@@ -2904,7 +2948,7 @@ expand_prompt_string (string, quoted)
   if (string == 0 || *string == 0)
     return ((WORD_LIST *)NULL);
 
-  td.flags = 0;
+  td.flags = wflags;
   td.word = savestring (string);
 
   no_longjmp_on_fatal_error = 1;
@@ -3225,9 +3269,10 @@ quote_list (list)
     {
       t = w->word->word;
       w->word->word = quote_string (t);
-      free (t);
+      if (*t == 0)
+	w->word->flags |= W_HASQUOTEDNULL;	/* XXX - turn on W_HASQUOTEDNULL here? */
       w->word->flags |= W_QUOTED;
-      /* XXX - turn on W_HAVEQUOTEDNULL here? */
+      free (t);
     }
   return list;
 }
@@ -3243,9 +3288,10 @@ dequote_list (list)
   for (tlist = list; tlist; tlist = tlist->next)
     {
       s = dequote_string (tlist->word->word);
+      if (QUOTED_NULL (tlist->word->word))
+	tlist->word->flags &= ~W_HASQUOTEDNULL;
       free (tlist->word->word);
       tlist->word->word = s;
-      /* XXX - turn off W_HAVEQUOTEDNULL here? */
     }
   return list;
 }
@@ -3982,12 +4028,22 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
     }
 
   l = REVERSE_LIST (new, WORD_LIST *);
-  if (itype == '*')
-    tword = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (l) : string_list (l);
+#if 0
+  if (itype == '*' && (quoted & Q_DOUBLE_QUOTES))
+    tword = string_list_dollar_star (quote_list (l));
+  else if (itype == '*')
+    tword = string_list_dollar_star (l);
+  else if (itype == '@' && (quoted & Q_DOUBLE_QUOTES))
+    tword = string_list_dollar_at (l, quoted);
+  else if (itype == '@')
+    tword = string_list_dollar_star (l);
   else
-    tword = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (l) : l);
-
+    tword = string_list (l);
+#else
+  tword = string_list_pos_params (itype, l, quoted);
+#endif
   dispose_words (l);
+
   return (tword);
 }
 
@@ -5812,6 +5868,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
   WORD_LIST *save, *params;
   WORD_DESC *w;
   char *ret;
+  int pchar, qflags;
 
   save = params = list_rest_of_args ();
   if (save == 0)
@@ -5826,10 +5883,22 @@ pos_params_pat_subst (string, pat, rep, mflags)
       params->word = w;
     }
 
+  pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+  qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+
+#if 0
   if ((mflags & (MATCH_QUOTED|MATCH_STARSUB)) == (MATCH_QUOTED|MATCH_STARSUB))
     ret = string_list_dollar_star (quote_list (save));
+  else if ((mflags & MATCH_STARSUB) == MATCH_STARSUB)
+    ret = string_list_dollar_star (save);
+  else if ((mflags & MATCH_QUOTED) == MATCH_QUOTED)
+    ret = string_list_dollar_at (save, qflags);
   else
-    ret = string_list ((mflags & MATCH_QUOTED) ? quote_list (save) : save);
+    ret = string_list_dollar_star (save);
+#else
+  ret = string_list_pos_params (pchar, save, qflags);
+#endif
+
   dispose_words (save);
 
   return (ret);
@@ -6136,6 +6205,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       temp = (char *)NULL;
       goto bad_substitution;
     }
+
   /* Indirect expansion begins with a `!'.  A valid indirect expansion is
      either a variable name, one of the positional parameters or a special
      variable that expands to one of the positional parameters. */
@@ -6675,7 +6745,7 @@ param_expand (string, sindex, quoted, expanded_something,
     case LPAREN:
       /* We have to extract the contents of this paren substitution. */
       t_index = zindex + 1;
-      temp = extract_command_subst (string, &t_index);
+      temp = extract_command_subst (string, &t_index, 0);
       zindex = t_index;
 
       /* For Posix.2-style `$(( ))' arithmetic substitution,
@@ -6734,7 +6804,8 @@ comsub:
 	{
 	  tdesc = command_substitute (temp, quoted);
 	  temp1 = tdesc ? tdesc->word : (char *)NULL;
-	  dispose_word_desc (tdesc);
+	  if (tdesc)
+	    dispose_word_desc (tdesc);
 	}
       FREE (temp);
       temp = temp1;
@@ -7152,7 +7223,8 @@ add_string:
 		de_backslash (temp);
 		tword = command_substitute (temp, quoted);
 		temp1 = tword ? tword->word : (char *)NULL;
-		dispose_word_desc (tword);
+		if (tword)
+		  dispose_word_desc (tword);
 	      }
 	    FREE (temp);
 	    temp = temp1;
@@ -7580,6 +7652,11 @@ string_quote_removal (string, quoted)
 	{
 	case '\\':
 	  c = string[++sindex];
+	  if (c == 0)
+	    {
+	      *r++ = '\\';
+	      break;
+	    }
 	  if (((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || dquote) && (sh_syntaxtab[c] & CBSDQUOTE) == 0)
 	    *r++ = '\\';
 	  /* FALLTHROUGH */

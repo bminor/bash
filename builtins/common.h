@@ -89,7 +89,7 @@ extern int dollar_vars_changed __P((void));
 extern void set_dollar_vars_unchanged __P((void));
 extern void set_dollar_vars_changed __P((void));
 
-extern intmax_t get_numeric_arg __P((WORD_LIST *, int));
+extern int get_numeric_arg __P((WORD_LIST *, int, intmax_t *));
 extern int get_exitstat __P((WORD_LIST *));
 extern int read_octal __P((char *));
 

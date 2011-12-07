@@ -43,6 +43,15 @@
 #define ASS_APPEND	0x01
 #define ASS_MKLOCAL	0x02
 
+/* Flags for the string extraction functions. */
+#define SX_NOALLOC	0x01	/* just skip; don't return substring */
+#define SX_VARNAME	0x02	/* variable name; for string_extract () */
+#define SX_REQMATCH	0x04	/* closing/matching delimiter required */
+#define SX_COMMAND	0x08	/* extracting a shell script/command */
+#define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
+#define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
+#define SX_NOLONGJMP	0x40	/* don't longjmp on fatal error */
+
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
 extern char * de_backslash __P((char *));
@@ -52,8 +61,9 @@ extern void unquote_bang __P((char *));
 
 /* Extract the $( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$(".
-   Make (SINDEX) get the position just after the matching ")". */
-extern char *extract_command_subst __P((char *, int *));
+   Make (SINDEX) get the position just after the matching ")".
+   XFLAGS is additional flags to pass to other extraction functions, */
+extern char *extract_command_subst __P((char *, int *, int));
 
 /* Extract the $[ construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$[".
@@ -83,6 +93,12 @@ extern char *string_list_dollar_star __P((WORD_LIST *));
 
 /* Expand $@ into a single string, obeying POSIX rules. */
 extern char *string_list_dollar_at __P((WORD_LIST *, int));
+
+/* Turn the positional paramters into a string, understanding quoting and
+   the various subtleties of using the first character of $IFS as the
+   separator.  Calls string_list_dollar_at, string_list_dollar_star, and
+   string_list as appropriate. */
+extern char *string_list_pos_params __P((int, WORD_LIST *, int));
 
 /* Perform quoted null character removal on each element of LIST.
    This modifies LIST. */

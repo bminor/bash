@@ -372,6 +372,8 @@ inputunit:	simple_list simple_list_terminator
 			  global_command = $1;
 			  eof_encountered = 0;
 			  /* discard_parser_constructs (0); */
+			  if (parser_state & PST_CMDSUBST)
+			    parser_state |= PST_EOFTOKEN;
 			  YYACCEPT;
 			}
 	|	'\n'
@@ -379,6 +381,8 @@ inputunit:	simple_list simple_list_terminator
 			  /* Case of regular command, but not a very
 			     interesting one.  Return a NULL command. */
 			  global_command = (COMMAND *)NULL;
+			  if (parser_state & PST_CMDSUBST)
+			    parser_state |= PST_EOFTOKEN;
 			  YYACCEPT;
 			}
 	|	error '\n'
@@ -762,12 +766,10 @@ case_command:	CASE WORD newline_list IN newline_list ESAC
 
 function_def:	WORD '(' ')' newline_list function_body
 			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); }
-
-	|	FUNCTION WORD '(' ')' newline_list function_body
-			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); }
-
 	|	FUNCTION WORD newline_list function_body
 			{ $$ = make_function_def ($2, $4, function_dstart, function_bstart); }
+	|	FUNCTION WORD '(' ')' newline_list function_body
+			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); }
 	;
 
 
@@ -953,6 +955,13 @@ simple_list:	simple_list1
 			  $$ = $1;
 			  if (need_here_doc)
 			    gather_here_documents ();
+			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
+			    {
+			      global_command = $1;
+			      eof_encountered = 0;
+			      rewind_input_string ();
+			      YYACCEPT;
+			    }
 			}
 	|	simple_list1 '&'
 			{
@@ -962,12 +971,26 @@ simple_list:	simple_list1
 			    $$ = command_connect ($1, (COMMAND *)NULL, '&');
 			  if (need_here_doc)
 			    gather_here_documents ();
+			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
+			    {
+			      global_command = $1;
+			      eof_encountered = 0;
+			      rewind_input_string ();
+			      YYACCEPT;
+			    }
 			}
 	|	simple_list1 ';'
 			{
 			  $$ = $1;
 			  if (need_here_doc)
 			    gather_here_documents ();
+			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
+			    {
+			      global_command = $1;
+			      eof_encountered = 0;
+			      rewind_input_string ();
+			      YYACCEPT;
+			    }
 			}
 	;
 
@@ -2258,6 +2281,15 @@ yylex ()
   token_before_that = last_read_token;
   last_read_token = current_token;
   current_token = read_token (READ);
+
+  if ((parser_state & PST_EOFTOKEN) && current_token == shell_eof_token)
+    {
+      current_token = yacc_EOF;
+      if (bash_input.type == st_string)
+	rewind_input_string ();
+    }
+  parser_state &= ~PST_EOFTOKEN;
+
   return (current_token);
 }
 
@@ -2686,6 +2718,7 @@ read_token (command)
 #if defined (ALIAS)
 	      parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
+
 	      peek_char = shell_getc (1);
 	      if MBTEST(peek_char == '&')
 		return (SEMI_SEMI_AND);
@@ -2895,7 +2928,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       /* Not exactly right yet, should handle shell metacharacters, too.  If
 	 any changes are made to this test, make analogous changes to subst.c:
 	 extract_delimited_string(). */
-      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
+      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
 	tflags |= LEX_INCOMMENT;
 
       if (tflags & LEX_PASSNEXT)		/* last char was backslash */
@@ -3015,7 +3048,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  if (open == ch)	/* undo previous increment */
 	    count--;
 	  if (ch == '(')		/* ) */
-	    nestret = parse_matched_pair (0, '(', ')', &nestlen, rflags & ~P_DQUOTE);
+	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
 	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
 	  else if (ch == '[')		/* ] */
@@ -3414,7 +3447,7 @@ xparse_dolparen (base, string, indp, flags)
   ostring = string;
 
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
-  if (flags & 0x010)		/* EX_NOLONGJMP */
+  if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
 
@@ -3436,7 +3469,8 @@ xparse_dolparen (base, string, indp, flags)
   if (ep[-1] != ')')
     {
 #if DEBUG
-      itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
+      if (ep[-1] != '\n')
+	itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
 #endif
       while (ep > ostring && ep[-1] == '\n') ep--;
     }
@@ -3450,7 +3484,7 @@ xparse_dolparen (base, string, indp, flags)
     itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
 #endif
 
-  if (flags & 1) 
+  if (flags & SX_NOALLOC) 
     return (char *)NULL;
 
   if (nc == 0)
@@ -4017,7 +4051,7 @@ read_token_word (character)
 		     history literally rather than causing a possibly-
 		     incorrect `;' to be added. ) */
 		  push_delimiter (dstack, peek_char);
-		  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, P_COMMAND);
+		  ttok = parse_comsub (cd, '(', ')', &ttoklen, P_COMMAND);
 		  pop_delimiter (dstack);
 		}
 	      else
@@ -4424,7 +4458,7 @@ history_delimiting_chars ()
     {
       /* Tricky.  `for i\nin ...' should not have a semicolon, but
 	 `for i\ndo ...' should.  We do what we can. */
-      for (i = shell_input_line_index; whitespace(shell_input_line[i]); i++)
+      for (i = shell_input_line_index; whitespace (shell_input_line[i]); i++)
 	;
       if (shell_input_line[i] && shell_input_line[i] == 'i' && shell_input_line[i+1] == 'n')
 	return " ";
@@ -4752,6 +4786,7 @@ decode_prompt_string (string)
 		     no longer than PATH_MAX - 1 characters. */
 		  strcpy (t_string, polite_directory_format (t_string));
 
+		temp = trim_pathname (t_string, PATH_MAX - 1);
 		/* If we're going to be expanding the prompt string later,
 		   quote the directory name. */
 		if (promptvars || posixly_correct)

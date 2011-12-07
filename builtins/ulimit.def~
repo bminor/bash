@@ -61,6 +61,9 @@ no option is given, then -f is assumed.
 Values are in 1024-byte increments, except for -t, which is in seconds,
 -p, which is in increments of 512 bytes, and -u, which is an unscaled
 number of processes.
+
+Exit Status:
+Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 #if !defined (_MINIX)
@@ -176,6 +179,14 @@ extern int errno;
 #define LIMIT_HARD 0x01
 #define LIMIT_SOFT 0x02
 
+/* "Blocks" are defined as 512 bytes when in Posix mode and 1024 bytes
+   otherwise. */
+#define POSIXBLK	-2
+
+#define BLOCKSIZE(x)	(((x) == POSIXBLK && posixly_correct) ? 512 : (x))
+
+extern int posixly_correct;
+
 static int _findlim __P((int));
 
 static int ulimit_internal __P((int, char *, int, int));
@@ -209,7 +220,7 @@ static RESOURCE_LIMITS limits[] = {
   { 'b',	RLIMIT_SBSIZE,  1,	"socket buffer size",	"bytes" },
 #endif
 #ifdef RLIMIT_CORE
-  { 'c',	RLIMIT_CORE,  512,	"core file size",	"blocks" },
+  { 'c',	RLIMIT_CORE,  POSIXBLK,	"core file size",	"blocks" },
 #endif
 #ifdef RLIMIT_DATA
   { 'd',	RLIMIT_DATA,  1024,	"data seg size",	"kbytes" },
@@ -217,7 +228,7 @@ static RESOURCE_LIMITS limits[] = {
 #ifdef RLIMIT_NICE
   { 'e',	RLIMIT_NICE,  1,	"scheduling priority",	(char *)NULL },
 #endif
-  { 'f',	RLIMIT_FILESIZE, 512,	"file size",		"blocks" },
+  { 'f',	RLIMIT_FILESIZE, POSIXBLK,	"file size",		"blocks" },
 #ifdef RLIMIT_SIGPENDING
   { 'i',	RLIMIT_SIGPENDING, 1,	"pending signals",	(char *)NULL },
 #endif
@@ -435,7 +446,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
   else if (all_digits (cmdarg))
     {
       limit = string_to_rlimtype (cmdarg);
-      block_factor = limits[limind].block_factor;
+      block_factor = BLOCKSIZE(limits[limind].block_factor);
       real_limit = limit * block_factor;
 
       if ((real_limit / block_factor) != limit)
@@ -699,7 +710,7 @@ printone (limind, curlim, pdesc)
   char unitstr[64];
   int factor;
 
-  factor = limits[limind].block_factor;
+  factor = BLOCKSIZE(limits[limind].block_factor);
   if (pdesc)
     {
       if (limits[limind].units)

@@ -71,7 +71,7 @@ break_builtin (list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  newbreak = get_numeric_arg (list, 1);
+  (void)get_numeric_arg (list, 1, &newbreak);
 
   if (newbreak <= 0)
     {
@@ -111,7 +111,7 @@ continue_builtin (list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  newcont = get_numeric_arg (list, 1);
+  (void)get_numeric_arg (list, 1, &newcont);
 
   if (newcont <= 0)
     {

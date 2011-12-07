@@ -774,6 +774,7 @@ function_def:	WORD '(' ')' newline_list function_body
 			{ $$ = make_function_def ($2, $4, function_dstart, function_bstart); }
 	;
 
+
 function_body:	shell_command
 			{ $$ = $1; }
 	|	shell_command redirection_list
@@ -2719,7 +2720,6 @@ read_token (command)
 #if defined (ALIAS)
 	      parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
-
 	      peek_char = shell_getc (1);
 	      if MBTEST(peek_char == '&')
 		return (SEMI_SEMI_AND);
@@ -3049,7 +3049,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  if (open == ch)	/* undo previous increment */
 	    count--;
 	  if (ch == '(')		/* ) */
-	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
+	    nestret = parse_matched_pair (0, '(', ')', &nestlen, rflags & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
 	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
 	  else if (ch == '[')		/* ] */
@@ -3448,7 +3448,7 @@ xparse_dolparen (base, string, indp, flags)
   ostring = string;
 
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
-  if (flags & SX_NOLONGJMP)
+  if (flags & 0x010)		/* EX_NOLONGJMP */
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
 
@@ -3470,8 +3470,7 @@ xparse_dolparen (base, string, indp, flags)
   if (ep[-1] != ')')
     {
 #if DEBUG
-      if (ep[-1] != '\n')
-	itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
+      itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
 #endif
       while (ep > ostring && ep[-1] == '\n') ep--;
     }
@@ -3485,7 +3484,7 @@ xparse_dolparen (base, string, indp, flags)
     itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
 #endif
 
-  if (flags & SX_NOALLOC) 
+  if (flags & 1) 
     return (char *)NULL;
 
   if (nc == 0)
@@ -4052,7 +4051,7 @@ read_token_word (character)
 		     history literally rather than causing a possibly-
 		     incorrect `;' to be added. ) */
 		  push_delimiter (dstack, peek_char);
-		  ttok = parse_comsub (cd, '(', ')', &ttoklen, P_COMMAND);
+		  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, P_COMMAND);
 		  pop_delimiter (dstack);
 		}
 	      else

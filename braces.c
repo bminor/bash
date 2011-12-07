@@ -538,7 +538,7 @@ brace_gobbler (text, tlen, indx, satisfy)
       if ((c == '$' || c == '<' || c == '>') && text[i+1] == '(')			/* ) */
 	{
 	  si = i + 2;
-	  t = extract_command_subst (text, &si);
+	  t = extract_command_subst (text, &si, 0);
 	  i = si;
 	  free (t);
 	  i++;

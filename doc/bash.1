@@ -4242,6 +4242,8 @@ The
 .I "previous job"
 may be referenced using
 .BR %\- .
+If there is only a single job, \fB%+\fP and \fB%\-\fP can both be used
+to refer to that job.
 In output pertaining to jobs (e.g., the output of the
 .B jobs
 command), the current job is always flagged with a
@@ -7749,8 +7751,10 @@ Cause \fBread\fP to time out and return failure if a complete line of
 input is not read within \fItimeout\fP seconds.
 \fItimeout\fP may be a decimal number with a fractional portion following
 the decimal point.
-This option has no effect if \fBread\fP is not reading input from the
-terminal or a pipe.
+This option is only effective if \fBread\fP is reading input from a
+terminal, pipe, or other special file; it has no effect when reading
+from regular files.
+The exit status is greater than 128 if the timeout is exceeded.
 .TP
 .B \-u \fIfd\fP
 Read input from file descriptor \fIfd\fP.

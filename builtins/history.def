@@ -88,7 +88,7 @@ extern int current_command_line_count;
 extern int force_append_history;	/* shopt -s histappend */
 
 static char *histtime __P((HIST_ENTRY *, const char *));
-static void display_history __P((WORD_LIST *));
+static int display_history __P((WORD_LIST *));
 static void push_history __P((WORD_LIST *));
 static int expand_and_print_history __P((WORD_LIST *));
 
@@ -197,8 +197,8 @@ history_builtin (list)
     }
   else if ((flags & (AFLAG|RFLAG|NFLAG|WFLAG|CFLAG)) == 0)
     {
-      display_history (list);
-      return (sh_chkwrite (EXECUTION_SUCCESS));
+      result = display_history (list);
+      return (sh_chkwrite (result));
     }
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");
@@ -260,7 +260,7 @@ histtime (hlist, histtimefmt)
   return timestr;
 }
 
-static void
+static int
 display_history (list)
      WORD_LIST *list;
 {
@@ -271,7 +271,9 @@ display_history (list)
 
   if (list)
     {
-      limit = get_numeric_arg (list, 0);
+      if (get_numeric_arg (list, 0, &limit) == 0)
+	return (EXECUTION_FAILURE);
+
       if (limit < 0)
 	limit = -limit;
     }
@@ -305,6 +307,8 @@ display_history (list)
 	  i++;
 	}
     }
+
+  return (EXECUTION_SUCCESS);
 }
 
 /* Remove the last entry in the history list and add each argument in
