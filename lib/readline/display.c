@@ -82,6 +82,7 @@ struct line_state
 static struct line_state line_state_array[2];
 static struct line_state *line_state_visible = &line_state_array[0];
 static struct line_state *line_state_invisible = &line_state_array[1];
+static int line_structures_initialized = 0;
 
 /* Backwards-compatible names. */
 #define inv_lbreaks	(line_state_invisible->lbreaks)
@@ -471,8 +472,7 @@ init_line_structures (minsize)
     {
       /* should be enough. */
       inv_lbsize = vis_lbsize = 256;
-      inv_lbreaks = (int *)xmalloc (inv_lbsize * sizeof (int));
-      vis_lbreaks = (int *)xmalloc (vis_lbsize * sizeof (int));
+
 #if defined (HANDLE_MULTIBYTE)
       line_state_visible->wbsize = vis_lbsize;
       line_state_visible->wrapped_line = (int *)xmalloc (line_state_visible->wbsize * sizeof (int));
@@ -480,8 +480,13 @@ init_line_structures (minsize)
       line_state_invisible->wbsize = inv_lbsize;
       line_state_invisible->wrapped_line = (int *)xmalloc (line_state_invisible->wbsize * sizeof (int));
 #endif
+
+      inv_lbreaks = (int *)xmalloc (inv_lbsize * sizeof (int));
+      vis_lbreaks = (int *)xmalloc (vis_lbsize * sizeof (int));
       inv_lbreaks[0] = vis_lbreaks[0] = 0;
     }
+
+  line_structures_initialized = 1;
 }
   
 /* Basic redisplay algorithm. */
@@ -507,7 +512,7 @@ rl_redisplay ()
   if (!rl_display_prompt)
     rl_display_prompt = "";
 
-  if (invisible_line == 0 || vis_lbreaks == 0)
+  if (line_structures_initialized == 0)
     {
       init_line_structures (0);
       rl_on_new_line ();

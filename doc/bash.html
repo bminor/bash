@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 September 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 December 5<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -532,12 +532,13 @@ No other startup files are read.
 
 <B>Bash</B>
 
-attempts to determine when it is being run by the remote shell
-daemon, usually <I>rshd</I>.
+attempts to determine when it is being run with its standard input
+connected to a a network connection, as if by the remote shell
+daemon, usually <I>rshd</I>, or the secure shell daemon <I>sshd</I>.
 If
 <B>bash</B>
 
-determines it is being run by <I>rshd</I>, it reads and executes
+determines it is being run in this fashion, it reads and executes
 commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, if that file exists and is readable.
 It will not do this if invoked as <B>sh</B>.
 The
@@ -1684,7 +1685,9 @@ The command argument to the <B>-c</B> invocation option.
 An array variable whose members are the line numbers in source files
 corresponding to each member of <B>FUNCNAME</B>.
 <B>${BASH_LINENO[</B><I>$i</I><B>]}</B> is the line number in the source
-file where <B>${FUNCNAME[</B><I>$ifP</I><B>]}</B> was called.
+file where <B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called
+(or <B>${BASH_LINENO[</B><I>$i-1</I><B>]}</B> if referenced within another
+shell function).
 The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}.
 Use LINENO</B> to obtain the current line number.
 <DT><B>BASH_REMATCH</B>
@@ -9829,7 +9832,7 @@ keyword,
 part of the test in an
 <B>if</B>
 
-statement, part of a
+statement, part of a command executed in a
 <B>&amp;&amp;</B>
 
 or
@@ -10890,7 +10893,7 @@ keyword,
 part of the test in an
 <I>if</I>
 
-statement, part of a
+statement, part of a command executed in a
 <B>&amp;&amp;</B>
 
 or
@@ -11549,7 +11552,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 September 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 December 5<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11653,6 +11656,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 10 October 2007 09:50:38 EDT
+Time: 10 January 2008 17:41:32 EST
 </BODY>
 </HTML>

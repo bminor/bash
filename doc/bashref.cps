@@ -50,7 +50,6 @@
 \entry {expressions, arithmetic}{76}
 \entry {expressions, conditional}{75}
 \initial {F}
-\entry {FDL, GNU Free Documentation License}{139}
 \entry {field}{3}
 \entry {filename}{3}
 \entry {filename expansion}{23}

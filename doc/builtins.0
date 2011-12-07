@@ -871,13 +871,14 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       above) exits with a non-zero status.  The shell does not
                       exit  if  the  command that fails is part of the command
                       list immediately following a  wwhhiillee  or  uunnttiill  keyword,
-                      part  of the test in an iiff statement, part of a &&&& or ||||
-                      list, any command in a pipeline but the last, or if  the
-                      command's return value is being inverted via !!.  Failing
-                      simple commands that are part of shell functions or com-
-                      mand  lists enclosed in braces or parentheses satisfying
-                      the above conditions do not cause the shell to exit.   A
-                      trap on EERRRR, if set, is executed before the shell exits.
+                      part  of  the test in an iiff statement, part of a command
+                      executed in a &&&& or |||| list, any command in  a  pipeline
+                      but  the last, or if the command's return value is being
+                      inverted via !!.  Failing simple commands that  are  part
+                      of  shell  functions or command lists enclosed in braces
+                      or parentheses satisfying the above  conditions  do  not
+                      cause the shell to exit.  A trap on EERRRR, if set, is exe-
+                      cuted before the shell exits.
               --ff      Disable pathname expansion.
               --hh      Remember the location of commands as they are looked  up
                       for execution.  This is enabled by default.
@@ -1305,16 +1306,16 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               non-zero exit status, subject to the following conditions.   The
               EERRRR  trap  is  not executed if the failed command is part of the
               command list immediately following a  wwhhiillee  or  uunnttiill  keyword,
-              part of the test in an _i_f statement, part of a &&&& or |||| list, or
-              if the command's return value is being inverted  via  !!.   These
-              are  the  same  conditions  obeyed  by the eerrrreexxiitt option.  If a
-              _s_i_g_s_p_e_c is RREETTUURRNN, the command _a_r_g is executed each time a shell
-              function or a script executed with the .. or ssoouurrccee builtins fin-
-              ishes executing.  Signals ignored upon entry to the shell cannot
-              be trapped or reset.  Trapped signals that are not being ignored
-              are reset to their original values in a child process when it is
-              created.   The return status is false if any _s_i_g_s_p_e_c is invalid;
-              otherwise ttrraapp returns true.
+              part  of the test in an _i_f statement, part of a command executed
+              in a &&&& or |||| list, or if the command's return  value  is  being
+              inverted  via  !!.   These  are the same conditions obeyed by the
+              eerrrreexxiitt option.  If a _s_i_g_s_p_e_c is RREETTUURRNN, the command _a_r_g is exe-
+              cuted each time a shell function or a script executed with the ..
+              or ssoouurrccee builtins finishes  executing.   Signals  ignored  upon
+              entry  to the shell cannot be trapped or reset.  Trapped signals
+              that are not being ignored are reset to their original values in
+              a  child process when it is created.  The return status is false
+              if any _s_i_g_s_p_e_c is invalid; otherwise ttrraapp returns true.
 
        ttyyppee [--aaffttppPP] _n_a_m_e [_n_a_m_e ...]
               With no options, indicate how each _n_a_m_e would be interpreted  if

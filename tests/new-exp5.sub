@@ -28,3 +28,13 @@ a=0123456789
 echo ${a:1}
 echo ${a: -1}
 echo ${a: ${#a}-1}
+
+# problem with bash through 3.2.33
+oIFS="$IFS"
+IFS=$'\n'
+a=(A B C D)
+b=("${a[@]}")
+echo "${#b[@]}", "${b[@]}"  # 4, A B C D -- OK
+b=("${a[@]:2}")
+echo "${#b[@]}", "${b[@]}"  # 1, C D -- bug, should be 2, C D 
+IFS="$oIFS"

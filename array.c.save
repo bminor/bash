@@ -329,7 +329,7 @@ int	starsub, quoted;
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, *sep, *t;
+	char		*ifs, sep[2], *t;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -361,24 +361,19 @@ int	starsub, quoted;
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
 		/* ${array[*]} */
-		sep = ifs_firstchar ((int *)NULL);
+		ifs = getifs();
+		sep[0] = ifs ? *ifs : '\0';
 	} else if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) {
-		/* ${array[@]} */
-		sep = ifs_firstchar ((int *)NULL);
-		ifs = getifs ();
-		if (ifs == 0 || *ifs == 0) {
-			sep[0] = ' ';
-			sep[1] = '\0';
-		}
-	} else {
-		sep = xmalloc (2);
+		/* ${array[@]}.  Use ' ' to make sure  the right splitting is
+		   performed even when $IFS is "" */
+		ifs = getifs();
+		sep[0] = (ifs && *ifs) ? *ifs : ' ';
+	} else
 		sep[0] = ' ';
-		sep[1] = '\0';
-	}
+	sep[1] = '\0';
 
 	t = array_to_string (a2, sep, 0);
 	array_dispose(a2);
-	free (sep);
 
 	return t;
 }
@@ -391,7 +386,7 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t, *sifs;
+	char	*t, *ifs, sifs[2];
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
@@ -408,9 +403,10 @@ int	mflags;
 	else
 		array_quote_escapes(a2);
 	if (mflags & MATCH_STARSUB) {
-		sifs = ifs_firstchar((int *)NULL);
+		ifs = getifs();
+		sifs[0] = ifs ? *ifs : '\0';
+		sifs[1] = '\0';
 		t = array_to_string (a2, sifs, 0);
-		free(sifs);
 	} else
 		t = array_to_string (a2, " ", 0);
 	array_dispose (a2);

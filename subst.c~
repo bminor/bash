@@ -1796,6 +1796,42 @@ string_list (list)
   return (string_list_internal (list, " "));
 }
 
+/* An external interface that can be used by the rest of the shell to
+   obtain a string containing the first character in $IFS.  Handles all
+   the multibyte complications.  If LENP is non-null, it is set to the
+   length of the returned string. */
+char *
+ifs_firstchar (lenp)
+     int *lenp;
+{
+  char *ret;
+  int len;
+
+  ret = xmalloc (MB_LEN_MAX + 1);
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc_len == 1)
+    {
+      ret[0] = ifs_firstc[0];
+      ret[1] = '\0';
+      len = ret[0] ? 1 : 0;
+    }
+  else
+    {
+      memcpy (ret, ifs_firstc, ifs_firstc_len);
+      ret[len = ifs_firstc_len] = '\0';
+    }
+#else
+  ret[0] = ifs_firstc;
+  ret[1] = '\0';
+  len = ret[0] ? 0 : 1;
+#endif
+
+  if (lenp)
+    *lenp = len;
+
+  return ret;
+}
+
 /* Return a single string of all the words present in LIST, obeying the
    quoting rules for "$*", to wit: (P1003.2, draft 11, 3.5.2) "If the
    expansion [of $*] appears within a double quoted string, it expands
@@ -5806,7 +5842,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
      char *varname, *value, *patsub;
      int quoted;
 {
-  int vtype, mflags, starsub;
+  int vtype, mflags, starsub, delim;
   char *val, *temp, *pat, *rep, *p, *lpatsub, *tt;
   SHELL_VAR *v;
 
@@ -5841,10 +5877,21 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 
   /* If the pattern starts with a `/', make sure we skip over it when looking
      for the replacement delimiter. */
+#if 0
   if (rep = quoted_strchr ((*patsub == '/') ? lpatsub+1 : lpatsub, '/', ST_BACKSL))
     *rep++ = '\0';
   else
     rep = (char *)NULL;
+#else
+  delim = skip_to_delim (lpatsub, ((*patsub == '/') ? 1 : 0), "/");
+  if (lpatsub[delim] == '/')
+    {
+      lpatsub[delim] = 0;
+      rep = lpatsub + delim + 1;
+    }
+  else
+    rep = (char *)NULL;
+#endif
 
   if (rep && *rep == '\0')
     rep = (char *)NULL;
@@ -7034,7 +7081,7 @@ add_string:
 	      free (temp);
 	      temp = temp1;
 	      sindex += t_index;
-	      goto add_string;
+	      goto add_quoted_string;		/* XXX was add_string */
 	    }
 	  else
 	    {

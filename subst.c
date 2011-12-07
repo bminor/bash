@@ -1362,6 +1362,87 @@ unquote_bang (string)
 }
 #endif
 
+/* Skip characters in STRING until we find a character in DELIMS, and return
+   the index of that character.  START is the index into string at which we
+   begin.  This is similar in spirit to strpbrk, but it returns an index into
+   STRING and takes a starting index.  This little piece of code knows quite
+   a lot of shell syntax.  It's very similar to skip_double_quoted and other
+   functions of that ilk. */
+int
+skip_to_delim (string, start, delims)
+     char *string;
+     int start;
+     char *delims;
+{
+  int i, pass_next, backq, si, c;
+  size_t slen;
+  char *temp;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string + start) + start;
+  no_longjmp_on_fatal_error = 1;
+  i = start;
+  pass_next = backq = 0;
+  while (c = string[i])
+    {
+      if (pass_next)
+	{
+	  pass_next = 0;
+	  if (c == 0)
+	    CQ_RETURN(i);
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else if (c == '\\')
+	{
+	  pass_next = 1;
+	  i++;
+	  continue;
+	}
+      else if (backq)
+	{
+	  if (c == '`')
+	    backq = 0;
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else if (c == '`')
+	{
+	  backq = 1;
+	  i++;
+	  continue;
+	}
+      else if (c == '\'' || c == '"')
+	{
+	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
+			  : skip_double_quoted (string, slen, ++i);
+	  /* no increment, the skip functions increment past the closing quote. */
+	}
+      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+	{
+	  si = i + 2;
+	  if (string[si] == '\0')
+	    CQ_RETURN(si);
+
+	  if (string[i+1] == LPAREN)
+	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
+	  else
+	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
+	  i = si;
+	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
+	    break;
+	  i++;
+	  continue;
+	}
+      else if (member (c, delims))
+	break;
+      else
+	ADVANCE_CHAR (string, slen, i);
+    }
+
+  CQ_RETURN(i);
+}
+
 #if defined (READLINE)
 /* Return 1 if the portion of STRING ending at EINDEX is quoted (there is
    an unclosed quoted string), or if the character at EINDEX is quoted
@@ -1463,87 +1544,6 @@ unclosed_pair (string, eindex, openstr)
 	ADVANCE_CHAR (string, slen, i);
     }
   return (openc);
-}
-
-/* Skip characters in STRING until we find a character in DELIMS, and return
-   the index of that character.  START is the index into string at which we
-   begin.  This is similar in spirit to strpbrk, but it returns an index into
-   STRING and takes a starting index.  This little piece of code knows quite
-   a lot of shell syntax.  It's very similar to skip_double_quoted and other
-   functions of that ilk. */
-int
-skip_to_delim (string, start, delims)
-     char *string;
-     int start;
-     char *delims;
-{
-  int i, pass_next, backq, si, c;
-  size_t slen;
-  char *temp;
-  DECLARE_MBSTATE;
-
-  slen = strlen (string + start) + start;
-  no_longjmp_on_fatal_error = 1;
-  i = start;
-  pass_next = backq = 0;
-  while (c = string[i])
-    {
-      if (pass_next)
-	{
-	  pass_next = 0;
-	  if (c == 0)
-	    CQ_RETURN(i);
-	  ADVANCE_CHAR (string, slen, i);
-	  continue;
-	}
-      else if (c == '\\')
-	{
-	  pass_next = 1;
-	  i++;
-	  continue;
-	}
-      else if (backq)
-	{
-	  if (c == '`')
-	    backq = 0;
-	  ADVANCE_CHAR (string, slen, i);
-	  continue;
-	}
-      else if (c == '`')
-	{
-	  backq = 1;
-	  i++;
-	  continue;
-	}
-      else if (c == '\'' || c == '"')
-	{
-	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
-			  : skip_double_quoted (string, slen, ++i);
-	  /* no increment, the skip functions increment past the closing quote. */
-	}
-      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
-	{
-	  si = i + 2;
-	  if (string[si] == '\0')
-	    CQ_RETURN(si);
-
-	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
-	  else
-	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
-	  i = si;
-	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
-	    break;
-	  i++;
-	  continue;
-	}
-      else if (member (c, delims))
-	break;
-      else
-	ADVANCE_CHAR (string, slen, i);
-    }
-
-  CQ_RETURN(i);
 }
 
 /* Split STRING (length SLEN) at DELIMS, and return a WORD_LIST with the
@@ -1794,6 +1794,42 @@ string_list (list)
      WORD_LIST *list;
 {
   return (string_list_internal (list, " "));
+}
+
+/* An external interface that can be used by the rest of the shell to
+   obtain a string containing the first character in $IFS.  Handles all
+   the multibyte complications.  If LENP is non-null, it is set to the
+   length of the returned string. */
+char *
+ifs_firstchar (lenp)
+     int *lenp;
+{
+  char *ret;
+  int len;
+
+  ret = xmalloc (MB_LEN_MAX + 1);
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc_len == 1)
+    {
+      ret[0] = ifs_firstc[0];
+      ret[1] = '\0';
+      len = ret[0] ? 1 : 0;
+    }
+  else
+    {
+      memcpy (ret, ifs_firstc, ifs_firstc_len);
+      ret[len = ifs_firstc_len] = '\0';
+    }
+#else
+  ret[0] = ifs_firstc;
+  ret[1] = '\0';
+  len = ret[0] ? 0 : 1;
+#endif
+
+  if (lenp)
+    *lenp = len;
+
+  return ret;
 }
 
 /* Return a single string of all the words present in LIST, obeying the
@@ -5806,7 +5842,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
      char *varname, *value, *patsub;
      int quoted;
 {
-  int vtype, mflags, starsub;
+  int vtype, mflags, starsub, delim;
   char *val, *temp, *pat, *rep, *p, *lpatsub, *tt;
   SHELL_VAR *v;
 
@@ -5841,10 +5877,21 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 
   /* If the pattern starts with a `/', make sure we skip over it when looking
      for the replacement delimiter. */
+#if 0
   if (rep = quoted_strchr ((*patsub == '/') ? lpatsub+1 : lpatsub, '/', ST_BACKSL))
     *rep++ = '\0';
   else
     rep = (char *)NULL;
+#else
+  delim = skip_to_delim (lpatsub, ((*patsub == '/') ? 1 : 0), "/");
+  if (lpatsub[delim] == '/')
+    {
+      lpatsub[delim] = 0;
+      rep = lpatsub + delim + 1;
+    }
+  else
+    rep = (char *)NULL;
+#endif
 
   if (rep && *rep == '\0')
     rep = (char *)NULL;

@@ -15143,3 +15143,43 @@ lib/sh/getcwd.c
 	  _path_checkino instead of directly comparing against d_fileno.
 	  Fixes Interix problem reported by Michael Haubenwallner
 	  <haubi@gentoo.org>
+
+				 1/7/2008
+				 --------
+array.c
+	- fix array_subrange to separate elements in returned string with
+	  first char of $IFS if QUOTED is non-zero, since this indicates
+	  the caller used ${array[@]:foo}.  Fixes bug reported by Lea
+	  Wiemann <lewiemann@gmail.com>
+
+				    1/8
+				    ---
+subst.c
+	- new function returning a string containing the first character of
+	  $IFS: char *ifs_firstchar(int *)
+
+subst.h
+	- extern declaration for ifs_firstchar()
+
+array.c
+	- call ifs_firstchar() to get first character of $IFS when needed
+	  (array_subrange() and array_patsub())
+
+				   1/11
+				   ----
+lib/readline/display.c
+	- use sentinel variable set at end of init_line_structures to decide
+	  whether to call it from rl_redisplay, since early SIGWINCH on
+	  Mac OS X that hits during this function can cause _rl_wrapped_line
+	  to be referenced before initialization.  Fix for bug reported by
+	  Len Lattanzi <llattanzi@apple.com>
+
+subst.[ch]
+	- skip_to_delim is now compiled into the shell all the time, not just
+	  when readline is linked in
+
+subst.c
+	- use skip_to_delim to find the `/' denoting the end of a pattern
+	  in pattern substitution, since it knows more shell syntax than
+	  quoted_strchr and understands multibyte characters.  Fixes bug
+	  reported by Dmitry V Golovashkin <Dmitry.Golovashkin@sas.com>

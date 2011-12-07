@@ -92,6 +92,7 @@ extern void word_list_remove_quoted_nulls __P((WORD_LIST *));
    STRING. */
 extern WORD_LIST *list_string __P((char *, char *, int));
 
+extern char *ifs_firstchar  __P((int *));
 extern char *get_word_from_string __P((char **, char *, char **));
 extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
 
@@ -239,10 +240,11 @@ extern char *remove_backslashes __P((char *));
 extern char *cond_expand_word __P((WORD_DESC *, int));
 #endif
 
+extern int skip_to_delim __P((char *, int, char *));
+
 #if defined (READLINE)
 extern int char_is_quoted __P((char *, int));
 extern int unclosed_pair __P((char *, int, char *));
-extern int skip_to_delim __P((char *, int, char *));
 extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int *, int *));
 #endif
 

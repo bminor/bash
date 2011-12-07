@@ -115,4 +115,3 @@
 \entry{configuration}{123}{configuration}
 \entry{Bash installation}{123}{Bash installation}
 \entry{Bash configuration}{123}{Bash configuration}
-\entry{FDL, GNU Free Documentation License}{139}{FDL, GNU Free Documentation License}
