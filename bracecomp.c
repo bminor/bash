@@ -35,9 +35,12 @@
 #endif
 
 #include "bashansi.h"
+#include "shmbutil.h"
 
 #include "shell.h"
 #include <readline/readline.h>
+
+static int _strcompare __P((char **, char **));
 
 /* Find greatest common prefix of two strings. */
 static int
@@ -146,13 +149,30 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 }
 
 static int
+_strcompare (s1, s2)
+     char **s1, **s2;
+{
+  int result;
+
+  result = **s1 - **s2;
+  if (result == 0)
+    result = strcmp (*s1, *s2);
+
+  return result;
+}
+
+static int
 hack_braces_completion (names)
      char **names;
 {
   register int i;
   char *temp;
 
-  temp = really_munge_braces (names, 1, strvec_len (names), 0);
+  i = strvec_len (names);
+  if (MB_CUR_MAX > 1 && i > 2)
+    qsort (names+1, i-1, sizeof (char *), (QSFUNC *)_strcompare);
+      
+  temp = really_munge_braces (names, 1, i, 0);
 
   for (i = 0; names[i]; ++i)
     {

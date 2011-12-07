@@ -15380,6 +15380,9 @@ pcomplete.c
 	  etc.)
 	- new function, pcomp_set_compspec_options, to set or unset bits in
 	  the options word of a passed compspec (default CURCS)
+	- only call bash_dequote_filename (via rl_filename_dequoting_function)
+	  from pcomp_filename_completion_function if the readline state
+	  word indicates word completion is in progress
 
 pcomplete.h
 	- new extern declaration for curcs
@@ -15393,3 +15396,37 @@ bashline.c
 		   the following character is one of the special ones
 	- call pcomp_set_readline_variables from attempt_shell_completion
 	  instead of doing the equivalent inline
+
+				   3/18
+				   ----
+bracecomp.c
+	- make sure we sort array of matches in byte order (using strcmp). so
+	  the brace calculations work correctly even when the locale orders
+	  characters like aAbBcC...zZ.  Fixes bug reported by Torsten Nahm
+	  <torstennahm@torstennahm.de>
+
+				   3/20
+				   ----
+lib/readline/{rltty,signals}.c
+	- move block_sigint and release_sigint from rltty.c to signals.c; add
+	  _rl_ prefix to make them public to the library; change callers.
+	  From Jan Kratchovil <jan.kratchovil@redhat.com>
+
+lib/readline/rlprivate.h
+	- new extern declarations for _rl_block_sigint and _rl_release_sigint
+
+lib/readline/display.c
+	- add calls to _rl_block_sigint and _rl_release_sigint to rl_redisplay,
+	  since it maniupluates global data structures.  Fix from Jan
+	  Kratchovil <jan.kratchovil@redhat.com>
+
+builtins/printf.def
+	- change calls to asprintf and manually adding to vbuf to use calls
+	  to vsnprintf against vbuf directly -- if the number of characters
+	  to be written overflows the buffer, realloc the buffer and use
+	  vsnprintf again.  This should reduce the memory used by printf.
+	  Idea from Yuya Katayama <yuya999@gmail.com>
+
+lib/readline/doc/rltech.texi
+	- documented rest of readline's state flags, including RL_STATE_CALLBACK
+	- documented rl_save_state and rl_restore_state

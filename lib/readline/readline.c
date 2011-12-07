@@ -305,7 +305,9 @@ readline (prompt)
      const char *prompt;
 {
   char *value;
+#if 0
   int in_callback;
+#endif
 
   /* If we are at EOF return a NULL string. */
   if (rl_pending_input == EOF)

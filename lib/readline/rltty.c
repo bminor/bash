@@ -52,74 +52,7 @@ extern int errno;
 rl_vintfunc_t *rl_prep_term_function = rl_prep_terminal;
 rl_voidfunc_t *rl_deprep_term_function = rl_deprep_terminal;
 
-static void block_sigint PARAMS((void));
-static void release_sigint PARAMS((void));
-
 static void set_winsize PARAMS((int));
-
-/* **************************************************************** */
-/*								    */
-/*			   Signal Management			    */
-/*								    */
-/* **************************************************************** */
-
-#if defined (HAVE_POSIX_SIGNALS)
-static sigset_t sigint_set, sigint_oset;
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-static int sigint_oldmask;
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
-
-static int sigint_blocked;
-
-/* Cause SIGINT to not be delivered until the corresponding call to
-   release_sigint(). */
-static void
-block_sigint ()
-{
-  if (sigint_blocked)
-    return;
-
-#if defined (HAVE_POSIX_SIGNALS)
-  sigemptyset (&sigint_set);
-  sigemptyset (&sigint_oset);
-  sigaddset (&sigint_set, SIGINT);
-  sigprocmask (SIG_BLOCK, &sigint_set, &sigint_oset);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-  sigint_oldmask = sigblock (sigmask (SIGINT));
-#  else /* !HAVE_BSD_SIGNALS */
-#    if defined (HAVE_USG_SIGHOLD)
-  sighold (SIGINT);
-#    endif /* HAVE_USG_SIGHOLD */
-#  endif /* !HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
-
-  sigint_blocked = 1;
-}
-
-/* Allow SIGINT to be delivered. */
-static void
-release_sigint ()
-{
-  if (sigint_blocked == 0)
-    return;
-
-#if defined (HAVE_POSIX_SIGNALS)
-  sigprocmask (SIG_SETMASK, &sigint_oset, (sigset_t *)NULL);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (sigint_oldmask);
-#  else /* !HAVE_BSD_SIGNALS */
-#    if defined (HAVE_USG_SIGHOLD)
-  sigrelse (SIGINT);
-#    endif /* HAVE_USG_SIGHOLD */
-#  endif /* !HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
-
-  sigint_blocked = 0;
-}
 
 /* **************************************************************** */
 /*								    */
@@ -663,7 +596,7 @@ rl_prep_terminal (meta_flag)
     return;
 
   /* Try to keep this function from being INTerrupted. */
-  block_sigint ();
+  _rl_block_sigint ();
 
   tty = fileno (rl_instream);
 
@@ -677,7 +610,8 @@ rl_prep_terminal (meta_flag)
       if (errno == ENOTTY || errno == EINVAL)
 #endif
 	readline_echoing_p = 1;		/* XXX */
-      release_sigint ();
+
+      _rl_release_sigint ();
       return;
     }
 
@@ -712,7 +646,7 @@ rl_prep_terminal (meta_flag)
 
   if (set_tty_settings (tty, &tio) < 0)
     {
-      release_sigint ();
+      _rl_release_sigint ();
       return;
     }
 
@@ -723,7 +657,7 @@ rl_prep_terminal (meta_flag)
   terminal_prepped = 1;
   RL_SETSTATE(RL_STATE_TERMPREPPED);
 
-  release_sigint ();
+  _rl_release_sigint ();
 }
 
 /* Restore the terminal's normal settings and modes. */
@@ -736,7 +670,7 @@ rl_deprep_terminal ()
     return;
 
   /* Try to keep this function from being interrupted. */
-  block_sigint ();
+  _rl_block_sigint ();
 
   tty = fileno (rl_instream);
 
@@ -747,14 +681,14 @@ rl_deprep_terminal ()
 
   if (set_tty_settings (tty, &otio) < 0)
     {
-      release_sigint ();
+      _rl_release_sigint ();
       return;
     }
 
   terminal_prepped = 0;
   RL_UNSETSTATE(RL_STATE_TERMPREPPED);
 
-  release_sigint ();
+  _rl_release_sigint ();
 }
 #endif /* !NO_TTY_DRIVER */
 

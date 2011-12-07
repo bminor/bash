@@ -294,6 +294,10 @@ extern int _rl_restore_tty_signals PARAMS((void));
 /* search.c */
 extern int _rl_nsearch_callback PARAMS((_rl_search_cxt *));
 
+/* signals.c */
+extern void _rl_block_sigint PARAMS((void));
+extern void _rl_release_sigint PARAMS((void));
+
 /* terminal.c */
 extern void _rl_get_screen_size PARAMS((int, int));
 extern int _rl_init_terminal_io PARAMS((const char *));

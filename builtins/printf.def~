@@ -37,7 +37,7 @@ format specifications, each of which causes printing of the next successive
 argument.
 
 In addition to the standard format specifications described in printf(1)
-and printf(3), print interprets:
+and printf(3), printf interprets:
 
   %b	expand backslash escape sequences in the corresponding argument
   %q	quote the argument in a way that can be reused as shell input
@@ -107,31 +107,22 @@ extern int errno;
 
 #define PF(f, func) \
   do { \
-    char *b = 0; \
     int nw; \
     clearerr (stdout); \
     if (have_fieldwidth && have_precision) \
-      nw = asprintf(&b, f, fieldwidth, precision, func); \
+      nw = vflag ? vbprintf (f, fieldwidth, precision, func) : printf (f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
-      nw = asprintf(&b, f, fieldwidth, func); \
+      nw = vflag ? vbprintf (f, fieldwidth, func) : printf (f, fieldwidth, func); \
     else if (have_precision) \
-      nw = asprintf(&b, f, precision, func); \
+      nw = vflag ? vbprintf (f, precision, func) : printf (f, fieldwidth, func); \
     else \
-      nw = asprintf(&b, f, func); \
+      nw = vflag ? vbprintf (f, func) : printf (f, func); \
     tw += nw; \
-    if (b) \
+    if (ferror (stdout)) \
       { \
-	if (vflag) \
-	  (void)vbadd (b, nw); \
-	else \
-	  (void)fputs (b, stdout); \
-	if (ferror (stdout)) \
-	  { \
-	    sh_wrerror (); \
-	    clearerr (stdout); \
-	    return (EXECUTION_FAILURE); \
-	  } \
-	free (b); \
+	sh_wrerror (); \
+	clearerr (stdout); \
+	return (EXECUTION_FAILURE); \
       } \
   } while (0)
 
@@ -175,11 +166,17 @@ extern int errno;
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
+#ifndef HAVE_VSNPRINTF
+extern int vsnprintf __P((char *, size_t, const char *, ...)) __attribute__((__format__ (printf, 3, 4)));
+#endif
+
 static void printf_erange __P((char *));
 static int printstr __P((char *, char *, int, int, int));
 static int tescape __P((char *, char *, int *));
 static char *bexpand __P((char *, int, int *, int *));
 static char *vbadd __P((char *, int));
+static int vbprintf __P((const char *, ...))
+ __attribute__((__format__ (printf, 1, 2)));
 static char *mklong __P((char *, char *, size_t));
 static int getchr __P((void));
 static char *getstr __P((void));
@@ -860,6 +857,42 @@ vbadd (buf, blen)
 #endif
 
   return vbuf;
+}
+
+static int
+#if defined (PREFER_STDARG)
+vbprintf (const char *format, ...)
+#else
+vbprintf (format, va_alist)
+  const char *format;
+  va_dcl
+#endif
+{
+  va_list args;
+  size_t nlen;
+  int blen;
+
+  SH_VA_START (args, format);
+  blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+
+  nlen = vblen + blen + 1;
+  if (nlen >= vbsize)
+    {
+      vbsize = ((nlen + 63) >> 6) << 6;
+      vbuf = (char *)xrealloc (vbuf, vbsize);
+      blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
+    }
+
+  va_end (args);
+  vblen += blen;
+  vbuf[vblen] = '\0';
+
+#ifdef DEBUG
+  if  (strlen (vbuf) != vblen)
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+#endif
+  
+  return (blen);
 }
 
 static char *

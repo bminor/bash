@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -1189,6 +1189,7 @@ rl_save_state (sp)
   sp->prompt = rl_prompt;
 
   sp->rlstate = rl_readline_state;
+  sp->in_callback = RL_ISSTATE (RL_STATE_CALLBACK).
   sp->done = rl_done;
   sp->kmap = _rl_keymap;
 
@@ -1223,6 +1224,7 @@ rl_restore_state (sp)
   rl_prompt = sp->prompt;
 
   rl_readline_state = sp->rlstate;
+  /* Don't need to do anything with sp->in_callback */
   rl_done = sp->done;
   _rl_keymap = sp->kmap;
 

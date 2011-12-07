@@ -1,7 +1,6 @@
 @comment %**start of header (This is for running Texinfo on a region.)
 @setfilename rltech.info
 @comment %**end of header (This is for running Texinfo on a region.)
-@setchapternewpage odd
 
 @ifinfo
 This document describes the GNU Readline Library, a utility for aiding
@@ -1083,6 +1082,21 @@ environment variable is used.
 
 @node Utility Functions
 @subsection Utility Functions
+
+@deftypefun int rl_save_state (struct readline_state *sp)
+Save a snapshot of Readline's internal state to @var{sp}.
+The contents of the @var{readline_state} structure are documented
+in @file{readline.h}.
+The caller is responsible for allocating the structure.
+@end deftypefun
+
+@deftypefun int rl_restore_state (struct readline_state *sp)
+Restore Readline's internal state to that stored in @var{sp}, which must
+have been saved by a call to @code{rl_save_state}.
+The contents of the @var{readline_state} structure are documented
+in @file{readline.h}.
+The caller is responsible for freeing the structure.
+@end deftypefun
 
 @deftypefun void rl_free (void *mem)
 Deallocate the memory pointed to by @var{mem}.  @var{mem} must have been

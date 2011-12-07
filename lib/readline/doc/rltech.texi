@@ -523,6 +523,20 @@ Readline is performing word completion.
 Readline is currently executing the readline signal handler.
 @item RL_STATE_UNDOING
 Readline is performing an undo.
+@item RL_STATE_INPUTPENDING
+Readline has input pending due to a call to @code{rl_execute_next()}.
+@item RL_STATE_TTYCSAVED
+Readline has saved the values of the terminal's special characters.
+@item RL_STATE_CALLBACK
+Readline is currently using the alternate (callback) interface
+(@pxref{Alternate Interface}).
+@item RL_STATE_VIMOTION
+Readline is reading the argument to a vi-mode "motion" command.
+@item RL_STATE_MULTIKEY
+Readline is reading a multiple-keystroke command.
+@item RL_STATE_VICMDONCE
+Readline has entered vi command (movement) mode at least one time during
+the current call to @code{readline()}.
 @item RL_STATE_DONE
 Readline has read a key sequence bound to @code{accept-line}
 and is about to return the line to the caller.
@@ -1082,6 +1096,21 @@ environment variable is used.
 
 @node Utility Functions
 @subsection Utility Functions
+
+@deftypefun int rl_save_state (struct readline_state *sp)
+Save a snapshot of Readline's internal state to @var{sp}.
+The contents of the @var{readline_state} structure are documented
+in @file{readline.h}.
+The caller is responsible for allocating the structure.
+@end deftypefun
+
+@deftypefun int rl_restore_state (struct readline_state *sp)
+Restore Readline's internal state to that stored in @var{sp}, which must
+have been saved by a call to @code{rl_save_state}.
+The contents of the @var{readline_state} structure are documented
+in @file{readline.h}.
+The caller is responsible for freeing the structure.
+@end deftypefun
 
 @deftypefun void rl_free (void *mem)
 Deallocate the memory pointed to by @var{mem}.  @var{mem} must have been

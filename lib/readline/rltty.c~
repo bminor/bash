@@ -670,10 +670,11 @@ rl_prep_terminal (meta_flag)
   if (get_tty_settings (tty, &tio) < 0)
     {
 #if defined (ENOTSUP)
-      /* MacOS X, at least, lies about the value of errno if tcgetattr fails. */
-      if (errno == ENOTTY || errno == ENOTSUP)
+      /* MacOS X and Linux, at least, lie about the value of errno if
+	 tcgetattr fails. */
+      if (errno == ENOTTY || errno == EINVAL || errno == ENOTSUP)
 #else
-      if (errno == ENOTTY)
+      if (errno == ENOTTY || errno == EINVAL)
 #endif
 	readline_echoing_p = 1;		/* XXX */
       release_sigint ();

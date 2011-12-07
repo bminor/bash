@@ -40,12 +40,13 @@
 #  include <sys/ioctl.h>
 #endif /* GWINSZ_IN_SYS_IOCTL */
 
-#if defined (HANDLE_SIGNALS)
 /* Some standard library routines. */
 #include "readline.h"
 #include "history.h"
 
 #include "rlprivate.h"
+
+#if defined (HANDLE_SIGNALS)
 
 #if !defined (RETSIGTYPE)
 #  if defined (VOID_SIGHANDLER)
@@ -465,3 +466,67 @@ rl_free_line_state ()
 }
 
 #endif  /* HANDLE_SIGNALS */
+
+/* **************************************************************** */
+/*								    */
+/*			   SIGINT Management			    */
+/*								    */
+/* **************************************************************** */
+
+#if defined (HAVE_POSIX_SIGNALS)
+static sigset_t sigint_set, sigint_oset;
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+static int sigint_oldmask;
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+static int sigint_blocked;
+
+/* Cause SIGINT to not be delivered until the corresponding call to
+   release_sigint(). */
+void
+_rl_block_sigint ()
+{
+  if (sigint_blocked)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigemptyset (&sigint_set);
+  sigemptyset (&sigint_oset);
+  sigaddset (&sigint_set, SIGINT);
+  sigprocmask (SIG_BLOCK, &sigint_set, &sigint_oset);
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  sigint_oldmask = sigblock (sigmask (SIGINT));
+#  else /* !HAVE_BSD_SIGNALS */
+#    if defined (HAVE_USG_SIGHOLD)
+  sighold (SIGINT);
+#    endif /* HAVE_USG_SIGHOLD */
+#  endif /* !HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  sigint_blocked = 1;
+}
+
+/* Allow SIGINT to be delivered. */
+void
+_rl_release_sigint ()
+{
+  if (sigint_blocked == 0)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &sigint_oset, (sigset_t *)NULL);
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  sigsetmask (sigint_oldmask);
+#  else /* !HAVE_BSD_SIGNALS */
+#    if defined (HAVE_USG_SIGHOLD)
+  sigrelse (SIGINT);
+#    endif /* HAVE_USG_SIGHOLD */
+#  endif /* !HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  sigint_blocked = 0;
+}

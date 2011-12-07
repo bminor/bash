@@ -506,8 +506,12 @@ rl_redisplay ()
   int _rl_wrapped_multicolumn = 0;
 #endif
 
-  if (!readline_echoing_p)
+  if (readline_echoing_p == 0)
     return;
+
+  /* Block keyboard interrupts because this function manipulates global
+     data structures. */
+  _rl_block_sigint ();  
 
   if (!rl_display_prompt)
     rl_display_prompt = "";
@@ -1233,6 +1237,8 @@ rl_redisplay ()
     else
       visible_wrap_offset = wrap_offset;
   }
+
+  _rl_release_sigint ();
 }
 
 /* PWP: update_line() is based on finding the middle difference of each
