@@ -1,4 +1,5 @@
 /* true and false builtins */
+#include <config.h>
 
 #include "bashtypes.h"
 #include "shell.h"

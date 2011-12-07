@@ -351,9 +351,7 @@ trap_handler (sig)
 
   if ((sigmodes[sig] & SIG_TRAPPED) == 0)
     {
-#if defined (DEBUG)
       internal_warning ("trap_handler: signal %d: signal not trapped", sig);
-#endif
       SIGRETURN (0);
     }
 

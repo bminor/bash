@@ -14784,3 +14784,32 @@ variables.c
 lib/sh/getcwd.c
 	- #undef HAVE_LSTAT on qnx, so it uses stat instead.  Patch from
 	  Sean Boudreau <seanb@qnx.com>
+
+				   7/21
+				   ----
+builtins/common.c
+	- change sh_invalidnum to be a little smarter about octal and hex
+	  numbers and change the message appropriately.  Bug originally
+	  reported on coreutils list by Jürgen Niinre<Jyrgen.Niinre@emt.ee>
+
+				   7/26
+				   ----
+test.c
+	- make sure the string passed to test_unop has only a single character
+	  following the `-'.  Fixes bug reported by Michael A. Smith
+	  <michael@smith-li.com>
+
+parse.y
+	- better input validation: make sure a word looks like a conditional
+	  unary operator (-X) before calling test_unop
+
+				   7/28
+				   ----
+trap.c
+	- in trap_handler, if it's called directly from the signal handler
+	  (e.g., SIGINT sighandler, set by set_sigint_handler), but the
+	  trap disposition has been reset to the default between the
+	  assignment and receipt of the signal, check that the signal is
+	  trapped and issue a warning if the shell was compiled with
+	  debugging enabled.  Fixes bug reported by Fergus Henderson
+	  <fergus@google.com>

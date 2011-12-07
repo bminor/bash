@@ -14780,3 +14780,25 @@ lib/readline/display.c
 variables.c
 	- use native __QNX__ and __QNXNTO__ cpp defines instead of qnx and
 	  qnx6, respectively.  Patch from Sean Boudreau <seanb@qnx.com>
+
+lib/sh/getcwd.c
+	- #undef HAVE_LSTAT on qnx, so it uses stat instead.  Patch from
+	  Sean Boudreau <seanb@qnx.com>
+
+				   7/21
+				   ----
+builtins/common.c
+	- change sh_invalidnum to be a little smarter about octal and hex
+	  numbers and change the message appropriately.  Bug originally
+	  reported on coreutils list by Jürgen Niinre<Jyrgen.Niinre@emt.ee>
+
+				   7/26
+				   ----
+test.c
+	- make sure the string passed to test_unop has only a single character
+	  following the `-'.  Fixes bug reported by Michael A. Smith
+	  <michael@smith-li.com>
+
+parse.y
+	- better input validation: make sure a word looks like a conditional
+	  unary operator (-X) before calling test_unop

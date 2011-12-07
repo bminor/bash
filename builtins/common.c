@@ -199,7 +199,15 @@ void
 sh_invalidnum (s)
      char *s;
 {
-  builtin_error (_("%s: invalid number"), s);
+  char *msg;
+
+  if (*s == '0' && isdigit (s[1]))
+    msg = _("invalid octal number");
+  else if (*s == '0' && s[1] == 'x')
+    msg = _("invalid hex number");
+  else
+    msg = _("invalid number");
+  builtin_error ("%s: %s", s, msg);
 }
 
 void
