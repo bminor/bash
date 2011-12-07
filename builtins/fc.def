@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@ $PRODUCES fc.c
 $BUILTIN fc
 $FUNCTION fc_builtin
 $DEPENDS_ON HISTORY
-$SHORT_DOC fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [cmd]
+$SHORT_DOC fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [command]
 fc is used to list or edit and re-execute commands from the history list.
 FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
@@ -37,7 +37,7 @@ string.
    -n means no line numbers listed.
    -r means reverse the order of the lines (making it newest listed first).
 
-With the `fc -s [pat=rep ...] [command]' format, the command is
+With the `fc -s [pat=rep ...] [command]' format, COMMAND is
 re-executed after the substitution OLD=NEW is performed.
 
 A useful alias to use with this is r='fc -s', so that typing `r cc'

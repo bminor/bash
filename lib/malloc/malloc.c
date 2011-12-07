@@ -312,7 +312,7 @@ xbotch (mem, e, s, file, line)
      int line;
 {
   fprintf (stderr, _("\r\nmalloc: %s:%d: assertion botched\r\n"),
-			file ? file : "unknown", line);
+			file ? file : _("unknown"), line);
 #ifdef MALLOC_REGISTER
   if (mem != NULL && malloc_register)
     mregister_describe_mem (mem, stderr);

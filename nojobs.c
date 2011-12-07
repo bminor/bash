@@ -518,9 +518,11 @@ make_child (command, async_p)
       sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
 #endif
 
+#if 0
       /* Ignore INT and QUIT in asynchronous children. */
       if (async_p)
 	last_asynchronous_pid = getpid ();
+#endif
 
       default_tty_job_signals ();
     }

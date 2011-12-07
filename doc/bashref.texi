@@ -1599,7 +1599,9 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the @samp{:-} expansion.
 Substring indexing is zero-based unless the positional parameters
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If @var{offset}} is 0, and the positional parameters are used, @code{$@@} is
+prefixed to the list.
 
 @item $@{!@var{prefix}*@}
 @itemx $@{!@var{prefix}@@@}
@@ -5736,7 +5738,7 @@ from the stack, so that only the stack is manipulated.
 @btindex pushd
 @item pushd
 @example
-pushd [@var{dir} | @var{+N} | @var{-N}] [-n]
+pushd [-n] [@var{+N} | @var{-N} | @var{dir} ]
 @end example
 
 Save the current directory on the top of the directory stack
@@ -5744,6 +5746,9 @@ and then @code{cd} to @var{dir}.
 With no arguments, @code{pushd} exchanges the top two directories.
 
 @table @code
+@item -n
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 @item +@var{N}
 Brings the @var{N}th directory (counting from the left of the
 list printed by @code{dirs}, starting with zero) to the top of
@@ -5752,9 +5757,6 @@ the list by rotating the stack.
 Brings the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}, starting with zero) to the top of
 the list by rotating the stack.
-@item -n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 @item @var{dir}
 Makes the current working directory be the top of the stack, and then
 executes the equivalent of `@code{cd} @var{dir}'.

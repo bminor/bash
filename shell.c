@@ -1416,7 +1416,7 @@ open_shell_script (script_name)
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
-	  internal_error ("%s: cannot execute binary file", filename);
+	  internal_error (_("%s: cannot execute binary file"), filename);
 	  exit (EX_BINARY_FILE);
 	}
       /* Now rewind the file back to the beginning. */

@@ -344,6 +344,16 @@ FUNCTION_FOR_MACRO (_rl_to_lower)
 FUNCTION_FOR_MACRO (_rl_to_upper)
 FUNCTION_FOR_MACRO (_rl_uppercase_p)
 
+/* A convenience function, to force memory deallocation to be performed
+   by readline.  DLLs on Windows apparently require this. */
+void
+rl_free (mem)
+     void *mem;
+{
+  if (mem)
+    free (mem);
+}
+
 /* Backwards compatibility, now that savestring has been removed from
    all `public' readline header files. */
 #undef _rl_savestring

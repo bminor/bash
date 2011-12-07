@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -429,6 +429,56 @@ rl_replace_from_history (entry, flags)
       rl_mark = rl_end;
     }
 #endif
+}
+
+/* Process and free undo lists attached to each history entry prior to the
+   current entry, inclusive, reverting each line to its saved state.  This 
+   is destructive, and state about the current line is lost.  This is not
+   intended to be called while actively editing, and the current line is
+   not assumed to have been added to the history list. */
+void
+_rl_revert_all_lines ()
+{
+  int hpos;
+  HIST_ENTRY *entry, *cur;
+  UNDO_LIST *ul, *saved_undo_list;
+  char *lbuf;
+
+  lbuf = savestring (rl_line_buffer);
+  saved_undo_list = rl_undo_list;
+  hpos = where_history ();
+
+  entry = (hpos == history_length) ? previous_history () : current_history ();
+  while (entry)
+    {
+      if (ul = (UNDO_LIST *)entry->data)
+	{
+	  if (ul == saved_undo_list)
+	    saved_undo_list = 0;
+	  /* Set up rl_line_buffer and other variables from history entry */
+	  rl_replace_from_history (entry, 0);	/* entry->line is now current */
+	  /* Undo all changes to this history entry */
+	  while (rl_undo_list)
+	    rl_do_undo ();
+	  /* And copy the reverted line back to the history entry, preserving
+	     the timestamp. */
+	  FREE (entry->line);
+	  entry->line = savestring (rl_line_buffer);
+	  entry->data = 0;
+	}
+      entry = previous_history ();
+    }
+
+  /* Restore history state */
+  rl_undo_list = saved_undo_list;	/* may have been set to null */
+  history_set_pos (hpos);
+  
+  /* reset the line buffer */
+  rl_replace_line (lbuf, 0);
+  _rl_set_the_line ();
+
+  /* and clean up */
+  free (lbuf);
 }  
 
 /* **************************************************************** */

@@ -261,6 +261,8 @@ extern void _rl_start_using_history PARAMS((void));
 extern int _rl_free_saved_history_line PARAMS((void));
 extern void _rl_set_insert_mode PARAMS((int, int));
 
+extern void _rl_revert_all_lines PARAMS((void));
+
 /* nls.c */
 extern int _rl_init_eightbit PARAMS((void));
 
@@ -359,7 +361,6 @@ extern int _rl_vis_botlin;
 extern int _rl_last_c_pos;
 extern int _rl_suppress_redisplay;
 extern int _rl_want_redisplay;
-extern char *rl_display_prompt;
 
 /* isearch.c */
 extern char *_rl_isearch_terminators;
@@ -383,6 +384,7 @@ extern int _rl_meta_flag;
 extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_output_meta_chars;
 extern int _rl_bind_stty_chars;
+extern int _rl_revert_all_at_newline;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

@@ -2481,6 +2481,12 @@ pos_params (string, start, end, quoted)
   if (save == 0)
     return ((char *)NULL);
 
+  if (start == 0)		/* handle ${@:0[:x]} specially */
+    {
+      t = make_word_list (make_word (dollar_vars[0]), params);
+      save = params = t;
+    }
+
   for (i = 1; params && i < start; i++)
     params = params->next;
   if (params == 0)
@@ -4364,7 +4370,7 @@ process_substitute (string, open_for_read_in_child)
     {
       if (sh_unset_nodelay_mode (fd) < 0)
 	{
-	  sys_error (_("cannout reset nodelay mode for fd %d"), fd);
+	  sys_error (_("cannot reset nodelay mode for fd %d"), fd);
 	  exit (127);
 	}
     }
@@ -5300,6 +5306,8 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
       break;
     case VT_POSPARMS:
       len = number_of_args () + 1;
+      if (*e1p == 0)
+	len++;		/* add one arg if counting from $0 */
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:

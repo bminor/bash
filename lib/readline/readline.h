@@ -420,6 +420,7 @@ extern int rl_set_keyboard_input_timeout PARAMS((int));
 extern void rl_extend_line_buffer PARAMS((int));
 extern int rl_ding PARAMS((void));
 extern int rl_alphabetic PARAMS((int));
+extern void rl_free PARAMS((void *));
 
 /* Readline signal handling, from signals.c */
 extern int rl_set_signals PARAMS((void));
@@ -492,6 +493,10 @@ extern const char *rl_readline_name;
 /* The prompt readline uses.  This is set from the argument to
    readline (), and should not be assigned to directly. */
 extern char *rl_prompt;
+
+/* The prompt string that is actually displayed by rl_redisplay.  Public so
+   applications can more easily supply their own redisplay functions. */
+extern char *rl_display_prompt;
 
 /* The line buffer that is in use. */
 extern char *rl_line_buffer;

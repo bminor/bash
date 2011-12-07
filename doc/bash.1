@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Nov  8 11:22:01 EST 2006
+.\"	Last Change: Tue Nov 21 10:50:26 EST 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 November 8" "GNU Bash-3.2"
+.TH BASH 1 "2006 November 21" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2432,7 +2432,9 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If \fIoffset\fP is 0, and the positional parameters are used, \fB$0\fP is
+prefixed to the list.
 .TP
 ${\fB!\fP\fIprefix\fP\fB*\fP}
 .PD 0
@@ -6519,7 +6521,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with \fB\-f\fP.
 .RE
 .TP
-.B dirs [\fB\-clpv\fP] [+\fIn\fP] [\-\fIn\fP]
+.B dirs [+\fIn\fP] [\-\fIn\fP] [\fB\-cplv\fP]
 Without options, displays the list of currently remembered directories.
 The default display is on a single line with directory names separated
 by spaces.
@@ -7272,6 +7274,10 @@ Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
+.B \-n
+Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
+.TP
 \fB+\fP\fIn\fP
 Removes the \fIn\fPth entry counting from the left of the list
 shown by
@@ -7295,10 +7301,6 @@ removes the last directory,
 .if n ``popd -1''
 .if t \f(CWpopd -1\fP
 the next to last.
-.TP
-.B \-n
-Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 .PD
 .PP
 If the
@@ -7337,10 +7339,10 @@ extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
 .TP
-\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
+\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
 .PD 0
 .TP
-\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
+\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
@@ -7349,6 +7351,10 @@ and returns 0, unless the directory stack is empty.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
+.TP
+.B \-n
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 .TP
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
@@ -7362,10 +7368,6 @@ Rotates the stack so that the \fIn\fPth directory
 (counting from the right of the list shown by
 .BR dirs ,
 starting with zero) is at the top.
-.TP
-.B \-n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 .TP
 .I dir
 Adds

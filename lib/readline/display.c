@@ -684,6 +684,8 @@ rl_redisplay ()
 	temp = ((newlines + 1) * _rl_screenwidth);
 
       /* Now account for invisible characters in the current line. */
+      /* XXX - this assumes that all of the invisible characters are before
+	 the line wrap. */
       temp += ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
 							     : ((newlines == 1) ? wrap_offset : 0))
 					  : ((newlines == 0) ? wrap_offset :0));
@@ -2406,11 +2408,11 @@ _rl_col_width (str, start, end)
 
   if (end <= start)
     return 0;
-if (MB_CUR_MAX == 1 || rl_byte_oriented)
-  {
-    fprintf (stderr, "_rl_col_width: called with MB_CUR_MAX == 1\n");
+  if (MB_CUR_MAX == 1 || rl_byte_oriented)
+{
+fprintf (stderr, "_rl_col_width: called with MB_CUR_MAX == 1\n");
     return (end - start);
-  }
+}
 
   memset (&ps, 0, sizeof (mbstate_t));
 

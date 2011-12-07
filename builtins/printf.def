@@ -26,8 +26,8 @@ $FUNCTION printf_builtin
 $SHORT_DOC printf [-v var] format [arguments]
 printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
 is a character string which contains three types of objects: plain
-characters, which are simply copied to standard output, character escape
-sequences which are converted and copied to the standard output, and
+characters, which are simply copied to standard output; character escape
+sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
 argument.  In addition to the standard printf(1) formats, %b means to
 expand backslash escape sequences in the corresponding argument, and %q
@@ -550,7 +550,7 @@ static void
 printf_erange (s)
      char *s;
 {
-  builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
 }
 
 /* We duplicate a lot of what printf(3) does here. */

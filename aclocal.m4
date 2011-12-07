@@ -1541,24 +1541,21 @@ AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
 [bash_cv_dev_fd=""
-if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
+if test -d /dev/fd  && (exec test -r /dev/fd/0 < /dev/null) ; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
-   exec 3</dev/null
-   if test -r /dev/fd/3; then
+   if (exec test -r /dev/fd/3 3</dev/null) ; then
      bash_cv_dev_fd=standard
    else
      bash_cv_dev_fd=absent
    fi
-   exec 3<&-
 fi
 if test -z "$bash_cv_dev_fd" ; then 
-  if test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
+  if test -d /proc/self/fd && (exec test -r /proc/self/fd/0 < /dev/null) ; then
     bash_cv_dev_fd=whacky
   else
     bash_cv_dev_fd=absent
   fi
 fi
-set +x
 ])
 AC_MSG_RESULT($bash_cv_dev_fd)
 if test $bash_cv_dev_fd = "standard"; then
@@ -1573,9 +1570,9 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && test -r /dev/stdin < /dev/null; then
+[if test -d /dev/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && test -r /dev/stdin < /dev/null; then
+ elif test -d /proc/self/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent

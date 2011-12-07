@@ -43,17 +43,17 @@ watch_warn (addr, file, line, type, data)
   char *tag;
 
   if (type == W_ALLOC)
-    tag = _("allocated");
+    tag = "allocated";
   else if (type == W_FREE)
-    tag = _("freed");
+    tag = "freed";
   else if (type == W_REALLOC)
-    tag = _("requesting resize");
+    tag = "requesting resize";
   else if (type == W_RESIZED)
-    tag = _("just resized");
+    tag = "just resized";
   else
-    tag = _("bug: unknown operation");
+    tag = "bug: unknown operation";
 
-  fprintf (stderr, _("malloc: watch alert: %p %s "), addr, tag);
+  fprintf (stderr, "malloc: watch alert: %p %s ", addr, tag);
   if (data != (unsigned long)-1)
     fprintf (stderr, "(size %lu) ", data);
   fprintf (stderr, "from '%s:%d'\n", file ? file : "unknown", line);

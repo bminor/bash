@@ -351,6 +351,12 @@ The @code{rl_set_prompt()} function (@pxref{Redisplay}) may
 be used to modify the prompt string after calling @code{readline()}.
 @end deftypevar
 
+@deftypevar {char *} rl_display_prompt
+The string displayed as the prompt.  This is usually identical to
+@var{rl_prompt}, but may be changed temporarily by functions that
+use the prompt string as a message area, such as incremental search.
+@end deftypevar
+
 @deftypevar int rl_already_prompted
 If an application wishes to display the prompt itself, rather than have
 Readline do it the first time @code{readline()} is called, it should set
@@ -793,7 +799,8 @@ Print the names of all bindable Readline functions to @code{rl_outstream}.
 @deftypefun {const char **} rl_funmap_names (void)
 Return a NULL terminated array of known function names.  The array is
 sorted.  The array itself is allocated, but not the strings inside.  You
-should @code{free()} the array when you are done, but not the pointers.
+should free the array, but not the pointers, using @code{free} or
+@code{rl_free} when you are done.
 @end deftypefun
 
 @deftypefun int rl_add_funmap_entry (const char *name, rl_command_func_t *function)
@@ -1076,6 +1083,11 @@ environment variable is used.
 
 @node Utility Functions
 @subsection Utility Functions
+
+@deftypefun void rl_free (void *mem)
+Deallocate the memory pointed to by @var{mem}.  @var{mem} must have been
+allocated by @code{malloc}.
+@end
 
 @deftypefun void rl_replace_line (const char *text, int clear_undo)
 Replace the contents of @code{rl_line_buffer} with @var{text}.

@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -270,6 +270,11 @@ int _rl_output_meta_chars = 0;
    them to equivalent readline functions at startup. */
 int _rl_bind_stty_chars = 1;
 
+/* Non-zero means to go through the history list at every newline (or
+   whenever rl_done is set and readline returns) and revert each line to
+   its initial state. */
+int _rl_revert_all_at_newline = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -300,6 +305,7 @@ readline (prompt)
      const char *prompt;
 {
   char *value;
+  int in_callback;
 
   /* If we are at EOF return a NULL string. */
   if (rl_pending_input == EOF)
@@ -307,6 +313,12 @@ readline (prompt)
       rl_clear_pending_input ();
       return ((char *)NULL);
     }
+
+  /* If readline() is called after installing a callback handler, temporarily
+     turn off the callback state to avoid ensuing messiness.  Patch supplied
+     by the gdb folks. */
+  if (in_callback = RL_ISSTATE (RL_STATE_CALLBACK))
+    RL_UNSETSTATE (RL_STATE_CALLBACK);
 
   rl_set_prompt (prompt);
 
@@ -325,6 +337,9 @@ readline (prompt)
 #if defined (HANDLE_SIGNALS)
   rl_clear_signals ();
 #endif
+
+  if (in_callback)
+    RL_SETSTATE (RL_STATE_CALLBACK);
 
   return (value);
 }
@@ -398,6 +413,9 @@ readline_internal_teardown (eof)
       strcpy (the_line, temp);
       free (temp);
     }
+
+  if (_rl_revert_all_at_newline)
+    _rl_revert_all_lines ();
 
   /* At any rate, it is highly likely that this line has an undo list.  Get
      rid of it now. */

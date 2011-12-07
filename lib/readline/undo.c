@@ -171,7 +171,7 @@ rl_do_undo ()
   start = end = waiting_for_begin = 0;
   do
     {
-      if (!rl_undo_list)
+      if (rl_undo_list == 0)
 	return (0);
 
       _rl_doing_an_undo = 1;
@@ -291,7 +291,7 @@ int
 rl_revert_line (count, key)
      int count, key;
 {
-  if (!rl_undo_list)
+  if (rl_undo_list == 0)
     rl_ding ();
   else
     {

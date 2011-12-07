@@ -13885,3 +13885,99 @@ lib/sh/snprintf.c
 
 general.[ch]
 	- first argument to legal_number is now `const char *'
+
+				   11/14
+				   -----
+lib/readline/{readline,rlprivate}.h
+	- move rl_display_prompt declaration from rlprivate.h to readline.h
+
+lib/readline/util.h
+	- new function: rl_free(void *mem), for use by users of readline dlls
+	  on Windows
+
+lib/readline/readline.h
+	- new extern declaration for rl_free
+
+lib/readline/doc/rltech.texi
+	- document rl_free and rl_display_prompt for use by application writers
+
+				   11/15
+				   -----
+aclocal.m4
+	- change tests for /dev/fd and /dev/stdin to use constructs of the form
+	  (exec test ... ) instead of test ... to avoid bash's /dev/fd and
+	  /dev/stdin emulation
+
+				   11/16
+				   -----
+jobs.c
+	- in delete_job, reset_current was being called before the job slot
+	  was cleared -- moved after job_slots[job] was set to NULL.  Fixes
+	  bug reported by Dan Jacobson <jidanni@jidanni.org>
+
+				   11/19
+				   -----
+findcmd.c
+	- when the checkhash option is set, fix the check for the hashed
+	  pathname being an existing executable file.  Old code required a
+	  hash table deletion and re-addition.  Bug reported by Linda
+	  Walsh <bash@tlinx.org>
+
+				   11/21
+				   -----
+subst.c
+	- in pos_params, handle case of `start' == 0 by making the list of
+	  positional parameters begin with $0
+	- in parameter_brace_substring, increment `len' if start == 0, sicne
+	  we will be adding $0 to the beginning of the list when we process it
+
+doc/{bash.1,bashref.texi}
+	- document new behavior of `0' offset when using substring expansion
+	  with the positional parameters
+
+support/shobj-conf
+	- changes to shared object creation for loadable builtins on Mac OS X
+	  10.4 to use libtool instead of ld by specifying -dynamiclib
+	  argument and changing options to be appropriate for libtool.  This
+	  winds up creating a dynamic shared library instead of an executable
+
+				   11/24
+				   -----
+{jobs,nojobs}.c
+	 - don't set last_asynchronous_pid to the child's pid in the child
+	   for asynchronous jobs (for compatibility -- all other posix shells
+	   seem to do it this way).  This means that (echo $! )& echo $! should
+	   display two different pids.  Fix from discussion on the
+	   austin-group-l list
+
+builtins/mkbuiltins.c
+	- change builtins.c file generation so short doc strings are marked for
+	  gettext and available for subsequent translation.  Suggestion by
+	  Benno Schulenberg <bensberg@justemail.net>
+
+builtins/{bind,cd,hash,inlib,printf,pushd,test,times,ulimit}.def
+lib/malloc/malloc.c
+{shell,subst}.c
+	- fix a few strings that were not marked as translatable.  Fix from
+	  Benno Schulenberg <bensberg@justemail.net>
+
+lib/readline/misc.c
+	- new function, _rl_revert_all_lines(void).  Goes through history,
+	  reverting all entries to their initial state by undoing any undo
+	  lists.
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_revert_all_lines
+
+rldefs.h
+	- add #undef HAVE_STRCOLL if STRCOLL_BROKEN is defined, prep to move
+	  from config.h.in.  Problem reported by Valerly Ushakov
+	  <uwe@ptc.spbu.ru>
+
+				   11/25
+				   -----
+lib/readline/readline.c
+	- call _rl_revert_all_lines from readline_internal_teardown if the
+	  variable _rl_revert_all_at_newline is non-zero
+	- declare _rl_revert_all_lines initially 0
+

@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,10 +24,13 @@ $PRODUCES pushd.c
 $BUILTIN pushd
 $FUNCTION pushd_builtin
 $DEPENDS_ON PUSHD_AND_POPD
-$SHORT_DOC pushd [dir | +N | -N] [-n]
+$SHORT_DOC pushd [-n] [+N | -N | dir]
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
 directory.  With no arguments, exchanges the top two directories.
+
+-n	Suppresses the normal change of directory when adding directories
+	to the stack, so only the stack is manipulated.
 
 +N	Rotates the stack so that the Nth directory (counting
 	from the left of the list shown by `dirs', starting with
@@ -37,10 +40,7 @@ directory.  With no arguments, exchanges the top two directories.
 	from the right of the list shown by `dirs', starting with
 	zero) is at the top.
 
--n	suppress the normal change of directory when adding directories
-	to the stack, so only the stack is manipulated.
-
-dir	adds DIR to the directory stack at the top, making it the
+dir	Adds DIR to the directory stack at the top, making it the
 	new current working directory.
 
 You can see the directory stack with the `dirs' command.
@@ -49,21 +49,21 @@ $END
 $BUILTIN popd
 $FUNCTION popd_builtin
 $DEPENDS_ON PUSHD_AND_POPD
-$SHORT_DOC popd [+N | -N] [-n]
+$SHORT_DOC popd [-n] [+N | -N]
 Removes entries from the directory stack.  With no arguments,
 removes the top directory from the stack, and cd's to the new
 top directory.
 
-+N	removes the Nth entry counting from the left of the list
+-n	Suppresses the normal change of directory when removing directories
+	from the stack, so only the stack is manipulated.
+
++N	Removes the Nth entry counting from the left of the list
 	shown by `dirs', starting with zero.  For example: `popd +0'
 	removes the first directory, `popd +1' the second.
 
--N	removes the Nth entry counting from the right of the list
+-N	Removes the Nth entry counting from the right of the list
 	shown by `dirs', starting with zero.  For example: `popd -0'
 	removes the last directory, `popd -1' the next to last.
-
--n	suppress the normal change of directory when removing directories
-	from the stack, so only the stack is manipulated.
 
 You can see the directory stack with the `dirs' command.
 $END
@@ -76,18 +76,18 @@ Display the list of currently remembered directories.  Directories
 find their way onto the list with the `pushd' command; you can get
 back up through the list with the `popd' command.
 
+The -c flag clears the directory stack by deleting all of the elements.
 The -l flag specifies that `dirs' should not print shorthand versions
 of directories which are relative to your home directory.  This means
-that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag
-causes `dirs' to print the directory stack with one entry per line,
-prepending the directory name with its position in the stack.  The -p
-flag does the same thing, but the stack position is not prepended.
-The -c flag clears the directory stack by deleting all of the elements.
+that `~/bin' might be displayed as `/homes/bfox/bin'.  The -p flag
+causes `dirs' to print the directory stack with one entry per line.
+The -v flag does the same thing, prefixing each directory name with its
+position in the stack.
 
-+N	displays the Nth entry counting from the left of the list shown by
++N	Displays the Nth entry counting from the left of the list shown by
 	dirs when invoked without options, starting with zero.
 
--N	displays the Nth entry counting from the right of the list shown by
+-N	Displays the Nth entry counting from the right of the list shown by
 	dirs when invoked without options, starting with zero.
 $END
 
@@ -483,9 +483,9 @@ pushd_error (offset, arg)
      char *arg;
 {
   if (offset == 0)
-    builtin_error ("directory stack empty");
+    builtin_error (_("directory stack empty"));
   else
-    sh_erange (arg, "directory stack index");
+    sh_erange (arg, _("directory stack index"));
 }
 
 static void
@@ -664,18 +664,18 @@ N_("Display the list of currently remembered directories.  Directories\n\
     find their way onto the list with the `pushd' command; you can get\n\
     back up through the list with the `popd' command.\n\
     \n\
+    The -c flag clears the directory stack by deleting all of the elements.\n\
     The -l flag specifies that `dirs' should not print shorthand versions\n\
     of directories which are relative to your home directory.  This means\n\
-    that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag\n\
-    causes `dirs' to print the directory stack with one entry per line,\n\
-    prepending the directory name with its position in the stack.  The -p\n\
-    flag does the same thing, but the stack position is not prepended.\n\
-    The -c flag clears the directory stack by deleting all of the elements.\n\
+    that `~/bin' might be displayed as `/homes/bfox/bin'.  The -p flag\n\
+    causes `dirs' to print the directory stack with one entry per line.\n\
+    The -v flag does the same thing, prefixing each directory name with its\n\
+    position in the stack.\n\
     \n\
-    +N  displays the Nth entry counting from the left of the list shown by\n\
+    +N  Displays the Nth entry counting from the left of the list shown by\n\
         dirs when invoked without options, starting with zero.\n\
     \n\
-    -N  displays the Nth entry counting from the right of the list shown by\n\
+    -N  Displays the Nth entry counting from the right of the list shown by\n\
         dirs when invoked without options, starting with zero."),
   (char *)NULL
 };
@@ -685,6 +685,9 @@ N_("Adds a directory to the top of the directory stack, or rotates\n\
     the stack, making the new top of the stack the current working\n\
     directory.  With no arguments, exchanges the top two directories.\n\
     \n\
+    -n  Suppresses the normal change of directory when adding directories\n\
+        to the stack, so only the stack is manipulated.\n\
+    \n\
     +N  Rotates the stack so that the Nth directory (counting\n\
         from the left of the list shown by `dirs', starting with\n\
         zero) is at the top.\n\
@@ -693,10 +696,7 @@ N_("Adds a directory to the top of the directory stack, or rotates\n\
         from the right of the list shown by `dirs', starting with\n\
         zero) is at the top.\n\
     \n\
-    -n  suppress the normal change of directory when adding directories\n\
-        to the stack, so only the stack is manipulated.\n\
-    \n\
-    dir adds DIR to the directory stack at the top, making it the\n\
+    dir Adds DIR to the directory stack at the top, making it the\n\
         new current working directory.\n\
     \n\
     You can see the directory stack with the `dirs' command."),
@@ -708,16 +708,16 @@ N_("Removes entries from the directory stack.  With no arguments,\n\
     removes the top directory from the stack, and cd's to the new\n\
     top directory.\n\
     \n\
-    +N  removes the Nth entry counting from the left of the list\n\
+    -n  Suppresses the normal change of directory when removing directories\n\
+        from the stack, so only the stack is manipulated.\n\
+    \n\
+    +N  Removes the Nth entry counting from the left of the list\n\
         shown by `dirs', starting with zero.  For example: `popd +0'\n\
         removes the first directory, `popd +1' the second.\n\
     \n\
-    -N  removes the Nth entry counting from the right of the list\n\
+    -N  Removes the Nth entry counting from the right of the list\n\
         shown by `dirs', starting with zero.  For example: `popd -0'\n\
         removes the last directory, `popd -1' the next to last.\n\
-    \n\
-    -n  suppress the normal change of directory when removing directories\n\
-        from the stack, so only the stack is manipulated.\n\
     \n\
     You can see the directory stack with the `dirs' command."),
   (char *)NULL

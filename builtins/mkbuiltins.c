@@ -1224,7 +1224,7 @@ write_builtins (defs, structfile, externfile)
 		    document_name (builtin));
 
 		  fprintf
-		    (structfile, "     \"%s\", (char *)NULL },\n",
+		    (structfile, "     N_(\"%s\"), (char *)NULL },\n",
 		     builtin->shortdoc ? builtin->shortdoc : builtin->name);
 
 		}

@@ -1,7 +1,7 @@
 This file is test.def, from which is created test.c.
 It implements the builtin "test" in Bash.
 
-Copyright (C) 1987-2002 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -109,6 +109,7 @@ $END
 #endif
 
 #include "../bashansi.h"
+#include "../bashintl.h"
 
 #include "../shell.h"
 #include "../test.h"
@@ -131,7 +132,7 @@ test_builtin (list)
     {
       if (this_command_name[0] == '[' && !this_command_name[1])
 	{
-	  builtin_error ("missing `]'");
+	  builtin_error (_("missing `]'"));
 	  return (EX_BADUSAGE);
 	}
 
