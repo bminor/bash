@@ -653,11 +653,7 @@ rl_redisplay ()
 
   /* inv_lbreaks[i] is where line i starts in the buffer. */
   inv_lbreaks[newlines = 0] = 0;
-#if 0
-  lpos = out - wrap_offset;
-#else
   lpos = prompt_physical_chars + modmark;
-#endif
 
 #if defined (HANDLE_MULTIBYTE)
   memset (line_state_invisible->wrapped_line, 0, line_state_invisible->wbsize * sizeof (int));

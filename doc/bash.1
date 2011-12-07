@@ -2315,7 +2315,7 @@ string are not sorted; left to right order is preserved.
 For example, a\fB{\fPd,c,b\fB}\fPe expands into `ade ace abe'.
 .PP
 A sequence expression takes the form
-\fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB[..\fIincr\fP]}\fP,
+\fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB[..\fP\fIincr\fP\fB]}\fP,
 where \fIx\fP and \fIy\fP are either integers or single characters,
 and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -2570,6 +2570,7 @@ ${\fB!\fP\fIprefix\fP\fB*\fP}
 .TP
 ${\fB!\fP\fIprefix\fP\fB@\fP}
 .PD
+\fBNames matching prefix.\fP
 Expands to the names of variables whose names begin with \fIprefix\fP,
 separated by the first character of the
 .SM
@@ -2583,6 +2584,7 @@ ${\fB!\fP\fIname\fP[\fI@\fP]}
 .TP
 ${\fB!\fP\fIname\fP[\fI*\fP]}
 .PD
+\fBList of array keys.\fP
 If \fIname\fP is an array variable, expands to the list of array indices
 (keys) assigned in \fIname\fP.
 If \fIname\fP is not an array, expands to 0 if \fIname\fP is set and null
@@ -2591,6 +2593,7 @@ When \fI@\fP is used and the expansion appears within double quotes, each
 key expands to a separate word.
 .TP
 ${\fB#\fP\fIparameter\fP}
+\fBParameter length.\fP
 The length in characters of the value of \fIparameter\fP is substituted.
 If
 .I parameter
@@ -2612,6 +2615,7 @@ ${\fIparameter\fP\fB#\fP\fIword\fP}
 .TP
 ${\fIparameter\fP\fB##\fP\fIword\fP}
 .PD
+\fBRemove matching prefix pattern.\fP
 The 
 .I word
 is expanded to produce a pattern just as in pathname
@@ -2644,6 +2648,7 @@ ${\fIparameter\fP\fB%\fP\fIword\fP}
 .TP
 ${\fIparameter\fP\fB%%\fP\fIword\fP}
 .PD
+\fBRemove matching suffix pattern.\fP
 The \fIword\fP is expanded to produce a pattern just as in
 pathname expansion.
 If the pattern matches a trailing portion of the expanded value of
@@ -2670,6 +2675,7 @@ the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 .TP
 ${\fIparameter\fP\fB/\fP\fIpattern\fP\fB/\fP\fIstring\fP}
+\fBPattern substitution.\fP
 The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion.
 \fIParameter\fP is expanded and the longest match of \fIpattern\fP
@@ -2708,6 +2714,7 @@ ${\fIparameter\fP\fB,\fP\fIpattern\fP}
 .TP
 ${\fIparameter\fP\fB,,\fP\fIpattern\fP}
 .PD
+\fBCase modification.\fP
 This expansion modifies the case of alphabetic characters in \fIparameter\fP.
 The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion.

@@ -6384,7 +6384,7 @@ builtins/history.def
 
 {braces,subst}.c
       - extract_command_subst now takes a third flags argument; passed flags
-	 are ORd into flags passed to other functions; changed callers
+	are ORd into flags passed to other functions; changed callers
 
 subst.h
 	- move SX_* defines here from subst.c so parse.y:xparse_dolparen can
@@ -6887,10 +6887,6 @@ builtins/return.def
 	- call no_options, as Posix requires.  This also has the effect of
 	  disallowing negative return values unless they're prefixed by `--'
 
-				   9/12
-				   ----
-
-
 				   9/13
 				   ----
 builtins/bind.def
@@ -7056,3 +7052,17 @@ parse.y
 	  PST_REPARSE is set, don't requote CTLESC or CTLNUL.  Fixes bug with
 	  compound array assignment using $'\x7f' reported by Antonio Macchi
 	  <antonio_macchi@alice.it>
+
+				   10/23
+				   -----
+configure.in
+	- define LOCAL_LDFLAGS as `-z interpose' on Solaris 8, 9, and 10 to
+	  allow the bash malloc to interpose the libc malloc when called by
+	  library functions pre-bound to the libc malloc.  Suggested by
+	  Serge Dussud <Serge.Dussud@Sun.COM>
+
+				   10/26
+				   -----
+doc/bash.1
+	- add single-sentence descriptions to rest of parameter expansions.
+	  Suggested by Ken Irving <fnkci@uaf.edu>

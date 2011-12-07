@@ -4464,7 +4464,7 @@ process_substitute (string, open_for_read_in_child)
   pathname = make_dev_fd_filename (parent_pipe_fd);
 #endif /* HAVE_DEV_FD */
 
-  if (!pathname)
+  if (pathname == 0)
     {
       sys_error (_("cannot make pipe for process substitution"));
       return ((char *)NULL);
