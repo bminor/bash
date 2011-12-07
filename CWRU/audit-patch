@@ -1,0 +1,339 @@
+Date: Tue, 06 Feb 2007 16:06:58 -0500
+From: Steve Grubb <sgrubb@redhat.com>
+Subject: Re: bash and linux audit
+To: chet.ramey@case.edu
+Organization: Red Hat
+
+OK, I released audit 1.4 Sunday which has the logging function for user
+commands. It produces audit events like this:
+
+type=USER_CMD msg=audit(01/30/2007 18:23:45.793:143) : user pid=22862 uid=root
+auid=root subj=system_u:system_r:unconfined_t:s0-s0:c0.c1023
+msg='cwd=/root/test dir cmd=ls -l (terminal=tty1 res=success)'
+
+diff -urp bash-3.2.orig/config-bot.h bash-3.2/config-bot.h
+--- bash-3.2.orig/config-bot.h	2007-01-03 09:01:05.000000000 -0500
++++ bash-3.2/config-bot.h	2007-01-20 11:59:23.000000000 -0500
+@@ -97,6 +97,11 @@
+ #  define RESTRICTED_SHELL_NAME "rbash"
+ #endif
+ 
++/* If the shell is called by this name, it will become audited. */
++#if defined (AUDIT_SHELL)
++#  define AUDIT_SHELL_NAME "aubash"
++#endif
++
+ /***********************************************************/
+ /* Make sure feature defines have necessary prerequisites. */
+ /***********************************************************/
+diff -urp bash-3.2.orig/config.h.in bash-3.2/config.h.in
+--- bash-3.2.orig/config.h.in	2007-01-03 09:01:05.000000000 -0500
++++ bash-3.2/config.h.in	2007-01-20 11:59:23.000000000 -0500
+@@ -81,6 +81,11 @@
+    flag. */
+ #undef RESTRICTED_SHELL
+ 
++/* Define AUDIT_SHELL if you want the generated shell to audit all
++   actions performed by root account.  The shell thus generated can become
++   audited by being run with the name "aubash". */
++#undef AUDIT_SHELL
++
+ /* Define DISABLED_BUILTINS if you want "builtin foo" to always run the
+    shell builtin "foo", even if it has been disabled with "enable -n foo". */
+ #undef DISABLED_BUILTINS
+diff -urp bash-3.2.orig/configure.in bash-3.2/configure.in
+--- bash-3.2.orig/configure.in	2007-01-03 09:01:05.000000000 -0500
++++ bash-3.2/configure.in	2007-01-20 11:59:23.000000000 -0500
+@@ -162,6 +162,7 @@ opt_history=yes
+ opt_bang_history=yes
+ opt_dirstack=yes
+ opt_restricted=yes
++opt_audit=yes
+ opt_process_subst=yes
+ opt_prompt_decoding=yes
+ opt_select=yes
+@@ -195,8 +196,8 @@ dnl a minimal configuration turns everyt
+ dnl added individually
+ if test $opt_minimal_config = yes; then
+ 	opt_job_control=no opt_alias=no opt_readline=no
+-	opt_history=no opt_bang_history=no opt_dirstack=no
+-	opt_restricted=no opt_process_subst=no opt_prompt_decoding=no
++	opt_history=no opt_bang_history=no opt_dirstack=no opt_restricted=no
++	opt_audit=no opt_process_subst=no opt_prompt_decoding=no
+ 	opt_select=no opt_help=no opt_array_variables=no opt_dparen_arith=no
+ 	opt_brace_expansion=no opt_disabled_builtins=no opt_command_timing=no
+ 	opt_extended_glob=no opt_cond_command=no opt_arith_for_command=no
+@@ -227,6 +228,7 @@ AC_ARG_ENABLE(progcomp, AC_HELP_STRING([
+ AC_ARG_ENABLE(prompt-string-decoding, AC_HELP_STRING([--enable-prompt-string-decoding], [turn on escape character decoding in prompts]), opt_prompt_decoding=$enableval)
+ AC_ARG_ENABLE(readline, AC_HELP_STRING([--enable-readline], [turn on command line editing]), opt_readline=$enableval)
+ AC_ARG_ENABLE(restricted, AC_HELP_STRING([--enable-restricted], [enable a restricted shell]), opt_restricted=$enableval)
++AC_ARG_ENABLE(audit, AC_HELP_STRING([--enable-audit], [enable an audited shell]), opt_audit=$enableval)
+ AC_ARG_ENABLE(select, AC_HELP_STRING([--enable-select], [include select command]), opt_select=$enableval)
+ AC_ARG_ENABLE(separate-helpfiles, AC_HELP_STRING([--enable-separate-helpfiles], [use external files for help builtin documentation]), opt_separate_help=$enableval)
+ AC_ARG_ENABLE(single-help-strings, AC_HELP_STRING([--enable-single-help-strings], [store help documentation as a single string to ease translation]), opt_single_longdoc_strings=$enableval)
+@@ -254,6 +256,10 @@ fi
+ if test $opt_restricted = yes; then
+ AC_DEFINE(RESTRICTED_SHELL)
+ fi
++if test $opt_audit = yes; then
++AC_DEFINE(AUDIT_SHELL)
++AUDIT_LIB='-laudit'
++fi
+ if test $opt_process_subst = yes; then
+ AC_DEFINE(PROCESS_SUBSTITUTION)
+ fi
+@@ -355,6 +361,8 @@ AC_SUBST(HELPDIRDEFINE)
+ AC_SUBST(HELPINSTALL)
+ AC_SUBST(HELPSTRINGS)
+ 
++AC_SUBST(AUDIT_LIB)
++
+ echo ""
+ echo "Beginning configuration for bash-$BASHVERS-$RELSTATUS for ${host_cpu}-${host_vendor}-${host_os}"
+ echo ""
+diff -urp bash-3.2.orig/doc/bash.1 bash-3.2/doc/bash.1
+--- bash-3.2.orig/doc/bash.1	2007-01-03 09:01:05.000000000 -0500
++++ bash-3.2/doc/bash.1	2007-01-20 11:59:23.000000000 -0500
+@@ -155,6 +155,12 @@ single-character options to be recognize
+ .PP
+ .PD 0
+ .TP
++.B \-\-audit
++The shell logs all commands run by the root user (see
++.SM
++.B "AUDIT SHELL"
++below).
++.TP
+ .B \-\-debugger
+ Arrange for the debugger profile to be executed before the shell
+ starts.
+@@ -8770,6 +8776,17 @@ turns off any restrictions in the shell 
+ script.
+ .\" end of rbash.1
+ .if \n(zY=1 .ig zY
++.SH "AUDIT SHELL"
++.zY
++.PP
++If
++.B bash
++is started with the name
++.BR aubash ,
++or the
++.B \-\-audit
++option is supplied at invocation, the shell logs all commands issued by the root user to the audit system.
++.if \n(zY=1 .ig zY
+ .SH "SEE ALSO"
+ .PD 0
+ .TP
+diff -urp bash-3.2.orig/eval.c bash-3.2/eval.c
+--- bash-3.2.orig/eval.c	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/eval.c	2007-01-20 11:59:23.000000000 -0500
+@@ -45,6 +45,11 @@
+ #  include "bashhist.h"
+ #endif
+ 
++#if defined (AUDIT_SHELL)
++#  include <libaudit.h>
++#  include <errno.h>
++#endif
++
+ extern int EOF_reached;
+ extern int indirection_level;
+ extern int posixly_correct;
+@@ -58,6 +63,38 @@ extern int rpm_requires;
+ static void send_pwd_to_eterm __P((void));
+ static sighandler alrm_catcher __P((int));
+ 
++#if defined (AUDIT_SHELL)
++static int audit_fd = -1;
++
++static int
++audit_start ()
++{
++  audit_fd = audit_open ();
++  if (audit_fd < 0)
++    return -1;
++  else
++    return 0;
++}
++
++static int
++audit (cmd, result)
++        char *cmd;
++        int result;
++{
++  int rc;
++
++  if (audit_fd < 0)
++    return 0;
++
++  rc = audit_log_user_command (audit_fd, AUDIT_USER_CMD, cmd,
++                               NULL, !result);
++  close (audit_fd);
++  audit_fd = -1;
++  return rc;
++}
++#endif
++
++
+ /* Read and execute commands until EOF is reached.  This assumes that
+    the input source has already been initialized. */
+ int
+@@ -145,7 +182,25 @@ reader_loop ()
+ 
+ 	      executing = 1;
+ 	      stdin_redir = 0;
++#if defined (AUDIT_SHELL)
++              if (audited && interactive_shell && getuid () == 0)
++                {
++                  if (audit_start () < 0)
++                    {
++                      if (errno != EINVAL && errno != EPROTONOSUPPORT &&
++                          errno != EAFNOSUPPORT)
++                        return EXECUTION_FAILURE;
++                    }
++                }
++#endif
++
+ 	      execute_command (current_command);
++#if defined (AUDIT_SHELL)
++              {
++                extern char *shell_input_line;
++                audit (shell_input_line, last_command_exit_value);
++              }
++#endif
+ 
+ 	    exec_done:
+ 	      QUIT;
+diff -urp bash-3.2.orig/externs.h bash-3.2/externs.h
+--- bash-3.2.orig/externs.h	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/externs.h	2007-01-20 12:05:00.000000000 -0500
+@@ -77,6 +77,10 @@ extern int shell_is_restricted __P((char
+ extern int maybe_make_restricted __P((char *));
+ #endif
+ 
++#if defined (AUDIT_SHELL)
++extern int maybe_make_audited __P((char *));
++#endif
++
+ extern void unset_bash_input __P((int));
+ extern void get_current_user_info __P((void));
+ 
+diff -urp bash-3.2.orig/flags.c bash-3.2/flags.c
+--- bash-3.2.orig/flags.c	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/flags.c	2007-01-20 11:59:23.000000000 -0500
+@@ -142,6 +142,12 @@ int restricted = 0;		/* currently restri
+ int restricted_shell = 0;	/* shell was started in restricted mode. */
+ #endif /* RESTRICTED_SHELL */
+ 
++#if defined (AUDIT_SHELL)
++/* Non-zero means that this shell is audited. An audited shell records
++   each command that the root user executes. */
++int audited = 0;		/* shell was started in audit mode. */
++#endif /* AUDIT_SHELL */
++
+ /* Non-zero means that this shell is running in `privileged' mode.  This
+    is required if the shell is to run setuid.  If the `-p' option is
+    not supplied at startup, and the real and effective uids or gids
+diff -urp bash-3.2.orig/flags.h bash-3.2/flags.h
+--- bash-3.2.orig/flags.h	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/flags.h	2007-01-20 11:59:23.000000000 -0500
+@@ -66,6 +66,10 @@ extern int restricted;
+ extern int restricted_shell;
+ #endif /* RESTRICTED_SHELL */
+ 
++#if defined (AUDIT_SHELL)
++extern int audited;
++#endif /* AUDIT_SHELL */
++
+ extern int *find_flag __P((int));
+ extern int change_flag __P((int, int));
+ extern char *which_set_flags __P((void));
+Only in bash-3.2: .made
+diff -urp bash-3.2.orig/Makefile.in bash-3.2/Makefile.in
+--- bash-3.2.orig/Makefile.in	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/Makefile.in	2007-01-20 11:59:23.000000000 -0500
+@@ -366,6 +366,8 @@ MALLOC_LIBRARY = @MALLOC_LIBRARY@
+ MALLOC_LDFLAGS = @MALLOC_LDFLAGS@
+ MALLOC_DEP = @MALLOC_DEP@
+ 
++AUDIT_LIB = @AUDIT_LIB@
++
+ ALLOC_HEADERS = $(ALLOC_LIBSRC)/getpagesize.h $(ALLOC_LIBSRC)/shmalloc.h \
+ 		$(ALLOC_LIBSRC)/imalloc.h $(ALLOC_LIBSRC)/mstats.h \
+ 		$(ALLOC_LIBSRC)/table.h $(ALLOC_LIBSRC)/watch.h
+@@ -386,7 +388,7 @@ BASHINCFILES =	 $(BASHINCDIR)/posixstat.
+ 		 $(BASHINCDIR)/ocache.h
+ 
+ LIBRARIES = $(SHLIB_LIB) $(READLINE_LIB) $(HISTORY_LIB) $(TERMCAP_LIB) $(GLOB_LIB) \
+-	    $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LOCAL_LIBS)
++	    $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LOCAL_LIBS) $(AUDIT_LIB)
+ 
+ LIBDEP = $(SHLIB_DEP) $(INTL_DEP) $(READLINE_DEP) $(HISTORY_DEP) $(TERMCAP_DEP) $(GLOB_DEP) \
+ 	 $(TILDE_DEP) $(MALLOC_DEP)
+diff -urp bash-3.2.orig/parse.y bash-3.2/parse.y
+--- bash-3.2.orig/parse.y	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/parse.y	2007-01-20 11:59:23.000000000 -0500
+@@ -258,7 +258,7 @@ int need_here_doc;
+ 
+ /* Where shell input comes from.  History expansion is performed on each
+    line when the shell is interactive. */
+-static char *shell_input_line = (char *)NULL;
++char *shell_input_line = (char *)NULL;
+ static int shell_input_line_index;
+ static int shell_input_line_size;	/* Amount allocated for shell_input_line. */
+ static int shell_input_line_len;	/* strlen (shell_input_line) */
+diff -urp bash-3.2.orig/shell.c bash-3.2/shell.c
+--- bash-3.2.orig/shell.c	2007-01-03 09:01:06.000000000 -0500
++++ bash-3.2/shell.c	2007-01-20 12:04:23.000000000 -0500
+@@ -240,6 +240,9 @@ struct {
+ #if defined (RESTRICTED_SHELL)
+   { "restricted", Int, &restricted, (char **)0x0 },
+ #endif
++#if defined (AUDIT_SHELL)
++  { "audit", Int, &audited, (char **)0x0 },
++#endif
+   { "verbose", Int, &echo_input_at_read, (char **)0x0 },
+   { "version", Int, &do_version, (char **)0x0 },
+   { "wordexp", Int, &wordexp_only, (char **)0x0 },
+@@ -644,6 +647,10 @@ main (argc, argv, env)
+     maybe_make_restricted (shell_name);
+ #endif /* RESTRICTED_SHELL */
+ 
++#if defined (AUDIT_SHELL)
++    maybe_make_audited (shell_name);
++#endif
++
+   if (wordexp_only)
+     {
+       startup_state = 3;
+@@ -1143,6 +1150,29 @@ maybe_make_restricted (name)
+ }
+ #endif /* RESTRICTED_SHELL */
+ 
++#if defined (AUDIT_SHELL)
++/* Perhaps make this shell an `audited' one, based on NAME.  If the
++   basename of NAME is "aubash", then this shell is audited.  The
++   name of the audited shell is a configurable option, see config.h.
++   In an audited shell, all actions performed by root will be logged
++   to the audit system.
++   Do this also if `audited' is already set to 1 maybe the shell was
++   started with --audit. */
++int
++maybe_make_audited (name)
++     char *name;
++{
++  char *temp;
++
++  temp = base_pathname (name);
++  if (*temp == '-')
++    temp++;
++  if (audited || (STREQ (temp, AUDIT_SHELL_NAME)))
++    audited = 1;
++  return (audited);
++}
++#endif /* AUDIT_SHELL */
++
+ /* Fetch the current set of uids and gids and return 1 if we're running
+    setuid or setgid. */
+ static int
