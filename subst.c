@@ -79,10 +79,12 @@ extern int errno;
 #define ST_DQUOTE	0x08	/* unused yet */
 
 /* Flags for the string extraction functions. */
-#define EX_NOALLOC	0x01	/* just skip; don't return substring */
-#define EX_VARNAME	0x02	/* variable name; for string_extract () */
-#define EX_REQMATCH	0x04	/* closing/matching delimiter required */
-#define EX_COMMAND	0x08	/* extracting a shell script/command */
+#define SX_NOALLOC	0x01	/* just skip; don't return substring */
+#define SX_VARNAME	0x02	/* variable name; for string_extract () */
+#define SX_REQMATCH	0x04	/* closing/matching delimiter required */
+#define SX_COMMAND	0x08	/* extracting a shell script/command */
+#define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
+#define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
 
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
@@ -543,11 +545,11 @@ sub_append_number (number, target, indx, size)
 /* Extract a substring from STRING, starting at SINDEX and ending with
    one of the characters in CHARLIST.  Don't make the ending character
    part of the string.  Leave SINDEX pointing at the ending character.
-   Understand about backslashes in the string.  If (flags & EX_VARNAME)
+   Understand about backslashes in the string.  If (flags & SX_VARNAME)
    is non-zero, and array variables have been compiled into the shell,
    everything between a `[' and a corresponding `]' is skipped over.
-   If (flags & EX_NOALLOC) is non-zero, don't return the substring, just
-   update SINDEX.  If (flags & EX_REQMATCH) is non-zero, the string must
+   If (flags & SX_NOALLOC) is non-zero, don't return the substring, just
+   update SINDEX.  If (flags & SX_REQMATCH) is non-zero, the string must
    contain a closing character from CHARLIST. */
 static char *
 string_extract (string, sindex, charlist, flags)
@@ -575,7 +577,7 @@ string_extract (string, sindex, charlist, flags)
 	    break;
 	}
 #if defined (ARRAY_VARS)
-      else if ((flags & EX_VARNAME) && c == '[')
+      else if ((flags & SX_VARNAME) && c == '[')
 	{
 	  int ni;
 	  /* If this is an array subscript, skip over it and continue. */
@@ -595,13 +597,13 @@ string_extract (string, sindex, charlist, flags)
 
   /* If we had to have a matching delimiter and didn't find one, return an
      error and let the caller deal with it. */
-  if ((flags & EX_REQMATCH) && found == 0)
+  if ((flags & SX_REQMATCH) && found == 0)
     {
       *sindex = i;
       return (&extract_string_error);
     }
   
-  temp = (flags & EX_NOALLOC) ? (char *)NULL : substring (string, *sindex, i);
+  temp = (flags & SX_NOALLOC) ? (char *)NULL : substring (string, *sindex, i);
   *sindex = i;
   
   return (temp);
@@ -712,7 +714,7 @@ add_one_character:
 
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_delimited_string (string, &si, "$(", "(", ")", EX_COMMAND); /*)*/
+	    ret = extract_delimited_string (string, &si, "$(", "(", ")", SX_COMMAND); /*)*/
 	  else
 	    ret = extract_dollar_brace_string (string, &si, 1, 0);
 
@@ -814,9 +816,9 @@ skip_double_quoted (string, slen, sind)
 	{
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_delimited_string (string, &si, "$(", "(", ")", EX_NOALLOC|EX_COMMAND); /* ) */
+	    ret = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
-	    ret = extract_dollar_brace_string (string, &si, 0, EX_NOALLOC);
+	    ret = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
 
 	  i = si + 1;
 	  continue;
@@ -924,12 +926,19 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 #if defined (HANDLE_MULTIBYTE)
       size_t mblength;
 #endif
-      if (c == CTLESC)
+      if ((flags & SX_NOCTLESC) == 0 && c == CTLESC)
 	{
 	  i += 2;
 	  continue;
 	}
-
+      /* Even if flags contains SX_NOCTLESC, we let CTLESC quoting CTLNUL
+	 through, to protect the CTLNULs from later calls to
+	 remove_quoted_nulls. */
+      else if ((flags & SX_NOESCCTLNUL) == 0 && c == CTLESC && string[i+1] == CTLNUL)
+	{
+	  i += 2;
+	  continue;
+	}
 #if defined (HANDLE_MULTIBYTE)
       mblength = MBLEN (string + i, slen - i);
       if (mblength > 1)
@@ -983,7 +992,7 @@ extract_command_subst (string, sindex)
      char *string;
      int *sindex;
 {
-  return (extract_delimited_string (string, sindex, "$(", "(", ")", EX_COMMAND)); /*)*/
+  return (extract_delimited_string (string, sindex, "$(", "(", ")", SX_COMMAND)); /*)*/
 }
 
 /* Extract the $[ construct in STRING, and return a new string. (])
@@ -1090,7 +1099,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 
       /* Not exactly right yet; should handle shell metacharacters and
 	 multibyte characters, too. */
-      if ((flags & EX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || whitespace (string[i - 1])))
+      if ((flags & SX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || whitespace (string[i - 1])))
 	{
           in_comment = 1;
           ADVANCE_CHAR (string, slen, i);
@@ -1108,7 +1117,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if (STREQN (string + i, opener, len_opener))
 	{
 	  si = i + len_opener;
-	  t = extract_delimited_string (string, &si, opener, alt_opener, closer, flags|EX_NOALLOC);
+	  t = extract_delimited_string (string, &si, opener, alt_opener, closer, flags|SX_NOALLOC);
 	  i = si + 1;
 	  continue;
 	}
@@ -1117,7 +1126,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if (len_alt_opener && STREQN (string + i, alt_opener, len_alt_opener))
 	{
 	  si = i + len_alt_opener;
-	  t = extract_delimited_string (string, &si, alt_opener, alt_opener, closer, flags|EX_NOALLOC);
+	  t = extract_delimited_string (string, &si, alt_opener, alt_opener, closer, flags|SX_NOALLOC);
 	  i = si + 1;
 	  continue;
 	}
@@ -1136,7 +1145,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if (c == '`')
 	{
 	  si = i + 1;
-	  t = string_extract (string, &si, "`", flags|EX_NOALLOC);
+	  t = string_extract (string, &si, "`", flags|SX_NOALLOC);
 	  i = si + 1;
 	  continue;
 	}
@@ -1170,7 +1179,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
     }
 
   si = i - *sindex - len_closer + 1;
-  if (flags & EX_NOALLOC)
+  if (flags & SX_NOALLOC)
     result = (char *)NULL;
   else    
     {
@@ -1245,7 +1254,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (c == '`')
 	{
 	  si = i + 1;
-	  t = string_extract (string, &si, "`", flags|EX_NOALLOC);
+	  t = string_extract (string, &si, "`", flags|SX_NOALLOC);
 	  i = si + 1;
 	  continue;
 	}
@@ -1255,7 +1264,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (string[i] == '$' && string[i+1] == LPAREN)
 	{
 	  si = i + 2;
-	  t = extract_delimited_string (string, &si, "$(", "(", ")", flags|EX_NOALLOC|EX_COMMAND); /*)*/
+	  t = extract_delimited_string (string, &si, "$(", "(", ")", flags|SX_NOALLOC|SX_COMMAND); /*)*/
 	  i = si + 1;
 	  continue;
 	}
@@ -1290,7 +1299,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	}
     }
 
-  result = (flags & EX_NOALLOC) ? (char *)NULL : substring (string, *sindex, i);
+  result = (flags & SX_NOALLOC) ? (char *)NULL : substring (string, *sindex, i);
   *sindex = i;
 
   return (result);
@@ -1518,9 +1527,9 @@ skip_to_delim (string, start, delims)
 	    CQ_RETURN(si);
 
 	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (string, &si, "$(", "(", ")", EX_NOALLOC|EX_COMMAND); /* ) */
+	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
-	    temp = extract_dollar_brace_string (string, &si, 0, EX_NOALLOC);
+	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
 	    break;
@@ -1945,7 +1954,7 @@ list_string (string, separators, quoted)
   WORD_LIST *result;
   WORD_DESC *t;
   char *current_word, *s;
-  int sindex, sh_style_split, whitesep;
+  int sindex, sh_style_split, whitesep, xflags;
   size_t slen;
 
   if (!string || !*string)
@@ -1955,6 +1964,11 @@ list_string (string, separators, quoted)
 				 separators[1] == '\t' &&
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
+  for (xflags = 0, s = ifs_value; s && *s; s++)
+    {
+      if (*s == CTLESC) xflags |= SX_NOCTLESC;
+      else if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
+    }
 
   slen = 0;
   /* Remove sequences of whitespace at the beginning of STRING, as
@@ -1980,7 +1994,7 @@ list_string (string, separators, quoted)
     {
       /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
 	 unless multibyte chars are possible. */
-      current_word = string_extract_verbatim (string, slen, &sindex, separators, 0);
+      current_word = string_extract_verbatim (string, slen, &sindex, separators, xflags);
       if (current_word == 0)
 	break;
 
@@ -2062,19 +2076,23 @@ get_word_from_string (stringp, separators, endptr)
 {
   register char *s;
   char *current_word;
-  int sindex, sh_style_split, whitesep;
+  int sindex, sh_style_split, whitesep, xflags;
   size_t slen;
 
   if (!stringp || !*stringp || !**stringp)
     return ((char *)NULL);
 
-  s = *stringp;
-
   sh_style_split = separators && separators[0] == ' ' &&
 				 separators[1] == '\t' &&
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
+  for (xflags = 0, s = ifs_value; s && *s; s++)
+    {
+      if (*s == CTLESC) xflags |= SX_NOCTLESC;
+      if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
+    }
 
+  s = *stringp;
   slen = 0;
 
   /* Remove sequences of whitespace at the beginning of STRING, as
@@ -2103,7 +2121,7 @@ get_word_from_string (stringp, separators, endptr)
   /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
      unless multibyte chars are possible. */
   slen = (MB_CUR_MAX > 1) ? strlen (s) : 1;
-  current_word = string_extract_verbatim (s, slen, &sindex, separators, 0);
+  current_word = string_extract_verbatim (s, slen, &sindex, separators, xflags);
 
   /* Set ENDPTR to the first character after the end of the word. */
   if (endptr)
@@ -2934,12 +2952,14 @@ expand_string (string, quoted)
 
 /* Quote escape characters in string s, but no other characters.  This is
    used to protect CTLESC and CTLNUL in variable values from the rest of
-   the word expansion process after the variable is expanded.  If IFS is
-   null, we quote spaces as well, just in case we split on spaces later
-   (in the case of unquoted $@, we will eventually attempt to split the
-   entire word on spaces).  Corresponding code exists in dequote_escapes.
-   Even if we don't end up splitting on spaces, quoting spaces is not a
-   problem. */
+   the word expansion process after the variable is expanded (word splitting
+   and filename generation).  If IFS is null, we quote spaces as well, just
+   in case we split on spaces later (in the case of unquoted $@, we will
+   eventually attempt to split the entire word on spaces).  Corresponding
+   code exists in dequote_escapes.  Even if we don't end up splitting on
+   spaces, quoting spaces is not a problem.  This should never be called on
+   a string that is quoted with single or double quotes or part of a here
+   document (effectively double-quoted). */
 char *
 quote_escapes (string)
      char *string;
@@ -2947,19 +2967,23 @@ quote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
-  int quote_spaces;
+  int quote_spaces, skip_ctlesc, skip_ctlnul;
   DECLARE_MBSTATE; 
 
   slen = strlen (string);
   send = string + slen;
 
   quote_spaces = (ifs_value && *ifs_value == 0);
+
+  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
+    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
 
   while (*s)
     {
-      if (*s == CTLESC || *s == CTLNUL || (quote_spaces && *s == ' '))
+      if ((skip_ctlesc == 0 && *s == CTLESC) || (skip_ctlnul == 0 && *s == CTLNUL) || (quote_spaces && *s == ' '))
 	*t++ = CTLESC;
       COPY_CHAR_P (t, s, send);
     }
@@ -2998,7 +3022,7 @@ static char *
 dequote_escapes (string)
      char *string;
 {
-  register char *s, *t;
+  register char *s, *t, *s1;
   size_t slen;
   char *result, *send;
   int quote_spaces;
@@ -3011,12 +3035,13 @@ dequote_escapes (string)
   send = string + slen;
 
   t = result = (char *)xmalloc (slen + 1);
-  s = string;
 
   if (strchr (string, CTLESC) == 0)
-    return (strcpy (result, s));
+    return (strcpy (result, string));
 
   quote_spaces = (ifs_value && *ifs_value == 0);
+
+  s = string;
   while (*s)
     {
       if (*s == CTLESC && (s[1] == CTLESC || s[1] == CTLNUL || (quote_spaces && s[1] == ' ')))
@@ -3993,7 +4018,9 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
 	FREE (val);
       if (temp1)
 	{
-	  val = quote_escapes (temp1);
+	  val = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+			? quote_string (temp1)
+			: quote_escapes (temp1);
 	  free (temp1);
 	  temp1 = val;
 	}
@@ -4460,12 +4487,15 @@ read_comsub (fd, quoted, rflag)
      int fd, quoted;
      int *rflag;
 {
-  char *istring, buf[128], *bufp;
-  int istring_index, istring_size, c, tflag;
+  char *istring, buf[128], *bufp, *s;
+  int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
   ssize_t bufn;
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
+
+  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
+    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
 
 #ifdef __CYGWIN__
   setmode (fd, O_TEXT);		/* we don't want CR/LF, we want Unix-style */
@@ -4503,12 +4533,12 @@ read_comsub (fd, quoted, rflag)
       /* Escape CTLESC and CTLNUL in the output to protect those characters
 	 from the rest of the word expansions (word splitting and globbing.)
 	 This is essentially quote_escapes inline. */
-      else if (c == CTLESC)
+      else if (skip_ctlesc == 0 && c == CTLESC)
 	{
 	  tflag |= W_HASCTLESC;
 	  istring[istring_index++] = CTLESC;
 	}
-      else if (c == CTLNUL || (c == ' ' && (ifs_value && *ifs_value == 0)))
+      else if ((skip_ctlnul == 0 && c == CTLNUL) || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
 
       istring[istring_index++] = c;
@@ -5608,18 +5638,9 @@ parameter_brace_substring (varname, value, substr, quoted)
       /* We want E2 to be the number of elements desired (arrays can be sparse,
 	 so verify_substring_values just returns the numbers specified and we
 	 rely on array_subrange to understand how to deal with them). */
-      tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
-#if 0
+      temp = array_subrange (array_cell (v), e1, e2, starsub, quoted);
       /* array_subrange now calls array_quote_escapes as appropriate, so the
 	 caller no longer needs to. */
-      if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
-	{
-	  temp = tt ? quote_escapes (tt) : (char *)NULL;
-	  FREE (tt);
-	}
-      else
-#endif
-	temp = tt;
       break;
 #endif
     default:
@@ -5852,7 +5873,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 	FREE (val);
       if (temp)
 	{
-	  tt = quote_escapes (temp);
+	  tt = (mflags & MATCH_QUOTED) ? quote_string (temp) : quote_escapes (temp);
 	  free (temp);
 	  temp = tt;
 	}
@@ -5869,16 +5890,9 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       temp = array_patsub (array_cell (v), p, rep, mflags);
-#if 0
-      /* Don't need to do this anymore; array_patsub calls array_quote_escapes
-	 as appropriate before adding the space separators. */
-      if (temp && (mflags & MATCH_QUOTED) == 0)
-	{
-	  tt = quote_escapes (temp);
-	  free (temp);
-	  temp = tt;
-	}
-#endif
+      /* Don't call quote_escapes anymore; array_patsub calls
+	 array_quote_escapes as appropriate before adding the
+	 space separators. */
       break;
 #endif
     }
@@ -5968,9 +5982,9 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
   t_index = ++sindex;
   /* ${#var} doesn't have any of the other parameter expansions on it. */
   if (string[t_index] == '#' && legal_variable_starter (string[t_index+1]))		/* {{ */
-    name = string_extract (string, &t_index, "}", EX_VARNAME);
+    name = string_extract (string, &t_index, "}", SX_VARNAME);
   else
-    name = string_extract (string, &t_index, "#%:-=?+/}", EX_VARNAME);
+    name = string_extract (string, &t_index, "#%:-=?+/}", SX_VARNAME);
 
   ret = 0;
   tflag = 0;
@@ -7027,7 +7041,7 @@ add_string:
 	  {
 	    t_index = sindex++;
 
-	    temp = string_extract (string, &sindex, "`", EX_REQMATCH);
+	    temp = string_extract (string, &sindex, "`", SX_REQMATCH);
 	    /* The test of sindex against t_index is to allow bare instances of
 	       ` to pass through, for backwards compatibility. */
 	    if (temp == &extract_string_error || temp == &extract_string_fatal)

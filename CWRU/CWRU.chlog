@@ -14458,3 +14458,45 @@ mailcheck.h
 
 shell.c
 	- call init_mail_dates instead of remember_mail_dates
+
+				    4/4
+				    ---
+builtins/read.def
+	- changes to print $PS2 when a line is continued with a backslash in
+	  an interactive shell.  This is as POSIX requires
+
+				    4/5
+				    ---
+subst.c
+	- make sure quote_escapes is only ever called when the word to be
+	  escaped is not marked as double-quoted -- cleaner, and allows us
+	  to make certain assumptions
+
+				    4/6
+				    ---
+subst.c
+	- change all EX_* defines to begin with SX_
+	- new flag, SX_NOCTLESC, obeyed by string_extract_verbatim, tells it
+	  to not obey CTLESC quoting
+	- change quote_escapes to not quote CTLESC with CTLESC if one of the
+	  chars in $IFS is CTLESC, since the return value from quote_string
+	  will be passed to word splitting and filename generation
+	- change read_comsub to do the same thing for unquoted command
+	  substitutions
+	- change list_string to pass SX_NOCTLESC if CTLESC is one of the
+	  chars in $IFS, so it will split on CTLESC instead of using it as a
+	  quote character
+
+				    4/7
+				    ---
+subst.c
+	- slight change to string_extract_verbatim to allow CTLESC to quote
+	  CTLNUL even if SX_NOCTLESC is set in the flags passed, to protect
+	  the CTLNULs from future calls to remove_quoted_nulls.  Only
+	  matters when $IFS contains CTLESC
+	- changes to cope with $IFS containing CTLNUL in the same way as the
+	  CTLESC changes
+
+builtins/read.def
+	- changes to cope with $IFS containing CTLNUL in the same way as the
+	  CTLESC changes

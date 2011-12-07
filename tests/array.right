@@ -152,10 +152,10 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: line 285: syntax error near unexpected token `<>'
-./array.tests: line 285: `metas=( <> < > ! )'
-./array.tests: line 286: syntax error near unexpected token `<>'
-./array.tests: line 286: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
+./array.tests: line 287: syntax error near unexpected token `<>'
+./array.tests: line 287: `metas=( <> < > ! )'
+./array.tests: line 288: syntax error near unexpected token `<>'
+./array.tests: line 288: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
 case 4
 abc case if then else 5
@@ -206,3 +206,63 @@ t
 e
 9
 2
+a b c
+argv[1] = <"-iname '"a>
+argv[2] = <"-iname '"b>
+argv[3] = <"-iname '"c>
+'hey'
+hey
+''hey
+'hey'
+argv[1] = <c>
+argv[2] = <d>
+argv[3] = <e>
+argv[4] = <f>
+argv[1] = <c d>
+argv[2] = <e f>
+argv[1] = <c d>
+argv[2] = <e f>
+argv[1] = <c d>
+argv[2] = <e f>
+argv[1] = <"-iname '"abc>
+argv[2] = <"-iname '"def>
+argv[1] = <-iname 'abc>
+argv[2] = <-iname 'def>
+argv[1] = <-iname \'abc>
+argv[2] = <-iname \'def>
+argv[1] = <-iname>
+argv[2] = <'abc>
+argv[3] = <-iname>
+argv[4] = <'def>
+argv[1] = <"-iname '"abc>
+argv[2] = <"-iname '"def>
+argv[1] = <-iname 'abc>
+argv[2] = <-iname 'def>
+*.* OK
+1
+a1 2 3c
+argv[1] = <var with spaces>
+argv[1] = <var with spaces>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+argv[1] = <var with spacesab>
+argv[2] = <cd>
+argv[3] = <ef>
+2
+argv[1] = <element1 with spaces>
+argv[2] = <element2 with spaces>
+argv[1] = <element1 with spaces>
+argv[2] = <element2 with spaces>

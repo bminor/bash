@@ -84,7 +84,6 @@ extern int errno;
 #define SX_REQMATCH	0x04	/* closing/matching delimiter required */
 #define SX_COMMAND	0x08	/* extracting a shell script/command */
 #define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
-#define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
 
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
@@ -934,7 +933,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
       /* Even if flags contains SX_NOCTLESC, we let CTLESC quoting CTLNUL
 	 through, to protect the CTLNULs from later calls to
 	 remove_quoted_nulls. */
-      else if ((flags & SX_NOESCCTLNUL) == 0 && c == CTLESC && string[i+1] == CTLNUL)
+      else if (c == CTLESC && string[i+1] == CTLNUL)
 	{
 	  i += 2;
 	  continue;
@@ -1965,10 +1964,7 @@ list_string (string, separators, quoted)
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
   for (xflags = 0, s = ifs_value; s && *s; s++)
-    {
-      if (*s == CTLESC) xflags |= SX_NOCTLESC;
-      else if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
-    }
+    if (*s == CTLESC) xflags |= SX_NOCTLESC;  
 
   slen = 0;
   /* Remove sequences of whitespace at the beginning of STRING, as
@@ -2087,10 +2083,7 @@ get_word_from_string (stringp, separators, endptr)
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
   for (xflags = 0, s = ifs_value; s && *s; s++)
-    {
-      if (*s == CTLESC) xflags |= SX_NOCTLESC;
-      if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
-    }
+    if (*s == CTLESC) xflags |= SX_NOCTLESC;  
 
   s = *stringp;
   slen = 0;
@@ -2967,7 +2960,7 @@ quote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
-  int quote_spaces, skip_ctlesc, skip_ctlnul;
+  int quote_spaces, skip_ctlesc;
   DECLARE_MBSTATE; 
 
   slen = strlen (string);
@@ -2975,18 +2968,15 @@ quote_escapes (string)
 
   quote_spaces = (ifs_value && *ifs_value == 0);
 
-  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    {
-      skip_ctlesc |= *s == CTLESC;
-      skip_ctlnul |= *s == CTLNUL;
-    }
+  for (skip_ctlesc = 0, s = ifs_value; s && *s; s++)
+    skip_ctlesc |= *s == CTLESC;
 
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
 
   while (*s)
     {
-      if ((skip_ctlesc == 0 && *s == CTLESC) || (skip_ctlnul == 0 && *s == CTLNUL) || (quote_spaces && *s == ' '))
+      if ((skip_ctlesc == 0 && *s == CTLESC) || *s == CTLNUL || (quote_spaces && *s == ' '))
 	*t++ = CTLESC;
       COPY_CHAR_P (t, s, send);
     }
@@ -4491,14 +4481,14 @@ read_comsub (fd, quoted, rflag)
      int *rflag;
 {
   char *istring, buf[128], *bufp, *s;
-  int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
+  int istring_index, istring_size, c, tflag, skip_ctlesc;
   ssize_t bufn;
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
-  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+  for (skip_ctlesc = 0, s = ifs_value; s && *s; s++)
+    skip_ctlesc |= *s == CTLESC;
 
 #ifdef __CYGWIN__
   setmode (fd, O_TEXT);		/* we don't want CR/LF, we want Unix-style */
@@ -4541,7 +4531,7 @@ read_comsub (fd, quoted, rflag)
 	  tflag |= W_HASCTLESC;
 	  istring[istring_index++] = CTLESC;
 	}
-      else if ((skip_ctlnul == 0 && c == CTLNUL) || (c == ' ' && (ifs_value && *ifs_value == 0)))
+      else if (c == CTLNUL || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
 
       istring[istring_index++] = c;
