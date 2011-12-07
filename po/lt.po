@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-3.2\n"
 "POT-Creation-Date: 2006-10-23 17:20-0400\n"
-"PO-Revision-Date: 2008-03-14 22:41+0200\n"
+"PO-Revision-Date: 2008-07-28 03:07-0400\n"
 "Last-Translator: Gintautas Miliauskas <gintas@akl.lt>\n"
 "Language-Team: Lithuanian <komp_lt@konferencijos.lt>\n"
 "MIME-Version: 1.0\n"
@@ -18,12 +18,12 @@ msgstr ""
 
 #: arrayfunc.c:48
 msgid "bad array subscript"
-msgstr ""
+msgstr "blogas masyvo indeksas"
 
 #: arrayfunc.c:362
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
-msgstr ""
+msgstr "%s: nepavyko priskirti prie neskaitinio indekso"
 
 #: bashhist.c:331
 #, c-format
@@ -32,7 +32,7 @@ msgstr "%s: nepavyko sukurti: %s"
 
 #: bashline.c:3030
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr ""
+msgstr "bash_execute_unix_command: nepavyko rasti keymapo komandai"
 
 #: bashline.c:3079
 #, c-format
@@ -62,7 +62,7 @@ msgstr "%s: nepavyko perskaityti: %s"
 #: builtins/bind.def:248
 #, c-format
 msgid "`%s': cannot unbind"
-msgstr ""
+msgstr "„%s“: nepavyko atjungti (unbind)"
 
 #: builtins/bind.def:283
 #, c-format
@@ -77,7 +77,7 @@ msgstr "%s nėra priskirtas jokiam klavišui.\n"
 #: builtins/bind.def:295
 #, c-format
 msgid "%s can be invoked via "
-msgstr "%s gali būti iškviestas su"
+msgstr "%s gali būti iškviestas su "
 
 #: builtins/break.def:128
 msgid "only meaningful in a `for', `while', or `until' loop"
@@ -85,7 +85,7 @@ msgstr "prasminga tik „for“, „while“ arba „until“ cikle"
 
 #: builtins/caller.def:131
 msgid "Returns the context of the current subroutine call."
-msgstr ""
+msgstr "Grąžina esamos procedūros kontekstą."
 
 #: builtins/caller.def:132 builtins/caller.def:136 builtins/pushd.def:666
 #: builtins/pushd.def:674 builtins/pushd.def:677 builtins/pushd.def:687
@@ -97,23 +97,23 @@ msgstr " "
 
 #: builtins/caller.def:133
 msgid "Without EXPR, returns returns \"$line $filename\".  With EXPR,"
-msgstr ""
+msgstr "Be EXPR, grąžina „$line $filename“.  Su EXPR,"
 
 #: builtins/caller.def:134
 msgid "returns \"$line $subroutine $filename\"; this extra information"
-msgstr ""
+msgstr "grąžina „$line $subroutine $filename“; ši papildoma informacija"
 
 #: builtins/caller.def:135
 msgid "can be used used to provide a stack trace."
-msgstr ""
+msgstr "gali būti panaudota generuojant steko išrašą (stack trace)."
 
 #: builtins/caller.def:137
 msgid "The value of EXPR indicates how many call frames to go back before the"
-msgstr ""
+msgstr "EXPR reikšmė nurodo, per kiek kvietimo freimų eiti atgal prieš"
 
 #: builtins/caller.def:138
 msgid "current one; the top frame is frame 0."
-msgstr ""
+msgstr "esamą.  Viršutinis freimas yra 0."
 
 #: builtins/cd.def:204
 msgid "HOME not set"
@@ -316,7 +316,7 @@ msgstr "%s: nepavyko paleisti: %s"
 
 #: builtins/exit.def:83
 msgid "not login shell: use `exit'"
-msgstr ""
+msgstr "ne prisijungimo aplinka: naudokite „exit“"
 
 #: builtins/exit.def:111
 msgid "There are stopped jobs.\n"
@@ -328,7 +328,7 @@ msgstr "komandų nerasta"
 
 #: builtins/fc.def:328
 msgid "history specification"
-msgstr ""
+msgstr "istorijos specifikacija"
 
 #: builtins/fc.def:349
 #, c-format
@@ -338,7 +338,7 @@ msgstr "%s: nepavyko atverti laikinojo failo: %s"
 #: builtins/fg_bg.def:149
 #, c-format
 msgid "job %d started without job control"
-msgstr ""
+msgstr "darbas %d pradėtas be darbų valdymo"
 
 #: builtins/getopt.c:109
 #, c-format
@@ -352,7 +352,7 @@ msgstr "%s: parametrui reikia argumento -- %c\n"
 
 #: builtins/hash.def:84
 msgid "hashing disabled"
-msgstr ""
+msgstr "maiša išjungta"
 
 #: builtins/hash.def:130
 #, c-format
@@ -361,11 +361,11 @@ msgstr "%s: maišos lentelė tuščia\n"
 
 #: builtins/help.def:108
 msgid "Shell commands matching keywords `"
-msgstr ""
+msgstr "Aplinkos komandos, atitinkančios raktažodžius „"
 
 #: builtins/help.def:110
 msgid "Shell commands matching keyword `"
-msgstr ""
+msgstr "Aplinkos komandos, atitinkančios raktažodį „"
 
 #: builtins/help.def:138
 #, c-format
@@ -387,28 +387,35 @@ msgid ""
 "A star (*) next to a name means that the command is disabled.\n"
 "\n"
 msgstr ""
+"Šios aplinkos komandos vidinės. Jei norite pamatyti šį sąrašą, įveskite „help“.\n"
+"Įveskite „help fn“, jei norite sužinoti daugiau apie funkciją „fn“.\n"
+"Įveskite „info bash“, jei norite daugiau sužinoti apie aplinką apskritai.\n"
+"Naudokite „man -k“ ir „info“, jei norite sužinoti daugiau apie komandas, nesančiasšiame sąraše.\n"
+"\n"
+"Žvaigždutė (*) prie vardo reiškia, kad komanda išjungta.\n"
+"\n"
 
 #: builtins/history.def:150
 msgid "cannot use more than one of -anrw"
-msgstr "negalima naudoti daugiau negu vieno iš -anrw"
+msgstr "negalima naudoti daugiau negu vieno parametro iš -anrw"
 
 #: builtins/history.def:182
 msgid "history position"
-msgstr ""
+msgstr "istorijos pozicija"
 
 #: builtins/history.def:400
 #, c-format
 msgid "%s: history expansion failed"
-msgstr ""
+msgstr "%s: istorijos išskleidimas nesėkmingas"
 
 #: builtins/jobs.def:99
 msgid "no other options allowed with `-x'"
-msgstr ""
+msgstr "su „-x“ neleidžiama naudoti kitų parametrų"
 
 #: builtins/kill.def:187
 #, c-format
 msgid "%s: arguments must be process or job IDs"
-msgstr ""
+msgstr "%s: argumentai turi būti procesų arba darbų ID"
 
 #: builtins/kill.def:250
 msgid "Unknown error"
@@ -442,156 +449,157 @@ msgstr "<nėra esamo aplanko>"
 
 #: builtins/pushd.def:663
 msgid "Display the list of currently remembered directories.  Directories"
-msgstr ""
+msgstr "Rodyti prisimenamų aplankų sąrašą. Aplankai"
 
 #: builtins/pushd.def:664
 msgid "find their way onto the list with the `pushd' command; you can get"
-msgstr ""
+msgstr "atsiduria sąraše su „pushd“ komanda; galite kilti"
 
 #: builtins/pushd.def:665
 msgid "back up through the list with the `popd' command."
-msgstr ""
+msgstr "sąrašu su „popd“ komanda."
 
 #: builtins/pushd.def:667
 msgid "The -l flag specifies that `dirs' should not print shorthand versions"
-msgstr ""
+msgstr "Parametras -l nurodo, kad „dirs“ neturėtų spausdinti sutrumpintų"
 
 #: builtins/pushd.def:668
 msgid "of directories which are relative to your home directory.  This means"
-msgstr ""
+msgstr "aplankų, santykinių namų aplinkui, pavadinimų. Tai reiškia, kad"
 
 #: builtins/pushd.def:669
+#, fuzzy
 msgid "that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag"
-msgstr ""
+msgstr "kad „~/bin“ bus rodomas kaip „/home/bfox/bin“.  Su parametru -v"
 
 #: builtins/pushd.def:670
 msgid "causes `dirs' to print the directory stack with one entry per line,"
-msgstr ""
+msgstr "„dirs“ išveda aplankų steką po vieną pavadinimą eilutėje,"
 
 #: builtins/pushd.def:671
 msgid "prepending the directory name with its position in the stack.  The -p"
-msgstr ""
+msgstr "prieš pavadinimą prirašoma aplanko pozicija steke. Parametras -p"
 
 #: builtins/pushd.def:672
 msgid "flag does the same thing, but the stack position is not prepended."
-msgstr ""
+msgstr "turi tokį patį efektą, tačiau pozicija steke neišvedama."
 
 #: builtins/pushd.def:673
 msgid "The -c flag clears the directory stack by deleting all of the elements."
-msgstr ""
+msgstr "Parametras -c išvalo aplankų steką."
 
 #: builtins/pushd.def:675
 msgid "+N   displays the Nth entry counting from the left of the list shown by"
-msgstr ""
+msgstr "+N   rodo N-tąjį įrašą skaičiuojant iš kairės sąraše, rodomame"
 
 #: builtins/pushd.def:676 builtins/pushd.def:679
 msgid "     dirs when invoked without options, starting with zero."
-msgstr ""
+msgstr "     „dirs“, iškviesto be parametrų (skaičiuojama nuo nulio)."
 
 #: builtins/pushd.def:678
 msgid "-N   displays the Nth entry counting from the right of the list shown by"
-msgstr ""
+msgstr "-N   rodo N-tajį įrašą skaičiuojant iš dešinės sąraše, rodomame"
 
 #: builtins/pushd.def:684
 msgid "Adds a directory to the top of the directory stack, or rotates"
-msgstr ""
+msgstr "Įdeda aplanką į aplankų steko viršų, arba pasuka"
 
 #: builtins/pushd.def:685
 msgid "the stack, making the new top of the stack the current working"
-msgstr ""
+msgstr "steką, nustatydamas esamą aplanką į naująją steko viršūnės reikšmę."
 
 #: builtins/pushd.def:686
 msgid "directory.  With no arguments, exchanges the top two directories."
-msgstr ""
+msgstr "Be argumentų, sukeičia viršutinius du aplankus."
 
 #: builtins/pushd.def:688
 msgid "+N   Rotates the stack so that the Nth directory (counting"
-msgstr ""
+msgstr "+N   Pasuka steką, kad N-tasis aplankas (skaičiuojant"
 
 #: builtins/pushd.def:689
 msgid "     from the left of the list shown by `dirs', starting with"
-msgstr ""
+msgstr "     iš kairės sąraše, rodomame „dirs“, pradedant nuo nulio)"
 
 #: builtins/pushd.def:690 builtins/pushd.def:694
 msgid "     zero) is at the top."
-msgstr ""
+msgstr "     būtų viršuje."
 
 #: builtins/pushd.def:692
 msgid "-N   Rotates the stack so that the Nth directory (counting"
-msgstr ""
+msgstr "-N   Pasuka steką, kad N-tasis aplankas (skaičiuojant"
 
 #: builtins/pushd.def:693
 msgid "     from the right of the list shown by `dirs', starting with"
-msgstr ""
+msgstr "     iš dešinės sąraše, rodomame „dirs“, pradedant nuo nulio)"
 
 #: builtins/pushd.def:696
 msgid "-n   suppress the normal change of directory when adding directories"
-msgstr ""
+msgstr "-n   išjungti įprastą aplanko pakeitimą pridedant aplankus"
 
 #: builtins/pushd.def:697
 msgid "     to the stack, so only the stack is manipulated."
-msgstr ""
+msgstr "     į steką, taigi, pakeičiamas tik stekas."
 
 #: builtins/pushd.def:699
 msgid "dir  adds DIR to the directory stack at the top, making it the"
-msgstr ""
+msgstr "dir  prideda DIR į aplankų steko viršų; DIR nustatomas"
 
 #: builtins/pushd.def:700
 msgid "     new current working directory."
-msgstr ""
+msgstr "     naujuoju darbiniu aplanku."
 
 #: builtins/pushd.def:702 builtins/pushd.def:722
 msgid "You can see the directory stack with the `dirs' command."
-msgstr ""
+msgstr "Galite pamatyti aplankų steką komanda „dirs“."
 
 #: builtins/pushd.def:707
 msgid "Removes entries from the directory stack.  With no arguments,"
-msgstr ""
+msgstr "Šalina įrašus iš aplankų steko. Jei nenurodyta argumentų,"
 
 #: builtins/pushd.def:708
 msgid "removes the top directory from the stack, and cd's to the new"
-msgstr ""
+msgstr "pašalina viršutinį aplanką iš steko ir pakeičia darbinį aplanką"
 
 #: builtins/pushd.def:709
 msgid "top directory."
-msgstr ""
+msgstr "steko viršūnėje esančiu."
 
 #: builtins/pushd.def:711
 msgid "+N   removes the Nth entry counting from the left of the list"
-msgstr ""
+msgstr "+N   pašalina N-tąjį įrašą skaičiuojant iš kairės sąraše, išvedamame „dir“"
 
 #: builtins/pushd.def:712
 msgid "     shown by `dirs', starting with zero.  For example: `popd +0'"
-msgstr ""
+msgstr "     (skaičiuojama nuo nulio).  Pavyzdžiui: „popd +0“"
 
 #: builtins/pushd.def:713
 msgid "     removes the first directory, `popd +1' the second."
-msgstr ""
+msgstr "     pašalina pirmąjį aplanką, „popd +1“ – antrąjį."
 
 #: builtins/pushd.def:715
 msgid "-N   removes the Nth entry counting from the right of the list"
-msgstr ""
+msgstr "+N   pašalina N-tąjį įrašą skaičiuojant iš dešinės sąraše, išvedamame „dir“"
 
 #: builtins/pushd.def:716
 msgid "     shown by `dirs', starting with zero.  For example: `popd -0'"
-msgstr ""
+msgstr "     (skaičiuojama nuo nulio).  Pavyzdžiui: „popd -0“"
 
 #: builtins/pushd.def:717
 msgid "     removes the last directory, `popd -1' the next to last."
-msgstr ""
+msgstr "     pašalina paskutinį aplanką, „popd -1“ – priešpaskutinį."
 
 #: builtins/pushd.def:719
 msgid "-n   suppress the normal change of directory when removing directories"
-msgstr ""
+msgstr "     išjungti įprastą darbinio aplanko keitimą šalinant aplankus"
 
 #: builtins/pushd.def:720
 msgid "     from the stack, so only the stack is manipulated."
-msgstr ""
+msgstr "     iš steko, taigi, pakeičiamas tik stekas."
 
 #: builtins/read.def:210
 #, c-format
 msgid "%s: invalid timeout specification"
-msgstr ""
+msgstr "%s: klaidinga laiko ribos (timeout) specifikacija"
 
 #: builtins/read.def:233
 #, c-format
@@ -614,17 +622,17 @@ msgstr "galima grįžti (return) tik iš funkcijos ar scenarijaus"
 
 #: builtins/set.def:744
 msgid "cannot simultaneously unset a function and a variable"
-msgstr ""
+msgstr "negalima kartu ištrinti funkcijos ir kintamojo"
 
 #: builtins/set.def:781
 #, c-format
 msgid "%s: cannot unset"
-msgstr ""
+msgstr "%s: nepavyko ištrinti"
 
 #: builtins/set.def:788
 #, c-format
 msgid "%s: cannot unset: readonly %s"
-msgstr ""
+msgstr "%s: nepavyko ištrinti: %s tik skaitymui"
 
 #: builtins/set.def:799
 #, c-format
@@ -642,12 +650,12 @@ msgstr "postūmių skaičius"
 
 #: builtins/shopt.def:227
 msgid "cannot set and unset shell options simultaneously"
-msgstr ""
+msgstr "negalima aplinkos nuostatos vienu metu įjungti ir išjungti"
 
 #: builtins/shopt.def:292
 #, c-format
 msgid "%s: invalid shell option name"
-msgstr ""
+msgstr "%s: netaisyklingas aplinkos nuostatos pavadinimas"
 
 #: builtins/source.def:115
 msgid "filename argument required"
@@ -664,7 +672,7 @@ msgstr "nepavyko sustabdyti"
 
 #: builtins/suspend.def:105
 msgid "cannot suspend a login shell"
-msgstr ""
+msgstr "nepavyko sustabdyti prisijungimo aplinkos"
 
 #: builtins/type.def:232
 #, c-format
@@ -694,7 +702,7 @@ msgstr "%s yra %s\n"
 #: builtins/type.def:339
 #, c-format
 msgid "%s is hashed (%s)\n"
-msgstr ""
+msgstr "%s yra hešuotas (%s)\n"
 
 #: builtins/ulimit.def:352
 #, c-format
@@ -723,12 +731,12 @@ msgstr "aštuntainis skaičius"
 #: builtins/umask.def:226
 #, c-format
 msgid "`%c': invalid symbolic mode operator"
-msgstr ""
+msgstr "„%c“: netaisyklingas simbolinės veiksenos operatorius"
 
 #: builtins/umask.def:281
 #, c-format
 msgid "`%c': invalid symbolic mode character"
-msgstr ""
+msgstr "„%c“: netaisyklingas simbolinės veiksenos simbolis"
 
 #: error.c:163
 #, c-format
@@ -758,7 +766,7 @@ msgstr "blogas jungtukas"
 
 #: error.c:406
 msgid "bad jump"
-msgstr ""
+msgstr "blogas šuolis"
 
 #: error.c:444
 #, c-format
@@ -772,7 +780,7 @@ msgstr "\alaukiant įvedimo baigėsi laikas: automatiškai atsijungta\n"
 #: execute_cmd.c:474
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
-msgstr ""
+msgstr "nepavyko peradresuoti standartinio įvedimo iš /dev/null: %s"
 
 #: execute_cmd.c:1058
 #, c-format
@@ -802,7 +810,7 @@ msgstr "%s: negalima vykdyti dvejetainių failų"
 #: execute_cmd.c:4112
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
-msgstr ""
+msgstr "nepavyko dublikuoti fd %d į fd %d"
 
 #: expr.c:241
 msgid "expression recursion level exceeded"
@@ -838,7 +846,7 @@ msgstr "eksponentas mažesnis už 0"
 
 #: expr.c:822
 msgid "identifier expected after pre-increment or pre-decrement"
-msgstr ""
+msgstr "po prieš-didinimo ar prieš-mažinimo operatoriaus tikėtasi identifikatoriaus"
 
 #: expr.c:850
 msgid "missing `)'"
@@ -871,12 +879,12 @@ msgstr "getcwd: nepavyko pasiekti aukštesnių aplankų"
 #: input.c:237
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
-msgstr ""
+msgstr "nepavyko išskirti naujo failo deskriptoriaus bash įvedimui iš fd %d"
 
 #: input.c:245
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
-msgstr ""
+msgstr "save_bash_input: naujam fd %d buferis jau egzistuoja"
 
 #: jobs.c:876
 #, c-format
@@ -886,7 +894,7 @@ msgstr ""
 #: jobs.c:983
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
-msgstr ""
+msgstr "trinamas sustabdytas darbas %d procesų grupėje %ld"
 
 #: jobs.c:1378
 #, c-format
@@ -896,7 +904,7 @@ msgstr "describe_pid: %ld: tokio pid nėra"
 #: jobs.c:2061 nojobs.c:575
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
-msgstr ""
+msgstr "wait: pid %ld nėra šios aplinkos dukterinis procesas"
 
 #: jobs.c:2265
 #, c-format
@@ -911,7 +919,7 @@ msgstr "wait_for_job: darbas %d yra sustabdytas"
 #: jobs.c:2746
 #, c-format
 msgid "%s: job has terminated"
-msgstr "%s: darbas baigtas"
+msgstr "%s: darbas užsibaigė"
 
 #: jobs.c:2755
 #, c-format
@@ -938,49 +946,49 @@ msgstr ""
 
 #: lib/malloc/malloc.c:799
 msgid "malloc: block on free list clobbered"
-msgstr ""
+msgstr "malloc: blokas iš laisvų blokų sąrašo sugadintas"
 
 #: lib/malloc/malloc.c:876
 msgid "free: called with already freed block argument"
-msgstr ""
+msgstr "free: iškviestas su jau atlaisvintu bloku"
 
 #: lib/malloc/malloc.c:879
 msgid "free: called with unallocated block argument"
-msgstr ""
+msgstr "free: iškviestas su nerezervuotu bloku"
 
 #: lib/malloc/malloc.c:898
 msgid "free: underflow detected; mh_nbytes out of range"
-msgstr ""
+msgstr "free: atvirkštinis perpildymas (underflow); mh_nbytes už ribos"
 
 #: lib/malloc/malloc.c:904
 msgid "free: start and end chunk sizes differ"
-msgstr ""
+msgstr "free: pradžios ir pabaigos blokų (chunk) dydžiai skiriasi"
 
 #: lib/malloc/malloc.c:1003
 msgid "realloc: called with unallocated block argument"
-msgstr ""
+msgstr "realloc: iškviestas su nerezervuotu bloku"
 
 #: lib/malloc/malloc.c:1018
 msgid "realloc: underflow detected; mh_nbytes out of range"
-msgstr ""
+msgstr "realloc: atvirkštinis perpildymas (underflow); mh_nbytes už ribos"
 
 #: lib/malloc/malloc.c:1024
 msgid "realloc: start and end chunk sizes differ"
-msgstr ""
+msgstr "realloc: pradžios ir pabaigos blokų (chunk) dydžiai skiriasi"
 
 #: lib/malloc/table.c:176
 msgid "register_alloc: alloc table is full with FIND_ALLOC?\n"
-msgstr ""
+msgstr "register_alloc: alloc lentelė pilna su FIND_ALLOC?\n"
 
 #: lib/malloc/table.c:183
 #, c-format
 msgid "register_alloc: %p already in table as allocated?\n"
-msgstr ""
+msgstr "register_alloc: %p jau lentelėje kaip rezervuotas?\n"
 
 #: lib/malloc/table.c:219
 #, c-format
 msgid "register_free: %p already in table as free?\n"
-msgstr ""
+msgstr "register_free: %p jau lentelėje kaip laisvas?\n"
 
 #: lib/malloc/watch.c:46
 msgid "allocated"
@@ -1005,11 +1013,11 @@ msgstr "klaida: nežinoma operacija"
 #: lib/malloc/watch.c:56
 #, c-format
 msgid "malloc: watch alert: %p %s "
-msgstr ""
+msgstr "malloc: stebinio įspėjimas: %p %s "
 
 #: lib/sh/fmtulong.c:101
 msgid "invalid base"
-msgstr ""
+msgstr "netaisyklingas pagrindas"
 
 #: lib/sh/netopen.c:168
 #, c-format
@@ -1237,37 +1245,39 @@ msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
 "\t%s [GNU long option] [option] script-file ...\n"
 msgstr ""
+"Naudojimas:\t%s [GNU ilgas parametras] [parametras] ...\n"
+"\t%s [GNU ilgas parametras] [parametras] scenarijaus-failas ...\n"
 
 #: shell.c:1737
 msgid "GNU long options:\n"
-msgstr ""
+msgstr "GNU ilgi parametrai:\n"
 
 #: shell.c:1741
 msgid "Shell options:\n"
-msgstr ""
+msgstr "Aplinkos parametrai:\n"
 
 #: shell.c:1742
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
-msgstr ""
+msgstr "\t-irsD arba -c komanda arba -O shopt_nustatymas\t\t(tik iškvietimui)\n"
 
 #: shell.c:1757
 #, c-format
 msgid "\t-%s or -o option\n"
-msgstr ""
+msgstr "\t-%s arba -o nustatymas\n"
 
 #: shell.c:1763
-#, c-format
+#, fuzzy, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
-msgstr ""
+msgstr "Bandykite „%s --help“ arba „%s --usage“, jei norite gauti daugiau informacijos.\n"
 
 #: shell.c:1764
-#, c-format
+#, fuzzy, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
-msgstr ""
+msgstr "Bandykite „ldd --help“, jei norite daugiau informacijos."
 
 #: shell.c:1765
 msgid "Use the `bashbug' command to report bugs.\n"
-msgstr ""
+msgstr "Naudokite komandą „bashbug“ klaidoms pranešti.\n"
 
 #: sig.c:557
 #, c-format
@@ -1277,12 +1287,12 @@ msgstr "sigprocmask: %d: netaisyklinga operacija"
 #: subst.c:1160
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
-msgstr ""
+msgstr "blogas keitinys: trūksta „%s“ %s"
 
 #: subst.c:2328
 #, c-format
 msgid "%s: cannot assign list to array member"
-msgstr ""
+msgstr "%s: negalima priskirti sąrašo masyvo elementui"
 
 #: subst.c:4265 subst.c:4281
 msgid "cannot make pipe for process substitution"
@@ -1332,12 +1342,12 @@ msgstr "%s: parametras tuščias arba nenustatytas"
 #: subst.c:5342
 #, c-format
 msgid "%s: substring expression < 0"
-msgstr ""
+msgstr "%s: posekio išraiška < 0"
 
 #: subst.c:6179
 #, c-format
 msgid "%s: bad substitution"
-msgstr ""
+msgstr "%s: blogas keitinys"
 
 #: subst.c:6255
 #, c-format
@@ -1393,7 +1403,7 @@ msgstr "run_pending_traps: bloga trap_list[%d] reikšmė: %p"
 #: trap.c:319
 #, c-format
 msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
-msgstr ""
+msgstr "run_pending_traps: signalo doroklė yra SIG_DFL, siunčiamas %d (%s) sau"
 
 #: trap.c:355
 #, c-format
@@ -1408,12 +1418,11 @@ msgstr "klaida importuojant funkcijos apibrėžimą „%s“"
 #: variables.c:711
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
-msgstr ""
+msgstr "aplinkos lygmuo (%d) per aukštas, nustatoma į 1"
 
 #: variables.c:1670
-#, fuzzy
 msgid "make_local_variable: no function context at current scope"
-msgstr "make_local_variable: "
+msgstr ""
 
 #: variables.c:2813
 msgid "all_local_variables: no function context at current scope"
@@ -1422,12 +1431,12 @@ msgstr ""
 #: variables.c:3030 variables.c:3039
 #, c-format
 msgid "invalid character %d in exportstr for %s"
-msgstr ""
+msgstr "netaisyklingas simbolis %d %s exportstr'e"
 
 #: variables.c:3045
 #, c-format
 msgid "no `=' in exportstr for %s"
-msgstr ""
+msgstr "%s exportstr'e trūksta „=“"
 
 #: variables.c:3472
 msgid "pop_var_context: head of shell_variables not a function context"
@@ -1435,7 +1444,7 @@ msgstr ""
 
 #: variables.c:3485
 msgid "pop_var_context: no global_variables context"
-msgstr ""
+msgstr "pop_var_context: nėra global_variables konteksto"
 
 #: variables.c:3557
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
@@ -1458,7 +1467,7 @@ msgstr "xmalloc: nepavyko išskirti %lu baitų"
 #: xmalloc.c:115
 #, c-format
 msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
-msgstr ""
+msgstr "xrealloc: nepavyko išskirti %lu baitų (išskirta %lu baitų)"
 
 #: xmalloc.c:117
 #, c-format
@@ -1468,7 +1477,7 @@ msgstr "xrealloc: nepavyko išskirti %lu baitų"
 #: xmalloc.c:151
 #, c-format
 msgid "xmalloc: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr ""
+msgstr "xmalloc: %s:%d: nepavyko išskirti %lu baitų (išskirta %lu baitų)"
 
 #: xmalloc.c:153
 #, c-format
@@ -1478,7 +1487,7 @@ msgstr "xmalloc: %s:%d: nepavyko išskirti %lu baitų"
 #: xmalloc.c:175
 #, c-format
 msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
-msgstr ""
+msgstr "xrealloc: %s:%d: nepavyko išskirti %lu baitų (išskirta %lu baitų)"
 
 #: xmalloc.c:177
 #, c-format
@@ -1494,12 +1503,22 @@ msgid ""
 "    alias substitution when the alias is expanded.  Alias returns\n"
 "    true unless a NAME is given for which no alias has been defined."
 msgstr ""
+"„alias“ be argumentų arba su -p nuostata išspausdina alternatyviųjų\n"
+"    vardų sąrašą formatu VARDAS=REIKŠMĖ į standartinį išvedimą.\n"
+"    Kitu atveju aprašomas alternatyvusis vardas kiekvienam VARDUI,\n"
+"    kurio REIKŠMĖ nurodyta.\n"
+"Jei REIKŠMĖ baigiasi tarpo simboliu, kitame\n"
+"    žodyje ieškoma alternatyviųjų vardų keitinių, kai alternatyvusis vardas\n"
+"    išskleidžiamas.  „alias“ grąžina „true“, nebent duotas VARDAS, kuriam\n"
+"    neaprašytas joks alternatyvusis vardas."
 
 #: builtins.c:257
 msgid ""
 "Remove NAMEs from the list of defined aliases.  If the -a option is given,\n"
 "    then remove all alias definitions."
 msgstr ""
+"Pašalinti VARDUS iš aprašytų alternatyviųjų vardų sąrašo.  Jei nurodyta\n"
+"    nuostata -a, pašalinti visus alternatyviuosius vardus."
 
 #: builtins.c:266
 msgid ""
@@ -1535,12 +1554,16 @@ msgid ""
 "Exit from within a FOR, WHILE or UNTIL loop.  If N is specified,\n"
 "    break N levels."
 msgstr ""
+"Išeiti iš FOR, WHILE arba UNTIL ciklo.  Jei nurodytas N,\n"
+"    išeiti aukštyn per N lygmenų."
 
 #: builtins.c:304
 msgid ""
 "Resume the next iteration of the enclosing FOR, WHILE or UNTIL loop.\n"
 "    If N is specified, resume at the N-th enclosing loop."
 msgstr ""
+"Tęsti kitą FOR, WHILE arba UNTIL ciklo iteraciją.\n"
+"    Jei N nurodytas, tęsti ciklą, esantį N lygmenų virš esamo."
 
 #: builtins.c:311
 msgid ""
@@ -1548,6 +1571,9 @@ msgid ""
 "    shell builtin to be a function, but need the functionality of the\n"
 "    builtin within the function itself."
 msgstr ""
+"Vykdyti aplinkos įtaisytą funkciją.  Ši komanda naudinga, kai norite\n"
+"    vietoje įtaisytos funkcijos naudoti savąją, tačiau reikia\n"
+"    pasinaudoti įtaisytąja šios funkcijos viduje."
 
 #: builtins.c:320
 msgid ""
@@ -1560,6 +1586,14 @@ msgid ""
 "    The value of EXPR indicates how many call frames to go back before the\n"
 "    current one; the top frame is frame 0."
 msgstr ""
+"Grąžina esamos procedūros kontekstą.\n"
+"    \n"
+"    Be IŠRAIŠKOS, grąžina „$eilutė $failo_vardas“.  Su IŠRAIŠKA,\n"
+"    grąžina „$eilutė $procedūra $failo_vardas“; ši papildoma informacija\n"
+"    gali būti panaudota kuriant steko išrašą (stack trace).\n"
+"    \n"
+"    IŠRAIŠKOS reikšmė nurodo, per kiek kvietimo freimų grįžti nuo\n"
+"    esamo; viršutinis freimas yra 0."
 
 #: builtins.c:334
 msgid ""
@@ -1575,6 +1609,17 @@ msgid ""
 "    instead of following symbolic links; the -L option forces symbolic links\n"
 "    to be followed."
 msgstr ""
+"Pakeisti esamą aplanką į DIR.  Kintamasis $HOME yra\n"
+"    numatytasis DIR.  Kintamasis CDPATH nurodo aplankus, kuriuose bus\n"
+"    ieškoma DIR.  Aplankų pavadinimai CDPATH skiriami dvitaškiu (:).\n"
+"    Tuščias aplanko vardas tapatus esamam aplankui, t.y. „.“.\n"
+"    Jei DIR prasideda pasviruoju brūkšniu (/), į CDPATH neatsižvelgiama.\n"
+"    Jei aplankas nerastas ir aplinkos nuostata „cdable_vars“ įjungta,\n"
+"    tada žodis bandomas kaip kintamojo pavadinimas.  Jei kintamasis\n"
+"    turi reikšmę, tada esamas aplankas pakeičiamas į kintamojo reikšmę.\n"
+"    Parametras -P nurodo, kad turi būti naudojama fizinė aplankų struktūra,\n"
+"    užuot sekus simbolines nuorodas; parametras -L nurodo, kad turi būti\n"
+"    sekama simbolinėmis nuorodomis."
 
 #: builtins.c:350
 msgid ""
@@ -1582,18 +1627,21 @@ msgid ""
 "    the physical directory, without any symbolic links; the -L option\n"
 "    makes pwd follow symbolic links."
 msgstr ""
+"Išspausdinti esamą aplanką.  Su parametru -P „pwd“ spausdina\n"
+"    fizinį aplanką, be jokių simbolinių nuorodų; su parametru -L\n"
+"    „pwd“ seka simbolinėmis nuorodomis."
 
 #: builtins.c:358
 msgid "No effect; the command does nothing.  A zero exit code is returned."
-msgstr ""
+msgstr "Jokio efekto; komanda nieko nedaro.  Grąžinamas klaidos kodas 0."
 
 #: builtins.c:364
 msgid "Return a successful result."
-msgstr ""
+msgstr "Grąžinti sėkmingą rezultatą."
 
 #: builtins.c:370
 msgid "Return an unsuccessful result."
-msgstr ""
+msgstr "Grąžinti nesėkmingą rezultatą."
 
 #: builtins.c:376
 msgid ""
@@ -1635,7 +1683,7 @@ msgstr ""
 
 #: builtins.c:416
 msgid "Obsolete.  See `declare'."
-msgstr ""
+msgstr "Pasenusi komanda.  Žr. „declare“."
 
 #: builtins.c:422
 msgid ""
@@ -1643,6 +1691,9 @@ msgid ""
 "    can only be used within a function; it makes the variable NAME\n"
 "    have a visible scope restricted to that function and its children."
 msgstr ""
+"Sukurti vietinį kintamąjį nurodytu PAVADINIMU ir suteikti jam REIKŠMĘ.\n"
+"    „local“ gali būti naudojamas tik funkcijose; jis sukuria kintamąjį,\n"
+"    matomą tik pačioje funkcijoje ir jos dukterinėse funkcijose."
 
 #: builtins.c:431
 msgid ""
@@ -1669,6 +1720,8 @@ msgstr ""
 #: builtins.c:456
 msgid "Output the ARGs.  If -n is specified, the trailing newline is suppressed."
 msgstr ""
+"Išspausdinti ARGUMENTUS.  Jei nurodytas -n, nespausdinamas naujos eilutės\n"
+"    simbolis pabaigoje."
 
 #: builtins.c:463
 msgid ""
@@ -1689,7 +1742,7 @@ msgstr ""
 
 #: builtins.c:481
 msgid "Read ARGs as input to the shell and execute the resulting command(s)."
-msgstr ""
+msgstr "Skaityti ARGUMENTUS kaip aplinkos komandas ir jas vykdyti."
 
 #: builtins.c:487
 msgid ""
@@ -1742,10 +1795,12 @@ msgid ""
 "Exit the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
+"Išeiti iš aplinkos su klaidos kodu N.  Jei N nenurodytas, išeinant nustatomas\n"
+"    paskutinės vykdytos komandos klaidos kodas."
 
 #: builtins.c:542
 msgid "Logout of a login shell."
-msgstr ""
+msgstr "Atsijungti nuo prisijungimo aplinkos (login shell)."
 
 #: builtins.c:549
 msgid ""
@@ -1936,6 +1991,8 @@ msgid ""
 "Causes a function to exit with the return value specified by N.  If N\n"
 "    is omitted, the return status is that of the last command."
 msgstr ""
+"Išeina iš funkcijos, grąžinama reikšmė N.  Jei N nenurodyta,\n"
+"    grąžinama paskutinės vykdytos komandos reikšmė."
 
 #: builtins.c:764
 msgid ""
@@ -2017,6 +2074,12 @@ msgid ""
 "    tries to unset a variable, and if that fails, then tries to unset a\n"
 "    function.  Some variables cannot be unset; also see readonly."
 msgstr ""
+"Kiekvienam PAVADINIMUi, pašalinti atitinkamą kintamąjį ar funkciją.\n"
+"    Jei nurodytas „-v“, unset veiks tik su kintamaisiais.  Jei nurodytas\n"
+"    „-f“, unset veiks tik su funkcijomis.  Jei nenurodytas nei vienas iš\n"
+"    šių parametrų, unset pirmiausiai bandys pašalinti kintamąjį, ir jei\n"
+"    tai nepasiseks, bandys pašalinti funkciją.  Kai kurie kintamieji negali\n"
+"    būti pašalinti; žr. „readonly“."
 
 #: builtins.c:847
 msgid ""
@@ -2053,6 +2116,10 @@ msgid ""
 "    ARGUMENTS are supplied, they become the positional parameters when\n"
 "    FILENAME is executed."
 msgstr ""
+"Skaityti ir vykdyti komandas iš FAILO ir grįžti.  Keliai\n"
+"    kintamajame $PATH naudojami aplankui, kuriame yra FAILAS, rasti.\n"
+"    Jei nurodyta ARGUMENTŲ, jie tampa poziciniais parametrais iškvietus\n"
+"    FAILĄ."
 
 #: builtins.c:897
 msgid ""
@@ -2060,6 +2127,9 @@ msgid ""
 "    signal.  The `-f' if specified says not to complain about this\n"
 "    being a login shell if it is; just suspend anyway."
 msgstr ""
+"Sustabdyti šios aplinkos darbą, kol bus gautas SIGCONT\n"
+"    signalas.  Jei nurodyta „-f“, nesiskųsti, jei ši aplinka yra prisijungimo\n"
+"    aplinka (login shell) ir sustabdyti ją bet kuriuo atveju."
 
 #: builtins.c:906
 msgid ""
@@ -2315,12 +2385,16 @@ msgid ""
 "Expand and execute COMMANDS as long as the final command in the\n"
 "    `while' COMMANDS has an exit status of zero."
 msgstr ""
+"Išskleisti ir vykdyti KOMANDAS tol, kol galutinė komanda iš\n"
+"    „while“ komandų grąžina klaidos kodą 0."
 
 #: builtins.c:1183
 msgid ""
 "Expand and execute COMMANDS as long as the final command in the\n"
 "    `until' COMMANDS has an exit status which is not zero."
 msgstr ""
+"Išskleisti ir vykdyti KOMANDAS tol, kol galutinė komanda iš\n"
+"    „until“ komandų grąžina klaidos kodą, nelygų 0."
 
 #: builtins.c:1190
 msgid ""
@@ -2328,12 +2402,17 @@ msgid ""
 "    Arguments on the command line along with NAME are passed to the\n"
 "    function as $0 .. $n."
 msgstr ""
+"Sukurti paprastą komandą, iškviečiamą PAVADINIMU, vykdančią KOMANDAS.\n"
+"    Argumentai komandų eilutėje kartu su PAVADINIMU perduodami funkcijai\n"
+"    kaip $0 .. $n."
 
 #: builtins.c:1198
 msgid ""
 "Run a set of commands in a group.  This is one way to redirect an\n"
 "    entire set of commands."
 msgstr ""
+"Vykdyti eilę komandų grupėje.  Tai yra vienas iš būdų nukreipti\n"
+"    visos eilės komandų įvedimą/išvedimą."
 
 #: builtins.c:1205
 msgid ""
@@ -2508,6 +2587,17 @@ msgid ""
 "    If the -v option is supplied, the output is placed into the value of the\n"
 "    shell variable VAR rather than being sent to the standard output."
 msgstr ""
+"printf formatuoja ir spausdina ARGUMENTUS nurodytu FORMATU. FORMATAS\n"
+"    yra simbolių seka, sudaryta iš trijų tipų objektų: paprastų\n"
+"    simbolių, tiesiog nukopijuojamų į standartinį išvedimą,\n"
+"    kaitos sekų, konvertuojamų ir kopijuojamų į standartinį išvedimą,\n"
+"    ir formato specifikacijų, kurių kiekviena išspausdina kitą argumentą.\n"
+"    Be įprastų printf(1) formatų, %b reiškia išplėsti kairinio brūkšnio\n"
+"    („\\“) kaitos sekas atitinkamame argumente, o %q reiškia išvesti\n"
+"    argumentą kabutėse tokia forma, kad rezultatą būtų galima\n"
+"    panaudoti įvedimui.\n"
+"    Jei pateiktas parametras -v, išvedimas įrašomas į aplinkos kintamąjį\n"
+"    KINT, užuot spausdinus į standartinį išvedimą."
 
 #: builtins.c:1396
 msgid ""
@@ -2517,6 +2607,12 @@ msgid ""
 "    reused as input.  The -r option removes a completion specification for\n"
 "    each NAME, or, if no NAMEs are supplied, all completion specifications."
 msgstr ""
+"Kiekvienam VARDUI nurodyti, kaip argumentai turėtų būti užbaigti.\n"
+"    Jei pateiktas -p nustatymas arba nepateikta jokių nustatymų,\n"
+"    spausdinamos esamos užbaigimo specifikacijos tokiu formatu, kad\n"
+"    jas būtų galima panaudoti kaip įvestį.  Nustatymas -r pašalina\n"
+"    užbaigimo specifikaciją kiekvienam VARDUI, arba, jei nenurodyta\n"
+"    VARDO, visas užbaigimo specifikacijas."
 
 #: builtins.c:1408
 msgid ""
@@ -2525,3 +2621,7 @@ msgid ""
 "    If the optional WORD argument is supplied, matches against WORD are\n"
 "    generated."
 msgstr ""
+"Rodyti galimus užbaigimus priklausomai nuo nustatymų.  Naudotina\n"
+"    iš aplinkos funkcijos, generuojančios galimus užbaigimus.\n"
+"    Jei pateiktas nebūtinasis ŽODŽIO argumentas, išvedami įrašai,\n"
+"    atitinkantys ŽODĮ."

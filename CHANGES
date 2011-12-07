@@ -50,7 +50,8 @@ o.  Fixed several bugs in the expansion of $* and $@ (quoted and unquoted)
     apply to arrays subscripted with * or @.
 
 p.  Fixed several problems with pattern substitution expansions on the
-    positional parameters and arrays subscripted with * or @.
+    positional parameters and arrays subscripted with * or @ that occurred
+    when $IFS was set to the empty string.
 
 q.  Made a change to the default locale initialization code that should
     result in better behavior from the locale-aware library functions.
@@ -117,8 +118,9 @@ kk. Fixed a bug with the `test' builtin that caused it to misinterpret
 ll. Fixed bug that could cause the shell to dump core in certain cases where
     a command sets the SIGINT disposition to the default.
 
-mm. Fixed a bug in the pattern replacement word expansion that occurred when
-    the pattern and replacement strings were empty.
+mm. Fixed a bug in the pattern replacement (affecting both word expansion
+    and the `fc' builtin) that occurred when the pattern and replacement
+    strings were empty.
 
 nn. Fixed a bug that caused an arithmetic evaluation error to disable all
     further evaluation.
@@ -265,6 +267,9 @@ eeee. The shell displays more warnings about failures to set the locale.
 ffff. Fixed a bug that caused the body of a here-document to not be saved to
       the history list.
 
+gggg. Fixed a bug that caused configure to incorrectly conclude that FreeBSD
+      had /dev/fd available, resulting in problems with process substitution.
+
 2.  Changes to Readline
 
 a.  Fixed a number of redisplay errors in environments supporting multibyte 
@@ -285,8 +290,9 @@ e.  Fixed bugs in redisplay occurring when displaying prompts containing
 f.  Fixed a bug that caused the completion append character to not be reset to
     the default after an application-specified completion function changed it.
 
-g.  Fixed a problem that caused incorrect positioning of the cursor in emacs
-    mode when at the end of a line in a locale supporting multibyte characters.
+g.  Fixed a problem that caused incorrect positioning of the cursor while in
+    emacs editing mode when moving forward at the end of a line while using
+    a locale supporting multibyte characters.
 
 h.  Fixed an off-by-one error that caused readline to drop every 511th
     character of buffered input.
@@ -313,6 +319,12 @@ o.  Fixed a bug that caused readline to disable echoing when it was being used
 
 p.  Readline now blocks SIGINT while manipulating internal data structures
     during redisplay.
+
+q.  Fixed a bug in redisplay that caused readline to segfault when pasting a
+    very long line (over 130,000 characters).
+
+r.  Fixed bugs in redisplay when using prompts with no visible printing
+    characters.
 
 3.  New Features in Bash
 
