@@ -235,7 +235,7 @@ cd_builtin (list)
     }
   else if (absolute_pathname (list->word->word))
     dirname = list->word->word;
-  else if (cdpath = get_string_value ("CDPATH"))
+  else if (privileged_mode == 0 && (cdpath = get_string_value ("CDPATH")))
     {
       dirname = list->word->word;
 

@@ -232,7 +232,7 @@ find_termsig_by_pid (pid)
     return (0);
   if (pid_list[i].flags & PROC_RUNNING)
     return (0);
-  return (get_termsig (pid_list[i].status));
+  return (get_termsig ((WAIT)pid_list[i].status));
 }
 
 /* Set LAST_COMMAND_EXIT_SIGNAL depending on STATUS.  If STATUS is -1, look

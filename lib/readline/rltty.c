@@ -137,8 +137,9 @@ save_tty_chars (tiop)
 
   if (tiop->flags & TCHARS_SET)
     {
-      _rl_tty_chars.t_intr = tiop->tchars.t_intrc;
-      _rl_tty_chars.t_quit = tiop->tchars.t_quitc;
+      _rl_intr_char = _rl_tty_chars.t_intr = tiop->tchars.t_intrc;
+      _rl_quit_char = _rl_tty_chars.t_quit = tiop->tchars.t_quitc;
+
       _rl_tty_chars.t_start = tiop->tchars.t_startc;
       _rl_tty_chars.t_stop = tiop->tchars.t_stopc;
       _rl_tty_chars.t_eof = tiop->tchars.t_eofc;
@@ -148,7 +149,8 @@ save_tty_chars (tiop)
 
   if (tiop->flags & LTCHARS_SET)
     {
-      _rl_tty_chars.t_susp = tiop->ltchars.t_suspc;
+      _rl_susp_char = _rl_tty_chars.t_susp = tiop->ltchars.t_suspc;
+
       _rl_tty_chars.t_dsusp = tiop->ltchars.t_dsuspc;
       _rl_tty_chars.t_reprint = tiop->ltchars.t_rprntc;
       _rl_tty_chars.t_flush = tiop->ltchars.t_flushc;
@@ -236,6 +238,7 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
      TIOTYPE oldtio, *tiop;
 {
   _rl_echoing_p = (oldtio.sgttyb.sg_flags & ECHO);
+  _rl_echoctl = (oldtio.sgttyb.sg_flags & ECHOCTL);
 
   /* Copy the original settings to the structure we're going to use for
      our settings. */
@@ -366,10 +369,10 @@ save_tty_chars (tiop)
 #ifdef VREPRINT
   _rl_tty_chars.t_reprint = tiop->c_cc[VREPRINT];
 #endif
-  _rl_tty_chars.t_intr = tiop->c_cc[VINTR];
-  _rl_tty_chars.t_quit = tiop->c_cc[VQUIT];
+  _rl_intr_char = _rl_tty_chars.t_intr = tiop->c_cc[VINTR];
+  _rl_quit_char = _rl_tty_chars.t_quit = tiop->c_cc[VQUIT];
 #ifdef VSUSP
-  _rl_tty_chars.t_susp = tiop->c_cc[VSUSP];
+  _rl_susp_char = _rl_tty_chars.t_susp = tiop->c_cc[VSUSP];
 #endif
 #ifdef VDSUSP
   _rl_tty_chars.t_dsusp = tiop->c_cc[VDSUSP];
@@ -514,6 +517,7 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
      TIOTYPE oldtio, *tiop;
 {
   _rl_echoing_p = (oldtio.c_lflag & ECHO);
+  _rl_echoctl = (oldtio.c_lflag & ECHOCTL);
 
   tiop->c_lflag &= ~(ICANON | ECHO);
 

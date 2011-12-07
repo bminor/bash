@@ -27,7 +27,9 @@
 #include "bashtypes.h"
 #include <stdio.h>
 #include "chartypes.h"
-#include <pwd.h>
+#if defined (HAVE_PWD_H)
+#  include <pwd.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 

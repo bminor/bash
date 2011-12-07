@@ -2,23 +2,22 @@
 
 /* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
-   This file is part of the GNU Readline Library, a library for
-   reading lines of text with interactive input and history editing.
+   This file is part of the GNU Readline Library (Readline), a library
+   for reading lines of text with interactive input and history editing.      
 
-   The GNU Readline Library is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2, or
+   Readline is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   The GNU Readline Library is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   Readline is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Readline.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #if !defined (_READLINE_H_)
 #define _READLINE_H_
@@ -40,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0502		/* Readline 5.2 */
-#define RL_VERSION_MAJOR	5
-#define RL_VERSION_MINOR	2
+#define RL_READLINE_VERSION	0x0600		/* Readline 6.0 */
+#define RL_VERSION_MAJOR	6
+#define RL_VERSION_MINOR	0
 
 /* Readline data structures. */
 
@@ -429,7 +428,7 @@ extern int rl_clear_signals PARAMS((void));
 extern void rl_cleanup_after_signal PARAMS((void));
 extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
- 
+
 extern int rl_set_paren_blink_timeout PARAMS((int));
 
 /* Undocumented. */
@@ -604,6 +603,10 @@ extern int rl_catch_sigwinch;
    NULL means to use rl_filename_completion_function (), the default
    filename completer. */
 extern rl_compentry_func_t *rl_completion_entry_function;
+
+/* Optional generator for menu completion.  Default is
+   rl_completion_entry_function (rl_filename_completion_function). */
+ extern rl_compentry_func_t *rl_menu_completion_entry_function;
 
 /* If rl_ignore_some_completions_function is non-NULL it is the address
    of a function to call after all of the possible matches have been

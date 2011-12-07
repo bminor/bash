@@ -38,7 +38,9 @@
 
 #include <stdio.h>
 #include "chartypes.h"
-#include <pwd.h>
+#if defined (HAVE_PWD_H)
+#  include <pwd.h>
+#endif
 #include "bashansi.h"
 #include "bashintl.h"
 
@@ -4232,7 +4234,8 @@ void
 sv_globignore (name)
      char *name;
 {
-  setup_glob_ignore (name);
+  if (privileged_mode == 0)
+    setup_glob_ignore (name);
 }
 
 #if defined (READLINE)

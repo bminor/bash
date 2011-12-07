@@ -6562,8 +6562,9 @@ Perform directory name completion if the compspec generates no matches.
 .TP 8
 .B filenames
 Tell readline that the compspec generates filenames, so it can perform any
-filename\-specific processing (like adding a slash to directory names or
-suppressing trailing spaces).  Intended to be used with shell functions.
+filename\-specific processing (like adding a slash to directory names,
+quoting special characters, or suppressing trailing spaces).
+Intended to be used with shell functions.
 .TP 8
 .B nospace
 Tell readline not to append a space (the default) to words completed at
@@ -8191,8 +8192,11 @@ and
 files are not processed, shell functions are not inherited from the
 environment, and the
 .SM
-.B SHELLOPTS
-variable, if it appears in the environment, is ignored.
+.BR SHELLOPTS ,
+.BR CDPATH ,
+and
+.B GLOBIGNORE
+variables, if they appear in the environment, are ignored.
 If the shell is started with the effective user (group) id not equal to the
 real user (group) id, and the \fB\-p\fP option is not supplied, these actions
 are taken and the effective user id is set to the real user id.

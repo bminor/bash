@@ -1541,6 +1541,7 @@ unset_bash_input (check_zero)
     {
       close_buffered_fd (default_buffered_input);
       default_buffered_input = bash_input.location.buffered_fd = -1;
+      bash_input.type = st_none;		/* XXX */
     }
 #else /* !BUFFERED_INPUT */
   if (default_input)

@@ -523,6 +523,20 @@ Readline is performing word completion.
 Readline is currently executing the readline signal handler.
 @item RL_STATE_UNDOING
 Readline is performing an undo.
+@item RL_STATE_INPUTPENDING
+Readline has input pending due to a call to @code{rl_execute_next()}.
+@item RL_STATE_TTYCSAVED
+Readline has saved the values of the terminal's special characters.
+@item RL_STATE_CALLBACK
+Readline is currently using the alternate (callback) interface
+(@pxref{Alternate Interface}).
+@item RL_STATE_VIMOTION
+Readline is reading the argument to a vi-mode "motion" command.
+@item RL_STATE_MULTIKEY
+Readline is reading a multiple-keystroke command.
+@item RL_STATE_VICMDONCE
+Readline has entered vi command (movement) mode at least one time during
+the current call to @code{readline()}.
 @item RL_STATE_DONE
 Readline has read a key sequence bound to @code{accept-line}
 and is about to return the line to the caller.
@@ -1898,27 +1912,51 @@ history list.
    GNU Readline library.  This application interactively allows users
    to manipulate files and their modes. */
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <sys/types.h>
-#include <sys/file.h>
+#ifdef HAVE_SYS_FILE_H
+#  include <sys/file.h>
+#endif
 #include <sys/stat.h>
-#include <sys/errno.h>
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <errno.h>
+
+#if defined (HAVE_STRING_H)
+#  include <string.h>
+#else /* !HAVE_STRING_H */
+#  include <strings.h>
+#endif /* !HAVE_STRING_H */
+
+#ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+#endif
+
+#include <time.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
-extern char *xmalloc ();
+extern char *xmalloc PARAMS((size_t));
 
 /* The names of functions that actually do the manipulation. */
-int com_list __P((char *));
-int com_view __P((char *));
-int com_rename __P((char *));
-int com_stat __P((char *));
-int com_pwd __P((char *));
-int com_delete __P((char *));
-int com_help __P((char *));
-int com_cd __P((char *));
-int com_quit __P((char *));
+int com_list PARAMS((char *));
+int com_view PARAMS((char *));
+int com_rename PARAMS((char *));
+int com_stat PARAMS((char *));
+int com_pwd PARAMS((char *));
+int com_delete PARAMS((char *));
+int com_help PARAMS((char *));
+int com_cd PARAMS((char *));
+int com_quit PARAMS((char *));
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -1951,12 +1989,12 @@ COMMAND *find_command ();
 /* The name of this program, as taken from argv[0]. */
 char *progname;
 
-/* When non-zero, this means the user is done using this program. */
+/* When non-zero, this global means the user is done using this program. */
 int done;
 
 char *
 dupstr (s)
-     int s;
+     char *s;
 @{
   char *r;
 
@@ -2081,12 +2119,12 @@ stripwhite (string)
 /*                                                                  */
 /* **************************************************************** */
 
-char *command_generator __P((const char *, int));
-char **fileman_completion __P((const char *, int, int));
+char *command_generator PARAMS((const char *, int));
+char **fileman_completion PARAMS((const char *, int, int));
 
-/* Tell the GNU Readline library how to complete.  We want to try to
-   complete on command names if this is the first word in the line, or
-   on filenames if not. */
+/* Tell the GNU Readline library how to complete.  We want to try to complete
+   on command names if this is the first word in the line, or on filenames
+   if not. */
 initialize_readline ()
 @{
   /* Allow conditional parsing of the ~/.inputrc file. */
@@ -2096,11 +2134,11 @@ initialize_readline ()
   rl_attempted_completion_function = fileman_completion;
 @}
 
-/* Attempt to complete on the contents of TEXT.  START and END
-   bound the region of rl_line_buffer that contains the word to
-   complete.  TEXT is the word to complete.  We can use the entire
-   contents of rl_line_buffer in case we want to do some simple
-   parsing.  Returnthe array of matches, or NULL if there aren't any. */
+/* Attempt to complete on the contents of TEXT.  START and END bound the
+   region of rl_line_buffer that contains the word to complete.  TEXT is
+   the word to complete.  We can use the entire contents of rl_line_buffer
+   in case we want to do some simple parsing.  Return the array of matches,
+   or NULL if there aren't any. */
 char **
 fileman_completion (text, start, end)
      const char *text;
@@ -2119,9 +2157,9 @@ fileman_completion (text, start, end)
   return (matches);
 @}
 
-/* Generator function for command completion.  STATE lets us
-   know whether to start from scratch; without any state
-   (i.e. STATE == 0), then we start at the top of the list. */
+/* Generator function for command completion.  STATE lets us know whether
+   to start from scratch; without any state (i.e. STATE == 0), then we
+   start at the top of the list. */
 char *
 command_generator (text, state)
      const char *text;
@@ -2130,17 +2168,16 @@ command_generator (text, state)
   static int list_index, len;
   char *name;
 
-  /* If this is a new word to complete, initialize now.  This
-     includes saving the length of TEXT for efficiency, and
-     initializing the index variable to 0. */
+  /* If this is a new word to complete, initialize now.  This includes
+     saving the length of TEXT for efficiency, and initializing the index
+     variable to 0. */
   if (!state)
     @{
       list_index = 0;
       len = strlen (text);
     @}
 
-  /* Return the next name which partially matches from the
-     command list. */
+  /* Return the next name which partially matches from the command list. */
   while (name = commands[list_index].name)
     @{
       list_index++;
@@ -2180,7 +2217,12 @@ com_view (arg)
   if (!valid_argument ("view", arg))
     return 1;
 
+#if defined (__MSDOS__)
+  /* more.com doesn't grok slashes in pathnames */
+  sprintf (syscom, "less %s", arg);
+#else
   sprintf (syscom, "more %s", arg);
+#endif
   return (system (syscom));
 @}
 
@@ -2207,7 +2249,8 @@ com_stat (arg)
 
   printf ("Statistics for `%s':\n", arg);
 
-  printf ("%s has %d link%s, and is %d byte%s in length.\n", arg,
+  printf ("%s has %d link%s, and is %d byte%s in length.\n",
+	  arg,
           finfo.st_nlink,
           (finfo.st_nlink == 1) ? "" : "s",
           finfo.st_size,
@@ -2296,8 +2339,7 @@ com_pwd (ignore)
   return 0;
 @}
 
-/* The user wishes to quit using this program.  Just set DONE
-   non-zero. */
+/* The user wishes to quit using this program.  Just set DONE non-zero. */
 com_quit (arg)
      char *arg;
 @{
@@ -2310,13 +2352,12 @@ too_dangerous (caller)
      char *caller;
 @{
   fprintf (stderr,
-           "%s: Too dangerous for me to distribute.\n",
+           "%s: Too dangerous for me to distribute.  Write it yourself.\n",
            caller);
-  fprintf (stderr, "Write it yourself.\n");
 @}
 
-/* Return non-zero if ARG is a valid argument for CALLER,
-   else print an error message and return zero. */
+/* Return non-zero if ARG is a valid argument for CALLER, else print
+   an error message and return zero. */
 int
 valid_argument (caller, arg)
      char *caller, *arg;

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Sep  6 13:05:54 EDT 2008
+.\"	Last Change: Sat Sep 13 18:27:41 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 September 6" "GNU Bash-4.0"
+.TH BASH 1 "2008 September 13" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4535,18 +4535,27 @@ This is the library that handles reading input when using an interactive
 shell, unless the
 .B \-\-noediting
 option is given at shell invocation.
+Line editing is also used when using the \fB\-e\fP option to the
+\fBread\fP builtin.
 By default, the line editing commands are similar to those of emacs.
 A vi-style line editing interface is also available.
-To turn off line editing after the shell is running, use the
-.B +o emacs
+Line editing can be enabled at any time using the
+.B \-o emacs
 or
-.B +o vi
+.B \-o vi
 options to the
 .B set
 builtin (see
 .SM
 .B SHELL BUILTIN COMMANDS
 below).
+To turn off line editing after the shell is running, use the
+.B +o emacs
+or
+.B +o vi
+options to the
+.B set
+builtin.
 .SS "Readline Notation"
 .PP
 In this section, the emacs-style notation is used to denote
@@ -6553,8 +6562,9 @@ Perform directory name completion if the compspec generates no matches.
 .TP 8
 .B filenames
 Tell readline that the compspec generates filenames, so it can perform any
-filename\-specific processing (like adding a slash to directory names or
-suppressing trailing spaces).  Intended to be used with shell functions.
+filename\-specific processing (like adding a slash to directory names,
+quoting special characters, or suppressing trailing spaces).
+Intended to be used with shell functions.
 .TP 8
 .B nospace
 Tell readline not to append a space (the default) to words completed at
@@ -7842,6 +7852,8 @@ is coming from a terminal,
 .SM
 .B READLINE
 above) is used to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings.
 .TP
 .B \-i \fItext\fP
 If
@@ -8052,6 +8064,7 @@ by default when the shell is interactive, unless the shell is started
 with the
 .B \-\-noediting
 option.
+This also affects the editing interface used for \fBread \-e\fP.
 .TP 8
 .B errtrace
 Same as
@@ -8148,6 +8161,7 @@ Same as
 .TP 8
 .B vi
 Use a vi-style command line editing interface.
+This also affects the editing interface used for \fBread \-e\fP.
 .TP 8
 .B xtrace
 Same as

@@ -736,7 +736,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  }
       }
 
-      if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
+      /* 10/6/2008 -- added test for pipe_in and pipe_out because they indicate
+	 the presence of a pipeline, and (until Posix changes things), a
+	 pipeline failure should not cause the parent shell to exit on an
+	 unsuccessful return status, even in the presence of errexit.. */
+      if (was_error_trap && ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
 	  run_error_trap ();
@@ -744,7 +748,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       if (ignore_return == 0 && invert == 0 &&
 	  ((posixly_correct && interactive == 0 && special_builtin_failed) ||
-	   (exit_immediately_on_error && (exec_result != EXECUTION_SUCCESS))))
+	   (exit_immediately_on_error && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)))
 	{
 	  last_command_exit_value = exec_result;
 	  run_pending_traps ();

@@ -50,8 +50,9 @@ Options:
   -t timeout	time out and return failure if a complete line of input is
 		not read withint TIMEOUT seconds.  The value of the TMOUT
 		variable is the default timeout.  TIMEOUT may be a
-		fractional number.  The exit status is greater than 128 if
-		the timeout is exceeded
+		fractional number.  If TIMEOUT is 0, read returns success only
+		if input is available on the specified file descriptor.  The
+		exit status is greater than 128 if the timeout is exceeded
   -u fd		read from file descriptor FD instead of the standard input
 
 Exit Status:
@@ -341,6 +342,7 @@ read_builtin (list)
      terminal, turn them off. */
   if ((prompt || edit || silent) && input_is_tty == 0)
     {
+itrace("read_builtin: input_is_tty == 0: disabling silent");
       prompt = (char *)NULL;
 #if defined (READLINE)
       itext = (char *)NULL;
@@ -353,11 +355,13 @@ read_builtin (list)
     add_unwind_protect (xfree, rlbuf);
 #endif
 
+#if 0
   if (prompt && edit == 0)
     {
       fprintf (stderr, "%s", prompt);
       fflush (stderr);
     }
+#endif
 
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
   saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
@@ -449,6 +453,14 @@ read_builtin (list)
   terminate_immediately = 1;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
+
+#if 1
+  if (prompt && edit == 0)
+    {
+      fprintf (stderr, "%s", prompt);
+      fflush (stderr);
+    }
+#endif
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (0, O_TEXT);

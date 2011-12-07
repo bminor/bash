@@ -310,7 +310,7 @@ filecomp (s, t, op)
     {
     case OT: return (r1 < r2 || (r2 == 0 && st1.st_mtime < st2.st_mtime));
     case NT: return (r1 > r2 || (r1 == 0 && st1.st_mtime > st2.st_mtime));
-    case EF: return ((st1.st_dev == st2.st_dev) && (st1.st_ino == st2.st_ino));
+    case EF: return (same_file (s, t, &st1, &st2));
     }
   return (FALSE);
 }

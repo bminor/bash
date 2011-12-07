@@ -94,6 +94,14 @@ int rl_catch_sigwinch = 1;
 int rl_catch_sigwinch = 0;	/* for the readline state struct in readline.c */
 #endif
 
+/* Private variables. */
+/* If non-zero, print characters corresponding to received signals. */
+int _rl_echoctl = 0;
+
+int _rl_intr_char = 0;
+int _rl_quit_char = 0;
+int _rl_susp_char = 0;
+
 static int signals_set_flag;
 static int sigwinch_set_flag;
 
@@ -159,6 +167,7 @@ rl_signal_handler (sig)
 #if defined (SIGQUIT)
     case SIGQUIT:
 #endif
+      rl_echo_signal_char (sig);
       rl_cleanup_after_signal ();
 
 #if defined (HAVE_POSIX_SIGNALS)
@@ -533,4 +542,42 @@ _rl_release_sigint ()
 #endif /* !HAVE_POSIX_SIGNALS */
 
   sigint_blocked = 0;
+}
+
+/* **************************************************************** */
+/*								    */
+/*		Echoing special control characters		    */
+/*								    */
+/* **************************************************************** */
+void
+rl_echo_signal_char (sig)
+     int sig;
+{
+  char cstr[3];
+  int cslen, c;
+
+  if (_rl_echoctl == 0)
+    return;
+
+  switch (sig)
+    {
+    case SIGINT:  c = _rl_intr_char; break;
+    case SIGQUIT: c = _rl_quit_char; break;
+    case SIGTSTP: c = _rl_susp_char; break;
+    default: return;
+    }
+
+  if (CTRL_CHAR (c) || c == RUBOUT)
+    {
+      cstr[0] = '^';
+      cstr[1] = CTRL_CHAR (c) ? UNCTRL (c) : '?';
+      cstr[cslen = 2] = '\0';
+    }
+  else
+    {
+      cstr[0] = c;
+      cstr[cslen = 1] = '\0';
+    }
+
+  _rl_output_some_chars (cstr, cslen);
 }

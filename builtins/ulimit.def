@@ -104,7 +104,7 @@ extern int errno;
 #  if defined (HPUX) && defined (RLIMIT_NEEDS_KERNEL)
 #    undef _KERNEL
 #  endif
-#else
+#elif defined (HAVE_SYS_TIMES_H)
 #  include <sys/times.h>
 #endif
 

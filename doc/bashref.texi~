@@ -3716,6 +3716,8 @@ rather than newline.
 
 @item -e
 Readline (@pxref{Command Line Editing}) is used to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings.
 
 @item -i @var{text}
 If Readline is being used to read the line, @var{text} is placed into
@@ -4003,6 +4005,7 @@ Same as @code{-B}.
 
 @item emacs
 Use an @code{emacs}-style line editing interface (@pxref{Command Line Editing}).
+This also affects the editing interface used for @code{read -e}.
 
 @item errexit
 Same as @code{-e}.
@@ -4077,6 +4080,7 @@ Same as @code{-v}.
 
 @item vi
 Use a @code{vi}-style line editing interface.
+This also affects the editing interface used for @code{read -e}.
 
 @item xtrace
 Same as @code{-x}.

@@ -6953,3 +6953,76 @@ builtins/bind.def
 	- experimental: print a warning, but go on, if line editing not active
 	  when bind is invoked.  Suggested by Rocky Bernstein
 	  <rocky.bernstein@gmail.com>
+
+				   10/3
+				   ----
+test.c
+	- use same_file instead of directly comparing st_dev and st_ino when
+	  comparing files in filecomp().  From mingw32 patches submitted
+	  by Hector Chu <hkcc2@cantab.net>
+
+				   10/4
+				   ----
+
+redir.c
+	- in redirection_error(), use `error' instead of errno when comparing
+	  against EBADF.  From mingw32 patches submitted by Hector Chu
+	  <hkcc2@cantab.net>
+
+shell.c
+	- in unset_bash_input(), reset bash_input.type to st_none after
+	  closing the default buffered fd.  From mingw32 patches submitted
+	  by Hector Chu <hkcc2@cantab.net>
+
+builtins/cd.def
+	- ignore CDPATH when in privileged mode.  Suggested by Paul Jarc
+	  <prj@po.cwru.edu>
+
+variables.c
+	- change sv_globignore to only act if privileged mode is not enabled.
+	  Suggested by Paul Jarc <prj@po.cwru.edu>
+
+doc/bash.1,bashref.texi
+	- document new treatment of CDPATH and GLOBIGNORE when privileged
+	  mode is enabled
+
+builtins/read.def
+	- change prompt printing to occur after terminal is set to no-echo
+	  mode.  Based on suggestion from Stephane Chazelas
+	  <stephane_chazelas@yahoo.fr>
+
+lib/readline/signals.c
+	- new variables to keep track of special characters corresponding to
+	  SIGINT, SIGQUIT, and SIGTSTP
+	- new variable to keep track of whether tty is echoing control
+	  characters corresponding to SIGINT, SIGQUIT, and SIGTSTP
+	- new function, _rl_echo_signal_char(int sig) to display the tty
+	  special char generating SIGINT, SIGQUIT, or SIGTSTP.  Based on
+	  idea and code from Joe Peterson <joe@skyrush.com>
+	- call rl_echo_signal_char in rl_signal_handler: if the terminal
+	  settings indicate it, readline will echo characters that generate
+	  keyboard signals
+
+lib/readline/rltty.c
+	- set _rl_intr_char, _rl_quit_char, and _rl_susp_char to special
+	  characters that generate signals from keyboard
+	- set _rl_echoctl if ECHOCTL tty flag is set
+
+lib/readline/rlprivate.h
+	- extern declarations for _rl_intr_char, _rl_quit_char, and
+	  _rl_susp_char
+	- extern declaration for _rl_echoctl
+
+lib/readline/readline.h
+	- extern declaration for rl_echo_signal_char()
+
+lib/readline/doc/rltech.texi
+	- document rl_echo_signal_handler(): available for applications
+	  that install their own signal handlers
+
+				   10/5
+				   ----
+execute_cmd.c
+	- fix errexit logic to not cause the shell to exit when a command in
+	  a pipeline fails.  Fixes bug reported by Marcin Owsiany
+	  <marcin@owsiany.pl>

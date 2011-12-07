@@ -428,7 +428,9 @@ extern int rl_clear_signals PARAMS((void));
 extern void rl_cleanup_after_signal PARAMS((void));
 extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
- 
+
+extern void rl_echo_signal_char PARAMS((int)); 
+
 extern int rl_set_paren_blink_timeout PARAMS((int));
 
 /* Undocumented. */

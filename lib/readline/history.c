@@ -318,6 +318,8 @@ add_history_time (string)
 {
   HIST_ENTRY *hs;
 
+  if (string == 0)
+    return;
   hs = the_history[history_length - 1];
   FREE (hs->timestamp);
   hs->timestamp = savestring (string);

@@ -354,12 +354,6 @@ read_builtin (list)
     add_unwind_protect (xfree, rlbuf);
 #endif
 
-  if (prompt && edit == 0)
-    {
-      fprintf (stderr, "%s", prompt);
-      fflush (stderr);
-    }
-
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
   saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
 
@@ -450,6 +444,12 @@ read_builtin (list)
   terminate_immediately = 1;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
+
+  if (prompt && edit == 0)
+    {
+      fprintf (stderr, "%s", prompt);
+      fflush (stderr);
+    }
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (0, O_TEXT);
