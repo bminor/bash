@@ -158,11 +158,7 @@ extern int errno;
 #define LENMODS "hjlLtz"
 
 #ifndef HAVE_ASPRINTF
-#  if defined (PREFER_STDARG)
-extern int asprintf __P((char **, const char *, ...));
-#  else
-extern int asprintf __P((char **, const char *, va_alist));
-#  endif
+extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
 static void printf_erange __P((char *));

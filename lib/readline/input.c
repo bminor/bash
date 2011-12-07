@@ -354,7 +354,7 @@ _rl_insert_typein (c)
 
   string[i] = '\0';
   rl_insert_text (string);
-  free (string);
+  xfree (string);
 }
 
 /* Add KEY to the buffer of characters to be read.  Returns 1 if the

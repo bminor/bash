@@ -406,7 +406,7 @@ static void xfree __P((void *));
 	      } \
 	} while (0)
 
-#if defined (HAVE_LOCALE_H)
+#if defined (HAVE_LOCALE_H) && defined (HAVE_LOCALECONV)
 #  define GETLOCALEDATA(d, t, g) \
       do \
 	{ \

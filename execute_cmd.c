@@ -2672,6 +2672,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 
 	  do_piping (pipe_in, pipe_out);
 
+	  subshell_environment = 0;
 	  if (async)
 	    subshell_environment |= SUBSHELL_ASYNC;
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)

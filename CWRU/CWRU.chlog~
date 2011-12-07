@@ -13812,4 +13812,72 @@ lib/sh/snprintf.c
 	  the hang reported on IRIX by Matthew Woehlke <mwoehlke@tibco.com>
 	  and Stuart Shelton <mwoehlke@tibco.com>
 
+				   10/28
+				   -----
+builtins/{caller,pushd}.def
+	- changed longdoc strings in loadable builtin section to be single
+	  strings, as put in the build directory builtins.c file, to aid
+	  translators
 
+				   11/1
+				   ----
+execute_cmd.c
+	- reset subshell_environment to 0 after make_child() call in
+	  execute_null_command.  Fix provided by Roy Marples
+	  <uberlord@gentoo.org>
+
+				   11/7
+				   ----
+lib/tilde/tilde.c
+lib/readline/{util,undo,callback,input,isearch,kill
+	- make sure that memory allocated with xmalloc is freed with xfree
+
+				   11/9
+				   ----
+lib/readline/display.c
+	- make sure that _rl_redisplay_after_sigwinch clears the last displayed
+	  line instead of the current line (instead of assuming that the
+	  cursor is on the last line).  Fixes bug reported by Egmont
+	  Koblinger <egmont@uhulinux.hu>
+
+				   11/10
+				   -----
+lib/readline/display.c
+	- make sure that _rl_col_width is never called with MB_CUR_MAX == 1,
+	  since it doesn't count invisible characters and they are not
+	  compensated for.  Added a warning in _rl_col_width if called when
+	  MB_CUR_MAX == 1.  Bug reported and solution suggested by Eric
+	  Blake <ebb9@byu.net>
+
+				   11/11
+				   -----
+lib/readline/display.c
+	- make sure _rl_wrapped_line is initialized to inv_lbsize int chars.
+	  inv_lbsize and vis_lbsize are the same at that point, but it makes
+	  the intent clearer.  Fix from jan.kratochvil@redhat.com.
+	- in rl_redisplay, make sure we call memset on _rl_wrapped_line with
+	  its full initialized size: inv_lbsize*sizeof(int).  Fix from
+	  jan.kratochvil@redhat.com.
+
+lib/readline/complete.c
+	- in stat_char, check for `//server' on cygwin and return `/', since
+	  it will always behave as a directory.  Fix from Eric Blake
+
+lib/readline/histfile.c
+	- Cygwin's mmap() works in recent versions, so don't #undef HAVE_MMAP.
+	  Recommendation from Eric Blake
+
+lib/readline/rlwinsize.h
+	- make sure tcflow() is defined on SCO Unix.  Fix from William Bader
+
+aclocal.m4
+	- add check for localeconv to AM_INTL_SUBDIR macro
+
+config.h.in
+	- add HAVE_LOCALECONV
+
+lib/sh/snprintf.c
+	- add check for HAVE_LOCALECONV for GETLOCALEDATA macro
+
+general.[ch]
+	- first argument to legal_number is now `const char *'

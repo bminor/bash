@@ -125,7 +125,7 @@ _rl_scxt_dispose (cxt, flags)
   FREE (cxt->allocated_line);
   FREE (cxt->lines);
 
-  free (cxt);
+  xfree (cxt);
 }
 
 /* Search backwards through the history looking for a string which is typed
@@ -192,7 +192,7 @@ rl_display_search (search_string, reverse_p, where)
   strcpy (message + msglen, "': ");
 
   rl_message ("%s", message);
-  free (message);
+  xfree (message);
   (*rl_redisplay_function) ();
 }
 

@@ -116,7 +116,7 @@ rl_free_undo_list ()
       if (release->what == UNDO_DELETE)
 	free (release->text);
 
-      free (release);
+      xfree (release);
     }
   rl_undo_list = (UNDO_LIST *)NULL;
   replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
@@ -221,7 +221,7 @@ rl_do_undo ()
       rl_undo_list = rl_undo_list->next;
       replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
 
-      free (release);
+      xfree (release);
     }
   while (waiting_for_begin);
 

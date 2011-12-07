@@ -1025,7 +1025,7 @@ exponent(p, d)
      double d;
 {
   char *tmp, *tmp2;
-  int j, i, usedec;
+  int j, i;
 
   if (d != 0 && (chkinfnan(p, d, 1) || chkinfnan(p, d, 2)))
     return;	/* already printed nan or inf */
@@ -1042,7 +1042,6 @@ exponent(p, d)
     }
   tmp = dtoa(d, p->precision, &tmp2);
 
-  usedec = 1;
   /* 1 for unit, 1 for the '.', 1 for 'e|E',
    * 1 for '+|-', 2 for 'exp' */
   /* calculate how much padding need */

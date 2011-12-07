@@ -251,8 +251,7 @@ _rl_callback_data_alloc (count)
 void _rl_callback_data_dispose (arg)
      _rl_callback_generic_arg *arg;
 {
-  if (arg)
-    free (arg);
+  xfree (arg);
 }
 
 #endif

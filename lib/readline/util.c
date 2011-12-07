@@ -212,7 +212,7 @@ rl_tilde_expand (ignore, key)
       strncpy (temp, rl_line_buffer + start, len);
       temp[len] = '\0';
       homedir = tilde_expand (temp);
-      free (temp);
+      xfree (temp);
 
       _rl_replace_text (homedir, start, end);
     }
