@@ -1,6 +1,6 @@
 /* display.c -- readline redisplay facility. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -164,6 +164,7 @@ int _rl_last_v_pos = 0;
 
 static int cpos_adjusted;
 static int cpos_buffer_position;
+static int prompt_multibyte_chars;
 
 /* Number of lines currently on screen minus 1. */
 int _rl_vis_botlin = 0;
@@ -300,6 +301,11 @@ expand_prompt (pmt, lp, lip, niflp, vlp)
 	        *r++ = *p++;
 	      if (!ignoring)
 		{
+		  /* rl ends up being assigned to prompt_visible_length,
+		     which is the number of characters in the buffer that
+		     contribute to characters on the screen, which might
+		     not be the same as the number of physical characters
+		     on the screen in the presence of multibyte characters */
 		  rl += ind - pind;
 		  physchars += _rl_col_width (pmt, pind, ind);
 		}
@@ -505,6 +511,8 @@ rl_redisplay ()
 
   /* Draw the line into the buffer. */
   cpos_buffer_position = -1;
+
+  prompt_multibyte_chars = prompt_visible_length - prompt_physical_chars;
 
   line = invisible_line;
   out = inv_botlin = 0;
@@ -1756,7 +1764,10 @@ _rl_move_cursor_relative (new, data)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
       dpos = _rl_col_width (data, 0, new);
-      if (dpos > prompt_last_invisible)		/* XXX - don't use woff here */
+      /* Use NEW when comparing against the last invisible character in the
+	 prompt string, since they're both buffer indices and DPOS is a
+	 desired display position. */
+      if (new > prompt_last_invisible)		/* XXX - don't use woff here */
 	{
 	  dpos -= woff;
 	  /* Since this will be assigned to _rl_last_c_pos at the end (more

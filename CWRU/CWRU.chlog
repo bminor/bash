@@ -14347,3 +14347,37 @@ CWRU/audit-patch
 	- patch from Steve Grubb of RedHat <sgrubb@redhat.com> to make bash
 	  audit root's behavior by logging commands using his audit
 	  framework.  Enabled if the shell's name is `aubash'.
+
+				    3/8
+				    ---
+jobs.c
+	- use WSTATUS (p->status) instead of bare p->status.  Fix from
+	  Jim Brown <jim.brown@rsmas.miami.edu>
+
+				    3/9
+				    ---
+lib/readline/{complete,input,isearch,misc,readline,text,vi_mode}.c
+	- make sure cases where rl_read_key returns -1 (usually due to EIO
+	  because the controlling tty has gone away) are handled correctly.
+	  Prompted by report from Thomas Loeber <ifp@loeber1.de>
+
+				   3/10
+				   ----
+sig.c
+	- new function, top_level_cleanup, callable from contexts where some
+	  cleanup needs to be performed before a non-fatal call to
+	  jump_to_top_level
+
+sig.h
+	- new extern declaration for top_level_cleanup
+
+builtins/common.c
+	- add calls to top_level_cleanup before calls to jump_to_top_level
+	  in a builtin command context (no_args(), get_numeric_arg()).  Fixes
+	  bug reported by Ian Watson
+
+lib/readline/display.c
+	- in _rl_move_cursor_relative, use `new' when comparing against
+	  the last invisible character in the prompt, since they both denote
+	  buffer indices when in a multibyte locale, whereas `dpos' is a
+	  display position

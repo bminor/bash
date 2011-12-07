@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -131,6 +131,7 @@ no_args (list)
   if (list)
     {
       builtin_error (_("too many arguments"));
+      top_level_cleanup ();
       jump_to_top_level (DISCARD);
     }
 }
@@ -395,7 +396,10 @@ get_numeric_arg (list, fatal)
 	  if (fatal)
 	    throw_to_top_level ();
 	  else
-	    jump_to_top_level (DISCARD);
+	    {
+	      top_level_cleanup ();
+	      jump_to_top_level (DISCARD);
+	    }
 	}
       no_args (list->next);
     }

@@ -2228,7 +2228,7 @@ raw_job_exit_status (job)
       p = jobs[job]->pipe;
       do
 	{
-	  if (p->status != EXECUTION_SUCCESS) fail = p->status;
+	  if (WSTATUS (p->status) != EXECUTION_SUCCESS) fail = WSTATUS(p->status);
 	  p = p->next;
 	}
       while (p != jobs[job]->pipe);
@@ -2370,7 +2370,7 @@ wait_for (pid)
 	  if (r == -1 && errno == ECHILD)
 	    {
 	      child->running = PS_DONE;
-	      child->status = 0;	/* XXX -- can't find true status */
+	      WSTATUS (child->status) = 0;	/* XXX -- can't find true status */
 	      js.c_living = 0;		/* no living child processes */
 	      if (job != NO_JOB)
 		{

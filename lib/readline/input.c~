@@ -513,25 +513,19 @@ _rl_read_mbchar (mbchar, size)
      char *mbchar;
      int size;
 {
-  int mb_len, c;
+  int mb_len = 0;
   size_t mbchar_bytes_length;
   wchar_t wc;
   mbstate_t ps, ps_back;
 
   memset(&ps, 0, sizeof (mbstate_t));
   memset(&ps_back, 0, sizeof (mbstate_t));
-
-  mb_len = 0;  
+  
   while (mb_len < size)
     {
       RL_SETSTATE(RL_STATE_MOREINPUT);
-      c = rl_read_key ();
+      mbchar[mb_len++] = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_MOREINPUT);
-
-      if (c < 0)
-	break;
-
-      mbchar[mb_len++] = c;
 
       mbchar_bytes_length = mbrtowc (&wc, mbchar, mb_len, &ps);
       if (mbchar_bytes_length == (size_t)(-1))
@@ -570,7 +564,7 @@ _rl_read_mbstring (first, mb, mlen)
 
   c = first;
   memset (mb, 0, mlen);
-  for (i = 0; c > 0 && i < mlen; i++)
+  for (i = 0; i < mlen; i++)
     {
       mb[i] = (char)c;
       memset (&ps, 0, sizeof (mbstate_t));

@@ -211,7 +211,6 @@ _rl_isearch_init (direction)
   cxt->search_terminators = _rl_isearch_terminators ? _rl_isearch_terminators
 						: default_isearch_terminators;
 
-itrace("_rl_isearch_init: set search_terminators to %s", cxt->search_terminators);
   /* Create an arrary of pointers to the lines that we want to search. */
   hlist = history_list ();
   rl_maybe_replace_line ();
@@ -328,8 +327,15 @@ _rl_isearch_dispatch (cxt, c)
   rl_command_func_t *f;
 
   f = (rl_command_func_t *)NULL;
- 
- /* Translate the keys we do something with to opcodes. */
+
+  if (c < 0)
+    {
+      cxt->flags |= SF_FAILED;
+      cxt->history_pos = cxt->last_found_line;
+      return -1;
+    }
+
+  /* Translate the keys we do something with to opcodes. */
   if (c >= 0 && _rl_keymap[c].type == ISFUNC)
     {
       f = _rl_keymap[c].function;
@@ -348,14 +354,12 @@ _rl_isearch_dispatch (cxt, c)
 	cxt->lastc = -6;
     }
 
-itrace("_rl_isearch_dispatch: looking for %d in cxt->search_terminators", cxt->lastc);
   /* The characters in isearch_terminators (set from the user-settable
      variable isearch-terminators) are used to terminate the search but
      not subsequently execute the character as a command.  The default
      value is "\033\012" (ESC and C-J). */
   if (strchr (cxt->search_terminators, cxt->lastc))
     {
-itrace("_rl_isearch_dispatch: found %d in search_terminators", cxt->lastc);
       /* ESC still terminates the search, but if there is pending
 	 input or if input arrives within 0.1 seconds (on systems
 	 with select(2)) it is used as a prefix character
@@ -367,7 +371,6 @@ itrace("_rl_isearch_dispatch: found %d in search_terminators", cxt->lastc);
 	 use _rl_input_queued(100000) */
       if (cxt->lastc == ESC && _rl_input_available ())
 	rl_execute_next (ESC);
-itrace("_rl_isearch_dispatch: exiting search based on char %d", cxt->lastc);
       return (0);
     }
 

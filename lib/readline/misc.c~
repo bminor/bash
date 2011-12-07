@@ -449,7 +449,6 @@ _rl_revert_all_lines ()
   hpos = where_history ();
 
   entry = (hpos == history_length) ? previous_history () : current_history ();
-  
   while (entry)
     {
       if (ul = (UNDO_LIST *)entry->data)
@@ -470,12 +469,16 @@ _rl_revert_all_lines ()
       entry = previous_history ();
     }
 
+  /* Restore history state */
   rl_undo_list = saved_undo_list;	/* may have been set to null */
   history_set_pos (hpos);
   
-  /* And reset the line buffer */
+  /* reset the line buffer */
   rl_replace_line (lbuf, 0);
   _rl_set_the_line ();
+
+  /* and clean up */
+  free (lbuf);
 }  
 
 /* **************************************************************** */

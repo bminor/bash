@@ -862,7 +862,7 @@ set_special_char (kmap, tiop, sc, func)
 }
 
 #define RESET_SPECIAL(c) \
-  if (c != -1 && kmap[(unsigned char)c].type == ISFUNC)
+  if (c != -1 && kmap[(unsigned char)c].type == ISFUNC) \
     kmap[(unsigned char)c].function = rl_insert;
 
 static void

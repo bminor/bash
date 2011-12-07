@@ -33,4 +33,10 @@ then
 fi
 
 [[ $REPAT =~ "$REPAT" ]] && echo rematch 1
-	
+
+v="one two buckle my shoe"
+[[ ${v} =~ "one two" ]] && echo matches 7
+
+[[ ${v} =~ (one two) ]] && echo matches 8
+
+[[ ${v} =~ one\ two ]] && echo matches 9

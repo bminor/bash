@@ -273,7 +273,7 @@ int _rl_bind_stty_chars = 1;
 /* Non-zero means to go through the history list at every newline (or
    whenever rl_done is set and readline returns) and revert each line to
    its initial state. */
-int _rl_revert_all_at_newline = 1;
+int _rl_revert_all_at_newline = 0;
 
 /* **************************************************************** */
 /*								    */
@@ -314,11 +314,14 @@ readline (prompt)
       return ((char *)NULL);
     }
 
+#if 0
   /* If readline() is called after installing a callback handler, temporarily
      turn off the callback state to avoid ensuing messiness.  Patch supplied
-     by the gdb folks. */
+     by the gdb folks.  XXX -- disabled.  This can be fooled and readline
+     left in a strange state by a poorly-timed longjmp. */
   if (in_callback = RL_ISSTATE (RL_STATE_CALLBACK))
     RL_UNSETSTATE (RL_STATE_CALLBACK);
+#endif
 
   rl_set_prompt (prompt);
 
@@ -338,8 +341,10 @@ readline (prompt)
   rl_clear_signals ();
 #endif
 
+#if 0
   if (in_callback)
     RL_SETSTATE (RL_STATE_CALLBACK);
+#endif
 
   return (value);
 }
