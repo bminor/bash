@@ -982,16 +982,11 @@ rl_redisplay ()
 		  _rl_last_c_pos > wrap_offset &&
 		  o_cpos < prompt_last_invisible)
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
-
 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
 			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 			cpos_adjusted == 0 &&
 			_rl_last_c_pos != o_cpos &&
-#if 0
-			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - (wrap_offset-prompt_invis_chars_first_line)))
-#else
 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))
-#endif
 		_rl_last_c_pos -= (wrap_offset-prompt_invis_chars_first_line);
 		  
 	      /* If this is the line with the prompt, we might need to

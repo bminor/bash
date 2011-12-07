@@ -5884,7 +5884,7 @@ doc/bash.1,lib/readline/doc/rluser.texi
 
 				    4/9
 				    ---
-bashline.c
+bashhist.c
 	- new variable, `enable_history_list', used to reflect setting of
 	  `-o history' option
 	- change bash_history_{enable,disable,reinit} to set enable_history_list
@@ -7126,4 +7126,24 @@ variables.c
 	  if the variable is unset after rl_completer_word_break_characters
 	  is freed and reallocated.  Fix from Mike Stroyan <mike@stroyan.net
 
+				   11/11
+				   -----
+bashline.c
+	- new function to reset the value of rl_completer_word_break_characters
+	  while honoring setting of `hostcomplete': reset_completer_word_break_chars.
+
+bashline.h
+	- new extern declaration for reset_completer_word_break_chars.
+
+variables.c
+	- call reset_completer_word_break_chars in sv_comp_wordbreaks when the
+	  variable is unset
+
 [bash-4.0-beta frozen]
+
+				   11/16
+				   -----
+subst.c
+	- call set_pipestatus_from_exit in exp_jump_to_top_level so that
+	  failed expansions that set $? will set $PIPESTATUS.  Fixes bug
+	  reported by Eric Blake <ebb9@byu.net>

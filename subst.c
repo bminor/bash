@@ -8106,6 +8106,8 @@ static void
 exp_jump_to_top_level (v)
      int v;
 {
+  set_pipestatus_from_exit (last_command_exit_value);
+
   /* Cleanup code goes here. */
   expand_no_split_dollar_star = 0;	/* XXX */
   expanding_redir = 0;
