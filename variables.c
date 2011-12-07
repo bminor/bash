@@ -24,13 +24,13 @@
 #include "posixstat.h"
 #include "posixtime.h"
 
-#if defined (qnx)
-#  if defined (qnx6)
+#if defined (__QNX__)
+#  if defined (__QNXNTO__)
 #    include <sys/netmgr.h>
 #  else
 #    include <sys/vc.h>
-#  endif /* !qnx6 */
-#endif /* qnx */
+#  endif /* !__QNXNTO__ */
+#endif /* __QNX__ */
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -391,11 +391,11 @@ initialize_shell_variables (env, privmode)
   set_auto_export (temp_var);	/* XXX */
 #endif
 
-#if defined (qnx)
+#if defined (__QNX__)
   /* set node id -- don't import it from the environment */
   {
     char node_name[22];
-#  if defined (qnx6)
+#  if defined (__QNXNTO__)
     netmgr_ndtostr(ND2S_LOCAL_STR, ND_LOCAL_NODE, node_name, sizeof(node_name));
 #  else
     qnx_nidtostr (getnid (), node_name, sizeof (node_name));

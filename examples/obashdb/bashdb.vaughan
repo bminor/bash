@@ -38,16 +38,20 @@
 # tbreak [regexp|+lines]
 # restart
 # Variable watchpoints
+# Output colourization
+# History with csh ^ substitution? Or write a readline frontend?
+# Instrument shell functions with the _steptrap in $_potbelliedpig
 # Instrument `source' and `.' files in $_potbelliedpig
 # be cleverer about lines we allow breakpoints to be set on
 # break [function_name]
 
+
 echo 'Bash Debugger version 1.2.4'
 
-export _dbname=${0##*/}
+export _dbname=$(echo "X$0"|sed -e 's,^X,,' -e 's,^.*/,,')
 
 if test $# -lt 1; then
-  echo "$_dbname: Usage: $_dbname filename" >&2
+  echo "$_dbname: Usage: $_dbname <filename>" >&2
   exit 1
 fi
 
@@ -74,26 +78,21 @@ exit 1
 
 __debug=$0
 _guineapig=$1
-__steptrap_calls=0
 
 shift
-
-shopt -s extglob	# turn on extglob so we can parse the debugger funcs
 
 function _steptrap
 {
   local i=0
-
+  
   _curline=$1
 
-  if (( ++__steptrap_calls > 1 && $_curline == 1 )); then
-    return
-  fi
-
-  if [ -n "$_disps" ]; then
+  if [ -n "$_disps" ]
+  then
     while (( $i < ${#_disps[@]} ))
     do
-      if [ -n "${_disps[$i]}" ]; then
+      if [ -n "${_disps[$i]}" ]
+      then
         _msg "${_disps[$i]}: \c"
         eval _msg ${_disps[$i]}
       fi
@@ -104,7 +103,7 @@ function _steptrap
   if (( $_trace )); then
     _showline $_curline
   fi
-
+  
   if (( $_steps >= 0 )); then
     let _steps="$_steps - 1"
   fi
@@ -117,7 +116,7 @@ function _steptrap
     _msg "Break condition $_brcond true at line $_curline"
     _showline $_curline
     _cmdloop
-  elif (( $_steps == 0 )); then
+  elif (( $_steps == 0 && $_curline > 1)); then
     # Assuming a real script will have the "#! /bin/sh" at line 1,
     # assume that when $_curline == 1 we are inside backticks.
     if (( ! $_trace )); then
@@ -130,25 +129,19 @@ function _steptrap
 
 function _setbp
 {
-  local i f line _x
+  local i f line
 
-  if [ -z "$1" ]; then
+  if [ -z "$1" ]
+  then
     _listbp
-    return
-  fi
-
-  eval "$_seteglob"
-
-  if [[ $1 == *(\+)[1-9]*([0-9]) ]]; then
+  elif [ $(echo $1 | grep '^\+*[1-9][0-9]*') ]
+  then
     case $1 in
     +*)
-      # normalize argument, then double it (+2 -> +2 + 2 = 4)
-      _x=${1##*([!1-9])}	# cut off non-numeric prefix
-      _x=${x%%*([!0-9])}	# cut off non-numeric suffix
-      f=$(( $1 + $_x ))
+      let f="$1 + `expr $1 : '+*\([1-9][0-9]*\)'`"
       ;;
     *)
-      f=$(( $1 ))
+      let f=$1
       ;;
     esac
 
@@ -156,7 +149,7 @@ function _setbp
     line="${_lines[$f]}"
     while _invalidbreakp $f
     do
-      (( f++ ))
+      let f="$f + 1"
       line="${_lines[$f]}"
     done
 
@@ -165,8 +158,10 @@ function _setbp
       _msg "Line $1 is not a valid breakpoint"
     fi
 
-    if [ -n "${_lines[$f]}" ]; then
-      _linebp[$1]=$1;
+    if [ -n "${_lines[$f]}" ]
+    then
+      _linebp=($(echo $( (for i in ${_linebp[*]} $1; do
+      echo $i; done) | sort -n) ))
       _msg "Breakpoint set at line $f"
     else
       _msg "Breakpoints can only be set on executable lines"
@@ -174,15 +169,14 @@ function _setbp
   else
     _msg "Please specify a numeric line number"
   fi
-
-  eval "$_resteglob"
 }
 
 function _listbp
 {
   local i
   
-  if [ -n "$_linebp" ]; then
+  if [ -n "$_linebp" ]
+  then
     _msg "Breakpoints:"
     for i in ${_linebp[*]}; do
       _showline $i
@@ -195,34 +189,28 @@ function _listbp
 function _clearbp
 {
   local i
-
   if [ -z "$1" ]; then
     read -e -p "Delete all breakpoints? "
     case $REPLY in
-    [yY]*)
+    y*)
       unset _linebp[*]
       _msg "All breakpoints have been cleared"
       ;;
     esac
-    return 0
-  fi
-
-  eval "$_seteglob"
-
-  if [[ $1 == [1-9]*([0-9]) ]]; then
-    unset _linebp[$1]
+  elif [ $(echo $1 | grep '^[0-9]*') ]; then
+    _linebp=($(echo $(for i in ${_linebp[*]}; do
+              if (( $1 != $i )); then echo $1;  fi; done) ))
     _msg "Breakpoint cleared at line $1"
   else
     _msg "Please specify a numeric line number"
   fi
-
-  eval "$_resteglob"
 }
 
 function _setbc
 {
-  if (( $# > 0 )); then
-    _brcond=$@
+  if [ -n "$*" ]
+  then
+    _brcond=$args
     _msg "Break when true: $_brcond"
   else
     _brcond=
@@ -232,7 +220,8 @@ function _setbc
 
 function _setdisp
 {
-  if [ -z "$1" ]; then
+  if [ -z "$1" ]
+  then
     _listdisp
   else
     _disps[${#_disps[@]}]="$1"
@@ -249,7 +238,8 @@ function _listdisp
 {
   local i=0 j
   
-  if [ -n "$_disps" ]; then
+  if [ -n "$_disps" ]
+  then
     while (( $i < ${#_disps[@]} ))
     do
       let j=$i+1
@@ -268,51 +258,30 @@ function _listdisp
 
 function _cleardisp
 {
-  if (( $# < 1 )) ; then
+  if (( $# < 1 ))
+  then
     read -e -p "Delete all display expressions? "
     case $REPLY in
-    [Yy]*)
+    y*)
       unset _disps[*]
       _msg "All breakpoints have been cleared"
       ;;
     esac
-    return 0
-  fi
-
-  eval "$_seteglob"
-
-  if [[ $1 == [1-9]*([0-9]) ]]; then
+  elif [ $(echo $1 | grep '^[0-9]*') ]
+  then
     unset _disps[$1]
     _msg "Display $i has been cleared"
   else
     _listdisp
     _msg "Please specify a numeric display number"
   fi
-
-  eval "$_resteglob"
 }   
-
-# usage _ftrace -u funcname [funcname...]
-function _ftrace
-{
-  local _opt=-t _tmsg="enabled" _func 
-  if [[ $1 == -u ]]; then
-	_opt=+t
-	_tmsg="disabled"
-	shift
-  fi
-  for _func; do
-	  declare -f $_opt $_func
-	  _msg "Tracing $_tmsg for function $_func"
-  done
-}
 
 function _cmdloop
 {
   local cmd args
 
   while read -e -p "bashdb> " cmd args; do
-    test -n "$cmd" && history -s "$cmd $args"	# save on history list
     test -n "$cmd" || { set $_lastcmd; cmd=$1; shift; args=$*; }
     if [ -n "$cmd" ]
     then
@@ -342,10 +311,6 @@ function _cmdloop
 	di|dis|disp|displ|displa|display)
 	  _setdisp $args
 	  _lastcmd="display $args"
-	  ;;
-	f|ft|ftr|ftra|ftrace)
-	  _ftrace $args
-	  _lastcmd="ftrace $args"
 	  ;;
 	\?|h|he|hel|help)
 	  _menu
@@ -388,14 +353,25 @@ function _cmdloop
 
 function _at_linenumbp
 {
-  [[ -n ${_linebp[$_curline]} ]]
+  local i=0
+
+  if [ "$_linebp" ]
+  then
+    while (( $i < ${#_linebp[@]} )); do
+      if (( ${_linebp[$i]} == $_curline )); then
+	return 0
+      fi
+      let i=$i+1
+    done
+  fi
+
+  return 1
 }
 
 function _invalidbreakp
 {
   local line=${_lines[$1]}
 
-  # XXX - should use shell patterns
   if test -z "$line" \
       || expr "$line" : '[ \t]*#.*' > /dev/null \
       || expr "$line" : '[ \t]*;;[ \t]*$' > /dev/null \
@@ -412,7 +388,8 @@ function _invalidbreakp
 
 function _examine
 {
-  if [ -n "$*" ]; then
+  if [ -n "$*" ]
+  then
     _msg "$args: \c"
     eval _msg $args
   else
@@ -424,41 +401,48 @@ function _displayscript
 {
   local i j start end bp cl
 
-  if (( $# == 1 )); then	# list 5 lines on either side of $1
-    if [ $1 = "%" ]; then
+  if (( $# == 1 ))
+  then
+    if test $1 = "%"
+    then
       let start=1
       let end=${#_lines[@]}
     else
       let start=$1-5
       let end=$1+5
     fi
-  elif (( $# > 1 )); then	# list between start and end
-    if [ $1 = "^" ]; then
+  elif (( $# > 1 ))
+  then
+    if test $1 = "^"
+    then
       let start=1
     else
       let start=$1
     fi
 
-    if [ $2 = "\$" ]; then
+    if test $2 = "\$"
+    then
       let end=${#_lines[@]}
     else
       let end=$2
     fi
-  else				# list 5 lines on either side of current line
+  else
     let start=$_curline-5
     let end=$_curline+5
   fi
 
-  # normalize start and end
-  if (( $start < 1 )); then
+  if (( $start < 1 ))
+  then
     start=1
   fi
-  if (( $end > ${#_lines[@]} )); then
+  if (( $end > ${#_lines[@]} ))
+  then
     end=${#_lines[@]}
   fi
 
-  cl=$(( $end - $start ))
-  if (( $cl > ${LINES-24} )); then
+  let cl=$end-$start
+  if (( $cl > ${LINES-24} ))
+  then
     pager=${PAGER-more}
   else
     pager=cat
@@ -471,8 +455,8 @@ function _displayscript
     done ) 2>&1 | $pager
 
   # calculate the next block of lines
-  start=$(( $end + 1 ))
-  end=$(( $start + 11 ))
+  let start=$end+1
+  let end=$start+11
   if (( $end > ${#_lines[@]} ))
   then
     end=${#_lines[@]}
@@ -498,22 +482,29 @@ function _msg
 
 function _showline
 {
-  local i=0 bp=' ' line=$1 cl=' '
-
-  if [[ -n ${_linebp[$line]} ]]; then
-    bp='*'
-  fi
+  local i=0 bp=' ' line=$1
+   
+  while (( $i < ${#_linebp[@]} ))
+  do
+    if [ ${_linebp[$i]} ] && (( ${_linebp[$i]} == $line ))
+    then
+      bp='*'
+    fi
+    let i=$i+1
+  done
 
   if  (( $_curline == $line )); then
     cl=">"
+  else
+    cl=" "
   fi
 
   if (( $line < 100 )); then
-    _msg "${_guineapig/*\//}:$line   $bp $cl${_lines[$line]}"
+    _msg "$_guineapig:$line   $bp $cl${_lines[$line]}"
   elif (( $line < 10 )); then
-    _msg "${_guineapig/*\//}:$line  $bp $cl${_lines[$line]}"
+    _msg "$_guineapig:$line  $bp $cl${_lines[$line]}"
   elif (( $line > 0 )); then
-    _msg "${_guineapig/*\//}:$line $bp $cl${_lines[$line]}"
+    _msg "$_guineapig:$line $bp $cl${_lines[$line]}"
   fi
 }
 
@@ -541,30 +532,18 @@ function _menu
 	next [N]	execute [N] statements (default 1)
 	print expr	prints the value of an expression
 	trace		toggle execution trace on/off
-	ftrace [-u] func	make the debugger step into function FUNC
-			(-u turns off tracing FUNC)
 	help		print this menu
 	! string	passes string to a shell
 	quit		quit'
 }
 
-shopt -u extglob
 
-HISTFILE=~/.bashdb_history
-set -o history
-set +H
-
-# strings to save and restore the setting of `extglob' in debugger functions
-# that need it
-_seteglob='local __eopt=-u ; shopt -q extglob && __eopt=-s ; shopt -s extglob'
-_resteglob='shopt $__eopt extglob'
-
-_linebp=()
+_linebp=
 let _trace=0
 let _i=1
 
 # Be careful about quoted newlines
-_potbelliedpig=${TMPDIR-/tmp}/${_guineapig/*\//}.$$
+_potbelliedpig=${TMPDIR-/tmp}/$_guineapig.$$
 sed 's,\\$,\\\\,' $_guineapig > $_potbelliedpig
 
 _msg "Reading source from file: $_guineapig"
@@ -576,6 +555,7 @@ done < $_potbelliedpig
 trap _cleanup EXIT
 # Assuming a real script will have the "#! /bin/sh" at line 1,
 # don't stop at line 1 on the first run
-let _steps=1
-LINENO=-1
+let _steps=2
+LINENO=-2
 trap '_steptrap $LINENO' DEBUG
+:

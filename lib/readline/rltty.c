@@ -500,7 +500,7 @@ _get_tty_settings (tty, tiop)
 	}
       if (OUTPUT_BEING_FLUSHED (tiop))
 	{
-#if defined (FLUSHO) && defined (_AIX41)
+#if defined (FLUSHO)
 	  _rl_errmsg ("warning: turning off output flushing");
 	  tiop->c_lflag &= ~FLUSHO;
 	  break;

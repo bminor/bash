@@ -419,14 +419,14 @@ rl_expand_prompt (prompt)
       t = ++p;
       local_prompt = expand_prompt (p, &prompt_visible_length,
 				       &prompt_last_invisible,
-				       (int *)NULL,
+				       &prompt_invis_chars_first_line,
 				       &prompt_physical_chars);
       c = *t; *t = '\0';
       /* The portion of the prompt string up to and including the
 	 final newline is now null-terminated. */
       local_prompt_prefix = expand_prompt (prompt, &prompt_prefix_length,
 						   (int *)NULL,
-						   &prompt_invis_chars_first_line,
+						   (int *)NULL,
 						   (int *)NULL);
       *t = c;
       local_prompt_len = local_prompt ? strlen (local_prompt) : 0;

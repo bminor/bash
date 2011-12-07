@@ -14757,5 +14757,26 @@ lib/readline/display.c
 	- change _rl_move_cursor_relative to adjust _rl_last_c_pos in a
 	  multibyte environment when the prompt has invisible chars on the
 	  second line and the redisplay draws the invisible character.  Fixes
-	  bug reported by Andreas Schwab <schwab@suse.de>
+	  redisplay bug reported by Andreas Schwab <schwab@suse.de>
 
+
+				   7/11
+				   ----
+
+lib/readline/rltty.c
+	- enable flush-output code for systems other than AIX 4.1.  Problem
+	  reported by Jan Kratochvil <jan.kratochvil@redhat.com>
+
+				   7/12
+				   ----
+lib/readline/display.c
+	- set prompt_invis_chars_first_line from the portion of the prompt
+	  following the final newline, instead of from the prefix.  Fixes
+	  bug reported on the Ubuntu bug list by dAniel hAhler
+	  <ubuntu@thequod.de>
+
+				   7/13
+				   ----
+variables.c
+	- use native __QNX__ and __QNXNTO__ cpp defines instead of qnx and
+	  qnx6, respectively.  Patch from Sean Boudreau <seanb@qnx.com>
