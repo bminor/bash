@@ -15258,3 +15258,10 @@ builtins/fc.def
 lib/readline/complete.c
 	- fix fnwidth to use string[pos] instead of *string when testing the
 	  current character for a control character or rubout
+
+				    2/2
+				    ---
+general.c
+	- change posix_initialize to turn off source/. searching $PWD when
+	  the file sourced is not found in $PATH.  Fixes bug reported by
+	  Paolo Bonzini <bonzini@gnu.org> and Eric Blake <ebb9@byu.net>

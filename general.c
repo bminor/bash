@@ -69,6 +69,7 @@ posix_initialize (on)
   if (on != 0)
     {
       interactive_comments = source_uses_path = expand_aliases = 1;
+      source_searches_cwd = 0;
     }
 
   /* Things that should be turned on when posix mode is disabled. */
