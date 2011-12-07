@@ -164,7 +164,7 @@ and symbols are expanded to create larger expressions.
 A Unix shell is both a command interpreter and a programming
 language.  As a command interpreter, the shell provides the user
 interface to the rich set of @sc{gnu} utilities.  The programming
-language features allow these utilitites to be combined.
+language features allow these utilities to be combined.
 Files containing commands can be created, and become
 commands themselves.  These new commands have the same status as
 system commands in directories such as @file{/bin}, allowing users
@@ -288,7 +288,7 @@ group @sc{id}.
 
 @item process group ID
 @cindex process group ID
-A unique identifer that represents a @code{process group}
+A unique identifier that represents a @code{process group}
 during its lifetime.
 
 @item reserved word
@@ -897,7 +897,7 @@ The list of words following @code{in} is expanded, generating a list
 of items.  The set of expanded words is printed on the standard
 error output stream, each preceded by a number.  If the
 @samp{in @var{words}} is omitted, the positional parameters are printed,
-as if @samp{in "$@@"} had been specifed.
+as if @samp{in "$@@"} had been specified.
 The @env{PS3} prompt is then displayed and a line is read from the
 standard input.
 If the line consists of a number corresponding to one of the displayed
@@ -1377,7 +1377,7 @@ This mechanism is similar to
 @var{filename expansion} (@pxref{Filename Expansion}),
 but the file names generated need not exist.
 Patterns to be brace expanded take the form of an optional @var{preamble},
-followed by either a series of comma-separated strings or a sequnce expression
+followed by either a series of comma-separated strings or a seqeunce expression
 between a pair of braces,
 followed by an optional @var{postscript}.
 The preamble is prefixed to each string contained within the braces, and
@@ -2717,7 +2717,7 @@ exec [-cl] [-a @var{name}] [@var{command} [@var{arguments}]]
 If @var{command}
 is supplied, it replaces the shell without creating a new process.
 If the @option{-l} option is supplied, the shell places a dash at the
-beginning of the zeroth arg passed to @var{command}.
+beginning of the zeroth argument passed to @var{command}.
 This is what the @code{login} program does.
 The @option{-c} option causes @var{command} to be executed with an empty
 environment.
@@ -3110,7 +3110,7 @@ key and function bindings,
 bind a key sequence to a Readline function or macro,
 or set a Readline variable.
 Each non-option argument is a command as it would appear in a
-a Readline initialization file (@pxref{Readline Init File}),
+Readline initialization file (@pxref{Readline Init File}),
 but each binding or command must be passed as a separate argument;  e.g.,
 @samp{"\C-x\C-r":re-read-init-file}.
 Options, if supplied, have the following meanings:
@@ -4476,7 +4476,7 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is "main".
+The bottom-most element is @code{"main"}.
 This variable exists only when a shell function is executing.
 Assignments to @env{FUNCNAME} have no effect and return an error status.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
@@ -4796,7 +4796,7 @@ The @code{select} command (@pxref{Conditional Constructs}) terminates
 if input does not arrive after @code{TMOUT} seconds when input is coming
 from a terminal.
 
-In an interative shell, the value is interpreted as
+In an interactive shell, the value is interpreted as
 the number of seconds to wait for input after issuing the primary
 prompt when the shell is interactive.
 Bash terminates after that number of seconds if input does
@@ -4866,7 +4866,7 @@ Equivalent to @option{-D} except for the output format.
 Equivalent to @option{-D}.
 
 @item --help
-Display a usage message on standard output and exit sucessfully.
+Display a usage message on standard output and exit successfully.
 
 @item --init-file @var{filename}
 @itemx --rcfile @var{filename}
@@ -4995,7 +4995,7 @@ in the script.  If no commands are executed, the exit status is 0.
 @section Bash Startup Files
 @cindex startup files
 
-This section describs how Bash executes its startup files.
+This section describes how Bash executes its startup files.
 If any of the files exist but cannot be read, Bash reports an error.
 Tildes are expanded in file names as described above under
 Tilde Expansion (@pxref{Tilde Expansion}).
@@ -5120,7 +5120,7 @@ the same, but the effective user id is not reset.
 
 An interactive shell
 is one started without non-option arguments, unless @option{-s} is
-specified, without specifiying the @option{-c} option, and
+specified, without specifying the @option{-c} option, and
 whose input and error output are both
 connected to terminals (as determined by @code{isatty(3)}),
 or one started with the @option{-i} option.
@@ -5213,7 +5213,7 @@ In the absence of any traps, @code{SIGINT} is caught and handled
 
 @item
 An interactive login shell sends a @code{SIGHUP} to all jobs on exit
-if the @code{hupoxexit} shell option has been enabled (@pxref{Signals}).
+if the @code{huponexit} shell option has been enabled (@pxref{Signals}).
 
 @item
 The @option{-n} invocation option is ignored, and @samp{set -n} has

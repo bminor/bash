@@ -1410,7 +1410,9 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is "main".
+The bottom-most element is
+.if t \f(CW"main"\fP.
+.if n "main".
 This variable exists only when a shell function is executing.
 Assignments to
 .SM
@@ -6711,7 +6713,7 @@ become the arguments to \fIcommand\fP.
 If the
 .B \-l
 option is supplied,
-the shell places a dash at the beginning of the zeroth arg passed to 
+the shell places a dash at the beginning of the zeroth argument passed to 
 .IR command .
 This is what
 .IR login (1)

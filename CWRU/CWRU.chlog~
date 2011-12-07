@@ -8889,8 +8889,8 @@ Makefile.in
 	- descend into `po' and run make recursively for the various clean
 	  targets
 
-				    1/4
-				    ---
+				 1/4/2004
+				 --------
 include/shmbutil.h
 	- two new macros:  BACKUP_CHAR(str, strsize, i), which backs up one
 	  multibyte character in STR starting at index I, and
@@ -12718,8 +12718,8 @@ jobs.c
 	- in delete_job, if find_last_proc returns NULL, don't try to call
 	  bgp_delete
 
-				    1/7
-				    ---
+				 1/7/2006
+				 --------
 doc/bash.1
 	- patch from Tim Waugh to replace some literal single quotes with
 	  \(aq, the groff special character for it
@@ -13744,3 +13744,72 @@ parse.y
 	- change parse_matched_pair to make sure `` command substitution does
 	  not check for shell comments while parsing.  Bug reported against
 	  bash-3.2 by Greg Schaefer <gschafer@zip.com.au>
+
+				   10/14
+				   -----
+parse.y
+	- add new parser_state flag: PST_REGEXP; means we are parsing a
+	  regular expression following the =~ conditional operator
+	- cond_node sets PST_REGEXP after reading the `=~' operator	
+	- change read_token to call read_token_word immediately if the
+	  PST_REGEXP bit is set in parser_state
+	- change read_token_word to skip over `(' and `|' if PST_REGEXP is
+	  set, since those characters are legitimate regexp chars (but still
+	  parse matched pairs of parens)
+
+				   10/16
+				   -----
+builtins/ulimit.def
+	- add -e and -r to $SHORT_DOC usage string
+
+po/ru.po
+	- fix encoding; Russian text in the file is actually encoded in KOI8-R
+
+				   10/23
+				   -----
+shell.c
+	- make sure that the call to move_to_high_fd in open_shell_script
+	  passes 1 for the  `check_new' parameter so open high file descriptors
+	  don't get closed and reused.  Bug reported by Mike Stroyan
+	  <mike.stroyan@hp.com>
+
+doc/bashref.texi
+	- fix typos and misspellings sent in by Brian Gough
+
+				   10/24
+				   -----
+support/shobj-conf
+	- make netbsd shared library creation like openbsd's until I hear
+	  differently (called using `gcc -shared')
+
+				   10/26
+				   -----
+subst.c
+	- fix bug in parameter_brace_patsub so if the first character of the
+	  expanded pattern is a `/', it is not taken as a global replacement
+	  specifier.  Bug reported on forums.nekochan.net 
+
+				   10/27
+				   -----
+builtins/printf.def
+	- if we need an extern declaration for asprintf, make sure we include
+	  stdarg.h or varargs.h, whichever is appropriate
+	- if we do not have asprintf, add an extern declaration using
+	  stdarg format.  This fixes the bugs with %G on IRIX reported by
+	  Matthew Woehlke <mwoehlke@tibco.com> and Stuart Shelton
+	  <srcshelton@gmail.com>
+
+
+lib/sh/snprintf.c
+	- add note to not call log_10 with 0 argument -- we don't want to do
+	  what real log10 does (-infinity/raise divide-by-zero exception)
+	- make sure numtoa (used by dtoa) takes the precision into account
+	  when computing the fractional part with an argument of `0.0'
+	- make sure `g' and `G' formats don't print radix char if there are
+	  no characters to be printed after it (change to floating())
+	- change callers of log_10 (exponent, 'g' and 'G' cases in
+	  vsnprintf_internal) to not call it with 0 for argument.  This fixes
+	  the hang reported on IRIX by Matthew Woehlke <mwoehlke@tibco.com>
+	  and Stuart Shelton <mwoehlke@tibco.com>
+
+

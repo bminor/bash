@@ -1772,7 +1772,7 @@ make_child (command, async_p)
 #endif /* PGRP_PIPE */
 
       if (async_p)
-	last_asynchronous_pid = mypid;
+	last_asynchronous_pid = mypid;		/* XXX */
 #if defined (RECYCLES_PIDS)
       else if (last_asynchronous_pid == mypid)
         /* Avoid pid aliasing.  1 seems like a safe, unusual pid value. */

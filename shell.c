@@ -1426,7 +1426,7 @@ open_shell_script (script_name)
   /* Open the script.  But try to move the file descriptor to a randomly
      large one, in the hopes that any descriptors used by the script will
      not match with ours. */
-  fd = move_to_high_fd (fd, 0, -1);
+  fd = move_to_high_fd (fd, 1, -1);
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (fd, O_TEXT);

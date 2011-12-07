@@ -5707,6 +5707,11 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   vtype &= ~VT_STARSUB;
 
   mflags = 0;
+  if (patsub && *patsub == '/')
+    {
+      mflags |= MATCH_GLOBREP;
+      patsub++;
+    }
 
   /* Malloc this because expand_string_if_necessary or one of the expansion
      functions in its call chain may free it on a substitution error. */
@@ -5741,13 +5746,12 @@ parameter_brace_patsub (varname, value, patsub, quoted)
     }
 
   /* ksh93 doesn't allow the match specifier to be a part of the expanded
-     pattern.  This is an extension. */
+     pattern.  This is an extension.  Make sure we don't anchor the pattern
+     at the beginning or end of the string if we're doing global replacement,
+     though. */
   p = pat;
-  if (pat && pat[0] == '/')
-    {
-      mflags |= MATCH_GLOBREP|MATCH_ANY;
-      p++;
-    }
+  if (mflags & MATCH_GLOBREP)
+    mflags |= MATCH_ANY;
   else if (pat && pat[0] == '#')
     {
       mflags |= MATCH_BEG;

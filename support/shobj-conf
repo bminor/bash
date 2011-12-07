@@ -114,7 +114,7 @@ linux*-*|gnu*-*|k*bsd*-gnu-*)
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)$(SHLIB_MINOR)'
 	;;
 
-freebsd2* | netbsd*)
+freebsd2*)
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD=ld
 	SHOBJ_LDFLAGS='-x -Bshareable'
@@ -182,7 +182,7 @@ darwin*|macosx*)
 	SHLIB_LIBS='-lncurses'	# see if -lcurses works on MacOS X 10.1 
 	;;
 
-openbsd*)
+openbsd*|netbsd*)
 	SHOBJ_CFLAGS=-fPIC
 	SHOBJ_LD='${CC}'
 	SHOBJ_LDFLAGS='-shared'
