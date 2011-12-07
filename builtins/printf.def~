@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2005 Free Software Foundation, Inc.
+Copyright (C) 1997-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,6 +69,10 @@ $END
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "common.h"
+
+#if defined (PRI_MACROS_BROKEN)
+#  undef PRIdMAX
+#endif
 
 #if !defined (PRIdMAX)
 #  if HAVE_LONG_LONG
@@ -550,7 +554,7 @@ static void
 printf_erange (s)
      char *s;
 {
-  builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
 }
 
 /* We duplicate a lot of what printf(3) does here. */

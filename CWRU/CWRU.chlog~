@@ -14263,6 +14263,11 @@ array.c
 	  on each element of the array in the same way array_quote calls
 	  quote_string
 	- call array_quote_escapes if match is not quoted in array_patsub
+	- array_slice is now used, so remove the #ifdef INCLUDE_UNUSED define
+	- change structure of array_subrange to call array_slice to create a
+	  new array with the desired subset of elements, then call array_quote
+	  or array_quote_escapes as necessary, like array_patsub.  Convert to
+	  a string by calling array_to_string on the sliced-out array
 
 array.h
 	- new extern declaration for array_quote_escapes
@@ -14271,3 +14276,52 @@ subst.c
 	- since array_patsub now calls quote_escapes as necessary, callers
 	  don't need to call it after array_patsub returns.  Fixes first bug
 	  reported by Brett Stahlman <brettstahlman@comcast.net>
+	- since array_subrange now calls quote_escapes as necessary, callers
+	  don't need to call it after array_patsub returns.  Same fix as
+	  for array_patsub
+
+				   1/31
+				   ----
+configure.in
+	- add -DSOLARIS to LOCAL_CFLAGS for solaris x
+
+config-bot.h
+	- don't #undef HAVE_GETCWD if GETCWD_BROKEN and SOLARIS are both
+	  defined.  Solaris's loopback mount implementation breaks some of the
+	  file system assumptions the replacement getcwd uses.
+
+builtins/common.c
+	- if GETCWD_BROKEN is defined, call getcwd with PATH_MAX for the size
+	  argument, so it will allocate a buffer for the current working dir
+	  with that size, instead of one that's `big enough'
+
+config.h.in
+	- add #undef PRI_MACROS_BROKEN for AIX 4.3.3
+
+pathexp.h
+	- new flag value for quote_string_for_globbing: QGLOB_REGEXP (quoting
+	  an ERE for matching as a string)
+
+pathexp.c
+	 - change quote_string_for_globbing to understand QGLOB_REGEXP
+
+execute_cmd.c
+	- change execute_cond_node to pass 2 (regexp match), 1 (shell pattern
+	  match), or 0 (no matching) to cond_expand_word
+
+subst.c
+	- change cond_expand_word to translate SPECIAL==2 into passing
+	  QGLOB_REGEXP to quote_string_for_globbing
+
+				    2/2
+				    ---
+builtins/printf.def
+	- if PRI_MACROS_BROKEN is defined, #undef PRIdMAX (AIX 4.3.3 broken)
+
+				    2/3
+				    ---
+Makefile.in,{builtins,doc}/Makefile.in,lib/*/Makefile.in
+	- add assignment for datarootdir as per GNU coding standards
+
+Makefile.in,builtins/Makefile.in,lib/intl/Makefile.in
+	- use @localedir@ instead of $(datadir)/locale in assignment

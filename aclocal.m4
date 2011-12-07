@@ -685,7 +685,7 @@ fi
 ])
 
 AC_DEFUN(BASH_FUNC_GETCWD,
-[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory])
+[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory with 0 size])
 AC_CACHE_VAL(bash_cv_getcwd_malloc,
 [AC_TRY_RUN([
 #include <stdio.h>

@@ -1,0 +1,54 @@
+*** builtins/printf.def	Fri Feb  2 20:00:48 2007
+--- ../bash-3.2-patched/builtins/printf.def	Mon Nov 13 08:58:52 2006
+***************
+*** 2,6 ****
+  It implements the builtin "printf" in Bash.
+  
+! Copyright (C) 1997-2006 Free Software Foundation, Inc.
+  
+  This file is part of GNU Bash, the Bourne Again SHell.
+--- 2,6 ----
+  It implements the builtin "printf" in Bash.
+  
+! Copyright (C) 1997-2005 Free Software Foundation, Inc.
+  
+  This file is part of GNU Bash, the Bourne Again SHell.
+***************
+*** 27,32 ****
+  printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
+  is a character string which contains three types of objects: plain
+! characters, which are simply copied to standard output; character escape
+! sequences, which are converted and copied to the standard output; and
+  format specifications, each of which causes printing of the next successive
+  argument.  In addition to the standard printf(1) formats, %b means to
+--- 27,32 ----
+  printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
+  is a character string which contains three types of objects: plain
+! characters, which are simply copied to standard output, character escape
+! sequences which are converted and copied to the standard output, and
+  format specifications, each of which causes printing of the next successive
+  argument.  In addition to the standard printf(1) formats, %b means to
+***************
+*** 71,78 ****
+  #include "common.h"
+  
+- #if defined (PRI_MACROS_BROKEN)
+- #  undef PRIdMAX
+- #endif
+- 
+  #if !defined (PRIdMAX)
+  #  if HAVE_LONG_LONG
+--- 71,74 ----
+***************
+*** 555,559 ****
+       char *s;
+  {
+!   builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
+  }
+  
+--- 551,555 ----
+       char *s;
+  {
+!   builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+  }
+  

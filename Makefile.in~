@@ -31,6 +31,9 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 prefix = @prefix@
 
 exec_prefix = @exec_prefix@
+
+datarootdir = @datarootdir@
+
 bindir = @bindir@
 libdir = @libdir@
 infodir = @infodir@
@@ -617,7 +620,7 @@ ${INTL_LIBRARY}: config.h ${INTL_LIBDIR}/Makefile
 	@(cd ${INTL_LIBDIR} && \
 		$(MAKE) $(MFLAGS) all) || exit 1
 
-${LIBINTL_H}:	${INTL_LIBRARY}
+${LIBINTL_H}:	${INTL_DEP}
 
 signames.o: $(SUPPORT_SRC)signames.c
 	$(RM) $@
@@ -686,13 +689,13 @@ config.status:	$(srcdir)/configure
 	$(SHELL) ./config.status --recheck
 
 pathnames.h:		Makefile $(srcdir)/pathnames.h.in
-	sed -e 's|@DEBUGGER_START_FILE\@|${DEBUGGER_START_FILE}|g' $(srcdir)/pathnames.h.in > pathnames.tmp
+	@sed -e 's|@DEBUGGER_START_FILE\@|${DEBUGGER_START_FILE}|g' $(srcdir)/pathnames.h.in > pathnames.tmp
 	@if test -f $@; then \
 		cmp -s pathnames.tmp $@ || mv pathnames.tmp $@; \
 	else \
 		mv pathnames.tmp $@; \
 	fi
-	${RM} pathnames.tmp
+	@${RM} pathnames.tmp
 
 # comment out for distribution
 $(srcdir)/configure:	$(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/config.h.in
@@ -1399,7 +1402,7 @@ builtins/inlib.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/jobs.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/kill.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/let.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
-builtins/mkbuiltins.c: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+builtins/mkbuiltins.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/printf.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/pushd.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/read.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h

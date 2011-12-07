@@ -2659,11 +2659,12 @@ remove_backslashes (string)
 
 /* This needs better error handling. */
 /* Expand W for use as an argument to a unary or binary operator in a
-   [[...]] expression.  If SPECIAL is nonzero, this is the rhs argument
+   [[...]] expression.  If SPECIAL is 1, this is the rhs argument
    to the != or == operator, and should be treated as a pattern.  In
-   this case, we quote the string specially for the globbing code.  The
-   caller is responsible for removing the backslashes if the unquoted
-   words is needed later. */   
+   this case, we quote the string specially for the globbing code.  If
+   SPECIAL is 2, this is an rhs argument for the =~ operator, and should
+   be quoted appropriately for regcomp/regexec.  The caller is responsible
+   for removing the backslashes if the unquoted word is needed later. */   
 char *
 cond_expand_word (w, special)
      WORD_DESC *w;
@@ -2671,6 +2672,7 @@ cond_expand_word (w, special)
 {
   char *r, *p;
   WORD_LIST *l;
+  int qflags;
 
   if (w->word == 0 || w->word[0] == '\0')
     return ((char *)NULL);
@@ -2685,8 +2687,11 @@ cond_expand_word (w, special)
 	}
       else
 	{
+	  qflags = QGLOB_CVTNULL;
+	  if (special == 2)
+	    qflags |= QGLOB_REGEXP;
 	  p = string_list (l);
-	  r = quote_string_for_globbing (p, QGLOB_CVTNULL);
+	  r = quote_string_for_globbing (p, qflags);
 	  free (p);
 	}
       dispose_words (l);

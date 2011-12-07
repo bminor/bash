@@ -110,6 +110,31 @@ unquoted_glob_pattern_p (string)
   return (0);
 }
 
+static inline int
+ere_char (c)
+     int c;
+{
+  switch (c)
+    {
+    case '.':
+    case '[':
+    case '\\':
+    case '(':
+    case ')':
+    case '*':
+    case '+':
+    case '?':
+    case '{':
+    case '|':
+    case '^':
+    case '$':
+      return 1;
+    default: 
+      return 0;
+    }
+  return (0);
+}
+
 /* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
    that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
@@ -141,6 +166,8 @@ quote_string_for_globbing (pathname, qflags)
       if (pathname[i] == CTLESC)
 	{
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
+	    continue;
+	  if ((qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
 	    continue;
 	  temp[j++] = '\\';
 	  i++;
