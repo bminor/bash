@@ -15120,6 +15120,14 @@ builtins/read.def
 	  the argument to the -u option (default 0).  Fix for bug reported
 	  by b_bashbug@thebellsplace.com
 
-doc/bashref.texi, lib/readline/doc/{history,rlman,rluser}.texi
+doc/bashref.texi, lib/readline/doc/{history,rlman,rluser,rluserman}.texi
 	- Slight changes to conform to the latest FSF documentation standards.
 	  Patch from Karl Berry <karl@freefriends.org>
+
+				   12/20
+				   -----
+execute_cmd.c
+	- after calling clear_unwind_protect_list, make sure we reset
+	  parse_and_execute_level to 0, since there's nothing left to
+	  restore it if top_level_cleanup tests it.  Fixes bug reported
+	  by Len Lattanzi <llattanzi@apple.com>

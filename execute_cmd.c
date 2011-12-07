@@ -3915,6 +3915,8 @@ initialize_subshell ()
     shell_variables = shell_variables->down;
 
   clear_unwind_protect_list (0);
+  /* XXX -- are there other things we should be resetting here? */
+  parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
   variable_context = return_catch_flag = 0;

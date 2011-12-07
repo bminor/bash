@@ -62,6 +62,33 @@ extern int errno;
 #  define NULL 0
 #endif
 
+/* If the d_fileno member of a struct dirent doesn't return anything useful,
+   we need to check inode number equivalence the hard way.  Return 1 if
+   the inode corresponding to PATH/DIR is identical to THISINO. */
+#if defined (BROKEN_DIRENT_D_INO)
+static int
+_path_checkino (dotp, name, thisino)
+     char *dotp;
+     char *name;
+     ino_t thisino;
+{
+  char *fullpath;
+  int r, e;
+  struct stat st;
+
+  e = errno;
+  fullpath = sh_makepath (dotp, name, MP_RMDOT);
+  if (stat (fullpath, &st) < 0)
+    {
+      errno = e;
+      return 0;
+    }
+  free (fullpath);
+  errno = e;
+  return (st.st_ino == thisino);
+}
+#endif
+    
 /* Get the pathname of the current working directory,
    and put it in SIZE bytes of BUF.  Returns NULL if the
    directory couldn't be determined or SIZE was too small.
@@ -173,7 +200,11 @@ getcwd (buf, size)
 	      (d->d_name[1] == '\0' ||
 		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
 	    continue;
+#if !defined (BROKEN_DIRENT_D_INO)
 	  if (mount_point || d->d_fileno == thisino)
+#else
+	  if (mount_point || _path_checkino (dotp, d->d_name, thisino))
+#endif
 	    {
 	      char *name;
 

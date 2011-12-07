@@ -778,6 +778,11 @@ do_redirection_internal (redirect, flags)
 	      fflush (stdout);
 	      fpurge (stdout);
 	    }
+	  else if (redirector == 2 && fileno (stderr) == redirector)
+	    {
+	      fflush (stderr);
+	      fpurge (stderr);
+	    }
 
 	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
 	    return (errno);

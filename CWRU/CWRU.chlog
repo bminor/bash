@@ -15123,3 +15123,23 @@ builtins/read.def
 doc/bashref.texi, lib/readline/doc/{history,rlman,rluser,rluserman}.texi
 	- Slight changes to conform to the latest FSF documentation standards.
 	  Patch from Karl Berry <karl@freefriends.org>
+
+				   12/20
+				   -----
+execute_cmd.c
+	- after calling clear_unwind_protect_list, make sure we reset
+	  parse_and_execute_level to 0, since there's nothing left to
+	  restore it if top_level_cleanup tests it.  Fixes bug reported
+	  by Len Lattanzi <llattanzi@apple.com>
+
+				   12/31
+				   -----
+lib/sh/getcwd.c
+	- new function, _path_checkino, checks whether the inode corresponding
+	  to the path constructed from the first two arguments is the same as
+	  the inode number passed as the third argument
+	- if BROKEN_DIRENT_D_INO is defined, meaning the d_ino/d_fileno
+	  member of struct dirent doesn't contain valid values, use
+	  _path_checkino instead of directly comparing against d_fileno.
+	  Fixes Interix problem reported by Michael Haubenwallner
+	  <haubi@gentoo.org>
