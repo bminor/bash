@@ -53,6 +53,8 @@
 #  include <unistd.h>
 #endif
 
+#include <ctype.h>
+
 #if defined (__EMX__)
 #  undef HAVE_MMAP
 #endif
@@ -103,7 +105,7 @@ int history_write_timestamps = 0;
 
 /* Does S look like the beginning of a history timestamp entry?  Placeholder
    for more extensive tests. */
-#define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char)
+#define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((s)[1]) )
 
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the

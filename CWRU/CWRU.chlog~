@@ -14171,5 +14171,103 @@ doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
 
 [many files]
 	- changes to make variables and function parameters `const' for better
-	  text sharing
+	  text sharing.  Changes originally from Andreas Mohr
+	  <andi@rhlx01.fht-esslingen.de>
 
+				 1/4/2007
+				 --------
+lib/intl/Makefile.in
+	- use cmp before copying libgnuintl.h to libintl.h -- maybe save a few
+	  rebuilds
+
+lib/builtins/Makefile
+	- fixes to build LIBINTL_H if necessary, dependency on this for
+	  mkbuiltins.o prevented `make -j 6' from working correctly
+
+				    1/8
+				    ---
+subst.c
+	- new function, fifos_pending(), returns the count of FIFOs in
+	  fifo_list (process substitution)
+
+subst.h
+	- extern declaration for fifos_pending()
+
+execute_cmd.c
+	- in execute_simple_command, if CMD_NO_FORK is set before we call
+	  execute_disk_command, make sure there are no FIFOs in the expanded
+	  words (from process substitution) and turn off CMD_NO_FORK if there
+	  are, so they can get unlinked when the command finishes
+
+				   1/10
+				   ----
+subst.c
+	- read_comsub now takes a flags parameter and returns appropriate W_*
+	  flags in it
+	- command_substitute now returns a WORD_DESC *, with the string it used
+	  to return as the `word' and `flags' filled in appropriately
+
+subst.h
+	- changed extern declaration for command_substitute
+
+{pcomplete,subst}.c
+	- changed callers of command_substitute appropriately
+
+subst.c
+	- string_extract_verbatim now takes an additional int flags argument;
+	  changed callers
+
+				   1/11
+				   ----
+support/texi2html
+	- fix problem that caused index links to not be generated if the first
+	  index node had a name different than the node name
+
+doc/bashref.texi
+	- encapsulated all indexes into a single `Indexes' appendix; works
+	  around bug fixed in texi2html
+
+				   1/12
+				   ----
+subst.c
+	- add call to sv_histtimefmt in initialize_variables so HISTTIMEFORMAT
+	  rom the environment is honored.  Fix from Ark Submedes (heh)
+	  <archimerged@gmail.com>
+
+lib/readline/histfile.c
+	- make sure that the first character following the history comment
+	  character at the beginning of a line is a digit before interpreting
+	  it as a timestamp for the previous line
+
+doc/{bash.1,bashref.texi},lib/readline/doc/hsuser.texi
+	- added detail to make it clear exactly how history timestamps are
+	  saved to and read from the history file
+
+subst.c
+	- change quote_escapes to add CTLESC before spaces if IFS is null,
+	  just in case we have to split on literal spaces later on (e.g., in
+	  case of unquoted $@).  Corresponding changes to dequote_escapes.
+	  Fixes a couple of problems reported by Brett Stahlman
+	  <brettstahlman@comcast.net>
+
+				   1/14
+				   ----
+subst.c
+	- make same change to read_comsub to add CTLESC before ' ' if $IFS is
+	  null, since we will split on literal spaces later
+
+				   1/15
+				   ----
+array.c
+	- new function, array_quote_escapes (ARRAY *a), calls quote_escapes
+	  on each element of the array in the same way array_quote calls
+	  quote_string
+	- call array_quote_escapes if match is not quoted in array_patsub
+
+array.h
+	- new extern declaration for array_quote_escapes
+
+subst.c
+	- since array_patsub now calls quote_escapes as necessary, callers
+	  don't need to call it after array_patsub returns.  Fixes first bug
+	  reported by Brett Stahlman <brettstahlman@comcast.net>

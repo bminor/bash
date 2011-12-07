@@ -3071,6 +3071,11 @@ run_builtin:
   if (command_line == 0)
     command_line = savestring (the_printed_command_except_trap);
 
+#if defined (PROCESS_SUBSTITUTION)
+  if ((subshell_environment & SUBSHELL_COMSUB) && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
+    simple_command->flags &= ~CMD_NO_FORK;
+#endif
+
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			simple_command->flags);

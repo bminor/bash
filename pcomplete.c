@@ -1084,6 +1084,7 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
   char *csbuf, *cscmd, *t;
   int cmdlen, cmdsize, n, ws, we;
   WORD_LIST *cmdlist, *cl;
+  WORD_DESC *tw;
   STRINGLIST *sl;
 
   bind_compfunc_variables (line, ind, lwords, cw, 1);
@@ -1115,7 +1116,9 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
     }
   cscmd[cmdlen] = '\0';
 
-  csbuf = command_substitute (cscmd, 0);
+  tw = command_substitute (cscmd, 0);
+  csbuf = tw ? tw->word : (char *)NULL;
+  dispose_word_desc (tw);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);

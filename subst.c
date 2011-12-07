@@ -216,7 +216,7 @@ static SHELL_VAR *do_compound_assignment __P((char *, char *, int));
 #endif
 static int do_assignment_internal __P((const WORD_DESC *, int));
 
-static char *string_extract_verbatim __P((char *, size_t, int *, char *));
+static char *string_extract_verbatim __P((char *, size_t, int *, char *, int));
 static char *string_extract __P((char *, int *, char *, int));
 static char *string_extract_double_quoted __P((char *, int *, int));
 static inline char *string_extract_single_quoted __P((char *, int *));
@@ -254,7 +254,7 @@ static char *parameter_brace_remove_pattern __P((char *, char *, char *, int, in
 
 static char *process_substitute __P((char *, int));
 
-static char *read_comsub __P((int, int));
+static char *read_comsub __P((int, int, int *));
 
 #ifdef ARRAY_VARS
 static arrayind_t array_length_reference __P((char *));
@@ -886,11 +886,12 @@ skip_single_quoted (string, slen, sind)
 /* Just like string_extract, but doesn't hack backslashes or any of
    that other stuff.  Obeys CTLESC quoting.  Used to do splitting on $IFS. */
 static char *
-string_extract_verbatim (string, slen, sindex, charlist)
+string_extract_verbatim (string, slen, sindex, charlist, flags)
      char *string;
      size_t slen;
      int *sindex;
      char *charlist;
+     int flags;
 {
   register int i = *sindex;
 #if defined (HANDLE_MULTIBYTE)
@@ -1887,7 +1888,13 @@ string_list_dollar_at (list, quoted)
   sep[1] = '\0';
 #endif
 
+  /* XXX -- why call quote_list if ifs == 0?  we can get away without doing
+     it now that quote_escapes quotes spaces */
+#if 0
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
+#else
+  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+#endif
 		? quote_list (list)
 		: list_quote_escapes (list);
 
@@ -1973,7 +1980,7 @@ list_string (string, separators, quoted)
     {
       /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
 	 unless multibyte chars are possible. */
-      current_word = string_extract_verbatim (string, slen, &sindex, separators);
+      current_word = string_extract_verbatim (string, slen, &sindex, separators, 0);
       if (current_word == 0)
 	break;
 
@@ -2096,7 +2103,7 @@ get_word_from_string (stringp, separators, endptr)
   /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
      unless multibyte chars are possible. */
   slen = (MB_CUR_MAX > 1) ? strlen (s) : 1;
-  current_word = string_extract_verbatim (s, slen, &sindex, separators);
+  current_word = string_extract_verbatim (s, slen, &sindex, separators, 0);
 
   /* Set ENDPTR to the first character after the end of the word. */
   if (endptr)
@@ -2922,7 +2929,12 @@ expand_string (string, quoted)
 
 /* Quote escape characters in string s, but no other characters.  This is
    used to protect CTLESC and CTLNUL in variable values from the rest of
-   the word expansion process after the variable is expanded. */
+   the word expansion process after the variable is expanded.  If IFS is
+   null, we quote spaces as well, just in case we split on spaces later
+   (in the case of unquoted $@, we will eventually attempt to split the
+   entire word on spaces).  Corresponding code exists in dequote_escapes.
+   Even if we don't end up splitting on spaces, quoting spaces is not a
+   problem. */
 char *
 quote_escapes (string)
      char *string;
@@ -2930,17 +2942,19 @@ quote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
+  int quote_spaces;
   DECLARE_MBSTATE; 
 
   slen = strlen (string);
   send = string + slen;
 
+  quote_spaces = (ifs_value && *ifs_value == 0);
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
 
   while (*s)
     {
-      if (*s == CTLESC || *s == CTLNUL)
+      if (*s == CTLESC || *s == CTLNUL || (quote_spaces && *s == ' '))
 	*t++ = CTLESC;
       COPY_CHAR_P (t, s, send);
     }
@@ -2982,6 +2996,7 @@ dequote_escapes (string)
   register char *s, *t;
   size_t slen;
   char *result, *send;
+  int quote_spaces;
   DECLARE_MBSTATE;
 
   if (string == 0)
@@ -2996,9 +3011,10 @@ dequote_escapes (string)
   if (strchr (string, CTLESC) == 0)
     return (strcpy (result, s));
 
+  quote_spaces = (ifs_value && *ifs_value == 0);
   while (*s)
     {
-      if (*s == CTLESC && (s[1] == CTLESC || s[1] == CTLNUL))
+      if (*s == CTLESC && (s[1] == CTLESC || s[1] == CTLNUL || (quote_spaces && s[1] == ' ')))
 	{
 	  s++;
 	  if (*s == '\0')
@@ -4129,6 +4145,12 @@ unlink_fifo_list ()
     nfifo = 0;
 }
 
+int
+fifos_pending ()
+{
+  return nfifo;
+}
+
 static char *
 make_named_pipe ()
 {
@@ -4176,6 +4198,12 @@ add_fifo_list (fd)
 
   dev_fd_list[fd] = 1;
   nfds++;
+}
+
+int
+fifos_pending ()
+{
+  return 0;	/* used for cleanup; not needed with /dev/fd */
 }
 
 void
@@ -4423,21 +4451,23 @@ process_substitute (string, open_for_read_in_child)
 /***********************************/
 
 static char *
-read_comsub (fd, quoted)
+read_comsub (fd, quoted, rflag)
      int fd, quoted;
+     int *rflag;
 {
   char *istring, buf[128], *bufp;
-  int istring_index, istring_size, c;
+  int istring_index, istring_size, c, tflag;
   ssize_t bufn;
 
   istring = (char *)NULL;
-  istring_index = istring_size = bufn = 0;
+  istring_index = istring_size = bufn = tflag = 0;
 
 #ifdef __CYGWIN__
   setmode (fd, O_TEXT);		/* we don't want CR/LF, we want Unix-style */
 #endif
 
-  /* Read the output of the command through the pipe. */
+  /* Read the output of the command through the pipe.  This may need to be
+     changed to understand multibyte characters in the future. */
   while (1)
     {
       if (fd < 0)
@@ -4462,7 +4492,18 @@ read_comsub (fd, quoted)
       /* Add the character to ISTRING, possibly after resizing it. */
       RESIZE_MALLOCED_BUFFER (istring, istring_index, 2, istring_size, DEFAULT_ARRAY_SIZE);
 
-      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || c == CTLESC || c == CTLNUL)
+      /* This is essentially quote_string inline */
+      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
+	istring[istring_index++] = CTLESC;
+      /* Escape CTLESC and CTLNUL in the output to protect those characters
+	 from the rest of the word expansions (word splitting and globbing.)
+	 This is essentially quote_escapes inline. */
+      else if (c == CTLESC)
+	{
+	  tflag |= W_HASCTLESC;
+	  istring[istring_index++] = CTLESC;
+	}
+      else if (c == CTLNUL || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
 
       istring[istring_index++] = c;
@@ -4486,6 +4527,8 @@ read_comsub (fd, quoted)
   if (istring_index == 0)
     {
       FREE (istring);
+      if (rflag)
+	*rflag = tflag;
       return (char *)NULL;
     }
 
@@ -4510,26 +4553,29 @@ read_comsub (fd, quoted)
   else
     strip_trailing (istring, istring_index - 1, 1);
 
+  if (rflag)
+    *rflag = tflag;
   return istring;
 }
 
-/* Perform command substitution on STRING.  This returns a string,
-   possibly quoted. */
-char *
+/* Perform command substitution on STRING.  This returns a WORD_DESC * with the
+   contained string possibly quoted. */
+WORD_DESC *
 command_substitute (string, quoted)
      char *string;
      int quoted;
 {
   pid_t pid, old_pid, old_pipeline_pgrp, old_async_pid;
   char *istring;
-  int result, fildes[2], function_value, pflags, rc;
+  int result, fildes[2], function_value, pflags, rc, tflag;
+  WORD_DESC *ret;
 
   istring = (char *)NULL;
 
   /* Don't fork () if there is no need to.  In the case of no command to
      run, just return NULL. */
   if (!string || !*string || (string[0] == '\n' && !string[1]))
-    return ((char *)NULL);
+    return ((WORD_DESC *)NULL);
 
   if (wordexp_only && read_but_dont_execute)
     {
@@ -4569,11 +4615,7 @@ command_substitute (string, quoted)
 #endif /* JOB_CONTROL */
 
   old_async_pid = last_asynchronous_pid;
-#if 0
-  pid = make_child ((char *)NULL, 0);
-#else
   pid = make_child ((char *)NULL, subshell_environment&SUBSHELL_ASYNC);
-#endif
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
@@ -4597,7 +4639,7 @@ command_substitute (string, quoted)
       FREE (istring);
       close (fildes[0]);
       close (fildes[1]);
-      return ((char *)NULL);
+      return ((WORD_DESC *)NULL);
     }
 
   if (pid == 0)
@@ -4671,6 +4713,9 @@ command_substitute (string, quoted)
 
       last_command_exit_value = rc;
       rc = run_exit_trap ();
+#if defined (PROCESS_SUBSTITUTION)
+      unlink_fifo_list ();
+#endif
       exit (rc);
     }
   else
@@ -4681,7 +4726,8 @@ command_substitute (string, quoted)
 
       close (fildes[1]);
 
-      istring = read_comsub (fildes[0], quoted);
+      tflag = 0;
+      istring = read_comsub (fildes[0], quoted, &tflag);
 
       close (fildes[0]);
 
@@ -4711,7 +4757,11 @@ command_substitute (string, quoted)
 	give_terminal_to (pipeline_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-      return (istring);
+      ret = alloc_word_desc ();
+      ret->word = istring;
+      ret->flags = tflag;
+
+      return ret;
     }
 }
 
@@ -4983,7 +5033,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
 
   /* If the entire expression is between double quotes, we want to treat
      the value as a double-quoted string, with the exception that we strip
-     embedded unescaped double quotes. */
+     embedded unescaped double quotes (for sh backwards compatibility). */
   if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *value)
     {
       hasdol = 0;
@@ -5554,12 +5604,16 @@ parameter_brace_substring (varname, value, substr, quoted)
 	 so verify_substring_values just returns the numbers specified and we
 	 rely on array_subrange to understand how to deal with them). */
       tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+#if 0
+      /* array_subrange now calls array_quote_escapes as appropriate, so the
+	 caller no longer needs to. */
       if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 	{
 	  temp = tt ? quote_escapes (tt) : (char *)NULL;
 	  FREE (tt);
 	}
       else
+#endif
 	temp = tt;
       break;
 #endif
@@ -5810,12 +5864,16 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       temp = array_patsub (array_cell (v), p, rep, mflags);
+#if 0
+      /* Don't need to do this anymore; array_patsub calls array_quote_escapes
+	 as appropriate before adding the space separators. */
       if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
 	  temp = tt;
 	}
+#endif
       break;
 #endif
     }
@@ -6578,7 +6636,11 @@ comsub:
 	/* we need zindex+1 because string[zindex] == RPAREN */
 	temp1 = substring (string, *sindex, zindex+1);
       else
-	temp1 = command_substitute (temp, quoted);
+	{
+	  tdesc = command_substitute (temp, quoted);
+	  temp1 = tdesc ? tdesc->word : (char *)NULL;
+	  dispose_word_desc (tdesc);
+	}
       FREE (temp);
       temp = temp1;
       break;
@@ -6986,7 +7048,9 @@ add_string:
 	    else
 	      {
 		de_backslash (temp);
-		temp1 = command_substitute (temp, quoted);
+		tword = command_substitute (temp, quoted);
+		temp1 = tword ? tword->word : (char *)NULL;
+		dispose_word_desc (tword);
 	      }
 	    FREE (temp);
 	    temp = temp1;
@@ -7512,11 +7576,7 @@ setifs (v)
   unsigned char uc;
 
   ifs_var = v;
-#if 0
-  ifs_value = v ? value_cell (v) : " \t\n";
-#else
   ifs_value = (v && value_cell (v)) ? value_cell (v) : " \t\n";
-#endif
 
   /* Should really merge ifs_cmap with sh_syntaxtab.  XXX - doesn't yet
      handle multibyte chars in IFS */

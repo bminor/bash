@@ -3564,9 +3564,14 @@ INPUT_LINE: while ($_ = &next_line) {
 		$name = &normalise_node($name);
 		$level = $sec2level{$tag};
 		# check for index
+#		$first_index_chapter = $name
 		$first_index_chapter = $node
 		  if ($level == 1 && !$first_index_chapter && 
 		      $name =~ /index/i);
+if ($level == 1 && $name =~ /index/i) {
+  print "# at level 1 found '" . $name . "' as matching index name (node = '" . $node . "')\n";
+  print "# first index chapter = '" . $first_index_chapter . "' \n";
+}
 		if ($in_top && /heading/){
 		    $T2H_HAS_TOP_HEADING = 1;
                     $_ = &debug("<H$level>$name</H$level>\n", __LINE__);
@@ -3624,6 +3629,8 @@ INPUT_LINE: while ($_ = &next_line) {
 		  $node2sec{$node} = $name;
 		  $sec2node{$name} = $node;
 		  $node2href{$node} = "$docu_doc#$docid";
+print "# set node2href for '" . $node . "' (" . $name . ") to '" . $node2href{$node} . "'\n"
+  if ($node =~ /index/i);
 		  $node2next{$node} = $node_next;
 		  $node2prev{$node} = $node_prev;
 		  $node2up{$node} = $node_up;
@@ -4539,10 +4546,13 @@ if (! $T2H_HREF{Index} && $first_index_chapter)
 {
   $T2H_INDEX_CHAPTER = $first_index_chapter;
   $T2H_HREF{Index} = $node2href{$T2H_INDEX_CHAPTER};
+print "# Set Index HREF to '" . clean_name($T2H_INDEX_CHAPTER) . "' \n";
 }
 
 print "# Using '" . clean_name($T2H_INDEX_CHAPTER) . "' as index page\n"
   if ($T2H_VERBOSE && $T2H_HREF{Index});
+
+print "# Using '" . $T2H_HREF{Index} . "' as index href\n";
 
 %T2H_NAME =
   (

@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Dec 26 19:01:54 EST 2006
+.\"	Last Change: Fri Jan 12 16:29:22 EST 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 December 26" "GNU Bash-3.2"
+.TH BASH 1 "2007 January 12" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2005 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2005 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2007 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2007 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -1752,6 +1752,8 @@ for \fIstrftime\fP(3) to print the time stamp associated with each history
 entry displayed by the \fBhistory\fP builtin.
 If this variable is set, time stamps are written to the history file so
 they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
 .TP
 .B HOME
 The home directory of the current user; the default argument for the
@@ -5611,6 +5613,13 @@ is truncated, if necessary, to contain no more than
 the number of lines specified by the value of
 .SM
 .BR HISTFILESIZE .
+When the history file is read,
+lines beginning with the history comment character followed immediately
+by a digit are interpreted as timestamps for the preceding history line.
+These timestamps are optionally displayed depending on the value of the
+.SM
+.B HISTTIMEFORMAT
+variable.
 When an interactive shell exits, the last
 .SM
 .B $HISTSIZE
@@ -5631,7 +5640,16 @@ If
 .SM
 .B HISTFILE
 is unset, or if the history file is unwritable, the history is
-not saved.  After saving the history, the history file is truncated
+not saved.
+If the
+.SM
+.HISTTIMEFORMAT
+variable is set, time stamps are written to the history file, marked
+with the history comment character, so
+they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
+After saving the history, the history file is truncated
 to contain no more than
 .SM
 .B HISTFILESIZE
@@ -5765,6 +5783,9 @@ history expansion mechanism (see the description of
 .B histchars
 above under
 .BR "Shell Variables" ).
+The shell uses
+the history comment character to mark history timestamps when
+writing the history file.
 .SS Event Designators
 .PP
 An event designator is a reference to a command line entry in the
@@ -7169,7 +7190,11 @@ are added.
 .PD
 .PP
 If the \fBHISTTIMEFORMAT\fP is set, the time stamp information
-associated with each history entry is written to the history file.
+associated with each history entry is written to the history file,
+marked with the history comment character.
+When the history file is read, lines beginning with the history
+comment character followed immediately by a digit are interpreted
+as timestamps for the previous history line.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 \fIoffset\fP is supplied as an argument to \fB\-d\fP, or the

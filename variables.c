@@ -26,7 +26,7 @@
 
 #if defined (qnx)
 #  if defined (qnx6)
-#    include <sy/netmgr.h>
+#    include <sys/netmgr.h>
 #  else
 #    include <sys/vc.h>
 #  endif /* !qnx6 */
@@ -515,6 +515,7 @@ initialize_shell_variables (env, privmode)
     {
       sv_history_control ("HISTCONTROL");
       sv_histignore ("HISTIGNORE");
+      sv_histtimefmt ("HISTTIMEFORMAT");
     }
 #endif /* HISTORY */
 

@@ -354,10 +354,10 @@ int	starsub, quoted;
 
 	a2 = array_slice(a, h, p);
 
-	if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-		array_quote(a2);
+	if (mflags & MATCH_QUOTED)
+		array_quote (a2);
 	else
-		array_quote_escapes(a2);
+		array_quote_escapes (a2);
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
 		ifs = getifs();
@@ -393,9 +393,9 @@ int	mflags;
 	}
 
 	if (mflags & MATCH_QUOTED)
-		array_quote(a2);
+		array_quote (a2);
 	else
-		array_quote_escapes(a2);
+		array_quote_escapes (a2);
 	if (mflags & MATCH_STARSUB) {
 		ifs = getifs();
 		sifs[0] = ifs ? *ifs : '\0';
