@@ -480,11 +480,12 @@ print_one_completion (cmd, cs)
   SQPRINTARG (cs->suffix, "-S");
   SQPRINTARG (cs->filterpat, "-X");
 
+  SQPRINTARG (cs->command, "-C");
+
   /* simple arguments that don't require quoting */
   PRINTARG (cs->funcname, "-F");
-  PRINTARG (cs->command, "-C");
 
-  printf ("%s\n", cmd);
+  printf ("%s\n", x);
 
   return (0);
 }

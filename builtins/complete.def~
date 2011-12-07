@@ -73,8 +73,8 @@ static int print_cmd_completions __P((WORD_LIST *));
 
 static char *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 
-static struct _compacts {
-  char *actname;
+static const struct _compacts {
+  const char * const actname;
   int actflag;
   int actopt;
 } compacts[] = {
@@ -106,8 +106,8 @@ static struct _compacts {
 };
 
 /* This should be a STRING_INT_ALIST */
-static struct _compopt {
-  char *optname;
+const static struct _compopt {
+  const char * const optname;
   int optflag;
 } compopts[] = {
   { "bashdefault", COPT_BASHDEFAULT },
@@ -484,7 +484,9 @@ print_one_completion (cmd, cs)
   PRINTARG (cs->funcname, "-F");
   PRINTARG (cs->command, "-C");
 
-  printf ("%s\n", cmd);
+  x = sh_single_quote (cmd);
+  printf ("%s\n", x);
+  free (x);
 
   return (0);
 }

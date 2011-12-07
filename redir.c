@@ -766,6 +766,12 @@ do_redirection_internal (redirect, flags)
 	  check_bash_input (redirector);
 #endif
 
+	  /* Make sure there is no pending output before we change the state
+	     of the underlying file descriptor, since the builtins use stdio
+	     for output. */
+	  if (redirector == 1 && fileno (stdout) == redirector)
+	    fflush (stdout);
+
 	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
 	    return (errno);
 

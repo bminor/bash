@@ -119,7 +119,7 @@ ibuffer_space ()
   if (pop_index > push_index)
     return (pop_index - push_index - 1);
   else
-    return (ibuffer_len - (push_index - pop_index));
+    return (ibuffer_len - (push_index - pop_index) - 1);
 }
 
 /* Get a key from the buffer of characters to be read.

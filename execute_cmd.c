@@ -3496,13 +3496,18 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
       else
 	{
 	  r = execute_builtin (builtin, words, flags, 1);
+	  fflush (stdout);
 	  if (r == EX_USAGE)
 	    r = EX_BADUSAGE;
 	  exit (r);
 	}
     }
   else
-    exit (execute_function (var, words, flags, fds_to_close, async, 1));
+    {
+      r = execute_function (var, words, flags, fds_to_close, async, 1);
+      fflush (stdout);
+      exit (r);
+    }
 }
 
 /* Execute a builtin or function in the current shell context.  If BUILTIN
@@ -3562,6 +3567,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
     result = execute_function (var, words, flags, fds_to_close, 0, 0);
 
   /* We do this before undoing the effects of any redirections. */
+  fflush (stdout);
   if (ferror (stdout))
     clearerr (stdout);  
 

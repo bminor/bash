@@ -375,7 +375,7 @@ here_document_to_fd (redirectee, ri)
   char *filename;
   int r, fd, fd2;
 
-  fd = sh_mktmpfd ("sh-thd", MT_USERANDOM, &filename);
+  fd = sh_mktmpfd ("sh-thd", MT_USERANDOM|MT_USETMPDIR, &filename);
 
   /* If we failed for some reason other than the file existing, abort */
   if (fd < 0)

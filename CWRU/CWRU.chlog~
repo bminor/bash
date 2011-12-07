@@ -14515,6 +14515,24 @@ subst.c
 	- add call to top_level_cleanup in exp_jump_to_top_level to get things
 	  like unwind-protects and the loop levels cleaned up
 
-{arrayfunc,variables}.c
+{arrayfunc,expr,variables}.c
 	- add calls to top_level_cleanup before jump_to_top_level() 
 
+				   4/27
+				   ----
+builtins/complete.def
+	- make sure the `command' argument to the -C option is printed with
+	  single quotes, since multi-word commands will require them.  Bug
+	  reported by martin@snowplow.org
+
+execute_cmd.c
+	- change execute_builtin_or_function and execute_subshell_builtin_or_function
+	  to call fflush(stdout) after the builtin or function returns, to
+	  make sure that all output  is flushed before the call returns.  It
+	  matters on cygwin.  Fix suggested by Eric Blake <ebb9@byu.net>
+
+redir.c
+	- in do_redirection_internal, if the file descriptor being acted upon
+	  is the same one used by the stdout stream, call fflush(stdout) to
+	  make sure all output is flushed before changing the underlying fd
+	  out from underneath stdio.  Fix suggested by Eric Blake <ebb9@byu.net>

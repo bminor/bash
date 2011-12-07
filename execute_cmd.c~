@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -908,7 +908,7 @@ extern int timeval_to_cpu __P((struct timeval *, struct timeval *, struct timeva
 #define POSIX_TIMEFORMAT "real %2R\nuser %2U\nsys %2S"
 #define BASH_TIMEFORMAT  "\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS"
 
-static int precs[] = { 0, 100, 10, 1 };
+static const int precs[] = { 0, 100, 10, 1 };
 
 /* Expand one `%'-prefixed escape sequence from a time format string. */
 static int
@@ -2497,7 +2497,7 @@ execute_arith_command (arith_command)
 
 #if defined (COND_COMMAND)
 
-static char *nullstr = "";
+static char * const nullstr = "";
 
 static int
 execute_cond_node (cond)
@@ -2547,7 +2547,7 @@ execute_cond_node (cond)
       arg1 = cond_expand_word (cond->left->op, 0);
       if (arg1 == 0)
 	arg1 = nullstr;
-      arg2 = cond_expand_word (cond->right->op, patmatch||rmatch);
+      arg2 = cond_expand_word (cond->right->op, rmatch ? 2 : (patmatch ? 1 : 0));
       if (arg2 == 0)
 	arg2 = nullstr;
 
@@ -3071,6 +3071,11 @@ run_builtin:
   if (command_line == 0)
     command_line = savestring (the_printed_command_except_trap);
 
+#if defined (PROCESS_SUBSTITUTION)
+  if ((subshell_environment & SUBSHELL_COMSUB) && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
+    simple_command->flags &= ~CMD_NO_FORK;
+#endif
+
   execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			simple_command->flags);
@@ -3557,6 +3562,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
     result = execute_function (var, words, flags, fds_to_close, 0, 0);
 
   /* We do this before undoing the effects of any redirections. */
+  fflush (stdout);
   if (ferror (stdout))
     clearerr (stdout);  
 
