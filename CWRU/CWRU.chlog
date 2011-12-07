@@ -14381,3 +14381,47 @@ lib/readline/display.c
 	  the last invisible character in the prompt, since they both denote
 	  buffer indices when in a multibyte locale, whereas `dpos' is a
 	  display position
+
+				   3/13
+				   ----
+lib/readline/complete.c
+	- set rl_completion_append_character to the default (' ') in
+	  set_completion_defaults().  Fixes bug reported by David Emerson
+	  <demerson3x@angelbase.com>
+
+				   3/23
+				   ----
+builtins/evalfile.c
+	- make sure read() returns a value >= 0 before using it as an index
+	  into string[]
+	- use a variable of type `ssize_t' for return value from read()
+	- only try to read the entire contents of a regular file in one shot
+	  if the file size is less than SSIZE_MAX.  These fix problems
+	  reported by hooanon05@yahoo.co.jp.
+
+include/typemax.h
+	- define SSIZE_MAX as 32767 if it's not defined
+
+lib/readline/display.c
+	- in rl_redisplay() and update_line(), if redrawing the prompt because
+	  it contains invisible characters, make sure we redraw the character
+	  indicating a modified history line and take it into account when
+	  computing _rl_last_c_pos
+	- in update_line, if deleting characters and redrawing the new text,
+	  make sure we adjust _rl_last_c_pos by wrap_offset in a multibyte
+	  locale if the text we're drawing starts before or at the last
+	  invisible character in the prompt string.  Fixes bug reported on
+	  bug-readline by J Pelkey <pelkeyj@gmail.com>
+
+parse.y
+	- when adding at CTLESC character to the current token, do not
+	  escape it with CTLESC if pass_next_character indicates that the
+	  CTLESC was escaped by a backslash.  Fixes bug reported by
+	  Paul Bagshaw <paul.bagshaw@orange-ftgroup.com>.
+
+				   3/25
+				   ----
+lib/readline/text.c
+	- in rl_forward_char, short-circuit the loop if in emacs mode and
+	  rl_point == rl_end.  Fixes problem with multibyte locales
+	  reported by Len Lattanzi <llattanzi@apple.com>

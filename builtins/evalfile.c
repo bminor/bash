@@ -45,6 +45,8 @@
 #  include "../bashhist.h"
 #endif
 
+#include <typemax.h>
+
 #include "common.h"
 
 #if !defined (errno)
@@ -78,6 +80,7 @@ _evalfile (filename, flags)
   volatile int old_interactive;
   procenv_t old_return_catch;
   int return_val, fd, result, pflags;
+  ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
   size_t file_size;
@@ -147,26 +150,27 @@ file_error_and_exit:
   setmode (fd, O_TEXT);
 #endif
 
-  if (S_ISREG (finfo.st_mode))
+  if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
     {
       string = (char *)xmalloc (1 + file_size);
-      result = read (fd, string, file_size);
-      string[result] = '\0';
+      nr = read (fd, string, file_size);
+      if (nr >= 0)
+	string[nr] = '\0';
     }
   else
-    result = zmapfd (fd, &string, 0);
+    nr = zmapfd (fd, &string, 0);
 
   return_val = errno;
   close (fd);
   errno = return_val;
 
-  if (result < 0)		/* XXX was != file_size, not < 0 */
+  if (nr < 0)		/* XXX was != file_size, not < 0 */
     {
       free (string);
       goto file_error_and_exit;
     }
 
-  if (result == 0)
+  if (nr == 0)
     {
       free (string);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_SUCCESS : 1);

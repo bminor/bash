@@ -296,6 +296,12 @@ rl_forward_char (count, key)
 
   if (count > 0)
     {
+      if (rl_point == rl_end && EMACS_MODE())
+	{
+	  rl_ding ();
+	  return 0;
+	}
+
       point = _rl_find_next_mbchar (rl_line_buffer, rl_point, count, MB_FIND_NONZERO);
 
 #if defined (VI_MODE)

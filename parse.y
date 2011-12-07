@@ -1,6 +1,6 @@
 /* Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3376,7 +3376,7 @@ read_token_word (character)
       if (pass_next_character)
 	{
 	  pass_next_character = 0;
-	  goto got_character;
+	  goto got_escaped_character;
 	}
 
       cd = current_delimiter (dstack);
@@ -3650,11 +3650,13 @@ read_token_word (character)
 
     got_character:
 
-      all_digit_token &= DIGIT (character);
-      dollar_present |= character == '$';
-
       if (character == CTLESC || character == CTLNUL)
 	token[token_index++] = CTLESC;
+
+    got_escaped_character:
+
+      all_digit_token &= DIGIT (character);
+      dollar_present |= character == '$';
 
       token[token_index++] = character;
 

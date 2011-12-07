@@ -416,6 +416,7 @@ set_completion_defaults (what_to_do)
   rl_filename_quoting_desired = 1;
   rl_completion_type = what_to_do;
   rl_completion_suppress_append = rl_completion_suppress_quote = 0;
+  rl_completion_append_character = ' ';
 
   /* The completion entry function may optionally change this. */
   rl_completion_mark_symlink_dirs = _rl_complete_mark_symlink_dirs;

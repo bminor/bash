@@ -106,7 +106,7 @@ static int _rl_col_width PARAMS((const char *, int, int));
 /* _rl_last_c_pos is an absolute cursor position in multibyte locales and a
    buffer index in others.  This macro is used when deciding whether the
    current cursor position is in the middle of a prompt string containing
-   invisible characters. */
+   invisible characters.  XXX - might need to take `modmark' into account. */
 #define PROMPT_ENDING_INDEX \
   ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
   
@@ -213,6 +213,10 @@ static int prompt_invis_chars_first_line;
 static int prompt_last_screen_line;
 
 static int prompt_physical_chars;
+
+/* set to a non-zero value by rl_redisplay if we are marking modified history
+   lines and the current line is so marked. */
+static int modmark;
 
 /* Variables to save and restore prompt and display information. */
 
@@ -487,7 +491,7 @@ rl_redisplay ()
   register int in, out, c, linenum, cursor_linenum;
   register char *line;
   int inv_botlin, lb_botlin, lb_linenum, o_cpos;
-  int newlines, lpos, temp, modmark, n0, num;
+  int newlines, lpos, temp, n0, num;
   char *prompt_this_line;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
@@ -1043,11 +1047,14 @@ rl_redisplay ()
 	      if (_rl_term_cr)
 		tputs (_rl_term_cr, 1, _rl_output_character_function);
 #endif
+	      if (modmark)
+		_rl_output_some_chars ("*", 1);
+
 	      _rl_output_some_chars (local_prompt, nleft);
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft) - wrap_offset;
+		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft) - wrap_offset + modmark;
 	      else
-		_rl_last_c_pos = nleft;
+		_rl_last_c_pos = nleft + modmark;
 	    }
 
 	  /* Where on that line?  And where does that line start
@@ -1317,7 +1324,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
       /* See if the old line is a subset of the new line, so that the
 	 only change is adding characters. */
       temp = (omax < nmax) ? omax : nmax;
-      if (memcmp (old, new, temp) == 0)
+      if (memcmp (old, new, temp) == 0)		/* adding at the end */
 	{
 	  ofd = old + temp;
 	  nfd = new + temp;
@@ -1470,16 +1477,18 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 #else
       tputs (_rl_term_cr, 1, _rl_output_character_function);
 #endif
+      if (modmark)
+	_rl_output_some_chars ("*", 1);
       _rl_output_some_chars (local_prompt, lendiff);
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
 	  /* We take wrap_offset into account here so we can pass correct
 	     information to _rl_move_cursor_relative. */
-	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
+	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset + modmark;
 	  cpos_adjusted = 1;
 	}
       else
-	_rl_last_c_pos = lendiff;
+	_rl_last_c_pos = lendiff + modmark;
     }
 
   /* When this function returns, _rl_last_c_pos is correct, and an absolute
@@ -1615,9 +1624,20 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  temp = nls - nfd;
 	  if (temp > 0)
 	    {
+	      /* If nfd begins at the prompt, or before the invisible
+		 characters in the prompt, we need to adjust _rl_last_c_pos
+		 in a multibyte locale to account for the wrap offset and
+		 set cpos_adjusted accordingly. */
 	      _rl_output_some_chars (nfd, temp);
 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos += _rl_col_width (nfd, 0, temp);
+		{
+		  _rl_last_c_pos += _rl_col_width (nfd, 0, temp);
+		  if (current_line == 0 && wrap_offset &&  ((nfd - new) <= prompt_last_invisible))
+		    {
+		      _rl_last_c_pos -= wrap_offset;
+		      cpos_adjusted = 1;
+		    }
+		}
 	      else
 		_rl_last_c_pos += temp;
 	    }
@@ -1627,8 +1647,20 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	{
 	  if (temp > 0)
 	    {
+	      /* If nfd begins at the prompt, or before the invisible
+		 characters in the prompt, we need to adjust _rl_last_c_pos
+		 in a multibyte locale to account for the wrap offset and
+		 set cpos_adjusted accordingly. */
 	      _rl_output_some_chars (nfd, temp);
 	      _rl_last_c_pos += col_temp;		/* XXX */
+	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		{
+		  if (current_line == 0 && wrap_offset &&  ((nfd - new) <= prompt_last_invisible))
+		    {
+		      _rl_last_c_pos -= wrap_offset;
+		      cpos_adjusted = 1;
+		    }
+		}
 	    }
 	  lendiff = (oe - old) - (ne - new);
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)

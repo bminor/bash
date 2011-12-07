@@ -66,7 +66,7 @@
    in words, or 1 if it is. */
 
 int _rl_allow_pathname_alphabetic_chars = 0;
-static const char *pathname_alphabetic_chars = "/-_=~.#$";
+static const char * const pathname_alphabetic_chars = "/-_=~.#$";
 
 int
 rl_alphabetic (c)
@@ -278,6 +278,7 @@ _rl_errmsg (va_alist)
 
   va_end (args);
 }
+
 #else /* !USE_VARARGS */
 void
 _rl_ttymsg (format, arg1, arg2)
@@ -443,3 +444,58 @@ _rl_savestring (s)
 {
   return (strcpy ((char *)xmalloc (1 + (int)strlen (s)), (s)));
 }
+
+#if defined (USE_VARARGS)
+static FILE *_rl_tracefp;
+
+void
+#if defined (PREFER_STDARG)
+_rl_trace (const char *format, ...)
+#else
+_rl_trace (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  if (_rl_tracefp == 0)
+    _rl_tropen ();
+  vfprintf (_rl_tracefp, format, args);
+  fprintf (_rl_tracefp, "\n");
+  fflush (_rl_tracefp);
+
+  va_end (args);
+}
+
+int
+_rl_tropen ()
+{
+  char fnbuf[128];
+
+  sprintf (fnbuf, "/var/tmp/rltrace.%ld", getpid());
+  unlink(fnbuf);
+  _rl_tracefp = fopen (fnbuf, "w+");
+  return _rl_tracefp != 0;
+}
+
+int
+_rl_trclose ()
+{
+  int r;
+
+  r = fclose (_rl_tracefp);
+  _rl_tracefp = 0;
+  return r;
+}
+
+#endif
