@@ -93,3 +93,8 @@
 /* Define if you want the case-capitalizing operators (~[~]) and the
    `capcase' variable attribute (declare -c). */
 #define  CASEMOD_CAPCASE
+
+/* This is used as the name of a shell function to call when a command
+   name is not found.  If you want to name it something other than the
+   default ("command_not_found_handle"), change it here. */
+/* #define NOTFOUND_HOOK "command_not_found_handle" */

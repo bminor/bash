@@ -74,7 +74,7 @@ extern int allow_null_glob_expansion, fail_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
 extern int no_exit_on_failed_exec, print_shift_error;
 extern int check_hashed_filenames, promptvars;
-extern int cdspelling, dircomplete_spelling, expand_aliases;
+extern int cdspelling, expand_aliases;
 extern int extended_quote;
 extern int check_window_size;
 extern int glob_ignore_case, match_ignore_case;
@@ -93,6 +93,8 @@ extern int extended_glob;
 extern int hist_verify, history_reediting, perform_hostname_completion;
 extern int no_empty_command_completion;
 extern int force_fignore;
+extern int dircomplete_spelling;
+
 extern int enable_hostname_completion __P((int));
 #endif
 
@@ -142,7 +144,9 @@ static struct {
 #endif
   { "compat31", &shopt_compat31, set_compatibility_level },
   { "compat32", &shopt_compat32, set_compatibility_level },
+#if defined (READLINE)
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
+#endif
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
   { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
