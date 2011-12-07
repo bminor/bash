@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue May  1 10:05:17 EDT 2007
+.\"	Last Change: Fri Sep 14 13:44:37 EDT 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2007 May 1" "GNU Bash-3.2"
+.TH BASH 1 "2007 September 14" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7672,6 +7672,9 @@ any command in a pipeline but the last,
 or if the command's return value is
 being inverted via
 .BR ! .
+Failing simple commands that are part of shell functions or command lists
+enclosed in braces or parentheses satisfying the above conditions do not
+cause the shell to exit.
 A trap on \fBERR\fP, if set, is executed before the shell exits.
 .TP 8
 .B \-f

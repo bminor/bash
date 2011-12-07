@@ -42,6 +42,8 @@
 #include "../bashansi.h"
 #include "../bashintl.h"
 
+#define NEED_FPURGE_DECL
+
 #include "../shell.h"
 #include "maxpath.h"
 #include "../flags.h"
@@ -131,6 +133,7 @@ no_args (list)
   if (list)
     {
       builtin_error (_("too many arguments"));
+      top_level_cleanup ();
       jump_to_top_level (DISCARD);
     }
 }
@@ -198,7 +201,15 @@ void
 sh_invalidnum (s)
      char *s;
 {
-  builtin_error (_("%s: invalid number"), s);
+  char *msg;
+
+  if (*s == '0' && isdigit (s[1]))
+    msg = _("invalid octal number");
+  else if (*s == '0' && s[1] == 'x')
+    msg = _("invalid hex number");
+  else
+    msg = _("invalid number");
+  builtin_error ("%s: %s", s, msg);
 }
 
 void
@@ -274,6 +285,20 @@ void
 sh_wrerror ()
 {
   builtin_error (_("write error: %s"), strerror (errno));
+}
+
+int
+sh_chkwrite (s)
+{
+  fflush (stdout);
+  if (ferror (stdout))
+    {
+      sh_wrerror ();
+      fpurge (stdout);
+      clearerr (stdout);
+      return (EXECUTION_FAILURE);
+    }
+  return (s);
 }
 
 /* **************************************************************** */

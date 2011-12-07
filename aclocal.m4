@@ -3997,3 +3997,11 @@ AC_DEFUN([jm_AC_TYPE_UNSIGNED_LONG_LONG],
       [Define if you have the unsigned long long type.])
   fi
 ])
+
+dnl From gnulib
+AC_DEFUN([BASH_FUNC_FPURGE],
+[
+  AC_CHECK_FUNCS_ONCE([fpurge])
+  AC_CHECK_FUNCS_ONCE([__fpurge])
+  AC_CHECK_DECLS([fpurge], , , [#include <stdio.h>])
+])

@@ -14857,3 +14857,39 @@ stringlib.c
 	  even if the pattern and replacement strings are empty, and set
 	  to a copy of string (like ${foo//})
 	  Bug report from Timo Lindfors <timo.lindfors@iki.fi>
+
+				   9/10
+				   ----
+{config.h,Makefile,configure}.in,aclocal.m4
+	- new tests for fpurge and __fpurge
+
+lib/sh/fpurge.c, externs.h
+	- new file, fpurge(3) implementation with external decl in externs.h
+
+builtins/common.c
+	- add call to fpurge(stdout) to sh_chkwrite
+
+{redir,execute_cmd}.c
+	- add call to fpurge(stdout) after fflush(stdout) before changing
+	  stdout file descriptor and after a builtin or function executes
+
+				   9/12
+				   ----
+expr.c
+	- make sure noeval is set to 0 when a longjmp occurs, since it will
+	  not be reset otherwise, and it can be set to 1 while processing
+	  a {pre,post}-increment or {pre,post}-decrement token
+	- set noeval to 0 at the beginning of evalexp, since it's never
+	  called recursively
+
+				   9/14
+				   ----
+config-top.h
+	- new builder-modifiable define:  DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS
+	  Turning it on will cause errors from EPIPE to not be reported by
+	  the normal shell write error message mechanism
+
+builtins/common.c
+	- if DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS is defined, don't print an
+	  error message from sh_wrerror if errno == EPIPE.  Suggestion from
+	  Petr Sumbera <petr.sumbera@sun.com>

@@ -3730,6 +3730,9 @@ part of the test in an @code{if} statement,
 part of a @code{&&} or @code{||} list,
 any command in a pipeline but the last,
 or if the command's return status is being inverted using @code{!}.
+Failing simple commands that are part of shell functions or command lists
+enclosed in braces or parentheses satisfying the above conditions do not
+cause the shell to exit.
 A trap on @code{ERR}, if set, is executed before the shell exits.
 
 @item -f

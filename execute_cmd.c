@@ -3575,6 +3575,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
 
   /* We do this before undoing the effects of any redirections. */
   fflush (stdout);
+  fpurge (stdout);
   if (ferror (stdout))
     clearerr (stdout);  
 

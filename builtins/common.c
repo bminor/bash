@@ -42,6 +42,8 @@
 #include "../bashansi.h"
 #include "../bashintl.h"
 
+#define NEED_FPURGE_DECL
+
 #include "../shell.h"
 #include "maxpath.h"
 #include "../flags.h"
@@ -282,6 +284,9 @@ sh_notbuiltin (s)
 void
 sh_wrerror ()
 {
+#if defined (DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS) && defined (EPIPE)
+  if (errno != EPIPE)
+#endif /* DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS && EPIPE */
   builtin_error (_("write error: %s"), strerror (errno));
 }
 
@@ -292,6 +297,7 @@ sh_chkwrite (s)
   if (ferror (stdout))
     {
       sh_wrerror ();
+      fpurge (stdout);
       clearerr (stdout);
       return (EXECUTION_FAILURE);
     }

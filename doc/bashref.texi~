@@ -225,7 +225,7 @@ than by an executable program somewhere in the file system.
 
 @item control operator
 @cindex control operator
-A @code{word} that performs a control function.  It is a @code{newline}
+A @code{token} that performs a control function.  It is a @code{newline}
 or one of the following:
 @samp{||}, @samp{&&}, @samp{&}, @samp{;}, @samp{;;},
 @samp{|}, @samp{(}, or @samp{)}.
@@ -974,6 +974,8 @@ If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
+Any part of the pattern may be quoted to force it to be matched as a
+string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable @code{BASH_REMATCH}.
 The element of @code{BASH_REMATCH} with index 0 is the portion of the string

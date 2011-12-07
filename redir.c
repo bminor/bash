@@ -43,8 +43,10 @@ extern int errno;
 
 #include "bashansi.h"
 #include "bashintl.h"
-
 #include "memalloc.h"
+
+#define NEED_FPURGE_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include "execute_cmd.h"
@@ -772,7 +774,10 @@ do_redirection_internal (redirect, flags)
 	     of the underlying file descriptor, since the builtins use stdio
 	     for output. */
 	  if (redirector == 1 && fileno (stdout) == redirector)
-	    fflush (stdout);
+	    {
+	      fflush (stdout);
+	      fpurge (stdout);
+	    }
 
 	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
 	    return (errno);
