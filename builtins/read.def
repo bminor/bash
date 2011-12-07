@@ -87,6 +87,12 @@ $END
 extern int errno;
 #endif
 
+struct ttsave
+{
+  int fd;
+  TTYSTRUCT *attrs;
+};
+
 #if defined (READLINE)
 static void reset_attempted_completion_function __P((char *));
 static char *edit_line __P((char *));
@@ -97,6 +103,7 @@ static SHELL_VAR *bind_read_variable __P((char *, char *));
 #if defined (HANDLE_MULTIBYTE)
 static int read_mbchar __P((int, char *, int, int, int));
 #endif
+static void ttyrestore __P((struct ttsave *));
 
 static sighandler sigalrm __P((int));
 static void reset_alarm __P((void));
@@ -140,6 +147,8 @@ read_builtin (list)
   char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
   SHELL_VAR *var;
+  TTYSTRUCT ttattrs, ttset;
+  struct ttsave termsave;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
 #endif
@@ -366,19 +375,30 @@ read_builtin (list)
 #endif
       if (input_is_tty)
 	{
-	  ttsave ();
+	  /* ttsave() */
+	  termsave.fd = fd;
+	  ttgetattr (fd, &ttattrs);
+	  termsave.attrs = &ttattrs;
+
+	  ttset = ttattrs;	  
 	  if (silent)
-	    ttcbreak ();
+	    ttfd_cbreak (fd, &ttset);		/* ttcbreak () */
 	  else
-	    ttonechar ();
-	  add_unwind_protect ((Function *)ttrestore, (char *)NULL);
+	    ttfd_onechar (fd, &ttset);		/* ttonechar () */
+	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
 	}
     }
   else if (silent)	/* turn off echo but leave term in canonical mode */
     {
-      ttsave ();
-      ttnoecho ();
-      add_unwind_protect ((Function *)ttrestore, (char *)NULL);
+      /* ttsave (); */
+      termsave.fd = fd;
+      ttgetattr (fd, &ttattrs);
+      termsave.attrs = &ttattrs;
+
+      ttset = ttattrs;
+      ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
+
+      add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
     }
 
   /* This *must* be the top unwind-protect on the stack, so the manipulation
@@ -531,10 +551,10 @@ add_char:
       else
 #endif
       if (input_is_tty)
-	ttrestore ();
+	ttyrestore (&termsave);
     }
   else if (silent)
-    ttrestore ();
+    ttyrestore (&termsave);
 
   if (unbuffered_read == 0)
     zsyncfd (fd);
@@ -783,6 +803,14 @@ mbchar_return:
   return i - 1;
 }
 #endif
+
+
+static void
+ttyrestore (ttp)
+     struct ttsave *ttp;
+{
+  ttsetattr (ttp->fd, ttp->attrs);
+}
 
 #if defined (READLINE)
 static rl_completion_func_t *old_attempted_completion_function = 0;

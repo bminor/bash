@@ -15095,9 +15095,31 @@ subst.c
 include/shtty.h, lib/sh/shtty.c
 	- add ttfd_onechar, ttfd_noecho, ttfd_eightbit, ttfd_nocanon, and
 	  ttfd_cbreak to set tty attributes associated with a particular
-	  file descriptor (which is presumed to point to a terminal)
+	  file descriptor (which is presumed to point to a terminal).  Support
+	  for fix for bug reported by b_bashbug@thebellsplace.com
 
 lib/readline/display.c
 	- make sure we only use rl_invis_chars_first_line when the number of
 	  physical characters exceeds the screen width, since that's the
 	  only time expand_prompt sets it to a valid value
+
+				   12/12
+				   -----
+builtins/set.def
+	- change set_minus_o_option to return EX_USAGE if an invalid option
+	  name is supplied.  All callers can handle it.
+	- change set_builtin to return what set_minus_o_option returns if it's
+	  not EXECUTION_SUCCESS.  This allows EX_USAGE errors to abort a
+	  shell running in posix mode
+
+				   12/14
+				   -----
+builtins/read.def
+	- generalize the calls to the tty attribute functions to maintain a
+	  local copy of the terminal attributes and use the fd supplied as
+	  the argument to the -u option (default 0).  Fix for bug reported
+	  by b_bashbug@thebellsplace.com
+
+doc/bashref.texi, lib/readline/doc/{history,rlman,rluser,rluserman}.texi
+	- Slight changes to conform to the latest FSF documentation standards.
+	  Patch from Karl Berry <karl@freefriends.org>

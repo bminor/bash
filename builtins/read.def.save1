@@ -87,6 +87,12 @@ $END
 extern int errno;
 #endif
 
+struct ttsave
+{
+  int fd;
+  TTYSTRUCT *attrs;
+};
+
 #if defined (READLINE)
 static void reset_attempted_completion_function __P((char *));
 static char *edit_line __P((char *));
@@ -94,6 +100,10 @@ static void set_eol_delim __P((int));
 static void reset_eol_delim __P((char *));
 #endif
 static SHELL_VAR *bind_read_variable __P((char *, char *));
+#if defined (HANDLE_MULTIBYTE)
+static int read_mbchar __P((int, char *, int, int, int));
+#endif
+static void ttyrestore __P((struct ttsave *));
 
 static sighandler sigalrm __P((int));
 static void reset_alarm __P((void));
@@ -134,9 +144,11 @@ read_builtin (list)
   intmax_t intval;
   char c;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
-  char *e, *t, *t1, *ps2;
+  char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
   SHELL_VAR *var;
+  TTYSTRUCT ttattrs;
+  struct ttsave termsave;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
 #endif
@@ -441,7 +453,7 @@ read_builtin (list)
 	}
 #endif
 
-      if (i + 2 >= size)
+      if (i + 4 >= size)	/* XXX was i + 2; use i + 4 for multibyte/read_mbchar */
 	{
 	  input_string = (char *)xrealloc (input_string, size += 128);
 	  remove_unwind_protect ();
@@ -487,6 +499,15 @@ read_builtin (list)
 
 add_char:
       input_string[i++] = c;
+
+#if defined (HANDLE_MULTIBYTE)
+      if (nchars > 0 && MB_CUR_MAX > 1)
+	{
+	  input_string[i] = '\0';	/* for simplicity and debugging */
+	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
+	}
+#endif
+
       nr++;
 
       if (nchars > 0 && nr >= nchars)
@@ -680,12 +701,13 @@ add_char:
 #else
   /* Check whether or not the number of fields is exactly the same as the
      number of variables. */
+  tofree = NULL;
   if (*input_string)
     {
       t1 = input_string;
       t = get_word_from_string (&input_string, ifs_chars, &e);
       if (*input_string == 0)
-	input_string = t;
+	tofree = input_string = t;
       else
 	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
     }
@@ -700,6 +722,8 @@ add_char:
   else
     var = bind_read_variable (list->word->word, input_string);
   stupidly_hack_special_variables (list->word->word);
+  FREE (tofree);
+
   if (var)
     VUNSETATTR (var, att_invisible);
   xfree (orig_input_string);
@@ -719,6 +743,61 @@ bind_read_variable (name, value)
 #else /* !ARRAY_VARS */
   return bind_variable (name, value, 0);
 #endif /* !ARRAY_VARS */
+}
+
+#if defined (HANDLE_MULTIBYTE)
+static int
+read_mbchar (fd, string, ind, ch, unbuffered)
+     int fd;
+     char *string;
+     int ind, ch, unbuffered;
+{
+  char mbchar[MB_LEN_MAX + 1];
+  int i, n, r;
+  char c;
+  size_t ret;
+  mbstate_t ps, ps_back;
+  wchar_t wc;
+
+  memset (&ps, '\0', sizeof (mbstate_t));
+  memset (&ps_back, '\0', sizeof (mbstate_t));
+  
+  mbchar[0] = ch;
+  i = 1;
+  for (n = 0; n <= MB_LEN_MAX; n++)
+    {
+      ps_back = ps;
+      ret = mbrtowc (&wc, mbchar, i, &ps);
+      if (ret == (size_t)-2)
+	{
+	  ps = ps_back;
+	  if (unbuffered)
+	    r = zread (fd, &c, 1);
+	  else
+	    r = zreadc (fd, &c);
+	  if (r < 0)
+	    goto mbchar_return;
+	  mbchar[i++] = c;	
+	  continue;
+	}
+      else if (ret == (size_t)-1 || ret == (size_t)0 || ret > (size_t)0)
+	break;
+    }
+
+mbchar_return:
+  if (i > 1)	/* read a multibyte char */
+    /* mbchar[0] is already string[ind-1] */
+    for (r = 1; r < i; r++)
+      string[ind+r-1] = mbchar[r];
+  return i - 1;
+}
+#endif
+
+static void
+ttyrestore (ttp)
+     struct ttsave *ttp;
+{
+  ttsetattr (ttp->fd, ttp->attrs);
 }
 
 #if defined (READLINE)

@@ -10,7 +10,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988-2006 Free Software Foundation, Inc.
+Copyright (C) 1988--2007 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -471,7 +471,8 @@ attempts word completion.  The default is @samp{off}.
 
 @item history-preserve-point
 @vindex history-preserve-point
-If set to @samp{on}, the history code attempts to place point at the
+If set to @samp{on}, the history code attempts to place the point (the
+current cursor position) at the
 same location on each history line retrieved with @code{previous-history}
 or @code{next-history}.  The default is @samp{off}.
 
@@ -1560,8 +1561,8 @@ completed, and the matching words become the possible completions.
 After these matches have been generated, any shell function or command
 specified with the @option{-F} and @option{-C} options is invoked.
 When the command or function is invoked, the @env{COMP_LINE},
-@env{COMP_POINT}, and @env{COMP_TYPE} variables are assigned values
-as described above (@pxref{Bash Variables}).
+@env{COMP_POINT}, @env{COMP_KEY}, and @env{COMP_TYPE} variables are
+assigned values as described above (@pxref{Bash Variables}).
 If a shell function is being invoked, the @env{COMP_WORDS} and
 @env{COMP_CWORD} variables are also set.
 When the function or command is invoked, the first argument is the

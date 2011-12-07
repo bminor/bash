@@ -425,7 +425,7 @@ set_minus_o_option (on_or_off, option_name)
     }
 
   sh_invalidoptname (option_name);
-  return (EXECUTION_FAILURE);
+  return (EX_USAGE);
 }
 
 static void
@@ -580,7 +580,7 @@ int
 set_builtin (list)
      WORD_LIST *list;
 {
-  int on_or_off, flag_name, force_assignment, opts_changed, rv;
+  int on_or_off, flag_name, force_assignment, opts_changed, rv, r;
   register char *arg;
   char s[3];
 
@@ -669,10 +669,10 @@ set_builtin (list)
 		  list = list->next; /* Skip over option name. */
 
 		  opts_changed = 1;
-		  if (set_minus_o_option (on_or_off, option_name) != EXECUTION_SUCCESS)
+		  if ((r = set_minus_o_option (on_or_off, option_name)) != EXECUTION_SUCCESS)
 		    {
 		      set_shellopts ();
-		      return (EXECUTION_FAILURE);
+		      return (r);
 		    }
 		}
 	      else if (change_flag (flag_name, on_or_off) == FLAG_ERROR)
