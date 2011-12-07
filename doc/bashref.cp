@@ -54,65 +54,65 @@
 \entry{expansion, arithmetic}{22}{expansion, arithmetic}
 \entry{arithmetic expansion}{22}{arithmetic expansion}
 \entry{process substitution}{22}{process substitution}
-\entry{word splitting}{22}{word splitting}
+\entry{word splitting}{23}{word splitting}
 \entry{expansion, filename}{23}{expansion, filename}
 \entry{expansion, pathname}{23}{expansion, pathname}
 \entry{filename expansion}{23}{filename expansion}
 \entry{pathname expansion}{23}{pathname expansion}
-\entry{pattern matching}{23}{pattern matching}
-\entry{matching, pattern}{23}{matching, pattern}
+\entry{pattern matching}{24}{pattern matching}
+\entry{matching, pattern}{24}{matching, pattern}
 \entry{redirection}{25}{redirection}
 \entry{command expansion}{28}{command expansion}
 \entry{command execution}{29}{command execution}
 \entry{command search}{29}{command search}
-\entry{execution environment}{29}{execution environment}
-\entry{environment}{30}{environment}
+\entry{execution environment}{30}{execution environment}
+\entry{environment}{31}{environment}
 \entry{exit status}{31}{exit status}
 \entry{signal handling}{31}{signal handling}
 \entry{shell script}{32}{shell script}
-\entry{special builtin}{56}{special builtin}
-\entry{login shell}{69}{login shell}
-\entry{interactive shell}{69}{interactive shell}
-\entry{startup files}{69}{startup files}
+\entry{special builtin}{57}{special builtin}
+\entry{login shell}{71}{login shell}
 \entry{interactive shell}{71}{interactive shell}
-\entry{shell, interactive}{71}{shell, interactive}
-\entry{expressions, conditional}{73}{expressions, conditional}
-\entry{arithmetic, shell}{74}{arithmetic, shell}
-\entry{shell arithmetic}{74}{shell arithmetic}
-\entry{expressions, arithmetic}{74}{expressions, arithmetic}
-\entry{evaluation, arithmetic}{74}{evaluation, arithmetic}
-\entry{arithmetic evaluation}{74}{arithmetic evaluation}
-\entry{alias expansion}{75}{alias expansion}
-\entry{arrays}{76}{arrays}
-\entry{directory stack}{77}{directory stack}
-\entry{prompting}{79}{prompting}
-\entry{restricted shell}{80}{restricted shell}
-\entry{POSIX Mode}{80}{POSIX Mode}
-\entry{job control}{85}{job control}
-\entry{foreground}{85}{foreground}
-\entry{background}{85}{background}
-\entry{suspending jobs}{85}{suspending jobs}
-\entry{Readline, how to use}{88}{Readline, how to use}
-\entry{interaction, readline}{89}{interaction, readline}
-\entry{notation, readline}{89}{notation, readline}
-\entry{command editing}{89}{command editing}
-\entry{editing command lines}{89}{editing command lines}
-\entry{killing text}{91}{killing text}
-\entry{yanking text}{91}{yanking text}
-\entry{kill ring}{91}{kill ring}
-\entry{initialization file, readline}{92}{initialization file, readline}
-\entry{variables, readline}{93}{variables, readline}
-\entry{programmable completion}{109}{programmable completion}
-\entry{completion builtins}{111}{completion builtins}
-\entry{History, how to use}{114}{History, how to use}
-\entry{command history}{115}{command history}
-\entry{history list}{115}{history list}
-\entry{history builtins}{115}{history builtins}
-\entry{history expansion}{117}{history expansion}
-\entry{event designators}{117}{event designators}
-\entry{history events}{117}{history events}
-\entry{installation}{121}{installation}
-\entry{configuration}{121}{configuration}
-\entry{Bash installation}{121}{Bash installation}
-\entry{Bash configuration}{121}{Bash configuration}
-\entry{FDL, GNU Free Documentation License}{137}{FDL, GNU Free Documentation License}
+\entry{startup files}{71}{startup files}
+\entry{interactive shell}{73}{interactive shell}
+\entry{shell, interactive}{73}{shell, interactive}
+\entry{expressions, conditional}{75}{expressions, conditional}
+\entry{arithmetic, shell}{76}{arithmetic, shell}
+\entry{shell arithmetic}{76}{shell arithmetic}
+\entry{expressions, arithmetic}{76}{expressions, arithmetic}
+\entry{evaluation, arithmetic}{76}{evaluation, arithmetic}
+\entry{arithmetic evaluation}{76}{arithmetic evaluation}
+\entry{alias expansion}{77}{alias expansion}
+\entry{arrays}{78}{arrays}
+\entry{directory stack}{79}{directory stack}
+\entry{prompting}{81}{prompting}
+\entry{restricted shell}{82}{restricted shell}
+\entry{POSIX Mode}{82}{POSIX Mode}
+\entry{job control}{87}{job control}
+\entry{foreground}{87}{foreground}
+\entry{background}{87}{background}
+\entry{suspending jobs}{87}{suspending jobs}
+\entry{Readline, how to use}{90}{Readline, how to use}
+\entry{interaction, readline}{91}{interaction, readline}
+\entry{notation, readline}{91}{notation, readline}
+\entry{command editing}{91}{command editing}
+\entry{editing command lines}{91}{editing command lines}
+\entry{killing text}{93}{killing text}
+\entry{yanking text}{93}{yanking text}
+\entry{kill ring}{93}{kill ring}
+\entry{initialization file, readline}{94}{initialization file, readline}
+\entry{variables, readline}{95}{variables, readline}
+\entry{programmable completion}{111}{programmable completion}
+\entry{completion builtins}{113}{completion builtins}
+\entry{History, how to use}{116}{History, how to use}
+\entry{command history}{117}{command history}
+\entry{history list}{117}{history list}
+\entry{history builtins}{117}{history builtins}
+\entry{history expansion}{119}{history expansion}
+\entry{event designators}{120}{event designators}
+\entry{history events}{120}{history events}
+\entry{installation}{123}{installation}
+\entry{configuration}{123}{configuration}
+\entry{Bash installation}{123}{Bash installation}
+\entry{Bash configuration}{123}{Bash configuration}
+\entry{FDL, GNU Free Documentation License}{139}{FDL, GNU Free Documentation License}

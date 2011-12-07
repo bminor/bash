@@ -3,8 +3,8 @@
 
 Starting Bash with the `--posix' command-line option or executing `set
 -o posix' while Bash is running will cause Bash to conform more closely
-to the POSIX 1003.2 standard by changing the behavior to match that
-specified by POSIX in areas where the Bash default differs.
+to the POSIX standard by changing the behavior to match that specified
+by POSIX in areas where the Bash default differs.
 
 When invoked as `sh', Bash enters POSIX mode after reading the startup
 files.
@@ -29,13 +29,13 @@ The following list is what's changed when `POSIX mode' is in effect:
   5. Reserved words appearing in a context where reserved words are
      recognized do not undergo alias expansion.
 
-  6. The POSIX 1003.2 `PS1' and `PS2' expansions of `!' to the history
-     number and `!!' to `!' are enabled, and parameter expansion is
-     performed on the values of `PS1' and `PS2' regardless of the
-     setting of the `promptvars' option.
+  6. The POSIX `PS1' and `PS2' expansions of `!' to the history number
+     and `!!' to `!' are enabled, and parameter expansion is performed
+     on the values of `PS1' and `PS2' regardless of the setting of the
+     `promptvars' option.
 
-  7. The POSIX 1003.2 startup files are executed (`$ENV') rather than
-     the normal Bash files.
+  7. The POSIX startup files are executed (`$ENV') rather than the
+     normal Bash files.
 
   8. Tilde expansion is only performed on assignments preceding a
      command name, rather than on all assignment statements on the line.
@@ -66,12 +66,12 @@ The following list is what's changed when `POSIX mode' is in effect:
      may not start with a digit.  Declaring a function with an invalid
      name causes a fatal syntax error in non-interactive shells.
 
- 17. POSIX 1003.2 special builtins are found before shell functions
-     during command lookup.
+ 17. POSIX special builtins are found before shell functions during
+     command lookup.
 
- 18. If a POSIX 1003.2 special builtin returns an error status, a
+ 18. If a POSIX special builtin returns an error status, a
      non-interactive shell exits.  The fatal errors are those listed in
-     the POSIX.2 standard, and include things like passing incorrect
+     the POSIX standard, and include things like passing incorrect
      options, redirection errors, variable assignment errors for
      assignments preceding the command name, and so on.
 
@@ -92,15 +92,15 @@ The following list is what's changed when `POSIX mode' is in effect:
 
  22. Process substitution is not available.
 
- 23. Assignment statements preceding POSIX 1003.2 special builtins
-     persist in the shell environment after the builtin completes.
+ 23. Assignment statements preceding POSIX special builtins persist in
+     the shell environment after the builtin completes.
 
  24. Assignment statements preceding shell function calls persist in the
      shell environment after the function returns, as if a POSIX
      special builtin command had been executed.
 
  25. The `export' and `readonly' builtin commands display their output
-     in the format required by POSIX 1003.2.
+     in the format required by POSIX.
 
  26. The `trap' builtin displays signal names without the leading `SIG'.
 
@@ -162,8 +162,8 @@ The following list is what's changed when `POSIX mode' is in effect:
      displayed, after escape characters are converted.
 
 
-There is other POSIX 1003.2 behavior that Bash does not implement by
-default even when in POSIX mode.  Specifically:
+There is other POSIX behavior that Bash does not implement by default
+even when in POSIX mode.  Specifically:
 
   1. The `fc' builtin checks `$EDITOR' as a program to edit history
      entries if `FCEDIT' is unset, rather than defaulting directly to

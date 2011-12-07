@@ -29,10 +29,14 @@ VPATH = $(srcdir)
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 transform = @program_transform_name@
+
+datarootdir = @datarootdir@
+
 libdir = @libdir@
 includedir = @includedir@
 datadir = @datadir@
-localedir = $(datadir)/locale
+localedir = @localedir@
+
 gettextsrcdir = $(datadir)/gettext/intl
 aliaspath = $(localedir)
 subdir = intl
@@ -58,7 +62,7 @@ DEFS = -DLOCALEDIR=\"$(localedir)\" -DLOCALE_ALIAS_PATH=\"$(aliaspath)\" \
 -DENABLE_RELOCATABLE=1 -DIN_LIBRARY -DINSTALLDIR=\"$(libdir)\" -DNO_XMALLOC \
 -Dset_relocation_prefix=libintl_set_relocation_prefix \
 -Drelocate=libintl_relocate \
--DDEPENDS_ON_LIBICONV=1 @DEFS@ @LOCAL_DEFS@
+-DDEPENDS_ON_LIBICONV=1 @DEFS@ ${LOCAL_DEFS}
 CPPFLAGS = @CPPFLAGS@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
@@ -229,7 +233,7 @@ libgnuintl.h: $(srcdir)/libgnuintl.h.in
 	cp $(srcdir)/libgnuintl.h.in libgnuintl.h
 
 libintl.h: libgnuintl.h
-	cp libgnuintl.h libintl.h
+	cmp libgnuintl.h libintl.h || cp libgnuintl.h libintl.h
 
 charset.alias: $(srcdir)/config.charset
 	$(SHELL) $(srcdir)/config.charset '@host@' > t-$@

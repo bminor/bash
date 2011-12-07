@@ -38,7 +38,6 @@ in $PATH are used to find the directory containing FILENAME.  If any
 ARGUMENTS are supplied, they become the positional parameters when
 FILENAME is executed.
 $END
-/* source.c - Implements the `.' and `source' builtins. */
 
 #include <config.h>
 
@@ -68,9 +67,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-#if defined (RESTRICTED_SHELL)
-extern int restricted;
-#endif
+static void maybe_pop_dollar_vars __P((void));
 
 /* If non-zero, `.' uses $PATH to look up the script to be sourced. */
 int source_uses_path = 1;

@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHacdfilmnpqstuvx] [limit]
+$SHORT_DOC ulimit [-SHacdefilmnpqrstuvx] [limit]
 Ulimit provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
 option is given, it is interpreted as follows:
@@ -35,7 +35,7 @@ option is given, it is interpreted as follows:
     -c	the maximum size of core files created
     -d	the maximum size of a process's data segment
     -e	the maximum scheduling priority (`nice')
-    -f	the maximum size of files created by the shell
+    -f	the maximum size of files written by the shell and its children
     -i	the maximum number of pending signals
     -l	the maximum size a process may lock into memory
     -m	the maximum resident set size
@@ -193,8 +193,8 @@ typedef struct {
   int  option;			/* The ulimit option for this limit. */
   int  parameter;		/* Parameter to pass to get_limit (). */
   int  block_factor;		/* Blocking factor for specific limit. */
-  char *description;		/* Descriptive string to output. */
-  char *units;			/* scale */
+  const char * const description;	/* Descriptive string to output. */
+  const char * const units;	/* scale */
 } RESOURCE_LIMITS;
 
 static RESOURCE_LIMITS limits[] = {
@@ -430,7 +430,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 
       if ((real_limit / block_factor) != limit)
 	{
-	  sh_erange (cmdarg, "limit");
+	  sh_erange (cmdarg, _("limit"));
 	  return (EXECUTION_FAILURE);
 	}
     }
@@ -740,7 +740,7 @@ set_all_limits (mode, newlim)
   for (retval = i = 0; limits[i].option > 0; i++)
     if (set_limit (i, newlim, mode) < 0)
       {
-	builtin_error ("%s: cannot modify limit: %s", limits[i].description,
+	builtin_error (_("%s: cannot modify limit: %s"), limits[i].description,
 						      strerror (errno));
 	retval = 1;
       }

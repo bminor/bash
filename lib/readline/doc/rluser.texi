@@ -471,7 +471,8 @@ attempts word completion.  The default is @samp{off}.
 
 @item history-preserve-point
 @vindex history-preserve-point
-If set to @samp{on}, the history code attempts to place point at the
+If set to @samp{on}, the history code attempts to place the point (the
+current cursor position) at the
 same location on each history line retrieved with @code{previous-history}
 or @code{next-history}.  The default is @samp{off}.
 
@@ -595,9 +596,11 @@ the command does.
 Once you know the name of the command, simply place on a line
 in the init file the name of the key
 you wish to bind the command to, a colon, and then the name of the
-command.  The name of the key
-can be expressed in different ways, depending on what you find most
-comfortable.
+command.
+There can be no space between the key name and the colon -- that will be
+interpreted as part of the key name.
+The name of the key can be expressed in different ways, depending on
+what you find most comfortable.
 
 In addition to command names, readline allows keys to be bound
 to a string that is inserted when the key is pressed (a @var{macro}).
@@ -1557,9 +1560,9 @@ completed, and the matching words become the possible completions.
 
 After these matches have been generated, any shell function or command
 specified with the @option{-F} and @option{-C} options is invoked.
-When the command or function is invoked, the @env{COMP_LINE} and
-@env{COMP_POINT} variables are assigned values as described above
-(@pxref{Bash Variables}).
+When the command or function is invoked, the @env{COMP_LINE},
+@env{COMP_POINT}, @env{COMP_KEY}, and @env{COMP_TYPE} variables are
+assigned values as described above (@pxref{Bash Variables}).
 If a shell function is being invoked, the @env{COMP_WORDS} and
 @env{COMP_CWORD} variables are also set.
 When the function or command is invoked, the first argument is the
@@ -1660,8 +1663,8 @@ matches were generated.
 @btindex complete
 @example
 @code{complete [-abcdefgjksuv] [-o @var{comp-option}] [-A @var{action}] [-G @var{globpat}] [-W @var{wordlist}]
-[-P @var{prefix}] [-S @var{suffix}] [-X @var{filterpat}] [-F @var{function}]
-[-C @var{command}] @var{name} [@var{name} @dots{}]}
+[-F @var{function}] [-C @var{command}] [-X @var{filterpat}]
+[-P @var{prefix}] [-S @var{suffix}] @var{name} [@var{name} @dots{}]}
 @code{complete -pr [@var{name} @dots{}]}
 @end example
 

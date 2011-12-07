@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 Jan 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2005 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2007 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1051,10 +1051,10 @@ as for pathname expansion (see
 
 below).
 The <I>word</I> is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, process substitution and quote removal.
 Each <I>pattern</I> examined is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, and process substitution.
 If the shell option
 <B>nocasematch</B>
@@ -1625,6 +1625,12 @@ The following variables are set by the shell:
 Expands to the full file name used to invoke this instance of
 <B>bash</B>.
 
+<DT><B>BASHPID</B>
+
+<DD>
+Expands to the process id of the current bash process.
+This differs from <B>$$</B> under certain circumstances, such as subshells
+that do not require bash to be re-initialized.
 <DT><B>BASH_ARGC</B>
 
 <DD>
@@ -1751,6 +1757,11 @@ cursor position.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
+<DT><B>COMP_KEY</B>
+
+<DD>
+The key (or final key of a key sequence) used to invoke the current
+completion function.
 <DT><B>COMP_LINE</B>
 
 <DD>
@@ -1766,6 +1777,21 @@ The index of the current cursor position relative to the beginning of
 the current command.
 If the current cursor position is at the end of the current command,
 the value of this variable is equal to <B>${#COMP_LINE}</B>.
+This variable is available only in shell functions and external
+commands invoked by the
+programmable completion facilities (see <B>Programmable Completion</B>
+below).
+<DT><B>COMP_TYPE</B>
+
+<DD>
+Set to an integer value corresponding to the type of completion attempted
+that caused a completion function to be called:
+<I>TAB</I>, for normal completion,
+<I>?</I>, for listing completions after successive tabs,
+<I>!</I>, for listing alternatives on partial word completion,
+<I>@</I>, to list completions if the word is not unmodified,
+or
+<I>%</I>, for menu completion.
 This variable is available only in shell functions and external
 commands invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
@@ -1786,6 +1812,8 @@ subsequently reset.
 <DD>
 An array variable (see <B>Arrays</B> below) consisting of the individual
 words in the current command line.
+The words are split on shell metacharacters as the shell parser would
+separate them.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
@@ -1827,7 +1855,9 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is &quot;main&quot;.
+The bottom-most element is
+<TT>&quot;main&quot;</TT>.
+
 This variable exists only when a shell function is executing.
 Assignments to
 <FONT SIZE=-1><B>FUNCNAME</B>
@@ -2192,7 +2222,8 @@ command history is not saved when an interactive shell exits.
 <DD>
 The maximum number of lines contained in the history file.  When this
 variable is assigned a value, the history file is truncated, if
-necessary, to contain no more than that number of lines.  The default
+necessary, by removing the oldest entries,
+to contain no more than that number of lines.  The default
 value is 500.  The history file is also truncated to this size after
 writing it when an interactive shell exits.
 <DT><B>HISTIGNORE</B>
@@ -2229,6 +2260,8 @@ for <I>strftime</I>(3) to print the time stamp associated with each history
 entry displayed by the <B>history</B> builtin.
 If this variable is set, time stamps are written to the history file so
 they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
 <DT><B>HOME</B>
 
 <DD>
@@ -3118,7 +3151,9 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If <I>offset</I> is 0, and the positional parameters are used, <B>$0</B> is
+prefixed to the list.
 <DT>${<B>!</B><I>prefix</I><B>*</B>}<DD>
 
 <DT>${<B>!</B><I>prefix</I><B>@</B>}<DD>
@@ -3129,6 +3164,8 @@ separated by the first character of the
 
 </FONT>
 special variable.
+When <I>@</I> is used and the expansion appears within double quotes, each
+variable name expands to a separate word.
 <DT>${<B>!</B><I>name</I>[<I>@</I>]}<DD>
 
 <DT>${<B>!</B><I>name</I>[<I>*</I>]}<DD>
@@ -3415,11 +3452,22 @@ value is exactly
 <B>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</B>,
 
 the default, then
+sequences of
+<B>&lt;space&gt;</B>,
+
+<B>&lt;tab&gt;</B>,
+
+and
+<B>&lt;newline&gt;</B>
+
+at the beginning and end of the results of the previous
+expansions are ignored, and
 any sequence of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-characters serves to delimit words.  If
+characters not at the beginning or end serves to delimit words.
+If
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
@@ -5409,12 +5457,16 @@ is executed for each child that exits.
 If an attempt to exit
 <B>bash</B>
 
-is made while jobs are stopped, the shell prints a warning message.  The
+is made while jobs are stopped (or, if the <B>checkjobs</B> shell option has
+been enabled using the <B>shopt</B> builtin, running), the shell prints a
+warning message, and, if the <B>checkjobs</B> option is enabled, lists the
+jobs and their statuses.
+The
 <B>jobs</B>
 
-command may then be used to inspect their status.
+command may then be used to inspect their status. 
 If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and the stopped
+the shell does not print another warning, and any stopped
 jobs are terminated.
 <A NAME="lbCC">&nbsp;</A>
 <H3>PROMPTING</H3>
@@ -7084,11 +7136,17 @@ completed, and the matching words become the possible completions.
 After these matches have been generated, any shell function or command
 specified with the <B>-F</B> and <B>-C</B> options is invoked.
 When the command or function is invoked, the
-<FONT SIZE=-1><B>COMP_LINE</B>
+<FONT SIZE=-1><B>COMP_LINE</B>,
+
+</FONT>
+<FONT SIZE=-1><B>COMP_POINT</B>,
+
+</FONT>
+<FONT SIZE=-1><B>COMP_KEY</B>,
 
 </FONT>
 and
-<FONT SIZE=-1><B>COMP_POINT</B>
+<FONT SIZE=-1><B>COMP_TYPE</B>
 
 </FONT>
 variables are assigned values as described above under
@@ -7223,6 +7281,14 @@ the number of lines specified by the value of
 <FONT SIZE=-1><B>HISTFILESIZE</B>.
 
 </FONT>
+When the history file is read,
+lines beginning with the history comment character followed immediately
+by a digit are interpreted as timestamps for the preceding history line.
+These timestamps are optionally displayed depending on the value of the
+<FONT SIZE=-1><B>HISTTIMEFORMAT</B>
+
+</FONT>
+variable.
 When an interactive shell exits, the last
 <FONT SIZE=-1><B>$HISTSIZE</B>
 
@@ -7249,7 +7315,16 @@ If
 
 </FONT>
 is unset, or if the history file is unwritable, the history is
-not saved.  After saving the history, the history file is truncated
+not saved.
+If the
+<FONT SIZE=-1>
+</FONT>
+variable is set, time stamps are written to the history file, marked
+with the history comment character, so
+they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
+After saving the history, the history file is truncated
 to contain no more than
 <FONT SIZE=-1><B>HISTFILESIZE</B>
 
@@ -7422,6 +7497,9 @@ history expansion mechanism (see the description of
 above under
 <B>Shell Variables</B>).
 
+The shell uses
+the history comment character to mark history timestamps when
+writing the history file.
 <A NAME="lbCW">&nbsp;</A>
 <H4>Event Designators</H4>
 
@@ -7771,8 +7849,10 @@ Resume each suspended job <I>jobspec</I> in the background, as if it
 had been started with
 <B>&amp;</B>.
 
-If <I>jobspec</I> is not present, the shell's notion of the
-<I>current job</I> is used.
+If
+<I>jobspec</I>
+
+is not present, the shell's notion of the <I>current job</I> is used.
 <B>bg</B>
 
 <I>jobspec</I>
@@ -7837,15 +7917,6 @@ that they can be re-read.
 
 <DD>
 List current <B>readline</B> function names and bindings.
-<DT><B>-v</B>
-
-<DD>
-Display <B>readline</B> variable names and values in such a way that they
-can be re-read.
-<DT><B>-V</B>
-
-<DD>
-List current <B>readline</B> variable names and values.
 <DT><B>-s</B>
 
 <DD>
@@ -7856,6 +7927,15 @@ they output in such a way that they can be re-read.
 <DD>
 Display <B>readline</B> key sequences bound to macros and the strings
 they output.
+<DT><B>-v</B>
+
+<DD>
+Display <B>readline</B> variable names and values in such a way that they
+can be re-read.
+<DT><B>-V</B>
+
+<DD>
+List current <B>readline</B> variable names and values.
 <DT><B>-f </B><I>filename</I>
 
 <DD>
@@ -8072,10 +8152,10 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
 <BR>
 
-[<B>-X</B> <I>filterpat</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>] <I>name</I> [<I>name ...</I>]
+[<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
 <DT><B>complete</B> <B>-pr</B> [<I>name</I> ...]<DD>
 
@@ -8395,10 +8475,13 @@ Mark <I>name</I>s for export to subsequent commands via the environment.
 <P>
 
 Using `+' instead of `-'
-turns off the attribute instead, with the exception that <B>+a</B>
-may not be used to destroy an array variable.  When used in a function,
+turns off the attribute instead,
+with the exceptions that <B>+a</B>
+may not be used to destroy an array variable and <B>+r will not
+remove the readonly attribute.
+When used in a function,
 makes each
-<I>name</I> local, as with the 
+</B><I>name</I> local, as with the 
 <B>local</B>
 
 command.
@@ -8419,7 +8502,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
 </DL>
 
-<DT><B>dirs [-clpv</B>] [+<I>n</I>] [-<I>n</I>]
+<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-cplv</B>]
 
 <DD>
 Without options, displays the list of currently remembered directories.
@@ -8479,6 +8562,11 @@ Without options, each
 <I>jobspec</I>
 
 is removed from the table of active jobs.
+If
+<I>jobspec</I>
+
+is not present, and neither <B>-a nor -r</B> is supplied,
+the shell's notion of the <I>current job</I> is used.
 If the <B>-h</B> option is given, each
 <I>jobspec</I>
 
@@ -8584,11 +8672,6 @@ backslash
 <DD>
 the eight-bit character whose value is the octal value <I>nnn</I>
 (zero to three octal digits)
-<DT><B>\</B><I>nnn</I>
-
-<DD>
-the eight-bit character whose value is the octal value <I>nnn</I>
-(one to three octal digits)
 <DT><B>\x</B><I>HH</I>
 
 <DD>
@@ -8597,7 +8680,7 @@ the eight-bit character whose value is the hexadecimal value <I>HH</I>
 
 </DL></DL>
 
-<DT><B>enable</B> [<B>-adnps</B>] [<B>-f</B> <I>filename</I>] [<I>name</I> ...]<DD>
+<DT><B>enable</B> [<B>-a</B>] [<B>-dnps</B>] [<B>-f</B> <I>filename</I>] [<I>name</I> ...]<DD>
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
@@ -8671,7 +8754,7 @@ If the
 <B>-l</B>
 
 option is supplied,
-the shell places a dash at the beginning of the zeroth arg passed to 
+the shell places a dash at the beginning of the zeroth argument passed to 
 <I>command</I>.
 
 This is what
@@ -8760,7 +8843,7 @@ is supplied with a
 <I>name</I>
 
 that is not a function.
-<DT><B>fc</B> [<B>-e</B> <I>ename</I>] [<B>-nlr</B>] [<I>first</I>] [<I>last</I>]<DD>
+<DT><B>fc</B> [<B>-e</B> <I>ename</I>] [<B>-lnr</B>] [<I>first</I>] [<I>last</I>]<DD>
 
 <DT><B>fc</B> <B>-s</B> [<I>pat</I>=<I>rep</I>] [<I>cmd</I>]<DD>
 
@@ -9168,7 +9251,11 @@ are added.
 <P>
 
 If the <B>HISTTIMEFORMAT</B> is set, the time stamp information
-associated with each history entry is written to the history file.
+associated with each history entry is written to the history file,
+marked with the history comment character.
+When the history file is read, lines beginning with the history
+comment character followed immediately by a digit are interpreted
+as timestamps for the previous history line.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 <I>offset</I> is supplied as an argument to <B>-d</B>, or the
@@ -9361,6 +9448,11 @@ Arguments, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
+<DT><B>-n</B>
+
+<DD>
+Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
 <DT><B>+</B><I>n</I><DD>
 Removes the <I>n</I>th entry counting from the left of the list
 shown by
@@ -9385,11 +9477,6 @@ removes the last directory,
 
 <TT>popd -1</TT>
 the next to last.
-<DT><B>-n</B>
-
-<DD>
-Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 
 </DL>
 <P>
@@ -9432,9 +9519,9 @@ If the <I>format</I> requires more <I>arguments</I> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
-<DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
-
 <DT><B>pushd</B> [<B>-n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
+
+<DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
 
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
@@ -9444,6 +9531,11 @@ Arguments, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
+<DT><B>-n</B>
+
+<DD>
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 <DT><B>+</B><I>n</I><DD>
 Rotates the stack so that the <I>n</I>th directory
 (counting from the left of the list shown by
@@ -9457,11 +9549,6 @@ Rotates the stack so that the <I>n</I>th directory
 <B>dirs</B>,
 
 starting with zero) is at the top.
-<DT><B>-n</B>
-
-<DD>
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 <DT><I>dir</I>
 
 <DD>
@@ -9515,7 +9602,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-u</B> <I>fd</I>] [<B>-t</B> <I>timeout</I>] [<B>-a</B> <I>aname</I>] [<B>-p</B> <I>prompt</I>] [<B>-n</B> <I>nchars</I>] [<B>-d</B> <I>delim</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
 is assigned to the first
@@ -9684,7 +9771,10 @@ function and not during execution of a script by <B>.</B>,
 the return status is false.
 Any command associated with the <B>RETURN</B> trap is executed
 before execution resumes after the function or script.
-<DT><B>set</B> [<B>--abefhkmnptuvxBCHP</B>] [<B>-o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+<DT><B>set</B> [<B>--abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+
+<DT><B>set</B> [<B>+abefhkmnptuvxBCEHPT</B>] [<B>+o</B> <I>option</I>] [<I>arg</I> ...]<DD>
+
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
@@ -9734,7 +9824,7 @@ or
 
 keyword, 
 part of the test in an
-<I>if</I>
+<B>if</B>
 
 statement, part of a
 <B>&amp;&amp;</B>
@@ -9742,7 +9832,9 @@ statement, part of a
 or
 <B>||</B>
 
-list, or if the command's return value is
+list,
+any command in a pipeline but the last,
+or if the command's return value is
 being inverted via
 <B>!</B>.
 
@@ -10219,6 +10311,12 @@ The list of <B>shopt</B> options is:
 
 
 <DL COMPACT>
+<DT><B>autocd</B>
+
+<DD>
+If set, a command name that is the name of a directory is executed as if
+it were the argument to the <B>cd</B> command.
+This option is only used by interactive shells.
 <DT><B>cdable_vars</B>
 
 <DD>
@@ -10246,6 +10344,14 @@ This option is only used by interactive shells.
 If set, <B>bash</B> checks that a command found in the hash
 table exists before trying to execute it.  If a hashed command no
 longer exists, a normal path search is performed.
+<DT><B>checkjobs</B>
+
+<DD>
+If set, bash lists the status of any stopped and running jobs before
+exiting an interactive shell.  If any jobs are running, this causes
+the exit to be deferred until a second exit is attempted without an
+intervening command (see <B>JOB CONTROL</B> above).  The shell always
+postpones exiting if any jobs are stopped.
 <DT><B>checkwinsize</B>
 
 <DD>
@@ -10801,8 +10907,8 @@ the command
 is executed each time a shell function or a script executed with the
 <B>.</B> or <B>source</B> builtins finishes executing.
 Signals ignored upon entry to the shell cannot be trapped or reset.
-Trapped signals are reset to their original values in a child
-process when it is created.
+Trapped signals that are not being ignored are reset to their original
+values in a child process when it is created.
 The return status is false if any
 <I>sigspec</I>
 
@@ -10963,7 +11069,7 @@ The maximum scheduling priority (&quot;nice&quot;)
 <DT><B>-f</B>
 
 <DD>
-The maximum size of files created by the shell
+The maximum size of files written by the shell and its children
 <DT><B>-i</B>
 
 <DD>
@@ -11435,7 +11541,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 Jan 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11539,6 +11645,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 26 January 2006 11:19:07 EST
+Time: 16 January 2007 11:15:22 EST
 </BODY>
 </HTML>

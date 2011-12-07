@@ -8889,8 +8889,8 @@ Makefile.in
 	- descend into `po' and run make recursively for the various clean
 	  targets
 
-				    1/4
-				    ---
+				 1/4/2004
+				 --------
 include/shmbutil.h
 	- two new macros:  BACKUP_CHAR(str, strsize, i), which backs up one
 	  multibyte character in STR starting at index I, and
@@ -12718,8 +12718,8 @@ jobs.c
 	- in delete_job, if find_last_proc returns NULL, don't try to call
 	  bgp_delete
 
-				    1/7
-				    ---
+				 1/7/2006
+				 --------
 doc/bash.1
 	- patch from Tim Waugh to replace some literal single quotes with
 	  \(aq, the groff special character for it
@@ -13198,3 +13198,1263 @@ lib/readline/search.c
 	- call rl_message with format argument of "%" in _rl_nsearch_init
 	  to avoid `%' characters in the prompt string from being interpreted
 	  as format specifiers to vsnprintf/vsprintf
+
+				   3/19
+				   ----
+parse.y, eval.c, input.h
+	- change execute_prompt_command to execute_variable_command; takes the
+	  variable name as a new second argument
+
+				   3/25
+				   ----
+bashline.c
+	- command_word_completion_function keeps track of when it's searching
+	  $PATH and doesn't return directory names as matches in that case.
+	  Problem reported by Pascal Terjan <pterjan@mandriva.com>
+	- command_word_completion_function returns what it's passed as a
+	  possible match if it's the name of a directory in the current
+	  directory (only non-absolute pathnames are so tested).
+
+				   3/27
+				   ----
+subst.c
+	- expand_arith_string takes a new argument: quoted.  Either 0 (outside
+	  subst.c) or Q_DOUBLE_QUOTES (substitution functions); changed callers
+
+subst.h
+	- changed extern declaration for expand_arith_string
+
+arrayfunc.c
+	- changed call to expand_arith_string in array_expand_index
+
+				   3/31
+				   ----
+lib/readline/histfile.c
+	- change read_history_range to allow windows-like \r\n line endings
+
+execute_cmd.c
+	- add new variable, line_number_for_err_trap, currently set but not
+	  used
+
+				    4/2
+				    ---
+lib/sh/strtrans.c
+	- add code to echo -e and echo with xpg_echo enabled to require
+	  a leading 0 to specify octal constants
+
+				    4/3
+				    ---
+subst.c
+	- slight change to wcsdup() replacement: use memcpy instead of wcscpy
+
+parse.y
+	- before turning on W_COMPASSIGN, make sure the final character in the
+	  token is a `(' (avoids problems with things like a=(4*3)/2)
+
+				    4/4
+				    ---
+lib/sh/snprintf.c
+	- in number() and lnumber(), turn off PF_ZEROPAD if explicit precision
+	  supplied in format
+	- change number() and lnumber() to correctly implement zero-padding
+	  specified by a non-zero `.precision' part of the format
+
+subst.c
+	- new flag for extract_delimited_string: EX_COMMAND.  For $(...), so
+	  we can do things like skip over delimiters in comments.  Added to
+	  appropriate callers
+	- changes to extract_delimited_string to skip over shell comments when
+	  extracting a command for $(...) (EX_COMMAND is contained in the
+	  flags argument)
+
+				    4/5
+				    ---
+subst.c
+	- first argument to skip_single_quoted is now a const char *
+	- new function, chk_arithsub, checks for valid arithmetic expressions
+	  by balancing parentheses.  Fix based on a patch from Len Lattanzi
+
+				    4/6
+				    ---
+{configure,config.h}.in
+	- add separate test for isnan in libc, instead of piggybacking on
+	  isinf-in-libc test
+
+lib/sh/snprintf.c
+	- separate the isnan replacement function so it's guarded by its own
+	  HAVE_ISNAN_IN_LIBC define
+
+lib/sh/wcsdup.c
+	- new file, contains replacement wcsdup library function from subst.c
+	  with change back to using wcscpy
+
+Makefile.in,lib/sh/Makefile.in
+	- make sure wcsdup.c is compiled and linked in
+
+subst.c
+	- wcsdup now found in libsh; removed static definition
+
+				   4/10
+				   ----
+lib/readline/callback.c
+	- loop over body of rl_callback_read_char as long as there is additional
+	  input rather than just calling readline_internal_char, which does
+	  not handle multi-character key sequences or escape-prefixed chars
+
+lib/readline/macro.c
+	- make sure we turn off RL_STATE_MACROINPUT when the macro stack is
+	  empty if we are reading additional input with RL_STATE_MOREINPUT
+
+support/shobj-conf
+	- Mac OS X no longer likes the `-bundle' option to gcc when creating a
+	  dynamic shared library
+
+				   4/11
+				   ----
+lib/tilde/tilde.c
+	- don't try to dereference user_entry if HAVE_GETPWENT isn't defined
+
+lib/readline/input.c
+	- make sure chars_avail is not used without being assigned a value in
+	  rl_gather_tyi
+	- use _kbhit() to check for available input on Windows consoles, in
+	  rl_gather_tyi and _rl_input_available
+
+				   4/21
+				   ----
+lib/readline/display.c
+	- calculate (in expand_prompt) and keep track of length of local_prompt
+	  in local_prompt_len; use where appropriate
+	- when using o_pos to check whether or not we need to adjust
+	  _rl_last_c_pos after calling update_line, assume that it's correct
+	  (a buffer index in non-multibyte locales and a cursor position in
+	  multibyte locales) and adjust with wrap_offset as appropriate
+	- in update_line, set cpos_adjusted to 1 after calling
+	  _rl_move_cursor_relative to move to the end of the displayed prompt
+	  string
+	- in _rl_move_cursor_relative, check that the multibyte display
+	  position is after the last invisible character in the prompt string
+	  before offsetting it by the number of invisible characters in the
+	  prompt (woff)
+
+				   4/26
+				   ----
+lib/readline/doc/{rluser.texi,readline.3}
+	- make sure to note that key bindings don't allow any whitespace
+	  between the key name or sequence to be bound and the colon
+
+				   4/28
+				   ----
+lib/readline/display.c
+	- in update_line, make sure we compare _rl_last_c_pos as strictly less
+	  than PROMPT_ENDING_INDEX, since it's 0-based, to avoid multiple
+	  prompt redraws
+
+				    5/4
+				    ---
+parse.y
+	- in decode_prompt_string, only prefix the expansion of \[ or \]
+	  with CTLESC if the corresponding readline escape character is
+	  CTLESC (coincidentally the same as \[) or CTLNUL.  Bug report sent
+	  by Mike Frysinger <vapier@gentoo.org> prompted the discovery
+
+aclocal.m4
+	- slight change to test for /dev/fd to compensate for a linux
+	  failing; suggested by Mike Frysinger <vapier@gentoo.org>
+
+				    5/9
+				    ---
+arrayfunc.c
+	- broke assign_array_var_from_string into two functions:
+	  expand_compound_array_assignment and assign_compound_array_list;
+	  assign_array_var_from_string just calls those functions now
+
+arrayfunc.h
+	- new extern declarations for expand_compound_array_assignment and
+	  assign_compound_array_list
+
+subst.c
+	- in do_compound_assignment, call expand_compound_array_assignment
+	  before creating the local variable so a previous inherited
+	  value can be used when expanding the rhs of the compound assignment
+	  statement
+
+				   5/11
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarifed `trap' description to make it clear that trapped signals
+	  that are not set to SIG_IGN are reset when a subshell is created
+
+				   5/18
+				   ----
+locale.c
+	- change reset_locale_vars to call setlocale (LC_ALL, "") if LANG
+	  is unset or NULL
+	- if LANG is unset or NULL, reset the export environment before
+	  calling setlocale in reset_locale_vars, and trust that it will
+	  change the environment setlocale() inspects
+
+				   5/21
+				   ----
+lib/readline/history.c
+	- new function, HIST_ENTRY *alloc_history_entry (char *string, char *ts);
+	  creates a new history entry with text STRING and timestamp TS (both
+	  of which may be NULL)
+	- new function, HIST_ENTRY *copy_history_entry (HIST_ENTRY *hist),
+	  which copies the line and timestamp entries to new memory but just
+	  copies the data member, since that's an opaque pointer
+	- new function, void replace_history_data (int which, histdata_t *old, histdata_t *new)
+	  which replaces the `data' member of specified history entries with
+	  NEW, as long as it is OLD.  WHICH says which history entries to
+  	  modify
+	- add calls to replace_history_data in rl_free_undo_list and
+	  rl_do_undo
+
+lib/readline/undo.c
+	- new function, alloc_undo_entry (enum undo_code what, int start, int end, char *text)
+	  takes care of allocating and populating a struct for an individual
+	  undo list entry
+	- new function: _rl_copy_undo_entry(UNDO_LIST *entry)
+	- new function: _rl_copy_undo_list(UNDO_LIST *head)
+
+lib/readline/rlprivate.h
+	- new extern declarations for _rl_copy_undo_{entry,list}
+
+execute_cmd.c
+	- change execute_cond_node so that quoting the rhs of the =~
+	  operator forces string matching, like the == and != operators
+
+				   5/23
+				   ----
+redir.c
+	- add_undo_redirect now takes as an additional argument the type of
+	  redirection we're trying to undo
+	- don't add a "preservation" redirection for fds > SHELL_FD_BASE if
+	  the redirection is closing the fd
+
+				   5/24
+				   ----
+subst.c
+	- make sure that parameter_brace_substring leaves this_command_name
+	  set to either NULL or its previous value after setting it so that
+	  arithmetic evaluation errors while expanding substring values
+	  contain meaningful information
+
+				    6/9
+				    ---
+execute_cmd.c
+	- make sure that SUBSHELL_ASYNC and SUBSHELL_PIPE are set as flag bits
+	  in subshell_environment, rather than setting only a single value
+	- change execute_subshell_builtin_or_function to give the `return'
+	  builtin a place to longjmp to when executed in a subshell or pipeline
+	  (mostly as the last command in a pipeline).  Bug reported by
+	  Oleg Verych <olecom@gmail.com>
+	- in execute_simple_command, make sure to call execute_disk_command
+	  with the_printed_command_except_trap to keep DEBUG trap command
+	  strings from overwriting the command strings associated with jobs
+	  and printed in job control messages.  Bug reported by Daniel Kahn
+	  Gillmor <dkg-debian.org@fifthhorseman.net>
+
+[bash-3.2-alpha frozen]
+
+				   6/22
+				   ----
+syntax.h
+	- add new CBLANK (for [:blank:] class) flag value for syntax table and
+	  shellblank(c) character test macro
+
+mksyntax.c
+	- add support for setting CBLANK flag in the syntax table depending on
+	  whether or not isblank(x) returns true for character x
+
+locale.c
+	- change locale_setblanks to set or unset CBLANK flag for each
+	  character when locale changes
+
+parse.y
+	- change call to whitespace(c) in lexical analyzer (read_token()) to
+	  call shellblank(c) instead, so locale-specific blank characters are
+	  treated as white space.  Fixes bug reported by Serge van deb Boom
+	  <svdb+bug-bash@stack.nl>
+
+print_cmd.c
+	- when printing redirections, add a space between <, >, and <> and the
+	  following word, to avoid conflicts with process substitution.  Bug
+	  reported by Ittay Dror <ittyad@qlusters.com>
+
+				   6/26
+				   ----
+configure.in
+	- set CROSS_COMPILE to the empty string by default, so we don't inherit
+	  a random value from the environment.   Bug reported by
+	  Lee Revell <rlrevell@joe-job.com>
+
+				   6/29
+				   ----
+lib/glob/xmbsrtowcs.c
+	- make sure destp is non-null before assigning a 0 to *destp in
+	  xdupmbstowcs.  Fix from Louiwa Salem <loulwas@us.ibm.com>
+
+execute_cmd.c
+	- fix execute_in_subshell to make sure asynchronous isn't set to 0
+	  before subshell_environment is set appropriately and
+	  setup_async_signals is run.  Based on report by Louiwa Salem
+	  <loulwas@us.ibm.com>
+
+lib/readline/bind.c
+	- in rl_generic_bind(), make sure that the keys array is freed before
+	  an error return.  Fix from Louiwa Salem <loulwas@us.ibm.com>
+
+				    7/1
+				    ---
+builtins/read.def
+	- make sure all editing code is protected with #ifdef READLINE, esp.
+	  unwind-protect that restores the default completion function
+
+lib/readline/display.c
+	- make sure to set local_prompt_len in rl_message() [in bash-3.2-alpha]
+
+				    7/5
+				    ---
+builtins/printf.def
+	- add more of echo's write error handling to printf.  Suggested by
+	  martin.wilck@fujitsu-siemens.com
+
+				    7/7
+				    ---
+lib/readline/display.c
+	- save and restore local_prompt_len in rl_{save,restore}_prompt
+	  [in bash-3.2-alpha]
+
+				    7/8
+				    ---
+[bash-3.2-alpha released]
+
+				    7/9
+				    ---
+lib/readline/display.c
+	- make sure that _rl_move_cursor_relative sets cpos_adjusted when it
+	  offsets `dpos' by wrap_offset in a multi-byte locale.  Bug reported
+	  by Andreas Schwab and Egmont Koblinger
+
+subst.c
+	- make sure that the call to mbstowcs in string_extract_verbatim is
+	  passed a string with enough space for the closing NUL.  Reported
+	  by Andreas Schwab
+
+				   7/18
+				   ----
+lib/readline/{display,terminal}.c
+	- remove #ifdefs for HACK_TERMCAP_MOTION so we can use
+	  _rl_term_forward_char in the redisplay code unconditionally
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_term_forward_char
+
+lib/readline/display.c
+	- in _rl_move_cursor_relative, use `dpos' instead of `new' when
+	  deciding whether or not a CR is faster than moving the cursor from
+	  its current position
+	- in _rl_move_cursor_relative, we can use _rl_term_forward_char to
+	  move the cursor forward in a multibyte locale, if it's available.
+	  Since that function doesn't have a handle on where the cursor is in
+	  the display buffer, it has to output a cr and print all the data.
+	  Fixes rest of problem reported by Egmont Koblinger
+	- change variable denoting the position of the cursor in the line buffer
+	  from c_pos (variable local to rl_redisplay) to cpos_buffer_position
+	  (variable local to file) for future use by other functions
+
+				   7/25
+				   ----
+lib/malloc/{stats,table}.h
+	- include <string.h> for prototypes for memset, strlen
+
+lib/termcap/{termcap,tparam}.c
+	- include <string.h> and provide macro replacement for bcopy if
+	  necessary
+
+				   7/27
+				   ----
+lib/readline/histexpand.c
+	- add support for `<<<' here-string redirection operator to
+	  history_tokenize_word.  Bug reported by agriffis@gentoo.org
+
+externs.h	
+	- don't add prototype for strerror() if HAVE_STRERROR defined
+
+				   7/29
+				   ----
+subst.c
+	- in list_string, use `string' instead of `s' -- s is not initialized
+
+				    8/9
+				    ---
+subst.c
+	- fix parameter_brace_expand to set W_HASQUOTEDNULL in the WORD_DESC it
+	  returns if the result of parameter_brace_substring is a quoted null
+	  ("\177").  Fixes bug reported by Igor Peshansky <pechtcha@cs.nyu.edu>
+
+				   8/16
+				   ----
+lib/readline/readline.h
+	- new #define, READERR, intended to be used to denote read/input errors
+
+lib/readline/input.c
+	- in rl_getc, if read() returns an error other than EINTR (after the
+	  EWOULDBLOCK/EAGAIN cases are handled), return READERR rather than
+	  converting return value to EOF if readline is reading a top-level
+	  command (RL_STATE_READCMD)
+
+lib/readline/readline.c
+	- if rl_read_key returns READERR to readline_internal_char[loop],
+	  abort as if it had read EOF on an empty line, without any conversion
+	  to newline, which would cause a partial line to be executed.  This
+	  fixes the bug reported by Mathieu Bonnet <mathieu.bonnet@nalkym.org>
+
+aclocal.m4
+	- when testing for validity of /dev/fd/3, use /dev/null instead of
+	  standard input, since the standard input fails with linux and `su'.
+	  Bug reported by Greg Shafer <gschafer@zip.com.au>
+
+				   8/17
+				   ----
+Makefile.in
+	- switch the TAGS and tags targets so TAGS is the output of `etags' and
+	  tags is the output of `ctags'.  Suggested by Masatake YAMATO
+
+				   8/25
+				   ----
+execute_cmd.c
+	- change code to match documentation: set BASH_COMMAND (which takes its
+	  value from the_printed_command_except_trap) only when not running a
+	  trap.  Rocky says the debugger is ok with this, and this is what his
+	  original diffs did
+
+				   8/29
+				   ----
+variables.c
+	- change set_if_not to create shell_variables if it is NULL, since
+	  -o invocation options can cause variables to be set before the
+	  environment is scanned
+
+[bash-3.2-beta frozen]
+
+				    9/5
+				    ---
+[bash-3.2-beta released]
+
+				    9/8
+				    ---
+variables.c
+	- change dispose_used_env_vars to call maybe_make_export_env
+	  immediately if we're disposing a temporary environment, since
+	  `environ' points to the export environment and getenv() will use
+	  that on systems that don't allow getenv() to be replaced.  This
+	  could cause the temporary environment to affect the shell.  Bug
+	  reported by Vasco Pedro <vp@di.uevora.pt>
+
+builtins/echo.def,doc/{bash.1,bashref.texi}
+	- clarify that `echo -e' and echo when the `xpg_echo' shell option is
+	  enabled require the \0 to precede any octal constant to be expanded.
+	  Reported by Vasco Pedro <vp@di.uevora.pt>
+
+				   9/12
+				   ----
+builtins/printf.def
+	- make sure `%q' format specifier outputs '' for empty string arguments
+	  Bug reported by Egmont Koblinger <egmont@uhulinux.hu>
+
+make_cmd.c
+	- change make_here_document to echo lines in here-doc if set -v has
+	  been executed.  Reported by Eduardo Ochs <eduardoochs@gmail.com>
+
+aclocal.m4
+	- change BASH_CHECK_MULTIBYTE:
+		o replace check for wctomb with check for wcrtomb
+		o add checks for wcscoll, iswctype, iswupper, iswlower,
+		  towupper, towlower
+		o add call to AC_FUNC_MBRTOWC to check for mbrtowc and mbstate_t
+		  define HAVE_MBSTATE_T manually
+		o add checks for wchar_t, wctype_t, wint_t
+
+config.h.in
+	- add defines for wcscoll, iswctype, iswupper, iswlower, towupper,
+	  towlower functions
+	- replace define for wctomb with one for wcrtomb
+	- add defines for wchar_t, wint_t, wctype_t types
+
+config-bot.h, lib/readline/rlmbutil.h
+	- add check for HAVE_LOCALE_H before defining HANDLE_MULTIBYTE
+	- add checks for: ISWCTYPE, ISWLOWER, ISWUPPER, TOWLOWER, TOWUPPER
+	- add checks for: WCTYPE_T, WCHAR_T, WCTYPE_T
+
+				   9/13
+				   ----
+lib/readline/display.c
+	- when displaying prompts longer than the screenwidth in rl_redisplay,
+	  and looking for the index of the last character whose buffer index
+	  is <= the screen width to set up the inv_lbreaks array, make sure to
+	  catch the case where the index == the screen width (an off-by-one
+	  error occurs otherwise with prompts one character longer than the
+	  screen width).  Bug reported by Alexey Toptygin <alexeyt@freeshell.org>
+
+configure.in
+	- change DEBUGGER_START_FILE to start with ${ac_default_prefix}/share,
+	  like bashdb installs itself.  Reported by Nick Brown
+	  <nickbroon@blueyonder.co.uk>
+
+				   9/14
+				   ----
+lib/readline/display.c
+	- make multibyte code that computes the buffer indices of line breaks
+	  for a multi-line prompt dependent on MB_CUR_MAX, so we don't take
+	  the function call hit unless we're in a locale that can have
+	  multibyte characters
+
+				   9/19
+				   ----
+subst.c
+	- make dequote_list extern so other parts of the shell can use it
+
+subst.h
+	- extern declaration for dequote_list
+
+builtins/read.def
+	- call dequote_list before assigning words read to array variable if
+	  we saw an escape character.  Old code left spurious CTLESCs in the
+	  string after processing backslashes.  Bug reported by Daniel Dawson
+	  <ddawson@icehouse.net>
+
+				   9/21
+				   ----
+[bash-3.2 frozen]
+
+				   10/9
+				   ----
+support/shobj-coonf
+	- change -fpic to -fPIC for FreeBSD systems (needed for SPARC at least)
+
+				   10/11
+				   -----
+[bash-3.2 released]
+
+				   10/12
+				   -----
+parse.y
+	- change parse_matched_pair to make sure `` command substitution does
+	  not check for shell comments while parsing.  Bug reported against
+	  bash-3.2 by Greg Schaefer <gschafer@zip.com.au>
+
+				   10/14
+				   -----
+parse.y
+	- add new parser_state flag: PST_REGEXP; means we are parsing a
+	  regular expression following the =~ conditional operator
+	- cond_node sets PST_REGEXP after reading the `=~' operator	
+	- change read_token to call read_token_word immediately if the
+	  PST_REGEXP bit is set in parser_state
+	- change read_token_word to skip over `(' and `|' if PST_REGEXP is
+	  set, since those characters are legitimate regexp chars (but still
+	  parse matched pairs of parens)
+
+				   10/16
+				   -----
+builtins/ulimit.def
+	- add -e and -r to $SHORT_DOC usage string
+
+po/ru.po
+	- fix encoding; Russian text in the file is actually encoded in KOI8-R
+
+				   10/23
+				   -----
+shell.c
+	- make sure that the call to move_to_high_fd in open_shell_script
+	  passes 1 for the  `check_new' parameter so open high file descriptors
+	  don't get closed and reused.  Bug reported by Mike Stroyan
+	  <mike.stroyan@hp.com>
+
+doc/bashref.texi
+	- fixes for typos and misspellings sent in by Brian Gough
+
+				   10/24
+				   -----
+support/shobj-conf
+	- make netbsd shared library creation like openbsd's until I hear
+	  differently (called using `gcc -shared')
+
+				   10/26
+				   -----
+subst.c
+	- fix bug in parameter_brace_patsub so if the first character of the
+	  expanded pattern is a `/', it is not taken as a global replacement
+	  specifier.  Bug reported on forums.nekochan.net 
+
+				   10/27
+				   -----
+builtins/printf.def
+	- if we need an extern declaration for asprintf, make sure we include
+	  stdarg.h or varargs.h, whichever is appropriate
+	- if we do not have asprintf, add an extern declaration using
+	  stdarg format.  This fixes the bugs with %G on IRIX reported by
+	  Matthew Woehlke <mwoehlke@tibco.com> and Stuart Shelton
+	  <srcshelton@gmail.com>
+
+
+lib/sh/snprintf.c
+	- add note to not call log_10 with 0 argument -- we don't want to do
+	  what real log10 does (-infinity/raise divide-by-zero exception)
+	- make sure numtoa (used by dtoa) takes the precision into account
+	  when computing the fractional part with an argument of `0.0'
+	- make sure `g' and `G' formats don't print radix char if there are
+	  no characters to be printed after it (change to floating())
+	- change callers of log_10 (exponent, 'g' and 'G' cases in
+	  vsnprintf_internal) to not call it with 0 for argument.  This fixes
+	  the hang reported on IRIX by Matthew Woehlke <mwoehlke@tibco.com>
+	  and Stuart Shelton <mwoehlke@tibco.com>
+
+				   10/28
+				   -----
+builtins/{caller,pushd}.def
+	- changed longdoc strings in loadable builtin section to be single
+	  strings, as put in the build directory builtins.c file, to aid
+	  translators
+
+				   11/1
+				   ----
+execute_cmd.c
+	- reset subshell_environment to 0 after make_child() call in
+	  execute_null_command.  Fix provided by Roy Marples
+	  <uberlord@gentoo.org>
+
+				   11/7
+				   ----
+lib/tilde/tilde.c
+lib/readline/{util,undo,callback,input,isearch,kill}.c
+	- make sure that memory allocated with xmalloc is freed with xfree
+
+				   11/9
+				   ----
+lib/readline/display.c
+	- make sure that _rl_redisplay_after_sigwinch clears the last displayed
+	  line instead of the current line (instead of assuming that the
+	  cursor is on the last line).  Fixes bug reported by Egmont
+	  Koblinger <egmont@uhulinux.hu>
+
+				   11/10
+				   -----
+lib/readline/display.c
+	- make sure that _rl_col_width is never called with MB_CUR_MAX == 1,
+	  since it doesn't count invisible characters and they are not
+	  compensated for.  Added a warning in _rl_col_width if called when
+	  MB_CUR_MAX == 1.  Bug reported and solution suggested by Eric
+	  Blake <ebb9@byu.net>
+
+				   11/11
+				   -----
+lib/readline/display.c
+	- make sure _rl_wrapped_line is initialized to inv_lbsize int chars.
+	  inv_lbsize and vis_lbsize are the same at that point, but it makes
+	  the intent clearer.  Fix from jan.kratochvil@redhat.com.
+	- in rl_redisplay, make sure we call memset on _rl_wrapped_line with
+	  its full initialized size: inv_lbsize*sizeof(int).  Fix from
+	  jan.kratochvil@redhat.com.
+	- wrap the invisible and visible line variables and _rl_wrapped_line
+	  into line_state structures, which can be swapped more efficiently.
+	  Have to watch the wrapped_line field, since there's now one for
+	  each struct.  Changes from jan.kratochvil@redhat.com.
+
+lib/readline/complete.c
+	- in stat_char, check for `//server' on cygwin and return `/', since
+	  it will always behave as a directory.  Fix from Eric Blake
+
+lib/readline/histfile.c
+	- Cygwin's mmap() works in recent versions, so don't #undef HAVE_MMAP.
+	  Recommendation from Eric Blake
+
+lib/readline/rlwinsize.h
+	- make sure tcflow() is defined on SCO Unix.  Fix from William Bader
+
+aclocal.m4
+	- add check for localeconv to AM_INTL_SUBDIR macro
+
+config.h.in
+	- add HAVE_LOCALECONV
+
+lib/sh/snprintf.c
+	- add check for HAVE_LOCALECONV for GETLOCALEDATA macro
+
+general.[ch]
+	- first argument to legal_number is now `const char *'
+
+				   11/14
+				   -----
+lib/readline/{readline,rlprivate}.h
+	- move rl_display_prompt declaration from rlprivate.h to readline.h
+
+lib/readline/util.h
+	- new function: rl_free(void *mem), for use by users of readline dlls
+	  on Windows
+
+lib/readline/readline.h
+	- new extern declaration for rl_free
+
+lib/readline/doc/rltech.texi
+	- document rl_free and rl_display_prompt for use by application writers
+
+				   11/15
+				   -----
+aclocal.m4
+	- change tests for /dev/fd and /dev/stdin to use constructs of the form
+	  (exec test ... ) instead of test ... to avoid bash's /dev/fd and
+	  /dev/stdin emulation
+
+				   11/16
+				   -----
+jobs.c
+	- in delete_job, reset_current was being called before the job slot
+	  was cleared -- moved after job_slots[job] was set to NULL.  Fixes
+	  bug reported by Dan Jacobson <jidanni@jidanni.org>
+
+				   11/19
+				   -----
+findcmd.c
+	- when the checkhash option is set, fix the check for the hashed
+	  pathname being an existing executable file.  Old code required a
+	  hash table deletion and re-addition.  Bug reported by Linda
+	  Walsh <bash@tlinx.org>
+
+				   11/21
+				   -----
+subst.c
+	- in pos_params, handle case of `start' == 0 by making the list of
+	  positional parameters begin with $0
+	- in parameter_brace_substring, increment `len' if start == 0, sicne
+	  we will be adding $0 to the beginning of the list when we process it
+
+doc/{bash.1,bashref.texi}
+	- document new behavior of `0' offset when using substring expansion
+	  with the positional parameters
+
+support/shobj-conf
+	- changes to shared object creation for loadable builtins on Mac OS X
+	  10.4 to use libtool instead of ld by specifying -dynamiclib
+	  argument and changing options to be appropriate for libtool.  This
+	  winds up creating a dynamic shared library instead of an executable
+
+				   11/24
+				   -----
+{jobs,nojobs}.c
+	 - don't set last_asynchronous_pid to the child's pid in the child
+	   for asynchronous jobs (for compatibility -- all other posix shells
+	   seem to do it this way).  This means that (echo $! )& echo $! should
+	   display two different pids.  Fix from discussion on the
+	   austin-group-l list
+
+builtins/mkbuiltins.c
+	- change builtins.c file generation so short doc strings are marked for
+	  gettext and available for subsequent translation.  Suggestion by
+	  Benno Schulenberg <bensberg@justemail.net>
+
+builtins/{bind,cd,hash,inlib,printf,pushd,test,times,ulimit}.def
+lib/malloc/malloc.c
+{shell,subst}.c
+	- fix a few strings that were not marked as translatable.  Fix from
+	  Benno Schulenberg <bensberg@justemail.net>
+
+lib/readline/misc.c
+	- new function, _rl_revert_all_lines(void).  Goes through history,
+	  reverting all entries to their initial state by undoing any undo
+	  lists.
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_revert_all_lines
+
+rldefs.h
+	- add #undef HAVE_STRCOLL if STRCOLL_BROKEN is defined, prep to move
+	  from config.h.in.  Problem reported by Valerly Ushakov
+	  <uwe@ptc.spbu.ru>
+
+				   11/25
+				   -----
+lib/readline/readline.c
+	- call _rl_revert_all_lines from readline_internal_teardown if the
+	  variable _rl_revert_all_at_newline is non-zero
+	- declare _rl_revert_all_lines initially 0
+
+				   11/27
+				   -----
+doc/{bash.1,bashref.texi}
+	- make sure to be explicit that `typeset +r' cannot remove the readonly
+	  attribute from a variable
+
+				   11/28
+				   -----
+lib/sh/zmapfd.c
+	- new file, implements zmapfd(), which takes a file and returns its
+	  contents in a string
+
+externs.h
+	- extern declaration for zmapfd
+
+				   11/29
+				   -----
+builtins/evalfile.c
+	- in _evalfile, use zmapfd to read the contents of the file into a
+	  string, rather than using the size reported by stat and reading that
+	  many characters, if the file is not a regular file (for things like
+	  named pipes, stat reports the size as 0)
+
+				   12/3
+				   ----
+lib/sh/snprintf.c
+	- make sure number() sets the FL_UNSIGNED flag for %x and %X, so
+	  fmtulong treats them as unsigned numbers.  Fixes bug reported by
+	  James Botte <James.M.Botte@lowes.com>
+
+				   12/13
+				   -----
+lib/readline/util.c
+	- new function, _rl_ttymsg, for internal warning messages -- does
+	  redisplay after printing message
+	- new function, _rl_errmsg, for internal warning/error messages --
+	  does not do redisplay after printing message
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_ttymsg, _rl_errmsg
+
+lib/readline/{bind,callback,complete,display,rltty}.c
+	- use _rl_ttymsg/_rl_errmsg instead of direct writes to stderr
+
+lib/sh/tmpfile.c
+	- in get_tmpdir(), make sure that $TMPDIR names a writable directory;
+	  otherwise skip it.  This catches names longer than PATH_MAX, but in
+	  case it doesn't test that the length does not exceed PATH_MAX.  Fixes
+	  heap overrun bug reported by Eric Blake <ebb9@byu.net>
+
+				   12/16
+				   -----
+builtin/{set,declare,shopt,trap,wait,bind,complete,enable,fc,history,read,setattr}.def
+doc/{bash.1,bashref.texi}
+	- improvements and clarifications to the help text associated with
+	  several builtins, in some cases bringing them into line with the
+	  man page text.  From Benno Schulenberg <bensberg@justemail.net>
+
+doc/{bash.1,bashref.texi}
+	- add `E' and `T' to the synopsis of the set builtin.
+	  From Benno Schulenberg <bensberg@justemail.net>
+
+builtins/{break,exit,fg_bg,hash,jobs,type,ulimit}.def
+builtins/{common,evalfile}.c
+{error,expr,jobs,mksyntax,nojobs,shell,subst,version,siglist}.c
+	- add gettextizing marks to untranslated strings
+	  From Benno Schulenberg <bensberg@justemail.net>
+
+				   12/19
+				   -----
+builtins/common.c
+	- change display_signal_list (used by `trap -l' and `kill -l') to use
+	  five columns instead of 4 to display signal names
+
+builtins/help.def
+	- use the true terminal width instead of assuming 80 when displaying
+	  help topics, leaving two characters of whitespace between horizontal
+	  descriptions instead of 1
+	- change to print in columns with entries sorted down rather than across
+	  (that is, like `ls' rather than `ls -x').  Change inspired by Benno 
+	  Schulenberg <bensberg@justemail.net>
+
+jobs.h
+	- give values to the JOB_STATE enumerations so they can be used as
+	  bitmasks, too
+
+				   12/22
+				   -----
+doc/{bash.1,bashref.texi}
+	- change description of `set' to make it clearer that you can use
+	  `+' to turn off options
+	- clarify in the description of word splitting that sequences of
+	  IFS whitespace at the beginning or end of the string are ignored
+
+				   12/26
+				   -----
+doc/bashref.texi
+	- move `shopt' builtin to its own section; change internal references
+	  from `Bash Builtins' to the new shopt builtin
+	- new section for builtins that modify shell behavior in `Shell
+	  Builtin Commands'; move set and shopt to new section.  Changes
+	  inspired by Benno Schulenberg <bensberg@justemail.net>
+
+{redir,subst}.c
+	- add MT_USETMPDIR flag to calls to sh_mktmpfd and sh_mktmpname.  Bug
+	  reported by Eric Blake <ebb9@byu.net>
+
+{configure,Makefile}.in
+	- changes so that the pathname for DEBUGGER_START_FILE is substituted
+	  into pathnames.h at make time (allowing more flexibility in setting
+	  `prefix' or `datadir') instead of at configure time.  Suggested by
+	  Nick Brown <nickbroon@blueyonder.co.uk>
+
+shell.c
+	- declaration for  have_devfd; initialized from HAVE_DEV_FD
+	- declaration for check_jobs_at_exit; initialized to 0
+	- declaration for autocd; initialized to 0
+
+variables.c
+	- new dynamic variable, BASHPID, always set from return value from
+	  getpid() (changes even when $$ doesn't change).  Idea from Bruce
+	  Korb <bruce.corb@3pardata.com>
+
+builtins/exit.def
+	- if check_jobs_at_exit is non-zero, list jobs if there are any stopped
+	  or running background jobs; don't exit shell if any running jobs
+
+execute_cmd.c
+	- in execute_simple_command, if the first word of a simple command is
+	  a directory name (after looking for builtins, so `.' isn't caught)
+	  that isn't found in $PATH, and `autocd' is non-zero, prefix a "cd"
+	  to the command words
+
+builtins/shopt.def
+	- new `checkjobs' option, changes value of check_jobs_at_exit
+	- new `autocd' option, changes value of autocd
+
+pcomplete.c
+	- add COMP_TYPE, set to rl_completion_type, to list of variables set
+	  by bind_compfunc_variables and unset by unbind_compfunc_variables
+
+doc/{bash.1,bashref.texi}
+	- document BASHPID
+	- document new shopt `checkjobs' option
+	- document new shopt `autocd' option
+	- document COMP_TYPE completion variable
+
+				   12/29
+				   -----
+aclocal.m4
+	- in BASH_SYS_SIGLIST, check HAVE_DECL_SYS_SIGLIST instead of the
+	  obsolete and no-longer-supported SYS_SIGLIST_DECLARED
+
+				   12/30
+				   -----
+lib/readline/vi_mode.c
+	- add ` (backquote) to the list of vi motion characters
+	- in rl_vi_delete_to, rl_vi_change_to, and rl_vi_yank_to, don't delete
+	  character under the cursor if the motion command moves the cursor
+	  backward, so add F and T to the commands that don't cause the
+	  mark to be adjusted
+	- add ` to the characters that don't cause the mark to be adjusted
+	  when used as a motion command, since it's defined to behave that way
+	- when a motion character that may adjust the mark moves point
+	  backward, don't adjust the mark so the character under the cursor
+	  isn't deleted
+
+lib/readline/complete.c
+	- add variable rl_sort_completion_matches; allows application to
+	  inhibit match list sorting
+	- add variable rl_completion_invoking_key; allows applications to
+	  discover the key that invoked rl_complete or rl_menu_complete
+
+lib/readline/readline.h
+	- extern declarations for rl_completion_invoking_key and
+	  rl_sort_completion_matches
+
+lib/readline/doc/rltech.texi
+	- documented rl_completion_invoking_key and rl_sort_completion_matches
+
+pcomplete.c
+	- export variable COMP_KEY to completion functions; initialized from
+	  rl_completion_invoking_key; unset along with rest of completion
+	  variables
+
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- document COMP_KEY
+
+[many files]
+	- changes to make variables and function parameters `const' for better
+	  text sharing.  Changes originally from Andreas Mohr
+	  <andi@rhlx01.fht-esslingen.de>
+
+				 1/4/2007
+				 --------
+lib/intl/Makefile.in
+	- use cmp before copying libgnuintl.h to libintl.h -- maybe save a few
+	  rebuilds
+
+lib/builtins/Makefile
+	- fixes to build LIBINTL_H if necessary, dependency on this for
+	  mkbuiltins.o prevented `make -j 6' from working correctly
+
+				    1/8
+				    ---
+subst.c
+	- new function, fifos_pending(), returns the count of FIFOs in
+	  fifo_list (process substitution)
+
+subst.h
+	- extern declaration for fifos_pending()
+
+execute_cmd.c
+	- in execute_simple_command, if CMD_NO_FORK is set before we call
+	  execute_disk_command, make sure there are no FIFOs in the expanded
+	  words (from process substitution) and turn off CMD_NO_FORK if there
+	  are, so they can get unlinked when the command finishes
+
+				   1/10
+				   ----
+subst.c
+	- read_comsub now takes a flags parameter and returns appropriate W_*
+	  flags in it
+	- command_substitute now returns a WORD_DESC *, with the string it used
+	  to return as the `word' and `flags' filled in appropriately
+
+subst.h
+	- changed extern declaration for command_substitute
+
+{pcomplete,subst}.c
+	- changed callers of command_substitute appropriately
+
+subst.c
+	- string_extract_verbatim now takes an additional int flags argument;
+	  changed callers
+
+				   1/11
+				   ----
+support/texi2html
+	- fix problem that caused index links to not be generated if the first
+	  index node had a name different than the node name
+
+doc/bashref.texi
+	- encapsulated all indexes into a single `Indexes' appendix; works
+	  around bug fixed in texi2html
+
+				   1/12
+				   ----
+subst.c
+	- add call to sv_histtimefmt in initialize_variables so HISTTIMEFORMAT
+	  rom the environment is honored.  Fix from Ark Submedes (heh)
+	  <archimerged@gmail.com>
+
+lib/readline/histfile.c
+	- make sure that the first character following the history comment
+	  character at the beginning of a line is a digit before interpreting
+	  it as a timestamp for the previous line
+
+doc/{bash.1,bashref.texi},lib/readline/doc/hsuser.texi
+	- added detail to make it clear exactly how history timestamps are
+	  saved to and read from the history file
+
+subst.c
+	- change quote_escapes to add CTLESC before spaces if IFS is null,
+	  just in case we have to split on literal spaces later on (e.g., in
+	  case of unquoted $@).  Corresponding changes to dequote_escapes.
+	  Fixes a couple of problems reported by Brett Stahlman
+	  <brettstahlman@comcast.net>
+
+				   1/14
+				   ----
+subst.c
+	- make same change to read_comsub to add CTLESC before ' ' if $IFS is
+	  null, since we will split on literal spaces later
+
+				   1/15
+				   ----
+array.c
+	- new function, array_quote_escapes (ARRAY *a), calls quote_escapes
+	  on each element of the array in the same way array_quote calls
+	  quote_string
+	- call array_quote_escapes if match is not quoted in array_patsub
+	- array_slice is now used, so remove the #ifdef INCLUDE_UNUSED define
+	- change structure of array_subrange to call array_slice to create a
+	  new array with the desired subset of elements, then call array_quote
+	  or array_quote_escapes as necessary, like array_patsub.  Convert to
+	  a string by calling array_to_string on the sliced-out array
+
+array.h
+	- new extern declaration for array_quote_escapes
+
+subst.c
+	- since array_patsub now calls quote_escapes as necessary, callers
+	  don't need to call it after array_patsub returns.  Fixes first bug
+	  reported by Brett Stahlman <brettstahlman@comcast.net>
+	- since array_subrange now calls quote_escapes as necessary, callers
+	  don't need to call it after array_patsub returns.  Same fix as
+	  for array_patsub
+
+				   1/31
+				   ----
+configure.in
+	- add -DSOLARIS to LOCAL_CFLAGS for solaris x
+
+config-bot.h
+	- don't #undef HAVE_GETCWD if GETCWD_BROKEN and SOLARIS are both
+	  defined.  Solaris's loopback mount implementation breaks some of the
+	  file system assumptions the replacement getcwd uses.
+
+builtins/common.c
+	- if GETCWD_BROKEN is defined, call getcwd with PATH_MAX for the size
+	  argument, so it will allocate a buffer for the current working dir
+	  with that size, instead of one that's `big enough'
+
+config.h.in
+	- add #undef PRI_MACROS_BROKEN for AIX 4.3.3
+
+pathexp.h
+	- new flag value for quote_string_for_globbing: QGLOB_REGEXP (quoting
+	  an ERE for matching as a string)
+
+pathexp.c
+	 - change quote_string_for_globbing to understand QGLOB_REGEXP
+
+execute_cmd.c
+	- change execute_cond_node to pass 2 (regexp match), 1 (shell pattern
+	  match), or 0 (no matching) to cond_expand_word
+
+subst.c
+	- change cond_expand_word to translate SPECIAL==2 into passing
+	  QGLOB_REGEXP to quote_string_for_globbing
+
+				    2/2
+				    ---
+builtins/printf.def
+	- if PRI_MACROS_BROKEN is defined, #undef PRIdMAX (AIX 4.3.3 broken)
+
+				    2/3
+				    ---
+Makefile.in,{builtins,doc}/Makefile.in,lib/*/Makefile.in
+	- add assignment for datarootdir as per GNU coding standards
+
+Makefile.in,builtins/Makefile.in,lib/intl/Makefile.in,po/Makefile.in.in
+	- use @localedir@ instead of $(datadir)/locale in assignment
+
+				   2/13
+				   ----
+jobs.c
+	- fix compact_jobs_list to not return js.j_lastj, since that is in use
+	  and should not be overwritten.  Fix from Len Lattanzi
+	  <llattanzi@apple.com>
+
+				   2/16
+				   ----
+lib/readline/text.c
+	- change rl_forward_char to allow moving to the end of the line when
+	  using the arrow keys in vi insertion mode, rather than having the
+	  behavior identical between vi command and insertion modes.  Change
+	  suggested by Hugh Sasse <hgs@dmu.ac.uk>
+
+				   2/19
+				   ----
+CWRU/audit-patch
+	- patch from Steve Grubb of RedHat <sgrubb@redhat.com> to make bash
+	  audit root's behavior by logging commands using his audit
+	  framework.  Enabled if the shell's name is `aubash'.
+
+				    3/8
+				    ---
+jobs.c
+	- use WSTATUS (p->status) instead of bare p->status.  Fix from
+	  Jim Brown <jim.brown@rsmas.miami.edu>
+
+				    3/9
+				    ---
+lib/readline/{complete,input,isearch,misc,readline,text,vi_mode}.c
+	- make sure cases where rl_read_key returns -1 (usually due to EIO
+	  because the controlling tty has gone away) are handled correctly.
+	  Prompted by report from Thomas Loeber <ifp@loeber1.de>
+
+				   3/10
+				   ----
+sig.c
+	- new function, top_level_cleanup, callable from contexts where some
+	  cleanup needs to be performed before a non-fatal call to
+	  jump_to_top_level
+
+sig.h
+	- new extern declaration for top_level_cleanup
+
+builtins/common.c
+	- add calls to top_level_cleanup before calls to jump_to_top_level
+	  in a builtin command context (no_args(), get_numeric_arg()).  Fixes
+	  bug reported by Ian Watson
+
+lib/readline/display.c
+	- in _rl_move_cursor_relative, use `new' when comparing against
+	  the last invisible character in the prompt, since they both denote
+	  buffer indices when in a multibyte locale, whereas `dpos' is a
+	  display position
+
+				   3/13
+				   ----
+lib/readline/complete.c
+	- set rl_completion_append_character to the default (' ') in
+	  set_completion_defaults().  Fixes bug reported by David Emerson
+	  <demerson3x@angelbase.com>
+
+				   3/23
+				   ----
+builtins/evalfile.c
+	- make sure read() returns a value >= 0 before using it as an index
+	  into string[]
+	- use a variable of type `ssize_t' for return value from read()
+	- only try to read the entire contents of a regular file in one shot
+	  if the file size is less than SSIZE_MAX.  These fix problems
+	  reported by hooanon05@yahoo.co.jp.
+
+include/typemax.h
+	- define SSIZE_MAX as 32767 if it's not defined
+
+lib/readline/display.c
+	- in rl_redisplay() and update_line(), if redrawing the prompt because
+	  it contains invisible characters, make sure we redraw the character
+	  indicating a modified history line and take it into account when
+	  computing _rl_last_c_pos
+	- in update_line, if deleting characters and redrawing the new text,
+	  make sure we adjust _rl_last_c_pos by wrap_offset in a multibyte
+	  locale if the text we're drawing starts before or at the last
+	  invisible character in the prompt string.  Fixes bug reported on
+	  bug-readline by J Pelkey <pelkeyj@gmail.com>
+
+parse.y
+	- when adding at CTLESC character to the current token, do not
+	  escape it with CTLESC if pass_next_character indicates that the
+	  CTLESC was escaped by a backslash.  Fixes bug reported by
+	  Paul Bagshaw <paul.bagshaw@orange-ftgroup.com>.
+
+				   3/25
+				   ----
+lib/readline/text.c
+	- in rl_forward_char, short-circuit the loop if in emacs mode and
+	  rl_point == rl_end.  Fixes problem with multibyte locales
+	  reported by Len Lattanzi <llattanzi@apple.com>
+
+				   3/29
+				   ----
+command.h
+	- new flag for subshell_environment: SUBSHELL_PROCSUB, for process
+	  substitution
+
+subst.c
+	- add SUBSHELL_PROCSUB to subshell_environment in process_substitute
+
+				   3/30
+				   ----
+doc/Makefile.in
+	- fix installation of bash.info to understand that it is in the build
+	  directory, not the source directory
+
+mailcheck.c
+	- new function, init_mail_dates, calls remember_mail_dates only if
+	  there are no mailboxes in `mailfiles'
+	- new function, init_mail_file, initializes a FILEINFO, using the
+	  last time mail was checked as the mtime and atime (or the time the
+	  shell was started if last_time_mail_checked is uninitialized)
+	- call init_mail_file instead of update_mail_file in add_mail_file,
+	  called from remember_mail_dates (which is supposed to initialize
+	  the list of mail files)
+	- new convenience functions, alloc_mail_file and dispose_mail_file to
+	  allocate and free FILEINFO structs
+
+mailcheck.h
+	- extern declaration for init_mail_dates
+
+shell.c
+	- call init_mail_dates instead of remember_mail_dates

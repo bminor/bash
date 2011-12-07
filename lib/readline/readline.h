@@ -40,9 +40,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0501		/* Readline 5.1 */
+#define RL_READLINE_VERSION	0x0502		/* Readline 5.2 */
 #define RL_VERSION_MAJOR	5
-#define RL_VERSION_MINOR	1
+#define RL_VERSION_MINOR	2
 
 /* Readline data structures. */
 
@@ -420,6 +420,7 @@ extern int rl_set_keyboard_input_timeout PARAMS((int));
 extern void rl_extend_line_buffer PARAMS((int));
 extern int rl_ding PARAMS((void));
 extern int rl_alphabetic PARAMS((int));
+extern void rl_free PARAMS((void *));
 
 /* Readline signal handling, from signals.c */
 extern int rl_set_signals PARAMS((void));
@@ -492,6 +493,10 @@ extern const char *rl_readline_name;
 /* The prompt readline uses.  This is set from the argument to
    readline (), and should not be assigned to directly. */
 extern char *rl_prompt;
+
+/* The prompt string that is actually displayed by rl_redisplay.  Public so
+   applications can more easily supply their own redisplay functions. */
+extern char *rl_display_prompt;
 
 /* The line buffer that is in use. */
 extern char *rl_line_buffer;
@@ -713,6 +718,9 @@ extern int rl_attempted_completion_over;
    functions. */
 extern int rl_completion_type;
 
+/* Set to the last key used to invoke one of the completion functions */
+extern int rl_completion_invoking_key;
+
 /* Up to this many items will be displayed in response to a
    possible-completions call.  After that, we ask the user if she
    is sure she wants to see them all.  The default value is 100. */
@@ -739,6 +747,9 @@ extern int rl_completion_found_quote;
    application-specific completion function. */
 extern int rl_completion_suppress_quote;
 
+/* If non-zero, readline will sort the completion matches.  On by default. */
+extern int rl_sort_completion_matches;
+
 /* If non-zero, a slash will be appended to completed filenames that are
    symbolic links to directory names, subject to the value of the
    mark-directories variable (which is user-settable).  This exists so
@@ -756,6 +767,10 @@ extern int rl_ignore_completion_duplicates;
 /* If this is non-zero, completion is (temporarily) inhibited, and the
    completion character will be inserted as any other. */
 extern int rl_inhibit_completion;
+
+/* Input error; can be returned by (*rl_getc_function) if readline is reading
+   a top-level command (RL_ISSTATE (RL_STATE_READCMD)). */
+#define READERR			(-2)
 
 /* Definitions available for use by readline clients. */
 #define RL_PROMPT_START_IGNORE	'\001'

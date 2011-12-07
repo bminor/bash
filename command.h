@@ -88,6 +88,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_HASQUOTEDNULL	0x040000	/* word contains a quoted null character */
 #define W_DQUOTE	0x080000	/* word should be treated as if double-quoted */
 #define W_NOPROCSUB	0x100000	/* don't perform process substitution */
+#define W_HASCTLESC	0x200000	/* word contains literal CTLESC characters */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -95,6 +96,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define SUBSHELL_COMSUB	0x04	/* subshell caused by `command` or $(command) */
 #define SUBSHELL_FORK	0x08	/* subshell caused by executing a disk command */
 #define SUBSHELL_PIPE	0x10	/* subshell from a pipeline element */
+#define SUBSHELL_PROCSUB 0x20	/* subshell caused by <(command) or >(command) */
 
 /* A structure which represents a word. */
 typedef struct word_desc {

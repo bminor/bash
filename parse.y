@@ -1,6 +1,6 @@
 /* Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -204,10 +204,6 @@ static void prompt_again __P((void));
 static void reset_readline_prompt __P((void));
 #endif
 static void print_prompt __P((void));
-
-#if defined (HISTORY)
-char *history_delimiting_chars __P((void));
-#endif
 
 #if defined (HANDLE_MULTIBYTE)
 static void set_line_mbstate __P((void));
@@ -1033,6 +1029,7 @@ timespec:	TIME
 #define PST_CMDTOKEN	0x1000		/* command token OK - unused */
 #define PST_COMPASSIGN	0x2000		/* parsing x=(...) compound assignment */
 #define PST_ASSIGNOK	0x4000		/* assignment statement ok in this context */
+#define PST_REGEXP	0x8000		/* parsing an ERE/BRE as a single word */
 
 /* Initial size to allocate for tokens, and the
    amount to grow them by. */
@@ -1876,7 +1873,6 @@ shell_getc (remove_quoted_newline)
   register int i;
   int c;
   unsigned char uc;
-  static int mustpop = 0;
 
   QUIT;
 
@@ -2149,8 +2145,8 @@ discard_until (character)
 }
 
 void
-execute_prompt_command (command)
-     char *command;
+execute_variable_command (command, vname)
+     char *command, *vname;
 {
   char *last_lastarg;
   sh_parser_state_t ps;
@@ -2160,7 +2156,7 @@ execute_prompt_command (command)
   if (last_lastarg)
     last_lastarg = savestring (last_lastarg);
 
-  parse_and_execute (savestring (command), "PROMPT_COMMAND", SEVAL_NONINT|SEVAL_NOHIST);
+  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST);
 
   restore_parser_state (&ps);
   bind_variable ("_", last_lastarg, 0);
@@ -2563,7 +2559,7 @@ read_token (command)
 #endif /* ALIAS */
 
   /* Read a single word from input.  Start by skipping blanks. */
-  while ((character = shell_getc (1)) != EOF && whitespace (character))
+  while ((character = shell_getc (1)) != EOF && shellblank (character))
     ;
 
   if (character == EOF)
@@ -2595,6 +2591,9 @@ read_token (command)
 
       return (character);
     }
+
+  if (parser_state & PST_REGEXP)
+    goto tokword;
 
   /* Shell meta-characters. */
   if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
@@ -2703,6 +2702,7 @@ read_token (command)
   if MBTEST(character == '-' && (last_read_token == LESS_AND || last_read_token == GREATER_AND))
     return (character);
 
+tokword:
   /* Okay, if we got this far, we have to read a word.  Read one,
      and then check it against the known ones. */
   result = read_token_word (character);
@@ -2740,7 +2740,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 /* itrace("parse_matched_pair: open = %c close = %c", open, close); */
   count = 1;
   pass_next_character = backq_backslash = was_dollar = in_comment = 0;
-  check_comment = (flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
+  check_comment = (flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
 
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
   rflags = (qc == '"') ? P_DQUOTE : (flags & P_DQUOTE);
@@ -2776,7 +2776,9 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
 	  continue;
 	}
-      /* Not exactly right yet */
+      /* Not exactly right yet, should handle shell metacharacters, too.  If
+	 any changes are made to this test, make analogous changes to subst.c:
+	 extract_delimited_string(). */
       else if MBTEST(check_comment && in_comment == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
 	in_comment = 1;
 
@@ -2954,8 +2956,8 @@ static int
 parse_dparen (c)
      int c;
 {
-  int cmdtyp, len, sline;
-  char *wval, *wv2;
+  int cmdtyp, sline;
+  char *wval;
   WORD_DESC *wd;
 
 #if defined (ARITH_FOR_COMMAND)
@@ -3205,8 +3207,11 @@ cond_term ()
       if (tok == WORD && test_binop (yylval.word->word))
 	op = yylval.word;
 #if defined (COND_REGEXP)
-      else if (tok == WORD && STREQ (yylval.word->word,"=~"))
-	op = yylval.word;
+      else if (tok == WORD && STREQ (yylval.word->word, "=~"))
+	{
+	  op = yylval.word;
+	  parser_state |= PST_REGEXP;
+	}
 #endif
       else if (tok == '<' || tok == '>')
 	op = make_word_from_token (tok);  /* ( */
@@ -3237,6 +3242,7 @@ cond_term ()
 
       /* rhs */
       tok = read_token (READ);
+      parser_state &= ~PST_REGEXP;
       if (tok == WORD)
 	{
 	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
@@ -3370,7 +3376,7 @@ read_token_word (character)
       if (pass_next_character)
 	{
 	  pass_next_character = 0;
-	  goto got_character;
+	  goto got_escaped_character;
 	}
 
       cd = current_delimiter (dstack);
@@ -3422,9 +3428,34 @@ read_token_word (character)
 	  goto next_character;
 	}
 
+#ifdef COND_REGEXP
+      /* When parsing a regexp as a single word inside a conditional command,
+	 we need to special-case characters special to both the shell and
+	 regular expressions.  Right now, that is only '(' and '|'. */ /*)*/
+      if MBTEST((parser_state & PST_REGEXP) && (character == '(' || character == '|'))		/*)*/
+	{
+	  if (character == '|')
+	    goto got_character;
+
+	  push_delimiter (dstack, character);
+	  ttok = parse_matched_pair (cd, '(', ')', &ttoklen, 0);
+	  pop_delimiter (dstack);
+	  if (ttok == &matched_pair_error)
+	    return -1;		/* Bail immediately. */
+	  RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+				  token_buffer_size, TOKEN_DEFAULT_GROW_SIZE);
+	  token[token_index++] = character;
+	  strcpy (token + token_index, ttok);
+	  token_index += ttoklen;
+	  FREE (ttok);
+	  dollar_present = all_digit_token = 0;
+	  goto next_character;
+	}
+#endif /* COND_REGEXP */
+
 #ifdef EXTENDED_GLOB
       /* Parse a ksh-style extended pattern matching specification. */
-      if (extended_glob && PATTERN_CHAR (character))
+      if MBTEST(extended_glob && PATTERN_CHAR (character))
 	{
 	  peek_char = shell_getc (1);
 	  if MBTEST(peek_char == '(')		/* ) */
@@ -3619,11 +3650,13 @@ read_token_word (character)
 
     got_character:
 
-      all_digit_token &= DIGIT (character);
-      dollar_present |= character == '$';
-
       if (character == CTLESC || character == CTLNUL)
 	token[token_index++] = CTLESC;
+
+    got_escaped_character:
+
+      all_digit_token &= DIGIT (character);
+      dollar_present |= character == '$';
 
       token[token_index++] = character;
 
@@ -3696,8 +3729,8 @@ got_token:
   if (dollar_present)
     the_word->flags |= W_HASDOLLAR;
   if (quoted)
-    the_word->flags |= W_QUOTED;
-  if (compound_assignment)
+    the_word->flags |= W_QUOTED;		/*(*/
+  if (compound_assignment && token[token_index-1] == ')')
     the_word->flags |= W_COMPASSIGN;
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
@@ -3828,7 +3861,7 @@ reset_readline_prompt ()
 /* A list of tokens which can be followed by newlines, but not by
    semi-colons.  When concatenating multiple lines of history, the
    newline separator for such tokens is replaced with a space. */
-static int no_semi_successors[] = {
+static const int no_semi_successors[] = {
   '\n', '{', '(', ')', ';', '&', '|',
   CASE, DO, ELSE, IF, SEMI_SEMI, THEN, UNTIL, WHILE, AND_AND, OR_OR, IN,
   0
@@ -3996,7 +4029,7 @@ decode_prompt_string (string)
   int last_exit_value;
 #if defined (PROMPT_STRING_DECODE)
   int result_size, result_index;
-  int c, n;
+  int c, n, i;
   char *temp, octal_string[4];
   struct tm *tm;  
   time_t the_time;
@@ -4158,7 +4191,7 @@ decode_prompt_string (string)
 	    case 'W':
 	      {
 		/* Use the value of PWD because it is much more efficient. */
-		char t_string[PATH_MAX], *t;
+		char t_string[PATH_MAX];
 		int tlen;
 
 		temp = get_string_value ("PWD");
@@ -4268,9 +4301,12 @@ decode_prompt_string (string)
 		  break;
 		}
 	      temp = (char *)xmalloc (3);
-	      temp[0] = CTLESC;
-	      temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
-	      temp[2] = '\0';
+	      n = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
+	      i = 0;
+	      if (n == CTLESC || n == CTLNUL)
+		temp[i++] = CTLESC;
+	      temp[i++] = n;
+	      temp[i] = '\0';
 	      goto add_string;
 #endif /* READLINE */
 
@@ -4366,15 +4402,15 @@ yyerror (msg)
 }
 
 static char *
-error_token_from_token (token)
-     int token;
+error_token_from_token (tok)
+     int tok;
 {
   char *t;
 
-  if (t = find_token_in_alist (token, word_token_alist, 0))
+  if (t = find_token_in_alist (tok, word_token_alist, 0))
     return t;
 
-  if (t = find_token_in_alist (token, other_token_alist, 0))
+  if (t = find_token_in_alist (tok, other_token_alist, 0))
     return t;
 
   t = (char *)NULL;

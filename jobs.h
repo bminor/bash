@@ -74,7 +74,7 @@ typedef struct process {
 #define get_job_by_jid(ind)	(jobs[(ind)])
 
 /* A description of a pipeline's state. */
-typedef enum { JRUNNING, JSTOPPED, JDEAD, JMIXED } JOB_STATE;
+typedef enum { JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } JOB_STATE;
 #define JOBSTATE(job)	(jobs[(job)]->state)
 #define J_JOBSTATE(j)	((j)->state)
 

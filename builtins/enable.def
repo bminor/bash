@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987-2003 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES enable.c
 
 $BUILTIN enable
 $FUNCTION enable_builtin
-$SHORT_DOC enable [-pnds] [-a] [-f filename] [name ...]
+$SHORT_DOC enable [-a] [-dnps] [-f filename] [name ...]
 Enable and disable builtin shell commands.  This allows
 you to use a disk command which has the same name as a shell
 builtin without specifying a full pathname.  If -n is used, the
@@ -32,7 +32,7 @@ to use the `test' found in $PATH instead of the shell builtin
 version, type `enable -n test'.  On systems supporting dynamic
 loading, the -f option may be used to load new builtins from the
 shared object FILENAME.  The -d option will delete a builtin
-previously loaded with -f.  If no non-option names are given, or
+previously loaded with -f.  If no non-option NAMEs are given, or
 the -p option is supplied, a list of builtins is printed.  The
 -a option means to print every builtin with an indication of whether
 or not it is enabled.  The -s option restricts the output to the POSIX.2

@@ -39,9 +39,12 @@ prefix = @prefix@
 srcdir = @srcdir@
 VPATH = .:@srcdir@
 topdir = @top_srcdir@
+
+datarootdir = @datarootdir@
+
 includedir = @includedir@
 datadir = @datadir@
-localedir = $(datadir)/locale
+localedir = @localedir@
 
 # Support an alternate destination root directory for package building
 DESTDIR =
@@ -74,7 +77,10 @@ RL_INCLUDEDIR = @RL_INCLUDEDIR@
 
 INTL_LIBSRC = ${topdir}/lib/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
+INTL_LIBDIR = ${INTL_BUILDDIR}
+INTL_LIBRARY = ${INTL_BUILDDIR}/libintl.a
 INTL_INC = @INTL_INC@
+INTL_DEP = @INTL_DEP@
 LIBINTL_H = @LIBINTL_H@
 
 HELPDIR = @HELPDIR@
@@ -235,6 +241,11 @@ $(OFILES):	$(MKBUILTINS) ../config.h
 # maintainer special - for now
 po:	builtins.c
 	xgettext -L C -o $(topdir)/po/builtins.pot --keyword='N_' builtins.c 2>/dev/null
+
+${LIBINTL_H}:
+	@echo making $@ in ${INTL_BUILDDIR}
+	@(cd ${INTL_BUILDDIR} && \
+		$(MAKE) $(MFLAGS) libintl.h) || exit 1
 
 # dependencies
 
@@ -609,7 +620,7 @@ inlib.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 jobs.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 kill.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 let.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
-mkbuiltins.c: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
+mkbuiltins.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 printf.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 pushd.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 read.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h

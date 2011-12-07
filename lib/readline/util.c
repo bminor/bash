@@ -66,7 +66,7 @@
    in words, or 1 if it is. */
 
 int _rl_allow_pathname_alphabetic_chars = 0;
-static const char *pathname_alphabetic_chars = "/-_=~.#$";
+static const char * const pathname_alphabetic_chars = "/-_=~.#$";
 
 int
 rl_alphabetic (c)
@@ -212,13 +212,94 @@ rl_tilde_expand (ignore, key)
       strncpy (temp, rl_line_buffer + start, len);
       temp[len] = '\0';
       homedir = tilde_expand (temp);
-      free (temp);
+      xfree (temp);
 
       _rl_replace_text (homedir, start, end);
     }
 
   return (0);
 }
+
+#if defined (USE_VARARGS)
+void
+#if defined (PREFER_STDARG)
+_rl_ttymsg (const char *format, ...)
+#else
+_rl_ttymsg (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
+
+  rl_forced_update_display ();
+}
+
+void
+#if defined (PREFER_STDARG)
+_rl_errmsg (const char *format, ...)
+#else
+_rl_errmsg (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
+}
+
+#else /* !USE_VARARGS */
+void
+_rl_ttymsg (format, arg1, arg2)
+     char *format;
+{
+  fprintf (stderr, "readline: ");
+  fprintf (stderr, format, arg1, arg2);
+  fprintf (stderr, "\n");
+
+  rl_forced_update_display ();
+}
+
+void
+_rl_errmsg (format, arg1, arg2)
+     char *format;
+{
+  fprintf (stderr, "readline: ");
+  fprintf (stderr, format, arg1, arg2);
+  fprintf (stderr, "\n");
+}
+#endif /* !USE_VARARGS */
 
 /* **************************************************************** */
 /*								    */
@@ -344,6 +425,16 @@ FUNCTION_FOR_MACRO (_rl_to_lower)
 FUNCTION_FOR_MACRO (_rl_to_upper)
 FUNCTION_FOR_MACRO (_rl_uppercase_p)
 
+/* A convenience function, to force memory deallocation to be performed
+   by readline.  DLLs on Windows apparently require this. */
+void
+rl_free (mem)
+     void *mem;
+{
+  if (mem)
+    free (mem);
+}
+
 /* Backwards compatibility, now that savestring has been removed from
    all `public' readline header files. */
 #undef _rl_savestring
@@ -353,3 +444,60 @@ _rl_savestring (s)
 {
   return (strcpy ((char *)xmalloc (1 + (int)strlen (s)), (s)));
 }
+
+#if defined (USE_VARARGS)
+static FILE *_rl_tracefp;
+
+void
+#if defined (PREFER_STDARG)
+_rl_trace (const char *format, ...)
+#else
+_rl_trace (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  if (_rl_tracefp == 0)
+    _rl_tropen ();
+  vfprintf (_rl_tracefp, format, args);
+  fprintf (_rl_tracefp, "\n");
+  fflush (_rl_tracefp);
+
+  va_end (args);
+}
+
+int
+_rl_tropen ()
+{
+  char fnbuf[128];
+
+  if (_rl_tracefp)
+    fclose (_rl_tracefp);
+  sprintf (fnbuf, "/var/tmp/rltrace.%ld", getpid());
+  unlink(fnbuf);
+  _rl_tracefp = fopen (fnbuf, "w+");
+  return _rl_tracefp != 0;
+}
+
+int
+_rl_trclose ()
+{
+  int r;
+
+  r = fclose (_rl_tracefp);
+  _rl_tracefp = 0;
+  return r;
+}
+
+#endif

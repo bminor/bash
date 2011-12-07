@@ -23,7 +23,7 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-u fd] [-t timeout] [-p prompt] [-a array] [-n nchars] [-d delim] [name ...]
+$SHORT_DOC read [-ers] [-a array] [-d delim] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 One line is read from the standard input, or from file descriptor FD if the
 -u option is supplied, and the first word is assigned to the first NAME,
 the second word to the second NAME, and so on, with leftover words assigned
@@ -329,8 +329,10 @@ read_builtin (list)
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
+#if defined (READLINE)
       if (edit)
 	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
+#endif
       alarm (tmout);
     }
 
@@ -532,7 +534,10 @@ add_char:
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
 	{
-	  word_list_remove_quoted_nulls (alist);
+	  if (saw_escape)
+	    dequote_list (alist);
+	  else
+	    word_list_remove_quoted_nulls (alist);
 	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}

@@ -815,7 +815,7 @@ gen_wordlist_matches (cs, text)
 {
   WORD_LIST *l, *l2;
   STRINGLIST *sl;
-  int nw, tlen, qc;
+  int nw, tlen;
   char *ntxt;		/* dequoted TEXT to use in comparisons */
 
   if (cs->words == 0 || cs->words[0] == '\0')
@@ -894,6 +894,16 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
   if (v && exported)
     VSETATTR(v, att_exported);
 
+  value = inttostr (rl_completion_type, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("COMP_TYPE", value);
+  if (v && exported)
+    VSETATTR(v, att_exported);
+
+  value = inttostr (rl_completion_invoking_key, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("COMP_KEY", value);
+  if (v && exported)
+    VSETATTR(v, att_exported);
+
   /* Since array variables can't be exported, we don't bother making the
      array of words. */
   if (exported == 0)
@@ -914,6 +924,8 @@ unbind_compfunc_variables (exported)
 {
   unbind_variable ("COMP_LINE");
   unbind_variable ("COMP_POINT");
+  unbind_variable ("COMP_TYPE");
+  unbind_variable ("COMP_KEY");
 #ifdef ARRAY_VARS
   unbind_variable ("COMP_WORDS");
   unbind_variable ("COMP_CWORD");
@@ -1072,6 +1084,7 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
   char *csbuf, *cscmd, *t;
   int cmdlen, cmdsize, n, ws, we;
   WORD_LIST *cmdlist, *cl;
+  WORD_DESC *tw;
   STRINGLIST *sl;
 
   bind_compfunc_variables (line, ind, lwords, cw, 1);
@@ -1103,7 +1116,9 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
     }
   cscmd[cmdlen] = '\0';
 
-  csbuf = command_substitute (cscmd, 0);
+  tw = command_substitute (cscmd, 0);
+  csbuf = tw ? tw->word : (char *)NULL;
+  dispose_word_desc (tw);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);

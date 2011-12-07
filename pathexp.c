@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -110,6 +110,33 @@ unquoted_glob_pattern_p (string)
   return (0);
 }
 
+/* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
+   be quoted to match itself. */
+static inline int
+ere_char (c)
+     int c;
+{
+  switch (c)
+    {
+    case '.':
+    case '[':
+    case '\\':
+    case '(':
+    case ')':
+    case '*':
+    case '+':
+    case '?':
+    case '{':
+    case '|':
+    case '^':
+    case '$':
+      return 1;
+    default: 
+      return 0;
+    }
+  return (0);
+}
+
 /* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
    that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
@@ -141,6 +168,8 @@ quote_string_for_globbing (pathname, qflags)
       if (pathname[i] == CTLESC)
 	{
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
+	    continue;
+	  if ((qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
 	    continue;
 	  temp[j++] = '\\';
 	  i++;

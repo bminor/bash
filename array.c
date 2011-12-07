@@ -120,7 +120,6 @@ ARRAY	*a;
 	return(a1);
 }
 
-#ifdef INCLUDE_UNUSED
 /*
  * Make and return a new array composed of the elements in array A from
  * S to E, inclusive.
@@ -141,13 +140,12 @@ ARRAY_ELEMENT	*s, *e;
 	for (p = s, i = 0; p != e; p = element_forw(p), i++) {
 		n = array_create_element (element_index(p), element_value(p));
 		ADD_BEFORE(a->head, n);
-		mi = element_index(ae);
+		mi = element_index(n);
 	}
 	a->num_elements = i;
 	a->max_index = mi;
 	return a;
 }
-#endif
 
 /*
  * Walk the array, calling FUNC once for each element, with the array
@@ -300,6 +298,23 @@ ARRAY	*array;
 	return array;
 }
 
+ARRAY	*
+array_quote_escapes(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = quote_escapes (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
 /*
  * Return a string whose elements are the members of array A beginning at
  * index START and spanning NELEM members.  Null elements are counted.
@@ -311,9 +326,10 @@ ARRAY	*a;
 arrayind_t	start, nelem;
 int	starsub, quoted;
 {
+	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, sep[2];
+	char		*ifs, sep[2], *t;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -336,6 +352,13 @@ int	starsub, quoted;
 	for (i = 0, h = p; p != a->head && i < nelem; i++, p = element_forw(p))
 		;
 
+	a2 = array_slice(a, h, p);
+
+	if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+		array_quote(a2);
+	else
+		array_quote_escapes(a2);
+
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
 		ifs = getifs();
 		sep[0] = ifs ? *ifs : '\0';
@@ -343,7 +366,10 @@ int	starsub, quoted;
 		sep[0] = ' ';
 	sep[1] = '\0';
 
-	return (array_to_string_internal (h, p, sep, quoted));
+	t = array_to_string (a2, sep, 0);
+	array_dispose(a2);
+
+	return t;
 }
 
 char *
@@ -367,7 +393,9 @@ int	mflags;
 	}
 
 	if (mflags & MATCH_QUOTED)
-		array_quote (a2);
+		array_quote(a2);
+	else
+		array_quote_escapes(a2);
 	if (mflags & MATCH_STARSUB) {
 		ifs = getifs();
 		sifs[0] = ifs ? *ifs : '\0';

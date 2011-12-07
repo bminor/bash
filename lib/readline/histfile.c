@@ -53,7 +53,9 @@
 #  include <unistd.h>
 #endif
 
-#if defined (__EMX__) || defined (__CYGWIN__)
+#include <ctype.h>
+
+#if defined (__EMX__)
 #  undef HAVE_MMAP
 #endif
 
@@ -103,7 +105,7 @@ int history_write_timestamps = 0;
 
 /* Does S look like the beginning of a history timestamp entry?  Placeholder
    for more extensive tests. */
-#define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char)
+#define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((s)[1]) )
 
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the
@@ -256,7 +258,11 @@ read_history_range (filename, from, to)
   for (line_end = line_start; line_end < bufend; line_end++)
     if (*line_end == '\n')
       {
-	*line_end = '\0';
+	/* Change to allow Windows-like \r\n end of line delimiter. */
+	if (line_end > line_start && line_end[-1] == '\r')
+	  line_end[-1] = '\0';
+	else
+	  *line_end = '\0';
 
 	if (*line_start)
 	  {

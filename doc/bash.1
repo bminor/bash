@@ -1,4 +1,4 @@
-\"
+.\"
 .\" MAN PAGE COMMENTS to
 .\"
 .\"	Chet Ramey
@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Jan 26 09:04:43 EST 2006
+.\"	Last Change: Fri Jan 12 16:29:22 EST 2007
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 Jan 26" "GNU Bash-3.2"
+.TH BASH 1 "2007 January 12" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -51,8 +51,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2005 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2005 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2007 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2007 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -809,10 +809,10 @@ as for pathname expansion (see
 .B Pathname Expansion
 below).
 The \fIword\fP is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, process substitution and quote removal.
 Each \fIpattern\fP examined is expanded using tilde
-expansion, parameter and variable expansion, arithmetic substituion,
+expansion, parameter and variable expansion, arithmetic substitution,
 command substitution, and process substitution.
 If the shell option
 .B nocasematch
@@ -1245,6 +1245,11 @@ The following variables are set by the shell:
 Expands to the full file name used to invoke this instance of
 .BR bash .
 .TP
+.B BASHPID
+Expands to the process id of the current bash process.
+This differs from \fB$$\fP under certain circumstances, such as subshells
+that do not require bash to be re-initialized.
+.TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
 frame of the current bash execution call stack.
@@ -1346,6 +1351,10 @@ This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
 .TP
+.B COMP_KEY
+The key (or final key of a key sequence) used to invoke the current
+completion function.
+.TP
 .B COMP_LINE
 The current command line.
 This variable is available only in shell functions and external
@@ -1363,6 +1372,20 @@ commands invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
 .TP
+.B COMP_TYPE
+Set to an integer value corresponding to the type of completion attempted
+that caused a completion function to be called:
+\fITAB\fP, for normal completion,
+\fI?\fP, for listing completions after successive tabs,
+\fI!\fP, for listing alternatives on partial word completion,
+\fI@\fP, to list completions if the word is not unmodified,
+or
+\fI%\fP, for menu completion.
+This variable is available only in shell functions and external
+commands invoked by the
+programmable completion facilities (see \fBProgrammable Completion\fP
+below).
+.TP
 .B COMP_WORDBREAKS
 The set of characters that the Readline library treats as word
 separators when performing word completion.
@@ -1375,6 +1398,8 @@ subsequently reset.
 .B COMP_WORDS
 An array variable (see \fBArrays\fP below) consisting of the individual
 words in the current command line.
+The words are split on shell metacharacters as the shell parser would
+separate them.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see \fBProgrammable Completion\fP
 below).
@@ -1408,7 +1433,9 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is "main".
+The bottom-most element is
+.if t \f(CW"main"\fP.
+.if n "main".
 This variable exists only when a shell function is executing.
 Assignments to
 .SM
@@ -1693,7 +1720,8 @@ command history is not saved when an interactive shell exits.
 .B HISTFILESIZE
 The maximum number of lines contained in the history file.  When this
 variable is assigned a value, the history file is truncated, if
-necessary, to contain no more than that number of lines.  The default
+necessary, by removing the oldest entries,
+to contain no more than that number of lines.  The default
 value is 500.  The history file is also truncated to this size after
 writing it when an interactive shell exits.
 .TP
@@ -1724,6 +1752,8 @@ for \fIstrftime\fP(3) to print the time stamp associated with each history
 entry displayed by the \fBhistory\fP builtin.
 If this variable is set, time stamps are written to the history file so
 they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
 .TP
 .B HOME
 The home directory of the current user; the default argument for the
@@ -2427,7 +2457,9 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If \fIoffset\fP is 0, and the positional parameters are used, \fB$0\fP is
+prefixed to the list.
 .TP
 ${\fB!\fP\fIprefix\fP\fB*\fP}
 .PD 0
@@ -2439,6 +2471,8 @@ separated by the first character of the
 .SM
 .B IFS
 special variable.
+When \fI@\fP is used and the expansion appears within double quotes, each
+variable name expands to a separate word.
 .TP
 ${\fB!\fP\fIname\fP[\fI@\fP]}
 .PD 0
@@ -2665,10 +2699,18 @@ is unset, or its
 value is exactly
 .BR <space><tab><newline> ,
 the default, then
+sequences of
+.BR <space> ,
+.BR <tab> ,
+and
+.B <newline>
+at the beginning and end of the results of the previous
+expansions are ignored, and
 any sequence of
 .SM
 .B IFS
-characters serves to delimit words.  If
+characters not at the beginning or end serves to delimit words.
+If
 .SM
 .B IFS
 has a value other than the default, then sequences of
@@ -4169,11 +4211,15 @@ is executed for each child that exits.
 .PP
 If an attempt to exit
 .B bash
-is made while jobs are stopped, the shell prints a warning message.  The
+is made while jobs are stopped (or, if the \fBcheckjobs\fP shell option has
+been enabled using the \fBshopt\fP builtin, running), the shell prints a
+warning message, and, if the \fBcheckjobs\fP option is enabled, lists the
+jobs and their statuses.
+The
 .B jobs
-command may then be used to inspect their status.
+command may then be used to inspect their status. 
 If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and the stopped
+the shell does not print another warning, and any stopped
 jobs are terminated.
 .SH PROMPTING
 When executing interactively, 
@@ -5450,10 +5496,14 @@ After these matches have been generated, any shell function or command
 specified with the \fB\-F\fP and \fB\-C\fP options is invoked.
 When the command or function is invoked, the
 .SM
-.B COMP_LINE
+.BR COMP_LINE ,
+.SM
+.BR COMP_POINT ,
+.SM
+.BR COMP_KEY ,
 and
 .SM
-.B COMP_POINT
+.B COMP_TYPE
 variables are assigned values as described above under
 \fBShell Variables\fP.
 If a shell function is being invoked, the 
@@ -5563,6 +5613,13 @@ is truncated, if necessary, to contain no more than
 the number of lines specified by the value of
 .SM
 .BR HISTFILESIZE .
+When the history file is read,
+lines beginning with the history comment character followed immediately
+by a digit are interpreted as timestamps for the preceding history line.
+These timestamps are optionally displayed depending on the value of the
+.SM
+.B HISTTIMEFORMAT
+variable.
 When an interactive shell exits, the last
 .SM
 .B $HISTSIZE
@@ -5583,7 +5640,16 @@ If
 .SM
 .B HISTFILE
 is unset, or if the history file is unwritable, the history is
-not saved.  After saving the history, the history file is truncated
+not saved.
+If the
+.SM
+.HISTTIMEFORMAT
+variable is set, time stamps are written to the history file, marked
+with the history comment character, so
+they may be preserved across shell sessions.
+This uses the history comment character to distinguish timestamps from
+other history lines.
+After saving the history, the history file is truncated
 to contain no more than
 .SM
 .B HISTFILESIZE
@@ -5717,6 +5783,9 @@ history expansion mechanism (see the description of
 .B histchars
 above under
 .BR "Shell Variables" ).
+The shell uses
+the history comment character to mark history timestamps when
+writing the history file.
 .SS Event Designators
 .PP
 An event designator is a reference to a command line entry in the
@@ -5976,8 +6045,9 @@ no alias has been defined.
 Resume each suspended job \fIjobspec\fP in the background, as if it
 had been started with
 .BR & .
-If \fIjobspec\fP is not present, the shell's notion of the
-\fIcurrent job\fP is used.
+If
+.I jobspec
+is not present, the shell's notion of the \fIcurrent job\fP is used.
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
@@ -6035,13 +6105,6 @@ that they can be re-read.
 .B \-P
 List current \fBreadline\fP function names and bindings.
 .TP
-.B \-v
-Display \fBreadline\fP variable names and values in such a way that they
-can be re-read.
-.TP
-.B \-V
-List current \fBreadline\fP variable names and values.
-.TP
 .B \-s
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output in such a way that they can be re-read.
@@ -6049,6 +6112,13 @@ they output in such a way that they can be re-read.
 .B \-S
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output.
+.TP
+.B \-v
+Display \fBreadline\fP variable names and values in such a way that they
+can be re-read.
+.TP
+.B \-V
+List current \fBreadline\fP variable names and values.
 .TP
 .B \-f \fIfilename\fP
 Read key bindings from \fIfilename\fP.
@@ -6222,9 +6292,9 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
 .br
-[\fB\-X\fP \fIfilterpat\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] \fIname\fP [\fIname ...\fP]
+[\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
 \fBcomplete\fP \fB\-pr\fP [\fIname\fP ...]
@@ -6490,8 +6560,11 @@ Mark \fIname\fPs for export to subsequent commands via the environment.
 .PD
 .PP
 Using `+' instead of `\-'
-turns off the attribute instead, with the exception that \fB+a\fP
-may not be used to destroy an array variable.  When used in a function,
+turns off the attribute instead,
+with the exceptions that \fB+a\fP
+may not be used to destroy an array variable and \fB+r\fB will not
+remove the readonly attribute.
+When used in a function,
 makes each
 \fIname\fP local, as with the 
 .B local
@@ -6512,7 +6585,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with \fB\-f\fP.
 .RE
 .TP
-.B dirs [\fB\-clpv\fP] [+\fIn\fP] [\-\fIn\fP]
+.B dirs [+\fIn\fP] [\-\fIn\fP] [\fB\-cplv\fP]
 Without options, displays the list of currently remembered directories.
 The default display is on a single line with directory names separated
 by spaces.
@@ -6560,6 +6633,10 @@ of the directory stack.
 Without options, each
 .I jobspec
 is removed from the table of active jobs.
+If
+.I jobspec
+is not present, and neither \fB\-a\fB nor \fB\-r\fP is supplied,
+the shell's notion of the \fIcurrent job\fP is used.
 If the \fB\-h\fP option is given, each
 .I jobspec
 is not removed from the table, but is marked so that
@@ -6641,17 +6718,13 @@ backslash
 the eight-bit character whose value is the octal value \fInnn\fP
 (zero to three octal digits)
 .TP
-.B \e\fInnn\fP
-the eight-bit character whose value is the octal value \fInnn\fP
-(one to three octal digits)
-.TP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP
 (one or two hex digits)
 .PD
 .RE
 .TP
-\fBenable\fP [\fB\-adnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
+\fBenable\fP [\fB\-a\fP] [\fB\-dnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
@@ -6712,7 +6785,7 @@ become the arguments to \fIcommand\fP.
 If the
 .B \-l
 option is supplied,
-the shell places a dash at the beginning of the zeroth arg passed to 
+the shell places a dash at the beginning of the zeroth argument passed to 
 .IR command .
 This is what
 .IR login (1)
@@ -6783,7 +6856,7 @@ is supplied with a
 .I name
 that is not a function.
 .TP
-\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-nlr\fP] [\fIfirst\fP] [\fIlast\fP]
+\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-lnr\fP] [\fIfirst\fP] [\fIlast\fP]
 .PD 0
 .TP
 \fBfc\fP \fB\-s\fP [\fIpat\fP=\fIrep\fP] [\fIcmd\fP]
@@ -7117,7 +7190,11 @@ are added.
 .PD
 .PP
 If the \fBHISTTIMEFORMAT\fP is set, the time stamp information
-associated with each history entry is written to the history file.
+associated with each history entry is written to the history file,
+marked with the history comment character.
+When the history file is read, lines beginning with the history
+comment character followed immediately by a digit are interpreted
+as timestamps for the previous history line.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 \fIoffset\fP is supplied as an argument to \fB\-d\fP, or the
@@ -7269,6 +7346,10 @@ Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
+.B \-n
+Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
+.TP
 \fB+\fP\fIn\fP
 Removes the \fIn\fPth entry counting from the left of the list
 shown by
@@ -7292,10 +7373,6 @@ removes the last directory,
 .if n ``popd -1''
 .if t \f(CWpopd -1\fP
 the next to last.
-.TP
-.B \-n
-Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 .PD
 .PP
 If the
@@ -7334,10 +7411,10 @@ extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
 .TP
-\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
+\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
 .PD 0
 .TP
-\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
+\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
@@ -7346,6 +7423,10 @@ and returns 0, unless the directory stack is empty.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
+.TP
+.B \-n
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 .TP
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
@@ -7359,10 +7440,6 @@ Rotates the stack so that the \fIn\fPth directory
 (counting from the right of the list shown by
 .BR dirs ,
 starting with zero) is at the top.
-.TP
-.B \-n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 .TP
 .I dir
 Adds
@@ -7404,7 +7481,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-u\fP \fIfd\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-a\fP \fIaname\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-n\fP \fInchars\fP] [\fB\-d\fP \fIdelim\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -7540,7 +7617,11 @@ the return status is false.
 Any command associated with the \fBRETURN\fP trap is executed
 before execution resumes after the function or script.
 .TP
-\fBset\fP [\fB\-\-abefhkmnptuvxBCHP\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
+\fBset\fP [\fB\-\-abefhkmnptuvxBCEHPT\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
+.PD 0
+.TP
+\fBset\fP [\fB+abefhkmnptuvxBCEHPT\fP] [\fB+o\fP \fIoption\fP] [\fIarg\fP ...]
+.PD
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
@@ -7579,12 +7660,14 @@ or
 .B until
 keyword, 
 part of the test in an
-.I if
+.B if
 statement, part of a
 .B &&
 or
 .B \(bv\(bv
-list, or if the command's return value is
+list,
+any command in a pipeline but the last,
+or if the command's return value is
 being inverted via
 .BR ! .
 A trap on \fBERR\fP, if set, is executed before the shell exits.
@@ -7940,6 +8023,11 @@ The list of \fBshopt\fP options is:
 .if n .sp 1v
 .PD 0
 .TP 8
+.B autocd
+If set, a command name that is the name of a directory is executed as if
+it were the argument to the \fBcd\fP command.
+This option is only used by interactive shells.
+.TP 8
 .B cdable_vars
 If set, an argument to the
 .B cd
@@ -7961,6 +8049,13 @@ This option is only used by interactive shells.
 If set, \fBbash\fP checks that a command found in the hash
 table exists before trying to execute it.  If a hashed command no
 longer exists, a normal path search is performed.
+.TP 8
+.B checkjobs
+If set, bash lists the status of any stopped and running jobs before
+exiting an interactive shell.  If any jobs are running, this causes
+the exit to be deferred until a second exit is attempted without an
+intervening command (see \fBJOB CONTROL\fP above).  The shell always
+postpones exiting if any jobs are stopped.
 .TP 8
 .B checkwinsize
 If set, \fBbash\fP checks the window size after each command
@@ -8406,8 +8501,8 @@ the command
 is executed each time a shell function or a script executed with the
 \fB.\fP or \fBsource\fP builtins finishes executing.
 Signals ignored upon entry to the shell cannot be trapped or reset.
-Trapped signals are reset to their original values in a child
-process when it is created.
+Trapped signals that are not being ignored are reset to their original
+values in a child process when it is created.
 The return status is false if any
 .I sigspec
 is invalid; otherwise
@@ -8530,7 +8625,7 @@ The maximum size of a process's data segment
 The maximum scheduling priority ("nice")
 .TP
 .B \-f
-The maximum size of files created by the shell
+The maximum size of files written by the shell and its children
 .TP
 .B \-i
 The maximum number of pending signals

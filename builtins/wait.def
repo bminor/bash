@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,8 +37,7 @@ $DEPENDS_ON !JOB_CONTROL
 $SHORT_DOC wait [n]
 Wait for the specified process and report its termination status.  If
 N is not given, all currently active child processes are waited for,
-and the return code is zero.  N is a process ID; if it is not given,
-all child processes of the shell are waited for.
+and the return code is zero.  N must be a process ID.
 $END
 
 #include <config.h>
@@ -59,7 +58,6 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int interrupt_immediately;
 extern int wait_signal_received;
 
 procenv_t wait_intr_buf;

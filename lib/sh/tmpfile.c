@@ -47,6 +47,9 @@ extern int errno;
 
 extern pid_t dollar_dollar_pid;
 
+static char *get_sys_tmpdir __P((void));
+static char *get_tmpdir __P((int));
+
 static char *sys_tmpdir = (char *)NULL;
 static int ntmpfiles;
 static int tmpnamelen = -1;
@@ -55,8 +58,6 @@ static unsigned long filenum = 1L;
 static char *
 get_sys_tmpdir ()
 {
-  struct stat sb;
-
   if (sys_tmpdir)
     return sys_tmpdir;
 
@@ -90,6 +91,9 @@ get_tmpdir (flags)
   char *tdir;
 
   tdir = (flags & MT_USETMPDIR) ? get_string_value ("TMPDIR") : (char *)NULL;
+  if (tdir && (file_iswdir (tdir) == 0 || strlen (tdir) > PATH_MAX))
+    tdir = 0;
+
   if (tdir == 0)
     tdir = get_sys_tmpdir ();
 

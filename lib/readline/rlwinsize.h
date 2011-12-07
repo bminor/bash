@@ -53,5 +53,8 @@
 #  endif /* HAVE_SYS_PTE_H */
 #endif /* !STRUCT_WINSIZE_IN_TERMIOS && !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
-#endif /* _RL_WINSIZE_H */
+#if defined (M_UNIX) && !defined (_SCO_DS) && !defined (tcflow)
+#  define tcflow(fd, action)	ioctl(fd, TCXONC, action)
+#endif
 
+#endif /* _RL_WINSIZE_H */

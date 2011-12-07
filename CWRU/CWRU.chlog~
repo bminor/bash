@@ -14418,3 +14418,42 @@ parse.y
 	  escape it with CTLESC if pass_next_character indicates that the
 	  CTLESC was escaped by a backslash.  Fixes bug reported by
 	  Paul Bagshaw <paul.bagshaw@orange-ftgroup.com>.
+
+				   3/25
+				   ----
+lib/readline/text.c
+	- in rl_forward_char, short-circuit the loop if in emacs mode and
+	  rl_point == rl_end.  Fixes problem with multibyte locales
+	  reported by Len Lattanzi <llattanzi@apple.com>
+
+				   3/29
+				   ----
+command.h
+	- new flag for subshell_environment: SUBSHELL_PROCSUB, for process
+	  substitution
+
+subst.c
+	- add SUBSHELL_PROCSUB to subshell_environment in process_substitute
+
+				   3/30
+				   ----
+doc/Makefile.in
+	- fix installation of bash.info to understand that it is in the build
+	  directory, not the source directory
+
+mailcheck.c
+	- new function, init_mail_dates, calls remember_mail_dates only if
+	  there are no mailboxes in `mailfiles'
+	- new function, init_mail_file, just calls RESET_MAIL_FILE (placeholder
+	  for later expansion)
+	- call init_mail_file instead of update_mail_file in add_mail_file,
+	  called from remember_mail_dates (which is supposed to initialize
+	  the list of mail files)
+	- new convenience functions, alloc_mail_file and dispose_mail_file to
+	  allocate and free FILEINFO structs
+
+mailcheck.h
+	- extern declaration for init_mail_dates
+
+shell.c
+	- call init_mail_dates instead of remember_mail_dates

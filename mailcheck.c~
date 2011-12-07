@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2004 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,8 +41,6 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 /* Values for flags word in struct _fileinfo */
 #define MBOX_INITIALIZED	0x01
 
-extern time_t shell_start_time;
-
 extern int mailstat __P((const char *, struct stat *));
 
 typedef struct _fileinfo {
@@ -61,7 +59,7 @@ static FILEINFO **mailfiles = (FILEINFO **)NULL;
 static int mailfiles_count;
 
 /* The last known time that mail was checked. */
-static time_t last_time_mail_checked = 0;
+static time_t last_time_mail_checked;
 
 /* Non-zero means warn if a mail file has been read since last checked. */
 int mail_warning;
@@ -147,9 +145,7 @@ static void
 init_mail_file (i)
      int i;
 {
-  mailfiles[i]->access_time = mailfiles[i]->mod_time = last_time_mail_checked ? last_time_mail_checked : shell_start_time;
-  mailfiles[i]->file_size = 0;
-  mailfiles[i]->flags = 0;
+  RESET_MAIL_FILE (i);
 }
 
 static void

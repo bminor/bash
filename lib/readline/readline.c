@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -49,6 +49,11 @@
 
 #include <stdio.h>
 #include "posixjmp.h"
+#include <errno.h>
+
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
 
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
@@ -265,6 +270,11 @@ int _rl_output_meta_chars = 0;
    them to equivalent readline functions at startup. */
 int _rl_bind_stty_chars = 1;
 
+/* Non-zero means to go through the history list at every newline (or
+   whenever rl_done is set and readline returns) and revert each line to
+   its initial state. */
+int _rl_revert_all_at_newline = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -295,6 +305,7 @@ readline (prompt)
      const char *prompt;
 {
   char *value;
+  int in_callback;
 
   /* If we are at EOF return a NULL string. */
   if (rl_pending_input == EOF)
@@ -302,6 +313,15 @@ readline (prompt)
       rl_clear_pending_input ();
       return ((char *)NULL);
     }
+
+#if 0
+  /* If readline() is called after installing a callback handler, temporarily
+     turn off the callback state to avoid ensuing messiness.  Patch supplied
+     by the gdb folks.  XXX -- disabled.  This can be fooled and readline
+     left in a strange state by a poorly-timed longjmp. */
+  if (in_callback = RL_ISSTATE (RL_STATE_CALLBACK))
+    RL_UNSETSTATE (RL_STATE_CALLBACK);
+#endif
 
   rl_set_prompt (prompt);
 
@@ -319,6 +339,11 @@ readline (prompt)
 
 #if defined (HANDLE_SIGNALS)
   rl_clear_signals ();
+#endif
+
+#if 0
+  if (in_callback)
+    RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
   return (value);
@@ -393,6 +418,9 @@ readline_internal_teardown (eof)
       strcpy (the_line, temp);
       free (temp);
     }
+
+  if (_rl_revert_all_at_newline)
+    _rl_revert_all_lines ();
 
   /* At any rate, it is highly likely that this line has an undo list.  Get
      rid of it now. */
@@ -478,6 +506,20 @@ readline_internal_charloop ()
       RL_SETSTATE(RL_STATE_READCMD);
       c = rl_read_key ();
       RL_UNSETSTATE(RL_STATE_READCMD);
+
+      /* look at input.c:rl_getc() for the circumstances under which this will
+	 be returned; punt immediately on read error without converting it to
+	 a newline. */
+      if (c == READERR)
+	{
+#if defined (READLINE_CALLBACKS)
+	  RL_SETSTATE(RL_STATE_DONE);
+	  return (rl_done = 1);
+#else
+	  eof_found = 1;
+	  break;
+#endif
+	}
 
       /* EOF typed to a non-blank line is a <NL>. */
       if (c == EOF && rl_end)
@@ -626,6 +668,11 @@ _rl_dispatch_callback (cxt)
   if ((cxt->flags & KSEQ_DISPATCHED) == 0)
     {
       nkey = _rl_subseq_getchar (cxt->okey);
+      if (nkey < 0)
+	{
+	  _rl_abort_internal ();
+	  return -1;
+	}
       r = _rl_dispatch_subseq (nkey, cxt->dmap, cxt->subseq_arg);
       cxt->flags |= KSEQ_DISPATCHED;
     }

@@ -215,7 +215,7 @@ AC_CACHE_VAL(bash_cv_sys_siglist,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifndef SYS_SIGLIST_DECLARED
+#if !HAVE_DECL_SYS_SIGLIST
 extern char *sys_siglist[];
 #endif
 main()
@@ -685,7 +685,7 @@ fi
 ])
 
 AC_DEFUN(BASH_FUNC_GETCWD,
-[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory])
+[AC_MSG_CHECKING([if getcwd() will dynamically allocate memory with 0 size])
 AC_CACHE_VAL(bash_cv_getcwd_malloc,
 [AC_TRY_RUN([
 #include <stdio.h>
@@ -1540,20 +1540,22 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
-[if test -d /dev/fd  && test -r /dev/fd/0 < /dev/null; then
+[bash_cv_dev_fd=""
+if test -d /dev/fd  && (exec test -r /dev/fd/0 < /dev/null) ; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
-   exec 3<&0
-   if test -r /dev/fd/3; then
+   if (exec test -r /dev/fd/3 3</dev/null) ; then
      bash_cv_dev_fd=standard
    else
      bash_cv_dev_fd=absent
    fi
-   exec 3<&-
- elif test -d /proc/self/fd && test -r /proc/self/fd/0 < /dev/null; then
-   bash_cv_dev_fd=whacky
- else
-   bash_cv_dev_fd=absent
- fi
+fi
+if test -z "$bash_cv_dev_fd" ; then 
+  if test -d /proc/self/fd && (exec test -r /proc/self/fd/0 < /dev/null) ; then
+    bash_cv_dev_fd=whacky
+  else
+    bash_cv_dev_fd=absent
+  fi
+fi
 ])
 AC_MSG_RESULT($bash_cv_dev_fd)
 if test $bash_cv_dev_fd = "standard"; then
@@ -1568,9 +1570,9 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && test -r /dev/stdin < /dev/null; then
+[if test -d /dev/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && test -r /dev/stdin < /dev/null; then
+ elif test -d /proc/self/fd && (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent
@@ -1676,23 +1678,21 @@ AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
-AC_CHECK_FUNC(mbrtowc, AC_DEFINE(HAVE_MBRTOWC))
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
-AC_CHECK_FUNC(wctomb, AC_DEFINE(HAVE_WCTOMB))
-AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
+
+AC_CHECK_FUNC(wcrtomb, AC_DEFINE(HAVE_WCRTOMB))
+AC_CHECK_FUNC(wcscoll, AC_DEFINE(HAVE_WCSCOLL))
 AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
+AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
 
-AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
-[AC_TRY_COMPILE([
-#include <wchar.h>], [
-  mbstate_t ps;
-  mbstate_t *psp;
-  psp = (mbstate_t *)0;
-], bash_cv_have_mbstate_t=yes,  bash_cv_have_mbstate_t=no)])
-if test $bash_cv_have_mbstate_t = yes; then
+dnl checks for both mbrtowc and mbstate_t
+AC_FUNC_MBRTOWC
+if test $ac_cv_func_mbrtowc = yes; then
 	AC_DEFINE(HAVE_MBSTATE_T)
 fi
+
+AC_CHECK_FUNCS(iswlower iswupper towlower towupper iswctype)
 
 AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
 [AC_TRY_LINK(
@@ -1701,6 +1701,43 @@ AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
 bash_cv_langinfo_codeset=yes, bash_cv_langinfo_codeset=no)])
 if test $bash_cv_langinfo_codeset = yes; then
   AC_DEFINE(HAVE_LANGINFO_CODESET)
+fi
+
+dnl check for wchar_t in <wchar.h>
+AC_CACHE_CHECK([for wchar_t in wchar.h], bash_cv_type_wchar_t,
+[AC_TRY_COMPILE(
+[#include <wchar.h>
+],
+[
+        wchar_t foo;
+        foo = 0;
+], bash_cv_type_wchar_t=yes, bash_cv_type_wchar_t=no)])
+if test $bash_cv_type_wchar_t = yes; then
+        AC_DEFINE(HAVE_WCHAR_T, 1, [systems should define this type here])
+fi
+
+dnl check for wctype_t in <wctype.h>
+AC_CACHE_CHECK([for wctype_t in wctype.h], bash_cv_type_wctype_t,
+[AC_TRY_COMPILE(
+[#include <wctype.h>],
+[
+        wctype_t foo;
+        foo = 0;
+], bash_cv_type_wctype_t=yes, bash_cv_type_wctype_t=no)])
+if test $bash_cv_type_wctype_t = yes; then
+        AC_DEFINE(HAVE_WCTYPE_T, 1, [systems should define this type here])
+fi
+
+dnl check for wint_t in <wctype.h>
+AC_CACHE_CHECK([for wint_t in wctype.h], bash_cv_type_wint_t,
+[AC_TRY_COMPILE(
+[#include <wctype.h>],
+[
+        wint_t foo;
+        foo = 0;
+], bash_cv_type_wint_t=yes, bash_cv_type_wint_t=no)])
+if test $bash_cv_type_wint_t = yes; then
+        AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi
 
 ])
@@ -2327,7 +2364,7 @@ AC_DEFUN([AM_INTL_SUBDIR],
   AC_CHECK_HEADERS([argz.h limits.h locale.h nl_types.h malloc.h stddef.h \
 stdlib.h string.h unistd.h sys/param.h])
   AC_CHECK_FUNCS([feof_unlocked fgets_unlocked getc_unlocked getcwd getegid \
-geteuid getgid getuid mempcpy munmap putenv setenv setlocale stpcpy \
+geteuid getgid getuid mempcpy munmap putenv setenv setlocale localeconv stpcpy \
 strcasecmp strdup strtoul tsearch __argz_count __argz_stringify __argz_next \
 __fsetlocking])
 

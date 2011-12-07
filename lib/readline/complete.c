@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -325,6 +325,12 @@ int rl_completion_mark_symlink_dirs;
 /* If non-zero, inhibit completion (temporarily). */
 int rl_inhibit_completion;
 
+/* Set to the last key used to invoke one of the completion functions */
+int rl_completion_invoking_key;
+
+/* If non-zero, sort the completion matches.  On by default. */
+int rl_sort_completion_matches = 1;
+
 /* Variables local to this file. */
 
 /* Local variable states what happened during the last completion attempt. */
@@ -343,6 +349,8 @@ int
 rl_complete (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
+
   if (rl_inhibit_completion)
     return (_rl_insert_char (ignore, invoking_key));
   else if (rl_last_func == rl_complete && !completion_changed_buffer)
@@ -360,6 +368,7 @@ int
 rl_possible_completions (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
   return (rl_complete_internal ('?'));
 }
 
@@ -367,6 +376,7 @@ int
 rl_insert_completions (ignore, invoking_key)
      int ignore, invoking_key;
 {
+  rl_completion_invoking_key = invoking_key;
   return (rl_complete_internal ('*'));
 }
 
@@ -406,6 +416,7 @@ set_completion_defaults (what_to_do)
   rl_filename_quoting_desired = 1;
   rl_completion_type = what_to_do;
   rl_completion_suppress_append = rl_completion_suppress_quote = 0;
+  rl_completion_append_character = ' ';
 
   /* The completion entry function may optionally change this. */
   rl_completion_mark_symlink_dirs = _rl_complete_mark_symlink_dirs;
@@ -428,7 +439,7 @@ get_y_or_n (for_pager)
 	return (1);
       if (c == 'n' || c == 'N' || c == RUBOUT)
 	return (0);
-      if (c == ABORT_CHAR)
+      if (c == ABORT_CHAR || c < 0)
 	_rl_abort_internal ();
       if (for_pager && (c == NEWLINE || c == RETURN))
 	return (2);
@@ -480,6 +491,13 @@ stat_char (filename)
 {
   struct stat finfo;
   int character, r;
+
+  /* Short-circuit a //server on cygwin, since that will always behave as
+     a directory. */
+#if __CYGWIN__
+  if (filename[0] == '/' && filename[1] == '/' && strchr (filename+2, '/') == 0)
+    return '/';
+#endif
 
 #if defined (HAVE_LSTAT) && defined (S_ISLNK)
   r = lstat (filename, &finfo);
@@ -992,7 +1010,7 @@ remove_duplicate_matches (matches)
 
   /* Sort the array without matches[0], since we need it to
      stay in place no matter what. */
-  if (i)
+  if (i && rl_sort_completion_matches)
     qsort (matches+1, i-1, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
 
   /* Remember the lowest common denominator for it may be unique. */
@@ -1104,7 +1122,8 @@ compute_lcd_of_matches (match_list, matches, text)
 #if defined (HANDLE_MULTIBYTE)
 	    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	      {
-		mbstate_t ps_back = ps1;
+		mbstate_t ps_back;
+		ps_back = ps1;
 		if (!_rl_compare_chars (match_list[i], si, &ps1, match_list[i+1], si, &ps2))
 		  break;
 		else if ((v = _rl_get_char_len (&match_list[i][si], &ps_back)) > 1)
@@ -1159,7 +1178,8 @@ compute_lcd_of_matches (match_list, matches, text)
 	    }
 
 	  /* sort the list to get consistent answers. */
-	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
+	  if (rl_sort_completion_matches)
+	    qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
 	  if (si <= low)
@@ -1277,7 +1297,7 @@ rl_display_match_list (matches, len, max)
 	   0 < len <= limit  implies  count = 1. */
 
   /* Sort the items if they are not already sorted. */
-  if (rl_ignore_completion_duplicates == 0)
+  if (rl_ignore_completion_duplicates == 0 && rl_sort_completion_matches)
     qsort (matches + 1, len, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
 
   rl_crlf ();
@@ -1741,7 +1761,7 @@ rl_complete_internal (what_to_do)
       break;
 
     default:
-      fprintf (stderr, "\r\nreadline: bad value %d for what_to_do in rl_complete\n", what_to_do);
+      _rl_ttymsg ("bad value %d for what_to_do in rl_complete", what_to_do);
       rl_ding ();
       FREE (saved_line_buffer);
       RL_UNSETSTATE(RL_STATE_COMPLETING);
@@ -1896,7 +1916,6 @@ rl_filename_completion_function (text, state)
   static char *filename = (char *)NULL;
   static char *dirname = (char *)NULL;
   static char *users_dirname = (char *)NULL;
-  static char *orig_filename = (char *)NULL;
   static int filename_len;
   char *temp;
   int dirlen;
@@ -2109,8 +2128,8 @@ rl_filename_completion_function (text, state)
    hit the end of the match list, we restore the original unmatched text,
    ring the bell, and reset the counter to zero. */
 int
-rl_menu_complete (count, ignore)
-     int count, ignore;
+rl_menu_complete (count, invoking_key)
+     int count, invoking_key;
 {
   rl_compentry_func_t *our_func;
   int matching_filenames, found_quote;
@@ -2134,6 +2153,8 @@ rl_menu_complete (count, ignore)
 
       match_list_index = match_list_size = 0;
       matches = (char **)NULL;
+
+      rl_completion_invoking_key = invoking_key;
 
       /* Only the completion entry function can change these. */
       set_completion_defaults ('%');

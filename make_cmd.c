@@ -610,6 +610,11 @@ make_here_document (temp)
       line = full_line;
       line_number++;
 
+      /* If set -v is in effect, echo the line read.  read_secondary_line/
+	 read_a_line leaves the newline at the end, so don't print another. */
+      if (echo_input_at_read)
+	fprintf (stderr, "%s", line);
+
       if (kill_leading && *line)
 	{
 	  /* Hack:  To be compatible with some Bourne shells, we
@@ -750,7 +755,6 @@ make_function_def (name, command, lineno, lstart)
 #if defined (ARRAY_VARS)
   SHELL_VAR *bash_source_v;
   ARRAY *bash_source_a;
-  char *t;
 #endif
 
   temp = (FUNCTION_DEF *)xmalloc (sizeof (FUNCTION_DEF));

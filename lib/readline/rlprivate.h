@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2007 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -27,6 +27,16 @@
 #include "rlconf.h"	/* for VISIBLE_STATS */
 #include "rlstdc.h"
 #include "posixjmp.h"	/* defines procenv_t */
+
+/*************************************************************************
+ *									 *
+ * Convenience definitions						 *
+ *									 *
+ *************************************************************************/
+
+#define EMACS_MODE()		(rl_editing_mode == emacs_mode)
+#define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
+#define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
 
 /*************************************************************************
  *									 *
@@ -261,6 +271,8 @@ extern void _rl_start_using_history PARAMS((void));
 extern int _rl_free_saved_history_line PARAMS((void));
 extern void _rl_set_insert_mode PARAMS((int, int));
 
+extern void _rl_revert_all_lines PARAMS((void));
+
 /* nls.c */
 extern int _rl_init_eightbit PARAMS((void));
 
@@ -309,7 +321,19 @@ extern int _rl_char_search_internal PARAMS((int, int, int));
 #endif
 extern int _rl_set_mark_at_pos PARAMS((int));
 
+/* undo.c */
+extern UNDO_LIST *_rl_copy_undo_entry PARAMS((UNDO_LIST *));
+extern UNDO_LIST *_rl_copy_undo_list PARAMS((UNDO_LIST *));
+
 /* util.c */
+#if defined (USE_VARARGS) && defined (PREFER_STDARG)
+extern void _rl_ttymsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+extern void _rl_errmsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+#else
+extern void _rl_ttymsg ();
+extern void _rl_errmsg ();
+#endif
+
 extern int _rl_abort_internal PARAMS((void));
 extern char *_rl_strindex PARAMS((const char *, const char *));
 extern int _rl_qsort_string_compare PARAMS((char **, char **));
@@ -333,8 +357,8 @@ extern void _rl_vi_done_inserting PARAMS((void));
  *************************************************************************/
 
 /* bind.c */
-extern const char *_rl_possible_control_prefixes[];
-extern const char *_rl_possible_meta_prefixes[];
+extern const char * const _rl_possible_control_prefixes[];
+extern const char * const _rl_possible_meta_prefixes[];
 
 /* callback.c */
 extern _rl_callback_func_t *_rl_callback_func;
@@ -355,7 +379,6 @@ extern int _rl_vis_botlin;
 extern int _rl_last_c_pos;
 extern int _rl_suppress_redisplay;
 extern int _rl_want_redisplay;
-extern char *rl_display_prompt;
 
 /* isearch.c */
 extern char *_rl_isearch_terminators;
@@ -379,6 +402,7 @@ extern int _rl_meta_flag;
 extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_output_meta_chars;
 extern int _rl_bind_stty_chars;
+extern int _rl_revert_all_at_newline;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;
@@ -404,6 +428,7 @@ extern char *_rl_term_up;
 extern char *_rl_term_dc;
 extern char *_rl_term_cr;
 extern char *_rl_term_IC;
+extern char *_rl_term_forward_char;
 extern int _rl_screenheight;
 extern int _rl_screenwidth;
 extern int _rl_screenchars;

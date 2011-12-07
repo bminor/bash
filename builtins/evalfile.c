@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,6 +45,8 @@
 #  include "../bashhist.h"
 #endif
 
+#include <typemax.h>
+
 #include "common.h"
 
 #if !defined (errno)
@@ -63,7 +65,7 @@ extern int errno;
 #define FEVAL_NOPUSHARGS	0x100
 
 extern int posixly_correct;
-extern int indirection_level, startup_state, subshell_environment;
+extern int indirection_level, subshell_environment;
 extern int return_catch_flag, return_catch_value;
 extern int last_command_exit_value;
 
@@ -78,6 +80,7 @@ _evalfile (filename, flags)
   volatile int old_interactive;
   procenv_t old_return_catch;
   int return_val, fd, result, pflags;
+  ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
   size_t file_size;
@@ -147,21 +150,27 @@ file_error_and_exit:
   setmode (fd, O_TEXT);
 #endif
 
-  string = (char *)xmalloc (1 + file_size);
-  result = read (fd, string, file_size);
-  string[result] = '\0';
+  if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
+    {
+      string = (char *)xmalloc (1 + file_size);
+      nr = read (fd, string, file_size);
+      if (nr >= 0)
+	string[nr] = '\0';
+    }
+  else
+    nr = zmapfd (fd, &string, 0);
 
   return_val = errno;
   close (fd);
   errno = return_val;
 
-  if (result < 0)		/* XXX was != file_size, not < 0 */
+  if (nr < 0)		/* XXX was != file_size, not < 0 */
     {
       free (string);
       goto file_error_and_exit;
     }
 
-  if (result == 0)
+  if (nr == 0)
     {
       free (string);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_SUCCESS : 1);
@@ -171,7 +180,7 @@ file_error_and_exit:
       check_binary_file (string, (result > 80) ? 80 : result))
     {
       free (string);
-      (*errfunc) ("%s: cannot execute binary file", filename);
+      (*errfunc) (_("%s: cannot execute binary file"), filename);
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 

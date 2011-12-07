@@ -145,7 +145,8 @@ xdupmbstowcs (destp, indicesp, src)
   /* In case SRC or DESP is NULL, conversion doesn't take place. */
   if (src == NULL || destp == NULL)
     {
-      *destp = NULL;
+      if (destp)
+	*destp = NULL;
       return (size_t)-1;
     }
 

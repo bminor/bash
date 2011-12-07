@@ -1,9 +1,11 @@
 ./shopt.tests: line 2: shopt: -z: invalid option
-shopt: usage: shopt [-pqsu] [-o long-option] optname [optname...]
+shopt: usage: shopt [-pqsu] [-o] [optname ...]
 --
+shopt -s autocd
 shopt -u cdable_vars
 shopt -s cdspell
 shopt -u checkhash
+shopt -u checkjobs
 shopt -u checkwinsize
 shopt -s cmdhist
 shopt -u dotglob
@@ -39,6 +41,7 @@ shopt -u huponexit
 shopt -u checkwinsize
 shopt -s sourcepath
 --
+shopt -s autocd
 shopt -s cdspell
 shopt -s cmdhist
 shopt -s expand_aliases
@@ -52,6 +55,7 @@ shopt -s sourcepath
 --
 shopt -u cdable_vars
 shopt -u checkhash
+shopt -u checkjobs
 shopt -u checkwinsize
 shopt -u dotglob
 shopt -u execfail
@@ -76,6 +80,7 @@ shopt -u xpg_echo
 --
 cdable_vars    	off
 checkhash      	off
+checkjobs      	off
 checkwinsize   	off
 dotglob        	off
 execfail       	off

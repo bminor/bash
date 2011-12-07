@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,7 +69,7 @@ extern int last_command_exit_value;
 extern int running_trap;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
-extern char *bash_getcwd_errstr;
+extern const char * const bash_getcwd_errstr;
 
 /* Used by some builtins and the mainline code. */
 sh_builtin_func_t *last_shell_builtin = (sh_builtin_func_t *)NULL;
@@ -100,7 +100,7 @@ builtin_error (format, va_alist)
   fprintf (stderr, "%s: ", name);
 
   if (interactive_shell == 0)
-    fprintf (stderr, "line %d: ", executing_line_number ());
+    fprintf (stderr, _("line %d: "), executing_line_number ());
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
@@ -117,7 +117,7 @@ void
 builtin_usage ()
 {
   if (this_command_name && *this_command_name)
-    fprintf (stderr, "%s: usage: ", this_command_name);
+    fprintf (stderr, _("%s: usage: "), this_command_name);
   fprintf (stderr, "%s\n", current_builtin->short_doc);
   fflush (stderr);
 }
@@ -131,6 +131,7 @@ no_args (list)
   if (list)
     {
       builtin_error (_("too many arguments"));
+      top_level_cleanup ();
       jump_to_top_level (DISCARD);
     }
 }
@@ -395,7 +396,10 @@ get_numeric_arg (list, fatal)
 	  if (fatal)
 	    throw_to_top_level ();
 	  else
-	    jump_to_top_level (DISCARD);
+	    {
+	      top_level_cleanup ();
+	      jump_to_top_level (DISCARD);
+	    }
 	}
       no_args (list->next);
     }
@@ -467,9 +471,6 @@ char *
 get_working_directory (for_whom)
      char *for_whom;
 {
-  char *directory;
-  size_t dsize;
-
   if (no_symbolic_links)
     {
       FREE (the_current_working_directory);
@@ -478,7 +479,11 @@ get_working_directory (for_whom)
 
   if (the_current_working_directory == 0)
     {
+#if defined (GETCWD_BROKEN)
+      the_current_working_directory = getcwd (0, PATH_MAX);
+#else
       the_current_working_directory = getcwd (0, 0);
+#endif
       if (the_current_working_directory == 0)
 	{
 	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
@@ -642,7 +647,7 @@ display_signal_list (list, forcecols)
 	    {
 	      printf ("%2d) %s", i, name);
 
-	      if (++column < 4)
+	      if (++column < 5)
 		printf ("\t");
 	      else
 		{

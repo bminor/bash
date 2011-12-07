@@ -48,7 +48,6 @@ extern int errno;
 #endif /* !errno */
 
 extern int expand_aliases;
-extern int interrupt_immediately;
 extern int interactive_comments;
 extern int check_hashed_filenames;
 extern int source_uses_path;
@@ -59,7 +58,7 @@ static int unquoted_tilde_word __P((const char *));
 static void initialize_group_array __P((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
-char *bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
+const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
 
 /* Do whatever is necessary to initialize `Posix mode'. */
 void
@@ -162,7 +161,7 @@ all_digits (string)
    not null. */
 int
 legal_number (string, result)
-     char *string;
+     const char *string;
      intmax_t *result;
 {
   intmax_t value;

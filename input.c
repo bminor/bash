@@ -47,6 +47,8 @@
 extern int errno;
 #endif /* !errno */
 
+extern void termsig_handler __P((int));
+
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
 

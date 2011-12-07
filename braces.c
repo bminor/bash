@@ -55,7 +55,7 @@
  */
 
 /* The character which is used to separate arguments. */
-int brace_arg_separator = ',';
+static const int brace_arg_separator = ',';
 
 #if defined (__P)
 static int brace_gobbler __P((char *, size_t, int *, int));
@@ -69,6 +69,18 @@ static char **expand_amble ();
 static char **expand_seqterm ();
 static char **mkseq();
 static char **array_concat ();
+#endif
+
+#if 0
+static void
+dump_result (a)
+     char **a;
+{
+  int i;
+
+  for (i = 0; a[i]; i++)
+    printf ("dump_result: a[%d] = -%s-\n", i, a[i]);
+}
 #endif
 
 /* Return an array of strings; the brace expansion of TEXT. */

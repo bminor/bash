@@ -67,7 +67,7 @@ fi
 # increment the build version if that's what's required
 
 if [ -n "$inc_build" ]; then
-	build_ver=`expr $build_ver + 1`
+	build_ver=`expr 1 + $build_ver`
 fi
 
 # what's the patch level?

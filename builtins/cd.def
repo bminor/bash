@@ -56,10 +56,11 @@ extern int errno;
 
 extern int posixly_correct;
 extern int array_needs_making;
-extern char *bash_getcwd_errstr;
+extern const char * const bash_getcwd_errstr;
 
 static int bindpwd __P((int));
 static void setpwd __P((char *));
+static char *resetpwd __P((char *));
 static int change_to_directory __P((char *, int));
 
 static char *cdspell __P((char *));
@@ -72,11 +73,11 @@ int cdable_vars;
 $BUILTIN cd
 $FUNCTION cd_builtin
 $SHORT_DOC cd [-L|-P] [dir]
-Change the current directory to DIR.  The variable $HOME is the
-default DIR.  The variable CDPATH defines the search path for
-the directory containing DIR.  Alternative directory names in CDPATH
-are separated by a colon (:).  A null directory name is the same as
-the current directory, i.e. `.'.  If DIR begins with a slash (/),
+Change the current directory to DIR.  The default for DIR is the value
+of the HOME shell variable.  The variable CDPATH defines the search
+path for the directory containing DIR.  Alternative directory names in
+CDPATH are separated by a colon (:).  A null directory name is the same
+as the current directory, i.e., `.'.  If DIR begins with a slash (/),
 then CDPATH is not used.  If the directory is not found, and the
 shell option `cdable_vars' is set, then try the word as a variable
 name.  If that variable has a value, then cd to the value of that

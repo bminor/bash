@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2005 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,7 +45,7 @@ static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
 
 /* Standard error message to use when encountering an invalid array subscript */
-char *bash_badsub_errmsg = N_("bad array subscript");
+const char * const bash_badsub_errmsg = N_("bad array subscript");
 
 /* **************************************************************** */
 /*								    */
@@ -265,32 +265,22 @@ assign_array_var_from_word_list (var, list, flags)
   return var;
 }
 
-/* Perform a compound array assignment:  VAR->name=( VALUE ).  The
-   VALUE has already had the parentheses stripped. */
-SHELL_VAR *
-assign_array_var_from_string (var, value, flags)
-     SHELL_VAR *var;
+WORD_LIST *
+expand_compound_array_assignment (value, flags)
      char *value;
      int flags;
 {
-  ARRAY *a;
   WORD_LIST *list, *nlist;
-  char *w, *val, *nval;
-  int ni, len;
-  arrayind_t ind, last_ind;
+  char *val;
+  int ni;
 
-  if (value == 0)
-    return var;
-
-  /* If this is called from declare_builtin, value[0] == '(' and
-     xstrchr(value, ')') != 0.  In this case, we need to extract
-     the value from between the parens before going on. */
+  /* I don't believe this condition is ever true any more. */
   if (*value == '(')	/*)*/
     {
       ni = 1;
       val = extract_array_assignment_list (value, &ni);
       if (val == 0)
-	return var;
+	return (WORD_LIST *)NULL;
     }
   else
     val = value;
@@ -315,6 +305,21 @@ assign_array_var_from_string (var, value, flags)
   if (val != value)
     free (val);
 
+  return nlist;
+}
+
+void
+assign_compound_array_list (var, nlist, flags)
+     SHELL_VAR *var;
+     WORD_LIST *nlist;
+     int flags;
+{
+  ARRAY *a;
+  WORD_LIST *list;
+  char *w, *val, *nval;
+  int len, iflags;
+  arrayind_t ind, last_ind;
+
   a = array_cell (var);
 
   /* Now that we are ready to assign values to the array, kill the existing
@@ -325,6 +330,7 @@ assign_array_var_from_string (var, value, flags)
 
   for (list = nlist; list; list = list->next)
     {
+      iflags = flags;
       w = list->word->word;
 
       /* We have a word of the form [ind]=value */
@@ -332,12 +338,8 @@ assign_array_var_from_string (var, value, flags)
 	{
 	  len = skipsubscript (w, 0);
 
-#if 1
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
-#else
-	  if (w[len] != ']' || w[len+1] != '=')
-#endif
 	    {
 	      nval = make_variable_value (var, w, flags);
 	      if (var->assign_func)
@@ -368,10 +370,10 @@ assign_array_var_from_string (var, value, flags)
 	      continue;
 	    }
 	  last_ind = ind;
-	  /* XXX - changes for `+=' */
+	  /* XXX - changes for `+=' -- just accept the syntax.  ksh93 doesn't do this */
 	  if (w[len + 1] == '+' && w[len + 2] == '=')
 	    {
-	      flags |= ASS_APPEND;
+	      iflags |= ASS_APPEND;
 	      val = w + len + 3;
 	    }
 	  else
@@ -385,11 +387,29 @@ assign_array_var_from_string (var, value, flags)
 
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
-      bind_array_var_internal (var, ind, val, flags);
+      bind_array_var_internal (var, ind, val, iflags);
       last_ind++;
     }
+}
 
-  dispose_words (nlist);
+/* Perform a compound array assignment:  VAR->name=( VALUE ).  The
+   VALUE has already had the parentheses stripped. */
+SHELL_VAR *
+assign_array_var_from_string (var, value, flags)
+     SHELL_VAR *var;
+     char *value;
+     int flags;
+{
+  WORD_LIST *nlist;
+
+  if (value == 0)
+    return var;
+
+  nlist = expand_compound_array_assignment (value, flags);
+  assign_compound_array_list (var, nlist, flags);
+
+  if (nlist)
+    dispose_words (nlist);
   return (var);
 }
 
@@ -590,7 +610,7 @@ array_expand_index (s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-  t = expand_arith_string (exp);
+  t = expand_arith_string (exp, 0);
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
   free (t);

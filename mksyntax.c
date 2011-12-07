@@ -62,6 +62,7 @@ struct wordflag {
 	{ CXQUOTE,	"CXQUOTE" },
 	{ CSPECVAR,	"CSPECVAR" },
 	{ CSUBSTOP,	"CSUBSTOP" },
+	{ CBLANK,	"CBLANK" },
 };
 	
 #define N_WFLAGS	(sizeof (wordflags) / sizeof (wordflags[0]))
@@ -196,6 +197,22 @@ addcchar (c, flag)
   lsyntax[c] |= flag;
 }
 
+static void
+addblanks ()
+{
+  register int i;
+  unsigned char uc;
+
+  for (i = 0; i < SYNSIZE; i++)
+    {
+      uc = i;
+      /* Since we don't call setlocale(), this defaults to the "C" locale, and
+	 the default blank characters will be space and tab. */
+      if (isblank (uc))
+	lsyntax[uc] |= CBLANK;
+    }
+}
+
 /* load up the correct flag values in lsyntax */
 static void
 load_lsyntax ()
@@ -230,6 +247,8 @@ load_lsyntax ()
   addcstr ("@*#?-$!", CSPECVAR);	/* omits $0...$9 and $_ */
 
   addcstr ("-=?+", CSUBSTOP);		/* OP in ${paramOPword} */
+
+  addblanks ();
 }
 
 static void

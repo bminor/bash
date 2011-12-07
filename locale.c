@@ -78,7 +78,6 @@ void
 set_default_locale_vars ()
 {
   char *val;
-  int r;
 
 #if defined (HAVE_SETLOCALE)
 
@@ -251,6 +250,20 @@ set_lang (var, value)
   return ((lc_all == 0 || *lc_all == 0) ? reset_locale_vars () : 0);
 }
 
+/* Set default values for LANG and LC_ALL.  Default values for all other
+   locale-related variables depend on these. */
+void
+set_default_lang ()
+{
+  char *v;
+
+  v = get_string_value ("LC_ALL");
+  set_locale_var ("LC_ALL", v);
+
+  v = get_string_value ("LANG");
+  set_lang ("LANG", v);
+}
+
 /* Get the value of one of the locale variables (LC_MESSAGES, LC_CTYPE).
    The precedence is as POSIX.2 specifies:  LC_ALL has precedence over
    the specific locale variables, and LANG, if set, is used as the default. */
@@ -267,8 +280,11 @@ get_locale_var (var)
   if (locale == 0 || *locale == 0)
     locale = lang;
   if (locale == 0 || *locale == 0)
-    locale = default_locale;	/* system-dependent; not really portable */
-
+#if 0
+    locale = default_locale;	/* system-dependent; not really portable.  should it be "C"? */
+#else
+    locale = "";
+#endif
   return (locale);
 }
 
@@ -278,29 +294,27 @@ get_locale_var (var)
 static int
 reset_locale_vars ()
 {
+  char *t;
 #if defined (HAVE_SETLOCALE)
-  char *locale;
-
-  locale = lang;
-  if (locale == 0 || *locale == '\0')
-    locale = default_locale;
-  if (setlocale (LC_ALL, locale) == 0)
+  if (lang == 0 || *lang == '\0')
+    maybe_make_export_env ();		/* trust that this will change environment for setlocale */
+  if (setlocale (LC_ALL, lang ? lang : "") == 0)
     return 0;
 
 #  if defined (LC_CTYPE)
-  setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
+  t = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 #  endif
 #  if defined (LC_COLLATE)
-  setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
+  t = setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
 #  endif
 #  if defined (LC_MESSAGES)
-  setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
+  t = setlocale (LC_MESSAGES, get_locale_var ("LC_MESSAGES"));
 #  endif
 #  if defined (LC_NUMERIC)
-  setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
+  t = setlocale (LC_NUMERIC, get_locale_var ("LC_NUMERIC"));
 #  endif
 #  if defined (LC_TIME)
-  setlocale (LC_TIME, get_locale_var ("LC_TIME"));
+  t = setlocale (LC_TIME, get_locale_var ("LC_TIME"));
 #  endif
 
   locale_setblanks ();  
@@ -487,10 +501,13 @@ locale_setblanks ()
   for (x = 0; x < sh_syntabsiz; x++)
     {
       if (isblank (x))
-	sh_syntaxtab[x] |= CSHBRK;
+	sh_syntaxtab[x] |= CSHBRK|CBLANK;
       else if (member (x, shell_break_chars))
-	sh_syntaxtab[x] |= CSHBRK;
+	{
+	  sh_syntaxtab[x] |= CSHBRK;
+	  sh_syntaxtab[x] &= ~CBLANK;
+	}
       else
-	sh_syntaxtab[x] &= ~CSHBRK;
+	sh_syntaxtab[x] &= ~(CSHBRK|CBLANK);
     }
 }

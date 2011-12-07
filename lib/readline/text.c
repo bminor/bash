@@ -260,7 +260,7 @@ rl_forward_byte (count, key)
     {
       int end = rl_point + count;
 #if defined (VI_MODE)
-      int lend = rl_end > 0 ? rl_end - (rl_editing_mode == vi_mode) : rl_end;
+      int lend = rl_end > 0 ? rl_end - (VI_COMMAND_MODE()) : rl_end;
 #else
       int lend = rl_end;
 #endif
@@ -296,10 +296,16 @@ rl_forward_char (count, key)
 
   if (count > 0)
     {
+      if (rl_point == rl_end && EMACS_MODE())
+	{
+	  rl_ding ();
+	  return 0;
+	}
+
       point = _rl_find_next_mbchar (rl_line_buffer, rl_point, count, MB_FIND_NONZERO);
 
 #if defined (VI_MODE)
-      if (rl_end <= point && rl_editing_mode == vi_mode)
+      if (point >= rl_end && VI_COMMAND_MODE())
 	point = _rl_find_prev_mbchar (rl_line_buffer, rl_end, MB_FIND_NONZERO);
 #endif
 
@@ -857,6 +863,9 @@ _rl_insert_next (count)
   c = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
+  if (c < 0)
+    return -1;
+
 #if defined (HANDLE_SIGNALS)
   if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
     _rl_restore_tty_signals ();
@@ -1237,8 +1246,8 @@ rl_change_case (count, op)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc, nwc;
   char mb[MB_LEN_MAX+1];
-  int mblen;
-  mbstate_t ps;
+  int mlen;
+  mbstate_t mps;
 #endif
 
   start = rl_point;
@@ -1255,7 +1264,7 @@ rl_change_case (count, op)
     SWAP (start, end);
 
 #if defined (HANDLE_MULTIBYTE)
-  memset (&ps, 0, sizeof (mbstate_t));
+  memset (&mps, 0, sizeof (mbstate_t));
 #endif
 
   /* We are going to modify some text, so let's prepare to undo it. */
@@ -1290,15 +1299,15 @@ rl_change_case (count, op)
 #if defined (HANDLE_MULTIBYTE)
       else
 	{
-	  mbrtowc (&wc, rl_line_buffer + start, end - start, &ps);
+	  mbrtowc (&wc, rl_line_buffer + start, end - start, &mps);
 	  nwc = (nop == UpCase) ? _rl_to_wupper (wc) : _rl_to_wlower (wc);
 	  if  (nwc != wc)	/*  just skip unchanged characters */
 	    {
-	      mblen = wcrtomb (mb, nwc, &ps);
-	      if (mblen > 0)
-		mb[mblen] = '\0';
+	      mlen = wcrtomb (mb, nwc, &mps);
+	      if (mlen > 0)
+		mb[mlen] = '\0';
 	      /* Assume the same width */
-	      strncpy (rl_line_buffer + start, mb, mblen);
+	      strncpy (rl_line_buffer + start, mb, mlen);
 	    }
 	}
 #endif
@@ -1520,6 +1529,9 @@ _rl_char_search (count, fdir, bdir)
 
   mb_len = _rl_read_mbchar (mbchar, MB_LEN_MAX);
 
+  if (mb_len <= 0)
+    return -1;
+
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, mbchar, mb_len));
   else
@@ -1535,6 +1547,9 @@ _rl_char_search (count, fdir, bdir)
   RL_SETSTATE(RL_STATE_MOREINPUT);
   c = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
+
+  if (c < 0)
+    return -1;
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, c));

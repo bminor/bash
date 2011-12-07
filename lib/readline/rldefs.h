@@ -32,6 +32,10 @@
 
 #include "rlstdc.h"
 
+#if defined (STRCOLL_BROKEN)
+#  undef HAVE_STRCOLL
+#endif
+
 #if defined (_POSIX_VERSION) && !defined (TERMIOS_MISSING)
 #  define TERMIOS_TTY_DRIVER
 #else

@@ -121,6 +121,7 @@ extern sighandler sigint_sighandler __P((int));
 extern void initialize_signals __P((int));
 extern void initialize_terminating_signals __P((void));
 extern void reset_terminating_signals __P((void));
+extern void top_level_cleanup __P((void));
 extern void throw_to_top_level __P((void));
 extern void jump_to_top_level __P((int)) __attribute__((__noreturn__));
 

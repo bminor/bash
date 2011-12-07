@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -139,6 +139,12 @@ int interactive_shell = 0;
    shell exits. */
 int hup_on_exit = 0;
 
+/* Non-zero means to list status of running and stopped jobs at shell exit */
+int check_jobs_at_exit = 0;
+
+/* Non-zero means to change to a directory name supplied as a command name */
+int autocd = 1;
+
 /* Tells what state the shell was in when it started:
 	0 = non-interactive shell script
 	1 = interactive
@@ -171,6 +177,13 @@ time_t shell_start_time;
 
 /* Are we running in an emacs shell window? */
 int running_under_emacs;
+
+/* Do we have /dev/fd? */
+#ifdef HAVE_DEV_FD
+int have_devfd = HAVE_DEV_FD;
+#else
+int have_devfd = 0;
+#endif
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -212,8 +225,8 @@ int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
 #define Charp 2
-struct {
-  char *name;
+static const struct {
+  const char *name;
   int type;
   int *int_value;
   char **char_value;
@@ -532,6 +545,7 @@ main (argc, argv, env)
      Variables from the environment are expected to be set, etc. */
   shell_initialize ();
 
+  set_default_lang ();
   set_default_locale_vars ();
 
   if (interactive_shell)
@@ -686,8 +700,8 @@ main (argc, argv, env)
   if (interactive_shell)
     {
       /* Set up for checking for presence of mail. */
-      remember_mail_dates ();
       reset_mail_timer ();
+      init_mail_dates ();
 
 #if defined (HISTORY)
       /* Initialize the interactive history stuff. */
@@ -1415,7 +1429,7 @@ open_shell_script (script_name)
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
-	  internal_error ("%s: cannot execute binary file", filename);
+	  internal_error (_("%s: cannot execute binary file"), filename);
 	  exit (EX_BINARY_FILE);
 	}
       /* Now rewind the file back to the beginning. */
@@ -1425,7 +1439,7 @@ open_shell_script (script_name)
   /* Open the script.  But try to move the file descriptor to a randomly
      large one, in the hopes that any descriptors used by the script will
      not match with ours. */
-  fd = move_to_high_fd (fd, 0, -1);
+  fd = move_to_high_fd (fd, 1, -1);
 
 #if defined (__CYGWIN__) && defined (O_TEXT)
   setmode (fd, O_TEXT);
@@ -1730,7 +1744,7 @@ show_shell_usage (fp, extra)
   char *set_opts, *s, *t;
 
   if (extra)
-    fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
+    fprintf (fp, _("GNU bash, version %s-(%s)\n"), shell_version_string (), MACHTYPE);
   fprintf (fp, _("Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n"),
 	     shell_name, shell_name);
   fputs (_("GNU long options:\n"), fp);

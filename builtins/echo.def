@@ -31,6 +31,8 @@ $PRODUCES echo.c
 #include <stdio.h>
 #include "../shell.h"
 
+#include "common.h"
+
 $BUILTIN echo
 $FUNCTION echo_builtin
 $DEPENDS_ON V9_ECHO
@@ -41,14 +43,17 @@ following backslash-escaped characters is turned on:
 	\a	alert (bell)
 	\b	backspace
 	\c	suppress trailing newline
-	\E	escape character
+	\e	escape character
 	\f	form feed
 	\n	new line
 	\r	carriage return
 	\t	horizontal tab
 	\v	vertical tab
 	\\	backslash
-	\num	the character whose ASCII code is NUM (octal).
+	\0nnn	the character whose ASCII code is NNN (octal).  NNN can be
+		0 to 3 octal digits
+	\xHH	the eight-bit character whose value is HH (hexadecimal).  HH
+		can be one or two hex digits
 
 You can explicitly turn off the interpretation of the above characters
 with the -E option.

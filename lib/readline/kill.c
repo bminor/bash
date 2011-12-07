@@ -115,7 +115,7 @@ _rl_copy_to_kill_ring (text, append)
 	  if (slot == rl_max_kills)
 	    {
 	      register int i;
-	      free (rl_kill_ring[0]);
+	      xfree (rl_kill_ring[0]);
 	      for (i = 0; i < slot; i++)
 		rl_kill_ring[i] = rl_kill_ring[i + 1];
 	    }
@@ -146,7 +146,7 @@ _rl_copy_to_kill_ring (text, append)
 	  strcpy (new, text);
 	  strcat (new, old);
 	}
-      free (old);
+      xfree (old);
       free (text);
       rl_kill_ring[slot] = new;
     }
@@ -582,6 +582,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
   if (!arg || !*arg)
     {
       rl_ding ();
+      FREE (arg);
       return -1;
     }
 
@@ -685,7 +686,7 @@ rl_paste_from_clipboard (count, key)
       _rl_set_mark_at_pos (rl_point);
       rl_insert_text (ptr);
       if (ptr != data)
-	free (ptr);
+	xfree (ptr);
       CloseClipboard ();
     }
   return (0);

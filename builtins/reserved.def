@@ -57,12 +57,12 @@ until a break command is executed.
 $END
 
 $BUILTIN time
-$SHORT_DOC time [-p] PIPELINE
+$SHORT_DOC time [-p] pipeline
 Execute PIPELINE and print a summary of the real time, user CPU time,
 and system CPU time spent executing PIPELINE when it terminates.
 The return status is the return status of PIPELINE.  The `-p' option
-prints the timing summary in a slightly different format.  This uses
-the value of the TIMEFORMAT variable as the output format.
+prints the timing summary in the portable Posix format; otherwise, the
+the value of the TIMEFORMAT variable is used as the output format.
 $END
 
 $BUILTIN case
@@ -110,7 +110,7 @@ $END
 
 $BUILTIN %
 $DOCNAME fg_percent
-$SHORT_DOC JOB_SPEC [&]
+$SHORT_DOC job_spec [&]
 Equivalent to the JOB_SPEC argument to the `fg' command.  Resume a
 stopped or background job.  JOB_SPEC can specify either a job name
 or a job number.  Following JOB_SPEC with a `&' places the job in
@@ -145,7 +145,7 @@ $END
 
 $BUILTIN variables
 $DOCNAME variable_help
-$SHORT_DOC variables - Some variable names and meanings
+$SHORT_DOC variables - Names and meanings of some shell variables
 BASH_VERSION	Version information for this Bash.
 CDPATH	A colon-separated list of directories to search
 		for directries given as arguments to `cd'.

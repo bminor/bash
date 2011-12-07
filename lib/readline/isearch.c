@@ -75,7 +75,7 @@ static int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 static char *last_isearch_string;
 static int last_isearch_string_len;
 
-static char *default_isearch_terminators = "\033\012";
+static char * const default_isearch_terminators = "\033\012";
 
 _rl_search_cxt *
 _rl_scxt_alloc (type, flags)
@@ -125,7 +125,7 @@ _rl_scxt_dispose (cxt, flags)
   FREE (cxt->allocated_line);
   FREE (cxt->lines);
 
-  free (cxt);
+  xfree (cxt);
 }
 
 /* Search backwards through the history looking for a string which is typed
@@ -192,7 +192,7 @@ rl_display_search (search_string, reverse_p, where)
   strcpy (message + msglen, "': ");
 
   rl_message ("%s", message);
-  free (message);
+  xfree (message);
   (*rl_redisplay_function) ();
 }
 
@@ -327,8 +327,15 @@ _rl_isearch_dispatch (cxt, c)
   rl_command_func_t *f;
 
   f = (rl_command_func_t *)NULL;
- 
- /* Translate the keys we do something with to opcodes. */
+
+  if (c < 0)
+    {
+      cxt->sflags |= SF_FAILED;
+      cxt->history_pos = cxt->last_found_line;
+      return -1;
+    }
+
+  /* Translate the keys we do something with to opcodes. */
   if (c >= 0 && _rl_keymap[c].type == ISFUNC)
     {
       f = _rl_keymap[c].function;

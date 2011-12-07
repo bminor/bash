@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,30 +24,29 @@ $PRODUCES declare.c
 $BUILTIN declare
 $FUNCTION declare_builtin
 $SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
-Declare variables and/or give them attributes.  If no NAMEs are
-given, then display the values of variables instead.  The -p option
-will display the attributes and values of each NAME.
+Declare variables and give them attributes.  If no NAMEs are
+given, then display the values of variables instead.  When
+displaying variable values, the -f option restricts the display
+to function names and definitions; the -F option restricts the
+display to function names only (plus line number and source file
+when debugging).  The -p option will display the attributes and
+values of each NAME. 
 
-The flags are:
+The options which set attributes are:
 
   -a	to make NAMEs arrays (if supported)
-  -f	to select from among function names only
-  -F	to display function names (and line number and source file name if
-	debugging) without definitions 
   -i	to make NAMEs have the `integer' attribute
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
   -x	to make NAMEs export
 
+Using `+' instead of `-' turns off the given attribute.
+
 Variables with the integer attribute have arithmetic evaluation (see
-`let') done when the variable is assigned to.
+the `let' command) done when the variable is assigned a value.
 
-When displaying values of variables, -f displays a function's name
-and definition.  The -F option restricts the display to function
-name only.
-
-Using `+' instead of `-' turns off the given attribute instead.  When
-used in a function, makes NAMEs local, as with the `local' command.
+When used in a function, `declare' makes NAMEs local, as with the `local'
+command.
 $END
 
 $BUILTIN typeset
@@ -90,10 +89,11 @@ declare_builtin (list)
 
 $BUILTIN local
 $FUNCTION local_builtin
-$SHORT_DOC local name[=value] ...
+$SHORT_DOC local [option] name[=value] ...
 Create a local variable called NAME, and give it VALUE.  LOCAL
 can only be used within a function; it makes the variable NAME
 have a visible scope restricted to that function and its children.
+OPTION can be any of the options accepted by `declare'.
 $END
 int
 local_builtin (list)

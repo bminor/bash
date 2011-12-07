@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2005 Free Software Foundation, Inc.
+Copyright (C) 1997-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,8 +26,8 @@ $FUNCTION printf_builtin
 $SHORT_DOC printf [-v var] format [arguments]
 printf formats and prints ARGUMENTS under control of the FORMAT. FORMAT
 is a character string which contains three types of objects: plain
-characters, which are simply copied to standard output, character escape
-sequences which are converted and copied to the standard output, and
+characters, which are simply copied to standard output; character escape
+sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
 argument.  In addition to the standard printf(1) formats, %b means to
 expand backslash escape sequences in the corresponding argument, and %q
@@ -49,6 +49,12 @@ $END
 #  define INT_MIN		(-2147483647-1)
 #endif
 
+#if defined (PREFER_STDARG)
+#  include <stdarg.h>
+#else
+#  include <varargs.h>
+#endif
+
 #include <stdio.h>
 #include <chartypes.h>
 
@@ -63,6 +69,10 @@ $END
 #include "stdc.h"
 #include "bashgetopt.h"
 #include "common.h"
+
+#if defined (PRI_MACROS_BROKEN)
+#  undef PRIdMAX
+#endif
 
 #if !defined (PRIdMAX)
 #  if HAVE_LONG_LONG
@@ -91,6 +101,7 @@ extern int errno;
   do { \
     char *b = 0; \
     int nw; \
+    clearerr (stdout); \
     if (have_fieldwidth && have_precision) \
       nw = asprintf(&b, f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
@@ -106,6 +117,12 @@ extern int errno;
 	  (void)vbadd (b, nw); \
 	else \
 	  (void)fputs (b, stdout); \
+	if (ferror (stdout)) \
+	  { \
+	    sh_wrerror (); \
+	    clearerr (stdout); \
+	    return (EXECUTION_FAILURE); \
+	  } \
 	free (b); \
       } \
   } while (0)
@@ -132,12 +149,21 @@ extern int errno;
 	  vbuf = 0; \
 	} \
       fflush (stdout); \
+      if (ferror (stdout)) \
+	{ \
+	  clearerr (stdout); \
+	  return (EXECUTION_FAILURE); \
+	} \
       return (value); \
     } \
   while (0)
 
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
+
+#ifndef HAVE_ASPRINTF
+extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+#endif
 
 static void printf_erange __P((char *));
 static int printstr __P((char *, char *, int, int, int));
@@ -407,7 +433,9 @@ printf_builtin (list)
 
 		r = 0;
 		p = getstr ();
-		if (ansic_shouldquote (p))
+		if (p && *p == 0)	/* XXX - getstr never returns null */
+		  xp = savestring ("''");
+		else if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
 		else
 		  xp = sh_backslash_quote (p);
@@ -526,7 +554,7 @@ static void
 printf_erange (s)
      char *s;
 {
-  builtin_error ("warning: %s: %s", s, strerror(ERANGE));
+  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
 }
 
 /* We duplicate a lot of what printf(3) does here. */
@@ -816,7 +844,7 @@ vbadd (buf, blen)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, strlen (vbuf));
+    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
 #endif
 
   return vbuf;

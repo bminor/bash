@@ -154,6 +154,26 @@ if [[ $STR = $PAT ]]; then
         echo ok
 fi
 
+# test the regular expression conditional operator
+[[ jbig2dec-0.9-i586-001.tgz =~ ([^-]+)-([^-]+)-([^-]+)-0*([1-9][0-9]*)\.tgz ]]
+echo ${BASH_REMATCH[1]}
+
+LDD_BASH="       linux-gate.so.1 =>  (0xffffe000)
+       libreadline.so.5 => /lib/libreadline.so.5 (0xb7f91000)
+       libhistory.so.5 => /lib/libhistory.so.5 (0xb7f8a000)
+       libncurses.so.5 => /lib/libncurses.so.5 (0xb7f55000)
+       libdl.so.2 => /lib/libdl.so.2 (0xb7f51000)
+       libc.so.6 => /lib/libc.so.6 (0xb7e34000)
+       /lib/ld-linux.so.2 (0xb7fd0000)"
+
+[[ "$LDD_BASH" =~ "libc" ]] && echo "found 1" 
+echo ${BASH_REMATCH[@]}
+
+[[ "$LDD_BASH" =~ libc ]] && echo "found 2" 
+echo ${BASH_REMATCH[@]}
+
 # bug in all versions up to and including bash-2.05b
 if [[ "123abc" == *?(a)bc ]]; then echo ok 42; else echo bad 42; fi
 if [[ "123abc" == *?(a)bc ]]; then echo ok 43; else echo bad 43; fi
+
+${THIS_SH} ./cond-regexp.sub

@@ -1,6 +1,6 @@
 /* tilde.c -- Tilde expansion code (~/foo := $HOME/foo). */
 
-/* Copyright (C) 1988,1989 Free Software Foundation, Inc.
+/* Copyright (C) 1988-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Readline, a library for reading lines
    of text with interactive input and history editing.
@@ -236,7 +236,7 @@ tilde_expand (string)
       string += end;
 
       expansion = tilde_expand_word (tilde_word);
-      free (tilde_word);
+      xfree (tilde_word);
 
       len = strlen (expansion);
 #ifdef __CYGWIN__
@@ -251,7 +251,7 @@ tilde_expand (string)
 	  strcpy (result + result_index, expansion);
 	  result_index += len;
 	}
-      free (expansion);
+      xfree (expansion);
     }
 
   result[result_index] = '\0';
@@ -377,7 +377,7 @@ tilde_expand_word (filename)
       if (expansion)
 	{
 	  dirname = glue_prefix_and_suffix (expansion, filename, user_len);
-	  free (username);
+	  xfree (username);
 	  free (expansion);
 	  return (dirname);
 	}
@@ -404,17 +404,17 @@ tilde_expand_word (filename)
 	      free (expansion);
 	    }
 	}
-      free (username);
       /* If we don't have a failure hook, or if the failure hook did not
 	 expand the tilde, return a copy of what we were passed. */
       if (dirname == 0)
 	dirname = savestring (filename);
     }
+#if defined (HAVE_GETPWENT)
   else
-    {
-      free (username);
-      dirname = glue_prefix_and_suffix (user_entry->pw_dir, filename, user_len);
-    }
+    dirname = glue_prefix_and_suffix (user_entry->pw_dir, filename, user_len);
+#endif
+
+  xfree (username);
 #if defined (HAVE_GETPWENT)
   endpwent ();
 #endif

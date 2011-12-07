@@ -113,7 +113,7 @@ _rl_next_macro_key ()
 
 #if defined (READLINE_CALLBACKS)
   c = rl_executing_macro[executing_macro_index++];
-  if (RL_ISSTATE (RL_STATE_CALLBACK) && RL_ISSTATE (RL_STATE_READCMD) && rl_executing_macro[executing_macro_index] == 0)
+  if (RL_ISSTATE (RL_STATE_CALLBACK) && RL_ISSTATE (RL_STATE_READCMD|RL_STATE_MOREINPUT) && rl_executing_macro[executing_macro_index] == 0)
       _rl_pop_executing_macro ();
   return c;
 #else
@@ -152,7 +152,7 @@ _rl_pop_executing_macro ()
       rl_executing_macro = macro_list->string;
       executing_macro_index = macro_list->sindex;
       macro_list = macro_list->next;
-      free (macro);
+      xfree (macro);
     }
 
   if (rl_executing_macro == 0)
@@ -181,7 +181,7 @@ _rl_kill_kbd_macro ()
 {
   if (current_macro)
     {
-      free (current_macro);
+      xfree (current_macro);
       current_macro = (char *) NULL;
     }
   current_macro_size = current_macro_index = 0;

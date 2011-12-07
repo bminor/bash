@@ -7,7 +7,7 @@
    Unix snprintf implementation.
    derived from inetutils/libinetutils/snprintf.c Version 1.1
 
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001,2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General License as published by
@@ -58,6 +58,11 @@
 #  include <config.h>
 #endif
 
+#if defined(DEBUG)
+#  undef HAVE_SNPRINTF
+#  undef HAVE_ASPRINTF
+#endif
+
 #if defined(DRIVER) && !defined(HAVE_CONFIG_H)
 #define HAVE_LONG_LONG
 #define HAVE_LONG_DOUBLE
@@ -65,6 +70,7 @@
 #define HAVE_PRINTF_A_FORMAT
 #endif
 #define HAVE_ISINF_IN_LIBC
+#define HAVE_ISNAN_IN_LIBC
 #define PREFER_STDARG
 #define HAVE_STRINGIZE
 #define HAVE_LIMITS_H
@@ -370,6 +376,12 @@ static void xfree __P((void *));
 	      for (; (p)->width > 0; (p)->width--) \
 		 PUT_CHAR((p)->pad, p)
 
+/* pad with zeros from decimal precision */
+#define PAD_ZERO(p) \
+	if ((p)->precision > 0) \
+	  for (; (p)->precision > 0; (p)->precision--) \
+	    PUT_CHAR('0', p)
+
 /* if width and prec. in the args */
 #define STAR_ARGS(p) \
 	do { \
@@ -394,7 +406,7 @@ static void xfree __P((void *));
 	      } \
 	} while (0)
 
-#if defined (HAVE_LOCALE_H)
+#if defined (HAVE_LOCALE_H) && defined (HAVE_LOCALECONV)
 #  define GETLOCALEDATA(d, t, g) \
       do \
 	{ \
@@ -464,6 +476,8 @@ pow_10(n)
 	  10^x ~= r
  * log_10(200) = 2;
  * log_10(250) = 2;
+ *
+ * NOTE: do not call this with r == 0 -- an infinite loop results.
  */
 static int
 log_10(r)
@@ -569,8 +583,11 @@ numtoa(number, base, precision, fract)
     { 
       integral_part[0] = '0';
       integral_part[1] = '\0';
-      fraction_part[0] = '0';
-      fraction_part[1] = '\0';
+      /* The fractional part has to take the precision into account */
+      for (ch = 0; ch < precision-1; ch++)
+ 	fraction_part[ch] = '0';
+      fraction_part[ch] = '0';
+      fraction_part[ch+1] = '\0';
       if (fract)
 	*fract = fraction_part;
       return integral_part;
@@ -651,8 +668,13 @@ number(p, d, base)
   long sd;
   int flags;
 
+  /* An explicit precision turns off the zero-padding flag. */
+  if ((p->flags & PF_ZEROPAD) && p->precision >= 0 && (p->flags & PF_DOT))
+    p->flags &= ~PF_ZEROPAD;
+
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  flags = 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
@@ -667,6 +689,12 @@ number(p, d, base)
 
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
+
+  if ((p->flags & PF_DOT) && p->precision > 0)
+    {
+      p->precision -= strlen(tmp);
+      PAD_ZERO(p);
+    }
 
   switch (base)
     {
@@ -711,8 +739,12 @@ lnumber(p, d, base)
   long long sd;
   int flags;
 
+  /* An explicit precision turns off the zero-padding flag. */
+  if ((p->flags & PF_ZEROPAD) && p->precision >= 0 && (p->flags & PF_DOT))
+    p->flags &= ~PF_ZEROPAD;
+
   sd = d;	/* signed for ' ' padding in base 10 */
-  flags = (*p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
+  flags = (*p->pf == 'x' || *p->pf == 'X' || *p->pf == 'o' || *p->pf == 'u' || *p->pf == 'U') ? FL_UNSIGNED : 0;
   if (*p->pf == 'X')
     flags |= FL_HEXUPPER;
 
@@ -727,6 +759,12 @@ lnumber(p, d, base)
 
   p->width -= strlen(tmp);
   PAD_RIGHT(p);
+
+  if ((p->flags & PF_DOT) && p->precision > 0)
+    {
+      p->precision -= strlen(tmp);
+      PAD_ZERO(p);
+    }
 
   switch (base)
     {
@@ -778,6 +816,7 @@ pointer(p, d)
       PUT_CHAR(*tmp, p);
       tmp++;
     }
+
   PAD_LEFT(p);
 }
 
@@ -881,7 +920,9 @@ isinf(d)
 #endif
     return 0;
 }
+#endif
 
+#ifndef HAVE_ISNAN_IN_LIBC
 static int
 isnan(d)
      double d;
@@ -943,11 +984,21 @@ floating(p, d)
   if ((p->flags & PF_THOUSANDS) && grouping && (t = groupnum (tmp)))
     tmp = t;
 
+  if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
+    {
+      /* smash the trailing zeros unless altform */
+      for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
+        tmp2[i] = '\0'; 
+      if (tmp2[0] == '\0')
+	p->precision = 0;
+    }
+
   /* calculate the padding. 1 for the dot */
   p->width = p->width -
 	    ((d > 0. && p->justify == RIGHT) ? 1:0) -
 	    ((p->flags & PF_SPACE) ? 1:0) -
-	    strlen(tmp) - p->precision - 1;
+	    strlen(tmp) - p->precision -
+	    ((p->precision != 0 || (p->flags & PF_ALTFORM)) ? 1 : 0);	/* radix char */
   PAD_RIGHT(p);  
   PUT_PLUS(d, p, 0.);
   PUT_SPACE(d, p, 0.);
@@ -961,11 +1012,6 @@ floating(p, d)
 
   if (p->precision != 0 || (p->flags & PF_ALTFORM))
     PUT_CHAR(decpoint, p);  /* put the '.' */
-
-  if ((*p->pf == 'g' || *p->pf == 'G') && (p->flags & PF_ALTFORM) == 0)
-    /* smash the trailing zeros unless altform */
-    for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
-      tmp2[i] = '\0'; 
 
   for (; *tmp2; tmp2++)
     PUT_CHAR(*tmp2, p); /* the fraction */
@@ -982,14 +1028,19 @@ exponent(p, d)
   char *tmp, *tmp2;
   int j, i;
 
-  if (chkinfnan(p, d, 1) || chkinfnan(p, d, 2))
+  if (d != 0 && (chkinfnan(p, d, 1) || chkinfnan(p, d, 2)))
     return;	/* already printed nan or inf */
 
   GETLOCALEDATA(decpoint, thoussep, grouping);
   DEF_PREC(p);
-  j = log_10(d);
-  d = d / pow_10(j);  /* get the Mantissa */
-  d = ROUND(d, p);		  
+  if (d == 0.)
+    j = 0;
+  else
+    {
+      j = log_10(d);
+      d = d / pow_10(j);  /* get the Mantissa */
+      d = ROUND(d, p);		  
+    }
   tmp = dtoa(d, p->precision, &tmp2);
 
   /* 1 for unit, 1 for the '.', 1 for 'e|E',
@@ -1047,6 +1098,7 @@ exponent(p, d)
        PUT_CHAR(*tmp, p);
        tmp++;
      }
+
    PAD_LEFT(p);
 }
 #endif
@@ -1329,7 +1381,7 @@ conv_break:
 		STAR_ARGS(data);
 		DEF_PREC(data);
 		d = GETDOUBLE(data);
-		i = log_10(d);
+		i = (d != 0.) ? log_10(d) : -1;
 		/*
 		 * for '%g|%G' ANSI: use f if exponent
 		 * is in the range or [-4,p] exclusively

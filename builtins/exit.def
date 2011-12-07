@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,6 +45,7 @@ $END
 #include "common.h"
 #include "builtext.h"	/* for jobs_builtin */
 
+extern int check_jobs_at_exit;
 extern int last_command_exit_value;
 extern int running_trap, trap_saved_exit_value;
 extern int subshell_environment;
@@ -60,7 +61,7 @@ exit_builtin (list)
 {
   if (interactive)
     {
-      fprintf (stderr, login_shell ? "logout\n" : "exit\n");
+      fprintf (stderr, login_shell ? _("logout\n") : "exit\n");
       fflush (stderr);
     }
 
@@ -94,7 +95,7 @@ exit_or_logout (list)
   int exit_value;
 
 #if defined (JOB_CONTROL)
-  int exit_immediate_okay;
+  int exit_immediate_okay, stopmsg;
 
   exit_immediate_okay = (interactive  == 0 ||
 			 last_shell_builtin == exit_builtin ||
@@ -102,21 +103,32 @@ exit_or_logout (list)
 			 last_shell_builtin == jobs_builtin);
 
   /* Check for stopped jobs if the user wants to. */
-  if (!exit_immediate_okay)
+  if (exit_immediate_okay == 0)
     {
       register int i;
-      for (i = 0; i < js.j_jobslots; i++)
+      for (i = stopmsg = 0; i < js.j_jobslots; i++)
 	if (jobs[i] && STOPPED (i))
-	  {
-	    fprintf (stderr, _("There are stopped jobs.\n"));
+	  stopmsg = JSTOPPED;
+	else if (check_jobs_at_exit && stopmsg == 0 && RUNNING (i))
+	  stopmsg = JRUNNING;
 
-	    /* This is NOT superfluous because EOF can get here without
-	       going through the command parser.  Set both last and this
-	       so that either `exit', `logout', or ^D will work to exit
-	       immediately if nothing intervenes. */
-	    this_shell_builtin = last_shell_builtin = exit_builtin;
-	    return (EXECUTION_FAILURE);
-	  }
+      if (stopmsg == JSTOPPED)
+	fprintf (stderr, _("There are stopped jobs.\n"));
+      else if (stopmsg == JRUNNING)
+	fprintf (stderr, _("There are running jobs.\n"));
+
+      if (stopmsg && check_jobs_at_exit)
+        list_all_jobs (JLIST_STANDARD);
+
+      if (stopmsg)
+	{
+	  /* This is NOT superfluous because EOF can get here without
+	     going through the command parser.  Set both last and this
+	     so that either `exit', `logout', or ^D will work to exit
+	     immediately if nothing intervenes. */
+	  this_shell_builtin = last_shell_builtin = exit_builtin;
+	  return (EXECUTION_FAILURE);
+	}
     }
 #endif /* JOB_CONTROL */
 

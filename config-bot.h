@@ -1,7 +1,7 @@
 /* config-bot.h */
 /* modify settings or make new ones based on what autoconf tells us. */
 
-/* Copyright (C) 1989-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,9 +70,11 @@
 #  define TERMIOS_MISSING
 #endif
 
-/* If we have a getcwd(3), but it calls popen(), #undef HAVE_GETCWD so
-   the replacement in getcwd.c will be built. */
-#if defined (HAVE_GETCWD) && defined (GETCWD_BROKEN)
+/* If we have a getcwd(3), but one that does not dynamically allocate memory,
+   #undef HAVE_GETCWD so the replacement in getcwd.c will be built.  We do
+   not do this on Solaris, because their implementation of loopback mounts
+   breaks the traditional file system assumptions that getcwd uses. */
+#if defined (HAVE_GETCWD) && defined (GETCWD_BROKEN) && !defined (SOLARIS)
 #  undef HAVE_GETCWD
 #endif
 
@@ -130,10 +132,22 @@
 /* For platforms which support the ISO C amendement 1 functionality we
    support user defined character classes.  */
 /* Solaris 2.5 has a bug: <wchar.h> must be included before <wctype.h>.  */
-#if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H)
+#if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H) && defined (HAVE_LOCALE_H)
 #  include <wchar.h>
 #  include <wctype.h>
-#  if defined (HAVE_MBSRTOWCS) && defined (HAVE_MBRTOWC) && defined (HAVE_MBRLEN) && defined (HAVE_WCWIDTH) && defined (HAVE_WCTYPE)
+#  if defined (HAVE_ISWCTYPE) && \
+      defined (HAVE_ISWLOWER) && \
+      defined (HAVE_ISWUPPER) && \
+      defined (HAVE_MBSRTOWCS) && \
+      defined (HAVE_MBRTOWC) && \
+      defined (HAVE_MBRLEN) && \
+      defined (HAVE_TOWLOWER) && \
+      defined (HAVE_TOWUPPER) && \
+      defined (HAVE_WCHAR_T) && \
+      defined (HAVE_WCTYPE_T) && \
+      defined (HAVE_WINT_T) && \
+      defined (HAVE_WCWIDTH) && \
+      defined (HAVE_WCTYPE)
      /* system is supposed to support XPG5 */
 #    define HANDLE_MULTIBYTE      1
 #  endif

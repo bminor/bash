@@ -1,5 +1,5 @@
 /* error.c -- Functions for handling errors. */
-/* Copyright (C) 1993-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,8 +52,6 @@ extern int errno;
 
 extern int executing_line_number __P((void));
 
-extern int interactive_shell, interactive, startup_state;
-extern char *dollar_vars[];
 extern char *shell_name;
 #if defined (JOB_CONTROL)
 extern pid_t shell_pgrp;
@@ -61,7 +59,7 @@ extern int give_terminal_to __P((pid_t, int));
 #endif /* JOB_CONTROL */
 
 #if defined (ARRAY_VARS)
-extern char *bash_badsub_errmsg;
+extern const char * const bash_badsub_errmsg;
 #endif
 
 static void error_prolog __P((int));
@@ -72,7 +70,7 @@ static void error_prolog __P((int));
 #define MAINTAINER "bash-maintainers@gnu.org"
 #endif
 
-char *the_current_maintainer = MAINTAINER;
+const char * const the_current_maintainer = MAINTAINER;
 
 int gnu_error_format = 0;
 
@@ -87,7 +85,7 @@ error_prolog (print_lineno)
   line = (print_lineno && interactive_shell == 0) ? executing_line_number () : -1;
 
   if (line > 0)
-    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", line);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : _(" line "), line);
   else
     fprintf (stderr, "%s: ", ename);
 }
@@ -317,11 +315,11 @@ parser_error (lineno, format, va_alist)
   if (interactive)
     fprintf (stderr, "%s: ", ename);
   else if (interactive_shell)
-    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : _(" line "), lineno);
   else if (STREQ (ename, iname))
-    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s:%s%d: ", ename, gnu_error_format ? "" : _(" line "), lineno);
   else
-    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : " line ", lineno);
+    fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : _(" line "), lineno);
 
   SH_VA_START (args, format);
 
@@ -401,7 +399,7 @@ trace (format, va_alist)
 /* **************************************************************** */
 
 
-static char *cmd_error_table[] = {
+static const char * const cmd_error_table[] = {
 	N_("unknown command error"),	/* CMDERR_DEFAULT */
 	N_("bad command type"),		/* CMDERR_BADTYPE */
 	N_("bad connector"),		/* CMDERR_BADCONN */

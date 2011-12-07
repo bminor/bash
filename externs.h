@@ -112,6 +112,7 @@ extern void set_default_locale __P((void));
 extern void set_default_locale_vars __P((void));
 extern int set_locale_var __P((char *, char *));
 extern int set_lang __P((char *, char *));
+extern void set_default_lang __P((void));
 extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
 extern char *mk_msgstr __P((char *, int *));
@@ -254,7 +255,7 @@ extern int strcasecmp __P((const char *, const char *));
 #endif /* HAVE_STRCASECMP */
 
 /* declarations for functions defined in lib/sh/strerror.c */
-#if !defined (strerror)
+#if !defined (HAVE_STRERROR) && !defined (strerror)
 extern char *strerror __P((int));
 #endif
 
@@ -381,6 +382,9 @@ extern char *xstrchr __P((const char *, int));
 
 /* declarations for functions defined in lib/sh/zcatfd.c */
 extern int zcatfd __P((int, int, char *));
+
+/* declarations for functions defined in lib/sh/zmapfd.c */
+extern int zmapfd __P((int, char **, char *));
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread __P((int, char *, size_t));

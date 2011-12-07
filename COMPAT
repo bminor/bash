@@ -1,5 +1,5 @@
 This document details the incompatibilities between this version of bash,
-bash-3.1, and the previous widely-available versions, bash-1.14 (which is
+bash-3.2, and the previous widely-available versions, bash-1.14 (which is
 still the `standard' version for a few Linux distributions) and bash-2.x. 
 These were discovered by users of bash-2.x and 3.x, so this list is not
 comprehensive.  Some of these incompatibilities occur between the current
@@ -201,7 +201,9 @@ bash-2.0 were significant.)
     Bash-2.x does not support it.
 
 15. Bash no longer auto-exports the HOME, PATH, SHELL, TERM, HOSTNAME,
-    HOSTTYPE, MACHTYPE, or OSTYPE variables.
+    HOSTTYPE, MACHTYPE, or OSTYPE variables.  If they appear in the initial
+    environment, the export attribute will be set, but if bash provides a
+    default value, they will remain local to the current shell.
 
 16. Bash no longer initializes the FUNCNAME, GROUPS, or DIRSTACK variables
     to have special behavior if they appear in the initial environment.
@@ -256,3 +258,18 @@ bash-2.0 were significant.)
 
 30. Beginning with bash-3.1, the combination of posix mode and enabling the
     `xpg_echo' option causes echo to ignore all options, not looking for `-n'
+
+31. Beginning with bash-3.2, bash follows the Bourne-shell-style (and POSIX-
+    style) rules for parsing the contents of old-style backquoted command
+    substitutions.  Previous versions of bash attempted to recursively parse
+    embedded quoted strings and shell constructs; bash-3.2 uses strict POSIX
+    rules to find the closing backquote and simply passes the contents of the
+    command substitution to a subshell for parsing and execution.
+
+32. Beginning with bash-3.2, bash uses access(2) when executing primaries for
+    the test builtin and the [[ compound command, rather than looking at the
+    file permission bits obtained with stat(2).  This obeys restrictions of
+    the file system (e.g., read-only or noexec mounts) not available via stat.
+
+33. Beginning with bash-3.1/readline-5.1, the readline key binding code obeys
+    the current setting of the `convert-meta' variable.

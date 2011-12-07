@@ -33,15 +33,15 @@
 extern char *shell_name;
 
 /* Defines from version.h */
-const char *dist_version = DISTVERSION;
-int patch_level = PATCHLEVEL;
-int build_version = BUILDVERSION;
+const char * const dist_version = DISTVERSION;
+const int patch_level = PATCHLEVEL;
+const int build_version = BUILDVERSION;
 #ifdef RELSTATUS
-const char *release_status = RELSTATUS;
+const char * const release_status = RELSTATUS;
 #else
-const char *release_status = (char *)0;
+const char * const release_status = (char *)0;
 #endif
-const char *sccs_version = SCCSVERSION;
+const char * const sccs_version = SCCSVERSION;
 
 /* Functions for getting, setting, and displaying the shell version. */
 
@@ -77,7 +77,7 @@ void
 show_shell_version (extended)
      int extended;
 {
-  printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
+  printf (_("GNU bash, version %s (%s)\n"), shell_version_string (), MACHTYPE);
   if (extended)
-    printf (_("Copyright (C) 2005 Free Software Foundation, Inc.\n"));
+    printf (_("Copyright (C) 2006 Free Software Foundation, Inc.\n"));
 }

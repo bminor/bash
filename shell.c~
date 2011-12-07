@@ -179,7 +179,11 @@ time_t shell_start_time;
 int running_under_emacs;
 
 /* Do we have /dev/fd? */
+#ifdef HAVE_DEV_FD
 int have_devfd = HAVE_DEV_FD;
+#else
+int have_devfd = 0;
+#endif
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
@@ -221,8 +225,8 @@ int posixly_correct = 0;	/* Non-zero means posix.2 superset. */
 /* Some long-winded argument names.  These are obviously new. */
 #define Int 1
 #define Charp 2
-struct {
-  char *name;
+static const struct {
+  const char *name;
   int type;
   int *int_value;
   char **char_value;
@@ -696,8 +700,8 @@ main (argc, argv, env)
   if (interactive_shell)
     {
       /* Set up for checking for presence of mail. */
-      remember_mail_dates ();
       reset_mail_timer ();
+      init_mail_dates ();
 
 #if defined (HISTORY)
       /* Initialize the interactive history stuff. */
