@@ -4666,7 +4666,10 @@ command_substitute (string, quoted)
   old_pipeline_pgrp = pipeline_pgrp;
   /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline. */
   if ((subshell_environment & SUBSHELL_PIPE) == 0)
+{
     pipeline_pgrp = shell_pgrp;
+itrace("command_substitute: set pipeline_pgrp = shell_pgrp = %d", pipeline_pgrp);
+}
   cleanup_the_pipeline ();
 #endif /* JOB_CONTROL */
 
@@ -4680,9 +4683,14 @@ command_substitute (string, quoted)
     reset_signal_handlers ();
 
 #if defined (JOB_CONTROL)
+  /* XXX DO THIS ONLY IN PARENT ? XXX */
   set_sigchld_handler ();
   stop_making_children ();
-  pipeline_pgrp = old_pipeline_pgrp;
+  if (pid != 0)
+{
+    pipeline_pgrp = old_pipeline_pgrp;
+itrace("command_substitute: set pipeline_pgrp = %d (old_pipeline_pgrp)", pipeline_pgrp);
+}
 #else
   stop_making_children ();
 #endif /* JOB_CONTROL */
@@ -4789,6 +4797,7 @@ command_substitute (string, quoted)
 
       current_command_subst_pid = pid;
       last_command_exit_value = wait_for (pid);
+itrace("command_substitute: waited for pid %d: status %d", pid, last_command_exit_value);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;
 

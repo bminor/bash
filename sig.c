@@ -508,7 +508,7 @@ sigint_sighandler (sig)
      right.  Should it be set unconditionally? */
   if (interrupt_state == 0)
     ADDINTERRUPT;
-
+itrace("sigint_sighandler");
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;

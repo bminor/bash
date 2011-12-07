@@ -453,6 +453,7 @@ start_pipeline ()
     {
       cleanup_the_pipeline ();
       pipeline_pgrp = 0;
+itrace("start_pipeline: set pipeline_pgrp = 0");
 #if defined (PGRP_PIPE)
       pipe_close (pgrp_pipe);
 #endif
@@ -566,6 +567,7 @@ stop_pipeline (async, deferred)
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
       pipeline_pgrp = 0;
+itrace("stop_pipeline: set pipeline_pgrp = 0");
 
       newjob->flags = 0;
 
@@ -1684,6 +1686,8 @@ make_child (command, async_p)
   sigemptyset (&oset);
   sigprocmask (SIG_BLOCK, &set, &oset);
 
+itrace("make_child start: pipeline_pgrp = %d", pipeline_pgrp);
+
   making_children ();
 
 #if defined (BUFFERED_INPUT)
@@ -1742,7 +1746,10 @@ make_child (command, async_p)
 	     process group. */
 
 	  if (pipeline_pgrp == 0)	/* This is the first child. */
+{
 	    pipeline_pgrp = mypid;
+itrace("make_child: child proc: set pipeline_pgrp = %d (mypid)", pipeline_pgrp);
+}
 
 	  /* Check for running command in backquotes. */
 	  if (pipeline_pgrp == shell_pgrp)
@@ -1768,7 +1775,10 @@ make_child (command, async_p)
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
 	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0))
+{
+itrace("make_child: give terminal to %d shell_pgrp = %d subshell_environment = %d", pipeline_pgrp, shell_pgrp, subshell_environment);
 	    give_terminal_to (pipeline_pgrp, 0);
+}
 
 #if defined (PGRP_PIPE)
 	  if (pipeline_pgrp == mypid)
@@ -1778,7 +1788,10 @@ make_child (command, async_p)
       else			/* Without job control... */
 	{
 	  if (pipeline_pgrp == 0)
+{
 	    pipeline_pgrp = shell_pgrp;
+itrace("make_child: child proc: set pipeline_pgrp = %d (shell_pgrp)", pipeline_pgrp);
+}
 
 	  /* If these signals are set to SIG_DFL, we encounter the curious
 	     situation of an interactive ^Z to a running process *working*
@@ -1823,6 +1836,7 @@ make_child (command, async_p)
 	  if (pipeline_pgrp == 0)
 	    {
 	      pipeline_pgrp = pid;
+itrace("make_child: parent proc: set pipeline_pgrp = %d (pid)", pipeline_pgrp);
 	      /* Don't twiddle terminal pgrps in the parent!  This is the bug,
 		 not the good thing of twiddling them in the child! */
 	      /* give_terminal_to (pipeline_pgrp, 0); */
@@ -1836,7 +1850,11 @@ make_child (command, async_p)
       else
 	{
 	  if (pipeline_pgrp == 0)
+{
 	    pipeline_pgrp = shell_pgrp;
+itrace("make_child: parent proc: set pipeline_pgrp = %d (shell_pgrp)", pipeline_pgrp);
+}
+	   
 	}
 
       /* Place all processes into the jobs array regardless of the
@@ -2212,7 +2230,7 @@ wait_sigint_handler (sig)
   /* XXX - should this be interrupt_state?  If it is, the shell will act
      as if it got the SIGINT interrupt. */
   wait_sigint_received = 1;
-
+itrace("wait_sigint_handler: wait_sigint_received -> 1");
   /* Otherwise effectively ignore the SIGINT and allow the running job to
      be killed. */
   SIGRETURN (0);
@@ -2319,11 +2337,14 @@ wait_for (pid)
      to finish.  We don't want the shell to exit if an interrupt is
      received, only if one of the jobs run is killed via SIGINT.  If
      job control is not set, the job will be run in the same pgrp as
-     the shell, and the shell will see any signals the job gets. */
+     the shell, and the shell will see any signals the job gets.  In
+     fact, we want this set every time the waiting shell and the waited-
+     for process are in the same process group, including command
+     substitution. */
 
   /* This is possibly a race condition -- should it go in stop_pipeline? */
   wait_sigint_received = 0;
-  if (job_control == 0)
+  if (job_control == 0 || (subshell_environment&SUBSHELL_COMSUB))
     {
       old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
       if (old_sigint_handler == SIG_IGN)
@@ -2427,6 +2448,7 @@ wait_for (pid)
   /* XXX */
   if ((job != NO_JOB && JOBSTATE (job) == JSTOPPED) || WIFSTOPPED (child->status))
     termination_state = 128 + WSTOPSIG (child->status);
+itrace("wait_for (%d): termination_state = %d last_command_exit_signal = %d", pid, termination_state, last_command_exit_signal);
 
   if (job == NO_JOB || IS_JOBCONTROL (job))
     {
@@ -3004,6 +3026,7 @@ waitchld (wpid, block)
 	  wcontinued = 0;
 	  continue;	/* jump back to the test and retry without WCONTINUED */
 	}
+itrace("waitchld: waitpid returns %d (status %d)", pid, status);
 
       /* The check for WNOHANG is to make sure we decrement sigchld only
 	 if it was non-zero before we called waitpid. */
@@ -4024,7 +4047,10 @@ set_job_control (arg)
   /* If we're turning on job control, reset pipeline_pgrp so make_child will
      put new child processes into the right pgrp */
   if (job_control != old && job_control)
+{
     pipeline_pgrp = 0;
+itrace("set_job_control: set pipeline_pgrp = 0");
+}
 
   return (old);
 }
