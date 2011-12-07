@@ -1,0 +1,3177 @@
+
+[code made available via ftp -- first redistributable version]
+
+				    9/3
+				    ---
+lib/readline/history.c
+	- removed stray extern declaration of strrchr()
+	- made get_history_word_specifier a static function
+
+lib/readline/readline.c
+	- removed redundant declaration of rl_visible_stats
+
+execute_cmd.c
+	- make sure that the subshell forked to execute ( xxx yyy ) &
+	  sets original_pgrp to -1 so that ( exec xxx yyy ) & does not
+	  make the exec builtin restore the original process group
+
+				    9/4
+				    ---
+
+builtins/read.def
+	- free `t' *only if* it was assigned the value from
+	  string_list_dollar_star when more words are read than variables
+	  supplied
+
+variables.c
+	- moved some external function declarations to file scope
+
+test.c
+	- changed the unary_advance and advance macros to use the
+	  do { ... } while (0) idiom rather than the comma operator
+
+				    9/5
+				    ---
+builtins/getopts.def
+	- if __GNU_LIBRARY__ is defined, change getopt_set_posix_option_order
+	  to a macro, because getopt.c will not be compiled in
+
+				    9/7
+				    ---
+subst.c
+	- support $POSIX_PEDANTIC as a synonym for $POSIXLY_CORRRECT
+
+builtins/set.def
+	- added support for `set -o posix'
+	- changed list_long_opts to use a define (`MINUS_O_FORMAT') for
+	  the format argument to printf
+
+bashline.c, execute_cmd.c, jobs.c, nojobs.c, print_cmd.c, subst.c, test.c,
+variables.c
+	- moved extern declarations from function scope to file scope, or
+	  removed extern function declarations already appearing in bash
+	  header files
+
+bashline.c
+	- include alias.h if ALIAS defined
+
+lib/readline/history.h
+	- added extern declaration for history_tokenize
+
+shell.c
+	- changed run_startup_files to use the global value of
+	  posixly_correct instead of the posix_env argument, which was
+	  eliminated
+
+lib/readline/readline.c
+	- changed alphabetic() so we're not casting the return value
+	  from strchr() to an int
+
+				    9/8
+				    ---
+builtins/ulimit.def
+	- disable the getrlimit stuff if GETRLIMIT_MISSING is defined
+
+machines.h
+	- define GETRLIMIT_MISSING for the Sequent Symmetry
+	- change the M_OS define to `Dynix_ptx' for the Sequent Symmetry
+	- take HAVE_ALLOCA out of the Symmetry definition
+	- removed extra HAVE_ALLOCA define from linux machine description
+
+cpp-Makefile
+	- add $OSTYPE to HOSTTYPE_DECL, defining it as ${OS_NAME}
+
+variables.c
+	- make a variable $OSTYPE analogous to $HOSTTYPE, set from the
+	  OSTYPE define from cpp-Makefile
+
+documentation/bash.1
+	- added description of $OSTYPE
+
+parse.y
+	- changed report_syntax_error so that syntax errors set $? to 2
+	  like sh and ksh do
+
+lib/readline/funmap.c
+	- added bindings for the non-incremental `search again' functions
+	  like those that vi uses
+
+expr.c, general.c, builtins/trap.def, builtins/common.c
+	- removed some extraneous extern function declarations
+
+				    9/9
+				    ---
+jobs.h
+	- added some more extern function declarations exported by jobs.c
+
+parse.y, bashline.c, shell.c, builtins/common.c
+	- removed some extraneous extern function declarations
+
+builtins/common.h
+	- fixed the extern declaration of parse_and_execute_cleanup
+
+lib/readline/readline.h
+	- added more extern function declarations for functions in bind.c
+	  and complete.c
+	- include tilde.h instead of redeclaring the tilde variables and
+	  functions
+
+parse.y
+	- made with_input_from_stream and with_input_from_stdin void
+	  functions
+	- made the yy_*_get and yy_*_unget functions static
+
+shell.c
+	- made all the initialize functions static void
+
+trap.h
+	- added extern declarations for the rest of the functions defined
+	  in trap.c
+
+trap.c
+	- made initialize_traps a void function, since it has no return
+	  value
+
+externs.h
+	- new file, with function declarations not mentioned in other header
+	  files.  Included by shell.h.
+
+cpp-Makefile, builtins/Makefile
+	- updated the dependencies to include new header files
+
+bashline.c, execute_cmd.c, jobs.c, general.c, mailcheck.c, make_cmd.c,
+nojobs.c, parse.y, print_cmd.c, shell.c, subst.c, test.c, trap.c,
+variables.c, builtins/common.c, builtins/bind.def, builtins/declare.def,
+builtins/exec.def, builtins/hash.def, builtins/let.def, builtins/source.def,
+builtins/trap.def, builtins/type.def, error.c
+	- removed extern function declarations already in externs.h
+
+lib/tilde/tilde.h, jobs.h
+	- protect against multiple inclusion with #ifdef __XXX_H__
+
+jobs.h
+	- added extern declaration of job_control
+
+general.c
+	- include <tilde/tilde.h> and remove all of the extern declarations
+	  for the tilde variables
+
+lib/readline/history.h
+	- added extern declarations for variables exported by history.c
+
+execute_cmd.c
+	- don't bother trying to free the string passed to make_child in
+	  the child if the command is not found
+
+bashhist.c, bashhist.h
+	- new files with bash interface to the history library.  Moved code
+	  from parse.y, shell.c, subst.c to here.
+
+parse.y, bashline.c, shell.c, subst.c, variables.c
+	- include bashhist.h
+
+error.c, bashhist.c, bracecomp.c
+	- added copyright comment
+
+machines.h
+	- changed hpux_8 and hpux_9 entries to #undef USE_GNU_MALLOC
+	  because they have the same YP bug as SunOS
+
+				   9/10
+				   ----
+print_cmd.c
+	- fixed the printing of functions declared within functions by
+	  making print_function_def and named_function_string responsible
+	  for printing the open and close braces and printing the `inside'
+	  command rather than overloading print_group_command
+
+builtins/fc.def, builtins/history.def
+	- fixed up to use bashhist.h and removed extra declarations of
+	  history stuff
+
+nojobs.c
+	- restore the top-level signal mask on Posix.1 systems after
+	  forking in make_child
+	- make all children set the job control signals to SIG_DFL in
+	  make_child
+
+				   9/12
+				   ----
+documentation/texi2roff-2.0.shar
+	- removed from the source tree
+
+				   9/13
+				   ----
+lib/doc-support
+	- new directory for building texindex
+
+lib/doc-support/texindex.c
+	- upgraded to version 1.45 from the texinfo-3.1 distribution
+
+documentation/Makefile
+	- fixed so that features.dvi would build correctly
+
+variables.c, subst.c, braces.c, flags.c, jobs.c, mailcheck.c, parse.y,
+builtins/cd.def, builtins/common.c, lib/readline/history.c,
+lib/readline/isearch.c, lib/readline/readline.c
+	- removed instances of `index' being used as a variable or
+	  structure member
+
+cpp-Makefile
+	- pass HAVE_LIMITS_H through to the rest of the build in
+	  SYSTEM_FLAGS and LIBRARY_CFLAGS
+
+maxpath.h
+	- removed inclusion of `sysdefs.h', since the only reason it was
+	  included was to pick up HAVE_LIMITS_H
+
+				   9/14
+				   ----
+bashhist.h
+	- add extern declaration of history_expansion_inhibited, dependent
+	  on BANG_HISTORY
+
+execute_cmd.c, builtins/common.c, subst.c, variables.c, parse.y, jobs.c,
+error.c, bashline.c
+	- moved all extern variable declarations to beginning of file,
+	  giving them file scope
+
+execute_cmd.c
+	- changed the code so that /dev/null is used as fd 0 for async
+	  jobs if the shell itself is not interactive (!interactive_shell)
+	  rather than currently interactive (!interactive)
+
+builtins/break.def, builtins/cd.def, builtins/declare.def
+builtins/exit.def, builtins/fc.def, builtins/fg_bg.def builtins/hash.def,
+builtins/kill.def builtins/read.def, builtins/return.def,
+builtins/setattr.def builtins/source.def, builtins/type.def,
+builtins/wait.def
+	- moved all extern variable declarations to beginning of file,
+	  giving them file scope
+
+				   9/15
+				   ----
+support/mksysdefs
+	- change the test to set SCOREL so that it handles SCO v4.2 and
+	  above (everything above and including 4.0)
+
+machines.h
+	- changed M_OS define of `Solaris' to `SunOS5'; added -DSolaris to
+	  SYSDEP_CFLAGS for Solaris 2 systems
+
+				   9/16
+				   ----
+print_cmd.c
+	- make sure cprintf() null-terminates the_printed_command correctly
+
+test.c
+	- changed the last two stray stat() calls to test_stat()
+	- made test_stat handle emulation of /dev/fd for systems that
+	  don't have it: /dev/fd/x returns the result of fstat(x, finfo)
+
+documentation/bash.1
+	- added -b to the usage line for the `set' builtin
+	- added description of `set -o posix'
+	- added -u, -v to the usage line for the `ulimit' builtin
+	- added text describing key bindings in ~/.inputrc to the
+	  READLINE section
+
+documentation/texinfo.tex
+	- upgraded to the latest version from the texinfo-3.1 distribution
+
+documentation/features.texi, lib/readline/doc/rluser.texinfo, 
+lib/readline/doc/hsuser.texinfo
+	- a major overhaul and expansion
+
+				   9/17
+				   ----
+bashline.c
+	- set rl_vi_comment_begin to "#" when in Posix.2 mode
+
+lib/readline/vi_mode.c
+	- set vi mode comment begin character string to "#" by default
+
+				   9/18
+				   ----
+lib/readline/bind.c
+	- added `set keymap' command to the init file variable setting code
+
+documentation/bash.1, documentation/features.texi
+	- added description of `set keymap' command
+
+lib/readline/doc/rluser.texinfo
+	- completed description of init file and keybinding syntax
+
+				   9/20
+				   ----
+variables.c
+	- if POSIXLY_CORRECT or POSIX_PEDANTIC are in the initial shell
+	  environment, enter `Posix.2 mode'
+
+machines.h
+	- define SCO REQUIRED_LIBRARIES as `-lc_s -lc -lPW' to pick up
+	  the functions in libc and libPW from libc (e.g. rename)
+
+
+				   9/21
+				   ----
+execute_cmd.c
+	- fixed X_BIT macro to protect its argument with parens in the
+	  macro body
+
+maxpath.h
+	- include sys/param.h on Dynix machines if MAXPATHLEN is not
+	  defined after including limits.h
+
+general.c
+	- moved the inclusion of <signal.h> on Posix.1 systems up with the
+	  rest of the includes
+
+shell.c, lib/readline/complete.c, lib/tilde/tilde.c
+	- don't extern declare getpwuid on Dynix machines
+
+lib/readline/history.c
+	- make sure strlen() is cast to int whenever used in a comparison
+
+				   9/23
+				   ----
+lib/readline/readline.c
+	- changed rl_call_last_kbd_macro to disallow recursive macro
+	  execution
+
+				   9/26
+				   ----
+bashline.c
+	- free rl_vi_comment_begin before assigning to it; make sure to
+	  savestring() what we assign to it
+
+				   9/28
+				   ----
+lib/readline/search.c
+	- in noninc_search, make the ^W and ^U bindings closer to what
+	  Posix.2 specifies.  (The ^W binding still uses unix_word_rubout,
+	  which uses whitespace as the word boundary.  This is what
+	  ksh-88 does, too.  Posix.2 says to use punctuation characters
+	  as word boundaries also.)
+
+lib/readline/vi_mode.c
+	- fixed a bug in rl_vi_delete_to which caused c[wW] to delete one
+	  extra character when there were multiple spaces between words.
+	  Made the same change to rl_vi_change_to() and rl_vi_yank_to().
+
+lib/readline/complete.c
+	- fixed quoted substring completion so that `\' can quote the
+	  quote character
+	- fixed the quoted string completion mechanism by doing the
+	  following:
+		o quoted word break characters do not break words for the
+		  completer, so `"abcde"/xhy' no longer sends `/xhy' to
+		  the rest of the completion code
+		o quotes are stripped after the application-specific
+		  completion function is attempted if filename completion
+		  is about to be performed.  If needed, they are added
+		  back later.  This has the benefit of removing unneeded
+		  quotes.
+
+				   9/29
+				   ----
+siglist.h
+	- ICL DRS6000s need sys_siglist to be defined as _sys_siglist
+
+machines.h
+	- take the define of sys_siglist out of the DRS6000 entry
+	- added summary of available definitions for SYSDEP_CFLAGS
+	- added new SYSDEP_CFLAGS variable: HAVE_GETPW_DECLS to isc386, sgi,
+	  Linux, Dynix descriptions
+	- changed isc386 description: added ISC_SYSDEPS to make the
+	  SYSDEP_CFLAGS lines a little cleaner
+
+shell.c, lib/tilde/tilde.c, lib/readline/complete.c
+	- now uses HAVE_GETPW_DECLS define
+
+lib/tilde/tilde.c
+	- removed references to getpwent(), since it's not called
+	- add extern declaration for getpwnam()
+
+lib/readline/complete.c
+	- add a __STDC__ definition for getpwnam() for isc386 machines
+
+cpp-Makefile
+	- updated the dependencies: bashhist.h, bashansi.h, dependencies
+	  on the library include files
+
+				   9/30
+				   ----
+mailcheck.c
+	- cleaned up the name space by making functions not used by other
+	  files static
+	- took out redundant test in check_mail after the goto next_mail_file
+
+variables.c
+	- cleaned up the code a bit by removing unnecessary { ... } pairs
+	  enclosing some code blocks
+	- check for $IGNOREEOF at startup, call sv_ignoreeof if imported
+
+parse.y
+	- new variable `ignoreeof', non-zero if we are ignoring EOF, used
+	  in handle_eof_input_unit -- keeps us from looking up $IGNOREEOF
+	  and $ignoreeof on every EOF character
+
+subst.c
+	- sv_ignoreeof now sets or clears `ignoreeof'
+
+flags.h
+	- changed flags_alist `name' member to be a char, since we only
+	  ever use one character
+	- added FLAG_UNKNOWN to be returned by find_flag, since (int *)-1
+	  is not portable, and (int *)0 is just as good a value
+
+flags.c
+	- changed find_flag, change_flag_char, change_flag, to take a
+	  char as a parameter rather than a char * because we only use
+	  one char and this is faster
+
+builtins/set.def
+	- changed calls to find_flag to pass a char instead of a char *
+
+shell.c, jobs.c, builtins/set.def
+	- changed instances of change_flag_char to change_flag, since the
+	  two are now equivalent
+
+cpp-Makefile
+	- added BUILTIN_OBJS, made BUILTINS_LIB depend on them
+	- added dependencies for builtin objects on builtin .def files
+	- otherwise tightened up the dependencies
+
+				   10/1
+				   ----
+support/mksysdefs
+	- handle SGI Irix 5.x by making SYSDEF="Irix5"
+
+parse.y
+	- made init_yy_io a void function
+
+input.h
+	- moved extern function declarations for parse.y and input.c to
+	  this file from externs.h
+
+shell.c
+	- include input.h unconditionally, now that it has extern function
+	  declarations
+	- check for $POSIX_PEDANTIC at shell startup, set posixly_correct
+	  if found
+
+make_cmd.c
+	- include input.h for the extern function declarations
+
+execute_cmd.h
+	- new file, with extern declarations from execute_cmd.c
+
+subst.c, builtins/type.def, variables.h, builtins/exec.def, builtins/hash.def,
+shell.c, buitlins/common.c, execute_cmd.c, mailcheck.c
+	- include execute_cmd.h
+
+cpp-Makefile, builtins/Makefile
+	- updated the dependencies as a result of the new and changed
+	  include files
+
+execute_cmd.h, externs.h, input.h
+	- changed to use the __P(()) method of using prototypes for extern
+	  functions
+
+nojobs.c
+	- include command.h
+
+				   10/5
+				   ----
+bashline.c
+	- make sure test_for_directory frees the filename if stat(2)
+	  fails
+
+lib/readline/vi_mode.c
+	- fixed the `c' command when used with the following motion
+	  commands: `^', `0', `%', `b', `B'.  The cursor was being
+	  moved one position too far, resulting in too much erasure
+
+parse.y
+	- changed redirection_needing_here_document into a stack of
+	  such redirections (redir_stack), indexed by need_here_doc,
+	  to handle command lines with >1 redirection, e.g.
+		cat <<a; cat <<b
+	- new function gather_here_documents to run the redirection stack
+
+shell.c
+	- don't import redirection_needing_here_doc; call
+	  gather_here_documents() instead
+
+input.h
+	- extern declaration for gather_here_documents()
+
+machines.h
+	- add OPENDIR_NOT_ROBUST to the SYSDEP_CFLAGS for SunOS 5
+
+				   10/6
+				   ----
+subst.c
+	- removed the unused `preserve_backslashes' and Q_KEEP_BACKSLASH
+	  code in expand_word_internal
+	- fixed memory leak: free `istring' before longjmping out of a
+	  bad substitution
+	- fixed memory leak: free `temp' at the bad_substitution label
+	- fixed memory leak: free `value' at the bad_substitution label
+	- removed all calls to longjmp from expand_word_internal: it now
+	  returns a pointer to expand_word_error or expand_word_fatal,
+	  and the caller is responsible for cleaning up locally allocated
+	  resources and calling longjmp with the appropriate parameter.
+	  BY CONVENTION: when one of those distinguished values is returned,
+	  the `string' variable has already been freed, so the caller must
+	  set it to null or otherwise not free it
+	- changed an fprintf (stderr, ...) to report_error in
+	  parameter_brace_expand_error
+
+dispose_cmd.c
+	- check for word->word being non-null in dispose_word before trying
+	  to free it
+
+				   10/8
+				   ----
+variables.c
+	- made new_shell_variable static
+	- made set_var_read_only, set_func_read_only, set_var_auto_export,
+	  set_func_auto_export, sort_char_array, maybe_make_export_env,
+	  put_command_name_into_env void functions
+
+variables.h
+	- added declarations for all the missing extern functions
+
+builtins/hash.def
+	- include posixstat.h for definition of struct stat to use in
+	  function prototype declarations
+
+expr.c                                 
+	- renamed local function `assignment' to `expassign' to avoid
+	  clashing with the global `assignment' defined in variables.c
+
+builtins/source.def
+	- include `execute_cmd.h' to pick up extern function declarations
+
+trap.h
+	- protected against multiple inclusion with __TRAP_H__ define
+	- added prototypes with __P
+
+				   10/11
+				   -----
+support/mksysdefs
+	- check in /usr/include/ansi and /usr/include/bsd for NeXT 3.x
+	  machines
+
+lib/readline/vi_mode.c
+	- include rldefs.h
+
+				   10/12
+				   -----
+test.c
+	- changed the `-x' test to call access(2) when AFS is defined,
+	  since `stat' doesn't work with AFS
+
+builtins/cd.def
+	- added code to dirs_builtin to implement dirs -n and dirs +n
+
+documentation/bash.1, documentation/features.texi
+	- updated description of `dirs' builtin
+
+				   10/14
+				   -----
+lib/readline/bind.c
+	- new function _rl_bind_if_unbound, which binds a key sequence to a
+	  readline function if that key sequence is unbound
+
+lib/readline/readline.c
+	- use _rl_bind_if_unbound to try to bind the arrow keys in
+	  init_terminal_io
+
+
+				  10/15
+				  ----- 
+
+lib/readline/display.c
+	- laid the groundwork for expanding special characters in
+	  readline prompt strings: new function expand_prompt
+	- rl_redisplay now has static local prompt variables:
+		local_prompt: expanded prompt string after last newline
+		local_prompt_prefix: expanded prompt string before last newline
+		visible_length: number of visible chars in local_prompt	
+		prefix_length: number of visible chars in local_prompt_prefix
+	  changed when rl_display_prompt changes
+
+				   10/18
+				   -----
+lib/readline/display.c
+	- new function: rl_expand_prompt, expands the prompt and sets the
+	  local display variables to the right values for redisplay.
+	- changed rl_redisplay to use the values computed by rl_expand_prompt
+	  if rl_display_prompt == rl_prompt and the old expansion code if
+	  otherwise (for instance, if rl_display_prompt is set by rl_message)
+
+lib/readline/readline.c
+	- new function: rl_get_termcap to retrieve the value of any termcap
+	  attribute that readline retrieves
+	- made readline_internal static, added appropriate declarations
+	- new global library variable: rl_visible_prompt_length
+	- added call to rl_expand_prompt in readline() before call to
+	  rl_initialize
+
+lib/readline/search.c
+	- use rl_visible_prompt_length instead of strlen(rl_prompt) in
+	  noninc_search ()
+
+				   10/19
+				   -----
+execute_cmd.c
+	- in execute_command_internal, mark an async job with a forced
+	  subshell `( xxx ) &' as no longer an interactive shell, no
+	  matter whether or not the original shell was interactive.  This
+	  allows jobs to be reaped without notification and fixes a mem
+	  `leak' (not really a leak, but the shell keeps increasing the
+	  size of the jobs table)
+
+				   10/21
+				   -----
+machines.h
+	- updated the NEC EWS description with hints from Jim Blandy
+
+				   10/23
+				   -----
+
+lib/readline/display.c
+	- changed expand_prompt so that it understands `escape' characters
+	  to mark the beginning and end of a sequence of non-visible
+	  characters, and takes these into account when returning the
+	  length of the prompt string
+
+lib/readline/readline.h
+	- new defines: RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE
+
+				   10/24
+				   -----
+
+parse.y
+	- removed check for $NO_PROMPT_VARS from decode_prompt_string()
+
+documentation/bash.1
+	- removed reference to $NO_PROMPT_VARS
+
+				   10/25
+				   -----
+machines.h
+	- add -lc_s to the AIX/PS2 REQUIRED_LIBRARIES definition
+
+lib/readline/readline.c
+	- removed the extra space that rl_yank_nth_arg adds before the
+	  yanked string
+
+				   10/26
+				   -----
+trap.c
+	- set_sigint_handler now sets the SIGINT handler to sigint_sighandler
+	  only if `interactive' is set, rather than interactive_shell.  This
+	  fixes the `". x", then sigint' bug reported by Vasco Pedro.
+
+general.c
+	- removed `register' from variable declarations in function prologues
+	- some functions now take slightly different arguments:
+		delete_element takes a `char *' as the third argument
+		find_name_in_list takes a `char **' as the second argument
+
+general.h
+	- changed definition of REVERSE_LIST to cast the argument of the
+	  call to reverse_list()
+	- added prototypes for all extern functions defined in general.c
+	- definition of BCOPY for use in general.c and elsewhere
+
+shell.c
+	- changed some calls to reverse_list to REVERSE_LIST
+
+shell.h, make_cmd.c, unwind_prot.c, input.c, builtins.h, error.c
+	- include command.h before general.h for declaration of WORD_LIST
+
+execute_cmd.c, expr.c, general.c, input.c, shell.c, unwind_prot.c, parse.y
+	- changed calls to bcopy to call xbcopy instead, and cast the
+	  first two arguments to char *
+
+copy_cmd.c
+	- changed calls to bcopy to call BCOPY instead
+
+machines.h
+	- new machine definition for IBM AIX/ESA (OSF/1) from Sergio
+	  Gelato
+
+support/mksysdefs
+	- If `uname -m' returns `ESA', the machine is an IBM ESA
+
+lib/posixheaders/memalloc.h
+	- new file, to unify the code to include <alloca.h> if necessary
+	  and declare alloca()
+
+config.h, config.h.mini, lib/readline/rldefs.h, lib/readline/history.c,
+lib/readline/isearch.c, lib/readline/search.c, lib/tilde/tilde.c
+	- changed to include "memalloc.h"
+
+builtins/getopt.c
+	- don't include #pragma alloca line on IBM ESA systems
+	- include malloc.h rather than alloca.h for AIX/ESA
+
+support/getcppsyms.c
+	- new defines to support AIX/ESA
+
+cpp-Makefile, builtins/Makefile, lib/readline/Makefile
+	- updated dependency information to include memalloc.h
+
+lib/readline/vi_keymap.c
+	- `\' in vi insertion mode should be mapped to self-insert rather
+	  than quoted-insert
+
+				   10/27
+				   -----
+nojobs.c
+	- added variable `already_making_children', made a function
+	  start_pipeline called from make_child to set it, value cleared
+	  in stop_pipeline.  This is how jobs.c treats it.
+
+execute_cmd.c
+	- in the `subshell' code in execute_command_internal, we need to
+	  handle a possible `return' if in a function:
+		f()
+		{
+			echo x | ( read b ; return 1 )
+			return 0
+		}
+	  and treat it like an `exit'
+	- already_making_children is no longer a job-control only variable
+	- made the code that decides whether or not to wait for a child
+	  process in the simple_command case of execute_command_internal
+	  be the same for job control and non-job control shells, since
+	  already_making_children has been put into nojobs.c
+
+lib/readline/display.c
+	- changed the display code to handle invisible characters in the
+	  prompt and still wrap lines at the correct column.  wrap_offset
+	  is the variable used to keep track of the number of invisible
+	  characters in the buffer
+	- changed rl_redisplay to use `screenchars' from readline.c so we
+	  don't have to compute (screenwidth * screenheight) on each
+	  redisplay
+
+lib/readline/readline.c
+	- new variable `screenchars', set to the total number of characters
+	  on the screen we can use (screenwidth * screenheight)
+	- changed rl_refresh_line so that it computes the line that the
+	  cursor is on correctly, taking invisible characters into account
+
+				   10/28
+				   -----
+general.h
+	- changed declaration of vfree to xfree
+
+general.c
+	- renamed vfree to xfree, since some systems already have a vfree()
+	  in libc
+
+execute_cmd.c, jobs.c, builtins/read.def, builtins/common.c
+	- changed vfree to xfree
+
+shell.c
+	- for systems that don't define USG and define ENOTSOCK, try to
+	  use getpeername() in issock() to find out whether or not an
+	  fd is a socket
+
+documentation/bash.1, documentation/features.texi
+	- documented the new \[ and \] prompt string escape sequences
+
+documentation/bash.1, lib/readline/doc/rluser.texinfo
+	- documented the new `show-all-if-ambiguous' readline variable
+
+lib/readline/complete.c
+	- changed rl_complete to call rl_complete_internal with `!' if
+	  the variable `_rl_complete_show_all' is non-zero
+	- changed rl_complete_internal to show all matches if there is
+	  more than one and what_to_do is `!'
+
+lib/readline/bind.c
+	- new variable `show-all-if-ambiguous' to control the value of
+	  _rl_complete_show_all
+	- changed a call to alloca() in rl_parse_and_bind to a
+	  malloc/free pair (`seq' variable), since some systems do not
+	  allow alloca'd memory to be passed to a function
+	- did the same alloca -> xmalloc/free in rl_generic_bind
+	  (`keys' variable)
+
+				   10/29
+			           -----
+dispose_cmd.h, make_cmd.h, command.h
+	- added prototypes for the extern function declarations
+
+variables.c
+	- BSD/386 needs getenv to have a `const char *' argument
+
+make_cmd.c
+	- changed make_until_or_while to a static function
+
+command.h
+	- removed extern declarations for functions in make_cmd.c; those
+	  are in make_cmd.h
+
+				   11/1
+				   ----
+input.c
+	- make sure that sync_buffered_stream returns a value
+
+test.c
+	- make sure that binary_operator returns a value
+
+				   11/2
+				   ----
+cpp-Makefile
+	- added a definition of GCC_LINT_FLAGS and GCC_LINT_CFLAGS to
+	  generate lint-like warnings from gcc
+
+siglist.h
+	- cast references to sys_siglist[] in the `strsignal' macro
+	  for the benefit of Linux
+
+jobs.c, nojobs.c
+	- changed all absolute references to sys_siglist to call the
+	  strsignal macro instead
+
+lib/readline/{readline.c,display.c,signals.c}
+	- _rl_output_character_function is an int
+
+lib/readline/rltty.c
+	- outchar should return an int
+
+general.c
+	- use %ld to printf longs
+
+builtins/trap.def
+	- reordered code and eliminated some brace groups
+
+builtins/ulimit.def
+	- open_files() should return a long
+
+shell.h
+	- include <varargs.h> if HAVE_VARARGS_H is defined, not simply if
+	  HAVE_VFPRINTF is defined
+
+parse.y, execute_cmd.c, subst.c, trap.c, jobs.c
+	- make sure that all function parameters are declared explicitly
+	  and not defaulted to int
+
+builtins/fg_bg.def
+	- fixed a bug where last_asynchronous_pid could be set to a random
+	  value if an unknown job or a non-job-control job was selected
+
+test.c
+	- added a missing `%s' to a call to test_syntax_error
+
+cpp-Makefile
+	- renamed `endian.h' to `bash-endian.h'; it seems that linux and
+	  gnu libc use it in /usr/include.  What a pain in the ass.
+
+				   11/4
+				   ----
+machines.h
+	- add `#define HAVE_VARARGS_H' to the Linux machine description;
+	  the auto-configuration process is unable to find it in the gcc
+	  private include directories
+
+				   11/5
+				   ----
+cpp-Makefile
+	- COMPRESS_EXT should be `.gz'
+
+general.h
+	- have the BCOPY define for USG machines use `memmove' rather than
+	  `memcpy', since that handles overlapping objects correctly
+
+lib/readline/display.c
+	- fixed the line updating code that checked whether a new line was
+	  shorter or had fewer invisible characters that the visible line,
+	  and called clear_to_eol with the right value and only in the
+	  right cases
+
+machines.h
+	- added separate machine descriptions for NetBSD and FreeBSD
+
+builtins/command.def
+	- don't try to call confstr() on NetBSD
+
+				   11/6
+				   ----
+machines.h
+	- define HAVE_BCOPY for sgi
+	- define HAVE_GETHOSTNAME for Linux and HPUX machines later than
+	  hpux 6.2
+
+general.h
+	- remove the `if defined (sgi) from the clause that defines BCOPY
+
+general.c
+	- use new HAVE_BCOPY and HAVE_GETHOSTNAME defines instead of the
+	  OS-specific symbols used before
+
+				   11/8
+				   ----
+machines.h
+	- for i386 machines running aix/ps2, use USE_TERMCAP_EMULATION,
+	  since the terminfo database is more up-to-date than termcap
+
+lib/readline/complete.c
+	- make sure that X_OK is defined for the VISIBLE_STATS code
+
+config.h, builtins/echo.def
+	- added a DEFAULT_ECHO_TO_USG option for the echo builtin
+
+lib/readline/rldefs.h
+	- Xenix 2.2 systems, while mostly USGr3, do not have `sighold'
+	  and related functions
+
+lib/readline/isearch.c
+	- added a variable `prev_line_found' to keep the incremental
+	  searches from finding the same line two or more times in a
+	  row
+
+support/getcppsyms.c
+	- recognize `_M_XENIX' and `mc68k32' symbols from cpp
+
+tests/run-dollar-at-star-test
+	- use `../bash' to point at the bash executable rather than
+	  `../../sun4/bash'
+
+general.h
+	- some systems have a `strerror' define, so we need to protect
+	  the extern function declaration
+
+trap.h
+	- use SIG_DFL rather than NSIG as the test of whether or not to
+	  include <signal.h>, since Posix.1 does not require NSIG
+
+				   11/9
+				   ----
+subst.c
+	- new function get_word_from_string to slice a field off the front
+	  of a string and skip trailing separators according to $IFS
+
+builtins/read.def
+	- changed read_builtin to use get_word_from_string to `incrementally'
+	  do word splitting on the line read so that if fewer variable names
+	  are given than words read, the separators in the original line are
+	  preserved.  This makes `read' Posix.2 compliant.
+
+				   11/10
+				   -----
+cpp-Makefile
+	- add a sentinel file `parser-built' for y.tab.c and y.tab.h to
+	  depend on, since there's no rule for telling make how to build
+	  y.tab.h
+
+shell.c
+	- removed the #ifdef AUX code that sets up a 4.2 compatible
+	  environment in favor of using the -ZP option to cc to create
+	  a Posix executable (AUX 3.0)
+
+jobs.c
+	- changed sigwinch_sighandler so that it saves the window size
+	  struct with the new values in shell_tty_info.c_winsize on AIX PS/2
+	  Since readline calls the old sigwinch handler, this code should
+	  be called no matter when the signal is received
+
+support/mksysdefs
+	- add code to define AIX_13 on AIX PS/2 version 1.3 machines
+
+machines.h
+	- there are different SYSDEP_CFLAGS and REQUIRED_LIBRARIES for
+	  AIX PS/2 1.2 and 1.3, so use the AIX_13 define to differentiate
+
+				   11/11
+				   -----
+execute_cmd.c
+	- speedups and fixes for here document processing in
+	  do_redirection_internal: don't do string processing we can
+	  avoid, use stdio to help with write buffering if we're
+	  expanding the document, close some file descriptor leaks
+
+make_cmd.c
+	- speed up gathering here documents: avoid expensive calls to
+	  strncmp when possible, avoid a stupid strcpy when stripping
+	  leading tabs, use BCOPY instead of strcpy
+
+print_cmd.c
+	- made varargs and non-varargs versions of cprintf() as similar
+	  as possible
+	- redid the_printed_command_resize() to be a little smarter about
+	  allocating memory
+
+subst.c
+	- sped up string_list_internal by allocating all the necessary
+	  space before copying rather than using xrealloc, using BCOPY
+	  and an `end ptr' instead of strcat, trying not to call strlen
+	  to get the separator length
+	- sped up sub_append_string by using BCOPY instead of strcat,
+	  being smarter about memory allocation, and cutting down calls
+	  to strcpy
+	- sped up expand_string_internal by not calling the
+	  make_word/dispose_word pair, but by filling in a local
+	  WORD_DESC, short-circuiting if the string is null or empty
+	- don't bother trying to split words in expand_string_leave_quoted
+	  if expand_string_internal returns a null list
+	- ditto for dequoting in expand_string_unsplit
+
+lib/readline/vi_mode.c
+	- removed `w' and `W' from the list of characters that do not
+	  require the point to be moved after a call to rl_vi_domove
+	  in rl_vi_delete_to (`d') and rl_vi_yank_to (`y').  Only the
+	  `c' command (rl_vi_change_to) requires this behavior
+
+				   11/12
+				   -----
+subst.c
+	- make sure all places which call expand_word_internal are
+	  prepared to deal with error returns (expand_word_error
+	  and expand_word_fatal) by adding a convenience function
+	  call_expand_word_internal that performs the call and deals
+	  with the possible error returns.  This keeps the shell
+	  from dumping core on some errors
+
+lib/readline/vi_mode.c
+	- make sure <sys/types.h> is included before rldefs.h
+
+parse.y
+	- changed read_a_line to use and re-use a static line buffer
+
+make_cmd.c
+	- no longer need to free full_line, since read_a_line (called
+	  from read_secondary_line), does not allocate a new one on
+	  each call
+
+builtins/psize.c, alias.c
+	- need to include command.h before general.h
+
+				   11/15
+				   -----
+documentation/features.texi, lib/readline/doc/{hsuser,rluser}.texi
+	- fixed some spelling errors and typos
+
+endian.c
+	- include <sys/types.h> for size_t
+
+Makefile.inc
+	- new file, included in cpp-Makefile, providing biolerplate Gnu
+	  make definitions
+
+cpp-Makefile
+	- include Makefile.inc
+	- added `distclean', `realclean' targets as per Gnu coding
+	  standards
+
+				   11/17
+				   -----
+cpp-Makefile
+	- `make install' now installs the documentation in $(mandir) and
+	  $(infodir)
+	- `make documentation' now passes $(MFLAGS) to the sub-make
+
+documentation/Makefile
+	- now has an `install' target
+
+config.h
+	- RESTRICTED_SHELL is no longer automatically defined
+
+support/mksysdefs
+	- Intel paragons (uname -m = paragon) need MAKE_ANSI set to true
+
+lib/readline/history.c
+	- create the history file with mode 0600, since it's supposed to
+	  be private information
+
+builtins/fc.def
+	- make sure we put in the tab and `*' only if the line is actually
+	  being listed to stdout rather than to a file for reexecution
+
+				   11/17
+				   -----
+machines.h
+	- fixed a typo in the hpux machine description
+	- added some SYSDEP_CFLAGS to the __BSD_4_4__ description
+
+README
+	- corrected mail address for bash-maintainers
+
+jobs.h
+	- don't declare fork (), getpid (), and getpgrp () on __BSD_4_4__
+
+				   11/18
+				   -----
+subst.c
+	- fix to string_list_internal to make it return a null string if
+	  handed a null list
+
+parse.y
+	- fix to find_reserved_word: `word' is declared as the argument, but
+	  `token' is what's used in the body
+
+lib/malloc/alloca.c
+	- Crays need to define _getb67() as CRAY_STACKSEG_END
+
+machines.h
+	- ISC machines should be using USE_TERMCAP_EMULATION
+
+				   11/19
+				   -----
+lib/readline/Makefile, lib/tilde/Makefile, lib/glob/Makefile, cpp-Makefile
+	- change instances of `make' in recipes to `$(MAKE) $(MFLAGS)'
+
+machines.h
+	- SunOS4 needs `OPENDIR_NOT_ROBUST'
+	- recognize a Motorola M88100 if m88k and USGr4 are defined, since
+	  support/mksysdefs sets SYSDEF to USGr4 rather than M88100 for
+	  the Motorola V.4
+	- changes to the ISC entry to handle ISC version 4 as well as
+	  version 3 using cc and gcc to compile
+
+shell.c
+	- fixed a typo (__POSIX_VERSION -> _POSIX_VERSION)
+	- fixed a problem with reset_terminating_signals which caused the
+	  wrong signal numbers to be checked for being trapped or
+	  handled specially
+
+lib/readline/vi_keymap.c
+	- ^H in movement mode should by default be mapped to rl_backward
+	- delete (^?) should be unbound in the default movement mode keymap
+
+lib/readline/vi_mode.c
+	- rl_vi_last_arg should insert a space before inserting the last
+	  argument, according to Posix.2
+
+getcwd.c
+	- correctly declare the second argument as a size_t if __STDC__
+	  is defined
+
+				   11/20
+				   -----
+builtins/fc.def
+	- go back to the ad-hoc option parsing style, because the builtin
+	  getopt does not handle things like `fc -l -10' correctly
+
+support/mksysdefs
+	- fixed a typo problem defining $UnicosMachine that left a comment
+	  unclosed
+
+lib/malloc/alloca.c
+	- bug fix from Bill Jones for CRAY_STACKSEG_END define
+
+config.h, execute_cmd.c
+	- fix for CRAY and defining `word'
+
+machines.h
+	- Crays need to define OPENDIR_NOT_ROBUST
+
+bashtypes.h
+	- sys/types.h with handling for multiple inclusion and Cray
+	  peculiarities
+
+execute_cmd.c, make_cmd.c, parse.y, subst.c
+	- include `bashtypes.h' rather than <sys/types.h>
+
+				   11/22
+				   -----
+machines.h
+	- add definitions of CRAY_STACKSEG_END for Cray XMP and YMP
+	- removed OLD_CRAY_DESCRIPTION stuff
+
+lib/readline/rldefs.h
+	- encapsulate CRAY peculiarities with casting pointers to ints
+	  inside two defines: FUNCTION_TO_KEYMAP and KEYMAP_TO_FUNCTION
+
+lib/readline/bind.c, lib/readline/readline.c
+	- change code to use FUNCTION_TO_KEYMAP and KEYMAP_TO_FUNCTION
+
+maxpath.h
+	- include <sys/param.h> on the convex, but not on bsdi
+
+newversion.c
+	- overhauled and cleaned up
+	- added the `-patch' argument to set the patch level of the shell
+	- look in `.patchlevel' for the patch level and write it out as
+	  PATCHLEVEL
+
+version.c
+	- new variable patch_level
+
+shell.c
+	- the version string is now `dist.patch(build)'
+	- new function shell_version_string returns a pointer to the
+	  version string, show_shell_version changed to use it
+
+variables.c
+	- bind $BASH_VERSION to the value of shell_version_string ()
+
+				   11/23
+				   -----
+machines.h
+	- SCO machines now include -DPGRP_PIPE in the SYSDEP_CFLAGS define
+	- HPUX_9 needs an #undef HAVE_RESOURCE; it appears that they've
+	  finally removed getrusage
+
+trap.c
+	- signal_name should return an error when passed NSIG
+
+parse.y
+	- add AND_AND and OR_OR to the list of tokens which are not followed
+	  by a semicolon
+	- decrement current_command_line_count if pre_process_line returns
+	  a null or empty string, otherwise the next input line may be
+	  combined with the previous line inappropriately
+
+				   11/24
+				   -----
+machines.h
+	- the KSR/1 section should be delimited by `__ksr1__', added some
+	  SYSDEP_CFLAGS to that description
+
+support/mksysdefs
+	- quote all the arguments to expr
+
+support/getcppsyms.c
+	- recognize and pass on `__ksr1__'
+
+lib/readline/bind.c
+	- new inputrc variable `output-meta', which means output meta
+	  chars without converting them to M- sequences
+
+lib/readline/readline.c
+	- new variable `_rl_output_meta_chars' to hold value of
+	  `output-meta', initially off
+	- slight efficiency improvement to rl_insert_text, rl_forward,
+	  rl_backward
+	- changed the order of args to rl_kill_text in rl_unix_word_rubout
+	  so that multiple words can be killed and yanked out in the
+	  `right' order
+
+lib/readline/display.c
+	- changes to use the value of `_rl_output_meta_chars' to decide how
+	  to output characters with the eighth bit set
+
+documentation/bash.1, lib/readline/doc/rluser.texinfo
+	- documented new readline `output-meta' variable
+
+lib/readline/complete.c
+	- make the replacement of typed text by a completion match be a
+	  single undoable event
+
+builtins/type.def
+	- call user_command_matches specifying FS_EXEC_ONLY as the search
+	  criteria.  This keeps test from finding directories
+
+bashhist.c
+	- changed maybe_save_shell_history so that if the history has
+	  been stifled then the history file is replaced with the current
+	  history list
+
+				   11/29
+				   -----
+builtins/exec.def
+	- if the shell is restricted, exec is not allowed
+
+cpp-Makefile
+	- more changes for GNU standards: VPATH, libdir, srcdir
+
+jobs.h
+	- remove machine-specific undefining of HAVE_WAIT_H
+
+machines.h
+	- cadmus systems need to #undef HAVE_WAIT_H
+	- hpux_usg and hpux_6 systems need to #undef HAVE_WAIT_H
+	- added a section for `Irix5' to the sgi section
+
+documentation/Makefile
+	- fixed up the install for bash_builtins.1 so that it sets the .so
+	  path correctly
+
+shell.c
+	- renamed issock to isnetconn and made its inclusion unconditional
+	- added a check for S_ISCHR for SVR4 and SVR4.2 systems to isnetconn
+
+subst.c
+	- added code so that `history_control=ignoreboth' works
+
+documentation/bash.1, documentation/features.texi
+	- added a description of `ignoreboth' to the text describing
+	  `history_control'
+
+				   11/30
+				   -----
+input.c
+	- don't print an error message in check_bash_input if the fnctl
+	  to dup the file descriptor fails unless the file descriptor
+	  is already active
+
+jobs.c, nojobs.c
+	- set bash_input.location.buffered_fd to -1 when setting
+	  default_buffered_input to -1 in make_child.  This fixes
+	  the `( echo hi 1>&3 ) 3>&1 >/dev/null' spurious error message
+
+shell.c, error.c
+	- removed the automated bug report code
+
+support/bashbug.c
+	- is no more
+
+Makefile
+	- added GNU boilerplate definitions
+
+support/bashbug.sh, support/mkbashbug
+	- new files for a BSD sendbug-like bug reporting shell script
+
+cpp-Makefile
+	- changes to use $(SUPPORT_SRC) instead of $(SDIR) under some
+	  circumstances
+	- removed references to support/bashbug.c
+	- new target to make bashbug from $(SUPPORT_SRC)/bashbug.sh using
+	  $(SUPPORT_SRC)/mkbashbug
+	- bashbug is now created by default
+	- don't build endian.aux or create bash-endian.h if HAVE_WAIT_H
+	  is defined, because it will end up being unused anyway
+
+machines.h
+	- add OPENDIR_NOT_ROBUST to the isc386 description
+
+signames.c
+	- make the signal_names array 2 * NSIG long to hack around HP/UX
+	  misfeature
+
+builtins/test.def
+	- fixed the help text for -t to note the the fd argument is not
+	  optional
+
+				   12/1
+				   ----
+builtins/common.c
+	- changed parse_and_execute so that it no longer unconditionally
+	  sets `interactive' to 0.  It is now the responsibility of callers
+	  of parse_and_execute to set it how they want, and reset it if
+	  necessary
+
+shell.c, subst.c, builtins/source.def
+	- changed the functions that call parse_and_execute to manage the
+	  value of `interactive'
+
+shell.c
+	- changed maybe_execute_file so that it takes a second argument
+	  saying whether or not to force the value of `interactive' to 0
+	- changed all calls to maybe_execute_file to add a second arg
+
+builtins/fc.def, builtins/exit.def
+	- changed all calls to maybe_execute_file to add the second arg
+	  Now background jobs re-run with `fc -s' echo the job number
+
+externs.h
+	- changed the function prototype for maybe_execute_file
+
+				   12/2
+				   ----
+execute_cmd.c
+	- rewrote the auto-resume code in execute_simple_command for clarity
+	- added the `substring' value for auto_resume to cause a command that
+	  matches a substring of a stopped job to restart that job
+
+documentation/bash.1, documentation/features.texi
+	- added a description of the possible values for `auto_resume' and
+	  their effects on the shell's behavior
+
+machines.h
+	- added a generic desription for SVR4 running on the sparc from
+	  Ian Stewartson
+
+Makefile
+	- added a command to the bash-Makefile target that will remove
+	  bash-Makefile and (hopefully) stop the make if something happens
+	  and bash-Makefile is created with zero length
+
+				   12/3
+				   ----
+machines.h
+	- add -DOPENDIR_NOT_ROBUST to the SYSDEP_CFLAGS for SCO
+	- if compiling with gcc on SCO, link with -lc_s and -lc in
+	  REQUIRED_LIBRARIES
+
+				   12/6
+				   ----
+builtins/source.def
+	- new variable `sourcelevel' which is incremented each time `.'
+	  is called and decremented before source_builtin returns
+
+variables.c
+	- find_variable should call find_variable with a second parameter
+	  of 1 if `builtin_env' is non-null, so it will search it.  This
+	  ensures that all builtins inside a script read with `.' with a
+	  temporary environment will get the right values
+
+subst.c
+	- fix for get_word_from_string: white space should be removed from
+	  the beginning of the string if $IFS is " \t\n"
+
+execute_cmd.c
+	- in `Posix.2 mode', redirections should not perform filename
+	  expansion when the shell is not interactive
+
+				   12/7
+				   ----
+support/getcppsyms.c
+	- recognize `__i386__'
+
+lib/readline/bind.c
+	- only free and reassign `last_readline_init_file' if it has
+	  changed (`filename' points to something different) in
+	  rl_read_init_file
+
+builtins/ulimit.def
+	- add a `$DEPENDS_ON !MINIX' line so that this won't be built
+	  under MINIX
+
+config.h
+	- Minix machines need JOB_CONTROL undefined
+
+cpp-Makefile
+	- don't define libraries with absolute pathnames; use -llibname
+	  instead
+	- make sure MALLOC_LIBRARY is defined even if the Gnu malloc is
+	  not being used for the benefit of `LD_HAS_NO_DASH_L'
+
+general.c
+	- use a `TIMEVAL_MISSING' define to decide whether or not to
+	  try to print a struct timeval * rather than simply `USG'
+
+lib/readline/parens.c
+	- don't try to include <sys/time.h> unless FD_SET is defined
+
+lib/readline/vi_keymap.c
+	- fix incorrect cast of rl_abort in vi_movement_keymap
+
+signames.c
+	- make sure NSIG is defined
+
+siglist.c
+	- include `trap.h' to pick up definition of NSIG if it's undefined
+
+siglist.h
+	- minix uses _sys_siglist and does not need an external declaration
+	  for it
+
+				   12/8
+				   ----
+lib/readline/readline.c
+	- add `ks' and `ke' to the termcap attributes that readline retrieves
+
+lib/readline/rltty.c
+	- new function `control_keypad' to enable and disable keypad keys.
+	  Some systems need this before the arrow keys will work
+	- call control_keypad to enable and disable the keypad from the
+	  terminal prep and deprep code
+
+				   12/9
+				   ----
+support/mksysdefs
+	- added code a la trn `Configure' to search a list of include
+	  directories for each .h file of interest.  Done by defining a
+	  variable containing the code fragement we want to execute and
+	  calling `eval' on this string for each file
+
+lib/readline/bind.c
+	- slightly changed the filenames used by rl_read_init_file.  Now
+	  the filename used is the first non-null file from this list:
+		1. the filename used for the previous call
+		2. the value of the shell variable `INPUTRC'
+		3. ~/.inputrc
+
+documentation/bash.1
+	- added descriptions of INPUTRC to the shell variables and
+	  readline sections
+
+documentation/features.texi
+	- added a description of INPUTRC to the shell variables section
+
+lib/readline/doc/rluser.texi
+	- added description of the INPUTRC environment variable
+	- changed instances of ~/.inputrc to the more generic `init file'
+	  or `inputrc file'
+
+lib/readline/complete.c
+	- added #defines for the possible values of `do_replace' rather
+	  than relying on magic numbers
+	- if a completion that needs double quotes starts with a tilde,
+	  rl_complete_internal now performs tilde expansion before
+	  quoting the string, since the shell allows double quotes to
+	  inhibit tilde expansion
+
+				   12/10
+				   -----
+lib/readline/readline.c
+	- new function to kill the whole line no matter what point is:
+	  rl_kill_full_line ()
+
+lib/readline/readline.h
+	- extern declaration for rl_kill_full_line ()
+
+lib/readline/funmap.c
+	- rl_kill_full_line is available as `kill-entire-line'
+
+cpp-Makefile
+	- remove `.machine' when `make clean' run
+
+subst.c, subst.h
+	- made expand_string_leave_quoted static again
+
+				   12/14
+				   -----
+shell.c
+	- use HAVE_SOCKETS define to decide whether to include <sys/socket.h>
+	  and call getsockname(); defined automatically for non-USG systems
+	  if ENOTSOCK is defined
+
+				   12/15
+				   -----
+bashline.c, flags.c, flags.h, jobs.c, subst.c, builtins/common.c,
+builtins/cd.def
+	- changed `follow_symbolic_links' to `no_symbolic_links', with an
+	  opposite meaning
+
+flags.c, flags.h
+	- new shell option, -P/-o physical set if no_symbolic_links is set
+	- changed a sequence of `if' statements into a switch statement in
+	  change_flag
+
+documentation/bash.1, documentation/features.texi
+	- added documentation for the -P/-o physical option
+
+builtins/cd.def
+	- follow_symbolic_links is now declared in flags.c and declared
+	  extern here
+
+builtins/set.def
+	- code to set and get the value of -P/-o physical
+	- fixed up the help text and short documentation string
+	- made `set -?' print a usage message
+
+subst.c
+	- made sv_nolinks set the new variable `no_symbolic_links'
+
+				   12/17
+				   -----
+machines.h
+	- add -DUSG to HPUX_CFLAGS
+	- hpux 9 does not need -lPW and can use the gnu malloc if gcc
+	  is being used
+
+config.h
+	- remove the code that defines USG for HPUX, Xenix, and UNIXPC
+	  in favor of putting it into the machines.h entry
+
+				   12/19
+				   -----
+flags.h
+	- added prototypes for the extern function declarations from flags.c
+
+*.h
+	- added copyrights to the include files which were missing them
+
+lib/readline/vi_mode.c
+	- rl_vi_yank_nth arg inserted the space in the wrong spot before
+	  yanking the last argument
+	- removed the call to rl_vi_insertion_mode because of changes to
+	  rl_yank_nth_arg
+
+lib/readline/readline.c
+	- changed rl_yank_nth_arg so that vi mode inserts a space in the
+	  right spot
+	- fixed rl_yank_nth_arg so that yanking into an empty line does
+	  not corrupt the buffer
+
+lib/readline/search.c
+	- fixed noninc_search so that ^H and RUBOUT call rl_rubout
+	  explicitly
+
+bashline.c
+	- fix for operate_and_get_next to make ^O work on the most
+	  recent line even if the history is unstifled.  From Seth
+	  Robertson.  XXX - may not be right
+
+parse.y
+	- set interactive to 0 before calling parse_and_execute in
+	  execute_prompt_command to stop infinite recursion through
+	  this function
+
+shell.c
+	- moved the code that executes PROMPT_COMMAND to parse_command
+
+parse.y
+	- removed the code that executes PROMPT_COMMAND from read_token
+	  to avoid confusing non-reentrant versions of yacc
+	- made execute_prompt_command global, not static
+
+input.h
+	- new declaration for execute_prompt_command 
+
+jobs.c
+	- made give_terminal_to return -1 if tcsetpgrp fails
+	- initialize_jobs now prints a message if job_control ends up being
+	  set to 0
+
+support/mkmachtype
+	- shell script stolen from emacs 19 that attempts to output the
+	  `GNU-style' machine type, e.g. sparc-sun-sunos4.1.2.  Named
+	  `mkmachtype' because I envision people assigning its output to
+	  a MACHTYPE variable
+
+
+				   12/20
+				   -----
+execute_cmd.c
+	- if a command is found in the temporary $PATH, don't add it to
+	  the hash table
+
+error.c
+	- changed report_error so that the script name is echoed instead
+	  of the shell name if the shell is not interactive
+
+				   12/22
+				   -----
+machines.h
+	- made the Sun description unconditionally #undef USE_GNU_MALLOC
+	  because memory access bugs are legion in libc in SunOS 4.x and 5.x
+
+jobs.c
+	- disabled printing an error message when the tcgetattr in
+	  get_tty_state() fails
+
+				   12/27
+				   -----
+cpp-Makefile, jobs.h
+	- renamed bash-endian.h to bash_endian.h
+
+machines.h
+	- NeXT machines need to #undef HAVE_DIRENT_H, since it requires
+	  ANSI/POSIX defines that make the rest of the compilation fail
+	- SGI irix 5.x machines need -DNO_SBRK_DECL in SYSDEP_CFLAGS
+	- machine descriptions for OSF/1 running on i386 and MIPS machines
+	  from Michael Meissner
+
+				   12/28
+				   -----
+expr.c
+	- fixed so that blank expressions evaluate to 0 rather than an
+	  error ($[    ] or $((    )))
+
+lib/readline/readline.c
+	- new variable `_rl_bell_preference' replacing _rl_prefer_visible_bell
+	- changed ding() to use _rl_bell_preference
+
+lib/readline/rldefs.h
+	- definitions for NO_BELL, AUDIBLE_BELL, and VISIBLE_BELL
+
+lib/readline/bind.c
+	- changed rl_variable_bind to parse the `bell-style' variable and its
+	  possible values (`none', `audible', or `visible'), keeping
+	  `prefer-visible-bell' for backwards compatibility
+
+documentation/bash.1, lib/readline/doc/rluser.texinfo
+	- added descriptions of the `bell-style' and `expand-tilde'
+	  readline variables
+
+general.c
+	- changed set_signal_handler for posix systems to attempt to
+	  restart all interrupted system calls execept for SIGALRM
+
+trap.c
+	- changed restore_signal to use set_signal_handler() instead of
+	  signal()
+	- added a new function set_signal_ignored to set the SIG_HARD_IGNORE
+	  flag for a particular signal
+
+execute_cmd.c
+	- call set_signal_ignored for SIGINT and SIGQUIT in the child if
+	  the command is asynchronous after calling restore_original_signals,
+	  since restore_original_signals will undo work done by make_child
+	  done in a new function setup_async_signals
+
+execute_cmd.h
+	- extern declaration for setup_async_signals
+
+subst.c
+	- call setup_async_signals when making the child for process
+	  substitution
+
+jobs.c, nojobs.c
+	- removed code from make_child that sets SIGINT and SIGQUIT to
+	  SIG_IGN, since setup_async_signals now does that
+
+shell.c
+	- let throw_to_top_level call longjmp with DISCARD if the shell
+	  is an interactive shell, but not yet initialized
+
+				   12/29
+				   -----
+config.h
+	- define PROCESS_SUBSTITUTION if HAVE_DEV_FD is defined, even if
+	  MKFIFO_MISSING is also defined
+
+execute_cmd.c
+	- close pipes created using /dev/fd for process substitution at
+	  the same time as the pipes for conventional piping are closed
+
+subst.c
+	- when the /dev/fd list is initialized, clamp the total number of
+	  file descriptors at 256, but make sure there is room enough to
+	  store a bit for the fd passed to add_fifo_list
+
+				   12/30
+				   -----
+lib/readline/readline.c
+	- change a strncpy() in rl_delete_text to a for loop, since some
+	  versions of strncpy can't handle overlapping arguments
+
+lib/readline/chardefs.h
+	- definition for digit_value(x)
+
+lib/readline/history.c
+	- changed calls to sscanf followed by an empty for loop that consumes
+	  the digits to a for loop that computes the value as it goes along
+	  in get_history_word_specifier()
+	- added `x*' and `x-' history word designators from csh
+	- added new `&' modifier to repeat previous substitution
+	- experimental implementation of `q' modifier to quote substituted
+	  words by calling single_quote on the substituted string
+
+lib/readline/history.c, builtins/fc.def
+	- changed a loop using strncmp() to find one string in another for
+	  substitution to test the current character against the first
+	  character of the pattern before calling strncmp()
+
+documentation/bash.1, lib/readline/doc/hsuser.texinfo
+	- documented the new history word designators
+	- documented new `&' and `q' history modifiers
+
+				    1/1
+				    ---
+parse.y
+	- broke the code that parses `( ... )' subshells out into its
+	  own grammar production
+
+lib/readline/history.c
+	- rearranged some code to get rid of gotos and make the intent
+	  clearer
+	- fixed a bug in history_truncate_file that tried to write to
+	  a file opened O_RDONLY
+	- changed a stat-open in history_truncate_file into an open-fstat
+	  pair
+	- removed gotos in history_search_internal
+	- changed straight strncmp() calls trying to find history line
+	  matches to check the first character before calling strncmp in
+	  history_search_internal
+	- changed a call to stat after an open (!) to fstat on the
+	  returned file descriptor
+	- cleaned up the code in get_history_event
+	- cleaned up some code in get_history_word_specifier
+	- cleaned up some code and removed extra function calls in
+	  history_arg_extract
+	- changed history_arg_extract to malloc enough space for the
+	  entire string at one time, instead of doing xrealloc in a
+	  loop
+	- cleaned up the code in history_tokenize, removing gotos and
+	  other spaghetti constructs
+	- replaced a call to sprintf with assignment statements and a call
+	  to strcpy in history_expand
+
+cpp-Makefile
+	- changed the `INDEX' target to a `TAGS' target
+
+lib/readline/emacs_keymap.c
+	- added a default binding for ESC-ESC to rl_complete, like ksh emacs
+	  mode editing
+
+				    1/3
+				    ---
+machines.h
+	- make sure ISC_POSIX is defined as nothing when using gcc on isc386
+
+parse.y
+	- made token_to_read, current_token, last_read_token,
+	  token_before_that, EOF_reached, shell_input_line,
+	  shell_input_line_*, token, token_buffer_size all static vars
+	- made prompt_again return immediately if the shell is not
+	  currently interactive
+	- made yylex call prompt_again only if there is no token_to_read
+	  and the shell is currently interactive
+
+jobs.c
+	- changed the NeXT || alliant define to use RLOGIN_PGRP_BUG
+	- use TERMIOS_LDISC define for systems with line discipline field
+	  in struct termios
+
+shell.c
+	- use RLOGIN_PGRP_BUG instead of NeXT to fix machines that get
+	  started without a controlling terminal
+
+machines.h
+	- added -DRLOGIN_PGRP_BUG to SYSDEP_CFLAGS for NeXT and alliant
+	- added -DTERMIOS_LDISC to SYSDEP_CFLAGS for Ultrix, Sun OS 4,
+	  and aixpc
+
+support/mksysdefs
+	- look for sys/param.h, define HAVE_SYS_PARAM if found
+
+cpp-Makefile
+	- pass -DHAVE_SYS_PARAM via SYSTEM_FLAGS if it's found by mksysdefs
+
+maxpath.h
+	- include <sys/param.h> if HAVE_SYS_PARAM is defined
+
+lib/readline/history.c
+	- got rid of the get_which label in get_history_event
+	- got rid of the event_not_found label in history_expand
+	- new function hist_error, which takes care of printing history
+	  expansion errors
+
+				    1/4
+				    ---
+lib/readline/history.c
+	- split the actual history expansion code out of history_expand into
+	  history_expand_internal
+	- got rid of the do_add and add_char labels in history_expand
+	- history_expand now returns 2 if the `p' modifier was given and the
+	  caller should just print the results
+	- new function `quote_breaks' to implement the `x' modifier
+
+bashhist.c
+	- if history expansion fails, make sure the error message is
+	  printed in a standard way by calling internal_error
+	- print the results of history_expand and return NULL if
+	  history_expand returns 2
+
+				    1/5
+				    ---
+lib/readline/history.c
+	- rearranged some code in the `s' and `&' cases of the switch in
+	  history_expand_internal, added the GET_SUBST_PATTERN macro
+
+				    1/6
+				    ---
+tests/*
+	- cleaned up the directory, made a runnable regression test suite
+
+cpp-Makefile
+	- added a `tests' target that runs all of the tests with a newly-
+	  built bash
+
+subst.c
+	- made process substitution work only when unquoted
+
+bashhist.c
+	- new function history_number to return the history number of a
+	  command
+
+bashhist.h
+	- extern declaration for history_number
+
+parse.y
+	- changed the `!' and `\!' code in decode_prompt_string to use
+	  history_number
+	- replaced calls to sprintf/savestring with calls to itos()
+
+variables.c
+	- new dynamic variable $HISTCMD is current history number (what
+	  you get with \! in a prompt string)
+
+documentation/bash.1
+	- description of $HISTCMD
+
+				    1/7
+				    ---
+
+execute_cmd.c
+	- new variable stdin_redir, incremented for subshells if stdin has
+	  been redirected, saved for children so we don't redirect /dev/null
+	  to fd 0 if it has already been the subject of a redirection.  Makes
+	  bash more sh-compatible, but I'm not sure it's the right thing.
+	- more changes to file_status for systems with AFS
+
+test.c
+	- changed calls to eaccess to EACCESS (not to be confused with the
+	  EACCES error).  EACCESS is defined as access on AFS machines,
+	  eaccess on all others
+
+siglist.h
+	- don't declare sys_siglist on NetBSD
+
+				   1/11
+				   ----
+lib/readline/history.c
+	- if `&' appears in the rhs of a history substitution, it is
+	  replaced with the matched lhs.  A single backslash protects
+	  the `&' from lhs interpolation
+	- fixed ADD_CHAR macro to properly terminate the target string
+	- changed GET_SUBST_PATTERN so that a single backslash can
+	  quote the substitution delimiter
+	- changed GET_SUBST_PATTERN so that subst_lhs is not changed if
+	  the lhs pattern is empty
+	- if the lhs is empty and there is no previous substitution, the
+	  last string used in a !?string? search is used
+	- turned the GET_SUBST_PATTERN macro into a real function,
+	  get_subst_pattern()
+	- changed get_subst_pattern() so that backslashes quoting the
+	  search delimiter are removed
+	- fixed get_history_word_specifier so that x- returns x-$ without
+	  the last word
+
+documentation/bash.1, lib/readline/doc/hsuser.texinfo
+	- changes for the new history substitution features
+
+				   1/13
+				   ----
+make_cmd.c
+	- new function fixup_async_list() which traverses a command list and
+	  makes the last command asynchronous (`&').  This is to fix up a
+	  problem with the yacc grammar productions
+
+parse.y
+	- call fixup_async_list if a list is followed by a bare `&' without
+	  a second list
+
+builtins/fc.def
+	- fixed a bug in fc_gethnum that caused negative history
+	  specifications (< 0) to be off by 1 when indexing against the
+	  current history index
+
+lib/readline/funmap.c
+	- kill-entire-line -> kill-whole-line
+	- tilde-expand is now a bindable command that calls rl_tilde_expand
+	- added emacs-editing-mode as a bindable command
+	- added more bindable vi-mode readline commands: vi-redo,
+	  vi-tilde-expand 
+
+lib/readline/emacs_keymap.c
+	- M-C-H is now bound to backward-kill-word
+
+lib/readline/vi_keymap.c
+	- `0' is now bound to beginning-of-line in vi-movement-mode
+
+documentation/bash.1, lib/readline/doc/rluser.texinfo
+	- added documentation for some of the new readline functions
+
+test.c
+	- added definitions for whitespace, digit, and digit_value when
+	  compiling -DSTANDALONE
+
+				   1/14
+				   ----
+make_cmd.c, make_cmd.h, parse.y
+	- fixup_async_list -> connect_async_list
+
+parse.y
+	- have the productions for all async lists call connect_async_list,
+	  even when followed by another async list
+	- don't save and restore the buffered stream in buffers[] in
+	  push_stream and pop_stream if the default input fd is -1
+	  (like command substitution sets it to, for instance)
+
+cpp-Makefile
+	- added $(PURIFY) the final cc line, make PURIFY=purify to build
+	  a `purified' bash
+
+builtins/read.def
+	- fixed a memory leak -- `input_string' was not being freed
+
+variables.c
+	- fixed a memory leak in assign_in_env -- free value
+
+subst.c
+	- process substitution and command substitution now call make_child
+	  with a null first argument -- no need to save a string for the
+	  call; it's never used
+
+				   1/17
+				   ----
+lib/readline/{readline.h,complete.c}
+	- renamed rl_symbolic_link_hook to rl_directory_completion_hook,
+	  which much more accurately reflects its purpose.  Left a define
+	  of the old name there is readline.h
+
+bashline.c
+	- use rl_directory_completion_hook instead of rl_symbolic_link_hook
+	- bash_symbolic_link_hook -> bash_directory_completion_hook
+	- bash_directory_completion_hook is now an `int' returning function
+	- bash_directory_completion_hook now tries to to variable expansion
+	  and command and arithmetic substitution if the directory name
+	  contains `$' or ``'
+	- fixed a bug in bash_directory_completion_hook which made it
+	  remove the trailing slash on a directory name
+	- bash_directory_completion returns 1 if variable expansion is
+	  performed, 0 otherwise
+	- when doing bash filename-specific completion, don't do any kind
+	  of directory name expansion
+	- removed ``' and `$' from the completer word break characters;
+	  they're not word break chars
+
+lib/readline/complete.c
+	- changed semantics for rl_directory_completion_hook -- if a non-zero
+	  value is returned, the return value is put into the expanded
+	  filename, replacing the directory name that the user typed
+	- changed filename_completion_function to quote a replacement if
+	  it contains `$' or ``' in addition to characters appearing in
+	  rl_completer_word_break_characters (#ifdef SHELL)
+
+				   1/18
+				   ----
+shell.c
+	- take out different code for USG and BSD and mail checking.  The
+	  shell always calls remember_mail_dates on startup.
+
+				   1/19
+				   ----
+execute_cmd.c
+	- changed executable_file into a simple return statement
+
+support/mksysdefs
+	- look for bison, define HAVE_BISON if found
+
+cpp-Makefile
+	- do not unconditionally define HAVE_BISON, let mksysdefs do
+	  the work
+
+				   1/20
+				   ----
+machines.h
+	- added -DNO_SBRK_DECL to hpux_8, hpux_9, and Solaris descriptions
+
+lib/malloc/malloc.c
+	- removed the code that defines NO_SBRK_DECL for some machines
+
+cpp-Makefile
+	- removed the definitions of PPROMPT and SPROMPT and their inclusion
+	  as defines in CFG_FLAGS
+	- added definitions for man3dir and man3ext and passed them to
+	  make install in the documentation directory
+
+config.h
+	- PPROMPT and SPROMPT are now defined here
+
+builtins/mkbuiltins.c
+	- plugged up a number of memory leaks (~35K worth)
+
+documentation/Makefile
+	- made readline.3 and readline.ps standard targets
+	- make install now installs readline.3
+
+documentation/readline.3
+	- new manual page documenting the readline library
+
+general.c
+	- don't define TIMEVAL_MISSING on USG systems if HAVE_TIMEVAL is
+	  defined
+
+				   1/21
+				   ----
+machines.h
+	- define HAVE_SOCKETS in HPUX_SYSDEP_CFLAGS for hpux_8 and hpux_9
+
+Makefile
+	- add a `tests' target that just runs `make -f bash-Makefile tests'
+
+general.c
+	- include config.h before any other include files so <unistd.h>
+	  gets included if present
+
+				   1/24
+				   ----
+cpp-Makefile
+	- make `bashbug' by using sed with multiple -e options rather than
+	  a separate `mkbashbug' program
+
+				   1/25
+				   ----
+machines.h
+	- sgi machines need HAVE_SOCKETS defined to make isnetconn() work
+
+lib/readline/isearch.c
+	- rewrote lots of rl_search_history to eliminate spaghetti and
+	  increase speed
+
+lib/readline/history.c
+	- added defines for STREQ and STREQN to clean up the search code
+
+lib/readline/complete.c
+	- compare the first characters of the name and returned value from
+	  getpwent when attempting username completion to avoid all those
+	  calls to strncmp
+
+				   1/26
+				   ----
+lib/readline/readline.h
+	- move definition of VISIBLE_STATS here so all files can see it
+	- extern definitions of rl_history_search_forward() and
+	  rl_history_search_backward ()
+
+lib/readline/search.c
+	- implementations of rl_history_search_forward() and
+	  rl_history_search_backward (), which search through the history
+	  list for lines beginning with the string of characters between
+	  the beginning of the line and rl_point (history lines with a
+	  common prefix)
+	- added definitions of STREQ and STREQN
+
+lib/readline/funmap.c
+	- added `history-search-forward' and `history-search-backward' as
+	  bindable commands (names compatible with tcsh)
+
+lib/readline/complete.c
+	- make stat_char use lstat if S_ISLNK is defined to pick up symbolic
+	  links
+	- split some common code out into auxiliary functions: printable_part
+	  and print_filename
+	- expand filenames before calling stat_char if visible-stats is
+	  active
+
+documentation/bash.1, documentation/readline.3, lib/readline/doc/rluser.texinfo
+	- documented new `history-search-forward' and `history-search-backward'
+	  readline commands, by default unbound
+
+error.c
+	- changed get_name to get_name_for_error and made it externally
+	  visible
+
+error.h
+	- extern declaration for get_name_for_error
+
+test.c
+	- call get_name_for_error in test_syntax_error if the shell is
+	  not interactive
+
+				   1/27
+				   ----
+lib/readline/emacs_keymap.c
+	- add M-~ as a binding for rl_tilde_expand, it's more intuitive
+
+lib/readline/bind.c, lib/readline/readline.h
+	- exported rl_invoking_keyseqs_in_map as a public interface
+
+lib/readline/rldefs.h
+	- don't include memalloc.h if PRAGMA_ALLOCA is defined
+
+lib/readline/readline.c, lib/readline/isearch.c, lib/tilde/tilde.c,
+lib/readline/complete.c, lib/readline/search.c
+	- replaced all calls to alloca with xmalloc/free pairs or array
+	  declarations
+
+lib/readline/history.c
+	- replaced some calls to alloca
+
+variables.c, subst.c, mailcheck.c, alias.c, parse.y, builtins/cd.def
+	- replaced all calls to alloca with xmalloc/free pairs or array
+	  declarations
+
+builtins/source.def
+	- replaced call to alloca with xmalloc/free/unwind_protect
+	- replaced stat/open sequence with open/fstat
+
+				   1/28
+				   ----
+lib/readline/history.c
+	- print an error message for an unrecognized history modifier
+	  instead of just ignoring it
+	- replaced remaining calls to alloca()
+
+execute_cmd.c
+	- added a #pragma alloca at the head of the file if AIX and
+	  RISC6000 are defined and __GNUC__ is not
+
+				   1/31
+				   ----
+support/recho.c
+	- now a standard part of the distribution, needed for `make tests'
+
+cpp-Makefile
+	- make sure recho is built before the tests are run
+
+				    2/1
+				    ---
+builtins/command.def
+	- If subshell_environment is 1, we've already forked and are in
+	  a subshell, so add CMD_NO_FORK to the flags of the command
+	  to be executed and see if we can get away without forking
+
+				    2/9
+				    ---
+support/mksysdefs
+	- write the name of the maintainer to sysdefs.h surrounded by
+	  double quotes
+
+cpp-Makefile
+	- removed the now-unnecessary double quotes around the MAINTAIN_DEFINE
+	  variable value
+
+lib/readline/readline.h
+	- new variable rl_attempted_completion_over, set in the completion
+	  attempt function to suppress the normal filename completion
+
+lib/readline/complete.c
+	- if rl_attempted_completion_over is set after the program-specific
+	  completion function is called, don't do filename completion
+
+general.h
+	- new FREE and STRLEN convenience defines
+
+subst.c
+	- code cleanups, use of FREE and STRLEN
+
+				   2/10
+				   ----
+execute_cmd.c, parse.y, jobs.c, variables.c, test.c
+	- changed code to use FREE, STRLEN, other code cleanups
+	- removed, wherever possible, calls to strncmp and strcmp
+
+builtins/set.def
+	- changed the `unset' builtin to use internal_getopt
+
+builtins/set.def, builtins/test.def, builtins/fg_bg.def, builtins/type.def,
+builtins/enable.def, builtins/exec.def, builtins/declare.def,
+builtins/ulimit.def, builtins/cd.def, builtins/fc.def
+	- removed calls to strcmp, strncmp wherever possible, replacing
+	  them with incline 
+
+builtins/common.h
+	- new define ISOPTION, to test whether a string s is setting
+	  a specific option
+
+builtins/kill.def, builtins/read.def, builtins/trap.def, builtins/umask.def,
+builtins/enable.def, builtins/alias.def, builtins/hash.def
+	- changed to use ISOPTION
+
+builtins/read.def
+	- moved option processing before all of the code that sets up
+	  the input stream
+
+				   2/11
+				   ----
+Makefile
+	- added `distclean' target to mirror one in cpp-Makefile
+
+				   2/14
+				   ----
+documentation/bash.1, documentation/features.texi
+	- noted that `=' was not a valid character for an alias name
+
+				   2/17
+				   ----
+builtins/common.c
+	- if parse_and_execute gets an interrupt during execution, make
+	  sure that `interactive' is restored to the correct value (the
+	  same value as `interactive_shell' before throwing control back
+	  to the top level with throw_to_top_level so the shell does
+	  not exit in throw_to_top_level
+
+builtins/reserved.def
+	- cleaned up the variables section, removing some and correcting
+	  the descriptions
+
+				   2/18
+				   ----
+cpp-Makefile
+	- provide alternate defintions for build_builtins_in_dir depending
+	  on whether __STDC__ is defined and > 0.  The `stdc' version uses
+	  `##' to concatenate tokens
+
+machines.h
+	- new machine description for QNX 4.2 from pt@flard.ocunix.on.ca
+
+jobs.c, nojobs.c
+	- changed some calls to report_error to calls to internal_error
+
+test.c
+	- some systems may not define S_IFMT, so use an #ifdef to work around
+
+print_cmd.c
+	- combined the code for print_word_list and command_print_word_list
+	  into an internal function that takes a pointer to a function to
+	  use to print the words
+
+variables.c
+	- don't call savestring in bind_variable on the value if it's an
+	  empty string
+
+nojobs.c
+	- changed wait_for to call waitpid with -1 for pid value on Posix
+	  systems so all processes in a pipeline get reaped at the same
+	  time (or at least most of them)
+
+				   2/21
+				   ----
+lib/readline/{complete.c,display.c,readline.c,rltty.c,signals.c}
+	- changed _GO32_ to __GO32__
+
+machines.h
+	- SunOS5 needs to add /usr/ccs/lib to the library search path
+	  for the right termcap library
+
+				   2/22
+				   ----
+shell.c
+	- make sure that a subshell sets sourced_env to 0 after longjmp
+	  so that $ENV is sourced by subshells forked to execute scripts
+	  without a leading `#!' line
+
+bashhist.c, bashhist.h
+	- make maybe_add_history a global interface -- new function
+	  to add a line to the history file depending on the value
+	  of history_control
+
+builtins/fc.def
+	- call maybe_add_history in fc_addhist rather than add_history
+
+machines.h
+	- new entry for concurrent machines in att universe from
+	  geoffl@vallista.ca.boeing.com (Geoffrey A. Lowney)
+
+				   2/23
+				   ----
+general.c, general.h
+	- new function string_to_long, which basically does the same
+	  thing as atol(), which I don't believe is universal
+
+builtins/ulimit.def
+	- replaced a call to sscanf with calls to all_digits and
+	  string_to_long
+	- non-root users can only raise a resource up to the hard limit,
+	  even if they specify `unlimited', so shell_ulimit translates
+	  RLIM_INFINITY into limit.rlim_max if euid != 0
+
+				   2/25
+				   ----
+shell.c
+	- make the default behavior of bash when invoked with -c command
+	  to make the first argument after the command string $0 and the
+	  rest $1...$N
+
+documentation/bash.1
+	- document the change in -c behavior
+
+				    3/2
+				    ---
+mailcheck.c
+	- made add_mail_file return the index in the list of mail files,
+	  so an immediate call to find_mail_file need not be made and
+	  we are guaranteed that the index returned is never -1
+	- added the check back in that changes the message to note that
+	  *new* mail has arrived -- the test was not redundant after all
+	- fixed an off-by-one error in free_mail_files
+	- replaced an sprintf() in get_mailpaths with two calls to strcpy
+
+general.c
+	- changed getc_with_restart to do local buffering to reduce the
+	  number of read(2) system calls
+
+subst.c
+	- changed do_assignment_internal to check for expansion and quoting
+	  characters and only call expand_string when something needs
+	  expansion, string_quote_removal when quotes appear, and savestring
+	  for simple assignment statements
+
+				    3/3
+				    ---
+builtins/exit.def, documentation/bash.1
+	- removed `bye' as a synonym for `exit'
+
+shell.h
+	- new exit value: EX_USAGE
+
+builtins/{bind,command,declare,fc,getopts,histctl,history,inlib,jobs,read,
+setattr,trap,ulimit}.def
+	- changed to return EX_USAGE when a usage message is printed
+
+builtins/declare.def
+	- removed the `no_modifiers' code, changed argument name to local_var
+
+command.h, make_cmd.h
+	- declarations for the select command, inside #ifdef SELECT_COMMAND
+
+copy_cmd.c
+	- declarations for copying select commands
+
+dispose_cmd.c
+	- code to dispose of select command structures
+
+execute_cmd.c
+	- code to execute select commands
+
+make_cmd.c
+	- code to construct select command structures
+	- removed `coerce_to_word()'
+
+parse.y
+	- code to parse select commands in the grammar.  The SELECT token is
+	  returned by read_token only if SELECT_COMMAND is defined
+
+print_cmd.c
+	- code to print select commands
+
+config.h, config.h.mini
+	- make SELECT_COMMAND the #define that controls whether or not the
+	  `select' command is compiled in
+
+documentation.bash,1, documentation/features.texi
+	- documented the `select' command and $PS3
+
+				    3/4
+				    ---
+builtins/getopts.def
+	- removed a call to sprintf() in favor of expanding a number manually
+
+builtins/getopt.c
+	- make sure that we set nextchar to NULL when incrementing optind
+	  so that it does not end up pointing to stale memory (freed, then
+	  later reallocated)
+
+				    3/7
+				    ---
+builtins/common.c
+	- fixed parse_and_execute not to be overzealous in marking a command
+	  as NO_FORK -- make sure there's nothing left in the string to be
+	  executed before doing so
+
+machines.h
+	- change the string check for BSD/386 to __bsdi__
+	- add INT_GROUPS_ARRAY to BSDI, SunOS4, 386bsd, FreeBSD, and NetBSD
+	  descriptions
+
+test.c
+	- change to use INT_GROUPS_ARRAY
+
+execute_cmd.c
+	- tightened up the execution loop in execute_for_command and
+	  removed a couple of unneeded variables
+
+lib/posixheaders/memalloc.h
+	- make sure to check for sun being defined when checking for sparc;
+	  there are ICL DRS6000 machines running SVR4.2 out there that do
+	  not have the file
+
+				    3/8
+				    ---
+execute_cmd.c
+	- make sure close_fd_bitmap is called before do_redirections, lest
+	  the bitmap override some of the redirections
+
+cpp-Makefile
+	- supply an explicit suffix list, so make understands the .def.o
+	  suffix rule as such
+
+				    3/9
+				    ---
+jobs.h
+	- added extern declarations for rest of global functions in jobs.c
+	- added prototypes
+
+jobs.c
+	- made delete_job, terminate_current_pipeline, kill_current_pipeline,
+	  describe_pid, notify_and_cleanup, reap_dead_jobs,
+	  initialize_job_signals , without_job_control void functions
+
+				   3/10
+				   ----
+execute_cmd.c, execute_cmd.h
+	- moved check_identifier to general.c, general.h
+
+general.c
+	- check_identifier has acquired a second parameter; when set to 1
+	  this causes the word to be checked by legal_identifier
+	- for and select commands call check_identifier with a second arg
+	  of 1, function names are checked with legal_identifier when in
+	  Posix.2 mode
+
+general.h
+	- add second argument to extern declaration of check_identifier
+
+CWRU/POSIX.NOTES
+	- added description of new function name behavior
+
+lib/readline/readline.h
+	- include sys/ioctl.h on FreeBSD and NetBSD
+
+lib/readline/rlconf.h
+	- new file, with readline configuration variables
+	- included in rldefs.h
+
+lib/readline/{readline.c,readline.h,complete.c,display.c}
+	- took configuration defines out and put them into rlconf.h
+
+lib/readline/Makefile
+	- updated dependencies to include rlconf.h
+
+				   3/14
+				   ----
+lib/readline/Makefile
+	- remove VI_MODE from the CFLAGS
+
+lib/readline/rlconf.h
+	- made VI_MODE a definable configuration option
+
+lib/readline/vi_mode.c
+	- include rlconf.h before testing whether or not VI_MODE is defined
+
+lib/readline./funmap.c
+	- include `rlconf.h' before `readline.h'
+
+lib/readline/keymaps.c
+	- include `rlconf.h' before `vi_keymap.c' and `keymaps.h'
+
+lib/readline/readline.c, lib/readline/vi_mode.c
+	- rl_vi_set_last -> _rl_vi_reset_last
+	- new function _rl_vi_set_last to set the vi-mode last command
+	  information
+	- renamed vi_done_inserting to _rl_vi_done_inserting
+
+lib/readline/vi_mode.c
+	- _rl_vi_last_command, _rl_vi_last_repeat, _rl_vi_last_arg_sign,
+	  and _rl_vi_doing_insert are now static
+
+				   3/15
+				   ----
+bashline.c
+	- unbind C-M-m in emacs_meta_keymap so people don't accidentally
+	  switch into vi editing mode
+
+				   3/21
+				   ----
+builtins/cd.def
+	- `pwd' now follows the setting of nolinks/set -o physical; there
+	  is an undocumented -P option to get the `real' working directory
+
+				   3/28
+				   ----
+make_cmd.c
+	- only follow the command chain to the end of a list in
+	  connect_async_list if the list is not being executed in the
+	  background as a unit with CMD_WANT_SUBSHELL
+
+support/mksysdefs
+	- removed the define of HAVE_CSH
+	- added an additional check for SVR4 on i[34]86 machines from
+	  mkmachtype
+
+lib/readline/vi_mode.c
+	- fix up rl_vi_delete_to so that cw deletes the character under
+	  the cursor no matter what, as per Posix.2
+	- any text modifying command that calls rl_vi_insertion_mode needs
+	  to explicitly set the `last command' info for `.'
+	- rl_vi_movement_mode() no longer resets the `last command' info
+	  so that things like `cw' can be redone with `.'
+
+				   3/29
+				   ----
+general.h
+	- a new define MEMMOVE_MISSING to specify to use memcpy in the
+	  define for BCOPY
+	- the defines for BCOPY don't need a trailing `;'
+
+machines.h
+	- isc386 needs -DMEMMOVE_MISSING in SYSDEP_CFLAGS
+
+				   3/30
+				   ----
+bashline.c
+	- fix to set_saved_history to simplify the code by using 
+	  rl_get_previous_history
+
+				   3/31
+				   ----
+error.c
+	- change the bug report message 
+
+support/mksysdefs
+	- removed `WHOAMI' junk for setting the `maintainer'
+
+cpp-Makefile
+	- hardcode the maintainer to `bug-bash@prep.ai.mit.edu'
+
+subst.c
+	- call rl_reset_terminal in sv_terminal if interactive_shell
+	  is nonzero
+	- split the code that checks whether or not expand_string_unsplit
+	  needs to be called from do_assignment_internal into a separate
+	  function that takes a function pointer to call as an additional
+	  parameter
+
+trap.c
+	- make sure that set_signal_ignored also sets original_signals[sig]
+	  to SIG_IGN
+
+bashline.c
+	- `{' is not a word break character for the completion functions
+
+				    4/2
+				    ---
+[first beta distribution of bash-1.14.0]
+
+				    4/5
+				    ---
+builtins/cd.def
+	- fixed a problem with CDPATH processing (used `dirlen' instead of
+	  `pathlen')
+
+subst.c
+	- make sure that get_word_from_string updates `stringp' even if
+	  it's nothing but separators
+
+builtins/read.def
+	- after the call to get_word_from_string, set *e to 0 only if t
+	  is not null and a word was actually returned
+
+machines.h
+	- remove the NO_SBRK_DECL declaration for sgi machines from all
+	  but Irix 5.x machines
+	- sgi needs __STDC__ defined if __EXTENSIONS__ is defined
+
+lib/posixheaders/stdc.h
+	- moved the #if defined (__P) inside the check for __STDC__, so
+	  the other things get defined even if __P is already defined
+	- don't redefine const, inline, etc. if `const' is already defined
+
+cpp-Makefile
+	- add dependencies on stdc.h
+	- pass -DHAVE_SYS_STREAM_H through to builds in subdirs
+
+support/mksysdefs
+	- redirect error messages from subshell attempting to find and invoke
+	  bison
+	- look for <sys/stream.h>, define HAVE_SYS_STREAM_H if found
+
+lib/readline/rldefs.h
+	- include <sys/stream.h> only of HAVE_SYS_STREAM_H is defined
+
+externs.h, print_cmd.c
+	- made print_command and print_simple_command void functions
+
+builtins/common.c, builtins/common.h
+	- builtin_error now a void function
+	- dispose_saved_dollar_vars now a void function
+	- bad_option now a void function
+	- initialize_shell_builtins now a void function
+
+variables.c
+	- initialize_shell_variables now a void function
+	- adjust_shell_level now a void function
+	- delete_all_variables now a void function
+
+jobs.c
+	- inserted some returns into `int'-valued functions lacking them
+
+hash.c
+	- initialize_hash_table now static void
+
+externs.h
+	- added declarations for functions from mailcheck.c
+
+				    4/6
+				    ---
+lib/readline/readline.c
+	- added missing function arguments
+
+
+lib/readline/complete.c
+	- get_y_or_n now accepts space for `y' and rubout/del for `n' to
+	  be more emacs-like
+
+lib/readline/history.c
+	- fixed an off-by-one error in history_expand_internal: checking
+	  the wrong character for the history event or word specifier
+
+				    4/7
+				    ---
+lib/readline/complete.c
+	- make sure `max' is intialized to 0 when displaying the possible
+	  completions, even if we've done `goto display_matches'
+
+lib/posixheaders/stdc.h
+	- if __STDC__ is defined but we're not using gcc (__GNUC__ not
+	  defined), make `inline' expand to nothing
+
+lib/readline/isearch.c
+	- use STREQN to match the search string against the history line,
+	  since we're not interested in exact matches, only matches of
+	  the search string
+
+				    4/8
+				    ---
+machines.h
+	- description for a sparc running netbsd
+
+				   4/11
+				   ----
+lib/readline/vi_mode.c
+	- make sure we're starting an undo group when we implicitly
+	  enter insertion mode after a command like c[motion], so
+	  we can get to the characters that were inserted
+	- new variable: vi_continued_command, set to 1 if we enter
+	  insert mode implicitly
+
+				   4/12
+				   ----
+machines.h
+	- generic entry for MIPS machines running SVR4, SVR4.2
+	- changed sony entry to handle M_MACHINE already being
+	  defined
+
+lib/malloclib/malloc.c
+	- fixes for malloc stats, from kboyce@bnr.ca
+
+				   4/13
+				   ----
+machines.h
+	- changed the u370/USGr4 description: added -DNO_SBRK_DECL to
+	  SYSDEP_CFLAGS
+
+lib/readline/readline.c
+	- add a call to rl_set_keymap_from_edit_mode after reading the
+	  inputrc file in readline_initialize_everything to override
+	  the effect of any `set keymap' assignments in the inputrc
+	  file
+
+support/mksysdefs
+	- added a check for MIPS RISCos machines
+	- set the value of `dirlist' to /bsd43/usr/include if we're
+	  building on a RISCos machine
+
+lib/readline/bind.c
+	- skip leading whitespace in lines read from the inputrc file
+	  in rl_read_init_file
+	- call rl_set_keymap_from_edit mode after reading the inputrc
+	  file in rl_re_read_init_file
+
+				   4/14
+				   ----
+documentation/Makefile
+	- change bash_builtins.1 to builtins.1 in the recipe for `install'
+	- remove the dependency on texindex from features.dvi
+
+builtins/kill.def
+	- remove explicit inclusion of <sys/types.h>
+
+machines.h
+	- Xenix requires -DMEMMOVE_MISSING
+	- Xenix 2.3 requires -DLD_HAS_NO_DASH_L
+	- added #undef HAVE_RESOURCE to xenix descriptions just to be sure
+
+cpp-Makefile
+	- make sure texindex is built before trying to build the documentation
+
+lib/doc-support/texindex.c
+	- fixes for portability and to fit into the bash configuration
+	  scheme
+
+support/mksysdefs
+	- fixed the Xenix section to make sure that sysdefs.h defines `i386'
+	  for machines.h -- apparently the default xenix cc does not
+	  predefine it
+
+				   4/16
+				   ----
+shell.c
+	- regularized parsing of `-c' option so it can be bundled with other
+	  options
+	- if bash is started with a `-o' without an argument, list the long
+	  options with list_minus_o_opts
+
+builtins/set.def
+	- renamed `list_long_opts' to `list_minus_o_opts', made it global
+
+builtins/common.c
+	- builtin_error now calls get_name_for_error if this_command_name
+	  is null or empty
+
+hash.c, hash.h
+	- made hash utility functions able to cope with being passed a
+	  null hash table
+
+				   4/18
+				   ----
+lib/readline/history.c
+	- changes to history_expand, history_expand_internal to allow
+	  modifiers to be used with `!#'
+	- changes to get_history_event so that only `?' or newline can
+	  terminate a substring search string.  This is more csh-like.
+
+builtins/common.c
+	- get_working_directory now uses get_name_for_error when for_whom
+	  is null and it needs to print an error message
+
+shell.c
+	- set no_rc and no_profile in shell_reinitialize to clarify our
+	  intent about not running the .bashrc for shell scripts
+
+				   4/19
+				   ----
+lib/readline/vi_mode.c
+	- change rl_vi_possible_completions to fix an inadvertent infinite
+	  loop in code that attempts to move to the end of the current word
+
+				   4/21
+				   ----
+lib/readline/vi_mode.c
+	- comment out rl_vi_possible_completions -- it's unused
+
+lib/readline/vi_keymap.c
+	- comment out vi_escape_keymap declaration -- it's unused
+
+parse.y, subst.c
+	- shells running in `posix mode' do not perform process substitution
+
+				   4/22
+				   ----
+support/getcppsyms
+	- don't process and define __GNUC__ at all
+	- only test for and possibly define __STDC__ if __GNUC__ is not
+	  defined (not using gcc)
+
+				   4/25
+				   ----
+machines.h
+	- Make sure SunOS 4.x has INT_GROUPS_ARRAY defined
+
+				   4/26
+				   ----
+lib/readline/readline.c
+	- make sure screenwidth is not set to 0
+
+				   4/27
+				   ----
+Makefile
+	- changed the text printed by the `.notified' target to refer to
+	  `bashbug'
+
+[1.14.1 announced and made available for anonymous FTP]
+
+				   4/28
+				   ----
+builtins/read.def
+	- unset the variables passed to `read' as arguments when EOF is
+	  read from stdin (sh, Posix.2 compatibility)
+
+machines.h
+	- add HAVE_STRERROR to the solaris machine description
+
+print_cmd.c
+	- made declaration of printf depend on __GNUC__ being defined, since
+	  only gcc seems to need it
+
+cpp-Makefile
+	- renamed DEBUG_FLAGS to CDEBUGFLAGS
+
+				   4/29
+				   ----
+builtins/getopt.c
+	- fix for core dump problems
+
+parse.y, make_cmd.c, make_cmd.h, execute_cmd.c
+	- changed make_redirection to take a `REDIRECTEE', which is a union,
+	  as its second argument, to avoid int/long/pointer problems
+	- changed all calls to make_redirction to pass a correctuly-
+	  initialized REDIRECTEE argument
+
+				    5/1
+				    ---
+general.h
+	- Linux needs a slightly different declaration for gethostname()
+
+nojobs.c
+	- fix to arguments to stop_pipeline
+
+				    5/3
+				    ---
+alias.c, bashline.c, variables.c
+	- added casts to eliminate compiler warnings
+
+general.h
+	- removed __P type information from functions taking a GENERIC_LIST *,
+	  since that is never what is passed
+	- changed prototype to show that xrealloc takes a `void *'
+
+general.c
+	- xrealloc takes a `void *' as its first argument
+
+				    5/4
+				    ---
+support/mksysdefs
+	- changed test -r to test -f when looking for ranlib
+
+lib/readline/readline.c
+	- cleaned up some casts before xmalloc/xrealloc calls
+	- make sure the arrow keys are bound into the vi movement keymap in
+	  init_terminal_io
+	- set the keymap explicitly in init_terminal_io before trying to
+	  bind the arrow keys
+
+lib/readline/vi_keymap.c
+	- bind ESC in vi_movement_keymap to 0 rather than rl_abort, since
+	  the rl_abort binding keeps _rl_bind_if_unbound from working
+
+shell.c
+	- look in $PATH for an input file given on the command line only
+	  if that file is not an `absolute program' (contains no slashes)
+
+				    5/5
+				    ---
+machines.h
+	- changed HPUX_SYSDEP_CFLAGS to HPUX_CFLAGS
+
+general.h, general.c, copy_cmd.c, make_cmd.c, print_cmd.c, parse.y, subst.c
+	- BCOPY -> FASTCOPY because some machines define or undef BCOPY in
+	  system header files
+
+longest_sig.c, support/pagesize.{c,sh}
+	- removed from distribution, moved to CWRU/misc
+
+lib/readline/parens.c, lib/readline/bind.c
+	- don't compile in all of the paren-matching code if PAREN_MATCHING
+	  is not defined in rlconf.h
+
+				    5/9
+				    ---
+lib/readline/rldefs.h
+	- new #define WINSIZE_IN_IOCTL_H, set for machines that need
+	  to include <sys/ioctl.h> to get TIOCGWINSZ and related definitions
+	- use `dirent' instead of `direct', define `dirent' as `direct' if
+	  HAVE_DIRENT_H is not defined
+
+lib/readline/signals.c, lib/readline/readline.c
+	- changed to include <sys/ioctl.h> if WINSIZE_IN_IOCTL_H defined
+
+lib/readline/readline.c
+	- strip high bit in rl_getc if __GO32__ is defined
+
+lib/readline/complete.c
+	- use `struct dirent' rather than `struct direct' in
+	  filename_completion_function
+
+lib/readline/bind.c
+	- make sure that "" is not passed to open as the name of the inputrc
+	  file
+
+general.c
+	- hpux_9 needs #undef HAVE_GETDTABLESIZE, just like hpux_8, on hppa
+
+builtins/times.def
+	- Posix.1 systems need to default to using `struct tms' and the
+	  output of `times'
+
+jobs.c
+	- don't redefine _POSIX_SOURCE on sun systems if already defined
+
+parse.y
+	- changed a couple of calls to reverse_list to use the REVERSE_LIST
+	  macro instead
+
+newversion.c
+	- now adds the `build version' as part of `SCCSVERSION' in the same
+	  format as the shell prints the version string
+
+				   5/12
+				   ----
+builtins/psize.sh
+	- if /tmp/pipesize is an empty file, default by defining PIPESIZE
+	  to be 512.  An empty file indicates that `psize.aux' did not
+	  succeed for some reason
+
+				   5/13
+				   ----
+machines.h
+	- dynix/ptx needs -DHAVE_SOCKETS added to SYSDEP_CFLAGS
+
+bashline.c
+	- changed some calls to strncmp to use STREQN
+
+				   5/15
+				   ----
+print_cmd.c
+	- if the delimiter to a here document is supposed to be quoted,
+	  print it single-quoted
+	- make if statements and while/until statements print similarly,
+	  with the then/do on the same line as the first word, separated
+	  from the command list by a semicolon
+
+make_cmd.c
+	- reverse the order of patterns in the case statement pattern
+	  list in make_pattern_list, so it's printed in the same way
+	  it was defined
+
+Makefile
+	- make sure that references to cpp-Makefile and ansi-Makefile
+	  are prefixed with $(srcdir) or use CPP_MAKEFILE or ANSI_MAKEFILE
+	  respectively
+	- make sure that srcdir is passed from Makefile to bash-Makefile
+	  when making `all'
+
+support/mkdirs
+	- new program, clone of `mkdir -p'
+
+cpp-Makefile
+	- before running a make in a subdirectory, call `mkdirs' to ensure
+	  that that subdirectory exists
+
+				   5/16
+				   ----
+newversion.c
+	- added a `-dir' option to specify a directory prefix, like $(srcdir)
+
+				   5/17
+				   ----
+builtins/mkbuiltins.c
+	- if the .def filename begins with a slash, don't prepend the name
+	  of the `error directory' when printing error messages or writing
+	  line number information to a generated c source file
+
+config.h
+	- don't include memalloc.h if BUILDING_MAKEFILE is defined
+
+lib/malloc/Makefile
+	- skeleton Makefile to make this directory more like other
+	  library directories
+
+Makefile, cpp-Makefile, builtins/Makefile, lib/*/Makefile
+	- changes to make bash buildable in a directory without the source
+	  present by running `make srcdir=xxx'
+
+support/srcdir
+	- new program, used to print the full path of the source directory;
+	  it echoes the output of `pwd' if $1 is `.'
+
+				   5/18
+				   ----
+cpp-Makefile
+	- CFLAGS -> CCFLAGS, CDEBUGFLAGS -> CFLAGS to obey the GNU standard
+	  (which does not consider the possibility that other information
+	  besides debugging could conceivably be passed to cc)
+
+general.h
+	- don't prototype gethostname() unless we're defining our own version
+	  in general.c
+
+lib/readline/history.c
+	- fix hist_error to allocate and return a new string with the
+	  error message; removed the `ret' argument
+
+				   5/19
+				   ----
+subst.c
+	- new function char_is_quoted(s, i) returns 1 if character at
+	  position i in s is quoted
+
+bashline.c
+	- removed `\' from rl_completer_word_break_characters
+	- make sure that a command separator character is not quoted in
+	  attempt_shell_completion by calling char_is_quoted before calling
+	  command_word_completion_function
+	- fixed a problem with detection of command separator characters
+	  in attempt_shell_completion
+
+lib/readline/complete.c
+	- set found_quote if a backslash is found in the string in
+	  rl_complete_internal
+	- if compiled for the shell, call char_is_quoted to find out
+	  whether a character in rl_line_buffer is quoted when deciding
+	  where to break a word for the completer
+
+				   5/23
+				   ----
+machines.h
+	- made sure all definitions of M_OS were quoted
+
+lib/doc-support/Makefile
+	- more surgery to use ${topdir} and ${srcdir}
+
+documentation/bash.1
+	- clarify that redirections may precede only simple commands
+
+support/fixlinks
+	- new script to make multiple copies of files links or symlinks
+	  to a single master copy
+
+support/SYMLINKS
+	- name -> target symlink map for support/fixlinks
+
+support/fixlib
+	- modification of fixdist to move lib to ../lib and clone the files
+	  in there like using lndir
+
+filecntl.h
+	- moved to lib/posixheaders, replaced with symlink
+
+support/getcppsyms.c
+	- removed support for outputting -D__STDC__; it's rarely right
+
+cpp-Makefile
+	- build_builtins_in_dir(directory, makefile) --> build_builtins(target)
+	  to get rid of the need to know how cpp does token concatenation
+
+nojobs.c
+	- changed the printing of the pid for asynchronous jobs to be the
+	  same as sh (no brackets)
+	- took a useless loop out of wait_for_background_pids
+
+				   5/24
+				   ----
+
+cpp-Makefile
+	- major surgery to replace #define with make variable assignments --
+	  now cpp is used only for inclusion and conditionals (and shorthand)
+
+machines.h
+	- new entry for Lynx 2.1
+
+builtins/declare.def
+	- make sure that the name in command name=value is a legal variable
+	  name (affects typeset/declare, export, readonly)
+
+				   5/26
+				   ----
+machines.h
+	- make sure a 386/486 running Solaris2 is not misidentified as a
+	  Sun 386i
+	- make sure a 486 running NeXT OS is identified as a `NeXT-i386'
+
+				   5/27
+				   ----
+builtins/enable.def
+	- fixed an off-by-one error in option parsing
+	- improved option parsing to be Posix compliant (`--'), bad options
+
+Makefile
+	- call /bin/sh to run support/mksysdefs and create sysdefs.h, since
+	  it's a shell script
+	- ditto for $(CPPMAGIC)
+
+cpp-Makefile
+	- newversion.aux does not need to be linked against the math
+	  library
+
+				   5/30
+				   ----
+machines.h
+	- set M_OS to `NeXTstep' for NeXT and i386 machines running NeXT OS
+
+[1.14.2 beta release made available for FTP]
+
+				   5/31
+				   ----
+siglist.h
+	- don't define `strsignal' on SunOS5; it has its own
+
+builtins/setattr.def
+	- change set_or_show_attributes to check for legal variable names

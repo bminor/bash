@@ -1,0 +1,15 @@
+#! /bin/sh
+
+if ksh -c 'echo ""' >/dev/null 2>&1; then
+	ksh=ksh
+fi
+
+for cmd in sh ../../bash $ksh
+do
+	echo
+	echo $cmd:
+	for demo in shx[0-9]
+	do
+		$cmd $demo
+	done
+done

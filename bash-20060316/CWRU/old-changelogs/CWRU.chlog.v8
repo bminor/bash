@@ -1,0 +1,251 @@
+[ Work begins after network release of version 1.11 ]
+
+				     1/11
+				     ----
+nojobs.c
+	- Posix systems now reap zombie children and retry a fork() once if
+	  it fails
+	- Posix systems should use waitpid() rather than wait() wherever
+	  possible
+	- Posix systems do not need to validate a pid before calling waitpid()
+	  in wait_for_single_pid(); waitpid takes a pid argument
+
+				   1/13
+				   ----
+execute_cmd.c
+	- get_next_path_element can return NULL, so the code that calls it
+	  must take that possibility into account
+
+jobs.c
+	- there was an extra parameter in the select() call
+
+builtins/type.def
+	- successful_finds needed to be initialized to 0
+
+machines.h
+	- fixed a typo (_D -> -D) in the DG/UX machine description
+
+				   1/14
+				   ----
+execute_cmd.c
+	- fixed extract_colon_unit to return "" in the case of a trailing
+	  colon in the path
+
+INSTALL
+	- note that on SCO Xenix 386 one must use cc -E rather than /lib/cpp
+	  to process cpp-Makefile
+
+cpp-Makefile
+	- fixed the problem of a single quote in a makefile comment
+
+machines.h
+	- Xenix 386 machines need -DUSG in SYSDEP_CFLAGS
+
+lib/readline/readline.c
+	- changed the includes around so that the Xenix 386 support is
+	  in the same section as the USGr3 code, and the Xenix 286
+	  support is in the same section as the plain USG code
+
+shell.c
+	- split the `int code = setjmp (top_level)' statement in
+	  reader_loop into two statements -- some compilers don't like
+	  it
+
+parse.y
+	- changed the overloaded `yy_input_dev' to a `union STREAM',
+	  where a `union STREAM' is
+
+		typedef union STREAM {
+			FILE	*s_file;
+			char	*s_string;
+		} STREAM;
+
+	  and changed the parameter to init_yy_io and all the functions
+	  that call it to use a STREAM argument instead of casting back
+	  and forth between a (char *) and a (FILE *)
+
+builtins/times.def
+	- If hpux or USGr4, #undef HAVE_RESOURCE, rather than try to fit
+	  all the special cases onto a single line deciding whether or
+	  not to include <sys/resource.h>
+
+				   1/15
+				   ----
+bashline.c
+	- changed the bindable name for the ksh-style ^O function from
+	  operate_and_get_next to operate-and-get-next
+
+execute_cmd.c
+	- some systems (e.g SGI) allow the result of alloca to be assigned
+	  only to a `simple' variable, so I introduced a dummy one instead
+	  of assigning to redirectee->word directly
+
+shell.c
+	- fixed a typo: PENDANTIC -> PEDANTIC
+
+machines.h
+	- took -DREVERESED_SETVBUF_ARGS out of the entries for Xenix 386
+
+cpp-Makefile
+	- added double quotes around the RHS of the assignment to
+	  SYSTEM_NAME to avoid further cpp processing if the system name
+	  happens to be a cpp define
+
+bashline.c
+	- added `search-forward', `search-backward' functions that perform
+	  non-incremental history searches using the vi-mode code
+
+				   1/16
+				   ----
+builtins/ulimit.def
+	- fixed a typo in a comment
+	- added parens around the object in an #if defined preprocessor
+	  statement
+
+machines.h
+	- the Xenix 386 machine descriptions need to #undef HAVE_GETWD
+
+builtins/read.def
+	- Fixed read to treat backslash as an escape character unless
+	  -r is given, as per Posix.2
+
+lib/readline/readline.c
+	- Fixed up the maze of dire[cn]t includes and defines so that
+	  they're correct for Xenix (finally)
+
+lib/glob/glob.c
+	- ditto.  Now the defines/includes are correct for Xenix 386
+
+execute_cmd.c
+	- a loop of the form
+			while : ; do echo -n 1; done
+	  can run a machine using Gwyn's alloca() emulation out of memory
+	  because alloca() keeps getting called at the same stack level
+	  and never frees anything up.  Added a call to alloca(0) after
+	  the call to execute_simple_command in execute_command_internal
+	- added Karl Kleinpaste's workaround for the AFS file creation
+	  bug, dependent on AFS_CREAT_BUG
+
+parse.y
+	- \s in a prompt string needs to decode to the shell basename, as
+	  per the documentation, rather than the full shell name
+
+				   1/17
+				   ----
+nojobs.c
+	- fixed a typo in one of the WAITPID calls, thanks to Bruce Evans
+
+[At this point, all of these fixes were sent along to bfox]
+
+support/getcppsyms.c
+	- now recognizes cpp symbol __hppa for use on HP precision
+	  architecture machines
+
+machines.h
+	- M_MACHINE is now `hppa' for HP Precision Architecture machines, so
+	  to make sure hpux is defined, it's now in SYSDEP_CFLAGS
+	- Make sure that the RS6000/AIXv3 description defines M_OS as AIX,
+	  not "AIX".  The quotes are added in cpp-Makefile
+
+				   1/27
+				   ----
+parser.h
+	- new file, contains structures necessary to parse commands
+
+input.h
+	- new file, contains definitions and structures used to read input
+
+bashline.c
+	- removed the definitions for search-backward, search-forward
+
+cpp-Makefile
+	- removed the definition of DESTDIR; now passed down from Makefile
+
+error.c, error.h
+	- new files to isolate the error-handling functions
+
+command.h
+	- new file including structures used internally to represent
+	  commands
+
+parse.y
+	- include input.h, parser.h
+	- changed all the code that deals with input streams to fit the
+	  new framework defined in input.h
+
+make_cmd.c
+	- moved the error reporting code to error.c
+	- added cpp code to ensure that alloca is defined correctly
+
+shell.h
+	- removed the code that was moved to input.h, parser.h, command.h
+
+builtins/common.c
+	- moved a call to setjmp out of an if statement
+	- changed the input code to work with the new input framework
+
+builtins/getopt.c
+	-include config.h if compiling for the shell
+
+lib/readline/readline.c
+	- change representation of characters > 127 to octal
+	  rather than M-c
+	- changed representation of characters < ' ' to ^X rather
+	  than C-x
+	- fixed a memory leak in parser_if () by freeing `tname'
+
+machines.h
+	- removed MIPS_CFLAGS from the ultrix Decstation entry, since the
+	  limit no longer needs increasing
+
+variables.c
+	- move the initialization of PWD before the environment is read, so
+	  an exported version of PWD takes precedence
+
+readline.c, funmap.c, emacs_keymap.c
+	- removed support for rl_arrow_keys -- it should now be done by the
+	  inputrc file
+
+documentation/bash.1
+	- only non-job-control shells start background jobs ignoring SIGINT
+	  and SIGQUIT
+
+builtins/umask.def
+	- don't print the octal representation of the umask if the symbolic
+	  representation has already been displayed
+	- a bad option to umask should return EXECUTION_FAILURE, not -1
+
+shell.c
+	- new function, init_signal_handler (sig), to initialize the SIG
+	  signal hander, call it in main loop
+
+nojobs.c
+	- call init_signal_handler (SIGINT, sigint_sighandler) so the correct
+	  thing happens on Posix systems
+
+general.c
+	- updated the comment above the fallback implemenation of killpg()
+
+machines.h
+	- machine entry for the Unix PC
+	- new variable HAVE_DIRENT
+
+				   1/28
+				   ----
+machines.h
+	- SCO needs to #undef HAVE_GETCWD so that the getcwd() function
+	  supplied with bash is used
+
+subst.c
+	- USG machines should include <string.h>, others <strings.h>
+	- sub_append_number should use itos() rather than xmalloc and
+	  sprintf
+
+builtins/ulimit.def
+	- changed the resource limit struct to one that has no explicit
+	  size to account for systems with differing numbers of resource
+	  limits
+
+lib/readline/readline.c
+	- there was an off-by-one error in the code that counts the number
+	  of items to list when doing completion listing

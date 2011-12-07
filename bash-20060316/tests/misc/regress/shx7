@@ -1,0 +1,9 @@
+# pd ksh and zsh fail this one
+echo -n "bgwait	"
+(
+	sleep 2
+	echo -n "sleep done... "
+) &
+waitcmd="wait $!"
+eval $waitcmd
+echo "$waitcmd"

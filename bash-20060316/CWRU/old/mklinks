@@ -1,0 +1,41 @@
+
+# Yet another script which requires an already built Bash.
+#
+# This makes links in the current directory to the directory specified as
+# the first argument.
+#
+
+topdir=$1
+
+if [ ! "$topdir" ]; then
+  echo "No directory specified.  Read the script $0."
+  exit 1
+fi
+
+function clone_files ()
+{
+  local dir=$1;
+  local files;
+
+  files=$(cd $dir; echo *);
+
+  if [ ! "$files" ]; then
+    return 0;
+  fi
+
+  for filename in $files; do
+    if [ -d $dir/$filename ]; then
+      # If the file to clone is this directory, then skip it.
+      if [ $(cd $dir/$filename; pwd) = $(pwd) ]; then
+	continue;
+      fi
+      mkdir $filename;
+      (cd $filename; clone_files ../$dir/$filename)
+    else
+      ln -s $dir/$filename .;
+    fi
+  done
+  rm -f \#* *~ .*~ *.bak .*.bak  *.tmp .*.tmp *.o core a.out;
+}
+
+clone_files $topdir

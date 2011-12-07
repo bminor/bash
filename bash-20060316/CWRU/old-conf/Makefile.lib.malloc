@@ -1,0 +1,33 @@
+# Skeleton Makefile for the GNU malloc code
+#
+# Maybe this should really create a library instead of just compiling
+# source files
+
+srcdir = .
+VPATH = .:$(srcdir)
+
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+.s.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+MALLOC_SOURCE = malloc.c
+
+ALLOCA_SOURCE = alloca.c
+ALLOCA_OBJECT = alloca.o
+
+libmalloc.a:	malloc.o $(ALLOCA)
+	rm -f $@
+	ar cq $@ malloc.o $(ALLOCA)
+	-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+malloc.o: malloc.c getpagesize.h
+
+$(ALLOCA_OBJECT): $(ALLOCA_SOURCE)
+
+alloca.o:	$(ALLOCA_SOURCE)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+	@- if [ "$(ALLOCA_OBJECT)" != alloca.o ]; then \
+		mv $(ALLOCA_OBJECT) alloca.o >/dev/null 2>&1 ; \
+	fi

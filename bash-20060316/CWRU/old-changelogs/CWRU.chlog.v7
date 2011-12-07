@@ -1,0 +1,671 @@
+[Beginning of work with version 1.11]
+
+                                   10/31
+                                   -----
+Makefile
+	- changed instances of $(AWK) to $(GAWK) -- political correctness from
+	  bfox
+
+builtins.h, builtins/help.def, builtins/mkbuiltins.c
+	- changed representation of long_doc from a single string to an
+	  array of strings
+
+execute_cmd.c
+	- only call __setostype() if on isc386 and _POSIX_SOURCE is
+	  defined
+
+general.c
+	- only define functions for index and rindex if index and rindex
+	  are not already cpp defines
+
+jobs.c
+	- #undef some things that clash between <sys/ioctl.h> and <termios.h>
+	  on Posix suns
+
+machines.h
+	- make isc386 machines links with the shared C library explicitly
+	  (-lc_s)
+	- new entry for a MagicStation (?) from bfox
+
+variables.c
+	- use a cpp define _CONST_HACK to determine whether the parameter to
+	  getenv() is a char const * (yes for _STDC_, no otherwise)
+
+builtins/type.def
+	- make found_file local to the block that searches for executable
+	  disk files
+
+				   11/4
+				   ----
+execute_cmd.c
+	- make execute_function_or_builtin use unwind protects to protect
+	  the `return catch' variables
+
+support/getcppsyms.c
+	- added definitions for M_UNIX, M_XENIX, and _AIX
+
+				   11/5
+				   ----
+bashline.c
+	- fix a call to savestring in command_word_completion_function with
+	  a post-incremented int parameter, since savestring is a macro that
+	  evaluates its argument twice (builtin completion)
+
+lib/glob/fnmatch.c
+	- add `^' as a character that negates a character class ([])
+
+				   11/6
+				   ----
+subst.c
+	- add a new variable last_command_subst_pid to keep track of the
+	  pid of the last child created for command substitution.  Used
+	  to determine whether or not command substitution has taken
+	  place.
+
+execute_cmd.c
+	- made the exit status of a command that has only assignments and
+	  redirections obey the Posix spec
+
+unwind_prot.c, trap.c
+	- make sure all sigset_t variables are initialized with sigemptyset
+	  before use
+
+lib/glob/fnmatch.c
+	- fixed a couple of bugs with [] classes in fnmatch: not checking
+	  whether or not we've hit the ']' and not incrementing the string
+	  argument in the right place
+
+				   11/7
+				   ----
+braces.c
+	- Make backquotes inhibit brace expansion -- defer it until the
+	  subshell runs
+	- Ditto for $( )
+
+subst.c
+	- since braces.c now calls unquoted_member and unquoted_substring,
+	  they can no longer be static functions
+
+config.h
+	- two new configuration options: ALLOW_RIGID_POSIX_COMPLIANCE and
+	  DISABLED_BUILTINS
+
+shell.c, jobs.c
+	- define and use top_level_signal_mask, restored on longjmps to
+	  top_level by throw_to_top_level
+
+builtins/builtin.def
+	- use builtin_address to find the function (if so configured) so
+	  that `builtin foo' still works after `enable -n foo'
+
+builtins/common.c
+	- have both find_shell_builtin, which never finds disabled builtins,
+	  and builtin_address, which does
+
+				   11/8
+				   ----
+general.c
+	- the getdtablesize emulation should ensure that _SC_OPEN_MAX is
+	  defined on Posix systems before trying to use it in a call to
+	  sysconf()
+
+
+				    11/10
+				    -----
+lib/glob/fnmatch.c
+	- fixes from Roland McGrath for some of the more egregious bugs
+	- naturally, Roland missed a few
+
+lib/readline/readline.c
+	- add missing calls to sigemptyset(), since Posix specifies that
+	  all sigset_t variables be initialized before use using it
+	- only turn off ISTRIP and INPCK in the termio(s) code if the
+	  character size is 8 bits ((otio.c_cflag & CSIZE) == CS8)
+	- Sequents running Dynix/ptx should include <sys/pte.h> rather
+	  that <sys/ptem.h>
+
+builtins/type.def
+	- change a call to printf to builtin_error when printing a
+	  diagnostic that something is not found
+
+builtins/times.def
+	- changed file inclusion code to include <sys/time.h> and
+	  <sys/resource.h> if HAVE_RESOURCE is defined, then to include
+	  <sys/times.h> if !HAVE_RESOURCE and RUSAGE_SELF is not defined.
+	  This catches systems with deficient <sys/resource.h> files
+
+                                   11/11
+                                   -----
+lib/readline/readline.c
+	- Don't try to dereference funmap in rl_named_function() if it's
+	  null (as it is before rl_initialize_funmap is called)
+
+				   11/12
+				   -----
+lib/readline/readline.c
+	- backed out of change of 11/11 to rl_named_function
+
+bashline.c
+	- add a state variable bash_readline_initialized to keep track of
+	  whether or not readline has been initialized with a call to
+	  initialize_readline()
+
+builtins/bind.def
+	- if readline has not been initialized the first time this is
+	  called, call initialize_readline
+
+				   11/13
+				   -----
+execute_cmd.c
+	- execute_subshell_builtin_or_function would only let the output
+	  of `jobs' be piped if pipe_in and pipe_out were both != NO_PIPE
+	  (?).  Obviously a typo.
+
+builtins/command.def
+	- add an unwind_protect to dispose of the new command created
+	  by the call to make_bare_simple_command
+
+builtins/jobs.def
+	- add the `jobs -x command args' form from the System V.4 sh
+	  All job specs in `args' are replaced with the appropriate
+	  job's process group id and `command' is executed
+
+builtins/getopt.c
+	- if getopt() finds that optind > argc when it is called, it
+	  sets optind = argc and returns EOF
+
+builtins/times.def
+	- backed out of 11/10 change.  Some systems, most notably
+	  HP/UX have all the correct includes and defines and simply
+	  do not implement getrusage().  At all.
+
+subst.c
+	- if sv_optind finds that OPTIND has been unset or set to an
+	  empty string, call getopts_reset (0).  The Gnu getopt
+	  resets its internal state when optind == 0.
+	- call getopts_reset(0) if OPTIND=1, because that's what the
+	  Posix spec says to use to reset
+
+				   11/14
+				   -----
+builtins/alias.def
+	- fixed a typo in the SHORT_DOC for the unalias builtin
+
+builtins/shift.def
+	- allowed the shift count to be 0
+
+				   11/15
+				   -----
+lib/readline/readline.c
+	- turn on 8 bit characters if NO_EIGHT_BIT_CHARACTERS is not
+	  defined and the Posix termios code path is being taken
+
+[The following two entries describe what's needed for an initial
+implementation of the vi mode `.' command]
+
+lib/readline/vi_mode.c
+	- new variables:
+		vi_last_command: last command that modified text in
+				 the buffer
+		vi_last_repeat: the repeat count to vi_last_command
+		vi_last_arg_sign: arg sign for vi_last_repeat
+		vi_last_motion: the last motion qualifier for the
+				text modification commands that use one
+		vi_redoing: state variable, if 1 we're re-doing a
+			    command
+		vi_textmod: list of commands that modify text
+			    (initially "_*\\AaIiCcDdPpYyRrSsXx~")
+
+	- new functions:
+		rl_vi_redo: an initial implementation of the vi mode
+			    `.' command
+		rl_vi_set_last: initialize the state of the new variables
+				described above
+		rl_vi_textmod_command: return true if command passed is
+				       a text modification command
+	- changed rl_vi_domove to save the movement command information in
+	  vi_last_motion
+	- changed rl_vi_movement_mode to call rl_vi_set_last to initialize
+	  the `last command' state
+
+lib/readline/readline.c
+	- changed rl_dispatch to save vi_last_command, vi_last_repeat,
+	  and vi_last_arg_sign
+	- changed rl_newline to call vi_set_last
+
+lib/readline/readline.h
+	- new function rl_vi_redo
+
+lib/readline/vi_keymap.c
+	- bind rl_vi_redo to `.'
+
+				   11/20
+				   -----
+posixstat.h
+	- make isc386 defines for S_IFDIR and S_IFMT be used if they
+	  do not already appear, no matter whether or not gcc is being
+	  used for the compile
+
+machines.h
+	- new entry for Omron Luna 88k running Mach 2.5 (nice machines)
+
+lib/readline/vi_mode.c
+	- fixed a bug with rl_vi_domove and the last word on the line.
+	  If rl_point ended up > rl_end, it was being set to rl_end - 1
+	  rather than to rl_end.
+
+cpp-Makefile
+	- quote the values of RANLIB and AR passed to makes in
+	  subdirectories
+
+shell.c
+	- instead of making all Xenix systems swap the second and third
+	  arguments to setvbuf, make that behavior dependent on the
+	  definition of REVERSED_SETVBUF_ARGS
+
+				   11/21
+				   -----
+lib/readline/readline.c
+	- fixed an error in rl_forward that caused vi-mode to walk off
+	  the end of the line after executing `l' in command mode on an
+	  empty line
+
+				   11/22
+				   -----
+support/getcppsyms.c
+	- added the `luna88k' define
+
+				    11/24
+				    -----
+execute_cmd.c
+	- all calls to dup2 in do_redirection_internal should be checked
+	  for errors and the redirection should fail if the dup2 fails
+
+shell.h, parse.y, execute_cmd.c, print_cmd.c, make_cmd.c
+	- replaced the single redirection operator `r_duplicating' with
+	  r_duplicating_input and r_duplicating_output to avoid the
+	  read 1<&7 getting printed as read 1>&7 problem:
+		foo()
+		{
+			exec 9</dev/tty
+			read 1<&9
+			exec 9<&-
+		}
+	  is printed wrong when `type foo' is executed
+
+shell.h
+	- added two new redirection_operators, r_duplicating_input_word and
+	  r_duplicating_output_word to implement true sh semantics for
+	  [n]<&word and [n]>&word
+parse.y
+	- eliminated the old yacc production for >& word, meaning put stdout
+	  and stderr into `word'
+	- added productions for [n]<&word and [n]>&word that use the new
+	  redirection operators
+execute_cmd.c
+	- the first thing done in do_redirection_internal is now a check for
+	  r_duplicating_input_word and r_duplicating_output_word.  If the
+	  redirection is one of those two, `word' is expanded and a new
+	  redirection is made
+print_cmd.c
+	- new code to print the [n]<&word and [n]>&word redirections
+	  (r_duplicating_input_word and r_duplicating_output_word)
+make_cmd.c
+	- new code for make_redirection to handle r_duplicating_input_word
+	  and r_duplicating_output_word
+
+documentation/bash.1
+	- added documentation for the -x option to `jobs' + minor cleanups
+	  and corrections
+
+				   11/25
+				   -----
+cpp-Makefile
+	- added GCC_EXTRAS for gcc-specific compiler flags
+
+execute_cmd.c
+	- removed some unused functions (close_all_files) and variables
+	  (file_exists_p)
+
+parse.y
+	- added new command-oriented-style history: all lines of a multiple
+	  line command will be added to the same history line
+	- new variable current_command_line_count to keep track of the
+	  number of lines in the current command.  If > 1, a line is appended
+	  to the current history line to implement command-oriented history
+	- new function bash_add_history
+
+shell.c
+	- added code to reset current_command_line_count to 0 before calling
+	  parse_command and yyparse
+
+subst.c
+	- the command-oriented history is controlled by the setting of the
+	  variable command_oriented_history
+
+builtins/reserved.def
+	- a new help topic: `variables', giving help on some common shell
+	  variables
+
+				   11/26
+				   -----
+lib/glob/glob.c
+	- if the filename portion of the pathname to be matched is null
+	  (e.g. a*/), do not call glob_vector to attempt to match each
+	  file in the expanded directories against the null string.
+
+				   11/27
+				   -----
+lib/glob/glob.c
+	- force globbing of directory names even if the metacharacters
+	  contained therein are protected by backslashes.  The globbing
+	  strips the quotes correctly
+
+shell.c
+	- make sure current_command_line_count is declared everywhere
+	  it's used
+
+parse.y
+	- remove declaration of history_lines_this_session from
+	  pre_process_line
+	- add extern declaration of history_lines_this_session to
+	  bash_add_history
+
+				   12/2
+				   ----
+trap.h
+	- removed inclusion of <sys/types.h> because most files include it
+	  themselves, and this is dangerous on systems that do not protect
+	  against multiple inclusion of header files
+
+trap.c
+	- include <sys/types.h> before "trap.h" since it was the only file
+	  in the distribution not to do so
+
+shell.c
+	- Install the SIGINT sighandler the Posix way on machines with
+	  _POSIX_VERSION defined
+
+				   12/3
+				   ----
+dispose_cmd.c
+	- make sure dispose_redirects properly handles r_duplicating_input_word
+	  and r_duplicating_output_word by freeing the `filename'
+
+execute_cmd.c
+	- fix do_redirection_internal to copy new_redirect->redirectee.filename
+	  using alloca() so no memory has to be freed at function exit
+
+				   12/4
+				   ----
+parse.y
+	- expand \n in PS1 or PS2 into \r\n only if line editing is enabled
+
+shell.c
+	- define top_level_mask if _POSIX_VERSION defined
+
+newversion.c
+	- made it write a definition of SCCSVERSION to version.h -- an SCCS
+	  string so the `what' command will be useful
+
+version.c
+	- new variable `sccsversion' set to SCCSVERSION
+
+				   12/5
+				   ----
+builtins/fc.def
+	- make fc_gethist check that the history list is non-null before
+	  trying to access its members
+
+				   12/6
+				   ----
+lib/readline/readline.c
+	- changed the ISTRIP code (again) to force bash to disable ISTRIP
+	  only if the tty driver guarantees eight bits (cflag & CSIZE == CS8)
+
+				   12/9
+				   ----
+lib/readline/readline.c
+	- tgetent returns 0 if it can't find the terminal name in /etc/termcap,
+	  so we failed if it returns <= 0, not < 0.
+
+				   12/11
+				   -----
+machines.h
+	- Sony machines running NEWS-OS 4.0 (V.4) should have strerror(),
+	  so define HAVE_STRERROR
+	- Pyramids running BSD do not all have the vprintf family of functions,
+	  so remove the definition of HAVE_VPRINTF
+
+				   12/12
+				   -----
+parse.y
+	- make sure that shell_getc always checks that shell_input_line is
+	  valid before trying to reference shell_input_line[0]
+
+				   12/13
+				   -----
+mailcheck.c
+	- Since `dollar_underscore' saves the value of $_ in a local variable,
+	  it's possible that bind_variable can free and reallocate the cell
+	  for $_, leaving dollar_underscore pointing at freed storage.  The
+	  fix is to copy it into freshly-allocated memory.
+	- ensure that when saving and restoring dollar_underscore that we do
+	  not try to call strlen on a null string
+
+				    12/15
+				    -----
+general.c, execute_cmd.c
+	- moved the utility function `all_digits' from execute_cmd.c to
+	  general.c
+
+builtins/kill.def
+	- remove use of sscanf, used calls to all_digits and atoi instead
+
+machines.h
+	- if not using gcc, need to make SYSDEP_LDFLAGS = -Xp for Posix
+	  on isc386
+
+				   12/16
+				   -----
+machines.h
+	- isc386 has multiple groups
+
+execute_cmd.c
+	- add a QUIT to the while loop in find_user_command_in_path that
+	  searches the path, so users can interrupt a lengthy path search
+
+				   12/17
+				   -----
+builtins/alias.def
+	- added the Posix-specified -a option to unalias, made unalias obey
+	  the getopt argument syntax guidelines
+
+builtins/jobs.def
+	- made `jobs' handle the -- option to signal the end of arguments
+
+flags.c
+	- Posix.2a has specified that the -b flag stand for asynchronous
+	  notification, so move the definition of asynchronous_notification
+	  here and add a new entry to the `flags' struct if JOB_CONTROL is
+	  defined
+
+flags.h
+	- add an extern declaration of asynchronous_notification
+
+jobs.c
+	- change the definition of asynchronous_notification to extern, since
+	  it's now declared in flags.c
+
+builtins/set.def
+	- change documentation strings to add -b option, note that
+	  set -o notify is now the same as set -b
+	- change the code to make set -o notify the same as set -b
+	  (list_long_opts(), take the special case out of set_minus_o_option)
+
+				   12/19
+				   -----
+lib/readline/readline.c
+	- added support for $LINES, $COLUMNS.  The variables are read after
+	  the ioctl(TIOCGWINSZ) and before calls to tgetent
+
+builtins/fc.def
+	- made the fc output format correspond to that specified by Posix.2a 
+	  ("%d\t%s\n")
+
+				   12/20
+				   -----
+execute_cmd.c
+	- user_command_matches did not properly handle a null $PATH element,
+	  which should be the same as ".".  Changed the code to mirror
+	  find_user_command_in_path ()
+
+
+				    12/23
+				    -----
+execute_cmd.c
+	- added a new function get_next_path_element, which calls
+	  extract_colon_unit and interprets the result, translating
+	  "" to "."
+
+builtins/cd.def
+	- added description of -l option to dirs short_doc
+	- fixed the bug that caused `dirs' to always print an extra
+	  trailing space
+
+documentation/bash.1
+	- added description of -l option to dirs
+
+parse.y
+	- added optional leading ( for case clause, as per Posix.2
+
+				   12/30
+				   -----
+lib/readline/vi_mode.c
+	- removed unused variable `added_blank'
+
+bashline.c
+	- added dynamic completion from bfox
+
+execute_cmd.c
+	- redirections must be performed in a child before execution of
+	  the command is attempted or aborted (because it's not found
+	  by a hash table or $PATH search), according to Posix.2
+
+getcwd.c
+	- new file, from the Gnu C library, for systems that don't do
+	  this right -- they use popen("/bin/pwd", "r") instead
+
+				   12/31
+				   -----
+builtins/type.def
+	- the type builtin would not report a name as not found if any name
+	  had previously been found because the flag variable used to report
+	  this (found_something) was not reset each time through the loop.
+	  Added a variable `found_any' to be global and reset found_something
+	  to 0 each time through the loop
+
+				     1/4
+				     ---
+builtins/jobs.def
+	- make sure that the call to add_unwind_protect in
+	  execute_list_with_replacements is made after the new command
+	  struct is completely initialized
+
+support/mksysdefs
+	- look for /dev/fd, define HAVE_DEV_FD if present
+
+cpp-Makefile
+	- pass HAVE_DEV_FD through to make in SYSTEM_FLAGS
+
+shell.c, execute_cmd.c
+	- call unlink_fifo_list only if HAVE_DEV_FD is not defined and
+	  PROCESS_SUBSTITUTION is defined
+
+subst.c
+	- new function make_dev_fd_filename to return /dev/fd/xx, where
+	  xx corresponds to the parent end of the pipe
+	- all the named pipe utility functions should be #if !defined
+	  (HAVE_DEV_FD)
+	- change process_subsitute to do the following on systems with /dev/fd:
+		1.  Make a pipe in the parent
+		2.  if (open_for_read_in_child)
+			parent_pipe_fd = fildes[1]
+			child_pipe_fd = fildes[0]
+		    else
+			parent_pipe_fd = fildes[0]
+			child_pipe_fd = fildes[1]
+		3.  pathname = make_dev_fd_filename (parent_pipe_fd);
+		4.  fork
+		5.  In parent, close child_pipe_fd and return pathname
+		6.  In child, turn off job control, dup child_pipe_fd to
+		    either fd 0 or 1 depending on OPEN_FOR_READ_IN_CHILD,
+		    close parent_pipe_fd, parse and execute the string,
+		    and exit
+
+shell.c
+	- added call to unlink_fifo_list in reader_loop so that all fifos
+	  get closed, even after builtin commands are executed
+
+				    1/6
+				    ---
+machines.h, make_cmd.c, print_cmd.c, shell.c, cpp-Makefile
+	- HAVE_VPRINTF --> HAVE_VFPRINTF
+
+cpp-Makefile, machines.h, test.c
+	- HAVE_MULTIPLE_GROUPS --> HAVE_GETGROUPS
+
+cpp-Makefile, machines.h
+	- HAVE_SIGLIST --> HAVE_SYS_SIGLIST
+
+parse.y
+	- add if_command production
+
+builtins/echo.def
+	- validate all arguments before using them so that -nanything != -n
+	- document the -E option and its use
+
+builtins/umask.def
+	- allow other arguments to be used with -S
+
+subst.c
+	- make sure to close all files in the child created to run a
+	  process substutition to avoid holding write file descriptors
+	  to pipes that will cause the shell to hang
+
+				    1/7
+				    ---
+cpp-Makefile
+	- fixed a typo: SEARCHLIB -> SEARCH_LIB
+
+machines.h
+	- new description for Amiga 3000 running System V.4
+
+shell.c
+	- default secondary prompt is now "> "
+
+builtins/bashgetopt.c
+	- more internal cleanups and bug fixes
+
+support/mksysdefs
+	- detect the amiga by the presence of /usr/amiga
+
+				    1/9
+				    ---
+general.c
+	- canonicalize_pathname should remove ./ only if it's at the
+	  beginning of the pathname, or immediately preceded by a `/'
+
+				   1/10
+				   ----
+documentation/bash.1
+	- clean up the documentation for test -t, since according to
+	  Posix, it always requires an argument
+
+general.c
+	- don't build index and rindex for DG machines
+
+
+machines.h
+	- description for System V.4 on IBM 370 architecture
+	- fixed up DG/UX machine description

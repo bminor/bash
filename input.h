@@ -100,7 +100,7 @@ extern int stream_on_stack __P((enum stream_type));
 extern char *read_secondary_line __P((int));
 extern int find_reserved_word __P((char *));
 extern void gather_here_documents __P((void));
-extern void execute_variable_command __P((char *, char *));
+extern void execute_prompt_command __P((char *));
 
 extern int *save_token_state __P((void));
 extern void restore_token_state __P((int *));

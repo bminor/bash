@@ -1,0 +1,13 @@
+#! /bin/sh
+#
+# srcdir - print out the absolute pathname of the top of the bash source
+#	   tree.  Used for getting the right value to makes in subdirectories
+#
+
+case "$1" in
+'.'|./)	pwd ;;
+./*|..*)	echo `pwd`/"$1" ;;
+*)	echo "$1" ;;
+esac
+
+exit 0

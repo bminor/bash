@@ -1,0 +1,237 @@
+# bashdb.fns - Bourne-Again Shell Debugger functions
+
+_BUFSIZ=100
+
+# Here after each statement in script being debugged.
+# Handle single-step and breakpoints.
+_steptrap() {
+	let _curline=$1-1		# no. of line that just ran
+	let "$_curline < 1" && let _curline=1
+
+	let "$_curline > $_firstline+$_BUFSIZ" && _readin $_curline
+
+	let " $_trace" &&
+		_msg "$PS4, line $_curline: ${_lines[$(($_curline-$_firstline+1))]}"
+
+
+	# if in step mode, decrement counter
+	let " $_steps >= 0" && let _steps="$_steps - 1"
+
+	# first check if line num or string brkpt. reached
+	if _at_linenumbp || _at_stringbp; then
+		_msg "Reached breakpoint at line $_curline"
+		_cmdloop		# enter debugger
+
+	# if not, check whether break condition exists and is true
+	elif [ -n "$_brcond" ] && eval $_brcond; then
+		_msg "Break condition $_brcond true at line $_curline"
+		_cmdloop		# enter debugger
+
+	# next, check if step mode and no. of steps is up
+	elif let "$_steps == 0"; then
+		_msg "Stopped at line $_curline"
+		_cmdloop		# enter debugger
+	fi
+}
+
+
+# Debugger command loop.
+# Here at start of debugger session, when brkpt. reached, or after single-step.
+_cmdloop() {
+	local cmd args
+
+# added support for default command (last one entered)
+
+	while read -e -p "bashdb> [$lastcmd $lastargs] " cmd args; do
+		if [ -z "$cmd" ]; then
+			cmd=$lastcmd
+			args=$lastargs 
+		fi
+
+		lastcmd="$cmd"
+		lastargs=$args
+
+# made commands to be debugger commands by default, no need for '*' prefix
+
+		case $cmd in
+		bp ) _setbp $args ;;	#set brkpt at line num or string
+
+		bc ) _setbc $args ;;	# set break condition
+
+		cb ) _clearbp ;;	# clear all brkpts.
+
+		g ) return ;;		# start/resume execution
+
+		s ) let _steps=${args:-1} 
+		    return ;;		# single-step N times(default 1)
+
+		x ) _xtrace ;;	# toggle execution trace
+
+		pr ) _print $args ;;	# print lines in file
+
+		\? | h | help ) _menu ;; # print command menu
+
+		hi ) history ;;		# show command history
+
+		q ) _cleanup; exit ;;		# quit
+
+		\! ) eval $args ;;	# run shell command
+
+		* ) _msg "Invalid command: $cmd" ; _menu ;;
+		esac
+	done
+}
+
+
+# see if next line no. is a brkpt.
+_at_linenumbp() {
+	if [ -z "${_linebp}" ]; then
+		return 1
+	fi
+	echo "${_curline}" | grep -E "(${_linebp%\|})" >/dev/null 2>&1
+	return $?
+}
+
+
+# search string brkpts to see if next line in script matches.
+_at_stringbp() {
+	local l;
+
+	if [ -z "$_stringbp" ]; then
+		return 1;
+	fi
+	l=${_lines[$_curline-$_firstline+1]}
+	echo "${l}" | grep -E "\\*(${_stringbp%\|})\\*" >/dev/null 2>&1
+	return $?
+}
+
+
+# print message to stderr
+_msg() {
+	echo -e "$@" >&2
+}
+
+
+# set brkpt(s) at given line numbers and/or strings
+# by appending lines to brkpt file
+_setbp() {
+	declare -i n
+	case "$1" in
+	"")	_listbp ;;
+	[0-9]*)	#number, set brkpt at that line
+		n=$1
+		_linebp="${_linebp}$n|"
+		_msg "Breakpoint at line " $1
+		;;
+	*)	#string, set brkpt at next line w/string
+		_stringbp="${_stringbp}$@|"
+		_msg "Breakpoint at next line containing $@."
+		;;
+	esac
+}
+
+
+# list brkpts and break condition.
+_listbp() {
+	_msg "Breakpoints at lines:"
+	_msg "${_linebp//\|/ }"
+	_msg "Breakpoints at strings:"
+	_msg "${_stringbp//\|/ }"
+	_msg "Break on condition:"
+	_msg "$_brcond"
+}
+
+
+# set or clear break condition
+_setbc() {
+	if [ -n "$@" ] ; then
+		_brcond=$args
+		_msg "Break when true: $_brcond"
+	else
+		_brcond=
+		_msg "Break condition cleared"
+	fi
+}
+
+
+# clear all brkpts
+_clearbp() {
+	_linebp=
+	_stringbp=
+	_msg "All breakpoints cleared"
+}
+
+
+# toggle execution trace feature
+_xtrace() {
+	let _trace="! $_trace"
+
+	_msg "Execution trace \c"
+	let " $_trace" && _msg "on." || _msg "off."
+}
+
+
+# print command menu
+_menu() {
+
+# made commands to be debugger commands by default, no need for '*' prefix
+
+	_msg 'bashdb commands:
+	bp N			set breakpoint at line N
+	bp string		set breakpoint at next line containing "string"
+	bp			list breakpoints and break condition
+	bc string		set break condition to "string"
+	bc			clear break condition
+	cb			clear all breakpoints
+	g			start/resume execution
+	s [N]			execute N statements (default 1)
+	x			toggle execution trace on/off (default on)
+	pr [start|.] [cnt]	print "cnt" lines from line no. "start"
+	?, h, help		print this menu
+	hi			show command history	
+	q			quit
+
+	! cmd [args]		execute command "cmd" with "args"
+
+	default:		last command (in "[ ]" at the prompt)
+
+	Readline command line editing (emacs/vi mode) is available'
+}
+
+
+# erase temp files before exiting
+_cleanup() {
+	rm $_dbgfile 2>/dev/null
+}
+
+
+# read $_BUFSIZ lines from $_guineapig into _lines array, starting from line $1
+# save number of first line read in _firstline
+_readin() {
+	declare -i _i=1			
+	let _firstline=$1
+
+	SEDCMD="$_firstline,$(($_firstline+$_BUFSIZ))p"
+
+	sed -n "$SEDCMD" $_guineapig > /tmp/_script.$$
+	while read -r _lines[$_i]; do
+		_i=_i+1
+	done  < /tmp/_script.$$
+	rm -f /tmp/_script.$$ 2>/dev/null
+}
+
+_print() {
+	typeset _start _cnt
+
+	if [ -z "$1" ] || [ "$1" = . ]; then
+		_start=$_curline
+	else
+		_start=$1
+	fi
+
+	_cnt=${2:-9}
+
+	SEDCMD="$_start,$(($_start+$_cnt))p"
+
+	pr -tn $_guineapig | sed -n "$SEDCMD"
+}

@@ -1,0 +1,152 @@
+Newsgroups: comp.os.coherent
+Subject: sh clones evaluated (was Re: C News)
+Organization: Software Tool & Die Netnews Research Center
+References: <138198@allan.sublink.org> <920725204@umunk.GUN.de>
+	<9207260813.30@rmkhome.UUCP> <1992Jul27.200244.2456@acme.gen.nz>
+	<Bs0x7K.2pp@world.std.com> <9207291604.00@rmkhome.UUCP>
+	<Bs84t1.3Fx@world.std.com> <9208011403.38@rmkhome.UUCP>
+
+I've reevaluated the allegedly-sh-compatible shells I have on hand (sh,
+bash, ash, zsh and a redistributable ksh).  bash seems to have improved
+since I last looked at it and seems to run inews and subordinates
+correctly, and passes the diagnostic tests I extracted from inews and
+anne.jones.  ash, zsh and redistributable ksh each fail three of the six
+tests.  This saddens me, as ash is an elegant and relatively small piece
+of work, whereas bash is bloated and complicated.
+
+I've enclosed the test scripts (shx?), driver script (shx) and results
+(log) below.  A couple caveats:  shx4 (a quoting test) uses the C News
+getdate command; there may be newer versions of the shells tested - this
+evaluation is decidedly informal.  Here's a quick summary: sh and bash
+passed all tests; ash can't parse "<&$fd" and doesn't understand quoting;
+redistributable ksh dumps core on a newline inside backquotes, doesn't
+understand quoting, and botches waiting on background processes; zsh
+doesn't understand sh quoting (in particular, it sees ! as a job control
+character, even inside quotes), and botches waiting for background
+processes.
+
+
+# To unbundle, sh this file
+echo log 1>&2
+sed 's/^X//' >log <<'!'
+X:; ./shx
+
+sh:
+X<&$fd	ok
+nlbq	Mon Aug  3 02:45:00 EDT 1992
+bang	geoff
+quote	712824302
+setbq	defmsgid=<1992Aug3.024502.6176@host>
+bgwait	sleep done... wait 6187
+
+
+bash:
+X<&$fd	ok
+nlbq	Mon Aug  3 02:45:09 EDT 1992
+bang	geoff
+quote	712824311
+setbq	defmsgid=<1992Aug3.024512.6212@host>
+bgwait	sleep done... wait 6223
+
+
+ash:
+X<&$fd	shx1: 4: Syntax error: Bad fd number
+nlbq	Mon Aug  3 02:45:19 EDT 1992
+bang	geoff
+quote	getdate: `"now"' not a valid date
+
+setbq	defmsgid=<1992Aug3.` echo 024521
+bgwait	sleep done... wait 6241
+
+
+ksh:
+X<&$fd	ok
+nlbq	./shx: 6248 Memory fault - core dumped
+bang	geoff
+quote	getdate: `"now"' not a valid date
+
+setbq	defmsgid=<1992Aug3.024530.6257@host>
+bgwait	no such job: 6265
+wait 6265
+sleep done... 
+
+zsh:
+X<&$fd	ok
+nlbq	Mon Aug 3 02:45:36 EDT 1992
+bang	shx3: event not found: /s/ [4]
+quote	712824337
+setbq	defmsgid=<..6290@host>
+bgwait	shx7: unmatched " [9]
+sleep done... 
+X:; 
+!
+echo shx 1>&2
+sed 's/^X//' >shx <<'!'
+X#! /bin/sh
+for cmd in sh bash ash ksh zsh
+do
+X	echo
+X	echo $cmd:
+X	for demo in shx?
+X	do
+X		$cmd $demo
+X	done
+done
+!
+echo shx1 1>&2
+sed 's/^X//' >shx1 <<'!'
+X# ash fails this one
+echo -n '<&$fd	'
+fd=3
+echo ok <&$fd
+!
+echo shx2 1>&2
+sed 's/^X//' >shx2 <<'!'
+X# pd ksh fails this one
+echo -n "nlbq	"
+date=`
+date`
+echo "$date"
+!
+echo shx3 1>&2
+sed 's/^X//' >shx3 <<'!'
+X# zsh fails this one
+echo -n 'bang	'
+echo 'geoff    tty??   Aug  3 02:35' |
+X    sed -e 's/[	 ].*//' -e '/!/s/^.*!//'
+!
+echo shx4 1>&2
+sed 's/^X//' >shx4 <<'!'
+X# ash, pd ksh fail this one
+echo -n "quote	"
+expiry="now"
+timet="` getdate \"$expiry\" `"
+echo "$timet"
+!
+echo shx5 1>&2
+sed 's/^X//' >shx5 <<'!'
+X# ash, zsh fail this one
+echo -n "setbq	"
+host=host
+date="`date`"
+echo defmsgid="`set $date; echo \<$6$2$3.\`  echo $4 | tr -d : \`.$$@$host\>`"
+!
+echo shx7 1>&2
+sed 's/^X//' >shx7 <<'!'
+X# pd ksh and zsh fail this one
+echo -n "bgwait	"
+X(
+X	sleep 2
+X	echo -n "sleep done... "
+X) &
+waitcmd="wait $!"
+eval $waitcmd
+echo "$waitcmd"
+!
+echo shx8 1>&2
+sed 's/^X//' >shx8 <<'!'
+X# in case gcx7 is really breaks this shell
+sleep 3
+echo
+!
+exit 0

@@ -1,0 +1,28 @@
+From chet@odin.INS.CWRU.Edu Fri May  3 17:22:41 1991
+Flags: 50
+Received: from odin.INS.CWRU.Edu by usenet.INS.CWRU.Edu with SMTP (5.65b+ida+/CWRU-1.5-UUCPGW)
+	id AA22515; Fri, 3 May 91 17:22:41 -0400 (from chet@odin.INS.CWRU.Edu for /usr/local/bin/m2mbox /usr/homes/chet/mbox)
+Received:  by odin.INS.CWRU.Edu (5.65b+ida+/CWRU-1.4-ins)
+	id AA07171; Fri, 3 May 91 17:22:21 -0400 (from chet for chet@usenet.INS.CWRU.Edu)
+Date: Fri, 3 May 91 17:18:03 -0400
+From: Chet Ramey <chet@odin.INS.CWRU.Edu>
+To: jp@lysator.liu.se
+Subject: fixed sequent bug
+Cc: chet@odin.INS.CWRU.Edu
+Reply-To: chet@po.CWRU.Edu
+Message-Id: <9105032118.AA07167.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+
+I fixed it.  Sequent's fcntl and dup2 are both messed up.  They do not set
+the new descriptor to be open-on-exec.  For dup2 it's OK; that's the way
+4.2 BSD did it.  fcntl doing it is a bug, and a bad one.
+
+Chet
+
+--
+Chet Ramey			  Internet: chet@po.CWRU.Edu
+Case Western Reserve University	  NeXT Mail: chet@macbeth.INS.CWRU.Edu
+
+``Now,  somehow we've brought our sins back physically -- and they're pissed.''
+

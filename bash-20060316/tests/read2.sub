@@ -1,0 +1,22 @@
+a=4
+
+read -t 2 a < /dev/tty
+echo $?
+
+echo $a
+
+sleep 5 | read -t 1 a
+echo $?
+
+echo $a
+
+read -t -3 a < /dev/tty
+echo $?
+
+echo $a
+
+# the above should all time out
+echo abcde | {
+	read -t 2 a
+	echo $a
+}

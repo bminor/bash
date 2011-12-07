@@ -1,0 +1,111 @@
+From chet@cwns1.INS.CWRU.Edu Sun Aug 26 17:46:14 1990
+Flags: 50
+Received: from cwns1.INS.CWRU.Edu by cwjcc.INS.CWRU.Edu with SMTP (5.61+ida+/CWRU-1.3-decnet)
+	id AA17813; Sun, 26 Aug 90 17:46:14 -0400 (from chet@cwns1.INS.CWRU.Edu for /usr/local/bin/m2mbox /usr/homes/chet/mbox)
+Received:  by cwns1.INS.CWRU.Edu (5.61+ida+/CWRU-1.3-client)
+	id AA00962; Sun, 26 Aug 90 17:46:31 -0400 (from chet for chet@cwjcc.INS.CWRU.Edu)
+Date: Sun, 26 Aug 90 17:01:56 -0400
+From: Chet Ramey <chet@cwns1.INS.CWRU.Edu>
+To: trent@jove.cs.pdx.edu
+Subject: Re: bash on triton
+Cc: chet@cwns1.INS.CWRU.Edu
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from trent@jove.cs.pdx.edu of Fri, 24 Aug 90 16:07:19 PDT
+Message-Id: <9008262101.AA00902.SM@cwns1.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> Actually, it just that PSU gets the short end of the stick compared to
+> the other state universities because we don't have a division I
+> football team (no :-).
+
+Yeah, but didn't you guys produce Neil Lomax (lo these many years ago)?  What
+have the other schools given the NFL lately?
+
+> First thing I noticed is that this alias fails:
+> 	alias  .root=/usr/local/.root
+> The error is:
+> 	alias: .root: not a valid shell identifier
+
+This is correct according to Posix 1003.2a draft 5.  An alias must obey this
+pseudo-regexp:
+	[a-zA-Z_][a-zA-Z0-9_]*
+
+(That is, only letters, digits, and underscores, and it may not begin with an
+underscore).  This is in the latest version of the manual page, the one in
+the documentation directory.
+
+> Also it crashes when PROMPT_COMMAND is set, thus:
+> 	bash$ PROMPT_COMMAND="A=`pwd`"
+> 	bash$				# just hit return
+> 	bash: free: Called with already freed block argument
+
+I am sorting through this problem right now, and I've discovered a few things
+(none complimentary to Sun).
+
+First of all, this crash happens because Sun's programmers are lazy.  The Sun
+malloc allows you to free things multiple times, instead of doing the old
+
+	if (x)
+		free(x);
+	x = NULL;
+
+trick.  The Gnu malloc disallows that.
+
+The root of this set of problems is that the Sun yyparse() is not reentrant
+(`impure').  First of all, /usr/lib/yaccpar has changed a number of things
+to be dynamically allocated that were once static arrays (the state stack
+and the value stack are the two major ones).  Second, some things that used
+to be automatic variables to yyparse (like the state stack) are now
+globally static variables in /usr/lib/yaccpar.  This means no more
+indirectly recursive calls to yyparse().  This is pure bogusness, and
+breaks backwards compatibility in a major way. 
+
+The first indirect call to yyparse() occurs when PROMPT_COMMAND is run
+through parse_and_execute() (parse.y, around line 1200).  The next call to
+yyparse() in your example (hitting return) returns quickly, putting nothing
+onto the state stack.  Of course, YYACCEPT doesn't check whether anything
+was put into the stack; it just goes ahead and frees it anyway. 
+
+The next problem arises when PROMPT_COMMAND contains a backquoted command,
+which is run through parse_and_execute() again.  It doesn't matter that
+this parse_and_execute is in a subshell; the data structures being built by
+Sun's yacc come along for free when bash forks.  The state stack gets all
+screwed up and a segmentation fault is the inevitable result.  If Sun (and,
+I assume, AT&T, since the SCCS line at the top of /usr/lib/yaccpar
+indicates that it is derived from S5R3.1) wants to do this kind of shit,
+they should at least provide a convenience function to clear out the state
+stack. 
+
+Both of these problems are avoided by using bison.  I have put bison on
+triton (you'll have to redo it if you want it; it looks for the parser
+skeletons in /home/chet/lib), and a bash compiled with a bison-generated
+parser does not crash given the above setting of PROMPT_COMMAND.  That bash
+is in /home/chet/bin.  I don't know how to solve these problems in a
+simple way by using the Sun yacc.
+
+`Byacc' (Berkeley Yacc), the 4.4 BSD rewrite of Yacc by Bob Corbett (who
+wrote the original version of bison), should also be OK, though I haven't
+looked at it.
+
+> That brings up something else:  Triton is set up as a mail-less
+> machine (all mail is forwarded elsewhere).  Do you want your mail
+> forwarded to CWSU??  Right now the bug reports Bash generates are
+> vanishing.  (I don't touch sendmail, and, from what I'm told, I'm
+> better off that way :-)
+
+(It's CWRU, by the way.)
+
+Don't worry, I get them all.  Look at the end of shell.c (make_bug_report)
+where it opens a pipe to `/bin/rmail chet@ins.cwru.edu'.
+
+Let me know of any more problems you encounter.
+
+Chet
+
+
+--
+Chet Ramey				``Levi Stubbs' tears run down
+Network Services Group			  his face...''
+Case Western Reserve University	
+chet@ins.CWRU.Edu		
+

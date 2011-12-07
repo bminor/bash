@@ -1,0 +1,140 @@
+This file details the changes between the previous release of CWRU bash
+(07/11/93) and this release.
+
+1. Bugs Fixed
+
+Readline's vi-mode once again has TAB bound to completion; entering `posix
+mode' changes it to self-insert
+
+Bash now binds its special emacs-mode functions directly into
+emacs_meta_keymap so that eight-bit character handling does not interfere
+
+Some source restructuring: more extern functions are defined in header files
+and not in C source files
+
+The handling of `line number' inside functions is now more correct and
+closer to reality
+
+Some functions of `general use' were moved to general.c (vfree,
+full_pathname)
+
+A bug that caused some redirections to be applied twice was fixed in
+execute_command_internal (dispose of redirection_undo_list after copying it;
+ditto for exec_redirection_undo_list)
+
+The exit status of a command that is not found is 126, as Posix.2 specifies
+
+More speed improvements -- bash now runs as fast as the SunOS sh on
+Haertel's `shell benchmark'
+
+Instead of returning pointers to -1, bash and the readline, history, and
+glob libraries now return pointers to special `error pointers', which the
+calling code checks for in place of -1
+
+Fixed a problem with canonicalize_pathname which made it get
+confused with xxx/./yyy if yyy was `.' or `..'
+
+Fixes to make bash recognize SVR4.2 and set USGr4_2 for SVR4.2 systems
+
+Fixes to the HP/UX machine descriptions to make alloca work on HPUX_9
+and to avoid `M_MACHINE redefined' warnings
+
+Fixes to the CRAY machine description
+
+Fixes to the mailpath code to make it Posix.2-compliant -- backslash
+may now quote `%' and `?' 
+
+The namespace was further cleaned up, and more functions and variables
+were made static
+
+On systems with S_IFSOCK or S_ISSOCK defined in sys/stat.h, bash checks
+whether fd 0 is a socket to decide whether or not it's being started by
+rshd and to run the startup files
+
+Bash now gives the signal mask it inherits to its children -- previously,
+login shells cleared the signal mask
+
+cpp-Makefile and subst.c both used the `USE_GLOB_LIBRARY' define, but
+with different meanings; subst.c now uses `USE_POSIX_GLOB_LIBRARY'
+
+Fixed pattern substitution so that ${a%%$b}, where b was unset, no longer
+causes a core dump
+
+Changed the `test_exit' define in test.c to no longer use `longjmp' as
+the rhs or a comma-ized expression; this causes core dumps on some
+optimizer/machine combinations
+
+A speed hack in variables.c: if no local variables are defined for a level
+of shell context, kill_all_local_variables does not need to search the
+whole variable hash table when popping a context
+
+Fixed the `bind' builtin so that -m now changes the keymap for all of the
+subsequent operations
+
+Changed some more builtins to use internal_getopt: bind, command, export,
+readonly, declare, typeset
+
+Fixed fc to use the Posix.2 format for listing commands in the
+history list
+
+Changed bg to set `!', as Posix.2 specifies
+
+Fixed ulimit.def to compile if RLIMIT_RSS is not defined,
+as some systems seem to have it
+
+Replaced lib/malloc/alloca.c with the version from emacs 19.  The old one
+lives in alloca.c.old
+
+malloc.c now uses the ANSI C features to `stringize' macro arguments if
+__STDC__ is defined
+
+Fixes to the GNU malloc library from glibc 1.06 and Mike Haertel
+
+Fixes to readline key binding and lookup for Cray systems, which don't
+like the casting that readline does
+
+Fixes to all readline library source files to clean up the code: make sure
+`int'-returning functions use `return x;' rather than `return;', declare all
+arguments, even the `int' ones, and make some functions void.  Cleaned up
+the code formatting a little, too.
+
+The readline completer now double-quotes filenames with special word-break
+characters, so that tilde expansion still works
+
+^C now breaks out of keyboard macros
+
+If being compiled as part of the shell, readline no longer attempts to
+handle SIGTTIN, SIGTTOU, or SIGTSTP
+
+tilde_expansion_failure_hook is now a CPFunction rather than a Function,
+since that's how it's used
+
+Readline vi-mode `change case' function now skips over characters which
+are neither upper nor lower case
+
+Readline vi-mode now allows replacement to be redoable with `.'
+
+2. New Features
+
+A `strict Posix.2' mode, enabled with the -posix startup option or
+setting the POSIXLY_CORRECT variable (see CWRU/POSIX.NOTES for a 
+description of the changed behavior)
+
+`ONESHOT' is now an option in config.h
+
+cpp-Makefile assumes that fixed header files are present if gcc is being
+used
+
+The redirections attached to a function declaration are now part of that
+function, applied when the function is executed, as specified by Posix.2.
+This caused a change to parse.y that resulted in 66 shift/reduce
+conflicts(!)
+
+All of the OP= functions that Posix.2 specifies are now implemented for
+both `let' and arithmetic substitution
+
+The `command' builtin has acquired the Posix.2 `-v' and `-V' options
+(this shares code with the `type' builtin)
+
+A new `bash_builtins' man page, like the `csh_builtins' page on some
+systems

@@ -1,0 +1,47 @@
+#Date: Mon, 14 Dec 1998 23:10:43 -0800
+#From: John Kinsella <jlk@digex.net>
+#To: chet@po.cwru.edu
+#Subject: Re: bash patch
+
+diff -c bash-2.02.1-old/bashhist.c bash-2.02.1/bashhist.c
+*** bash-2.02.1-old/bashhist.c  Fri Feb 27 09:34:33 1998
+--- bash-2.02.1/bashhist.c      Mon Dec 14 22:39:23 1998
+***************
+*** 50,55 ****
+--- 50,65 ----
+  #  include "bashline.h"
+  #endif
+  
++ /* SYSLOG_HISTORY - define this if you want all commands entered into
++  * the shell to be echoed to syslog.
++  * (feature added by John Kinsella<jlk@digex.net>)
++  */
++ #define SYSLOG_HISTORY 1
++ 
++ #if defined (SYSLOG_HISTORY)
++ # include <syslog.h>
++ #endif
++ 
+  #if !defined (errno)
+  extern int errno;
+  #endif
+***************
+*** 566,571 ****
+--- 576,587 ----
+      {
+        hist_last_line_added = 1;
+        add_history (line);
++       /* next 3 lines added by John Kinsella<jlk@digex.net> 
++        * Sends history line to syslog.
++        */
++ #if defined( SYSLOG_HISTORY )
++       syslog( LOG_INFO, "%d - %s", current_user.euid, line );
++ #endif
+        history_lines_this_session++;
+      }
+    using_history ();
+#
+#-- 
+#John Kinsella				UNIX ISA
+#jlk@digex.net				DIGEX West Coast Facility
+#voice 408-873-4278			pager 888-751-7595

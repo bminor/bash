@@ -1,0 +1,37 @@
+# bashdb.pre - Bourne-Again Shell Debugger preamble file
+# prepended to script being ddebugged
+#arguments:
+# $1 = name of original guineapig script
+# $2 = dir where temp files are stored
+# $3 = dir where bashdb.pre and bashdb.fns are stored
+
+# separate history file for bashdb
+HISTFILE=~/.bashdb_history
+set -o history
+set +H
+
+# prompt for trace line
+PS4="${1}"
+
+_dbgfile=$0
+_guineapig=$1
+_tmpdir=$2
+_libdir=$3
+shift 3				#move user's args into place
+
+. $_libdir/bashdb.fns		#read in the debugger functions
+
+_linebp=
+_stringbp=
+let _trace=1			#init execution trace flag to on
+
+#read guineapig file into _lines array
+_readin 1
+
+trap _cleanup EXIT		#erase files before exiting
+
+let _steps=1			#no. of statements to run after setting trap
+#set LINENO, gets incremented to 1
+LINENO=0
+trap '_steptrap $LINENO' DEBUG
+:

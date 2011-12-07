@@ -1,0 +1,234 @@
+This file documents changes to CWRU bash following its first network-wide
+release.
+
+                                   3/15
+                                   ----
+Makefile
+	- change the declaration of $CPP_ARGS so that CPP_CC can have
+	  embedded blanks, by adding quotes
+
+bashline.c
+	- some cosmetic changes to the FIGNORE support functions
+
+glob.c
+	- don't define USGr3 if it's already defined
+
+variables.c
+	- a declaration for the argument to put_command_name_into_env was
+	  missing
+
+builtins.c
+	- only print the command name in builtin_error if this_command_name
+	  is non-null
+
+expr.c
+	- catch something % 0 as an error
+
+subst.c
+	- make sure this_command_name is set to NULL before calling evalexp,
+	  because evalexp uses builtin_error
+
+                                   3/18
+                                   ----
+
+variables.c
+	- changed getenv() to search the inherited environment if the hash
+	  table of shell variables does not exist or has not been created
+
+                                   3/19
+                                   ----
+
+subst.c
+	- when doing command substitution, strip only the trailing newlines.
+	  This is in accordance with Posix.2.
+
+general.c
+	- strip_trailing () has aquired a new flag telling whether to strip
+	  all white space or just trailing newlines.
+
+variables.c
+	- since some places in the code rely on bind_variable returning a
+	  valid value, the dynamic variable assignment functions have been
+	  changed to take a pointer to themselves as the first parameter:
+
+		return ((*(entry->assign_func)) (entry, value));
+
+	  and then return that value after doing whatever they need to
+
+                                     3/30
+                                     ----
+
+bashline.c
+	- disabled builtin commands should not be returned to the readline
+	  completion functions as legal command alternatives
+
+flags.c
+	- do not redefine NULL; check only after including all needed
+	  .h files
+
+nojobs.c
+	- fix unconditional reference to status.w_*
+	- fix typo after call to WIFCORED in wait_for
+
+readline/readline.c
+	- make sure all calls to BSD signal mechanism are protected by test
+	  for HAVE_BSD_SIGNALS define
+	- make sure declaration of struct ltchars variable is protected by
+	  test for definition of TIOCGLTC
+	- change #include file from sys/errno.h to errno.h
+	- added a new function rl_stop_output (), the non-emacs version of
+	  ^S, to go with rl_restart_output.  Haven't done anything with it
+	  yet.
+	- added Posix support in the form of tcflow() calls to 
+	  rl_restart_output and rl_stop_output
+
+readline/readline.h
+	- change the declaration of rl_filename_completion_ignore_function
+	  to extern.  It was coming up as multiply defined on some systems
+
+siglist.c
+	- change #include file from sys/signal.h to signal.h
+	- some systems define _NSIG but not NSIG.  Define NSIG in terms of
+	  _NSIG on those systems
+
+ulimit.c
+	- change #include file from sys/errno.h to errno.h
+
+subst.c
+	- string_extract_double_quoted() needs to ignore "" inside `` pair,
+	  but this code should be executed only if the ` is not backslash-
+	  escaped.
+	- changed sv_uids() to give UID, EUID the integer attribute
+	  automatically
+
+machines.h
+	- check for the DG AViiON defining either __DGUX__ or DGUX, make
+	  sure DGUX is defined in any case
+
+trap.c
+	- change run_pending_traps to loop from 1 to NSIG instead of 0 to
+	  NSIG
+
+execute_cmd.c
+	- For a command run explicitly in a subshell via (), run_exit_trap ()
+	  needs to be called after that command has executed for /bin/sh
+	  compatibility
+
+variables.c
+	- make $PPID have the integer attribute when it is intialized
+
+                                    4/2
+                                    ---
+
+subst.c
+	- make string_extract_double_quoted handle backslash-escaped
+	  ` correctly when parsing a `` pair
+
+                                    4/3
+                                    ---
+
+jobs.c
+	- make sure job_control is set to 1 before the first time
+	  give_terminal_to is called, so that it does its job and the
+	  process groups are correct.
+
+subst.c
+	- make string_extract_double_quoted() not turn \\ into \ inside
+	  quoted strings.  The translations will be taken care of later.
+
+nojobs.c
+	- make sure we get the tty state in initialize_jobs(), and don't
+	  try to set it in set_tty_state until we know we have saved
+	  valid settings.
+
+                                     4/6
+                                     ---
+
+shell.c, execute_cmd.c, shell.h
+	- shell now exits with status 127 when asked to execute a binary	
+	  file as a shell script
+
+builtins.c
+	- `local' is once again an error outside a function
+	- `trap' now formats output differently when given no arguments;
+	  the new format is suitable for feeding back to the shell as
+	  input to `trap'
+	- cleaned up a contradiction in the help text for the `export'
+	  builtin
+	- `export' and `readonly' now accept a -p flag for Posix.2 compliance
+	  that acts the same as if no flags had been specified, and take a
+	  `--' option to disable further option processing
+	- `unset' takes a `--' argument to disable further option
+	  processing
+	- when given the -f flag, unset will now try to unset a variable
+	  if no function is found for the name supplied
+	- `kill' now takes a -s signal argument as equivalent to -signal
+	- `kill' takes a `--' argument to disable further option processing,
+	  since a negative number may be used to denote a process group
+	- `kill -l' now takes arguments and lists the names for individual
+	  signals by number.  If the number given as argument is > 128, it
+	  is assumed to be an exit status, and 128 is subtracted before
+	  further processing
+
+builtins.c, variables.c
+	- `set +' is no more; print_vars_no_values() is no longer needed
+
+flags.c, builtins.c
+	- `set -C' is now an alias for noclobber
+
+trap.c
+	- SIGNULL is no longer a valid name for signal 0
+
+getopts.c, subst.c
+	- resetopts () --> getopts_reset ()
+	- rewrote getopt() per Brian's request
+
+builtins.c
+	- `return' is now valid when executing a file with the `.' builtin
+	  and causes the execution to be aborted
+
+execute_cmd.c
+	- file descriptors > 2 manipulated via `exec' are no longer set to
+	  close-on-exec
+
+                                    4/8
+                                    ---
+
+cpp-Makefile
+	- fixed the bad definition of RANLIB if RANLIB_LOCATION was defined
+	- pass the correct definition of ranlib through to the make of
+	  readline
+
+readline/readline.c
+	- make sure some defaults for screen size are defined in the case
+	  of a dumb terminal
+
+builtins.c
+	- `return' now works for aborting files executed with the `.'
+	  builtin
+
+parse.y
+	- a `"' before a closing ) in a $( ) construct within double
+	  quotes is no longer an error
+
+subst.c
+	- string_extract_double_quoted now passes everything between $(
+	  and ) through verbatim, without scanning it for double quotes.
+	  This way, `echo "$(echo "*")"' will echo `*' like it should.
+
+documentation/bash.1
+	- updated to reflect the changes from Posix.2 draft 11.
+
+                                   4/10
+                                   ----
+
+execute_cmd.c, builtins.c
+	- changed some instances of absolute_pathname to absolute_program
+	  (like doing PATH, CDPATH searching, the `type' builtin,  and
+	  filename hashing)
+
+readline/readline.c
+	- made rl_deprep_terminal do a little sanity checking on the
+	  values in otio that it is restoring
+
+	Minor update of tar files available for FTP from CWRU

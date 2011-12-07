@@ -1,0 +1,64 @@
+## -*- text -*- ####################################################
+#								   #
+# Makefile for termcap replacement libbrary.			   #
+#								   #
+####################################################################
+
+# Here is a rule for making .o files from .c files that doesn't force
+# the type of the machine (like -sun3) into the flags.
+.c.o:
+	$(CC) -c $(CFLAGS) $(LOCAL_INCLUDES) $(CPPFLAGS) $*.c
+
+# Destination installation directory.  The libraries are copied to DESTDIR
+# when you do a `make install'.
+DESTDIR = /usr/local/lib
+
+DEBUG_FLAGS = -g
+#OPTIMIZE_FLAGS = -O
+LDFLAGS = $(DEBUG_FLAGS) 
+CFLAGS = $(DEBUG_FLAGS) $(OPTIMIZE_FLAGS)
+
+SHELL = /bin/sh
+
+# A good alternative is gcc -traditional.
+#CC = gcc -traditional
+CC = cc
+RANLIB = /usr/bin/ranlib
+AR = ar
+RM = rm
+CP = cp
+
+CSOURCES = termcap.c tparam.c
+
+SOURCES  = $(CSOURCES)
+
+OBJECTS = termcap.o tparam.o
+
+DOCUMENTATION = termcap.texinfo
+
+THINGS_TO_TAR = $(SOURCES) $(DOCUMENTATION)
+
+##########################################################################
+
+all: libtermcap.a
+
+libtermcap.a:	$(OBJECTS)
+		$(RM) -f $@
+		$(AR) clq $@ $(OBJECTS)
+		-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+termcap.tar:	$(THINGS_TO_TAR)
+		tar -cf $@ $(THINGS_TO_TAR)
+
+termcap.tar.Z:	termcap.tar
+		compress -f termcap.tar
+
+install:	$(DESTDIR)/libtermcap.a
+
+clean:
+		rm -f *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+
+$(DESTDIR)/libtermcap.a: libtermcap.a
+		-mv $(DESTDIR)/libtermcap.a $(DESTDIR)/libtermcap.old
+		cp libtermcap.a $@
+		-[ -n "$(RANLIB)" ] && $(RANLIB) -t $@

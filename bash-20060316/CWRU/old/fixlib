@@ -1,0 +1,87 @@
+
+# This script is for bash-maintainers only!  It takes a freshly unpacked Bash,
+# and reorganizes it so that there is exactly one version of any given
+# source file.
+#
+
+if [ "$0" != "./fixdist" ]; then
+   echo "You must run 'fixdist' from the 'support' directory!"
+   exit 1
+fi
+
+cd ../lib
+must_exist="posixheaders/posixstat.h posixheaders/ansi_stdlib.h"
+must_exist="$must_exist tilde/tilde.c tilde/tilde.h"
+must_exist="$must_exist malloc/xmalloc.c"
+
+for filename in $must_exist; do
+   if [ ! -f $filename ]; then
+      echo "The file lib/$filename doesn't exist, but it must!"
+      exit 1
+   fi
+done
+
+echo -n "Relinking neccessary files in lib/readline..."
+cd readline
+for filename in tilde.c tilde.h; do
+   rm $filename
+   ln -s ../tilde/$filename .
+done
+
+rm posixstat.h && ln -s ../posixheaders/posixstat.h .
+rm ansi_stdlib.h && ln -s ../posixheaders/ansi_stdlib.h .
+rm xmalloc.c && ln -s ../malloc/xmalloc.c .
+echo "done."
+
+echo -n "Linking files in . ..."
+cd ../..
+rm posixstat.h && ln -s lib/posixheaders/posixstat.h .
+rm ansi_stdlib.h && ln -s lib/posixheaders/ansi_stdlib.h .
+echo "done."
+
+echo "Should I move the \"lib\" directory to \"../lib\" if I wouldn't"
+echo -n "clobber anything by doing so (y/n)? "
+read reply
+if [ "$reply" != 'y' ]; then
+   echo "You said no, so in that case I'm all done."
+   exit 0
+fi
+
+# Try as hard as we can to move the lib directory to ../lib.
+#
+if [ -d ../lib ]; then
+   echo "The directory $(cd ../lib; pwd) already exists.  It looks like:"
+   echo $(cd ../lib; ls -ldg .; ls -lF)
+   echo "I can:"
+   echo "  1) Move the directory to another name,"
+   echo "  2) Delete matching directories from within it,"
+   echo "  3) Copy files into existing directories, or"
+   echo "  4) Quit now, while you are ahead."
+   echo ""
+   echo -n "Which will it be? "
+   read reply
+   case "$reply" in
+     1)
+	echo "I would be moving the directory to lib-old now"
+	;;
+     2)
+	echo "I would be deleting the matching directories now"
+	;;
+     3)
+	echo "I would just go ahead and copy the directories now"
+	;;
+     4)
+	echo "Probably a good move.  Look at the script	support/mklinks."
+	;;
+   esac
+else
+   echo -n "Moving lib to ../lib, and relinking lib in this directory..."
+   mv lib ../lib
+   mkdir lib
+   cd lib
+   ../support/mklinks ../../lib
+   echo "done."
+fi
+
+echo "That concludes this fixing of the distribution."
+exit 0

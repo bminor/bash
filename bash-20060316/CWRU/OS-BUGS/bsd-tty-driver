@@ -1,0 +1,38 @@
+From chet Thu Aug 13 10:42:35 1992
+Flags: 50
+Received:  by odin.INS.CWRU.Edu (5.65b+ida+/CWRU-1.5-ins)
+	id AA07004; Thu, 13 Aug 92 10:42:35 -0400 (from chet for /usr/homes/chet/bin/mailfilter.sh /usr/homes/chet/mbox)
+Date: Thu, 13 Aug 1992 10:34:47 -0400
+From: Chet Ramey <chet@odin.INS.CWRU.Edu>
+To: przemek@rrdstrad.nist.gov
+Subject: Re: output of background jobs in BASH
+Cc: bug-bash@prep.ai.mit.edu, chet
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from przemek@rrdstrad.nist.gov of 12 Aug 92 18:15:53 GMT
+Message-Id: <9208131434.AA00639.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> I believe that this changed when I installed bash 1.12: when I put a job that
+> prints on stdout in background (^Z/bg or directly by &), the output comes out
+> staggered, as if the CR wasn't being added to the LF at the end of the lines.
+
+This is a result of bash using the BSD-style tty driver on Ultrix.  The BSD
+driver ties input and output carriage return translation together with the
+CRMOD bit.  (The CRMOD bit causes CR->LF translation on input and LF->CRLF
+translation on output.)  Unless the CRMOD bit is cleared, it is impossible
+to get a literal ^M in an input line.  Unfortunately, one of the effects of
+clearing it is the loss of output processing you've observed. 
+
+The Ultrix Posix-style tty driver can't be used because it has serious
+problems with losing typeahead when ICANON is switched on and off.  These
+characters seem to reappear later without warning, usually when a
+program that uses the BSD-style ioctls turns on CBREAK (e.g., `more').
+
+Chet
+
+--
+``The use of history as therapy means the corruption of history as history.''
+	-- Arthur Schlesinger
+
+Chet Ramey, Case Western Reserve University	Internet: chet@po.CWRU.Edu
+

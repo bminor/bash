@@ -1,0 +1,1119 @@
+This documents the changes between the second `public' release of CWRU bash
+and this, its third release.  It summarizes, without going into detail, the
+changes that have been made. 
+
+NEW FEATURES
+
+	o Some performance work was done.  Scripts are now somewhat faster.
+	  Bash will never be a speed demon -- it allocates, frees, and
+	  copies way too many times.
+
+	o Added a new readline variable `prefer-visual-bell'.  If this is
+	  set, and the `vb' termcap capability exists, visual rather than
+	  audible bells will be used.
+
+	o `bash file' will now search the $PATH for `file' if it is not
+	  found in the current directory.
+
+	o new machines.h variables: HAVE_MULTIPLE_GROUPS, HAVE_RESOURCE
+
+	o new machines.h entries: AIX/PS2, System V.4 on 386, AIX/370, Ardent
+	  Titan, DG AViiON, Harris Nighthawk, SGI Iris
+
+	o all filenames are now fewer than 14 characters
+
+	o The FIGNORE variable was implemented
+
+NOTABLE BUG FIXES
+
+	o When expanding commands, word splitting is no longer performed on
+	  all words, but only the output of command, arithmetic, and variable
+	  and parameter substitution
+
+	o The close-on-exec code now also passes around a bitmap of file
+	  descriptors to close in child processes.  This is necessary
+	  because of the way bash does pipes.  Details on request.
+
+	o Fixed readline to do correct cursor motion when using Sun's
+	  shelltool or cmdtool.
+
+	o Fixed command substitution so that old-style substitution (``)
+	  passes the characters between the backquotes through verbatim.
+
+	o Fixed reading here documents to obey newline quoting
+
+                                   11/19
+                                   -----
+nojobs.c
+	- removed bogus call to set_process_resource_limits
+
+test.c
+	- changed references to SYSV to USG
+
+readline/readline.c
+	- added support for visible bells, turned on by the startup file
+	  variable "prefer-visible-bell"
+	- changed rl_signal_handler() so that sigsetmask() is not called
+	  on vanilla SYSV machines
+	- made include declarations correct for USG machines that define
+	  TIOCGWINSZ in sys/ioctl.h
+
+variables.c
+	- s5r3 invokes getenv() before main() in some cases.  Make sure
+	  that the variable hash table is created there if it does not
+	  exist.  (BSD systems using gprof also do this, by the way.)
+
+                                   11/20
+                                   -----
+readline/readline.c
+	- Make sure HACK_TERMCAP_MOTION is not defined.  It's faster to
+	  print a character than an escape sequence for a non-destructive
+	  space, and it screws up on OpenWindows shelltool and cmdtool.
+
+subst.c
+	- Finally fixed the word splitting bug.  Bash now splits only the
+	  results of command, parameter, and arithmetic expansion that do
+	  not appear in double quotes.  As currently implemented, the change
+	  has expand_word_internal return a flag indicating whether or not
+	  it expanded something.  If not, the word is not split.  This is
+	  only noticed by expand_words_1; all other functions that call
+	  expand_word_internal ignore the result -- they are either supposed
+	  to or not supposed to do word splitting and they take care of it
+	  themselves.  This latter bit may have to be changed later.
+
+readline/emacs_keymap.c
+	- Make M-TAB insert a tab.  The binding had been inadvertently
+	  omitted.
+
+builtins.c, builtins.c.posix
+	- make read_builtin() call string_list_dollar_star when more words
+	  are read than variables specified, because Posix specifies that in
+	  this case, the intervening separators are preserved in the
+	  remaining words (``the leftover words and their intervening
+	  separators are assigned to the last var'').  This allows the
+	  following to work correctly:
+
+		while read line
+		do
+			echo "$line"
+		done < /etc/passwd
+
+subst.c
+	- remove from list_string the requirement that the word be quoted to
+	  make sequences of characters in $IFS expand to separate arguments.
+	  I can't remember why it was there.
+
+builtins.c, builtins.c.posix
+	- both ksh and the s5r3 sh remove the trailing newline from a line
+	  input to `read', so now bash does, too.
+
+                                   11/21
+                                   -----
+execute_cmd.c
+	- Finally do things the *right* way, and pass around a bitmap of
+	  file descriptors to close when forking.  The way bash does
+	  pipes forces this.
+
+builtins.c, builtins.c.posix
+	- change the call to execute_command_internal in parse_and_execute
+	  to call it with an empty bitmap of file descriptors to close.
+
+shell.c
+	- make the fd that we open to read a script argument be close-on-exec
+
+shell.c, variables.c, readline/readline.c
+	- add endpwent() everywhere getpwnam or getpwuid is called -- they
+	  leave an open file descriptor on systems with YP code derived
+	  from Sun's 3.x release.
+
+
+                                   11/25
+                                   -----
+builtins.c, builtins.c.posix
+	- use the same logic for locating a program when in the exec builtin as
+	  when finding a program normally -- pathnames with slashes in them
+	  anywhere are not looked up via $PATH.
+
+shell.c
+	- when invoked as `bash file', use $PATH to look up `file', using the
+	  same logic as the `.' builtin.  (Said logic is possibly faulty --
+	  files with slashes in their names are still looked up in the path.
+	  This is different from ksh86, at least.)  Do this only if `file'
+	  is not found in the current directory.
+	- when invoked as an interactive login shell, close all file
+	  descriptors < 20 first thing.  There is a fairly common bug in the
+	  Sun NFS code that leaves an open file descriptor when you use one
+	  of the getpw* C library functions. 
+
+                                   11/28
+                                   -----
+shell.c
+	- make sure history_expansion is set to 0 if interactive is set to 0.
+	  This fix makes rn's mbox.saver run correctly, rather than report
+	  the famous `Event not found' error.
+
+                                   11/29
+                                   -----
+variables.c
+	- make sure the hash table is created in getenv if necessary on all
+	  systems; gprof requires it.
+
+builtins.c, builtins.c.posix
+	- make read return 1 only on EOF
+
+shell.c
+	- make `bash file' look through $PATH only if ./file does not exist.
+	  (bug fix for previous improvement)
+
+readline/readline.c
+	- need to turn off CRMOD when using the BSD tty driver so that extra
+	  carriage returns are not generated
+
+subst.c, parse.y
+	- changes so that characters between backquotes in double quotes are
+	  passed through verbatim, so this will work: echo "ab `echo "hi"` cd"
+	  echoes ab hi cd.  The fixes are to string_extract_double_quoted and
+	  read_token.
+
+subst.c
+	- small change in command substitution error message printed when
+	  pipe(2) fails -- `backquote' --> `command'
+
+                                   12/1
+                                   ----
+parse.y, shell.c, builtins.c, builtins.c.posix, make_cmd.c
+	- changed the way parsing of here documents works in the presence
+	  of continued lines (unquoted backslash-newline pair or via quoting).
+	  Now the shell reads up to an unquoted newline before trying to
+	  read the contents of the here-document (that's the way sh works).
+	  The changes are spread out over multiple files.
+
+	  The cases that this fixes are these:
+
+		cat << EOF | sed -n \
+			-e 'blah blah...' \
+			-e 'more more...'
+		input
+		to
+		cat
+		for
+		sed
+		EOF
+
+		cat << EOF | echo 'a b c
+		d e f
+		g h i'
+		EOF
+
+	  Previously, the yacc-generated bash parser would resolve the
+	  `<< EOF' redirection and immediately try to create the here
+	  document, and the rest of the command would become part of
+	  the here document.
+
+	  Changes by file:
+		parse.y:
+			added two new variables, need_here_doc, and
+			redirection_needing_here_doc.  The yacc actions
+			associated with the here-document productions
+			were modified to set these variables appropriately.
+			Changed read_token to read the text of any pending
+			here-documents just before it returns an unquoted
+			newline to the parser.
+		make_cmd.c:
+			moved the code that reads the text of the
+			here-document out of make_redirection into a new
+			function named make_here_document.  The cases in
+			make_redirection don't do anything now; they just
+			set the EOF marker and return
+		shell.c:
+			added a wrapper function around yyparse called
+			parse_command that initializes the above variables,
+			calls parse_command, then makes the here-document
+			if necessary by calling make_here_document (usually
+			it doesn't need to; read_token has already done it).
+		builtins.c.posix:
+		builtins.c:
+			changed the call to yyparse to a call to parse_command
+			(in parse_and_execute)
+
+subst.c
+	- for some reason which I have not yet fully divined, a shell whose
+	  standard output (file descriptor 1) is closed cannot perform
+	  backquote substitution if the child closes both sides of the pipe
+	  after dup2(fildes[1], 1).  The obvious fix is to not close 
+	  fildes[0] in the child, but it's not intuitive.  I got the example
+	  from the Dec Ultrix 4.0 release notes:
+
+		exec >&-
+		echo `echo hi` >&2
+
+	  The 4.3 BSD sh has the same problem.  I'm stumped.
+
+	  (LATER NOTE:  I'm not stumped anymore.)
+
+                                   12/2
+                                   ----
+shell.c
+	- shells started to execute scripts (`bash file') should set
+	  remember_on_history and history_expansion to 0.
+	- redid maybe_execute_file to eliminate a possibly unnecessary
+	  call to stat.  Just open the file immediately and call fstat
+	  to get the size.  Return if the open fails.
+
+execute_cmd.c
+	- redid same_file to eliminate some calls to stat().  Added two
+	  new parameters, which, if non-null, are pointers to status
+	  information about the pathnames passed.  This required changes
+	  to find_user_command_in_path.
+	- eliminated some calls to strlen in find_user_command_in_path
+
+builtins.c, builtins.c.posix
+	- changed calls to same_file to pass the two extra parameters
+
+parse.y
+	- only call pre_process_line in shell_getc if the shell is
+	  interactive, because history expansion and remembering lines
+	  on the history are not done for script shells
+	- make the shell echo comment lines (lines whose first character
+	  is `#') by moving the after_pre_process label to just before 
+	  that code
+	- eliminated several calls to xrealloc in shell_getc when the
+	  shell is non-interactive by correcting confusing uses of
+	  shell_input_line_size -- after pre_process_line is called, it
+	  must be set to strlen(shell_input_line) because we don't know
+	  what the `true' allocated size of that block is, but not if
+	  pre_process_line is never called.  This became apparent
+	  as a result of the previous two changes.
+
+readline/history.c
+	- make history_do_write abort on write errors instead of ignoring
+	  them.
+
+                                   12/3
+                                   ----
+general.c
+	- defined bcopy in terms of memcpy for USG systems
+	- changed the USG getwd to return the result of getcwd
+
+                                   12/4
+                                   ----
+readline/vi_keymap.c, readline/funmap.c
+	- changed #ifdef FILE to #ifdef BUFSIZ as the test for a
+	  previous inclusion of stdio.h
+
+general.c
+	- changed USG getwd emulation to return an error message in the
+	  buffer if the getcwd fails
+
+subst.c
+	- fixed extern declaration of copy_word
+
+variables.c
+	- set_var_auto_export does a complete new lookup of the variable
+	  it's setting.  Most of the time in initialize_shell_variables
+	  it's called immediately after bind_variable or set_if_not on
+	  the same variable.  Made set_if_not return a SHELL_VAR * like
+	  bind_variable, then replaced the calls to set_var_auto_export
+	  with calls to a new function set_auto_export that is passed a
+	  SHELL_VAR * and skips the lookup.
+
+execute_cmd.c
+	- don't call print_simple_command in execute_simple_command if the
+	  shell is not interactive, since the only place that's ever used
+	  is pretty_print_job, which is never called if the shell is not
+	  interactive.  This might need to be changed.
+
+                                   12/5
+                                   ----
+parse.y
+	- made read_token call atoi(3) instead of using sscanf("%d") when
+	  reading numbers
+
+variables.c
+	- changed a call to sprintf in put_command_name_into_env into two
+	  assignment statements and a call to strcpy
+
+variables.c
+	- changed a call to sprintf in make_var_array into two calls to
+	  strcpy and an assignment statement
+
+execute_cmd.c
+	- only call geteuid() once in executable_file and cache the result
+
+general.h
+	- added definitions for STREQ and STREQN, which are replacements for
+	  strcmp(a, b) == 0 and strncmp(a, b, n) == 0 that check the first
+	  character to possibly save a function call.  From C News.
+
+variables.c
+	- changed add_or_supercede to use STREQN 
+
+parse.y
+	- changed most instances of strcmp() in read_token to use STREQ.
+	  Rearranged some code to reduce the number of times this is called.
+	  The idea is to rewrite code like
+
+		if ((this token is xx) && (certain conditions hold))
+
+	  to be
+
+		if ((certain conditions hold) && (this token is xx))
+
+	  to take advantage of left-to-right evaluation done by many (most?)
+	  C compilers.
+
+subst.c
+	- changed instance of strcmp() in stupidly_hack_special_variables
+	  to STREQ
+
+alias.c
+	- changed instance of strcmp() in find_alias to STREQ
+
+hash.c
+	- changed instance of strcmp() in find_hash_item to STREQ
+
+execute_cmd.c
+	- changed instance of strcmp() in find_shell_builtin to STREQ
+
+unwind_prot.c
+	- changed instance of strcmp() in unwind_frame_discard_internal
+	  to STREQ
+
+                                   12/6
+                                   ----
+readline/readline.c
+	- In rl_complete_internal, when listing all completion possibilities,
+	  if the length of the longest item to be listed is greater than the
+	  screen width, a divide-by-0 exception can result.  Fix is to always
+	  make sure `limit' is at least 1.
+
+                                   12/7
+                                   ----
+readline/readline.c
+	- Add a new #define, HAVE_BSD_SIGNALS.  This is for hybrid systems
+	  like HP-UX (pre-Posix) that have both termio and the BSD reliable
+	  signal mechanism (sigmask, sigblock, sigsetmask, etc.).  This
+	  allows better use of `critical sections' when changing the terminal
+	  parameters.
+
+readline/history.c
+	- Need to #include <fcntl.h> for System V.4
+
+makeargs.sh
+	- If we are on System V.4, define USGr4 and make it show through to
+	  the rest of the build process
+
+machines.h
+	- changed the i386 entry to add support for recognizing System V.4
+	  machines
+
+                                   12/8
+                                   ----
+shell.c
+	- made the TMOUT code be executed only for interactive shells
+	- .bashrc should not be run if the standard input and standard
+	  output are not ttys
+
+machines.h
+	- reorganized the `i386' section so that all defines for a single
+	  machine/OS combination are now grouped
+
+                                   12/9
+                                   ----
+shell.c
+	- make the -s flag force interactive use only if all the other
+	  conditions for interactive use are met
+	- since the same conditions are used to mark the shell as
+	  interactive and to decide whether or not to execute the .bashrc,
+	  only execute the .bashrc if we are interactive, and use the
+	  value of `interactive' in the test
+	- only test if `file' in `bash file' is a binary file if the file
+	  descriptor obtained by opening it is not a tty.  An argument of
+	  /dev/fd/xx is always a tty, and we can't read on it and seek
+	  back to the beginning.
+
+variables.c
+	- replaced the random number generator functions with the simple
+	  linear congruential generator from the ANSI C standard
+
+                                   12/10
+                                   -----
+machines.h
+	- added new defines: HAVE_MULTIPLE_GROUPS for systems that allow
+	  multiple simultaneous group membership and support getgroups(2),
+	  and HAVE_RESOURCE for systems that define struct rusage and
+	  have getrlimit(2) and setrlimit(2)
+
+execute_cmd.c
+	- changed executable_file and group_member to obey the new
+	  HAVE_MULTIPLE_GROUPS define
+
+ulimit.c
+	- allow the full range of options for systems that define
+	  HAVE_RESOURCE
+
+builtins.c, builtins.c.posix
+	- make systems that have HAVE_RESOURCE defined use the getrusage
+	  code in times_builtin
+
+                                   12/11
+                                   -----
+cpp-Makefile
+	- make ulimit.o dependent on `psize' so that psize can use 
+	  the same #ifdefs and #defines as the rest of the code
+
+psize.c
+	- added definition of memset for those machines that don't have
+	  it
+
+psize.sh
+	- removed the compilation of psize.c
+
+shell.c
+	- save and restore the SIGALRM catcher around the TMOUT code in
+	  read_command, in case it's trapped
+
+trap.c, execute_cmd.c, shell.c
+	- redid the way traps were done slightly.  Now, instead of calling
+	  parse_and_execute out of a signal handler (!), the signal handler
+	  just sets a flag that the rest of the code checks at appropriate
+	  times.  This means traps are kind of like interrupts, but serviced
+	  far fewer times.  It also means a bit of a loss of immediacy.
+
+                                   12/12
+                                   -----
+
+shell.c
+	- fixed a bug in read_command that caused the handler for SIGALRM
+	  to be reset to garbage each time through.
+
+variables.c
+	- change makunbound to call stupidly_hack_special_variables so
+	  that things like `noclobber' and such can be reset properly
+	  on function exit or when a `special' variable is unset.
+
+                                   12/14
+                                   -----
+parse.y
+	- made `<>' without a number specifying the file descriptor open
+	  the named file for both standard input and standard output.
+
+cpp-Makefile, jobs.h, endian.c, endian.h, endian.sh
+	- made jobs.h include a file `endian.h' if NO_WAIT_H is defined.
+	  This file defines either BIG_ENDIAN or LITTLE_ENDIAN, and is
+	  automatically generated by `endian' and `endian.sh'.
+
+execute_cmd.c
+	- aa && bb & was being executed incorrectly -- the subshell was
+	  not being forced for the `aa && bb' portion.  Same for aa || bb &.
+	  Of course, if the sh `grammar' was regular `aa && bb &' would
+	  be treated the same way as `aa ; bb &'.
+
+cpp-Makefile, psize.sh, ulimit.c
+	- changed the `psize' stuff so that ulimit.c includes a file
+	  `pipesize.h', which contains a #define for PIPESIZE.
+	  pipesize.h depends on psize, which is still made via the standard
+	  `make' rules.  It's exactly like the `endian' stuff.
+
+parse.y
+	- pre_process_line can return NULL, so we have to take that into
+	  account in shell_getc
+
+glob.c
+	- fixed glob_pattern_p to only return TRUE for a pattern containing
+	  a `[' if there is at least one `]' to match it.  It produces wrong
+	  results if allow_null_glob_expansion is set, and is inefficient
+	  otherwise (wasted calls to glob_filename).
+
+	  For instance, if some twisted soul sets allow_null_glob_expansion,
+	  the following would produce an error without this fix:
+
+		if [ a = a ] ; then echo hi ; fi
+
+                                   12/16
+                                   -----
+execute_cmd.c, parse.y, shell.h
+	- the `subshell bit' in the command struct is being used for two
+	  purposes: to signal that the user requested that this command be
+	  done in a subshell via `()' and to force some portions of a
+	  command to be executed in a subshell, like `{ xx } &'.  We need
+	  to differentiate between the two so that the command printed when
+	  reporting job status is correct and so the code is clearer.
+
+	  Define two `states' for that value, if non-zero: WANT_SUBSHELL is
+	  used when the user requests a subshell, and FORCE_SUBSHELL is used
+	  internally by the command execution code.
+
+parse.y
+	- clean up some casts, and make sure function arguments are coerced
+	  to the correct type
+
+subst.c
+	- comment out some unnecessary `break' statements in case statement
+	  clauses that immediately follow `goto' statements.  It makes the
+	  compilation output cleaner on a compiler that complains about such
+	  things, like the IBM/4.3 compiler (High-C).
+
+make_cmd.c
+	- move all the error reporting code to the end of the file, so that
+	  picky compilers that like to report about mismatches in the number
+	  of arguments won't complain about the varargs code.
+	- it's not allows to pass a va_list from one function to another, so
+	  expand the body of fatal_error to be the same as report_error in
+	  the varargs case
+
+                                   12/17
+                                   -----
+readline/readline.c
+	- Use TCXONC in rl_restart_output, if it's defined.
+
+make_cmd.c, builtins.c, builtins.c.posix, shell.c
+	- Make all the non-varargs versions of the various error reporting
+	  functions take 5 arguments
+
+                                   12/18
+                                   -----
+builtins.c, builtins.c.posix
+	- made the builtins that accept option arguments report errors when
+	  they get a bad option, and make these error messages consistent.
+	  The builtins affected are: export, hash, history, read, readonly,
+	  dirs, jobs, declare, typeset, local, and type.
+
+shell.c
+	- make the function that displays the version number of the shell
+	  indicate that it's the CWRU version.
+
+readline/readline.c
+	- On machines without BSD signals, do a signal(SIGINT, SIG_IGN) in
+	  rl_signal_handler if an interrupt is received.  This will take
+	  the place of blocking it while in the handler.
+
+jobs.c, jobs.c.posix
+	- change the setting of the job control signals SIGTSTP, SIGTTOU,
+	  and SIGTTIN to SIG_DFL in make_child when job control is not
+	  active
+
+                                   12/19
+                                   -----
+builtins.c, builtins.c.posix
+	- corrected some spelling errors and other mistakes in the help
+	  documentation
+
+readline/readline.c
+	- Made the inclusion of sys/ptem.h dependent on the definition of
+	  USGr4
+
+                                   12/20
+                                   -----
+machines.h
+	- Added -DUSGr4 to SYSDEP_CFLAGS in the System V.4 machines.h entry
+	  for the i386 so it will get passed to readline.
+	- new entry for Ardent Titan
+
+                                   12/22
+                                   -----
+general.c
+	- added two new functions to print time values in a standard way:
+	  print_timeval, which prints the contents of a struct timeval,
+	  and print_time_in_hz, which prints a time_t scaled by the value
+	  of HZ (which is system-dependent).
+
+builtins.c, builtins.c.posix
+	- made times_builtin call the new functions for printing time
+
+                                   12/30
+                                   -----
+general.h
+	- made the definition of `sighandler' as `void' or `int' depend
+	  on the definition of VOID_SIGHANDLER; provide the definition
+	  for those systems already using that code
+
+machines.h
+	- new entry for AIX/PS2 1.2
+
+                                   12/31
+                                   -----
+mailcheck.c
+	- When reporting that a mail file has been read, take into account
+	  changes in the file size as well, and only report the change if
+	  the file has gotten larger.  This help for systems like USG that
+	  don't change the access time of /usr/mail/$USER to be the same
+	  as the modification time after the mail in the file is manipulated.
+
+                                    1/2
+                                    ---
+builtins.c, builtins.c.posix
+	- the `command' builtin should not reparse its arguments; it screws
+	  up quoting (consider "command echo 'foo &'"), so instead of making
+	  a string and calling parse_and_execute, make a new simple command
+	  struct, put the arguments to `command' in it as its words, and
+	  call execute_command recursively.
+	- added a correct extern declaration for copy_word_list () in
+	  remember_args
+
+make_cmd.c
+	- new function: make_bare_simple_command() to support the changes to
+	  the command builtin
+
+                                    1/3
+                                    ---
+builtins.c.posix, jobs.c.posix, jobs.h.posix
+	- renamed these to be `.px' to help out systems with short file names
+
+CWRU.changelog, CWRU.changelog.v2
+	- renamed these to CWRU.chlog and CWRU.chlog.v2 for the same reason
+
+longest_signal_desc.c
+	- renamed to longest_sig.c
+
+enable-posix
+	- changed to recognize and use the `.px' suffix
+
+termcap/termcap.texinfo
+	- renamed to termcap.tex
+
+makeargs.sh
+	- change instance of `uuname' to `uuname -l' for compatibility with
+	  more systems
+	- look for uuname in /bin as well as /usr/bin
+
+cpp-Makefile
+	- always define HAVE_ALLOCA if HAVE_GCC is defined
+
+bashline.c
+	- declare functions referred to in several places at the start of
+	  the file
+
+jobs.c, jobs.c.px
+	- signal handlers should take one argument to be portable
+
+jobs.c.px
+	- hack around SCO Unix broken sigsuspend() and the fact that it
+	  can't do job control on /dev/tty
+
+variables.c
+	- add declaration for sbrand before it is used
+
+machines.h
+	- define USGr3 for generic System V.3 entry; it is used in
+	  readline/readline.c to conditionally include sys/ptem.h for the
+	  `struct winsize' definition.  I'm about to say screw it and
+	  define one myself.
+
+readline/readline.c
+	- include sys/ptem.h for both system V.3 and V.4 (USGr3 and USGr4)
+
+                                    1/4
+                                    ---
+shell.h
+	- some USG systems have a definition for MAXPATHLEN, so only define
+	  it if there is no existing definition
+
+bashline.c
+	- changed operate_and_get_next to realize when it is at the end of
+	  the stifled history list and to adjust the history pointer to the
+	  `next' line appropriately
+
+readline/history.c
+	- made three variables needed by the above change to bashline.c
+	  public: history_stifled, max_input_history, and history_length
+
+parse.y
+	- reset last_read_token and current_token in handle_eof_input_unit
+	  so that an alias expansion on the next command entered will be
+	  handled correctly.  If these are not reset, last_read_token ends
+	  up being `yacc_EOF', which is not something that that will cause
+	  command_token_position to return TRUE.
+
+                                    1/7
+                                    ---
+execute_cmd.c
+	- changed the test for matching jobs when testing for auto-resume
+	  to make `exact' work as documented
+
+builtins.c, builtins.c.px
+	- Change exit_builtin so an interactive shell prints a message
+	  when it exits: `logout' if it is a login shell, `exit' otherwise
+
+general.c
+	- include <sys/time.h> and compile in print_timeval if HAVE_RESOURCE
+	  is defined
+
+readline/readline.c, readline/readline.h, bashline.c
+	- added a new readline function to call on filename completion, after
+	  the match list has been generated:
+	  rl_filename_completion_ignore_function().
+	  It gets to munge the list of matches to its satisfaction.  It is
+	  used to implement FIGNORE, a colon-separated list of filename
+	  suffixes to ignore when doing filename completion
+
+jobs.c, jobs.c.px
+	- rewrote pretty_print_job to fix this bug:
+
+		thor$ { sleep 2 ; exit 1 ;} | sleep 10 &
+		[1] 11854
+		thor$ j
+		[1]+  Running                 { sleep 2; exit 1 } | sleep 10 &
+		thor$ j
+		[1]+  Exit 1                  { sleep 2; exit 1 } | sleep 10 &
+		thor$
+		[1]+  Exit 1                  { sleep 2; exit 1 } | sleep 10
+		thor$ echo $?
+		0
+
+	  (since it's the exit status of the last job in the pipeline that
+	  bash cares about, make it the one whose status is displayed.)  Also,
+	  print "Running" if any processes in the job are still running,
+	  instead of the status of the process group leader.  The code was
+	  rearranged a bit as well.
+
+                                    1/8
+                                    ---
+fc.c
+	- changed fc_replhist to call history_get with a parameter offset by
+	  history_base, like it should have been in the first place
+
+execute_cmd.c
+	- call dispose_used_env_vars () after any call to
+	  execute_simple_command, because the temporary environment should be
+	  in force only for the simple command immediately following it.
+	  This fixes the
+		a=c printenv a | printenv a
+	  bug, which should print nothing, but used to print `c'.
+	- added form feed ('\f') to the list of acceptable control characters
+	  in check_binary_file
+
+                                    1/9
+                                    ---
+make_cmd.c
+	- fix to make_simple_command to make <> work.  We need to follow the
+	  chain of redirections passed as element.redirect to the end, since
+	  there might be more than a single redirection there.
+
+                                   1/14
+                                   ----
+machines.h
+        - redid the DEC, Mips, and Sony entries to get rid of the individual
+          MIPSEL and MIPSEB entries.  The goal is to isolate everything into
+          manufacturer-specific blocks.
+
+                                   1/18
+                                   ----
+builtins.c, builtins.c.px
+	- added call to QUIT to history_builtin, to allow the display of
+	  history entries to be interruptible
+
+variables.c
+	- made find_variable return the dynamic value for a variable only
+	  if this variable is in the current context.  This is to avoid
+	  an `extra' value of RANDOM, for instance, being `wasted' in the
+	  call to find_variable in make_local_variable
+
+execute_cmd.c, builtins.c, builtins.c.px, shell.h
+	- changed the bitmap holding the file descriptors to be closed in
+	  the child to be a structure holding a bitmap and a size, rather
+	  than use a char * bitmap with a fixed size, which will inevitably
+	  be too small.  You'd probably run out of processes before you
+	  ran out of file descriptors, though.  Pipe errors now call
+	  throw_to_top_level () rather than return an error, because it's
+	  no use continuing with the current pipeline.  Not doing so can
+	  cause a call to wait_for () for the remainder of the pipeline,
+	  which is just going to sit there in a stopped state with no user
+	  feedback.
+
+                                   1/20
+                                   ----
+subst.c
+	- increased the amount of memory allocated when adding a number to
+	  the string currently being expanded from 10 to 16.  10 characters
+	  will not hold the result of 32767 * 32767, for instance.  16
+	  should be plenty, but 32 would be better.
+
+                                   1/21
+                                   ----
+bashline.c
+	- added a new emacs-mode readline command to display the shell version
+	  (kind of like Korn's C-V, but it displays on a separate line).  It's
+	  on C-X C-V.
+
+                                   1/22
+                                   ----
+shell.c
+	- make termination_unwind_protect save the history only for an
+	  interactive shell
+	- consolidated the loading and saving of the history file into
+	  two functions: load_history () and save_history ()
+	- changed the history writing behavior so that interactive shells
+	  will always try to append the history from the current session
+	  to this history file instead of rewriting it every time.
+
+                                   1/23
+                                   ----
+general.h
+	- Posix systems have void signal handlers
+
+ulimit.c, ulimit.c.new, jobs.c.px, jobs.c, general.c
+	- moved the getdtablesize() emulation for non-BSD systems to
+	  general.c, removing the private copies held by jobs.c.px, jobs.c,
+	  ulimit.c, and ulimit.c.new
+
+execute_cmd.c, general.c
+	- replaced all references to NOFILE with references to
+	  getdtablesize ()
+
+machines.h
+	- new entries for DG AViiON and Harris Nighthawk
+
+general.h
+	- split the replacement Posix stat definitions into their own
+	  header file, `posixstat.h'
+
+test.c
+	- removed the Posix S_IS* macro definitions and added an include of
+	  posixstat.h to pick them up
+
+general.c
+	- added an inclusion of posixstat.h for the replacement Posix stat
+	  definitions
+
+posixstat.h
+	- this file should be included only after <sys/stat.h>
+	- some Posix-wannabe systems do not define the S_IS* macros, and
+	  do not define the S_IF macros in favor of _S_IF* macros.
+
+shell.c
+	- make all signals in the terminating_signals array be conditionally
+	  compiled it -- no signals are assumed to be present
+
+glob.c
+	- some Posix systems do not have a member d_ino in struct dirent.
+	  Its use is now compiled out if _POSIX_SOURCE is defined.  I don't
+	  think the check is necessary anyway; isn't readdir guaranteed to
+	  return only active directory entries?
+
+cpp-Makefile
+	- added various entries for posixstat.h
+
+subst.c
+	- changed the code by add_number in expand_word_internal to call
+	  itos() when translating an int to a string
+
+misc.c
+	- enlarged MAX_INT_LEN to 32
+
+                                   1/25
+                                   ----
+shell.c
+	- made bash, when invoked with the -c command option, save the rest
+	  of the arguments as the positional parameters
+
+                                   1/29
+                                   ----
+
+misc.c
+	- made itos() handle negative numbers correctly
+
+posixstat.h
+	- include <sys/stat.h>, now can be included as a replacement for
+	  stat.h
+
+builtins.c, builtins.c.px, execute_cmd.c, mailcheck.c, shell.c, test.c
+	- changed to include posixstat.h instead of <sys/stat.h>
+
+                                   1/30
+                                   ----
+
+lots of changes to nearly every file as the result of a merge with Brian's
+version of this code
+
+                                   1/31
+                                   ----
+
+parse.y
+	- correctly cast NULL pointer arguments passed to the command
+	  construction functions in make_cmd.c
+
+test.c
+	- change uses of access(2) to call a new function eaccess(), which
+	  performs a stat(2) call and checks the permission bits itself.
+	  This means that root no longer finds that /etc/passwd is an
+	  executable file.
+
+                                    2/3
+                                    ---
+test.c
+        - make eaccess() use group_member() from execute_cmd.c to test group
+          membership against all groups a user is in.  Do this if the system
+	  supports multiple groups.
+
+                                    2/5
+                                    ---
+shell.c
+	- bash always executes .bashrc unless it's a login shell or acting
+	  like sh.  Brian wants it this way.
+
+parse.y
+	- build a stack of tokens that have been alias expanded during a 
+	  single call to read_token(), and use it to stop alias loops
+
+                                    2/6
+                                    ---
+make_cmd.c
+	- if redirection_expand returns NULL, it means that the word being
+	  expanded expanded into multiple words.  In this case, abort the
+	  here-document processing.  Specifically:
+
+		cat << $(date)
+
+	  no longer dumps core calling strlen with a null argument.
+
+                                    2/8
+                                    ---
+readline/vi_mode.c
+	- some changes to rl_vi_eWord to make completion on `*' work
+	  right
+
+builtins.c, builtins.c.px
+	- made history_builtin add a newline at the end of the history
+	  expansions done when the -s option is specified
+
+                                    2/9
+                                    ---
+
+variables.c
+       - backed out of 1/18 change to find_variable().  It has the effect
+	 of making this function always return the same value:
+
+	       rand()
+	       {
+		       echo $RANDOM
+	       }
+
+				   2/10
+				   ----
+parse.y
+	- save the value of eof_encountered around execution of
+	  PROMPT_COMMAND, otherwise ignoreeof will not work
+
+documentation/bash.1
+	- Add descriptions of the keybindings to go from emacs editing mode
+	  to vi and vice versa
+
+				   2/11
+				   ----
+shell.c
+	- added tests for running shell scripts and for stdin being a tty
+	  to the test for reading and executing .bashrc.  This means that
+	  bash -c command still runs .bashrc (that's next :-).
+
+parse.y
+	- added test for interactive to disable alias expansion for
+	  non-interactive shells
+
+builtins.c, builtins.c.px
+	- history -s is now gone
+
+                                   2/12
+                                   ----
+shell.c
+	- implemented a better (hopefully the final) test for executing
+	  ~/.bashrc at shell startup
+
+general.c
+	- made dup2() emulation better, based on ideas from Usenet
+
+fc.c
+	- made fc_gethnum treat 0 the same as a negative number (an offset
+	  from the current command number) so that fc -l -30 0 works
+	  correctly
+	- make sure history_base is ignored in all calculations, but use it
+	  when reporting the command number with the -l flag
+	- make `last' default to the current command when the -l flag is
+	  given so that fc -l -20 works as it does in ksh
+
+                                   2/20
+                                   ----
+
+Many changes from a merge with bfox's version 1.07
+
+                                     2/25
+                                     ----
+
+jobs.c.px, jobs.h.px, builtins.c.px
+	- These files are no more, having been merged with jobs.c, jobs.h
+	  and builtins.c
+
+jobs.c, jobs.h, builtins.c, shell.c, make_cmd.c, subst.c, execute_cmd.c,
+nojobs.c
+	- Adopted pid_t and WAIT_T as `native' types
+	- Propagated pid_t definition around to all necessary files
+
+readline/readline.c
+	- Some systems need the USG code without being USG (like HPUX and
+	  AIX, for instance)
+
+                                     2/27
+                                     ----
+
+fc.c
+	- fixed up a few remaining bugs
+	- added code that lets options be grouped behind a single `-'
+	- added fencepost code that prevents overflow errors
+
+Another merge with Brian's almost-1.07
+
+                                    3/1
+                                    ---
+
+A final merge with Brian's 1.07
+
+                                     3/2
+                                     ---
+
+execute_cmd.c
+	- fixed a problem with asynchronous commands started from `.'
+	  scripts (run with parse_and_execute) being waited for
+	  inappropriately on systems without job control.  For example,
+	  `. foo' where foo contains
+
+		. bar
+		echo bar done
+
+	  and bar contains
+
+		sleep 300 &
+		sleep 300 &
+
+	  would not echo `bar done' until 5 minutes had passed and both
+	  `sleep' processes had exited.  Badness.
+
+nojobs.c
+	- fixed up so that bash can be built without job control on BSD
+	  systems -- God forbid.
+
+                                    3/7
+                                    ---
+
+jobs.c
+	- Added code to initialize_jobs () to handle the broken NeXT 2.0
+	  rlogind, which starts bash so that the terminal still belongs
+	  to the rlogind process and getpgrp () returns 0 (?).  Looks like
+	  a setpgrp(0, 0) is being done somewhere, and NeXT is not handling
+	  it like 4.3 BSD does.
+
+                                   3/11
+                                   ----
+shell.c
+	- $0 is now initialized to `bash' for interactive shells when there
+	  is no argv[0]
+
+                                   3/12
+                                   ----
+
+jobs.c
+	- Make set_new_line_discipline return 0 when on a termio system
+	  without NTTYDISC defined (like HP/UX 6.x)
+
+                                   3/13
+                                   ----
+                     BASELINE FOR NETWORK WIDE RELEASE

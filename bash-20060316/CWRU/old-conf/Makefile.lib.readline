@@ -1,0 +1,154 @@
+## -*- text -*- ####################################################
+#								   #
+# Makefile for the GNU Readline and History Libraries.		   #
+#								   #
+####################################################################
+
+srcdir = .
+VPATH = .:$(srcdir)
+
+INSTALL = install -c
+INSTALL_PROGRAM = ${INSTALL}
+INSTALL_DATA = ${INSTALL} -m 644
+
+RANLIB = ranlib
+AR = ar
+RM = rm
+CP = cp
+MV = mv
+
+# See the file STANDALONE for the -D defines that readline understands
+DEFS =
+# For libraries which include headers from other libraries.
+LOCAL_INCLUDES = -I. -I..
+
+CPPFLAGS = $(DEFS) $(LOCAL_INCLUDES)
+
+# Here is a rule for making .o files from .c files that doesn't force
+# the type of the machine (like -sun3) into the flags.
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+# The name of the main library target.
+LIBRARY_NAME = libreadline.a
+
+# The C code source files for this library.
+CSOURCES = $(srcdir)readline.c $(srcdir)funmap.c $(srcdir)keymaps.c \
+	   $(srcdir)vi_mode.c $(srcdir)parens.c $(srcdir)rltty.c \
+	   $(srcdir)complete.c $(srcdir)bind.c $(srcdir)isearch.c \
+	   $(srcdir)display.c $(srcdir)signals.c $(srcdir)emacs_keymap.c \
+	   $(srcdir)vi_keymap.c $(srcdir)util.c $(srcdir)kill.c \
+	   $(srcdir)undo.c $(srcdir)macro.c $(srcdir)input.c \
+	   $(srcdir)callback.c $(srcdir)xmalloc.c \
+	   $(srcdir)history.c $(srcdir)histsearch.c $(srcdir)histexpand.c \
+	   $(srcdir)histfile.c \
+	   $(srcdir)tilde.c \
+
+# The header files for this library.
+HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
+	   posixstat.h tilde.h rlconf.h
+
+HISTOBJ = history.o histexpand.o histfile.o histsearch.o
+TILDEOBJ= tilde.o
+OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
+	  rltty.o complete.o bind.o isearch.o display.o signals.o \
+	  util.o kill.o undo.o macro.o input.o callback.o xmalloc.o \
+	  $(HISTOBJ) $(TILDEOBJ)
+
+# The texinfo files which document this library.
+DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
+DOCOBJECT = doc/readline.dvi
+DOCSUPPORT = doc/Makefile
+DOCUMENTATION = $(DOCSOURCE) $(DOCOBJECT) $(DOCSUPPORT)
+
+SUPPORT = Makefile ChangeLog $(DOCSUPPORT) examples/[-a-z.]*
+
+SOURCES  = $(CSOURCES) $(HSOURCES) $(DOCSOURCE)
+
+THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
+
+INSTALLED_HEADERS = readline.h chardefs.h keymaps.h history.h tilde.h
+
+##########################################################################
+
+all: libreadline.a libhistory.a
+
+libreadline.a: $(OBJECTS)
+	$(RM) -f $@
+	$(AR) cq $@ $(OBJECTS)
+	-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+libhistory.a: $(HISTOBJ) xmalloc.o
+	$(RM) -f $@
+	$(AR) cq $@ $(HISTOBJ) xmalloc.o
+	-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+documentation: force
+	[ ! -d doc ] && mkdir doc
+	(if [ -d doc ]; then cd doc; $(MAKE) $(MFLAGS); fi)
+
+force:
+
+# The rule for 'includes' is written funny so that the if statement
+# always returns TRUE unless there really was an error installing the
+# include files.
+install: installdirs libreadline.a
+	for file in $(INSTALLED_HEADERS) ; do \
+		$(INSTALL_DATA) $(srcdir)/$$file $(incdir)/readline ; \
+	done
+	${INSTALL_DATA} readline.h keymaps.h chardefs.h history.h \
+		$(incdir)/readline
+	-${MV} $(libdir)/libreadline.a $(libdir)/libreadline.old
+	${INSTALL_DATA} libreadline.a $(bindir)/libreadline.a
+	-[ -n "$(RANLIB)" ] && $(RANLIB) -t $(bindir)/libreadline.a
+
+installdirs:
+	-[ ! -d $(incdir)/readline ] && { \
+	  mkdir $(incdir)/readline && chmod 755 $(incdir)/readline; }
+	-[ ! -d $(libdir) ] && mkdir $(libdir)
+
+uninstall:
+	cd $(incdir)/readline && ${RM} -f ${INSTALLED_HEADERS}
+	cd $(libdir) && ${RM} -f libreadline.a libreadline.old
+
+clean:
+	rm -f $(OBJECTS) *.a
+	(if [ -d doc ]; then cd doc; $(MAKE) $(MFLAGS) $@; fi)
+
+tags:	force
+	etags $(CSOURCES) $(HSOURCES)
+
+TAGS:	force
+	ctags -x $(CSOURCES) $(HSOURCES) > $@
+
+readline: readline.h rldefs.h chardefs.h
+readline: $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
+	  $(LOCAL_INCLUDES) -DTEST -o readline readline.c vi_mode.o funmap.o \
+	  keymaps.o -ltermcap
+
+realclean distclean mostlyclean: clean
+
+# Dependencies
+readline.o: readline.c readline.h rldefs.h rlconf.h chardefs.h
+readline.o: keymaps.h history.h
+vi_mode.o: rldefs.h rlconf.h readline.h history.h
+funmap.o: funmap.c readline.h rlconf.h
+keymaps.o: keymaps.c emacs_keymap.c vi_keymap.c keymaps.h chardefs.h rlconf.h
+history.o: history.h histlib.h
+histexpand.o: history.h histlib.h
+histsearch.o: history.h histlib.h
+histfile.o: history.h histlib.h
+isearch.o: readline.h history.h
+search.o: readline.h history.h
+display.o: readline.h history.h rldefs.h rlconf.h
+complete.o: readline.h rldefs.h rlconf.h
+rltty.o: rldefs.h rlconf.h readline.h
+bind.o: rldefs.h rlconf.h readline.h history.h
+signals.o: rldefs.h rlconf.h readline.h history.h
+parens.o: readline.h
+kill.o: rldefs.h rlconf.h readline.h history.h
+macro.o: rldefs.h rlconf.h readline.h history.h
+undo.o: rldefs.h rlconf.h readline.h history.h
+input.o: rldefs.h rlconf.h readline.h history.h
+callback.o: rlconf.h rldefs.h readline.h

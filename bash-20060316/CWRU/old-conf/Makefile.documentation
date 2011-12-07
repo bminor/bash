@@ -1,0 +1,119 @@
+# This Makefile is for the Bash/documentation directory -*- text -*-.
+#
+CP	    = cp
+RM	    = rm -f
+
+INSTALL_DATA = install -c -m 644
+
+DOC_SUPPORT = ../lib/doc-support/
+TEXINDEX    = $(DOC_SUPPORT)texindex
+TEXINDSRC   = $(DOC_SUPPORT)texindex.c
+TEX	    = tex
+QUIETPS	    = #set this to -q to shut up dvips
+DVIPS	    = dvips -D 300 $(QUIETPS) -o $@	# tricky
+TEXINPUTS   = ./../lib/readline/doc
+MAKEINFO    = makeinfo
+
+# Change to groff -Tascii if you don't have nroff
+NROFF	    = nroff
+
+# This should be a program that converts troff to postscript
+GROFF	    = groff
+
+HSUSER      = ./../lib/readline/doc/hsuser.texinfo
+RLUSER      = ./../lib/readline/doc/rluser.texinfo
+
+.SUFFIXES:	.0 .1 .3 .ms .ps .txt .dvi
+
+.1.ps:
+	$(RM) $@
+	-${GROFF} -man $< > $@
+
+.1.0:
+	$(RM) $@
+	-${NROFF} -man $< > $@
+
+.ms.ps:
+	$(RM) $@
+	-${GROFF} -ms $< > $@
+
+.ms.txt:
+	$(RM) $@
+	-${NROFF} -ms $< > $@
+
+.3.ps:
+	$(RM) $@
+	-${GROFF} -man $< > $@
+
+.3.0:
+	$(RM) $@
+	-${NROFF} -man $< > $@
+
+all: ps info dvi text
+
+ps: bash.ps builtins.ps readline.ps article.ps
+dvi: features.dvi features.ps 
+info: features.info
+text: bash.0 builtins.0 readline.0
+
+features.dvi: features.texi $(HSUSER) $(RLUSER)
+	TEXINPUTS=.:$(TEXINPUTS):$$TEXINPUTS $(TEX) features.texi
+	$(TEXINDEX) features.??
+	TEXINPUTS=.:$(TEXINPUTS):$$TEXINPUTS $(TEX) features.texi
+
+features.ps: features.dvi
+	$(RM) $@
+	$(DVIPS) features.dvi
+
+features.info: features.texi $(HSUSER) $(RLUSER)
+	$(MAKEINFO) --no-split -I$(TEXINPUTS) features.texi
+
+bash.dvi: $(TEXINDEX) bash.texinfo $(HSUSER) $(RLUSER)
+	TEXINPUTS=.:$(TEXINPUTS):$$TEXINPUTS $(TEX) bash.texinfo
+	$(TEXINDEX) bash.??
+	TEXINPUTS=.:$(TEXINPUTS):$$TEXINPUTS $(TEX) bash.texinfo
+
+bashman.ps: bash.dvi
+	rm -f $@
+	$(DVIPS) bash.dvi
+
+bash.txt: bash.1
+bash.ps: bash.1
+builtins.ps: builtins.1 bash.1
+builtins.txt: builtins.1 bash.1
+readline.txt: readline.3
+readline.ps: readline.3
+article.ps: article.ms
+
+$(TEXINDEX): $(TEXINDSRC)
+	(cd $(DOC_SUPPORT); $(MAKE) $(MFLAGS) texindex)
+
+hsuser.texinfo: ../lib/readline/doc/hsuser.texinfo
+	ln -s ../lib/readline/doc/hsuser.texinfo .
+
+rluser.texinfo: ../lib/readline/doc/rluser.texinfo
+	ln -s ../lib/readline/doc/rluser.texinfo .
+
+clean:
+	rm -f *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps *.pgs \
+	*.fns *.kys *.tps *.vrs *.o core texindex rluser.texinfo hsuser.texinfo
+
+distclean:
+	rm -f *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps *.pgs \
+	*.dvi *.info *.info-* *.fns *.kys *.tps *.vrs *.o core texindex \
+	rluser.texinfo hsuser.texinfo
+
+realclean:	clean
+
+install: all
+	-[ -d $(mandir) ] || mkdir $(mandir)
+	$(INSTALL_DATA) bash.1 $(mandir)
+	sed 's:so bash.1:so man1/bash.1:' < builtins.1 > $(mandir)/bash_builtins.1
+	-[ -d $(man3dir) ] || mkdir $(man3dir)
+	$(INSTALL_DATA) readline.3 $(man3dir)
+	-[ -d $(infodir) ] || mkdir $(infodir)
+	$(INSTALL_DATA) features.info $(infodir)/bash.info
+
+uninstall:
+	$(RM) $(mandir)/bash.1 $(mandir)/bash_builtins.1
+	$(RM) $(man3dir)/readline.3 $(infodir)/bash.info
