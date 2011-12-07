@@ -14987,6 +14987,14 @@ builtins/printf.def
 	  multibyte support functions).  Fixes bug reported by Rich
 	  Felker <dalias@aerifal.cx>
 
+				   11/5
+				   ----
+execute_cmd.c
+	- if redirections attached to a compound command fail, make sure to
+	  set last_command_exit_value when returning EXECUTION_FAILURE.
+	  Fixes bug reported separately by Andreas Schwab <schwab@suse.de>
+	  and Paul Eggert <eggert@cs.ucla.edu>
+
 				   11/9
 				   ----
 builtins/read.def
@@ -15007,3 +15015,26 @@ lib/readline/display.c
 	  wrap_offset if the text we're drawing begins before the last
 	  invisible character in the line.  Similar to fix from 5/24.  Fixes
 	  bug reported by Miroslav Lichvar <mlichvar@redhat.com>
+
+				   11/14
+				   -----
+subst.c
+	- fix $[ expansion case to deal with extract_arithmetic_subst
+	  returning NULL (if the `]' is missing) and return the construct
+	  unchanged in that case.  Fixes tab completion bug reported by
+	  Heikki Hokkanen <hoxu@users.sf.net> (debian bug 451263)
+
+lib/readline/display.c
+	- fix _rl_find_next_mbchar_internal to deal with invalid multibyte
+	  character sequences when finding non-zero-length chars.  Fixes
+	  bug reported by Morita Sho <morita-pub-en-debian@inz.sakura.ne.jp>
+
+				   11/15
+				   -----
+variables.c
+	- add new function `seedrand' to seed the bash random number
+	  generator from more random data.  Suggestion from Steve Grubb
+	  <sgrubb@redhat.com>
+	- replace the rng in brand() with a slightly better one from FreeBSD
+	  (filtered through Mac OS X 10.5).  Replacement suggested by
+	  Steve Grubb <sgrubb@redhat.com>

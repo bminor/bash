@@ -6695,6 +6695,13 @@ comsub:
       t_index = zindex + 1;
       temp = extract_arithmetic_subst (string, &t_index);
       zindex = t_index;
+      if (temp == 0)
+	{
+	  temp = savestring (string);
+	  if (expanded_something)
+	    *expanded_something = 0;
+	  goto return0;
+	}	  
 
        /* Do initial variable expansion. */
       temp1 = expand_arith_string (temp, Q_DOUBLE_QUOTES);

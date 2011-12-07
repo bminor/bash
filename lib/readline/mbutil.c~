@@ -91,8 +91,9 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
     return seed;
 
   point = seed + _rl_adjust_point (string, seed, &ps);
-  /* if this is true, means that seed was not pointed character
-     started byte.  So correct the point and consume count */
+  /* if this is true, means that seed was not pointing to a byte indicating
+     the beginning of a multibyte character.  Correct the point and consume
+     one char. */
   if (seed < point)
     count--;
 
@@ -101,7 +102,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
       tmp = mbrtowc (&wc, string+point, strlen(string + point), &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
-	  /* invalid bytes. asume a byte represents a character */
+	  /* invalid bytes. assume a byte represents a character */
 	  point++;
 	  count--;
 	  /* reset states. */
@@ -128,12 +129,10 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   if (find_non_zero)
     {
       tmp = mbrtowc (&wc, string + point, strlen (string + point), &ps);
-      while (tmp > 0 && wcwidth (wc) == 0)
+      while (MB_NULLWCH (tmp) == 0 && MB_INVALIDCH (tmp) == 0 && wc_width (wc) == 0)
 	{
 	  point += tmp;
 	  tmp = mbrtowc (&wc, string + point, strlen (string + point), &ps);
-	  if (MB_NULLWCH (tmp) || MB_INVALIDCH (tmp))
-	    break;
 	}
     }
 

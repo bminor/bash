@@ -83,7 +83,7 @@
 0
 ./arith.tests: line 149: 7 = 43 : attempted assignment to non-variable (error token is "= 43 ")
 ./arith.tests: line 150: 2#44: value too great for base (error token is "2#44")
-./arith.tests: line 151: 44 / 0 : division by 0 (error token is " ")
+./arith.tests: line 151: 44 / 0 : division by 0 (error token is "0 ")
 ./arith.tests: line 152: let: jv += $iv: syntax error: operand expected (error token is "$iv")
 ./arith.tests: line 153: jv += $iv : syntax error: operand expected (error token is "$iv ")
 ./arith.tests: line 154: let: rv = 7 + (43 * 6: missing `)' (error token is "6")
@@ -96,11 +96,11 @@ ok
 6
 1
 0
-./arith.tests: line 177: 4 + : syntax error: operand expected (error token is " ")
+./arith.tests: line 177: 4 + : syntax error: operand expected (error token is "+ ")
 16
 ./arith.tests: line 182: 4 ? : 3 + 5 : expression expected (error token is ": 3 + 5 ")
-./arith.tests: line 183: 1 ? 20 : `:' expected for conditional expression (error token is " ")
-./arith.tests: line 184: 4 ? 20 : : expression expected (error token is " ")
+./arith.tests: line 183: 1 ? 20 : `:' expected for conditional expression (error token is "20 ")
+./arith.tests: line 184: 4 ? 20 : : expression expected (error token is ": ")
 9
 ./arith.tests: line 190: 0 && B=42 : attempted assignment to non-variable (error token is "=42 ")
 9
@@ -130,7 +130,7 @@ ok
 4
 4
 7
-./arith.tests: line 241: 7-- : syntax error: operand expected (error token is " ")
+./arith.tests: line 241: 7-- : syntax error: operand expected (error token is "- ")
 ./arith.tests: line 243: --x=7 : attempted assignment to non-variable (error token is "=7 ")
 ./arith.tests: line 244: ++x=7 : attempted assignment to non-variable (error token is "=7 ")
 ./arith.tests: line 246: x++=7 : attempted assignment to non-variable (error token is "=7 ")
@@ -140,10 +140,10 @@ ok
 -7
 7
 7
-./arith1.sub: line 2: 4-- : syntax error: operand expected (error token is " ")
-./arith1.sub: line 3: 4++ : syntax error: operand expected (error token is " ")
-./arith1.sub: line 4: 4 -- : syntax error: operand expected (error token is " ")
-./arith1.sub: line 5: 4 ++ : syntax error: operand expected (error token is " ")
+./arith1.sub: line 2: 4-- : syntax error: operand expected (error token is "- ")
+./arith1.sub: line 3: 4++ : syntax error: operand expected (error token is "+ ")
+./arith1.sub: line 4: 4 -- : syntax error: operand expected (error token is "- ")
+./arith1.sub: line 5: 4 ++ : syntax error: operand expected (error token is "+ ")
 1
 2
 1
@@ -158,10 +158,10 @@ ok
 2
 -2
 1
-./arith1.sub: line 35: ((: ++ : syntax error: operand expected (error token is " ")
+./arith1.sub: line 35: ((: ++ : syntax error: operand expected (error token is "+ ")
 7
 7
-./arith1.sub: line 38: ((: -- : syntax error: operand expected (error token is " ")
+./arith1.sub: line 38: ((: -- : syntax error: operand expected (error token is "- ")
 7
 7
 7
@@ -180,10 +180,10 @@ ok
 1
 4
 0
-./arith2.sub: line 33: ((: -- : syntax error: operand expected (error token is " ")
+./arith2.sub: line 33: ((: -- : syntax error: operand expected (error token is "- ")
 -7
 -7
-./arith2.sub: line 37: ((: ++ : syntax error: operand expected (error token is " ")
+./arith2.sub: line 37: ((: ++ : syntax error: operand expected (error token is "+ ")
 7
 7
 -7

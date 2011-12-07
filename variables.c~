@@ -185,6 +185,7 @@ static SHELL_VAR *init_seconds_var __P((void));
 
 static int brand __P((void));
 static void sbrand __P((unsigned long));		/* set bash random number generator. */
+static void seedrand __P((void));			/* seed generator randomly */
 static SHELL_VAR *assign_random __P((SHELL_VAR *, char *, arrayind_t));
 static SHELL_VAR *get_random __P((SHELL_VAR *));
 
@@ -499,7 +500,7 @@ initialize_shell_variables (env, privmode)
 #endif /* HISTORY */
 
   /* Seed the random number generator. */
-  sbrand (dollar_dollar_pid + shell_start_time);
+  seedrand ();
 
   /* Handle some "special" variables that we may have inherited from a
      parent shell. */
@@ -1165,8 +1166,24 @@ static int seeded_subshell = 0;
 static int
 brand ()
 {
+#if 0
   rseed = rseed * 1103515245 + 12345;
   return ((unsigned int)((rseed >> 16) & 32767));	/* was % 32768 */
+#else
+  /* From "Random number generators: good ones are hard to find",
+     Park and Miller, Communications of the ACM, vol. 31, no. 10,
+     October 1988, p. 1195. filtered through FreeBSD */
+  long h, l;
+
+  if (rseed == 0)
+    seedrand ();
+  h = rseed / 127773;
+  l = rseed % 127773;
+  rseed = 16807 * l - 2836 * h;
+  if (rseed < 0)
+    rseed += 0x7fffffff;
+  return ((unsigned int)(rseed & 32767));	/* was % 32768 */
+#endif
 }
 
 /* Set the random number generator seed to SEED. */
@@ -1178,6 +1195,15 @@ sbrand (seed)
   last_random_value = 0;
 }
 
+static void
+seedrand ()
+{
+  struct timeval tv;
+
+  gettimeofday (&tv, NULL);
+  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid ());
+}
+
 static SHELL_VAR *
 assign_random (self, value, unused)
      SHELL_VAR *self;
@@ -1186,20 +1212,21 @@ assign_random (self, value, unused)
 {
   sbrand (strtoul (value, (char **)NULL, 10));
   if (subshell_environment)
-    seeded_subshell = 1;
+    seeded_subshell = getpid ();
   return (self);
 }
 
 int
 get_random_number ()
 {
-  int rv;
+  int rv, pid;
 
   /* Reset for command and process substitution. */
-  if (subshell_environment && seeded_subshell == 0)
+  pid = getpid ();
+  if (subshell_environment && seeded_subshell != pid)
     {
-      sbrand (rseed + getpid() + NOW);
-      seeded_subshell = 1;
+      seedrand ();
+      seeded_subshell = pid;
     }
 
   do
