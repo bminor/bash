@@ -114,7 +114,7 @@ rl_free_undo_list ()
       rl_undo_list = rl_undo_list->next;
 
       if (release->what == UNDO_DELETE)
-	xfree (release->text);
+	free (release->text);
 
       xfree (release);
     }
@@ -191,7 +191,7 @@ rl_do_undo ()
 	case UNDO_DELETE:
 	  rl_point = start;
 	  rl_insert_text (rl_undo_list->text);
-	  xfree (rl_undo_list->text);
+	  free (rl_undo_list->text);
 	  break;
 
 	/* Undoing inserts means deleting some text. */

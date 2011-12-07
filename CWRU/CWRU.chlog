@@ -7418,3 +7418,42 @@ builtins/mapfile.def
 	  `mapfile -n 5 -c 1 -C 'echo foo' array < file' work right and call
 	  the callback after the first line is read.  Fixes bug reported by
 	  Pierre Gaston <pierre.gaston@gmail.com>
+
+				   1/22
+				   ----
+lib/readline/complete.c
+	- set _rl_interrupt_immediately non-zero before reading from the file
+	  system or calling an application-defined completion function
+
+lib/readline/signals.c
+	- renamed rl_signal_handler to _rl_handle_signal; new version of
+	  rl_signal_handler that just calls _rl_handle_signal (for now)
+	- new function _rl_signal_handler that calls _rl_handle_signal without
+	  any checking
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_signal_handler
+	- new define, RL_CHECK_SIGNALS, checks whether or not _rl_caught_signal
+	  is set and calls _rl_signal_handler if so
+
+lib/readline/{bind,input,readline}.c
+	- add RL_CHECK_SIGNALS in appropriate places
+
+lib/readline/signals.c
+	- change rl_signal_handler to set a flag and return rather than
+	  run through the entire signal handling process.  If
+	  _rl_interrupt_immediately is set, call the signal handling code
+	  right away instead of setting the flag.  Initial fix for crash
+	  bug reported by Roman Rakus <rrakus@redhat.com>
+
+aclocal.m4
+	- new macro, BASH_TYPE_SIG_ATOMIC_T, tests for sig_atomic_t in
+	  <signal.h>, defines as int if not defined
+
+configure.in
+	- call BASH_TYPE_SIG_ATOMIC_T
+	- call AC_C_VOLATILE
+
+config.h.in
+	- empty define for sig_atomic_t
+	- empty define for volatile

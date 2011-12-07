@@ -37,6 +37,11 @@
 #define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
 #define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
 
+#define RL_CHECK_SIGNALS() \
+	do { \
+	  if (_rl_caught_signal) _rl_signal_handler (_rl_caught_signal); \
+	} while (0)
+
 /*************************************************************************
  *									 *
  * Global structs undocumented in texinfo manual and not in readline.h   *
@@ -291,6 +296,8 @@ extern int _rl_restore_tty_signals PARAMS((void));
 extern int _rl_nsearch_callback PARAMS((_rl_search_cxt *));
 
 /* signals.c */
+extern void _rl_signal_handler PARAMS((int));
+
 extern void _rl_block_sigint PARAMS((void));
 extern void _rl_release_sigint PARAMS((void));
 
@@ -424,6 +431,9 @@ extern _rl_keyseq_cxt *_rl_kscxt;
 extern _rl_search_cxt *_rl_nscxt;
 
 /* signals.c */
+extern int _rl_interrupt_immediately;
+extern int volatile _rl_caught_signal;
+
 extern int _rl_echoctl;
 
 extern int _rl_intr_char;

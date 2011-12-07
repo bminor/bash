@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2008 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -36,6 +36,11 @@
 #define EMACS_MODE()		(rl_editing_mode == emacs_mode)
 #define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
 #define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
+
+#define RL_CHECK_SIGNALS() \
+	do { \
+	  if (_rl_caught_signal) _rl_signal_handler (_rl_caught_signal); \
+	} while (0)
 
 /*************************************************************************
  *									 *
@@ -291,10 +296,10 @@ extern int _rl_restore_tty_signals PARAMS((void));
 extern int _rl_nsearch_callback PARAMS((_rl_search_cxt *));
 
 /* signals.c */
+extern void _rl_signal_handler PARAMS((int));
+
 extern void _rl_block_sigint PARAMS((void));
 extern void _rl_release_sigint PARAMS((void));
-
-extern void _rl_echo_signal_char PARAMS((int)); 
 
 /* terminal.c */
 extern void _rl_get_screen_size PARAMS((int, int));
@@ -426,11 +431,14 @@ extern _rl_keyseq_cxt *_rl_kscxt;
 extern _rl_search_cxt *_rl_nscxt;
 
 /* signals.c */
+extern int _rl_interrupt_immediately;
+extern int _rl_caught_signal;
+
 extern int _rl_echoctl;
 
-extern _rl_intr_char;
-extern _rl_quit_char;
-extern _rl_susp_char;
+extern int _rl_intr_char;
+extern int _rl_quit_char;
+extern int _rl_susp_char;
 
 /* terminal.c */
 extern int _rl_enable_keypad;

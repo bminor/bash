@@ -252,6 +252,7 @@ rl_gather_tyi ()
     {
       while (chars_avail--)
 	{
+	  RL_CHECK_SIGNALS ();
 	  k = (*rl_getc_function) (rl_instream);
 	  if (rl_stuff_char (k) == 0)
 	    break;			/* some problem; no more room */
@@ -437,6 +438,7 @@ rl_read_key ()
 	  while (rl_event_hook && rl_get_char (&c) == 0)
 	    {
 	      (*rl_event_hook) ();
+	      RL_CHECK_SIGNALS ();
 	      if (rl_done)		/* XXX - experimental */
 		return ('\n');
 	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
@@ -450,6 +452,7 @@ rl_read_key ()
 	{
 	  if (rl_get_char (&c) == 0)
 	    c = (*rl_getc_function) (rl_instream);
+	  RL_CHECK_SIGNALS ();
 	}
     }
 
@@ -465,6 +468,8 @@ rl_getc (stream)
 
   while (1)
     {
+      RL_CHECK_SIGNALS ();
+
 #if defined (__MINGW32__)
       if (isatty (fileno (stream)))
 	return (getch ());

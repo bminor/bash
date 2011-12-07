@@ -383,7 +383,7 @@ _rl_isearch_dispatch (cxt, c)
     {
       if (cxt->lastc >= 0 && (cxt->mb[0] && cxt->mb[1] == '\0') && ENDSRCH_CHAR (cxt->lastc))
 	{
-	  /* This sets rl_pending_input to c; it will be picked up the next
+	  /* This sets rl_pending_input to LASTC; it will be picked up the next
 	     time rl_read_key is called. */
 	  rl_execute_next (cxt->lastc);
 	  return (0);

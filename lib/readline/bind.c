@@ -796,6 +796,8 @@ _rl_read_file (filename, sizep)
       return ((char *)NULL);
     }
 
+  RL_CHECK_SIGNALS ();
+
   buffer[i] = '\0';
   if (sizep)
     *sizep = i;
@@ -864,6 +866,7 @@ _rl_read_init_file (filename, include_level)
   buffer = _rl_read_file (openname, &file_size);
   xfree (openname);
 
+  RL_CHECK_SIGNALS ();
   if (buffer == 0)
     return (errno);
   

@@ -81,6 +81,9 @@ typedef struct { SigHandler *sa_handler; int sa_mask, sa_flags; } sighandler_cxt
 static SigHandler *rl_set_sighandler PARAMS((int, SigHandler *, sighandler_cxt *));
 static void rl_maybe_set_sighandler PARAMS((int, SigHandler *, sighandler_cxt *));
 
+static RETSIGTYPE rl_signal_handler PARAMS((int));
+static RETSIGTYPE _rl_handle_signal PARAMS((int));
+     
 /* Exported variables for use by applications. */
 
 /* If non-zero, readline will install its own signal handlers for
@@ -95,6 +98,9 @@ int rl_catch_sigwinch = 0;	/* for the readline state struct in readline.c */
 #endif
 
 /* Private variables. */
+int _rl_interrupt_immediately = 0;
+int volatile _rl_caught_signal = 0;	/* should be sig_atomic_t, but that requires including <signal.h> everywhere */
+
 /* If non-zero, print characters corresponding to received signals. */
 int _rl_echoctl = 0;
 
@@ -121,8 +127,32 @@ static sighandler_cxt old_winch;
 
 /* Readline signal handler functions. */
 
+/* Called from RL_CHECK_SIGNALS() macro */
+RETSIGTYPE
+_rl_signal_handler (sig)
+{
+  _rl_caught_signal = 0;	/* XXX */
+
+  _rl_handle_signal (sig);
+  SIGHANDLER_RETURN;
+}
+
 static RETSIGTYPE
 rl_signal_handler (sig)
+     int sig;
+{
+  if (_rl_interrupt_immediately)
+    {
+      _rl_interrupt_immediately = 0;
+      _rl_handle_signal (sig);
+    }
+
+  _rl_caught_signal = sig;
+  SIGHANDLER_RETURN;
+}
+
+static RETSIGTYPE
+_rl_handle_signal (sig)
      int sig;
 {
 #if defined (HAVE_POSIX_SIGNALS)
