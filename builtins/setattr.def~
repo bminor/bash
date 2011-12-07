@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,7 +52,7 @@ extern int declare_builtin __P((WORD_LIST *));
 
 $BUILTIN export
 $FUNCTION export_builtin
-$SHORT_DOC export [-nf] [name[=value] ...] or export -p
+$SHORT_DOC export [-fn] [name[=value] ...] or export -p
 NAMEs are marked for automatic export to the environment of
 subsequently executed commands.  If the -f option is given,
 the NAMEs refer to functions.  If no NAMEs are given, or if `-p'
@@ -268,7 +268,11 @@ set_or_show_attributes (list, attribute, nodefs)
 		continue;
 #endif
 	      if ((var->attributes & attribute))
-		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+		{
+		  show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+		  if (any_failed = sh_chkwrite (any_failed))
+		    break;
+		}
 	    }
 	  free (variable_list);
 	}
@@ -336,7 +340,7 @@ show_var_attributes (var, pattr, nodefs)
      reused as input to recreate the current state. */
   if (function_p (var) && nodefs == 0 && (pattr == 0 || posixly_correct == 0))
     {
-      printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+      printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE));
       nodefs++;
       if (pattr == 0 && i == 1 && flags[0] == 'f')
 	return 0;		/* don't print `declare -f name' */
@@ -359,7 +363,7 @@ show_var_attributes (var, pattr, nodefs)
   if (nodefs || (function_p (var) && pattr != 0 && posixly_correct))
     printf ("%s\n", var->name);
   else if (function_p (var))
-    printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+    printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE));
   else if (invisible_p (var))
     printf ("%s\n", var->name);
   else

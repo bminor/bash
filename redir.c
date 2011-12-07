@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -53,6 +53,8 @@ extern int errno;
 #if defined (BUFFERED_INPUT)
 #  include "input.h"
 #endif
+
+#define SHELL_FD_BASE	10
 
 int expanding_redir;
 
@@ -481,7 +483,7 @@ redir_special_open (spec, filename, flags, mode, ri)
       if (all_digits (filename+8) && legal_number (filename+8, &lfd) && lfd == (int)lfd)
 	{
 	  fd = lfd;
-	  fd = fcntl (fd, F_DUPFD, 10);
+	  fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
 	}
       else
 	fd = AMBIGUOUS_REDIRECT;
@@ -490,13 +492,13 @@ redir_special_open (spec, filename, flags, mode, ri)
 
 #if !defined (HAVE_DEV_STDIN)
     case RF_DEVSTDIN:
-      fd = fcntl (0, F_DUPFD, 10);
+      fd = fcntl (0, F_DUPFD, SHELL_FD_BASE);
       break;
     case RF_DEVSTDOUT:
-      fd = fcntl (1, F_DUPFD, 10);
+      fd = fcntl (1, F_DUPFD, SHELL_FD_BASE);
       break;
     case RF_DEVSTDERR:
-      fd = fcntl (2, F_DUPFD, 10);
+      fd = fcntl (2, F_DUPFD, SHELL_FD_BASE);
       break;
 #endif
 
@@ -888,7 +890,6 @@ do_redirection_internal (redirect, flags)
 	      else
 		add_undo_close_redirect (redirector);
 	    }
-
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
@@ -949,8 +950,6 @@ do_redirection_internal (redirect, flags)
   return (0);
 }
 
-#define SHELL_FD_BASE	10
-
 /* Remember the file descriptor associated with the slot FD,
    on REDIRECTION_UNDO_LIST.  Note that the list will be reversed
    before it is executed.  Any redirections that need to be undone
@@ -996,17 +995,19 @@ add_undo_redirect (fd, ri)
 
   /* experimental:  if we're saving a redirection to undo for a file descriptor
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
-     causes redirections to be discarded. */
-  if (fd >= SHELL_FD_BASE && ri != r_close_this)
+     causes redirections to be discarded.  There needs to be a difference
+     between fds that are used to save other fds and then are the target of
+     user redirctions and fds that are just the target of user redirections.
+     We use the close-on-exec flag to tell the difference; fds > SHELL_FD_BASE
+     that have the close-on-exec flag set are assumed to be fds used internally
+     to save others. */
+  if (fd >= SHELL_FD_BASE && ri != r_close_this && clexec_flag)
     {
       rd.dest = new_fd;
       new_redirect = make_redirection (fd, r_duplicating_output, rd);
-#if 0
-      closer = copy_redirects (new_redirect);
-      add_exec_redirect (closer);
-#else
+      new_redirect->flags |= RX_INTERNAL;
+
       add_exec_redirect (new_redirect);
-#endif     
     }
 
   /* File descriptors used only for saving others should always be

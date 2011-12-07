@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -332,7 +332,7 @@ declare_internal (list, local_var)
 #endif /* DEBUGGER */
 			{	
 			  t = nodefs ? var->name
-				     : named_function_string (name, function_cell (var), 1);
+				     : named_function_string (name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL);
 			  printf ("%s\n", t);
 			  any_failed = sh_chkwrite (any_failed);
 			}

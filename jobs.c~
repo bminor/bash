@@ -974,7 +974,10 @@ compact_jobs_list (flags)
   reap_dead_jobs ();
   realloc_jobs_list ();
 
-itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+#ifdef DEBUG
+  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+#endif
+
   return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
 }
 
@@ -3554,6 +3557,7 @@ initialize_job_control (force)
 		  setpgid (0, original_pgrp);
 		  shell_pgrp = original_pgrp;
 		  job_control = 0;
+internal_error ("cannot set terminal pgrp to %d: %s", shell_pgrp, strerror (errno));
 		}
 	    }
 	}

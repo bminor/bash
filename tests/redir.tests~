@@ -174,12 +174,3 @@ echo after block
 ${THIS_SH} ./redir7.sub
 
 ${THIS_SH} ./redir8.sub
-
-exec 9>&2
-command exec 2>/tmp/foo
-echo whatsis >&2
-echo cat /tmp/foo
-cat /tmp/foo
-rm -f /tmp/foo
-exec 2>&9
-exec 9>&-

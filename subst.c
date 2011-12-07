@@ -211,7 +211,6 @@ static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static char *dequote_escapes __P((char *));
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
-static char *remove_quoted_escapes __P((char *));
 static char *remove_quoted_nulls __P((char *));
 
 static int unquoted_substring __P((char *, char *));
@@ -3201,7 +3200,7 @@ dequote_list (list)
 
 /* Remove CTLESC protecting a CTLESC or CTLNUL in place.  Return the passed
    string. */
-static char *
+char *
 remove_quoted_escapes (string)
      char *string;
 {

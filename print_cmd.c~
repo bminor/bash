@@ -106,8 +106,6 @@ int command_string_index = 0;
 
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
-
-static int inside_pipeline;
 static int skip_this_indent;
 static int was_heredoc;
 
@@ -135,7 +133,7 @@ char *
 make_command_string (command)
      COMMAND *command;
 {
-  command_string_index = was_heredoc = inside_pipeline = 0;
+  command_string_index = was_heredoc = 0;
   make_command_string_internal (command);
   return (the_printed_command);
 }
@@ -217,11 +215,7 @@ make_command_string_internal (command)
 	case cm_connection:
 
 	  skip_this_indent++;
-	  if (command->value.Connection->connector == '|')
-	    inside_pipeline = 1;
 	  make_command_string_internal (command->value.Connection->first);
-	  if (command->value.Connection->connector == '|')
-	    inside_pipeline = 0;
 
 	  switch (command->value.Connection->connector)
 	    {
@@ -229,10 +223,7 @@ make_command_string_internal (command)
 	    case '|':
 	      {
 		char c = command->value.Connection->connector;
-		if (c == '&' || was_heredoc == 0)
-		  cprintf (" %c", c);
-		else
-		  was_heredoc = 0;
+		cprintf (" %c", c);
 		if (c != '&' || command->value.Connection->second)
 		  {
 		    cprintf (" ");
@@ -860,10 +851,6 @@ print_redirection_list (redirects)
      print the here documents. */
   if (heredocs)
     {
-if (inside_pipeline)
-{
-itrace("print_redirection_list: here documents inside pipeline");
-}
       cprintf (" "); 
       for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
 	{
@@ -881,7 +868,6 @@ print_redirection (redirect)
 {
   int kill_leading, redirector, redir_fd;
   WORD_DESC *redirectee;
-  char *x;
 
   kill_leading = 0;
   redirectee = redirect->redirectee.filename;
@@ -919,16 +905,17 @@ print_redirection (redirect)
       if (redirector != 0)
 	cprintf ("%d", redirector);
       /* If the here document delimiter is quoted, single-quote it. */
-      x = (redirect->redirectee.filename->flags & W_QUOTED)
-		? sh_single_quote (redirect->here_doc_eof)
-		: redirect->here_doc_eof;
-      cprintf ("<<%s%s", kill_leading? "-" : "", x);
-      if (x != redirect->here_doc_eof)
-	free (x);
-if (inside_pipeline)
-  cprintf (" |");
-      cprintf ("\n");
-      cprintf ("%s%s", redirect->redirectee.filename->word, redirect->here_doc_eof);
+      if (redirect->redirectee.filename->flags & W_QUOTED)
+	{
+	  char *x;
+	  x = sh_single_quote (redirect->here_doc_eof);
+	  cprintf ("<<%s%s\n", kill_leading? "-" : "", x);
+	  free (x);
+	}
+      else
+	cprintf ("<<%s%s\n", kill_leading? "-" : "", redirect->here_doc_eof);
+      cprintf ("%s%s",
+	       redirect->redirectee.filename->word, redirect->here_doc_eof);
       break;
 
     case r_reading_string:
@@ -1004,7 +991,6 @@ reset_locals ()
 {
   inside_function_def = 0;
   indentation = 0;
-  inside_pipeline = 0;
 }
 
 static void
@@ -1024,7 +1010,7 @@ print_function_def (func)
   inside_function_def++;
   indentation += indentation_amount;
 
-  cmdcopy = copy_command (func->command);	/* possible mem leak on unwind-protect */
+  cmdcopy = copy_command (func->command);
   if (cmdcopy->type == cm_group)
     {
       func_redirects = cmdcopy->redirects;
@@ -1053,13 +1039,14 @@ print_function_def (func)
 /* Return the string representation of the named function.
    NAME is the name of the function.
    COMMAND is the function body.  It should be a GROUP_COM.
-   MULTI_LINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_MULTILINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_EXTERNAL means convert from internal to external form
   */
 char *
-named_function_string (name, command, multi_line)
+named_function_string (name, command, flags)
      char *name;
      COMMAND *command;
-     int multi_line;
+     int flags;
 {
   char *result;
   int old_indent, old_amount;
@@ -1069,14 +1056,13 @@ named_function_string (name, command, multi_line)
   old_indent = indentation;
   old_amount = indentation_amount;
   command_string_index = was_heredoc = 0;
-  inside_pipeline = 0;
 
   if (name && *name)
     cprintf ("%s ", name);
 
   cprintf ("() ");
 
-  if (multi_line == 0)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
       indentation = 1;
       indentation_amount = 0;
@@ -1089,7 +1075,7 @@ named_function_string (name, command, multi_line)
 
   inside_function_def++;
 
-  cprintf (multi_line ? "{ \n" : "{ ");
+  cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");
 
   cmdcopy = copy_command (command);
   /* Take any redirections specified in the function definition (which should
@@ -1119,7 +1105,7 @@ named_function_string (name, command, multi_line)
 
   result = the_printed_command;
 
-  if (!multi_line)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
 #if 0
       register int i;
@@ -1136,6 +1122,9 @@ named_function_string (name, command, multi_line)
     }
 
   dispose_command (cmdcopy);
+
+  if (flags & FUNC_EXTERNAL)
+    remove_quoted_escapes (result);
 
   return (result);
 }

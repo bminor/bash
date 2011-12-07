@@ -148,6 +148,8 @@ extern int errno;
 	  vbsize = 0; \
 	  vbuf = 0; \
 	} \
+      else if (vbuf) \
+	vbuf[0] = 0; \
       fflush (stdout); \
       if (ferror (stdout)) \
 	{ \
@@ -228,6 +230,8 @@ printf_builtin (list)
 	    {
 	      vflag = 1;
 	      vblen = 0;
+	      if (vbuf)
+		vbuf[0] = 0;
 	    }
 	  else
 	    {
@@ -835,7 +839,7 @@ vbadd (buf, blen)
 
   if (blen == 1)
     vbuf[vblen++] = buf[0];
-  else
+  else if (blen > 1)
     {
       FASTCOPY (buf, vbuf  + vblen, blen);
       vblen += blen;

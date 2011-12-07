@@ -136,6 +136,8 @@ size_t ifs_firstc_len;
 unsigned char ifs_firstc;
 #endif
 
+int assigning_in_environment;
+
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment;
@@ -209,7 +211,7 @@ static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static char *dequote_escapes __P((char *));
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
-static char *remove_quoted_escapes __P((char *));
+/*static*/ char *remove_quoted_escapes __P((char *));
 static char *remove_quoted_nulls __P((char *));
 
 static int unquoted_substring __P((char *, char *));
@@ -3199,7 +3201,7 @@ dequote_list (list)
 
 /* Remove CTLESC protecting a CTLESC or CTLNUL in place.  Return the passed
    string. */
-static char *
+/*static*/ char *
 remove_quoted_escapes (string)
      char *string;
 {

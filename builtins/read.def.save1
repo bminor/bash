@@ -128,7 +128,7 @@ read_builtin (list)
 {
   register char *varname;
   int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
-  int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc;
+  int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, fd;
   unsigned int tmout;
   intmax_t intval;
@@ -263,8 +263,8 @@ read_builtin (list)
   ifs_chars = getifs ();
   if (ifs_chars == 0)		/* XXX - shouldn't happen */
     ifs_chars = "";
-  for (skip_ctlesc = 0, e = ifs_chars; *e; e++)
-    skip_ctlesc |= *e == CTLESC;
+  for (skip_ctlesc = skip_ctlnul = 0, e = ifs_chars; *e; e++)
+    skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
 
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
 
@@ -456,7 +456,7 @@ read_builtin (list)
 	  if (c == '\n')
 	    {
 	      i--;		/* back up over the CTLESC */
-	      if (interactive && raw == 0)
+	      if (interactive && input_is_tty && raw == 0)
 		print_ps2 = 1;
 	    }
 	  else
@@ -479,7 +479,7 @@ read_builtin (list)
       if ((unsigned char)c == delim)
 	break;
 
-      if ((skip_ctlesc == 0 && c == CTLESC) || c == CTLNUL)
+      if ((skip_ctlesc == 0 && c == CTLESC) || (skip_ctlnul == 0 && c == CTLNUL))
 	{
 	  saw_escape++;
 	  input_string[i++] = CTLESC;

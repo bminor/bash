@@ -340,7 +340,7 @@ show_var_attributes (var, pattr, nodefs)
      reused as input to recreate the current state. */
   if (function_p (var) && nodefs == 0 && (pattr == 0 || posixly_correct == 0))
     {
-      printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+      printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL));
       nodefs++;
       if (pattr == 0 && i == 1 && flags[0] == 'f')
 	return 0;		/* don't print `declare -f name' */
@@ -363,7 +363,7 @@ show_var_attributes (var, pattr, nodefs)
   if (nodefs || (function_p (var) && pattr != 0 && posixly_correct))
     printf ("%s\n", var->name);
   else if (function_p (var))
-    printf ("%s\n", named_function_string (var->name, function_cell (var), 1));
+    printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL));
   else if (invisible_p (var))
     printf ("%s\n", var->name);
   else

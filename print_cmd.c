@@ -1039,13 +1039,14 @@ print_function_def (func)
 /* Return the string representation of the named function.
    NAME is the name of the function.
    COMMAND is the function body.  It should be a GROUP_COM.
-   MULTI_LINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_MULTILINE is non-zero to pretty-print, or zero for all on one line.
+   flags&FUNC_EXTERNAL means convert from internal to external form
   */
 char *
-named_function_string (name, command, multi_line)
+named_function_string (name, command, flags)
      char *name;
      COMMAND *command;
-     int multi_line;
+     int flags;
 {
   char *result;
   int old_indent, old_amount;
@@ -1061,7 +1062,7 @@ named_function_string (name, command, multi_line)
 
   cprintf ("() ");
 
-  if (multi_line == 0)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
       indentation = 1;
       indentation_amount = 0;
@@ -1074,7 +1075,7 @@ named_function_string (name, command, multi_line)
 
   inside_function_def++;
 
-  cprintf (multi_line ? "{ \n" : "{ ");
+  cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");
 
   cmdcopy = copy_command (command);
   /* Take any redirections specified in the function definition (which should
@@ -1104,7 +1105,7 @@ named_function_string (name, command, multi_line)
 
   result = the_printed_command;
 
-  if (!multi_line)
+  if ((flags & FUNC_MULTILINE) == 0)
     {
 #if 0
       register int i;
@@ -1121,6 +1122,9 @@ named_function_string (name, command, multi_line)
     }
 
   dispose_command (cmdcopy);
+
+  if (flags & FUNC_EXTERNAL)
+    result = remove_quoted_escapes (result);
 
   return (result);
 }

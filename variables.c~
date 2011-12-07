@@ -93,6 +93,7 @@ extern char *this_command_name;
 extern char *command_execution_string;
 extern time_t shell_start_time;
 extern int assigning_in_environment;
+extern int executing_builtin;
 
 #if defined (READLINE)
 extern int no_line_editing;
@@ -984,8 +985,13 @@ void
 print_var_function (var)
      SHELL_VAR *var;
 {
+  char *x;
+
   if (function_p (var) && var_isset (var))
-    printf ("%s", named_function_string ((char *)NULL, function_cell(var), 1));
+    {
+      x = named_function_string ((char *)NULL, function_cell(var), FUNC_MULTILINE|FUNC_EXTERNAL);
+      printf ("%s", x);
+    }
 }
 
 /* **************************************************************** */
@@ -1580,7 +1586,7 @@ SHELL_VAR *
 find_variable (name)
      const char *name;
 {
-  return (find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || this_shell_builtin != 0))));
+  return (find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin))));
 }
 
 /* Look up the function entry whose name matches STRING.

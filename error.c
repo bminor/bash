@@ -108,7 +108,7 @@ get_name_for_error ()
       if (bash_source_v && array_p (bash_source_v) &&
 	  (bash_source_a = array_cell (bash_source_v)))
 	name = array_reference (bash_source_a, 0);
-      if (name == 0)
+      if (name == 0 || *name == '\0')	/* XXX - was just name == 0 */
 #endif
 	name = dollar_vars[0];
     }

@@ -1317,9 +1317,6 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
     }
 
       
-_rl_trace("update_line: old = %p \"%s\"", old, old);
-_rl_trace("update_line: new = %p \"%s\"", new, new);
-
   /* Find first difference. */
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1356,8 +1353,6 @@ _rl_trace("update_line: new = %p \"%s\"", new, new);
 		}
 	    }
 	}
-_rl_trace("update_line: ofd = %p \"%s\"", ofd, ofd);
-_rl_trace("update_line: nfd = %p \"%s\"", nfd, nfd);
     }
   else
 #endif
@@ -1371,9 +1366,6 @@ _rl_trace("update_line: nfd = %p \"%s\"", nfd, nfd);
      move a subtraction out of each loop. */
   for (od = ofd - old, oe = ofd; od < omax && *oe; oe++, od++);
   for (nd = nfd - new, ne = nfd; nd < nmax && *ne; ne++, nd++);
-
-_rl_trace("update_line: oe = %p \"%s\"", oe, oe);
-_rl_trace("update_line: ne = %p \"%s\"", ne, ne);
 
   /* If no difference, continue to next line. */
   if (ofd == oe && nfd == ne)
@@ -1453,9 +1445,6 @@ _rl_trace("update_line: ne = %p \"%s\"", ne, ne);
 	}
     }
 
-_rl_trace("update_line: ols = %p \"%s\"", ols, ols);
-_rl_trace("update_line: nls = %p \"%s\"", nls, nls);
-
   /* count of invisible characters in the current invisible line. */
   current_invis_chars = W_OFFSET (current_line, wrap_offset);
   if (_rl_last_v_pos != current_line)
@@ -1488,18 +1477,18 @@ _rl_trace("update_line: nls = %p \"%s\"", nls, nls);
 #else
       tputs (_rl_term_cr, 1, _rl_output_character_function);
 #endif
-_rl_trace("update_line: redrawing prompt");
+      if (modmark)
+	_rl_output_some_chars ("*", 1);
       _rl_output_some_chars (local_prompt, lendiff);
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
 	  /* We take wrap_offset into account here so we can pass correct
 	     information to _rl_move_cursor_relative. */
-	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
+	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset + modmark;
 	  cpos_adjusted = 1;
 	}
       else
-	_rl_last_c_pos = lendiff;
-_rl_trace("update_line: redrawing prompt: _rl_last_c_pos = %d", _rl_last_c_pos);
+	_rl_last_c_pos = lendiff + modmark;
     }
 
   /* When this function returns, _rl_last_c_pos is correct, and an absolute
@@ -1526,7 +1515,6 @@ _rl_trace("update_line: redrawing prompt: _rl_last_c_pos = %d", _rl_last_c_pos);
   else
     col_lendiff = lendiff;
 
-_rl_trace("update_line: lendiff = %d col_lendiff = %d", lendiff, col_lendiff);
   /* If we are changing the number of invisible characters in a line, and
      the spot of first difference is before the end of the invisible chars,
      lendiff needs to be adjusted. */
@@ -1545,7 +1533,6 @@ _rl_trace("update_line: lendiff = %d col_lendiff = %d", lendiff, col_lendiff);
 	}
     }
 
-_rl_trace("update_line: after adjustment: lendiff = %d col_lendiff = %d", lendiff, col_lendiff);
   /* Insert (diff (len (old), len (new)) ch. */
   temp = ne - nfd;
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1557,11 +1544,23 @@ _rl_trace("update_line: after adjustment: lendiff = %d col_lendiff = %d", lendif
     {
       /* Non-zero if we're increasing the number of lines. */
       int gl = current_line >= _rl_vis_botlin && inv_botlin > _rl_vis_botlin;
+      /* If col_lendiff is > 0, implying that the new string takes up more
+	 screen real estate than the old, but lendiff is < 0, meaning that it
+	 takes fewer bytes, we need to just output the characters starting
+	 from the first difference.  These will overwrite what is on the
+	 display, so there's no reason to do a smart update.  This can really
+	 only happen in a multibyte environment. */
+      if (lendiff < 0)
+	{
+	  _rl_output_some_chars (nfd, temp);
+	  _rl_last_c_pos += col_temp;
+	  return;
+	}
       /* Sometimes it is cheaper to print the characters rather than
 	 use the terminal's capabilities.  If we're growing the number
 	 of lines, make sure we actually cause the new line to wrap
 	 around on auto-wrapping terminals. */
-      if (_rl_terminal_can_insert && ((2 * col_temp) >= col_lendiff || _rl_term_IC) && (!_rl_term_autowrap || !gl))
+      else if (_rl_terminal_can_insert && ((2 * col_temp) >= col_lendiff || _rl_term_IC) && (!_rl_term_autowrap || !gl))
 	{
 	  /* If lendiff > prompt_visible_length and _rl_last_c_pos == 0 and
 	     _rl_horizontal_scroll_mode == 1, inserting the characters with

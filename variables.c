@@ -985,8 +985,13 @@ void
 print_var_function (var)
      SHELL_VAR *var;
 {
+  char *x;
+
   if (function_p (var) && var_isset (var))
-    printf ("%s", named_function_string ((char *)NULL, function_cell(var), 1));
+    {
+      x = named_function_string ((char *)NULL, function_cell(var), FUNC_MULTILINE|FUNC_EXTERNAL);
+      printf ("%s", x);
+    }
 }
 
 /* **************************************************************** */
@@ -1599,7 +1604,11 @@ FUNCTION_DEF *
 find_function_def (name)
      const char *name;
 {
+#if defined (DEBUGGER)
   return ((FUNCTION_DEF *)hash_lookup (name, shell_function_defs));
+#else
+  return ((FUNCTION_DEF *)0);
+#endif
 }
 
 /* Return the value of VAR.  VAR is assumed to have been the result of a
@@ -2142,6 +2151,7 @@ bind_function (name, value)
   return (entry);
 }
 
+#if defined (DEBUGGER)
 /* Bind a function definition, which includes source file and line number
    information in addition to the command, into the FUNCTION_DEF hash table.*/
 void
@@ -2170,6 +2180,7 @@ bind_function_def (name, value)
       elt->data = (PTR_T *)entry;
     }
 }
+#endif /* DEBUGGER */
 
 /* Add STRING, which is of the form foo=bar, to the temporary environment
    HASH_TABLE (temporary_env).  The functions in execute_cmd.c are
@@ -2362,6 +2373,7 @@ unbind_func (name)
   return 0;  
 }
 
+#if defined (DEBUGGER)
 int
 unbind_function_def (name)
      const char *name;
@@ -2383,6 +2395,7 @@ unbind_function_def (name)
 
   return 0;  
 }
+#endif /* DEBUGGER */
 
 /* Make the variable associated with NAME go away.  HASH_LIST is the
    hash table from which this variable should be deleted (either

@@ -14577,7 +14577,8 @@ subst.c
 	  memory.  If word expansions (particularly brace expansions) are
 	  required, the expansion code will free the string passed to
 	  expand_word_internal, and we don't want to free unallocated memory
-	  (patstr++) or have duplicate frees (patstr)
+	  (patstr++) or have duplicate frees (patstr).  Fixes bug reported on
+	  Red Hat bugzilla
 
 				    5/9
 				    ---
@@ -14604,10 +14605,97 @@ execute_cmd.c
 	  and restored by execute_simple_command
 
 subst.c
-	- new variablem, assigning_in_environment, set and unset around calls
+	- new variable, assigning_in_environment, set and unset around calls
 	  to assign_in_env by the expansion code
 
 variables.c
 	- use executing_builtin and assigning_in_environment to decide whether
 	  or not to look into temporary_env when calling find_variable_internal.
 	  Fixes problem reported by Kevin Quinn <kevquinn@gentoo.org>
+
+				   5/22
+				   ----
+redir.c
+	- change add_undo_redirect to differentiate between file descriptors
+	  greater than SHELL_FD_BASE (currently 10) used internally to save
+	  others and then being the targets of user redirection and fds that
+	  are just the target of user redirections.  The former need to have
+	  an `exec undo' redirect added to undo it in case exec throws away
+	  redirections; the latter does not.  We use the close-on-exec flag
+	  for this:  if it's set, we assume that the file descriptor is being
+	  used internally to save another.  Fixes problem reported by Ian
+	  Jackson <ian@davenant.greenend.org.uk>
+
+shell.c
+	- new function, init_interactive_script(), does interactive initialization
+	  for a script run with `bash -i script' -- does everything the same
+	  as init_interactive except set `interactive == 1', which causes the
+	  shell to read from the standard input, after calling
+	  init_noninteractive
+	- call init_interactive_script if a script is run as `bash -i script'.
+	  Fixes problem reported by Joseph Michaud <jmichaud@sgi.com>
+
+				   5/24
+				   ----
+builtins/printf.def
+	- change vbadd to only call FASTCOPY if the passed buffer length is
+	  > 1
+	- if the `-v' option is supplied and `vbuf' is already non-null from a
+	  previous `printf -v var' call, set vbuf[0]=0 explicitly instead of
+	  relying on vbadd to do it -- vbadd may not be called.
+	- fix PRETURN macro to set vbuf[0] == 0 if vbuf is not freed.  These
+	  should fix problem reported by Elmar Stellnberger <estellnb@yahoo.de>
+
+lib/readline/display.c
+	 - fix update_line to deal with the case where col_lendiff > 0 (meaning
+	   the new string takes up more screen real estate than the old) but
+	   lendiff < 0 (meaning that it takes fewer bytes to do so).  This can
+	   happen when a multibyte prompt string is replaced with a longer one
+	   containing only single-byte characters (e.g., when doing a reverse
+	   i-search).  Fixes gentoo bug reported by Peter Volkov
+	   <torre_cremata@mail.ru>
+
+builtins/read.def
+	- make sure we only print $PS2 if the standard input is a terminal
+	- new function, read_mbchar, to read a multibyte character so we
+	  can make sure we read entire multibyte chars when `read -n' is
+	  used, rather than bytes.  Only called when -n is supplied.
+	  Fixes problem reported by Stanislav Brabec <sbrabec@suse.cz>
+
+				   5/25
+				   ----
+externs.h
+	- new #defines for third argument to named_function_string:
+	  FUNC_MULTILINE (don't suppress newlines) and FUNC_EXTERNAL (convert
+	  to external display form)
+
+subst.h
+	- new extern declaration for remove_quoted_escapes
+
+subst.c
+	- remove_quoted_escapes is now global
+
+print_cmd.c
+	- in named_function_string, if FUNC_EXTERNAL is in the flags argument,
+	  call remove_quoted_escapes to convert from internal to external form.
+	  Fixes bug reported by Bo Andresen <bo.andresen@zlin.dk>
+
+variables.c,builtins/{declare,setattr,type}.def
+	- use FUNC_MULTILINE in calls to named_function_string as appropriate
+	- add FUNC_EXTERNAL to calls to named_function_string as appropriate
+
+				   5/27
+				   ----
+{make_cmd,variables}.c
+	- changes to enable the shell to compile when debugger support is
+	  configured out (function_def hash table and access functions).  Fixes
+	  bug reported by Horst Wente <horst.wente@acm.org>
+
+builtins/help.def
+	- fix bug in `help' two-column printing to avoid referencing
+	  shell_builtins[num_shell_builtins]
+
+error.c
+	- in get_name_for_error, use dollar_vars[0] if the name returned from
+	  looking in $BASH_SOURCE[0] is the empty string as well as if it's
+	  null

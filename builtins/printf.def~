@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2006 Free Software Foundation, Inc.
+Copyright (C) 1997-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -228,6 +228,8 @@ printf_builtin (list)
 	    {
 	      vflag = 1;
 	      vblen = 0;
+	      if (vbuf)
+		vbuf[0] = 0;
 	    }
 	  else
 	    {
@@ -835,7 +837,7 @@ vbadd (buf, blen)
 
   if (blen == 1)
     vbuf[vblen++] = buf[0];
-  else
+  else if (blen > 1)
     {
       FASTCOPY (buf, vbuf  + vblen, blen);
       vblen += blen;

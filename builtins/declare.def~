@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -89,10 +89,11 @@ declare_builtin (list)
 
 $BUILTIN local
 $FUNCTION local_builtin
-$SHORT_DOC local name[=value] ...
+$SHORT_DOC local [option] name[=value] ...
 Create a local variable called NAME, and give it VALUE.  LOCAL
 can only be used within a function; it makes the variable NAME
 have a visible scope restricted to that function and its children.
+OPTION can be any of the options accepted by `declare'.
 $END
 int
 local_builtin (list)
@@ -190,16 +191,12 @@ declare_internal (list, local_var)
 	      free (vlist);
 	    }
 	}
+      else if (flags_on == 0)
+	return (set_builtin ((WORD_LIST *)NULL));
       else
-	{
-	  if (flags_on == 0)
-	    set_builtin ((WORD_LIST *)NULL);
-	  else
-	    set_or_show_attributes ((WORD_LIST *)NULL, flags_on, nodefs);
-	}
+	set_or_show_attributes ((WORD_LIST *)NULL, flags_on, nodefs);
 
-      fflush (stdout);
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   if (pflag)	/* declare -p [-afFirtx] name [name...] */
@@ -213,7 +210,7 @@ declare_internal (list, local_var)
 	      any_failed++;
 	    }
 	}
-      return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+      return (sh_chkwrite (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS));
     }
 
 #define NEXT_VARIABLE() free (name); list = list->next; continue
@@ -335,8 +332,9 @@ declare_internal (list, local_var)
 #endif /* DEBUGGER */
 			{	
 			  t = nodefs ? var->name
-				     : named_function_string (name, function_cell (var), 1);
+				     : named_function_string (name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL);
 			  printf ("%s\n", t);
+			  any_failed = sh_chkwrite (any_failed);
 			}
 		    }
 		  else		/* declare -[fF] -[rx] name [name...] */

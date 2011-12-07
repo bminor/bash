@@ -305,6 +305,7 @@ static int uidget __P((void));
 
 static void init_interactive __P((void));
 static void init_noninteractive __P((void));
+static void init_interactive_script __P((void));
 
 static void set_shell_name __P((char *));
 static void shell_initialize __P((void));
@@ -1480,7 +1481,7 @@ open_shell_script (script_name)
     /* But if a script is called with something like `bash -i scriptname',
        we need to do a non-interactive setup here, since we didn't do it
        before. */
-    init_noninteractive ();
+    init_interactive_script ();
 
   free (filename);
   return (fd);
@@ -1573,8 +1574,8 @@ set_shell_name (argv0)
 static void
 init_interactive ()
 {
-  interactive_shell = startup_state = interactive = 1;
-  expand_aliases = 1;
+  expand_aliases = interactive_shell = startup_state = 1;
+  interactive = 1;
 }
 
 static void
@@ -1589,6 +1590,13 @@ init_noninteractive ()
 #if defined (JOB_CONTROL)
   set_job_control (0);
 #endif /* JOB_CONTROL */
+}
+
+static void
+init_interactive_script ()
+{
+  init_noninteractive ();
+  expand_aliases = interactive_shell = startup_state = 1;
 }
 
 void
