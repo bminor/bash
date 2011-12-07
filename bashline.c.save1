@@ -2862,17 +2862,9 @@ bash_dequote_filename (text, quote_char)
   ret = (char *)xmalloc (l + 1);
   for (quoted = quote_char, p = text, r = ret; p && *p; p++)
     {
-      /* Allow backslash-escaped characters to pass through unscathed. */
+      /* Allow backslash-quoted characters to pass through unscathed. */
       if (*p == '\\')
 	{
-	  /* Backslashes are preserved within single quotes. */
-	  if (quoted == '\'')
-	    *r++ = *p;
-	  /* Backslashes are preserved within double quotes unless the
-	     character is one that is defined to be escaped */
-	  else if (quoted == '"' && ((sh_syntaxtab[p[1]] & CBSDQUOTE) == 0))
-	    *r++ = *p;
-
 	  *r++ = *++p;
 	  if (*p == '\0')
 	    break;

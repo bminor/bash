@@ -1095,13 +1095,7 @@ attempt_shell_completion (text, start, end)
 	 option has been set with the `-o default' option to complete. */
       if (foundcs)
 	{
-	  /* If the user specified that the compspec returns filenames, make
-	     sure that readline knows it. */
-	  if (foundcs & COPT_FILENAMES)
-	    rl_filename_completion_desired = 1;
-	  /* If the user doesn't want a space appended, tell readline. */
-	  if (foundcs & COPT_NOSPACE)
-	    rl_completion_suppress_append = 1;
+	  pcomp_set_readline_variables (foundcs, 1);
 	  /* Turn what the programmable completion code returns into what
 	     readline wants.  I should have made compute_lcd_of_matches
 	     external... */
@@ -2862,9 +2856,17 @@ bash_dequote_filename (text, quote_char)
   ret = (char *)xmalloc (l + 1);
   for (quoted = quote_char, p = text, r = ret; p && *p; p++)
     {
-      /* Allow backslash-quoted characters to pass through unscathed. */
+      /* Allow backslash-escaped characters to pass through unscathed. */
       if (*p == '\\')
 	{
+	  /* Backslashes are preserved within single quotes. */
+	  if (quoted == '\'')
+	    *r++ = *p;
+	  /* Backslashes are preserved within double quotes unless the
+	     character is one that is defined to be escaped */
+	  else if (quoted == '"' && ((sh_syntaxtab[p[1]] & CBSDQUOTE) == 0))
+	    *r++ = *p;
+
 	  *r++ = *++p;
 	  if (*p == '\0')
 	    break;

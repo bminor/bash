@@ -290,7 +290,7 @@ fc_builtin (list)
      line was actually added (HISTIGNORE may have caused it to not be),
      so we check hist_last_line_added. */
 
-  /* "When not  listing, the fc command that caused the editing shall not be
+  /* "When not listing, the fc command that caused the editing shall not be
      entered into the history list." */
   if (listing == 0 && hist_last_line_added)
     delete_last_history ();
@@ -443,10 +443,11 @@ fc_gethnum (command, hlist)
      char *command;
      HIST_ENTRY **hlist;
 {
-  int sign = 1, n, clen;
+  int sign, n, clen;
   register int i, j;
   register char *s;
 
+  sign = 1;
   /* Count history elements. */
   for (i = 0; hlist[i]; i++);
 
@@ -456,8 +457,9 @@ fc_gethnum (command, hlist)
      and makes the last command that this deals with be the last command
      the user entered before the fc.  We need to check whether the
      line was actually added (HISTIGNORE may have caused it to not be),
-     so we check hist_last_line_added. */
-  i -= 1 + hist_last_line_added;
+     so we check hist_last_line_added.  This needs to agree with the
+     calculation of last_hist in fc_builtin above. */
+  i -= remember_on_history + hist_last_line_added;
 
   /* No specification defaults to most recent command. */
   if (command == NULL)

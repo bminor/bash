@@ -164,6 +164,8 @@ ITEMLIST it_stopped = { LIST_DYNAMIC, it_init_stopped, (STRINGLIST *)0 };
 ITEMLIST it_users = { LIST_DYNAMIC };		/* unused */
 ITEMLIST it_variables = { LIST_DYNAMIC, it_init_variables, (STRINGLIST *)0 };
 
+COMPSPEC *curcs;
+
 #ifdef DEBUG
 /* Debugging code */
 static void
@@ -688,18 +690,17 @@ pcomp_filename_completion_function (text, state)
     {
       FREE (dfn);
       /* remove backslashes quoting special characters in filenames. */
-      if (rl_filename_dequoting_function)
-	{
-#if 0
-	  qc = (text[0] == '"' || text[0] == '\'') ? text[0] : 0;
+#if 1
+      if (RL_ISSTATE (RL_STATE_COMPLETING) && rl_filename_dequoting_function)
 #else
+      if (rl_filename_dequoting_function)
+#endif
+	{
 	  /* Use rl_completion_quote_character because any single or
 	     double quotes have been removed by the time TEXT makes it
 	     here, and we don't want to remove backslashes inside
 	     quoted strings. */
-	  qc = rl_dispatching ? rl_completion_quote_character : 0;
-#endif
-	  dfn = (*rl_filename_dequoting_function) ((char *)text, qc);
+	  dfn = (*rl_filename_dequoting_function) ((char *)text, rl_completion_quote_character);
 	}
       else
 	dfn = savestring (text);
@@ -1359,6 +1360,34 @@ gen_compspec_completions (cs, cmd, word, start, end)
   return (ret);
 }
 
+void
+pcomp_set_readline_variables (flags, nval)
+     int flags, nval;
+{
+  /* If the user specified that the compspec returns filenames, make
+     sure that readline knows it. */
+  if (flags & COPT_FILENAMES)
+    rl_filename_completion_desired = nval;
+  /* If the user doesn't want a space appended, tell readline. */
+  if (flags & COPT_NOSPACE)
+    rl_completion_suppress_append = nval;
+}
+
+/* Set or unset FLAGS in the options word of the current compspec.
+   SET_OR_UNSET is 1 for setting, 0 for unsetting. */
+void
+pcomp_set_compspec_options (cs, flags, set_or_unset)
+     COMPSPEC *cs;
+     int flags, set_or_unset;
+{
+  if (cs == 0 || (cs = curcs) == 0)
+    return;
+  if (set_or_unset)
+    cs->options |= flags;
+  else
+    cs->options &= ~flags;
+}
+
 /* The driver function for the programmable completion code.  Returns a list
    of matches for WORD, which is an argument to command CMD.  START and END
    bound the command currently being completed in rl_line_buffer. */
@@ -1368,7 +1397,7 @@ programmable_completions (cmd, word, start, end, foundp)
      const char *word;
      int start, end, *foundp;
 {
-  COMPSPEC *cs;
+  COMPSPEC *cs, *oldcs;
   STRINGLIST *ret;
   char **rmatches, *t;
 
@@ -1390,6 +1419,9 @@ programmable_completions (cmd, word, start, end, foundp)
 
   cs = compspec_copy (cs);
 
+  oldcs = curcs;
+  curcs = cs;
+
   /* Signal the caller that we found a COMPSPEC for this command, and pass
      back any meta-options associated with the compspec. */
   if (foundp)
@@ -1397,6 +1429,7 @@ programmable_completions (cmd, word, start, end, foundp)
 
   ret = gen_compspec_completions (cs, cmd, word, start, end);
 
+  curcs = oldcs;
   compspec_dispose (cs);
 
   if (ret)

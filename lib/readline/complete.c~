@@ -405,6 +405,14 @@ rl_completion_mode (cfunc)
 /*				    */
 /************************************/
 
+/* Reset readline state on a signal. */
+void
+_rl_reset_completion_state ()
+{
+  rl_completion_found_quote = 0;
+  rl_completion_quote_character = 0;
+}
+
 /* Set default values for readline word completion.  These are the variables
    that application completion functions can change or inspect. */
 static void
@@ -599,7 +607,7 @@ fnwidth (string)
   width = pos = 0;
   while (string[pos])
     {
-      if (CTRL_CHAR (*string) || *string == RUBOUT)
+      if (CTRL_CHAR (string[pos]) || string[pos] == RUBOUT)
 	{
 	  width += 2;
 	  pos++;

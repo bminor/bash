@@ -34,6 +34,7 @@
  *									 *
  *************************************************************************/
 
+#define EMACS_MODE()		(rl_editing_mode == emacs_mode)
 #define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
 #define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
 

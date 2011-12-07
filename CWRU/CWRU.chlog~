@@ -15341,3 +15341,52 @@ builtins/cd.def
 builtins/read.def
 	- when read times out, make sure input_string is null-terminated before
 	  assigning any partial input read to the named variables
+
+				   3/10
+				   ----
+lib/glob/xmbsrtowcs.c
+	- cut the number of memory allocations in xdupmbstowcs by not keeping
+	  track of the indices if the caller hasn't asked for it
+
+				   3/17
+				   ----
+builtins/fc.def
+	- make sure the adjustment to i in fc_gethnum uses the same formula
+	  fc_builtin uses to calculate last_hist
+	- make sure that every time fc_gethnum is called, the fc command last
+	  in the history list has not yet been deleted, since fc_gethnum
+	  assumes that it has not.  Fix from John Haxby <john.haxby@oracle.com>
+
+lib/readline/complete.c
+	- new private library function, _rl_reset_completion_state(), used to
+	  reset any completion state internal to the library when a signal
+	  is received
+	- call _rl_reset_completion_state() before returning from
+	  rl_complete_internal
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_reset_completion_state
+
+lib/readline/signals.c
+	- call _rl_reset_completion_state from rl_signal_handler on SIGINT.
+	  This fixes one of the problems identified by Mika Fischer
+	  <mf+ubuntu@zoopnet.de>
+
+pcomplete.c
+	- programmable_completions now saves pointer to the compspec it's
+	  working with in new global variable CURCS
+	- new function, pcomp_set_readline_variables, that sets or unsets
+	  readline variables based on a passed flags value (COPT_FILENAMES,
+	  etc.)
+
+pcomplete.h
+	- new extern declaration for curcs
+	- new extern declaration for pcomp_set_readline_variables
+
+bashline.c
+	- fix bash_dequote_filename to implement shell quoting conventions:
+		1. Inhibit backslash stripping within single quotes
+		2. Inhibit backslash stripping within double quotes only if
+		   the following character is one of the special ones
+	- call pcomp_set_readline_variables from attempt_shell_completion
+	  instead of doing the equivalent inline

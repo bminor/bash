@@ -216,6 +216,7 @@ extern void _rl_callback_data_dispose PARAMS((_rl_callback_generic_arg *));
 /* bind.c */
 
 /* complete.c */
+extern void _rl_reset_completion_state PARAMS((void));
 extern char _rl_find_completion_word PARAMS((int *, int *));
 extern void _rl_free_match_list PARAMS((char **));
 

@@ -405,6 +405,14 @@ rl_completion_mode (cfunc)
 /*				    */
 /************************************/
 
+/* Reset readline state on a signal or other event. */
+void
+_rl_reset_completion_state ()
+{
+  rl_completion_found_quote = 0;
+  rl_completion_quote_character = 0;
+}
+
 /* Set default values for readline word completion.  These are the variables
    that application completion functions can change or inspect. */
 static void
@@ -1697,6 +1705,7 @@ rl_complete_internal (what_to_do)
       FREE (saved_line_buffer);
       completion_changed_buffer = 0;
       RL_UNSETSTATE(RL_STATE_COMPLETING);
+      _rl_reset_completion_state ();
       return (0);
     }
 
@@ -1711,6 +1720,7 @@ rl_complete_internal (what_to_do)
       FREE (saved_line_buffer);
       completion_changed_buffer = 0;
       RL_UNSETSTATE(RL_STATE_COMPLETING);
+      _rl_reset_completion_state ();
       return (0);
     }
 
@@ -1765,6 +1775,7 @@ rl_complete_internal (what_to_do)
       rl_ding ();
       FREE (saved_line_buffer);
       RL_UNSETSTATE(RL_STATE_COMPLETING);
+      _rl_reset_completion_state ();
       return 1;
     }
 
@@ -1778,6 +1789,7 @@ rl_complete_internal (what_to_do)
     }
 
   RL_UNSETSTATE(RL_STATE_COMPLETING);
+  _rl_reset_completion_state ();
   return 0;
 }
 
