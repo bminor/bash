@@ -1,7 +1,7 @@
 Newsgroups: comp.unix.shell,comp.unix.questions
 Distribution: world
 From: chet@po.cwru.edu (Chet Ramey)
-Subject: BASH Frequently-Asked Questions (FAQ version 3.35)
+Subject: BASH Frequently-Asked Questions (FAQ version 3.36)
 Organization: Case Western Reserve University
 Summary: A's to Q's about BASH, the Bourne-Again SHell
 Reply-To: chet@po.cwru.edu
@@ -10,13 +10,13 @@ Followup-To: poster
 Archive-name: unix-faq/shell/bash
 Posting-Frequency: monthly
 Submitted-By: chet@po.cwru.edu (Chet Ramey)
-Last-Modified: Thu Dec 14 11:34:54 EST 2006
-FAQ-Version: 3.35
+Last-Modified: Fri May 11 16:18:55 EDT 2007
+FAQ-Version: 3.36
 Bash-Version: 3.2
 URL: ftp://ftp.cwru.edu/pub/bash/FAQ
 Maintainer: chet@po.cwru.edu (Chet Ramey)
 
-This is the Bash FAQ, version 3.35, for Bash version 3.2.
+This is the Bash FAQ, version 3.36, for Bash version 3.2.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -97,6 +97,8 @@ E11) If I resize my xterm while another program is running, why doesn't bash
      notice the change?
 E12) Why don't negative offsets in substring expansion work like I expect?
 E13) Why does filename completion misbehave if a colon appears in the filename?
+E14) Why does quoting the pattern argument to the regular expression matching
+     conditional operator (=~) cause matching to stop working?
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -926,7 +928,9 @@ D1) Why does bash run a different version of `command' than
 On many systems, `which' is actually a csh script that assumes
 you're running csh.  In tcsh, `which' and its cousin `where'
 are builtins.  On other Unix systems, `which' is a perl script
-that uses the PATH environment variable.
+that uses the PATH environment variable.  Many Linux distributions
+use GNU `which', which is a C program that can understand shell
+aliases.
 
 The csh script version reads the csh startup files from your
 home directory and uses those to determine which `command' will
@@ -1442,6 +1446,34 @@ COMP_WORDBREAKS=${COMP_WORDBREAKS//:}
 
 You can also quote the colon with a backslash to achieve the same result
 temporarily.
+
+E14) Why does quoting the pattern argument to the regular expression matching
+     conditional operator (=~) cause regexp matching to stop working?
+
+In versions of bash prior to bash-3.2, the effect of quoting the regular
+expression argument to the [[ command's =~ operator was not specified.
+The practical effect was that double-quoting the pattern argument required
+backslashes to quote special pattern characters, which interfered with the
+backslash processing performed by double-quoted word expansion and was
+inconsistent with how the == shell pattern matching operator treated
+quoted characters.
+
+In bash-3.2, the shell was changed to internally quote characters in single-
+and double-quoted string arguments to the =~ operator, which suppresses the
+special meaning of the characters special to regular expression processing
+(`.', `[', `\', `(', `), `*', `+', `?', `{', `|', `^', and `$') and forces
+them to be matched literally.  This is consistent with how the `==' pattern
+matching operator treats quoted portions of its pattern argument.
+
+Since the treatment of quoted string arguments was changed, several issues
+have arisen, chief among them the problem of white space in pattern arguments
+and the differing treatment of quoted strings between bash-3.1 and bash-3.2.
+Both problems may be solved by using a shell variable to hold the pattern.
+Since word splitting is not performed when expanding shell variables in all
+operands of the [[ command, this allows users to quote patterns as they wish
+when assigning the variable, then expand the values to a single string that
+may contain whitespace.  The first problem may be solved by using backslashes
+or any other quoting mechanism to escape the white space in the patterns.
 
 Section F:  Things to watch out for on certain Unix versions
 

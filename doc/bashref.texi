@@ -225,7 +225,7 @@ than by an executable program somewhere in the file system.
 
 @item control operator
 @cindex control operator
-A @code{word} that performs a control function.  It is a @code{newline}
+A @code{token} that performs a control function.  It is a @code{newline}
 or one of the following:
 @samp{||}, @samp{&&}, @samp{&}, @samp{;}, @samp{;;},
 @samp{|}, @samp{(}, or @samp{)}.
@@ -959,13 +959,13 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (@samp{==}) or does not
 match (@samp{!=})the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a string.
+Any part of the pattern may be quoted to force it to be matched as a
+string.
 
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
 When it is used, the string to the right of the operator is considered
 an extended regular expression and matched accordingly (as in @i{regex}3)).  
-Any part of the pattern may be quoted to force it to be matched as a string.
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional

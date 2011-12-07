@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -92,6 +92,8 @@ extern char *the_printed_command_except_trap;
 extern char *this_command_name;
 extern char *command_execution_string;
 extern time_t shell_start_time;
+extern int assigning_in_environment;
+extern int executing_builtin;
 
 #if defined (READLINE)
 extern int no_line_editing;
@@ -135,6 +137,13 @@ WORD_LIST *rest_of_args = (WORD_LIST *)NULL;
 /* The value of $$. */
 pid_t dollar_dollar_pid;
 
+/* Non-zero means that we have to remake EXPORT_ENV. */
+int array_needs_making = 1;
+
+/* The number of times BASH has been executed.  This is set
+   by initialize_variables (). */
+int shell_level = 0;
+
 /* An array which is passed to commands as their environment.  It is
    manufactured from the union of the initial environment and the
    shell variables that are marked for export. */
@@ -146,13 +155,6 @@ static int export_env_size;
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
 static int winsize_assigned;		/* assigned to LINES or COLUMNS */
 #endif
-
-/* Non-zero means that we have to remake EXPORT_ENV. */
-int array_needs_making = 1;
-
-/* The number of times BASH has been executed.  This is set
-   by initialize_variables (). */
-int shell_level = 0;
 
 /* Some forward declarations. */
 static void create_variable_tables __P((void));
@@ -1579,7 +1581,7 @@ SHELL_VAR *
 find_variable (name)
      const char *name;
 {
-  return (find_variable_internal (name, (expanding_redir == 0 && this_shell_builtin != 0)));
+  return (find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin))));
 }
 
 /* Look up the function entry whose name matches STRING.
@@ -2206,13 +2208,7 @@ assign_in_env (word)
 	}
 
       temp = name + offset + 1;
-#if 0
-      temp = (xstrchr (temp, '~') != 0) ? bash_tilde_expand (temp, 1) : savestring (temp);
-      value = expand_string_unsplit_to_string (temp, 0);
-      free (temp);
-#else
       value = expand_assignment_string_to_string (temp, 0);
-#endif
     }
 
   if (temporary_env == 0)

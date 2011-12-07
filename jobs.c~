@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -783,11 +783,13 @@ reset_job_indices ()
   if (jobs[js.j_firstj] == 0)
     {
       old = js.j_firstj++;
+      if (old >= js.j_jobslots)
+	old = js.j_jobslots - 1;
       while (js.j_firstj != old)
 	{
 	  if (js.j_firstj >= js.j_jobslots)
 	    js.j_firstj = 0;
-	  if (jobs[js.j_firstj])
+	  if (jobs[js.j_firstj] || js.j_firstj == old)	/* needed if old == 0 */
 	    break;
 	  js.j_firstj++;
 	}
@@ -797,11 +799,13 @@ reset_job_indices ()
   if (jobs[js.j_lastj] == 0)
     {
       old = js.j_lastj--;
+      if (old < 0)
+	old = 0;
       while (js.j_lastj != old)
 	{
 	  if (js.j_lastj < 0)
 	    js.j_lastj = js.j_jobslots - 1;
-	  if (jobs[js.j_lastj])
+	  if (jobs[js.j_lastj] || js.j_lastj == old)	/* needed if old == js.j_jobslots */
 	    break;
 	  js.j_lastj--;
 	}
@@ -900,6 +904,7 @@ realloc_jobs_list ()
   BLOCK_CHILD (set, oset);
   nlist = (js.j_jobslots == nsize) ? jobs : (JOB **) xmalloc (nsize * sizeof (JOB *));
 
+  js.c_reaped = js.j_ndead = 0;
   for (i = j = 0; i < js.j_jobslots; i++)
     if (jobs[i])
       {
@@ -908,12 +913,18 @@ realloc_jobs_list ()
 	if (i == js.j_previous)
 	  nprev = j;
 	nlist[j++] = jobs[i];
+	if (jobs[i]->state == JDEAD)
+	  {
+	    js.j_ndead++;
+	    js.c_reaped += processes_in_job (i);
+	  }
       }
 
 #if defined (DEBUG)
   itrace ("realloc_jobs_list: resize jobs list from %d to %d", js.j_jobslots, nsize);
   itrace ("realloc_jobs_list: j_lastj changed from %d to %d", js.j_lastj, (j > 0) ? j - 1 : 0);
-  itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, (j > 0) ? j - 1 : 0);
+  itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, j);
+  itrace ("realloc_jobs_list: js.j_ndead %d js.c_reaped %d", js.j_ndead, js.c_reaped);
 #endif
 
   js.j_firstj = 0;
@@ -963,7 +974,8 @@ compact_jobs_list (flags)
   reap_dead_jobs ();
   realloc_jobs_list ();
 
-  return (js.j_lastj);
+itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+  return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
 }
 
 /* Delete the job at INDEX from the job list.  Must be called
@@ -1391,7 +1403,7 @@ j_strsignal (s)
   if (x == 0)
     {
       x = retcode_name_buffer;
-      sprintf (x, "Signal %d", s);
+      sprintf (x, _("Signal %d"), s);
     }
   return x;
 }
@@ -1405,20 +1417,20 @@ printable_job_status (j, p, format)
   static char *temp;
   int es;
 
-  temp = "Done";
+  temp = _("Done");
 
   if (STOPPED (j) && format == 0)
     {
       if (posixly_correct == 0 || p == 0 || (WIFSTOPPED (p->status) == 0))
-	temp = "Stopped";
+	temp = _("Stopped");
       else
 	{
 	  temp = retcode_name_buffer;
-	  sprintf (temp, "Stopped(%s)", signal_name (WSTOPSIG (p->status)));
+	  sprintf (temp, _("Stopped(%s)"), signal_name (WSTOPSIG (p->status)));
 	}
     }
   else if (RUNNING (j))
-    temp = "Running";
+    temp = _("Running");
   else
     {
       if (WIFSTOPPED (p->status))
@@ -1430,14 +1442,14 @@ printable_job_status (j, p, format)
 	  temp = retcode_name_buffer;
 	  es = WEXITSTATUS (p->status);
 	  if (es == 0)
-	    strcpy (temp, "Done");
+	    strcpy (temp, _("Done"));
 	  else if (posixly_correct)
-	    sprintf (temp, "Done(%d)", es);
+	    sprintf (temp, _("Done(%d)"), es);
 	  else
-	    sprintf (temp, "Exit %d", es);
+	    sprintf (temp, _("Exit %d"), es);
 	}
       else
-	temp = "Unknown status";
+	temp = _("Unknown status");
     }
 
   return temp;
@@ -1524,7 +1536,7 @@ print_pipeline (p, job_index, format, stream)
 	      if ((WIFSTOPPED (show->status) == 0) &&
 		  (WIFCONTINUED (show->status) == 0) &&
 		  WIFCORED (show->status))
-		fprintf (stream, "(core dumped) ");
+		fprintf (stream, _("(core dumped) "));
 	    }
 	}
 
@@ -1543,7 +1555,7 @@ print_pipeline (p, job_index, format, stream)
 
 	  if (strcmp (temp, jobs[job_index]->wd) != 0)
 	    fprintf (stream,
-	      "  (wd: %s)", polite_directory_format (jobs[job_index]->wd));
+	      _("  (wd: %s)"), polite_directory_format (jobs[job_index]->wd));
 	}
 
       if (format || (p == last))
@@ -1735,7 +1747,7 @@ make_child (command, async_p)
 	     B.4.3.3, p. 237 also covers this, in the context of job control
 	     shells. */
 	  if (setpgid (mypid, pipeline_pgrp) < 0)
-	    sys_error ("child setpgid (%ld to %ld)", (long)mypid, (long)pipeline_pgrp);
+	    sys_error (_("child setpgid (%ld to %ld)"), (long)mypid, (long)pipeline_pgrp);
 
 	  /* By convention (and assumption above), if
 	     pipeline_pgrp == shell_pgrp, we are making a child for
@@ -2228,7 +2240,7 @@ raw_job_exit_status (job)
       p = jobs[job]->pipe;
       do
 	{
-	  if (p->status != EXECUTION_SUCCESS) fail = p->status;
+	  if (WSTATUS (p->status) != EXECUTION_SUCCESS) fail = WSTATUS(p->status);
 	  p = p->next;
 	}
       while (p != jobs[job]->pipe);
@@ -2370,7 +2382,7 @@ wait_for (pid)
 	  if (r == -1 && errno == ECHILD)
 	    {
 	      child->running = PS_DONE;
-	      child->status = 0;	/* XXX -- can't find true status */
+	      WSTATUS (child->status) = 0;	/* XXX -- can't find true status */
 	      js.c_living = 0;		/* no living child processes */
 	      if (job != NO_JOB)
 		{
@@ -3399,7 +3411,7 @@ notify_of_job_status ()
 		  signal_is_trapped (termsig) == 0)
 		{
 		  /* Don't print `0' for a line number. */
-		  fprintf (stderr, "%s: line %d: ", get_name_for_error (), (line_number == 0) ? 1 : line_number);
+		  fprintf (stderr, _("%s: line %d: "), get_name_for_error (), (line_number == 0) ? 1 : line_number);
 		  pretty_print_job (job, JLIST_NONINTERACTIVE, stderr);
 		}
 	      else if (IS_FOREGROUND (job))
@@ -3413,7 +3425,7 @@ notify_of_job_status ()
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))
-			fprintf (stderr, " (core dumped)");
+			fprintf (stderr, _(" (core dumped)"));
 
 		      fprintf (stderr, "\n");
 		    }
@@ -3425,7 +3437,7 @@ notify_of_job_status ()
 		  pretty_print_job (job, JLIST_STANDARD, stderr);
 		  if (dir && strcmp (dir, jobs[job]->wd) != 0)
 		    fprintf (stderr,
-			     "(wd now: %s)\n", polite_directory_format (dir));
+			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
 	      jobs[job]->flags |= J_NOTIFIED;
@@ -3438,7 +3450,7 @@ notify_of_job_status ()
 	      pretty_print_job (job, JLIST_STANDARD, stderr);
 	      if (dir && (strcmp (dir, jobs[job]->wd) != 0))
 		fprintf (stderr,
-			 "(wd now: %s)\n", polite_directory_format (dir));
+			 _("(wd now: %s)\n"), polite_directory_format (dir));
 	      jobs[job]->flags |= J_NOTIFIED;
 	      break;
 
@@ -3466,7 +3478,7 @@ initialize_job_control (force)
 
   if (shell_pgrp == -1)
     {
-      sys_error ("initialize_job_control: getpgrp failed");
+      sys_error (_("initialize_job_control: getpgrp failed"));
       exit (1);
     }
 
@@ -3512,7 +3524,7 @@ initialize_job_control (force)
       /* Make sure that we are using the new line discipline. */
       if (set_new_line_discipline (shell_tty) < 0)
 	{
-	  sys_error ("initialize_job_control: line discipline");
+	  sys_error (_("initialize_job_control: line discipline"));
 	  job_control = 0;
 	}
       else
@@ -3522,7 +3534,7 @@ initialize_job_control (force)
 
 	  if ((original_pgrp != shell_pgrp) && (setpgid (0, shell_pgrp) < 0))
 	    {
-	      sys_error ("initialize_job_control: setpgid");
+	      sys_error (_("initialize_job_control: setpgid"));
 	      shell_pgrp = original_pgrp;
 	    }
 

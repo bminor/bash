@@ -188,9 +188,6 @@ static int execute_connection __P((COMMAND *, int, int, int, struct fd_bitmap *)
 
 static int execute_intern_function __P((WORD_DESC *, COMMAND *));
 
-/* The line number that the currently executing function starts on. */
-static int function_line_number;
-
 /* Set to 1 if fd 0 was the subject of redirection to a subshell.  Global
    so that reader_loop can set it to zero before executing a command. */
 int stdin_redir;
@@ -203,19 +200,6 @@ char *this_command_name;
    the_printed_command), except when a trap is being executed.  Useful for
    a debugger to know where exactly the program is currently executing. */
 char *the_printed_command_except_trap;
-
-static COMMAND *currently_executing_command;
-
-struct stat SB;		/* used for debugging */
-
-static int special_builtin_failed;
-
-/* XXX - set to 1 if we're running the DEBUG trap and we want to show the line
-   number containing the function name.  Used by executing_line_number to
-   report the correct line number.  Kind of a hack. */
-static int showing_function_line;
-
-static int line_number_for_err_trap;
 
 /* For catching RETURN in a function. */
 int return_catch_flag;
@@ -238,6 +222,10 @@ REDIRECT *redirection_undo_list = (REDIRECT *)NULL;
    that must be undone even when exec discards redirection_undo_list. */
 REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
 
+/* When greater than zero, value is the `level' of builtins we are
+   currently executing (e.g. `eval echo a' would have it set to 2). */
+int executing_builtin = 0;
+
 /* Non-zero if we have just forked and are currently running in a subshell
    environment. */
 int subshell_environment;
@@ -250,6 +238,22 @@ SHELL_VAR *this_shell_function;
 
 /* If non-zero, matches in case and [[ ... ]] are case-insensitive */
 int match_ignore_case = 0;
+
+struct stat SB;		/* used for debugging */
+
+static int special_builtin_failed;
+
+static COMMAND *currently_executing_command;
+
+/* The line number that the currently executing function starts on. */
+static int function_line_number;
+
+/* XXX - set to 1 if we're running the DEBUG trap and we want to show the line
+   number containing the function name.  Used by executing_line_number to
+   report the correct line number.  Kind of a hack. */
+static int showing_function_line;
+
+static int line_number_for_err_trap;
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -3006,6 +3010,8 @@ run_builtin:
 
   if (builtin || func)
     {
+      if (builtin)
+	unwind_protect_int (executing_builtin);	/* modified in execute_builtin */
       if (already_forked)
 	{
 	  /* reset_terminating_signals (); */	/* XXX */
@@ -3171,6 +3177,7 @@ execute_builtin (builtin, words, flags, subshell)
       add_unwind_protect (merge_temporary_env, (char *)NULL);
     }
 
+  executing_builtin++;
   result = ((*builtin) (words->next));
 
   /* This shouldn't happen, but in case `return' comes back instead of

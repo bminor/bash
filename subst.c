@@ -136,6 +136,8 @@ size_t ifs_firstc_len;
 unsigned char ifs_firstc;
 #endif
 
+int assigning_in_environment;
+
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment;
@@ -160,6 +162,8 @@ int allow_null_glob_expansion;
 
 /* Non-zero means to throw an error when globbing fails to match anything. */
 int fail_glob_expansion;
+
+int assigining_in_environment;
 
 #if 0
 /* Variables to keep track of which words in an expanded word list (the
@@ -7700,6 +7704,7 @@ exp_jump_to_top_level (v)
   /* Cleanup code goes here. */
   expand_no_split_dollar_star = 0;	/* XXX */
   expanding_redir = 0;
+  assigning_in_environment = 0;
 
   top_level_cleanup ();			/* from sig.c */
 
@@ -8202,7 +8207,9 @@ expand_word_list_internal (list, eflags)
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
 	  this_command_name = (char *)NULL;
+	  assigning_in_environment = (assign_func == assign_in_env);
 	  tint = (*assign_func) (temp_list->word);
+	  assigning_in_environment = 0;
 	  /* Variable assignment errors in non-interactive shells running
 	     in Posix.2 mode cause the shell to exit. */
 	  if (tint == 0)

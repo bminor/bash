@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 May 1<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -864,7 +864,8 @@ The return status is the exit status of
 Note that unlike the metacharacters <B>(</B> and <B>)</B>, <B>{</B> and
 <B>}</B> are <I>reserved words</I> and must occur where a reserved
 word is permitted to be recognized.  Since they do not cause a word
-break, they must be separated from <I>list</I> by whitespace.
+break, they must be separated from <I>list</I> by whitespace or another
+shell metacharacter.
 <DT>((<I>expression</I>))<DD>
 The <I>expression</I> is evaluated according to the rules described
 below under
@@ -3278,7 +3279,7 @@ The <I>pattern</I> is expanded to produce a pattern just as in
 pathname expansion.
 <I>Parameter</I> is expanded and the longest match of <I>pattern</I>
 against its value is replaced with <I>string</I>.
-If Ipattern begins with <B>/</B>, all matches of <I>pattern</I> are
+If <I>pattern</I> begins with <B>/</B>, all matches of <I>pattern</I> are
 replaced with <I>string</I>.  Normally only the first match is replaced.
 If <I>pattern</I> begins with <B>#</B>, it must match at the beginning
 of the expanded value of <I>parameter</I>.
@@ -10685,6 +10686,7 @@ an argument of <B>--</B> as signifying the end of options.
 
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence.
+The evaluation depends on the number of arguments; see below.
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
@@ -10750,14 +10752,14 @@ under
 </FONT>
 the result of the expression is the result of the binary test using
 the first and third arguments as operands.
+The <B>-a</B> and <B>-o</B> operators are considered binary operators
+when there are three arguments.  
 If the first argument is <B>!</B>, the value is the negation of
 the two-argument test using the second and third arguments.
 If the first argument is exactly <B>(</B> and the third argument is
 exactly <B>)</B>, the result is the one-argument test of the second
 argument.
 Otherwise, the expression is false.
-The <B>-a</B> and <B>-o</B> operators are considered binary operators
-in this case.  
 <DT>4 arguments<DD>
 If the first argument is <B>!</B>, the result is the negation of
 the three-argument expression composed of the remaining arguments.
@@ -11541,7 +11543,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 January 12<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 May 1<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11645,6 +11647,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 16 January 2007 11:15:22 EST
+Time: 11 May 2007 16:18:51 EDT
 </BODY>
 </HTML>

@@ -783,11 +783,13 @@ reset_job_indices ()
   if (jobs[js.j_firstj] == 0)
     {
       old = js.j_firstj++;
+      if (old >= js.j_jobslots)
+	old = js.j_jobslots - 1;
       while (js.j_firstj != old)
 	{
 	  if (js.j_firstj >= js.j_jobslots)
 	    js.j_firstj = 0;
-	  if (jobs[js.j_firstj])
+	  if (jobs[js.j_firstj] || js.j_firstj == old)	/* needed if old == 0 */
 	    break;
 	  js.j_firstj++;
 	}
@@ -797,11 +799,13 @@ reset_job_indices ()
   if (jobs[js.j_lastj] == 0)
     {
       old = js.j_lastj--;
+      if (old < 0)
+	old = 0;
       while (js.j_lastj != old)
 	{
 	  if (js.j_lastj < 0)
 	    js.j_lastj = js.j_jobslots - 1;
-	  if (jobs[js.j_lastj])
+	  if (jobs[js.j_lastj] || js.j_lastj == old)	/* needed if old == js.j_jobslots */
 	    break;
 	  js.j_lastj--;
 	}
@@ -900,6 +904,7 @@ realloc_jobs_list ()
   BLOCK_CHILD (set, oset);
   nlist = (js.j_jobslots == nsize) ? jobs : (JOB **) xmalloc (nsize * sizeof (JOB *));
 
+  js.c_reaped = js.j_ndead = 0;
   for (i = j = 0; i < js.j_jobslots; i++)
     if (jobs[i])
       {
@@ -908,12 +913,18 @@ realloc_jobs_list ()
 	if (i == js.j_previous)
 	  nprev = j;
 	nlist[j++] = jobs[i];
+	if (jobs[i]->state == JDEAD)
+	  {
+	    js.j_ndead++;
+	    js.c_reaped += processes_in_job (i);
+	  }
       }
 
 #if defined (DEBUG)
   itrace ("realloc_jobs_list: resize jobs list from %d to %d", js.j_jobslots, nsize);
   itrace ("realloc_jobs_list: j_lastj changed from %d to %d", js.j_lastj, (j > 0) ? j - 1 : 0);
-  itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, (j > 0) ? j - 1 : 0);
+  itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, j);
+  itrace ("realloc_jobs_list: js.j_ndead %d js.c_reaped %d", js.j_ndead, js.c_reaped);
 #endif
 
   js.j_firstj = 0;
@@ -963,7 +974,11 @@ compact_jobs_list (flags)
   reap_dead_jobs ();
   realloc_jobs_list ();
 
-  return (js.j_lastj ? js.j_lastj + 1 : 0);
+#ifdef DEBUG
+  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+#endif
+
+  return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
 }
 
 /* Delete the job at INDEX from the job list.  Must be called

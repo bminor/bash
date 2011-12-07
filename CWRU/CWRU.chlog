@@ -14584,3 +14584,30 @@ subst.c
 lib/readline/signals.c
 	- fix bug in rl_set_signals that caught SIGINT twice and didn't catch
 	  SIGTERM.  Bug reported by Ed Kwan <ed.kwan@onstor.com>
+
+				   5/18
+				   ----
+jobs.c
+	- change compact_jobs_list to return 1 if js.j_lastj == 0 and there is
+	  a job in jobs[0]; compact_jobs_list should never return an index
+	  already occupied
+	- change reset_job_indices to avoid infinite looping when js.j_firstj
+	  == 0 or js.j_firstj == js.j_jobslots upon function entry.  Fixes
+	  bug reported by osicka@post.cz
+
+				   5/20
+				   ----
+
+execute_cmd.c
+	- new variable, executing_builtin, keeps track of number of "levels"
+	  of builtins being executed; incremented by execute_builtin; saved
+	  and restored by execute_simple_command
+
+subst.c
+	- new variablem, assigning_in_environment, set and unset around calls
+	  to assign_in_env by the expansion code
+
+variables.c
+	- use executing_builtin and assigning_in_environment to decide whether
+	  or not to look into temporary_env when calling find_variable_internal.
+	  Fixes problem reported by Kevin Quinn <kevquinn@gentoo.org>

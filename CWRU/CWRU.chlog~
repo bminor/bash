@@ -14570,12 +14570,27 @@ lib/readline/input.c
 	  (push_index) that caused the 511th character in the buffer to be
 	  discarded.  Fixes bug reported by Tom Bjorkholm <tom.bjorkholm@ericsson.com>
 
-				    5/5
+				    5/8
 				    ---
-print_cmd.c
-	- added logic (inside_pipeline variable) to print_connection code and
-	  print_redirection to handle the case of a command with a here
-	  document inside a pipeline.  In that case, print_redirection prints
-	  the `|' before the here document text, so the parser knows the
-	  command is continued.  Fixes problem reported by Chris Lesner
-	  <chris.lesner@gmail.com>
+subst.c
+	- fix parameter_brace_remove_pattern to pass getpattern() newly-allocated
+	  memory.  If word expansions (particularly brace expansions) are
+	  required, the expansion code will free the string passed to
+	  expand_word_internal, and we don't want to free unallocated memory
+	  (patstr++) or have duplicate frees (patstr)
+
+				    5/9
+				    ---
+lib/readline/signals.c
+	- fix bug in rl_set_signals that caught SIGINT twice and didn't catch
+	  SIGTERM.  Bug reported by Ed Kwan <ed.kwan@onstor.com>
+
+				   5/18
+				   ----
+jobs.c
+	- change compact_jobs_list to return 1 if js.j_lastj == 0 and there is
+	  a job in jobs[0]; compact_jobs_list should never return an index
+	  already occupied
+	- change reset_job_indices to avoid infinite looping when js.j_firstj
+	  == 0 or js.j_firstj == js.j_jobslots upon function entry.  Fixes
+	  bug reported by osicka@post.cz
