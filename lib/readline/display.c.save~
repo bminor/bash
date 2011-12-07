@@ -971,7 +971,7 @@ rl_redisplay ()
 		 take invisible characters into account, since _rl_last_c_pos
 		 is an absolute cursor position in a multibyte locale.  See
 		 if compensating here is the right thing, or if we have to
-		 change update_line itself.  There are several cases in which
+		 change update_line itself.  There is one case in which
 		 update_line adjusts _rl_last_c_pos itself (so it can pass
 		 _rl_move_cursor_relative accurate values); it communicates
 		 this back by setting cpos_adjusted.  If we assume that
@@ -1611,30 +1611,12 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	     _rl_horizontal_scroll_mode == 1, inserting the characters with
 	     _rl_term_IC or _rl_term_ic will screw up the screen because of the
 	     invisible characters.  We need to just draw them. */
-	  /* The same thing happens if we're trying to draw before the last
-	     invisible character in the prompt string or we're increasing the
-	     number of invisible characters in the line and we're not drawing
-	     the entire prompt string. */
-	  if (*ols && ((_rl_horizontal_scroll_mode &&
-			_rl_last_c_pos == 0 &&
-			lendiff > prompt_visible_length &&
-			current_invis_chars > 0) == 0) &&
-		      (((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-		        current_line == 0 && wrap_offset &&
-		        ((nfd - new) <= prompt_last_invisible) &&
-		        (col_lendiff < prompt_visible_length)) == 0) &&
-		      (visible_wrap_offset >= current_invis_chars))
+	  if (*ols && (!_rl_horizontal_scroll_mode || _rl_last_c_pos > 0 ||
+			lendiff <= prompt_visible_length || !current_invis_chars))
 	    {
 	      insert_some_chars (nfd, lendiff, col_lendiff);
 	      _rl_last_c_pos += col_lendiff;
 	    }
-#if 0		/* XXX - for now */
-	  else if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && _rl_last_c_pos == 0 && wrap_offset && (nfd-new) <= prompt_last_invisible && col_lendiff < prompt_visible_length && visible_wrap_offset >= current_invis_chars)
-	    {
-	      _rl_output_some_chars (nfd, lendiff);
-	      _rl_last_c_pos += col_lendiff;
-	    }
-#endif
 	  else if ((MB_CUR_MAX == 1 || rl_byte_oriented != 0) && *ols == 0 && lendiff > 0)
 	    {
 	      /* At the end of a line the characters do not have to
@@ -1648,10 +1630,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	    {
 	      _rl_output_some_chars (nfd, temp);
 	      _rl_last_c_pos += col_temp;
-	      /* If nfd begins before the last invisible character in the
-		 prompt, adjust _rl_last_c_pos to account for wrap_offset
-		 and set cpos_adjusted to let the caller know. */
-	      if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
+	      /* If nfd begins before any invisible characters in the prompt,
+		 adjust _rl_last_c_pos to account for wrap_offset and set
+		 cpos_adjusted to let the caller know. */
+	      if (current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
 		  _rl_last_c_pos -= wrap_offset;
 		  cpos_adjusted = 1;
@@ -1672,10 +1654,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      else
 		twidth = temp - lendiff;
 	      _rl_last_c_pos += twidth;
-	      /* If nfd begins before the last invisible character in the
-		 prompt, adjust _rl_last_c_pos to account for wrap_offset
-		 and set cpos_adjusted to let the caller know. */
-	      if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
+	      /* If nfd begins before any invisible characters in the prompt,
+		 adjust _rl_last_c_pos to account for wrap_offset and set
+		 cpos_adjusted to let the caller know. */
+	      if (current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
 		  _rl_last_c_pos -= wrap_offset;
 		  cpos_adjusted = 1;
@@ -1691,14 +1673,6 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	     char in the current line (which implies we just output some invisible
 	     characters) we need to adjust _rl_last_c_pos, since it represents
 	     a physical character position. */
-	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-		current_line == prompt_last_screen_line && wrap_offset &&
-		wrap_offset != prompt_invis_chars_first_line &&
-		((nfd-new) < (prompt_last_invisible-(current_line*_rl_screenwidth))))
-	    {
-	      _rl_last_c_pos -= wrap_offset - prompt_invis_chars_first_line;
-	      cpos_adjusted = 1;
-	    }
 	}
     }
   else				/* Delete characters from line. */
@@ -1908,8 +1882,7 @@ _rl_move_cursor_relative (new, data)
 	  (prompt_physical_chars > _rl_screenwidth &&
 	   _rl_last_v_pos == prompt_last_screen_line &&
 	   wrap_offset != woff &&
-	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
-	   /* XXX last comparison might need to be >= */
+	   new > (prompt_last_invisible-_rl_screenwidth-wrap_offset)))
 	{
 	  dpos -= woff;
 	  /* Since this will be assigned to _rl_last_c_pos at the end (more

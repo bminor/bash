@@ -7179,3 +7179,40 @@ redir.c
 	  close-on-exec when the fd is restored.  Set flag in add_undo_redirect,
 	  check in do_redirection_internal.  Fixes problem reported by Andreas
 	  Schwab <schwab@suse.de>
+
+				   11/26
+				   -----
+subst.c
+	- fix param_expand to have expansions of $@ and $* exit the shell if
+	  there are no positional parameters and `set -u' is enabled.  Fixes
+	  bug reported by Dan Jacobson <jidanni@jidanni.org>
+
+				   11/27
+				   -----
+lib/readline/display.c
+	- fix update_line to not call space_to_eol if current cursor position
+	  (_rl_last_c_pos) indicates that we're already at end of line.
+	  Partial fix for bug reported by Mike Frysinger <vapier@gentoo.org>
+	- in update_line, don't call insert_some_chars if that will start
+	  before the last invisible character in the prompt string and not
+	  draw the entire prompt string.  More of the partial fix for bug
+	  reported by Mike Frysinger <vapier@gentoo.org>
+	- fix update_line to adjust _rl_last_c_pos by wrap_offset when adding
+	  characters beginning before the last invisible character in the
+	  prompt.  New code is same as previously existed in a different code
+	  path.  Rest of fix for bug from Mike Frysinger <vapier@gentoo.org>
+	- fix assignment of newline breaks (inv_lbreaks) to correctly account
+	  for prompts longer than two screen lines containing invisible
+	  characters.  The assumption is that part of the invisible characters
+	  are on the first line (prompt_invis_chars_first_line) and the
+	  remainder are on the last (wrap_offset - prompt_invis_chars_first_line).
+	  Fix is in rl_redisplay.  part of fix for bug reported by
+	  "Wesley J. Landaker" <wjl@icecavern.net> in
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=265182
+	  [TENTATIVE]
+	- fix _rl_move_cursor_relative to correctly offset `dpos' by `woff'
+	  when there are invisible characters on lines after the second by
+	  using (_rl_screenwidth*_rl_last_v_pos) when seeing whether or not
+	  we just wrote some invisible characters.  Rest of fix for bug
+	  reported in http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=265182
+	  [TENTATIVE]

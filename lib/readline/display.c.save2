@@ -1611,30 +1611,14 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	     _rl_horizontal_scroll_mode == 1, inserting the characters with
 	     _rl_term_IC or _rl_term_ic will screw up the screen because of the
 	     invisible characters.  We need to just draw them. */
-	  /* The same thing happens if we're trying to draw before the last
-	     invisible character in the prompt string or we're increasing the
-	     number of invisible characters in the line and we're not drawing
-	     the entire prompt string. */
-	  if (*ols && ((_rl_horizontal_scroll_mode &&
-			_rl_last_c_pos == 0 &&
-			lendiff > prompt_visible_length &&
-			current_invis_chars > 0) == 0) &&
-		      (((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-		        current_line == 0 && wrap_offset &&
-		        ((nfd - new) <= prompt_last_invisible) &&
-		        (col_lendiff < prompt_visible_length)) == 0) &&
-		      (visible_wrap_offset >= current_invis_chars))
+	  if (*ols && (_rl_horizontal_scroll_mode == 0 ||
+			_rl_last_c_pos > 0 ||
+			lendiff <= prompt_visible_length ||
+			current_invis_chars == 0))
 	    {
 	      insert_some_chars (nfd, lendiff, col_lendiff);
 	      _rl_last_c_pos += col_lendiff;
 	    }
-#if 0		/* XXX - for now */
-	  else if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && _rl_last_c_pos == 0 && wrap_offset && (nfd-new) <= prompt_last_invisible && col_lendiff < prompt_visible_length && visible_wrap_offset >= current_invis_chars)
-	    {
-	      _rl_output_some_chars (nfd, lendiff);
-	      _rl_last_c_pos += col_lendiff;
-	    }
-#endif
 	  else if ((MB_CUR_MAX == 1 || rl_byte_oriented != 0) && *ols == 0 && lendiff > 0)
 	    {
 	      /* At the end of a line the characters do not have to
@@ -1648,9 +1632,9 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	    {
 	      _rl_output_some_chars (nfd, temp);
 	      _rl_last_c_pos += col_temp;
-	      /* If nfd begins before the last invisible character in the
-		 prompt, adjust _rl_last_c_pos to account for wrap_offset
-		 and set cpos_adjusted to let the caller know. */
+	      /* If nfd begins before any invisible characters in the prompt,
+		 adjust _rl_last_c_pos to account for wrap_offset and set
+		 cpos_adjusted to let the caller know. */
 	      if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
 		  _rl_last_c_pos -= wrap_offset;
@@ -1672,9 +1656,9 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      else
 		twidth = temp - lendiff;
 	      _rl_last_c_pos += twidth;
-	      /* If nfd begins before the last invisible character in the
-		 prompt, adjust _rl_last_c_pos to account for wrap_offset
-		 and set cpos_adjusted to let the caller know. */
+	      /* If nfd begins before any invisible characters in the prompt,
+		 adjust _rl_last_c_pos to account for wrap_offset and set
+		 cpos_adjusted to let the caller know. */
 	      if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && current_line == 0 && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
 		  _rl_last_c_pos -= wrap_offset;

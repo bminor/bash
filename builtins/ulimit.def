@@ -182,7 +182,7 @@ extern int errno;
    otherwise. */
 #define POSIXBLK	-2
 
-#define BLOCKSIZE(x)	(((x) == POSIXBLK && posixly_correct) ? 512 : 1024)
+#define BLOCKSIZE(x)	(((x) == POSIXBLK) ? (posixly_correct ? 512 : 1024) : (x))
 
 extern int posixly_correct;
 

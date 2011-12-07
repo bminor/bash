@@ -6887,6 +6887,16 @@ param_expand (string, sindex, quoted, expanded_something,
     case '*':		/* `$*' */
       list = list_rest_of_args ();
 
+      if (list == 0 && unbound_vars_is_error)
+	{
+	  uerror[0] = '$';
+	  uerror[1] = '*';
+	  uerror[2] = '\0';
+	  err_unboundvar (uerror);
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
+
       /* If there are no command-line arguments, this should just
 	 disappear if there are other characters in the expansion,
 	 even if it's quoted. */
@@ -6938,6 +6948,16 @@ param_expand (string, sindex, quoted, expanded_something,
        on the first character of $IFS is still done.  */
     case '@':		/* `$@' */
       list = list_rest_of_args ();
+
+      if (list == 0 && unbound_vars_is_error)
+	{
+	  uerror[0] = '$';
+	  uerror[1] = '@';
+	  uerror[2] = '\0';
+	  err_unboundvar (uerror);
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
 
       /* We want to flag the fact that we saw this.  We can't turn
 	 off quoting entirely, because other characters in the

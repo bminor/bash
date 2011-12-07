@@ -1874,6 +1874,7 @@ read_secondary_line (remove_quoted_newline)
   if (SHOULD_PROMPT())
     prompt_again ();
   ret = read_a_line (remove_quoted_newline);
+#if defined (HISTORY)
   if (remember_on_history && (parser_state & PST_HEREDOC))
     {
       /* To make adding the the here-document body right, we need to rely
@@ -1885,6 +1886,7 @@ read_secondary_line (remove_quoted_newline)
       current_command_line_count++;
       maybe_add_history (ret);
     }
+#endif /* HISTORY */
   return ret;
 }
 

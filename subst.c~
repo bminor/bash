@@ -3943,7 +3943,6 @@ match_pattern (string, pat, mtype, sp, ep)
       free (wstring);
       free (indices);
 
-itrace("match_pattern: pat = `%s' string = `%s' -> %d", pat, string, ret);
       return (ret);
     }
   else
@@ -6887,6 +6886,16 @@ param_expand (string, sindex, quoted, expanded_something,
     /* The only difference between this and $@ is when the arg is quoted. */
     case '*':		/* `$*' */
       list = list_rest_of_args ();
+
+      if (list == 0 && unbound_vars_is_error)
+	{
+	  uerror[0] = '$';
+	  uerror[1] = '*';
+	  uerror[2] = '\0';
+	  err_unboundvar (uerror);
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
 
       /* If there are no command-line arguments, this should just
 	 disappear if there are other characters in the expansion,
