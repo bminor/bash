@@ -34,7 +34,6 @@
 #include "builtins.h"
 #include "shell.h"
 #include "bashgetopt.h"
-#include "common.h"
 
 #ifndef errno
 extern int	errno;
@@ -68,14 +67,14 @@ WORD_LIST	*list;
 			vflag = 1;
 			break;
 		default:
-			builtin_usage();
+			usage();
 		}
 	}
 
 	list = loptend;
 
 	if (list == 0)
-		builtin_usage();
+		usage();
 
 	for (es = EXECUTION_SUCCESS; list; list = list->next) {
 		p = list->word->word;

@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -185,6 +185,7 @@ rl_tilde_expand (ignore, key)
     {
       homedir = tilde_expand ("~");
       _rl_replace_text (homedir, start, end);
+      xfree (homedir);
       return (0);
     }
   else if (rl_line_buffer[start] != '~')
@@ -215,6 +216,7 @@ rl_tilde_expand (ignore, key)
       xfree (temp);
 
       _rl_replace_text (homedir, start, end);
+      xfree (homedir);
     }
 
   return (0);

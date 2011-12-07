@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (the Library), a set of
    routines for managing the text of previously typed lines.
@@ -66,6 +66,7 @@ static int subst_rhs_len;
 static char *get_history_word_specifier PARAMS((char *, char *, int *));
 static char *history_find_word PARAMS((char *, int));
 static int history_tokenize_word PARAMS((const char *, int));
+static char **history_tokenize_internal PARAMS((const char *, int, int *));
 static char *history_substring PARAMS((const char *, int, int));
 
 static char *quote_breaks PARAMS((char *));
@@ -1582,7 +1583,10 @@ history_find_word (line, ind)
 
   words = history_tokenize_internal (line, ind, &wind);
   if (wind == -1 || words == 0)
-    return ((char *)NULL);
+    {
+      FREE (words);
+      return ((char *)NULL);
+    }
   s = words[wind];
   for (i = 0; i < wind; i++)
     free (words[i]);

@@ -14790,7 +14790,7 @@ lib/sh/getcwd.c
 builtins/common.c
 	- change sh_invalidnum to be a little smarter about octal and hex
 	  numbers and change the message appropriately.  Bug originally
-	  reported on coreutils list by Jürgen Niinre<Jyrgen.Niinre@emt.ee>
+	  reported on coreutils list by Jürgen Niinre <Jyrgen.Niinre@emt.ee>
 
 				   7/26
 				   ----
@@ -14802,3 +14802,31 @@ test.c
 parse.y
 	- better input validation: make sure a word looks like a conditional
 	  unary operator (-X) before calling test_unop
+
+				   7/28
+				   ----
+trap.c
+	- in trap_handler, if it's called directly from the signal handler
+	  (e.g., SIGINT sighandler, set by set_sigint_handler), but the
+	  trap disposition has been reset to the default between the
+	  assignment and receipt of the signal, check that the signal is
+	  trapped and issue a warning if the shell was compiled with
+	  debugging enabled.  Fixes bug reported by Fergus Henderson
+	  <fergus@google.com>
+
+				    8/1
+				    ---
+lib/readline/{util,histexpand}.c
+	- fixes for small memory leaks from Michael Snyder <msnyder@sonic.net>
+
+				   8/18
+				   ----
+Makefile.in
+	- add dependency on builtins/builtext.h to nojobs.o list.  Fixes
+	  `make -j 5' issue reported by Chris MacGregor <chris@bouncingdog.com>
+
+examples/loadables/Makefile.in
+	- add @LDFLAGS@ to SHOBJ_LDFLAGS assignment -- experimental.  Suggested
+	  by Mike Frysinger <vapier@gentoo.org>
+
+examples/loadables/{
