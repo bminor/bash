@@ -7216,3 +7216,26 @@ lib/readline/display.c
 	  we just wrote some invisible characters.  Rest of fix for bug
 	  reported in http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=265182
 	  [TENTATIVE]
+
+				   12/11
+				   -----
+sig.c
+	- reset the execution context before running the exit trap in
+	  termsig_handler
+
+general.c
+	- set and unset terminate_immediately like interrupt_immediately in
+	  bash_tilde_expand
+
+builtins/read.def
+	- change terminate_immediately to a counter instead of a flag, as
+	  interrupt_immediately is used
+
+lib/readline/display.c
+	- slight change to fix from 11/27 to deal with prompts longer than a
+	  screen line where the invisible characters all appear after the
+	  line wrap.  Fixes bug reported by Andreas Schwab <schwab@suse.de>
+
+builtins/{echo,printf}.def
+	- increment terminate_immediately at entry; decrement before returning.
+	  Fix for bug reported by Ralf.Wildenhues@gmx.de

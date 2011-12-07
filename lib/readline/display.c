@@ -1907,7 +1907,7 @@ _rl_move_cursor_relative (new, data)
       if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
 	  (prompt_physical_chars > _rl_screenwidth &&
 	   _rl_last_v_pos == prompt_last_screen_line &&
-	   wrap_offset != woff &&
+	   wrap_offset >= woff &&
 	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
 	   /* XXX last comparison might need to be >= */
 	{

@@ -441,7 +441,7 @@ read_builtin (list)
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
   interrupt_immediately++;
-  terminate_immediately = 1;
+  terminate_immediately++;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
 
@@ -602,7 +602,7 @@ add_char:
     zsyncfd (fd);
 
   interrupt_immediately--;
-  terminate_immediately = 0;
+  terminate_immediately--;
   discard_unwind_frame ("read_builtin");
 
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;

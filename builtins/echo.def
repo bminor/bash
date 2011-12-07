@@ -159,6 +159,7 @@ just_echo:
 
   clearerr (stdout);	/* clear error before writing and testing success */
 
+  terminate_immediately++;
   while (list)
     {
       i = len = 0;
@@ -191,5 +192,7 @@ just_echo:
 
   if (display_return)
     putchar ('\n');
+
+  terminate_immediately--;
   return (sh_chkwrite (EXECUTION_SUCCESS));
 }

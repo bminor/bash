@@ -2018,6 +2018,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   UNBLOCK_CHILD (oset);
 #endif
 
+  QUIT;
   return (exec_result);
 }
 
@@ -3706,6 +3707,9 @@ execute_builtin (builtin, words, flags, subshell)
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
 
+  /* XXX -- added 12/11 */
+/*   terminate_immediately++; */
+
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
@@ -3771,6 +3775,9 @@ execute_builtin (builtin, words, flags, subshell)
       exit_immediately_on_error += old_e_flag;
       discard_unwind_frame ("eval_builtin");
     }
+
+  /* XXX -- added 12/11 */
+/*  terminate_immediately--; */
 
   return (result);
 }
@@ -4549,7 +4556,6 @@ shell_execve (command, args, env)
      char *command;
      char **args, **env;
 {
-  struct stat finfo;
   int larray, i, fd;
   char sample[80];
   int sample_len;
@@ -4564,7 +4570,7 @@ shell_execve (command, args, env)
      Maybe it is something we can hack ourselves. */
   if (i != ENOEXEC)
     {
-      if ((stat (command, &finfo) == 0) && (S_ISDIR (finfo.st_mode)))
+      if (file_isdir (command))
 	internal_error (_("%s: is a directory"), command);
       else if (executable_file (command) == 0)
 	{
@@ -4698,7 +4704,7 @@ execute_intern_function (name, function)
     {
       if (posixly_correct && interactive_shell == 0)
 	{
-	  last_command_exit_value = EX_USAGE;
+	  last_command_exit_value = EX_BADUSAGE;
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);

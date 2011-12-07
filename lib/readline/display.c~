@@ -1628,7 +1628,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      insert_some_chars (nfd, lendiff, col_lendiff);
 	      _rl_last_c_pos += col_lendiff;
 	    }
-#if 1
+#if 0		/* XXX - for now */
 	  else if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && _rl_last_c_pos == 0 && wrap_offset && (nfd-new) <= prompt_last_invisible && col_lendiff < prompt_visible_length && visible_wrap_offset >= current_invis_chars)
 	    {
 	      _rl_output_some_chars (nfd, lendiff);

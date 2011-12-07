@@ -449,6 +449,7 @@ termsig_sighandler (sig)
 {
   terminating_signal = sig;
 
+  /* XXX - should this also trigger when interrupt_immediately is set? */
   if (terminate_immediately)
     {
       terminate_immediately = 0;
@@ -490,6 +491,9 @@ termsig_handler (sig)
 #if defined (PROCESS_SUBSTITUTION)
   unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
+
+  /* Reset execution context */
+  loop_level = continuing = breaking = executing_list = return_catch_flag = 0;
 
   run_exit_trap ();
   set_signal_handler (sig, SIG_DFL);

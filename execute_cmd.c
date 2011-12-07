@@ -2018,6 +2018,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   UNBLOCK_CHILD (oset);
 #endif
 
+  QUIT;
   return (exec_result);
 }
 
@@ -3706,6 +3707,11 @@ execute_builtin (builtin, words, flags, subshell)
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
 
+#if 0
+  /* XXX -- added 12/11 */
+  terminate_immediately++;
+#endif
+
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
@@ -3771,6 +3777,11 @@ execute_builtin (builtin, words, flags, subshell)
       exit_immediately_on_error += old_e_flag;
       discard_unwind_frame ("eval_builtin");
     }
+
+#if 0
+  /* XXX -- added 12/11 */
+  terminate_immediately--;
+#endif
 
   return (result);
 }
