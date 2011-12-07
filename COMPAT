@@ -282,7 +282,8 @@ bash-2.0 were significant.)
 35. Bash-3.2 (patched) and Bash-4.0 fix a bug that leaves the shell in an
     inconsistent internal state following an assignment error.  One of the
     changes means that compound commands or { ... } grouping commands are
-    aborted.  This is what Posix specifies.
+    aborted under some circumstances in which they previously were not.
+    This is what Posix specifies.
 
 36. Bash-4.0 now allows process substitution constructs to pass unchanged
     through brace expansion, so any expansion of the contents will have to be
@@ -307,3 +308,7 @@ bash-2.0 were significant.)
     specified variables, which also causes variables to be set to the empty
     string if there is not enough input.  Previous versions discarded the
     characters read.
+
+41. Beginning with bash-4.0, when one of the commands in a pipeline is killed
+    by a SIGINT while executing a command list, the shell acts as if it
+    received the interrupt.

@@ -1,5 +1,5 @@
 This document details the incompatibilities between this version of bash,
-bash-3.2, and the previous widely-available versions, bash-1.14 (which is
+bash-4.0, and the previous widely-available versions, bash-1.14 (which is
 still the `standard' version for a few Linux distributions) and bash-2.x. 
 These were discovered by users of bash-2.x and 3.x, so this list is not
 comprehensive.  Some of these incompatibilities occur between the current
@@ -275,3 +275,35 @@ bash-2.0 were significant.)
     operators for the `[[' compound command, and matches any quoted portion
     of the right-hand-side argument to the =~ operator as a string rather
     than a regular expression.
+
+34. Bash-4.0 allows the behavior in the previous item to be modified using
+    the notion of a shell `compatibility level'.
+
+35. Bash-3.2 (patched) and Bash-4.0 fix a bug that leaves the shell in an
+    inconsistent internal state following an assignment error.  One of the
+    changes means that compound commands or { ... } grouping commands are
+    aborted.  This is what Posix specifies.
+
+36. Bash-4.0 now allows process substitution constructs to pass unchanged
+    through brace expansion, so any expansion of the contents will have to be
+    separately specified, and each process subsitution will have to be
+    separately entered.
+
+37. Bash-4.0 now allows SIGCHLD to interrupt the wait builtin, as Posix
+    specifies, so the SIGCHLD trap is no longer always invoked once per
+    exiting child if you are using `wait' to wait for all children.
+
+38. Since bash-4.0 now follows Posix rules for finding the closing delimiter
+    of a $() command substitution, it will not behave as previous versions
+    did, but will catch more syntax and parsing errors before spawning a
+    subshell to evaluate the command substitution.
+
+39. The programmable completion code uses the same set of delimiting characters
+    as readline when breaking the command line into words, rather than the
+    set of shell metacharacters, so programmable completion and readline
+    should be more consistent.
+
+40. When the read builtin times out, it attempts to assign any input read to
+    specified variables, which also causes variables to be set to the empty
+    string if there is not enough input.  Previous versions discarded the
+    characters read.

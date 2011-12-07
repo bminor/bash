@@ -1,5 +1,37 @@
-This document details the changes between this version, bash-4.0-beta,
+This document details the changes between this version, bash-4.0-beta2,
 and the previous version, bash-4.0-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused failed word expansions to set $? but not
+    PIPESTATUS.
+
+b.  Changed filename completion to quote the tilde in a filename with a
+    leading tilde that exists in the current directory.
+
+c.  Fixed a bug that caused a file descriptor leak when performing
+    redirections attached to a compound command.
+
+d.  Fixed a bug that caused expansions of $@ and $* to not exit the shell if
+    the -u option was enabled and there were no posititional parameters.
+
+e.  Fixed a bug that resulted in bash not terminating immediately if a
+    terminating signal was received while performing output.
+
+f.  Fixed a bug that caused the shell to crash after creating 256 process
+    substitutions during word completion.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused redisplay errors when using prompts with invisible
+    characters and numeric arguments to a command in a multibyte locale.
+
+b.  Fixed a bug that caused redisplay errors when using prompts with invisible
+    characters spanning more than two physical screen lines.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-4.0-beta,
+and the previous version, bash-4.0-beta.
 
 1.  Changes to Bash
 

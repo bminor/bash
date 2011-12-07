@@ -7223,10 +7223,6 @@ sig.c
 	- reset the execution context before running the exit trap in
 	  termsig_handler
 
-execute_cmd.c	
-	- increment terminate_immediately at entry to execute_builtin; decrement
-	  it before returning [TENTATIVE]
-
 general.c
 	- set and unset terminate_immediately like interrupt_immediately in
 	  bash_tilde_expand
@@ -7239,3 +7235,14 @@ lib/readline/display.c
 	- slight change to fix from 11/27 to deal with prompts longer than a
 	  screen line where the invisible characters all appear after the
 	  line wrap.  Fixes bug reported by Andreas Schwab <schwab@suse.de>
+
+builtins/{echo,printf}.def
+	- increment terminate_immediately at entry; decrement before returning.
+	  Fix for bug reported by Ralf.Wildenhues@gmx.de
+
+				   12/16
+				   -----
+subst.c
+	- fix off-by-one error in /dev/fd version of add_fifo_list; make
+	  sure we add to totfds when it is == fd, not just when fd > totfds.
+	  Fixes bug reported by marciso@gmail.com

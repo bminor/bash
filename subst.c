@@ -4346,7 +4346,7 @@ add_fifo_list (fd)
       totfds = getdtablesize ();
       if (totfds < 0 || totfds > 256)
 	totfds = 256;
-      if (fd > totfds)
+      if (fd >= totfds)
 	totfds = fd + 2;
 
       dev_fd_list = (char *)xrealloc (dev_fd_list, totfds);

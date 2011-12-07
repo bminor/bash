@@ -7239,3 +7239,12 @@ lib/readline/display.c
 builtins/{echo,printf}.def
 	- increment terminate_immediately at entry; decrement before returning.
 	  Fix for bug reported by Ralf.Wildenhues@gmx.de
+
+				   12/16
+				   -----
+subst.c
+	- fix off-by-one error in /dev/fd version of add_fifo_list; make
+	  sure we add to totfds when it is == fd, not just when fd > totfds.
+	  Fixes bug reported by marciso@gmail.com
+
+[bash-4.0-beta2 frozen]
