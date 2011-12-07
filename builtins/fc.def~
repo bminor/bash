@@ -24,7 +24,7 @@ $PRODUCES fc.c
 $BUILTIN fc
 $FUNCTION fc_builtin
 $DEPENDS_ON HISTORY
-$SHORT_DOC fc [-e ename] [-nlr] [first] [last] or fc -s [pat=rep] [command]
+$SHORT_DOC fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]
 fc is used to list or edit and re-execute commands from the history list.
 FIRST and LAST can be numbers specifying the range, or FIRST can be a
 string, which means the most recent command beginning with that
@@ -290,12 +290,13 @@ fc_builtin (list)
      line was actually added (HISTIGNORE may have caused it to not be),
      so we check hist_last_line_added. */
 
-  /* "When not  listing, he fc command that caused the editing shall not be
+  /* "When not  listing, the fc command that caused the editing shall not be
      entered into the history list." */
   if (listing == 0 && hist_last_line_added)
     delete_last_history ();
 
-  last_hist = i - 1 - hist_last_line_added;
+  last_hist = i - remember_on_history - hist_last_line_added;
+itrace("fc: i = %d last_hist = %d remember_on_history = %d hist_last_line_added = %d", i, last_hist, remember_on_history, hist_last_line_added);
 
   if (list)
     {
@@ -306,6 +307,7 @@ fc_builtin (list)
 	histend = fc_gethnum (list->word->word, hlist);
       else
 	histend = listing ? last_hist : histbeg;
+itrace("fc: histbeg = %d histend = %d", histbeg, histend);
     }
   else
     {
@@ -368,8 +370,15 @@ fc_builtin (list)
     }
 
   if (listing)
-    return (EXECUTION_SUCCESS);
+    return (sh_chkwrite (EXECUTION_SUCCESS));
 
+  fflush (stream);
+  if (ferror (stream))
+    {
+      sh_wrerror ();
+      fclose (stream);
+      return (EXECUTION_FAILURE);
+    }
   fclose (stream);
 
   /* Now edit the file of commands. */

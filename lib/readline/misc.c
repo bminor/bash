@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -610,7 +610,7 @@ rl_vi_editing_mode (count, key)
 #if defined (VI_MODE)
   _rl_set_insert_mode (RL_IM_INSERT, 1);	/* vi mode ignores insert mode */
   rl_editing_mode = vi_mode;
-  rl_vi_insertion_mode (1, key);
+  rl_vi_insert_mode (1, key);
 #endif /* VI_MODE */
 
   return 0;

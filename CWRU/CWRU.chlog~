@@ -15181,5 +15181,65 @@ subst.[ch]
 subst.c
 	- use skip_to_delim to find the `/' denoting the end of a pattern
 	  in pattern substitution, since it knows more shell syntax than
-	  quoted_strchr.  Fixes bug reported by Dmitry V Golovashkin
-	  <Dmitry.Golovashkin@sas.com>
+	  quoted_strchr and understands multibyte characters.  Fixes bug
+	  reported by Dmitry V Golovashkin <Dmitry.Golovashkin@sas.com>
+
+				   1/15
+				   ----
+subst.c
+	- add `flags' argument to skip_to_delim telling it whether or not to
+	  set no_longjmp_on_fatal_error; set this flag when calling from the
+	  readline completion code
+
+subst.h	
+	- update extern declaration for skip_to_delim
+
+				   1/17
+				   ----
+subst.c
+	- expand_prompt_string takes a third argument: the initial flags for
+	  the WORD
+
+subst.h
+	- change extern declaration for expand_prompt_string to add third arg
+
+bashline.c
+	- pass W_NOCOMSUB as third argment to expand_prompt_string when
+	  calling from bash_directory_completion_hook, since we don't want
+	  to do command substitution from the completion code
+
+parse.y
+	- change call to expand_prompt_string
+
+				   1/18
+				   ----
+doc/Makefile.in
+	- added an `install_builtins' rule to install the builtins.1 man page,
+	  preprocessing it with sed to force `.so man1/bash.1', which some
+	  versions of man require.  Suggestion from Peter Breitenlohner
+	  <peb@mppmu.mpg.de>
+	- new target `install_everything' that will install normal documentation
+	  and builtins man page
+	- changed uninstall target to remove bash_builtins page from man
+	  directory
+
+lib/readline/vi_mode.c
+	- new function, rl_vi_insert_mode, which calls rl_vi_start_inserting
+	  to make sure the value of `last command to repeat' is set correctly.
+	  Fix from Thomas Janousek <tjanouse@redhat.com>
+	- add support for redoing inserts made with the `I' command.  Fix
+	  from Thomas Janousek <tjanouse@redhat.com>
+	- add support for redoing inserts made with the `A' command
+
+lib/readline/readline.h
+	- new extern declaration for rl_vi_insert_mode
+
+lib/readline/{misc,readline,vi_mode,vi_keymap}.c
+	- change calls to rl_vi_insertion_mode to rl_vi_insert_mode
+
+				   1/19
+				   ----
+builtins/read.def
+	- change timeout behavior when not reading from a tty device to save
+	  any partial input in the variable list, but still return failure.
+	  Fix inspired by Brian Craft <bcboy@thecraftstudio.com>

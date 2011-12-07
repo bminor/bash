@@ -1362,6 +1362,8 @@ unquote_bang (string)
 }
 #endif
 
+#define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
+
 /* Skip characters in STRING until we find a character in DELIMS, and return
    the index of that character.  START is the index into string at which we
    begin.  This is similar in spirit to strpbrk, but it returns an index into
@@ -1369,10 +1371,11 @@ unquote_bang (string)
    a lot of shell syntax.  It's very similar to skip_double_quoted and other
    functions of that ilk. */
 int
-skip_to_delim (string, start, delims)
+skip_to_delim (string, start, delims, flags)
      char *string;
      int start;
      char *delims;
+     int flags;
 {
   int i, pass_next, backq, si, c;
   size_t slen;
@@ -1380,7 +1383,8 @@ skip_to_delim (string, start, delims)
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
-  no_longjmp_on_fatal_error = 1;
+  if (flags & SD_NOJMP)
+    no_longjmp_on_fatal_error = 1;
   i = start;
   pass_next = backq = 0;
   while (c = string[i])
@@ -1451,8 +1455,6 @@ skip_to_delim (string, start, delims)
    error if there are unclosed quotes or braces.  The characters that this
    recognizes need to be the same as the contents of
    rl_completer_quote_characters. */
-
-#define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
 
 int
 char_is_quoted (string, eindex)
@@ -1630,7 +1632,7 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
   cw = -1;
   while (1)
     {
-      te = skip_to_delim (string, ts, d);
+      te = skip_to_delim (string, ts, d, SD_NOJMP);
 
       /* If we have a non-whitespace delimiter character, use it to make a
 	 separate field.  This is just about what $IFS splitting does and
@@ -2892,9 +2894,10 @@ expand_string_assignment (string, quoted)
    passed string when an error occurs.  Might want to trap other calls
    to jump_to_top_level here so we don't endlessly loop. */
 WORD_LIST *
-expand_prompt_string (string, quoted)
+expand_prompt_string (string, quoted, wflags)
      char *string;
      int quoted;
+     int wflags;
 {
   WORD_LIST *value;
   WORD_DESC td;
@@ -2902,7 +2905,7 @@ expand_prompt_string (string, quoted)
   if (string == 0 || *string == 0)
     return ((WORD_LIST *)NULL);
 
-  td.flags = 0;
+  td.flags = wflags;
   td.word = savestring (string);
 
   no_longjmp_on_fatal_error = 1;
@@ -5883,7 +5886,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   else
     rep = (char *)NULL;
 #else
-  delim = skip_to_delim (lpatsub, ((*patsub == '/') ? 1 : 0), "/");
+  delim = skip_to_delim (lpatsub, ((*patsub == '/') ? 1 : 0), "/", 0);
   if (lpatsub[delim] == '/')
     {
       lpatsub[delim] = 0;

@@ -3173,7 +3173,7 @@ cond_term ()
       if (term)
 	term->flags |= CMD_INVERT_RETURN;
     }
-  else if (tok == WORD && test_unop (yylval.word->word))
+  else if (tok == WORD && yylval.word->word[0] == '-' && yylval.word->word[2] == 0 && test_unop (yylval.word->word))
     {
       op = yylval.word;
       tok = read_token (READ);

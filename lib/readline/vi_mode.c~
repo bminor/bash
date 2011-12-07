@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -211,11 +211,29 @@ rl_vi_redo (count, c)
       if (rl_point > 0)
 	_rl_vi_backup ();
     }
+  /* Ditto for redoing an insert with `I', but move to the beginning of the
+     line like the `I' command does. */
+  else if (_rl_vi_last_command == 'I' && vi_insert_buffer && *vi_insert_buffer)
+    {
+      rl_beg_of_line (1, 'I');
+      _rl_vi_stuff_insert (count);
+      if (rl_point > 0)
+	_rl_vi_backup ();
+    }
   /* Ditto for redoing an insert with `a', but move forward a character first
      like the `a' command does. */
   else if (_rl_vi_last_command == 'a' && vi_insert_buffer && *vi_insert_buffer)
     {
       _rl_vi_append_forward ('a');
+      _rl_vi_stuff_insert (count);
+      if (rl_point > 0)
+	_rl_vi_backup ();
+    }
+  /* Ditto for redoing an insert with `A', but move to the end of the line
+     like the `A' command does. */
+  else if (_rl_vi_last_command == 'a' && vi_insert_buffer && *vi_insert_buffer)
+    {
+      rl_end_of_line (1, 'A');
       _rl_vi_stuff_insert (count);
       if (rl_point > 0)
 	_rl_vi_backup ();
@@ -584,7 +602,7 @@ rl_vi_insert_beg (count, key)
      int count, key;
 {
   rl_beg_of_line (1, key);
-  rl_vi_insertion_mode (1, key);
+  rl_vi_insert_mode (1, key);
   return (0);
 }
 
@@ -647,6 +665,14 @@ rl_vi_insertion_mode (count, key)
   return (0);
 }
 
+int
+rl_vi_insert_mode (count, key)
+     int count, key;
+{
+  rl_vi_start_inserting (key, 1, rl_arg_sign);
+  return (0);
+}
+
 static void
 _rl_vi_save_insert (up)
       UNDO_LIST *up;
@@ -690,7 +716,10 @@ _rl_vi_done_inserting ()
     }
   else
     {
-      if ((_rl_vi_last_key_before_insert == 'i' || _rl_vi_last_key_before_insert == 'a') && rl_undo_list)
+      if (rl_undo_list && (_rl_vi_last_key_before_insert == 'i' ||
+			   _rl_vi_last_key_before_insert == 'a' ||
+			   _rl_vi_last_key_before_insert == 'I' ||
+			   _rl_vi_last_key_before_insert == 'A'))
         _rl_vi_save_insert (rl_undo_list);
       /* XXX - Other keys probably need to be checked. */
       else if (_rl_vi_last_key_before_insert == 'C')
@@ -1251,10 +1280,13 @@ _rl_vi_callback_char_search (data)
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 #endif
 
-  if (c < 0)
+  if (c <= 0)
     return -1;
 
+#if !defined (HANDLE_MULTIBYTE)
   _rl_vi_last_search_char = c;
+#endif
+
   _rl_callback_func = 0;
   _rl_want_redisplay = 1;
 

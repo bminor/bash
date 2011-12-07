@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -233,6 +233,7 @@ extern int rl_vi_append_mode PARAMS((int, int));
 extern int rl_vi_append_eol PARAMS((int, int));
 extern int rl_vi_eof_maybe PARAMS((int, int));
 extern int rl_vi_insertion_mode PARAMS((int, int));
+extern int rl_vi_insert_mode PARAMS((int, int));
 extern int rl_vi_movement_mode PARAMS((int, int));
 extern int rl_vi_arg_digit PARAMS((int, int));
 extern int rl_vi_change_case PARAMS((int, int));

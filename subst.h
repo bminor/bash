@@ -136,7 +136,7 @@ extern WORD_LIST *expand_string_unsplit __P((char *, int));
 extern WORD_LIST *expand_string_assignment __P((char *, int));
 
 /* Expand a prompt string. */
-extern WORD_LIST *expand_prompt_string __P((char *, int));
+extern WORD_LIST *expand_prompt_string __P((char *, int, int));
 
 /* Expand STRING just as if you were expanding a word.  This also returns
    a list of words.  Note that filename globbing is *NOT* done for word
@@ -240,7 +240,10 @@ extern char *remove_backslashes __P((char *));
 extern char *cond_expand_word __P((WORD_DESC *, int));
 #endif
 
-extern int skip_to_delim __P((char *, int, char *));
+/* Flags for skip_to_delim */
+#define SD_NOJMP	0x01	/* don't longjmp on fatal error. */
+
+extern int skip_to_delim __P((char *, int, char *, int));
 
 #if defined (READLINE)
 extern int char_is_quoted __P((char *, int));

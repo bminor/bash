@@ -503,7 +503,6 @@ initialize_readline ()
     posix_readline_initialize (1);
 #endif
 
-  rl_erase_empty_line = 1;
   bash_readline_initialized = 1;
 }
 
@@ -945,7 +944,7 @@ find_cmd_start (start)
   register int s, os;
 
   os = 0;
-  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS)) <= start) &&
+  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP)) <= start) &&
 	 rl_line_buffer[s])
     os = s+1;
   return os;
@@ -957,7 +956,7 @@ find_cmd_end (end)
 {
   register int e;
 
-  e = skip_to_delim (rl_line_buffer, end, COMMAND_SEPARATORS);
+  e = skip_to_delim (rl_line_buffer, end, COMMAND_SEPARATORS, SD_NOJMP);
   return e;
 }
 
@@ -972,7 +971,7 @@ find_cmd_name (start)
     ;
 
   /* skip until a shell break character */
-  e = skip_to_delim (rl_line_buffer, s, "()<>;&| \t\n");
+  e = skip_to_delim (rl_line_buffer, s, "()<>;&| \t\n", SD_NOJMP);
 
   name = substring (rl_line_buffer, s, e);
 
@@ -1478,9 +1477,12 @@ command_word_completion_function (hint_text, state)
 	  if (*hint_text == '~')
 	    {
 	      int l, tl, vl, dl;
-	      char *rd;
+	      char *rd, *dh;
+
+	      dh = bash_dequote_filename ((char *)hint_text, 0);
+
 	      vl = strlen (val);
-	      tl = strlen (hint_text);
+	      tl = strlen (dh);
 #if 0
 	      l = vl - hint_len;	/* # of chars added */
 #else
@@ -1491,8 +1493,9 @@ command_word_completion_function (hint_text, state)
 	      free (rd);
 #endif
 	      temp = (char *)xmalloc (l + 2 + tl);
-	      strcpy (temp, hint_text);
+	      strcpy (temp, dh);
 	      strcpy (temp + tl, val + vl - l);
+	      free (dh);
 	    }
 	  else
 	    temp = savestring (val);

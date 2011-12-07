@@ -4366,7 +4366,7 @@ not_escape:
   if (promptvars || posixly_correct)
     {
       last_exit_value = last_command_exit_value;
-      list = expand_prompt_string (result, Q_DOUBLE_QUOTES);
+      list = expand_prompt_string (result, Q_DOUBLE_QUOTES, 0);
       free (result);
       result = string_list (list);
       dispose_words (list);

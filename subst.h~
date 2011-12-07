@@ -240,10 +240,14 @@ extern char *remove_backslashes __P((char *));
 extern char *cond_expand_word __P((WORD_DESC *, int));
 #endif
 
+/* Flags for skip_to_delim */
+#define SD_NOJMP	0x01	/* don't longjmp on fatal error. */
+
+extern int skip_to_delim __P((char *, int, char *, int));
+
 #if defined (READLINE)
 extern int char_is_quoted __P((char *, int));
 extern int unclosed_pair __P((char *, int, char *));
-extern int skip_to_delim __P((char *, int, char *));
 extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int *, int *));
 #endif
 

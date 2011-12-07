@@ -340,8 +340,13 @@ read_builtin (list)
       code = setjmp (alrmbuf);
       if (code)
 	{
+#if 0
 	  run_unwind_frame ("read_builtin");
 	  return (EXECUTION_FAILURE);
+#else
+	  retval = EXECUTION_FAILURE;
+	  goto assign_vars;
+#endif
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
@@ -565,6 +570,8 @@ add_char:
 
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 
+assign_vars:
+
 #if defined (ARRAY_VARS)
   /* If -a was given, take the string read, break it into a list of words,
      an assign them to `arrayname' in turn. */
@@ -641,7 +648,6 @@ add_char:
   for (t = input_string; ifs_chars && *ifs_chars && spctabnl(*t) && isifs(*t); t++)
     ;
   input_string = t;
-
   for (; list->next; list = list->next)
     {
       varname = list->word->word;
