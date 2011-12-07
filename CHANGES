@@ -1,9 +1,6 @@
 This document details the changes between this version, bash-4.0-release,
 and the previous version, bash-4.0-rc1.
 
-This document details the changes between this version, bash-4.0-rc1,
-and the previous version, bash-4.0-beta2.
-
 1.  Changes to Bash
 
 a.  Changed the message printed when setlocale(3) fails to only include the
@@ -41,6 +38,10 @@ k.  Fixed a bug that caused the CPU usage reported by the `time' builtin to be
 l.  Changed behavior of shell when -e option is in effect to reflect consensus
     of Posix shell standardization working group.
 
+m.  Fixed a bug introduced in bash-4.0-alpha that caused redirections to not
+    be displayed by `type' or `declare' when appearing in functions under
+    certain circumstances.
+
 2.  Changes to Readline
 
 a.  Fixed a bug that caused !(...) extended glob patterns to inhibit later
@@ -53,6 +54,9 @@ b.  Reworked the signal handling to avoid calling disallowed functions from a
 
 a.  `readarray' is now a synonym for `mapfile'.
 ------------------------------------------------------------------------------
+This document details the changes between this version, bash-4.0-rc1,
+and the previous version, bash-4.0-beta2.
+
 1.  Changes to Bash
 
 a.  Fixed a bug that caused parsing errors when a $()-style command

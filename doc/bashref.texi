@@ -3173,7 +3173,7 @@ is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
-part of the test in an @code{if} statement,
+part of the test following the @code{if} or @code{elif} reserved words,
 part of a command executed in a @code{&&} or @code{||} list,
 or if the command's return
 status is being inverted using @code{!}.
@@ -3989,9 +3989,9 @@ immediately, rather than before printing the next primary prompt.
 @item -e
 Exit immediately if a pipeline (@pxref{Pipelines}), which may consist
 of a single simple command (@pxref{Simple Commands}),
-a subshell command enclosed in parentheses (@pxref{Grouping Commands}),
+a subshell command enclosed in parentheses (@pxref{Command Grouping}),
 or one of the commands executed as part of a command list enclosed
-by braces (@pxref{Grouping Commands})
+by braces (@pxref{Command Grouping})
 returns a non-zero status.
 The shell does not exit if the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
@@ -7346,7 +7346,7 @@ to reproduce it.
 the template it provides for filing a bug report.
 
 Please send all reports concerning this manual to
-@email{chet.ramey@case.edu}.
+@email{chet.ramey@@case.edu}.
 
 @node Major Differences From The Bourne Shell
 @appendix Major Differences From The Bourne Shell
