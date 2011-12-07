@@ -108,8 +108,10 @@ bindpwd (no_symlinks)
      int no_symlinks;
 {
   char *dirname, *pwdvar;
-  int old_anm;
+  int old_anm, r;
   SHELL_VAR *tvar;
+
+  r = sh_chkwrite (EXECUTION_SUCCESS);
 
 #define tcwd the_current_working_directory
   dirname = tcwd ? (no_symlinks ? sh_physpath (tcwd, 0) : tcwd)
@@ -131,7 +133,7 @@ bindpwd (no_symlinks)
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
 
-  return (EXECUTION_SUCCESS);
+  return (r);
 }
 
 /* Call get_working_directory to reset the value of
@@ -375,15 +377,7 @@ pwd_builtin (list)
 	setpwd (directory);
       if (directory != the_current_working_directory)
 	free (directory);
-      fflush (stdout);
-      if (ferror (stdout))
-	{
-	  sh_wrerror ();
-	  clearerr (stdout);
-	  return (EXECUTION_FAILURE);
-	}
-
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
   else
     return (EXECUTION_FAILURE);

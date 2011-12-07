@@ -580,17 +580,18 @@ int
 set_builtin (list)
      WORD_LIST *list;
 {
-  int on_or_off, flag_name, force_assignment, opts_changed;
+  int on_or_off, flag_name, force_assignment, opts_changed, rv;
   register char *arg;
   char s[3];
 
   if (list == 0)
     {
       print_all_shell_variables ();
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   /* Check validity of flag arguments. */
+  rv = EXECUTION_SUCCESS;
   reset_internal_getopt ();
   while ((flag_name = internal_getopt (list, optflags)) != -1)
     {
@@ -653,6 +654,7 @@ set_builtin (list)
 		  if (opt == 0)
 		    {
 		      list_minus_o_opts (-1, (on_or_off == '+'));
+		      rv = sh_chkwrite (rv);
 		      continue;
 		    }
 
@@ -699,7 +701,7 @@ set_builtin (list)
   /* Set up new value of $SHELLOPTS */
   if (opts_changed)
     set_shellopts ();
-  return (EXECUTION_SUCCESS);
+  return (rv);
 }
 
 $BUILTIN unset

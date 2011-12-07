@@ -352,7 +352,7 @@ list_shopts (list, flags)
 	  if ((flags & QFLAG) == 0)
 	    print_shopt (shopt_vars[i].name, val, flags);
 	}
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   for (l = list, rval = EXECUTION_SUCCESS; l; l = l->next)
@@ -371,7 +371,7 @@ list_shopts (list, flags)
 	print_shopt (l->word->word, val, flags);
     }
 
-  return (rval);
+  return (sh_chkwrite (rval));
 }
 
 static int
@@ -386,7 +386,7 @@ list_some_shopts (mode, flags)
       if (((flags & QFLAG) == 0) && mode == val)
 	print_shopt (shopt_vars[i].name, val, flags);
     }
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
@@ -401,7 +401,7 @@ list_shopt_o_options (list, flags)
     {
       if ((flags & QFLAG) == 0)
 	list_minus_o_opts (-1, (flags & PFLAG));
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   for (l = list, rval = EXECUTION_SUCCESS; l; l = l->next)
@@ -423,7 +423,7 @@ list_shopt_o_options (list, flags)
 	    printf (OPTFMT, l->word->word, val ? on : off);
 	}
     }
-  return (rval);
+  return (sh_chkwrite (rval));
 }
 
 static int
@@ -432,7 +432,7 @@ list_some_o_options (mode, flags)
 {
   if ((flags & QFLAG) == 0)
     list_minus_o_opts (mode, (flags & PFLAG));
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
@@ -540,5 +540,5 @@ shopt_listopt (name, reusable)
     }
 
   print_shopt (name, *shopt_vars[i].value, reusable ? PFLAG : 0);
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }

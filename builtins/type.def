@@ -185,9 +185,8 @@ type_builtin (list)
       list = list->next;
     }
 
-  fflush (stdout);
-
-  return ((successful_finds != 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+  opt = (successful_finds != 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+  return (sh_chkwrite (opt));
 }
 
 /*

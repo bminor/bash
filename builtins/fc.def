@@ -368,8 +368,15 @@ fc_builtin (list)
     }
 
   if (listing)
-    return (EXECUTION_SUCCESS);
+    return (sh_chkwrite (EXECUTION_SUCCESS));
 
+  fflush (stream);
+  if (ferror (stream))
+    {
+      sh_wrerror ();
+      fclose (stream);
+      return (EXECUTION_FAILURE);
+    }
   fclose (stream);
 
   /* Now edit the file of commands. */

@@ -119,7 +119,7 @@ ibuffer_space ()
   if (pop_index > push_index)
     return (pop_index - push_index - 1);
   else
-    return (ibuffer_len - (push_index - pop_index) - 1);
+    return (ibuffer_len - (push_index - pop_index));
 }
 
 /* Get a key from the buffer of characters to be read.
@@ -133,8 +133,11 @@ rl_get_char (key)
     return (0);
 
   *key = ibuffer[pop_index++];
-
+#if 0
   if (pop_index >= ibuffer_len)
+#else
+  if (pop_index > ibuffer_len)
+#endif
     pop_index = 0;
 
   return (1);
@@ -250,7 +253,8 @@ rl_gather_tyi ()
       while (chars_avail--)
 	{
 	  k = (*rl_getc_function) (rl_instream);
-	  rl_stuff_char (k);
+	  if (rl_stuff_char (k) == 0)
+	    break;			/* some problem; no more room */
 	  if (k == NEWLINE || k == RETURN)
 	    break;
 	}
@@ -373,7 +377,11 @@ rl_stuff_char (key)
       RL_SETSTATE (RL_STATE_INPUTPENDING);
     }
   ibuffer[push_index++] = key;
+#if 0
   if (push_index >= ibuffer_len)
+#else
+  if (push_index > ibuffer_len)
+#endif
     push_index = 0;
 
   return 1;

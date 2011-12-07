@@ -277,6 +277,19 @@ sh_wrerror ()
   builtin_error (_("write error: %s"), strerror (errno));
 }
 
+int
+sh_chkwrite (s)
+{
+  fflush (stdout);
+  if (ferror (stdout))
+    {
+      sh_wrerror ();
+      clearerr (stdout);
+      return (EXECUTION_FAILURE);
+    }
+  return (s);
+}
+
 /* **************************************************************** */
 /*								    */
 /*	     Shell positional parameter manipulation		    */

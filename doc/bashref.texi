@@ -1041,7 +1041,8 @@ The semicolon (or newline) following @var{list} is required.
 In addition to the creation of a subshell, there is a subtle difference
 between these two constructs due to historical reasons.  The braces
 are @code{reserved words}, so they must be separated from the @var{list}
-by @code{blank}s.  The parentheses are @code{operators}, and are
+by @code{blank}s or other shell metacharacters.
+The parentheses are @code{operators}, and are
 recognized as separate tokens by the shell even if they are not separated
 from the @var{list} by whitespace.
 
@@ -1092,7 +1093,8 @@ Note that for historical reasons, in the most common usage the curly braces
 that surround the body of the function must be separated from the body by
 @code{blank}s or newlines.
 This is because the braces are reserved words and are only recognized
-as such when they are separated by whitespace.
+as such when they are separated from the command list
+by whitespace or another shell metacharacter.
 Also, when using the braces, the @var{list} must be terminated by a semicolon,
 a @samp{&}, or a newline.
 
@@ -2918,6 +2920,7 @@ be a @code{]}.
 
 Expressions may be combined using the following operators, listed in
 decreasing order of precedence.
+The evaluation depends on the number of arguments; see below.
 
 @table @code
 @item ! @var{expr}
@@ -2958,14 +2961,14 @@ If the second argument is one of the binary conditional
 operators (@pxref{Bash Conditional Expressions}), the
 result of the expression is the result of the binary test using the
 first and third arguments as operands.
+The @samp{-a} and @samp{-o} operators are considered binary operators
+when there are three arguments.
 If the first argument is @samp{!}, the value is the negation of
 the two-argument test using the second and third arguments.
 If the first argument is exactly @samp{(} and the third argument is
 exactly @samp{)}, the result is the one-argument test of the second
 argument.
 Otherwise, the expression is false.
-The @samp{-a} and @samp{-o} operators are considered binary operators
-in this case.  
 
 @item 4 arguments
 If the first argument is @samp{!}, the result is the negation of

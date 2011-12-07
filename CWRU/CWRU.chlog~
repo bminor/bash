@@ -14536,3 +14536,46 @@ redir.c
 	  is the same one used by the stdout stream, call fflush(stdout) to
 	  make sure all output is flushed before changing the underlying fd
 	  out from underneath stdio.  Fix suggested by Eric Blake <ebb9@byu.net>
+
+
+				   4/30
+				   ----
+
+builtins/common.c
+	- new function, sh_chkwrite(int), fflushes stdout and checks for error;
+	  printing an error message and returning a new exit status if there's
+	  an error on stdout.  Takes exit status as argument; returns new exit
+	  status (EXECUTION_FAILURE if write error)
+
+builtins/common.h
+	- new extern declaration for sh_chkwrite
+
+builtins/{alias,cd,complete,echo,fc,history,pushd,shopt,times,trap,type,ulimit,umask}.def
+	- change to use sh_chkwrite to report write errors
+
+builtins/fc.def
+	- if an error occurs while writing commands from the history to a file
+	  to be executed, report a write error and return failure without
+	  attempting to execute any commands
+
+				    5/1
+				    ---
+builtins/{bind,declare,set,setattr}.def
+	- change to use sh_chkwrite to report write errors
+
+				    5/2
+				    ---
+lib/readline/input.c
+	- fix off-by-one errors in _rl_get_char (pop_index) and rl_stuff_char
+	  (push_index) that caused the 511th character in the buffer to be
+	  discarded.  Fixes bug reported by Tom Bjorkholm <tom.bjorkholm@ericsson.com>
+
+				    5/5
+				    ---
+print_cmd.c
+	- added logic (inside_pipeline variable) to print_connection code and
+	  print_redirection to handle the case of a command with a here
+	  document inside a pipeline.  In that case, print_redirection prints
+	  the `|' before the here document text, so the parser knows the
+	  command is continued.  Fixes problem reported by Chris Lesner
+	  <chris.lesner@gmail.com>

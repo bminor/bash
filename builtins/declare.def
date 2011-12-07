@@ -191,16 +191,12 @@ declare_internal (list, local_var)
 	      free (vlist);
 	    }
 	}
+      else if (flags_on == 0)
+	return (set_builtin ((WORD_LIST *)NULL));
       else
-	{
-	  if (flags_on == 0)
-	    set_builtin ((WORD_LIST *)NULL);
-	  else
-	    set_or_show_attributes ((WORD_LIST *)NULL, flags_on, nodefs);
-	}
+	set_or_show_attributes ((WORD_LIST *)NULL, flags_on, nodefs);
 
-      fflush (stdout);
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   if (pflag)	/* declare -p [-afFirtx] name [name...] */
@@ -214,7 +210,7 @@ declare_internal (list, local_var)
 	      any_failed++;
 	    }
 	}
-      return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+      return (sh_chkwrite (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS));
     }
 
 #define NEXT_VARIABLE() free (name); list = list->next; continue
@@ -338,6 +334,7 @@ declare_internal (list, local_var)
 			  t = nodefs ? var->name
 				     : named_function_string (name, function_cell (var), 1);
 			  printf ("%s\n", t);
+			  any_failed = sh_chkwrite (any_failed);
 			}
 		    }
 		  else		/* declare -[fF] -[rx] name [name...] */

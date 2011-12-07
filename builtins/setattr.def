@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2006 Free Software Foundation, Inc.
+Copyright (C) 1987-2007 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -268,7 +268,11 @@ set_or_show_attributes (list, attribute, nodefs)
 		continue;
 #endif
 	      if ((var->attributes & attribute))
-		show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+		{
+		  show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+		  if (any_failed = sh_chkwrite (any_failed))
+		    break;
+		}
 	    }
 	  free (variable_list);
 	}

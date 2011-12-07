@@ -448,7 +448,7 @@ dirs_builtin (list)
       if (index_flag)
 	{
 	  putchar ('\n');
-	  return EXECUTION_SUCCESS;
+	  return (sh_chkwrite (EXECUTION_SUCCESS));
 	}
     }
 
@@ -473,8 +473,8 @@ dirs_builtin (list)
 	printf ("%s%s", (vflag & 1) ? "\n" : " ", DIRSTACK_ENTRY (i));
 
   putchar ('\n');
-  fflush (stdout);
-  return (EXECUTION_SUCCESS);
+
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static void

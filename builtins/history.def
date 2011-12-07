@@ -170,7 +170,7 @@ history_builtin (list)
     {
       if (list)
 	return (expand_and_print_history (list));
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 #endif
   else if (flags & DFLAG)
@@ -193,7 +193,7 @@ history_builtin (list)
   else if ((flags & (AFLAG|RFLAG|NFLAG|WFLAG|CFLAG)) == 0)
     {
       display_history (list);
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");

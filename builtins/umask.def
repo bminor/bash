@@ -137,8 +137,7 @@ umask_builtin (list)
 	printf ("%04lo\n", (unsigned long)umask_arg);
     }
 
-  fflush (stdout);
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 /* Print the umask in a symbolic form.  In the output, a letter is

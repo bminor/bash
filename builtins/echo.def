@@ -177,12 +177,5 @@ just_echo:
 
   if (display_return)
     putchar ('\n');
-  fflush (stdout);
-  if (ferror (stdout))
-    {
-      sh_wrerror ();
-      clearerr (stdout);
-      return (EXECUTION_FAILURE);
-    }
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
