@@ -251,7 +251,7 @@ bash_history_disable ()
 void
 bash_history_enable ()
 {
-  remember_on_history = enable_history_list = 1;
+  remember_on_history = 1;
 #if defined (BANG_HISTORY)
   history_expansion_inhibited = 0;
 #endif
@@ -286,6 +286,28 @@ load_history ()
       using_history ();
       history_lines_in_file = where_history ();
     }
+}
+
+void
+bash_clear_history ()
+{
+  clear_history ();
+  history_lines_this_session = 0;
+}
+
+/* Delete and free the history list entry at offset I. */
+int
+bash_delete_histent (i)
+     int i;
+{
+  HIST_ENTRY *discard;
+
+  discard = remove_history (i);
+  if (discard)
+    free_history_entry (discard);
+  history_lines_this_session--;
+
+  return 1;
 }
 
 #ifdef INCLUDE_UNUSED

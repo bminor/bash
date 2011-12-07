@@ -93,7 +93,6 @@ extern int posixly_correct;
 extern int unlink __P((const char *));
 
 extern FILE *sh_mktmpfp __P((char *, int, char **));
-extern int delete_last_history __P((void));
 
 /* **************************************************************** */
 /*								    */
@@ -326,7 +325,7 @@ fc_builtin (list)
      entered into the history list." */
   if (listing == 0 && hist_last_line_added)
     {
-      delete_last_history ();
+      bash_delete_last_history ();
       /* If we're editing a single command -- the last command in the
 	 history -- and we just removed the dummy command added by
 	 edit_and_execute_command (), we need to check whether or not we
@@ -625,7 +624,7 @@ fc_replhist (command)
 
   if (command && *command)
     {
-      delete_last_history ();
+      bash_delete_last_history ();
       maybe_add_history (command);	/* Obeys HISTCONTROL setting. */
     }
 }

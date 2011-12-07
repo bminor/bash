@@ -1,6 +1,6 @@
 /* Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -251,6 +251,12 @@ static char *current_decoded_prompt;
 /* The number of lines read from input while creating the current command. */
 int current_command_line_count;
 
+/* The token that currently denotes the end of parse. */
+int shell_eof_token;
+
+/* The token currently being read. */
+int current_token;
+
 /* Variables to manage the task of reading here documents, because we need to
    defer the reading until after a complete command has been collected. */
 static REDIRECT *redir_stack[10];
@@ -274,6 +280,19 @@ static int function_bstart;
 
 /* The line number in a script at which an arithmetic for command starts. */
 static int arith_for_lineno;
+
+/* The current parser state. */
+static int parser_state;
+
+/* The last read token, or NULL.  read_token () uses this for context
+   checking. */
+static int last_read_token;
+
+/* The token read prior to last_read_token. */
+static int token_before_that;
+
+/* The token read prior to token_before_that. */
+static int two_tokens_ago;
 
 /* The line number in a script where the word in a `case WORD', `select WORD'
    or `for WORD' begins.  This is a nested command maximum, since the array
@@ -316,8 +335,9 @@ static REDIRECTEE redir;
 %token <word_list> ARITH_CMD ARITH_FOR_EXPRS
 %token <command> COND_CMD
 %token AND_AND OR_OR GREATER_GREATER LESS_LESS LESS_AND LESS_LESS_LESS
-%token GREATER_AND SEMI_SEMI LESS_LESS_MINUS AND_GREATER LESS_GREATER
-%token GREATER_BAR
+%token GREATER_AND SEMI_SEMI SEMI_AND SEMI_SEMI_AND
+%token LESS_LESS_MINUS AND_GREATER AND_GREATER_GREATER LESS_GREATER
+%token GREATER_BAR BAR_AND
 
 /* The types that the various syntactical units return. */
 
@@ -340,7 +360,7 @@ static REDIRECTEE redir;
 
 %left '&' ';' '\n' yacc_EOF
 %left AND_AND OR_OR
-%right '|'
+%right '|' BAR_AND
 %%
 
 inputunit:	simple_list simple_list_terminator
@@ -520,6 +540,11 @@ redirection:	'>' WORD
 			{
 			  redir.filename = $2;
 			  $$ = make_redirection (1, r_err_and_out, redir);
+			}
+	|	AND_GREATER_GREATER WORD
+			{
+			  redir.filename = $2;
+			  $$ = make_redirection (1, r_append_err_and_out, redir);
 			}
 	|	NUMBER LESS_GREATER WORD
 			{
@@ -829,8 +854,17 @@ pattern_list:	newline_list pattern ')' compound_list
 	;
 
 case_clause_sequence:  pattern_list SEMI_SEMI
+			{ $$ = $1; }
 	|	case_clause_sequence pattern_list SEMI_SEMI
 			{ $2->next = $1; $$ = $2; }
+	|	pattern_list SEMI_AND
+			{ $1->flags |= CASEPAT_FALLTHROUGH; $$ = $1; }
+	|	case_clause_sequence pattern_list SEMI_AND
+			{ $2->flags |= CASEPAT_FALLTHROUGH; $2->next = $1; $$ = $2; }
+	|	pattern_list SEMI_SEMI_AND
+			{ $1->flags |= CASEPAT_TESTNEXT; $$ = $1; }
+	|	case_clause_sequence pattern_list SEMI_SEMI_AND
+			{ $2->flags |= CASEPAT_TESTNEXT; $2->next = $1; $$ = $2; }	
 	;
 
 pattern:	WORD
@@ -999,9 +1033,30 @@ pipeline_command: pipeline
 			
 	;
 
-pipeline:
-		pipeline '|' newline_list pipeline
+pipeline:	pipeline '|' newline_list pipeline
 			{ $$ = command_connect ($1, $4, '|'); }
+	|	pipeline BAR_AND newline_list pipeline
+			{
+			  /* Make cmd1 |& cmd2 equivalent to cmd1 2>&1 | cmd2 */
+			  COMMAND *tc;
+			  REDIRECTEE rd;
+			  REDIRECT *r;
+
+			  tc = $1;
+			  rd.dest = 1;
+			  r = make_redirection (2, r_duplicating_output, rd);
+			  if (tc->redirects)
+			    {
+			      register REDIRECT *t;
+			      for (t = tc->redirects; t->next; t = t->next)
+				;
+			      t->next = r;
+			    }
+			  else
+			    tc->redirects = r;
+
+			  $$ = command_connect ($1, $4, '|');
+			}
 	|	command
 			{ $$ = $1; }
 	;
@@ -1027,22 +1082,6 @@ timespec:	TIME
 #else
 #  define expanding_alias() 0
 #endif
-
-/* The token currently being read. */
-static int current_token;
-
-/* The last read token, or NULL.  read_token () uses this for context
-   checking. */
-static int last_read_token;
-
-/* The token read prior to last_read_token. */
-static int token_before_that;
-
-/* The token read prior to token_before_that. */
-static int two_tokens_ago;
-
-/* The current parser state. */
-static int parser_state;
 
 /* Global var is non-zero when end of file has been reached. */
 int EOF_Reached = 0;
@@ -1779,11 +1818,15 @@ STRING_INT_ALIST other_token_alist[] = {
   { "<&", LESS_AND },
   { ">&", GREATER_AND },
   { ";;", SEMI_SEMI },
+  { ";&", SEMI_AND },
+  { ";;&", SEMI_SEMI_AND },
   { "<<-", LESS_LESS_MINUS },
   { "<<<", LESS_LESS_LESS },
   { "&>", AND_GREATER },
+  { "&>>", AND_GREATER_GREATER },
   { "<>", LESS_GREATER },
   { ">|", GREATER_BAR },
+  { "|&", BAR_AND },
   { "EOF", yacc_EOF },
   /* Tokens whose value is the character itself */
   { ">", '>' },
@@ -2212,7 +2255,7 @@ static int open_brace_count;
 
 #define command_token_position(token) \
   (((token) == ASSIGNMENT_WORD) || \
-   ((token) != SEMI_SEMI && reserved_word_acceptable(token)))
+   ((token) != SEMI_SEMI && (token) != SEMI_AND && (token) != SEMI_SEMI_AND && reserved_word_acceptable(token)))
 
 #define assignment_acceptable(token) \
   (command_token_position(token) && ((parser_state & PST_CASEPAT) == 0))
@@ -2616,8 +2659,14 @@ read_token (command)
 #if defined (ALIAS)
 	      parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
-
-	      return (SEMI_SEMI);
+	      peek_char = shell_getc (1);
+	      if MBTEST(peek_char == '&')
+		return (SEMI_SEMI_AND);
+	      else
+		{
+		  shell_ungetc (peek_char);
+		  return (SEMI_SEMI);
+		}
 
 	    case '&':
 	      return (AND_AND);
@@ -2643,8 +2692,27 @@ read_token (command)
 	return (LESS_GREATER);
       else if MBTEST(character == '>' && peek_char == '|')
 	return (GREATER_BAR);
-      else if MBTEST(peek_char == '>' && character == '&')
-	return (AND_GREATER);
+      else if MBTEST(character == '&' && peek_char == '>')
+	{
+	  peek_char = shell_getc (1);
+	  if MBTEST(peek_char == '>')
+	    return (AND_GREATER_GREATER);
+	  else
+	    {
+	      shell_ungetc (peek_char);
+	      return (AND_GREATER);
+	    }
+	}
+      else if MBTEST(character == '|' && peek_char == '&')
+	return (BAR_AND);
+      else if MBTEST(character == ';' && peek_char == '&')
+	{
+	  parser_state |= PST_CASEPAT;
+#if defined (ALIAS)
+	  parser_state &= ~PST_ALEXPNEXT;
+#endif /* ALIAS */
+	  return (SEMI_AND);
+	}
 
       shell_ungetc (peek_char);
 
@@ -2707,7 +2775,41 @@ tokword:
 #define P_COMMAND	0x08	/* parsing a command, so look for comments */
 #define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
 
+/* Lexical state while parsing a grouping construct or $(...). */
+#define LEX_WASDOL	0x001
+#define LEX_CKCOMMENT	0x002
+#define LEX_INCOMMENT	0x004
+#define LEX_PASSNEXT	0x008
+#define LEX_RESWDOK	0x010
+#define LEX_CKCASE	0x020
+#define LEX_INCASE	0x040
+#define LEX_INHEREDOC	0x080
+#define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
+#define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
+
+#define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) = '|')
+
+#define CHECK_NESTRET_ERROR() \
+  do { \
+    if (nestret == &matched_pair_error) \
+      { \
+	free (ret); \
+	return &matched_pair_error; \
+      } \
+  } while (0)
+
+#define APPEND_NESTRET() \
+  do { \
+    if (nestlen) \
+      { \
+	RESIZE_MALLOCED_BUFFER (ret, retind, nestlen, retsize, 64); \
+	strcpy (ret + retind, nestret); \
+	retind += nestlen; \
+      } \
+  } while (0)
+
 static char matched_pair_error;
+
 static char *
 parse_matched_pair (qc, open, close, lenp, flags)
      int qc;	/* `"' if this construct is within double quotes */
@@ -3785,6 +3887,8 @@ reserved_word_acceptable (toksym)
     case IF:
     case OR_OR:
     case SEMI_SEMI:
+    case SEMI_AND:
+    case SEMI_SEMI_AND:
     case THEN:
     case TIME:
     case TIMEOPT:
@@ -3845,7 +3949,8 @@ reset_readline_prompt ()
    newline separator for such tokens is replaced with a space. */
 static const int no_semi_successors[] = {
   '\n', '{', '(', ')', ';', '&', '|',
-  CASE, DO, ELSE, IF, SEMI_SEMI, THEN, UNTIL, WHILE, AND_AND, OR_OR, IN,
+  CASE, DO, ELSE, IF, SEMI_SEMI, SEMI_AND, SEMI_SEMI_AND, THEN, UNTIL,
+  WHILE, AND_AND, OR_OR, IN,
   0
 };
 

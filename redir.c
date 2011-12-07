@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -217,6 +217,7 @@ expandable_redirection_filename (redirect)
     case r_input_direction:
     case r_inputa_direction:
     case r_err_and_out:
+    case r_append_err_and_out:
     case r_input_output:
     case r_output_force:
     case r_duplicating_input_word:
@@ -724,6 +725,7 @@ do_redirection_internal (redirect, flags)
     case r_input_direction:
     case r_inputa_direction:
     case r_err_and_out:		/* command &>filename */
+    case r_append_err_and_out:	/* command &>> filename */
     case r_input_output:
     case r_output_force:
       if (posixly_correct && interactive_shell == 0)
@@ -821,7 +823,7 @@ do_redirection_internal (redirect, flags)
 
       /* If we are hacking both stdout and stderr, do the stderr
 	 redirection here. */
-      if (ri == r_err_and_out)
+      if (ri == r_err_and_out || ri == r_append_err_and_out)
 	{
 	  if (flags & RX_ACTIVE)
 	    {
@@ -1081,6 +1083,7 @@ stdin_redirection (ri, redirector)
     case r_appending_to:
     case r_duplicating_output:
     case r_err_and_out:
+    case r_append_err_and_out:
     case r_output_force:
     case r_duplicating_output_word:
       return (0);

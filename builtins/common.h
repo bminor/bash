@@ -31,6 +31,8 @@
 #define SEVAL_NOHIST	0x004
 #define SEVAL_NOFREE	0x008
 #define SEVAL_RESETLINE	0x010
+#define SEVAL_PARSEONLY	0x020
+#define SEVAL_NOLONGJMP 0x040
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu May  8 09:32:34 EDT 2008
+.\"	Last Change: Sun May 25 10:41:29 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 May 8" "GNU Bash-4.0"
+.TH BASH 1 "2008 May 25" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -471,8 +471,8 @@ A \fItoken\fP that performs a control function.  It is one of the following
 symbols:
 .RS
 .PP
-.if t \fB\(bv\(bv  &  &&  ;  ;;  (  )  |  <newline>\fP
-.if n \fB|| & && ; ;; ( ) | <newline>\fP
+.if t \fB\(bv\(bv  &  &&  ;  ;;  (  )  |  |&    <newline>\fP
+.if n \fB|| & && ; ;; ( ) | |& <newline>\fP
 .RE
 .PD
 .SH "RESERVED WORDS"
@@ -507,12 +507,13 @@ The return value of a \fIsimple command\fP is its exit status, or
 .SS Pipelines
 .PP
 A \fIpipeline\fP is a sequence of one or more commands separated by
-the character
-.BR | .
+one of the control operators
+.B |
+or \fB|&\fP.
 The format for a pipeline is:
 .RS
 .PP
-[\fBtime\fP [\fB\-p\fP]] [ ! ] \fIcommand\fP [ \fB|\fP \fIcommand2\fP ... ]
+[\fBtime\fP [\fB\-p\fP]] [ ! ] \fIcommand\fP [ [\fB|\fP\(bv\fB|&\fP] \fIcommand2\fP ... ]
 .RE
 .PP
 The standard output of
@@ -524,6 +525,11 @@ command (see
 .SM
 .B REDIRECTION
 below).
+If \fB|&\fP is used, the standard error of \fIcommand\fP is connected to
+\fIcommand2\fP's standard input through the pipe; it is shorthand for
+\fB2>&1 |\fP.
+This implicit redirection of the standard error is performed after any
+redirections specified by the command.
 .PP
 The return status of a pipeline is the exit status of the last
 command, unless the \fBpipefail\fP option is enabled.
@@ -820,9 +826,15 @@ If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-When a match is found, the
-corresponding \fIlist\fP is executed.  After the first match, no
-subsequent matches are attempted.  The exit status is zero if no
+When a match is found, the corresponding \fIlist\fP is executed.
+If the \fB;;\fP operator is used, no subsequent matches are attempted after
+the first pattern match.
+Using \fB;&\fP in place of \fB;;\fP causes execution to continue with
+the \fIlist\fP associated with the next set of patterns.
+Using \fB;;&\fP in place of \fB;;\fP causes the shell to test the next
+pattern list in the statement, if any, and execute any associated \fIlist\fP
+on a successful match.
+The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
 last command executed in \fIlist\fP.
 .TP
@@ -2224,13 +2236,21 @@ Brace expansions may be nested.  The results of each expanded
 string are not sorted; left to right order is preserved.
 For example, a\fB{\fPd,c,b\fB}\fPe expands into `ade ace abe'.
 .PP
-A sequence expression takes the form \fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB}\fP,
-where \fIx\fP and \fIy\fP are either integers or single characters.
+A sequence expression takes the form
+\fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB[..\fIincr\fP]}\fP,
+where \fIx\fP and \fIy\fP are either integers or single characters,
+and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 \fIx\fP and \fIy\fP, inclusive.
+Supplied integers may be prefixed with \fI0\fP to force each term to have the
+same width.  When either \fIx\fP or \fPy\fP begins with a zero, the shell
+attempts to force all generated terms to contain the same number of digits,
+zero-padding where necessary.
 When characters are supplied, the expression expands to each character
 lexicographically between \fIx\fP and \fIy\fP, inclusive.  Note that
 both \fIx\fP and \fIy\fP must be of the same type.
+When the increment is supplied, it is used as the difference between
+each term.  The default increment is 1 or -1 as appropriate.
 .PP
 Brace expansion is performed before any other expansions,
 and any characters special to other expansions are preserved
@@ -3141,14 +3161,12 @@ The general format for appending output is:
 .PP
 .SS Redirecting Standard Output and Standard Error
 .PP
-.B Bash
-allows both the
+This construct allows both the
 standard output (file descriptor 1) and
 the standard error output (file descriptor 2)
 to be redirected to the file whose name is the
 expansion of
-.I word
-with this construct.
+.IR word .
 .PP
 There are two formats for redirecting standard output and
 standard error:
@@ -3166,6 +3184,27 @@ This is semantically equivalent to
 .RS
 .PP
 \fB>\fP\fIword\fP 2\fB>&\fP1
+.RE
+.PP
+.SS Appending Standard Output and Standard Error
+.PP
+This construct allows both the
+standard output (file descriptor 1) and
+the standard error output (file descriptor 2)
+to be appended to the file whose name is the
+expansion of
+.IR word .
+.PP
+The format for appending standard output and standard error is:
+.RS
+.PP
+\fB&>>\fP\fIword\fP
+.RE
+.PP
+This is semantically equivalent to
+.RS
+.PP
+\fB>>\fP\fIword\fP 2\fB>&\fP1
 .RE
 .SS Here Documents
 .PP
@@ -5338,6 +5377,11 @@ Attempt completion on the text before point, comparing
 the text against lines from the history list for possible
 completion matches.
 .TP
+.B dabbrev\-expand
+Attempt menu completion on the text before point, comparing
+the text against lines from the history list for possible
+completion matches.
+.TP
 .B complete\-into\-braces (M\-{)
 Perform filename completion and insert the list of possible completions
 enclosed within braces so the list is available to the shell (see
@@ -6175,6 +6219,16 @@ Remove any current binding for \fIkeyseq\fP.
 .B \-x \fIkeyseq\fP:\fIshell\-command\fP
 Cause \fIshell\-command\fP to be executed whenever \fIkeyseq\fP is
 entered.
+When \fIshell\-command\fP is executed, the shell sets the
+.B READLINE_LINE
+variable to the contents of the \fBreadline\fP line buffer and the
+.B READLINE_POINT
+variable to the current location of the insertion point.
+If the executed command changes the value of
+.B READLINE_LINE
+or
+.BR READLINE_POINT ,
+those new values will be reflected in the editing state.
 .PD
 .PP
 The return value is 0 unless an unrecognized option is given or an

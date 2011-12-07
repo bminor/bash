@@ -15738,8 +15738,6 @@ lib/readline/readline.h
 
 				    5/8
 				    ---
-lib/readline/bind.c
-
 lib/readline/complete.c
 	- add support for a third argument to fnprint and print_filename,
 	  which supports replacing a specified portion of the pathnames
@@ -15812,6 +15810,9 @@ lib/readline/display.c
 	- in update_line, when fixing _rl_last_c_pos after drawing the first
 	  line of the prompt, use the number of invisible chars on the first
 	  line as the offset, instead of the total number of invisible chars
+	- use prompt_multibyte_characters, the number of multibyte chars in
+	  the prompt string, to short-circuit some relatively expensive
+	  multibyte text processing in rl_redisplay
 
 				   5/21
 				   ----
@@ -15834,3 +15835,100 @@ bashline.c
 
 bashline.h
 	- new extern declaration for bashline_reset()
+
+				   5/23
+				   ----
+bashhist.c
+	- new function, bash_clear_history, clears the history and resets any
+	  associated internal bash state
+
+bashhist.h
+	- extern declaration for bash_clear_history
+
+builtins/history.def
+	- call bash_clear_history instead of clear_history for `history -c'.
+	  Fixes part of problem reported by Scott McDermott
+	  <scott.m.mcdermott@gmail.com>
+	- decrement history_lines_this_session in delete_histent, called for
+	  `history -d'
+
+builtins/history.def,bashhist.[ch]
+	- move delete_histent() to bashhist.c; rename to bash_delete_histent
+	- move delete_last_history() to bashhist.c; rename to
+	  bash_delete_last_history()
+
+				   5/25
+				   ----
+braces.c
+	- add another parameter to mkseq(), the number of digits to put into
+	  each member of a numeric sequence (width), changes to determine
+	  any zero-padding go into expand_seqterm
+	- changes to expand_seqterm to allow user-specified increments
+
+bashline.[ch],shell.c,sig.c
+	- switched names of bashline_reinitialize and bashline_reset to better
+	  reflect their functions
+	- when searching $PATH for directories to use for command completion,
+	  make sure to free `current_path' before going out of scope
+	- new bindable function `dabbrev-expand', which is more or less
+	  menu completion using dynamic history completion as the generator
+	- changes to bash_execute_unix_command to set variables for the
+	  executed command like programmable completion: READLINE_LINE
+	  (rl_line_buffer) and READLINE_POINT (rl_point)
+	- change to bash_execute_unix_command to allow the executed command
+	  to change the readline line buffer by modifying the value of
+	  READLINE_LINE and to change rl_point by modifying the value of
+	  READLINE_POINT
+
+common.h
+	- new SEVAL_ defines for later parse_string changes from 4.0-devel
+	  branch
+
+command.h
+	- new defines for new &>> r_append_err_and_out redirection
+
+builtins/evalstring.c
+	- new function, parse_string, parses a command from a passed string
+	  and returns the number of characters consumed.  For satisfying
+	  Posix rules when parsing command substitutions, from bash-4.0-devel
+	  branch
+	- split out common prolog code from parse_string and
+	  parse_and_execute into a separate function called from both
+
+parse.y
+	- small changes to add symbols needed for parse_string
+	- parser change to add `|&' as synonym for `2>&1 |'; translation is
+	  performed at parse time so |& never shows up in output of
+	  print_command, for instance.  Picked up from zsh, merged in from
+	  bash-4.0-devel branch
+
+parse.y,{redir,copy_cmd,dispose_cmd,make_cmd,print_cmd}.c
+	- implement new &>> r_append_err_and_out (like >>foo 2>&1); merged
+	  in from bash-4.0-devel branch
+
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- document new optional increment in brace expansion
+	- document new zero-padded fixed-width integer brace expansion
+	- document new `dabbrev-expand' bindable readline command
+	- document new effects of `bind -x' setting and reading the values of
+	  READLINE_LINE and READLINE_POINT
+	- document new |& synonym for `2>&1 |' pipeline operator
+
+				   5/26
+				   ----
+parse.y
+	- recognize new ;& and ;;& case action list terminator tokens and
+	  implement them in the grammar, setting CASEPAT_FALLTHROUGH and
+	  CASEPAT_TESTNEXT flags as appropriate
+
+print_cmd.c
+	- print new ;& and ;;& case clause action list terminators as
+	  appropriate
+
+execute_cmd.c
+	- implement new case clause action list terminators:
+		;& - fall through to actions associated with next pattern list
+		;;& - fall through to tests in next pattern list
+
+doc/{bash.1,bashref.texi}
+	- document new ;& and ;;& case clause action list terminators

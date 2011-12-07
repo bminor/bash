@@ -85,7 +85,6 @@ copy_case_clause (clause)
   new_clause = (PATTERN_LIST *)xmalloc (sizeof (PATTERN_LIST));
   new_clause->patterns = copy_word_list (clause->patterns);
   new_clause->action = copy_command (clause->action);
-  new_clause->flags = clause->flags;
   return (new_clause);
 }
 
@@ -125,7 +124,6 @@ copy_redirect (redirect)
     case r_input_direction:
     case r_inputa_direction:
     case r_err_and_out:
-    case r_append_err_and_out:
     case r_input_output:
     case r_output_force:
     case r_duplicating_input_word:

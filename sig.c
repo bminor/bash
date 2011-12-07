@@ -408,7 +408,7 @@ throw_to_top_level ()
 
 #if defined (READLINE)
   if (interactive)
-    bashline_reinitialize ();
+    bashline_reset ();
 #endif /* READLINE */
 
 #if defined (PROCESS_SUBSTITUTION)

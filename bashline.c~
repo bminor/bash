@@ -122,6 +122,7 @@ static char *command_subst_completion_function __P((const char *, int));
 static void build_history_completion_array __P((void));
 static char *history_completion_generator __P((const char *, int));
 static int dynamic_complete_history __P((int, int));
+static int bash_dabbrev_expand __P((int, int));
 
 static void initialize_hostname_list __P((void));
 static void add_host_name __P((char *));
@@ -162,6 +163,7 @@ extern int hist_verify;
 #endif
 
 extern int current_command_line_count, last_command_exit_value;
+extern int array_needs_making;
 extern int posixly_correct, no_symbolic_links;
 extern char *current_prompt_string, *ps1_prompt;
 extern STRING_INT_ALIST word_token_alist[];
@@ -331,7 +333,7 @@ enable_hostname_completion (on_or_off)
       free (rl_completer_word_break_characters);
       rl_completer_word_break_characters = nval;
     }
-itrace("enable_hostname_completion: rl_completer_word_break_characters = %s", rl_completer_word_break_characters);
+
   return (old_value);
 }
 
@@ -395,6 +397,7 @@ initialize_readline ()
 #endif
 
   rl_add_defun ("dynamic-complete-history", dynamic_complete_history, -1);
+  rl_add_defun ("dabbrev-expand", bash_dabbrev_expand, -1);
 
   /* Bind defaults before binding our custom shell keybindings. */
   if (RL_ISSTATE(RL_STATE_INITIALIZED) == 0)
@@ -513,13 +516,19 @@ initialize_readline ()
   bash_readline_initialized = 1;
 }
 
+void
+bashline_reinitialize ()
+{
+  bash_readline_initialized = 0;
+}
+
 /* On Sun systems at least, rl_attempted_completion_function can end up
    getting set to NULL, and rl_completion_entry_function set to do command
    word completion if Bash is interrupted while trying to complete a command
    word.  This just resets all the completion functions to the right thing.
    It's called from throw_to_top_level(). */
 void
-bashline_reinitialize ()
+bashline_reset ()
 {
   tilde_initialize ();
   rl_attempted_completion_function = attempt_shell_completion;
@@ -1502,7 +1511,7 @@ globword:
 
       /* Get the next directory from the path.  If there is none, then we
 	 are all done. */
-      if (!path || !path[path_index] ||
+      if (path == 0 || path[path_index] == 0 ||
 	  (current_path = extract_colon_unit (path, &path_index)) == 0)
 	return ((char *)NULL);
 
@@ -1529,6 +1538,7 @@ globword:
 	free (filename_hint);
 
       filename_hint = sh_makepath (current_path, hint, 0);
+      free (current_path);		/* XXX */
     }
 
  inner:
@@ -2421,7 +2431,7 @@ bash_directory_expansion (dirname)
       *dirname = nd;
     }
 }
-  
+
 /* Handle symbolic link references and other directory name
    expansions while hacking completion. */
 static int
@@ -2608,12 +2618,12 @@ dynamic_complete_history (count, key)
      int count, key;
 {
   int r;
-
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+
   rl_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
 
@@ -2625,6 +2635,33 @@ dynamic_complete_history (count, key)
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  return r;
+}
+
+static int
+bash_dabbrev_expand (count, key)
+     int count, key;
+{
+  int r;
+  rl_compentry_func_t *orig_func;
+  rl_completion_func_t *orig_attempt_func;
+
+  orig_func = rl_menu_completion_entry_function;
+  orig_attempt_func = rl_attempted_completion_function;
+
+  rl_menu_completion_entry_function = history_completion_generator;
+  rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_filename_completion_desired = 0;
+
+  /* XXX - use rl_completion_mode here? */
+  if (rl_last_func == bash_dabbrev_expand)
+    rl_last_func = rl_menu_complete;
+  r = rl_menu_complete (count, key);
+
+  rl_last_func = bash_dabbrev_expand;
+  rl_menu_completion_entry_function = orig_func;
+  rl_attempted_completion_function = orig_attempt_func;
+
   return r;
 }
 
@@ -3127,8 +3164,10 @@ bash_execute_unix_command (count, key)
   Keymap ckmap;		/* current keymap */
   Keymap xkmap;		/* unix command executing keymap */
   register int i;
-  char *cmd;
   sh_parser_state_t ps;
+  char *cmd, *value, *l;
+  SHELL_VAR *v;
+  char ibuf[INT_STRLEN_BOUND(int) + 1];
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap. */
@@ -3164,12 +3203,27 @@ bash_execute_unix_command (count, key)
 
   rl_crlf ();	/* move to a new line */
 
+  v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
+  if (v)
+    VSETATTR (v, att_exported);
+  l = value_cell (v);
+  value = inttostr (rl_point, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("READLINE_POINT", value);
+  if (v)
+    VSETATTR (v, att_exported);
+  array_needs_making = 1;
+
   save_parser_state (&ps);
-
-  cmd = savestring (cmd);
-  parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST);
-
+  parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
   restore_parser_state (&ps);
+
+  v = find_variable ("READLINE_LINE");
+  if (value_cell (v) != l)
+    maybe_make_readline_line (value_cell (v));
+
+  unbind_variable ("READLINE_LINE");
+  unbind_variable ("READLINE_POINT");
+  array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */
   rl_forced_update_display ();

@@ -288,6 +288,56 @@ load_history ()
     }
 }
 
+void
+bash_clear_history ()
+{
+  clear_history ();
+  history_lines_this_session = 0;
+}
+
+/* Delete and free the history list entry at offset I. */
+int
+bash_delete_histent (i)
+     int i;
+{
+  HIST_ENTRY *discard;
+
+  discard = remove_history (i);
+  if (discard)
+    free_history_entry (discard);
+  history_lines_this_session--;
+
+  return 1;
+}
+
+int
+bash_delete_last_history ()
+{
+  register int i;
+  HIST_ENTRY **hlist, *histent;
+  int r;
+
+  hlist = history_list ();
+  if (hlist == NULL)
+    return 0;
+
+  for (i = 0; hlist[i]; i++)
+    ;
+  i--;
+
+  /* History_get () takes a parameter that must be offset by history_base. */
+  histent = history_get (history_base + i);	/* Don't free this */
+  if (histent == NULL)
+    return 0;
+
+  r = bash_delete_histent (i);
+
+  if (where_history () > history_length)
+    history_set_pos (history_length);
+
+  return r;
+}
+
 #ifdef INCLUDE_UNUSED
 /* Write the existing history out to the history file. */
 void

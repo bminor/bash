@@ -229,7 +229,7 @@ than by an executable program somewhere in the file system.
 A @code{token} that performs a control function.  It is a @code{newline}
 or one of the following:
 @samp{||}, @samp{&&}, @samp{&}, @samp{;}, @samp{;;},
-@samp{|}, @samp{(}, or @samp{)}.
+@samp{|}, @samp{|&}, @samp{(}, or @samp{)}.
 
 @item exit status
 @cindex exit status
@@ -606,21 +606,28 @@ the command was terminated by signal @var{n}.
 @cindex pipeline
 @cindex commands, pipelines
 
-A @code{pipeline} is a sequence of simple commands separated by
-@samp{|}.
+A @code{pipeline} is a sequence of simple commands separated by one of
+the control operators @samp{|} or @samp{|&}.
 
 @rwindex time
 @rwindex !
 @cindex command timing
 The format for a pipeline is
 @example
-[@code{time} [@code{-p}]] [@code{!}] @var{command1} [@code{|} @var{command2} @dots{}]
+[@code{time} [@code{-p}]] [@code{!}] @var{command1} [ [@code{|} or @code{|&}] @var{command2} @dots{}]
 @end example
 
 @noindent
 The output of each command in the pipeline is connected via a pipe
 to the input of the next command.
-That is, each command reads the previous command's output.
+That is, each command reads the previous command's output.  This
+connection is performed before any redirections specified by the
+command.
+
+If @samp{|&} is used, the standard error of @var{command1} is connected to
+@var{command2}'s standard input through the pipe; it is shorthand for
+@code{2>&1 |}.  This implicit redirection of the standard error is
+performed after any redirections specified by the command.
 
 The reserved word @code{time} causes timing statistics
 to be printed for the pipeline once it finishes.
@@ -1395,13 +1402,20 @@ bash$ echo a@{d,c,b@}e
 ade ace abe
 @end example
 
-A sequence expression takes the form @code{@{@var{x}..@var{y}@}},
-where @var{x} and @var{y} are either integers or single characters.
+A sequence expression takes the form @code{@{@var{x}..@var{y}[@var{incr}]@}},
+where @var{x} and @var{y} are either integers or single characters,
+and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 @var{x} and @var{y}, inclusive.
+Supplied integers may be prefixed with @samp{0} to force each term to have the
+same width.  When either @var{x} or @var{y} begins with a zero, the shell
+attempts to force all generated terms to contain the same number of digits,
+zero-padding where necessary.
 When characters are supplied, the expression expands to each character
 lexicographically between @var{x} and @var{y}, inclusive.  Note that
 both @var{x} and @var{y} must be of the same type.
+When the increment is supplied, it is used as the difference between
+each term.  The default increment is 1 or -1 as appropriate.
 
 Brace expansion is performed before any other expansions,
 and any characters special to other expansions are preserved
@@ -2094,11 +2108,11 @@ The general format for appending output is:
 @end example
 
 @subsection Redirecting Standard Output and Standard Error
-Bash allows both the
+This construct allows both the
 standard output (file descriptor 1) and
 the standard error output (file descriptor 2)
 to be redirected to the file whose name is the
-expansion of @var{word} with this construct.
+expansion of @var{word}.
 
 There are two formats for redirecting standard output and
 standard error:
@@ -2115,6 +2129,23 @@ Of the two forms, the first is preferred.
 This is semantically equivalent to
 @example
 >@var{word} 2>&1
+@end example
+
+@subsection Appending Standard Output and Standard Error
+This construct allows both the
+standard output (file descriptor 1) and
+the standard error output (file descriptor 2)
+to be appended to the file whose name is the
+expansion of @var{word}.
+
+The format for appending standard output and standard error is:
+@example
+&>>@var{word}
+@end example
+@noindent
+This is semantically equivalent to
+@example
+>>@var{word} 2>&1
 @end example
 
 @subsection Here Documents
@@ -3202,7 +3233,13 @@ Remove any current binding for @var{keyseq}.
 @item -x @var{keyseq:shell-command}
 Cause @var{shell-command} to be executed whenever @var{keyseq} is
 entered.
-
+When @var{shell-command} is executed, the shell sets the
+@code{READLINE_LINE} variable to the contents of the Readline line
+buffer and the @code{READLINE_POINT} variable to the current location
+of the insertion point.
+If the executed command changes the value of @code{READLINE_LINE} or
+@code{READLINE_POINT}, those new values will be reflected in the
+editing state.
 @end table
 
 @noindent
@@ -3610,6 +3647,8 @@ not echoed.
 @item -t @var{timeout}
 Cause @code{read} to time out and return failure if a complete line of
 input is not read within @var{timeout} seconds.
+@var{timeout}  may be a decimal number with a fractional portion following
+the decimal point.
 This option has no effect if @code{read} is not reading input from the
 terminal or a pipe.
 

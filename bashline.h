@@ -1,6 +1,6 @@
 /* bashline.h -- interface to the bash readline functions in bashline.c. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

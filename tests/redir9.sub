@@ -1,0 +1,48 @@
+: ${TMPDIR:=/tmp}
+
+func()
+{
+	echo "to stdout"
+	echo "to stderr" >&2
+}
+
+rm -f $TMPDIR/foo
+
+echo hey > $TMPDIR/foo
+func &>> $TMPDIR/foo
+
+cat $TMPDIR/foo
+
+echo
+func &> $TMPDIR/foo
+
+cat $TMPDIR/foo
+
+echo
+func >$TMPDIR/foo
+cat $TMPDIR/foo
+
+echo
+echo hey > $TMPDIR/foo
+func >> $TMPDIR/foo
+cat $TMPDIR/foo
+
+rm -f $TMPDIR/foo
+
+logfunc()
+{
+	echo "$@" &>> $TMPDIR/log
+}
+
+type logfunc
+
+echo foo 2>&1
+
+bix()
+{
+echo foo |& cat
+}
+
+type bix
+
+bix

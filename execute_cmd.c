@@ -2292,10 +2292,17 @@ execute_case_command (case_command)
 
 	  if (match)
 	    {
-	      if (clauses->action && ignore_return)
-		clauses->action->flags |= CMD_IGNORE_RETURN;
-	      retval = execute_command (clauses->action);
-	      EXIT_CASE ();
+	      do
+		{
+		  if (clauses->action && ignore_return)
+		    clauses->action->flags |= CMD_IGNORE_RETURN;
+		  retval = execute_command (clauses->action);
+		}
+	      while ((clauses->flags & CASEPAT_FALLTHROUGH) && (clauses = clauses->next));
+	      if ((clauses->flags & CASEPAT_TESTNEXT) == 0)
+		EXIT_CASE ();
+	      else
+		break;
 	    }
 
 	  QUIT;

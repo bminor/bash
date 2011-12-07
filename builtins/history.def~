@@ -51,6 +51,9 @@ if $HISTFILE has a value, that is used, else ~/.bash_history.
 If the $HISTTIMEFORMAT variable is set and not null, its value is used
 as a format string for strftime(3) to print the time stamp associated
 with each displayed history entry.  No time stamps are printed otherwise.
+
+Exit Status:
+Returns success unless an invalid option is given or an error occurs.
 $END
 
 #include <config.h>
@@ -88,7 +91,6 @@ int delete_last_history __P((void));
 
 static char *histtime __P((HIST_ENTRY *, const char *));
 static void display_history __P((WORD_LIST *));
-static int delete_histent __P((int));
 static void push_history __P((WORD_LIST *));
 static int expand_and_print_history __P((WORD_LIST *));
 
@@ -159,7 +161,7 @@ history_builtin (list)
   /* clear the history, but allow other arguments to add to it again. */
   if (flags & CFLAG)
     {
-      clear_history ();
+      bash_clear_history ();
       if (list == 0)
 	return (EXECUTION_SUCCESS);
     }
@@ -188,7 +190,7 @@ history_builtin (list)
 	  return (EXECUTION_FAILURE);
 	}
       opt = delete_offset;
-      result = delete_histent (opt - history_base);
+      result = bash_delete_histent (opt - history_base);
       /* Since remove_history changes history_length, this can happen if
 	 we delete the last history entry. */
       if (where_history () > history_length)
@@ -307,20 +309,6 @@ display_history (list)
     }
 }
 
-/* Delete and free the history list entry at offset I. */
-static int
-delete_histent (i)
-     int i;
-{
-  HIST_ENTRY *discard;
-
-  discard = remove_history (i);
-  if (discard)
-    free_history_entry (discard);
-
-  return 1;
-}
-
 int
 delete_last_history ()
 {
@@ -341,7 +329,7 @@ delete_last_history ()
   if (histent == NULL)
     return 0;
 
-  r = delete_histent (i);
+  r = bash_delete_histent (i);
 
   if (where_history () > history_length)
     history_set_pos (history_length);

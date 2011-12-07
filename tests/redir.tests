@@ -1,3 +1,5 @@
+: ${TMPDIR:=/tmp}
+
 export LC_ALL=C
 export LANG=C
 
@@ -31,31 +33,31 @@ cat < $z
 echo "Point 1"
 
 exec 3</etc/passwd
-exec 4>/tmp/bash-a
-exec 5>/tmp/bash-b
+exec 4>$TMPDIR/bash-a
+exec 5>$TMPDIR/bash-b
 echo "Point 2"
 
 echo to a 1>&4
 echo to b 1>&5
-cat /tmp/bash-a
-cat /tmp/bash-b
+cat $TMPDIR/bash-a
+cat $TMPDIR/bash-b
 exec 11</dev/null
 echo "Point 3"
 
 echo to a 1>&4
 echo to b 1>&5
-cat /tmp/bash-a
-cat /tmp/bash-b
+cat $TMPDIR/bash-a
+cat $TMPDIR/bash-b
 
 exec 11<&-
 echo "Point 4"
 
-exec 6<>/tmp/bash-c
+exec 6<>$TMPDIR/bash-c
 echo to c 1>&6
-cat /tmp/bash-c
+cat $TMPDIR/bash-c
 echo "Point 5"
 
-rm -f /tmp/bash-a /tmp/bash-b /tmp/bash-c
+rm -f $TMPDIR/bash-a $TMPDIR/bash-b $TMPDIR/bash-c
 
 #
 # Test the effect of input buffering on the shell's input
@@ -78,34 +80,34 @@ testf()
 	fi
 }
 
-> /tmp/null-redir-a
-testf /tmp/null-redir-a
+> $TMPDIR/null-redir-a
+testf $TMPDIR/null-redir-a
 
-$EXIT > /tmp/null-redir-b
-testf /tmp/null-redir-b
+$EXIT > $TMPDIR/null-redir-b
+testf $TMPDIR/null-redir-b
 
-( > /tmp/null-redir-c )
-testf /tmp/null-redir-c
+( > $TMPDIR/null-redir-c )
+testf $TMPDIR/null-redir-c
 
-$EXIT > /tmp/null-redir-d &
+$EXIT > $TMPDIR/null-redir-d &
 wait
-testf /tmp/null-redir-d
+testf $TMPDIR/null-redir-d
 
-exit 3 | $EXIT > /tmp/null-redir-e
+exit 3 | $EXIT > $TMPDIR/null-redir-e
 echo $? -- ${PIPESTATUS[@]}
-testf /tmp/null-redir-e
+testf $TMPDIR/null-redir-e
 
-exit 4 | > /tmp/null-redir-f
+exit 4 | > $TMPDIR/null-redir-f
 echo $? -- ${PIPESTATUS[@]}
-testf /tmp/null-redir-f
+testf $TMPDIR/null-redir-f
 
-> /tmp/null-redir-g &
+> $TMPDIR/null-redir-g &
 wait
-testf /tmp/null-redir-g
+testf $TMPDIR/null-redir-g
 
-exec >/tmp/null-redir-h &
+exec >$TMPDIR/null-redir-h &
 wait
-testf /tmp/null-redir-h
+testf $TMPDIR/null-redir-h
 
 # make sure async commands don't get /dev/null as stdin when an explicit
 # input redirection is supplied
@@ -158,7 +160,7 @@ ${THIS_SH} ./redir5.sub
 ${THIS_SH} ./redir6.sub
 
 # problem with redirections using fds bash uses internally
-: ${TMPDIR:=/tmp}
+: ${TMPDIR:=$TMPDIR}
 
 trap 'rm -f $TMPDIR/bash-redir-$$' 0 1 2 3 6 15
 
@@ -176,10 +178,12 @@ ${THIS_SH} ./redir7.sub
 ${THIS_SH} ./redir8.sub
 
 exec 9>&2
-command exec 2>/tmp/foo
+command exec 2>$TMPDIR/foo
 echo whatsis >&2
 echo cat /tmp/foo
-cat /tmp/foo
-rm -f /tmp/foo
+cat $TMPDIR/foo
+rm -f $TMPDIR/foo
 exec 2>&9
 exec 9>&-
+
+${THIS_SH} ./redir9.sub

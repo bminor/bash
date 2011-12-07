@@ -87,11 +87,8 @@ extern int errno;
 extern int current_command_line_count;
 extern int force_append_history;	/* shopt -s histappend */
 
-int delete_last_history __P((void));
-
 static char *histtime __P((HIST_ENTRY *, const char *));
 static void display_history __P((WORD_LIST *));
-static int delete_histent __P((int));
 static void push_history __P((WORD_LIST *));
 static int expand_and_print_history __P((WORD_LIST *));
 
@@ -162,7 +159,7 @@ history_builtin (list)
   /* clear the history, but allow other arguments to add to it again. */
   if (flags & CFLAG)
     {
-      clear_history ();
+      bash_clear_history ();
       if (list == 0)
 	return (EXECUTION_SUCCESS);
     }
@@ -191,7 +188,7 @@ history_builtin (list)
 	  return (EXECUTION_FAILURE);
 	}
       opt = delete_offset;
-      result = delete_histent (opt - history_base);
+      result = bash_delete_histent (opt - history_base);
       /* Since remove_history changes history_length, this can happen if
 	 we delete the last history entry. */
       if (where_history () > history_length)
@@ -310,48 +307,6 @@ display_history (list)
     }
 }
 
-/* Delete and free the history list entry at offset I. */
-static int
-delete_histent (i)
-     int i;
-{
-  HIST_ENTRY *discard;
-
-  discard = remove_history (i);
-  if (discard)
-    free_history_entry (discard);
-
-  return 1;
-}
-
-int
-delete_last_history ()
-{
-  register int i;
-  HIST_ENTRY **hlist, *histent;
-  int r;
-
-  hlist = history_list ();
-  if (hlist == NULL)
-    return 0;
-
-  for (i = 0; hlist[i]; i++)
-    ;
-  i--;
-
-  /* History_get () takes a parameter that must be offset by history_base. */
-  histent = history_get (history_base + i);	/* Don't free this */
-  if (histent == NULL)
-    return 0;
-
-  r = delete_histent (i);
-
-  if (where_history () > history_length)
-    history_set_pos (history_length);
-
-  return r;
-}
-
 /* Remove the last entry in the history list and add each argument in
    LIST to the history. */
 static void
@@ -367,12 +322,12 @@ push_history (list)
      If you don't want history -s to remove the compound command from the
      history, change #if 0 to #if 1 below. */
 #if 0
-  if (hist_last_line_pushed == 0 && hist_last_line_added && delete_last_history () == 0)
+  if (hist_last_line_pushed == 0 && hist_last_line_added && bash_delete_last_history () == 0)
 #else
   if (hist_last_line_pushed == 0 &&
 	(hist_last_line_added ||
 	  (current_command_line_count > 0 && current_command_first_line_saved && command_oriented_history))
-      && delete_last_history () == 0)
+      && bash_delete_last_history () == 0)
 #endif
       return;
 
@@ -397,7 +352,7 @@ expand_and_print_history (list)
   char *s;
   int r, result;
 
-  if (hist_last_line_pushed == 0 && hist_last_line_added && delete_last_history () == 0)
+  if (hist_last_line_pushed == 0 && hist_last_line_added && bash_delete_last_history () == 0)
     return EXECUTION_FAILURE;
   result = EXECUTION_SUCCESS;
   while (list)

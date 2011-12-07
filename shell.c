@@ -1747,7 +1747,7 @@ shell_reinitialize ()
   reinit_special_variables ();
 
 #if defined (READLINE)
-  bashline_reset ();
+  bashline_reinitialize ();
 #endif
 
   shell_reinitialized = 1;

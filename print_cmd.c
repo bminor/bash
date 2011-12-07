@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -609,7 +609,12 @@ print_case_clauses (clauses)
       indentation += indentation_amount;
       make_command_string_internal (clauses->action);
       indentation -= indentation_amount;
-      newline (";;");
+      if (clauses->flags & CASEPAT_FALLTHROUGH)
+	newline (";&");
+      else if (clauses->flags & CASEPAT_TESTNEXT)
+	newline (";;&");
+      else
+	newline (";;");
       clauses = clauses->next;
     }
   indentation -= indentation_amount;
@@ -970,6 +975,10 @@ print_redirection (redirect)
 
     case r_err_and_out:
       cprintf ("&>%s", redirectee->word);
+      break;
+
+    case r_append_err_and_out:
+      cprintf ("&>>%s", redirectee->word);
       break;
 
     case r_input_output:

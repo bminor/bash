@@ -3138,7 +3138,7 @@ execute_builtin (builtin, words, flags, subshell)
      eval builtin is being called, and we're supposed to ignore the exit
      value of the command, we turn the -e flag off ourselves, then
      restore it when the command completes.  This is also a problem (as
-     below) for the command and source builtins. */
+     below) for the command and source/. builtins. */
   if (subshell == 0 && (flags & CMD_IGNORE_RETURN) &&
 	(builtin == eval_builtin || builtin == command_builtin || builtin == source_builtin))
     {

@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2008 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -690,6 +690,7 @@ make_redirection (source, instruction, dest_and_filename)
       break;
 
     case r_appending_to:		/* >>foo */
+    case r_append_err_and_out:		/* &>> filename */
       temp->flags = O_APPEND | O_WRONLY | O_CREAT;
       break;
 
