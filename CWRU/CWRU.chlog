@@ -15482,3 +15482,25 @@ builtins/complete.def
 				   ----
 doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
 	- document new compopt builtin
+
+				    4/5
+				    ---
+support/shobj-conf
+	- change solaris10 stanza to use -fPIC to fix 64-bit sparc_v9/solaris10
+	  compilations.  Fix from Fabian Groffen <grobian@gentoo.org>
+
+builtins/read.def
+	- added `-i text' option, inserts `text' into line if using readline.
+	  Suggested by many, used some ideas from Kevin Pulo <kevin@pulo.com.au>
+
+doc/{bash.1,bashref.texi}
+	- document new `-i text' option to read builtin
+
+				    4/7
+				    ---
+lib/readline/bind.c
+	- new settable variable, `history-size', sets the max number of
+	  entries in the history list
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- document new `history-size' settable readline variable

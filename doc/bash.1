@@ -10,7 +10,7 @@
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 March 27" "GNU Bash-3.2"
+.TH BASH 1 "2008 April 5" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4711,6 +4711,10 @@ If set to \fBon\fP, the history code attempts to place point at the
 same location on each history line retrieved with \fBprevious-history\fP
 or \fBnext-history\fP.
 .TP
+.B history\-size (0)
+Set the maximum number of history entries saved in the history list.  If
+set to zero, the number of entries in the history list is not limited.
+.TP
 .B horizontal\-scroll\-mode (Off)
 When set to \fBOn\fP, makes readline use a single line for display,
 scrolling the input horizontally on a single screen line when it
@@ -7515,7 +7519,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fb\-\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -7558,6 +7562,12 @@ is coming from a terminal,
 .SM
 .B READLINE
 above) is used to obtain the line.
+.TP
+.B \-i \fItext\fP
+If
+.B readline
+is being used to read the line, \fItext\fP is placed into the editing
+buffer before editing begins.
 .TP
 .B \-n \fInchars\fP
 \fBread\fP returns after reading \fInchars\fP characters rather than

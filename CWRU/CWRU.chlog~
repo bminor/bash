@@ -15480,5 +15480,18 @@ builtins/complete.def
 
 				   3/30
 				   ----
-doc/{bash.1,bashref.texi}
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
 	- document new compopt builtin
+
+				    4/5
+				    ---
+support/shobj-conf
+	- change solaris10 stanza to use -fPIC to fix 64-bit sparc_v9/solaris10
+	  compilations.  Fix from Fabian Groffen <grobian@gentoo.org>
+
+builtins/read.def
+	- added `-i text' option, inserts `text' into line if using readline.
+	  Suggested by many, used some ideas from Kevin Pulo <kevin@pulo.com.au>
+
+doc/{bash.1,bashref.texi}
+	- document new `-i text' option to read builtin

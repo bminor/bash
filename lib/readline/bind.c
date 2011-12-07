@@ -1493,6 +1493,7 @@ static int sv_compquery PARAMS((const char *));
 static int sv_editmode PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
 static int sv_keymap PARAMS((const char *));
+static int sv_histsize PARAMS((const char *));
 
 static const struct {
   const char * const name;
@@ -1503,6 +1504,7 @@ static const struct {
   { "comment-begin",	V_STRING,	sv_combegin },
   { "completion-query-items", V_INT,	sv_compquery },
   { "editing-mode",	V_STRING,	sv_editmode },
+  { "history-size",	V_INT,		sv_histsize },
   { "isearch-terminators", V_STRING,	sv_isrchterm },
   { "keymap",		V_STRING,	sv_keymap },
   { (char *)NULL,	0 }
@@ -1697,6 +1699,22 @@ sv_isrchterm (value)
   return 0;
 }
       
+static int
+sv_histsize (value)
+     const char *value;
+{
+  int nval = 500;
+
+  if (value && *value)
+    {
+      nval = atoi (value);
+      if (nval < 0)
+	return 1;
+    }
+  stifle_history (nval);
+  return 0;
+}
+
 /* Return the character which matches NAME.
    For example, `Space' returns ' '. */
 

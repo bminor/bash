@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2007 Free Software Foundation, Inc.
+Copyright (C) 1988--2008 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -474,6 +474,11 @@ If set to @samp{on}, the history code attempts to place the point (the
 current cursor position) at the
 same location on each history line retrieved with @code{previous-history}
 or @code{next-history}.  The default is @samp{off}.
+
+@item history-size
+@vindex history-size
+Set the maximum number of history entries saved in the history list.  If
+set to zero, the number of entries in the history list is not limited.
 
 @item horizontal-scroll-mode
 @vindex horizontal-scroll-mode
@@ -1574,7 +1579,7 @@ the matches.
 
 Any function specified with @option{-F} is invoked first.
 The function may use any of the shell facilities, including the
-@code{compgen} builtin described below
+@code{compgen} and @code{compopt} builtins described below
 (@pxref{Programmable Completion Builtins}), to generate the matches.
 It must put the possible completions in the @env{COMPREPLY} array
 variable.
@@ -1847,4 +1852,22 @@ a @var{name} for which no specification exists, or
 an error occurs adding a completion specification.
 
 @end table
+
+@item compopt
+@btindex compopt
+@example
+@code{compopt} [-o @var{option}] [+o @var{option}] [@var{name}]
+@end example
+Modify completion options for each @var{name} according to the
+@var{option}s, or for the currently-execution completion if no @var{name}s
+are supplied.
+If no @var{option}s are given, display the completion options for each
+@var{name} or the current completion.
+The possible values of @var{option} are those valid for the @code{complete}
+builtin described above.
+
+The return value is true unless an invalid option is supplied, an attempt
+is made to modify the options for a @var{name} for which no completion
+specification exists, or an output error occurs.
+
 @end ifset

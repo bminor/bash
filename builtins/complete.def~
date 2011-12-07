@@ -27,8 +27,9 @@ $FUNCTION complete_builtin
 $SHORT_DOC complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
 Specify how arguments are to be completed by Readline.
 
-If no options are supplied, existing completion specifications are printed
-in a way that allows them to be reused as input.
+For each NAME, specify how arguments are to be completed.  If no options
+are supplied, existing completion specifications are printed in a way that
+allows them to be reused as input.
 
 Options:
   -p	print existing completion specifications in a reusable format
@@ -583,10 +584,11 @@ $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
 $SHORT_DOC compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
-Display the possible completions depending on the options.  Intended
-to be used from within a shell function generating possible completions.
-If the optional WORD argument is supplied, matches against WORD are
-generated.
+Display the possible completions depending on the options.
+
+Intended to be used from within a shell function generating possible
+completions.  If the optional WORD argument is supplied, matches against
+WORD are generated.
 $END
 
 int
@@ -679,7 +681,8 @@ $SHORT_DOC compopt [-o|+o option] [name ...]
 Modify or display completion options.
 
 Modify the completion options for each NAME, or, if no NAMEs are supplied,
-the completion currently begin executed.
+the completion currently begin executed.  If no OPTIONs are givenm, print
+the completion options for each NAME or the current completion specification.
 
 Options:
 	-o option	Set completion option OPTION for each NAME

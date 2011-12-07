@@ -19,13 +19,14 @@
 
 #include "stdc.h"
 
+#include <stdio.h>
+
 /* Specification.  Same as in ../../externs.h.  */
 #define NEED_FPURGE_DECL
 #if HAVE_FPURGE
 #  define fpurge _bash_fpurge
 #endif
 extern int fpurge __P((FILE *stream));
-
 
 #if HAVE___FPURGE                   /* glibc >= 2.2, Solaris >= 7 */
 # include <stdio_ext.h>
