@@ -10,7 +10,7 @@
 # Chet Ramey
 # chet@po.cwru.edu
 
-# Copyright (C) 1996-2002 Free Software Foundation, Inc.
+# Copyright (C) 1996-2007 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -247,7 +247,7 @@ osf*)
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
 	;;
 
-aix4.[2-9]*-*gcc*)		# lightly tested by jik@cisco.com
+aix4.[2-9]*-*gcc*|aix[5-9].*-*gcc*)		# lightly tested by jik@cisco.com
 	SHOBJ_CFLAGS=-fpic
 	SHOBJ_LD='ld'
 	SHOBJ_LDFLAGS='-bdynamic -bnoentry -bexpall'
@@ -258,7 +258,7 @@ aix4.[2-9]*-*gcc*)		# lightly tested by jik@cisco.com
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
 	;;
 
-aix4.[2-9]*)
+aix4.[2-9]*|aix[5-9].*)
 	SHOBJ_CFLAGS=-K
 	SHOBJ_LD='ld'
 	SHOBJ_LDFLAGS='-bdynamic -bnoentry -bexpall'

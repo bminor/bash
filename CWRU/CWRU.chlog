@@ -14724,4 +14724,38 @@ jobs.c
 	  the controlling terminal.  If it's not, try to open /dev/tty and
 	  assign it to shell_tty.  Fixes problems reported by Derek Fawcus
 	  <dfawcus@cisco.com>
-	  
+
+				   6/13
+				   ----
+support/shobj-conf
+	- changes to support shared object and shared library creation on AIX
+	  5.x and later versions.  From Niklas Edmundsson <nikke@acc.umu.se>
+
+				   6/17
+				   ----
+builtins/mkbuiltins.c
+	- new array of builtins, posix_builtins, containing builtins listed
+	  as special to the command search order by POSIX
+	- add POSIX_BUILTIN to the builtin flags if the builtin name is one
+	  that's special to the posix command search order
+
+builtins.h
+	- new define, POSIX_BUILTIN, means that a builtin is special to the
+	  posix command search order
+
+				   6/22
+				   ----
+lib/readline/display.c
+	- new macro, WRAP_OFFSET, intended to replace W_OFFSET.  Takes prompt
+	  strings longer than one physical line with invisible characters on
+	  the second line into account when calculating the number of
+	  invisible characters on the current screen line
+	- use WRAP_OFFSET where appropriate (update_line, _rl_move_cursor_relative)
+	- change update_line to deal with adjusting _rl_last_c_pos in a
+	  multibyte environment when the prompt has invisible chars on the
+	  second line and redisplay has output the invisible characters
+	- change _rl_move_cursor_relative to adjust _rl_last_c_pos in a
+	  multibyte environment when the prompt has invisible chars on the
+	  second line and the redisplay draws the invisible character.  Fixes
+	  redisplay bug reported by Andreas Schwab <schwab@suse.de>
+
