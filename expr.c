@@ -1032,8 +1032,6 @@ readtok ()
   if (c)
     cp++;
 
-  lasttp = tp = cp - 1;
-
   if (c == '\0')
     {
       lasttok = curtok;
@@ -1041,6 +1039,7 @@ readtok ()
       tp = cp;
       return;
     }
+  lasttp = tp = cp - 1;
 
   if (legal_variable_starter (c))
     {

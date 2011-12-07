@@ -1477,9 +1477,12 @@ command_word_completion_function (hint_text, state)
 	  if (*hint_text == '~')
 	    {
 	      int l, tl, vl, dl;
-	      char *rd;
+	      char *rd, *dh;
+
+	      dh = bash_dequote_filename ((char *)hint_text, 0);
+
 	      vl = strlen (val);
-	      tl = strlen (hint_text);
+	      tl = strlen (dh);
 #if 0
 	      l = vl - hint_len;	/* # of chars added */
 #else
@@ -1490,8 +1493,9 @@ command_word_completion_function (hint_text, state)
 	      free (rd);
 #endif
 	      temp = (char *)xmalloc (l + 2 + tl);
-	      strcpy (temp, hint_text);
+	      strcpy (temp, dh);
 	      strcpy (temp + tl, val + vl - l);
+	      free (dh);
 	    }
 	  else
 	    temp = savestring (val);

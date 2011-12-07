@@ -14963,3 +14963,18 @@ pcomplete.c
 	  instead of the shell metacharacters to split words, so programmable
 	  completion does the same thing readline does internally.  Reported
 	  by Vasily Tarasov <vtaras@sw.ru>
+
+				   10/16
+				   -----
+bashline.c
+	- When completing a command name beginnig with a tilde and containing
+	  escaped specical characters, dequote the filename before prefixing
+	  it to the matches, so the escapes are not quoted again.  Reported
+	  by neil@s-z.org
+
+				   10/17
+				   -----
+expr.c
+	- in readtok(), don't reset lasttp if we've consumed the whitespace
+	  at the end of the expression string.  Fixes error message problem
+	  reported by <anmaster@tele2.se>
