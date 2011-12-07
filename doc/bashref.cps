@@ -14,10 +14,10 @@
 \initial {C}
 \entry {command editing}{91}
 \entry {command execution}{30}
-\entry {command expansion}{29}
+\entry {command expansion}{30}
 \entry {command history}{119}
 \entry {command search}{30}
-\entry {command substitution}{22}
+\entry {command substitution}{23}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
 \entry {commands, conditional}{10}
@@ -31,6 +31,7 @@
 \entry {completion builtins}{114}
 \entry {configuration}{125}
 \entry {control operator}{3}
+\entry {coprocess}{14}
 \initial {D}
 \entry {directory stack}{79}
 \initial {E}
@@ -39,14 +40,14 @@
 \entry {evaluation, arithmetic}{76}
 \entry {event designators}{122}
 \entry {execution environment}{31}
-\entry {exit status}{3, 32}
+\entry {exit status}{3, 33}
 \entry {expansion}{17}
 \entry {expansion, arithmetic}{23}
 \entry {expansion, brace}{18}
 \entry {expansion, filename}{24}
-\entry {expansion, parameter}{19}
+\entry {expansion, parameter}{20}
 \entry {expansion, pathname}{24}
-\entry {expansion, tilde}{18}
+\entry {expansion, tilde}{19}
 \entry {expressions, arithmetic}{76}
 \entry {expressions, conditional}{75}
 \initial {F}
@@ -78,7 +79,7 @@
 \entry {localization}{7}
 \entry {login shell}{71}
 \initial {M}
-\entry {matching, pattern}{24}
+\entry {matching, pattern}{25}
 \entry {metacharacter}{3}
 \initial {N}
 \entry {name}{3}
@@ -87,12 +88,12 @@
 \initial {O}
 \entry {operator, shell}{3}
 \initial {P}
-\entry {parameter expansion}{19}
-\entry {parameters}{15}
+\entry {parameter expansion}{20}
+\entry {parameters}{16}
 \entry {parameters, positional}{16}
-\entry {parameters, special}{16}
+\entry {parameters, special}{17}
 \entry {pathname expansion}{24}
-\entry {pattern matching}{24}
+\entry {pattern matching}{25}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
 \entry {POSIX Mode}{83}
@@ -113,8 +114,8 @@
 \initial {S}
 \entry {shell arithmetic}{76}
 \entry {shell function}{14}
-\entry {shell script}{33}
-\entry {shell variable}{15}
+\entry {shell script}{34}
+\entry {shell variable}{16}
 \entry {shell, interactive}{73}
 \entry {signal}{4}
 \entry {signal handling}{33}
@@ -122,14 +123,14 @@
 \entry {startup files}{71}
 \entry {suspending jobs}{87}
 \initial {T}
-\entry {tilde expansion}{18}
+\entry {tilde expansion}{19}
 \entry {token}{4}
 \entry {translation, native languages}{7}
 \initial {V}
-\entry {variable, shell}{15}
+\entry {variable, shell}{16}
 \entry {variables, readline}{95}
 \initial {W}
 \entry {word}{4}
-\entry {word splitting}{23}
+\entry {word splitting}{24}
 \initial {Y}
 \entry {yanking text}{93}

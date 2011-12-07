@@ -1312,7 +1312,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   do_piping (pipe_in, pipe_out);
 
 #if defined (COPROCESS_SUPPORT)
-  coproc_close (&sh_coproc);
+  coproc_closeall ();
 #endif
 
   /* If this is a user subshell, set a flag if stdin was redirected.
@@ -1404,10 +1404,183 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 }
 
 #if defined (COPROCESS_SUPPORT)
+#define COPROC_MAX	16
+
+typedef struct cpelement
+  {
+    struct cpelement *next;
+    struct coproc *coproc;
+  }
+cpelement_t;
+    
+typedef struct cplist
+  {
+    struct cpelement *head;
+    struct cpelement *tail;
+    int ncoproc;
+  }
+cplist_t;
+
+static struct cpelement *cpe_alloc __P((struct coproc *));
+static void cpe_dispose __P((struct cpelement *));
+static struct cpelement *cpl_add __P((struct coproc *));
+static struct cpelement *cpl_delete __P((pid_t));
+static void cpl_flush __P((void));
+static struct cpelement *cpl_search __P((pid_t));
+static struct cpelement *cpl_searchbyname __P((char *));
+static void cpl_prune __P((void));
+
 Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0 };
 
+cplist_t coproc_list = {0, 0, 0};
+
+/* Functions to manage the list of exited background pids whose status has
+   been saved. */
+
+static struct cpelement *
+cpe_alloc (cp)
+     Coproc *cp;
+{
+  struct cpelement *cpe;
+
+  cpe = (struct cpelement *)xmalloc (sizeof (struct cpelement));
+  cpe->coproc = cp;
+  cpe->next = (struct cpelement *)0;
+  return cpe;
+}
+
+static void
+cpe_dispose (cpe)
+      struct cpelement *cpe;
+{
+  free (cpe);
+}
+
+static struct cpelement *
+cpl_add (cp)
+     Coproc *cp;
+{
+  struct cpelement *cpe;
+
+  cpe = cpe_alloc (cp);
+
+  if (coproc_list.head == 0)
+    {
+      coproc_list.head = coproc_list.tail = cpe;
+      coproc_list.ncoproc = 0;			/* just to make sure */
+    }
+  else
+    {
+      coproc_list.tail->next = cpe;
+      coproc_list.tail = cpe;
+    }
+  coproc_list.ncoproc++;
+
+  return cpe;
+}
+
+static struct cpelement *
+cpl_delete (pid)
+     pid_t pid;
+{
+  struct cpelement *prev, *p;
+
+  for (prev = p = coproc_list.head; p; prev = p, p = p->next)
+    if (p->coproc->c_pid == pid)
+      {
+        prev->next = p->next;	/* remove from list */
+        break;
+      }
+
+  if (p == 0)
+    return 0;		/* not found */
+
+#if defined (DEBUG)
+  itrace("cpl_delete: deleting %d", pid);
+#endif
+
+  /* Housekeeping in the border cases. */
+  if (p == coproc_list.head)
+    coproc_list.head = coproc_list.head->next;
+  else if (p == coproc_list.tail)
+    coproc_list.tail = prev;
+
+  coproc_list.ncoproc--;
+  if (coproc_list.ncoproc == 0)
+    coproc_list.head = coproc_list.tail = 0;
+  else if (coproc_list.ncoproc == 1)
+    coproc_list.tail = coproc_list.head;		/* just to make sure */
+
+  return (p);
+}
+
+/* Clear out the list of saved statuses */
+static void
+cpl_flush ()
+{
+  struct cpelement *cpe, *p;
+
+  for (cpe = coproc_list.head; cpe; )
+    {
+      p = cpe;
+      cpe = cpe->next;
+
+      coproc_dispose (p->coproc);
+      cpe_dispose (p);
+    }
+
+  coproc_list.head = coproc_list.tail = 0;
+  coproc_list.ncoproc = 0;
+}
+
+/* Search for PID in the list of coprocs; return the cpelement struct if
+   found.  If not found, return NULL. */
+static struct cpelement *
+cpl_search (pid)
+     pid_t pid;
+{
+  struct cpelement *cp;
+
+  for (cp = coproc_list.head ; cp; cp = cp->next)
+    if (cp->coproc->c_pid == pid)
+      return cp;
+  return (struct cpelement *)NULL;
+}
+
+/* Search for the coproc named NAME in the list of coprocs; return the
+   cpelement struct if found.  If not found, return NULL. */
+static struct cpelement *
+cpl_searchbyname (name)
+     char *name;
+{
+  struct cpelement *cp;
+
+  for (cp = coproc_list.head ; cp; cp = cp->next)
+    if (STREQ (cp->coproc->c_name, name))
+      return cp;
+  return (struct cpelement *)NULL;
+}
+
+#if 0
+static void
+cpl_prune ()
+{
+  struct cpelement *cp;
+
+  while (coproc_list.head && coproc_list.ncoproc > COPROC_MAX)
+    {
+      cp = coproc_list.head;
+      coproc_list.head = coproc_list.head->next;
+      coproc_dispose (cp->coproc);
+      cpe_dispose (cp);
+      coproc_list.ncoproc--;
+    }
+}
+#endif
+
 /* These currently use a single global "shell coproc" but are written in a
-   way to not preclude additional coprocs later */
+   way to not preclude additional coprocs later (using the list management
+   package above). */
 
 struct coproc *
 getcoprocbypid (pid)
@@ -1441,7 +1614,7 @@ coproc_alloc (name, pid)
 {
   struct coproc *cp;
 
-  cp = &sh_coproc;
+  cp = &sh_coproc;		/* XXX */
   coproc_init (cp);
 
   cp->c_name = savestring (name);
@@ -1463,6 +1636,13 @@ coproc_dispose (cp)
   coproc_init (cp);
 }
 
+/* Placeholder for now. */
+void
+coproc_flush ()
+{
+  coproc_dispose (&sh_coproc);
+}
+
 void
 coproc_close (cp)
      struct coproc *cp;
@@ -1478,6 +1658,12 @@ coproc_close (cp)
       cp->c_wfd = -1;
     }
   cp->c_rsave = cp->c_wsave = -1;
+}
+
+void
+coproc_closeall ()
+{
+  coproc_close (&sh_coproc);
 }
 
 void
@@ -1505,7 +1691,7 @@ coproc_wclose (cp, fd)
 }
 
 void
-coproc_fdchk (cp, fd)
+coproc_checkfd (cp, fd)
      struct coproc *cp;
      int fd;
 {
@@ -1521,6 +1707,13 @@ coproc_fdchk (cp, fd)
 }
 
 void
+coproc_fdchk (fd)
+     int fd;
+{
+  coproc_checkfd (&sh_coproc, fd);
+}
+
+void
 coproc_fdclose (cp, fd)
      struct coproc *cp;
      int fd;
@@ -1529,7 +1722,6 @@ coproc_fdclose (cp, fd)
   coproc_wclose (cp, fd);
   coproc_setvars (cp);
 }
-
 
 void
 coproc_fdsave (cp)
@@ -1554,11 +1746,12 @@ coproc_pidchk (pid)
   struct coproc *cp;
 
   cp = getcoprocbypid (pid);
+#if defined (DEBUG)
   if (cp)
-{
-itrace("coproc_pidchk: pid %d has died", pid);
+    itrace("coproc_pidchk: pid %d has died", pid);
+#endif
+  if (cp)
     coproc_dispose (cp);
-}
 }
 
 void
@@ -1652,6 +1845,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   Coproc *cp;
   char *tcmd;
 
+  /* XXX -- will require changes to handle multiple coprocs */
   if (sh_coproc.c_pid != NO_PID)
     {
 #if 0
@@ -3017,7 +3211,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 	  do_piping (pipe_in, pipe_out);
 
 #if defined (COPROCESS_SUPPORT)
-	  coproc_close (&sh_coproc);
+	  coproc_closeall ();
 #endif
 
 	  subshell_environment = 0;
@@ -3223,7 +3417,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = NO_PIPE;
 #if defined (COPROCESS_SUPPORT)
-	  coproc_close (&sh_coproc);
+	  coproc_closeall ();
 #endif
 
 	  last_asynchronous_pid = old_last_async_pid;

@@ -275,7 +275,16 @@ does not provide the necessary support.
 
 `--enable-brace-expansion'
      Include `csh'-like brace expansion ( `b{a,b}c' ==> `bac bbc' ).
-     See *Note Brace Expansion::, for a complete description.
+     See *note Brace Expansion::, for a complete description.
+
+`--enable-casemod-attributes'
+     Include support for case-modifying attributes in the `declare'
+     builtin and assignment statements.  Variables with the UPPERCASE
+     attribute, for example, will have their values converted to
+     uppercase upon assignment.
+
+`--enable-casemod-expansion'
+     Include support for case-modifying word expansions.
 
 `--enable-command-timing'
      Include support for recognizing `time' as a reserved word and for
@@ -292,6 +301,10 @@ does not provide the necessary support.
      `=~' binary operator in the `[[' conditional command.  (*note
      Conditional Constructs::).
 
+`--enable-coprocesses'
+     Include support for coprocesses and the `coproc' reserved word
+     (*note Pipelines::).
+
 `--enable-debugger'
      Include support for the bash debugger (distributed separately).
 
@@ -301,7 +314,7 @@ does not provide the necessary support.
 
 `--enable-disabled-builtins'
      Allow builtin commands to be invoked via `builtin xxx' even after
-     `xxx' has been disabled using `enable -n xxx'.  See *Note Bash
+     `xxx' has been disabled using `enable -n xxx'.  See *note Bash
      Builtins::, for details of the `builtin' and `enable' builtin
      commands.
 
@@ -311,7 +324,7 @@ does not provide the necessary support.
 
 `--enable-extended-glob'
      Include support for the extended pattern matching features
-     described above under *Note Pattern Matching::.
+     described above under *note Pattern Matching::.
 
 `--enable-help-builtin'
      Include the `help' builtin, which displays help on shell builtins
@@ -346,7 +359,7 @@ does not provide the necessary support.
 `--enable-prompt-string-decoding'
      Turn on the interpretation of a number of backslash-escaped
      characters in the `$PS1', `$PS2', `$PS3', and `$PS4' prompt
-     strings.  See *Note Printing a Prompt::, for a complete list of
+     strings.  See *note Printing a Prompt::, for a complete list of
      prompt string escape sequences.
 
 `--enable-readline'
@@ -355,7 +368,7 @@ does not provide the necessary support.
 
 `--enable-restricted'
      Include support for a "restricted shell".  If this is enabled,
-     Bash, when called as `rbash', enters a restricted mode.  See *Note
+     Bash, when called as `rbash', enters a restricted mode.  See *note
      The Restricted Shell::, for a description of restricted mode.
 
 `--enable-select'

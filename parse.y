@@ -1867,10 +1867,25 @@ char *
 read_secondary_line (remove_quoted_newline)
      int remove_quoted_newline;
 {
+  char *ret;
+  int n, c;
+
   prompt_string_pointer = &ps2_prompt;
   if (SHOULD_PROMPT())
     prompt_again ();
-  return (read_a_line (remove_quoted_newline));
+  ret = read_a_line (remove_quoted_newline);
+  if (remember_on_history && (parser_state & PST_HEREDOC))
+    {
+      /* To make adding the the here-document body right, we need to rely
+	 on history_delimiting_chars() returning \n for the first line of
+	 the here-document body and the null string for the second and
+	 subsequent lines, so we avoid double newlines.
+	 current_command_line_count == 2 for the first line of the body. */
+
+      current_command_line_count++;
+      maybe_add_history (ret);
+    }
+  return ret;
 }
 
 /* **************************************************************** */
@@ -2358,10 +2373,14 @@ static int esacs_needed_count;
 void
 gather_here_documents ()
 {
-  int r = 0;
+  int r;
+
+  r = 0;
   while (need_here_doc)
     {
+      parser_state |= PST_HEREDOC;
       make_here_document (redir_stack[r++], line_number);
+      parser_state &= ~PST_HEREDOC;
       need_here_doc--;
     }
 }
@@ -2939,7 +2958,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
-/* itrace("parse_matched_pair: open = %c close = %c", open, close); */
+/* itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
   count = 1;
   tflags = 0;
 
@@ -3037,6 +3056,15 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
       if MBTEST(ch == '\\')			/* backslashes */
 	tflags |= LEX_PASSNEXT;
+
+#if 0
+      /* The big hammer.  Single quotes aren't special in double quotes.  The
+         problem is that Posix says the single quotes are semi-special:
+         within a double-quoted ${...} construct "an even number of
+         unescaped double-quotes or single-quotes, if any, shall occur." */
+      if MBTEST(open == '{' && (flags & P_DQUOTE) && ch == '\'')	/* } */
+	continue;
+#endif
 
       /* Could also check open == '`' if we want to parse grouping constructs
 	 inside old-style command substitution. */
@@ -4499,7 +4527,13 @@ history_delimiting_chars ()
 
   if (dstack.delimiter_depth != 0)
     return ("\n");
-    
+
+  /* We look for current_command_line_count == 2 because we are looking to
+     add the first line of the body of the here document (the second line
+     of the command). */
+  if (parser_state & PST_HEREDOC)
+    return (current_command_line_count == 2 ? "\n" : "");
+
   /* First, handle some special cases. */
   /*(*/
   /* If we just read `()', assume it's a function definition, and don't

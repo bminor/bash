@@ -35,6 +35,7 @@ Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 #include "bashintl.h"
 
 #include "syntax.h"
+#include "parser.h"
 #include "command.h"
 #include "general.h"
 #include "error.h"
@@ -794,6 +795,20 @@ make_subshell_command (command)
   temp->command = command;
   temp->flags = CMD_WANT_SUBSHELL;
   return (make_command (cm_subshell, (SIMPLE_COM *)temp));
+}
+
+COMMAND *
+make_coproc_command (name, command)
+     char *name;
+     COMMAND *command;
+{
+  COPROC_COM *temp;
+
+  temp = (COPROC_COM *)xmalloc (sizeof (COPROC_COM));
+  temp->name = savestring (name);
+  temp->command = command;
+  temp->flags = CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+  return (make_command (cm_coproc, (SIMPLE_COM *)temp));
 }
 
 /* Reverse the word list and redirection list in the simple command

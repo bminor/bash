@@ -816,7 +816,7 @@ skip_double_quoted (string, slen, sind)
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, SX_NOALLOC);
 	  else
-	    ret = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
+	    ret = extract_dollar_brace_string (string, &si, 1, SX_NOALLOC);
 
 	  i = si + 1;
 	  continue;

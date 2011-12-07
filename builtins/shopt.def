@@ -62,6 +62,10 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
+#if defined (HISTORY)
+#  include "../bashhist.h"
+#endif
+
 #define UNSETOPT	0
 #define SETOPT		1
 
@@ -84,11 +88,6 @@ extern int glob_star;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
-#endif
-
-#if defined (HISTORY)
-extern int literal_history, command_oriented_history;
-extern int force_append_history;
 #endif
 
 #if defined (READLINE)

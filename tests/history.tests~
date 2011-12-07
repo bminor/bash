@@ -92,6 +92,17 @@ r cc
 unalias -a
 alias
 
+# these two blocks had better both result in the same output
+echo aa
+echo bb
+echo cc
+fc -e cat
+
+echo aa
+echo bb
+echo cc
+fc -e cat -1
+
 set +o history
 
 shopt -q -o history

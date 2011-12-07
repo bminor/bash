@@ -6718,3 +6718,34 @@ print_cmd.c
 locale.c
 	- in set_locale_var, print a warning message if setlocale() fails any
 	  time it's called -- required some code restructuring
+
+				   7/19
+				   ----
+support/shobj-conf
+	- support for mingw32, contributed by Carlo Bramix
+	  <carlo.bramix@libero.it>
+
+				   7/23
+				   ----
+execute_cmd.c
+	- added support (currently unused) to manage a list of coprocs
+
+				   7/25
+				   ----
+bashline.c
+	- add extern declarations for literal_history and force_append_history
+
+builtins/shopt.def
+	- include "bashhist.h" instead of having extern declarations for the
+	  appropriate history variables
+
+parser.h
+	- new parser_state value: PST_HEREDOC, set when reading body of here-
+	  document in parse.y:read_secondary_line
+
+parse.y
+	- set PST_HEREDOC bit in parser_state when reading a secondary line
+	  for the body of a here-document
+	- change read_secondary_line to save lines in the body of a here-
+	  document in the shell history list if remember_on_history is
+	  set.  Fixes bug reported by Gene Golub <gene_golub@hotmail.com>

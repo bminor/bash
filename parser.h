@@ -43,6 +43,7 @@
 #define PST_ASSIGNOK	0x04000		/* assignment statement ok in this context */
 #define PST_EOFTOKEN	0x08000		/* yylex checks against shell_eof_token */
 #define PST_REGEXP	0x10000		/* parsing an ERE/BRE as a single word */
+#define PST_HEREDOC	0x20000		/* reading body of here-document */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 June 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 July 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1115,6 +1115,58 @@ of the last <B>do</B> <I>list</I> command executed, or zero if
 none was executed.
 </DL>
 <A NAME="lbAP">&nbsp;</A>
+<H4>Coprocesses</H4>
+
+<P>
+
+A <I>coprocess</I> is a shell command preceded by the <B>coproc</B> reserved
+word.
+A coprocess is executed asynchronously in a subshell, as if the command
+had been terminated with the <B>&amp;</B> control operator, with a two-way pipe
+established between the executing shell and the coprocess.
+<P>
+
+The format for a coprocess is:
+<DL COMPACT><DT><DD>
+<P>
+
+<B>coproc</B> [<I>NAME</I>] <I>command</I> [<I>redirections</I>]
+</DL>
+
+<P>
+
+This creates a coprocess named <I>NAME</I>.
+If <I>NAME</I> is not supplied, the default name is <I>COPROC</I>.
+When the coproc is executed, the shell creates an array variable (see
+<B>Arrays</B>
+
+below) named <I>NAME</I> in the context of the executing shell.
+The standard output of
+<I>command</I>
+
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to <I>NAME</I>[0].
+The standard input of
+<I>command</I>
+
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to <I>NAME</I>[1].
+This pipe is established before any redirections specified by the
+command (see
+<FONT SIZE=-1><B>REDIRECTION</B>
+
+</FONT>
+below).
+The file descriptors can be utilized as arguments to shell commands
+and redirections using standard word expansions.
+The process id of the shell spawned to execute the coprocess is
+available as the value of the variable <I>NAME</I>_PID.
+The <B>wait</B>
+builtin command may be used to wait for the coprocess to terminate.
+<P>
+
+The return status of a coprocess is the exit status of <I>command</I>.
+<A NAME="lbAQ">&nbsp;</A>
 <H4>Shell Function Definitions</H4>
 
 <P>
@@ -1150,7 +1202,7 @@ last command executed in the body.  (See
 </FONT>
 below.)
 </DL>
-<A NAME="lbAQ">&nbsp;</A>
+<A NAME="lbAR">&nbsp;</A>
 <H3>COMMENTS</H3>
 
 In a non-interactive shell, or an interactive shell in which the
@@ -1174,7 +1226,7 @@ option enabled does not allow comments.  The
 <B>interactive_comments</B>
 
 option is on by default in interactive shells.
-<A NAME="lbAR">&nbsp;</A>
+<A NAME="lbAS">&nbsp;</A>
 <H3>QUOTING</H3>
 
 <I>Quoting</I> is used to remove the special meaning of certain
@@ -1355,7 +1407,7 @@ If the current locale is <B>C</B> or <B>POSIX</B>, the dollar sign
 is ignored.
 If the string is translated and replaced, the replacement is
 double-quoted.
-<A NAME="lbAS">&nbsp;</A>
+<A NAME="lbAT">&nbsp;</A>
 <H3>PARAMETERS</H3>
 
 A
@@ -1472,7 +1524,7 @@ appended to the array beginning at one greater than the array's maximum index
 associative array.
 When applied to a string-valued variable, <I>value</I> is expanded and
 appended to the variable's value.
-<A NAME="lbAT">&nbsp;</A>
+<A NAME="lbAU">&nbsp;</A>
 <H4>Positional Parameters</H4>
 
 <P>
@@ -1501,7 +1553,7 @@ digit is expanded, it must be enclosed in braces (see
 
 </FONT>
 below).
-<A NAME="lbAU">&nbsp;</A>
+<A NAME="lbAV">&nbsp;</A>
 <H4>Special Parameters</H4>
 
 <P>
@@ -1624,7 +1676,7 @@ When checking mail, this parameter holds the name of the mail file
 currently being checked.
 
 </DL>
-<A NAME="lbAV">&nbsp;</A>
+<A NAME="lbAW">&nbsp;</A>
 <H4>Shell Variables</H4>
 
 <P>
@@ -2709,7 +2761,7 @@ remaining words on the line.  It does not necessarily cause the shell
 parser to treat the rest of the line as a comment.
 
 </DL>
-<A NAME="lbAW">&nbsp;</A>
+<A NAME="lbAX">&nbsp;</A>
 <H4>Arrays</H4>
 
 <B>Bash</B>
@@ -2853,7 +2905,7 @@ and
 
 builtins display array values in a way that allows them to be
 reused as assignments.
-<A NAME="lbAX">&nbsp;</A>
+<A NAME="lbAY">&nbsp;</A>
 <H3>EXPANSION</H3>
 
 Expansion is performed on the command line after it has been split into
@@ -2895,7 +2947,7 @@ as explained above (see
 <FONT SIZE=-1><B>PARAMETERS</B>).
 
 </FONT>
-<A NAME="lbAY">&nbsp;</A>
+<A NAME="lbAZ">&nbsp;</A>
 <H4>Brace Expansion</H4>
 
 <P>
@@ -3018,7 +3070,7 @@ command (see
 
 </FONT>
 below).
-<A NAME="lbAZ">&nbsp;</A>
+<A NAME="lbBA">&nbsp;</A>
 <H4>Tilde Expansion</H4>
 
 <P>
@@ -3089,7 +3141,7 @@ and
 
 </FONT>
 and the shell assigns the expanded value.
-<A NAME="lbBA">&nbsp;</A>
+<A NAME="lbBB">&nbsp;</A>
 <H4>Parameter Expansion</H4>
 
 <P>
@@ -3421,7 +3473,7 @@ or
 the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 </DL>
-<A NAME="lbBB">&nbsp;</A>
+<A NAME="lbBC">&nbsp;</A>
 <H4>Command Substitution</H4>
 
 <P>
@@ -3475,7 +3527,7 @@ escape the inner backquotes with backslashes.
 
 If the substitution appears within double quotes, word splitting and
 pathname expansion are not performed on the results.
-<A NAME="lbBC">&nbsp;</A>
+<A NAME="lbBD">&nbsp;</A>
 <H4>Arithmetic Expansion</H4>
 
 <P>
@@ -3511,7 +3563,7 @@ is invalid,
 <B>bash</B>
 
 prints a message indicating failure and no substitution occurs.
-<A NAME="lbBD">&nbsp;</A>
+<A NAME="lbBE">&nbsp;</A>
 <H4>Process Substitution</H4>
 
 <P>
@@ -3535,7 +3587,7 @@ When available, process substitution is performed
 simultaneously with parameter and variable expansion, 
 command substitution,
 and arithmetic expansion.
-<A NAME="lbBE">&nbsp;</A>
+<A NAME="lbBF">&nbsp;</A>
 <H4>Word Splitting</H4>
 
 <P>
@@ -3635,7 +3687,7 @@ null argument results and is retained.
 
 Note that if no expansion occurs, no splitting
 is performed.
-<A NAME="lbBF">&nbsp;</A>
+<A NAME="lbBG">&nbsp;</A>
 <H4>Pathname Expansion</H4>
 
 <P>
@@ -3916,7 +3968,7 @@ Matches anything except one of the given patterns
 </DL></DL>
 
 
-<A NAME="lbBG">&nbsp;</A>
+<A NAME="lbBH">&nbsp;</A>
 <H4>Quote Removal</H4>
 
 <P>
@@ -3929,7 +3981,7 @@ characters
 
 and <B>&quot;</B> that did not result from one of the above
 expansions are removed.
-<A NAME="lbBH">&nbsp;</A>
+<A NAME="lbBI">&nbsp;</A>
 <H3>REDIRECTION</H3>
 
 Before a command is executed, its input and output
@@ -4048,7 +4100,7 @@ A failure to open or create a file causes the redirection to fail.
 Redirections using file descriptors greater than 9 should be used with
 care, as they may conflict with file descriptors the shell uses
 internally.
-<A NAME="lbBI">&nbsp;</A>
+<A NAME="lbBJ">&nbsp;</A>
 <H4>Redirecting Input</H4>
 
 <P>
@@ -4073,7 +4125,7 @@ The general format for redirecting input is:
 [<I>n</I>]<B>&lt;</B><I>word</I>
 </DL>
 
-<A NAME="lbBJ">&nbsp;</A>
+<A NAME="lbBK">&nbsp;</A>
 <H4>Redirecting Output</H4>
 
 <P>
@@ -4127,7 +4179,7 @@ option to the
 
 builtin command is not enabled, the redirection is attempted even
 if the file named by <I>word</I> exists.
-<A NAME="lbBK">&nbsp;</A>
+<A NAME="lbBL">&nbsp;</A>
 <H4>Appending Redirected Output</H4>
 
 <P>
@@ -4155,7 +4207,7 @@ The general format for appending output is:
 
 <P>
 
-<A NAME="lbBL">&nbsp;</A>
+<A NAME="lbBM">&nbsp;</A>
 <H4>Redirecting Standard Output and Standard Error</H4>
 
 <P>
@@ -4194,7 +4246,7 @@ This is semantically equivalent to
 
 <P>
 
-<A NAME="lbBM">&nbsp;</A>
+<A NAME="lbBN">&nbsp;</A>
 <H4>Appending Standard Output and Standard Error</H4>
 
 <P>
@@ -4224,7 +4276,7 @@ This is semantically equivalent to
 <B>&gt;&gt;</B><I>word</I> 2<B>&gt;&amp;</B>1
 </DL>
 
-<A NAME="lbBN">&nbsp;</A>
+<A NAME="lbBO">&nbsp;</A>
 <H4>Here Documents</H4>
 
 <P>
@@ -4296,7 +4348,7 @@ line containing
 This allows
 here-documents within shell scripts to be indented in a
 natural fashion.
-<A NAME="lbBO">&nbsp;</A>
+<A NAME="lbBP">&nbsp;</A>
 <H4>Here Strings</H4>
 
 A variant of here documents, the format is:
@@ -4313,7 +4365,7 @@ A variant of here documents, the format is:
 
 The <I>word</I> is expanded and supplied to the command on its standard
 input.
-<A NAME="lbBP">&nbsp;</A>
+<A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
 <P>
@@ -4374,7 +4426,7 @@ do not specify a file descriptor open for output, a redirection error occurs.
 As a special case, if <I>n</I> is omitted, and <I>word</I> does not
 expand to one or more digits, the standard output and standard
 error are redirected as described previously.
-<A NAME="lbBQ">&nbsp;</A>
+<A NAME="lbBR">&nbsp;</A>
 <H4>Moving File Descriptors</H4>
 
 <P>
@@ -4408,7 +4460,7 @@ moves the file descriptor <I>digit</I> to file descriptor
 <I>n</I>,
 
 or the standard output (file descriptor 1) if <I>n</I> is not specified.
-<A NAME="lbBR">&nbsp;</A>
+<A NAME="lbBS">&nbsp;</A>
 <H4>Opening File Descriptors for Reading and Writing</H4>
 
 <P>
@@ -4432,7 +4484,7 @@ or on file descriptor 0 if
 <I>n</I>
 
 is not specified.  If the file does not exist, it is created.
-<A NAME="lbBS">&nbsp;</A>
+<A NAME="lbBT">&nbsp;</A>
 <H3>ALIASES</H3>
 
 <I>Aliases</I> allow a string to be substituted for a word when it is used
@@ -4534,7 +4586,7 @@ in compound commands.
 
 For almost every purpose, aliases are superseded by
 shell functions.
-<A NAME="lbBT">&nbsp;</A>
+<A NAME="lbBU">&nbsp;</A>
 <H3>FUNCTIONS</H3>
 
 A shell function, defined as described above under
@@ -4653,7 +4705,7 @@ Care should be taken in cases where this may cause a problem.
 
 Functions may be recursive.  No limit is imposed on the number
 of recursive calls.
-<A NAME="lbBU">&nbsp;</A>
+<A NAME="lbBV">&nbsp;</A>
 <H3>ARITHMETIC EVALUATION</H3>
 
 The shell allows arithmetic expressions to be evaluated, under
@@ -4776,7 +4828,7 @@ and 35.
 Operators are evaluated in order of precedence.  Sub-expressions in
 parentheses are evaluated first and may override the precedence
 rules above.
-<A NAME="lbBV">&nbsp;</A>
+<A NAME="lbBW">&nbsp;</A>
 <H3>CONDITIONAL EXPRESSIONS</H3>
 
 Conditional expressions are used by the <B>[[</B> compound command and
@@ -4961,7 +5013,7 @@ and
 may be positive or negative integers.
 
 </DL>
-<A NAME="lbBW">&nbsp;</A>
+<A NAME="lbBX">&nbsp;</A>
 <H3>SIMPLE COMMAND EXPANSION</H3>
 
 When a simple command is executed, the shell performs the following
@@ -5005,7 +5057,7 @@ described below.  Otherwise, the command exits.  If one of the expansions
 contained a command substitution, the exit status of the command is
 the exit status of the last command substitution performed.  If there
 were no command substitutions, the command exits with a status of zero.
-<A NAME="lbBX">&nbsp;</A>
+<A NAME="lbBY">&nbsp;</A>
 <H3>COMMAND EXECUTION</H3>
 
 After a command has been split into words, if it results in a
@@ -5091,7 +5143,7 @@ interpreter consist of a single optional argument following the
 interpreter name on the first line of the program, followed
 by the name of the program, followed by the command
 arguments, if any.
-<A NAME="lbBY">&nbsp;</A>
+<A NAME="lbBZ">&nbsp;</A>
 <H3>COMMAND EXECUTION ENVIRONMENT</H3>
 
 The shell has an <I>execution environment</I>, which consists of the
@@ -5169,7 +5221,7 @@ If a command is followed by a <B>&amp;</B> and job control is not active, the
 default standard input for the command is the empty file <I>/dev/null</I>.
 Otherwise, the invoked command inherits the file descriptors of the calling
 shell as modified by redirections.
-<A NAME="lbBZ">&nbsp;</A>
+<A NAME="lbCA">&nbsp;</A>
 <H3>ENVIRONMENT</H3>
 
 When a program is invoked it is given an array of strings
@@ -5246,7 +5298,7 @@ invokes an external command, the variable
 
 is set to the full file name of the command and passed to that
 command in its environment.
-<A NAME="lbCA">&nbsp;</A>
+<A NAME="lbCB">&nbsp;</A>
 <H3>EXIT STATUS</H3>
 
 <P>
@@ -5286,7 +5338,7 @@ All builtins return an exit status of 2 to indicate incorrect usage.
 executed, unless a syntax error occurs, in which case it exits
 with a non-zero value.  See also the <B>exit</B> builtin
 command below.
-<A NAME="lbCB">&nbsp;</A>
+<A NAME="lbCC">&nbsp;</A>
 <H3>SIGNALS</H3>
 
 When <B>bash</B> is interactive, in the absence of any traps, it ignores
@@ -5403,7 +5455,7 @@ When <B>bash</B> is waiting for an asynchronous command via the <B>wait</B>
 builtin, the reception of a signal for which a trap has been set will
 cause the <B>wait</B> builtin to return immediately with an exit status
 greater than 128, immediately after which the trap is executed.
-<A NAME="lbCC">&nbsp;</A>
+<A NAME="lbCD">&nbsp;</A>
 <H3>JOB CONTROL</H3>
 
 <I>Job control</I>
@@ -5633,7 +5685,7 @@ command may then be used to inspect their status.
 If a second attempt to exit is made without an intervening command,
 the shell does not print another warning, and any stopped
 jobs are terminated.
-<A NAME="lbCD">&nbsp;</A>
+<A NAME="lbCE">&nbsp;</A>
 <H3>PROMPTING</H3>
 
 When executing interactively, 
@@ -5803,7 +5855,7 @@ command under
 
 </FONT>
 below).
-<A NAME="lbCE">&nbsp;</A>
+<A NAME="lbCF">&nbsp;</A>
 <H3>READLINE</H3>
 
 This is the library that handles reading input when using an interactive
@@ -5827,7 +5879,7 @@ builtin (see
 
 </FONT>
 below).
-<A NAME="lbCF">&nbsp;</A>
+<A NAME="lbCG">&nbsp;</A>
 <H4>Readline Notation</H4>
 
 <P>
@@ -5873,7 +5925,7 @@ deleted is saved for possible future retrieval
 accumulated into one unit, which can be yanked all at once. 
 Commands which do not kill text separate the chunks of text
 on the kill ring.
-<A NAME="lbCG">&nbsp;</A>
+<A NAME="lbCH">&nbsp;</A>
 <H4>Readline Initialization</H4>
 
 <P>
@@ -5952,7 +6004,7 @@ and
 
 In addition to command names, readline allows keys to be bound
 to a string that is inserted when the key is pressed (a <I>macro</I>).
-<A NAME="lbCH">&nbsp;</A>
+<A NAME="lbCI">&nbsp;</A>
 <H4>Readline Key Bindings</H4>
 
 <P>
@@ -6159,7 +6211,7 @@ builtin command (see
 
 </FONT>
 below).
-<A NAME="lbCI">&nbsp;</A>
+<A NAME="lbCJ">&nbsp;</A>
 <H4>Readline Variables</H4>
 
 <P>
@@ -6404,7 +6456,7 @@ by <I>stat</I>(2) is appended to the filename when listing possible
 completions.
 
 </DL>
-<A NAME="lbCJ">&nbsp;</A>
+<A NAME="lbCK">&nbsp;</A>
 <H4>Readline Conditional Constructs</H4>
 
 <P>
@@ -6488,7 +6540,7 @@ would read <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>:
 </DL>
 
 </DL>
-<A NAME="lbCK">&nbsp;</A>
+<A NAME="lbCL">&nbsp;</A>
 <H4>Searching</H4>
 
 <P>
@@ -6541,7 +6593,7 @@ new search string, any remembered search string is used.
 Non-incremental searches read the entire search string before starting
 to search for matching history lines.  The search string may be
 typed by the user or be part of the contents of the current line.
-<A NAME="lbCL">&nbsp;</A>
+<A NAME="lbCM">&nbsp;</A>
 <H4>Readline Command Names</H4>
 
 <P>
@@ -6553,7 +6605,7 @@ In the following descriptions, <I>point</I> refers to the current cursor
 position, and <I>mark</I> refers to a cursor position saved by the
 <B>set-mark</B> command.
 The text between the point and mark is referred to as the <I>region</I>.
-<A NAME="lbCM">&nbsp;</A>
+<A NAME="lbCN">&nbsp;</A>
 <H4>Commands for Moving</H4>
 
 <P>
@@ -6598,7 +6650,7 @@ screen.
 Refresh the current line.
 
 </DL>
-<A NAME="lbCN">&nbsp;</A>
+<A NAME="lbCO">&nbsp;</A>
 <H4>Commands for Manipulating the History</H4>
 
 <P>
@@ -6755,7 +6807,7 @@ commands.
 and <I>emacs</I> as the editor, in that order.
 
 </DL>
-<A NAME="lbCO">&nbsp;</A>
+<A NAME="lbCP">&nbsp;</A>
 <H4>Commands for Changing Text</H4>
 
 <P>
@@ -6840,7 +6892,7 @@ Characters bound to <B>backward-delete-char</B> replace the character
 before point with a space.  By default, this command is unbound.
 
 </DL>
-<A NAME="lbCP">&nbsp;</A>
+<A NAME="lbCQ">&nbsp;</A>
 <H4>Killing and Yanking</H4>
 
 <P>
@@ -6924,7 +6976,7 @@ or
 
 
 </DL>
-<A NAME="lbCQ">&nbsp;</A>
+<A NAME="lbCR">&nbsp;</A>
 <H4>Numeric Arguments</H4>
 
 <P>
@@ -6954,7 +7006,7 @@ first time makes the argument count four, a second time makes the
 argument count sixteen, and so on.
 
 </DL>
-<A NAME="lbCR">&nbsp;</A>
+<A NAME="lbCS">&nbsp;</A>
 <H4>Completing</H4>
 
 <P>
@@ -7079,7 +7131,7 @@ enclosed within braces so the list is available to the shell (see
 above).
 
 </DL>
-<A NAME="lbCS">&nbsp;</A>
+<A NAME="lbCT">&nbsp;</A>
 <H4>Keyboard Macros</H4>
 
 <P>
@@ -7102,7 +7154,7 @@ Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 
 </DL>
-<A NAME="lbCT">&nbsp;</A>
+<A NAME="lbCU">&nbsp;</A>
 <H4>Miscellaneous</H4>
 
 <P>
@@ -7242,7 +7294,7 @@ Display version information about the current instance of
 
 
 </DL>
-<A NAME="lbCU">&nbsp;</A>
+<A NAME="lbCV">&nbsp;</A>
 <H4>Programmable Completion</H4>
 
 <P>
@@ -7422,7 +7474,7 @@ the programmable completion functions force readline to append a slash
 to completed names which are symbolic links to directories, subject to  
 the value of the <B>mark-directories</B> readline variable, regardless
 of the setting of the <B>mark-symlinked-directories</B> readline variable.
-<A NAME="lbCV">&nbsp;</A>
+<A NAME="lbCW">&nbsp;</A>
 <H3>HISTORY</H3>
 
 When the
@@ -7575,7 +7627,7 @@ builtin below under
 
 </FONT>
 for information on setting and unsetting shell options.
-<A NAME="lbCW">&nbsp;</A>
+<A NAME="lbCX">&nbsp;</A>
 <H3>HISTORY EXPANSION</H3>
 
 <P>
@@ -7691,7 +7743,7 @@ above under
 The shell uses
 the history comment character to mark history timestamps when
 writing the history file.
-<A NAME="lbCX">&nbsp;</A>
+<A NAME="lbCY">&nbsp;</A>
 <H4>Event Designators</H4>
 
 <P>
@@ -7761,7 +7813,7 @@ Equivalent to
 The entire command line typed so far.
 
 </DL>
-<A NAME="lbCY">&nbsp;</A>
+<A NAME="lbCZ">&nbsp;</A>
 <H4>Word Designators</H4>
 
 <P>
@@ -7838,7 +7890,7 @@ Abbreviates <I>x-$</I> like <B>x*</B>, but omits the last word.
 
 If a word designator is supplied without an event specification, the
 previous command is used as the event.
-<A NAME="lbCZ">&nbsp;</A>
+<A NAME="lbDA">&nbsp;</A>
 <H4>Modifiers</H4>
 
 <P>
@@ -7943,7 +7995,7 @@ An <B>a</B> may be used as a synonym for <B>g</B>.
 Apply the following `<B>s</B>' modifier once to each word in the event line.
 
 </DL>
-<A NAME="lbDA">&nbsp;</A>
+<A NAME="lbDB">&nbsp;</A>
 <H3>SHELL BUILTIN COMMANDS</H3>
 
 
@@ -8617,9 +8669,9 @@ must be >= 1.  If
 is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless <I>n</I> is not greater than or equal to 1.
-<DT><B>declare</B> [<B>-aAfFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>declare</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
-<DT><B>typeset</B> [<B>-aAfFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>typeset</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
 Declare variables and/or give them attributes.
 If no <I>name</I>s are given then display the values of variables.
@@ -8687,6 +8739,12 @@ The variable is treated as an integer; arithmetic evaluation (see
 
 </FONT>
 is performed when the variable is assigned a value.
+<DT><B>-l</B>
+
+<DD>
+When the variable is assigned a value, all upper-case characters are
+converted to lower-case.
+The upper-case attribute is disabled.
 <DT><B>-r</B>
 
 <DD>
@@ -8699,6 +8757,12 @@ Give each <I>name</I> the <I>trace</I> attribute.
 Traced functions inherit the <B>DEBUG</B> and <B>RETURN</B> traps from
 the calling shell.
 The trace attribute has no special meaning for variables.
+<DT><B>-u</B>
+
+<DD>
+When the variable is assigned a value, all lower-case characters are
+converted to upper-case.
+The lower-case attribute is disabled.
 <DT><B>-x</B>
 
 <DD>
@@ -10045,8 +10109,8 @@ are supplied, the line read is assigned to the variable
 
 </FONT>
 The return code is zero, unless end-of-file is encountered, <B>read</B>
-times out, or an invalid file descriptor is supplied as the argument to
-<B>-u</B>.
+times out (in which case the return code is greater than 128), or an
+invalid file descriptor is supplied as the argument to <B>-u</B>.
 </DL>
 
 <DT><B>readonly</B> [<B>-aApf</B>] [<I>name</I>[=<I>word</I>] ...]<DD>
@@ -11646,7 +11710,7 @@ process or job waited for.
 
 
 </DL>
-<A NAME="lbDB">&nbsp;</A>
+<A NAME="lbDC">&nbsp;</A>
 <H3>RESTRICTED SHELL</H3>
 
 
@@ -11760,7 +11824,7 @@ turns off any restrictions in the shell spawned to execute the
 script.
 
 
-<A NAME="lbDC">&nbsp;</A>
+<A NAME="lbDD">&nbsp;</A>
 <H3>SEE ALSO</H3>
 
 
@@ -11774,7 +11838,7 @@ script.
 <DT><I>readline</I>(3)<DD>
 
 </DL>
-<A NAME="lbDD">&nbsp;</A>
+<A NAME="lbDE">&nbsp;</A>
 <H3>FILES</H3>
 
 
@@ -11811,7 +11875,7 @@ The individual login shell cleanup file, executed when a login shell exits
 Individual <I>readline</I> initialization file
 
 </DL>
-<A NAME="lbDE">&nbsp;</A>
+<A NAME="lbDF">&nbsp;</A>
 <H3>AUTHORS</H3>
 
 Brian Fox, Free Software Foundation
@@ -11824,7 +11888,7 @@ Chet Ramey, Case Western Reserve University
 <BR>
 
 <A HREF="mailto:chet@po.cwru.edu">chet@po.cwru.edu</A>
-<A NAME="lbDF">&nbsp;</A>
+<A NAME="lbDG">&nbsp;</A>
 <H3>BUG REPORTS</H3>
 
 If you find a bug in
@@ -11875,7 +11939,7 @@ Comments and bug reports concerning
 this manual page should be directed to
 <I><A HREF="mailto:chet@po.cwru.edu">chet@po.cwru.edu</A></I>.
 
-<A NAME="lbDG">&nbsp;</A>
+<A NAME="lbDH">&nbsp;</A>
 <H3>BUGS</H3>
 
 <P>
@@ -11919,13 +11983,16 @@ error messages while the construct is being read.
 <P>
 
 Array variables may not (yet) be exported.
+<P>
+
+There may be only one active coprocess at a time.
 
 
 
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 June 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 July 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11946,90 +12013,91 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbAM">Pipelines</A><DD>
 <DT><A HREF="#lbAN">Lists</A><DD>
 <DT><A HREF="#lbAO">Compound Commands</A><DD>
-<DT><A HREF="#lbAP">Shell Function Definitions</A><DD>
+<DT><A HREF="#lbAP">Coprocesses</A><DD>
+<DT><A HREF="#lbAQ">Shell Function Definitions</A><DD>
 </DL>
-<DT><A HREF="#lbAQ">COMMENTS</A><DD>
-<DT><A HREF="#lbAR">QUOTING</A><DD>
-<DT><A HREF="#lbAS">PARAMETERS</A><DD>
+<DT><A HREF="#lbAR">COMMENTS</A><DD>
+<DT><A HREF="#lbAS">QUOTING</A><DD>
+<DT><A HREF="#lbAT">PARAMETERS</A><DD>
 <DL>
-<DT><A HREF="#lbAT">Positional Parameters</A><DD>
-<DT><A HREF="#lbAU">Special Parameters</A><DD>
-<DT><A HREF="#lbAV">Shell Variables</A><DD>
-<DT><A HREF="#lbAW">Arrays</A><DD>
+<DT><A HREF="#lbAU">Positional Parameters</A><DD>
+<DT><A HREF="#lbAV">Special Parameters</A><DD>
+<DT><A HREF="#lbAW">Shell Variables</A><DD>
+<DT><A HREF="#lbAX">Arrays</A><DD>
 </DL>
-<DT><A HREF="#lbAX">EXPANSION</A><DD>
+<DT><A HREF="#lbAY">EXPANSION</A><DD>
 <DL>
-<DT><A HREF="#lbAY">Brace Expansion</A><DD>
-<DT><A HREF="#lbAZ">Tilde Expansion</A><DD>
-<DT><A HREF="#lbBA">Parameter Expansion</A><DD>
-<DT><A HREF="#lbBB">Command Substitution</A><DD>
-<DT><A HREF="#lbBC">Arithmetic Expansion</A><DD>
-<DT><A HREF="#lbBD">Process Substitution</A><DD>
-<DT><A HREF="#lbBE">Word Splitting</A><DD>
-<DT><A HREF="#lbBF">Pathname Expansion</A><DD>
-<DT><A HREF="#lbBG">Quote Removal</A><DD>
+<DT><A HREF="#lbAZ">Brace Expansion</A><DD>
+<DT><A HREF="#lbBA">Tilde Expansion</A><DD>
+<DT><A HREF="#lbBB">Parameter Expansion</A><DD>
+<DT><A HREF="#lbBC">Command Substitution</A><DD>
+<DT><A HREF="#lbBD">Arithmetic Expansion</A><DD>
+<DT><A HREF="#lbBE">Process Substitution</A><DD>
+<DT><A HREF="#lbBF">Word Splitting</A><DD>
+<DT><A HREF="#lbBG">Pathname Expansion</A><DD>
+<DT><A HREF="#lbBH">Quote Removal</A><DD>
 </DL>
-<DT><A HREF="#lbBH">REDIRECTION</A><DD>
+<DT><A HREF="#lbBI">REDIRECTION</A><DD>
 <DL>
-<DT><A HREF="#lbBI">Redirecting Input</A><DD>
-<DT><A HREF="#lbBJ">Redirecting Output</A><DD>
-<DT><A HREF="#lbBK">Appending Redirected Output</A><DD>
-<DT><A HREF="#lbBL">Redirecting Standard Output and Standard Error</A><DD>
-<DT><A HREF="#lbBM">Appending Standard Output and Standard Error</A><DD>
-<DT><A HREF="#lbBN">Here Documents</A><DD>
-<DT><A HREF="#lbBO">Here Strings</A><DD>
-<DT><A HREF="#lbBP">Duplicating File Descriptors</A><DD>
-<DT><A HREF="#lbBQ">Moving File Descriptors</A><DD>
-<DT><A HREF="#lbBR">Opening File Descriptors for Reading and Writing</A><DD>
+<DT><A HREF="#lbBJ">Redirecting Input</A><DD>
+<DT><A HREF="#lbBK">Redirecting Output</A><DD>
+<DT><A HREF="#lbBL">Appending Redirected Output</A><DD>
+<DT><A HREF="#lbBM">Redirecting Standard Output and Standard Error</A><DD>
+<DT><A HREF="#lbBN">Appending Standard Output and Standard Error</A><DD>
+<DT><A HREF="#lbBO">Here Documents</A><DD>
+<DT><A HREF="#lbBP">Here Strings</A><DD>
+<DT><A HREF="#lbBQ">Duplicating File Descriptors</A><DD>
+<DT><A HREF="#lbBR">Moving File Descriptors</A><DD>
+<DT><A HREF="#lbBS">Opening File Descriptors for Reading and Writing</A><DD>
 </DL>
-<DT><A HREF="#lbBS">ALIASES</A><DD>
-<DT><A HREF="#lbBT">FUNCTIONS</A><DD>
-<DT><A HREF="#lbBU">ARITHMETIC EVALUATION</A><DD>
-<DT><A HREF="#lbBV">CONDITIONAL EXPRESSIONS</A><DD>
-<DT><A HREF="#lbBW">SIMPLE COMMAND EXPANSION</A><DD>
-<DT><A HREF="#lbBX">COMMAND EXECUTION</A><DD>
-<DT><A HREF="#lbBY">COMMAND EXECUTION ENVIRONMENT</A><DD>
-<DT><A HREF="#lbBZ">ENVIRONMENT</A><DD>
-<DT><A HREF="#lbCA">EXIT STATUS</A><DD>
-<DT><A HREF="#lbCB">SIGNALS</A><DD>
-<DT><A HREF="#lbCC">JOB CONTROL</A><DD>
-<DT><A HREF="#lbCD">PROMPTING</A><DD>
-<DT><A HREF="#lbCE">READLINE</A><DD>
+<DT><A HREF="#lbBT">ALIASES</A><DD>
+<DT><A HREF="#lbBU">FUNCTIONS</A><DD>
+<DT><A HREF="#lbBV">ARITHMETIC EVALUATION</A><DD>
+<DT><A HREF="#lbBW">CONDITIONAL EXPRESSIONS</A><DD>
+<DT><A HREF="#lbBX">SIMPLE COMMAND EXPANSION</A><DD>
+<DT><A HREF="#lbBY">COMMAND EXECUTION</A><DD>
+<DT><A HREF="#lbBZ">COMMAND EXECUTION ENVIRONMENT</A><DD>
+<DT><A HREF="#lbCA">ENVIRONMENT</A><DD>
+<DT><A HREF="#lbCB">EXIT STATUS</A><DD>
+<DT><A HREF="#lbCC">SIGNALS</A><DD>
+<DT><A HREF="#lbCD">JOB CONTROL</A><DD>
+<DT><A HREF="#lbCE">PROMPTING</A><DD>
+<DT><A HREF="#lbCF">READLINE</A><DD>
 <DL>
-<DT><A HREF="#lbCF">Readline Notation</A><DD>
-<DT><A HREF="#lbCG">Readline Initialization</A><DD>
-<DT><A HREF="#lbCH">Readline Key Bindings</A><DD>
-<DT><A HREF="#lbCI">Readline Variables</A><DD>
-<DT><A HREF="#lbCJ">Readline Conditional Constructs</A><DD>
-<DT><A HREF="#lbCK">Searching</A><DD>
-<DT><A HREF="#lbCL">Readline Command Names</A><DD>
-<DT><A HREF="#lbCM">Commands for Moving</A><DD>
-<DT><A HREF="#lbCN">Commands for Manipulating the History</A><DD>
-<DT><A HREF="#lbCO">Commands for Changing Text</A><DD>
-<DT><A HREF="#lbCP">Killing and Yanking</A><DD>
-<DT><A HREF="#lbCQ">Numeric Arguments</A><DD>
-<DT><A HREF="#lbCR">Completing</A><DD>
-<DT><A HREF="#lbCS">Keyboard Macros</A><DD>
-<DT><A HREF="#lbCT">Miscellaneous</A><DD>
-<DT><A HREF="#lbCU">Programmable Completion</A><DD>
+<DT><A HREF="#lbCG">Readline Notation</A><DD>
+<DT><A HREF="#lbCH">Readline Initialization</A><DD>
+<DT><A HREF="#lbCI">Readline Key Bindings</A><DD>
+<DT><A HREF="#lbCJ">Readline Variables</A><DD>
+<DT><A HREF="#lbCK">Readline Conditional Constructs</A><DD>
+<DT><A HREF="#lbCL">Searching</A><DD>
+<DT><A HREF="#lbCM">Readline Command Names</A><DD>
+<DT><A HREF="#lbCN">Commands for Moving</A><DD>
+<DT><A HREF="#lbCO">Commands for Manipulating the History</A><DD>
+<DT><A HREF="#lbCP">Commands for Changing Text</A><DD>
+<DT><A HREF="#lbCQ">Killing and Yanking</A><DD>
+<DT><A HREF="#lbCR">Numeric Arguments</A><DD>
+<DT><A HREF="#lbCS">Completing</A><DD>
+<DT><A HREF="#lbCT">Keyboard Macros</A><DD>
+<DT><A HREF="#lbCU">Miscellaneous</A><DD>
+<DT><A HREF="#lbCV">Programmable Completion</A><DD>
 </DL>
-<DT><A HREF="#lbCV">HISTORY</A><DD>
-<DT><A HREF="#lbCW">HISTORY EXPANSION</A><DD>
+<DT><A HREF="#lbCW">HISTORY</A><DD>
+<DT><A HREF="#lbCX">HISTORY EXPANSION</A><DD>
 <DL>
-<DT><A HREF="#lbCX">Event Designators</A><DD>
-<DT><A HREF="#lbCY">Word Designators</A><DD>
-<DT><A HREF="#lbCZ">Modifiers</A><DD>
+<DT><A HREF="#lbCY">Event Designators</A><DD>
+<DT><A HREF="#lbCZ">Word Designators</A><DD>
+<DT><A HREF="#lbDA">Modifiers</A><DD>
 </DL>
-<DT><A HREF="#lbDA">SHELL BUILTIN COMMANDS</A><DD>
-<DT><A HREF="#lbDB">RESTRICTED SHELL</A><DD>
-<DT><A HREF="#lbDC">SEE ALSO</A><DD>
-<DT><A HREF="#lbDD">FILES</A><DD>
-<DT><A HREF="#lbDE">AUTHORS</A><DD>
-<DT><A HREF="#lbDF">BUG REPORTS</A><DD>
-<DT><A HREF="#lbDG">BUGS</A><DD>
+<DT><A HREF="#lbDB">SHELL BUILTIN COMMANDS</A><DD>
+<DT><A HREF="#lbDC">RESTRICTED SHELL</A><DD>
+<DT><A HREF="#lbDD">SEE ALSO</A><DD>
+<DT><A HREF="#lbDE">FILES</A><DD>
+<DT><A HREF="#lbDF">AUTHORS</A><DD>
+<DT><A HREF="#lbDG">BUG REPORTS</A><DD>
+<DT><A HREF="#lbDH">BUGS</A><DD>
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 July 2008 09:08:29 EDT
+Time: 24 July 2008 09:12:48 EDT
 </BODY>
 </HTML>

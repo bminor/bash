@@ -906,7 +906,7 @@ exit_shell (s)
 #endif /* HISTORY */
 
 #if defined (COPROCESS_SUPPORT)
-  coproc_dispose (&sh_coproc);
+  coproc_flush ();
 #endif
 
 #if defined (JOB_CONTROL)

@@ -939,7 +939,7 @@ do_redirection_internal (redirect, flags)
 	    {
 	      close (redir_fd);
 #if defined (COPROCESS_SUPPORT)
-	      coproc_fdchk (&sh_coproc, redir_fd);	/* XXX - loses coproc fds */
+	      coproc_fdchk (redir_fd);	/* XXX - loses coproc fds */
 #endif
 	    }
 	}
@@ -952,7 +952,7 @@ do_redirection_internal (redirect, flags)
 	    add_undo_redirect (redirector, ri);
 
 #if defined (COPROCESS_SUPPORT)
-	  coproc_fdchk (&sh_coproc, redirector);
+	  coproc_fdchk (redirector);
 #endif
 
 #if defined (BUFFERED_INPUT)

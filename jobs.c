@@ -769,7 +769,7 @@ bgp_prune ()
       bgpids.npid--;
     }
 }
-    
+
 /* Reset the values of js.j_lastj and js.j_firstj after one or both have
    been deleted.  The caller should check whether js.j_njobs is 0 before
    calling this.  This wraps around, but the rest of the code does not.  At
