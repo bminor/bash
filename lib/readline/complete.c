@@ -1749,7 +1749,7 @@ rl_complete_internal (what_to_do)
       break;
 
     default:
-      fprintf (stderr, "\r\nreadline: bad value %d for what_to_do in rl_complete\n", what_to_do);
+      _rl_ttymsg ("bad value %d for what_to_do in rl_complete", what_to_do);
       rl_ding ();
       FREE (saved_line_buffer);
       RL_UNSETSTATE(RL_STATE_COMPLETING);

@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -430,7 +430,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 
       if ((real_limit / block_factor) != limit)
 	{
-	  sh_erange (cmdarg, "limit");
+	  sh_erange (cmdarg, _("limit"));
 	  return (EXECUTION_FAILURE);
 	}
     }

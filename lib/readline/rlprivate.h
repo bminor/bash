@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2006 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -316,6 +316,14 @@ extern UNDO_LIST *_rl_copy_undo_entry PARAMS((UNDO_LIST *));
 extern UNDO_LIST *_rl_copy_undo_list PARAMS((UNDO_LIST *));
 
 /* util.c */
+#if defined (USE_VARARGS) && defined (PREFER_STDARG)
+extern void _rl_ttymsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+extern void _rl_errmsg (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+#else
+extern void _rl_ttymsg ();
+extern void _rl_errmsg ();
+#endif
+
 extern int _rl_abort_internal PARAMS((void));
 extern char *_rl_strindex PARAMS((const char *, const char *));
 extern int _rl_qsort_string_compare PARAMS((char **, char **));

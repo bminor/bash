@@ -462,7 +462,7 @@ start_pipeline ()
   if (job_control)
     {
       if (pipe (pgrp_pipe) == -1)
-	sys_error ("start_pipeline: pgrp pipe");
+	sys_error (_("start_pipeline: pgrp pipe"));
     }
 #endif
 }
@@ -1085,7 +1085,7 @@ add_process (name, pid)
     {
 #  ifdef DEBUG
       if (j == NO_JOB)
-	internal_warning ("add_process: process %5ld (%s) in the_pipeline", (long)p->pid, p->command);
+	internal_warning (_("add_process: process %5ld (%s) in the_pipeline"), (long)p->pid, p->command);
 #  endif
       if (PALIVE (p))
         internal_warning ("add_process: pid %5ld (%s) marked as still alive", (long)p->pid, p->command);
@@ -1391,7 +1391,7 @@ j_strsignal (s)
   if (x == 0)
     {
       x = retcode_name_buffer;
-      sprintf (x, "Signal %d", s);
+      sprintf (x, _("Signal %d"), s);
     }
   return x;
 }
@@ -1405,20 +1405,20 @@ printable_job_status (j, p, format)
   static char *temp;
   int es;
 
-  temp = "Done";
+  temp = _("Done");
 
   if (STOPPED (j) && format == 0)
     {
       if (posixly_correct == 0 || p == 0 || (WIFSTOPPED (p->status) == 0))
-	temp = "Stopped";
+	temp = _("Stopped");
       else
 	{
 	  temp = retcode_name_buffer;
-	  sprintf (temp, "Stopped(%s)", signal_name (WSTOPSIG (p->status)));
+	  sprintf (temp, _("Stopped(%s)"), signal_name (WSTOPSIG (p->status)));
 	}
     }
   else if (RUNNING (j))
-    temp = "Running";
+    temp = _("Running");
   else
     {
       if (WIFSTOPPED (p->status))
@@ -1430,14 +1430,14 @@ printable_job_status (j, p, format)
 	  temp = retcode_name_buffer;
 	  es = WEXITSTATUS (p->status);
 	  if (es == 0)
-	    strcpy (temp, "Done");
+	    strcpy (temp, _("Done"));
 	  else if (posixly_correct)
-	    sprintf (temp, "Done(%d)", es);
+	    sprintf (temp, _("Done(%d)"), es);
 	  else
-	    sprintf (temp, "Exit %d", es);
+	    sprintf (temp, _("Exit %d"), es);
 	}
       else
-	temp = "Unknown status";
+	temp = _("Unknown status");
     }
 
   return temp;
@@ -1524,7 +1524,7 @@ print_pipeline (p, job_index, format, stream)
 	      if ((WIFSTOPPED (show->status) == 0) &&
 		  (WIFCONTINUED (show->status) == 0) &&
 		  WIFCORED (show->status))
-		fprintf (stream, "(core dumped) ");
+		fprintf (stream, _("(core dumped) "));
 	    }
 	}
 
@@ -1543,7 +1543,7 @@ print_pipeline (p, job_index, format, stream)
 
 	  if (strcmp (temp, jobs[job_index]->wd) != 0)
 	    fprintf (stream,
-	      "  (wd: %s)", polite_directory_format (jobs[job_index]->wd));
+	      _("  (wd: %s)"), polite_directory_format (jobs[job_index]->wd));
 	}
 
       if (format || (p == last))
@@ -1735,7 +1735,7 @@ make_child (command, async_p)
 	     B.4.3.3, p. 237 also covers this, in the context of job control
 	     shells. */
 	  if (setpgid (mypid, pipeline_pgrp) < 0)
-	    sys_error ("child setpgid (%ld to %ld)", (long)mypid, (long)pipeline_pgrp);
+	    sys_error (_("child setpgid (%ld to %ld)"), (long)mypid, (long)pipeline_pgrp);
 
 	  /* By convention (and assumption above), if
 	     pipeline_pgrp == shell_pgrp, we are making a child for
@@ -3399,7 +3399,7 @@ notify_of_job_status ()
 		  signal_is_trapped (termsig) == 0)
 		{
 		  /* Don't print `0' for a line number. */
-		  fprintf (stderr, "%s: line %d: ", get_name_for_error (), (line_number == 0) ? 1 : line_number);
+		  fprintf (stderr, _("%s: line %d: "), get_name_for_error (), (line_number == 0) ? 1 : line_number);
 		  pretty_print_job (job, JLIST_NONINTERACTIVE, stderr);
 		}
 	      else if (IS_FOREGROUND (job))
@@ -3413,7 +3413,7 @@ notify_of_job_status ()
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))
-			fprintf (stderr, " (core dumped)");
+			fprintf (stderr, _(" (core dumped)"));
 
 		      fprintf (stderr, "\n");
 		    }
@@ -3425,7 +3425,7 @@ notify_of_job_status ()
 		  pretty_print_job (job, JLIST_STANDARD, stderr);
 		  if (dir && strcmp (dir, jobs[job]->wd) != 0)
 		    fprintf (stderr,
-			     "(wd now: %s)\n", polite_directory_format (dir));
+			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
 	      jobs[job]->flags |= J_NOTIFIED;
@@ -3438,7 +3438,7 @@ notify_of_job_status ()
 	      pretty_print_job (job, JLIST_STANDARD, stderr);
 	      if (dir && (strcmp (dir, jobs[job]->wd) != 0))
 		fprintf (stderr,
-			 "(wd now: %s)\n", polite_directory_format (dir));
+			 _("(wd now: %s)\n"), polite_directory_format (dir));
 	      jobs[job]->flags |= J_NOTIFIED;
 	      break;
 
@@ -3466,7 +3466,7 @@ initialize_job_control (force)
 
   if (shell_pgrp == -1)
     {
-      sys_error ("initialize_job_control: getpgrp failed");
+      sys_error (_("initialize_job_control: getpgrp failed"));
       exit (1);
     }
 
@@ -3512,7 +3512,7 @@ initialize_job_control (force)
       /* Make sure that we are using the new line discipline. */
       if (set_new_line_discipline (shell_tty) < 0)
 	{
-	  sys_error ("initialize_job_control: line discipline");
+	  sys_error (_("initialize_job_control: line discipline"));
 	  job_control = 0;
 	}
       else
@@ -3522,7 +3522,7 @@ initialize_job_control (force)
 
 	  if ((original_pgrp != shell_pgrp) && (setpgid (0, shell_pgrp) < 0))
 	    {
-	      sys_error ("initialize_job_control: setpgid");
+	      sys_error (_("initialize_job_control: setpgid"));
 	      shell_pgrp = original_pgrp;
 	    }
 

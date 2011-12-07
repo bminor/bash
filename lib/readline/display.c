@@ -2169,7 +2169,7 @@ insert_some_chars (string, count, col)
   /* DEBUGGING */
   if (MB_CUR_MAX == 1 || rl_byte_oriented)
     if (count != col)
-      fprintf(stderr, "readline: debug: insert_some_chars: count (%d) != col (%d)\n", count, col);
+      _rl_ttymsg ("debug: insert_some_chars: count (%d) != col (%d)", count, col);
 
   /* If IC is defined, then we do not have to "enter" insert mode. */
   if (_rl_term_IC)
@@ -2410,7 +2410,7 @@ _rl_col_width (str, start, end)
     return 0;
   if (MB_CUR_MAX == 1 || rl_byte_oriented)
 {
-fprintf (stderr, "_rl_col_width: called with MB_CUR_MAX == 1\n");
+_rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
     return (end - start);
 }
 

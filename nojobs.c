@@ -803,7 +803,7 @@ wait_for (pid)
     {
       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
       if (WIFCORED (status))
-	fprintf (stderr, " (core dumped)");
+	fprintf (stderr, _(" (core dumped)"));
       fprintf (stderr, "\n");
     }
 

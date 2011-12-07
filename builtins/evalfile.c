@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -176,7 +176,7 @@ file_error_and_exit:
       check_binary_file (string, (result > 80) ? 80 : result))
     {
       free (string);
-      (*errfunc) ("%s: cannot execute binary file", filename);
+      (*errfunc) (_("%s: cannot execute binary file"), filename);
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 

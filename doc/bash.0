@@ -1336,12 +1336,16 @@ EEXXPPAANNSSIIOONN
               Note that a negative offset must be separated from the colon  by
               at  least  one  space to avoid being confused with the :- expan-
               sion.  Substring indexing is zero-based  unless  the  positional
-              parameters are used, in which case the indexing starts at 1.
+              parameters  are  used, in which case the indexing starts at 1 by
+              default.  If _o_f_f_s_e_t is 0,  and  the  positional  parameters  are
+              used, $$00 is prefixed to the list.
 
        ${!!_p_r_e_f_i_x**}
        ${!!_p_r_e_f_i_x@@}
               Expands to the names of variables whose names begin with _p_r_e_f_i_x,
-              separated by the first character of the IIFFSS special variable.
+              separated by the first character of the  IIFFSS  special  variable.
+              When  _@  is used and the expansion appears within double quotes,
+              each variable name expands to a separate word.
 
        ${!!_n_a_m_e[_@]}
        ${!!_n_a_m_e[_*]}
@@ -3689,64 +3693,67 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      environment.
 
               Using  `+'  instead of `-' turns off the attribute instead, with
-              the exception that ++aa may not be used to destroy an array  vari-
-              able.   When  used in a function, makes each _n_a_m_e local, as with
-              the llooccaall command.  If a variable name is  followed  by  =_v_a_l_u_e,
-              the  value of the variable is set to _v_a_l_u_e.  The return value is
-              0 unless an invalid option is encountered, an attempt is made to
-              define  a  function  using ``-f foo=bar'', an attempt is made to
-              assign a value to a readonly variable, an  attempt  is  made  to
-              assign  a  value to an array variable without using the compound
-              assignment syntax (see AArrrraayyss above), one of the _n_a_m_e_s is not  a
-              valid  shell variable name, an attempt is made to turn off read-
-              only status for a readonly variable, an attempt is made to  turn
-              off array status for an array variable, or an attempt is made to
-              display a non-existent function with --ff.
+              the exceptions that ++aa may not be used to destroy an array vari-
+              able  and  ++rr wwiillll nnoott rreemmoovvee tthhee rreeaaddoonnllyy aattttrriibbuuttee..  WWhheenn uusseedd
+              iinn aa ffuunnccttiioonn,, mmaakkeess eeaacchh _n_a_m_e llooccaall,, aass wwiitthh tthhee llooccaall command.
+              If a variable name is followed by =_v_a_l_u_e, the value of the vari-
+              able is set to _v_a_l_u_e.  The return value is 0 unless  an  invalid
+              option  is  encountered, an attempt is made to define a function
+              using ``-f foo=bar'', an attempt is made to assign a value to  a
+              readonly  variable,  an  attempt is made to assign a value to an
+              array variable without using the compound assignment syntax (see
+              AArrrraayyss  above),  one  of the _n_a_m_e_s is not a valid shell variable
+              name, an attempt is made to turn off readonly status for a read-
+              only  variable,  an attempt is made to turn off array status for
+              an array variable, or an attempt is made to display a  non-exis-
+              tent function with --ff.
 
-       ddiirrss [[--ccllppvv]] [[++_n]] [[--_n]]
-              Without options,  displays  the  list  of  currently  remembered
-              directories.   The  default  display  is  on  a single line with
-              directory names separated by spaces.  Directories are  added  to
-              the  list  with  the  ppuusshhdd  command;  the  ppooppdd command removes
+       ddiirrss [[++_n]] [[--_n]] [[--ccppllvv]]
+              Without  options,  displays  the  list  of  currently remembered
+              directories.  The default display  is  on  a  single  line  with
+              directory  names  separated by spaces.  Directories are added to
+              the list with  the  ppuusshhdd  command;  the  ppooppdd  command  removes
               entries from the list.
               ++_n     Displays the _nth entry counting from the left of the list
                      shown by ddiirrss when invoked without options, starting with
                      zero.
-              --_n     Displays the _nth entry counting from  the  right  of  the
+              --_n     Displays  the  _nth  entry  counting from the right of the
                      list shown by ddiirrss when invoked without options, starting
                      with zero.
               --cc     Clears  the  directory  stack  by  deleting  all  of  the
                      entries.
-              --ll     Produces  a  longer  listing;  the default listing format
+              --ll     Produces a longer listing;  the  default  listing  format
                      uses a tilde to denote the home directory.
               --pp     Print the directory stack with one entry per line.
-              --vv     Print the directory stack with one entry per  line,  pre-
+              --vv     Print  the  directory stack with one entry per line, pre-
                      fixing each entry with its index in the stack.
 
-              The  return value is 0 unless an invalid option is supplied or _n
+              The return value is 0 unless an invalid option is supplied or  _n
               indexes beyond the end of the directory stack.
 
        ddiissoowwnn [--aarr] [--hh] [_j_o_b_s_p_e_c ...]
-              Without options, each _j_o_b_s_p_e_c  is  removed  from  the  table  of
-              active  jobs.   If  the  --hh option is given, each _j_o_b_s_p_e_c is not
-              removed from the table, but is marked so that SSIIGGHHUUPP is not sent
-              to  the  job  if  the shell receives a SSIIGGHHUUPP.  If no _j_o_b_s_p_e_c is
-              present, and neither the --aa nor the --rr option is  supplied,  the
-              _c_u_r_r_e_n_t  _j_o_b  is used.  If no _j_o_b_s_p_e_c is supplied, the --aa option
-              means to remove or mark all jobs; the --rr option without  a  _j_o_b_-
-              _s_p_e_c  argument  restricts operation to running jobs.  The return
-              value is 0 unless a _j_o_b_s_p_e_c does not specify a valid job.
+              Without  options,  each  _j_o_b_s_p_e_c  is  removed  from the table of
+              active jobs.  If _j_o_b_s_p_e_c is not present, and neither --aa  nnoorr  --rr
+              iiss  ssuupppplliieedd,, tthhee sshheellll''ss nnoottiioonn ooff tthhee _c_u_r_r_e_n_t _j_o_b iiss uusseedd..  IIff
+              tthhee --hh ooppttiioonn iiss ggiivveenn,, eeaacchh _j_o_b_s_p_e_c is not removed from the ta-
+              ble,  but is marked so that SSIIGGHHUUPP is not sent to the job if the
+              shell receives a SSIIGGHHUUPP.  If no _j_o_b_s_p_e_c is present, and  neither
+              the  --aa  nor the --rr option is supplied, the _c_u_r_r_e_n_t _j_o_b is used.
+              If no _j_o_b_s_p_e_c is supplied, the --aa option means to remove or mark
+              all  jobs;  the  --rr  option without a _j_o_b_s_p_e_c argument restricts
+              operation to running jobs.  The return value is 0 unless a  _j_o_b_-
+              _s_p_e_c does not specify a valid job.
 
        eecchhoo [--nneeEE] [_a_r_g ...]
-              Output the _a_r_gs, separated by spaces,  followed  by  a  newline.
+              Output  the  _a_r_gs,  separated  by spaces, followed by a newline.
               The return status is always 0.  If --nn is specified, the trailing
-              newline is suppressed.  If the --ee option is  given,  interpreta-
-              tion  of  the following backslash-escaped characters is enabled.
-              The --EE option disables the interpretation of these escape  char-
-              acters,  even  on systems where they are interpreted by default.
-              The xxppgg__eecchhoo shell option may be used to  dynamically  determine
-              whether  or not eecchhoo expands these escape characters by default.
-              eecchhoo does not interpret ---- to mean the  end  of  options.   eecchhoo
+              newline  is  suppressed.  If the --ee option is given, interpreta-
+              tion of the following backslash-escaped characters  is  enabled.
+              The  --EE option disables the interpretation of these escape char-
+              acters, even on systems where they are interpreted  by  default.
+              The  xxppgg__eecchhoo  shell option may be used to dynamically determine
+              whether or not eecchhoo expands these escape characters by  default.
+              eecchhoo  does  not  interpret  ---- to mean the end of options.  eecchhoo
               interprets the following escape sequences:
               \\aa     alert (bell)
               \\bb     backspace
@@ -3758,52 +3765,52 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               \\tt     horizontal tab
               \\vv     vertical tab
               \\\\     backslash
-              \\00_n_n_n  the  eight-bit  character  whose value is the octal value
+              \\00_n_n_n  the eight-bit character whose value is  the  octal  value
                      _n_n_n (zero to three octal digits)
-              \\xx_H_H   the eight-bit character whose value  is  the  hexadecimal
+              \\xx_H_H   the  eight-bit  character  whose value is the hexadecimal
                      value _H_H (one or two hex digits)
 
        eennaabbllee [--aaddnnppss] [--ff _f_i_l_e_n_a_m_e] [_n_a_m_e ...]
-              Enable  and disable builtin shell commands.  Disabling a builtin
+              Enable and disable builtin shell commands.  Disabling a  builtin
               allows a disk command which has the same name as a shell builtin
-              to  be  executed without specifying a full pathname, even though
-              the shell normally searches for builtins before  disk  commands.
-              If  --nn  is  used,  each  _n_a_m_e  is disabled; otherwise, _n_a_m_e_s are
+              to be executed without specifying a full pathname,  even  though
+              the  shell  normally searches for builtins before disk commands.
+              If --nn is used, each  _n_a_m_e  is  disabled;  otherwise,  _n_a_m_e_s  are
               enabled.  For example, to use the tteesstt binary found via the PPAATTHH
-              instead  of  the  shell builtin version, run ``enable -n test''.
-              The --ff option means to load the new builtin  command  _n_a_m_e  from
+              instead of the shell builtin version, run  ``enable  -n  test''.
+              The  --ff  option  means to load the new builtin command _n_a_m_e from
               shared object _f_i_l_e_n_a_m_e, on systems that support dynamic loading.
-              The --dd option will delete a builtin previously loaded  with  --ff.
+              The  --dd  option will delete a builtin previously loaded with --ff.
               If no _n_a_m_e arguments are given, or if the --pp option is supplied,
               a list of shell builtins is printed.  With no other option argu-
-              ments,  the  list consists of all enabled shell builtins.  If --nn
-              is supplied, only disabled builtins are printed.  If --aa is  sup-
-              plied,  the  list printed includes all builtins, with an indica-
-              tion of whether or not each is enabled.  If --ss is supplied,  the
-              output  is restricted to the POSIX _s_p_e_c_i_a_l builtins.  The return
-              value is 0 unless a _n_a_m_e is not a shell builtin or there  is  an
+              ments, the list consists of all enabled shell builtins.   If  --nn
+              is  supplied, only disabled builtins are printed.  If --aa is sup-
+              plied, the list printed includes all builtins, with  an  indica-
+              tion  of whether or not each is enabled.  If --ss is supplied, the
+              output is restricted to the POSIX _s_p_e_c_i_a_l builtins.  The  return
+              value  is  0 unless a _n_a_m_e is not a shell builtin or there is an
               error loading a new builtin from a shared object.
 
        eevvaall [_a_r_g ...]
-              The  _a_r_gs  are read and concatenated together into a single com-
-              mand.  This command is then read and executed by the shell,  and
-              its  exit status is returned as the value of eevvaall.  If there are
+              The _a_r_gs are read and concatenated together into a  single  com-
+              mand.   This command is then read and executed by the shell, and
+              its exit status is returned as the value of eevvaall.  If there  are
               no _a_r_g_s, or only null arguments, eevvaall returns 0.
 
        eexxeecc [--ccll] [--aa _n_a_m_e] [_c_o_m_m_a_n_d [_a_r_g_u_m_e_n_t_s]]
-              If _c_o_m_m_a_n_d is specified, it replaces the shell.  No new  process
-              is  created.  The _a_r_g_u_m_e_n_t_s become the arguments to _c_o_m_m_a_n_d.  If
+              If  _c_o_m_m_a_n_d is specified, it replaces the shell.  No new process
+              is created.  The _a_r_g_u_m_e_n_t_s become the arguments to _c_o_m_m_a_n_d.   If
               the --ll option is supplied, the shell places a dash at the begin-
-              ning of the zeroth arg passed to _c_o_m_m_a_n_d.  This is what _l_o_g_i_n(1)
-              does.  The --cc option causes _c_o_m_m_a_n_d to be executed with an empty
-              environment.   If  --aa  is supplied, the shell passes _n_a_m_e as the
-              zeroth argument to the executed command.  If _c_o_m_m_a_n_d  cannot  be
-              executed  for some reason, a non-interactive shell exits, unless
-              the shell option eexxeeccffaaiill is enabled, in which case  it  returns
-              failure.   An interactive shell returns failure if the file can-
-              not be executed.  If _c_o_m_m_a_n_d is not specified, any  redirections
-              take  effect  in  the current shell, and the return status is 0.
-              If there is a redirection error, the return status is 1.
+              ning of the zeroth argument passed to  _c_o_m_m_a_n_d.   This  is  what
+              _l_o_g_i_n(1) does.  The --cc option causes _c_o_m_m_a_n_d to be executed with
+              an empty environment.  If --aa is supplied, the shell passes  _n_a_m_e
+              as the zeroth argument to the executed command.  If _c_o_m_m_a_n_d can-
+              not be executed for some reason, a non-interactive shell  exits,
+              unless  the  shell  option eexxeeccffaaiill is enabled, in which case it
+              returns failure.  An interactive shell returns  failure  if  the
+              file cannot be executed.  If _c_o_m_m_a_n_d is not specified, any redi-
+              rections take effect in the current shell, and the return status
+              is  0.  If there is a redirection error, the return status is 1.
 
        eexxiitt [_n]
               Cause the shell to exit with a status of _n.  If  _n  is  omitted,
@@ -4043,6 +4050,9 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               removes  the  top directory from the stack, and performs a ccdd to
               the new top directory.  Arguments, if supplied, have the follow-
               ing meanings:
+              --nn     Suppresses  the  normal change of directory when removing
+                     directories from the stack, so that  only  the  stack  is
+                     manipulated.
               ++_n     Removes  the _nth entry counting from the left of the list
                      shown by ddiirrss, starting with zero.  For  example:  ``popd
                      +0'' removes the first directory, ``popd +1'' the second.
@@ -4050,9 +4060,6 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      shown  by  ddiirrss, starting with zero.  For example: ``popd
                      -0'' removes the last directory, ``popd -1'' the next  to
                      last.
-              --nn     Suppresses  the  normal change of directory when removing
-                     directories from the stack, so that  only  the  stack  is
-                     manipulated.
 
               If  the ppooppdd command is successful, a ddiirrss is performed as well,
               and the return status is 0.  ppooppdd returns false  if  an  invalid
@@ -4084,22 +4091,22 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               null  string,  as  appropriate,  had  been supplied.  The return
               value is zero on success, non-zero on failure.
 
-       ppuusshhdd [--nn] [_d_i_r]
        ppuusshhdd [--nn] [+_n] [-_n]
+       ppuusshhdd [--nn] [_d_i_r]
               Adds a directory to the top of the directory stack,  or  rotates
               the  stack,  making the new top of the stack the current working
               directory.  With no arguments, exchanges the top two directories
               and  returns 0, unless the directory stack is empty.  Arguments,
               if supplied, have the following meanings:
+              --nn     Suppresses the normal change  of  directory  when  adding
+                     directories  to  the  stack,  so  that  only the stack is
+                     manipulated.
               ++_n     Rotates the stack so that  the  _nth  directory  (counting
                      from  the  left  of the list shown by ddiirrss, starting with
                      zero) is at the top.
               --_n     Rotates the stack so that  the  _nth  directory  (counting
                      from  the  right of the list shown by ddiirrss, starting with
                      zero) is at the top.
-              --nn     Suppresses the normal change  of  directory  when  adding
-                     directories  to  the  stack,  so  that  only the stack is
-                     manipulated.
               _d_i_r    Adds _d_i_r to the directory stack at the top, making it the
                      new current working directory.
 
@@ -4214,10 +4221,10 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       above) exits with a non-zero status.  The shell does not
                       exit if the command that fails is part  of  the  command
                       list  immediately  following  a  wwhhiillee or uunnttiill keyword,
-                      part of the test in an _i_f statement, part of a &&&& or  ||||
-                      list, or if the command's return value is being inverted
-                      via !!.  A trap on EERRRR, if set, is  executed  before  the
-                      shell exits.
+                      part of the test in an iiff statement, part of a &&&& or  ||||
+                      list,  any command in a pipeline but the last, or if the
+                      command's return value is being inverted via !!.  A  trap
+                      on EERRRR, if set, is executed before the shell exits.
               --ff      Disable pathname expansion.
               --hh      Remember  the location of commands as they are looked up
                       for execution.  This is enabled by default.
@@ -4883,4 +4890,4 @@ BBUUGGSS
 
 
 
-GNU Bash-3.2                   2006 September 28                       BASH(1)
+GNU Bash-3.2                   2006 November 27                        BASH(1)

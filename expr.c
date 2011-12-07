@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1194,7 +1194,7 @@ evalerror (msg)
   name = this_command_name;
   for (t = expression; whitespace (*t); t++)
     ;
-  internal_error ("%s%s%s: %s (error token is \"%s\")",
+  internal_error (_("%s%s%s: %s (error token is \"%s\")"),
 		   name ? name : "", name ? ": " : "", t,
 		   msg, (lasttp && *lasttp) ? lasttp : "");
   longjmp (evalbuf, 1);
@@ -1321,7 +1321,7 @@ main (argc, argv)
     {
       v = evalexp (argv[i], &expok);
       if (expok == 0)
-	fprintf (stderr, "%s: expression error\n", argv[i]);
+	fprintf (stderr, _("%s: expression error\n"), argv[i]);
       else
 	printf ("'%s' -> %ld\n", argv[i], v);
     }

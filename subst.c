@@ -1278,7 +1278,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{			/* { */
-	  report_error ("bad substitution: no closing `%s' in %s", "}", string);
+	  report_error (_("bad substitution: no closing `%s' in %s"), "}", string);
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  exp_jump_to_top_level (DISCARD);
 	}
@@ -6970,7 +6970,7 @@ add_string:
 		    sindex = t_index;
 		    goto add_character;
 		  }
-		report_error ("bad substitution: no closing \"`\" in %s", string+t_index);
+		report_error (_("bad substitution: no closing \"`\" in %s") , string+t_index);
 		free (string);
 		free (istring);
 		return ((temp == &extract_string_error) ? &expand_word_error

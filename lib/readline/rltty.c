@@ -464,7 +464,7 @@ static void
 rltty_warning (msg)
      char *msg;
 {
-  fprintf (stderr, "readline: warning: %s\n", msg);
+  _rl_errmsg ("warning: %s", msg);
 }
 #endif
 
@@ -475,7 +475,7 @@ TIOTYPE *tp;
 {
   if ((tp->c_oflag & OPOST) == 0)
     {
-      rltty_warning ("turning on OPOST for terminal\r");
+      _rl_errmsg ("warning: turning on OPOST for terminal\r");
       tp->c_oflag |= OPOST|ONLCR;
     }
 }
@@ -501,7 +501,7 @@ _get_tty_settings (tty, tiop)
       if (OUTPUT_BEING_FLUSHED (tiop))
 	{
 #if defined (FLUSHO) && defined (_AIX41)
-	  rltty_warning ("turning off output flushing");
+	  _rl_errmsg ("warning: turning off output flushing");
 	  tiop->c_lflag &= ~FLUSHO;
 	  break;
 #else

@@ -111,7 +111,7 @@ rl_callback_read_char ()
 
   if (rl_linefunc == NULL)
     {
-      fprintf (stderr, "readline: readline_callback_read_char() called with no handler!\r\n");
+      _rl_errmsg ("readline_callback_read_char() called with no handler!");
       abort ();
     }
 

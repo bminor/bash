@@ -91,6 +91,9 @@ get_tmpdir (flags)
   char *tdir;
 
   tdir = (flags & MT_USETMPDIR) ? get_string_value ("TMPDIR") : (char *)NULL;
+  if (tdir && (file_iswdir (tdir) == 0 || strlen (tdir) > PATH_MAX))
+    tdir = 0;
+
   if (tdir == 0)
     tdir = get_sys_tmpdir ();
 

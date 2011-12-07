@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on September, 28  2006 by texi2html 1.64 -->
+<!-- Created on December, 12  2006 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 3.2, 28 September 2006).
+the Bash shell (version 3.2, 27 November 2006).
 </P><P>
 
-This is Edition 3.2, last updated 28 September 2006,
+This is Edition 3.2, last updated 27 November 2006,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 3.2.
 </P><P>
@@ -176,7 +176,7 @@ and symbols are expanded to create larger expressions.
 A Unix shell is both a command interpreter and a programming
 language.  As a command interpreter, the shell provides the user
 interface to the rich set of GNU utilities.  The programming
-language features allow these utilitites to be combined.
+language features allow these utilities to be combined.
 Files containing commands can be created, and become
 commands themselves.  These new commands have the same status as
 system commands in directories such as <TT>`/bin'</TT>, allowing users
@@ -334,7 +334,7 @@ group ID.
 
 <DT><CODE>process group ID</CODE>
 <DD><A NAME="IDX14"></A>
-A unique identifer that represents a <CODE>process group</CODE>
+A unique identifier that represents a <CODE>process group</CODE>
 during its lifetime.
 <P>
 
@@ -1236,7 +1236,7 @@ The list of words following <CODE>in</CODE> is expanded, generating a list
 of items.  The set of expanded words is printed on the standard
 error output stream, each preceded by a number.  If the
 <SAMP>`in <VAR>words</VAR>'</SAMP> is omitted, the positional parameters are printed,
-as if <SAMP>`in "$@"'</SAMP> had been specifed.
+as if <SAMP>`in "$@"'</SAMP> had been specified.
 The <CODE>PS3</CODE> prompt is then displayed and a line is read from the
 standard input.
 If the line consists of a number corresponding to one of the displayed
@@ -1865,7 +1865,7 @@ This mechanism is similar to
 <VAR>filename expansion</VAR> (see section <A HREF="bashref.html#SEC35">3.5.8 Filename Expansion</A>),
 but the file names generated need not exist.
 Patterns to be brace expanded take the form of an optional <VAR>preamble</VAR>,
-followed by either a series of comma-separated strings or a sequnce expression
+followed by either a series of comma-separated strings or a seqeunce expression
 between a pair of braces,
 followed by an optional <VAR>postscript</VAR>.
 The preamble is prefixed to each string contained within the braces, and
@@ -2139,13 +2139,17 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the <SAMP>`:-'</SAMP> expansion.
 Substring indexing is zero-based unless the positional parameters
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If <VAR>offset</VAR> is 0, and the positional parameters are used, <CODE>$@</CODE> is
+prefixed to the list.
 </P><P>
 
 <DT><CODE>${!<VAR>prefix</VAR>*}</CODE>
 <DD><DT><CODE>${!<VAR>prefix</VAR>@}</CODE>
 <DD>Expands to the names of variables whose names begin with <VAR>prefix</VAR>,
 separated by the first character of the <CODE>IFS</CODE> special variable.
+When <SAMP>`@'</SAMP> is used and the expansion appears within double quotes, each
+variable name expands to a separate word.
 <P>
 
 <DT><CODE>${!<VAR>name</VAR>[@]}</CODE>
@@ -3713,7 +3717,7 @@ zero.
 </pre></td></tr></table>If <VAR>command</VAR>
 is supplied, it replaces the shell without creating a new process.
 If the <SAMP>`-l'</SAMP> option is supplied, the shell places a dash at the
-beginning of the zeroth arg passed to <VAR>command</VAR>.
+beginning of the zeroth argument passed to <VAR>command</VAR>.
 This is what the <CODE>login</CODE> program does.
 The <SAMP>`-c'</SAMP> option causes <VAR>command</VAR> to be executed with an empty
 environment.
@@ -4133,7 +4137,7 @@ key and function bindings,
 bind a key sequence to a Readline function or macro,
 or set a Readline variable.
 Each non-option argument is a command as it would appear in a
-a Readline initialization file (see section <A HREF="bashref.html#SEC99">8.3 Readline Init File</A>),
+Readline initialization file (see section <A HREF="bashref.html#SEC99">8.3 Readline Init File</A>),
 but each binding or command must be passed as a separate argument;  e.g.,
 <SAMP>`"\C-x\C-r":re-read-init-file'</SAMP>.
 Options, if supplied, have the following meanings:
@@ -4328,7 +4332,10 @@ the environment.
 </DL>
 <P>
 
-Using <SAMP>`+'</SAMP> instead of <SAMP>`-'</SAMP> turns off the attribute instead.
+Using <SAMP>`+'</SAMP> instead of <SAMP>`-'</SAMP> turns off the attribute instead,
+with the exceptions that <SAMP>`+a'</SAMP>
+may not be used to destroy an array variable and <SAMP>`+r'</SAMP> will not
+remove the readonly attribute.
 When used in a function, <CODE>declare</CODE> makes each <VAR>name</VAR> local,
 as with the <CODE>local</CODE> command.  If a variable name is followed by
 =<VAR>value</VAR>, the value of the variable is set to <VAR>value</VAR>.
@@ -5106,10 +5113,11 @@ immediately, rather than before printing the next primary prompt.
 <DT><CODE>-e</CODE>
 <DD>Exit immediately if a simple command (see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>) exits
 with a non-zero status, unless the command that fails is part of the
-command list immediately following a <CODE>while</CODE> or <CODE>until</CODE>
-keyword, part of the test in an <CODE>if</CODE> statement,
-part of a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> list, or if the command's return
-status is being inverted using <CODE>!</CODE>.
+command list immediately following a <CODE>while</CODE> or <CODE>until</CODE> keyword,
+part of the test in an <CODE>if</CODE> statement,
+part of a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> list,
+any command in a pipeline but the last,
+or if the command's return status is being inverted using <CODE>!</CODE>.
 A trap on <CODE>ERR</CODE>, if set, is executed before the shell exits.
 <P>
 
@@ -5848,7 +5856,7 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is "main".
+The bottom-most element is <CODE>"main"</CODE>.
 This variable exists only when a shell function is executing.
 Assignments to <CODE>FUNCNAME</CODE> have no effect and return an error status.
 If <CODE>FUNCNAME</CODE> is unset, it loses its special properties, even if
@@ -6302,7 +6310,7 @@ if input does not arrive after <CODE>TMOUT</CODE> seconds when input is coming
 from a terminal.
 <P>
 
-In an interative shell, the value is interpreted as
+In an interactive shell, the value is interpreted as
 the number of seconds to wait for input after issuing the primary
 prompt when the shell is interactive.
 Bash terminates after that number of seconds if input does
@@ -6415,7 +6423,7 @@ Equivalent to <SAMP>`-D'</SAMP> except for the output format.
 <P>
 
 <DT><CODE>--help</CODE>
-<DD>Display a usage message on standard output and exit sucessfully.
+<DD>Display a usage message on standard output and exit successfully.
 <P>
 
 <DT><CODE>--init-file <VAR>filename</VAR></CODE>
@@ -6582,7 +6590,7 @@ in the script.  If no commands are executed, the exit status is 0.
 <!--docid::SEC66::-->
 <P>
 
-This section describs how Bash executes its startup files.
+This section describes how Bash executes its startup files.
 If any of the files exist but cannot be read, Bash reports an error.
 Tildes are expanded in file names as described above under
 Tilde Expansion (see section <A HREF="bashref.html#SEC29">3.5.2 Tilde Expansion</A>).
@@ -6765,7 +6773,7 @@ the same, but the effective user id is not reset.
 
 An interactive shell
 is one started without non-option arguments, unless <SAMP>`-s'</SAMP> is
-specified, without specifiying the <SAMP>`-c'</SAMP> option, and
+specified, without specifying the <SAMP>`-c'</SAMP> option, and
 whose input and error output are both
 connected to terminals (as determined by <CODE>isatty(3)</CODE>),
 or one started with the <SAMP>`-i'</SAMP> option.
@@ -6902,7 +6910,7 @@ In the absence of any traps, <CODE>SIGINT</CODE> is caught and handled
 
 <LI>
 An interactive login shell sends a <CODE>SIGHUP</CODE> to all jobs on exit
-if the <CODE>hupoxexit</CODE> shell option has been enabled (see section <A HREF="bashref.html#SEC54">3.7.6 Signals</A>).
+if the <CODE>huponexit</CODE> shell option has been enabled (see section <A HREF="bashref.html#SEC54">3.7.6 Signals</A>).
 <P>
 
 <LI>
@@ -7578,7 +7586,7 @@ from the stack, so that only the stack is manipulated.
 
 <A NAME="IDX274"></A>
 <DT><CODE>pushd</CODE>
-<DD><TABLE><tr><td>&nbsp;</td><td class=example><pre>pushd [<VAR>dir</VAR> | <VAR>+N</VAR> | <VAR>-N</VAR>] [-n]
+<DD><TABLE><tr><td>&nbsp;</td><td class=example><pre>pushd [-n] [<VAR>+N</VAR> | <VAR>-N</VAR> | <VAR>dir</VAR> ]
 </pre></td></tr></table><P>
 
 Save the current directory on the top of the directory stack
@@ -7587,6 +7595,9 @@ With no arguments, <CODE>pushd</CODE> exchanges the top two directories.
 </P><P>
 
 <DL COMPACT>
+<DT><CODE>-n</CODE>
+<DD>Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 <DT><CODE>+<VAR>N</VAR></CODE>
 <DD>Brings the <VAR>N</VAR>th directory (counting from the left of the
 list printed by <CODE>dirs</CODE>, starting with zero) to the top of
@@ -7595,9 +7606,6 @@ the list by rotating the stack.
 <DD>Brings the <VAR>N</VAR>th directory (counting from the right of the
 list printed by <CODE>dirs</CODE>, starting with zero) to the top of
 the list by rotating the stack.
-<DT><CODE>-n</CODE>
-<DD>Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 <DT><CODE><VAR>dir</VAR></CODE>
 <DD>Makes the current working directory be the top of the stack, and then
 executes the equivalent of `<CODE>cd</CODE> <VAR>dir</VAR>'.
@@ -15136,7 +15144,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>September, 28  2006</I>
+This document was generated by <I>Chet Ramey</I> on <I>December, 12  2006</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15298,7 +15306,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>September, 28  2006</I>
+by <I>Chet Ramey</I> on <I>December, 12  2006</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

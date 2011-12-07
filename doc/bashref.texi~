@@ -1600,7 +1600,7 @@ Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the @samp{:-} expansion.
 Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
-If @var{offset}} is 0, and the positional parameters are used, @code{$@@} is
+If @var{offset} is 0, and the positional parameters are used, @code{$@@} is
 prefixed to the list.
 
 @item $@{!@var{prefix}*@}
@@ -2592,8 +2592,8 @@ under another shell.
 * Bourne Shell Builtins::	Builtin commands inherited from the Bourne
 				Shell.
 * Bash Builtins::		Table of builtins specific to Bash.
-* The Set Builtin::		This builtin is so overloaded it
-				deserves its own section.
+* The Set Builtin::		Change the values of shell attributes and
+				positional parameters.
 * Special Builtins::		Builtin commands classified specially by
 				POSIX.
 @end menu
@@ -3287,7 +3287,10 @@ Mark each @var{name} for export to subsequent commands via
 the environment.
 @end table
 
-Using @samp{+} instead of @samp{-} turns off the attribute instead.
+Using @samp{+} instead of @samp{-} turns off the attribute instead,
+with the exceptions that @samp{+a}
+may not be used to destroy an array variable and @samp{+r} will not
+remove the readonly attribute.
 When used in a function, @code{declare} makes each @var{name} local,
 as with the @code{local} command.  If a variable name is followed by
 =@var{value}, the value of the variable is set to @var{value}.
@@ -3939,7 +3942,7 @@ This builtin is so complicated that it deserves its own section.
 @item set
 @btindex set
 @example
-set [--abefhkmnptuvxBCHP] [-o @var{option}] [@var{argument} @dots{}]
+set [--abefhkmnptuvxBCEHPT] [-o @var{option}] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -3964,10 +3967,11 @@ immediately, rather than before printing the next primary prompt.
 @item -e
 Exit immediately if a simple command (@pxref{Simple Commands}) exits
 with a non-zero status, unless the command that fails is part of the
-command list immediately following a @code{while} or @code{until}
-keyword, part of the test in an @code{if} statement,
-part of a @code{&&} or @code{||} list, or if the command's return
-status is being inverted using @code{!}.
+command list immediately following a @code{while} or @code{until} keyword,
+part of the test in an @code{if} statement,
+part of a @code{&&} or @code{||} list,
+any command in a pipeline but the last,
+or if the command's return status is being inverted using @code{!}.
 A trap on @code{ERR}, if set, is executed before the shell exits.
 
 @item -f
@@ -5738,7 +5742,7 @@ from the stack, so that only the stack is manipulated.
 @btindex pushd
 @item pushd
 @example
-pushd [@var{dir} | @var{+N} | @var{-N}] [-n]
+pushd [-n] [@var{+N} | @var{-N} | @var{dir} ]
 @end example
 
 Save the current directory on the top of the directory stack
@@ -5746,6 +5750,9 @@ and then @code{cd} to @var{dir}.
 With no arguments, @code{pushd} exchanges the top two directories.
 
 @table @code
+@item -n
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 @item +@var{N}
 Brings the @var{N}th directory (counting from the left of the
 list printed by @code{dirs}, starting with zero) to the top of
@@ -5754,9 +5761,6 @@ the list by rotating the stack.
 Brings the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}, starting with zero) to the top of
 the list by rotating the stack.
-@item -n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 @item @var{dir}
 Makes the current working directory be the top of the stack, and then
 executes the equivalent of `@code{cd} @var{dir}'.

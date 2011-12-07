@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1396,7 +1396,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       /* Make a pipeline between the two commands. */
       if (pipe (fildes) < 0)
 	{
-	  sys_error ("pipe error");
+	  sys_error (_("pipe error"));
 #if defined (JOB_CONTROL)
 	  terminate_current_pipeline ();
 	  kill_current_pipeline ();

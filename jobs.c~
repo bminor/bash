@@ -462,7 +462,7 @@ start_pipeline ()
   if (job_control)
     {
       if (pipe (pgrp_pipe) == -1)
-	sys_error ("start_pipeline: pgrp pipe");
+	sys_error (_("start_pipeline: pgrp pipe"));
     }
 #endif
 }
@@ -1085,7 +1085,7 @@ add_process (name, pid)
     {
 #  ifdef DEBUG
       if (j == NO_JOB)
-	internal_warning ("add_process: process %5ld (%s) in the_pipeline", (long)p->pid, p->command);
+	internal_warning (_("add_process: process %5ld (%s) in the_pipeline"), (long)p->pid, p->command);
 #  endif
       if (PALIVE (p))
         internal_warning ("add_process: pid %5ld (%s) marked as still alive", (long)p->pid, p->command);
@@ -1772,8 +1772,10 @@ make_child (command, async_p)
       pipe_close (pgrp_pipe);
 #endif /* PGRP_PIPE */
 
+#if 0
       if (async_p)
 	last_asynchronous_pid = mypid;		/* XXX */
+#endif
 #if defined (RECYCLES_PIDS)
       else if (last_asynchronous_pid == mypid)
         /* Avoid pid aliasing.  1 seems like a safe, unusual pid value. */

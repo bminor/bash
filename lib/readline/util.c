@@ -220,6 +220,86 @@ rl_tilde_expand (ignore, key)
   return (0);
 }
 
+#if defined (USE_VARARGS)
+void
+#if defined (PREFER_STDARG)
+_rl_ttymsg (const char *format, ...)
+#else
+_rl_ttymsg (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
+
+  rl_forced_update_display ();
+}
+
+void
+#if defined (PREFER_STDARG)
+_rl_errmsg (const char *format, ...)
+#else
+_rl_errmsg (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
+}
+#else /* !USE_VARARGS */
+void
+_rl_ttymsg (format, arg1, arg2)
+     char *format;
+{
+  fprintf (stderr, "readline: ");
+  fprintf (stderr, format, arg1, arg2);
+  fprintf (stderr, "\n");
+
+  rl_forced_update_display ();
+}
+
+void
+_rl_errmsg (format, arg1, arg2)
+     char *format;
+{
+  fprintf (stderr, "readline: ");
+  fprintf (stderr, format, arg1, arg2);
+  fprintf (stderr, "\n");
+}
+#endif /* !USE_VARARGS */
+
 /* **************************************************************** */
 /*								    */
 /*			String Utility Functions		    */

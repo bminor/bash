@@ -13774,7 +13774,7 @@ shell.c
 	  <mike.stroyan@hp.com>
 
 doc/bashref.texi
-	- fix typos and misspellings sent in by Brian Gough
+	- fixes for typos and misspellings sent in by Brian Gough
 
 				   10/24
 				   -----
@@ -13829,7 +13829,7 @@ execute_cmd.c
 				   11/7
 				   ----
 lib/tilde/tilde.c
-lib/readline/{util,undo,callback,input,isearch,kill
+lib/readline/{util,undo,callback,input,isearch,kill}.c
 	- make sure that memory allocated with xmalloc is freed with xfree
 
 				   11/9
@@ -14008,4 +14008,43 @@ builtins/evalfile.c
 				   ----
 lib/sh/snprintf.c
 	- make sure number() sets the FL_UNSIGNED flag for %x and %X, so
-	  fmtulong treats them as unsigned numbers
+	  fmtulong treats them as unsigned numbers.  Fixes bug reported by
+	  James Botte <James.M.Botte@lowes.com>
+
+				   12/13
+				   -----
+lib/readline/util.c
+	- new function, _rl_ttymsg, for internal warning messages -- does
+	  redisplay after printing message
+	- new function, _rl_errmsg, for internal warning/error messages --
+	  does not do redisplay after printing message
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_ttymsg, _rl_errmsg
+
+lib/readline/{bind,callback,complete,display,rltty}.c
+	- use _rl_ttymsg/_rl_errmsg instead of direct writes to stderr
+
+lib/sh/tmpfile.c
+	- in get_tmpdir(), make sure that $TMPDIR names a writable directory;
+	  otherwise skip it.  This catches names longer than PATH_MAX, but in
+	  case it doesn't test that the length does not exceed PATH_MAX.  Fixes
+	  heap overrun bug reported by Eric Blake <ebb9@byu.net>
+
+				   12/16
+				   -----
+builtin/{set,declare,shopt,trap,wait,bind,complete,enable,fc,history,read,setattr}.def
+doc/{bash.1,bashref.texi}
+	- improvements and clarifications to the help text associated with
+	  several builtins, in some cases bringing them into line with the
+	  man page text.  From Benno Schulenberg <bensberg@justemail.net>
+
+doc/{bash.1,bashref.texi}
+	- add `E' and `T' to the synopsis of the set builtin.
+	  From Benno Schulenberg <bensberg@justemail.net>
+
+builtins/{break,exit,fg_bg,hash,jobs,type,ulimit}.def
+builtins/{common,evalfile}.c
+{error,expr,jobs,mksyntax,nojobs,shell,subst,version}.c
+	- add gettextizing marks to untranslated strings
+	  From Benno Schulenberg <bensberg@justemail.net>

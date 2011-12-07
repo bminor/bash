@@ -1600,7 +1600,7 @@ Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the @samp{:-} expansion.
 Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
-If @var{offset}} is 0, and the positional parameters are used, @code{$@@} is
+If @var{offset} is 0, and the positional parameters are used, @code{$@@} is
 prefixed to the list.
 
 @item $@{!@var{prefix}*@}
@@ -2592,8 +2592,8 @@ under another shell.
 * Bourne Shell Builtins::	Builtin commands inherited from the Bourne
 				Shell.
 * Bash Builtins::		Table of builtins specific to Bash.
-* The Set Builtin::		This builtin is so overloaded it
-				deserves its own section.
+* The Set Builtin::		Change the values of shell attributes and
+				positional parameters.
 * Special Builtins::		Builtin commands classified specially by
 				POSIX.
 @end menu
@@ -3356,7 +3356,7 @@ the eight-bit character whose value is the hexadecimal value @var{HH}
 @item enable
 @btindex enable
 @example
-enable [-n] [-p] [-f @var{filename}] [-ads] [@var{name} @dots{}]
+enable [-a] [-dnps] [-f @var{filename}] [@var{name} @dots{}]
 @end example
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
@@ -3942,7 +3942,7 @@ This builtin is so complicated that it deserves its own section.
 @item set
 @btindex set
 @example
-set [--abefhkmnptuvxBCHP] [-o @var{option}] [@var{argument} @dots{}]
+set [--abefhkmnptuvxBCEHPT] [-o @var{option}] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names

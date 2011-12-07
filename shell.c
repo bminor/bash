@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1731,7 +1731,7 @@ show_shell_usage (fp, extra)
   char *set_opts, *s, *t;
 
   if (extra)
-    fprintf (fp, "GNU bash, version %s-(%s)\n", shell_version_string (), MACHTYPE);
+    fprintf (fp, _("GNU bash, version %s-(%s)\n"), shell_version_string (), MACHTYPE);
   fprintf (fp, _("Usage:\t%s [GNU long option] [option] ...\n\t%s [GNU long option] [option] script-file ...\n"),
 	     shell_name, shell_name);
   fputs (_("GNU long options:\n"), fp);

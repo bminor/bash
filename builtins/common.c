@@ -1,4 +1,4 @@
-/* Copyright (C) 1987-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -100,7 +100,7 @@ builtin_error (format, va_alist)
   fprintf (stderr, "%s: ", name);
 
   if (interactive_shell == 0)
-    fprintf (stderr, "line %d: ", executing_line_number ());
+    fprintf (stderr, _("line %d: "), executing_line_number ());
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
@@ -117,7 +117,7 @@ void
 builtin_usage ()
 {
   if (this_command_name && *this_command_name)
-    fprintf (stderr, "%s: usage: ", this_command_name);
+    fprintf (stderr, _("%s: usage: "), this_command_name);
   fprintf (stderr, "%s\n", current_builtin->short_doc);
   fflush (stderr);
 }

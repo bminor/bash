@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2005 Free Software Foundation, Inc.
+Copyright (C) 1987-2006 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -261,7 +261,7 @@ disown_builtin (list)
 
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
 	{
-	  sh_badjob (list ? list->word->word : "current");
+	  sh_badjob (list ? list->word->word : _("current"));
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)

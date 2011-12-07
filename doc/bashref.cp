@@ -54,19 +54,19 @@
 \entry{expansion, arithmetic}{22}{expansion, arithmetic}
 \entry{arithmetic expansion}{22}{arithmetic expansion}
 \entry{process substitution}{22}{process substitution}
-\entry{word splitting}{22}{word splitting}
+\entry{word splitting}{23}{word splitting}
 \entry{expansion, filename}{23}{expansion, filename}
 \entry{expansion, pathname}{23}{expansion, pathname}
 \entry{filename expansion}{23}{filename expansion}
 \entry{pathname expansion}{23}{pathname expansion}
-\entry{pattern matching}{23}{pattern matching}
-\entry{matching, pattern}{23}{matching, pattern}
+\entry{pattern matching}{24}{pattern matching}
+\entry{matching, pattern}{24}{matching, pattern}
 \entry{redirection}{25}{redirection}
 \entry{command expansion}{28}{command expansion}
 \entry{command execution}{29}{command execution}
 \entry{command search}{29}{command search}
-\entry{execution environment}{29}{execution environment}
-\entry{environment}{30}{environment}
+\entry{execution environment}{30}{execution environment}
+\entry{environment}{31}{environment}
 \entry{exit status}{31}{exit status}
 \entry{signal handling}{31}{signal handling}
 \entry{shell script}{32}{shell script}

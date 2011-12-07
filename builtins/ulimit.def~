@@ -740,7 +740,7 @@ set_all_limits (mode, newlim)
   for (retval = i = 0; limits[i].option > 0; i++)
     if (set_limit (i, newlim, mode) < 0)
       {
-	builtin_error ("%s: cannot modify limit: %s", limits[i].description,
+	builtin_error (_("%s: cannot modify limit: %s"), limits[i].description,
 						      strerror (errno));
 	retval = 1;
       }

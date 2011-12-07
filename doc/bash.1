@@ -6045,13 +6045,6 @@ that they can be re-read.
 .B \-P
 List current \fBreadline\fP function names and bindings.
 .TP
-.B \-v
-Display \fBreadline\fP variable names and values in such a way that they
-can be re-read.
-.TP
-.B \-V
-List current \fBreadline\fP variable names and values.
-.TP
 .B \-s
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output in such a way that they can be re-read.
@@ -6059,6 +6052,13 @@ they output in such a way that they can be re-read.
 .B \-S
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output.
+.TP
+.B \-v
+Display \fBreadline\fP variable names and values in such a way that they
+can be re-read.
+.TP
+.B \-V
+List current \fBreadline\fP variable names and values.
 .TP
 .B \-f \fIfilename\fP
 Read key bindings from \fIfilename\fP.
@@ -6232,9 +6232,9 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
 .br
-[\fB\-X\fP \fIfilterpat\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] \fIname\fP [\fIname ...\fP]
+[\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
 \fBcomplete\fP \fB\-pr\fP [\fIname\fP ...]
@@ -6664,7 +6664,7 @@ the eight-bit character whose value is the hexadecimal value \fIHH\fP
 .PD
 .RE
 .TP
-\fBenable\fP [\fB\-adnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
+\fBenable\fP [\fB\-a\fP] [\fB\-dnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
@@ -6796,7 +6796,7 @@ is supplied with a
 .I name
 that is not a function.
 .TP
-\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-nlr\fP] [\fIfirst\fP] [\fIlast\fP]
+\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-lnr\fP] [\fIfirst\fP] [\fIlast\fP]
 .PD 0
 .TP
 \fBfc\fP \fB\-s\fP [\fIpat\fP=\fIrep\fP] [\fIcmd\fP]
@@ -7417,7 +7417,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-u\fP \fIfd\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-a\fP \fIaname\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-n\fP \fInchars\fP] [\fB\-d\fP \fIdelim\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -7553,7 +7553,7 @@ the return status is false.
 Any command associated with the \fBRETURN\fP trap is executed
 before execution resumes after the function or script.
 .TP
-\fBset\fP [\fB\-\-abefhkmnptuvxBCHP\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
+\fBset\fP [\fB\-\-abefhkmnptuvxBCEHPT\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 September 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2006 November 27<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1829,7 +1829,9 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is &quot;main&quot;.
+The bottom-most element is
+<TT>&quot;main&quot;</TT>.
+
 This variable exists only when a shell function is executing.
 Assignments to
 <FONT SIZE=-1><B>FUNCNAME</B>
@@ -3121,7 +3123,9 @@ index of the specified array.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
-are used, in which case the indexing starts at 1.
+are used, in which case the indexing starts at 1 by default.
+If <I>offset</I> is 0, and the positional parameters are used, <B>$0</B> is
+prefixed to the list.
 <DT>${<B>!</B><I>prefix</I><B>*</B>}<DD>
 
 <DT>${<B>!</B><I>prefix</I><B>@</B>}<DD>
@@ -3132,6 +3136,8 @@ separated by the first character of the
 
 </FONT>
 special variable.
+When <I>@</I> is used and the expansion appears within double quotes, each
+variable name expands to a separate word.
 <DT>${<B>!</B><I>name</I>[<I>@</I>]}<DD>
 
 <DT>${<B>!</B><I>name</I>[<I>*</I>]}<DD>
@@ -7774,8 +7780,10 @@ Resume each suspended job <I>jobspec</I> in the background, as if it
 had been started with
 <B>&amp;</B>.
 
-If <I>jobspec</I> is not present, the shell's notion of the
-<I>current job</I> is used.
+If
+<I>jobspec</I>
+
+is not present, the shell's notion of the <I>current job</I> is used.
 <B>bg</B>
 
 <I>jobspec</I>
@@ -8398,10 +8406,13 @@ Mark <I>name</I>s for export to subsequent commands via the environment.
 <P>
 
 Using `+' instead of `-'
-turns off the attribute instead, with the exception that <B>+a</B>
-may not be used to destroy an array variable.  When used in a function,
+turns off the attribute instead,
+with the exceptions that <B>+a</B>
+may not be used to destroy an array variable and <B>+r will not
+remove the readonly attribute.
+When used in a function,
 makes each
-<I>name</I> local, as with the 
+</B><I>name</I> local, as with the 
 <B>local</B>
 
 command.
@@ -8422,7 +8433,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
 </DL>
 
-<DT><B>dirs [-clpv</B>] [+<I>n</I>] [-<I>n</I>]
+<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-cplv</B>]
 
 <DD>
 Without options, displays the list of currently remembered directories.
@@ -8482,6 +8493,11 @@ Without options, each
 <I>jobspec</I>
 
 is removed from the table of active jobs.
+If
+<I>jobspec</I>
+
+is not present, and neither <B>-a nor -r</B> is supplied,
+the shell's notion of the <I>current job</I> is used.
 If the <B>-h</B> option is given, each
 <I>jobspec</I>
 
@@ -8669,7 +8685,7 @@ If the
 <B>-l</B>
 
 option is supplied,
-the shell places a dash at the beginning of the zeroth arg passed to 
+the shell places a dash at the beginning of the zeroth argument passed to 
 <I>command</I>.
 
 This is what
@@ -9359,6 +9375,11 @@ Arguments, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
+<DT><B>-n</B>
+
+<DD>
+Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
 <DT><B>+</B><I>n</I><DD>
 Removes the <I>n</I>th entry counting from the left of the list
 shown by
@@ -9383,11 +9404,6 @@ removes the last directory,
 
 <TT>popd -1</TT>
 the next to last.
-<DT><B>-n</B>
-
-<DD>
-Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 
 </DL>
 <P>
@@ -9430,9 +9446,9 @@ If the <I>format</I> requires more <I>arguments</I> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
-<DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
-
 <DT><B>pushd</B> [<B>-n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
+
+<DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
 
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
@@ -9442,6 +9458,11 @@ Arguments, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
+<DT><B>-n</B>
+
+<DD>
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 <DT><B>+</B><I>n</I><DD>
 Rotates the stack so that the <I>n</I>th directory
 (counting from the left of the list shown by
@@ -9455,11 +9476,6 @@ Rotates the stack so that the <I>n</I>th directory
 <B>dirs</B>,
 
 starting with zero) is at the top.
-<DT><B>-n</B>
-
-<DD>
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 <DT><I>dir</I>
 
 <DD>
@@ -9732,7 +9748,7 @@ or
 
 keyword, 
 part of the test in an
-<I>if</I>
+<B>if</B>
 
 statement, part of a
 <B>&amp;&amp;</B>
@@ -9740,7 +9756,9 @@ statement, part of a
 or
 <B>||</B>
 
-list, or if the command's return value is
+list,
+any command in a pipeline but the last,
+or if the command's return value is
 being inverted via
 <B>!</B>.
 
@@ -11433,7 +11451,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 September 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2006 November 27<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11537,6 +11555,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 03 October 2006 08:54:31 EDT
+Time: 12 December 2006 14:43:32 EST
 </BODY>
 </HTML>

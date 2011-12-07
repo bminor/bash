@@ -6,12 +6,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Nov 21 10:50:26 EST 2006
+.\"	Last Change: Mon Nov 27 12:02:01 EST 2006
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2006 November 21" "GNU Bash-3.2"
+.TH BASH 1 "2006 November 27" "GNU Bash-3.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5985,8 +5985,9 @@ no alias has been defined.
 Resume each suspended job \fIjobspec\fP in the background, as if it
 had been started with
 .BR & .
-If \fIjobspec\fP is not present, the shell's notion of the
-\fIcurrent job\fP is used.
+If
+.I jobspec
+is not present, the shell's notion of the \fIcurrent job\fP is used.
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
@@ -6044,13 +6045,6 @@ that they can be re-read.
 .B \-P
 List current \fBreadline\fP function names and bindings.
 .TP
-.B \-v
-Display \fBreadline\fP variable names and values in such a way that they
-can be re-read.
-.TP
-.B \-V
-List current \fBreadline\fP variable names and values.
-.TP
 .B \-s
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output in such a way that they can be re-read.
@@ -6058,6 +6052,13 @@ they output in such a way that they can be re-read.
 .B \-S
 Display \fBreadline\fP key sequences bound to macros and the strings
 they output.
+.TP
+.B \-v
+Display \fBreadline\fP variable names and values in such a way that they
+can be re-read.
+.TP
+.B \-V
+List current \fBreadline\fP variable names and values.
 .TP
 .B \-f \fIfilename\fP
 Read key bindings from \fIfilename\fP.
@@ -6231,9 +6232,9 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
 .br
-[\fB\-X\fP \fIfilterpat\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] \fIname\fP [\fIname ...\fP]
+[\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
 \fBcomplete\fP \fB\-pr\fP [\fIname\fP ...]
@@ -6499,8 +6500,11 @@ Mark \fIname\fPs for export to subsequent commands via the environment.
 .PD
 .PP
 Using `+' instead of `\-'
-turns off the attribute instead, with the exception that \fB+a\fP
-may not be used to destroy an array variable.  When used in a function,
+turns off the attribute instead,
+with the exceptions that \fB+a\fP
+may not be used to destroy an array variable and \fB+r\fB will not
+remove the readonly attribute.
+When used in a function,
 makes each
 \fIname\fP local, as with the 
 .B local
@@ -6569,6 +6573,10 @@ of the directory stack.
 Without options, each
 .I jobspec
 is removed from the table of active jobs.
+If
+.I jobspec
+is not present, and neither \fB\-a\fB nor \fB\-r\fP is supplied,
+the shell's notion of the \fIcurrent job\fP is used.
 If the \fB\-h\fP option is given, each
 .I jobspec
 is not removed from the table, but is marked so that
@@ -6656,7 +6664,7 @@ the eight-bit character whose value is the hexadecimal value \fIHH\fP
 .PD
 .RE
 .TP
-\fBenable\fP [\fB\-adnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
+\fBenable\fP [\fB\-a\fP] [\fB\-dnps\fP] [\fB\-f\fP \fIfilename\fP] [\fIname\fP ...]
 Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
@@ -6788,7 +6796,7 @@ is supplied with a
 .I name
 that is not a function.
 .TP
-\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-nlr\fP] [\fIfirst\fP] [\fIlast\fP]
+\fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-lnr\fP] [\fIfirst\fP] [\fIlast\fP]
 .PD 0
 .TP
 \fBfc\fP \fB\-s\fP [\fIpat\fP=\fIrep\fP] [\fIcmd\fP]
@@ -7274,6 +7282,10 @@ Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
+.B \-n
+Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
+.TP
 \fB+\fP\fIn\fP
 Removes the \fIn\fPth entry counting from the left of the list
 shown by
@@ -7297,10 +7309,6 @@ removes the last directory,
 .if n ``popd -1''
 .if t \f(CWpopd -1\fP
 the next to last.
-.TP
-.B \-n
-Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 .PD
 .PP
 If the
@@ -7339,10 +7347,10 @@ extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.  The return value is zero on success,
 non-zero on failure.
 .TP
-\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
+\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
 .PD 0
 .TP
-\fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
+\fBpushd\fP [\fB\-n\fP] [\fIdir\fP]
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
@@ -7351,6 +7359,10 @@ and returns 0, unless the directory stack is empty.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
+.TP
+.B \-n
+Suppresses the normal change of directory when adding directories
+to the stack, so that only the stack is manipulated.
 .TP
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
@@ -7364,10 +7376,6 @@ Rotates the stack so that the \fIn\fPth directory
 (counting from the right of the list shown by
 .BR dirs ,
 starting with zero) is at the top.
-.TP
-.B \-n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
 .TP
 .I dir
 Adds
@@ -7545,7 +7553,7 @@ the return status is false.
 Any command associated with the \fBRETURN\fP trap is executed
 before execution resumes after the function or script.
 .TP
-\fBset\fP [\fB\-\-abefhkmnptuvxBCHP\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
+\fBset\fP [\fB\-\-abefhkmnptuvxBCEHPT\fP] [\fB\-o\fP \fIoption\fP] [\fIarg\fP ...]
 Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
@@ -7584,12 +7592,14 @@ or
 .B until
 keyword, 
 part of the test in an
-.I if
+.B if
 statement, part of a
 .B &&
 or
 .B \(bv\(bv
-list, or if the command's return value is
+list,
+any command in a pipeline but the last,
+or if the command's return value is
 being inverted via
 .BR ! .
 A trap on \fBERR\fP, if set, is executed before the shell exits.

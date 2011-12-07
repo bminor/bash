@@ -35,10 +35,10 @@
 \entry {directory stack}{77}
 \initial {E}
 \entry {editing command lines}{89}
-\entry {environment}{30}
+\entry {environment}{31}
 \entry {evaluation, arithmetic}{74}
 \entry {event designators}{117}
-\entry {execution environment}{29}
+\entry {execution environment}{30}
 \entry {exit status}{3, 31}
 \entry {expansion}{17}
 \entry {expansion, arithmetic}{22}
@@ -79,7 +79,7 @@
 \entry {localization}{7}
 \entry {login shell}{69}
 \initial {M}
-\entry {matching, pattern}{23}
+\entry {matching, pattern}{24}
 \entry {metacharacter}{3}
 \initial {N}
 \entry {name}{3}
@@ -93,7 +93,7 @@
 \entry {parameters, positional}{15}
 \entry {parameters, special}{16}
 \entry {pathname expansion}{23}
-\entry {pattern matching}{23}
+\entry {pattern matching}{24}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
 \entry {POSIX Mode}{80}
@@ -131,6 +131,6 @@
 \entry {variables, readline}{93}
 \initial {W}
 \entry {word}{4}
-\entry {word splitting}{22}
+\entry {word splitting}{23}
 \initial {Y}
 \entry {yanking text}{91}

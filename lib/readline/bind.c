@@ -921,10 +921,10 @@ _rl_init_file_error (msg)
      const char *msg;
 {
   if (currently_reading_init_file)
-    fprintf (stderr, "readline: %s: line %d: %s\n", current_readline_init_file,
+    _rl_errmsg ("%s: line %d: %s\n", current_readline_init_file,
 		     current_readline_init_lineno, msg);
   else
-    fprintf (stderr, "readline: %s\n", msg);
+    _rl_errmsg ("%s", msg);
 }
 
 /* **************************************************************** */
