@@ -42,11 +42,15 @@ extern void assoc_remove __P((HASH_TABLE *, char *));
 
 extern char *assoc_reference __P((HASH_TABLE *, char *));
 
+extern char *assoc_subrange __P((HASH_TABLE *, arrayind_t, arrayind_t, int, int));
 extern char *assoc_patsub __P((HASH_TABLE *, char *, char *, int));
 extern char *assoc_modcase __P((HASH_TABLE *, char *, int, int));
 
 extern HASH_TABLE *assoc_quote __P((HASH_TABLE *));
 extern HASH_TABLE *assoc_quote_escapes __P((HASH_TABLE *));
+extern HASH_TABLE *assoc_dequote __P((HASH_TABLE *));
+extern HASH_TABLE *assoc_dequote_escapes __P((HASH_TABLE *));
+extern HASH_TABLE *assoc_remove_quoted_nulls __P((HASH_TABLE *));
 
 extern char *assoc_to_assign __P((HASH_TABLE *, int));
 

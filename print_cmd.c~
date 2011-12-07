@@ -609,7 +609,12 @@ print_case_clauses (clauses)
       indentation += indentation_amount;
       make_command_string_internal (clauses->action);
       indentation -= indentation_amount;
-      newline (";;");
+      if (clauses->flags & CASEPAT_FALLTHROUGH)
+	newline (";&");
+      else if (clauses->flags & CASEPAT_TESTNEXT)
+	newline (";;&");
+      else
+	newline (";;");
       clauses = clauses->next;
     }
   indentation -= indentation_amount;

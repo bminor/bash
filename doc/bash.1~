@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Jun  2 20:32:53 EDT 2008
+.\"	Last Change: Sun Jul  6 14:33:52 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 June 2" "GNU Bash-4.0"
+.TH BASH 1 "2008 July 6" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -871,6 +871,42 @@ The exit status of the \fBwhile\fP and \fBuntil\fP commands
 is the exit status
 of the last \fBdo\fP \fIlist\fP command executed, or zero if
 none was executed.
+.SS Coprocesses
+.PP
+A \fIcoprocess\fP is a shell command preceded by the \fBcoproc\fP reserved
+word.
+A coprocess is executed asynchronously in a subshell, as if the command
+had been terminated with the \fB&\fP control operator, with a two-way pipe
+established between the executing shell and the coprocess.
+.PP
+The format for a coprocess is:
+.RS
+.PP
+\fBcoproc\fP [\fINAME\fP] \fIcommand\fP [\fIredirections\fP]
+.RE
+.PP
+This creates a coprocess named \fINAME\fP.
+If \fINAME\fP is not supplied, the default name is \fICOPROC\fP.
+When the coproc is executed, the shell creates an array variable (see
+.B arrays
+below) named \fINAME\fP in the context of the executing shell.
+The standard output of
+.I command
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to \fINAME\fP[0].
+The standard input of
+.I command
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to \fINAME\fP[1].
+This pipe is established before any redirections specified by the
+command (see
+.SM
+.B REDIRECTION
+below).
+The file descriptors can be utilized as arguments to shell commands
+and redirections using standard word expansions.
+.PP
+The return status of a coprocess is the exit status of \fIcommand\fP.
 .SS Shell Function Definitions
 .PP
 A shell function is an object that is called like a simple command and
@@ -2116,15 +2152,15 @@ parser to treat the rest of the line as a comment.
 .SS Arrays
 .B Bash
 provides one-dimensional indexed and associative array variables.
-Any variable may be used as an array; the
+Any variable may be used as an indexed array; the
 .B declare
 builtin will explicitly declare an array.
 There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
-expressions)  and are zero-based; associative arrays use arbitrary
-strings.
+expressions)  and are zero-based; associative arrays are referenced
+using arbitrary strings.
 .PP
 An indexed array is created automatically if any variable is assigned to
 using the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
@@ -2138,21 +2174,24 @@ use
 .B SHELL BUILTIN COMMANDS
 below).
 .B declare \-a \fIname\fP[\fIsubscript\fP]
-is also accepted; the \fIsubscript\fP is ignored.  Attributes may be
+is also accepted; the \fIsubscript\fP is ignored.
+.PP
+Associative arrays are created using
+.BR "declare \-A \fIname\fP" .
+.PP
+Attributes may be
 specified for an array variable using the
 .B declare
 and
 .B readonly
 builtins.  Each attribute applies to all members of an array.
 .PP
-Associative arrays are created using
-.BR declare \-A \fIname\fP .
-.PP
 Arrays are assigned to using compound assignments of the form
 \fIname\fP=\fB(\fPvalue\fI1\fP ... value\fIn\fP\fB)\fP, where each
-\fIvalue\fP is of the form [\fIsubscript\fP]=\fIstring\fP.  Only
-\fIstring\fP is required.  When using indexed arrays, if
-the optional brackets and subscript are supplied, that index is assigned to;
+\fIvalue\fP is of the form [\fIsubscript\fP]=\fIstring\fP.
+Indexed array assignments do not require the bracket and subscript.
+When assigning to indexed arrays, if the optional brackets and subscript
+are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
 .PP
@@ -2508,11 +2547,13 @@ If \fIoffset\fP evaluates to a number less than zero, the value
 is used as an offset from the end of the value of \fIparameter\fP.
 If \fIparameter\fP is \fB@\fP, the result is \fIlength\fP positional
 parameters beginning at \fIoffset\fP.
-If \fIparameter\fP is an array name indexed by @ or *,
+If \fIparameter\fP is an indexed array name subscripted by @ or *,
 the result is the \fIlength\fP
 members of the array beginning with ${\fIparameter\fP[\fIoffset\fP]}.
 A negative \fIoffset\fP is taken relative to one greater than the maximum
 index of the specified array.
+Substring expansion applied to an associative array produces undefined
+results.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
@@ -2652,6 +2693,43 @@ is an array variable subscripted with
 or
 .BR * ,
 the substitution operation is applied to each member of the
+array in turn, and the expansion is the resultant list.
+.TP
+${\fIparameter\fP\fB^\fP\fIpattern\fP}
+.PD 0
+.TP
+${\fIparameter\fP\fB^^\fP\fIpattern\fP}
+.TP
+${\fIparameter\fP\fB,\fP\fIpattern\fP}
+.TP
+${\fIparameter\fP\fB,,\fP\fIpattern\fP}
+.PD
+This expansion modifies the case of alphabetic characters in \fIparameter\fP.
+The \fIpattern\fP is expanded to produce a pattern just as in
+pathname expansion.
+The \fB^\fP operator converts lowercase letters matching \fIpattern\fP
+to uppercase; the \fB,\fP operator converts matching uppercase letters
+to lowercase.
+The \fB^^\fP and \fB,,\fP expansions convert each matched character in the
+expanded value; the \fB^\fP and \fB,\fP expansions match and convert only
+the first character.
+If \fIpattern\fP is omitted, it is treated like a \fB?\fP, which matches
+every character.
+If
+.I parameter
+is
+.B @
+or
+.BR * ,
+the case modification operation is applied to each positional
+parameter in turn, and the expansion is the resultant list.
+If
+.I parameter
+is an array variable subscripted with
+.B @
+or
+.BR * ,
+the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 .SS Command Substitution
 .PP
@@ -6645,10 +6723,10 @@ is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
-\fBdeclare\fP [\fB\-aAfFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBdeclare\fP [\fB\-aAfFilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0
 .TP
-\fBtypeset\fP [\fB\-aAfFirtx\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBtypeset\fP [\fB\-aAfFilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -6702,6 +6780,11 @@ The variable is treated as an integer; arithmetic evaluation (see
 .B "ARITHMETIC EVALUATION" ") "
 is performed when the variable is assigned a value.
 .TP
+.B \-l
+When the variable is assigned a value, all upper-case characters are
+converted to lower-case.
+The upper-case attribute is disabled.
+.TP
 .B \-r
 Make \fIname\fPs readonly.  These names cannot then be assigned values
 by subsequent assignment statements or unset.
@@ -6711,6 +6794,11 @@ Give each \fIname\fP the \fItrace\fP attribute.
 Traced functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps from
 the calling shell.
 The trace attribute has no special meaning for variables.
+.TP
+.B \-u
+When the variable is assigned a value, all lower-case characters are
+converted to upper-case.
+The lower-case attribute is disabled.
 .TP
 .B \-x
 Mark \fIname\fPs for export to subsequent commands via the environment.
@@ -7505,9 +7593,7 @@ is supplied, or
 .B logout
 Exit a login shell.
 .TP
-\fBmapfile\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcou
-nt\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \f
-Iquantum\fP] [\fIarray\fP]
+\fBmapfile\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
 Read lines from the standard input into array variable
 .IR array ,
 or from file descriptor 
@@ -7709,7 +7795,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fb\-\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -7798,8 +7884,8 @@ are supplied, the line read is assigned to the variable
 .SM
 .BR REPLY .
 The return code is zero, unless end-of-file is encountered, \fBread\fP
-times out, or an invalid file descriptor is supplied as the argument to
-\fB\-u\fP.
+times out (in which case the return code is greater than 128), or an
+invalid file descriptor is supplied as the argument to \fB\-u\fP.
 .RE
 .TP
 \fBreadonly\fP [\fB\-aApf\fP] [\fIname\fP[=\fIword\fP] ...]
@@ -8555,11 +8641,10 @@ by default.
 Suspend the execution of this shell until it receives a
 .SM
 .B SIGCONT
-signal.  The
+signal.  A login shell cannot be suspended; the
 .B \-f
-option says not to complain if this is 
-a login shell; just suspend anyway.  The return status is 0 unless
-the shell is a login shell and
+option can be used to override this and force the suspension.
+The return status is 0 unless the shell is a login shell and
 .B \-f
 is not supplied, or if job control is not enabled.
 .TP
@@ -9249,5 +9334,7 @@ unmatched parentheses, even inside shell comments, will result in
 error messages while the construct is being read.
 .PP
 Array variables may not (yet) be exported.
+.PP
+There may be only one active coprocess at a time.
 .zZ
 .zY

@@ -51,24 +51,24 @@
 \entry{parameter expansion}{19}{parameter expansion}
 \entry{expansion, parameter}{19}{expansion, parameter}
 \entry{command substitution}{22}{command substitution}
-\entry{expansion, arithmetic}{22}{expansion, arithmetic}
-\entry{arithmetic expansion}{22}{arithmetic expansion}
-\entry{process substitution}{22}{process substitution}
+\entry{expansion, arithmetic}{23}{expansion, arithmetic}
+\entry{arithmetic expansion}{23}{arithmetic expansion}
+\entry{process substitution}{23}{process substitution}
 \entry{word splitting}{23}{word splitting}
-\entry{expansion, filename}{23}{expansion, filename}
-\entry{expansion, pathname}{23}{expansion, pathname}
-\entry{filename expansion}{23}{filename expansion}
-\entry{pathname expansion}{23}{pathname expansion}
+\entry{expansion, filename}{24}{expansion, filename}
+\entry{expansion, pathname}{24}{expansion, pathname}
+\entry{filename expansion}{24}{filename expansion}
+\entry{pathname expansion}{24}{pathname expansion}
 \entry{pattern matching}{24}{pattern matching}
 \entry{matching, pattern}{24}{matching, pattern}
-\entry{redirection}{25}{redirection}
+\entry{redirection}{26}{redirection}
 \entry{command expansion}{29}{command expansion}
 \entry{command execution}{30}{command execution}
 \entry{command search}{30}{command search}
-\entry{execution environment}{30}{execution environment}
-\entry{environment}{31}{environment}
+\entry{execution environment}{31}{execution environment}
+\entry{environment}{32}{environment}
 \entry{exit status}{32}{exit status}
-\entry{signal handling}{32}{signal handling}
+\entry{signal handling}{33}{signal handling}
 \entry{shell script}{33}{shell script}
 \entry{special builtin}{58}{special builtin}
 \entry{login shell}{71}{login shell}
@@ -87,7 +87,7 @@
 \entry{directory stack}{79}{directory stack}
 \entry{prompting}{81}{prompting}
 \entry{restricted shell}{82}{restricted shell}
-\entry{POSIX Mode}{82}{POSIX Mode}
+\entry{POSIX Mode}{83}{POSIX Mode}
 \entry{job control}{87}{job control}
 \entry{foreground}{87}{foreground}
 \entry{background}{87}{background}

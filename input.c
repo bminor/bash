@@ -47,6 +47,18 @@
 extern int errno;
 #endif /* !errno */
 
+#if defined (EAGAIN)
+#  define X_EAGAIN EAGAIN
+#else
+#  define X_EAGAIN -99
+#endif
+
+#if defined (EWOULDBLOCK)
+#  define X_EWOULDBLOCK EWOULDBLOCK
+#else
+#  define X_EWOULDBLOCK -99
+#endif
+
 extern void termsig_handler __P((int));
 
 /* Functions to handle reading input on systems that don't restart read(2)
@@ -75,6 +87,15 @@ getc_with_restart (stream)
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
 	  if (local_bufused > 0)
 	    break;
+	  else if (errno == X_EAGAIN || errno == X_EWOULDBLOCK)
+	    {
+	      if (sh_unset_nodelay_mode (fileno (stream)) < 0)
+		{
+		  sys_error (_("cannot reset nodelay mode for fd %d"), fileno (stream));
+		  return EOF;
+		}
+	      continue;
+	    }
 	  else if (local_bufused == 0 || errno != EINTR)
 	    {
 	      local_index = 0;

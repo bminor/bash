@@ -199,10 +199,8 @@ static WORD_LIST *expand_string_leave_quoted __P((char *, int));
 static WORD_LIST *expand_string_for_rhs __P((char *, int, int *, int *));
 
 static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
-static char *dequote_escapes __P((char *));
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
-static char *remove_quoted_nulls __P((char *));
 
 static int unquoted_substring __P((char *, char *));
 static int unquoted_member __P((int, char *));
@@ -269,7 +267,7 @@ static int valid_length_expression __P((char *));
 static intmax_t parameter_brace_expand_length __P((char *));
 
 static char *skiparith __P((char *, int));
-static int verify_substring_values __P((char *, char *, int, intmax_t *, intmax_t *));
+static int verify_substring_values __P((SHELL_VAR *, char *, char *, int, intmax_t *, intmax_t *));
 static int get_var_and_type __P((char *, char *, int, SHELL_VAR **, char **));
 static char *mb_substring __P((char *, int, int));
 static char *parameter_brace_substring __P((char *, char *, char *, int));
@@ -277,6 +275,9 @@ static char *parameter_brace_substring __P((char *, char *, char *, int));
 static char *pos_params_pat_subst __P((char *, char *, char *, int));
 
 static char *parameter_brace_patsub __P((char *, char *, char *, int));
+
+static char *pos_params_casemod __P((char *, char *, int, int));
+static char *parameter_brace_casemod __P((char *, char *, int, char *, int));
 
 static WORD_DESC *parameter_brace_expand __P((char *, int *, int, int *, int *));
 static WORD_DESC *param_expand __P((char *, int *, int, int *, int *, int *, int *, int));
@@ -2341,16 +2342,19 @@ do_compound_assignment (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
-  int mklocal;
+  int mklocal, mkassoc;
   WORD_LIST *list;
 
   mklocal = flags & ASS_MKLOCAL;
+  mkassoc = flags & ASS_MKASSOC;
 
   if (mklocal && variable_context)
     {
       v = find_variable (name);
       list = expand_compound_array_assignment (v, value, flags);
-      if (v == 0 || array_p (v) == 0 || v->context != variable_context)
+      if (mkassoc)
+	v = make_local_assoc_variable (name);
+      else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
         v = make_local_array_variable (name);
       assign_compound_array_list (v, list, flags);
     }
@@ -2454,6 +2458,8 @@ do_assignment_internal (word, expand)
     {
       if (word->flags & W_ASSIGNARG)
 	aflags |= ASS_MKLOCAL;
+      if (word->flags & W_ASSIGNASSOC)
+	aflags |= ASS_MKASSOC;
       entry = do_compound_assignment (name, value, aflags);
     }
   else
@@ -2473,10 +2479,11 @@ do_assignment_internal (word, expand)
     }
   else
     retval = 1;
-  ASSIGN_RETURN (retval);
 
-  if (entry && retval != 0)
+  if (entry && retval != 0 && noassign_p (entry) == 0)
     VUNSETATTR (entry, att_invisible);
+
+  ASSIGN_RETURN (retval);
 #else
   if (entry)
     VUNSETATTR (entry, att_invisible);
@@ -3120,7 +3127,7 @@ list_quote_escapes (list)
    characters.
 
    Also used by parts of the pattern substitution code. */
-static char *
+char *
 dequote_escapes (string)
      char *string;
 {
@@ -3322,7 +3329,7 @@ remove_quoted_escapes (string)
    of how expand_word_internal works.  remove_quoted_nulls () turns
    STRING into an empty string iff it only consists of a quoted null,
    and removes all unquoted CTLNUL characters. */
-static char *
+char *
 remove_quoted_nulls (string)
      char *string;
 {
@@ -4966,7 +4973,7 @@ array_length_reference (s)
   if (assoc_p (var))
     {
       t[len - 1] = '\0';
-      akey = expand_assignment_string_to_string (t, 0);		/* [ */
+      akey = expand_assignment_string_to_string (t, 0);	/* [ */
       t[len - 1] = ']';
       if (akey == 0 || *akey == 0)
 	{
@@ -5504,7 +5511,8 @@ skiparith (substr, delim)
    Return value is 1 if both values were OK, 0 if there was a problem
    with an invalid expression, or -1 if the values were out of range. */
 static int
-verify_substring_values (value, substr, vtype, e1p, e2p)
+verify_substring_values (v, value, substr, vtype, e1p, e2p)
+     SHELL_VAR *v;
      char *value, *substr;
      int vtype;
      intmax_t *e1p, *e2p;
@@ -5514,6 +5522,7 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
   int expok;
 #if defined (ARRAY_VARS)
  ARRAY *a;
+ HASH_TABLE *h;
 #endif
 
   /* duplicate behavior of strchr(3) */
@@ -5543,10 +5552,19 @@ verify_substring_values (value, substr, vtype, e1p, e2p)
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      a = (ARRAY *)value;
       /* For arrays, the first value deals with array indices.  Negative
-	 offsets count from one past the array's maximum index. */
-      len = array_max_index (a) + (*e1p < 0);	/* arrays index from 0 to n - 1 */
+	 offsets count from one past the array's maximum index.  Associative
+	 arrays treat the number of elements as the maximum index. */
+      if (assoc_p (v))
+	{
+	  h = assoc_cell (v);
+	  len = assoc_num_elements (h) + (*e1p < 0);
+	}
+      else
+	{
+	  a = (ARRAY *)value;
+	  len = array_max_index (a) + (*e1p < 0);	/* arrays index from 0 to n - 1 */
+	}
       break;
 #endif
     }
@@ -5750,7 +5768,7 @@ parameter_brace_substring (varname, value, substr, quoted)
   starsub = vtype & VT_STARSUB;
   vtype &= ~VT_STARSUB;
 
-  r = verify_substring_values (val, substr, vtype, &e1, &e2);
+  r = verify_substring_values (v, val, substr, vtype, &e1, &e2);
   this_command_name = oname;
   if (r <= 0)
     return ((r == 0) ? &expand_param_error : (char *)NULL);
@@ -5787,7 +5805,9 @@ parameter_brace_substring (varname, value, substr, quoted)
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       if (assoc_p (v))
-	tt = (char *)NULL;
+	/* we convert to list and take first e2 elements starting at e1th
+	   element -- officially undefined for now */	
+	temp = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
       else
       /* We want E2 to be the number of elements desired (arrays can be sparse,
 	 so verify_substring_values just returns the numbers specified and we
@@ -6083,6 +6103,149 @@ parameter_brace_patsub (varname, value, patsub, quoted)
   return temp;
 }
 
+/****************************************************************/
+/*								*/
+/*   Functions to perform case modification on variable values  */
+/*								*/
+/****************************************************************/
+
+/* Do case modification on the positional parameters. */
+
+static char *
+pos_params_modcase (string, pat, modop, mflags)
+     char *string, *pat;
+     int modop;
+     int mflags;
+{
+  WORD_LIST *save, *params;
+  WORD_DESC *w;
+  char *ret;
+  int pchar, qflags;
+
+  save = params = list_rest_of_args ();
+  if (save == 0)
+    return ((char *)NULL);
+
+  for ( ; params; params = params->next)
+    {
+      ret = sh_modcase (params->word->word, pat, modop);
+      w = alloc_word_desc ();
+      w->word = ret ? ret : savestring ("");
+      dispose_word (params->word);
+      params->word = w;
+    }
+
+  pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+  qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+
+  ret = string_list_pos_params (pchar, save, qflags);
+  dispose_words (save);
+
+  return (ret);
+}
+
+/* Perform case modification on VALUE, which is the expansion of
+   VARNAME.  MODSPEC is an expression supplying the type of modification
+   to perform.  QUOTED is a flags word containing the type of quoting
+   currently in effect. */
+static char *
+parameter_brace_casemod (varname, value, modspec, patspec, quoted)
+     char *varname, *value;
+     int modspec;
+     char *patspec;
+     int quoted;
+{
+  int vtype, starsub, modop, mflags, x;
+  char *val, *temp, *pat, *p, *lpat, *tt;
+  SHELL_VAR *v;
+
+  if (value == 0)
+    return ((char *)NULL);
+
+  this_command_name = varname;
+
+  vtype = get_var_and_type (varname, value, quoted, &v, &val);
+  if (vtype == -1)
+    return ((char *)NULL);
+
+  starsub = vtype & VT_STARSUB;
+  vtype &= ~VT_STARSUB;
+
+  modop = 0;
+  mflags = 0;
+  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+    mflags |= MATCH_QUOTED;
+  if (starsub)
+    mflags |= MATCH_STARSUB;
+  
+  p = patspec;
+  if (modspec == '^')
+    {
+      x = p && p[0] == modspec;
+      modop = x ? CASE_UPPER : CASE_CAPITALIZE;
+      p += x;
+    }
+  else if (modspec == ',')
+    {
+      x = p && p[0] == modspec;
+      modop = x ? CASE_LOWER : CASE_UNCAP;
+      p += x;
+    }
+  else if (modspec == '~')
+    {
+      x = p && p[0] == modspec;
+      modop = x ? CASE_TOGGLEALL : CASE_TOGGLE;
+      p += x;
+    }
+    
+  lpat = p ? savestring (p) : 0;
+  /* Perform the same expansions on the pattern as performed by the
+     pattern removal expansions.  FOR LATER */
+  pat = lpat ? getpattern (lpat, quoted, 1) : 0;
+
+  /* OK, now we do the case modification. */
+  switch (vtype)
+    {
+    case VT_VARIABLE:
+    case VT_ARRAYMEMBER:
+      temp = sh_modcase (val, pat, modop);
+      if (vtype == VT_VARIABLE)
+	FREE (val);
+      if (temp)
+	{
+	  tt = (mflags & MATCH_QUOTED) ? quote_string (temp) : quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
+      break;
+
+    case VT_POSPARMS:
+      temp = pos_params_modcase (val, pat, modop, mflags);
+      if (temp && (mflags & MATCH_QUOTED)  == 0)
+	{
+	  tt = quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
+      break;
+
+#if defined (ARRAY_VARS)
+    case VT_ARRAYVAR:
+      temp = assoc_p (v) ? assoc_modcase (assoc_cell (v), pat, modop, mflags)
+			 : array_modcase (array_cell (v), pat, modop, mflags);
+      /* Don't call quote_escapes; array_modcase calls array_quote_escapes
+	 as appropriate before adding the space separators; ditto for
+	 assoc_modcase. */
+      break;
+#endif
+    }
+
+  FREE (pat);
+  free (lpat);
+
+  return temp;
+}
+
 /* Check for unbalanced parens in S, which is the contents of $(( ... )).  If
    any occur, this must be a nested command substitution, so return 0.
    Otherwise, return 1.  A valid arithmetic expression must always have a
@@ -6140,22 +6303,22 @@ chk_arithsub (s, len)
 /*								*/
 /****************************************************************/
 
-/* ${[#][!]name[[:]#[#]%[%]-=?+[word][:e1[:e2]]]} */
+/* ${[#][!]name[[:][^[^]][,[,]]#[#]%[%]-=?+[word][:e1[:e2]]]} */
 static WORD_DESC *
 parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_dollar_at)
      char *string;
      int *indexp, quoted, *quoted_dollar_atp, *contains_dollar_at;
 {
   int check_nullness, var_is_set, var_is_null, var_is_special;
-  int want_substring, want_indir, want_patsub;
+  int want_substring, want_indir, want_patsub, want_casemod;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag;
+  int t_index, sindex, c, tflag, modspec;
   intmax_t number;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
-  want_substring = want_indir = want_patsub = 0;
+  want_substring = want_indir = want_patsub = want_casemod = 0;
 
   sindex = *indexp;
   t_index = ++sindex;
@@ -6163,7 +6326,17 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
   if (string[t_index] == '#' && legal_variable_starter (string[t_index+1]))		/* {{ */
     name = string_extract (string, &t_index, "}", SX_VARNAME);
   else
+#if defined (CASEMOD_EXPANSIONS)
+    /* To enable case-toggling expansions using the `~' operator character
+       change the 1 to 0. */
+#  if defined (CASEMOD_CAPCASE)
+    name = string_extract (string, &t_index, "#%^,~:-=?+/}", SX_VARNAME);
+#  else
+    name = string_extract (string, &t_index, "#%^,:-=?+/}", SX_VARNAME);
+#  endif /* CASEMOD_CAPCASE */
+#else
     name = string_extract (string, &t_index, "#%:-=?+/}", SX_VARNAME);
+#endif /* CASEMOD_EXPANSIONS */
 
   ret = 0;
   tflag = 0;
@@ -6217,6 +6390,13 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     want_substring = 1;
   else if (c == '/' && string[sindex] != RBRACE)
     want_patsub = 1;
+#if defined (CASEMOD_EXPANSIONS)
+  else if (c == '^' || c == ',' || c == '~')
+    {
+      modspec = c;
+      want_casemod = 1;
+    }
+#endif
 
   /* Catch the valid and invalid brace expressions that made it through the
      tests above. */
@@ -6437,6 +6617,24 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       ret->word = temp1;
       return ret;
     }
+#if defined (CASEMOD_EXPANSIONS)
+  else if (want_casemod)
+    {
+      temp1 = parameter_brace_casemod (name, temp, modspec, value, quoted);
+      FREE (name);
+      FREE (value);
+      FREE (temp);
+
+      if (temp1 == &expand_param_error)
+	return (&expand_wdesc_error);
+      else if (temp1 == &expand_param_fatal)
+	return (&expand_wdesc_fatal);
+
+      ret = alloc_word_desc ();
+      ret->word = temp1;
+      return ret;
+    }
+#endif
 
   /* Do the right thing based on which character ended the variable name. */
   switch (c)

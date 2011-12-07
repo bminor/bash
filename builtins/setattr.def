@@ -377,6 +377,15 @@ show_var_attributes (var, pattr, nodefs)
 
       if (exported_p (var))
 	flags[i++] = 'x';
+
+      if (capcase_p (var))
+	flags[i++] = 'c';
+
+      if (lowercase_p (var))
+	flags[i++] = 'l';
+
+      if (uppercase_p (var))
+	flags[i++] = 'u';
     }
   else
     {

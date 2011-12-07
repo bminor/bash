@@ -54,8 +54,12 @@ extern ARRAY_ELEMENT *array_shift __P((ARRAY *, int, int));
 extern int	array_rshift __P((ARRAY *, int, char *));
 extern ARRAY_ELEMENT *array_unshift_element __P((ARRAY *));
 extern int	array_shift_element __P((ARRAY *, char *));
+
 extern ARRAY	*array_quote __P((ARRAY *));
 extern ARRAY	*array_quote_escapes __P((ARRAY *));
+extern ARRAY	*array_dequote __P((ARRAY *));
+extern ARRAY	*array_dequote_escapes __P((ARRAY *));
+extern ARRAY	*array_remove_quoted_nulls __P((ARRAY *));
 
 extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int));
 extern char	*array_patsub __P((ARRAY *, char *, char *, int));

@@ -647,6 +647,9 @@ make_here_document (temp, lineno)
       document_index += len;
     }
 
+  if (full_line == 0)
+    internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
+
 document_done:
   if (document)
     document[document_index] = '\0';
@@ -791,6 +794,20 @@ make_subshell_command (command)
   temp->command = command;
   temp->flags = CMD_WANT_SUBSHELL;
   return (make_command (cm_subshell, (SIMPLE_COM *)temp));
+}
+
+COMMAND *
+make_coproc_command (name, command)
+     char *name;
+     COMMAND *command;
+{
+  COPROC_COM *temp;
+
+  temp = (COPROC_COM *)xmalloc (sizeof (COPROC_COM));
+  temp->name = savestring (name);
+  temp->command = command;
+  temp->flags = CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+  return (make_command (cm_coproc, (SIMPLE_COM *)temp));
 }
 
 /* Reverse the word list and redirection list in the simple command

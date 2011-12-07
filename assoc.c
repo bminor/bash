@@ -160,6 +160,114 @@ assoc_quote_escapes (h)
   return h;
 }
 
+HASH_TABLE *
+assoc_dequote (h)
+     HASH_TABLE *h;
+{
+  int i;
+  BUCKET_CONTENTS *tlist;
+  char *t;
+
+  if (h == 0 || assoc_empty (h))
+    return ((HASH_TABLE *)NULL);
+  
+  for (i = 0; i < h->nbuckets; i++)
+    for (tlist = hash_items (i, h); tlist; tlist = tlist->next)
+      {
+	t = dequote_string ((char *)tlist->data);
+	FREE (tlist->data);
+	tlist->data = t;
+      }
+
+  return h;
+}
+
+HASH_TABLE *
+assoc_dequote_escapes (h)
+     HASH_TABLE *h;
+{
+  int i;
+  BUCKET_CONTENTS *tlist;
+  char *t;
+
+  if (h == 0 || assoc_empty (h))
+    return ((HASH_TABLE *)NULL);
+  
+  for (i = 0; i < h->nbuckets; i++)
+    for (tlist = hash_items (i, h); tlist; tlist = tlist->next)
+      {
+	t = dequote_escapes ((char *)tlist->data);
+	FREE (tlist->data);
+	tlist->data = t;
+      }
+
+  return h;
+}
+
+HASH_TABLE *
+assoc_remove_quoted_nulls (h)
+     HASH_TABLE *h;
+{
+  int i;
+  BUCKET_CONTENTS *tlist;
+  char *t;
+
+  if (h == 0 || assoc_empty (h))
+    return ((HASH_TABLE *)NULL);
+  
+  for (i = 0; i < h->nbuckets; i++)
+    for (tlist = hash_items (i, h); tlist; tlist = tlist->next)
+      {
+	t = remove_quoted_nulls ((char *)tlist->data);
+	tlist->data = t;
+      }
+
+  return h;
+}
+
+/*
+ * Return a string whose elements are the members of array H beginning at
+ * the STARTth element and spanning NELEM members.  Null elements are counted.
+ */
+char *
+assoc_subrange (hash, start, nelem, starsub, quoted)
+HASH_TABLE *hash;
+arrayind_t start, nelem;
+int starsub, quoted;
+{
+  WORD_LIST *l, *save, *h, *t;
+  int i, j;
+  char *ret;
+
+  if (assoc_empty (hash))
+    return ((char *)NULL);
+
+  save = l = assoc_to_word_list (hash);
+  if (save == 0)
+    return ((char *)NULL);
+
+  for (i = 1; l && i < start; i++)
+    l = l->next;
+  if (l == 0)
+    return ((char *)NULL);
+  for (j = 0,h = t = l; l && j < nelem; j++)
+    {
+      t = l;
+      l = l->next;
+    }
+
+  t->next = (WORD_LIST *)NULL;
+
+  ret = string_list_pos_params (starsub ? '*' : '@', h, quoted);
+
+  if (t != l)
+    t->next = l;
+
+  dispose_words (save);
+  return (ret);
+
+}
+
 char *
 assoc_patsub (h, pat, rep, mflags)
      HASH_TABLE *h;
@@ -167,9 +275,9 @@ assoc_patsub (h, pat, rep, mflags)
      int mflags;
 {
   BUCKET_CONTENTS *tlist;
-  int i;
+  int i, slen;
   HASH_TABLE *h2;
-  char	*t, *sifs;
+  char	*t, *sifs, *ifs;
 
   if (h == 0 || assoc_empty (h))
     return ((char *)NULL);
@@ -190,9 +298,25 @@ assoc_patsub (h, pat, rep, mflags)
 
   if (mflags & MATCH_STARSUB)
     {
+      assoc_remove_quoted_nulls (h2);
       sifs = ifs_firstchar ((int *)NULL);
       t = assoc_to_string (h2, sifs, 0);
       free (sifs);
+    }
+  else if (mflags & MATCH_QUOTED)
+    {
+      /* ${array[@]} */
+      sifs = ifs_firstchar (&slen);
+      ifs = getifs ();
+      if (ifs == 0 || *ifs == 0)
+	{
+	  if (slen < 2)
+	    sifs = xrealloc (sifs, 2);
+	  sifs[0] = ' ';
+	  sifs[1] = '\0';
+	}
+      t = assoc_to_string (h2, sifs, 0);
+      free(sifs);
     }
   else
     t = assoc_to_string (h2, " ", 0);
@@ -210,9 +334,9 @@ assoc_modcase (h, pat, modop, mflags)
      int mflags;
 {
   BUCKET_CONTENTS *tlist;
-  int i;
+  int i, slen;
   HASH_TABLE *h2;
-  char	*t, *sifs;
+  char	*t, *sifs, *ifs;
 
   if (h == 0 || assoc_empty (h))
     return ((char *)NULL);
@@ -233,9 +357,25 @@ assoc_modcase (h, pat, modop, mflags)
 
   if (mflags & MATCH_STARSUB)
     {
+      assoc_remove_quoted_nulls (h2);
       sifs = ifs_firstchar ((int *)NULL);
       t = assoc_to_string (h2, sifs, 0);
       free (sifs);
+    }
+  else if (mflags & MATCH_QUOTED)
+    {
+      /* ${array[@]} */
+      sifs = ifs_firstchar (&slen);
+      ifs = getifs ();
+      if (ifs == 0 || *ifs == 0)
+	{
+	  if (slen < 2)
+	    sifs = xrealloc (sifs, 2);
+	  sifs[0] = ' ';
+	  sifs[1] = '\0';
+	}
+      t = assoc_to_string (h2, sifs, 0);
+      free(sifs);
     }
   else
     t = assoc_to_string (h2, " ", 0);

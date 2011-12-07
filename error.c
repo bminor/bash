@@ -256,7 +256,8 @@ internal_warning (format, va_alist)
 {
   va_list args;
 
-  fprintf (stderr, _("%s: warning: "), get_name_for_error ());
+  error_prolog (1);
+  fprintf (stderr, _("warning: "));
 
   SH_VA_START (args, format);
 

@@ -1,7 +1,7 @@
 \initial {A}
 \entry {alias expansion}{77}
 \entry {arithmetic evaluation}{76}
-\entry {arithmetic expansion}{22}
+\entry {arithmetic expansion}{23}
 \entry {arithmetic, shell}{76}
 \entry {arrays}{78}
 \initial {B}
@@ -35,24 +35,24 @@
 \entry {directory stack}{79}
 \initial {E}
 \entry {editing command lines}{91}
-\entry {environment}{31}
+\entry {environment}{32}
 \entry {evaluation, arithmetic}{76}
 \entry {event designators}{122}
-\entry {execution environment}{30}
+\entry {execution environment}{31}
 \entry {exit status}{3, 32}
 \entry {expansion}{17}
-\entry {expansion, arithmetic}{22}
+\entry {expansion, arithmetic}{23}
 \entry {expansion, brace}{18}
-\entry {expansion, filename}{23}
+\entry {expansion, filename}{24}
 \entry {expansion, parameter}{19}
-\entry {expansion, pathname}{23}
+\entry {expansion, pathname}{24}
 \entry {expansion, tilde}{18}
 \entry {expressions, arithmetic}{76}
 \entry {expressions, conditional}{75}
 \initial {F}
 \entry {field}{3}
 \entry {filename}{3}
-\entry {filename expansion}{23}
+\entry {filename expansion}{24}
 \entry {foreground}{87}
 \entry {functions, shell}{14}
 \initial {H}
@@ -91,14 +91,14 @@
 \entry {parameters}{15}
 \entry {parameters, positional}{16}
 \entry {parameters, special}{16}
-\entry {pathname expansion}{23}
+\entry {pathname expansion}{24}
 \entry {pattern matching}{24}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
-\entry {POSIX Mode}{82}
+\entry {POSIX Mode}{83}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{22}
+\entry {process substitution}{23}
 \entry {programmable completion}{112}
 \entry {prompting}{81}
 \initial {Q}
@@ -106,7 +106,7 @@
 \entry {quoting, ANSI}{6}
 \initial {R}
 \entry {Readline, how to use}{90}
-\entry {redirection}{25}
+\entry {redirection}{26}
 \entry {reserved word}{3}
 \entry {restricted shell}{82}
 \entry {return status}{3}
@@ -117,7 +117,7 @@
 \entry {shell variable}{15}
 \entry {shell, interactive}{73}
 \entry {signal}{4}
-\entry {signal handling}{32}
+\entry {signal handling}{33}
 \entry {special builtin}{4, 58}
 \entry {startup files}{71}
 \entry {suspending jobs}{87}

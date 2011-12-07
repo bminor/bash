@@ -284,6 +284,12 @@ make_command_string_internal (command)
 	  cprintf (" )");
 	  break;
 
+	case cm_coproc:
+	  cprintf ("coproc %s ", command->value.Coproc->name);
+	  skip_this_indent++;
+	  make_command_string_internal (command->value.Coproc->command);
+	  break;
+
 	default:
 	  command_error ("print_command", CMDERR_BADTYPE, command->type, 0);
 	  break;

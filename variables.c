@@ -2104,7 +2104,6 @@ make_variable_value (var, value, flags)
 	  if (value)
 	    strcpy (retval+olen, value);
 	}
-#endif /* CASEMOD_ATTRS */
       else if (*value)
 	retval = savestring (value);
       else
@@ -2118,6 +2117,7 @@ make_variable_value (var, value, flags)
       free (retval);
       retval = oval;
     }
+#endif /* CASEMOD_ATTRS */
   else if (value)
     {
       if (flags & ASS_APPEND)

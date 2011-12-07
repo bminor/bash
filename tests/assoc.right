@@ -99,3 +99,33 @@ argv[1] = </bin/bash --login -o posix>
 argv[2] = </usr/sbin/foo>
 argv[3] = <cd /blat ; echo $PWD>
 argv[4] = </usr/local/bin/qux -l>
+outside: outside
+declare -A BASH_ALIASES='()'
+declare -A BASH_CMDS='()'
+declare -A afoo='([six]="six" [foo bar]="foo quux" )'
+argv[1] = <inside:>
+argv[2] = <six>
+argv[3] = <foo quux>
+outside 2: outside
+argv[1] = <fooq//barq/>
+argv[1] = <fooq>
+argv[1] = <foo!//bar!/>
+argv[1] = <foo!>
+argv[2] = <>
+argv[3] = <bar!>
+argv[4] = <>
+argv[1] = <ooq//arq/>
+argv[1] = <ooq>
+argv[2] = <>
+argv[3] = <arq>
+argv[4] = <>
+argv[1] = <Fooq//Barq/>
+argv[1] = <Fooq>
+argv[2] = <>
+argv[3] = <Barq>
+argv[4] = <>
+argv[1] = <FOOQ//BARQ/>
+argv[1] = <FOOQ>
+argv[2] = <>
+argv[3] = <BARQ>
+argv[4] = <>

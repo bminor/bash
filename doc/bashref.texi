@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2007 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2008 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -584,6 +584,7 @@ some other grouping.
 				commands.
 * Lists::			How to execute commands sequentially.
 * Compound Commands::		Shell commands for control flow.
+* Coprocesses::			Two-way communication between commands.
 @end menu
 
 @node Simple Commands
@@ -1073,6 +1074,41 @@ from the @var{list} by whitespace.
 
 The exit status of both of these constructs is the exit status of
 @var{list}.
+
+@node Coprocesses
+@subsection Coprocesses
+@cindex coprocess
+
+A @code{coprocess} is a shell command preceded by the @code{coproc}
+reserved word.
+A coprocess is executed asynchronously in a subshell, as if the command
+had been terminated with the @samp{&} control operator, with a two-way pipe
+established between the executing shell and the coprocess.
+
+The format for a coprocess is:
+@example
+@code{coproc} [@var{NAME}] @var{command} [@var{redirections}]
+@end example
+
+@noindent
+This creates a coprocess named @var{NAME}.
+If @var{NAME} is not supplied, the default name is @var{COPROC}.
+
+When the coproc is executed, the shell creates an array variable
+(@pxref{Arrays})
+named @var{NAME} in the context of the executing shell.
+The standard output of @var{command}
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to @var{NAME}[0].
+The standard input of @var{command}
+is connected via a pipe to a file descriptor in the executing shell,
+and that file descriptor is assigned to @var{NAME}[1].
+This pipe is established before any redirections specified by the
+command (@pxref{Redirections}).
+The file descriptors can be utilized as arguments to shell commands
+and redirections using standard word expansions.
+
+The return status of a coprocess is the exit status of @var{command}.
 
 @node Shell Functions
 @section Shell Functions
@@ -1620,11 +1656,14 @@ If @var{offset} evaluates to a number less than zero, the value
 is used as an offset from the end of the value of @var{parameter}.
 If @var{parameter} is @samp{@@}, the result is @var{length} positional
 parameters beginning at @var{offset}.
-If @var{parameter} is an array name indexed by @samp{@@} or @samp{*},
-the result is the @var{length}
+If @var{parameter} is an indexed array name subscripted
+by @samp{@@} or @samp{*}, the result is the @var{length}
 members of the array beginning with @code{$@{@var{parameter}[@var{offset}]@}}.
 A negative @var{offset} is taken relative to one greater than the maximum
 index of the specified array.
+Substring expansion applied to an associative array produces undefined
+results.
+
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the @samp{:-} expansion.
 Substring indexing is zero-based unless the positional parameters
@@ -1709,6 +1748,29 @@ parameter in turn, and the expansion is the resultant list.
 If @var{parameter}
 is an array variable subscripted with @samp{@@} or @samp{*},
 the substitution operation is applied to each member of the
+array in turn, and the expansion is the resultant list.
+
+@item $@{@var{parameter}^@var{pattern}@}
+@itemx $@{@var{parameter}^^@var{pattern}@}
+@itemx $@{@var{parameter},@var{pattern}@}
+@itemx $@{@var{parameter},,@var{pattern}@}
+This expansion modifies the case of alphabetic characters in @var{parameter}.
+The @var{pattern} is expanded to produce a pattern just as in
+pathname expansion.
+The @samp{^} operator converts lowercase letters matching @var{pattern}
+to uppercase; the @samp{,} operator converts matching uppercase letters
+to lowercase.
+The @samp{^^} and @samp{,,} expansions convert each matched character in the
+expanded value; the @samp{^} and @samp{,} expansions match and convert only
+the first character.
+If @var{pattern} is omitted, it is treated like a @samp{?}, which matches
+every character.
+If @var{parameter} is @samp{@@} or @samp{*},
+the case modification operation is applied to each positional
+parameter in turn, and the expansion is the resultant list.
+If @var{parameter}
+is an array variable subscripted with @samp{@@} or @samp{*},
+the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 
 @end table
@@ -3321,7 +3383,7 @@ zero if @var{command} is found, and non-zero if not.
 @item declare
 @btindex declare
 @example
-declare [-aAfFirtx] [-p] [@var{name}[=@var{value}] @dots{}]
+declare [-aAfFilrtux] [-p] [@var{name}[=@var{value}] @dots{}]
 @end example
 
 Declare variables and give them attributes.  If no @var{name}s
@@ -3363,6 +3425,11 @@ The variable is to be treated as
 an integer; arithmetic evaluation (@pxref{Shell Arithmetic}) is
 performed when the variable is assigned a value.
 
+@item -l
+When the variable is assigned a value, all upper-case characters are
+converted to lower-case.
+The upper-case attribute is disabled.
+
 @item -r
 Make @var{name}s readonly.  These names cannot then be assigned values
 by subsequent assignment statements or unset.
@@ -3372,6 +3439,11 @@ Give each @var{name} the @code{trace} attribute.
 Traced functions inherit the @code{DEBUG} and @code{RETURN} traps from
 the calling shell.
 The trace attribute has no special meaning for variables.
+
+@item -u
+When the variable is assigned a value, all lower-case characters are
+converted to upper-case.
+The lower-case attribute is disabled.
 
 @item -x
 Mark each @var{name} for export to subsequent commands via
@@ -3621,8 +3693,9 @@ meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
 variable @env{REPLY}.
 The return code is zero, unless end-of-file is encountered, @code{read}
-times out, or an invalid file descriptor is supplied as the argument to
-@option{-u}.
+times out (in which case the return code is greater than 128), or an
+invalid file descriptor is supplied as the argument to @option{-u}.
+
 Options, if supplied, have the following meanings:
 
 @table @code
@@ -5828,8 +5901,8 @@ For almost every purpose, shell functions are preferred over aliases.
 @cindex arrays
 
 Bash provides one-dimensional indexed and associative array variables.
-Any variable may be used as an array; the @code{declare} builtin will
-explicitly declare an array.
+Any variable may be used as an indexed array;
+the @code{declare} builtin will explicitly declare an array.
 There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
@@ -5856,15 +5929,17 @@ The syntax
 declare -a @var{name}[@var{subscript}]
 @end example
 @noindent
-is also accepted; the @var{subscript} is ignored.  Attributes may be
-specified for an array variable using the @code{declare} and
-@code{readonly} builtins.  Each attribute applies to all members of
-an array.
+is also accepted; the @var{subscript} is ignored.
 
 Associative arrays are created using
 @example
 declare -A @var{name}.
 @end example
+
+Attributes may be
+specified for an array variable using the @code{declare} and
+@code{readonly} builtins.  Each attribute applies to all members of
+an array.
 
 Arrays are assigned to using compound assignments of the form
 @example
@@ -5872,8 +5947,9 @@ name=(value@var{1} @dots{} value@var{n})
 @end example
 @noindent
 where each
-@var{value} is of the form @code{[[@var{subscript}]=]}@var{string}.
-When using indexed arrays, if
+@var{value} is of the form @code{[@var{subscript}]=}@var{string}.
+Indexed array assignments do not require the bracket and subscript.
+When assigning to indexed arrays, if
 the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
@@ -6655,8 +6731,9 @@ argument restricts operation to running jobs.
 suspend [-f]
 @end example
 Suspend the execution of this shell until it receives a
-@code{SIGCONT} signal.  The @option{-f} option means to suspend
-even if the shell is a login shell.
+@code{SIGCONT} signal.
+A login shell cannot be suspended; the @option{-f}
+option can be used to override this and force the suspension.
 
 @end table
 
@@ -7075,6 +7152,10 @@ Include support for the @code{[[} conditional command.
 Include support for matching POSIX regular expressions using the
 @samp{=~} binary operator in the @code{[[} conditional command.
 (@pxref{Conditional Constructs}).
+
+@item --enable-coprocesses
+Include support for coprocesses and the @code{coproc} reserved word
+(@pxref{Pipelines}).
 
 @item --enable-debugger
 Include support for the bash debugger (distributed separately).

@@ -123,6 +123,10 @@
    =~ binary operator in the [[...]] conditional command. */
 #define COND_REGEXP
 
+/* Define COPROCESS_SUPPORT if you want support for ksh-like coprocesses and
+   the `coproc' reserved word */
+#define COPROCESS_SUPPORT
+
 /* Define ARITH_FOR_COMMAND if you want the ksh93-style
 	for (( init; test; step )) do list; done
    arithmetic for command. */
@@ -154,6 +158,13 @@
 
 /* Define AFS if you are using Transarc's AFS. */
 #undef AFS
+
+/* Define for case-modifying variable attributes; variables modified on
+   assignment */
+#undef CASEMOD_ATTRS
+
+/* Define for case-modifying word expansions */
+#undef CASEMOD_EXPANSIONS
 
 #undef ENABLE_NLS
 
@@ -685,6 +696,9 @@
 
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
+
+/* Define if you have the setitimer function.  */
+#undef HAVE_SETITIMER
 
 /* Define if you have the setlinebuf function.  */
 #undef HAVE_SETLINEBUF

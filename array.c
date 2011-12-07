@@ -281,7 +281,7 @@ char	*v;
 	return (array_rshift (a, 1, v));
 }
 
-ARRAY	*
+ARRAY *
 array_quote(array)
 ARRAY	*array;
 {
@@ -298,7 +298,7 @@ ARRAY	*array;
 	return array;
 }
 
-ARRAY	*
+ARRAY *
 array_quote_escapes(array)
 ARRAY	*array;
 {
@@ -312,6 +312,54 @@ ARRAY	*array;
 		FREE(a->value);
 		a->value = t;
 	}
+	return array;
+}
+
+ARRAY *
+array_dequote(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = dequote_string (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
+ARRAY *
+array_dequote_escapes(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a)) {
+		t = dequote_escapes (a->value);
+		FREE(a->value);
+		a->value = t;
+	}
+	return array;
+}
+
+ARRAY *
+array_remove_quoted_nulls(array)
+ARRAY	*array;
+{
+	ARRAY_ELEMENT	*a;
+	char	*t;
+
+	if (array == 0 || array_head(array) == 0 || array_empty(array))
+		return (ARRAY *)NULL;
+	for (a = element_forw(array->head); a != array->head; a = element_forw(a))
+		a->value = remove_quoted_nulls (a->value);
 	return array;
 }
 
@@ -329,7 +377,8 @@ int	starsub, quoted;
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, *sep, *t;
+	char		*ifs, *sifs, *t;
+	int		slen;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -361,24 +410,25 @@ int	starsub, quoted;
 
 	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
 		/* ${array[*]} */
-		sep = ifs_firstchar ((int *)NULL);
+		array_remove_quoted_nulls (a2);
+		sifs = ifs_firstchar ((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free (sifs);
 	} else if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) {
 		/* ${array[@]} */
-		sep = ifs_firstchar ((int *)NULL);
+		sifs = ifs_firstchar (&slen);
 		ifs = getifs ();
 		if (ifs == 0 || *ifs == 0) {
-			sep[0] = ' ';
-			sep[1] = '\0';
+			if (slen < 2)
+				sifs = xrealloc(sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
 		}
-	} else {
-		sep = xmalloc (2);
-		sep[0] = ' ';
-		sep[1] = '\0';
-	}
-
-	t = array_to_string (a2, sep, 0);
+		t = array_to_string (a2, sifs, 0);
+		free (sifs);
+	} else
+		t = array_to_string (a2, " ", 0);
 	array_dispose(a2);
-	free (sep);
 
 	return t;
 }
@@ -391,7 +441,8 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t, *sifs;
+	char	*t, *sifs, *ifs;
+	int	slen;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
@@ -407,8 +458,22 @@ int	mflags;
 		array_quote(a2);
 	else
 		array_quote_escapes(a2);
+
 	if (mflags & MATCH_STARSUB) {
+		array_remove_quoted_nulls (a2);
 		sifs = ifs_firstchar((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else if (mflags & MATCH_QUOTED) {
+		/* ${array[@]} */
+		sifs = ifs_firstchar (&slen);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			if (slen < 2)
+				sifs = xrealloc (sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
+		}
 		t = array_to_string (a2, sifs, 0);
 		free(sifs);
 	} else
@@ -427,7 +492,8 @@ int	mflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*e;
-	char	*t, *sifs;
+	char	*t, *sifs, *ifs;
+	int	slen;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
@@ -443,8 +509,22 @@ int	mflags;
 		array_quote(a2);
 	else
 		array_quote_escapes(a2);
+
 	if (mflags & MATCH_STARSUB) {
+		array_remove_quoted_nulls (a2);
 		sifs = ifs_firstchar((int *)NULL);
+		t = array_to_string (a2, sifs, 0);
+		free(sifs);
+	} else if (mflags & MATCH_QUOTED) {
+		/* ${array[@]} */
+		sifs = ifs_firstchar (&slen);
+		ifs = getifs ();
+		if (ifs == 0 || *ifs == 0) {
+			if (slen < 2)
+				sifs = xrealloc (sifs, 2);
+			sifs[0] = ' ';
+			sifs[1] = '\0';
+		}
 		t = array_to_string (a2, sifs, 0);
 		free(sifs);
 	} else

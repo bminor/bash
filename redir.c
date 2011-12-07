@@ -936,7 +936,12 @@ do_redirection_internal (redirect, flags)
 
 	  /* dup-and-close redirection */
 	  if (ri == r_move_input || ri == r_move_output)
-	    close (redir_fd);
+	    {
+	      close (redir_fd);
+#if defined (COPROCESS_SUPPORT)
+	      coproc_fdchk (&sh_coproc, redir_fd);	/* XXX - loses coproc fds */
+#endif
+	    }
 	}
       break;
 
@@ -945,6 +950,10 @@ do_redirection_internal (redirect, flags)
 	{
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
 	    add_undo_redirect (redirector, ri);
+
+#if defined (COPROCESS_SUPPORT)
+	  coproc_fdchk (&sh_coproc, redirector);
+#endif
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);

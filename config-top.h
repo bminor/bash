@@ -92,3 +92,7 @@
    for the presence of SSH_CLIENT or SSH2_CLIENT in the initial environment,
    which can be fooled under certain not-uncommon circumstances. */
 /* #define SSH_SOURCE_BASHRC */
+
+/* Define if you want the case-capitalizing operators (~[~]) and the
+   `capcase' variable attribute (declare -c). */
+#define  CASEMOD_CAPCASE

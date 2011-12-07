@@ -92,6 +92,14 @@ dispose_command (command)
 	break;
       }
 
+    case cm_coproc:
+      {
+	free (command->value.Coproc->name);
+	dispose_command (command->value.Coproc->command);
+	free (command->value.Coproc);
+	break;
+      }
+
     case cm_case:
       {
 	register CASE_COM *c;

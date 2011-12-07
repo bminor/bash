@@ -647,6 +647,9 @@ make_here_document (temp, lineno)
       document_index += len;
     }
 
+  if (full_line == 0)
+    internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
+
 document_done:
   if (document)
     document[document_index] = '\0';

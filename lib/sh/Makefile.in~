@@ -92,7 +92,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c xstrchr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c
+	   casemod.c fdprintf.c
 
 # The header files for this library.
 HSOURCES = 
@@ -104,7 +104,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  netconn.o netopen.o timeval.o makepath.o pathcanon.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
-	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
+	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o zmapfd.o winsize.o wcsdup.o 
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o ${LIBOBJS}
 
 SUPPORT = Makefile
@@ -204,6 +204,7 @@ strtoull.o: strtol.c
 
 # all files in the library depend on config.h
 casemod.o: ${BUILD_DIR}/config.h
+clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h

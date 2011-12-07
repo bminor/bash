@@ -660,13 +660,13 @@ fnprint (to_print, prefix_bytes)
      const char *to_print;
      int prefix_bytes;
 {
-  int printed_len;
+  int printed_len, w;
   const char *s;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
   const char *end;
   size_t tlen;
-  int width, w;
+  int width;
   wchar_t wc;
 
   end = to_print + strlen (to_print) + 1;

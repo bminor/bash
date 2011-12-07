@@ -23,7 +23,7 @@ $PRODUCES declare.c
 
 $BUILTIN declare
 $FUNCTION declare_builtin
-$SHORT_DOC declare [-afFirtx] [-p] [name[=value] ...]
+$SHORT_DOC declare [-aAfFilrtux] [-p] [name[=value] ...]
 Set variable values and attributes.
 
 Declare variables and give them attributes.  If no NAMEs are given,
@@ -39,8 +39,10 @@ Options which set attributes:
   -a	to make NAMEs indexed arrays (if supported)
   -A	to make NAMEs associative arrays (if supported)
   -i	to make NAMEs have the `integer' attribute
+  -l	to convert NAMEs to lower case on assignment
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
+  -u	to convert NAMEs to upper case on assignment
   -x	to make NAMEs export
 
 Using `+' instead of `-' turns off the given attribute.
@@ -57,7 +59,7 @@ $END
 
 $BUILTIN typeset
 $FUNCTION declare_builtin
-$SHORT_DOC typeset [-afFirtx] [-p] name[=value] ...
+$SHORT_DOC typeset [-aAfFilrtux] [-p] name[=value] ...
 Set variable values and attributes.
 
 Obsolete.  See `help declare'.
@@ -124,9 +126,9 @@ local_builtin (list)
 }
 
 #if defined (ARRAY_VARS)
-#  define DECLARE_OPTS	"+afiprtxAF"
+#  define DECLARE_OPTS	"+acfilprtuxAF"
 #else
-#  define DECLARE_OPTS	"+fiprtxF"
+#  define DECLARE_OPTS	"+cfilprtuxF"
 #endif
 
 /* The workhorse function. */
@@ -189,6 +191,25 @@ declare_internal (list, local_var)
 	  *flags |= att_exported;
 	  array_needs_making = 1;
 	  break;
+#if defined (CASEMOD_ATTRS)
+#  if defined (CASEMOD_CAPCASE)
+	 case 'c':
+	  *flags |= att_capcase;
+	  if (flags == &flags_on)
+	    flags_off |= att_uppercase|att_lowercase;
+	  break;
+#  endif
+	case 'l':
+	  *flags |= att_lowercase;
+	  if (flags == &flags_on)
+	    flags_off |= att_capcase|att_uppercase;
+	  break;
+	case 'u':
+	  *flags |= att_uppercase;
+	  if (flags == &flags_on)
+	    flags_off |= att_capcase|att_lowercase;
+	  break;
+#endif /* CASEMOD_ATTRS */
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

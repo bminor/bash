@@ -181,6 +181,9 @@ static void execute_disk_command __P((WORD_LIST *, REDIRECT *, char *,
 static char *getinterp __P((char *, int, int *));
 static void initialize_subshell __P((void));
 static int execute_in_subshell __P((COMMAND *, int, int, int, struct fd_bitmap *));
+#if defined (COPROCESS_SUPPORT)
+static int execute_coproc __P((COMMAND *, int, int, struct fd_bitmap *));
+#endif
 
 static int execute_pipeline __P((COMMAND *, int, int, int, struct fd_bitmap *));
 
@@ -539,6 +542,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
      in a subshell. */
   if (command->type == cm_subshell && (command->flags & CMD_NO_FORK))
     return (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
+
+#if defined (COPROCESS_SUPPORT)
+  if (command->type == cm_coproc)
+    return (execute_coproc (command, pipe_in, pipe_out, fds_to_close));
+#endif
 
   if (command->type == cm_subshell ||
       (command->flags & (CMD_WANT_SUBSHELL|CMD_FORCE_SUBSHELL)) ||
@@ -1199,10 +1207,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      struct fd_bitmap *fds_to_close;
 {
   int user_subshell, return_code, function_value, should_redir_stdin, invert;
-  int ois;
+  int ois, user_coproc;
   COMMAND *tcom;
 
   USE_VAR(user_subshell);
+  USE_VAR(user_coproc);
   USE_VAR(invert);
   USE_VAR(tcom);
   USE_VAR(asynchronous);
@@ -1214,6 +1223,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
+  user_coproc = command->type == cm_coproc;
 
   command->flags &= ~(CMD_FORCE_SUBSHELL | CMD_WANT_SUBSHELL | CMD_INVERT_RETURN);
 
@@ -1266,6 +1276,8 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	subshell_environment |= SUBSHELL_ASYNC;
       if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	subshell_environment |= SUBSHELL_PIPE;
+      if (user_coproc)
+	subshell_environment |= SUBSHELL_COPROC;
     }
 
   reset_terminating_signals ();		/* in sig.c */
@@ -1299,6 +1311,10 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   do_piping (pipe_in, pipe_out);
 
+#if defined (COPROCESS_SUPPORT)
+  coproc_close (&sh_coproc);
+#endif
+
   /* If this is a user subshell, set a flag if stdin was redirected.
      This is used later to decide whether to redirect fd 0 to
      /dev/null for async commands in the subshell.  This adds more
@@ -1325,7 +1341,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       command->redirects = (REDIRECT *)NULL;
     }
 
-  tcom = (command->type == cm_subshell) ? command->value.Subshell->command : command;
+  if (command->type == cm_subshell)
+    tcom = command->value.Subshell->command;
+  else if (user_coproc)
+    tcom = command->value.Coproc->command;
+  else
+    tcom = command;
 
   if (command->flags & CMD_TIME_PIPELINE)
     tcom->flags |= CMD_TIME_PIPELINE;
@@ -1341,7 +1362,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      This means things like ( sleep 10 ) will only cause one fork.
      If we're timing the command or inverting its return value, however,
      we cannot do this optimization. */
-  if (user_subshell && (tcom->type == cm_simple || tcom->type == cm_subshell) &&
+  if ((user_subshell || user_coproc) && (tcom->type == cm_simple || tcom->type == cm_subshell) &&
       ((tcom->flags & CMD_TIME_PIPELINE) == 0) &&
       ((tcom->flags & CMD_INVERT_RETURN) == 0))
     {
@@ -1381,6 +1402,302 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   return (return_code);
   /* NOTREACHED */
 }
+
+#if defined (COPROCESS_SUPPORT)
+Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0 };
+
+/* These currently use a single global "shell coproc" but are written in a
+   way to not preclude additional coprocs later */
+
+struct coproc *
+getcoprocbypid (pid)
+     pid_t pid;
+{
+  return (pid == sh_coproc.c_pid ? &sh_coproc : 0);
+}
+
+struct coproc *
+getcoprocbyname (name)
+     const char *name;
+{
+  return ((sh_coproc.c_name && STREQ (sh_coproc.c_name, name)) ? &sh_coproc : 0);
+}
+
+void
+coproc_init (cp)
+     struct coproc *cp;
+{
+  cp->c_name = 0;
+  cp->c_pid = NO_PID;
+  cp->c_rfd = cp->c_wfd = -1;
+  cp->c_rsave = cp->c_wsave = -1;
+  cp->c_flags = cp->c_status = 0;  
+}
+
+struct coproc *
+coproc_alloc (name, pid)
+     char *name;
+     pid_t pid;
+{
+  struct coproc *cp;
+
+  cp = &sh_coproc;
+  coproc_init (cp);
+
+  cp->c_name = savestring (name);
+  cp->c_pid = pid;
+
+  return (cp);
+}
+
+void
+coproc_dispose (cp)
+     struct coproc *cp;
+{
+  if (cp == 0)
+    return;
+
+  coproc_unsetvars (cp);
+  FREE (cp->c_name);
+  coproc_close (cp);
+  coproc_init (cp);
+}
+
+void
+coproc_close (cp)
+     struct coproc *cp;
+{
+  if (cp->c_rfd >= 0)
+    {
+      close (cp->c_rfd);
+      cp->c_rfd = -1;
+    }
+  if (cp->c_wfd >= 0)
+    {
+      close (cp->c_wfd);
+      cp->c_wfd = -1;
+    }
+  cp->c_rsave = cp->c_wsave = -1;
+}
+
+void
+coproc_rclose (cp, fd)
+     struct coproc *cp;
+     int fd;
+{
+  if (cp->c_rfd >= 0 && cp->c_rfd == fd)
+    {
+      close (cp->c_rfd);
+      cp->c_rfd = -1;
+    }
+}
+
+void
+coproc_wclose (cp, fd)
+     struct coproc *cp;
+     int fd;
+{
+  if (cp->c_wfd >= 0 && cp->c_wfd == fd)
+    {
+      close (cp->c_wfd);
+      cp->c_wfd = -1;
+    }
+}
+
+void
+coproc_fdchk (cp, fd)
+     struct coproc *cp;
+     int fd;
+{
+  int update;
+
+  update = 0;
+  if (cp->c_rfd >= 0 && cp->c_rfd == fd)
+    update = cp->c_rfd = -1;
+  if (cp->c_wfd >= 0 && cp->c_wfd == fd)
+    update = cp->c_wfd = -1;
+  if (update)
+    coproc_setvars (cp);
+}
+
+void
+coproc_fdclose (cp, fd)
+     struct coproc *cp;
+     int fd;
+{
+  coproc_rclose (cp, fd);
+  coproc_wclose (cp, fd);
+  coproc_setvars (cp);
+}
+
+
+void
+coproc_fdsave (cp)
+     struct coproc *cp;
+{
+  cp->c_rsave = cp->c_rfd;
+  cp->c_wsave = cp->c_wfd;
+}
+
+void
+coproc_fdrestore (cp)
+     struct coproc *cp;
+{
+  cp->c_rfd = cp->c_rsave;
+  cp->c_wfd = cp->c_wsave;
+}
+  
+void
+coproc_pidchk (pid)
+     pid_t pid;
+{
+  struct coproc *cp;
+
+  cp = getcoprocbypid (pid);
+  if (cp)
+    coproc_dispose (cp);
+}
+
+void
+coproc_setvars (cp)
+     struct coproc *cp;
+{
+  SHELL_VAR *v;
+  char *namevar, *t;
+  int l;
+#if defined (ARRAY_VARS)
+  arrayind_t ind;
+#endif
+
+  if (cp->c_name == 0)
+    return;
+
+  l = strlen (cp->c_name);
+  namevar = xmalloc (l + 16);
+
+#if defined (ARRAY_VARS)
+  v = find_variable (cp->c_name);
+  if (v == 0)
+    v = make_new_array_variable (cp->c_name);
+  if (array_p (v) == 0)
+    v = convert_var_to_array (v);
+
+  t = itos (cp->c_rfd);
+  ind = 0;
+  v = bind_array_variable (cp->c_name, ind, t, 0);
+  free (t);
+
+  t = itos (cp->c_wfd);
+  ind = 1;
+  bind_array_variable (cp->c_name, ind, t, 0);
+  free (t);
+#else
+  sprintf (namevar, "%s_READ", cp->c_name);
+  t = itos (cp->c_rfd);
+  bind_variable (namevar, t, 0);
+  free (t);
+  sprintf (namevar, "%s_WRITE", cp->c_name);
+  t = itos (cp->c_wfd);
+  bind_variable (namevar, t, 0);
+  free (t);
+#endif
+
+  sprintf (namevar, "%s_PID", cp->c_name);
+  t = itos (cp->c_pid);
+  bind_variable (namevar, t, 0);
+  free (t);
+
+  free (namevar);
+}
+
+void
+coproc_unsetvars (cp)
+     struct coproc *cp;
+{
+  int l;
+  char *namevar;
+
+  if (cp->c_name == 0)
+    return;
+
+  l = strlen (cp->c_name);
+  namevar = xmalloc (l + 16);
+
+  sprintf (namevar, "%s_PID", cp->c_name);
+  unbind_variable (namevar);  
+
+#if defined (ARRAY_VARS)
+  unbind_variable (cp->c_name);
+#else
+  sprintf (namevar, "%s_READ", cp->c_name);
+  unbind_variable (namevar);
+  sprintf (namevar, "%s_WRITE", cp->c_name);
+  unbind_variable (namevar);
+#endif  
+
+  free (namevar);
+}
+
+static int
+execute_coproc (command, pipe_in, pipe_out, fds_to_close)
+     COMMAND *command;
+     int pipe_in, pipe_out;
+     struct fd_bitmap *fds_to_close;
+{
+  int rpipe[2], wpipe[2];
+  pid_t coproc_pid;
+  Coproc *cp;
+  char *tcmd;
+
+  if (sh_coproc.c_pid != -1)
+    {
+      internal_error ("execute_coproc: coproc [%d:%s] already exists", sh_coproc.c_pid, sh_coproc.c_name);
+      return (last_command_exit_value = EXECUTION_FAILURE);
+    }
+  coproc_init (&sh_coproc);
+
+  command_string_index = 0;
+  tcmd = make_command_string (command);
+
+  sh_openpipe ((int *)&rpipe);	/* 0 = parent read, 1 = child write */
+  sh_openpipe ((int *)&wpipe); /* 0 = child read, 1 = parent write */
+
+  coproc_pid = make_child (savestring (tcmd), 1);
+  if (coproc_pid == 0)
+    {
+      close (rpipe[0]);
+      close (wpipe[1]);
+
+      exit (execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close));
+    }
+
+  close (rpipe[1]);
+  close (wpipe[0]);
+
+  cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
+  cp->c_rfd = rpipe[0];
+  cp->c_wfd = wpipe[1];
+
+  SET_CLOSE_ON_EXEC (cp->c_rfd);
+  SET_CLOSE_ON_EXEC (cp->c_wfd);
+
+  coproc_setvars (cp);
+
+#if defined (DEBUG)
+  itrace ("execute_coproc: [%d] %s", coproc_pid, the_printed_command);
+#endif
+
+  close_pipes (pipe_in, pipe_out);
+#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
+  unlink_fifo_list ();
+#endif
+  stop_pipeline (1, (COMMAND *)NULL);
+  DESCRIBE_PID (coproc_pid);
+  run_pending_traps ();
+
+  return (EXECUTION_SUCCESS);
+}
+#endif
 
 static int
 execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
@@ -2692,6 +3009,10 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 
 	  do_piping (pipe_in, pipe_out);
 
+#if defined (COPROCESS_SUPPORT)
+	  coproc_close (&sh_coproc);
+#endif
+
 	  subshell_environment = 0;
 	  if (async)
 	    subshell_environment |= SUBSHELL_ASYNC;
@@ -2894,6 +3215,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = NO_PIPE;
+#if defined (COPROCESS_SUPPORT)
+	  coproc_close (&sh_coproc);
+#endif
 
 	  last_asynchronous_pid = old_last_async_pid;
 	}

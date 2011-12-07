@@ -3074,6 +3074,10 @@ waitchld (wpid, block)
       /* Locate our PROCESS for this pid. */
       child = find_process (pid, 1, &job);	/* want living procs only */
 
+#if defined (COPROCESS_SUPPORT)
+      coproc_pidchk (pid);
+#endif
+
       /* It is not an error to have a child terminate that we did
 	 not have a record of.  This child could have been part of
 	 a pipeline in backquote substitution.  Even so, I'm not

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 May 25<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 June 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1467,7 +1467,9 @@ When += is applied to an array variable using compound assignment (see
 
 below), the
 variable's value is not unset (as it is when using =), and new values are
-appended to the array beginning at one greater than the array's maximum index.
+appended to the array beginning at one greater than the array's maximum index
+(for indexed arrays) or added as additional key-value pairs in an
+associative array.
 When applied to a string-valued variable, <I>value</I> is expanded and
 appended to the variable's value.
 <A NAME="lbAT">&nbsp;</A>
@@ -1644,6 +1646,13 @@ Expands to the full file name used to invoke this instance of
 Expands to the process id of the current <B>bash</B> process.
 This differs from <B>$$</B> under certain circumstances, such as subshells
 that do not require <B>bash</B> to be re-initialized.
+<DT><B>BASH_ALIASES</B>
+
+<DD>
+An associative array variable whose members correspond to the internal
+list of aliases as maintained by the <B>alias</B> builtin
+Elements added to this array appear in the alias list; unsetting array
+elements cause aliases to be removed from the alias list.
 <DT><B>BASH_ARGC</B>
 
 <DD>
@@ -1678,6 +1687,13 @@ option to the
 <B>shopt</B>
 
 builtin below)
+<DT><B>BASH_CMDS</B>
+
+<DD>
+An associative array variable whose members correspond to the internal
+hash table of commands as maintained by the <B>hash</B> builtin.
+Elements added to this array appear in the hash table; unsetting array
+elements cause commands to be removed from the hash table.
 <DT><B>BASH_COMMAND</B>
 
 <DD>
@@ -2501,6 +2517,16 @@ had been executed.
 <DD>
 If set, the value is executed as a command prior to issuing each primary
 prompt.
+<DT><B>PROMPT_DIRTRIM</B>
+
+<DD>
+If set to a number greater than zero, the value is used as the number of
+trailing directory components to retain when expanding the <B>\w and
+\W</B> prompt string escapes (see
+<FONT SIZE=-1><B>PROMPTING</B>
+
+</FONT>
+below).  Characters removed are replaced with an ellipsis.
 <DT><B>PS1</B>
 
 <DD>
@@ -2688,22 +2714,26 @@ parser to treat the rest of the line as a comment.
 
 <B>Bash</B>
 
-provides one-dimensional array variables.  Any variable may be used as
-an array; the
+provides one-dimensional indexed and associative array variables.
+Any variable may be used as an indexed array; the
 <B>declare</B>
 
-builtin will explicitly declare an array.  There is no maximum
+builtin will explicitly declare an array.
+There is no maximum
 limit on the size of an array, nor any requirement that members
-be indexed or assigned contiguously.  Arrays are indexed using
-integers and are zero-based.
+be indexed or assigned contiguously.
+Indexed arrays are referenced using integers (including arithmetic
+expressions)  and are zero-based; associative arrays are referenced
+using arbitrary strings.
 <P>
 
-An array is created automatically if any variable is assigned to using
-the syntax <I>name</I>[<I>subscript</I>]=<I>value</I>.  The
+An indexed array is created automatically if any variable is assigned to
+using the syntax <I>name</I>[<I>subscript</I>]=<I>value</I>.  The
 <I>subscript</I>
 
 is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an array, use
+greater than or equal to zero.  To explicitly declare an indexed array,
+use
 <B>declare -a </B><I>name</I>
 
 (see
@@ -2713,7 +2743,15 @@ greater than or equal to zero.  To explicitly declare an array, use
 below).
 <B>declare -a </B><I>name</I>[<I>subscript</I>]
 
-is also accepted; the <I>subscript</I> is ignored.  Attributes may be
+is also accepted; the <I>subscript</I> is ignored.
+<P>
+
+Associative arrays are created using
+<B>declare -A </B><I>name</I>.
+
+<P>
+
+Attributes may be
 specified for an array variable using the
 <B>declare</B>
 
@@ -2725,11 +2763,17 @@ builtins.  Each attribute applies to all members of an array.
 
 Arrays are assigned to using compound assignments of the form
 <I>name</I>=<B>(</B>value<I>1</I> ... value<I>n</I><B>)</B>, where each
-<I>value</I> is of the form [<I>subscript</I>]=<I>string</I>.  Only
-<I>string</I> is required.  If
-the optional brackets and subscript are supplied, that index is assigned to;
+<I>value</I> is of the form [<I>subscript</I>]=<I>string</I>.
+Indexed array assignments do not require the bracket and subscript.
+When assigning to indexed arrays, if the optional brackets and subscript
+are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
+<P>
+
+When assigning to an associative array, the subscript is required.
+<P>
+
 This syntax is also accepted by the
 <B>declare</B>
 
@@ -2764,7 +2808,7 @@ above).  ${#<I>name</I>[<I>subscript</I>]} expands to the length of
 ${<I>name</I>[<I>subscript</I>]}.  If <I>subscript</I> is <B>*</B> or
 <B>@</B>, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
-referencing element zero.
+referencing the array with a subscript of 0.
 <P>
 
 The
@@ -2790,7 +2834,11 @@ and
 builtins each accept a
 <B>-a</B>
 
-option to specify an array.  The
+option to specify an indexed array and a
+<B>-A</B>
+
+option to specify an associative array.
+The
 <B>read</B>
 
 builtin accepts a
@@ -3166,11 +3214,13 @@ If <I>offset</I> evaluates to a number less than zero, the value
 is used as an offset from the end of the value of <I>parameter</I>.
 If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
 parameters beginning at <I>offset</I>.
-If <I>parameter</I> is an array name indexed by @ or *,
+If <I>parameter</I> is an indexed array name subscripted by @ or *,
 the result is the <I>length</I>
 members of the array beginning with ${<I>parameter</I>[<I>offset</I>]}.
 A negative <I>offset</I> is taken relative to one greater than the maximum
 index of the specified array.
+Substring expansion applied to an associative array produces undefined
+results.
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the :- expansion.
 Substring indexing is zero-based unless the positional parameters 
@@ -3330,6 +3380,45 @@ or
 <B>*</B>,
 
 the substitution operation is applied to each member of the
+array in turn, and the expansion is the resultant list.
+<DT>${<I>parameter</I><B>^</B><I>pattern</I>}<DD>
+
+<DT>${<I>parameter</I><B>^^</B><I>pattern</I>}<DD>
+<DT>${<I>parameter</I><B>,</B><I>pattern</I>}<DD>
+<DT>${<I>parameter</I><B>,,</B><I>pattern</I>}<DD>
+
+This expansion modifies the case of alphabetic characters in <I>parameter</I>.
+The <I>pattern</I> is expanded to produce a pattern just as in
+pathname expansion.
+The <B>^</B> operator converts lowercase letters matching <I>pattern</I>
+to uppercase; the <B>,</B> operator converts matching uppercase letters
+to lowercase.
+The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
+expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
+the first character.
+If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
+every character.
+If
+<I>parameter</I>
+
+is
+<B>@</B>
+
+or
+<B>*</B>,
+
+the case modification operation is applied to each positional
+parameter in turn, and the expansion is the resultant list.
+If
+<I>parameter</I>
+
+is an array variable subscripted with
+<B>@</B>
+
+or
+<B>*</B>,
+
+the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 </DL>
 <A NAME="lbBB">&nbsp;</A>
@@ -5477,6 +5566,8 @@ The
 may be referenced using
 <B>%-</B>.
 
+If there is only a single job, <B>%+</B> and <B>%-</B> can both be used
+to refer to that job.
 In output pertaining to jobs (e.g., the output of the
 <B>jobs</B>
 
@@ -5645,6 +5736,7 @@ the release of <B>bash</B>, version + patch level (e.g., 2.00.0)
 
 <DD>
 the current working directory, with <B>$HOME</B> abbreviated with a tilde
+(uses the <B>$PROMPT_DIRTRIM</B> variable)
 <DT><B>\W</B>
 
 <DD>
@@ -8525,9 +8617,9 @@ must be >= 1.  If
 is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless <I>n</I> is not greater than or equal to 1.
-<DT><B>declare</B> [<B>-afFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>declare</B> [<B>-aAfFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
-<DT><B>typeset</B> [<B>-afFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>typeset</B> [<B>-aAfFirtx</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
 Declare variables and/or give them attributes.
 If no <I>name</I>s are given then display the values of variables.
@@ -8572,7 +8664,14 @@ to give variables attributes:
 <DT><B>-a</B>
 
 <DD>
-Each <I>name</I> is an array variable (see
+Each <I>name</I> is an indexed array variable (see
+<B>Arrays</B>
+
+above).
+<DT><B>-A</B>
+
+<DD>
+Each <I>name</I> is an associative array variable (see
 <B>Arrays</B>
 
 above).
@@ -9588,8 +9687,7 @@ is supplied, or
 
 <DD>
 Exit a login shell.
-<DT><B>mapfile</B> [<B>-n</B> <I>count</I>] [<B>-O</B> <I>origin</I>] [<B>-s</B> <I>cou<DD>
-nt</I>] [<B>-t</B>] [<B>-u</B> <I>fd</I>] [<B>-C</B> <I>callback</I>] [<B>-c</B> Iquantum] [<I>array</I>]
+<DT><B>mapfile</B> [<B>-n</B> <I>count</I>] [<B>-O</B> <I>origin</I>] [<B>-s</B> <I>count</I>] [<B>-t</B>] [<B>-u</B> <I>fd</I>] [<B>-C</B> <I>callback</I>] [<B>-c</B> <I>quantum</I>] [<I>array</I>]<DD>
 Read lines from the standard input into array variable
 <I>array</I>,
 
@@ -9834,7 +9932,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [- <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
 is assigned to the first
@@ -9927,8 +10025,10 @@ Cause <B>read</B> to time out and return failure if a complete line of
 input is not read within <I>timeout</I> seconds.
 <I>timeout</I> may be a decimal number with a fractional portion following
 the decimal point.
-This option has no effect if <B>read</B> is not reading input from the
-terminal or a pipe.
+This option is only effective if <B>read</B> is reading input from a
+terminal, pipe, or other special file; it has no effect when reading
+from regular files.
+The exit status is greater than 128 if the timeout is exceeded.
 <DT><B>-u </B><I>fd</I>
 
 <DD>
@@ -9949,7 +10049,7 @@ times out, or an invalid file descriptor is supplied as the argument to
 <B>-u</B>.
 </DL>
 
-<DT><B>readonly</B> [<B>-apf</B>] [<I>name</I>[=<I>word</I>] ...]<DD>
+<DT><B>readonly</B> [<B>-aApf</B>] [<I>name</I>[=<I>word</I>] ...]<DD>
 
 The given
 <I>names</I> are marked readonly; the values of these
@@ -9965,7 +10065,10 @@ marked.
 The
 <B>-a</B>
 
-option restricts the variables to arrays.
+option restricts the variables to indexed arrays; the
+<B>-A</B>
+
+option restricts the variables to associative arrays.
 If no
 <I>name</I>
 
@@ -10925,12 +11028,11 @@ Suspend the execution of this shell until it receives a
 <FONT SIZE=-1><B>SIGCONT</B>
 
 </FONT>
-signal.  The
+signal.  A login shell cannot be suspended; the
 <B>-f</B>
 
-option says not to complain if this is 
-a login shell; just suspend anyway.  The return status is 0 unless
-the shell is a login shell and
+option can be used to override this and force the suspension.
+The return status is 0 unless the shell is a login shell and
 <B>-f</B>
 
 is not supplied, or if job control is not enabled.
@@ -11823,7 +11925,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 May 25<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 June 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11928,6 +12030,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 29 May 2008 11:48:48 EDT
+Time: 02 July 2008 09:08:29 EDT
 </BODY>
 </HTML>

@@ -327,7 +327,7 @@ static REDIRECTEE redir;
    in the case that they are preceded by a list_terminator.  Members
    of the second group are for [[...]] commands.  Members of the
    third group are recognized only under special circumstances. */
-%token IF THEN ELSE ELIF FI CASE ESAC FOR SELECT WHILE UNTIL DO DONE FUNCTION
+%token IF THEN ELSE ELIF FI CASE ESAC FOR SELECT WHILE UNTIL DO DONE FUNCTION COPROC
 %token COND_START COND_END COND_ERROR
 %token IN BANG TIME TIMEOPT
 
@@ -350,6 +350,7 @@ static REDIRECTEE redir;
 %type <command> arith_command
 %type <command> cond_command
 %type <command> arith_for_command
+%type <command> coproc
 %type <command> function_def function_body if_command elif_clause subshell
 %type <redirect> redirection redirection_list
 %type <element> simple_command_element
@@ -625,6 +626,8 @@ command:	simple_command
 			}
 	|	function_def
 			{ $$ = $1; }
+	|	coproc
+			{ $$ = $1; }
 	;
 
 shell_command:	for_command
@@ -811,6 +814,57 @@ subshell:	'(' compound_list ')'
 			{
 			  $$ = make_subshell_command ($2);
 			  $$->flags |= CMD_WANT_SUBSHELL;
+			}
+	;
+
+coproc:		COPROC shell_command
+			{
+			  $$ = make_coproc_command ("COPROC", $2);
+			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			}
+	|	COPROC shell_command redirection_list
+			{
+			  COMMAND *tc;
+
+			  tc = $2;
+			  if (tc->redirects)
+			    {
+			      register REDIRECT *t;
+			      for (t = tc->redirects; t->next; t = t->next)
+				;
+			      t->next = $3;
+			    }
+			  else
+			    tc->redirects = $3;
+			  $$ = make_coproc_command ("COPROC", $2);
+			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			}
+	|	COPROC WORD shell_command
+			{
+			  $$ = make_coproc_command ($2->word, $3);
+			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			}
+	|	COPROC WORD shell_command redirection_list
+			{
+			  COMMAND *tc;
+
+			  tc = $3;
+			  if (tc->redirects)
+			    {
+			      register REDIRECT *t;
+			      for (t = tc->redirects; t->next; t = t->next)
+				;
+			      t->next = $4;
+			    }
+			  else
+			    tc->redirects = $4;
+			  $$ = make_coproc_command ($2->word, $3);
+			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			}
+	|	COPROC simple_command
+			{
+			  $$ = make_coproc_command ("COPROC", clean_simple_command ($2));
+			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
 	;
 
@@ -1854,6 +1908,9 @@ STRING_INT_ALIST word_token_alist[] = {
 #if defined (COND_COMMAND)
   { "[[", COND_START },
   { "]]", COND_END },
+#endif
+#if defined (COPROCESS_SUPPORT)
+  { "coproc", COPROC },
 #endif
   { (char *)NULL, 0}
 };
@@ -4364,11 +4421,16 @@ reserved_word_acceptable (toksym)
     case THEN:
     case TIME:
     case TIMEOPT:
+    case COPROC:
     case UNTIL:
     case WHILE:
     case 0:
       return 1;
     default:
+#if defined (COPROCESS_SUPPORT)
+      if (last_read_token == WORD && token_before_that == COPROC)
+	return 1;
+#endif
       return 0;
     }
 }

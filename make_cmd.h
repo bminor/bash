@@ -1,6 +1,6 @@
 /* make_cmd.h -- Declarations of functions found in make_cmd.c */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,6 +63,7 @@ extern COMMAND *make_cond_command __P((COND_COM *));
 extern COMMAND *make_arith_for_command __P((WORD_LIST *, COMMAND *, int));
 
 extern COMMAND *make_subshell_command __P((COMMAND *));
+extern COMMAND *make_coproc_command __P((char *, COMMAND *));
 
 extern COMMAND *connect_async_list __P((COMMAND *, COMMAND *, int));
 

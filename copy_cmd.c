@@ -40,6 +40,7 @@ static ARITH_FOR_COM *copy_arith_for_command __P((ARITH_FOR_COM *));
 #endif
 static GROUP_COM *copy_group_command __P((GROUP_COM *));
 static SUBSHELL_COM *copy_subshell_command __P((SUBSHELL_COM *));
+static COPROC_COM *copy_coproc_command __P((COPROC_COM *));
 static CASE_COM *copy_case_command __P((CASE_COM *));
 static WHILE_COM *copy_while_command __P((WHILE_COM *));
 static IF_COM *copy_if_command __P((IF_COM *));
@@ -215,6 +216,19 @@ copy_subshell_command (com)
   return (new_subshell);
 }
 
+static COPROC_COM *
+copy_coproc_command (com)
+     COPROC_COM *com;
+{
+  COPROC_COM *new_coproc;
+
+  new_coproc = (COPROC_COM *)xmalloc (sizeof (COPROC_COM));
+  new_coproc->name = savestring (com->name);
+  new_coproc->command = copy_command (com->command);
+  new_coproc->flags = com->flags;
+  return (new_coproc);
+}
+
 static CASE_COM *
 copy_case_command (com)
      CASE_COM *com;
@@ -373,6 +387,10 @@ copy_command (command)
 
       case cm_subshell:
 	new_command->value.Subshell = copy_subshell_command (command->value.Subshell);
+	break;
+
+      case cm_coproc:
+	new_command->value.Coproc = copy_coproc_command (command->value.Coproc);
 	break;
 
       case cm_case:

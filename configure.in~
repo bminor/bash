@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 4.0, version 4.001])dnl
+AC_REVISION([for Bash 4.0, version 4.003])dnl
 
 define(bashvers, 4.0)
 define(relstatus, devel)
@@ -176,6 +176,7 @@ opt_xpg_echo=no
 opt_strict_posix=no
 opt_cond_command=yes
 opt_cond_regexp=yes
+opt_coproc=yes
 opt_arith_for_command=yes
 opt_net_redirs=yes
 opt_progcomp=yes
@@ -183,6 +184,8 @@ opt_separate_help=no
 opt_multibyte=yes
 opt_debugger=yes
 opt_single_longdoc_strings=yes
+opt_casemod_attrs=yes
+opt_casemod_expansions=yes
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -201,7 +204,8 @@ if test $opt_minimal_config = yes; then
 	opt_brace_expansion=no opt_disabled_builtins=no opt_command_timing=no
 	opt_extended_glob=no opt_cond_command=no opt_arith_for_command=no
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
-	opt_multibyte=yes opt_cond_regexp=no
+	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
+	opt_casemod_attrs=no opt_casemod_expansions=no
 fi
 
 AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -209,9 +213,12 @@ AC_ARG_ENABLE(arith-for-command, AC_HELP_STRING([--enable-arith-for-command], [e
 AC_ARG_ENABLE(array-variables, AC_HELP_STRING([--enable-array-variables], [include shell array variables]), opt_array_variables=$enableval)
 AC_ARG_ENABLE(bang-history, AC_HELP_STRING([--enable-bang-history], [turn on csh-style history substitution]), opt_bang_history=$enableval)
 AC_ARG_ENABLE(brace-expansion, AC_HELP_STRING([--enable-brace-expansion], [include brace expansion]), opt_brace_expansion=$enableval)
+AC_ARG_ENABLE(casemod-attributes, AC_HELP_STRING([--enable-casemod-attributes], [include case-modifying variable attributes]), opt_casemod_attrs=$enableval)
+AC_ARG_ENABLE(casemod-expansions, AC_HELP_STRING([--enable-casemod-expansions], [include case-modifying word expansions]), opt_casemod_expansions=$enableval)
 AC_ARG_ENABLE(command-timing, AC_HELP_STRING([--enable-command-timing], [enable the time reserved word and command timing]), opt_command_timing=$enableval)
 AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the conditional command]), opt_cond_command=$enableval)
 AC_ARG_ENABLE(cond-regexp, AC_HELP_STRING([--enable-cond-regexp], [enable extended regular expression matching in conditional commands]), opt_cond_regexp=$enableval)
+AC_ARG_ENABLE(coprocesses, AC_HELP_STRING([--enable-coprocesses], [enable coprocess support and the coproc reserved word]), opt_coproc=$enableval)
 AC_ARG_ENABLE(debugger, AC_HELP_STRING([--enable-debugger], [enable support for bash debugger]), opt_debugger=$enableval)
 AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
@@ -296,6 +303,9 @@ fi
 if test $opt_cond_regexp = yes ; then
 AC_DEFINE(COND_REGEXP)
 fi
+if test $opt_coproc = yes; then
+AC_DEFINE(COPROCESS_SUPPORT)
+fi
 if test $opt_arith_for_command = yes; then
 AC_DEFINE(ARITH_FOR_COMMAND)
 fi
@@ -310,6 +320,12 @@ AC_DEFINE(NO_MULTIBYTE_SUPPORT)
 fi
 if test $opt_debugger = yes; then
 AC_DEFINE(DEBUGGER)
+fi
+if test $opt_casemod_attrs = yes; then
+AC_DEFINE(CASEMOD_ATTRS)
+fi
+if test $opt_casemod_expansions = yes; then
+AC_DEFINE(CASEMOD_EXPANSIONS)
 fi
 
 if test $opt_memscramble = yes; then
@@ -698,7 +714,7 @@ dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
 		getpagesize getpeername getrlimit getrusage gettimeofday \
 		kill killpg lstat readlink sbrk select setdtablesize \
-		tcgetpgrp uname ulimit waitpid)
+		setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions

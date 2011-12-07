@@ -336,6 +336,112 @@ parse_and_execute (string, from_file, flags)
   return (last_result);
 }
 
+/* Parse a command contained in STRING according to FLAGS and return the
+   number of characters consumed from the string.  If non-NULL, set *ENDP
+   to the position in the string where the parse ended.  Used to validate
+   command substitutions during parsing to obey Posix rules about finding
+   the end of the command and balancing parens. */
+int
+parse_string (string, from_file, flags, endp)
+     char *string;
+     const char *from_file;
+     int flags;
+     char **endp;
+{
+  int code, nc;
+  volatile int should_jump_to_top_level;
+  COMMAND *volatile command, *oglobal;
+  char *ostring;
+
+  parse_prologue (string, flags, PS_TAG);
+
+  /* Reset the line number if the caller wants us to.  If we don't reset the
+     line number, we have to subtract one, because we will add one just
+     before executing the next command (resetting the line number sets it to
+     0; the first line number is 1). */
+  push_stream (0);
+    
+  code = should_jump_to_top_level = 0;
+  oglobal = global_command;
+
+  with_input_from_string (string, from_file);
+  while (*(bash_input.location.string))
+    {
+      command = (COMMAND *)NULL;
+
+#if 0
+      if (interrupt_state)
+	break;
+#endif
+
+      /* Provide a location for functions which `longjmp (top_level)' to
+	 jump to. */
+      code = setjmp (top_level);
+
+      if (code)
+	{
+#if defined (DEBUG)
+itrace("parse_string: longjmp executed: code = %d", code);
+#endif
+	  should_jump_to_top_level = 0;
+	  switch (code)
+	    {
+	    case FORCE_EOF:
+	    case ERREXIT:
+	    case EXITPROG:
+	    case DISCARD:		/* XXX */
+	      if (command)
+		dispose_command (command);
+	      /* Remember to call longjmp (top_level) after the old
+		 value for it is restored. */
+	      should_jump_to_top_level = 1;
+	      goto out;
+
+	    default:
+	      command_error ("parse_string", CMDERR_BADJUMP, code, 0);
+	      break;
+	    }
+	}
+	  
+      if (parse_command () == 0)
+	{
+	  dispose_command (global_command);
+	  global_command = (COMMAND *)NULL;
+	}
+      else
+	{
+	  if ((flags & SEVAL_NOLONGJMP) == 0)
+	    {
+	      should_jump_to_top_level = 1;
+	      code = DISCARD;
+	    }
+	  else
+	    reset_parser ();	/* XXX - sets token_to_read */
+	  break;
+	}
+
+      if (current_token == yacc_EOF || current_token == shell_eof_token)
+{
+itrace("parse_string: current_token = %d; breaking", current_token);
+	  break;
+}
+    }
+
+ out:
+
+  global_command = oglobal;
+  nc = bash_input.location.string - ostring;
+  if (endp)
+    *endp = bash_input.location.string;
+
+  run_unwind_frame (PS_TAG);
+
+  if (should_jump_to_top_level)
+    jump_to_top_level (code);
+
+  return (nc);
+}
+
 /* Handle a $( < file ) command substitution.  This expands the filename,
    returning errors as appropriate, then just cats the file to the standard
    output. */

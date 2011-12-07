@@ -175,6 +175,9 @@ extern char *expand_arith_string __P((char *, int));
 /* De-quote quoted characters in STRING. */
 extern char *dequote_string __P((char *));
 
+/* De-quote CTLESC-escaped CTLESC or CTLNUL characters in STRING. */
+extern char *dequote_escapes __P((char *));
+
 /* De-quote quoted characters in each word in LIST. */
 extern WORD_LIST *dequote_list __P((WORD_LIST *));
 
@@ -201,6 +204,9 @@ extern char *quote_escapes __P((char *));
 
 /* And remove such quoted special characters. */
 extern char *remove_quoted_escapes __P((char *));
+
+/* Remove CTLNUL characters from STRING unless they are quoted with CTLESC. */
+extern char *remove_quoted_nulls __P((char *));
 
 /* Perform quote removal on STRING.  If QUOTED > 0, assume we are obeying the
    backslash quoting rules for within double quotes. */

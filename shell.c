@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -897,6 +897,10 @@ exit_shell (s)
   if (interactive_shell)
     maybe_save_shell_history ();
 #endif /* HISTORY */
+
+#if defined (COPROCESS_SUPPORT)
+  coproc_dispose (&sh_coproc);
+#endif
 
 #if defined (JOB_CONTROL)
   /* If the user has run `shopt -s huponexit', hangup all jobs when we exit
