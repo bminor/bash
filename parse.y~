@@ -3375,7 +3375,6 @@ read_token_word (character)
 
       if (pass_next_character)
 	{
-itrace("read_token_word: pass_next_character = 1 read %c (%d)", character, character);
 	  pass_next_character = 0;
 	  goto got_escaped_character;
 	}
@@ -4796,6 +4795,7 @@ parse_compound_assignment (retlenp)
     {
       last_command_exit_value = EXECUTION_FAILURE;
       last_read_token = '\n';	/* XXX */
+top_level_cleanup ();
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
       else

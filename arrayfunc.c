@@ -618,6 +618,8 @@ array_expand_index (s, len)
   if (expok == 0)
     {
       last_command_exit_value = EXECUTION_FAILURE;
+
+      top_level_cleanup ();      
       jump_to_top_level (DISCARD);
     }
   return val;

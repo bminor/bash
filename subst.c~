@@ -2976,10 +2976,7 @@ quote_escapes (string)
   quote_spaces = (ifs_value && *ifs_value == 0);
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    {
-      skip_ctlesc |= *s == CTLESC;
-      skip_ctlnul |= *s == CTLNUL;
-    }
+    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
 
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
@@ -7700,6 +7697,8 @@ exp_jump_to_top_level (v)
   /* Cleanup code goes here. */
   expand_no_split_dollar_star = 0;	/* XXX */
   expanding_redir = 0;
+
+  top_level_cleanup ();			/* from sig.c */
 
   jump_to_top_level (v);
 }

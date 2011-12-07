@@ -153,7 +153,7 @@ static void	readtok __P((void));	/* lexical analyzer */
 
 static intmax_t	expr_streval __P((char *, int));
 static intmax_t	strlong __P((char *));
-static void	evalerror __P((char *));
+static void	evalerror __P((const char *));
 
 static void	pushexp __P((void));
 static void	popexp __P((void));
@@ -205,7 +205,7 @@ extern char *this_command_name;
 extern int unbound_vars_is_error;
 
 #if defined (ARRAY_VARS)
-extern char *bash_badsub_errmsg;
+extern const char * const bash_badsub_errmsg;
 #endif
 
 #define SAVETOK(X) \
@@ -1187,7 +1187,7 @@ readtok ()
 
 static void
 evalerror (msg)
-     char *msg;
+     const char *msg;
 {
   char *name, *t;
 

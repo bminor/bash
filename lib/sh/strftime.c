@@ -471,6 +471,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 		 * us that muck around with various message processors.
 		 */
  		case 'z':	/* time zone offset east of GMT e.g. -0600 */
+ 			if (timeptr->tm_isdst < 0)
+ 				break;
 #ifdef HAVE_TM_NAME
 			/*
 			 * Systems with tm_name probably have tm_tzadj as
@@ -493,7 +495,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 #  ifdef HPUX
 			off = -timezone / 60;
 #  else
-			off = -(daylight ? timezone : altzone) / 60;
+			off = -(daylight ? altzone : timezone) / 60;
 #  endif /* !HPUX */
 #else /* !HAVE_TZNAME */
 			gettimeofday(& tv, & zone);

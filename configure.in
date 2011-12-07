@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-AC_REVISION([for Bash 3.2, version 3.194])dnl
+AC_REVISION([for Bash 3.2, version 3.195])dnl
 
 define(bashvers, 3.2)
 define(relstatus, maint)
@@ -1074,10 +1074,21 @@ case "$BUILD_DIR" in
 *)	;;
 esac
 
+if test -z "$localedir"; then
+	localedir='${datarootdir}/locale'
+fi
+if test -z "$datarootdir"; then
+	datarootdir='${prefix}/share'
+fi
+
 AC_SUBST(PROFILE_FLAGS)
 
 AC_SUBST(incdir)
 AC_SUBST(BUILD_DIR)
+
+# Some versions of autoconf don't substitute these automatically
+AC_SUBST(datarootdir)
+AC_SUBST(localedir)
 
 AC_SUBST(YACC)
 AC_SUBST(AR)

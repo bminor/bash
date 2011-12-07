@@ -45,7 +45,7 @@ static void quote_array_assignment_chars __P((WORD_LIST *));
 static char *array_value_internal __P((char *, int, int, int *));
 
 /* Standard error message to use when encountering an invalid array subscript */
-char *bash_badsub_errmsg = N_("bad array subscript");
+const char * const bash_badsub_errmsg = N_("bad array subscript");
 
 /* **************************************************************** */
 /*								    */

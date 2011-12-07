@@ -14500,3 +14500,20 @@ subst.c
 builtins/read.def
 	- changes to cope with $IFS containing CTLNUL in the same way as the
 	  CTLESC changes
+
+				   4/16
+				   ----
+lib/sh/strftime.c
+	- a couple of fixes to the `%z' code
+
+eval.c
+	- add an fflush after printing the auto-logout message
+
+				   4/24
+				   ----
+subst.c
+	- add call to top_level_cleanup in exp_jump_to_top_level to get things
+	  like unwind-protects and the loop levels cleaned up
+
+{arrayfunc,expr,variables}.c
+	- add calls to top_level_cleanup before jump_to_top_level() 

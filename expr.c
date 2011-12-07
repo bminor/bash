@@ -929,6 +929,7 @@ expr_streval (tok, e)
       if (interactive_shell)
 	{
 	  expr_unwind ();
+	  top_level_cleanup ();
 	  jump_to_top_level (DISCARD);
 	}
       else
