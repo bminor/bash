@@ -1,20 +1,19 @@
 # This Makefile is for the Bash/documentation directory -*- text -*-.
 #
-# Copyright (C) 2003 Free Software Foundation, Inc.
+# Copyright (C) 2003-2008 Free Software Foundation, Inc.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA.
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 PACKAGE = @PACKAGE_NAME@
 VERSION = @PACKAGE_VERSION@
@@ -145,6 +144,7 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/version.texi
 
 all: ps info dvi text html
 nodvi: ps info text html
+everything: all pdf
 
 PSFILES = bash.ps bashbug.ps article.ps builtins.ps rbash.ps 
 DVIFILES = bashref.dvi bashref.ps
@@ -225,9 +225,11 @@ installdirs:
 install: info installdirs bash.info
 	-$(INSTALL_DATA) $(srcdir)/bash.1 $(DESTDIR)$(man1dir)/bash${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(DESTDIR)$(man1dir)/bashbug${man1ext}
-# uncomment the next line to install the builtins man page
-#	-$(INSTALL_DATA) $(srcdir)/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
-	-if test -f bash.info; then d=.; else d=$srcdir; fi; \ 
+# uncomment the next lines to install the builtins man page
+#	sed 's:bash\.1:man1/&:' $(srcdir)/builtins.1 > $${TMPDIR:-/var/tmp}/builtins.1
+#	-$(INSTALL_DATA) $${TMPDIR:-/var/tmp}/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
+#	-$(RM) $${TMPDIR:-/var/tmp}/builtins.1
+	-if test -f bash.info; then d=.; else d=$(srcdir); fi; \ 
 	  $(INSTALL_DATA) $$d/bash.info $(DESTDIR)$(infodir)/bash.info
 # run install-info if it is present to update the info directory
 	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
@@ -244,8 +246,11 @@ install_builtins:	installdirs
 	-$(INSTALL_DATA) $${TMPDIR:-/var/tmp}/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
 	-$(RM) $${TMPDIR:-/var/tmp}/builtins.1
 
+install_everything:	install install_builtins
+
 uninstall:
 	-$(RM) $(DESTDIR)$(man1dir)/bash${man1ext} $(DESTDIR)$(man1dir)/bashbug${man1ext}
+	-$(RM) $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
 	$(RM) $(DESTDIR)$(infodir)/bash.info
 	-if test -n "$(htmldir)" ; then \
 		$(RM) $(DESTDIR)$(htmldir)/bash.html ; \

@@ -6,28 +6,30 @@ func()
 	echo "to stderr" >&2
 }
 
-rm -f $TMPDIR/foo
+TMPFN=$TMPDIR/foo-$$
 
-echo hey > $TMPDIR/foo
-func &>> $TMPDIR/foo
+rm -f $TMPFN
 
-cat $TMPDIR/foo
+echo hey > $TMPFN
+func &>> $TMPFN
 
-echo
-func &> $TMPDIR/foo
-
-cat $TMPDIR/foo
+cat $TMPFN
 
 echo
-func >$TMPDIR/foo
-cat $TMPDIR/foo
+func &> $TMPFN
+
+cat $TMPFN
 
 echo
-echo hey > $TMPDIR/foo
-func >> $TMPDIR/foo
-cat $TMPDIR/foo
+func >$TMPFN
+cat $TMPFN
 
-rm -f $TMPDIR/foo
+echo
+echo hey > $TMPFN
+func >> $TMPFN
+cat $TMPFN
+
+rm -f $TMPFN
 
 logfunc()
 {

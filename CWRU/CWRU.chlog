@@ -6809,3 +6809,22 @@ doc/bash.1
 	  by
 
 [bash-4.0-alpha frozen]
+
+				   8/28
+				   ----
+[bash-4.0-alpha released]
+
+				    9/1
+				    ---
+builtins/evalstring.c
+	- fixed typo in parse_string (ostring used uninitialized).  Bug
+	  reported by Andreas Schwab <schwab@suse.de>
+
+subst.c
+	- fix return value of parameter_brace_expand to set the
+	  W_HASQUOTEDNULL flag in the returned WORD_DESC * if the return value
+	  from parameter_brace_remove_pattern is a quoted null string.  Fixes
+	  bug reported by Andreas Schwab <schwab@suse.de>
+	- set the W_HASQUOTEDNULL flag in the return value from
+	  parameter_brace_expand if the return value from parameter_brace_patsub
+	  is a quoted null string

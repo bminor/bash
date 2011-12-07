@@ -229,7 +229,7 @@ install: info installdirs bash.info
 #	sed 's:bash\.1:man1/&:' $(srcdir)/builtins.1 > $${TMPDIR:-/var/tmp}/builtins.1
 #	-$(INSTALL_DATA) $${TMPDIR:-/var/tmp}/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
 #	-$(RM) $${TMPDIR:-/var/tmp}/builtins.1
-	-if test -f bash.info; then d=.; else d=$(srcdir); fi; \ 
+	-if test -f bash.info; then d=.; else d=$(srcdir); fi; \
 	  $(INSTALL_DATA) $$d/bash.info $(DESTDIR)$(infodir)/bash.info
 # run install-info if it is present to update the info directory
 	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \

@@ -2,11 +2,13 @@
 
 : ${TMPDIR:=/tmp}
 
-rm -f $TMPDIR/foo
-echo "echo one - OK" > $TMPDIR/foo
-. $TMPDIR/foo
+TMPFN=$TMPDIR/foo-$$
+
+rm -f $TMPFN
+echo "echo one - OK" > $TMPFN
+. $TMPFN
 echo $?
-rm -f $TMPDIR/foo
+rm -f $TMPFN
 
 # non-regular readable file
 . /dev/null

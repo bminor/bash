@@ -26,7 +26,8 @@ static SHELL_VAR *
 assign_mypid (
      SHELL_VAR *self,
      char *value,
-     arrayind_t unused )
+     arrayind_t unused,
+     char *key )
 {
   return (self);
 }

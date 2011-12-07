@@ -6616,6 +6616,10 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
       ret = alloc_word_desc ();
       ret->word = temp1;
+      ret = alloc_word_desc ();
+      ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
 #if defined (CASEMOD_EXPANSIONS)
@@ -6633,6 +6637,8 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 
       ret = alloc_word_desc ();
       ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
 #endif
@@ -6671,8 +6677,12 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       temp1 = parameter_brace_remove_pattern (name, temp, value, c, quoted);
       free (temp);
       free (value);
-      temp = temp1;
-      break;
+
+      ret = alloc_word_desc ();
+      ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      return ret;
 
     case '-':
     case '=':

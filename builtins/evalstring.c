@@ -363,6 +363,7 @@ parse_string (string, from_file, flags, endp)
     
   code = should_jump_to_top_level = 0;
   oglobal = global_command;
+  ostring = string;
 
   with_input_from_string (string, from_file);
   while (*(bash_input.location.string))

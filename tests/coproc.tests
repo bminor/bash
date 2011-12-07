@@ -32,7 +32,7 @@ read <&${COPROC[0]}
 echo $REPLY
 echo ${COPROC[@]}
 
-cat /etc/passwd | grep root | awk -F: '{print $1;}'
+cat /etc/passwd | grep root | awk -F: '{print $1;}' | sed 1q
 
 exec 4<&${COPROC[0]}-
 exec >&${COPROC[1]}-

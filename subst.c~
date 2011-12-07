@@ -8,19 +8,19 @@
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
-   Bash is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Bash; see the file COPYING.  If not, write to the Free Software
-   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA. */
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 
@@ -134,7 +134,7 @@ int assigning_in_environment;
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment;
-extern int subshell_level;
+extern int subshell_level, parse_and_execute_level;
 extern int eof_encountered;
 extern int return_catch_flag, return_catch_value;
 extern pid_t dollar_dollar_pid;
@@ -1278,11 +1278,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 
       /* Pass the contents of single-quoted and double-quoted strings
 	 through verbatim. */
-#if 0
-      if ((c == '\'' && quoted == 0) || c == '"')
-#else
       if (c == '\'' || c == '"')
-#endif
 	{
 	  si = i + 1;
 	  i = (c == '\'') ? skip_single_quoted (string, slen, si)
@@ -5585,7 +5581,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 #if defined (ARRAY_VARS)
   /* For arrays, the second offset deals with the number of elements. */
   if (vtype == VT_ARRAYVAR)
-    len = array_num_elements (a);
+    len = assoc_p (v) ? assoc_num_elements (h) : array_num_elements (a);
 #endif
 
   if (t)
@@ -5655,6 +5651,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
 	    {
+	      /* Callers have to differentiate betwen indexed and associative */
 	      vtype = VT_ARRAYVAR;
 	      if (temp[0] == '*')
 		vtype |= VT_STARSUB;
@@ -6674,8 +6671,12 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       temp1 = parameter_brace_remove_pattern (name, temp, value, c, quoted);
       free (temp);
       free (value);
-      temp = temp1;
-      break;
+
+      ret = alloc_word_desc ();
+      ret->word = temp1;
+      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      return ret;
 
     case '-':
     case '=':
@@ -8095,7 +8096,9 @@ exp_jump_to_top_level (v)
   expanding_redir = 0;
   assigning_in_environment = 0;
 
-  top_level_cleanup ();			/* from sig.c */
+  if (parse_and_execute_level == 0)
+    top_level_cleanup ();			/* from sig.c */
+
   jump_to_top_level (v);
 }
 
