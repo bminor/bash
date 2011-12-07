@@ -7026,3 +7026,10 @@ execute_cmd.c
 	- fix errexit logic to not cause the shell to exit when a command in
 	  a pipeline fails.  Fixes bug reported by Marcin Owsiany
 	  <marcin@owsiany.pl>
+
+				   10/14
+				   -----
+builtins/evalstring.c
+	- don't short-circuit execution in parse_and_execute if we want to
+	  run an exit trap.  Fixes bug reported by Steffen Kiess
+	  <s-kiess@web.de>

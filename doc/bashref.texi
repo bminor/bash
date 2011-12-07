@@ -275,6 +275,7 @@ Also referred to as an @code{identifier}.
 @cindex operator, shell
 A @code{control operator} or a @code{redirection operator}.
 @xref{Redirections}, for a list of redirection operators.
+Operators contain at least one unquoted @code{metacharacter}.
 
 @item process group
 @cindex process group
@@ -308,12 +309,13 @@ A shell builtin command that has been classified as special by the
 
 @item token
 @cindex token
-A sequence of characters considered a single unit by the shell.  It is
-either a @code{word} or an @code{operator}.
+A sequence of characters considered a single unit by the shell.
+It is either a @code{word} or an @code{operator}.
 
 @item word
 @cindex word
-A @code{token} that is not an @code{operator}.
+A sequence of characters treated as a unit by the shell.
+Words may not include unquoted @code{metacharacters}.
 @end table
 
 @node Basic Shell Features
