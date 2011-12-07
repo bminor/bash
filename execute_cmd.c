@@ -1555,7 +1555,10 @@ coproc_pidchk (pid)
 
   cp = getcoprocbypid (pid);
   if (cp)
+{
+itrace("coproc_pidchk: pid %d has died", pid);
     coproc_dispose (cp);
+}
 }
 
 void
@@ -1649,10 +1652,14 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   Coproc *cp;
   char *tcmd;
 
-  if (sh_coproc.c_pid != -1)
+  if (sh_coproc.c_pid != NO_PID)
     {
+#if 0
       internal_error ("execute_coproc: coproc [%d:%s] already exists", sh_coproc.c_pid, sh_coproc.c_name);
       return (last_command_exit_value = EXECUTION_FAILURE);
+#else
+      internal_warning ("execute_coproc: coproc [%d:%s] still exists", sh_coproc.c_pid, sh_coproc.c_name);
+#endif
     }
   coproc_init (&sh_coproc);
 

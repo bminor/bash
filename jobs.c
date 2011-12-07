@@ -265,6 +265,7 @@ static void set_current_job __P((int));
 static void reset_current __P((void));
 static void set_job_running __P((int));
 static void setjstatus __P((int));
+static int maybe_give_terminal_to __P((pid_t, pid_t, int));
 static void mark_all_jobs_as_dead __P((void));
 static void mark_dead_jobs_as_notified __P((int));
 static void restore_sigint_handler __P((void));
@@ -636,7 +637,7 @@ stop_pipeline (async, deferred)
 	   *
 	   */
 	  if (job_control && newjob->pgrp && (subshell_environment&SUBSHELL_ASYNC) == 0)
-	    give_terminal_to (newjob->pgrp, 0);
+	    maybe_give_terminal_to (shell_pgrp, newjob->pgrp, 0);
 	}
     }
 
@@ -3830,6 +3831,32 @@ give_terminal_to (pgrp, force)
   if (r == -1)
     errno = e;
   return r;
+}
+
+/* Give terminal to NPGRP iff it's currently owned by OPGRP.  FLAGS are the
+   flags to pass to give_terminal_to(). */
+static int
+maybe_give_terminal_to (opgrp, npgrp, flags)
+     pid_t opgrp, npgrp;
+     int flags;
+{
+  int tpgrp;
+
+  tpgrp = tcgetpgrp (shell_tty);
+  if (tpgrp == npgrp)
+    {
+      terminal_pgrp = npgrp;
+      return 0;
+    }
+  else if (tpgrp != opgrp)
+    {
+#if defined (DEBUG)
+      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d", tpgrp, opgrp);
+#endif
+      return -1;
+    }
+  else
+    return (give_terminal_to (npgrp, flags));     
 }
 
 /* Clear out any jobs in the job array.  This is intended to be used by

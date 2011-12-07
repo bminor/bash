@@ -336,18 +336,18 @@ main()
 {
 DIR *dir;
 int fd, err;
-err = mkdir("/tmp/bash-aclocal", 0700);
+err = mkdir("bash-aclocal", 0700);
 if (err < 0) {
   perror("mkdir");
   exit(1);
 }
-unlink("/tmp/bash-aclocal/not_a_directory");
-fd = open("/tmp/bash-aclocal/not_a_directory", O_WRONLY|O_CREAT|O_EXCL, 0666);
+unlink("bash-aclocal/not_a_directory");
+fd = open("bash-aclocal/not_a_directory", O_WRONLY|O_CREAT|O_EXCL, 0666);
 write(fd, "\n", 1);
 close(fd);
-dir = opendir("/tmp/bash-aclocal/not_a_directory");
-unlink("/tmp/bash-aclocal/not_a_directory");
-rmdir("/tmp/bash-aclocal");
+dir = opendir("bash-aclocal/not_a_directory");
+unlink("bash-aclocal/not_a_directory");
+rmdir("bash-aclocal");
 exit (dir == 0);
 }], bash_cv_opendir_not_robust=yes,bash_cv_opendir_not_robust=no,
     [AC_MSG_WARN(cannot check opendir if cross compiling -- defaulting to no)
@@ -1423,19 +1423,19 @@ exit (1);
 #if defined (NeXT)
 exit (1);
 #endif
-err = mkdir("/tmp/bash-aclocal", 0700);
+err = mkdir("bash-aclocal", 0700);
 if (err < 0) {
   perror ("mkdir");
   exit(1);
 }
-fd = mknod ("/tmp/bash-aclocal/sh-np-autoconf", 0666 | S_IFIFO, 0);
+fd = mknod ("bash-aclocal/sh-np-autoconf", 0666 | S_IFIFO, 0);
 if (fd == -1) {
-  rmdir ("/tmp/bash-aclocal");
+  rmdir ("bash-aclocal");
   exit (1);
 }
 close(fd);
-unlink ("/tmp/bash-aclocal/sh-np-autoconf");
-rmdir ("/tmp/bash-aclocal");
+unlink ("bash-aclocal/sh-np-autoconf");
+rmdir ("bash-aclocal");
 exit(0);
 }], bash_cv_sys_named_pipes=present, bash_cv_sys_named_pipes=missing,
     [AC_MSG_WARN(cannot check for named pipes if cross-compiling -- defaulting to missing)

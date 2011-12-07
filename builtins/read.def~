@@ -51,7 +51,8 @@ Options:
   -t timeout	time out and return failure if a complete line of input is
 		not read withint TIMEOUT seconds.  The value of the TMOUT
 		variable is the default timeout.  TIMEOUT may be a
-		fractional number.
+		fractional number.  The exit status is greater than 128 if
+		the timeout is exceeded
   -u fd		read from file descriptor FD instead of the standard input
 
 Exit Status:
@@ -374,7 +375,7 @@ read_builtin (list)
 	  return (EXECUTION_FAILURE);
 #else
 	  input_string[i] = '\0';	/* make sure it's terminated */
-	  retval = EXECUTION_FAILURE;
+	  retval = 128+SIGALRM;;
 	  goto assign_vars;
 #endif
 	}

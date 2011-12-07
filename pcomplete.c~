@@ -164,7 +164,8 @@ ITEMLIST it_stopped = { LIST_DYNAMIC, it_init_stopped, (STRINGLIST *)0 };
 ITEMLIST it_users = { LIST_DYNAMIC };		/* unused */
 ITEMLIST it_variables = { LIST_DYNAMIC, it_init_variables, (STRINGLIST *)0 };
 
-COMPSPEC *curcs;
+COMPSPEC *pcomp_curcs;
+const char *pcomp_curcmd;
 
 #ifdef DEBUG
 /* Debugging code */
@@ -1380,7 +1381,7 @@ pcomp_set_compspec_options (cs, flags, set_or_unset)
      COMPSPEC *cs;
      int flags, set_or_unset;
 {
-  if (cs == 0 && ((cs = curcs) == 0))
+  if (cs == 0 && ((cs = pcomp_curcs) == 0))
     return;
   if (set_or_unset)
     cs->options |= flags;
@@ -1400,6 +1401,7 @@ programmable_completions (cmd, word, start, end, foundp)
   COMPSPEC *cs, *oldcs;
   STRINGLIST *ret;
   char **rmatches, *t;
+  const char *oldcmd;
 
   /* We look at the basename of CMD if the full command does not have
      an associated COMPSPEC. */
@@ -1419,8 +1421,11 @@ programmable_completions (cmd, word, start, end, foundp)
 
   cs = compspec_copy (cs);
 
-  oldcs = curcs;
-  curcs = cs;
+  oldcs = pcomp_curcs;
+  oldcmd = pcomp_curcmd;
+
+  pcomp_curcs = cs;
+  pcomp_curcmd = cmd;
 
   /* Signal the caller that we found a COMPSPEC for this command, and pass
      back any meta-options associated with the compspec. */
@@ -1429,7 +1434,9 @@ programmable_completions (cmd, word, start, end, foundp)
 
   ret = gen_compspec_completions (cs, cmd, word, start, end);
 
-  curcs = oldcs;
+  pcomp_curcs = oldcs;
+  pcomp_curcmd = oldcmd;
+
   compspec_dispose (cs);
 
   if (ret)

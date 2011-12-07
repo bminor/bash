@@ -888,7 +888,7 @@ The format for a coprocess is:
 This creates a coprocess named \fINAME\fP.
 If \fINAME\fP is not supplied, the default name is \fICOPROC\fP.
 When the coproc is executed, the shell creates an array variable (see
-.B arrays
+.B Arrays
 below) named \fINAME\fP in the context of the executing shell.
 The standard output of
 .I command
@@ -905,6 +905,8 @@ command (see
 below).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
+The process id of the shell spawned to execute the coprocess is
+available as the value of the variable \fINAME\fP_PID.
 .PP
 The return status of a coprocess is the exit status of \fIcommand\fP.
 .SS Shell Function Definitions

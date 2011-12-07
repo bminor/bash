@@ -1,282 +1,667 @@
-*** ../bash-20080221/doc/bashref.texi	2008-02-22 21:44:51.000000000 -0500
---- doc/bashref.texi	2008-04-25 12:32:42.000000000 -0400
+*** ../bash-3.2-patched/lib/readline/display.c	2007-12-13 22:31:16.000000000 -0500
+--- lib/readline/display.c	2008-05-21 21:39:43.000000000 -0400
 ***************
-*** 681,688 ****
-  waits for each command to terminate in turn.  The return status is the
-  exit status of the last command executed.
+*** 1,5 ****
+  /* display.c -- readline redisplay facility. */
   
-! The control operators @samp{&&} and @samp{||}
-! denote @sc{and} lists and @sc{or} lists, respectively.
-  An @sc{and} list has the form
-  @example
-  @var{command1} && @var{command2}
---- 681,691 ----
-  waits for each command to terminate in turn.  The return status is the
-  exit status of the last command executed.
+! /* Copyright (C) 1987-2006 Free Software Foundation, Inc.
   
-! @sc{and} and @sc{or} lists are sequences of one or more pipelines
-! separated by the control operators @samp{&&} and @samp{||},
-! respectively.  @sc{and} and @sc{or} lists are executed with left
-! associativity.
+     This file is part of the GNU Readline Library, a library for
+--- 1,5 ----
+  /* display.c -- readline redisplay facility. */
+  
+! /* Copyright (C) 1987-2007 Free Software Foundation, Inc.
+  
+     This file is part of the GNU Readline Library, a library for
+***************
+*** 66,79 ****
+  static void cr PARAMS((void));
+  
+  #if defined (HANDLE_MULTIBYTE)
+  static int _rl_col_width PARAMS((const char *, int, int));
+- static int *_rl_wrapped_line;
+  #else
+  #  define _rl_col_width(l, s, e)	(((e) <= (s)) ? 0 : (e) - (s))
+  #endif
+  
+- static int *inv_lbreaks, *vis_lbreaks;
+- static int inv_lbsize, vis_lbsize;
+- 
+  /* Heuristic used to decide whether it is faster to move from CUR to NEW
+     by backing up or outputting a carriage return and moving forward.  CUR
+--- 66,103 ----
+  static void cr PARAMS((void));
+  
++ /* State of visible and invisible lines. */
++ struct line_state
++   {
++     char *line;
++     int *lbreaks;
++     int lbsize;
++ #if defined (HANDLE_MULTIBYTE)
++     int *wrapped_line;
++     int wbsize;
++ #endif
++   };
++ 
++ /* The line display buffers.  One is the line currently displayed on
++    the screen.  The other is the line about to be displayed. */
++ static struct line_state line_state_array[2];
++ static struct line_state *line_state_visible = &line_state_array[0];
++ static struct line_state *line_state_invisible = &line_state_array[1];
++ static int line_structures_initialized = 0;
++ 
++ /* Backwards-compatible names. */
++ #define inv_lbreaks	(line_state_invisible->lbreaks)
++ #define inv_lbsize	(line_state_invisible->lbsize)
++ #define vis_lbreaks	(line_state_visible->lbreaks)
++ #define vis_lbsize	(line_state_visible->lbsize)
++ 
++ #define visible_line	(line_state_visible->line)
++ #define invisible_line	(line_state_invisible->line)
++ 
+  #if defined (HANDLE_MULTIBYTE)
+  static int _rl_col_width PARAMS((const char *, int, int));
+  #else
+  #  define _rl_col_width(l, s, e)	(((e) <= (s)) ? 0 : (e) - (s))
+  #endif
+  
+  /* Heuristic used to decide whether it is faster to move from CUR to NEW
+     by backing up or outputting a carriage return and moving forward.  CUR
+***************
+*** 84,88 ****
+     buffer index in others.  This macro is used when deciding whether the
+     current cursor position is in the middle of a prompt string containing
+!    invisible characters. */
+  #define PROMPT_ENDING_INDEX \
+    ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
+--- 108,112 ----
+     buffer index in others.  This macro is used when deciding whether the
+     current cursor position is in the middle of a prompt string containing
+!    invisible characters.  XXX - might need to take `modmark' into account. */
+  #define PROMPT_ENDING_INDEX \
+    ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
+***************
+*** 142,145 ****
+--- 166,170 ----
+  static int cpos_adjusted;
+  static int cpos_buffer_position;
++ static int prompt_multibyte_chars;
+  
+  /* Number of lines currently on screen minus 1. */
+***************
+*** 151,159 ****
+  static int last_lmargin;
+  
+- /* The line display buffers.  One is the line currently displayed on
+-    the screen.  The other is the line about to be displayed. */
+- static char *visible_line = (char *)NULL;
+- static char *invisible_line = (char *)NULL;
+- 
+  /* A buffer for `modeline' messages. */
+  static char msg_buf[128];
+--- 176,179 ----
+***************
+*** 196,199 ****
+--- 216,223 ----
+  static int prompt_physical_chars;
+  
++ /* set to a non-zero value by rl_redisplay if we are marking modified history
++    lines and the current line is so marked. */
++ static int modmark;
++ 
+  /* Variables to save and restore prompt and display information. */
+  
+***************
+*** 283,286 ****
+--- 307,315 ----
+  	      if (!ignoring)
+  		{
++ 		  /* rl ends up being assigned to prompt_visible_length,
++ 		     which is the number of characters in the buffer that
++ 		     contribute to characters on the screen, which might
++ 		     not be the same as the number of physical characters
++ 		     on the screen in the presence of multibyte characters */
+  		  rl += ind - pind;
+  		  physchars += _rl_col_width (pmt, pind, ind);
+***************
+*** 444,454 ****
+        /* should be enough. */
+        inv_lbsize = vis_lbsize = 256;
+!       inv_lbreaks = (int *)xmalloc (inv_lbsize * sizeof (int));
+!       vis_lbreaks = (int *)xmalloc (vis_lbsize * sizeof (int));
+  #if defined (HANDLE_MULTIBYTE)
+!       _rl_wrapped_line = (int *)xmalloc (vis_lbsize * sizeof (int));
+  #endif
+        inv_lbreaks[0] = vis_lbreaks[0] = 0;
+      }
+  }
+    
+--- 473,491 ----
+        /* should be enough. */
+        inv_lbsize = vis_lbsize = 256;
 ! 
-  An @sc{and} list has the form
-  @example
-  @var{command1} && @var{command2}
-***************
-*** 2298,2304 ****
-  (see the description of @code{hash} in @ref{Bourne Shell Builtins}).
-  A full search of the directories in @env{$PATH}
-  is performed only if the command is not found in the hash table.
-! If the search is unsuccessful, the shell prints an error
-  message and returns an exit status of 127.
-  
-  @item
---- 2301,2312 ----
-  (see the description of @code{hash} in @ref{Bourne Shell Builtins}).
-  A full search of the directories in @env{$PATH}
-  is performed only if the command is not found in the hash table.
-! If the search is unsuccessful, the shell searches for a defined shell
-! function named @code{command_not_found_handle}.
-! If that function exists, it is invoked with the original command and
-! the original command's arguments as its arguments, and the function's
-! exit status becomes the exit status of the shell.
-! If that function is not defined, the shell prints an error
-  message and returns an exit status of 127.
-  
-  @item
-***************
-*** 3129,3134 ****
---- 3137,3143 ----
-  Readline initialization file (@pxref{Readline Init File}),
-  but each binding or command must be passed as a separate argument;  e.g.,
-  @samp{"\C-x\C-r":re-read-init-file}.
-+ 
-  Options, if supplied, have the following meanings:
-  
-  @table @code
-***************
-*** 3262,3268 ****
-  
-  The @option{-p} option will display the attributes and values of each
-  @var{name}.
-! When @option{-p} is used, additional options are ignored.
-  The @option{-F} option inhibits the display of function definitions;
-  only the function name and attributes are printed.
-  If the @code{extdebug} shell option is enabled using @code{shopt}
---- 3271,3286 ----
-  
-  The @option{-p} option will display the attributes and values of each
-  @var{name}.
-! When @option{-p} is used with @var{name} arguments, additional options
-! are ignored.
+  #if defined (HANDLE_MULTIBYTE)
+!       line_state_visible->wbsize = vis_lbsize;
+!       line_state_visible->wrapped_line = (int *)xmalloc (line_state_visible->wbsize * sizeof (int));
 ! 
-! When @option{-p} is supplied without @var{name} arguments, @code{declare}
-! will display the attributes and values of all variables having the
-! attributes specified by the additional options.
-! If no other options are supplied with @option{-p}, @code{declare} will
-! display the attributes and values of all shell variables.  The @option{-f}
-! option will restrict the display to shell functions.
+!       line_state_invisible->wbsize = inv_lbsize;
+!       line_state_invisible->wrapped_line = (int *)xmalloc (line_state_invisible->wbsize * sizeof (int));
+  #endif
++ 
++       inv_lbreaks = (int *)xmalloc (inv_lbsize * sizeof (int));
++       vis_lbreaks = (int *)xmalloc (vis_lbsize * sizeof (int));
+        inv_lbreaks[0] = vis_lbreaks[0] = 0;
+      }
++ 
++   line_structures_initialized = 1;
+  }
+    
+***************
+*** 460,464 ****
+    register char *line;
+    int inv_botlin, lb_botlin, lb_linenum, o_cpos;
+!   int newlines, lpos, temp, modmark, n0, num;
+    char *prompt_this_line;
+  #if defined (HANDLE_MULTIBYTE)
+--- 497,501 ----
+    register char *line;
+    int inv_botlin, lb_botlin, lb_linenum, o_cpos;
+!   int newlines, lpos, temp, n0, num;
+    char *prompt_this_line;
+  #if defined (HANDLE_MULTIBYTE)
+***************
+*** 470,480 ****
+  #endif
+  
+!   if (!readline_echoing_p)
+      return;
+  
+    if (!rl_display_prompt)
+      rl_display_prompt = "";
+  
+!   if (invisible_line == 0 || vis_lbreaks == 0)
+      {
+        init_line_structures (0);
+--- 507,521 ----
+  #endif
+  
+!   if (_rl_echoing_p == 0)
+      return;
+  
++   /* Block keyboard interrupts because this function manipulates global
++      data structures. */
++   _rl_block_sigint ();  
++ 
+    if (!rl_display_prompt)
+      rl_display_prompt = "";
+  
+!   if (line_structures_initialized == 0)
+      {
+        init_line_structures (0);
+***************
+*** 485,488 ****
+--- 526,531 ----
+    cpos_buffer_position = -1;
+  
++   prompt_multibyte_chars = prompt_visible_length - prompt_physical_chars;
++ 
+    line = invisible_line;
+    out = inv_botlin = 0;
+***************
+*** 562,576 ****
+      }
+  
+- #if defined (HANDLE_MULTIBYTE)
+- #define CHECK_INV_LBREAKS() \
+-       do { \
+- 	if (newlines >= (inv_lbsize - 2)) \
+- 	  { \
+- 	    inv_lbsize *= 2; \
+- 	    inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
+- 	    _rl_wrapped_line = (int *)xrealloc (_rl_wrapped_line, inv_lbsize * sizeof (int)); \
+- 	  } \
+-       } while (0)
+- #else
+  #define CHECK_INV_LBREAKS() \
+        do { \
+--- 605,608 ----
+***************
+*** 581,585 ****
+  	  } \
+        } while (0)
+- #endif /* HANDLE_MULTIBYTE */
+  
+  #if defined (HANDLE_MULTIBYTE)	  
+--- 613,616 ----
+***************
+*** 593,600 ****
+  		inv_lbsize *= 2; \
+  		inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
+- 		_rl_wrapped_line = (int *)xrealloc (_rl_wrapped_line, inv_lbsize * sizeof (int)); \
+  	      } \
+  	    inv_lbreaks[++newlines] = out; \
+! 	    _rl_wrapped_line[newlines] = _rl_wrapped_multicolumn; \
+  	    lpos = 0; \
+  	  } \
+--- 624,635 ----
+  		inv_lbsize *= 2; \
+  		inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
+  	      } \
+  	    inv_lbreaks[++newlines] = out; \
+! 	    if (newlines >= (line_state_invisible->wbsize - 1)) \
+! 	      { \
+! 		line_state_invisible->wbsize *= 2; \
+! 		line_state_invisible->wrapped_line = (int *)xrealloc (line_state_invisible->wrapped_line, line_state_invisible->wbsize * sizeof(int)); \
+! 	      } \
+! 	    line_state_invisible->wrapped_line[newlines] = _rl_wrapped_multicolumn; \
+  	    lpos = 0; \
+  	  } \
+***************
+*** 626,630 ****
+  
+  #if defined (HANDLE_MULTIBYTE)
+!   memset (_rl_wrapped_line, 0, vis_lbsize);
+    num = 0;
+  #endif
+--- 661,665 ----
+  
+  #if defined (HANDLE_MULTIBYTE)
+!   memset (line_state_invisible->wrapped_line, 0, line_state_invisible->wbsize * sizeof (int));
+    num = 0;
+  #endif
+***************
+*** 648,652 ****
+           Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
+  #if defined (HANDLE_MULTIBYTE)
+!       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  	{
+  	  n0 = num;
+--- 683,687 ----
+           Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
+  #if defined (HANDLE_MULTIBYTE)
+!       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
+  	{
+  	  n0 = num;
+***************
+*** 671,674 ****
+--- 706,711 ----
+  
+        /* Now account for invisible characters in the current line. */
++       /* XXX - this assumes that all of the invisible characters are before
++ 	 the line wrap. */
+        temp += ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
+  							     : ((newlines == 1) ? wrap_offset : 0))
+***************
+*** 677,681 ****
+        inv_lbreaks[++newlines] = temp;
+  #if defined (HANDLE_MULTIBYTE)
+!       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  	lpos -= _rl_col_width (local_prompt, n0, num);
+        else
+--- 714,718 ----
+        inv_lbreaks[++newlines] = temp;
+  #if defined (HANDLE_MULTIBYTE)
+!       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
+  	lpos -= _rl_col_width (local_prompt, n0, num);
+        else
+***************
+*** 911,914 ****
+--- 948,955 ----
+  	     OFFSET (which has already been calculated above).  */
+  
++ #define INVIS_FIRST()	(prompt_physical_chars > _rl_screenwidth ? prompt_invis_chars_first_line : wrap_offset)
++ #define WRAP_OFFSET(line, offset)  ((line == 0) \
++ 					? (offset ? INVIS_FIRST() : 0) \
++ 					: ((line == prompt_last_screen_line) ? wrap_offset-prompt_invis_chars_first_line : 0))
+  #define W_OFFSET(line, offset) ((line) == 0 ? offset : 0)
+  #define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))
+***************
+*** 945,949 ****
+  		  _rl_last_c_pos > wrap_offset &&
+  		  o_cpos < prompt_last_invisible)
+! 		_rl_last_c_pos -= wrap_offset;
+  		  
+  	      /* If this is the line with the prompt, we might need to
+--- 986,1001 ----
+  		  _rl_last_c_pos > wrap_offset &&
+  		  o_cpos < prompt_last_invisible)
+! 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 ! 
-  The @option{-F} option inhibits the display of function definitions;
-  only the function name and attributes are printed.
-  If the @code{extdebug} shell option is enabled using @code{shopt}
+! 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
+! 			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+! 			cpos_adjusted == 0 &&
+! 			_rl_last_c_pos != o_cpos &&
+! #if 0
+! 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - (wrap_offset-prompt_invis_chars_first_line)))
+! #else
+! 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))
+! #endif
+! 		_rl_last_c_pos -= (wrap_offset-prompt_invis_chars_first_line);
+  		  
+  	      /* If this is the line with the prompt, we might need to
 ***************
-*** 3400,3413 ****
-  @item help
-  @btindex help
-  @example
-! help [-s] [@var{pattern}]
-  @end example
-  Display helpful information about builtin commands.
-  If @var{pattern} is specified, @code{help} gives detailed help
-  on all commands matching @var{pattern}, otherwise a list of
-  the builtins is printed.
-! The @option{-s} option restricts the information displayed to a short
-! usage synopsis.
-  The return status is zero unless no command matches @var{pattern}.
+*** 965,968 ****
+--- 1017,1033 ----
+  		    _rl_clear_to_eol (nleft);
+  		}
++ #if 0
++ 	      /* This segment is intended to handle the case where the prompt
++ 		 has invisible characters on the second line and the new line
++ 		 to be displayed needs to clear the rest of the old characters
++ 		 out (e.g., when printing the i-search prompt).  In general,
++ 		 the case of the new line being shorter than the old.
++ 		 Incomplete */
++ 	      else if (linenum == prompt_last_screen_line &&
++ 		       prompt_physical_chars > _rl_screenwidth &&
++ 		       wrap_offset != prompt_invis_chars_first_line &&
++ 		       _rl_last_c_pos == out &&
++ #endif
++ 
   
-  @item let
---- 3418,3441 ----
-  @item help
-  @btindex help
-  @example
-! help [-dms] [@var{pattern}]
-  @end example
-  Display helpful information about builtin commands.
-  If @var{pattern} is specified, @code{help} gives detailed help
-  on all commands matching @var{pattern}, otherwise a list of
-  the builtins is printed.
+  	      /* Since the new first line is now visible, save its length. */
+***************
+*** 1020,1028 ****
+  		tputs (_rl_term_cr, 1, _rl_output_character_function);
+  #endif
+  	      _rl_output_some_chars (local_prompt, nleft);
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft) - wrap_offset;
+  	      else
+! 		_rl_last_c_pos = nleft;
+  	    }
+  
+--- 1085,1096 ----
+  		tputs (_rl_term_cr, 1, _rl_output_character_function);
+  #endif
++ 	      if (modmark)
++ 		_rl_output_some_chars ("*", 1);
++ 
+  	      _rl_output_some_chars (local_prompt, nleft);
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft) - wrap_offset + modmark;
+  	      else
+! 		_rl_last_c_pos = nleft + modmark;
+  	    }
+  
+***************
+*** 1160,1174 ****
+    /* Swap visible and non-visible lines. */
+    {
+!     char *vtemp = visible_line;
+!     int *itemp = vis_lbreaks, ntemp = vis_lbsize;
 ! 
-! Options, if supplied, have the following meanings:
+!     visible_line = invisible_line;
+!     invisible_line = vtemp;
+  
+!     vis_lbreaks = inv_lbreaks;
+!     inv_lbreaks = itemp;
 ! 
-! @table @code
-! @item -d
-! Display a short description of each @var{pattern}
-! @item -m
-! Display the description of each @var{pattern} in a manpage-like format
-! @item -s
-! Display only a short usage synopsis for each @var{pattern}
-! @end table
-! 
-  The return status is zero unless no command matches @var{pattern}.
+!     vis_lbsize = inv_lbsize;
+!     inv_lbsize = ntemp;
   
-  @item let
+      rl_display_fixed = 0;
+--- 1228,1235 ----
+    /* Swap visible and non-visible lines. */
+    {
+!     struct line_state *vtemp = line_state_visible;
+  
+!     line_state_visible = line_state_invisible;
+!     line_state_invisible = vtemp;
+  
+      rl_display_fixed = 0;
 ***************
-*** 3443,3448 ****
---- 3471,3516 ----
-  Exit a login shell, returning a status of @var{n} to the shell's
-  parent.
-  
-+ @item mapfile
-+ @btindex mapfile
-+ @example
-+ mapfile [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
-+ -C @var{callback}] [-c @var{quantum}] [@var{array}]
-+ @end example
-+ Read lines from the standard input into array variable @var{array},
-+ or from file descriptor @var{fd}
-+ if the @option{-u} option is supplied.
-+ The variable @code{MAPFILE} is the default @var{array}.
-+ Options, if supplied, have the following meanings:
-+ @table @code
+*** 1181,1184 ****
+--- 1242,1247 ----
+        visible_wrap_offset = wrap_offset;
+    }
 + 
-+ @item -n
-+ Copy at most @var{count} lines.  If @var{count} is 0, all lines are copied.
-+ @item -O
-+ Begin assigning to @var{array} at index @var{origin}.
-+ The default index is 0.
-+ @item -s
-+ Discard the first @var{count} lines read.
-+ @item -t
-+ Remove a trailing line from each line read.
-+ @item -u
-+ Read lines from file descriptor @var{fd} instead of the standard input.
-+ @item -C
-+ Evaluate @var{callback} each time @var{quantum}P lines are read.
-+ The @option{-c} option specifies @var{quantum}.
-+ @item -c
-+ Specify the number of lines read between each call to @var{callback}.
-+ @end table
-+ 
-+ If @option{-C} is specified without @option{-c}, 
-+ the default quantum is 5000.
-+ 
-+ If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
-+ before assigning to it.
-+ 
-+ @code{mapfile} returns successfully unless an invalid option or option
-+ argument is supplied, or @var{array} is invalid or unassignable.
-+ 
-  @item printf
-  @btindex printf
-  @example
-***************
-*** 3476,3482 ****
-  @item read
-  @btindex read
-  @example
-! read [-ers] [-a @var{aname}] [-d @var{delim}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
-  @end example
-  One line is read from the standard input, or from the file descriptor
-  @var{fd} supplied as an argument to the @option{-u} option, and the first word
---- 3544,3550 ----
-  @item read
-  @btindex read
-  @example
-! read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
-  @end example
-  One line is read from the standard input, or from the file descriptor
-  @var{fd} supplied as an argument to the @option{-u} option, and the first word
-***************
-*** 3510,3515 ****
---- 3578,3587 ----
-  @item -e
-  Readline (@pxref{Command Line Editing}) is used to obtain the line.
-  
-+ @item -i @var{text}
-+ If Readline is being used to read the line, @var{text} is placed into
-+ the editing buffer before editing begins.
-+ 
-  @item -n @var{nchars}
-  @code{read} returns after reading @var{nchars} characters rather than
-  waiting for a complete line of input.
-***************
-*** 3581,3588 ****
-  If the @option{-f} option is used, @code{type} does not attempt to find
-  shell functions, as with the @code{command} builtin.
-  
-! The return status is zero if any of the @var{names} are found, non-zero
-! if none are found.
-  
-  @item typeset
-  @btindex typeset
---- 3653,3660 ----
-  If the @option{-f} option is used, @code{type} does not attempt to find
-  shell functions, as with the @code{command} builtin.
-  
-! The return status is zero if all of the @var{names} are found, non-zero
-! if any are not found.
-  
-  @item typeset
-  @btindex typeset
-***************
-*** 3596,3602 ****
-  @item ulimit
-  @btindex ulimit
-  @example
-! ulimit [-acdefilmnpqrstuvxSH] [@var{limit}]
-  @end example
-  @code{ulimit} provides control over the resources available to processes
-  started by the shell, on systems that allow such control.  If an
---- 3668,3674 ----
-  @item ulimit
-  @btindex ulimit
-  @example
-! ulimit [-abcdefilmnpqrstuvxHST] [@var{limit}]
-  @end example
-  @code{ulimit} provides control over the resources available to processes
-  started by the shell, on systems that allow such control.  If an
-***************
-*** 3611,3616 ****
---- 3683,3691 ----
-  @item -a
-  All current limits are reported.
-  
-+ @item -b
-+ The maximum socket buffer size.
-+ 
-  @item -c
-  The maximum size of core files created.
++   _rl_release_sigint ();
+  }
   
 ***************
-*** 3659,3664 ****
---- 3734,3742 ----
-  @item -x
-  The maximum number of file locks.
-  
-+ @item -T
-+ The maximum number of threads.
-+ 
-  @end table
-  
-  If @var{limit} is given, it is the new value of the specified resource;
+*** 1205,1209 ****
+  {
+    register char *ofd, *ols, *oe, *nfd, *nls, *ne;
+!   int temp, lendiff, wsatend, od, nd, o_cpos;
+    int current_invis_chars;
+    int col_lendiff, col_temp;
+--- 1268,1272 ----
+  {
+    register char *ofd, *ols, *oe, *nfd, *nls, *ne;
+!   int temp, lendiff, wsatend, od, nd, twidth, o_cpos;
+    int current_invis_chars;
+    int col_lendiff, col_temp;
 ***************
-*** 7049,7056 ****
+*** 1221,1225 ****
+      temp = _rl_last_c_pos;
+    else
+!     temp = _rl_last_c_pos - W_OFFSET(_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+--- 1284,1288 ----
+      temp = _rl_last_c_pos;
+    else
+!     temp = _rl_last_c_pos - WRAP_OFFSET (_rl_last_v_pos, visible_wrap_offset);
+    if (temp == _rl_screenwidth && _rl_term_autowrap && !_rl_horizontal_scroll_mode
+  	&& _rl_last_v_pos == current_line - 1)
+***************
+*** 1236,1241 ****
+  	     character comsumes more than three columns, spaces will be
+  	     inserted in the string buffer. */
+! 	  if (_rl_wrapped_line[current_line] > 0)
+! 	    _rl_clear_to_eol (_rl_wrapped_line[current_line]);
   
-  @item
-  Bash provides a programmable word completion mechanism
-! (@pxref{Programmable Completion}), and two builtin commands,
-! @code{complete} and @code{compgen}, to manipulate it.
+  	  memset (&ps, 0, sizeof (mbstate_t));
+--- 1299,1304 ----
+  	     character comsumes more than three columns, spaces will be
+  	     inserted in the string buffer. */
+! 	  if (current_line < line_state_visible->wbsize && line_state_visible->wrapped_line[current_line] > 0)
+! 	    _rl_clear_to_eol (line_state_visible->wrapped_line[current_line]);
   
-  @item
-  Bash has command history (@pxref{Bash History Facilities}) and the
---- 7127,7135 ----
+  	  memset (&ps, 0, sizeof (mbstate_t));
+***************
+*** 1301,1305 ****
+  	 only change is adding characters. */
+        temp = (omax < nmax) ? omax : nmax;
+!       if (memcmp (old, new, temp) == 0)
+  	{
+  	  ofd = old + temp;
+--- 1364,1368 ----
+  	 only change is adding characters. */
+        temp = (omax < nmax) ? omax : nmax;
+!       if (memcmp (old, new, temp) == 0)		/* adding at the end */
+  	{
+  	  ofd = old + temp;
+***************
+*** 1454,1457 ****
+--- 1517,1522 ----
+        tputs (_rl_term_cr, 1, _rl_output_character_function);
+  #endif
++       if (modmark)
++ 	_rl_output_some_chars ("*", 1);
+        _rl_output_some_chars (local_prompt, lendiff);
+        if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+***************
+*** 1459,1467 ****
+  	  /* We take wrap_offset into account here so we can pass correct
+  	     information to _rl_move_cursor_relative. */
+! 	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset;
+  	  cpos_adjusted = 1;
+  	}
+        else
+! 	_rl_last_c_pos = lendiff;
+      }
   
-  @item
-  Bash provides a programmable word completion mechanism
-! (@pxref{Programmable Completion}), and builtin commands
-! @code{complete}, @code{compgen}, and @code{compopt}, to
-! manipulate it.
+--- 1524,1532 ----
+  	  /* We take wrap_offset into account here so we can pass correct
+  	     information to _rl_move_cursor_relative. */
+! 	  _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff) - wrap_offset + modmark;
+  	  cpos_adjusted = 1;
+  	}
+        else
+! 	_rl_last_c_pos = lendiff + modmark;
+      }
   
-  @item
-  Bash has command history (@pxref{Bash History Facilities}) and the
+***************
+*** 1477,1481 ****
+       invisible characters in the prompt string.  Let's see if setting this when
+       we make sure we're at the end of the drawn prompt string works. */
+!   if (current_line == 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0 && 
+        (_rl_last_c_pos > 0 || o_cpos > 0) &&
+        _rl_last_c_pos == prompt_physical_chars)
+--- 1542,1546 ----
+       invisible characters in the prompt string.  Let's see if setting this when
+       we make sure we're at the end of the drawn prompt string works. */
+!   if (current_line == 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0 &&
+        (_rl_last_c_pos > 0 || o_cpos > 0) &&
+        _rl_last_c_pos == prompt_physical_chars)
+***************
+*** 1587,1599 ****
+  	    {
+  	      _rl_output_some_chars (nfd + lendiff, temp - lendiff);
+- #if 1
+  	     /* XXX -- this bears closer inspection.  Fixes a redisplay bug
+  		reported against bash-3.0-alpha by Andreas Schwab involving
+  		multibyte characters and prompt strings with invisible
+  		characters, but was previously disabled. */
+! 	      _rl_last_c_pos += _rl_col_width (nfd+lendiff, 0, temp-col_lendiff);
+! #else
+! 	      _rl_last_c_pos += _rl_col_width (nfd+lendiff, 0, temp-lendiff);
+! #endif
+  	    }
+  	}
+--- 1652,1664 ----
+  	    {
+  	      _rl_output_some_chars (nfd + lendiff, temp - lendiff);
+  	     /* XXX -- this bears closer inspection.  Fixes a redisplay bug
+  		reported against bash-3.0-alpha by Andreas Schwab involving
+  		multibyte characters and prompt strings with invisible
+  		characters, but was previously disabled. */
+! 	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+! 		twidth = _rl_col_width (nfd+lendiff, 0, temp-col_lendiff);
+! 	      else
+! 		twidth = temp - lendiff;
+! 	      _rl_last_c_pos += twidth;
+  	    }
+  	}
+***************
+*** 1635,1640 ****
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  		{
+!                   _rl_last_c_pos += _rl_col_width (nfd, 0, temp);
+!                   if (current_line == 0 && wrap_offset &&  ((nfd - new) <= prompt_last_invisible))
+  		    {
+  		      _rl_last_c_pos -= wrap_offset;
+--- 1700,1705 ----
+  	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  		{
+! 		  _rl_last_c_pos += _rl_col_width (nfd, 0, temp);
+! 		  if (current_line == 0 && wrap_offset &&  ((nfd - new) <= prompt_last_invisible))
+  		    {
+  		      _rl_last_c_pos -= wrap_offset;
+***************
+*** 1642,1647 ****
+  		    }
+  		}
+!               else
+!                 _rl_last_c_pos += temp;
+  	    }
+  	}
+--- 1707,1712 ----
+  		    }
+  		}
+! 	      else
+! 		_rl_last_c_pos += temp;
+  	    }
+  	}
+***************
+*** 1789,1793 ****
+    int cpos, dpos;		/* current and desired cursor positions */
+  
+!   woff = W_OFFSET (_rl_last_v_pos, wrap_offset);
+    cpos = _rl_last_c_pos;
+  #if defined (HANDLE_MULTIBYTE)
+--- 1854,1858 ----
+    int cpos, dpos;		/* current and desired cursor positions */
+  
+!   woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
+    cpos = _rl_last_c_pos;
+  #if defined (HANDLE_MULTIBYTE)
+***************
+*** 1803,1807 ****
+  	 prompt string, since they're both buffer indices and DPOS is a
+  	 desired display position. */
+!       if (new > prompt_last_invisible)		/* XXX - don't use woff here */
+  	{
+  	  dpos -= woff;
+--- 1868,1876 ----
+  	 prompt string, since they're both buffer indices and DPOS is a
+  	 desired display position. */
+!       if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
+! 	  (prompt_physical_chars > _rl_screenwidth &&
+! 	   _rl_last_v_pos == prompt_last_screen_line &&
+! 	   wrap_offset != woff &&
+! 	   new > (prompt_last_invisible-_rl_screenwidth-wrap_offset)))
+  	{
+  	  dpos -= woff;
+***************
+*** 2216,2220 ****
+    if (MB_CUR_MAX == 1 || rl_byte_oriented)
+      if (count != col)
+!       fprintf(stderr, "readline: debug: insert_some_chars: count (%d) != col (%d)\n", count, col);
+  
+    /* If IC is defined, then we do not have to "enter" insert mode. */
+--- 2285,2289 ----
+    if (MB_CUR_MAX == 1 || rl_byte_oriented)
+      if (count != col)
+!       _rl_ttymsg ("debug: insert_some_chars: count (%d) != col (%d)", count, col);
+  
+    /* If IC is defined, then we do not have to "enter" insert mode. */
+***************
+*** 2357,2364 ****
+    char *t;
+  
+!   /* Clear the current line and put the cursor at column 0.  Make sure
+!      the right thing happens if we have wrapped to a new screen line. */
+    if (_rl_term_cr)
+      {
+  #if defined (__MSDOS__)
+        putc ('\r', rl_outstream);
+--- 2426,2437 ----
+    char *t;
+  
+!   /* Clear the last line (assuming that the screen size change will result in
+!      either more or fewer characters on that line only) and put the cursor at
+!      column 0.  Make sure the right thing happens if we have wrapped to a new
+!      screen line. */
+    if (_rl_term_cr)
+      {
++       _rl_move_vert (_rl_vis_botlin);
++ 
+  #if defined (__MSDOS__)
+        putc ('\r', rl_outstream);
+***************
+*** 2396,2400 ****
+  _rl_clean_up_for_exit ()
+  {
+!   if (readline_echoing_p)
+      {
+        _rl_move_vert (_rl_vis_botlin);
+--- 2469,2473 ----
+  _rl_clean_up_for_exit ()
+  {
+!   if (_rl_echoing_p)
+      {
+        _rl_move_vert (_rl_vis_botlin);
+***************
+*** 2452,2456 ****
+--- 2525,2532 ----
+      return 0;
+    if (MB_CUR_MAX == 1 || rl_byte_oriented)
++ {
++ _rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
+      return (end - start);
++ }
+  
+    memset (&ps, 0, sizeof (mbstate_t));

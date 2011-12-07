@@ -6658,3 +6658,38 @@ lib/sh/fdprintf.c
 
 Makefile.in,lib/sh/Makefile.in
 	- add rules to include fdprintf.o
+
+doc/{bash.1,bashref.texi}
+	- documented coprocesses and `coproc' reserved word
+
+				    7/7
+				    ---
+subst.c
+	- fix array_length_reference to use MB_STRLEN instead of STRLEN, so
+	  multibyte characters in array values are computed correctly.  Fixes
+	  bug reported by Wang Xin <wxinee@gmail.com>
+
+				   7/10
+				   ----
+jobs.c
+	- new function, maybe_give_terminal_to (old, new, flags), sets the
+	  terminal pgrp to NEW if and only if it's currently set to OLD
+	- call maybe_give_terminal_to when the parent sets the terminal pgrp
+	  to the pipeline pgrp in stop_pipeline, so we don't give the
+	  terminal to the new job's pgrp unless it's currently owned by the
+	  shell.  Fixes race condition described by Joe Peterson
+	  <joe@skyrush.com>, where parent bash may change tty pgrp after a
+	  grandchild (interactive bash child of su) has changed it to
+	  something else.  The call to maybe_give_terminal_to makes explicit
+	  a previously-implicit assumption
+
+aclocal.m4
+	- remove dependency on writable /tmp by creating directories in
+	  build directory
+
+shell.c
+	- make changes to how bash sets no_line_editing and running_under_emacs
+	  to deal with various emacs terminal emulators; use better check
+	  for `eterm', since bash sends $PWD to eterm with control sequences
+	  that confuse other programs.  Problem reported by Micah Cowan
+	  <micah@cowan.name>

@@ -553,19 +553,26 @@ main (argc, argv, env)
   set_default_lang ();
   set_default_locale_vars ();
 
+  /*
+   * M-x term -> TERM=eterm EMACS=22.1 (term:0.96)	(eterm)
+   * M-x shell -> TERM=dumb EMACS=t			(no line editing)
+   * M-x terminal -> TERM=emacs-em7955 EMACS=		(line editing)
+   */
   if (interactive_shell)
     {
       char *term, *emacs;
 
       term = get_string_value ("TERM");
-      no_line_editing |= term && (STREQ (term, "emacs"));
       emacs = get_string_value ("EMACS");
-      running_under_emacs = emacs ? ((strstr (emacs, "term") != 0) ? 2 : 1) : 0;
-#if 0
-      no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0';
-#else
+
+      /* Not sure any emacs terminal emulator sets TERM=emacs any more */
+      no_line_editing |= term && (STREQ (term, "emacs"));
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
-#endif
+
+      /* running_under_emacs == 2 for `eterm' */
+      running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
+      running_under_emacs += term && STREQN (term, "eterm", 5) && strstr (emacs, "term");
+
       if (running_under_emacs)
 	gnu_error_format = 1;
     }

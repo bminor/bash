@@ -357,6 +357,7 @@ trap_handler (sig)
 {
   int oerrno;
 
+itrace("trap_handler: signal %d", sig);
   if ((sigmodes[sig] & SIG_TRAPPED) == 0)
     {
 #if defined (DEBUG)
@@ -430,6 +431,7 @@ set_impossible_sigchld_trap ()
 {
   restore_default_signal (SIGCHLD);
   change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
+  sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 
