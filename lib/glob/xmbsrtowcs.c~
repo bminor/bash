@@ -29,7 +29,7 @@
 #if HANDLE_MULTIBYTE
 
 #ifndef FREE
-#  define FREE(x)	do { if (x) free (x); } while (0)
+#  define FREE(x)		if (x) free (x)
 #endif
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.
    So, this function is made for converting 0x5c to U<0x5c>. */

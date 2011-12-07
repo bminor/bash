@@ -68,7 +68,7 @@
 \entry{execution environment}{30}{execution environment}
 \entry{environment}{31}{environment}
 \entry{exit status}{31}{exit status}
-\entry{signal handling}{31}{signal handling}
+\entry{signal handling}{32}{signal handling}
 \entry{shell script}{32}{shell script}
 \entry{special builtin}{57}{special builtin}
 \entry{login shell}{71}{login shell}

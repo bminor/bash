@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2007 December 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 February 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2007 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2008 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1549,7 +1549,7 @@ Expands to the number of positional parameters in decimal.
 <DT><B>?</B>
 
 <DD>
-Expands to the status of the most recently executed foreground
+Expands to the exit status of the most recently executed foreground
 pipeline.
 <DT><B>-</B>
 
@@ -5102,6 +5102,17 @@ is set to the full file name of the command and passed to that
 command in its environment.
 <A NAME="lbBZ">&nbsp;</A>
 <H3>EXIT STATUS</H3>
+
+<P>
+
+The exit status of an executed command is the value returned by the
+<I>waitpid</I> system call or equivalent function.  Exit statuses
+fall between 0 and 255, though, as explained below, the shell may
+use values above 125 specially.  Exit statuses from shell builtins and
+compound commands are also limited to this range. Under certain
+circumstances, the shell will use special values to indicate specific
+failure modes.
+<P>
 
 For the shell's purposes, a command which exits with a 
 zero exit status has succeeded.  An exit status of zero
@@ -10382,6 +10393,14 @@ If set,
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+<DT><B>compat31</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+changes its behavior to that of version 3.1 with respect to quoted
+arguments to the conditional command's =~ operator.
 <DT><B>dotglob</B>
 
 <DD>
@@ -11552,7 +11571,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2007 December 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-3.2<TH ALIGN=CENTER width=33%>2008 February 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -11656,6 +11675,6 @@ Array variables may not (yet) be exported.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 10 January 2008 17:41:32 EST
+Time: 04 March 2008 08:38:15 EST
 </BODY>
 </HTML>

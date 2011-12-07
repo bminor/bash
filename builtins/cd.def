@@ -63,8 +63,6 @@ static void setpwd __P((char *));
 static char *resetpwd __P((char *));
 static int change_to_directory __P((char *, int));
 
-static char *cdspell __P((char *));
-
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;
 
@@ -309,7 +307,7 @@ cd_builtin (list)
      typo.  This is similar to the UNIX 8th and 9th Edition shells. */
   if (lflag & LCD_DOSPELL)
     {
-      temp = cdspell (dirname);
+      temp = dirspell (dirname);
       if (temp && change_to_directory (temp, no_symlinks))
 	{
 	  printf ("%s\n", temp);
@@ -504,29 +502,4 @@ change_to_directory (newdir, nolinks)
 
   free (tdir);
   return r;
-}
-
-/* Code for cd spelling correction.  Original patch submitted by
-   Neil Russel (caret@c-side.com). */
-
-static char *
-cdspell (dirname)
-     char *dirname;
-{
-  int n;
-  char *guess;
-
-  n = (strlen (dirname) * 3 + 1) / 2 + 1;
-  guess = (char *)xmalloc (n);
-
-  switch (spname (dirname, guess))
-    {
-    case -1:
-    default:
-      free (guess);
-      return (char *)NULL;
-    case 0:
-    case 1:
-      return guess;
-    }
 }

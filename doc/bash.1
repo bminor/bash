@@ -1249,13 +1249,13 @@ Expands to the full file name used to invoke this instance of
 .BR bash .
 .TP
 .B BASHPID
-Expands to the process id of the current bash process.
+Expands to the process id of the current \fBbash\fP process.
 This differs from \fB$$\fP under certain circumstances, such as subshells
-that do not require bash to be re-initialized.
+that do not require \fBbash\fP to be re-initialized.
 .TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
-frame of the current bash execution call stack.
+frame of the current \fBbash\fP execution call stack.
 The number of
 parameters to the current subroutine (shell function or script executed
 with \fB.\fP or \fBsource\fP) is at the top of the stack.
@@ -1269,7 +1269,7 @@ option to the
 builtin below)
 .TP
 .B BASH_ARGV
-An array variable containing all of the parameters in the current bash
+An array variable containing all of the parameters in the current \fBbash\fP
 execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
@@ -8068,7 +8068,7 @@ table exists before trying to execute it.  If a hashed command no
 longer exists, a normal path search is performed.
 .TP 8
 .B checkjobs
-If set, bash lists the status of any stopped and running jobs before
+If set, \fBbash\fP lists the status of any stopped and running jobs before
 exiting an interactive shell.  If any jobs are running, this causes
 the exit to be deferred until a second exit is attempted without an
 intervening command (see \fBJOB CONTROL\fP above).  The shell always

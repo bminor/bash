@@ -15315,3 +15315,29 @@ builtins/shopt.def
 execute_cmd.c
 	- in execute_cond_node, restore bash-3.1 behavior of quoted rhs of
 	  regexp matches if shell_compatibility_level == 31
+
+				   2/28
+				   ----
+lib/readline/rltty.c
+	- set readline_echoing_p = 1 if tcgetattr fails and sets errno to
+	  EINVAL, as Linux does when the fd is a pipe.  Reported by Mike
+	  Frysinger <vapier@gentoo.org>
+
+				    3/6
+				    ---
+{MANIFEST,Makefile.in},lib/sh/{casemod,uconvert,ufuncs}.c
+	- new library sources from bash-4.0-devel triee
+
+lib/sh/spell.c
+	- moved cdspell() here from builtins/cd.def, renamed dirspell()
+
+externs.h
+	- new declarations for extern functions from new library files
+	- new extern declaration for lib/sh/spell.c:dirspell()
+
+builtins/cd.def
+	- call extern library function dirspell(); remove static cdspell()
+
+builtins/read.def
+	- when read times out, make sure input_string is null-terminated before
+	  assigning any partial input read to the named variables

@@ -30,12 +30,10 @@ the stack, making the new top of the stack the current working
 directory.  With no arguments, exchanges the top two directories.
 
 Options:
-
   -n	Suppresses the normal change of directory when adding
-	directorie to the stack, so only the stack is manipulated.
+	directories to the stack, so only the stack is manipulated.
 
 Arguments:
-
   +N	Rotates the stack so that the Nth directory (counting
 	from the left of the list shown by `dirs', starting with
 	zero) is at the top.
@@ -58,12 +56,10 @@ Removes entries from the directory stack.  With no arguments, removes
 the top directory from the stack, and changes to the new top directory.
 
 Options:
-
   -n	Suppresses the normal change of directory when removing
 	directories from the stack, so only the stack is manipulated.
 
 Arguments:
-
   +N	Removes the Nth entry counting from the left of the list
 	shown by `dirs', starting with zero.  For example: `popd +0'
 	removes the first directory, `popd +1' the second.
@@ -84,7 +80,6 @@ find their way onto the list with the `pushd' command; you can get
 back up through the list with the `popd' command.
 
 Options:
-
   -c	clear the directory stack by deleting all of the elements
   -l	do not print tilde-prefixed versions of directories relative
 	to your home directory
@@ -93,7 +88,6 @@ Options:
 	with its position in the stack
 
 Arguments:
-
   +N	Displays the Nth entry counting from the left of the list shown by
 	dirs when invoked without options, starting with zero.
 
@@ -674,19 +668,20 @@ N_("Display the list of currently remembered directories.  Directories\n\
     find their way onto the list with the `pushd' command; you can get\n\
     back up through the list with the `popd' command.\n\
     \n\
-    The -c flag clears the directory stack by deleting all of the elements.\n\
-    The -l flag specifies that `dirs' should not print shorthand versions\n\
-    of directories which are relative to your home directory.  This means\n\
-    that `~/bin' might be displayed as `/homes/bfox/bin'.  The -p flag\n\
-    causes `dirs' to print the directory stack with one entry per line.\n\
-    The -v flag does the same thing, prefixing each directory name with its\n\
-    position in the stack.\n\
+    Options:\n\    
+      -c	clear the directory stack by deleting all of the elements\n\
+      -l	do not print tilde-prefixed versions of directories relative\n\
+    	to your home directory\n\
+      -p	print the directory stack with one entry per line\n\
+      -v	print the directory stack with one entry per line prefixed\n\
+    	with its position in the stack\n\
     \n\
-    +N  Displays the Nth entry counting from the left of the list shown by\n\
-        dirs when invoked without options, starting with zero.\n\
+    Arguments:\n\
+      +N	Displays the Nth entry counting from the left of the list shown by\n\
+    	dirs when invoked without options, starting with zero.\n\
     \n\
-    -N  Displays the Nth entry counting from the right of the list shown by\n\
-        dirs when invoked without options, starting with zero."),
+      -N	Displays the Nth entry counting from the right of the list shown by\n\
+	dirs when invoked without options, starting with zero."),
   (char *)NULL
 };
 
@@ -695,21 +690,23 @@ N_("Adds a directory to the top of the directory stack, or rotates\n\
     the stack, making the new top of the stack the current working\n\
     directory.  With no arguments, exchanges the top two directories.\n\
     \n\
-    -n  Suppresses the normal change of directory when adding directories\n\
-        to the stack, so only the stack is manipulated.\n\
+    Options:\n\
+      -n	Suppresses the normal change of directory when adding\n\
+    	directories to the stack, so only the stack is manipulated.\n\
     \n\
-    +N  Rotates the stack so that the Nth directory (counting\n\
-        from the left of the list shown by `dirs', starting with\n\
-        zero) is at the top.\n\
+    Arguments:\n\
+      +N	Rotates the stack so that the Nth directory (counting\n\
+    	from the left of the list shown by `dirs', starting with\n\
+    	zero) is at the top.\n\
     \n\
-    -N  Rotates the stack so that the Nth directory (counting\n\
-        from the right of the list shown by `dirs', starting with\n\
-        zero) is at the top.\n\
+      -N	Rotates the stack so that the Nth directory (counting\n\
+    	from the right of the list shown by `dirs', starting with\n\
+    	zero) is at the top.\n\
     \n\
-    dir Adds DIR to the directory stack at the top, making it the\n\
-        new current working directory.\n\
+      dir	Adds DIR to the directory stack at the top, making it the\n\
+    	new current working directory.\n\
     \n\
-    You can see the directory stack with the `dirs' command."),
+    The `dirs' builtin displays the directory stack."),
   (char *)NULL
 };
 

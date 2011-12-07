@@ -35,20 +35,20 @@ If no NAMEs are supplied, the line read is stored in the REPLY variable.
 
 Options:
   -a array	assign the words read to sequential indices of the array
-	variable ARRAY, starting at zero
+		variable ARRAY, starting at zero
   -d delim	continue until the first character of DELIM is read, rather
-	than newline
-  -e	use Readline to obtain the line in an interactive shell
+		than newline
+  -e		use Readline to obtain the line in an interactive shell
   -n nchars	return after reading NCHARS characters rather than waiting
-	for a newline
+		for a newline
   -p prompt	output the string PROMPT without a trailing newline before
-	attempting to read
-  -r	do not allow backslashes to escape any characters
-  -s	do not echo input coming from a terminal
+		attempting to read
+  -r		do not allow backslashes to escape any characters
+  -s		do not echo input coming from a terminal
   -t timeout	time out and return failure if a complete line of input is
-	not read withint TIMEOUT seconds.  The value of the TMOUT
-	variable is the default timeout.
-  -u fd	read from file descriptor FD instead of the standard input
+		not read withint TIMEOUT seconds.  The value of the TMOUT
+		variable is the default timeout.
+  -u fd		read from file descriptor FD instead of the standard input
 
 The return code is zero, unless end-of-file is encountered, read times out,
 or an invalid file descriptor is supplied as the argument to -u.
@@ -286,6 +286,7 @@ read_builtin (list)
     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
 
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
+  input_string[0] = '\0';
 
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
@@ -351,6 +352,8 @@ read_builtin (list)
 	  run_unwind_frame ("read_builtin");
 	  return (EXECUTION_FAILURE);
 #else
+itrace("read: timeout: i = %d", i);
+	  input_string[i] = '\0';	/* make sure it's terminated */
 	  retval = EXECUTION_FAILURE;
 	  goto assign_vars;
 #endif

@@ -811,10 +811,7 @@ builtin_handler (self, defs, arg)
   if (is_assignment_builtin (name))
     new->flags |= BUILTIN_FLAG_ASSIGNMENT;
   if (is_posix_builtin (name))
-{
-fprintf(stderr, "%s: added BUILTIN_FLAG_POSIX_BUILTIN\n", name);
     new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
-}
 
   array_add ((char *)new, defs->builtins);
   building_builtin = 1;

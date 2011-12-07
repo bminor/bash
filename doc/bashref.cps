@@ -117,7 +117,7 @@
 \entry {shell variable}{15}
 \entry {shell, interactive}{73}
 \entry {signal}{4}
-\entry {signal handling}{31}
+\entry {signal handling}{32}
 \entry {special builtin}{4, 57}
 \entry {startup files}{71}
 \entry {suspending jobs}{87}

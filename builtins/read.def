@@ -286,6 +286,7 @@ read_builtin (list)
     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
 
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
+  input_string[0] = '\0';
 
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
@@ -351,6 +352,7 @@ read_builtin (list)
 	  run_unwind_frame ("read_builtin");
 	  return (EXECUTION_FAILURE);
 #else
+	  input_string[i] = '\0';	/* make sure it's terminated */
 	  retval = EXECUTION_FAILURE;
 	  goto assign_vars;
 #endif

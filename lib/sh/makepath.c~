@@ -42,12 +42,9 @@
 #  define MP_DOTILDE	0x01
 #  define MP_DOCWD	0x02
 #  define MP_RMDOT	0x04
-#  define MP_IGNDOT	0x08
 #endif
 
 extern char *get_working_directory __P((char *));
-
-static char *nullpath = "";
 
 /* Take PATH, an element from, e.g., $CDPATH, and DIR, a directory name,
    and paste them together into PATH/DIR.  Tilde expansion is performed on
@@ -55,8 +52,7 @@ static char *nullpath = "";
    string, it is converted to the current directory.  A full pathname is
    used if (flags & MP_DOCWD) is non-zero, otherwise `./' is used.  If
    (flags & MP_RMDOT) is non-zero, any `./' is removed from the beginning
-   of DIR.  If (flags & MP_IGNDOT) is non-zero, a PATH that is "." or "./"
-   is ignored. */
+   of DIR. */
 
 #define MAKEDOT() \
   do { \
@@ -93,12 +89,6 @@ sh_makepath (path, dir, flags)
       else
 	MAKEDOT();
     }
-  else if ((flags & MP_IGNDOT) && path[0] == '.' && (path[1] == '\0' ||
-						     path[1] == '/' && path[2] == '\0'))
-    {
-      xpath = nullpath;
-      pathlen = 0;
-    }
   else
     {
       xpath = ((flags & MP_DOTILDE) && *path == '~') ? bash_tilde_expand (path, 0) : (char *)path;
@@ -117,12 +107,12 @@ sh_makepath (path, dir, flags)
   s = xpath;
   while (*s)
     *r++ = *s++;
-  if (s > xpath && s[-1] != '/')
+  if (s[-1] != '/')
     *r++ = '/';      
   s = xdir;
   while (*r++ = *s++)
     ;
-  if (xpath != path && xpath != nullpath)
+  if (xpath != path)
     free (xpath);
   return (ret);
 }

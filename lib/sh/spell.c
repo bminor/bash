@@ -186,3 +186,27 @@ spdist(cur, new)
 
   return 3;
 }
+
+char *
+dirspell (dirname)
+     char *dirname;
+{
+  int n;
+  char *guess;
+
+  n = (strlen (dirname) * 3 + 1) / 2 + 1;
+  guess = (char *)malloc (n);
+  if (guess == 0)
+    return 0;
+
+  switch (spname (dirname, guess))
+    {
+    case -1:
+    default:
+      free (guess);
+      return (char *)NULL;
+    case 0:
+    case 1:
+      return guess;
+    }
+}

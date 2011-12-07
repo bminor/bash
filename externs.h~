@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2008 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -30,6 +30,9 @@
 extern intmax_t evalexp __P((char *, int *));
 
 /* Functions from print_cmd.c. */
+#define FUNC_MULTILINE	0x01
+#define FUNC_EXTERNAL	0x02
+
 extern char *make_command_string __P((COMMAND *));
 extern char *named_function_string __P((char *, COMMAND *, int));
 
@@ -145,6 +148,18 @@ extern void show_shell_version __P((int));
 /* Functions from the bash library, lib/sh/libsh.a.  These should really
    go into a separate include file. */
 
+/* declarations for functions defined in lib/sh/casemod.c */
+extern char *sh_modcase __P((const char *, char *, int));
+
+/* Defines for flags argument to sh_modcase.  These need to agree with what's
+   in lib/sh/casemode.c */
+#define CASE_LOWER	0x01
+#define CASE_UPPER	0x02
+#define CASE_CAPITALIZE	0x04
+#define CASE_UNCAP	0x08
+#define CASE_TOGGLE	0x10
+#define CASE_TOGGLEALL	0x20
+
 /* declarations for functions defined in lib/sh/clktck.c */
 extern long get_clk_tck __P((void));
 
@@ -168,6 +183,17 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 /* Declarations for functions defined in lib/sh/fmtumax.c */
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
 
+/* Declarations for functions defined in lib/sh/fpurge.c */
+#if defined (NEED_FPURGE_DECL)
+
+#if HAVE_FPURGE
+#  define fpurge _bash_fpurge
+#endif
+extern int fpurge __P((FILE *stream));
+
+#endif /* NEED_FPURGE_DECL */
+
+
 /* Declarations for functions defined in lib/sh/getcwd.c */
 #if !defined (HAVE_GETCWD)
 extern char *getcwd __P((char *, size_t));
@@ -183,6 +209,7 @@ extern char *uitos __P((uintmax_t));
 #define MP_DOTILDE	0x01
 #define MP_DOCWD	0x02
 #define MP_RMDOT	0x04
+#define MP_IGNDOT	0x08
 
 extern char *sh_makepath __P((const char *, const char *, int));
 
@@ -373,6 +400,13 @@ extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
 
+/* declarations for functions defined in lib/sh/uconvert.c */
+extern int uconvert __P((char *, long *, long *));
+
+/* declarations for functions defined in lib/sh/ufuncs.c */
+extern unsigned int falarm __P((unsigned int, unsigned int));
+extern unsigned int fsleep __P((unsigned int, unsigned int));
+
 /* declarations for functions defined in lib/sh/winsize.c */
 extern void get_new_window_size __P((int, int *, int *));
 
@@ -382,6 +416,9 @@ extern char *xstrchr __P((const char *, int));
 
 /* declarations for functions defined in lib/sh/zcatfd.c */
 extern int zcatfd __P((int, int, char *));
+
+/* declarations for functions defined in lib/sh/zgetline.c */
+extern ssize_t zgetline __P((int, char **, size_t *, int));
 
 /* declarations for functions defined in lib/sh/zmapfd.c */
 extern int zmapfd __P((int, char **, char *));

@@ -91,7 +91,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c xstrchr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
-	   wcsdup.c fpurge.c zgetline.c mbscmp.c
+	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
+	   casemod.c
 
 # The header files for this library.
 HSOURCES = 
@@ -104,7 +105,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o strindex.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o xstrchr.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
-	  fpurge.o zgetline.o mbscmp.o ${LIBOBJS}
+	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -136,6 +137,7 @@ ${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
 	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
 
 # rules for losing makes, like SunOS
+casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
 eaccess.o: eaccess.c
@@ -182,6 +184,8 @@ strtrans.o: strtrans.c
 times.o: times.c
 timeval.o: timeval.c
 tmpfile.o: tmpfile.c
+uconvert.o: uconvert.c
+ufuncs.o: ufuncs.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
 xstrchr.o: xstrchr.c
@@ -199,6 +203,7 @@ strtoul.o: strtol.c
 strtoull.o: strtol.c
 
 # all files in the library depend on config.h
+casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
@@ -245,6 +250,8 @@ strtrans.o: ${BUILD_DIR}/config.h
 times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
 tmpfile.o: ${BUILD_DIR}/config.h
+uconvert.o: ${BUILD_DIR}/config.h
+ufuncs.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
 xstrchr.o: ${BUILD_DIR}/config.h
@@ -449,6 +456,10 @@ tmpfile.o: ${topdir}/bashtypes.h
 tmpfile.o: ${BASHINCDIR}/posixstat.h
 tmpfile.o: ${BASHINCDIR}/filecntl.h
 
+uconvert.o: ${topdir}/bashtypes.h
+
+ufuncs.o: ${topdir}/bashtypes.h
+
 clock.o: ${BASHINCDIR}/posixtime.h
 
 mailstat.o: ${topdir}/bashansi.h
@@ -495,3 +506,10 @@ zgetline.o: ${topdir}/bashtypes.h
 mbscmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 mbscmp.o: ${BASHINCDIR}/stdc.h
 mbscmp.o: ${topdir}/xmalloc.h
+
+casemod.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+casemod.o: ${BASHINCDIR}/stdc.h
+casemod.o: ${topdir}/xmalloc.h
+casemod.o: ${topdir}/bashtypes.h
+casemod.o: ${BASHINCDIR}/shmbutil.h
+casemod.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
