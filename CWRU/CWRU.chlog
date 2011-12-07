@@ -15315,3 +15315,10 @@ builtins/shopt.def
 execute_cmd.c
 	- in execute_cond_node, restore bash-3.1 behavior of quoted rhs of
 	  regexp matches if shell_compatibility_level == 31
+
+				   2/28
+				   ----
+lib/readline/rltty.c
+	- set readline_echoing_p = 1 if tcgetattr fails and sets errno to
+	  EINVAL, as Linux does when the fd is a pipe.  Reported by Mike
+	  Frysinger <vapier@gentoo.org>
