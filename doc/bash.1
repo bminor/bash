@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun May 25 10:41:29 EDT 2008
+.\"	Last Change: Mon Jun  2 20:32:53 EDT 2008
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2008 May 25" "GNU Bash-4.0"
+.TH BASH 1 "2008 June 2" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1944,6 +1944,14 @@ had been executed.
 .B PROMPT_COMMAND
 If set, the value is executed as a command prior to issuing each primary
 prompt.
+.TP
+.B PROMPT_DIRTRIM
+If set to a number greater than zero, the value is used as the number of
+trailing directory components to retain when expanding the \fB\ew\fB and
+\fB\eW\fP prompt string escapes (see
+.SM
+.B PROMPTING
+below).  Characters removed are replaced with an ellipsis.
 .TP
 .B PS1
 The value of this parameter is expanded (see
@@ -4360,6 +4368,7 @@ the release of \fBbash\fP, version + patch level (e.g., 2.00.0)
 .TP
 .B \ew
 the current working directory, with \fB$HOME\fP abbreviated with a tilde
+(uses the \fB$PROMPT_DIRTRIM\fP variable)
 .TP
 .B \eW
 the basename of the current working directory, with \fB$HOME\fP

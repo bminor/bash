@@ -4928,6 +4928,12 @@ is readonly.
 If set, the value is interpreted as a command to execute
 before the printing of each primary prompt (@env{$PS1}).
 
+@item PROMPT_DIRTRIM
+If set to a number greater than zero, the value is used as the number of
+trailing directory components to retain when expanding the @code{\w} and
+@code{\W} prompt string escapes (@pxref{Printing a Prompt}).
+Characters removed are replaced with an ellipsis.
+
 @item PS3
 The value of this variable is used as the prompt for the
 @code{select} command.  If this variable is not set, the
@@ -6050,7 +6056,8 @@ The version of Bash (e.g., 2.00)
 @item \V
 The release of Bash, version + patchlevel (e.g., 2.00.0)
 @item \w
-The current working directory, with @env{$HOME} abbreviated with a tilde.
+The current working directory, with @env{$HOME} abbreviated with a tilde
+(uses the @env{$PROMPT_DIRTRIM} variable).
 @item \W
 The basename of @env{$PWD}, with @env{$HOME} abbreviated with a tilde.
 @item \!

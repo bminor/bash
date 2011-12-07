@@ -859,14 +859,17 @@ of alphabetic characters.
 The @samp{|} is used to separate multiple patterns, and the @samp{)}
 operator terminates a pattern list.
 A list of patterns and an associated command-list is known
-as a @var{clause}.  Each clause must be terminated with @samp{;;}.
+as a @var{clause}.
+
+Each clause must be terminated with @samp{;;}, @samp{,&}, or @samp{;;&}.
 The @var{word} undergoes tilde expansion, parameter expansion, command
 substitution, arithmetic expansion, and quote removal before matching is
 attempted.  Each @var{pattern} undergoes tilde expansion, parameter
 expansion, command substitution, and arithmetic expansion.
 
 There may be an arbitrary number of @code{case} clauses, each terminated
-by a @samp{;;}.  The first pattern that matches determines the
+by a @samp{;;}, @samp{;&}, or @samp{;;&}.
+The first pattern that matches determines the
 command-list that is executed.
 
 Here is an example using @code{case} in a script that could be used to
@@ -885,6 +888,15 @@ echo " legs."
 @end example
 
 @noindent
+
+If the @samp{;;} operator is used, no subsequent matches are attempted after
+the first pattern match.
+Using @samp{;&}  in place of @samp{;;} causes execution to continue with
+the @var{command-list} associated with the next clause, if any.
+Using @samp{;;&} in place of @samp{;;} causes the shell to test the patterns
+in the next clause, if any, and execute any associated @var{command-list}
+on a successful match.
+
 The return status is zero if no @var{pattern} is matched.  Otherwise, the
 return status is the exit status of the @var{command-list} executed.
 
@@ -4915,6 +4927,12 @@ is readonly.
 @item PROMPT_COMMAND
 If set, the value is interpreted as a command to execute
 before the printing of each primary prompt (@env{$PS1}).
+
+@item PROMPT_DIRTRIM
+If set to a number greater than zero, the value is used as the number of
+trailing directory components to retain when expanding the @code{\w} and
+@code{\W} prompt string escapes (@pxref{Printing a Prompt}).
+Characters removed are replaced with an ellipsis.
 
 @item PS3
 The value of this variable is used as the prompt for the

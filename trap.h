@@ -63,6 +63,7 @@ extern void initialize_traps __P((void));
 extern void run_pending_traps __P((void));
 
 extern void maybe_set_sigchld_trap __P((char *));
+extern void set_impossible_sigchld_trap __P((void));
 extern void set_sigchld_trap __P((char *));
 
 extern void set_debug_trap __P((char *));

@@ -2843,17 +2843,15 @@ parse_matched_pair (qc, open, close, lenp, flags)
      int open, close;
      int *lenp, flags;
 {
-  int count, ch, tflags;
-  int nestlen, ttranslen, start_lineno;
+  int count, ch, was_dollar, in_comment, check_comment;
+  int pass_next_character, backq_backslash, nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
 /* itrace("parse_matched_pair: open = %c close = %c", open, close); */
   count = 1;
-  tflags = 0;
-
-  if ((flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0)
-    tflags |= LEX_CKCOMMENT;
+  pass_next_character = backq_backslash = was_dollar = in_comment = 0;
+  check_comment = (flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
 
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
   rflags = (qc == '"') ? P_DQUOTE : (flags & P_DQUOTE);
@@ -2864,7 +2862,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && pass_next_character == 0 && backq_backslash == 0);
 
       if (ch == EOF)
 	{
@@ -2880,14 +2878,14 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
       /* Don't bother counting parens or doing anything else if in a comment
 	 or part of a case statement */
-      if (tflags & LEX_INCOMMENT)
+      if (in_comment)
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	  ret[retind++] = ch;
 
 	  if (ch == '\n')
-	    tflags &= ~LEX_INCOMMENT;
+	    in_comment = 0;
 
 	  continue;
 	}
@@ -2895,16 +2893,22 @@ parse_matched_pair (qc, open, close, lenp, flags)
       /* Not exactly right yet, should handle shell metacharacters, too.  If
 	 any changes are made to this test, make analogous changes to subst.c:
 	 extract_delimited_string(). */
-      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
-	tflags |= LEX_INCOMMENT;
+      else if MBTEST(check_comment && in_comment == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
+	in_comment = 1;
 
-      if (tflags & LEX_PASSNEXT)		/* last char was backslash */
+      /* last char was backslash inside backquoted command substitution */
+      if (backq_backslash)
 	{
-	  tflags &= ~LEX_PASSNEXT;
+	  backq_backslash = 0;
+	  /* Placeholder for adding special characters */
+	}
+
+      if (pass_next_character)		/* last char was backslash */
+	{
+	  pass_next_character = 0;
 	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
 	    {
-	      if (retind > 0)
-		retind--;	/* swallow previously-added backslash */
+	      if (retind > 0) retind--;	/* swallow previously-added backslash */
 	      continue;
 	    }
 
@@ -2924,7 +2928,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       else if MBTEST(ch == close)		/* ending delimiter */
 	count--;
       /* handle nested ${...} specially. */
-      else if MBTEST(open != close && (tflags & LEX_WASDOL) && open == '{' && ch == open) /* } */
+      else if MBTEST(open != close && was_dollar && open == '{' && ch == open) /* } */
 	count++;
       else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && ch == open)	/* nested begin */
 	count++;
@@ -2940,12 +2944,16 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if (open == '\'')			/* '' inside grouping construct */
 	{
 	  if MBTEST((flags & P_ALLOWESC) && ch == '\\')
-	    tflags |= LEX_PASSNEXT;
+	    pass_next_character++;
+#if 0
+	  else if MBTEST((flags & P_BACKQUOTE) && ch == '\\')
+	    backq_backslash++;
+#endif
 	  continue;
 	}
 
       if MBTEST(ch == '\\')			/* backslashes */
-	tflags |= LEX_PASSNEXT;
+	pass_next_character++;
 
       /* Could also check open == '`' if we want to parse grouping constructs
 	 inside old-style command substitution. */
@@ -2955,14 +2963,14 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    {
 	      /* '', ``, or "" inside $(...) or other grouping construct. */
 	      push_delimiter (dstack, ch);
-	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'')	/* $'...' inside group */
+	      if MBTEST(was_dollar && ch == '\'')	/* $'...' inside group */
 		nestret = parse_matched_pair (ch, ch, ch, &nestlen, P_ALLOWESC|rflags);
 	      else
 		nestret = parse_matched_pair (ch, ch, ch, &nestlen, rflags);
 	      pop_delimiter (dstack);
 	      CHECK_NESTRET_ERROR ();
 
-	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      if MBTEST(was_dollar && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
 		{
 		  /* Translate $'...' here. */
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
@@ -2981,7 +2989,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		    }
 		  retind -= 2;		/* back up before the $' */
 		}
-	      else if MBTEST((tflags & LEX_WASDOL) && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      else if MBTEST(was_dollar && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
 		{
 		  /* Locale expand $"..." here. */
 		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
@@ -3009,7 +3017,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
 	  FREE (nestret);
 	}
-      else if MBTEST(open != '`' && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+      else if MBTEST(open != '`' && was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	/* check for $(), $[], or ${} inside quoted string. */
 	{
 	  if (open == ch)	/* undo previous increment */
@@ -3026,10 +3034,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
 	  FREE (nestret);
 	}
-      if MBTEST(ch == '$')
-	tflags |= LEX_WASDOL;
-      else
-	tflags &= ~LEX_WASDOL;
+      was_dollar = MBTEST(ch == '$');
     }
 
   ret[retind] = '\0';
@@ -3371,7 +3376,11 @@ eof_error:
 	  if ((tflags & LEX_INCASE) == 0 && open == ch)	/* undo previous increment */
 	    count--;
 	  if (ch == '(')		/* ) */
+#if 0
+	    nestret = parse_comsub (0, '(', ')', &nestlen, rflags & ~P_DQUOTE);
+#else
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
+#endif
 	  else if (ch == '{')		/* } */
 	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
 	  else if (ch == '[')		/* ] */

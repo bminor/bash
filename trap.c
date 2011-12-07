@@ -295,6 +295,14 @@ run_pending_traps ()
 	      run_interrupt_trap ();
 	      CLRINTERRUPT;
 	    }
+#if defined (JOB_CONTROL) && defined (SIGCHLD)
+	  else if (sig == SIGCHLD &&
+		   trap_list[SIGCHLD] != (char *)IMPOSSIBLE_TRAP_HANDLER &&
+		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
+	    {
+	      run_sigchld_trap (pending_traps[sig]);	/* use as counter */
+	    }
+#endif
 	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
 		   trap_list[sig] == (char *)IGNORE_SIG ||
 		   trap_list[sig] == (char *)IMPOSSIBLE_TRAP_HANDLER)
@@ -365,6 +373,9 @@ trap_handler (sig)
     {
       oerrno = errno;
 #if defined (MUST_REINSTALL_SIGHANDLERS)
+#  if defined (JOB_CONTROL) && defined (SIGCHLD)
+      if (sig != SIGCHLD)
+#  endif /* JOB_CONTROL && SIGCHLD */
       set_signal_handler (sig, trap_handler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
 
@@ -399,13 +410,27 @@ set_sigchld_trap (command_string)
 #endif
 
 /* Make COMMAND_STRING be executed when SIGCHLD is caught iff SIGCHLD
-   is not already trapped. */
+   is not already trapped.  IMPOSSIBLE_TRAP_HANDLER is used as a sentinel
+   to make sure that a SIGCHLD trap handler run via run_sigchld_trap can
+   reset the disposition to the default and not have the original signal
+   accidentally restored, undoing the user's command. */
 void
 maybe_set_sigchld_trap (command_string)
      char *command_string;
 {
-  if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0)
+  if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0 && trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER)
     set_signal (SIGCHLD, command_string);
+}
+
+/* Temporarily set the SIGCHLD trap string to IMPOSSIBLE_TRAP_HANDLER.  Used
+   as a sentinel in run_sigchld_trap and maybe_set_sigchld_trap to see whether
+   or not a SIGCHLD trap handler reset SIGCHLD disposition to the default. */
+void
+set_impossible_sigchld_trap ()
+{
+  restore_default_signal (SIGCHLD);
+  change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
+  sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 

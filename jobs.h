@@ -221,6 +221,8 @@ extern int initialize_job_control __P((int));
 extern void initialize_job_signals __P((void));
 extern int give_terminal_to __P((pid_t, int));
 
+extern void run_sigchld_trap __P((int));
+
 extern void unfreeze_jobs_list __P((void));
 extern int set_job_control __P((int));
 extern void without_job_control __P((void));

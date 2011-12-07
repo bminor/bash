@@ -33,7 +33,7 @@
 \entry{command timing}{8}{command timing}
 \entry{commands, lists}{9}{commands, lists}
 \entry{commands, compound}{9}{commands, compound}
-\entry{commands, looping}{9}{commands, looping}
+\entry{commands, looping}{10}{commands, looping}
 \entry{commands, conditional}{10}{commands, conditional}
 \entry{commands, grouping}{13}{commands, grouping}
 \entry{shell function}{14}{shell function}
@@ -41,16 +41,16 @@
 \entry{parameters}{15}{parameters}
 \entry{variable, shell}{15}{variable, shell}
 \entry{shell variable}{15}{shell variable}
-\entry{parameters, positional}{15}{parameters, positional}
+\entry{parameters, positional}{16}{parameters, positional}
 \entry{parameters, special}{16}{parameters, special}
 \entry{expansion}{17}{expansion}
-\entry{brace expansion}{17}{brace expansion}
-\entry{expansion, brace}{17}{expansion, brace}
+\entry{brace expansion}{18}{brace expansion}
+\entry{expansion, brace}{18}{expansion, brace}
 \entry{tilde expansion}{18}{tilde expansion}
 \entry{expansion, tilde}{18}{expansion, tilde}
 \entry{parameter expansion}{19}{parameter expansion}
 \entry{expansion, parameter}{19}{expansion, parameter}
-\entry{command substitution}{21}{command substitution}
+\entry{command substitution}{22}{command substitution}
 \entry{expansion, arithmetic}{22}{expansion, arithmetic}
 \entry{arithmetic expansion}{22}{arithmetic expansion}
 \entry{process substitution}{22}{process substitution}
@@ -62,15 +62,15 @@
 \entry{pattern matching}{24}{pattern matching}
 \entry{matching, pattern}{24}{matching, pattern}
 \entry{redirection}{25}{redirection}
-\entry{command expansion}{28}{command expansion}
-\entry{command execution}{29}{command execution}
-\entry{command search}{29}{command search}
+\entry{command expansion}{29}{command expansion}
+\entry{command execution}{30}{command execution}
+\entry{command search}{30}{command search}
 \entry{execution environment}{30}{execution environment}
 \entry{environment}{31}{environment}
-\entry{exit status}{31}{exit status}
+\entry{exit status}{32}{exit status}
 \entry{signal handling}{32}{signal handling}
-\entry{shell script}{32}{shell script}
-\entry{special builtin}{57}{special builtin}
+\entry{shell script}{33}{shell script}
+\entry{special builtin}{58}{special builtin}
 \entry{login shell}{71}{login shell}
 \entry{interactive shell}{71}{interactive shell}
 \entry{startup files}{71}{startup files}
@@ -102,16 +102,16 @@
 \entry{kill ring}{93}{kill ring}
 \entry{initialization file, readline}{94}{initialization file, readline}
 \entry{variables, readline}{95}{variables, readline}
-\entry{programmable completion}{111}{programmable completion}
-\entry{completion builtins}{113}{completion builtins}
-\entry{History, how to use}{116}{History, how to use}
-\entry{command history}{117}{command history}
-\entry{history list}{117}{history list}
-\entry{history builtins}{117}{history builtins}
-\entry{history expansion}{119}{history expansion}
-\entry{event designators}{120}{event designators}
-\entry{history events}{120}{history events}
-\entry{installation}{123}{installation}
-\entry{configuration}{123}{configuration}
-\entry{Bash installation}{123}{Bash installation}
-\entry{Bash configuration}{123}{Bash configuration}
+\entry{programmable completion}{112}{programmable completion}
+\entry{completion builtins}{114}{completion builtins}
+\entry{History, how to use}{117}{History, how to use}
+\entry{command history}{119}{command history}
+\entry{history list}{119}{history list}
+\entry{history builtins}{119}{history builtins}
+\entry{history expansion}{121}{history expansion}
+\entry{event designators}{122}{event designators}
+\entry{history events}{122}{history events}
+\entry{installation}{125}{installation}
+\entry{configuration}{125}{configuration}
+\entry{Bash installation}{125}{Bash installation}
+\entry{Bash configuration}{125}{Bash configuration}

@@ -15913,3 +15913,69 @@ doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
 	- document new effects of `bind -x' setting and reading the values of
 	  READLINE_LINE and READLINE_POINT
 	- document new |& synonym for `2>&1 |' pipeline operator
+
+				   5/26
+				   ----
+parse.y	- recognize new ;& and ;;& case action list terminator tokens and
+	  implement them in the grammar, setting CASEPAT_FALLTHROUGH and
+	  CASEPAT_TESTNEXT flags as appropriate
+
+print_cmd.c
+	- print new ;& and ;;& case clause action list terminators as
+	  appropriate
+
+execute_cmd.c
+	- implement new case clause action list terminators:
+		;& - fall through to actions associated with next pattern list
+		;;& - fall through to tests in next pattern list
+
+doc/{bash.1,bashref.texi}
+	- document new ;& and ;;& case clause action list terminators
+
+				   5/28
+				   ----
+jobs.c
+	- change waitchld so it treats SIGCHLD like SIGINT if `wait' is being
+	  executed, and allows wait to jump out before running any trap set
+	  on SIGCHLD.  Fixes debian bug #483016 reported by Miroslav Rudisin
+	  <miero@atrey.karlin.mff.cuni.cz>
+	- run_sigchld_trap is no longer static, so the trap code in trap.c
+	  can call it
+	- change run_sigchld_trap to call set_impossible_sigchld_trap instead
+	  of just using a call to restore_default_signal
+
+jobs.h
+	- new extern declaration for run_sigchld_trap
+
+trap.c
+	- fix run_pending_traps to run a SIGCHLD trap if the trap handler isn't
+	  set to IMPOSSIBLE_TRAP_HANDLER
+	- in trap_handler, don't reset the SIGCHLD trap handler to trap_handler
+	  if MUST_REINSTALL_SIGHANDLERS is defined
+	- new function, set_impossible_sigchld_handler, sets the trap string
+	  associated with SIGCHLD to IMPOSSIBLE_TRAP_HANDLER; used as a sentinel
+	  by run_sigchld_trap and maybe_set_sigchld_handler
+	- change maybe_set_sigchld_handler to set the SIGCHLD trap string only
+	  if the current value is IMPOSSIBLE_TRAP_HANDLER.  This ensures that
+	  any traps on SIGCHLD set in a SIGCHLD handler will persist.  Fixes
+	  debian bug #483016 reported by Miroslav Rudisin
+	  <miero@atrey.karlin.mff.cuni.cz>
+
+trap.h
+	- new extern declaration for set_impossible_sigchld_trap
+
+				   5/31
+				   ----
+parse.y
+	- new function: parse_comsub(), parses $(...) by parsing command
+	  between parens and making sure the next token is `)'.  From
+	  the bash-4.0-devel branch
+	- new function: xparse_dolparen, helper function for parsing
+	  command substitutions in $(...).  Called from subst.c to extract
+	  a command substitution during word expansion.  From bash-4.0-devel
+	  branch
+	- new function: rewind_input_stream().  Rewinds bash_input.location.string
+	  back to where it was before the shell parsed a $() command
+	  substitution.  From bash-4.0-devel branch
+	- changes to parse_matched_pair to combine most of the flag variables
+	  (was_dollar, in_comment, and so on) into a local flags word

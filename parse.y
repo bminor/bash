@@ -148,6 +148,7 @@ static int yy_readline_unget __P((int));
 
 static int yy_string_get __P((void));
 static int yy_string_unget __P((int));
+static void rewind_input_string __P((void));
 static int yy_stream_get __P((void));
 static int yy_stream_unget __P((int));
 
@@ -170,6 +171,7 @@ static int time_command_acceptable __P((void));
 static int special_case_tokens __P((char *));
 static int read_token __P((int));
 static char *parse_matched_pair __P((int, int, int, int *, int));
+static char *parse_comsub __P((int, int, int, int *, int));
 #if defined (ARRAY_VARS)
 static char *parse_compound_assignment __P((int *));
 #endif
@@ -1343,6 +1345,31 @@ with_input_from_string (string, name)
 
   location.string = string;
   init_yy_io (yy_string_get, yy_string_unget, st_string, name, location);
+}
+
+/* Count the number of characters we've consumed from bash_input.location.string
+   and read into shell_input_line, but have not returned from shell_getc.
+   That is the true input location.  Rewind bash_input.location.string by
+   that number of characters, so it points to the last character actually
+   consumed by the parser. */
+void
+rewind_input_string ()
+{
+  int xchars;
+
+  /* number of unconsumed characters in the input -- XXX need to take newlines
+     into account, e.g., $(...\n) */
+  xchars = shell_input_line_len - shell_input_line_index;
+
+  /* XXX - how to reflect bash_input.location.string back to string passed to
+     parse_and_execute or xparse_dolparen?  xparse_dolparen needs to know how
+     far into the string we parsed.  parse_and_execute knows where bash_input.
+     location.string is, and how far from orig_string that is -- that's the
+     number of characters the command consumed. */
+
+  /* bash_input.location.string - xchars should be where we parsed to */
+  /* need to do more validation on xchars value for sanity -- test cases. */
+  bash_input.location.string -= xchars;
 }
 
 /* **************************************************************** */
@@ -2787,7 +2814,7 @@ tokword:
 #define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
 #define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
 
-#define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) = '|')
+#define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
 
 #define CHECK_NESTRET_ERROR() \
   do { \
@@ -2816,15 +2843,17 @@ parse_matched_pair (qc, open, close, lenp, flags)
      int open, close;
      int *lenp, flags;
 {
-  int count, ch, was_dollar, in_comment, check_comment;
-  int pass_next_character, backq_backslash, nestlen, ttranslen, start_lineno;
+  int count, ch, tflags;
+  int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
 /* itrace("parse_matched_pair: open = %c close = %c", open, close); */
   count = 1;
-  pass_next_character = backq_backslash = was_dollar = in_comment = 0;
-  check_comment = (flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
+  tflags = 0;
+
+  if ((flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0)
+    tflags |= LEX_CKCOMMENT;
 
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
   rflags = (qc == '"') ? P_DQUOTE : (flags & P_DQUOTE);
@@ -2835,7 +2864,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && pass_next_character == 0 && backq_backslash == 0);
+      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
 
       if (ch == EOF)
 	{
@@ -2849,36 +2878,33 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if (ch == '\n' && SHOULD_PROMPT ())
 	prompt_again ();
 
-      if (in_comment)
+      /* Don't bother counting parens or doing anything else if in a comment
+	 or part of a case statement */
+      if (tflags & LEX_INCOMMENT)
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	  ret[retind++] = ch;
 
 	  if (ch == '\n')
-	    in_comment = 0;
+	    tflags &= ~LEX_INCOMMENT;
 
 	  continue;
 	}
+
       /* Not exactly right yet, should handle shell metacharacters, too.  If
 	 any changes are made to this test, make analogous changes to subst.c:
 	 extract_delimited_string(). */
-      else if MBTEST(check_comment && in_comment == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
-	in_comment = 1;
+      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || whitespace (ret[retind - 1])))
+	tflags |= LEX_INCOMMENT;
 
-      /* last char was backslash inside backquoted command substitution */
-      if (backq_backslash)
+      if (tflags & LEX_PASSNEXT)		/* last char was backslash */
 	{
-	  backq_backslash = 0;
-	  /* Placeholder for adding special characters */
-	}
-
-      if (pass_next_character)		/* last char was backslash */
-	{
-	  pass_next_character = 0;
+	  tflags &= ~LEX_PASSNEXT;
 	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
 	    {
-	      if (retind > 0) retind--;	/* swallow previously-added backslash */
+	      if (retind > 0)
+		retind--;	/* swallow previously-added backslash */
 	      continue;
 	    }
 
@@ -2898,7 +2924,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       else if MBTEST(ch == close)		/* ending delimiter */
 	count--;
       /* handle nested ${...} specially. */
-      else if MBTEST(open != close && was_dollar && open == '{' && ch == open) /* } */
+      else if MBTEST(open != close && (tflags & LEX_WASDOL) && open == '{' && ch == open) /* } */
 	count++;
       else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && ch == open)	/* nested begin */
 	count++;
@@ -2907,37 +2933,36 @@ parse_matched_pair (qc, open, close, lenp, flags)
       RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
       ret[retind++] = ch;
 
+      /* If we just read the ending character, don't bother continuing. */
+      if (count == 0)
+	break;
+
       if (open == '\'')			/* '' inside grouping construct */
 	{
 	  if MBTEST((flags & P_ALLOWESC) && ch == '\\')
-	    pass_next_character++;
-#if 0
-	  else if MBTEST((flags & P_BACKQUOTE) && ch == '\\')
-	    backq_backslash++;
-#endif
+	    tflags |= LEX_PASSNEXT;
 	  continue;
 	}
 
       if MBTEST(ch == '\\')			/* backslashes */
-	pass_next_character++;
+	tflags |= LEX_PASSNEXT;
 
+      /* Could also check open == '`' if we want to parse grouping constructs
+	 inside old-style command substitution. */
       if (open != close)		/* a grouping construct */
 	{
 	  if MBTEST(shellquote (ch))
 	    {
 	      /* '', ``, or "" inside $(...) or other grouping construct. */
 	      push_delimiter (dstack, ch);
-	      if MBTEST(was_dollar && ch == '\'')	/* $'...' inside group */
+	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'')	/* $'...' inside group */
 		nestret = parse_matched_pair (ch, ch, ch, &nestlen, P_ALLOWESC|rflags);
 	      else
 		nestret = parse_matched_pair (ch, ch, ch, &nestlen, rflags);
 	      pop_delimiter (dstack);
-	      if (nestret == &matched_pair_error)
-		{
-		  free (ret);
-		  return &matched_pair_error;
-		}
-	      if MBTEST(was_dollar && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      CHECK_NESTRET_ERROR ();
+
+	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
 		{
 		  /* Translate $'...' here. */
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
@@ -2956,7 +2981,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		    }
 		  retind -= 2;		/* back up before the $' */
 		}
-	      else if MBTEST(was_dollar && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      else if MBTEST((tflags & LEX_WASDOL) && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
 		{
 		  /* Locale expand $"..." here. */
 		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
@@ -2968,12 +2993,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  retind -= 2;		/* back up before the $" */
 		}
 
-	      if (nestlen)
-		{
-		  RESIZE_MALLOCED_BUFFER (ret, retind, nestlen, retsize, 64);
-		  strcpy (ret + retind, nestret);
-		  retind += nestlen;
-		}
+	      APPEND_NESTRET ();
 	      FREE (nestret);
 	    }
 	}
@@ -2983,32 +3003,13 @@ parse_matched_pair (qc, open, close, lenp, flags)
       else if MBTEST(open == '"' && ch == '`')
 	{
 	  nestret = parse_matched_pair (0, '`', '`', &nestlen, rflags);
-add_nestret:
-	  if (nestret == &matched_pair_error)
-	    {
-	      free (ret);
-	      return &matched_pair_error;
-	    }
-	  if (nestlen)
-	    {
-	      RESIZE_MALLOCED_BUFFER (ret, retind, nestlen, retsize, 64);
-	      strcpy (ret + retind, nestret);
-	      retind += nestlen;
-	    }
+
+	  CHECK_NESTRET_ERROR ();
+	  APPEND_NESTRET ();
+
 	  FREE (nestret);
 	}
-#if 0
-      else if MBTEST(qc == '`' && (ch == '"' || ch == '\'') && in_comment == 0)
-	{
-	  /* Add P_BACKQUOTE so backslash quotes the next character and
-	     shell_getc does the right thing with \<newline>.  We do this for
-	     a measure  of backwards compatibility -- it's not strictly the
-	     right POSIX thing. */
-	  nestret = parse_matched_pair (0, ch, ch, &nestlen, rflags|P_BACKQUOTE);
-	  goto add_nestret;
-	}
-#endif
-      else if MBTEST(open != '`' && was_dollar && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+      else if MBTEST(open != '`' && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	/* check for $(), $[], or ${} inside quoted string. */
 	{
 	  if (open == ch)	/* undo previous increment */
@@ -3020,14 +3021,446 @@ add_nestret:
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
 
-	  goto add_nestret;
+	  CHECK_NESTRET_ERROR ();
+	  APPEND_NESTRET ();
+
+	  FREE (nestret);
 	}
-      was_dollar = MBTEST(ch == '$');
+      if MBTEST(ch == '$')
+	tflags |= LEX_WASDOL;
+      else
+	tflags &= ~LEX_WASDOL;
     }
 
   ret[retind] = '\0';
   if (lenp)
     *lenp = retind;
+  return ret;
+}
+
+/* Parse a $(...) command substitution.  This is messier than I'd like, and
+   reproduces a lot more of the token-reading code than I'd like. */
+static char *
+parse_comsub (qc, open, close, lenp, flags)
+     int qc;	/* `"' if this construct is within double quotes */
+     int open, close;
+     int *lenp, flags;
+{
+  int count, ch, peekc, tflags, lex_rwlen, lex_firstind;
+  int nestlen, ttranslen, start_lineno;
+  char *ret, *nestret, *ttrans, *heredelim;
+  int retind, retsize, rflags, hdlen;
+
+/*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
+  count = 1;
+  tflags = LEX_RESWDOK;
+
+  if ((flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0)
+    tflags |= LEX_CKCASE;
+  if ((tflags & LEX_CKCASE) && (interactive == 0 || interactive_comments))
+    tflags |= LEX_CKCOMMENT;
+
+  /* RFLAGS is the set of flags we want to pass to recursive calls. */
+  rflags = (flags & P_DQUOTE);
+
+  ret = (char *)xmalloc (retsize = 64);
+  retind = 0;
+
+  start_lineno = line_number;
+  lex_rwlen = 0;
+
+  heredelim = 0;
+  lex_firstind = -1;
+
+  while (count)
+    {
+comsub_readchar:
+      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+
+      if (ch == EOF)
+	{
+eof_error:
+	  free (ret);
+	  FREE (heredelim);
+	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
+	  EOF_Reached = 1;	/* XXX */
+	  return (&matched_pair_error);
+	}
+
+      /* If we hit the end of a line and are reading the contents of a here
+	 document, and it's not the same line that the document starts on,
+	 check for this line being the here doc delimiter.  Otherwise, if
+	 we're in a here document, mark the next character as the beginning
+	 of a line. */
+      if (ch == '\n')
+	{
+	  if ((tflags & LEX_HEREDELIM) && heredelim)
+	    {
+	      tflags &= ~LEX_HEREDELIM;
+	      tflags |= LEX_INHEREDOC;
+	      lex_firstind = retind + 1;
+	    }
+	  else if (tflags & LEX_INHEREDOC)
+	    {
+	      int tind;
+	      tind = lex_firstind;
+	      while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
+		tind++;
+	      if (STREQN (ret + tind, heredelim, hdlen))
+		{
+		  tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
+/*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
+		  lex_firstind = -1;
+		}
+	      else
+		lex_firstind = retind + 1;
+	    }
+	}
+
+      /* Possible reprompting. */
+      if (ch == '\n' && SHOULD_PROMPT ())
+	prompt_again ();
+
+      /* Don't bother counting parens or doing anything else if in a comment */
+      if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))
+	{
+	  /* Add this character. */
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+
+	  if ((tflags & LEX_INCOMMENT) && ch == '\n')
+	    tflags &= ~LEX_INCOMMENT;
+
+	  continue;
+	}
+
+      /* Skip whitespace */
+      if MBTEST(shellblank (ch) && lex_rwlen == 0)
+        {
+	  /* Add this character. */
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  continue;
+        }
+
+      /* Either we are looking for the start of the here-doc delimiter
+	 (lex_firstind == -1) or we are reading one (lex_firstind >= 0).
+	 If this character is a shell break character and we are reading
+	 the delimiter, save it and note that we are now reading a here
+	 document.  If we've found the start of the delimiter, note it by
+	 setting lex_firstind.  Backslashes can quote shell metacharacters
+	 in here-doc delimiters. */
+      if (tflags & LEX_HEREDELIM)
+	{
+	  if (lex_firstind == -1 && shellbreak (ch) == 0)
+	    lex_firstind = retind;
+	  else if (lex_firstind >= 0 && (tflags & LEX_PASSNEXT) == 0 && shellbreak (ch))
+	    {
+	      nestret = substring (ret, lex_firstind, retind);
+	      heredelim = string_quote_removal (nestret, 0);
+	      free (nestret);
+	      hdlen = STRLEN(heredelim);
+/*itrace("parse_comsub:%d: found here doc delimiter `%s' (%d)", line_number, heredelim, hdlen);*/
+	      if (ch == '\n')
+		{
+		  tflags |= LEX_INHEREDOC;
+		  tflags &= ~LEX_HEREDELIM;
+		  lex_firstind = retind + 1;
+		}
+	      else
+		lex_firstind = -1;
+	    }
+	}
+
+      /* Meta-characters that can introduce a reserved word.  Not perfect yet. */
+      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
+	{
+	  /* Add this character. */
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  peekc = shell_getc (1);
+	  if (ch == peekc && (ch == '&' || ch == '|' || ch == ';'))	/* two-character tokens */
+	    {
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	      ret[retind++] = peekc;
+/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch); */
+	      tflags |= LEX_RESWDOK;
+	      lex_rwlen = 0;
+	      continue;
+	    }
+	  else if (ch == '\n' || COMSUB_META(ch))
+	    {
+	      shell_ungetc (peekc);
+	      tflags |= LEX_RESWDOK;
+/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
+	      lex_rwlen = 0;
+	      continue;
+	    }
+	  else if (ch == EOF)
+	    goto eof_error;
+	  else
+	    {
+	      /* `unget' the character we just added and fall through */
+	      retind--;
+	      shell_ungetc (peekc);
+	    }
+	}
+
+      /* If we can read a reserved word, try to read one. */
+      if (tflags & LEX_RESWDOK)
+	{
+	  if MBTEST(islower (ch))
+	    {
+	      /* Add this character. */
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	      ret[retind++] = ch;
+	      lex_rwlen++;
+	      continue;
+	    }
+	  else if MBTEST(lex_rwlen == 4 && shellbreak (ch))
+	    {
+	      if (STREQN (ret + retind - 4, "case", 4))
+{
+		tflags |= LEX_INCASE;
+/*itrace("parse_comsub:%d: found `case', lex_incase -> 1", line_number);*/
+}
+	      else if (STREQN (ret + retind - 4, "esac", 4))
+{
+		tflags &= ~LEX_INCASE;
+/*itrace("parse_comsub:%d: found `esac', lex_incase -> 0", line_number);*/
+}	        
+	      tflags &= ~LEX_RESWDOK;
+	    }
+	  else if (shellbreak (ch) == 0)
+{
+	      tflags &= ~LEX_RESWDOK;
+/*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/
+}
+	}
+
+      if MBTEST((tflags & LEX_INCOMMENT) == 0 && (tflags & LEX_CKCASE) && ch == '<')
+	{
+	  /* Add this character. */
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  peekc = shell_getc (1);
+	  if (peekc == EOF)
+	    goto eof_error;
+	  if (peekc == ch)
+	    {
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	      ret[retind++] = peekc;
+	      peekc = shell_getc (1);
+	      if (peekc == EOF)
+		goto eof_error;
+	      if (peekc == '-')
+		{
+		  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+		  ret[retind++] = peekc;
+		  tflags |= LEX_STRIPDOC;
+		}
+	      else
+		shell_ungetc (peekc);
+	      tflags |= LEX_HEREDELIM;
+	      lex_firstind = -1;
+	      continue;
+	    }
+	  else
+	    ch = peekc;		/* fall through and continue XXX - this skips comments if peekc == '#' */
+	}
+      /* Not exactly right yet, should handle shell metacharacters, too.  If
+	 any changes are made to this test, make analogous changes to subst.c:
+	 extract_delimited_string(). */
+      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
+	tflags |= LEX_INCOMMENT;
+
+      if (tflags & LEX_PASSNEXT)		/* last char was backslash */
+	{
+	  tflags &= ~LEX_PASSNEXT;
+	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
+	    {
+	      if (retind > 0)
+		retind--;	/* swallow previously-added backslash */
+	      continue;
+	    }
+
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+	    ret[retind++] = CTLESC;
+	  ret[retind++] = ch;
+	  continue;
+	}
+      else if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
+	{
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+	  ret[retind++] = CTLESC;
+	  ret[retind++] = ch;
+	  continue;
+	}
+#if 0
+      else if MBTEST((tflags & LEX_INCASE) && ch == close && close == ')')
+        tflags &= ~LEX_INCASE;		/* XXX */
+#endif
+      else if MBTEST(ch == close && (tflags & LEX_INCASE) == 0)		/* ending delimiter */
+{
+	count--;
+/*itrace("parse_comsub:%d: found close: count = %d", line_number, count);*/
+}
+      else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && (tflags & LEX_INCASE) == 0 && ch == open)	/* nested begin */
+	count++;
+
+      /* Add this character. */
+      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+      ret[retind++] = ch;
+
+      /* If we just read the ending character, don't bother continuing. */
+      if (count == 0)
+	break;
+
+      if MBTEST(ch == '\\')			/* backslashes */
+	tflags |= LEX_PASSNEXT;
+
+      if MBTEST(shellquote (ch))
+        {
+          /* '', ``, or "" inside $(...). */
+          push_delimiter (dstack, ch);
+          if MBTEST((tflags & LEX_WASDOL) && ch == '\'')	/* $'...' inside group */
+	    nestret = parse_matched_pair (ch, ch, ch, &nestlen, P_ALLOWESC|rflags);
+	  else
+	    nestret = parse_matched_pair (ch, ch, ch, &nestlen, rflags);
+	  pop_delimiter (dstack);
+	  CHECK_NESTRET_ERROR ();
+
+	  if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	    {
+	      /* Translate $'...' here. */
+	      ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
+	      xfree (nestret);
+
+	      if ((rflags & P_DQUOTE) == 0)
+		{
+		  nestret = sh_single_quote (ttrans);
+		  free (ttrans);
+		  nestlen = strlen (nestret);
+		}
+	      else
+		{
+		  nestret = ttrans;
+		  nestlen = ttranslen;
+		}
+	      retind -= 2;		/* back up before the $' */
+	    }
+	  else if MBTEST((tflags & LEX_WASDOL) && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	    {
+	      /* Locale expand $"..." here. */
+	      ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
+	      xfree (nestret);
+
+	      nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
+	      free (ttrans);
+	      nestlen = ttranslen + 2;
+	      retind -= 2;		/* back up before the $" */
+	    }
+
+	  APPEND_NESTRET ();
+	  FREE (nestret);
+	}
+      else if MBTEST((tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+	/* check for $(), $[], or ${} inside command substitution. */
+	{
+	  if ((tflags & LEX_INCASE) == 0 && open == ch)	/* undo previous increment */
+	    count--;
+	  if (ch == '(')		/* ) */
+	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
+	  else if (ch == '{')		/* } */
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
+	  else if (ch == '[')		/* ] */
+	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
+
+	  CHECK_NESTRET_ERROR ();
+	  APPEND_NESTRET ();
+
+	  FREE (nestret);
+	}
+      if MBTEST(ch == '$')
+	tflags |= LEX_WASDOL;
+      else
+	tflags &= ~LEX_WASDOL;
+    }
+
+  FREE (heredelim);
+  ret[retind] = '\0';
+  if (lenp)
+    *lenp = retind;
+/*itrace("parse_comsub:%d: returning `%s'", line_number, ret);*/
+  return ret;
+}
+
+/* XXX - this needs to handle functionality like subst.c:no_longjmp_on_fatal_error;
+   maybe extract_command_subst should handle it. */
+char *
+xparse_dolparen (base, string, indp, flags)
+     char *base;
+     char *string;
+     int *indp;
+     int flags;
+{
+  sh_parser_state_t ps;
+  int orig_ind, nc, sflags;
+  char *ret, *s, *ep, *ostring;
+
+  /*yydebug = 1;*/
+  orig_ind = *indp;
+  ostring = string;
+
+  sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
+  if (flags & 0x010)		/* EX_NOLONGJMP */
+    sflags |= SEVAL_NOLONGJMP;
+  save_parser_state (&ps);
+
+  /*(*/
+  parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
+  shell_eof_token = ')';
+  parse_string (string, "command substitution", sflags, &ep);
+
+  restore_parser_state (&ps);
+  reset_parser ();
+  if (interactive)
+    token_to_read = 0;
+
+  /* Need to find how many characters parse_and_execute consumed, update
+     *indp, if flags != 0, copy the portion of the string parsed into RET
+     and return it.  If flags & 1 (EX_NOALLOC) we can return NULL. */
+
+  /*(*/
+  if (ep[-1] != ')')
+    {
+#if DEBUG
+      itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
+#endif
+      while (ep > ostring && ep[-1] == '\n') ep--;
+    }
+
+  nc = ep - ostring;
+  *indp = ep - base - 1;
+
+  /*(*/
+#if DEBUG
+  if (base[*indp] != ')')
+    itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
+#endif
+
+  if (flags & 1) 
+    return (char *)NULL;
+
+  if (nc == 0)
+    {
+      ret = xmalloc (1);
+      ret[0] = '\0';
+    }
+  else
+    ret = substring (ostring, 0, nc - 1);
+
   return ret;
 }
 
@@ -4319,6 +4752,7 @@ decode_prompt_string (string)
 		     no longer than PATH_MAX - 1 characters. */
 		  strcpy (t_string, polite_directory_format (t_string));
 
+		temp = trim_pathname (t_string, PATH_MAX - 1);
 		/* If we're going to be expanding the prompt string later,
 		   quote the directory name. */
 		if (promptvars || posixly_correct)

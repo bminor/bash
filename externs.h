@@ -96,6 +96,7 @@ extern char **brace_expand __P((char *));
 /* Miscellaneous functions from parse.y */
 extern int yyparse __P((void));
 extern int return_EOF __P((void));
+extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 

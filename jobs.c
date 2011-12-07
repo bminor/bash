@@ -217,8 +217,6 @@ int check_window_size;
 
 /* Functions local to this file. */
 
-static void run_sigchld_trap __P((int));
-
 static sighandler wait_sigint_handler __P((int));
 static sighandler sigchld_handler __P((int));
 static sighandler sigcont_sighandler __P((int));
@@ -3123,7 +3121,17 @@ waitchld (wpid, block)
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
   if (job_control && signal_is_trapped (SIGCHLD) && children_exited &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
-    run_sigchld_trap (children_exited);
+    {
+      if (this_shell_builtin && this_shell_builtin == wait_builtin)
+	{
+	  interrupt_immediately = 0;
+	  trap_handler (SIGCHLD);	/* set pending_traps[SIGCHLD] */
+	  wait_signal_received = SIGCHLD;
+	  longjmp (wait_intr_buf, 1);
+	}
+
+      run_sigchld_trap (children_exited);
+    }
 
   /* We have successfully recorded the useful information about this process
      that has just changed state.  If we notify asynchronously, and the job
@@ -3342,7 +3350,7 @@ setjstatus (j)
 #endif
 }
 
-static void
+void
 run_sigchld_trap (nchild)
      int nchild;
 {
@@ -3373,7 +3381,7 @@ run_sigchld_trap (nchild)
   subst_assign_varlist = (WORD_LIST *)NULL;
   the_pipeline = (PROCESS *)NULL;
 
-  restore_default_signal (SIGCHLD);
+  set_impossible_sigchld_trap ();
   jobs_list_frozen = 1;
   for (i = 0; i < nchild; i++)
     {
