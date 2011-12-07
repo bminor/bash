@@ -2454,6 +2454,14 @@ command in its environment.
 @subsection Exit Status
 @cindex exit status
 
+The exit status of an executed command is the value returned by the
+@var{waitpid} system call or equivalent function.  Exit statuses    
+fall between 0 and 255, though, as explained below, the shell may
+use values above 125 specially.  Exit statuses from shell builtins and
+compound commands are also limited to this range. Under certain
+circumstances, the shell will use special values to indicate specific
+failure modes.
+
 For the shell's purposes, a command which exits with a
 zero exit status has succeeded.
 A non-zero exit status indicates failure.
@@ -3438,7 +3446,7 @@ parent.
 @item printf
 @btindex printf
 @example
-@code{printf} [-v @var{var}] @var{format} [@var{arguments}]
+printf [-v @var{var}] @var{format} [@var{arguments}]
 @end example
 Write the formatted @var{arguments} to the standard output under the
 control of the @var{format}.

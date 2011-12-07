@@ -43,6 +43,9 @@ const char * const release_status = (char *)0;
 #endif
 const char * const sccs_version = SCCSVERSION;
 
+/* If == 31, shell compatible with bash-3.1, = =32 with bash-3.2, and so on */
+int shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+
 /* Functions for getting, setting, and displaying the shell version. */
 
 /* Forward declarations so we don't have to include externs.h */
@@ -79,5 +82,5 @@ show_shell_version (extended)
 {
   printf (_("GNU bash, version %s (%s)\n"), shell_version_string (), MACHTYPE);
   if (extended)
-    printf (_("Copyright (C) 2007 Free Software Foundation, Inc.\n"));
+    printf (_("Copyright (C) 2008 Free Software Foundation, Inc.\n"));
 }

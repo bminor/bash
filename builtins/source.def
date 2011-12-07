@@ -67,6 +67,8 @@ $END
 extern int errno;
 #endif /* !errno */
 
+extern int posixly_correct;
+
 static void maybe_pop_dollar_vars __P((void));
 
 /* If non-zero, `.' uses $PATH to look up the script to be sourced. */
@@ -125,7 +127,12 @@ source_builtin (list)
 #endif
 
   filename = (char *)NULL;
-  if (source_uses_path)
+  /* XXX -- should this be absolute_pathname? */
+  if (posixly_correct && strchr (list->word->word, '/'))
+    filename = savestring (list->word->word);
+  else if (absolute_pathname (list->word->word))
+    filename = savestring (list->word->word);
+  else if (source_uses_path)
     filename = find_path_file (list->word->word);
   if (filename == 0)
     {

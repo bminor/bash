@@ -1,42 +1,98 @@
-*** ../bash-3.2-patched/version.c	2005-05-16 11:58:34.000000000 -0400
---- version.c	2007-11-23 16:03:40.000000000 -0500
+*** ../bash-3.2-patched/lib/sh/getcwd.c	2004-07-21 17:15:19.000000000 -0400
+--- lib/sh/getcwd.c	2007-12-31 19:26:36.000000000 -0500
 ***************
-*** 34,46 ****
+*** 27,30 ****
+--- 27,34 ----
+  #endif /* _AIX && RISC6000 && !__GNUC__ */
   
-  /* Defines from version.h */
-! const char *dist_version = DISTVERSION;
-! int patch_level = PATCHLEVEL;
-! int build_version = BUILDVERSION;
-  #ifdef RELSTATUS
-! const char *release_status = RELSTATUS;
-  #else
-! const char *release_status = (char *)0;
-  #endif
-! const char *sccs_version = SCCSVERSION;
-  
-  /* Functions for getting, setting, and displaying the shell version. */
---- 34,46 ----
-  
-  /* Defines from version.h */
-! const char * const dist_version = DISTVERSION;
-! const int patch_level = PATCHLEVEL;
-! const int build_version = BUILDVERSION;
-  #ifdef RELSTATUS
-! const char * const release_status = RELSTATUS;
-  #else
-! const char * const release_status = (char *)0;
-  #endif
-! const char * const sccs_version = SCCSVERSION;
-  
-  /* Functions for getting, setting, and displaying the shell version. */
++ #if defined (__QNX__)
++ #  undef HAVE_LSTAT
++ #endif
++ 
+  #include <bashtypes.h>
+  #include <errno.h>
 ***************
-*** 80,83 ****
-    printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
-    if (extended)
-!     printf (_("Copyright (C) 2005 Free Software Foundation, Inc.\n"));
-  }
---- 80,83 ----
-    printf ("GNU bash, version %s (%s)\n", shell_version_string (), MACHTYPE);
-    if (extended)
-!     printf (_("Copyright (C) 2007 Free Software Foundation, Inc.\n"));
-  }
+*** 59,62 ****
+--- 63,93 ----
+  #endif
+  
++ /* If the d_fileno member of a struct dirent doesn't return anything useful,
++    we need to check inode number equivalence the hard way.  Return 1 if
++    the inode corresponding to PATH/DIR is identical to THISINO. */
++ #if defined (BROKEN_DIRENT_D_INO)
++ static int
++ _path_checkino (dotp, name, thisino)
++      char *dotp;
++      char *name;
++      ino_t thisino;
++ {
++   char *fullpath;
++   int r, e;
++   struct stat st;
++ 
++   e = errno;
++   fullpath = sh_makepath (dotp, name, MP_RMDOT);
++   if (stat (fullpath, &st) < 0)
++     {
++       errno = e;
++       return 0;
++     }
++   free (fullpath);
++   errno = e;
++   return (st.st_ino == thisino);
++ }
++ #endif
++     
+  /* Get the pathname of the current working directory,
+     and put it in SIZE bytes of BUF.  Returns NULL if the
+***************
+*** 170,174 ****
+--- 201,209 ----
+  		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
+  	    continue;
++ #if !defined (BROKEN_DIRENT_D_INO)
+  	  if (mount_point || d->d_fileno == thisino)
++ #else
++ 	  if (mount_point || _path_checkino (dotp, d->d_name, thisino))
++ #endif
+  	    {
+  	      char *name;
+***************
+*** 252,268 ****
+    {
+      size_t len = pathbuf + pathsize - pathp;
+      if (buf == NULL)
+        {
+! 	if (len < (size_t) size)
+! 	  len = size;
+! 	buf = (char *) malloc (len);
+  	if (buf == NULL)
+  	  goto lose2;
+        }
+!     else if ((size_t) size < len)
+!       {
+! 	errno = ERANGE;
+! 	goto lose2;
+!       }
+      (void) memcpy((PTR_T) buf, (PTR_T) pathp, len);
+    }
+--- 287,305 ----
+    {
+      size_t len = pathbuf + pathsize - pathp;
++     if (buf == NULL && size <= 0)
++       size = len;
++ 
++     if ((size_t) size < len)
++       {
++ 	errno = ERANGE;
++ 	goto lose2;
++       }
+      if (buf == NULL)
+        {
+! 	buf = (char *) malloc (size);
+  	if (buf == NULL)
+  	  goto lose2;
+        }
+! 
+      (void) memcpy((PTR_T) buf, (PTR_T) pathp, len);
+    }

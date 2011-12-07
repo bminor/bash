@@ -15271,3 +15271,47 @@ general.c
 builtins/*.def
 	- changes to text and formatting suggested by Jan Schampera
 	  <jan.schampera@web.de>
+
+				   2/16
+				   ----
+bashline.c
+	- change command_word_completion_function to use the word completion
+	  found by readline, which matters only when ignoring case is on
+	  and the completion found in the file system differs in case from
+	  the text the user typed (this is what readline does for normal
+	  filename completion).  Fixes issue reported by Jian Wang
+	  <jwang@a10networks.com.cn>.
+
+				   2/18
+				   ----
+builtins/source.def
+	- if the filename passed as an argument contains a `/', don't search
+	  $PATH.  Not sure why it wasn't like this before
+
+				   2/21
+				   ----
+lib/readline/terminal.c
+	- change rl_crlf so that the MINT system on ATARI systems adds a
+	  carriage return before the \n
+
+				   2/22
+				   ----
+doc/{bash.1,bashref.texi}
+	- added text to the EXIT STATUS section noting that exit statuses
+	  fall between 0 and 255, inclusive
+
+support/mkversion.sh
+	- output a #define for DEFAULT_COMPAT_LEVEL (${major}${minor}; e.g. 32)
+	  to version.h
+
+version.c
+	- int variable, shell_compatibility_level, set to DEFAULT_COMPAT_LEVEL
+	  by default
+
+builtins/shopt.def
+	- new shopt variable, compat31, sets shell_compatibility_level to 31
+	  (or back to default if unset)
+
+execute_cmd.c
+	- in execute_cond_node, restore bash-3.1 behavior of quoted rhs of
+	  regexp matches if shell_compatibility_level == 31

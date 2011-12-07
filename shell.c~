@@ -143,7 +143,7 @@ int hup_on_exit = 0;
 int check_jobs_at_exit = 0;
 
 /* Non-zero means to change to a directory name supplied as a command name */
-int autocd = 1;
+int autocd = 0;
 
 /* Tells what state the shell was in when it started:
 	0 = non-interactive shell script
@@ -184,6 +184,9 @@ int have_devfd = HAVE_DEV_FD;
 #else
 int have_devfd = 0;
 #endif
+
+/* If == 31, shell compatible with bash-3.1, = =32 with bash-3.2, and so on */
+int shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
 /* The name of the .(shell)rc file. */
 static char *bashrc_file = "~/.bashrc";
