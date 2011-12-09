@@ -7512,3 +7512,62 @@ execute_cmd.c
 doc/{bash.1,bashref.texi}
 	- clarified description of set -e option to accurately reflect current
 	  implementation
+
+				   2/19
+				   ----
+print_cmd.c
+	- fix print_deferred_heredocs to not print a space if the separator
+	  string is null
+	- change print_deferred_heredocs to set `was_heredoc' after printing
+	  something
+	- change connection printing code to only print the `;' separator
+	  if we haven't just printed a here-document
+	- change connection printing code to print any deferred here
+	  documents after the rhs of the connection.  Fixes bug reported by
+	  Bo Andresen <bo.andresen@zlin.dk>
+
+[bash-4.0 frozen]
+
+				   2/20
+				   ----
+
+[bash-4.0 released]
+
+				   2/22
+				   ----
+
+parse.y
+	- fix parse_comsub to not test a character for being a possible shell
+	  metacharacter if LEX_PASSNEXT flag is set.  Fixes bug reported by
+	  Mike Frysinger <vapier@gentoo.org>
+
+pcomplete.c
+	- add call to save_parser_state (accidentally dropped from patch) to
+	  gen_shell_function_matches.  Fixes bug with bash_completion and
+	  file/directory completion reported by phil@Arcturus.universe
+
+Makefile.in
+	- fix assignment to LDFLAGS_FOR_BUILD to match those in subdir
+	  Makefiles.  Fixes bug reported by Mike Frysinger <vapier@gentoo.org>
+
+builtins/mapfile.def
+	- make sure the callback quantum (-c option argument) is > 0.  Fixes
+	  bug reported by Stephane Chazleas <stephane_chazelas@yahoo.fr>
+
+				   2/23
+				   ----
+parse.y
+	- fix save_token_state and restore_token_state to save and restore
+	  current_token.  Fixes bug reported by Bernd Eggink
+	  <monoped@sudrala.de>
+
+builtins/exit.def
+	- check jobs[i] before checking whether or not it's running when
+	  the checkjobs option is set and we're looking for running jobs
+	  at exit.  Fixes bug reported by Mike Frysinger <vapier@gentoo.org>
+
+				   2/24
+				   ----
+siglist.c
+	- include bashintl.h for definition of _.  Fixes bug reported by
+	  Greg Wooledge <wooledg@eeg.ccf.org>

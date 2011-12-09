@@ -1374,6 +1374,97 @@ unquote_bang (string)
 
 #define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
 
+/* This function assumes s[i] == '['; returns with s[ret] == ']' if
+   an array subscript is correctly parsed. */
+int
+skipsubscript (string, start)
+     const char *string;
+     int start;
+{
+  int i, pass_next, backq, si, c, count;
+  size_t slen;
+  char *temp, *ss;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string + start) + start;
+  no_longjmp_on_fatal_error = 1;
+
+  i = start + 1;		/* skip over leading bracket */
+  count = 1;
+  pass_next = backq = 0;
+  ss = (char *)string;
+  while (c = string[i])
+    {
+      if (pass_next)
+	{
+	  pass_next = 0;
+	  if (c == 0)
+	    CQ_RETURN(i);
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else if (c == '\\')
+	{
+	  pass_next = 1;
+	  i++;
+	  continue;
+	}
+      else if (backq)
+	{
+	  if (c == '`')
+	    backq = 0;
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else if (c == '`')
+	{
+	  backq = 1;
+	  i++;
+	  continue;
+	}
+      else if (c == '[')
+	{
+	  count++;
+	  i++;
+	  continue;
+	}
+      else if (c == ']')
+	{
+	  count--;
+	  if (count == 0)
+	    break;
+	  i++;
+	  continue;
+	}
+      else if (c == '\'' || c == '"')
+	{
+	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i)
+			  : skip_double_quoted (ss, slen, ++i);
+	  /* no increment, the skip functions increment past the closing quote. */
+	}
+      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+	{
+	  si = i + 2;
+	  if (string[si] == '\0')
+	    CQ_RETURN(si);
+
+	  if (string[i+1] == LPAREN)
+	    temp = extract_delimited_string (ss, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
+	  else
+	    temp = extract_dollar_brace_string (ss, &si, 0, SX_NOALLOC);
+	  i = si;
+	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
+	    break;
+	  i++;
+	  continue;
+	}
+      else
+	ADVANCE_CHAR (string, slen, i);
+    }
+
+  CQ_RETURN(i);
+}
+
 /* Skip characters in STRING until we find a character in DELIMS, and return
    the index of that character.  START is the index into string at which we
    begin.  This is similar in spirit to strpbrk, but it returns an index into

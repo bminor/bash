@@ -604,6 +604,7 @@ quote_array_assignment_chars (list)
     }
 }
 
+#if 0
 /* This function assumes s[i] == '['; returns with s[ret] == ']' if
    an array subscript is correctly parsed. */
 int
@@ -662,6 +663,7 @@ skipsubscript (s, i)
 
   return i;
 }
+#endif
 
 /* This function is called with SUB pointing to just after the beginning
    `[' of an array subscript and removes the array element to which SUB

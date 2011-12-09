@@ -1032,6 +1032,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   cmdlist = build_arg_list (funcname, text, lwords, cw);
 
   pps = &ps;
+  save_parser_state (pps);
   begin_unwind_frame ("gen-shell-function-matches");
   add_unwind_protect (restore_parser_state, (char *)pps);
   add_unwind_protect (dispose_words, (char *)cmdlist);

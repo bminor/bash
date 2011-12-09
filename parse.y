@@ -1615,10 +1615,11 @@ save_token_state ()
 {
   int *ret;
 
-  ret = (int *)xmalloc (3 * sizeof (int));
+  ret = (int *)xmalloc (4 * sizeof (int));
   ret[0] = last_read_token;
   ret[1] = token_before_that;
   ret[2] = two_tokens_ago;
+  ret[3] = current_token;
   return ret;
 }
 
@@ -1631,6 +1632,7 @@ restore_token_state (ts)
   last_read_token = ts[0];
   token_before_that = ts[1];
   two_tokens_ago = ts[2];
+  current_token = ts[3];
 }
 
 /*
@@ -2915,6 +2917,7 @@ tokword:
 #define P_DQUOTE	0x04
 #define P_COMMAND	0x08	/* parsing a command, so look for comments */
 #define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
+#define P_ARRAY		0x20	/* parsing a [...] array assignment */
 
 /* Lexical state while parsing a grouping construct or $(...). */
 #define LEX_WASDOL	0x001
@@ -3306,7 +3309,7 @@ eof_error:
 	}
 
       /* Meta-characters that can introduce a reserved word.  Not perfect yet. */
-      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
+      if MBTEST((tflags & LEX_PASSNEXT) == 0 && (tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -4248,7 +4251,7 @@ read_token_word (character)
 		     ((token_index > 0 && assignment_acceptable (last_read_token) && token_is_ident (token, token_index)) ||
 		      (token_index == 0 && (parser_state&PST_COMPASSIGN))))
         {
-	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
+	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, P_ARRAY);
 	  if (ttok == &matched_pair_error)
 	    return -1;		/* Bail immediately. */
 	  RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,

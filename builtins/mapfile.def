@@ -281,7 +281,7 @@ mapfile_builtin (list)
 	  break;
 	case 'c':
 	  code = legal_number (list_optarg, &intval);
-	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
+	  if (code == 0 || intval <= 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid callback quantum"), list_optarg);
 	      return (EXECUTION_FAILURE);
