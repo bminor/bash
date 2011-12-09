@@ -8148,3 +8148,52 @@ findcmd.c
 	- use eaccess(2) if available in file_status to take other file
 	  access mechanisms such as ACLs into account.  Patch supplied
 	  by werner@suse.de
+
+				   6/12
+				   ----
+xmalloc.c
+	- also calculate lowest brk() value the first time xmalloc/xrealloc
+	  (and their sh_ counterparts) are called
+	- error messages consolidated into a single function (allocerr/
+	  sh_allocerr) to avoid string duplication
+
+				   6/16
+				   ----
+variables.c
+	- changes to allow variables.c to be compiled if ALIAS is not defined.
+	  Bug and fix from John Gatewood Ham <uraphalinuxserver@gmail.com>
+
+lib/sh/getcwd.c
+	- fix so systems defining BROKEN_DIRENT_D_INO have the necessary
+	  defines.  Fix from Jay Krell <jay.krell@cornell.edu>
+
+configure.in
+	- add -D_ALL_SOURCE to interix CFLAGS for struct timezone definition.
+	  Bug and fix from John Gatewood Ham <uraphalinuxserver@gmail.com>
+
+				   6/29
+				   ----
+variables.c
+	- change initialize_shell_variables to add environment variables with
+	  invalid names to the variables hash table, but marking them as
+	  invisible and imported
+	- new function, export_environment_candidate.  Used when creating the
+	  export environment for commands to include variables with invalid
+	  names inherited from the initial environment.  Apparently this
+	  behavior is widespread
+	- change make_var_export_array to use export_environment_candidate
+	  rather than visible_and_exported to test variables for inclusion
+	  in the export environment
+
+				    7/1
+				    ---
+builtins/read.def
+	- fix a memory leak where the number of fields is not the same as
+	  the number of variables passed to `read'.  Bug report from
+	  werner@suse.de
+
+builtins/command.def
+	- move section of code that sets PATH from -p option before the
+	  verbose-handling section, so command -v and command -V honor
+	  the PATH set by command -p.  Bug and fix from
+	  ohki@gssm.otsuka.tsukuba.ac.jp

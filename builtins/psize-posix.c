@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 main(c, v)
 int	c;

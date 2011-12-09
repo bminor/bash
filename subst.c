@@ -8579,6 +8579,13 @@ brace_expand_word_list (tlist, eflags)
     {
       next = tlist->next;
 
+      if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
+        {
+/*itrace("brace_expand_word_list: %s: W_COMPASSIGN|W_ASSIGNARG", tlist->word->word);*/
+	  PREPEND_LIST (tlist, output_list);
+	  continue;
+        }
+          
       /* Only do brace expansion if the word has a brace character.  If
 	 not, just add the word list element to BRACES and continue.  In
 	 the common case, at least when running shell scripts, this will

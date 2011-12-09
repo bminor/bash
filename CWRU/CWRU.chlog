@@ -8197,3 +8197,11 @@ builtins/command.def
 	  verbose-handling section, so command -v and command -V honor
 	  the PATH set by command -p.  Bug and fix from
 	  ohki@gssm.otsuka.tsukuba.ac.jp
+
+				    7/9
+				    ---
+subst.c
+	- change brace_expand_word_list to defer brace expansion on compound
+	  array assignments that are arguments to builtins like `declare',
+	  deferring the expansion until the assignment statement is processed.
+	  Fixes inconsistency reported by agriffis@n01se.net
