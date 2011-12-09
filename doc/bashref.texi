@@ -6562,6 +6562,11 @@ escape characters are converted.
 The @code{ulimit} builtin uses a block size of 512 bytes for the @option{-c}
 and @option{-f} options.
 
+@item
+The arrival of @code{SIGCHLD}  when a trap is set on @code{SIGCHLD} does
+not interrupt the @code{wait} builtin and cause it to return immediately.
+The trap command is run once for each child that exits.
+
 @end enumerate
 
 There is other @sc{posix} behavior that Bash does not implement by

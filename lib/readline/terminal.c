@@ -528,8 +528,8 @@ _rl_init_terminal_io (terminal_name)
 
   /* Check to see if this terminal has a meta key and clear the capability
      variables if there is none. */
-  term_has_meta = (tgetflag ("km") || tgetflag ("MT"));
-  if (!term_has_meta)
+  term_has_meta = tgetflag ("km") != 0;
+  if (term_has_meta == 0)
     _rl_term_mm = _rl_term_mo = (char *)NULL;
 
   /* Attempt to find and bind the arrow keys.  Do not override already

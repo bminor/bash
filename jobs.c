@@ -3143,7 +3143,7 @@ waitchld (wpid, block)
   if (job_control && signal_is_trapped (SIGCHLD) && children_exited &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {
-      if (this_shell_builtin && this_shell_builtin == wait_builtin)
+      if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
 	{
 	  interrupt_immediately = 0;
 	  trap_handler (SIGCHLD);	/* set pending_traps[SIGCHLD] */

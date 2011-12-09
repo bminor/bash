@@ -93,6 +93,11 @@ extern int errno;
 #define LPAREN		'('
 #define RPAREN		')'
 
+#if defined (HANDLE_MULTIBYTE)
+#define WLPAREN		L'('
+#define WRPAREN		L')'
+#endif
+
 /* Evaluates to 1 if C is one of the shell's special parameters whose length
    can be taken, but is also one of the special expansion characters. */
 #define VALID_SPECIAL_LENGTH_PARAM(c) \
@@ -1131,7 +1136,7 @@ extract_command_subst (string, sindex, xflags)
      int *sindex;
      int xflags;
 {
-  if (string[*sindex] == '(')	/*)*/
+  if (string[*sindex] == LPAREN)
     return (extract_delimited_string (string, sindex, "$(", "(", ")", xflags|SX_COMMAND)); /*)*/
   else
     {
@@ -1625,7 +1630,7 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c, invert, skipquote;
+  int i, pass_next, backq, si, c, invert, skipquote, skipcmd;
   size_t slen;
   char *temp;
   DECLARE_MBSTATE;
@@ -1634,6 +1639,7 @@ skip_to_delim (string, start, delims, flags)
   if (flags & SD_NOJMP)
     no_longjmp_on_fatal_error = 1;
   invert = (flags & SD_INVERT);
+  skipcmd = (flags & SD_NOSKIPCMD) == 0;
 
   i = start;
   pass_next = backq = 0;
@@ -1679,7 +1685,7 @@ skip_to_delim (string, start, delims, flags)
 			  : skip_double_quoted (string, slen, ++i);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
-      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+      else if (c == '$' && ((skipcmd && string[i+1] == LPAREN) || string[i+1] == LBRACE))
 	{
 	  si = i + 2;
 	  if (string[si] == '\0')
@@ -1695,6 +1701,20 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
+#if defined (PROCESS_SUBSTITUTION)
+      else if (skipcmd && (c == '<' || c == '>') && string[i+1] == LPAREN)
+	{
+	  si = i + 2;
+	  if (string[si] == '\0')
+	    CQ_RETURN(si);
+	  temp = extract_process_subst (string, (c == '<') ? "<(" : ">(", &si);
+	  i = si;
+	  if (string[i] == '\0')
+	    break;
+	  i++;
+	  continue;
+	}
+#endif /* PROCESS_SUBSTITUTION */
       else if ((skipquote || invert) && (member (c, delims) == 0))
 	break;
       else
@@ -3928,11 +3948,11 @@ match_upattern (string, pat, mtype, sp, ep)
   /* XXX - check this later if I ever implement `**' with special meaning,
      since this will potentially result in `**' at the beginning or end */
   len = STRLEN (pat);
-  if (pat[0] != '*' || (pat[0] == '*' && pat[1] == '(' && extended_glob) || pat[len - 1] != '*')	/*)*/
+  if (pat[0] != '*' || (pat[0] == '*' && pat[1] == LPAREN && extended_glob) || pat[len - 1] != '*')
     {
       p = npat = (char *)xmalloc (len + 3);
       p1 = pat;
-      if (*p1 != '*' || (*p1 == '*' && p1[1] == '(' && extended_glob))	/*)*/
+      if (*p1 != '*' || (*p1 == '*' && p1[1] == LPAREN && extended_glob))
 	*p++ = '*';
       while (*p1)
 	*p++ = *p1++;
@@ -4072,11 +4092,11 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   /* XXX - check this later if I ever implement `**' with special meaning,
      since this will potentially result in `**' at the beginning or end */
   len = wcslen (wpat);
-  if (wpat[0] != L'*' || (wpat[0] == L'*' && wpat[1] == L'(' && extended_glob) || wpat[len - 1] != L'*')	/*)*/
+  if (wpat[0] != L'*' || (wpat[0] == L'*' && wpat[1] == WLPAREN && extended_glob) || wpat[len - 1] != L'*')
     {
       wp = nwpat = (wchar_t *)xmalloc ((len + 3) * sizeof (wchar_t));
       wp1 = wpat;
-      if (*wp1 != L'*' || (*wp1 == '*' && wp1[1] == '(' && extended_glob))	/*)*/
+      if (*wp1 != L'*' || (*wp1 == '*' && wp1[1] == WLPAREN && extended_glob))
 	*wp++ = L'*';
       while (*wp1 != L'\0')
 	*wp++ = *wp1++;
@@ -6542,9 +6562,9 @@ chk_arithsub (s, len)
   i = count = 0;
   while (i < len)
     {
-      if (s[i] == '(')
+      if (s[i] == LPAREN)
 	count++;
-      else if (s[i] == ')')
+      else if (s[i] == RPAREN)
 	{
 	  count--;
 	  if (count < 0)

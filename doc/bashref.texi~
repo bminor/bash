@@ -976,6 +976,9 @@ substitution, and quote removal are performed.
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
+When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+lexicographically using the current locale.
+
 When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching}.
@@ -6558,6 +6561,10 @@ escape characters are converted.
 @item
 The @code{ulimit} builtin uses a block size of 512 bytes for the @option{-c}
 and @option{-f} options.
+
+@item
+The arrival of @code{SIGCHLD}  when a trap is set on @code{SIGCHLD} does
+not interrupt the @code{wait} builtin and cause it to return immediately.
 
 @end enumerate
 

@@ -246,10 +246,6 @@ int promptvars = 1;
    quotes. */
 int extended_quote = 1;
 
-/* The decoded prompt string.  Used if READLINE is not defined or if
-   editing is turned off.  Analogous to current_readline_prompt. */
-static char *current_decoded_prompt;
-
 /* The number of lines read from input while creating the current command. */
 int current_command_line_count;
 
@@ -286,6 +282,10 @@ static int function_bstart;
 /* The line number in a script at which an arithmetic for command starts. */
 static int arith_for_lineno;
 
+/* The decoded prompt string.  Used if READLINE is not defined or if
+   editing is turned off.  Analogous to current_readline_prompt. */
+static char *current_decoded_prompt;
+
 /* The last read token, or NULL.  read_token () uses this for context
    checking. */
 static int last_read_token;
@@ -295,6 +295,8 @@ static int token_before_that;
 
 /* The token read prior to token_before_that. */
 static int two_tokens_ago;
+
+static int global_extglob;
 
 /* The line number in a script where the word in a `case WORD', `select WORD'
    or `for WORD' begins.  This is a nested command maximum, since the array
@@ -2769,6 +2771,13 @@ reset_parser ()
   dstack.delimiter_depth = 0;	/* No delimiters found so far. */
   open_brace_count = 0;
 
+  /* Reset to global value of extended glob */
+  if (parser_state & PST_EXTPAT)
+{
+itrace("reset_parser: parser_state includes PST_EXTPAT");
+    extended_glob = global_extglob;
+}
+
   parser_state = 0;
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
@@ -4043,7 +4052,13 @@ cond_term ()
       /* binop */
       tok = read_token (READ);
       if (tok == WORD && test_binop (yylval.word->word))
-	op = yylval.word;
+	{
+	  op = yylval.word;
+	  if (op->word[0] == '=' && (op->word[1] == '\0' || (op->word[1] == '=' && op->word[2] == '\0')))
+	    parser_state |= PST_EXTPAT;
+	  else if (op->word[0] == '!' && op->word[1] == '=' && op->word[2] == '\0')
+	    parser_state |= PST_EXTPAT;
+	}
 #if defined (COND_REGEXP)
       else if (tok == WORD && STREQ (yylval.word->word, "=~"))
 	{
@@ -4079,8 +4094,13 @@ cond_term ()
 	}
 
       /* rhs */
+      if (parser_state & PST_EXTPAT)
+	extended_glob = 1;
       tok = read_token (READ);
-      parser_state &= ~PST_REGEXP;
+      if (parser_state & PST_EXTPAT)
+	extended_glob = global_extglob;
+      parser_state &= ~(PST_REGEXP|PST_EXTPAT);
+
       if (tok == WORD)
 	{
 	  tright = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
@@ -4125,6 +4145,7 @@ parse_cond_command ()
 {
   COND_COM *cexp;
 
+  global_extglob = extended_glob;
   cexp = cond_expr ();
   return (make_cond_command (cexp));
 }

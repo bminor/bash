@@ -8896,7 +8896,7 @@ configure.in
 	- add "darwin10" cases like darwin8 and darwin9 to handle linking with
 	  included readline and history libraries
 
-				   9/25
+				   9/26
 				   ----
 lib/readline/display.c
 	- modify change of 7/24 to use prompt_physical_chars instead of
@@ -8919,3 +8919,61 @@ lib/sh/fnxform.c
 	  argument in calls to iconv, since outlen is used to keep track of
 	  the size of the buffer, and iconv potentially modifies its
 	  `outbytesleft' argument
+
+				   9/29
+				   ----
+subst.c
+	- make skip_to_delim understand how to skip over process substitution
+	  constructs the way it skips $(...) command substitution
+
+				   9/30
+				   ----
+lib/readline/terminal.c
+	- don't set the `terminal has meta key' flag if the `MT' capability is
+	  available; that means something completely different
+
+				   10/1
+				   ----
+builtins/help.def
+	- make sure width is at least 7, since we pass `width/2 - 3' to strncpy
+	  as the length argument.  Terminal widths <= 6 are converted to 80.
+	  Fixes bug reported by Chris Hall <c@pobox.co.uk>
+
+configure.in
+	- changed version to 4.1-alpha
+
+subst.h
+	- new flag for skip_to_delim: SD_NOSKIPCMD, which means to not skip
+	  over embedded command and process substitutions, but rather to look
+	  for delimiters within them
+
+subst.c
+	- implement semantics of SD_NOSKIPCMD in skip_to_delim
+
+bashline.c
+	- call skip_to_delim with SD_NOSKIPCMD from find_cmd_start, so
+	  programmable completion can use the completion defined for `b' for
+	  command lines like "a $(b c".  Fixes inconsistency/bug reported by
+	  Freddy Vulto <fvulto@gmail.com>
+
+parser.h
+	- replace unused PST_CMDTOKEN parser state value with PST_EXTPAT,
+	  means currently parsing an extended glob pattern (extglob)
+
+parse.y
+	- fix cond_node() so that extended_glob is set before parsing the
+	  rhs of the `==' or `!=' operators.  For ksh93 compatibility.
+	- reset extended_glob to global value (saved in parse_cond_command())
+	  in reset_parser()
+
+				   10/5
+				   ----
+jobs.c
+	- change waitchld() to only interrupt the wait builtin when the shell
+	  receives SIGCHLD in Posix mode.  It's a posix requirement, but
+	  makes easy things hard to do, like run a SIGCHLD trap for every
+	  exiting child
+
+doc/bashref.texi
+	- document new posix mode behavior about SIGCHLD arriving while the
+	  wait builtin is executing when a trap on SIGCHLD has been set

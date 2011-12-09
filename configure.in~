@@ -540,7 +540,7 @@ if test $opt_readline = yes; then
 		# static version specified as -llibname to override the
 		# dynamic version
 		case "${host_os}" in
-		darwin[[89]]*)	READLINE_LIB='${READLINE_LIBRARY}' ;;
+		darwin[[89]]*|darwin10*) READLINE_LIB='${READLINE_LIBRARY}' ;;
 		*)		READLINE_LIB=-lreadline ;;
 		esac
 	fi
@@ -575,7 +575,7 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 		# static version specified as -llibname to override the
 		# dynamic version
 		case "${host_os}" in
-		darwin[[89]]*)	HISTORY_LIB='${HISTORY_LIBRARY}' ;;
+		darwin[[89]]*|darwin10*) HISTORY_LIB='${HISTORY_LIBRARY}' ;;
 		*)		HISTORY_LIB=-lhistory ;;
 		esac
 	fi
@@ -802,13 +802,6 @@ dnl End of checks needed by files in lib/intl
 dnl
 
 BASH_CHECK_MULTIBYTE
-
-if test "$am_cv_func_iconv" = yes; then
-	OLDLIBS="$LIBS"
-	LIBS="$LIBS $LIBICONV"
-	AC_CHECK_FUNCS(locale_charset)
-	LIBS="$OLDLIBS"
-fi
 
 dnl checks for the dynamic loading library functions in libc and libdl
 if test "$opt_static_link" != yes; then

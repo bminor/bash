@@ -350,6 +350,8 @@ A star (*) next to a name means that the command is disabled.\n\
   width /= 2;
   if (width > sizeof (blurb))
     width = sizeof (blurb);
+  if (width <= 3)
+    width = 40;
   height = (num_shell_builtins + 1) / 2;	/* number of rows */
 
   for (i = 0; i < height; i++)
