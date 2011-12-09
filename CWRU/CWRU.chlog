@@ -8767,3 +8767,37 @@ variables.c
 bashline.c
 	- fix to bash_execute_unix_command to avoid possible null pointer
 	  dereference if READLINE_LINE or READLINE_POINT is not bound
+
+				   9/11
+				   ----
+[Prayers for the victimes of 9/11/2001]
+
+command.h
+	- add `rflags' member to struct redirect to hold private flags and
+	  state information
+	- change redirector to a REDIRECTEE instead of int to prepare for
+	  possible future changes
+
+{copy_cmd,dispose_cmd,make_cmd,print_cmd,redir}.c
+	- changes resulting from type change of `redirector' member of struct
+	  redirect: change x->redirector to x->redirector.dest and add code
+	  where appropriate to deal with x->redirector.filename
+
+make_cmd.h
+	- change extern declaration for make_redirection
+
+make_cmd.c
+	- first argument of make_redirection is now a `REDIRECTEE' to prepare
+	  for possible future changes.  First arg is now assigned directly to
+	  redirector member instead of assigning int to redirector.dest
+
+{make_cmd,redir}.c,parse.y
+	- changes resulting from type change of first argument to
+	  make_redirection from int to REDIRECTEE.  In general, changes are
+	  using REDIRECTEE sd and assigning old argument to sd.dest, then
+	  passing sd to make_redirection
+
+make_cmd.[ch],parse.y
+	- add fourth argument to make_redirection: flags.  Sets initial value
+	  of `rflags' member of struct redirect
+	- changed all callers of make_redirection to add fourth argument of 0

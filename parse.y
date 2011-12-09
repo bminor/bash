@@ -310,6 +310,7 @@ static int word_top = -1;
 static int token_to_read;
 static WORD_DESC *word_desc_to_read;
 
+static REDIRECTEE source;
 static REDIRECTEE redir;
 %}
 
@@ -332,7 +333,7 @@ static REDIRECTEE redir;
 %token IN BANG TIME TIMEOPT
 
 /* More general tokens. yylex () knows how to make these. */
-%token <word> WORD ASSIGNMENT_WORD
+%token <word> WORD ASSIGNMENT_WORD REDIR_WORD
 %token <number> NUMBER
 %token <word_list> ARITH_CMD ARITH_FOR_EXPRS
 %token <command> COND_CMD
@@ -419,159 +420,187 @@ word_list:	WORD
 
 redirection:	'>' WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_output_direction, redir);
+			  $$ = make_redirection (source, r_output_direction, redir, 0);
 			}
 	|	'<' WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection (0, r_input_direction, redir);
+			  $$ = make_redirection (source, r_input_direction, redir, 0);
 			}
 	|	NUMBER '>' WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_output_direction, redir);
+			  $$ = make_redirection (source, r_output_direction, redir, 0);
 			}
 	|	NUMBER '<' WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_input_direction, redir);
+			  $$ = make_redirection (source, r_input_direction, redir, 0);
 			}
 	|	GREATER_GREATER WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_appending_to, redir);
+			  $$ = make_redirection (source, r_appending_to, redir, 0);
 			}
 	|	NUMBER GREATER_GREATER WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_appending_to, redir);
+			  $$ = make_redirection (source, r_appending_to, redir, 0);
 			}
 	|	LESS_LESS WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection (0, r_reading_until, redir);
+			  $$ = make_redirection (source, r_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = $$;
 			}
 	|	NUMBER LESS_LESS WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_reading_until, redir);
+			  $$ = make_redirection (source, r_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = $$;
 			}
 	|	LESS_LESS_LESS WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection (0, r_reading_string, redir);
+			  $$ = make_redirection (source, r_reading_string, redir, 0);
 			}
 	|	NUMBER LESS_LESS_LESS WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_reading_string, redir);
+			  $$ = make_redirection (source, r_reading_string, redir, 0);
 			}
 	|	LESS_AND NUMBER
 			{
+			  source.dest = 0;
 			  redir.dest = $2;
-			  $$ = make_redirection (0, r_duplicating_input, redir);
+			  $$ = make_redirection (source, r_duplicating_input, redir, 0);
 			}
 	|	NUMBER LESS_AND NUMBER
 			{
+			  source.dest = $1;
 			  redir.dest = $3;
-			  $$ = make_redirection ($1, r_duplicating_input, redir);
+			  $$ = make_redirection (source, r_duplicating_input, redir, 0);
 			}
 	|	GREATER_AND NUMBER
 			{
+			  source.dest = 1;
 			  redir.dest = $2;
-			  $$ = make_redirection (1, r_duplicating_output, redir);
+			  $$ = make_redirection (source, r_duplicating_output, redir, 0);
 			}
 	|	NUMBER GREATER_AND NUMBER
 			{
+			  source.dest = $1;
 			  redir.dest = $3;
-			  $$ = make_redirection ($1, r_duplicating_output, redir);
+			  $$ = make_redirection (source, r_duplicating_output, redir, 0);
 			}
 	|	LESS_AND WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection (0, r_duplicating_input_word, redir);
+			  $$ = make_redirection (source, r_duplicating_input_word, redir, 0);
 			}
 	|	NUMBER LESS_AND WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_duplicating_input_word, redir);
+			  $$ = make_redirection (source, r_duplicating_input_word, redir, 0);
 			}
 	|	GREATER_AND WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_duplicating_output_word, redir);
+			  $$ = make_redirection (source, r_duplicating_output_word, redir, 0);
 			}
 	|	NUMBER GREATER_AND WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_duplicating_output_word, redir);
+			  $$ = make_redirection (source, r_duplicating_output_word, redir, 0);
 			}
 	|	LESS_LESS_MINUS WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection
-			    (0, r_deblank_reading_until, redir);
+			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = $$;
 			}
 	|	NUMBER LESS_LESS_MINUS WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection
-			    ($1, r_deblank_reading_until, redir);
+			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = $$;
 			}
 	|	GREATER_AND '-'
 			{
+			  source.dest = 1;
 			  redir.dest = 0;
-			  $$ = make_redirection (1, r_close_this, redir);
+			  $$ = make_redirection (source, r_close_this, redir, 0);
 			}
 	|	NUMBER GREATER_AND '-'
 			{
+			  source.dest = $1;
 			  redir.dest = 0;
-			  $$ = make_redirection ($1, r_close_this, redir);
+			  $$ = make_redirection (source, r_close_this, redir, 0);
 			}
 	|	LESS_AND '-'
 			{
+			  source.dest = 0;
 			  redir.dest = 0;
-			  $$ = make_redirection (0, r_close_this, redir);
+			  $$ = make_redirection (source, r_close_this, redir, 0);
 			}
 	|	NUMBER LESS_AND '-'
 			{
+			  source.dest = $1;
 			  redir.dest = 0;
-			  $$ = make_redirection ($1, r_close_this, redir);
+			  $$ = make_redirection (source, r_close_this, redir, 0);
 			}
 	|	AND_GREATER WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_err_and_out, redir);
+			  $$ = make_redirection (source, r_err_and_out, redir, 0);
 			}
 	|	AND_GREATER_GREATER WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_append_err_and_out, redir);
+			  $$ = make_redirection (source, r_append_err_and_out, redir, 0);
 			}
 	|	NUMBER LESS_GREATER WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_input_output, redir);
+			  $$ = make_redirection (source, r_input_output, redir, 0);
 			}
 	|	LESS_GREATER WORD
 			{
+			  source.dest = 0;
 			  redir.filename = $2;
-			  $$ = make_redirection (0, r_input_output, redir);
+			  $$ = make_redirection (source, r_input_output, redir, 0);
 			}
 	|	GREATER_BAR WORD
 			{
+			  source.dest = 1;
 			  redir.filename = $2;
-			  $$ = make_redirection (1, r_output_force, redir);
+			  $$ = make_redirection (source, r_output_force, redir, 0);
 			}
 	|	NUMBER GREATER_BAR WORD
 			{
+			  source.dest = $1;
 			  redir.filename = $3;
-			  $$ = make_redirection ($1, r_output_force, redir);
+			  $$ = make_redirection (source, r_output_force, redir, 0);
 			}
 	;
 
@@ -1119,12 +1148,13 @@ pipeline:	pipeline '|' newline_list pipeline
 			{
 			  /* Make cmd1 |& cmd2 equivalent to cmd1 2>&1 | cmd2 */
 			  COMMAND *tc;
-			  REDIRECTEE rd;
+			  REDIRECTEE rd, sd;
 			  REDIRECT *r;
 
 			  tc = $1->type == cm_simple ? (COMMAND *)$1->value.Simple : $1;
+			  sd.dest = 2;
 			  rd.dest = 1;
-			  r = make_redirection (2, r_duplicating_output, rd);
+			  r = make_redirection (sd, r_duplicating_output, rd, 0);
 			  if (tc->redirects)
 			    {
 			      register REDIRECT *t;

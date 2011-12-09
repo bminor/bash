@@ -988,7 +988,7 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector == 1)
+      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector.dest == 1)
 	{
 	  /* Temporarily translate it as the execution code does. */
 	  redirects->instruction = r_err_and_out;
@@ -1024,8 +1024,8 @@ print_heredoc_header (redirect)
   kill_leading = redirect->instruction == r_deblank_reading_until;
 
   /* Here doc header */
-  if (redirect->redirector != 0)
-    cprintf ("%d", redirect->redirector);
+  if (redirect->redirector.dest != 0)
+    cprintf ("%d", redirect->redirector.dest);
 
   /* If the here document delimiter is quoted, single-quote it. */
   if (redirect->redirectee.filename->flags & W_QUOTED)
@@ -1055,7 +1055,7 @@ print_redirection (redirect)
 
   kill_leading = 0;
   redirectee = redirect->redirectee.filename;
-  redirector = redirect->redirector;
+  redirector = redirect->redirector.dest;
   redir_fd = redirect->redirectee.dest;
 
   switch (redirect->instruction)

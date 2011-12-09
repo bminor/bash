@@ -673,10 +673,11 @@ document_done:
    INSTRUCTION is the instruction type, SOURCE is a file descriptor,
    and DEST is a file descriptor or a WORD_DESC *. */
 REDIRECT *
-make_redirection (source, instruction, dest_and_filename)
-     int source;
+make_redirection (source, instruction, dest_and_filename, flags)
+     REDIRECTEE source;
      enum r_instruction instruction;
      REDIRECTEE dest_and_filename;
+     int flags;
 {
   REDIRECT *temp;
   WORD_DESC *w;
@@ -690,6 +691,7 @@ make_redirection (source, instruction, dest_and_filename)
   temp->redirectee = dest_and_filename;
   temp->instruction = instruction;
   temp->flags = 0;
+  temp->rflags = flags;
   temp->next = (REDIRECT *)NULL;
 
   switch (instruction)

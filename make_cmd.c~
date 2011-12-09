@@ -526,7 +526,6 @@ make_simple_command (element, command)
      ELEMENT element;
      COMMAND *command;
 {
-itrace("make_simple_command");
   /* If we are starting from scratch, then make the initial command
      structure.  Also note that we have to fill in all the slots, since
      malloc doesn't return zeroed space. */
@@ -675,7 +674,7 @@ document_done:
    and DEST is a file descriptor or a WORD_DESC *. */
 REDIRECT *
 make_redirection (source, instruction, dest_and_filename)
-     int source;
+     REDIRECTEE source;
      enum r_instruction instruction;
      REDIRECTEE dest_and_filename;
 {
@@ -690,7 +689,7 @@ make_redirection (source, instruction, dest_and_filename)
   temp->redirector = source;
   temp->redirectee = dest_and_filename;
   temp->instruction = instruction;
-  temp->flags = 0;
+  temp->flags = temp->rflags = 0;
   temp->next = (REDIRECT *)NULL;
 
   switch (instruction)

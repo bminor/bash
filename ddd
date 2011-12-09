@@ -1,0 +1,286 @@
+*** ../bash-20090903/redir.c	2009-08-17 17:46:34.000000000 -0400
+--- redir.c	2009-09-11 17:29:54.000000000 -0400
+***************
+*** 99,111 ****
+    int oflags;
+  
+    allocname = 0;
+!   if (temp->redirector < 0)
+      /* This can happen when read_token_word encounters overflow, like in
+         exec 4294967297>x */
+      filename = _("file descriptor out of range");
+  #ifdef EBADF
+    /* This error can never involve NOCLOBBER */
+!   else if (error != NOCLOBBER_REDIRECT && temp->redirector >= 0 && error == EBADF)
+      {
+        /* If we're dealing with two file descriptors, we have to guess about
+           which one is invalid; in the cases of r_{duplicating,move}_input and
+--- 99,113 ----
+    int oflags;
+  
+    allocname = 0;
+!   if (temp->rflags & REDIR_VARASSIGN)
+!     filename = savestring (temp->redirector.filename->word);
+!   else if (temp->redirector.dest < 0)
+      /* This can happen when read_token_word encounters overflow, like in
+         exec 4294967297>x */
+      filename = _("file descriptor out of range");
+  #ifdef EBADF
+    /* This error can never involve NOCLOBBER */
+!   else if (error != NOCLOBBER_REDIRECT && temp->redirector.dest >= 0 && error == EBADF)
+      {
+        /* If we're dealing with two file descriptors, we have to guess about
+           which one is invalid; in the cases of r_{duplicating,move}_input and
+***************
+*** 119,125 ****
+  	  filename = allocname = itos (temp->redirectee.dest);
+  	  break;
+  	default:
+! 	  filename = allocname = itos (temp->redirector);
+  	  break;
+          }
+      }
+--- 121,127 ----
+  	  filename = allocname = itos (temp->redirectee.dest);
+  	  break;
+  	default:
+! 	  filename = allocname = itos (temp->redirector.dest);
+  	  break;
+          }
+      }
+***************
+*** 162,167 ****
+--- 164,173 ----
+        internal_error (_("cannot create temp file for here-document: %s"), strerror (heredoc_errno));
+        break;
+  
++     case BADVAR_REDIRECT:
++       internal_error (_("cannot assign fd to variable %s"), filename);
++       break;
++ 
+      default:
+        internal_error ("%s: %s", filename, strerror (error));
+        break;
+***************
+*** 649,658 ****
+    char *redirectee_word;
+    enum r_instruction ri;
+    REDIRECT *new_redirect;
+  
+    redirectee = redirect->redirectee.filename;
+    redir_fd = redirect->redirectee.dest;
+!   redirector = redirect->redirector;
+    ri = redirect->instruction;
+  
+    if (redirect->flags & RX_INTERNAL)
+--- 655,665 ----
+    char *redirectee_word;
+    enum r_instruction ri;
+    REDIRECT *new_redirect;
++   REDIRECTEE sd;
+  
+    redirectee = redirect->redirectee.filename;
+    redir_fd = redirect->redirectee.dest;
+!   redirector = redirect->redirector.dest;
+    ri = redirect->instruction;
+  
+    if (redirect->flags & RX_INTERNAL)
+***************
+*** 670,680 ****
+  	return (AMBIGUOUS_REDIRECT);
+        else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
+  	{
+  	  rd.dest = 0;
+! 	  new_redirect = make_redirection (redirector, r_close_this, rd);
+  	}
+        else if (all_digits (redirectee_word))
+  	{
+  	  if (legal_number (redirectee_word, &lfd) && (int)lfd == lfd)
+  	    rd.dest = lfd;
+  	  else
+--- 677,689 ----
+  	return (AMBIGUOUS_REDIRECT);
+        else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
+  	{
++ 	  sd.dest = redirector;
+  	  rd.dest = 0;
+! 	  new_redirect = make_redirection (sd, r_close_this, rd, 0);
+  	}
+        else if (all_digits (redirectee_word))
+  	{
++ 	  sd.dest = redirector;
+  	  if (legal_number (redirectee_word, &lfd) && (int)lfd == lfd)
+  	    rd.dest = lfd;
+  	  else
+***************
+*** 682,704 ****
+  	  switch (ri)
+  	    {
+  	    case r_duplicating_input_word:
+! 	      new_redirect = make_redirection (redirector, r_duplicating_input, rd);
+  	      break;
+  	    case r_duplicating_output_word:
+! 	      new_redirect = make_redirection (redirector, r_duplicating_output, rd);
+  	      break;
+  	    case r_move_input_word:
+! 	      new_redirect = make_redirection (redirector, r_move_input, rd);
+  	      break;
+  	    case r_move_output_word:
+! 	      new_redirect = make_redirection (redirector, r_move_output, rd);
+  	      break;
+  	    }
+  	}
+        else if (ri == r_duplicating_output_word && redirector == 1)
+  	{
+  	  rd.filename = make_bare_word (redirectee_word);
+! 	  new_redirect = make_redirection (1, r_err_and_out, rd);
+  	}
+        else
+  	{
+--- 691,714 ----
+  	  switch (ri)
+  	    {
+  	    case r_duplicating_input_word:
+! 	      new_redirect = make_redirection (sd, r_duplicating_input, rd, 0);
+  	      break;
+  	    case r_duplicating_output_word:
+! 	      new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+  	      break;
+  	    case r_move_input_word:
+! 	      new_redirect = make_redirection (sd, r_move_input, rd, 0);
+  	      break;
+  	    case r_move_output_word:
+! 	      new_redirect = make_redirection (sd, r_move_output, rd, 0);
+  	      break;
+  	    }
+  	}
+        else if (ri == r_duplicating_output_word && redirector == 1)
+  	{
++ 	  sd.dest = 1;
+  	  rd.filename = make_bare_word (redirectee_word);
+! 	  new_redirect = make_redirection (sd, r_err_and_out, rd, 0);
+  	}
+        else
+  	{
+***************
+*** 730,736 ****
+  	redirectee = new_redirect->redirectee.filename;
+  
+        redir_fd = new_redirect->redirectee.dest;
+!       redirector = new_redirect->redirector;
+        ri = new_redirect->instruction;
+  
+        /* Overwrite the flags element of the old redirect with the new value. */
+--- 740,746 ----
+  	redirectee = new_redirect->redirectee.filename;
+  
+        redir_fd = new_redirect->redirectee.dest;
+!       redirector = new_redirect->redirector.dest;
+        ri = new_redirect->instruction;
+  
+        /* Overwrite the flags element of the old redirect with the new value. */
+***************
+*** 1021,1026 ****
+--- 1031,1037 ----
+  {
+    int new_fd, clexec_flag;
+    REDIRECT *new_redirect, *closer, *dummy_redirect;
++   REDIRECTEE sd;
+  
+    new_fd = fcntl (fd, F_DUPFD, (fdbase < SHELL_FD_BASE) ? SHELL_FD_BASE : fdbase+1);
+    if (new_fd < 0)
+***************
+*** 1034,1049 ****
+  
+    clexec_flag = fcntl (fd, F_GETFD, 0);
+  
+    rd.dest = 0;
+!   closer = make_redirection (new_fd, r_close_this, rd);
+    closer->flags |= RX_INTERNAL;
+    dummy_redirect = copy_redirects (closer);
+  
+    rd.dest = new_fd;
+    if (fd == 0)
+!     new_redirect = make_redirection (fd, r_duplicating_input, rd);
+    else
+!     new_redirect = make_redirection (fd, r_duplicating_output, rd);
+    new_redirect->flags |= RX_INTERNAL;
+    if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
+      new_redirect->flags |= RX_SAVCLEXEC;
+--- 1045,1062 ----
+  
+    clexec_flag = fcntl (fd, F_GETFD, 0);
+  
++   sd.dest = new_fd;
+    rd.dest = 0;
+!   closer = make_redirection (sd, r_close_this, rd, 0);
+    closer->flags |= RX_INTERNAL;
+    dummy_redirect = copy_redirects (closer);
+  
++   sd.dest = fd;
+    rd.dest = new_fd;
+    if (fd == 0)
+!     new_redirect = make_redirection (sd, r_duplicating_input, rd, 0);
+    else
+!     new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+    new_redirect->flags |= RX_INTERNAL;
+    if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
+      new_redirect->flags |= RX_SAVCLEXEC;
+***************
+*** 1066,1073 ****
+       to save others. */
+    if (fd >= SHELL_FD_BASE && ri != r_close_this && clexec_flag)
+      {
+        rd.dest = new_fd;
+!       new_redirect = make_redirection (fd, r_duplicating_output, rd);
+        new_redirect->flags |= RX_INTERNAL;
+  
+        add_exec_redirect (new_redirect);
+--- 1079,1087 ----
+       to save others. */
+    if (fd >= SHELL_FD_BASE && ri != r_close_this && clexec_flag)
+      {
++       sd.dest = fd;
+        rd.dest = new_fd;
+!       new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+        new_redirect->flags |= RX_INTERNAL;
+  
+        add_exec_redirect (new_redirect);
+***************
+*** 1096,1104 ****
+       int fd;
+  {
+    REDIRECT *closer;
+  
+    rd.dest = 0;
+!   closer = make_redirection (fd, r_close_this, rd);
+    closer->flags |= RX_INTERNAL;
+    closer->next = redirection_undo_list;
+    redirection_undo_list = closer;
+--- 1110,1120 ----
+       int fd;
+  {
+    REDIRECT *closer;
++   REDIRECTEE sd;
+  
++   sd.dest = fd;
+    rd.dest = 0;
+!   closer = make_redirection (sd, r_close_this, rd, 0);
+    closer->flags |= RX_INTERNAL;
+    closer->next = redirection_undo_list;
+    redirection_undo_list = closer;
+***************
+*** 1154,1159 ****
+    int n;
+  
+    for (n = 0, rp = redirs; rp; rp = rp->next)
+!     n += stdin_redirection (rp->instruction, rp->redirector);
+    return n;
+  }
+--- 1170,1175 ----
+    int n;
+  
+    for (n = 0, rp = redirs; rp; rp = rp->next)
+!     n += stdin_redirection (rp->instruction, rp->redirector.dest);
+    return n;
+  }

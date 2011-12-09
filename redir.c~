@@ -679,7 +679,7 @@ do_redirection_internal (redirect, flags)
 	{
 	  sd.dest = redirector;
 	  rd.dest = 0;
-	  new_redirect = make_redirection (sd, r_close_this, rd, 0);
+	  new_redirect = make_redirection (sd, r_close_this, rd);
 	}
       else if (all_digits (redirectee_word))
 	{
@@ -691,16 +691,16 @@ do_redirection_internal (redirect, flags)
 	  switch (ri)
 	    {
 	    case r_duplicating_input_word:
-	      new_redirect = make_redirection (sd, r_duplicating_input, rd, 0);
+	      new_redirect = make_redirection (sd, r_duplicating_input, rd);
 	      break;
 	    case r_duplicating_output_word:
-	      new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+	      new_redirect = make_redirection (sd, r_duplicating_output, rd);
 	      break;
 	    case r_move_input_word:
-	      new_redirect = make_redirection (sd, r_move_input, rd, 0);
+	      new_redirect = make_redirection (sd, r_move_input, rd);
 	      break;
 	    case r_move_output_word:
-	      new_redirect = make_redirection (sd, r_move_output, rd, 0);
+	      new_redirect = make_redirection (sd, r_move_output, rd);
 	      break;
 	    }
 	}
@@ -708,7 +708,7 @@ do_redirection_internal (redirect, flags)
 	{
 	  sd.dest = 1;
 	  rd.filename = make_bare_word (redirectee_word);
-	  new_redirect = make_redirection (sd, r_err_and_out, rd, 0);
+	  new_redirect = make_redirection (sd, r_err_and_out, rd);
 	}
       else
 	{
@@ -1047,16 +1047,16 @@ add_undo_redirect (fd, ri, fdbase)
 
   sd.dest = new_fd;
   rd.dest = 0;
-  closer = make_redirection (sd, r_close_this, rd, 0);
+  closer = make_redirection (sd, r_close_this, rd);
   closer->flags |= RX_INTERNAL;
   dummy_redirect = copy_redirects (closer);
 
   sd.dest = fd;
   rd.dest = new_fd;
   if (fd == 0)
-    new_redirect = make_redirection (sd, r_duplicating_input, rd, 0);
+    new_redirect = make_redirection (sd, r_duplicating_input, rd);
   else
-    new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+    new_redirect = make_redirection (sd, r_duplicating_output, rd);
   new_redirect->flags |= RX_INTERNAL;
   if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
     new_redirect->flags |= RX_SAVCLEXEC;
@@ -1081,7 +1081,7 @@ add_undo_redirect (fd, ri, fdbase)
     {
       sd.dest = fd;
       rd.dest = new_fd;
-      new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
+      new_redirect = make_redirection (sd, r_duplicating_output, rd);
       new_redirect->flags |= RX_INTERNAL;
 
       add_exec_redirect (new_redirect);
@@ -1114,7 +1114,7 @@ add_undo_close_redirect (fd)
 
   sd.dest = fd;
   rd.dest = 0;
-  closer = make_redirection (sd, r_close_this, rd, 0);
+  closer = make_redirection (sd, r_close_this, rd);
   closer->flags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
