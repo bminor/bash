@@ -7965,3 +7965,92 @@ lib/readline/{input,parens}.c
 
 lib/sh/fpurge.c
 	- updated implementation, taken from gnulib
+
+				   4/21
+				   ----
+lib/glob/glob.c
+	- in finddirs, don't try to free a return value of glob_error_return
+	  from glob_vector.  Bug and fix from werner@suse.de
+
+lib/readline/signals.c
+	- in rl_echo_signal_char, check that SIGQUIT and SIGTSTP are defined
+	  before trying to use them.  Bug report and fix from Volker Grabsch
+	  <vog@notjusthosting.com>
+
+				   4/24
+				   ----
+aclocal.m4
+	- add conditional inclusion of <stdint.h> to BASH_CHECK_TYPE
+
+bashtypes.h,lib/sh/strto[iu]max.c
+	- include <stdint.h> if present for any existing declaration of
+	  intmax_t and uintmax_t.  Fixes Interix problem reported by
+	  Markus Duft <mduft@gentoo.org>
+
+lib/sh/strindex.c,externs.h,builtins/common.h
+	- renamed strindex to strcasestr to agree with other implementations
+	  (e.g., BSD, MacOS X, gnulib); changed callers
+
+lib/sh/{strindex.c,Makefile.in},Makefile.in
+	- renamed strindex.c to strcasestr.c
+
+configure.in
+	- add strcasestr to call to AC_REPLACE_FUNCS, take advantage of
+	  existing libc implementations
+
+config.h.in
+	- add define for HAVE_STRCASESTR
+
+lib/sh/mbscmp.c
+	- fix mbscmp to return correct values when the strings do not contain
+	  valid multibyte characters.  Ideas from gnulib
+
+xstrchr.c
+	- only compare current character against C if mblength == 1
+
+{shell,variables}.c
+	- changed some xstrchr calls back to strchr when the arguments cannot
+	  contain multibyte characters
+
+lib/sh/{xstrchr.c,Makefile.in},Makefile.in
+	- renamed xstrchr to mbschr; renamed file to mbschr.c
+
+aclocal.m4
+	- change BASH_CHECK_MULTIBYTE to use AC_REPLACE_FUNCS(mbschr)
+
+externs.h
+	- extern declarations for mbscmp and mbschr, conditional on the usual
+	  HAVE_MBSCMP and HAVE_MBSCHR defines
+
+general.h,{alias,arrayfunc,bashline,general,execute_cmd,subst}.c
+	- changed calls to xstrchr to mbschr
+
+doc/bash.1
+	- use `pathname expansion' consistently, not `filename expansion' or
+	  `filename generation'
+
+doc/bashref.texi
+	- use the phrase `filename expansion' consistently (since this is
+	  what they Gnu people prefer) instead of `pathname expansion' or
+	  `filename generation'
+
+aclocal.m4,config.h.in
+	- check for mbscasecmp in BASH_CHECK_MULTIBYTE, define HAVE_MBSCASECMP
+	  if found
+
+lib/sh/{mbscasecmp.c,Makefile.in}
+	- new file, case-insensitive multibyte string comparison
+
+externs.h
+	- extern declaration for mbscasecmp
+
+				   4/25
+				   ----
+lib/readline/display.c
+	- in _rl_move_cursor_relative, don't adjust dpos by woff if it's
+	  already less than woff (don't want it less than 0)
+	- in _rl_move_cursor_relative, short-circuit right away if the cursor
+	  is at columns 0 and `new' is 0 (doesn't matter if it's a multibyte
+	  locale or not, or whether there are invisible chars in the prompt)
+	- in _rl_move_cursor_relative, go ahead and adjust dpos if
+	  prompt_physical_chars >= _rl_screenwidth (previous check was just > )

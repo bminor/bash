@@ -643,8 +643,12 @@ rl_echo_signal_char (sig)
   switch (sig)
     {
     case SIGINT:  c = _rl_intr_char; break;
+#if defined (SIGQUIT)
     case SIGQUIT: c = _rl_quit_char; break;
+#endif
+#if defined (SIGTSTP)
     case SIGTSTP: c = _rl_susp_char; break;
+#endif
     default: return;
     }
 

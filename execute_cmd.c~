@@ -3592,10 +3592,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   begin_unwind_frame ("simple-command");
 
   if (echo_command_at_execute)
-{
-itrace("execute_simple_command: xtrace_print_word_list: %s", words->word->word);
     xtrace_print_word_list (words, 1);
-}
 
   builtin = (sh_builtin_func_t *)NULL;
   func = (SHELL_VAR *)NULL;

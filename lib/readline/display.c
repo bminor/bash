@@ -1894,6 +1894,10 @@ _rl_move_cursor_relative (new, data)
 
   woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
   cpos = _rl_last_c_pos;
+
+  if (cpos == 0 && cpos == new)
+    return;
+
 #if defined (HANDLE_MULTIBYTE)
   /* If we have multibyte characters, NEW is indexed by the buffer point in
      a multibyte string, but _rl_last_c_pos is the display position.  In
@@ -1907,9 +1911,9 @@ _rl_move_cursor_relative (new, data)
 	 prompt string, since they're both buffer indices and DPOS is a
 	 desired display position. */
       if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
-	  (prompt_physical_chars > _rl_screenwidth &&
+	  (prompt_physical_chars >= _rl_screenwidth &&
 	   _rl_last_v_pos == prompt_last_screen_line &&
-	   wrap_offset >= woff &&
+	   wrap_offset >= woff && dpos >= woff &&
 	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
 	   /* XXX last comparison might need to be >= */
 	{

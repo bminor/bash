@@ -41,8 +41,8 @@ mbscmp (mbs1, mbs2)
 
   do
     {
-      len1 = mbtowc (&c1, mbs1, MB_CUR_MAX);
-      len2 = mbtowc (&c2, mbs2, MB_CUR_MAX);
+      len1 = mbtowc ((wchar_t *) &c1, mbs1, MB_CUR_MAX);
+      len2 = mbtowc ((wchar_t *) &c2, mbs2, MB_CUR_MAX);
 
       if (len1 == 0)
 	return len2 == 0 ? 0 : -1;

@@ -24,7 +24,7 @@ are preserved on all copies.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
 and with the Back-Cover Texts as in (a) below.  A copy of the license is
@@ -777,7 +777,7 @@ in @var{consequent-commands}, or zero if none was executed.
 The syntax of the @code{for} command is:
 
 @example
-for @var{name} [in @var{words} @dots{}]; do @var{commands}; done
+for @var{name} [ [in [@var{words} @dots{}] ] ; ] do @var{commands}; done
 @end example
 Expand @var{words}, and execute @var{commands} once for each member
 in the resultant list, with @var{name} bound to the current member.
@@ -864,7 +864,7 @@ operator terminates a pattern list.
 A list of patterns and an associated command-list is known
 as a @var{clause}.
 
-Each clause must be terminated with @samp{;;}, @samp{,&}, or @samp{;;&}.
+Each clause must be terminated with @samp{;;}, @samp{;&}, or @samp{;;&}.
 The @var{word} undergoes tilde expansion, parameter expansion, command
 substitution, arithmetic expansion, and quote removal before matching is
 attempted.  Each @var{pattern} undergoes tilde expansion, parameter
@@ -1767,7 +1767,7 @@ array in turn, and the expansion is the resultant list.
 @itemx $@{@var{parameter},,@var{pattern}@}
 This expansion modifies the case of alphabetic characters in @var{parameter}.
 The @var{pattern} is expanded to produce a pattern just as in
-pathname expansion.
+filename expansion.
 The @samp{^} operator converts lowercase letters matching @var{pattern}
 to uppercase; the @samp{,} operator converts matching uppercase letters
 to lowercase.
@@ -1941,7 +1941,7 @@ an error message is printed and the command is not executed.
 If the shell option @code{nocaseglob} is enabled, the match is performed
 without regard to the case of alphabetic characters.
 
-When a pattern is used for filename generation, the character @samp{.}
+When a pattern is used for filename expansion, the character @samp{.}
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
 When matching a file name, the slash character must always be
@@ -4013,7 +4013,7 @@ separately (@pxref{Command Execution Environment}), and may cause
 subshells to exit before executing all the commands in the subshell.
 
 @item -f
-Disable file name generation (globbing).
+Disable filename expansion (globbing).
 
 @item -h
 Locate and remember (hash) commands as they are looked up for execution.
@@ -4396,7 +4396,7 @@ performed within @code{$@{@var{parameter}@}} expansions
 enclosed in double quotes.  This option is enabled by default. 
 
 @item failglob
-If set, patterns which fail to match filenames during pathname expansion
+If set, patterns which fail to match filenames during filename expansion
 result in an expansion error.
 
 @item force_fignore
@@ -5764,12 +5764,10 @@ True if the strings are equal.
 True if the strings are not equal.
 
 @item @var{string1} < @var{string2}
-True if @var{string1} sorts before @var{string2} lexicographically
-in the current locale.
+True if @var{string1} sorts before @var{string2} lexicographically.
 
 @item @var{string1} > @var{string2}
-True if @var{string1} sorts after @var{string2} lexicographically
-in the current locale.
+True if @var{string1} sorts after @var{string2} lexicographically.
 
 @item @var{arg1} OP @var{arg2}
 @code{OP} is one of 
@@ -6041,7 +6039,7 @@ The @code{unset} builtin is used to destroy arrays.
 @code{unset} @var{name}[@var{subscript}]
 destroys the array element at index @var{subscript}.
 Care must be taken to avoid unwanted side effects caused by filename
-generation.
+expansion.
 @code{unset} @var{name}, where @var{name} is an array, removes the
 entire array. A subscript of @samp{*} or @samp{@@} also removes the
 entire array.
@@ -7325,7 +7323,7 @@ But first, you should
 make sure that it really is a bug, and that it appears in the latest
 version of Bash.
 The latest version of Bash is always available for FTP from
-@uref{ftp://ftp.gnu.org/pub/bash/}.
+@uref{ftp://ftp.gnu.org/pub/gnu/bash/}.
 
 Once you have determined that a bug actually exists, use the
 @code{bashbug} command to submit a bug report.

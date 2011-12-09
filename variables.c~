@@ -867,7 +867,7 @@ make_vers_array ()
   vv = make_new_array_variable ("BASH_VERSINFO");
   av = array_cell (vv);
   strcpy (d, dist_version);
-  s = strchr (d, '.');
+  s = xstrchr (d, '.');
   if (s)
     *s++ = '\0';
   array_insert (av, 0, d);

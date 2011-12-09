@@ -1,6 +1,6 @@
-/* mbscmp - multibyte string comparison. */
+/* mbscasecmp - case-insensitive multibyte string comparison. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -20,20 +20,23 @@
 
 #include <config.h>
 
-#if !defined (HAVE_MBSCMP) && defined (HANDLE_MULTIBYTE)
+#if !defined (HAVE_MBSCASECMP) && defined (HANDLE_MULTIBYTE)
 
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 
+#include <wchar.h>
+#include <wctype.h>
+
 /* Compare MBS1 and MBS2.  */
 int
-mbscmp (mbs1, mbs2)
+mbscasecmp (mbs1, mbs2)
     const char *mbs1;
     const char *mbs2;
 {
   int len1, len2;
-  wchar_t c1, c2;
+  wchar_t c1, c2, l1, l2;
 
   len1 = len2 = 0;
   /* Reset multibyte characters to their initial state.	 */
@@ -61,12 +64,15 @@ mbscmp (mbs1, mbs2)
 						: (memcmp (mbs1, mbs2, len2) >= 0 ? 1 : -1)));
 	}
 
+      l1 = towlower (c1);
+      l2 = towlower (c2);
+ 
       mbs1 += len1;
       mbs2 += len2;
     }
-  while (c1 == c2);
+  while (l1 == l2);
 
-  return c1 - c2;
+  return l1 - l2;
 }
 
 #endif

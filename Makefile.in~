@@ -147,7 +147,7 @@ CCFLAGS = $(BASE_CCFLAGS) $(CPPFLAGS) $(CFLAGS)
 CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 
 LDFLAGS = @LDFLAGS@ $(STATIC_LD) $(LOCAL_LDFLAGS) $(PROFILE_FLAGS) $(CFLAGS)
-LDFLAGS_FOR_BUILD = $(LDFLAGS)
+LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
 
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
@@ -198,14 +198,14 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/pathphys.c ${SH_LIBSRC}/stringlist.c \
 		${SH_LIBSRC}/stringvec.c ${SH_LIBSRC}/tmpfile.c \
 		${SH_LIBSRC}/spell.c ${SH_LIBSRC}/strtrans.c \
-		${SH_LIBSRC}/strindex.c ${SH_LIBSRC}/shquote.c \
+		${SH_LIBSRC}/strcasestr.c ${SH_LIBSRC}/shquote.c \
 		${SH_LIBSRC}/snprintf.c ${SH_LIBSRC}/mailstat.c \
 		${SH_LIBSRC}/fmtulong.c ${SH_LIBSRC}/fmtullong.c \
 		${SH_LIBSRC}/strtoll.c ${SH_LIBSRC}/strtoull.c \
 		${SH_LIBSRC}/strtoimax.c ${SH_LIBSRC}/strtoumax.c \
 		${SH_LIBSRC}/fmtumax.c ${SH_LIBSRC}/netconn.c \
 		${SH_LIBSRC}/mktime.c ${SH_LIBSRC}/strftime.c \
-		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/xstrchr.c \
+		${SH_LIBSRC}/memset.c ${SH_LIBSRC}/mbschr.c \
 		${SH_LIBSRC}/zcatfd.c ${SH_LIBSRC}/shmatch.c \
 		${SH_LIBSRC}/strnlen.c ${SH_LIBSRC}/winsize.c \
 		${SH_LIBSRC}/eaccess.c ${SH_LIBSRC}/wcsdup.c \

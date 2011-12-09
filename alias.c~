@@ -526,7 +526,7 @@ alias_expand (string)
       /* If there is a backslash-escaped character quoted in TOKEN,
 	 then we don't do alias expansion.  This should check for all
 	 other quoting characters, too. */
-      if (mbschr (token, '\\'))
+      if (xstrchr (token, '\\'))
 	expand_this_token = 0;
 
       /* If we should be expanding here, if we are expanding all words, or if

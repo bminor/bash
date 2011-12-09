@@ -2554,7 +2554,7 @@ do_assignment_internal (word, expand)
     aflags |= ASS_APPEND;
 
 #if defined (ARRAY_VARS)
-  if (t = xstrchr (name, '['))	/*]*/
+  if (t = mbschr (name, '['))	/*]*/
     {
       if (assign_list)
 	{
@@ -5077,6 +5077,7 @@ array_length_reference (s)
     {
       c = *--t;
       *t = '\0';
+      last_command_exit_value = EXECUTION_FAILURE;
       err_unboundvar (s);
       *t = c;
       return (-1);
@@ -5187,7 +5188,7 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
 #if defined (ARRAY_VARS)
   else if (valid_array_reference (name))
     {
-      temp1 = xstrchr (name, '[');
+      temp1 = mbschr (name, '[');
       if (temp1 && temp1[1] == '@' && temp1[2] == ']')
 	{
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && quoted_dollar_atp)
@@ -5971,6 +5972,7 @@ pat_subst (string, pat, rep, mflags)
 
   mtype = mflags & MATCH_TYPEMASK;
 
+itrace("pat_subst: string = `%s' pat = `%s' rep = `%s'", string, pat, rep);
   /* Special cases:
    * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING
    *	    with REP and return the result.
@@ -6794,11 +6796,11 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     case RBRACE:
       if (var_is_set == 0 && unbound_vars_is_error)
 	{
+	  last_command_exit_value = EXECUTION_FAILURE;
 	  err_unboundvar (name);
 	  FREE (value);
 	  FREE (temp);
 	  free (name);
-	  last_command_exit_value = EXECUTION_FAILURE;
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
       break;
@@ -6954,8 +6956,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = c;
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
       if (temp1)
@@ -7002,8 +7004,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	      uerror[0] = '$';
 	      uerror[1] = c;
 	      uerror[2] = '\0';
-	      err_unboundvar (uerror);
 	      last_command_exit_value = EXECUTION_FAILURE;
+	      err_unboundvar (uerror);
 	      return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	    }
 	}
@@ -7020,8 +7022,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '*';
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
 
@@ -7082,8 +7084,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '@';
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
 
@@ -7286,7 +7288,10 @@ comsub:
 
 unbound_variable:
       if (unbound_vars_is_error)
-	err_unboundvar (temp1);
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (temp1);
+	}
       else
 	{
 	  free (temp1);
@@ -8558,11 +8563,11 @@ brace_expand_word_list (tlist, eflags)
       /* Only do brace expansion if the word has a brace character.  If
 	 not, just add the word list element to BRACES and continue.  In
 	 the common case, at least when running shell scripts, this will
-	 degenerate to a bunch of calls to `xstrchr', and then what is
+	 degenerate to a bunch of calls to `mbschr', and then what is
 	 basically a reversal of TLIST into BRACES, which is corrected
 	 by a call to REVERSE_LIST () on BRACES when the end of TLIST
 	 is reached. */
-      if (xstrchr (tlist->word->word, LBRACE))
+      if (mbschr (tlist->word->word, LBRACE))
 	{
 	  expansions = brace_expand (tlist->word->word);
 

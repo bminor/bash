@@ -596,7 +596,7 @@ quote_array_assignment_chars (list)
       if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
 	continue;	/* should not happen, but just in case... */
       /* Don't bother if it doesn't look like [ind]=value */
-      if (l->word->word[0] != '[' || xstrchr (l->word->word, '=') == 0) /* ] */
+      if (l->word->word[0] != '[' || mbschr (l->word->word, '=') == 0) /* ] */
 	continue;
       nword = quote_assign (l->word->word);
       free (l->word->word);
@@ -713,7 +713,7 @@ valid_array_reference (name)
   char *t;
   int r, len;
 
-  t = xstrchr (name, '[');	/* ] */
+  t = mbschr (name, '[');	/* ] */
   if (t)
     {
       *t = '\0';
@@ -773,7 +773,7 @@ array_variable_name (s, subp, lenp)
   char *t, *ret;
   int ind, ni;
 
-  t = xstrchr (s, '[');
+  t = mbschr (s, '[');
   if (t == 0)
     {
       if (subp)

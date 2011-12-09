@@ -4372,7 +4372,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
 #if defined (RESTRICTED_SHELL)
   command = (char *)NULL;
-  if (restricted && xstrchr (pathname, '/'))
+  if (restricted && mbschr (pathname, '/'))
     {
       internal_error (_("%s: restricted: cannot specify `/' in command names"),
 		    pathname);

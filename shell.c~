@@ -1790,12 +1790,12 @@ show_shell_usage (fp, extra)
       set_opts = savestring (shell_builtins[i].short_doc);
   if (set_opts)
     {
-      s = strchr (set_opts, '[');
+      s = xstrchr (set_opts, '[');
       if (s == 0)
 	s = set_opts;
       while (*++s == '-')
 	;
-      t = strchr (s, ']');
+      t = xstrchr (s, ']');
       if (t)
 	*t = '\0';
       fprintf (fp, _("\t-%s or -o option\n"), s);

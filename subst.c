@@ -2554,7 +2554,7 @@ do_assignment_internal (word, expand)
     aflags |= ASS_APPEND;
 
 #if defined (ARRAY_VARS)
-  if (t = xstrchr (name, '['))	/*]*/
+  if (t = mbschr (name, '['))	/*]*/
     {
       if (assign_list)
 	{
@@ -5188,7 +5188,7 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
 #if defined (ARRAY_VARS)
   else if (valid_array_reference (name))
     {
-      temp1 = xstrchr (name, '[');
+      temp1 = mbschr (name, '[');
       if (temp1 && temp1[1] == '@' && temp1[2] == ']')
 	{
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && quoted_dollar_atp)
@@ -8562,11 +8562,11 @@ brace_expand_word_list (tlist, eflags)
       /* Only do brace expansion if the word has a brace character.  If
 	 not, just add the word list element to BRACES and continue.  In
 	 the common case, at least when running shell scripts, this will
-	 degenerate to a bunch of calls to `xstrchr', and then what is
+	 degenerate to a bunch of calls to `mbschr', and then what is
 	 basically a reversal of TLIST into BRACES, which is corrected
 	 by a call to REVERSE_LIST () on BRACES when the end of TLIST
 	 is reached. */
-      if (xstrchr (tlist->word->word, LBRACE))
+      if (mbschr (tlist->word->word, LBRACE))
 	{
 	  expansions = brace_expand (tlist->word->word);
 

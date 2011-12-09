@@ -1,9 +1,9 @@
-/* strtoumax - convert string representation of a number into an uintmax_t value. */
+/* strtoimax - convert string representation of a number into an intmax_t value. */
 
-/* Copyright 1999-2009 Free Software Foundation, Inc.
+/* Copyright 1999-2005 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
-
+   
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -41,42 +41,42 @@
 /* Verify a requirement at compile-time (unlike assert, which is runtime).  */
 #define verify(name, assertion) struct name { char a[(assertion) ? 1 : -1]; }
 
-#ifndef HAVE_DECL_STRTOUL
+#ifndef HAVE_DECL_STRTOL
 "this configure-time declaration test was not run"
 #endif
-#if !HAVE_DECL_STRTOUL
-extern unsigned long strtoul __P((const char *, char **, int));
+#if !HAVE_DECL_STRTOL
+extern long strtol __P((const char *, char **, int));
 #endif
 
-#ifndef HAVE_DECL_STRTOULL
+#ifndef HAVE_DECL_STRTOLL
 "this configure-time declaration test was not run"
 #endif
-#if !HAVE_DECL_STRTOULL && HAVE_UNSIGNED_LONG_LONG
-extern unsigned long long strtoull __P((const char *, char **, int));
+#if !HAVE_DECL_STRTOLL && HAVE_LONG_LONG
+extern long long strtoll __P((const char *, char **, int));
 #endif
 
-#ifdef strtoumax
-#undef strtoumax
+#ifdef strtoimax
+#undef strtoimax
 #endif
 
-uintmax_t
-strtoumax (ptr, endptr, base)
+intmax_t
+strtoimax (ptr, endptr, base)
      const char *ptr;
      char **endptr;
      int base;
 {
-#if HAVE_UNSIGNED_LONG_LONG
-  verify (size_is_that_of_unsigned_long_or_unsigned_long_long,
-	  (sizeof (uintmax_t) == sizeof (unsigned long) ||
-	   sizeof (uintmax_t) == sizeof (unsigned long long)));
+#if HAVE_LONG_LONG
+  verify(size_is_that_of_long_or_long_long,
+	 (sizeof (intmax_t) == sizeof (long) ||
+	  sizeof (intmax_t) == sizeof (long long)));
 
-  if (sizeof (uintmax_t) != sizeof (unsigned long))
-    return (strtoull (ptr, endptr, base));
+  if (sizeof (intmax_t) != sizeof (long))
+    return (strtoll (ptr, endptr, base));
 #else
-  verify (size_is_that_of_unsigned_long, sizeof (uintmax_t) == sizeof (unsigned long));
+  verify (size_is_that_of_long, sizeof (intmax_t) == sizeof (long));
 #endif
 
-  return (strtoul (ptr, endptr, base));
+  return (strtol (ptr, endptr, base));
 }
 
 #ifdef TESTING
@@ -85,28 +85,28 @@ int
 main ()
 {
   char *p, *endptr;
-  uintmax_t x;
-#if HAVE_UNSIGNED_LONG_LONG
-  unsigned long long y;
-#endif
-  unsigned long z;
-
-  printf ("sizeof uintmax_t: %d\n", sizeof (uintmax_t));
-
-#if HAVE_UNSIGNED_LONG_LONG
-  printf ("sizeof unsigned long long: %d\n", sizeof (unsigned long long));
-#endif
-  printf ("sizeof unsigned long: %d\n", sizeof (unsigned long));
-
-  x = strtoumax("42", &endptr, 10);
+  intmax_t x;
 #if HAVE_LONG_LONG
-  y = strtoull("42", &endptr, 10);
-#else
-  y = 0;
+  long long y;
 #endif
-  z = strtoul("42", &endptr, 10);
+  long z;
+  
+  printf ("sizeof intmax_t: %d\n", sizeof (intmax_t));
 
-  printf ("%llu %llu %lu\n", x, y, z);
+#if HAVE_LONG_LONG
+  printf ("sizeof long long: %d\n", sizeof (long long));
+#endif
+  printf ("sizeof long: %d\n", sizeof (long));
+
+  x = strtoimax("42", &endptr, 10);
+#if HAVE_LONG_LONG
+  y = strtoll("42", &endptr, 10);
+#else
+  y = -1;
+#endif
+  z = strtol("42", &endptr, 10);
+
+  printf ("%lld %lld %ld\n", x, y, z);
 
   exit (0);
 }

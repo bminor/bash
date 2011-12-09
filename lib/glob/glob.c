@@ -356,7 +356,7 @@ finddirs (pat, sdir, flags, ep, np)
 	*np = 0;
       if (ep)
         *ep = 0;
-      if (r)
+      if (r && r != &glob_error_return)
 	free (r);
       return (struct globval *)0;
     }
