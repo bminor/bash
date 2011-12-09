@@ -9094,4 +9094,60 @@ lib/readline/complete.c
 	  documentation states (incorrect in bash-4.1-alpha)
 	- in insert_match, skip over a close quote in the replacement text if
 	  the character at point when completion is invoked is a single
-	  quote
+	  quote.  Fixes complaint from bash-bugs@atu.cjb.net
+
+				   10/26
+				   -----
+shell.c
+	- in main, make sure "$EMACS" is non-null before calling strstr on its
+	  value.  Fixes Red Hat bug 530911 submitted by Mitchell Berger
+
+builtins/mapfile.def
+	- don't save callback commands in shell history.  Suggested by
+	  Jan Schampera <jan.schampera@web.de>
+
+mailcheck.c
+	- in file_mod_date_changed, make sure the modification time is later
+	  than the saved modification date, not just that it's not equal.
+	  Fix from Evgeniy Dushistov <dushistov@mail.ru>
+	- in file_access_date_changed, make sure the access time is later
+	  than the saved access time, not just that it's not equal
+
+				   10/27
+				   -----
+builtins/shopt.def
+	- added new `compat40' compatibility variable, with associated changes
+	  to shell_compatibility_level(), since the default compatibility level
+	  is now 41
+
+test.c
+	- make the < and > operators to [[ use strcoll() only if the shell
+	  compatibility level is greater than 40 (it is 41 by default in
+	  bash-4.1)
+
+				   10/28
+				   -----
+support/shobj-conf
+	- decrease the default version of FreeBSD that creates shared libraries
+	  to 4.x.  Advice from Peter Jeremy <peterjeremy@acm.org>
+
+				   11/2
+				   ----
+parse.y
+	- change parse_comsub to free `heredelim' and set it to 0 whenever the
+	  comsub scanner finds the end of a here document.  Really need to
+	  implement a stack of here doc delimiters like in the parser (can we
+	  use redir_stack here, too?)
+	- fix parse_comsub to not attempt to read another here doc delimiter
+	  after seeing a shell break character (that is not newline) if we
+	  already have one.  Fixes Debian bash bug #553485, submitted by
+	  Samuel Hym <samuel.hym@gmail.com>
+
+				   11/3
+				   ----
+variables.c
+	- fix bind_variable_internal to call a variable's dynamic 'set function'
+	  with the right arguments depending on whether its an associative
+	  array, an indexed array, or a scalar.  Fixes Ubuntu bug #471504
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/471504 reported
+	  by AJ Slater <aj.slater@gmail.com>

@@ -9130,3 +9130,26 @@ test.c
 support/shobj-conf
 	- decrease the default version of FreeBSD that creates shared libraries
 	  to 4.x.  Advice from Peter Jeremy <peterjeremy@acm.org>
+
+				   11/2
+				   ----
+parse.y
+	- change parse_comsub to free `heredelim' and set it to 0 whenever the
+	  comsub scanner finds the end of a here document.  Really need to
+	  implement a stack of here doc delimiters like in the parser (can we
+	  use redir_stack here, too?)
+	- fix parse_comsub to not attempt to read another here doc delimiter
+	  after seeing a shell break character (that is not newline) if we
+	  already have one.  Fixes Debian bash bug #553485, submitted by
+	  Samuel Hym <samuel.hym@gmail.com>
+
+				   11/3
+				   ----
+variables.c
+	- fix bind_variable_internal to call a variable's dynamic 'set function'
+	  with the right arguments depending on whether its an associative
+	  array, an indexed array, or a scalar.  Fixes Ubuntu bug #471504
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/471504 reported
+	  by AJ Slater <aj.slater@gmail.com>
+
+[bash-4.1-beta frozen]

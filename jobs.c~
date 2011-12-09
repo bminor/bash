@@ -481,6 +481,7 @@ stop_pipeline (async, deferred)
   JOB *newjob;
   sigset_t set, oset;
 
+itrace("stop_pipeline");
   BLOCK_CHILD (set, oset);
 
 #if defined (PGRP_PIPE)
@@ -701,8 +702,9 @@ bgp_delete (pid)
   for (prev = p = bgpids.list; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
-        prev->next = p->next;	/* remove from list */
-        break;
+	if (p != prev)
+	  prev->next = p->next;	/* remove from list */
+	break;
       }
 
   if (p == 0)
@@ -1100,6 +1102,7 @@ add_process (name, pid)
 {
   PROCESS *t, *p;
 
+itrace("add_process; %s (%d)", name, pid);
 #if defined (RECYCLES_PIDS)
   int j;
   p = find_process (pid, 0, &j);
@@ -3050,6 +3053,12 @@ waitchld (wpid, block)
       /* Check for terminating signals and exit the shell if we receive one */
       CHECK_TERMSIG;
 
+      if (block == 1 && queue_sigchld == 0 && (waitpid_flags & WNOHANG) == 0)
+	{
+	  internal_warning (_("waitchld: turning on WNOHANG to avoid indefinite block"));
+	  waitpid_flags |= WNOHANG;
+	}
+
       pid = WAITPID (-1, &status, waitpid_flags);
 
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
@@ -3150,7 +3159,7 @@ waitchld (wpid, block)
 	  wait_signal_received = SIGCHLD;
 	  longjmp (wait_intr_buf, 1);
 	}
-itrace("waitchld: call run_sigchld_trap (%d)", children_exited);
+
       run_sigchld_trap (children_exited);
     }
 

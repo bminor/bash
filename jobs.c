@@ -701,8 +701,9 @@ bgp_delete (pid)
   for (prev = p = bgpids.list; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
-        prev->next = p->next;	/* remove from list */
-        break;
+	if (p != prev)
+	  prev->next = p->next;	/* remove from list */
+	break;
       }
 
   if (p == 0)
@@ -3049,6 +3050,12 @@ waitchld (wpid, block)
 	waitpid_flags |= WNOHANG;
       /* Check for terminating signals and exit the shell if we receive one */
       CHECK_TERMSIG;
+
+      if (block == 1 && queue_sigchld == 0 && (waitpid_flags & WNOHANG) == 0)
+	{
+	  internal_warning (_("waitchld: turning on WNOHANG to avoid indefinite block"));
+	  waitpid_flags |= WNOHANG;
+	}
 
       pid = WAITPID (-1, &status, waitpid_flags);
 

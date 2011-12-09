@@ -3377,7 +3377,7 @@ eof_error:
 	      if (STREQN (ret + tind, heredelim, hdlen))
 		{
 		  tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
-/*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
+itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);
 		  free (heredelim);
 		  heredelim = 0;
 		  lex_firstind = -1;
@@ -3403,7 +3403,7 @@ eof_error:
 	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
 	    {
 	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
-/*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
+itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);
 	      free (heredelim);
 	      heredelim = 0;
 	      lex_firstind = -1;
@@ -3486,24 +3486,19 @@ eof_error:
 	{
 	  if (lex_firstind == -1 && shellbreak (ch) == 0)
 	    lex_firstind = retind;
-#if 0
-	  else if (heredelim && (tflags & LEX_PASSNEXT) == 0 && ch == '\n')
+	  else if (heredelim && ch == '\n')
 	    {
 	      tflags |= LEX_INHEREDOC;
 	      tflags &= ~LEX_HEREDELIM;
 	      lex_firstind = retind + 1;
 	    }
-#endif
-	  else if (lex_firstind >= 0 && (tflags & LEX_PASSNEXT) == 0 && shellbreak (ch))
+	  else if (heredelim == 0 && lex_firstind >= 0 && (tflags & LEX_PASSNEXT) == 0 && shellbreak (ch))
 	    {
-	      if (heredelim == 0)
-		{
-		  nestret = substring (ret, lex_firstind, retind);
-		  heredelim = string_quote_removal (nestret, 0);
-		  free (nestret);
-		  hdlen = STRLEN(heredelim);
-/*itrace("parse_comsub:%d: found here doc delimiter `%s' (%d)", line_number, heredelim, hdlen);*/
-		}
+	      nestret = substring (ret, lex_firstind, retind);
+	      heredelim = string_quote_removal (nestret, 0);
+	      free (nestret);
+	      hdlen = STRLEN(heredelim);
+itrace("parse_comsub:%d: found here doc delimiter `%s' (%d)", line_number, heredelim, hdlen);
 	      if (ch == '\n')
 		{
 		  tflags |= LEX_INHEREDOC;

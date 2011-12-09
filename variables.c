@@ -2192,7 +2192,12 @@ bind_variable_internal (name, value, table, hflags, aflags)
     {
       INVALIDATE_EXPORTSTR (entry);
       newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
-      entry = (*(entry->assign_func)) (entry, newval, -1, 0);
+      if (assoc_p (entry))
+	entry = (*(entry->assign_func)) (entry, newval, -1, savestring ("0"));
+      else if (array_p (entry))
+	entry = (*(entry->assign_func)) (entry, newval, 0, 0);
+      else
+	entry = (*(entry->assign_func)) (entry, newval, -1, 0);
       if (newval != value)
 	free (newval);
       return (entry);
