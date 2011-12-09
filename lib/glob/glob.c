@@ -665,8 +665,9 @@ glob_vector (pat, dir, flags)
       (void) closedir (d);
     }
 
-  /* compat: if GX_ALLDIRS, add the passed directory also */
-  if (add_current)
+  /* compat: if GX_ALLDIRS, add the passed directory also, but don't add an
+     empty directory name. */
+  if (add_current && (flags & GX_NULLDIR) == 0)
     {
       sdlen = strlen (dir);
       nextname = (char *)malloc (sdlen + 1);
@@ -678,10 +679,7 @@ glob_vector (pat, dir, flags)
 	  nextlink->name = nextname;
 	  nextlink->next = lastlink;
 	  lastlink = nextlink;
-	  if (flags & GX_NULLDIR)
-	    nextname[0] = '\0';
-	  else
-	    bcopy (dir, nextname, sdlen + 1);
+	  bcopy (dir, nextname, sdlen + 1);
 	  ++count;
 	}
     }
@@ -941,7 +939,6 @@ glob_filename (pathname, flags)
 	    {
 	      char **array;
 	      register unsigned int l;
-	      int free_array;
 
 	      /* If we're expanding **, we don't need to glue the directory
 		 name to the results; we've already done it in glob_vector */

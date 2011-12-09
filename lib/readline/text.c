@@ -67,6 +67,10 @@ static int _rl_insert_next_callback PARAMS((_rl_callback_generic_arg *));
 static int _rl_char_search_callback PARAMS((_rl_callback_generic_arg *));
 #endif
 
+/* The largest chunk of text that can be inserted in one call to
+   rl_insert_text.  Text blocks larger than this are divided. */
+#define TEXT_COUNT_MAX	1024
+
 /* **************************************************************** */
 /*								    */
 /*			Insert and Delete			    */
@@ -707,7 +711,7 @@ _rl_insert_char (count, c)
 	  
   /* If we can optimize, then do it.  But don't let people crash
      readline because of extra large arguments. */
-  if (count > 1 && count <= 1024)
+  if (count > 1 && count <= TEXT_COUNT_MAX)
     {
 #if defined (HANDLE_MULTIBYTE)
       string_size = count * incoming_length;
@@ -735,11 +739,11 @@ _rl_insert_char (count, c)
       return 0;
     }
 
-  if (count > 1024)
+  if (count > TEXT_COUNT_MAX)
     {
       int decreaser;
 #if defined (HANDLE_MULTIBYTE)
-      string_size = incoming_length * 1024;
+      string_size = incoming_length * TEXT_COUNT_MAX;
       string = (char *)xmalloc (1 + string_size);
 
       i = 0;
@@ -751,7 +755,7 @@ _rl_insert_char (count, c)
 
       while (count)
 	{
-	  decreaser = (count > 1024) ? 1024 : count;
+	  decreaser = (count > TEXT_COUNT_MAX) ? TEXT_COUNT_MAX : count;
 	  string[decreaser*incoming_length] = '\0';
 	  rl_insert_text (string);
 	  count -= decreaser;
@@ -761,14 +765,14 @@ _rl_insert_char (count, c)
       incoming_length = 0;
       stored_count = 0;
 #else /* !HANDLE_MULTIBYTE */
-      char str[1024+1];
+      char str[TEXT_COUNT_MAX+1];
 
-      for (i = 0; i < 1024; i++)
+      for (i = 0; i < TEXT_COUNT_MAX; i++)
 	str[i] = c;
 
       while (count)
 	{
-	  decreaser = (count > 1024 ? 1024 : count);
+	  decreaser = (count > TEXT_COUNT_MAX ? TEXT_COUNT_MAX : count);
 	  str[decreaser] = '\0';
 	  rl_insert_text (str);
 	  count -= decreaser;

@@ -8054,3 +8054,11 @@ lib/readline/display.c
 	  locale or not, or whether there are invisible chars in the prompt)
 	- in _rl_move_cursor_relative, go ahead and adjust dpos if
 	  prompt_physical_chars >= _rl_screenwidth (previous check was just > )
+
+				   4/28
+				   ----
+lib/glob/glob.c
+	- in glob_vector, don't add an empty pathname ("") if we're adding the
+	  currect directory to the dirlist and GX_NULLDIR is set -- we can just
+	  ignore it, since the passed directory name (".") was created by
+	  the caller.  Fixes bug reported by Matt Zyzik <matt.zyzik@nyu.edu>
