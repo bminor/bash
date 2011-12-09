@@ -7773,7 +7773,7 @@ subst.c
 	  to Q_DOUBLE_QUOTES when expanding $*
 	- expand_word_unsplit now sets W_NOSPLIT in the flags of the word it
 	  passes to expand_word_internal if $IFS is NULL
-	- expand_word_leave_quoted now sets expand_no_split_dollar_start and
+	- expand_word_leave_quoted now sets expand_no_split_dollar_star and
 	  the W_NOSPLIT bit in the word flags before calling
 	  expand_word_internal if $IFS is NULL, just like expand_word_unsplit.
 	  It is now virtually identical to expand_word_unsplit.  Rest of fix for
@@ -8031,7 +8031,7 @@ doc/bash.1
 
 doc/bashref.texi
 	- use the phrase `filename expansion' consistently (since this is
-	  what they Gnu people prefer) instead of `pathname expansion' or
+	  what the Gnu people prefer) instead of `pathname expansion' or
 	  `filename generation'
 
 aclocal.m4,config.h.in
@@ -8131,3 +8131,15 @@ lib/readline/mbutil.c
 	- fix _rl_find_next_mbchar_internalto not call mbrtowc at the end of
 	  the string, since implementations return different values -- just
 	  break the loop immediately
+
+lib/readline/display.c
+	- fix rl_redisplay to make same sort of cursor position adjustments
+	  based on multibyte locale and _rl_last_c_pos when performing
+	  horizontal scrolling rather than line wrapping.  Probably still
+	  more to do.  Fixes bug reported by jim@jim.sh
+
+				    6/5
+				    ---
+doc/{bash.1,bashref.texi
+	- added some more explanation of the inheritance of the ERR trap at
+	  the suggestion of Thomas Pospisek <tpo@sourcepole.ch>

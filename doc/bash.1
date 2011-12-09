@@ -3581,9 +3581,10 @@ The first element of the
 .B FUNCNAME
 variable is set to the name of the function while the function
 is executing.
+.PP
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with the exception that the
+with these exceptions:  the
 .SM
 .B DEBUG
 and
@@ -3600,7 +3601,12 @@ below) are not inherited unless the function has been given the
 builtin below) or the
 \fB\-o functrace\fP shell option has been enabled with
 the \fBset\fP builtin
-(in which case all functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps).
+(in which case all functions inherit the \fBDEBUG\fP and \fBRETURN\fP traps),
+and the
+.SM
+.B ERR
+trap is not inherited unless the \fB\-o errtrace\fP shell option has
+been enabled.
 .PP
 Variables local to the function may be declared with the
 .B local
@@ -8868,6 +8874,8 @@ Each
 is either
 a signal name defined in <\fIsignal.h\fP>, or a signal number.
 Signal names are case insensitive and the SIG prefix is optional.
+.if t .sp 0.5
+.if n .sp 1
 If a
 .I sigspec
 is
@@ -8891,6 +8899,17 @@ command, and before the first command executes in a shell function (see
 above).
 Refer to the description of the \fBextdebug\fP option to the
 \fBshopt\fP builtin for details of its effect on the \fBDEBUG\fP trap.
+If a
+.I sigspec
+is
+.SM
+.BR RETURN ,
+the command
+.I arg
+is executed each time a shell function or a script executed with the
+\fB.\fP or \fBsource\fP builtins finishes executing.
+.if t .sp 0.5
+.if n .sp 1
 If a
 .I sigspec
 is
@@ -8919,18 +8938,11 @@ list, or if the command's return value is
 being inverted via
 .BR ! .
 These are the same conditions obeyed by the \fBerrexit\fP option.
-If a
-.I sigspec
-is
-.SM
-.BR RETURN ,
-the command
-.I arg
-is executed each time a shell function or a script executed with the
-\fB.\fP or \fBsource\fP builtins finishes executing.
+.if t .sp 0.5
+.if n .sp 1
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals that are not being ignored are reset to their original
-values in a child process when it is created.
+values in a subshell or subshell environment when one is created.
 The return status is false if any
 .I sigspec
 is invalid; otherwise

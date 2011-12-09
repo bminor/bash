@@ -1177,14 +1177,18 @@ positional parameters is updated to reflect the change.
 Special parameter @code{0} is unchanged.
 The first element of the @env{FUNCNAME} variable is set to the
 name of the function while the function is executing.
+
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with the exception that the @env{DEBUG} and @env{RETURN} traps
+with these exceptions:
+the @env{DEBUG} and @env{RETURN} traps
 are not inherited unless the function has been given the
 @code{trace} attribute using the @code{declare} builtin or
 the @code{-o functrace} option has been enabled with
 the @code{set} builtin,
-(in which case all functions inherit the @env{DEBUG} and @env{RETURN} traps).
+(in which case all functions inherit the @env{DEBUG} and @env{RETURN} traps),
+and the @env{ERR} trap is not inherited unless the @code{-o errtrace}
+shell option has been enabled.
 @xref{Bourne Shell Builtins}, for the description of the
 @code{trap} builtin.
 
@@ -3165,6 +3169,7 @@ The @option{-l} option causes the shell to print a list of signal names
 and their corresponding numbers.
 Each @var{sigspec} is either a signal name or a signal number.
 Signal names are case insensitive and the @code{SIG} prefix is optional.
+
 If a @var{sigspec}
 is @code{0} or @code{EXIT}, @var{arg} is executed when the shell exits.
 If a @var{sigspec} is @code{DEBUG}, the command @var{arg} is executed
@@ -3174,6 +3179,10 @@ the first command executes in a shell function.
 Refer to the description of the @code{extdebug} option to the
 @code{shopt} builtin (@pxref{The Shopt Builtin}) for details of its
 effect on the @code{DEBUG} trap.
+If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
+each time a shell function or a script executed with the @code{.} or
+@code{source} builtins finishes executing.
+
 If a @var{sigspec} is @code{ERR}, the command @var{arg} 
 is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
@@ -3184,13 +3193,10 @@ part of a command executed in a @code{&&} or @code{||} list,
 or if the command's return
 status is being inverted using @code{!}.
 These are the same conditions obeyed by the @code{errexit} option.
-If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
-each time a shell function or a script executed with the @code{.} or
-@code{source} builtins finishes executing.
 
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals that are not being ignored are reset to their original
-values in a child process when it is created.
+values in a subshell or subshell environment when one is created.
 
 The return status is zero unless a @var{sigspec} does not specify a
 valid signal.
