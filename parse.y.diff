@@ -1,0 +1,326 @@
+*** ../bash-4.0/parse.y	2009-01-08 08:29:12.000000000 -0500
+--- parse.y	2009-03-06 20:32:35.000000000 -0500
+***************
+*** 1616,1623 ****
+    int *ret;
+  
+!   ret = (int *)xmalloc (3 * sizeof (int));
+    ret[0] = last_read_token;
+    ret[1] = token_before_that;
+    ret[2] = two_tokens_ago;
+    return ret;
+  }
+--- 1616,1624 ----
+    int *ret;
+  
+!   ret = (int *)xmalloc (4 * sizeof (int));
+    ret[0] = last_read_token;
+    ret[1] = token_before_that;
+    ret[2] = two_tokens_ago;
++   ret[3] = current_token;
+    return ret;
+  }
+***************
+*** 1632,1635 ****
+--- 1633,1637 ----
+    token_before_that = ts[1];
+    two_tokens_ago = ts[2];
++   current_token = ts[3];
+  }
+  
+***************
+*** 2669,2672 ****
+--- 2671,2675 ----
+    word_desc_to_read = (WORD_DESC *)NULL;
+  
++   current_token = '\n';		/* XXX */
+    last_read_token = '\n';
+    token_to_read = '\n';
+***************
+*** 2916,2919 ****
+--- 2919,2923 ----
+  #define P_COMMAND	0x08	/* parsing a command, so look for comments */
+  #define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
++ #define P_ARRAYSUB	0x20	/* parsing a [...] array subscript for assignment */
+  
+  /* Lexical state while parsing a grouping construct or $(...). */
+***************
+*** 2928,2931 ****
+--- 2932,2936 ----
+  #define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
+  #define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
++ #define LEX_INWORD	0x400
+  
+  #define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
+***************
+*** 2963,2967 ****
+    int retind, retsize, rflags;
+  
+! /* itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
+    count = 1;
+    tflags = 0;
+--- 2968,2972 ----
+    int retind, retsize, rflags;
+  
+! /*itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
+    count = 1;
+    tflags = 0;
+***************
+*** 3130,3133 ****
+--- 3135,3140 ----
+  	      FREE (nestret);
+  	    }
++ 	  else if ((flags & P_ARRAYSUB) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
++ 	    goto parse_dollar_word;
+  	}
+        /* Parse an old-style command substitution within double quotes as a
+***************
+*** 3146,3149 ****
+--- 3153,3157 ----
+  	/* check for $(), $[], or ${} inside quoted string. */
+  	{
++ parse_dollar_word:
+  	  if (open == ch)	/* undo previous increment */
+  	    count--;
+***************
+*** 3180,3184 ****
+       int *lenp, flags;
+  {
+!   int count, ch, peekc, tflags, lex_rwlen, lex_firstind;
+    int nestlen, ttranslen, start_lineno;
+    char *ret, *nestret, *ttrans, *heredelim;
+--- 3188,3192 ----
+       int *lenp, flags;
+  {
+!   int count, ch, peekc, tflags, lex_rwlen, lex_wlen, lex_firstind;
+    int nestlen, ttranslen, start_lineno;
+    char *ret, *nestret, *ttrans, *heredelim;
+***************
+*** 3201,3205 ****
+  
+    start_lineno = line_number;
+!   lex_rwlen = 0;
+  
+    heredelim = 0;
+--- 3209,3213 ----
+  
+    start_lineno = line_number;
+!   lex_rwlen = lex_wlen = 0;
+  
+    heredelim = 0;
+***************
+*** 3268,3271 ****
+--- 3276,3319 ----
+  	}
+  
++       if (tflags & LEX_PASSNEXT)		/* last char was backslash */
++ 	{
++ /*itrace("parse_comsub:%d: lex_passnext -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
++ 	  tflags &= ~LEX_PASSNEXT;
++ 	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
++ 	    {
++ 	      if (retind > 0)
++ 		retind--;	/* swallow previously-added backslash */
++ 	      continue;
++ 	    }
++ 
++ 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
++ 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
++ 	    ret[retind++] = CTLESC;
++ 	  ret[retind++] = ch;
++ 	  continue;
++ 	}
++ 
++       /* If this is a shell break character, we are not in a word.  If not,
++ 	 we either start or continue a word. */
++       if MBTEST(shellbreak (ch))
++ 	{
++ 	  tflags &= ~LEX_INWORD;
++ /*itrace("parse_comsub:%d: lex_inword -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
++ 	}
++       else
++ 	{
++ 	  if (tflags & LEX_INWORD)
++ 	    {
++ 	      lex_wlen++;
++ /*itrace("parse_comsub:%d: lex_inword == 1 ch = `%c' lex_wlen = %d (%d)", line_number, ch, lex_wlen, __LINE__);*/
++ 	    }	      
++ 	  else
++ 	    {
++ /*itrace("parse_comsub:%d: lex_inword -> 1 ch = `%c' (%d)", line_number, ch, __LINE__);*/
++ 	      tflags |= LEX_INWORD;
++ 	      lex_wlen = 0;
++ 	    }
++ 	}
++ 
+        /* Skip whitespace */
+        if MBTEST(shellblank (ch) && lex_rwlen == 0)
+***************
+*** 3317,3321 ****
+  	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+  	      ret[retind++] = peekc;
+! /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch); */
+  	      tflags |= LEX_RESWDOK;
+  	      lex_rwlen = 0;
+--- 3365,3369 ----
+  	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+  	      ret[retind++] = peekc;
+! /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
+  	      tflags |= LEX_RESWDOK;
+  	      lex_rwlen = 0;
+***************
+*** 3325,3330 ****
+  	    {
+  	      shell_ungetc (peekc);
+- 	      tflags |= LEX_RESWDOK;
+  /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
+  	      lex_rwlen = 0;
+  	      continue;
+--- 3373,3378 ----
+  	    {
+  	      shell_ungetc (peekc);
+  /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
++ 	      tflags |= LEX_RESWDOK;
+  	      lex_rwlen = 0;
+  	      continue;
+***************
+*** 3365,3369 ****
+  	      tflags &= ~LEX_RESWDOK;
+  	    }
+! 	  else if (shellbreak (ch) == 0)
+  {
+  	      tflags &= ~LEX_RESWDOK;
+--- 3413,3419 ----
+  	      tflags &= ~LEX_RESWDOK;
+  	    }
+! 	  else if MBTEST((tflags & LEX_CKCOMMENT) && ch == '#' && (lex_rwlen == 0 || ((tflags & LEX_INWORD) && lex_wlen == 0)))
+! 	    ;	/* don't turn off LEX_RESWDOK if we're starting a comment */
+! 	  else if MBTEST(shellbreak (ch) == 0)
+  {
+  	      tflags &= ~LEX_RESWDOK;
+***************
+*** 3372,3375 ****
+--- 3422,3426 ----
+  	}
+  
++       /* Might be the start of a here-doc delimiter */
+        if MBTEST((tflags & LEX_INCOMMENT) == 0 && (tflags & LEX_CKCASE) && ch == '<')
+  	{
+***************
+*** 3395,3428 ****
+  	      else
+  		shell_ungetc (peekc);
+! 	      tflags |= LEX_HEREDELIM;
+! 	      lex_firstind = -1;
+  	      continue;
+  	    }
+  	  else
+! 	    ch = peekc;		/* fall through and continue XXX - this skips comments if peekc == '#' */
+  	}
+!       /* Not exactly right yet, should handle shell metacharacters, too.  If
+! 	 any changes are made to this test, make analogous changes to subst.c:
+! 	 extract_delimited_string(). */
+!       else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
+  	tflags |= LEX_INCOMMENT;
+  
+!       if (tflags & LEX_PASSNEXT)		/* last char was backslash */
+! 	{
+! 	  tflags &= ~LEX_PASSNEXT;
+! 	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
+! 	    {
+! 	      if (retind > 0)
+! 		retind--;	/* swallow previously-added backslash */
+! 	      continue;
+! 	    }
+! 
+! 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+! 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+! 	    ret[retind++] = CTLESC;
+! 	  ret[retind++] = ch;
+! 	  continue;
+! 	}
+!       else if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
+  	{
+  	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+--- 3446,3466 ----
+  	      else
+  		shell_ungetc (peekc);
+! 	      if (peekc != '<')
+! 		{
+! 		  tflags |= LEX_HEREDELIM;
+! 		  lex_firstind = -1;
+! 		}
+  	      continue;
+  	    }
+  	  else
+! 	    ch = peekc;		/* fall through and continue XXX */
+  	}
+!       else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (((tflags & LEX_RESWDOK) && lex_rwlen == 0) || ((tflags & LEX_INWORD) && lex_wlen == 0)))
+! {
+! /*itrace("parse_comsub:%d: lex_incomment -> 1 (%d)", line_number, __LINE__);*/
+  	tflags |= LEX_INCOMMENT;
++ }
+  
+!       if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
+  	{
+  	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+***************
+*** 4249,4253 ****
+  		      (token_index == 0 && (parser_state&PST_COMPASSIGN))))
+          {
+! 	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
+  	  if (ttok == &matched_pair_error)
+  	    return -1;		/* Bail immediately. */
+--- 4287,4291 ----
+  		      (token_index == 0 && (parser_state&PST_COMPASSIGN))))
+          {
+! 	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, P_ARRAYSUB);
+  	  if (ttok == &matched_pair_error)
+  	    return -1;		/* Bail immediately. */
+***************
+*** 4450,4453 ****
+--- 4488,4492 ----
+      case AND_AND:
+      case BANG:
++     case BAR_AND:
+      case DO:
+      case DONE:
+***************
+*** 5184,5188 ****
+        if (interactive && EOF_Reached)
+  	EOF_Reached = 0;
+!       last_command_exit_value = EX_USAGE;
+        return;
+      }
+--- 5223,5227 ----
+        if (interactive && EOF_Reached)
+  	EOF_Reached = 0;
+!       last_command_exit_value = EX_BADUSAGE;
+        return;
+      }
+***************
+*** 5199,5203 ****
+  	print_offending_line ();
+  
+!       last_command_exit_value = EX_USAGE;
+        return;
+      }
+--- 5238,5242 ----
+  	print_offending_line ();
+  
+!       last_command_exit_value = EX_BADUSAGE;
+        return;
+      }
+***************
+*** 5230,5234 ****
+      }
+  
+!   last_command_exit_value = EX_USAGE;
+  }
+  
+--- 5269,5273 ----
+      }
+  
+!   last_command_exit_value = EX_BADUSAGE;
+  }
+  

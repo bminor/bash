@@ -1110,7 +1110,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	}
 
       /* Not exactly right yet; should handle shell metacharacters and
-	 multibyte characters, too. */
+	 multibyte characters, too.  See COMMENT_BEGIN define in parse.y */
       if ((flags & SX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || shellblank (string[i - 1])))
 	{
           in_comment = 1;

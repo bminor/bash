@@ -6566,7 +6566,7 @@ refers to the ability to selectively stop (suspend)
 the execution of processes and continue (resume)
 their execution at a later point.  A user typically employs
 this facility via an interactive interface supplied jointly
-by the system's terminal driver and Bash.
+by the operating system kernel's terminal driver and Bash.
 
 The shell associates a @var{job} with each pipeline.  It keeps a
 table of currently executing jobs, which may be listed with the
@@ -6591,11 +6591,13 @@ process group @sc{id} is equal to the current terminal process group
 These processes are said to be in the foreground.  Background
 processes are those whose process group @sc{id} differs from the
 terminal's; such processes are immune to keyboard-generated
-signals.  Only foreground processes are allowed to read from or
-write to the terminal.  Background processes which attempt to
-read from (write to) the terminal are sent a @code{SIGTTIN}
-(@code{SIGTTOU}) signal by the terminal driver, which, unless
-caught, suspends the process. 
+signals.  Only foreground processes are allowed to read from or, if
+the user so specifies with @code{stty tostop}, write to the terminal.
+Background processes which attempt to
+read from (write to when @code{stty tostop} is in effect) the
+terminal are sent a @code{SIGTTIN} (@code{SIGTTOU})
+signal by the kernel's terminal driver,
+which, unless caught, suspends the process. 
 
 If the operating system on which Bash is running supports
 job control, Bash contains facilities to use it.  Typing the

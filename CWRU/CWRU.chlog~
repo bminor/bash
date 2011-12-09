@@ -7627,3 +7627,69 @@ sig.c
 jobs.c
 	- if fork() fails, set last_command_exit_value to 126 before calling
 	  throw_to_top_level
+
+execute_cmd.c
+	- defer calling unlink_fifo_list in parent branch of
+	  execute_disk_command if we're executing in a shell function
+	- change execute_function to call unlink_fifo_list before returning
+	  if it's the top-level function
+
+				    3/2
+				    ---
+builtins/read.def
+	- if read times out, make sure we remove the top element from the
+	  unwind-protect stack (the free of input_string) and run the rest,
+	  to reset the tty and readline and alarm states.  Then we jump to
+	  assigning the variables to any partial input.  Fixes bug reported
+	  by Christopher F. A. Johnson <cfajohnson@gmail.com>
+
+				    3/3
+				    ---
+parse.y
+	- break comment checking code into a common COMMENT_BEGIN define so
+	  we can use it in multiple places in parse_comsub
+	- in parse_comsub, don't turn off the LEX_RESWDOK flag if we read a
+	  `#' and we're checking comments, even though `#' isn't a `shell break'
+	  character.  Fixes bug reported by Mike Frysinger  <vapier@gentoo.org>
+
+braces.c
+	- in expand_seqterm, decrease the total length of the rhs by the length
+	  of any (optional) increment, so we don't end up with unwanted zero
+	  padding because the rhs length is wrong.  Fixes bug reported by
+	  Carl Albing <albing@comcast.net>
+
+				    3/4
+				    ---
+doc/{bash.1,bashref.texi}
+	- changes to clean up some of the language describing the effects of
+	  terminal process groups on the ability to read from and write to
+	  the terminal
+
+				    3/5
+				    ---
+support/shobj-conf
+	- add host_vendor to string tested in switch to handle things like
+	  gentoo/freebsd
+	- beginning with version 7, FreeBSD no longer has /usr/bin/objformat
+	  or a.out binaries and libraries.  It's always ELF.  Fix from
+	  Timothy Redaelli <drizzt@gentoo.org>
+
+parse.y
+	- in parse_comsub, allow comments if we are ready to read a
+	  reserved word (tflags & LEX_RESWDOK), haven't read anything from
+	  one yet (lex_rwlen == 0) and the current character is a '#'
+
+				    3/6
+				    ---
+parse.y
+	- new lex flag for parse_comsub: LEX_INWORD.  Turn it off when
+	  we see a shell break character; turn it on or keep it on when
+	  not a break character.  Keep track of word length (reset to 0
+	  when we turn on LEX_INWORD when it was off).
+	- don't use COMMENT_BEGIN in parse_comsub any more; test
+	  whether or not LEX_INWORD is set and lex_wlen == 0 in addition
+	  to tests for LEX_RESWDOK and lex_rwlen.  Comments are valid
+	  when at the start of a word
+	- move LEX_PASSNEXT code to the top of parse_comsub, so the rest
+	  of the function doesn't have to check for the flag at different
+	  places

@@ -364,7 +364,7 @@ expand_seqterm (text, tlen)
   char *t, *lhs, *rhs;
   int i, lhs_t, rhs_t, lhs_v, rhs_v, incr, lhs_l, rhs_l, width;
   intmax_t tl, tr;
-  char **result, *ep;
+  char **result, *ep, *oep;
 
   t = strstr (text, BRACE_SEQ_SPECIFIER);
   if (t == 0)
@@ -410,10 +410,12 @@ expand_seqterm (text, tlen)
   incr = 1;
   if (rhs_t != ST_BAD)
     {
+      oep = ep;
       if (ep && *ep == '.' && ep[1] == '.' && ep[2])
 	incr = strtoimax (ep + 2, &ep, 10);
       if (*ep != 0)
 	rhs_t = ST_BAD;			/* invalid incr */
+      tlen -= ep - oep;
     }
 
   if (lhs_t != rhs_t || lhs_t == ST_BAD || rhs_t == ST_BAD)

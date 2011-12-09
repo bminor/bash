@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 February 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 March 4<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -5481,7 +5481,7 @@ refers to the ability to selectively stop (<I>suspend</I>)
 the execution of processes and continue (<I>resume</I>)
 their execution at a later point.  A user typically employs
 this facility via an interactive interface supplied jointly
-by the system's terminal driver and
+by the operating system kernel's terminal driver and
 <B>bash</B>.
 
 <P>
@@ -5534,13 +5534,16 @@ These processes are said to be in the
 
 processes are those whose process group ID differs from the terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or write to the
-terminal.  Background processes which attempt to read from (write to) the
+Only foreground processes are allowed to read from or, if the
+user so specifies with <TT>stty tostop</TT>, write to the
+terminal.
+Background processes which attempt to read from (write to when
+<TT>stty tostop</TT> is in effect) the
 terminal are sent a 
 <FONT SIZE=-1><B>SIGTTIN (SIGTTOU)</B>
 
 </FONT>
-signal by the terminal driver, 
+signal by the kernel's terminal driver, 
 which, unless caught, suspends the process.
 <P>
 
@@ -12070,7 +12073,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 February 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 March 4<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12176,6 +12179,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 23 February 2009 11:56:09 EST
+Time: 05 March 2009 07:55:02 EST
 </BODY>
 </HTML>

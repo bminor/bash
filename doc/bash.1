@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Feb  7 20:50:40 EST 2009
+.\"	Last Change: Wed Mar  4 15:55:47 EST 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 February 7" "GNU Bash-4.0"
+.TH BASH 1 "2009 March 4" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4255,7 +4255,7 @@ refers to the ability to selectively stop (\fIsuspend\fP)
 the execution of processes and continue (\fIresume\fP)
 their execution at a later point.  A user typically employs
 this facility via an interactive interface supplied jointly
-by the system's terminal driver and
+by the operating system kernel's terminal driver and
 .BR bash .
 .PP
 The shell associates a
@@ -4293,12 +4293,15 @@ These processes are said to be in the
 .I Background
 processes are those whose process group ID differs from the terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or write to the
-terminal.  Background processes which attempt to read from (write to) the
+Only foreground processes are allowed to read from or, if the
+user so specifies with \f(CWstty tostop\fP, write to the
+terminal.
+Background processes which attempt to read from (write to when
+\f(CWstty tostop\fP is in effect) the
 terminal are sent a 
 .SM
 .B SIGTTIN (SIGTTOU)
-signal by the terminal driver, 
+signal by the kernel's terminal driver, 
 which, unless caught, suspends the process.
 .PP
 If the operating system on which

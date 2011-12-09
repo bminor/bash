@@ -2921,18 +2921,17 @@ tokword:
 #define P_ARRAYSUB	0x20	/* parsing a [...] array subscript for assignment */
 
 /* Lexical state while parsing a grouping construct or $(...). */
-#define LEX_WASDOL	0x0001
-#define LEX_CKCOMMENT	0x0002
-#define LEX_INCOMMENT	0x0004
-#define LEX_PASSNEXT	0x0008
-#define LEX_RESWDOK	0x0010
-#define LEX_CKCASE	0x0020
-#define LEX_INCASE	0x0040
-#define LEX_INHEREDOC	0x0080
-#define LEX_HEREDELIM	0x0100		/* reading here-doc delimiter */
-#define LEX_STRIPDOC	0x0200		/* <<- strip tabs from here doc delim */
-#define LEX_WASQUOTED	0x0400
-#define LEX_INWORD	0x0800
+#define LEX_WASDOL	0x001
+#define LEX_CKCOMMENT	0x002
+#define LEX_INCOMMENT	0x004
+#define LEX_PASSNEXT	0x008
+#define LEX_RESWDOK	0x010
+#define LEX_CKCASE	0x020
+#define LEX_INCASE	0x040
+#define LEX_INHEREDOC	0x080
+#define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
+#define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
+#define LEX_INWORD	0x400
 
 #define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
 
@@ -2955,11 +2954,6 @@ tokword:
       } \
   } while (0)
 
-/* Not exactly right yet, should handle shell metacharacters, too.  If
-   any changes are made to this test, make analogous changes to subst.c:
-   extract_delimited_string(). */
-#define COMMENT_BEGIN(x)	((x) == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
-
 static char matched_pair_error;
 
 static char *
@@ -2973,7 +2967,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
-/*itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
+/* itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
   count = 1;
   tflags = 0;
 
@@ -3017,7 +3011,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  continue;
 	}
 
-      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && COMMENT_BEGIN (ch))
+      /* Not exactly right yet, should handle shell metacharacters, too.  If
+	 any changes are made to this test, make analogous changes to subst.c:
+	 extract_delimited_string(). */
+      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
 	tflags |= LEX_INCOMMENT;
 
       if (tflags & LEX_PASSNEXT)		/* last char was backslash */
@@ -3182,6 +3179,11 @@ parse_dollar_word:
   return ret;
 }
 
+/* Not exactly right yet, should handle shell metacharacters better.  If
+   any changes are made to this test, make analogous changes to subst.c:
+   extract_delimited_string(). */
+#define COMMENT_BEGIN(x)	((x) == '#' && (retind == 0 || ret[retind-1] == '\n' || shellblank (ret[retind - 1])))
+
 /* Parse a $(...) command substitution.  This is messier than I'd like, and
    reproduces a lot more of the token-reading code than I'd like. */
 static char *
@@ -3190,14 +3192,14 @@ parse_comsub (qc, open, close, lenp, flags)
      int open, close;
      int *lenp, flags;
 {
-  int count, ch, peekc, tflags, lex_rwlen, lex_wlen, lex_firstind;
+  int count, ch, peekc, tflags, lex_rwlen, lex_firstind;
   int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
-  tflags = LEX_RESWDOK|LEX_INWORD;
+  tflags = LEX_RESWDOK;
 
   if ((flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0)
     tflags |= LEX_CKCASE;
@@ -3211,7 +3213,7 @@ parse_comsub (qc, open, close, lenp, flags)
   retind = 0;
 
   start_lineno = line_number;
-  lex_rwlen = lex_wlen = 0;
+  lex_rwlen = 0;
 
   heredelim = 0;
   lex_firstind = -1;
@@ -3278,46 +3280,6 @@ eof_error:
 	  continue;
 	}
 
-      if (tflags & LEX_PASSNEXT)		/* last char was backslash */
-	{
-/*itrace("parse_comsub:%d: lex_passnext -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
-	  tflags &= ~LEX_PASSNEXT;
-	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
-	    {
-	      if (retind > 0)
-		retind--;	/* swallow previously-added backslash */
-	      continue;
-	    }
-
-	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
-	  if MBTEST(ch == CTLESC || ch == CTLNUL)
-	    ret[retind++] = CTLESC;
-	  ret[retind++] = ch;
-	  continue;
-	}
-
-      /* If this is a shell break character, we are not in a word.  If not,
-	 we either start or continue a word. */
-      if MBTEST(shellbreak (ch))
-	{
-	  tflags &= ~LEX_INWORD;
-/*itrace("parse_comsub:%d: lex_inword -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
-	}
-      else
-	{
-	  if (tflags & LEX_INWORD)
-	    {
-	      lex_wlen++;
-/*itrace("parse_comsub:%d: lex_inword == 1 ch = `%c' lex_wlen = %d (%d)", line_number, ch, lex_wlen, __LINE__);*/
-	    }	      
-	  else
-	    {
-/*itrace("parse_comsub:%d: lex_inword -> 1 ch = `%c' (%d)", line_number, ch, __LINE__);*/
-	      tflags |= LEX_INWORD;
-	      lex_wlen = 0;
-	    }
-	}
-
       /* Skip whitespace */
       if MBTEST(shellblank (ch) && lex_rwlen == 0)
         {
@@ -3356,8 +3318,25 @@ eof_error:
 	    }
 	}
 
+      if (tflags & LEX_PASSNEXT)		/* last char was backslash */
+	{
+	  tflags &= ~LEX_PASSNEXT;
+	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
+	    {
+	      if (retind > 0)
+		retind--;	/* swallow previously-added backslash */
+	      continue;
+	    }
+
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+	    ret[retind++] = CTLESC;
+	  ret[retind++] = ch;
+	  continue;
+	}
+
       /* Meta-characters that can introduce a reserved word.  Not perfect yet. */
-      if MBTEST((tflags & LEX_PASSNEXT) == 0 && (tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
+      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -3367,7 +3346,7 @@ eof_error:
 	    {
 	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	      ret[retind++] = peekc;
-/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
+/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch); */
 	      tflags |= LEX_RESWDOK;
 	      lex_rwlen = 0;
 	      continue;
@@ -3375,8 +3354,8 @@ eof_error:
 	  else if (ch == '\n' || COMSUB_META(ch))
 	    {
 	      shell_ungetc (peekc);
-/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
 	      tflags |= LEX_RESWDOK;
+/*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
 	      lex_rwlen = 0;
 	      continue;
 	    }
@@ -3415,7 +3394,7 @@ eof_error:
 }	        
 	      tflags &= ~LEX_RESWDOK;
 	    }
-	  else if MBTEST((tflags & LEX_CKCOMMENT) && ((lex_rwlen == 0 && ch == '#') || COMMENT_BEGIN(ch)))
+	  else if MBTEST((tflags & LEX_CKCOMMENT) && COMMENT_BEGIN(ch))
 	    ;	/* don't turn off LEX_RESWDOK if we're starting a comment */
 	  else if MBTEST(shellbreak (ch) == 0)
 {
@@ -3424,8 +3403,7 @@ eof_error:
 }
 	}
 
-      /* Might be the start of a here-doc delimiter */
-      if MBTEST((tflags & (LEX_PASSNEXT|LEX_INCOMMENT)) == 0 && (tflags & LEX_CKCASE) && ch == '<')
+      if MBTEST((tflags & LEX_INCOMMENT) == 0 && (tflags & LEX_CKCASE) && ch == '<')
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -3456,17 +3434,10 @@ eof_error:
 	      continue;
 	    }
 	  else
-	    ch = peekc;		/* fall through and continue XXX */
+	    ch = peekc;		/* fall through and continue XXX - this skips comments if peekc == '#' */
 	}
-#if 0
-      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (((tflags & LEX_RESWDOK) && lex_rwlen == 0) || ((tflags & LEX_INWORD) && lex_wlen == 0) || COMMENT_BEGIN(ch)))
-#else
-      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (((tflags & LEX_RESWDOK) && lex_rwlen == 0) || ((tflags & LEX_INWORD) && lex_wlen == 0)))
-#endif
-{
-/*itrace("parse_comsub:%d: lex_incomment -> 1 (%d)", line_number, __LINE__);*/
+      else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && COMMENT_BEGIN(ch))
 	tflags |= LEX_INCOMMENT;
-}
 
       if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
 	{
@@ -3479,6 +3450,7 @@ eof_error:
       else if MBTEST((tflags & LEX_INCASE) && ch == close && close == ')')
         tflags &= ~LEX_INCASE;		/* XXX */
 #endif
+      /* XXX - could check for here doc delimiter if count == 0 */
       else if MBTEST(ch == close && (tflags & LEX_INCASE) == 0)		/* ending delimiter */
 {
 	count--;
