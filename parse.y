@@ -5083,6 +5083,13 @@ decode_prompt_string (string)
 		  }
 		t_string[tlen] = '\0';
 
+#if defined (MACOSX)
+		/* Convert from "fs" format to "input" format */
+		temp = fnx_fromfs (t_string, strlen (t_string));
+		if (temp != t_string)
+		  strcpy (t_string, temp);
+#endif
+
 #define ROOT_PATH(x)	((x)[0] == '/' && (x)[1] == 0)
 #define DOUBLE_SLASH_ROOT(x)	((x)[0] == '/' && (x)[1] == '/' && (x)[2] == 0)
 		/* Abbreviate \W as ~ if $PWD == $HOME */

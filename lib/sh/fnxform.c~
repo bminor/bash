@@ -42,6 +42,8 @@ extern const char *locale_charset __P((void));
 static iconv_t conv_fromfs = (iconv_t)-1;
 static iconv_t conv_tofs = (iconv_t)-1;
 
+#define OUTLEN_MAX 4096
+
 static char *outbuf = 0;
 static size_t outlen = 0;
 
@@ -98,11 +100,20 @@ fnx_tofs (string, len)
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
   char *tempbuf;
+  size_t templen;
   
   if (conv_tofs == (iconv_t)-1)
     init_tofs ();
   if (conv_tofs == (iconv_t)-1)
     return string;
+
+  /* Free and reallocate outbuf if it's *too* big */
+  if (outlen >= OUTLEN_MAX && len < OUTLEN_MAX - 8)
+    {
+      free (outbuf);
+      outbuf = 0;
+      outlen = 0;
+    }
 
   inbuf = string;
   if (outbuf == 0 || outlen < len + 8)
@@ -111,10 +122,11 @@ fnx_tofs (string, len)
       outbuf = outbuf ? xrealloc (outbuf, outlen + 1) : xmalloc (outlen + 1);
     }
   tempbuf = outbuf;
+  templen = outlen;
 
   iconv (conv_tofs, NULL, NULL, NULL, NULL);
 
-  if (iconv (conv_tofs, &inbuf, &len, &tempbuf, &outlen) == (size_t)-1)
+  if (iconv (conv_tofs, &inbuf, &len, &tempbuf, &templen) == (size_t)-1)
     return string;
 
   *tempbuf = '\0';
@@ -132,23 +144,35 @@ fnx_fromfs (string, len)
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
   char *tempbuf;
+  size_t templen;
 
   if (conv_fromfs == (iconv_t)-1)
     init_fromfs ();
   if (conv_fromfs == (iconv_t)-1)
     return string;
 
+itrace("fnx_fromfs: outlen = %d after init_fromfs", outlen);
+  /* Free and reallocate outbuf if it's *too* big */
+  if (outlen >= OUTLEN_MAX && len < OUTLEN_MAX - 8)
+    {
+      free (outbuf);
+      outbuf = 0;
+      outlen = 0;
+    }
+
   inbuf = string;
-  if (outbuf == 0 || outlen < len + 8)
+  if (outbuf == 0 || outlen < (len + 8))
     {
       outlen = len + 8;
       outbuf = outbuf ? xrealloc (outbuf, outlen + 1) : xmalloc (outlen + 1);
+itrace("fnx_fromfs: increased outlen to %d", outlen);
     }
   tempbuf = outbuf;
+  templen = outlen;
 
   iconv (conv_fromfs, NULL, NULL, NULL, NULL);
 
-  if (iconv (conv_fromfs, &inbuf, &len, &tempbuf, &outlen) == (size_t)-1)
+  if (iconv (conv_fromfs, &inbuf, &len, &tempbuf, &templen) == (size_t)-1)
     return string;
 
   *tempbuf = '\0';
@@ -163,6 +187,7 @@ char *
 fnx_tofs (string)
      char *string;
 {
+bar
   return string;
 }
 

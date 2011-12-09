@@ -8889,3 +8889,33 @@ execute_cmd.c
 
 doc/{bash.1,bashref.texi}
 	- documented [[ command new locale-sensitive treatment of < and >
+
+				   9/24
+				   ----
+configure.in
+	- add "darwin10" cases like darwin8 and darwin9 to handle linking with
+	  included readline and history libraries
+
+				   9/26
+				   ----
+lib/readline/display.c
+	- modify change of 7/24 to use prompt_physical_chars instead of
+	  prompt_visible_length to account for visible multibyte characters in
+	  the line (usually in the prompt).  Fixes debian bug #547264
+	  reported by Pietro Battiston <toobaz@email.it>
+	- add flags argument to _rl_col_width; changed callers.  flags > 0
+	  means that it's ok to use the already-computed prompt information;
+	  flags == 0 means that we're expanding the prompt and we should not
+	  short-circuit
+
+parse.y
+	- in decode_prompt_string, when expanding \w and \W on Mac OS X,
+	  use fnx_fromfs to convert from "filesystem" form to "input" form.
+	  This makes $PWD with multibyte characters work in the prompt
+	  string on Mac OS X
+
+lib/sh/fnxform.c
+	- in fnx_fromfs and fnx_tofs, use templen instead of outlen as last
+	  argument in calls to iconv, since outlen is used to keep track of
+	  the size of the buffer, and iconv potentially modifies its
+	  `outbytesleft' argument

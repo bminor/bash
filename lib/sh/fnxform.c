@@ -100,6 +100,7 @@ fnx_tofs (string, len)
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
   char *tempbuf;
+  size_t templen;
   
   if (conv_tofs == (iconv_t)-1)
     init_tofs ();
@@ -121,10 +122,11 @@ fnx_tofs (string, len)
       outbuf = outbuf ? xrealloc (outbuf, outlen + 1) : xmalloc (outlen + 1);
     }
   tempbuf = outbuf;
+  templen = outlen;
 
   iconv (conv_tofs, NULL, NULL, NULL, NULL);
 
-  if (iconv (conv_tofs, &inbuf, &len, &tempbuf, &outlen) == (size_t)-1)
+  if (iconv (conv_tofs, &inbuf, &len, &tempbuf, &templen) == (size_t)-1)
     return string;
 
   *tempbuf = '\0';
@@ -142,6 +144,7 @@ fnx_fromfs (string, len)
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
   char *tempbuf;
+  size_t templen;
 
   if (conv_fromfs == (iconv_t)-1)
     init_fromfs ();
@@ -157,16 +160,17 @@ fnx_fromfs (string, len)
     }
 
   inbuf = string;
-  if (outbuf == 0 || outlen < len + 8)
+  if (outbuf == 0 || outlen < (len + 8))
     {
       outlen = len + 8;
       outbuf = outbuf ? xrealloc (outbuf, outlen + 1) : xmalloc (outlen + 1);
     }
   tempbuf = outbuf;
+  templen = outlen;
 
   iconv (conv_fromfs, NULL, NULL, NULL, NULL);
 
-  if (iconv (conv_fromfs, &inbuf, &len, &tempbuf, &outlen) == (size_t)-1)
+  if (iconv (conv_fromfs, &inbuf, &len, &tempbuf, &templen) == (size_t)-1)
     return string;
 
   *tempbuf = '\0';
@@ -181,6 +185,7 @@ char *
 fnx_tofs (string)
      char *string;
 {
+bar
   return string;
 }
 
