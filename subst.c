@@ -717,7 +717,7 @@ string_extract (string, sindex, charlist, flags)
 	{
 	  int ni;
 	  /* If this is an array subscript, skip over it and continue. */
-	  ni = skipsubscript (string, i);
+	  ni = skipsubscript (string, i, 0);
 	  if (string[ni] == ']')
 	    i = ni;
 	}
@@ -1509,7 +1509,10 @@ unquote_bang (string)
 #define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
 
 /* This function assumes s[i] == open; returns with s[ret] == close; used to
-   parse array subscripts.  FLAGS currently unused. */
+   parse array subscripts.  FLAGS & 1 means to not attempt to skip over
+   matched pairs of quotes or backquotes, or skip word expansions; it is
+   intended to be used after expansion has been performed and during final
+   assignment parsing (see arrayfunc.c:assign_compound_array_list()). */
 static int
 skip_matched_pair (string, start, open, close, flags)
      const char *string;
@@ -1550,13 +1553,13 @@ skip_matched_pair (string, start, open, close, flags)
 	  ADVANCE_CHAR (string, slen, i);
 	  continue;
 	}
-      else if (c == '`')
+      else if ((flags & 1) == 0 && c == '`')
 	{
 	  backq = 1;
 	  i++;
 	  continue;
 	}
-      else if (c == open)
+      else if ((flags & 1) == 0 && c == open)
 	{
 	  count++;
 	  i++;
@@ -1570,13 +1573,13 @@ skip_matched_pair (string, start, open, close, flags)
 	  i++;
 	  continue;
 	}
-      else if (c == '\'' || c == '"')
+      else if ((flags & 1) == 0 && (c == '\'' || c == '"'))
 	{
 	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i)
 			  : skip_double_quoted (ss, slen, ++i);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
-      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+      else if ((flags&1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
 	{
 	  si = i + 2;
 	  if (string[si] == '\0')
@@ -1601,11 +1604,11 @@ skip_matched_pair (string, start, open, close, flags)
 
 #if defined (ARRAY_VARS)
 int
-skipsubscript (string, start)
+skipsubscript (string, start, flags)
      const char *string;
-     int start;
+     int start, flags;
 {
-  return (skip_matched_pair (string, start, '[', ']', 0));
+  return (skip_matched_pair (string, start, '[', ']', flags));
 }
 #endif
 
@@ -4995,7 +4998,7 @@ command_substitute (string, quoted)
 
   if (wordexp_only && read_but_dont_execute)
     {
-      last_command_exit_value = 125;
+      last_command_exit_value = EX_WEXPCOMSUB;
       jump_to_top_level (EXITPROG);
     }
 

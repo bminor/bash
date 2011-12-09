@@ -275,7 +275,9 @@ write_here_string (fd, redirectee)
   char *herestr;
   int herelen, n, e;
 
+  expanding_redir = 1;
   herestr = expand_string_to_string (redirectee->word, 0);
+  expanding_redir = 0;
   herelen = STRLEN (herestr);
 
   n = write (fd, herestr, herelen);
@@ -327,7 +329,10 @@ write_here_document (fd, redirectee)
 	return 0;
     }
 
+  expanding_redir = 1;
   tlist = expand_string (redirectee->word, Q_HERE_DOCUMENT);
+  expanding_redir = 0;
+
   if (tlist)
     {
       /* Try using buffered I/O (stdio) and writing a word

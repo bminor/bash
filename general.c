@@ -285,7 +285,7 @@ assignment (string, flags)
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  newi = skipsubscript (string, indx);
+	  newi = skipsubscript (string, indx, 0);
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')

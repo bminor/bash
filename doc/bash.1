@@ -5698,12 +5698,17 @@ using the \fBcomplete\fP builtin (see
 below), the programmable completion facilities are invoked.
 .PP
 First, the command name is identified.
+If the command word is the empty string (completion attempted at the
+beginning of an empty line), any compspec defined with
+the \fB\-E\fP option to \fBcomplete\fP is used.
 If a compspec has been defined for that command, the
 compspec is used to generate the list of possible completions for the word.
 If the command word is a full pathname, a compspec for the full
 pathname is searched for first.
 If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
+If those searches to not result in a compspec, any compspec defined with
+the \fB\-D\fP option to \fBcomplete\fP is used as the default.
 .PP
 Once a compspec has been found, it is used to generate the list of
 matching words.
@@ -5836,6 +5841,35 @@ the programmable completion functions force readline to append a slash
 to completed names which are symbolic links to directories, subject to  
 the value of the \fBmark\-directories\fP readline variable, regardless
 of the setting of the \fBmark-symlinked\-directories\fP readline variable.
+.PP
+There is some support for dynamically modifying completions.  This is
+most useful when used in combination with a default completion specified
+with \fBcomplete -D\fP.
+It's possible for shell functions executed as completion
+handlers to indicate that completion should be retried by returning an
+exit status of 124.  If a shell function returns 124, and changes
+the compspec associated with the command on which completion is being
+attempted (supplied as the first argument when the function is executed),
+programmable completion restarts from the beginning, with an
+attempt to find a compspec for that command.  This allows a set of
+completions to be built dynamically as completion is attempted, rather than
+being loaded all at once.
+.PP
+For instance, assuming that there is a library of compspecs, each kept in a
+file corresponding to the name of the command, the following default
+completion function would load completions dynamically:
+.PP
+\f(CW_completion_loader()
+.br
+{
+.br
+	. "/etc/bash_completion.d/$1.sh" >/dev/null 2>&1 && return 124
+.br
+}
+.br
+complete -D -F _completion_loader
+.br
+\fP
 .SH HISTORY
 When the
 .B \-o history
@@ -6567,12 +6601,12 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-E\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-DE\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
 .br
 [\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
-\fBcomplete\fP \fB\-pr\fP [\fB\-E\fP] [\fIname\fP ...]
+\fBcomplete\fP \fB\-pr\fP [\fB\-DE\fP] [\fIname\fP ...]
 .PD
 Specify how arguments to each \fIname\fP should be completed.
 If the \fB\-p\fP option is supplied, or if no options are supplied,
@@ -6581,6 +6615,9 @@ them to be reused as input.
 The \fB\-r\fP option removes a completion specification for
 each \fIname\fP, or, if no \fIname\fPs are supplied, all
 completion specifications.
+The \fB\-D\fP option indicates that the remaining options and actions should
+apply to the ``default'' command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
 The \fB\-E\fP option indicates that the remaining options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
@@ -6760,7 +6797,7 @@ a \fIname\fP for which no specification exists, or
 an error occurs adding a completion specification.
 .RE
 .TP
-\fBcompopt\fP [\fB\-o\fP \fIoption\fP] [\fB+o\fP \fIoption\fP] [\fIname\fP]
+\fBcompopt\fP [\fB\-o\fP \fIoption\fP] [\fB\-DE\fP] [\fB+o\fP \fIoption\fP] [\fIname\fP]
 Modify completion options for each \fIname\fP according to the
 \fIoption\fPs, or for the
 currently-execution completion if no \fIname\fPs are supplied.
@@ -6768,6 +6805,12 @@ If no \fIoption\fPs are given, display the completion options for each
 \fIname\fP or the current completion.
 The possible values of \fIoption\fP are those valid for the \fBcomplete\fP
 builtin described above.
+The \fB\-D\fP option indicates that the remaining options should
+apply to the ``default'' command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
+The \fB\-E\fP option indicates that the remaining options should
+apply to ``empty'' command completion; that is, completion attempted on a
+blank line.
 .PP
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a \fIname\fP for which no completion

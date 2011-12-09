@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on June, 17  2009 by texi2html 1.64 -->
+<!-- Created on August, 3  2009 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -6486,7 +6486,8 @@ is running;
 the next time hostname completion is attempted after the
 value is changed, Bash adds the contents of the new file to the
 existing list.
-If <CODE>HOSTFILE</CODE> is set, but has no value, Bash attempts to read 
+If <CODE>HOSTFILE</CODE> is set, but has no value, or does not name a readable file,
+Bash attempts to read 
 <TT>`/etc/hosts'</TT> to obtain the list of possible hostname completions.
 When <CODE>HOSTFILE</CODE> is unset, the hostname list is cleared.
 <P>
@@ -10726,8 +10727,16 @@ by default.
 <P>
 
 <A NAME="IDX443"></A>
-<DT><CODE>delete-char-or-list ()</CODE>
+<DT><CODE>menu-complete-backward ()</CODE>
 <DD><A NAME="IDX444"></A>
+Identical to <CODE>menu-complete</CODE>, but moves backward through the list
+of possible completions, as if <CODE>menu-complete</CODE> had been given a
+negative argument.
+<P>
+
+<A NAME="IDX445"></A>
+<DT><CODE>delete-char-or-list ()</CODE>
+<DD><A NAME="IDX446"></A>
 Deletes the character under the cursor if not at the beginning or
 end of the line (like <CODE>delete-char</CODE>).
 If at the end of the line, behaves identically to
@@ -10735,64 +10744,64 @@ If at the end of the line, behaves identically to
 This command is unbound by default.
 <P>
 
-<A NAME="IDX445"></A>
+<A NAME="IDX447"></A>
 <DT><CODE>complete-filename (M-/)</CODE>
-<DD><A NAME="IDX446"></A>
+<DD><A NAME="IDX448"></A>
 Attempt filename completion on the text before point.
 <P>
 
-<A NAME="IDX447"></A>
+<A NAME="IDX449"></A>
 <DT><CODE>possible-filename-completions (C-x /)</CODE>
-<DD><A NAME="IDX448"></A>
+<DD><A NAME="IDX450"></A>
 List the possible completions of the text before point,
 treating it as a filename.
 <P>
 
-<A NAME="IDX449"></A>
+<A NAME="IDX451"></A>
 <DT><CODE>complete-username (M-~)</CODE>
-<DD><A NAME="IDX450"></A>
+<DD><A NAME="IDX452"></A>
 Attempt completion on the text before point, treating
 it as a username.
 <P>
 
-<A NAME="IDX451"></A>
+<A NAME="IDX453"></A>
 <DT><CODE>possible-username-completions (C-x ~)</CODE>
-<DD><A NAME="IDX452"></A>
+<DD><A NAME="IDX454"></A>
 List the possible completions of the text before point,
 treating it as a username.
 <P>
 
-<A NAME="IDX453"></A>
+<A NAME="IDX455"></A>
 <DT><CODE>complete-variable (M-$)</CODE>
-<DD><A NAME="IDX454"></A>
+<DD><A NAME="IDX456"></A>
 Attempt completion on the text before point, treating
 it as a shell variable.
 <P>
 
-<A NAME="IDX455"></A>
+<A NAME="IDX457"></A>
 <DT><CODE>possible-variable-completions (C-x $)</CODE>
-<DD><A NAME="IDX456"></A>
+<DD><A NAME="IDX458"></A>
 List the possible completions of the text before point,
 treating it as a shell variable.
 <P>
 
-<A NAME="IDX457"></A>
+<A NAME="IDX459"></A>
 <DT><CODE>complete-hostname (M-@)</CODE>
-<DD><A NAME="IDX458"></A>
+<DD><A NAME="IDX460"></A>
 Attempt completion on the text before point, treating
 it as a hostname.
 <P>
 
-<A NAME="IDX459"></A>
+<A NAME="IDX461"></A>
 <DT><CODE>possible-hostname-completions (C-x @)</CODE>
-<DD><A NAME="IDX460"></A>
+<DD><A NAME="IDX462"></A>
 List the possible completions of the text before point,
 treating it as a hostname.
 <P>
 
-<A NAME="IDX461"></A>
+<A NAME="IDX463"></A>
 <DT><CODE>complete-command (M-!)</CODE>
-<DD><A NAME="IDX462"></A>
+<DD><A NAME="IDX464"></A>
 Attempt completion on the text before point, treating
 it as a command name.  Command completion attempts to
 match the text against aliases, reserved words, shell
@@ -10800,32 +10809,32 @@ functions, shell builtins, and finally executable filenames,
 in that order.
 <P>
 
-<A NAME="IDX463"></A>
+<A NAME="IDX465"></A>
 <DT><CODE>possible-command-completions (C-x !)</CODE>
-<DD><A NAME="IDX464"></A>
+<DD><A NAME="IDX466"></A>
 List the possible completions of the text before point,
 treating it as a command name.
 <P>
 
-<A NAME="IDX465"></A>
+<A NAME="IDX467"></A>
 <DT><CODE>dynamic-complete-history (M-<KBD>TAB</KBD>)</CODE>
-<DD><A NAME="IDX466"></A>
+<DD><A NAME="IDX468"></A>
 Attempt completion on the text before point, comparing
 the text against lines from the history list for possible
 completion matches.
 <P>
 
-<A NAME="IDX467"></A>
+<A NAME="IDX469"></A>
 <DT><CODE>dabbrev-expand ()</CODE>
-<DD><A NAME="IDX468"></A>
+<DD><A NAME="IDX470"></A>
 Attempt menu completion on the text before point, comparing
 the text against lines from the history list for possible
 completion matches.
 <P>
 
-<A NAME="IDX469"></A>
+<A NAME="IDX471"></A>
 <DT><CODE>complete-into-braces (M-{)</CODE>
-<DD><A NAME="IDX470"></A>
+<DD><A NAME="IDX472"></A>
 Perform filename completion and insert the list of possible completions
 enclosed within braces so the list is available to the shell
 (see section <A HREF="bashref.html#SEC29">3.5.1 Brace Expansion</A>).
@@ -10852,22 +10861,22 @@ enclosed within braces so the list is available to the shell
 <!--docid::SEC114::-->
 <DL COMPACT>
 
-<A NAME="IDX471"></A>
+<A NAME="IDX473"></A>
 <DT><CODE>start-kbd-macro (C-x ()</CODE>
-<DD><A NAME="IDX472"></A>
+<DD><A NAME="IDX474"></A>
 Begin saving the characters typed into the current keyboard macro.
 <P>
 
-<A NAME="IDX473"></A>
+<A NAME="IDX475"></A>
 <DT><CODE>end-kbd-macro (C-x ))</CODE>
-<DD><A NAME="IDX474"></A>
+<DD><A NAME="IDX476"></A>
 Stop saving the characters typed into the current keyboard macro
 and save the definition.
 <P>
 
-<A NAME="IDX475"></A>
+<A NAME="IDX477"></A>
 <DT><CODE>call-last-kbd-macro (C-x e)</CODE>
-<DD><A NAME="IDX476"></A>
+<DD><A NAME="IDX478"></A>
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 <P>
@@ -10893,87 +10902,87 @@ in the macro appear as if typed at the keyboard.
 <!--docid::SEC115::-->
 <DL COMPACT>
 
-<A NAME="IDX477"></A>
+<A NAME="IDX479"></A>
 <DT><CODE>re-read-init-file (C-x C-r)</CODE>
-<DD><A NAME="IDX478"></A>
+<DD><A NAME="IDX480"></A>
 Read in the contents of the <VAR>inputrc</VAR> file, and incorporate
 any bindings or variable assignments found there.
 <P>
 
-<A NAME="IDX479"></A>
+<A NAME="IDX481"></A>
 <DT><CODE>abort (C-g)</CODE>
-<DD><A NAME="IDX480"></A>
+<DD><A NAME="IDX482"></A>
 Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 <CODE>bell-style</CODE>).
 <P>
 
-<A NAME="IDX481"></A>
+<A NAME="IDX483"></A>
 <DT><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, <small>...</small>)</CODE>
-<DD><A NAME="IDX482"></A>
+<DD><A NAME="IDX484"></A>
 If the metafied character <VAR>x</VAR> is lowercase, run the command
 that is bound to the corresponding uppercase character.
 <P>
 
-<A NAME="IDX483"></A>
+<A NAME="IDX485"></A>
 <DT><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE>
-<DD><A NAME="IDX484"></A>
+<DD><A NAME="IDX486"></A>
 Metafy the next character typed.  This is for keyboards
 without a meta key.  Typing <SAMP>`<KBD>ESC</KBD> f'</SAMP> is equivalent to typing
 <KBD>M-f</KBD>.
 <P>
 
-<A NAME="IDX485"></A>
+<A NAME="IDX487"></A>
 <DT><CODE>undo (C-_ or C-x C-u)</CODE>
-<DD><A NAME="IDX486"></A>
+<DD><A NAME="IDX488"></A>
 Incremental undo, separately remembered for each line.
 <P>
 
-<A NAME="IDX487"></A>
+<A NAME="IDX489"></A>
 <DT><CODE>revert-line (M-r)</CODE>
-<DD><A NAME="IDX488"></A>
+<DD><A NAME="IDX490"></A>
 Undo all changes made to this line.  This is like executing the <CODE>undo</CODE>
 command enough times to get back to the beginning.
 <P>
 
-<A NAME="IDX489"></A>
+<A NAME="IDX491"></A>
 <DT><CODE>tilde-expand (M-&#38;)</CODE>
-<DD><A NAME="IDX490"></A>
+<DD><A NAME="IDX492"></A>
 Perform tilde expansion on the current word.
 <P>
 
-<A NAME="IDX491"></A>
+<A NAME="IDX493"></A>
 <DT><CODE>set-mark (C-@)</CODE>
-<DD><A NAME="IDX492"></A>
+<DD><A NAME="IDX494"></A>
 Set the mark to the point.  If a
 numeric argument is supplied, the mark is set to that position.
 <P>
 
-<A NAME="IDX493"></A>
+<A NAME="IDX495"></A>
 <DT><CODE>exchange-point-and-mark (C-x C-x)</CODE>
-<DD><A NAME="IDX494"></A>
+<DD><A NAME="IDX496"></A>
 Swap the point with the mark.  The current cursor position is set to
 the saved position, and the old cursor position is saved as the mark.
 <P>
 
-<A NAME="IDX495"></A>
+<A NAME="IDX497"></A>
 <DT><CODE>character-search (C-])</CODE>
-<DD><A NAME="IDX496"></A>
+<DD><A NAME="IDX498"></A>
 A character is read and point is moved to the next occurrence of that
 character.  A negative count searches for previous occurrences.
 <P>
 
-<A NAME="IDX497"></A>
+<A NAME="IDX499"></A>
 <DT><CODE>character-search-backward (M-C-])</CODE>
-<DD><A NAME="IDX498"></A>
+<DD><A NAME="IDX500"></A>
 A character is read and point is moved to the previous occurrence
 of that character.  A negative count searches for subsequent
 occurrences.
 <P>
 
-<A NAME="IDX499"></A>
+<A NAME="IDX501"></A>
 <DT><CODE>insert-comment (M-#)</CODE>
-<DD><A NAME="IDX500"></A>
+<DD><A NAME="IDX502"></A>
 Without a numeric argument, the value of the <CODE>comment-begin</CODE>
 variable is inserted at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle:  if
@@ -10988,115 +10997,115 @@ If a numeric argument causes the comment character to be removed, the line
 will be executed by the shell.
 <P>
 
-<A NAME="IDX501"></A>
+<A NAME="IDX503"></A>
 <DT><CODE>dump-functions ()</CODE>
-<DD><A NAME="IDX502"></A>
+<DD><A NAME="IDX504"></A>
 Print all of the functions and their key bindings to the
 Readline output stream.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX503"></A>
+<A NAME="IDX505"></A>
 <DT><CODE>dump-variables ()</CODE>
-<DD><A NAME="IDX504"></A>
+<DD><A NAME="IDX506"></A>
 Print all of the settable variables and their values to the
 Readline output stream.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX505"></A>
+<A NAME="IDX507"></A>
 <DT><CODE>dump-macros ()</CODE>
-<DD><A NAME="IDX506"></A>
+<DD><A NAME="IDX508"></A>
 Print all of the Readline key sequences bound to macros and the
 strings they output.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX507"></A>
+<A NAME="IDX509"></A>
 <DT><CODE>glob-complete-word (M-g)</CODE>
-<DD><A NAME="IDX508"></A>
+<DD><A NAME="IDX510"></A>
 The word before point is treated as a pattern for pathname expansion,
 with an asterisk implicitly appended.  This pattern is used to
 generate a list of matching file names for possible completions.
 <P>
 
-<A NAME="IDX509"></A>
+<A NAME="IDX511"></A>
 <DT><CODE>glob-expand-word (C-x *)</CODE>
-<DD><A NAME="IDX510"></A>
+<DD><A NAME="IDX512"></A>
 The word before point is treated as a pattern for pathname expansion,
 and the list of matching file names is inserted, replacing the word.
 If a numeric argument is supplied, a <SAMP>`*'</SAMP> is appended before
 pathname expansion.
 <P>
 
-<A NAME="IDX511"></A>
+<A NAME="IDX513"></A>
 <DT><CODE>glob-list-expansions (C-x g)</CODE>
-<DD><A NAME="IDX512"></A>
+<DD><A NAME="IDX514"></A>
 The list of expansions that would have been generated by
 <CODE>glob-expand-word</CODE> is displayed, and the line is redrawn.
 If a numeric argument is supplied, a <SAMP>`*'</SAMP> is appended before
 pathname expansion.
 <P>
 
-<A NAME="IDX513"></A>
+<A NAME="IDX515"></A>
 <DT><CODE>display-shell-version (C-x C-v)</CODE>
-<DD><A NAME="IDX514"></A>
+<DD><A NAME="IDX516"></A>
 Display version information about the current instance of Bash.
 <P>
 
-<A NAME="IDX515"></A>
+<A NAME="IDX517"></A>
 <DT><CODE>shell-expand-line (M-C-e)</CODE>
-<DD><A NAME="IDX516"></A>
+<DD><A NAME="IDX518"></A>
 Expand the line as the shell does.
 This performs alias and history expansion as well as all of the shell
 word expansions (see section <A HREF="bashref.html#SEC28">3.5 Shell Expansions</A>).
 <P>
 
-<A NAME="IDX517"></A>
+<A NAME="IDX519"></A>
 <DT><CODE>history-expand-line (M-^)</CODE>
-<DD><A NAME="IDX518"></A>
+<DD><A NAME="IDX520"></A>
 Perform history expansion on the current line.
 <P>
 
-<A NAME="IDX519"></A>
+<A NAME="IDX521"></A>
 <DT><CODE>magic-space ()</CODE>
-<DD><A NAME="IDX520"></A>
+<DD><A NAME="IDX522"></A>
 Perform history expansion on the current line and insert a space
 (see section <A HREF="bashref.html#SEC122">9.3 History Expansion</A>).
 <P>
 
-<A NAME="IDX521"></A>
+<A NAME="IDX523"></A>
 <DT><CODE>alias-expand-line ()</CODE>
-<DD><A NAME="IDX522"></A>
+<DD><A NAME="IDX524"></A>
 Perform alias expansion on the current line (see section <A HREF="bashref.html#SEC84">6.6 Aliases</A>).
 <P>
 
-<A NAME="IDX523"></A>
+<A NAME="IDX525"></A>
 <DT><CODE>history-and-alias-expand-line ()</CODE>
-<DD><A NAME="IDX524"></A>
+<DD><A NAME="IDX526"></A>
 Perform history and alias expansion on the current line.
 <P>
 
-<A NAME="IDX525"></A>
+<A NAME="IDX527"></A>
 <DT><CODE>insert-last-argument (M-. or M-_)</CODE>
-<DD><A NAME="IDX526"></A>
+<DD><A NAME="IDX528"></A>
 A synonym for <CODE>yank-last-arg</CODE>.
 <P>
 
-<A NAME="IDX527"></A>
+<A NAME="IDX529"></A>
 <DT><CODE>operate-and-get-next (C-o)</CODE>
-<DD><A NAME="IDX528"></A>
+<DD><A NAME="IDX530"></A>
 Accept the current line for execution and fetch the next line
 relative to the current line from the history for editing.  Any
 argument is ignored.
 <P>
 
-<A NAME="IDX529"></A>
+<A NAME="IDX531"></A>
 <DT><CODE>edit-and-execute-command (C-xC-e)</CODE>
-<DD><A NAME="IDX530"></A>
+<DD><A NAME="IDX532"></A>
 Invoke an editor on the current command line, and execute the result as shell
 commands.
 Bash attempts to invoke
@@ -11317,7 +11326,7 @@ facilities.
 
 <DL COMPACT>
 <DT><CODE>compgen</CODE>
-<DD><A NAME="IDX531"></A>
+<DD><A NAME="IDX533"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>compgen [<VAR>option</VAR>] [<VAR>word</VAR>]</CODE>
 </pre></td></tr></table><P>
 
@@ -11343,11 +11352,11 @@ matches were generated.
 </P><P>
 
 <DT><CODE>complete</CODE>
-<DD><A NAME="IDX532"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>complete [-abcdefgjksuv] [-o <VAR>comp-option</VAR>] [-E] [-A <VAR>action</VAR>] [-G <VAR>globpat</VAR>] [-W <VAR>wordlist</VAR>]
+<DD><A NAME="IDX534"></A>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>complete [-abcdefgjksuv] [-o <VAR>comp-option</VAR>] [-DE] [-A <VAR>action</VAR>] [-G <VAR>globpat</VAR>] [-W <VAR>wordlist</VAR>]
 [-F <VAR>function</VAR>] [-C <VAR>command</VAR>] [-X <VAR>filterpat</VAR>]
 [-P <VAR>prefix</VAR>] [-S <VAR>suffix</VAR>] <VAR>name</VAR> [<VAR>name</VAR> <small>...</small>]</CODE>
-<CODE>complete -pr [-E] [<VAR>name</VAR> <small>...</small>]</CODE>
+<CODE>complete -pr [-DE] [<VAR>name</VAR> <small>...</small>]</CODE>
 </pre></td></tr></table><P>
 
 Specify how arguments to each <VAR>name</VAR> should be completed.
@@ -11357,6 +11366,9 @@ reused as input.
 The <SAMP>`-r'</SAMP> option removes a completion specification for
 each <VAR>name</VAR>, or, if no <VAR>name</VAR>s are supplied, all
 completion specifications.
+The <SAMP>`-D'</SAMP> option indicates that the remaining options and actions should
+apply to the "default" command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
 The <SAMP>`-E'</SAMP> option indicates that the remaining options and actions should
 apply to "empty" command completion; that is, completion attempted on a 
 blank line.
@@ -11577,8 +11589,8 @@ an error occurs adding a completion specification.
 </P><P>
 
 <DT><CODE>compopt</CODE>
-<DD><A NAME="IDX533"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>compopt</CODE> [-o <VAR>option</VAR>] [+o <VAR>option</VAR>] [<VAR>name</VAR>]
+<DD><A NAME="IDX535"></A>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>compopt</CODE> [-o <VAR>option</VAR>] [-DE] [+o <VAR>option</VAR>] [<VAR>name</VAR>]
 </pre></td></tr></table>Modify completion options for each <VAR>name</VAR> according to the
 <VAR>option</VAR>s, or for the currently-execution completion if no <VAR>name</VAR>s
 are supplied.
@@ -11586,6 +11598,12 @@ If no <VAR>option</VAR>s are given, display the completion options for each
 <VAR>name</VAR> or the current completion.
 The possible values of <VAR>option</VAR> are those valid for the <CODE>complete</CODE>
 builtin described above.
+The <SAMP>`-D'</SAMP> option indicates that the remaining options should
+apply to the "default" command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
+The <SAMP>`-E'</SAMP> option indicates that the remaining options should
+apply to "empty" command completion; that is, completion attempted on a 
+blank line.
 <P>
 
 The return value is true unless an invalid option is supplied, an attempt
@@ -11596,7 +11614,7 @@ specification exists, or an output error occurs.
 </DL>
 <P>
 
-<A NAME="IDX534"></A>
+<A NAME="IDX536"></A>
 </P><P>
 
 <A NAME="Using History Interactively"></A>
@@ -11741,7 +11759,7 @@ history list and history file.
 <DL COMPACT>
 
 <DT><CODE>fc</CODE>
-<DD><A NAME="IDX535"></A>
+<DD><A NAME="IDX537"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>fc [-e <VAR>ename</VAR>] [-lnr] [<VAR>first</VAR>] [<VAR>last</VAR>]</CODE>
 <CODE>fc -s [<VAR>pat</VAR>=<VAR>rep</VAR>] [<VAR>command</VAR>]</CODE>
 </pre></td></tr></table><P>
@@ -11775,7 +11793,7 @@ and typing <SAMP>`r'</SAMP> re-executes the last command (see section <A HREF="b
 </P><P>
 
 <DT><CODE>history</CODE>
-<DD><A NAME="IDX536"></A>
+<DD><A NAME="IDX538"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>history [<VAR>n</VAR>]
 history -c
 history -d <VAR>offset</VAR>
@@ -11948,7 +11966,7 @@ writing the history file.
 
 An event designator is a reference to a command line entry in the
 history list.
-<A NAME="IDX537"></A>
+<A NAME="IDX539"></A>
 </P><P>
 
 <DL COMPACT>
@@ -14210,9 +14228,9 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX92"><CODE>caller</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC60">4.2 Bash Builtin Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX71"><CODE>cd</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC59">4.1 Bourne Shell Builtins</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX93"><CODE>command</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC60">4.2 Bash Builtin Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX531"><CODE>compgen</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX532"><CODE>complete</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX533"><CODE>compopt</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX533"><CODE>compgen</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX534"><CODE>complete</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX535"><CODE>compopt</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX72"><CODE>continue</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC59">4.1 Bourne Shell Builtins</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="bt_D"></A>D</TH><TD></TD><TD></TD></TR>
@@ -14229,7 +14247,7 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX76"><CODE>export</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC59">4.1 Bourne Shell Builtins</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="bt_F"></A>F</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX535"><CODE>fc</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC121">9.2 Bash History Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX537"><CODE>fc</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC121">9.2 Bash History Builtins</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX290"><CODE>fg</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC93">7.2 Job Control Builtins</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="bt_G"></A>G</TH><TD></TD><TD></TD></TR>
@@ -14238,7 +14256,7 @@ to permit their use in free software.
 <TR><TH><A NAME="bt_H"></A>H</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX78"><CODE>hash</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC59">4.1 Bourne Shell Builtins</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX97"><CODE>help</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC60">4.2 Bash Builtin Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX536"><CODE>history</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC121">9.2 Bash History Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX538"><CODE>history</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC121">9.2 Bash History Builtins</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="bt_J"></A>J</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX291"><CODE>jobs</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC93">7.2 Job Control Builtins</A></TD></TR>
@@ -14937,12 +14955,12 @@ to permit their use in free software.
 <TR><TD></TD><TH ALIGN=LEFT>Index Entry</TH><TH ALIGN=LEFT> Section</TH></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_A"></A>A</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX479"><CODE>abort (C-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX480"><CODE>abort (C-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX481"><CODE>abort (C-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX482"><CODE>abort (C-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX349"><CODE>accept-line (Newline or Return)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX350"><CODE>accept-line (Newline or Return)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX521"><CODE>alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX522"><CODE>alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX523"><CODE>alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX524"><CODE>alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_B"></A>B</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX335"><CODE>backward-char (C-b)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
@@ -14963,30 +14981,30 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX330"><CODE>beginning-of-line (C-a)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_C"></A>C</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX475"><CODE>call-last-kbd-macro (C-x e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX476"><CODE>call-last-kbd-macro (C-x e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX477"><CODE>call-last-kbd-macro (C-x e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX478"><CODE>call-last-kbd-macro (C-x e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX393"><CODE>capitalize-word (M-c)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX394"><CODE>capitalize-word (M-c)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX495"><CODE>character-search (C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX496"><CODE>character-search (C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX497"><CODE>character-search-backward (M-C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX498"><CODE>character-search-backward (M-C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX497"><CODE>character-search (C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX498"><CODE>character-search (C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX499"><CODE>character-search-backward (M-C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX500"><CODE>character-search-backward (M-C-])</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX345"><CODE>clear-screen (C-l)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX346"><CODE>clear-screen (C-l)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX435"><CODE>complete (<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX436"><CODE>complete (<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX461"><CODE>complete-command (M-!)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX462"><CODE>complete-command (M-!)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX445"><CODE>complete-filename (M-/)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX446"><CODE>complete-filename (M-/)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX457"><CODE>complete-hostname (M-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX458"><CODE>complete-hostname (M-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX469"><CODE>complete-into-braces (M-{)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX470"><CODE>complete-into-braces (M-{)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX449"><CODE>complete-username (M-~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX450"><CODE>complete-username (M-~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX453"><CODE>complete-variable (M-$)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX454"><CODE>complete-variable (M-$)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX463"><CODE>complete-command (M-!)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX464"><CODE>complete-command (M-!)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX447"><CODE>complete-filename (M-/)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX448"><CODE>complete-filename (M-/)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX459"><CODE>complete-hostname (M-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX460"><CODE>complete-hostname (M-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX471"><CODE>complete-into-braces (M-{)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX472"><CODE>complete-into-braces (M-{)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX451"><CODE>complete-username (M-~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX452"><CODE>complete-username (M-~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX455"><CODE>complete-variable (M-$)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX456"><CODE>complete-variable (M-$)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX423"><CODE>copy-backward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX424"><CODE>copy-backward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX425"><CODE>copy-forward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
@@ -14995,42 +15013,42 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX422"><CODE>copy-region-as-kill ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_D"></A>D</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX467"><CODE>dabbrev-expand ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX468"><CODE>dabbrev-expand ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX469"><CODE>dabbrev-expand ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX470"><CODE>dabbrev-expand ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX375"><CODE>delete-char (C-d)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX376"><CODE>delete-char (C-d)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX443"><CODE>delete-char-or-list ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX444"><CODE>delete-char-or-list ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX445"><CODE>delete-char-or-list ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX446"><CODE>delete-char-or-list ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX417"><CODE>delete-horizontal-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX418"><CODE>delete-horizontal-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX431"><CODE>digit-argument (<KBD>M-0</KBD>, <KBD>M-1</KBD>, &#60;small&#62;...&#60;/small&#62; <KBD>M--</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC112">8.4.5 Specifying Numeric Arguments</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX432"><CODE>digit-argument (<KBD>M-0</KBD>, <KBD>M-1</KBD>, &#60;small&#62;...&#60;/small&#62; <KBD>M--</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC112">8.4.5 Specifying Numeric Arguments</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX513"><CODE>display-shell-version (C-x C-v)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX514"><CODE>display-shell-version (C-x C-v)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX481"><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX482"><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX515"><CODE>display-shell-version (C-x C-v)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX516"><CODE>display-shell-version (C-x C-v)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX483"><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX484"><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX391"><CODE>downcase-word (M-l)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX392"><CODE>downcase-word (M-l)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX501"><CODE>dump-functions ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX502"><CODE>dump-functions ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX505"><CODE>dump-macros ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX506"><CODE>dump-macros ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX503"><CODE>dump-variables ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX504"><CODE>dump-variables ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX465"><CODE>dynamic-complete-history (M-<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX466"><CODE>dynamic-complete-history (M-<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX503"><CODE>dump-functions ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX504"><CODE>dump-functions ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX507"><CODE>dump-macros ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX508"><CODE>dump-macros ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX505"><CODE>dump-variables ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX506"><CODE>dump-variables ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX467"><CODE>dynamic-complete-history (M-<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX468"><CODE>dynamic-complete-history (M-<KBD>TAB</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_E"></A>E</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX529"><CODE>edit-and-execute-command (C-xC-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX530"><CODE>edit-and-execute-command (C-xC-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX473"><CODE>end-kbd-macro (C-x ))</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX474"><CODE>end-kbd-macro (C-x ))</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX531"><CODE>edit-and-execute-command (C-xC-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX532"><CODE>edit-and-execute-command (C-xC-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX475"><CODE>end-kbd-macro (C-x ))</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX476"><CODE>end-kbd-macro (C-x ))</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX357"><CODE>end-of-history (M-&#38;#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX358"><CODE>end-of-history (M-&#38;#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX331"><CODE>end-of-line (C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX332"><CODE>end-of-line (C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX493"><CODE>exchange-point-and-mark (C-x C-x)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX494"><CODE>exchange-point-and-mark (C-x C-x)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX495"><CODE>exchange-point-and-mark (C-x C-x)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX496"><CODE>exchange-point-and-mark (C-x C-x)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_F"></A>F</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX379"><CODE>forward-backward-delete-char ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
@@ -15043,30 +15061,30 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX338"><CODE>forward-word (M-f)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_G"></A>G</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX507"><CODE>glob-complete-word (M-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX508"><CODE>glob-complete-word (M-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX509"><CODE>glob-expand-word (C-x *)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX510"><CODE>glob-expand-word (C-x *)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX511"><CODE>glob-list-expansions (C-x g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX512"><CODE>glob-list-expansions (C-x g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX509"><CODE>glob-complete-word (M-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX510"><CODE>glob-complete-word (M-g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX511"><CODE>glob-expand-word (C-x *)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX512"><CODE>glob-expand-word (C-x *)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX513"><CODE>glob-list-expansions (C-x g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX514"><CODE>glob-list-expansions (C-x g)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_H"></A>H</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX523"><CODE>history-and-alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX524"><CODE>history-and-alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX517"><CODE>history-expand-line (M-^)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX518"><CODE>history-expand-line (M-^)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX525"><CODE>history-and-alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX526"><CODE>history-and-alias-expand-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX519"><CODE>history-expand-line (M-^)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX520"><CODE>history-expand-line (M-^)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX369"><CODE>history-search-backward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX370"><CODE>history-search-backward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX367"><CODE>history-search-forward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX368"><CODE>history-search-forward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_I"></A>I</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX499"><CODE>insert-comment (M-#)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX500"><CODE>insert-comment (M-#)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX501"><CODE>insert-comment (M-#)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX502"><CODE>insert-comment (M-#)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX439"><CODE>insert-completions (M-*)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX440"><CODE>insert-completions (M-*)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX525"><CODE>insert-last-argument (M-. or M-_)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX526"><CODE>insert-last-argument (M-. or M-_)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX527"><CODE>insert-last-argument (M-. or M-_)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX528"><CODE>insert-last-argument (M-. or M-_)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_K"></A>K</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX397"><CODE>kill-line (C-k)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
@@ -15079,10 +15097,12 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX406"><CODE>kill-word (M-d)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_M"></A>M</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX519"><CODE>magic-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX520"><CODE>magic-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX521"><CODE>magic-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX522"><CODE>magic-space ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX441"><CODE>menu-complete ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX442"><CODE>menu-complete ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX443"><CODE>menu-complete-backward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX444"><CODE>menu-complete-backward ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_N"></A>N</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX353"><CODE>next-history (C-n)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
@@ -15093,26 +15113,26 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX364"><CODE>non-incremental-reverse-search-history (M-p)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_O"></A>O</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX527"><CODE>operate-and-get-next (C-o)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX528"><CODE>operate-and-get-next (C-o)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX529"><CODE>operate-and-get-next (C-o)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX530"><CODE>operate-and-get-next (C-o)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX395"><CODE>overwrite-mode ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX396"><CODE>overwrite-mode ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_P"></A>P</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX463"><CODE>possible-command-completions (C-x !)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX464"><CODE>possible-command-completions (C-x !)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX465"><CODE>possible-command-completions (C-x !)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX466"><CODE>possible-command-completions (C-x !)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX437"><CODE>possible-completions (M-?)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX438"><CODE>possible-completions (M-?)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX447"><CODE>possible-filename-completions (C-x /)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX448"><CODE>possible-filename-completions (C-x /)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX459"><CODE>possible-hostname-completions (C-x @)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX460"><CODE>possible-hostname-completions (C-x @)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX451"><CODE>possible-username-completions (C-x ~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX452"><CODE>possible-username-completions (C-x ~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX455"><CODE>possible-variable-completions (C-x $)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX456"><CODE>possible-variable-completions (C-x $)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX483"><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX484"><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX449"><CODE>possible-filename-completions (C-x /)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX450"><CODE>possible-filename-completions (C-x /)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX461"><CODE>possible-hostname-completions (C-x @)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX462"><CODE>possible-hostname-completions (C-x @)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX453"><CODE>possible-username-completions (C-x ~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX454"><CODE>possible-username-completions (C-x ~)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX457"><CODE>possible-variable-completions (C-x $)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX458"><CODE>possible-variable-completions (C-x $)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC113">8.4.6 Letting Readline Type For You</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX485"><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX486"><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX351"><CODE>previous-history (C-p)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX352"><CODE>previous-history (C-p)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
@@ -15121,42 +15141,42 @@ to permit their use in free software.
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX382"><CODE>quoted-insert (C-q or C-v)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_R"></A>R</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX477"><CODE>re-read-init-file (C-x C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX478"><CODE>re-read-init-file (C-x C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX479"><CODE>re-read-init-file (C-x C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX480"><CODE>re-read-init-file (C-x C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX347"><CODE>redraw-current-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX348"><CODE>redraw-current-line ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX359"><CODE>reverse-search-history (C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX360"><CODE>reverse-search-history (C-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC109">8.4.2 Commands For Manipulating The History</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX487"><CODE>revert-line (M-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX488"><CODE>revert-line (M-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX489"><CODE>revert-line (M-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX490"><CODE>revert-line (M-r)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_S"></A>S</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX383"><CODE>self-insert (a, b, A, 1, !, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX384"><CODE>self-insert (a, b, A, 1, !, &#60;small&#62;...&#60;/small&#62;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX491"><CODE>set-mark (C-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX492"><CODE>set-mark (C-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX493"><CODE>set-mark (C-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX494"><CODE>set-mark (C-@)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX343"><CODE>shell-backward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX344"><CODE>shell-backward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX515"><CODE>shell-expand-line (M-C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX516"><CODE>shell-expand-line (M-C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX517"><CODE>shell-expand-line (M-C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX518"><CODE>shell-expand-line (M-C-e)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX341"><CODE>shell-forward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX342"><CODE>shell-forward-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC108">8.4.1 Commands For Moving</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX409"><CODE>shell-kill-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX410"><CODE>shell-kill-word ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX471"><CODE>start-kbd-macro (C-x ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX472"><CODE>start-kbd-macro (C-x ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX473"><CODE>start-kbd-macro (C-x ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX474"><CODE>start-kbd-macro (C-x ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC114">8.4.7 Keyboard Macros</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_T"></A>T</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX489"><CODE>tilde-expand (M-&#38;#38;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX490"><CODE>tilde-expand (M-&#38;#38;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX491"><CODE>tilde-expand (M-&#38;#38;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX492"><CODE>tilde-expand (M-&#38;#38;)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX385"><CODE>transpose-chars (C-t)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX386"><CODE>transpose-chars (C-t)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX387"><CODE>transpose-words (M-t)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX388"><CODE>transpose-words (M-t)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC110">8.4.3 Commands For Changing Text</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="fn_U"></A>U</TH><TD></TD><TD></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX485"><CODE>undo (C-_ or C-x C-u)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX486"><CODE>undo (C-_ or C-x C-u)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX487"><CODE>undo (C-_ or C-x C-u)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX488"><CODE>undo (C-_ or C-x C-u)</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC115">8.4.8 Some Miscellaneous Commands</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX433"><CODE>universal-argument ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC112">8.4.5 Specifying Numeric Arguments</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX434"><CODE>universal-argument ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC112">8.4.5 Specifying Numeric Arguments</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX415"><CODE>unix-filename-rubout ()</CODE></A></TD><TD valign=top><A HREF="bashref.html#SEC111">8.4.4 Killing And Yanking</A></TD></TR>
@@ -15351,10 +15371,10 @@ to permit their use in free software.
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="cp_H"></A>H</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#SEC121">history builtins</A></TD><TD valign=top><A HREF="bashref.html#SEC121">9.2 Bash History Builtins</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX537">history events</A></TD><TD valign=top><A HREF="bashref.html#SEC123">9.3.1 Event Designators</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX539">history events</A></TD><TD valign=top><A HREF="bashref.html#SEC123">9.3.1 Event Designators</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#SEC122">history expansion</A></TD><TD valign=top><A HREF="bashref.html#SEC122">9.3 History Expansion</A></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#SEC120">history list</A></TD><TD valign=top><A HREF="bashref.html#SEC120">9.1 Bash History Facilities</A></TD></TR>
-<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX534">History, how to use</A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
+<TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX536">History, how to use</A></TD><TD valign=top><A HREF="bashref.html#SEC118">8.7 Programmable Completion Builtins</A></TD></TR>
 <TR><TD COLSPAN=3> <HR></TD></TR>
 <TR><TH><A NAME="cp_I"></A>I</TH><TD></TD><TD></TD></TR>
 <TR><TD></TD><TD valign=top><A HREF="bashref.html#IDX11">identifier</A></TD><TD valign=top><A HREF="bashref.html#SEC4">2. Definitions</A></TD></TR>
@@ -15880,7 +15900,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>June, 17  2009</I>
+This document was generated by <I>Chet Ramey</I> on <I>August, 3  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -16042,7 +16062,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>June, 17  2009</I>
+by <I>Chet Ramey</I> on <I>August, 3  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

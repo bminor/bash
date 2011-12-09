@@ -13,11 +13,11 @@ declare -A BASH_CMDS='()'
 declare -Ai chaff='([one]="10" [zero]="5" )'
 declare -Ar waste='([version]="4.0-devel" [source]="./assoc.tests" [lineno]="28" [pid]="42134" )'
 declare -A wheat='([one]="a" [zero]="0" [two]="b" [three]="c" )'
-declare -A chaff='([one]="10" [hello world]="flip" [zero]="5" )'
+declare -A chaff='([one]="10" ["hello world"]="flip" [zero]="5" )'
 ./assoc.tests: line 38: unset: waste: cannot unset: readonly variable
 ./assoc.tests: line 39: chaff[*]: bad array subscript
 ./assoc.tests: line 40: [*]=12: invalid associative array key
-declare -A chaff='([one]="a" [hello world]="flip" )'
+declare -A chaff='([one]="a" ["hello world"]="flip" )'
 flip
 argv[1] = <a>
 argv[2] = <flip>
@@ -34,11 +34,11 @@ argv[1] = <a flip multiple words>
 ./assoc.tests: line 57: declare: chaff: cannot destroy array variables in this way
 ./assoc.tests: line 59: chaff[*]: bad array subscript
 ./assoc.tests: line 60: [*]=12: invalid associative array key
-declare -A wheat='([six]="6" [foo bar]="qux qix" )'
+declare -A wheat='([six]="6" ["foo bar"]="qux qix" )'
 argv[1] = <qux>
 argv[2] = <qix>
 argv[1] = <qux qix>
-declare -A wheat='([six]="6" [foo bar]="qux qix" )'
+declare -A wheat='([six]="6" ["foo bar"]="qux qix" )'
 argv[1] = <2>
 argv[1] = <7>
 argv[1] = <qux>
@@ -102,7 +102,7 @@ argv[4] = </usr/local/bin/qux -l>
 outside: outside
 declare -A BASH_ALIASES='()'
 declare -A BASH_CMDS='()'
-declare -A afoo='([six]="six" [foo bar]="foo quux" )'
+declare -A afoo='([six]="six" ["foo bar"]="foo quux" )'
 argv[1] = <inside:>
 argv[2] = <six>
 argv[3] = <foo quux>
@@ -137,7 +137,52 @@ def
 def
 ./assoc5.sub: line 13: declare: `myarray[foo[bar]=bleh': not a valid identifier
 abc def bleh
-myarray=([a]a]="abc" []]="def" [a]=test1;#a]="123" [foo]="bleh" )
+myarray=(["a]a"]="abc" ["]"]="def" ["a]=test1;#a"]="123" [foo]="bleh" )
 
 123
-myarray=([a]a]="abc" [a]=test2;#a]="def" []]="def" [a]=test1;#a]="123" [foo]="bleh" )
+myarray=(["a]a"]="abc" ["a]=test2;#a"]="def" ["]"]="def" ["a]=test1;#a"]="123" [foo]="bleh" )
+bar"bie
+doll
+declare -A foo='(["bar\"bie"]="doll" )'
+bar"bie
+doll
+declare -A foo='(["bar\"bie"]="doll" )'
+bar"bie
+doll
+declare -A foo='(["bar\"bie"]="doll" )'
+bar"bie
+doll
+declare -A foo='(["bar\"bie"]="doll" )'
+bar"bie
+doll
+declare -A foo='(["bar\"bie"]="doll" )'
+bar'bie
+doll
+declare -A foo='(["bar'\''bie"]="doll" )'
+bar'bie
+doll
+declare -A foo='(["bar'\''bie"]="doll" )'
+bar'bie
+doll
+declare -A foo='(["bar'\''bie"]="doll" )'
+bar'bie
+doll
+declare -A foo='(["bar'\''bie"]="doll" )'
+bar'bie
+doll
+declare -A foo='(["bar'\''bie"]="doll" )'
+bar$bie
+doll
+declare -A foo='(["bar\$bie"]="doll" )'
+bar[bie
+doll
+declare -A foo='(["bar[bie"]="doll" )'
+bar`bie
+doll
+declare -A foo='(["bar\`bie"]="doll" )'
+bar\]bie
+doll
+declare -A foo='(["bar\\]bie"]="doll" )'
+bar${foo}bie
+doll
+declare -A foo='(["bar\${foo}bie"]="doll" )'

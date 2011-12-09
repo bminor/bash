@@ -125,7 +125,7 @@ find_index_in_alist (string, alist, flags)
    not including END. */
 char *
 substring (string, start, end)
-     char *string;
+     const char *string;
      int start, end;
 {
   register int len;

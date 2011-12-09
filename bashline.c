@@ -249,6 +249,9 @@ static rl_hook_func_t *old_rl_startup_hook = (rl_hook_func_t *)NULL;
 
 static int dot_in_path = 0;
 
+/* Set to non-zero when dabbrev-expand is running */
+static int dabbrev_expand_active = 0;
+
 /* What kind of quoting is performed by bash_quote_filename:
 	COMPLETE_DQUOTE = double-quoting the filename
 	COMPLETE_SQUOTE = single_quoting the filename
@@ -2791,6 +2794,8 @@ build_history_completion_array ()
   if (hlist)
     {
       for (i = 0; hlist[i]; i++)
+	;
+      for ( --i; i >= 0; i--)
 	{
 	  /* Separate each token, and place into an array. */
 	  tokens = history_tokenize (hlist[i]->line);
@@ -2807,7 +2812,8 @@ build_history_completion_array ()
 	}
 
       /* Sort the complete list of tokens. */
-      qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
+      if (dabbrev_expand_active == 0)
+        qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
     }
 }
 
@@ -2823,6 +2829,8 @@ history_completion_generator (hint_text, state)
      list of strings to complete over. */
   if (state == 0)
     {
+      if (dabbrev_expand_active)	/* This is kind of messy */
+	rl_completion_suppress_append = 1;
       local_index = 0;
       build_history_completion_array ();
       text = hint_text;
@@ -2866,25 +2874,33 @@ static int
 bash_dabbrev_expand (count, key)
      int count, key;
 {
-  int r;
+  int r, orig_suppress, orig_sort;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
 
   orig_func = rl_menu_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_suppress = rl_completion_suppress_append;
+  orig_sort = rl_sort_completion_matches;
 
   rl_menu_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   rl_filename_completion_desired = 0;
+  rl_completion_suppress_append = 1;
+  rl_sort_completion_matches = 0;
 
   /* XXX - use rl_completion_mode here? */
+  dabbrev_expand_active = 1;
   if (rl_last_func == bash_dabbrev_expand)
     rl_last_func = rl_menu_complete;
   r = rl_menu_complete (count, key);
+  dabbrev_expand_active = 0;
 
   rl_last_func = bash_dabbrev_expand;
   rl_menu_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_completion_suppress_append = orig_suppress;
+  rl_sort_completion_matches = orig_sort;
 
   return r;
 }

@@ -4357,10 +4357,10 @@ Variables::).
      list of possible hostname completions may be changed while the
      shell is running; the next time hostname completion is attempted
      after the value is changed, Bash adds the contents of the new file
-     to the existing list.  If `HOSTFILE' is set, but has no value,
-     Bash attempts to read `/etc/hosts' to obtain the list of possible
-     hostname completions.  When `HOSTFILE' is unset, the hostname list
-     is cleared.
+     to the existing list.  If `HOSTFILE' is set, but has no value, or
+     does not name a readable file, Bash attempts to read `/etc/hosts'
+     to obtain the list of possible hostname completions.  When
+     `HOSTFILE' is unset, the hostname list is cleared.
 
 `HOSTNAME'
      The name of the current host.
@@ -7190,6 +7190,11 @@ File: bashref.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Pre
      command is intended to be bound to <TAB>, but is unbound by
      default.
 
+`menu-complete-backward ()'
+     Identical to `menu-complete', but moves backward through the list
+     of possible completions, as if `menu-complete' had been given a
+     negative argument.
+
 `delete-char-or-list ()'
      Deletes the character under the cursor if not at the beginning or
      end of the line (like `delete-char').  If at the end of the line,
@@ -7562,19 +7567,23 @@ completion facilities.
      no matches were generated.
 
 `complete'
-          `complete [-abcdefgjksuv] [-o COMP-OPTION] [-E] [-A ACTION] [-G GLOBPAT] [-W WORDLIST]
+          `complete [-abcdefgjksuv] [-o COMP-OPTION] [-DE] [-A ACTION] [-G GLOBPAT] [-W WORDLIST]
           [-F FUNCTION] [-C COMMAND] [-X FILTERPAT]
           [-P PREFIX] [-S SUFFIX] NAME [NAME ...]'
-          `complete -pr [-E] [NAME ...]'
+          `complete -pr [-DE] [NAME ...]'
 
      Specify how arguments to each NAME should be completed.  If the
      `-p' option is supplied, or if no options are supplied, existing
      completion specifications are printed in a way that allows them to
      be reused as input.  The `-r' option removes a completion
      specification for each NAME, or, if no NAMEs are supplied, all
-     completion specifications.  The `-E' option indicates that the
-     remaining options and actions should apply to "empty" command
-     completion; that is, completion attempted on a blank line.
+     completion specifications.  The `-D' option indicates that the
+     remaining options and actions should apply to the "default"
+     command completion; that is, completion attempted on a command for
+     which no completion has previously been defined.  The `-E' option
+     indicates that the remaining options and actions should apply to
+     "empty" command completion; that is, completion attempted on a
+     blank line.
 
      The process of applying these completion specifications when word
      completion is attempted is described above (*note Programmable
@@ -7747,12 +7756,18 @@ completion facilities.
      adding a completion specification.
 
 `compopt'
-          `compopt' [-o OPTION] [+o OPTION] [NAME]
+          `compopt' [-o OPTION] [-DE] [+o OPTION] [NAME]
      Modify completion options for each NAME according to the OPTIONs,
      or for the currently-execution completion if no NAMEs are supplied.
      If no OPTIONs are given, display the completion options for each
      NAME or the current completion.  The possible values of OPTION are
-     those valid for the `complete' builtin described above.
+     those valid for the `complete' builtin described above.  The `-D'
+     option indicates that the remaining options should apply to the
+     "default" command completion; that is, completion attempted on a
+     command for which no completion has previously been defined.  The
+     `-E' option indicates that the remaining options should apply to
+     "empty" command completion; that is, completion attempted on a
+     blank line.
 
      The return value is true unless an invalid option is supplied, an
      attempt is made to modify the options for a NAME for which no
@@ -9526,7 +9541,7 @@ D.1 Index of Shell Builtin Commands
 * complete:                              Programmable Completion Builtins.
                                                               (line  28)
 * compopt:                               Programmable Completion Builtins.
-                                                              (line 213)
+                                                              (line 217)
 * continue:                              Bourne Shell Builtins.
                                                               (line  55)
 * declare:                               Bash Builtins.       (line 142)
@@ -9847,7 +9862,7 @@ D.4 Function Index
 * copy-region-as-kill ():                Commands For Killing. (line 54)
 * delete-char (C-d):                     Commands For Text.    (line  6)
 * delete-char-or-list ():                Commands For Completion.
-                                                               (line 34)
+                                                               (line 39)
 * delete-horizontal-space ():            Commands For Killing. (line 46)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.    (line  6)
 * do-uppercase-version (M-a, M-b, M-X, ...): Miscellaneous Commands.
@@ -9880,6 +9895,8 @@ D.4 Function Index
 * kill-word (M-d):                       Commands For Killing. (line 19)
 * menu-complete ():                      Commands For Completion.
                                                                (line 22)
+* menu-complete-backward ():             Commands For Completion.
+                                                               (line 34)
 * next-history (C-n):                    Commands For History. (line 17)
 * non-incremental-forward-search-history (M-n): Commands For History.
                                                                (line 41)
@@ -10000,7 +10017,7 @@ D.5 Concept Index
 * history list:                          Bash History Facilities.
                                                               (line   6)
 * History, how to use:                   Programmable Completion Builtins.
-                                                              (line 225)
+                                                              (line 235)
 * identifier:                            Definitions.         (line  51)
 * initialization file, readline:         Readline Init File.  (line   6)
 * installation:                          Basic Installation.  (line   6)
@@ -10135,74 +10152,74 @@ Node: Special Builtins165022
 Node: Shell Variables166001
 Node: Bourne Shell Variables166441
 Node: Bash Variables168422
-Node: Bash Features190761
-Node: Invoking Bash191644
-Node: Bash Startup Files197453
-Node: Interactive Shells202422
-Node: What is an Interactive Shell?202832
-Node: Is this Shell Interactive?203481
-Node: Interactive Shell Behavior204296
-Node: Bash Conditional Expressions207576
-Node: Shell Arithmetic211101
-Node: Aliases213847
-Node: Arrays216419
-Node: The Directory Stack220377
-Node: Directory Stack Builtins221091
-Node: Printing a Prompt223983
-Node: The Restricted Shell226735
-Node: Bash POSIX Mode228567
-Node: Job Control236420
-Node: Job Control Basics236880
-Node: Job Control Builtins241597
-Node: Job Control Variables245961
-Node: Command Line Editing247119
-Node: Introduction and Notation248686
-Node: Readline Interaction250308
-Node: Readline Bare Essentials251499
-Node: Readline Movement Commands253288
-Node: Readline Killing Commands254253
-Node: Readline Arguments256173
-Node: Searching257217
-Node: Readline Init File259403
-Node: Readline Init File Syntax260550
-Node: Conditional Init Constructs273784
-Node: Sample Init File276317
-Node: Bindable Readline Commands279434
-Node: Commands For Moving280641
-Node: Commands For History281785
-Node: Commands For Text284940
-Node: Commands For Killing287613
-Node: Numeric Arguments290064
-Node: Commands For Completion291203
-Node: Keyboard Macros294970
-Node: Miscellaneous Commands295541
-Node: Readline vi Mode300852
-Node: Programmable Completion301766
-Node: Programmable Completion Builtins307599
-Node: Using History Interactively316025
-Node: Bash History Facilities316709
-Node: Bash History Builtins319623
-Node: History Interaction323480
-Node: Event Designators326185
-Node: Word Designators327200
-Node: Modifiers328839
-Node: Installing Bash330243
-Node: Basic Installation331380
-Node: Compilers and Options334072
-Node: Compiling For Multiple Architectures334813
-Node: Installation Names336477
-Node: Specifying the System Type337295
-Node: Sharing Defaults338011
-Node: Operation Controls338684
-Node: Optional Features339642
-Node: Reporting Bugs349044
-Node: Major Differences From The Bourne Shell350245
-Node: GNU Free Documentation License366932
-Node: Indexes392128
-Node: Builtin Index392582
-Node: Reserved Word Index399409
-Node: Variable Index401857
-Node: Function Index413663
-Node: Concept Index420395
+Node: Bash Features190795
+Node: Invoking Bash191678
+Node: Bash Startup Files197487
+Node: Interactive Shells202456
+Node: What is an Interactive Shell?202866
+Node: Is this Shell Interactive?203515
+Node: Interactive Shell Behavior204330
+Node: Bash Conditional Expressions207610
+Node: Shell Arithmetic211135
+Node: Aliases213881
+Node: Arrays216453
+Node: The Directory Stack220411
+Node: Directory Stack Builtins221125
+Node: Printing a Prompt224017
+Node: The Restricted Shell226769
+Node: Bash POSIX Mode228601
+Node: Job Control236454
+Node: Job Control Basics236914
+Node: Job Control Builtins241631
+Node: Job Control Variables245995
+Node: Command Line Editing247153
+Node: Introduction and Notation248720
+Node: Readline Interaction250342
+Node: Readline Bare Essentials251533
+Node: Readline Movement Commands253322
+Node: Readline Killing Commands254287
+Node: Readline Arguments256207
+Node: Searching257251
+Node: Readline Init File259437
+Node: Readline Init File Syntax260584
+Node: Conditional Init Constructs273818
+Node: Sample Init File276351
+Node: Bindable Readline Commands279468
+Node: Commands For Moving280675
+Node: Commands For History281819
+Node: Commands For Text284974
+Node: Commands For Killing287647
+Node: Numeric Arguments290098
+Node: Commands For Completion291237
+Node: Keyboard Macros295197
+Node: Miscellaneous Commands295768
+Node: Readline vi Mode301079
+Node: Programmable Completion301993
+Node: Programmable Completion Builtins307826
+Node: Using History Interactively316867
+Node: Bash History Facilities317551
+Node: Bash History Builtins320465
+Node: History Interaction324322
+Node: Event Designators327027
+Node: Word Designators328042
+Node: Modifiers329681
+Node: Installing Bash331085
+Node: Basic Installation332222
+Node: Compilers and Options334914
+Node: Compiling For Multiple Architectures335655
+Node: Installation Names337319
+Node: Specifying the System Type338137
+Node: Sharing Defaults338853
+Node: Operation Controls339526
+Node: Optional Features340484
+Node: Reporting Bugs349886
+Node: Major Differences From The Bourne Shell351087
+Node: GNU Free Documentation License367774
+Node: Indexes392970
+Node: Builtin Index393424
+Node: Reserved Word Index400251
+Node: Variable Index402699
+Node: Function Index414505
+Node: Concept Index421376
 
 End Tag Table

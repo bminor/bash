@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 June 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 July 30<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2374,7 +2374,8 @@ If
 <FONT SIZE=-1><B>HOSTFILE</B>
 
 </FONT>
-is set, but has no value, <B>bash</B> attempts to read
+is set, but has no value, or does not name a readable file,
+<B>bash</B> attempts to read
 
 <I>/etc/hosts</I>
 
@@ -7112,6 +7113,12 @@ of matches; a negative argument may be used to move backward
 through the list.
 This command is intended to be bound to <B>TAB</B>, but is unbound
 by default.
+<DT><B>menu-complete-rd</B>
+
+<DD>
+Identical to <B>menu-complete</B>, but moves backward through the list
+of possible completions, as if <B>menu-complete</B> had been given a
+negative argument.  This command is unbound by default.
 <DT><B>delete-char-or-list</B>
 
 <DD>
@@ -8475,12 +8482,12 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-E</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DE</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
 <BR>
 
 [<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
-<DT><B>complete</B> <B>-pr</B> [<B>-E</B>] [<I>name</I> ...]<DD>
+<DT><B>complete</B> <B>-pr</B> [<B>-DE</B>] [<I>name</I> ...]<DD>
 
 Specify how arguments to each <I>name</I> should be completed.
 If the <B>-p</B> option is supplied, or if no options are supplied,
@@ -8489,6 +8496,9 @@ them to be reused as input.
 The <B>-r</B> option removes a completion specification for
 each <I>name</I>, or, if no <I>name</I>s are supplied, all
 completion specifications.
+The <B>-D</B> option indicates that the remaining options and actions should
+apply to the ``default'' command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
 The <B>-E</B> option indicates that the remaining options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
@@ -8700,7 +8710,7 @@ a <I>name</I> for which no specification exists, or
 an error occurs adding a completion specification.
 </DL>
 
-<DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
+<DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>-DE</B>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
 Modify completion options for each <I>name</I> according to the
 <I>option</I>s, or for the
 currently-execution completion if no <I>name</I>s are supplied.
@@ -8708,6 +8718,12 @@ If no <I>option</I>s are given, display the completion options for each
 <I>name</I> or the current completion.
 The possible values of <I>option</I> are those valid for the <B>complete</B>
 builtin described above.
+The <B>-D</B> option indicates that the remaining options should
+apply to the ``default'' command completion; that is, completion attempted
+on a command for which no completion has previously been defined.
+The <B>-E</B> option indicates that the remaining options should
+apply to ``empty'' command completion; that is, completion attempted on a
+blank line.
 </DL>
 <P>
 
@@ -12093,7 +12109,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 June 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 July 30<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12199,6 +12215,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 17 June 2009 08:51:37 EDT
+Time: 03 August 2009 10:10:44 EDT
 </BODY>
 </HTML>

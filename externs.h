@@ -135,7 +135,7 @@ extern int find_string_in_alist __P((char *, STRING_INT_ALIST *, int));
 extern char *find_token_in_alist __P((int, STRING_INT_ALIST *, int));
 extern int find_index_in_alist __P((char *, STRING_INT_ALIST *, int));
 
-extern char *substring __P((char *, int, int));
+extern char *substring __P((const char *, int, int));
 extern char *strsub __P((char *, char *, char *, int));
 extern char *strcreplace __P((char *, int, char *, int));
 extern void strip_leading __P((char *));

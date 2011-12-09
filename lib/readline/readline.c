@@ -686,7 +686,8 @@ _rl_dispatch_callback (cxt)
     r = cxt->childval;
 
   /* For now */
-  r = _rl_subseq_result (r, cxt->oldmap, cxt->okey, (cxt->flags & KSEQ_SUBSEQ));
+  if (r != -3)	/* don't do this if we indicate there will be other matches */
+    r = _rl_subseq_result (r, cxt->oldmap, cxt->okey, (cxt->flags & KSEQ_SUBSEQ));
 
   RL_CHECK_SIGNALS ();
   if (r == 0)			/* success! */
@@ -831,7 +832,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	    {
 	      /* Return 0 only the first time, to indicate success to
 		 _rl_callback_read_char.  The rest of the time, we're called
-		 from _rl_dispatch_callback, so we return 3 to indicate
+		 from _rl_dispatch_callback, so we return -3 to indicate
 		 special handling is necessary. */
 	      r = RL_ISSTATE (RL_STATE_MULTIKEY) ? -3 : 0;
 	      cxt = _rl_keyseq_cxt_alloc ();

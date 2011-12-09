@@ -66,6 +66,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#define PCOMP_RETRYFAIL	256
+
 #ifdef STRDUP
 #  undef STRDUP
 #endif
@@ -118,9 +120,14 @@ static STRINGLIST *gen_globpat_matches __P((COMPSPEC *, const char *));
 static STRINGLIST *gen_wordlist_matches __P((COMPSPEC *, const char *));
 static STRINGLIST *gen_shell_function_matches __P((COMPSPEC *, const char *,
 						   char *, int, WORD_LIST *,
-						   int, int));
+						   int, int, int *));
 static STRINGLIST *gen_command_matches __P((COMPSPEC *, const char *, char *,
 					    int, WORD_LIST *, int, int));
+
+static STRINGLIST *gen_progcomp_completions __P((const char *, const char *,
+						 const char *,
+						 int, int, int *, int *,
+						 COMPSPEC **));
 
 static char *pcomp_filename_completion_function __P((const char *, int));
 
@@ -992,24 +999,29 @@ build_arg_list (cmd, text, lwords, ind)
    variable, this does nothing if arrays are not compiled into the shell. */
 
 static STRINGLIST *
-gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
+gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw, foundp)
      COMPSPEC *cs;
      const char *text;
      char *line;
      int ind;
      WORD_LIST *lwords;
      int nw, cw;
+     int *foundp;
 {
   char *funcname;
   STRINGLIST *sl;
   SHELL_VAR *f, *v;
   WORD_LIST *cmdlist;
-  int fval;
+  int fval, found;
   sh_parser_state_t ps;
   sh_parser_state_t * restrict pps;
 #if defined (ARRAY_VARS)
   ARRAY *a;
 #endif
+
+  found = 0;
+  if (foundp)
+    *foundp = found;
 
   funcname = cs->funcname;
   f = find_function (funcname);
@@ -1043,6 +1055,12 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   discard_unwind_frame ("gen-shell-function-matches");
   restore_parser_state (pps);
 
+  found = fval != EX_NOTFOUND;
+  if (fval == EX_RETRYFAIL)
+    found |= PCOMP_RETRYFAIL;
+  if (foundp)
+    *foundp = found;
+
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);
   unbind_compfunc_variables (0);
@@ -1057,7 +1075,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   VUNSETATTR (v, att_invisible);
 
   a = array_cell (v);
-  if (a == 0 || array_empty (a))
+  if (found == 0 || (found & PCOMP_RETRYFAIL) || a == 0 || array_empty (a))
     sl = (STRINGLIST *)NULL;
   else
     {
@@ -1188,17 +1206,20 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
 /* Evaluate COMPSPEC *cs and return all matches for WORD. */
 
 STRINGLIST *
-gen_compspec_completions (cs, cmd, word, start, end)
+gen_compspec_completions (cs, cmd, word, start, end, foundp)
      COMPSPEC *cs;
      const char *cmd;
      const char *word;
      int start, end;
+     int *foundp;
 {
   STRINGLIST *ret, *tmatches;
   char *line;
-  int llen, nw, cw;
+  int llen, nw, cw, found, foundf;
   WORD_LIST *lwords;
   COMPSPEC *tcs;
+
+  found = 1;
 
 #ifdef DEBUG
   debug_printf ("gen_compspec_completions (%s, %s, %d, %d)", cmd, word, start, end);
@@ -1284,7 +1305,10 @@ gen_compspec_completions (cs, cmd, word, start, end)
 
   if (cs->funcname)
     {
-      tmatches = gen_shell_function_matches (cs, word, line, rl_point - start, lwords, nw, cw);
+      foundf = 0;
+      tmatches = gen_shell_function_matches (cs, word, line, rl_point - start, lwords, nw, cw, &foundf);
+      if (foundf != 0)
+	found = foundf;
       if (tmatches)
 	{
 #ifdef DEBUG
@@ -1323,6 +1347,15 @@ gen_compspec_completions (cs, cmd, word, start, end)
       if (lwords)
 	dispose_words (lwords);
       FREE (line);
+    }
+
+  if (foundp)
+    *foundp = found;
+
+  if (found == 0 || (found & PCOMP_RETRYFAIL))
+    {
+      strlist_dispose (ret);
+      return NULL;
     }
 
   if (cs->filterpat)
@@ -1399,35 +1432,28 @@ pcomp_set_compspec_options (cs, flags, set_or_unset)
     cs->options &= ~flags;
 }
 
-/* The driver function for the programmable completion code.  Returns a list
-   of matches for WORD, which is an argument to command CMD.  START and END
-   bound the command currently being completed in rl_line_buffer. */
-char **
-programmable_completions (cmd, word, start, end, foundp)
+static STRINGLIST *
+gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
+     const char *ocmd;
      const char *cmd;
      const char *word;
-     int start, end, *foundp;
+     int start, end;
+     int *foundp, *retryp;
+     COMPSPEC **lastcs;
 {
   COMPSPEC *cs, *oldcs;
-  STRINGLIST *ret;
-  char **rmatches, *t;
   const char *oldcmd;
+  STRINGLIST *ret;
 
-  /* We look at the basename of CMD if the full command does not have
-     an associated COMPSPEC. */
-  cs = progcomp_search (cmd);
-  if (cs == 0)
-    {
-      t = strrchr (cmd, '/');
-      if (t)
-	cs = progcomp_search (++t);
-    }
-  if (cs == 0)
-    {
-      if (foundp)
-	*foundp = 0;
-      return ((char **)NULL);
-    }
+  cs = progcomp_search (ocmd);
+
+  if (cs == 0 || cs == *lastcs)
+    return (NULL);
+
+  if (*lastcs)
+    compspec_dispose (*lastcs);
+  cs->refcount++;	/* XXX */
+  *lastcs = cs;
 
   cs = compspec_copy (cs);
 
@@ -1437,17 +1463,68 @@ programmable_completions (cmd, word, start, end, foundp)
   pcomp_curcs = cs;
   pcomp_curcmd = cmd;
 
-  ret = gen_compspec_completions (cs, cmd, word, start, end);
+  ret = gen_compspec_completions (cs, cmd, word, start, end, foundp);
 
   pcomp_curcs = oldcs;
   pcomp_curcmd = oldcmd;
 
-  /* Signal the caller that we found a COMPSPEC for this command, and pass
-     back any meta-options associated with the compspec. */
+  /* We need to conditionally handle setting *retryp here */
+  if (retryp)
+    *retryp = foundp && (*foundp & PCOMP_RETRYFAIL);    	
+
   if (foundp)
-    *foundp = 1|cs->options;
+    {
+      *foundp &= ~PCOMP_RETRYFAIL;
+      *foundp |= cs->options;
+    }
 
   compspec_dispose (cs);
+  return ret;  
+}
+
+/* The driver function for the programmable completion code.  Returns a list
+   of matches for WORD, which is an argument to command CMD.  START and END
+   bound the command currently being completed in rl_line_buffer. */
+char **
+programmable_completions (cmd, word, start, end, foundp)
+     const char *cmd;
+     const char *word;
+     int start, end, *foundp;
+{
+  COMPSPEC *cs, *lastcs;
+  STRINGLIST *ret;
+  char **rmatches, *t;
+  int found, retry, count;
+
+  lastcs = 0;
+  found = count = 0;
+
+  do
+    {
+      retry = 0;
+
+      /* We look at the basename of CMD if the full command does not have
+	 an associated COMPSPEC. */
+      ret = gen_progcomp_completions (cmd, cmd, word, start, end, &found, &retry, &lastcs);
+      if (found == 0)
+	{
+	  t = strrchr (cmd, '/');
+	  if (t && *(++t))
+	    ret = gen_progcomp_completions (t, cmd, word, start, end, &found, &retry, &lastcs);
+	}
+
+      if (found == 0)
+	ret = gen_progcomp_completions (DEFAULTCMD, cmd, word, start, end, &found, &retry, &lastcs);
+
+      count++;
+
+      if (count > 32)
+	{
+	  internal_warning ("programmable_completion: %s: possible retry loop", cmd);
+	  break;
+	}
+    }
+  while (retry);
 
   if (ret)
     {
@@ -1456,6 +1533,12 @@ programmable_completions (cmd, word, start, end, foundp)
     }
   else
     rmatches = (char **)NULL;
+
+  if (foundp)
+    *foundp = found;
+
+  if (lastcs)	/* XXX - should be while? */
+    compspec_dispose (lastcs);
 
   return (rmatches);
 }

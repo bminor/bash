@@ -8345,3 +8345,123 @@ lib/readline/display.c
 	  second, we need to update OMAX and the line indices to account for
 	  the moved data.  Bug report and fix from Martin Hamrle
 	  <martin.hamrle@gmail.com>
+
+				    8/3
+				    ---
+pcomplete.h
+	- defines for EMPTYCMD ("_EmptycmD_") and DEFAULTCMD ("_DefaultCmD_")
+
+builtins/complete.def
+	- change compopt_builtin to make -E work on the "empty" command
+	  completion
+	- fix print_compitem and print_compopts to replace EMPTYCMD with -E
+	- added -D (default) option to complete/compgen/compopt.  No supporting
+	  code yet
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- document new -D, -E options to compopt
+	- document new -D option to complete/compgen
+
+shell.h
+	- new define, EX_WEXPCOMSUB, value of 125
+	- new define, EX_RETRYFAIL, value of 124 (for programmable completion)
+
+subst.c
+	- use EX_WEXPCOMSUB instead of literal 125 as exit status when a shell
+	  invoked to run wordexp(3) with the -n option supplied attempts a
+	  command substitution
+
+pcomplete.c
+	- new define, PCOMP_RETRYFAIL, used to indicate a "failure, retry with
+	  next completion" status to the programmable completion code
+
+				    8/4
+				    ---
+pcomplete.c
+	- changed gen_shell_function_matches to take an extra parameter
+	  indicating whether the specified shell function was not found or
+	  returned the special "fail/retry" status, and, if it was either,
+	  to not bother returning any matches list
+	- changed gen_compspec_completions to take an extra parameter to pass
+	  through the "found" status from gen_shell_function_completions
+	- new function gen_progcomp_completions to take care of searching for
+	  and evaluating a compspec for a particular word, saving its status,
+	  and returning to its caller (programmable_completions) whether or
+	  not to retry completion.  This function also checks whether a
+	  retry changed the compspec associated with a command and short-
+	  circuits the retry if it has not
+	- changed programmable_completions to try default completion (if set)
+	  if a specific completion was not found for a command
+	- changed programmable_completions to implement "fail/retry" semantics
+	  for a shell function that returns 124 and changes the compspec
+	  associated with the command.  All based on proposal and changes from
+	  Behdad Esfahbod (Red Hat bugzilla 475229)
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- documented new dynamic programmable completion functionality
+
+				    8/5
+				    ---
+stringlib.c
+	- first argument to substring() is now `const char *'
+
+externs.h
+	- changed extern declaration for substring()
+
+subst.c
+	- skipsubscript now takes a third FLAGS argument, passes to
+	  skip_matched_pair
+	- skip_matched_pair now interprets flags&1 to mean not to parse
+	  matched pairs of quotes, backquotes, or shell word expansion
+	  constructs
+
+{subst,general,expr}.c
+	- changed skipsubscript() callers
+
+assoc.c
+	- changed assoc_to_assign to double-quote the key if it contains any
+	  shell metacharacters
+
+arrayfunc.c
+	- use skipsubscript in quote_assign rather than quote any glob
+	  characters in the subscript of an array assignment
+	- in assign_compound_array_list, call skipsubscript with a flags
+	  argument of 1 if assigning an associative array to avoid trying
+	  to re-parse quoted strings
+
+redir.c
+	- set expanding_redir before expanding body of here documents and
+	  here strings to avoid looking for variables in temporary env
+
+				    8/7
+				    ---
+lib/readline/readline.c
+	- in _rl_dispatch_callback, return value of -3 means that we have
+	  added to a key sequence, but there are previous matches in the
+	  sequence.  Don't call _rl_subseq_result if we get a -3 from a
+	  previous context in the chain; just go back up the chain.  Report
+	  and fix from <freehaha@gmail.com>
+
+bashline.c
+	- fixes to history_completion_generator and bash_dabbrev_expand to
+	  make dabbrev-expand inhibit suppressing of appending space char
+	  to matches.  Have to do it with the generator too because
+	  rl_menu_complete turns off suppressing the appended space in
+	  set_completion_defaults().  Suggestion from Dan Nicolaescu
+	  <dann@ics.uci.edu>
+	- suppress completion match sorting in bash_dabbrev_expand by
+	  setting rl_sort_completion_matches = 0.  Suggestion from Dan
+	  Nicolaescu <dann@ics.uci.edu>
+	- don't qsort history match list in build_history_completion_array
+	  if dabbrev_expand_active == 1
+	- start the loop in build_history_completion_array that gathers words
+	  from history for possible completions from the end of the list
+	  rather than the beginning.  It doesn't matter where you start if
+	  the results are sorted, and dabbrev-expand is supposed to offer
+	  the most recent completions first
+
+				   8/12
+				   ----
+execute_cmd.c
+	- change to execute_command_internal to make [[ ... ]] conditional
+	  command subject to settings of `set -e' and the ERR trap
