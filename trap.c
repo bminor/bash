@@ -798,12 +798,24 @@ int
 run_debug_trap ()
 {
   int trap_exit_value;
+  pid_t save_pgrp;
 
   /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
   trap_exit_value = 0;
   if ((sigmodes[DEBUG_TRAP] & SIG_TRAPPED) && ((sigmodes[DEBUG_TRAP] & SIG_IGNORED) == 0) && ((sigmodes[DEBUG_TRAP] & SIG_INPROGRESS) == 0))
     {
+#if defined (JOB_CONTROL)
+      save_pgrp = pipeline_pgrp;
+      pipeline_pgrp = shell_pgrp;
+      save_pipeline (1);
+      stop_making_children ();
+#endif
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+#if defined (JOB_CONTROL)
+      pipeline_pgrp = save_pgrp;
+      restore_pipeline (1);
+      notify_and_cleanup ();
+#endif
       
 #if defined (DEBUGGER)
       /* If we're in the debugger and the DEBUG trap returns 2 while we're in

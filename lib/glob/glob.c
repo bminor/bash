@@ -941,8 +941,14 @@ glob_filename (pathname, flags)
 	    {
 	      char **array;
 	      register unsigned int l;
+	      int free_array;
 
-	      array = glob_dir_to_array (directories[i], temp_results, flags);
+	      /* If we're expanding **, we don't need to glue the directory
+		 name to the results; we've already done it in glob_vector */
+	      if ((dflags & GX_ALLDIRS) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
+		array = temp_results;
+	      else
+		array = glob_dir_to_array (directories[i], temp_results, flags);
 	      l = 0;
 	      while (array[l] != NULL)
 		++l;
@@ -959,7 +965,8 @@ glob_filename (pathname, flags)
 	      result[result_size - 1] = NULL;
 
 	      /* Note that the elements of ARRAY are not freed.  */
-	      free ((char *) array);
+	      if (array != temp_results)
+		free ((char *) array);
 	    }
 	}
       /* Free the directories.  */

@@ -6029,11 +6029,10 @@ pat_subst (string, pat, rep, mflags)
       if (s == e)
 	{
 	  /* On a zero-length match, make sure we copy one character, since
-	     we increment one character below to avoid infinite recursion. */
+	     we increment one character to avoid infinite recursion. */
 	  RESIZE_MALLOCED_BUFFER (ret, rptr, 1, rsize, 64);
-	  strncpy (ret + rptr, str, 1);
-	  rptr += 1;
-	  e++, str++;		/* avoid infinite recursion on zero-length match */
+	  ret[rptr++] = *str++;
+	  e++;		/* avoid infinite recursion on zero-length match */
 	}
     }
 

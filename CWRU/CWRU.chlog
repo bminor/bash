@@ -7855,3 +7855,60 @@ lib/sh/winsize.c
 	- incorporate contents of readline/rlwinsize.h to get all the various
 	  system dependencies right when trying to find TIOCGWINSZ.  Fixes
 	  bug reported by Dan Price <dp@eng.sun.com>
+
+				    4/6
+				    ---
+doc/{bash.1,bashref.texi}
+	- fix description of conditional `>' and `<' to remove statement that
+	  the comparison pays attention to the current locale -- it has
+	  always used strcmp
+
+lib/glob/glob.c
+	- fixed a bug in glob_filename that caused glob_dir_to_array to be
+	  called to prepend a (globbed) directory name onto the results from
+	  glob_vector, which, if we were globbing `**', glob_vector has
+	  already done.  Effect is to have the directory name(s) on there
+	  twice.  Fixes "dir*/**" bug reported by Matt Zyzik
+	  <Matt@ice.filescope.com>
+
+				    4/8
+				    ---
+doc/{bash.1,bashref.texi}
+	- fix short syntax summary of for command to reflect full bash
+	  syntax (which is a superset of Posix syntax).  Fixes bug reported
+	  by Reuben Thomas <rrt@sc3d.org>
+
+				   4/10
+				   ----
+{expr,subst}.c
+	- make sure last_command_exit_value is set to EXECUTION_FAILURE
+	  before calling err_unboundvar, in case set -e is enabled and
+	  the shell exits from there.  Fixes bug reported by Freddy
+	  Vulto <fvulto@gmail.com> and Piotr Zielinski
+	  <piotr.zielinski@gmail.com>
+
+				   4/11
+				   ----
+jobs.c
+	- in restore_pipeline, don't call discard_pipeline with a NULL
+	  argument
+
+trap.c
+	- in run_debug_trap, make sure to save and restore the pipeline,
+	  pipeline_pgrp, and state of the pipeline around running the debug
+	  trap, then remove any job created by running the debug trap from
+	  the jobs table when it completes.  Fixes for two bugs reported
+	  by lex@upc.ca
+
+				   4/12
+				   ----
+lib/readline/signals.c
+	- new functions to block and release SIGWINCH like the SIGINT blocking
+	  and releasing functions
+
+lib/readline/rlprivate.h
+	- new extern declarations for _rl_block_sigwinch and _rl_release_sigwinch
+
+lib/readline/display.c
+	- block SIGWINCH during redisplay like SIGINT.  Should fix bug reported
+	  by Nicolai Lissner <nlissne@linux01.org>

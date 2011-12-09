@@ -54,10 +54,6 @@
 #  endif /* HAVE_SYS_PTE_H */
 #endif /* !STRUCT_WINSIZE_IN_TERMIOS && !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
-#if defined (M_UNIX) && !defined (_SCO_DS) && !defined (tcflow)
-#  define tcflow(fd, action)	ioctl(fd, TCXONC, action)
-#endif
-
 #include <stdio.h>
 
 /* Return the fd from which we are actually getting input. */

@@ -777,7 +777,7 @@ in @var{consequent-commands}, or zero if none was executed.
 The syntax of the @code{for} command is:
 
 @example
-for @var{name} [in @var{words} @dots{}]; do @var{commands}; done
+for @var{name} [ [in [@var{words} @dots{}] ] ; ] do @var{commands}; done
 @end example
 Expand @var{words}, and execute @var{commands} once for each member
 in the resultant list, with @var{name} bound to the current member.
@@ -5764,12 +5764,10 @@ True if the strings are equal.
 True if the strings are not equal.
 
 @item @var{string1} < @var{string2}
-True if @var{string1} sorts before @var{string2} lexicographically
-in the current locale.
+True if @var{string1} sorts before @var{string2} lexicographically.
 
 @item @var{string1} > @var{string2}
-True if @var{string1} sorts after @var{string2} lexicographically
-in the current locale.
+True if @var{string1} sorts after @var{string2} lexicographically.
 
 @item @var{arg1} OP @var{arg2}
 @code{OP} is one of 

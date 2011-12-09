@@ -512,7 +512,6 @@ rl_redisplay ()
   /* Block keyboard interrupts because this function manipulates global
      data structures. */
   _rl_block_sigint ();  
-  _rl_block_sigwinch ();
 
   if (!rl_display_prompt)
     rl_display_prompt = "";
@@ -1238,7 +1237,6 @@ rl_redisplay ()
   }
 
   _rl_release_sigint ();
-  _rl_release_sigwinch ();
 }
 
 /* PWP: update_line() is based on finding the middle difference of each

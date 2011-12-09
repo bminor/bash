@@ -5077,6 +5077,7 @@ array_length_reference (s)
     {
       c = *--t;
       *t = '\0';
+      last_command_exit_value = EXECUTION_FAILURE;
       err_unboundvar (s);
       *t = c;
       return (-1);
@@ -6794,11 +6795,11 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
     case RBRACE:
       if (var_is_set == 0 && unbound_vars_is_error)
 	{
+	  last_command_exit_value = EXECUTION_FAILURE;
 	  err_unboundvar (name);
 	  FREE (value);
 	  FREE (temp);
 	  free (name);
-	  last_command_exit_value = EXECUTION_FAILURE;
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
       break;
@@ -6954,8 +6955,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = c;
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
       if (temp1)
@@ -7002,8 +7003,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	      uerror[0] = '$';
 	      uerror[1] = c;
 	      uerror[2] = '\0';
-	      err_unboundvar (uerror);
 	      last_command_exit_value = EXECUTION_FAILURE;
+	      err_unboundvar (uerror);
 	      return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	    }
 	}
@@ -7020,8 +7021,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '*';
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
 
@@ -7082,8 +7083,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '@';
 	  uerror[2] = '\0';
-	  err_unboundvar (uerror);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
 
@@ -7286,7 +7287,10 @@ comsub:
 
 unbound_variable:
       if (unbound_vars_is_error)
-	err_unboundvar (temp1);
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (temp1);
+	}
       else
 	{
 	  free (temp1);

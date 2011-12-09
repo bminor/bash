@@ -442,7 +442,7 @@ restore_pipeline (discard)
   old_pipeline = the_pipeline;
   the_pipeline = saved_pipeline;
   already_making_children = saved_already_making_children;
-  if (discard)
+  if (discard && old_pipeline)
     discard_pipeline (old_pipeline);
 }
 

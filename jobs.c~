@@ -427,6 +427,7 @@ void
 save_pipeline (clear)
      int clear;
 {
+itrace("save_pipeline (%d)", clear);
   saved_pipeline = the_pipeline;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
@@ -439,10 +440,11 @@ restore_pipeline (discard)
 {
   PROCESS *old_pipeline;
 
+itrace("restore_pipeline (%d)", discard);
   old_pipeline = the_pipeline;
   the_pipeline = saved_pipeline;
   already_making_children = saved_already_making_children;
-  if (discard)
+  if (discard && old_pipeline)
     discard_pipeline (old_pipeline);
 }
 
@@ -592,6 +594,7 @@ stop_pipeline (async, deferred)
       newjob->j_cleanup = (sh_vptrfunc_t *)NULL;
       newjob->cleanarg = (PTR_T) NULL;
 
+itrace("adding the_pipeline (%s) as job index %d", newjob->pipe->command, i);
       jobs[i] = newjob;
       if (newjob->state == JDEAD && (newjob->flags & J_FOREGROUND))
 	setjstatus (i);
@@ -1725,6 +1728,7 @@ make_child (command, async_p)
       if (the_pipeline)
 	kill_current_pipeline ();
 
+      last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();	/* Reset signals, etc. */
     }
 
