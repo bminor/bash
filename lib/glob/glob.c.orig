@@ -665,10 +665,9 @@ glob_vector (pat, dir, flags)
       (void) closedir (d);
     }
 
-  /* compat: if GX_ADDCURDIR, add the passed directory also.  Add an empty
-     directory name as a placeholder if GX_NULLDIR (in which case the passed
-     directory name is "."). */
-  if (add_current)
+  /* compat: if GX_ALLDIRS, add the passed directory also, but don't add an
+     empty directory name. */
+  if (add_current && (flags & GX_NULLDIR) == 0)
     {
       sdlen = strlen (dir);
       nextname = (char *)malloc (sdlen + 1);
@@ -680,10 +679,7 @@ glob_vector (pat, dir, flags)
 	  nextlink->name = nextname;
 	  nextlink->next = lastlink;
 	  lastlink = nextlink;
-	  if (flags & GX_NULLDIR)
-	    nextname[0] = '\0';
-	  else
-	    bcopy (dir, nextname, sdlen + 1);
+	  bcopy (dir, nextname, sdlen + 1);
 	  ++count;
 	}
     }
@@ -1011,24 +1007,11 @@ glob_filename (pathname, flags)
 
       /* Just return what glob_vector () returns appended to the
 	 directory name. */
-      /* If flags & GX_ALLDIRS, we're called recursively */
       dflags = flags & ~GX_MARKDIRS;
       if (directory_len == 0)
 	dflags |= GX_NULLDIR;
       if ((flags & GX_GLOBSTAR) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
-	{
-	  dflags |= GX_ALLDIRS|GX_ADDCURDIR;
-#if 0
-	  /* If we want all directories (dflags & GX_ALLDIRS) and we're not
-	     being called recursively as something like `echo **/*.o'
-	     ((flags & GX_ALLDIRS) == 0), we want to prevent glob_vector from
-	     adding a null directory name to the front of the temp_results
-	     array.  We turn off ADDCURDIR if not called recursively and
-	     dlen == 0 */
-#endif
-	  if (directory_len == 0 && (flags & GX_ALLDIRS) == 0)
-	    dflags &= ~GX_ADDCURDIR;
-	}
+	dflags |= GX_ALLDIRS|GX_ADDCURDIR;
       temp_results = glob_vector (filename,
 				  (directory_len == 0 ? "." : directory_name),
 				  dflags);

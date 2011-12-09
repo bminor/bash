@@ -8054,6 +8054,7 @@ lib/readline/display.c
 	  locale or not, or whether there are invisible chars in the prompt)
 	- in _rl_move_cursor_relative, go ahead and adjust dpos if
 	  prompt_physical_chars >= _rl_screenwidth (previous check was just > )
+	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>
 
 				   4/28
 				   ----
@@ -8071,3 +8072,36 @@ subst.c
 	  consensus of the austin group, though it is not historical practice.
 	  Message from Geoff Clare <20090505091501.GA10097@squonk.masqnet> of
 	  5 May 2009 to austin-group list
+
+				   5/20
+				   ----
+lib/glob/glob.c
+	- tentative fix to glob_filename to compensate for glob_vector putting
+	  null pathname at front of result vector when dflags&GX_NULLDIR.
+	  Current fix manually removes empty string element from front of
+	  result vector; a better fix would be to use a flag so glob_vector
+	  doesn't add it at all.  Augments patch from 4/28, which appears to
+	  have broken some things.  Fixes bug reported by Matt Zyzik
+	  <matt.zyzik@nyu.edu>
+
+				   5/22
+				   ----
+
+lib/glob/glob.c
+	- better fix for glob_filename; supersedes patch of 5/20.  Now the
+	  code does not set GX_ADDCURDIR if directory_len == 0 and the
+	  function has not been called recursively ((flags & GX_ALLDIRS) == 0).
+	  Better fix for bug reported by Matt Zyzik <matt.zyzik@nyu.edu>
+
+Makefile.in
+	- fix build race condition that occurs in some makes caused by
+	  libreadline.a and libhistory.a containing some of the same files
+	  (e.g., xmalloc.o) and conflicting when trying to build both at
+	  the same time.  Reported by Mike Frysinger <vapier@gentoo.org>
+
+				   5/25
+				   ----
+lib/readline/vi_mode.c
+	- fix _rl_vi_initialize_line so that the loop counter is not
+	  unsigned (it doesn't matter, but it eliminates a compiler warning).
+	  Bug reported by Dave Caroline <dave.thearchivist@gmail.com>

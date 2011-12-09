@@ -2236,12 +2236,15 @@ ${\fIname\fP[\fIsubscript\fP]}.  If \fIsubscript\fP is \fB*\fP or
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
 .PP
+An array variable is considered set if a subscript has been assigned a
+value.  The null string is a valid value.
+.PP
 The
 .B unset
 builtin is used to destroy arrays.  \fBunset\fP \fIname\fP[\fIsubscript\fP]
 destroys the array element at index \fIsubscript\fP.
-Care must be taken to avoid unwanted side effects caused by filename
-generation.
+Care must be taken to avoid unwanted side effects caused by pathname
+expansion.
 \fBunset\fP \fIname\fP, where \fIname\fP is an array, or
 \fBunset\fP \fIname\fP[\fIsubscript\fP], where
 \fIsubscript\fP is \fB*\fP or \fB@\fP, removes the entire array.

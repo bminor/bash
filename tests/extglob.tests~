@@ -193,8 +193,7 @@ esac
 
 MYDIR=$PWD      # save where we are
 
-: ${TMPDIR:=/var/tmp}
-TESTDIR=$TMPDIR/eglob-test-$$
+TESTDIR=/tmp/eglob-test-$$
 mkdir $TESTDIR
 builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
 rm -rf *

@@ -665,9 +665,8 @@ glob_vector (pat, dir, flags)
       (void) closedir (d);
     }
 
-  /* compat: if GX_ADDCURDIR, add the passed directory also.  Add an empty
-     directory name as a placeholder if GX_NULLDIR (in which case the passed
-     directory name is "."). */
+  /* compat: if GX_ALLDIRS, add the passed directory also.  Add an empty
+     directory name as a placeholder if GX_NULLDIR. */
   if (add_current)
     {
       sdlen = strlen (dir);

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Mar  4 15:55:47 EST 2009
+.\"	Last Change: Tue May 26 17:03:43 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 March 4" "GNU Bash-4.0"
+.TH BASH 1 "2009 May 26" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2235,6 +2235,9 @@ ${\fIname\fP[\fIsubscript\fP]}.  If \fIsubscript\fP is \fB*\fP or
 \fB@\fP, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
+.PP
+An array variable is considered set if a subscript has been assigned a
+value.  The null string is a valid value.
 .PP
 The
 .B unset

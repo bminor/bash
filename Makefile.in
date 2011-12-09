@@ -595,7 +595,7 @@ $(READLINE_LIBRARY): config.h $(READLINE_SOURCE)
 	@( { test "${RL_LIBDIR}" = "${libdir}" && exit 0; } || \
 		cd ${RL_LIBDIR} && $(MAKE) $(MFLAGS) libreadline.a) || exit 1
 
-$(HISTORY_LIBRARY): config.h $(HISTORY_SOURCE)
+$(HISTORY_LIBRARY): config.h $(HISTORY_SOURCE) $(READLINE_DEP)
 	@echo making $@ in ${HIST_LIBDIR}
 	@( { test "${HIST_LIBDIR}" = "${libdir}" && exit 0; } || \
 		cd ${HIST_LIBDIR} && $(MAKE) $(MFLAGS) libhistory.a) || exit 1

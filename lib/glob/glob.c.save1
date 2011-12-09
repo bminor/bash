@@ -665,11 +665,11 @@ glob_vector (pat, dir, flags)
       (void) closedir (d);
     }
 
-  /* compat: if GX_ADDCURDIR, add the passed directory also.  Add an empty
-     directory name as a placeholder if GX_NULLDIR (in which case the passed
-     directory name is "."). */
+  /* compat: if GX_ALLDIRS, add the passed directory also, but don't add an
+     empty directory name. */
   if (add_current)
     {
+/*itrace("glob_vector: add_current = %d flags = %d", add_current, flags);*/
       sdlen = strlen (dir);
       nextname = (char *)malloc (sdlen + 1);
       nextlink = (struct globval *) malloc (sizeof (struct globval));
@@ -1016,19 +1016,7 @@ glob_filename (pathname, flags)
       if (directory_len == 0)
 	dflags |= GX_NULLDIR;
       if ((flags & GX_GLOBSTAR) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
-	{
-	  dflags |= GX_ALLDIRS|GX_ADDCURDIR;
-#if 0
-	  /* If we want all directories (dflags & GX_ALLDIRS) and we're not
-	     being called recursively as something like `echo **/*.o'
-	     ((flags & GX_ALLDIRS) == 0), we want to prevent glob_vector from
-	     adding a null directory name to the front of the temp_results
-	     array.  We turn off ADDCURDIR if not called recursively and
-	     dlen == 0 */
-#endif
-	  if (directory_len == 0 && (flags & GX_ALLDIRS) == 0)
-	    dflags &= ~GX_ADDCURDIR;
-	}
+	dflags |= GX_ALLDIRS|GX_ADDCURDIR;
       temp_results = glob_vector (filename,
 				  (directory_len == 0 ? "." : directory_name),
 				  dflags);
@@ -1038,6 +1026,41 @@ glob_filename (pathname, flags)
 	  if (free_dirname)
 	    free (directory_name);
 	  return (temp_results);
+	}
+
+#if 0
+      /* If we want all directories (dflags & GX_ALLDIRS) and we're not being
+	 called recursively as something like `echo **/*.o'
+	 ((flags & GX_ALLDIRS) == 0), we want to remove the null directory
+	 name glob_vector added to the front of the temp_results array.
+	 Currently, we do this by copying the array to another.
+
+	 We have to do it this way as long as glob_vector uses GX_NULLDIR for
+	 two things: removing the `./' from the pathnames it adds to the
+	 result vector and adding the "" placeholder directory name at the
+	 front of the result vector for the current directory.  We could use
+	 another flag to control the latter action.
+#endif
+      if ((flags & GX_ALLDIRS) == 0 && (dflags & GX_ALLDIRS) && (dflags & GX_NULLDIR))
+	{
+	  register int x, y;
+	  char **l;
+
+	  for (x = 1; temp_results[x]; x++)
+	    ;
+	  l = (char **)malloc ((x + 1) * sizeof (char *));
+	  if (l == 0)
+	    {
+	      if (free_dirname)
+		free (directory_name);
+	      free (temp_results);
+	      goto memory_error;
+	    }
+	  for (y = 0; y < x; y++)
+	    l[y] = temp_results[y+1];
+	  l[y] = (char *)NULL;
+	  free (temp_results);
+	  temp_results = l;
 	}
 
       result = glob_dir_to_array ((dflags & GX_ALLDIRS) ? "" : directory_name, temp_results, flags);
