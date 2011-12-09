@@ -303,6 +303,13 @@ static void dfallback __P((struct DATA *, const char *, const char *, double));
 
 static char *groupnum __P((char *));
 
+#ifndef HAVE_ISINF_IN_LIBC
+static int isinf __P((double));
+#endif
+#ifndef HAVE_ISNAN_IN_LIBC
+static int isnan __P((double));
+#endif
+
 #ifdef DRIVER
 static void memory_error_and_abort ();
 static void *xmalloc __P((size_t));

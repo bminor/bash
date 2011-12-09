@@ -864,6 +864,7 @@ hashtest:	hashlib.c
 
 # Files that depend on the definitions in config-top.h, which are not meant
 # to be changed
+bashhist.o: config-top.h
 shell.o: config-top.h
 input.o: config-top.h
 y.tab.o: config-top.h
@@ -1229,7 +1230,7 @@ builtins/evalstring.o: ${BASHINCDIR}/memalloc.h variables.h arrayfunc.h conftype
 builtins/evalstring.o: quit.h unwind_prot.h ${BASHINCDIR}/maxpath.h jobs.h builtins.h
 builtins/evalstring.o: dispose_cmd.h make_cmd.h subst.h externs.h 
 builtins/evalstring.o: jobs.h builtins.h flags.h input.h execute_cmd.h
-builtins/evalstring.o: bashhist.h $(DEFSRC)/common.h
+builtins/evalstring.o: bashhist.h $(DEFSRC)/common.h pathnames.h
 builtins/getopt.o: config.h ${BASHINCDIR}/memalloc.h
 builtins/getopt.o: shell.h syntax.h bashjmp.h command.h general.h xmalloc.h error.h
 builtins/getopt.o: variables.h arrayfunc.h conftypes.h quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
@@ -1285,6 +1286,7 @@ builtins/enable.o: pcomplete.h pathnames.h
 builtins/eval.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
 builtins/eval.o: shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h unwind_prot.h variables.h arrayfunc.h conftypes.h quit.h 
 builtins/eval.o: dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h
+builtins/eval.o: pathnames.h
 builtins/exec.o: bashtypes.h pathnames.h
 builtins/exec.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
 builtins/exec.o: shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h unwind_prot.h variables.h arrayfunc.h conftypes.h

@@ -9189,7 +9189,7 @@ config-top.h
 shell.c
 	- don't include the --wordexp option or the supporting function
 	  (run_wordexp) if WORDEXP_OPTION is not defined.  Suggested by
-	  Aharon Robbins.
+	  Aharon Robbins <arnold@skeeve.com>
 
 execute_cmd.c
 	- in execute_cond_node, turn on comsub_ignore_return if the flags
@@ -9270,3 +9270,39 @@ lib/readline/signals.c
 	  immediately handles signals.  This restores the readline-5.2
 	  behavior.  Fixes GDB readline bug reported by Jan Kratochvil
 	  <jan.kratochvil@redhat.com>
+
+				   12/22
+				   -----
+config-top.h
+	- don't have SYSLOG_HISTORY enabled by default
+
+lib/sh/Makefile.in
+	- add explicit dependency on pathnames.h for parallel make support
+
+externs.h
+	- add extern declaration for xtrace_fdchk
+
+lib/sh/snprintf.c
+	- add local prototype declarations for isinf, isnan if we are providing
+	  local definitions
+
+lib/sh/fnxform.c
+	- add extern declaration for get_locale_var if HAVE_LOCALE_CHARSET not
+	  defined
+
+execute_cmd.c
+	- define NEED_FPURGE_DECL so we pick up any extern declaration for
+	  fpurge (e.g., if the system doesn't provide it)
+
+builtins/shopt.def
+	- correct prototype and declaration for set_shellopts_after_change so
+	  it's the correct type for shopt_set_func_t
+	- add new function shopt_enable_hostname_completion that is the correct
+	  type for shopt_set_func_t; just calls enable_hostname_completion and
+	  returns its result
+
+				   12/26
+				   -----
+doc/{bash.1,bashref.texi}
+	- add \E and \" escape sequences to ANSI-C quoting description.
+	  Suggested by Aharon Robbins <arnold@skeeve.com>

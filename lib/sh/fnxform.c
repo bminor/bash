@@ -36,6 +36,8 @@
 
 #if defined (HAVE_LOCALE_CHARSET)
 extern const char *locale_charset __P((void));
+#else
+extern char *get_locale_var __P((char *));
 #endif
 
 #if defined (HAVE_ICONV)

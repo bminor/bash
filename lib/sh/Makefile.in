@@ -136,6 +136,9 @@ mostlyclean: clean
 ${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
 	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
 
+${BUILD_DIR}/pathnames.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
+	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} pathnames.h )
+
 # rules for losing makes, like SunOS
 casemod.o: casemod.c
 clktck.o: clktck.c

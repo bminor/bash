@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Oct 16 12:24:25 EDT 2009
+.\"	Last Change: Wed Dec 23 16:29:14 EST 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 October 16" "GNU Bash-4.1"
+.TH BASH 1 "2009 December 23" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1057,6 +1057,8 @@ alert (bell)
 backspace
 .TP
 .B \ee
+.TP
+.B \eE
 an escape character
 .TP   
 .B \ef
@@ -1079,6 +1081,9 @@ backslash
 .TP
 .B \e\(aq
 single quote
+.TP
+.B \e\(dq
+double quote
 .TP   
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
@@ -3927,8 +3932,12 @@ True if the length of
 is non-zero.
 .TP
 \fIstring1\fP \fB==\fP \fIstring2\fP
-True if the strings are equal.  \fB=\fP may be used in place of
-\fB==\fP for strict POSIX compliance.
+.PD 0
+.TP
+\fIstring1\fP \fB=\fP \fIstring2\fP
+.PD
+True if the strings are equal.  \fB=\fP should be used
+with the \fBtest\fP command for POSIX conformance.
 .TP
 \fIstring1\fP \fB!=\fP \fIstring2\fP
 True if the strings are not equal.
@@ -8057,7 +8066,10 @@ than \fInchars\fP characters are read before the delimiter.
 .B \-N \fInchars\fP
 \fBread\fP returns after reading exactly \fInchars\fP characters rather
 than waiting for a complete line of input, unless EOF is encountered or
-\fBread\fP times out.  Any delimiter is ignored.
+\fBread\fP times out.
+Delimiter characters encountered in the input are
+not treated specially and do not cause \fBread\fP to return until
+\fInchars\fP characters are read.
 .TP
 .B \-p \fIprompt\fP
 Display \fIprompt\fP on standard error, without a
@@ -8267,6 +8279,10 @@ with the
 option.
 This also affects the editing interface used for \fBread \-e\fP.
 .TP 8
+.B errexit
+Same as
+.BR \-e .
+.TP 8
 .B errtrace
 Same as
 .BR \-E .
@@ -8274,10 +8290,6 @@ Same as
 .B functrace
 Same as
 .BR \-T .
-.TP 8
-.B errexit
-Same as
-.BR \-e .
 .TP 8
 .B hashall
 Same as

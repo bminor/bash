@@ -58,6 +58,7 @@ extern void xtrace_init __P((void));
 #ifdef NEED_XTRACE_SET_DECL
 extern void xtrace_set __P((int, FILE *));
 #endif
+extern void xtrace_fdchk __P((int));
 extern void xtrace_reset __P((void));
 extern char *indirection_level_string __P((void));
 extern void xtrace_print_assignment __P((char *, char *, int, int));

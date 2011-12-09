@@ -498,6 +498,7 @@ alert (bell)
 @item \b
 backspace
 @item \e
+@itemx \E
 an escape character (not ANSI C)
 @item \f
 form feed
@@ -513,6 +514,8 @@ vertical tab
 backslash
 @item \'
 single quote
+@item \"
+double quote
 @item \@var{nnn}
 the eight-bit character whose value is the octal value @var{nnn}
 (one to three digits)
@@ -3769,7 +3772,10 @@ than @var{nchars} characters are read before the delimiter.
 @item -N @var{nchars}
 @code{read} returns after reading exactly @var{nchars} characters rather
 than waiting for a complete line of input, unless EOF is encountered or
-@code{read} times out.  Any delimiter is ignored.
+@code{read} times out.
+Delimiter characters encountered in the input are
+not treated specially and do not cause @code{read} to return until
+@var{nchars} characters are read.
 
 @item -p @var{prompt}
 Display @var{prompt}, without a trailing newline, before attempting
@@ -5811,8 +5817,9 @@ True if the length of @var{string} is zero.
 True if the length of @var{string} is non-zero.
 
 @item @var{string1} == @var{string2}
+@itemx @var{string1} = @var{string2}
 True if the strings are equal.
-@samp{=} may be used in place of @samp{==} for strict @sc{posix} compliance.
+@samp{=} should be used with the @code{test} command for @sc{posix} conformance.
 
 @item @var{string1} != @var{string2}
 True if the strings are not equal.

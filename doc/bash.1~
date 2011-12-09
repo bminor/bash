@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Oct  9 12:07:53 EDT 2009
+.\"	Last Change: Wed Dec 23 16:29:14 EST 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 October 9" "GNU Bash-4.1"
+.TH BASH 1 "2009 December 23" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1057,6 +1057,8 @@ alert (bell)
 backspace
 .TP
 .B \ee
+.TP
+.B \eE
 an escape character
 .TP   
 .B \ef
@@ -1079,6 +1081,9 @@ backslash
 .TP
 .B \e\(aq
 single quote
+.TP
+.B \e\(dq
+double quote
 .TP   
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
@@ -3820,6 +3825,10 @@ descriptor 0, 1, or 2, respectively, is checked.
 .PP
 Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
+.if t .sp 0.5
+.if n .sp 1
+When used with \fB[[\fP, The \fB<\fP and \fB>\fP operators sort
+lexicographically using the current locale.
 .sp 1
 .PD 0
 .TP
@@ -3923,8 +3932,12 @@ True if the length of
 is non-zero.
 .TP
 \fIstring1\fP \fB==\fP \fIstring2\fP
-True if the strings are equal.  \fB=\fP may be used in place of
-\fB==\fP for strict POSIX compliance.
+.PD 0
+.TP
+\fIstring1\fP \fB=\fP \fIstring2\fP
+.PD
+True if the strings are equal.  \fB=\fP should be used
+with the \fBtest\fP command for POSIX conformance.
 .TP
 \fIstring1\fP \fB!=\fP \fIstring2\fP
 True if the strings are not equal.
@@ -7787,7 +7800,7 @@ Exit a login shell.
 .TP
 \fBreadarray\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
 .PD
-Read lines from the standard input into array variable
+Read lines from the standard input into the indexed array variable
 .IR array ,
 or from file descriptor 
 .IR fd
@@ -7845,7 +7858,8 @@ If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
 before assigning to it.
 .PP
 \fBmapfile\fP returns successfully unless an invalid option or option
-argument is supplied, or \fIarray\fP is invalid or unassignable.
+argument is supplied, \fIarray\fP is invalid or unassignable, or if
+\fIarray\fP is not an indexed array.
 .RE
 .TP
 \fBpopd\fP [\-\fBn\fP] [+\fIn\fP] [\-\fIn\fP]
@@ -8052,7 +8066,10 @@ than \fInchars\fP characters are read before the delimiter.
 .B \-N \fInchars\fP
 \fBread\fP returns after reading exactly \fInchars\fP characters rather
 than waiting for a complete line of input, unless EOF is encountered or
-\fBread\fP times out.  Any delimiter is ignored.
+\fBread\fP times out.
+Delimiter characters encountered in the input are
+not treated specially and do not cause \fBread\fP to return until
+\fInchars\fP characters are read.
 .TP
 .B \-p \fIprompt\fP
 Display \fIprompt\fP on standard error, without a
@@ -8629,6 +8646,19 @@ If set,
 .B bash
 changes its behavior to that of version 3.1 with respect to quoted
 arguments to the conditional command's =~ operator.
+.TP 8
+.B compat32
+If set,
+.B bash
+changes its behavior to that of version 3.2 with respect to locale-specific
+string comparison when using the conditional command's < and > operators.
+.TP 8
+.B compat40
+If set,
+.B bash
+changes its behavior to that of version 4.0 with respect to locale-specific
+string comparison when using the conditional command's < and > operators
+and the effect of interrupting a command list.
 .TP 8
 .B dirspell
 If set,

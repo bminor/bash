@@ -112,8 +112,8 @@ extern int debugging_mode;
 
 static void shopt_error __P((char *));
 
-static int set_shellopts_after_change __P((int));
-
+static int set_shellopts_after_change __P((char *, int));
+static int shopt_enable_hostname_completion __P((char *, int));
 static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
@@ -171,7 +171,7 @@ static struct {
 #if defined (READLINE)
   { "histreedit", &history_reediting, (shopt_set_func_t *)NULL },
   { "histverify", &hist_verify, (shopt_set_func_t *)NULL },
-  { "hostcomplete", &perform_hostname_completion, enable_hostname_completion },
+  { "hostcomplete", &perform_hostname_completion, shopt_enable_hostname_completion },
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_shellopts_after_change },
@@ -487,11 +487,20 @@ set_shopt_o_options (mode, list, quiet)
 /* If we set or unset interactive_comments with shopt, make sure the
    change is reflected in $SHELLOPTS. */
 static int
-set_shellopts_after_change (mode)
+set_shellopts_after_change (option_name, mode)
+     char *option_name;
      int mode;
 {
   set_shellopts ();
   return (0);
+}
+
+static int
+shopt_enable_hostname_completion (option_name, mode)
+     char *option_name;
+     int mode;
+{
+  return (enable_hostname_completion (mode));
 }
 
 static int

@@ -143,7 +143,7 @@ extern int set_login_shell __P((char *, int));
 
 extern void set_bashopts __P((void));
 extern void parse_bashopts __P((char *));
-extern void intialize_bashopts __P((int));
+extern void initialize_bashopts __P((int));
 
 /* Functions from type.def */
 extern int describe_command __P((char *, int));

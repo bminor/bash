@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 October 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 December 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -5066,8 +5066,11 @@ True if the length of
 
 is non-zero.
 <DT><I>string1</I> <B>==</B> <I>string2</I><DD>
-True if the strings are equal.  <B>=</B> may be used in place of
-<B>==</B> for strict POSIX compliance.
+
+<DT><I>string1</I> <B>=</B> <I>string2</I><DD>
+
+True if the strings are equal.  <B>=</B> should be used
+with the <B>test</B> command for POSIX conformance.
 <DT><I>string1</I> <B>!=</B> <I>string2</I><DD>
 True if the strings are not equal.
 <DT><I>string1</I> <B>&lt;</B> <I>string2</I><DD>
@@ -10308,7 +10311,10 @@ than <I>nchars</I> characters are read before the delimiter.
 <DD>
 <B>read</B> returns after reading exactly <I>nchars</I> characters rather
 than waiting for a complete line of input, unless EOF is encountered or
-<B>read</B> times out.  Any delimiter is ignored.
+<B>read</B> times out.
+Delimiter characters encountered in the input are
+not treated specially and do not cause <B>read</B> to return until
+<I>nchars</I> characters are read.
 <DT><B>-p </B><I>prompt</I>
 
 <DD>
@@ -11060,6 +11066,23 @@ If set,
 
 changes its behavior to that of version 3.1 with respect to quoted
 arguments to the conditional command's =~ operator.
+<DT><B>compat32</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+changes its behavior to that of version 3.2 with respect to locale-specific
+string comparison when using the conditional command's &lt; and &gt; operators.
+<DT><B>compat40</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+changes its behavior to that of version 4.0 with respect to locale-specific
+string comparison when using the conditional command's &lt; and &gt; operators
+and the effect of interrupting a command list.
 <DT><B>dirspell</B>
 
 <DD>
@@ -12261,7 +12284,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 October 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 December 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12367,6 +12390,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 09 November 2009 14:08:09 EST
+Time: 23 December 2009 16:47:15 EST
 </BODY>
 </HTML>
