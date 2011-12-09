@@ -6793,7 +6793,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
       return &expand_wdesc_error;
 
     case RBRACE:
-      if (var_is_set == 0 && unbound_vars_is_error)
+      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]))
 	{
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  err_unboundvar (name);

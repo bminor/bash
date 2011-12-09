@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue May 26 17:03:43 EDT 2009
+.\"	Last Change: Wed Jun 17 08:51:11 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 May 26" "GNU Bash-4.0"
+.TH BASH 1 "2009 June 17" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8273,9 +8273,10 @@ and group ids to be set to the real user and group ids.
 Exit after reading and executing one command.
 .TP 8
 .B \-u
-Treat unset variables as an error when performing
+Treat unset variables and parameters other than the special
+parameters "@" and "*" as an error when performing
 parameter expansion.  If expansion is attempted on an
-unset variable, the shell prints an error message, and,
+unset variable or parameter, the shell prints an error message, and,
 if not interactive, exits with a non-zero status.
 .TP 8
 .B \-v

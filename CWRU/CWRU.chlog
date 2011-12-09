@@ -8156,3 +8156,17 @@ xmalloc.c
 	  (and their sh_ counterparts) are called
 	- error messages consolidated into a single function (allocerr/
 	  sh_allocerr) to avoid string duplication
+
+				   6/16
+				   ----
+variables.c
+	- changes to allow variables.c to be compiled if ALIAS is not defined.
+	  Bug and fix from John Gatewood Ham <uraphalinuxserver@gmail.com>
+
+lib/sh/getcwd.c
+	- fix so systems defining BROKEN_DIRENT_D_INO have the necessary
+	  defines.  Fix from Jay Krell <jay.krell@cornell.edu>
+
+configure.in
+	- add -D_ALL_SOURCE to interix CFLAGS for struct timezone definition.
+	  Bug and fix from John Gatewood Ham <uraphalinuxserver@gmail.com>

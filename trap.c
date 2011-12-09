@@ -582,7 +582,7 @@ get_original_signal (sig)
      int sig;
 {
   /* If we aren't sure the of the original value, then get it. */
-  if (original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
+  if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
     GETORIGSIG (sig);
 }
 

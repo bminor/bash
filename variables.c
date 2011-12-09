@@ -221,9 +221,11 @@ static SHELL_VAR *get_groupset __P((SHELL_VAR *));
 static SHELL_VAR *build_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
+#  if defined (ALIAS)
 static SHELL_VAR *build_aliasvar __P((SHELL_VAR *));
 static SHELL_VAR *get_aliasvar __P((SHELL_VAR *));
 static SHELL_VAR *assign_aliasvar __P((SHELL_VAR *,  char *, arrayind_t, char *));
+#  endif
 #endif
 
 static SHELL_VAR *get_funcname __P((SHELL_VAR *));
@@ -1548,6 +1550,7 @@ assign_hashcmd (self, value, ind, key)
   return (build_hashcmd (self));
 }
 
+#if defined (ALIAS)
 static SHELL_VAR *
 build_aliasvar (self)
      SHELL_VAR *self;
@@ -1600,6 +1603,8 @@ assign_aliasvar (self, value, ind, key)
   add_alias (key, value);
   return (build_aliasvar (self));
 }
+#endif /* ALIAS */
+
 #endif /* ARRAY_VARS */
 
 /* If ARRAY_VARS is not defined, this just returns the name of any
@@ -1695,7 +1700,9 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign|att_nounset);
 
   v = init_dynamic_assoc_var ("BASH_CMDS", get_hashcmd, assign_hashcmd, att_nofree);
+#  if defined (ALIAS)
   v = init_dynamic_assoc_var ("BASH_ALIASES", get_aliasvar, assign_aliasvar, att_nofree);
+#  endif
 #endif
 
   v = init_funcname_var ();
