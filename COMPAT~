@@ -1,10 +1,12 @@
+Compatibility with previous versions
+====================================
+
 This document details the incompatibilities between this version of bash,
-bash-4.0, and the previous widely-available versions, bash-1.14 (which is
-still the `standard' version for a few Linux distributions) and bash-2.x. 
+bash-4.1, and the previous widely-available versions, bash-2.x (which is
+still the `standard' version for a few Linux distributions) and bash-3.x. 
 These were discovered by users of bash-2.x and 3.x, so this list is not
 comprehensive.  Some of these incompatibilities occur between the current
-version and versions 2.0 and above.  (The differences between bash-1.14 and
-bash-2.0 were significant.)
+version and versions 2.0 and above.
 
 1.  Bash uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -277,7 +279,8 @@ bash-2.0 were significant.)
     than a regular expression.
 
 34. Bash-4.0 allows the behavior in the previous item to be modified using
-    the notion of a shell `compatibility level'.
+    the notion of a shell `compatibility level'.  If the compat31 shopt
+    option is set, quoting the pattern has no special effect.
 
 35. Bash-3.2 (patched) and Bash-4.0 fix a bug that leaves the shell in an
     inconsistent internal state following an assignment error.  One of the
@@ -311,10 +314,54 @@ bash-2.0 were significant.)
 
 41. Beginning with bash-4.0, when one of the commands in a pipeline is killed
     by a SIGINT while executing a command list, the shell acts as if it
-    received the interrupt.
+    received the interrupt.  This can be disabled by setting the compat31 or
+    compat32 shell options.
 
 42. Bash-4.0 changes the handling of the set -e option so that the shell exits
     if a pipeline fails (and not just if the last command in the failing
     pipeline is a simple command).  This is not as Posix specifies.  There is
     work underway to update this portion of the standard; the bash-4.0
     behavior attempts to capture the consensus at the time of release.
+
+43. Bash-4.0 fixes a Posix mode bug that caused the . (source) builtin to
+    search the current directory for its filename argument, even if "." is
+    not in $PATH.  Posix says that the shell shouldn't look in $PWD in this
+    case.
+
+44. Bash-4.1 uses the current locale when comparing strings using the < and
+    > operators to the `[[' command.  This can be reverted to the previous
+    behavior by setting one of the `compatNN' shopt options.
+
+Shell Compatibility Level
+=========================
+
+Bash-3.2 introduced the concept of a `shell compatibility level', specified
+as a set of options to the shopt builtin (compat31, compat32, compat40 at
+this writing).  There is only one current compatibility level -- each
+option is mutually exclusive.  This list does not mention behavior that is
+standard for a particular version (e.g., setting compat32 means that quoting
+the rhs of the regexp matching operator quotes special regexp characters in
+the word, which is default behavior in bash-3.2 and above).
+
+compat31 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+	- quoting the rhs of the regexp matching operator (=~) has no
+	  special effect
+
+compat32 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+
+compat40 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+	- interrupting a command list such as "a ; b ; c" causes the execution
+	  of the entire list to be aborted
+
+-------------------------------------------------------------------------------
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.

@@ -52,6 +52,7 @@
 #define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
 #define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
 #define SX_NOLONGJMP	0x40	/* don't longjmp on fatal error */
+#define SX_ARITHSUB	0x80	/* extracting $(( ... )) (currently unused) */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */

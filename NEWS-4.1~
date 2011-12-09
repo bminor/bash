@@ -59,8 +59,7 @@ p.  If the optional left-hand-side of a redirection is of the form {var}, the
     descriptor to move or close, depending on the redirection operator.
 
 q.  The < and > operators to the [[ conditional command now do string
-    comparison according to the current locale if the compatibility level
-    is greater than 40.
+    comparison according to the current locale.
 
 r.  Programmable completion now uses the completion for `b' instead of `a'
     when completion is attempted on a line like: a $(b c.
@@ -78,6 +77,9 @@ v.  The mapfile/readarray builtin no longer stores the commands it invokes via
     callbacks in the history list.
 
 w.  There is a new `compat40' shopt option.
+
+x.  The < and > operators to [[ do string comparisons using the current locale
+    only if the compatibility level is greater than 40 (set to 41 by default).
 
 2.  New Features in Readline
 

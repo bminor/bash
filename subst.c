@@ -1130,7 +1130,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 /* Extract the $( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$(".
    Make (SINDEX) get the position of the matching ")". )
-   XFLAGS is additional flags to pass to other extraction functions, */
+   XFLAGS is additional flags to pass to other extraction functions. */
 char *
 extract_command_subst (string, sindex, xflags)
      char *string;
@@ -1263,6 +1263,18 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	  i++;
 	  continue;
 	}
+
+#if 0
+      /* Process a nested command substitution, but only if we're parsing a
+	 command substitution.  XXX - for bash-4.2 */
+      if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LPAREN)
+        {
+          si = i + 2;
+          t = extract_command_subst (string, &si, flags);
+          i = si + 1;
+          continue;
+        }
+#endif
 
       /* Process a nested OPENER. */
       if (STREQN (string + i, opener, len_opener))
@@ -7358,6 +7370,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  if (chk_arithsub (temp2, t_index) == 0)
 	    {
 	      free (temp2);
+	      internal_warning (_("future versions of the shell will force evaluation as an arithmetic substitution"));
 	      goto comsub;
 	    }
 
