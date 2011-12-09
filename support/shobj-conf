@@ -128,7 +128,7 @@ freebsd2*)
 	;;
 
 # FreeBSD-3.x ELF
-freebsd[3-6]*|freebsdelf[3-6]*|freebsdaout[3-6]*|dragonfly*)
+freebsd3*|freebsdaout*)
 	SHOBJ_CFLAGS=-fPIC
 	SHOBJ_LD='${CC}'
 
@@ -145,8 +145,8 @@ freebsd[3-6]*|freebsdelf[3-6]*|freebsdaout[3-6]*|dragonfly*)
 	fi
 	;;
 
-# FreeBSD-7.x and later have only ELF
-freebsd[7-9]*|freebsdelf[7-9]*)
+# FreeBSD-4.x and later have only ELF
+freebsd[4-9]*|freebsdelf*|dragonfly*)
 	SHOBJ_CFLAGS=-fPIC
 	SHOBJ_LD='${CC}'
 

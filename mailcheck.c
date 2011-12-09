@@ -268,7 +268,7 @@ file_mod_date_changed (i)
   mtime = mailfiles[i]->mod_time;
 
   if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
-    return (mtime != finfo.st_mtime);
+    return (mtime < finfo.st_mtime);
 
   if (finfo.st_size == 0 && mailfiles[i]->file_size > 0)
     UPDATE_MAIL_FILE (i, finfo);
@@ -289,7 +289,7 @@ file_access_date_changed (i)
   atime = mailfiles[i]->access_time;
 
   if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
-    return (atime != finfo.st_atime);
+    return (atime < finfo.st_atime);
 
   return (0);
 }

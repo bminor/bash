@@ -574,7 +574,7 @@ main (argc, argv, env)
 
       /* running_under_emacs == 2 for `eterm' */
       running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
-      running_under_emacs += term && STREQN (term, "eterm", 5) && strstr (emacs, "term");
+      running_under_emacs += term && STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
 
       if (running_under_emacs)
 	gnu_error_format = 1;

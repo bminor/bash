@@ -112,10 +112,10 @@ run_callback(callback, current_index)
   execlen += 2;
   execstr = xmalloc (execlen);
 
-  flags = 0;
+  flags = SEVAL_NOHIST;
 #if 0
   if (interactive)
-    flags |= SEVAL_NOHIST|SEVAL_INTERACT;
+    flags |= SEVAL_INTERACT;
 #endif
   snprintf (execstr, execlen, "%s %d", callback, current_index);
   return parse_and_execute(execstr, NULL, flags);

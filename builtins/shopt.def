@@ -145,6 +145,7 @@ static struct {
 #endif
   { "compat31", &shopt_compat31, set_compatibility_level },
   { "compat32", &shopt_compat32, set_compatibility_level },
+  { "compat40", &shopt_compat40, set_compatibility_level },
 #if defined (READLINE)
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
 #endif
@@ -502,6 +503,8 @@ set_compatibility_level (mode)
     shell_compatibility_level = 31;
   else if (shopt_compat32)
     shell_compatibility_level = 32;
+  else if (shopt_compat40)
+    shell_compatibility_level = 40;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
   return 0;
