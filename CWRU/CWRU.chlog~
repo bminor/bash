@@ -7801,7 +7801,7 @@ builtins/fc.def
 	  set -o history has been enabled (interactive or not) should use it
 	  in the last_hist calculation as if it were on.  Same calculation
 	  in fc_gethnum and fc_builtin.  Fixes bug reported by
-	  <smallnow@gmail.com> 
+	  Ian Kelling <smallnow@gmail.com> 
 
 sig.c
 	- change termsig_sighandler to terminate immediately if it gets called
@@ -7828,3 +7828,25 @@ array.c
 	  invalidated where necessary in other functions
 	- array_rshift needs to set max_index to 0 if the array was empty
 	  before shifting in the new element 0
+	- array_shift needs to use element_index(a->head->prev) to set the
+	  max_index, not a simple decrement, to deal with sparse arrays
+
+				    4/1
+				    ---
+bashline.c
+	- in bash_dequote_filename, return right away after copying the
+	  backslash if the last character in the string to be expanded
+	  is a backslash.  The old code copied an extra NUL and overwrote
+	  the bounds checking.  Fixes bug reported by Shawn Starr
+	  https://bugzilla.redhat.com/show_bug.cgi?id=488649
+
+				    4/3
+				    ---
+subst.c
+	- in pat_subst.c, make sure to copy one character from the input
+	  string in the case of a null pattern match, since we substitute
+	  on the null match and then increment past the current character.
+	  Not doing this means that each character of the original string
+	  is replaced because of the null matches.  Fixes debian bug
+	  reported bhy Louis-David Mitterrand <ldm@apartia.fr>
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=522160

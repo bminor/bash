@@ -4313,7 +4313,12 @@ expand_word_unsplit (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
-  word->flags |= W_NOSPLIT;
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc[0] == 0)
+#else
+  if (ifs_firstc == 0)
+#endif
+    word->flags |= W_NOSPLIT;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -4331,7 +4336,12 @@ expand_word_leave_quoted (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
-  word->flags |= W_NOSPLIT;
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc[0] == 0)
+#else
+  if (ifs_firstc == 0)
+#endif
+    word->flags |= W_NOSPLIT;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -6017,7 +6027,14 @@ pat_subst (string, pat, rep, mflags)
 	break;
 
       if (s == e)
-	e++, str++;		/* avoid infinite recursion on zero-length match */
+	{
+	  /* On a zero-length match, make sure we copy one character, since
+	     we increment one character below to avoid infinite recursion. */
+	  RESIZE_MALLOCED_BUFFER (ret, rptr, 1, rsize, 64);
+	  strncpy (ret + rptr, str, 1);
+	  rptr += 1;
+	  e++, str++;		/* avoid infinite recursion on zero-length match */
+	}
     }
 
   /* Now copy the unmatched portion of the input string */

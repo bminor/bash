@@ -2058,7 +2058,7 @@ string_list_dollar_at (list, quoted)
 #if 0
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
 #else
-  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE))
 #endif
 		? quote_list (list)
 		: list_quote_escapes (list);
@@ -4313,6 +4313,12 @@ expand_word_unsplit (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc[0] == 0)
+#else
+  if (ifs_firstc == 0)
+#endif
+    word->flags |= W_NOSPLIT;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -4320,13 +4326,26 @@ expand_word_unsplit (word, quoted)
 }
 
 /* Perform shell expansions on WORD, but do not perform word splitting or
-   quote removal on the result. */
+   quote removal on the result.  Virtually identical to expand_word_unsplit;
+   could be combined if implementations don't diverge. */
 WORD_LIST *
 expand_word_leave_quoted (word, quoted)
      WORD_DESC *word;
      int quoted;
 {
-  return (call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL));
+  WORD_LIST *result;
+
+  expand_no_split_dollar_star = 1;
+#if defined (HANDLE_MULTIBYTE)
+  if (ifs_firstc[0] == 0)
+#else
+  if (ifs_firstc == 0)
+#endif
+    word->flags |= W_NOSPLIT;
+  result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
+  expand_no_split_dollar_star = 0;
+
+  return result;
 }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -6008,7 +6027,14 @@ pat_subst (string, pat, rep, mflags)
 	break;
 
       if (s == e)
-	e++, str++;		/* avoid infinite recursion on zero-length match */
+	{
+	  /* On a zero-length match, make sure we copy one character, since
+	     we increment one character below to avoid infinite recursion. */
+	  RESIZE_MALLOCED_BUFFER (ret, rptr, 1, rsize, 64);
+	  strncpy (ret + rptr, str, 1);
+	  rptr += 1;
+	  e++, str++;		/* avoid infinite recursion on zero-length match */
+	}
     }
 
   /* Now copy the unmatched portion of the input string */
@@ -7005,14 +7031,14 @@ param_expand (string, sindex, quoted, expanded_something,
 	 even if it's quoted. */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && list == 0)
 	temp = (char *)NULL;
-      else if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+      else if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE))
 	{
 	  /* If we have "$*" we want to make a string of the positional
 	     parameters, separated by the first character of $IFS, and
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
-	  temp = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (list) : string_list (list);
+	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list) : string_list (list);
 	  temp1 = quote_string (temp);
 	  if (*temp == 0)
 	    tflag |= W_HASQUOTEDNULL;
@@ -7067,6 +7093,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
+      /* XXX - should this test include Q_PATQUOTE? */
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)

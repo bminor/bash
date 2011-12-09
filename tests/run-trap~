@@ -1,0 +1,6 @@
+echo "warning: UNIX versions number signals differently.  If output differing" >&2
+echo "warning: only in line numbers is produced, please do not consider this" >&2
+echo "warning: a test failure." >&2
+
+${THIS_SH} ./trap.tests > /tmp/xx 2>&1
+diff /tmp/xx trap.right && rm -f /tmp/xx

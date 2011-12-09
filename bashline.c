@@ -3225,7 +3225,7 @@ bash_dequote_filename (text, quote_char)
 
 	  *r++ = *++p;
 	  if (*p == '\0')
-	    break;
+	    return ret;		/* XXX - was break; */
 	  continue;
 	}
       /* Close quote. */

@@ -6027,7 +6027,13 @@ pat_subst (string, pat, rep, mflags)
 	break;
 
       if (s == e)
-	e++, str++;		/* avoid infinite recursion on zero-length match */
+	{
+	  /* On a zero-length match, make sure we copy one character, since
+	     we increment one character to avoid infinite recursion. */
+	  RESIZE_MALLOCED_BUFFER (ret, rptr, 1, rsize, 64);
+	  ret[rptr++] = *str++;
+	  e++;		/* avoid infinite recursion on zero-length match */
+	}
     }
 
   /* Now copy the unmatched portion of the input string */
