@@ -142,13 +142,14 @@ static RETSIGTYPE
 rl_signal_handler (sig)
      int sig;
 {
-  if (_rl_interrupt_immediately)
+  if (_rl_interrupt_immediately || RL_ISSTATE(RL_STATE_CALLBACK))
     {
       _rl_interrupt_immediately = 0;
       _rl_handle_signal (sig);
     }
+  else
+    _rl_caught_signal = sig;
 
-  _rl_caught_signal = sig;
   SIGHANDLER_RETURN;
 }
 

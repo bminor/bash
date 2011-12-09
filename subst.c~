@@ -152,8 +152,8 @@ WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
 
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
-extern int subshell_environment;
-extern int subshell_level, parse_and_execute_level;
+extern int subshell_environment, line_number;
+extern int subshell_level, parse_and_execute_level, sourcelevel;
 extern int eof_encountered;
 extern int return_catch_flag, return_catch_value;
 extern pid_t dollar_dollar_pid;
@@ -5042,8 +5042,9 @@ command_substitute (string, quoted)
   if (subst_assign_varlist == 0 || garglist == 0)
     maybe_make_export_env ();	/* XXX */
 
+itrace("command_substitute: line_number = %d sourcelevel = %d", line_number, sourcelevel);
   /* Flags to pass to parse_and_execute() */
-  pflags = interactive ? SEVAL_RESETLINE : 0;
+  pflags = (interactive && sourcelevel == 0) ? SEVAL_RESETLINE : 0;
 
   /* Pipe the output of executing STRING into the current shell. */
   if (pipe (fildes) < 0)
@@ -7283,7 +7284,7 @@ param_expand (string, sindex, quoted, expanded_something,
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
 
-#if 1
+#if 0
       if (pflags & PF_NOSPLIT2)
 	temp = string_list_internal (quoted ? quote_list (list) : list, " ");
       else
@@ -7981,7 +7982,7 @@ add_twochars:
 	    {
 	      if (list->next)
 		{
-#if 1
+#if 0
 		  if (quoted_dollar_at && word->flags & W_NOSPLIT2)
 		    temp = string_list_internal (quote_list (list), " ");
 		  else

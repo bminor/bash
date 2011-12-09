@@ -717,7 +717,7 @@ trim_pathname (name, maxlen)
   for (ndirs = 0, ntail = nbeg; *ntail; ntail++)
     if (*ntail == '/')
       ndirs++;
-  if (ndirs <= nskip)
+  if (ndirs < nskip)
     return name;
 
   for (ntail = (*nend == '/') ? nend : nend - 1; ntail > nbeg; ntail--)

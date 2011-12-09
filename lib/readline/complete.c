@@ -1038,7 +1038,8 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
     {
       _rl_interrupt_immediately++;
       matches = (*rl_attempted_completion_function) (text, start, end);
-      _rl_interrupt_immediately--;
+      if (_rl_interrupt_immediately > 0)
+	_rl_interrupt_immediately--;
 
       if (matches || rl_attempted_completion_over)
 	{
@@ -1929,7 +1930,8 @@ rl_completion_matches (text, entry_function)
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;
     }
-  _rl_interrupt_immediately--;
+  if (_rl_interrupt_immediately > 0)
+    _rl_interrupt_immediately--;
 
   /* If there were any matches, then look through them finding out the
      lowest common denominator.  That then becomes match_list[0]. */

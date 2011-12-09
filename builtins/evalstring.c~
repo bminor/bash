@@ -181,7 +181,7 @@ parse_and_execute (string, from_file, flags)
   parse_and_execute_level++;
 
   lreset = flags & SEVAL_RESETLINE;
-
+itrace("parse_and_execute: lreset = %d", lreset);
   /* Reset the line number if the caller wants us to.  If we don't reset the
      line number, we have to subtract one, because we will add one just
      before executing the next command (resetting the line number sets it to
@@ -331,7 +331,7 @@ parse_and_execute (string, from_file, flags)
 	      (this_shell_builtin == source_builtin || this_shell_builtin == eval_builtin) &&
 	      last_command_exit_value == EX_BADSYNTAX && posixly_correct)
 	    {
-#if 1	/* XXX - for bash-4.2 */
+#if 0	/* XXX - for bash-4.2 */
 	      should_jump_to_top_level = 1;
 	      code = ERREXIT;
 	      last_command_exit_value = EX_BADUSAGE;

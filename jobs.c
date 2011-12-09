@@ -1708,6 +1708,10 @@ make_child (command, async_p)
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
+#if 0		/* for bash-4.2 */
+      /* If we can't create any children, try to reap some dead ones. */
+      waitchld (-1, 0);
+#endif
       sys_error ("fork: retry");
       if (sleep (forksleep) != 0)
 	break;

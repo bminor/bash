@@ -509,13 +509,8 @@ declare_internal (list, local_var)
 	      *subscript_start = '\0';
 	    }
 	  else if (simple_array_assign)
-	    {
-	      /* let bind_{array,assoc}_variable take care of this. */
-	      if (assoc_p (var))
-		bind_assoc_variable (var, name, "0", value, aflags);
-	      else
-		bind_array_variable (name, 0, value, aflags);
-	    }
+	    /* let bind_array_variable take care of this. */
+	    bind_array_variable (name, 0, value, aflags);
 	  else
 #endif
 	  /* bind_variable_value duplicates the essential internals of

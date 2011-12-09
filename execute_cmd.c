@@ -100,7 +100,7 @@ extern int posixly_correct;
 extern int expand_aliases;
 extern int autocd;
 extern int breaking, continuing, loop_level;
-extern int parse_and_execute_level, running_trap;
+extern int parse_and_execute_level, running_trap, sourcelevel;
 extern int command_string_index, line_number;
 extern int dot_found_in_search;
 extern int already_making_children;
@@ -266,6 +266,10 @@ static int function_line_number;
 static int showing_function_line;
 
 static int line_number_for_err_trap;
+
+/* A sort of function nesting level counter */
+static int funcnest = 0;
+int funcnest_max = 0;		/* XXX - for bash-4.2 */
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -3215,8 +3219,10 @@ execute_cond_node (cond)
   ignore = (cond->flags & CMD_IGNORE_RETURN);
   if (ignore)
     {
-      cond->left->flags |= CMD_IGNORE_RETURN;
-      cond->right->flags |= CMD_IGNORE_RETURN;
+      if (cond->left)
+	cond->left->flags |= CMD_IGNORE_RETURN;
+      if (cond->right)
+	cond->right->flags |= CMD_IGNORE_RETURN;
     }
       
   if (cond->type == COND_EXPR)
@@ -3331,7 +3337,6 @@ execute_cond_command (cond_command)
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
     line_number -= function_line_number;
-
   command_string_index = 0;
   print_cond_command (cond_command);
 
@@ -3532,7 +3537,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   command_line = (char *)0;
 
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell)
+  if (variable_context && interactive_shell && sourcelevel == 0)
     line_number -= function_line_number;
 
   /* Remember what this command line looks like at invocation. */
@@ -4001,9 +4006,16 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 #endif
   FUNCTION_DEF *shell_fn;
   char *sfile, *t;
-  static int funcnest = 0;
 
   USE_VAR(fc);
+
+#if 0	/* for bash-4.2 */
+  if (funcnest_max > 0 && funcnest >= funcnest_max)
+    {
+      internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);
+      jump_to_top_level (DISCARD);
+    }
+#endif
 
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
@@ -4026,6 +4038,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       add_unwind_protect (dispose_command, (char *)tc);
       unwind_protect_pointer (this_shell_function);
       unwind_protect_int (loop_level);
+      unwind_protect_int (funcnest);
     }
   else
     push_context (var->name, subshell, temporary_env);	/* don't unwind-protect for subshells */
@@ -4167,7 +4180,6 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (subshell == 0)
     run_unwind_frame ("function_calling");
 
-  funcnest--;
 #if defined (ARRAY_VARS)
   /* These two variables cannot be unset, and cannot be affected by the
      function. */
@@ -4725,7 +4737,7 @@ initialize_subshell ()
   parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
-  variable_context = return_catch_flag = 0;
+  variable_context = return_catch_flag = funcnest = 0;
 
   executing_list = 0;		/* XXX */
 

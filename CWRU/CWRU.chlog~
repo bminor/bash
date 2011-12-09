@@ -5772,7 +5772,7 @@ bracecomp.c
 lib/readline/{rltty,signals}.c
 	- move block_sigint and release_sigint from rltty.c to signals.c; add
 	  _rl_ prefix to make them public to the library; change callers.
-	  From Jan Kratchovil <jan.kratchovil@redhat.com>
+	  From Jan Kratochvil <jan.kratochvil@redhat.com>
 
 lib/readline/rlprivate.h
 	- new extern declarations for _rl_block_sigint and _rl_release_sigint
@@ -5780,7 +5780,7 @@ lib/readline/rlprivate.h
 lib/readline/display.c
 	- add calls to _rl_block_sigint and _rl_release_sigint to rl_redisplay,
 	  since it maniupluates global data structures.  Fix from Jan
-	  Kratchovil <jan.kratchovil@redhat.com>
+	  Kratochvil <jan.kratochvil@redhat.com>
 
 builtins/printf.def
 	- change calls to asprintf and manually adding to vbuf to use calls
@@ -9204,6 +9204,61 @@ configure.in,aclocal.m4
 	- new autoconf macro, BASH_FUNC_SNPRINTF, checks for snprintf present
 	  and working as C99 specifies with a zero length argument.  Idea
 	  from Greg Wooledge <wooledg@eeg.ccf.org>
+	- new macro BASH_FUNC_VSNPRINTF, does same thing for vsnprintf
 
+				   11/25
+				   -----
+subst.c
+	- in command_substitute, only tell parse_and_execute to reset the line
+	  number in an interactive shell if sourcelevel == 0 -- we'll use the
+	  line numbers from the sourced file
 
+execute_cmd.c
+	- in execute_simple_command, only subtract function_line_number from
+	  line_number if sourcelevel == 0.  If sourcing, we'll use the line
+	  numbers from the sourced file.  Fixes bug reported by Hugo
+	  Mildenberger <Hugo.Mildenberger@namir.de>
 
+builtins/declare.def
+	- in declare_internal, call bind_assoc_variable instead of
+	  bind_array_variable in the case of declare -A foo=bar.  Fixes bug
+	  reported by Bernd Eggink <monoped@sudrala.de>.
+
+				   11/27
+				   -----
+lib/readline/util.c
+	- change declaration for _rl_walphabetic to use prototype, assuming
+	  that any system with multibyte characters has a compiler that can
+	  handle prototypes.  Fix for AIX compilation problem reported by
+	  Nick Hillman <nick_hillman@neverbox.com>
+
+				   11/28
+				   -----
+execute_cmd.c
+	- make funcnest file-scope static and unwind-protect its value in
+	  execute_function, so it can be used as a real measure of function
+	  call nesting
+
+general.c
+	- fix off-by-one error in trim_pathname that caused it to short-circuit	
+	  when PROMPT_DIRTRIM == number of directories - 1.  Fixes bug
+	  reported by Dennis Williamson <dennistwilliamson@gmail.com>
+
+				   11/29
+				   -----
+jobs.c
+	- when fork() returns -1/EAGAIN, call waitchld(-1, 0) so the shell can
+	  reap any dead jobs before trying fork again.  Currently disabled
+	  until bash-4.2 development starts
+
+lib/readline/complete.c
+	- when incrementing _rl_interrupt_immediately, make sure it's greater
+	  than 0 before decrementing it.  In practice, not a problem, but
+	  the right way to do it.  Suggested by Jan Kratochvil
+	  <jan.kratochvil@redhat.com>
+
+lib/readline/signals.c
+	- make sure rl_signal_handler doesn't set rl_caught_signal if
+	  _rl_interrupt_immediately is set, so RL_CHECK_SIGNALS doesn't
+	  cause it to be processed twice.  Suggested by Jan Kratochvil
+	  <jan.kratochvil@redhat.com>

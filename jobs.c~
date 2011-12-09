@@ -481,7 +481,6 @@ stop_pipeline (async, deferred)
   JOB *newjob;
   sigset_t set, oset;
 
-itrace("stop_pipeline");
   BLOCK_CHILD (set, oset);
 
 #if defined (PGRP_PIPE)
@@ -702,8 +701,7 @@ bgp_delete (pid)
   for (prev = p = bgpids.list; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
-	if (p != prev)
-	  prev->next = p->next;	/* remove from list */
+	prev->next = p->next;	/* remove from list */
 	break;
       }
 
@@ -1102,7 +1100,6 @@ add_process (name, pid)
 {
   PROCESS *t, *p;
 
-itrace("add_process; %s (%d)", name, pid);
 #if defined (RECYCLES_PIDS)
   int j;
   p = find_process (pid, 0, &j);
@@ -1711,6 +1708,10 @@ make_child (command, async_p)
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
+#if 0		/* for bash-4.2 */
+      /* If we can't create any children, try to wait for some dead ones. */
+      waitchld (-1, 0);
+#endif
       sys_error ("fork: retry");
       if (sleep (forksleep) != 0)
 	break;

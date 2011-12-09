@@ -98,7 +98,7 @@ string_to_rlimtype (s)
   neg = 0;
   while (s && *s && whitespace (*s))
     s++;
-  if (*s == '-' || *s == '+')
+  if (s && (*s == '-' || *s == '+'))
     {
       neg = *s == '-';
       s++;

@@ -152,8 +152,8 @@ WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
 
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
-extern int subshell_environment;
-extern int subshell_level, parse_and_execute_level;
+extern int subshell_environment, line_number;
+extern int subshell_level, parse_and_execute_level, sourcelevel;
 extern int eof_encountered;
 extern int return_catch_flag, return_catch_value;
 extern pid_t dollar_dollar_pid;
@@ -5043,7 +5043,7 @@ command_substitute (string, quoted)
     maybe_make_export_env ();	/* XXX */
 
   /* Flags to pass to parse_and_execute() */
-  pflags = interactive ? SEVAL_RESETLINE : 0;
+  pflags = (interactive && sourcelevel == 0) ? SEVAL_RESETLINE : 0;
 
   /* Pipe the output of executing STRING into the current shell. */
   if (pipe (fildes) < 0)
