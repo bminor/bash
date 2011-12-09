@@ -81,7 +81,7 @@ _evalfile (filename, flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
-  int return_val, fd, result, pflags, i;
+  int return_val, fd, result, pflags, i, nnull;
   ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
@@ -189,11 +189,20 @@ file_error_and_exit:
   i = strlen (string);
   if (i < nr)
     {
-      for (i = 0; i < nr; i++)
+      for (nnull = i = 0; i < nr; i++)
 	if (string[i] == '\0')
           {
 	    memmove (string+i, string+i+1, nr - i);
 	    nr--;
+	    /* Even if the `check binary' flag is not set, we want to avoid
+	       sourcing files with more than 256 null characters -- that
+	       probably indicates a binary file. */
+	    if ((flags & FEVAL_BUILTIN) && ++nnull > 256)
+	      {
+		free (string);
+		(*errfunc) (_("%s: cannot execute binary file"), filename);
+		return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
+	      }
           }
     }
 

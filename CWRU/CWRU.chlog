@@ -9071,3 +9071,27 @@ builtins/evalstring.c
 	  indicating a parse error, print a warning message if the conditions
 	  would require  a posix-mode shell to abort (parse error in a `.'
 	  script or eval string)
+
+				   10/19
+				   -----
+builtins/evalfile.c
+	- even if the `check binary' flag is not passed to _evalfile, return an
+	  error after reading 128 null characters if called by `source', on
+	  the assumption that it's probably a binary file.  [This will be in
+	  bash-4.1-beta]
+
+				   10/24
+				   -----
+[bash-4.1-alpha released]
+
+bashline.c
+	- don't call command_substitution_completion_function if we're
+	  completing a substring delimited by a single quote.  Fixes bug
+	  reported by bash-bugs@atu.cjb.net
+
+lib/readline/complete.c
+	- make sure _rl_skip_completed_text defaults to 0, as the
+	  documentation states (incorrect in bash-4.1-alpha)
+	- in insert_match, skip over a close quote in the replacement text if
+	  the character at point when completion is invoked is a single
+	  quote.  Fixes complaint from bash-bugs@atu.cjb.net

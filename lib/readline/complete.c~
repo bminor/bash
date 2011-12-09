@@ -183,7 +183,7 @@ int rl_visible_stats = 0;
    characters from the match that match characters following point in
    the word.  This means, for instance, completing when the cursor is
    after the `e' in `Makefile' won't result in `Makefilefile'. */
-int _rl_skip_completed_text = 1;
+int _rl_skip_completed_text = 0;
 
 /* If non-zero, then this is the address of a function to call when
    completing on a directory name.  The function is called with
@@ -1570,7 +1570,7 @@ insert_match (match, start, mtype, qc)
 {
   char *replacement, *r;
   char oqc;
-  int end, ostart;
+  int end;
 
   oqc = qc ? *qc : '\0';
   replacement = make_quoted_replacement (match, mtype, qc);
@@ -2226,12 +2226,12 @@ rl_filename_completion_function (text, state)
 }
 
 /* An initial implementation of a menu completion function a la tcsh.  The
-   first time (if the last readline command was not rl_menu_complete), we
+   first time (if the last readline command was not rl_old_menu_complete), we
    generate the list of matches.  This code is very similar to the code in
    rl_complete_internal -- there should be a way to combine the two.  Then,
    for each item in the list of matches, we insert the match in an undoable
    fashion, with the appropriate character appended (this happens on the
-   second and subsequent consecutive calls to rl_menu_complete).  When we
+   second and subsequent consecutive calls to rl_old_menu_complete).  When we
    hit the end of the match list, we restore the original unmatched text,
    ring the bell, and reset the counter to zero. */
 int
@@ -2251,7 +2251,7 @@ rl_old_menu_complete (count, invoking_key)
 
   /* The first time through, we generate the list of matches and set things
      up to insert them. */
-  if (rl_last_func != rl_menu_complete)
+  if (rl_last_func != rl_old_menu_complete)
     {
       /* Clean up from previous call, if any. */
       FREE (orig_text);

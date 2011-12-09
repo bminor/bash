@@ -183,7 +183,7 @@ int rl_visible_stats = 0;
    characters from the match that match characters following point in
    the word.  This means, for instance, completing when the cursor is
    after the `e' in `Makefile' won't result in `Makefilefile'. */
-int _rl_skip_completed_text = 1;
+int _rl_skip_completed_text = 0;
 
 /* If non-zero, then this is the address of a function to call when
    completing on a directory name.  The function is called with
@@ -1570,7 +1570,7 @@ insert_match (match, start, mtype, qc)
 {
   char *replacement, *r;
   char oqc;
-  int end;
+  int end, rlen;
 
   oqc = qc ? *qc : '\0';
   replacement = make_quoted_replacement (match, mtype, qc);
@@ -1578,6 +1578,7 @@ insert_match (match, start, mtype, qc)
   /* Now insert the match. */
   if (replacement)
     {
+      rlen = strlen (replacement);
       /* Don't double an opening quote character. */
       if (qc && *qc && start && rl_line_buffer[start - 1] == *qc &&
 	    replacement[0] == *qc)
@@ -1588,6 +1589,9 @@ insert_match (match, start, mtype, qc)
 	    replacement[0] != oqc)
 	start--;
       end = rl_point - 1;
+      /* Don't double a closing quote character */
+      if (qc && *qc && end && rl_line_buffer[rl_point] == *qc && replacement[rlen - 1] == *qc)
+        end++;
       if (_rl_skip_completed_text)
 	{
 	  r = replacement;

@@ -1315,8 +1315,9 @@ attempt_shell_completion (text, start, end)
   /* Special handling for command substitution.  If *TEXT is a backquote,
      it can be the start or end of an old-style command substitution, or
      unmatched.  If it's unmatched, both calls to unclosed_pair will
-     succeed.  */
-  if (*text == '`' && 
+     succeed.  Don't bother if readline found a single quote and we are
+     completing on the substring.  */
+  if (*text == '`' && rl_completion_quote_character != '\'' &&
 	(in_command_position || (unclosed_pair (rl_line_buffer, start, "`") &&
 				 unclosed_pair (rl_line_buffer, end, "`"))))
     matches = rl_completion_matches (text, command_subst_completion_function);
