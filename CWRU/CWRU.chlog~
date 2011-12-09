@@ -8258,3 +8258,83 @@ lib/readline/complete.c
 	  and unset RL_STATE_COMPLETING while generating the list of matches.
 	  Fixes debian bug #538013 reported by Jerome Reybert
 	  <jreybert@gmail.com>
+
+				   7/25
+				   ----
+execute_cmd.c
+	- change execute_builtin to temporarily turn off and restore the ERR
+	  trap for the eval/source/command builtins in the same way as we
+	  temporarily disable and restore the setting of the -e option.
+	  Fixes bug reported by Henning Garus <henning.garus@googlemail.com>
+
+				   7/27
+				   ----
+shell.c
+	- add fflush(stdout) and fflush(stderr) to exit_shell before closing
+	  any file descriptors at exit time (e.g., coproc pipes)
+
+				   7/30
+				   ----
+lib/readline/complete.c
+	- new function rl_backward_menu_complete, just passes negative count
+	  argument to rl_menu_complete
+	- change rl_menu_complete to act appropriately if rl_last_command is
+	  rl_backward_menu_complete, so we can cycle forward and backward
+	  through the list of completions
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- document new "menu-complete-backward" bindable readline function.
+	  Suggested by Jason Spiro <jasonspiro04@gmail.com>
+
+lib/readline/vi_keymap.c
+	- add binding of C-n to menu-complete and C-p to menu-complete-backward
+	  in vi-insert keymap, as suggested by Jason Spiro
+	  <jasonspiro04@gmail.com>
+
+pcomplete.c
+	- fixed a bug in programmable_completions: the options it returned from
+	  the compspec it found were set before generating the completions,
+	  which meant that any changes made by "compopt" were overridden and
+	  only in effect for the duration of the executing shell function
+	  rather than the entire completion.  Fixes bug reported by Ville
+	  Skytta <ville.skytta@iki.fi>
+
+				   7/31
+				   ----
+lib/readline/keymaps.c
+	- fixed memory leak in rl_discard_keymap by freeing storage associated
+	  with hierarchical keymaps
+	- new convenience function, rl_free_keymap, that calls rl_discard_keymap
+	  and frees the keymap passed as an argument
+
+lib/readline/util.c
+	- new bindable keymap function, _rl_null_function, to be used internally
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_null_function
+
+lib/readline/bind.c
+	- fix rl_generic_bind in the case where we are trying to override a
+	  keymap with a null function (e.g., when trying to unbind it).  We
+	  can't use a NULL function pointer in ANYOTHERKEY since that's
+	  indistinguishable from the keymap not having been overridden at all.
+	  We use  _rl_null_function instead, which simply does nothing.  We
+	  could add an rl_ding to it later.  Fixes problem with hitting ESC
+	  repeatedly while in vi command mode reported by James Rowell
+	  <jrjimmy801-misc1@yahoo.com>
+
+builtins/bind.def
+	- call rl_bind_keyseq instead of rl_set_key for -r option
+
+lib/readline/readline.c
+	- Set vi_movement_keymap[ESC] to _rl_null_function after binding the
+	  arrow keys in bind_arrow_keys() to allow vi-mode users to hit ESC
+	  multiple times in vi command mode while still allowing the arrow
+	  keys to work
+
+				    8/2
+				    ---
+bashline.c
+	- fix clear_hostname_list by setting hostname_list_initialized to 0
+	  after freeing all list members.  Fixes bug reported by Freddy
+	  Vulto <fvulto@gmail.com>

@@ -622,7 +622,7 @@ Readline which keymap to use.
 @deftypefun Keymap rl_make_bare_keymap (void)
 Returns a new, empty keymap.  The space for the keymap is allocated with
 @code{malloc()}; the caller should free it by calling
-@code{rl_free_keymap()} when done.
+@code{rl_discard_keymap()} when done.
 @end deftypefun
 
 @deftypefun Keymap rl_copy_keymap (Keymap map)
@@ -641,8 +641,7 @@ The caller should free @var{keymap}.
 @end deftypefun
 
 @deftypefun void rl_free_keymap (Keymap keymap)
-Free all storage associated with @var{keymap}.  This calls
-@code{rl_discard_keymap} to free subordindate keymaps and macros.
+Free all storage associated with @var{keymap}.
 @end deftypefun
 
 Readline has several internal keymaps.  These functions allow you to

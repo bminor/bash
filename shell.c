@@ -892,6 +892,9 @@ void
 exit_shell (s)
      int s;
 {
+  fflush (stdout);		/* XXX */
+  fflush (stderr);
+
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
   if (signal_is_trapped (0))

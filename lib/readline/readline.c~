@@ -1172,7 +1172,7 @@ bind_arrow_keys ()
   /* Unbind vi_movement_keymap[ESC] to allow users to repeatedly hit ESC
      in vi command mode while still allowing the arrow keys to work. */
   if (vi_movement_keymap[ESC].type == ISKMAP)
-    rl_bind_keyseq_in_map ("\033", (rl_command_func_t *)NULL, vi_movement_keymap);
+    rl_bind_key_in_map (ESC, (rl_command_func_t *)NULL, vi_movement_keymap);
   bind_arrow_keys_internal (vi_insertion_keymap);
 #endif
 }

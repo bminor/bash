@@ -653,7 +653,7 @@ gen_matches_from_itemlist (itp, text)
   if ((itp->flags & (LIST_DIRTY|LIST_DYNAMIC)) ||
       (itp->flags & LIST_INITIALIZED) == 0)
     {
-      if (itp->flags & (LIST_DIRTY | LIST_DYNAMIC))
+      if (itp->flags & (LIST_DIRTY|LIST_DYNAMIC))
 	clean_itemlist (itp);
       if ((itp->flags & LIST_INITIALIZED) == 0)
 	initialize_itemlist (itp);
@@ -1437,15 +1437,15 @@ programmable_completions (cmd, word, start, end, foundp)
   pcomp_curcs = cs;
   pcomp_curcmd = cmd;
 
-  /* Signal the caller that we found a COMPSPEC for this command, and pass
-     back any meta-options associated with the compspec. */
-  if (foundp)
-    *foundp = 1|cs->options;
-
   ret = gen_compspec_completions (cs, cmd, word, start, end);
 
   pcomp_curcs = oldcs;
   pcomp_curcmd = oldcmd;
+
+  /* Signal the caller that we found a COMPSPEC for this command, and pass
+     back any meta-options associated with the compspec. */
+  if (foundp)
+    *foundp = 1|cs->options;
 
   compspec_dispose (cs);
 

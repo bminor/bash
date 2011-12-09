@@ -1032,6 +1032,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw)
   cmdlist = build_arg_list (funcname, text, lwords, cw);
 
   pps = &ps;
+  save_parser_state (pps);
   begin_unwind_frame ("gen-shell-function-matches");
   add_unwind_protect (restore_parser_state, (char *)pps);
   add_unwind_protect (dispose_words, (char *)cmdlist);
@@ -1436,15 +1437,15 @@ programmable_completions (cmd, word, start, end, foundp)
   pcomp_curcs = cs;
   pcomp_curcmd = cmd;
 
-  /* Signal the caller that we found a COMPSPEC for this command, and pass
-     back any meta-options associated with the compspec. */
-  if (foundp)
-    *foundp = 1|cs->options;
-
   ret = gen_compspec_completions (cs, cmd, word, start, end);
 
   pcomp_curcs = oldcs;
   pcomp_curcmd = oldcmd;
+
+  /* Signal the caller that we found a COMPSPEC for this command, and pass
+     back any meta-options associated with the compspec. */
+  if (foundp)
+    *foundp = 1|cs->options;
 
   compspec_dispose (cs);
 

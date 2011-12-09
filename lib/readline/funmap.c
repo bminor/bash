@@ -105,6 +105,7 @@ static const FUNMAP default_funmap[] = {
   { "kill-region", rl_kill_region },
   { "kill-word", rl_kill_word },
   { "menu-complete", rl_menu_complete },
+  { "menu-complete-backward", rl_backward_menu_complete },
   { "next-history", rl_get_next_history },
   { "non-incremental-forward-search-history", rl_noninc_forward_search },
   { "non-incremental-reverse-search-history", rl_noninc_reverse_search },

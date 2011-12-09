@@ -82,6 +82,9 @@
 extern int bash_brace_completion __P((int, int));
 #endif /* BRACE_COMPLETION */
 
+/* To avoid including curses.h/term.h/termcap.h and that whole mess. */
+extern int tputs __P((const char *string, int nlines, int (*outx)(int)));
+
 /* Forward declarations */
 
 /* Functions bound to keys in Readline for Bash users. */

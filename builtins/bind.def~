@@ -255,7 +255,7 @@ bind_builtin (list)
 
   if ((flags & RFLAG) && remove_seq)
     {
-      if (rl_bind_keyseq (remove_seq, (rl_command_func_t *)NULL) != 0)
+      if (rl_set_key (remove_seq, (rl_command_func_t *)NULL, rl_get_keymap ()) != 0)
 	{
 	  builtin_error (_("`%s': cannot unbind"), remove_seq);
 	  BIND_RETURN (EXECUTION_FAILURE);

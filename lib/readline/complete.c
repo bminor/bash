@@ -2330,7 +2330,7 @@ rl_menu_complete (count, ignore)
 
   /* The first time through, we generate the list of matches and set things
      up to insert them. */
-  if (rl_last_func != rl_menu_complete || full_completion)
+  if ((rl_last_func != rl_menu_complete && rl_last_func != rl_backward_menu_complete) || full_completion)
     {
       /* Clean up from previous call, if any. */
       FREE (orig_text);
@@ -2469,4 +2469,13 @@ rl_menu_complete (count, ignore)
 
   completion_changed_buffer = 1;
   return (0);
+}
+
+int
+rl_backward_menu_complete (count, key)
+     int count, key;
+{
+  /* Positive arguments to backward-menu-complete translate into negative
+     arguments for menu-complete, and vice versa. */
+  return (rl_menu_complete (-count, key));
 }

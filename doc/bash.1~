@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue May 26 17:03:43 EDT 2009
+.\"	Last Change: Thu Jul 30 09:25:13 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 May 26" "GNU Bash-4.0"
+.TH BASH 1 "2009 July 30" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5494,6 +5494,11 @@ through the list.
 This command is intended to be bound to \fBTAB\fP, but is unbound
 by default.
 .TP
+.B menu\-complete-\backward
+Identical to \fBmenu\-complete\fP, but moves backward through the list
+of possible completions, as if \fBmenu\-complete\fP had been given a
+negative argument.  This command is unbound by default.
+.TP
 .B delete\-char\-or\-list
 Deletes the character under the cursor if not at the beginning or
 end of the line (like \fBdelete\-char\fP).
@@ -8273,9 +8278,10 @@ and group ids to be set to the real user and group ids.
 Exit after reading and executing one command.
 .TP 8
 .B \-u
-Treat unset variables as an error when performing
+Treat unset variables and parameters other than the special
+parameters "@" and "*" as an error when performing
 parameter expansion.  If expansion is attempted on an
-unset variable, the shell prints an error message, and,
+unset variable or parameter, the shell prints an error message, and,
 if not interactive, exits with a non-zero status.
 .TP 8
 .B \-v
@@ -8942,7 +8948,7 @@ These are the same conditions obeyed by the \fBerrexit\fP option.
 .if n .sp 1
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals that are not being ignored are reset to their original
-values in a subshell or subshell environment.
+values in a subshell or subshell environment when one is created.
 The return status is false if any
 .I sigspec
 is invalid; otherwise

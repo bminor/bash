@@ -151,6 +151,7 @@ extern int rl_complete PARAMS((int, int));
 extern int rl_possible_completions PARAMS((int, int));
 extern int rl_insert_completions PARAMS((int, int));
 extern int rl_menu_complete PARAMS((int, int));
+extern int rl_backward_menu_complete PARAMS((int, int));
 
 /* Bindable commands for killing and yanking text, and managing the kill ring. */
 extern int rl_kill_word PARAMS((int, int));

@@ -1319,7 +1319,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 
 	  if (tempwidth > 0)
 	    {
-	      int count;
+	      int count, i;
 	      bytes = ret;
 	      for (count = 0; count < bytes; count++)
 		putc (new[count], rl_outstream);
@@ -1330,10 +1330,13 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      if (ret != 0 && bytes != 0)
 		{
 		  if (MB_INVALIDCH (ret))
-		    memmove (old+bytes, old+1, strlen (old+1));
-		  else
-		    memmove (old+bytes, old+ret, strlen (old+ret));
+		    ret = 1;
+		  memmove (old+bytes, old+ret, strlen (old+ret));
 		  memcpy (old, new, bytes);
+		  /* Fix up indices if we copy data from one line to another */
+		  omax += bytes - ret;
+		  for (i = current_line+1; i < inv_botlin+1; i++)
+		    vis_lbreaks[i] += bytes - ret;
 		}
 	    }
 	  else

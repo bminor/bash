@@ -752,7 +752,7 @@ clear_hostname_list ()
     return;
   for (i = 0; i < hostname_list_length; i++)
     free (hostname_list[i]);
-  hostname_list_length = 0;
+  hostname_list_length = hostname_list_initialized = 0;
 }
 
 /* Return a NULL terminated list of hostnames which begin with TEXT.

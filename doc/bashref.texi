@@ -4974,7 +4974,8 @@ is running;
 the next time hostname completion is attempted after the
 value is changed, Bash adds the contents of the new file to the
 existing list.
-If @env{HOSTFILE} is set, but has no value, Bash attempts to read 
+If @env{HOSTFILE} is set, but has no value, or does not name a readable file,
+Bash attempts to read 
 @file{/etc/hosts} to obtain the list of possible hostname completions.
 When @env{HOSTFILE} is unset, the hostname list is cleared.
 

@@ -960,6 +960,11 @@ rl_redisplay ()
 #define VIS_LINE(line) ((line) > _rl_vis_botlin) ? "" : VIS_CHARS(line)
 #define INV_LINE(line) (invisible_line + inv_lbreaks[line])
 
+#define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
+			_rl_last_c_pos != o_cpos && \
+			_rl_last_c_pos > wrap_offset && \
+			o_cpos < prompt_last_invisible)
+
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
@@ -982,13 +987,7 @@ rl_redisplay ()
 		 time update_line is called, then we can assume in our
 		 calculations that o_cpos does not need to be adjusted by
 		 wrap_offset. */
-	      /* XXX - if this is changed, change the version down below in
-		 the horizontal scrolling section as well. */
-	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-		  cpos_adjusted == 0 &&
-		  _rl_last_c_pos != o_cpos &&
-		  _rl_last_c_pos > wrap_offset &&
-		  o_cpos < prompt_last_invisible)
+	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
 			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
@@ -1205,14 +1204,8 @@ rl_redisplay ()
 		       _rl_screenwidth + (lmargin ? 0 : wrap_offset),
 		       0);
 
-	  /* This should be identical to the code above in the non-horizontal
-	     scrolling section. */
-	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-	      cpos_adjusted == 0 &&
-	      _rl_last_c_pos != o_cpos &&
-	      _rl_last_c_pos > wrap_offset &&
-	      o_cpos < prompt_last_invisible)
-		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
+	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
+	    _rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 
 	  /* If the visible new line is shorter than the old, but the number
 	     of invisible characters is greater, and we are at the end of
@@ -1326,7 +1319,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 
 	  if (tempwidth > 0)
 	    {
-	      int count;
+	      int count, i;
 	      bytes = ret;
 	      for (count = 0; count < bytes; count++)
 		putc (new[count], rl_outstream);
@@ -1337,10 +1330,15 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      if (ret != 0 && bytes != 0)
 		{
 		  if (MB_INVALIDCH (ret))
-		    memmove (old+bytes, old+1, strlen (old+1));
-		  else
-		    memmove (old+bytes, old+ret, strlen (old+ret));
+		    ret = 1;
+		  memmove (old+bytes, old+ret, strlen (old+ret));
 		  memcpy (old, new, bytes);
+#if 0
+		  /* Fix up indices if we copy data from one line to another */
+		  omax += bytes - ret;
+		  for (i = current_line+1; i < inv_botlin+1; i++)
+		    vis_lbreaks[i] += bytes - ret;
+#endif
 		}
 	    }
 	  else
@@ -1906,6 +1904,7 @@ _rl_move_cursor_relative (new, data)
   register int i;
   int woff;			/* number of invisible chars on current line */
   int cpos, dpos;		/* current and desired cursor positions */
+  int adjust;
 
   woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
   cpos = _rl_last_c_pos;
@@ -1921,15 +1920,34 @@ _rl_move_cursor_relative (new, data)
      as long as we are past them and they are counted by _rl_col_width. */
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
-      dpos = _rl_col_width (data, 0, new);
+      adjust = 1;
+      /* Try to short-circuit common cases and eliminate a bunch of multibyte
+	 character function calls. */
+      /* 1.  prompt string */
+      if (new == local_prompt_len && memcmp (data, local_prompt, new) == 0)
+	{
+	  dpos = prompt_visible_length;
+	  cpos_adjusted = 1;
+	  adjust = 0;
+	}
+      /* 2.  prompt_string + line contents */
+      else if (new > local_prompt_len && local_prompt && memcmp (data, local_prompt, local_prompt_len) == 0)
+	{
+	  dpos = prompt_visible_length + _rl_col_width (data, local_prompt_len, new);
+	  cpos_adjusted = 1;
+	  adjust = 0;
+	}
+      else
+        dpos = _rl_col_width (data, 0, new);
+
       /* Use NEW when comparing against the last invisible character in the
 	 prompt string, since they're both buffer indices and DPOS is a
 	 desired display position. */
-      if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
+      if (adjust && ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
 	  (prompt_physical_chars >= _rl_screenwidth &&
 	   _rl_last_v_pos == prompt_last_screen_line &&
 	   wrap_offset >= woff && dpos >= woff &&
-	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
+	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset))))
 	   /* XXX last comparison might need to be >= */
 	{
 	  dpos -= woff;
@@ -2592,6 +2610,20 @@ _rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
 
   point = 0;
   max = end;
+
+  /* Try to short-circuit common cases.  The adjustment to remove wrap_offset
+     is done by the caller. */
+  /* 1.  prompt string */
+  if (start == 0 && end == local_prompt_len && memcmp (str, local_prompt, local_prompt_len) == 0)
+    return (prompt_visible_length + wrap_offset);
+  /* 2.  prompt string + line contents */
+  else if (start == 0 && end > local_prompt_len && local_prompt && memcmp (str, local_prompt, local_prompt_len) == 0)
+    {
+      tmp = prompt_visible_length + wrap_offset;
+      /* XXX - try to call ourselves recursively with non-prompt portion */
+      tmp += _rl_col_width (str, local_prompt_len, end);
+      return (tmp);
+    }
 
   while (point < start)
     {

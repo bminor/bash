@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Jun 17 08:51:11 EDT 2009
+.\"	Last Change: Thu Jul 30 09:25:13 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 June 17" "GNU Bash-4.0"
+.TH BASH 1 "2009 July 30" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1847,7 +1847,8 @@ adds the contents of the new file to the existing list.
 If
 .SM
 .B HOSTFILE
-is set, but has no value, \fBbash\fP attempts to read
+is set, but has no value, or does not name a readable file,
+\fBbash\fP attempts to read
 .FN /etc/hosts
 to obtain the list of possible hostname completions.
 When
@@ -5493,6 +5494,11 @@ of matches; a negative argument may be used to move backward
 through the list.
 This command is intended to be bound to \fBTAB\fP, but is unbound
 by default.
+.TP
+.B menu\-complete-\backward
+Identical to \fBmenu\-complete\fP, but moves backward through the list
+of possible completions, as if \fBmenu\-complete\fP had been given a
+negative argument.  This command is unbound by default.
 .TP
 .B delete\-char\-or\-list
 Deletes the character under the cursor if not at the beginning or
