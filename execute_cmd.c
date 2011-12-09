@@ -2930,7 +2930,7 @@ execute_case_command (case_command)
 		  retval = execute_command (clauses->action);
 		}
 	      while ((clauses->flags & CASEPAT_FALLTHROUGH) && (clauses = clauses->next));
-	      if ((clauses->flags & CASEPAT_TESTNEXT) == 0)
+	      if (clauses == 0 || (clauses->flags & CASEPAT_TESTNEXT) == 0)
 		EXIT_CASE ();
 	      else
 		break;

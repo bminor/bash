@@ -85,6 +85,7 @@ extern int errno;
 
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
+#define PF_IGNUNBOUND	0x02	/* ignore unbound vars even if -u set */
 
 /* These defs make it easier to use the editor. */
 #define LBRACE		'{'
@@ -263,7 +264,7 @@ static int valid_brace_expansion_word __P((char *, int));
 static int chk_atstar __P((char *, int, int *, int *));
 static int chk_arithsub __P((const char *, int));
 
-static WORD_DESC *parameter_brace_expand_word __P((char *, int, int));
+static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int));
 static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int *, int *));
 static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int *, int *));
 static void parameter_brace_expand_error __P((char *, char *));
@@ -1110,7 +1111,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	}
 
       /* Not exactly right yet; should handle shell metacharacters and
-	 multibyte characters, too. */
+	 multibyte characters, too.  See COMMENT_BEGIN define in parse.y */
       if ((flags & SX_COMMAND) && c == '#' && (i == 0 || string[i - 1] == '\n' || shellblank (string[i - 1])))
 	{
           in_comment = 1;
@@ -2057,7 +2058,7 @@ string_list_dollar_at (list, quoted)
 #if 0
   tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
 #else
-  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+  tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE))
 #endif
 		? quote_list (list)
 		: list_quote_escapes (list);
@@ -4312,6 +4313,7 @@ expand_word_unsplit (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
+  word->flags |= W_NOSPLIT;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -4319,13 +4321,21 @@ expand_word_unsplit (word, quoted)
 }
 
 /* Perform shell expansions on WORD, but do not perform word splitting or
-   quote removal on the result. */
+   quote removal on the result.  Virtually identical to expand_word_unsplit;
+   could be combined if implementations don't diverge. */
 WORD_LIST *
 expand_word_leave_quoted (word, quoted)
      WORD_DESC *word;
      int quoted;
 {
-  return (call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL));
+  WORD_LIST *result;
+
+  expand_no_split_dollar_star = 1;
+  word->flags |= W_NOSPLIT;
+  result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
+  expand_no_split_dollar_star = 0;
+
+  return result;
 }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -4476,7 +4486,6 @@ unlink_fifo_list ()
   for (i = 0; nfds && i < totfds; i++)
     if (dev_fd_list[i])
       {
-itrace("unlink_fifo_list: closing %d", i);
 	close (i);
 	dev_fd_list[i] = 0;
 	nfds--;
@@ -5196,9 +5205,9 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
    the shell, e.g., "@", "$", "*", etc.  QUOTED, if non-zero, means that
    NAME was found inside of a double-quoted expression. */
 static WORD_DESC *
-parameter_brace_expand_word (name, var_is_special, quoted)
+parameter_brace_expand_word (name, var_is_special, quoted, pflags)
      char *name;
-     int var_is_special, quoted;
+     int var_is_special, quoted, pflags;
 {
   WORD_DESC *ret;
   char *temp, *tt;
@@ -5230,7 +5239,7 @@ parameter_brace_expand_word (name, var_is_special, quoted)
       strcpy (tt + 1, name);
 
       ret = param_expand (tt, &sindex, quoted, (int *)NULL, (int *)NULL,
-			  (int *)NULL, (int *)NULL, 0);
+			  (int *)NULL, (int *)NULL, pflags);
       free (tt);
     }
 #if defined (ARRAY_VARS)
@@ -5291,7 +5300,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   char *temp, *t;
   WORD_DESC *w;
 
-  w = parameter_brace_expand_word (name, var_is_special, quoted);
+  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND);
   t = w->word;
   /* Have to dequote here if necessary */
   if (t)
@@ -5308,7 +5317,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   if (t == 0)
     return (WORD_DESC *)NULL;
 
-  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted);
+  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, 0);
   free (t);
 
   return w;
@@ -6659,7 +6668,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
   if (want_indir)
     tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted);
+    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND);
 
   if (tdesc)
     {
@@ -6990,7 +6999,7 @@ param_expand (string, sindex, quoted, expanded_something,
     case '*':		/* `$*' */
       list = list_rest_of_args ();
 
-      if (list == 0 && unbound_vars_is_error)
+      if (list == 0 && unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	{
 	  uerror[0] = '$';
 	  uerror[1] = '*';
@@ -7005,14 +7014,14 @@ param_expand (string, sindex, quoted, expanded_something,
 	 even if it's quoted. */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && list == 0)
 	temp = (char *)NULL;
-      else if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+      else if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE))
 	{
 	  /* If we have "$*" we want to make a string of the positional
 	     parameters, separated by the first character of $IFS, and
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
-	  temp = (quoted & Q_DOUBLE_QUOTES) ? string_list_dollar_star (list) : string_list (list);
+	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list) : string_list (list);
 	  temp1 = quote_string (temp);
 	  if (*temp == 0)
 	    tflag |= W_HASQUOTEDNULL;
@@ -7052,7 +7061,7 @@ param_expand (string, sindex, quoted, expanded_something,
     case '@':		/* `$@' */
       list = list_rest_of_args ();
 
-      if (list == 0 && unbound_vars_is_error)
+      if (list == 0 && unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	{
 	  uerror[0] = '$';
 	  uerror[1] = '@';
@@ -7067,6 +7076,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	 string might need it (consider "\"$@\""), but we need some
 	 way to signal that the final split on the first character
 	 of $IFS should be done, even though QUOTED is 1. */
+      /* XXX - should this test include Q_PATQUOTE? */
       if (quoted_dollar_at_p && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	*quoted_dollar_at_p = 1;
       if (contains_dollar_at)

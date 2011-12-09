@@ -7705,3 +7705,68 @@ parse.y
 	  reported by Mike Frysinger <vapier@gentoo.org> (rest of fix
 	  on 3/3)
 
+				   3/10
+				   ----
+{.,lib/readline}/doc/fdl.texi
+	- updated to FDL version 1.3
+
+				   3/14
+				   ----
+execute_cmd.c
+	- in execute_case_command, if ;& is used with no following pattern
+	  list, make sure we don't reference a NULL pointer.  Bug report and
+	  fix from Clark Jian Wang <dearvoid@gmail.com>
+
+parse.y
+	- make parser_state global, so other files can use it
+	- command_word_acceptable now returns non-zero if PST_REDIRLIST bit
+	  set in parser_state, so we accept assignment statements and
+	  perform alias expansion.  Fix for bug reported by Vincent
+	  Lefevre <vincent@vinc17.org> (2/24/2009)
+
+parser.h
+	- add PST_REDIRLIST flag, notes that parser is currently parsing a
+	  redirection list preceding a simple command
+
+make_cmd.c
+	- make_simple_command now turns on PST_REDIRLIST in parser_state when
+	  creating a new simple command
+	- make_simple_command turns off PST_REDIRLIST in parser_state if it
+	  adds a non-redirection to the command it's building
+	- clean_simple_command turns off PST_REDIRLIST to make sure it's off
+
+subst.c
+	- new flag for param_expand: PF_IGNUNBOUND, means to not exit if the
+	  variable is unbound even if `set -u' is enabled
+	- change param_expand to not call err_unboundvar if the `pflags'
+	  argument has the PF_IGNUNBOUND bit set
+	- parameter_brace_expand_word now takes an extra `pflags' argument to
+	  pass down to param_expand; changed callers
+	- changed call to parameter_brace_expand_word in parameter_brace_expand
+	  to add PF_IGNUNBOUND flag so ${@:-foo} doesn't cause the shell to
+	  exit (but ${@} does) when there are no positional parameters.  Fixes	
+	  Debian bug 519165 from Dan Jacobson <jidanni@jidanni.org>
+
+parse.y
+	- add code to parse_comsub to allow here-documents within command
+	  substitutions to be delimited by the closing right paren, with the
+	  usual warning about here documents delimited by EOF on execution.
+	  Fixes regression from bash-3.2 noted in Red Hat bugzilla 485664 by
+	  Ralf Corsepius
+
+				   3/15
+				   ----
+subst.c
+	- string_list_dollar_at now checks for Q_PATQUOTE, which getpattern()
+	  uses to denote Q_DOUBLE_QUOTES (?).  Fixes a=abcd echo "${a#$*}"
+	  when IFS= and args are `a b' as noted by Stephane Chazleas
+	  <stephane_chazelas@yahoo.fr>
+	- param_expand now checks for Q_PATQUOTE and treats it identically
+	  to Q_DOUBLE_QUOTES when expanding $*
+	- expand_word_unsplit now sets W_NOSPLIT in the flags of the word it
+	  passes to expand_word_internal if $IFS is NULL
+	- expand_word_leave_quoted now sets expand_no_split_dollar_start and
+	  the W_NOSPLIT bit in the word flags before calling
+	  expand_word_internal if $IFS is NULL, just like expand_word_unsplit.
+	  It is now virtually identical to expand_word_unsplit.  Rest of fix for
+	  problems reported by Stephane Chazleas <stephane_chazelas@yahoo.fr>

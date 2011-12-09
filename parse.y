@@ -259,6 +259,9 @@ int shell_eof_token;
 /* The token currently being read. */
 int current_token;
 
+/* The current parser state. */
+int parser_state;
+
 /* Variables to manage the task of reading here documents, because we need to
    defer the reading until after a complete command has been collected. */
 static REDIRECT *redir_stack[10];
@@ -282,9 +285,6 @@ static int function_bstart;
 
 /* The line number in a script at which an arithmetic for command starts. */
 static int arith_for_lineno;
-
-/* The current parser state. */
-static int parser_state;
 
 /* The last read token, or NULL.  read_token () uses this for context
    checking. */
@@ -1122,7 +1122,7 @@ pipeline:	pipeline '|' newline_list pipeline
 			  REDIRECTEE rd;
 			  REDIRECT *r;
 
-			  tc = $1;
+			  tc = $1->type == cm_simple ? (COMMAND *)$1->value.Simple : $1;
 			  rd.dest = 1;
 			  r = make_redirection (2, r_duplicating_output, rd);
 			  if (tc->redirects)
@@ -2396,7 +2396,7 @@ gather_here_documents ()
 static int open_brace_count;
 
 #define command_token_position(token) \
-  (((token) == ASSIGNMENT_WORD) || \
+  (((token) == ASSIGNMENT_WORD) || (parser_state&PST_REDIRLIST) || \
    ((token) != SEMI_SEMI && (token) != SEMI_AND && (token) != SEMI_SEMI_AND && reserved_word_acceptable(token)))
 
 #define assignment_acceptable(token) \
@@ -3261,6 +3261,23 @@ eof_error:
       /* Possible reprompting. */
       if (ch == '\n' && SHOULD_PROMPT ())
 	prompt_again ();
+
+      /* XXX -- possibly allow here doc to be delimited by ending right
+	 paren. */
+      if ((tflags & LEX_INHEREDOC) && ch == close && count == 1)
+	{
+	  int tind;
+/*itrace("parse_comsub: in here doc, ch == close, retind - firstind = %d hdlen = %d retind = %d", retind-lex_firstind, hdlen, retind);*/
+	  tind = lex_firstind;
+	  while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
+	    tind++;
+	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
+	    {
+	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
+/*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
+	      lex_firstind = -1;
+	    }
+	}
 
       /* Don't bother counting parens or doing anything else if in a comment */
       if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))

@@ -15,25 +15,34 @@
 # Chet Ramey
 # chet@po.cwru.edu
 #
-trap 'rm -f /tmp/cb$$.? cshout cshin' 0 1 2 3 6 15
+trap 'rm -f $TMPFILE1 $TMPFILEa $TMPFILEe $TMPFILEv $TMPFILEco $TMPFILEci' 0 1 2 3 6 15
+
+{ TMPFILE1=$(mktemp -t cb.1.XXXXXX) &&
+  TMPFILEa=$(mktemp -t cb.a.XXXXXX) &&
+  TMPFILEe=$(mktemp -t cb.e.XXXXXX) &&
+  TMPFILEv=$(mktemp -t cb.v.XXXXXX) &&
+  TMPFILEco=$(mktemp -t cshout.XXXXXX) &&
+  TMPFILEci=$(mktemp -t cshin.XXXXXX)
+} || exit 1
+
 
 T=$'\t'
 
 SOURCE="${1:+source $1}"
 
-cat << EOF >cshin
+cat << EOF >$TMPFILEci
 $SOURCE
-alias >! /tmp/cb$$.a
-setenv >! /tmp/cb$$.e
-set >! /tmp/cb$$.v
+alias >! $TMPFILEa
+setenv >! $TMPFILEe
+set >! $TMPFILEv
 EOF
 
 # give csh a minimal environment, similar to what login would provide
-/usr/bin/env - USER=$USER HOME=$HOME PATH=/usr/bin:/bin:/usr/ucb:. TERM=$TERM SHELL=$SHELL /bin/csh -i < ./cshin > cshout 2>&1
+/usr/bin/env - USER=$USER HOME=$HOME PATH=/usr/bin:/bin:/usr/ucb:. TERM=$TERM SHELL=$SHELL /bin/csh -i < $TMPFILEci > $TMPFILEco 2>&1
 
 # First convert aliases
 
-cat << \EOF >/tmp/cb$$.1
+cat << \EOF >$TMPFILE1
 mkalias ()
 {
 	case $2 in
@@ -49,12 +58,12 @@ mkalias ()
 }
 EOF
 
-sed "s/^\([a-zA-Z0-9_]*\)$T\(.*\)$/mkalias \1 '\2'/" < /tmp/cb$$.a >>/tmp/cb$$.1
+sed "s/^\([a-zA-Z0-9_]*\)$T\(.*\)$/mkalias \1 '\2'/" < $TMPFILEa >>$TMPFILE1
 
 echo '# csh aliases'
 echo
 
-$BASH /tmp/cb$$.1 | sed -e 's/\$cwd/\$PWD/g' \
+$BASH $TMPFILE1 | sed -e 's/\$cwd/\$PWD/g' \
 		   -e 's/\$term/\$TERM/g' \
 		   -e 's/\$home/\$HOME/g' \
 		   -e 's/\$user/\$USER/g' \
@@ -70,7 +79,7 @@ sed -e '/^SHLVL/d' \
     -e '/^PWD/d' \
     -e "s/'/'"\\\\"''"/g \
     -e "s/^\([A-Za-z0-9_]*=\)/export \1'/" \
-    -e "s/$/'/" < /tmp/cb$$.e
+    -e "s/$/'/" < $TMPFILEe
 
 # Finally, convert local variables
 echo
@@ -82,7 +91,7 @@ sed -e 's/'"$T"'/=/' \
     -e '/^[A-Za-z0-9_]*=[^(]/{
 	s/=/='"'/"'
 	s/$/'"'/"'
-	}' < /tmp/cb$$.v |
+	}' < $TMPFILEv |
 sed -e '/^argv=/d' -e '/^cwd=/d' -e '/^filec=/d' -e '/^status=/d' \
 	 -e '/^verbose=/d' \
 	 -e '/^term=/d' \
@@ -110,7 +119,7 @@ echo
 echo '# special csh variables converted to bash equivalents'
 echo
 
-sed -e 's/'"$T"'/=/' < /tmp/cb$$.v |
+sed -e 's/'"$T"'/=/' < $TMPFILEv |
 grep "^cdpath=" |
 sed 's/(//
      s/ /:/g
@@ -118,7 +127,7 @@ sed 's/(//
      s/cdpath=/CDPATH=/'
 
 
-sed -e 's/'"$T"'/=/' < /tmp/cb$$.v |
+sed -e 's/'"$T"'/=/' < $TMPFILEv |
 grep "^mail=" |
 sed 's/(//
      s/ /:/g
