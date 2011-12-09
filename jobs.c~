@@ -427,7 +427,6 @@ void
 save_pipeline (clear)
      int clear;
 {
-itrace("save_pipeline (%d)", clear);
   saved_pipeline = the_pipeline;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
@@ -440,7 +439,6 @@ restore_pipeline (discard)
 {
   PROCESS *old_pipeline;
 
-itrace("restore_pipeline (%d)", discard);
   old_pipeline = the_pipeline;
   the_pipeline = saved_pipeline;
   already_making_children = saved_already_making_children;
@@ -457,6 +455,7 @@ start_pipeline ()
       cleanup_the_pipeline ();
       pipeline_pgrp = 0;
 #if defined (PGRP_PIPE)
+itrace("start_pipeline: cleaning up existing pipeline: closing %d %d", pgrp_pipe[0], pgrp_pipe[1]);
       sh_closepipe (pgrp_pipe);
 #endif
     }
@@ -466,6 +465,7 @@ start_pipeline ()
     {
       if (pipe (pgrp_pipe) == -1)
 	sys_error (_("start_pipeline: pgrp pipe"));
+itrace("start_pipeline: pgrp_pipe: %d %d", pgrp_pipe[0], pgrp_pipe[1]);
     }
 #endif
 }
@@ -487,6 +487,7 @@ stop_pipeline (async, deferred)
 
 #if defined (PGRP_PIPE)
   /* The parent closes the process group synchronization pipe. */
+itrace("stop_pipeline: close pgrp_pipe %d %d", pgrp_pipe[0], pgrp_pipe[1]);
   sh_closepipe (pgrp_pipe);
 #endif
 
@@ -594,7 +595,6 @@ stop_pipeline (async, deferred)
       newjob->j_cleanup = (sh_vptrfunc_t *)NULL;
       newjob->cleanarg = (PTR_T) NULL;
 
-itrace("adding the_pipeline (%s) as job index %d", newjob->pipe->command, i);
       jobs[i] = newjob;
       if (newjob->state == JDEAD && (newjob->flags & J_FOREGROUND))
 	setjstatus (i);
@@ -4204,6 +4204,25 @@ void
 close_pgrp_pipe ()
 {
   sh_closepipe (pgrp_pipe);
+}
+
+void
+save_pgrp_pipe (p, clear)
+     int *p;
+     int clear;
+{
+  p[0] = pgrp_pipe[0];
+  p[1] = pgrp_pipe[1];
+  if (clear)
+    pgrp_pipe[0] = pgrp_pipe[1] = -1;
+}
+
+void
+restore_pgrp_pipe (p)
+     int *p;
+{
+  pgrp_pipe[0] = p[0];
+  pgrp_pipe[1] = p[1];
 }
 
 #endif /* PGRP_PIPE */

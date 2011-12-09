@@ -7934,3 +7934,34 @@ parse.y
 	  character can change to a state where a reserved word is legal,
 	  since it is not a shell meta character.  Fixes bug reported by
 	  Bernd Eggink <monoped@sudrala.de>.
+
+				   4/17
+				   ----
+jobs.c
+	- new functions to save and restore the pgrp_pipe (since there's only
+	  one): save_pgrp_pipe and restore_pgrp_pipe
+
+trap.c
+	- run_debug_trap now saves and restores the pgrp_pipe before and
+	  after calling the debug trap
+	- run_debug_trap now makes sure the terminal is owned by the pipeline
+	  pgrp after the debug trap runs.  Rest of fix for bug reported by
+	  Oleksly Melnyk <o.melnyk@upc.ua> (lex@upc.ca)
+
+				   4/19
+				   ----
+include/posixselect.h
+	- new include file, encapsulates select(2) includes and defines for
+	  bash and readline.  Inspired by patch from Mike Frysinger
+	  <vapier@gentoo.org>
+
+lib/sh/input_avail.c
+	 - include "posixselect.h"
+
+lib/readline/{input,parens}.c
+	- include "posixselect.h" instead of using inline includes
+	- use new USEC_TO_TIMEVAL define to make sure that values for timeouts
+	  greater than one second are handled properly
+
+lib/sh/fpurge.c
+	- updated implementation, taken from gnulib

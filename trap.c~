@@ -86,6 +86,10 @@ extern procenv_t wait_intr_buf;
 extern int return_catch_flag, return_catch_value;
 extern int subshell_level;
 
+#if defined (PGRP_PIPE)
+extern int pgrp_pipe[2];
+#endif
+
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
 
@@ -799,6 +803,7 @@ run_debug_trap ()
 {
   int trap_exit_value;
   pid_t save_pgrp;
+  int save_pipe[2];
 
   /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
   trap_exit_value = 0;
@@ -806,14 +811,26 @@ run_debug_trap ()
     {
 #if defined (JOB_CONTROL)
       save_pgrp = pipeline_pgrp;
-      pipeline_pgrp = shell_pgrp;
+      pipeline_pgrp = 0;
       save_pipeline (1);
+#  if defined (PGRP_PIPE)
+      save_pgrp_pipe (save_pipe, 1);
+#  endif
       stop_making_children ();
 #endif
+
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+
 #if defined (JOB_CONTROL)
       pipeline_pgrp = save_pgrp;
       restore_pipeline (1);
+#  if defined (PGRP_PIPE)
+      close_pgrp_pipe ();
+      restore_pgrp_pipe (save_pipe);
+#  endif
+      if (pipeline_pgrp > 0)
+	give_terminal_to (pipeline_pgrp, 1);
+      notify_and_cleanup ();
 #endif
       
 #if defined (DEBUGGER)

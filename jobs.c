@@ -4203,4 +4203,23 @@ close_pgrp_pipe ()
   sh_closepipe (pgrp_pipe);
 }
 
+void
+save_pgrp_pipe (p, clear)
+     int *p;
+     int clear;
+{
+  p[0] = pgrp_pipe[0];
+  p[1] = pgrp_pipe[1];
+  if (clear)
+    pgrp_pipe[0] = pgrp_pipe[1] = -1;
+}
+
+void
+restore_pgrp_pipe (p)
+     int *p;
+{
+  pgrp_pipe[0] = p[0];
+  pgrp_pipe[1] = p[1];
+}
+
 #endif /* PGRP_PIPE */
