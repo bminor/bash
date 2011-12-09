@@ -1879,7 +1879,7 @@ read_secondary_line (remove_quoted_newline)
     prompt_again ();
   ret = read_a_line (remove_quoted_newline);
 #if defined (HISTORY)
-  if (remember_on_history && (parser_state & PST_HEREDOC))
+  if (ret && remember_on_history && (parser_state & PST_HEREDOC))
     {
       /* To make adding the the here-document body right, we need to rely
 	 on history_delimiting_chars() returning \n for the first line of
@@ -3374,7 +3374,7 @@ eof_error:
 	}
 
       /* Meta-characters that can introduce a reserved word.  Not perfect yet. */
-      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
+      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && (shellmeta(ch) || ch == '\n'))
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -3505,12 +3505,12 @@ eof_error:
       else if MBTEST(ch == close && (tflags & LEX_INCASE) == 0)		/* ending delimiter */
 {
 	count--;
-/*itrace("parse_comsub:%d: found close: count = %d", line_number, count);*/
+itrace("parse_comsub:%d: found close: count = %d", line_number, count);
 }
       else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && (tflags & LEX_INCASE) == 0 && ch == open)	/* nested begin */
 {
 	count++;
-/*itrace("parse_comsub:%d: found open: count = %d", line_number, count);*/
+itrace("parse_comsub:%d: found open: count = %d", line_number, count);
 }
 
       /* Add this character. */

@@ -512,6 +512,7 @@ rl_redisplay ()
   /* Block keyboard interrupts because this function manipulates global
      data structures. */
   _rl_block_sigint ();  
+  RL_SETSTATE (RL_STATE_REDISPLAYING);
 
   if (!rl_display_prompt)
     rl_display_prompt = "";
@@ -1236,6 +1237,7 @@ rl_redisplay ()
       visible_wrap_offset = wrap_offset;
   }
 
+  RL_UNSETSTATE (RL_STATE_REDISPLAYING);
   _rl_release_sigint ();
 }
 

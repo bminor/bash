@@ -7912,3 +7912,25 @@ lib/readline/rlprivate.h
 lib/readline/display.c
 	- block SIGWINCH during redisplay like SIGINT.  Should fix bug reported
 	  by Nicolai Lissner <nlissne@linux01.org>
+
+				   4/13
+				   ----
+lib/readline/readline.h
+	- new readline state variable: RL_STATE_REDISPLAYING
+
+lib/readline/display.c
+	- in rl_redisplay, don't block SIGWINCH during redisplay; just set
+	  the REDISPLAYING state
+
+lib/readline/terminal.c
+	- in rl_resize_terminal, don't call rl_redisplay_after_sigwinch() if
+	  we're already in the middle of redisplay (RL_STATE_REDISPLAYING).
+	  Fix for bug reported by Nicolai Lissner <nlissne@linux01.org>
+
+				   4/15
+				   ----
+parse.y
+	- fix parse_comsub to add check for \n when seeing whether the current
+	  character can change to a state where a reserved word is legal,
+	  since it is not a shell meta character.  Fixes bug reported by
+	  Bernd Eggink <monoped@sudrala.de>.

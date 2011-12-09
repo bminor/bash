@@ -512,7 +512,7 @@ rl_redisplay ()
   /* Block keyboard interrupts because this function manipulates global
      data structures. */
   _rl_block_sigint ();  
-  _rl_block_sigwinch ();
+  RL_SETSTATE (RL_STATE_REDISPLAYING);
 
   if (!rl_display_prompt)
     rl_display_prompt = "";
@@ -1237,8 +1237,8 @@ rl_redisplay ()
       visible_wrap_offset = wrap_offset;
   }
 
+  RL_UNSETSTATE (RL_STATE_REDISPLAYING);
   _rl_release_sigint ();
-  _rl_release_sigwinch ();
 }
 
 /* PWP: update_line() is based on finding the middle difference of each
@@ -1774,7 +1774,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	     space_to_eol will insert too many spaces.  XXX - maybe we should
 	     adjust col_lendiff based on the difference between _rl_last_c_pos
 	     and _rl_screenwidth */
-	  if (col_lendiff && (_rl_last_c_pos < _rl_screenwidth))
+	  if (col_lendiff && ((MB_CUR_MAX == 1 || rl_byte_oriented) || (_rl_last_c_pos < _rl_screenwidth)))
 #endif
 	    {	  
 	      if (_rl_term_autowrap && current_line < inv_botlin)

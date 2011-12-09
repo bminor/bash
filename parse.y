@@ -3374,7 +3374,7 @@ eof_error:
 	}
 
       /* Meta-characters that can introduce a reserved word.  Not perfect yet. */
-      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && shellmeta(ch))
+      if MBTEST((tflags & LEX_RESWDOK) == 0 && (tflags & LEX_CKCASE) && (tflags & LEX_INCOMMENT) == 0 && (shellmeta(ch) || ch == '\n'))
 	{
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
