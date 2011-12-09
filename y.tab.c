@@ -4234,7 +4234,7 @@ read_a_line (remove_quoted_newline)
 {
   static char *line_buffer = (char *)NULL;
   static int buffer_size = 0;
-  int indx = 0, c, peekc, pass_next;
+  int indx, c, peekc, pass_next;
 
 #if defined (READLINE)
   if (no_line_editing && SHOULD_PROMPT ())
@@ -4243,7 +4243,7 @@ read_a_line (remove_quoted_newline)
 #endif
     print_prompt ();
 
-  pass_next = 0;
+  pass_next = indx = 0;
   while (1)
     {
       /* Allow immediate exit if interrupted during input. */
@@ -4683,6 +4683,7 @@ shell_getc (remove_quoted_newline)
      because we have fully consumed the result of the last alias expansion.
      Do it transparently; just return the next character of the string popped
      to. */
+pop_alias:
   if (!uc && (pushed_string_list != (STRING_SAVER *)NULL))
     {
       pop_string ();
@@ -4697,6 +4698,17 @@ shell_getc (remove_quoted_newline)
 	if (SHOULD_PROMPT ())
 	  prompt_again ();
 	line_number++;
+	/* XXX - what do we do here if we're expanding an alias whose definition
+	   ends with a newline?  Recall that we inhibit the appending of a
+	   space in mk_alexpansion() if newline is the last character. */
+#if 0	/* XXX - bash-4.2 (jonathan@claggett.org) */
+	if (expanding_alias () && shell_input_line[shell_input_line_index+1] == '\0')
+	  {
+	    uc = 0;
+	    goto pop_alias;
+	  }
+#endif
+	  
 	goto restart_read;
     }
 
@@ -4907,7 +4919,11 @@ mk_alexpansion (s)
   l = strlen (s);
   r = xmalloc (l + 2);
   strcpy (r, s);
+#if 0		/* XXX - bash-4.2 */
+  if (r[l -1] != ' ' && r[l -1] != '\n')
+#else
   if (r[l -1] != ' ')
+#endif
     r[l++] = ' ';
   r[l] = '\0';
   return r;
@@ -5101,12 +5117,11 @@ reset_parser ()
   dstack.delimiter_depth = 0;	/* No delimiters found so far. */
   open_brace_count = 0;
 
+#if defined (EXTENDED_GLOB)
   /* Reset to global value of extended glob */
   if (parser_state & PST_EXTPAT)
-{
-/*itrace("reset_parser: parser_state includes PST_EXTPAT");*/
     extended_glob = global_extglob;
-}
+#endif
 
   parser_state = 0;
 
@@ -7167,7 +7182,7 @@ prompt_again ()
 {
   char *temp_prompt;
 
-  if (interactive == 0 || expanding_alias())	/* XXX */
+  if (interactive == 0 || expanding_alias ())	/* XXX */
     return;
 
   ps1_prompt = get_string_value ("PS1");

@@ -368,8 +368,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      above).
               --ff     Use function names only.
               --ii     The variable is treated as an integer; arithmetic evalua-
-                     tion (see AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN )) is performed  when  the
-                     variable is assigned a value.
+                     tion (see AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN above) is performed  when
+                     the variable is assigned a value.
               --ll     When  the  variable  is  assigned a value, all upper-case
                      characters are converted to lower-case.   The  upper-case
                      attribute is disabled.
@@ -387,8 +387,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
               Using `+' instead of `-' turns off the attribute  instead,  with
               the exceptions that ++aa may not be used to destroy an array vari-
-              able and ++rr wwiillll nnoott rreemmoovvee tthhee rreeaaddoonnllyy aattttrriibbuuttee..   WWhheenn  uusseedd
-              iinn aa ffuunnccttiioonn,, mmaakkeess eeaacchh _n_a_m_e llooccaall,, aass wwiitthh tthhee llooccaall command.
+              able and ++rr will not remove the readonly attribute.   When  used
+              in a function, makes each _n_a_m_e local, as with the llooccaall command.
               If a variable name is followed by =_v_a_l_u_e, the value of the vari-
               able  is  set to _v_a_l_u_e.  The return value is 0 unless an invalid
               option is encountered, an attempt is made to define  a  function
@@ -426,9 +426,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        ddiissoowwnn [--aarr] [--hh] [_j_o_b_s_p_e_c ...]
               Without options, each _j_o_b_s_p_e_c  is  removed  from  the  table  of
-              active  jobs.   If _j_o_b_s_p_e_c is not present, and neither --aa nnoorr --rr
-              iiss ssuupppplliieedd,, tthhee sshheellll''ss nnoottiioonn ooff tthhee _c_u_r_r_e_n_t _j_o_b iiss uusseedd..   IIff
-              tthhee --hh ooppttiioonn iiss ggiivveenn,, eeaacchh _j_o_b_s_p_e_c is not removed from the ta-
+              active  jobs.   If _j_o_b_s_p_e_c is not present, and neither --aa nor --rr
+              is supplied, the shell's notion of the _c_u_r_r_e_n_t _j_o_b is used.   If
+              the --hh option is given, each _j_o_b_s_p_e_c is not removed from the ta-
               ble, but is marked so that SSIIGGHHUUPP is not sent to the job if  the
               shell  receives a SSIIGGHHUUPP.  If no _j_o_b_s_p_e_c is present, and neither
               the --aa nor the --rr option is supplied, the _c_u_r_r_e_n_t _j_o_b  is  used.
@@ -681,16 +681,16 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      The  last  command  in the history list is removed before
                      the _a_r_g_s are added.
 
-              If the HHIISSTTTTIIMMEEFFOORRMMAATT is set, the time stamp information associ-
-              ated  with  each  history  entry is written to the history file,
-              marked with the history comment  character.   When  the  history
-              file is read, lines beginning with the history comment character
-              followed immediately by a digit are  interpreted  as  timestamps
-              for  the previous history line.  The return value is 0 unless an
-              invalid option is encountered, an error occurs while reading  or
-              writing  the  history  file, an invalid _o_f_f_s_e_t is supplied as an
-              argument to --dd, or the history expansion supplied as an argument
-              to --pp fails.
+              If the HHIISSTTTTIIMMEEFFOORRMMAATT variable is set, the time  stamp  informa-
+              tion  associated  with each history entry is written to the his-
+              tory file, marked with the history comment character.  When  the
+              history  file  is read, lines beginning with the history comment
+              character followed immediately by a  digit  are  interpreted  as
+              timestamps for the previous history line.  The return value is 0
+              unless an invalid option is encountered, an error  occurs  while
+              reading  or  writing the history file, an invalid _o_f_f_s_e_t is sup-
+              plied as an argument to --dd, or the history expansion supplied as
+              an argument to --pp fails.
 
        jjoobbss [--llnnpprrss] [ _j_o_b_s_p_e_c ... ]
        jjoobbss --xx _c_o_m_m_a_n_d [ _a_r_g_s ... ]
@@ -729,8 +729,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        lleett _a_r_g [_a_r_g ...]
               Each _a_r_g is an arithmetic expression to be evaluated (see AARRIITTHH--
-              MMEETTIICC  EEVVAALLUUAATTIIOONN).  If the last _a_r_g evaluates to 0, lleett returns
-              1; 0 is returned otherwise.
+              MMEETTIICC  EEVVAALLUUAATTIIOONN  above).   If the last _a_r_g evaluates to 0, lleett
+              returns 1; 0 is returned otherwise.
 
        llooccaall [_o_p_t_i_o_n] [_n_a_m_e[=_v_a_l_u_e] ...]
               For each argument, a local variable named _n_a_m_e is  created,  and
@@ -758,7 +758,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --OO     Begin assigning to _a_r_r_a_y at index  _o_r_i_g_i_n.   The  default
                      index is 0.
               --ss     Discard the first _c_o_u_n_t lines read.
-              --tt     Remove a trailing line from each line read.
+              --tt     Remove a trailing newline from each line read.
               --uu     Read  lines  from file descriptor _f_d instead of the stan-
                      dard input.
               --CC     Evaluate _c_a_l_l_b_a_c_k each time _q_u_a_n_t_u_m lines are read.   The
@@ -1017,11 +1017,11 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               is interactive, unless the shell is started with
                               the ----nnooeeddiittiinngg option.  This also  affects  the
                               editing interface used for rreeaadd --ee.
+                      eerrrreexxiitt Same as --ee.
                       eerrrrttrraaccee
                               Same as --EE.
                       ffuunnccttrraaccee
                               Same as --TT.
-                      eerrrreexxiitt Same as --ee.
                       hhaasshhaallll Same as --hh.
                       hhiisstteexxppaanndd
                               Same as --HH.
@@ -1556,10 +1556,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               unset.  If --ff is specified, each _n_a_m_e refers to  a  shell  func-
               tion,  and the function definition is removed.  Each unset vari-
               able or function is removed from the environment passed to  sub-
-              sequent  commands.   If any of RRAANNDDOOMM, SSEECCOONNDDSS, LLIINNEENNOO, HHIISSTTCCMMDD,
-              FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are unset, they lose their special
-              properties,  even if they are subsequently reset.  The exit sta-
-              tus is true unless a _n_a_m_e is readonly.
+              sequent  commands.   If any of CCOOMMPP__WWOORRDDBBRREEAAKKSS, RRAANNDDOOMM, SSEECCOONNDDSS,
+              LLIINNEENNOO, HHIISSTTCCMMDD, FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are  unset,  they
+              lose  their  special  properties,  even if they are subsequently
+              reset.  The exit status is true unless a _n_a_m_e is readonly.
 
        wwaaiitt [_n _._._.]
               Wait for each specified process and return its termination  sta-

@@ -2788,12 +2788,11 @@ reset_parser ()
   dstack.delimiter_depth = 0;	/* No delimiters found so far. */
   open_brace_count = 0;
 
+#if defined (EXTENDED_GLOB)
   /* Reset to global value of extended glob */
   if (parser_state & PST_EXTPAT)
-{
-/*itrace("reset_parser: parser_state includes PST_EXTPAT");*/
     extended_glob = global_extglob;
-}
+#endif
 
   parser_state = 0;
 

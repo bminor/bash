@@ -4198,7 +4198,9 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (variable_context == 0 || this_shell_function == 0)
     {
       make_funcname_visible (0);
+#if defined (PROCESS_SUBSTITUTION)
       unlink_fifo_list ();
+#endif
     }
   
   return (result);

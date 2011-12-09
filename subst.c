@@ -7370,7 +7370,9 @@ param_expand (string, sindex, quoted, expanded_something,
 	  if (chk_arithsub (temp2, t_index) == 0)
 	    {
 	      free (temp2);
+#if 0
 	      internal_warning (_("future versions of the shell will force evaluation as an arithmetic substitution"));
+#endif
 	      goto comsub;
 	    }
 

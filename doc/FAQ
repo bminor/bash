@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 4.01, for Bash version 4.0.
+This is the Bash FAQ, version 4.11, for Bash version 4.1.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,9 +36,9 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 4.0?
-B2) Are there any user-visible incompatibilities between bash-4.0,
-    bash-3.2, and bash-2.05b?
+B1) What's new in version 4.1?
+B2) Are there any user-visible incompatibilities between bash-4.1 and
+    previous bash versions?
 
 Section C:  Differences from other Unix shells
 
@@ -81,6 +81,7 @@ E12) Why don't negative offsets in substring expansion work like I expect?
 E13) Why does filename completion misbehave if a colon appears in the filename?
 E14) Why does quoting the pattern argument to the regular expression matching
      conditional operator (=~) cause matching to stop working?
+E15) Tell me more about the shell compatibility level.
 
 Section F:  Things to watch out for on certain Unix versions
 
@@ -143,26 +144,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 4.0, first made available on 20 February, 2009.
+The latest version is 4.1, first made available on 31 December, 2009.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 4.0:
+The following URLs tell how to get version 4.1:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-4.0.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-4.0.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-4.1.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-4.1.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.0.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-4.0.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.1.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-4.1.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-4.0-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-4.1-patches/
 
 A4)  On what machines will bash run?
 
@@ -194,7 +195,7 @@ http://www.cygwin.com/.
 
 Cygnus originally ported bash-1.14.7, and that port was part of their
 early GNU-Win32 (the original name) releases.  Cygnus has also done
-ports of bash-2.05b and bash-3.2 to the CYGWIN environment, and both
+ports of bash-3.2 and bash-4.0 to the CYGWIN environment, and both
 are available as part of their current release.
 
 Bash-2.05b and later versions should require no local Cygnus changes to
@@ -218,7 +219,7 @@ Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-4.0, but will gladly accept any patches that are needed.
+with building bash-4.1, but will gladly accept any patches that are needed.
 
 A6) How can I build bash with gcc? 
 
@@ -387,15 +388,123 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 4.0?
+B1) What's new in version 4.1?
 
-Bash-4.0 is the fourth major release of bash.  There are numerous new features,
-some experimental.  Depending on community reception, the experimental
-features will evolve.
+Bash-4.1 is the first revision to the fourth major release of bash.
 
-Bash-4.0 contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-4.0
+Bash-4.1 contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-4.1
 distribution):
+
+o   Here-documents within $(...) command substitutions may once more be
+    delimited by the closing right paren, instead of requiring a newline.
+
+o   Bash's file status checks (executable, readable, etc.) now take file
+    system ACLs into account on file systems that support them.
+
+o   Bash now passes environment variables with names that are not valid
+    shell variable names through into the environment passed to child
+    processes.
+
+o   The `execute-unix-command' readline function now attempts to clear and
+    reuse the current line rather than move to a new one after the command
+    executes.
+
+o   `printf -v' can now assign values to array indices.
+
+o   New `complete -E' and `compopt -E' options that work on the "empty"
+    completion: completion attempted on an empty command line.
+
+o   New complete/compgen/compopt -D option to define a `default' completion:
+    a completion to be invoked on command for which no completion has been
+    defined.  If this function returns 124, programmable completion is
+    attempted again, allowing a user to dynamically build a set of completions
+    as completion is attempted by having the default completion function
+    install individual completion functions each time it is invoked.
+
+o   When displaying associative arrays, subscripts are now quoted.
+
+o   Changes to dabbrev-expand to make it more `emacs-like': no space appended
+    after matches, completions are not sorted, and most recent history entries
+    are presented first.
+
+o   The [[ and (( commands are now subject to the setting of `set -e' and the
+    ERR trap.
+
+o   The source/. builtin now removes NUL bytes from the file before attempting
+    to parse commands.
+
+o   There is a new configuration option (in config-top.h) that forces bash to
+    forward all history entries to syslog.
+
+o   A new variable $BASHOPTS to export shell options settable using `shopt' to
+    child processes.
+
+o   There is a new confgure option that forces the extglob option to be
+    enabled by default.
+
+o   New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
+    output to that file descriptor.
+
+o   If the optional left-hand-side of a redirection is of the form {var}, the
+    shell assigns the file descriptor used to $var or uses $var as the file
+    descriptor to move or close, depending on the redirection operator.
+
+o   The < and > operators to the [[ conditional command now do string
+    comparison according to the current locale.
+
+o   Programmable completion now uses the completion for `b' instead of `a'
+    when completion is attempted on a line like: a $(b c.
+
+o   Force extglob on temporarily when parsing the pattern argument to
+    the == and != operators to the [[ command, for compatibility.
+
+o   Changed the behavior of interrupting the wait builtin when a SIGCHLD is
+    received and a trap on SIGCHLD is set to be Posix-mode only.
+
+o   The read builtin has a new `-N nchars' option, which reads exactly NCHARS
+    characters, ignoring delimiters like newline.
+
+o   The mapfile/readarray builtin no longer stores the commands it invokes via
+    callbacks in the history list.
+
+o   There is a new `compat40' shopt option.
+
+o   The < and > operators to [[ do string comparisons using the current locale
+    only if the compatibility level is greater than 40 (set to 41 by default).
+
+o   New bindable readline function: menu-complete-backward.
+
+o   In the readline vi-mode insertion keymap, C-n is now bound to menu-complete
+    by default, and C-p to menu-complete-backward.
+
+o   When in readline vi command mode, repeatedly hitting ESC now does nothing,
+    even when ESC introduces a bound key sequence.  This is closer to how
+    historical vi behaves.
+
+o   New bindable readline function: skip-csi-sequence.  Can be used as a
+    default to consume key sequences generated by keys like Home and End
+    without having to bind all keys.
+
+o   New bindable readline variable: skip-completed-text, active when
+    completing in the middle of a word.  If enabled, it means that characters
+    in the completion that match characters in the remainder of the word are
+    "skipped" rather than inserted into the line.
+
+o   The pre-readline-6.0 version of menu completion is available as
+    "old-menu-complete" for users who do not like the readline-6.0 version.
+
+o   New bindable readline variable: echo-control-characters.  If enabled, and
+    the tty ECHOCTL bit is set, controls the echoing of characters
+    corresponding to keyboard-generated signals.
+
+o   New bindable readline variable: enable-meta-key.  Controls whether or not
+    readline sends the smm/rmm sequences if the terminal indicates it has a
+    meta key that enables eight-bit characters.
+
+A short feature history dating from Bash-2.0:
+
+Bash-4.0 contained the following new features:
 
 o   When using substring expansion on the positional parameters, a starting
     index of 0 now causes $0 to be prefixed to the list.
@@ -535,8 +644,6 @@ o   New bindable readline functions shell-forward-word and shell-backward-word,
 o   New bindable readline functions shell-backward-kill-word and shell-kill-word
     which kill words backward and forward, but use the same word boundaries
     as shell-forward-word and shell-backward-word.
-
-A short feature history dating from Bash-2.0:
 
 Bash-3.2 contained the following new features:
 
@@ -794,13 +901,14 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-4.0, bash-3.2,
-    and bash-2.05b?
+B2) Are there any user-visible incompatibilities between bash-4.1 and
+    previous bash versions?
 
-There are a few incompatibilities between version 4.0 and version 3.2.
-They are detailed in the file COMPAT in the bash distribution.  That file
-is not meant to be all-encompassing; send mail to bash-maintainers@gnu.org
-if if you find something that's not mentioned there.
+There are a few incompatibilities between version 4.1 and previous
+versions.  They are detailed in the file COMPAT in the bash distribution.
+That file is not meant to be all-encompassing; send mail to
+bash-maintainers@gnu.org (or bug-bash@gnu.org if you would like
+community discussion) if if you find something that's not mentioned there.
 
 Section C:  Differences from other Unix shells
 
@@ -837,7 +945,7 @@ Things bash has that sh does not:
 		   HISTFILESIZE, HISTCONTROL, HISTIGNORE, GLOBIGNORE, GROUPS,
 		   PROMPT_COMMAND, FCEDIT, FIGNORE, IGNOREEOF, INPUTRC,
 		   SHELLOPTS, OPTERR, HOSTFILE, TMOUT, FUNCNAME, histchars,
-		   auto_resume, PROMPT_DIRTRIM
+		   auto_resume, PROMPT_DIRTRIM, BASHOPTS, BASH_XTRACEFD
 	DEBUG trap
 	ERR trap
 	variable arrays with new compound assignment syntax
@@ -848,7 +956,7 @@ Things bash has that sh does not:
 	bash return builtin will exit a file sourced with `.'
 	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -d/-l/-p/-t.
 		  export -n/-f/-p/name=value, pwd -L/-P,
-		  read -e/-p/-a/-t/-n/-d/-s/-u/-i,
+		  read -e/-p/-a/-t/-n/-d/-s/-u/-i/-N,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
 		  unset -f/-v, ulimit -i/-m/-p/-q/-u/-x,
@@ -894,6 +1002,7 @@ Things bash has that sh does not:
 	case-modifying word expansions and variable attributes
 	associative arrays
 	coprocesses using the `coproc' reserved word and variables
+	shell assignment of a file descriptor used in a redirection to a variable
 
 Things sh has that bash does not:
 	uses variable SHACCT to do shell accounting
@@ -950,7 +1059,7 @@ Things bash has or uses that ksh88 does not:
 	builtins: bind, builtin, command, declare, dirs, echo -e/-E, enable,
 		  exec -l/-c/-a, fc -s, export -n/-f/-p, hash, help, history,
 		  jobs -x/-r/-s, kill -s/-n/-l, local, logout, popd, pushd,
-		  read -e/-p/-a/-t/-n/-d/-s, readonly -a/-n/-f/-p,
+		  read -e/-p/-a/-t/-n/-d/-s/-N, readonly -a/-n/-f/-p,
 		  set -o braceexpand/-o histexpand/-o interactive-comments/
 		  -o notify/-o physical/-o posix/-o hashall/-o onecmd/
 		  -h/-B/-C/-b/-H/-P, set +o, suspend, trap -l, type,
@@ -979,6 +1088,7 @@ Things bash has or uses that ksh88 does not:
 	case-modifying word expansions and variable attributes
 	associative arrays
 	coprocesses using the `coproc' reserved word and variables
+	shell assignment of a file descriptor used in a redirection to a variable
 
 Things ksh88 has or uses that bash does not:
 	tracked aliases (alias -t)
@@ -1006,9 +1116,9 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-This list is current through ksh93t (11/04/2008)
+This list is current through ksh93t+ (05/05/2009)
 
-New things in ksh-93 not in bash-4.0:
+New things in ksh-93 not in bash-4.1:
 	floating point arithmetic and variables
 	math library functions
 	${!name[sub]} name of subscript for associative array
@@ -1031,10 +1141,11 @@ New things in ksh-93 not in bash-4.0:
 	`.' can execute shell functions
 	getopts -a
 	printf %B, %H, %P, %R, %T, %Z modifiers, output base for %d, `=' flag
-	read -N (read -n differs, too)/-v
+	read -n/-N differ/-v
 	set -o showme/-o multiline (bash default)
 	`sleep' and `getconf' builtins (bash has loadable versions)
 	typeset -n and `nameref' variables
+	[[ -R name ]] (checks whether or not name is a nameref)
 	typeset -C/-S/-T/-X/-h/-s
 	experimental `type' definitions (a la typedef) using typeset
 	negative subscripts for indexed array variables
@@ -1042,11 +1153,11 @@ New things in ksh-93 not in bash-4.0:
 	associative array assignments using `;' as element separator
 	command substitution $(n<#) expands to current byte offset for fd N
 	new '${ ' form of command substitution, executed in current shell
-	new >;/<#pat/<##pat/<#/># redirections
-	redirection operators preceded with {varname} to store fd number in varname
+	new >;/<>;/<#pat/<##pat/<#/># redirections
 	brace expansion printf-like formats 
+	[[ -v var ]] operators (checks whether or not var is set)
 
-New things in ksh-93 present in bash-4.0:
+New things in ksh-93 present in bash-4.1:
 	associative arrays
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
@@ -1080,6 +1191,8 @@ New things in ksh-93 present in bash-4.0:
 	the `;&' case statement "fallthrough" pattern list terminator
 	csh-style history expansion and set -H
 	negative offsets in ${param:offset:length}
+	redirection operators preceded with {varname} to store fd number in varname
+	DEBUG can force skipping following command
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1641,6 +1754,32 @@ several options to the `shopt' builtin.  If the `compat31' option is enabled,
 bash reverts to the bash-3.1 behavior with respect to quoting the rhs of
 the =~ operator.
 
+E15) Tell me more about the shell compatibility level.
+
+Bash-4.0 introduced the concept of a `shell compatibility level', specified
+as a set of options to the shopt builtin (compat31, compat32, compat40 at
+this writing).  There is only one current compatibility level -- each
+option is mutually exclusive.  This list does not mention behavior that is
+standard for a particular version (e.g., setting compat32 means that quoting
+the rhs of the regexp matching operator quotes special regexp characters in
+the word, which is default behavior in bash-3.2 and above).
+
+compat31 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+	- quoting the rhs of the regexp matching operator (=~) has no
+	  special effect
+
+compat32 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+
+compat40 set
+	- the < and > operators to the [[ command do not consider the current
+	  locale when comparing strings
+	- interrupting a command list such as "a ; b ; c" causes the execution
+	  of the entire list to be aborted
+
 Section F:  Things to watch out for on certain Unix versions
 
 F1) Why can't I use command line editing in my `cmdtool'?
@@ -2049,9 +2188,9 @@ Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2009.  Never make predictions. 
+The next version will appear sometime in 2010.  Never make predictions. 
 
-This document is Copyright 1995-2009 by Chester Ramey.
+This document is Copyright 1995-2010 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

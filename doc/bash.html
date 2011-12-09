@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 December 23<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -558,13 +558,16 @@ files are read, shell functions are not inherited from the environment, the
 <FONT SIZE=-1><B>SHELLOPTS</B>,
 
 </FONT>
-<B>BASHOPTS</B>,
+<FONT SIZE=-1><B>BASHOPTS</B>,
 
-<B>CDPATH</B>,
+</FONT>
+<FONT SIZE=-1><B>CDPATH</B>,
 
+</FONT>
 and
-<B>GLOBIGNORE</B>
+<FONT SIZE=-1><B>GLOBIGNORE</B>
 
+</FONT>
 variables, if they appear in the environment, are ignored,
 and the effective user id is set to the real user id.
 If the <B>-p</B> option is supplied at invocation, the startup behavior is
@@ -938,10 +941,21 @@ of alphabetic characters.
 Any part of the pattern may be quoted to force it to be matched as a
 string.
 Substrings matched by parenthesized subexpressions within the regular
-expression are saved in the array variable <B>BASH_REMATCH</B>.
-The element of <B>BASH_REMATCH</B> with index 0 is the portion of the string
+expression are saved in the array variable
+<FONT SIZE=-1><B>BASH_REMATCH</B>.
+
+</FONT>
+The element of
+<FONT SIZE=-1><B>BASH_REMATCH</B>
+
+</FONT>
+with index 0 is the portion of the string
 matching the entire regular expression.
-The element of <B>BASH_REMATCH</B> with index <I>n</I> is the portion of the
+The element of
+<FONT SIZE=-1><B>BASH_REMATCH</B>
+
+</FONT>
+with index <I>n</I> is the portion of the
 string matching the <I>n</I>th parenthesized subexpression.
 <P>
 
@@ -1032,8 +1046,9 @@ error, each preceded by a number.  If the <B>in</B>
 
 </FONT>
 below).  The
-<B>PS3</B>
+<FONT SIZE=-1><B>PS3</B>
 
+</FONT>
 prompt is then displayed and a line read from the standard input.
 If the line consists of a number corresponding to one of
 the displayed words, then the value of
@@ -1045,8 +1060,9 @@ other value read causes
 <I>name</I>
 
 to be set to null.  The line read is saved in the variable
-<B>REPLY</B>.
+<FONT SIZE=-1><B>REPLY</B>.
 
+</FONT>
 The
 <I>list</I>
 
@@ -1364,6 +1380,9 @@ backspace
 <DT><B>\e</B>
 
 <DD>
+<DT><B>\E</B>
+
+<DD>
 an escape character
 <DT><B>\f</B>
 
@@ -1393,6 +1412,10 @@ backslash
 
 <DD>
 single quote
+<DT><B>\dq</B>
+
+<DD>
+double quote
 <DT><B>\</B><I>nnn</I>
 
 <DD>
@@ -1757,9 +1780,14 @@ The number of
 parameters to the current subroutine (shell function or script executed
 with <B>.</B> or <B>source</B>) is at the top of the stack.
 When a subroutine is executed, the number of parameters passed is pushed onto
-<B>BASH_ARGC</B>.
-The shell sets <B>BASH_ARGC</B> only when in extended debugging mode
-(see the description of the
+<FONT SIZE=-1><B>BASH_ARGC</B>.
+
+</FONT>
+The shell sets
+<FONT SIZE=-1><B>BASH_ARGC</B>
+
+</FONT>
+only when in extended debugging mode (see the description of the
 <B>extdebug</B>
 
 option to the
@@ -1773,8 +1801,15 @@ An array variable containing all of the parameters in the current <B>bash</B>
 execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
-are pushed onto <B>BASH_ARGV</B>.
-The shell sets <B>BASH_ARGV</B> only when in extended debugging mode
+are pushed onto
+<FONT SIZE=-1><B>BASH_ARGV</B>.
+
+</FONT>
+The shell sets
+<FONT SIZE=-1><B>BASH_ARGV</B>
+
+</FONT>
+only when in extended debugging mode
 (see the description of the
 <B>extdebug</B>
 
@@ -1803,13 +1838,20 @@ The command argument to the <B>-c</B> invocation option.
 
 <DD>
 An array variable whose members are the line numbers in source files
-corresponding to each member of <B>FUNCNAME</B>.
+corresponding to each member of
+<FONT SIZE=-1><B>FUNCNAME</B>.
+
+</FONT>
 <B>${BASH_LINENO[</B><I>$i</I><B>]}</B> is the line number in the source
 file where <B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called
 (or <B>${BASH_LINENO[</B><I>$i-1</I><B>]}</B> if referenced within another
 shell function).
 The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}</B>.
-Use <B>LINENO</B> to obtain the current line number.
+Use
+<FONT SIZE=-1><B>LINENO</B>
+
+</FONT>
+to obtain the current line number.
 <DT><B>BASH_REMATCH</B>
 
 <DD>
@@ -1824,7 +1866,11 @@ This variable is read-only.
 
 <DD>
 An array variable whose members are the source filenames corresponding
-to the elements in the <B>FUNCNAME</B> array variable.
+to the elements in the
+<FONT SIZE=-1><B>FUNCNAME</B>
+
+</FONT>
+array variable.
 <DT><B>BASH_SUBSHELL</B>
 
 <DD>
@@ -1865,7 +1911,10 @@ The release status (e.g., <I>beta1</I>).
 <DT><B>BASH_VERSINFO[</B>5]
 
 <DD>
-The value of <B>MACHTYPE</B>.
+The value of
+<FONT SIZE=-1><B>MACHTYPE</B>.
+
+</FONT>
 
 </DL></DL>
 
@@ -1939,7 +1988,10 @@ subsequently reset.
 An array variable (see <B>Arrays</B> below) consisting of the individual
 words in the current command line.
 The line is split into words as <B>readline</B> would split it, using
-<B>COMP_WORDBREAKS</B> as described above.
+<FONT SIZE=-1><B>COMP_WORDBREAKS</B>
+
+</FONT>
+as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
@@ -2252,11 +2304,22 @@ will write the trace output generated when
 <TT>set -x</TT>
 
 is enabled to that file descriptor.
-The file descriptor is closed when <B>BASH_XTRACEFD</B> is unset or assigned
-a new value.
-Unsetting <B>BASH_XTRACEFD</B> or assigning it the empty string causes the
+The file descriptor is closed when
+<FONT SIZE=-1><B>BASH_XTRACEFD</B>
+
+</FONT>
+is unset or assigned a new value.
+Unsetting
+<FONT SIZE=-1><B>BASH_XTRACEFD</B>
+
+</FONT>
+or assigning it the empty string causes the
 trace output to be sent to the standard error.
-Note that setting BASH_XTRACEFD to 2 (the standard error file
+Note that setting
+<FONT SIZE=-1><B>BASH_XTRACEFD</B>
+
+</FONT>
+to 2 (the standard error file
 descriptor) and then unsetting it will result in the standard error
 being closed.
 <DT><B>COLUMNS</B>
@@ -2340,15 +2403,21 @@ A value of
 causes all previous lines matching the current line to be removed from
 the history list before that line is saved.
 Any value not in the above list is ignored.
-If <B>HISTCONTROL</B> is unset, or does not include a valid value,
+If
+<FONT SIZE=-1><B>HISTCONTROL</B>
+
+</FONT>
+is unset, or does not include a valid value,
 all lines read by the shell parser are saved on the history list,
 subject to the value of
-<B>HISTIGNORE</B>.
+<FONT SIZE=-1><B>HISTIGNORE</B>.
 
+</FONT>
 The second and subsequent lines of a multi-line compound command are
 not tested, and are added to the history regardless of the value of
-<B>HISTCONTROL</B>.
+<FONT SIZE=-1><B>HISTCONTROL</B>.
 
+</FONT>
 <DT><B>HISTFILE</B>
 
 <DD>
@@ -2375,16 +2444,18 @@ should be saved on the history list.  Each pattern is anchored at the
 beginning of the line and must match the complete line (no implicit
 `<B>*</B>' is appended).  Each pattern is tested against the line
 after the checks specified by
-<B>HISTCONTROL</B>
+<FONT SIZE=-1><B>HISTCONTROL</B>
 
+</FONT>
 are applied.
 In addition to the normal shell pattern matching characters, `<B>&amp;</B>'
 matches the previous history line.  `<B>&amp;</B>' may be escaped using a
 backslash; the backslash is removed before attempting a match.
 The second and subsequent lines of a multi-line compound command are
 not tested, and are added to the history regardless of the value of
-<B>HISTIGNORE</B>.
+<FONT SIZE=-1><B>HISTIGNORE</B>.
 
+</FONT>
 <DT><B>HISTSIZE</B>
 
 <DD>
@@ -2499,7 +2570,11 @@ selected with a variable starting with <B>LC_</B>.
 <DT><B>LC_ALL</B>
 
 <DD>
-This variable overrides the value of <B>LANG</B> and any other
+This variable overrides the value of
+<FONT SIZE=-1><B>LANG</B>
+
+</FONT>
+and any other
 <B>LC_</B> variable specifying a locale category.
 <DT><B>LC_COLLATE</B>
 
@@ -2527,7 +2602,10 @@ This variable determines the locale category used for number formatting.
 
 <DD>
 Used by the <B>select</B> builtin command to determine the column length
-for printing selection lists.  Automatically set upon receipt of a SIGWINCH.
+for printing selection lists.  Automatically set upon receipt of a
+<FONT SIZE=-1><B>SIGWINCH</B>.
+
+</FONT>
 <DT><B>MAIL</B>
 
 <DD>
@@ -2600,8 +2678,11 @@ the shell looks for commands (see
 
 </FONT>
 below).
-A zero-length (null) directory name in the value of <B>PATH</B> indicates the
-current directory.
+A zero-length (null) directory name in the value of
+<FONT SIZE=-1><B>PATH</B>
+
+</FONT>
+indicates the current directory.
 A null directory name may appear as two adjacent colons, or as an initial
 or trailing colon.
 The default path is system-dependent,
@@ -2651,8 +2732,9 @@ below) and used as the primary prompt string.  The default value is
 
 <DD>
 The value of this parameter is expanded as with
-<B>PS1</B>
+<FONT SIZE=-1><B>PS1</B>
 
+</FONT>
 and used as the secondary prompt string.  The default is
 ``<B>&gt; </B>''.
 <DT><B>PS3</B>
@@ -2670,8 +2752,9 @@ above).
 
 <DD>
 The value of this parameter is expanded as with
-<B>PS1</B>
+<FONT SIZE=-1><B>PS1</B>
 
+</FONT>
 and the value is printed before each command
 <B>bash</B>
 
@@ -2748,10 +2831,18 @@ A trailing newline is added when the format string is displayed.
 <DT><B>TMOUT</B>
 
 <DD>
-If set to a value greater than zero, <B>TMOUT</B> is treated as the
+If set to a value greater than zero,
+<FONT SIZE=-1><B>TMOUT</B>
+
+</FONT>
+is treated as the
 default timeout for the <B>read</B> builtin.
 The <B>select</B> command terminates if input does not arrive
-after <B>TMOUT</B> seconds when input is coming from a terminal.
+after
+<FONT SIZE=-1><B>TMOUT</B>
+
+</FONT>
+seconds when input is coming from a terminal.
 In an interactive shell, the value is interpreted as the
 number of seconds to wait for input after issuing the primary prompt.
 <B>Bash</B>
@@ -3946,7 +4037,11 @@ or a
 
 then any character not enclosed is matched.
 The sorting order of characters in range expressions is determined by
-the current locale and the value of the <B>LC_COLLATE</B> shell variable,
+the current locale and the value of the
+<FONT SIZE=-1><B>LC_COLLATE</B>
+
+</FONT>
+shell variable,
 if set.
 A 
 <B>-</B>
@@ -5243,7 +5338,7 @@ arguments, if any.
 
 The shell has an <I>execution environment</I>, which consists of the
 following:
-<P>
+
 <DL COMPACT>
 <DT>*<DD>
 open files inherited by the shell at invocation, as modified by
@@ -5271,7 +5366,10 @@ options enabled by <B>shopt</B>
 shell aliases defined with <B>alias</B>
 <DT>*<DD>
 various process IDs, including those of background jobs, the value
-of <B>$$</B>, and the value of <B>$PPID</B>
+of <B>$$</B>, and the value of
+<FONT SIZE=-1><B>PPID</B>
+
+</FONT>
 </DL>
 <P>
 
@@ -5280,7 +5378,7 @@ is to be executed, it
 is invoked in a separate execution environment that consists of
 the following.  Unless otherwise noted, the values are inherited
 from the shell.
-<P>
+
 <DL COMPACT>
 <DT>*<DD>
 the shell's open files, plus any modifications and additions specified
@@ -5890,12 +5988,23 @@ the release of <B>bash</B>, version + patch level (e.g., 2.00.0)
 <DT><B>\w</B>
 
 <DD>
-the current working directory, with <B>$HOME</B> abbreviated with a tilde
-(uses the <B>$PROMPT_DIRTRIM</B> variable)
+the current working directory, with
+<FONT SIZE=-1><B>$HOME</B>
+
+</FONT>
+abbreviated with a tilde
+(uses the value of the
+<FONT SIZE=-1><B>PROMPT_DIRTRIM</B>
+
+</FONT>
+variable)
 <DT><B>\W</B>
 
 <DD>
-the basename of the current working directory, with <B>$HOME</B>
+the basename of the current working directory, with
+<FONT SIZE=-1><B>$HOME</B>
+
+</FONT>
 abbreviated with a tilde
 <DT><B>\!</B>
 
@@ -7701,7 +7810,11 @@ option to the
 builtin is enabled, the shell provides access to the
 <I>command history</I>,
 the list of commands previously typed.
-The value of the <B>HISTSIZE</B> variable is used as the
+The value of the
+<FONT SIZE=-1><B>HISTSIZE</B>
+
+</FONT>
+variable is used as the
 number of commands to save in a history list.
 The text of the last
 <FONT SIZE=-1><B>HISTSIZE</B>
@@ -7775,7 +7888,8 @@ If
 is unset, or if the history file is unwritable, the history is
 not saved.
 If the
-<FONT SIZE=-1>
+<FONT SIZE=-1><B>HISTTIMEFORMAT</B>
+
 </FONT>
 variable is set, time stamps are written to the history file, marked
 with the history comment character, so
@@ -7909,7 +8023,7 @@ If the
 shell option is enabled (see the description of the
 <B>shopt</B>
 
-builtin), and
+builtin below), and
 <B>readline</B>
 
 is being used, history substitutions are not immediately passed to
@@ -8422,18 +8536,22 @@ Remove any current binding for <I>keyseq</I>.
 Cause <I>shell-command</I> to be executed whenever <I>keyseq</I> is
 entered.
 When <I>shell-command</I> is executed, the shell sets the
-<B>READLINE_LINE</B>
+<FONT SIZE=-1><B>READLINE_LINE</B>
 
+</FONT>
 variable to the contents of the <B>readline</B> line buffer and the
-<B>READLINE_POINT</B>
+<FONT SIZE=-1><B>READLINE_POINT</B>
 
+</FONT>
 variable to the current location of the insertion point.
 If the executed command changes the value of
-<B>READLINE_LINE</B>
+<FONT SIZE=-1><B>READLINE_LINE</B>
 
+</FONT>
 or
-<B>READLINE_POINT</B>,
+<FONT SIZE=-1><B>READLINE_POINT</B>,
 
+</FONT>
 those new values will be reflected in the editing state.
 
 </DL>
@@ -8541,7 +8659,11 @@ is equivalent to
 <FONT SIZE=-1><B>$OLDPWD</B>.
 
 </FONT>
-If a non-empty directory name from <B>CDPATH</B> is used, or if
+If a non-empty directory name from
+<FONT SIZE=-1><B>CDPATH</B>
+
+</FONT>
+is used, or if
 <B>-</B> is the first argument, and the directory change is
 successful, the absolute pathname of the new working directory is
 written to the standard output.
@@ -8566,8 +8688,9 @@ option is given, the search for
 <I>command</I>
 
 is performed using a default value for
-<B>PATH</B>
+<FONT SIZE=-1><B>PATH</B>
 
+</FONT>
 that is guaranteed to find all of the standard utilities.
 If either the
 <B>-V</B>
@@ -8966,10 +9089,10 @@ Use function names only.
 
 <DD>
 The variable is treated as an integer; arithmetic evaluation (see
-<FONT SIZE=-1><B>ARITHMETIC EVALUATION ) </B>
+<FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
 </FONT>
-is performed when the variable is assigned a value.
+above) is performed when the variable is assigned a value.
 <DT><B>-l</B>
 
 <DD>
@@ -9005,11 +9128,11 @@ Mark <I>name</I>s for export to subsequent commands via the environment.
 Using `+' instead of `-'
 turns off the attribute instead,
 with the exceptions that <B>+a</B>
-may not be used to destroy an array variable and <B>+r will not
+may not be used to destroy an array variable and <B>+r</B> will not
 remove the readonly attribute.
 When used in a function,
 makes each
-</B><I>name</I> local, as with the 
+<I>name</I> local, as with the 
 <B>local</B>
 
 command.
@@ -9093,7 +9216,7 @@ is removed from the table of active jobs.
 If
 <I>jobspec</I>
 
-is not present, and neither <B>-a nor -r</B> is supplied,
+is not present, and neither <B>-a</B> nor <B>-r</B> is supplied,
 the shell's notion of the <I>current job</I> is used.
 If the <B>-h</B> option is given, each
 <I>jobspec</I>
@@ -9553,7 +9676,10 @@ is to be used.
 <P>
 When the end of options is encountered, <B>getopts</B> exits with a
 return value greater than zero.
-<B>OPTIND</B> is set to the index of the first non-option argument,
+<FONT SIZE=-1><B>OPTIND</B>
+
+</FONT>
+is set to the index of the first non-option argument,
 and <B>name</B> is set to ?.
 <P>
 <B>getopts</B>
@@ -9730,7 +9856,11 @@ lists only the last
 <I>n</I>
 
 lines.
-If the shell variable <B>HISTTIMEFORMAT</B> is set and not null,
+If the shell variable
+<FONT SIZE=-1><B>HISTTIMEFORMAT</B>
+
+</FONT>
+is set and not null,
 it is used as a format string for <I>strftime</I>(3) to display
 the time stamp associated with each displayed history entry.
 No intervening blank is printed between the formatted time stamp
@@ -9794,7 +9924,11 @@ are added.
 </DL>
 <P>
 
-If the <B>HISTTIMEFORMAT</B> is set, the time stamp information
+If the
+<FONT SIZE=-1><B>HISTTIMEFORMAT</B>
+
+</FONT>
+variable is set, the time stamp information
 associated with each history entry is written to the history file,
 marked with the history comment character.
 When the history file is read, lines beginning with the history
@@ -9938,9 +10072,10 @@ Each
 <I>arg</I>
 
 is an arithmetic expression to be evaluated (see
-<FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>).
+<FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
 </FONT>
+above).
 If the last
 <I>arg</I>
 
@@ -9996,7 +10131,11 @@ if the
 <B>-u</B>
 
 option is supplied.
-The variable <B>MAPFILE</B> is the default <I>array</I>.
+The variable
+<FONT SIZE=-1><B>MAPFILE</B>
+
+</FONT>
+is the default <I>array</I>.
 Options, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
@@ -10025,7 +10164,7 @@ Discard the first <I>count</I> lines read.
 <DT><B>-t</B>
 
 <DD>
-Remove a trailing line from each line read.
+Remove a trailing newline from each line read.
 <DT><B>-u</B>
 
 <DD>
@@ -10509,8 +10648,9 @@ being inverted with
 A trap on <B>ERR</B>, if set, is executed before the shell exits.
 This option applies to the shell environment and each subshell environment
 separately (see
-<B>COMMAND EXECUTION ENVIRONMENT</B>
+<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B>
 
+</FONT>
 above), and may cause
 subshells to exit before executing all the commands in the subshell.
 <DT><B>-f</B>
@@ -10574,6 +10714,12 @@ with the
 
 option.
 This also affects the editing interface used for <B>read -e</B>.
+<DT><B>errexit</B>
+
+<DD>
+Same as
+<B>-e</B>.
+
 <DT><B>errtrace</B>
 
 <DD>
@@ -10585,12 +10731,6 @@ Same as
 <DD>
 Same as
 <B>-T</B>.
-
-<DT><B>errexit</B>
-
-<DD>
-Same as
-<B>-e</B>.
 
 <DT><B>hashall</B>
 
@@ -10757,13 +10897,16 @@ environment, and the
 <FONT SIZE=-1><B>SHELLOPTS</B>,
 
 </FONT>
-<B>BASHOPTS</B>,
+<FONT SIZE=-1><B>BASHOPTS</B>,
 
-<B>CDPATH</B>,
+</FONT>
+<FONT SIZE=-1><B>CDPATH</B>,
 
+</FONT>
 and
-<B>GLOBIGNORE</B>
+<FONT SIZE=-1><B>GLOBIGNORE</B>
 
+</FONT>
 variables, if they appear in the environment, are ignored.
 If the shell is started with the effective user (group) id not equal to the
 real user (group) id, and the <B>-p</B> option is not supplied, these actions
@@ -11035,7 +11178,11 @@ longer exists, a normal path search is performed.
 If set, <B>bash</B> lists the status of any stopped and running jobs before
 exiting an interactive shell.  If any jobs are running, this causes
 the exit to be deferred until a second exit is attempted without an
-intervening command (see <B>JOB CONTROL</B> above).  The shell always
+intervening command (see
+<FONT SIZE=-1><B>JOB CONTROL</B>
+
+</FONT>
+above).  The shell always
 postpones exiting if any jobs are stopped.
 <DT><B>checkwinsize</B>
 
@@ -11145,8 +11292,14 @@ executed by the <B>.</B> or <B>source</B> builtins), a call to
 <DT><B>4.</B>
 
 <DD>
-<B>BASH_ARGC</B> and <B>BASH_ARGV</B> are updated as described in their
-descriptions above.
+<FONT SIZE=-1><B>BASH_ARGC</B>
+
+</FONT>
+and
+<FONT SIZE=-1><B>BASH_ARGV</B>
+
+</FONT>
+are updated as described in their descriptions above.
 <DT><B>5.</B>
 
 <DD>
@@ -11180,12 +11333,19 @@ result in an expansion error.
 <DT><B>force_fignore</B>
 
 <DD>
-If set, the suffixes specified by the <B>FIGNORE</B> shell variable
+If set, the suffixes specified by the
+<FONT SIZE=-1><B>FIGNORE</B>
+
+</FONT>
+shell variable
 cause words to be ignored when performing word completion even if
 the ignored words are the only possible completions.
 See
 <FONT SIZE=-1><B>SHELL VARIABLES</B></FONT>
-above for a description of <B>FIGNORE</B>.
+above for a description of
+<FONT SIZE=-1><B>FIGNORE</B>.
+
+</FONT>
 This option is enabled by default.
 <DT><B>globstar</B>
 
@@ -11204,8 +11364,9 @@ message format.
 <DD>
 If set, the history list is appended to the file named by the value
 of the
-<B>HISTFILE</B>
+<FONT SIZE=-1><B>HISTFILE</B>
 
+</FONT>
 variable when the shell exits, rather than overwriting the file.
 <DT><B>histreedit</B>
 
@@ -11292,7 +11453,11 @@ If set, and
 is being used,
 <B>bash</B>
 
-will not attempt to search the <B>PATH</B> for possible completions when
+will not attempt to search the
+<FONT SIZE=-1><B>PATH</B>
+
+</FONT>
+for possible completions when
 completion is attempted on an empty line.
 <DT><B>nocaseglob</B>
 
@@ -11962,6 +12127,9 @@ is removed.
 Each unset variable or function is removed from the environment
 passed to subsequent commands.
 If any of
+<FONT SIZE=-1><B>COMP_WORDBREAKS</B>,
+
+</FONT>
 <FONT SIZE=-1><B>RANDOM</B>,
 
 </FONT>
@@ -12038,15 +12206,19 @@ with the exception that the following are disallowed or not performed:
 changing directories with <B>cd</B>
 <DT>*<DD>
 setting or unsetting the values of
-<B>SHELL</B>,
+<FONT SIZE=-1><B>SHELL</B>,
 
-<B>PATH</B>,
+</FONT>
+<FONT SIZE=-1><B>PATH</B>,
 
-<B>ENV</B>,
+</FONT>
+<FONT SIZE=-1><B>ENV</B>,
 
+</FONT>
 or
-<B>BASH_ENV</B>
+<FONT SIZE=-1><B>BASH_ENV</B>
 
+</FONT>
 <DT>*<DD>
 specifying command names containing
 <B>/</B>
@@ -12070,7 +12242,11 @@ builtin command
 <DT>*<DD>
 importing function definitions from the shell environment at startup
 <DT>*<DD>
-parsing the value of <B>SHELLOPTS</B> from the shell environment at startup
+parsing the value of
+<FONT SIZE=-1><B>SHELLOPTS</B>
+
+</FONT>
+from the shell environment at startup
 <DT>*<DD>
 redirecting output using the &gt;, &gt;|, &lt;&gt;, &gt;&amp;, &amp;&gt;, and &gt;&gt; redirection operators
 <DT>*<DD>
@@ -12284,7 +12460,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 December 23<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12390,6 +12566,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 23 December 2009 16:47:15 EST
+Time: 30 December 2009 13:07:38 EST
 </BODY>
 </HTML>
