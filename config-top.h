@@ -106,3 +106,6 @@
 #  define SYSLOG_FACILITY LOG_USER
 #  define SYSLOG_LEVEL LOG_INFO
 #endif
+
+/* Define if you want to include code in shell.c to support wordexp(3) */
+/* #define WORDEXP_OPTION */

@@ -256,7 +256,9 @@ static const struct {
 #endif
   { "verbose", Int, &echo_input_at_read, (char **)0x0 },
   { "version", Int, &do_version, (char **)0x0 },
+#if defined (WORDEXP_OPTION)
   { "wordexp", Int, &wordexp_only, (char **)0x0 },
+#endif
   { (char *)0x0, Int, (int *)0x0, (char **)0x0 }
 };
 
@@ -304,7 +306,9 @@ static void run_startup_files __P((void));
 static int open_shell_script __P((char *));
 static void set_bash_input __P((void));
 static int run_one_command __P((char *));
+#if defined (WORDEXP_OPTION)
 static int run_wordexp __P((char *));
+#endif
 
 static int uidget __P((void));
 
@@ -473,7 +477,7 @@ main (argc, argv, env)
       login_shell = -login_shell;
     }
 
-  set_login_shell (login_shell != 0);
+  set_login_shell ("login_shell", login_shell != 0);
 
   if (dump_po_strings)
     dump_translatable_strings = 1;
@@ -662,12 +666,14 @@ main (argc, argv, env)
     maybe_make_restricted (shell_name);
 #endif /* RESTRICTED_SHELL */
 
+#if defined (WORDEXP_OPTION)
   if (wordexp_only)
     {
       startup_state = 3;
       last_command_exit_value = run_wordexp (argv[arg_index]);
       exit_shell (last_command_exit_value);
     }
+#endif
 
   if (command_execution_string)
     {
@@ -1202,6 +1208,7 @@ disable_priv_mode ()
   current_user.egid = current_user.gid;
 }
 
+#if defined (WORDEXP_OPTION)
 static int
 run_wordexp (words)
      char *words;
@@ -1273,6 +1280,7 @@ run_wordexp (words)
 
   return (0);
 }
+#endif
 
 #if defined (ONESHOT)
 /* Run one command, given as the argument to the -c option.  Tell

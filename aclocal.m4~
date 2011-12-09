@@ -1759,6 +1759,13 @@ if test $bash_cv_type_wint_t = yes; then
         AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi
 
+if test "$am_cv_func_iconv" = yes; then
+	OLDLIBS="$LIBS"
+	LIBS="$LIBS $LIBICONV"
+	AC_CHECK_FUNCS(locale_charset)
+	LIBS="$OLDLIBS"
+fi
+
 ])
 
 dnl need: prefix exec_prefix libdir includedir CC TERMCAP_LIB
@@ -4023,4 +4030,87 @@ AC_DEFUN([BASH_FUNC_FPURGE],
   AC_CHECK_FUNCS_ONCE([fpurge])
   AC_CHECK_FUNCS_ONCE([__fpurge])
   AC_CHECK_DECLS([fpurge], , , [#include <stdio.h>])
+])
+
+AC_DEFUN([BASH_FUNC_SNPRINTF],
+[
+  AC_CHECK_FUNCS_ONCE([snprintf])
+  if test X$ac_cv_func_snprintf = Xyes; then
+    AC_CACHE_CHECK([for standard-conformant snprintf], [bash_cv_func_snprintf],
+      [AC_TRY_RUN([
+#include <stdio.h>
+
+main()
+{
+  int n;
+  n = snprintf (0, 0, "%s", "0123456");
+  exit(n != 7);
+}
+], bash_cv_func_snprintf=yes, bash_cv_func_snprintf=no,
+   [AC_MSG_WARN([cannot check snprintf if cross-compiling])
+    bash_cv_func_snprintf=yes]
+)])
+    if test $bash_cv_func_snprintf = no; then
+      ac_cv_func_snprintf=no
+    fi
+  fi
+  if test $ac_cv_func_snprintf = no; then
+    AC_DEFINE(HAVE_SNPRINTF, 0,
+      [Define if you have a standard-conformant snprintf function.])
+  fi
+])
+
+AC_DEFUN([BASH_FUNC_VSNPRINTF],
+[
+  AC_CHECK_FUNCS_ONCE([vsnprintf])
+  if test X$ac_cv_func_vsnprintf = Xyes; then
+    AC_CACHE_CHECK([for standard-conformant vsnprintf], [bash_cv_func_vsnprintf],
+      [AC_TRY_RUN([
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+#include <stdio.h>
+
+static int
+#if HAVE_STDARG_H
+foo(const char *fmt, ...)
+#else
+foo(format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+  int n;
+
+#if HAVE_STDARG_H
+  va_start(args, fmt);
+#else
+  va_start(args);
+#endif
+  n = vsnprintf(0, 0, fmt, args);
+  va_end (args);
+  return n;
+}
+
+main()
+{
+  int n;
+  n = foo("%s", "0123456");
+  exit(n != 7);
+}
+], bash_cv_func_vsnprintf=yes, bash_cv_func_vsnprintf=no,
+   [AC_MSG_WARN([cannot check vsnprintf if cross-compiling])
+    bash_cv_func_vsnprintf=yes]
+)])
+    if test $bash_cv_func_vsnprintf = no; then
+      ac_cv_func_vsnprintf=no
+    fi
+  fi
+  if test $ac_cv_func_vsnprintf = no; then
+    AC_DEFINE(HAVE_VSNPRINTF, 0,
+      [Define if you have a standard-conformant vsnprintf function.])
+  fi
 ])

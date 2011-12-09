@@ -8141,7 +8141,7 @@ lib/readline/display.c
 
 				    6/5
 				    ---
-doc/{bash.1,bashref.texi
+doc/{bash.1,bashref.texi}
 	- added some more explanation of the inheritance of the ERR trap at
 	  the suggestion of Thomas Pospisek <tpo@sourcepole.ch>
 
@@ -9151,3 +9151,59 @@ variables.c
 	  array, an indexed array, or a scalar.  Fixes Ubuntu bug #471504
 	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/471504 reported
 	  by AJ Slater <aj.slater@gmail.com>
+
+[bash-4.1-beta frozen]
+
+				   11/11
+				   -----
+builtins/printf.def
+	- in getintmax(), in the case of a conversion error, return the partial
+	  value accumulated so far, which is suppose to be what
+	  strtoimax/strtoll/strtol returns
+
+				   11/18
+				   -----
+builtins/{common.h,shopt.def},shell.c
+	- changed shopt variable "set functions" to take the option name as
+	  the first argument; changed function prototypes and callers
+
+builtins/shopt.def
+	- change set_compatibility_level() to turn off other compatNN options
+	  when one is set -- enforce mutual exclusivity.  Fixes problem noted
+	  by Jan Schampera <jan.schampera@web.de>
+
+				   11/19
+				   -----
+lib/readline/rltty.c
+	- make sure prepare_terminal_settings() tests for the presence of
+	  ECHOCTL before using it.  Fixes bug reported by Joachim Schmitz
+	  <schmitz@hp.com>
+
+config-top.h
+	- new WORDEXP_OPTION define (off by default)
+
+shell.c
+	- don't include the --wordexp option or the supporting function
+	  (run_wordexp) if WORDEXP_OPTION is not defined.  Suggested by
+	  Aharon Robbins.
+
+execute_cmd.c
+	- in execute_cond_node, turn on comsub_ignore_return if the flags
+	  indicate we're ignoring the return value before calling
+	  cond_expand_word.  Fixes bug reported by Anirban Sinha
+	  <asinha@zeugmasystems.com>
+
+				   11/20
+				   -----
+lib/sh/snprintf.c,builtins/printf.def
+	- change check for HAVE_ASPRINTF and HAVE_SNPRINTF to check if value
+	  is 1 or 0 rather than whether they are defined or not.  This allows
+	  a value of 0 to enable function replacement
+
+configure.in,aclocal.m4
+	- new autoconf macro, BASH_FUNC_SNPRINTF, checks for snprintf present
+	  and working as C99 specifies with a zero length argument.  Idea
+	  from Greg Wooledge <wooledg@eeg.ccf.org>
+
+
+

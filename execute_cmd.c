@@ -3208,11 +3208,17 @@ static int
 execute_cond_node (cond)
      COND_COM *cond;
 {
-  int result, invert, patmatch, rmatch, mflags;
+  int result, invert, patmatch, rmatch, mflags, ignore;
   char *arg1, *arg2;
 
   invert = (cond->flags & CMD_INVERT_RETURN);
-
+  ignore = (cond->flags & CMD_IGNORE_RETURN);
+  if (ignore)
+    {
+      cond->left->flags |= CMD_IGNORE_RETURN;
+      cond->right->flags |= CMD_IGNORE_RETURN;
+    }
+      
   if (cond->type == COND_EXPR)
     result = execute_cond_node (cond->left);
   else if (cond->type == COND_OR)
@@ -3229,7 +3235,11 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_UNARY)
     {
+      if (ignore)
+	comsub_ignore_return++;
       arg1 = cond_expand_word (cond->left->op, 0);
+      if (ignore)
+	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
       if (echo_command_at_execute)
@@ -3249,11 +3259,19 @@ execute_cond_node (cond)
 		cond->op->word[2] == '\0');
 #endif
 
+      if (ignore)
+	comsub_ignore_return++;
       arg1 = cond_expand_word (cond->left->op, 0);
+      if (ignore)
+	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
+      if (ignore)
+	comsub_ignore_return++;
       arg2 = cond_expand_word (cond->right->op,
 			       (rmatch && shell_compatibility_level > 31) ? 2 : (patmatch ? 1 : 0));
+      if (ignore)
+	comsub_ignore_return--;
       if (arg2 == 0)
 	arg2 = nullstr;
 

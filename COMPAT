@@ -338,21 +338,23 @@ Shell Compatibility Level
 Bash-3.2 introduced the concept of a `shell compatibility level', specified
 as a set of options to the shopt builtin (compat31, compat32, compat40 at
 this writing).  There is only one current compatibility level -- each
-option is mutually exclusive.
+option is mutually exclusive.  This list does not mention behavior that is
+standard for a particular version (e.g., setting compat32 means that quoting
+the rhs of the regexp matching operator quotes special regexp characters in
+the word, which is default behavior in bash-3.2 and above).
 
 compat31 set
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings
+	- quoting the rhs of the regexp matching operator (=~) has no
+	  special effect
 
 compat32 set
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings
-	- quoting the rhs of the regexp matching operator (=~) has no
-	  special effect
 
 compat40 set
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings
 	- interrupting a command list such as "a ; b ; c" causes the execution
 	  of the entire list to be aborted
-

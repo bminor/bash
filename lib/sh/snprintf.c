@@ -65,6 +65,9 @@
 #if defined(DEBUG) && !defined (MACOSX)
 #  undef HAVE_SNPRINTF
 #  undef HAVE_ASPRINTF
+
+#  define HAVE_SNPRINTF 0
+#  define HAVE_ASPRINTF 0
 #endif
 
 #if defined(DRIVER) && !defined(HAVE_CONFIG_H)
@@ -83,7 +86,7 @@
 #define intmax_t long
 #endif
 
-#if !defined (HAVE_SNPRINTF) || !defined (HAVE_ASPRINTF)
+#if !HAVE_SNPRINTF || !HAVE_ASPRINTF
 
 #include <bashtypes.h>
 
@@ -1641,7 +1644,7 @@ dfallback (data, fs, fe, d)
 }
 #endif /* FLOATING_POINT */
 
-#ifndef HAVE_SNPRINTF
+#if !HAVE_SNPRINTF
 
 int
 #if defined (__STDC__)
@@ -1691,7 +1694,7 @@ snprintf(string, length, format, va_alist)
 
 #endif /* HAVE_SNPRINTF */
 
-#ifndef HAVE_ASPRINTF
+#if !HAVE_ASPRINTF
 
 int
 #if defined (__STDC__)
@@ -1736,9 +1739,9 @@ asprintf(stringp, format, va_alist)
   return rval;
 }
 
-#endif
+#endif /* !HAVE_ASPRINTF */
 
-#endif
+#endif /* !HAVE_SNPRINTF || !HAVE_ASPRINTF */
 
 #ifdef DRIVER
 

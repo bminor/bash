@@ -701,8 +701,7 @@ bgp_delete (pid)
   for (prev = p = bgpids.list; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
-	if (p != prev)
-	  prev->next = p->next;	/* remove from list */
+	prev->next = p->next;	/* remove from list */
 	break;
       }
 

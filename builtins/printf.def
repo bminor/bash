@@ -167,11 +167,11 @@ extern int errno;
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
 
-#ifndef HAVE_ASPRINTF
+#if !HAVE_ASPRINTF
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
-#ifndef HAVE_VSNPRINTF
+#if !HAVE_VSNPRINTF
 extern int vsnprintf __P((char *, size_t, const char *, ...)) __attribute__((__format__ (printf, 3, 4)));
 #endif
 

@@ -139,7 +139,7 @@ extern char **get_shopt_options __P((void));
 extern int shopt_setopt __P((char *, int));
 extern int shopt_listopt __P((char *, int));
 
-extern int set_login_shell __P((int));
+extern int set_login_shell __P((char *, int));
 
 extern void set_bashopts __P((void));
 extern void parse_bashopts __P((char *));

@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.1, version 4.016])dnl
+AC_REVISION([for Bash 4.1, version 4.018])dnl
 
 define(bashvers, 4.1)
-define(relstatus, beta)
+define(relstatus, rc)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -507,8 +507,8 @@ then
 	case "$ac_cv_rl_version" in
 	5*|6*|7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
-		AC_MSG_WARN(installed readline library is too old to be linked with bash)
-		AC_MSG_WARN(using private bash version)
+		AC_MSG_WARN([installed readline library is too old to be linked with bash])
+		AC_MSG_WARN([using private bash version])
 		;;
 	esac
 fi
@@ -733,7 +733,7 @@ AC_CHECK_FUNCS(bcopy bzero confstr fnmatch \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
 		sysconf syslog tcgetattr times ttyname tzset unsetenv)
 
-AC_CHECK_FUNCS(vsnprintf snprintf vasprintf asprintf)
+AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
 AC_REPLACE_FUNCS(getcwd memset)
@@ -928,6 +928,8 @@ BASH_FUNC_GETCWD
 fi
 BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
+BASH_FUNC_SNPRINTF
+BASH_FUNC_VSNPRINTF
 
 dnl If putenv or unsetenv is not present, set the right define so the
 dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant

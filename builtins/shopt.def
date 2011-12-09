@@ -114,10 +114,10 @@ static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((int));
 
-static int set_compatibility_level __P((int));
+static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell __P((int));
+static int set_restricted_shell __P((char *, int));
 #endif
 
 static int shopt_login_shell;
@@ -125,7 +125,7 @@ static int shopt_compat31;
 static int shopt_compat32;
 static int shopt_compat40;
 
-typedef int shopt_set_func_t __P((int));
+typedef int shopt_set_func_t __P((char *, int));
 
 static struct {
   char *name;
@@ -346,7 +346,7 @@ toggle_shopts (mode, list, quiet)
 	{
 	  *shopt_vars[ind].value = mode;	/* 1 for set, 0 for unset */
 	  if (shopt_vars[ind].set_func)
-	    (*shopt_vars[ind].set_func) (mode);
+	    (*shopt_vars[ind].set_func) (shopt_vars[ind].name, mode);
 	}
     }
 
@@ -495,10 +495,22 @@ set_shellopts_after_change (mode)
 }
 
 static int
-set_compatibility_level (mode)
+set_compatibility_level (option_name, mode)
+     char *option_name;
      int mode;
 {
   /* Need to change logic here as we add more compatibility levels */
+
+  /* First, check option_name so we can turn off other compat options when
+     one is set. */
+  if (mode && option_name[6] == '3' && option_name[7] == '1')
+    shopt_compat32 = shopt_compat40 = 0;
+  else if (mode && option_name[6] == '3' && option_name[7] == '2')
+    shopt_compat31 = shopt_compat40 = 0;
+  else if (mode && option_name[6] == '4' && option_name[7] == '0')
+    shopt_compat31 = shopt_compat32 = 0;
+
+  /* Then set shell_compatibility_level based on what remains */
   if (shopt_compat31)
     shell_compatibility_level = 31;
   else if (shopt_compat32)
@@ -514,7 +526,8 @@ set_compatibility_level (mode)
 /* Don't allow the value of restricted_shell to be modified. */
 
 static int
-set_restricted_shell (mode)
+set_restricted_shell (option_name, mode)
+     char *option_name;
      int mode;
 {
   static int save_restricted = -1;
@@ -529,7 +542,8 @@ set_restricted_shell (mode)
 
 /* Not static so shell.c can call it to initialize shopt_login_shell */
 int
-set_login_shell (mode)
+set_login_shell (option_name, mode)
+     char *option_name;
      int mode;
 {
   shopt_login_shell = login_shell != 0;
