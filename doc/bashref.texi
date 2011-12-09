@@ -2765,8 +2765,14 @@ Many of the builtins have been extended by @sc{posix} or Bash.
 Unless otherwise noted, each builtin command documented as accepting
 options preceded by @samp{-} accepts @samp{--}
 to signify the end of the options.
-For example, the @code{:}, @code{true}, @code{false}, and @code{test}
-builtins do not accept options.
+The @code{:}, @code{true}, @code{false}, and @code{test}
+builtins do not accept options and do not treat @samp{--} specially.
+The @code{exit}, @code{logout}, @code{break}, @code{continue}, @code{let},
+and @code{shift} builtins accept and process arguments beginning
+with @samp{-} without requiring @samp{--}.
+Other builtins that accept arguments but are not specified as accepting
+options interpret arguments beginning with @samp{-} as invalid options and
+require @samp{--} to prevent this interpretation.
 
 @node Bourne Shell Builtins
 @section Bourne Shell Builtins

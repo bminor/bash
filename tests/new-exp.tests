@@ -553,6 +553,14 @@ echo ${var/#/--}
 echo ${var[@]##?}
 echo ${var##?}
 
+unset var
+var=(abcde abcfg abchi)
+
+# problems with anchoring pattern replacements
+echo ${var[*]//#abc/foo}
+echo ${var[*]/#abc/foo}
+unset var
+
 ${THIS_SH} ./new-exp6.sub
 
 ${THIS_SH} ./new-exp7.sub

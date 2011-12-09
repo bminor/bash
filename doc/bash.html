@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2008 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 February 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1768,8 +1768,8 @@ corresponding to each member of <B>FUNCNAME</B>.
 file where <B>${FUNCNAME[</B><I>$i</I><B>]}</B> was called
 (or <B>${BASH_LINENO[</B><I>$i-1</I><B>]}</B> if referenced within another
 shell function).
-The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}.
-Use LINENO</B> to obtain the current line number.
+The corresponding source file name is <B>${BASH_SOURCE[</B><I>$i</I><B>]}</B>.
+Use <B>LINENO</B> to obtain the current line number.
 <DT><B>BASH_REMATCH</B>
 
 <DD>
@@ -1885,7 +1885,7 @@ below).
 <DT><B>COMP_WORDBREAKS</B>
 
 <DD>
-The set of characters that the Readline library treats as word
+The set of characters that the <B>readline</B> library treats as word
 separators when performing word completion.
 If
 <FONT SIZE=-1><B>COMP_WORDBREAKS</B>
@@ -1898,8 +1898,8 @@ subsequently reset.
 <DD>
 An array variable (see <B>Arrays</B> below) consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as <B>readline</B> would split it, using
+<B>COMP_WORDBREAKS</B> as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
@@ -4060,7 +4060,7 @@ ls 2<B>&gt;&amp;</B>1 <B>&gt;</B> dirlist
 directs only the standard output to file
 <I>dirlist</I>,
 
-because the standard error was duplicated as standard output
+because the standard error was duplicated from the standard output
 before the standard output was redirected to
 <I>dirlist</I>.
 
@@ -8060,8 +8060,14 @@ accepts
 <B>--</B>
 
 to signify the end of the options.
-For example, the <B>:</B>, <B>true</B>, <B>false</B>, and <B>test</B> builtins
-do not accept options.
+The <B>:</B>, <B>true</B>, <B>false</B>, and <B>test</B> builtins
+do not accept options and do not treat <B>--</B> specially.
+The <B>exit</B>, <B>logout</B>, <B>break</B>, <B>continue</B>, <B>let</B>,
+and <B>shift</B> builtins accept and process arguments beginning with
+<B>-</B> without requiring <B>--</B>.
+Other builtins that accept arguments but are not specified as accepting
+options interpret arguments beginning with <B>-</B> as invalid options and
+require <B>--</B> to prevent this interpretation.
 <P>
 
 <DL COMPACT>
@@ -9516,7 +9522,7 @@ is printed.
 
 <DD>
 Display a short description of each <I>pattern</I>
-<DT><B>&nbsp;-m</B>
+<DT><B>-m</B>
 
 <DD>
 Display the description of each <I>pattern</I> in a manpage-like format
@@ -10054,7 +10060,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
 is assigned to the first
@@ -10281,7 +10287,10 @@ effective only when job control is enabled.
 <DT><B>-e</B>
 
 <DD>
-Exit immediately if a <I>simple command</I> (see
+Exit immediately if a <I>pipeline</I> (which may consist of a single
+<I>simple command</I>),  a <I>subshell</I> command enclosed in parentheses,
+or one of the commands executed as part of a command list enclosed
+by braces (see
 <FONT SIZE=-1><B>SHELL GRAMMAR</B>
 
 </FONT>
@@ -10294,25 +10303,31 @@ or
 <B>until</B>
 
 keyword, 
-part of the test in an
+part of the test following the
 <B>if</B>
 
-statement, part of a command executed in a
+or
+<B>elif</B>
+
+reserved words, part of any command executed in a
 <B>&amp;&amp;</B>
 
 or
 <B>||</B>
 
-list,
+list except the command following the final <B>&amp;&amp;</B> or <B>||</B>,
 any command in a pipeline but the last,
 or if the command's return value is
-being inverted via
+being inverted with
 <B>!</B>.
 
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
 A trap on <B>ERR</B>, if set, is executed before the shell exits.
+This option applies to the shell environment and each subshell environment
+separately (see
+<B>COMMAND EXECUTION ENVIRONMENT</B>
+
+above), and may cause
+subshells to exit before executing all the commands in the subshell.
 <DT><B>-f</B>
 
 <DD>
@@ -11591,7 +11606,7 @@ The maximum size that may be locked into memory
 <DT><B>-m</B>
 
 <DD>
-The maximum resident set size
+The maximum resident set size (many systems do not honor this limit)
 <DT><B>-n</B>
 
 <DD>
@@ -11957,7 +11972,7 @@ Brian Fox, Free Software Foundation
 Chet Ramey, Case Western Reserve University
 <BR>
 
-<A HREF="mailto:chet@po.cwru.edu">chet@po.cwru.edu</A>
+<A HREF="mailto:chet.ramey@case.edu">chet.ramey@case.edu</A>
 <A NAME="lbDG">&nbsp;</A>
 <H3>BUG REPORTS</H3>
 
@@ -12055,7 +12070,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2008 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 February 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12161,6 +12176,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 05 February 2009 08:05:34 EST
+Time: 23 February 2009 11:56:09 EST
 </BODY>
 </HTML>

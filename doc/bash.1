@@ -6218,8 +6218,14 @@ section as accepting options preceded by
 accepts
 .B \-\-
 to signify the end of the options.
-For example, the \fB:\fP, \fBtrue\fP, \fBfalse\fP, and \fBtest\fP builtins
-do not accept options.
+The \fB:\fP, \fBtrue\fP, \fBfalse\fP, and \fBtest\fP builtins
+do not accept options and do not treat \fB\-\-\fP specially.
+The \fBexit\fP, \fBlogout\fP, \fBbreak\fP, \fBcontinue\fP, \fBlet\fP,
+and \fBshift\fP builtins accept and process arguments beginning with
+\fB\-\fP without requiring \fB\-\-\fP.
+Other builtins that accept arguments but are not specified as accepting
+options interpret arguments beginning with \fB\-\fP as invalid options and
+require \fB\-\-\fP to prevent this interpretation.
 .sp .5
 .PD 0
 .TP
@@ -7407,7 +7413,7 @@ is printed.
 .B \-d
 Display a short description of each \fIpattern\fP
 .TP
-.B \ -m
+.B \-m
 Display the description of each \fIpattern\fP in a manpage-like format
 .TP
 .B \-s

@@ -25,13 +25,13 @@ bdef
 hello world
 11
 3
-bdef hello world test expression
-./array.tests: line 74: readonly: `a[5]': not a valid identifier
-declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+bdef hello world test expression test 2
+./array.tests: line 76: readonly: `a[5]': not a valid identifier
+declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -ar c='()'
-declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -ar c='()'
-readonly -a a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+readonly -a a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 readonly -a c='()'
 a test
 declare -a BASH_ARGC='()'
@@ -40,36 +40,36 @@ declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
 declare -a FUNCNAME='([0]="main")'
-declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
 declare -ar c='()'
 declare -a d='([1]="" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")'
 declare -a e='([0]="test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
-./array.tests: line 98: a: readonly variable
-./array.tests: line 100: b[]: bad array subscript
-./array.tests: line 101: b[*]: bad array subscript
-./array.tests: line 102: ${b[   ]}: bad substitution
-./array.tests: line 104: c[-2]: bad array subscript
-./array.tests: line 105: c: bad array subscript
+./array.tests: line 100: a: readonly variable
+./array.tests: line 102: b[]: bad array subscript
+./array.tests: line 103: b[*]: bad array subscript
+./array.tests: line 104: ${b[   ]}: bad substitution
+./array.tests: line 106: c[-2]: bad array subscript
+./array.tests: line 107: c: bad array subscript
 
-./array.tests: line 107: d[7]: cannot assign list to array member
-./array.tests: line 109: []=abcde: bad array subscript
-./array.tests: line 109: [*]=last: cannot assign to non-numeric index
-./array.tests: line 109: [-65]=negative: bad array subscript
+./array.tests: line 109: d[7]: cannot assign list to array member
+./array.tests: line 111: []=abcde: bad array subscript
+./array.tests: line 111: [*]=last: cannot assign to non-numeric index
+./array.tests: line 111: [-65]=negative: bad array subscript
 declare -a BASH_ARGC='()'
 declare -a BASH_ARGV='()'
 declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
 declare -a FUNCNAME='([0]="main")'
-declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
 declare -ar c='()'
 declare -a d='([1]="test test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
-./array.tests: line 117: unset: ps1: not an array variable
-./array.tests: line 121: declare: c: cannot destroy array variables in this way
+./array.tests: line 119: unset: ps1: not an array variable
+./array.tests: line 123: declare: c: cannot destroy array variables in this way
 this of
 this is a test of read using arrays
 this test
@@ -80,7 +80,7 @@ declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
 declare -a FUNCNAME='([0]="main")'
-declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression")'
+declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
 declare -ar c='()'
 declare -a d='([1]="test test")'
@@ -127,7 +127,7 @@ grep [ 123 ] *
 6 7 9 5
 length = 3
 value = new1 new2 new3
-./array.tests: line 237: narray: unbound variable
+./array.tests: line 239: narray: unbound variable
 ./array1.sub: line 1: syntax error near unexpected token `('
 ./array1.sub: line 1: `printf "%s\n" -a a=(a 'b  c')'
 ./array2.sub: line 1: syntax error near unexpected token `('
@@ -152,10 +152,10 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: line 287: syntax error near unexpected token `<>'
-./array.tests: line 287: `metas=( <> < > ! )'
-./array.tests: line 288: syntax error near unexpected token `<>'
-./array.tests: line 288: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
+./array.tests: line 289: syntax error near unexpected token `<>'
+./array.tests: line 289: `metas=( <> < > ! )'
+./array.tests: line 290: syntax error near unexpected token `<>'
+./array.tests: line 290: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
 case 4
 abc case if then else 5

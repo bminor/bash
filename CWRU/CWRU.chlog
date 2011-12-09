@@ -7571,3 +7571,65 @@ builtins/exit.def
 siglist.c
 	- include bashintl.h for definition of _.  Fixes bug reported by
 	  Greg Wooledge <wooledg@eeg.ccf.org>
+
+				   2/25
+				   ----
+subst.c
+	- new function, skip_matched_pair.  Similar to skip_to_delim and
+	  the extract_XXX family
+	- move skipsubscript here from arrayfunc.c; re-implement in terms of
+	  skip_matched_pair.  Fixes bugs reported by <anmaster@tele2.se>
+
+arrayfunc.c
+	- remove skipsubscript; moved to subst.c
+
+parse.y
+	- change reset_parser to set current_token to '\n'.  Rest of fix for
+	  bug reported by Bernd Eggink <monoped@sudrala.de>; earlier fix on
+	  2/23
+
+				   2/26
+				   ----
+builtins/declare.def
+	- when given something like array[x]=y (which sets making_array_special
+	  to 1), don't convert an associative array to an indexed array (line
+	  493).  Part of fix for bug reported by Pierre Gaston
+	  <pierre.gaston@gmail.com>
+	- if offset == 0, indicating that we do not have a valid assignment,
+	  make sure any `name' containing a `[' is a valid array reference
+	  before trying to go on.  Not doing this leads to creating crazy
+	  variables like `name[foo[bar]=bax'.  Rest of fix for bug reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>
+
+assoc.c
+	- change assoc_to_assign to single-quote the array keys if `quoted' is
+	  non-zero.  Makes things easier to read with weird characters in the
+	  key
+
+parse.y
+	- fix parse_comsub to not set LEX_HEREDELIM when it sees "<<<".  Fixes
+	  bug reported by Mike Frysinger <vapier@gentoo.org>
+
+				   2/27
+				   ----
+parse.y
+	- fix report_syntax_error to set last_command_exit_value to
+	  EX_BADUSAGE (2) instead of EX_USAGE (258), since there's nothing
+	  that will translate that to something < 128 before reading the
+	  next command.  Partial fix for bug reported by Mike Frysinger
+	  <vapier@gentoo.org>
+
+sig.c
+	- fix sigint_sighandler to set last_command_exit_value to sig+128
+	  before calling throw_to_top_level.  Rest of fix for bug reported
+	  by Mike Frysinger <vapier@gentoo.org>
+
+jobs.c
+	- if fork() fails, set last_command_exit_value to 126 before calling
+	  throw_to_top_level
+
+execute_cmd.c
+	- defer calling unlink_fifo_list in parent branch of
+	  execute_disk_command if we're executing in a shell function
+	- change execute_function to call unlink_fifo_list before returning
+	  if it's the top-level function

@@ -12,6 +12,8 @@ unset fluff[foo]
 declare -p fluff
 
 fluff[bar]=newval
+declare fluff[qux]=assigned
+
 declare -p fluff
 
 unset fluff
@@ -171,3 +173,5 @@ ${THIS_SH} ./assoc2.sub
 ${THIS_SH} ./assoc3.sub
 
 ${THIS_SH} ./assoc4.sub
+
+${THIS_SH} ./assoc5.sub

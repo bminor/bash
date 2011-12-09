@@ -357,7 +357,7 @@ int	flags;
 		else
 			printf("%d\n", st->st_gid);
 	} else if (flags & OPT_SIZE)
-		printf("%ld\n", st->st_size);
+		printf("%ld\n", (long) st->st_size);
 
 	return (0);
 }

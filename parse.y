@@ -2670,6 +2670,7 @@ reset_parser ()
   FREE (word_desc_to_read);
   word_desc_to_read = (WORD_DESC *)NULL;
 
+  current_token = '\n';		/* XXX */
   last_read_token = '\n';
   token_to_read = '\n';
 }
@@ -2917,7 +2918,7 @@ tokword:
 #define P_DQUOTE	0x04
 #define P_COMMAND	0x08	/* parsing a command, so look for comments */
 #define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
-#define P_ARRAY		0x20	/* parsing a [...] array assignment */
+#define P_ARRAYSUB	0x20	/* parsing a [...] array subscript for assignment */
 
 /* Lexical state while parsing a grouping construct or $(...). */
 #define LEX_WASDOL	0x001
@@ -3132,6 +3133,8 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	      APPEND_NESTRET ();
 	      FREE (nestret);
 	    }
+	  else if ((flags & P_ARRAYSUB) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+	    goto parse_dollar_word;
 	}
       /* Parse an old-style command substitution within double quotes as a
 	 single word. */
@@ -3148,6 +3151,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
       else if MBTEST(open != '`' && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	/* check for $(), $[], or ${} inside quoted string. */
 	{
+parse_dollar_word:
 	  if (open == ch)	/* undo previous increment */
 	    count--;
 	  if (ch == '(')		/* ) */
@@ -3397,8 +3401,11 @@ eof_error:
 		}
 	      else
 		shell_ungetc (peekc);
-	      tflags |= LEX_HEREDELIM;
-	      lex_firstind = -1;
+	      if (peekc != '<')
+		{
+		  tflags |= LEX_HEREDELIM;
+		  lex_firstind = -1;
+		}
 	      continue;
 	    }
 	  else
@@ -4251,7 +4258,7 @@ read_token_word (character)
 		     ((token_index > 0 && assignment_acceptable (last_read_token) && token_is_ident (token, token_index)) ||
 		      (token_index == 0 && (parser_state&PST_COMPASSIGN))))
         {
-	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, P_ARRAY);
+	  ttok = parse_matched_pair (cd, '[', ']', &ttoklen, P_ARRAYSUB);
 	  if (ttok == &matched_pair_error)
 	    return -1;		/* Bail immediately. */
 	  RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
@@ -4452,6 +4459,7 @@ reserved_word_acceptable (toksym)
     case '}':		/* XXX */
     case AND_AND:
     case BANG:
+    case BAR_AND:
     case DO:
     case DONE:
     case ELIF:
@@ -5186,7 +5194,7 @@ report_syntax_error (message)
       parser_error (line_number, "%s", message);
       if (interactive && EOF_Reached)
 	EOF_Reached = 0;
-      last_command_exit_value = EX_USAGE;
+      last_command_exit_value = EX_BADUSAGE;
       return;
     }
 
@@ -5201,7 +5209,7 @@ report_syntax_error (message)
       if (interactive == 0)
 	print_offending_line ();
 
-      last_command_exit_value = EX_USAGE;
+      last_command_exit_value = EX_BADUSAGE;
       return;
     }
 
@@ -5232,7 +5240,7 @@ report_syntax_error (message)
 	EOF_Reached = 0;
     }
 
-  last_command_exit_value = EX_USAGE;
+  last_command_exit_value = EX_BADUSAGE;
 }
 
 /* ??? Needed function. ??? We have to be able to discard the constructs

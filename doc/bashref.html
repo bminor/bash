@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on February, 5  2009 by texi2html 1.64 -->
+<!-- Created on February, 23  2009 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.0, 29 December 2008).
+the Bash shell (version 4.0, 13 February 2009).
 </P><P>
 
-This is Edition 4.0, last updated 29 December 2008,
+This is Edition 4.0, last updated 13 February 2009,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 4.0.
 </P><P>
@@ -2806,7 +2806,7 @@ the command
 (file descriptor 2) to the file <VAR>dirlist</VAR>, while the command
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>ls 2&#62;&#38;1 &#62; <VAR>dirlist</VAR>
 </pre></td></tr></table>directs only the standard output to file <VAR>dirlist</VAR>,
-because the standard error was duplicated as standard output
+because the standard error was made a copy of the standard output
 before the standard output was redirected to <VAR>dirlist</VAR>.
 </P><P>
 
@@ -3785,8 +3785,14 @@ Many of the builtins have been extended by POSIX or Bash.
 Unless otherwise noted, each builtin command documented as accepting
 options preceded by <SAMP>`-'</SAMP> accepts <SAMP>`--'</SAMP>
 to signify the end of the options.
-For example, the <CODE>:</CODE>, <CODE>true</CODE>, <CODE>false</CODE>, and <CODE>test</CODE>
-builtins do not accept options.
+The <CODE>:</CODE>, <CODE>true</CODE>, <CODE>false</CODE>, and <CODE>test</CODE>
+builtins do not accept options and do not treat <SAMP>`--'</SAMP> specially.
+The <CODE>exit</CODE>, <CODE>logout</CODE>, <CODE>break</CODE>, <CODE>continue</CODE>, <CODE>let</CODE>,
+and <CODE>shift</CODE> builtins accept and process arguments beginning
+with <SAMP>`-'</SAMP> without requiring <SAMP>`--'</SAMP>.
+Other builtins that accept arguments but are not specified as accepting
+options interpret arguments beginning with <SAMP>`-'</SAMP> as invalid options and
+require <SAMP>`--'</SAMP> to prevent this interpretation.
 </P><P>
 
 <A NAME="Bourne Shell Builtins"></A>
@@ -4215,7 +4221,7 @@ is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
 The <CODE>ERR</CODE> trap is not executed if the failed command is part of the
 command list immediately following an <CODE>until</CODE> or <CODE>while</CODE> keyword,
-part of the test in an <CODE>if</CODE> statement,
+part of the test following the <CODE>if</CODE> or <CODE>elif</CODE> reserved words,
 part of a command executed in a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> list,
 or if the command's return
 status is being inverted using <CODE>!</CODE>.
@@ -4994,11 +5000,12 @@ option is given, it is interpreted as follows:
 <P>
 
 <DT><CODE>-m</CODE>
-<DD>The maximum resident set size.
+<DD>The maximum resident set size (many systems do not honor this limit).
 <P>
 
 <DT><CODE>-n</CODE>
-<DD>The maximum number of open file descriptors.
+<DD>The maximum number of open file descriptors (most systems do not
+allow this value to be set).
 <P>
 
 <DT><CODE>-p</CODE>
@@ -5151,18 +5158,26 @@ immediately, rather than before printing the next primary prompt.
 <P>
 
 <DT><CODE>-e</CODE>
-<DD>Exit immediately if a simple command (see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>) exits
-with a non-zero status, unless the command that fails is part of the
+<DD>Exit immediately if a pipeline (see section <A HREF="bashref.html#SEC17">3.2.2 Pipelines</A>), which may consist
+of a single simple command (see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>),
+a subshell command enclosed in parentheses (see section <A HREF="bashref.html#SEC22">3.2.4.3 Grouping Commands</A>),
+or one of the commands executed as part of a command list enclosed
+by braces (see section <A HREF="bashref.html#SEC22">3.2.4.3 Grouping Commands</A>)
+returns a non-zero status.
+The shell does not exit if the command that fails is part of the
 command list immediately following a <CODE>while</CODE> or <CODE>until</CODE> keyword,
 part of the test in an <CODE>if</CODE> statement,
-part of a command executed in a <CODE>&#38;&#38;</CODE> or <CODE>||b</CODE> list,
+part of any command executed in a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> list except
+the command following the final <CODE>&#38;&#38;</CODE> or <CODE>||</CODE>,
 any command in a pipeline but the last,
-or if the command's return status is being inverted using <CODE>!</CODE>.
-Failing simple commands that are part of shell functions or command lists
-enclosed in braces or parentheses satisfying the above conditions do not
-cause the shell to exit.
+or if the command's return status is being inverted with <CODE>!</CODE>.
 A trap on <CODE>ERR</CODE>, if set, is executed before the shell exits.
 <P>
+
+This option applies to the shell environment and each subshell environment
+separately (see section <A HREF="bashref.html#SEC53">3.7.3 Command Execution Environment</A>), and may cause
+subshells to exit before executing all the commands in the subshell.
+</P><P>
 
 <DT><CODE>-f</CODE>
 <DD>Disable file name generation (globbing).
@@ -6246,8 +6261,8 @@ even if it is subsequently reset.
 <DD><A NAME="IDX177"></A>
 An array variable consisting of the individual
 words in the current command line.
-The words are split on shell metacharacters as the shell parser would
-separate them.
+The line is split into words as Readline would split it, using
+<CODE>COMP_WORDBREAKS</CODE> as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see section <A HREF="bashref.html#SEC117">8.6 Programmable Completion</A>).
 <P>
@@ -12894,7 +12909,7 @@ the template it provides for filing a bug report.
 </P><P>
 
 Please send all reports concerning this manual to
-<A HREF="mailto:chet@po.CWRU.Edu">chet@po.CWRU.Edu</A>.
+<A HREF="mailto:chet.ramey@case.edu">chet.ramey@case.edu</A>.
 </P><P>
 
 <A NAME="Major Differences From The Bourne Shell"></A>
@@ -15785,7 +15800,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>February, 5  2009</I>
+This document was generated by <I>Chet Ramey</I> on <I>February, 23  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -15947,7 +15962,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>February, 5  2009</I>
+by <I>Chet Ramey</I> on <I>February, 23  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

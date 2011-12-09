@@ -222,6 +222,7 @@ static inline int skip_single_quoted __P((const char *, size_t, int));
 static int skip_double_quoted __P((char *, size_t, int));
 static char *extract_delimited_string __P((char *, int *, char *, char *, char *, int));
 static char *extract_dollar_brace_string __P((char *, int *, int, int));
+static int skip_matched_pair __P((const char *, int, int, int, int));
 
 static char *pos_params __P((char *, int, int, int));
 
@@ -1374,12 +1375,12 @@ unquote_bang (string)
 
 #define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
 
-/* This function assumes s[i] == '['; returns with s[ret] == ']' if
-   an array subscript is correctly parsed. */
-int
-skipsubscript (string, start)
+/* This function assumes s[i] == open; returns with s[ret] == close; used to
+   parse array subscripts.  FLAGS currently unused. */
+static int
+skip_matched_pair (string, start, open, close, flags)
      const char *string;
-     int start;
+     int start, open, close, flags;
 {
   int i, pass_next, backq, si, c, count;
   size_t slen;
@@ -1422,13 +1423,13 @@ skipsubscript (string, start)
 	  i++;
 	  continue;
 	}
-      else if (c == '[')
+      else if (c == open)
 	{
 	  count++;
 	  i++;
 	  continue;
 	}
-      else if (c == ']')
+      else if (c == close)
 	{
 	  count--;
 	  if (count == 0)
@@ -1464,6 +1465,16 @@ skipsubscript (string, start)
 
   CQ_RETURN(i);
 }
+
+#if defined (ARRAY_VARS)
+int
+skipsubscript (string, start)
+     const char *string;
+     int start;
+{
+  return (skip_matched_pair (string, start, '[', ']', 0));
+}
+#endif
 
 /* Skip characters in STRING until we find a character in DELIMS, and return
    the index of that character.  START is the index into string at which we
