@@ -314,6 +314,135 @@ static WORD_LIST *expand_word_list_internal __P((WORD_LIST *, int));
 /*								    */
 /* **************************************************************** */
 
+#if defined (DEBUG)
+void
+dump_word_flags (flags)
+     int flags;
+{
+  int f;
+
+  f = flags;
+  fprintf (stderr, "%d -> ", f);
+  if (f & W_ASSIGNASSOC)
+    {
+      f &= ~W_ASSIGNASSOC;
+      fprintf (stderr, "W_ASSIGNASSOC%s", f ? "|" : "");
+    }
+  if (f & W_HASCTLESC)
+    {
+      f &= ~W_HASCTLESC;
+      fprintf (stderr, "W_HASCTLESC%s", f ? "|" : "");
+    }
+  if (f & W_NOPROCSUB)
+    {
+      f &= ~W_NOPROCSUB;
+      fprintf (stderr, "W_NOPROCSUB%s", f ? "|" : "");
+    }
+  if (f & W_DQUOTE)
+    {
+      f &= ~W_DQUOTE;
+      fprintf (stderr, "W_DQUOTE%s", f ? "|" : "");
+    }
+  if (f & W_HASQUOTEDNULL)
+    {
+      f &= ~W_HASQUOTEDNULL;
+      fprintf (stderr, "W_HASQUOTEDNULL%s", f ? "|" : "");
+    }
+  if (f & W_ASSIGNARG)
+    {
+      f &= ~W_ASSIGNARG;
+      fprintf (stderr, "W_ASSIGNARG%s", f ? "|" : "");
+    }
+  if (f & W_ASSNBLTIN)
+    {
+      f &= ~W_ASSNBLTIN;
+      fprintf (stderr, "W_ASSNBLTIN%s", f ? "|" : "");
+    }
+  if (f & W_COMPASSIGN)
+    {
+      f &= ~W_COMPASSIGN;
+      fprintf (stderr, "W_COMPASSIGN%s", f ? "|" : "");
+    }
+  if (f & W_NOEXPAND)
+    {
+      f &= ~W_NOEXPAND;
+      fprintf (stderr, "W_NOEXPAND%s", f ? "|" : "");
+    }
+  if (f & W_ITILDE)
+    {
+      f &= ~W_ITILDE;
+      fprintf (stderr, "W_ITILDE%s", f ? "|" : "");
+    }
+  if (f & W_NOTILDE)
+    {
+      f &= ~W_NOTILDE;
+      fprintf (stderr, "W_NOTILDE%s", f ? "|" : "");
+    }
+  if (f & W_ASSIGNRHS)
+    {
+      f &= ~W_ASSIGNRHS;
+      fprintf (stderr, "W_ASSIGNRHS%s", f ? "|" : "");
+    }
+  if (f & W_NOCOMSUB)
+    {
+      f &= ~W_NOCOMSUB;
+      fprintf (stderr, "W_NOCOMSUB%s", f ? "|" : "");
+    }
+  if (f & W_DOLLARSTAR)
+    {
+      f &= ~W_DOLLARSTAR;
+      fprintf (stderr, "W_DOLLARSTAR%s", f ? "|" : "");
+    }
+  if (f & W_DOLLARAT)
+    {
+      f &= ~W_DOLLARAT;
+      fprintf (stderr, "W_DOLLARAT%s", f ? "|" : "");
+    }
+  if (f & W_TILDEEXP)
+    {
+      f &= ~W_TILDEEXP;
+      fprintf (stderr, "W_TILDEEXP%s", f ? "|" : "");
+    }
+  if (f & W_NOSPLIT2)
+    {
+      f &= ~W_NOSPLIT2;
+      fprintf (stderr, "W_NOSPLIT2%s", f ? "|" : "");
+    }
+  if (f & W_NOGLOB)
+    {
+      f &= ~W_NOGLOB;
+      fprintf (stderr, "W_NOGLOB%s", f ? "|" : "");
+    }
+  if (f & W_NOSPLIT)
+    {
+      f &= ~W_NOSPLIT;
+      fprintf (stderr, "W_NOSPLIT%s", f ? "|" : "");
+    }
+  if (f & W_GLOBEXP)
+    {
+      f &= ~W_GLOBEXP;
+      fprintf (stderr, "W_GLOBEXP%s", f ? "|" : "");
+    }
+  if (f & W_ASSIGNMENT)
+    {
+      f &= ~W_ASSIGNMENT;
+      fprintf (stderr, "W_ASSIGNMENT%s", f ? "|" : "");
+    }
+  if (f & W_QUOTED)
+    {
+      f &= ~W_QUOTED;
+      fprintf (stderr, "W_QUOTED%s", f ? "|" : "");
+    }
+  if (f & W_HASDOLLAR)
+    {
+      f &= ~W_HASDOLLAR;
+      fprintf (stderr, "W_HASDOLLAR%s", f ? "|" : "");
+    }
+  fprintf (stderr, "\n");
+  fflush (stderr);
+}
+#endif
+
 #ifdef INCLUDE_UNUSED
 static char *
 quoted_substring (string, start, end)
@@ -588,7 +717,7 @@ string_extract (string, sindex, charlist, flags)
 	{
 	  int ni;
 	  /* If this is an array subscript, skip over it and continue. */
-	  ni = skipsubscript (string, i);
+	  ni = skipsubscript (string, i, 0);
 	  if (string[ni] == ']')
 	    i = ni;
 	}
@@ -902,7 +1031,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
      char *charlist;
      int flags;
 {
-  register int i = *sindex;
+  register int i;
 #if defined (HANDLE_MULTIBYTE)
   size_t clen;
   wchar_t *wcharlist;
@@ -1380,7 +1509,10 @@ unquote_bang (string)
 #define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
 
 /* This function assumes s[i] == open; returns with s[ret] == close; used to
-   parse array subscripts.  FLAGS currently unused. */
+   parse array subscripts.  FLAGS & 1 means to not attempt to skip over
+   matched pairs of quotes or backquotes, or skip word expansions; it is
+   intended to be used after expansion has been performed and during final
+   assignment parsing (see arrayfunc.c:assign_compound_array_list()). */
 static int
 skip_matched_pair (string, start, open, close, flags)
      const char *string;
@@ -1421,13 +1553,13 @@ skip_matched_pair (string, start, open, close, flags)
 	  ADVANCE_CHAR (string, slen, i);
 	  continue;
 	}
-      else if (c == '`')
+      else if ((flags & 1) == 0 && c == '`')
 	{
 	  backq = 1;
 	  i++;
 	  continue;
 	}
-      else if (c == open)
+      else if ((flags & 1) == 0 && c == open)
 	{
 	  count++;
 	  i++;
@@ -1441,13 +1573,13 @@ skip_matched_pair (string, start, open, close, flags)
 	  i++;
 	  continue;
 	}
-      else if (c == '\'' || c == '"')
+      else if ((flags & 1) == 0 && (c == '\'' || c == '"'))
 	{
 	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i)
 			  : skip_double_quoted (ss, slen, ++i);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
-      else if (c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+      else if ((flags&1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
 	{
 	  si = i + 2;
 	  if (string[si] == '\0')
@@ -1472,11 +1604,11 @@ skip_matched_pair (string, start, open, close, flags)
 
 #if defined (ARRAY_VARS)
 int
-skipsubscript (string, start)
+skipsubscript (string, start, flags)
      const char *string;
-     int start;
+     int start, flags;
 {
-  return (skip_matched_pair (string, start, '[', ']', 0));
+  return (skip_matched_pair (string, start, '[', ']', flags));
 }
 #endif
 
@@ -1810,8 +1942,9 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
 
   /* Special case for SENTINEL at the end of STRING.  If we haven't found
      the word containing SENTINEL yet, and the index we're looking for is at
-     the end of STRING, add an additional null argument and set the current
-     word pointer to that. */
+     the end of STRING (or past the end of the previously-found token,
+     possible if the end of the line is composed solely of IFS whitespace)
+     add an additional null argument and set the current word pointer to that. */
   if (cwp && cw == -1 && (sentinel >= slen || sentinel >= te))
     {
       if (whitespace (string[sentinel - 1]))
@@ -4865,7 +4998,7 @@ command_substitute (string, quoted)
 
   if (wordexp_only && read_but_dont_execute)
     {
-      last_command_exit_value = 125;
+      last_command_exit_value = EX_WEXPCOMSUB;
       jump_to_top_level (EXITPROG);
     }
 
@@ -6635,7 +6768,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 	    *contains_dollar_at = 1;
 	}
       free (x);
-      free (xlist);
+      dispose_words (xlist);
       free (temp1);
       *indexp = sindex;
 

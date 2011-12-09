@@ -1031,7 +1031,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
      char *charlist;
      int flags;
 {
-  register int i = *sindex;
+  register int i;
 #if defined (HANDLE_MULTIBYTE)
   size_t clen;
   wchar_t *wcharlist;
@@ -2662,7 +2662,6 @@ do_assignment_internal (word, expand)
 	}
       else
 #endif
-
       if (expand && temp[0])
 	value = expand_string_if_necessary (temp, 0, expand_string_assignment);
       else

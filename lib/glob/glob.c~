@@ -637,7 +637,7 @@ glob_vector (pat, dir, flags)
 	      continue;
 	    }
 
-	  convfn = fnxform (dp->d_name, D_NAMLEN (dp));
+	  convfn = fnx_fromfs (dp->d_name, D_NAMLEN (dp));
 	  if (strmatch (pat, convfn, mflags) != FNM_NOMATCH)
 	    {
 	      if (nalloca < ALLOCA_MAX)

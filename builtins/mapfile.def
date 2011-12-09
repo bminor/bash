@@ -153,7 +153,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   entry = find_or_make_array_variable (array_name, 1);
   if (entry == 0 || readonly_p (entry) || noassign_p (entry))
     {
-      if (readonly_p (entry))
+      if (entry && readonly_p (entry))
 	err_readonly (array_name);
 	
       return (EXECUTION_FAILURE);

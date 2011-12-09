@@ -8128,7 +8128,7 @@ lib/sh/casemod.c
 	  multibyte character
 
 lib/readline/mbutil.c
-	- fix _rl_find_next_mbchar_internalto not call mbrtowc at the end of
+	- fix _rl_find_next_mbchar_internal to not call mbrtowc at the end of
 	  the string, since implementations return different values -- just
 	  break the loop immediately
 
@@ -8702,3 +8702,64 @@ subst.c
 execute_cmd.c
 	- add fflush(stdout) and fflush(stderr) to child coproc code before
 	  calling exit after execute_in_subshell
+
+				   8/31
+				   ----
+lib/readline/{{bind,readline}.c,rlprivate.h}
+	- new bindable variable, "echo-control-characters", enabled by default.
+	  This controls whether or not readline honors the tty ECHOCTL bit
+	  and displays characters corresponding to keyboard-generated signals.
+	  Controlled by _rl_echo_control_chars variable, declared in readline.c
+
+lib/readline/signals.c
+	- if _rl_echo_control_chars == 0, don't go through _rl_echo_signal_char
+
+
+lib/readline/doc/{readline.3,rluser.texi}
+	- document "echo-control-characters" bindable variable
+
+				    9/1
+				    ---
+lib/readline/histexpand.c
+	- hist_string_extract_single_quoted now takes an additional argument:
+	  a flags word.  The only defined value (flags & 1) allows backslash
+	  to quote the single quote.  This is to inhibit history expansion
+	  inside $'...' containing an escaped single quote.
+	- change history_expand to call hist_string_extract_single_quoted
+	  with flags == 1 if it sees $'.  Fixes bug reported by Sean
+	  Donner <sean.donner@gmail.com>
+
+				    9/2
+				    ---
+builtins/printf.def
+	- add a call to sh_wrerror if ferror() succeeds in the PRETURN macro,
+	  to print an error message in the case that the final fflush fails
+	  (for instance, because it attempts to write data that didn't have a
+	  trailing newline).  Fixes bug reported by Stefano Lattarini
+	  <stefano.lattarini@gmail.com>
+
+				    9/7
+				    ---
+arrayfunc.c
+	- some fixes to assign_compound_array_list to avoid null pointer
+	  dereferences pointed out by clang/scan-build
+
+lib/glob/glob.c
+	- fixes to udequote_pathname and wdequote_pathname to avoid possible
+	  null pointer dereferences pointed out by clang/scan-build
+
+lib/readline/undo.c
+	- fix to _rl_copy_undo_list (function unused) to avoid deref of
+	  uninitialized pointer pointed out by clang/scan-build
+
+general.c
+	- fix string_to_rlimtype so it works if passed a null pointer (though
+	  it never is)
+
+builtins/mapfile.def
+	- fix to mapfile() to avoid possible null pointer dereference pointed	
+	  out by clang/scan-build
+
+variables.c
+	- fix to valid_exportstr to avoid possible null pointer dereferences
+	  pointed out by clang/scan-build

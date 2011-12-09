@@ -1151,7 +1151,7 @@ int
 rl_delete_horizontal_space (count, ignore)
      int count, ignore;
 {
-  int start = rl_point;
+  int start;
 
   while (rl_point && whitespace (rl_line_buffer[rl_point - 1]))
     rl_point--;

@@ -275,6 +275,10 @@ int _rl_bind_stty_chars = 1;
    its initial state. */
 int _rl_revert_all_at_newline = 0;
 
+/* Non-zero means to honor the termios ECHOCTL bit and echo control
+   characters corresponding to keyboard-generated signals. */
+int _rl_echo_control_chars = 1;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */

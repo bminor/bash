@@ -344,4 +344,8 @@ Platform-Specific Configuration and Operation Notes
      Apple ships inadequate dynamic libreadline and libhistory "replacements"
      as standard libraries.
 
-  
+20.  If you're on a system like SGI Irix, and you get an error about not
+     being able to refer to a dynamic symbol
+     (ld: non-dynamic relocations refer to dynamic symbol PC), add
+     -DNEED_EXTERN_PC to the LOCAL_CFLAGS variable in lib/readline/Makefile.in
+     and rebuild.

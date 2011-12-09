@@ -1426,6 +1426,7 @@ static const struct {
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },
   { "disable-completion",	&rl_inhibit_completion,		0 },
+  { "echo-control-characters",	&_rl_echo_control_chars,	0 },
   { "enable-keypad",		&_rl_enable_keypad,		0 },
   { "expand-tilde",		&rl_complete_with_tilde_expansion, 0 },
   { "history-preserve-point",	&_rl_history_preserve_point,	0 },

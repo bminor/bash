@@ -3366,6 +3366,11 @@ valid_exportstr (v)
   char *s;
 
   s = v->exportstr;
+  if (s == 0)
+    {
+      internal_error (_("%s has null exportstr"), v->name);
+      return (0);
+    }
   if (legal_variable_starter ((unsigned char)*s) == 0)
     {
       internal_error (_("invalid character %d in exportstr for %s"), *s, v->name);

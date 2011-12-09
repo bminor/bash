@@ -421,6 +421,7 @@ extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_output_meta_chars;
 extern int _rl_bind_stty_chars;
 extern int _rl_revert_all_at_newline;
+extern int _rl_echo_control_chars;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

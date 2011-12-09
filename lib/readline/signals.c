@@ -101,7 +101,8 @@ int rl_catch_sigwinch = 0;	/* for the readline state struct in readline.c */
 int _rl_interrupt_immediately = 0;
 int volatile _rl_caught_signal = 0;	/* should be sig_atomic_t, but that requires including <signal.h> everywhere */
 
-/* If non-zero, print characters corresponding to received signals. */
+/* If non-zero, print characters corresponding to received signals as long as
+   the user has indicated his desire to do so (_rl_echo_control_chars). */
 int _rl_echoctl = 0;
 
 int _rl_intr_char = 0;
@@ -637,7 +638,7 @@ rl_echo_signal_char (sig)
   char cstr[3];
   int cslen, c;
 
-  if (_rl_echoctl == 0)
+  if (_rl_echoctl == 0 || _rl_echo_control_chars == 0)
     return;
 
   switch (sig)

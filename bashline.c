@@ -3433,7 +3433,7 @@ bash_execute_unix_command (count, key)
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *l, *ce;
+  char *cmd, *value, *l, *l1, *ce;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
@@ -3482,7 +3482,7 @@ bash_execute_unix_command (count, key)
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  l = value_cell (v);
+  l = v ? value_cell (v) : 0;
   value = inttostr (rl_point, ibuf, sizeof (ibuf));
   v = bind_int_variable ("READLINE_POINT", value);
   if (v)
@@ -3494,7 +3494,8 @@ bash_execute_unix_command (count, key)
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");
-  if (value_cell (v) != l)
+  l1 = v ? value_cell (v) : 0;
+  if (l1 != l)
     maybe_make_readline_line (value_cell (v));
   v = find_variable ("READLINE_POINT");
   if (v && legal_number (value_cell (v), &mi))

@@ -407,6 +407,7 @@ expand_compound_array_assignment (var, value, flags)
   return nlist;
 }
 
+/* Callers ensure that VAR is not NULL */
 void
 assign_compound_array_list (var, nlist, flags)
      SHELL_VAR *var;
@@ -431,9 +432,9 @@ assign_compound_array_list (var, nlist, flags)
      value. */
   if ((flags & ASS_APPEND) == 0)
     {
-      if (array_p (var) && a)
+      if (a && array_p (var))
 	array_flush (a);
-      else if (assoc_p (var) && h)
+      else if (h && assoc_p (var))
 	assoc_flush (h);
     }
 
@@ -447,7 +448,7 @@ assign_compound_array_list (var, nlist, flags)
       /* We have a word of the form [ind]=value */
       if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')
 	{
-	  len = skipsubscript (w, 0, assoc_p (var) != 0);
+	  len = skipsubscript (w, 0, (var && assoc_p (var) != 0));
 
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))

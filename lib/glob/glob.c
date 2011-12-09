@@ -246,7 +246,8 @@ udequote_pathname (pathname)
       if (pathname[i - 1] == 0)
 	break;
     }
-  pathname[j] = '\0';
+  if (pathname)
+    pathname[j] = '\0';
 }
 
 #if HANDLE_MULTIBYTE
@@ -279,7 +280,8 @@ wdequote_pathname (pathname)
       if (wpathname[i - 1] == L'\0')
 	break;
     }
-  wpathname[j] = L'\0';
+  if (wpathname)
+    wpathname[j] = L'\0';
 
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
