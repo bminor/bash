@@ -982,6 +982,8 @@ rl_redisplay ()
 		 time update_line is called, then we can assume in our
 		 calculations that o_cpos does not need to be adjusted by
 		 wrap_offset. */
+	      /* XXX - if this is changed, change the version down below in
+		 the horizontal scrolling section as well. */
 	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 		  cpos_adjusted == 0 &&
 		  _rl_last_c_pos != o_cpos &&
@@ -1203,7 +1205,9 @@ rl_redisplay ()
 		       _rl_screenwidth + (lmargin ? 0 : wrap_offset),
 		       0);
 
-	  if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+	  /* This should be identical to the code above in the non-horizontal
+	     scrolling section. */
+	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 	      cpos_adjusted == 0 &&
 	      _rl_last_c_pos != o_cpos &&
 	      _rl_last_c_pos > wrap_offset &&

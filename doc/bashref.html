@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on March, 18  2009 by texi2html 1.64 -->
+<!-- Created on June, 8  2009 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.0, 4 March 2009).
+the Bash shell (version 4.0, 5 June 2009).
 </P><P>
 
-This is Edition 4.0, last updated 4 March 2009,
+This is Edition 4.0, last updated 5 June 2009,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 4.0.
 </P><P>
@@ -1097,7 +1097,7 @@ in <VAR>consequent-commands</VAR>, or zero if none was executed.
 The syntax of the <CODE>for</CODE> command is:
 <P>
 
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>for <VAR>name</VAR> [in <VAR>words</VAR> <small>...</small>]; do <VAR>commands</VAR>; done
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>for <VAR>name</VAR> [ [in [<VAR>words</VAR> <small>...</small>] ] ; ] do <VAR>commands</VAR>; done
 </pre></td></tr></table>Expand <VAR>words</VAR>, and execute <VAR>commands</VAR> once for each member
 in the resultant list, with <VAR>name</VAR> bound to the current member.
 If <SAMP>`in <VAR>words</VAR>'</SAMP> is not present, the <CODE>for</CODE> command
@@ -1577,14 +1577,19 @@ positional parameters is updated to reflect the change.
 Special parameter <CODE>0</CODE> is unchanged.
 The first element of the <CODE>FUNCNAME</CODE> variable is set to the
 name of the function while the function is executing.
+</P><P>
+
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with the exception that the <CODE>DEBUG</CODE> and <CODE>RETURN</CODE> traps
+with these exceptions:
+the <CODE>DEBUG</CODE> and <CODE>RETURN</CODE> traps
 are not inherited unless the function has been given the
 <CODE>trace</CODE> attribute using the <CODE>declare</CODE> builtin or
 the <CODE>-o functrace</CODE> option has been enabled with
 the <CODE>set</CODE> builtin,
-(in which case all functions inherit the <CODE>DEBUG</CODE> and <CODE>RETURN</CODE> traps).
+(in which case all functions inherit the <CODE>DEBUG</CODE> and <CODE>RETURN</CODE> traps),
+and the <CODE>ERR</CODE> trap is not inherited unless the <CODE>-o errtrace</CODE>
+shell option has been enabled.
 See section <A HREF="bashref.html#SEC59">4.1 Bourne Shell Builtins</A>, for the description of the
 <CODE>trap</CODE> builtin.
 </P><P>
@@ -1970,7 +1975,7 @@ For example,
 ade ace abe
 </pre></td></tr></table></P><P>
 
-A sequence expression takes the form <CODE>{<VAR>x</VAR>..<VAR>y</VAR>[<VAR>incr</VAR>]}</CODE>,
+A sequence expression takes the form <CODE>{<VAR>x</VAR>..<VAR>y</VAR>[..<VAR>incr</VAR>]}</CODE>,
 where <VAR>x</VAR> and <VAR>y</VAR> are either integers or single characters,
 and <VAR>incr</VAR>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -2337,7 +2342,7 @@ array in turn, and the expansion is the resultant list.
 <DD><DT><CODE>${<VAR>parameter</VAR>,,<VAR>pattern</VAR>}</CODE>
 <DD>This expansion modifies the case of alphabetic characters in <VAR>parameter</VAR>.
 The <VAR>pattern</VAR> is expanded to produce a pattern just as in
-pathname expansion.
+filename expansion.
 The <SAMP>`^'</SAMP> operator converts lowercase letters matching <VAR>pattern</VAR>
 to uppercase; the <SAMP>`,'</SAMP> operator converts matching uppercase letters
 to lowercase.
@@ -2585,7 +2590,7 @@ If the shell option <CODE>nocaseglob</CODE> is enabled, the match is performed
 without regard to the case of alphabetic characters.
 </P><P>
 
-When a pattern is used for filename generation, the character <SAMP>`.'</SAMP>
+When a pattern is used for filename expansion, the character <SAMP>`.'</SAMP>
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option <CODE>dotglob</CODE> is set.
 When matching a file name, the slash character must always be
@@ -4207,15 +4212,22 @@ The <SAMP>`-l'</SAMP> option causes the shell to print a list of signal names
 and their corresponding numbers.
 Each <VAR>sigspec</VAR> is either a signal name or a signal number.
 Signal names are case insensitive and the <CODE>SIG</CODE> prefix is optional.
+<P>
+
 If a <VAR>sigspec</VAR>
 is <CODE>0</CODE> or <CODE>EXIT</CODE>, <VAR>arg</VAR> is executed when the shell exits.
 If a <VAR>sigspec</VAR> is <CODE>DEBUG</CODE>, the command <VAR>arg</VAR> is executed
 before every simple command, <CODE>for</CODE> command, <CODE>case</CODE> command,
 <CODE>select</CODE> command, every arithmetic <CODE>for</CODE> command, and before
 the first command executes in a shell function.
-Refer to the description of the <CODE>extglob</CODE> option to the
+Refer to the description of the <CODE>extdebug</CODE> option to the
 <CODE>shopt</CODE> builtin (see section <A HREF="bashref.html#SEC63">4.3.2 The Shopt Builtin</A>) for details of its
 effect on the <CODE>DEBUG</CODE> trap.
+If a <VAR>sigspec</VAR> is <CODE>RETURN</CODE>, the command <VAR>arg</VAR> is executed
+each time a shell function or a script executed with the <CODE>.</CODE> or
+<CODE>source</CODE> builtins finishes executing.
+</P><P>
+
 If a <VAR>sigspec</VAR> is <CODE>ERR</CODE>, the command <VAR>arg</VAR> 
 is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
@@ -4226,14 +4238,11 @@ part of a command executed in a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> list,
 or if the command's return
 status is being inverted using <CODE>!</CODE>.
 These are the same conditions obeyed by the <CODE>errexit</CODE> option.
-If a <VAR>sigspec</VAR> is <CODE>RETURN</CODE>, the command <VAR>arg</VAR> is executed
-each time a shell function or a script executed with the <CODE>.</CODE> or
-<CODE>source</CODE> builtins finishes executing.
-<P>
+</P><P>
 
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals that are not being ignored are reset to their original
-values in a child process when it is created.
+values in a subshell or subshell environment when one is created.
 </P><P>
 
 The return status is zero unless a <VAR>sigspec</VAR> does not specify a
@@ -5180,7 +5189,7 @@ subshells to exit before executing all the commands in the subshell.
 </P><P>
 
 <DT><CODE>-f</CODE>
-<DD>Disable file name generation (globbing).
+<DD>Disable filename expansion (globbing).
 <P>
 
 <DT><CODE>-h</CODE>
@@ -5652,7 +5661,7 @@ enclosed in double quotes.  This option is enabled by default.
 <P>
 
 <DT><CODE>failglob</CODE>
-<DD>If set, patterns which fail to match filenames during pathname expansion
+<DD>If set, patterns which fail to match filenames during filename expansion
 result in an expansion error.
 <P>
 
@@ -7617,13 +7626,11 @@ option to the <CODE>set</CODE> builtin (see section <A HREF="bashref.html#SEC62"
 <P>
 
 <DT><CODE><VAR>string1</VAR> &#60; <VAR>string2</VAR></CODE>
-<DD>True if <VAR>string1</VAR> sorts before <VAR>string2</VAR> lexicographically
-in the current locale.
+<DD>True if <VAR>string1</VAR> sorts before <VAR>string2</VAR> lexicographically.
 <P>
 
 <DT><CODE><VAR>string1</VAR> &#62; <VAR>string2</VAR></CODE>
-<DD>True if <VAR>string1</VAR> sorts after <VAR>string2</VAR> lexicographically
-in the current locale.
+<DD>True if <VAR>string1</VAR> sorts after <VAR>string2</VAR> lexicographically.
 <P>
 
 <DT><CODE><VAR>arg1</VAR> OP <VAR>arg2</VAR></CODE>
@@ -7957,11 +7964,15 @@ Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0. 
 </P><P>
 
+An array variable is considered set if a subscript has been assigned a
+value.  The null string is a valid value.
+</P><P>
+
 The <CODE>unset</CODE> builtin is used to destroy arrays.
 <CODE>unset</CODE> <VAR>name</VAR>[<VAR>subscript</VAR>]
 destroys the array element at index <VAR>subscript</VAR>.
 Care must be taken to avoid unwanted side effects caused by filename
-generation.
+expansion.
 <CODE>unset</CODE> <VAR>name</VAR>, where <VAR>name</VAR> is an array, removes the
 entire array. A subscript of <SAMP>`*'</SAMP> or <SAMP>`@'</SAMP> also removes the
 entire array.
@@ -12879,7 +12890,7 @@ But first, you should
 make sure that it really is a bug, and that it appears in the latest
 version of Bash.
 The latest version of Bash is always available for FTP from
-<A HREF="ftp://ftp.gnu.org/pub/bash/">ftp://ftp.gnu.org/pub/bash/</A>.
+<A HREF="ftp://ftp.gnu.org/pub/gnu/bash/">ftp://ftp.gnu.org/pub/gnu/bash/</A>.
 </P><P>
 
 Once you have determined that a bug actually exists, use the
@@ -15868,7 +15879,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>March, 18  2009</I>
+This document was generated by <I>Chet Ramey</I> on <I>June, 8  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -16030,7 +16041,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>March, 18  2009</I>
+by <I>Chet Ramey</I> on <I>June, 8  2009</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

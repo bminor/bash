@@ -960,6 +960,11 @@ rl_redisplay ()
 #define VIS_LINE(line) ((line) > _rl_vis_botlin) ? "" : VIS_CHARS(line)
 #define INV_LINE(line) (invisible_line + inv_lbreaks[line])
 
+#define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
+			_rl_last_c_pos != o_cpos && \
+			_rl_last_c_pos > wrap_offset && \
+			o_cpos < prompt_last_invisible)
+
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
@@ -982,11 +987,7 @@ rl_redisplay ()
 		 time update_line is called, then we can assume in our
 		 calculations that o_cpos does not need to be adjusted by
 		 wrap_offset. */
-	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-		  cpos_adjusted == 0 &&
-		  _rl_last_c_pos != o_cpos &&
-		  _rl_last_c_pos > wrap_offset &&
-		  o_cpos < prompt_last_invisible)
+	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
 			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
@@ -1203,12 +1204,8 @@ rl_redisplay ()
 		       _rl_screenwidth + (lmargin ? 0 : wrap_offset),
 		       0);
 
-	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
-	      cpos_adjusted == 0 &&
-	      _rl_last_c_pos != o_cpos &&
-	      _rl_last_c_pos > wrap_offset &&
-	      o_cpos < prompt_last_invisible)
-		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
+	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
+	    _rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 
 	  /* If the visible new line is shorter than the old, but the number
 	     of invisible characters is greater, and we are at the end of

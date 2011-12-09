@@ -103,10 +103,8 @@ xmalloc (bytes)
 {
   PTR_T temp;
 
-#if defined (DEBUG)
   if (bytes == 0)
     internal_warning("xmalloc: size argument is 0");
-#endif
 
   FINDBRK();
   temp = malloc (bytes);
@@ -124,10 +122,8 @@ xrealloc (pointer, bytes)
 {
   PTR_T temp;
 
-#if defined (DEBUG)
   if (bytes == 0)
     internal_warning("xrealloc: size argument is 0");
-#endif
 
   FINDBRK();
   temp = pointer ? realloc (pointer, bytes) : malloc (bytes);
@@ -174,11 +170,6 @@ sh_xmalloc (bytes, file, line)
 {
   PTR_T temp;
 
-#if defined (DEBUG)
-  if (bytes == 0)
-    internal_warning("xmalloc: %s:%d: size argument is 0", file, line);
-#endif
-
   FINDBRK();
   temp = sh_malloc (bytes, file, line);
 
@@ -196,11 +187,6 @@ sh_xrealloc (pointer, bytes, file, line)
      int line;
 {
   PTR_T temp;
-
-#if defined (DEBUG)
-  if (bytes == 0)
-    internal_warning("xrealloc: %s:%d: size argument is 0", file, line);
-#endif
 
   FINDBRK();
   temp = pointer ? sh_realloc (pointer, bytes, file, line) : sh_malloc (bytes, file, line);

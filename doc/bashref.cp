@@ -62,13 +62,13 @@
 \entry{pathname expansion}{24}{pathname expansion}
 \entry{pattern matching}{24}{pattern matching}
 \entry{matching, pattern}{24}{matching, pattern}
-\entry{redirection}{25}{redirection}
+\entry{redirection}{26}{redirection}
 \entry{command expansion}{29}{command expansion}
 \entry{command execution}{29}{command execution}
 \entry{command search}{29}{command search}
 \entry{execution environment}{30}{execution environment}
 \entry{environment}{31}{environment}
-\entry{exit status}{31}{exit status}
+\entry{exit status}{32}{exit status}
 \entry{signal handling}{32}{signal handling}
 \entry{shell script}{33}{shell script}
 \entry{special builtin}{59}{special builtin}

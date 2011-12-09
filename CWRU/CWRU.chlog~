@@ -8143,3 +8143,8 @@ lib/readline/display.c
 doc/{bash.1,bashref.texi
 	- added some more explanation of the inheritance of the ERR trap at
 	  the suggestion of Thomas Pospisek <tpo@sourcepole.ch>
+
+findcmd.c
+	- use eaccess(2) if available in file_status to take other file
+	  access mechanisms such as ACLs into account.  Patch supplied
+	  by werner@suse.de

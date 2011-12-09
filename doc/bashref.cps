@@ -40,7 +40,7 @@
 \entry {evaluation, arithmetic}{78}
 \entry {event designators}{121}
 \entry {execution environment}{30}
-\entry {exit status}{3, 31}
+\entry {exit status}{3, 32}
 \entry {expansion}{17}
 \entry {expansion, arithmetic}{23}
 \entry {expansion, brace}{18}
@@ -107,7 +107,7 @@
 \entry {quoting, ANSI}{6}
 \initial {R}
 \entry {Readline, how to use}{90}
-\entry {redirection}{25}
+\entry {redirection}{26}
 \entry {reserved word}{3}
 \entry {restricted shell}{84}
 \entry {return status}{4}

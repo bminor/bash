@@ -279,7 +279,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               Names of all shell variables.  May also be spec-
                               ified as --vv.
               --GG _g_l_o_b_p_a_t
-                      The filename expansion pattern _g_l_o_b_p_a_t  is  expanded  to
+                      The pathname expansion pattern _g_l_o_b_p_a_t  is  expanded  to
                       generate the possible completions.
               --WW _w_o_r_d_l_i_s_t
                       The  _w_o_r_d_l_i_s_t  is  split using the characters in the IIFFSS
@@ -296,7 +296,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       pletions are retrieved from the value of  the  CCOOMMPPRREEPPLLYY
                       array variable.
               --XX _f_i_l_t_e_r_p_a_t
-                      _f_i_l_t_e_r_p_a_t  is  a pattern as used for filename expansion.
+                      _f_i_l_t_e_r_p_a_t  is  a pattern as used for pathname expansion.
                       It is applied to the list of possible completions gener-
                       ated  by  the  preceding options and arguments, and each
                       completion matching _f_i_l_t_e_r_p_a_t is removed from the  list.
@@ -1235,7 +1235,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       description of  FFIIGGNNOORREE.   This  option  is  enabled  by
                       default.
               gglloobbssttaarr
-                      If set, the pattern **** used in a filename expansion con-
+                      If set, the pattern **** used in a pathname expansion con-
                       text will match a files and zero or more directories and
                       subdirectories.  If the pattern is followed by a //, only
                       directories and subdirectories match.
@@ -1404,63 +1404,68 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               causes the shell to print a list of signal names and their  cor-
               responding  numbers.   Each  _s_i_g_s_p_e_c  is  either  a  signal name
               defined in <_s_i_g_n_a_l_._h>, or a signal  number.   Signal  names  are
-              case  insensitive  and the SIG prefix is optional.  If a _s_i_g_s_p_e_c
-              is EEXXIITT (0) the command _a_r_g is executed on exit from the  shell.
-              If  a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is executed before every
-              _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r command, _c_a_s_e command, _s_e_l_e_c_t command, every
-              arithmetic _f_o_r command, and before the first command executes in
-              a shell function  (see  SSHHEELLLL  GGRRAAMMMMAARR  above).   Refer  to  the
-              description  of  the  eexxttddeebbuugg  option  to the sshhoopptt builtin for
-              details of its effect on the DDEEBBUUGG trap.  If a _s_i_g_s_p_e_c  is  EERRRR,
-              the  command  _a_r_g  is  executed  whenever a simple command has a
-              non-zero exit status, subject to the following conditions.   The
-              EERRRR  trap  is  not executed if the failed command is part of the
-              command list immediately following a  wwhhiillee  or  uunnttiill  keyword,
-              part  of the test in an _i_f statement, part of a command executed
-              in a &&&& or |||| list, or if the command's return  value  is  being
-              inverted  via  !!.   These  are the same conditions obeyed by the
-              eerrrreexxiitt option.  If a _s_i_g_s_p_e_c is RREETTUURRNN, the command _a_r_g is exe-
-              cuted each time a shell function or a script executed with the ..
-              or ssoouurrccee builtins finishes  executing.   Signals  ignored  upon
-              entry  to the shell cannot be trapped or reset.  Trapped signals
-              that are not being ignored are reset to their original values in
-              a  child process when it is created.  The return status is false
-              if any _s_i_g_s_p_e_c is invalid; otherwise ttrraapp returns true.
+              case insensitive and the SIG prefix is optional.
+
+              If  a  _s_i_g_s_p_e_c  is  EEXXIITT (0) the command _a_r_g is executed on exit
+              from the shell.  If a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is  exe-
+              cuted  before  every  _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r command, _c_a_s_e command,
+              _s_e_l_e_c_t command, every arithmetic _f_o_r  command,  and  before  the
+              first  command  executes  in a shell function (see SSHHEELLLL GGRRAAMMMMAARR
+              above).  Refer to the description of the eexxttddeebbuugg option to  the
+              sshhoopptt builtin for details of its effect on the DDEEBBUUGG trap.  If a
+              _s_i_g_s_p_e_c is RREETTUURRNN, the command _a_r_g is executed each time a shell
+              function or a script executed with the .. or ssoouurrccee builtins fin-
+              ishes executing.
+
+              If a _s_i_g_s_p_e_c is EERRRR, the command _a_r_g is executed whenever a sim-
+              ple command has a non-zero exit status, subject to the following
+              conditions.  The EERRRR trap is not executed if the failed  command
+              is  part  of  the  command list immediately following a wwhhiillee or
+              uunnttiill keyword, part of the test in an _i_f statement,  part  of  a
+              command  executed in a &&&& or |||| list, or if the command's return
+              value is being inverted via !!.  These are  the  same  conditions
+              obeyed by the eerrrreexxiitt option.
+
+              Signals  ignored  upon  entry  to the shell cannot be trapped or
+              reset.  Trapped signals that are not being ignored are reset  to
+              their original values in a subshell or subshell environment when
+              one is created.  The return status is false if  any  _s_i_g_s_p_e_c  is
+              invalid; otherwise ttrraapp returns true.
 
        ttyyppee [--aaffttppPP] _n_a_m_e [_n_a_m_e ...]
-              With no options, indicate how each _n_a_m_e would be interpreted  if
+              With  no options, indicate how each _n_a_m_e would be interpreted if
               used as a command name.  If the --tt option is used, ttyyppee prints a
-              string which is one of _a_l_i_a_s,  _k_e_y_w_o_r_d,  _f_u_n_c_t_i_o_n,  _b_u_i_l_t_i_n,  or
-              _f_i_l_e  if  _n_a_m_e  is  an  alias,  shell  reserved  word, function,
-              builtin, or disk file, respectively.  If the _n_a_m_e is not  found,
-              then  nothing  is  printed,  and  an  exit  status  of  false is
-              returned.  If the --pp option is used,  ttyyppee  either  returns  the
+              string  which  is  one  of _a_l_i_a_s, _k_e_y_w_o_r_d, _f_u_n_c_t_i_o_n, _b_u_i_l_t_i_n, or
+              _f_i_l_e if  _n_a_m_e  is  an  alias,  shell  reserved  word,  function,
+              builtin,  or disk file, respectively.  If the _n_a_m_e is not found,
+              then nothing  is  printed,  and  an  exit  status  of  false  is
+              returned.   If  the  --pp  option is used, ttyyppee either returns the
               name of the disk file that would be executed if _n_a_m_e were speci-
               fied as a command name, or nothing if ``type -t name'' would not
-              return  _f_i_l_e.  The --PP option forces a PPAATTHH search for each _n_a_m_e,
+              return _f_i_l_e.  The --PP option forces a PPAATTHH search for each  _n_a_m_e,
               even if ``type -t name'' would not return _f_i_l_e.  If a command is
-              hashed,  --pp  and  --PP print the hashed value, not necessarily the
+              hashed, --pp and --PP print the hashed value,  not  necessarily  the
               file that appears first in PPAATTHH.  If the --aa option is used, ttyyppee
-              prints  all of the places that contain an executable named _n_a_m_e.
-              This includes aliases and functions,  if  and  only  if  the  --pp
-              option  is  not  also used.  The table of hashed commands is not
-              consulted when using --aa.  The --ff option suppresses  shell  func-
-              tion  lookup, as with the ccoommmmaanndd builtin.  ttyyppee returns true if
+              prints all of the places that contain an executable named  _n_a_m_e.
+              This  includes  aliases  and  functions,  if  and only if the --pp
+              option is not also used.  The table of hashed  commands  is  not
+              consulted  when  using --aa.  The --ff option suppresses shell func-
+              tion lookup, as with the ccoommmmaanndd builtin.  ttyyppee returns true  if
               all of the arguments are found, false if any are not found.
 
        uulliimmiitt [--HHSSTTaabbccddeeffiillmmnnppqqrrssttuuvvxx [_l_i_m_i_t]]
-              Provides control over the resources available to the  shell  and
-              to  processes started by it, on systems that allow such control.
+              Provides  control  over the resources available to the shell and
+              to processes started by it, on systems that allow such  control.
               The --HH and --SS options specify that the hard or soft limit is set
-              for  the  given resource.  A hard limit cannot be increased by a
-              non-root user once it is set; a soft limit may be  increased  up
-              to  the value of the hard limit.  If neither --HH nor --SS is speci-
+              for the given resource.  A hard limit cannot be increased  by  a
+              non-root  user  once it is set; a soft limit may be increased up
+              to the value of the hard limit.  If neither --HH nor --SS is  speci-
               fied, both the soft and hard limits are set.  The value of _l_i_m_i_t
               can be a number in the unit specified for the resource or one of
               the special values hhaarrdd, ssoofftt, or uunnlliimmiitteedd, which stand for the
-              current  hard  limit,  the  current  soft  limit,  and no limit,
-              respectively.  If _l_i_m_i_t is omitted, the  current  value  of  the
-              soft  limit  of the resource is printed, unless the --HH option is
+              current hard limit,  the  current  soft  limit,  and  no  limit,
+              respectively.   If  _l_i_m_i_t  is  omitted, the current value of the
+              soft limit of the resource is printed, unless the --HH  option  is
               given.  When more than one resource is specified, the limit name
               and unit are printed before the value.  Other options are inter-
               preted as follows:
@@ -1469,11 +1474,11 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --cc     The maximum size of core files created
               --dd     The maximum size of a process's data segment
               --ee     The maximum scheduling priority ("nice")
-              --ff     The maximum size of files written by the  shell  and  its
+              --ff     The  maximum  size  of files written by the shell and its
                      children
               --ii     The maximum number of pending signals
               --ll     The maximum size that may be locked into memory
-              --mm     The  maximum resident set size (many systems do not honor
+              --mm     The maximum resident set size (many systems do not  honor
                      this limit)
               --nn     The maximum number of open file descriptors (most systems
                      do not allow this value to be set)
@@ -1482,58 +1487,58 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --rr     The maximum real-time scheduling priority
               --ss     The maximum stack size
               --tt     The maximum amount of cpu time in seconds
-              --uu     The  maximum  number  of  processes available to a single
+              --uu     The maximum number of processes  available  to  a  single
                      user
-              --vv     The maximum amount of virtual  memory  available  to  the
+              --vv     The  maximum  amount  of  virtual memory available to the
                      shell
               --xx     The maximum number of file locks
               --TT     The maximum number of threads
 
               If _l_i_m_i_t is given, it is the new value of the specified resource
               (the --aa option is display only).  If no option is given, then --ff
-              is  assumed.  Values are in 1024-byte increments, except for --tt,
-              which is in seconds, --pp, which is in units of  512-byte  blocks,
-              and  --TT,  --bb, --nn, and --uu, which are unscaled values.  The return
+              is assumed.  Values are in 1024-byte increments, except for  --tt,
+              which  is  in seconds, --pp, which is in units of 512-byte blocks,
+              and --TT, --bb, --nn, and --uu, which are unscaled values.   The  return
               status is 0 unless an invalid option or argument is supplied, or
               an error occurs while setting a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
               The user file-creation mask is set to _m_o_d_e.  If _m_o_d_e begins with
-              a digit, it is interpreted as an octal number; otherwise  it  is
-              interpreted  as a symbolic mode mask similar to that accepted by
-              _c_h_m_o_d(1).  If _m_o_d_e is omitted, the current value of the mask  is
-              printed.   The  --SS  option causes the mask to be printed in sym-
-              bolic form; the default output is an octal number.   If  the  --pp
+              a  digit,  it is interpreted as an octal number; otherwise it is
+              interpreted as a symbolic mode mask similar to that accepted  by
+              _c_h_m_o_d(1).   If _m_o_d_e is omitted, the current value of the mask is
+              printed.  The --SS option causes the mask to be  printed  in  sym-
+              bolic  form;  the  default output is an octal number.  If the --pp
               option is supplied, and _m_o_d_e is omitted, the output is in a form
               that may be reused as input.  The return status is 0 if the mode
-              was  successfully  changed  or if no _m_o_d_e argument was supplied,
+              was successfully changed or if no _m_o_d_e  argument  was  supplied,
               and false otherwise.
 
        uunnaalliiaass [-aa] [_n_a_m_e ...]
-              Remove each _n_a_m_e from the list of defined  aliases.   If  --aa  is
-              supplied,  all  alias definitions are removed.  The return value
+              Remove  each  _n_a_m_e  from  the list of defined aliases.  If --aa is
+              supplied, all alias definitions are removed.  The  return  value
               is true unless a supplied _n_a_m_e is not a defined alias.
 
        uunnsseett [-ffvv] [_n_a_m_e ...]
-              For each _n_a_m_e, remove the corresponding  variable  or  function.
+              For  each  _n_a_m_e,  remove the corresponding variable or function.
               If no options are supplied, or the --vv option is given, each _n_a_m_e
-              refers to a shell variable.   Read-only  variables  may  not  be
-              unset.   If  --ff  is specified, each _n_a_m_e refers to a shell func-
-              tion, and the function definition is removed.  Each unset  vari-
-              able  or function is removed from the environment passed to sub-
-              sequent commands.  If any of RRAANNDDOOMM, SSEECCOONNDDSS,  LLIINNEENNOO,  HHIISSTTCCMMDD,
+              refers  to  a  shell  variable.   Read-only variables may not be
+              unset.  If --ff is specified, each _n_a_m_e refers to  a  shell  func-
+              tion,  and the function definition is removed.  Each unset vari-
+              able or function is removed from the environment passed to  sub-
+              sequent  commands.   If any of RRAANNDDOOMM, SSEECCOONNDDSS, LLIINNEENNOO, HHIISSTTCCMMDD,
               FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are unset, they lose their special
-              properties, even if they are subsequently reset.  The exit  sta-
+              properties,  even if they are subsequently reset.  The exit sta-
               tus is true unless a _n_a_m_e is readonly.
 
        wwaaiitt [_n _._._.]
-              Wait  for each specified process and return its termination sta-
-              tus.  Each _n may be a process ID or a job  specification;  if  a
-              job  spec  is  given,  all  processes in that job's pipeline are
-              waited for.  If _n is not given, all currently active child  pro-
-              cesses  are  waited  for,  and  the return status is zero.  If _n
-              specifies a non-existent process or job, the  return  status  is
-              127.   Otherwise,  the  return  status is the exit status of the
+              Wait for each specified process and return its termination  sta-
+              tus.   Each  _n  may be a process ID or a job specification; if a
+              job spec is given, all processes  in  that  job's  pipeline  are
+              waited  for.  If _n is not given, all currently active child pro-
+              cesses are waited for, and the return  status  is  zero.   If  _n
+              specifies  a  non-existent  process or job, the return status is
+              127.  Otherwise, the return status is the  exit  status  of  the
               last process or job waited for.
 
 SSEEEE AALLSSOO

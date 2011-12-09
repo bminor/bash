@@ -8148,3 +8148,11 @@ findcmd.c
 	- use eaccess(2) if available in file_status to take other file
 	  access mechanisms such as ACLs into account.  Patch supplied
 	  by werner@suse.de
+
+				   6/12
+				   ----
+xmalloc.c
+	- also calculate lowest brk() value the first time xmalloc/xrealloc
+	  (and their sh_ counterparts) are called
+	- error messages consolidated into a single function (allocerr/
+	  sh_allocerr) to avoid string duplication
