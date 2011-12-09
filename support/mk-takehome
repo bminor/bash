@@ -8,6 +8,23 @@ DIR=$PARENT/$FROOT
 TARF=${FROOT}.tar
 SRC=/usr/homes/chet/src/bash/src
 
+fflag= sflag=
+while getopts "fs" opt
+do
+	case $opt in
+	f)	fflag=1 ;;
+	s)	sflag=1 ;;
+	*)	echo "mk-takehome: usage: mk-takehome [-fs]" 2>&1
+		exit 2;;
+	esac
+done
+
+shift $(($OPTIND - 1))
+
+if [ -n "$fflag" ]; then
+	rm -rf "$DIR"
+fi
+
 mkdir $DIR || exit 1
 
 cd $DIR || exit 1
@@ -34,6 +51,6 @@ gzip -v ${TARF}
 
 REMHOST=z4
 
-if [ "$1" = "-s" ]; then
+if [ -n "$sflag" ]; then
 	scp ${TARF}.gz ${REMHOST}:
 fi
