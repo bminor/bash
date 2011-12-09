@@ -4136,8 +4136,8 @@ Same as @code{-x}.
 Turn on privileged mode.
 In this mode, the @env{$BASH_ENV} and @env{$ENV} files are not
 processed, shell functions are not inherited from the environment,
-and the @env{SHELLOPTS}, @env{CDPATH} and @env{GLOBIGNORE}  variables,
-if they appear in the environment, are ignored.
+and the @env{SHELLOPTS}, @env{BASHOPTS}, @env{CDPATH} and @env{GLOBIGNORE}
+variables, if they appear in the environment, are ignored.
 If the shell is started with the effective user (group) id not equal to the
 real user (group) id, and the @code{-p} option is not supplied, these actions
 are taken and the effective user id is set to the real user id.
@@ -4649,6 +4649,16 @@ variables for controlling the job control facilities
 
 @item BASH
 The full pathname used to execute the current instance of Bash.
+
+@item BASHOPTS
+A colon-separated list of enabled shell options.  Each word in
+the list is a valid argument for the @option{-s} option to the
+@code{shopt} builtin command (@pxref{The Shopt Builtin}).
+The options appearing in @env{BASHOPTS} are those reported
+as @samp{on} by @samp{shopt}.
+If this variable is in the environment when Bash
+starts up, each shell option in the list will be enabled before
+reading any startup files.  This variable is readonly.
 
 @item BASHPID
 Expands to the process id of the current Bash process.
@@ -5495,8 +5505,9 @@ allow them to be specified.
 If Bash is started with the effective user (group) id not equal to the
 real user (group) id, and the @code{-p} option is not supplied, no startup
 files are read, shell functions are not inherited from the environment,
-the @env{SHELLOPTS} variable, if it appears in the environment, is ignored,
-and the effective user id is set to the real user id.
+the @env{SHELLOPTS}, @env{BASHOPTS}, @env{CDPATH}, and @env{GLOBIGNORE}
+variables, if they appear in the environment, are ignored, and the effective
+user id is set to the real user id.
 If the @code{-p} option is supplied at invocation, the startup behavior is
 the same, but the effective user id is not reset.
 
@@ -7240,6 +7251,10 @@ Include support for the @code{((@dots{}))} command
 @item --enable-extended-glob
 Include support for the extended pattern matching features described
 above under @ref{Pattern Matching}.
+
+@item --enable-extended-glob-default
+Set the default value of the @var{extglob} shell option described
+above under @ref{The Shopt Builtin} to be enabled.
 
 @item --enable-help-builtin
 Include the @code{help} builtin, which displays help on shell builtins and

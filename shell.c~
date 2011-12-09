@@ -892,6 +892,9 @@ void
 exit_shell (s)
      int s;
 {
+  fflush (stdout);		/* XXX */
+  fflush (stderr);
+
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
   if (signal_is_trapped (0))
@@ -1710,8 +1713,10 @@ shell_initialize ()
      privileged or restricted mode or if the shell is running setuid. */
 #if defined (RESTRICTED_SHELL)
   initialize_shell_options (privileged_mode||restricted||running_setuid);
+  initialize_bashopts (privileged_mode||restricted||running_setuid);
 #else
   initialize_shell_options (privileged_mode||running_setuid);
+  initialize_bashopts (privileged_mode||running_setuid);
 #endif
 }
 
@@ -1790,12 +1795,12 @@ show_shell_usage (fp, extra)
       set_opts = savestring (shell_builtins[i].short_doc);
   if (set_opts)
     {
-      s = xstrchr (set_opts, '[');
+      s = strchr (set_opts, '[');
       if (s == 0)
 	s = set_opts;
       while (*++s == '-')
 	;
-      t = xstrchr (s, ']');
+      t = strchr (s, ']');
       if (t)
 	*t = '\0';
       fprintf (fp, _("\t-%s or -o option\n"), s);

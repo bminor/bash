@@ -374,6 +374,8 @@ main (argc, argv, env)
   if (code)
     exit (2);
 
+  xtrace_init ();
+
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
 #  if 1
   malloc_set_register (1);
@@ -1713,8 +1715,10 @@ shell_initialize ()
      privileged or restricted mode or if the shell is running setuid. */
 #if defined (RESTRICTED_SHELL)
   initialize_shell_options (privileged_mode||restricted||running_setuid);
+  initialize_bashopts (privileged_mode||restricted||running_setuid);
 #else
   initialize_shell_options (privileged_mode||running_setuid);
+  initialize_bashopts (privileged_mode||running_setuid);
 #endif
 }
 

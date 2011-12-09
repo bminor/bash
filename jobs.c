@@ -2372,6 +2372,8 @@ wait_for (pid)
 
   if (interactive && job_control == 0)
     QUIT;
+  /* Check for terminating signals and exit the shell if we receive one */
+  CHECK_TERMSIG;
 
   /* If we say wait_for (), then we have a record of this child somewhere.
      If it and none of its peers are running, don't call waitchld(). */
@@ -2450,6 +2452,8 @@ wait_for (pid)
 	 old SIGINT signal handler. */
       if (interactive && job_control == 0)
 	QUIT;
+      /* Check for terminating signals and exit the shell if we receive one */
+      CHECK_TERMSIG;
     }
   while (PRUNNING (child) || (job != NO_JOB && RUNNING (job)));
 
@@ -3043,6 +3047,7 @@ waitchld (wpid, block)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
+      /* Check for terminating signals and exit the shell if we receive one */
       CHECK_TERMSIG;
 
       pid = WAITPID (-1, &status, waitpid_flags);

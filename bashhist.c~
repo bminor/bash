@@ -708,7 +708,7 @@ bash_syslog_history (line)
     syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);
   else
     {
-      strncpy (trunc, line, SYSLOG_MAXLEN);
+      strcpy (trunc, line, SYSLOG_MAXLEN);
       trunc[SYSLOG_MAXLEN - 1] = '\0';
       syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY (TRUNCATED): PID=%d UID=%d %s", getpid(), current_user.uid, trunc);
     }

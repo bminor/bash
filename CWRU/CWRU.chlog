@@ -8465,3 +8465,101 @@ bashline.c
 execute_cmd.c
 	- change to execute_command_internal to make [[ ... ]] conditional
 	  command subject to settings of `set -e' and the ERR trap
+
+				   8/14
+				   ----
+execute_cmd.c
+	- change to execute_command_internal to make (( ... )) arithmetic
+	  command subject to settings of `set -e' and the ERR trap
+
+lib/readline/text.c
+	- new bindable function, rl_skip_csi_sequence, reads the characters
+	  that make up a control sequence as defined by ECMA-48.  Sequences
+	  are introduced by the Control Sequence Indicator (CSI) and
+	  contain a defined set of characters.  Insert, End, Page Up and so
+	  on are CSI sequences.  Report and code from Andy Koppe
+	  <andy.koppe@gmail.com>
+
+lib/readline/readline.h
+	- extern declaration for rl_skip_csi_sequence
+
+lib/readline/funmap.c
+	- new bindable command "skip-csi-sequence", runs rl_skip_csi_sequence
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- documented new bindable command "skip-csi-sequence", unbound by
+	  default
+
+builtins/evalfile.c
+	- fix _evalfile to remove embedded null bytes from the file read
+	  into the string.  Report and proposed fix from Roman Rakus
+	  <rrakus@redhat.com>
+
+{configure,config.h}.in
+	- check for syslog(3), define HAVE_SYSLOG
+	- check for syslog.h, define HAVE_SYSLOG_H
+
+config-top.h
+	- new define SYSLOG_HISTORY, disabled by default
+
+config-bot.h
+	- if HAVE_SYSLOG or HAVE_SYSLOG_H are not defined, undef SYSLOG_HISTORY
+
+bashhist.c
+	- if SYSLOG_HISTORY is defined, call bash_syslog_history with the
+	  line added to the history in bash_add_history.
+	- new function, bash_syslog_history(line), sends line to syslog at
+	  user.info.  The line is truncated to send no more than 600
+	  (SYSLOG_MAXLEN) bytes to syslog. Feature requested by many, and
+	  required by some national laws
+
+sig.c
+	- in termsig_handler, resend SIGHUP to children if subshell_environment
+	  indicates we're a shell performing command or process substitution
+
+jobs.c
+	- add CHECK_TERMSIG calls to wait_for in addition to the ones in
+	  waitchld()
+
+builtins/shopt.def
+	- new functions set_bashopts, parse_bashopts, and initialize_bashopts
+	  to manage new environment variable $BASHOPTS, like $SHELLOPTS but
+	  for shopt options
+	- change toggle_shopts to call set_bashopts after setting options, so
+	  $BASHOPTS reflects new values
+
+shell.c
+	- call initialize_bashopts after calling initialize_shell_options at
+	  shell startup
+
+configure.in
+	- new configure `enable' option --enable-exended-tglob-default, to
+	  set the initial default value of the `extglob' shell option
+
+config.h
+	- new define, EXTGLOB_DEFAULT, controlled by the `extended-glob-default'
+	  configure option
+
+pathexp.c
+	 - initialize extended_glob variable to EXTGLOB_DEFAULT
+
+doc/{bash.1,bashref.texi}
+	- document new $BASHOPTS variable and its behavior
+
+doc/bashref.texi
+	- document new --enable-extended-glob-default configure option
+
+				   8/16
+				   ----
+print_cmd.c
+	- new variables: xtrace_fd and xtrace_fp, the file descriptor and
+	  FILE * to which we send `set -x' tracing output.  If fd == -1
+	  then fp == STDERR, the default mode
+	- new function xtrace_init, sets xtrace_fd == -1 and xtrace_fp = stderr
+	- new function xtrace_set (fd, fp), sets xtrace_fd and xtrace_fp
+	  to the arguments
+	- change xtrace functions to fprintf to xtrace_fp instead of stderr
+
+shell.c
+	- call xtrace_init() very early in main()
+

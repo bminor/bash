@@ -44,6 +44,8 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
+#define NEED_XTRACE_SET_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include "execute_cmd.h"
@@ -4083,6 +4085,8 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+  { "BASH_XTRACEFD", sv_xtracefd },
+
 #if defined (READLINE)
 #  if defined (STRICT_POSIX)
   { "COLUMNS", sv_winsize },
@@ -4633,4 +4637,37 @@ set_pipestatus_from_exit (s)
   v[0] = s;
   set_pipestatus_array (v, 1);
 #endif
+}
+
+void
+sv_xtracefd (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  char *t, *e;
+  int fd;
+  FILE *fp;
+
+  v = find_variable (name);
+  if (v == 0)
+    {
+      xtrace_reset ();
+      return;
+    }
+
+  t = value_cell (v);
+  if (t == 0 || *t == 0)
+    xtrace_reset ();
+  else
+    {
+      fd = (int)strtol (t, &e, 10);
+      if (e != t && *e == '\0' && sh_validfd (fd))
+	{
+	  fp = fdopen (fd, "w");
+	  if (fp == 0)
+	    internal_error ("%s: %s: cannot open as FILE", name, value_cell (v));
+	}
+      else
+	internal_error ("%s: %s: invalid value for trace file descriptor", name, value_cell (v));
+    }
 }

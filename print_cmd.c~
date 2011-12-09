@@ -381,17 +381,6 @@ xtrace_init ()
   xtrace_set (-1, stderr);
 }
 
-void
-xtrace_reset ()
-{
-  if (xtrace_fd >= 0)
-    close (xtrace_fd);
-  xtrace_fd = -1;
-  if (xtrace_fp)
-    fclose (xtrace_fp);
-  xtrace_fp = stderr;
-}
-
 /* Return a string denoting what our indirection level is. */
 
 char *

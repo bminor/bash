@@ -902,7 +902,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
-	  save_line_number = line_number
+	  save_line_number = line_number;
 	  line_number = line_number_for_err_trap;
 	  run_error_trap ();
 	  line_number = save_line_number;
@@ -3270,9 +3270,7 @@ static int
 execute_cond_command (cond_command)
      COND_COM *cond_command;
 {
-  int retval, save_line_number, invert;
-
-  invert = cond_command->flags & CMD_I
+  int retval, save_line_number;
 
   retval = EXECUTION_SUCCESS;
   save_line_number = line_number;

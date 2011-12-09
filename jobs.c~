@@ -455,7 +455,6 @@ start_pipeline ()
       cleanup_the_pipeline ();
       pipeline_pgrp = 0;
 #if defined (PGRP_PIPE)
-itrace("start_pipeline: cleaning up existing pipeline: closing %d %d", pgrp_pipe[0], pgrp_pipe[1]);
       sh_closepipe (pgrp_pipe);
 #endif
     }
@@ -465,7 +464,6 @@ itrace("start_pipeline: cleaning up existing pipeline: closing %d %d", pgrp_pipe
     {
       if (pipe (pgrp_pipe) == -1)
 	sys_error (_("start_pipeline: pgrp pipe"));
-itrace("start_pipeline: pgrp_pipe: %d %d", pgrp_pipe[0], pgrp_pipe[1]);
     }
 #endif
 }
@@ -487,7 +485,6 @@ stop_pipeline (async, deferred)
 
 #if defined (PGRP_PIPE)
   /* The parent closes the process group synchronization pipe. */
-itrace("stop_pipeline: close pgrp_pipe %d %d", pgrp_pipe[0], pgrp_pipe[1]);
   sh_closepipe (pgrp_pipe);
 #endif
 

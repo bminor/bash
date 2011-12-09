@@ -575,6 +575,21 @@ rl_clear_screen (count, key)
 }
 
 int
+rl_skip_csi_sequence (count, key)
+     int count, key;
+{
+  int ch;
+
+  RL_SETSTATE (RL_STATE_MOREINPUT);
+  do
+    ch = rl_read_key ();
+  while (ch >= 0x20 && ch < 0x40);
+  RL_UNSETSTATE (RL_STATE_MOREINPUT);
+
+  return 0;
+}
+
+int
 rl_arrow_keys (count, c)
      int count, c;
 {

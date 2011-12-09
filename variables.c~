@@ -44,6 +44,8 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
+#define NEED_XTRACE_SET_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include "execute_cmd.h"
@@ -4083,6 +4085,8 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+  { "BASH_XTRACEFD", sv_xtracefd },
+
 #if defined (READLINE)
 #  if defined (STRICT_POSIX)
   { "COLUMNS", sv_winsize },
@@ -4304,12 +4308,6 @@ sv_hostfile (name)
     clear_hostname_list ();
   else
     hostname_list_initialized = 0;
-
-#if 0
-#if defined (PROGRAMMABLE_COMPLETION)
-  set_itemlist_dirty (&it_hostnames);
-#endif
-#endif
 }
 
 #if defined (STRICT_POSIX)
@@ -4639,4 +4637,18 @@ set_pipestatus_from_exit (s)
   v[0] = s;
   set_pipestatus_array (v, 1);
 #endif
+}
+
+void
+sv_xtracefd (name)
+     char *name;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (v == 0)
+    xtrace_reset ();
+  else
+    {
+    }
 }
