@@ -98,7 +98,7 @@ convert_var_to_assoc (var)
   oldval = value_cell (var);
   hash = assoc_create (0);
   if (oldval)
-    assoc_insert (hash, "0", oldval);
+    assoc_insert (hash, savestring ("0"), oldval);
 
   FREE (value_cell (var));
   var_setassoc (var, hash);

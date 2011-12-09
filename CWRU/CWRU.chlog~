@@ -8195,7 +8195,7 @@ builtins/read.def
 builtins/command.def
 	- move section of code that sets PATH from -p option before the
 	  verbose-handling section, so command -v and command -V honor
-	  the PATH set by command -p.  Bug and fix from
+	  the PATH set by command -p.  Bug report and fix from
 	  ohki@gssm.otsuka.tsukuba.ac.jp
 
 				    7/9
@@ -8533,7 +8533,7 @@ shell.c
 	  shell startup
 
 configure.in
-	- new configure `enable' option --enable-exended-tglob-default, to
+	- new configure `enable' option --enable-exended-glob-default, to
 	  set the initial default value of the `extglob' shell option
 
 config.h
@@ -8666,3 +8666,39 @@ error.c
 	  calling exit_shell (if set -e is enabled), so any exit or ERR
 	  trap gets the right value of $?.  Suggestion from Stefano
 	  Lattarini <stefano.lattarini@gmail.com>
+
+braces.c
+	- fix expand_seqterm so that a non-zero-prefixed term that's longer
+	  than a zero-prefixed term determines the length of each term
+	  in the brace-expanded sequence.  This means that things like
+	  {01..100} will have three digits in all the elements of the
+	  expanded list.  Fixes bug reported by Jeff Haemer
+	  <jeffrey.haemer@gmail.com>
+
+				   8/24
+				   ----
+{arrayfunc,variables}.c
+	- when inserting a value into an associative array using syntax like
+	  T=v where T is an already-declared associative array using key "0",
+	  make sure the key is in newly-allocated memory so it can be freed
+	  when the variable is unset.  Fixes bug reported as redhat 518644
+	  by Jon Fairbairn
+
+				   8/26
+				   ----
+lib/readline/funmap.c
+	- add "old-menu-complete" binding for rl_old_menu_complete
+
+lib/readline/readline.h
+	- add extern declaration for rl_old_menu_complete
+
+subst.c
+	- fix memory leak when processing ${!prefix@}.  Need to dispose all
+	  words in the word list created from all matching variable.  Fixes
+	  bug reported by muszi@muszi.kite.hu.
+
+				   8/29
+				   ----
+execute_cmd.c
+	- add fflush(stdout) and fflush(stderr) to child coproc code before
+	  calling exit after execute_in_subshell

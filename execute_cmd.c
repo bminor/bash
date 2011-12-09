@@ -1967,7 +1967,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rpipe[2], wpipe[2];
+  int rpipe[2], wpipe[2], estat;
   pid_t coproc_pid;
   Coproc *cp;
   char *tcmd;
@@ -1996,7 +1996,12 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
       close (rpipe[0]);
       close (wpipe[1]);
 
-      exit (execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close));
+      estat = execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close);
+
+      fflush (stdout);
+      fflush (stderr);
+
+      exit (estat);
     }
 
   close (rpipe[1]);

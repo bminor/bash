@@ -166,6 +166,13 @@ zecho "${xpath[@]/\//\\}"
 zecho "${xpath[@]//\//\\}"
 zecho "${xpath[@]//[\/]/\\}"
 
+# test assignment to key "0"
+unset T
+declare -A T
+T='([a]=1)'
+echo "${T[@]}"
+unset T
+
 ${THIS_SH} ./assoc1.sub
 
 ${THIS_SH} ./assoc2.sub
@@ -177,4 +184,3 @@ ${THIS_SH} ./assoc4.sub
 ${THIS_SH} ./assoc5.sub
 
 ${THIS_SH} ./assoc6.sub
-

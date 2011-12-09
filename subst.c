@@ -6768,7 +6768,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
 	    *contains_dollar_at = 1;
 	}
       free (x);
-      free (xlist);
+      dispose_words (xlist);
       free (temp1);
       *indexp = sindex;
 
