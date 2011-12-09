@@ -1004,7 +1004,9 @@ getintmax ()
 	 shall continue processing any remaining operands and shall write the
          value accumulated at the time the error was detected to standard
 	 output.''  Yecch. */
-      ret = 0;
+#if 0
+      ret = 0;		/* return partially-converted value from strtoimax */
+#endif
       conversion_error = 1;
     }
   else if (errno == ERANGE)

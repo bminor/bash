@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 October 9<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 October 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -4933,6 +4933,11 @@ descriptor 0, 1, or 2, respectively, is checked.
 
 Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
+<P>
+
+
+When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+lexicographically using the current locale.
 <P>
 
 <DL COMPACT>
@@ -9978,7 +9983,7 @@ Exit a login shell.
 
 <DT><B>readarray</B> [<B>-n</B> <I>count</I>] [<B>-O</B> <I>origin</I>] [<B>-s</B> <I>count</I>] [<B>-t</B>] [<B>-u</B> <I>fd</I>] [<B>-C</B> <I>callback</I>] [<B>-c</B> <I>quantum</I>] [<I>array</I>]<DD>
 
-Read lines from the standard input into array variable
+Read lines from the standard input into the indexed array variable
 <I>array</I>,
 
 or from file descriptor 
@@ -10059,7 +10064,8 @@ before assigning to it.
 <P>
 
 <B>mapfile</B> returns successfully unless an invalid option or option
-argument is supplied, or <I>array</I> is invalid or unassignable.
+argument is supplied, <I>array</I> is invalid or unassignable, or if
+<I>array</I> is not an indexed array.
 </DL>
 
 <DT><B>popd</B> [-<B>n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
@@ -12255,7 +12261,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 October 9<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 October 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12361,6 +12367,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 12 October 2009 10:07:29 EDT
+Time: 09 November 2009 14:08:09 EST
 </BODY>
 </HTML>

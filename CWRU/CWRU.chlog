@@ -8141,7 +8141,7 @@ lib/readline/display.c
 
 				    6/5
 				    ---
-doc/{bash.1,bashref.texi
+doc/{bash.1,bashref.texi}
 	- added some more explanation of the inheritance of the ERR trap at
 	  the suggestion of Thomas Pospisek <tpo@sourcepole.ch>
 
@@ -9153,3 +9153,10 @@ variables.c
 	  by AJ Slater <aj.slater@gmail.com>
 
 [bash-4.1-beta frozen]
+
+				   11/11
+				   -----
+builtins/printf.def
+	- in getintmax(), in the case of a conversion error, return the partial
+	  value accumulated so far, which is suppose to be what
+	  strtoimax/strtoll/strtol returns

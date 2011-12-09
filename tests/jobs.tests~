@@ -116,6 +116,7 @@ echo $? -- ${PIPESTATUS[@]} -- ${PIPESTATUS[0]} - ${PIPESTATUS[1]} - ${PIPESTATU
 
 sleep 300 &
 sleep300pid=$!
+echo sleep300pid = $sleep300pid
 sleep 350 &
 sleep 400 &
 
@@ -169,7 +170,6 @@ exec 5>&2
 exec 2>/dev/null
 
 echo killing...
-kill -n 9 $sleep300pid
 kill -n 9 %2 %3
 wait	# make sure we reap the processes while stderr is still redirected
 echo done
