@@ -1899,6 +1899,7 @@ _rl_move_cursor_relative (new, data)
   register int i;
   int woff;			/* number of invisible chars on current line */
   int cpos, dpos;		/* current and desired cursor positions */
+  int adjust;
 
   woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
   cpos = _rl_last_c_pos;
@@ -1914,15 +1915,34 @@ _rl_move_cursor_relative (new, data)
      as long as we are past them and they are counted by _rl_col_width. */
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
-      dpos = _rl_col_width (data, 0, new);
+      adjust = 1;
+      /* Try to short-circuit common cases and eliminate a bunch of multibyte
+	 character function calls. */
+      /* 1.  prompt string */
+      if (new == local_prompt_len && memcmp (data, local_prompt, new) == 0)
+	{
+	  dpos = prompt_visible_length;
+	  cpos_adjusted = 1;
+	  adjust = 0;
+	}
+      /* 2.  prompt_string + line contents */
+      else if (new > local_prompt_len && local_prompt && memcmp (data, local_prompt, local_prompt_len) == 0)
+	{
+	  dpos = prompt_visible_length + _rl_col_width (data, local_prompt_len, new);
+	  cpos_adjusted = 1;
+	  adjust = 0;
+	}
+      else
+        dpos = _rl_col_width (data, 0, new);
+
       /* Use NEW when comparing against the last invisible character in the
 	 prompt string, since they're both buffer indices and DPOS is a
 	 desired display position. */
-      if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
+      if (adjust && ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
 	  (prompt_physical_chars >= _rl_screenwidth &&
 	   _rl_last_v_pos == prompt_last_screen_line &&
 	   wrap_offset >= woff && dpos >= woff &&
-	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
+	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset))))
 	   /* XXX last comparison might need to be >= */
 	{
 	  dpos -= woff;
@@ -2585,6 +2605,20 @@ _rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
 
   point = 0;
   max = end;
+
+  /* Try to short-circuit common cases.  The adjustment to remove wrap_offset
+     is done by the caller. */
+  /* 1.  prompt string */
+  if (start == 0 && end == local_prompt_len && memcmp (str, local_prompt, local_prompt_len) == 0)
+    return (prompt_visible_length + wrap_offset);
+  /* 2.  prompt string + line contents */
+  else if (start == 0 && end > local_prompt_len && local_prompt && memcmp (str, local_prompt, local_prompt_len) == 0)
+    {
+      tmp = prompt_visible_length + wrap_offset;
+      /* XXX - try to call ourselves recursively with non-prompt portion */
+      tmp += _rl_col_width (str, local_prompt_len, end);
+      return (tmp);
+    }
 
   while (point < start)
     {

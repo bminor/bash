@@ -82,6 +82,9 @@
 extern int bash_brace_completion __P((int, int));
 #endif /* BRACE_COMPLETION */
 
+/* To avoid including curses.h/term.h/termcap.h and that whole mess. */
+extern int tputs __P((const char *string, int nlines, int (*outx)(int)));
+
 /* Forward declarations */
 
 /* Functions bound to keys in Readline for Bash users. */
@@ -146,6 +149,7 @@ static char *bash_dequote_filename __P((char *, int));
 static char *quote_word_break_chars __P((char *));
 static char *bash_quote_filename __P((char *, int, char *));
 
+static int putx __P((int));
 static int bash_execute_unix_command __P((int, int));
 static void init_unix_command_map __P((void));
 static int isolate_sequence __P((char *, int, int, int *));
@@ -3380,16 +3384,23 @@ bash_quote_filename (s, rtype, qcp)
 static Keymap cmd_xmap;
 
 static int
+putx(c)
+     int c;
+{
+  putc (c, rl_outstream);
+}
+  
+static int
 bash_execute_unix_command (count, key)
      int count;	/* ignored */
      int key;
 {
   Keymap ckmap;		/* current keymap */
   Keymap xkmap;		/* unix command executing keymap */
-  register int i;
+  register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *l;
+  char *cmd, *value, *l, *ce;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
@@ -3425,7 +3436,15 @@ bash_execute_unix_command (count, key)
       return 1;
     }
 
-  rl_crlf ();	/* move to a new line */
+  ce = rl_get_termcap ("ce");
+  if (ce)	/* clear current line */
+    {
+      fprintf (rl_outstream, "\r");
+      tputs (ce, 1, putx);
+      fflush (rl_outstream);
+    }
+  else
+    rl_crlf ();	/* move to a new line */
 
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
@@ -3438,7 +3457,7 @@ bash_execute_unix_command (count, key)
   array_needs_making = 1;
 
   save_parser_state (&ps);
-  parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  r = parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");

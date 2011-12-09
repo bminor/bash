@@ -3814,6 +3814,7 @@ execute_builtin (builtin, words, flags, subshell)
 {
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
+  char *error_trap;
 
 #if 0
   /* XXX -- added 12/11 */
@@ -3825,14 +3826,22 @@ execute_builtin (builtin, words, flags, subshell)
      the setting of flags, and always calls the execution functions with
      flags that will exit the shell on an error if -e is set.  If the
      eval builtin is being called, and we're supposed to ignore the exit
-     value of the command, we turn the -e flag off ourselves, then
-     restore it when the command completes.  This is also a problem (as
-     below) for the command and source/. builtins. */
+     value of the command, we turn the -e flag off ourselves and disable
+     the ERR trap, then restore them when the command completes.  This is
+     also a problem (as below) for the command and source/. builtins. */
   if (subshell == 0 && (flags & CMD_IGNORE_RETURN) &&
 	(builtin == eval_builtin || builtin == command_builtin || builtin == source_builtin))
     {
       begin_unwind_frame ("eval_builtin");
       unwind_protect_int (exit_immediately_on_error);
+      error_trap = TRAP_STRING (ERROR_TRAP);
+      if (error_trap)
+	{
+	  error_trap = savestring (error_trap);
+	  add_unwind_protect (xfree, error_trap);
+	  add_unwind_protect (set_error_trap, error_trap);
+	  restore_default_signal (ERROR_TRAP);
+	}
       exit_immediately_on_error = 0;
       eval_unwind = 1;
     }
@@ -3883,6 +3892,11 @@ execute_builtin (builtin, words, flags, subshell)
   if (eval_unwind)
     {
       exit_immediately_on_error += old_e_flag;
+      if (error_trap)
+	{
+	  set_error_trap (error_trap);
+	  xfree (error_trap);
+	}
       discard_unwind_frame ("eval_builtin");
     }
 
@@ -4372,7 +4386,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
 #if defined (RESTRICTED_SHELL)
   command = (char *)NULL;
-  if (restricted && xstrchr (pathname, '/'))
+  if (restricted && mbschr (pathname, '/'))
     {
       internal_error (_("%s: restricted: cannot specify `/' in command names"),
 		    pathname);

@@ -1740,7 +1740,7 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
 
   ret = (WORD_LIST *)NULL;
 
-  /* Remove sequences of whitspace characters at the start of the string, as
+  /* Remove sequences of whitespace characters at the start of the string, as
      long as those characters are delimiters. */
   for (i = 0; member (string[i], d) && spctabnl (string[i]); i++)
     ;
@@ -1810,9 +1810,10 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
 
   /* Special case for SENTINEL at the end of STRING.  If we haven't found
      the word containing SENTINEL yet, and the index we're looking for is at
-     the end of STRING, add an additional null argument and set the current
-     word pointer to that. */
-  if (cwp && cw == -1 && sentinel >= slen)
+     the end of STRING (or past the end of the previously-found token,
+     possible if the end of the line is composed solely of IFS whitespace)
+     add an additional null argument and set the current word pointer to that. */
+  if (cwp && cw == -1 && (sentinel >= slen || sentinel >= te))
     {
       if (whitespace (string[sentinel - 1]))
 	{

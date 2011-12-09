@@ -8226,3 +8226,43 @@ subst.c
 	- fix off-by-one error in pos_params when computing positional
 	  parameters beginning with index 0.  Bug and fix from Isaac Good
 	  <isaacgood@gmail.com>
+
+				   7/24
+				   ----
+lib/readline/display.c
+	- add code to _rl_move_cursor_relative and _rl_col_width to short-
+	  circuit a few special cases: prompt string and prompt string plus
+	  line contents, both starting from 0.  Saves a bunch of calls to
+	  multibyte character functions using already-computed information.
+	  As a side effect, fixes bug reported by Lasse Karkkainen
+	  <tronic+8qug@trn.iki.fi>
+
+subst.c
+	- fixed a problem in split_at_delims that could leave *cwp set to -1
+	  if the line ends in IFS whitespace and SENTINEL is one of those
+	  whitespace characters.  Fixes problem with setting COMP_CWORD for
+	  programmable completion reported by Ville Skytta <ville.skytta@iki.fi>
+
+bashline.c
+	- change bash_execute_unix_command to clear the current line (if the
+	  terminal supplies the "ce" attribute) instead of moving to a new
+	  line.  Inspired by report from Henning Bekel <h.bekel@googlemail.com>
+
+builtins/printf.def
+	- changes to allow printf -v var to assign to array indices, the way
+	  the read builtin can.  Suggested by Christopher F. A. Johnson
+	  <cfajohnson@gmail.com>
+
+lib/readline/complete.c
+	- fix rl_old_menu_complete and rl_menu_complete to appropriately set
+	  and unset RL_STATE_COMPLETING while generating the list of matches.
+	  Fixes debian bug #538013 reported by Jerome Reybert
+	  <jreybert@gmail.com>
+
+				   7/25
+				   ----
+execute_cmd.c
+	- change execute_builtin to temporarily turn off and restore the ERR
+	  trap for the eval/source/command builtins in the same way as we
+	  temporarily disable and restore the setting of the -e option.
+	  Fixes bug reported by Henning Garus <henning.garus@googlemail.com>

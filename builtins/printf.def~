@@ -235,12 +235,7 @@ printf_builtin (list)
       switch (ch)
 	{
 	case 'v':
-	  vname = list_optarg;
-#if defined (ARRAY_VARS)
-	  if (legal_identifier (vname) || valid_array_reference (vname))
-#else
-	  if (legal_identifier (vname))
-#endif
+	  if (legal_identifier (vname = list_optarg))
 	    {
 	      vflag = 1;
 	      vblen = 0;

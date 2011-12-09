@@ -1,130 +1,125 @@
-*** ../bash-4.0-patched/variables.c	2009-01-04 14:32:46.000000000 -0500
---- variables.c	2009-06-29 09:17:20.000000000 -0400
+*** ../bash-4.0-patched/bashline.c	2009-01-08 09:29:24.000000000 -0500
+--- bashline.c	2009-07-16 14:13:41.000000000 -0400
 ***************
-*** 222,228 ****
---- 222,230 ----
-  static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
-  static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
-+ #  if defined (ALIAS)
-  static SHELL_VAR *build_aliasvar __P((SHELL_VAR *));
-  static SHELL_VAR *get_aliasvar __P((SHELL_VAR *));
-  static SHELL_VAR *assign_aliasvar __P((SHELL_VAR *,  char *, arrayind_t, char *));
-+ #  endif
-  #endif
+*** 1387,1391 ****
+    /* If the word starts in `~', and there is no slash in the word, then
+       try completing this word as a username. */
+!   if (!matches && *text == '~' && !xstrchr (text, '/'))
+      matches = rl_completion_matches (text, rl_username_completion_function);
+  
+--- 1387,1391 ----
+    /* If the word starts in `~', and there is no slash in the word, then
+       try completing this word as a username. */
+!   if (matches ==0 && *text == '~' && mbschr (text, '/') == 0)
+      matches = rl_completion_matches (text, rl_username_completion_function);
   
 ***************
-*** 253,256 ****
---- 255,259 ----
-  static int visible_var __P((SHELL_VAR *));
-  static int visible_and_exported __P((SHELL_VAR *));
-+ static int export_environment_candidate __P((SHELL_VAR *));
-  static int local_and_exported __P((SHELL_VAR *));
-  static int variable_in_context __P((SHELL_VAR *));
+*** 2667,2675 ****
+    local_dirname = *dirname;
+  
+!   if (xstrchr (local_dirname, '$'))
+      should_expand_dirname = 1;
+    else
+      {
+!       t = xstrchr (local_dirname, '`');
+        if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
+  	should_expand_dirname = 1;
+--- 2667,2675 ----
+    local_dirname = *dirname;
+  
+!   if (mbschr (local_dirname, '$'))
+      should_expand_dirname = 1;
+    else
+      {
+!       t = mbschr (local_dirname, '`');
+        if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
+  	should_expand_dirname = 1;
 ***************
-*** 376,383 ****
-  #  endif
-  #endif
-        else if (legal_identifier (name))
-  	{
-  	  temp_var = bind_variable (name, string, 0);
-! 	  VSETATTR (temp_var, (att_exported | att_imported));
-  	  array_needs_making = 1;
+*** 3226,3230 ****
+  	  *r++ = *++p;
+  	  if (*p == '\0')
+! 	    break;
+  	  continue;
   	}
---- 379,393 ----
-  #  endif
-  #endif
-+ #if 0
-        else if (legal_identifier (name))
-+ #else
-+       else
-+ #endif
-  	{
-  	  temp_var = bind_variable (name, string, 0);
-! 	  if (legal_identifier (name))
-! 	    VSETATTR (temp_var, (att_exported | att_imported));
-! 	  else
-! 	    VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
-  	  array_needs_making = 1;
+--- 3226,3230 ----
+  	  *r++ = *++p;
+  	  if (*p == '\0')
+! 	    return ret;		/* XXX - was break; */
+  	  continue;
   	}
 ***************
-*** 868,872 ****
-    av = array_cell (vv);
-    strcpy (d, dist_version);
-!   s = xstrchr (d, '.');
-    if (s)
-      *s++ = '\0';
---- 878,882 ----
-    av = array_cell (vv);
-    strcpy (d, dist_version);
-!   s = strchr (d, '.');
-    if (s)
-      *s++ = '\0';
+*** 3272,3276 ****
+        /* OK, we have an unquoted character.  Check its presence in
+  	 rl_completer_word_break_characters. */
+!       if (xstrchr (rl_completer_word_break_characters, *s))
+  	*r++ = '\\';
+        /* XXX -- check for standalone tildes here and backslash-quote them */
+--- 3272,3276 ----
+        /* OK, we have an unquoted character.  Check its presence in
+  	 rl_completer_word_break_characters. */
+!       if (mbschr (rl_completer_word_break_characters, *s))
+  	*r++ = '\\';
+        /* XXX -- check for standalone tildes here and backslash-quote them */
 ***************
-*** 1549,1552 ****
---- 1559,1563 ----
-  }
-  
-+ #if defined (ALIAS)
-  static SHELL_VAR *
-  build_aliasvar (self)
+*** 3314,3318 ****
+       quoted correctly using backslashes (a backslash-newline pair is
+       special to the shell parser). */
+!   if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (s, '\n'))
+      cs = COMPLETE_SQUOTE;
+    else if (*qcp == '"')
+--- 3314,3318 ----
+       quoted correctly using backslashes (a backslash-newline pair is
+       special to the shell parser). */
+!   if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
+      cs = COMPLETE_SQUOTE;
+    else if (*qcp == '"')
 ***************
-*** 1601,1604 ****
---- 1612,1617 ----
-    return (build_aliasvar (self));
-  }
-+ #endif /* ALIAS */
-+ 
-  #endif /* ARRAY_VARS */
+*** 3322,3330 ****
+  #if defined (BANG_HISTORY)
+    else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
+! 	   history_expansion_inhibited == 0 && xstrchr (s, '!'))
+      cs = COMPLETE_BSQUOTE;
   
+    if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
+! 	history_expansion_inhibited == 0 && xstrchr (s, '!'))
+      {
+        cs = COMPLETE_BSQUOTE;
+--- 3322,3330 ----
+  #if defined (BANG_HISTORY)
+    else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
+! 	   history_expansion_inhibited == 0 && mbschr (s, '!'))
+      cs = COMPLETE_BSQUOTE;
+  
+    if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
+! 	history_expansion_inhibited == 0 && mbschr (s, '!'))
+      {
+        cs = COMPLETE_BSQUOTE;
 ***************
-*** 1696,1700 ****
---- 1709,1715 ----
-  
-    v = init_dynamic_assoc_var ("BASH_CMDS", get_hashcmd, assign_hashcmd, att_nofree);
-+ #  if defined (ALIAS)
-    v = init_dynamic_assoc_var ("BASH_ALIASES", get_aliasvar, assign_aliasvar, att_nofree);
-+ #  endif
-  #endif
-  
+*** 3389,3393 ****
+    register int i;
+    intmax_t mi;
+-   int save_point;
+    sh_parser_state_t ps;
+    char *cmd, *value, *l;
+--- 3389,3392 ----
 ***************
-*** 3083,3086 ****
---- 3098,3111 ----
-  }
-  
-+ /* Candidate variables for the export environment are either valid variables
-+    with the export attribute or invalid variables inherited from the initial
-+    environment and simply passed through. */
-+ static int
-+ export_environment_candidate (var)
-+      SHELL_VAR *var;
-+ {
-+   return (exported_p (var) && (invisible_p (var) == 0 || imported_p (var)));
-+ }
-+ 
-  /* Return non-zero if VAR is a local variable in the current context and
-     is exported. */
+*** 3433,3437 ****
+      VSETATTR (v, att_exported);
+    l = value_cell (v);
+-   save_point = rl_point;
+    value = inttostr (rl_point, ibuf, sizeof (ibuf));
+    v = bind_int_variable ("READLINE_POINT", value);
+--- 3432,3435 ----
 ***************
-*** 3439,3443 ****
---- 3464,3472 ----
-    SHELL_VAR **vars;
-  
-+ #if 0
-    vars = map_over (visible_and_exported, vcxt);
-+ #else
-+   vars = map_over (export_environment_candidate, vcxt);
-+ #endif
-  
-    if (vars == 0)
-***************
-*** 3588,3592 ****
-        export_env[export_env_index = 0] = (char *)NULL;
-  
-!       /* Make a dummy variable context from the  temporary_env, stick it on
-  	 the front of shell_variables, call make_var_export_array on the
-  	 whole thing to flatten it, and convert the list of SHELL_VAR *s
---- 3617,3621 ----
-        export_env[export_env_index = 0] = (char *)NULL;
-  
-!       /* Make a dummy variable context from the temporary_env, stick it on
-  	 the front of shell_variables, call make_var_export_array on the
-  	 whole thing to flatten it, and convert the list of SHELL_VAR *s
+*** 3451,3455 ****
+      {
+        i = mi;
+!       if (i != save_point)
+  	{
+  	  rl_point = i;
+--- 3449,3453 ----
+      {
+        i = mi;
+!       if (i != rl_point)
+  	{
+  	  rl_point = i;
