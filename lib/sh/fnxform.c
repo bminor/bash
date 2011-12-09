@@ -185,7 +185,6 @@ char *
 fnx_tofs (string)
      char *string;
 {
-bar
   return string;
 }
 

@@ -1030,7 +1030,7 @@ glob_filename (pathname, flags)
 	  dflags |= GX_ALLDIRS|GX_ADDCURDIR;
 #if 0
 	  /* If we want all directories (dflags & GX_ALLDIRS) and we're not
-	     being called recursively as something like `echo **/*.o'
+	     being called recursively as something like `echo [star][star]/*.o'
 	     ((flags & GX_ALLDIRS) == 0), we want to prevent glob_vector from
 	     adding a null directory name to the front of the temp_results
 	     array.  We turn off ADDCURDIR if not called recursively and

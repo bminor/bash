@@ -164,6 +164,10 @@ The following list is what's changed when `POSIX mode' is in effect:
  42. The `ulimit' builtin uses a block size of 512 bytes for the `-c'
      and `-f' options.
 
+ 43. The arrival of `SIGCHLD'  when a trap is set on `SIGCHLD' does not
+     interrupt the `wait' builtin and cause it to return immediately.
+     The trap command is run once for each child that exits.
+
 
 There is other POSIX behavior that Bash does not implement by default
 even when in POSIX mode.  Specifically:
