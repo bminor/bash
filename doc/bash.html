@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 August 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 September 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -4068,6 +4068,15 @@ Redirections are processed in the order they appear, from
 left to right.
 <P>
 
+Each redirection that may be preceded by a file descriptor number
+may instead be preceded by a word of the form {<I>varname</I>}.
+In this case, for each redirection operator except
+&gt;&amp;- and &lt;&amp;-, the shell will allocate a file descriptor greater
+than 10 and assign it to <I>varname</I>.  If &gt;&amp;- or &lt;&amp;- is preceded
+by {<I>varname</I>}, the value of <I>varname</I> defines the file
+descriptor to close.
+<P>
+
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
 <B>&lt;</B>,
@@ -6414,6 +6423,12 @@ can be set to either
 or
 <B>vi</B>.
 
+<DT><B>echo-control-characters (On)</B>
+
+<DD>
+When set to <B>On</B>, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
@@ -6541,6 +6556,15 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+<DT><B>skip-completed-text (Off)</B>
+
+<DD>
+If set to <B>On</B>, this alters the default completion behavior when
+inserting a single match into the line.  It's only active when
+performing completion in the middle of a word.  If enabled, readline
+does not insert characters from the completion that match characters
+after point in the word being completed, so portions of the word
+following the cursor are not duplicated.
 <DT><B>visible-stats (Off)</B>
 
 <DD>
@@ -12213,7 +12237,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 August 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 September 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12319,6 +12343,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 17 August 2009 14:46:46 EDT
+Time: 16 September 2009 21:35:09 EDT
 </BODY>
 </HTML>

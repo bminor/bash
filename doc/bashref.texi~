@@ -2088,6 +2088,14 @@ simple command or may follow a command.
 Redirections are processed in the order they appear, from
 left to right.
 
+Each redirection that may be preceded by a file descriptor number
+may instead be preceded by a word of the form @{@var{varname}@}.
+In this case, for each redirection operator except
+>&- and <&-, the shell will allocate a file descriptor greater
+than 10 and assign it to @{@var{varname}@}.  If >&- or <&- is preceded
+by @{@var{varname}@}, the value of @var{varname} defines the file
+descriptor to close.
+
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
 @samp{<}, the redirection refers to the standard input (file
@@ -4772,6 +4780,20 @@ The value of @env{MACHTYPE}.
 @item BASH_VERSION
 The version number of the current instance of Bash.
 
+@item BASH_XTRACEFD
+If set to an integer corresponding to a valid file descriptor, Bash
+will write the trace output generated when @samp{set -x}
+is enabled to that file descriptor.
+This allows tracing output to be separated from diagnostic and error
+messages.
+The file descriptor is closed when @code{BASH_XTRACEFD} is unset or assigned
+a new value.
+Unsetting @code{BASH_XTRACEFD} or assigning it the empty string causes the
+trace output to be sent to the standard error.
+Note that setting @code{BASH_XTRACEFD} to 2 (the standard error file
+descriptor) and then unsetting it will result in the standard error
+being closed.
+
 @item COLUMNS
 Used by the @code{select} builtin command to determine the terminal width
 when printing selection lists.  Automatically set upon receipt of a
@@ -7251,6 +7273,10 @@ Include support for the @code{((@dots{}))} command
 @item --enable-extended-glob
 Include support for the extended pattern matching features described
 above under @ref{Pattern Matching}.
+
+@item --enable-extended-glob-default
+Set the default value of the @var{extglob} shell option described
+above under @ref{The Shopt Builtin} to be enabled.
 
 @item --enable-help-builtin
 Include the @code{help} builtin, which displays help on shell builtins and

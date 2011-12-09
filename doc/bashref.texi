@@ -976,6 +976,9 @@ substitution, and quote removal are performed.
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
+When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+lexicographically using the current locale.
+
 When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching}.
@@ -2087,6 +2090,14 @@ operators may precede or appear anywhere within a
 simple command or may follow a command.
 Redirections are processed in the order they appear, from
 left to right.
+
+Each redirection that may be preceded by a file descriptor number
+may instead be preceded by a word of the form @{@var{varname}@}.
+In this case, for each redirection operator except
+>&- and <&-, the shell will allocate a file descriptor greater
+than 10 and assign it to @{@var{varname}@}.  If >&- or <&- is preceded
+by @{@var{varname}@}, the value of @var{varname} defines the file
+descriptor to close.
 
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is

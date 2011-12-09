@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Aug 31 08:59:57 EDT 2009
+.\"	Last Change: Wed Sep 16 21:33:34 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 August 31" "GNU Bash-4.0"
+.TH BASH 1 "2009 September 16" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -679,6 +679,10 @@ variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal are performed.
 Conditional operators such as \fB\-f\fP must be unquoted to be recognized
 as primaries.
+.if t .sp 0.5
+.if n .sp 1
+When used with \fB[[\fP, The \fB<\fP and \fB>\fP operators sort
+lexicographically using the current locale.
 .if t .sp 0.5
 .if n .sp 1
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
@@ -3185,6 +3189,14 @@ or may follow a
 .IR command .
 Redirections are processed in the order they appear, from
 left to right.
+.PP
+Each redirection that may be preceded by a file descriptor number
+may instead be preceded by a word of the form {\fIvarname\fP}.
+In this case, for each redirection operator except
+>&- and <&-, the shell will allocate a file descriptor greater
+than 10 and assign it to \fIvarname\fP.  If >&- or <&- is preceded
+by {\fIvarname\fP}, the value of \fIvarname\fP defines the file
+descriptor to close.
 .PP
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is

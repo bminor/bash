@@ -1024,7 +1024,9 @@ print_heredoc_header (redirect)
   kill_leading = redirect->instruction == r_deblank_reading_until;
 
   /* Here doc header */
-  if (redirect->redirector.dest != 0)
+  if (redirect->rflags & REDIR_VARASSIGN)
+    cprintf ("{%s}", redirect->redirector.filename->word);
+  else if (redirect->redirector.dest != 0)
     cprintf ("%d", redirect->redirector.dest);
 
   /* If the here document delimiter is quoted, single-quote it. */
@@ -1051,35 +1053,59 @@ print_redirection (redirect)
      REDIRECT *redirect;
 {
   int kill_leading, redirector, redir_fd;
-  WORD_DESC *redirectee;
+  WORD_DESC *redirectee, *redir_word;
 
   kill_leading = 0;
   redirectee = redirect->redirectee.filename;
-  redirector = redirect->redirector.dest;
   redir_fd = redirect->redirectee.dest;
+
+  redir_word = redirect->redirector.filename;
+  redirector = redirect->redirector.dest;
 
   switch (redirect->instruction)
     {
-    case r_output_direction:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf ("> %s", redirectee->word);
-      break;
-
     case r_input_direction:
-      if (redirector != 0)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 0)
 	cprintf ("%d", redirector);
       cprintf ("< %s", redirectee->word);
+      break;
+
+    case r_output_direction:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf ("> %s", redirectee->word);
       break;
 
     case r_inputa_direction:	/* Redirection created by the shell. */
       cprintf ("&");
       break;
 
+    case r_output_force:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf (">|%s", redirectee->word);
+      break;
+
     case r_appending_to:
-      if (redirector != 1)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
 	cprintf ("%d", redirector);
       cprintf (">> %s", redirectee->word);
+      break;
+
+    case r_input_output:
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 1)
+	cprintf ("%d", redirector);
+      cprintf ("<> %s", redirectee->word);
       break;
 
     case r_deblank_reading_until:
@@ -1090,7 +1116,9 @@ print_redirection (redirect)
       break;
 
     case r_reading_string:
-      if (redirector != 0)
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}", redir_word->word);
+      else if (redirector != 0)
 	cprintf ("%d", redirector);
       if (ansic_shouldquote (redirect->redirectee.filename->word))
 	{
@@ -1104,39 +1132,66 @@ print_redirection (redirect)
       break;
 
     case r_duplicating_input:
-      cprintf ("%d<&%d", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%d", redir_word->word, redir_fd);
+      else
+	cprintf ("%d<&%d", redirector, redir_fd);
       break;
 
     case r_duplicating_output:
-      cprintf ("%d>&%d", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%d", redir_word->word, redir_fd);
+      else
+	cprintf ("%d>&%d", redirector, redir_fd);
       break;
 
     case r_duplicating_input_word:
-      cprintf ("%d<&%s", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%s", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d<&%s", redirector, redirectee->word);
       break;
 
     case r_duplicating_output_word:
-      cprintf ("%d>&%s", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%s", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d>&%s", redirector, redirectee->word);
       break;
 
     case r_move_input:
-      cprintf ("%d<&%d-", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%d-", redir_word->word, redir_fd);
+      else
+	cprintf ("%d<&%d-", redirector, redir_fd);
       break;
 
     case r_move_output:
-      cprintf ("%d>&%d-", redirector, redir_fd);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%d-", redir_word->word, redir_fd);
+      else
+	cprintf ("%d>&%d-", redirector, redir_fd);
       break;
 
     case r_move_input_word:
-      cprintf ("%d<&%s-", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}<&%s-", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d<&%s-", redirector, redirectee->word);
       break;
 
     case r_move_output_word:
-      cprintf ("%d>&%s-", redirector, redirectee->word);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&%s-", redir_word->word, redirectee->word);
+      else
+	cprintf ("%d>&%s-", redirector, redirectee->word);
       break;
 
     case r_close_this:
-      cprintf ("%d>&-", redirector);
+      if (redirect->rflags & REDIR_VARASSIGN)
+	cprintf ("{%s}>&-", redir_word->word);
+      else
+	cprintf ("%d>&-", redirector);
       break;
 
     case r_err_and_out:
@@ -1145,18 +1200,6 @@ print_redirection (redirect)
 
     case r_append_err_and_out:
       cprintf ("&>>%s", redirectee->word);
-      break;
-
-    case r_input_output:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf ("<> %s", redirectee->word);
-      break;
-
-    case r_output_force:
-      if (redirector != 1)
-	cprintf ("%d", redirector);
-      cprintf (">|%s", redirectee->word);
       break;
     }
 }
@@ -1339,7 +1382,7 @@ semicolon ()
 {
   if (command_string_index > 0 &&
        (the_printed_command[command_string_index - 1] == '&' ||
-        the_printed_command[command_string_index - 1] == '\n'))
+	the_printed_command[command_string_index - 1] == '\n'))
     return;
   cprintf (";");
 }
@@ -1404,7 +1447,7 @@ cprintf (control, va_alist)
 		  argp = intbuf;
 		}
 	      else
-	        argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
+		argp = inttostr (digit_arg, intbuf, sizeof (intbuf));
 	      arg_len = strlen (argp);
 	      break;
 

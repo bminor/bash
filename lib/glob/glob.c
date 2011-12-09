@@ -309,9 +309,9 @@ dequote_pathname (pathname)
 #  define GLOB_TESTNAME(name)  (lstat (name, &finfo))
 #else /* !HAVE_LSTAT */
 #  if !defined (AFS)
-#    define GLOB_TESTNAME(name)  (sh_eaccess (nextname, F_OK))
+#    define GLOB_TESTNAME(name)  (sh_eaccess (name, F_OK))
 #  else /* AFS */
-#    define GLOB_TESTNAME(name)  (access (nextname, F_OK))
+#    define GLOB_TESTNAME(name)  (access (name, F_OK))
 #  endif /* AFS */
 #endif /* !HAVE_LSTAT */
 
@@ -322,6 +322,7 @@ glob_testdir (dir)
 {
   struct stat finfo;
 
+/*itrace("glob_testdir: testing %s", dir);*/
   if (stat (dir, &finfo) < 0)
     return (-1);
 
@@ -925,11 +926,14 @@ glob_filename (pathname, flags)
 	{
 	  char **temp_results;
 
+	  /* XXX -- we've recursively scanned any directories resulting from
+	     a `**', so turn off the flag.  We turn it on again below if
+	     filename is `**' */
 	  /* Scan directory even on a NULL filename.  That way, `*h/'
 	     returns only directories ending in `h', instead of all
 	     files ending in `h' with a `/' appended. */
 	  dname = directories[i];
-	  dflags = flags & ~GX_MARKDIRS;
+	  dflags = flags & ~(GX_MARKDIRS|GX_ALLDIRS|GX_ADDCURDIR);
 	  if ((flags & GX_GLOBSTAR) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
 	    dflags |= GX_ALLDIRS|GX_ADDCURDIR;
 	  if (dname[0] == '\0' && filename[0])

@@ -64,8 +64,8 @@
 \entry{matching, pattern}{24}{matching, pattern}
 \entry{redirection}{26}{redirection}
 \entry{command expansion}{29}{command expansion}
-\entry{command execution}{29}{command execution}
-\entry{command search}{29}{command search}
+\entry{command execution}{30}{command execution}
+\entry{command search}{30}{command search}
 \entry{execution environment}{30}{execution environment}
 \entry{environment}{31}{environment}
 \entry{exit status}{32}{exit status}
@@ -103,9 +103,9 @@
 \entry{kill ring}{93}{kill ring}
 \entry{initialization file, readline}{94}{initialization file, readline}
 \entry{variables, readline}{95}{variables, readline}
-\entry{programmable completion}{112}{programmable completion}
-\entry{completion builtins}{114}{completion builtins}
-\entry{History, how to use}{117}{History, how to use}
+\entry{programmable completion}{113}{programmable completion}
+\entry{completion builtins}{115}{completion builtins}
+\entry{History, how to use}{118}{History, how to use}
 \entry{command history}{119}{command history}
 \entry{history list}{119}{history list}
 \entry{history builtins}{119}{history builtins}

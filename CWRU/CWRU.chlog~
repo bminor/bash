@@ -8796,3 +8796,93 @@ make_cmd.c
 	  make_redirection from int to REDIRECTEE.  In general, changes are
 	  using REDIRECTEE sd and assigning old argument to sd.dest, then
 	  passing sd to make_redirection
+
+make_cmd.[ch],parse.y
+	- add fourth argument to make_redirection: flags.  Sets initial value
+	  of `rflags' member of struct redirect
+	- changed all callers of make_redirection to add fourth argument of 0
+
+				   9/15
+				   ----
+parse.y
+	- change read_token_word to return REDIR_WORD for tokens of the form
+	  {var} where `var' is a valid shell identifier and the character
+	  following the } is a `<' or `>'
+	- add REDIR_WORD versions of all input and output file redirections
+	  and here documents
+
+print_cmd.c
+	- change input and output file redirection direction and here
+	  document cases of print_redirection to print a varname
+	  specification of the form {var} when appropriate.  Still need
+	  to fix rest of cases
+
+redir.c
+	- implement REDIR_VARASSIGN semantics for file input and output
+	  redirections and here documents
+
+				   9/16
+				   ----
+parse.y
+	- added REDIR_WORD versions of remaining redirection constructs except
+	  for err_and_out ones
+
+redir.c
+	- handle REDIR_VARASSIGN semantics for rest of redirection constructs 
+	- accommodate REDIR_VARASSIGN when translating redirections
+	- new function, redir_varvalue, does variable lookup for {v} when
+	  redirection needs the value (e.g., r_close_this)
+
+print_cmd.c
+	- fix rest of cases to print {varname} when REDIR_VARASSIGN is set in
+	  redirect->rflags
+
+doc/{bash.1,bashref.texi}
+	- document new {varname} REDIR_VARASSIGN form of redirections
+
+tests/vredir.{right,tests},vredir[1-5].sub
+	- tests for new {varname} REDIR_VARASSIGN form of redirections
+
+				   9/18
+				   ----
+subst.c
+	- new flags argument to split_at_delims: these flags are ORd with
+	  SD_NOJMP and passed to skip_to_delim
+	- change skip_to_delim to honor new SD_NOQUOTEDELIM flag by not
+	  checking whether or not single and double quotes are delimiters
+	  if it's set in passed flags until after skipping quoted strings.
+
+subst.h
+	- change extern declaration for split_at_delims
+	- new define for SD_NOQUOTEDELIM flag
+
+pcomplete.c
+	- pass SD_NOQUOTEDELIM in flags argument to split_at_delims so single
+	  and double quotes, even though they're in
+	  rl_completer_word_break_characters, don't act as word delimiters
+	  for programmable completion.  Fixes bug reported by Freddy
+	  Vulto <fvulto@gmail.com>
+
+lib/glob/glob.c
+	- in glob_filename, after recursively scanning a directory specified
+	  with `**', turn off GX_ALLDIRS|GX_ADDCURDIR before calling
+	  glob_vector on the rest of the pathname, since it may not apply to
+	  the rest of the pattern.  Turned back on if the filename makes it
+	  appropriate.  Fixes bug reported by Anders Kaseorg <andersk@mit.edu>
+
+redir.c
+	- change execute_null_command to fork a child to execute if any of
+	  the commands redirections have the REDIR_VARASSIGN flag set, since
+	  those commands are not supposed to have side effects
+
+test.c
+	- < and > binary operators will obey the locale by using strcoll if
+	  the TEST_LOCALE flag is passed to binary_test
+
+test.h
+	- new define for TEST_LOCALE
+
+execute_cmd.c
+	- execute_cond_node sets TEST_LOCALE so [[ str1 < str2 ]] (and >)
+	  obey the locale.  Fixes bug/incompatibility reported by Greg
+	  Wooledge <wooledg@eeg.ccf.org>

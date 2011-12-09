@@ -13,10 +13,10 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{92}
-\entry {command execution}{29}
+\entry {command execution}{30}
 \entry {command expansion}{29}
 \entry {command history}{119}
-\entry {command search}{29}
+\entry {command search}{30}
 \entry {command substitution}{22}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
@@ -28,7 +28,7 @@
 \entry {commands, shell}{7}
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
-\entry {completion builtins}{114}
+\entry {completion builtins}{115}
 \entry {configuration}{125}
 \entry {control operator}{3}
 \entry {coprocess}{13}
@@ -61,7 +61,7 @@
 \entry {history events}{121}
 \entry {history expansion}{121}
 \entry {history list}{119}
-\entry {History, how to use}{117}
+\entry {History, how to use}{118}
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{94}
@@ -100,7 +100,7 @@
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{23}
-\entry {programmable completion}{112}
+\entry {programmable completion}{113}
 \entry {prompting}{82}
 \initial {Q}
 \entry {quoting}{6}

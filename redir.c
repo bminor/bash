@@ -82,6 +82,9 @@ static int redir_special_open __P((int, char *, int, int, enum r_instruction));
 static int noclobber_open __P((char *, int, int, enum r_instruction));
 static int redir_open __P((char *, int, int, enum r_instruction));
 
+static int redir_varassign __P((REDIRECT *, int));
+static int redir_varvalue __P((REDIRECT *));
+
 /* Spare redirector used when translating [N]>&WORD[-] or [N]<&WORD[-] to
    a new redirection and when creating the redirection undo list. */
 static REDIRECTEE rd;
@@ -120,6 +123,18 @@ redirection_error (temp, error)
         case r_move_output:
 	  filename = allocname = itos (temp->redirectee.dest);
 	  break;
+	case r_duplicating_input_word:
+	  if (temp->redirector.dest == 0)	/* Guess */
+	    filename = temp->redirectee.filename->word;	/* XXX */
+	  else
+	    filename = allocname = itos (temp->redirector.dest);
+	  break;
+	case r_duplicating_output_word:
+	  if (temp->redirector.dest == 1)	/* Guess */
+	    filename = temp->redirectee.filename->word;	/* XXX */
+	  else
+	    filename = allocname = itos (temp->redirector.dest);
+	  break;
 	default:
 	  filename = allocname = itos (temp->redirector.dest);
 	  break;
@@ -128,6 +143,7 @@ redirection_error (temp, error)
 #endif
   else if (expandable_redirection_filename (temp))
     {
+expandable_filename:
       if (posixly_correct && interactive_shell == 0)
 	{
 	  oflags = temp->redirectee.filename->flags;
@@ -165,7 +181,7 @@ redirection_error (temp, error)
       break;
 
     case BADVAR_REDIRECT:
-      internal_error (_("cannot assign fd to variable %s"), filename);
+      internal_error (_("%s: cannot assign fd to variable"), filename);
       break;
 
     default:
@@ -667,8 +683,9 @@ do_redirection_internal (redirect, flags)
 
   if (TRANSLATE_REDIRECT (ri))
     {
-      /* We have [N]>&WORD[-] or [N]<&WORD[-].  Expand WORD, then translate
-	 the redirection into a new one and continue. */
+      /* We have [N]>&WORD[-] or [N]<&WORD[-] (or {V}>&WORD[-] or {V}<&WORD-).
+         and WORD, then translate the redirection into a new one and 
+	 continue. */
       redirectee_word = redirection_expand (redirectee);
 
       /* XXX - what to do with [N]<&$w- where w is unset or null?  ksh93
@@ -677,13 +694,13 @@ do_redirection_internal (redirect, flags)
 	return (AMBIGUOUS_REDIRECT);
       else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
 	{
-	  sd.dest = redirector;
+	  sd = redirect->redirector;
 	  rd.dest = 0;
 	  new_redirect = make_redirection (sd, r_close_this, rd, 0);
 	}
       else if (all_digits (redirectee_word))
 	{
-	  sd.dest = redirector;
+	  sd = redirect->redirector;
 	  if (legal_number (redirectee_word, &lfd) && (int)lfd == lfd)
 	    rd.dest = lfd;
 	  else
@@ -704,9 +721,9 @@ do_redirection_internal (redirect, flags)
 	      break;
 	    }
 	}
-      else if (ri == r_duplicating_output_word && redirector == 1)
+      else if (ri == r_duplicating_output_word && (redirect->rflags & REDIR_VARASSIGN) == 0 && redirector == 1)
 	{
-	  sd.dest = 1;
+	  sd = redirect->redirector;
 	  rd.filename = make_bare_word (redirectee_word);
 	  new_redirect = make_redirection (sd, r_err_and_out, rd, 0);
 	}
@@ -789,6 +806,9 @@ do_redirection_internal (redirect, flags)
 
       if (flags & RX_ACTIVE)
 	{
+	  if (redirect->rflags & REDIR_VARASSIGN)
+	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+
 	  if (flags & RX_UNDOABLE)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
@@ -816,7 +836,16 @@ do_redirection_internal (redirect, flags)
 	      fpurge (stderr);
 	    }
 
-	  if ((fd != redirector) && (dup2 (fd, redirector) < 0))
+	  if (redirect->rflags & REDIR_VARASSIGN)
+	    {
+	      if ((r = redir_varassign (redirect, redirector)) < 0)
+		{
+		  close (redirector);
+		  close (fd);
+		  return (r);	/* XXX */
+		}
+	    }
+	  else if ((fd != redirector) && (dup2 (fd, redirector) < 0))
 	    return (errno);
 
 #if defined (BUFFERED_INPUT)
@@ -852,7 +881,7 @@ do_redirection_internal (redirect, flags)
 	}
 
       /* If we are hacking both stdout and stderr, do the stderr
-	 redirection here. */
+	 redirection here.  XXX - handle {var} here? */
       if (ri == r_err_and_out || ri == r_append_err_and_out)
 	{
 	  if (flags & RX_ACTIVE)
@@ -880,6 +909,9 @@ do_redirection_internal (redirect, flags)
 	      return (HEREDOC_REDIRECT);
 	    }
 
+	  if (redirect->rflags & REDIR_VARASSIGN)
+	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+
 	  if (flags & RX_ACTIVE)
 	    {
 	      if (flags & RX_UNDOABLE)
@@ -894,7 +926,16 @@ do_redirection_internal (redirect, flags)
 #if defined (BUFFERED_INPUT)
 	      check_bash_input (redirector);
 #endif
-	      if (fd != redirector && dup2 (fd, redirector) < 0)
+	      if (redirect->rflags & REDIR_VARASSIGN)
+		{
+		  if ((r = redir_varassign (redirect, redirector)) < 0)
+		    {
+		      close (redirector);
+		      close (fd);
+		      return (r);	/* XXX */
+		    }
+		}
+	      else if (fd != redirector && dup2 (fd, redirector) < 0)
 		{
 		  r = errno;
 		  close (fd);
@@ -922,6 +963,9 @@ do_redirection_internal (redirect, flags)
     case r_duplicating_output:
     case r_move_input:
     case r_move_output:
+      if ((flags & RX_ACTIVE) && (redirect->rflags & REDIR_VARASSIGN))
+	redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
 	{
 	  if (flags & RX_UNDOABLE)
@@ -935,8 +979,16 @@ do_redirection_internal (redirect, flags)
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
+	  if (redirect->rflags & REDIR_VARASSIGN)
+	    {
+	      if ((r = redir_varassign (redirect, redirector)) < 0)
+		{
+		  close (redirector);
+		  return (r);	/* XXX */
+		}
+	    }
 	  /* This is correct.  2>&1 means dup2 (1, 2); */
-	  if (dup2 (redir_fd, redirector) < 0)
+	  else if (dup2 (redir_fd, redirector) < 0)
 	    return (errno);
 
 #if defined (BUFFERED_INPUT)
@@ -987,6 +1039,13 @@ do_redirection_internal (redirect, flags)
     case r_close_this:
       if (flags & RX_ACTIVE)
 	{
+	  if (redirect->rflags & REDIR_VARASSIGN)
+	    {
+	      redirector = redir_varvalue (redirect);
+	      if (redirector < 0)
+		return AMBIGUOUS_REDIRECT;
+	    }
+
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
 	    add_undo_redirect (redirector, ri, -1);
 
@@ -1170,6 +1229,49 @@ stdin_redirects (redirs)
   int n;
 
   for (n = 0, rp = redirs; rp; rp = rp->next)
-    n += stdin_redirection (rp->instruction, rp->redirector.dest);
+    if ((rp->rflags & REDIR_VARASSIGN) == 0)
+      n += stdin_redirection (rp->instruction, rp->redirector.dest);
   return n;
+}
+
+/* These don't yet handle array references */
+static int
+redir_varassign (redir, fd)
+     REDIRECT *redir;
+     int fd;
+{
+  WORD_DESC *w;
+  SHELL_VAR *v;
+
+  w = redir->redirector.filename;
+  v = bind_var_to_int (w->word, fd);
+  if (v == 0 || readonly_p (v) || noassign_p (v))
+    return BADVAR_REDIRECT;
+
+  return 0;
+}
+
+static int
+redir_varvalue (redir)
+     REDIRECT *redir;
+{
+  SHELL_VAR *v;
+  char *val;
+  intmax_t vmax;
+  int i;
+
+  /* XXX - handle set -u here? */
+  v = find_variable (redir->redirector.filename->word);
+  if (v == 0 || invisible_p (v))
+    return -1;
+
+  val = get_variable_value (v);
+  if (val == 0 || *val == 0)
+    return -1;
+
+  if (legal_number (val, &vmax) < 0)
+    return -1;
+
+  i = vmax;	/* integer truncation */
+  return i;
 }

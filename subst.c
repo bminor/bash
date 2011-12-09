@@ -1625,7 +1625,7 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c, invert;
+  int i, pass_next, backq, si, c, invert, skipquote;
   size_t slen;
   char *temp;
   DECLARE_MBSTATE;
@@ -1639,6 +1639,11 @@ skip_to_delim (string, start, delims, flags)
   pass_next = backq = 0;
   while (c = string[i])
     {
+      /* If this is non-zero, we should not let quote characters be delimiters
+	 and the current character is a single or double quote.  We should not
+	 test whether or not it's a delimiter until after we skip single- or
+	 double-quoted strings. */
+      skipquote = ((flags & SD_NOQUOTEDELIM) && (c == '\'' || c =='"'));
       if (pass_next)
 	{
 	  pass_next = 0;
@@ -1666,7 +1671,7 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
-      else if (invert == 0 && member (c, delims))
+      else if (skipquote == 0 && invert == 0 && member (c, delims))
 	break;
       else if (c == '\'' || c == '"')
 	{
@@ -1690,7 +1695,7 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
-      else if (invert && (member (c, delims) == 0))
+      else if ((skipquote || invert) && (member (c, delims) == 0))
 	break;
       else
 	ADVANCE_CHAR (string, slen, i);
@@ -1808,14 +1813,14 @@ unclosed_pair (string, eindex, openstr)
    the index of the word containing SENTINEL.  Non-whitespace chars in
    DELIMS delimit separate fields. */
 WORD_LIST *
-split_at_delims (string, slen, delims, sentinel, nwp, cwp)
+split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
      char *string;
      int slen;
      char *delims;
-     int sentinel;
+     int sentinel, flags;
      int *nwp, *cwp;
 {
-  int ts, te, i, nw, cw, ifs_split;
+  int ts, te, i, nw, cw, ifs_split, dflags;
   char *token, *d, *d2;
   WORD_LIST *ret, *tl;
 
@@ -1882,9 +1887,10 @@ split_at_delims (string, slen, delims, sentinel, nwp, cwp)
   ts = i;
   nw = 0;
   cw = -1;
+  dflags = flags|SD_NOJMP;
   while (1)
     {
-      te = skip_to_delim (string, ts, d, SD_NOJMP);
+      te = skip_to_delim (string, ts, d, dflags);
 
       /* If we have a non-whitespace delimiter character, use it to make a
 	 separate field.  This is just about what $IFS splitting does and

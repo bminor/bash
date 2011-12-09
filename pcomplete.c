@@ -834,7 +834,7 @@ gen_wordlist_matches (cs, text)
      do -- there's no way to split a simple list into individual words
      that way, since the shell semantics say that word splitting is done
      only on the results of expansion. */
-  l = split_at_delims (cs->words, strlen (cs->words), (char *)NULL, -1, (int *)NULL, (int *)NULL);
+  l = split_at_delims (cs->words, strlen (cs->words), (char *)NULL, -1, 0, (int *)NULL, (int *)NULL);
   if (l == 0)
     return ((STRINGLIST *)NULL);
   /* This will jump back to the top level if the expansion fails... */
@@ -1199,7 +1199,7 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
 #else
   delims = rl_completer_word_break_characters;
 #endif
-  ret = split_at_delims (line, llen, delims, sentinel, nwp, cwp);
+  ret = split_at_delims (line, llen, delims, sentinel, SD_NOQUOTEDELIM, nwp, cwp);
   return (ret);
 }
 

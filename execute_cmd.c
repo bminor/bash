@@ -3268,7 +3268,7 @@ execute_cond_node (cond)
 	  int oe;
 	  oe = extended_glob;
 	  extended_glob = 1;
-	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP)
+	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP|TEST_LOCALE)
 				  ? EXECUTION_SUCCESS
 				  : EXECUTION_FAILURE;
 	  extended_glob = oe;
@@ -3359,8 +3359,13 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
      int pipe_in, pipe_out, async;
 {
   int r;
+  int forcefork;
+  REDIRECT *rd;
 
-  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
+  for (forcefork = 0, rd = redirects; rd; rd = rd->next)
+    forcefork += rd->rflags & REDIR_VARASSIGN;
+
+  if (forcefork || pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
       /* We have a null command, but we really want a subshell to take
 	 care of it.  Just fork, do piping and redirections, and exit. */
