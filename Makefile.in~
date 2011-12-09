@@ -213,7 +213,8 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/zgetline.c ${SH_LIBSRC}/mbscmp.c \
 		${SH_LIBSRC}/casemod.c ${SH_LIBSRC}/uconvert.c \
 		${SH_LIBSRC}/ufuncs.c ${SH_LIBSRC}/fdprintf.c \
-		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c
+		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c \
+		${SH_LIBSRC}/fnxform.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -943,6 +944,7 @@ hashlib.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 hashlib.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 input.o: config.h bashtypes.h ${BASHINCDIR}/filecntl.h ${BASHINCDIR}/posixstat.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 input.o: command.h ${BASHINCDIR}/stdc.h general.h xmalloc.h input.h error.h externs.h
+input.o: quit.h
 list.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 list.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
 list.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
@@ -1046,7 +1048,7 @@ variables.o: make_cmd.h subst.h sig.h pathnames.h externs.h
 variables.o: flags.h execute_cmd.h mailcheck.h input.h $(DEFSRC)/common.h
 variables.o: findcmd.h bashhist.h hashcmd.h pathexp.h
 variables.o: pcomplete.h  ${BASHINCDIR}/chartypes.h
-variables.o: ${BASHINCDIR}/posixtime.h
+variables.o: ${BASHINCDIR}/posixtime.h assoc.h
 version.o:  conftypes.h patchlevel.h version.h
 xmalloc.o: config.h bashtypes.h ${BASHINCDIR}/ansi_stdlib.h error.h
 

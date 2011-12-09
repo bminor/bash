@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Aug 14 18:32:52 EDT 2009
+.\"	Last Change: Sat Aug 22 12:02:47 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 August 14" "GNU Bash-4.0"
+.TH BASH 1 "2009 August 22" "GNU Bash-4.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1735,6 +1735,20 @@ command.
 A sample value is
 .if t \f(CW".:~:/usr"\fP.
 .if n ".:~:/usr".
+.TP
+.B BASH_XTRACEFD
+If set to an integer corresponding to a valid file descriptor, \fBbash\fP
+will write the trace output generated when
+.if t \f(CWset -x\fP
+.if n \fIset -x\fP
+is enabled to that file descriptor.
+The file descriptor is closed when \fBBASH_XTRACEFD\fP is unset or assigned
+a new value.
+Unsetting \fBBASH_XTRACEFD\fP or assigning it the empty string causes the
+trace output to be sent to the standard error.
+Note that setting \fPBASH_XTRACEFD\fP to 2 (the standard error file
+descriptor) and then unsetting it will result in the standard error
+being closed.
 .TP
 .B COLUMNS
 Used by the \fBselect\fP builtin command to determine the terminal width
@@ -5035,6 +5049,14 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+.TP
+.B skip\-completed\-text (Off)
+If set to \fBOn\fP, this alters the default completion behavior when
+inserting a single match into the line.  It's only active when
+performing completion in the middle of a word.  If enabled, readline
+does not insert characters from the completion that match characters
+after point in the word being completed, so portions of the word
+following the cursor are not duplicated.
 .TP
 .B visible\-stats (Off)
 If set to \fBOn\fP, a character denoting a file's type as reported

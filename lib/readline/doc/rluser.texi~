@@ -1436,6 +1436,15 @@ A character is read and point is moved to the previous occurrence
 of that character.  A negative count searches for subsequent
 occurrences.
 
+@item skip-csi-sequence ()
+Read enough characters to consume a multi-key sequence such as those
+defined for keys like Home and End.  Such sequences begin with a
+Control Sequence Indicator (CSI), usually ESC-[.  If this sequence is
+bound to "\e[", keys producing such sequences will have no effect
+unless explicitly bound to a readline command, instead of inserting
+stray characters into the editing buffer.  This is unbound by default,
+but usually bound to ESC-[.
+
 @item insert-comment (M-#)
 Without a numeric argument, the value of the @code{comment-begin}
 variable is inserted at the beginning of the current line.
@@ -1707,11 +1716,13 @@ For instance, assuming that there is a library of compspecs, each kept in a
 file corresponding to the name of the command, the following default
 completion function would load completions dynamically:
 
+@example
 _completion_loader()
-{
+@{
 	. "/etc/bash_completion.d/$1.sh" >/dev/null 2>&1 && return 124
-}
+@}
 complete -D -F _completion_loader
+@end example
 
 @node Programmable Completion Builtins
 @section Programmable Completion Builtins

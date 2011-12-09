@@ -8558,8 +8558,119 @@ print_cmd.c
 	- new function xtrace_init, sets xtrace_fd == -1 and xtrace_fp = stderr
 	- new function xtrace_set (fd, fp), sets xtrace_fd and xtrace_fp
 	  to the arguments
+	- new function xtrace_reset, handles closing old xtrace fd/fp and
+	  moving them back to -1/stderr
+	- new function xtrace_fdchck, calls xtrace_reset if the fd passed as
+	  an argument is xtrace_fd
 	- change xtrace functions to fprintf to xtrace_fp instead of stderr
 
 shell.c
 	- call xtrace_init() very early in main()
 
+variables.c
+	- new special variable, BASH_XTRACEFD, holds file descriptor used for
+	  set -x trace output.  Inspired by suggestion from Bruce Korb
+	  <bruce.korb@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- added description of new BASH_XTRACEFD variable
+
+redir.c
+	- add calls to xtrace_fdchk to the redirections that close file
+	  descriptors, so we notice if we close BASH_XTRACEFD and compensate
+	  accordingly (same places that call coproc_fdchk())
+
+				   8/18
+				   ----
+lib/readline/text.c
+	- change to _rl_replace_text to add error checks: start must be <=
+	  end, and we don't call rl_insert_text if passed the empty string
+
+config.h.in
+	- add define for HAVE_ICONV, already found by intl autoconf
+	  macros
+	- add define for HAVE_LOCALE_CHARSET
+
+aclocal.m4
+	- add check for locale_charset() to BASH_CHECK_MULTIBYTE
+
+lib/sh/fnxform.c
+	- new file with two public function: fnx_tofs and fnx_fromfs.
+	  Primarily intended for use on MacOS X, they use iconv to convert
+	  between whatever the current locale encoding is and "UTF-8-MAC",
+	  a special encoding on OS X in which all characters are
+	  decomposed unicode, as the HFS+ filesystem stores them.  These
+	  functions return a pointer to a local buffer, allocated once and
+	  resized as necessary, to avoid too many allocations; callers
+	  should not free the return value, since it may be the string
+	  passed
+
+Makefile.in
+	- make sure LIBICONV is set by autoconf (@LIBICONV@) and added to
+	  list of link libraries
+
+externs.h
+	- new extern declarations for fnx_fromfs and fnx_tofs
+
+lib/glob/glob.c
+	- convert the filename read using readdir() in glob_vector() using
+	  fnx_fromfs and use that value in the call to strmatch.  This
+	  ensures that we're using the precomposed Unicode value of the
+	  filename rather than the native decomposed form.  Original bug
+	  report from Len Lattanzi <llatanzi@apple.com>; fix inspired by
+	  Guillaume Outters <guillaume.outters@free.fr>
+
+				   8/19
+				   ----
+lib/readline/complete.c
+	- new completion hook: rl_filename_rewrite_hook, can rewrite or modify
+	  filenames read from the filesystem before they are compared to the
+	  word to be completed
+
+lib/readline/readline.h
+	- extern declaration for rl_filename_rewrite_hook
+
+lib/readline/doc/rltech.texi
+	- document rl_filename_rewrite_hook
+
+bashline.c
+	- new function, bash_filename_rewrite_hook, assigned to
+	  rl_filename_rewrite_hook.  Calls fnx_fromfs to convert from
+	  filesystem format to "input" format.  This makes completing
+	  filenames with accented characters work on Mac OS X
+
+				   8/20
+				   ----
+lib/readline/bind.c
+	- new bindable variable "skip-completed-text", bound to
+	  _rl_skip_completed_text.  If enabled, it means to note when
+	  completing before the end of a word and skipping over characters
+	  after rl_point that match in both the completion to be inserted
+	  and the word being completed.  It means that completing
+	  `Makefile' with the cursor after the `e' results in `Makefile'
+	  instead of `Makefilefile'.  Inspired by an idea from Jared
+	  Yanovich <phierunner@comcast.net> from back in 2004
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_skip_completed_text
+
+lib/readline/complete.c
+	- implement semantics of _rl_skip_completed_text in insert_match:
+	  skip characters in `replacement' that match chars in rl_line_buffer
+	  from the start of the word to be completed
+
+				   8/21
+				   ----
+error.c
+	- change parser_error to set last_command_exit_value to 2 before
+	  calling exit_shell (if set -e is enabled), so any exit or ERR
+	  trap gets the right value of $?.  Suggestion from Stefano
+	  Lattarini <stefano.lattarini@gmail.com>
+
+braces.c
+	- fix expand_seqterm so that a non-zero-prefixed term that's longer
+	  than a zero-prefixed term determines the length of each term
+	  in the brace-expanded sequence.  This means that things like
+	  {01..100} will have three digits in all the elements of the
+	  expanded list.  Fixes bug reported by Jeff Haemer
+	  <jeffrey.haemer@gmail.com>

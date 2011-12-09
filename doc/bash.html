@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 July 30<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 August 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -555,10 +555,17 @@ or allow them to be specified.
 If the shell is started with the effective user (group) id not equal to the
 real user (group) id, and the <B>-p</B> option is not supplied, no startup
 files are read, shell functions are not inherited from the environment, the
-<FONT SIZE=-1><B>SHELLOPTS</B>
+<FONT SIZE=-1><B>SHELLOPTS</B>,
 
 </FONT>
-variable, if it appears in the environment, is ignored,
+<B>BASHOPTS</B>,
+
+<B>CDPATH</B>,
+
+and
+<B>GLOBIGNORE</B>
+
+variables, if they appear in the environment, are ignored,
 and the effective user id is set to the real user id.
 If the <B>-p</B> option is supplied at invocation, the startup behavior is
 the same, but the effective user id is not reset.
@@ -1695,6 +1702,34 @@ The following variables are set by the shell:
 Expands to the full file name used to invoke this instance of
 <B>bash</B>.
 
+<DT><B>BASHOPTS</B>
+
+<DD>
+A colon-separated list of enabled shell options.  Each word in
+the list is a valid argument for the
+<B>-s</B>
+
+option to the
+<B>shopt</B>
+
+builtin command (see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).  The options appearing in
+<FONT SIZE=-1><B>BASHOPTS</B>
+
+</FONT>
+are those reported as
+<I>on</I>
+
+by <B>shopt</B>.
+If this variable is in the environment when
+<B>bash</B>
+
+starts up, each shell option in the list will be enabled before
+reading any startup files.
+This variable is read-only.
 <DT><B>BASHPID</B>
 
 <DD>
@@ -2204,6 +2239,21 @@ command.
 A sample value is
 <TT>&quot;.:~:/usr&quot;</TT>.
 
+<DT><B>BASH_XTRACEFD</B>
+
+<DD>
+If set to an integer corresponding to a valid file descriptor, <B>bash</B>
+will write the trace output generated when
+<TT>set -x</TT>
+
+is enabled to that file descriptor.
+The file descriptor is closed when <B>BASH_XTRACEFD</B> is unset or assigned
+a new value.
+Unsetting <B>BASH_XTRACEFD</B> or assigning it the empty string causes the
+trace output to be sent to the standard error.
+Note that setting BASH_XTRACEFD to 2 (the standard error file
+descriptor) and then unsetting it will result in the standard error
+being closed.
 <DT><B>COLUMNS</B>
 
 <DD>
@@ -7295,6 +7345,16 @@ character.  A negative count searches for previous occurrences.
 <DD>
 A character is read and point is moved to the previous occurrence of that
 character.  A negative count searches for subsequent occurrences.
+<DT><B>skip-csi-sequence ()</B>
+
+<DD>
+Read enough characters to consume a multi-key sequence such as those
+defined for keys like Home and End.  Such sequences begin with a
+Control Sequence Indicator (CSI), usually ESC-[.  If this sequence is
+bound to &quot;\[&quot;, keys producing such sequences will have no effect
+unless explicitly bound to a readline command, instead of inserting
+stray characters into the editing buffer.  This is unbound by default,
+but usually bound to ESC-[.
 <DT><B>insert-comment (M-#)</B>
 
 <DD>
@@ -7379,12 +7439,17 @@ below), the programmable completion facilities are invoked.
 <P>
 
 First, the command name is identified.
+If the command word is the empty string (completion attempted at the
+beginning of an empty line), any compspec defined with
+the <B>-E</B> option to <B>complete</B> is used.
 If a compspec has been defined for that command, the
 compspec is used to generate the list of possible completions for the word.
 If the command word is a full pathname, a compspec for the full
 pathname is searched for first.
 If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
+If those searches to not result in a compspec, any compspec defined with
+the <B>-D</B> option to <B>complete</B> is used as the default.
 <P>
 
 Once a compspec has been found, it is used to generate the list of
@@ -7544,6 +7609,43 @@ the programmable completion functions force readline to append a slash
 to completed names which are symbolic links to directories, subject to  
 the value of the <B>mark-directories</B> readline variable, regardless
 of the setting of the <B>mark-symlinked-directories</B> readline variable.
+<P>
+
+There is some support for dynamically modifying completions.  This is
+most useful when used in combination with a default completion specified
+with <B>complete -D</B>.
+It's possible for shell functions executed as completion
+handlers to indicate that completion should be retried by returning an
+exit status of 124.  If a shell function returns 124, and changes
+the compspec associated with the command on which completion is being
+attempted (supplied as the first argument when the function is executed),
+programmable completion restarts from the beginning, with an
+attempt to find a compspec for that command.  This allows a set of
+completions to be built dynamically as completion is attempted, rather than
+being loaded all at once.
+<P>
+
+For instance, assuming that there is a library of compspecs, each kept in a
+file corresponding to the name of the command, the following default
+completion function would load completions dynamically:
+<P>
+
+<TT>_completion_loader()
+<BR>
+
+{
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>. &quot;/etc/bash_completion.d/$1.sh&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; return 124<BR>
+<BR>
+
+}
+<BR>
+
+complete -D -F _completion_loader
+<BR>
+
+</TT>
 <A NAME="lbCW">&nbsp;</A>
 <H3>HISTORY</H3>
 
@@ -10601,6 +10703,8 @@ environment, and the
 <FONT SIZE=-1><B>SHELLOPTS</B>,
 
 </FONT>
+<B>BASHOPTS</B>,
+
 <B>CDPATH</B>,
 
 and
@@ -12109,7 +12213,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 July 30<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.0<TH ALIGN=CENTER width=33%>2009 August 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12215,6 +12319,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 03 August 2009 10:10:44 EDT
+Time: 17 August 2009 14:46:46 EDT
 </BODY>
 </HTML>

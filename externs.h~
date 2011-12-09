@@ -58,6 +58,7 @@ extern void xtrace_init __P((void));
 #ifdef NEED_XTRACE_SET_DECL
 extern void xtrace_set __P((int, FILE *));
 #endif
+extern void xtrace_reset __P((void));
 extern char *indirection_level_string __P((void));
 extern void xtrace_print_assignment __P((char *, char *, int, int));
 extern void xtrace_print_word_list __P((WORD_LIST *, int));
@@ -194,6 +195,10 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 
 /* Declarations for functions defined in lib/sh/fmtumax.c */
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
+
+/* Declarations for functions defined in lib/sh/fnxform.c */
+extern char *fnx_fromfs __P((ICONV_CONST char *, size_t));
+extern char *fnx_tofs __P((ICONV_CONST char *, size_t));
 
 /* Declarations for functions defined in lib/sh/fpurge.c */
 

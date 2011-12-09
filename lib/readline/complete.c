@@ -179,12 +179,29 @@ int _rl_completion_prefix_display_length = 0;
 int rl_visible_stats = 0;
 #endif /* VISIBLE_STATS */
 
+/* If non-zero, when completing in the middle of a word, don't insert
+   characters from the match that match characters following point in
+   the word.  This means, for instance, completing when the cursor is
+   after the `e' in `Makefile' won't result in `Makefilefile'. */
+int _rl_skip_completed_text = 1;
+
 /* If non-zero, then this is the address of a function to call when
    completing on a directory name.  The function is called with
    the address of a string (the current directory name) as an arg. */
 rl_icppfunc_t *rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
 
 rl_icppfunc_t *rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
+
+/* If non-zero, this is the address of a function to call when reading
+   directory entries from the filesystem for completion and comparing
+   them to the partial word to be completed.  The function should
+   either return its first argument (if no conversion takes place) or
+   newly-allocated memory.  This can, for instance, convert filenames
+   between character sets for comparison against what's typed at the
+   keyboard.  The returned value is what is added to the list of
+   matches.  The second argument is the length of the filename to be
+   converted. */
+rl_dequote_func_t *rl_filename_rewrite_hook = (rl_dequote_func_t *)NULL;
 
 /* Non-zero means readline completion functions perform tilde expansion. */
 int rl_complete_with_tilde_expansion = 0;
@@ -1551,8 +1568,9 @@ insert_match (match, start, mtype, qc)
      int start, mtype;
      char *qc;
 {
-  char *replacement;
+  char *replacement, *r;
   char oqc;
+  int end;
 
   oqc = qc ? *qc : '\0';
   replacement = make_quoted_replacement (match, mtype, qc);
@@ -1569,7 +1587,21 @@ insert_match (match, start, mtype, qc)
       else if (qc && (*qc != oqc) && start && rl_line_buffer[start - 1] == oqc &&
 	    replacement[0] != oqc)
 	start--;
-      _rl_replace_text (replacement, start, rl_point - 1);
+      end = rl_point - 1;
+      if (_rl_skip_completed_text)
+	{
+	  r = replacement;
+	  while (start < rl_end && *r && rl_line_buffer[start] == *r)
+	    {
+	      start++;
+	      r++;
+	    }
+	  if (start <= end || *r)
+	    _rl_replace_text (r, start, end);
+	  rl_point = start + strlen (r);
+	}
+      else
+	_rl_replace_text (replacement, start, end);
       if (replacement != match)
         free (replacement);
     }
@@ -1981,8 +2013,8 @@ rl_filename_completion_function (text, state)
   static char *dirname = (char *)NULL;
   static char *users_dirname = (char *)NULL;
   static int filename_len;
-  char *temp;
-  int dirlen;
+  char *temp, *dentry, *convfn;
+  int dirlen, dentlen, convlen;
   struct dirent *entry;
 
   /* If we don't have any state, then do some initialization. */
@@ -2086,6 +2118,15 @@ rl_filename_completion_function (text, state)
   entry = (struct dirent *)NULL;
   while (directory && (entry = readdir (directory)))
     {
+      convfn = dentry = entry->d_name;
+      convlen = dentlen = D_NAMLEN (entry);
+
+      if (rl_filename_rewrite_hook)
+	{
+	  convfn = (*rl_filename_rewrite_hook) (dentry, dentlen);
+	  convlen = (convfn == dentry) ? dentlen : strlen (convfn);
+	}
+
       /* Special case for no filename.  If the user has disabled the
          `match-hidden-files' variable, skip filenames beginning with `.'.
 	 All other entries except "." and ".." match. */
@@ -2094,9 +2135,8 @@ rl_filename_completion_function (text, state)
 	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (entry->d_name))
 	    continue;
 
-	  if (entry->d_name[0] != '.' ||
-	       (entry->d_name[1] &&
-		 (entry->d_name[1] != '.' || entry->d_name[2])))
+	  if (convfn[0] != '.' ||
+	       (convfn[1] && (convfn[1] != '.' || convfn[2])))
 	    break;
 	}
       else
@@ -2105,16 +2145,16 @@ rl_filename_completion_function (text, state)
 	     it is a match. */
 	  if (_rl_completion_case_fold)
 	    {
-	      if ((_rl_to_lower (entry->d_name[0]) == _rl_to_lower (filename[0])) &&
-		  (((int)D_NAMLEN (entry)) >= filename_len) &&
-		  (_rl_strnicmp (filename, entry->d_name, filename_len) == 0))
+	      if ((_rl_to_lower (convfn[0]) == _rl_to_lower (filename[0])) &&
+		  (convlen >= filename_len) &&
+		  (_rl_strnicmp (filename, convfn, filename_len) == 0))
 		break;
 	    }
 	  else
 	    {
-	      if ((entry->d_name[0] == filename[0]) &&
-		  (((int)D_NAMLEN (entry)) >= filename_len) &&
-		  (strncmp (filename, entry->d_name, filename_len) == 0))
+	      if ((convfn[0] == filename[0]) &&
+		  (convlen >= filename_len) &&
+		  (strncmp (filename, convfn, filename_len) == 0))
 		break;
 	    }
 	}
@@ -2176,7 +2216,10 @@ rl_filename_completion_function (text, state)
 	  strcpy (temp + dirlen, entry->d_name);
 	}
       else
-	temp = savestring (entry->d_name);
+	temp = savestring (convfn);
+
+      if (convfn != dentry)
+	free (convfn);
 
       return (temp);
     }

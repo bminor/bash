@@ -451,11 +451,6 @@ expand_seqterm (text, tlen)
 	width = rhs_l, lhs_t = ST_ZINT;
       if (rhs_l > 2 && rhs[0] == '-' && rhs[1] == '0' && width < rhs_l)
 	width = rhs_l, lhs_t = ST_ZINT;
-
-      if (width < lhs_l && lhs_t == ST_ZINT)
-        width = lhs_l;
-      if (width < rhs_l && lhs_t == ST_ZINT)
-        width = rhs_l;
     }
 
   result = mkseq (lhs_v, rhs_v, incr, lhs_t, width);

@@ -189,10 +189,13 @@ _rl_replace_text (text, start, end)
 {
   int n;
 
+  n = 0;
   rl_begin_undo_group ();
-  rl_delete_text (start, end + 1);
+  if (start <= end)
+    rl_delete_text (start, end + 1);
   rl_point = start;
-  n = rl_insert_text (text);
+  if (*text)
+    n = rl_insert_text (text);
   rl_end_undo_group ();
 
   return n;

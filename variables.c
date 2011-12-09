@@ -4665,9 +4665,11 @@ sv_xtracefd (name)
 	{
 	  fp = fdopen (fd, "w");
 	  if (fp == 0)
-	    internal_error ("%s: %s: cannot open as FILE", name, value_cell (v));
+	    internal_error (_("%s: %s: cannot open as FILE"), name, value_cell (v));
+	  else
+	    xtrace_set (fd, fp);
 	}
       else
-	internal_error ("%s: %s: invalid value for trace file descriptor", name, value_cell (v));
+	internal_error (_("%s: %s: invalid value for trace file descriptor"), name, value_cell (v));
     }
 }

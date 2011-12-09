@@ -426,13 +426,14 @@ glob_vector (pat, dir, flags)
   register struct globval *nextlink;
   register char *nextname, *npat, *subdir;
   unsigned int count;
-  int lose, skip, ndirs, isdir, sdlen, add_current;
+  int lose, skip, ndirs, isdir, sdlen, add_current, patlen;
   register char **name_vector;
   register unsigned int i;
   int mflags;		/* Flags passed to strmatch (). */
   int pflags;		/* flags passed to sh_makepath () */
   int nalloca;
   struct globval *firstmalloc, *tmplink;
+  char *convfn;
 
   lastlink = 0;
   count = lose = skip = add_current = 0;
@@ -466,6 +467,8 @@ glob_vector (pat, dir, flags)
       skip = 1;
     }
 
+  patlen = strlen (pat);
+
   /* If the filename pattern (PAT) does not contain any globbing characters,
      we can dispense with reading the directory, and just see if there is
      a filename `DIR/PAT'.  If there is, and we can access it, just make the
@@ -479,8 +482,8 @@ glob_vector (pat, dir, flags)
 	return ((char **) &glob_error_return);
 
       dirlen = strlen (dir);
-      nextname = (char *)malloc (dirlen + strlen (pat) + 2);
-      npat = (char *)malloc (strlen (pat) + 1);
+      nextname = (char *)malloc (dirlen + patlen + 2);
+      npat = (char *)malloc (patlen + 1);
       if (nextname == 0 || npat == 0)
 	lose = 1;
       else
@@ -633,8 +636,9 @@ glob_vector (pat, dir, flags)
 	      ++count;
 	      continue;
 	    }
-	      
-	  if (strmatch (pat, dp->d_name, mflags) != FNM_NOMATCH)
+
+	  convfn = fnx_fromfs (dp->d_name, D_NAMLEN (dp));
+	  if (strmatch (pat, convfn, mflags) != FNM_NOMATCH)
 	    {
 	      if (nalloca < ALLOCA_MAX)
 		{

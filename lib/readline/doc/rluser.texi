@@ -606,6 +606,20 @@ a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
 The default value is @samp{off}.
 
+@item skip-completed-text
+@vindex skip-completed-text
+If set to @samp{on}, this alters the default completion behavior when
+inserting a single match into the line.  It's only active when
+performing completion in the middle of a word.  If enabled, readline
+does not insert characters from the completion that match characters
+after point in the word being completed, so portions of the word
+following the cursor are not duplicated.
+For instance, if this is enabled, attempting completion when the cursor
+is after the @samp{e} in @samp{Makefile} will result in @samp{Makefile}
+rather than @samp{Makefilefile}, assuming there is a single possible
+completion.
+The default value is @samp{off}.
+
 @item visible-stats
 @vindex visible-stats
 If set to @samp{on}, a character denoting a file's type
@@ -1716,11 +1730,13 @@ For instance, assuming that there is a library of compspecs, each kept in a
 file corresponding to the name of the command, the following default
 completion function would load completions dynamically:
 
+@example
 _completion_loader()
-{
+@{
 	. "/etc/bash_completion.d/$1.sh" >/dev/null 2>&1 && return 124
-}
+@}
 complete -D -F _completion_loader
+@end example
 
 @node Programmable Completion Builtins
 @section Programmable Completion Builtins

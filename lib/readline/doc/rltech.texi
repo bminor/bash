@@ -1728,6 +1728,35 @@ remove any quote characters from the directory name, because its result will
 be passed directly to @code{opendir()}.
 @end deftypevar
 
+@ignore
+@deftypevar extern rl_icppfunc_t *rl_directory_rewrite_hook;
+If non-zero, this is the address of a function to call when completing
+a directory name.  This function takes the address of the directory name
+to be modified as an argument.  Unlike @code{rl_directory_completion_hook},
+it only modifies the directory name used in @code{opendir}, not what is
+displayed when the possible completions are printed or inserted.  It is
+called before rl_directory_completion_hook.
+
+I'm not happy with how this worksyet, so it's undocumented.
+@end deftypevar
+@end ignore
+
+@deftypevar {rl_dequote_func_t *} rl_filename_rewrite_hook
+If non-zero, this is the address of a function called when reading
+directory entries from the filesystem for completion and comparing
+them to the partial word to be completed.  The function should
+perform any necesary application or system-specific conversion on
+the filename, such as converting between character sets or converting
+from a filesystem format to a character input format.
+The function takes two arguments: @var{fname}, the filename to be converted,
+and @var{fnlen}, its length in bytes.
+It must either return its first argument (if no conversion takes place)
+or the converted filename in newly-allocated memory.  The converted
+form is used to compare against the word to be completed, and, if it
+matches, is added to the list of matches.  Readline will free the
+allocated string.
+@end deftypevar
+
 @deftypevar {rl_compdisp_func_t *} rl_completion_display_matches_hook
 If non-zero, then this is the address of a function to call when
 completing a word would normally display the list of possible matches.

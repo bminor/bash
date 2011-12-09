@@ -115,6 +115,7 @@ static int bash_backward_kill_shellword __P((int, int));
 /* Helper functions for Readline. */
 static char *restore_tilde __P((char *, char *));
 
+static char *bash_filename_rewrite_hook __P((char *, int));
 static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
@@ -2659,6 +2660,20 @@ bash_directory_expansion (dirname)
     }
 }
 
+/* If necessary, rewrite directory entry */
+static char *
+bash_filename_rewrite_hook (fname, fnlen)
+     char *fname;
+     int fnlen;
+{
+  char *conv;
+
+  conv = fnx_fromfs (fname, fnlen);
+  if (conv != fname)
+    conv = savestring (conv);
+  return conv;
+}
+
 /* Handle symbolic link references and other directory name
    expansions while hacking completion. */
 static int
@@ -2795,7 +2810,7 @@ build_history_completion_array ()
     {
       for (i = 0; hlist[i]; i++)
 	;
-      for ( ; i > 0; i--)
+      for ( --i; i >= 0; i--)
 	{
 	  /* Separate each token, and place into an array. */
 	  tokens = history_tokenize (hlist[i]->line);

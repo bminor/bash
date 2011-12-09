@@ -75,8 +75,8 @@
 \entry{login shell}{73}{login shell}
 \entry{interactive shell}{73}{interactive shell}
 \entry{startup files}{73}{startup files}
-\entry{interactive shell}{74}{interactive shell}
-\entry{shell, interactive}{74}{shell, interactive}
+\entry{interactive shell}{75}{interactive shell}
+\entry{shell, interactive}{75}{shell, interactive}
 \entry{expressions, conditional}{76}{expressions, conditional}
 \entry{arithmetic, shell}{78}{arithmetic, shell}
 \entry{shell arithmetic}{78}{shell arithmetic}
@@ -104,7 +104,7 @@
 \entry{initialization file, readline}{94}{initialization file, readline}
 \entry{variables, readline}{95}{variables, readline}
 \entry{programmable completion}{112}{programmable completion}
-\entry{completion builtins}{113}{completion builtins}
+\entry{completion builtins}{114}{completion builtins}
 \entry{History, how to use}{117}{History, how to use}
 \entry{command history}{119}{command history}
 \entry{history list}{119}{history list}

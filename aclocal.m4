@@ -1759,6 +1759,13 @@ if test $bash_cv_type_wint_t = yes; then
         AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi
 
+if test "$am_cv_func_iconv" = yes; then
+	OLDLIBS="$LIBS"
+	LIBS="$LIBS $LIBICONV"
+	AC_CHECK_FUNCS(locale_charset)
+	LIBS="$OLDLIBS"
+fi
+
 ])
 
 dnl need: prefix exec_prefix libdir includedir CC TERMCAP_LIB

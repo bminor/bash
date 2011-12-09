@@ -299,7 +299,9 @@ if test $opt_extended_glob = yes ; then
 AC_DEFINE(EXTENDED_GLOB)
 fi
 if test $opt_extglob_default = yes; then
-AC_DEFINE(EXTGLOB_DEFAULT)
+AC_DEFINE(EXTGLOB_DEFAULT, 1)
+else
+AC_DEFINE(EXTGLOB_DEFAULT, 0)
 fi
 if test $opt_cond_command = yes ; then
 AC_DEFINE(COND_COMMAND)
@@ -800,6 +802,13 @@ dnl End of checks needed by files in lib/intl
 dnl
 
 BASH_CHECK_MULTIBYTE
+
+if test "$am_cv_func_iconv" = yes; then
+	OLDLIBS="$LIBS"
+	LIBS="$LIBS $LIBICONV"
+	AC_CHECK_FUNCS(locale_charset)
+	LIBS="$OLDLIBS"
+fi
 
 dnl checks for the dynamic loading library functions in libc and libdl
 if test "$opt_static_link" != yes; then

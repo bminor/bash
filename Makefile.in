@@ -213,7 +213,8 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/zgetline.c ${SH_LIBSRC}/mbscmp.c \
 		${SH_LIBSRC}/casemod.c ${SH_LIBSRC}/uconvert.c \
 		${SH_LIBSRC}/ufuncs.c ${SH_LIBSRC}/fdprintf.c \
-		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c
+		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c \
+		${SH_LIBSRC}/fnxform.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -347,6 +348,9 @@ INTL_INC = @INTL_INC@
 
 LIBINTL_H = @LIBINTL_H@
 
+# libiconv
+LIBICONV = @LIBICONV@
+
 # tests
 LIBINTL = @LIBINTL@
 LTLIBINTL = @LTLIBINTL@
@@ -394,7 +398,7 @@ BASHINCFILES =	 $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/ansi_stdlib.h \
 		 $(BASHINCDIR)/ocache.h
 
 LIBRARIES = $(SHLIB_LIB) $(READLINE_LIB) $(HISTORY_LIB) $(TERMCAP_LIB) $(GLOB_LIB) \
-	    $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LOCAL_LIBS)
+	    $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LIBICONV) $(LOCAL_LIBS)
 
 LIBDEP = $(SHLIB_DEP) $(INTL_DEP) $(READLINE_DEP) $(HISTORY_DEP) $(TERMCAP_DEP) $(GLOB_DEP) \
 	 $(TILDE_DEP) $(MALLOC_DEP)

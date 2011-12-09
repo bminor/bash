@@ -349,6 +349,7 @@ extern void _rl_trace ();
 extern int _rl_tropen PARAMS((void));
 
 extern int _rl_abort_internal PARAMS((void));
+extern int _rl_null_function PARAMS((int, int));
 extern char *_rl_strindex PARAMS((const char *, const char *));
 extern int _rl_qsort_string_compare PARAMS((char **, char **));
 extern int (_rl_uppercase_p) PARAMS((int));

@@ -196,22 +196,23 @@ IINNVVOOCCAATTIIOONN
        If the shell is started with the effective user (group) id not equal to
        the real user (group) id, and the --pp option is not supplied, no startup
        files are read, shell functions are not inherited from the environment,
-       the  SSHHEELLLLOOPPTTSS  variable, if it appears in the environment, is ignored,
-       and the effective user id is set to the real user id.  If the --pp option
-       is  supplied  at  invocation, the startup behavior is the same, but the
-       effective user id is not reset.
+       the  SSHHEELLLLOOPPTTSS,  BBAASSHHOOPPTTSS,  CCDDPPAATTHH,  and  GGLLOOBBIIGGNNOORREE variables, if they
+       appear in the environment, are ignored, and the effective  user  id  is
+       set  to  the real user id.  If the --pp option is supplied at invocation,
+       the startup behavior is the same, but the  effective  user  id  is  not
+       reset.
 
 DDEEFFIINNIITTIIOONNSS
-       The following definitions are used throughout the rest  of  this  docu-
+       The  following  definitions  are used throughout the rest of this docu-
        ment.
        bbllaannkk  A space or tab.
-       wwoorrdd   A  sequence  of  characters  considered  as a single unit by the
+       wwoorrdd   A sequence of characters considered as  a  single  unit  by  the
               shell.  Also known as a ttookkeenn.
-       nnaammee   A _w_o_r_d consisting only of  alphanumeric  characters  and  under-
-              scores,  and beginning with an alphabetic character or an under-
+       nnaammee   A  _w_o_r_d  consisting  only  of alphanumeric characters and under-
+              scores, and beginning with an alphabetic character or an  under-
               score.  Also referred to as an iiddeennttiiffiieerr.
        mmeettaacchhaarraacctteerr
-              A character that, when unquoted, separates words.   One  of  the
+              A  character  that,  when unquoted, separates words.  One of the
               following:
               ||  && ;; (( )) << >> ssppaaccee ttaabb
        ccoonnttrrooll ooppeerraattoorr
@@ -222,81 +223,81 @@ DDEEFFIINNIITTIIOONNSS
 RREESSEERRVVEEDD WWOORRDDSS
        _R_e_s_e_r_v_e_d _w_o_r_d_s are words that have a special meaning to the shell.  The
        following words are recognized as reserved when unquoted and either the
-       first word of a simple command (see SSHHEELLLL GGRRAAMMMMAARR below) or  the  third
+       first  word  of a simple command (see SSHHEELLLL GGRRAAMMMMAARR below) or the third
        word of a ccaassee or ffoorr command:
 
-       !!  ccaassee  ddoo ddoonnee eelliiff eellssee eessaacc ffii ffoorr ffuunnccttiioonn iiff iinn sseelleecctt tthheenn uunnttiill
+       !! ccaassee  ddoo ddoonnee eelliiff eellssee eessaacc ffii ffoorr ffuunnccttiioonn iiff iinn sseelleecctt tthheenn  uunnttiill
        wwhhiillee {{ }} ttiimmee [[[[ ]]]]
 
 SSHHEELLLL GGRRAAMMMMAARR
    SSiimmppllee CCoommmmaannddss
-       A _s_i_m_p_l_e _c_o_m_m_a_n_d is a sequence of optional  variable  assignments  fol-
-       lowed  by  bbllaannkk-separated  words and redirections, and terminated by a
+       A  _s_i_m_p_l_e  _c_o_m_m_a_n_d  is a sequence of optional variable assignments fol-
+       lowed by bbllaannkk-separated words and redirections, and  terminated  by  a
        _c_o_n_t_r_o_l _o_p_e_r_a_t_o_r.  The first word specifies the command to be executed,
-       and  is  passed  as  argument  zero.  The remaining words are passed as
+       and is passed as argument zero.  The  remaining  words  are  passed  as
        arguments to the invoked command.
 
-       The return value of a _s_i_m_p_l_e _c_o_m_m_a_n_d is its exit status,  or  128+_n  if
+       The  return  value  of a _s_i_m_p_l_e _c_o_m_m_a_n_d is its exit status, or 128+_n if
        the command is terminated by signal _n.
 
    PPiippeelliinneess
-       A  _p_i_p_e_l_i_n_e  is  a sequence of one or more commands separated by one of
+       A _p_i_p_e_l_i_n_e is a sequence of one or more commands separated  by  one  of
        the control operators || or ||&&.  The format for a pipeline is:
 
               [ttiimmee [--pp]] [ ! ] _c_o_m_m_a_n_d [ [|||||&&] _c_o_m_m_a_n_d_2 ... ]
 
-       The standard output of _c_o_m_m_a_n_d is connected via a pipe to the  standard
-       input  of  _c_o_m_m_a_n_d_2.   This connection is performed before any redirec-
+       The  standard output of _c_o_m_m_a_n_d is connected via a pipe to the standard
+       input of _c_o_m_m_a_n_d_2.  This connection is performed  before  any  redirec-
        tions specified by the command (see RREEDDIIRREECCTTIIOONN below).  If ||&& is used,
        the standard error of _c_o_m_m_a_n_d is connected to _c_o_m_m_a_n_d_2's standard input
-       through the pipe; it is shorthand for 22>>&&11 ||.  This implicit  redirect-
+       through  the pipe; it is shorthand for 22>>&&11 ||.  This implicit redirect-
        ion of the standard error is performed after any redirections specified
        by the command.
 
        The return status of a pipeline is the exit status of the last command,
-       unless  the  ppiippeeffaaiill  option  is enabled.  If ppiippeeffaaiill is enabled, the
-       pipeline's return status is the value of the last  (rightmost)  command
-       to  exit  with a non-zero status, or zero if all commands exit success-
+       unless the ppiippeeffaaiill option is enabled.  If  ppiippeeffaaiill  is  enabled,  the
+       pipeline's  return  status is the value of the last (rightmost) command
+       to exit with a non-zero status, or zero if all commands  exit  success-
        fully.  If the reserved word !!  precedes a pipeline, the exit status of
-       that  pipeline  is the logical negation of the exit status as described
-       above.  The shell waits for all commands in the pipeline  to  terminate
+       that pipeline is the logical negation of the exit status  as  described
+       above.   The  shell waits for all commands in the pipeline to terminate
        before returning a value.
 
-       If  the  ttiimmee reserved word precedes a pipeline, the elapsed as well as
-       user and system time consumed by its execution are  reported  when  the
-       pipeline  terminates.   The --pp option changes the output format to that
-       specified by POSIX.  The TTIIMMEEFFOORRMMAATT variable may be  set  to  a  format
-       string  that  specifies how the timing information should be displayed;
+       If the ttiimmee reserved word precedes a pipeline, the elapsed as  well  as
+       user  and  system  time consumed by its execution are reported when the
+       pipeline terminates.  The --pp option changes the output format  to  that
+       specified  by  POSIX.   The  TTIIMMEEFFOORRMMAATT variable may be set to a format
+       string that specifies how the timing information should  be  displayed;
        see the description of TTIIMMEEFFOORRMMAATT under SShheellll VVaarriiaabblleess below.
 
-       Each command in a pipeline is executed as a separate process (i.e.,  in
+       Each  command in a pipeline is executed as a separate process (i.e., in
        a subshell).
 
    LLiissttss
-       A  _l_i_s_t  is a sequence of one or more pipelines separated by one of the
+       A _l_i_s_t is a sequence of one or more pipelines separated by one  of  the
        operators ;;, &&, &&&&, or ||||, and optionally terminated by one of ;;, &&, or
        <<nneewwlliinnee>>.
 
        Of these list operators, &&&& and |||| have equal precedence, followed by ;;
        and &&, which have equal precedence.
 
-       A sequence of one or more newlines may appear in a _l_i_s_t  instead  of  a
+       A  sequence  of  one or more newlines may appear in a _l_i_s_t instead of a
        semicolon to delimit commands.
 
-       If  a  command  is terminated by the control operator &&, the shell exe-
-       cutes the command in the _b_a_c_k_g_r_o_u_n_d in a subshell.  The shell does  not
-       wait  for  the command to finish, and the return status is 0.  Commands
-       separated by a ;; are executed sequentially; the shell  waits  for  each
-       command  to terminate in turn.  The return status is the exit status of
+       If a command is terminated by the control operator &&,  the  shell  exe-
+       cutes  the command in the _b_a_c_k_g_r_o_u_n_d in a subshell.  The shell does not
+       wait for the command to finish, and the return status is  0.   Commands
+       separated  by  a  ;; are executed sequentially; the shell waits for each
+       command to terminate in turn.  The return status is the exit status  of
        the last command executed.
 
-       AND and OR lists are sequences of one of more  pipelines  separated  by
-       the  &&&&  and  |||| control operators, respectively.  AND and OR lists are
+       AND  and  OR  lists are sequences of one of more pipelines separated by
+       the &&&& and |||| control operators, respectively.  AND and  OR  lists  are
        executed with left associativity.  An AND list has the form
 
               _c_o_m_m_a_n_d_1 &&&& _c_o_m_m_a_n_d_2
 
-       _c_o_m_m_a_n_d_2 is executed if, and only if, _c_o_m_m_a_n_d_1 returns an  exit  status
+       _c_o_m_m_a_n_d_2  is  executed if, and only if, _c_o_m_m_a_n_d_1 returns an exit status
        of zero.
 
        An OR list has the form
@@ -304,77 +305,77 @@ SSHHEELLLL GGRRAAMMMMAARR
               _c_o_m_m_a_n_d_1 |||| _c_o_m_m_a_n_d_2
 
 
-       _c_o_m_m_a_n_d_2  is  executed  if and only if _c_o_m_m_a_n_d_1 returns a non-zero exit
-       status.  The return status of AND and OR lists is the  exit  status  of
+       _c_o_m_m_a_n_d_2 is executed if and only if _c_o_m_m_a_n_d_1 returns  a  non-zero  exit
+       status.   The  return  status of AND and OR lists is the exit status of
        the last command executed in the list.
 
    CCoommppoouunndd CCoommmmaannddss
        A _c_o_m_p_o_u_n_d _c_o_m_m_a_n_d is one of the following:
 
-       (_l_i_s_t) _l_i_s_t  is  executed in a subshell environment (see CCOOMMMMAANNDD EEXXEECCUU--
-              TTIIOONN EENNVVIIRROONNMMEENNTT below).  Variable assignments and builtin  com-
-              mands  that  affect  the  shell's  environment  do not remain in
-              effect after the command completes.  The return  status  is  the
+       (_l_i_s_t) _l_i_s_t is executed in a subshell environment (see  CCOOMMMMAANNDD  EEXXEECCUU--
+              TTIIOONN  EENNVVIIRROONNMMEENNTT below).  Variable assignments and builtin com-
+              mands that affect the  shell's  environment  do  not  remain  in
+              effect  after  the  command completes.  The return status is the
               exit status of _l_i_s_t.
 
        { _l_i_s_t; }
-              _l_i_s_t  is simply executed in the current shell environment.  _l_i_s_t
-              must be terminated with a newline or semicolon.  This  is  known
-              as  a  _g_r_o_u_p  _c_o_m_m_a_n_d.   The return status is the exit status of
-              _l_i_s_t.  Note that unlike the metacharacters (( and )), {{ and }}  are
+              _l_i_s_t is simply executed in the current shell environment.   _l_i_s_t
+              must  be  terminated with a newline or semicolon.  This is known
+              as a _g_r_o_u_p _c_o_m_m_a_n_d.  The return status is  the  exit  status  of
+              _l_i_s_t.   Note that unlike the metacharacters (( and )), {{ and }} are
               _r_e_s_e_r_v_e_d _w_o_r_d_s and must occur where a reserved word is permitted
-              to be recognized.  Since they do not cause a  word  break,  they
-              must  be  separated  from  _l_i_s_t  by  whitespace or another shell
+              to  be  recognized.   Since they do not cause a word break, they
+              must be separated from  _l_i_s_t  by  whitespace  or  another  shell
               metacharacter.
 
        ((_e_x_p_r_e_s_s_i_o_n))
-              The _e_x_p_r_e_s_s_i_o_n is evaluated according  to  the  rules  described
-              below  under AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN.  If the value of the expres-
-              sion is non-zero, the return status is 0; otherwise  the  return
+              The  _e_x_p_r_e_s_s_i_o_n  is  evaluated  according to the rules described
+              below under AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN.  If the value of the  expres-
+              sion  is  non-zero, the return status is 0; otherwise the return
               status is 1.  This is exactly equivalent to lleett ""_e_x_p_r_e_s_s_i_o_n"".
 
        [[[[ _e_x_p_r_e_s_s_i_o_n ]]]]
-              Return  a  status  of  0 or 1 depending on the evaluation of the
-              conditional expression _e_x_p_r_e_s_s_i_o_n.  Expressions are composed  of
-              the  primaries  described  below  under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS.
-              Word splitting and pathname expansion are not performed  on  the
-              words  between  the  [[[[  and  ]]]]; tilde expansion, parameter and
-              variable expansion, arithmetic expansion, command  substitution,
-              process  substitution,  and quote removal are performed.  Condi-
+              Return a status of 0 or 1 depending on  the  evaluation  of  the
+              conditional  expression _e_x_p_r_e_s_s_i_o_n.  Expressions are composed of
+              the primaries described  below  under  CCOONNDDIITTIIOONNAALL  EEXXPPRREESSSSIIOONNSS.
+              Word  splitting  and pathname expansion are not performed on the
+              words between the [[[[ and  ]]]];  tilde  expansion,  parameter  and
+              variable  expansion, arithmetic expansion, command substitution,
+              process substitution, and quote removal are  performed.   Condi-
               tional operators such as --ff must be unquoted to be recognized as
               primaries.
 
-              When  the  ==== and !!== operators are used, the string to the right
+              When the ==== and !!== operators are used, the string to  the  right
               of the operator is considered a pattern and matched according to
-              the  rules described below under PPaatttteerrnn MMaattcchhiinngg.  If the shell
-              option nnooccaasseemmaattcchh is enabled, the match  is  performed  without
-              regard  to  the case of alphabetic characters.  The return value
-              is 0 if the string matches (====) or does not match (!!==) the  pat-
+              the rules described below under PPaatttteerrnn MMaattcchhiinngg.  If the  shell
+              option  nnooccaasseemmaattcchh  is  enabled, the match is performed without
+              regard to the case of alphabetic characters.  The  return  value
+              is  0 if the string matches (====) or does not match (!!==) the pat-
               tern, and 1 otherwise.  Any part of the pattern may be quoted to
               force it to be matched as a string.
 
-              An additional binary operator, ==~~, is available, with  the  same
-              precedence  as  ====  and  !!==.  When it is used, the string to the
-              right of the operator is considered an extended regular  expres-
+              An  additional  binary operator, ==~~, is available, with the same
+              precedence as ==== and !!==.  When it is used,  the  string  to  the
+              right  of the operator is considered an extended regular expres-
               sion and matched accordingly (as in _r_e_g_e_x(3)).  The return value
               is 0 if the string matches the pattern, and 1 otherwise.  If the
-              regular  expression  is syntactically incorrect, the conditional
+              regular expression is syntactically incorrect,  the  conditional
               expression's return value is 2.  If the shell option nnooccaasseemmaattcchh
               is enabled, the match is performed without regard to the case of
               alphabetic characters.  Any part of the pattern may be quoted to
-              force  it  to  be  matched  as  a string.  Substrings matched by
-              parenthesized subexpressions within the regular  expression  are
-              saved  in  the  array  variable  BBAASSHH__RREEMMAATTCCHH.   The  element of
-              BBAASSHH__RREEMMAATTCCHH with index 0 is the portion of the string  matching
+              force it to be matched  as  a  string.   Substrings  matched  by
+              parenthesized  subexpressions  within the regular expression are
+              saved in  the  array  variable  BBAASSHH__RREEMMAATTCCHH.   The  element  of
+              BBAASSHH__RREEMMAATTCCHH  with index 0 is the portion of the string matching
               the entire regular expression.  The element of BBAASSHH__RREEMMAATTCCHH with
-              index _n is the portion of the string matching the _nth  parenthe-
+              index  _n is the portion of the string matching the _nth parenthe-
               sized subexpression.
 
-              Expressions  may  be  combined  using  the  following operators,
+              Expressions may  be  combined  using  the  following  operators,
               listed in decreasing order of precedence:
 
               (( _e_x_p_r_e_s_s_i_o_n ))
-                     Returns the value of _e_x_p_r_e_s_s_i_o_n.  This  may  be  used  to
+                     Returns  the  value  of  _e_x_p_r_e_s_s_i_o_n.  This may be used to
                      override the normal precedence of operators.
               !! _e_x_p_r_e_s_s_i_o_n
                      True if _e_x_p_r_e_s_s_i_o_n is false.
@@ -384,187 +385,187 @@ SSHHEELLLL GGRRAAMMMMAARR
                      True if either _e_x_p_r_e_s_s_i_o_n_1 or _e_x_p_r_e_s_s_i_o_n_2 is true.
 
               The &&&& and |||| operators do not evaluate _e_x_p_r_e_s_s_i_o_n_2 if the value
-              of _e_x_p_r_e_s_s_i_o_n_1 is sufficient to determine the  return  value  of
+              of  _e_x_p_r_e_s_s_i_o_n_1  is  sufficient to determine the return value of
               the entire conditional expression.
 
        ffoorr _n_a_m_e [ [ iinn [ _w_o_r_d _._._. ] ] ; ] ddoo _l_i_s_t ; ddoonnee
               The list of words following iinn is expanded, generating a list of
               items.  The variable _n_a_m_e is set to each element of this list in
-              turn,  and  _l_i_s_t is executed each time.  If the iinn _w_o_r_d is omit-
-              ted, the ffoorr command executes  _l_i_s_t  once  for  each  positional
+              turn, and _l_i_s_t is executed each time.  If the iinn _w_o_r_d  is  omit-
+              ted,  the  ffoorr  command  executes  _l_i_s_t once for each positional
               parameter that is set (see PPAARRAAMMEETTEERRSS below).  The return status
-              is the exit status of the last command that  executes.   If  the
+              is  the  exit  status of the last command that executes.  If the
               expansion of the items following iinn results in an empty list, no
               commands are executed, and the return status is 0.
 
        ffoorr (( _e_x_p_r_1 ; _e_x_p_r_2 ; _e_x_p_r_3 )) ; ddoo _l_i_s_t ; ddoonnee
               First, the arithmetic expression _e_x_p_r_1 is evaluated according to
-              the  rules  described  below  under  AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN.  The
-              arithmetic expression _e_x_p_r_2 is then evaluated  repeatedly  until
-              it  evaluates  to zero.  Each time _e_x_p_r_2 evaluates to a non-zero
-              value, _l_i_s_t is executed and the arithmetic expression  _e_x_p_r_3  is
-              evaluated.   If  any  expression is omitted, it behaves as if it
+              the rules described  below  under  AARRIITTHHMMEETTIICC  EEVVAALLUUAATTIIOONN.   The
+              arithmetic  expression  _e_x_p_r_2 is then evaluated repeatedly until
+              it evaluates to zero.  Each time _e_x_p_r_2 evaluates to  a  non-zero
+              value,  _l_i_s_t  is executed and the arithmetic expression _e_x_p_r_3 is
+              evaluated.  If any expression is omitted, it behaves  as  if  it
               evaluates to 1.  The return value is the exit status of the last
               command in _l_i_s_t that is executed, or false if any of the expres-
               sions is invalid.
 
        sseelleecctt _n_a_m_e [ iinn _w_o_r_d ] ; ddoo _l_i_s_t ; ddoonnee
               The list of words following iinn is expanded, generating a list of
-              items.   The  set  of  expanded words is printed on the standard
-              error, each preceded by a number.  If the iinn  _w_o_r_d  is  omitted,
-              the  positional  parameters  are printed (see PPAARRAAMMEETTEERRSS below).
-              The PPSS33 prompt is then displayed and a line read from the  stan-
-              dard  input.   If the line consists of a number corresponding to
-              one of the displayed words, then the value of  _n_a_m_e  is  set  to
-              that  word.  If the line is empty, the words and prompt are dis-
+              items.  The set of expanded words is  printed  on  the  standard
+              error,  each  preceded  by a number.  If the iinn _w_o_r_d is omitted,
+              the positional parameters are printed  (see  PPAARRAAMMEETTEERRSS  below).
+              The  PPSS33 prompt is then displayed and a line read from the stan-
+              dard input.  If the line consists of a number  corresponding  to
+              one  of  the  displayed  words, then the value of _n_a_m_e is set to
+              that word.  If the line is empty, the words and prompt are  dis-
               played again.  If EOF is read, the command completes.  Any other
-              value  read  causes  _n_a_m_e  to  be set to null.  The line read is
-              saved in the variable RREEPPLLYY.  The _l_i_s_t is  executed  after  each
+              value read causes _n_a_m_e to be set to  null.   The  line  read  is
+              saved  in  the  variable RREEPPLLYY.  The _l_i_s_t is executed after each
               selection until a bbrreeaakk command is executed.  The exit status of
-              sseelleecctt is the exit status of the last command executed in  _l_i_s_t,
+              sseelleecctt  is the exit status of the last command executed in _l_i_s_t,
               or zero if no commands were executed.
 
        ccaassee _w_o_r_d iinn [ [(] _p_a_t_t_e_r_n [ || _p_a_t_t_e_r_n ] ... ) _l_i_s_t ;; ] ... eessaacc
               A ccaassee command first expands _w_o_r_d, and tries to match it against
               each _p_a_t_t_e_r_n in turn, using the same matching rules as for path-
-              name  expansion  (see  PPaatthhnnaammee  EExxppaannssiioonn  below).  The _w_o_r_d is
-              expanded using tilde expansion, parameter  and  variable  expan-
-              sion,  arithmetic  substitution,  command  substitution, process
-              substitution  and  quote  removal.   Each  _p_a_t_t_e_r_n  examined  is
+              name expansion (see PPaatthhnnaammee  EExxppaannssiioonn  below).   The  _w_o_r_d  is
               expanded  using  tilde  expansion, parameter and variable expan-
+              sion, arithmetic  substitution,  command  substitution,  process
+              substitution  and  quote  removal.   Each  _p_a_t_t_e_r_n  examined  is
+              expanded using tilde expansion, parameter  and  variable  expan-
               sion, arithmetic substitution, command substitution, and process
-              substitution.   If  the shell option nnooccaasseemmaattcchh is enabled, the
-              match is performed without regard  to  the  case  of  alphabetic
-              characters.   When  a  match is found, the corresponding _l_i_s_t is
+              substitution.  If the shell option nnooccaasseemmaattcchh is  enabled,  the
+              match  is  performed  without  regard  to the case of alphabetic
+              characters.  When a match is found, the  corresponding  _l_i_s_t  is
               executed.  If the ;;;; operator is used, no subsequent matches are
-              attempted  after  the first pattern match.  Using ;;&& in place of
-              ;;;; causes execution to continue with the  _l_i_s_t  associated  with
-              the  next  set of patterns.  Using ;;;;&& in place of ;;;; causes the
-              shell to test the next pattern list in the  statement,  if  any,
+              attempted after the first pattern match.  Using ;;&& in  place  of
+              ;;;;  causes  execution  to continue with the _l_i_s_t associated with
+              the next set of patterns.  Using ;;;;&& in place of ;;;;  causes  the
+              shell  to  test  the next pattern list in the statement, if any,
               and execute any associated _l_i_s_t on a successful match.  The exit
               status is zero if no pattern matches.  Otherwise, it is the exit
               status of the last command executed in _l_i_s_t.
 
        iiff _l_i_s_t; tthheenn _l_i_s_t_; [ eelliiff _l_i_s_t; tthheenn _l_i_s_t; ] ... [ eellssee _l_i_s_t; ] ffii
-              The  iiff  _l_i_s_t is executed.  If its exit status is zero, the tthheenn
-              _l_i_s_t is executed.  Otherwise, each  eelliiff  _l_i_s_t  is  executed  in
-              turn,  and  if  its  exit status is zero, the corresponding tthheenn
+              The iiff _l_i_s_t is executed.  If its exit status is zero,  the  tthheenn
+              _l_i_s_t  is  executed.   Otherwise,  each  eelliiff _l_i_s_t is executed in
+              turn, and if its exit status is  zero,  the  corresponding  tthheenn
               _l_i_s_t is executed and the command completes.  Otherwise, the eellssee
-              _l_i_s_t  is executed, if present.  The exit status is the exit sta-
+              _l_i_s_t is executed, if present.  The exit status is the exit  sta-
               tus of the last command executed, or zero if no condition tested
               true.
 
        wwhhiillee _l_i_s_t; ddoo _l_i_s_t; ddoonnee
        uunnttiill _l_i_s_t; ddoo _l_i_s_t; ddoonnee
-              The  wwhhiillee  command continuously executes the ddoo _l_i_s_t as long as
-              the last command in _l_i_s_t returns an exit status  of  zero.   The
+              The wwhhiillee command continuously executes the ddoo _l_i_s_t as  long  as
+              the  last  command  in _l_i_s_t returns an exit status of zero.  The
               uunnttiill command is identical to the wwhhiillee command, except that the
-              test is negated; the ddoo _l_i_s_t is executed as  long  as  the  last
+              test  is  negated;  the  ddoo _l_i_s_t is executed as long as the last
               command in _l_i_s_t returns a non-zero exit status.  The exit status
-              of the wwhhiillee and uunnttiill commands is the exit status of  the  last
+              of  the  wwhhiillee and uunnttiill commands is the exit status of the last
               ddoo _l_i_s_t command executed, or zero if none was executed.
 
    CCoopprroocceesssseess
        A _c_o_p_r_o_c_e_s_s is a shell command preceded by the ccoopprroocc reserved word.  A
-       coprocess is executed asynchronously in a subshell, as if  the  command
-       had  been  terminated  with the && control operator, with a two-way pipe
+       coprocess  is  executed asynchronously in a subshell, as if the command
+       had been terminated with the && control operator, with  a  two-way  pipe
        established between the executing shell and the coprocess.
 
        The format for a coprocess is:
 
               ccoopprroocc [_N_A_M_E] _c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n_s]
 
-       This creates a coprocess named _N_A_M_E.  If  _N_A_M_E  is  not  supplied,  the
+       This  creates  a  coprocess  named  _N_A_M_E.  If _N_A_M_E is not supplied, the
        default name is _C_O_P_R_O_C.  _N_A_M_E must not be supplied if _c_o_m_m_a_n_d is a _s_i_m_-
        _p_l_e _c_o_m_m_a_n_d (see above); otherwise, it is interpreted as the first word
-       of  the simple command.  When the coproc is executed, the shell creates
-       an array variable (see AArrrraayyss below) named _N_A_M_E in the context  of  the
-       executing  shell.   The  standard  output of _c_o_m_m_a_n_d is connected via a
-       pipe to a file  descriptor  in  the  executing  shell,  and  that  file
-       descriptor  is  assigned  to _N_A_M_E[0].  The standard input of _c_o_m_m_a_n_d is
-       connected via a pipe to a file descriptor in the executing  shell,  and
-       that  file descriptor is assigned to _N_A_M_E[1].  This pipe is established
-       before any redirections  specified  by  the  command  (see  RREEDDIIRREECCTTIIOONN
-       below).   The  file  descriptors  can be utilized as arguments to shell
-       commands and redirections using standard word expansions.  The  process
-       id  of  the  shell spawned to execute the coprocess is available as the
-       value of the variable _N_A_M_E_PID.  The wwaaiitt builtin command may  be  used
+       of the simple command.  When the coproc is executed, the shell  creates
+       an  array  variable (see AArrrraayyss below) named _N_A_M_E in the context of the
+       executing shell.  The standard output of _c_o_m_m_a_n_d  is  connected  via  a
+       pipe  to  a  file  descriptor  in  the  executing  shell, and that file
+       descriptor is assigned to _N_A_M_E[0].  The standard input  of  _c_o_m_m_a_n_d  is
+       connected  via  a pipe to a file descriptor in the executing shell, and
+       that file descriptor is assigned to _N_A_M_E[1].  This pipe is  established
+       before  any  redirections  specified  by  the  command (see RREEDDIIRREECCTTIIOONN
+       below).  The file descriptors can be utilized  as  arguments  to  shell
+       commands  and redirections using standard word expansions.  The process
+       id of the shell spawned to execute the coprocess is  available  as  the
+       value  of  the variable _N_A_M_E_PID.  The wwaaiitt builtin command may be used
        to wait for the coprocess to terminate.
 
        The return status of a coprocess is the exit status of _c_o_m_m_a_n_d.
 
    SShheellll FFuunnccttiioonn DDeeffiinniittiioonnss
-       A  shell function is an object that is called like a simple command and
-       executes a compound command with a new set  of  positional  parameters.
+       A shell function is an object that is called like a simple command  and
+       executes  a  compound  command with a new set of positional parameters.
        Shell functions are declared as follows:
 
        [ ffuunnccttiioonn ] _n_a_m_e () _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n]
-              This  defines a function named _n_a_m_e.  The reserved word ffuunnccttiioonn
-              is optional.  If the ffuunnccttiioonn reserved  word  is  supplied,  the
-              parentheses  are optional.  The _b_o_d_y of the function is the com-
-              pound command _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d (see  CCoommppoouunndd  CCoommmmaannddss  above).
-              That  command is usually a _l_i_s_t of commands between { and }, but
-              may be any command listed under CCoommppoouunndd CCoommmmaannddss  above.   _c_o_m_-
+              This defines a function named _n_a_m_e.  The reserved word  ffuunnccttiioonn
+              is  optional.   If  the  ffuunnccttiioonn reserved word is supplied, the
+              parentheses are optional.  The _b_o_d_y of the function is the  com-
+              pound  command  _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d  (see CCoommppoouunndd CCoommmmaannddss above).
+              That command is usually a _l_i_s_t of commands between { and },  but
+              may  be  any command listed under CCoommppoouunndd CCoommmmaannddss above.  _c_o_m_-
               _p_o_u_n_d_-_c_o_m_m_a_n_d is executed whenever _n_a_m_e is specified as the name
-              of a simple command.  Any redirections (see  RREEDDIIRREECCTTIIOONN  below)
-              specified  when  a  function  is  defined are performed when the
-              function is executed.  The exit status of a function  definition
+              of  a  simple command.  Any redirections (see RREEDDIIRREECCTTIIOONN below)
+              specified when a function is  defined  are  performed  when  the
+              function  is executed.  The exit status of a function definition
               is zero unless a syntax error occurs or a readonly function with
               the same name already exists.  When executed, the exit status of
-              a  function  is  the exit status of the last command executed in
+              a function is the exit status of the last  command  executed  in
               the body.  (See FFUUNNCCTTIIOONNSS below.)
 
 CCOOMMMMEENNTTSS
        In a non-interactive shell, or an interactive shell in which the iinntteerr--
-       aaccttiivvee__ccoommmmeennttss  option  to  the  sshhoopptt  builtin  is enabled (see SSHHEELLLL
-       BBUUIILLTTIINN CCOOMMMMAANNDDSS below), a word beginning with ## causes that  word  and
-       all  remaining  characters  on that line to be ignored.  An interactive
-       shell without the iinntteerraaccttiivvee__ccoommmmeennttss option enabled  does  not  allow
+       aaccttiivvee__ccoommmmeennttss option to the  sshhoopptt  builtin  is  enabled  (see  SSHHEELLLL
+       BBUUIILLTTIINN  CCOOMMMMAANNDDSS  below), a word beginning with ## causes that word and
+       all remaining characters on that line to be  ignored.   An  interactive
+       shell  without  the  iinntteerraaccttiivvee__ccoommmmeennttss option enabled does not allow
        comments.  The iinntteerraaccttiivvee__ccoommmmeennttss option is on by default in interac-
        tive shells.
 
 QQUUOOTTIINNGG
-       _Q_u_o_t_i_n_g is used to remove the special meaning of certain characters  or
-       words  to  the shell.  Quoting can be used to disable special treatment
+       _Q_u_o_t_i_n_g  is used to remove the special meaning of certain characters or
+       words to the shell.  Quoting can be used to disable  special  treatment
        for special characters, to prevent reserved words from being recognized
        as such, and to prevent parameter expansion.
 
-       Each  of  the _m_e_t_a_c_h_a_r_a_c_t_e_r_s listed above under DDEEFFIINNIITTIIOONNSS has special
+       Each of the _m_e_t_a_c_h_a_r_a_c_t_e_r_s listed above under DDEEFFIINNIITTIIOONNSS  has  special
        meaning to the shell and must be quoted if it is to represent itself.
 
-       When the command history expansion facilities are being used (see  HHIISS--
+       When  the command history expansion facilities are being used (see HHIISS--
        TTOORRYY EEXXPPAANNSSIIOONN below), the _h_i_s_t_o_r_y _e_x_p_a_n_s_i_o_n character, usually !!, must
        be quoted to prevent history expansion.
 
-       There are  three  quoting  mechanisms:  the  _e_s_c_a_p_e  _c_h_a_r_a_c_t_e_r,  single
+       There  are  three  quoting  mechanisms:  the  _e_s_c_a_p_e  _c_h_a_r_a_c_t_e_r, single
        quotes, and double quotes.
 
-       A  non-quoted  backslash (\\) is the _e_s_c_a_p_e _c_h_a_r_a_c_t_e_r.  It preserves the
+       A non-quoted backslash (\\) is the _e_s_c_a_p_e _c_h_a_r_a_c_t_e_r.  It  preserves  the
        literal value of the next character that follows, with the exception of
-       <newline>.   If  a  \\<newline>  pair  appears, and the backslash is not
-       itself quoted, the \\<newline> is treated as a line  continuation  (that
+       <newline>.  If a \\<newline> pair appears,  and  the  backslash  is  not
+       itself  quoted,  the \\<newline> is treated as a line continuation (that
        is, it is removed from the input stream and effectively ignored).
 
-       Enclosing  characters  in  single quotes preserves the literal value of
+       Enclosing characters in single quotes preserves the  literal  value  of
        each character within the quotes.  A single quote may not occur between
        single quotes, even when preceded by a backslash.
 
-       Enclosing  characters  in  double quotes preserves the literal value of
-       all characters within the quotes, with the exception of $$, ``,  \\,  and,
-       when  history  expansion  is enabled, !!.  The characters $$ and `` retain
-       their special meaning within double quotes.  The backslash retains  its
-       special  meaning only when followed by one of the following characters:
-       $$, ``, "", \\, or <<nneewwlliinnee>>.  A double quote may be quoted  within  double
+       Enclosing characters in double quotes preserves the  literal  value  of
+       all  characters  within the quotes, with the exception of $$, ``, \\, and,
+       when history expansion is enabled, !!.  The characters $$  and  ``  retain
+       their  special meaning within double quotes.  The backslash retains its
+       special meaning only when followed by one of the following  characters:
+       $$,  ``,  "", \\, or <<nneewwlliinnee>>.  A double quote may be quoted within double
        quotes by preceding it with a backslash.  If enabled, history expansion
-       will be performed unless an !!  appearing in double  quotes  is  escaped
+       will  be  performed  unless an !!  appearing in double quotes is escaped
        using a backslash.  The backslash preceding the !!  is not removed.
 
-       The  special  parameters  **  and  @@ have special meaning when in double
+       The special parameters ** and @@ have  special  meaning  when  in  double
        quotes (see PPAARRAAMMEETTEERRSS below).
 
        Words of the form $$'_s_t_r_i_n_g' are treated specially.  The word expands to
-       _s_t_r_i_n_g,  with backslash-escaped characters replaced as specified by the
-       ANSI C standard.  Backslash escape sequences, if present,  are  decoded
+       _s_t_r_i_n_g, with backslash-escaped characters replaced as specified by  the
+       ANSI  C  standard.  Backslash escape sequences, if present, are decoded
        as follows:
               \\aa     alert (bell)
               \\bb     backspace
@@ -576,202 +577,210 @@ QQUUOOTTIINNGG
               \\vv     vertical tab
               \\\\     backslash
               \\''     single quote
-              \\_n_n_n   the  eight-bit  character  whose value is the octal value
+              \\_n_n_n   the eight-bit character whose value is  the  octal  value
                      _n_n_n (one to three digits)
-              \\xx_H_H   the eight-bit character whose value  is  the  hexadecimal
+              \\xx_H_H   the  eight-bit  character  whose value is the hexadecimal
                      value _H_H (one or two hex digits)
               \\cc_x    a control-_x character
 
-       The  expanded  result  is  single-quoted, as if the dollar sign had not
+       The expanded result is single-quoted, as if the  dollar  sign  had  not
        been present.
 
-       A double-quoted string preceded by a dollar sign  ($$)  will  cause  the
-       string  to  be translated according to the current locale.  If the cur-
-       rent locale is CC or PPOOSSIIXX, the dollar sign is ignored.  If  the  string
+       A  double-quoted  string  preceded  by a dollar sign ($$) will cause the
+       string to be translated according to the current locale.  If  the  cur-
+       rent  locale  is CC or PPOOSSIIXX, the dollar sign is ignored.  If the string
        is translated and replaced, the replacement is double-quoted.
 
 PPAARRAAMMEETTEERRSS
-       A  _p_a_r_a_m_e_t_e_r is an entity that stores values.  It can be a _n_a_m_e, a num-
+       A _p_a_r_a_m_e_t_e_r is an entity that stores values.  It can be a _n_a_m_e, a  num-
        ber, or one of the special characters listed below under SSppeecciiaall PPaarraamm--
-       eetteerrss.   A _v_a_r_i_a_b_l_e is a parameter denoted by a _n_a_m_e.  A variable has a
-       _v_a_l_u_e and zero or more _a_t_t_r_i_b_u_t_e_s.  Attributes are assigned  using  the
-       ddeeccllaarree  builtin command (see ddeeccllaarree below in SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS).
+       eetteerrss.  A _v_a_r_i_a_b_l_e is a parameter denoted by a _n_a_m_e.  A variable has  a
+       _v_a_l_u_e  and  zero or more _a_t_t_r_i_b_u_t_e_s.  Attributes are assigned using the
+       ddeeccllaarree builtin command (see ddeeccllaarree below in SSHHEELLLL BBUUIILLTTIINN  CCOOMMMMAANNDDSS).
 
        A parameter is set if it has been assigned a value.  The null string is
-       a  valid  value.  Once a variable is set, it may be unset only by using
+       a valid value.  Once a variable is set, it may be unset only  by  using
        the uunnsseett builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
        A _v_a_r_i_a_b_l_e may be assigned to by a statement of the form
 
               _n_a_m_e=[_v_a_l_u_e]
 
-       If _v_a_l_u_e is not given, the variable is assigned the null  string.   All
-       _v_a_l_u_e_s  undergo tilde expansion, parameter and variable expansion, com-
-       mand substitution, arithmetic expansion, and quote removal (see  EEXXPPAANN--
+       If  _v_a_l_u_e  is not given, the variable is assigned the null string.  All
+       _v_a_l_u_e_s undergo tilde expansion, parameter and variable expansion,  com-
+       mand  substitution, arithmetic expansion, and quote removal (see EEXXPPAANN--
        SSIIOONN below).  If the variable has its iinntteeggeerr attribute set, then _v_a_l_u_e
        is evaluated as an arithmetic expression even if the $((...)) expansion
-       is  not  used  (see AArriitthhmmeettiicc EExxppaannssiioonn below).  Word splitting is not
-       performed, with the exception of ""$$@@"" as explained below under  SSppeecciiaall
-       PPaarraammeetteerrss.   Pathname  expansion  is not performed.  Assignment state-
-       ments may also appear as arguments  to  the  aalliiaass,  ddeeccllaarree,  ttyyppeesseett,
+       is not used (see AArriitthhmmeettiicc EExxppaannssiioonn below).  Word  splitting  is  not
+       performed,  with the exception of ""$$@@"" as explained below under SSppeecciiaall
+       PPaarraammeetteerrss.  Pathname expansion is not  performed.   Assignment  state-
+       ments  may  also  appear  as  arguments to the aalliiaass, ddeeccllaarree, ttyyppeesseett,
        eexxppoorrtt, rreeaaddoonnllyy, and llooccaall builtin commands.
 
-       In  the context where an assignment statement is assigning a value to a
+       In the context where an assignment statement is assigning a value to  a
        shell variable or array index, the += operator can be used to append to
        or add to the variable's previous value.  When += is applied to a vari-
-       able for which the integer attribute has been set, _v_a_l_u_e  is  evaluated
-       as  an arithmetic expression and added to the variable's current value,
+       able  for  which the integer attribute has been set, _v_a_l_u_e is evaluated
+       as an arithmetic expression and added to the variable's current  value,
        which is also evaluated.  When += is applied to an array variable using
-       compound  assignment  (see  AArrrraayyss  below), the variable's value is not
+       compound assignment (see AArrrraayyss below), the  variable's  value  is  not
        unset (as it is when using =), and new values are appended to the array
-       beginning  at  one  greater than the array's maximum index (for indexed
+       beginning at one greater than the array's maximum  index  (for  indexed
        arrays) or added as additional key-value pairs in an associative array.
-       When  applied  to  a  string-valued  variable,  _v_a_l_u_e  is  expanded and
+       When applied  to  a  string-valued  variable,  _v_a_l_u_e  is  expanded  and
        appended to the variable's value.
 
    PPoossiittiioonnaall PPaarraammeetteerrss
-       A _p_o_s_i_t_i_o_n_a_l _p_a_r_a_m_e_t_e_r is a parameter denoted by one  or  more  digits,
+       A  _p_o_s_i_t_i_o_n_a_l  _p_a_r_a_m_e_t_e_r  is a parameter denoted by one or more digits,
        other than the single digit 0.  Positional parameters are assigned from
-       the shell's arguments when it is invoked, and may be  reassigned  using
-       the  sseett builtin command.  Positional parameters may not be assigned to
-       with assignment statements.  The positional parameters are  temporarily
+       the  shell's  arguments when it is invoked, and may be reassigned using
+       the sseett builtin command.  Positional parameters may not be assigned  to
+       with  assignment statements.  The positional parameters are temporarily
        replaced when a shell function is executed (see FFUUNNCCTTIIOONNSS below).
 
-       When  a  positional parameter consisting of more than a single digit is
+       When a positional parameter consisting of more than a single  digit  is
        expanded, it must be enclosed in braces (see EEXXPPAANNSSIIOONN below).
 
    SSppeecciiaall PPaarraammeetteerrss
-       The shell treats several parameters specially.   These  parameters  may
+       The  shell  treats  several parameters specially.  These parameters may
        only be referenced; assignment to them is not allowed.
-       **      Expands  to  the positional parameters, starting from one.  When
-              the expansion occurs within double quotes, it expands to a  sin-
+       **      Expands to the positional parameters, starting from  one.   When
+              the  expansion occurs within double quotes, it expands to a sin-
               gle word with the value of each parameter separated by the first
               character of the IIFFSS special variable.  That is, "$$**" is equiva-
               lent to "$$11_c$$22_c......", where _c is the first character of the value
-              of the IIFFSS variable.  If IIFFSS is unset, the parameters are  sepa-
-              rated  by  spaces.   If  IIFFSS  is null, the parameters are joined
+              of  the IIFFSS variable.  If IIFFSS is unset, the parameters are sepa-
+              rated by spaces.  If IIFFSS is  null,  the  parameters  are  joined
               without intervening separators.
-       @@      Expands to the positional parameters, starting from  one.   When
+       @@      Expands  to  the positional parameters, starting from one.  When
               the  expansion  occurs  within  double  quotes,  each  parameter
               expands to a separate word.  That is, "$$@@" is equivalent to "$$11"
-              "$$22"  ...   If the double-quoted expansion occurs within a word,
-              the expansion of the first parameter is joined with  the  begin-
-              ning  part  of  the original word, and the expansion of the last
-              parameter is joined with the last part  of  the  original  word.
-              When  there  are no positional parameters, "$$@@" and $$@@ expand to
+              "$$22" ...  If the double-quoted expansion occurs within  a  word,
+              the  expansion  of the first parameter is joined with the begin-
+              ning part of the original word, and the expansion  of  the  last
+              parameter  is  joined  with  the last part of the original word.
+              When there are no positional parameters, "$$@@" and $$@@  expand  to
               nothing (i.e., they are removed).
        ##      Expands to the number of positional parameters in decimal.
-       ??      Expands to the exit status of the most recently  executed  fore-
+       ??      Expands  to  the exit status of the most recently executed fore-
               ground pipeline.
-       --      Expands  to  the  current option flags as specified upon invoca-
-              tion, by the sseett builtin command, or  those  set  by  the  shell
+       --      Expands to the current option flags as  specified  upon  invoca-
+              tion,  by  the  sseett  builtin  command, or those set by the shell
               itself (such as the --ii option).
-       $$      Expands  to  the  process ID of the shell.  In a () subshell, it
-              expands to the process ID of the current  shell,  not  the  sub-
+       $$      Expands to the process ID of the shell.  In a  ()  subshell,  it
+              expands  to  the  process  ID of the current shell, not the sub-
               shell.
-       !!      Expands  to  the  process ID of the most recently executed back-
+       !!      Expands to the process ID of the most  recently  executed  back-
               ground (asynchronous) command.
-       00      Expands to the name of the shell or shell script.  This  is  set
+       00      Expands  to  the name of the shell or shell script.  This is set
               at shell initialization.  If bbaasshh is invoked with a file of com-
-              mands, $$00 is set to the name of that file.  If bbaasshh  is  started
-              with  the  --cc option, then $$00 is set to the first argument after
-              the string to be executed, if one is present.  Otherwise, it  is
-              set  to  the file name used to invoke bbaasshh, as given by argument
+              mands,  $$00  is set to the name of that file.  If bbaasshh is started
+              with the --cc option, then $$00 is set to the first  argument  after
+              the  string to be executed, if one is present.  Otherwise, it is
+              set to the file name used to invoke bbaasshh, as given  by  argument
               zero.
-       __      At shell startup, set to the absolute pathname  used  to  invoke
-              the  shell or shell script being executed as passed in the envi-
-              ronment or argument list.  Subsequently,  expands  to  the  last
-              argument  to the previous command, after expansion.  Also set to
-              the full pathname used  to  invoke  each  command  executed  and
+       __      At  shell  startup,  set to the absolute pathname used to invoke
+              the shell or shell script being executed as passed in the  envi-
+              ronment  or  argument  list.   Subsequently, expands to the last
+              argument to the previous command, after expansion.  Also set  to
+              the  full  pathname  used  to  invoke  each command executed and
               placed in the environment exported to that command.  When check-
-              ing mail, this parameter holds the name of the  mail  file  cur-
+              ing  mail,  this  parameter holds the name of the mail file cur-
               rently being checked.
 
    SShheellll VVaarriiaabblleess
        The following variables are set by the shell:
 
-       BBAASSHH   Expands  to  the  full file name used to invoke this instance of
+       BBAASSHH   Expands to the full file name used to invoke  this  instance  of
               bbaasshh.
+       BBAASSHHOOPPTTSS
+              A  colon-separated  list of enabled shell options.  Each word in
+              the list is a valid argument for the  --ss  option  to  the  sshhoopptt
+              builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  The options
+              appearing in BBAASSHHOOPPTTSS are those reported as  _o_n  by  sshhoopptt.   If
+              this  variable  is  in the environment when bbaasshh starts up, each
+              shell option in the list will  be  enabled  before  reading  any
+              startup files.  This variable is read-only.
        BBAASSHHPPIIDD
-              Expands to the process id of the  current  bbaasshh  process.   This
-              differs  from  $$$$ under certain circumstances, such as subshells
+              Expands  to  the  process  id of the current bbaasshh process.  This
+              differs from $$$$ under certain circumstances, such  as  subshells
               that do not require bbaasshh to be re-initialized.
        BBAASSHH__AALLIIAASSEESS
-              An associative array variable whose members  correspond  to  the
+              An  associative  array  variable whose members correspond to the
               internal list of aliases as maintained by the aalliiaass builtin Ele-
-              ments added to this array appear in the  alias  list;  unsetting
-              array  elements cause aliases to be removed from the alias list.
+              ments  added  to  this array appear in the alias list; unsetting
+              array elements cause aliases to be removed from the alias  list.
        BBAASSHH__AARRGGCC
-              An array variable whose values are the number of  parameters  in
+              An  array  variable whose values are the number of parameters in
               each frame of the current bbaasshh execution call stack.  The number
-              of parameters to  the  current  subroutine  (shell  function  or
-              script  executed  with  .. or ssoouurrccee) is at the top of the stack.
-              When a subroutine is executed, the number of  parameters  passed
+              of  parameters  to  the  current  subroutine  (shell function or
+              script executed with .. or ssoouurrccee) is at the top  of  the  stack.
+              When  a  subroutine is executed, the number of parameters passed
               is pushed onto BBAASSHH__AARRGGCC.  The shell sets BBAASSHH__AARRGGCC only when in
-              extended debugging mode (see the  description  of  the  eexxttddeebbuugg
+              extended  debugging  mode  (see  the description of the eexxttddeebbuugg
               option to the sshhoopptt builtin below)
        BBAASSHH__AARRGGVV
-              An  array  variable containing all of the parameters in the cur-
+              An array variable containing all of the parameters in  the  cur-
               rent bbaasshh execution call stack.  The final parameter of the last
-              subroutine  call is at the top of the stack; the first parameter
+              subroutine call is at the top of the stack; the first  parameter
               of the initial call is at the bottom.  When a subroutine is exe-
-              cuted,  the  parameters supplied are pushed onto BBAASSHH__AARRGGVV.  The
-              shell sets BBAASSHH__AARRGGVV only when in extended debugging  mode  (see
-              the  description  of  the  eexxttddeebbuugg  option to the sshhoopptt builtin
+              cuted, the parameters supplied are pushed onto  BBAASSHH__AARRGGVV.   The
+              shell  sets  BBAASSHH__AARRGGVV only when in extended debugging mode (see
+              the description of the eexxttddeebbuugg  option  to  the  sshhoopptt  builtin
               below)
        BBAASSHH__CCMMDDSS
-              An associative array variable whose members  correspond  to  the
-              internal  hash  table  of  commands  as  maintained  by the hhaasshh
+              An  associative  array  variable whose members correspond to the
+              internal hash table  of  commands  as  maintained  by  the  hhaasshh
               builtin.  Elements added to this array appear in the hash table;
-              unsetting  array  elements cause commands to be removed from the
+              unsetting array elements cause commands to be removed  from  the
               hash table.
        BBAASSHH__CCOOMMMMAANNDD
-              The command currently being executed or about  to  be  executed,
+              The  command  currently  being executed or about to be executed,
               unless the shell is executing a command as the result of a trap,
-              in which case it is the command executing at  the  time  of  the
+              in  which  case  it  is the command executing at the time of the
               trap.
        BBAASSHH__EEXXEECCUUTTIIOONN__SSTTRRIINNGG
               The command argument to the --cc invocation option.
        BBAASSHH__LLIINNEENNOO
-              An  array  variable whose members are the line numbers in source
-              files   corresponding    to    each    member    of    FFUUNNCCNNAAMMEE.
-              $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}}  is  the line number in the source file where
-              $${{FFUUNNCCNNAAMMEE[[_$_i]]}} was called (or  $${{BBAASSHH__LLIINNEENNOO[[_$_i_-_1]]}}  if  refer-
-              enced  within another shell function).  The corresponding source
-              file name is $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}.  Use LLIINNEENNOO to obtain the  cur-
+              An array variable whose members are the line numbers  in  source
+              files    corresponding    to    each    member    of   FFUUNNCCNNAAMMEE.
+              $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}} is the line number in the source  file  where
+              $${{FFUUNNCCNNAAMMEE[[_$_i]]}}  was  called  (or $${{BBAASSHH__LLIINNEENNOO[[_$_i_-_1]]}} if refer-
+              enced within another shell function).  The corresponding  source
+              file  name is $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}.  Use LLIINNEENNOO to obtain the cur-
               rent line number.
        BBAASSHH__RREEMMAATTCCHH
-              An  array  variable  whose members are assigned by the ==~~ binary
-              operator to the [[[[ conditional command.  The element with  index
-              0  is  the  portion  of  the  string matching the entire regular
-              expression.  The element with index _n  is  the  portion  of  the
+              An array variable whose members are assigned by  the  ==~~  binary
+              operator  to the [[[[ conditional command.  The element with index
+              0 is the portion of  the  string  matching  the  entire  regular
+              expression.   The  element  with  index  _n is the portion of the
               string matching the _nth parenthesized subexpression.  This vari-
               able is read-only.
        BBAASSHH__SSOOUURRCCEE
-              An array variable whose members are the source filenames  corre-
+              An  array variable whose members are the source filenames corre-
               sponding to the elements in the FFUUNNCCNNAAMMEE array variable.
        BBAASSHH__SSUUBBSSHHEELLLL
-              Incremented  by one each time a subshell or subshell environment
+              Incremented by one each time a subshell or subshell  environment
               is spawned.  The initial value is 0.
        BBAASSHH__VVEERRSSIINNFFOO
               A readonly array variable whose members hold version information
-              for  this  instance  of  bbaasshh.  The values assigned to the array
+              for this instance of bbaasshh.  The values  assigned  to  the  array
               members are as follows:
-              BBAASSHH__VVEERRSSIINNFFOO[[0]]        The major version number (the  _r_e_l_e_a_s_e).
-              BBAASSHH__VVEERRSSIINNFFOO[[1]]        The  minor version number (the _v_e_r_s_i_o_n).
+              BBAASSHH__VVEERRSSIINNFFOO[[0]]        The  major version number (the _r_e_l_e_a_s_e).
+              BBAASSHH__VVEERRSSIINNFFOO[[1]]        The minor version number (the  _v_e_r_s_i_o_n).
               BBAASSHH__VVEERRSSIINNFFOO[[2]]        The patch level.
               BBAASSHH__VVEERRSSIINNFFOO[[3]]        The build version.
               BBAASSHH__VVEERRSSIINNFFOO[[4]]        The release status (e.g., _b_e_t_a_1).
               BBAASSHH__VVEERRSSIINNFFOO[[5]]        The value of MMAACCHHTTYYPPEE.
 
        BBAASSHH__VVEERRSSIIOONN
-              Expands to a string describing the version of this  instance  of
+              Expands  to  a string describing the version of this instance of
               bbaasshh.
 
        CCOOMMPP__CCWWOORRDD
-              An  index  into $${{CCOOMMPP__WWOORRDDSS}} of the word containing the current
+              An index into $${{CCOOMMPP__WWOORRDDSS}} of the word containing  the  current
               cursor position.  This variable is available only in shell func-
-              tions  invoked  by  the  programmable completion facilities (see
+              tions invoked by the  programmable  completion  facilities  (see
               PPrrooggrraammmmaabbllee CCoommpplleettiioonn below).
 
        CCOOMMPP__KKEEYY
@@ -779,116 +788,116 @@ PPAARRAAMMEETTEERRSS
               rent completion function.
 
        CCOOMMPP__LLIINNEE
-              The  current  command  line.  This variable is available only in
-              shell functions  and  external  commands  invoked  by  the  pro-
-              grammable  completion  facilities  (see  PPrrooggrraammmmaabbllee CCoommpplleettiioonn
+              The current command line.  This variable is  available  only  in
+              shell  functions  and  external  commands  invoked  by  the pro-
+              grammable completion  facilities  (see  PPrrooggrraammmmaabbllee  CCoommpplleettiioonn
               below).
 
        CCOOMMPP__PPOOIINNTT
-              The index of the current cursor position relative to the  begin-
-              ning  of the current command.  If the current cursor position is
+              The  index of the current cursor position relative to the begin-
+              ning of the current command.  If the current cursor position  is
               at the end of the current command, the value of this variable is
-              equal  to  $${{##CCOOMMPP__LLIINNEE}}.   This  variable  is available only in
-              shell functions  and  external  commands  invoked  by  the  pro-
-              grammable  completion  facilities  (see  PPrrooggrraammmmaabbllee CCoommpplleettiioonn
+              equal to $${{##CCOOMMPP__LLIINNEE}}.  This  variable  is  available  only  in
+              shell  functions  and  external  commands  invoked  by  the pro-
+              grammable completion  facilities  (see  PPrrooggrraammmmaabbllee  CCoommpplleettiioonn
               below).
 
        CCOOMMPP__TTYYPPEE
-              Set to an integer value corresponding to the type of  completion
-              attempted  that  caused a completion function to be called: _T_A_B,
-              for normal completion, _?, for listing completions after  succes-
-              sive  tabs,  _!, for listing alternatives on partial word comple-
-              tion, _@, to list completions if the word is not  unmodified,  or
-              _%,  for  menu  completion.   This  variable is available only in
-              shell functions  and  external  commands  invoked  by  the  pro-
-              grammable  completion  facilities  (see  PPrrooggrraammmmaabbllee CCoommpplleettiioonn
+              Set  to an integer value corresponding to the type of completion
+              attempted that caused a completion function to be  called:  _T_A_B,
+              for  normal completion, _?, for listing completions after succes-
+              sive tabs, _!, for listing alternatives on partial  word  comple-
+              tion,  _@,  to list completions if the word is not unmodified, or
+              _%, for menu completion.  This  variable  is  available  only  in
+              shell  functions  and  external  commands  invoked  by  the pro-
+              grammable completion  facilities  (see  PPrrooggrraammmmaabbllee  CCoommpplleettiioonn
               below).
 
        CCOOMMPP__WWOORRDDBBRREEAAKKSS
-              The set of characters that the rreeaaddlliinnee library treats  as  word
-              separators  when performing word completion.  If CCOOMMPP__WWOORRDDBBRREEAAKKSS
-              is unset, it loses its special properties, even if it is  subse-
+              The  set  of characters that the rreeaaddlliinnee library treats as word
+              separators when performing word completion.  If  CCOOMMPP__WWOORRDDBBRREEAAKKSS
+              is  unset, it loses its special properties, even if it is subse-
               quently reset.
 
        CCOOMMPP__WWOORRDDSS
-              An  array variable (see AArrrraayyss below) consisting of the individ-
-              ual words in the current command line.  The line is  split  into
-              words  as  rreeaaddlliinnee  would  split  it,  using CCOOMMPP__WWOORRDDBBRREEAAKKSS as
+              An array variable (see AArrrraayyss below) consisting of the  individ-
+              ual  words  in the current command line.  The line is split into
+              words as rreeaaddlliinnee  would  split  it,  using  CCOOMMPP__WWOORRDDBBRREEAAKKSS  as
               described above.  This variable is available only in shell func-
-              tions  invoked  by  the  programmable completion facilities (see
+              tions invoked by the  programmable  completion  facilities  (see
               PPrrooggrraammmmaabbllee CCoommpplleettiioonn below).
 
        DDIIRRSSTTAACCKK
               An array variable (see AArrrraayyss below) containing the current con-
-              tents  of  the directory stack.  Directories appear in the stack
-              in the order they are displayed by the ddiirrss builtin.   Assigning
+              tents of the directory stack.  Directories appear in  the  stack
+              in  the order they are displayed by the ddiirrss builtin.  Assigning
               to members of this array variable may be used to modify directo-
-              ries already in the stack, but the ppuusshhdd and ppooppdd builtins  must
+              ries  already in the stack, but the ppuusshhdd and ppooppdd builtins must
               be used to add and remove directories.  Assignment to this vari-
-              able will not change the  current  directory.   If  DDIIRRSSTTAACCKK  is
-              unset,  it  loses  its  special properties, even if it is subse-
+              able  will  not  change  the  current directory.  If DDIIRRSSTTAACCKK is
+              unset, it loses its special properties, even  if  it  is  subse-
               quently reset.
 
-       EEUUIIDD   Expands to the effective user ID of the current  user,  initial-
+       EEUUIIDD   Expands  to  the effective user ID of the current user, initial-
               ized at shell startup.  This variable is readonly.
 
        FFUUNNCCNNAAMMEE
-              An  array  variable  containing the names of all shell functions
+              An array variable containing the names of  all  shell  functions
               currently in the execution call stack.  The element with index 0
               is the name of any currently-executing shell function.  The bot-
-              tom-most element is "main".  This variable exists  only  when  a
-              shell  function  is  executing.  Assignments to FFUUNNCCNNAAMMEE have no
-              effect and return an error status.  If  FFUUNNCCNNAAMMEE  is  unset,  it
-              loses  its special properties, even if it is subsequently reset.
+              tom-most  element  is  "main".  This variable exists only when a
+              shell function is executing.  Assignments to  FFUUNNCCNNAAMMEE  have  no
+              effect  and  return  an  error status.  If FFUUNNCCNNAAMMEE is unset, it
+              loses its special properties, even if it is subsequently  reset.
 
-       GGRROOUUPPSS An array variable containing the list of  groups  of  which  the
-              current  user is a member.  Assignments to GGRROOUUPPSS have no effect
-              and return an error status.  If GGRROOUUPPSS is unset,  it  loses  its
+       GGRROOUUPPSS An  array  variable  containing  the list of groups of which the
+              current user is a member.  Assignments to GGRROOUUPPSS have no  effect
+              and  return  an  error status.  If GGRROOUUPPSS is unset, it loses its
               special properties, even if it is subsequently reset.
 
        HHIISSTTCCMMDD
               The history number, or index in the history list, of the current
-              command.  If HHIISSTTCCMMDD is unset, it loses its special  properties,
+              command.   If HHIISSTTCCMMDD is unset, it loses its special properties,
               even if it is subsequently reset.
 
        HHOOSSTTNNAAMMEE
               Automatically set to the name of the current host.
 
        HHOOSSTTTTYYPPEE
-              Automatically  set  to a string that uniquely describes the type
-              of machine on which bbaasshh is executing.  The default  is  system-
+              Automatically set to a string that uniquely describes  the  type
+              of  machine  on which bbaasshh is executing.  The default is system-
               dependent.
 
-       LLIINNEENNOO Each  time this parameter is referenced, the shell substitutes a
-              decimal number representing the current sequential  line  number
-              (starting  with  1)  within a script or function.  When not in a
-              script or function, the value substituted is not  guaranteed  to
+       LLIINNEENNOO Each time this parameter is referenced, the shell substitutes  a
+              decimal  number  representing the current sequential line number
+              (starting with 1) within a script or function.  When  not  in  a
+              script  or  function, the value substituted is not guaranteed to
               be meaningful.  If LLIINNEENNOO is unset, it loses its special proper-
               ties, even if it is subsequently reset.
 
        MMAACCHHTTYYPPEE
-              Automatically set to a string that fully  describes  the  system
-              type  on  which  bbaasshh is executing, in the standard GNU _c_p_u_-_c_o_m_-
+              Automatically  set  to  a string that fully describes the system
+              type on which bbaasshh is executing, in the  standard  GNU  _c_p_u_-_c_o_m_-
               _p_a_n_y_-_s_y_s_t_e_m format.  The default is system-dependent.
 
        OOLLDDPPWWDD The previous working directory as set by the ccdd command.
 
-       OOPPTTAARRGG The value of the last option argument processed by  the  ggeettooppttss
+       OOPPTTAARRGG The  value  of the last option argument processed by the ggeettooppttss
               builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
-       OOPPTTIINNDD The  index  of  the next argument to be processed by the ggeettooppttss
+       OOPPTTIINNDD The index of the next argument to be processed  by  the  ggeettooppttss
               builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
-       OOSSTTYYPPEE Automatically set to a string that describes the operating  sys-
-              tem  on  which  bbaasshh is executing.  The default is system-depen-
+       OOSSTTYYPPEE Automatically  set to a string that describes the operating sys-
+              tem on which bbaasshh is executing.  The  default  is  system-depen-
               dent.
 
        PPIIPPEESSTTAATTUUSS
-              An array variable (see AArrrraayyss below) containing a list  of  exit
-              status  values  from the processes in the most-recently-executed
+              An  array  variable (see AArrrraayyss below) containing a list of exit
+              status values from the processes in  the  most-recently-executed
               foreground pipeline (which may contain only a single command).
 
-       PPPPIIDD   The process ID of the shell's parent.  This  variable  is  read-
+       PPPPIIDD   The  process  ID  of the shell's parent.  This variable is read-
               only.
 
        PPWWDD    The current working directory as set by the ccdd command.
@@ -896,27 +905,27 @@ PPAARRAAMMEETTEERRSS
        RRAANNDDOOMM Each time this parameter is referenced, a random integer between
               0 and 32767 is generated.  The sequence of random numbers may be
               initialized by assigning a value to RRAANNDDOOMM.  If RRAANNDDOOMM is unset,
-              it loses its special properties,  even  if  it  is  subsequently
+              it  loses  its  special  properties,  even if it is subsequently
               reset.
 
-       RREEPPLLYY  Set  to  the line of input read by the rreeaadd builtin command when
+       RREEPPLLYY  Set to the line of input read by the rreeaadd builtin  command  when
               no arguments are supplied.
 
        SSEECCOONNDDSS
-              Each time this parameter is referenced, the  number  of  seconds
-              since  shell  invocation is returned.  If a value is assigned to
-              SSEECCOONNDDSS, the value returned upon subsequent  references  is  the
-              number  of seconds since the assignment plus the value assigned.
+              Each  time  this  parameter is referenced, the number of seconds
+              since shell invocation is returned.  If a value is  assigned  to
+              SSEECCOONNDDSS,  the  value  returned upon subsequent references is the
+              number of seconds since the assignment plus the value  assigned.
               If SSEECCOONNDDSS is unset, it loses its special properties, even if it
               is subsequently reset.
 
        SSHHEELLLLOOPPTTSS
-              A  colon-separated  list of enabled shell options.  Each word in
-              the list is a valid argument  for  the  --oo  option  to  the  sseett
+              A colon-separated list of enabled shell options.  Each  word  in
+              the  list  is  a  valid  argument  for  the --oo option to the sseett
               builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  The options
-              appearing in SSHHEELLLLOOPPTTSS are those reported as _o_n by sseett  --oo.   If
-              this  variable  is  in the environment when bbaasshh starts up, each
-              shell option in the list will  be  enabled  before  reading  any
+              appearing  in  SSHHEELLLLOOPPTTSS are those reported as _o_n by sseett --oo.  If
+              this variable is in the environment when bbaasshh  starts  up,  each
+              shell  option  in  the  list  will be enabled before reading any
               startup files.  This variable is read-only.
 
        SSHHLLVVLL  Incremented by one each time an instance of bbaasshh is started.
@@ -924,20 +933,29 @@ PPAARRAAMMEETTEERRSS
        UUIIDD    Expands to the user ID of the current user, initialized at shell
               startup.  This variable is readonly.
 
-       The following variables are used by the shell.   In  some  cases,  bbaasshh
+       The  following  variables  are  used by the shell.  In some cases, bbaasshh
        assigns a default value to a variable; these cases are noted below.
 
        BBAASSHH__EENNVV
-              If  this parameter is set when bbaasshh is executing a shell script,
-              its value is interpreted as a filename  containing  commands  to
+              If this parameter is set when bbaasshh is executing a shell  script,
+              its  value  is  interpreted as a filename containing commands to
               initialize the shell, as in _~_/_._b_a_s_h_r_c.  The value of BBAASSHH__EENNVV is
-              subjected to  parameter  expansion,  command  substitution,  and
-              arithmetic  expansion  before  being interpreted as a file name.
+              subjected  to  parameter  expansion,  command  substitution, and
+              arithmetic expansion before being interpreted as  a  file  name.
               PPAATTHH is not used to search for the resultant file name.
-       CCDDPPAATTHH The search path for the ccdd command.  This is  a  colon-separated
-              list  of  directories  in  which the shell looks for destination
-              directories specified by the ccdd  command.   A  sample  value  is
+       CCDDPPAATTHH The  search  path for the ccdd command.  This is a colon-separated
+              list of directories in which the  shell  looks  for  destination
+              directories  specified  by  the  ccdd  command.  A sample value is
               ".:~:/usr".
+       BBAASSHH__XXTTRRAACCEEFFDD
+              If set to an integer corresponding to a valid  file  descriptor,
+              bbaasshh  will  write  the  trace  output  generated  when _s_e_t _-_x is
+              enabled to that file descriptor.  The file descriptor is  closed
+              when  BBAASSHH__XXTTRRAACCEEFFDD is unset or assigned a new value.  Unsetting
+              BBAASSHH__XXTTRRAACCEEFFDD or assigning it the empty string causes the  trace
+              output  to  be  sent  to  the standard error.  Note that setting
+              BBAASSHH__XXTTRRAACCEEFFDD to 2 (the standard error file descriptor) and then
+              unsetting it will result in the standard error being closed.
        CCOOLLUUMMNNSS
               Used  by  the  sseelleecctt  builtin command to determine the terminal
               width when printing selection  lists.   Automatically  set  upon
@@ -3264,6 +3282,14 @@ RREEAADDLLIINNEE
               A  character  is  read and point is moved to the previous occur-
               rence of that character.  A negative count searches  for  subse-
               quent occurrences.
+       sskkiipp--ccssii--sseeqquueennccee (())
+              Read  enough  characters to consume a multi-key sequence such as
+              those defined for keys like Home and End.  Such sequences  begin
+              with a Control Sequence Indicator (CSI), usually ESC-[.  If this
+              sequence is bound to "\[", keys producing  such  sequences  will
+              have  no  effect  unless explicitly bound to a readline command,
+              instead of inserting stray characters into the  editing  buffer.
+              This is unbound by default, but usually bound to ESC-[.
        iinnsseerrtt--ccoommmmeenntt ((MM--##))
               Without  a  numeric  argument,  the  value  of the readline ccoomm--
               mmeenntt--bbeeggiinn variable is inserted at the beginning of the  current
@@ -4656,15 +4682,15 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --pp      Turn on _p_r_i_v_i_l_e_g_e_d mode.  In this  mode,  the  $$EENNVV  and
                       $$BBAASSHH__EENNVV  files  are not processed, shell functions are
                       not inherited from the environment, and  the  SSHHEELLLLOOPPTTSS,
-                      CCDDPPAATTHH,  and GGLLOOBBIIGGNNOORREE variables, if they appear in the
-                      environment, are ignored.  If the shell is started  with
-                      the effective user (group) id not equal to the real user
-                      (group) id, and the --pp option  is  not  supplied,  these
-                      actions  are  taken  and the effective user id is set to
-                      the real user id.  If  the  --pp  option  is  supplied  at
-                      startup,  the  effective  user id is not reset.  Turning
-                      this option off causes the effective user and group  ids
-                      to be set to the real user and group ids.
+                      BBAASSHHOOPPTTSS,  CCDDPPAATTHH,  and  GGLLOOBBIIGGNNOORREE  variables,  if they
+                      appear in the environment, are ignored.  If the shell is
+                      started  with the effective user (group) id not equal to
+                      the real user (group) id, and the --pp option is not  sup-
+                      plied, these actions are taken and the effective user id
+                      is set to the real user id.  If the --pp  option  is  sup-
+                      plied  at  startup,  the effective user id is not reset.
+                      Turning this option off causes the  effective  user  and
+                      group ids to be set to the real user and group ids.
               --tt      Exit after reading and executing one command.
               --uu      Treat unset variables and parameters other than the spe-
                       cial parameters "@" and "*" as an error when  performing
@@ -5278,4 +5304,4 @@ BBUUGGSS
 
 
 
-GNU Bash-4.0                     2009 July 30                          BASH(1)
+GNU Bash-4.0                    2009 August 17                         BASH(1)

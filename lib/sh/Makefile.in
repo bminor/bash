@@ -91,7 +91,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c fdprintf.c input_avail.c mbscasecmp.c
+	   casemod.c fdprintf.c input_avail.c mbscasecmp.c fnxform.c
 
 # The header files for this library.
 HSOURCES = 
@@ -105,7 +105,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
-	  fdprintf.o input_avail.o mbscasecmp.o ${LIBOBJS}
+	  fdprintf.o input_avail.o mbscasecmp.o fnxform.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -145,6 +145,7 @@ fdprintf.o: fdprintf.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
+fnxform.o: fnxform.c
 fpurge.o: fpurge.c
 getcwd.o: getcwd.c
 getenv.o: getenv.c
@@ -214,6 +215,7 @@ fdprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
+fnxform.o: ${BUILD_DIR}/config.h
 fpurge.o: ${BUILD_DIR}/config.h
 getcwd.o: ${BUILD_DIR}/config.h
 getenv.o: ${BUILD_DIR}/config.h
@@ -532,3 +534,8 @@ input_avail.o: ${topdir}/xmalloc.h ${BASHINCDIR}/posixselect.h
 
 mktime.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 mktime.o: ${BASHINCDIR}/stdc.h
+
+fnxform.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+fnxform.o: ${BASHINCDIR}/stdc.h
+fnxform.o: ${topdir}/bashtypes.h
+fnxform.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h

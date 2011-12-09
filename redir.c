@@ -964,6 +964,8 @@ do_redirection_internal (redirect, flags)
 	  /* dup-and-close redirection */
 	  if (ri == r_move_input || ri == r_move_output)
 	    {
+	      xtrace_fdchk (redir_fd);
+
 	      close (redir_fd);
 #if defined (COPROCESS_SUPPORT)
 	      coproc_fdchk (redir_fd);	/* XXX - loses coproc fds */
@@ -981,6 +983,7 @@ do_redirection_internal (redirect, flags)
 #if defined (COPROCESS_SUPPORT)
 	  coproc_fdchk (redirector);
 #endif
+	  xtrace_fdchk (redirector);
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);

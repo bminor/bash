@@ -360,16 +360,16 @@ xtrace_set (fd, fp)
 {
   if (fd >= 0 && sh_validfd (fd) == 0)
     {
-      internal_error ("xtrace_set: %d: invalid file descriptor", fd);
+      internal_error (_("xtrace_set: %d: invalid file descriptor"), fd);
       return;
     }
   if (fp == 0)
     {
-      internal_error ("xtrace_set: NULL file pointer");
+      internal_error (_("xtrace_set: NULL file pointer"));
       return;
     }
   if (fd >= 0 && fileno (fp) != fd)
-    internal_warning ("xtrace fd (%d) != fileno xtrace fp (%d)", fd, fileno (fp));
+    internal_warning (_("xtrace fd (%d) != fileno xtrace fp (%d)"), fd, fileno (fp));
   
   xtrace_fd = fd;
   xtrace_fp = fp;
@@ -384,12 +384,24 @@ xtrace_init ()
 void
 xtrace_reset ()
 {
-  if (xtrace_fd >= 0)
+  if (xtrace_fd >= 0 && xtrace_fp)
+    {
+      fflush (xtrace_fp);
+      fclose (xtrace_fp);
+    }
+  else if (xtrace_fd >= 0)
     close (xtrace_fd);
+
   xtrace_fd = -1;
-  if (xtrace_fp)
-    fclose (xtrace_fp);
   xtrace_fp = stderr;
+}
+
+void
+xtrace_fdchk (fd)
+     int fd;
+{
+  if (fd == xtrace_fd)
+    xtrace_reset ();
 }
 
 /* Return a string denoting what our indirection level is. */

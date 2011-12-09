@@ -389,6 +389,7 @@ extern int _rl_print_completions_horizontally;
 extern int _rl_completion_case_fold;
 extern int _rl_match_hidden_files;
 extern int _rl_page_completions;
+extern int _rl_skip_completed_text;
 
 /* display.c */
 extern int _rl_vis_botlin;

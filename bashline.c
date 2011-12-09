@@ -115,6 +115,7 @@ static int bash_backward_kill_shellword __P((int, int));
 /* Helper functions for Readline. */
 static char *restore_tilde __P((char *, char *));
 
+static char *bash_filename_rewrite_hook __P((char *, int));
 static void bash_directory_expansion __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
@@ -500,6 +501,8 @@ initialize_readline ()
   /* Tell the completer that we might want to follow symbolic links or
      do other expansion on directory names. */
   rl_directory_completion_hook = bash_directory_completion_hook;
+
+  rl_filename_rewrite_hook = bash_filename_rewrite_hook;
 
   /* Tell the filename completer we want a chance to ignore some names. */
   rl_ignore_some_completions_function = filename_completion_ignore;
@@ -2657,6 +2660,20 @@ bash_directory_expansion (dirname)
       free (d);
       *dirname = nd;
     }
+}
+
+/* If necessary, rewrite directory entry */
+static char *
+bash_filename_rewrite_hook (fname, fnlen)
+     char *fname;
+     int fnlen;
+{
+  char *conv;
+
+  conv = fnx_fromfs (fname, fnlen);
+  if (conv != fname)
+    conv = savestring (conv);
+  return conv;
 }
 
 /* Handle symbolic link references and other directory name

@@ -28,7 +28,7 @@
 \entry {commands, shell}{7}
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
-\entry {completion builtins}{113}
+\entry {completion builtins}{114}
 \entry {configuration}{125}
 \entry {control operator}{3}
 \entry {coprocess}{13}
@@ -67,7 +67,7 @@
 \entry {initialization file, readline}{94}
 \entry {installation}{125}
 \entry {interaction, readline}{91}
-\entry {interactive shell}{73, 74}
+\entry {interactive shell}{73, 75}
 \entry {internationalization}{7}
 \initial {J}
 \entry {job}{3}
@@ -116,7 +116,7 @@
 \entry {shell function}{14}
 \entry {shell script}{33}
 \entry {shell variable}{15}
-\entry {shell, interactive}{74}
+\entry {shell, interactive}{75}
 \entry {signal}{4}
 \entry {signal handling}{32}
 \entry {special builtin}{4, 59}

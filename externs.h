@@ -196,6 +196,10 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
 /* Declarations for functions defined in lib/sh/fmtumax.c */
 extern char *fmtumax __P((uintmax_t, int, char *, size_t, int));
 
+/* Declarations for functions defined in lib/sh/fnxform.c */
+extern char *fnx_fromfs __P((char *, size_t));
+extern char *fnx_tofs __P((char *, size_t));
+
 /* Declarations for functions defined in lib/sh/fpurge.c */
 
 #if defined NEED_FPURGE_DECL
