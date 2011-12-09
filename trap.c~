@@ -85,10 +85,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern procenv_t wait_intr_buf;
 extern int return_catch_flag, return_catch_value;
 extern int subshell_level;
-
-#if defined (PGRP_PIPE)
-extern int pgrp_pipe[2];
-#endif
+extern WORD_LIST *subst_assign_varlist;
 
 /* The list of things to do originally, before we started trapping. */
 SigHandler *original_signals[NSIG];
@@ -266,6 +263,7 @@ run_pending_traps ()
 {
   register int sig;
   int old_exit_value, *token_state;
+  WORD_LIST *save_subst_varlist;
 
   if (catch_flag == 0)		/* simple optimization */
     return;
@@ -336,9 +334,13 @@ run_pending_traps ()
 	  else
 	    {
 	      token_state = save_token_state ();
+save_subst_varlist = subst_assign_varlist;
+subst_assign_varlist = 0;
+itrace("run_pending_traps: subst_assign_varlist = NULL");
 	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      restore_token_state (token_state);
 	      free (token_state);
+subst_assign_varlist = save_subst_varlist;
 	    }
 
 	  pending_traps[sig] = 0;
@@ -586,7 +588,7 @@ get_original_signal (sig)
      int sig;
 {
   /* If we aren't sure the of the original value, then get it. */
-  if (original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
+  if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
     GETORIGSIG (sig);
 }
 

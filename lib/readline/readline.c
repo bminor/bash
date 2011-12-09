@@ -895,7 +895,7 @@ _rl_subseq_result (r, map, key, got_subseq)
   Keymap m;
   int type, nt;
   rl_command_func_t *func, *nf;
-  
+
   if (r == -2)
     /* We didn't match anything, and the keymap we're indexed into
        shadowed a function previously bound to that prefix.  Call

@@ -8197,3 +8197,32 @@ builtins/command.def
 	  verbose-handling section, so command -v and command -V honor
 	  the PATH set by command -p.  Bug and fix from
 	  ohki@gssm.otsuka.tsukuba.ac.jp
+
+				    7/9
+				    ---
+subst.c
+	- change brace_expand_word_list to defer brace expansion on compound
+	  array assignments that are arguments to builtins like `declare',
+	  deferring the expansion until the assignment statement is processed.
+	  Fixes inconsistency reported by agriffis@n01se.net
+
+				   7/16
+				   ----
+bashline.c
+	- fix bash_execute_unix_command to set rl_point correctly based on
+	  READLINE_POINT.  The old method of using save_point will not
+	  work because maybe_make_readline_line will change rl_point.  Bug
+	  reported by Henning Bekel <h.bekel@googlemail.com>
+
+trap.c
+	- fix _run_trap_internal and run_pending_traps to save and restore
+	  value of subst_assign_varlist so the dispose_words on it doesn't
+	  leave dangling pointers after the trap handler runs.  Fixes bug
+	  reported by Marc Herbert <marc.herbert@gmail.com>
+
+				   7/22
+				   ----
+subst.c
+	- fix off-by-one error in pos_params when computing positional
+	  parameters beginning with 0.  Bug and fix from Isaac Good
+	  <isaacgood@gmail.com>

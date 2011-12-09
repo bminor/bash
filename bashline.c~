@@ -1386,7 +1386,7 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
-  if (!matches && *text == '~' && !xstrchr (text, '/'))
+  if (matches ==0 && *text == '~' && mbschr (text, '/') == 0)
     matches = rl_completion_matches (text, rl_username_completion_function);
 
   /* Another one.  Why not?  If the word starts in '@', then look through
@@ -2666,11 +2666,11 @@ bash_directory_completion_hook (dirname)
   return_value = should_expand_dirname = 0;
   local_dirname = *dirname;
 
-  if (xstrchr (local_dirname, '$'))
+  if (mbschr (local_dirname, '$'))
     should_expand_dirname = 1;
   else
     {
-      t = xstrchr (local_dirname, '`');
+      t = mbschr (local_dirname, '`');
       if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
 	should_expand_dirname = 1;
     }
@@ -3271,7 +3271,7 @@ quote_word_break_chars (text)
 	}
       /* OK, we have an unquoted character.  Check its presence in
 	 rl_completer_word_break_characters. */
-      if (xstrchr (rl_completer_word_break_characters, *s))
+      if (mbschr (rl_completer_word_break_characters, *s))
 	*r++ = '\\';
       /* XXX -- check for standalone tildes here and backslash-quote them */
       if (s == text && *s == '~' && file_exists (text))
@@ -3313,7 +3313,7 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && xstrchr (s, '\n'))
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -3321,11 +3321,11 @@ bash_quote_filename (s, rtype, qcp)
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
   else if (*qcp == '\0' && history_expansion && cs == COMPLETE_DQUOTE &&
-	   history_expansion_inhibited == 0 && xstrchr (s, '!'))
+	   history_expansion_inhibited == 0 && mbschr (s, '!'))
     cs = COMPLETE_BSQUOTE;
 
   if (*qcp == '"' && history_expansion && cs == COMPLETE_DQUOTE &&
-	history_expansion_inhibited == 0 && xstrchr (s, '!'))
+	history_expansion_inhibited == 0 && mbschr (s, '!'))
     {
       cs = COMPLETE_BSQUOTE;
       *qcp = '\0';
@@ -3450,7 +3450,7 @@ bash_execute_unix_command (count, key)
   if (v && legal_number (value_cell (v), &mi))
     {
       i = mi;
-      if (i != save_point)
+      if (i != rl_point)
 	{
 	  rl_point = i;
 	  if (rl_point > rl_end)

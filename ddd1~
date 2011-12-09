@@ -1,59 +1,130 @@
-*** ../bash-4.0-patched/lib/readline/display.c	2009-01-04 14:32:32.000000000 -0500
---- lib/readline/display.c	2009-04-25 21:42:18.000000000 -0400
+*** ../bash-4.0-patched/variables.c	2009-01-04 14:32:46.000000000 -0500
+--- variables.c	2009-06-29 09:17:20.000000000 -0400
 ***************
-*** 513,516 ****
---- 513,517 ----
-       data structures. */
-    _rl_block_sigint ();  
-+   RL_SETSTATE (RL_STATE_REDISPLAYING);
+*** 222,228 ****
+--- 222,230 ----
+  static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
+  static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
++ #  if defined (ALIAS)
+  static SHELL_VAR *build_aliasvar __P((SHELL_VAR *));
+  static SHELL_VAR *get_aliasvar __P((SHELL_VAR *));
+  static SHELL_VAR *assign_aliasvar __P((SHELL_VAR *,  char *, arrayind_t, char *));
++ #  endif
+  #endif
   
-    if (!rl_display_prompt)
 ***************
-*** 1237,1240 ****
---- 1238,1242 ----
-    }
-  
-+   RL_UNSETSTATE (RL_STATE_REDISPLAYING);
-    _rl_release_sigint ();
+*** 253,256 ****
+--- 255,259 ----
+  static int visible_var __P((SHELL_VAR *));
+  static int visible_and_exported __P((SHELL_VAR *));
++ static int export_environment_candidate __P((SHELL_VAR *));
+  static int local_and_exported __P((SHELL_VAR *));
+  static int variable_in_context __P((SHELL_VAR *));
+***************
+*** 376,383 ****
+  #  endif
+  #endif
+        else if (legal_identifier (name))
+  	{
+  	  temp_var = bind_variable (name, string, 0);
+! 	  VSETATTR (temp_var, (att_exported | att_imported));
+  	  array_needs_making = 1;
+  	}
+--- 379,393 ----
+  #  endif
+  #endif
++ #if 0
+        else if (legal_identifier (name))
++ #else
++       else
++ #endif
+  	{
+  	  temp_var = bind_variable (name, string, 0);
+! 	  if (legal_identifier (name))
+! 	    VSETATTR (temp_var, (att_exported | att_imported));
+! 	  else
+! 	    VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
+  	  array_needs_making = 1;
+  	}
+***************
+*** 868,872 ****
+    av = array_cell (vv);
+    strcpy (d, dist_version);
+!   s = xstrchr (d, '.');
+    if (s)
+      *s++ = '\0';
+--- 878,882 ----
+    av = array_cell (vv);
+    strcpy (d, dist_version);
+!   s = strchr (d, '.');
+    if (s)
+      *s++ = '\0';
+***************
+*** 1549,1552 ****
+--- 1559,1563 ----
   }
+  
++ #if defined (ALIAS)
+  static SHELL_VAR *
+  build_aliasvar (self)
 ***************
-*** 1773,1777 ****
-  	     adjust col_lendiff based on the difference between _rl_last_c_pos
-  	     and _rl_screenwidth */
-! 	  if (col_lendiff && (_rl_last_c_pos < _rl_screenwidth))
-  #endif
-  	    {	  
---- 1775,1779 ----
-  	     adjust col_lendiff based on the difference between _rl_last_c_pos
-  	     and _rl_screenwidth */
-! 	  if (col_lendiff && ((MB_CUR_MAX == 1 || rl_byte_oriented) || (_rl_last_c_pos < _rl_screenwidth)))
-  #endif
-  	    {	  
-***************
-*** 1893,1896 ****
---- 1895,1902 ----
-    woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
-    cpos = _rl_last_c_pos;
+*** 1601,1604 ****
+--- 1612,1617 ----
+    return (build_aliasvar (self));
+  }
++ #endif /* ALIAS */
 + 
-+   if (cpos == 0 && cpos == new)
-+     return;
-+ 
-  #if defined (HANDLE_MULTIBYTE)
-    /* If we have multibyte characters, NEW is indexed by the buffer point in
+  #endif /* ARRAY_VARS */
+  
 ***************
-*** 1906,1912 ****
-  	 desired display position. */
-        if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
-! 	  (prompt_physical_chars > _rl_screenwidth &&
-  	   _rl_last_v_pos == prompt_last_screen_line &&
-! 	   wrap_offset >= woff &&
-  	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
-  	   /* XXX last comparison might need to be >= */
---- 1912,1918 ----
-  	 desired display position. */
-        if ((new > prompt_last_invisible) ||		/* XXX - don't use woff here */
-! 	  (prompt_physical_chars >= _rl_screenwidth &&
-  	   _rl_last_v_pos == prompt_last_screen_line &&
-! 	   wrap_offset >= woff && dpos >= woff &&
-  	   new > (prompt_last_invisible-(_rl_screenwidth*_rl_last_v_pos)-wrap_offset)))
-  	   /* XXX last comparison might need to be >= */
+*** 1696,1700 ****
+--- 1709,1715 ----
+  
+    v = init_dynamic_assoc_var ("BASH_CMDS", get_hashcmd, assign_hashcmd, att_nofree);
++ #  if defined (ALIAS)
+    v = init_dynamic_assoc_var ("BASH_ALIASES", get_aliasvar, assign_aliasvar, att_nofree);
++ #  endif
+  #endif
+  
+***************
+*** 3083,3086 ****
+--- 3098,3111 ----
+  }
+  
++ /* Candidate variables for the export environment are either valid variables
++    with the export attribute or invalid variables inherited from the initial
++    environment and simply passed through. */
++ static int
++ export_environment_candidate (var)
++      SHELL_VAR *var;
++ {
++   return (exported_p (var) && (invisible_p (var) == 0 || imported_p (var)));
++ }
++ 
+  /* Return non-zero if VAR is a local variable in the current context and
+     is exported. */
+***************
+*** 3439,3443 ****
+--- 3464,3472 ----
+    SHELL_VAR **vars;
+  
++ #if 0
+    vars = map_over (visible_and_exported, vcxt);
++ #else
++   vars = map_over (export_environment_candidate, vcxt);
++ #endif
+  
+    if (vars == 0)
+***************
+*** 3588,3592 ****
+        export_env[export_env_index = 0] = (char *)NULL;
+  
+!       /* Make a dummy variable context from the  temporary_env, stick it on
+  	 the front of shell_variables, call make_var_export_array on the
+  	 whole thing to flatten it, and convert the list of SHELL_VAR *s
+--- 3617,3621 ----
+        export_env[export_env_index = 0] = (char *)NULL;
+  
+!       /* Make a dummy variable context from the temporary_env, stick it on
+  	 the front of shell_variables, call make_var_export_array on the
+  	 whole thing to flatten it, and convert the list of SHELL_VAR *s

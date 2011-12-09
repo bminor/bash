@@ -134,7 +134,15 @@ size_t ifs_firstc_len;
 unsigned char ifs_firstc;
 #endif
 
+/* Sentinel to tell when we are performing variable assignments preceding a
+   command name and putting them into the environment.  Used to make sure
+   we use the temporary environment when looking up variable values. */
 int assigning_in_environment;
+
+/* Used to hold a list of variable assignments preceding a command.  Global
+   so the SIGCHLD handler in jobs.c can unwind-protect it when it runs a
+   SIGCHLD trap and so it can be saved and restored by the trap handlers. */
+WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
 
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
@@ -182,11 +190,6 @@ static int no_longjmp_on_fatal_error = 0;
 /* Set by expand_word_unsplit; used to inhibit splitting and re-joining
    $* on $IFS, primarily when doing assignment statements. */
 static int expand_no_split_dollar_star = 0;
-
-/* Used to hold a list of variable assignments preceding a command.  Global
-   so the SIGCHLD handler in jobs.c can unwind-protect it when it runs a
-   SIGCHLD trap. */
-WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
 
 /* A WORD_LIST of words to be expanded by expand_word_list_internal,
    without any leading variable assignments. */
@@ -2739,7 +2742,7 @@ pos_params (string, start, end, quoted)
       save = params = t;
     }
 
-  for (i = 1; params && i < start; i++)
+  for (i = start ? 1 : 0; params && i < start; i++)
     params = params->next;
   if (params == 0)
     return ((char *)NULL);
@@ -8327,7 +8330,7 @@ separate_out_assignments (tlist)
 {
   register WORD_LIST *vp, *lp;
 
-  if (!tlist)
+  if (tlist == 0)
     return ((WORD_LIST *)NULL);
 
   if (subst_assign_varlist)
