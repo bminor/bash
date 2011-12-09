@@ -24,11 +24,11 @@ $PRODUCES mapfile.c
 $BUILTIN mapfile
 $FUNCTION mapfile_builtin
 $SHORT_DOC mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
-Read lines from the standard input into an array variable.
+Read lines from the standard input into an indexed array variable.
 
-Read lines from the standard input into the array variable ARRAY, or from
-file descriptor FD if the -u option is supplied.  The variable MAPFILE is
-the default ARRAY.
+Read lines from the standard input into the indexed array variable ARRAY, or
+from file descriptor FD if the -u option is supplied.  The variable MAPFILE
+is the default ARRAY.
 
 Options:
   -n count	Copy at most COUNT lines.  If COUNT is 0, all lines are copied.
@@ -50,7 +50,8 @@ If not supplied with an explicit origin, mapfile will clear ARRAY before
 assigning to it.
 
 Exit Status:
-Returns success unless an invalid option is given or ARRAY is readonly.
+Returns success unless an invalid option is given or ARRAY is readonly or
+not an indexed array.
 $END
 
 $BUILTIN readarray
@@ -71,6 +72,7 @@ $END
 #endif
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -153,11 +155,17 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   entry = find_or_make_array_variable (array_name, 1);
   if (entry == 0 || readonly_p (entry) || noassign_p (entry))
     {
-      if (readonly_p (entry))
+      if (entry && readonly_p (entry))
 	err_readonly (array_name);
 	
       return (EXECUTION_FAILURE);
     }
+  else if (array_p (entry) == 0)
+    {
+      builtin_error (_("%s: not an indexed array", array_name));
+      return (EXECUTION_FAILURE);
+    }
+      
   if (flags & MAPF_CLEARARRAY)
     array_flush (array_cell (entry));
 

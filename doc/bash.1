@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Oct  9 12:07:53 EDT 2009
+.\"	Last Change: Fri Oct 16 12:24:25 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 October 9" "GNU Bash-4.1"
+.TH BASH 1 "2009 October 16" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7787,7 +7787,7 @@ Exit a login shell.
 .TP
 \fBreadarray\fP [\fB\-n\fP \fIcount\fP] [\fB\-O\fP \fIorigin\fP] [\fB\-s\fP \fIcount\fP] [\fB\-t\fP] [\fB\-u\fP \fIfd\fP] [\fB\-C\fP \fIcallback\fP] [\fB\-c\fP \fIquantum\fP] [\fIarray\fP]
 .PD
-Read lines from the standard input into array variable
+Read lines from the standard input into the indexed array variable
 .IR array ,
 or from file descriptor 
 .IR fd
@@ -7845,7 +7845,8 @@ If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
 before assigning to it.
 .PP
 \fBmapfile\fP returns successfully unless an invalid option or option
-argument is supplied, or \fIarray\fP is invalid or unassignable.
+argument is supplied, \fIarray\fP is invalid or unassignable, or if
+\fIarray\fP is not an indexed array.
 .RE
 .TP
 \fBpopd\fP [\-\fBn\fP] [+\fIn\fP] [\-\fIn\fP]

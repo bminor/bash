@@ -6,7 +6,7 @@
 \entry{convert-meta}{5}{convert-meta}
 \entry{disable-completion}{5}{disable-completion}
 \entry{editing-mode}{5}{editing-mode}
-\entry{enable-keypad}{5}{enable-keypad}
+\entry{enable-keypad}{6}{enable-keypad}
 \entry{expand-tilde}{6}{expand-tilde}
 \entry{history-preserve-point}{6}{history-preserve-point}
 \entry{history-size}{6}{history-size}
@@ -15,7 +15,7 @@
 \entry{meta-flag}{6}{meta-flag}
 \entry{isearch-terminators}{6}{isearch-terminators}
 \entry{keymap}{6}{keymap}
-\entry{mark-modified-lines}{6}{mark-modified-lines}
+\entry{mark-modified-lines}{7}{mark-modified-lines}
 \entry{mark-symlinked-directories}{7}{mark-symlinked-directories}
 \entry{match-hidden-files}{7}{match-hidden-files}
 \entry{output-meta}{7}{output-meta}
@@ -23,7 +23,8 @@
 \entry{revert-all-at-newline}{7}{revert-all-at-newline}
 \entry{show-all-if-ambiguous}{7}{show-all-if-ambiguous}
 \entry{show-all-if-unmodified}{7}{show-all-if-unmodified}
-\entry{visible-stats}{7}{visible-stats}
+\entry{skip-completed-text}{8}{skip-completed-text}
+\entry{visible-stats}{8}{visible-stats}
 \entry{beginning-of-line (C-a)}{13}{\code {beginning-of-line (C-a)}}
 \entry{end-of-line (C-e)}{13}{\code {end-of-line (C-e)}}
 \entry{forward-char (C-f)}{13}{\code {forward-char (C-f)}}
@@ -78,8 +79,9 @@
 \entry{possible-completions (M-?)}{17}{\code {possible-completions (M-?)}}
 \entry{insert-completions (M-*)}{17}{\code {insert-completions (M-*)}}
 \entry{menu-complete ()}{17}{\code {menu-complete ()}}
+\entry{menu-complete-backward ()}{17}{\code {menu-complete-backward ()}}
 \entry{delete-char-or-list ()}{17}{\code {delete-char-or-list ()}}
-\entry{start-kbd-macro (C-x ()}{17}{\code {start-kbd-macro (C-x ()}}
+\entry{start-kbd-macro (C-x ()}{18}{\code {start-kbd-macro (C-x ()}}
 \entry{end-kbd-macro (C-x ))}{18}{\code {end-kbd-macro (C-x ))}}
 \entry{call-last-kbd-macro (C-x e)}{18}{\code {call-last-kbd-macro (C-x e)}}
 \entry{re-read-init-file (C-x C-r)}{18}{\code {re-read-init-file (C-x C-r)}}
@@ -93,7 +95,8 @@
 \entry{exchange-point-and-mark (C-x C-x)}{18}{\code {exchange-point-and-mark (C-x C-x)}}
 \entry{character-search (C-])}{18}{\code {character-search (C-])}}
 \entry{character-search-backward (M-C-])}{18}{\code {character-search-backward (M-C-])}}
-\entry{insert-comment (M-#)}{18}{\code {insert-comment (M-#)}}
+\entry{skip-csi-sequence ()}{19}{\code {skip-csi-sequence ()}}
+\entry{insert-comment (M-#)}{19}{\code {insert-comment (M-#)}}
 \entry{dump-functions ()}{19}{\code {dump-functions ()}}
 \entry{dump-variables ()}{19}{\code {dump-variables ()}}
 \entry{dump-macros ()}{19}{\code {dump-macros ()}}
@@ -140,6 +143,7 @@
 \entry{rl_copy_keymap}{28}{\code {rl_copy_keymap}}
 \entry{rl_make_keymap}{28}{\code {rl_make_keymap}}
 \entry{rl_discard_keymap}{28}{\code {rl_discard_keymap}}
+\entry{rl_free_keymap}{28}{\code {rl_free_keymap}}
 \entry{rl_get_keymap}{28}{\code {rl_get_keymap}}
 \entry{rl_set_keymap}{28}{\code {rl_set_keymap}}
 \entry{rl_get_keymap_by_name}{28}{\code {rl_get_keymap_by_name}}
@@ -257,9 +261,10 @@
 \entry{rl_char_is_quoted_p}{44}{\code {rl_char_is_quoted_p}}
 \entry{rl_ignore_some_completions_function}{44}{\code {rl_ignore_some_completions_function}}
 \entry{rl_directory_completion_hook}{44}{\code {rl_directory_completion_hook}}
+\entry{rl_filename_rewrite_hook}{44}{\code {rl_filename_rewrite_hook}}
 \entry{rl_completion_display_matches_hook}{44}{\code {rl_completion_display_matches_hook}}
-\entry{rl_basic_word_break_characters}{44}{\code {rl_basic_word_break_characters}}
-\entry{rl_basic_quote_characters}{44}{\code {rl_basic_quote_characters}}
+\entry{rl_basic_word_break_characters}{45}{\code {rl_basic_word_break_characters}}
+\entry{rl_basic_quote_characters}{45}{\code {rl_basic_quote_characters}}
 \entry{rl_completer_word_break_characters}{45}{\code {rl_completer_word_break_characters}}
 \entry{rl_completion_word_break_hook}{45}{\code {rl_completion_word_break_hook}}
 \entry{rl_completer_quote_characters}{45}{\code {rl_completer_quote_characters}}
@@ -267,16 +272,16 @@
 \entry{rl_special_prefixes}{45}{\code {rl_special_prefixes}}
 \entry{rl_completion_query_items}{45}{\code {rl_completion_query_items}}
 \entry{rl_completion_append_character}{45}{\code {rl_completion_append_character}}
-\entry{rl_completion_suppress_append}{45}{\code {rl_completion_suppress_append}}
-\entry{rl_completion_quote_character}{45}{\code {rl_completion_quote_character}}
+\entry{rl_completion_suppress_append}{46}{\code {rl_completion_suppress_append}}
+\entry{rl_completion_quote_character}{46}{\code {rl_completion_quote_character}}
 \entry{rl_completion_suppress_quote}{46}{\code {rl_completion_suppress_quote}}
 \entry{rl_completion_found_quote}{46}{\code {rl_completion_found_quote}}
 \entry{rl_completion_mark_symlink_dirs}{46}{\code {rl_completion_mark_symlink_dirs}}
 \entry{rl_ignore_completion_duplicates}{46}{\code {rl_ignore_completion_duplicates}}
 \entry{rl_filename_completion_desired}{46}{\code {rl_filename_completion_desired}}
 \entry{rl_filename_quoting_desired}{46}{\code {rl_filename_quoting_desired}}
-\entry{rl_attempted_completion_over}{46}{\code {rl_attempted_completion_over}}
-\entry{rl_sort_completion_matches}{46}{\code {rl_sort_completion_matches}}
+\entry{rl_attempted_completion_over}{47}{\code {rl_attempted_completion_over}}
+\entry{rl_sort_completion_matches}{47}{\code {rl_sort_completion_matches}}
 \entry{rl_completion_type}{47}{\code {rl_completion_type}}
 \entry{rl_completion_invoking_key}{47}{\code {rl_completion_invoking_key}}
 \entry{rl_inhibit_completion}{47}{\code {rl_inhibit_completion}}

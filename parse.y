@@ -118,6 +118,7 @@ extern int current_command_number;
 extern int sourcelevel, parse_and_execute_level;
 extern int posixly_correct;
 extern int last_command_exit_value;
+extern pid_t last_command_subst_pid;
 extern char *shell_name, *current_host_name;
 extern char *dist_version;
 extern int patch_level;
@@ -2774,7 +2775,7 @@ reset_parser ()
   /* Reset to global value of extended glob */
   if (parser_state & PST_EXTPAT)
 {
-itrace("reset_parser: parser_state includes PST_EXTPAT");
+/*itrace("reset_parser: parser_state includes PST_EXTPAT");*/
     extended_glob = global_extglob;
 }
 
@@ -3092,7 +3093,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
 
-/*itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
+/*itrace("parse_matched_pair[%d]: open = %c close = %c flags = %d", line_number, open, close, flags);*/
   count = 1;
   tflags = 0;
 
@@ -3301,6 +3302,7 @@ parse_dollar_word:
   ret[retind] = '\0';
   if (lenp)
     *lenp = retind;
+/*itrace("parse_matched_pair[%d]: returning %s", line_number, ret);*/
   return ret;
 }
 
@@ -4917,7 +4919,7 @@ decode_prompt_string (string)
   WORD_LIST *list;
   char *result, *t;
   struct dstack save_dstack;
-  int last_exit_value;
+  int last_exit_value, last_comsub_pid;
 #if defined (PROMPT_STRING_DECODE)
   int result_size, result_index;
   int c, n, i;
@@ -5265,11 +5267,13 @@ not_escape:
   if (promptvars || posixly_correct)
     {
       last_exit_value = last_command_exit_value;
+      last_comsub_pid = last_command_subst_pid;
       list = expand_prompt_string (result, Q_DOUBLE_QUOTES, 0);
       free (result);
       result = string_list (list);
       dispose_words (list);
       last_command_exit_value = last_exit_value;
+      last_command_subst_pid = last_comsub_pid;
     }
   else
     {
@@ -5412,7 +5416,7 @@ report_syntax_error (message)
       parser_error (line_number, "%s", message);
       if (interactive && EOF_Reached)
 	EOF_Reached = 0;
-      last_command_exit_value = EX_BADUSAGE;
+      last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
       return;
     }
 
@@ -5427,7 +5431,7 @@ report_syntax_error (message)
       if (interactive == 0)
 	print_offending_line ();
 
-      last_command_exit_value = EX_BADUSAGE;
+      last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
       return;
     }
 
@@ -5458,7 +5462,7 @@ report_syntax_error (message)
 	EOF_Reached = 0;
     }
 
-  last_command_exit_value = EX_BADUSAGE;
+  last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
 }
 
 /* ??? Needed function. ??? We have to be able to discard the constructs

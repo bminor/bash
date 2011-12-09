@@ -1,0 +1,283 @@
+This document details the changes between this version, bash-4.1-alpha,
+and the previous version, bash-4.0-release.
+
+1.  Changes to Bash
+
+a.  Fixed bugs in the parser involving new parsing of the commands contained
+    in command substitution when the substitution is read.
+
+b.  Fixed a bug that caused the shell to dump core when performing programmable
+    completion using a shell function.
+
+c.  Fixed a bug in `mapfile' that caused it to invoke callbacks at the wrong
+    time.
+
+d.  Fixed a bug that caused the shell to dump core when listing jobs in the
+    `exit' builtin.
+
+e.  Fixed several bugs encountered when reading subscripts in associative
+    array assignments and expansions.
+
+f.  Fixed a bug that under some circumstances caused an associative array to
+    be converted to an indexed array.
+
+g.  Fixed a bug that caused syntax errors and SIGINT interrupts to not set
+    $? to a value > 128.
+
+h.  Fixed a bug that caused the shell to remove FIFOs associated with process
+    substitution inside shell functions.
+
+i.  Fixed a bug that caused terminal attributes to not be reset when the
+    `read' builtin timed out.
+
+j.  Fixed a bug in brace expansion that caused unwanted zero padding of the
+    expanded terms.
+
+k.  Fixed a bug that prevented the |& construct from working as intended when
+    used with a simple command with additional redirections.
+
+l.  Fixed a bug with the case statment ;& terminator that caused the shell to
+    dereference a NULL pointer.
+
+m.  Fixed a bug that caused assignment statements or redirections preceding
+    a simple command name to inhibit alias expansion.
+
+n.  Fixed the behavior of `set -u' to conform to the latest Posix interpretation:
+    every expansion of an unset variable except $@ and $* will cause the
+    shell to exit.
+
+o.  Fixed a bug that caused double-quoted expansions of $* inside word
+    expansions like ${x#$*} to not expand properly when $IFS is empty.
+
+p.  Fixed a bug that caused traps to set $LINENO to the wrong value when they
+    execute.
+
+q.  Fixed a bug that caused off-by-one errors when computing history lines in
+    the `fc' builtin.
+
+r.  Fixed a bug that caused some terminating signals to not exit the shell
+    quickly enough, forcing the kernel to send the signal (e.g., SIGSEGV)
+    multiple times.
+
+s.  Fixed a bug that caused the shell to attempt to add empty lines to the
+    history list when reading here documents.
+
+t.  Made some internal changes that dramatically speeds up sequential indexed
+    array access.
+
+u.  Fixed a bug that caused the shell to write past the end of a string when
+    completing a double-quoted string ending in a backslash.
+
+v.  Fixed a bug that caused the shell to replace too many characters when a
+    pattern match was null in a ${foo//bar} expansion.
+
+w.  Fixed bugs in the expansion of ** that caused duplicate directory names
+    and the contents of the current directory to be omitted.
+
+x.  Fixed a bug that caused $? to not be set correctly when referencing an
+    unset variable with set -u and set -e enabled.
+
+y.  Fixed a bug caused by executing an external program from the DEBUG trap
+    while a pipeline was running.  The effect was to disturb the pipeline
+    state, occasionally causing it to hang.
+
+z.  Fixed a bug that caused the ** glob expansion to dump core if it
+    encountered an unsearchable directory.
+
+aa. Fixed a bug that caused `command -v' and `command -V' to not honor the
+    path set by the -p option.
+
+bb. Fixed a bug that caused brace expansion to take place too soon in some
+    compound array assignments.
+
+cc. Fixed a bug that caused programmable completion functions' changes to
+    READLINE_POINT to not be reflected back to readline.
+
+dd. Fixed a bug that caused the shell to dump core if a trap was executed
+    during a shell assignment statement.
+
+ee. Fixed an off-by-one error when computing the number of positional
+    parameters for the ${@:0:n} expansion.
+
+ff. Fixed a problem with setting COMP_CWORD for programmable completion
+    functions that could leave it set to -1.
+
+gg. Fixed a bug that caused the ERR trap to be triggered in some cases where
+    `set -e' would not have caused the shell to exit.
+
+hh. Fixed a bug that caused changes made by `compopt' to not persist past the
+    completion function in which compopt was executed.
+
+ii. Fixed a bug that caused the list of hostname completions to not be cleared
+    when HOSTNAME was unset.
+
+jj. Fixed a bug that caused variable expansion in here documents to look in
+    any temporary environment.
+
+kk. Bash and readline can now convert file names between precomposed and
+    decomposed Unicode on Mac OS X ("keyboard" and file system forms,
+    respectively).  This affects filename completion (using new
+    rl_filename_rewrite_hook), globbing, and readline redisplay.
+
+ll. The ERR and EXIT traps now see a non-zero value for $? when a parser
+    error after set -e has been enabled causes the shell to exit.
+
+mm. Fixed a bug that in brace expansion that caused zero-prefixed terms to
+    not contain the correct number of digits.
+
+nn. Fixed a bug that caused the shell to free non-allocated memory when
+    unsetting an associative array which had had a value implicitly assigned
+    to index "0".
+
+oo. Fixed a memory leak in the ${!prefix@} expansion.
+
+pp. Fixed a bug that caused printf to not correctly report all write errors.
+
+qq. Fixed a bug that caused single and double quotes to act as delimiters
+    when splitting a command line into words for programmable completion.
+
+rr. Fixed a bug that caused ** globbing that caused **/path/* to match every
+    directory, not just those matching `path'.
+
+ss. Fixed a bug that caused the shell to dump core when running `help' without
+    arguments if the terminal width was fewer than 7 characters.
+
+2.  Changes to Readline
+
+a.  The SIGWINCH signal handler now avoids calling the redisplay code if
+    one arrives while in the middle of redisplay.
+
+b.  Changes to the timeout code to make sure that timeout values greater
+    than one second are handled better.
+
+c.  Fixed a bug in the redisplay code that was triggered by a prompt
+    containing invisible characters exactly the width of the screen.
+
+d.  Fixed a bug in the redisplay code encountered when running in horizontal
+    scroll mode.
+
+e.  Fixed a bug that prevented menu completion from properly completing
+    filenames.
+
+f.  Fixed a redisplay bug caused by a multibyte character causing a line to
+    wrap.
+
+g.  Fixed a bug that caused key sequences of two characters to not be
+    recognized when a longer sequence identical in the first two characters
+    was bound.
+
+h.  Fixed a bug that caused history expansion to be attempted on $'...'
+    single-quoted strings.
+
+i.  Fixed a bug that caused incorrect redisplay when the prompt contained
+    multibyte characters in an `invisible' sequence bracketed by \[ and
+    \].
+
+j.  Fixed a bug that caused history expansion to short-circuit after
+    encountering a multibyte character.
+
+3.  New Features in Bash
+
+a.  Here-documents within $(...) command substitutions may once more be
+    delimited by the closing right paren, instead of requiring a newline.
+
+b.  Bash's file status checks (executable, readable, etc.) now take file
+    system ACLs into account on file systems that support them.
+
+c.  Bash now passes environment variables with names that are not valid
+    shell variable names through into the environment passed to child
+    processes.
+
+d.  The `execute-unix-command' readline function now attempts to clear and
+    reuse the current line rather than move to a new one after the command
+    executes.
+
+e.  `printf -v' can now assign values to array indices.
+
+f.  New `complete -E' and `compopt -E' options that work on the "empty"
+    completion: completion attempted on an empty command line.
+
+g.  New complete/compgen/compopt -D option to define a `default' completion:
+    a completion to be invoked on command for which no completion has been
+    defined.  If this function returns 124, programmable completion is
+    attempted again, allowing a user to dynamically build a set of completions
+    as completion is attempted by having the default completion function
+    install individual completion functions each time it is invoked.
+
+h.  When displaying associative arrays, subscripts are now quoted.
+
+i.  Changes to dabbrev-expand to make it more `emacs-like': no space appended
+    after matches, completions are not sorted, and most recent history entries
+    are presented first.
+
+j.  The [[ and (( commands are now subject to the setting of `set -e' and the
+    ERR trap.
+
+k.  The source/. builtin now removes NUL bytes from the file before attempting
+    to parse commands.
+
+l.  There is a new configuration option (in config-top.h) that forces bash to
+    forward all history entries to syslog.
+
+m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
+    child processes.
+
+n.  There is a new confgure option that forces the extglob option to be
+    enabled by default.
+
+o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
+    output to that file descriptor.
+
+p.  If the optional left-hand-side of a redirection is of the form {var}, the
+    shell assigns the file descriptor used to $var or uses $var as the file
+    descriptor to move or close, depending on the redirection operator.
+
+q.  The < and > operators to the [[ conditional command now do string
+    comparison according to the current locale.
+
+r.  Programmable completion now uses the completion for `b' instead of `a'
+    when completion is attempted on a line like: a $(b c.
+
+s.  Force extglob on temporarily when parsing the pattern argument to
+    the == and != operators to the [[ command, for compatibility.
+
+t.  Changed the behavior of interrupting the wait builtin when a SIGCHLD is
+    received and a trap on SIGCHLD is set to be Posix-mode only.
+
+u.  The read builtin has a new `-N nchars' option, which reads exactly NCHARS
+    characters, ignoring delimiters like newline.
+
+4.  New Features in Readline
+
+a.  New bindable function: menu-complete-backward.
+
+b.  In the vi insertion keymap, C-n is now bound to menu-complete by default,
+    and C-p to menu-complete-backward.
+
+c.  When in vi command mode, repeatedly hitting ESC now does nothing, even
+    when ESC introduces a bound key sequence.  This is closer to how
+    historical vi behaves.
+
+d.  New bindable function: skip-csi-sequence.  Can be used as a default to
+    consume key sequences generated by keys like Home and End without having
+    to bind all keys.
+
+e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
+    to rewite or modify filenames read from the file system before they are
+    compared to the word to be completed.
+
+f.  New bindable variable: skip-completed-text, active when completing in the
+    middle of a word.  If enabled, it means that characters in the completion
+    that match characters in the remainder of the word are "skipped" rather
+    than inserted into the line.
+
+g.  The pre-readline-6.0 version of menu completion is available as
+    "old-menu-complete" for users who do not like the readline-6.0 version.
+
+h.  New bindable variable: echo-control-characters.  If enabled, and the
+    tty ECHOCTL bit is set, controls the echoing of characters corresponding
+    to keyboard-generated signals.
+
+i.  New bindable variable: enable-meta-key.  Controls whether or not readline
+    sends the smm/rmm sequences if the terminal indicates it has a meta key
+    that enables eight-bit characters.

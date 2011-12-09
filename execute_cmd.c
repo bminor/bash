@@ -607,7 +607,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	      else
 		exec_result = last_command_exit_value;
 
-
 	      if (user_subshell && was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
 		{
 		  last_command_exit_value = exec_result;
@@ -1287,6 +1286,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 {
   int user_subshell, return_code, function_value, should_redir_stdin, invert;
   int ois, user_coproc;
+  int result;
   COMMAND *tcom;
 
   USE_VAR(user_subshell);
@@ -1453,13 +1453,21 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   invert = (tcom->flags & CMD_INVERT_RETURN) != 0;
   tcom->flags &= ~CMD_INVERT_RETURN;
 
+  result = setjmp (top_level);
+
   /* If we're inside a function while executing this subshell, we
      need to handle a possible `return'. */
   function_value = 0;
   if (return_catch_flag)
     function_value = setjmp (return_catch);
 
-  if (function_value)
+  /* If we're going to exit the shell, we don't want to invert the return
+     status. */
+  if (result == EXITPROG)
+    invert = 0, return_code = last_command_exit_value;
+  else if (result)
+    return_code = EXECUTION_FAILURE;
+  else if (function_value)
     return_code = return_catch_value;
   else
     return_code = execute_command_internal (tcom, asynchronous, NO_PIPE, NO_PIPE, fds_to_close);

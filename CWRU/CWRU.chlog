@@ -9014,3 +9014,60 @@ trap.c
 	  SIG_TRAPPED flag without changing signal disposition
 
 [bash-4.1-alpha frozen]
+
+				   10/16
+				   -----
+builtins/mapfile.def
+	- return an error if the variable passed is not an indexed array.
+	  Fixes bug reported by Nick Hobson <nick.hobson@yahoo.com>
+	- change help text to make it clear that an indexed array is required
+
+doc/{bash.1,bashref.texi}
+	- changed description of mapfile to note that the array variable
+	  argument must be an indexed array, and mapfile will return an
+	  error if it is not
+
+subst.c
+	- change expand_string_unsplit and expand_string_leave_quoted to
+	  add the (previously unused) W_NOSPLIT2 flag to the created word
+	- change expand_word_internal to understand W_NOSPLIT2 to mean that
+	  we're not going to split on $IFS, so we should not quote any
+	  characters in IFS that we add to the result string.  Fixes bug
+	  reported by Enrique Perez-Terron <enrio@online.no>
+	- change cond_expand_word similarly.  Fixes rest of bug reported by
+	  Enrique Perez-Terron <enrio@online.no>
+
+parse.y
+	- save and restore value of last_command_subst_pid around call to
+	  expand_prompt_string in decode_prompt_string.  Fixes bug that causes
+	  $? to be set wrong when using a construct like false || A=3 when
+	  set -x is enabled and $PS4 contains a command substitution.  Reported
+	  by Jeff Haemer <jeffrey.haemer@gmail.com>
+
+				   10/17
+				   -----
+execute_cmd.c
+	- in execute_in_subshell, make sure we set setjmp(return_catch) before
+	  running the command, in case the command or its word expansion
+	  calls jump_to_top_level.  Fixes bug reported by Nils Bernhard
+	  <nils.bernhard@yahoo.de>
+
+subst.c
+	- new PF_NOSPLIT2 flag for param_expand
+	- parameter_brace_expand takes a new `pflags' argument, before the
+	  `output' parameters; passes to param_expand as necessary
+	- change parameter_brace_expand to call parameter_brace_expand_word
+	  with the PF_NOSPLIT2 flag if the pflags argument to
+	  parameter_brace_expand has it set
+
+parse.y
+	- change report_syntax_error to set last_command_exit_value to
+	  EX_BADSYNTAX if parse_and_execute_level is > 0, indicating a
+	  syntax error while we're executing a dot script, eval string,
+	  trap command, etc.
+
+builtins/evalstring.c
+	- in parse_and_execute, if parse_command() returns non-zero,
+	  indicating a parse error, print a warning message if the conditions
+	  would require  a posix-mode shell to abort (parse error in a `.'
+	  script or eval string)

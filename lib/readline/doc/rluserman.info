@@ -2,7 +2,7 @@ This is rluserman.info, produced by makeinfo version 4.13 from
 ./rluserman.texi.
 
 This manual describes the end user interface of the GNU Readline Library
-(version 6.0, 28 October 2008), a library which aids in the consistency
+(version 6.1, 9 October 2009), a library which aids in the consistency
 of user interface across discrete programs which provide a command line
 interface.
 
@@ -438,10 +438,21 @@ Variable Settings
           editing mode, where the keystrokes are most similar to Emacs.
           This variable can be set to either `emacs' or `vi'.
 
+    `echo-control-characters'
+          When set to `on', on operating systems that indicate they
+          support it, readline echoes a character corresponding to a
+          signal generated from the keyboard.  The default is `on'.
+
     `enable-keypad'
           When set to `on', Readline will try to enable the application
           keypad when it is called.  Some systems need this to enable
           the arrow keys.  The default is `off'.
+
+    `enable-meta-key'
+          When set to `on', Readline will try to enable any meta
+          modifier key the terminal claims to support when it is
+          called.  On many terminals, the meta key is used to send
+          eight-bit characters.  The default is `on'.
 
     `expand-tilde'
           If set to `on', tilde expansion is performed when Readline
@@ -544,6 +555,19 @@ Variable Settings
           completions don't share a common prefix) cause the matches to
           be listed immediately instead of ringing the bell.  The
           default value is `off'.
+
+    `skip-completed-text'
+          If set to `on', this alters the default completion behavior
+          when inserting a single match into the line.  It's only
+          active when performing completion in the middle of a word.
+          If enabled, readline does not insert characters from the
+          completion that match characters after point in the word
+          being completed, so portions of the word following the cursor
+          are not duplicated.  For instance, if this is enabled,
+          attempting completion when the cursor is after the `e' in
+          `Makefile' will result in `Makefile' rather than
+          `Makefilefile', assuming there is a single possible
+          completion.  The default value is `off'.
 
     `visible-stats'
           If set to `on', a character denoting a file's type is
@@ -1159,6 +1183,11 @@ File: rluserman.info,  Node: Commands For Completion,  Next: Keyboard Macros,  P
      command is intended to be bound to <TAB>, but is unbound by
      default.
 
+`menu-complete-backward ()'
+     Identical to `menu-complete', but moves backward through the list
+     of possible completions, as if `menu-complete' had been given a
+     negative argument.
+
 `delete-char-or-list ()'
      Deletes the character under the cursor if not at the beginning or
      end of the line (like `delete-char').  If at the end of the line,
@@ -1234,6 +1263,15 @@ File: rluserman.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up
      A character is read and point is moved to the previous occurrence
      of that character.  A negative count searches for subsequent
      occurrences.
+
+`skip-csi-sequence ()'
+     Read enough characters to consume a multi-key sequence such as
+     those defined for keys like Home and End.  Such sequences begin
+     with a Control Sequence Indicator (CSI), usually ESC-[.  If this
+     sequence is bound to "\e[", keys producing such sequences will
+     have no effect unless explicitly bound to a readline command,
+     instead of inserting stray characters into the editing buffer.
+     This is unbound by default, but usually bound to ESC-[.
 
 `insert-comment (M-#)'
      Without a numeric argument, the value of the `comment-begin'
@@ -1783,29 +1821,29 @@ permit their use in free software.
 
 
 Tag Table:
-Node: Top1328
-Node: Command Line Editing1782
-Node: Introduction and Notation2436
-Node: Readline Interaction4060
-Node: Readline Bare Essentials5253
-Node: Readline Movement Commands7044
-Node: Readline Killing Commands8011
-Node: Readline Arguments9933
-Node: Searching10979
-Node: Readline Init File13132
-Node: Readline Init File Syntax14287
-Node: Conditional Init Constructs27241
-Node: Sample Init File29776
-Node: Bindable Readline Commands32895
-Node: Commands For Moving33954
-Node: Commands For History34817
-Node: Commands For Text37943
-Node: Commands For Killing40671
-Node: Numeric Arguments42815
-Node: Commands For Completion43956
-Node: Keyboard Macros45502
-Node: Miscellaneous Commands46075
-Node: Readline vi Mode49438
-Node: GNU Free Documentation License50359
+Node: Top1327
+Node: Command Line Editing1781
+Node: Introduction and Notation2435
+Node: Readline Interaction4059
+Node: Readline Bare Essentials5252
+Node: Readline Movement Commands7043
+Node: Readline Killing Commands8010
+Node: Readline Arguments9932
+Node: Searching10978
+Node: Readline Init File13131
+Node: Readline Init File Syntax14286
+Node: Conditional Init Constructs28493
+Node: Sample Init File31028
+Node: Bindable Readline Commands34147
+Node: Commands For Moving35206
+Node: Commands For History36069
+Node: Commands For Text39195
+Node: Commands For Killing41923
+Node: Numeric Arguments44067
+Node: Commands For Completion45208
+Node: Keyboard Macros46947
+Node: Miscellaneous Commands47520
+Node: Readline vi Mode51378
+Node: GNU Free Documentation License52299
 
 End Tag Table

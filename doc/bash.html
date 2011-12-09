@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 September 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 October 9<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -902,6 +902,11 @@ as primaries.
 <P>
 
 
+When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+lexicographically using the current locale.
+<P>
+
+
 When the <B>==</B> and <B>!=</B> operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under <B>Pattern Matching</B>.
@@ -1411,8 +1416,8 @@ The expanded result is single-quoted, as if the dollar sign had
 not been present.
 <P>
 
-A double-quoted string preceded by a dollar sign (<B>$</B>) will cause
-the string to be translated according to the current locale.
+A double-quoted string preceded by a dollar sign (<B>$</B>dq<I>string</I>dq)
+will cause the string to be translated according to the current locale.
 If the current locale is <B>C</B> or <B>POSIX</B>, the dollar sign
 is ignored.
 If the string is translated and replaced, the replacement is
@@ -3235,7 +3240,7 @@ interpreted as part of its name.
 </DL>
 <P>
 
-If the first character of <I>parameter</I> is an exclamation point,
+If the first character of <I>parameter</I> is an exclamation point (<B>!</B>),
 a level of variable indirection is introduced.
 <B>Bash</B> uses the value of the variable formed from the rest of
 <I>parameter</I> as the name of the variable; this variable is then
@@ -6435,6 +6440,12 @@ keyboard.
 When set to <B>On</B>, readline will try to enable the application
 keypad when it is called.  Some systems need this to enable the
 arrow keys.
+<DT><B>enable-meta-key (On)</B>
+
+<DD>
+When set to <B>On</B>, readline will try to enable any meta modifier
+key the terminal claims to support when it is called.  On many terminals,
+the meta key is used to send eight-bit characters.
 <DT><B>expand-tilde (Off)</B>
 
 <DD>
@@ -10215,7 +10226,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
 is assigned to the first
@@ -10284,7 +10295,14 @@ buffer before editing begins.
 
 <DD>
 <B>read</B> returns after reading <I>nchars</I> characters rather than
-waiting for a complete line of input.
+waiting for a complete line of input, but honor a delimiter if fewer
+than <I>nchars</I> characters are read before the delimiter.
+<DT><B>-N </B><I>nchars</I>
+
+<DD>
+<B>read</B> returns after reading exactly <I>nchars</I> characters rather
+than waiting for a complete line of input, unless EOF is encountered or
+<B>read</B> times out.  Any delimiter is ignored.
 <DT><B>-p </B><I>prompt</I>
 
 <DD>
@@ -12237,7 +12255,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 September 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 October 9<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12343,6 +12361,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 16 September 2009 21:35:09 EDT
+Time: 12 October 2009 10:07:29 EDT
 </BODY>
 </HTML>

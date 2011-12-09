@@ -3648,7 +3648,7 @@ parent.
 mapfile [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
 -C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
-Read lines from the standard input into array variable @var{array},
+Read lines from the standard input into the indexed array variable @var{array},
 or from file descriptor @var{fd}
 if the @option{-u} option is supplied.
 The variable @code{MAPFILE} is the default @var{array}.
@@ -3684,7 +3684,8 @@ If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
 before assigning to it.
 
 @code{mapfile} returns successfully unless an invalid option or option
-argument is supplied, or @var{array} is invalid or unassignable.
+argument is supplied, @var{array} is invalid or unassignable, or @var{array}
+is not an indexed array.
 
 @item printf
 @btindex printf
@@ -3808,7 +3809,7 @@ Read input from file descriptor @var{fd}.
 readarray [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}] [
 -C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
-Read lines from the standard input into array variable @var{array},
+Read lines from the standard input into the indexed array variable @var{array},
 or from file descriptor @var{fd}
 if the @option{-u} option is supplied.
 

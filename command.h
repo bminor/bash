@@ -77,9 +77,9 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_QUOTED	0x000002	/* Some form of quote character is present. */
 #define W_ASSIGNMENT	0x000004	/* This word is a variable assignment. */
 #define W_GLOBEXP	0x000008	/* This word is the result of a glob expansion. */
-#define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word. */
+#define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word because ifs is empty string. */
 #define W_NOGLOB	0x000020	/* Do not perform globbing on this word. */
-#define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion. */
+#define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
 #define W_TILDEEXP	0x000080	/* Tilde expand this assignment word */
 #define W_DOLLARAT	0x000100	/* $@ and its special handling */
 #define W_DOLLARSTAR	0x000200	/* $* and its special handling */

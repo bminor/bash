@@ -86,6 +86,7 @@ extern int errno;
 /* Flags for the `pflags' argument to param_expand() */
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
 #define PF_IGNUNBOUND	0x02	/* ignore unbound vars even if -u set */
+#define PF_NOSPLIT2	0x04	/* same as W_NOSPLIT2 */
 
 /* These defs make it easier to use the editor. */
 #define LBRACE		'{'
@@ -293,7 +294,7 @@ static char *parameter_brace_patsub __P((char *, char *, char *, int));
 static char *pos_params_casemod __P((char *, char *, int, int));
 static char *parameter_brace_casemod __P((char *, char *, int, char *, int));
 
-static WORD_DESC *parameter_brace_expand __P((char *, int *, int, int *, int *));
+static WORD_DESC *parameter_brace_expand __P((char *, int *, int, int, int *, int *));
 static WORD_DESC *param_expand __P((char *, int *, int, int *, int *, int *, int *, int));
 
 static WORD_LIST *expand_word_internal __P((WORD_DESC *, int, int, int *, int *));
@@ -3076,6 +3077,7 @@ cond_expand_word (w, special)
   if (w->word == 0 || w->word[0] == '\0')
     return ((char *)NULL);
 
+  w->flags |= W_NOSPLIT2;
   l = call_expand_word_internal (w, 0, 0, (int *)0, (int *)0);
   if (l)
     {
@@ -4503,6 +4505,7 @@ expand_word_leave_quoted (word, quoted)
   if (ifs_firstc == 0)
 #endif
     word->flags |= W_NOSPLIT;
+  word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -6604,9 +6607,9 @@ chk_arithsub (s, len)
 
 /* ${[#][!]name[[:][^[^]][,[,]]#[#]%[%]-=?+[word][:e1[:e2]]]} */
 static WORD_DESC *
-parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_dollar_at)
+parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, contains_dollar_at)
      char *string;
-     int *indexp, quoted, *quoted_dollar_atp, *contains_dollar_at;
+     int *indexp, quoted, *quoted_dollar_atp, *contains_dollar_at, pflags;
 {
   int check_nullness, var_is_set, var_is_null, var_is_special;
   int want_substring, want_indir, want_patsub, want_casemod;
@@ -6846,7 +6849,7 @@ parameter_brace_expand (string, indexp, quoted, quoted_dollar_atp, contains_doll
   if (want_indir)
     tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND);
+    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&PF_NOSPLIT2));
 
   if (tdesc)
     {
@@ -7280,6 +7283,11 @@ param_expand (string, sindex, quoted, expanded_something,
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
 
+#if 0
+      if (pflags & PF_NOSPLIT2)
+	temp = string_list_internal (quoted ? quote_list (list) : list, " ");
+      else
+#endif
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
 	 We also want to make sure that splitting is done no matter what --
@@ -7291,7 +7299,7 @@ param_expand (string, sindex, quoted, expanded_something,
       break;
 
     case LBRACE:
-      tdesc = parameter_brace_expand (string, &zindex, quoted,
+      tdesc = parameter_brace_expand (string, &zindex, quoted, pflags,
 				      quoted_dollar_at_p,
 				      contains_dollar_at);
 
@@ -7569,6 +7577,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   int had_quoted_null;
   int has_dollar_at;
   int tflag;
+  int pflags;			/* flags passed to param_expand */
 
   int assignoff;		/* If assignment, offset of `=' */
 
@@ -7678,7 +7687,7 @@ add_string:
 	     even in POSIX mode. */	
 	  if (word->flags & (W_ASSIGNRHS|W_NOTILDE))
 	    {
-	      if (isexp == 0 && isifs (c))
+	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 		goto add_ifs_character;
 	      else
 		goto add_character;
@@ -7698,7 +7707,7 @@ add_string:
 		   string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 #endif
-	  if (isexp == 0 && isifs (c))
+	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 	    goto add_ifs_character;
 	  else
 	    goto add_character;
@@ -7706,7 +7715,7 @@ add_string:
 	case ':':
 	  if (word->flags & W_NOTILDE)
 	    {
-	      if (isexp == 0 && isifs (c))
+	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 		goto add_ifs_character;
 	      else
 		goto add_character;
@@ -7716,7 +7725,7 @@ add_string:
 	      string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 
-	  if (isexp == 0 && isifs (c))
+	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 	    goto add_ifs_character;
 	  else
 	    goto add_character;
@@ -7730,7 +7739,7 @@ add_string:
 	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	    {
 	      word->flags &= ~W_ITILDE;
-	      if (isexp == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
+	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 		goto add_ifs_character;
 	      else
 		goto add_character;
@@ -7772,10 +7781,12 @@ add_string:
 	    *expanded_something = 1;
 
 	  has_dollar_at = 0;
+	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
+	  if (word->flags & W_NOSPLIT2)
+	    pflags |= PF_NOSPLIT2;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
 			       &has_dollar_at, &quoted_dollar_at,
-			       &had_quoted_null,
-			       (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0);
+			       &had_quoted_null, pflags);
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -7970,6 +7981,11 @@ add_twochars:
 	    {
 	      if (list->next)
 		{
+#if 0
+		  if (quoted_dollar_at && word->flags & W_NOSPLIT2)
+		    temp = string_list_internal (quote_list (list), " ");
+		  else
+#endif
 		  /* Testing quoted_dollar_at makes sure that "$@" is
 		     split correctly when $IFS does not contain a space. */
 		  temp = quoted_dollar_at
