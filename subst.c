@@ -7016,6 +7016,15 @@ param_expand (string, sindex, quoted, expanded_something,
     case '*':		/* `$*' */
       list = list_rest_of_args ();
 
+#if 0
+      /* According to austin-group posix proposal by Geoff Clare in
+	 <20090505091501.GA10097@squonk.masqnet> of 5 May 2009:
+
+ 	"The shell shall write a message to standard error and
+ 	 immediately exit when it tries to expand an unset parameter
+ 	 other than the '@' and '*' special parameters."
+      */
+
       if (list == 0 && unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	{
 	  uerror[0] = '$';
@@ -7025,6 +7034,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
+#endif
 
       /* If there are no command-line arguments, this should just
 	 disappear if there are other characters in the expansion,
@@ -7078,6 +7088,15 @@ param_expand (string, sindex, quoted, expanded_something,
     case '@':		/* `$@' */
       list = list_rest_of_args ();
 
+#if 0
+      /* According to austin-group posix proposal by Geoff Clare in
+	 <20090505091501.GA10097@squonk.masqnet> of 5 May 2009:
+
+ 	"The shell shall write a message to standard error and
+ 	 immediately exit when it tries to expand an unset parameter
+ 	 other than the '@' and '*' special parameters."
+      */
+
       if (list == 0 && unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	{
 	  uerror[0] = '$';
@@ -7087,6 +7106,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
+#endif
 
       /* We want to flag the fact that we saw this.  We can't turn
 	 off quoting entirely, because other characters in the

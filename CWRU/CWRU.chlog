@@ -7898,7 +7898,7 @@ trap.c
 	  pipeline_pgrp, and state of the pipeline around running the debug
 	  trap, then remove any job created by running the debug trap from
 	  the jobs table when it completes.  Fixes for two bugs reported
-	  by lex@upc.ca
+	  by lex@upc.ua
 
 				   4/12
 				   ----
@@ -8054,6 +8054,7 @@ lib/readline/display.c
 	  locale or not, or whether there are invisible chars in the prompt)
 	- in _rl_move_cursor_relative, go ahead and adjust dpos if
 	  prompt_physical_chars >= _rl_screenwidth (previous check was just > )
+	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>
 
 				   4/28
 				   ----
@@ -8062,3 +8063,12 @@ lib/glob/glob.c
 	  currect directory to the dirlist and GX_NULLDIR is set -- we can just
 	  ignore it, since the passed directory name (".") was created by
 	  the caller.  Fixes bug reported by Matt Zyzik <matt.zyzik@nyu.edu>
+
+				    5/5
+				    ---
+subst.c
+	- make expansion of $@ and $* when set -u is in effect and there are
+	  no positional parameters be a non-fatal error.  This is the
+	  consensus of the austin group, though it is not historical practice.
+	  Message from Geoff Clare <20090505091501.GA10097@squonk.masqnet> of
+	  5 May 2009 to austin-group list
